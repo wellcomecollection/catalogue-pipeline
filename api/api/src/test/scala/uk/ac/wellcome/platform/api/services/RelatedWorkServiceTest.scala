@@ -31,7 +31,8 @@ class RelatedWorkServiceTest
       .title(path)
       .collectionPath(CollectionPath(path = path, level = Some(level)))
 
-  def storeWorks(index: Index, works: List[Work[Identified]] = works): Assertion =
+  def storeWorks(index: Index,
+                 works: List[Work[Identified]] = works): Assertion =
     insertIntoElasticsearch(index, works: _*)
 
   val workA = work("a", CollectionLevel.Collection)

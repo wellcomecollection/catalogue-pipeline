@@ -119,8 +119,7 @@ class MatcherWorkerServiceTest
     val expectedMatchedWorksAv1 = MatcherResult(
       Set(
         MatchedIdentifiers(
-          identifiers =
-            Set(WorkIdentifier(identifierA.toString, version = 1))
+          identifiers = Set(WorkIdentifier(identifierA.toString, version = 1))
         )
       )
     )
@@ -131,8 +130,7 @@ class MatcherWorkerServiceTest
     val expectedMatchedWorksBv1 = MatcherResult(
       Set(
         MatchedIdentifiers(
-          identifiers =
-            Set(WorkIdentifier(identifierB.toString, version = 1))
+          identifiers = Set(WorkIdentifier(identifierB.toString, version = 1))
         )
       )
     )
@@ -161,8 +159,7 @@ class MatcherWorkerServiceTest
       MatcherResult(
         Set(
           MatchedIdentifiers(
-            identifiers =
-              Set(WorkIdentifier(identifierC.toString, version = 1))
+            identifiers = Set(WorkIdentifier(identifierC.toString, version = 1))
           )
         )
       )
@@ -207,8 +204,7 @@ class MatcherWorkerServiceTest
     val expectedMatchedWorksAv1 = MatcherResult(
       Set(
         MatchedIdentifiers(
-          identifiers =
-            Set(WorkIdentifier(identifierA.toString, version = 1))
+          identifiers = Set(WorkIdentifier(identifierA.toString, version = 1))
         )
       )
     )
@@ -219,8 +215,7 @@ class MatcherWorkerServiceTest
     val expectedMatchedWorksBv1 = MatcherResult(
       Set(
         MatchedIdentifiers(
-          identifiers =
-            Set(WorkIdentifier(identifierB.toString, version = 1))
+          identifiers = Set(WorkIdentifier(identifierB.toString, version = 1))
         )
       )
     )
@@ -251,12 +246,10 @@ class MatcherWorkerServiceTest
       MatcherResult(
         Set(
           MatchedIdentifiers(
-            identifiers =
-              Set(WorkIdentifier(identifierA.toString, version = 3))
+            identifiers = Set(WorkIdentifier(identifierA.toString, version = 3))
           ),
           MatchedIdentifiers(
-            identifiers =
-              Set(WorkIdentifier(identifierB.toString, version = 1))
+            identifiers = Set(WorkIdentifier(identifierB.toString, version = 1))
           )
         )
       )
@@ -285,8 +278,7 @@ class MatcherWorkerServiceTest
     val expectedMatchedWorkAv2 = MatcherResult(
       Set(
         MatchedIdentifiers(
-          identifiers =
-            Set(WorkIdentifier(identifierA.toString, version = 2))
+          identifiers = Set(WorkIdentifier(identifierA.toString, version = 2))
         )
       )
     )
@@ -326,8 +318,7 @@ class MatcherWorkerServiceTest
     val expectedMatchedWorkAv2 = MatcherResult(
       Set(
         MatchedIdentifiers(
-          identifiers =
-            Set(WorkIdentifier(identifierA.toString, version = 2))
+          identifiers = Set(WorkIdentifier(identifierA.toString, version = 2))
         )
       )
     )
