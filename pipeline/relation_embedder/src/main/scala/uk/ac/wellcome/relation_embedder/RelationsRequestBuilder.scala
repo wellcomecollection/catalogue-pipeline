@@ -15,14 +15,13 @@ case class RelationsRequestBuilder(index: Index,
   // To reduce response size and improve Elasticsearch performance we only
   // return core fields
   val relationsFieldWhitelist = List(
-    "canonicalId",
     "version",
-    "sourceIdentifier.identifierType.id",
-    "sourceIdentifier.identifierType.label",
-    "sourceIdentifier.value",
-    "sourceIdentifier.ontologyType",
+    "state.sourceIdentifier.identifierType.id",
+    "state.sourceIdentifier.identifierType.label",
+    "state.sourceIdentifier.value",
+    "state.sourceIdentifier.ontologyType",
+    "state.hasMultipleSources",
     "data.title",
-    "data.alternativeTitles",
     "data.collectionPath.path",
     "data.collectionPath.level.type",
     "data.collectionPath.label",
@@ -31,10 +30,13 @@ case class RelationsRequestBuilder(index: Index,
   // To reduce response size and improve Elasticsearch performance we only
   // return core fields
   val otherAffectedWorksFieldWhitelist = List(
-    "sourceIdentifier.identifierType.id",
-    "sourceIdentifier.identifierType.label",
-    "sourceIdentifier.value",
-    "sourceIdentifier.ontologyType",
+    "version",
+    "state.sourceIdentifier.identifierType.id",
+    "state.sourceIdentifier.identifierType.label",
+    "state.sourceIdentifier.value",
+    "state.sourceIdentifier.ontologyType",
+    "state.hasMultipleSources",
+    "data.title",
   )
 
   lazy val relationsRequest: MultiSearchRequest =
