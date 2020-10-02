@@ -21,9 +21,7 @@ class IdentifiedWorkToVisibleDisplayWorkFlowTest
       val flow = IdentifiedWorkToVisibleDisplayWork(
         toDisplayWork = DisplayWork.apply(_, WorksIncludes.includeAll()))
 
-      val works = (1 to 3).map { _ =>
-        identifiedWork()
-      }
+      val works = identifiedWorks(count = 3)
 
       val eventualDisplayWorks = Source(works)
         .via(flow)

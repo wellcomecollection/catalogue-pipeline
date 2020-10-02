@@ -48,9 +48,7 @@ class WorksServiceTest
 
   describe("listOrSearchWorks") {
     it("gets records in Elasticsearch") {
-      val works = (1 to 2).map { _ =>
-        identifiedWork()
-      }
+      val works = identifiedWorks(count = 2)
 
       assertListOrSearchResultIsCorrect(
         allWorks = works,
@@ -69,9 +67,7 @@ class WorksServiceTest
 
     it("returns an empty result set when asked for a page that does not exist") {
       assertListOrSearchResultIsCorrect(
-        allWorks = (1 to 3).map { _ =>
-          identifiedWork()
-        },
+        allWorks = identifiedWorks(count = 3),
         expectedWorks = Seq(),
         expectedTotalResults = 3,
         worksSearchOptions = createWorksSearchOptionsWith(pageNumber = 4)
@@ -79,12 +75,8 @@ class WorksServiceTest
     }
 
     it("does not list invisible works") {
-      val visibleWorks = (1 to 3).map { _ =>
-        identifiedWork()
-      }
-      val invisibleWorks = (1 to 3).map { _ =>
-        identifiedWork().invisible()
-      }
+      val visibleWorks = identifiedWorks(count = 3)
+      val invisibleWorks = identifiedWorks(count = 3).map { _.invisible() }
 
       assertListOrSearchResultIsCorrect(
         allWorks = visibleWorks ++ invisibleWorks,

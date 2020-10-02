@@ -369,9 +369,7 @@ class ElasticsearchServiceTest
 
   private def populateElasticsearch(
     index: Index): List[Work.Visible[Identified]] = {
-    val works = (1 to 10).map { _ =>
-      identifiedWork()
-    }
+    val works = identifiedWorks(count = 10)
 
     insertIntoElasticsearch(index, works: _*)
 

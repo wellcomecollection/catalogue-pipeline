@@ -68,10 +68,10 @@ class RecorderPlaybackServiceTest
   }
 
   it("gets a mixture of works as appropriate") {
-    val unchangedWorks = (1 to 3).map(_ => sourceWork())
-    val outdatedWorks = (4 to 5).map(_ => sourceWork())
+    val unchangedWorks = sourceWorks(count = 3)
+    val outdatedWorks = sourceWorks(count = 2)
     val updatedWorks = outdatedWorks.map { work =>
-      work.copy(version = work.version + 1)
+      work.version(work.version + 1)
     }
 
     val lookupWorks = (unchangedWorks ++ outdatedWorks).toList
