@@ -278,12 +278,4 @@ trait LegacyWorkGenerators
           createDigitalLocationWith(locationType = createImageLocationType)))),
       images = images
     )
-
-  def createIsbnWork: Work.Visible[Source] =
-    createSourceWorkWith(
-      sourceIdentifier = createIsbnSourceIdentifier,
-    )
-
-  def createIsbnWorks(count: Int): List[Work.Visible[Source]] =
-    List.fill(count)(createIsbnWork)
 }
