@@ -4,7 +4,6 @@ import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.stream.scaladsl.{Sink, Source}
 import com.sksamuel.elastic4s.Index
-import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
@@ -16,8 +15,6 @@ import uk.ac.wellcome.models.work.internal._
 class ElasticsearchSourceTest
     extends AnyFunSpec
     with Matchers
-    with ScalaFutures
-    with IntegrationPatience
     with Akka
     with ElasticsearchFixtures
     with WorkGenerators {
