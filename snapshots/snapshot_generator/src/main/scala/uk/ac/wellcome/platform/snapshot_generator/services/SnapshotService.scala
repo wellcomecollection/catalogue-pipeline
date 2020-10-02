@@ -40,7 +40,7 @@ class SnapshotService(akkaS3Settings: S3Settings,
 
   def generateSnapshot(
     snapshotJob: SnapshotJob): Future[CompletedSnapshotJob] = {
-    info(s"ConvertorService running $snapshotJob")
+    info(s"${this.getClass.getSimpleName} running $snapshotJob")
 
     val uploadResult = snapshotJob.apiVersion match {
       case ApiVersions.v2 =>
