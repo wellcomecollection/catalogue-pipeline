@@ -71,10 +71,12 @@ trait CustomDirectives extends Directives with FailFastCirceSupport {
       }
     }
 
-  private def error(err: DisplayError): Route =
+  private def error(err: DisplayError): Route = {
+    val status = err.httpStatus.getOrElse(500)
     complete(
-      err.httpStatus -> ResultResponse(context = contextUri, result = err)
+      status -> ResultResponse(context = contextUri, result = err)
     )
+  }
 
   implicit val jsonPrinter: Printer = DisplayJsonUtil.printer
 
