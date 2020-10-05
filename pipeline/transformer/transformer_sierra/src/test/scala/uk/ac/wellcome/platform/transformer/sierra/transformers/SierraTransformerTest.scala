@@ -774,7 +774,7 @@ class SierraTransformerTest
         identifier = createSierraSystemSourceIdentifierWith(
           value = mergeCandidateBibNumber
         ),
-        reason = Some("Physical/digitised Sierra work")
+        reason = "Physical/digitised Sierra work"
       )
     )
   }
@@ -808,7 +808,7 @@ class SierraTransformerTest
     work.data.mergeCandidates shouldBe List(
       MergeCandidate(
         identifier = createMiroSourceIdentifierWith(value = miroId),
-        reason = Some("Miro/Sierra work")
+        reason = "Miro/Sierra work"
       )
     )
   }

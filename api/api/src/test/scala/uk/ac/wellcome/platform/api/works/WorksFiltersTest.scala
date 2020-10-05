@@ -8,8 +8,15 @@ import uk.ac.wellcome.models.work.internal.Format.{
 }
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.Implicits._
+import uk.ac.wellcome.models.work.generators.{
+  ItemsGenerators,
+  ProductionEventGenerators
+}
 
-class WorksFiltersTest extends ApiWorksTestBase {
+class WorksFiltersTest
+    extends ApiWorksTestBase
+    with ItemsGenerators
+    with ProductionEventGenerators {
   it("combines multiple filters") {
     val work1 = identifiedWork()
       .genres(List(createGenreWith(label = "horror")))

@@ -3,8 +3,9 @@ package uk.ac.wellcome.platform.api.works
 import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.Implicits._
+import uk.ac.wellcome.models.work.generators.ProductionEventGenerators
 
-class WorksTest extends ApiWorksTestBase {
+class WorksTest extends ApiWorksTestBase with ProductionEventGenerators {
   it("returns a list of works") {
     withApi {
       case (ElasticConfig(worksIndex, _), routes) =>

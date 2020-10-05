@@ -3,53 +3,50 @@ package uk.ac.wellcome.platform.merger.rules
 import org.scalatest.Inspectors
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import uk.ac.wellcome.models.work.generators.{
+  MetsWorkGenerators,
+  MiroWorkGenerators
+}
+import uk.ac.wellcome.models.work.internal.WorkState.Source
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.platform.merger.generators.WorksWithImagesGenerators
-import WorkState.Source
 
 class WorkPredicatesTest
     extends AnyFunSpec
-    with WorksWithImagesGenerators
+    with MetsWorkGenerators
+    with MiroWorkGenerators
     with Matchers
     with Inspectors {
   val works: Seq[Work[Source]] = List(
-    createSierraSourceWork,
-    createMiroWorkWith(
-      sourceIdentifier = createNonHistoricalLibraryMiroSourceIdentifier,
-      images = List(createUnmergedMiroImage)
-    ),
-    createMiroWorkWith(
-      sourceIdentifier = createHistoricalLibraryMiroSourceIdentifier,
-      images = List(createUnmergedMiroImage)
-    ),
-    createInvisibleMetsSourceWork,
-    createInvisibleMetsSourceWorkWith(
-      items = (0 to 3).map(_ => createDigitalItem).toList,
-      images = List(createUnmergedMetsImage)
-    ),
-    createSourceWorkWith(
-      sourceIdentifier = createMiroSourceIdentifier,
-      otherIdentifiers = List(),
-      thumbnail = createMiroWork.data.thumbnail,
-      items = (0 to 3).flatMap(_ => createMiroWork.data.items).toList
-    ),
-    createSierraDigitalWorkWith(
-      items = (0 to 3).flatMap(_ => createSierraDigitalWork.data.items).toList
-    ),
-    createSierraPhysicalWork,
-    createSierraDigitalWork,
-    createSierraSourceWorkWith(
-      format = Some(Format.`3DObjects`)
-    ),
-    createSierraSourceWorkWith(
-      format = Some(Format.DigitalImages)
-    ),
-    createSierraSourceWorkWith(
-      format = Some(Format.Pictures)
-    ),
-    createSierraSourceWorkWith(
-      format = Some(Format.Music)
-    )
+    sierraSourceWork(),
+    miroSourceWork(
+      sourceIdentifier = createNonHistoricalLibraryMiroSourceIdentifier),
+    miroSourceWork(
+      sourceIdentifier = createHistoricalLibraryMiroSourceIdentifier),
+    metsSourceWork().invisible(),
+    metsSourceWork()
+      .items((0 to 3).map { _ =>
+        createDigitalItem
+      }.toList)
+      .images(List(createUnmergedMetsImage))
+      .invisible(),
+    sourceWork(sourceIdentifier = createMiroSourceIdentifier)
+      .otherIdentifiers(List.empty)
+      .thumbnail(miroThumbnail())
+      .items(miroItems(count = 3)),
+    sierraSourceWork()
+      .items(
+        (0 to 3)
+          .map(_ =>
+            createUnidentifiableItemWith(
+              locations = List(createDigitalLocation)))
+          .toList
+      ),
+    sierraPhysicalSourceWork(),
+    sierraDigitalSourceWork(),
+    sierraSourceWork().format(Format.`3DObjects`),
+    sierraSourceWork().format(Format.DigitalImages),
+    sierraSourceWork().format(Format.Pictures),
+    sierraSourceWork().format(Format.Music),
   )
 
   it("selects Sierra works") {

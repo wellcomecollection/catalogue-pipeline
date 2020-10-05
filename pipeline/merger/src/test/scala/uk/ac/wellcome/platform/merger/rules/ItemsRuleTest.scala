@@ -3,48 +3,55 @@ package uk.ac.wellcome.platform.merger.rules
 import org.scalatest.Inside
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.internal.Format
-import uk.ac.wellcome.platform.merger.generators.WorksWithImagesGenerators
+import uk.ac.wellcome.models.work.generators.{
+  MetsWorkGenerators,
+  MiroWorkGenerators
+}
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 
 class ItemsRuleTest
     extends AnyFunSpec
     with Matchers
-    with WorksWithImagesGenerators
+    with MetsWorkGenerators
+    with MiroWorkGenerators
     with Inside {
-  val physicalPictureSierra = createSierraPhysicalWork.copy(
-    data = createSierraPhysicalWork.data.copy(
-      format = Some(Format.Pictures)
-    )
-  )
-  val physicalMapsSierra = physicalPictureSierra.copy(
-    data = physicalPictureSierra.data.copy(
-      format = Some(Format.Maps)
-    )
-  )
-  val zeroItemPhysicalSierra = createSierraSourceWork.copy(
-    data = createSierraSourceWork.data.copy(
-      format = Some(Format.Pictures)
-    )
-  )
-  val multiItemPhysicalSierra = createSierraWorkWithTwoPhysicalItems
-  val digitalSierra = createSierraDigitalWork
-  val metsWork = createInvisibleMetsSourceWork
-  val miroWork = createMiroWork
-  val calmWork = createCalmSourceWork
-  val (sierraWorkWithMergeCandidate, sierraWorkMergeCandidate) =
-    createSierraWorkWithDigitisedMergeCandidate
+  val physicalPictureSierra: Work.Visible[WorkState.Source] =
+    sierraPhysicalSourceWork()
+      .format(Format.Pictures)
+
+  val physicalMapsSierra: Work.Visible[WorkState.Source] =
+    sierraPhysicalSourceWork().format(Format.Maps)
+
+  val zeroItemPhysicalSierra: Work.Visible[WorkState.Source] =
+    sierraSourceWork().format(Format.Pictures)
+
+  val multiItemPhysicalSierra: Work.Visible[WorkState.Source] =
+    sierraSourceWork()
+      .items((1 to 2).map { _ =>
+        createPhysicalItem
+      }.toList)
+
+  val metsWork: Work.Invisible[WorkState.Source] = metsSourceWork().invisible()
+
+  val miroWork: Work.Visible[WorkState.Source] = miroSourceWork()
+
+  val calmWork: Work.Visible[WorkState.Source] =
+    sourceWork(sourceIdentifier = createCalmSourceIdentifier)
+      .items(List(createCalmItem))
 
   it(
     "leaves items unchanged and returns a digitised version of a Sierra work as a merged source") {
+    val (digitisedWork, physicalWork) = sierraSourceWorkPair()
+
     inside(
       ItemsRule
-        .merge(sierraWorkWithMergeCandidate, List(sierraWorkMergeCandidate))) {
+        .merge(physicalWork, List(digitisedWork))) {
       case FieldMergeResult(items, mergedSources) =>
         items should have size 1
-        items should be(sierraWorkWithMergeCandidate.data.items)
+        items shouldBe physicalWork.data.items
 
-        mergedSources should be(Seq(sierraWorkMergeCandidate))
+        mergedSources should be(Seq(digitisedWork))
     }
   }
 
@@ -93,7 +100,8 @@ class ItemsRuleTest
 
   it("does not merge any Miro sources when there are several of them") {
     inside(
-      ItemsRule.merge(physicalPictureSierra, List(miroWork, createMiroWork))) {
+      ItemsRule
+        .merge(physicalPictureSierra, List(miroWork, miroSourceWork()))) {
       case FieldMergeResult(items, mergedSources) =>
         items shouldEqual physicalPictureSierra.data.items
         mergedSources shouldBe empty
@@ -118,7 +126,7 @@ class ItemsRuleTest
           physicalPictureSierra.data.items.head.locations ++
             metsWork.data.items.head.locations
 
-        mergedSources should contain theSameElementsAs (Seq(metsWork, miroWork))
+        mergedSources should contain theSameElementsAs Seq(metsWork, miroWork)
     }
   }
 

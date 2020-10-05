@@ -63,7 +63,7 @@ object SierraMergeCandidates
               ontologyType = "Work",
               value = bibNumber
             ),
-            reason = Some("Physical/digitised Sierra work")
+            reason = "Physical/digitised Sierra work"
           )
         )
       case _ => Nil
@@ -104,7 +104,7 @@ object SierraMergeCandidates
             ontologyType = "Work",
             value = recordId.toString
           ),
-          reason = Some("Calm/Sierra harvest")
+          reason = "Calm/Sierra harvest"
         )
       }
       .distinct
@@ -129,7 +129,7 @@ object SierraMergeCandidates
         ontologyType = "Work",
         value = miroId
       ),
-      reason = Some(reason)
+      reason = reason
     )
   }
 }

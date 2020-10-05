@@ -104,7 +104,8 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
           SourceIdentifier(
             value = "b456",
             identifierType = IdentifierType("sierra-system-number"),
-            ontologyType = "Work")
+            ontologyType = "Work"
+          )
         )
       )
   }
