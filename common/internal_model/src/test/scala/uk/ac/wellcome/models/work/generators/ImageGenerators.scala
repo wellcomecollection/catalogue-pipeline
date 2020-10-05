@@ -6,7 +6,6 @@ import SourceWork._
 trait ImageGenerators
     extends IdentifiersGenerators
     with ItemsGenerators
-    with LegacyWorkGenerators
     with VectorGenerators
     with SierraWorkGenerators {
   def createUnmergedImageWith(
@@ -38,23 +37,6 @@ trait ImageGenerators
     location = createDigitalLocation,
     identifierType = IdentifierType("mets-image")
   )
-
-  def createMergedImageWith(
-    location: DigitalLocationDeprecated = createDigitalLocation,
-    version: Int = 1,
-    identifierType: IdentifierType = IdentifierType("miro-image-number"),
-    parentWork: Work.Visible[WorkState.Source] = sierraSourceWork(),
-    redirectedWork: Option[Work[WorkState.Source]] = Some(
-      createMiroWorkWith(Nil)),
-    nMergedSources: Int = 0): MergedImage[DataState.Unidentified] =
-    createUnmergedImageWith(location, version, identifierType = identifierType) mergeWith (
-      parentWork.toSourceWork,
-      redirectedWork.map(_.toSourceWork),
-      nMergedSources = nMergedSources
-    )
-
-  def createMergedImage: MergedImage[DataState.Unidentified] =
-    createMergedImageWith()
 
   def createIdentifiedMergedImageWith(
     imageId: IdState.Identified =
