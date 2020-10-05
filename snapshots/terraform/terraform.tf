@@ -1,8 +1,8 @@
 terraform {
   backend "s3" {
-    role_arn = "arn:aws:iam::760097843905:role/platform-developer"
+    role_arn = "arn:aws:iam::756629837203:role/catalogue-developer"
 
-    bucket         = "wellcomecollection-platform-infra"
+    bucket         = "wellcomecollection-catalogue-infra-delta"
     key            = "terraform/catalogue/snapshots.tfstate"
     dynamodb_table = "terraform-locktable"
     region         = "eu-west-1"
