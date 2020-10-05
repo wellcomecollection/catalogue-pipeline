@@ -70,9 +70,6 @@ trait LegacyWorkGenerators
       )
     )
 
-  def createSourceWork: Work.Visible[Source] =
-    createSourceWorkWith()
-
   def createSierraSourceWorkWith(
     format: Option[Format] = None,
     items: List[Item[IdState.Unminted]] = Nil,

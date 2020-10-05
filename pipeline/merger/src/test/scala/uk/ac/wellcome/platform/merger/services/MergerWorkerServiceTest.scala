@@ -34,9 +34,9 @@ class MergerWorkerServiceTest
     "reads matcher result messages, retrieves the works from vhs and sends them to sns") {
     withMergerWorkerServiceFixtures {
       case (vhs, QueuePair(queue, dlq), senders, metrics) =>
-        val work1 = createSourceWork
-        val work2 = createSourceWork
-        val work3 = createSourceWork
+        val work1 = sourceWork()
+        val work2 = sourceWork()
+        val work3 = sourceWork()
 
         val matcherResult =
           matcherResultWith(Set(Set(work3), Set(work1, work2)))
@@ -95,7 +95,7 @@ class MergerWorkerServiceTest
   it("fails if the work is not in vhs") {
     withMergerWorkerServiceFixtures {
       case (_, QueuePair(queue, dlq), senders, metrics) =>
-        val work = createSourceWork
+        val work = sourceWork()
 
         val matcherResult = matcherResultWith(Set(Set(work)))
 
@@ -119,9 +119,11 @@ class MergerWorkerServiceTest
   it("discards works with newer versions in vhs, sends along the others") {
     withMergerWorkerServiceFixtures {
       case (vhs, QueuePair(queue, dlq), senders, _) =>
-        val work = createSourceWork
-        val olderWork = createSourceWork
-        val newerWork = olderWork.copy(version = 2)
+        val work = sourceWork()
+        val olderWork = sourceWork()
+        val newerWork =
+          sourceWork(sourceIdentifier = olderWork.sourceIdentifier)
+            .withVersion(olderWork.version + 1)
 
         val matcherResult = matcherResultWith(Set(Set(work, olderWork)))
 
