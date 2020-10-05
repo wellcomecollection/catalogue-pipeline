@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.snapshot_generator.akka.flow
+package uk.ac.wellcome.platform.snapshot_generator.akkastreams.flow
 
 import java.io.File
 import java.nio.file.Paths

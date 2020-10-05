@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.snapshot_generator.akka.source
+package uk.ac.wellcome.platform.snapshot_generator.akkastreams.source
 
 import akka.NotUsed
 import akka.stream.alpakka.s3.scaladsl.S3

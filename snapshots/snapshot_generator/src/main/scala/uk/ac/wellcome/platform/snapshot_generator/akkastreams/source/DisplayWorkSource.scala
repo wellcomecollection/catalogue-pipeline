@@ -1,10 +1,10 @@
-package uk.ac.wellcome.platform.snapshot_generator.akka.source
+package uk.ac.wellcome.platform.snapshot_generator.akkastreams.source
 
 import akka.actor.ActorSystem
 import akka.stream.scaladsl.Source
 import com.sksamuel.elastic4s.{ElasticClient, Index}
 import uk.ac.wellcome.display.models.{DisplayWork, WorksIncludes}
-import uk.ac.wellcome.platform.snapshot_generator.akka.flow.IdentifiedWorkToVisibleDisplayWork
+import uk.ac.wellcome.platform.snapshot_generator.akkastreams.flow.IdentifiedWorkToVisibleDisplayWork
 
 object DisplayWorkSource {
   def apply(

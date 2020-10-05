@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.snapshot_generator.akka.sink
+package uk.ac.wellcome.platform.snapshot_generator.akkastreams.sink
 
 import akka.stream.scaladsl.Sink
 

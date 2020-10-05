@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.snapshot_generator.akka.sink
+package uk.ac.wellcome.platform.snapshot_generator.akkastreams.sink
 
 import akka.stream.alpakka.s3.scaladsl.S3
 import akka.stream.alpakka.s3.{MultipartUploadResult, S3Attributes, S3Settings}
