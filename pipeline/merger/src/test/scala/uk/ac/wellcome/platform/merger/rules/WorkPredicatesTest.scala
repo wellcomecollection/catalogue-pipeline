@@ -3,14 +3,15 @@ package uk.ac.wellcome.platform.merger.rules
 import org.scalatest.Inspectors
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import uk.ac.wellcome.models.work.generators.{MetsWorkGenerators, MiroWorkGenerators}
+import uk.ac.wellcome.models.work.internal.WorkState.Source
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.generators.WorksWithImagesGenerators
-import WorkState.Source
-import uk.ac.wellcome.models.work.generators.MiroWorkGenerators
 
 class WorkPredicatesTest
     extends AnyFunSpec
     with WorksWithImagesGenerators
+    with MetsWorkGenerators
     with MiroWorkGenerators
     with Matchers
     with Inspectors {
@@ -24,11 +25,11 @@ class WorkPredicatesTest
       sourceIdentifier = createHistoricalLibraryMiroSourceIdentifier,
       images = List(createUnmergedMiroImage)
     ),
-    createInvisibleMetsSourceWork,
-    createInvisibleMetsSourceWorkWith(
-      items = (0 to 3).map(_ => createDigitalItem).toList,
-      images = List(createUnmergedMetsImage)
-    ),
+    metsSourceWork().invisible(),
+    metsSourceWork()
+      .items((0 to 3).map { _ => createDigitalItem }.toList)
+      .images(List(createUnmergedMetsImage))
+      .invisible(),
     sourceWork(sourceIdentifier = createMiroSourceIdentifier)
       .otherIdentifiers(List.empty)
       .thumbnail(miroThumbnail())

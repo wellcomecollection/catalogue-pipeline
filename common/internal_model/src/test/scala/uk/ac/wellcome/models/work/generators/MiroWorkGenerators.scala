@@ -1,6 +1,6 @@
 package uk.ac.wellcome.models.work.generators
 
-import uk.ac.wellcome.models.work.internal.{DigitalLocationDeprecated, License, LocationType}
+import uk.ac.wellcome.models.work.internal._
 
 import scala.util.Random
 
@@ -12,7 +12,7 @@ trait MiroWorkGenerators extends ItemsGenerators {
       license = Some(License.CCBY)
     )
 
-  def miroItems(count: Int = Random.nextInt(5)) =
+  def miroItems(count: Int = Random.nextInt(5)): List[Item[IdState.Unidentifiable.type]] =
     (0 to count).map { _ =>
       createUnidentifiableItemWith(
         locations = List(

@@ -3,6 +3,7 @@ package uk.ac.wellcome.platform.merger.rules
 import org.scalatest.Inside
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import uk.ac.wellcome.models.work.generators.MetsWorkGenerators
 import uk.ac.wellcome.models.work.internal.{Format, Work, WorkState}
 import uk.ac.wellcome.platform.merger.generators.WorksWithImagesGenerators
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
@@ -11,6 +12,7 @@ class ItemsRuleTest
     extends AnyFunSpec
     with Matchers
     with WorksWithImagesGenerators
+    with MetsWorkGenerators
     with Inside {
   val physicalPictureSierra: Work.Visible[WorkState.Source] = sierraPhysicalSourceWork()
     .format(Format.Pictures)
@@ -25,7 +27,8 @@ class ItemsRuleTest
     sierraSourceWork()
       .items((1 to 2).map { _ => createPhysicalItem}.toList)
 
-  val metsWork = createInvisibleMetsSourceWork
+  val metsWork: Work.Invisible[WorkState.Source] = metsSourceWork().invisible()
+
   val miroWork = createMiroWork
   val calmWork = createCalmSourceWork
 

@@ -8,10 +8,12 @@ import uk.ac.wellcome.platform.merger.generators.WorksWithImagesGenerators
 import WorkState.{Merged, Source}
 import WorkFsm._
 import SourceWork._
+import uk.ac.wellcome.models.work.generators.MetsWorkGenerators
 
 class PlatformMergerTest
     extends AnyFunSpec
     with WorksWithImagesGenerators
+    with MetsWorkGenerators
     with Matchers {
   val digitalLocationCCBYNC = createDigitalLocationWith(
     license = Some(License.CCBYNC))
@@ -69,21 +71,20 @@ class PlatformMergerTest
     sourceIdentifier = createNonHistoricalLibraryMiroSourceIdentifier,
     images = List(createUnmergedMiroImage)
   )
-  private val metsWork =
-    createInvisibleMetsSourceWorkWith(
-      items = List(createDigitalItemWith(List(digitalLocationCCBYNC))),
-      images = List(createUnmergedMetsImage)
-    ).mapData { data =>
-      data.copy(
-        thumbnail = Some(
-          DigitalLocationDeprecated(
-            url = "https://path.to/thumbnail.jpg",
-            locationType = LocationType("thumbnail-image"),
-            license = Some(License.CCBY)
-          )
+
+  private val metsWork: Work.Invisible[Source] =
+    metsSourceWork()
+      .items(List(createDigitalItemWith(List(digitalLocationCCBYNC))))
+      .images(List(createUnmergedMetsImage))
+      .thumbnail(
+        DigitalLocationDeprecated(
+          url = "https://path.to/thumbnail.jpg",
+          locationType = LocationType("thumbnail-image"),
+          license = Some(License.CCBY)
         )
       )
-    }
+      .invisible()
+
   val calmWork = createCalmSourceWork
 
   private val merger = PlatformMerger

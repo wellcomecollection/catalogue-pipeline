@@ -8,13 +8,14 @@ import uk.ac.wellcome.platform.merger.generators.WorksWithImagesGenerators
 import uk.ac.wellcome.platform.merger.rules.ImagesRule.FlatImageMergeRule
 import uk.ac.wellcome.platform.merger.rules.WorkPredicates.WorkPredicate
 import WorkState.Source
-import uk.ac.wellcome.models.work.generators.SierraWorkGenerators
+import uk.ac.wellcome.models.work.generators.{MetsWorkGenerators, SierraWorkGenerators}
 
 class ImagesRuleTest
     extends AnyFunSpec
     with Matchers
     with WorksWithImagesGenerators
     with SierraWorkGenerators
+    with MetsWorkGenerators
     with PrivateMethodTester
     with OptionValues
     with Inspectors {
@@ -86,8 +87,11 @@ class ImagesRuleTest
   }
 
   def createInvisibleMetsSourceWorkWith(
-    numImages: Int): Work.Invisible[Source] =
-    createInvisibleMetsSourceWorkWith(images = (1 to numImages).map { _ =>
-      createUnmergedMetsImage
-    }.toList)
+    numImages: Int): Work.Invisible[Source] = {
+    val images =
+      (1 to numImages).map { _ => createUnmergedMetsImage }.toList
+
+    metsSourceWork().images(images).invisible()
+  }
+
 }

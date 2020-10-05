@@ -9,17 +9,19 @@ import uk.ac.wellcome.platform.merger.rules.FieldMergeRule
 import WorkState.{Merged, Source}
 import WorkFsm._
 import cats.data.State
-import uk.ac.wellcome.models.work.generators.SierraWorkGenerators
+import uk.ac.wellcome.models.work.generators.{MetsWorkGenerators, SierraWorkGenerators}
 
 class MergerTest
     extends AnyFunSpec
     with Matchers
     with WorksWithImagesGenerators
+    with MetsWorkGenerators
     with SierraWorkGenerators {
-  val inputWorks =
+  val inputWorks: Seq[Work[Source]] =
     (0 to 5).map { _ => sierraDigitalSourceWork() } ++
       (0 to 5).map(_ => createMiroWork) ++
-      (0 to 5).map(_ => createInvisibleMetsSourceWork)
+      (0 to 5).map(_ => metsSourceWork().invisible())
+
   val mergedTargetItems = (0 to 3).map(_ => createDigitalItem).toList
   val mergedOtherIdentifiers =
     (0 to 3).map(_ => createSierraSystemSourceIdentifier).toList

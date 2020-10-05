@@ -10,20 +10,6 @@ trait LegacyWorkGenerators
 
   private def createTitle: String = randomAlphanumeric(length = 100)
 
-  def createInvisibleSourceWorkWith(
-    sourceIdentifier: SourceIdentifier = createSourceIdentifier,
-    items: List[Item[IdState.Unminted]] = Nil,
-    images: List[UnmergedImage[DataState.Unidentified]] = Nil,
-  ): Work.Invisible[Source] =
-    Work.Invisible[Source](
-      state = Source(sourceIdentifier),
-      data = WorkData[DataState.Unidentified](
-        items = items,
-        images = images,
-      ),
-      version = 1
-    )
-
   def createSourceWorkWith(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     version: Int = 1,
@@ -85,17 +71,6 @@ trait LegacyWorkGenerators
     )
 
   val createCalmSourceWork = createCalmSourceWorkWith()
-
-  def createInvisibleMetsSourceWorkWith(
-    sourceIdentifier: SourceIdentifier = createMetsSourceIdentifier,
-    items: List[Item[IdState.Unminted]] = List(createDigitalItem),
-    images: List[UnmergedImage[DataState.Unidentified]])
-    : Work.Invisible[Source] =
-    createInvisibleSourceWorkWith(
-      sourceIdentifier = sourceIdentifier,
-      items = items,
-      images = images
-    )
 
   def createMiroWorkWith(images: List[UnmergedImage[DataState.Unidentified]],
                          otherIdentifiers: List[SourceIdentifier] = Nil,
