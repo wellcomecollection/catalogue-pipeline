@@ -43,7 +43,7 @@ trait ImageGenerators
     location: DigitalLocationDeprecated = createDigitalLocation,
     version: Int = 1,
     identifierType: IdentifierType = IdentifierType("miro-image-number"),
-    parentWork: Work.Visible[WorkState.Source] = createSierraSourceWorkWith(),
+    parentWork: Work.Visible[WorkState.Source] = sierraSourceWork(),
     redirectedWork: Option[Work[WorkState.Source]] = Some(
       createMiroWorkWith(Nil)),
     nMergedSources: Int = 0): MergedImage[DataState.Unidentified] =

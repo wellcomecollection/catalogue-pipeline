@@ -67,19 +67,6 @@ trait LegacyWorkGenerators
       )
     )
 
-  def createSierraSourceWorkWith(
-    format: Option[Format] = None,
-    items: List[Item[IdState.Unminted]] = Nil,
-    mergeCandidates: List[MergeCandidate] = Nil,
-  ): Work.Visible[Source] =
-    createSourceWorkWith(
-      sourceIdentifier = createSierraSystemSourceIdentifier,
-      format = format,
-      otherIdentifiers = List(createSierraSystemSourceIdentifier),
-      items = items,
-      mergeCandidates = mergeCandidates
-    )
-
   def createCalmSourceWorkWith(data: WorkData[DataState.Unidentified] =
                                  WorkData[DataState.Unidentified](
                                    items = List(createCalmItem)
@@ -109,12 +96,6 @@ trait LegacyWorkGenerators
       items = items,
       images = images
     )
-
-  def createSierraDigitalWorkWith(
-    items: List[Item[IdState.Unminted]] = List(
-      createUnidentifiableItemWith(locations = List(createDigitalLocation))))
-    : Work.Visible[Source] =
-    createSierraSourceWorkWith(items = items)
 
   def createMiroWorkWith(images: List[UnmergedImage[DataState.Unidentified]],
                          otherIdentifiers: List[SourceIdentifier] = Nil,

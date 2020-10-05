@@ -33,9 +33,10 @@ class WorkPredicatesTest
       .otherIdentifiers(List.empty)
       .thumbnail(miroThumbnail())
       .items(miroItems(count = 3)),
-    createSierraDigitalWorkWith(
-      items = (0 to 3).map(_ => createUnidentifiableItemWith(locations = List(createDigitalLocation))).toList
-    ),
+    sierraSourceWork()
+      .items(
+        (0 to 3).map(_ => createUnidentifiableItemWith(locations = List(createDigitalLocation))).toList
+      ),
     sierraPhysicalSourceWork(),
     sierraDigitalSourceWork(),
     sierraSourceWork().format(Format.`3DObjects`),
