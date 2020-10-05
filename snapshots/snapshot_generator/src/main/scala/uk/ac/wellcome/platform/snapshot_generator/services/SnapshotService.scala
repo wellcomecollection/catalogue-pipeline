@@ -36,7 +36,7 @@ class SnapshotService(akkaS3Settings: S3Settings,
 
   def generateSnapshot(
     snapshotJob: SnapshotJob): Future[CompletedSnapshotJob] = {
-    info(s"${this.getClass.getSimpleName} running $snapshotJob")
+    info(msg = s"${this.getClass.getSimpleName} running $snapshotJob")
 
     val startedAt = Instant.now
 

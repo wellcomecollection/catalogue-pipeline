@@ -12,6 +12,7 @@ import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.snapshot_generator.akka.source.ElasticsearchWorksSource
+import uk.ac.wellcome.models.Implicits._
 
 class ElasticsearchSourceTest
     extends AnyFunSpec

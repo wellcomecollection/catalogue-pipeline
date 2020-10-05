@@ -6,9 +6,11 @@ import com.sksamuel.elastic4s.Index
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.display.models.{ApiVersions, DisplaySerialisationTestBase}
 import uk.ac.wellcome.fixtures.TestWith
+import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue

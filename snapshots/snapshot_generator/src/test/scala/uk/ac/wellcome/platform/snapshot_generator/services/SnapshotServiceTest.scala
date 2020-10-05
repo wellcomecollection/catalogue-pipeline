@@ -10,10 +10,11 @@ import com.sksamuel.elastic4s.http.JavaClientExceptionWrapper
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.display.json.DisplayJsonUtil
-import uk.ac.wellcome.display.json.DisplayJsonUtil._
+import uk.ac.wellcome.display.json.DisplayJsonUtil.toJson
+import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.display.models.{ApiVersions, DisplayWork, WorksIncludes}
 import uk.ac.wellcome.elasticsearch.ElasticClientBuilder
 import uk.ac.wellcome.models.work.generators.WorkGenerators
@@ -62,7 +63,6 @@ class SnapshotServiceTest
         val notVisibleWorks = identifiedWorks(count = 2).map { _.invisible() }
 
         val works = visibleWorks ++ notVisibleWorks
-
         insertIntoElasticsearch(worksIndex, works: _*)
 
         val s3Location = S3ObjectLocation(bucket.name, key = "target.txt.gz")
@@ -75,6 +75,8 @@ class SnapshotServiceTest
         val future = snapshotService.generateSnapshot(snapshotJob)
 
         whenReady(future) { result: CompletedSnapshotJob =>
+          import uk.ac.wellcome.display.models.Implicits._
+
           val (objectMetadata, contents) = getGzipObjectFromS3(s3Location)
 
           val s3Etag = objectMetadata.getETag
@@ -84,9 +86,7 @@ class SnapshotServiceTest
             .map {
               DisplayWork(_, includes = WorksIncludes.includeAll())
             }
-            .map {
-              DisplayJsonUtil.toJson(_)
-            }
+            .map(toJson[DisplayWork])
             .mkString("\n") + "\n"
 
           contents shouldBe expectedContents
@@ -129,6 +129,7 @@ class SnapshotServiceTest
 
         whenReady(future) { result =>
           val (objectMetadata, contents) = getGzipObjectFromS3(s3Location)
+          import uk.ac.wellcome.display.models.Implicits._
 
           val s3Etag = objectMetadata.getETag
           val s3Size = objectMetadata.getContentLength
@@ -137,9 +138,7 @@ class SnapshotServiceTest
             .map {
               DisplayWork(_, includes = WorksIncludes.includeAll())
             }
-            .map {
-              DisplayJsonUtil.toJson(_)
-            }
+            .map(toJson[DisplayWork])
             .mkString("\n") + "\n"
 
           contents shouldBe expectedContents

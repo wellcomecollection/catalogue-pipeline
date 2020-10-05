@@ -22,7 +22,7 @@ variable "vpc_id" {
 variable "subnets" {
   type = list(string)
 }
-variable "infra_bucket" {
+variable "lambda_upload_bucket" {
   type = string
 }
 variable "lambda_error_alarm_arn" {

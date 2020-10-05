@@ -1,6 +1,9 @@
 ROOT = $(shell git rev-parse --show-toplevel)
 INFRA_BUCKET = wellcomecollection-platform-infra
 
+LAMBDA_UPLOAD_BUCKET = wellcomecollection-catalogue-infra-delta
+LAMBDA_PUBLISH_ROLE_ARN = arn:aws:iam::756629837203:role/catalogue-developer
+
 ifneq ($(CI),true)
 DEV_ROLE_ARN := arn:aws:iam::760097843905:role/platform-developer
 endif
@@ -18,7 +21,10 @@ include $(ROOT)/makefiles/terraform.Makefile
 define publish_lambda
     $(ROOT)/docker_run.py --aws --root -- \
         wellcome/publish_lambda:130 \
-        "$(1)" --key="lambdas/$(1).zip" --bucket="$(INFRA_BUCKET)" --role-arn="$(DEV_ROLE_ARN)" --sns-topic="arn:aws:sns:eu-west-1:760097843905:lambda_pushes"
+        "$(1)" --key="lambdas/$(1).zip" \
+		--bucket="$(LAMBDA_UPLOAD_BUCKET)" \
+		--role-arn="$(LAMBDA_PUBLISH_ROLE_ARN)" \
+		--sns-topic="arn:aws:sns:eu-west-1:760097843905:lambda_pushes"
 endef
 
 
@@ -58,22 +64,6 @@ endef
 # Publish a Docker image to ECR, and put its associated release ID in S3.
 #
 # Args:
-#   $1 - Name of the Docker image.
-#
-define publish_service
-	$(ROOT)/docker_run.py \
-	    --aws --dind -- \
-	    wellcome/publish_service:30 \
-	        --project="$(1)" \
-	        --namespace=uk.ac.wellcome \
-	        --infra-bucket="$(INFRA_BUCKET)" \
-			--sns-topic="arn:aws:sns:eu-west-1:760097843905:ecr_pushes"
-endef
-
-
-# Publish a Docker image to ECR, and put its associated release ID in S3.
-#
-# Args:
 #   $1 - Name of the Docker image
 #   $2 - Stack name
 #   $3 - ECR Repository URI
@@ -82,7 +72,7 @@ endef
 define publish_service_ssm
 	$(ROOT)/docker_run.py \
     	    --aws --dind -- \
-                wellcome/weco-deploy:5.0.2 \
+                wellcome/weco-deploy:5.2.0 \
                 --project-id="$(2)" \
                 --verbose \
                 publish \

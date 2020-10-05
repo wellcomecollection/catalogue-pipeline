@@ -18,7 +18,7 @@ case object ImagesIndexConfig extends IndexConfig {
   private def sourceWork(canonicalWork: String): ObjectField =
     objectField(canonicalWork).fields(
       id("id"),
-      WorksIndexConfig.data(textField("path")),
+      IdentifiedWorkIndexConfig.data(textField("path")),
       keywordField("type")
     )
   val source = objectField("source").fields(

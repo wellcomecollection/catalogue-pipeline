@@ -12,14 +12,13 @@ import com.sksamuel.elastic4s.requests.searches.{
 import com.sksamuel.elastic4s.requests.searches.SearchHit
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.circe._
-import io.circe.generic.semiauto.deriveDecoder
 
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.internal.result._
 import uk.ac.wellcome.models.Implicits._
-import WorkState.Identified
+import WorkState.Merged
 
-trait RelatedWorksService {
+trait RelationsService {
 
   /** Given some work, return the IDs of all other works which need to be
     * denormalised. This should consist of the works siblings, its parent, and
@@ -28,39 +27,39 @@ trait RelatedWorksService {
     * @param work The work
     * @return The IDs of the other works to denormalise
     */
-  def getOtherAffectedWorks(
-    work: Work[Identified]): Future[List[SourceIdentifier]]
+  def getOtherAffectedWorks(work: Work[Merged]): Future[List[SourceIdentifier]]
 
   /** For a given work return all its relations.
     *
     * @param work The work
     * @return The related works which are embedded into the given work
     */
-  def getRelations(work: Work[Identified]): Future[RelatedWorks]
+  def getRelations(
+    work: Work[Merged]): Future[Relations[DataState.Unidentified]]
 }
 
-class PathQueryRelatedWorksService(elasticClient: ElasticClient, index: Index)(
+class PathQueryRelationsService(elasticClient: ElasticClient, index: Index)(
   implicit ec: ExecutionContext)
-    extends RelatedWorksService {
+    extends RelationsService {
 
   def getOtherAffectedWorks(
-    work: Work[Identified]): Future[List[SourceIdentifier]] =
+    work: Work[Merged]): Future[List[SourceIdentifier]] =
     work match {
-      case work: Work.Visible[Identified] =>
+      case work: Work.Visible[Merged] =>
         work.data.collectionPath match {
           case None => Future.successful(Nil)
           case Some(CollectionPath(path, _, _)) =>
             executeSearchRequest(
-              RelatedWorkRequestBuilder(index, path).otherAffectedWorksRequest
+              RelationsRequestBuilder(index, path).otherAffectedWorksRequest
             ).flatMap { result =>
               val works = result.left
                 .map(_.asException)
                 .flatMap { resp =>
-                  resp.hits.hits.toList.map(toAffectedWork).toResult
+                  resp.hits.hits.toList.map(toWork).toResult
                 }
               works match {
                 case Right(works) =>
-                  Future.successful(works.map(_.sourceIdentifier))
+                  Future.successful(works.map(_.state.sourceIdentifier))
                 case Left(err) => Future.failed(err)
               }
             }
@@ -68,14 +67,15 @@ class PathQueryRelatedWorksService(elasticClient: ElasticClient, index: Index)(
       case _ => Future.successful(Nil)
     }
 
-  def getRelations(work: Work[Identified]): Future[RelatedWorks] =
+  def getRelations(
+    work: Work[Merged]): Future[Relations[DataState.Unidentified]] =
     work match {
-      case work: Work.Visible[Identified] =>
+      case work: Work.Visible[Merged] =>
         work.data.collectionPath match {
-          case None => Future.successful(RelatedWorks.nil)
+          case None => Future.successful(Relations.none)
           case Some(CollectionPath(path, _, _)) =>
             executeMultiSearchRequest(
-              RelatedWorkRequestBuilder(index, path).relationsRequest
+              RelationsRequestBuilder(index, path).relationsRequest
             ).flatMap { result =>
               val works = result.left
                 .map(_.asException)
@@ -84,22 +84,24 @@ class PathQueryRelatedWorksService(elasticClient: ElasticClient, index: Index)(
                     resp.hits.hits.toList.map(toWork).toResult
                   }.toResult
                 }
-              val relatedWorks = works.flatMap {
+              val relations = works.flatMap {
                 case List(children, siblings, ancestors) =>
-                  Right(RelatedWorks(path, children, siblings, ancestors))
+                  Right(
+                    ArchiveRelationsBuilder(path, children, siblings, ancestors)
+                  )
                 case works =>
                   Left(
                     new Exception(
                       "Expected multisearch response containing 3 items")
                   )
               }
-              relatedWorks match {
-                case Right(relatedWorks) => Future.successful(relatedWorks)
-                case Left(err)           => Future.failed(err)
+              relations match {
+                case Right(relations) => Future.successful(relations)
+                case Left(err)        => Future.failed(err)
               }
             }
         }
-      case _ => Future.successful(RelatedWorks.nil)
+      case _ => Future.successful(Relations.none)
     }
 
   private def executeSearchRequest(
@@ -132,13 +134,6 @@ class PathQueryRelatedWorksService(elasticClient: ElasticClient, index: Index)(
     else
       Right(response.result)
 
-  private def toWork(hit: SearchHit): Result[Work.Visible[Identified]] =
-    hit.safeTo[Work.Visible[Identified]].toEither
-
-  case class AffectedWork(sourceIdentifier: SourceIdentifier)
-
-  implicit val affectedWorkDecoder = deriveDecoder[AffectedWork]
-
-  private def toAffectedWork(hit: SearchHit): Result[AffectedWork] =
-    hit.safeTo[AffectedWork].toEither
+  private def toWork(hit: SearchHit): Result[Work.Visible[Merged]] =
+    hit.safeTo[Work.Visible[Merged]].toEither
 }

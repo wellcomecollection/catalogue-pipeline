@@ -21,7 +21,7 @@ object Main extends WellcomeTypesafeApp {
       msgSender = ???,
       workRetriever = ???,
       workIndexer = ???,
-      relatedWorksService = ???,
+      relationsService = ???,
     )
   }
 }

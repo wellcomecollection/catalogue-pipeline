@@ -23,7 +23,7 @@ module "snapshot_scheduler" {
 
   deployment_service_env = var.deployment_service_env
 
-  infra_bucket = var.infra_bucket
+  lambda_upload_bucket = var.lambda_upload_bucket
 
   lambda_error_alarm_arn = var.lambda_error_alarm_arn
 

@@ -1,5 +1,7 @@
 package uk.ac.wellcome.models.work.internal
 
+import WorkState.Merged
+
 /** Holds relations for a particular work.
   *
   * @param ancestors Ancestors from root downwards
@@ -36,3 +38,13 @@ case class Relation[State <: DataState](
   id: State#Id,
   depth: Int,
 )
+
+object Relation {
+
+  def apply(work: Work[Merged], depth: Int): Relation[DataState.Unidentified] =
+    Relation[DataState.Unidentified](
+      data = work.data,
+      id = IdState.Identifiable(work.state.sourceIdentifier),
+      depth = depth
+    )
+}

@@ -38,6 +38,10 @@ output "prod_namespace" {
   value = aws_service_discovery_private_dns_namespace.prod_namespace.id
 }
 
-output "api_repository_url" {
-  value = aws_ecr_repository.platform_api.repository_url
+output "ecr_api_repository_url" {
+  value = aws_ecr_repository.api.repository_url
+}
+
+output "ecr_snapshot_generator_repository_url" {
+  value = aws_ecr_repository.snapshot_generator.repository_url
 }
