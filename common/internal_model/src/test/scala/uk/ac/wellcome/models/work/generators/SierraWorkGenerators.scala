@@ -18,7 +18,7 @@ trait SierraWorkGenerators extends WorkGenerators with ItemsGenerators {
         List(
           MergeCandidate(
             identifier = digitisedWork.sourceIdentifier,
-            reason = Some("Physical/digitised Sierra work")
+            reason = "Physical/digitised Sierra work"
           )
         )
       )

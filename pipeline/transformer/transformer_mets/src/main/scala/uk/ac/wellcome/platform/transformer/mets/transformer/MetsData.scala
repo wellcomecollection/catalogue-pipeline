@@ -45,7 +45,7 @@ case class MetsData(
       ontologyType = "Work",
       value = recordIdentifier
     ),
-    reason = Some("METS work")
+    reason = "METS work"
   )
 
   private def digitalLocation(license: Option[License],

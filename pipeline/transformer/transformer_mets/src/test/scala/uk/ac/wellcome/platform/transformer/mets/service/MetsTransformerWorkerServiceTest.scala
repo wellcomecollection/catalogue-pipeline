@@ -134,7 +134,7 @@ class MetsTransformerWorkerServiceTest
               ontologyType = "Work",
               value = identifier
             ),
-            reason = Some("METS work")
+            reason = "METS work"
           )
         )
       )

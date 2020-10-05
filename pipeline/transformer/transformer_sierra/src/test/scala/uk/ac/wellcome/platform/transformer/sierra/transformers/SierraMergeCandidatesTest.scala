@@ -301,7 +301,7 @@ class SierraMergeCandidatesTest
       ontologyType = "Work",
       value = calmId
     ),
-    reason = Some("Calm/Sierra harvest")
+    reason = "Calm/Sierra harvest"
   )
 
   private def createPictureWithUrls(urls: List[String]): SierraBibData =
@@ -368,7 +368,7 @@ class SierraMergeCandidatesTest
           ontologyType = "Work",
           value = bibNumber
         ),
-        reason = Some("Physical/digitised Sierra work")
+        reason = "Physical/digitised Sierra work"
       )
     )
 
@@ -382,7 +382,7 @@ class SierraMergeCandidatesTest
           ontologyType = "Work",
           value = miroID
         ),
-        reason = Some(reason)
+        reason = reason
       )
     )
 }

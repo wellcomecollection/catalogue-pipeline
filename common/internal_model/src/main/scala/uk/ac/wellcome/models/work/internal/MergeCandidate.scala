@@ -14,3 +14,11 @@ case class MergeCandidate(
   identifier: SourceIdentifier,
   reason: Option[String] = None
 )
+
+case object MergeCandidate {
+  def apply(identifier: SourceIdentifier, reason: String): MergeCandidate =
+    MergeCandidate(
+      identifier = identifier,
+      reason = Some(reason)
+    )
+}

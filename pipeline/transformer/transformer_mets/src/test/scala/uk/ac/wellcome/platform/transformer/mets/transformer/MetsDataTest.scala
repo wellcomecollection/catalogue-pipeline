@@ -43,7 +43,7 @@ class MetsDataTest
               ontologyType = "Work",
               value = bNumber
             ),
-            reason = Some("METS work")
+            reason = "METS work"
           )
         )
       )
@@ -81,7 +81,7 @@ class MetsDataTest
               ontologyType = "Work",
               value = bNumber
             ),
-            reason = Some("METS work")
+            reason = "METS work"
           )
         )
       )

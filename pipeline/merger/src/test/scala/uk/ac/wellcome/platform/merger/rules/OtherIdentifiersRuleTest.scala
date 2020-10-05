@@ -61,7 +61,7 @@ class OtherIdentifiersRuleTest
         List(
           MergeCandidate(
             identifier = mergeCandidate.sourceIdentifier,
-            reason = Some("Physical/digitised Sierra work")
+            reason = "Physical/digitised Sierra work"
           )
         )
       )

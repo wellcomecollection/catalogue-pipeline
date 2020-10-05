@@ -31,7 +31,7 @@ class PlatformMergerTest
         List(
           MergeCandidate(
             identifier = sierraDigitisedWork.sourceIdentifier,
-            reason = Some("Physical/digitised Sierra work")
+            reason = "Physical/digitised Sierra work"
           )
         )
       )
@@ -50,7 +50,7 @@ class PlatformMergerTest
         List(
           MergeCandidate(
             identifier = sierraDigitisedWork.sourceIdentifier,
-            reason = Some("Physical/digitised Sierra work")
+            reason = "Physical/digitised Sierra work"
           )
         )
       )
