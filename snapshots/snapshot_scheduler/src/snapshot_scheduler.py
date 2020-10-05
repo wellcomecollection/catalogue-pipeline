@@ -42,7 +42,7 @@ def main(event=None, _ctxt=None, sns_client=None):
                 bucket=public_bucket_name, key=public_object_key_v2
             ),
             apiVersion=api_version,
-            requestedAt=datetime.datetime.utcnow(),
+            requestedAt=datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
         )
 
         publish_sns_message(
