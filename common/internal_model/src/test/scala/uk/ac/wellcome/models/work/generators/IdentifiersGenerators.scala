@@ -81,6 +81,12 @@ trait IdentifiersGenerators extends RandomStrings {
   def createMiroSourceIdentifier: SourceIdentifier =
     createMiroSourceIdentifierWith()
 
+  def createCalmSourceIdentifier: SourceIdentifier =
+    SourceIdentifier(
+      value = randomAlphanumeric(length = 6),
+      identifierType = IdentifierType("calm-record-id"),
+    )
+
   def createHistoricalLibraryMiroSourceIdentifier: SourceIdentifier =
     createMiroSourceIdentifierWith(
       value = randomMiroId(prefix = randomCharFrom('L', 'M'))

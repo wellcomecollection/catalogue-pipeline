@@ -4,7 +4,7 @@ import org.scalatest.Inside
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.generators.MetsWorkGenerators
-import uk.ac.wellcome.models.work.internal.{Format, Work, WorkState}
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.generators.WorksWithImagesGenerators
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 
@@ -30,7 +30,9 @@ class ItemsRuleTest
   val metsWork: Work.Invisible[WorkState.Source] = metsSourceWork().invisible()
 
   val miroWork = createMiroWork
-  val calmWork = createCalmSourceWork
+
+  val calmWork: Work.Visible[WorkState.Source] =
+    sourceWork(sourceIdentifier = createCalmSourceIdentifier)
 
   it(
     "leaves items unchanged and returns a digitised version of a Sierra work as a merged source") {

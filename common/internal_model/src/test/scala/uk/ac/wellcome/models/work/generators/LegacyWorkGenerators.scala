@@ -53,25 +53,6 @@ trait LegacyWorkGenerators
       )
     )
 
-  def createCalmSourceWorkWith(data: WorkData[DataState.Unidentified] =
-                                 WorkData[DataState.Unidentified](
-                                   items = List(createCalmItem)
-                                 ),
-                               id: String = randomAlphanumeric(6),
-                               version: Int = 0): Work.Visible[Source] =
-    Work.Visible[Source](
-      state = Source(
-        sourceIdentifier = SourceIdentifier(
-          value = id,
-          identifierType = IdentifierType("calm-record-id"),
-        ),
-      ),
-      version = version,
-      data = data,
-    )
-
-  val createCalmSourceWork = createCalmSourceWorkWith()
-
   def createMiroWorkWith(images: List[UnmergedImage[DataState.Unidentified]],
                          otherIdentifiers: List[SourceIdentifier] = Nil,
                          sourceIdentifier: SourceIdentifier =

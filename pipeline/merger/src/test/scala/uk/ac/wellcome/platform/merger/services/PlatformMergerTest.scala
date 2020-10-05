@@ -85,7 +85,8 @@ class PlatformMergerTest
       )
       .invisible()
 
-  val calmWork = createCalmSourceWork
+  val calmWork: Work.Visible[Source] =
+    sourceWork(sourceIdentifier = createCalmSourceIdentifier)
 
   private val merger = PlatformMerger
 

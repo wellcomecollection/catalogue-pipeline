@@ -42,8 +42,8 @@ class OtherIdentifiersRuleTest
     sierraSourceWork()
       .items((1 to 2).map { _ => createPhysicalItem}.toList)
 
-  val calmWork =
-    createCalmSourceWork
+  val calmWork: Work.Visible[WorkState.Source] =
+    sourceWork(sourceIdentifier = createCalmSourceIdentifier)
 
   val mergeCandidate: Work.Visible[WorkState.Source] = sierraSourceWork()
 
