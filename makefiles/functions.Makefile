@@ -64,22 +64,6 @@ endef
 # Publish a Docker image to ECR, and put its associated release ID in S3.
 #
 # Args:
-#   $1 - Name of the Docker image.
-#
-define publish_service
-	$(ROOT)/docker_run.py \
-	    --aws --dind -- \
-	    wellcome/publish_service:30 \
-	        --project="$(1)" \
-	        --namespace=uk.ac.wellcome \
-	        --infra-bucket="$(INFRA_BUCKET)" \
-			--sns-topic="arn:aws:sns:eu-west-1:760097843905:ecr_pushes"
-endef
-
-
-# Publish a Docker image to ECR, and put its associated release ID in S3.
-#
-# Args:
 #   $1 - Name of the Docker image
 #   $2 - Stack name
 #   $3 - ECR Repository URI
