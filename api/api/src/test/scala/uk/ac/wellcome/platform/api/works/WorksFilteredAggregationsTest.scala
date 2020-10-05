@@ -3,6 +3,7 @@ package uk.ac.wellcome.platform.api.works
 import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.models.work.internal.Language
 import uk.ac.wellcome.models.work.internal.Format._
+import uk.ac.wellcome.models.Implicits._
 
 class WorksFilteredAggregationsTest extends ApiWorksTestBase {
 

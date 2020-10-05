@@ -9,6 +9,7 @@ import uk.ac.wellcome.models.work.generators.{
   SubjectGenerators
 }
 import uk.ac.wellcome.models.work.internal._
+import uk.ac.wellcome.models.Implicits._
 
 class WorksIncludesTest
     extends ApiWorksTestBase

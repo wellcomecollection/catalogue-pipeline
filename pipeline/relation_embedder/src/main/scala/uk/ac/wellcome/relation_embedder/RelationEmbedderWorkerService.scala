@@ -13,14 +13,15 @@ import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.pipeline_storage.{Indexer, Retriever}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.json.JsonUtil._
-import WorkState.Identified
+import WorkState.{Denormalised, Merged}
+import WorkFsm._
 
 class RelationEmbedderWorkerService[MsgDestination](
   sqsStream: SQSStream[NotificationMessage],
   msgSender: MessageSender[MsgDestination],
-  workRetriever: Retriever[Work[Identified]],
-  workIndexer: Indexer[Work[Identified]],
-  relatedWorksService: RelatedWorksService,
+  workRetriever: Retriever[Work[Merged]],
+  workIndexer: Indexer[Work[Denormalised]],
+  relationsService: RelationsService,
   batchSize: Int = 20,
   flushInterval: FiniteDuration = 3 seconds
 )(implicit ec: ExecutionContext, materializer: Materializer)
@@ -32,7 +33,7 @@ class RelationEmbedderWorkerService[MsgDestination](
     Source
       .future(workRetriever(message.body))
       .mapAsync(1) { work =>
-        relatedWorksService
+        relationsService
           .getOtherAffectedWorks(work)
           .map(work.sourceIdentifier :: _)
       }
@@ -41,21 +42,10 @@ class RelationEmbedderWorkerService[MsgDestination](
         workRetriever(sourceIdentifier.toString)
       }
       .mapAsync(3) { work =>
-        relatedWorksService
-          .getRelations(work)
-          .map(relations => (work, relations))
-      }
-      .map {
-        case (work, relations) =>
-          // TODO: here we should add the relations to the work model for storage.
-          // This requires model changes which have not been made yet
-          val denormalisedWork: Work[Identified] = ???
-          denormalisedWork
+        relationsService.getRelations(work).map(work.transition[Denormalised])
       }
       .groupedWithin(batchSize, flushInterval)
-      .map { works =>
-        workIndexer.index(works)
-      }
+      .map(workIndexer.index)
       .runForeach(_ => ())
       .map(_ => ())
 }
