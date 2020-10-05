@@ -7,7 +7,10 @@ import uk.ac.wellcome.models.work.internal._
 import WorkState.{Merged, Source}
 import WorkFsm._
 import SourceWork._
-import uk.ac.wellcome.models.work.generators.{MetsWorkGenerators, MiroWorkGenerators}
+import uk.ac.wellcome.models.work.generators.{
+  MetsWorkGenerators,
+  MiroWorkGenerators
+}
 
 class PlatformMergerTest
     extends AnyFunSpec
@@ -40,7 +43,9 @@ class PlatformMergerTest
 
   private val multipleItemsSierraWork =
     sierraSourceWork()
-      .items((1 to 2).map { _ => createPhysicalItem}.toList)
+      .items((1 to 2).map { _ =>
+        createPhysicalItem
+      }.toList)
       .mergeCandidates(
         List(
           MergeCandidate(

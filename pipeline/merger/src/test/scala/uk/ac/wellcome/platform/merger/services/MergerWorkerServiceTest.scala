@@ -12,7 +12,10 @@ import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, MatcherResult}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
-import uk.ac.wellcome.platform.merger.fixtures.{MatcherResultFixture, WorkerServiceFixture}
+import uk.ac.wellcome.platform.merger.fixtures.{
+  MatcherResultFixture,
+  WorkerServiceFixture
+}
 import WorkState.Merged
 import WorkFsm._
 import uk.ac.wellcome.models.work.generators.MiroWorkGenerators

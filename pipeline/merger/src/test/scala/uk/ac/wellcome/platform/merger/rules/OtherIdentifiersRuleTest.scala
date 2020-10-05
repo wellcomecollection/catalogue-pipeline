@@ -3,7 +3,10 @@ package uk.ac.wellcome.platform.merger.rules
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{Inside, Inspectors}
-import uk.ac.wellcome.models.work.generators.{MetsWorkGenerators, MiroWorkGenerators}
+import uk.ac.wellcome.models.work.generators.{
+  MetsWorkGenerators,
+  MiroWorkGenerators
+}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 
@@ -24,7 +27,9 @@ class OtherIdentifiersRuleTest
   val miroWork: Work.Visible[WorkState.Source] = miroSourceWork()
 
   val metsWorks: List[Work.Invisible[WorkState.Source]] =
-    (0 to 3).map { _ => metsSourceWork().invisible() }.toList
+    (0 to 3).map { _ =>
+      metsSourceWork().invisible()
+    }.toList
 
   val physicalSierraWork: Work.Visible[WorkState.Source] =
     sierraPhysicalSourceWork().format(Format.Pictures)
@@ -39,7 +44,9 @@ class OtherIdentifiersRuleTest
 
   val sierraWorkWithTwoPhysicalItems: Work.Visible[WorkState.Source] =
     sierraSourceWork()
-      .items((1 to 2).map { _ => createPhysicalItem}.toList)
+      .items((1 to 2).map { _ =>
+        createPhysicalItem
+      }.toList)
 
   val calmWork: Work.Visible[WorkState.Source] =
     sourceWork(sourceIdentifier = createCalmSourceIdentifier)
