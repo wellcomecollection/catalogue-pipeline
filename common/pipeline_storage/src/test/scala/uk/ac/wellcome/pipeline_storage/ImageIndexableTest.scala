@@ -65,8 +65,7 @@ class ImageIndexableTest
         redirectedWork = None,
       )
       val mergedSourceImage = originalImage.copy(
-        source = SourceWorks(
-          canonicalWork = createIdentifiedWork.toSourceWork,
+        source = originalImage.source.copy(
           redirectedWork = Some(source.toSourceWork)
         )
       )
