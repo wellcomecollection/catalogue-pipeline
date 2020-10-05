@@ -9,7 +9,7 @@ trait WorkGenerators extends IdentifiersGenerators {
   private def createVersion: Int =
     Random.nextInt(100) + 1
 
-  private def chooseFrom[T](seq: T*): T =
+  def chooseFrom[T](seq: T*): T =
     seq(Random.nextInt(seq.size))
 
   def sourceWork(
@@ -163,6 +163,9 @@ trait WorkGenerators extends IdentifiersGenerators {
 
     def workType(workType: WorkType): Work.Visible[State] =
       work.map(_.copy(workType = workType))
+
+    def duration(newDuration: Int): Work.Visible[State] =
+      work.map(_.copy(duration = Some(newDuration)))
 
     def map(f: WorkData[State#WorkDataState] => WorkData[State#WorkDataState])
       : Work.Visible[State] =

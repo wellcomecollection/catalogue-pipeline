@@ -7,7 +7,8 @@ trait ImageGenerators
     extends IdentifiersGenerators
     with ItemsGenerators
     with LegacyWorkGenerators
-    with VectorGenerators {
+    with VectorGenerators
+    with SierraWorkGenerators {
   def createUnmergedImageWith(
     location: DigitalLocationDeprecated = createDigitalLocation,
     version: Int = 1,
@@ -60,10 +61,9 @@ trait ImageGenerators
       IdState.Identified(createCanonicalId, createSourceIdentifier),
     location: DigitalLocationDeprecated = createDigitalLocation,
     version: Int = 1,
-    parentWork: Work.Visible[WorkState.Identified] =
-      createIdentifiedSierraWorkWith(),
+    parentWork: Work.Visible[WorkState.Identified] = sierraIdentifiedWork(),
     redirectedWork: Option[Work[WorkState.Identified]] = Some(
-      createIdentifiedSierraWorkWith())): MergedImage[DataState.Identified] =
+      sierraIdentifiedWork())): MergedImage[DataState.Identified] =
     MergedImage[DataState.Identified](
       imageId,
       version,
@@ -89,10 +89,9 @@ trait ImageGenerators
     imageId: IdState.Identified = IdState.Identified(
       createCanonicalId,
       createSourceIdentifierWith(IdentifierType("miro-image-number"))),
-    parentWork: Work.Visible[WorkState.Identified] =
-      createIdentifiedSierraWorkWith(),
+    parentWork: Work.Visible[WorkState.Identified] = sierraIdentifiedWork(),
     redirectedWork: Option[Work.Visible[WorkState.Identified]] = Some(
-      createIdentifiedWork),
+      identifiedWork()),
     inferredData: Option[InferredData] = createInferredData,
     location: DigitalLocationDeprecated = createDigitalLocation,
     version: Int = 1,

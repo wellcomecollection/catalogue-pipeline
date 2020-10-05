@@ -1,8 +1,9 @@
-# -*- encoding: utf-8 -*-
 """
-Publish a new Snapshot Schedule to SNS.
+Publish a new SnapshotJob to SNS.
 """
 
+import datetime
+import json
 import os
 
 import attr
@@ -11,13 +12,27 @@ from wellcome_aws_utils.lambda_utils import log_on_error
 from wellcome_aws_utils.sns_utils import publish_sns_message
 
 
-# This class is duplicated in the elasticdump app
-# Changes here will need to be reflected there.
 @attr.s
-class SnapshotRequest(object):
-    apiVersion = attr.ib()
-    publicBucketName = attr.ib()
-    publicObjectKey = attr.ib()
+class S3ObjectLocation:
+    bucket = attr.ib()
+    key = attr.ib()
+
+
+# This class is duplicated in the snapshot generator app
+# Changes here will need to be reflected there, and vice versa.
+@attr.s
+class SnapshotJob(object):
+    s3Location = attr.ib(type=S3ObjectLocation)
+    apiVersion = attr.ib(type=str)
+    requestedAt = attr.ib(type=datetime.datetime)
+
+
+class DatetimeEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, datetime.datetime):
+            # This needs to be a timestamp that can be parsed by Instant.parse()
+            # in Scala, e.g. 2020-10-02T12:04:31Z
+            return obj.strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 @log_on_error
@@ -31,15 +46,19 @@ def main(event=None, _ctxt=None, sns_client=None):
     public_object_key_v2 = os.environ["PUBLIC_OBJECT_KEY_V2"]
 
     for (api_version, public_object_key) in [("v2", public_object_key_v2)]:
-        snapshot_request_message = SnapshotRequest(
+        snapshot_job = SnapshotJob(
+            s3Location=S3ObjectLocation(
+                bucket=public_bucket_name, key=public_object_key_v2
+            ),
             apiVersion=api_version,
-            publicBucketName=public_bucket_name,
-            publicObjectKey=public_object_key,
+            requestedAt=datetime.datetime.utcnow(),
         )
+
+        json_string = json.dumps(attr.asdict(snapshot_job), cls=DatetimeEncoder)
 
         publish_sns_message(
             sns_client=sns_client,
             topic_arn=topic_arn,
-            message=attr.asdict(snapshot_request_message),
+            message=json_string,
             subject="source: snapshot_scheduler.main",
         )
