@@ -13,11 +13,13 @@ class OtherIdentifiersRuleTest
     with WorksWithImagesGenerators
     with Inside
     with Inspectors {
-  val nothingWork = createSourceWorkWith(
+  val nothingWork: Work.Visible[WorkState.Source] = sourceWork(
     sourceIdentifier = SourceIdentifier(
       identifierType = IdentifierType("fake", "fake"),
       value = "fake"
-    ))
+    )
+  )
+
   val miroWork = createMiroWork
   val metsWorks = (0 to 3).map(_ => createInvisibleMetsSourceWork).toList
 

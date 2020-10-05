@@ -6,10 +6,12 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.generators.WorksWithImagesGenerators
 import WorkState.Source
+import uk.ac.wellcome.models.work.generators.MiroWorkGenerators
 
 class WorkPredicatesTest
     extends AnyFunSpec
     with WorksWithImagesGenerators
+    with MiroWorkGenerators
     with Matchers
     with Inspectors {
   val works: Seq[Work[Source]] = List(
@@ -27,12 +29,10 @@ class WorkPredicatesTest
       items = (0 to 3).map(_ => createDigitalItem).toList,
       images = List(createUnmergedMetsImage)
     ),
-    createSourceWorkWith(
-      sourceIdentifier = createMiroSourceIdentifier,
-      otherIdentifiers = List(),
-      thumbnail = createMiroWork.data.thumbnail,
-      items = (0 to 3).flatMap(_ => createMiroWork.data.items).toList
-    ),
+    sourceWork(sourceIdentifier = createMiroSourceIdentifier)
+      .otherIdentifiers(List.empty)
+      .thumbnail(miroThumbnail())
+      .items(miroItems(count = 3)),
     createSierraDigitalWorkWith(
       items = (0 to 3).map(_ => createUnidentifiableItemWith(locations = List(createDigitalLocation))).toList
     ),

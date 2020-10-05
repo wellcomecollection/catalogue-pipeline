@@ -147,9 +147,13 @@ class MergerWorkerServiceTest
   it("discards works with version 0 and sends along the others") {
     withMergerWorkerServiceFixtures {
       case (vhs, QueuePair(queue, dlq), senders, metrics) =>
-        val versionZeroWork = createSourceWorkWith(version = 0)
-        val work = versionZeroWork
-          .copy(version = 1)
+        val versionZeroWork =
+          sourceWork()
+            .withVersion(0)
+
+        val work =
+          sourceWork(sourceIdentifier = versionZeroWork.sourceIdentifier)
+            .withVersion(1)
 
         val matcherResult = matcherResultWith(Set(Set(work, versionZeroWork)))
 
