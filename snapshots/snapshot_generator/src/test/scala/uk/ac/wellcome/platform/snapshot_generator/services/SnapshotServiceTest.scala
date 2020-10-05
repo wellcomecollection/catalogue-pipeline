@@ -55,7 +55,8 @@ class SnapshotServiceTest
       }
     }
 
-  val expectedDisplayWorkClassName = "uk.ac.wellcome.display.models.DisplayWork$"
+  val expectedDisplayWorkClassName =
+    "uk.ac.wellcome.display.models.DisplayWork$"
 
   it("completes a snapshot generation") {
     withFixtures {
