@@ -47,13 +47,16 @@ class OtherIdentifiersRuleTest
 
   val mergeCandidate: Work.Visible[WorkState.Source] = sierraSourceWork()
 
-  val sierraWithMergeCandidate = physicalSierraWork.copy(
-    data = physicalSierraWork.data.copy(
-      mergeCandidates = List(
-        MergeCandidate(
-          mergeCandidate.sourceIdentifier,
-          Some("Physical/digitised Sierra work")))
-    ))
+  val sierraWithMergeCandidate: Work.Visible[WorkState.Source] =
+    sierraPhysicalSourceWork()
+      .mergeCandidates(
+        List(
+          MergeCandidate(
+            identifier = mergeCandidate.sourceIdentifier,
+            reason = Some("Physical/digitised Sierra work")
+          )
+        )
+      )
 
   it("merges METS, Miro, and Sierra source IDs into Calm target") {
     inside(
