@@ -131,7 +131,7 @@ trait ElasticsearchFixtures
     index: Index,
     images: AugmentedImage*): Seq[Assertion] = {
     implicit val id: CanonicalId[AugmentedImage] =
-      (t: AugmentedImage) => t.id.canonicalId
+      (image: AugmentedImage) => image.id.canonicalId
     assertElasticsearchEventuallyHas(index, images: _*)
   }
 
