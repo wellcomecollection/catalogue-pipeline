@@ -13,7 +13,6 @@ import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.snapshot_generator.akka.source.ElasticsearchWorksSource
 
-
 class ElasticsearchSourceTest
     extends AnyFunSpec
     with Matchers
