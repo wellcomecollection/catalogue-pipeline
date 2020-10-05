@@ -13,7 +13,7 @@ class WorkPredicatesTest
     with Matchers
     with Inspectors {
   val works: Seq[Work[Source]] = List(
-    createSierraSourceWork,
+    sierraSourceWork(),
     createMiroWorkWith(
       sourceIdentifier = createNonHistoricalLibraryMiroSourceIdentifier,
       images = List(createUnmergedMiroImage)
@@ -36,20 +36,12 @@ class WorkPredicatesTest
     createSierraDigitalWorkWith(
       items = (0 to 3).map(_ => createUnidentifiableItemWith(locations = List(createDigitalLocation))).toList
     ),
-    createSierraPhysicalWork,
+    sierraPhysicalSourceWork(),
     sierraDigitalSourceWork(),
-    createSierraSourceWorkWith(
-      format = Some(Format.`3DObjects`)
-    ),
-    createSierraSourceWorkWith(
-      format = Some(Format.DigitalImages)
-    ),
-    createSierraSourceWorkWith(
-      format = Some(Format.Pictures)
-    ),
-    createSierraSourceWorkWith(
-      format = Some(Format.Music)
-    )
+    sierraSourceWork().format(Format.`3DObjects`),
+    sierraSourceWork().format(Format.DigitalImages),
+    sierraSourceWork().format(Format.Pictures),
+    sierraSourceWork().format(Format.Music),
   )
 
   it("selects Sierra works") {

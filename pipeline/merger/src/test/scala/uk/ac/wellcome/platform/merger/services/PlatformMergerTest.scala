@@ -17,35 +17,51 @@ class PlatformMergerTest
     license = Some(License.CCBYNC))
   val digitalLocationNoLicense = digitalLocationCCBYNC.copy(license = None)
 
-  val sierraDigitised = createSierraSourceWork
-  val sierraPhysicalWork = createSierraPhysicalWork.copy(
-    data = createSierraPhysicalWork.data.copy(
-      mergeCandidates = List(
-        MergeCandidate(
-          sierraDigitised.sourceIdentifier,
-          Some("Physical/digitised Sierra work"))),
-      format = Some(Format.`3DObjects`)
-    ))
-  val zeroItemSierraWork = createSierraSourceWorkWith(
-    items = Nil,
-    format = Some(Format.Pictures)
-  )
+  val sierraDigitisedWork: Work.Visible[Source] =
+    sierraDigitalSourceWork()
+
+  val sierraPhysicalWork: Work.Visible[Source] =
+    sierraPhysicalSourceWork()
+      .format(Format.`3DObjects`)
+      .mergeCandidates(
+        List(
+          MergeCandidate(
+            identifier = sierraDigitisedWork.sourceIdentifier,
+            reason = Some("Physical/digitised Sierra work")
+          )
+        )
+      )
+
+  val zeroItemSierraWork: Work.Visible[Source] =
+    sierraSourceWork()
+      .items(List.empty)
+      .format(Format.Pictures)
+
   private val multipleItemsSierraWork =
     createSierraWorkWithTwoPhysicalItems.copy(
       data = createSierraWorkWithTwoPhysicalItems.data.copy(
         mergeCandidates = List(
           MergeCandidate(
-            sierraDigitised.sourceIdentifier,
+            sierraDigitisedWork.sourceIdentifier,
             Some("Physical/digitised Sierra work")))
       ))
-  private val sierraDigitalWork = createSierraSourceWorkWith(
-    items = List(createDigitalItemWith(List(digitalLocationNoLicense))),
-    format = Some(Format.DigitalImages)
-  )
-  private val sierraPictureWork = createSierraSourceWorkWith(
-    items = List(createPhysicalItem),
-    format = Some(Format.Pictures)
-  )
+
+  private val sierraDigitalWork: Work.Visible[Source] =
+    sierraSourceWork()
+      .items(
+        List(
+          createDigitalItemWith(List(digitalLocationNoLicense))
+        )
+      )
+      .format(Format.DigitalImages)
+
+  private val sierraPictureWork: Work.Visible[Source] =
+    sierraSourceWork()
+      .items(
+        List(createPhysicalItem)
+      )
+      .format(Format.Pictures)
+
   private val miroWork = createMiroWorkWith(
     sourceIdentifier = createNonHistoricalLibraryMiroSourceIdentifier,
     images = List(createUnmergedMiroImage)
@@ -347,7 +363,7 @@ class PlatformMergerTest
   it(
     "merges a 3D object physical Sierra work with a digital Sierra work, a non-historical-library Miro work and a METS work") {
     val result = merger.merge(
-      works = Seq(sierraPhysicalWork, sierraDigitised, miroWork, metsWork)
+      works = Seq(sierraPhysicalWork, sierraDigitisedWork, miroWork, metsWork)
     )
 
     result.works.size shouldBe 4
@@ -360,7 +376,7 @@ class PlatformMergerTest
       .mapData { data =>
         data.copy(
           otherIdentifiers = sierraPhysicalWork.data.otherIdentifiers
-            ++ sierraDigitised.identifiers
+            ++ sierraDigitisedWork.identifiers
             ++ miroWork.identifiers,
           thumbnail = metsWork.data.thumbnail,
           items = List(
@@ -375,9 +391,9 @@ class PlatformMergerTest
     val expectedRedirectedDigitalWork =
       Work.Redirected[Merged](
         state = Merged(
-          sourceIdentifier = sierraDigitised.sourceIdentifier,
+          sourceIdentifier = sierraDigitisedWork.sourceIdentifier,
           nMergedSources = 0),
-        version = sierraDigitised.version,
+        version = sierraDigitisedWork.version,
         redirect = IdState.Identifiable(sierraPhysicalWork.sourceIdentifier)
       )
 
@@ -454,7 +470,7 @@ class PlatformMergerTest
   it(
     "merges a multiple items physical Sierra work with a digital Sierra work and a METS work") {
     val result = merger.merge(
-      works = Seq(multipleItemsSierraWork, sierraDigitised, metsWork)
+      works = Seq(multipleItemsSierraWork, sierraDigitisedWork, metsWork)
     )
 
     result.works.size shouldBe 3
@@ -466,7 +482,7 @@ class PlatformMergerTest
       .transition[Merged](2)
       .mapData { data =>
         data.copy(
-          otherIdentifiers = multipleItemsSierraWork.data.otherIdentifiers ++ sierraDigitised.identifiers,
+          otherIdentifiers = multipleItemsSierraWork.data.otherIdentifiers ++ sierraDigitisedWork.identifiers,
           thumbnail = metsWork.data.thumbnail,
           items = sierraItems :+ metsItem,
         )
@@ -475,9 +491,9 @@ class PlatformMergerTest
     val expectedRedirectedDigitalWork =
       Work.Redirected[Merged](
         state = Merged(
-          sourceIdentifier = sierraDigitised.sourceIdentifier,
+          sourceIdentifier = sierraDigitisedWork.sourceIdentifier,
           nMergedSources = 0),
-        version = sierraDigitised.version,
+        version = sierraDigitisedWork.version,
         redirect =
           IdState.Identifiable(multipleItemsSierraWork.sourceIdentifier)
       )

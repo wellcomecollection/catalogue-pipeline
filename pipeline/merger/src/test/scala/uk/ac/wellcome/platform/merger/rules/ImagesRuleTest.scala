@@ -34,8 +34,7 @@ class ImagesRuleTest
       "creates n images from a METS work containing n images, and a single Sierra picture work") {
       val n = 5
       val metsWork = createInvisibleMetsSourceWorkWith(numImages = n)
-      val sierraPictureWork =
-        createSierraSourceWorkWith(format = Some(Format.Pictures))
+      val sierraPictureWork = sierraSourceWork().format(Format.Pictures)
       val result = ImagesRule.merge(sierraPictureWork, List(metsWork)).data
 
       result should have length n
@@ -49,8 +48,7 @@ class ImagesRuleTest
       val m = 4
       val miroWorks = (1 to m).map(_ => createMiroWork).toList
       val metsWork = createInvisibleMetsSourceWorkWith(numImages = n)
-      val sierraPictureWork =
-        createSierraSourceWorkWith(format = Some(Format.Pictures))
+      val sierraPictureWork = sierraSourceWork().format(Format.Pictures)
       val result =
         ImagesRule.merge(sierraPictureWork, miroWorks :+ metsWork).data
 

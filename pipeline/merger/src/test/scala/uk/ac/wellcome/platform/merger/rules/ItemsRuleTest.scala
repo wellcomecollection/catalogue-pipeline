@@ -12,21 +12,15 @@ class ItemsRuleTest
     with Matchers
     with WorksWithImagesGenerators
     with Inside {
-  val physicalPictureSierra = createSierraPhysicalWork.copy(
-    data = createSierraPhysicalWork.data.copy(
-      format = Some(Format.Pictures)
-    )
-  )
-  val physicalMapsSierra = physicalPictureSierra.copy(
-    data = physicalPictureSierra.data.copy(
-      format = Some(Format.Maps)
-    )
-  )
-  val zeroItemPhysicalSierra = createSierraSourceWork.copy(
-    data = createSierraSourceWork.data.copy(
-      format = Some(Format.Pictures)
-    )
-  )
+  val physicalPictureSierra: Work.Visible[WorkState.Source] = sierraPhysicalSourceWork()
+    .format(Format.Pictures)
+
+  val physicalMapsSierra: Work.Visible[WorkState.Source] =
+    sierraPhysicalSourceWork().format(Format.Maps)
+
+  val zeroItemPhysicalSierra: Work.Visible[WorkState.Source] =
+    sierraSourceWork().format(Format.Pictures)
+
   val multiItemPhysicalSierra = createSierraWorkWithTwoPhysicalItems
 
   val digitalSierraWork: Work.Visible[WorkState.Source] = sierraDigitalSourceWork()
