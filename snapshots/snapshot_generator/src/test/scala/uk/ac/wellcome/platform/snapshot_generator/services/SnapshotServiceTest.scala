@@ -55,6 +55,9 @@ class SnapshotServiceTest
       }
     }
 
+  val expectedDisplayWorkClassName =
+    "uk.ac.wellcome.display.models.DisplayWork$"
+
   it("completes a snapshot generation") {
     withFixtures {
       case (snapshotService: SnapshotService, worksIndex, bucket) =>
@@ -73,9 +76,13 @@ class SnapshotServiceTest
 
         val future = snapshotService.generateSnapshot(snapshotJob)
 
-        whenReady(future) { result =>
-          val contents = getGzipObjectFromS3(s3Location)
+        whenReady(future) { result: CompletedSnapshotJob =>
           import uk.ac.wellcome.display.models.Implicits._
+
+          val (objectMetadata, contents) = getGzipObjectFromS3(s3Location)
+
+          val s3Etag = objectMetadata.getETag
+          val s3Size = objectMetadata.getContentLength
 
           val expectedContents = visibleWorks
             .map {
@@ -86,11 +93,20 @@ class SnapshotServiceTest
 
           contents shouldBe expectedContents
 
-          result shouldBe CompletedSnapshotJob(
-            snapshotJob = snapshotJob,
-            targetLocation =
-              s"http://localhost:33333/${s3Location.bucket}/${s3Location.key}"
-          )
+          result.snapshotJob shouldBe snapshotJob
+
+          result.snapshotResult.indexName shouldBe worksIndex.name
+          result.snapshotResult.documentCount shouldBe visibleWorks.length
+          result.snapshotResult.displayModel shouldBe expectedDisplayWorkClassName
+
+          result.snapshotResult.startedAt shouldBe >(
+            result.snapshotJob.requestedAt)
+          result.snapshotResult.finishedAt shouldBe >(
+            result.snapshotResult.startedAt)
+
+          result.snapshotResult.s3Etag shouldBe s3Etag
+          result.snapshotResult.s3Size shouldBe s3Size
+          result.snapshotResult.s3Location shouldBe s3Location
         }
     }
 
@@ -114,8 +130,11 @@ class SnapshotServiceTest
         val future = snapshotService.generateSnapshot(snapshotJob)
 
         whenReady(future) { result =>
-          val contents = getGzipObjectFromS3(s3Location)
+          val (objectMetadata, contents) = getGzipObjectFromS3(s3Location)
           import uk.ac.wellcome.display.models.Implicits._
+
+          val s3Etag = objectMetadata.getETag
+          val s3Size = objectMetadata.getContentLength
 
           val expectedContents = works
             .map {
@@ -126,11 +145,20 @@ class SnapshotServiceTest
 
           contents shouldBe expectedContents
 
-          result shouldBe CompletedSnapshotJob(
-            snapshotJob = snapshotJob,
-            targetLocation =
-              s"http://localhost:33333/${s3Location.bucket}/${s3Location.key}"
-          )
+          result.snapshotJob shouldBe snapshotJob
+
+          result.snapshotResult.indexName shouldBe worksIndex.name
+          result.snapshotResult.documentCount shouldBe works.length
+          result.snapshotResult.displayModel shouldBe expectedDisplayWorkClassName
+
+          result.snapshotResult.startedAt shouldBe >(
+            result.snapshotJob.requestedAt)
+          result.snapshotResult.finishedAt shouldBe >(
+            result.snapshotResult.startedAt)
+
+          result.snapshotResult.s3Etag shouldBe s3Etag
+          result.snapshotResult.s3Size shouldBe s3Size
+          result.snapshotResult.s3Location shouldBe s3Location
         }
     }
   }

@@ -44,19 +44,26 @@ class SnapshotGeneratorFeatureTest
 
         insertIntoElasticsearch(worksIndex, works: _*)
 
+        val expectedDisplayWorkClassName =
+          "uk.ac.wellcome.display.models.DisplayWork$"
         val s3Location = S3ObjectLocation(bucket.name, key = "target.tar.gz")
 
         val snapshotJob = SnapshotJob(
           s3Location = s3Location,
-          apiVersion = ApiVersions.v2,
-          requestedAt = Instant.now()
+          requestedAt = Instant.now(),
+          apiVersion = ApiVersions.v2
         )
 
         sendNotificationToSQS(queue = queue, message = snapshotJob)
 
         eventually {
-          val actualJsonLines: List[String] =
-            getGzipObjectFromS3(s3Location).split("\n").toList
+
+          val (objectMetadata, contents) = getGzipObjectFromS3(s3Location)
+
+          val actualJsonLines = contents.split("\n").toList
+
+          val s3Etag = objectMetadata.getETag
+          val s3Size = objectMetadata.getContentLength
 
           val expectedJsonLines = works.sortBy { _.state.canonicalId }.map {
             work =>
@@ -83,14 +90,22 @@ class SnapshotGeneratorFeatureTest
               assertJsonStringsAreEqual(actualLine, expectedLine)
           }
 
-          val expectedJob = CompletedSnapshotJob(
-            snapshotJob = snapshotJob,
-            targetLocation =
-              s"http://localhost:33333/${s3Location.bucket}/${s3Location.key}"
-          )
+          val result = messageSender.getMessages[CompletedSnapshotJob].head
 
-          messageSender.getMessages[CompletedSnapshotJob] shouldBe Seq(
-            expectedJob)
+          result.snapshotJob shouldBe snapshotJob
+
+          result.snapshotResult.indexName shouldBe worksIndex.name
+          result.snapshotResult.documentCount shouldBe works.length
+          result.snapshotResult.displayModel shouldBe expectedDisplayWorkClassName
+
+          result.snapshotResult.startedAt shouldBe >(
+            result.snapshotJob.requestedAt)
+          result.snapshotResult.finishedAt shouldBe >(
+            result.snapshotResult.startedAt)
+
+          result.snapshotResult.s3Etag shouldBe s3Etag
+          result.snapshotResult.s3Size shouldBe s3Size
+          result.snapshotResult.s3Location shouldBe s3Location
         }
     }
   }

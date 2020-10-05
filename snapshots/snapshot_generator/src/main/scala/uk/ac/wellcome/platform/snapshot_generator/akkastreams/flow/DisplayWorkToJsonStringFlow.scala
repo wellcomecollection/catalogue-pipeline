@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.snapshot_generator.flow
+package uk.ac.wellcome.platform.snapshot_generator.akkastreams.flow
 
 import akka.NotUsed
 import akka.stream.scaladsl.Flow
@@ -8,7 +8,7 @@ import uk.ac.wellcome.display.json.DisplayJsonUtil
 import uk.ac.wellcome.display.models.Implicits._
 
 object DisplayWorkToJsonStringFlow extends Logging {
-  def flow: Flow[DisplayWork, String, NotUsed] =
+  def apply(): Flow[DisplayWork, String, NotUsed] =
     Flow[DisplayWork]
       .map {
         case work: DisplayWork => DisplayJsonUtil.toJson(work)
