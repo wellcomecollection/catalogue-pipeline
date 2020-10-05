@@ -33,3 +33,14 @@ data "terraform_remote_state" "shared" {
   }
 }
 
+data "terraform_remote_state" "data_api" {
+  backend = "s3"
+
+  config = {
+    role_arn = "arn:aws:iam::756629837203:role/catalogue-read_only"
+
+    bucket = "wellcomecollection-catalogue-infra-delta"
+    key    = "terraform/catalogue/api/data_api.tfstate"
+    region = "eu-west-1"
+  }
+}

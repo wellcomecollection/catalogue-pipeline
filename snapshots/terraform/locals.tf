@@ -1,7 +1,3 @@
-data "aws_ecs_cluster" "data_api" {
-  cluster_name = "data-api"
-}
-
 data "aws_ecr_repository" "snapshot_generator" {
   name = "uk.ac.wellcome/snapshot_generator"
 
@@ -13,8 +9,8 @@ data "aws_s3_bucket" "public_data" {
 }
 
 locals {
-  cluster_arn  = data.aws_ecs_cluster.data_api.arn
-  cluster_name = data.aws_ecs_cluster.data_api.cluster_name
+  cluster_arn  = data.terraform_remote_state.data_api.outputs.cluster_arn
+  cluster_name = data.terraform_remote_state.data_api.outputs.cluster_name
 
   public_object_key_v2    = "catalogue/v2/works.json.gz"
   public_data_bucket_name = data.aws_s3_bucket.public_data.id
