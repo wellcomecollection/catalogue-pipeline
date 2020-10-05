@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# This is a pre-exit hook that runs before the job finishes.
+#
+# See https://buildkite.com/docs/agent/v3/hooks
+
+set -o errexit
+set -o nounset
+set -o verbose
+
+echo "Hello, I am the pre-exit hook!"
+echo "These are the containers which are still running:"
+docker ps
+echo "I am going away now 👋"
+exit 0
