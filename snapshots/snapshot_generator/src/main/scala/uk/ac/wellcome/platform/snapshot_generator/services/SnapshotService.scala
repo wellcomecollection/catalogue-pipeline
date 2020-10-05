@@ -13,7 +13,11 @@ import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.snapshot_generator.akka.graph.UploadSnapshotGraph
 import uk.ac.wellcome.platform.snapshot_generator.akka.source.S3ObjectMetadataSource
-import uk.ac.wellcome.platform.snapshot_generator.models.{CompletedSnapshotJob, SnapshotJob, SnapshotResult}
+import uk.ac.wellcome.platform.snapshot_generator.models.{
+  CompletedSnapshotJob,
+  SnapshotJob,
+  SnapshotResult
+}
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 
 import scala.concurrent.{ExecutionContext, Future}

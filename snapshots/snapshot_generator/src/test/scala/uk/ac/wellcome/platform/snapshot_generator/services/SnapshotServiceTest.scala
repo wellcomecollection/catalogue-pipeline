@@ -30,7 +30,6 @@ import uk.ac.wellcome.platform.snapshot_generator.test.utils.S3GzipUtils
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 
-
 class SnapshotServiceTest
     extends AnyFunSpec
     with ScalaFutures
@@ -119,7 +118,6 @@ class SnapshotServiceTest
 
         insertIntoElasticsearch(worksIndex, works: _*)
 
-
         val s3Location = S3ObjectLocation(bucket.name, key = "target.txt.gz")
         val snapshotJob = SnapshotJob(
           s3Location = s3Location,
@@ -200,7 +198,6 @@ class SnapshotServiceTest
           s3Settings,
           worksIndex = "wrong-index",
           elasticClient = brokenElasticClient) { brokenSnapshotService =>
-
           val snapshotJob = SnapshotJob(
             s3Location = createS3ObjectLocation,
             apiVersion = ApiVersions.v2,
