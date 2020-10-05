@@ -57,6 +57,18 @@ trait Indexable[T] {
   *
   * The exact same logic is applied to image versions, using both the
   * merge state and the version numbers of the image's SourceWorks.
+  *
+  *  Gotchas:
+  *
+  *  We don't believe this causes us issues right now, but it's worth noting
+  *  that an unlinked work with the same version wouldn't override its merged
+  *  predecessor (even if it was then linked to another, different work).
+  *
+  *   Image version and image source version have the same precedence. If this
+  *   became an issue we'd probably want to do something like:
+  *
+  *   def version(image: AugmentedImage) =
+  *     10 * (2*image.version + image.source.version)
   */
 object Indexable extends Logging {
 
