@@ -177,6 +177,17 @@ class WorkIndexableTest
           }
       }
     }
+
+    it("throws an error if a work has >= 10 merged sources") {
+      val erroneousWork = identifiedWork(nMergedSources = 10)
+
+      withWorksIndexAndIndexer {
+        case (_, indexer) =>
+          a[RuntimeException] should be thrownBy {
+            ingestInOrder(indexer)(erroneousWork)
+          }
+      }
+    }
   }
 
   private def assertIngestedWorkIs(

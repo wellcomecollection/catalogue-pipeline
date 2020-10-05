@@ -79,22 +79,14 @@ object Indexable extends Logging {
 
       def version(image: AugmentedImage) =
         10 * (image.version + image.source.version) +
-          (warnOnTooManySources(image).source match {
+          (image.source match {
+            case SourceWorks(_, _, nMergedSources) if nMergedSources >= 10 =>
+              throw new RuntimeException(
+                s"Image ${image.id.canonicalId} has $nMergedSources >= 10 merged sources; versioning/ingest may be inconsistent")
             case SourceWorks(_, Some(redirected), nMergedSources) =>
               nMergedSources + 1
             case SourceWorks(_, None, nMergedSources) => nMergedSources
           })
-
-      private def warnOnTooManySources(
-        image: AugmentedImage): AugmentedImage = {
-        image.source match {
-          case SourceWorks(_, _, nMergedSources) if nMergedSources >= 10 =>
-            warn(
-              s"Image ${image.id.canonicalId} has $nMergedSources >= 10 merged sources; versioning/ingest may be inconsistent")
-          case _ => ()
-        }
-        image
-      }
     }
 
   implicit val workIndexable: Indexable[Work[Identified]] =
@@ -104,20 +96,15 @@ object Indexable extends Logging {
         work.state.canonicalId
 
       def version(work: Work[Identified]) =
-        warnOnTooManySources(work) match {
+        work match {
+          case Work.Visible(_, _, state) if state.nMergedSources >= 10 =>
+            throw new RuntimeException(
+              s"Work ${work.state.canonicalId} has ${work.state.nMergedSources} >= 10 merged sources; versioning/ingest may be inconsistent")
           case Work.Visible(version, _, state) =>
             (version * 10) + state.nMergedSources
           case Work.Redirected(version, _, _)   => (version * 10) + 1
           case Work.Invisible(version, _, _, _) => version * 10
         }
 
-      private def warnOnTooManySources(
-        work: Work[Identified]): Work[Identified] = {
-        if (work.state.nMergedSources >= 10) {
-          warn(
-            s"Work ${work.state.canonicalId} has ${work.state.nMergedSources} >= 10 merged sources; versioning/ingest may be inconsistent")
-        }
-        work
-      }
     }
 }
