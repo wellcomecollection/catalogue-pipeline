@@ -16,7 +16,7 @@ data "terraform_remote_state" "catalogue_account" {
     bucket = "wellcomecollection-platform-infra"
     key    = "terraform/platform-infrastructure/accounts/catalogue.tfstate"
 
-    role_arn = "arn:aws:iam::760097843905:role/platform-developer"
+    role_arn = "arn:aws:iam::760097843905:role/platform-read_only"
     region   = "eu-west-1"
   }
 }
@@ -25,7 +25,7 @@ data "terraform_remote_state" "shared" {
   backend = "s3"
 
   config = {
-    role_arn = "arn:aws:iam::760097843905:role/platform-developer"
+    role_arn = "arn:aws:iam::760097843905:role/platform-read_only"
 
     bucket = "wellcomecollection-platform-infra"
     key    = "terraform/platform-infrastructure/shared.tfstate"
