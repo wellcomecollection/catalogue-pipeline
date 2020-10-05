@@ -18,7 +18,6 @@ import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.display.models.{ApiVersions, DisplayWork, WorksIncludes}
 import uk.ac.wellcome.elasticsearch.ElasticClientBuilder
 import uk.ac.wellcome.models.work.generators.WorkGenerators
-import uk.ac.wellcome.models.work.internal.Work
 import uk.ac.wellcome.platform.snapshot_generator.fixtures.{
   AkkaS3,
   SnapshotServiceFixture
@@ -55,6 +54,8 @@ class SnapshotServiceTest
         }
       }
     }
+
+  val expectedDisplayWorkClassName = "uk.ac.wellcome.display.models.DisplayWork$"
 
   it("completes a snapshot generation") {
     withFixtures {
@@ -95,7 +96,7 @@ class SnapshotServiceTest
 
           result.snapshotResult.indexName shouldBe worksIndex.name
           result.snapshotResult.documentCount shouldBe visibleWorks.length
-          result.snapshotResult.displayModel shouldBe Work.getClass.getCanonicalName
+          result.snapshotResult.displayModel shouldBe expectedDisplayWorkClassName
 
           result.snapshotResult.startedAt shouldBe >(
             result.snapshotJob.requestedAt)
@@ -147,7 +148,7 @@ class SnapshotServiceTest
 
           result.snapshotResult.indexName shouldBe worksIndex.name
           result.snapshotResult.documentCount shouldBe works.length
-          result.snapshotResult.displayModel shouldBe Work.getClass.getCanonicalName
+          result.snapshotResult.displayModel shouldBe expectedDisplayWorkClassName
 
           result.snapshotResult.startedAt shouldBe >(
             result.snapshotJob.requestedAt)

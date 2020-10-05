@@ -16,7 +16,6 @@ import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.models.work.generators.WorkGenerators
-import uk.ac.wellcome.models.work.internal.Work
 import uk.ac.wellcome.platform.snapshot_generator.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.platform.snapshot_generator.models.{
   CompletedSnapshotJob,
@@ -45,6 +44,7 @@ class SnapshotGeneratorFeatureTest
 
         insertIntoElasticsearch(worksIndex, works: _*)
 
+        val expectedDisplayWorkClassName = "uk.ac.wellcome.display.models.DisplayWork$"
         val s3Location = S3ObjectLocation(bucket.name, key = "target.tar.gz")
 
         val snapshotJob = SnapshotJob(
@@ -95,7 +95,7 @@ class SnapshotGeneratorFeatureTest
 
           result.snapshotResult.indexName shouldBe worksIndex.name
           result.snapshotResult.documentCount shouldBe works.length
-          result.snapshotResult.displayModel shouldBe Work.getClass.getCanonicalName
+          result.snapshotResult.displayModel shouldBe expectedDisplayWorkClassName
 
           result.snapshotResult.startedAt shouldBe >(
             result.snapshotJob.requestedAt)

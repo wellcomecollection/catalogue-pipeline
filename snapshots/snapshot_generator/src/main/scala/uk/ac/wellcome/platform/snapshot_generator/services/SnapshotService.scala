@@ -10,7 +10,6 @@ import com.sksamuel.elastic4s.ElasticClient
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.elasticsearch.ElasticConfig
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.snapshot_generator.akka.graph.UploadSnapshotGraph
 import uk.ac.wellcome.platform.snapshot_generator.akka.source.S3ObjectMetadataSource
 import uk.ac.wellcome.platform.snapshot_generator.models.{
@@ -63,7 +62,7 @@ class SnapshotService(akkaS3Settings: S3Settings,
       snapshotResult = SnapshotResult(
         indexName = elasticConfig.worksIndex.name,
         documentCount = documentCount,
-        displayModel = Work.getClass.getCanonicalName,
+        displayModel = DisplayWork.getClass.getCanonicalName,
         startedAt = startedAt,
         finishedAt = Instant.now(),
         s3Etag = uploadResult.etag,
