@@ -114,7 +114,7 @@ class ItemsRuleTest
           physicalPictureSierra.data.items.head.locations ++
             metsWork.data.items.head.locations
 
-        mergedSources should contain theSameElementsAs (Seq(metsWork, miroWork))
+        mergedSources should contain theSameElementsAs Seq(metsWork, miroWork)
     }
   }
 
