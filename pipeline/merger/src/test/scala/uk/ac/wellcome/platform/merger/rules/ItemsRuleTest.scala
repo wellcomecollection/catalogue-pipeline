@@ -32,6 +32,7 @@ class ItemsRuleTest
 
   val calmWork: Work.Visible[WorkState.Source] =
     sourceWork(sourceIdentifier = createCalmSourceIdentifier)
+      .items(List(createCalmItem))
 
   it(
     "leaves items unchanged and returns a digitised version of a Sierra work as a merged source") {
