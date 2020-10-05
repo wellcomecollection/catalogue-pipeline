@@ -1,6 +1,9 @@
 ROOT = $(shell git rev-parse --show-toplevel)
 INFRA_BUCKET = wellcomecollection-platform-infra
 
+LAMBDA_UPLOAD_BUCKET = wellcomecollection-catalogue-infra-delta
+LAMBDA_PUBLISH_ROLE_ARN = arn:aws:iam::756629837203:role/catalogue-developer
+
 ifneq ($(CI),true)
 DEV_ROLE_ARN := arn:aws:iam::760097843905:role/platform-developer
 endif
@@ -18,7 +21,10 @@ include $(ROOT)/makefiles/terraform.Makefile
 define publish_lambda
     $(ROOT)/docker_run.py --aws --root -- \
         wellcome/publish_lambda:130 \
-        "$(1)" --key="lambdas/$(1).zip" --bucket="$(INFRA_BUCKET)" --role-arn="$(DEV_ROLE_ARN)" --sns-topic="arn:aws:sns:eu-west-1:760097843905:lambda_pushes"
+        "$(1)" --key="lambdas/$(1).zip" \
+		--bucket="$(LAMBDA_UPLOAD_BUCKET)" \
+		--role-arn="$(LAMBDA_PUBLISH_ROLE_ARN)" \
+		--sns-topic="arn:aws:sns:eu-west-1:760097843905:lambda_pushes"
 endef
 
 
