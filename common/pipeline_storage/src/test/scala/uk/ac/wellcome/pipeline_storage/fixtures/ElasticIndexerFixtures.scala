@@ -2,7 +2,7 @@ package uk.ac.wellcome.pipeline_storage.fixtures
 
 import com.sksamuel.elastic4s.analysis.Analysis
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 import com.sksamuel.elastic4s.requests.mappings.MappingDefinition
 import com.sksamuel.elastic4s.{ElasticClient, Index}
 import org.scalatest.Suite
@@ -52,4 +52,13 @@ trait ElasticIndexerFixtures extends ElasticsearchFixtures with Akka {
   implicit def canonicalId[T](
     implicit indexable: Indexable[T]): CanonicalId[T] =
     (doc: T) => indexable.id(doc)
+
+  def ingestInOrder[T](indexer: ElasticIndexer[T])(documents: T*)(
+    implicit ec: ExecutionContext): Future[Either[Seq[T], Seq[T]]] =
+    documents.tail.foldLeft(indexer.index(List(documents.head))) {
+      (future, doc) =>
+        future.flatMap { _ =>
+          indexer.index(List(doc))
+        }
+    }
 }

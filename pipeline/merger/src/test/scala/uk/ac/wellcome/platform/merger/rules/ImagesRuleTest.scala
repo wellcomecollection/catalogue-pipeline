@@ -17,47 +17,15 @@ class ImagesRuleTest
     with OptionValues
     with Inspectors {
   describe("image creation rules") {
-    it("creates 1 image from a single non-historical-library Miro work") {
-      val miroWork = createMiroWorkWith(
-        sourceIdentifier = createNonHistoricalLibraryMiroSourceIdentifier,
-        images = List(createUnmergedMiroImage)
-      )
-      val result = ImagesRule.merge(miroWork).data
-
-      result should have length 1
-      result.head.location should be(miroWork.data.images.head.location)
-      val source = result.head.source
-      source shouldBe a[SourceWorks[_]]
-      val sourceWorks =
-        source.asInstanceOf[SourceWorks[DataState.Unidentified]]
-      sourceWorks.canonicalWork.id.sourceIdentifier should be(
-        miroWork.sourceIdentifier)
-      sourceWorks.redirectedWork should be(None)
-    }
-
     it("creates n images from n Miro works and a single Sierra work") {
       val n = 3
-      val miroWorks = (1 to n)
-        .map(_ => {
-          val work = createMiroWork
-          (work.sourceIdentifier -> work)
-        })
-        .toMap
+      val miroWorks = (1 to n).map(_ => createMiroWork)
       val sierraWork = createSierraDigitalWork
-      val result = ImagesRule.merge(sierraWork, miroWorks.values.toList).data
+      val result = ImagesRule.merge(sierraWork, miroWorks.toList).data
 
-      result.foreach { image =>
-        val imageSource =
-          image.source
-            .asInstanceOf[SourceWorks[DataState.Unidentified]]
-        val identifier = imageSource.canonicalWork.id.sourceIdentifier
-        identifier shouldBe sierraWork.sourceIdentifier
-        imageSource.redirectedWork shouldBe defined
-        val redirectedSource = imageSource.redirectedWork.get
-        val miroWork = miroWorks(redirectedSource.id.sourceIdentifier)
-        image.location shouldBe miroWork.data.images.head.location
-        redirectedSource.data shouldBe miroWork.data
-      }
+      result should have length n
+      result.map(_.location) should contain theSameElementsAs
+        miroWorks.map(_.data.images.head.location)
     }
 
     it(
@@ -71,13 +39,6 @@ class ImagesRuleTest
       result should have length n
       result.map(_.location) should contain theSameElementsAs
         metsWork.data.images.map(_.location)
-      result.map { image =>
-        image.source
-          .asInstanceOf[SourceWorks[DataState.Unidentified]]
-          .canonicalWork
-          .id
-          .sourceIdentifier
-      } should contain only sierraPictureWork.sourceIdentifier
     }
 
     it(
@@ -95,13 +56,6 @@ class ImagesRuleTest
       result.map(_.location) should contain theSameElementsAs
         metsWork.data.images.map(_.location) ++
           miroWorks.map(_.data.images.head.location)
-      result.map { image =>
-        image.source
-          .asInstanceOf[SourceWorks[DataState.Unidentified]]
-          .canonicalWork
-          .id
-          .sourceIdentifier
-      } should contain only sierraPictureWork.sourceIdentifier
     }
 
     it(
@@ -115,13 +69,6 @@ class ImagesRuleTest
       result should have length n
       result.map(_.location) should contain theSameElementsAs
         miroWorks.map(_.data.images.head.location)
-      result.map { image =>
-        image.source
-          .asInstanceOf[SourceWorks[DataState.Unidentified]]
-          .canonicalWork
-          .id
-          .sourceIdentifier
-      } should contain only sierraWork.sourceIdentifier
     }
   }
 
@@ -135,18 +82,6 @@ class ImagesRuleTest
       val target = createSierraDigitalWork
       val sources = (1 to 5).map(_ => createMiroWork)
       testRule(target, sources).get should have length 5
-    }
-
-    it("sets the target as the parentWork") {
-      val target = createSierraDigitalWork
-      val sources = (1 to 5).map(_ => createMiroWork)
-      forAll(testRule.apply(target, sources).get) {
-        _.source
-          .asInstanceOf[SourceWorks[DataState.Unidentified]]
-          .canonicalWork
-          .id
-          .sourceIdentifier should be(target.sourceIdentifier)
-      }
     }
   }
 

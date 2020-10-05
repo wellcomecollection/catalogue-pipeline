@@ -32,12 +32,8 @@ trait FieldMergeRule {
   protected type MergeState = State[Set[Work[Source]], FieldData]
 
   def apply(target: Work.Visible[Source],
-            sources: Seq[Work[Source]]): MergeState =
-    merge(target, sources) match {
-      case FieldMergeResult(field, mergedSources) =>
-        State(existingMergedSources =>
-          (existingMergedSources ++ mergedSources.toSet, field))
-    }
+            sources: Seq[Work[Source]]): FieldMergeResult[FieldData] =
+    merge(target, sources)
 
   def merge(target: Work.Visible[Source],
             sources: Seq[Work[Source]]): FieldMergeResult[FieldData]

@@ -16,7 +16,7 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorkGenerators {
 
     val result = mergerManager.applyMerge(maybeWorks = List(Some(work)))
 
-    result.works shouldBe List(work.transition[Merged](false))
+    result.works shouldBe List(work.transition[Merged](0))
   }
 
   it("performs a merge with multiple works") {
@@ -27,7 +27,7 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorkGenerators {
 
     val result = mergerManager.applyMerge(maybeWorks = works)
 
-    result.works.head shouldBe work.transition[Merged](false)
+    result.works.head shouldBe work.transition[Merged](0)
 
     result.works.tail.zip(otherWorks).map {
       case (baseWork: Work[Merged], unmergedWork: Work.Visible[Source]) =>
@@ -48,7 +48,7 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorkGenerators {
     val result = mergerManager.applyMerge(maybeWorks = maybeWorks.toList)
 
     result.works should contain theSameElementsAs
-      expectedWorks.map(_.transition[Merged](false))
+      expectedWorks.map(_.transition[Merged](0))
   }
 
   val mergerRules = new Merger {
@@ -65,7 +65,7 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorkGenerators {
         )
       }
       MergerOutcome(
-        works = outputWorks.map(_.transition[Merged](false)),
+        works = outputWorks.map(_.transition[Merged](0)),
         images = Nil
       )
     }
@@ -76,9 +76,13 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorkGenerators {
 
     override protected def createMergeResult(
       target: Work.Visible[Source],
-      sources: Seq[Work[Source]]): MergeState =
-      State(_ =>
-        (sources.toSet, MergeResult(target.transition[Merged](false), Nil)))
+      sources: Seq[Work[Source]]): State[MergeState, MergeResult] =
+      State(
+        _ =>
+          (
+            sources zip Stream.continually(true) toMap,
+            MergeResult(target.transition[Merged](0), Nil))
+      )
   }
 
   val mergerManager = new MergerManager(mergerRules = mergerRules)

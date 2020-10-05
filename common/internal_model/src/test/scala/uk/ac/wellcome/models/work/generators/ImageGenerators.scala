@@ -45,10 +45,12 @@ trait ImageGenerators
     identifierType: IdentifierType = IdentifierType("miro-image-number"),
     parentWork: Work.Visible[WorkState.Source] = createSierraSourceWorkWith(),
     redirectedWork: Option[Work[WorkState.Source]] = Some(
-      createMiroWorkWith(Nil))): MergedImage[DataState.Unidentified] =
+      createMiroWorkWith(Nil)),
+    nMergedSources: Int = 0): MergedImage[DataState.Unidentified] =
     createUnmergedImageWith(location, version, identifierType = identifierType) mergeWith (
       parentWork.toSourceWork,
-      redirectedWork.map(_.toSourceWork)
+      redirectedWork.map(_.toSourceWork),
+      nMergedSources = nMergedSources
     )
 
   def createMergedImage: MergedImage[DataState.Unidentified] =

@@ -4,15 +4,20 @@ import cats.data.State
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.rules._
 import uk.ac.wellcome.platform.merger.logging.MergerLogging
-import uk.ac.wellcome.platform.merger.models.{MergeResult, MergerOutcome}
+import uk.ac.wellcome.platform.merger.models.{
+  FieldMergeResult,
+  MergeResult,
+  MergerOutcome
+}
 import WorkState.{Merged, Source}
 import WorkFsm._
 
 /*
  * The implementor of a Merger must provide:
  * - `findTarget`, which finds the target from the input works
- * - `createMergeResult`, a recipe for creating a merged target and a complete
- *    list of works that should be redirected as a result of any merged fields.
+ * - `createMergeResult`, a recipe for creating a merged target and a
+ *   map with keys of works used in the merge and values of whether they
+ *   should be redirected
  *
  * Calling `merge` with a list of works will return a new list of works including:
  * - the target work with all fields merged
@@ -20,13 +25,14 @@ import WorkFsm._
  * - any other works untouched
  */
 trait Merger extends MergerLogging {
-  type MergeState = State[Set[Work[Source]], MergeResult]
+  type MergeState = Map[Work[Source], Boolean]
 
   protected def findTarget(
     works: Seq[Work[Source]]): Option[Work.Visible[Source]]
 
-  protected def createMergeResult(target: Work.Visible[Source],
-                                  sources: Seq[Work[Source]]): MergeState
+  protected def createMergeResult(
+    target: Work.Visible[Source],
+    sources: Seq[Work[Source]]): State[MergeState, MergeResult]
 
   protected def getTargetAndSources(works: Seq[Work[Source]])
     : Option[(Work.Visible[Source], Seq[Work[Source]])] =
@@ -44,20 +50,39 @@ trait Merger extends MergerLogging {
         }
     }
 
+  implicit class MergeResultAccumulation[T](val result: FieldMergeResult[T]) {
+    def redirectSources: State[MergeState, T] = shouldRedirect(true)
+    def retainSources: State[MergeState, T] = shouldRedirect(false)
+
+    // If the state already contains a source, then don't change the existing `redirect` value
+    // Otherwise, add the source with the current value.
+    private def shouldRedirect(redirect: Boolean): State[MergeState, T] =
+      State { prevState =>
+        val nextState = result.sources.foldLeft(prevState) {
+          case (state, source) if state.contains(source) => state
+          case (state, source)                           => state + (source -> redirect)
+        }
+        (nextState, result.data)
+      }
+  }
+
   def merge(works: Seq[Work[Source]]): MergerOutcome =
     getTargetAndSources(works)
       .map {
         case (target, sources) =>
           logIntentions(target, sources)
           val (mergeResultSources, result) = createMergeResult(target, sources)
-            .run(Set.empty)
+            .run(Map.empty)
             .value
+          val redirectedSources = mergeResultSources.collect {
+            case (source, true) => source
+          }
 
-          val remaining = (sources.toSet -- mergeResultSources)
-            .map(_.transition[Merged](false))
-          val redirects = mergeResultSources
+          val remaining = (sources.toSet -- redirectedSources)
+            .map(_.transition[Merged](0))
+          val redirects = redirectedSources
             .map(redirectSourceToTarget(target))
-            .map(_.transition[Merged](false))
+            .map(_.transition[Merged](0))
           logResult(result, redirects.toList, remaining.toList)
 
           MergerOutcome(
@@ -98,6 +123,8 @@ trait Merger extends MergerLogging {
 }
 
 object PlatformMerger extends Merger {
+  import SourceWork._
+
   override def findTarget(
     works: Seq[Work[Source]]): Option[Work.Visible[Source]] =
     works
@@ -108,32 +135,53 @@ object PlatformMerger extends Merger {
       case _                                  => None
     }
 
-  override def createMergeResult(target: Work.Visible[Source],
-                                 sources: Seq[Work[Source]]): MergeState =
+  override def createMergeResult(
+    target: Work.Visible[Source],
+    sources: Seq[Work[Source]]): State[MergeState, MergeResult] =
     if (sources.isEmpty)
       State.pure(
         MergeResult(
-          mergedTarget = target.transition[Merged](false),
-          images = ImagesRule.merge(target).data
+          mergedTarget = target.transition[Merged](0),
+          images = standaloneImages(target).map {
+            _ mergeWith (
+              canonicalWork = target.toSourceWork,
+              redirectedWork = None,
+              nMergedSources = 0
+            )
+          }
         )
       )
     else
       for {
-        items <- ItemsRule(target, sources)
-        thumbnail <- ThumbnailRule(target, sources)
-        otherIdentifiers <- OtherIdentifiersRule(target, sources)
-        images <- ImagesRule(target, sources)
+        items <- ItemsRule(target, sources).redirectSources
+        thumbnail <- ThumbnailRule(target, sources).redirectSources
+        otherIdentifiers <- OtherIdentifiersRule(target, sources).redirectSources
+        unmergedImages <- ImagesRule(target, sources).retainSources
         work = target.mapData { data =>
           data.copy[DataState.Unidentified](
             items = items,
             thumbnail = thumbnail,
             otherIdentifiers = otherIdentifiers,
-            images = images.map(_.toUnmerged)
+            images = unmergedImages
           )
         }
+        nSources <- State.inspect[MergeState, Int](_.size)
       } yield
         MergeResult(
-          mergedTarget = work.transition[Merged](true),
-          images = images
+          mergedTarget = work.transition[Merged](nSources),
+          images = unmergedImages.map { image =>
+            image mergeWith (
+              canonicalWork = work.toSourceWork,
+              redirectedWork = sources
+                .find { _.data.images.contains(image) }
+                .map(_.toSourceWork),
+              nMergedSources = nSources
+            )
+          }
         )
+
+  private def standaloneImages(
+    target: Work.Visible[Source]): List[UnmergedImage[DataState.Unidentified]] =
+    if (WorkPredicates.singleDigitalItemMiroWork(target)) target.data.images
+    else Nil
 }

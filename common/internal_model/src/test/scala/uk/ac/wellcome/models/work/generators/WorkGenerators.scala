@@ -23,21 +23,21 @@ trait WorkGenerators extends IdentifiersGenerators {
 
   def mergedWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
-    hasMultipleSources: Boolean = false
+    nMergedSources: Int = 0
   ): Work.Visible[Merged] =
     Work.Visible[Merged](
-      state = Merged(sourceIdentifier, hasMultipleSources),
+      state = Merged(sourceIdentifier, nMergedSources),
       data = initData,
       version = createVersion
     )
 
   def denormalisedWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
-    hasMultipleSources: Boolean = false,
+    nMergedSources: Int = 0,
     relations: Relations[DataState.Unidentified] = Relations.none
   ): Work.Visible[Denormalised] =
     Work.Visible[Denormalised](
-      state = Denormalised(sourceIdentifier, hasMultipleSources, relations),
+      state = Denormalised(sourceIdentifier, nMergedSources, relations),
       data = initData,
       version = createVersion
     )
@@ -45,14 +45,14 @@ trait WorkGenerators extends IdentifiersGenerators {
   def identifiedWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     canonicalId: String = createCanonicalId,
-    hasMultipleSources: Boolean = chooseFrom(true, false),
+    nMergedSources: Int = chooseFrom(0, 1, 2, 3),
     relations: Relations[DataState.Identified] = Relations.none
   ): Work.Visible[Identified] =
     Work.Visible[Identified](
       state = Identified(
         sourceIdentifier = sourceIdentifier,
         canonicalId = canonicalId,
-        hasMultipleSources = hasMultipleSources,
+        nMergedSources = nMergedSources,
         relations = relations
       ),
       data = initData,

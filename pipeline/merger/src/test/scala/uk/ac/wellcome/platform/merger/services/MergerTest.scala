@@ -8,6 +8,7 @@ import uk.ac.wellcome.platform.merger.models.{FieldMergeResult, MergeResult}
 import uk.ac.wellcome.platform.merger.rules.FieldMergeRule
 import WorkState.{Merged, Source}
 import WorkFsm._
+import cats.data.State
 
 class MergerTest
     extends AnyFunSpec
@@ -51,10 +52,10 @@ class MergerTest
 
     override protected def createMergeResult(
       target: Work.Visible[Source],
-      sources: Seq[Work[Source]]): MergeState =
+      sources: Seq[Work[Source]]): State[MergeState, MergeResult] =
       for {
-        items <- TestItemsRule(target, sources)
-        otherIdentifiers <- TestOtherIdentifiersRule(target, sources)
+        items <- TestItemsRule(target, sources).redirectSources
+        otherIdentifiers <- TestOtherIdentifiersRule(target, sources).redirectSources
       } yield
         MergeResult(
           mergedTarget = target
@@ -64,7 +65,7 @@ class MergerTest
                 otherIdentifiers = otherIdentifiers
               )
             }
-            .transition[Merged](true),
+            .transition[Merged](1),
           images = Nil
         )
   }
@@ -75,7 +76,7 @@ class MergerTest
     mergedWorks.works should contain(
       inputWorks.head
         .asInstanceOf[Work.Visible[Source]]
-        .transition[Merged](true)
+        .transition[Merged](1)
         .mapData { data =>
           data.copy[DataState.Unidentified](
             items = mergedTargetItems,
@@ -95,7 +96,7 @@ class MergerTest
 
   it("returns all non-redirected and non-target works untouched") {
     mergedWorks.works should contain(
-      inputWorks.tail.head.transition[Merged](false)
+      inputWorks.tail.head.transition[Merged](0)
     )
   }
 }

@@ -15,7 +15,7 @@ object MergerOutcome {
 
   def passThrough(works: Seq[Work[Source]]): MergerOutcome =
     MergerOutcome(
-      works = works.map(_.transition[Merged](false)),
+      works = works.map(_.transition[Merged](0)),
       images = Nil
     )
 }
