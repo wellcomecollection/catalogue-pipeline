@@ -3,7 +3,6 @@ Publish a new SnapshotJob to SNS.
 """
 
 import datetime
-import json
 import os
 
 import attr
@@ -27,14 +26,6 @@ class SnapshotJob(object):
     requestedAt = attr.ib(type=datetime.datetime)
 
 
-class DatetimeEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, datetime.datetime):
-            # This needs to be a timestamp that can be parsed by Instant.parse()
-            # in Scala, e.g. 2020-10-02T12:04:31Z
-            return obj.strftime("%Y-%m-%dT%H:%M:%SZ")
-
-
 @log_on_error
 def main(event=None, _ctxt=None, sns_client=None):
     print(os.environ)
@@ -54,11 +45,9 @@ def main(event=None, _ctxt=None, sns_client=None):
             requestedAt=datetime.datetime.utcnow(),
         )
 
-        json_string = json.dumps(attr.asdict(snapshot_job), cls=DatetimeEncoder)
-
         publish_sns_message(
             sns_client=sns_client,
             topic_arn=topic_arn,
-            message=json_string,
+            message=attr.asdict(snapshot_job),
             subject="source: snapshot_scheduler.main",
         )
