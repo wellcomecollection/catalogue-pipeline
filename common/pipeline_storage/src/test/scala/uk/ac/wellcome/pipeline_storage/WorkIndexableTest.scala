@@ -133,8 +133,10 @@ class WorkIndexableTest
 
     it("overrides a merged work with one that has been merged again") {
       val mergedWork1 = identifiedWork(nMergedSources = 1)
-      val mergedWork2 = identifiedWork(nMergedSources = 2)
-      val mergedWork3 = identifiedWork(nMergedSources = 3)
+      val mergedWork2 =
+        mergedWork1.copy(state = mergedWork1.state.copy(nMergedSources = 2))
+      val mergedWork3 =
+        mergedWork1.copy(state = mergedWork1.state.copy(nMergedSources = 3))
 
       withWorksIndexAndIndexer {
         case (index, indexer) =>

@@ -9,8 +9,11 @@ import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.{ImageGenerators, WorkGenerators}
-import uk.ac.wellcome.models.work.internal
-import uk.ac.wellcome.models.work.internal.{AugmentedImage, SourceWorks}
+import uk.ac.wellcome.models.work.internal.{
+  AugmentedImage,
+  DataState,
+  SourceWorks
+}
 import uk.ac.wellcome.models.work.internal.SourceWork._
 import uk.ac.wellcome.pipeline_storage.Indexable.imageIndexable
 import uk.ac.wellcome.pipeline_storage.fixtures.ElasticIndexerFixtures
@@ -28,17 +31,18 @@ class ImageIndexableTest
 
   describe("updating images with merged / redirected sources") {
     it("overrides an image with the same version if source version is higher") {
-      val source = createIdentifiedWork
+      val source = identifiedWork()
       val originalImage = createAugmentedImageWith(
         parentWork = source,
-        redirectedWork = None,
-        version = 2
+        redirectedWork = None
       )
       val updatedSourceImage = originalImage.copy(
-        source = internal.SourceWorks(
-          canonicalWork = source.toSourceWork.copy(version = 2),
-          redirectedWork = None
-        )
+        source =
+          SourceWorks(
+            canonicalWork =
+              source.toSourceWork.copy(version = source.version + 1),
+            redirectedWork = None
+          )
       )
 
       withImagesIndexAndIndexer {
@@ -59,15 +63,17 @@ class ImageIndexableTest
     }
 
     it("overrides an image with the same version if sources have been merged") {
-      val source = createIdentifiedWork
+      val source = identifiedWork()
       val originalImage = createAugmentedImageWith(
         parentWork = source,
         redirectedWork = None,
       )
       val mergedSourceImage = originalImage.copy(
-        source = originalImage.source.copy(
-          redirectedWork = Some(source.toSourceWork)
-        )
+        source = originalImage.source
+          .asInstanceOf[SourceWorks[DataState.Identified]]
+          .copy(
+            redirectedWork = Some(source.toSourceWork)
+          )
       )
 
       withImagesIndexAndIndexer {
@@ -113,10 +119,11 @@ class ImageIndexableTest
       "doesn't override an image with a redirected source with a non-redirected one") {
       val originalImage = createAugmentedImage
       val nonRedirectedImage = originalImage.copy(
-        source = SourceWorks(
-          canonicalWork = createIdentifiedWork.toSourceWork,
-          redirectedWork = None
-        )
+        source = originalImage.source
+          .asInstanceOf[SourceWorks[DataState.Identified]]
+          .copy(
+            redirectedWork = None
+          )
       )
 
       withImagesIndexAndIndexer {
