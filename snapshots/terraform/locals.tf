@@ -12,18 +12,12 @@ data "aws_s3_bucket" "public_data" {
   bucket = "wellcomecollection-data-public-delta"
 }
 
-data "aws_s3_bucket" "infra" {
-  bucket = "wellcomecollection-catalogue-infra-delta"
-}
-
 locals {
   cluster_arn  = data.aws_ecs_cluster.data_api.arn
   cluster_name = data.aws_ecs_cluster.data_api.cluster_name
 
   public_object_key_v2    = "catalogue/v2/works.json.gz"
   public_data_bucket_name = data.aws_s3_bucket.public_data.id
-
-  infra_bucket = data.aws_s3_bucket.infra.id
 
   snapshot_generator_image = data.aws_ecr_repository.snapshot_generator.repository_url
 
