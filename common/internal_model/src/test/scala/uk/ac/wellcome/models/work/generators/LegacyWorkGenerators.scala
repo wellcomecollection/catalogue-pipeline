@@ -24,9 +24,6 @@ trait LegacyWorkGenerators
       version = 1
     )
 
-  def createInvisibleSourceWork: Work.Invisible[Source] =
-    createInvisibleSourceWorkWith()
-
   def createSourceWorkWith(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     version: Int = 1,

@@ -68,7 +68,7 @@ class MergerWorkerServiceTest
   it("sends InvisibleWorks unmerged") {
     withMergerWorkerServiceFixtures {
       case (vhs, QueuePair(queue, dlq), senders, metrics) =>
-        val work = createInvisibleSourceWork
+        val work = sourceWork().invisible()
 
         val matcherResult = matcherResultWith(Set(Set(work)))
 
