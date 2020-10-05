@@ -4,9 +4,15 @@ import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.models.work.internal.Format.{Books, Journals, Pictures}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.generators.{ItemsGenerators, ProductionEventGenerators}
+import uk.ac.wellcome.models.work.generators.{
+  ItemsGenerators,
+  ProductionEventGenerators
+}
 
-class WorksAggregationsTest extends ApiWorksTestBase with ItemsGenerators with ProductionEventGenerators {
+class WorksAggregationsTest
+    extends ApiWorksTestBase
+    with ItemsGenerators
+    with ProductionEventGenerators {
 
   it("supports fetching the format aggregation") {
     withApi {
