@@ -49,6 +49,7 @@ class OtherIdentifiersRuleTest
 
   val sierraWithMergeCandidate: Work.Visible[WorkState.Source] =
     sierraPhysicalSourceWork()
+      .format(Format.Pictures)
       .mergeCandidates(
         List(
           MergeCandidate(
