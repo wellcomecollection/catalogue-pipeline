@@ -1,21 +1,25 @@
 package uk.ac.wellcome.platform.merger.services
 
+import scala.concurrent.{ExecutionContext, Future}
 import akka.Done
 import io.circe.Encoder
 
-import scala.concurrent.{ExecutionContext, Future}
 import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, MatcherResult}
 import uk.ac.wellcome.typesafe.Runnable
 import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
+import uk.ac.wellcome.pipeline_storage.Indexer
+import WorkState.Merged
 
 class MergerWorkerService[WorkDestination, ImageDestination](
   sqsStream: SQSStream[NotificationMessage],
   playbackService: RecorderPlaybackService,
   mergerManager: MergerManager,
+  workIndexer: Indexer[Work[Merged]],
   workSender: MessageSender[WorkDestination],
   imageSender: MessageSender[ImageDestination]
 )(implicit ec: ExecutionContext)
@@ -34,10 +38,16 @@ class MergerWorkerService[WorkDestination, ImageDestination](
     for {
       maybeWorks <- playbackService.fetchAllWorks(
         matchedIdentifiers.identifiers.toList)
-      merged = mergerManager.applyMerge(maybeWorks = maybeWorks)
+      mergerOutcome = mergerManager.applyMerge(maybeWorks = maybeWorks)
+      indexResult <- workIndexer.index(mergerOutcome.works)
+      works <- indexResult match {
+        case Left(failedWorks) =>
+          Future.failed(new Exception(s"Failed indexing works: $failedWorks"))
+        case Right(works) => Future.successful(works)
+      }
       (worksFuture, imagesFuture) = (
-        sendMessages(workSender, merged.works),
-        sendMessages(imageSender, merged.images)
+        sendMessages(workSender, works.map(_.state.id)),
+        sendMessages(imageSender, mergerOutcome.images)
       )
       _ <- worksFuture
       _ <- imagesFuture

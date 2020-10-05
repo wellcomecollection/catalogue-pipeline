@@ -123,6 +123,7 @@ sealed trait WorkState {
   type TransitionArgs
 
   val sourceIdentifier: SourceIdentifier
+  val nMergedSources: Int
 
   def id: String = sourceIdentifier.toString
 }
@@ -135,6 +136,8 @@ object WorkState {
 
     type WorkDataState = DataState.Unidentified
     type TransitionArgs = Unit
+
+    val nMergedSources = 1
   }
 
   case class Merged(

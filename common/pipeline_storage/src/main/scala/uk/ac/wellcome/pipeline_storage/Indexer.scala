@@ -99,18 +99,17 @@ object Indexable extends Logging {
       }
     }
 
-  implicit val workIndexable: Indexable[Work[Identified]] =
-    new Indexable[Work[Identified]] {
+  implicit def workIndexable[State <: WorkState]: Indexable[Work[State]] =
+    new Indexable[Work[State]] {
 
-      def id(work: Work[Identified]) =
-        work.state.canonicalId
+      def id(work: Work[State]): String = work.state.id
 
-      def version(work: Work[Identified]) =
+      def version(work: Work[State]) =
         work match {
           case Work.Visible(_, _, state)
               if state.numberOfSources >= versionMultiplier =>
             throw new RuntimeException(
-              s"Work ${work.state.sourceIdentifier.toString} has ${work.state.numberOfSources} >= $versionMultiplier sources; versioning/ingest may be inconsistent")
+              s"Work ${work.sourceIdentifier.toString} has ${work.state.numberOfSources} >= $versionMultiplier sources; versioning/ingest may be inconsistent")
           case Work.Visible(version, _, state) =>
             (version * versionMultiplier) + (state.numberOfSources - 1) // The number of additional sources
           case Work.Redirected(version, _, _) =>
