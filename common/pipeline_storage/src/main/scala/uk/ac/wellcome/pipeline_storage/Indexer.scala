@@ -1,9 +1,9 @@
 package uk.ac.wellcome.pipeline_storage
 
 import scala.concurrent.Future
-
 import uk.ac.wellcome.models.work.internal._
 import WorkState.Identified
+import grizzled.slf4j.Logging
 
 abstract class Indexer[T: Indexable] {
 
@@ -44,7 +44,7 @@ trait Indexable[T] {
   *
   * We can do that by ingesting works into Elasticsearch with a document
   * version derived from a combination of work version, number of merged
-  * sources and work type.
+  * sources and whether it is visible, redirected or invisible.
   *
   * More specifically, by multiplying the work version by 10, we make sure
   * that a new version of a work always wins over previous versions
@@ -58,7 +58,7 @@ trait Indexable[T] {
   * The exact same logic is applied to image versions, using both the
   * merge state and the version numbers of the image's SourceWorks.
   */
-object Indexable {
+object Indexable extends Logging {
 
   implicit val imageIndexable: Indexable[AugmentedImage] =
     new Indexable[AugmentedImage] {
@@ -66,11 +66,23 @@ object Indexable {
         image.id.canonicalId
 
       def version(image: AugmentedImage) =
-        10 * (image.version + image.source.version) + (image.source match {
-          case SourceWorks(_, Some(_), nMergedSources) => nMergedSources + 1
-          case SourceWorks(_, None, nMergedSources)    => nMergedSources
-          case _                                       => 0
-        })
+        10 * (image.version + image.source.version) +
+          (warnOnTooManySources(image).source match {
+            case SourceWorks(_, Some(redirected), nMergedSources) =>
+              nMergedSources + 1
+            case SourceWorks(_, None, nMergedSources) => nMergedSources
+          })
+
+      private def warnOnTooManySources(
+        image: AugmentedImage): AugmentedImage = {
+        image.source match {
+          case SourceWorks(_, _, nMergedSources) if nMergedSources >= 10 =>
+            warn(
+              s"Image ${image.id.canonicalId} has $nMergedSources >= 10 merged sources; versioning/ingest may be inconsistent")
+          case _ => ()
+        }
+        image
+      }
     }
 
   implicit val workIndexable: Indexable[Work[Identified]] =
@@ -80,11 +92,20 @@ object Indexable {
         work.state.canonicalId
 
       def version(work: Work[Identified]) =
-        work match {
+        warnOnTooManySources(work) match {
           case Work.Visible(version, _, state) =>
             (version * 10) + state.nMergedSources
           case Work.Redirected(version, _, _)   => (version * 10) + 1
           case Work.Invisible(version, _, _, _) => version * 10
         }
+
+      private def warnOnTooManySources(
+        work: Work[Identified]): Work[Identified] = {
+        if (work.state.nMergedSources >= 10) {
+          warn(
+            s"Work ${work.state.canonicalId} has ${work.state.nMergedSources} >= 10 merged sources; versioning/ingest may be inconsistent")
+        }
+        work
+      }
     }
 }
