@@ -17,8 +17,8 @@ trait ApiWorksTestBase
 
   implicit object IdentifiedWorkIndexable
       extends Indexable[Work.Visible[Identified]] {
-    override def json(t: Work.Visible[Identified]): String =
-      toJson(t).get
+    override def json(work: Work.Visible[Identified]): String =
+      toJson(work).get
   }
 
   def singleWorkResult(apiPrefix: String,
