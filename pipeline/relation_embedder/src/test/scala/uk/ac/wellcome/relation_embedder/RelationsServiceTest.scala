@@ -27,8 +27,7 @@ class RelatedWorksServiceTest
       .collectionPath(CollectionPath(path = path))
       .title(path)
 
-  def storeWorks(index: Index,
-                 works: List[Work[Merged]] = works): Assertion =
+  def storeWorks(index: Index, works: List[Work[Merged]] = works): Assertion =
     insertIntoElasticsearch(index, works: _*)
 
   val workA = work("a")
