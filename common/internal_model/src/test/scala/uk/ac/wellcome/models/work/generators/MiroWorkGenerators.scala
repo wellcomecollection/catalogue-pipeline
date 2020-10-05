@@ -13,7 +13,7 @@ trait MiroWorkGenerators extends ImageGenerators {
     )
 
   def miroItems(count: Int = Random.nextInt(5)): List[Item[IdState.Unidentifiable.type]] =
-    (0 to count).map { _ =>
+    (1 to count).map { _ =>
       createUnidentifiableItemWith(
         locations = List(
           createDigitalLocationWith(locationType = createImageLocationType)
