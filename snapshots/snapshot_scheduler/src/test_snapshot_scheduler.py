@@ -1,21 +1,13 @@
 # -*- encoding: utf-8 -*-
 
-import datetime as dt
+import datetime
+import json
 import os
 
-import mock
 from unittest.mock import patch
-
 import snapshot_scheduler
 
 
-class patched_datetime(dt.datetime):
-    @classmethod
-    def utcnow(cls):
-        return dt.datetime(2011, 6, 21, 0, 0, 0, 0)
-
-
-@mock.patch("datetime.datetime", patched_datetime)
 def test_writes_message_to_sqs(sns_client, topic_arn):
     public_bucket_name = "public-bukkit"
     public_object_key_v2 = "v2/works.json.gz"
@@ -31,10 +23,15 @@ def test_writes_message_to_sqs(sns_client, topic_arn):
 
     messages = sns_client.list_messages()
     assert len(messages) == 1
-    assert [m[":message"] for m in messages] == [
-        {
-            "publicBucketName": public_bucket_name,
-            "publicObjectKey": public_object_key_v2,
-            "apiVersion": "v2",
-        }
-    ]
+
+    snapshot_job = json.loads(messages[0][":message"])
+    assert snapshot_job["s3Location"] == {
+        "bucket": public_bucket_name,
+        "key": public_object_key_v2,
+    }
+    assert snapshot_job["apiVersion"] == "v2"
+
+    requested_at = datetime.datetime.strptime(
+        snapshot_job["requestedAt"], "%Y-%m-%dT%H:%M:%SZ"
+    )
+    assert (datetime.datetime.now() - requested_at).total_seconds() < 5
