@@ -28,19 +28,28 @@ class ItemsRuleTest
   val metsWork = createInvisibleMetsSourceWork
   val miroWork = createMiroWork
   val calmWork = createCalmSourceWork
-  val (sierraWorkWithMergeCandidate, sierraWorkMergeCandidate) =
-    createSierraWorkWithDigitisedMergeCandidate
 
   it(
     "leaves items unchanged and returns a digitised version of a Sierra work as a merged source") {
+    val digitisedWork = sierraDigitalSourceWork()
+    val physicalWork = sierraPhysicalSourceWork()
+      .mergeCandidates(
+        List(
+          MergeCandidate(
+            identifier = digitisedWork.sourceIdentifier,
+            reason = Some("Physical/digitised Sierra work")
+          )
+        )
+      )
+
     inside(
       ItemsRule
-        .merge(sierraWorkWithMergeCandidate, List(sierraWorkMergeCandidate))) {
+        .merge(physicalWork, List(digitisedWork))) {
       case FieldMergeResult(items, mergedSources) =>
         items should have size 1
-        items should be(sierraWorkWithMergeCandidate.data.items)
+        items shouldBe physicalWork.data.items
 
-        mergedSources should be(Seq(sierraWorkMergeCandidate))
+        mergedSources should be(Seq(digitisedWork))
     }
   }
 
