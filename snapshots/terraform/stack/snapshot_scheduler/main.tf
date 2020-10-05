@@ -3,8 +3,8 @@ module "snapshot_scheduler" {
 
   name = "snapshot_scheduler-${var.deployment_service_env}"
 
-  s3_bucket = var.infra_bucket
-  s3_key    = "lambdas/data_api/snapshot_scheduler.zip"
+  s3_bucket = var.lambda_upload_bucket
+  s3_key    = "lambdas/snapshots/snapshot_scheduler.zip"
 
   description     = "Send snapshot schedules to an SNS topic"
   alarm_topic_arn = var.lambda_error_alarm_arn

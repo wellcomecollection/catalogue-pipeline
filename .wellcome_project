@@ -115,18 +115,13 @@ catalogue_api:
       name: Production
   image_repositories:
     - id: api
-      namespace: uk.ac.wellcome
-      account_id: '760097843905'
       services:
         - id: catalogue-api
-          role_arn: arn:aws:iam::756629837203:role/catalogue-ci
     - id: snapshot_generator
-      namespace: uk.ac.wellcome
-      account_id: '760097843905'
       services:
         - id: snapshot-generator
-          role_arn: arn:aws:iam::756629837203:role/catalogue-ci
   name: Catalogue API
-  role_arn: arn:aws:iam::760097843905:role/platform-ci
+  account_id: '756629837203'
+  role_arn: arn:aws:iam::756629837203:role/catalogue-ci
   aws_region_name: eu-west-1
   github_repository: wellcometrust/catalogue

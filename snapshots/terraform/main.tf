@@ -18,5 +18,5 @@ module "stack" {
   vpc_id  = local.vpc_id
   subnets = local.subnets
 
-  infra_bucket = local.infra_bucket
+  lambda_upload_bucket = "wellcomecollection-catalogue-infra-delta"
 }
