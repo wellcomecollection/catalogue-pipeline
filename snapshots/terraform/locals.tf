@@ -1,9 +1,3 @@
-data "aws_ecr_repository" "snapshot_generator" {
-  name = "uk.ac.wellcome/snapshot_generator"
-
-  provider = aws.platform
-}
-
 data "aws_s3_bucket" "public_data" {
   bucket = "wellcomecollection-data-public-delta"
 }
@@ -15,7 +9,7 @@ locals {
   public_object_key_v2    = "catalogue/v2/works.json.gz"
   public_data_bucket_name = data.aws_s3_bucket.public_data.id
 
-  snapshot_generator_image = data.aws_ecr_repository.snapshot_generator.repository_url
+  snapshot_generator_image = data.terraform_remote_state.api_shared.outputs.ecr_snapshot_generator_repository_url
 
   lambda_error_alarm_arn = data.terraform_remote_state.shared.outputs.lambda_error_alarm_arn
   dlq_alarm_arn          = data.terraform_remote_state.shared.outputs.dlq_alarm_arn

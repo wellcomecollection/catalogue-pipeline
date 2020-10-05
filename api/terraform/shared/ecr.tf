@@ -1,22 +1,33 @@
-module "ecr_repository_api" {
-  source = "git::https://github.com/wellcometrust/terraform.git//ecr?ref=v1.0.0"
-  name   = "api"
+resource "aws_ecr_repository" "api" {
+  name = "uk.ac.wellcome/api"
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
-module "ecr_repository_nginx_api_gw" {
-  source    = "git::https://github.com/wellcometrust/terraform.git//ecr?ref=v19.5.1"
-  id        = "nginx_api_gw"
-  namespace = "uk.ac.wellcome"
+resource "aws_ecr_repository" "nginx_api_gw" {
+  name = "uk.ac.wellcome/nginx_api_gw"
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
-module "ecr_repository_snapshot_generator" {
-  source = "git::https://github.com/wellcometrust/terraform.git//ecr?ref=v1.0.0"
-  name   = "snapshot_generator"
+resource "aws_ecr_repository" "snapshot_generator" {
+  name = "uk.ac.wellcome/snapshot_generator"
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
-module "ecr_repository_update_api_docs" {
-  source = "git::https://github.com/wellcometrust/terraform.git//ecr?ref=v1.0.0"
-  name   = "update_api_docs"
+resource "aws_ecr_repository" "update_api_docs" {
+  name = "uk.ac.wellcome/update_api_docs"
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # These are the ECR repositories in the *platform* account, where new images
