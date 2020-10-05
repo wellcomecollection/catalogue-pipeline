@@ -4,16 +4,15 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.platform.merger.generators.WorksWithImagesGenerators
 import WorkState.{Merged, Source}
 import WorkFsm._
 import SourceWork._
-import uk.ac.wellcome.models.work.generators.MetsWorkGenerators
+import uk.ac.wellcome.models.work.generators.{MetsWorkGenerators, MiroWorkGenerators}
 
 class PlatformMergerTest
     extends AnyFunSpec
-    with WorksWithImagesGenerators
     with MetsWorkGenerators
+    with MiroWorkGenerators
     with Matchers {
   val digitalLocationCCBYNC = createDigitalLocationWith(
     license = Some(License.CCBYNC))
@@ -67,9 +66,8 @@ class PlatformMergerTest
       )
       .format(Format.Pictures)
 
-  private val miroWork = createMiroWorkWith(
-    sourceIdentifier = createNonHistoricalLibraryMiroSourceIdentifier,
-    images = List(createUnmergedMiroImage)
+  private val miroWork: Work.Visible[Source] = miroSourceWork(
+    sourceIdentifier = createNonHistoricalLibraryMiroSourceIdentifier
   )
 
   private val metsWork: Work.Invisible[Source] =

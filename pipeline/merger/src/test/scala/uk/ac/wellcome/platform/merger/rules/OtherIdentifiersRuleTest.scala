@@ -3,16 +3,15 @@ package uk.ac.wellcome.platform.merger.rules
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{Inside, Inspectors}
-import uk.ac.wellcome.models.work.generators.MetsWorkGenerators
+import uk.ac.wellcome.models.work.generators.{MetsWorkGenerators, MiroWorkGenerators}
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.platform.merger.generators.WorksWithImagesGenerators
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 
 class OtherIdentifiersRuleTest
     extends AnyFunSpec
     with Matchers
-    with WorksWithImagesGenerators
     with MetsWorkGenerators
+    with MiroWorkGenerators
     with Inside
     with Inspectors {
   val nothingWork: Work.Visible[WorkState.Source] = sourceWork(
@@ -22,7 +21,7 @@ class OtherIdentifiersRuleTest
     )
   )
 
-  val miroWork = createMiroWork
+  val miroWork: Work.Visible[WorkState.Source] = miroSourceWork()
 
   val metsWorks: List[Work.Invisible[WorkState.Source]] =
     (0 to 3).map { _ => metsSourceWork().invisible() }.toList
@@ -87,7 +86,7 @@ class OtherIdentifiersRuleTest
   }
 
   it("does not merge any Miro source IDs when there is more than 1 Miro work") {
-    val miroWork2 = createMiroWork
+    val miroWork2: Work.Visible[WorkState.Source] = miroSourceWork()
     inside(
       OtherIdentifiersRule
         .merge(physicalSierraWork, List(nothingWork, miroWork, miroWork2))) {
@@ -136,15 +135,18 @@ class OtherIdentifiersRuleTest
   }
 
   it("only merges miro source identifiers") {
-    val miroWorkWithOtherSources = miroWork.copy(
-      data = miroWork.data.copy(
-        otherIdentifiers = List(
-          SourceIdentifier(
-            identifierType = IdentifierType("miro-library-reference"),
-            ontologyType = "Work",
-            value = randomAlphanumeric(32)
-          ))
-      ))
+    val miroWorkWithOtherSources =
+      miroSourceWork(sourceIdentifier = miroWork.sourceIdentifier)
+        .otherIdentifiers(
+          List(
+            SourceIdentifier(
+              identifierType = IdentifierType("miro-library-reference"),
+              ontologyType = "Work",
+              value = randomAlphanumeric(32)
+            )
+          )
+        )
+
     inside(
       OtherIdentifiersRule
         .merge(physicalSierraWork, List(miroWorkWithOtherSources))) {

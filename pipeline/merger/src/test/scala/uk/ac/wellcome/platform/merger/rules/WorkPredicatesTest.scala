@@ -6,25 +6,17 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.generators.{MetsWorkGenerators, MiroWorkGenerators}
 import uk.ac.wellcome.models.work.internal.WorkState.Source
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.platform.merger.generators.WorksWithImagesGenerators
 
 class WorkPredicatesTest
     extends AnyFunSpec
-    with WorksWithImagesGenerators
     with MetsWorkGenerators
     with MiroWorkGenerators
     with Matchers
     with Inspectors {
   val works: Seq[Work[Source]] = List(
     sierraSourceWork(),
-    createMiroWorkWith(
-      sourceIdentifier = createNonHistoricalLibraryMiroSourceIdentifier,
-      images = List(createUnmergedMiroImage)
-    ),
-    createMiroWorkWith(
-      sourceIdentifier = createHistoricalLibraryMiroSourceIdentifier,
-      images = List(createUnmergedMiroImage)
-    ),
+    miroSourceWork(sourceIdentifier = createNonHistoricalLibraryMiroSourceIdentifier),
+    miroSourceWork(sourceIdentifier = createHistoricalLibraryMiroSourceIdentifier),
     metsSourceWork().invisible(),
     metsSourceWork()
       .items((0 to 3).map { _ => createDigitalItem }.toList)

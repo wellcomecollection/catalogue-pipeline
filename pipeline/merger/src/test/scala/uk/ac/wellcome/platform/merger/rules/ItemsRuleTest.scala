@@ -3,16 +3,15 @@ package uk.ac.wellcome.platform.merger.rules
 import org.scalatest.Inside
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.generators.MetsWorkGenerators
+import uk.ac.wellcome.models.work.generators.{MetsWorkGenerators, MiroWorkGenerators}
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.platform.merger.generators.WorksWithImagesGenerators
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 
 class ItemsRuleTest
     extends AnyFunSpec
     with Matchers
-    with WorksWithImagesGenerators
     with MetsWorkGenerators
+    with MiroWorkGenerators
     with Inside {
   val physicalPictureSierra: Work.Visible[WorkState.Source] = sierraPhysicalSourceWork()
     .format(Format.Pictures)
@@ -29,7 +28,7 @@ class ItemsRuleTest
 
   val metsWork: Work.Invisible[WorkState.Source] = metsSourceWork().invisible()
 
-  val miroWork = createMiroWork
+  val miroWork: Work.Visible[WorkState.Source] = miroSourceWork()
 
   val calmWork: Work.Visible[WorkState.Source] =
     sourceWork(sourceIdentifier = createCalmSourceIdentifier)
@@ -94,7 +93,7 @@ class ItemsRuleTest
 
   it("does not merge any Miro sources when there are several of them") {
     inside(
-      ItemsRule.merge(physicalPictureSierra, List(miroWork, createMiroWork))) {
+      ItemsRule.merge(physicalPictureSierra, List(miroWork, miroSourceWork()))) {
       case FieldMergeResult(items, mergedSources) =>
         items shouldEqual physicalPictureSierra.data.items
         mergedSources shouldBe empty

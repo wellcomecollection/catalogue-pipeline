@@ -12,20 +12,17 @@ import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, MatcherResult}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
-import uk.ac.wellcome.platform.merger.fixtures.{
-  MatcherResultFixture,
-  WorkerServiceFixture
-}
-import uk.ac.wellcome.platform.merger.generators.WorksWithImagesGenerators
+import uk.ac.wellcome.platform.merger.fixtures.{MatcherResultFixture, WorkerServiceFixture}
 import WorkState.Merged
 import WorkFsm._
+import uk.ac.wellcome.models.work.generators.MiroWorkGenerators
 
 class MergerWorkerServiceTest
     extends AnyFunSpec
     with Matchers
     with Eventually
     with IntegrationPatience
-    with WorksWithImagesGenerators
+    with MiroWorkGenerators
     with MatcherResultFixture
     with MockitoSugar
     with WorkerServiceFixture {
@@ -222,7 +219,7 @@ class MergerWorkerServiceTest
 
   it("sends an image, a merged work, and redirected works to SQS") {
     val (digitisedWork, physicalWork) = sierraSourceWorkPair()
-    val miroWork = createMiroWork
+    val miroWork = miroSourceWork()
 
     val works =
       List(physicalWork, digitisedWork, miroWork)

@@ -3,23 +3,22 @@ package uk.ac.wellcome.platform.merger.services
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.platform.merger.generators.WorksWithImagesGenerators
 import uk.ac.wellcome.platform.merger.models.{FieldMergeResult, MergeResult}
 import uk.ac.wellcome.platform.merger.rules.FieldMergeRule
 import WorkState.{Merged, Source}
 import WorkFsm._
 import cats.data.State
-import uk.ac.wellcome.models.work.generators.{MetsWorkGenerators, SierraWorkGenerators}
+import uk.ac.wellcome.models.work.generators.{MetsWorkGenerators, MiroWorkGenerators, SierraWorkGenerators}
 
 class MergerTest
     extends AnyFunSpec
     with Matchers
-    with WorksWithImagesGenerators
     with MetsWorkGenerators
+    with MiroWorkGenerators
     with SierraWorkGenerators {
   val inputWorks: Seq[Work[Source]] =
     (0 to 5).map { _ => sierraDigitalSourceWork() } ++
-      (0 to 5).map(_ => createMiroWork) ++
+      (0 to 5).map(_ => miroSourceWork()) ++
       (0 to 5).map(_ => metsSourceWork().invisible())
 
   val mergedTargetItems = (0 to 3).map(_ => createDigitalItem).toList

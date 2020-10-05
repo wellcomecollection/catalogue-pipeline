@@ -4,7 +4,7 @@ import uk.ac.wellcome.models.work.internal._
 
 import scala.util.Random
 
-trait MiroWorkGenerators extends ItemsGenerators {
+trait MiroWorkGenerators extends ImageGenerators {
   def miroThumbnail() =
     DigitalLocationDeprecated(
       url = s"https://iiif.wellcomecollection.org/${randomAlphanumeric(length = 8)}.jpg",
@@ -20,4 +20,10 @@ trait MiroWorkGenerators extends ItemsGenerators {
         )
       )
     }.toList
+
+  def miroSourceWork(sourceIdentifier: SourceIdentifier = createMiroSourceIdentifier): Work.Visible[WorkState.Source] =
+    sourceWork(sourceIdentifier = sourceIdentifier)
+      .thumbnail(miroThumbnail())
+      .items(miroItems(count = 1))
+      .images(List(createUnmergedMiroImage))
 }

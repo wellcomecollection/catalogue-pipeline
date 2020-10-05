@@ -52,23 +52,4 @@ trait LegacyWorkGenerators
         images = images
       )
     )
-
-  def createMiroWorkWith(images: List[UnmergedImage[DataState.Unidentified]],
-                         otherIdentifiers: List[SourceIdentifier] = Nil,
-                         sourceIdentifier: SourceIdentifier =
-                           createMiroSourceIdentifier): Work.Visible[Source] =
-    createSourceWorkWith(
-      sourceIdentifier = sourceIdentifier,
-      otherIdentifiers = otherIdentifiers,
-      thumbnail = Some(
-        DigitalLocationDeprecated(
-          url = "https://iiif.wellcomecollection.org/V01234.jpg",
-          locationType = LocationType("thumbnail-image"),
-          license = Some(License.CCBY)
-        )),
-      items = List(
-        createUnidentifiableItemWith(locations = List(
-          createDigitalLocationWith(locationType = createImageLocationType)))),
-      images = images
-    )
 }

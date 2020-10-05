@@ -4,16 +4,15 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{Inspectors, OptionValues, PrivateMethodTester}
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.platform.merger.generators.WorksWithImagesGenerators
 import uk.ac.wellcome.platform.merger.rules.ImagesRule.FlatImageMergeRule
 import uk.ac.wellcome.platform.merger.rules.WorkPredicates.WorkPredicate
 import WorkState.Source
-import uk.ac.wellcome.models.work.generators.{MetsWorkGenerators, SierraWorkGenerators}
+import uk.ac.wellcome.models.work.generators.{MetsWorkGenerators, MiroWorkGenerators, SierraWorkGenerators}
 
 class ImagesRuleTest
     extends AnyFunSpec
     with Matchers
-    with WorksWithImagesGenerators
+    with MiroWorkGenerators
     with SierraWorkGenerators
     with MetsWorkGenerators
     with PrivateMethodTester
@@ -22,7 +21,7 @@ class ImagesRuleTest
   describe("image creation rules") {
     it("creates n images from n Miro works and a single Sierra work") {
       val n = 3
-      val miroWorks = (1 to n).map(_ => createMiroWork)
+      val miroWorks = (1 to n).map(_ => miroSourceWork())
       val sierraWork = sierraDigitalSourceWork()
       val result = ImagesRule.merge(sierraWork, miroWorks.toList).data
 
@@ -47,7 +46,7 @@ class ImagesRuleTest
       "creates n + m images from m Miro works, a METS work containing n images, and a single Sierra picture work") {
       val n = 3
       val m = 4
-      val miroWorks = (1 to m).map(_ => createMiroWork).toList
+      val miroWorks = (1 to m).map(_ => miroSourceWork()).toList
       val metsWork = createInvisibleMetsSourceWorkWith(numImages = n)
       val sierraPictureWork = sierraSourceWork().format(Format.Pictures)
       val result =
@@ -63,7 +62,7 @@ class ImagesRuleTest
       "ignores METS images, but uses n Miro images, for a non-picture Sierra work") {
       val n = 3
       val metsWork = createInvisibleMetsSourceWorkWith(numImages = 3)
-      val miroWorks = (1 to n).map(_ => createMiroWork).toList
+      val miroWorks = (1 to n).map(_ => miroSourceWork()).toList
       val sierraWork = sierraDigitalSourceWork()
       val result = ImagesRule.merge(sierraWork, miroWorks :+ metsWork).data
 
@@ -81,7 +80,7 @@ class ImagesRuleTest
 
     it("creates images from every source") {
       val target = sierraDigitalSourceWork()
-      val sources = (1 to 5).map(_ => createMiroWork)
+      val sources = (1 to 5).map(_ => miroSourceWork())
       testRule(target, sources).get should have length 5
     }
   }
