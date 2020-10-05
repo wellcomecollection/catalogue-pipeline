@@ -34,13 +34,11 @@ object UploadSnapshotGraph {
     val countingSink = CountingSink()
     val s3Sink = S3Sink(s3Settings)(s3ObjectLocation)
 
-    RunnableGraph.fromGraph(
-      GraphDSL.create(countingSink, s3Sink)(
-        (_, _)) { implicit builder => (countingSinkShape, s3SinkShape) =>
+    RunnableGraph.fromGraph(GraphDSL.create(countingSink, s3Sink)((_, _)) {
+      implicit builder => (countingSinkShape, s3SinkShape) =>
         import GraphDSL.Implicits._
 
         val broadcast = builder.add(Broadcast[DisplayWork](outputPorts = 2))
-
 
         // The Graph DSL begins here.
         // See: https://doc.akka.io/docs/akka/current/stream/stream-graphs.html
@@ -53,20 +51,20 @@ object UploadSnapshotGraph {
         broadcast.out(0) ~> countingSinkShape
 
         // Second port
-        broadcast.out(1) ~>(
-            // convert display work to string
-            DisplayWorkToJsonStringFlow()
-          ) ~>(
-            // consume strings and gzip bytes
-            StringToGzipFlow()
-          ) ~>(
-            // send those bytes to S3
-            s3SinkShape
-          )
+        broadcast.out(1) ~> (
+          // convert display work to string
+          DisplayWorkToJsonStringFlow()
+        ) ~> (
+          // consume strings and gzip bytes
+          StringToGzipFlow()
+        ) ~> (
+          // send those bytes to S3
+          s3SinkShape
+        )
 
         // "ClosedShape" indicates that this is the end of the graph and there is a single output.
         // The results of the broadcast via both ports is returned as a tuple when this graph is run.
         ClosedShape
-      })
+    })
   }
 }
