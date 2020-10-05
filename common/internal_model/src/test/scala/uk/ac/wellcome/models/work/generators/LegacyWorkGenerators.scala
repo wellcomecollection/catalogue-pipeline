@@ -73,94 +73,12 @@ trait LegacyWorkGenerators
   def createSourceWork: Work.Visible[Source] =
     createSourceWorkWith()
 
-  def createIdentifiedWorkWith(
-    canonicalId: String = createCanonicalId,
-    sourceIdentifier: SourceIdentifier = createSourceIdentifier,
-    otherIdentifiers: List[SourceIdentifier] = List(),
-    title: Option[String] = Some(createTitle),
-    alternativeTitles: List[String] = Nil,
-    format: Option[Format] = None,
-    description: Option[String] = None,
-    physicalDescription: Option[String] = None,
-    lettering: Option[String] = None,
-    createdDate: Option[Period[IdState.Minted]] = None,
-    subjects: List[Subject[IdState.Minted]] = Nil,
-    genres: List[Genre[IdState.Minted]] = Nil,
-    contributors: List[Contributor[IdState.Minted]] = Nil,
-    thumbnail: Option[LocationDeprecated] = None,
-    production: List[ProductionEvent[IdState.Minted]] = Nil,
-    notes: List[Note] = Nil,
-    edition: Option[String] = None,
-    language: Option[Language] = None,
-    duration: Option[Int] = None,
-    items: List[Item[IdState.Minted]] = Nil,
-    images: List[UnmergedImage[DataState.Identified]] = Nil,
-    version: Int = 1,
-    merged: Boolean = false,
-    collectionPath: Option[CollectionPath] = None,
-    mergeCandidates: List[MergeCandidate] = Nil,
-    workType: WorkType = WorkType.Standard,
-  ): Work.Visible[Identified] =
-    Work.Visible[Identified](
-      state = Identified(
-        canonicalId = canonicalId,
-        sourceIdentifier = sourceIdentifier,
-        hasMultipleSources = merged
-      ),
-      version = version,
-      data = WorkData[DataState.Identified](
-        otherIdentifiers = otherIdentifiers,
-        mergeCandidates = mergeCandidates,
-        title = title,
-        alternativeTitles = alternativeTitles,
-        format = format,
-        description = description,
-        physicalDescription = physicalDescription,
-        lettering = lettering,
-        createdDate = createdDate,
-        subjects = subjects,
-        genres = genres,
-        contributors = contributors,
-        thumbnail = thumbnail,
-        production = production,
-        language = language,
-        edition = edition,
-        notes = notes,
-        duration = duration,
-        items = items,
-        images = images,
-        collectionPath = collectionPath,
-        workType = workType,
-      )
-    )
-
-  def createIdentifiedWork: Work.Visible[Identified] =
-    createIdentifiedWorkWith()
-
-  def createIdentifiedWorks(count: Int): Seq[Work.Visible[Identified]] =
-    (1 to count).map { _ =>
-      createIdentifiedWork
-    }
-
   def createSierraSourceWorkWith(
     format: Option[Format] = None,
     items: List[Item[IdState.Unminted]] = Nil,
     mergeCandidates: List[MergeCandidate] = Nil,
   ): Work.Visible[Source] =
     createSourceWorkWith(
-      sourceIdentifier = createSierraSystemSourceIdentifier,
-      format = format,
-      otherIdentifiers = List(createSierraSystemSourceIdentifier),
-      items = items,
-      mergeCandidates = mergeCandidates
-    )
-
-  def createIdentifiedSierraWorkWith(
-    format: Option[Format] = None,
-    items: List[Item[IdState.Minted]] = Nil,
-    mergeCandidates: List[MergeCandidate] = Nil,
-  ): Work.Visible[Identified] =
-    createIdentifiedWorkWith(
       sourceIdentifier = createSierraSystemSourceIdentifier,
       format = format,
       otherIdentifiers = List(createSierraSystemSourceIdentifier),

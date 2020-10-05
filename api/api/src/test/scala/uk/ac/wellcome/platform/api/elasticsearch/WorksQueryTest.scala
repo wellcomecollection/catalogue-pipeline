@@ -241,8 +241,7 @@ class WorksQueryTest
         val work2 = identifiedWork()
 
         // We've put spaces in this as some Miro IDs are sentences
-        val work3 =
-          createIdentifiedWorkWith(canonicalId = "Oxford English Dictionary")
+        val work3 = identifiedWork(canonicalId = "Oxford English Dictionary")
 
         insertIntoElasticsearch(index, work1, work2, work3)
 
