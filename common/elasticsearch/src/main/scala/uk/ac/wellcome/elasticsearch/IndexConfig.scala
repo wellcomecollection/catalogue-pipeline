@@ -11,8 +11,8 @@ import com.sksamuel.elastic4s.requests.mappings.MappingDefinition
 import uk.ac.wellcome.elasticsearch.WorksAnalysis._
 
 trait IndexConfig {
-  val mapping: MappingDefinition
-  val analysis: Analysis
+  def mapping: MappingDefinition
+  def analysis: Analysis
 
   // `textWithKeyword` and `keywordWithText` are slightly different in the semantics and their use case.
   // If the intended field type is keyword, but you would like to search it textually, use `keywordWithText` and

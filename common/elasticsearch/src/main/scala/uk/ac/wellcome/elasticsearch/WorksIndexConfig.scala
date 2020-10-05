@@ -8,9 +8,12 @@ import com.sksamuel.elastic4s.requests.mappings.{
 }
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
 
-case object WorksIndexConfig extends IndexConfig {
+sealed trait WorksIndexConfig extends IndexConfig {
+
   import WorksAnalysis._
   val analysis = WorksAnalysis()
+
+  def state: ObjectField
 
   // Fields
   val sourceIdentifier = objectField("sourceIdentifier")
@@ -176,14 +179,9 @@ case object WorksIndexConfig extends IndexConfig {
     relation("siblingsSucceeding"),
   )
 
-  val fields: Seq[FieldDefinition with Product with Serializable] =
+  def fields: Seq[FieldDefinition with Product with Serializable] =
     Seq(
-      objectField("state").fields(
-        canonicalId,
-        sourceIdentifier,
-        booleanField("hasMultipleSources"),
-        relations
-      ),
+      state,
       version,
       objectField("redirect")
         .fields(sourceIdentifier, canonicalId, otherIdentifiers),
@@ -195,5 +193,37 @@ case object WorksIndexConfig extends IndexConfig {
       )
     )
 
-  val mapping = properties(fields).dynamic(DynamicMapping.Strict)
+  def mapping = properties(fields).dynamic(DynamicMapping.Strict)
+}
+
+object SourceWorkIndexConfig extends WorksIndexConfig {
+
+  val state = objectField("state").fields(sourceIdentifier)
+}
+
+object MergedWorkIndexConfig extends WorksIndexConfig {
+
+  val state = objectField("state").fields(
+    sourceIdentifier,
+    booleanField("hasMultipleSources"),
+  )
+}
+
+object DenormalisedWorkIndexConfig extends WorksIndexConfig {
+
+  val state = objectField("state").fields(
+    sourceIdentifier,
+    booleanField("hasMultipleSources"),
+    relations
+  )
+}
+
+object IdentifiedWorkIndexConfig extends WorksIndexConfig {
+
+  val state = objectField("state").fields(
+    canonicalId,
+    sourceIdentifier,
+    booleanField("hasMultipleSources"),
+    relations
+  )
 }

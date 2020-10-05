@@ -56,7 +56,7 @@ class SnapshotService(akkaS3Settings: S3Settings,
 
       CompletedSnapshotJob(
         snapshotJob = snapshotJob,
-        targetLocation = targetLocation
+        targetLocation = targetLocation.toString
       )
     }
   }

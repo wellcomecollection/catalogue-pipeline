@@ -4,7 +4,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
-import uk.ac.wellcome.elasticsearch.WorksIndexConfig
+import uk.ac.wellcome.elasticsearch.IdentifiedWorkIndexConfig
 import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.work.internal._
@@ -32,7 +32,7 @@ class IngestorFeatureTest
         withWorkerService(
           queue,
           index,
-          WorksIndexConfig,
+          IdentifiedWorkIndexConfig,
           new ElasticIndexer[Work[Identified]](elasticClient, index)) { _ =>
           assertElasticsearchEventuallyHasWork(index, work)
         }
@@ -51,7 +51,7 @@ class IngestorFeatureTest
         withWorkerService(
           queue,
           index,
-          WorksIndexConfig,
+          IdentifiedWorkIndexConfig,
           new ElasticIndexer[Work[Identified]](elasticClient, index)) { _ =>
           assertElasticsearchEventuallyHasWork(index, work)
         }

@@ -3,6 +3,7 @@ package uk.ac.wellcome.platform.api.works
 import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.models.work.internal.Format.{Books, Journals, Pictures}
 import uk.ac.wellcome.models.work.internal._
+import uk.ac.wellcome.models.Implicits._
 
 class WorksAggregationsTest extends ApiWorksTestBase {
 

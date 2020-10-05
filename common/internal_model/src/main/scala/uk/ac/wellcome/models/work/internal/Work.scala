@@ -123,6 +123,8 @@ sealed trait WorkState {
   type TransitionArgs
 
   val sourceIdentifier: SourceIdentifier
+
+  def id: String = sourceIdentifier.toString
 }
 
 object WorkState {
@@ -163,6 +165,8 @@ object WorkState {
 
     type WorkDataState = DataState.Identified
     type TransitionArgs = Unit
+
+    override def id = canonicalId
   }
 }
 

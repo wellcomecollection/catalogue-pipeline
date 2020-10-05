@@ -7,6 +7,7 @@ import uk.ac.wellcome.models.work.internal.Format.{
   ManuscriptsAsian
 }
 import uk.ac.wellcome.models.work.internal._
+import uk.ac.wellcome.models.Implicits._
 
 class WorksFiltersTest extends ApiWorksTestBase {
   it("combines multiple filters") {
