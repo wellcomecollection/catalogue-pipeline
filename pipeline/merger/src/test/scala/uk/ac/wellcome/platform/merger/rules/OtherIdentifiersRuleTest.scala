@@ -34,7 +34,10 @@ class OtherIdentifiersRuleTest
   val physicalMapsSierraWork: Work.Visible[WorkState.Source] =
     sierraPhysicalSourceWork().format(Format.Maps)
 
-  val sierraWorkWithTwoPhysicalItems = createSierraWorkWithTwoPhysicalItems
+  val sierraWorkWithTwoPhysicalItems: Work.Visible[WorkState.Source] =
+    sierraSourceWork()
+      .items((1 to 2).map { _ => createPhysicalItem}.toList)
+
   val calmWork =
     createCalmSourceWork
 

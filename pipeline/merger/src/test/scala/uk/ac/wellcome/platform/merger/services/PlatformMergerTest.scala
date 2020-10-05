@@ -38,13 +38,16 @@ class PlatformMergerTest
       .format(Format.Pictures)
 
   private val multipleItemsSierraWork =
-    createSierraWorkWithTwoPhysicalItems.copy(
-      data = createSierraWorkWithTwoPhysicalItems.data.copy(
-        mergeCandidates = List(
+    sierraSourceWork()
+      .items((1 to 2).map { _ => createPhysicalItem}.toList)
+      .mergeCandidates(
+        List(
           MergeCandidate(
-            sierraDigitisedWork.sourceIdentifier,
-            Some("Physical/digitised Sierra work")))
-      ))
+            identifier = sierraDigitisedWork.sourceIdentifier,
+            reason = Some("Physical/digitised Sierra work")
+          )
+        )
+      )
 
   private val sierraDigitalWork: Work.Visible[Source] =
     sierraSourceWork()

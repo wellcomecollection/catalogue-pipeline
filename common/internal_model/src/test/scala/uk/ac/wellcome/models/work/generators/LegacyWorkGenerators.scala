@@ -109,11 +109,6 @@ trait LegacyWorkGenerators
       items = items,
       images = images
     )
-  
-  def createSierraWorkWithTwoPhysicalItems =
-    createSierraSourceWorkWith(
-      items = List(createPhysicalItem, createPhysicalItem)
-    )
 
   def createSierraDigitalWorkWith(
     items: List[Item[IdState.Unminted]] = List(

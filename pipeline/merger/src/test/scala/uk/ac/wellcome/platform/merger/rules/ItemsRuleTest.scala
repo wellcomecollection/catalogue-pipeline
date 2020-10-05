@@ -21,7 +21,9 @@ class ItemsRuleTest
   val zeroItemPhysicalSierra: Work.Visible[WorkState.Source] =
     sierraSourceWork().format(Format.Pictures)
 
-  val multiItemPhysicalSierra = createSierraWorkWithTwoPhysicalItems
+  val multiItemPhysicalSierra: Work.Visible[WorkState.Source] =
+    sierraSourceWork()
+      .items((1 to 2).map { _ => createPhysicalItem}.toList)
 
   val digitalSierraWork: Work.Visible[WorkState.Source] = sierraDigitalSourceWork()
 
