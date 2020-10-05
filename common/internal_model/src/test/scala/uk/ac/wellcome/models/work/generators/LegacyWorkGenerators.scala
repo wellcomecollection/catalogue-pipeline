@@ -109,27 +109,7 @@ trait LegacyWorkGenerators
       items = items,
       images = images
     )
-
-  def createSierraSourceWork: Work.Visible[Source] =
-    createSierraSourceWorkWith()
-
-  def createSierraPhysicalWork: Work.Visible[Source] =
-    createSierraSourceWorkWith(items = List(createPhysicalItem))
-
-  def createSierraWorkWithDigitisedMergeCandidate = {
-    val physicalSierraWork = createSierraPhysicalWork
-    val digitisedCopyOfSierraWork = createSierraSourceWork
-    val physicalSierraWorkWithMergeCandidate = physicalSierraWork.copy(
-      data = physicalSierraWork.data.copy(
-        mergeCandidates = List(
-          MergeCandidate(
-            identifier = digitisedCopyOfSierraWork.sourceIdentifier,
-            reason = Some("Physical/digitised Sierra work")
-          ))))
-
-    (physicalSierraWorkWithMergeCandidate, digitisedCopyOfSierraWork)
-  }
-
+  
   def createSierraWorkWithTwoPhysicalItems =
     createSierraSourceWorkWith(
       items = List(createPhysicalItem, createPhysicalItem)

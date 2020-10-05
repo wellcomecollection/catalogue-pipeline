@@ -31,16 +31,7 @@ class ItemsRuleTest
 
   it(
     "leaves items unchanged and returns a digitised version of a Sierra work as a merged source") {
-    val digitisedWork = sierraDigitalSourceWork()
-    val physicalWork = sierraPhysicalSourceWork()
-      .mergeCandidates(
-        List(
-          MergeCandidate(
-            identifier = digitisedWork.sourceIdentifier,
-            reason = Some("Physical/digitised Sierra work")
-          )
-        )
-      )
+    val (digitisedWork, physicalWork) = sierraSourceWorkPair()
 
     inside(
       ItemsRule

@@ -179,10 +179,9 @@ class MergerWorkerServiceTest
   }
 
   it("sends a merged work and a redirected work to SQS") {
-    val (sierraWorkWithMergeCandidate, sierraWorkMergeCandidate) =
-      createSierraWorkWithDigitisedMergeCandidate
+    val (digitisedWork, physicalWork) = sierraSourceWorkPair()
 
-    val works = List(sierraWorkWithMergeCandidate, sierraWorkMergeCandidate)
+    val works = List(physicalWork, digitisedWork)
 
     withMergerWorkerServiceFixtures {
       case (vhs, QueuePair(queue, dlq), senders, _) =>
@@ -211,23 +210,22 @@ class MergerWorkerServiceTest
           }
 
           redirectedWorks should have size 1
-          redirectedWorks.head.sourceIdentifier shouldBe sierraWorkMergeCandidate.sourceIdentifier
+          redirectedWorks.head.sourceIdentifier shouldBe digitisedWork.sourceIdentifier
           redirectedWorks.head.redirect shouldBe IdState.Identifiable(
-            sierraWorkWithMergeCandidate.sourceIdentifier)
+            physicalWork.sourceIdentifier)
 
           mergedWorks should have size 1
-          mergedWorks.head.sourceIdentifier shouldBe sierraWorkWithMergeCandidate.sourceIdentifier
+          mergedWorks.head.sourceIdentifier shouldBe physicalWork.sourceIdentifier
         }
     }
   }
 
   it("sends an image, a merged work, and redirected works to SQS") {
-    val (sierraWorkWithMergeCandidate, sierraWorkMergeCandidate) =
-      createSierraWorkWithDigitisedMergeCandidate
+    val (digitisedWork, physicalWork) = sierraSourceWorkPair()
     val miroWork = createMiroWork
 
     val works =
-      List(sierraWorkWithMergeCandidate, sierraWorkMergeCandidate, miroWork)
+      List(physicalWork, digitisedWork, miroWork)
 
     withMergerWorkerServiceFixtures {
       case (vhs, QueuePair(queue, dlq), senders, _) =>
@@ -263,12 +261,12 @@ class MergerWorkerServiceTest
 
           redirectedWorks should have size 2
           redirectedWorks.map(_.sourceIdentifier) should contain only
-            (sierraWorkMergeCandidate.sourceIdentifier, miroWork.sourceIdentifier)
+            (digitisedWork.sourceIdentifier, miroWork.sourceIdentifier)
           redirectedWorks.map(_.redirect) should contain only
-            IdState.Identifiable(sierraWorkWithMergeCandidate.sourceIdentifier)
+            IdState.Identifiable(physicalWork.sourceIdentifier)
 
           mergedWorks should have size 1
-          mergedWorks.head.sourceIdentifier shouldBe sierraWorkWithMergeCandidate.sourceIdentifier
+          mergedWorks.head.sourceIdentifier shouldBe physicalWork.sourceIdentifier
 
           imagesSent.head.id shouldBe miroWork.data.images.head.id
         }
@@ -276,14 +274,12 @@ class MergerWorkerServiceTest
   }
 
   it("splits the received works into multiple merged works if required") {
-    val (sierraWorkWithMergeCandidate1, sierraWorkMergeCandidate1) =
-      createSierraWorkWithDigitisedMergeCandidate
-    val (sierraWorkWithMergeCandidate2, sierraWorkMergeCandidate2) =
-      createSierraWorkWithDigitisedMergeCandidate
-    val workPair1 =
-      List(sierraWorkWithMergeCandidate1, sierraWorkMergeCandidate1)
-    val workPair2 =
-      List(sierraWorkWithMergeCandidate2, sierraWorkMergeCandidate2)
+    val (digitisedWork1, physicalWork1) = sierraSourceWorkPair()
+    val (digitisedWork2, physicalWork2) = sierraSourceWorkPair()
+
+    val workPair1 = List(physicalWork1, digitisedWork1)
+    val workPair2 = List(physicalWork2, digitisedWork2)
+
     val works = workPair1 ++ workPair2
 
     withMergerWorkerServiceFixtures {
