@@ -9,37 +9,23 @@ class WorksAggregationsTest extends ApiWorksTestBase {
   it("supports fetching the format aggregation") {
     withApi {
       case (ElasticConfig(worksIndex, _), routes) =>
-        val work1 = createIdentifiedWorkWith(
-          canonicalId = "1",
-          title = Some("Working with wombats"),
-          format = Some(Books)
+        val formats = List(
+          Books,
+          Books,
+          Books,
+          Pictures,
+          Pictures,
+          Journals
         )
-        val work2 = createIdentifiedWorkWith(
-          canonicalId = "2",
-          title = Some("Working with wombats"),
-          format = Some(Books)
-        )
-        val work3 = createIdentifiedWorkWith(
-          canonicalId = "3",
-          title = Some("Working with wombats"),
-          format = Some(Pictures)
-        )
-        val work4 = createIdentifiedWorkWith(
-          canonicalId = "4",
-          title = Some("Working with wombats"),
-          format = Some(Pictures)
-        )
-        val work5 = createIdentifiedWorkWith(
-          canonicalId = "5",
-          title = Some("Working with wombats"),
-          format = Some(Journals)
-        )
-        insertIntoElasticsearch(worksIndex, work1, work2, work3, work4, work5)
+
+        val works = formats.map { identifiedWork().format(_) }
+
+        insertIntoElasticsearch(worksIndex, works: _*)
 
         assertJsonResponse(routes, s"/$apiPrefix/works?aggregations=workType") {
           Status.OK -> s"""
             {
-              ${resultList(apiPrefix, totalResults = 5)},
+              ${resultList(apiPrefix, totalResults = works.size)},
               "aggregations": {
                 "type" : "Aggregations",
                 "workType": {
@@ -51,7 +37,7 @@ class WorksAggregationsTest extends ApiWorksTestBase {
                         "label" : "Books",
                         "type" : "Format"
                       },
-                      "count" : 2,
+                      "count" : 3,
                       "type" : "AggregationBucket"
                     },
                     {
@@ -76,11 +62,10 @@ class WorksAggregationsTest extends ApiWorksTestBase {
                 }
               },
               "results": [
-                ${workResponse(work1)},
-                ${workResponse(work2)},
-                ${workResponse(work3)},
-                ${workResponse(work4)},
-                ${workResponse(work5)}
+                ${works
+            .sortBy { _.state.canonicalId }
+            .map(workResponse)
+            .mkString(",")}
               ]
             }
           """
@@ -109,13 +94,9 @@ class WorksAggregationsTest extends ApiWorksTestBase {
           concepts = List(concept0, concept1, concept2)
         )
 
-        val work1 = createIdentifiedWorkWith(
-          canonicalId = "1",
-          title = Some("Working with wombats"),
-          genres = List(genre)
-        )
+        val work = identifiedWork().genres(List(genre))
 
-        insertIntoElasticsearch(worksIndex, work1)
+        insertIntoElasticsearch(worksIndex, work)
 
         assertJsonResponse(routes, s"/$apiPrefix/works?aggregations=genres") {
           Status.OK -> s"""
@@ -156,7 +137,7 @@ class WorksAggregationsTest extends ApiWorksTestBase {
                   ]
                 }
               },
-              "results": [${workResponse(work1)}]
+              "results": [${workResponse(work)}]
             }
           """
         }
@@ -182,7 +163,7 @@ class WorksAggregationsTest extends ApiWorksTestBase {
           s"/$apiPrefix/works?aggregations=production.dates") {
           Status.OK -> s"""
             {
-              ${resultList(apiPrefix, totalResults = 4)},
+              ${resultList(apiPrefix, totalResults = works.size)},
               "aggregations": {
                 "type" : "Aggregations",
                 "production.dates": {
@@ -215,25 +196,21 @@ class WorksAggregationsTest extends ApiWorksTestBase {
   }
 
   it("supports aggregating on language") {
-    val works = List(
-      createIdentifiedWorkWith(
-        language = Some(Language("English", Some("eng")))
-      ),
-      createIdentifiedWorkWith(
-        language = Some(Language("German", Some("ger")))
-      ),
-      createIdentifiedWorkWith(
-        language = Some(Language("German", Some("ger")))
-      ),
-      createIdentifiedWorkWith(language = None)
-    ).sortBy(_.state.canonicalId)
+    val languages = List(
+      Language("English", Some("eng")),
+      Language("German", Some("ger")),
+      Language("German", Some("ger"))
+    )
+
+    val works = languages.map { identifiedWork().language(_) }
+
     withApi {
       case (ElasticConfig(worksIndex, _), routes) =>
         insertIntoElasticsearch(worksIndex, works: _*)
         assertJsonResponse(routes, s"/$apiPrefix/works?aggregations=language") {
           Status.OK -> s"""
             {
-              ${resultList(apiPrefix, totalResults = 4)},
+              ${resultList(apiPrefix, totalResults = works.size)},
               "aggregations": {
                 "type" : "Aggregations",
                 "language": {
@@ -260,7 +237,10 @@ class WorksAggregationsTest extends ApiWorksTestBase {
                   ]
                 }
               },
-              "results": [${works.map(workResponse).mkString(",")}]
+              "results": [${works
+            .sortBy { _.state.canonicalId }
+            .map(workResponse)
+            .mkString(",")}]
             }
           """
         }
@@ -268,32 +248,27 @@ class WorksAggregationsTest extends ApiWorksTestBase {
   }
 
   it("supports aggregating on subject, ordered by frequency") {
-
     val paeleoNeuroBiology = createSubjectWith(label = "paeleoNeuroBiology")
     val realAnalysis = createSubjectWith(label = "realAnalysis")
 
-    val works = List(
-      createIdentifiedWorkWith(
-        subjects = List(paeleoNeuroBiology)
-      ),
-      createIdentifiedWorkWith(
-        subjects = List(realAnalysis)
-      ),
-      createIdentifiedWorkWith(
-        subjects = List(realAnalysis)
-      ),
-      createIdentifiedWorkWith(
-        subjects = List(paeleoNeuroBiology, realAnalysis)
-      ),
-      createIdentifiedWorkWith(subjects = Nil)
-    ).sortBy(_.state.canonicalId)
+    val subjectLists = List(
+      List(paeleoNeuroBiology),
+      List(realAnalysis),
+      List(realAnalysis),
+      List(paeleoNeuroBiology, realAnalysis),
+      List.empty
+    )
+
+    val works = subjectLists
+      .map { identifiedWork().subjects(_) }
+
     withApi {
       case (ElasticConfig(worksIndex, _), routes) =>
         insertIntoElasticsearch(worksIndex, works: _*)
         assertJsonResponse(routes, s"/$apiPrefix/works?aggregations=subjects") {
           Status.OK -> s"""
             {
-              ${resultList(apiPrefix, totalResults = 5)},
+              ${resultList(apiPrefix, totalResults = works.size)},
               "aggregations": {
                 "type" : "Aggregations",
                 "subjects": {
@@ -320,7 +295,10 @@ class WorksAggregationsTest extends ApiWorksTestBase {
                   ]
                 }
               },
-              "results": [${works.map(workResponse).mkString(",")}]
+              "results": [${works
+                            .sortBy { _.state.canonicalId }
+                            .map(workResponse)
+                            .mkString(",")}]
             }
           """.stripMargin
         }
@@ -329,36 +307,39 @@ class WorksAggregationsTest extends ApiWorksTestBase {
 
   it("supports aggregating on license") {
     def createLicensedWork(
-      canonicalId: String,
       licenses: Seq[License]): Work.Visible[WorkState.Identified] = {
       val items =
         licenses.map { license =>
           createDigitalItemWith(license = Some(license))
         }.toList
 
-      identifiedWork(canonicalId = canonicalId).items(items)
+      identifiedWork().items(items)
     }
 
-    val works = List(
-      createLicensedWork("A", licenses = List(License.CCBY)),
-      createLicensedWork("B", licenses = List(License.CCBYNC)),
-      createLicensedWork("C", licenses = List(License.CCBY, License.CCBYNC)),
-      createLicensedWork("D", licenses = List.empty)
+    val licenseLists = List(
+      List(License.CCBY),
+      List(License.CCBY),
+      List(License.CCBYNC),
+      List(License.CCBY, License.CCBYNC),
+      List.empty
     )
+
+    val works = licenseLists.map { createLicensedWork(_) }
+
     withApi {
       case (ElasticConfig(worksIndex, _), routes) =>
         insertIntoElasticsearch(worksIndex, works: _*)
         assertJsonResponse(routes, s"/$apiPrefix/works?aggregations=license") {
           Status.OK -> s"""
             {
-              ${resultList(apiPrefix, totalResults = 4)},
+              ${resultList(apiPrefix, totalResults = works.size)},
               "aggregations": {
                 "type" : "Aggregations",
                 "license": {
                   "type" : "Aggregation",
                   "buckets": [
                     {
-                      "count" : 2,
+                      "count" : 3,
                       "data" : {
                         "id" : "cc-by",
                         "label" : "Attribution 4.0 International (CC BY 4.0)",
@@ -380,7 +361,10 @@ class WorksAggregationsTest extends ApiWorksTestBase {
                   ]
                 }
               },
-              "results": [${works.map(workResponse).mkString(",")}]
+              "results": [${works
+                            .sortBy { _.state.canonicalId }
+                            .map(workResponse)
+                            .mkString(",")}]
             }
           """.stripMargin
         }
@@ -388,20 +372,18 @@ class WorksAggregationsTest extends ApiWorksTestBase {
   }
 
   it("supports aggregating on locationType") {
-    val works = List(
-      identifiedWork(canonicalId = "A").items(
-        List(createIdentifiedItemWith(locations = List(createPhysicalLocation)))
-      ),
-      identifiedWork(canonicalId = "B").items(
-        List(createIdentifiedItemWith(locations = List(createPhysicalLocation)))
-      ),
-      identifiedWork(canonicalId = "C").items(
-        List(createIdentifiedItemWith(locations = List(createDigitalLocation)))
-      ),
-      identifiedWork(canonicalId = "D").items(
-        List(createIdentifiedItemWith(locations = List(createDigitalLocation)))
-      )
+    val locations = List(
+      createPhysicalLocation,
+      createPhysicalLocation,
+      createDigitalLocation,
+      createDigitalLocation,
+      createDigitalLocation
     )
+
+    val works = locations.map { loc =>
+      identifiedWork()
+        .items(List(createIdentifiedItemWith(locations = List(loc))))
+    }
 
     withApi {
       case (ElasticConfig(worksIndex, _), routes) =>
@@ -411,12 +393,12 @@ class WorksAggregationsTest extends ApiWorksTestBase {
           s"/$apiPrefix/works?aggregations=locationType") {
           Status.OK -> s"""
             {
-              ${resultList(apiPrefix, totalResults = 4)},
+              ${resultList(apiPrefix, totalResults = works.size)},
               "aggregations" : {
                 "locationType" : {
                   "buckets" : [
                     {
-                      "count" : 2,
+                      "count" : 3,
                       "data" : {
                         "label" : "Online",
                         "type" : "DigitalLocation"
@@ -436,7 +418,10 @@ class WorksAggregationsTest extends ApiWorksTestBase {
                 },
                 "type" : "Aggregations"
               },
-              "results": [${works.map(workResponse).mkString(",")}]
+              "results": [${works
+                            .sortBy { _.state.canonicalId }
+                            .map(workResponse)
+                            .mkString(",")}]
             }
           """.stripMargin
         }

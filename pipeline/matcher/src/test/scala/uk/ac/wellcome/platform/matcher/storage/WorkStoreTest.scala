@@ -24,7 +24,7 @@ class WorkStoreTest
       val actualWork = for {
         key <- vhs.put(Version("b12345678", 1))(expectedWork)
         work <- workStore.getWork(key.id)
-      } yield (work)
+      } yield work
       actualWork shouldBe Right(expectedWork)
     }
   }
@@ -34,7 +34,7 @@ class WorkStoreTest
       val workStore = new WorkStore(vhs)
       val actualWork = for {
         work <- workStore.getWork(Version("b12345678", 1))
-      } yield (work)
+      } yield work
       actualWork shouldBe a[Left[_, _]]
     }
   }
@@ -47,7 +47,7 @@ class WorkStoreTest
       val actualWork = for {
         _ <- vhs.put(Version("b12345678", 2))(expectedWork)
         work <- workStore.getWork(Version("b12345678", 1))
-      } yield (work)
+      } yield work
       inside(actualWork) {
         case Left(MatcherException(e)) =>
           e shouldBe a[VersionExpectedConflictException]
@@ -63,7 +63,7 @@ class WorkStoreTest
       val actualWork = for {
         _ <- vhs.put(Version("b12345678", 1))(expectedWork)
         work <- workStore.getWork(Version("b12345678", 2))
-      } yield (work)
+      } yield work
       actualWork shouldBe a[Left[_, _]]
     }
   }

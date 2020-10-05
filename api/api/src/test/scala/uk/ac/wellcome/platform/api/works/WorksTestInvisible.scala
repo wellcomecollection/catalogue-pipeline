@@ -5,8 +5,7 @@ import uk.ac.wellcome.models.work.internal._
 import WorkState.Identified
 
 class WorksTestInvisible extends ApiWorksTestBase {
-
-  val deletedWork = createIdentifiedInvisibleWork
+  val deletedWork: Work.Invisible[Identified] = identifiedWork().invisible()
 
   it("returns an HTTP 410 Gone if looking up a work with visible = false") {
     withApi {
@@ -22,7 +21,7 @@ class WorksTestInvisible extends ApiWorksTestBase {
   it("excludes works with visible=false from list results") {
     withApi {
       case (ElasticConfig(worksIndex, _), routes) =>
-        val works = createIdentifiedWorks(count = 2).sortBy {
+        val works = identifiedWorks(count = 2).sortBy {
           _.state.canonicalId
         }
 
@@ -38,9 +37,7 @@ class WorksTestInvisible extends ApiWorksTestBase {
   it("excludes works with visible=false from search results") {
     withApi {
       case (ElasticConfig(worksIndex, _), routes) =>
-        val work = createIdentifiedWorkWith(
-          title = Some("This shouldn't be deleted!")
-        )
+        val work = identifiedWork().title("This shouldn't be deleted!")
         insertIntoElasticsearch(worksIndex, work, deletedWork)
 
         assertJsonResponse(routes, s"/$apiPrefix/works?query=deleted") {

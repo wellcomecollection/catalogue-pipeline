@@ -1,9 +1,7 @@
 package uk.ac.wellcome.platform.snapshot_generator
 
-import java.io.File
 import java.time.Instant
 
-import com.amazonaws.services.s3.model.GetObjectRequest
 import com.sksamuel.elastic4s.Index
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
@@ -22,7 +20,7 @@ import uk.ac.wellcome.platform.snapshot_generator.models.{
   CompletedSnapshotJob,
   SnapshotJob
 }
-import uk.ac.wellcome.platform.snapshot_generator.test.utils.GzipUtils
+import uk.ac.wellcome.platform.snapshot_generator.test.utils.S3GzipUtils
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 
@@ -31,7 +29,7 @@ class SnapshotGeneratorFeatureTest
     with Eventually
     with Matchers
     with Akka
-    with GzipUtils
+    with S3GzipUtils
     with JsonAssertions
     with IntegrationPatience
     with DisplaySerialisationTestBase
@@ -40,17 +38,12 @@ class SnapshotGeneratorFeatureTest
 
   it("completes a snapshot generation") {
     withFixtures {
-      case (queue, messageSender, worksIndex, _, publicBucket: Bucket) =>
+      case (queue, messageSender, worksIndex, _, bucket) =>
         val works = identifiedWorks(count = 3)
 
         insertIntoElasticsearch(worksIndex, works: _*)
 
-        val publicObjectKey = "target.txt.gz"
-
-        val s3Location = S3ObjectLocation(
-          bucket = publicBucket.name,
-          key = publicObjectKey
-        )
+        val s3Location = S3ObjectLocation(bucket.name, key = "target.tar.gz")
 
         val snapshotJob = SnapshotJob(
           s3Location = s3Location,
@@ -61,21 +54,13 @@ class SnapshotGeneratorFeatureTest
         sendNotificationToSQS(queue = queue, message = snapshotJob)
 
         eventually {
-          val downloadFile =
-            File.createTempFile("snapshotGeneratorFeatureTest", ".txt.gz")
 
-          s3Client.getObject(
-            new GetObjectRequest(publicBucket.name, publicObjectKey),
-            downloadFile)
+          val (objectMetadata, contents) = getGzipObjectFromS3(s3Location)
 
-          val objectMetadata =
-            s3Client.getObjectMetadata(publicBucket.name, publicObjectKey)
+          val actualJsonLines = contents.split("\n").toList
 
           val s3Etag = objectMetadata.getETag
           val s3Size = objectMetadata.getContentLength
-
-          val actualJsonLines: List[String] =
-            readGzipFile(downloadFile.getPath).split("\n").toList
 
           val expectedJsonLines = works.sortBy { _.state.canonicalId }.map {
             work =>
@@ -105,13 +90,16 @@ class SnapshotGeneratorFeatureTest
           val result = messageSender.getMessages[CompletedSnapshotJob].head
 
           result.snapshotJob shouldBe snapshotJob
+
           result.snapshotResult.indexName shouldBe worksIndex.name
           result.snapshotResult.documentCount shouldBe works.length
           result.snapshotResult.displayModel shouldBe Work.getClass.getCanonicalName
+
           result.snapshotResult.startedAt shouldBe >(
             result.snapshotJob.requestedAt)
           result.snapshotResult.finishedAt shouldBe >(
             result.snapshotResult.startedAt)
+
           result.snapshotResult.s3Etag shouldBe s3Etag
           result.snapshotResult.s3Size shouldBe s3Size
           result.snapshotResult.s3Location shouldBe s3Location
