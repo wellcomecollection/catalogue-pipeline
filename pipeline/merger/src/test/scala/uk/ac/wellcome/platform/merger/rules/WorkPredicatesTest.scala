@@ -34,10 +34,10 @@ class WorkPredicatesTest
       items = (0 to 3).flatMap(_ => createMiroWork.data.items).toList
     ),
     createSierraDigitalWorkWith(
-      items = (0 to 3).flatMap(_ => createSierraDigitalWork.data.items).toList
+      items = (0 to 3).map(_ => createUnidentifiableItemWith(locations = List(createDigitalLocation))).toList
     ),
     createSierraPhysicalWork,
-    createSierraDigitalWork,
+    sierraDigitalSourceWork(),
     createSierraSourceWorkWith(
       format = Some(Format.`3DObjects`)
     ),

@@ -8,11 +8,13 @@ import uk.ac.wellcome.platform.merger.generators.WorksWithImagesGenerators
 import uk.ac.wellcome.platform.merger.rules.ImagesRule.FlatImageMergeRule
 import uk.ac.wellcome.platform.merger.rules.WorkPredicates.WorkPredicate
 import WorkState.Source
+import uk.ac.wellcome.models.work.generators.SierraWorkGenerators
 
 class ImagesRuleTest
     extends AnyFunSpec
     with Matchers
     with WorksWithImagesGenerators
+    with SierraWorkGenerators
     with PrivateMethodTester
     with OptionValues
     with Inspectors {
@@ -20,7 +22,7 @@ class ImagesRuleTest
     it("creates n images from n Miro works and a single Sierra work") {
       val n = 3
       val miroWorks = (1 to n).map(_ => createMiroWork)
-      val sierraWork = createSierraDigitalWork
+      val sierraWork = sierraDigitalSourceWork()
       val result = ImagesRule.merge(sierraWork, miroWorks.toList).data
 
       result should have length n
@@ -63,7 +65,7 @@ class ImagesRuleTest
       val n = 3
       val metsWork = createInvisibleMetsSourceWorkWith(numImages = 3)
       val miroWorks = (1 to n).map(_ => createMiroWork).toList
-      val sierraWork = createSierraDigitalWork
+      val sierraWork = sierraDigitalSourceWork()
       val result = ImagesRule.merge(sierraWork, miroWorks :+ metsWork).data
 
       result should have length n
@@ -79,7 +81,7 @@ class ImagesRuleTest
     }
 
     it("creates images from every source") {
-      val target = createSierraDigitalWork
+      val target = sierraDigitalSourceWork()
       val sources = (1 to 5).map(_ => createMiroWork)
       testRule(target, sources).get should have length 5
     }

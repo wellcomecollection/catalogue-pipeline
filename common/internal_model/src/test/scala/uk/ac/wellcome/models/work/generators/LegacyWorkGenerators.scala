@@ -136,9 +136,6 @@ trait LegacyWorkGenerators
     (physicalSierraWorkWithMergeCandidate, digitisedCopyOfSierraWork)
   }
 
-  def createSierraDigitalWork: Work.Visible[Source] =
-    createSierraDigitalWorkWith()
-
   def createSierraWorkWithTwoPhysicalItems =
     createSierraSourceWorkWith(
       items = List(createPhysicalItem, createPhysicalItem)

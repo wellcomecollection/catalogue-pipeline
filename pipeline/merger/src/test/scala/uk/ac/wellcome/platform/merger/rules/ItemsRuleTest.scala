@@ -3,7 +3,7 @@ package uk.ac.wellcome.platform.merger.rules
 import org.scalatest.Inside
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.internal.Format
+import uk.ac.wellcome.models.work.internal.{Format, Work, WorkState}
 import uk.ac.wellcome.platform.merger.generators.WorksWithImagesGenerators
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 
@@ -28,7 +28,9 @@ class ItemsRuleTest
     )
   )
   val multiItemPhysicalSierra = createSierraWorkWithTwoPhysicalItems
-  val digitalSierra = createSierraDigitalWork
+
+  val digitalSierraWork: Work.Visible[WorkState.Source] = sierraDigitalSourceWork()
+
   val metsWork = createInvisibleMetsSourceWork
   val miroWork = createMiroWork
   val calmWork = createCalmSourceWork
