@@ -25,8 +25,6 @@ class ItemsRuleTest
     sierraSourceWork()
       .items((1 to 2).map { _ => createPhysicalItem}.toList)
 
-  val digitalSierraWork: Work.Visible[WorkState.Source] = sierraDigitalSourceWork()
-
   val metsWork = createInvisibleMetsSourceWork
   val miroWork = createMiroWork
   val calmWork = createCalmSourceWork
