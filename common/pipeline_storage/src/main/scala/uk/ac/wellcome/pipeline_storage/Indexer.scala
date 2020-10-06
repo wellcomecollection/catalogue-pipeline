@@ -46,14 +46,14 @@ trait Indexable[T] {
   * version derived from a combination of work version, number of merged
   * sources and whether it is visible, redirected or invisible.
   *
-  * More specifically, by multiplying the work version by 10, we make sure
-  * that a new version of a work always wins over previous versions
-  * (merged or unmerged, provided that there are fewer than 10 merged
-  * sources, which we think is a reasonable assumption).
+  * More specifically, by multiplying the work version by versionMultiplier,
+  * we make sure that a new version of a work always wins over previous
+  * versions (merged or unmerged, provided that there are fewer than
+  * versionMultiplier merged sources, which we think is a reasonable assumption).
   *
   * We make sure that a merger modified work always wins over other works
   * with the same version, by adding the number of merged sources to
-  * work.version * 10.
+  * work.version * versionMultiplier.
   *
   * The exact same logic is applied to image versions, using both the
   * merge state and the version numbers of the image's SourceWorks.
@@ -68,9 +68,11 @@ trait Indexable[T] {
   *   became an issue we'd probably want to do something like:
   *
   *   def version(image: AugmentedImage) =
-  *     10 * (2*image.version + image.source.version)
+  *     versionMultiplier * (2*image.version + image.source.version)
   */
 object Indexable extends Logging {
+
+  final val versionMultiplier = 1000
 
   implicit val imageIndexable: Indexable[AugmentedImage] =
     new Indexable[AugmentedImage] {
@@ -78,11 +80,12 @@ object Indexable extends Logging {
         image.id.canonicalId
 
       def version(image: AugmentedImage) =
-        10 * (image.version + image.source.version) +
+        versionMultiplier * (image.version + image.source.version) +
           (image.source match {
-            case SourceWorks(_, _, nMergedSources) if nMergedSources >= 10 =>
+            case SourceWorks(_, _, nMergedSources)
+                if nMergedSources >= versionMultiplier =>
               throw new RuntimeException(
-                s"Image ${image.id.canonicalId} has $nMergedSources >= 10 merged sources; versioning/ingest may be inconsistent")
+                s"Image ${image.id.canonicalId} has $nMergedSources >= $versionMultiplier merged sources; versioning/ingest may be inconsistent")
             case SourceWorks(_, Some(redirected), nMergedSources) =>
               nMergedSources + 1
             case SourceWorks(_, None, nMergedSources) => nMergedSources
@@ -97,13 +100,15 @@ object Indexable extends Logging {
 
       def version(work: Work[Identified]) =
         work match {
-          case Work.Visible(_, _, state) if state.nMergedSources >= 10 =>
+          case Work.Visible(_, _, state)
+              if state.nMergedSources >= versionMultiplier =>
             throw new RuntimeException(
-              s"Work ${work.state.canonicalId} has ${work.state.nMergedSources} >= 10 merged sources; versioning/ingest may be inconsistent")
+              s"Work ${work.state.canonicalId} has ${work.state.nMergedSources} >= $versionMultiplier merged sources; versioning/ingest may be inconsistent")
           case Work.Visible(version, _, state) =>
-            (version * 10) + state.nMergedSources
-          case Work.Redirected(version, _, _)   => (version * 10) + 1
-          case Work.Invisible(version, _, _, _) => version * 10
+            (version * versionMultiplier) + state.nMergedSources
+          case Work.Redirected(version, _, _) =>
+            (version * versionMultiplier) + 1
+          case Work.Invisible(version, _, _, _) => version * versionMultiplier
         }
 
     }
