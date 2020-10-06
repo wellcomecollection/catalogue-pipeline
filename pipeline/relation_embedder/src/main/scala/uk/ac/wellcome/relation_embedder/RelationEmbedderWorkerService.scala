@@ -26,6 +26,7 @@ class RelationEmbedderWorkerService[MsgDestination](
   flushInterval: FiniteDuration = 3 seconds
 )(implicit ec: ExecutionContext, materializer: Materializer)
     extends Runnable {
+
   def run(): Future[Done] =
     sqsStream.foreach(this.getClass.getSimpleName, processMessage)
 
@@ -52,9 +53,8 @@ class RelationEmbedderWorkerService[MsgDestination](
       .run()
       .flatMap {
         case Nil => Future.successful(())
-        case failedWorks =>
-          Future.failed(
-            new Exception(s"Failed indexing works: $failedWorks")
-          )
+        case failedWorks => Future.failed(
+          new Exception(s"Failed indexing works: $failedWorks")
+        )
       }
 }
