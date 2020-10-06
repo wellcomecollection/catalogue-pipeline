@@ -30,7 +30,7 @@ trait Indexable[T] {
   * When the merger makes the decision to merge some works, it modifies
   * the content of the affected works. Despite the content of these works
   * being modified, their version remains the same. However, the merger
-  * attaches the number of merged sources (`nMergedSources`) to the target
+  * attaches the number of sources (`nSources`) to the target
   * work and may choose to redirect some of the source works.
   *
   * When we ingest those works, we need to make sure that the merger
@@ -82,13 +82,12 @@ object Indexable extends Logging {
       def version(image: AugmentedImage) =
         versionMultiplier * (image.version + image.source.version) +
           (image.source match {
-            case SourceWorks(_, _, nMergedSources)
-                if nMergedSources >= versionMultiplier =>
+            case SourceWorks(_, _, nSources) if nSources > versionMultiplier =>
               throw new RuntimeException(
-                s"Image ${image.id.sourceIdentifier.toString} has $nMergedSources >= $versionMultiplier merged sources; versioning/ingest may be inconsistent")
-            case SourceWorks(_, Some(redirected), nMergedSources) =>
-              nMergedSources + 1
-            case SourceWorks(_, None, nMergedSources) => nMergedSources
+                s"Image ${image.id.sourceIdentifier.toString} has $nSources > $versionMultiplier sources; versioning/ingest may be inconsistent")
+            case SourceWorks(_, Some(redirected), nSources) => nSources
+            case SourceWorks(_, None, nSources) =>
+              nSources - 1 // The number of additional sources
           })
     }
 
@@ -101,11 +100,11 @@ object Indexable extends Logging {
       def version(work: Work[Identified]) =
         work match {
           case Work.Visible(_, _, state)
-              if state.nMergedSources >= versionMultiplier =>
+              if state.nSources > versionMultiplier =>
             throw new RuntimeException(
-              s"Work ${work.state.sourceIdentifier.toString} has ${work.state.nMergedSources} >= $versionMultiplier merged sources; versioning/ingest may be inconsistent")
+              s"Work ${work.state.sourceIdentifier.toString} has ${work.state.nSources} > $versionMultiplier sources; versioning/ingest may be inconsistent")
           case Work.Visible(version, _, state) =>
-            (version * versionMultiplier) + state.nMergedSources
+            (version * versionMultiplier) + (state.nSources - 1) // The number of additional sources
           case Work.Redirected(version, _, _) =>
             (version * versionMultiplier) + 1
           case Work.Invisible(version, _, _, _) => version * versionMultiplier

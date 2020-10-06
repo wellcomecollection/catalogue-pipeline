@@ -25,13 +25,12 @@ class WorkIndexableTest
     with WorkGenerators {
 
   describe("updating merged / redirected works") {
-    it(
-      "doesn't override a merged Work with the same version but no merged sources") {
-      val mergedWork = identifiedWork(nMergedSources = 1).withVersion(3)
+    it("doesn't override a merged Work with the same version but only 1 source") {
+      val mergedWork = identifiedWork(nSources = 2).withVersion(3)
 
       val unmergedWork = identifiedWork(
         sourceIdentifier = mergedWork.sourceIdentifier,
-        nMergedSources = 0
+        nSources = 1
       ).withVersion(mergedWork.version)
 
       withWorksIndexAndIndexer {
@@ -51,10 +50,10 @@ class WorkIndexableTest
     }
 
     it("doesn't overwrite a Work with lower version and multiple sources") {
-      val unmergedNewWork = identifiedWork(nMergedSources = 0).withVersion(4)
+      val unmergedNewWork = identifiedWork(nSources = 1).withVersion(4)
       val mergedOldWork = identifiedWork(
         sourceIdentifier = unmergedNewWork.sourceIdentifier,
-        nMergedSources = 1
+        nSources = 2
       ).withVersion(unmergedNewWork.version - 1)
 
       withWorksIndexAndIndexer {
@@ -103,7 +102,7 @@ class WorkIndexableTest
 
     it(
       "doesn't override a redirected Work with an identified work with the same version") {
-      val redirectedWork = identifiedWork(nMergedSources = 0)
+      val redirectedWork = identifiedWork(nSources = 1)
         .redirected(
           IdState.Identified(
             canonicalId = createCanonicalId,
@@ -113,7 +112,7 @@ class WorkIndexableTest
       val identifiedOldWork =
         identifiedWork(
           canonicalId = redirectedWork.state.canonicalId,
-          nMergedSources = 0)
+          nSources = 1)
           .withVersion(redirectedWork.version)
 
       withWorksIndexAndIndexer {
@@ -132,11 +131,11 @@ class WorkIndexableTest
     }
 
     it("overrides a merged work with one that has been merged again") {
-      val mergedWork1 = identifiedWork(nMergedSources = 1)
+      val mergedWork1 = identifiedWork(nSources = 2)
       val mergedWork2 =
-        mergedWork1.copy(state = mergedWork1.state.copy(nMergedSources = 2))
+        mergedWork1.copy(state = mergedWork1.state.copy(nSources = 3))
       val mergedWork3 =
-        mergedWork1.copy(state = mergedWork1.state.copy(nMergedSources = 3))
+        mergedWork1.copy(state = mergedWork1.state.copy(nSources = 4))
 
       withWorksIndexAndIndexer {
         case (index, indexer) =>
@@ -178,8 +177,9 @@ class WorkIndexableTest
       }
     }
 
-    it("throws an error if a work has >= 10 merged sources") {
-      val erroneousWork = identifiedWork(nMergedSources = 10)
+    it("throws an error if a work has > versionMultiplier sources") {
+      val erroneousWork =
+        identifiedWork(nSources = Indexable.versionMultiplier + 1)
 
       withWorksIndexAndIndexer {
         case (_, indexer) =>

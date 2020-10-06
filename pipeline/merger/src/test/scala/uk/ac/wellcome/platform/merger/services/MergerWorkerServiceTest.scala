@@ -54,9 +54,9 @@ class MergerWorkerServiceTest
 
           senders.works
             .getMessages[Work[Merged]] should contain only (
-            work1.transition[Merged](0),
-            work2.transition[Merged](0),
-            work3.transition[Merged](0)
+            work1.transition[Merged](1),
+            work2.transition[Merged](1),
+            work3.transition[Merged](1)
           )
 
           metrics.incrementedCounts.length should be >= 1
@@ -84,7 +84,7 @@ class MergerWorkerServiceTest
           assertQueueEmpty(dlq)
 
           senders.works.getMessages[Work[Merged]] should contain only
-            work.transition[Merged](0)
+            work.transition[Merged](1)
 
           metrics.incrementedCounts.length shouldBe 1
           metrics.incrementedCounts.last should endWith("_success")
@@ -139,7 +139,7 @@ class MergerWorkerServiceTest
           assertQueueEmpty(dlq)
           val worksSent = senders.works.getMessages[Work[Merged]]
           worksSent should contain only
-            work.transition[Merged](0)
+            work.transition[Merged](1)
         }
     }
   }
@@ -170,7 +170,7 @@ class MergerWorkerServiceTest
 
           val worksSent = senders.works.getMessages[Work[Merged]]
           worksSent should contain only
-            work.transition[Merged](0)
+            work.transition[Merged](1)
 
           metrics.incrementedCounts.length shouldBe 1
           metrics.incrementedCounts.last should endWith("_success")
