@@ -340,7 +340,11 @@ class MergerWorkerServiceTest
   case class Senders(works: MemoryMessageSender, images: MemoryMessageSender)
 
   def withMergerWorkerServiceFixtures[R](
-    testWith: TestWith[(VHS, QueuePair, Senders, MemoryMetrics[StandardUnit], Map[String, Work[Merged]]),
+    testWith: TestWith[(VHS,
+                        QueuePair,
+                        Senders,
+                        MemoryMetrics[StandardUnit],
+                        Map[String, Work[Merged]]),
                        R]): R =
     withVHS { vhs =>
       withLocalSqsQueuePair() {
@@ -351,10 +355,16 @@ class MergerWorkerServiceTest
           val metrics = new MemoryMetrics[StandardUnit]
           val index = Map.empty[String, Work[Merged]]
 
-          withWorkerService(vhs, queue, workSender, imageSender, metrics, index) { _ =>
-            testWith(
-              (vhs, queuePair, Senders(workSender, imageSender), metrics, index)
-            )
+          withWorkerService(vhs, queue, workSender, imageSender, metrics, index) {
+            _ =>
+              testWith(
+                (
+                  vhs,
+                  queuePair,
+                  Senders(workSender, imageSender),
+                  metrics,
+                  index)
+              )
           }
       }
     }

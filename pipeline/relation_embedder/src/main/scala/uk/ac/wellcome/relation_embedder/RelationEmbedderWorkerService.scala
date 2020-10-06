@@ -53,8 +53,9 @@ class RelationEmbedderWorkerService[MsgDestination](
       .run()
       .flatMap {
         case Nil => Future.successful(())
-        case failedWorks => Future.failed(
-          new Exception(s"Failed indexing works: $failedWorks")
-        )
+        case failedWorks =>
+          Future.failed(
+            new Exception(s"Failed indexing works: $failedWorks")
+          )
       }
 }
