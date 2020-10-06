@@ -13,6 +13,8 @@ sealed trait Work[State <: WorkState] {
 
   def sourceIdentifier: SourceIdentifier = state.sourceIdentifier
 
+  def id: String = state.id
+
   def identifiers: List[SourceIdentifier] =
     sourceIdentifier :: data.otherIdentifiers
 
