@@ -37,15 +37,23 @@ class RelationEmbedderWorkerService[MsgDestination](
           .getOtherAffectedWorks(work)
           .map(work.sourceIdentifier :: _)
       }
-      .mapConcat(sourceIdentifier => sourceIdentifier)
-      .mapAsync(3) { sourceIdentifier =>
+      .mapConcat(identity)
+      .mapAsync(2) { sourceIdentifier =>
         workRetriever(sourceIdentifier.toString)
       }
-      .mapAsync(3) { work =>
+      .mapAsync(2) { work =>
         relationsService.getRelations(work).map(work.transition[Denormalised])
       }
       .groupedWithin(batchSize, flushInterval)
-      .map(workIndexer.index)
-      .runForeach(_ => ())
-      .map(_ => ())
+      .mapAsync(2)(workIndexer.index)
+      .collect { case Left(failedWorks) => failedWorks.toList }
+      .mapConcat(identity)
+      .toMat(Sink.seq)(Keep.right)
+      .run()
+      .flatMap {
+        case Nil => Future.successful(())
+        case failedWorks => Future.failed(
+          new Exception(s"Failed indexing works: $failedWorks")
+        )
+      }
 }
