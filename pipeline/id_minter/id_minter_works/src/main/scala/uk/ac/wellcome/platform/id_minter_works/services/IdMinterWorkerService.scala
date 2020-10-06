@@ -29,7 +29,8 @@ class IdMinterWorkerService[Destination](
   jsonRetriever: Retriever[Json],
   rdsClientConfig: RDSClientConfig,
   identifiersTableConfig: IdentifiersTableConfig
-)(implicit ec: ExecutionContext) extends Runnable
+)(implicit ec: ExecutionContext)
+    extends Runnable
     with Logging {
 
   def run(): Future[Done] = {
