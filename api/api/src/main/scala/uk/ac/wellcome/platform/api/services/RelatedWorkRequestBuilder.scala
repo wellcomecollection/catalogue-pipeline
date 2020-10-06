@@ -27,6 +27,7 @@ case class RelatedWorkRequestBuilder(index: Index,
     "data.collectionPath.path",
     "data.collectionPath.level.type",
     "data.collectionPath.label",
+    "data.workType",
   )
 
   lazy val request: MultiSearchRequest =

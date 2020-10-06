@@ -25,6 +25,7 @@ case class RelationsRequestBuilder(index: Index,
     "data.collectionPath.path",
     "data.collectionPath.level.type",
     "data.collectionPath.label",
+    "data.workType",
   )
 
   // To reduce response size and improve Elasticsearch performance we only
