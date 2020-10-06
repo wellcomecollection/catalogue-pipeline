@@ -85,7 +85,7 @@ object Indexable extends Logging {
             case SourceWorks(_, _, nMergedSources)
                 if nMergedSources >= versionMultiplier =>
               throw new RuntimeException(
-                s"Image ${image.id.canonicalId} has $nMergedSources >= $versionMultiplier merged sources; versioning/ingest may be inconsistent")
+                s"Image ${image.id.sourceIdentifier.toString} has $nMergedSources >= $versionMultiplier merged sources; versioning/ingest may be inconsistent")
             case SourceWorks(_, Some(redirected), nMergedSources) =>
               nMergedSources + 1
             case SourceWorks(_, None, nMergedSources) => nMergedSources
@@ -103,7 +103,7 @@ object Indexable extends Logging {
           case Work.Visible(_, _, state)
               if state.nMergedSources >= versionMultiplier =>
             throw new RuntimeException(
-              s"Work ${work.state.canonicalId} has ${work.state.nMergedSources} >= $versionMultiplier merged sources; versioning/ingest may be inconsistent")
+              s"Work ${work.state.sourceIdentifier.toString} has ${work.state.nMergedSources} >= $versionMultiplier merged sources; versioning/ingest may be inconsistent")
           case Work.Visible(version, _, state) =>
             (version * versionMultiplier) + state.nMergedSources
           case Work.Redirected(version, _, _) =>
