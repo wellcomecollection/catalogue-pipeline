@@ -609,12 +609,12 @@ class WorksIncludesTest
                   "id": "${workA.state.canonicalId}",
                   "title": "0/a",
                   "alternativeTitles": [],
-                  "type": "Work",
+                  "type": "Section",
                   "partOf": [{
                     "id": "${work0.state.canonicalId}",
                     "title": "0",
                     "alternativeTitles": [],
-                    "type": "Work",
+                    "type": "Collection",
                     "partOf": []
                   }
                 ]
