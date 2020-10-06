@@ -10,7 +10,9 @@ logger = get_logger(__name__)
 
 # Initialise encoder
 logger.info("Initialising PaletteEncoder model")
-palette_encoder = PaletteEncoder(palette_weights=[2, 2, 1, 1, 1], bin_sizes=[4, 6, 8])
+palette_encoder = PaletteEncoder(
+    palette_weights=[2, 2, 1, 1, 1], bin_sizes=[2, 4, 6, 8]
+)
 
 # initialise API
 logger.info("Starting API")
