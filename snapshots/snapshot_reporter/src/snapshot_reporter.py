@@ -42,74 +42,61 @@ def get_elastic_client(elastic_secret_id):
 def get_snapshots(es_client, days_to_fetch):
     index = "snapshots"
 
-    date_filter = [{"range": {"snapshotJob.requestedAt": {"gte": f"now-{days_to_fetch}d/d"}}}]
+    date_filter = [
+        {"range": {"snapshotJob.requestedAt": {"gte": f"now-{days_to_fetch}d/d"}}}
+    ]
     es_query = {"bool": {"filter": date_filter}}
     sort_by = [{"snapshotJob.requestedAt": {"order": "desc"}}]
 
-    response = es_client.search(
-        index=index,
-        body={
-            "query": es_query,
-            "sort": sort_by
-        }
-    )
+    response = es_client.search(index=index, body={"query": es_query, "sort": sort_by})
 
     return [hit["_source"] for hit in response["hits"]["hits"]]
 
 
 def prepare_slack_payload(snapshots, days_to_fetch):
     def _snapshot_message(snapshot):
-        index_name = snapshot['snapshotResult']['indexName']
-        document_count = snapshot['snapshotResult']['documentCount']
-        s3_size = snapshot['snapshotResult']['s3Size']['bytes']
+        index_name = snapshot["snapshotResult"]["indexName"]
+        document_count = snapshot["snapshotResult"]["documentCount"]
+        s3_size = snapshot["snapshotResult"]["s3Size"]["bytes"]
 
-        requested_at = parser.parse(
-            snapshot['snapshotJob']['requestedAt']
-        ).strftime("%A, %B %e, %I:%M %p")
-
-        started_at = parser.parse(
-            snapshot['snapshotResult']['startedAt']
+        requested_at = parser.parse(snapshot["snapshotJob"]["requestedAt"]).strftime(
+            "%A, %B %e, %I:%M %p"
         )
 
-        finished_at = parser.parse(
-            snapshot['snapshotResult']['finishedAt']
+        started_at = parser.parse(snapshot["snapshotResult"]["startedAt"])
+
+        finished_at = parser.parse(snapshot["snapshotResult"]["finishedAt"])
+
+        return "\n".join(
+            [
+                f'*"{index_name}" on {requested_at}*',
+                f"{humanize.naturalsize(s3_size)} containing {humanize.intword(document_count)} documents ({document_count} exactly)",
+                f"Took {humanize.precisedelta(finished_at - started_at)}",
+            ]
         )
 
-        return '\n'.join([
-            f"*\"{index_name}\" on {requested_at}*",
-            f"{humanize.naturalsize(s3_size)} containing {humanize.intword(document_count)} documents ({document_count} exactly)",
-            f"Took {humanize.precisedelta(finished_at - started_at)}"
-        ])
+    heading = f"Snapshots in the last {days_to_fetch} days"
 
-    heading = (
-        f"Snapshots in the last {days_to_fetch} days"
-    )
-
-    heading_block = [{
-        "type": "header", "text": {"type": "plain_text", "text": heading}
-    }]
+    heading_block = [
+        {"type": "header", "text": {"type": "plain_text", "text": heading}}
+    ]
 
     snapshot_blocks = []
     for snapshot in snapshots:
-        snapshot_blocks.append({
-            "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": _snapshot_message(snapshot),
+        snapshot_blocks.append(
+            {
+                "type": "section",
+                "text": {"type": "mrkdwn", "text": _snapshot_message(snapshot)},
             }
-        })
+        )
 
-    result = {
-        "blocks": heading_block + snapshot_blocks
-    }
+    result = {"blocks": heading_block + snapshot_blocks}
 
     return result
 
 
 def post_to_slack(slack_secret_id, payload):
-    resp = httpx.post(
-        get_secret(slack_secret_id), json=payload
-    )
+    resp = httpx.post(get_secret(slack_secret_id), json=payload)
 
     print(f"Sent payload to Slack: {resp}")
 
