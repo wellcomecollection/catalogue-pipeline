@@ -1,7 +1,9 @@
 package uk.ac.wellcome.platform.id_minter_works.fixtures
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import io.circe.Json
 import scalikejdbc.{ConnectionPool, ConnectionPoolSettings}
+
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
@@ -13,6 +15,8 @@ import uk.ac.wellcome.platform.id_minter.models.IdentifiersTable
 import uk.ac.wellcome.platform.id_minter.steps.IdentifierGenerator
 import uk.ac.wellcome.platform.id_minter.fixtures.IdentifiersDatabase
 import uk.ac.wellcome.platform.id_minter_works.services.IdMinterWorkerService
+import uk.ac.wellcome.pipeline_storage.MemoryRetriever
+import uk.ac.wellcome.messaging.sns.NotificationMessage
 
 trait WorkerServiceFixture
     extends IdentifiersDatabase
@@ -22,10 +26,11 @@ trait WorkerServiceFixture
     messageSender: MemoryMessageSender = new MemoryMessageSender(),
     queue: Queue = Queue("url://q", "arn::q", visibilityTimeout = 1),
     identifiersDao: IdentifiersDao,
-    identifiersTableConfig: IdentifiersTableConfig)(
+    identifiersTableConfig: IdentifiersTableConfig,
+    jsonIndex: Map[String, Json] = Map.empty)(
     testWith: TestWith[IdMinterWorkerService[String], R]): R =
     withActorSystem { implicit actorSystem =>
-      withBigMessageStream[Json, R](queue) { messageStream =>
+      withSQSStream[NotificationMessage, R](queue) { messageStream =>
         val identifierGenerator = new IdentifierGenerator(
           identifiersDao = identifiersDao
         )
@@ -33,6 +38,7 @@ trait WorkerServiceFixture
           identifierGenerator = identifierGenerator,
           sender = messageSender,
           messageStream = messageStream,
+          jsonRetriever = new MemoryRetriever(jsonIndex),
           rdsClientConfig = rdsClientConfig,
           identifiersTableConfig = identifiersTableConfig
         )
