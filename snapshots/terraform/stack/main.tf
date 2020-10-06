@@ -30,3 +30,14 @@ module "snapshot_scheduler" {
   public_bucket_name   = var.public_bucket_name
   public_object_key_v2 = var.public_object_key_v2
 }
+
+module "snapshot_recorder" {
+  source = "./snapshot_recorder"
+
+  snapshot_generator_output_topic_arn = module.snapshot_generator.output_topic_arn
+
+  deployment_service_env = var.deployment_service_env
+
+  lambda_upload_bucket   = var.lambda_upload_bucket
+  lambda_error_alarm_arn = var.lambda_error_alarm_arn
+}
