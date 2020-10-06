@@ -11,4 +11,4 @@ echo "These are the containers which are still running:"
 docker ps
 
 echo "I'm going to stop these containers now."
-docker stop $(docker ps -q)
+docker stop $(docker ps -q) || true
