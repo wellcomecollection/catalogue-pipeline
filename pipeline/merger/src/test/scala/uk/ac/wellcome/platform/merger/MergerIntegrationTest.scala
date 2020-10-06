@@ -42,7 +42,7 @@ class MergerIntegrationTest
             eventually {
               assertQueueEmpty(queue)
               assertQueueEmpty(dlq)
-              workSender.getMessages[String] should contain only work.state.id
+              workSender.getMessages[String] should contain only work.id
               index shouldBe Map(work.id -> work.transition[Merged](1))
             }
           }

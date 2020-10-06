@@ -46,7 +46,7 @@ class MergerWorkerService[WorkDestination, ImageDestination](
         case Right(works) => Future.successful(works)
       }
       (worksFuture, imagesFuture) = (
-        sendMessages(workSender, works.map(_.state.id)),
+        sendMessages(workSender, works.map(_.id)),
         sendMessages(imageSender, mergerOutcome.images)
       )
       _ <- worksFuture

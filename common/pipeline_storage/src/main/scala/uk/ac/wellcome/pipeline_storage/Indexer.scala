@@ -102,7 +102,7 @@ object Indexable extends Logging {
   implicit def workIndexable[State <: WorkState]: Indexable[Work[State]] =
     new Indexable[Work[State]] {
 
-      def id(work: Work[State]): String = work.state.id
+      def id(work: Work[State]): String = work.id
 
       def version(work: Work[State]) =
         work match {
