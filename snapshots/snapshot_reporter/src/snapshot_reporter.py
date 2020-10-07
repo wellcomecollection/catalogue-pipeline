@@ -42,17 +42,15 @@ def get_snapshots(es_client, elastic_index):
     response = es_client.search(
         index=elastic_index,
         body={
-            "query": {"bool": {"filter": [
-                {"range": {
-                    "snapshotJob.requestedAt": {
-                        "gte": f"now-1d/d"
-                    }
-                }}
-            ]}},
-            "sort": [{"snapshotJob.requestedAt": {
-                "order": "desc"
-            }}]
-        }
+            "query": {
+                "bool": {
+                    "filter": [
+                        {"range": {"snapshotJob.requestedAt": {"gte": f"now-1d/d"}}}
+                    ]
+                }
+            },
+            "sort": [{"snapshotJob.requestedAt": {"order": "desc"}}],
+        },
     )
 
     return [hit["_source"] for hit in response["hits"]["hits"]]
@@ -77,25 +75,15 @@ def prepare_slack_payload(snapshots):
             [
                 f"The last snapshot was of index {index_name} at {requested_at}. ",
                 f"It is {humanize.naturalsize(s3_size)}, took {humanize.naturaldelta(time_took)} "
-                f"and contains {humanize.intcomma(document_count)} documents."
+                f"and contains {humanize.intcomma(document_count)} documents.",
             ]
         )
 
     def _create_header_block(text):
-        return [
-            {
-                "type": "header",
-                "text": {"type": "plain_text", "text": text}
-            }
-        ]
+        return [{"type": "header", "text": {"type": "plain_text", "text": text}}]
 
     def _create_section_block(text):
-        return [
-            {
-                "type": "section",
-                "text": {"type": "mrkdwn", "text": text},
-            }
-        ]
+        return [{"type": "section", "text": {"type": "mrkdwn", "text": text}}]
 
     if snapshots:
         snapshot = snapshots[0]
@@ -103,7 +91,9 @@ def prepare_slack_payload(snapshots):
         header_block = _create_header_block(":white_check_mark: Catalogue Snapshot")
         section_block = _create_section_block(_snapshot_message(snapshot))
     else:
-        header_block = _create_header_block(":interrobang: Catalogue Snapshot not found")
+        header_block = _create_header_block(
+            ":interrobang: Catalogue Snapshot not found"
+        )
         section_block = _create_section_block("No snapshot found within the last day.")
 
     return {"blocks": header_block + section_block}
