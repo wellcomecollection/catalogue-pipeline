@@ -6,7 +6,7 @@ import uk.ac.wellcome.models.work.internal.{IdentifierType, SourceIdentifier}
 import scala.util.Random
 
 trait IdentifiersGenerators extends RandomGenerators {
-  def createCanonicalId: String = randomAlphanumeric(length = 10)
+  def createCanonicalId: String = randomAlphanumeric(length = 10).toLowerCase()
 
   def createSourceIdentifier: SourceIdentifier = createSourceIdentifierWith()
 
