@@ -198,6 +198,7 @@ object ExternalDependencies {
 object CatalogueDependencies {
   val internalModelDependencies =
     ExternalDependencies.scalacsvDependencies ++
+      WellcomeDependencies.fixturesLibrary ++
       WellcomeDependencies.jsonLibrary ++
       ExternalDependencies.parseDependencies ++
       ExternalDependencies.scalacheckDependencies ++
