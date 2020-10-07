@@ -1,9 +1,8 @@
 package uk.ac.wellcome.platform.id_minter.steps
 
-import org.mockito.Matchers.{any, anyListOf}
-import org.mockito.Mockito.when
+import org.mockito.Mockito._
+import org.mockito.ArgumentMatchers.any
 import org.scalatest.funspec.AnyFunSpec
-import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.{Inspectors, OptionValues}
 import scalikejdbc._
@@ -15,12 +14,10 @@ import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.work.internal.SourceIdentifier
 
 import scala.util.{Failure, Success}
-import scala.collection.JavaConverters._
 
 class IdentifierGeneratorTest
     extends AnyFunSpec
     with fixtures.IdentifiersDatabase
-    with Matchers
     with Inspectors
     with OptionValues
     with MockitoSugar
@@ -125,7 +122,7 @@ class IdentifierGeneratorTest
     val sourceIdentifiers = (1 to 5).map(_ => createSourceIdentifier).toList
 
     val triedLookup = identifiersDao.lookupIds(
-      anyListOf(classOf[SourceIdentifier]).asScala.toList
+      any[List[SourceIdentifier]]
     )(any[DBSession])
     when(triedLookup)
       .thenReturn(
@@ -134,7 +131,7 @@ class IdentifierGeneratorTest
     val saveException = new Exception("Don't do that please!")
     when(
       identifiersDao.saveIdentifiers(
-        anyListOf(classOf[Identifier]).asScala.toList)(any[DBSession]))
+        any[List[Identifier]])(any[DBSession]))
       .thenThrow(IdentifiersDao.InsertError(Nil, saveException, Nil))
 
     withIdentifierGenerator(Some(identifiersDao)) {
