@@ -205,7 +205,7 @@ object MergedWorkIndexConfig extends WorksIndexConfig {
 
   val state = objectField("state").fields(
     sourceIdentifier,
-    intField("nSources"),
+    intField("numberOfSources"),
   )
 }
 
@@ -213,7 +213,7 @@ object DenormalisedWorkIndexConfig extends WorksIndexConfig {
 
   val state = objectField("state").fields(
     sourceIdentifier,
-    intField("nSources"),
+    intField("numberOfSources"),
     relations
   )
 }
@@ -223,7 +223,7 @@ object IdentifiedWorkIndexConfig extends WorksIndexConfig {
   val state = objectField("state").fields(
     canonicalId,
     sourceIdentifier,
-    intField("nSources"),
+    intField("numberOfSources"),
     relations
   )
 }

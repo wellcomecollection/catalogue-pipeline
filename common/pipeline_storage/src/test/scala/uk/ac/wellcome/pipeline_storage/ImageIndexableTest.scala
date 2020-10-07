@@ -148,7 +148,7 @@ class ImageIndexableTest
         source = SourceWorks(
           canonicalWork = identifiedWork().toSourceWork,
           redirectedWork = None,
-          nSources = Indexable.versionMultiplier
+          numberOfSources = Indexable.versionMultiplier
         )
       )
 

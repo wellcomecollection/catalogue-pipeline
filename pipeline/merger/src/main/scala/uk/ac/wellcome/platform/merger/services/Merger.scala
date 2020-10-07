@@ -52,7 +52,7 @@ trait Merger extends MergerLogging {
 
   implicit class MergeResultAccumulation[T](val result: FieldMergeResult[T]) {
     def redirectSources: State[MergeState, T] = shouldRedirect(true)
-    def retainSources: State[MergeState, T] = shouldRedirect(false)
+    def retainumberOfSources: State[MergeState, T] = shouldRedirect(false)
 
     // If the state already contains a source, then don't change the existing `redirect` value
     // Otherwise, add the source with the current value.
@@ -146,7 +146,7 @@ object PlatformMerger extends Merger {
             _ mergeWith (
               canonicalWork = target.toSourceWork,
               redirectedWork = None,
-              nSources = 1
+              numberOfSources = 1
             )
           }
         )
@@ -156,7 +156,7 @@ object PlatformMerger extends Merger {
         items <- ItemsRule(target, sources).redirectSources
         thumbnail <- ThumbnailRule(target, sources).redirectSources
         otherIdentifiers <- OtherIdentifiersRule(target, sources).redirectSources
-        unmergedImages <- ImagesRule(target, sources).retainSources
+        unmergedImages <- ImagesRule(target, sources).retainumberOfSources
         work = target.mapData { data =>
           data.copy[DataState.Unidentified](
             items = items,
@@ -175,7 +175,7 @@ object PlatformMerger extends Merger {
               redirectedWork = sources
                 .find { _.data.images.contains(image) }
                 .map(_.toSourceWork),
-              nSources = nMergedSources + 1
+              numberOfSources = nMergedSources + 1
             )
           }
         )
