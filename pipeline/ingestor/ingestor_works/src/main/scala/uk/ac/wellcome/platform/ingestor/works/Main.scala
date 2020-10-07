@@ -32,7 +32,7 @@ object Main extends WellcomeTypesafeApp {
     new IngestorWorkerService(
       ingestorConfig = IngestorConfigBuilder.buildIngestorConfig(config),
       documentIndexer =
-        new ElasticIndexer(elasticClient, index, IdentifiedWorkIndexConfig),
+        new ElasticIndexer[Work[Identified]](elasticClient, index, IdentifiedWorkIndexConfig),
       messageStream =
         BigMessagingBuilder.buildMessageStream[Work[Identified]](config)
     )
