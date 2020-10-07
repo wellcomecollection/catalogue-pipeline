@@ -1,11 +1,11 @@
 package uk.ac.wellcome.models.work.generators
 
-import uk.ac.wellcome.models.generators.RandomStrings
+import uk.ac.wellcome.fixtures.RandomGenerators
 import uk.ac.wellcome.models.work.internal.{IdentifierType, SourceIdentifier}
 
 import scala.util.Random
 
-trait IdentifiersGenerators extends RandomStrings {
+trait IdentifiersGenerators extends RandomGenerators {
   def createCanonicalId: String = randomAlphanumeric(length = 10)
 
   def createSourceIdentifier: SourceIdentifier = createSourceIdentifierWith()

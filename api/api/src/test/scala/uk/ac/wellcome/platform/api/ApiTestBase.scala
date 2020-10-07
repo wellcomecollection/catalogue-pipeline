@@ -5,10 +5,9 @@ import com.sksamuel.elastic4s.ElasticDsl._
 import org.scalatest.Assertion
 import uk.ac.wellcome.display.models.ApiVersions
 import uk.ac.wellcome.fixtures._
-import uk.ac.wellcome.models.generators.RandomStrings
 import uk.ac.wellcome.platform.api.fixtures.ApiFixture
 
-trait ApiTestBase extends ApiFixture with RandomStrings {
+trait ApiTestBase extends ApiFixture with RandomGenerators {
   def getApiPrefix(
     apiVersion: ApiVersions.Value = ApiVersions.default): String =
     apiName + "/" + apiVersion

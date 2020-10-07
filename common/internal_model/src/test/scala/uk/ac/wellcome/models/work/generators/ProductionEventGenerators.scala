@@ -1,9 +1,9 @@
 package uk.ac.wellcome.models.work.generators
 
-import uk.ac.wellcome.models.generators.RandomStrings
+import uk.ac.wellcome.fixtures.RandomGenerators
 import uk.ac.wellcome.models.work.internal._
 
-trait ProductionEventGenerators extends RandomStrings {
+trait ProductionEventGenerators extends RandomGenerators {
   def createProductionEventWith(
     function: Option[Concept[IdState.Minted]] = None,
     dateLabel: Option[String] = None
