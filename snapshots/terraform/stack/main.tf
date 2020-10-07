@@ -41,3 +41,12 @@ module "snapshot_recorder" {
   lambda_upload_bucket   = var.lambda_upload_bucket
   lambda_error_alarm_arn = var.lambda_error_alarm_arn
 }
+
+module "snapshot_reporter" {
+  source = "./snapshot_reporter"
+
+  deployment_service_env = var.deployment_service_env
+
+  lambda_upload_bucket   = var.lambda_upload_bucket
+  lambda_error_alarm_arn = var.lambda_error_alarm_arn
+}
