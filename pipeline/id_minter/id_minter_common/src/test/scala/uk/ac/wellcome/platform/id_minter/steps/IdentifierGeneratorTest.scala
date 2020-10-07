@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.id_minter.steps
 
-import org.mockito.Mockito._
+import org.mockito.Mockito.when
 import org.mockito.ArgumentMatchers.any
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatestplus.mockito.MockitoSugar
