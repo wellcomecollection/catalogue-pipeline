@@ -131,23 +131,23 @@ class WorkIndexableTest
     }
 
     it("overrides a merged work with one that has been merged again") {
-      val mergedWork1 = identifiedWork(nSources = 2)
-      val mergedWork2 =
-        mergedWork1.copy(state = mergedWork1.state.copy(nSources = 3))
+      val mergedWork2 = identifiedWork(nSources = 2)
       val mergedWork3 =
-        mergedWork1.copy(state = mergedWork1.state.copy(nSources = 4))
+        mergedWork2.copy(state = mergedWork2.state.copy(nSources = 3))
+      val mergedWork4 =
+        mergedWork2.copy(state = mergedWork2.state.copy(nSources = 4))
 
       withWorksIndexAndIndexer {
         case (index, indexer) =>
           val insertFuture = ingestInOrder(indexer)(
-            mergedWork1,
-            mergedWork3,
-            mergedWork2
+            mergedWork2,
+            mergedWork4,
+            mergedWork3
           )
           whenReady(insertFuture) { result =>
             assertIngestedWorkIs(
               result = result,
-              ingestedWork = mergedWork3,
+              ingestedWork = mergedWork4,
               index = index
             )
           }
@@ -177,9 +177,9 @@ class WorkIndexableTest
       }
     }
 
-    it("throws an error if a work has > versionMultiplier sources") {
+    it("throws an error if a work has >= versionMultiplier sources") {
       val erroneousWork =
-        identifiedWork(nSources = Indexable.versionMultiplier + 1)
+        identifiedWork(nSources = Indexable.versionMultiplier)
 
       withWorksIndexAndIndexer {
         case (_, indexer) =>

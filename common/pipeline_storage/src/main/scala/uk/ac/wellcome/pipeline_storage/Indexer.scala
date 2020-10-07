@@ -79,16 +79,17 @@ object Indexable extends Logging {
       def id(image: AugmentedImage) =
         image.id.canonicalId
 
-      def version(image: AugmentedImage) =
-        versionMultiplier * (image.version + image.source.version) +
-          (image.source match {
-            case SourceWorks(_, _, nSources) if nSources > versionMultiplier =>
-              throw new RuntimeException(
-                s"Image ${image.id.sourceIdentifier.toString} has $nSources > $versionMultiplier sources; versioning/ingest may be inconsistent")
-            case SourceWorks(_, Some(redirected), nSources) => nSources
-            case SourceWorks(_, None, nSources) =>
-              nSources - 1 // The number of additional sources
-          })
+      def version(image: AugmentedImage) = {
+        val versionOffset = image.source match {
+          case SourceWorks(_, _, nSources) if nSources >= versionMultiplier =>
+            throw new RuntimeException(
+              s"Image ${image.id.sourceIdentifier.toString} has $nSources >= $versionMultiplier sources; versioning/ingest may be inconsistent")
+          case SourceWorks(_, Some(redirected), nSources) => nSources
+          case SourceWorks(_, None, nSources) =>
+            nSources - 1 // The number of additional sources
+        }
+        versionMultiplier * (image.version + image.source.version) + versionOffset
+      }
     }
 
   implicit val workIndexable: Indexable[Work[Identified]] =
@@ -100,9 +101,9 @@ object Indexable extends Logging {
       def version(work: Work[Identified]) =
         work match {
           case Work.Visible(_, _, state)
-              if state.nSources > versionMultiplier =>
+              if state.nSources >= versionMultiplier =>
             throw new RuntimeException(
-              s"Work ${work.state.sourceIdentifier.toString} has ${work.state.nSources} > $versionMultiplier sources; versioning/ingest may be inconsistent")
+              s"Work ${work.state.sourceIdentifier.toString} has ${work.state.nSources} >= $versionMultiplier sources; versioning/ingest may be inconsistent")
           case Work.Visible(version, _, state) =>
             (version * versionMultiplier) + (state.nSources - 1) // The number of additional sources
           case Work.Redirected(version, _, _) =>
