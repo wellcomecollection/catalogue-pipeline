@@ -1,21 +1,19 @@
 package uk.ac.wellcome.platform.matcher.fixtures
 
-import scala.util.Random
-
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.dynamodbv2.model._
 import com.amazonaws.services.dynamodbv2.util.TableUtils.waitUntilActive
-
+import uk.ac.wellcome.fixtures.RandomGenerators
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
 
-trait LocalWorkGraphDynamoDb extends DynamoFixtures {
+trait LocalWorkGraphDynamoDb extends DynamoFixtures with RandomGenerators {
   override def createTable(table: Table): Table = Table("table", "index")
 
   def createLockTable(dynamoDbClient: AmazonDynamoDB): Table = {
-    val tableName = Random.alphanumeric.take(10).mkString
-    val tableIndex = Random.alphanumeric.take(10).mkString
-    val table = Table(tableName, tableIndex)
+    val tableName = s"table-${randomAlphanumeric()}"
+    val indexName = s"index-${randomAlphanumeric()}"
+    val table = Table(tableName, indexName)
 
     dynamoDbClient.createTable(
       new CreateTableRequest()
@@ -54,8 +52,8 @@ trait LocalWorkGraphDynamoDb extends DynamoFixtures {
   }
 
   def createWorkGraphTable(dynamoDbClient: AmazonDynamoDB): Table = {
-    val tableName = Random.alphanumeric.take(10).mkString
-    val indexName = Random.alphanumeric.take(10).mkString
+    val tableName = s"table-${randomAlphanumeric()}"
+    val indexName = s"index-${randomAlphanumeric()}"
     val table = Table(tableName, indexName)
 
     dynamoDbClient.createTable(

@@ -16,7 +16,6 @@ import uk.ac.wellcome.storage.store.Store
 import uk.ac.wellcome.storage.store.memory.MemoryStore
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.Random
 
 trait MiroVHSRecordReceiverFixture extends MiroRecordGenerators with SQS {
 
@@ -59,7 +58,7 @@ trait MiroVHSRecordReceiverFixture extends MiroRecordGenerators with SQS {
     miroMetadata: MiroMetadata = MiroMetadata(isClearedForCatalogueAPI = true),
     version: Int = 1,
     namespace: String = "test",
-    id: String = Random.alphanumeric take 10 mkString): HybridRecord = {
+    id: String = randomAlphanumeric()): HybridRecord = {
     val location = S3ObjectLocation(namespace, id)
 
     store.put(location)(miroRecord)

@@ -1,31 +1,26 @@
 package uk.ac.wellcome.platform.ingestor.common.services
 
-import scala.concurrent.ExecutionContext.Implicits.global
-
 import com.sksamuel.elastic4s.ElasticClient
 import com.sksamuel.elastic4s.http.JavaClient
 import org.apache.http.HttpHost
 import org.elasticsearch.client.RestClient
 import org.scalatest.funspec.AnyFunSpec
 import software.amazon.awssdk.services.sqs.model.QueueAttributeName
-
-import uk.ac.wellcome.elasticsearch.{
-  ElasticCredentials,
-  ElasticsearchIndexCreator
-}
-import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.elasticsearch.{ElasticCredentials, ElasticsearchIndexCreator}
+import uk.ac.wellcome.fixtures.RandomGenerators
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
+import uk.ac.wellcome.pipeline_storage.fixtures.SampleDocument
 import uk.ac.wellcome.platform.ingestor.common.fixtures.IngestorFixtures
 import uk.ac.wellcome.platform.ingestor.common.models.IngestorConfig
-import uk.ac.wellcome.storage.generators.RandomThings
-import uk.ac.wellcome.pipeline_storage.fixtures.SampleDocument
+
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class IngestorWorkerServiceTest
     extends AnyFunSpec
     with IngestorFixtures
     with IdentifiersGenerators
-    with RandomThings {
+    with RandomGenerators {
 
   it("creates the index at startup if it doesn't already exist") {
     val index = createIndex
@@ -44,7 +39,7 @@ class IngestorWorkerServiceTest
   }
 
   it("ingests a single document") {
-    val document = SampleDocument(1, createCanonicalId, randomAlphanumeric)
+    val document = SampleDocument(1, createCanonicalId, randomAlphanumeric())
     withLocalSqsQueuePair(visibilityTimeout = 10) {
       case QueuePair(queue, dlq) =>
         sendMessage[SampleDocument](queue = queue, obj = document)
@@ -68,7 +63,7 @@ class IngestorWorkerServiceTest
 
   it("ingests lots of documents") {
     val documents = (1 to 250).map(_ =>
-      SampleDocument(1, createCanonicalId, randomAlphanumeric))
+      SampleDocument(1, createCanonicalId, randomAlphanumeric()))
     withLocalSqsQueuePair(visibilityTimeout = 10) {
       case QueuePair(queue, dlq) =>
         documents.foreach(document =>
