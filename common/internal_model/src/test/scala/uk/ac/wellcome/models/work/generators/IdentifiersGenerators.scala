@@ -58,10 +58,7 @@ trait IdentifiersGenerators extends RandomGenerators {
     'C', 'L', 'V', 'W', 'N', 'M', 'B', 'A', 'S', 'F', 'D'
   )
 
-  private def randomCharFrom(list: Char*) =
-    list(Random.nextInt(list.size))
-
-  def randomMiroId(prefix: Char = randomCharFrom(miroIdPrefixes: _*),
+  def randomMiroId(prefix: Char = chooseFrom(miroIdPrefixes: _*),
                    length: Int = 8): String =
     s"%c%0${length - 1}d".format(
       prefix,
@@ -89,12 +86,12 @@ trait IdentifiersGenerators extends RandomGenerators {
 
   def createHistoricalLibraryMiroSourceIdentifier: SourceIdentifier =
     createMiroSourceIdentifierWith(
-      value = randomMiroId(prefix = randomCharFrom('L', 'M'))
+      value = randomMiroId(prefix = chooseFrom('L', 'M'))
     )
 
   def createNonHistoricalLibraryMiroSourceIdentifier: SourceIdentifier =
     createMiroSourceIdentifierWith(
-      value = randomMiroId(prefix = randomCharFrom(miroIdPrefixes.filter {
+      value = randomMiroId(prefix = chooseFrom(miroIdPrefixes.filter {
         case 'L' | 'M' => false
         case _         => true
       }: _*)))
