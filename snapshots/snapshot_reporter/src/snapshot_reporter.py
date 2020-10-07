@@ -70,7 +70,7 @@ def prepare_slack_payload(snapshots, days_to_fetch):
         return "\n".join(
             [
                 f'*"{index_name}" on {requested_at}*',
-                f"{humanize.naturalsize(s3_size)} containing {humanize.intword(document_count)} documents ({document_count} exactly)",
+                f"{humanize.naturalsize(s3_size)} containing {humanize.intword(document_count)} documents ({humanize.intcomma(document_count)} exactly)",
                 f"Took {humanize.precisedelta(finished_at - started_at)}",
             ]
         )
