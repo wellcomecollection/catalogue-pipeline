@@ -62,10 +62,10 @@ module "catalogue_pipeline_20200923" {
   inferrer_model_data_bucket_name = aws_s3_bucket.inferrer_model_core_data.id
 }
 
-module "catalogue_pipeline_20201006" {
+module "catalogue_pipeline_20201007" {
   source = "./stack"
 
-  namespace = "catalogue-20201006"
+  namespace = "catalogue-20201007"
 
   release_label = "stage"
 
@@ -104,8 +104,8 @@ module "catalogue_pipeline_20201006" {
   ]
 
   # Elasticsearch
-  es_works_index  = "works-20201006"
-  es_images_index = "images-20201006"
+  es_works_index  = "works-20201007"
+  es_images_index = "images-20201007"
 
   # RDS
   rds_ids_access_security_group_id = local.rds_access_security_group_id
