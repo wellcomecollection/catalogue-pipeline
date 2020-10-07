@@ -1,6 +1,8 @@
 """
-What do?
+This lambda queries Elasticsearch for catalogue snapshots made within the last
+day. The index queried is available on the reporting cluster.
 
+This lambda should be triggered by a daily CloudWatch event.
 """
 
 import boto3
@@ -14,9 +16,6 @@ import os
 
 
 def get_secret(secret_id):
-    """
-    Use secrets from SecretsManager to construct an Elasticsearch client.
-    """
     secrets_client = boto3.client("secretsmanager")
 
     resp = secrets_client.get_secret_value(SecretId=secret_id)
@@ -39,14 +38,14 @@ def get_elastic_client(elastic_secret_id):
     )
 
 
-def get_snapshots(es_client, elastic_index, days_to_fetch):
+def get_snapshots(es_client, elastic_index):
     response = es_client.search(
         index=elastic_index,
         body={
             "query": {"bool": {"filter": [
                 {"range": {
                     "snapshotJob.requestedAt": {
-                        "gte": f"now-{days_to_fetch}d/d"
+                        "gte": f"now-1d/d"
                     }
                 }}
             ]}},
@@ -59,7 +58,7 @@ def get_snapshots(es_client, elastic_index, days_to_fetch):
     return [hit["_source"] for hit in response["hits"]["hits"]]
 
 
-def prepare_slack_payload(snapshots, days_to_fetch):
+def prepare_slack_payload(snapshots):
     def _snapshot_message(snapshot):
         index_name = snapshot["snapshotResult"]["indexName"]
         document_count = snapshot["snapshotResult"]["documentCount"]
@@ -70,35 +69,44 @@ def prepare_slack_payload(snapshots, days_to_fetch):
         )
 
         started_at = parser.parse(snapshot["snapshotResult"]["startedAt"])
-
         finished_at = parser.parse(snapshot["snapshotResult"]["finishedAt"])
 
-        return "\n".join(
+        time_took = finished_at - started_at
+
+        return "".join(
             [
-                f'*"{index_name}" on {requested_at}*',
-                f"{humanize.naturalsize(s3_size)} containing {humanize.intword(document_count)} documents ({humanize.intcomma(document_count)} exactly)",
-                f"Took {humanize.precisedelta(finished_at - started_at)}",
+                f"The last snapshot was of index {index_name} at {requested_at}. ",
+                f"It is {humanize.naturalsize(s3_size)}, took {humanize.naturaldelta(time_took)} "
+                f"and contains {humanize.intcomma(document_count)} documents."
             ]
         )
 
-    heading = f"Snapshots in the last {days_to_fetch} days"
+    def _create_header_block(text):
+        return [
+            {
+                "type": "header",
+                "text": {"type": "plain_text", "text": text}
+            }
+        ]
 
-    heading_block = [
-        {"type": "header", "text": {"type": "plain_text", "text": heading}}
-    ]
-
-    snapshot_blocks = []
-    for snapshot in snapshots:
-        snapshot_blocks.append(
+    def _create_section_block(text):
+        return [
             {
                 "type": "section",
-                "text": {"type": "mrkdwn", "text": _snapshot_message(snapshot)},
+                "text": {"type": "mrkdwn", "text": text},
             }
-        )
+        ]
 
-    result = {"blocks": heading_block + snapshot_blocks}
+    if snapshots:
+        snapshot = snapshots[0]
 
-    return result
+        header_block = _create_header_block(":white_check_mark: Catalogue Snapshot")
+        section_block = _create_section_block(_snapshot_message(snapshot))
+    else:
+        header_block = _create_header_block(":interrobang: Catalogue Snapshot not found")
+        section_block = _create_section_block("No snapshot found within the last day.")
+
+    return {"blocks": header_block + section_block}
 
 
 def post_to_slack(slack_secret_id, payload):
@@ -127,10 +135,8 @@ def main(*args):
 
     elastic_client = get_elastic_client(elastic_secret_id)
 
-    days_to_fetch = 1
-
-    snapshots = get_snapshots(elastic_client, elastic_index, days_to_fetch)
-    slack_payload = prepare_slack_payload(snapshots, days_to_fetch)
+    snapshots = get_snapshots(elastic_client, elastic_index)
+    slack_payload = prepare_slack_payload(snapshots)
 
     post_to_slack(slack_secret_id, slack_payload)
 
