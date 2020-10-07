@@ -10,10 +10,16 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Try}
 
-class BulkMessageSenderTest extends AnyFunSpec with Matchers with ScalaFutures with RandomGenerators {
+class BulkMessageSenderTest
+    extends AnyFunSpec
+    with Matchers
+    with ScalaFutures
+    with RandomGenerators {
 
   def createMessages(count: Int = 5): Seq[String] =
-    (1 to count).map { _ => randomAlphanumeric() }
+    (1 to count).map { _ =>
+      randomAlphanumeric()
+    }
 
   it("sends messages for the provided IDs") {
     val messageSender = new MemoryIndividualMessageSender()

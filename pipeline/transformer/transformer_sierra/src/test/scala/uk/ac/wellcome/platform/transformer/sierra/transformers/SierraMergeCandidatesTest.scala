@@ -18,7 +18,6 @@ import uk.ac.wellcome.platform.transformer.sierra.generators.{
   SierraDataGenerators
 }
 import org.scalatest.prop.TableDrivenPropertyChecks._
-import java.util.UUID.randomUUID
 
 class SierraMergeCandidatesTest
     extends AnyFunSpec

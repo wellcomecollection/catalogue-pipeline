@@ -3,7 +3,12 @@ package uk.ac.wellcome.platform.reindex.reindex_worker.fixtures
 import org.scanamo.{Scanamo, Table => ScanamoTable}
 import org.scanamo.auto._
 import uk.ac.wellcome.fixtures.RandomGenerators
-import uk.ac.wellcome.platform.reindex.reindex_worker.dynamo.{BatchItemGetter, MaxRecordsScanner, ParallelScanner, ScanSpecScanner}
+import uk.ac.wellcome.platform.reindex.reindex_worker.dynamo.{
+  BatchItemGetter,
+  MaxRecordsScanner,
+  ParallelScanner,
+  ScanSpecScanner
+}
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
 
 import scala.concurrent.ExecutionContext.Implicits.global
