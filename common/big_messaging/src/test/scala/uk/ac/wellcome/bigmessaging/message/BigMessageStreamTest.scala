@@ -14,10 +14,7 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.messaging.fixtures.SQS.{Queue, QueuePair}
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
-import uk.ac.wellcome.storage.generators.{
-  RandomThings,
-  S3ObjectLocationGenerators
-}
+import uk.ac.wellcome.storage.generators.S3ObjectLocationGenerators
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.Store
 import uk.ac.wellcome.storage.store.memory.MemoryStore
@@ -31,8 +28,7 @@ class BigMessageStreamTest
     with IntegrationPatience
     with Akka
     with BigMessagingFixture
-    with S3ObjectLocationGenerators
-    with RandomThings {
+    with S3ObjectLocationGenerators {
 
   case class ExampleObject(name: String)
 
