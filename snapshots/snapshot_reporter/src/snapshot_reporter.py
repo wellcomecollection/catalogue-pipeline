@@ -39,18 +39,20 @@ def get_elastic_client(elastic_secret_id):
     )
 
 
-def get_snapshots(es_client, days_to_fetch):
-    index = "snapshots"
-
-    date_filter = [{"range": {"snapshotJob.requestedAt": {"gte": f"now-{days_to_fetch}d/d"}}}]
-    es_query = {"bool": {"filter": date_filter}}
-    sort_by = [{"snapshotJob.requestedAt": {"order": "desc"}}]
-
+def get_snapshots(es_client, elastic_index, days_to_fetch):
     response = es_client.search(
-        index=index,
+        index=elastic_index,
         body={
-            "query": es_query,
-            "sort": sort_by
+            "query": {"bool": {"filter": [
+                {"range": {
+                    "snapshotJob.requestedAt": {
+                        "gte": f"now-{days_to_fetch}d/d"
+                    }
+                }}
+            ]}},
+            "sort": [{"snapshotJob.requestedAt": {
+                "order": "desc"
+            }}]
         }
     )
 
@@ -130,12 +132,13 @@ def post_to_slack(slack_secret_id, payload):
 def main(*args):
     elastic_secret_id = os.environ["ELASTIC_SECRET_ID"]
     slack_secret_id = os.environ["SLACK_SECRET_ID"]
+    elastic_index = os.environ["ELASTIC_INDEX"]
 
     elastic_client = get_elastic_client(elastic_secret_id)
 
     days_to_fetch = 1
 
-    snapshots = get_snapshots(elastic_client, days_to_fetch)
+    snapshots = get_snapshots(elastic_client, elastic_index, days_to_fetch)
     slack_payload = prepare_slack_payload(snapshots, days_to_fetch)
 
     post_to_slack(slack_secret_id, slack_payload)
