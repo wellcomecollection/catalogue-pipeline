@@ -28,30 +28,31 @@ class IdMinterFeatureTest
       withIdentifiersDatabase { identifiersTableConfig =>
         val work: Work[Denormalised] = denormalisedWork()
         val index = createIndex(List(work))
-        withWorkerService(messageSender, queue, identifiersTableConfig, index) { _ =>
-          eventuallyTableExists(identifiersTableConfig)
+        withWorkerService(messageSender, queue, identifiersTableConfig, index) {
+          _ =>
+            eventuallyTableExists(identifiersTableConfig)
 
-          val messageCount = 5
+            val messageCount = 5
 
-          (1 to messageCount).foreach { _ =>
-            sendNotificationToSQS(queue = queue, body = work.id)
-          }
-
-          eventually {
-            val works = messageSender.getMessages[Work[Identified]]
-            works.length shouldBe >=(messageCount)
-
-            works.map(_.state.canonicalId).distinct should have size 1
-            works.foreach { receivedWork =>
-              receivedWork
-                .asInstanceOf[Work.Visible[Identified]]
-                .sourceIdentifier shouldBe work.sourceIdentifier
-              receivedWork
-                .asInstanceOf[Work.Visible[Identified]]
-                .data
-                .title shouldBe work.data.title
+            (1 to messageCount).foreach { _ =>
+              sendNotificationToSQS(queue = queue, body = work.id)
             }
-          }
+
+            eventually {
+              val works = messageSender.getMessages[Work[Identified]]
+              works.length shouldBe >=(messageCount)
+
+              works.map(_.state.canonicalId).distinct should have size 1
+              works.foreach { receivedWork =>
+                receivedWork
+                  .asInstanceOf[Work.Visible[Identified]]
+                  .sourceIdentifier shouldBe work.sourceIdentifier
+                receivedWork
+                  .asInstanceOf[Work.Visible[Identified]]
+                  .data
+                  .title shouldBe work.data.title
+              }
+            }
         }
       }
     }
@@ -64,21 +65,22 @@ class IdMinterFeatureTest
       withIdentifiersDatabase { identifiersTableConfig =>
         val work: Work[Denormalised] = denormalisedWork().invisible()
         val index = createIndex(List(work))
-        withWorkerService(messageSender, queue, identifiersTableConfig, index) { _ =>
-          eventuallyTableExists(identifiersTableConfig)
+        withWorkerService(messageSender, queue, identifiersTableConfig, index) {
+          _ =>
+            eventuallyTableExists(identifiersTableConfig)
 
-          sendNotificationToSQS(queue = queue, body = work.id)
+            sendNotificationToSQS(queue = queue, body = work.id)
 
-          eventually {
-            val works = messageSender.getMessages[Work[Identified]]
-            works.length shouldBe >=(1)
+            eventually {
+              val works = messageSender.getMessages[Work[Identified]]
+              works.length shouldBe >=(1)
 
-            val receivedWork = works.head
-            val invisibleWork =
-              receivedWork.asInstanceOf[Work.Invisible[Identified]]
-            invisibleWork.sourceIdentifier shouldBe work.sourceIdentifier
-            invisibleWork.state.canonicalId shouldNot be(empty)
-          }
+              val receivedWork = works.head
+              val invisibleWork =
+                receivedWork.asInstanceOf[Work.Invisible[Identified]]
+              invisibleWork.sourceIdentifier shouldBe work.sourceIdentifier
+              invisibleWork.state.canonicalId shouldNot be(empty)
+            }
         }
       }
     }
@@ -92,23 +94,23 @@ class IdMinterFeatureTest
         val work: Work[Denormalised] = denormalisedWork()
           .redirected(redirect = IdState.Identifiable(createSourceIdentifier))
         val index = createIndex(List(work))
-        withWorkerService(messageSender, queue, identifiersTableConfig, index) { _ =>
-          eventuallyTableExists(identifiersTableConfig)
+        withWorkerService(messageSender, queue, identifiersTableConfig, index) {
+          _ =>
+            eventuallyTableExists(identifiersTableConfig)
 
+            sendNotificationToSQS(queue = queue, body = work.id)
 
-          sendNotificationToSQS(queue = queue, body = work.id)
+            eventually {
+              val works = messageSender.getMessages[Work[Identified]]
+              works.length shouldBe >=(1)
 
-          eventually {
-            val works = messageSender.getMessages[Work[Identified]]
-            works.length shouldBe >=(1)
-
-            val receivedWork = works.head
-            val redirectedWork =
-              receivedWork.asInstanceOf[Work.Redirected[Identified]]
-            redirectedWork.sourceIdentifier shouldBe work.sourceIdentifier
-            redirectedWork.state.canonicalId shouldNot be(empty)
-            redirectedWork.redirect.canonicalId shouldNot be(empty)
-          }
+              val receivedWork = works.head
+              val redirectedWork =
+                receivedWork.asInstanceOf[Work.Redirected[Identified]]
+              redirectedWork.sourceIdentifier shouldBe work.sourceIdentifier
+              redirectedWork.state.canonicalId shouldNot be(empty)
+              redirectedWork.redirect.canonicalId shouldNot be(empty)
+            }
         }
       }
     }
@@ -121,16 +123,17 @@ class IdMinterFeatureTest
       withIdentifiersDatabase { identifiersTableConfig =>
         val work: Work[Denormalised] = denormalisedWork()
         val index = createIndex(List(work))
-        withWorkerService(messageSender, queue, identifiersTableConfig, index) { _ =>
-          sendInvalidJSONto(queue)
+        withWorkerService(messageSender, queue, identifiersTableConfig, index) {
+          _ =>
+            sendInvalidJSONto(queue)
 
-          sendNotificationToSQS(queue = queue, body = work.id)
+            sendNotificationToSQS(queue = queue, body = work.id)
 
-          eventually {
-            messageSender.messages should not be empty
+            eventually {
+              messageSender.messages should not be empty
 
-            assertMessageIsNotDeleted(queue)
-          }
+              assertMessageIsNotDeleted(queue)
+            }
         }
       }
     }
