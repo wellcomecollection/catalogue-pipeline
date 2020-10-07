@@ -60,7 +60,7 @@ def prepare_slack_payload(snapshots, days_to_fetch):
         s3_size = snapshot["snapshotResult"]["s3Size"]["bytes"]
 
         requested_at = parser.parse(snapshot["snapshotJob"]["requestedAt"]).strftime(
-            "%A, %B %e, %I:%M %p"
+            "%A, %B %-d, %I:%M %p"
         )
 
         started_at = parser.parse(snapshot["snapshotResult"]["startedAt"])
