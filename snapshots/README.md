@@ -19,7 +19,7 @@ Contains:
 
 ### Steps
 
-The snapshot_generator is deployed alongside the Catalogue API (as specified in `.wellcome_project`), in order that it remains in sync with the current display model. You will need to use the `weco-deploy` tool.
+The snapshot_generator is deployed alongside the Catalogue API (as specified in `.wellcome_project`), in order that it remains in sync with the current display model. You will need to use the [`weco-deploy`](https://github.com/wellcomecollection/weco-deploy) tool.
 
 ```
 weco-deploy --project-id catalogue_api deploy --environment-id prod
