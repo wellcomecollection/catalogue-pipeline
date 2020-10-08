@@ -202,7 +202,7 @@ trait ElasticsearchFixtures
   def assertElasticsearchNeverHasWork(index: Index,
                                       works: Work[Identified]*): Unit = {
     implicit val id: CanonicalId[Work[Identified]] =
-      (t: Work[Identified]) => t.state.canonicalId
+      (work: Work[Identified]) => work.state.canonicalId
     assertElasticsearchNeverHas(index, works: _*)
   }
 
