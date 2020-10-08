@@ -52,7 +52,7 @@ trait Merger extends MergerLogging {
 
   implicit class MergeResultAccumulation[T](val result: FieldMergeResult[T]) {
     def redirectSources: State[MergeState, T] = shouldRedirect(true)
-    def retainSources: State[MergeState, T] = shouldRedirect(false)
+    def retainumberOfSources: State[MergeState, T] = shouldRedirect(false)
 
     // If the state already contains a source, then don't change the existing `redirect` value
     // Otherwise, add the source with the current value.
@@ -79,10 +79,10 @@ trait Merger extends MergerLogging {
           }
 
           val remaining = (sources.toSet -- redirectedSources)
-            .map(_.transition[Merged](0))
+            .map(_.transition[Merged](1))
           val redirects = redirectedSources
             .map(redirectSourceToTarget(target))
-            .map(_.transition[Merged](0))
+            .map(_.transition[Merged](1))
           logResult(result, redirects.toList, remaining.toList)
 
           MergerOutcome(
@@ -141,12 +141,12 @@ object PlatformMerger extends Merger {
     if (sources.isEmpty)
       State.pure(
         MergeResult(
-          mergedTarget = target.transition[Merged](0),
+          mergedTarget = target.transition[Merged](1),
           images = standaloneImages(target).map {
             _ mergeWith (
               canonicalWork = target.toSourceWork,
               redirectedWork = None,
-              nMergedSources = 0
+              numberOfSources = 1
             )
           }
         )
@@ -156,7 +156,7 @@ object PlatformMerger extends Merger {
         items <- ItemsRule(target, sources).redirectSources
         thumbnail <- ThumbnailRule(target, sources).redirectSources
         otherIdentifiers <- OtherIdentifiersRule(target, sources).redirectSources
-        unmergedImages <- ImagesRule(target, sources).retainSources
+        unmergedImages <- ImagesRule(target, sources).retainumberOfSources
         work = target.mapData { data =>
           data.copy[DataState.Unidentified](
             items = items,
@@ -165,17 +165,17 @@ object PlatformMerger extends Merger {
             images = unmergedImages
           )
         }
-        nSources <- State.inspect[MergeState, Int](_.size)
+        nMergedSources <- State.inspect[MergeState, Int](_.size)
       } yield
         MergeResult(
-          mergedTarget = work.transition[Merged](nSources),
+          mergedTarget = work.transition[Merged](nMergedSources + 1),
           images = unmergedImages.map { image =>
             image mergeWith (
               canonicalWork = work.toSourceWork,
               redirectedWork = sources
                 .find { _.data.images.contains(image) }
                 .map(_.toSourceWork),
-              nMergedSources = nSources
+              numberOfSources = nMergedSources + 1
             )
           }
         )

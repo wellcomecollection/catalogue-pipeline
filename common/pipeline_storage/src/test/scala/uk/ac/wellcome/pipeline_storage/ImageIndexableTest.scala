@@ -143,12 +143,12 @@ class ImageIndexableTest
       }
     }
 
-    it("throws an error if an image has >= 10 merged sources") {
+    it("throws an error if an image has >= versionMultiplier merged sources") {
       val erroneousImage = createAugmentedImage().copy(
         source = SourceWorks(
           canonicalWork = identifiedWork().toSourceWork,
           redirectedWork = None,
-          nMergedSources = 10
+          numberOfSources = Indexable.versionMultiplier
         )
       )
 
