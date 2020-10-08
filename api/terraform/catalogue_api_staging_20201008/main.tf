@@ -1,9 +1,9 @@
-module "catalogue_api_staging_20200520" {
+module "catalogue_api_staging_20201008" {
   source = "../modules/stack"
 
   environment        = local.environment
-  instance           = "20200721"
-  listener_port      = 1235
+  instance           = "20201008"
+  listener_port      = 1236
   desired_task_count = 1
 
   namespace   = local.namespace
