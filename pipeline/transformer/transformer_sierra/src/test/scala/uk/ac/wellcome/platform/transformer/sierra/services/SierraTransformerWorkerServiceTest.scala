@@ -26,7 +26,6 @@ import uk.ac.wellcome.storage.{StoreReadError, StoreWriteError, Version}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.storage.generators.RandomThings
 import WorkState.Source
 
 class SierraTransformerWorkerServiceTest
@@ -37,8 +36,7 @@ class SierraTransformerWorkerServiceTest
     with SierraGenerators
     with Akka
     with SQS
-    with IdentifiersGenerators
-    with RandomThings {
+    with IdentifiersGenerators {
 
   it("transforms sierra records and publishes the result to the given topic") {
     withLocalSqsQueue() { queue =>
@@ -117,7 +115,7 @@ class SierraTransformerWorkerServiceTest
   it("fails if store errors when retrieving the record") {
     withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>
-        sendNotificationToSQS(queue, Version(randomAlphanumeric, 1))
+        sendNotificationToSQS(queue, Version(randomAlphanumeric(), 1))
 
         val store = brokenStore
         val sender = new MemoryMessageSender()
@@ -137,7 +135,7 @@ class SierraTransformerWorkerServiceTest
       case QueuePair(queue, dlq) =>
         val store = createStore[SierraTransformable]()
         val sender = new MemoryMessageSender()
-        sendNotificationToSQS(queue, Version(randomAlphanumeric, 1))
+        sendNotificationToSQS(queue, Version(randomAlphanumeric(), 1))
         withWorkerService(store, sender, queue) { _ =>
           eventually {
             assertQueueEmpty(queue)

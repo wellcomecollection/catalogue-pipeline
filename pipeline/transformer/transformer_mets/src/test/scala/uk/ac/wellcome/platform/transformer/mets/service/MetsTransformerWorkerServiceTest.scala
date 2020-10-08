@@ -15,7 +15,6 @@ import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.mets_adapter.models.MetsLocation
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.generators.RandomStrings
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.mets.client.ClientFactory
 import uk.ac.wellcome.platform.transformer.mets.fixtures.{
@@ -35,7 +34,6 @@ import WorkState.Source
 class MetsTransformerWorkerServiceTest
     extends AnyFunSpec
     with MetsGenerators
-    with RandomStrings
     with Eventually
     with IntegrationPatience
     with STSFixtures

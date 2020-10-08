@@ -2,7 +2,6 @@ package uk.ac.wellcome.elasticsearch.test.fixtures
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.util.Random
 
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.bulk.BulkResponse
@@ -36,7 +35,8 @@ trait ElasticsearchFixtures
     with Matchers
     with JsonAssertions
     with IntegrationPatience
-    with Logging { this: Suite =>
+    with Logging
+    with RandomGenerators { this: Suite =>
 
   private val esHost = "localhost"
   private val esPort = 9200
@@ -202,7 +202,7 @@ trait ElasticsearchFixtures
   def assertElasticsearchNeverHasWork(index: Index,
                                       works: Work[Identified]*): Unit = {
     implicit val id: CanonicalId[Work[Identified]] =
-      (t: Work[Identified]) => t.state.canonicalId
+      (work: Work[Identified]) => work.state.canonicalId
     assertElasticsearchNeverHas(index, works: _*)
   }
 
@@ -287,5 +287,8 @@ trait ElasticsearchFixtures
     }
 
   def createIndex: Index =
-    Index(name = (Random.alphanumeric take 10 mkString) toLowerCase)
+    Index(name = createIndexName)
+
+  def createIndexName: String =
+    s"index-${randomAlphanumeric().toLowerCase}"
 }

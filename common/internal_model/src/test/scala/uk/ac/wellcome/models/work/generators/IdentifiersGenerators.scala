@@ -1,12 +1,12 @@
 package uk.ac.wellcome.models.work.generators
 
-import uk.ac.wellcome.models.generators.RandomStrings
+import uk.ac.wellcome.fixtures.RandomGenerators
 import uk.ac.wellcome.models.work.internal.{IdentifierType, SourceIdentifier}
 
 import scala.util.Random
 
-trait IdentifiersGenerators extends RandomStrings {
-  def createCanonicalId: String = randomAlphanumeric(length = 10)
+trait IdentifiersGenerators extends RandomGenerators {
+  def createCanonicalId: String = randomAlphanumeric(length = 10).toLowerCase()
 
   def createSourceIdentifier: SourceIdentifier = createSourceIdentifierWith()
 
@@ -58,10 +58,7 @@ trait IdentifiersGenerators extends RandomStrings {
     'C', 'L', 'V', 'W', 'N', 'M', 'B', 'A', 'S', 'F', 'D'
   )
 
-  private def randomCharFrom(list: Char*) =
-    list(Random.nextInt(list.size))
-
-  def randomMiroId(prefix: Char = randomCharFrom(miroIdPrefixes: _*),
+  def randomMiroId(prefix: Char = chooseFrom(miroIdPrefixes: _*),
                    length: Int = 8): String =
     s"%c%0${length - 1}d".format(
       prefix,
@@ -89,12 +86,12 @@ trait IdentifiersGenerators extends RandomStrings {
 
   def createHistoricalLibraryMiroSourceIdentifier: SourceIdentifier =
     createMiroSourceIdentifierWith(
-      value = randomMiroId(prefix = randomCharFrom('L', 'M'))
+      value = randomMiroId(prefix = chooseFrom('L', 'M'))
     )
 
   def createNonHistoricalLibraryMiroSourceIdentifier: SourceIdentifier =
     createMiroSourceIdentifierWith(
-      value = randomMiroId(prefix = randomCharFrom(miroIdPrefixes.filter {
+      value = randomMiroId(prefix = chooseFrom(miroIdPrefixes.filter {
         case 'L' | 'M' => false
         case _         => true
       }: _*)))

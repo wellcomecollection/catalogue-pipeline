@@ -1,9 +1,9 @@
 package uk.ac.wellcome.models.work.generators
 
-import uk.ac.wellcome.models.generators.RandomStrings
+import uk.ac.wellcome.fixtures.RandomGenerators
 import uk.ac.wellcome.models.work.internal._
 
-trait GenreGenerators extends RandomStrings {
+trait GenreGenerators extends RandomGenerators {
 
   def createGenreWith(label: String = randomAlphanumeric(10),
                       concepts: List[AbstractConcept[IdState.Minted]] =

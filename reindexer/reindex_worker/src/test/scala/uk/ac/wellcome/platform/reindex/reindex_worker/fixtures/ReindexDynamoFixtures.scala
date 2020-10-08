@@ -2,6 +2,7 @@ package uk.ac.wellcome.platform.reindex.reindex_worker.fixtures
 
 import org.scanamo.{Scanamo, Table => ScanamoTable}
 import org.scanamo.auto._
+import uk.ac.wellcome.fixtures.RandomGenerators
 import uk.ac.wellcome.platform.reindex.reindex_worker.dynamo.{
   BatchItemGetter,
   MaxRecordsScanner,
@@ -11,17 +12,16 @@ import uk.ac.wellcome.platform.reindex.reindex_worker.dynamo.{
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.Random
 
-trait ReindexDynamoFixtures extends ReindexableTable {
+trait ReindexDynamoFixtures extends ReindexableTable with RandomGenerators {
   case class NamedRecord(
     id: String,
     name: String
   )
 
   private def createRecord(): NamedRecord = NamedRecord(
-    id = Random.alphanumeric.take(5) mkString,
-    name = Random.alphanumeric.take(15) mkString
+    id = randomAlphanumeric(length = 5),
+    name = randomAlphanumeric(length = 15)
   )
 
   def createRecords(table: Table, count: Int): Seq[NamedRecord] = {

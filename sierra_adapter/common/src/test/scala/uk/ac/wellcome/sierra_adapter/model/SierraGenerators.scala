@@ -2,11 +2,12 @@ package uk.ac.wellcome.sierra_adapter.model
 
 import java.time.Instant
 
+import uk.ac.wellcome.fixtures.RandomGenerators
 import uk.ac.wellcome.json.JsonUtil._
 
 import scala.util.Random
 
-trait SierraGenerators {
+trait SierraGenerators extends RandomGenerators {
   // A lot of Sierra tests (e.g. mergers) check the behaviour when merging
   // a record with a newer version, or vice versa.  Provide two dates here
   // for convenience.
@@ -103,7 +104,4 @@ trait SierraGenerators {
 
   def createSierraTransformable: SierraTransformable =
     createSierraTransformableWith()
-
-  private def randomAlphanumeric(length: Int): String =
-    (Random.alphanumeric take length mkString) toLowerCase
 }

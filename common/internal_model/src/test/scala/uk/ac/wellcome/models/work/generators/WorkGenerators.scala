@@ -9,9 +9,6 @@ trait WorkGenerators extends IdentifiersGenerators {
   private def createVersion: Int =
     Random.nextInt(100) + 1
 
-  def chooseFrom[T](seq: T*): T =
-    seq(Random.nextInt(seq.size))
-
   def sourceWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier
   ): Work.Visible[Source] =

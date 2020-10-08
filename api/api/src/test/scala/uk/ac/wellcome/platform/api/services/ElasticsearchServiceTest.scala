@@ -355,13 +355,10 @@ class ElasticsearchServiceTest
       locations = List(
         // This test really shouldn't be affected by physical/digital locations;
         // we just pick randomly here to ensure we get a good mixture.
-        Random
-          .shuffle(
-            List(
-              createPhysicalLocationWith(locationType = locationType),
-              createDigitalLocationWith(locationType = locationType)
-            ))
-          .head
+        chooseFrom(
+          createPhysicalLocationWith(locationType = locationType),
+          createDigitalLocationWith(locationType = locationType)
+        )
       )
     )
 
