@@ -91,9 +91,7 @@ def prepare_slack_payload(snapshots):
         header_block = _create_header_block(":white_check_mark: Catalogue Snapshot")
         section_block = _create_section_block(_snapshot_message(snapshot))
     else:
-        kibana_logs_link = (
-            "https://logging.wellcomecollection.org/goto/ddc4dfc7308261cf17f956515ca1ce35"
-        )
+        kibana_logs_link = "https://logging.wellcomecollection.org/goto/ddc4dfc7308261cf17f956515ca1ce35"
         header_block = _create_header_block(
             ":interrobang: Catalogue Snapshot not found"
         )
