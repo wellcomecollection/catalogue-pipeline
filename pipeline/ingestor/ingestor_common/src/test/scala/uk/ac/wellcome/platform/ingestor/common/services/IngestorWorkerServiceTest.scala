@@ -32,7 +32,6 @@ class IngestorWorkerServiceTest
         withWorkerService[SampleDocument, Any](
           queue,
           index,
-          NoStrictMapping,
           indexer,
           elasticClient) { _ =>
           eventuallyIndexExists(index)
@@ -51,7 +50,6 @@ class IngestorWorkerServiceTest
           withWorkerService[SampleDocument, Any](
             queue,
             index,
-            NoStrictMapping,
             indexer,
             elasticClient) { _ =>
             assertElasticsearchEventuallyHas(index = index, document)
@@ -76,7 +74,6 @@ class IngestorWorkerServiceTest
           withWorkerService[SampleDocument, Any](
             queue,
             index,
-            NoStrictMapping,
             indexer,
             elasticClient) { _ =>
             assertElasticsearchEventuallyHas(index = index, documents: _*)
@@ -96,7 +93,6 @@ class IngestorWorkerServiceTest
         withWorkerService[SampleDocument, Any](
           queue,
           index,
-          NoStrictMapping,
           indexer,
           elasticClient) { _ =>
           sendNotificationToSQS(
@@ -153,10 +149,6 @@ class IngestorWorkerServiceTest
             indexer =>
               val service = new IngestorWorkerService(
                 ingestorConfig = config,
-                indexCreator = new ElasticsearchIndexCreator(
-                  brokenClient,
-                  index,
-                  NoStrictMapping),
                 messageStream = messageStream,
                 documentIndexer = indexer
               )

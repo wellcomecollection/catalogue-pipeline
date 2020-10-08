@@ -93,3 +93,8 @@ trait IndexConfig {
   val canonicalId = lowercaseKeyword("canonicalId")
   val version = intField("version")
 }
+
+object NoStrictMapping extends IndexConfig {
+  val analysis: Analysis = Analysis(analyzers = List())
+  val mapping: MappingDefinition = MappingDefinition.empty
+}

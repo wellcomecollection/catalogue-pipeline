@@ -5,7 +5,6 @@ import io.circe.Decoder
 import org.scalatest.Suite
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
-import uk.ac.wellcome.elasticsearch.{ElasticsearchIndexCreator, IndexConfig}
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.pipeline_storage.Indexer
@@ -24,7 +23,6 @@ trait IngestorFixtures
 
   def withWorkerService[T, R](queue: Queue,
                               index: Index,
-                              indexConfig: IndexConfig,
                               indexer: Indexer[T],
                               elasticClient: ElasticClient = elasticClient)(
     testWith: TestWith[IngestorWorkerService[T], R])(
@@ -38,8 +36,6 @@ trait IngestorFixtures
           )
 
           val workerService = new IngestorWorkerService(
-            indexCreator =
-              new ElasticsearchIndexCreator(elasticClient, index, indexConfig),
             documentIndexer = indexer,
             ingestorConfig = ingestorConfig,
             messageStream = messageStream

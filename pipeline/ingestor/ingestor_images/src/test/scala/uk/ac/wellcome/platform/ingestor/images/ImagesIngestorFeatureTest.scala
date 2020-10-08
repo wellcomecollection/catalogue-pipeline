@@ -30,8 +30,8 @@ class ImagesIngestorFeatureTest
       case QueuePair(queue, dlq) =>
         sendMessage[AugmentedImage](queue = queue, obj = image)
         withLocalImagesIndex { index =>
-          val indexer = new ElasticIndexer[AugmentedImage](elasticClient, index)
-          withWorkerService(queue, index, ImagesIndexConfig, indexer) { _ =>
+          val indexer = new ElasticIndexer[AugmentedImage](elasticClient, index, ImagesIndexConfig)
+          withWorkerService(queue, index, indexer) { _ =>
             assertElasticsearchEventuallyHas(index, image)
             assertQueueEmpty(queue)
             assertQueueEmpty(dlq)
@@ -48,8 +48,8 @@ class ImagesIngestorFeatureTest
       case QueuePair(queue, dlq) =>
         sendMessage[Something](queue = queue, obj = wrongMessage)
         withLocalImagesIndex { index =>
-          val indexer = new ElasticIndexer[AugmentedImage](elasticClient, index)
-          withWorkerService(queue, index, ImagesIndexConfig, indexer) { _ =>
+          val indexer = new ElasticIndexer[AugmentedImage](elasticClient, index, ImagesIndexConfig)
+          withWorkerService(queue, index, indexer) { _ =>
             assertElasticsearchEmpty(index)
             eventually(Timeout(Span(5, Seconds))) {
               assertQueueEmpty(queue)
