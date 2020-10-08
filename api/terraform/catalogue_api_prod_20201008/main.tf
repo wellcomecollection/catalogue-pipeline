@@ -1,9 +1,9 @@
-module "catalogue_api_prod_20200520" {
+module "catalogue_api_prod_20201008" {
   source = "../modules/stack"
 
   environment        = local.environment
-  instance           = "20200721"
-  listener_port      = 8081
+  instance           = "20201008"
+  listener_port      = 8082
   desired_task_count = 3
 
   namespace   = local.namespace
