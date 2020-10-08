@@ -9,12 +9,15 @@ import com.sksamuel.elastic4s.circe._
 import io.circe.Encoder
 import grizzled.slf4j.Logging
 
-import uk.ac.wellcome.elasticsearch.{ElasticsearchIndexCreator, IndexConfig, NoStrictMapping}
+import uk.ac.wellcome.elasticsearch.{
+  ElasticsearchIndexCreator,
+  IndexConfig,
+  NoStrictMapping
+}
 
-class ElasticIndexer[T: Indexable](
-  client: ElasticClient,
-  index: Index,
-  config: IndexConfig = NoStrictMapping)(
+class ElasticIndexer[T: Indexable](client: ElasticClient,
+                                   index: Index,
+                                   config: IndexConfig = NoStrictMapping)(
   implicit ec: ExecutionContext,
   encoder: Encoder[T])
     extends Indexer[T]
