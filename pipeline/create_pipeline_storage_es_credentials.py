@@ -69,7 +69,7 @@ def store_secret(secret_id, secret_value, description=DEFAULT_DESCRIPTION):
 
         try:
             resp = secrets_client.create_secret(
-                Name=secret_id, Description=description, SecretString=secret_value,
+                Name=secret_id, Description=description, SecretString=secret_value
             )
         except ClientError as err:
             if err.response["Error"]["Code"] == "ResourceExistsException":
@@ -101,7 +101,7 @@ def create_roles(es, *, work_type):
 
         es.security.put_role(
             role_name,
-            body={"indices": [{"names": [index_pattern], "privileges": privileges,}]},
+            body={"indices": [{"names": [index_pattern], "privileges": privileges}]},
         )
 
         yield role_name
@@ -112,9 +112,7 @@ def create_user(es, *, username, roles):
     Creates a user with the given roles.  Returns a (username, password) pair.
     """
     password = secrets.token_hex()
-    es.security.put_user(
-        username=username, body={"password": password, "roles": roles}
-    )
+    es.security.put_user(username=username, body={"password": password, "roles": roles})
 
     return (username, password)
 
