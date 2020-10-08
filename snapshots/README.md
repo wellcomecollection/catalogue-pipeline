@@ -1,4 +1,4 @@
-# catalogue\snapshots
+# snapshots
 
 Services for creating, recording and reporting on Catalogue API snapshots.
 
@@ -6,10 +6,10 @@ Services for creating, recording and reporting on Catalogue API snapshots.
 
 Contains:
 
-- snapshot_generator: inspect the production Catalogue Elasticsearch index and produce a snapshot of works using their display model.
-- snapshot_scheduler: a lambda to schedule snapshots (triggers the snapshot generator). Triggered daily by CloudWatch events.
-- snapshot_recorder: notified by SNS -> SQS from the snapshot_generator about completed snapshots, recording metadata in a reporting cluster Elasticsearch index.
-- snapshot_reporter: reports on daily snapshots in team Slack, will provide notification on failure. Triggered daily by CloudWatch events.
+- `snapshot_scheduler`: a lambda triggered by CloudWatch, publishes messages to SNS describing required snapshots.
+- `snapshot_generator`: an ECS service which polls SQS, produces a snapshot of works from the Catalogue ES index using their display model.
+- `snapshot_recorder`: a lambda triggered by SNS, recording metadata in a reporting cluster Elasticsearch index.
+- `snapshot_reporter`: a lambda triggered by CloudWatch, reports on daily snapshots in team Slack, will provide notification on failure.
 
 ## Architecture
 
@@ -19,7 +19,7 @@ Contains:
 
 ### Steps
 
-The snapshot_generator is deployed alongside the Catalogue API (as specified in `.wellcome_project`), in order that it remains in sync with the current display model. You will need to use the [`weco-deploy`](https://github.com/wellcomecollection/weco-deploy) tool.
+The snapshot_generator deploys alongside the Catalogue API (as specified in [`.wellcome_project`](../.wellcome_project)), in order that it remains in sync with the current display model. You will need to use the [`weco-deploy`](https://github.com/wellcomecollection/weco-deploy) tool.
 
 ```
 weco-deploy --project-id catalogue_api deploy --environment-id prod
