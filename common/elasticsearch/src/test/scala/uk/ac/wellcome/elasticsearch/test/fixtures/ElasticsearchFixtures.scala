@@ -287,5 +287,8 @@ trait ElasticsearchFixtures
     }
 
   def createIndex: Index =
-    Index(name = s"index-${randomAlphanumeric().toLowerCase}")
+    Index(name = createIndexName)
+
+  def createIndexName: String =
+    s"index-${randomAlphanumeric().toLowerCase}"
 }

@@ -82,7 +82,7 @@ trait ApiTestBase extends ApiFixture with RandomGenerators {
   def withEmptyIndex[R]: Fixture[Index, R] =
     fixture[Index, R](
       create = {
-        val index = Index(randomAlphanumeric(length = 10))
+        val index = createIndex
         elasticClient
           .execute {
             ElasticDsl.createIndex(index.name)
