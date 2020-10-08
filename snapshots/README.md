@@ -13,7 +13,7 @@ Contains:
 
 ## Architecture
 
-![](architecture.png)
+![Architecture diagram for catalogue snapshots](architecture.png)
 
 ## Deployment
 
