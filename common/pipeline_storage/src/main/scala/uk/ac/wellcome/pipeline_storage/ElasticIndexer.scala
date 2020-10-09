@@ -9,7 +9,7 @@ import com.sksamuel.elastic4s.circe._
 import io.circe.Encoder
 import grizzled.slf4j.Logging
 
-import uk.ac.wellcome.elasticsearch.{ElasticsearchIndexCreator, IndexConfig,}
+import uk.ac.wellcome.elasticsearch.{ElasticsearchIndexCreator, IndexConfig}
 
 class ElasticIndexer[T: Indexable](
   client: ElasticClient,
