@@ -12,7 +12,7 @@ resource "aws_iam_role_policy" "snapshot_generator_cloudwatch" {
 
 resource "aws_iam_role_policy" "snapshot_generator_read_from_q" {
   role   = module.snapshot_generator.task_role_name
-  policy = module.snapshot_generator_queue.read_policy
+  policy = module.snapshot_generator_input_queue.read_policy
 }
 
 # Policy documents
