@@ -10,7 +10,12 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import io.circe.Encoder
 
-import uk.ac.wellcome.elasticsearch.{IndexConfig, WorksAnalysis}
+import uk.ac.wellcome.elasticsearch.{
+  IndexConfig,
+  IndexConfigFields,
+  NoStrictMapping,
+  WorksAnalysis
+}
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
@@ -150,7 +155,9 @@ class ElasticIndexerTest
       }
     }
 
-  object StrictWithNoDataIndexConfig extends IndexConfig {
+  object StrictWithNoDataIndexConfig
+      extends IndexConfig
+      with IndexConfigFields {
     import com.sksamuel.elastic4s.ElasticDsl._
 
     val analysis = WorksAnalysis()

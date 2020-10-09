@@ -1,13 +1,16 @@
 package uk.ac.wellcome.pipeline_storage
 
 import scala.concurrent.Future
+import grizzled.slf4j.Logging
+
 import uk.ac.wellcome.models.work.internal._
 import WorkState.Identified
-import grizzled.slf4j.Logging
 
 abstract class Indexer[T: Indexable] {
 
   protected val indexable: Indexable[T] = implicitly
+
+  def init(): Future[Unit]
 
   /** Indexes the given documents into the store
     *

@@ -5,6 +5,8 @@ import org.scalatest.Assertion
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+
+import uk.ac.wellcome.elasticsearch.ImagesIndexConfig
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.Implicits._
@@ -172,7 +174,7 @@ class ImageIndexableTest
   private def withImagesIndexAndIndexer[R](
     testWith: TestWith[(Index, ElasticIndexer[AugmentedImage]), R]) =
     withLocalImagesIndex { index =>
-      val indexer = new ElasticIndexer(elasticClient, index)
+      val indexer = new ElasticIndexer(elasticClient, index, ImagesIndexConfig)
       testWith((index, indexer))
     }
 }

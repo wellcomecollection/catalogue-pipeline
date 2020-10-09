@@ -1,14 +1,13 @@
 package uk.ac.wellcome.platform.ingestor.works
 
+import scala.concurrent.ExecutionContext
 import akka.actor.ActorSystem
 import com.sksamuel.elastic4s.Index
 import com.typesafe.config.Config
+
 import uk.ac.wellcome.bigmessaging.typesafe.BigMessagingBuilder
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
-import uk.ac.wellcome.elasticsearch.{
-  ElasticsearchIndexCreator,
-  IdentifiedWorkIndexConfig
-}
+import uk.ac.wellcome.elasticsearch.IdentifiedWorkIndexConfig
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.pipeline_storage.ElasticIndexer
@@ -19,8 +18,6 @@ import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 import WorkState.Identified
-
-import scala.concurrent.ExecutionContext
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
@@ -34,11 +31,8 @@ object Main extends WellcomeTypesafeApp {
     val index = Index(indexName)
     new IngestorWorkerService(
       ingestorConfig = IngestorConfigBuilder.buildIngestorConfig(config),
-      documentIndexer = new ElasticIndexer(elasticClient, index),
-      indexCreator = new ElasticsearchIndexCreator(
-        elasticClient,
-        index,
-        IdentifiedWorkIndexConfig),
+      documentIndexer =
+        new ElasticIndexer(elasticClient, index, IdentifiedWorkIndexConfig),
       messageStream =
         BigMessagingBuilder.buildMessageStream[Work[Identified]](config)
     )

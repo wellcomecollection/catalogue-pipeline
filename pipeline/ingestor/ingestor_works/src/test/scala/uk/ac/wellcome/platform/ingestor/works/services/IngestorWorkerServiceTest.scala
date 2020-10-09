@@ -126,8 +126,10 @@ class IngestorWorkerServiceTest
           withWorkerService(
             queue,
             index,
-            IdentifiedWorkIndexConfig,
-            new ElasticIndexer[Work[Identified]](elasticClient, index)) { _ =>
+            new ElasticIndexer[Work[Identified]](
+              elasticClient,
+              index,
+              IdentifiedWorkIndexConfig)) { _ =>
             works.map { work =>
               sendMessage[Work[Identified]](queue = queue, obj = work)
             }

@@ -1,7 +1,6 @@
 package uk.ac.wellcome.pipeline_storage
 
 import scala.concurrent.{ExecutionContext, Future}
-
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.bulk.{BulkResponse, BulkResponseItem}
 import com.sksamuel.elastic4s.requests.common.VersionType.ExternalGte
@@ -10,11 +9,17 @@ import com.sksamuel.elastic4s.circe._
 import io.circe.Encoder
 import grizzled.slf4j.Logging
 
-class ElasticIndexer[T: Indexable](client: ElasticClient, index: Index)(
-  implicit ec: ExecutionContext,
-  encoder: Encoder[T])
+import uk.ac.wellcome.elasticsearch.{ElasticsearchIndexCreator, IndexConfig}
+
+class ElasticIndexer[T: Indexable](
+  client: ElasticClient,
+  index: Index,
+  config: IndexConfig)(implicit ec: ExecutionContext, encoder: Encoder[T])
     extends Indexer[T]
     with Logging {
+
+  final def init(): Future[Unit] =
+    new ElasticsearchIndexCreator(client, index, config).create
 
   final def index(documents: Seq[T]): Future[Either[Seq[T], Seq[T]]] = {
 

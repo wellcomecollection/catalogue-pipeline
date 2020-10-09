@@ -3,6 +3,7 @@ package uk.ac.wellcome.platform.ingestor.images.services
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import uk.ac.wellcome.elasticsearch.ImagesIndexConfig
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.models.work.generators.ImageGenerators
 import uk.ac.wellcome.models.work.internal.AugmentedImage
@@ -24,7 +25,10 @@ class ImagesIndexerTest
   it("ingests an image") {
     withLocalImagesIndex { index =>
       val imagesIndexer =
-        new ElasticIndexer[AugmentedImage](elasticClient, index)
+        new ElasticIndexer[AugmentedImage](
+          elasticClient,
+          index,
+          ImagesIndexConfig)
       val image = createAugmentedImage()
       whenReady(imagesIndexer.index(List(image))) { r =>
         r.isRight shouldBe true
@@ -37,7 +41,10 @@ class ImagesIndexerTest
   it("ingests a list of images") {
     withLocalImagesIndex { index =>
       val imagesIndexer =
-        new ElasticIndexer[AugmentedImage](elasticClient, index)
+        new ElasticIndexer[AugmentedImage](
+          elasticClient,
+          index,
+          ImagesIndexConfig)
       val images = (1 to 5).map(_ => createAugmentedImage())
       whenReady(imagesIndexer.index(images)) { r =>
         r.isRight shouldBe true
@@ -50,7 +57,10 @@ class ImagesIndexerTest
   it("ingests a higher version of the same image") {
     withLocalImagesIndex { index =>
       val imagesIndexer =
-        new ElasticIndexer[AugmentedImage](elasticClient, index)
+        new ElasticIndexer[AugmentedImage](
+          elasticClient,
+          index,
+          ImagesIndexConfig)
       val image = createAugmentedImage()
       val newerImage = image.copy(version = image.version + 1)
       val result = for {
@@ -68,7 +78,10 @@ class ImagesIndexerTest
   it("doesn't replace a newer version with a lower one") {
     withLocalImagesIndex { index =>
       val imagesIndexer =
-        new ElasticIndexer[AugmentedImage](elasticClient, index)
+        new ElasticIndexer[AugmentedImage](
+          elasticClient,
+          index,
+          ImagesIndexConfig)
       val image = createAugmentedImage()
       val olderImage = image.copy(version = image.version - 1)
       val result = for {

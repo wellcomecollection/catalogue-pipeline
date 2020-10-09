@@ -6,10 +6,7 @@ import org.apache.http.HttpHost
 import org.elasticsearch.client.RestClient
 import org.scalatest.funspec.AnyFunSpec
 import software.amazon.awssdk.services.sqs.model.QueueAttributeName
-import uk.ac.wellcome.elasticsearch.{
-  ElasticCredentials,
-  ElasticsearchIndexCreator
-}
+import uk.ac.wellcome.elasticsearch.ElasticCredentials
 import uk.ac.wellcome.fixtures.RandomGenerators
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
@@ -32,7 +29,6 @@ class IngestorWorkerServiceTest
         withWorkerService[SampleDocument, Any](
           queue,
           index,
-          NoStrictMapping,
           indexer,
           elasticClient) { _ =>
           eventuallyIndexExists(index)
@@ -51,7 +47,6 @@ class IngestorWorkerServiceTest
           withWorkerService[SampleDocument, Any](
             queue,
             index,
-            NoStrictMapping,
             indexer,
             elasticClient) { _ =>
             assertElasticsearchEventuallyHas(index = index, document)
@@ -76,7 +71,6 @@ class IngestorWorkerServiceTest
           withWorkerService[SampleDocument, Any](
             queue,
             index,
-            NoStrictMapping,
             indexer,
             elasticClient) { _ =>
             assertElasticsearchEventuallyHas(index = index, documents: _*)
@@ -96,7 +90,6 @@ class IngestorWorkerServiceTest
         withWorkerService[SampleDocument, Any](
           queue,
           index,
-          NoStrictMapping,
           indexer,
           elasticClient) { _ =>
           sendNotificationToSQS(
@@ -153,10 +146,6 @@ class IngestorWorkerServiceTest
             indexer =>
               val service = new IngestorWorkerService(
                 ingestorConfig = config,
-                indexCreator = new ElasticsearchIndexCreator(
-                  brokenClient,
-                  index,
-                  NoStrictMapping),
                 messageStream = messageStream,
                 documentIndexer = indexer
               )

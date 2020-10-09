@@ -5,7 +5,7 @@ import com.sksamuel.elastic4s.analysis.Analysis
 import com.sksamuel.elastic4s.requests.mappings.{MappingDefinition, ObjectField}
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
 
-case object ImagesIndexConfig extends IndexConfig {
+object ImagesIndexConfig extends IndexConfig with IndexConfigFields {
 
   override val analysis: Analysis = WorksAnalysis()
 

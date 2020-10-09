@@ -32,8 +32,10 @@ class IngestorFeatureTest
         withWorkerService(
           queue,
           index,
-          IdentifiedWorkIndexConfig,
-          new ElasticIndexer[Work[Identified]](elasticClient, index)) { _ =>
+          new ElasticIndexer[Work[Identified]](
+            elasticClient,
+            index,
+            IdentifiedWorkIndexConfig)) { _ =>
           assertElasticsearchEventuallyHasWork(index, work)
         }
       }
@@ -51,8 +53,10 @@ class IngestorFeatureTest
         withWorkerService(
           queue,
           index,
-          IdentifiedWorkIndexConfig,
-          new ElasticIndexer[Work[Identified]](elasticClient, index)) { _ =>
+          new ElasticIndexer[Work[Identified]](
+            elasticClient,
+            index,
+            IdentifiedWorkIndexConfig)) { _ =>
           assertElasticsearchEventuallyHasWork(index, work)
         }
       }
