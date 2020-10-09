@@ -24,6 +24,7 @@ def get_sns_messages(event):
         pass
 
     for record in event_records:
+        print(f"Working on record: {record!r}")
         assert record["EventSource"] == "aws:sns", record
 
         yield json.loads(record["Sns"]["Message"])
