@@ -55,9 +55,10 @@ def prepare_message_for_indexing(completed_snapshot):
     # The snapshot generator returns the size of the final snapshot in bytes.
     # Include the snapshot size as a human-readable string (e.g. 100MB)
     # for humans to read in Kibana.
-    completed_snapshot["snapshotResult"]["s3Size.humanReadable"] = humanize.naturalsize(
-        completed_snapshot["snapshotResult"]["s3Size"]
-    )
+    completed_snapshot["snapshotResult"]["s3Size"] = {
+        "bytes": completed_snapshot["snapshotResult"]["s3Size"],
+        "humanReadable": humanize.naturalsize(completed_snapshot["snapshotResult"]["s3Size"]),
+    }
 
 
 def main(event, _):
