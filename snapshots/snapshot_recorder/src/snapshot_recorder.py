@@ -57,7 +57,9 @@ def prepare_message_for_indexing(completed_snapshot):
     # for humans to read in Kibana.
     completed_snapshot["snapshotResult"]["s3Size"] = {
         "bytes": completed_snapshot["snapshotResult"]["s3Size"],
-        "humanReadable": humanize.naturalsize(completed_snapshot["snapshotResult"]["s3Size"]),
+        "humanReadable": humanize.naturalsize(
+            completed_snapshot["snapshotResult"]["s3Size"]
+        ),
     }
 
 
