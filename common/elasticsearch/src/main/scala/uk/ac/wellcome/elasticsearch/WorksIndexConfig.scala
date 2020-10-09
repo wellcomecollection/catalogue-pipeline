@@ -8,7 +8,7 @@ import com.sksamuel.elastic4s.requests.mappings.{
 }
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
 
-sealed trait WorksIndexConfig extends IndexConfig {
+sealed trait WorksIndexConfig extends IndexConfig with IndexConfigFields {
 
   import WorksAnalysis._
   val analysis = WorksAnalysis()

@@ -12,6 +12,7 @@ import io.circe.Encoder
 
 import uk.ac.wellcome.elasticsearch.{
   IndexConfig,
+  IndexConfigFields,
   NoStrictMapping,
   WorksAnalysis
 }
@@ -154,7 +155,7 @@ class ElasticIndexerTest
       }
     }
 
-  object StrictWithNoDataIndexConfig extends IndexConfig {
+  object StrictWithNoDataIndexConfig extends IndexConfig with IndexConfigFields {
     import com.sksamuel.elastic4s.ElasticDsl._
 
     val analysis = WorksAnalysis()

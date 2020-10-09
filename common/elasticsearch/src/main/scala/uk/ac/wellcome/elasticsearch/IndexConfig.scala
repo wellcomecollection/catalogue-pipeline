@@ -13,7 +13,11 @@ import uk.ac.wellcome.elasticsearch.WorksAnalysis._
 trait IndexConfig {
   def mapping: MappingDefinition
   def analysis: Analysis
+}
 
+/** Mixin for common fields used within an IndexConfig in our internal models.
+  */
+trait IndexConfigFields {
   // `textWithKeyword` and `keywordWithText` are slightly different in the semantics and their use case.
   // If the intended field type is keyword, but you would like to search it textually, use `keywordWithText` and
   // visa versa.
