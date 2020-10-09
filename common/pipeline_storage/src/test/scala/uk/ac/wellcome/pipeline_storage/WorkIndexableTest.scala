@@ -5,6 +5,8 @@ import org.scalatest.Assertion
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+
+import uk.ac.wellcome.elasticsearch.IdentifiedWorkIndexConfig
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.work.generators.WorkGenerators
@@ -201,7 +203,7 @@ class WorkIndexableTest
   def withWorksIndexAndIndexer[R](
     testWith: TestWith[(Index, ElasticIndexer[Work[Identified]]), R]) = {
     withLocalWorksIndex { index =>
-      val indexer = new ElasticIndexer(elasticClient, index)
+      val indexer = new ElasticIndexer(elasticClient, index, IdentifiedWorkIndexConfig)
       testWith((index, indexer))
     }
   }

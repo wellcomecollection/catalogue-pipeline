@@ -12,12 +12,11 @@ import grizzled.slf4j.Logging
 import uk.ac.wellcome.elasticsearch.{
   ElasticsearchIndexCreator,
   IndexConfig,
-  NoStrictMapping
 }
 
 class ElasticIndexer[T: Indexable](client: ElasticClient,
                                    index: Index,
-                                   config: IndexConfig = NoStrictMapping)(
+                                   config: IndexConfig)(
   implicit ec: ExecutionContext,
   encoder: Encoder[T])
     extends Indexer[T]
