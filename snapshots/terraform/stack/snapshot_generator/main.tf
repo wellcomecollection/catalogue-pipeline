@@ -48,10 +48,14 @@ module "snapshot_generator" {
 }
 
 module "snapshot_generator_output_topic" {
-  source = "../../modules/topic"
+  source = "git::github.com/wellcomecollection/terraform-aws-sns-topic?ref=v1.0.1"
 
-  name       = "snapshot_complete-${var.deployment_service_env}"
-  role_names = [module.snapshot_generator.task_role_name]
+  name = "snapshot_complete-${var.deployment_service_env}"
+}
+
+resource "aws_iam_role_policy" "allow_generator_to_publish_to_topic" {
+  role   = module.snapshot_generator.task_role_name
+  policy = module.snapshot_generator_output_topic.publish_policy
 }
 
 module "snapshot_generator_scaling_alarm" {
