@@ -155,7 +155,9 @@ class ElasticIndexerTest
       }
     }
 
-  object StrictWithNoDataIndexConfig extends IndexConfig with IndexConfigFields {
+  object StrictWithNoDataIndexConfig
+      extends IndexConfig
+      with IndexConfigFields {
     import com.sksamuel.elastic4s.ElasticDsl._
 
     val analysis = WorksAnalysis()

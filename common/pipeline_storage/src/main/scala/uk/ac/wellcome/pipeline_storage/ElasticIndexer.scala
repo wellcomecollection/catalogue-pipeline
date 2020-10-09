@@ -9,16 +9,12 @@ import com.sksamuel.elastic4s.circe._
 import io.circe.Encoder
 import grizzled.slf4j.Logging
 
-import uk.ac.wellcome.elasticsearch.{
-  ElasticsearchIndexCreator,
-  IndexConfig,
-}
+import uk.ac.wellcome.elasticsearch.{ElasticsearchIndexCreator, IndexConfig,}
 
-class ElasticIndexer[T: Indexable](client: ElasticClient,
-                                   index: Index,
-                                   config: IndexConfig)(
-  implicit ec: ExecutionContext,
-  encoder: Encoder[T])
+class ElasticIndexer[T: Indexable](
+  client: ElasticClient,
+  index: Index,
+  config: IndexConfig)(implicit ec: ExecutionContext, encoder: Encoder[T])
     extends Indexer[T]
     with Logging {
 

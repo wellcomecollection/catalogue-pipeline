@@ -203,7 +203,8 @@ class WorkIndexableTest
   def withWorksIndexAndIndexer[R](
     testWith: TestWith[(Index, ElasticIndexer[Work[Identified]]), R]) = {
     withLocalWorksIndex { index =>
-      val indexer = new ElasticIndexer(elasticClient, index, IdentifiedWorkIndexConfig)
+      val indexer =
+        new ElasticIndexer(elasticClient, index, IdentifiedWorkIndexConfig)
       testWith((index, indexer))
     }
   }
