@@ -36,6 +36,12 @@ module "work_id_minter" {
     db_port              = "catalogue/id_minter/rds_port"
     db_username          = "catalogue/id_minter/rds_user"
     db_password          = "catalogue/id_minter/rds_password"
+
+    es_host     = "catalogue/pipeline_storage/es_host"
+    es_port     = "catalogue/pipeline_storage/es_port"
+    es_protocol = "catalogue/pipeline_storage/es_protocol"
+    es_username = "catalogue/pipeline_storage/id_minter/es_username"
+    es_password = "catalogue/pipeline_storage/id_minter/es_password"
   }
 
   // The total number of connections to RDS across all tasks from all ID minter
