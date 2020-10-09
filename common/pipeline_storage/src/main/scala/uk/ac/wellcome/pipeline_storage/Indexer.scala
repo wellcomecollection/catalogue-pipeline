@@ -4,7 +4,6 @@ import scala.concurrent.Future
 import grizzled.slf4j.Logging
 
 import uk.ac.wellcome.models.work.internal._
-import WorkState.Identified
 
 abstract class Indexer[T: Indexable] {
 
