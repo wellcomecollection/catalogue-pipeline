@@ -6,10 +6,7 @@ import org.apache.http.HttpHost
 import org.elasticsearch.client.RestClient
 import org.scalatest.funspec.AnyFunSpec
 import software.amazon.awssdk.services.sqs.model.QueueAttributeName
-import uk.ac.wellcome.elasticsearch.{
-  ElasticCredentials,
-  ElasticsearchIndexCreator
-}
+import uk.ac.wellcome.elasticsearch.ElasticCredentials
 import uk.ac.wellcome.fixtures.RandomGenerators
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
