@@ -1,14 +1,8 @@
 module "snapshot_generator" {
-  source          = "../../modules/service"
-  service_name    = "snapshot_generator-${var.deployment_service_env}"
-  container_image = "${var.snapshot_generator_image}:env.${var.deployment_service_env}"
+  source = "../../../../infrastructure/modules/worker"
 
-  security_group_ids = [
-    aws_security_group.egress.id
-  ]
-
-  cluster_name = var.cluster_name
-  cluster_arn  = var.cluster_arn
+  name  = "snapshot_generator-${var.deployment_service_env}"
+  image = "${var.snapshot_generator_image}:env.${var.deployment_service_env}"
 
   env_vars = {
     queue_url        = module.snapshot_generator_input_queue.url
@@ -27,9 +21,17 @@ module "snapshot_generator" {
     es_password = "catalogue/api/es_password"
   }
 
-  subnets           = var.subnets
-  max_capacity      = 1
-  queue_read_policy = module.snapshot_generator_input_queue.read_policy
+  subnets = var.subnets
+
+  cluster_name = var.cluster_name
+  cluster_arn  = var.cluster_arn
+
+  security_group_ids = [
+    aws_security_group.egress.id
+  ]
+
+  min_capacity = 0
+  max_capacity = 1
 
   deployment_service_env  = var.deployment_service_env
   deployment_service_name = "snapshot-generator"
