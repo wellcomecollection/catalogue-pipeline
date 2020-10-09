@@ -1,6 +1,6 @@
-resource "aws_security_group" "service_egress" {
+resource "aws_security_group" "egress" {
   name        = "snapshot_generator_service_egress"
-  description = "Allow egress traffic to service"
+  description = "Allow the snapshot generator to make outbound requests"
   vpc_id      = var.vpc_id
 
   egress {
