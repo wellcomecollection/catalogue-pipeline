@@ -104,8 +104,9 @@ def prepare_slack_payload(snapshots, api_document_count):
         return "\n".join(
             [
                 f"The latest snapshot is of index *{index_name}*, taken *{format_date(requested_at)}*.",
-                f"It is {humanize.naturalsize(s3_size)}, took {humanize.naturaldelta(time_took)} "
-                f"and contains {humanize.intcomma(snapshot_document_count)} documents ({api_comparison}).",
+                f"• It is {humanize.naturalsize(s3_size)}",
+                f"• It took {humanize.naturaldelta(time_took)} to create",
+                f"• It contains {humanize.intcomma(snapshot_document_count)} documents ({api_comparison})",
             ]
         )
 
