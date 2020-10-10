@@ -162,8 +162,7 @@ def main(*args):
     api_document_count = get_catalogue_api_document_count(endpoint="works")
 
     slack_payload = prepare_slack_payload(
-        snapshots=snapshots,
-        api_document_count=api_document_count
+        snapshots=snapshots, api_document_count=api_document_count
     )
 
     post_to_slack(slack_secret_id, slack_payload)
