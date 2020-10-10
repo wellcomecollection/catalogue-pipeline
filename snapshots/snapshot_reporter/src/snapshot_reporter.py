@@ -59,6 +59,14 @@ def get_snapshots(es_client, elastic_index):
     return [hit["_source"] for hit in response["hits"]["hits"]]
 
 
+def get_catalogue_api_document_count(endpoint):
+    """
+    How many documents are available in the catalogue API?
+    """
+    resp = httpx.get(f"https://api.wellcomecollection.org/catalogue/v2/{endpoint}")
+    return resp.json()["totalResults"]
+
+
 def format_date(d):
     # The timestamps passed around by the snapshots pipeline are all UTC.
     # This Lambda reports into our Slack channel, so adjust the time if
@@ -73,10 +81,10 @@ def format_date(d):
         return d.strftime("on %A, %B %-d at %-I:%M %p %Z")
 
 
-def prepare_slack_payload(snapshots):
+def prepare_slack_payload(snapshots, api_document_count):
     def _snapshot_message(snapshot):
         index_name = snapshot["snapshotResult"]["indexName"]
-        document_count = snapshot["snapshotResult"]["documentCount"]
+        snapshot_document_count = snapshot["snapshotResult"]["documentCount"]
         s3_size = snapshot["snapshotResult"]["s3Size"]["bytes"]
 
         requested_at = parser.parse(snapshot["snapshotJob"]["requestedAt"])
@@ -86,11 +94,18 @@ def prepare_slack_payload(snapshots):
 
         time_took = finished_at - started_at
 
+        if api_document_count == snapshot_document_count:
+            api_comparison = "same as the catalogue API"
+        elif abs(api_document_count - snapshot_document_count) < 25:
+            api_comparison = "almost the same as the catalogue API"
+        else:
+            api_comparison = f"*different from the catalogue API, which has {humanize.intcomma(api_document_count)}*"
+
         return "\n".join(
             [
                 f"The latest snapshot is of index *{index_name}*, taken *{format_date(requested_at)}*.",
                 f"It is {humanize.naturalsize(s3_size)}, took {humanize.naturaldelta(time_took)} "
-                f"and contains {humanize.intcomma(document_count)} documents.",
+                f"and contains {humanize.intcomma(snapshot_document_count)} documents ({api_comparison}).",
             ]
         )
 
@@ -139,7 +154,12 @@ def main(*args):
     elastic_client = get_elastic_client(elastic_secret_id)
 
     snapshots = get_snapshots(elastic_client, elastic_index)
-    slack_payload = prepare_slack_payload(snapshots)
+    api_document_count = get_catalogue_api_document_count(endpoint="works")
+
+    slack_payload = prepare_slack_payload(
+        snapshots=snapshots,
+        api_document_count=api_document_count
+    )
 
     post_to_slack(slack_secret_id, slack_payload)
 
