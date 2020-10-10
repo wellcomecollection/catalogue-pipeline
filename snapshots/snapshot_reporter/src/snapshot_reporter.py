@@ -94,6 +94,10 @@ def prepare_slack_payload(snapshots, api_document_count):
 
         time_took = finished_at - started_at
 
+        # In general, a snapshot should have the same number of works as the
+        # catalogue API.  There might be some drift, if new works appear in the
+        # pipeline between the snapshot being taken and the reporter running,
+        # but not much.  The threshold 25 is chosen somewhat arbitrarily.
         if api_document_count == snapshot_document_count:
             api_comparison = "same as the catalogue API"
         elif abs(api_document_count - snapshot_document_count) < 25:
