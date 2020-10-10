@@ -5,6 +5,8 @@ day. The index queried is available on the reporting cluster.
 This lambda should be triggered by a daily CloudWatch event.
 """
 
+import datetime
+
 import boto3
 from elasticsearch import Elasticsearch
 import httpx
@@ -56,24 +58,31 @@ def get_snapshots(es_client, elastic_index):
     return [hit["_source"] for hit in response["hits"]["hits"]]
 
 
+def format_date(d):
+    if d.date() == datetime.datetime.now().date():
+        return d.strftime("today at %I:%M %p")
+    elif d.date() == (datetime.datetime.now() - datetime.timedelta(days=1)).date():
+        return d.strftime("yesterday at %I:%M %p")
+    else:
+        return d.strftime("on %A, %B %-d at %I:%M %p")
+
+
 def prepare_slack_payload(snapshots):
     def _snapshot_message(snapshot):
         index_name = snapshot["snapshotResult"]["indexName"]
         document_count = snapshot["snapshotResult"]["documentCount"]
         s3_size = snapshot["snapshotResult"]["s3Size"]["bytes"]
 
-        requested_at = parser.parse(snapshot["snapshotJob"]["requestedAt"]).strftime(
-            "%A, %B %-d, %I:%M %p"
-        )
+        requested_at = parser.parse(snapshot["snapshotJob"]["requestedAt"])
 
         started_at = parser.parse(snapshot["snapshotResult"]["startedAt"])
         finished_at = parser.parse(snapshot["snapshotResult"]["finishedAt"])
 
         time_took = finished_at - started_at
 
-        return "".join(
+        return "\n".join(
             [
-                f"The last snapshot was of index {index_name} at {requested_at}. ",
+                f"The latest snapshot is of index {index_name}, taken {format_date(requested_at)}.",
                 f"It is {humanize.naturalsize(s3_size)}, took {humanize.naturaldelta(time_took)} "
                 f"and contains {humanize.intcomma(document_count)} documents.",
             ]
