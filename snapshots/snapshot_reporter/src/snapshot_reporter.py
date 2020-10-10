@@ -94,27 +94,22 @@ def prepare_slack_payload(snapshots):
             ]
         )
 
-    def _create_header_block(text):
-        return [{"type": "header", "text": {"type": "plain_text", "text": text}}]
-
-    def _create_section_block(text):
-        return [{"type": "section", "text": {"type": "mrkdwn", "text": text}}]
-
     if snapshots:
         snapshot = snapshots[0]
 
-        header_block = _create_header_block(":white_check_mark: Catalogue Snapshot")
-        section_block = _create_section_block(_snapshot_message(snapshot))
+        heading = ":white_check_mark: Catalogue Snapshot"
+        message = _snapshot_message(snapshot)
     else:
         kibana_logs_link = "https://logging.wellcomecollection.org/goto/ddc4dfc7308261cf17f956515ca1ce35"
-        header_block = _create_header_block(
-            ":interrobang: Catalogue Snapshot not found"
-        )
-        section_block = _create_section_block(
-            f"No snapshot found within the last day. See logs: {kibana_logs_link}"
-        )
+        heading = ":interrobang: Catalogue Snapshot not found"
+        message = f"No snapshot found within the last day. See logs: {kibana_logs_link}"
 
-    return {"blocks": header_block + section_block}
+    return {
+        "blocks": [
+            {"type": "header", "text": {"type": "plain_text", "text": heading}},
+            {"type": "section", "text": {"type": "mrkdwn", "text": message}},
+        ]
+    }
 
 
 def post_to_slack(slack_secret_id, payload):
