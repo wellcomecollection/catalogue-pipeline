@@ -95,10 +95,10 @@ def prepare_slack_payload(snapshots):
         )
 
     if snapshots:
-        snapshot = snapshots[0]
+        latest_snapshot = snapshots[0]
 
         heading = ":white_check_mark: Catalogue Snapshot"
-        message = _snapshot_message(snapshot)
+        message = _snapshot_message(latest_snapshot)
     else:
         kibana_logs_link = "https://logging.wellcomecollection.org/goto/ddc4dfc7308261cf17f956515ca1ce35"
         heading = ":interrobang: Catalogue Snapshot not found"
