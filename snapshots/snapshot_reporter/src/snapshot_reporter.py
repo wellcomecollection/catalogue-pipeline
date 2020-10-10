@@ -66,11 +66,11 @@ def format_date(d):
     d = d.astimezone(pytz.timezone("Europe/London"))
 
     if d.date() == datetime.datetime.now().date():
-        return d.strftime("today at %I:%M %p %Z")
+        return d.strftime("today at %-I:%M %p %Z")
     elif d.date() == (datetime.datetime.now() - datetime.timedelta(days=1)).date():
-        return d.strftime("yesterday at %I:%M %p %Z")
+        return d.strftime("yesterday at %-I:%M %p %Z")
     else:
-        return d.strftime("on %A, %B %-d at %I:%M %p %Z")
+        return d.strftime("on %A, %B %-d at %-I:%M %p %Z")
 
 
 def prepare_slack_payload(snapshots):
