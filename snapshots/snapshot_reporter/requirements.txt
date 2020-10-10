@@ -12,6 +12,7 @@ httpx==0.16.0             # via -r requirements.in
 humanize==3.0.1           # via -r requirements.in
 idna==2.10                # via rfc3986
 python-dateutil==2.8.1    # via -r requirements.in
+pytz==2020.1              # via -r requirements.in
 rfc3986[idna2008]==1.4.0  # via httpx
 six==1.15.0               # via python-dateutil
 sniffio==1.1.0            # via httpcore, httpx

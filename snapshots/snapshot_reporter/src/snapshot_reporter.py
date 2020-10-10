@@ -11,6 +11,7 @@ import boto3
 from elasticsearch import Elasticsearch
 import httpx
 import humanize
+import pytz
 
 from dateutil import parser
 import json
@@ -59,12 +60,17 @@ def get_snapshots(es_client, elastic_index):
 
 
 def format_date(d):
+    # The timestamps passed around by the snapshots pipeline are all UTC.
+    # This Lambda reports into our Slack channel, so adjust the time if
+    # necessary for the UK, and add the appropriate timezone label.
+    d = d.astimezone(pytz.timezone("Europe/London"))
+
     if d.date() == datetime.datetime.now().date():
-        return d.strftime("today at %I:%M %p")
+        return d.strftime("today at %I:%M %p %Z")
     elif d.date() == (datetime.datetime.now() - datetime.timedelta(days=1)).date():
-        return d.strftime("yesterday at %I:%M %p")
+        return d.strftime("yesterday at %I:%M %p %Z")
     else:
-        return d.strftime("on %A, %B %-d at %I:%M %p")
+        return d.strftime("on %A, %B %-d at %I:%M %p %Z")
 
 
 def prepare_slack_payload(snapshots):
