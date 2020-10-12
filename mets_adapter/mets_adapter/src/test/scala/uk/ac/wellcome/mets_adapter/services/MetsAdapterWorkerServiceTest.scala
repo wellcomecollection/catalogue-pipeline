@@ -18,6 +18,7 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.storage.{Identified, Version}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
+import java.time.Instant
 
 class MetsAdapterWorkerServiceTest
     extends AnyFunSpec
@@ -38,7 +39,8 @@ class MetsAdapterWorkerServiceTest
       path = "root",
       bucket = "bucket",
     ),
-    "v1"
+    "v1",
+    Instant.now
   )
 
   val bagRetriever =
@@ -71,14 +73,14 @@ class MetsAdapterWorkerServiceTest
             expectedVersion)
 
           vhs.getLatest(id = externalIdentifier) shouldBe Right(
-            Identified(expectedVersion, metsLocation())
+            Identified(expectedVersion, metsLocation("mets.xml",createdDate=bag.createdDate))
           )
         }
     }
   }
 
   it("publishes new METS data when old version exists in the store") {
-    val vhs = createStore(Map(Version(externalIdentifier, 0) -> "old-data"))
+    val vhs = createStore(Map(Version(externalIdentifier, 0) -> (("old-data", Instant.now))))
     withWorkerService(bagRetriever, vhs) {
       case (_, QueuePair(queue, dlq), messageSender) =>
         sendNotificationToSQS(queue, notification)
@@ -90,14 +92,15 @@ class MetsAdapterWorkerServiceTest
           expectedVersion)
 
         vhs.getLatest(id = externalIdentifier) shouldBe Right(
-          Identified(expectedVersion, metsLocation())
+          Identified(expectedVersion, metsLocation("mets.xml",createdDate = bag.createdDate))
         )
     }
   }
 
   it("re-publishes existing data when current version exists in the store") {
+    val createdDate = Instant.now
     val vhs =
-      createStore(Map(Version(externalIdentifier, 1) -> "existing-data"))
+      createStore(Map(Version(externalIdentifier, 1) ->(("existing-data", createdDate))))
     withWorkerService(bagRetriever, vhs) {
       case (_, QueuePair(queue, dlq), messageSender) =>
         sendNotificationToSQS(queue, notification)
@@ -108,14 +111,15 @@ class MetsAdapterWorkerServiceTest
           expectedVersion)
 
         vhs.getLatest(id = externalIdentifier) shouldBe Right(
-          Identified(expectedVersion, metsLocation("existing-data"))
+          Identified(expectedVersion, metsLocation("existing-data", createdDate))
         )
     }
   }
 
   it("ignores messages when greater version exists in the store") {
+    val createdDate = Instant.now
     val vhs =
-      createStore(Map(Version(externalIdentifier, 2) -> "existing-data"))
+      createStore(Map(Version(externalIdentifier, 2) -> (("existing-data", createdDate))))
     withWorkerService(bagRetriever, vhs) {
       case (_, QueuePair(queue, dlq), messageSender) =>
         sendNotificationToSQS(queue, notification)
@@ -128,7 +132,7 @@ class MetsAdapterWorkerServiceTest
         vhs.getLatest(id = externalIdentifier) shouldBe Right(
           Identified(
             Version(externalIdentifier, 2),
-            metsLocation("existing-data"))
+            metsLocation("existing-data", createdDate))
         )
     }
   }
@@ -236,11 +240,11 @@ class MetsAdapterWorkerServiceTest
       }
     }
 
-  def createStore(data: Map[Version[String, Int], String] = Map.empty) =
-    MemoryVersionedStore(data.mapValues(metsLocation(_)))
+  def createStore(data: Map[Version[String, Int], (String, Instant)] = Map.empty) =
+    MemoryVersionedStore(data.mapValues{ case (file, createdDate)=> metsLocation(file, createdDate)})
 
-  def metsLocation(file: String = "mets.xml", version: Int = 1) =
-    MetsLocation("bucket", "root", version, file, Nil)
+  def metsLocation(file: String, createdDate: Instant, version: Int = 1) =
+    MetsLocation("bucket", "root", version, file, createdDate, Nil)
 
   def createBagRegistrationNotificationWith(
     space: String,

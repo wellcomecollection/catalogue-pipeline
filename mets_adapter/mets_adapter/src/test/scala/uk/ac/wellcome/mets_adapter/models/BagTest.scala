@@ -2,6 +2,7 @@ package uk.ac.wellcome.mets_adapter.models
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import java.time.Instant
 
 class BagTest extends AnyFunSpec with Matchers {
 
@@ -99,7 +100,8 @@ class BagTest extends AnyFunSpec with Matchers {
           "bucket",
           "digitised/b30246039",
           2,
-          "v1/data/b30246039.xml"))
+          "v1/data/b30246039.xml",
+          bag.createdDate))
     }
 
     it("fails extracting METS data if invalid version string") {
@@ -132,5 +134,6 @@ class BagTest extends AnyFunSpec with Matchers {
         bucket = "bucket",
       ),
       version,
+      createdDate = Instant.now
     )
 }

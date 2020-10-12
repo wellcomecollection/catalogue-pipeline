@@ -1,11 +1,14 @@
 package uk.ac.wellcome.mets_adapter.models
 
+import java.time.Instant
+
 /** The response receiveved from the storage-service bag API.
   */
 case class Bag(info: BagInfo,
                manifest: BagManifest,
                location: BagLocation,
-               version: String) {
+               version: String,
+               createdDate: Instant) {
 
   def metsLocation: Either[Exception, MetsLocation] =
     file
@@ -16,6 +19,7 @@ case class Bag(info: BagInfo,
             location.path,
             version,
             file,
+            createdDate,
             manifestations)
         }
       }
