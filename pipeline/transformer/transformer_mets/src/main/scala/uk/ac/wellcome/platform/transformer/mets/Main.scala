@@ -22,6 +22,7 @@ import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import scala.concurrent.ExecutionContext
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 import org.scanamo.auto._
+import org.scanamo.time.JavaTimeFormats._
 import uk.ac.wellcome.platform.transformer.mets.store.TemporaryCredentialsStore
 import uk.ac.wellcome.typesafe.config.builders.AWSClientConfigBuilder
 import scala.concurrent.duration._
