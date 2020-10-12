@@ -4,7 +4,8 @@ locals {
     "ingestor_images",
     "matcher",
     "merger",
-    "id_minter",
+    "id_minter_works",
+    "id_minter_images",
     "inference_manager",
     "feature_inferrer",
     "feature_training",
@@ -34,7 +35,8 @@ locals {
   repo_urls = [for repo_url in data.aws_ecr_repository.service.*.repository_url : "${repo_url}:env.${var.release_label}"]
   image_ids = zipmap(local.services, local.repo_urls)
 
-  id_minter_image          = local.image_ids["id_minter"]
+  id_minter_images_image   = local.image_ids["id_minter_images"]
+  id_minter_works_image    = local.image_ids["id_minter_works"]
   recorder_image           = local.image_ids["recorder"]
   matcher_image            = local.image_ids["matcher"]
   merger_image             = local.image_ids["merger"]
