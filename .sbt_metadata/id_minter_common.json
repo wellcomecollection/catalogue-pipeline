@@ -1,0 +1,8 @@
+{
+  "id" : "id_minter_common",
+  "folder" : "pipeline/id_minter/id_minter_common",
+  "dependencyIds" : [
+    "internal_model",
+    "big_messaging_typesafe"
+  ]
+}

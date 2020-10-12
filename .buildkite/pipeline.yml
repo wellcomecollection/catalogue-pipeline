@@ -25,8 +25,12 @@ steps:
     label: "ingestor (works)"
   - command: .buildkite/scripts/run_job.py ingestor_images
     label: "ingestor (images)"
-  - command: .buildkite/scripts/run_job.py id_minter
-    label: "ID minter"
+  - command: .buildkite/scripts/run_job.py id_minter_common
+    label: "ID minter common"
+  - command: .buildkite/scripts/run_job.py id_minter_works
+    label: "ID minter works"
+  - command: .buildkite/scripts/run_job.py id_minter_images
+    label: "ID minter images"
   - command: .buildkite/scripts/run_job.py matcher
     label: "matcher"
   - command: .buildkite/scripts/run_job.py merger

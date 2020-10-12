@@ -10,7 +10,7 @@ module "work_id_minter_queue" {
 module "work_id_minter" {
   source          = "../modules/service"
   service_name    = "${local.namespace_hyphen}_work_id_minter"
-  container_image = local.id_minter_image
+  container_image = local.id_minter_works_image
 
   security_group_ids = [
     aws_security_group.service_egress.id,
