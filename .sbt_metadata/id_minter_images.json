@@ -1,0 +1,7 @@
+{
+  "id" : "id_minter_images",
+  "folder" : "pipeline/id_minter/id_minter_images",
+  "dependencyIds" : [
+    "id_minter_common"
+  ]
+}
