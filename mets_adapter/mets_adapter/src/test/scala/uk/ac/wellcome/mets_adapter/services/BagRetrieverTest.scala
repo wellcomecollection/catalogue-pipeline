@@ -33,7 +33,12 @@ class BagRetrieverTest
     withActorSystem { implicit actorSystem =>
       withBagRetriever { bagRetriever =>
         whenReady(getBag(bagRetriever, "digitised", "b30246039")) {
-          case Bag(_, BagManifest(files), BagLocation(bucket, path), _, createdDate) =>
+          case Bag(
+              _,
+              BagManifest(files),
+              BagLocation(bucket, path),
+              _,
+              createdDate) =>
             verify(
               moreThanOrExactly(1),
               postRequestedFor(urlEqualTo("/oauth2/token"))

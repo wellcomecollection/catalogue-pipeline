@@ -18,7 +18,11 @@ import uk.ac.wellcome.mets_adapter.models.MetsLocation
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.mets.client.ClientFactory
-import uk.ac.wellcome.platform.transformer.mets.fixtures.{LocalStackS3Fixtures, MetsGenerators, STSFixtures}
+import uk.ac.wellcome.platform.transformer.mets.fixtures.{
+  LocalStackS3Fixtures,
+  MetsGenerators,
+  STSFixtures
+}
 import uk.ac.wellcome.platform.transformer.mets.store.TemporaryCredentialsStore
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
@@ -55,7 +59,14 @@ class MetsTransformerWorkerServiceTest
 
     withWorkerService {
       case (QueuePair(queue, _), metsBucket, messageSender, dynamoStore) =>
-        sendWork(str, "mets.xml", dynamoStore, metsBucket, queue, version, Instant.now)
+        sendWork(
+          str,
+          "mets.xml",
+          dynamoStore,
+          metsBucket,
+          queue,
+          version,
+          Instant.now)
         eventually {
           val works = messageSender.getMessages[Work.Invisible[Source]]
           works.head shouldBe expectedWork(identifier, version)
@@ -72,7 +83,14 @@ class MetsTransformerWorkerServiceTest
 
     withWorkerService {
       case (QueuePair(queue, dlq), metsBucket, messageSender, vhs) =>
-        sendWork(value1, "mets.xml", vhs, metsBucket, queue, version, Instant.now)
+        sendWork(
+          value1,
+          "mets.xml",
+          vhs,
+          metsBucket,
+          queue,
+          version,
+          Instant.now)
         eventually {
           messageSender.getMessages[Work.Invisible[Source]] shouldBe empty
 
@@ -90,7 +108,14 @@ class MetsTransformerWorkerServiceTest
 
     withWorkerService {
       case (QueuePair(queue, _), metsBucket, messageSender, dynamoStore) =>
-        sendWork(str, "mets.xml", dynamoStore, metsBucket, queue, version, Instant.now)
+        sendWork(
+          str,
+          "mets.xml",
+          dynamoStore,
+          metsBucket,
+          queue,
+          version,
+          Instant.now)
         eventually {
           val works = messageSender.getMessages[Work[Source]]
           works.head shouldBe expectedWork(identifier, version)
@@ -183,12 +208,18 @@ class MetsTransformerWorkerServiceTest
                        metsBucket: Bucket,
                        queue: SQS.Queue,
                        version: Int,
-                      createdDate: Instant): SendMessageResponse = {
+                       createdDate: Instant): SendMessageResponse = {
     val rootPath = "data"
     val key = for {
       _ <- S3TypedStore[String].put(
         S3ObjectLocation(metsBucket.name, key = s"$rootPath/$name"))(mets)
-      entry = MetsLocation(metsBucket.name, rootPath, 1, name, createdDate, List())
+      entry = MetsLocation(
+        metsBucket.name,
+        rootPath,
+        1,
+        name,
+        createdDate,
+        List())
       key <- dynamoStore.put(Version(name, version))(entry)
     } yield key
 
