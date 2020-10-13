@@ -239,9 +239,6 @@ object CatalogueDependencies {
       ExternalDependencies.mySqlDependencies ++
       ExternalDependencies.circeOpticsDependencies
 
-  val ingestorDependencies: Seq[ModuleID] =
-    ExternalDependencies.mockitoDependencies
-
   val matcherDependencies: Seq[ModuleID] =
     ExternalDependencies.mockitoDependencies ++
       ExternalDependencies.scalaGraphDependencies
