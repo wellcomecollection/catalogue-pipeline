@@ -31,6 +31,8 @@ steps:
     label: "ID minter works"
   - command: .buildkite/scripts/run_job.py id_minter_images
     label: "ID minter images"
+  - command: .buildkite/scripts/run_job.py relation_embedder
+    label: "relation embedder"
   - command: .buildkite/scripts/run_job.py matcher
     label: "matcher"
   - command: .buildkite/scripts/run_job.py merger

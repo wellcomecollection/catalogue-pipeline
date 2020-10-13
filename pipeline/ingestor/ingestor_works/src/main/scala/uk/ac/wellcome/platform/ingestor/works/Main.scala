@@ -31,8 +31,10 @@ object Main extends WellcomeTypesafeApp {
     val index = Index(indexName)
     new IngestorWorkerService(
       ingestorConfig = IngestorConfigBuilder.buildIngestorConfig(config),
-      documentIndexer =
-        new ElasticIndexer(elasticClient, index, IdentifiedWorkIndexConfig),
+      documentIndexer = new ElasticIndexer[Work[Identified]](
+        elasticClient,
+        index,
+        IdentifiedWorkIndexConfig),
       messageStream =
         BigMessagingBuilder.buildMessageStream[Work[Identified]](config)
     )

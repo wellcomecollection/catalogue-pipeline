@@ -235,13 +235,14 @@ object CatalogueDependencies {
       WellcomeDependencies.typesafeLibrary
 
   val idminterDependencies: Seq[ModuleID] =
-    ExternalDependencies.mockitoDependencies ++
-      ExternalDependencies.mySqlDependencies ++
+    ExternalDependencies.mySqlDependencies ++
       ExternalDependencies.circeOpticsDependencies
 
   val matcherDependencies: Seq[ModuleID] =
     ExternalDependencies.mockitoDependencies ++
       ExternalDependencies.scalaGraphDependencies
+
+  val mergerDependencies: Seq[ModuleID] = Nil
 
   val relationEmbedderDependencies: Seq[ModuleID] =
     WellcomeDependencies.storageTypesafeLibrary ++

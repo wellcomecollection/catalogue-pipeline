@@ -1,9 +1,13 @@
 package uk.ac.wellcome.platform.id_minter_works.services
 
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
 import akka.Done
 import grizzled.slf4j.Logging
 import io.circe.Json
-import uk.ac.wellcome.bigmessaging.message.BigMessageStream
+
+import uk.ac.wellcome.messaging.sqs.SQSStream
+import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.platform.id_minter.config.models.{
   IdentifiersTableConfig,
@@ -15,19 +19,19 @@ import uk.ac.wellcome.platform.id_minter.steps.{
   SourceIdentifierEmbedder
 }
 import uk.ac.wellcome.typesafe.Runnable
-
-import scala.concurrent.Future
+import uk.ac.wellcome.pipeline_storage.Retriever
+import uk.ac.wellcome.json.JsonUtil._
 
 class IdMinterWorkerService[Destination](
   identifierGenerator: IdentifierGenerator,
   sender: MessageSender[Destination],
-  messageStream: BigMessageStream[Json],
+  messageStream: SQSStream[NotificationMessage],
+  jsonRetriever: Retriever[Json],
   rdsClientConfig: RDSClientConfig,
   identifiersTableConfig: IdentifiersTableConfig
-) extends Runnable
+)(implicit ec: ExecutionContext)
+    extends Runnable
     with Logging {
-
-  private val className = this.getClass.getSimpleName
 
   def run(): Future[Done] = {
     val tableProvisioner = new TableProvisioner(
@@ -39,10 +43,14 @@ class IdMinterWorkerService[Destination](
       tableName = identifiersTableConfig.tableName
     )
 
-    messageStream.foreach(className, processMessage)
+    messageStream.foreach(this.getClass.getSimpleName, processMessage)
   }
 
-  def processMessage(json: Json): Future[Unit] = Future fromTry {
+  def processMessage(message: NotificationMessage): Future[Unit] =
+    jsonRetriever(message.body)
+      .flatMap(json => Future.fromTry(processJson(json)))
+
+  def processJson(json: Json): Try[Unit] =
     for {
       sourceIdentifiers <- SourceIdentifierEmbedder.scan(json)
       mintedIdentifiers <- identifierGenerator.retrieveOrGenerateCanonicalIds(
@@ -50,5 +58,4 @@ class IdMinterWorkerService[Destination](
       updatedJson <- SourceIdentifierEmbedder.update(json, mintedIdentifiers)
       _ <- sender.sendT(updatedJson)
     } yield ()
-  }
 }

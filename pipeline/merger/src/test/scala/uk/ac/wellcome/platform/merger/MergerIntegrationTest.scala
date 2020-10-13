@@ -1,7 +1,9 @@
 package uk.ac.wellcome.platform.merger
 
+import scala.collection.mutable.Map
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
+
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.models.Implicits._
@@ -28,7 +30,8 @@ class MergerIntegrationTest
     withVHS { vhs =>
       withLocalSqsQueuePair() {
         case QueuePair(queue, dlq) =>
-          withWorkerService(vhs, queue, workSender) { _ =>
+          val index = Map.empty[String, Work[Merged]]
+          withWorkerService(vhs, queue, workSender, index = index) { _ =>
             val work = sourceWork()
 
             givenStoredInVhs(vhs, work)
@@ -39,9 +42,8 @@ class MergerIntegrationTest
             eventually {
               assertQueueEmpty(queue)
               assertQueueEmpty(dlq)
-
-              workSender.getMessages[Work[Merged]] should contain only
-                work.transition[Merged](1)
+              workSender.getMessages[String] should contain only work.id
+              index shouldBe Map(work.id -> work.transition[Merged](1))
             }
           }
       }
