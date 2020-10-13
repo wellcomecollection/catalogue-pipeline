@@ -5,10 +5,13 @@ day. The index queried is available on the reporting cluster.
 This lambda should be triggered by a daily CloudWatch event.
 """
 
+import datetime
+
 import boto3
 from elasticsearch import Elasticsearch
 import httpx
 import humanize
+import pytz
 
 from dateutil import parser
 import json
@@ -56,50 +59,77 @@ def get_snapshots(es_client, elastic_index):
     return [hit["_source"] for hit in response["hits"]["hits"]]
 
 
-def prepare_slack_payload(snapshots):
+def get_catalogue_api_document_count(endpoint):
+    """
+    How many documents are available in the catalogue API?
+    """
+    resp = httpx.get(f"https://api.wellcomecollection.org/catalogue/v2/{endpoint}")
+    return resp.json()["totalResults"]
+
+
+def format_date(d):
+    # The timestamps passed around by the snapshots pipeline are all UTC.
+    # This Lambda reports into our Slack channel, so adjust the time if
+    # necessary for the UK, and add the appropriate timezone label.
+    d = d.astimezone(pytz.timezone("Europe/London"))
+
+    if d.date() == datetime.datetime.now().date():
+        return d.strftime("today at %-I:%M %p %Z")
+    elif d.date() == (datetime.datetime.now() - datetime.timedelta(days=1)).date():
+        return d.strftime("yesterday at %-I:%M %p %Z")
+    else:
+        return d.strftime("on %A, %B %-d at %-I:%M %p %Z")
+
+
+def prepare_slack_payload(snapshots, api_document_count):
     def _snapshot_message(snapshot):
         index_name = snapshot["snapshotResult"]["indexName"]
-        document_count = snapshot["snapshotResult"]["documentCount"]
+        snapshot_document_count = snapshot["snapshotResult"]["documentCount"]
         s3_size = snapshot["snapshotResult"]["s3Size"]["bytes"]
 
-        requested_at = parser.parse(snapshot["snapshotJob"]["requestedAt"]).strftime(
-            "%A, %B %-d, %I:%M %p"
-        )
+        requested_at = parser.parse(snapshot["snapshotJob"]["requestedAt"])
 
         started_at = parser.parse(snapshot["snapshotResult"]["startedAt"])
         finished_at = parser.parse(snapshot["snapshotResult"]["finishedAt"])
 
         time_took = finished_at - started_at
 
-        return "".join(
+        # In general, a snapshot should have the same number of works as the
+        # catalogue API.  There might be some drift, if new works appear in the
+        # pipeline between the snapshot being taken and the reporter running,
+        # but not much.  The threshold 25 is chosen somewhat arbitrarily.
+        if api_document_count == snapshot_document_count:
+            api_comparison = "same as the catalogue API"
+        elif abs(api_document_count - snapshot_document_count) < 25:
+            api_comparison = "almost the same as the catalogue API"
+        else:
+            api_comparison = f"*different from the catalogue API, which has {humanize.intcomma(api_document_count)}*"
+
+        return "\n".join(
             [
-                f"The last snapshot was of index {index_name} at {requested_at}. ",
-                f"It is {humanize.naturalsize(s3_size)}, took {humanize.naturaldelta(time_took)} "
-                f"and contains {humanize.intcomma(document_count)} documents.",
+                f"The latest snapshot is of index *{index_name}*, taken *{format_date(requested_at)}*.",
+                f"• It is {humanize.naturalsize(s3_size)}",
+                f"• It took {humanize.naturaldelta(time_took)} to create",
+                f"• It contains {humanize.intcomma(snapshot_document_count)} documents ({api_comparison})",
             ]
         )
 
-    def _create_header_block(text):
-        return [{"type": "header", "text": {"type": "plain_text", "text": text}}]
-
-    def _create_section_block(text):
-        return [{"type": "section", "text": {"type": "mrkdwn", "text": text}}]
-
     if snapshots:
-        snapshot = snapshots[0]
+        latest_snapshot = snapshots[0]
 
-        header_block = _create_header_block(":white_check_mark: Catalogue Snapshot")
-        section_block = _create_section_block(_snapshot_message(snapshot))
+        heading = ":white_check_mark: Catalogue Snapshot"
+        message = _snapshot_message(latest_snapshot)
     else:
         kibana_logs_link = "https://logging.wellcomecollection.org/goto/ddc4dfc7308261cf17f956515ca1ce35"
-        header_block = _create_header_block(
-            ":interrobang: Catalogue Snapshot not found"
-        )
-        section_block = _create_section_block(
-            f"No snapshot found within the last day. See logs: {kibana_logs_link}"
-        )
+        heading = ":interrobang: Catalogue Snapshot not found"
+        message = f"No snapshot found within the last day. See logs: {kibana_logs_link}"
 
-    return {"blocks": header_block + section_block}
+    return {
+        "blocks": [
+            {"type": "header", "text": {"type": "plain_text", "text": heading}},
+            {"type": "section", "text": {"type": "mrkdwn", "text": message}},
+        ]
+    }
 
 
 def post_to_slack(slack_secret_id, payload):
@@ -129,7 +159,11 @@ def main(*args):
     elastic_client = get_elastic_client(elastic_secret_id)
 
     snapshots = get_snapshots(elastic_client, elastic_index)
-    slack_payload = prepare_slack_payload(snapshots)
+    api_document_count = get_catalogue_api_document_count(endpoint="works")
+
+    slack_payload = prepare_slack_payload(
+        snapshots=snapshots, api_document_count=api_document_count
+    )
 
     post_to_slack(slack_secret_id, slack_payload)
 
