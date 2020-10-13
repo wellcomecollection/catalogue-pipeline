@@ -243,9 +243,6 @@ object CatalogueDependencies {
     ExternalDependencies.mockitoDependencies ++
       ExternalDependencies.scalaGraphDependencies
 
-  val mergerDependencies: Seq[ModuleID] =
-    ExternalDependencies.mockitoDependencies
-
   val relationEmbedderDependencies: Seq[ModuleID] =
     WellcomeDependencies.storageTypesafeLibrary ++
       WellcomeDependencies.messagingTypesafeLibrary
