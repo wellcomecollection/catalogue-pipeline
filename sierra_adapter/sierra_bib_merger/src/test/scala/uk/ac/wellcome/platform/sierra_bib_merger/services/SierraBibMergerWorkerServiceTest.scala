@@ -58,7 +58,5 @@ class SierraBibMergerWorkerServiceTest
           testWith((metricsSender, queuePair))
         }
     }
-
   }
-
 }
