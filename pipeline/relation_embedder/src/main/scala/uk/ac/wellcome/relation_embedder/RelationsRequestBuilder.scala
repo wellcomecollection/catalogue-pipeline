@@ -123,7 +123,9 @@ case class RelationsRequestBuilder(index: Index,
 
   def relatedWorksRequest(query: Query): SearchRequest =
     search(index)
-      .query(query)
+      .query {
+        must(query, termQuery(field = "type", value = "Visible"))
+      }
       .from(0)
       .limit(maxRelatedWorks)
       .sourceInclude(relationsFieldWhitelist)
