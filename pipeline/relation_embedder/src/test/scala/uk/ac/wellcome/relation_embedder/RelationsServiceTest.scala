@@ -149,6 +149,23 @@ class RelatedWorksServiceTest
       }
     }
 
+    it("Filters out invisible works") {
+      withLocalWorksIndex { index =>
+        val workP = work("p")
+        val workQ = work("p/q").invisible()
+        val workR = work("p/r")
+        storeWorks(index, List(workP, workQ, workR))
+        whenReady(service(index).getRelations(workP)) { relations =>
+          relations shouldBe Relations(
+            children = List(Relation(workR, 1)),
+            ancestors = Nil,
+            siblingsPreceding = Nil,
+            siblingsSucceeding = Nil
+          )
+        }
+      }
+    }
+
     it("Returns no related works when work is not part of a collection") {
       withLocalMergedWorksIndex { index =>
         val workX = mergedWork()

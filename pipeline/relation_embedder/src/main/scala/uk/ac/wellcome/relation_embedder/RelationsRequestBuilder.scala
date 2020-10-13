@@ -20,7 +20,7 @@ case class RelationsRequestBuilder(index: Index,
     "state.sourceIdentifier.identifierType.label",
     "state.sourceIdentifier.value",
     "state.sourceIdentifier.ontologyType",
-    "state.hasMultipleSources",
+    "state.numberOfSources",
     "data.title",
     "data.collectionPath.path",
     "data.collectionPath.level.type",
@@ -36,7 +36,7 @@ case class RelationsRequestBuilder(index: Index,
     "state.sourceIdentifier.identifierType.label",
     "state.sourceIdentifier.value",
     "state.sourceIdentifier.ontologyType",
-    "state.hasMultipleSources",
+    "state.numberOfSources",
     "data.title",
   )
 
@@ -123,7 +123,9 @@ case class RelationsRequestBuilder(index: Index,
 
   def relatedWorksRequest(query: Query): SearchRequest =
     search(index)
-      .query(query)
+      .query {
+        must(query, termQuery(field = "type", value = "Visible"))
+      }
       .from(0)
       .limit(maxRelatedWorks)
       .sourceInclude(relationsFieldWhitelist)

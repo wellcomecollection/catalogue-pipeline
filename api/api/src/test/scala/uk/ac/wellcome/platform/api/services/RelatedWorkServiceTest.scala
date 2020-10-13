@@ -184,6 +184,25 @@ class RelatedWorkServiceTest
     }
   }
 
+  it("Filters out invisible works") {
+    withLocalWorksIndex { index =>
+      val workP = work("p", CollectionLevel.Collection)
+      val workQ = work("p/q", CollectionLevel.Series).invisible()
+      val workR = work("p/r", CollectionLevel.Series)
+      storeWorks(index, List(workP, workQ, workR))
+      whenReady(service.retrieveRelatedWorks(index, workP)) { result =>
+        result shouldBe Right(
+          RelatedWorks(
+            parts = Some(List(RelatedWork(workR))),
+            partOf = Some(Nil),
+            precededBy = Some(Nil),
+            succeededBy = Some(Nil)
+          )
+        )
+      }
+    }
+  }
+
   it("Returns no related works when work is not part of a collection") {
     withLocalWorksIndex { index =>
       val workX = identifiedWork()
