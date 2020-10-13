@@ -68,8 +68,7 @@ lazy val big_messaging_typesafe = setupProject(
 lazy val pipeline_storage = setupProject(
   project,
   "common/pipeline_storage",
-  localDependencies = Seq(elasticsearch_typesafe),
-  externalDependencies = CatalogueDependencies.pipelineStorageDependencies
+  localDependencies = Seq(elasticsearch_typesafe)
 )
 
 lazy val api = setupProject(
@@ -105,24 +104,21 @@ lazy val ingestor_common = setupProject(
   project,
   "pipeline/ingestor/ingestor_common",
   localDependencies =
-    Seq(elasticsearch_typesafe, big_messaging_typesafe, pipeline_storage),
-  externalDependencies = CatalogueDependencies.ingestorDependencies
+    Seq(elasticsearch_typesafe, big_messaging_typesafe, pipeline_storage)
 )
 
 lazy val ingestor_works = setupProject(
   project,
   "pipeline/ingestor/ingestor_works",
   localDependencies =
-    Seq(elasticsearch_typesafe, big_messaging_typesafe, ingestor_common),
-  externalDependencies = Seq()
+    Seq(elasticsearch_typesafe, big_messaging_typesafe, ingestor_common)
 )
 
 lazy val ingestor_images = setupProject(
   project,
   "pipeline/ingestor/ingestor_images",
   localDependencies =
-    Seq(elasticsearch_typesafe, big_messaging_typesafe, ingestor_common),
-  externalDependencies = Seq()
+    Seq(elasticsearch_typesafe, big_messaging_typesafe, ingestor_common)
 )
 
 lazy val matcher = setupProject(
@@ -135,8 +131,8 @@ lazy val matcher = setupProject(
 lazy val merger = setupProject(
   project,
   "pipeline/merger",
-  localDependencies = Seq(internal_model, big_messaging_typesafe),
-  externalDependencies = CatalogueDependencies.mergerDependencies)
+  localDependencies = Seq(internal_model, big_messaging_typesafe)
+)
 
 lazy val relation_embedder = setupProject(
   project,
@@ -148,8 +144,7 @@ lazy val relation_embedder = setupProject(
 lazy val recorder = setupProject(
   project,
   "pipeline/recorder",
-  localDependencies = Seq(internal_model, big_messaging_typesafe),
-  externalDependencies = CatalogueDependencies.recorderDependencies
+  localDependencies = Seq(internal_model, big_messaging_typesafe)
 )
 
 lazy val reindex_worker = setupProject(
