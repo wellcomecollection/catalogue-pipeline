@@ -11,6 +11,7 @@ locals {
     "feature_training",
     "palette_inferrer",
     "recorder",
+    "relation_embedder",
     "transformer_miro",
     "transformer_mets",
     "transformer_sierra",
@@ -44,6 +45,7 @@ locals {
   feature_inferrer_image   = local.image_ids["feature_inferrer"]
   feature_training_image   = local.image_ids["feature_training"]
   palette_inferrer_image   = local.image_ids["palette_inferrer"]
+  relation_embedder_image  = local.image_ids["relation_embedder"]
   ingestor_works_image     = local.image_ids["ingestor_works"]
   ingestor_images_image    = local.image_ids["ingestor_images"]
   transformer_miro_image   = local.image_ids["transformer_miro"]
