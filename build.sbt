@@ -144,8 +144,7 @@ lazy val relation_embedder = setupProject(
 lazy val recorder = setupProject(
   project,
   "pipeline/recorder",
-  localDependencies = Seq(internal_model, big_messaging_typesafe),
-  externalDependencies = CatalogueDependencies.recorderDependencies
+  localDependencies = Seq(internal_model, big_messaging_typesafe)
 )
 
 lazy val reindex_worker = setupProject(

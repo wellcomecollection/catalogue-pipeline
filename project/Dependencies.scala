@@ -250,9 +250,6 @@ object CatalogueDependencies {
   val miroTransformerDependencies: Seq[ModuleID] =
     ExternalDependencies.apacheCommonsDependencies
 
-  val recorderDependencies: Seq[ModuleID] =
-    ExternalDependencies.mockitoDependencies
-
   val reindexWorkerDependencies: Seq[ModuleID] = Nil
 
   val sierraTransformerDependencies: Seq[ModuleID] =
