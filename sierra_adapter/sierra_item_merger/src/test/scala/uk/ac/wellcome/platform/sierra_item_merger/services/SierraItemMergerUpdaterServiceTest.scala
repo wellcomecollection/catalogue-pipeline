@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.sierra_item_merger.services
 
 import org.scalatest.funspec.AnyFunSpec
-import org.scalatestplus.mockito.MockitoSugar
 import uk.ac.wellcome.platform.sierra_item_merger.fixtures.SierraItemMergerFixtures
 import uk.ac.wellcome.sierra_adapter.model.{
   SierraGenerators,
@@ -14,8 +13,7 @@ import uk.ac.wellcome.storage.store.memory.{MemoryStore, MemoryVersionedStore}
 class SierraItemMergerUpdaterServiceTest
     extends AnyFunSpec
     with SierraGenerators
-    with SierraItemMergerFixtures
-    with MockitoSugar {
+    with SierraItemMergerFixtures {
 
   it("creates a record if it receives an item with a bibId that doesn't exist") {
     val sierraTransformableStore = createStore[SierraTransformable]()
