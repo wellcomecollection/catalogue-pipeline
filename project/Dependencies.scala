@@ -302,8 +302,7 @@ object CatalogueDependencies {
   // Sierra adapter stack
 
   val sierraAdapterCommonDependencies: Seq[ModuleID] =
-    ExternalDependencies.mockitoDependencies ++
-      WellcomeDependencies.storageTypesafeLibrary ++
+    WellcomeDependencies.storageTypesafeLibrary ++
       WellcomeDependencies.messagingTypesafeLibrary ++
       WellcomeDependencies.jsonLibrary ++
       ExternalDependencies.javaxDependencies
