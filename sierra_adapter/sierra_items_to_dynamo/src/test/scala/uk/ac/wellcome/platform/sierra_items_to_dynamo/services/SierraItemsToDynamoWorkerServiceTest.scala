@@ -1,21 +1,17 @@
 package uk.ac.wellcome.platform.sierra_items_to_dynamo.services
 
-import org.mockito.Mockito.{never, verify}
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import org.scalatestplus.mockito.MockitoSugar
 import software.amazon.awssdk.services.cloudwatch.model.StandardUnit
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
-import uk.ac.wellcome.monitoring.Metrics
+import uk.ac.wellcome.monitoring.memory.MemoryMetrics
 import uk.ac.wellcome.platform.sierra_items_to_dynamo.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.platform.sierra_items_to_dynamo.merger.SierraItemRecordMerger
 import uk.ac.wellcome.sierra_adapter.model.{SierraGenerators, SierraItemRecord}
 import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
 import uk.ac.wellcome.storage.Version
-
-import scala.concurrent.Future
 
 class SierraItemsToDynamoWorkerServiceTest
     extends AnyFunSpec
@@ -25,8 +21,7 @@ class SierraItemsToDynamoWorkerServiceTest
     with ScalaFutures
     with SierraGenerators
     with WorkerServiceFixture
-    with SierraAdapterHelpers
-    with MockitoSugar {
+    with SierraAdapterHelpers {
 
   it("reads a sierra record from SQS and inserts it into DynamoDB") {
     val bibIds = createSierraBibNumbers(count = 5)
@@ -70,10 +65,10 @@ class SierraItemsToDynamoWorkerServiceTest
 
   it("records a failure if it receives an invalid message") {
     val store = createStore[SierraItemRecord]()
-    val mockMetricsSender = mock[Metrics[Future, StandardUnit]]
+    val metrics = new MemoryMetrics[StandardUnit]()
     withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>
-        withWorkerService(queue, store, mockMetricsSender) { _ =>
+        withWorkerService(queue, store, metrics) { _ =>
           val body =
             """
                     |{
@@ -86,8 +81,7 @@ class SierraItemsToDynamoWorkerServiceTest
           eventually {
             assertQueueEmpty(queue)
             assertQueueHasSize(dlq, size = 1)
-            verify(mockMetricsSender, never()).incrementCount(
-              "SierraItemsToDynamoWorkerService_ProcessMessage_failure")
+            metrics.incrementedCounts should not contain("SierraItemsToDynamoWorkerService_ProcessMessage_failure")
           }
         }
     }
