@@ -4,7 +4,6 @@ locals {
 
   es_works_index = "works-${var.pipeline_date}"
   es_images_index = "images-${var.pipeline_date}"
-
   es_works_merged_index = "works-merged-${var.pipeline_date}"
   es_works_denormalised_index = "works-denormalised-${var.pipeline_date}"
 

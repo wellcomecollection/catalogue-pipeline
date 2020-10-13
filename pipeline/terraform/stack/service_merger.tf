@@ -28,6 +28,7 @@ module "merger" {
     merger_images_topic_arn  = module.merger_images_topic.arn
     vhs_recorder_bucket_name = module.vhs_recorder.bucket_name
     vhs_recorder_table_name  = module.vhs_recorder.table_name
+    es_index                 = local.es_works_merged_index
   }
 
   secret_env_vars = {
