@@ -49,7 +49,7 @@ class SierraBibMergerWorkerServiceTest
   }
 
   private def withWorkerServiceFixtures[R](
-    testWith: TestWith[(Metrics[Future, StandardUnit], QueuePair), R]) = {
+    testWith: TestWith[(Metrics[Future, StandardUnit], QueuePair), R]): R = {
     val metricsSender = mock[Metrics[Future, StandardUnit]]
     withLocalSqsQueuePair() {
       case queuePair @ QueuePair(queue, _) =>
