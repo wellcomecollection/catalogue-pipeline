@@ -28,6 +28,7 @@ module "work_id_minter" {
     queue_url       = module.work_id_minter_queue.url
     topic_arn       = module.work_id_minter_topic.arn
     max_connections = local.id_minter_task_max_connections
+    es_index        = local.es_works_merged_index
   }
 
   secret_env_vars = {

@@ -25,7 +25,7 @@ module "ingestor_images" {
 
   env_vars = {
     metrics_namespace   = "${local.namespace_hyphen}_ingestor_images"
-    es_index            = var.es_images_index
+    es_index            = local.es_images_index
     ingest_queue_id     = module.ingestor_images_queue.url
     es_ingest_batchSize = 100
   }
