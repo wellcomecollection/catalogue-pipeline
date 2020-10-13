@@ -248,8 +248,7 @@ object CatalogueDependencies {
       WellcomeDependencies.messagingTypesafeLibrary
 
   val miroTransformerDependencies: Seq[ModuleID] =
-    ExternalDependencies.apacheCommonsDependencies ++
-      ExternalDependencies.mockitoDependencies
+    ExternalDependencies.apacheCommonsDependencies
 
   val recorderDependencies: Seq[ModuleID] =
     ExternalDependencies.mockitoDependencies
