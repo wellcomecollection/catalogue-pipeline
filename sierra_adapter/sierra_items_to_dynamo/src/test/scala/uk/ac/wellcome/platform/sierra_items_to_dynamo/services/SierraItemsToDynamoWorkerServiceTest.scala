@@ -8,7 +8,6 @@ import org.scalatestplus.mockito.MockitoSugar
 import software.amazon.awssdk.services.cloudwatch.model.StandardUnit
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
-import uk.ac.wellcome.messaging.fixtures.{SNS, SQS}
 import uk.ac.wellcome.monitoring.Metrics
 import uk.ac.wellcome.platform.sierra_items_to_dynamo.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.platform.sierra_items_to_dynamo.merger.SierraItemRecordMerger
@@ -20,8 +19,6 @@ import scala.concurrent.Future
 
 class SierraItemsToDynamoWorkerServiceTest
     extends AnyFunSpec
-    with SNS
-    with SQS
     with Matchers
     with Eventually
     with IntegrationPatience

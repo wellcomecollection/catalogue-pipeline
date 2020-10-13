@@ -2,21 +2,17 @@ package uk.ac.wellcome.platform.sierra_item_merger.services
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatestplus.mockito.MockitoSugar
-import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.platform.sierra_item_merger.fixtures.SierraItemMergerFixtures
 import uk.ac.wellcome.sierra_adapter.model.{
   SierraGenerators,
   SierraTransformable
 }
-import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
 import uk.ac.wellcome.storage.{UpdateNotApplied, Version}
 import uk.ac.wellcome.storage.maxima.memory.MemoryMaxima
 import uk.ac.wellcome.storage.store.memory.{MemoryStore, MemoryVersionedStore}
 
 class SierraItemMergerUpdaterServiceTest
     extends AnyFunSpec
-    with SQS
-    with SierraAdapterHelpers
     with SierraGenerators
     with SierraItemMergerFixtures
     with MockitoSugar {

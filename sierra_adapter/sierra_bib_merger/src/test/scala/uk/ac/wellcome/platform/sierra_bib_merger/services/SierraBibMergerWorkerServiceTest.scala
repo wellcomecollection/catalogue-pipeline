@@ -7,7 +7,6 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import software.amazon.awssdk.services.cloudwatch.model.StandardUnit
 import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.monitoring.Metrics
 import uk.ac.wellcome.platform.sierra_bib_merger.fixtures.WorkerServiceFixture
@@ -15,7 +14,6 @@ import uk.ac.wellcome.sierra_adapter.model.{
   SierraGenerators,
   SierraTransformable
 }
-import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
 
 import scala.concurrent.Future
 
@@ -23,8 +21,6 @@ class SierraBibMergerWorkerServiceTest
     extends AnyFunSpec
     with MockitoSugar
     with Matchers
-    with SQS
-    with SierraAdapterHelpers
     with SierraGenerators
     with WorkerServiceFixture
     with Eventually
