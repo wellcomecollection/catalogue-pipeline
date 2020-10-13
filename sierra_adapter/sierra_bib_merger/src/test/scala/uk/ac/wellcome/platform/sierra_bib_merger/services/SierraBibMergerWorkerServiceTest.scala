@@ -50,7 +50,7 @@ class SierraBibMergerWorkerServiceTest
     withLocalSqsQueuePair() {
       case queuePair @ QueuePair(queue, _) =>
         val store = createStore[SierraTransformable]()
-        withWorkerService(store, queue) { _ =>
+        withWorkerService(store, queue, metricsSender) { _ =>
           testWith((metricsSender, queuePair))
         }
     }
