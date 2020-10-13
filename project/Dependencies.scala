@@ -320,8 +320,7 @@ object CatalogueDependencies {
   // Snapshots stack
 
   val snapshotGeneratorDependencies: Seq[ModuleID] =
-    ExternalDependencies.mockitoDependencies ++
-      WellcomeDependencies.messagingTypesafeLibrary ++
+    WellcomeDependencies.messagingTypesafeLibrary ++
       WellcomeDependencies.storageLibrary ++
       ExternalDependencies.alpakkaS3Dependencies
 }
