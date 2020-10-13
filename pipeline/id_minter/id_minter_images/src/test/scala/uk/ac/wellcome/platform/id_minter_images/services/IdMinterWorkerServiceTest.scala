@@ -1,25 +1,26 @@
 package uk.ac.wellcome.platform.id_minter_images.services
 
 import org.scalatest.funspec.AnyFunSpec
-import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.matchers.should.Matchers
 import scalikejdbc._
-
 import uk.ac.wellcome.platform.id_minter.database.{
   FieldDescription,
   IdentifiersDao
 }
+import uk.ac.wellcome.platform.id_minter.models.IdentifiersTable
 import uk.ac.wellcome.platform.id_minter_images.fixtures.WorkerServiceFixture
 
 class IdMinterWorkerServiceTest
     extends AnyFunSpec
     with Matchers
-    with MockitoSugar
     with WorkerServiceFixture {
 
   it("creates the Identifiers table in MySQL upon startup") {
     withIdentifiersDatabase { identifiersTableConfig =>
-      val identifiersDao = mock[IdentifiersDao]
+      val identifiersDao = new IdentifiersDao(
+        identifiers = new IdentifiersTable(identifiersTableConfig)
+      )
+
       withWorkerService(
         identifiersDao = identifiersDao,
         identifiersTableConfig = identifiersTableConfig) { _ =>
