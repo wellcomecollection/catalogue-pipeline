@@ -51,6 +51,9 @@ class RelationEmbedderWorkerService[MsgDestination](
       .mapAsync(2)(workIndexer.index)
       .collect { case Left(failedWorks) => failedWorks.toList }
       .mapConcat(identity)
+      .mapAsync(2) { work =>
+        Future.fromTry(msgSender.send(work.sourceIdentifier.toString))
+      }
       .toMat(Sink.seq)(Keep.right)
       .run()
       .flatMap {
