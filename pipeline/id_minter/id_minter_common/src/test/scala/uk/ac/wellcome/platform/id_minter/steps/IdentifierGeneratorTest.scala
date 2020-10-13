@@ -1,10 +1,7 @@
 package uk.ac.wellcome.platform.id_minter.steps
 
-import org.mockito.Matchers.{any, anyListOf}
-import org.mockito.Mockito.when
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.{Inspectors, OptionValues}
 import scalikejdbc._
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
@@ -13,9 +10,9 @@ import uk.ac.wellcome.platform.id_minter.fixtures
 import uk.ac.wellcome.platform.id_minter.models.{Identifier, IdentifiersTable}
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.work.internal.SourceIdentifier
+import uk.ac.wellcome.platform.id_minter.config.models.IdentifiersTableConfig
 
-import scala.util.{Failure, Success}
-import scala.collection.JavaConverters._
+import scala.util.{Failure, Success, Try}
 
 class IdentifierGeneratorTest
     extends AnyFunSpec
@@ -23,7 +20,6 @@ class IdentifierGeneratorTest
     with Matchers
     with Inspectors
     with OptionValues
-    with MockitoSugar
     with IdentifiersGenerators {
 
   def withIdentifierGenerator[R](maybeIdentifiersDao: Option[IdentifiersDao] =
@@ -121,21 +117,37 @@ class IdentifierGeneratorTest
   }
 
   it("returns a failure if it fails registering new identifiers") {
-    val identifiersDao = mock[IdentifiersDao]
-    val sourceIdentifiers = (1 to 5).map(_ => createSourceIdentifier).toList
-
-    val triedLookup = identifiersDao.lookupIds(
-      anyListOf(classOf[SourceIdentifier]).asScala.toList
-    )(any[DBSession])
-    when(triedLookup)
-      .thenReturn(
-        Success(IdentifiersDao.LookupResult(Map.empty, sourceIdentifiers)))
+    val config = IdentifiersTableConfig(
+      database = createDatabaseName,
+      tableName = createTableName
+    )
 
     val saveException = new Exception("Don't do that please!")
-    when(
-      identifiersDao.saveIdentifiers(
-        anyListOf(classOf[Identifier]).asScala.toList)(any[DBSession]))
-      .thenThrow(IdentifiersDao.InsertError(Nil, saveException, Nil))
+
+    val identifiersDao = new IdentifiersDao(
+      identifiers = new IdentifiersTable(config)
+    ) {
+      override def lookupIds(
+        sourceIdentifiers: Seq[SourceIdentifier])(
+        implicit session: DBSession
+      ): Try[IdentifiersDao.LookupResult] =
+        Success(
+          IdentifiersDao.LookupResult(
+            existingIdentifiers = Map.empty,
+            unmintedIdentifiers = sourceIdentifiers.toList
+          )
+        )
+
+      override def saveIdentifiers(
+        ids: List[Identifier])(
+        implicit session: DBSession
+      ): Try[IdentifiersDao.InsertResult] =
+        Failure(
+          IdentifiersDao.InsertError(Nil, saveException, Nil)
+        )
+    }
+
+    val sourceIdentifiers = (1 to 5).map(_ => createSourceIdentifier).toList
 
     withIdentifierGenerator(Some(identifiersDao)) {
       case (identifierGenerator, _) =>
