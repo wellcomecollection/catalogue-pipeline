@@ -29,7 +29,8 @@ trait WorkerServiceFixture
     queue: Queue,
     metrics: Metrics[Future, StandardUnit] = new MemoryMetrics[StandardUnit]())(
     testWith: TestWith[(SierraBibMergerWorkerService[String],
-                        MemoryMessageSender), R]): R =
+                        MemoryMessageSender),
+                       R]): R =
     withActorSystem { implicit actorSystem =>
       val updaterService = new SierraBibMergerUpdaterService(
         versionedHybridStore = store

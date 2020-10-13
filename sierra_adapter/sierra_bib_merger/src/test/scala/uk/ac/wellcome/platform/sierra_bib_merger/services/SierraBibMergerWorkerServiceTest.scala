@@ -34,7 +34,8 @@ class SierraBibMergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueHasSize(dlq, 1)
 
-          metrics.incrementedCounts should contain("SierraBibMergerWorkerService_ProcessMessage_recognisedFailure")
+          metrics.incrementedCounts should contain(
+            "SierraBibMergerWorkerService_ProcessMessage_recognisedFailure")
         }
     }
   }
