@@ -28,7 +28,9 @@ class RelationEmbedderWorkerService[MsgDestination](
     extends Runnable {
 
   def run(): Future[Done] =
-    sqsStream.foreach(this.getClass.getSimpleName, processMessage)
+    workIndexer.init().flatMap { _ =>
+      sqsStream.foreach(this.getClass.getSimpleName, processMessage)
+    }
 
   def processMessage(message: NotificationMessage): Future[Unit] =
     Source
