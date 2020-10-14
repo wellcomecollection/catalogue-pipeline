@@ -26,7 +26,7 @@ SERVICES = {
     "matcher": ["source_read"],
     "merger": ["source_read", "merged_write"],
     "relation_embedder": ["merged_read", "denormalised_write"],
-    "id_minter": ["merged_read", "denormalised_read", "identified_write"],
+    "id_minter": ["denormalised_read", "identified_write"],
     "ingestor": ["identified_read"],
 }
 
