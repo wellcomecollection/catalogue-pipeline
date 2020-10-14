@@ -57,10 +57,10 @@ module "catalogue_pipeline_20200923" {
   inferrer_model_data_bucket_name = aws_s3_bucket.inferrer_model_core_data.id
 }
 
-module "catalogue_pipeline_20201013" {
+module "catalogue_pipeline_20201014" {
   source = "./stack"
 
-  pipeline_date = "20201013"
+  pipeline_date = "20201014"
   release_label = "stage"
 
   account_id      = data.aws_caller_identity.current.account_id
