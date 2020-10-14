@@ -19,7 +19,7 @@ import hyperlink
 
 WORK_TYPES = ["source", "merged", "denormalised", "identified"]
 
-INDEX_PATTERN = "works_{work_type}*"
+INDEX_PATTERN = "works-{work_type}*"
 
 SERVICES = {
     "transformer": ["source_write"],
