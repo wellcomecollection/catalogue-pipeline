@@ -5,13 +5,24 @@ import java.time.Instant
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.exceptions.JsonDecodingError
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.platform.transformer.sierra.exceptions.{ShouldNotTransformException, SierraTransformerException}
-import uk.ac.wellcome.platform.transformer.sierra.source.{SierraBibData, SierraItemData}
+import uk.ac.wellcome.platform.transformer.sierra.exceptions.{
+  ShouldNotTransformException,
+  SierraTransformerException
+}
+import uk.ac.wellcome.platform.transformer.sierra.source.{
+  SierraBibData,
+  SierraItemData
+}
 import uk.ac.wellcome.platform.transformer.sierra.transformers._
 import uk.ac.wellcome.platform.transformer.sierra.source.SierraMaterialType._
 import uk.ac.wellcome.platform.transformer.sierra.source.SierraBibData._
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.sierra_adapter.model.{SierraBibNumber, SierraBibRecord, SierraItemNumber, SierraTransformable}
+import uk.ac.wellcome.sierra_adapter.model.{
+  SierraBibNumber,
+  SierraBibRecord,
+  SierraItemNumber,
+  SierraTransformable
+}
 
 import scala.util.{Failure, Success, Try}
 import WorkState.Source

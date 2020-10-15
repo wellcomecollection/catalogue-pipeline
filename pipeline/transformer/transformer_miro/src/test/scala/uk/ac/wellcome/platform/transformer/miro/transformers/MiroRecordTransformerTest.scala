@@ -13,7 +13,6 @@ import uk.ac.wellcome.platform.transformer.miro.models.MiroMetadata
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 import WorkState.Source
 
-
 class MiroRecordTransformerTest
     extends AnyFunSpec
     with Matchers

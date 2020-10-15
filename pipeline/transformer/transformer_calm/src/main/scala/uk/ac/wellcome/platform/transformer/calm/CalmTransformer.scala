@@ -74,7 +74,8 @@ object CalmTransformer
                   version = version,
                   data = WorkData(),
                   invisibilityReasons =
-                    List(knownErrToUntransformableReason(knownErr))))
+                    List(knownErrToUntransformableReason(knownErr))
+                ))
             case unknownStatus: UnknownAccessStatus =>
               Right(
                 Work.Invisible[Source](
@@ -82,7 +83,8 @@ object CalmTransformer
                   version = version,
                   data = WorkData(),
                   invisibilityReasons =
-                    List(InvalidValueInSourceField("Calm:AccessStatus"))))
+                    List(InvalidValueInSourceField("Calm:AccessStatus"))
+                ))
             case err: Exception => Left(err)
           }
       }

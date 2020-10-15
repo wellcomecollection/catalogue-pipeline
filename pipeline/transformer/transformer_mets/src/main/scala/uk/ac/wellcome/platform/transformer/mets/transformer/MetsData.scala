@@ -18,7 +18,8 @@ case class MetsData(
   titlePageId: Option[String] = None
 ) {
 
-  def toWork(version: Int, modifiedTime: Instant): Either[Throwable, Work.Invisible[Source]] =
+  def toWork(version: Int,
+             modifiedTime: Instant): Either[Throwable, Work.Invisible[Source]] =
     for {
       license <- parseLicense
       accessStatus <- parseAccessStatus

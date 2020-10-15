@@ -60,14 +60,7 @@ class MetsTransformerWorkerServiceTest
     withWorkerService {
       case (QueuePair(queue, _), metsBucket, messageSender, dynamoStore) =>
         val now = Instant.now
-        sendWork(
-          str,
-          "mets.xml",
-          dynamoStore,
-          metsBucket,
-          queue,
-          version,
-          now)
+        sendWork(str, "mets.xml", dynamoStore, metsBucket, queue, version, now)
         eventually {
           val works = messageSender.getMessages[Work.Invisible[Source]]
           works.head shouldBe expectedWork(identifier, version, now)
@@ -110,14 +103,7 @@ class MetsTransformerWorkerServiceTest
     withWorkerService {
       case (QueuePair(queue, _), metsBucket, messageSender, dynamoStore) =>
         val now = Instant.now
-        sendWork(
-          str,
-          "mets.xml",
-          dynamoStore,
-          metsBucket,
-          queue,
-          version,
-          now)
+        sendWork(str, "mets.xml", dynamoStore, metsBucket, queue, version, now)
         eventually {
           val works = messageSender.getMessages[Work[Source]]
           works.head shouldBe expectedWork(identifier, version, now)
@@ -126,7 +112,8 @@ class MetsTransformerWorkerServiceTest
   }
 
   private def expectedWork(identifier: String,
-                           version: Int, createdDate: Instant): Work.Invisible[Source] = {
+                           version: Int,
+                           createdDate: Instant): Work.Invisible[Source] = {
     val expectedUrl =
       s"https://wellcomelibrary.org/iiif/$identifier/manifest"
     val expectedDigitalLocation = DigitalLocationDeprecated(

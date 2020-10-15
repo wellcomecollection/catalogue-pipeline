@@ -35,23 +35,24 @@ class MetsDataTest
 
     val unidentifiableItem =
       Item(id = IdState.Unidentifiable, locations = List(digitalLocation))
-    metsData.toWork(version,createdDate).right.get shouldBe Work.Invisible[Source](
-      version = version,
-      state = Source(expectedSourceIdentifier,createdDate),
-      data = WorkData[DataState.Unidentified](
-        items = List(unidentifiableItem),
-        mergeCandidates = List(
-          MergeCandidate(
-            identifier = SourceIdentifier(
-              identifierType = IdentifierType("sierra-system-number"),
-              ontologyType = "Work",
-              value = bNumber
-            ),
-            reason = "METS work"
+    metsData.toWork(version, createdDate).right.get shouldBe Work
+      .Invisible[Source](
+        version = version,
+        state = Source(expectedSourceIdentifier, createdDate),
+        data = WorkData[DataState.Unidentified](
+          items = List(unidentifiableItem),
+          mergeCandidates = List(
+            MergeCandidate(
+              identifier = SourceIdentifier(
+                identifierType = IdentifierType("sierra-system-number"),
+                ontologyType = "Work",
+                value = bNumber
+              ),
+              reason = "METS work"
+            )
           )
         )
       )
-    )
   }
 
   it("creates a invisible work with an item and no license") {
@@ -75,23 +76,24 @@ class MetsDataTest
 
     val unidentifiableItem =
       Item(id = IdState.Unidentifiable, locations = List(digitalLocation))
-    metsData.toWork(version, createdDate).right.get shouldBe Work.Invisible[Source](
-      version = version,
-      state = Source(expectedSourceIdentifier, createdDate),
-      data = WorkData[DataState.Unidentified](
-        items = List(unidentifiableItem),
-        mergeCandidates = List(
-          MergeCandidate(
-            identifier = SourceIdentifier(
-              identifierType = IdentifierType("sierra-system-number"),
-              ontologyType = "Work",
-              value = bNumber
-            ),
-            reason = "METS work"
+    metsData.toWork(version, createdDate).right.get shouldBe Work
+      .Invisible[Source](
+        version = version,
+        state = Source(expectedSourceIdentifier, createdDate),
+        data = WorkData[DataState.Unidentified](
+          items = List(unidentifiableItem),
+          mergeCandidates = List(
+            MergeCandidate(
+              identifier = SourceIdentifier(
+                identifierType = IdentifierType("sierra-system-number"),
+                ontologyType = "Work",
+                value = bNumber
+              ),
+              reason = "METS work"
+            )
           )
         )
       )
-    )
   }
 
   it("fails creating a work if it cannot parse the license") {

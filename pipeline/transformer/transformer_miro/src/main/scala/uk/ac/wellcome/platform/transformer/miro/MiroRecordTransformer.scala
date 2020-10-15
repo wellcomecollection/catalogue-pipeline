@@ -88,7 +88,8 @@ class MiroRecordTransformer
 
       Work.Visible[Source](
         version = version,
-        state = Source(sourceIdentifier,
+        state = Source(
+          sourceIdentifier,
           // Miro records are static so we just send 0 as a last modification timestamp
           Instant.EPOCH),
         data = data
