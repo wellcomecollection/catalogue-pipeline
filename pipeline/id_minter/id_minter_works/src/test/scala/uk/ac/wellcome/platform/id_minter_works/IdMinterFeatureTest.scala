@@ -7,9 +7,9 @@ import software.amazon.awssdk.services.sqs.model.QueueAttributeName
 
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
+import uk.ac.wellcome.platform.id_minter_works.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.generators.WorkGenerators
-import uk.ac.wellcome.platform.id_minter_works.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.models.Implicits._
 import WorkState.{Denormalised, Identified}
 
@@ -134,6 +134,27 @@ class IdMinterFeatureTest
 
               assertMessageIsNotDeleted(queue)
             }
+        }
+      }
+    }
+  }
+
+  it("mints ID when using Elasticsearch storage backend") {
+    val messageSender = new MemoryMessageSender()
+    val work: Work[Denormalised] = denormalisedWork()
+
+    withLocalSqsQueue() { queue =>
+      withElasticStorageWorkerService(work, queue, messageSender) { workerService =>
+
+        sendNotificationToSQS(queue = queue, body = work.id)
+
+        eventually {
+          val works = messageSender.getMessages[Work[Identified]]
+          works.length shouldBe >=(1)
+
+          val receivedWork = works.head.asInstanceOf[Work[Identified]]
+          receivedWork.sourceIdentifier shouldBe work.sourceIdentifier
+          receivedWork.state.canonicalId shouldNot be(empty)
         }
       }
     }

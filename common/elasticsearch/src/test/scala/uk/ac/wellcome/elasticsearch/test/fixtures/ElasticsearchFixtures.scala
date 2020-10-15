@@ -18,7 +18,7 @@ import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.time.{Seconds, Span}
-import org.scalatest.{Assertion, Suite}
+import org.scalatest.Assertion
 
 import uk.ac.wellcome.elasticsearch._
 import uk.ac.wellcome.elasticsearch.model.CanonicalId
@@ -36,7 +36,7 @@ trait ElasticsearchFixtures
     with JsonAssertions
     with IntegrationPatience
     with Logging
-    with RandomGenerators { this: Suite =>
+    with RandomGenerators {
 
   private val esHost = "localhost"
   private val esPort = 9200

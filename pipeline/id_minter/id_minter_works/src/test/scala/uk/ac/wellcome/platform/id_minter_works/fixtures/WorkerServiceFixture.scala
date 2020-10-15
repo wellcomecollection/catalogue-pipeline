@@ -16,6 +16,8 @@ import uk.ac.wellcome.platform.id_minter.models.IdentifiersTable
 import uk.ac.wellcome.platform.id_minter.steps.IdentifierGenerator
 import uk.ac.wellcome.platform.id_minter.fixtures.IdentifiersDatabase
 import uk.ac.wellcome.platform.id_minter_works.services.IdMinterWorkerService
+import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
+import uk.ac.wellcome.pipeline_storage.ElasticRetriever
 import uk.ac.wellcome.pipeline_storage.MemoryRetriever
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.work.internal._
@@ -25,6 +27,7 @@ import WorkState.Denormalised
 trait WorkerServiceFixture
     extends IdentifiersDatabase
     with BigMessagingFixture
+    with ElasticsearchFixtures
     with Akka {
   def withWorkerService[R](
     messageSender: MemoryMessageSender = new MemoryMessageSender(),
@@ -81,6 +84,49 @@ trait WorkerServiceFixture
       testWith(service)
     }
   }
+
+  def withElasticStorageWorkerService[R](
+    work: Work[Denormalised],
+    queue: Queue,
+    messageSender: MemoryMessageSender)(
+    testWith: TestWith[IdMinterWorkerService[String], R]): R =
+    withIdentifiersDatabase { identifiersTableConfig =>
+      Class.forName("com.mysql.jdbc.Driver")
+      ConnectionPool.singleton(
+        s"jdbc:mysql://$host:$port",
+        username,
+        password,
+        settings = ConnectionPoolSettings(maxSize = maxSize)
+      )
+      val identifiersDao = new IdentifiersDao(
+        identifiers = new IdentifiersTable(
+          identifiersTableConfig = identifiersTableConfig
+        )
+      )
+
+      withActorSystem { implicit actorSystem =>
+        withSQSStream[NotificationMessage, R](queue) { messageStream =>
+          withLocalDenormalisedWorksIndex { index =>
+            insertIntoElasticsearch(index, work)
+
+            val workerService = new IdMinterWorkerService(
+              identifierGenerator = new IdentifierGenerator(
+                identifiersDao = identifiersDao
+              ),
+              sender = messageSender,
+              messageStream = messageStream,
+              jsonRetriever = new ElasticRetriever(elasticClient, index),
+              rdsClientConfig = rdsClientConfig,
+              identifiersTableConfig = identifiersTableConfig
+            )
+
+            workerService.run()
+
+            testWith(workerService)
+          }
+        }
+      }
+    }
 
   def createIndex(works: List[Work[Denormalised]]): Map[String, Json] =
     works.map(work => (work.id, work.asJson)).toMap

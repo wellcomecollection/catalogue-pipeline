@@ -43,12 +43,16 @@ class IdMinterWorkerService[Destination](
       tableName = identifiersTableConfig.tableName
     )
 
+    println("\n\nxxxxxxxxxxxxxxxxxxxxx\n\n\n")
+
     messageStream.foreach(this.getClass.getSimpleName, processMessage)
   }
 
-  def processMessage(message: NotificationMessage): Future[Unit] =
+  def processMessage(message: NotificationMessage): Future[Unit] = {
+    println(message.body)
     jsonRetriever(message.body)
       .flatMap(json => Future.fromTry(processJson(json)))
+  }
 
   def processJson(json: Json): Try[Unit] =
     for {
