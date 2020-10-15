@@ -15,6 +15,8 @@ sealed trait WorksIndexConfig extends IndexConfig with IndexConfigFields {
 
   def state: ObjectField
 
+  val idState: ObjectField
+
   // Fields
   val sourceIdentifier = objectField("sourceIdentifier")
     .fields(sourceIdentifierFields)
@@ -43,7 +45,7 @@ sealed trait WorksIndexConfig extends IndexConfig with IndexConfigFields {
 
   val period = Seq(
     label,
-    id(),
+    idState,
     objectField("range").fields(
       label,
       dateField("from"),
@@ -54,18 +56,18 @@ sealed trait WorksIndexConfig extends IndexConfig with IndexConfigFields {
 
   val place = Seq(
     label,
-    id()
+    idState
   )
 
   val concept = Seq(
     label,
-    id(),
+    idState,
     keywordField("type")
   )
 
   val agent = Seq(
     label,
-    id(),
+    idState,
     keywordField("type"),
     keywordField("prefix"),
     keywordField("numeration")
@@ -74,7 +76,7 @@ sealed trait WorksIndexConfig extends IndexConfig with IndexConfigFields {
   val rootConcept = concept ++ agent ++ period
 
   val subject: Seq[FieldDefinition] = Seq(
-    id(),
+    idState,
     label,
     objectField("concepts").fields(rootConcept)
   )
@@ -93,7 +95,7 @@ sealed trait WorksIndexConfig extends IndexConfig with IndexConfigFields {
   def period(fieldName: String) = labelledTextField(fieldName)
 
   def items(fieldName: String) = objectField(fieldName).fields(
-    id(),
+    idState,
     location(),
     title
   )
@@ -104,7 +106,7 @@ sealed trait WorksIndexConfig extends IndexConfig with IndexConfigFields {
   )
 
   val contributors = objectField("contributors").fields(
-    id(),
+    idState,
     objectField("agent").fields(agent),
     objectField("roles").fields(label),
   )
@@ -123,7 +125,7 @@ sealed trait WorksIndexConfig extends IndexConfig with IndexConfigFields {
   )
 
   val images = objectField("images").fields(
-    id(),
+    idState,
     location("location"),
     version
   )
@@ -168,7 +170,7 @@ sealed trait WorksIndexConfig extends IndexConfig with IndexConfigFields {
     // Locally override the strict mapping mode. No data fields are indexed for
     // now, in the future specific fields can be added as required.
     objectField("data").dynamic("false"),
-    id(),
+    idState,
     intField("depth")
   )
 
@@ -199,6 +201,8 @@ sealed trait WorksIndexConfig extends IndexConfig with IndexConfigFields {
 object SourceWorkIndexConfig extends WorksIndexConfig {
 
   val state = objectField("state").fields(sourceIdentifier)
+
+  val idState = identifiable()
 }
 
 object MergedWorkIndexConfig extends WorksIndexConfig {
@@ -207,6 +211,8 @@ object MergedWorkIndexConfig extends WorksIndexConfig {
     sourceIdentifier,
     intField("numberOfSources"),
   )
+
+  val idState = identifiable()
 }
 
 object DenormalisedWorkIndexConfig extends WorksIndexConfig {
@@ -216,6 +222,8 @@ object DenormalisedWorkIndexConfig extends WorksIndexConfig {
     intField("numberOfSources"),
     relations
   )
+
+  val idState = identifiable()
 }
 
 object IdentifiedWorkIndexConfig extends WorksIndexConfig {
@@ -226,4 +234,6 @@ object IdentifiedWorkIndexConfig extends WorksIndexConfig {
     intField("numberOfSources"),
     relations
   )
+
+  val idState = id()
 }
