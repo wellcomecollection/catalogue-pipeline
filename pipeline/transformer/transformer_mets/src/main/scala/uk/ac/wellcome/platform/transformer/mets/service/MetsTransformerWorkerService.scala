@@ -50,7 +50,7 @@ class MetsTransformerWorkerService[Destination](
     for {
       metsLocation <- getMetsLocation(key)
       metsData <- xmlTransformer.transform(metsLocation)
-      work <- metsData.toWork(key.version)
+      work <- metsData.toWork(key.version, metsLocation.createdDate)
       // We send the generic type param to `sendT` so it serialises uses the
       // discriminator `type` when read by the recorder.
       _ <- messageSender.sendT[Work[Source]](work).toEither
