@@ -65,7 +65,10 @@ class StorageManifestScanner:
                                                      KeyConditionExpression=Key('id').eq(f"digitised/{id}"),
                                                      Limit = 1,
                                                      ScanIndexForward = False)["Items"][0]
-                            bucket = stored["payload"]["bucket"]
+                            try:
+                                bucket = stored["payload"]["bucket"]
+                            except KeyError as e:
+                                bucket = stored["payload"]["namespace"]
                             try:
                                 key = stored["payload"]["key"]
                             except KeyError:
