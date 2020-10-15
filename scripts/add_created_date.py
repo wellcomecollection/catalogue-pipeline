@@ -1,11 +1,12 @@
-import boto3
 import concurrent.futures
-from yaspin import yaspin
-from boto3.dynamodb.conditions import Key
-import json
 import itertools
-import maya
+import json
 import math
+
+import boto3
+from boto3.dynamodb.conditions import Key
+import maya
+from yaspin import yaspin
 
 platform_dev_role = "arn:aws:iam::760097843905:role/platform-developer"
 adapter_table_name = "mets-adapter-store"
@@ -64,10 +65,14 @@ class StorageManifestScanner:
                                                      KeyConditionExpression=Key('id').eq(f"digitised/{id}"),
                                                      Limit = 1,
                                                      ScanIndexForward = False)["Items"][0]
-                            bucket = stored["payload"]["bucket"]
-                            key = stored["payload"]["key"]
-                            bag_manifest = json.loads(self.s3.Object(bucket, key).get()["Body"].read().decode("utf-8"))
-                            yield id, bag_manifest["createdDate"]
+                            try:
+                                bucket = stored["payload"]["bucket"]
+                                key = stored["payload"]["key"]
+                                bag_manifest = json.loads(self.s3.Object(bucket, key).get()["Body"].read().decode("utf-8"))
+                                yield id, bag_manifest["createdDate"]
+                            except KeyError:
+                                print(f"error when parsing id:{id} and item:{stored}")
+                                pass
 
                     scan_params = futures.pop(fut)
 
