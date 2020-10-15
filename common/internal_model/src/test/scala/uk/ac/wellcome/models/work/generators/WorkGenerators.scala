@@ -1,5 +1,7 @@
 package uk.ac.wellcome.models.work.generators
 
+import java.time.Instant
+
 import uk.ac.wellcome.models.work.internal._
 import WorkState._
 
@@ -10,10 +12,11 @@ trait WorkGenerators extends IdentifiersGenerators {
     Random.nextInt(100) + 1
 
   def sourceWork(
-    sourceIdentifier: SourceIdentifier = createSourceIdentifier
+    sourceIdentifier: SourceIdentifier = createSourceIdentifier,
+    modifiedTime: Instant = Instant.now()
   ): Work.Visible[Source] =
     Work.Visible[Source](
-      state = Source(sourceIdentifier),
+      state = Source(sourceIdentifier, modifiedTime),
       data = initData,
       version = createVersion
     )

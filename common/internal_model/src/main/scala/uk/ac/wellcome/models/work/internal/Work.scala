@@ -1,5 +1,7 @@
 package uk.ac.wellcome.models.work.internal
 
+import java.time.Instant
+
 /** Work is the core model in the pipeline / API.
   *
   * It is parameterised by State, meaning the same type of Work can be in a
@@ -130,7 +132,8 @@ sealed trait WorkState {
 object WorkState {
 
   case class Source(
-    sourceIdentifier: SourceIdentifier
+    sourceIdentifier: SourceIdentifier,
+    modifiedTime: Instant
   ) extends WorkState {
 
     type WorkDataState = DataState.Unidentified
