@@ -13,30 +13,35 @@ trait WorksIndexConfigFields extends IndexConfigFields {
   import WorksAnalysis._
 
   // Fields
-  def sourceIdentifier = objectField("sourceIdentifier")
-    .fields(sourceIdentifierFields)
+  def sourceIdentifier =
+    objectField("sourceIdentifier")
+      .fields(sourceIdentifierFields)
 
-  def otherIdentifiers = objectField("otherIdentifiers")
-    .fields(sourceIdentifierFields)
+  def otherIdentifiers =
+    objectField("otherIdentifiers")
+      .fields(sourceIdentifierFields)
 
-  def format = objectField("format")
-    .fields(
-      label,
-      keywordField("id")
-    )
+  def format =
+    objectField("format")
+      .fields(
+        label,
+        keywordField("id")
+      )
 
-  def title = asciifoldingTextFieldWithKeyword("title")
-    .fields(
-      keywordField("keyword"),
-      textField("english").analyzer(englishAnalyzer.name),
-      textField("shingles").analyzer(shingleAsciifoldingAnalyzer.name)
-    )
+  def title =
+    asciifoldingTextFieldWithKeyword("title")
+      .fields(
+        keywordField("keyword"),
+        textField("english").analyzer(englishAnalyzer.name),
+        textField("shingles").analyzer(shingleAsciifoldingAnalyzer.name)
+      )
 
-  def notes = objectField("notes")
-    .fields(
-      keywordField("type"),
-      englishTextField("content")
-    )
+  def notes =
+    objectField("notes")
+      .fields(
+        keywordField("type"),
+        englishTextField("content")
+      )
 
   def period(idState: ObjectField) = Seq(
     label,
@@ -68,7 +73,8 @@ trait WorksIndexConfigFields extends IndexConfigFields {
     keywordField("numeration")
   )
 
-  def rootConcept(idState: ObjectField) = concept(idState) ++ agent(idState) ++ period(idState)
+  def rootConcept(idState: ObjectField) =
+    concept(idState) ++ agent(idState) ++ period(idState)
 
   def subject(idState: ObjectField): Seq[FieldDefinition] = Seq(
     idState,
@@ -79,10 +85,11 @@ trait WorksIndexConfigFields extends IndexConfigFields {
   def subjects(idState: ObjectField): ObjectField =
     objectField("subjects").fields(subject(idState))
 
-  def genre(fieldName: String, idState: ObjectField) = objectField(fieldName).fields(
-    label,
-    objectField("concepts").fields(rootConcept(idState))
-  )
+  def genre(fieldName: String, idState: ObjectField) =
+    objectField(fieldName).fields(
+      label,
+      objectField("concepts").fields(rootConcept(idState))
+    )
 
   def labelledTextField(fieldName: String) = objectField(fieldName).fields(
     label
@@ -90,11 +97,12 @@ trait WorksIndexConfigFields extends IndexConfigFields {
 
   def period(fieldName: String) = labelledTextField(fieldName)
 
-  def items(fieldName: String, idState: ObjectField) = objectField(fieldName).fields(
-    idState,
-    location(),
-    title
-  )
+  def items(fieldName: String, idState: ObjectField) =
+    objectField(fieldName).fields(
+      idState,
+      location(),
+      title
+    )
 
   def language =
     objectField("language").fields(
@@ -128,10 +136,11 @@ trait WorksIndexConfigFields extends IndexConfigFields {
     version
   )
 
-  def analyzedPath: TextField = textField("path")
-    .copyTo("data.collectionPath.depth")
-    .analyzer(pathAnalyzer.name)
-    .fields(keywordField("keyword"))
+  def analyzedPath: TextField =
+    textField("path")
+      .copyTo("data.collectionPath.depth")
+      .analyzer(pathAnalyzer.name)
+      .fields(keywordField("keyword"))
 
   def data(pathField: TextField, idState: ObjectField): ObjectField =
     objectField("data").fields(
