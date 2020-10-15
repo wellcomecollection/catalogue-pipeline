@@ -65,14 +65,14 @@ class StorageManifestScanner:
                                                      KeyConditionExpression=Key('id').eq(f"digitised/{id}"),
                                                      Limit = 1,
                                                      ScanIndexForward = False)["Items"][0]
+                            bucket = stored["payload"]["bucket"]
                             try:
-                                bucket = stored["payload"]["bucket"]
                                 key = stored["payload"]["key"]
-                                bag_manifest = json.loads(self.s3.Object(bucket, key).get()["Body"].read().decode("utf-8"))
-                                yield id, bag_manifest["createdDate"]
                             except KeyError:
-                                print(f"error when parsing id:{id} and item:{stored}")
-                                pass
+                                key = stored["payload"]["path"]
+
+                            bag_manifest = json.loads(self.s3.Object(bucket, key).get()["Body"].read().decode("utf-8"))
+                            yield id, bag_manifest["createdDate"]
 
                     scan_params = futures.pop(fut)
 
