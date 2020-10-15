@@ -8,42 +8,44 @@ import com.sksamuel.elastic4s.requests.mappings.{
 }
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
 
-sealed trait WorksIndexConfig extends IndexConfig with IndexConfigFields {
+trait WorksIndexConfigFields extends IndexConfigFields {
 
   import WorksAnalysis._
-  val analysis = WorksAnalysis()
-
-  def state: ObjectField
 
   // Fields
-  val sourceIdentifier = objectField("sourceIdentifier")
-    .fields(sourceIdentifierFields)
+  def sourceIdentifier =
+    objectField("sourceIdentifier")
+      .fields(sourceIdentifierFields)
 
-  val otherIdentifiers = objectField("otherIdentifiers")
-    .fields(sourceIdentifierFields)
+  def otherIdentifiers =
+    objectField("otherIdentifiers")
+      .fields(sourceIdentifierFields)
 
-  val format = objectField("format")
-    .fields(
-      label,
-      keywordField("id")
-    )
+  def format =
+    objectField("format")
+      .fields(
+        label,
+        keywordField("id")
+      )
 
-  val title = asciifoldingTextFieldWithKeyword("title")
-    .fields(
-      keywordField("keyword"),
-      textField("english").analyzer(englishAnalyzer.name),
-      textField("shingles").analyzer(shingleAsciifoldingAnalyzer.name)
-    )
+  def title =
+    asciifoldingTextFieldWithKeyword("title")
+      .fields(
+        keywordField("keyword"),
+        textField("english").analyzer(englishAnalyzer.name),
+        textField("shingles").analyzer(shingleAsciifoldingAnalyzer.name)
+      )
 
-  val notes = objectField("notes")
-    .fields(
-      keywordField("type"),
-      englishTextField("content")
-    )
+  def notes =
+    objectField("notes")
+      .fields(
+        keywordField("type"),
+        englishTextField("content")
+      )
 
-  val period = Seq(
+  def period(idState: ObjectField) = Seq(
     label,
-    id(),
+    idState,
     objectField("range").fields(
       label,
       dateField("from"),
@@ -52,39 +54,42 @@ sealed trait WorksIndexConfig extends IndexConfig with IndexConfigFields {
     )
   )
 
-  val place = Seq(
+  def place(idState: ObjectField) = Seq(
     label,
-    id()
+    idState
   )
 
-  val concept = Seq(
+  def concept(idState: ObjectField) = Seq(
     label,
-    id(),
+    idState,
     keywordField("type")
   )
 
-  val agent = Seq(
+  def agent(idState: ObjectField) = Seq(
     label,
-    id(),
+    idState,
     keywordField("type"),
     keywordField("prefix"),
     keywordField("numeration")
   )
 
-  val rootConcept = concept ++ agent ++ period
+  def rootConcept(idState: ObjectField) =
+    concept(idState) ++ agent(idState) ++ period(idState)
 
-  val subject: Seq[FieldDefinition] = Seq(
-    id(),
+  def subject(idState: ObjectField): Seq[FieldDefinition] = Seq(
+    idState,
     label,
-    objectField("concepts").fields(rootConcept)
+    objectField("concepts").fields(rootConcept(idState))
   )
 
-  def subjects: ObjectField = objectField("subjects").fields(subject)
+  def subjects(idState: ObjectField): ObjectField =
+    objectField("subjects").fields(subject(idState))
 
-  def genre(fieldName: String) = objectField(fieldName).fields(
-    label,
-    objectField("concepts").fields(rootConcept)
-  )
+  def genre(fieldName: String, idState: ObjectField) =
+    objectField(fieldName).fields(
+      label,
+      objectField("concepts").fields(rootConcept(idState))
+    )
 
   def labelledTextField(fieldName: String) = objectField(fieldName).fields(
     label
@@ -92,48 +97,52 @@ sealed trait WorksIndexConfig extends IndexConfig with IndexConfigFields {
 
   def period(fieldName: String) = labelledTextField(fieldName)
 
-  def items(fieldName: String) = objectField(fieldName).fields(
-    id(),
-    location(),
-    title
-  )
+  def items(fieldName: String, idState: ObjectField) =
+    objectField(fieldName).fields(
+      idState,
+      location(),
+      title
+    )
 
-  val language = objectField("language").fields(
-    label,
-    keywordField("id")
-  )
+  def language =
+    objectField("language").fields(
+      label,
+      keywordField("id")
+    )
 
-  val contributors = objectField("contributors").fields(
-    id(),
-    objectField("agent").fields(agent),
+  def contributors(idState: ObjectField) = objectField("contributors").fields(
+    idState,
+    objectField("agent").fields(agent(idState)),
     objectField("roles").fields(label),
   )
 
-  val production: ObjectField = objectField("production").fields(
-    label,
-    objectField("places").fields(place),
-    objectField("agents").fields(agent),
-    objectField("dates").fields(period),
-    objectField("function").fields(concept)
-  )
+  def production(idState: ObjectField): ObjectField =
+    objectField("production").fields(
+      label,
+      objectField("places").fields(place(idState)),
+      objectField("agents").fields(agent(idState)),
+      objectField("dates").fields(period(idState)),
+      objectField("function").fields(concept(idState))
+    )
 
-  val mergeCandidates = objectField("mergeCandidates").fields(
+  def mergeCandidates = objectField("mergeCandidates").fields(
     objectField("identifier").fields(sourceIdentifierFields),
     keywordField("reason")
   )
 
-  val images = objectField("images").fields(
-    id(),
+  def images(idState: ObjectField) = objectField("images").fields(
+    idState,
     location("location"),
     version
   )
 
-  private val analyzedPath: TextField = textField("path")
-    .copyTo("data.collectionPath.depth")
-    .analyzer(pathAnalyzer.name)
-    .fields(keywordField("keyword"))
+  def analyzedPath: TextField =
+    textField("path")
+      .copyTo("data.collectionPath.depth")
+      .analyzer(pathAnalyzer.name)
+      .fields(keywordField("keyword"))
 
-  def data(pathField: TextField): ObjectField =
+  def data(pathField: TextField, idState: ObjectField): ObjectField =
     objectField("data").fields(
       otherIdentifiers,
       mergeCandidates,
@@ -143,12 +152,12 @@ sealed trait WorksIndexConfig extends IndexConfig with IndexConfigFields {
       englishTextField("description"),
       englishTextKeywordField("physicalDescription"),
       englishTextKeywordField("lettering"),
-      objectField("createdDate").fields(period),
-      contributors,
-      subjects,
-      genre("genres"),
-      items("items"),
-      production,
+      objectField("createdDate").fields(period(idState)),
+      contributors(idState),
+      subjects(idState),
+      genre("genres", idState),
+      items("items", idState),
+      production(idState),
       language,
       location("thumbnail"),
       textField("edition"),
@@ -160,24 +169,35 @@ sealed trait WorksIndexConfig extends IndexConfig with IndexConfigFields {
         pathField,
         tokenCountField("depth").analyzer("standard")
       ),
-      images,
+      images(idState),
       keywordField("workType")
     )
 
-  def relation(name: String) = objectField(name).fields(
-    // Locally override the strict mapping mode. No data fields are indexed for
-    // now, in the future specific fields can be added as required.
-    objectField("data").dynamic("false"),
-    id(),
-    intField("depth")
-  )
+  def relation(name: String, idState: ObjectField) =
+    objectField(name).fields(
+      // Locally override the strict mapping mode. No data fields are indexed for
+      // now, in the future specific fields can be added as required.
+      objectField("data").dynamic("false"),
+      idState,
+      intField("depth")
+    )
 
-  val relations = objectField("relations").fields(
-    relation("ancestors"),
-    relation("children"),
-    relation("siblingsPreceding"),
-    relation("siblingsSucceeding"),
-  )
+  def relations(idState: ObjectField) =
+    objectField("relations").fields(
+      relation("ancestors", idState),
+      relation("children", idState),
+      relation("siblingsPreceding", idState),
+      relation("siblingsSucceeding", idState),
+    )
+}
+
+sealed trait WorksIndexConfig extends IndexConfig with WorksIndexConfigFields {
+
+  val analysis = WorksAnalysis()
+
+  def state: ObjectField
+
+  def idState: ObjectField
 
   def fields: Seq[FieldDefinition with Product with Serializable] =
     Seq(
@@ -186,7 +206,7 @@ sealed trait WorksIndexConfig extends IndexConfig with IndexConfigFields {
       objectField("redirect")
         .fields(sourceIdentifier, canonicalId, otherIdentifiers),
       keywordField("type"),
-      data(analyzedPath),
+      data(analyzedPath, idState),
       objectField("invisibilityReasons").fields(
         keywordField("type"),
         keywordField("info")
@@ -199,6 +219,8 @@ sealed trait WorksIndexConfig extends IndexConfig with IndexConfigFields {
 object SourceWorkIndexConfig extends WorksIndexConfig {
 
   val state = objectField("state").fields(sourceIdentifier)
+
+  val idState = identifiable()
 }
 
 object MergedWorkIndexConfig extends WorksIndexConfig {
@@ -207,23 +229,29 @@ object MergedWorkIndexConfig extends WorksIndexConfig {
     sourceIdentifier,
     intField("numberOfSources"),
   )
+
+  val idState = identifiable()
 }
 
 object DenormalisedWorkIndexConfig extends WorksIndexConfig {
 
+  val idState = identifiable()
+
   val state = objectField("state").fields(
     sourceIdentifier,
     intField("numberOfSources"),
-    relations
+    relations(idState)
   )
 }
 
 object IdentifiedWorkIndexConfig extends WorksIndexConfig {
 
+  val idState = id()
+
   val state = objectField("state").fields(
     canonicalId,
     sourceIdentifier,
     intField("numberOfSources"),
-    relations
+    relations(idState)
   )
 }

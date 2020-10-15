@@ -5,7 +5,7 @@ import com.sksamuel.elastic4s.analysis.Analysis
 import com.sksamuel.elastic4s.requests.mappings.{MappingDefinition, ObjectField}
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
 
-object ImagesIndexConfig extends IndexConfig with IndexConfigFields {
+object ImagesIndexConfig extends IndexConfig with WorksIndexConfigFields {
 
   override val analysis: Analysis = WorksAnalysis()
 
@@ -17,11 +17,12 @@ object ImagesIndexConfig extends IndexConfig with IndexConfigFields {
 
   private def sourceWork(canonicalWork: String): ObjectField =
     objectField(canonicalWork).fields(
-      id("id"),
-      IdentifiedWorkIndexConfig.data(textField("path")),
+      id(),
+      data(textField("path"), id()),
       keywordField("type"),
       version
     )
+
   val source = objectField("source").fields(
     sourceWork("canonicalWork"),
     sourceWork("redirectedWork"),

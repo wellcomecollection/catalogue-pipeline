@@ -61,7 +61,15 @@ trait IndexConfigFields {
       keywordField("type"),
       canonicalId,
       objectField("sourceIdentifier").fields(sourceIdentifierFields),
-      objectField("otherIdentifiers").fields(sourceIdentifierFields)
+      objectField("otherIdentifiers").fields(sourceIdentifierFields),
+    )
+
+  def identifiable(fieldName: String = "id") =
+    objectField(fieldName).fields(
+      keywordField("type"),
+      keywordField("identifiedType"),
+      objectField("sourceIdentifier").fields(sourceIdentifierFields),
+      objectField("otherIdentifiers").fields(sourceIdentifierFields),
     )
 
   def location(fieldName: String = "locations") =

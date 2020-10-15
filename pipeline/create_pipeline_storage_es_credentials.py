@@ -92,10 +92,7 @@ def create_roles(es, *, work_type):
     """
     Create read and write roles for a given work type.
     """
-    for role_suffix, privileges in [
-        ("read", ["read"]),
-        ("write", ["write", "create_index"]),
-    ]:
+    for role_suffix, privileges in [("read", ["read"]), ("write", ["all"])]:
         role_name = f"{work_type}_{role_suffix}"
         index_pattern = INDEX_PATTERN.format(work_type=work_type)
 
