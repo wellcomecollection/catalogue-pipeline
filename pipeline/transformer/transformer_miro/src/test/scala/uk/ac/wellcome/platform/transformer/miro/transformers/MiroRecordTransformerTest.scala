@@ -333,7 +333,7 @@ class MiroRecordTransformerTest
         createMiroSourceIdentifierWith(
           value = miroRecord.imageNumber
         ),
-        Instant.ofEpochMilli(0)
+        Instant.EPOCH
       ),
       version = 1,
       data = WorkData()

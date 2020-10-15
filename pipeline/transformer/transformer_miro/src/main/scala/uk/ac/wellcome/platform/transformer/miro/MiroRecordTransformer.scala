@@ -90,14 +90,14 @@ class MiroRecordTransformer
         version = version,
         state = Source(sourceIdentifier,
           // Miro records are static so we just send 0 as a last modification timestamp
-          Instant.ofEpochMilli(0)),
+          Instant.EPOCH),
         data = data
       )
     }.recover {
       case e: ShouldNotTransformException =>
         debug(s"Should not transform: ${e.getMessage}")
         Work.Invisible[Source](
-          state = Source(sourceIdentifier, Instant.ofEpochMilli(0)),
+          state = Source(sourceIdentifier, Instant.EPOCH),
           version = version,
           data = WorkData()
         )

@@ -213,7 +213,8 @@ class SierraTransformerTest
 
   it("returns an InvisibleWork if there isn't any bib data") {
     assertTransformReturnsInvisibleWork(
-      maybeBibRecord = None
+      maybeBibRecord = None,
+      Instant.EPOCH
     )
   }
 
@@ -221,6 +222,7 @@ class SierraTransformerTest
     "does not perform a transformation without bibData, even if some itemData is present") {
     assertTransformReturnsInvisibleWork(
       maybeBibRecord = None,
+      Instant.EPOCH,
       itemRecords = List(createSierraItemRecord)
     )
   }
@@ -829,7 +831,8 @@ class SierraTransformerTest
     )
 
     assertTransformReturnsInvisibleWork(
-      maybeBibRecord = Some(bibRecord)
+      maybeBibRecord = Some(bibRecord),
+      bibRecord.modifiedDate
     )
   }
 
@@ -953,6 +956,7 @@ class SierraTransformerTest
 
   private def assertTransformReturnsInvisibleWork(
     maybeBibRecord: Option[SierraBibRecord],
+    modifiedDate: Instant,
     itemRecords: List[SierraItemRecord] = List()) = {
     val id = createSierraBibNumber
 
@@ -971,6 +975,7 @@ class SierraTransformerTest
         createSierraSystemSourceIdentifierWith(
           value = id.withCheckDigit
         ),
+        modifiedDate
       ),
       version = 1,
       data = WorkData()

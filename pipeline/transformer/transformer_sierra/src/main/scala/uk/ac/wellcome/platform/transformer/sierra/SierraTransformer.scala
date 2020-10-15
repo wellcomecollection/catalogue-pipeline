@@ -1,26 +1,18 @@
 package uk.ac.wellcome.platform.transformer.sierra
 
+import java.time.Instant
+
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.exceptions.JsonDecodingError
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.platform.transformer.sierra.exceptions.{
-  ShouldNotTransformException,
-  SierraTransformerException
-}
-import uk.ac.wellcome.platform.transformer.sierra.source.{
-  SierraBibData,
-  SierraItemData
-}
+import uk.ac.wellcome.platform.transformer.sierra.exceptions.{ShouldNotTransformException, SierraTransformerException}
+import uk.ac.wellcome.platform.transformer.sierra.source.{SierraBibData, SierraItemData}
 import uk.ac.wellcome.platform.transformer.sierra.transformers._
 import uk.ac.wellcome.platform.transformer.sierra.source.SierraMaterialType._
 import uk.ac.wellcome.platform.transformer.sierra.source.SierraBibData._
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.sierra_adapter.model.{
-  SierraBibNumber,
-  SierraBibRecord,
-  SierraItemNumber,
-  SierraTransformable
-}
+import uk.ac.wellcome.sierra_adapter.model.{SierraBibNumber, SierraBibRecord, SierraItemNumber, SierraTransformable}
+
 import scala.util.{Failure, Success, Try}
 import WorkState.Source
 
@@ -40,7 +32,7 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
         debug(s"No bib data for ${sierraTransformable.sierraId}, so skipping")
         Success(
           Work.Invisible[Source](
-            state = Source(sourceIdentifier),
+            state = Source(sourceIdentifier, Instant.EPOCH),
             version = version,
             data = WorkData()
           )
@@ -69,7 +61,7 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
         val data = workDataFromBibData(bibId, bibData)
         Work.Visible[Source](
           version = version,
-          state = Source(sourceIdentifier),
+          state = Source(sourceIdentifier, bibRecord.modifiedDate),
           data = data
         )
       }
@@ -81,7 +73,7 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
         case e: ShouldNotTransformException =>
           debug(s"Should not transform $bibId: ${e.getMessage}")
           Work.Invisible[Source](
-            state = Source(sourceIdentifier),
+            state = Source(sourceIdentifier, bibRecord.modifiedDate),
             version = version,
             data = WorkData()
           )
