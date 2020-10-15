@@ -28,7 +28,8 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
           SourceIdentifier(
             value = id,
             identifierType = CalmIdentifierTypes.recordId
-          )
+          ),
+          record.retrievedAt
         ),
         data = WorkData[DataState.Unidentified](
           title = Some("abc"),
@@ -487,7 +488,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
           SourceIdentifier(
             value = id,
             identifierType = CalmIdentifierTypes.recordId
-          )
+          ),record.retrievedAt
         ),
         version = version,
         data = WorkData[DataState.Unidentified](

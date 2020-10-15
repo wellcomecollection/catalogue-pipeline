@@ -48,7 +48,7 @@ object CalmTransformer
     if (shouldSuppress(record)) {
       Right(
         Work.Invisible[Source](
-          state = Source(sourceIdentifier(record)),
+          state = Source(sourceIdentifier(record), record.retrievedAt),
           version = version,
           data = workData(record)
             .getOrElse(WorkData[DataState.Unidentified]()),
@@ -60,7 +60,7 @@ object CalmTransformer
         case Right(data) =>
           Right(
             Work.Visible[Source](
-              state = Source(sourceIdentifier(record)),
+              state = Source(sourceIdentifier(record), record.retrievedAt),
               version = version,
               data = data
             ))
@@ -70,7 +70,7 @@ object CalmTransformer
             case knownErr: CalmTransformerException =>
               Right(
                 Work.Invisible[Source](
-                  state = Source(sourceIdentifier(record)),
+                  state = Source(sourceIdentifier(record), record.retrievedAt),
                   version = version,
                   data = WorkData(),
                   invisibilityReasons =
@@ -78,7 +78,7 @@ object CalmTransformer
             case unknownStatus: UnknownAccessStatus =>
               Right(
                 Work.Invisible[Source](
-                  state = Source(sourceIdentifier(record)),
+                  state = Source(sourceIdentifier(record), record.retrievedAt),
                   version = version,
                   data = WorkData(),
                   invisibilityReasons =
