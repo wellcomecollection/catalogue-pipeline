@@ -144,18 +144,18 @@ class IdMinterFeatureTest
     val work: Work[Denormalised] = denormalisedWork()
 
     withLocalSqsQueue() { queue =>
-      withElasticStorageWorkerService(work, queue, messageSender) { workerService =>
+      withElasticStorageWorkerService(work, queue, messageSender) {
+        workerService =>
+          sendNotificationToSQS(queue = queue, body = work.id)
 
-        sendNotificationToSQS(queue = queue, body = work.id)
+          eventually {
+            val works = messageSender.getMessages[Work[Identified]]
+            works.length shouldBe >=(1)
 
-        eventually {
-          val works = messageSender.getMessages[Work[Identified]]
-          works.length shouldBe >=(1)
-
-          val receivedWork = works.head.asInstanceOf[Work[Identified]]
-          receivedWork.sourceIdentifier shouldBe work.sourceIdentifier
-          receivedWork.state.canonicalId shouldNot be(empty)
-        }
+            val receivedWork = works.head.asInstanceOf[Work[Identified]]
+            receivedWork.sourceIdentifier shouldBe work.sourceIdentifier
+            receivedWork.state.canonicalId shouldNot be(empty)
+          }
       }
     }
   }

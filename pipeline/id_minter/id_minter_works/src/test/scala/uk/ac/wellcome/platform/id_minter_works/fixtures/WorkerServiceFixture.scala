@@ -85,10 +85,9 @@ trait WorkerServiceFixture
     }
   }
 
-  def withElasticStorageWorkerService[R](
-    work: Work[Denormalised],
-    queue: Queue,
-    messageSender: MemoryMessageSender)(
+  def withElasticStorageWorkerService[R](work: Work[Denormalised],
+                                         queue: Queue,
+                                         messageSender: MemoryMessageSender)(
     testWith: TestWith[IdMinterWorkerService[String], R]): R =
     withIdentifiersDatabase { identifiersTableConfig =>
       Class.forName("com.mysql.jdbc.Driver")
