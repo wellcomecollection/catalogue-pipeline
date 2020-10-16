@@ -28,6 +28,10 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
   def lookupIds(sourceIdentifiers: Seq[SourceIdentifier])(
     implicit session: DBSession = readOnlySession): Try[LookupResult] =
     Try {
+      assert(
+        sourceIdentifiers.nonEmpty,
+        message = "Cannot look up an empty list of sourceIdentifiers"
+      )
       debug(s"Matching ($sourceIdentifiers)")
       val distinctIdentifiers = sourceIdentifiers.distinct
       val identifierRowsMap: Map[(String, String, String), SourceIdentifier] =
