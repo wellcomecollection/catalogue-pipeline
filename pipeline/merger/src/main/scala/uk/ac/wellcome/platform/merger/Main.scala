@@ -10,7 +10,7 @@ import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.elasticsearch.MergedWorkIndexConfig
 import uk.ac.wellcome.pipeline_storage.ElasticIndexer
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.messaging.typesafe.SQSBuilder
+import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.services._
@@ -33,8 +33,10 @@ object Main extends WellcomeTypesafeApp {
       mergerRules = PlatformMerger
     )
     val workSender =
-      BigMessagingBuilder.buildBigMessageSender(
-        config.getConfig("work-sender").withFallback(config)
+      SNSBuilder.buildSNSMessageSender(
+        config,
+        namespace = "work-sender",
+        subject = "Sent by the merger"
       )
     val imageSender =
       BigMessagingBuilder
