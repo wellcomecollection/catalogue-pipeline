@@ -284,9 +284,9 @@ class SierraTransformerTest
       value = id.withoutCheckDigit
     )
 
-    val work = transformDataToWork(id = id, data = data)
+    val work = transformDataToWork(id = id, data = data, modifiedTime)
 
-    work shouldBe sourceWork(sourceIdentifier)
+    work shouldBe sourceWork(sourceIdentifier, modifiedTime)
       .withVersion(1)
       .title(title)
       .otherIdentifiers(List(sierraIdentifier))
@@ -941,10 +941,10 @@ class SierraTransformerTest
                                                                                                                |""".stripMargin
 
   private def transformDataToWork(id: SierraBibNumber,
-                                  data: String): Work[Source] = {
+                                  data: String, modifiedDate: Instant = olderDate): Work[Source] = {
     val bibRecord = createSierraBibRecordWith(
       id = id,
-      data = data
+      data = data, modifiedDate= modifiedDate
     )
 
     val sierraTransformable = SierraTransformable(

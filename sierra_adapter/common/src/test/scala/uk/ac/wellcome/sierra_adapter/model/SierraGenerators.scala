@@ -43,7 +43,7 @@ trait SierraGenerators extends RandomGenerators {
   def createSierraBibRecordWith(
     id: SierraBibNumber = createSierraBibNumber,
     data: String = "",
-    modifiedDate: Instant = Instant.now): SierraBibRecord = {
+    modifiedDate: Instant = olderDate): SierraBibRecord = {
     val recordData = if (data == "") {
       s"""{"id": "$id", "title": "${randomAlphanumeric(50)}"}"""
     } else data
