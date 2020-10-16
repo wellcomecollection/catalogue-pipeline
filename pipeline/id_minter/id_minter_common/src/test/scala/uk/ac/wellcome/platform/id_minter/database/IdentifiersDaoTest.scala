@@ -24,7 +24,7 @@ class IdentifiersDaoTest
 
   def withIdentifiersDao[R](existingEntries: Seq[Identifier] = Nil)(
     testWith: TestWith[(IdentifiersDao, IdentifiersTable), R]): R =
-    withIdentifiersDatabase { identifiersTableConfig =>
+    withIdentifiersTable { identifiersTableConfig =>
       val identifiersTable = new IdentifiersTable(identifiersTableConfig)
 
       new TableProvisioner(rdsClientConfig)

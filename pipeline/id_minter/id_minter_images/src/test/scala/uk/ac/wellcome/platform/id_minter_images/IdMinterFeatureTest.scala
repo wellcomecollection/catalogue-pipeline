@@ -24,7 +24,7 @@ class IdMinterFeatureTest
     val messageSender = new MemoryMessageSender()
 
     withLocalSqsQueue() { queue =>
-      withIdentifiersDatabase { identifiersTableConfig =>
+      withIdentifiersTable { identifiersTableConfig =>
         withWorkerService(messageSender, queue, identifiersTableConfig) { _ =>
           eventuallyTableExists(identifiersTableConfig)
           val work: Work[Source] = sourceWork()
@@ -59,7 +59,7 @@ class IdMinterFeatureTest
     val messageSender = new MemoryMessageSender()
 
     withLocalSqsQueue() { queue =>
-      withIdentifiersDatabase { identifiersTableConfig =>
+      withIdentifiersTable { identifiersTableConfig =>
         withWorkerService(messageSender, queue, identifiersTableConfig) { _ =>
           eventuallyTableExists(identifiersTableConfig)
           val work: Work[Source] = sourceWork().invisible()
@@ -85,7 +85,7 @@ class IdMinterFeatureTest
     val messageSender = new MemoryMessageSender()
 
     withLocalSqsQueue() { queue =>
-      withIdentifiersDatabase { identifiersTableConfig =>
+      withIdentifiersTable { identifiersTableConfig =>
         withWorkerService(messageSender, queue, identifiersTableConfig) { _ =>
           eventuallyTableExists(identifiersTableConfig)
 
@@ -114,7 +114,7 @@ class IdMinterFeatureTest
     val messageSender = new MemoryMessageSender()
 
     withLocalSqsQueue() { queue =>
-      withIdentifiersDatabase { identifiersTableConfig =>
+      withIdentifiersTable { identifiersTableConfig =>
         withWorkerService(messageSender, queue, identifiersTableConfig) { _ =>
           sendInvalidJSONto(queue)
 

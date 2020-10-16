@@ -16,7 +16,7 @@ class IdMinterWorkerServiceTest
     with WorkerServiceFixture {
 
   it("creates the Identifiers table in MySQL upon startup") {
-    withIdentifiersDatabase { identifiersTableConfig =>
+    withIdentifiersTable { identifiersTableConfig =>
       val identifiersDao = new IdentifiersDao(
         identifiers = new IdentifiersTable(identifiersTableConfig)
       )

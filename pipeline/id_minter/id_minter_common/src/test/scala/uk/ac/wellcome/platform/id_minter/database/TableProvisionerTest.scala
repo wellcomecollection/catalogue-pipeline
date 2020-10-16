@@ -15,7 +15,7 @@ class TableProvisionerTest
     with Matchers {
 
   it("creates the Identifiers table") {
-    withIdentifiersDatabase { identifiersTableConfig =>
+    withIdentifiersTable { identifiersTableConfig =>
       val databaseName = identifiersTableConfig.database
       val tableName = identifiersTableConfig.tableName
 
