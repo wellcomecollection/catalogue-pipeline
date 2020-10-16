@@ -7,12 +7,13 @@ import uk.ac.wellcome.elasticsearch.model.CanonicalId
 import uk.ac.wellcome.fixtures.TestWith
 
 trait RetrieverTestCases[Context, T]
-  extends AnyFunSpec
+    extends AnyFunSpec
     with Matchers
     with ScalaFutures {
   def withContext[R](documents: Seq[T])(testWith: TestWith[Context, R]): R
 
-  def withRetriever[R](testWith: TestWith[Retriever[T], R])(implicit context: Context): R
+  def withRetriever[R](testWith: TestWith[Retriever[T], R])(
+    implicit context: Context): R
 
   def createT: T
 
@@ -30,7 +31,8 @@ trait RetrieverTestCases[Context, T]
     }
   }
 
-  it("throws a RetrieverNotFoundException if asked to retrieve a missing document") {
+  it(
+    "throws a RetrieverNotFoundException if asked to retrieve a missing document") {
     val missingId = id.canonicalId(createT)
 
     withContext(documents = Seq.empty) { implicit context =>

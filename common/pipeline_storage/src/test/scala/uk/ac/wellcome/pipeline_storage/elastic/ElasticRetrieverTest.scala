@@ -6,20 +6,28 @@ import uk.ac.wellcome.elasticsearch.model.CanonicalId
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
-import uk.ac.wellcome.pipeline_storage.{ElasticRetriever, Retriever, RetrieverTestCases}
-import uk.ac.wellcome.pipeline_storage.fixtures.{ElasticIndexerFixtures, SampleDocument}
+import uk.ac.wellcome.pipeline_storage.{
+  ElasticRetriever,
+  Retriever,
+  RetrieverTestCases
+}
+import uk.ac.wellcome.pipeline_storage.fixtures.{
+  ElasticIndexerFixtures,
+  SampleDocument
+}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class ElasticRetrieverTest
-  extends RetrieverTestCases[Index, SampleDocument]
+    extends RetrieverTestCases[Index, SampleDocument]
     with ElasticsearchFixtures
     with ElasticIndexerFixtures
     with IdentifiersGenerators {
 
   import SampleDocument._
 
-  override def withContext[R](documents: Seq[SampleDocument])(testWith: TestWith[Index, R]): R =
+  override def withContext[R](documents: Seq[SampleDocument])(
+    testWith: TestWith[Index, R]): R =
     withLocalElasticsearchIndex(config = NoStrictMapping) { index =>
       withElasticIndexer[SampleDocument, R](index) { indexer =>
         whenReady(indexer.index(documents)) { _ =>
@@ -31,7 +39,8 @@ class ElasticRetrieverTest
     }
 
   override def withRetriever[R](
-    testWith: TestWith[Retriever[SampleDocument], R])(implicit index: Index): R =
+    testWith: TestWith[Retriever[SampleDocument], R])(
+    implicit index: Index): R =
     testWith(
       new ElasticRetriever(elasticClient, index = index)
     )
