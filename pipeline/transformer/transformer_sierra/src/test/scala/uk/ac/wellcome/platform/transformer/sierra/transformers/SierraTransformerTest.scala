@@ -940,11 +940,14 @@ class SierraTransformerTest
                                                                                                                |}
                                                                                                                |""".stripMargin
 
-  private def transformDataToWork(id: SierraBibNumber,
-                                  data: String, modifiedDate: Instant = olderDate): Work[Source] = {
+  private def transformDataToWork(
+    id: SierraBibNumber,
+    data: String,
+    modifiedDate: Instant = olderDate): Work[Source] = {
     val bibRecord = createSierraBibRecordWith(
       id = id,
-      data = data, modifiedDate= modifiedDate
+      data = data,
+      modifiedDate = modifiedDate
     )
 
     val sierraTransformable = SierraTransformable(
