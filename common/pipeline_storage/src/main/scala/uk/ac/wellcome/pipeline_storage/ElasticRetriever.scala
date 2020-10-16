@@ -28,6 +28,8 @@ class ElasticRetriever[T](client: ElasticClient, index: Index)(
       }
       .flatMap {
         case RequestFailure(_, _, _, error) => Future.failed(error.asException)
+        case RequestSuccess(_, _, _, response) if !response.found =>
+          Future.failed(new RetrieverNotFoundException(id))
         case RequestSuccess(_, _, _, response) =>
           response.safeTo[T] match {
             case Success(item)  => Future.successful(item)
