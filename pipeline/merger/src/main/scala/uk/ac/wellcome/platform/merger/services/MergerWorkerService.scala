@@ -45,7 +45,7 @@ class MergerWorkerService[WorkDestination, ImageDestination](
                          lastUpdated: Instant): Future[Unit] = {
     val merged = mergerManager
       .applyMerge(maybeWorks = maybeWorks)
-      .lastUpdated(lastUpdated)
+      .withModifiedTime(lastUpdated)
     val worksFuture = sendMessages(workSender, merged.works)
     val imagesFuture = sendMessages(imageSender, merged.images)
     for {

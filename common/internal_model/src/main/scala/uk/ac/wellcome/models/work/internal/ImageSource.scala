@@ -2,17 +2,13 @@ package uk.ac.wellcome.models.work.internal
 
 sealed trait ImageSource[State <: DataState] {
   val id: State#Id
-  val version: Int
 }
 
 case class SourceWorks[State <: DataState](
   canonicalWork: SourceWork[State],
   redirectedWork: Option[SourceWork[State]],
-  numberOfSources: Int = 1
 ) extends ImageSource[State] {
   override val id = canonicalWork.id
-  override val version =
-    canonicalWork.version + redirectedWork.map(_.version).getOrElse(0)
 }
 
 case class SourceWork[State <: DataState](

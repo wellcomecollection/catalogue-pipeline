@@ -79,10 +79,10 @@ trait Merger extends MergerLogging {
           }
 
           val remaining = (sources.toSet -- redirectedSources)
-            .map(_.transition[Merged](1))
+            .map(_.transition[Merged]())
           val redirects = redirectedSources
             .map(redirectSourceToTarget(target))
-            .map(_.transition[Merged](1))
+            .map(_.transition[Merged]())
           logResult(result, redirects.toList, remaining.toList)
 
           MergerOutcome(
@@ -141,12 +141,12 @@ object PlatformMerger extends Merger {
     if (sources.isEmpty)
       State.pure(
         MergeResult(
-          mergedTarget = target.transition[Merged](1),
+          mergedTarget = target.transition[Merged],
           images = standaloneImages(target).map {
             _ mergeWith (
               canonicalWork = target.toSourceWork,
               redirectedWork = None,
-              numberOfSources = 1
+              modifiedTime = target.state.modifiedTime
             )
           }
         )
@@ -165,17 +165,16 @@ object PlatformMerger extends Merger {
             images = unmergedImages
           )
         }
-        nMergedSources <- State.inspect[MergeState, Int](_.size)
       } yield
         MergeResult(
-          mergedTarget = work.transition[Merged](nMergedSources + 1),
+          mergedTarget = work.transition[Merged](),
           images = unmergedImages.map { image =>
             image mergeWith (
               canonicalWork = work.toSourceWork,
               redirectedWork = sources
                 .find { _.data.images.contains(image) }
                 .map(_.toSourceWork),
-              numberOfSources = nMergedSources + 1
+              modifiedTime = work.state.modifiedTime
             )
           }
         )

@@ -1,5 +1,7 @@
 package uk.ac.wellcome.models.work.internal
 
+import java.time.Instant
+
 sealed trait BaseImage[+State <: DataState] extends HasId[State#Id] {
   val id: State#Id
   val location: DigitalLocationDeprecated
@@ -12,29 +14,23 @@ case class UnmergedImage[State <: DataState](
 ) extends BaseImage[State] {
   def mergeWith(canonicalWork: SourceWork[State],
                 redirectedWork: Option[SourceWork[State]],
-                numberOfSources: Int): MergedImage[State] =
+                modifiedTime: Instant): MergedImage[State] =
     MergedImage[State](
       id = id,
       version = version,
+      modifiedTime = modifiedTime,
       location = location,
-      source =
-        SourceWorks[State](canonicalWork, redirectedWork, numberOfSources)
+      source = SourceWorks[State](canonicalWork, redirectedWork)
     )
 }
 
 case class MergedImage[State <: DataState](
   id: State#Id,
   version: Int,
+  modifiedTime: Instant,
   location: DigitalLocationDeprecated,
   source: ImageSource[State]
-) extends BaseImage[State] {
-  def toUnmerged: UnmergedImage[State] =
-    UnmergedImage[State](
-      id = id,
-      version = version,
-      location = location
-    )
-}
+) extends BaseImage[State]
 
 object MergedImage {
   implicit class IdentifiedMergedImageOps(
@@ -43,6 +39,7 @@ object MergedImage {
       AugmentedImage(
         id = mergedImage.id,
         version = mergedImage.version,
+        modifiedTime = mergedImage.modifiedTime,
         location = mergedImage.location,
         source = mergedImage.source,
         inferredData = inferredData
@@ -53,6 +50,7 @@ object MergedImage {
 case class AugmentedImage(
   id: IdState.Identified,
   version: Int,
+  modifiedTime: Instant,
   location: DigitalLocationDeprecated,
   source: ImageSource[DataState.Identified],
   inferredData: Option[InferredData] = None

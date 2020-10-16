@@ -12,23 +12,33 @@ import WorkFsm._
  */
 case class MergerOutcome(works: Seq[Work[Merged]],
                          images: Seq[MergedImage[DataState.Unidentified]]) {
-  def lastUpdated(lastUpdated: Instant): MergerOutcome = MergerOutcome(
-    works = works.map(touchWorkLastUpdated(lastUpdated)),
-    images = images.map(touchImageLastUpdated(lastUpdated)),
+  def withModifiedTime(modifiedTime: Instant): MergerOutcome = MergerOutcome(
+    works = works.map(workWithModifiedTime(modifiedTime)),
+    images = images.map(imageWithModifiedTime(modifiedTime)),
   )
 
-  private def touchImageLastUpdated(lastUpdated: Instant)(
+  private def imageWithModifiedTime(modifiedTime: Instant)(
     image: MergedImage[DataState.Unidentified])
-    : MergedImage[DataState.Unidentified] = ???
-  private def touchWorkLastUpdated(lastUpdated: Instant)(
-    work: Work[WorkState.Merged]): Work[WorkState.Merged] = ???
+    : MergedImage[DataState.Unidentified] = image.copy(
+    modifiedTime = modifiedTime
+  )
+
+  private def workWithModifiedTime(modifiedTime: Instant)(
+    work: Work[Merged]): Work[Merged] = work match {
+    case visibleWork @ Work.Visible(_, _, state) =>
+      visibleWork.copy(state = state.copy(modifiedTime = modifiedTime))
+    case redirectedWork @ Work.Redirected(_, _, state) =>
+      redirectedWork.copy(state = state.copy(modifiedTime = modifiedTime))
+    case invisibleWork @ Work.Invisible(_, _, state, _) =>
+      invisibleWork.copy(state = state.copy(modifiedTime = modifiedTime))
+  }
 }
 
 object MergerOutcome {
 
   def passThrough(works: Seq[Work[Source]]): MergerOutcome =
     MergerOutcome(
-      works = works.map(_.transition[Merged](1)),
+      works = works.map(_.transition[Merged]),
       images = Nil
     )
 }
