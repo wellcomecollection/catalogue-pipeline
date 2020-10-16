@@ -20,17 +20,21 @@ class ElasticRetriever[T](client: ElasticClient, index: Index)(
     extends Retriever[T]
     with Logging {
 
-  final def apply(id: String): Future[T] =
+  final def apply(id: String): Future[T] = {
+    debug(s"Looking up ID $id in index $index")
     client
       .execute {
         get(index, id)
       }
       .flatMap {
         case RequestFailure(_, _, _, error) => Future.failed(error.asException)
+        case RequestSuccess(_, _, _, response) if !response.found =>
+          Future.failed(new RetrieverNotFoundException(id))
         case RequestSuccess(_, _, _, response) =>
           response.safeTo[T] match {
             case Success(item)  => Future.successful(item)
             case Failure(error) => Future.failed(error)
           }
       }
+  }
 }

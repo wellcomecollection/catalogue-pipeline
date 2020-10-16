@@ -25,7 +25,7 @@ class IdMinterFeatureTest
     val messageSender = new MemoryMessageSender()
 
     withLocalSqsQueue() { queue =>
-      withIdentifiersDatabase { identifiersTableConfig =>
+      withIdentifiersTable { identifiersTableConfig =>
         val work: Work[Denormalised] = denormalisedWork()
         val index = createIndex(List(work))
         withWorkerService(messageSender, queue, identifiersTableConfig, index) {
@@ -62,7 +62,7 @@ class IdMinterFeatureTest
     val messageSender = new MemoryMessageSender()
 
     withLocalSqsQueue() { queue =>
-      withIdentifiersDatabase { identifiersTableConfig =>
+      withIdentifiersTable { identifiersTableConfig =>
         val work: Work[Denormalised] = denormalisedWork().invisible()
         val index = createIndex(List(work))
         withWorkerService(messageSender, queue, identifiersTableConfig, index) {
@@ -90,7 +90,7 @@ class IdMinterFeatureTest
     val messageSender = new MemoryMessageSender()
 
     withLocalSqsQueue() { queue =>
-      withIdentifiersDatabase { identifiersTableConfig =>
+      withIdentifiersTable { identifiersTableConfig =>
         val work: Work[Denormalised] = denormalisedWork()
           .redirected(redirect = IdState.Identifiable(createSourceIdentifier))
         val index = createIndex(List(work))
@@ -120,7 +120,7 @@ class IdMinterFeatureTest
     val messageSender = new MemoryMessageSender()
 
     withLocalSqsQueue() { queue =>
-      withIdentifiersDatabase { identifiersTableConfig =>
+      withIdentifiersTable { identifiersTableConfig =>
         val work: Work[Denormalised] = denormalisedWork()
         val index = createIndex(List(work))
         withWorkerService(messageSender, queue, identifiersTableConfig, index) {

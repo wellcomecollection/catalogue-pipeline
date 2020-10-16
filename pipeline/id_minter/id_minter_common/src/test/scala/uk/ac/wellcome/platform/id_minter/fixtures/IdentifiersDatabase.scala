@@ -74,7 +74,7 @@ trait IdentifiersDatabase
     password = password
   )
 
-  def withIdentifiersDatabase[R](
+  def withIdentifiersTable[R](
     testWith: TestWith[IdentifiersTableConfig, R]): R = {
     ConnectionPool.add(
       'primary,

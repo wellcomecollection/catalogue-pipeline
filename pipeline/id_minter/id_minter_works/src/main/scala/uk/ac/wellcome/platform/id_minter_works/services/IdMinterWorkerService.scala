@@ -48,10 +48,7 @@ class IdMinterWorkerService[Destination](
 
   def processMessage(message: NotificationMessage): Future[Unit] =
     jsonRetriever(message.body)
-      .flatMap { json =>
-        error(s"NICKDEBUG: ${json.noSpacesSortKeys}")
-        Future.fromTry(processJson(json))
-      }
+      .flatMap(json => Future.fromTry(processJson(json)))
 
   def processJson(json: Json): Try[Unit] =
     for {

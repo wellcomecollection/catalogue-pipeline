@@ -26,7 +26,7 @@ class IdentifierGeneratorTest
                                    None,
                                  existingDaoEntries: Seq[Identifier] = Nil)(
     testWith: TestWith[(IdentifierGenerator, IdentifiersTable), R]) =
-    withIdentifiersDatabase[R] { identifiersTableConfig =>
+    withIdentifiersTable[R] { identifiersTableConfig =>
       val identifiersTable = new IdentifiersTable(identifiersTableConfig)
 
       new TableProvisioner(rdsClientConfig)
