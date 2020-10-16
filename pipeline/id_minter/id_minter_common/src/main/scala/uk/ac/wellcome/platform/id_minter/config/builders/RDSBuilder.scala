@@ -7,12 +7,19 @@ import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 
 object RDSBuilder {
   def buildDB(config: Config): Unit = {
-
-    val maxSize = config.requireInt("aws.rds.maxConnections")
+    val maxConnections = config.requireInt("aws.rds.maxConnections")
 
     val rdsClientConfig = buildRDSClientConfig(config)
+
+    buildDB(
+      maxConnections = maxConnections,
+      rdsClientConfig = rdsClientConfig
+    )
+  }
+
+  def buildDB(maxConnections: Int, rdsClientConfig: RDSClientConfig): Unit = {
     val connectionPoolSettings = ConnectionPoolSettings(
-      maxSize = maxSize,
+      maxSize = maxConnections,
       connectionTimeoutMillis = 120000L
     )
 
