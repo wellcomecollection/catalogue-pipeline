@@ -29,7 +29,8 @@ class ElasticRetriever[T](client: ElasticClient, index: Index)(
       .flatMap {
         case RequestFailure(_, _, _, error) => Future.failed(error.asException)
         case RequestSuccess(_, _, _, response) if !response.found =>
-          warn(s"Asked to look up ID $id, got response $response")
+          warn(
+            s"Asked to look up ID $id in index $index, got response $response")
           Future.failed(new RetrieverNotFoundException(id))
         case RequestSuccess(_, _, _, response) =>
           response.safeTo[T] match {

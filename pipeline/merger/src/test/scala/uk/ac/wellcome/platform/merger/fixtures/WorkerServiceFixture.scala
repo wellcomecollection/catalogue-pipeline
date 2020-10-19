@@ -7,6 +7,7 @@ import software.amazon.awssdk.services.cloudwatch.model.StandardUnit
 
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
+import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
@@ -54,4 +55,11 @@ trait WorkerServiceFixture extends LocalWorksVhs with SQS with Akka {
         testWith(workerService)
       }
     }
+
+  def getWorksSent(workSender: MemoryMessageSender): Seq[String] =
+    workSender.messages.map { _.body }
+
+  def getImagesSent(imageSender: MemoryMessageSender)
+    : Seq[MergedImage[DataState.Unidentified]] =
+    imageSender.getMessages[MergedImage[DataState.Unidentified]]
 }

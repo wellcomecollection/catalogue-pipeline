@@ -48,12 +48,19 @@ class MergerWorkerService[WorkDestination, ImageDestination](
         case Right(works) => Future.successful(works)
       }
       (worksFuture, imagesFuture) = (
-        sendMessages(workSender, works.map(_.id)),
+        sendWorks(works),
         sendMessages(imageSender, mergerOutcome.images)
       )
       _ <- worksFuture
       _ <- imagesFuture
     } yield ()
+
+  private def sendWorks(works: Seq[Work[Merged]]): Future[Seq[Unit]] =
+    Future.sequence(
+      works.map { w =>
+        Future.fromTry(workSender.send(w.id))
+      }
+    )
 
   private def sendMessages[Destination, T](
     sender: MessageSender[Destination],

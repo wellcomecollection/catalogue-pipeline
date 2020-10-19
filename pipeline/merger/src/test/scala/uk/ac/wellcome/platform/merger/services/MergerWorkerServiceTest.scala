@@ -30,8 +30,7 @@ class MergerWorkerServiceTest
     with MatcherResultFixture
     with WorkerServiceFixture {
 
-  it(
-    "reads matcher result messages, retrieves the works from vhs and sends them to sns") {
+  it("reads matcher result messages, retrieves the works and sends on the IDs") {
     withMergerWorkerServiceFixtures {
       case (vhs, QueuePair(queue, dlq), senders, metrics, index) =>
         val work1 = sourceWork()
@@ -52,7 +51,7 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          senders.works.getMessages[String] should contain only (
+          getWorksSent(senders) should contain only (
             work1.id,
             work2.id,
             work3.id
@@ -88,9 +87,7 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          senders.works.getMessages[String] should contain only (
-            work.id,
-          )
+          getWorksSent(senders) should contain only work.id
 
           index shouldBe Map(work.id -> work.transition[Merged](1))
 
@@ -100,9 +97,9 @@ class MergerWorkerServiceTest
     }
   }
 
-  it("fails if the work is not in vhs") {
+  it("fails if the matcher result refers to a non-existent work") {
     withMergerWorkerServiceFixtures {
-      case (_, QueuePair(queue, dlq), senders, metrics, index) =>
+      case (_, QueuePair(queue, dlq), senders, metrics, _) =>
         val work = sourceWork()
 
         val matcherResult = matcherResultWith(Set(Set(work)))
@@ -116,7 +113,7 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueHasSize(dlq, size = 1)
 
-          senders.works.messages shouldBe empty
+          getWorksSent(senders) shouldBe empty
 
           metrics.incrementedCounts.length shouldBe 3
           metrics.incrementedCounts.last should endWith("_failure")
@@ -124,7 +121,7 @@ class MergerWorkerServiceTest
     }
   }
 
-  it("discards works with newer versions in vhs, sends along the others") {
+  it("always sends the newest version of a Work") {
     withMergerWorkerServiceFixtures {
       case (vhs, QueuePair(queue, dlq), senders, _, index) =>
         val work = sourceWork()
@@ -145,15 +142,13 @@ class MergerWorkerServiceTest
         eventually {
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
-          senders.works.getMessages[String] should contain only (
-            work.id,
-          )
+          getWorksSent(senders) should contain only work.id
           index shouldBe Map(work.id -> work.transition[Merged](1))
         }
     }
   }
 
-  it("discards works with version 0 and sends along the others") {
+  it("discards Works with version 0") {
     withMergerWorkerServiceFixtures {
       case (vhs, QueuePair(queue, dlq), senders, metrics, index) =>
         val versionZeroWork =
@@ -177,9 +172,7 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          senders.works.getMessages[String] should contain only (
-            work.id,
-          )
+          getWorksSent(senders) should contain only work.id
           index shouldBe Map(work.id -> work.transition[Merged](1))
 
           metrics.incrementedCounts.length shouldBe 1
@@ -188,7 +181,8 @@ class MergerWorkerServiceTest
     }
   }
 
-  it("sends a merged work and a redirected work to SQS") {
+  it(
+    "if it merges two Works, it sends two onward results (one merged, one redirected)") {
     val (digitisedWork, physicalWork) = sierraSourceWorkPair()
 
     val works = List(physicalWork, digitisedWork)
@@ -209,7 +203,7 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          senders.works.getMessages[String] should have size 2
+          getWorksSent(senders) should have size 2
           index should have size 2
 
           val redirectedWorks = index.collect {
@@ -230,7 +224,7 @@ class MergerWorkerServiceTest
     }
   }
 
-  it("sends an image, a merged work, and redirected works to SQS") {
+  it("sends an image, a merged work, and redirected works") {
     val (digitisedWork, physicalWork) = sierraSourceWorkPair()
     val miroWork = miroSourceWork()
 
@@ -253,13 +247,10 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          senders.works.getMessages[String].distinct should have size 3
+          getWorksSent(senders).distinct should have size 3
           index should have size 3
 
-          val imagesSent =
-            senders.images
-              .getMessages[MergedImage[DataState.Unidentified]]
-              .distinct
+          val imagesSent = getImagesSent(senders).distinct
           imagesSent should have size 1
 
           val redirectedWorks = index.collect {
@@ -308,7 +299,7 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          senders.works.getMessages[String] should have size 4
+          getWorksSent(senders) should have size 4
 
           val redirectedWorks = index.collect {
             case (_, work: Work.Redirected[Merged]) => work
@@ -368,4 +359,11 @@ class MergerWorkerServiceTest
           }
       }
     }
+
+  def getWorksSent(senders: Senders): Seq[String] =
+    getWorksSent(senders.works)
+
+  def getImagesSent(
+    senders: Senders): Seq[MergedImage[DataState.Unidentified]] =
+    getImagesSent(senders.images)
 }
