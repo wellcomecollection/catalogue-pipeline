@@ -99,7 +99,7 @@ class MergerWorkerServiceTest
 
   it("fails if the matcher result refers to a non-existent work") {
     withMergerWorkerServiceFixtures {
-      case (_, QueuePair(queue, dlq), senders, metrics, index) =>
+      case (_, QueuePair(queue, dlq), senders, metrics, _) =>
         val work = sourceWork()
 
         val matcherResult = matcherResultWith(Set(Set(work)))
