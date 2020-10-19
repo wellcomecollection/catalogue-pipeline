@@ -51,7 +51,7 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          senders.works.getMessages[String] should contain only (
+          getWorksSent(senders) should contain only (
             work1.id,
             work2.id,
             work3.id
@@ -87,9 +87,7 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          senders.works.getMessages[String] should contain only (
-            work.id,
-          )
+          getWorksSent(senders) should contain only work.id
 
           index shouldBe Map(work.id -> work.transition[Merged](1))
 
@@ -115,7 +113,7 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueHasSize(dlq, size = 1)
 
-          senders.works.messages shouldBe empty
+          getWorksSent(senders) shouldBe empty
 
           metrics.incrementedCounts.length shouldBe 3
           metrics.incrementedCounts.last should endWith("_failure")
@@ -144,9 +142,7 @@ class MergerWorkerServiceTest
         eventually {
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
-          senders.works.getMessages[String] should contain only (
-            work.id,
-          )
+          getWorksSent(senders) should contain only work.id
           index shouldBe Map(work.id -> work.transition[Merged](1))
         }
     }
@@ -176,9 +172,7 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          senders.works.getMessages[String] should contain only (
-            work.id,
-          )
+          getWorksSent(senders) should contain only work.id
           index shouldBe Map(work.id -> work.transition[Merged](1))
 
           metrics.incrementedCounts.length shouldBe 1
@@ -208,7 +202,7 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          senders.works.getMessages[String] should have size 2
+          getWorksSent(senders) should have size 2
           index should have size 2
 
           val redirectedWorks = index.collect {
@@ -252,13 +246,10 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          senders.works.getMessages[String].distinct should have size 3
+          getWorksSent(senders).distinct should have size 3
           index should have size 3
 
-          val imagesSent =
-            senders.images
-              .getMessages[MergedImage[DataState.Unidentified]]
-              .distinct
+          val imagesSent = getImagesSent(senders).distinct
           imagesSent should have size 1
 
           val redirectedWorks = index.collect {
@@ -307,7 +298,7 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          senders.works.getMessages[String] should have size 4
+          getWorksSent(senders) should have size 4
 
           val redirectedWorks = index.collect {
             case (_, work: Work.Redirected[Merged]) => work
@@ -367,4 +358,10 @@ class MergerWorkerServiceTest
           }
       }
     }
+
+  def getWorksSent(senders: Senders): Seq[String] =
+    getWorksSent(senders.works)
+
+  def getImagesSent(senders: Senders): Seq[MergedImage[DataState.Unidentified]] =
+    getImagesSent(senders.images)
 }
