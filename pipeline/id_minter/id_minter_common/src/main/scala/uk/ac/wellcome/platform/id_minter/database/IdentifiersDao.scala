@@ -162,12 +162,17 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
       rs.string(i.resultName.SourceId))
   }
 
-  private lazy val poolNames = Iterator
+  private val poolNames = Iterator
     .continually(List('replica, 'primary))
     .flatten
 
-  // Round-robin between the replica and the primary for SELECTs
-  private def readOnlySession = ReadOnlyNamedAutoSession(poolNames.next)
+  // Round-robin between the replica and the primary for SELECTs.
+  // If we use a single endpoint, we see the ID minter get slow, especially
+  // for works with a large number of IDs.
+  private def readOnlySession: ReadOnlyNamedAutoSession = {
+    val name = poolNames.next()
+    ReadOnlyNamedAutoSession(name)
+  }
 
   // In MySQL 5.6, the optimiser isn't able to optimise huge index range scans,
   // so we batch the sourceIdentifiers ourselves to prevent these scans.
