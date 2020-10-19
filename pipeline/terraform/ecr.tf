@@ -65,3 +65,7 @@ resource "aws_ecr_repository" "ecr_repository_ingestor_images" {
 resource "aws_ecr_repository" "ecr_repository_elasticdump" {
   name = "uk.ac.wellcome/elasticdump"
 }
+
+resource "aws_ecr_repository" "ecr_repository_relation_embedder" {
+  name = "uk.ac.wellcome/relation_embedder"
+}
