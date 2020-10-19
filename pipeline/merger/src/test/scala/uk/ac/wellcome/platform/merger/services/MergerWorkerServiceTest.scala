@@ -30,8 +30,7 @@ class MergerWorkerServiceTest
     with MatcherResultFixture
     with WorkerServiceFixture {
 
-  it(
-    "reads matcher result messages, retrieves the works from vhs and sends them to sns") {
+  it("reads matcher result messages, retrieves the works and sends on the IDs") {
     withMergerWorkerServiceFixtures {
       case (vhs, QueuePair(queue, dlq), senders, metrics, index) =>
         val work1 = sourceWork()
@@ -100,7 +99,7 @@ class MergerWorkerServiceTest
     }
   }
 
-  it("fails if the work is not in vhs") {
+  it("fails if the matcher result refers to a non-existent work") {
     withMergerWorkerServiceFixtures {
       case (_, QueuePair(queue, dlq), senders, metrics, index) =>
         val work = sourceWork()
@@ -124,7 +123,7 @@ class MergerWorkerServiceTest
     }
   }
 
-  it("discards works with newer versions in vhs, sends along the others") {
+  it("always sends the newest version of a Work") {
     withMergerWorkerServiceFixtures {
       case (vhs, QueuePair(queue, dlq), senders, _, index) =>
         val work = sourceWork()
@@ -153,7 +152,7 @@ class MergerWorkerServiceTest
     }
   }
 
-  it("discards works with version 0 and sends along the others") {
+  it("discards Works with version 0") {
     withMergerWorkerServiceFixtures {
       case (vhs, QueuePair(queue, dlq), senders, metrics, index) =>
         val versionZeroWork =
@@ -188,7 +187,7 @@ class MergerWorkerServiceTest
     }
   }
 
-  it("sends a merged work and a redirected work to SQS") {
+  it("if it merges two Works, it sends two onward results (one merged, one redirected)") {
     val (digitisedWork, physicalWork) = sierraSourceWorkPair()
 
     val works = List(physicalWork, digitisedWork)
@@ -230,7 +229,7 @@ class MergerWorkerServiceTest
     }
   }
 
-  it("sends an image, a merged work, and redirected works to SQS") {
+  it("sends an image, a merged work, and redirected works") {
     val (digitisedWork, physicalWork) = sierraSourceWorkPair()
     val miroWork = miroSourceWork()
 
