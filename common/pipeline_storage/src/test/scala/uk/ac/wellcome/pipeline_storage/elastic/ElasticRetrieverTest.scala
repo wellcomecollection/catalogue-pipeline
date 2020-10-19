@@ -54,4 +54,20 @@ class ElasticRetrieverTest
 
   override implicit val id: CanonicalId[SampleDocument] =
     (doc: SampleDocument) => doc.canonicalId
+
+  it("retrieves a document with a slash in the ID") {
+    val documentWithSlash = SampleDocument(
+      version = 1,
+      canonicalId = "sierra-system-number/b1234",
+      title = randomAlphanumeric()
+    )
+
+    withContext(documents = Seq(documentWithSlash)) { implicit context =>
+      val future = withRetriever { _.apply(documentWithSlash.canonicalId) }
+
+      whenReady(future) {
+        _ shouldBe documentWithSlash
+      }
+    }
+  }
 }
