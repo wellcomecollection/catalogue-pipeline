@@ -284,9 +284,9 @@ class SierraTransformerTest
       value = id.withoutCheckDigit
     )
 
-    val work = transformDataToWork(id = id, data = data, modifiedTime)
+    val work = transformDataToWork(id = id, data = data, now)
 
-    work shouldBe sourceWork(sourceIdentifier, modifiedTime)
+    work shouldBe sourceWork(sourceIdentifier, now)
       .withVersion(1)
       .title(title)
       .otherIdentifiers(List(sierraIdentifier))
