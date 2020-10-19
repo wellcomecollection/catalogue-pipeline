@@ -181,7 +181,8 @@ class MergerWorkerServiceTest
     }
   }
 
-  it("if it merges two Works, it sends two onward results (one merged, one redirected)") {
+  it(
+    "if it merges two Works, it sends two onward results (one merged, one redirected)") {
     val (digitisedWork, physicalWork) = sierraSourceWorkPair()
 
     val works = List(physicalWork, digitisedWork)
@@ -362,6 +363,7 @@ class MergerWorkerServiceTest
   def getWorksSent(senders: Senders): Seq[String] =
     getWorksSent(senders.works)
 
-  def getImagesSent(senders: Senders): Seq[MergedImage[DataState.Unidentified]] =
+  def getImagesSent(
+    senders: Senders): Seq[MergedImage[DataState.Unidentified]] =
     getImagesSent(senders.images)
 }
