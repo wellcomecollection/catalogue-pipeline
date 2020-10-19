@@ -3,6 +3,7 @@ package uk.ac.wellcome.platform.merger.logging
 import grizzled.slf4j.Logging
 import cats.data.NonEmptyList
 import uk.ac.wellcome.models.work.internal._
+import uk.ac.wellcome.platform.merger.models.ImageWithSource
 
 trait MergerLogging extends Logging {
   def describeWork(work: Work[_]): String =
@@ -14,10 +15,10 @@ trait MergerLogging extends Logging {
   def describeWorks(works: NonEmptyList[Work[_]]): String =
     describeWorks(works.toList)
 
-  def describeImage(image: BaseImage[DataState.Unidentified]): String =
-    s"(id=${image.id})"
+  def describeImage(imageWithSource: ImageWithSource): String =
+    s"(id=${imageWithSource.image.id})"
 
-  def describeImages(images: Seq[BaseImage[DataState.Unidentified]]): String =
+  def describeImages(images: Seq[ImageWithSource]): String =
     s"[${images.map(describeImage).mkString(",")}]"
 
   def describeMergeSet(target: Work[_], sources: Seq[Work[_]]): String =

@@ -22,6 +22,16 @@ case class UnmergedImage[State <: DataState](
       location = location,
       source = SourceWorks[State](canonicalWork, redirectedWork)
     )
+
+  def mergeWith(source: ImageSource[State],
+                modifiedTime: Instant): MergedImage[State] =
+    MergedImage[State](
+      id = id,
+      version = version,
+      modifiedTime = modifiedTime,
+      location = location,
+      source = source
+    )
 }
 
 case class MergedImage[State <: DataState](

@@ -75,7 +75,7 @@ class MergerTest
               )
             }
             .transition[Merged](2),
-          images = Nil
+          imagesWithSources = Nil
         )
   }
 
