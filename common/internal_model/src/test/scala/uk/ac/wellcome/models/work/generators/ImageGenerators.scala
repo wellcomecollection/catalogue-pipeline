@@ -1,11 +1,14 @@
 package uk.ac.wellcome.models.work.generators
 
+import java.time.Instant
+
 import uk.ac.wellcome.models.work.internal._
 import SourceWork._
 
 trait ImageGenerators
     extends IdentifiersGenerators
     with ItemsGenerators
+    with InstantGenerators
     with VectorGenerators
     with SierraWorkGenerators {
   def createUnmergedImageWith(
@@ -43,12 +46,14 @@ trait ImageGenerators
       IdState.Identified(createCanonicalId, createSourceIdentifier),
     location: DigitalLocationDeprecated = createDigitalLocation,
     version: Int = 1,
+    modifiedTime: Instant = instantInLast30Days,
     parentWork: Work.Visible[WorkState.Identified] = sierraIdentifiedWork(),
     redirectedWork: Option[Work[WorkState.Identified]] = Some(
       sierraIdentifiedWork())): MergedImage[DataState.Identified] =
     MergedImage[DataState.Identified](
       imageId,
       version,
+      modifiedTime,
       location,
       SourceWorks(parentWork.toSourceWork, redirectedWork.map(_.toSourceWork)))
 
@@ -77,11 +82,13 @@ trait ImageGenerators
     inferredData: Option[InferredData] = createInferredData,
     location: DigitalLocationDeprecated = createDigitalLocation,
     version: Int = 1,
+    modifiedTime: Instant = instantInLast30Days,
   ) =
     createIdentifiedMergedImageWith(
       imageId,
       location,
       version,
+      modifiedTime,
       parentWork,
       redirectedWork
     ).augment(inferredData)

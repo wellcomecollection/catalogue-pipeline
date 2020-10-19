@@ -7,18 +7,13 @@ import WorkState._
 
 import scala.util.Random
 
-trait WorkGenerators extends IdentifiersGenerators {
+trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
   private def createVersion: Int =
     Random.nextInt(100) + 1
 
-  // To avoid having to specify a created date, it's handy having a default used in tests.
-  // We can't use `Instant.now` as a default because that introduces all sorts of flakyness and race conditions.
-  // So, we are introducing an arbitrary date here for convenience.
-  val modifiedTime = Instant.parse("2020-10-15T15:51:00.00Z")
-
   def sourceWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
-    modifiedTime: Instant = modifiedTime
+    modifiedTime: Instant = instantInLast30Days
   ): Work.Visible[Source] =
     Work.Visible[Source](
       state = Source(sourceIdentifier, modifiedTime),
@@ -28,21 +23,21 @@ trait WorkGenerators extends IdentifiersGenerators {
 
   def mergedWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
-    numberOfSources: Int = 1
+    modifiedTime: Instant = instantInLast30Days
   ): Work.Visible[Merged] =
     Work.Visible[Merged](
-      state = Merged(sourceIdentifier, numberOfSources),
+      state = Merged(sourceIdentifier, modifiedTime),
       data = initData,
       version = createVersion
     )
 
   def denormalisedWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
-    numberOfSources: Int = 1,
+    modifiedTime: Instant = instantInLast30Days,
     relations: Relations[DataState.Unidentified] = Relations.none
   ): Work.Visible[Denormalised] =
     Work.Visible[Denormalised](
-      state = Denormalised(sourceIdentifier, numberOfSources, relations),
+      state = Denormalised(sourceIdentifier, modifiedTime, relations),
       data = initData,
       version = createVersion
     )
@@ -50,14 +45,14 @@ trait WorkGenerators extends IdentifiersGenerators {
   def identifiedWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     canonicalId: String = createCanonicalId,
-    numberOfSources: Int = chooseFrom(1, 2, 3, 4),
+    modifiedTime: Instant = instantInLast30Days,
     relations: Relations[DataState.Identified] = Relations.none
   ): Work.Visible[Identified] =
     Work.Visible[Identified](
       state = Identified(
         sourceIdentifier = sourceIdentifier,
         canonicalId = canonicalId,
-        numberOfSources = numberOfSources,
+        modifiedTime = modifiedTime,
         relations = relations
       ),
       data = initData,

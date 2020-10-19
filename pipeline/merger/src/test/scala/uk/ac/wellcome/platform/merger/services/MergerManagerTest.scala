@@ -16,7 +16,8 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorkGenerators {
 
     val result = mergerManager.applyMerge(maybeWorks = List(Some(work)))
 
-    result.works shouldBe List(work.transition[Merged](1))
+    result.mergedWorksWithTime(now) shouldBe List(
+      work.transition[Merged](Some(now)))
   }
 
   it("performs a merge with multiple works") {
@@ -26,16 +27,17 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorkGenerators {
     val works = (work +: otherWorks).map { Some(_) }.toList
 
     val result = mergerManager.applyMerge(maybeWorks = works)
+    val resultWorks = result.mergedWorksWithTime(now)
 
-    result.works.head shouldBe work.transition[Merged](1)
+    resultWorks.head shouldBe work.transition[Merged](Some(now))
 
-    result.works.tail.zip(otherWorks).map {
+    resultWorks.tail.zip(otherWorks).map {
       case (baseWork: Work[Merged], unmergedWork: Work.Visible[Source]) =>
         baseWork.sourceIdentifier shouldBe unmergedWork.sourceIdentifier
 
         val redirect = baseWork.asInstanceOf[Work.Redirected[Merged]]
         val redirectTarget =
-          result.works.head.asInstanceOf[Work.Visible[Merged]]
+          resultWorks.head.asInstanceOf[Work.Visible[Merged]]
         redirect.redirect.sourceIdentifier shouldBe redirectTarget.sourceIdentifier
     }
   }
@@ -47,8 +49,8 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorkGenerators {
 
     val result = mergerManager.applyMerge(maybeWorks = maybeWorks.toList)
 
-    result.works should contain theSameElementsAs
-      expectedWorks.map(_.transition[Merged](1))
+    result.mergedWorksWithTime(now) should contain theSameElementsAs
+      expectedWorks.map(_.transition[Merged](Some(now)))
   }
 
   val mergerRules = new Merger {
@@ -64,9 +66,9 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorkGenerators {
           redirect = IdState.Identifiable(works.head.sourceIdentifier)
         )
       }
-      MergerOutcome(
-        works = outputWorks.map(_.transition[Merged](1)),
-        images = Nil
+      new MergerOutcome(
+        resultWorks = outputWorks,
+        imagesWithSources = Nil
       )
     }
 
@@ -79,9 +81,7 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorkGenerators {
       sources: Seq[Work[Source]]): State[MergeState, MergeResult] =
       State(
         _ =>
-          (
-            sources zip Stream.continually(true) toMap,
-            MergeResult(target.transition[Merged](1), Nil))
+          (sources zip Stream.continually(true) toMap, MergeResult(target, Nil))
       )
   }
 

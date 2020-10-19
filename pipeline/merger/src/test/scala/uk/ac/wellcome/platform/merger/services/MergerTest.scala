@@ -73,8 +73,7 @@ class MergerTest
                 items = items,
                 otherIdentifiers = otherIdentifiers
               )
-            }
-            .transition[Merged](2),
+            },
           imagesWithSources = Nil
         )
   }
@@ -82,10 +81,10 @@ class MergerTest
   val mergedWorks = TestMerger.merge(inputWorks)
 
   it("returns a single target work as specified") {
-    mergedWorks.works should contain(
+    mergedWorks.mergedWorksWithTime(now) should contain(
       inputWorks.head
         .asInstanceOf[Work.Visible[Source]]
-        .transition[Merged](2)
+        .transition[Merged](Some(now))
         .mapData { data =>
           data.copy[DataState.Unidentified](
             items = mergedTargetItems,
@@ -97,15 +96,15 @@ class MergerTest
 
   it(
     "returns redirects for all sources that were marked as such by any field rule") {
-    mergedWorks.works.collect {
+    mergedWorks.mergedWorksWithTime(now).collect {
       case redirect: Work.Redirected[Merged] => redirect.sourceIdentifier
     } should contain theSameElementsAs
       inputWorks.tail.tail.map(_.sourceIdentifier)
   }
 
   it("returns all non-redirected and non-target works untouched") {
-    mergedWorks.works should contain(
-      inputWorks.tail.head.transition[Merged](1)
+    mergedWorks.mergedWorksWithTime(now) should contain(
+      inputWorks.tail.head.transition[Merged](Some(now))
     )
   }
 }

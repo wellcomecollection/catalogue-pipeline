@@ -146,7 +146,7 @@ object WorkState {
   ) extends WorkState {
 
     type WorkDataState = DataState.Unidentified
-    type TransitionArgs = Instant
+    type TransitionArgs = Option[Instant]
   }
 
   case class Denormalised(
@@ -193,8 +193,8 @@ object WorkFsm {
   }
 
   implicit val sourceToMerged = new Transition[Source, Merged] {
-    def state(state: Source, modifiedTime: Instant): Merged =
-      Merged(state.sourceIdentifier, modifiedTime)
+    def state(state: Source, modifiedTime: Option[Instant]): Merged =
+      Merged(state.sourceIdentifier, modifiedTime.getOrElse(state.modifiedTime))
 
     def data(data: WorkData[DataState.Unidentified]) = data
 
