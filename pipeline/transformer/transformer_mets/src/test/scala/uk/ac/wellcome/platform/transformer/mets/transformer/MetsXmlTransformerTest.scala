@@ -1,5 +1,7 @@
 package uk.ac.wellcome.platform.transformer.mets.transformer
 
+import java.time.Instant
+
 import org.scalatest.matchers.should.Matchers
 import org.apache.commons.io.IOUtils
 import org.scalatest.funspec.AnyFunSpec
@@ -16,7 +18,7 @@ class MetsXmlTransformerTest
 
   it("should transform METS XML") {
     val xml = loadXmlFile("/b30246039.xml")
-    transform(Some(xml)) shouldBe Right(
+    transform(Some(xml), Instant.now) shouldBe Right(
       MetsData(
         recordIdentifier = "b30246039",
         accessConditionDz = Some("CC-BY-NC"),
@@ -29,7 +31,7 @@ class MetsXmlTransformerTest
   }
 
   it("should error when the root XML doesn't exist in the store") {
-    transform(None) shouldBe a[Left[_, _]]
+    transform(None, Instant.now) shouldBe a[Left[_, _]]
   }
 
   it("should transform METS XML with manifestations") {
@@ -38,7 +40,7 @@ class MetsXmlTransformerTest
       "b22012692_0003.xml" -> Some(loadXmlFile("/b22012692_0003.xml")),
       "b22012692_0001.xml" -> Some(loadXmlFile("/b22012692_0001.xml")),
     )
-    transform(Some(xml), manifestations) shouldBe Right(
+    transform(Some(xml), Instant.now, manifestations) shouldBe Right(
       MetsData(
         recordIdentifier = "b22012692",
         accessConditionDz = Some("PDM"),
@@ -62,7 +64,7 @@ class MetsXmlTransformerTest
           structMap = structMap)),
       "second.xml" -> Some(metsXmlWith("b30246039")),
     )
-    transform(Some(xml), manifestations) shouldBe Right(
+    transform(Some(xml), Instant.now, manifestations) shouldBe Right(
       MetsData(
         recordIdentifier = "b30246039",
         accessConditionDz = Some("INC"),
@@ -78,10 +80,11 @@ class MetsXmlTransformerTest
       "b22012692_0003.xml" -> Some(loadXmlFile("/b22012692_0003.xml")),
       "b22012692_0001.xml" -> None,
     )
-    transform(Some(xml), manifestations) shouldBe a[Left[_, _]]
+    transform(Some(xml), Instant.now, manifestations) shouldBe a[Left[_, _]]
   }
 
   def transform(root: Option[String],
+                createdDate: Instant,
                 manifestations: Map[String, Option[String]] = Map.empty) = {
 
     val metsLocation = MetsLocation(
@@ -89,6 +92,7 @@ class MetsXmlTransformerTest
       "path",
       1,
       if (root.nonEmpty) "root.xml" else "nonexistent.xml",
+      createdDate,
       manifestations.toList.map { case (file, _) => file }
     )
 

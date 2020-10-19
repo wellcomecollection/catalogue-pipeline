@@ -6,6 +6,7 @@ import akka.actor.ActorSystem
 import com.typesafe.config.Config
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import org.scanamo.auto._
+import org.scanamo.time.JavaTimeFormats._
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._

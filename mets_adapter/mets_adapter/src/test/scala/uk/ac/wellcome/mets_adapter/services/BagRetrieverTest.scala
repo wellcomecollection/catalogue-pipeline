@@ -17,6 +17,7 @@ import uk.ac.wellcome.mets_adapter.fixtures.BagsWiremock
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import java.time.Instant
 
 class BagRetrieverTest
     extends AnyFunSpec
@@ -32,7 +33,12 @@ class BagRetrieverTest
     withActorSystem { implicit actorSystem =>
       withBagRetriever { bagRetriever =>
         whenReady(getBag(bagRetriever, "digitised", "b30246039")) {
-          case Bag(_, BagManifest(files), BagLocation(bucket, path), _) =>
+          case Bag(
+              _,
+              BagManifest(files),
+              BagLocation(bucket, path),
+              _,
+              createdDate) =>
             verify(
               moreThanOrExactly(1),
               postRequestedFor(urlEqualTo("/oauth2/token"))
@@ -48,6 +54,7 @@ class BagRetrieverTest
               "v1/data/b30246039.xml")
             bucket shouldBe "wellcomecollection-storage"
             path shouldBe "digitised/b30246039"
+            createdDate shouldBe Instant.parse("2019-09-14T02:25:40.532998Z")
         }
       }
     }
