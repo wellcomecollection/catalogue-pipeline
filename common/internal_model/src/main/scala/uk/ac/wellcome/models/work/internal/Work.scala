@@ -142,16 +142,18 @@ object WorkState {
 
   case class Merged(
     sourceIdentifier: SourceIdentifier,
-    modifiedTime: Instant
+    modifiedTime: Instant,
+    numberOfSources: Int,
   ) extends WorkState {
 
     type WorkDataState = DataState.Unidentified
-    type TransitionArgs = Option[Instant]
+    type TransitionArgs = (Option[Instant], Int)
   }
 
   case class Denormalised(
     sourceIdentifier: SourceIdentifier,
     modifiedTime: Instant,
+    numberOfSources: Int,
     relations: Relations[DataState.Unidentified] = Relations.none
   ) extends WorkState {
 
@@ -163,6 +165,7 @@ object WorkState {
     sourceIdentifier: SourceIdentifier,
     canonicalId: String,
     modifiedTime: Instant,
+    numberOfSources: Int,
     relations: Relations[DataState.Identified] = Relations.none
   ) extends WorkState {
 
@@ -193,8 +196,12 @@ object WorkFsm {
   }
 
   implicit val sourceToMerged = new Transition[Source, Merged] {
-    def state(state: Source, modifiedTime: Option[Instant]): Merged =
-      Merged(state.sourceIdentifier, modifiedTime.getOrElse(state.modifiedTime))
+    def state(state: Source, args: (Option[Instant], Int)): Merged =
+      Merged(
+        state.sourceIdentifier,
+        args._1.getOrElse(state.modifiedTime),
+        args._2
+      )
 
     def data(data: WorkData[DataState.Unidentified]) = data
 
@@ -204,7 +211,11 @@ object WorkFsm {
   implicit val mergedToDenormalised = new Transition[Merged, Denormalised] {
     def state(state: Merged,
               relations: Relations[DataState.Unidentified]): Denormalised =
-      Denormalised(state.sourceIdentifier, state.modifiedTime, relations)
+      Denormalised(
+        state.sourceIdentifier,
+        state.modifiedTime,
+        state.numberOfSources,
+        relations)
 
     def data(data: WorkData[DataState.Unidentified]) = data
 
