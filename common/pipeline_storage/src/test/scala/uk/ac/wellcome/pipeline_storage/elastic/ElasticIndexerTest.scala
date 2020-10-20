@@ -5,22 +5,35 @@ import com.sksamuel.elastic4s.{Index, Response}
 import com.sksamuel.elastic4s.requests.get.GetResponse
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
 import org.scalatest.Assertion
-import uk.ac.wellcome.elasticsearch.{IndexConfig, IndexConfigFields, NoStrictMapping, WorksAnalysis}
+import uk.ac.wellcome.elasticsearch.{
+  IndexConfig,
+  IndexConfigFields,
+  NoStrictMapping,
+  WorksAnalysis
+}
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil.toJson
-import uk.ac.wellcome.pipeline_storage.fixtures.{SampleDocument, SampleDocumentData}
-import uk.ac.wellcome.pipeline_storage.{ElasticIndexer, Indexer, IndexerTestCases}
+import uk.ac.wellcome.pipeline_storage.fixtures.{
+  SampleDocument,
+  SampleDocumentData
+}
+import uk.ac.wellcome.pipeline_storage.{
+  ElasticIndexer,
+  Indexer,
+  IndexerTestCases
+}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class ElasticIndexerTest
-  extends IndexerTestCases[Index, SampleDocument]
+    extends IndexerTestCases[Index, SampleDocument]
     with ElasticsearchFixtures {
 
   import SampleDocument._
 
-  override def withContext[R](documents: Seq[SampleDocument])(testWith: TestWith[Index, R]): R =
+  override def withContext[R](documents: Seq[SampleDocument])(
+    testWith: TestWith[Index, R]): R =
     withLocalElasticsearchIndex(config = NoStrictMapping) { implicit index =>
       if (documents.nonEmpty) {
         withIndexer { indexer =>
@@ -35,8 +48,8 @@ class ElasticIndexerTest
       testWith(index)
     }
 
-  override def withIndexer[R](
-    testWith: TestWith[Indexer[SampleDocument], R])(implicit index: Index): R = {
+  override def withIndexer[R](testWith: TestWith[Indexer[SampleDocument], R])(
+    implicit index: Index): R = {
     val indexer = new ElasticIndexer[SampleDocument](
       client = elasticClient,
       index = index,
@@ -47,12 +60,17 @@ class ElasticIndexerTest
   }
 
   override def createDocumentWith(id: String, version: Int): SampleDocument =
-    SampleDocument(canonicalId = id, version = version, title = s"$version-${randomAlphanumeric()}")
+    SampleDocument(
+      canonicalId = id,
+      version = version,
+      title = s"$version-${randomAlphanumeric()}")
 
-  override def assertIsIndexed(doc: SampleDocument)(implicit index: Index): Assertion =
+  override def assertIsIndexed(doc: SampleDocument)(
+    implicit index: Index): Assertion =
     assertElasticsearchEventuallyHas(index, doc).head
 
-  override def assertIsNotIndexed(doc: SampleDocument)(implicit index: Index): Assertion = {
+  override def assertIsNotIndexed(doc: SampleDocument)(
+    implicit index: Index): Assertion = {
     val documentJson = toJson(doc).get
 
     eventually {
@@ -73,14 +91,16 @@ class ElasticIndexerTest
   }
 
   it("returns a list of documents that weren't indexed correctly") {
-    val validDocuments = (1 to 5).map { _ => createDocument }
+    val validDocuments = (1 to 5).map { _ =>
+      createDocument
+    }
     val invalidDocuments = (1 to 3).map { _ =>
       createDocument
         .copy(data = SampleDocumentData(Some(randomAlphanumeric())))
     }
 
     object StrictWithNoDataIndexConfig
-      extends IndexConfig
+        extends IndexConfig
         with IndexConfigFields {
 
       import com.sksamuel.elastic4s.ElasticDsl._
@@ -94,22 +114,23 @@ class ElasticIndexerTest
         .dynamic(DynamicMapping.Strict)
     }
 
-    withLocalElasticsearchIndex(config = StrictWithNoDataIndexConfig) { implicit index =>
-      withIndexer { indexer =>
-        val future = indexer.index(validDocuments ++ invalidDocuments)
+    withLocalElasticsearchIndex(config = StrictWithNoDataIndexConfig) {
+      implicit index =>
+        withIndexer { indexer =>
+          val future = indexer.index(validDocuments ++ invalidDocuments)
 
-        whenReady(future) { result =>
-          result.left.get should contain only (invalidDocuments: _*)
+          whenReady(future) { result =>
+            result.left.get should contain only (invalidDocuments: _*)
 
-          validDocuments.foreach { doc =>
-            assertIsIndexed(doc)
-          }
+            validDocuments.foreach { doc =>
+              assertIsIndexed(doc)
+            }
 
-          invalidDocuments.foreach { doc =>
-            assertIsNotIndexed(doc)
+            invalidDocuments.foreach { doc =>
+              assertIsNotIndexed(doc)
+            }
           }
         }
-      }
     }
   }
 }

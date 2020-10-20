@@ -10,19 +10,19 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
 trait IndexerTestCases[Context, Document]
-  extends AnyFunSpec
+    extends AnyFunSpec
     with Matchers
     with ScalaFutures
     with RandomGenerators {
 
-  def withContext[R](documents: Seq[Document] = Seq.empty)(testWith: TestWith[Context, R]): R
+  def withContext[R](documents: Seq[Document] = Seq.empty)(
+    testWith: TestWith[Context, R]): R
 
   def withIndexer[R](testWith: TestWith[Indexer[Document], R])(
     implicit context: Context): R
 
-  def createDocumentWith(
-    id: String = randomAlphanumeric(),
-    version: Int = randomInt(1, 5)): Document
+  def createDocumentWith(id: String = randomAlphanumeric(),
+                         version: Int = randomInt(1, 5)): Document
 
   def createDocument: Document =
     createDocumentWith()
@@ -52,7 +52,9 @@ trait IndexerTestCases[Context, Document]
       withContext() { implicit context =>
         withIndexer { indexer =>
           val futures = Future.sequence(
-            (1 to 3).map { _ => indexer.index(doc) }
+            (1 to 3).map { _ =>
+              indexer.index(doc)
+            }
           )
 
           whenReady(futures) { _ =>
@@ -120,7 +122,9 @@ trait IndexerTestCases[Context, Document]
     }
 
     it("indexes a list of documents") {
-      val documents = (1 to 5).map { _ => createDocument }
+      val documents = (1 to 5).map { _ =>
+        createDocument
+      }
 
       withContext() { implicit context =>
         withIndexer { indexer =>
