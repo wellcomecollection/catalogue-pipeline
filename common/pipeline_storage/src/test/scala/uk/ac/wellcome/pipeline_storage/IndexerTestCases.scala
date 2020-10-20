@@ -7,6 +7,7 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.fixtures.{RandomGenerators, TestWith}
 
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 trait IndexerTestCases[Context, Document]
   extends AnyFunSpec
@@ -26,7 +27,8 @@ trait IndexerTestCases[Context, Document]
   def createDocument: Document =
     createDocumentWith()
 
-  def isIndexed(doc: Document)(implicit context: Context): Boolean
+  def assertIsIndexed(doc: Document)(implicit context: Context): Assertion
+  def assertIsNotIndexed(doc: Document)(implicit context: Context): Assertion
 
   describe("behaves as an Indexer") {
     it("indexes a single document") {
@@ -38,7 +40,7 @@ trait IndexerTestCases[Context, Document]
 
           whenReady(future) { result =>
             result.right.get should contain(doc)
-            isIndexed(doc) shouldBe true
+            assertIsIndexed(doc)
           }
         }
       }
@@ -54,7 +56,7 @@ trait IndexerTestCases[Context, Document]
           )
 
           whenReady(futures) { _ =>
-            isIndexed(doc) shouldBe true
+            assertIsIndexed(doc)
           }
         }
       }
@@ -72,8 +74,8 @@ trait IndexerTestCases[Context, Document]
 
           whenReady(future) { result =>
             result.isRight shouldBe true
-            isIndexed(doc1) shouldBe false
-            isIndexed(doc2) shouldBe true
+            assertIsIndexed(doc2)
+            assertIsNotIndexed(doc1)
           }
         }
       }
@@ -91,8 +93,8 @@ trait IndexerTestCases[Context, Document]
 
           whenReady(future) { result =>
             result.isRight shouldBe true
-            isIndexed(doc1) shouldBe false
-            isIndexed(doc2) shouldBe true
+            assertIsIndexed(doc2)
+            assertIsNotIndexed(doc1)
           }
         }
       }
@@ -110,8 +112,8 @@ trait IndexerTestCases[Context, Document]
 
           whenReady(future) { result =>
             result.isRight shouldBe true
-            isIndexed(doc1a) shouldBe false
-            isIndexed(doc1b) shouldBe true
+            assertIsIndexed(doc1b)
+            assertIsNotIndexed(doc1a)
           }
         }
       }
@@ -127,7 +129,7 @@ trait IndexerTestCases[Context, Document]
           whenReady(future) { result =>
             result.right.get should contain theSameElementsAs documents
             documents.foreach { doc =>
-              isIndexed(doc) shouldBe true
+              assertIsIndexed(doc)
             }
           }
         }

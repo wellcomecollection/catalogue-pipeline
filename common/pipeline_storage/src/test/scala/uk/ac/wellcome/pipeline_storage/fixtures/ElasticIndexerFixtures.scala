@@ -20,11 +20,13 @@ case class SampleDocument(version: Int,
                           data: SampleDocumentData = SampleDocumentData())
 case class SampleDocumentData(stuff: Option[String] = None)
 object SampleDocument {
-
   implicit val indexable = new Indexable[SampleDocument] {
     def version(document: SampleDocument): Int = document.version
     def id(document: SampleDocument): String = document.canonicalId
   }
+
+  implicit val canonicalId: CanonicalId[SampleDocument] =
+    (doc: SampleDocument) => doc.canonicalId
 
   implicit val encoder: Encoder[SampleDocument] = deriveEncoder
 

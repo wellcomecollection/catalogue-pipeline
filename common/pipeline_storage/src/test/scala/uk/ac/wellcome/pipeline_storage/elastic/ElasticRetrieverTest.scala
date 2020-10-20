@@ -53,7 +53,7 @@ class ElasticRetrieverTest
     )
 
   override implicit val id: CanonicalId[SampleDocument] =
-    (doc: SampleDocument) => doc.canonicalId
+    SampleDocument.canonicalId
 
   it("retrieves a document with a slash in the ID") {
     val documentWithSlash = SampleDocument(
