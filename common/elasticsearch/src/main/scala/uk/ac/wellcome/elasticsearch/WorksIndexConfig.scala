@@ -197,16 +197,15 @@ sealed trait WorksIndexConfig extends IndexConfig with WorksIndexConfigFields {
 
   def state: ObjectField
 
-  def idState: ObjectField
+  val idState: String => ObjectField
 
   def fields: Seq[FieldDefinition with Product with Serializable] =
     Seq(
       state,
       version,
-      objectField("redirect")
-        .fields(sourceIdentifier, canonicalId, otherIdentifiers),
+      idState("redirect"),
       keywordField("type"),
-      data(analyzedPath, idState),
+      data(analyzedPath, idState("id")),
       objectField("invisibilityReasons").fields(
         keywordField("type"),
         keywordField("info")
@@ -220,7 +219,7 @@ object SourceWorkIndexConfig extends WorksIndexConfig {
 
   val state = objectField("state").fields(sourceIdentifier)
 
-  val idState = identifiable()
+  val idState = identifiable
 }
 
 object MergedWorkIndexConfig extends WorksIndexConfig {
@@ -231,30 +230,30 @@ object MergedWorkIndexConfig extends WorksIndexConfig {
     intField("numberOfSources"),
   )
 
-  val idState = identifiable()
+  val idState = identifiable
 }
 
 object DenormalisedWorkIndexConfig extends WorksIndexConfig {
 
-  val idState = identifiable()
+  val idState = identifiable
 
   val state = objectField("state").fields(
     sourceIdentifier,
     modifiedTime,
     intField("numberOfSources"),
-    relations(idState)
+    relations(idState("id"))
   )
 }
 
 object IdentifiedWorkIndexConfig extends WorksIndexConfig {
 
-  val idState = id()
+  val idState = id
 
   val state = objectField("state").fields(
     canonicalId,
     sourceIdentifier,
     modifiedTime,
     intField("numberOfSources"),
-    relations(idState)
+    relations(idState("id"))
   )
 }
