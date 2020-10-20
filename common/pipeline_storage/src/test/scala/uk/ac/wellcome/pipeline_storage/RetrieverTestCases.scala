@@ -34,8 +34,9 @@ trait RetrieverTestCases[Context, T]
   it(
     "throws a RetrieverNotFoundException if asked to retrieve a missing document") {
     val missingId = id.canonicalId(createT)
+    val someOtherDocument = createT
 
-    withContext(documents = Seq.empty) { implicit context =>
+    withContext(documents = Seq(someOtherDocument)) { implicit context =>
       val future = withRetriever { _.apply(missingId) }
 
       whenReady(future.failed) { exc =>
