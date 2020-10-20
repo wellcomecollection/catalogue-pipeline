@@ -7,7 +7,6 @@ In particular, it runs the 'make format' task, and if there are any changes,
 it pushes a new commit to your pull request and aborts the current build.
 """
 
-import subprocess
 import sys
 
 from commands import make, git
@@ -34,7 +33,9 @@ if __name__ == "__main__":
         git("fetch", "ssh-origin")
 
         # If we already have the branch checked out, it's fine.
-        git("checkout", "--track", f"ssh-origin/{current_branch()}", exit_on_error=False)
+        git(
+            "checkout", "--track", f"ssh-origin/{current_branch()}", exit_on_error=False
+        )
 
         git("add", "--verbose", "--update")
         git("commit", "-m", "Apply auto-formatting rules")
