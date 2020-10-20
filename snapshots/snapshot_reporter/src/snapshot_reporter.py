@@ -48,7 +48,7 @@ def get_snapshots(es_client, elastic_index):
             "query": {
                 "bool": {
                     "filter": [
-                        {"range": {"snapshotJob.requestedAt": {"gte": f"now-1d/d"}}}
+                        {"range": {"snapshotJob.requestedAt": {"gte": "now-1d/d"}}}
                     ]
                 }
             },

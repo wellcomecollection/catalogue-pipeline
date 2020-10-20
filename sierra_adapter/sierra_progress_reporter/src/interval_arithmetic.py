@@ -11,7 +11,7 @@ class Interval:
     key = attr.ib()
 
     def __repr__(self):
-        return f"%s(start=%r, end=%r, key=%r)" % (
+        return "%s(start=%r, end=%r, key=%r)" % (
             type(self).__name__,
             self.start.isoformat(),
             self.end.isoformat(),

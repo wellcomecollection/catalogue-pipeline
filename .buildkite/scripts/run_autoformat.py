@@ -7,7 +7,6 @@ In particular, it runs the 'make format' task, and if there are any changes,
 it pushes a new commit to your pull request and aborts the current build.
 """
 
-import subprocess
 import sys
 
 from commands import make, git
