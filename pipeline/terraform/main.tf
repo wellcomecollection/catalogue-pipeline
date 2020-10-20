@@ -1,8 +1,7 @@
 module "catalogue_pipeline_20200923" {
   source = "./stack"
 
-  namespace = "catalogue-20200923"
-
+  pipeline_date = "20200923"
   release_label = "prod"
 
   account_id      = data.aws_caller_identity.current.account_id
@@ -39,10 +38,6 @@ module "catalogue_pipeline_20200923" {
     local.calm_adapter_topic_arn,
   ]
 
-  # Elasticsearch
-  es_works_index  = "works-20200923"
-  es_images_index = "images-20200923"
-
   # RDS
   rds_ids_access_security_group_id = local.rds_access_security_group_id
 
@@ -62,11 +57,10 @@ module "catalogue_pipeline_20200923" {
   inferrer_model_data_bucket_name = aws_s3_bucket.inferrer_model_core_data.id
 }
 
-module "catalogue_pipeline_20201007" {
+module "catalogue_pipeline_20201016" {
   source = "./stack"
 
-  namespace = "catalogue-20201007"
-
+  pipeline_date = "20201016"
   release_label = "stage"
 
   account_id      = data.aws_caller_identity.current.account_id
@@ -102,10 +96,6 @@ module "catalogue_pipeline_20201007" {
     local.calm_reindexer_topic_arn,
     local.calm_adapter_topic_arn,
   ]
-
-  # Elasticsearch
-  es_works_index  = "works-20201007"
-  es_images_index = "images-20201007"
 
   # RDS
   rds_ids_access_security_group_id = local.rds_access_security_group_id

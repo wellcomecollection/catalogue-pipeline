@@ -248,7 +248,7 @@ trait ElasticsearchFixtures
           indexInto(index.name)
             .version(work.version)
             .versionType(ExternalGte)
-            .id(work.state.id)
+            .id(work.id)
             .doc(jsonDoc)
         }
       )

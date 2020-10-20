@@ -2,7 +2,6 @@ package uk.ac.wellcome.platform.sierra_items_to_dynamo.services
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import org.scalatestplus.mockito.MockitoSugar
 import uk.ac.wellcome.platform.sierra_items_to_dynamo.fixtures.DynamoInserterFixture
 import uk.ac.wellcome.sierra_adapter.model.{SierraGenerators, SierraItemRecord}
 import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
@@ -13,7 +12,6 @@ import uk.ac.wellcome.storage.{UpdateNotApplied, Version}
 class DynamoInserterTest
     extends AnyFunSpec
     with Matchers
-    with MockitoSugar
     with DynamoInserterFixture
     with SierraGenerators
     with SierraAdapterHelpers {

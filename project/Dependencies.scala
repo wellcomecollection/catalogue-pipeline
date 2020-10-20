@@ -228,9 +228,6 @@ object CatalogueDependencies {
   val elasticsearchTypesafeDependencies: Seq[ModuleID] =
     WellcomeDependencies.typesafeLibrary
 
-  val pipelineStorageDependencies: Seq[ModuleID] =
-    ExternalDependencies.mockitoDependencies
-
   val apiDependencies: Seq[ModuleID] =
     ExternalDependencies.akkaHttpDependencies ++
       ExternalDependencies.apmDependencies ++
@@ -238,36 +235,26 @@ object CatalogueDependencies {
       WellcomeDependencies.typesafeLibrary
 
   val idminterDependencies: Seq[ModuleID] =
-    ExternalDependencies.mockitoDependencies ++
-      ExternalDependencies.mySqlDependencies ++
+    ExternalDependencies.mySqlDependencies ++
       ExternalDependencies.circeOpticsDependencies
-
-  val ingestorDependencies: Seq[ModuleID] =
-    ExternalDependencies.mockitoDependencies
 
   val matcherDependencies: Seq[ModuleID] =
     ExternalDependencies.mockitoDependencies ++
       ExternalDependencies.scalaGraphDependencies
 
-  val mergerDependencies: Seq[ModuleID] =
-    ExternalDependencies.mockitoDependencies
+  val mergerDependencies: Seq[ModuleID] = Nil
 
   val relationEmbedderDependencies: Seq[ModuleID] =
     WellcomeDependencies.storageTypesafeLibrary ++
       WellcomeDependencies.messagingTypesafeLibrary
 
   val miroTransformerDependencies: Seq[ModuleID] =
-    ExternalDependencies.apacheCommonsDependencies ++
-      ExternalDependencies.mockitoDependencies
-
-  val recorderDependencies: Seq[ModuleID] =
-    ExternalDependencies.mockitoDependencies
+    ExternalDependencies.apacheCommonsDependencies
 
   val reindexWorkerDependencies: Seq[ModuleID] = Nil
 
   val sierraTransformerDependencies: Seq[ModuleID] =
-    ExternalDependencies.apacheCommonsDependencies ++
-      ExternalDependencies.mockitoDependencies
+    ExternalDependencies.apacheCommonsDependencies
 
   val metsTransformerDependencies: Seq[ModuleID] =
     ExternalDependencies.apacheCommonsDependencies ++
@@ -281,7 +268,6 @@ object CatalogueDependencies {
 
   val calmTransformerDependencies: Seq[ModuleID] =
     ExternalDependencies.apacheCommonsDependencies ++
-      ExternalDependencies.mockitoDependencies ++
       ExternalDependencies.jsoupDependencies
 
   // METS adapter
@@ -302,8 +288,7 @@ object CatalogueDependencies {
   // Sierra adapter stack
 
   val sierraAdapterCommonDependencies: Seq[ModuleID] =
-    ExternalDependencies.mockitoDependencies ++
-      WellcomeDependencies.storageTypesafeLibrary ++
+    WellcomeDependencies.storageTypesafeLibrary ++
       WellcomeDependencies.messagingTypesafeLibrary ++
       WellcomeDependencies.jsonLibrary ++
       ExternalDependencies.javaxDependencies
@@ -321,8 +306,7 @@ object CatalogueDependencies {
   // Snapshots stack
 
   val snapshotGeneratorDependencies: Seq[ModuleID] =
-    ExternalDependencies.mockitoDependencies ++
-      WellcomeDependencies.messagingTypesafeLibrary ++
+    WellcomeDependencies.messagingTypesafeLibrary ++
       WellcomeDependencies.storageLibrary ++
       ExternalDependencies.alpakkaS3Dependencies
 }

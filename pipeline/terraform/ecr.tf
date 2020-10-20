@@ -18,8 +18,12 @@ resource "aws_ecr_repository" "ecr_repository_transformer_calm" {
   name = "uk.ac.wellcome/transformer_calm"
 }
 
-resource "aws_ecr_repository" "ecr_repository_id_minter" {
-  name = "uk.ac.wellcome/id_minter"
+resource "aws_ecr_repository" "ecr_repository_id_minter_works" {
+  name = "uk.ac.wellcome/id_minter_works"
+}
+
+resource "aws_ecr_repository" "ecr_repository_id_minter_images" {
+  name = "uk.ac.wellcome/id_minter_images"
 }
 
 resource "aws_ecr_repository" "ecr_repository_recorder" {
@@ -60,4 +64,8 @@ resource "aws_ecr_repository" "ecr_repository_ingestor_images" {
 
 resource "aws_ecr_repository" "ecr_repository_elasticdump" {
   name = "uk.ac.wellcome/elasticdump"
+}
+
+resource "aws_ecr_repository" "ecr_repository_relation_embedder" {
+  name = "uk.ac.wellcome/relation_embedder"
 }

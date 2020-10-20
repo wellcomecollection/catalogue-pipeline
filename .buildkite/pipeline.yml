@@ -25,8 +25,14 @@ steps:
     label: "ingestor (works)"
   - command: .buildkite/scripts/run_job.py ingestor_images
     label: "ingestor (images)"
-  - command: .buildkite/scripts/run_job.py id_minter
-    label: "ID minter"
+  - command: .buildkite/scripts/run_job.py id_minter_common
+    label: "ID minter common"
+  - command: .buildkite/scripts/run_job.py id_minter_works
+    label: "ID minter works"
+  - command: .buildkite/scripts/run_job.py id_minter_images
+    label: "ID minter images"
+  - command: .buildkite/scripts/run_job.py relation_embedder
+    label: "relation embedder"
   - command: .buildkite/scripts/run_job.py matcher
     label: "matcher"
   - command: .buildkite/scripts/run_job.py merger
@@ -69,7 +75,14 @@ steps:
     if: build.branch == "master"
     plugins:
       - docker#v3.5.0:
-          image: wellcome/weco-deploy:5.1.1
+          image: wellcome/weco-deploy:5.4.1
           workdir: /repo
           mount-ssh-agent: true
-          command: ["--project-id", "catalogue_api", "--confirm", "release-deploy", "--from-label", "latest", "--environment-id", "staging", "--description", $BUILDKITE_BUILD_URL]
+          command: [
+              "--project-id", "catalogue_api",
+              "--confirm",
+              "release-deploy",
+              "--from-label", "latest",
+              "--environment-id", "staging",
+              "--description", $BUILDKITE_BUILD_URL,
+              "--confirmation-wait-for", 1200]

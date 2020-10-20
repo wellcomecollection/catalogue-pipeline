@@ -1,10 +1,11 @@
 package uk.ac.wellcome.platform.merger.services
 
+import scala.collection.mutable.Map
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import org.scalatestplus.mockito.MockitoSugar
 import software.amazon.awssdk.services.cloudwatch.model.StandardUnit
+
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
@@ -29,13 +30,11 @@ class MergerWorkerServiceTest
     with IntegrationPatience
     with MiroWorkGenerators
     with MatcherResultFixture
-    with MockitoSugar
     with WorkerServiceFixture {
 
-  it(
-    "reads matcher result messages, retrieves the works from vhs and sends them to sns") {
+  it("reads matcher result messages, retrieves the works and sends on the IDs") {
     withMergerWorkerServiceFixtures {
-      case (vhs, QueuePair(queue, dlq), senders, metrics) =>
+      case (vhs, QueuePair(queue, dlq), senders, metrics, index) =>
         val latestUpdate = randomInstantBefore(now, 30 days)
         val work1 = sourceWork(modifiedTime = latestUpdate)
         val work2 = sourceWork(modifiedTime = latestUpdate - (1 day))
@@ -55,11 +54,16 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          senders.works
-            .getMessages[Work[Merged]] should contain only (
-            work1.transition[Merged]((Some(latestUpdate), 1)),
-            work2.transition[Merged]((Some(latestUpdate), 1)),
-            work3.transition[Merged]((Some(latestUpdate), 1))
+          getWorksSent(senders) should contain only (
+            work1.id,
+            work2.id,
+            work3.id
+          )
+
+          index shouldBe Map(
+            work1.id -> work1.transition[Merged]((Some(latestUpdate), 1)),
+            work2.id -> work2.transition[Merged]((Some(latestUpdate), 1)),
+            work3.id -> work3.transition[Merged]((Some(latestUpdate), 1))
           )
 
           metrics.incrementedCounts.length should be >= 1
@@ -70,7 +74,7 @@ class MergerWorkerServiceTest
 
   it("sends InvisibleWorks unmerged") {
     withMergerWorkerServiceFixtures {
-      case (vhs, QueuePair(queue, dlq), senders, metrics) =>
+      case (vhs, QueuePair(queue, dlq), senders, metrics, index) =>
         val work = sourceWork().invisible()
 
         val matcherResult = matcherResultWith(Set(Set(work)))
@@ -86,8 +90,9 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          senders.works.getMessages[Work[Merged]] should contain only
-            work.transition[Merged]((None, 1))
+          getWorksSent(senders) should contain only work.id
+
+          index shouldBe Map(work.id -> work.transition[Merged]((None, 1))
 
           metrics.incrementedCounts.length shouldBe 1
           metrics.incrementedCounts.last should endWith("_success")
@@ -95,9 +100,9 @@ class MergerWorkerServiceTest
     }
   }
 
-  it("fails if the work is not in vhs") {
+  it("fails if the matcher result refers to a non-existent work") {
     withMergerWorkerServiceFixtures {
-      case (_, QueuePair(queue, dlq), senders, metrics) =>
+      case (_, QueuePair(queue, dlq), senders, metrics, _) =>
         val work = sourceWork()
 
         val matcherResult = matcherResultWith(Set(Set(work)))
@@ -111,7 +116,7 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueHasSize(dlq, size = 1)
 
-          senders.works.messages shouldBe empty
+          getWorksSent(senders) shouldBe empty
 
           metrics.incrementedCounts.length shouldBe 3
           metrics.incrementedCounts.last should endWith("_failure")
@@ -119,9 +124,9 @@ class MergerWorkerServiceTest
     }
   }
 
-  it("discards works with higher versions in vhs, sends along the others") {
+  it("always sends the highest version of a Work") {
     withMergerWorkerServiceFixtures {
-      case (vhs, QueuePair(queue, dlq), senders, _) =>
+      case (vhs, QueuePair(queue, dlq), senders, _, index) =>
         val work = sourceWork()
         val olderWork = sourceWork()
         val newerWork =
@@ -140,16 +145,15 @@ class MergerWorkerServiceTest
         eventually {
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
-          val worksSent = senders.works.getMessages[Work[Merged]]
-          worksSent should contain only
-            work.transition[Merged]((None, 1))
+          getWorksSent(senders) should contain only work.id
+          index shouldBe Map(work.id -> work.transition[Merged]((None, 1))
         }
     }
   }
 
-  it("discards works with version 0 and sends along the others") {
+  it("discards Works with version 0") {
     withMergerWorkerServiceFixtures {
-      case (vhs, QueuePair(queue, dlq), senders, metrics) =>
+      case (vhs, QueuePair(queue, dlq), senders, metrics, index) =>
         val versionZeroWork =
           sourceWork()
             .withVersion(0)
@@ -171,9 +175,8 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          val worksSent = senders.works.getMessages[Work[Merged]]
-          worksSent should contain only
-            work.transition[Merged]((None, 1))
+          getWorksSent(senders) should contain only work.id
+          index shouldBe Map(work.id -> work.transition[Merged]((None, 1))
 
           metrics.incrementedCounts.length shouldBe 1
           metrics.incrementedCounts.last should endWith("_success")
@@ -181,13 +184,14 @@ class MergerWorkerServiceTest
     }
   }
 
-  it("sends a merged work and a redirected work to SQS") {
+  it(
+    "if it merges two Works, it sends two onward results (one merged, one redirected)") {
     val (digitisedWork, physicalWork) = sierraSourceWorkPair()
 
     val works = List(physicalWork, digitisedWork)
 
     withMergerWorkerServiceFixtures {
-      case (vhs, QueuePair(queue, dlq), senders, _) =>
+      case (vhs, QueuePair(queue, dlq), senders, _, index) =>
         givenStoredInVhs(vhs, works: _*)
 
         val matcherResult = MatcherResult(
@@ -202,14 +206,14 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          val worksSent = senders.works.getMessages[Work[Merged]].distinct
-          worksSent should have size 2
+          getWorksSent(senders) should have size 2
+          index should have size 2
 
-          val redirectedWorks = worksSent.collect {
-            case work: Work.Redirected[Merged] => work
+          val redirectedWorks = index.collect {
+            case (_, work: Work.Redirected[Merged]) => work
           }
-          val mergedWorks = worksSent.collect {
-            case work: Work.Visible[Merged] => work
+          val mergedWorks = index.collect {
+            case (_, work: Work.Visible[Merged]) => work
           }
 
           redirectedWorks should have size 1
@@ -223,7 +227,7 @@ class MergerWorkerServiceTest
     }
   }
 
-  it("sends an image, a merged work, and redirected works to SQS") {
+  it("sends an image, a merged work, and redirected works") {
     val (digitisedWork, physicalWork) = sierraSourceWorkPair()
     val miroWork = miroSourceWork()
 
@@ -231,7 +235,7 @@ class MergerWorkerServiceTest
       List(physicalWork, digitisedWork, miroWork)
 
     withMergerWorkerServiceFixtures {
-      case (vhs, QueuePair(queue, dlq), senders, _) =>
+      case (vhs, QueuePair(queue, dlq), senders, _, index) =>
         givenStoredInVhs(vhs, works: _*)
 
         val matcherResult = MatcherResult(
@@ -246,20 +250,17 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          val worksSent = senders.works.getMessages[Work[Merged]].distinct
-          worksSent should have size 3
+          getWorksSent(senders).distinct should have size 3
+          index should have size 3
 
-          val imagesSent =
-            senders.images
-              .getMessages[MergedImage[DataState.Unidentified]]
-              .distinct
+          val imagesSent = getImagesSent(senders).distinct
           imagesSent should have size 1
 
-          val redirectedWorks = worksSent.collect {
-            case work: Work.Redirected[Merged] => work
+          val redirectedWorks = index.collect {
+            case (_, work: Work.Redirected[Merged]) => work
           }
-          val mergedWorks = worksSent.collect {
-            case work: Work.Visible[Merged] => work
+          val mergedWorks = index.collect {
+            case (_, work: Work.Visible[Merged]) => work
           }
 
           redirectedWorks should have size 2
@@ -286,7 +287,7 @@ class MergerWorkerServiceTest
     val works = workPair1 ++ workPair2
 
     withMergerWorkerServiceFixtures {
-      case (vhs, QueuePair(queue, dlq), senders, _) =>
+      case (vhs, QueuePair(queue, dlq), senders, _, index) =>
         givenStoredInVhs(vhs, works: _*)
 
         val matcherResult = MatcherResult(
@@ -301,14 +302,13 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          val worksSent = senders.works.getMessages[Work[Merged]]
-          worksSent should have size 4
+          getWorksSent(senders) should have size 4
 
-          val redirectedWorks = worksSent.collect {
-            case work: Work.Redirected[Merged] => work
+          val redirectedWorks = index.collect {
+            case (_, work: Work.Redirected[Merged]) => work
           }
-          val mergedWorks = worksSent.collect {
-            case work: Work.Visible[Merged] => work
+          val mergedWorks = index.collect {
+            case (_, work: Work.Visible[Merged]) => work
           }
 
           redirectedWorks should have size 2
@@ -319,7 +319,7 @@ class MergerWorkerServiceTest
 
   it("fails if the message sent is not a matcher result") {
     withMergerWorkerServiceFixtures {
-      case (_, QueuePair(queue, dlq), _, metrics) =>
+      case (_, QueuePair(queue, dlq), _, metrics, index) =>
         sendInvalidJSONto(queue)
 
         eventually {
@@ -334,7 +334,11 @@ class MergerWorkerServiceTest
   case class Senders(works: MemoryMessageSender, images: MemoryMessageSender)
 
   def withMergerWorkerServiceFixtures[R](
-    testWith: TestWith[(VHS, QueuePair, Senders, MemoryMetrics[StandardUnit]),
+    testWith: TestWith[(VHS,
+                        QueuePair,
+                        Senders,
+                        MemoryMetrics[StandardUnit],
+                        Map[String, Work[Merged]]),
                        R]): R =
     withVHS { vhs =>
       withLocalSqsQueuePair() {
@@ -343,12 +347,26 @@ class MergerWorkerServiceTest
           val imageSender = new MemoryMessageSender()
 
           val metrics = new MemoryMetrics[StandardUnit]
+          val index = Map.empty[String, Work[Merged]]
 
-          withWorkerService(vhs, queue, workSender, imageSender, metrics) { _ =>
-            testWith(
-              (vhs, queuePair, Senders(workSender, imageSender), metrics)
-            )
+          withWorkerService(vhs, queue, workSender, imageSender, metrics, index) {
+            _ =>
+              testWith(
+                (
+                  vhs,
+                  queuePair,
+                  Senders(workSender, imageSender),
+                  metrics,
+                  index)
+              )
           }
       }
     }
+
+  def getWorksSent(senders: Senders): Seq[String] =
+    getWorksSent(senders.works)
+
+  def getImagesSent(
+    senders: Senders): Seq[MergedImage[DataState.Unidentified]] =
+    getImagesSent(senders.images)
 }

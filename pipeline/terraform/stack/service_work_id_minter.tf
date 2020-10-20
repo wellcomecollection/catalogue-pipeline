@@ -10,7 +10,7 @@ module "work_id_minter_queue" {
 module "work_id_minter" {
   source          = "../modules/service"
   service_name    = "${local.namespace_hyphen}_work_id_minter"
-  container_image = local.id_minter_image
+  container_image = local.id_minter_works_image
 
   security_group_ids = [
     aws_security_group.service_egress.id,
@@ -28,6 +28,7 @@ module "work_id_minter" {
     queue_url       = module.work_id_minter_queue.url
     topic_arn       = module.work_id_minter_topic.arn
     max_connections = local.id_minter_task_max_connections
+    es_index        = local.es_works_merged_index
   }
 
   secret_env_vars = {
@@ -36,6 +37,12 @@ module "work_id_minter" {
     db_port              = "catalogue/id_minter/rds_port"
     db_username          = "catalogue/id_minter/rds_user"
     db_password          = "catalogue/id_minter/rds_password"
+
+    es_host     = "catalogue/pipeline_storage/es_host"
+    es_port     = "catalogue/pipeline_storage/es_port"
+    es_protocol = "catalogue/pipeline_storage/es_protocol"
+    es_username = "catalogue/pipeline_storage/id_minter/es_username"
+    es_password = "catalogue/pipeline_storage/id_minter/es_password"
   }
 
   // The total number of connections to RDS across all tasks from all ID minter

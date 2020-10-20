@@ -6,26 +6,31 @@ import akka.Done
 import io.circe.Encoder
 
 import scala.concurrent.{ExecutionContext, Future}
-import uk.ac.wellcome.models.matcher.MatcherResult
+import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, MatcherResult}
 import uk.ac.wellcome.typesafe.Runnable
 import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
-import uk.ac.wellcome.models.work.internal.{Work, WorkState}
+import uk.ac.wellcome.pipeline_storage.Indexer
+import WorkState.Merged
 
 class MergerWorkerService[WorkDestination, ImageDestination](
   sqsStream: SQSStream[NotificationMessage],
   playbackService: RecorderPlaybackService,
   mergerManager: MergerManager,
+  workIndexer: Indexer[Work[Merged]],
   workSender: MessageSender[WorkDestination],
   imageSender: MessageSender[ImageDestination]
 )(implicit ec: ExecutionContext)
     extends Runnable {
 
   def run(): Future[Done] =
-    sqsStream.foreach(this.getClass.getSimpleName, processMessage)
+    workIndexer.init().flatMap { _ =>
+      sqsStream.foreach(this.getClass.getSimpleName, processMessage)
+    }
 
   private def processMessage(message: NotificationMessage): Future[Unit] =
     for {
@@ -43,16 +48,29 @@ class MergerWorkerService[WorkDestination, ImageDestination](
 
   private def applyMerge(maybeWorks: Seq[Option[Work[WorkState.Source]]],
                          lastUpdated: Instant): Future[Unit] = {
-    val merged = mergerManager.applyMerge(maybeWorks = maybeWorks)
-    val worksFuture =
-      sendMessages(workSender, merged.mergedWorksWithTime(lastUpdated))
-    val imagesFuture =
-      sendMessages(imageSender, merged.mergedImagesWithTime(lastUpdated))
+    val outcome = mergerManager.applyMerge(maybeWorks = maybeWorks)
     for {
+      indexResult <- workIndexer.index(outcome.mergedWorksWithTime(lastUpdated))
+      works <- indexResult match {
+        case Left(failedWorks) =>
+          Future.failed(new Exception(s"Failed indexing works: $failedWorks"))
+        case Right(works) => Future.successful(works)
+      }
+      (worksFuture, imagesFuture) = (
+        sendWorks(works),
+        sendMessages(imageSender, outcome.mergedImagesWithTime(lastUpdated))
+      )
       _ <- worksFuture
       _ <- imagesFuture
     } yield ()
   }
+
+  private def sendWorks(works: Seq[Work[Merged]]): Future[Seq[Unit]] =
+    Future.sequence(
+      works.map { w =>
+        Future.fromTry(workSender.send(w.id))
+      }
+    )
 
   private def sendMessages[Destination, T](
     sender: MessageSender[Destination],

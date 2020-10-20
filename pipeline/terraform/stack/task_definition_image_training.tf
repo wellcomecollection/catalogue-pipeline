@@ -6,7 +6,7 @@ locals {
   env_vars = {
     MODEL_DATA_BUCKET = var.inferrer_model_data_bucket_name,
     MODEL_SSM_PATH    = data.aws_ssm_parameter.latest_lsh_model_key.name
-    ES_INDEX          = var.es_images_index
+    ES_INDEX          = local.es_images_index
   }
 
   secret_env_vars = {

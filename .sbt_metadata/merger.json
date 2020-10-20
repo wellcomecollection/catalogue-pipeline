@@ -3,6 +3,7 @@
   "folder" : "pipeline/merger",
   "dependencyIds" : [
     "internal_model",
-    "big_messaging_typesafe"
+    "big_messaging_typesafe",
+    "pipeline_storage"
   ]
 }
