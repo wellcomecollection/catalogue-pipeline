@@ -20,9 +20,14 @@ class ElasticIndexerTest
   import SampleDocument._
 
   override def withContext[R](documents: Seq[SampleDocument])(testWith: TestWith[Index, R]): R =
-    withLocalElasticsearchIndex(config = NoStrictMapping) { index =>
+    withLocalElasticsearchIndex(config = NoStrictMapping) { implicit index =>
+      if (documents.nonEmpty) {
+        withIndexer { indexer =>
+          indexer.index(documents).await shouldBe a[Right[_, _]]
+        }
+      }
+
       documents.foreach { doc =>
-        indexObject(index, doc)
         assertObjectIndexed(index, doc)
       }
 
@@ -41,7 +46,7 @@ class ElasticIndexerTest
   }
 
   override def createDocumentWith(id: String, version: Int): SampleDocument =
-    SampleDocument(canonicalId = id, version = version, title = randomAlphanumeric())
+    SampleDocument(canonicalId = id, version = version, title = s"$version-${randomAlphanumeric()}")
 
   override def assertIsIndexed(doc: SampleDocument)(implicit index: Index): Assertion =
     assertElasticsearchEventuallyHas(index, doc).head
