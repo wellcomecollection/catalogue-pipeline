@@ -85,4 +85,4 @@ steps:
               "--from-label", "latest",
               "--environment-id", "staging",
               "--description", $BUILDKITE_BUILD_URL,
-              "--confirmation-wait-for", 1200]
+              "--confirmation-wait-for", 3600]
