@@ -6,7 +6,7 @@ import akka.Done
 import io.circe.Encoder
 
 import scala.concurrent.{ExecutionContext, Future}
-import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, MatcherResult}
+import uk.ac.wellcome.models.matcher.MatcherResult
 import uk.ac.wellcome.typesafe.Runnable
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.work.internal._

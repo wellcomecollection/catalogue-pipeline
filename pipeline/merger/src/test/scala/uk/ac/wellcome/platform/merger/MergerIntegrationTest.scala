@@ -43,7 +43,7 @@ class MergerIntegrationTest
               assertQueueEmpty(queue)
               assertQueueEmpty(dlq)
               getWorksSent(workSender) should contain only work.id
-              index shouldBe Map(work.id -> work.transition[Merged]((None, 1))
+              index shouldBe Map(work.id -> work.transition[Merged]((None, 1)))
             }
           }
       }
