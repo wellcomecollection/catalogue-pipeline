@@ -7,6 +7,7 @@ In particular, it runs the 'make format' task, and if there are any changes,
 it pushes a new commit to your pull request and aborts the current build.
 """
 
+import subprocess
 import sys
 
 from commands import make, git
@@ -31,7 +32,9 @@ if __name__ == "__main__":
         # We checkout the branch before we add the commit, so we don't
         # include the merge commit that Buildkite makes.
         git("fetch", "ssh-origin")
-        git("checkout", "--track", f"ssh-origin/{current_branch()}")
+
+        # If we already have the branch checked out, it's fine.
+        git("checkout", "--track", f"ssh-origin/{current_branch()}", exit_on_error=False)
 
         git("add", "--verbose", "--update")
         git("commit", "-m", "Apply auto-formatting rules")

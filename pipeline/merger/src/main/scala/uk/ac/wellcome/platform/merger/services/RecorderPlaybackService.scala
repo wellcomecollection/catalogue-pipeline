@@ -26,6 +26,10 @@ class RecorderPlaybackService(vhs: VersionedStore[String, Int, Work[Source]])(
     */
   def fetchAllWorks(
     workIdentifiers: Seq[WorkIdentifier]): Future[Seq[Option[Work[Source]]]] = {
+    assert(
+      workIdentifiers.nonEmpty,
+      "You should never look up an empty list of WorkIdentifiers!"
+    )
     Future.sequence(
       workIdentifiers.map(id => Future { getWorkForIdentifier(id) })
     )

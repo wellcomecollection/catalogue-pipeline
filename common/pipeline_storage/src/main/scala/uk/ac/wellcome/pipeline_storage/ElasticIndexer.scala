@@ -22,6 +22,7 @@ class ElasticIndexer[T: Indexable](
     new ElasticsearchIndexCreator(client, index, config).create
 
   final def index(documents: Seq[T]): Future[Either[Seq[T], Seq[T]]] = {
+    assert(documents.nonEmpty, "Cannot index an empty list of documents")
 
     debug(s"Indexing ${documents.map(doc => indexable.id(doc)).mkString(", ")}")
 

@@ -11,6 +11,11 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
   private def createVersion: Int =
     Random.nextInt(100) + 1
 
+  // To avoid having to specify a created date, it's handy having a default used in tests.
+  // We can't use `Instant.now` as a default because that introduces all sorts of flakyness and race conditions.
+  // So, we are introducing an arbitrary date here for convenience.
+  val modifiedTime = Instant.parse("2020-10-15T15:51:00.00Z")
+
   def sourceWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     modifiedTime: Instant = instantInLast30Days
