@@ -34,7 +34,9 @@ if __name__ == "__main__":
         git("fetch", "ssh-origin")
 
         # If we already have the branch checked out, it's fine.
-        git("checkout", "--track", f"ssh-origin/{current_branch()}", exit_on_error=False)
+        git(
+            "checkout", "--track", f"ssh-origin/{current_branch()}", exit_on_error=False
+        )
 
         git("add", "--verbose", "--update")
         git("commit", "-m", "Apply auto-formatting rules")

@@ -45,7 +45,8 @@ class MergerWorkerService[WorkDestination, ImageDestination](
       works <- indexResult match {
         case Left(failedWorks) =>
           Future.failed(
-            new Exception(s"Failed indexing works: $failedWorks (tried to ingest ${mergerOutcome.works})")
+            new Exception(
+              s"Failed indexing works: $failedWorks (tried to ingest ${mergerOutcome.works})")
           )
         case Right(works) => Future.successful(works)
       }
