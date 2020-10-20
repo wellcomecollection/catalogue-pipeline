@@ -1,10 +1,17 @@
 import java.io.File
 
 import sbt.{IO, Project}
+import scala.reflect.io.Directory
 import io.circe.generic.auto._
 import io.circe.syntax._
 
 object Metadata {
+  // Clear out the .sbt_metadata directory before every invocation of sbt,
+  // so if we change the project structure old metadata entries will
+  // be deleted.
+  val directory = new Directory(new File(".sbt_metadata"))
+  directory.deleteRecursively()
+
   def write(
     project: Project,
     folder: String,
