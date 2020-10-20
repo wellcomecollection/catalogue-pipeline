@@ -7,10 +7,10 @@ import software.amazon.awssdk.services.sqs.model.QueueAttributeName
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.models.work.generators.WorkGenerators
+import uk.ac.wellcome.models.work.generators.ImageGenerators
 import uk.ac.wellcome.platform.id_minter_images.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.models.Implicits._
-import WorkState.{Identified, Source}
+import SourceWork._
 
 class IdMinterFeatureTest
     extends AnyFunSpec
@@ -18,7 +18,7 @@ class IdMinterFeatureTest
     with IntegrationPatience
     with Eventually
     with WorkerServiceFixture
-    with WorkGenerators {
+    with ImageGenerators {
 
   it("mints the same IDs where source identifiers match") {
     val messageSender = new MemoryMessageSender()
@@ -27,83 +27,26 @@ class IdMinterFeatureTest
       withIdentifiersTable { identifiersTableConfig =>
         withWorkerService(messageSender, queue, identifiersTableConfig) { _ =>
           eventuallyTableExists(identifiersTableConfig)
-          val work: Work[Source] = sourceWork()
+          val image = createUnmergedImage mergeWith (
+            mergedWork().toSourceWork, None, 1
+          )
 
           val messageCount = 5
 
           (1 to messageCount).foreach { _ =>
-            sendMessage(queue = queue, obj = work)
+            sendMessage(queue = queue, obj = image)
           }
 
           eventually {
-            val works = messageSender.getMessages[Work[Identified]]
-            works.length shouldBe >=(messageCount)
+            val images =
+              messageSender.getMessages[MergedImage[DataState.Identified]]
+            images.length shouldBe >=(messageCount)
 
-            works.map(_.state.canonicalId).distinct should have size 1
-            works.foreach { receivedWork =>
-              receivedWork
-                .asInstanceOf[Work.Visible[Identified]]
-                .sourceIdentifier shouldBe work.sourceIdentifier
-              receivedWork
-                .asInstanceOf[Work.Visible[Identified]]
-                .data
-                .title shouldBe work.data.title
+            images.map(_.id.canonicalId).distinct should have size 1
+            images.foreach { receivedImage =>
+              receivedImage.id.sourceIdentifier shouldBe image.id.sourceIdentifier
+              receivedImage.location shouldBe image.location
             }
-          }
-        }
-      }
-    }
-  }
-
-  it("mints an identifier for a invisible work") {
-    val messageSender = new MemoryMessageSender()
-
-    withLocalSqsQueue() { queue =>
-      withIdentifiersTable { identifiersTableConfig =>
-        withWorkerService(messageSender, queue, identifiersTableConfig) { _ =>
-          eventuallyTableExists(identifiersTableConfig)
-          val work: Work[Source] = sourceWork().invisible()
-
-          sendMessage(queue = queue, obj = work)
-
-          eventually {
-            val works = messageSender.getMessages[Work[Identified]]
-            works.length shouldBe >=(1)
-
-            val receivedWork = works.head
-            val invisibleWork =
-              receivedWork.asInstanceOf[Work.Invisible[Identified]]
-            invisibleWork.sourceIdentifier shouldBe work.sourceIdentifier
-            invisibleWork.state.canonicalId shouldNot be(empty)
-          }
-        }
-      }
-    }
-  }
-
-  it("mints an identifier for a redirected work") {
-    val messageSender = new MemoryMessageSender()
-
-    withLocalSqsQueue() { queue =>
-      withIdentifiersTable { identifiersTableConfig =>
-        withWorkerService(messageSender, queue, identifiersTableConfig) { _ =>
-          eventuallyTableExists(identifiersTableConfig)
-
-          val work: Work[Source] = sourceWork()
-            .redirected(redirect = IdState.Identifiable(createSourceIdentifier))
-
-          sendMessage(queue = queue, obj = work)
-
-          eventually {
-            val works = messageSender.getMessages[Work[Identified]]
-            works.length shouldBe >=(1)
-
-            val receivedWork = works.head
-            val redirectedWork =
-              receivedWork.asInstanceOf[Work.Redirected[Identified]]
-            redirectedWork.sourceIdentifier shouldBe work.sourceIdentifier
-            redirectedWork.state.canonicalId shouldNot be(empty)
-            redirectedWork.redirect.canonicalId shouldNot be(empty)
           }
         }
       }
@@ -118,9 +61,11 @@ class IdMinterFeatureTest
         withWorkerService(messageSender, queue, identifiersTableConfig) { _ =>
           sendInvalidJSONto(queue)
 
-          val work: Work[Source] = sourceWork()
+          val image = createUnmergedImage mergeWith (
+            mergedWork().toSourceWork, None, 1
+          )
 
-          sendMessage(queue = queue, obj = work)
+          sendMessage(queue = queue, obj = image)
 
           eventually {
             messageSender.messages should not be empty
