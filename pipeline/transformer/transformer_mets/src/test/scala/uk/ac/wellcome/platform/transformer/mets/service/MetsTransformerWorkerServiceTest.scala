@@ -59,17 +59,11 @@ class MetsTransformerWorkerServiceTest
 
     withWorkerService {
       case (QueuePair(queue, _), metsBucket, messageSender, dynamoStore) =>
-        sendWork(
-          str,
-          "mets.xml",
-          dynamoStore,
-          metsBucket,
-          queue,
-          version,
-          Instant.now)
+        val now = Instant.now
+        sendWork(str, "mets.xml", dynamoStore, metsBucket, queue, version, now)
         eventually {
           val works = messageSender.getMessages[Work.Invisible[Source]]
-          works.head shouldBe expectedWork(identifier, version)
+          works.head shouldBe expectedWork(identifier, version, now)
 
           assertQueueEmpty(queue)
         }
@@ -108,23 +102,18 @@ class MetsTransformerWorkerServiceTest
 
     withWorkerService {
       case (QueuePair(queue, _), metsBucket, messageSender, dynamoStore) =>
-        sendWork(
-          str,
-          "mets.xml",
-          dynamoStore,
-          metsBucket,
-          queue,
-          version,
-          Instant.now)
+        val now = Instant.now
+        sendWork(str, "mets.xml", dynamoStore, metsBucket, queue, version, now)
         eventually {
           val works = messageSender.getMessages[Work[Source]]
-          works.head shouldBe expectedWork(identifier, version)
+          works.head shouldBe expectedWork(identifier, version, now)
         }
     }
   }
 
   private def expectedWork(identifier: String,
-                           version: Int): Work.Invisible[Source] = {
+                           version: Int,
+                           createdDate: Instant): Work.Invisible[Source] = {
     val expectedUrl =
       s"https://wellcomelibrary.org/iiif/$identifier/manifest"
     val expectedDigitalLocation = DigitalLocationDeprecated(
@@ -143,7 +132,8 @@ class MetsTransformerWorkerServiceTest
           identifierType = IdentifierType("mets", "METS"),
           ontologyType = "Work",
           value = identifier
-        )
+        ),
+        createdDate
       ),
       data = WorkData[DataState.Unidentified](
         items = List(expectedItem),

@@ -1,9 +1,9 @@
 package uk.ac.wellcome.platform.transformer.miro
 
+import java.time.Instant
+
 import scala.util.Try
-
 import grizzled.slf4j.Logging
-
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.miro.exceptions.ShouldNotTransformException
@@ -88,14 +88,17 @@ class MiroRecordTransformer
 
       Work.Visible[Source](
         version = version,
-        state = Source(sourceIdentifier),
+        state = Source(
+          sourceIdentifier,
+          // Miro records are static so we just send 0 as a last modification timestamp
+          Instant.EPOCH),
         data = data
       )
     }.recover {
       case e: ShouldNotTransformException =>
         debug(s"Should not transform: ${e.getMessage}")
         Work.Invisible[Source](
-          state = Source(sourceIdentifier),
+          state = Source(sourceIdentifier, Instant.EPOCH),
           version = version,
           data = WorkData()
         )

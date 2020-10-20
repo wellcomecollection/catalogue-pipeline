@@ -96,7 +96,7 @@ trait Merger extends MergerLogging {
     source: Work[Source]): Work.Redirected[Source] =
     Work.Redirected[Source](
       version = source.version,
-      state = Source(source.sourceIdentifier),
+      state = Source(source.sourceIdentifier, source.state.modifiedTime),
       redirect = IdState.Identifiable(target.sourceIdentifier)
     )
 

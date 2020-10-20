@@ -1,5 +1,7 @@
 package uk.ac.wellcome.models.work.generators
 
+import java.time.Instant
+
 import uk.ac.wellcome.models.work.internal._
 import WorkState._
 
@@ -9,11 +11,17 @@ trait WorkGenerators extends IdentifiersGenerators {
   private def createVersion: Int =
     Random.nextInt(100) + 1
 
+  // To avoid having to specify a created date, it's handy having a default used in tests.
+  // We can't use `Instant.now` as a default because that introduces all sorts of flakyness and race conditions.
+  // So, we are introducing an arbitrary date here for convenience.
+  val modifiedTime = Instant.parse("2020-10-15T15:51:00.00Z")
+
   def sourceWork(
-    sourceIdentifier: SourceIdentifier = createSourceIdentifier
+    sourceIdentifier: SourceIdentifier = createSourceIdentifier,
+    modifiedTime: Instant = modifiedTime
   ): Work.Visible[Source] =
     Work.Visible[Source](
-      state = Source(sourceIdentifier),
+      state = Source(sourceIdentifier, modifiedTime),
       data = initData,
       version = createVersion
     )

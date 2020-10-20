@@ -213,7 +213,8 @@ class SierraTransformerTest
 
   it("returns an InvisibleWork if there isn't any bib data") {
     assertTransformReturnsInvisibleWork(
-      maybeBibRecord = None
+      maybeBibRecord = None,
+      Instant.EPOCH
     )
   }
 
@@ -221,6 +222,7 @@ class SierraTransformerTest
     "does not perform a transformation without bibData, even if some itemData is present") {
     assertTransformReturnsInvisibleWork(
       maybeBibRecord = None,
+      Instant.EPOCH,
       itemRecords = List(createSierraItemRecord)
     )
   }
@@ -282,9 +284,9 @@ class SierraTransformerTest
       value = id.withoutCheckDigit
     )
 
-    val work = transformDataToWork(id = id, data = data)
+    val work = transformDataToWork(id = id, data = data, modifiedTime)
 
-    work shouldBe sourceWork(sourceIdentifier)
+    work shouldBe sourceWork(sourceIdentifier, modifiedTime)
       .withVersion(1)
       .title(title)
       .otherIdentifiers(List(sierraIdentifier))
@@ -829,7 +831,8 @@ class SierraTransformerTest
     )
 
     assertTransformReturnsInvisibleWork(
-      maybeBibRecord = Some(bibRecord)
+      maybeBibRecord = Some(bibRecord),
+      bibRecord.modifiedDate
     )
   }
 
@@ -937,11 +940,14 @@ class SierraTransformerTest
                                                                                                                |}
                                                                                                                |""".stripMargin
 
-  private def transformDataToWork(id: SierraBibNumber,
-                                  data: String): Work[Source] = {
+  private def transformDataToWork(
+    id: SierraBibNumber,
+    data: String,
+    modifiedDate: Instant = olderDate): Work[Source] = {
     val bibRecord = createSierraBibRecordWith(
       id = id,
-      data = data
+      data = data,
+      modifiedDate = modifiedDate
     )
 
     val sierraTransformable = SierraTransformable(
@@ -953,6 +959,7 @@ class SierraTransformerTest
 
   private def assertTransformReturnsInvisibleWork(
     maybeBibRecord: Option[SierraBibRecord],
+    modifiedDate: Instant,
     itemRecords: List[SierraItemRecord] = List()) = {
     val id = createSierraBibNumber
 
@@ -971,6 +978,7 @@ class SierraTransformerTest
         createSierraSystemSourceIdentifierWith(
           value = id.withCheckDigit
         ),
+        modifiedDate
       ),
       version = 1,
       data = WorkData()

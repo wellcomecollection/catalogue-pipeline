@@ -1,10 +1,11 @@
 package uk.ac.wellcome.platform.transformer.mets.transformer
 
+import java.time.Instant
+
 import cats.syntax.traverse._
 import cats.instances.either._
 import cats.instances.option._
 import org.apache.commons.lang3.StringUtils.equalsIgnoreCase
-
 import uk.ac.wellcome.models.work.internal._
 import WorkState.Source
 
@@ -17,7 +18,8 @@ case class MetsData(
   titlePageId: Option[String] = None
 ) {
 
-  def toWork(version: Int): Either[Throwable, Work.Invisible[Source]] =
+  def toWork(version: Int,
+             modifiedTime: Instant): Either[Throwable, Work.Invisible[Source]] =
     for {
       license <- parseLicense
       accessStatus <- parseAccessStatus
@@ -27,7 +29,7 @@ case class MetsData(
     } yield
       Work.Invisible[Source](
         version = version,
-        state = Source(sourceIdentifier),
+        state = Source(sourceIdentifier, modifiedTime),
         data = WorkData[DataState.Unidentified](
           items = List(item),
           mergeCandidates = List(mergeCandidate),

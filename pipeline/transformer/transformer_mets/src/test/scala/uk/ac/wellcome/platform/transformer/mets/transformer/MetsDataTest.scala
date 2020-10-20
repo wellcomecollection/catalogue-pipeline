@@ -1,5 +1,7 @@
 package uk.ac.wellcome.platform.transformer.mets.transformer
 
+import java.time.Instant
+
 import org.scalatest.Inside
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -29,25 +31,28 @@ class MetsDataTest
       LocationType("iiif-presentation"),
       license = Some(License.CCBYNC))
 
+    val createdDate = Instant.now()
+
     val unidentifiableItem =
       Item(id = IdState.Unidentifiable, locations = List(digitalLocation))
-    metsData.toWork(version).right.get shouldBe Work.Invisible[Source](
-      version = version,
-      state = Source(expectedSourceIdentifier),
-      data = WorkData[DataState.Unidentified](
-        items = List(unidentifiableItem),
-        mergeCandidates = List(
-          MergeCandidate(
-            identifier = SourceIdentifier(
-              identifierType = IdentifierType("sierra-system-number"),
-              ontologyType = "Work",
-              value = bNumber
-            ),
-            reason = "METS work"
+    metsData.toWork(version, createdDate).right.get shouldBe Work
+      .Invisible[Source](
+        version = version,
+        state = Source(expectedSourceIdentifier, createdDate),
+        data = WorkData[DataState.Unidentified](
+          items = List(unidentifiableItem),
+          mergeCandidates = List(
+            MergeCandidate(
+              identifier = SourceIdentifier(
+                identifierType = IdentifierType("sierra-system-number"),
+                ontologyType = "Work",
+                value = bNumber
+              ),
+              reason = "METS work"
+            )
           )
         )
       )
-    )
   }
 
   it("creates a invisible work with an item and no license") {
@@ -67,25 +72,28 @@ class MetsDataTest
         LocationType("iiif-presentation"),
         license = None)
 
+    val createdDate = Instant.now()
+
     val unidentifiableItem =
       Item(id = IdState.Unidentifiable, locations = List(digitalLocation))
-    metsData.toWork(version).right.get shouldBe Work.Invisible[Source](
-      version = version,
-      state = Source(expectedSourceIdentifier),
-      data = WorkData[DataState.Unidentified](
-        items = List(unidentifiableItem),
-        mergeCandidates = List(
-          MergeCandidate(
-            identifier = SourceIdentifier(
-              identifierType = IdentifierType("sierra-system-number"),
-              ontologyType = "Work",
-              value = bNumber
-            ),
-            reason = "METS work"
+    metsData.toWork(version, createdDate).right.get shouldBe Work
+      .Invisible[Source](
+        version = version,
+        state = Source(expectedSourceIdentifier, createdDate),
+        data = WorkData[DataState.Unidentified](
+          items = List(unidentifiableItem),
+          mergeCandidates = List(
+            MergeCandidate(
+              identifier = SourceIdentifier(
+                identifierType = IdentifierType("sierra-system-number"),
+                ontologyType = "Work",
+                value = bNumber
+              ),
+              reason = "METS work"
+            )
           )
         )
       )
-    )
   }
 
   it("fails creating a work if it cannot parse the license") {
@@ -94,7 +102,7 @@ class MetsDataTest
       MetsData(recordIdentifier = bNumber, accessConditionDz = Some("blah"))
     val version = 1
 
-    metsData.toWork(version).left.get shouldBe a[Exception]
+    metsData.toWork(version, Instant.now()).left.get shouldBe a[Exception]
 
   }
 
@@ -103,7 +111,8 @@ class MetsDataTest
       MetsData(
         recordIdentifier = randomAlphanumeric(10),
         accessConditionDz = Some("in copyright"))
-    inside(metsData.toWork(1).right.get.data.items) {
+
+    inside(metsData.toWork(1, Instant.now()).right.get.data.items) {
       case List(
           Item(
             IdState.Unidentifiable,
@@ -118,7 +127,8 @@ class MetsDataTest
       MetsData(
         recordIdentifier = randomAlphanumeric(10),
         accessConditionDz = Some("In copyright"))
-    inside(metsData.toWork(1).right.get.data.items) {
+
+    inside(metsData.toWork(1, Instant.now()).right.get.data.items) {
       case List(
           Item(
             IdState.Unidentifiable,
@@ -133,7 +143,7 @@ class MetsDataTest
       MetsData(
         recordIdentifier = randomAlphanumeric(10),
         accessConditionDz = Some(License.InCopyright.url))
-    inside(metsData.toWork(1).right.get.data.items) {
+    inside(metsData.toWork(1, Instant.now()).right.get.data.items) {
       case List(
           Item(
             IdState.Unidentifiable,
@@ -147,7 +157,7 @@ class MetsDataTest
     val metsData = MetsData(
       recordIdentifier = randomAlphanumeric(10),
       accessConditionDz = Some("Copyright not cleared"))
-    val result = metsData.toWork(1)
+    val result = metsData.toWork(1, Instant.now())
 
     inside(result.right.get.data.items) {
       case List(
@@ -165,7 +175,7 @@ class MetsDataTest
         recordIdentifier = randomAlphanumeric(10),
         accessConditionDz =
           Some("rightsstatements.org/page/InC/1.0/?language=en"))
-    val result = metsData.toWork(1)
+    val result = metsData.toWork(1, Instant.now())
 
     inside(result.right.get.data.items) {
       case List(
@@ -182,7 +192,7 @@ class MetsDataTest
       MetsData(
         recordIdentifier = randomAlphanumeric(10),
         accessConditionDz = Some("All Rights Reserved"))
-    val result = metsData.toWork(1)
+    val result = metsData.toWork(1, Instant.now())
 
     inside(result.right.get.data.items) {
       case List(
@@ -202,7 +212,7 @@ class MetsDataTest
         "id" -> FileReference("l", "location.jp2", Some("image/jp2"))
       )
     )
-    val result = metsData.toWork(1)
+    val result = metsData.toWork(1, Instant.now())
     result shouldBe a[Right[_, _]]
     result.right.get.data.thumbnail shouldBe Some(
       DigitalLocationDeprecated(
@@ -223,7 +233,7 @@ class MetsDataTest
       ),
       titlePageId = Some("title-id")
     )
-    val result = metsData.toWork(1)
+    val result = metsData.toWork(1, Instant.now())
     result shouldBe a[Right[_, _]]
     result.right.get.data.thumbnail shouldBe Some(
       DigitalLocationDeprecated(
@@ -243,7 +253,7 @@ class MetsDataTest
         "id" -> FileReference("l", "location.jp2", Some("image/jp2"))
       )
     )
-    val result = metsData.toWork(1)
+    val result = metsData.toWork(1, Instant.now())
     result shouldBe a[Right[_, _]]
     result.right.get.data.thumbnail shouldBe None
   }
@@ -258,7 +268,7 @@ class MetsDataTest
         "id" -> FileReference("l", "location.pdf")
       )
     )
-    val result = metsData.toWork(1)
+    val result = metsData.toWork(1, Instant.now())
     result shouldBe a[Right[_, _]]
     result.right.get.data.thumbnail shouldBe Some(
       DigitalLocationDeprecated(
@@ -277,7 +287,7 @@ class MetsDataTest
         "id" -> FileReference("v", "video.mpg", Some("video/mpeg"))
       )
     )
-    val result = metsData.toWork(1)
+    val result = metsData.toWork(1, Instant.now())
     result shouldBe a[Right[_, _]]
     result.right.get.data.thumbnail shouldBe None
   }
@@ -290,7 +300,7 @@ class MetsDataTest
         "id" -> FileReference("v", "video.mp3", Some("audio/x-mpeg-3"))
       )
     )
-    val result = metsData.toWork(1)
+    val result = metsData.toWork(1, Instant.now())
     result shouldBe a[Right[_, _]]
     result.right.get.data.thumbnail shouldBe None
   }
@@ -303,7 +313,7 @@ class MetsDataTest
         "id" -> FileReference("l", "location.jp2", Some("image/jp2"))
       )
     )
-    val result = metsData.toWork(1)
+    val result = metsData.toWork(1, Instant.now())
     result shouldBe a[Right[_, _]]
     result.right.get.data.images.head.location shouldBe DigitalLocationDeprecated(
       url = s"https://dlcs.io/iiif-img/wellcome/5/location.jp2/info.json",
@@ -316,7 +326,7 @@ class MetsDataTest
     val result = MetsData(
       recordIdentifier = "ID",
       accessConditionStatus = Some("Requires registration"),
-    ).toWork(1)
+    ).toWork(1, Instant.now())
     result shouldBe a[Right[_, _]]
     inside(result.right.get.data.items.head.locations.head) {
       case DigitalLocationDeprecated(_, _, _, _, accessConditions) =>
@@ -340,7 +350,7 @@ class MetsDataTest
         "D" -> FileReference("D", "location4.jp2", Some("application/pdf")),
         "E" -> FileReference("E", "location4.jp2", Some("video/mpeg"))
       )
-    ).toWork(1)
+    ).toWork(1, Instant.now())
     result shouldBe a[Right[_, _]]
     val images = result.right.get.data.images
     images should have length 3
@@ -359,7 +369,7 @@ class MetsDataTest
         "A" -> FileReference("A", "location1.jp2", Some("image/jp2")),
         "B" -> FileReference("B", "location2.jp2", Some("image/jp2"))
       )
-    ).toWork(1)
+    ).toWork(1, Instant.now())
     result shouldBe a[Right[_, _]]
     result.right.get.data.images shouldBe empty
   }
@@ -369,7 +379,7 @@ class MetsDataTest
       recordIdentifier = "ID",
       accessConditionStatus = Some("Clinical Images"),
       accessConditionUsage = Some("Please ask nicely")
-    ).toWork(1)
+    ).toWork(1, Instant.now())
     result shouldBe a[Right[_, _]]
     inside(result.right.get.data.items.head.locations.head) {
       case DigitalLocationDeprecated(_, _, _, _, accessConditions) =>
@@ -386,7 +396,7 @@ class MetsDataTest
       recordIdentifier = "ID",
       accessConditionStatus = None,
       accessConditionUsage = None
-    ).toWork(1)
+    ).toWork(1, Instant.now())
     result shouldBe a[Right[_, _]]
     inside(result.right.get.data.items.head.locations.head) {
       case DigitalLocationDeprecated(_, _, _, _, accessConditions) =>
@@ -398,7 +408,7 @@ class MetsDataTest
     val result = MetsData(
       recordIdentifier = "ID",
       accessConditionStatus = Some("Restricted files")
-    ).toWork(1)
+    ).toWork(1, Instant.now())
     result shouldBe a[Right[_, _]]
     inside(result.right.get.data.items.head.locations.head) {
       case DigitalLocationDeprecated(_, _, _, _, accessConditions) =>
@@ -415,7 +425,7 @@ class MetsDataTest
     val result = MetsData(
       recordIdentifier = "ID",
       accessConditionStatus = Some("Kanye West"),
-    ).toWork(1)
+    ).toWork(1, Instant.now())
     result shouldBe a[Left[_, _]]
   }
 }

@@ -1,5 +1,7 @@
 package uk.ac.wellcome.platform.transformer.miro.transformers
 
+import java.time.Instant
+
 import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.prop.TableDrivenPropertyChecks._
@@ -329,7 +331,8 @@ class MiroRecordTransformerTest
       state = Source(
         createMiroSourceIdentifierWith(
           value = miroRecord.imageNumber
-        )
+        ),
+        Instant.EPOCH
       ),
       version = 1,
       data = WorkData()
