@@ -18,6 +18,9 @@ abstract class Indexer[T: Indexable] {
     *         Right with the succesfully indexed documents
     */
   def index(documents: Seq[T]): Future[Either[Seq[T], Seq[T]]]
+
+  def index(document: T): Future[Either[Seq[T], Seq[T]]] =
+    index(documents = Seq(document))
 }
 
 trait Indexable[T] {
