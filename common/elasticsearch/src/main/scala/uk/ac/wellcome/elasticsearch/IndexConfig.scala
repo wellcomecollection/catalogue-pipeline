@@ -1,7 +1,7 @@
 package uk.ac.wellcome.elasticsearch
 
-import com.sksamuel.elastic4s.ElasticApi.dateField
 import com.sksamuel.elastic4s.ElasticDsl.{
+  dateField,
   intField,
   keywordField,
   objectField,

@@ -217,7 +217,7 @@ sealed trait WorksIndexConfig extends IndexConfig with WorksIndexConfigFields {
 
 object SourceWorkIndexConfig extends WorksIndexConfig {
 
-  val state = objectField("state").fields(sourceIdentifier)
+  val state = objectField("state").fields(sourceIdentifier, modifiedTime)
 
   val idState = identifiable
 }

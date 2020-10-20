@@ -55,6 +55,8 @@ class PathQueryRelationsService(elasticClient: ElasticClient, index: Index)(
               val works = result.left
                 .map(_.asException)
                 .flatMap { resp =>
+                  // Are you here because something is erroring when being decoded?
+                  // Check that all the fields you need are in the lists in RelationsRequestBuilder!
                   resp.hits.hits.toList.map(toWork).toResult
                 }
               works match {

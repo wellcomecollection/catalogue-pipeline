@@ -28,7 +28,7 @@ class IdMinterFeatureTest
         withWorkerService(messageSender, queue, identifiersTableConfig) { _ =>
           eventuallyTableExists(identifiersTableConfig)
           val image = createUnmergedImage mergeWith (
-            mergedWork().toSourceWork, None, 1
+            mergedWork().toSourceWork, None, now
           )
 
           val messageCount = 5
@@ -62,7 +62,7 @@ class IdMinterFeatureTest
           sendInvalidJSONto(queue)
 
           val image = createUnmergedImage mergeWith (
-            mergedWork().toSourceWork, None, 1
+            mergedWork().toSourceWork, None, now
           )
 
           sendMessage(queue = queue, obj = image)
