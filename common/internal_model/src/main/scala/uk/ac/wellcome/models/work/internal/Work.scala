@@ -128,6 +128,7 @@ sealed trait WorkState {
 
   val sourceIdentifier: SourceIdentifier
   val numberOfSources: Int
+  val modifiedTime: Instant
 
   def id: String = sourceIdentifier.toString
 }

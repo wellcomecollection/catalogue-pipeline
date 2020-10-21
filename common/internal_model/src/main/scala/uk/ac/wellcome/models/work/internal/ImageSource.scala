@@ -1,8 +1,11 @@
 package uk.ac.wellcome.models.work.internal
 
+import java.time.Instant
+
 sealed trait ImageSource[State <: DataState] {
   val id: State#Id
   val version: Int
+  val modifiedTime: Instant
 }
 
 // numberOfSources is hardcoded here so as not to break builds
@@ -10,6 +13,7 @@ sealed trait ImageSource[State <: DataState] {
 case class SourceWorks[State <: DataState](
   canonicalWork: SourceWork[State],
   redirectedWork: Option[SourceWork[State]],
+  modifiedTime: Instant,
   numberOfSources: Int = 1
 ) extends ImageSource[State] {
   override val id = canonicalWork.id
