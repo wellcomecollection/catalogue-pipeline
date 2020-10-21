@@ -140,7 +140,7 @@ trait ElasticsearchFixtures
     index: Index,
     works: Work[Identified]*): Seq[Assertion] = {
     implicit val id: CanonicalId[Work[Identified]] =
-      (t: Work[Identified]) => t.state.canonicalId
+      (work: Work[Identified]) => work.state.canonicalId
     assertElasticsearchEventuallyHas(index, works: _*)
   }
 
