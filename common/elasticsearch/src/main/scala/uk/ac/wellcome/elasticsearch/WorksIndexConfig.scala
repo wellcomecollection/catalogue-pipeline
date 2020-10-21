@@ -217,7 +217,7 @@ sealed trait WorksIndexConfig extends IndexConfig with WorksIndexConfigFields {
 
 object SourceWorkIndexConfig extends WorksIndexConfig {
 
-  val state = objectField("state").fields(sourceIdentifier)
+  val state = objectField("state").fields(sourceIdentifier, modifiedTime)
 
   val idState = identifiable
 }
@@ -226,6 +226,7 @@ object MergedWorkIndexConfig extends WorksIndexConfig {
 
   val state = objectField("state").fields(
     sourceIdentifier,
+    modifiedTime,
     intField("numberOfSources"),
   )
 
@@ -238,6 +239,7 @@ object DenormalisedWorkIndexConfig extends WorksIndexConfig {
 
   val state = objectField("state").fields(
     sourceIdentifier,
+    modifiedTime,
     intField("numberOfSources"),
     relations(idState("id"))
   )
@@ -250,6 +252,7 @@ object IdentifiedWorkIndexConfig extends WorksIndexConfig {
   val state = objectField("state").fields(
     canonicalId,
     sourceIdentifier,
+    modifiedTime,
     intField("numberOfSources"),
     relations(idState("id"))
   )

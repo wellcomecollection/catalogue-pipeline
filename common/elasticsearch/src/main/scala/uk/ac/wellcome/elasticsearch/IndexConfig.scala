@@ -1,6 +1,7 @@
 package uk.ac.wellcome.elasticsearch
 
 import com.sksamuel.elastic4s.ElasticDsl.{
+  dateField,
   intField,
   keywordField,
   objectField,
@@ -104,6 +105,7 @@ trait IndexConfigFields {
 
   val canonicalId = lowercaseKeyword("canonicalId")
   val version = intField("version")
+  val modifiedTime = dateField("modifiedTime")
 }
 
 object NoStrictMapping extends IndexConfig {

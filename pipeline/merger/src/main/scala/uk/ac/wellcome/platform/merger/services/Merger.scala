@@ -6,11 +6,11 @@ import uk.ac.wellcome.platform.merger.rules._
 import uk.ac.wellcome.platform.merger.logging.MergerLogging
 import uk.ac.wellcome.platform.merger.models.{
   FieldMergeResult,
+  ImageWithSource,
   MergeResult,
   MergerOutcome
 }
-import WorkState.{Merged, Source}
-import WorkFsm._
+import WorkState.Source
 
 /*
  * The implementor of a Merger must provide:
@@ -78,16 +78,13 @@ trait Merger extends MergerLogging {
             case (source, true) => source
           }
 
-          val remaining = (sources.toSet -- redirectedSources)
-            .map(_.transition[Merged](1))
-          val redirects = redirectedSources
-            .map(redirectSourceToTarget(target))
-            .map(_.transition[Merged](1))
+          val remaining = sources.toSet -- redirectedSources
+          val redirects = redirectedSources.map(redirectSourceToTarget(target))
           logResult(result, redirects.toList, remaining.toList)
 
-          MergerOutcome(
-            works = redirects.toList ++ remaining :+ result.mergedTarget,
-            images = result.images
+          new MergerOutcome(
+            resultWorks = redirects.toList ++ remaining :+ result.mergedTarget,
+            imagesWithSources = result.imagesWithSources
           )
       }
       .getOrElse(MergerOutcome.passThrough(works))
@@ -110,14 +107,14 @@ trait Merger extends MergerLogging {
     }
 
   private def logResult(result: MergeResult,
-                        redirects: Seq[Work[Merged]],
-                        remaining: Seq[Work[Merged]]): Unit = {
+                        redirects: Seq[Work[_]],
+                        remaining: Seq[Work[_]]): Unit = {
     if (redirects.nonEmpty) {
       info(
         s"Merged ${describeMergeOutcome(result.mergedTarget, redirects, remaining)}")
     }
-    if (result.images.nonEmpty) {
-      info(s"Created images ${describeImages(result.images)}")
+    if (result.imagesWithSources.nonEmpty) {
+      info(s"Created images ${describeImages(result.imagesWithSources)}")
     }
   }
 }
@@ -141,12 +138,14 @@ object PlatformMerger extends Merger {
     if (sources.isEmpty)
       State.pure(
         MergeResult(
-          mergedTarget = target.transition[Merged](1),
-          images = standaloneImages(target).map {
-            _ mergeWith (
-              canonicalWork = target.toSourceWork,
-              redirectedWork = None,
-              numberOfSources = 1
+          mergedTarget = target,
+          imagesWithSources = standaloneImages(target).map { image =>
+            ImageWithSource(
+              image,
+              SourceWorks(
+                canonicalWork = target.toSourceWork,
+                redirectedWork = None
+              )
             )
           }
         )
@@ -165,17 +164,18 @@ object PlatformMerger extends Merger {
             images = unmergedImages
           )
         }
-        nMergedSources <- State.inspect[MergeState, Int](_.size)
       } yield
         MergeResult(
-          mergedTarget = work.transition[Merged](nMergedSources + 1),
-          images = unmergedImages.map { image =>
-            image mergeWith (
-              canonicalWork = work.toSourceWork,
-              redirectedWork = sources
-                .find { _.data.images.contains(image) }
-                .map(_.toSourceWork),
-              numberOfSources = nMergedSources + 1
+          mergedTarget = work,
+          imagesWithSources = unmergedImages.map { image =>
+            ImageWithSource(
+              image = image,
+              source = SourceWorks(
+                canonicalWork = work.toSourceWork,
+                redirectedWork = sources
+                  .find { _.data.images.contains(image) }
+                  .map(_.toSourceWork)
+              )
             )
           }
         )

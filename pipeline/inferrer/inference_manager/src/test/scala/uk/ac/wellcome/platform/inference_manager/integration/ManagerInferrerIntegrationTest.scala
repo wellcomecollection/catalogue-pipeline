@@ -66,7 +66,7 @@ class ManagerInferrerIntegrationTest
           val augmentedImage = messageSender.getMessages[AugmentedImage].head
 
           inside(augmentedImage) {
-            case AugmentedImage(id, _, _, _, Some(inferredData)) =>
+            case AugmentedImage(id, _, _, _, _, Some(inferredData)) =>
               id should be(image.id)
               inside(inferredData) {
                 case InferredData(

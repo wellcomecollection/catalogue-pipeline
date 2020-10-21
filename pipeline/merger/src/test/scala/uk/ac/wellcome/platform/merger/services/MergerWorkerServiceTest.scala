@@ -21,6 +21,8 @@ import WorkState.Merged
 import WorkFsm._
 import uk.ac.wellcome.models.work.generators.MiroWorkGenerators
 
+import scala.concurrent.duration._
+
 class MergerWorkerServiceTest
     extends AnyFunSpec
     with Matchers
@@ -33,9 +35,10 @@ class MergerWorkerServiceTest
   it("reads matcher result messages, retrieves the works and sends on the IDs") {
     withMergerWorkerServiceFixtures {
       case (vhs, QueuePair(queue, dlq), senders, metrics, index) =>
-        val work1 = sourceWork()
-        val work2 = sourceWork()
-        val work3 = sourceWork()
+        val latestUpdate = randomInstantBefore(now, 30 days)
+        val work1 = sourceWork(modifiedTime = latestUpdate)
+        val work2 = sourceWork(modifiedTime = latestUpdate - (1 day))
+        val work3 = sourceWork(modifiedTime = latestUpdate - (2 days))
 
         val matcherResult =
           matcherResultWith(Set(Set(work3), Set(work1, work2)))
@@ -58,9 +61,9 @@ class MergerWorkerServiceTest
           )
 
           index shouldBe Map(
-            work1.id -> work1.transition[Merged](1),
-            work2.id -> work2.transition[Merged](1),
-            work3.id -> work3.transition[Merged](1)
+            work1.id -> work1.transition[Merged]((Some(latestUpdate), 1)),
+            work2.id -> work2.transition[Merged]((Some(latestUpdate), 1)),
+            work3.id -> work3.transition[Merged]((Some(latestUpdate), 1))
           )
 
           metrics.incrementedCounts.length should be >= 1
@@ -89,7 +92,7 @@ class MergerWorkerServiceTest
 
           getWorksSent(senders) should contain only work.id
 
-          index shouldBe Map(work.id -> work.transition[Merged](1))
+          index shouldBe Map(work.id -> work.transition[Merged]((None, 1)))
 
           metrics.incrementedCounts.length shouldBe 1
           metrics.incrementedCounts.last should endWith("_success")
@@ -121,7 +124,7 @@ class MergerWorkerServiceTest
     }
   }
 
-  it("always sends the newest version of a Work") {
+  it("always sends the highest version of a Work") {
     withMergerWorkerServiceFixtures {
       case (vhs, QueuePair(queue, dlq), senders, _, index) =>
         val work = sourceWork()
@@ -143,7 +146,7 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
           getWorksSent(senders) should contain only work.id
-          index shouldBe Map(work.id -> work.transition[Merged](1))
+          index shouldBe Map(work.id -> work.transition[Merged]((None, 1)))
         }
     }
   }
@@ -173,7 +176,7 @@ class MergerWorkerServiceTest
           assertQueueEmpty(dlq)
 
           getWorksSent(senders) should contain only work.id
-          index shouldBe Map(work.id -> work.transition[Merged](1))
+          index shouldBe Map(work.id -> work.transition[Merged]((None, 1)))
 
           metrics.incrementedCounts.length shouldBe 1
           metrics.incrementedCounts.last should endWith("_success")

@@ -33,6 +33,7 @@ object ImagesIndexConfig extends IndexConfig with WorksIndexConfigFields {
   override val mapping: MappingDefinition = properties(
     id(),
     version,
+    modifiedTime,
     location("location"),
     source,
     inferredData

@@ -1,10 +1,12 @@
 package uk.ac.wellcome.platform.merger.services
 
-import scala.concurrent.{ExecutionContext, Future}
+import java.time.Instant
+
 import akka.Done
 import io.circe.Encoder
 
-import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, MatcherResult}
+import scala.concurrent.{ExecutionContext, Future}
+import uk.ac.wellcome.models.matcher.MatcherResult
 import uk.ac.wellcome.typesafe.Runnable
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.work.internal._
@@ -33,30 +35,38 @@ class MergerWorkerService[WorkDestination, ImageDestination](
   private def processMessage(message: NotificationMessage): Future[Unit] =
     for {
       matcherResult <- Future.fromTry(fromJson[MatcherResult](message.body))
-      _ <- Future.sequence(matcherResult.works.map { applyMerge })
+      workSets <- Future.sequence {
+        matcherResult.works.map { matchedIdentifiers =>
+          playbackService.fetchAllWorks(matchedIdentifiers.identifiers.toList)
+        }
+      }
+      lastUpdated = workSets.flatMap(_.flatten.map(_.state.modifiedTime)).max
+      _ <- Future.sequence {
+        workSets.map(applyMerge(_, lastUpdated))
+      }
     } yield ()
 
-  private def applyMerge(matchedIdentifiers: MatchedIdentifiers): Future[Unit] =
+  private def applyMerge(maybeWorks: Seq[Option[Work[WorkState.Source]]],
+                         lastUpdated: Instant): Future[Unit] = {
+    val outcome = mergerManager.applyMerge(maybeWorks = maybeWorks)
     for {
-      maybeWorks <- playbackService.fetchAllWorks(
-        matchedIdentifiers.identifiers.toList)
-      mergerOutcome = mergerManager.applyMerge(maybeWorks = maybeWorks)
-      indexResult <- workIndexer.index(mergerOutcome.works)
+      indexResult <- workIndexer.index(outcome.mergedWorksWithTime(lastUpdated))
       works <- indexResult match {
         case Left(failedWorks) =>
           Future.failed(
             new Exception(
-              s"Failed indexing works: $failedWorks (tried to ingest ${mergerOutcome.works})")
+              s"Failed indexing works: $failedWorks (tried to ingest ${outcome.mergedWorksWithTime(lastUpdated)})")
           )
         case Right(works) => Future.successful(works)
       }
       (worksFuture, imagesFuture) = (
         sendWorks(works),
-        sendMessages(imageSender, mergerOutcome.images)
+        sendMessages(imageSender, outcome.mergedImagesWithTime(lastUpdated))
       )
       _ <- worksFuture
       _ <- imagesFuture
     } yield ()
+  }
 
   private def sendWorks(works: Seq[Work[Merged]]): Future[Seq[Unit]] =
     Future.sequence(

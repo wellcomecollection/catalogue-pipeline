@@ -70,7 +70,7 @@ class InferenceManagerWorkerServiceTest
 
           forAll(messageSender.getMessages[AugmentedImage]) { image =>
             inside(image) {
-              case AugmentedImage(id, _, _, _, inferredData) =>
+              case AugmentedImage(id, _, _, _, _, inferredData) =>
                 images should contain key id
                 val seed = id.canonicalId.hashCode
                 inside(inferredData.value) {
@@ -112,7 +112,7 @@ class InferenceManagerWorkerServiceTest
 
           forAll(messageSender.getMessages[AugmentedImage]) { image =>
             inside(image) {
-              case AugmentedImage(_, _, _, _, inferredData) =>
+              case AugmentedImage(_, _, _, _, _, inferredData) =>
                 inside(inferredData.value) {
                   case InferredData(
                       features1,

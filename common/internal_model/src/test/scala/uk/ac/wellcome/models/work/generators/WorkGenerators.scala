@@ -7,7 +7,7 @@ import WorkState._
 
 import scala.util.Random
 
-trait WorkGenerators extends IdentifiersGenerators {
+trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
   private def createVersion: Int =
     Random.nextInt(100) + 1
 
@@ -18,7 +18,7 @@ trait WorkGenerators extends IdentifiersGenerators {
 
   def sourceWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
-    modifiedTime: Instant = modifiedTime
+    modifiedTime: Instant = instantInLast30Days
   ): Work.Visible[Source] =
     Work.Visible[Source](
       state = Source(sourceIdentifier, modifiedTime),
@@ -28,21 +28,27 @@ trait WorkGenerators extends IdentifiersGenerators {
 
   def mergedWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
-    numberOfSources: Int = 1
+    numberOfSources: Int = chooseFrom(1, 2, 3, 4),
+    modifiedTime: Instant = instantInLast30Days
   ): Work.Visible[Merged] =
     Work.Visible[Merged](
-      state = Merged(sourceIdentifier, numberOfSources),
+      state = Merged(sourceIdentifier, modifiedTime, numberOfSources),
       data = initData,
       version = createVersion
     )
 
   def denormalisedWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
+    modifiedTime: Instant = instantInLast30Days,
     numberOfSources: Int = 1,
     relations: Relations[DataState.Unidentified] = Relations.none
   ): Work.Visible[Denormalised] =
     Work.Visible[Denormalised](
-      state = Denormalised(sourceIdentifier, numberOfSources, relations),
+      state = Denormalised(
+        sourceIdentifier,
+        modifiedTime,
+        numberOfSources,
+        relations),
       data = initData,
       version = createVersion
     )
@@ -50,6 +56,7 @@ trait WorkGenerators extends IdentifiersGenerators {
   def identifiedWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     canonicalId: String = createCanonicalId,
+    modifiedTime: Instant = instantInLast30Days,
     numberOfSources: Int = chooseFrom(1, 2, 3, 4),
     relations: Relations[DataState.Identified] = Relations.none
   ): Work.Visible[Identified] =
@@ -57,6 +64,7 @@ trait WorkGenerators extends IdentifiersGenerators {
       state = Identified(
         sourceIdentifier = sourceIdentifier,
         canonicalId = canonicalId,
+        modifiedTime = modifiedTime,
         numberOfSources = numberOfSources,
         relations = relations
       ),
