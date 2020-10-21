@@ -2,6 +2,7 @@ package uk.ac.wellcome.calm_adapter
 
 import scala.concurrent.{ExecutionContext, Future}
 import java.time.Instant
+import grizzled.slf4j.Logging
 
 import akka.NotUsed
 import akka.stream.Materializer
@@ -32,7 +33,8 @@ class HttpCalmRetriever(url: String,
   ec: ExecutionContext,
   materializer: Materializer,
   httpClient: CalmHttpClient)
-    extends CalmRetriever {
+    extends CalmRetriever
+    with Logging {
 
   type Result[T] = Either[Throwable, T]
 
@@ -41,10 +43,12 @@ class HttpCalmRetriever(url: String,
       .future(callApi(CalmSearchRequest(query), searchResponseParser))
       .mapConcat {
         case CalmSession(numHits, cookie) =>
+          info(s"Received $numHits records for query: ${query.queryExpression}")
           (0 until numHits).map(pos => (pos, cookie))
       }
       .mapAsync(concurrentHttpConnections) {
         case (pos, cookie) =>
+          info(s"Querying record $pos for query: ${query.queryExpression}")
           callApi(CalmSummaryRequest(pos), summaryResponseParser, Some(cookie))
       }
 

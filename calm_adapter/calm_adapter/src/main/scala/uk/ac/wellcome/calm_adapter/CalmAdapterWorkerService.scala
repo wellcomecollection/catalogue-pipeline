@@ -7,6 +7,7 @@ import akka.stream.Materializer
 import akka.stream.scaladsl._
 import grizzled.slf4j.Logging
 import software.amazon.awssdk.services.sqs.model.{Message => SQSMessage}
+
 import uk.ac.wellcome.bigmessaging.FlowOps
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.MessageSender
@@ -77,6 +78,7 @@ class CalmAdapterWorkerService[Destination](
     Flow[(Context, CalmWindow)]
       .mapAsync(concurrentWindows) {
         case (ctx, CalmWindow(date)) =>
+          info(s"Ingesting all Calm records modified on $date")
           calmRetriever(CalmQuery.ModifiedDate(date))
             .map(calmStore.putRecord)
             .via(publishKey)
