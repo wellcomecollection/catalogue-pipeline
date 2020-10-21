@@ -10,14 +10,16 @@ import uk.ac.wellcome.storage.{
 }
 import uk.ac.wellcome.storage.store.VersionedStore
 
-class CalmStore(store: VersionedStore[String, Int, CalmRecord]) extends Logging {
+class CalmStore(store: VersionedStore[String, Int, CalmRecord])
+    extends Logging {
 
   type Key = Version[String, Int]
 
   type Result[T] = Either[Throwable, T]
 
   def putRecord(record: CalmRecord): Result[Option[(Key, CalmRecord)]] = {
-    val recordSummmary = s"ID=${record.id}, RefNo=${record.refNo.getOrElse("NONE")}, Modified=${record.modified.getOrElse("NONE")}"
+    val recordSummmary = s"ID=${record.id}, RefNo=${record.refNo.getOrElse(
+      "NONE")}, Modified=${record.modified.getOrElse("NONE")}"
     shouldStoreRecord(record)
       .flatMap {
         case false =>

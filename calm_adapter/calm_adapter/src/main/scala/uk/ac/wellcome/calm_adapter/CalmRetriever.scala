@@ -33,7 +33,8 @@ class HttpCalmRetriever(url: String,
   ec: ExecutionContext,
   materializer: Materializer,
   httpClient: CalmHttpClient)
-    extends CalmRetriever with Logging {
+    extends CalmRetriever
+    with Logging {
 
   type Result[T] = Either[Throwable, T]
 
