@@ -84,7 +84,7 @@ object Indexable extends Logging {
         image.id.canonicalId
 
       def version(image: AugmentedImage) =
-        image.source.modifiedTime.toEpochMilli
+        image.modifiedTime.toEpochMilli
     }
 
   implicit def workIndexable[State <: WorkState]: Indexable[Work[State]] =
