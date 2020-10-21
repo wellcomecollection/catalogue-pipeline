@@ -1,7 +1,3 @@
-data "aws_ssm_parameter" "mets_adapter_image" {
-  name = "/mets_adapter/images/latest/mets_adapter"
-}
-
 locals {
   mets_adapter_image = "${aws_ecr_repository.mets_adapter.repository_url}:env.prod"
 
