@@ -1,5 +1,7 @@
 package uk.ac.wellcome.calm_adapter
 
+import grizzled.slf4j.Logging
+
 import uk.ac.wellcome.storage.{
   Identified,
   NoVersionExistsError,
@@ -8,23 +10,28 @@ import uk.ac.wellcome.storage.{
 }
 import uk.ac.wellcome.storage.store.VersionedStore
 
-class CalmStore(store: VersionedStore[String, Int, CalmRecord]) {
+class CalmStore(store: VersionedStore[String, Int, CalmRecord]) extends Logging {
 
   type Key = Version[String, Int]
 
   type Result[T] = Either[Throwable, T]
 
-  def putRecord(record: CalmRecord): Result[Option[(Key, CalmRecord)]] =
+  def putRecord(record: CalmRecord): Result[Option[(Key, CalmRecord)]] = {
+    val recordSummmary = s"ID=${record.id}, RefNo=${record.refNo.getOrElse("NONE")}, Modified=${record.modified.getOrElse("NONE")}"
     shouldStoreRecord(record)
       .flatMap {
-        case false => Right(None)
+        case false =>
+          info(s"Ignoring calm record: $recordSummmary")
+          Right(None)
         case true =>
+          info(s"Storing calm record: $recordSummmary")
           store
             .putLatest(record.id)(record)
             .map { case Identified(key, record) => Some(key -> record) }
             .left
             .map(toReadableException)
       }
+  }
 
   def setRecordPublished(key: Key, record: CalmRecord): Result[Key] =
     store
