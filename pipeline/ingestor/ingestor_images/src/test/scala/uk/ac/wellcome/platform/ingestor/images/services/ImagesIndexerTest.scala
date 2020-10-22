@@ -13,6 +13,7 @@ import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.pipeline_storage.fixtures.ElasticIndexerFixtures
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
 
 class ImagesIndexerTest
     extends AnyFunSpec
@@ -62,7 +63,7 @@ class ImagesIndexerTest
           index,
           ImagesIndexConfig)
       val image = createAugmentedImage()
-      val newerImage = image.copy(version = image.version + 1)
+      val newerImage = image.copy(modifiedTime = image.modifiedTime + (2 minutes))
       val result = for {
         _ <- imagesIndexer.index(List(image))
         res <- imagesIndexer.index(List(newerImage))
@@ -83,7 +84,7 @@ class ImagesIndexerTest
           index,
           ImagesIndexConfig)
       val image = createAugmentedImage()
-      val olderImage = image.copy(version = image.version - 1)
+      val olderImage = image.copy(modifiedTime = image.modifiedTime - (2 minutes))
       val result = for {
         _ <- imagesIndexer.index(List(image))
         res <- imagesIndexer.index(List(olderImage))
