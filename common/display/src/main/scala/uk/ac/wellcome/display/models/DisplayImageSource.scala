@@ -25,7 +25,7 @@ object DisplayImageSource {
     new DisplayImageSource(
       id = imageSource.id.canonicalId,
       ontologyType = imageSource match {
-        case SourceWorks(_, _, _, _) => "Work"
+        case SourceWorks(_, _, _) => "Work"
       }
     )
 }
