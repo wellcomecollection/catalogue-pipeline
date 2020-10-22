@@ -63,7 +63,8 @@ class ImagesIndexerTest
           index,
           ImagesIndexConfig)
       val image = createAugmentedImage()
-      val newerImage = image.copy(modifiedTime = image.modifiedTime + (2 minutes))
+      val newerImage =
+        image.copy(modifiedTime = image.modifiedTime + (2 minutes))
       val result = for {
         _ <- imagesIndexer.index(List(image))
         res <- imagesIndexer.index(List(newerImage))
@@ -84,7 +85,8 @@ class ImagesIndexerTest
           index,
           ImagesIndexConfig)
       val image = createAugmentedImage()
-      val olderImage = image.copy(modifiedTime = image.modifiedTime - (2 minutes))
+      val olderImage =
+        image.copy(modifiedTime = image.modifiedTime - (2 minutes))
       val result = for {
         _ <- imagesIndexer.index(List(image))
         res <- imagesIndexer.index(List(olderImage))

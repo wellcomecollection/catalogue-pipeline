@@ -9,7 +9,11 @@ import uk.ac.wellcome.elasticsearch.ImagesIndexConfig
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.generators.{ImageGenerators, InstantGenerators, WorkGenerators}
+import uk.ac.wellcome.models.work.generators.{
+  ImageGenerators,
+  InstantGenerators,
+  WorkGenerators
+}
 import uk.ac.wellcome.models.work.internal.SourceWork._
 import uk.ac.wellcome.models.work.internal.{AugmentedImage, SourceWorks}
 import uk.ac.wellcome.pipeline_storage.Indexable.imageIndexable
@@ -25,10 +29,11 @@ class ImageIndexableTest
     with ElasticsearchFixtures
     with ElasticIndexerFixtures
     with ImageGenerators
-    with WorkGenerators with InstantGenerators{
+    with WorkGenerators
+    with InstantGenerators {
 
   describe("updating images with merged / redirected sources") {
-    it("overrides an image if modifiedTime is higher"){
+    it("overrides an image if modifiedTime is higher") {
       val originalImage = createAugmentedImageWith()
       val updatedModifiedTimeImage = originalImage.copy(
         modifiedTime = originalImage.modifiedTime + (2 minutes)
@@ -50,7 +55,7 @@ class ImageIndexableTest
           }
       }
     }
-    it("does not override an image if modifiedTime is lower"){
+    it("does not override an image if modifiedTime is lower") {
       val originalImage = createAugmentedImageWith()
       val updatedModifiedTimeImage = originalImage.copy(
         modifiedTime = originalImage.modifiedTime - (2 minutes)
@@ -72,9 +77,10 @@ class ImageIndexableTest
           }
       }
     }
-    it("overrides an image if modifiedTime is the same"){
+    it("overrides an image if modifiedTime is the same") {
       val originalImage = createAugmentedImageWith()
-      val updatedSourceImage = originalImage.copy(source = SourceWorks(sierraIdentifiedWork().toSourceWork, None))
+      val updatedSourceImage = originalImage.copy(
+        source = SourceWorks(sierraIdentifiedWork().toSourceWork, None))
 
       withImagesIndexAndIndexer {
         case (index, indexer) =>

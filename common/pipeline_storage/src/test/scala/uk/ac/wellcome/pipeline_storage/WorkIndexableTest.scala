@@ -24,13 +24,16 @@ class WorkIndexableTest
     with Matchers
     with ElasticsearchFixtures
     with ElasticIndexerFixtures
-    with WorkGenerators with InstantGenerators{
+    with WorkGenerators
+    with InstantGenerators {
 
   describe("updating merged / redirected works") {
     it("overrides with a work with a later modifiedDate") {
       val originalWork = identifiedWork()
 
-      val newWork: Work.Visible[Identified] = originalWork.copy(state = originalWork.state.copy(modifiedTime = originalWork.state.modifiedTime + (2 days)))
+      val newWork: Work.Visible[Identified] = originalWork.copy(
+        state = originalWork.state.copy(
+          modifiedTime = originalWork.state.modifiedTime + (2 days)))
 
       withWorksIndexAndIndexer {
         case (index, indexer) =>
@@ -52,7 +55,8 @@ class WorkIndexableTest
     it("overrides with a work with the same modifiedDate") {
       val originalWork = identifiedWork()
 
-      val newWork: Work.Visible[Identified] = originalWork.copy(data= originalWork.data.copy(description = Some(randomAlphanumeric())))
+      val newWork: Work.Visible[Identified] = originalWork.copy(
+        data = originalWork.data.copy(description = Some(randomAlphanumeric())))
 
       withWorksIndexAndIndexer {
         case (index, indexer) =>
@@ -72,7 +76,9 @@ class WorkIndexableTest
     it("does not override with a work with an earlier modifiedDate") {
       val originalWork = identifiedWork()
 
-      val olderWork: Work.Visible[Identified] = originalWork.copy(state = originalWork.state.copy(modifiedTime = originalWork.state.modifiedTime - (2 days)))
+      val olderWork: Work.Visible[Identified] = originalWork.copy(
+        state = originalWork.state.copy(
+          modifiedTime = originalWork.state.modifiedTime - (2 days)))
 
       withWorksIndexAndIndexer {
         case (index, indexer) =>
