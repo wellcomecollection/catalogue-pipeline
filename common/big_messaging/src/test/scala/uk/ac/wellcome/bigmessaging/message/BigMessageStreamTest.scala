@@ -7,7 +7,6 @@ import io.circe.Decoder
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import software.amazon.awssdk.services.cloudwatch.model.StandardUnit
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
@@ -319,7 +318,7 @@ class BigMessageStreamTest
   private def withMessageStreamFixtures[R](
     testWith: TestWith[(BigMessageStream[ExampleObject],
                         QueuePair,
-                        MemoryMetrics[StandardUnit]),
+                        MemoryMetrics),
                        R]
   )(implicit
     decoderT: Decoder[ExampleObject],
@@ -328,7 +327,7 @@ class BigMessageStreamTest
     withActorSystem { implicit actorSystem =>
       withLocalSqsQueuePair(visibilityTimeout = 5) {
         case queuePair @ QueuePair(queue, _) =>
-          val metrics = new MemoryMetrics[StandardUnit]()
+          val metrics = new MemoryMetrics()
           withBigMessageStream[ExampleObject, R](queue, metrics) { stream =>
             testWith((stream, queuePair, metrics))
           }

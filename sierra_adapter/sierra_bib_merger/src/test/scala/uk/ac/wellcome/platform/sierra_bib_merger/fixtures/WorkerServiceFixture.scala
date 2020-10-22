@@ -1,6 +1,5 @@
 package uk.ac.wellcome.platform.sierra_bib_merger.fixtures
 
-import software.amazon.awssdk.services.cloudwatch.model.StandardUnit
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
@@ -27,7 +26,7 @@ trait WorkerServiceFixture
   def withWorkerService[R](
     store: VersionedStore[String, Int, SierraTransformable],
     queue: Queue,
-    metrics: Metrics[Future, StandardUnit] = new MemoryMetrics[StandardUnit]())(
+    metrics: Metrics[Future] = new MemoryMetrics())(
     testWith: TestWith[(SierraBibMergerWorkerService[String],
                         MemoryMessageSender),
                        R]): R =

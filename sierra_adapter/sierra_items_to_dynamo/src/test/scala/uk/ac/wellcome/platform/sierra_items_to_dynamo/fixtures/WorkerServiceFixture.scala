@@ -1,6 +1,5 @@
 package uk.ac.wellcome.platform.sierra_items_to_dynamo.fixtures
 
-import software.amazon.awssdk.services.cloudwatch.model.StandardUnit
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
@@ -21,10 +20,10 @@ trait WorkerServiceFixture
     with DynamoInserterFixture
     with Akka {
 
-  def withWorkerService[R](queue: Queue,
-                           store: VersionedStore[String, Int, SierraItemRecord],
-                           metricsSender: Metrics[Future, StandardUnit] =
-                             new MemoryMetrics())(
+  def withWorkerService[R](
+    queue: Queue,
+    store: VersionedStore[String, Int, SierraItemRecord],
+    metricsSender: Metrics[Future] = new MemoryMetrics())(
     testWith: TestWith[(SierraItemsToDynamoWorkerService[String],
                         MemoryMessageSender),
                        R]): R =

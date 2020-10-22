@@ -4,7 +4,6 @@ import akka.actor.ActorSystem
 import akka.stream.scaladsl.Source
 import akka.{Done, NotUsed}
 import io.circe.Decoder
-import software.amazon.awssdk.services.cloudwatch.model.StandardUnit
 import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import software.amazon.awssdk.services.sqs.model.Message
 import uk.ac.wellcome.bigmessaging.BigMessageReader
@@ -20,7 +19,7 @@ import scala.util.Try
 
 class BigMessageStream[T](sqsClient: SqsAsyncClient,
                           sqsConfig: SQSConfig,
-                          metrics: Metrics[Future, StandardUnit])(
+                          metrics: Metrics[Future])(
   implicit
   actorSystem: ActorSystem,
   decoderT: Decoder[T],
