@@ -18,8 +18,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 trait BigMessagingFixture extends SQS {
   def withBigMessageStream[T, R](queue: SQS.Queue,
-                                 metrics: MemoryMetrics =
-                                   new MemoryMetrics(),
+                                 metrics: MemoryMetrics = new MemoryMetrics(),
                                  sqsClient: SqsAsyncClient = asyncSqsClient)(
     testWith: TestWith[BigMessageStream[T], R])(
     implicit

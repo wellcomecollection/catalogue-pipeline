@@ -19,13 +19,13 @@ import uk.ac.wellcome.models.work.internal._
 import WorkState.Merged
 
 trait WorkerServiceFixture extends LocalWorksVhs with SQS with Akka {
-  def withWorkerService[R](
-    vhs: VHS,
-    queue: Queue,
-    workSender: MemoryMessageSender,
-    imageSender: MemoryMessageSender = new MemoryMessageSender(),
-    metrics: Metrics[Future] = new MemoryMetrics,
-    index: Map[String, Work[Merged]] = Map.empty)(
+  def withWorkerService[R](vhs: VHS,
+                           queue: Queue,
+                           workSender: MemoryMessageSender,
+                           imageSender: MemoryMessageSender =
+                             new MemoryMessageSender(),
+                           metrics: Metrics[Future] = new MemoryMetrics,
+                           index: Map[String, Work[Merged]] = Map.empty)(
     testWith: TestWith[MergerWorkerService[String, String], R]): R =
     withActorSystem { implicit actorSystem =>
       withSQSStream[NotificationMessage, R](queue, metrics) { sqsStream =>

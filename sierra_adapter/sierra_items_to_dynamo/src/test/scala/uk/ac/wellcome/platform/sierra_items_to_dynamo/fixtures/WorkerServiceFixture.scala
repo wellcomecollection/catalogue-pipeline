@@ -20,10 +20,10 @@ trait WorkerServiceFixture
     with DynamoInserterFixture
     with Akka {
 
-  def withWorkerService[R](queue: Queue,
-                           store: VersionedStore[String, Int, SierraItemRecord],
-                           metricsSender: Metrics[Future] =
-                             new MemoryMetrics())(
+  def withWorkerService[R](
+    queue: Queue,
+    store: VersionedStore[String, Int, SierraItemRecord],
+    metricsSender: Metrics[Future] = new MemoryMetrics())(
     testWith: TestWith[(SierraItemsToDynamoWorkerService[String],
                         MemoryMessageSender),
                        R]): R =

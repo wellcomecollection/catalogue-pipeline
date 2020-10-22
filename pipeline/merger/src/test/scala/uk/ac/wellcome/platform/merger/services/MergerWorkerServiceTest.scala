@@ -333,12 +333,9 @@ class MergerWorkerServiceTest
   case class Senders(works: MemoryMessageSender, images: MemoryMessageSender)
 
   def withMergerWorkerServiceFixtures[R](
-    testWith: TestWith[(VHS,
-                        QueuePair,
-                        Senders,
-                        MemoryMetrics,
-                        Map[String, Work[Merged]]),
-                       R]): R =
+    testWith: TestWith[
+      (VHS, QueuePair, Senders, MemoryMetrics, Map[String, Work[Merged]]),
+      R]): R =
     withVHS { vhs =>
       withLocalSqsQueuePair() {
         case queuePair @ QueuePair(queue, _) =>
