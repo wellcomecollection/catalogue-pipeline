@@ -3,7 +3,6 @@ package uk.ac.wellcome.platform.merger.fixtures
 import scala.collection.mutable.Map
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import software.amazon.awssdk.services.cloudwatch.model.StandardUnit
 
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
@@ -25,7 +24,7 @@ trait WorkerServiceFixture extends LocalWorksVhs with SQS with Akka {
     queue: Queue,
     workSender: MemoryMessageSender,
     imageSender: MemoryMessageSender = new MemoryMessageSender(),
-    metrics: Metrics[Future, StandardUnit] = new MemoryMetrics[StandardUnit],
+    metrics: Metrics[Future] = new MemoryMetrics,
     index: Map[String, Work[Merged]] = Map.empty)(
     testWith: TestWith[MergerWorkerService[String, String], R]): R =
     withActorSystem { implicit actorSystem =>

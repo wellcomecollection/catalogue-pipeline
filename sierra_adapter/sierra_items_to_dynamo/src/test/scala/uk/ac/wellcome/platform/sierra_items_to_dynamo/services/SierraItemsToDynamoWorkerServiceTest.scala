@@ -3,7 +3,6 @@ package uk.ac.wellcome.platform.sierra_items_to_dynamo.services
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import software.amazon.awssdk.services.cloudwatch.model.StandardUnit
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
@@ -65,7 +64,7 @@ class SierraItemsToDynamoWorkerServiceTest
 
   it("records a failure if it receives an invalid message") {
     val store = createStore[SierraItemRecord]()
-    val metrics = new MemoryMetrics[StandardUnit]()
+    val metrics = new MemoryMetrics()
     withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>
         withWorkerService(queue, store, metrics) { _ =>

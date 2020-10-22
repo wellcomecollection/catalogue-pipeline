@@ -4,7 +4,6 @@ import scala.collection.mutable.Map
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import software.amazon.awssdk.services.cloudwatch.model.StandardUnit
 
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
@@ -337,7 +336,7 @@ class MergerWorkerServiceTest
     testWith: TestWith[(VHS,
                         QueuePair,
                         Senders,
-                        MemoryMetrics[StandardUnit],
+                        MemoryMetrics,
                         Map[String, Work[Merged]]),
                        R]): R =
     withVHS { vhs =>
@@ -346,7 +345,7 @@ class MergerWorkerServiceTest
           val workSender = new MemoryMessageSender()
           val imageSender = new MemoryMessageSender()
 
-          val metrics = new MemoryMetrics[StandardUnit]
+          val metrics = new MemoryMetrics()
           val index = Map.empty[String, Work[Merged]]
 
           withWorkerService(vhs, queue, workSender, imageSender, metrics, index) {

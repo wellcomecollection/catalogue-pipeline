@@ -2,7 +2,6 @@ package uk.ac.wellcome.bigmessaging.fixtures
 
 import akka.actor.ActorSystem
 import io.circe.{Decoder, Encoder}
-import software.amazon.awssdk.services.cloudwatch.model.StandardUnit
 import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import software.amazon.awssdk.services.sqs.model.SendMessageResponse
 import uk.ac.wellcome.bigmessaging.message._
@@ -19,8 +18,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 trait BigMessagingFixture extends SQS {
   def withBigMessageStream[T, R](queue: SQS.Queue,
-                                 metrics: MemoryMetrics[StandardUnit] =
-                                   new MemoryMetrics[StandardUnit](),
+                                 metrics: MemoryMetrics =
+                                   new MemoryMetrics(),
                                  sqsClient: SqsAsyncClient = asyncSqsClient)(
     testWith: TestWith[BigMessageStream[T], R])(
     implicit
