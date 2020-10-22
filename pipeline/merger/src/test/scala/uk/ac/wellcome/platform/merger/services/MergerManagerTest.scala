@@ -66,7 +66,7 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorkGenerators {
           redirect = IdState.Identifiable(works.head.sourceIdentifier)
         )
       }
-      new MergerOutcome(
+      MergerOutcome(
         resultWorks = outputWorks,
         imagesWithSources = Nil
       )
