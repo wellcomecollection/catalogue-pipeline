@@ -80,7 +80,7 @@ class SierraItemsToDynamoWorkerServiceTest
           eventually {
             assertQueueEmpty(queue)
             assertQueueHasSize(dlq, size = 1)
-            metrics.incrementedCounts should not contain ("SierraItemsToDynamoWorkerService_ProcessMessage_failure")
+            metrics.incrementedCounts should not contain "SierraItemsToDynamoWorkerService_ProcessMessage_failure"
           }
         }
     }
