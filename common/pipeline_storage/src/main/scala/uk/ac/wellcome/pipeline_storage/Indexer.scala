@@ -74,10 +74,6 @@ trait Indexable[T] {
   */
 object Indexable extends Logging {
 
-  // The largest number of merged sources is about 650, so this
-  // allows sufficient room for that at the moment.
-  final val versionMultiplier = 1000
-
   implicit val imageIndexable: Indexable[AugmentedImage] =
     new Indexable[AugmentedImage] {
       def id(image: AugmentedImage) =

@@ -179,17 +179,6 @@ class WorkIndexableTest
       }
     }
 
-    it("throws an error if a work has >= versionMultiplier sources") {
-      val erroneousWork =
-        identifiedWork(numberOfSources = Indexable.versionMultiplier)
-
-      withWorksIndexAndIndexer {
-        case (_, indexer) =>
-          a[RuntimeException] should be thrownBy {
-            ingestInOrder(indexer)(erroneousWork)
-          }
-      }
-    }
   }
 
   private def assertIngestedWorkIs(
