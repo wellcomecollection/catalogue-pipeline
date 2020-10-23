@@ -15,7 +15,7 @@ import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.pipeline_storage.Indexer
-import WorkState.Merged
+import WorkState.{Merged, Source}
 
 class MergerWorkerService[WorkDestination, ImageDestination](
   sqsStream: SQSStream[NotificationMessage],
@@ -36,17 +36,24 @@ class MergerWorkerService[WorkDestination, ImageDestination](
     for {
       matcherResult <- Future.fromTry(fromJson[MatcherResult](message.body))
       workSets <- Future.sequence {
-        matcherResult.works.map { matchedIdentifiers =>
+        matcherResult.works.toList.map { matchedIdentifiers =>
           playbackService.fetchAllWorks(matchedIdentifiers.identifiers.toList)
         }
       }
-      lastUpdated = workSets.flatMap(_.flatten.map(_.state.modifiedTime)).max
-      _ <- Future.sequence {
-        workSets.map(applyMerge(_, lastUpdated))
+      nonEmptyWorkSets = workSets.filter(_.flatten.nonEmpty)
+      _ <- nonEmptyWorkSets match {
+        case Nil => Future.successful(Nil)
+        case _ =>
+          val lastUpdated = nonEmptyWorkSets
+            .flatMap(_.flatten.map(work => work.state.modifiedTime))
+            .max
+          Future.sequence {
+            nonEmptyWorkSets.map(applyMerge(_, lastUpdated))
+          }
       }
     } yield ()
 
-  private def applyMerge(maybeWorks: Seq[Option[Work[WorkState.Source]]],
+  private def applyMerge(maybeWorks: Seq[Option[Work[Source]]],
                          lastUpdated: Instant): Future[Unit] = {
     val outcome = mergerManager.applyMerge(maybeWorks = maybeWorks)
     for {

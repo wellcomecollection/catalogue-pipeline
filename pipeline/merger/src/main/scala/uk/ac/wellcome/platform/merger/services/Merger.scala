@@ -82,7 +82,7 @@ trait Merger extends MergerLogging {
           val redirects = redirectedSources.map(redirectSourceToTarget(target))
           logResult(result, redirects.toList, remaining.toList)
 
-          new MergerOutcome(
+          MergerOutcome(
             resultWorks = redirects.toList ++ remaining :+ result.mergedTarget,
             imagesWithSources = result.imagesWithSources
           )

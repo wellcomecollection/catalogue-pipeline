@@ -330,6 +330,33 @@ class MergerWorkerServiceTest
     }
   }
 
+  it("doesn't send anything if the works are outdated") {
+    withMergerWorkerServiceFixtures {
+      case (vhs, QueuePair(queue, dlq), senders, metrics, index) =>
+        val work0 = sourceWork().withVersion(0)
+        val work1 = sourceWork(sourceIdentifier = work0.sourceIdentifier)
+          .withVersion(1)
+        val matcherResult = matcherResultWith(Set(Set(work0)))
+        givenStoredInVhs(vhs, work1)
+
+        sendNotificationToSQS(
+          queue = queue,
+          message = matcherResult
+        )
+
+        eventually {
+          assertQueueEmpty(queue)
+          assertQueueEmpty(dlq)
+
+          getWorksSent(senders) shouldBe empty
+          index shouldBe Map()
+
+          metrics.incrementedCounts.length shouldBe 1
+          metrics.incrementedCounts.last should endWith("_success")
+        }
+    }
+  }
+
   case class Senders(works: MemoryMessageSender, images: MemoryMessageSender)
 
   def withMergerWorkerServiceFixtures[R](

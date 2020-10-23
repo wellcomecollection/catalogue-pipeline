@@ -12,8 +12,8 @@ import WorkFsm._
  * the works/images getters must be provided with a modifiedTime to use for all
  * the output entities.
  */
-class MergerOutcome(resultWorks: Seq[Work[Source]],
-                    imagesWithSources: Seq[ImageWithSource]) {
+case class MergerOutcome(resultWorks: Seq[Work[Source]],
+                         imagesWithSources: Seq[ImageWithSource]) {
 
   // numberOfSources is hardcoded here so as not to break builds
   // TODO: remove numberOfSources
