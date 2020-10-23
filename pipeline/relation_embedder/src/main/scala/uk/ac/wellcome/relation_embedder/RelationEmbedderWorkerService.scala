@@ -2,6 +2,7 @@ package uk.ac.wellcome.relation_embedder
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
+import scala.util.{Success, Failure}
 import akka.Done
 import akka.stream.scaladsl._
 import akka.stream.Materializer
@@ -59,7 +60,10 @@ class RelationEmbedderWorkerService[MsgDestination](
       }
       .mapConcat(identity)
       .mapAsync(2) { work =>
-        Future.fromTry(msgSender.send(work.id))
+        Future(msgSender.send(work.id)).flatMap {
+          case Success(_)   => Future.successful(())
+          case Failure(err) => Future.failed(err)
+        }
       }
       .runWith(Sink.ignore)
       .map(_ => ())
