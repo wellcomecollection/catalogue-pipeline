@@ -48,19 +48,19 @@ class RelationEmbedderWorkerService[MsgDestination](
         relationsService.getRelations(work).map(work.transition[Denormalised])
       }
       .groupedWithin(batchSize, flushInterval)
-      .mapAsync(2)(workIndexer.index)
-      .collect { case Left(failedWorks) => failedWorks.toList }
+      .mapAsync(2) { work =>
+        workIndexer.index(work).flatMap {
+          case Left(failedWorks) =>
+            Future.failed(
+              new Exception(s"Failed indexing works: $failedWorks")
+            )
+          case Right(works) => Future.successful(works.toList)
+        }
+      }
       .mapConcat(identity)
       .mapAsync(2) { work =>
-        Future.fromTry(msgSender.send(work.sourceIdentifier.toString))
+        Future.fromTry(msgSender.send(work.id))
       }
-      .toMat(Sink.seq)(Keep.right)
-      .run()
-      .flatMap {
-        case Nil => Future.successful(())
-        case failedWorks =>
-          Future.failed(
-            new Exception(s"Failed indexing works: $failedWorks")
-          )
-      }
+      .runWith(Sink.ignore)
+      .map(_ => ())
 }

@@ -10,10 +10,10 @@ import WorkState.Merged
   * @param siblingsSucceeding Siblings following the work
   */
 case class Relations[State <: DataState](
-  ancestors: List[Relation[State]],
-  children: List[Relation[State]],
-  siblingsPreceding: List[Relation[State]],
-  siblingsSucceeding: List[Relation[State]],
+  ancestors: List[Relation[State]] = Nil,
+  children: List[Relation[State]] = Nil,
+  siblingsPreceding: List[Relation[State]] = Nil,
+  siblingsSucceeding: List[Relation[State]] = Nil,
 )
 
 object Relations {
