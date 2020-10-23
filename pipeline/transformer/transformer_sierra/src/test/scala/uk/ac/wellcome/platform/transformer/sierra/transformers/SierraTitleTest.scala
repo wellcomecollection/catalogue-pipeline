@@ -52,27 +52,63 @@ class SierraTitleTest
     }
   }
 
-  it("passes through the title from the bib record") {
-    val title = "Tickling a tiny turtle in Tenerife"
-    assertTitleIsCorrect(
-      bibDataTitle = title,
-      expectedTitle = title
-    )
-  }
-
-  it("throws a ShouldNotTransform exception if bibData has no title") {
-    val bibData = createSierraBibDataWith(title = None)
-    val caught = intercept[ShouldNotTransformException] {
-      SierraTitle(createSierraBibNumber, bibData)
+  describe("throws a ShouldNotTransformException if it can't create a title") {
+    it("if there are multiple instances of the MARC 245 field") {
+      val bibData = createSierraBibDataWith(
+        varFields = List(
+          createVarFieldWith(marcTag = "245"),
+          createVarFieldWith(marcTag = "245")
+        )
+      )
+      val caught = intercept[ShouldNotTransformException] {
+        SierraTitle(createSierraBibNumber, bibData)
+      }
+      caught.getMessage should startWith("Multiple instances of non-repeatable varfield with tag 245:")
     }
-    caught.getMessage shouldBe "Sierra record has no title!"
-  }
 
-  private def assertTitleIsCorrect(
-    bibDataTitle: String,
-    expectedTitle: String
-  ) = {
-    val bibData = createSierraBibDataWith(title = Some(bibDataTitle))
-    SierraTitle(createSierraBibNumber, bibData) shouldBe Some(expectedTitle)
+    it("if there is no MARC field 245") {
+      val bibData = createSierraBibDataWith(
+        varFields = List.empty
+      )
+      val caught = intercept[ShouldNotTransformException] {
+        SierraTitle(createSierraBibNumber, bibData)
+      }
+      caught.getMessage should startWith("Could not find varField 245!")
+    }
+
+    it("if one of the subfields is repeated") {
+      val bibData = createSierraBibDataWith(
+        varFields = List(
+          createVarFieldWith(
+            marcTag = "245",
+            subfields = List(
+              MarcSubfield(tag = "a", content = "The “winter mind” :"),
+              MarcSubfield(tag = "a", content = "The “spring mind” :"),
+              MarcSubfield(tag = "a", content = "The “autumn mind” :"),
+              MarcSubfield(tag = "a", content = "The “summer mind” :")
+            )
+          )
+        )
+      )
+      val caught = intercept[ShouldNotTransformException] {
+        SierraTitle(createSierraBibNumber, bibData)
+      }
+      caught.getMessage should startWith("Multiple instances of non-repeatable subfield with tag ǂa")
+    }
+
+    it("if there are no subfields a, b or c") {
+      val bibData = createSierraBibDataWith(
+        varFields = List(
+          createVarFieldWith(
+            marcTag = "245",
+            subfields = List.empty
+          )
+        )
+      )
+      val caught = intercept[ShouldNotTransformException] {
+        SierraTitle(createSierraBibNumber, bibData)
+      }
+      caught.getMessage should startWith("No fields to construct title!")
+    }
   }
 }

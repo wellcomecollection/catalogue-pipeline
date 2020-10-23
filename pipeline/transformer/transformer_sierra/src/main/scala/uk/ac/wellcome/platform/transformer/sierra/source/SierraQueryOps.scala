@@ -1,5 +1,7 @@
 package uk.ac.wellcome.platform.transformer.sierra.source
 
+import uk.ac.wellcome.platform.transformer.sierra.exceptions.ShouldNotTransformException
+
 trait SierraQueryOps {
 
   implicit class BibDataOps(bibData: SierraBibData) {
@@ -11,6 +13,15 @@ trait SierraQueryOps {
 
     def varfieldsWithTag(tag: String): List[VarField] =
       varfieldsWithTags(tag)
+
+    def nonrepeatableVarfieldWithTag(tag: String): Option[VarField] =
+      varfieldsWithTag(tag) match {
+        case Seq(vf) => Some(vf)
+        case Nil     => None
+        case fields  => throw new ShouldNotTransformException(
+          s"Multiple instances of non-repeatable varfield with tag $tag: $fields"
+        )
+      }
 
     def subfieldsWithTags(tags: (String, String)*): List[MarcSubfield] =
       tags.toList.flatMap {
@@ -57,6 +68,15 @@ trait SierraQueryOps {
 
     def subfieldsWithTag(tag: String): List[MarcSubfield] =
       subfieldsWithTags(tag)
+
+    def nonrepeatableSubfieldWithTag(tag: String): Option[MarcSubfield] =
+      subfieldsWithTag(tag) match {
+        case Seq(sf) => Some(sf)
+        case Nil     => None
+        case fields  => throw new ShouldNotTransformException(
+          s"Multiple instances of non-repeatable subfield with tag ǂ$tag: $fields"
+        )
+      }
 
     def contents: List[String] = varfields.flatMap(_.content)
 
