@@ -168,7 +168,17 @@ object AggregationMapping extends Logging {
       }
       .flatMap {
         _.toList.sequence.map { maybeBuckets =>
-          Aggregation(maybeBuckets.flatten)
+          Aggregation(
+            maybeBuckets.flatten
+            // For consistency across all combinations of aggregations and filters,
+            // we need to filter out empty buckets when they are constructed from a top hit
+            // (See the language aggregation in WorksRequestBuilder)
+            //
+            // If we don't do this then empty buckets will be returned inconsistently
+            // depending on other filters and aggregations applied due to the subaggregation
+            // filtering technique used in FiltersAndAggregationsBuilder and parsed here.
+              .filterNot(path.isDefined && _.count == 0)
+          )
         }
       }
 
