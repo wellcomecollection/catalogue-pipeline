@@ -3,7 +3,10 @@ package uk.ac.wellcome.platform.api.elasticsearch
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.common.Operator.{AND, OR}
 import com.sksamuel.elastic4s.requests.searches.queries.BoolQuery
-import com.sksamuel.elastic4s.requests.searches.queries.matches.MultiMatchQueryBuilderType.BEST_FIELDS
+import com.sksamuel.elastic4s.requests.searches.queries.matches.MultiMatchQueryBuilderType.{
+  BEST_FIELDS,
+  CROSS_FIELDS
+}
 import com.sksamuel.elastic4s.requests.searches.queries.matches.{
   FieldWithOptionalBoost,
   MultiMatchQuery
@@ -34,7 +37,7 @@ case object WorksMultiMatcher {
         prefixQuery("data.title.keyword", q).boost(1000),
         MultiMatchQuery(
           q,
-          `type` = Some(BEST_FIELDS),
+          `type` = Some(CROSS_FIELDS),
           operator = Some(AND),
           fields = Seq(
             ("data.contributors.agent.label", Some(1000)),
