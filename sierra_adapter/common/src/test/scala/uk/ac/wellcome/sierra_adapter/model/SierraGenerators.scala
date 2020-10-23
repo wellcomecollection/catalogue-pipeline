@@ -40,12 +40,30 @@ trait SierraGenerators extends RandomGenerators {
   def createSierraItemNumber: SierraItemNumber =
     SierraItemNumber(createSierraRecordNumberString)
 
+  protected def createTitleVarfield(
+    title: String = s"title-${randomAlphanumeric()}"): String =
+    s"""
+       |{
+       |  "marcTag": "245",
+       |  "subfields": [
+       |    {"tag": "a", "content": "$title"}
+       |  ]
+       |}
+     """.stripMargin
+
   def createSierraBibRecordWith(
     id: SierraBibNumber = createSierraBibNumber,
     data: String = "",
     modifiedDate: Instant = olderDate): SierraBibRecord = {
+
     val recordData = if (data == "") {
-      s"""{"id": "$id", "title": "${randomAlphanumeric(50)}"}"""
+      s"""
+         |{
+         |  "id": "$id",
+         |  "varFields": [
+         |    ${createTitleVarfield()}
+         |  ]
+         |}""".stripMargin
     } else data
 
     SierraBibRecord(

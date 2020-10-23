@@ -8,8 +8,8 @@ import uk.ac.wellcome.platform.transformer.sierra.source.sierra.{
 }
 
 // https://techdocs.iii.com/sierraapi/Content/zReference/objects/bibObjectDescription.htm
+// We only parse fields that we're going to use.
 case class SierraBibData(
-  title: Option[String] = None,
   deleted: Boolean = false,
   suppressed: Boolean = false,
   country: Option[SierraSourceCountry] = None,
