@@ -91,6 +91,28 @@ class FiltersAndAggregationsBuilderTest extends AnyFunSpec with Matchers {
         .subaggs should have length 0
     }
 
+    it("applies paired filters to non-paired aggregations") {
+      val formatFilter = FormatFilter(Seq("bananas"))
+      val sut = new FiltersAndAggregationsBuilder(
+        List(AggregationRequest.Format, AggregationRequest.Language),
+        List(formatFilter),
+        requestToAggregation,
+        filterToQuery
+      )
+
+      sut.filteredAggregations should have length 2
+      val formatAgg =
+        sut.filteredAggregations.head.asInstanceOf[MockAggregation]
+      val languageAgg =
+        sut.filteredAggregations(1).asInstanceOf[MockAggregation]
+      formatAgg.subaggs.size shouldBe 0
+      languageAgg.subaggs.head
+        .asInstanceOf[FilterAggregation]
+        .query
+        .asInstanceOf[BoolQuery]
+        .filters should contain only MockQuery(formatFilter)
+    }
+
     it("applies all other aggregation-dependent filters to the paired filter") {
       val formatFilter = FormatFilter(Seq("bananas"))
       val languageFilter = LanguageFilter(Seq("en"))
