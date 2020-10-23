@@ -272,7 +272,12 @@ class SierraTransformerTest
     )
 
     val marcFields =
-      List(titleField, productionField, descriptionField, letteringField, notesField)
+      List(
+        titleField,
+        productionField,
+        descriptionField,
+        letteringField,
+        notesField)
 
     val data =
       s"""

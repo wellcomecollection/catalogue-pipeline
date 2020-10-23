@@ -18,9 +18,10 @@ trait SierraQueryOps {
       varfieldsWithTag(tag) match {
         case Seq(vf) => Some(vf)
         case Nil     => None
-        case fields  => throw new ShouldNotTransformException(
-          s"Multiple instances of non-repeatable varfield with tag $tag: $fields"
-        )
+        case fields =>
+          throw new ShouldNotTransformException(
+            s"Multiple instances of non-repeatable varfield with tag $tag: $fields"
+          )
       }
 
     def subfieldsWithTags(tags: (String, String)*): List[MarcSubfield] =
@@ -73,9 +74,10 @@ trait SierraQueryOps {
       subfieldsWithTag(tag) match {
         case Seq(sf) => Some(sf)
         case Nil     => None
-        case fields  => throw new ShouldNotTransformException(
-          s"Multiple instances of non-repeatable subfield with tag ǂ$tag: $fields"
-        )
+        case fields =>
+          throw new ShouldNotTransformException(
+            s"Multiple instances of non-repeatable subfield with tag ǂ$tag: $fields"
+          )
       }
 
     def contents: List[String] = varfields.flatMap(_.content)

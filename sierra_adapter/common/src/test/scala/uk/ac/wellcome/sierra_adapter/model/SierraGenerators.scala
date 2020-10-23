@@ -40,7 +40,8 @@ trait SierraGenerators extends RandomGenerators {
   def createSierraItemNumber: SierraItemNumber =
     SierraItemNumber(createSierraRecordNumberString)
 
-  protected def createTitleVarfield(title: String = s"title-${randomAlphanumeric()}"): String =
+  protected def createTitleVarfield(
+    title: String = s"title-${randomAlphanumeric()}"): String =
     s"""
        |{
        |  "marcTag": "245",
