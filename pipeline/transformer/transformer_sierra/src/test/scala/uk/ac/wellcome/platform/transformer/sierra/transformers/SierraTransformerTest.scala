@@ -87,14 +87,13 @@ class SierraTransformerTest
 
   it("trims whitespace from the materialType code") {
     val id = createSierraBibNumber
-    val title = "Hi Diddle Dee Dee"
 
     val data =
       s"""
          |{
          | "id": "$id",
-         | "title": "$title",
-         | "materialType": {"code":"k  "}
+         | "materialType": {"code":"k  "},
+         | "varFields": [${createTitleVarfield()}]
          |}
         """.stripMargin
 
@@ -232,6 +231,13 @@ class SierraTransformerTest
     val title = "Hi Diddle Dee Dee"
     val lettering = "An actor's life for me"
 
+    val titleField = createVarFieldWith(
+      marcTag = "245",
+      subfields = List(
+        MarcSubfield(tag = "a", content = title)
+      )
+    )
+
     val productionField = createVarFieldWith(
       marcTag = "260",
       subfields = List(
@@ -266,13 +272,12 @@ class SierraTransformerTest
     )
 
     val marcFields =
-      List(productionField, descriptionField, letteringField, notesField)
+      List(titleField, productionField, descriptionField, letteringField, notesField)
 
     val data =
       s"""
          |{
          | "id": "$id",
-         | "title": "$title",
          | "varFields": ${toJson(marcFields).get}
          |}
         """.stripMargin
@@ -369,8 +374,8 @@ class SierraTransformerTest
       s"""
         | {
         |   "id": "$id",
-        |   "title": "Doddering dinosaurs are daring in dance",
         |   "varFields": [
+        |     ${createTitleVarfield()},
         |     {
         |       "fieldTag": "b",
         |       "marcTag": "300",
@@ -402,12 +407,11 @@ class SierraTransformerTest
       s"""
          | {
          |   "id": "$id",
-         |   "title": "Doddering dinosaurs are daring in dance",
          |    "materialType": {
          |      "code": "$formatId",
          |      "value": "$formatValue"
          |    },
-         |   "varFields": []
+         |   "varFields": [${createTitleVarfield()}]
          | }
       """.stripMargin
 
@@ -423,8 +427,8 @@ class SierraTransformerTest
       s"""
         | {
         |   "id": "$id",
-        |   "title": "English earwigs earn evidence of evil",
         |   "varFields": [
+        |     ${createTitleVarfield()},
         |     {
         |       "fieldTag": "a",
         |       "marcTag": "240",
@@ -453,8 +457,8 @@ class SierraTransformerTest
       s"""
         | {
         |   "id": "$id",
-        |   "title": "Title",
         |   "varFields": [
+        |     ${createTitleVarfield()},
         |     {
         |       "fieldTag": "a",
         |       "marcTag": "250",
@@ -492,11 +496,11 @@ class SierraTransformerTest
     val data =
       s"""{
          |  "id": "$id",
+         |  "varFields": [${createTitleVarfield()}],
          |  "lang": {
          |    "code": "fra",
          |    "name": "French"
-         |  },
-         |  "title": "A title"
+         |  }
          |}""".stripMargin
 
     val expectedLanguage = Language(
@@ -516,8 +520,8 @@ class SierraTransformerTest
       s"""
           | {
           |   "id": "$id",
-          |   "title": "English earwigs earn evidence of evil",
           |   "varFields": [
+          |     ${createTitleVarfield()},
           |     {
           |       "fieldTag": "",
           |       "marcTag": "100",
@@ -546,8 +550,8 @@ class SierraTransformerTest
       s"""
          | {
          |   "id": "$id",
-         |   "title": "Dastardly Danish dogs draw dubious doughnuts",
          |   "varFields": [
+         |     ${createTitleVarfield()},
          |     {
          |       "fieldTag": "",
          |       "marcTag": "650",
@@ -578,8 +582,8 @@ class SierraTransformerTest
       s"""
          | {
          |   "id": "$id",
-         |   "title": "Dastardly Danish dogs draw dubious doughnuts",
          |   "varFields": [
+         |     ${createTitleVarfield()},
          |     {
          |       "fieldTag": "",
          |       "marcTag": "600",
@@ -610,8 +614,8 @@ class SierraTransformerTest
       s"""
          | {
          |   "id": "$id",
-         |   "title": "Wacky Racers",
          |   "varFields": [
+         |     ${createTitleVarfield()},
          |     {
          |       "fieldTag": "",
          |       "marcTag": "610",
@@ -645,8 +649,8 @@ class SierraTransformerTest
       s"""
          | {
          |   "id": "$id",
-         |   "title": "Proceedings of 3rd Big Meeting",
          |   "varFields": [
+         |     ${createTitleVarfield()},
          |     {
          |       "fieldTag": "",
          |       "marcTag": "611",
@@ -680,8 +684,8 @@ class SierraTransformerTest
       s"""
          | {
          |   "id": "$id",
-         |   "title": "Wacky Racers",
          |   "varFields": [
+         |     ${createTitleVarfield()},
          |     {
          |       "fieldTag": "",
          |       "marcTag": "652",
@@ -715,8 +719,8 @@ class SierraTransformerTest
       s"""
          | {
          |   "id": "$id",
-         |   "title": "Loosely lamenting the lemons of London",
          |   "varFields": [
+         |     ${createTitleVarfield()},
          |     {
          |       "fieldTag": "",
          |       "marcTag": "260",
@@ -752,8 +756,8 @@ class SierraTransformerTest
       s"""
          | {
          |   "id": "$id",
-         |   "title": "Loosely lamenting the lemons of London",
          |   "varFields": [
+         |     ${createTitleVarfield()},
          |     {
          |       "fieldTag": "",
          |       "marcTag": "776",
@@ -788,8 +792,8 @@ class SierraTransformerTest
       s"""
          | {
          |   "id": "$id",
-         |   "title": "Loosely lamenting the lemons of London",
          |   "varFields": [
+         |     ${createTitleVarfield()},
          |     {
          |       "fieldTag": "",
          |       "marcTag": "962",
@@ -845,7 +849,7 @@ class SierraTransformerTest
       s"""
          |{
          |  "id": "$id",
-         |  "title": "${randomAlphanumeric(50)}",
+         |  "varFields": [${createTitleVarfield()}],
          |  "materialType": {
          |    "code": "k  "
          |  }

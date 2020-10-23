@@ -48,8 +48,7 @@ class SierraTransformerWorkerServiceTest
           data = s"""
                |{
                | "id": "$id",
-               | "title": "$title",
-               | "varFields": []
+               | "varFields": [${createTitleVarfield(title)}]
                |}
                     """.stripMargin
         )
