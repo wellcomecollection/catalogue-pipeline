@@ -26,7 +26,7 @@ abstract class Indexer[T: Indexable] {
 trait Indexable[T] {
   def id(document: T): String
 
-  def version(document: T): Int
+  def version(document: T): Long
 }
 
 /**
@@ -77,28 +77,13 @@ trait Indexable[T] {
   */
 object Indexable extends Logging {
 
-  // The largest number of merged sources is about 650, so this
-  // allows sufficient room for that at the moment.
-  final val versionMultiplier = 1000
-
   implicit val imageIndexable: Indexable[AugmentedImage] =
     new Indexable[AugmentedImage] {
       def id(image: AugmentedImage) =
         image.id.canonicalId
 
-      def version(image: AugmentedImage) = {
-        val versionOffset = image.source match {
-          case SourceWorks(_, _, numberOfSources)
-              if numberOfSources >= versionMultiplier =>
-            throw new RuntimeException(
-              s"Image ${image.id.sourceIdentifier.toString} has $numberOfSources >= $versionMultiplier sources; versioning/ingest may be inconsistent")
-          case SourceWorks(_, Some(redirected), numberOfSources) =>
-            numberOfSources
-          case SourceWorks(_, None, numberOfSources) =>
-            numberOfSources - 1 // The number of additional sources
-        }
-        versionMultiplier * (image.version + image.source.version) + versionOffset
-      }
+      def version(image: AugmentedImage) =
+        image.modifiedTime.toEpochMilli
     }
 
   implicit def workIndexable[State <: WorkState]: Indexable[Work[State]] =
@@ -107,17 +92,7 @@ object Indexable extends Logging {
       def id(work: Work[State]): String = work.id
 
       def version(work: Work[State]) =
-        work match {
-          case Work.Visible(_, _, state)
-              if state.numberOfSources >= versionMultiplier =>
-            throw new RuntimeException(
-              s"Work ${work.sourceIdentifier.toString} has ${work.state.numberOfSources} >= $versionMultiplier sources; versioning/ingest may be inconsistent")
-          case Work.Visible(version, _, state) =>
-            (version * versionMultiplier) + (state.numberOfSources - 1) // The number of additional sources
-          case Work.Redirected(version, _, _) =>
-            (version * versionMultiplier) + 1
-          case Work.Invisible(version, _, _, _) => version * versionMultiplier
-        }
+        work.state.modifiedTime.toEpochMilli
 
     }
 }
