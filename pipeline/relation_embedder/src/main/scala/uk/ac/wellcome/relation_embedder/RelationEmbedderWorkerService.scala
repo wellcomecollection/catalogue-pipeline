@@ -2,7 +2,7 @@ package uk.ac.wellcome.relation_embedder
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
-import scala.util.{Success, Failure}
+import scala.util.{Failure, Success}
 import akka.Done
 import akka.stream.scaladsl._
 import akka.stream.Materializer
