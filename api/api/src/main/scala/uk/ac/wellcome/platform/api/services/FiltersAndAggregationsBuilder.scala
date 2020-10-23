@@ -42,18 +42,16 @@ class FiltersAndAggregationsBuilder(
   lazy val filteredAggregations: List[AbstractAggregation] =
     aggregationRequests.map { aggReq =>
       val agg = requestToAggregation(aggReq)
-      pairedFilter(aggReq) match {
-        case Some(filter) if !pairedFilters.forall(_ == filter) =>
-          agg.subAggregations(
-            FilterAggregation(
-              "filtered",
-              boolQuery.filter {
-                pairedFilters
-                  .filterNot(_ == filter)
-                  .map(filterToQuery)
-              }
-            ))
-        case _ => agg
+      val subFilters = pairedFilters.filterNot(pairedFilter(aggReq).contains(_))
+      if (subFilters.nonEmpty) {
+        agg.addSubagg(
+          FilterAggregation(
+            "filtered",
+            boolQuery.filter { subFilters.map(filterToQuery) }
+          )
+        )
+      } else {
+        agg
       }
     }
 
