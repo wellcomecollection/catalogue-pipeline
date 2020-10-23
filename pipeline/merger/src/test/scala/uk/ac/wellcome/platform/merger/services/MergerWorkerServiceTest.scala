@@ -330,8 +330,7 @@ class MergerWorkerServiceTest
     }
   }
 
-  it(
-    "processes the message when out of date works, emitting nothing at the output") {
+  it("doesn't send anything if the works are outdated") {
     withMergerWorkerServiceFixtures {
       case (vhs, QueuePair(queue, dlq), senders, metrics, index) =>
         val work0 = sourceWork().withVersion(0)
