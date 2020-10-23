@@ -142,7 +142,7 @@ def remove_image_from_es_indexes(catalogue_id, indices):
                     miro_identifier,
                 )
 
-            assert existing_work["type"] == "IdentifiedWork"
+            assert existing_work["type"] == "Visible"
 
             # It's necessary to fill in the data field so that Circe can
             # decode IdentifiedInvisibleWorks

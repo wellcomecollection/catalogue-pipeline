@@ -113,7 +113,7 @@ class Router(elasticClient: ElasticClient,
       "multi_matcher_search_query",
       elasticConfig.worksIndex.name,
       WorksMultiMatcher("{{query}}").filter(
-        termQuery(field = "type", value = "IdentifiedWork")))
+        termQuery(field = "type", value = "Visible")))
 
     complete(SearchTemplateResponse(List(searchTemplate)))
   }
