@@ -2,6 +2,7 @@ package uk.ac.wellcome.relation_embedder
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
+import scala.util.{Failure, Success}
 import akka.Done
 import akka.stream.scaladsl._
 import akka.stream.Materializer
@@ -48,16 +49,22 @@ class RelationEmbedderWorkerService[MsgDestination](
         relationsService.getRelations(work).map(work.transition[Denormalised])
       }
       .groupedWithin(batchSize, flushInterval)
-      .mapAsync(2)(workIndexer.index)
-      .collect { case Left(failedWorks) => failedWorks.toList }
-      .mapConcat(identity)
-      .toMat(Sink.seq)(Keep.right)
-      .run()
-      .flatMap {
-        case Nil => Future.successful(())
-        case failedWorks =>
-          Future.failed(
-            new Exception(s"Failed indexing works: $failedWorks")
-          )
+      .mapAsync(2) { work =>
+        workIndexer.index(work).flatMap {
+          case Left(failedWorks) =>
+            Future.failed(
+              new Exception(s"Failed indexing works: $failedWorks")
+            )
+          case Right(works) => Future.successful(works.toList)
+        }
       }
+      .mapConcat(identity)
+      .mapAsync(2) { work =>
+        Future(msgSender.send(work.id)).flatMap {
+          case Success(_)   => Future.successful(())
+          case Failure(err) => Future.failed(err)
+        }
+      }
+      .runWith(Sink.ignore)
+      .map(_ => ())
 }
