@@ -924,14 +924,6 @@ class SierraTransformerTest
     }
   }
 
-  // This and defaultItemRecordData are needed because createSierraItemRecord
-  // in SierraGenerators call JsonUtil.toJson which causes a runtime error
-  // because the sierra adapter uses circe 0.9.0 and the sierra transformer uses circe 0.13.0
-  // TODO: delete this one the sierra_adapter is updated
-  override def createSierraItemRecord = {
-    createSierraItemRecordWith(data = defaultItemRecordData)
-  }
-
   def defaultItemRecordData(id: SierraItemNumber,
                             modifiedDate: Instant,
                             bibIds: List[SierraBibNumber]) =
