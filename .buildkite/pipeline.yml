@@ -75,7 +75,7 @@ steps:
     if: build.branch == "master"
     plugins:
       - docker#v3.5.0:
-          image: wellcome/weco-deploy:5.5.0
+          image: wellcome/weco-deploy:5.5.3
           workdir: /repo
           mount-ssh-agent: true
           command: [
