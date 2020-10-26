@@ -65,6 +65,10 @@ object MiroIdParsing {
     }
   }
 
+  def stripSuffix(id: String): String = id match {
+    case miroIdComponents(prefix, digits, _) => prefix + digits
+  }
+
   private def formatMiroId(prefix: Char, digits: String, suffix: String) =
     s"$prefix${leftPad(digits, 7, '0')}$suffix"
 }

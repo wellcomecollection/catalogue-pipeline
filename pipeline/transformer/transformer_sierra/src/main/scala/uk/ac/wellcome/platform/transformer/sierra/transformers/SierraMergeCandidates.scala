@@ -66,11 +66,12 @@ object SierraMergeCandidates extends SierraDataTransformer with SierraQueryOps {
    * We always try to merge all linked Miro and Sierra works
    */
   private def getSinglePageMiroMergeCandidates(
-    bibData: SierraBibData): List[MergeCandidate] =
-    (matching089Ids(bibData) ++ matching962Ids(bibData)).distinct
-      .map {
-        miroMergeCandidate(_, "Miro/Sierra work")
-      }
+    bibData: SierraBibData): List[MergeCandidate] = {
+    val allIds = (matching089Ids(bibData) ++ matching962Ids(bibData)).distinct
+    removeNonSuffixedIfSuffixedExists(allIds).map {
+      miroMergeCandidate(_, "Miro/Sierra work")
+    }
+  }
 
   /** When we harvest the Calm data into Sierra, the `RecordID` is stored in
     * Marcfield 035$a.
@@ -125,4 +126,19 @@ object SierraMergeCandidates extends SierraDataTransformer with SierraQueryOps {
       reason = reason
     )
   }
+
+  // If we have IDs that are identical except for a non-numeric suffix,
+  // then we want to use the suffixed IDs over the the non-suffixed ones.
+  //
+  // eg. if we have V0036036EL and V0036036, we want to remove
+  // V0036036 and keep V0036036EL.
+  private def removeNonSuffixedIfSuffixedExists(
+    ids: List[String]): List[String] =
+    ids
+      .groupBy(MiroIdParsing.stripSuffix)
+      .flatMap {
+        case (_, List(singleId)) => List(singleId)
+        case (stemId, leafIds)   => leafIds.filterNot(_ == stemId)
+      }
+      .toList
 }

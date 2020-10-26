@@ -42,6 +42,14 @@ class MiroIdParsingTest extends AnyFunSpec with Matchers {
     }
   }
 
+  it("strips suffixes from IDs if present") {
+    val suffixed = "V0036036EL"
+    val nonSuffixed = "V0036036"
+
+    stripSuffix(suffixed) shouldBe nonSuffixed
+    stripSuffix(nonSuffixed) shouldBe nonSuffixed
+  }
+
   it("does not parse invalid miroIds") {
     forAll(
       Table(
