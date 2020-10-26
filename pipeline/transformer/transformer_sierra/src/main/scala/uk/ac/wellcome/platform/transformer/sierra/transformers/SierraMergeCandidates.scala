@@ -11,20 +11,13 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraBibData,
   SierraQueryOps
 }
-import uk.ac.wellcome.platform.transformer.sierra.transformers.parsers.{
-  MiroIdParser,
-  WellcomeImagesURLParser
-}
+import uk.ac.wellcome.platform.transformer.sierra.transformers.parsers.MiroIdParsing
 import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 
 import scala.util.Try
 import scala.util.matching.Regex
 
-object SierraMergeCandidates
-    extends SierraDataTransformer
-    with SierraQueryOps
-    with WellcomeImagesURLParser
-    with MiroIdParser {
+object SierraMergeCandidates extends SierraDataTransformer with SierraQueryOps {
 
   type Output = List[MergeCandidate]
 
@@ -113,14 +106,14 @@ object SierraMergeCandidates
     bibData
       .subfieldsWithTag("962" -> "u")
       .contents
-      .flatMap { maybeGetMiroID }
+      .flatMap { MiroIdParsing.maybeFromURL }
       .distinct
 
   private def matching089Ids(bibData: SierraBibData) =
     bibData
       .subfieldsWithTag("089" -> "a")
       .contents
-      .flatMap { parse089MiroId }
+      .flatMap { MiroIdParsing.maybeFromString }
 
   private def miroMergeCandidate(miroId: String, reason: String) = {
     MergeCandidate(
