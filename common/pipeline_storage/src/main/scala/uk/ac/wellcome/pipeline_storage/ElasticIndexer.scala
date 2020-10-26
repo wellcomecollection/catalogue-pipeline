@@ -5,8 +5,8 @@ import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.bulk.{BulkResponse, BulkResponseItem}
 import com.sksamuel.elastic4s.requests.common.VersionType.ExternalGte
 import com.sksamuel.elastic4s.{ElasticClient, Index, Response}
-import com.sksamuel.elastic4s.circe._
-import io.circe.Encoder
+import com.sksamuel.elastic4s.{Indexable => ElasticIndexable}
+import io.circe.{Encoder, Printer}
 import grizzled.slf4j.Logging
 
 import uk.ac.wellcome.elasticsearch.{ElasticsearchIndexCreator, IndexConfig}
@@ -17,6 +17,17 @@ class ElasticIndexer[T: Indexable](
   config: IndexConfig)(implicit ec: ExecutionContext, encoder: Encoder[T])
     extends Indexer[T]
     with Logging {
+
+  implicit val elasticIndexable = new ElasticIndexable[T] {
+    override def json(item: T): String = {
+      // Here we drop nulls in the indexed json to reduce storage size: this is
+      // mainly for relations which only contain very limited work data.
+      // In circe v0.14.0 we may also consider adding dropEmptyValues, which is
+      // a new Json method that is non trivial to include here
+      val json = encoder(item).dropNullValues
+      Printer.noSpaces.print(json)
+    }
+  }
 
   final def init(): Future[Unit] =
     new ElasticsearchIndexCreator(client, index, config).create
