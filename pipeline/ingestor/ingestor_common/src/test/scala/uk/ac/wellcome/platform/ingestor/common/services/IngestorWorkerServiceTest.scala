@@ -1,11 +1,7 @@
 package uk.ac.wellcome.platform.ingestor.common.services
 
-import com.sksamuel.elastic4s.ElasticClient
-import com.sksamuel.elastic4s.http.JavaClient
-import org.apache.http.HttpHost
-import org.elasticsearch.client.RestClient
 import org.scalatest.funspec.AnyFunSpec
-import uk.ac.wellcome.elasticsearch.ElasticCredentials
+import uk.ac.wellcome.elasticsearch.ElasticClientBuilder
 import uk.ac.wellcome.fixtures.RandomGenerators
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
@@ -94,21 +90,13 @@ class IngestorWorkerServiceTest
         withBigMessageStream[SampleDocument, Any](queue) { messageStream =>
           import scala.concurrent.duration._
 
-          val brokenRestClient: RestClient = RestClient
-            .builder(
-              new HttpHost(
-                "localhost",
-                9800,
-                "http"
-              )
-            )
-            .setHttpClientConfigCallback(
-              new ElasticCredentials("elastic", "changeme")
-            )
-            .build()
-
-          val brokenClient: ElasticClient =
-            ElasticClient(JavaClient.fromRestClient(brokenRestClient))
+          val brokenClient = ElasticClientBuilder.create(
+            hostname = "localhost",
+            port = 9800,
+            protocol = "http",
+            username = "elastic",
+            password = "dontletmein"
+          )
 
           val config = IngestorConfig(
             batchSize = 100,
