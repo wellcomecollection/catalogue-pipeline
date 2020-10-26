@@ -6,7 +6,7 @@ resource "aws_ecs_cluster" "cluster" {
 module "inference_capacity_provider" {
   source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/ec2_capacity_provider?ref=v3.1.0"
 
-  name = "${local.namespace_hyphen}_inference_capacity_provider"
+  name = local.namespace_hyphen
 
   // Setting this variable from aws_ecs_cluster.cluster.name creates a cycle
   // The cluster name is required for the instance user data script
