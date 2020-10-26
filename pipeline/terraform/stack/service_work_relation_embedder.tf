@@ -1,7 +1,7 @@
-module "relation_embedder_input_queue" {
+module "relation_embedder_queue" {
   source = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
 
-  queue_name                 = "${local.namespace_hyphen}_relation_embedder_input"
+  queue_name                 = "${local.namespace_hyphen}_relation_embedder"
   topic_arns                 = [module.merger_works_topic.arn]
   visibility_timeout_seconds = 120
 
@@ -25,7 +25,7 @@ module "relation_embedder" {
   env_vars = {
     metrics_namespace    = "${local.namespace_hyphen}_relation_embedder"
 
-    queue_url = module.relation_embedder_input_queue.url
+    queue_url = module.relation_embedder_queue.url
     topic_arn = module.relation_embedder_output_topic.arn
 
     es_merged_index       = local.es_works_merged_index
@@ -41,9 +41,9 @@ module "relation_embedder" {
   }
 
   subnets             = var.subnets
-  max_capacity        = 5
+  max_capacity        = 10
   messages_bucket_arn = aws_s3_bucket.messages.arn
-  queue_read_policy   = module.work_id_minter_queue.read_policy
+  queue_read_policy   = module.relation_embedder_queue.read_policy
 
   cpu    = 1024
   memory = 2048
@@ -65,7 +65,7 @@ module "relation_embedder_output_topic" {
 
 module "relation_embedder_scaling_alarm" {
   source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.1.3"
-  queue_name = module.relation_embedder_input_queue.name
+  queue_name = module.relation_embedder_queue.name
 
   queue_high_actions = [module.relation_embedder.scale_up_arn]
   queue_low_actions  = [module.relation_embedder.scale_down_arn]
