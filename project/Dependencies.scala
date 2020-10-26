@@ -2,7 +2,7 @@ import sbt._
 
 object WellcomeDependencies {
 
-  val defaultVersion = "24.0.0"
+  val defaultVersion = "24.1.0"
 
   lazy val versions = new {
     val typesafe = defaultVersion
@@ -67,7 +67,7 @@ object WellcomeDependencies {
 
 object ExternalDependencies {
   lazy val versions = new {
-    val akka = "2.6.8"
+    val akka = "2.6.9"
     val akkaHttp = "10.1.11"
     val akkaHttpCirce = "1.32.0"
     val akkaStreamAlpakka = "1.1.2"
