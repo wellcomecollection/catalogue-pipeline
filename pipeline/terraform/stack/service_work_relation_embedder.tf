@@ -24,7 +24,6 @@ module "relation_embedder" {
 
   env_vars = {
     metrics_namespace    = "${local.namespace_hyphen}_relation_embedder"
-    messages_bucket_name = aws_s3_bucket.messages.id
 
     queue_url = module.relation_embedder_input_queue.url
     topic_arn = module.relation_embedder_output_topic.arn
