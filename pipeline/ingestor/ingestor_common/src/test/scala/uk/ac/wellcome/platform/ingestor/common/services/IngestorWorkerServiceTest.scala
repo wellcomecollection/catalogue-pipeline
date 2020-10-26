@@ -26,11 +26,7 @@ class IngestorWorkerServiceTest
     val index = createIndex
     withLocalSqsQueue() { queue =>
       withElasticIndexer[SampleDocument, Any](index) { indexer =>
-        withWorkerService[SampleDocument, Any](
-          queue,
-          index,
-          indexer,
-          elasticClient) { _ =>
+        withWorkerService[SampleDocument, Any](queue, index, indexer) { _ =>
           eventuallyIndexExists(index)
         }
       }
@@ -44,11 +40,7 @@ class IngestorWorkerServiceTest
         sendMessage[SampleDocument](queue = queue, obj = document)
         val index = createIndex
         withElasticIndexer[SampleDocument, Any](index) { indexer =>
-          withWorkerService[SampleDocument, Any](
-            queue,
-            index,
-            indexer,
-            elasticClient) { _ =>
+          withWorkerService[SampleDocument, Any](queue, index, indexer) { _ =>
             assertElasticsearchEventuallyHas(index = index, document)
 
             assertQueueEmpty(queue)
@@ -68,11 +60,7 @@ class IngestorWorkerServiceTest
           sendMessage[SampleDocument](queue = queue, obj = document))
         val index = createIndex
         withElasticIndexer[SampleDocument, Any](index) { indexer =>
-          withWorkerService[SampleDocument, Any](
-            queue,
-            index,
-            indexer,
-            elasticClient) { _ =>
+          withWorkerService[SampleDocument, Any](queue, index, indexer) { _ =>
             assertElasticsearchEventuallyHas(index = index, documents: _*)
             eventually {
               assertQueueEmpty(queue)
@@ -87,11 +75,7 @@ class IngestorWorkerServiceTest
     withLocalSqsQueue() { queue =>
       val index = createIndex
       withElasticIndexer[SampleDocument, Any](index) { indexer =>
-        withWorkerService[SampleDocument, Any](
-          queue,
-          index,
-          indexer,
-          elasticClient) { _ =>
+        withWorkerService[SampleDocument, Any](queue, index, indexer) { _ =>
           sendNotificationToSQS(
             queue = queue,
             body = "not a json string -- this will fail parsing"
