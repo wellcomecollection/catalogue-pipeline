@@ -21,9 +21,7 @@ trait IngestorFixtures
     with Akka {
   this: Suite =>
 
-  def withWorkerService[T, R](queue: Queue,
-                              index: Index,
-                              indexer: Indexer[T])(
+  def withWorkerService[T, R](queue: Queue, index: Index, indexer: Indexer[T])(
     testWith: TestWith[IngestorWorkerService[T], R])(
     implicit dec: Decoder[T]): R =
     withActorSystem { implicit actorSystem =>

@@ -69,17 +69,18 @@ class IngestorWorkerServiceTest
   it("leaves a message on the queue if it fails processing") {
     val index = createIndex
 
-    withLocalSqsQueuePair(visibilityTimeout = 1) { case QueuePair(queue, dlq) =>
-      withElasticIndexer[SampleDocument, Any](index) { indexer =>
-        withWorkerService[SampleDocument, Any](queue, index, indexer) { _ =>
-          sendInvalidJSONto(queue)
+    withLocalSqsQueuePair(visibilityTimeout = 1) {
+      case QueuePair(queue, dlq) =>
+        withElasticIndexer[SampleDocument, Any](index) { indexer =>
+          withWorkerService[SampleDocument, Any](queue, index, indexer) { _ =>
+            sendInvalidJSONto(queue)
 
-          eventually {
-            assertQueueEmpty(queue)
-            assertQueueHasSize(dlq, size = 1)
+            eventually {
+              assertQueueEmpty(queue)
+              assertQueueHasSize(dlq, size = 1)
+            }
           }
         }
-      }
     }
   }
 
