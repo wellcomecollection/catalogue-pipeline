@@ -57,11 +57,11 @@ module "catalogue_pipeline_20201023" {
   inferrer_model_data_bucket_name = aws_s3_bucket.inferrer_model_core_data.id
 }
 
-module "catalogue_pipeline_relation_embedder" {
+module "catalogue_pipeline_20201027" {
   source = "./stack"
 
-  pipeline_date = "relation_embedder"
-  release_label = "relation_embedder"
+  pipeline_date = "20201027"
+  release_label = "stage"
 
   account_id      = data.aws_caller_identity.current.account_id
   aws_region      = local.aws_region
