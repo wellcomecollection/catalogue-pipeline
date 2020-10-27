@@ -203,7 +203,8 @@ class SierraMergeCandidatesTest
         miroMergeCandidate(miroID) ++ miroMergeCandidate("V0013889")
     }
 
-    it("Overrides non-suffixed IDs with suffixed ones where those are present") {
+    it(
+      "overrides non-suffixed Miro IDs with suffixed ones where those are present") {
       val bibData = createPictureWith(
         varFields = create089subfieldsWith(List("V0036036")) ++
           create962subfieldsForWellcomeImageUrl("V0036036EL")
@@ -211,6 +212,27 @@ class SierraMergeCandidatesTest
 
       SierraMergeCandidates(createSierraBibNumber, bibData) should contain theSameElementsAs
         miroMergeCandidate("V0036036EL")
+    }
+
+    it("deduplicates identical Miro IDs across the 089 and 962 fields") {
+      val bibData = createPictureWith(
+        varFields = create089subfieldsWith(List(miroID)) ++
+          create962subfieldsForWellcomeImageUrl(miroID)
+      )
+
+      val result = SierraMergeCandidates(createSierraBibNumber, bibData)
+      result should contain theSameElementsAs miroMergeCandidate(miroID)
+    }
+
+    it(
+      "retains non-suffixed Miro IDs when there is no matching suffixed ID present") {
+      val bibData = createPictureWith(
+        varFields = create089subfieldsWith(List("V0036036")) ++
+          create962subfieldsForWellcomeImageUrl("V0012345EBR")
+      )
+
+      SierraMergeCandidates(createSierraBibNumber, bibData) should contain theSameElementsAs
+        miroMergeCandidate("V0036036") ++ miroMergeCandidate("V0012345EBR")
     }
   }
 

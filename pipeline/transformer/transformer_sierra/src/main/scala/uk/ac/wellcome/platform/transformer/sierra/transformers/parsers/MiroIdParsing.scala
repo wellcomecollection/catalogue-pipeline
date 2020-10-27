@@ -57,10 +57,12 @@ object MiroIdParsing {
   }
 
   def maybeFromString(str: String): Option[String] = {
+    // Strip whitespace because IDs in the 089 field usually
+    // look something like "V 123"
     val strippedMiroId = str.replace(" ", "")
     strippedMiroId match {
       case miroIdComponents(prefix, digits, suffix) =>
-        Some(formatMiroId(prefix.charAt(0), digits, suffix))
+        Some(formatMiroId(prefix, digits, suffix))
       case _ => None
     }
   }
@@ -69,6 +71,6 @@ object MiroIdParsing {
     case miroIdComponents(prefix, digits, _) => prefix + digits
   }
 
-  private def formatMiroId(prefix: Char, digits: String, suffix: String) =
+  private def formatMiroId(prefix: String, digits: String, suffix: String) =
     s"$prefix${leftPad(digits, 7, '0')}$suffix"
 }
