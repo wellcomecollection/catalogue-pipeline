@@ -12,21 +12,17 @@ def download_digital_location(location, out_dir, name_prefix):
 
     # e.g. https://iiif.wellcomecollection.org/image/L1234.jpg/info.json
     if location["url"].endswith("/info.json"):
-        filename = os.path.basename(
-            location["url"][:-len("/info.json")]
-        )
+        filename = os.path.basename(location["url"][: -len("/info.json")])
         out_path = os.path.join(out_dir, name_prefix + filename)
 
         urlretrieve(
-            location["url"].replace("/info.json", "/full/full/0/default.jpg"),
-            out_path
+            location["url"].replace("/info.json", "/full/full/0/default.jpg"), out_path
         )
 
     # e.g. https://wellcomelibrary.org/iiif/b28405717/manifest
-    elif (
-        location["url"].startswith("https://wellcomelibrary.org/iiif/") and
-        location["url"].endswith("/manifest")
-    ):
+    elif location["url"].startswith("https://wellcomelibrary.org/iiif/") and location[
+        "url"
+    ].endswith("/manifest"):
         manifest = httpx.get(location["url"]).json()
 
         # TODO: What if it's a multiple manifestation?
@@ -36,7 +32,7 @@ def download_digital_location(location, out_dir, name_prefix):
                     filename = os.path.basename(image["@id"])
                     urlretrieve(
                         image["resource"]["@id"].replace("!1024,1024", "full"),
-                        os.path.join(out_dir, filename)
+                        os.path.join(out_dir, filename),
                     )
 
     else:

@@ -41,7 +41,7 @@ def get_work_id(url):
 def get_digital_locations(work_id):
     resp = httpx.get(
         f"https://api.wellcomecollection.org/catalogue/v2/works/{work_id}",
-        params={"include": "images,items"}
+        params={"include": "images,items"},
     )
     work = resp.json()
 
@@ -81,7 +81,5 @@ if __name__ == "__main__":
 
     for i, location in enumerate(get_digital_locations(work_id), start=1):
         download_digital_location(
-            location=location,
-            out_dir=work_id,
-            name_prefix=f"{i}-"
+            location=location, out_dir=work_id, name_prefix=f"{i}-"
         )

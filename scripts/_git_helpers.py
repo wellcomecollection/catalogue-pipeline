@@ -5,8 +5,11 @@ import subprocess
 
 @functools.lru_cache()
 def repo_root():
-    return subprocess.check_output(
-        ["git", "rev-parse", "--show-toplevel"]).strip().decode("utf8")
+    return (
+        subprocess.check_output(["git", "rev-parse", "--show-toplevel"])
+        .strip()
+        .decode("utf8")
+    )
 
 
 def ignore_directory(dirname):
