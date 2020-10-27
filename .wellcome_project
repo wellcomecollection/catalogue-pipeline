@@ -62,8 +62,6 @@ catalogue_pipeline:
       name: Production
     - id: stage
       name: Staging
-    - id: relation_embedder
-      name: Relation Embedder
   image_repositories:
     - id: id_minter_works
       services:
