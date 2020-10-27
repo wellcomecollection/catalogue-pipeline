@@ -5,5 +5,5 @@ case class ProductionEvent[+State](
   places: List[Place[State]],
   agents: List[AbstractAgent[State]],
   dates: List[Period[State]],
-  function: Option[Concept[State]]
+  function: Option[Concept[State]] = None
 )

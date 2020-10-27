@@ -6,7 +6,7 @@ import uk.ac.wellcome.models.work.internal.result.Result
 
 case class Language(
   label: String,
-  id: Option[String]
+  id: Option[String] = None
 )
 
 object Language {

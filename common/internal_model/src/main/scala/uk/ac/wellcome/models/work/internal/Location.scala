@@ -14,9 +14,9 @@ object Location {
 
   case class DigitalResource(accessConditions: List[AccessCondition],
                              url: String,
-                             license: Option[License],
-                             credit: Option[String],
-                             format: Option[DigitalResourceFormat])
+                             license: Option[License] = None,
+                             credit: Option[String] = None,
+                             format: Option[DigitalResourceFormat] = None)
       extends Location
 }
 

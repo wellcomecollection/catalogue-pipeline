@@ -26,7 +26,7 @@ object Concept {
 case class Period[+State](
   id: State,
   label: String,
-  range: Option[InstantRange],
+  range: Option[InstantRange] = None,
 ) extends AbstractConcept[State]
 
 object Period {

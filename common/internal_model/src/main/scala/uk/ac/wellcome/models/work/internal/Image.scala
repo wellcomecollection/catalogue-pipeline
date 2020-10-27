@@ -13,7 +13,7 @@ case class UnmergedImage[State <: DataState](
   location: DigitalLocationDeprecated
 ) extends BaseImage[State] {
   def mergeWith(canonicalWork: SourceWork[State],
-                redirectedWork: Option[SourceWork[State]],
+                redirectedWork: Option[SourceWork[State]] = None,
                 modifiedTime: Instant): MergedImage[State] =
     MergedImage[State](
       id = id,
