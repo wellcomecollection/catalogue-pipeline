@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.ingestor.common.fixtures
 
-import com.sksamuel.elastic4s.{ElasticClient, Index}
+import com.sksamuel.elastic4s.Index
 import io.circe.Decoder
 import org.scalatest.Suite
 import uk.ac.wellcome.akka.fixtures.Akka
@@ -21,10 +21,7 @@ trait IngestorFixtures
     with Akka {
   this: Suite =>
 
-  def withWorkerService[T, R](queue: Queue,
-                              index: Index,
-                              indexer: Indexer[T],
-                              elasticClient: ElasticClient = elasticClient)(
+  def withWorkerService[T, R](queue: Queue, index: Index, indexer: Indexer[T])(
     testWith: TestWith[IngestorWorkerService[T], R])(
     implicit dec: Decoder[T]): R =
     withActorSystem { implicit actorSystem =>
