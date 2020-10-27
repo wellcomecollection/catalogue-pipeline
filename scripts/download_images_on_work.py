@@ -38,23 +38,21 @@ def get_work_id(url):
     return work_id
 
 
-def get_image_ids(work_id):
-    """
-    Get a list of all the image IDs associated with a work.
-    """
+def get_digital_locations(work_id):
     resp = httpx.get(
         f"https://api.wellcomecollection.org/catalogue/v2/works/{work_id}",
-        params={"include": "images"}
+        params={"include": "images,items"}
     )
     work = resp.json()
 
-    return [img["id"] for img in work["images"]]
+    for item in work.get("items", []):
+        for loc in item["locations"]:
+            if loc["type"] == "DigitalLocation":
+                yield loc
 
-
-def get_digital_locations(image_ids):
-    for img_id in image_ids:
+    for w_image in work.get("images", []):
         resp = httpx.get(
-            f"https://api.wellcomecollection.org/catalogue/v2/images/{img_id}"
+            f"https://api.wellcomecollection.org/catalogue/v2/images/{w_image['id']}"
         )
 
         image = resp.json()
@@ -76,15 +74,12 @@ if __name__ == "__main__":
         sys.exit(str(err))
 
     os.makedirs(work_id, exist_ok=True)
-
     ignore_directory(work_id)
-
-    image_ids = get_image_ids(work_id=work_id)
 
     with open(work_id + "/README.txt", "w") as outfile:
         outfile.write(f"Images from {works_url}\n")
 
-    for i, location in enumerate(get_digital_locations(image_ids), start=1):
+    for i, location in enumerate(get_digital_locations(work_id), start=1):
         download_digital_location(
             location=location,
             out_dir=work_id,
