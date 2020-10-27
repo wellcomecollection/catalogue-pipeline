@@ -203,23 +203,36 @@ class SierraMergeCandidatesTest
         miroMergeCandidate(miroID) ++ miroMergeCandidate("V0013889")
     }
 
-    // - - - - - - -  Material type - - - - - - -
-    it("creates a merge candidate if the material type is '3D objects'") {
-      val bibData = create3DObjectWith(
-        varFields = create962subfieldsForWellcomeImageUrl(miroID)
+    it(
+      "overrides non-suffixed Miro IDs with suffixed ones where those are present") {
+      val bibData = createPictureWith(
+        varFields = create089subfieldsWith(List("V0036036")) ++
+          create962subfieldsForWellcomeImageUrl("V0036036EL")
       )
 
-      SierraMergeCandidates(createSierraBibNumber, bibData) shouldBe
-        miroMergeCandidate(miroID)
+      SierraMergeCandidates(createSierraBibNumber, bibData) should contain theSameElementsAs
+        miroMergeCandidate("V0036036EL")
     }
 
-    it("creates a merge candidate if the material type is 'Digital Images'") {
+    it("deduplicates identical Miro IDs across the 089 and 962 fields") {
       val bibData = createPictureWith(
-        varFields = create962subfieldsForWellcomeImageUrl(miroID)
+        varFields = create089subfieldsWith(List(miroID)) ++
+          create962subfieldsForWellcomeImageUrl(miroID)
       )
 
-      SierraMergeCandidates(createSierraBibNumber, bibData) shouldBe
-        miroMergeCandidate(miroID)
+      val result = SierraMergeCandidates(createSierraBibNumber, bibData)
+      result should contain theSameElementsAs miroMergeCandidate(miroID)
+    }
+
+    it(
+      "retains non-suffixed Miro IDs when there is no matching suffixed ID present") {
+      val bibData = createPictureWith(
+        varFields = create089subfieldsWith(List("V0036036")) ++
+          create962subfieldsForWellcomeImageUrl("V0012345EBR")
+      )
+
+      SierraMergeCandidates(createSierraBibNumber, bibData) should contain theSameElementsAs
+        miroMergeCandidate("V0036036") ++ miroMergeCandidate("V0012345EBR")
     }
   }
 
@@ -311,9 +324,6 @@ class SierraMergeCandidatesTest
 
   private def createDigitalImageWith(varFields: List[VarField]): SierraBibData =
     createBibDataWith(varFields = varFields, materialTypeCode = 'q')
-
-  private def create3DObjectWith(varFields: List[VarField]): SierraBibData =
-    createBibDataWith(varFields = varFields, materialTypeCode = 'r')
 
   private def createBibDataWith(varFields: List[VarField],
                                 materialTypeCode: Char) = {
