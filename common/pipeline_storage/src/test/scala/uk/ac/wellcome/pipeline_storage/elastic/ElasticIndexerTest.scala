@@ -60,10 +60,7 @@ class ElasticIndexerTest
   }
 
   override def createDocumentWith(id: String, version: Int): SampleDocument =
-    SampleDocument(
-      canonicalId = id,
-      version = version,
-      title = s"$id:$version")
+    SampleDocument(canonicalId = id, version = version, title = s"$id:$version")
 
   override def assertIsIndexed(doc: SampleDocument)(
     implicit index: Index): Assertion =

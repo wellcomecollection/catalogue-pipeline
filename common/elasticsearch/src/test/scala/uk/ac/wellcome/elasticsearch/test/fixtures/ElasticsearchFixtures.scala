@@ -167,7 +167,9 @@ trait ElasticsearchFixtures
 
         getResponse.exists shouldBe true
 
-        assertJsonStringsAreEqualIgnoringNulls(getResponse.sourceAsString, documentJson)
+        assertJsonStringsAreEqualIgnoringNulls(
+          getResponse.sourceAsString,
+          documentJson)
       }
     }
 
@@ -292,7 +294,8 @@ trait ElasticsearchFixtures
   def createIndexName: String =
     s"index-${randomAlphanumeric().toLowerCase}"
 
-  def assertJsonStringsAreEqualIgnoringNulls(a: String, b: String): Assertion = {
+  def assertJsonStringsAreEqualIgnoringNulls(a: String,
+                                             b: String): Assertion = {
     val jsonA = parseOrElse(a)
     val jsonB = parseOrElse(a)
     jsonA shouldBe jsonB
