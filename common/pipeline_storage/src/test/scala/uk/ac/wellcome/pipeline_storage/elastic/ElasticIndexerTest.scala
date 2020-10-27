@@ -60,10 +60,7 @@ class ElasticIndexerTest
   }
 
   override def createDocumentWith(id: String, version: Int): SampleDocument =
-    SampleDocument(
-      canonicalId = id,
-      version = version,
-      title = s"$version-${randomAlphanumeric()}")
+    SampleDocument(canonicalId = id, version = version, title = s"$id:$version")
 
   override def assertIsIndexed(doc: SampleDocument)(
     implicit index: Index): Assertion =
@@ -96,7 +93,7 @@ class ElasticIndexerTest
     }
     val invalidDocuments = (1 to 3).map { _ =>
       createDocument
-        .copy(data = SampleDocumentData(Some(randomAlphanumeric())))
+        .copy(data = SampleDocumentData(genre = Some(randomAlphanumeric())))
     }
 
     object StrictWithNoDataIndexConfig
@@ -129,6 +126,68 @@ class ElasticIndexerTest
             invalidDocuments.foreach { doc =>
               assertIsNotIndexed(doc)
             }
+          }
+        }
+    }
+  }
+
+  it("does not store optional fields when those fields are unmapped") {
+
+    val documents = List(
+      createDocumentWith("A", 1).copy(
+        data = SampleDocumentData(genre = Some("Crime"))
+      ),
+      createDocumentWith("B", 2).copy(
+        data = SampleDocumentData(date = Some("10/10/2010"))
+      ),
+    )
+
+    object UnmappedDataMappingIndexConfig
+        extends IndexConfig
+        with IndexConfigFields {
+
+      import com.sksamuel.elastic4s.ElasticDsl._
+
+      val analysis = WorksAnalysis()
+
+      val title = textField("title")
+      val data = objectField("data").dynamic("false")
+
+      val mapping = properties(Seq(title, canonicalId, version, data))
+        .dynamic(DynamicMapping.Strict)
+    }
+
+    withLocalElasticsearchIndex(config = UnmappedDataMappingIndexConfig) {
+      implicit index =>
+        withIndexer { indexer =>
+          val future = indexer.index(documents)
+
+          whenReady(future) { result =>
+            result.right.get should contain only (documents: _*)
+            val hits = eventually {
+              val response = elasticClient.execute {
+                search(index).matchAllQuery()
+              }.await
+
+              val hits = response.result.hits.hits
+
+              hits should have size 2
+              hits
+            }
+            hits.map(_.sourceAsMap).toList shouldBe List(
+              Map(
+                "canonicalId" -> "A",
+                "version" -> 1,
+                "title" -> "A:1",
+                "data" -> Map("genre" -> "Crime")
+              ),
+              Map(
+                "canonicalId" -> "B",
+                "version" -> 2,
+                "title" -> "B:2",
+                "data" -> Map("date" -> "10/10/2010")
+              )
+            )
           }
         }
     }
