@@ -5,11 +5,29 @@ import org.apache.commons.lang3.StringUtils.leftPad
 import scala.util.matching.Regex
 
 object MiroIdParsing {
-  // Regex for parsing a Miro ID.  Examples of valid IDs, all taken from
-  // the Sierra data:
-  //
-  //    L0046161, V0033167F1, V0032544ECL
-  //
+  /* Regex for parsing a Miro ID.  Examples of valid IDs, all taken from
+   * the Sierra data:
+   *
+   *    L0046161, V0033167F1, V0032544ECL
+   *
+   * Regarding suffixes (from a slack discussion with collections):
+   *
+   * You should find two types of suffix, one beginning with E and one beginning with F.
+   * The E suffix was used to introduce a further character that distinguished two or
+   * more works that were photographed on the same piece of film
+   * (colour transparency and black&white negative).
+   *
+   *   L = Left
+   *   R = Right.
+   *   T=Top
+   *   B=Bottom
+   *   TR =Top Right
+   *   etc.
+   *
+   * To add to that, there are also M series images with suffix EA, EB, EC, ED, EE, and EF.
+   * They don't seem to mean anything (like L = left), they seem to just be running letters
+   * to slip the image in line.
+   */
   private val fullMiroId: Regex = "[A-Z][0-9]{7}[A-Z]{0,3}[0-9]?".r
   // groups are (prefix, digits, suffix)
   private val miroIdComponents: Regex =
