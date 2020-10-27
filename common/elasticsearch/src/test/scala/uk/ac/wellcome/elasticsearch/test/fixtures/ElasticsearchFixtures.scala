@@ -2,7 +2,11 @@ package uk.ac.wellcome.elasticsearch.test.fixtures
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-
+import org.scalatest.concurrent.PatienceConfiguration.Timeout
+import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.time.{Seconds, Span}
+import org.scalatest.{Assertion, Suite}
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.bulk.BulkResponse
 import com.sksamuel.elastic4s.requests.cluster.ClusterHealthResponse
@@ -13,12 +17,8 @@ import com.sksamuel.elastic4s.requests.indexes.admin.IndexExistsResponse
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
 import com.sksamuel.elastic4s.{ElasticClient, Index, Response}
 import grizzled.slf4j.Logging
-import io.circe.{Decoder, Encoder}
-import org.scalatest.concurrent.PatienceConfiguration.Timeout
-import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.time.{Seconds, Span}
-import org.scalatest.{Assertion, Suite}
+import io.circe.{Decoder, Encoder, Json}
+import io.circe.parser.parse
 
 import uk.ac.wellcome.elasticsearch._
 import uk.ac.wellcome.elasticsearch.model.CanonicalId
@@ -167,7 +167,7 @@ trait ElasticsearchFixtures
 
         getResponse.exists shouldBe true
 
-        assertJsonStringsAreEqual(getResponse.sourceAsString, documentJson)
+        assertJsonStringsAreEqualIgnoringNulls(getResponse.sourceAsString, documentJson)
       }
     }
 
@@ -291,4 +291,19 @@ trait ElasticsearchFixtures
 
   def createIndexName: String =
     s"index-${randomAlphanumeric().toLowerCase}"
+
+  def assertJsonStringsAreEqualIgnoringNulls(a: String, b: String): Assertion = {
+    val jsonA = parseOrElse(a)
+    val jsonB = parseOrElse(a)
+    jsonA shouldBe jsonB
+  }
+
+  private def parseOrElse(jsonString: String): Json =
+    parse(jsonString) match {
+      case Right(json) => json.deepDropNullValues
+      case Left(err) => {
+        println(s"Error trying to parse string <<$jsonString>>")
+        throw err
+      }
+    }
 }

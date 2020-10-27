@@ -24,7 +24,7 @@ class ElasticIndexer[T: Indexable](
       // mainly for relations which only contain very limited work data.
       // In circe v0.14.0 we may also consider adding dropEmptyValues, which is
       // a new Json method that is non trivial to include here
-      val json = encoder(item).dropNullValues
+      val json = encoder(item).deepDropNullValues
       Printer.noSpaces.print(json)
     }
   }

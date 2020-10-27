@@ -18,7 +18,12 @@ case class SampleDocument(version: Int,
                           canonicalId: String,
                           title: String,
                           data: SampleDocumentData = SampleDocumentData())
-case class SampleDocumentData(stuff: Option[String] = None)
+
+case class SampleDocumentData(
+  genre: Option[String] = None,
+  date: Option[String] = None,
+)
+
 object SampleDocument {
   implicit val indexable = new Indexable[SampleDocument] {
     def version(document: SampleDocument): Long = document.version
