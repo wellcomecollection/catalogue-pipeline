@@ -57,6 +57,16 @@ object Relation {
       numDescendents = numDescendents,
     )
 
+  def fromIdentifiedWork(work: Work[Identified], depth: Int): Relation[DataState.Identified] =
+    Relation[DataState.Identified](
+      data = work.data,
+      id = IdState.Identified(
+        canonicalId = work.state.canonicalId,
+        sourceIdentifier = work.state.sourceIdentifier
+      ),
+      depth = depth
+    )
+
   implicit class ToWork(relation: Relation[DataState.Identified]) {
     def toWork: Work.Visible[Identified] =
       // NOTE: The numberOfSources, modifiedTime and version are not currently
