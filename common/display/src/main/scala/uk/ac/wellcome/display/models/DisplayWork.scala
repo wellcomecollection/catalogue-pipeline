@@ -2,6 +2,7 @@ package uk.ac.wellcome.display.models
 
 import io.circe.generic.extras.JsonKey
 import io.swagger.v3.oas.annotations.media.Schema
+<<<<<<< HEAD
 import uk.ac.wellcome.models.work.internal.{
   RelatedWork,
   RelatedWorks,
@@ -10,6 +11,10 @@ import uk.ac.wellcome.models.work.internal.{
   WorkType
 }
 import WorkState.Indexed
+=======
+import uk.ac.wellcome.models.work.internal._
+import WorkState.Identified
+>>>>>>> e77806808 (Serialise relations stored on Work)
 
 @Schema(
   name = "Work",
@@ -191,44 +196,6 @@ case object DisplayWork {
 
   def apply(work: Work.Visible[Indexed]): DisplayWork =
     DisplayWork(work = work, includes = WorksIncludes.none)
-
-  def apply(work: Work.Visible[Indexed],
-            includes: WorksIncludes,
-            relatedWorks: RelatedWorks): DisplayWork =
-    DisplayWork(work, includes).copy(
-      parts =
-        if (includes.parts)
-          relatedWorks.parts.map { parts =>
-            parts.collect {
-              case RelatedWork(work: Work.Visible[Indexed], related) =>
-                DisplayWork(work, includes, related)
-            }
-          } else None,
-      partOf =
-        if (includes.partOf)
-          relatedWorks.partOf.map { partOf =>
-            partOf.collect {
-              case RelatedWork(work: Work.Visible[Indexed], related) =>
-                DisplayWork(work, includes, related)
-            }
-          } else None,
-      precededBy =
-        if (includes.precededBy)
-          relatedWorks.precededBy.map { precededBy =>
-            precededBy.collect {
-              case RelatedWork(work: Work.Visible[Indexed], related) =>
-                DisplayWork(work, includes, related)
-            }
-          } else None,
-      succeededBy =
-        if (includes.succeededBy)
-          relatedWorks.succeededBy.map { succeededBy =>
-            succeededBy.collect {
-              case RelatedWork(work: Work.Visible[Indexed], related) =>
-                DisplayWork(work, includes, related)
-            }
-          } else None,
-    )
 
   def displayWorkType(workType: WorkType): String = workType match {
     case WorkType.Standard   => "Work"
