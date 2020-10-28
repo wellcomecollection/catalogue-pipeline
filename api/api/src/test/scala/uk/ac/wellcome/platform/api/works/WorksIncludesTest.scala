@@ -665,8 +665,7 @@ class WorksIncludesTest
           siblingsPreceding = List(Relation.fromIdentifiedWork(workB, 2)),
           siblingsSucceeding = List(Relation.fromIdentifiedWork(workD, 2)),
         )
-      )
-        .collectionPath(CollectionPath(path = "0/a/c"))
+      ).collectionPath(CollectionPath(path = "0/a/c"))
         .title("0/a/c")
         .workType(WorkType.Series)
 

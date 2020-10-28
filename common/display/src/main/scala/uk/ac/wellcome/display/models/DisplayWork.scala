@@ -192,6 +192,39 @@ case object DisplayWork {
           Some(work.data.images.map(DisplayWorkImageInclude(_)))
         else None,
       ontologyType = displayWorkType(work.data.workType),
+      partOf =
+        if (includes.partOf)
+          Some(
+            work.state.relations.ancestors.foldLeft(List.empty[DisplayWork]) {
+              case (partOf, relation) =>
+                List(DisplayWork(relation.toWork).copy(partOf = Some(partOf)))
+            }
+          )
+        else None,
+      parts =
+        if (includes.parts)
+          Some(
+            work.state.relations.children.map { relation =>
+              DisplayWork(relation.toWork)
+            }
+          )
+        else None,
+      precededBy =
+        if (includes.precededBy)
+          Some(
+            work.state.relations.siblingsPreceding.map { relation =>
+              DisplayWork(relation.toWork)
+            }
+          )
+        else None,
+      succeededBy =
+        if (includes.succeededBy)
+          Some(
+            work.state.relations.siblingsSucceeding.map { relation =>
+              DisplayWork(relation.toWork)
+            }
+          )
+        else None,
     )
 
   def apply(work: Work.Visible[Indexed]): DisplayWork =

@@ -57,7 +57,8 @@ object Relation {
       numDescendents = numDescendents,
     )
 
-  def fromIdentifiedWork(work: Work[Identified], depth: Int): Relation[DataState.Identified] =
+  def fromIdentifiedWork(work: Work[Identified],
+                         depth: Int): Relation[DataState.Identified] =
     Relation[DataState.Identified](
       data = work.data,
       id = IdState.Identified(
