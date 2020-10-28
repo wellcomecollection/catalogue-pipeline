@@ -650,9 +650,25 @@ class WorksIncludesTest
     val work0 = work("0", WorkType.Collection)
     val workA = work("0/a", WorkType.Section)
     val workB = work("0/a/b", WorkType.Standard)
-    val workC = work("0/a/c", WorkType.Series)
     val workD = work("0/a/d", WorkType.Standard)
     val workE = work("0/a/c/e", WorkType.Standard)
+
+    val workC =
+      identifiedWork(
+        sourceIdentifier = createSourceIdentifierWith(value = "0/a/c"),
+        relations = Relations(
+          ancestors = List(
+            Relation.fromIdentifiedWork(work0, 0),
+            Relation.fromIdentifiedWork(workA, 1),
+          ),
+          children = List(Relation.fromIdentifiedWork(workE, 3)),
+          siblingsPreceding = List(Relation.fromIdentifiedWork(workB, 2)),
+          siblingsSucceeding = List(Relation.fromIdentifiedWork(workD, 2)),
+        )
+      )
+        .collectionPath(CollectionPath(path = "0/a/c"))
+        .title("0/a/c")
+        .workType(WorkType.Series)
 
     def storeWorks(index: Index) =
       insertIntoElasticsearch(index, work0, workA, workB, workC, workD, workE)
