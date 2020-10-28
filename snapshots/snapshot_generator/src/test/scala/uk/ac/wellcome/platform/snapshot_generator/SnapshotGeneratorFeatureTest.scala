@@ -66,7 +66,8 @@ class SnapshotGeneratorFeatureTest
           val s3Size = objectMetadata.getContentLength
 
           val expectedJsonLines = works.sortBy { _.state.canonicalId }.map {
-            work => s"""
+            work =>
+              s"""
               {
                 "id": "${work.state.canonicalId}",
                 "title": "${work.data.title.get}",
