@@ -1,20 +1,16 @@
 package uk.ac.wellcome.platform.api.rest
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
+
 import akka.http.scaladsl.model.StatusCodes.Found
 import akka.http.scaladsl.server.Route
 import com.sksamuel.elastic4s.Index
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
-import grizzled.slf4j.Logger
 import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.display.models.Implicits._
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.api.models.ApiConfig
-import uk.ac.wellcome.platform.api.services.{
-  ElasticsearchService,
-  RelatedWorkService,
-  WorksService
-}
+import uk.ac.wellcome.platform.api.services.{ElasticsearchService, WorksService}
 import uk.ac.wellcome.platform.api.Tracing
 import WorkState.Indexed
 
@@ -61,38 +57,20 @@ class WorksController(elasticsearchService: ElasticsearchService,
         val includes = params.include.getOrElse(WorksIncludes.none)
         worksService
           .findWorkById(id)(index)
-          .flatMap {
+          .map {
             case Right(Some(work: Work.Visible[Indexed])) =>
-              if (includes.anyRelation) {
-                retrieveRelatedWorks(index, work).map { relatedWorks =>
-                  workFound(work, relatedWorks, includes)
-                }
-              } else
-                Future.successful(workFound(work, None, includes))
+              workFound(work, includes)
             case Right(Some(work: Work.Redirected[Indexed])) =>
               Future.successful(workRedirect(work))
             case Right(Some(work: Work.Invisible[Indexed])) =>
               Future.successful(gone("This work has been deleted"))
             case Right(None) =>
-              Future.successful(notFound(s"Work not found for identifier $id"))
-            case Left(err) => Future.successful(elasticError(err))
+              notFound(s"Work not found for identifier $id")
+            case Left(err) => elasticError(err)
           }
       }
     }
 
-  private def retrieveRelatedWorks(
-    index: Index,
-    work: Work.Visible[Indexed]): Future[Option[RelatedWorks]] =
-    relatedWorkService
-      .retrieveRelatedWorks(index, work)
-      .map {
-        case Left(err) =>
-          // We just log this here rather than raising so as not to bring down
-          // the work API when related work retrieval fails
-          logger.error("Error retrieving related works", err)
-          None
-        case Right(relatedWorks) => Some(relatedWorks)
-      }
 
   def workRedirect(work: Work.Redirected[Indexed]): Route =
     extractPublicUri { uri =>
@@ -101,21 +79,13 @@ class WorksController(elasticsearchService: ElasticsearchService,
     }
 
   def workFound(work: Work.Visible[Indexed],
-                relatedWorks: Option[RelatedWorks],
                 includes: WorksIncludes): Route =
     complete(
       ResultResponse(
         context = contextUri,
-        result = relatedWorks
-          .map(DisplayWork(work, includes, _))
-          .getOrElse(DisplayWork(work, includes))
+        result = DisplayWork(work, includes)
       )
     )
 
-  private lazy val relatedWorkService =
-    new RelatedWorkService(elasticsearchService)
-
   private lazy val worksService = new WorksService(elasticsearchService)
-
-  private lazy val logger = Logger(this.getClass.getName)
 }
