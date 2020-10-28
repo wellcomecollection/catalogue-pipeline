@@ -60,9 +60,6 @@ object WorkPredicates {
         format(Format.Pictures)
     )
 
-  val historicalLibraryMiro: WorkPredicate = singleDigitalItemMiroWork and
-    sourceIdentifierSatisfies(_.matches("^[LM].+"))
-
   def not(pred: WorkPredicate): WorkPredicate = !pred(_)
 
   def sierraWorkWithId(id: SourceIdentifier)(work: Work[Source]): Boolean =
@@ -96,9 +93,6 @@ object WorkPredicates {
     work.data.items.forall { item =>
       item.locations.size == 1
     }
-
-  private def sourceIdentifierSatisfies(pred: String => Boolean)(
-    work: Work[Source]): Boolean = pred(work.sourceIdentifier.value)
 
   private def identifierTypeId(id: String)(work: Work[Source]): Boolean =
     work.sourceIdentifier.identifierType == IdentifierType(id)
