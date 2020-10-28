@@ -66,24 +66,27 @@ class SnapshotGeneratorFeatureTest
           val s3Size = objectMetadata.getContentLength
 
           val expectedJsonLines = works.sortBy { _.state.canonicalId }.map {
-            work =>
-              s"""
-              |{
-              |  "id": "${work.state.canonicalId}",
-              |  "title": "${work.data.title.get}",
-              |  "identifiers": [ ${identifier(work.sourceIdentifier)} ],
-              |  "contributors": [ ],
-              |  "genres": [ ],
-              |  "subjects": [ ],
-              |  "items": [ ],
-              |  "production": [ ],
-              |  "languages": [ ],
-              |  "alternativeTitles": [ ],
-              |  "availableOnline": false,
-              |  "notes": [ ],
-              |  "images": [ ],
-              |  "type": "Work"
-              |}""".stripMargin
+            work => s"""
+              {
+                "id": "${work.state.canonicalId}",
+                "title": "${work.data.title.get}",
+                "identifiers": [ ${identifier(work.sourceIdentifier)} ],
+                "contributors": [ ],
+                "genres": [ ],
+                "subjects": [ ],
+                "items": [ ],
+                "production": [ ],
+                "alternativeTitles": [ ],
+                "availableOnline": false,
+                "notes": [ ],
+                "images": [ ],
+                "parts": [ ],
+                "partOf": [ ],
+                "precededBy": [ ],
+                "succeededBy": [ ],
+                "type": "Work"
+              }
+            """
           }
 
           actualJsonLines.sorted.zip(expectedJsonLines).foreach {
