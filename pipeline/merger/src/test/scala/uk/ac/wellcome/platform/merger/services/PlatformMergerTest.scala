@@ -283,8 +283,17 @@ class PlatformMergerTest
         )
       }
 
+    val expectedRedirectedMiro = Work.Redirected[Merged](
+      state = Merged(
+        sourceIdentifier = miroWork.sourceIdentifier,
+        modifiedTime = now,
+        numberOfSources = 1),
+      version = miroWork.version,
+      redirect = IdState.Identifiable(multipleItemsSierraWork.sourceIdentifier)
+    )
+
     result.mergedWorksWithTime(now) should contain theSameElementsAs Seq(
-      miroWork.transition[Merged]((Some(now), 1)),
+      expectedRedirectedMiro,
       expectedMergedWork)
   }
 
