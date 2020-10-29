@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.transformer.calm.periods
 
-sealed trait PeriodToken
+sealed trait PeriodToken extends Product with Serializable
 
 sealed trait ElementToken extends PeriodToken
 case class CENTURY(n: Int) extends ElementToken
@@ -14,6 +14,7 @@ case object PRESENT extends ElementToken
 case class SEASON(season: String) extends ElementToken
 case class LAWTERM(term: String) extends ElementToken
 case object SLASH extends ElementToken
+case object RANGESEPARATOR extends ElementToken
 
 sealed trait QualifierToken extends PeriodToken
 object QUALIFIER {
@@ -29,5 +30,4 @@ object QUALIFIER {
   case object FLORUIT extends QualifierToken
   case class ERA(era: String) extends QualifierToken
   case object GAPS extends QualifierToken
-  case object RANGESEPARATOR extends QualifierToken
 }
