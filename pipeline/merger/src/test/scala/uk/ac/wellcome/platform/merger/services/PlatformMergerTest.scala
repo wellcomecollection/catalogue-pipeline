@@ -71,9 +71,7 @@ class PlatformMergerTest
       )
       .format(Format.Pictures)
 
-  private val miroWork: Work.Visible[Source] = miroSourceWork(
-    sourceIdentifier = createNonHistoricalLibraryMiroSourceIdentifier
-  )
+  private val miroWork: Work.Visible[Source] = miroSourceWork()
 
   private val metsWork: Work.Invisible[Source] =
     metsSourceWork()
@@ -125,7 +123,7 @@ class PlatformMergerTest
   }
 
   it(
-    "merges a Sierra picture/digital image/3D object physical work with a non-historical-library Miro work") {
+    "merges a Sierra picture/digital image/3D object physical work with a Miro work") {
     val result = merger.merge(
       works = Seq(sierraPhysicalWork, miroWork)
     )
@@ -219,7 +217,7 @@ class PlatformMergerTest
   }
 
   it(
-    "merges a Sierra Sierra picture/digital image/3D object digital work with a non-historical-library Miro work") {
+    "merges a Sierra Sierra picture/digital image/3D object digital work with a Miro work") {
     val result = merger.merge(
       works = Seq(sierraDigitalWork, miroWork)
     )
@@ -283,8 +281,17 @@ class PlatformMergerTest
         )
       }
 
+    val expectedRedirectedMiro = Work.Redirected[Merged](
+      state = Merged(
+        sourceIdentifier = miroWork.sourceIdentifier,
+        modifiedTime = now,
+        numberOfSources = 1),
+      version = miroWork.version,
+      redirect = IdState.Identifiable(multipleItemsSierraWork.sourceIdentifier)
+    )
+
     result.mergedWorksWithTime(now) should contain theSameElementsAs Seq(
-      miroWork.transition[Merged]((Some(now), 1)),
+      expectedRedirectedMiro,
       expectedMergedWork)
   }
 
@@ -376,7 +383,7 @@ class PlatformMergerTest
   }
 
   it(
-    "merges a 3D object physical Sierra work with a digital Sierra work, a non-historical-library Miro work and a METS work") {
+    "merges a 3D object physical Sierra work with a digital Sierra work, a Miro work and a METS work") {
     val result = merger.merge(
       works = Seq(sierraPhysicalWork, sierraDigitisedWork, miroWork, metsWork)
     )
@@ -537,7 +544,7 @@ class PlatformMergerTest
     result.mergedImagesWithTime(now) shouldBe empty
   }
 
-  it("creates an image for a single non-historical-library Miro target") {
+  it("creates an image for a single Miro target") {
     val result = merger.merge(List(miroWork))
 
     result.mergedWorksWithTime(now) should have length 1

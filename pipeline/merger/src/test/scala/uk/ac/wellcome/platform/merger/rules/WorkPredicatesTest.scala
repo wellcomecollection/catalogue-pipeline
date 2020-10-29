@@ -18,10 +18,7 @@ class WorkPredicatesTest
     with Inspectors {
   val works: Seq[Work[Source]] = List(
     sierraSourceWork(),
-    miroSourceWork(
-      sourceIdentifier = createNonHistoricalLibraryMiroSourceIdentifier),
-    miroSourceWork(
-      sourceIdentifier = createHistoricalLibraryMiroSourceIdentifier),
+    miroSourceWork(),
     metsSourceWork().invisible(),
     metsSourceWork()
       .items((0 to 3).map { _ =>
@@ -94,14 +91,6 @@ class WorkPredicatesTest
       atLeast(1, work.data.items.flatMap(_.locations)) should matchPattern {
         case _: PhysicalLocationDeprecated =>
       }
-    }
-  }
-
-  it("selects historical library Miro works") {
-    val filtered = works.filter(WorkPredicates.historicalLibraryMiro)
-    filtered should not be empty
-    forAll(filtered) { work =>
-      work.sourceIdentifier.value should startWith regex "[LM]"
     }
   }
 

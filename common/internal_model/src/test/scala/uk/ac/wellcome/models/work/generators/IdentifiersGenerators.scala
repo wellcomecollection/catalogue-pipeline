@@ -83,16 +83,4 @@ trait IdentifiersGenerators extends RandomGenerators {
       value = randomAlphanumeric(length = 6),
       identifierType = IdentifierType("calm-record-id"),
     )
-
-  def createHistoricalLibraryMiroSourceIdentifier: SourceIdentifier =
-    createMiroSourceIdentifierWith(
-      value = randomMiroId(prefix = chooseFrom('L', 'M'))
-    )
-
-  def createNonHistoricalLibraryMiroSourceIdentifier: SourceIdentifier =
-    createMiroSourceIdentifierWith(
-      value = randomMiroId(prefix = chooseFrom(miroIdPrefixes.filter {
-        case 'L' | 'M' => false
-        case _         => true
-      }: _*)))
 }
