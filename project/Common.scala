@@ -20,6 +20,7 @@ object Common {
       "-Ypartial-unification",
       "-Xcheckinit"
     ),
+    updateOptions := updateOptions.value.withCachedResolution(true),
     parallelExecution in Test := false
   )
 }
