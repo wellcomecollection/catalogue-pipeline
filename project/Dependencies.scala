@@ -76,7 +76,7 @@ object ExternalDependencies {
     val aws = "1.11.504"
     val circe = "0.13.0"
     val elastic4s = "7.9.0"
-    val fastparse = "2.1.3"
+    val fastparse = "2.3.0"
     val swagger = "2.0.10"
     val mockito = "1.9.5"
     val scalatestplusMockito = "3.1.0.0"
@@ -88,6 +88,7 @@ object ExternalDependencies {
     val enumeratum = "1.5.13"
     val enumeratumScalacheck = "1.5.16"
     val jsoup = "1.13.1"
+    val parserCombinators = "1.1.2"
   }
   val enumeratumDependencies = Seq(
     "com.beachape" %% "enumeratum" % versions.enumeratum,
@@ -193,6 +194,10 @@ object ExternalDependencies {
   val jsoupDependencies = Seq(
     "org.jsoup" % "jsoup" % versions.jsoup
   )
+
+  val parserCombinatorsDependencies = Seq(
+    "org.scala-lang.modules" %% "scala-parser-combinators" % versions.parserCombinators
+  )
 }
 
 object CatalogueDependencies {
@@ -268,7 +273,8 @@ object CatalogueDependencies {
 
   val calmTransformerDependencies: Seq[ModuleID] =
     ExternalDependencies.apacheCommonsDependencies ++
-      ExternalDependencies.jsoupDependencies
+      ExternalDependencies.jsoupDependencies ++
+      ExternalDependencies.parseDependencies
 
   // METS adapter
 
