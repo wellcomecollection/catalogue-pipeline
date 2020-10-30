@@ -17,6 +17,9 @@ import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 //    -   "isbn" from MARC tag 020 subfield $a.  This is repeatable.
 //        https://www.loc.gov/marc/bibliographic/bd020.html
 //
+//    -   "issn" from MARC tag 022 ǂa.  This is repeatable.
+//        https://www.loc.gov/marc/bibliographic/bd022.html
+//
 //    Adding other identifiers is out-of-scope for now.
 //
 object SierraIdentifiers extends SierraDataTransformer with SierraQueryOps {
@@ -43,6 +46,19 @@ object SierraIdentifiers extends SierraDataTransformer with SierraQueryOps {
           )
         }
 
-    List(sierraIdentifier) ++ isbnIdentifiers
+    val issnIdentifiers: List[SourceIdentifier] =
+      bibData
+        .subfieldsWithTag("022" -> "a")
+        .contents
+        .distinct
+        .map { value =>
+          SourceIdentifier(
+            identifierType = IdentifierType("issn"),
+            ontologyType = "Work",
+            value = value
+          )
+        }
+
+    List(sierraIdentifier) ++ isbnIdentifiers ++ issnIdentifiers
   }
 }

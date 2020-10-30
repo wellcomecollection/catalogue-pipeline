@@ -107,4 +107,85 @@ class SierraIdentifiersTest
       isbnIdentifiers should have size 1
     }
   }
+
+  describe("finds ISSN identifiers from MARC 022 ǂa") {
+    it("a single identifier") {
+      val issn = "0305-3342"
+      val bibData = createSierraBibDataWith(
+        varFields = List(
+          createVarFieldWith(
+            marcTag = "022",
+            subfields = List(
+              MarcSubfield(tag = "a", content = issn)
+            )
+          )
+        )
+      )
+      val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
+      otherIdentifiers should contain(
+        SourceIdentifier(
+          identifierType = IdentifierType("issn"),
+          ontologyType = "Work",
+          value = issn
+        ))
+    }
+
+    it("multiple identifiers") {
+      val issn1 = "0305-3342"
+      val issn2 = "0019-2422"
+      val bibData = createSierraBibDataWith(
+        varFields = List(
+          createVarFieldWith(
+            marcTag = "022",
+            subfields = List(
+              MarcSubfield(tag = "a", content = issn1)
+            )
+          ),
+          createVarFieldWith(
+            marcTag = "022",
+            subfields = List(
+              MarcSubfield(tag = "a", content = issn2)
+            )
+          )
+        )
+      )
+      val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
+      otherIdentifiers should contain(
+        SourceIdentifier(
+          identifierType = IdentifierType("issn"),
+          ontologyType = "Work",
+          value = issn1
+        ))
+      otherIdentifiers should contain(
+        SourceIdentifier(
+          identifierType = IdentifierType("issn"),
+          ontologyType = "Work",
+          value = issn2
+        ))
+    }
+
+    it("deduplicates identifiers") {
+      val issn = "0305-3342"
+      val bibData = createSierraBibDataWith(
+        varFields = List(
+          createVarFieldWith(
+            marcTag = "022",
+            subfields = List(
+              MarcSubfield(tag = "a", content = issn)
+            )
+          ),
+          createVarFieldWith(
+            marcTag = "022",
+            subfields = List(
+              MarcSubfield(tag = "a", content = issn)
+            )
+          )
+        )
+      )
+      val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
+
+      val issnIdentifiers = otherIdentifiers.filter { _.identifierType.id == "issn" }
+      issnIdentifiers should have size 1
+    }
+  }
 }
