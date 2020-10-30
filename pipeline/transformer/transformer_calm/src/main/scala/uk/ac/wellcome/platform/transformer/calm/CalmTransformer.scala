@@ -160,11 +160,13 @@ object CalmTransformer
       case (key, idType) =>
         record
           .getList(key)
-          .map(id => SourceIdentifier(
-            identifierType = idType,
-            value = id,
-            ontologyType = "SourceIdentifier"
-          ))
+          .map(
+            id =>
+              SourceIdentifier(
+                identifierType = idType,
+                value = id,
+                ontologyType = "SourceIdentifier"
+            ))
     }
 
   def mergeCandidates(record: CalmRecord): List[MergeCandidate] =
