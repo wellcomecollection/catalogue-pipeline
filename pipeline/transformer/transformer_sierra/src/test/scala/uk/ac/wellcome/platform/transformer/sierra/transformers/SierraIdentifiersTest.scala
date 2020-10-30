@@ -28,11 +28,14 @@ class SierraIdentifiersTest
   }
 
   describe("finds ISBN identifiers from MARC 020 ǂa") {
+    // This example is taken from b1754201
+    val isbn10 = "159463078X"
+    val isbn13 = "9781594630781"
+
     it("a single identifier") {
-      val isbn = "1785783033"
       val bibData = createSierraBibDataWith(
         varFields = List(
-          createVarFieldWith(marcTag = "020", subfieldA = isbn)
+          createVarFieldWith(marcTag = "020", subfieldA = isbn10)
         )
       )
       val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
@@ -40,13 +43,11 @@ class SierraIdentifiersTest
         SourceIdentifier(
           identifierType = IdentifierType("isbn"),
           ontologyType = "Work",
-          value = isbn
+          value = isbn10
         ))
     }
 
     it("multiple identifiers") {
-      val isbn10 = "1473647649"
-      val isbn13 = "978-1473647640"
       val bibData = createSierraBibDataWith(
         varFields = List(
           createVarFieldWith(marcTag = "020", subfieldA = isbn10),
@@ -69,11 +70,10 @@ class SierraIdentifiersTest
     }
 
     it("deduplicates identifiers") {
-      val isbn = "1785783033"
       val bibData = createSierraBibDataWith(
         varFields = List(
-          createVarFieldWith(marcTag = "020", subfieldA = isbn),
-          createVarFieldWith(marcTag = "020", subfieldA = isbn)
+          createVarFieldWith(marcTag = "020", subfieldA = isbn10),
+          createVarFieldWith(marcTag = "020", subfieldA = isbn10)
         )
       )
       val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
