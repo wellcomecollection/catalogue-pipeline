@@ -7,7 +7,7 @@ import uk.ac.wellcome.platform.transformer.sierra.generators.{
   MarcGenerators,
   SierraDataGenerators
 }
-import uk.ac.wellcome.platform.transformer.sierra.source.MarcSubfield
+import uk.ac.wellcome.platform.transformer.sierra.source.{MarcSubfield, VarField}
 
 class SierraIdentifiersTest
     extends AnyFunSpec
@@ -32,12 +32,7 @@ class SierraIdentifiersTest
       val isbn = "1785783033"
       val bibData = createSierraBibDataWith(
         varFields = List(
-          createVarFieldWith(
-            marcTag = "020",
-            subfields = List(
-              MarcSubfield(tag = "a", content = isbn)
-            )
-          )
+          createVarFieldWith(marcTag = "020", subfieldA = isbn)
         )
       )
       val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
@@ -54,18 +49,8 @@ class SierraIdentifiersTest
       val isbn13 = "978-1473647640"
       val bibData = createSierraBibDataWith(
         varFields = List(
-          createVarFieldWith(
-            marcTag = "020",
-            subfields = List(
-              MarcSubfield(tag = "a", content = isbn10)
-            )
-          ),
-          createVarFieldWith(
-            marcTag = "020",
-            subfields = List(
-              MarcSubfield(tag = "a", content = isbn13)
-            )
-          )
+          createVarFieldWith(marcTag = "020", subfieldA = isbn10),
+          createVarFieldWith(marcTag = "020", subfieldA = isbn13)
         )
       )
       val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
@@ -87,18 +72,8 @@ class SierraIdentifiersTest
       val isbn = "1785783033"
       val bibData = createSierraBibDataWith(
         varFields = List(
-          createVarFieldWith(
-            marcTag = "020",
-            subfields = List(
-              MarcSubfield(tag = "a", content = isbn)
-            )
-          ),
-          createVarFieldWith(
-            marcTag = "020",
-            subfields = List(
-              MarcSubfield(tag = "a", content = isbn)
-            )
-          )
+          createVarFieldWith(marcTag = "020", subfieldA = isbn),
+          createVarFieldWith(marcTag = "020", subfieldA = isbn)
         )
       )
       val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
@@ -113,12 +88,7 @@ class SierraIdentifiersTest
       val issn = "0305-3342"
       val bibData = createSierraBibDataWith(
         varFields = List(
-          createVarFieldWith(
-            marcTag = "022",
-            subfields = List(
-              MarcSubfield(tag = "a", content = issn)
-            )
-          )
+          createVarFieldWith(marcTag = "022", subfieldA = issn)
         )
       )
       val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
@@ -135,18 +105,8 @@ class SierraIdentifiersTest
       val issn2 = "0019-2422"
       val bibData = createSierraBibDataWith(
         varFields = List(
-          createVarFieldWith(
-            marcTag = "022",
-            subfields = List(
-              MarcSubfield(tag = "a", content = issn1)
-            )
-          ),
-          createVarFieldWith(
-            marcTag = "022",
-            subfields = List(
-              MarcSubfield(tag = "a", content = issn2)
-            )
-          )
+          createVarFieldWith(marcTag = "022", subfieldA = issn1),
+          createVarFieldWith(marcTag = "022", subfieldA = issn2)
         )
       )
       val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
@@ -168,18 +128,8 @@ class SierraIdentifiersTest
       val issn = "0305-3342"
       val bibData = createSierraBibDataWith(
         varFields = List(
-          createVarFieldWith(
-            marcTag = "022",
-            subfields = List(
-              MarcSubfield(tag = "a", content = issn)
-            )
-          ),
-          createVarFieldWith(
-            marcTag = "022",
-            subfields = List(
-              MarcSubfield(tag = "a", content = issn)
-            )
-          )
+          createVarFieldWith(marcTag = "022", subfieldA = issn),
+          createVarFieldWith(marcTag = "022", subfieldA = issn)
         )
       )
       val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
@@ -194,12 +144,7 @@ class SierraIdentifiersTest
       val digcode = "digrcs"
       val bibData = createSierraBibDataWith(
         varFields = List(
-          createVarFieldWith(
-            marcTag = "759",
-            subfields = List(
-              MarcSubfield(tag = "a", content = digcode)
-            )
-          )
+          createVarFieldWith(marcTag = "759", subfieldA = digcode)
         )
       )
       val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
@@ -217,18 +162,8 @@ class SierraIdentifiersTest
       val digcode2 = "digukmhl"
       val bibData = createSierraBibDataWith(
         varFields = List(
-          createVarFieldWith(
-            marcTag = "759",
-            subfields = List(
-              MarcSubfield(tag = "a", content = digcode1)
-            )
-          ),
-          createVarFieldWith(
-            marcTag = "759",
-            subfields = List(
-              MarcSubfield(tag = "a", content = digcode2)
-            )
-          )
+          createVarFieldWith(marcTag = "759", subfieldA = digcode1),
+          createVarFieldWith(marcTag = "759", subfieldA = digcode2)
         )
       )
       val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
@@ -250,18 +185,8 @@ class SierraIdentifiersTest
       val digcode = "digrcs"
       val bibData = createSierraBibDataWith(
         varFields = List(
-          createVarFieldWith(
-            marcTag = "759",
-            subfields = List(
-              MarcSubfield(tag = "a", content = digcode)
-            )
-          ),
-          createVarFieldWith(
-            marcTag = "759",
-            subfields = List(
-              MarcSubfield(tag = "a", content = digcode)
-            )
-          )
+          createVarFieldWith(marcTag = "759", subfieldA = digcode),
+          createVarFieldWith(marcTag = "759", subfieldA = digcode)
         )
       )
       val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
@@ -273,21 +198,13 @@ class SierraIdentifiersTest
     it("skips values in MARC 759 which aren't digcodes") {
       val bibData = createSierraBibDataWith(
         varFields = List(
-          createVarFieldWith(
-            marcTag = "759",
-            subfields = List(
-              // Although this starts with the special string `dig`, the lack
-              // of any extra information makes it useless for identifying a
-              // digitisation project!
-              MarcSubfield(tag = "a", content = "dig")
-            )
-          ),
-          createVarFieldWith(
-            marcTag = "759",
-            subfields = List(
-              MarcSubfield(tag = "a", content = "notadigcode")
-            )
-          )
+          // Although this starts with the special string `dig`, the lack
+          // of any extra information makes it useless for identifying a
+          // digitisation project!
+          createVarFieldWith(marcTag = "759", subfieldA = "dig"),
+
+          // digcodes have to start with the special string `dig`
+          createVarFieldWith(marcTag = "759", subfieldA = "notadigcode")
         )
       )
 
@@ -304,12 +221,7 @@ class SierraIdentifiersTest
 
       val bibData = createSierraBibDataWith(
         varFields = List(
-          createVarFieldWith(
-            marcTag = "759",
-            subfields = List(
-              MarcSubfield(tag = "a", content = marcDigcode)
-            )
-          )
+          createVarFieldWith(marcTag = "759", subfieldA = marcDigcode)
         )
       )
       val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
@@ -325,18 +237,8 @@ class SierraIdentifiersTest
       val digcode = "digmoh"
       val bibData = createSierraBibDataWith(
         varFields = List(
-          createVarFieldWith(
-            marcTag = "759",
-            subfields = List(
-              MarcSubfield(tag = "a", content = digcode)
-            )
-          ),
-          createVarFieldWith(
-            marcTag = "759",
-            subfields = List(
-              MarcSubfield(tag = "a", content = s"$digcode(Channel)")
-            )
-          )
+          createVarFieldWith(marcTag = "759", subfieldA = digcode),
+          createVarFieldWith(marcTag = "759", subfieldA = s"$digcode(Channel)")
         )
       )
       val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
@@ -345,4 +247,12 @@ class SierraIdentifiersTest
       digcodeIdentifiers should have size 1
     }
   }
+
+  private def createVarFieldWith(marcTag: String, subfieldA: String): VarField =
+    createVarFieldWith(
+      marcTag = marcTag,
+      subfields = List(
+        MarcSubfield(tag = "a", content = subfieldA)
+      )
+    )
 }
