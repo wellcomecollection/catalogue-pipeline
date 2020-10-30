@@ -82,5 +82,6 @@ trait IdentifiersGenerators extends RandomGenerators {
     SourceIdentifier(
       value = randomAlphanumeric(length = 6),
       identifierType = IdentifierType("calm-record-id"),
+      ontologyType = "Work"
     )
 }
