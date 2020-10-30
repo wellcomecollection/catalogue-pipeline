@@ -21,7 +21,7 @@ class ElasticRetriever[T](client: ElasticClient, index: Index)(
     with Logging {
 
   final def lookupSingleId(id: String): Future[T] = {
-    debug(s"Looking up ID $id in index $index")
+    debug(s"Index $index: looking up ID $id")
     client
       .execute {
         get(index, id)
@@ -31,7 +31,7 @@ class ElasticRetriever[T](client: ElasticClient, index: Index)(
         case RequestSuccess(_, _, _, response) if !response.found =>
           warn(
             s"Asked to look up ID $id in index $index, got response $response")
-          Future.failed(new RetrieverNotFoundException(id))
+          Future.failed(RetrieverNotFoundException.id(id))
         case RequestSuccess(_, _, _, response) =>
           response.safeTo[T] match {
             case Success(item)  => Future.successful(item)
@@ -40,7 +40,39 @@ class ElasticRetriever[T](client: ElasticClient, index: Index)(
       }
   }
 
-  override def lookupMultipleIds(ids: Seq[String]): Future[Map[String, T]] =
-    Future.sequence(ids.map { lookupSingleId })
-      .map { documents => ids.zip(documents).toMap }
+  override def lookupMultipleIds(ids: Seq[String]): Future[Map[String, T]] = {
+    debug(s"Index $index: looking up multiple IDs $ids")
+
+    client
+      .execute {
+        multiget(ids.map { get(index, _) })
+      }
+      .flatMap {
+        case RequestSuccess(_, _, _, response) =>
+          val responses = ids.zip(response.docs).toMap
+
+          val missing = responses.filter { case (_, resp) => !resp.found }
+          val present = responses.filter { case (_, resp) => resp.found }
+
+          val decodedT = present.map { case (id, resp) => id -> resp.safeTo[T] }
+          val successes = decodedT.collect { case (id, Success(s)) => id -> s }
+          val failures = decodedT.collect { case (id, Failure(err)) => id -> err }
+
+          assert(successes.size + failures.size + missing.size == responses.size)
+
+          debug(s"Missing:   $missing")
+          debug(s"Successes: $successes")
+          debug(s"Failures:  $failures")
+
+          if (missing.nonEmpty) {
+            Future.failed(RetrieverNotFoundException.ids(missing.keys.toSeq))
+          } else if (failures.nonEmpty) {
+            Future.failed(new RuntimeException(s"Unable to decode some responses: $failures"))
+          } else {
+            Future.successful(successes)
+          }
+        case _ =>
+          Future.failed(new RuntimeException("BOOM!"))
+      }
+  }
 }

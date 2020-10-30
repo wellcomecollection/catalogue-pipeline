@@ -72,7 +72,7 @@ trait RetrieverTestCases[Context, T]
 
       whenReady(future.failed) { exc =>
         exc shouldBe a[RetrieverNotFoundException]
-        exc.getMessage shouldBe s"Nothing found with ID $missingId!"
+        exc.getMessage shouldBe s"Nothing found with ID(s) $missingId!"
       }
     }
   }
