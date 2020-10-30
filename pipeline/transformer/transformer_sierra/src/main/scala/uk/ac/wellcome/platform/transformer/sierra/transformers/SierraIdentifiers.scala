@@ -78,7 +78,6 @@ object SierraIdentifiers extends SierraDataTransformer with SierraQueryOps {
       bibData
         .subfieldsWithTag("759" -> "a")
         .contents
-        .distinct
 
     // Capture any string starting with `dig` followed by a non-zero number
     // of alphabet characters.  The digcode is only useful if it identifies
@@ -97,6 +96,7 @@ object SierraIdentifiers extends SierraDataTransformer with SierraQueryOps {
         }
 
     digcodeValues
+      .distinct
       .map { value =>
         SourceIdentifier(
           identifierType = IdentifierType("wellcome-digcode"),

@@ -317,5 +317,29 @@ class SierraIdentifiersTest
           value = parsedDigcode
         ))
     }
+
+    it("deduplicates based on the actual digcode") {
+      val digcode = "digmoh"
+      val bibData = createSierraBibDataWith(
+        varFields = List(
+          createVarFieldWith(
+            marcTag = "759",
+            subfields = List(
+              MarcSubfield(tag = "a", content = digcode)
+            )
+          ),
+          createVarFieldWith(
+            marcTag = "759",
+            subfields = List(
+              MarcSubfield(tag = "a", content = s"$digcode(Channel)")
+            )
+          )
+        )
+      )
+      val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
+
+      val digcodeIdentifiers = otherIdentifiers.filter { _.identifierType.id == "wellcome-digcode" }
+      digcodeIdentifiers should have size 1
+    }
   }
 }
