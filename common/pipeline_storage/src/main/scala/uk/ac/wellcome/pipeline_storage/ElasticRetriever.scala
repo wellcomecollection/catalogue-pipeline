@@ -39,4 +39,8 @@ class ElasticRetriever[T](client: ElasticClient, index: Index)(
           }
       }
   }
+
+  override def lookupMultipleIds(ids: Seq[String]): Future[Map[String, T]] =
+    Future.sequence(ids.map { lookupSingleId })
+      .map { documents => ids.zip(documents).toMap }
 }
