@@ -27,7 +27,8 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
         state = Source(
           SourceIdentifier(
             value = id,
-            identifierType = CalmIdentifierTypes.recordId
+            identifierType = CalmIdentifierTypes.recordId,
+            ontologyType = "SourceIdentifier"
           ),
           record.retrievedAt
         ),
@@ -44,10 +45,12 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
           otherIdentifiers = List(
             SourceIdentifier(
               value = "a/b/c",
-              identifierType = CalmIdentifierTypes.refNo),
+              identifierType = CalmIdentifierTypes.refNo,
+              ontologyType = "SourceIdentifier"),
             SourceIdentifier(
               value = "a.b.c",
-              identifierType = CalmIdentifierTypes.altRefNo),
+              identifierType = CalmIdentifierTypes.altRefNo,
+              ontologyType = "SourceIdentifier"),
           ),
           items = List(
             Item(
@@ -80,13 +83,16 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       List(
         SourceIdentifier(
           value = "a/b/c",
-          identifierType = CalmIdentifierTypes.refNo),
+          identifierType = CalmIdentifierTypes.refNo,
+          ontologyType = "SourceIdentifier"),
         SourceIdentifier(
           value = "a.b.c",
-          identifierType = CalmIdentifierTypes.altRefNo),
+          identifierType = CalmIdentifierTypes.altRefNo,
+          ontologyType = "SourceIdentifier"),
         SourceIdentifier(
           value = "b456",
-          identifierType = IdentifierType("sierra-system-number")),
+          identifierType = IdentifierType("sierra-system-number"),
+          ontologyType = "SourceIdentifier"),
       )
   }
 
@@ -487,7 +493,8 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
         state = Source(
           SourceIdentifier(
             value = id,
-            identifierType = CalmIdentifierTypes.recordId
+            identifierType = CalmIdentifierTypes.recordId,
+            ontologyType = "SourceIdentifier"
           ),
           record.retrievedAt
         ),
@@ -504,7 +511,8 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
           otherIdentifiers = List(
             SourceIdentifier(
               value = "AMSG/X/Y",
-              identifierType = CalmIdentifierTypes.refNo),
+              identifierType = CalmIdentifierTypes.refNo,
+              ontologyType = "SourceIdentifier"),
           ),
           items = List(
             Item(

@@ -148,6 +148,11 @@ object CalmTransformer
     SourceIdentifier(
       value = record.id,
       identifierType = CalmIdentifierTypes.recordId,
+      // Although this is a Work, we have previously created Calm-identified
+      // works with ontologyType "SourceIdentifier".  We need to keep using
+      // this ontologyType, or those works will be assigned new identifiers
+      // by the ID minter.
+      ontologyType = "SourceIdentifier"
     )
 
   def otherIdentifiers(record: CalmRecord): List[SourceIdentifier] =
@@ -155,7 +160,13 @@ object CalmTransformer
       case (key, idType) =>
         record
           .getList(key)
-          .map(id => SourceIdentifier(identifierType = idType, value = id))
+          .map(
+            id =>
+              SourceIdentifier(
+                identifierType = idType,
+                value = id,
+                ontologyType = "SourceIdentifier"
+            ))
     }
 
   def mergeCandidates(record: CalmRecord): List[MergeCandidate] =

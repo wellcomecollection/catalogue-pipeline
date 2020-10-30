@@ -20,7 +20,8 @@ class OtherIdentifiersRuleTest
   val nothingWork: Work.Visible[WorkState.Source] = sourceWork(
     sourceIdentifier = SourceIdentifier(
       identifierType = IdentifierType("fake", "fake"),
-      value = "fake"
+      value = "fake",
+      ontologyType = "Work"
     )
   )
 
