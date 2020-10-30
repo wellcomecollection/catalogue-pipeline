@@ -19,6 +19,9 @@ import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 //    -   "issn" from MARC tag 022 ǂa.  This is repeatable.
 //        https://www.loc.gov/marc/bibliographic/bd022.html
 //
+//    -   "digcode" from MARC tag 759 ǂa.  This is repeatable.
+//        Note: MARC 759 is not assigned by the Library of Congress.
+//
 object SierraIdentifiers extends SierraDataTransformer with SierraQueryOps {
 
   type Output = List[SourceIdentifier]
@@ -30,7 +33,7 @@ object SierraIdentifiers extends SierraDataTransformer with SierraQueryOps {
       value = bibId.withoutCheckDigit
     )
 
-    List(sierraIdentifier) ++ getIsbnIdentifiers(bibData) ++ getIssnIdentifiers(bibData)
+    List(sierraIdentifier) ++ getIsbnIdentifiers(bibData) ++ getIssnIdentifiers(bibData) ++ getDigcodes(bibData)
   }
 
   // Find ISBN (International Serial Book Number) identifiers from MARC 020 ǂa.
@@ -60,4 +63,30 @@ object SierraIdentifiers extends SierraDataTransformer with SierraQueryOps {
           value = value
         )
       }
+
+  // Find the digcodes from MARC 759 ǂa.
+  //
+  // A digcode is a Wellcome-specific identifier that identifies the
+  // digitisation project under which the item was digitised.  These are
+  // used by staff to quickly locate, for example, all the MOH reports or
+  // everything digitised from a partner institution.
+  //
+  // The value of the digcode should only be the contiguous alphabetic
+  // string that starts with `dig`.
+  private def getDigcodes(bibData: SierraBibData): List[SourceIdentifier] = {
+    val marcValues =
+      bibData
+        .subfieldsWithTag("759" -> "a")
+        .contents
+
+    marcValues
+      .distinct
+      .map { value =>
+        SourceIdentifier(
+          identifierType = IdentifierType("wellcome-digcode"),
+          ontologyType = "Work",
+          value = value
+        )
+      }
+  }
 }

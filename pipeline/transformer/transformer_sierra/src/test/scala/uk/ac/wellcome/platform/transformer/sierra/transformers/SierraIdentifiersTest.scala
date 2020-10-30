@@ -188,4 +188,85 @@ class SierraIdentifiersTest
       issnIdentifiers should have size 1
     }
   }
+
+  describe("finds digcodes from MARC 759 ǂa") {
+    it("a single identifier") {
+      val digcode = "digrcs"
+      val bibData = createSierraBibDataWith(
+        varFields = List(
+          createVarFieldWith(
+            marcTag = "759",
+            subfields = List(
+              MarcSubfield(tag = "a", content = digcode)
+            )
+          )
+        )
+      )
+      val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
+      otherIdentifiers should contain(
+        SourceIdentifier(
+          identifierType = IdentifierType("wellcome-digcode"),
+          ontologyType = "Work",
+          value = digcode
+        ))
+    }
+
+    it("multiple identifiers") {
+      // This example is based on b22474262
+      val digcode1 = "digrcs"
+      val digcode2 = "digukmhl"
+      val bibData = createSierraBibDataWith(
+        varFields = List(
+          createVarFieldWith(
+            marcTag = "759",
+            subfields = List(
+              MarcSubfield(tag = "a", content = digcode1)
+            )
+          ),
+          createVarFieldWith(
+            marcTag = "759",
+            subfields = List(
+              MarcSubfield(tag = "a", content = digcode2)
+            )
+          )
+        )
+      )
+      val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
+      otherIdentifiers should contain(
+        SourceIdentifier(
+          identifierType = IdentifierType("wellcome-digcode"),
+          ontologyType = "Work",
+          value = digcode1
+        ))
+      otherIdentifiers should contain(
+        SourceIdentifier(
+          identifierType = IdentifierType("wellcome-digcode"),
+          ontologyType = "Work",
+          value = digcode2
+        ))
+    }
+
+    it("deduplicates identifiers") {
+      val digcode = "digrcs"
+      val bibData = createSierraBibDataWith(
+        varFields = List(
+          createVarFieldWith(
+            marcTag = "759",
+            subfields = List(
+              MarcSubfield(tag = "a", content = digcode)
+            )
+          ),
+          createVarFieldWith(
+            marcTag = "759",
+            subfields = List(
+              MarcSubfield(tag = "a", content = digcode)
+            )
+          )
+        )
+      )
+      val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
+
+      val digcodeIdentifiers = otherIdentifiers.filter { _.identifierType.id == "wellcome-digcode" }
+      digcodeIdentifiers should have size 1
+    }
 }
