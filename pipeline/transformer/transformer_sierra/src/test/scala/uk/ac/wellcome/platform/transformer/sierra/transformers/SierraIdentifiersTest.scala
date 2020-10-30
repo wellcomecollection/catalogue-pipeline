@@ -270,6 +270,30 @@ class SierraIdentifiersTest
       digcodeIdentifiers should have size 1
     }
 
+    it("skips values in MARC 759 which aren't digcodes") {
+      val bibData = createSierraBibDataWith(
+        varFields = List(
+          createVarFieldWith(
+            marcTag = "759",
+            subfields = List(
+              MarcSubfield(tag = "a", content = "dig")
+            )
+          ),
+          createVarFieldWith(
+            marcTag = "759",
+            subfields = List(
+              MarcSubfield(tag = "a", content = "notadigcode")
+            )
+          )
+        )
+      )
+
+      val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
+
+      val digcodeIdentifiers = otherIdentifiers.filter { _.identifierType.id == "wellcome-digcode" }
+      digcodeIdentifiers shouldBe empty
+    }
+
     it("only captures the continuous alphabetic string starting `dig`") {
       // This example is based on b29500783
       val marcDigcode = "digmoh(Channel)"
