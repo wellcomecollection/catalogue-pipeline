@@ -66,7 +66,9 @@ class ElasticRetrieverTest
     )
 
     withContext(documents = Seq(documentWithSlash)) { implicit context =>
-      val future = withRetriever { _.lookupSingleId(documentWithSlash.canonicalId) }
+      val future = withRetriever {
+        _.lookupSingleId(documentWithSlash.canonicalId)
+      }
 
       whenReady(future) {
         _ shouldBe documentWithSlash
@@ -100,7 +102,8 @@ class ElasticRetrieverTest
           }
         }
 
-        val retriever = new ElasticRetriever[Country](elasticClient, index = index)
+        val retriever =
+          new ElasticRetriever[Country](elasticClient, index = index)
 
         whenReady(retriever.lookupSingleId(person.id).failed) {
           _ shouldBe a[DecodingFailure]
@@ -125,11 +128,14 @@ class ElasticRetrieverTest
           }
         }
 
-        val retriever = new ElasticRetriever[Country](elasticClient, index = index)
+        val retriever =
+          new ElasticRetriever[Country](elasticClient, index = index)
 
-        whenReady(retriever.lookupMultipleIds(Seq(person.id, country.id)).failed) { err =>
-          err shouldBe a[RuntimeException]
-          err.getMessage should startWith("Unable to decode some responses:")
+        whenReady(
+          retriever.lookupMultipleIds(Seq(person.id, country.id)).failed) {
+          err =>
+            err shouldBe a[RuntimeException]
+            err.getMessage should startWith("Unable to decode some responses:")
         }
       }
     }

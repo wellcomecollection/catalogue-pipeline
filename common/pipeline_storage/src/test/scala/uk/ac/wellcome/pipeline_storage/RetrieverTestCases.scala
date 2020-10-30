@@ -47,8 +47,12 @@ trait RetrieverTestCases[Context, T]
   }
 
   it("retrieves multiple documents") {
-    val documents = (1 to 3).map { _ => createT }
-    val otherDocuments = (1 to 3).map { _ => createT }
+    val documents = (1 to 3).map { _ =>
+      createT
+    }
+    val otherDocuments = (1 to 3).map { _ =>
+      createT
+    }
 
     val idsToLookup = documents.map { id.canonicalId }
 
@@ -56,13 +60,17 @@ trait RetrieverTestCases[Context, T]
       val future = withRetriever { _.lookupMultipleIds(idsToLookup) }
 
       whenReady(future) { result =>
-        result shouldBe documents.map { doc => id.canonicalId(doc) -> doc }.toMap
+        result shouldBe documents.map { doc =>
+          id.canonicalId(doc) -> doc
+        }.toMap
       }
     }
   }
 
   it("throws if it can't find all the requested documents") {
-    val documents = (1 to 3).map { _ => createT }
+    val documents = (1 to 3).map { _ =>
+      createT
+    }
     val missingId = id.canonicalId(createT)
 
     val idsToLookup = documents.map { id.canonicalId } :+ missingId

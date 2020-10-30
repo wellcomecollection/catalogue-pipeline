@@ -54,11 +54,14 @@ class ElasticRetriever[T](client: ElasticClient, index: Index)(
           val missing = responses.filter { case (_, resp) => !resp.found }
           val present = responses.filter { case (_, resp) => resp.found }
 
-          val decodedT = present.map { case (id, resp) => id -> resp.safeTo[T] }
+          val decodedT = present.map { case (id, resp)             => id -> resp.safeTo[T] }
           val successes = decodedT.collect { case (id, Success(s)) => id -> s }
-          val failures = decodedT.collect { case (id, Failure(err)) => id -> err }
+          val failures = decodedT.collect {
+            case (id, Failure(err)) => id -> err
+          }
 
-          assert(successes.size + failures.size + missing.size == responses.size)
+          assert(
+            successes.size + failures.size + missing.size == responses.size)
 
           debug(s"Missing:   $missing")
           debug(s"Successes: $successes")
@@ -67,7 +70,9 @@ class ElasticRetriever[T](client: ElasticClient, index: Index)(
           if (missing.nonEmpty) {
             Future.failed(RetrieverNotFoundException.ids(missing.keys.toSeq))
           } else if (failures.nonEmpty) {
-            Future.failed(new RuntimeException(s"Unable to decode some responses: $failures"))
+            Future.failed(
+              new RuntimeException(
+                s"Unable to decode some responses: $failures"))
           } else {
             Future.successful(successes)
           }

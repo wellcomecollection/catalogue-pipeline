@@ -12,10 +12,12 @@ class MemoryRetriever[T](index: Map[String, T] = Map.empty)
     }
 
   override def lookupMultipleIds(ids: Seq[String]): Future[Map[String, T]] = {
-    val results = ids.map { id => id -> index.get(id) }
+    val results = ids.map { id =>
+      id -> index.get(id)
+    }
 
     val successes = results.collect { case (id, Some(t)) => id -> t }
-    val failures = results.collect { case (id, None) => id }
+    val failures = results.collect { case (id, None)     => id }
 
     if (failures.isEmpty) {
       Future.successful(successes.toMap)
