@@ -26,18 +26,21 @@ object SierraIdentifiers extends SierraDataTransformer with SierraQueryOps {
 
   type Output = List[SourceIdentifier]
 
-  def apply(bibId: SierraBibNumber, bibData: SierraBibData): List[SourceIdentifier] = {
+  def apply(bibId: SierraBibNumber,
+            bibData: SierraBibData): List[SourceIdentifier] = {
     val sierraIdentifier = SourceIdentifier(
       identifierType = IdentifierType("sierra-identifier"),
       ontologyType = "Work",
       value = bibId.withoutCheckDigit
     )
 
-    List(sierraIdentifier) ++ getIsbnIdentifiers(bibData) ++ getIssnIdentifiers(bibData) ++ getDigcodes(bibData)
+    List(sierraIdentifier) ++ getIsbnIdentifiers(bibData) ++ getIssnIdentifiers(
+      bibData) ++ getDigcodes(bibData)
   }
 
   // Find ISBN (International Serial Book Number) identifiers from MARC 020 ǂa.
-  private def getIsbnIdentifiers(bibData: SierraBibData): List[SourceIdentifier] =
+  private def getIsbnIdentifiers(
+    bibData: SierraBibData): List[SourceIdentifier] =
     bibData
       .subfieldsWithTag("020" -> "a")
       .contents
@@ -51,7 +54,8 @@ object SierraIdentifiers extends SierraDataTransformer with SierraQueryOps {
       }
 
   // Find ISSN (International Standard Serial Number) identifiers from MARC 022 ǂa.
-  private def getIssnIdentifiers(bibData: SierraBibData): List[SourceIdentifier] =
+  private def getIssnIdentifiers(
+    bibData: SierraBibData): List[SourceIdentifier] =
     bibData
       .subfieldsWithTag("022" -> "a")
       .contents
@@ -95,8 +99,7 @@ object SierraIdentifiers extends SierraDataTransformer with SierraQueryOps {
           case digcodeRegex(d) => d
         }
 
-    digcodeValues
-      .distinct
+    digcodeValues.distinct
       .map { value =>
         SourceIdentifier(
           identifierType = IdentifierType("wellcome-digcode"),

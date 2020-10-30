@@ -7,7 +7,10 @@ import uk.ac.wellcome.platform.transformer.sierra.generators.{
   MarcGenerators,
   SierraDataGenerators
 }
-import uk.ac.wellcome.platform.transformer.sierra.source.{MarcSubfield, VarField}
+import uk.ac.wellcome.platform.transformer.sierra.source.{
+  MarcSubfield,
+  VarField
+}
 
 class SierraIdentifiersTest
     extends AnyFunSpec
@@ -78,7 +81,9 @@ class SierraIdentifiersTest
       )
       val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
 
-      val isbnIdentifiers = otherIdentifiers.filter { _.identifierType.id == "isbn" }
+      val isbnIdentifiers = otherIdentifiers.filter {
+        _.identifierType.id == "isbn"
+      }
       isbnIdentifiers should have size 1
     }
   }
@@ -134,7 +139,9 @@ class SierraIdentifiersTest
       )
       val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
 
-      val issnIdentifiers = otherIdentifiers.filter { _.identifierType.id == "issn" }
+      val issnIdentifiers = otherIdentifiers.filter {
+        _.identifierType.id == "issn"
+      }
       issnIdentifiers should have size 1
     }
   }
@@ -191,7 +198,9 @@ class SierraIdentifiersTest
       )
       val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
 
-      val digcodeIdentifiers = otherIdentifiers.filter { _.identifierType.id == "wellcome-digcode" }
+      val digcodeIdentifiers = otherIdentifiers.filter {
+        _.identifierType.id == "wellcome-digcode"
+      }
       digcodeIdentifiers should have size 1
     }
 
@@ -202,7 +211,6 @@ class SierraIdentifiersTest
           // of any extra information makes it useless for identifying a
           // digitisation project!
           createVarFieldWith(marcTag = "759", subfieldA = "dig"),
-
           // digcodes have to start with the special string `dig`
           createVarFieldWith(marcTag = "759", subfieldA = "notadigcode")
         )
@@ -210,7 +218,9 @@ class SierraIdentifiersTest
 
       val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
 
-      val digcodeIdentifiers = otherIdentifiers.filter { _.identifierType.id == "wellcome-digcode" }
+      val digcodeIdentifiers = otherIdentifiers.filter {
+        _.identifierType.id == "wellcome-digcode"
+      }
       digcodeIdentifiers shouldBe empty
     }
 
@@ -243,7 +253,9 @@ class SierraIdentifiersTest
       )
       val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
 
-      val digcodeIdentifiers = otherIdentifiers.filter { _.identifierType.id == "wellcome-digcode" }
+      val digcodeIdentifiers = otherIdentifiers.filter {
+        _.identifierType.id == "wellcome-digcode"
+      }
       digcodeIdentifiers should have size 1
     }
   }
