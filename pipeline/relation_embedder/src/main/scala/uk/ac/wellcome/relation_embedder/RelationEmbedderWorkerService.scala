@@ -35,7 +35,7 @@ class RelationEmbedderWorkerService[MsgDestination](
 
   def processMessage(message: NotificationMessage): Future[Unit] =
     Source
-      .future(workRetriever(message.body))
+      .future(workRetriever.lookupSingleId(message.body))
       .mapAsync(1) { work =>
         relationsService
           .getOtherAffectedWorks(work)
@@ -43,7 +43,7 @@ class RelationEmbedderWorkerService[MsgDestination](
       }
       .mapConcat(identity)
       .mapAsync(2) { sourceIdentifier =>
-        workRetriever(sourceIdentifier.toString)
+        workRetriever.lookupSingleId(sourceIdentifier.toString)
       }
       .mapAsync(2) { work =>
         relationsService.getRelations(work).map(work.transition[Denormalised])

@@ -20,7 +20,7 @@ class ElasticRetriever[T](client: ElasticClient, index: Index)(
     extends Retriever[T]
     with Logging {
 
-  final def apply(id: String): Future[T] = {
+  final def lookupSingleId(id: String): Future[T] = {
     debug(s"Looking up ID $id in index $index")
     client
       .execute {

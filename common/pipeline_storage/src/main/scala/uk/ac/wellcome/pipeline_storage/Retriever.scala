@@ -9,5 +9,5 @@ trait Retriever[T] {
     * @param id The id of the document
     * @return A future containing the document
     */
-  def apply(id: String): Future[T]
+  def lookupSingleId(id: String): Future[T]
 }

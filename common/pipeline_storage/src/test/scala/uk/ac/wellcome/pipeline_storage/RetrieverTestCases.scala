@@ -23,7 +23,7 @@ trait RetrieverTestCases[Context, T]
     val t = createT
 
     withContext(documents = Seq(t)) { implicit context =>
-      val future = withRetriever { _.apply(id.canonicalId(t)) }
+      val future = withRetriever { _.lookupSingleId(id.canonicalId(t)) }
 
       whenReady(future) {
         _ shouldBe t
@@ -37,7 +37,7 @@ trait RetrieverTestCases[Context, T]
     val someOtherDocument = createT
 
     withContext(documents = Seq(someOtherDocument)) { implicit context =>
-      val future = withRetriever { _.apply(missingId) }
+      val future = withRetriever { _.lookupSingleId(missingId) }
 
       whenReady(future.failed) { exc =>
         exc shouldBe a[RetrieverNotFoundException]

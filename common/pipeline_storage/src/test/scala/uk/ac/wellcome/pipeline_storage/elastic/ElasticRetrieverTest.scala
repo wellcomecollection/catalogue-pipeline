@@ -63,7 +63,7 @@ class ElasticRetrieverTest
     )
 
     withContext(documents = Seq(documentWithSlash)) { implicit context =>
-      val future = withRetriever { _.apply(documentWithSlash.canonicalId) }
+      val future = withRetriever { _.lookupSingleId(documentWithSlash.canonicalId) }
 
       whenReady(future) {
         _ shouldBe documentWithSlash
