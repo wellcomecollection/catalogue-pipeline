@@ -82,5 +82,29 @@ class SierraIdentifiersTest
           value = isbn13
         ))
     }
+
+    it("deduplicates identifiers") {
+      val isbn = "1785783033"
+      val bibData = createSierraBibDataWith(
+        varFields = List(
+          createVarFieldWith(
+            marcTag = "020",
+            subfields = List(
+              MarcSubfield(tag = "a", content = isbn)
+            )
+          ),
+          createVarFieldWith(
+            marcTag = "020",
+            subfields = List(
+              MarcSubfield(tag = "a", content = isbn)
+            )
+          )
+        )
+      )
+      val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
+
+      val isbnIdentifiers = otherIdentifiers.filter { _.identifierType.id == "isbn" }
+      isbnIdentifiers should have size 1
+    }
   }
 }

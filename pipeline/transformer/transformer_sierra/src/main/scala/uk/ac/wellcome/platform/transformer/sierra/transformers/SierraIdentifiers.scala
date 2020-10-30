@@ -34,6 +34,7 @@ object SierraIdentifiers extends SierraDataTransformer with SierraQueryOps {
       bibData
         .subfieldsWithTag("020" -> "a")
         .contents
+        .distinct
         .map { value =>
           SourceIdentifier(
             identifierType = IdentifierType("isbn"),
