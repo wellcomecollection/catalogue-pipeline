@@ -78,9 +78,25 @@ object SierraIdentifiers extends SierraDataTransformer with SierraQueryOps {
       bibData
         .subfieldsWithTag("759" -> "a")
         .contents
+        .distinct
 
-    marcValues
-      .distinct
+    // Capture any string starting with `dig` followed by a non-zero number
+    // of alphabet characters.  The digcode is only useful if it identifies
+    // a digitisation project, hence requiring a non-empty suffix.
+    //
+    // We match any number of characters after the alphabetic string, so the
+    // pattern match below captures (but discards) extra data.
+    //
+    // e.g. `digmoh(Channel)` becomes `digmoh`
+    val digcodeRegex = "^(dig[a-z]+).*$".r
+
+    val digcodeValues =
+      marcValues
+        .collect {
+          case digcodeRegex(d) => d
+        }
+
+    digcodeValues
       .map { value =>
         SourceIdentifier(
           identifierType = IdentifierType("wellcome-digcode"),

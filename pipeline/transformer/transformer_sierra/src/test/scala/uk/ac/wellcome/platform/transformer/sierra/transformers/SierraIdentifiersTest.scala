@@ -269,4 +269,29 @@ class SierraIdentifiersTest
       val digcodeIdentifiers = otherIdentifiers.filter { _.identifierType.id == "wellcome-digcode" }
       digcodeIdentifiers should have size 1
     }
+
+    it("only captures the continuous alphabetic string starting `dig`") {
+      // This example is based on b29500783
+      val marcDigcode = "digmoh(Channel)"
+      val parsedDigcode = "digmoh"
+
+      val bibData = createSierraBibDataWith(
+        varFields = List(
+          createVarFieldWith(
+            marcTag = "759",
+            subfields = List(
+              MarcSubfield(tag = "a", content = marcDigcode)
+            )
+          )
+        )
+      )
+      val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
+      otherIdentifiers should contain(
+        SourceIdentifier(
+          identifierType = IdentifierType("wellcome-digcode"),
+          ontologyType = "Work",
+          value = parsedDigcode
+        ))
+    }
+  }
 }
