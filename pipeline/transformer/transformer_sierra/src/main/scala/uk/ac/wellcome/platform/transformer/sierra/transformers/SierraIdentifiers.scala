@@ -19,7 +19,7 @@ import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 //    -   "issn" from MARC tag 022 ǂa.  This is repeatable.
 //        https://www.loc.gov/marc/bibliographic/bd022.html
 //
-//    -   "digcode" from MARC tag 759 ǂa.  This is repeatable.
+//    -   "wellcome-digcode" from MARC tag 759 ǂa.  This is repeatable.
 //        Note: MARC 759 is not assigned by the Library of Congress.
 //
 object SierraIdentifiers extends SierraDataTransformer with SierraQueryOps {

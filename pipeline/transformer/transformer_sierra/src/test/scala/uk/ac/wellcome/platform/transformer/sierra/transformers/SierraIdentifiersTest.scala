@@ -276,6 +276,9 @@ class SierraIdentifiersTest
           createVarFieldWith(
             marcTag = "759",
             subfields = List(
+              // Although this starts with the special string `dig`, the lack
+              // of any extra information makes it useless for identifying a
+              // digitisation project!
               MarcSubfield(tag = "a", content = "dig")
             )
           ),
