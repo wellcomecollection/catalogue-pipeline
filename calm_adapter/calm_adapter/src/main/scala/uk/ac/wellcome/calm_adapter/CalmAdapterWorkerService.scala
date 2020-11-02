@@ -74,7 +74,8 @@ class CalmAdapterWorkerService[Destination](
     Flow[(Context, CalmQuery)]
       .mapAsync(concurrentWindows) {
         case (ctx, query) =>
-          info(s"Ingesting all Calm records for query: ${query.queryExpression}")
+          info(
+            s"Ingesting all Calm records for query: ${query.queryExpression}")
           calmRetriever(query)
             .map(calmStore.putRecord)
             .via(publishKey)
@@ -107,7 +108,9 @@ class CalmAdapterWorkerService[Destination](
                             query: CalmQuery): Result[Unit] = {
     val errs = results.collect { case Left(err) => err }.toList
     if (errs.nonEmpty)
-      Left(new Exception(s"Errors processing query: ${query.queryExpression}: $errs"))
+      Left(
+        new Exception(
+          s"Errors processing query: ${query.queryExpression}: $errs"))
     else
       Right(())
   }
