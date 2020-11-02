@@ -52,7 +52,7 @@ class CalmAdapterWorkerServiceTest
 
     withCalmAdapterWorkerService(retriever, store, messageSender) {
       case (_, QueuePair(queue, dlq)) =>
-        sendNotificationToSQS(queue, CalmWindow(queryDate))
+        sendNotificationToSQS[CalmQuery](queue, CalmQuery.ModifiedDate(queryDate))
         eventually {
           store.entries shouldBe Map(
             Version("A", 0) -> recordA,
@@ -83,7 +83,7 @@ class CalmAdapterWorkerServiceTest
 
     withCalmAdapterWorkerService(retriever, store, messageSender) {
       case (_, QueuePair(queue, dlq)) =>
-        sendNotificationToSQS(queue, CalmWindow(queryDate))
+        sendNotificationToSQS[CalmQuery](queue, CalmQuery.ModifiedDate(queryDate))
         Thread.sleep(1500)
         store.entries shouldBe Map.empty
         assertQueueEmpty(queue)
@@ -119,7 +119,7 @@ class CalmAdapterWorkerServiceTest
 
     withCalmAdapterWorkerService(retriever, messageSender = brokenMessageSender) {
       case (_, QueuePair(queue, dlq)) =>
-        sendNotificationToSQS(queue, CalmWindow(queryDate))
+        sendNotificationToSQS[CalmQuery](queue, CalmQuery.ModifiedDate(queryDate))
         Thread.sleep(2000)
         assertQueueEmpty(queue)
         assertQueueHasSize(dlq, size = 1)
