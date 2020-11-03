@@ -9,7 +9,7 @@ import boto3
 
 from wellcome_aws_utils.lambda_utils import log_on_error
 
-from window_generator import WindowGenerator
+from window_generator import WindowGenerator, CalmQuery, created_or_modified_date_range
 
 
 @log_on_error
@@ -20,7 +20,14 @@ def main(event=None, _ctxt=None):
     start = (datetime.now() - timedelta(hours=crossover_hours)).date()
     end = date.today()
 
+    queries = created_or_modified_date_range(start, end)
+
+    # At the beginning of the day lets also check for Calm records without
+    # either created or modified dates.
+    if start != end:
+        queries = [CalmQuery.empty_created_and_modified_date(), *queries]
+
     sns_client = boto3.client("sns")
 
     print(f"topic_arn={topic_arn}, start={start}, end={end}")
-    WindowGenerator(sns_client, topic_arn, start, end).run()
+    WindowGenerator(sns_client, topic_arn, queries).run()
