@@ -1,22 +1,16 @@
 package uk.ac.wellcome.relation_embedder
 
 import scala.concurrent.{ExecutionContext, Future}
-
 import com.sksamuel.elastic4s.{ElasticClient, ElasticError, Index, Response}
-import com.sksamuel.elastic4s.requests.searches.{
-  MultiSearchRequest,
-  MultiSearchResponse,
-  SearchRequest,
-  SearchResponse
-}
+import com.sksamuel.elastic4s.requests.searches.{MultiSearchRequest, MultiSearchResponse, SearchRequest, SearchResponse}
 import com.sksamuel.elastic4s.requests.searches.SearchHit
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.circe._
-
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.internal.result._
 import uk.ac.wellcome.models.Implicits._
 import WorkState.Merged
+import grizzled.slf4j.Logging
 
 trait RelationsService {
 
@@ -40,14 +34,16 @@ trait RelationsService {
 
 class PathQueryRelationsService(elasticClient: ElasticClient, index: Index)(
   implicit ec: ExecutionContext)
-    extends RelationsService {
+    extends RelationsService with Logging {
 
   def getOtherAffectedWorks(
     work: Work[Merged]): Future[List[SourceIdentifier]] =
     work match {
       case work: Work.Visible[Merged] =>
         work.data.collectionPath match {
-          case None => Future.successful(Nil)
+          case None =>
+            debug(s"work ${work.id} does not belong to an archive, skipping getOtherAffectedWorks.")
+            Future.successful(Nil)
           case Some(CollectionPath(path, _, _)) =>
             executeSearchRequest(
               RelationsRequestBuilder(index, path).otherAffectedWorksRequest
@@ -74,7 +70,9 @@ class PathQueryRelationsService(elasticClient: ElasticClient, index: Index)(
     work match {
       case work: Work.Visible[Merged] =>
         work.data.collectionPath match {
-          case None => Future.successful(Relations.none)
+          case None =>
+            debug(s"work ${work.id} does not belong to an archive, skipping getRelations.")
+            Future.successful(Relations.none)
           case Some(CollectionPath(path, _, _)) =>
             executeMultiSearchRequest(
               RelationsRequestBuilder(index, path).relationsRequest
