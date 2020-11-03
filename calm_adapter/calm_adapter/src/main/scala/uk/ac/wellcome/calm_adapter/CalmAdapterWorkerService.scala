@@ -1,7 +1,5 @@
 package uk.ac.wellcome.calm_adapter
 
-import java.time.LocalDate
-
 import akka.Done
 import akka.stream.Materializer
 import akka.stream.scaladsl._
@@ -17,8 +15,6 @@ import uk.ac.wellcome.storage.Version
 import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.{ExecutionContext, Future}
-
-case class CalmWindow(date: LocalDate)
 
 /** Processes SQS messages consisting of a daily window, and publishes any CALM
   * records to the transformer that have been modified within this window.
@@ -66,7 +62,7 @@ class CalmAdapterWorkerService[Destination](
     Flow[(SQSMessage, NotificationMessage)]
       .map {
         case (msg, NotificationMessage(body)) =>
-          (Context(msg), fromJson[CalmWindow](body).toEither)
+          (Context(msg), fromJson[CalmQuery](body).toEither)
       }
       .via(catchErrors)
 
@@ -75,16 +71,17 @@ class CalmAdapterWorkerService[Destination](
     * one delete action per message received.
     */
   def processWindow =
-    Flow[(Context, CalmWindow)]
+    Flow[(Context, CalmQuery)]
       .mapAsync(concurrentWindows) {
-        case (ctx, CalmWindow(date)) =>
-          info(s"Ingesting all Calm records modified on $date")
-          calmRetriever(CalmQuery.ModifiedDate(date))
+        case (ctx, query) =>
+          info(
+            s"Ingesting all Calm records for query: ${query.queryExpression}")
+          calmRetriever(query)
             .map(calmStore.putRecord)
             .via(publishKey)
             .via(updatePublished)
             .runWith(Sink.seq)
-            .map(checkResultsForErrors(_, date))
+            .map(checkResultsForErrors(_, query))
             .map((ctx, _))
       }
       .via(catchErrors)
@@ -108,10 +105,12 @@ class CalmAdapterWorkerService[Destination](
       }
 
   def checkResultsForErrors(results: Seq[Result[_]],
-                            date: LocalDate): Result[Unit] = {
+                            query: CalmQuery): Result[Unit] = {
     val errs = results.collect { case Left(err) => err }.toList
     if (errs.nonEmpty)
-      Left(new Exception(s"Errors processing window $date: $errs"))
+      Left(
+        new Exception(
+          s"Errors processing query: ${query.queryExpression}: $errs"))
     else
       Right(())
   }
