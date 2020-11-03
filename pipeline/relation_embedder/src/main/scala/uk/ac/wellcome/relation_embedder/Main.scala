@@ -37,7 +37,8 @@ object Main extends WellcomeTypesafeApp {
         esClient,
         denormalisedIndex,
         DenormalisedWorkIndexConfig),
-      relationsService = new PathQueryRelationsService(esClient, mergedIndex)
+      relationsService = new PathQueryRelationsService(esClient, mergedIndex),
+      multiGetWorks = config.getIntOption("es.works.multiget").getOrElse(250)
     )
   }
 }

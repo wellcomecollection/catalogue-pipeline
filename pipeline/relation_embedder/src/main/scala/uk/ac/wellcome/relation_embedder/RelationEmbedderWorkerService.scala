@@ -23,7 +23,8 @@ class RelationEmbedderWorkerService[MsgDestination](
   workIndexer: Indexer[Work[Denormalised]],
   relationsService: RelationsService,
   batchSize: Int = 20,
-  flushInterval: FiniteDuration = 3 seconds
+  flushInterval: FiniteDuration = 3 seconds,
+  multiGetWorks: Int
 )(implicit ec: ExecutionContext, materializer: Materializer)
     extends Runnable {
 
@@ -45,7 +46,7 @@ class RelationEmbedderWorkerService[MsgDestination](
 
     val affectedWorks =
       affectedWorkIds
-        .grouped(250)
+        .grouped(multiGetWorks)
         .mapAsync(1) { identifiers =>
           workRetriever
             .lookupMultipleIds(identifiers.map { _.toString })
