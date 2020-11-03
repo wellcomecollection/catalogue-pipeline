@@ -45,7 +45,7 @@ class RelationEmbedderWorkerService[MsgDestination](
 
     val affectedWorks =
       affectedWorkIds
-        .grouped(25)
+        .grouped(250)
         .mapAsync(1) { identifiers =>
           workRetriever
             .lookupMultipleIds(identifiers.map { _.toString })

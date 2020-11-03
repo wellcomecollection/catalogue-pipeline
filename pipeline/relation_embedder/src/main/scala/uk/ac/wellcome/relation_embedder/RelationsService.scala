@@ -57,6 +57,7 @@ class PathQueryRelationsService(elasticClient: ElasticClient, index: Index)(
                 }
               works match {
                 case Right(works) =>
+                  debug(s"work ${work.id} has ${works.size} affected works")
                   Future.successful(works.map(_.state.sourceIdentifier))
                 case Left(err) => Future.failed(err)
               }
@@ -89,7 +90,7 @@ class PathQueryRelationsService(elasticClient: ElasticClient, index: Index)(
                   Right(
                     ArchiveRelationsBuilder(path, children, siblings, ancestors)
                   )
-                case works =>
+                case _ =>
                   Left(
                     new Exception(
                       "Expected multisearch response containing 3 items")
