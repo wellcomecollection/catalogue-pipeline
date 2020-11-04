@@ -238,7 +238,7 @@ object IdentifiedWorkIndexConfig extends WorksIndexConfig {
     intField("numberOfSources"),
     relations(id("id"))
   )
-  
+
   val dynamicMapping = DynamicMapping.Strict
 
   val fields =
