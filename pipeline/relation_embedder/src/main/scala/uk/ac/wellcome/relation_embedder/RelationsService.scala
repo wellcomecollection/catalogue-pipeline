@@ -1,7 +1,6 @@
 package uk.ac.wellcome.relation_embedder
 
 import scala.concurrent.{ExecutionContext, Future}
-
 import com.sksamuel.elastic4s.{ElasticClient, ElasticError, Index, Response}
 import com.sksamuel.elastic4s.requests.searches.{
   MultiSearchRequest,
@@ -12,11 +11,11 @@ import com.sksamuel.elastic4s.requests.searches.{
 import com.sksamuel.elastic4s.requests.searches.SearchHit
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.circe._
-
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.internal.result._
 import uk.ac.wellcome.models.Implicits._
 import WorkState.Merged
+import grizzled.slf4j.Logging
 
 trait RelationsService {
 
@@ -40,14 +39,18 @@ trait RelationsService {
 
 class PathQueryRelationsService(elasticClient: ElasticClient, index: Index)(
   implicit ec: ExecutionContext)
-    extends RelationsService {
+    extends RelationsService
+    with Logging {
 
   def getOtherAffectedWorks(
     work: Work[Merged]): Future[List[SourceIdentifier]] =
     work match {
       case work: Work.Visible[Merged] =>
         work.data.collectionPath match {
-          case None => Future.successful(Nil)
+          case None =>
+            info(
+              s"work ${work.id} does not belong to an archive, skipping getOtherAffectedWorks.")
+            Future.successful(Nil)
           case Some(CollectionPath(path, _, _)) =>
             executeSearchRequest(
               RelationsRequestBuilder(index, path).otherAffectedWorksRequest
@@ -61,6 +64,7 @@ class PathQueryRelationsService(elasticClient: ElasticClient, index: Index)(
                 }
               works match {
                 case Right(works) =>
+                  info(s"work ${work.id} has ${works.size} affected works")
                   Future.successful(works.map(_.state.sourceIdentifier))
                 case Left(err) => Future.failed(err)
               }
@@ -74,7 +78,10 @@ class PathQueryRelationsService(elasticClient: ElasticClient, index: Index)(
     work match {
       case work: Work.Visible[Merged] =>
         work.data.collectionPath match {
-          case None => Future.successful(Relations.none)
+          case None =>
+            info(
+              s"work ${work.id} does not belong to an archive, skipping getRelations.")
+            Future.successful(Relations.none)
           case Some(CollectionPath(path, _, _)) =>
             executeMultiSearchRequest(
               RelationsRequestBuilder(index, path).relationsRequest
@@ -91,7 +98,7 @@ class PathQueryRelationsService(elasticClient: ElasticClient, index: Index)(
                   Right(
                     ArchiveRelationsBuilder(path, children, siblings, ancestors)
                   )
-                case works =>
+                case _ =>
                   Left(
                     new Exception(
                       "Expected multisearch response containing 3 items")
