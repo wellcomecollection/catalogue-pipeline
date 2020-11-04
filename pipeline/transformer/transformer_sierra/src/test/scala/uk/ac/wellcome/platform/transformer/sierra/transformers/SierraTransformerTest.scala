@@ -300,7 +300,7 @@ class SierraTransformerTest
       .withVersion(1)
       .title(title)
       .otherIdentifiers(List(sierraIdentifier))
-      .description("A delightful description of a dead daisy.")
+      .description("<p>A delightful description of a dead daisy.</p>")
       .production(
         List(
           ProductionEvent(

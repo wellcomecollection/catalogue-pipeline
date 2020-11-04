@@ -23,8 +23,8 @@ object SierraDescription extends SierraDataTransformer {
   //
   // https://www.loc.gov/marc/bibliographic/bd520.html
   //
-  def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
-    getSubfields(bibData, "520", List("a", "b"))
+  def apply(bibId: SierraBibNumber, bibData: SierraBibData) = {
+    val descriptions = getSubfields(bibData, "520", List("a", "b"))
       .foldLeft[List[String]](Nil)((acc, subfields) => {
 
         (subfields.get("a"), subfields.get("b")) match {
@@ -40,10 +40,16 @@ object SierraDescription extends SierraDataTransformer {
               s"Saw a MARC field 520 with $$b but no $$a? $bibData"
             )
         }
-      }) match {
-      case Nil  => None
-      case list => Some(list.mkString(" "))
-    }
+      })
+    if (descriptions.isEmpty)
+      None
+    else
+      Some(
+        descriptions
+          .map(description => s"<p>$description</p>")
+          .mkString("\n")
+      )
+  }
 
   def getSubfields(
     bibData: SierraBibData,

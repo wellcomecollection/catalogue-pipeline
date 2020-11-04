@@ -30,7 +30,7 @@ class SierraDescriptionTest
           )
         )
       ),
-      expectedDescription = Some(description)
+      expectedDescription = Some(s"<p>$description</p>")
     )
   }
 
@@ -38,8 +38,6 @@ class SierraDescriptionTest
     val description1 = "A malcontent marc minion."
     val description2 = "A fresh fishy fruit."
     val summaryDescription2 = "A case of colloidal coffee capsules."
-
-    val description = s"$description1 $description2 $summaryDescription2"
 
     assertFindsCorrectDescription(
       varFields = List(
@@ -57,7 +55,7 @@ class SierraDescriptionTest
           )
         )
       ),
-      expectedDescription = Some(description)
+      expectedDescription = Some(s"<p>$description1</p>\n<p>$description2</p>\n<p>$summaryDescription2</p>")
     )
   }
 
@@ -76,7 +74,7 @@ class SierraDescriptionTest
           )
         )
       ),
-      expectedDescription = Some(s"$description $summaryDescription")
+      expectedDescription = Some(s"<p>$description $summaryDescription</p>")
     )
   }
 
