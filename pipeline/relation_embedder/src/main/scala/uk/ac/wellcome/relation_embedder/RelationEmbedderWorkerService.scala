@@ -3,9 +3,11 @@ package uk.ac.wellcome.relation_embedder
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
+
 import akka.{Done, NotUsed}
 import akka.stream.scaladsl._
 import akka.stream.Materializer
+
 import uk.ac.wellcome.typesafe.Runnable
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
@@ -22,8 +24,8 @@ class RelationEmbedderWorkerService[MsgDestination](
   workRetriever: Retriever[Work[Merged]],
   workIndexer: Indexer[Work[Denormalised]],
   relationsService: RelationsService,
-  batchSize: Int = 20,
-  flushInterval: FiniteDuration = 3 seconds,
+  batchSize: Int = 100,
+  flushInterval: FiniteDuration = 20 seconds,
   multiGetWorks: Int = 100
 )(implicit ec: ExecutionContext, materializer: Materializer)
     extends Runnable {
