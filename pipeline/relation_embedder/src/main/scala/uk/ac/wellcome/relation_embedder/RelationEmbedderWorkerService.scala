@@ -24,7 +24,7 @@ class RelationEmbedderWorkerService[MsgDestination](
   relationsService: RelationsService,
   batchSize: Int = 20,
   flushInterval: FiniteDuration = 3 seconds,
-  multiGetWorks: Int
+  multiGetWorks: Int = 100
 )(implicit ec: ExecutionContext, materializer: Materializer)
     extends Runnable {
 
