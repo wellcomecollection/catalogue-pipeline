@@ -29,7 +29,7 @@ module "relation_embedder" {
     es_merged_index       = local.es_works_merged_index
     es_denormalised_index = local.es_works_denormalised_index
 
-    multiget_works = 250
+    multiget_works    = 250
     queue_parallelism = 5
   }
 
