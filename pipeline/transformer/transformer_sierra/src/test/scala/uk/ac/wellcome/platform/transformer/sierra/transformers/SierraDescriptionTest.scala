@@ -55,7 +55,8 @@ class SierraDescriptionTest
           )
         )
       ),
-      expectedDescription = Some(s"<p>$description1</p>\n<p>$description2</p>\n<p>$summaryDescription2</p>")
+      expectedDescription = Some(
+        s"<p>$description1</p>\n<p>$description2</p>\n<p>$summaryDescription2</p>")
     )
   }
 
