@@ -163,14 +163,17 @@ trait WorksIndexConfigFields extends IndexConfigFields {
       textField("edition"),
       notes,
       intField("duration"),
-      objectField("collectionPath").fields(
-        label,
-        objectField("level").fields(keywordField("type")),
-        pathField,
-        tokenCountField("depth").analyzer("standard")
-      ),
+      collectionPath(pathField),
       images(idState),
       keywordField("workType")
+    )
+
+  def collectionPath(pathField: TextField) =
+    objectField("collectionPath").fields(
+      label,
+      objectField("level").fields(keywordField("type")),
+      pathField,
+      tokenCountField("depth").analyzer("standard")
     )
 
   def relation(name: String, idState: ObjectField) =
@@ -195,65 +198,59 @@ sealed trait WorksIndexConfig extends IndexConfig with WorksIndexConfigFields {
 
   val analysis = WorksAnalysis()
 
-  def state: ObjectField
+  val dynamicMapping: DynamicMapping
 
-  val idState: String => ObjectField
+  def fields: Seq[FieldDefinition with Product with Serializable]
 
-  def fields: Seq[FieldDefinition with Product with Serializable] =
-    Seq(
-      state,
-      version,
-      idState("redirect"),
-      keywordField("type"),
-      data(analyzedPath, idState("id")),
-      objectField("invisibilityReasons").fields(
-        keywordField("type"),
-        keywordField("info")
-      )
-    )
-
-  def mapping = properties(fields).dynamic(DynamicMapping.Strict)
+  def mapping = properties(fields).dynamic(dynamicMapping)
 }
 
 object SourceWorkIndexConfig extends WorksIndexConfig {
 
-  val state = objectField("state").fields(sourceIdentifier, modifiedTime)
-
-  val idState = identifiable
+  val fields = Seq.empty
+  val dynamicMapping = DynamicMapping.False
 }
 
 object MergedWorkIndexConfig extends WorksIndexConfig {
 
-  val state = objectField("state").fields(
-    sourceIdentifier,
-    modifiedTime,
-    intField("numberOfSources"),
+  val fields = Seq(
+    keywordField("type"),
+    objectField("data").fields(
+      collectionPath(analyzedPath)
+    )
   )
 
-  val idState = identifiable
+  val dynamicMapping = DynamicMapping.False
 }
 
 object DenormalisedWorkIndexConfig extends WorksIndexConfig {
 
-  val idState = identifiable
-
-  val state = objectField("state").fields(
-    sourceIdentifier,
-    modifiedTime,
-    intField("numberOfSources"),
-    relations(idState("id"))
-  )
+  val fields = Seq.empty
+  val dynamicMapping = DynamicMapping.False
 }
 
 object IdentifiedWorkIndexConfig extends WorksIndexConfig {
-
-  val idState = id
 
   val state = objectField("state").fields(
     canonicalId,
     sourceIdentifier,
     modifiedTime,
     intField("numberOfSources"),
-    relations(idState("id"))
+    relations(id("id"))
   )
+
+  val dynamicMapping = DynamicMapping.Strict
+
+  val fields =
+    Seq(
+      state,
+      version,
+      id("redirect"),
+      keywordField("type"),
+      data(analyzedPath, id("id")),
+      objectField("invisibilityReasons").fields(
+        keywordField("type"),
+        keywordField("info")
+      )
+    )
 }

@@ -13,7 +13,7 @@ import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.models.Implicits._
 import WorkState.Merged
 
-class RelatedWorksServiceTest
+class RelationsServiceTest
     extends AnyFunSpec
     with Matchers
     with ElasticsearchFixtures
