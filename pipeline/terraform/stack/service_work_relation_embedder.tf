@@ -30,6 +30,7 @@ module "relation_embedder" {
     es_denormalised_index = local.es_works_denormalised_index
 
     multiget_works = 250
+    queue_parallelism = 5
   }
 
   secret_env_vars = {
