@@ -21,7 +21,6 @@ class ElasticRetriever[T](client: ElasticClient, index: Index)(
     with Logging {
 
   final def lookupSingleId(id: String): Future[T] = {
-    debug(s"Index $index: looking up ID $id")
     client
       .execute {
         get(index, id)
@@ -41,8 +40,6 @@ class ElasticRetriever[T](client: ElasticClient, index: Index)(
   }
 
   override def lookupMultipleIds(ids: Seq[String]): Future[Map[String, T]] = {
-    debug(s"Index $index: looking up multiple IDs $ids")
-
     client
       .execute {
         multiget(ids.map { get(index, _) })
@@ -62,10 +59,6 @@ class ElasticRetriever[T](client: ElasticClient, index: Index)(
 
           assert(
             successes.size + failures.size + missing.size == responses.size)
-
-          debug(s"Missing:   $missing")
-          debug(s"Successes: $successes")
-          debug(s"Failures:  $failures")
 
           if (missing.nonEmpty) {
             Future.failed(RetrieverNotFoundException.ids(missing.keys.toSeq))
