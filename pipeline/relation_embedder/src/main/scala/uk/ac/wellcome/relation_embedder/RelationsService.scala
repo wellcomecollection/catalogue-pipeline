@@ -2,7 +2,12 @@ package uk.ac.wellcome.relation_embedder
 
 import scala.concurrent.{ExecutionContext, Future}
 import com.sksamuel.elastic4s.{ElasticClient, ElasticError, Index, Response}
-import com.sksamuel.elastic4s.requests.searches.{MultiSearchRequest, MultiSearchResponse, SearchRequest, SearchResponse}
+import com.sksamuel.elastic4s.requests.searches.{
+  MultiSearchRequest,
+  MultiSearchResponse,
+  SearchRequest,
+  SearchResponse
+}
 import com.sksamuel.elastic4s.requests.searches.SearchHit
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.circe._
@@ -34,7 +39,8 @@ trait RelationsService {
 
 class PathQueryRelationsService(elasticClient: ElasticClient, index: Index)(
   implicit ec: ExecutionContext)
-    extends RelationsService with Logging {
+    extends RelationsService
+    with Logging {
 
   def getOtherAffectedWorks(
     work: Work[Merged]): Future[List[SourceIdentifier]] =
@@ -42,7 +48,8 @@ class PathQueryRelationsService(elasticClient: ElasticClient, index: Index)(
       case work: Work.Visible[Merged] =>
         work.data.collectionPath match {
           case None =>
-            info(s"work ${work.id} does not belong to an archive, skipping getOtherAffectedWorks.")
+            info(
+              s"work ${work.id} does not belong to an archive, skipping getOtherAffectedWorks.")
             Future.successful(Nil)
           case Some(CollectionPath(path, _, _)) =>
             executeSearchRequest(
@@ -72,7 +79,8 @@ class PathQueryRelationsService(elasticClient: ElasticClient, index: Index)(
       case work: Work.Visible[Merged] =>
         work.data.collectionPath match {
           case None =>
-            info(s"work ${work.id} does not belong to an archive, skipping getRelations.")
+            info(
+              s"work ${work.id} does not belong to an archive, skipping getRelations.")
             Future.successful(Relations.none)
           case Some(CollectionPath(path, _, _)) =>
             executeMultiSearchRequest(
