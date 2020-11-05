@@ -1,6 +1,8 @@
 package uk.ac.wellcome.relation_embedder
 
 import scala.concurrent.ExecutionContext
+import scala.concurrent.duration._
+
 import akka.actor.ActorSystem
 import com.typesafe.config.Config
 import com.sksamuel.elastic4s.Index
@@ -38,7 +40,10 @@ object Main extends WellcomeTypesafeApp {
         denormalisedIndex,
         DenormalisedWorkIndexConfig),
       relationsService = new PathQueryRelationsService(esClient, mergedIndex),
-      multiGetWorks = config.requireInt("es.works.multiget")
+      multiGetWorks = config.requireInt("es.works.multiget"),
+      batchSize = config.requireInt("es.works.batch_size"),
+      flushInterval =
+        config.requireInt("es.works.flush_interval_seconds").seconds,
     )
   }
 }
