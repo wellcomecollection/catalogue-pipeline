@@ -1,7 +1,8 @@
 package uk.ac.wellcome.models.parse
 
 import uk.ac.wellcome.models.work.internal.InstantRange
-import fastparse._, NoWhitespace._
+import fastparse._
+import NoWhitespace._
 
 trait DateParserUtils extends ParserUtils {
 
@@ -16,7 +17,7 @@ trait DateParserUtils extends ParserUtils {
   def writtenMonth[_: P] =
     StringInIgnoreCase(
       "january",
-      "febuary",
+      "february",
       "march",
       "april",
       "may",
@@ -96,11 +97,38 @@ trait ParserUtils {
   */
 object DateParserImplicits extends ParserUtils {
 
-  implicit class ToDateRangeParser[F <: FuzzyDate](from: => P[F]) {
+  private def sep[_: P]: P[Unit] = P(ws.? ~ StringIn("to", "x", "-") ~ ws.?)
+
+  implicit class DateToDateRangeParser[F <: FuzzyDate](from: => P[F]) {
 
     def to[_: P, T <: FuzzyDate](to: => P[T]): P[FuzzyDateRange[F, T]] =
-      (from ~ ws.? ~ "-" ~ ws.? ~ to)
+      (from ~ sep ~ to)
         .map { case (f, t) => FuzzyDateRange(f, t) }
+
+    def to[_: P, T <: FuzzyDate](to: => P[FuzzyDateRange[F, T]])(
+      implicit d: DummyImplicit): P[FuzzyDateRange[F, T]] =
+      (from ~ sep ~ to)
+        .map {
+          case (f, FuzzyDateRange(_, t)) => FuzzyDateRange(f, t)
+        }
+  }
+
+  implicit class DateRangeToDateRangeParser[F <: FuzzyDate](
+    from: => P[FuzzyDateRange[F, _ <: FuzzyDate]]) {
+
+    def to[_: P, T <: FuzzyDate](to: => P[T]): P[FuzzyDateRange[F, T]] =
+      (from ~ sep ~ to)
+        .map {
+          case (FuzzyDateRange(f, _), t) => FuzzyDateRange(f, t)
+        }
+
+    def to[_: P, T <: FuzzyDate](to: => P[FuzzyDateRange[_ <: FuzzyDate, T]])(
+      implicit d: DummyImplicit): P[FuzzyDateRange[F, T]] =
+      (from ~ sep ~ to)
+        .map {
+          case (FuzzyDateRange(f, _), FuzzyDateRange(_, t)) =>
+            FuzzyDateRange(f, t)
+        }
   }
 
   implicit class ToInstantRangeParser[T <: TimePeriod](parser: P[T]) {

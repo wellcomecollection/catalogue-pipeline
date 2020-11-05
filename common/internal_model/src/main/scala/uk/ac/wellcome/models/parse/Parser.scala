@@ -1,11 +1,12 @@
 package uk.ac.wellcome.models.parse
 
 import fastparse._
+import grizzled.slf4j.Logging
 
 /**
   *  Trait for parsing some input into T with the FastParse library
   */
-trait Parser[T] {
+trait Parser[T] extends Logging {
 
   /**
     *  The FastParse parser combinator applied to the input
@@ -19,9 +20,11 @@ trait Parser[T] {
     *  @return Some(output) if parse was successful, None otherwise
     */
   def apply(input: String): Option[T] =
-    parse(input, parser(_)) match {
+    parse(input, parser(_), verboseFailures = true) match {
       case Parsed.Success(value, _) => Some(value)
-      case Parsed.Failure(_, _, _)  => None
+      case Parsed.Failure(label, index, _) =>
+        error(s"Failed parsing $input with $label at $index")
+        None
     }
 }
 
