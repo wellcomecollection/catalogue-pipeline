@@ -235,7 +235,6 @@ object IdentifiedWorkIndexConfig extends WorksIndexConfig {
     canonicalId,
     sourceIdentifier,
     modifiedTime,
-    intField("numberOfSources"),
     relations(id("id"))
   )
 

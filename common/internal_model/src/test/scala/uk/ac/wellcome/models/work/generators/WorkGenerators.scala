@@ -28,11 +28,10 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
 
   def mergedWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
-    numberOfSources: Int = chooseFrom(1, 2, 3, 4),
     modifiedTime: Instant = instantInLast30Days
   ): Work.Visible[Merged] =
     Work.Visible[Merged](
-      state = Merged(sourceIdentifier, modifiedTime, numberOfSources),
+      state = Merged(sourceIdentifier, modifiedTime),
       data = initData,
       version = createVersion
     )
@@ -40,14 +39,12 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
   def denormalisedWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     modifiedTime: Instant = instantInLast30Days,
-    numberOfSources: Int = 1,
     relations: Relations[DataState.Unidentified] = Relations.none
   ): Work.Visible[Denormalised] =
     Work.Visible[Denormalised](
       state = Denormalised(
         sourceIdentifier,
         modifiedTime,
-        numberOfSources,
         relations),
       data = initData,
       version = createVersion
@@ -57,7 +54,6 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     canonicalId: String = createCanonicalId,
     modifiedTime: Instant = instantInLast30Days,
-    numberOfSources: Int = chooseFrom(1, 2, 3, 4),
     relations: Relations[DataState.Identified] = Relations.none
   ): Work.Visible[Identified] =
     Work.Visible[Identified](
@@ -65,7 +61,6 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
         sourceIdentifier = sourceIdentifier,
         canonicalId = canonicalId,
         modifiedTime = modifiedTime,
-        numberOfSources = numberOfSources,
         relations = relations
       ),
       data = initData,

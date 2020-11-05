@@ -27,8 +27,7 @@ class RelatedWorkServiceTest
 
   def work(path: String, level: CollectionLevel): Work.Visible[Identified] =
     identifiedWork(
-      sourceIdentifier = createSourceIdentifierWith(value = path),
-      numberOfSources = 1)
+      sourceIdentifier = createSourceIdentifierWith(value = path))
       .title(path)
       .collectionPath(CollectionPath(path = path, level = Some(level)))
 
