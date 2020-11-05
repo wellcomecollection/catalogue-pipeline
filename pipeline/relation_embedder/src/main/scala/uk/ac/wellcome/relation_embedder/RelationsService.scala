@@ -64,7 +64,8 @@ class PathQueryRelationsService(elasticClient: ElasticClient, index: Index)(
                 }
               works match {
                 case Right(works) =>
-                  info(s"work ${work.id} ($path) has ${works.size} affected works")
+                  info(
+                    s"work ${work.id} ($path) has ${works.size} affected works")
                   Future.successful(works.map(_.state.sourceIdentifier))
                 case Left(err) => Future.failed(err)
               }
