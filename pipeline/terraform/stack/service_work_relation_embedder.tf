@@ -32,7 +32,7 @@ module "relation_embedder" {
     queue_parallelism      = 5
     multiget_works         = 100
     batch_size             = 100
-    flush_interval_seconds = 30
+    flush_interval_seconds = 60
   }
 
   secret_env_vars = {

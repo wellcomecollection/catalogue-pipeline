@@ -10,7 +10,7 @@ import com.sksamuel.elastic4s.requests.searches.queries.Query
 
 case class RelationsRequestBuilder(index: Index,
                                    path: String,
-                                   maxRelatedWorks: Int = 1000) {
+                                   maxRelatedWorks: Int = 2000) {
 
   // To reduce response size and improve Elasticsearch performance we only
   // return core fields

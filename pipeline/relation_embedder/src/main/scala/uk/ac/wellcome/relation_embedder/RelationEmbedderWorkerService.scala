@@ -58,13 +58,13 @@ class RelationEmbedderWorkerService[MsgDestination](
 
     val denormalisedWorks =
       affectedWorks
-        .mapAsync(2) { work =>
+        .mapAsync(1) { work =>
           relationsService.getRelations(work).map(work.transition[Denormalised])
         }
 
     denormalisedWorks
       .groupedWithin(batchSize, flushInterval)
-      .mapAsync(2) { works =>
+      .mapAsync(1) { works =>
         workIndexer.index(works).flatMap {
           case Left(failedWorks) =>
             Future.failed(
@@ -74,7 +74,7 @@ class RelationEmbedderWorkerService[MsgDestination](
         }
       }
       .mapConcat(identity)
-      .mapAsync(2) { work =>
+      .mapAsync(3) { work =>
         Future(msgSender.send(work.id)).flatMap {
           case Success(_)   => Future.successful(())
           case Failure(err) => Future.failed(err)

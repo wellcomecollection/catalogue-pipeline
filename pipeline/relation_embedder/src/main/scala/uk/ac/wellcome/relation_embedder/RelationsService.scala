@@ -64,7 +64,7 @@ class PathQueryRelationsService(elasticClient: ElasticClient, index: Index)(
                 }
               works match {
                 case Right(works) =>
-                  info(s"work ${work.id} has ${works.size} affected works")
+                  info(s"work ${work.id} ($path) has ${works.size} affected works")
                   Future.successful(works.map(_.state.sourceIdentifier))
                 case Left(err) => Future.failed(err)
               }
@@ -79,8 +79,6 @@ class PathQueryRelationsService(elasticClient: ElasticClient, index: Index)(
       case work: Work.Visible[Merged] =>
         work.data.collectionPath match {
           case None =>
-            info(
-              s"work ${work.id} does not belong to an archive, skipping getRelations.")
             Future.successful(Relations.none)
           case Some(CollectionPath(path, _, _)) =>
             executeMultiSearchRequest(
