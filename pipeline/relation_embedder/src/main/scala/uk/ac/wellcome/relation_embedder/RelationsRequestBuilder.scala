@@ -58,7 +58,6 @@ case class RelationsRequestBuilder(index: Index,
       }
       .from(0)
       .limit(maxRelatedWorks)
-      .sourceInclude(otherAffectedWorksFieldWhitelist)
 
   /**
     * Query all direct children of the node with the given path.

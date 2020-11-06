@@ -1,21 +1,21 @@
 package uk.ac.wellcome.relation_embedder
 
-import scala.concurrent.{ExecutionContext, Future}
-import com.sksamuel.elastic4s.{ElasticClient, ElasticError, Index, Response}
-import com.sksamuel.elastic4s.requests.searches.{MultiSearchRequest, MultiSearchResponse, SearchRequest, SearchResponse}
-import com.sksamuel.elastic4s.requests.searches.SearchHit
-import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.circe._
-import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.models.work.internal.result._
-import uk.ac.wellcome.models.Implicits._
-import WorkState.{Identified, Merged}
 import akka.NotUsed
 import akka.actor.ActorSystem
-import akka.stream.scaladsl.{Flow, Source}
-import grizzled.slf4j.Logging
+import akka.stream.scaladsl.Source
+import com.sksamuel.elastic4s.ElasticDsl._
+import com.sksamuel.elastic4s.circe._
+import com.sksamuel.elastic4s.requests.searches._
 import com.sksamuel.elastic4s.streams.ReactiveElastic._
+import com.sksamuel.elastic4s.{ElasticClient, ElasticError, Index, Response}
+import grizzled.slf4j.Logging
 import uk.ac.wellcome.json.JsonUtil.fromJson
+import uk.ac.wellcome.models.Implicits._
+import uk.ac.wellcome.models.work.internal.WorkState.Merged
+import uk.ac.wellcome.models.work.internal._
+import uk.ac.wellcome.models.work.internal.result._
+
+import scala.concurrent.{ExecutionContext, Future}
 
 trait RelationsService {
 
@@ -26,7 +26,7 @@ trait RelationsService {
     * @param work The work
     * @return The IDs of the other works to denormalise
     */
-  def getOtherAffectedWorks(work: Work[Merged]): Future[List[Work[Merged]]]
+  def getOtherAffectedWorks(work: Work[Merged]): Source[Work[Merged], NotUsed]
 
   /** For a given work return all its relations.
     *
@@ -37,7 +37,7 @@ trait RelationsService {
     work: Work[Merged]): Future[Relations[DataState.Unidentified]]
 }
 
-class PathQueryRelationsService(elasticClient: ElasticClient, index: Index)(
+class PathQueryRelationsService(elasticClient: ElasticClient, index: Index, scrollSize:Int)(
   implicit ec: ExecutionContext, as: ActorSystem)
     extends RelationsService
     with Logging {
@@ -58,7 +58,7 @@ class PathQueryRelationsService(elasticClient: ElasticClient, index: Index)(
                 elasticClient.publisher(
                   RelationsRequestBuilder(index, path).otherAffectedWorksRequest
                     .scroll(keepAlive = "5m")
-                    .size(100)))
+                    .size(scrollSize)))
               .map { searchHit: SearchHit =>
                 fromJson[Work[Merged]](searchHit.sourceAsString).get
               }
@@ -103,10 +103,6 @@ class PathQueryRelationsService(elasticClient: ElasticClient, index: Index)(
         }
       case _ => Future.successful(Relations.none)
     }
-
-  private def executeSearchRequest(
-    request: SearchRequest): Future[Either[ElasticError, SearchResponse]] =
-    elasticClient.execute(request).map(toEither)
 
   private def executeMultiSearchRequest(request: MultiSearchRequest)
     : Future[Either[ElasticError, List[SearchResponse]]] =

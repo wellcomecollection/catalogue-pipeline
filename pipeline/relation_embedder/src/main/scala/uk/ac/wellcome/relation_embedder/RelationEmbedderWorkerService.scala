@@ -25,8 +25,7 @@ class RelationEmbedderWorkerService[MsgDestination](
   workIndexer: Indexer[Work[Denormalised]],
   relationsService: RelationsService,
   batchSize: Int = 100,
-  flushInterval: FiniteDuration = 20 seconds,
-  multiGetWorks: Int = 100
+  flushInterval: FiniteDuration = 20 seconds
 )(implicit ec: ExecutionContext, materializer: Materializer)
     extends Runnable {
 
@@ -36,25 +35,9 @@ class RelationEmbedderWorkerService[MsgDestination](
     }
 
   def processMessage(message: NotificationMessage): Future[Unit] = {
-    val affectedWorkIds: Source[SourceIdentifier, NotUsed] =
+    val affectedWorks: Source[Work[Merged], NotUsed] =
       Source
-        .future(workRetriever.lookupSingleId(message.body))
-        .mapAsync(1) { work =>
-          relationsService
-            .getOtherAffectedWorks(work)
-            .map(work.sourceIdentifier :: _)
-        }
-        .mapConcat(identity)
-
-    val affectedWorks =
-      affectedWorkIds
-        .grouped(multiGetWorks)
-        .mapAsync(1) { identifiers =>
-          workRetriever
-            .lookupMultipleIds(identifiers.map { _.toString })
-            .map { _.values.toList }
-        }
-        .mapConcat(identity)
+        .future(workRetriever(message.body)).flatMapConcat{ work => relationsService.getOtherAffectedWorks(work)}
 
     val denormalisedWorks =
       affectedWorks
