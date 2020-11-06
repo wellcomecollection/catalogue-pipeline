@@ -42,10 +42,7 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
     relations: Relations[DataState.Unidentified] = Relations.none
   ): Work.Visible[Denormalised] =
     Work.Visible[Denormalised](
-      state = Denormalised(
-        sourceIdentifier,
-        modifiedTime,
-        relations),
+      state = Denormalised(sourceIdentifier, modifiedTime, relations),
       data = initData,
       version = createVersion
     )

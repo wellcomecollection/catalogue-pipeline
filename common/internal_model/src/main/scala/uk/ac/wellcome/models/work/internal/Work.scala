@@ -210,10 +210,7 @@ object WorkFsm {
   implicit val mergedToDenormalised = new Transition[Merged, Denormalised] {
     def state(state: Merged,
               relations: Relations[DataState.Unidentified]): Denormalised =
-      Denormalised(
-        state.sourceIdentifier,
-        state.modifiedTime,
-        relations)
+      Denormalised(state.sourceIdentifier, state.modifiedTime, relations)
 
     def data(data: WorkData[DataState.Unidentified]) = data
 
