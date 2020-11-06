@@ -8,7 +8,7 @@ import WorkState.Merged
 class ArchiveRelationsCache(
   relations: Map[String, Relation[DataState.Unidentified]]) {
 
-  def relations(work: Work[Merged]): Relations[DataState.Unidentified] =
+  def apply(work: Work[Merged]): Relations[DataState.Unidentified] =
     work.data.collectionPath
       .map {
         case CollectionPath(path, _, _) =>
@@ -31,14 +31,13 @@ class ArchiveRelationsCache(
     val siblings = parentMapping
       .get(path)
       .map(childMapping)
-      .map(siblingPaths => siblingPaths.map(relations).toList)
       .getOrElse(Nil)
     siblings match {
       case Nil => (Nil, Nil)
       case siblings =>
-        val (siblingsPreceding, siblingsSucceeding) = siblings
-          .splitAt(siblings.indexOf(path))
-        (siblingsPreceding, siblingsSucceeding.tail)
+        val splitIdx = siblings.indexOf(path)
+        val (preceding, succeeding) = siblings.splitAt(splitIdx)
+        (preceding.map(relations), succeeding.tail.map(relations))
     }
   }
 
@@ -48,21 +47,15 @@ class ArchiveRelationsCache(
     : List[Relation[DataState.Unidentified]] =
     parentMapping.get(path) match {
       case None             => accum
-      case Some(parentPath) => ancestors(path, relations(parentPath) :: accum)
+      case Some(parentPath) => ancestors(parentPath, relations(parentPath) :: accum)
     }
 
   private lazy val parentMapping: Map[String, String] =
     relations
       .map {
         case (path, _) =>
-          val pathTokens = tokenize(path)
-          path -> relations.keys
-            .find { parentPath =>
-              val parentPathTokens = tokenize(parentPath)
-              pathTokens == parentPathTokens.slice(
-                0,
-                parentPathTokens.length - 1)
-            }
+          val parent = tokenize(path).dropRight(1)
+          path -> relations.keys.find(tokenize(_) == parent)
       }
       .collect { case (path, Some(parentPath)) => path -> parentPath }
 
