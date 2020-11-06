@@ -9,7 +9,9 @@ import uk.ac.wellcome.models.work.internal.InstantRange
 
 class ParserTest extends AnyFunSpec with Matchers with Inspectors {
 
-  val validExamples: Seq[(String, InstantRange)] = Seq(
+  // From: http://www.dswebhosting.info/documents/Manuals/ALM/V10/MANUAL/main_menu/basics/period_field_format.htm
+  // Can't use a Table() because the list is too long (> 22 elements)
+  val documentedExamples: Seq[(String, InstantRange)] = Seq(
     (
       "1900s",
       InstantRange(
@@ -64,12 +66,12 @@ class ParserTest extends AnyFunSpec with Matchers with Inspectors {
         LocalDate of (1689, 1, 1),
         LocalDate of (2001, 12, 23),
         "jan 1689-23rd december 2001")),
-//    (
-//      "late 13th century",
-//      InstantRange(
-//        LocalDate of (1260, 1, 1),
-//        LocalDate of (1299, 12, 31),
-//        "late 13th century")),
+    (
+      "late 13th century",
+      InstantRange(
+        LocalDate of (1260, 1, 1),
+        LocalDate of (1299, 12, 31),
+        "late 13th century")),
     (
       "12/6/1278",
       InstantRange(
@@ -142,30 +144,30 @@ class ParserTest extends AnyFunSpec with Matchers with Inspectors {
         LocalDate of (1974, 11, 30),
         LocalDate of (1974, 11, 30),
         "1974 nov 30")),
-//    (
-//      "early 12th century",
-//      InstantRange(
-//        LocalDate of (1100, 1, 1),
-//        LocalDate of (1139, 12, 31),
-//        "early 12th century")),
-//    (
-//      "12th century-mid 20th century",
-//      InstantRange(
-//        LocalDate of (1100, 1, 1),
-//        LocalDate of (1969, 12, 31),
-//        "12th century-mid 20th century")),
+    (
+      "early 12th century",
+      InstantRange(
+        LocalDate of (1100, 1, 1),
+        LocalDate of (1139, 12, 31),
+        "early 12th century")),
+    (
+      "12th century-mid 20th century",
+      InstantRange(
+        LocalDate of (1100, 1, 1),
+        LocalDate of (1969, 12, 31),
+        "12th century-mid 20th century")),
     (
       "29th oct-30th oct 2002",
       InstantRange(
         LocalDate of (2002, 10, 29),
         LocalDate of (2002, 10, 30),
         "29th oct-30th oct 2002")),
-//    (
-//      "10th dec 2002 a.d.",
-//      InstantRange(
-//        LocalDate of (2002, 12, 10),
-//        LocalDate of (2002, 12, 10),
-//        "10th dec 2002 a.d.")),
+    (
+      "10th dec 2002 a.d.",
+      InstantRange(
+        LocalDate of (2002, 12, 10),
+        LocalDate of (2002, 12, 10),
+        "10th dec 2002 a.d.")),
     (
       "11th jan 1899-12 dec 1999",
       InstantRange(
@@ -331,11 +333,35 @@ class ParserTest extends AnyFunSpec with Matchers with Inspectors {
   )
 
   describe("parser") {
-    it("parses all examples correctly") {
-      forEvery(validExamples) {
+    it("parses all documented examples correctly") {
+      forEvery(documentedExamples) {
         case (str, expectedTokens) =>
           PeriodParser(str) shouldBe Some(expectedTokens)
       }
+    }
+
+    it("strips no-op qualifiers") {
+      PeriodParser("fl. 1999-2001 [gaps]") shouldBe Some(
+        InstantRange(
+          LocalDate of (1999, 1, 1),
+          LocalDate of (2001, 12, 31),
+          "fl. 1999-2001 [gaps]"))
+    }
+
+    it("handles dates from the BC era") {
+      PeriodParser("1111 BC") shouldBe Some(
+        InstantRange(
+          LocalDate of (-1111, 1, 1),
+          LocalDate of (-1111, 12, 31),
+          "1111 BC"))
+    }
+
+    it("handles approximate year qualifiers") {
+      PeriodParser("c.1920") shouldBe Some(
+        InstantRange(
+          LocalDate of (1910, 1, 1),
+          LocalDate of (1929, 12, 31),
+          "c.1920"))
     }
   }
 

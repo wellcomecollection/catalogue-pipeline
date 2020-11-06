@@ -67,7 +67,18 @@ trait DateParserUtils extends ParserUtils {
   def monthDigits[_: P] =
     digitRep(min = 1, max = 2).filter(value => value >= 1 && value <= 12)
 
-  def yearDigits[_: P] = digitRep(exactly = 4)
+  def yearDigits[_: P] =
+    digitRep(exactly = 4) ~ (ws.? ~ era).? map {
+      case (year, None)       => year
+      case (year, Some("bc")) => -year
+      case (year, Some(_))    => year
+    }
+
+  def era[_: P] =
+    P(StringInIgnoreCase("a.d.", "ad", "b.c.", "bc").! map (_.toLowerCase) map {
+      case "a.d." | "ad" => "ad"
+      case "b.c." | "bc" => "bc"
+    })
 
   def ordinalIndicator[_: P] = StringIn("st", "nd", "rd", "th")
 
@@ -105,7 +116,9 @@ object DateParserImplicits extends ParserUtils {
       (from ~ sep ~ to)
         .map { case (f, t) => FuzzyDateRange(f, t) }
 
-    def to[_: P, T <: FuzzyDate](to: => P[FuzzyDateRange[F, T]])(
+    // The DummyImplicit is to prevent type erasure causing these methods
+    // to have duplicate signatures.
+    def to[_: P, T <: FuzzyDate](to: => P[FuzzyDateRange[_ <: FuzzyDate, T]])(
       implicit d: DummyImplicit): P[FuzzyDateRange[F, T]] =
       (from ~ sep ~ to)
         .map {
@@ -122,6 +135,8 @@ object DateParserImplicits extends ParserUtils {
           case (FuzzyDateRange(f, _), t) => FuzzyDateRange(f, t)
         }
 
+    // The DummyImplicit is to prevent type erasure causing these methods
+    // to have duplicate signatures.
     def to[_: P, T <: FuzzyDate](to: => P[FuzzyDateRange[_ <: FuzzyDate, T]])(
       implicit d: DummyImplicit): P[FuzzyDateRange[F, T]] =
       (from ~ sep ~ to)

@@ -8,26 +8,35 @@ import uk.ac.wellcome.models.work.internal.InstantRange
 object PeriodParser extends Parser[InstantRange] with DateParserUtils {
   import DateParserImplicits._
   import FreeformDateParser.{calendarDate, day, month, monthAndYear}
+  import QualifyFuzzyDate._
+
+  private def preprocess(input: String): String =
+    Seq("\\[gaps\\]", "floruit", "fl.", "fl", "between")
+      .foldLeft(input.toLowerCase) {
+        case (str, noop) => str.replaceAll(noop, "")
+      }
+      .trim
 
   def parser[_: P]: P[InstantRange] = Start ~ timePeriod ~ End
 
   override def apply(input: String): Option[InstantRange] =
-    super.apply(input.toLowerCase) map (_ withLabel input)
-
-  def crumbs[_: P] = (inferredCentury to century)
+    super.apply(preprocess(input)) map (_ withLabel input)
 
   def timePeriod[_: P] =
     dateRange |
       calendarDate.toInstantRange |
       monthAndYear.toInstantRange |
       monthRangeYear.toInstantRange |
+      qualified(century).toInstantRange |
       century.toInstantRange |
       decade.toInstantRange |
+      qualified(year).toInstantRange |
       year.toInstantRange
 
   def dateRange[_: P] =
     (calendarDate to calendarDate).toInstantRange |
       (calendarDate to year).toInstantRange |
+      (calendarDate to qualified(year)).toInstantRange |
       (calendarDate to monthAndYear).toInstantRange |
       (calendarDate to monthAndDay).toInstantRange |
       (calendarDate to month).toInstantRange |
@@ -37,12 +46,26 @@ object PeriodParser extends Parser[InstantRange] with DateParserUtils {
       (monthAndYear to monthAndDay).toInstantRange |
       (monthAndYear to month).toInstantRange |
       (monthAndDay to calendarDate).toInstantRange |
+      (qualified(century | inferredCentury) to century).toInstantRange |
+      ((century | inferredCentury) to qualified(century)).toInstantRange |
+      (qualified(century | inferredCentury) to qualified(century)).toInstantRange |
       ((century | inferredCentury) to century).toInstantRange |
       (century to year).toInstantRange |
+      (qualified(century) to year).toInstantRange |
+      (century to qualified(year)).toInstantRange |
+      (qualified(century) to qualified(year)).toInstantRange |
+      (qualified(year) to calendarDate).toInstantRange |
+      (qualified(year) to monthAndYear).toInstantRange |
       (year to calendarDate).toInstantRange |
       (year to monthAndYear).toInstantRange |
       (year to century).toInstantRange |
+      (qualified(year) to century).toInstantRange |
+      (year to qualified(century)).toInstantRange |
+      (qualified(year) to qualified(century)).toInstantRange |
       (year to year).toInstantRange |
+      (qualified(year) to year).toInstantRange |
+      (year to qualified(year)).toInstantRange |
+      (qualified(year) to qualified(year)).toInstantRange |
       (monthRangeYear to monthRangeYear).toInstantRange |
       (decade to decade).toInstantRange |
       (month to monthAndYear).toInstantRange |

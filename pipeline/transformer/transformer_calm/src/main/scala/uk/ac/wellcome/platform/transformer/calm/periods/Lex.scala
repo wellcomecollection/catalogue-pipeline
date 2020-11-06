@@ -39,29 +39,15 @@ object Lex extends ParserUtils {
   def present[_: P]: P[Unit] = "present"
 
   // Qualifiers
-  def pre[_: P]: P[Qualifier.Pre.type] = keyword(Qualifier.Pre, "pre")
-  def post[_: P]: P[Qualifier.Post.type] = keyword(Qualifier.Post, "post")
-  def mid[_: P]: P[Qualifier.Mid.type] =
+  def pre[_: P] = keyword(Qualifier.Pre, "pre")
+  def post[_: P] = keyword(Qualifier.Post, "post")
+  def mid[_: P] =
     keywords(Qualifier.Mid, StringIn("middle", "mid.", "mid"))
-  def early[_: P]: P[Qualifier.Early.type] = keyword(Qualifier.Early, "early")
-  def late[_: P]: P[Qualifier.Late.type] = keyword(Qualifier.Late, "late")
-  def about[_: P]: P[Qualifier.About.type] = keyword(Qualifier.About, "about")
-  def approx[_: P]: P[Qualifier.Approx.type] =
-    keyword(Qualifier.Approx, "approx")
-  def between[_: P]: P[Qualifier.Between.type] =
-    keyword(Qualifier.Between, "between")
-  def circa[_: P]: P[Qualifier.Circa.type] =
-    keywords(Qualifier.Circa, StringIn("circa", "circ.", "circ", "c.", "c"))
-  def floruit[_: P]: P[Qualifier.Floruit.type] =
-    keywords(Qualifier.Floruit, StringIn("floruit", "fl.", "fl"))
-  def era[_: P]: P[Qualifier.Era] =
-    P(StringIn("a.d.", "ad", "b.c.", "bc").! map {
-      case "a.d." | "ad" => Qualifier.Era("ad")
-      case "b.c." | "bc" => Qualifier.Era("bc")
-    })
-  def gaps[_: P]: P[Qualifier.Gaps.type] = keyword(Qualifier.Gaps, "[gaps]")
-
-  def qualifier[_: P]: P[Qualifier] = P(
-    pre | post | mid | early | late | about | approx | between | circa | floruit | era | gaps
-  )
+  def early[_: P] = keyword(Qualifier.Early, "early")
+  def late[_: P] = keyword(Qualifier.Late, "late")
+  def about[_: P] =
+    keywords(
+      Qualifier.About,
+      StringIn("about", "approx", "circa", "circ.", "circ", "c.", "c")
+    )
 }
