@@ -2,20 +2,20 @@ package uk.ac.wellcome.relation_embedder
 
 import scala.concurrent.{ExecutionContext, Future}
 import com.sksamuel.elastic4s.{ElasticClient, ElasticError, Index, Response}
-import com.sksamuel.elastic4s.requests.searches.{
-  MultiSearchRequest,
-  MultiSearchResponse,
-  SearchRequest,
-  SearchResponse
-}
+import com.sksamuel.elastic4s.requests.searches.{MultiSearchRequest, MultiSearchResponse, SearchRequest, SearchResponse}
 import com.sksamuel.elastic4s.requests.searches.SearchHit
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.circe._
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.internal.result._
 import uk.ac.wellcome.models.Implicits._
-import WorkState.Merged
+import WorkState.{Identified, Merged}
+import akka.NotUsed
+import akka.actor.ActorSystem
+import akka.stream.scaladsl.{Flow, Source}
 import grizzled.slf4j.Logging
+import com.sksamuel.elastic4s.streams.ReactiveElastic._
+import uk.ac.wellcome.json.JsonUtil.fromJson
 
 trait RelationsService {
 
@@ -26,7 +26,7 @@ trait RelationsService {
     * @param work The work
     * @return The IDs of the other works to denormalise
     */
-  def getOtherAffectedWorks(work: Work[Merged]): Future[List[SourceIdentifier]]
+  def getOtherAffectedWorks(work: Work[Merged]): Future[List[Work[Merged]]]
 
   /** For a given work return all its relations.
     *
@@ -38,40 +38,32 @@ trait RelationsService {
 }
 
 class PathQueryRelationsService(elasticClient: ElasticClient, index: Index)(
-  implicit ec: ExecutionContext)
+  implicit ec: ExecutionContext, as: ActorSystem)
     extends RelationsService
     with Logging {
 
   def getOtherAffectedWorks(
-    work: Work[Merged]): Future[List[SourceIdentifier]] =
+    work: Work[Merged]): Source[Work[Merged], NotUsed] =
     work match {
       case work: Work.Visible[Merged] =>
         work.data.collectionPath match {
           case None =>
             info(
               s"work ${work.id} does not belong to an archive, skipping getOtherAffectedWorks.")
-            Future.successful(Nil)
+            Source.empty[Work[Merged]]
           case Some(CollectionPath(path, _, _)) =>
-            executeSearchRequest(
-              RelationsRequestBuilder(index, path).otherAffectedWorksRequest
-            ).flatMap { result =>
-              val works = result.left
-                .map(_.asException)
-                .flatMap { resp =>
-                  // Are you here because something is erroring when being decoded?
-                  // Check that all the fields you need are in the lists in RelationsRequestBuilder!
-                  resp.hits.hits.toList.map(toWork).toResult
-                }
-              works match {
-                case Right(works) =>
-                  info(
-                    s"work ${work.id} ($path) has ${works.size} affected works")
-                  Future.successful(works.map(_.state.sourceIdentifier))
-                case Left(err) => Future.failed(err)
+
+            Source
+              .fromPublisher(
+                elasticClient.publisher(
+                  RelationsRequestBuilder(index, path).otherAffectedWorksRequest
+                    .scroll(keepAlive = "5m")
+                    .size(100)))
+              .map { searchHit: SearchHit =>
+                fromJson[Work[Merged]](searchHit.sourceAsString).get
               }
-            }
         }
-      case _ => Future.successful(Nil)
+      case _ => Source.empty[Work[Merged]]
     }
 
   def getRelations(
