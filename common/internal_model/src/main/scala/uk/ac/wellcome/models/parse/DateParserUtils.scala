@@ -101,6 +101,16 @@ trait ParserUtils {
       .map(_.toInt)
 
   def ws[_: P] = " ".rep
+
+  // EagerOps is defined here:
+  // https://github.com/lihaoyi/fastparse/blob/dd74612224846d3743e19419b3f1191554b973f5/fastparse/src/fastparse/package.scala#L119
+  implicit class AdditionalEagerOps[T](val parse: P[T]) {
+    def collect[V](pf: PartialFunction[T, V])(implicit ctx: P[Any]): P[V] =
+      parse.filter(pf.isDefinedAt).map(pf.apply)
+
+    def flatMapOption[V](f: T => Option[V])(implicit ctx: P[Any]): P[V] =
+      parse.map(f).filter(_.isDefined).map(_.get)
+  }
 }
 
 /**
@@ -150,9 +160,6 @@ object DateParserImplicits extends ParserUtils {
 
     def toInstantRange[_: P](
       implicit toInstantRange: ToInstantRange[T]): P[InstantRange] =
-      parser
-        .map(toInstantRange.safeConvert(_))
-        .filter(_.nonEmpty)
-        .map(_.get)
+      parser.flatMapOption(toInstantRange.safeConvert)
   }
 }

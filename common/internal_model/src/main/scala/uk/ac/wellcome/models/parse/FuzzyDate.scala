@@ -27,11 +27,9 @@ case class FuzzyDateRange[F <: FuzzyDate, T <: FuzzyDate](from: F, to: T)
 object FuzzyDateRange {
   def combine[
     FF <: FuzzyDate,
-    FT <: FuzzyDate,
-    TF <: FuzzyDate,
     TT <: FuzzyDate
-  ](from: FuzzyDateRange[FF, FT],
-    to: FuzzyDateRange[TF, TT]): FuzzyDateRange[FF, TT] =
+  ](from: FuzzyDateRange[FF, _ <: FuzzyDate],
+    to: FuzzyDateRange[_ <: FuzzyDate, TT]): FuzzyDateRange[FF, TT] =
     FuzzyDateRange(from.from, to.to)
 }
 

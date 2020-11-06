@@ -71,6 +71,24 @@ object ToInstantRange extends DateHelpers {
       )
     )
 
+  implicit val centuryAndDecadeToYearToInstantRange =
+    convert[FuzzyDateRange[CenturyAndDecade, Year]](
+      value =>
+        yearToYearToInstantRange(
+          FuzzyDateRange(
+            Year(value.from.century * 100 + value.from.decade * 10),
+            value.to
+          )))
+
+  implicit val yearToCenturyAndDecadeToInstantRange =
+    convert[FuzzyDateRange[Year, CenturyAndDecade]](
+      value =>
+        yearToYearToInstantRange(
+          FuzzyDateRange(
+            value.from,
+            Year(value.to.century * 100 + value.to.decade * 10 + 9)
+          )))
+
   implicit val yearToCenturyToInstantRange =
     convert[FuzzyDateRange[Year, Century]](
       value =>

@@ -50,4 +50,7 @@ object Lex extends ParserUtils {
       Qualifier.About,
       StringIn("about", "approx", "circa", "circ.", "circ", "c.", "c")
     )
+
+  def qualifier[_: P]: P[Qualifier] =
+    pre | post | mid | early | late | about
 }

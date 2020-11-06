@@ -10,8 +10,22 @@ object PeriodParser extends Parser[InstantRange] with DateParserUtils {
   import FreeformDateParser.{calendarDate, day, month, monthAndYear}
   import QualifyFuzzyDate._
 
+  private final val ignoreSubstrings = Seq(
+    "\\[gaps\\]",
+    "floruit",
+    "fl.",
+    "fl",
+    "between",
+    "\\(",
+    "\\)",
+    "\\[",
+    "\\]",
+    "\\?",
+    "\\."
+  )
+
   private def preprocess(input: String): String =
-    Seq("\\[gaps\\]", "floruit", "fl.", "fl", "between")
+    ignoreSubstrings
       .foldLeft(input.toLowerCase) {
         case (str, noop) => str.replaceAll(noop, "")
       }
@@ -29,6 +43,7 @@ object PeriodParser extends Parser[InstantRange] with DateParserUtils {
       monthRangeYear.toInstantRange |
       qualified(century).toInstantRange |
       century.toInstantRange |
+      qualified(decade).toInstantRange |
       decade.toInstantRange |
       qualified(year).toInstantRange |
       year.toInstantRange
@@ -67,6 +82,9 @@ object PeriodParser extends Parser[InstantRange] with DateParserUtils {
       (year to qualified(year)).toInstantRange |
       (qualified(year) to qualified(year)).toInstantRange |
       (monthRangeYear to monthRangeYear).toInstantRange |
+      (qualified(decade) to qualified(decade)).toInstantRange |
+      (qualified(decade) to decade).toInstantRange |
+      (decade to qualified(decade)).toInstantRange |
       (decade to decade).toInstantRange |
       (month to monthAndYear).toInstantRange |
       (day to calendarDate).toInstantRange
