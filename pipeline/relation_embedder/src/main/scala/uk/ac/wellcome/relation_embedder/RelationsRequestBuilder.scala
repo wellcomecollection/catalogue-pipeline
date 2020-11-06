@@ -35,6 +35,15 @@ case class RelationsRequestBuilder(index: Index,
       relatedWorksRequest(ancestorsQuery)
     )
 
+  lazy val allRelationsRequest: SearchRequest =
+    search(index)
+      .query {
+        termQuery(field = "data.collectionPath.path", value = collectionRoot)
+      }
+      .from(0)
+      .limit(maxRelatedWorks)
+      .sourceInclude(relationsFieldWhitelist)
+
   lazy val otherAffectedWorksRequest: SearchRequest =
     search(index)
       .query {
@@ -101,6 +110,9 @@ case class RelationsRequestBuilder(index: Index,
 
   lazy val depth: Int =
     ancestors.length + 1
+
+  lazy val collectionRoot: String =
+    ancestors.head
 
   def pathQuery(path: String, depth: Int) =
     must(
