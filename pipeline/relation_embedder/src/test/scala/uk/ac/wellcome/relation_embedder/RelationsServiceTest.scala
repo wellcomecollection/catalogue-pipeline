@@ -1,5 +1,6 @@
 package uk.ac.wellcome.relation_embedder
 
+import akka.actor.ActorSystem
 import akka.stream.scaladsl.Sink
 import com.sksamuel.elastic4s.Index
 import org.scalatest.Assertion
@@ -7,7 +8,6 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
-import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.work.internal.WorkState.Merged
@@ -21,13 +21,7 @@ class RelationsServiceTest
     with ElasticsearchFixtures
     with WorkGenerators with Akka {
 
-  def withService[R](index: Index)(testWith: TestWith[RelationsService, R]) = {
-    withActorSystem { implicit as =>
-      testWith(
-        new PathQueryRelationsService(elasticClient, index, 10)
-      )
-    }
-  }
+  def service[R](index: Index)(implicit as: ActorSystem) = new PathQueryRelationsService(elasticClient, index, 10)
 
   def work(path: String) =
     mergedWork(createSourceIdentifierWith(value = path))
@@ -55,8 +49,8 @@ class RelationsServiceTest
     it("Retrieves all affected works") {
       withLocalMergedWorksIndex { index =>
         storeWorks(index)
-          withService(index) { service =>
-            whenReady(queryAffectedWorks(service, workE)) { result =>
+        withActorSystem { implicit as =>
+            whenReady(queryAffectedWorks(service(index), workE)) { result =>
               result should contain theSameElementsAs List(
                 work2,
                 workD,
@@ -72,12 +66,11 @@ class RelationsServiceTest
       "Retrieves the whole remaining tree when getting affected works from root position") {
       withLocalMergedWorksIndex { index =>
         storeWorks(index)
-          withService(index) { service =>
-            whenReady(queryAffectedWorks(service, workA)) { result =>
+        withActorSystem { implicit as =>
+          whenReady(queryAffectedWorks(service(index), workA)) { result =>
               result should contain theSameElementsAs
                 works
                   .filter(_.state.sourceIdentifier != workA.state.sourceIdentifier)
-                  .map(_.sourceIdentifier)
             }
           }
         }
@@ -88,27 +81,25 @@ class RelationsServiceTest
         withLocalMergedWorksIndex { index =>
           val workX = mergedWork()
           storeWorks(index, List(workA, work1, workX))
-          withService(index) { service =>
-            whenReady(queryAffectedWorks(service, workX)) { result =>
+          withActorSystem { implicit as =>
+            whenReady(queryAffectedWorks(service(index), workX)) { result =>
             result shouldBe Nil
           }
         }
       }
     }
-    def queryAffectedWorks(service: RelationsService, work: Work[Merged]) = {
-      withMaterializer { implicit mat =>
+    def queryAffectedWorks(service: RelationsService, work: Work[Merged])(implicit as: ActorSystem) =
         service.getOtherAffectedWorks(work).runWith(Sink.seq[Work[Merged]])
-      }
-    }
+
   }
 
   describe("getRelations") {
     it(
       "Retrieves a related works for the given path with children and siblings sorted correctly") {
       withLocalMergedWorksIndex { index =>
-        storeWorks(index)
-        withService(index) { service =>
-          whenReady(service.getRelations(work2)) { relations =>
+        withActorSystem { implicit as =>
+          storeWorks(index)
+          whenReady(service(index).getRelations(work2)) { relations =>
             relations shouldBe Relations(
               ancestors = List(Relation(workA, 0)),
               children = List(Relation(workD, 2), Relation(workE, 2)),
@@ -123,9 +114,9 @@ class RelationsServiceTest
     it(
       "Retrieves a related works for the given path with ancestors sorted correctly") {
       withLocalMergedWorksIndex { index =>
-        storeWorks(index)
-        withService(index) { service =>
-          whenReady(service.getRelations(workF)) { relations =>
+        withActorSystem { implicit as =>
+          storeWorks(index)
+          whenReady(service(index).getRelations(workF)) { relations =>
             relations shouldBe Relations(
               ancestors =
                 List(Relation(workA, 0), Relation(work2, 1), Relation(workE, 2)),
@@ -136,13 +127,13 @@ class RelationsServiceTest
           }
         }
       }
-    }
+      }
 
     it("Retrieves relations correctly from root position") {
       withLocalMergedWorksIndex { index =>
-        storeWorks(index)
-        withService(index) { service =>
-          whenReady(service.getRelations(workA)) { relations =>
+        withActorSystem { implicit as =>
+          storeWorks(index)
+          whenReady(service(index).getRelations(workA)) { relations =>
             relations shouldBe Relations(
               ancestors = Nil,
               children = List(
@@ -155,14 +146,14 @@ class RelationsServiceTest
             )
           }
         }
+        }
       }
-    }
 
     it("Ignores missing ancestors") {
       withLocalMergedWorksIndex { index =>
-        storeWorks(index, List(workA, workB, workC, workD, workE, workF))
-        withService(index) { service =>
-          whenReady(service.getRelations(workF)) { relations =>
+        withActorSystem { implicit as =>
+          storeWorks(index, List(workA, workB, workC, workD, workE, workF))
+          whenReady(service(index).getRelations(workF)) { relations =>
             relations shouldBe Relations(
               ancestors = List(
                 Relation(workA, 0),
@@ -174,17 +165,18 @@ class RelationsServiceTest
             )
           }
         }
+        }
       }
-    }
+
 
     it("Filters out invisible works") {
       withLocalWorksIndex { index =>
-        val workP = work("p")
-        val workQ = work("p/q").invisible()
-        val workR = work("p/r")
-        storeWorks(index, List(workP, workQ, workR))
-        withService(index) { service =>
-          whenReady(service.getRelations(workP)) { relations =>
+        withActorSystem { implicit as =>
+          val workP = work("p")
+          val workQ = work("p/q").invisible()
+          val workR = work("p/r")
+          storeWorks(index, List(workP, workQ, workR))
+          whenReady(service(index).getRelations(workP)) { relations =>
             relations shouldBe Relations(
               children = List(Relation(workR, 1)),
               ancestors = Nil,
@@ -194,14 +186,15 @@ class RelationsServiceTest
           }
         }
       }
-    }
+      }
+
 
     it("Returns no related works when work is not part of a collection") {
       withLocalMergedWorksIndex { index =>
-        val workX = mergedWork()
-        storeWorks(index, List(workA, work1, workX))
-        withService(index) { service =>
-          whenReady(service.getRelations(workX)) { relations =>
+        withActorSystem { implicit as =>
+          val workX = mergedWork()
+          storeWorks(index, List(workA, work1, workX))
+          whenReady(service(index).getRelations(workX)) { relations =>
             relations shouldBe Relations(
               ancestors = Nil,
               children = Nil,
@@ -211,17 +204,18 @@ class RelationsServiceTest
           }
         }
       }
-    }
+      }
+
 
     it("Sorts works consisting of paths with an alphanumeric mixture of tokens") {
       withLocalMergedWorksIndex { index =>
-        val workA = work("a")
-        val workB1 = work("a/B1")
-        val workB2 = work("a/B2")
-        val workB10 = work("a/B10")
-        storeWorks(index, List(workA, workB2, workB1, workB10))
-        withService(index) { service =>
-          whenReady(service.getRelations(workA)) { relations =>
+        withActorSystem { implicit as =>
+          val workA = work("a")
+          val workB1 = work("a/B1")
+          val workB2 = work("a/B2")
+          val workB10 = work("a/B10")
+          storeWorks(index, List(workA, workB2, workB1, workB10))
+          whenReady(service(index).getRelations(workA)) { relations =>
             relations shouldBe Relations(
               ancestors = Nil,
               children = List(
