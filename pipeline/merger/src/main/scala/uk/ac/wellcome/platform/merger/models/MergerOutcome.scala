@@ -15,10 +15,8 @@ import WorkFsm._
 case class MergerOutcome(resultWorks: Seq[Work[Source]],
                          imagesWithSources: Seq[ImageWithSource]) {
 
-  // numberOfSources is hardcoded here so as not to break builds
-  // TODO: remove numberOfSources
   def mergedWorksWithTime(modifiedTime: Instant): Seq[Work[Merged]] =
-    resultWorks.map(_.transition[Merged]((Some(modifiedTime), 1)))
+    resultWorks.map(_.transition[Merged](Some(modifiedTime)))
 
   def mergedImagesWithTime(
     modifiedTime: Instant): Seq[MergedImage[DataState.Unidentified]] =

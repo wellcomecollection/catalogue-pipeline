@@ -5,12 +5,9 @@ sealed trait ImageSource[State <: DataState] {
   val version: Int
 }
 
-// numberOfSources is hardcoded here so as not to break builds
-// TODO: remove numberOfSources
 case class SourceWorks[State <: DataState](
   canonicalWork: SourceWork[State],
-  redirectedWork: Option[SourceWork[State]] = None,
-  numberOfSources: Int = 1
+  redirectedWork: Option[SourceWork[State]] = None
 ) extends ImageSource[State] {
   override val id = canonicalWork.id
   override val version =

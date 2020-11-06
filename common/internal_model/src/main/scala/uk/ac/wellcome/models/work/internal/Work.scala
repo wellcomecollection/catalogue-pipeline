@@ -127,7 +127,6 @@ sealed trait WorkState {
   type TransitionArgs
 
   val sourceIdentifier: SourceIdentifier
-  val numberOfSources: Int
   val modifiedTime: Instant
 
   def id: String = sourceIdentifier.toString
@@ -142,24 +141,20 @@ object WorkState {
 
     type WorkDataState = DataState.Unidentified
     type TransitionArgs = Unit
-
-    val numberOfSources = 1
   }
 
   case class Merged(
     sourceIdentifier: SourceIdentifier,
     modifiedTime: Instant,
-    numberOfSources: Int,
   ) extends WorkState {
 
     type WorkDataState = DataState.Unidentified
-    type TransitionArgs = (Option[Instant], Int)
+    type TransitionArgs = Option[Instant]
   }
 
   case class Denormalised(
     sourceIdentifier: SourceIdentifier,
     modifiedTime: Instant,
-    numberOfSources: Int,
     relations: Relations[DataState.Unidentified] = Relations.none
   ) extends WorkState {
 
@@ -171,7 +166,6 @@ object WorkState {
     sourceIdentifier: SourceIdentifier,
     canonicalId: String,
     modifiedTime: Instant,
-    numberOfSources: Int,
     relations: Relations[DataState.Identified] = Relations.none
   ) extends WorkState {
 
@@ -202,11 +196,10 @@ object WorkFsm {
   }
 
   implicit val sourceToMerged = new Transition[Source, Merged] {
-    def state(state: Source, args: (Option[Instant], Int)): Merged =
+    def state(state: Source, args: Option[Instant]): Merged =
       Merged(
         state.sourceIdentifier,
-        args._1.getOrElse(state.modifiedTime),
-        args._2
+        args.getOrElse(state.modifiedTime)
       )
 
     def data(data: WorkData[DataState.Unidentified]) = data
@@ -217,11 +210,7 @@ object WorkFsm {
   implicit val mergedToDenormalised = new Transition[Merged, Denormalised] {
     def state(state: Merged,
               relations: Relations[DataState.Unidentified]): Denormalised =
-      Denormalised(
-        state.sourceIdentifier,
-        state.modifiedTime,
-        state.numberOfSources,
-        relations)
+      Denormalised(state.sourceIdentifier, state.modifiedTime, relations)
 
     def data(data: WorkData[DataState.Unidentified]) = data
 

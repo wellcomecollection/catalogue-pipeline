@@ -26,8 +26,7 @@ object ImagesIndexConfig extends IndexConfig with WorksIndexConfigFields {
   val source = objectField("source").fields(
     sourceWork("canonicalWork"),
     sourceWork("redirectedWork"),
-    keywordField("type"),
-    intField("numberOfSources")
+    keywordField("type")
   )
 
   override val mapping: MappingDefinition = properties(
