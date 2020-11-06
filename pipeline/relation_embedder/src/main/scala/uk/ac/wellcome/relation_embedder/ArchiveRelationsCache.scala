@@ -5,27 +5,29 @@ import scala.annotation.tailrec
 import uk.ac.wellcome.models.work.internal._
 import WorkState.Merged
 
-class ArchiveRelationsCache(relations: Map[String, Relation[DataState.Unidentified]]) {
+class ArchiveRelationsCache(
+  relations: Map[String, Relation[DataState.Unidentified]]) {
 
   def relations(work: Work[Merged]): Relations[DataState.Unidentified] =
-    work
-      .data
-      .collectionPath
-      .map { case CollectionPath(path, _, _) =>
-        val (siblingsPreceding, siblingsSucceeding) = siblings(path)
-        Relations(
-          ancestors = ancestors(path),
-          children = children(path),
-          siblingsPreceding = siblingsPreceding,
-          siblingsSucceeding = siblingsSucceeding
-        )
+    work.data.collectionPath
+      .map {
+        case CollectionPath(path, _, _) =>
+          val (siblingsPreceding, siblingsSucceeding) = siblings(path)
+          Relations(
+            ancestors = ancestors(path),
+            children = children(path),
+            siblingsPreceding = siblingsPreceding,
+            siblingsSucceeding = siblingsSucceeding
+          )
       }
       .getOrElse(Relations.none)
 
   private def children(path: String): List[Relation[DataState.Unidentified]] =
     childMapping(path).map(relations).toList
 
-  private def siblings(path: String): (List[Relation[DataState.Unidentified]], List[Relation[DataState.Unidentified]]) = {
+  private def siblings(
+    path: String): (List[Relation[DataState.Unidentified]],
+                    List[Relation[DataState.Unidentified]]) = {
     val siblings = parentMapping
       .get(path)
       .map(childMapping)
@@ -42,34 +44,36 @@ class ArchiveRelationsCache(relations: Map[String, Relation[DataState.Unidentifi
 
   @tailrec
   private def ancestors(path: String,
-                        accum: List[Relation[DataState.Unidentified]] = Nil): List[Relation[DataState.Unidentified]] =
+                        accum: List[Relation[DataState.Unidentified]] = Nil)
+    : List[Relation[DataState.Unidentified]] =
     parentMapping.get(path) match {
-      case None => accum
+      case None             => accum
       case Some(parentPath) => ancestors(path, relations(parentPath) :: accum)
     }
 
   private lazy val parentMapping: Map[String, String] =
     relations
-      .map { case (path, _) =>
-        val pathTokens = tokenize(path)
-        path -> relations
-          .keys
-          .find { parentPath =>
-            val parentPathTokens = tokenize(parentPath)
-            pathTokens == parentPathTokens.slice(0, parentPathTokens.length - 1)
-          }
+      .map {
+        case (path, _) =>
+          val pathTokens = tokenize(path)
+          path -> relations.keys
+            .find { parentPath =>
+              val parentPathTokens = tokenize(parentPath)
+              pathTokens == parentPathTokens.slice(
+                0,
+                parentPathTokens.length - 1)
+            }
       }
       .collect { case (path, Some(parentPath)) => path -> parentPath }
 
   private lazy val childMapping: Map[String, List[String]] =
-    relations.map { case (path, work) =>
-      path -> CollectionPathSorter.sortPaths(
-        parentMapping
-          .collect {
+    relations.map {
+      case (path, work) =>
+        path -> CollectionPathSorter.sortPaths(
+          parentMapping.collect {
             case (childPath, parentPath) if parentPath == path =>
               childPath
-          }
-          .toList
+          }.toList
         )
     }
 
@@ -83,8 +87,9 @@ object ArchiveRelationsCache {
     new ArchiveRelationsCache(
       works
         .map { case work => work.data.collectionPath -> work }
-        .collect { case (Some(CollectionPath(path, _, _)), work) =>
-          path -> Relation(work, path.split("/").length - 1)
+        .collect {
+          case (Some(CollectionPath(path, _, _)), work) =>
+            path -> Relation(work, path.split("/").length - 1)
         }
         .toMap
     )
