@@ -136,7 +136,7 @@ class RelationEmbedderWorkerServiceTest
               workRetriever = new ElasticRetriever(elasticClient, mergedIndex),
               workIndexer = new MemoryIndexer(denormalisedIndex),
               relationsService =
-                new PathQueryRelationsService(elasticClient, mergedIndex),
+                new PathQueryRelationsService(elasticClient, mergedIndex, 10),
               flushInterval = 1 milliseconds,
             )
             workerService.run()
