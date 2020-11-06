@@ -41,8 +41,7 @@ class ArchiveRelationsCacheTest
     )
   }
 
-  it(
-    "Retrieves relations for the given path with ancestors sorted correctly") {
+  it("Retrieves relations for the given path with ancestors sorted correctly") {
     val relationsCache = ArchiveRelationsCache(works)
     relationsCache(workF) shouldBe Relations(
       ancestors =
@@ -65,7 +64,7 @@ class ArchiveRelationsCacheTest
       siblingsPreceding = Nil,
       siblingsSucceeding = Nil
     )
-}
+  }
 
   it("Ignores missing ancestors") {
     val works = List(workA, workB, workC, workD, workE, workF)

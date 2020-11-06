@@ -46,8 +46,9 @@ class ArchiveRelationsCache(
                         accum: List[Relation[DataState.Unidentified]] = Nil)
     : List[Relation[DataState.Unidentified]] =
     parentMapping.get(path) match {
-      case None             => accum
-      case Some(parentPath) => ancestors(parentPath, relations(parentPath) :: accum)
+      case None => accum
+      case Some(parentPath) =>
+        ancestors(parentPath, relations(parentPath) :: accum)
     }
 
   private lazy val parentMapping: Map[String, String] =
