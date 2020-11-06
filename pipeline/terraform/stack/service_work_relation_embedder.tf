@@ -29,8 +29,8 @@ module "relation_embedder" {
     es_merged_index       = local.es_works_merged_index
     es_denormalised_index = local.es_works_denormalised_index
 
-    queue_parallelism      = 5
-    scroll_size            = 250
+    queue_parallelism      = 3
+    multiget_works         = 150
     batch_size             = 100
     flush_interval_seconds = 60
   }
