@@ -6,6 +6,8 @@ import uk.ac.wellcome.models.parse.ParserUtils
 
 import scala.Function.const
 
+// Elements and qualifiers are based upon (but not limited to) those documented here:
+// http://www.dswebhosting.info/documents/Manuals/ALM/V10/MANUAL/main_menu/basics/period_field_format.htm
 object Lex extends ParserUtils {
   def keyword[T, _: P](token: T, str: String): P[T] =
     LiteralStr(str) map const(token)

@@ -22,9 +22,7 @@ trait Parser[T] extends Logging {
   def apply(input: String): Option[T] =
     parse(input, parser(_)) match {
       case Parsed.Success(value, _) => Some(value)
-      case Parsed.Failure(_, index, _) =>
-        warn(s"Failed parsing $input at $index")
-        None
+      case Parsed.Failure(_, _, _)  => None
     }
 }
 

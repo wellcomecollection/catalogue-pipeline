@@ -20,6 +20,8 @@ trait QualifyFuzzyDate[D <: FuzzyDate] {
   val toDateRange: PartialFunction[(Qualifier, D), FuzzyDateRange[Year, Year]]
 }
 
+// Qualifier behaviours are specified here
+// http://www.dswebhosting.info/documents/Manuals/ALM/V10/MANUAL/main_menu/basics/period_field_format.htm
 object QualifyFuzzyDate extends ParserUtils {
   def qualified[_: P, D <: FuzzyDate](unqualified: => P[D])(
     implicit q: QualifyFuzzyDate[D]): P[FuzzyDateRange[Year, Year]] =

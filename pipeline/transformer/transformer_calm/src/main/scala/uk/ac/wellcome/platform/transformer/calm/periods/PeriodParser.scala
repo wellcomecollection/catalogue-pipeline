@@ -13,6 +13,8 @@ object PeriodParser extends Parser[InstantRange] with DateParserUtils {
   override def apply(input: String): Option[InstantRange] =
     super.apply(preprocess(input)) map (_ withLabel input)
 
+  // These strings don't change parsing outcomes so we remove them rather
+  // than trying to handle them in the parser
   private final val ignoreSubstrings = Seq(
     "\\[gaps\\]",
     "floruit",
@@ -34,6 +36,8 @@ object PeriodParser extends Parser[InstantRange] with DateParserUtils {
       .replaceAllIn(input.toLowerCase, "")
       .trim
 
+  // Try to parse as many `timePeriod`s as we can and then add them to find
+  // the interval that covers all of them
   def parser[_: P]: P[InstantRange] =
     (Start ~ timePeriod.rep(sep = multiPeriodSeparator, min = 1) ~ End) map {
       periods =>
@@ -44,12 +48,14 @@ object PeriodParser extends Parser[InstantRange] with DateParserUtils {
     ws.? ~ StringIn(";", ",", "and") ~ ws.?
 
   def timePeriod[_: P] =
-    dateRange | singleDate | (noopQualifier ~ ws.? ~ singleDate)
+    dateRange |
+      singleDate |
+      (noopQualifier ~ ws.? ~ singleDate) // Try not to fail for un-spec'd qualifiers
 
   def singleDate[_: P]: P[InstantRange] =
     calendarDate.toInstantRange |
       monthAndYear.toInstantRange |
-      monthRangeYear.toInstantRange |
+      yearDivision.toInstantRange |
       qualified(century).toInstantRange |
       century.toInstantRange |
       qualified(decade).toInstantRange |
@@ -65,7 +71,7 @@ object PeriodParser extends Parser[InstantRange] with DateParserUtils {
       yearToDate |
       decadeToDate |
       (monthAndDay to calendarDate).toInstantRange |
-      (monthRangeYear to monthRangeYear).toInstantRange |
+      (yearDivision to yearDivision).toInstantRange |
       (month to monthAndYear).toInstantRange |
       (day to calendarDate).toInstantRange
 
@@ -126,6 +132,8 @@ object PeriodParser extends Parser[InstantRange] with DateParserUtils {
 
   def noopQualifier[_: P]: P[Unit] = Lex.qualifier map (_ => ())
 
+  // We can infer a century intention for some numbers, eg for
+  // 14 in the string "14th-15th century"
   def inferredCentury[_: P]: P[Century] =
     P(Lex.int.filter(_ <= 999) ~ Lex.ordinalSuffix.? map { n =>
       Century(n - 1)
@@ -137,6 +145,7 @@ object PeriodParser extends Parser[InstantRange] with DateParserUtils {
     CenturyAndDecade(century = year / 100, decade = (year % 100) / 10)
   }
 
+  // A year range is a string like 1994-5 or 1066-90
   def yearRange[_: P]: P[FuzzyDateRange[Year, Year]] =
     P(year ~ ws.? ~ "-" ~ ws.? ~ digitRep(1, 2) map {
       case (year @ Year(y), n) if n < 10 =>
@@ -154,7 +163,7 @@ object PeriodParser extends Parser[InstantRange] with DateParserUtils {
   def monthFollowedByDay[_: P]: P[MonthAndDay] =
     P(writtenMonth ~ ws ~ writtenDay map MonthAndDay.tupled)
 
-  def monthRangeYear[_: P]: P[FuzzyDateRange[MonthAndYear, MonthAndYear]] =
+  def yearDivision[_: P]: P[FuzzyDateRange[MonthAndYear, MonthAndYear]] =
     seasonYear | lawTermYear
 
   def seasonYear[_: P]: P[FuzzyDateRange[MonthAndYear, MonthAndYear]] =
