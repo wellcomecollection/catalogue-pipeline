@@ -109,7 +109,7 @@ trait ParserUtils {
       parse.filter(pf.isDefinedAt).map(pf.apply)
 
     def flatMapOption[V](f: T => Option[V])(implicit ctx: P[Any]): P[V] =
-      parse.map(f).filter(_.isDefined).map(_.get)
+      parse.map(f).collect { case Some(v) => v }
   }
 }
 
@@ -118,6 +118,8 @@ trait ParserUtils {
   */
 object DateParserImplicits extends ParserUtils {
 
+  // Unicode 0096 is used as a separator in some data
+  // It is the "START OF GUARDED AREA" character
   private def sep[_: P]: P[Unit] =
     P(ws.? ~ StringIn("to", "x", "-", "/", "\u0096") ~ ws.?)
 

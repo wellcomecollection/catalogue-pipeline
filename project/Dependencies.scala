@@ -88,7 +88,6 @@ object ExternalDependencies {
     val enumeratum = "1.5.13"
     val enumeratumScalacheck = "1.5.16"
     val jsoup = "1.13.1"
-    val parserCombinators = "1.1.2"
   }
   val enumeratumDependencies = Seq(
     "com.beachape" %% "enumeratum" % versions.enumeratum,
@@ -193,10 +192,6 @@ object ExternalDependencies {
 
   val jsoupDependencies = Seq(
     "org.jsoup" % "jsoup" % versions.jsoup
-  )
-
-  val parserCombinatorsDependencies = Seq(
-    "org.scala-lang.modules" %% "scala-parser-combinators" % versions.parserCombinators
   )
 }
 
