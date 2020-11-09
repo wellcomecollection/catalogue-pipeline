@@ -21,7 +21,6 @@ class ElasticRetriever[T](client: ElasticClient, index: Index)(
     with Logging {
 
   final def apply(id: String): Future[T] = {
-    debug(s"Looking up ID $id in index $index")
     client
       .execute {
         get(index, id)
