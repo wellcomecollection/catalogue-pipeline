@@ -18,7 +18,7 @@ class SierraNotesTest
     with MarcGenerators
     with SierraDataGenerators {
 
-  it("should extract notes from all fields") {
+  it("extracts notes from all fields") {
     val notes = List(
       "500" -> GeneralNote("general note a"),
       "501" -> GeneralNote("general note b"),
@@ -48,7 +48,7 @@ class SierraNotesTest
     SierraNotes(bibId, bibData(notes)) shouldBe notes.map(_._2)
   }
 
-  it("should extract all notes when duplicate fields") {
+  it("extracts all notes when duplicate fields") {
     val notes = List(
       "500" -> GeneralNote("note a"),
       "500" -> GeneralNote("note b"),
@@ -56,7 +56,7 @@ class SierraNotesTest
     SierraNotes(bibId, bibData(notes)) shouldBe notes.map(_._2)
   }
 
-  it("should not extract notes from non notes fields") {
+  it("does not extract notes from non-note fields") {
     val notes = List(
       "100" -> "not a note",
       "530" -> "not a note",
@@ -64,12 +64,12 @@ class SierraNotesTest
     SierraNotes(bibId, bibData(notes: _*)) shouldBe Nil
   }
 
-  it("should preserve html in notes fields") {
+  it("preserves HTML in notes fields") {
     val notes = List("500" -> GeneralNote("<p>note</p>"))
     SierraNotes(bibId, bibData(notes)) shouldBe notes.map(_._2)
   }
 
-  it("should concatenate subfields into a single note") {
+  it("concatenate all the subfields on a single MARC field into a single note") {
     val bibData = createSierraBibDataWith(
       varFields = List(
         createVarFieldWith(
@@ -87,7 +87,7 @@ class SierraNotesTest
     )
   }
 
-  it("should not concatenate separate varfields") {
+  it("does not concatenate separate varfields") {
     val notes = List(
       "500" -> GeneralNote("1st note."),
       "500" -> GeneralNote("2nd note."),
@@ -95,7 +95,7 @@ class SierraNotesTest
     SierraNotes(bibId, bibData(notes)) shouldBe notes.map(_._2)
   }
 
-  it("should suppress subfield $5 in binding information") {
+  it("suppresses subfield ǂ5 in binding information") {
     val bibData = createSierraBibDataWith(
       varFields = List(
         createVarFieldWith(
