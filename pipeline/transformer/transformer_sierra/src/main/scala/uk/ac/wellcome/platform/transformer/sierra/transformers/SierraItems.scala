@@ -23,7 +23,7 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
     * So the output is deterministic here we sort all items by the
     * sierra-identifier
     */
-  override def apply(bibData: SierraBibData) =
+  def apply(bibData: SierraBibData) =
     getPhysicalItems(itemDataMap, bibData)
       .sortBy { item =>
         item.id match {

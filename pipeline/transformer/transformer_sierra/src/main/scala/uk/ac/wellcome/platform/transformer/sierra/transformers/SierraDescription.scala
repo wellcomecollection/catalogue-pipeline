@@ -22,7 +22,7 @@ object SierraDescription extends SierraDataTransformer {
   //
   // https://www.loc.gov/marc/bibliographic/bd520.html
   //
-  override def apply(bibData: SierraBibData) =
+  def apply(bibData: SierraBibData) =
     getSubfields(bibData, "520", List("a", "b"))
       .foldLeft[List[String]](Nil)((acc, subfields) => {
 

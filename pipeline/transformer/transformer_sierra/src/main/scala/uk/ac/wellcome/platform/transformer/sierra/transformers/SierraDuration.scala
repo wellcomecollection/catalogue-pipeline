@@ -11,7 +11,7 @@ object SierraDuration extends SierraDataTransformer with SierraQueryOps {
 
   type Output = Option[Int]
 
-  override def apply(bibData: SierraBibData) =
+  def apply(bibData: SierraBibData) =
     bibData
       .subfieldsWithTag("306" -> "a")
       .firstContent

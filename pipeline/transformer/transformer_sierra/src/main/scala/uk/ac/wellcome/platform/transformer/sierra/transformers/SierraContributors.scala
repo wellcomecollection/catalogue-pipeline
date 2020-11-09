@@ -45,7 +45,7 @@ object SierraContributors
     ("711", getMeetingContributors _, "j"),
   )
 
-  override def apply(bibData: SierraBibData) =
+  def apply(bibData: SierraBibData) =
     contributorFields.flatMap {
       case (tag, f, roleTag) =>
         bibData

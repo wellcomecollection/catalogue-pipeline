@@ -41,7 +41,7 @@ object SierraNotes extends SierraDataTransformer with SierraQueryOps {
       "593" -> NotesField(CopyrightNote),
     )
 
-  override def apply(bibData: SierraBibData) =
+  def apply(bibData: SierraBibData) =
     notesFields
       .flatMap {
         case (tag, NotesField(createNote, suppressedSubfields)) =>

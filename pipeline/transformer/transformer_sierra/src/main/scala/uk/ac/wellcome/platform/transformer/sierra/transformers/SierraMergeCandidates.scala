@@ -20,7 +20,7 @@ object SierraMergeCandidates extends SierraDataTransformer with SierraQueryOps {
 
   type Output = List[MergeCandidate]
 
-  override def apply(bibData: SierraBibData) =
+  def apply(bibData: SierraBibData) =
     get776mergeCandidates(bibData) ++
       getSinglePageMiroMergeCandidates(bibData) ++ get035CalmMergeCandidates(
       bibData)

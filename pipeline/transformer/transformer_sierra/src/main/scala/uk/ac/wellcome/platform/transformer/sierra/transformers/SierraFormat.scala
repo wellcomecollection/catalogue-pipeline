@@ -23,7 +23,7 @@ object SierraFormat extends SierraDataTransformer {
    *
    * Note: will map to a controlled vocabulary terms in future
    */
-  override def apply(bibData: SierraBibData) =
+  def apply(bibData: SierraBibData) =
     bibData.materialType.map { t =>
       SierraMaterialTypes.fromCode(t.code)
     }

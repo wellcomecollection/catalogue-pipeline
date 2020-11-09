@@ -24,7 +24,7 @@ object SierraAlternativeTitles
 
   type Output = List[String]
 
-  override def apply(bibData: SierraBibData): List[String] =
+  def apply(bibData: SierraBibData): List[String] =
     bibData
       .varfieldsWithTags("240", "130", "246")
       .filterNot { varfield =>

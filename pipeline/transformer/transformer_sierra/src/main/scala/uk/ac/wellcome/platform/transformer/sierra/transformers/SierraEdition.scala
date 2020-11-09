@@ -13,7 +13,7 @@ object SierraEdition extends SierraDataTransformer with SierraQueryOps {
 
   type Output = Option[String]
 
-  override def apply(bibData: SierraBibData) =
+  def apply(bibData: SierraBibData) =
     bibData
       .subfieldsWithTag("250" -> "a")
       .contentString(" ")

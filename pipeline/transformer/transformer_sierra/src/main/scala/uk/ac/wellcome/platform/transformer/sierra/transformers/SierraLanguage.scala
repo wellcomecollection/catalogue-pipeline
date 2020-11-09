@@ -17,7 +17,7 @@ object SierraLanguage extends SierraDataTransformer {
   //  - These are populated by ISO 639-2 language codes, but we treat them
   //    as opaque identifiers for our purposes.
   //
-  override def apply(bibData: SierraBibData) =
+  def apply(bibData: SierraBibData) =
     bibData.lang.map { lang =>
       Language(
         label = lang.name,

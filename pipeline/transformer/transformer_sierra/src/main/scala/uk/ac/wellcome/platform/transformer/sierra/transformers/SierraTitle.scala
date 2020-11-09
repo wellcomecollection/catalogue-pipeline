@@ -16,7 +16,7 @@ object SierraTitle extends SierraDataTransformer with SierraQueryOps {
   //
   // MARC 245 is non-repeatable, as are these three subfields.
   // http://www.loc.gov/marc/bibliographic/bd245.html
-  override def apply(bibData: SierraBibData): Option[String] = {
+  def apply(bibData: SierraBibData): Option[String] = {
     val marc245Field = bibData
       .nonrepeatableVarfieldWithTag("245")
       .getOrElse(

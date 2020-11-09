@@ -50,7 +50,7 @@ object SierraGenres
 
   type Output = List[Genre[IdState.Unminted]]
 
-  override def apply(bibData: SierraBibData) =
+  def apply(bibData: SierraBibData) =
     bibData
       .varfieldsWithTag("655")
       .map { varField =>

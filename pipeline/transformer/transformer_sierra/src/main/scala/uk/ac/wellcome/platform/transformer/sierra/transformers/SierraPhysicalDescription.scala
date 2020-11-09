@@ -31,7 +31,7 @@ object SierraPhysicalDescription
 
   type Output = Option[String]
 
-  override def apply(bibData: SierraBibData) =
+  def apply(bibData: SierraBibData) =
     bibData
       .subfieldsWithTags(
         "300" -> "a",

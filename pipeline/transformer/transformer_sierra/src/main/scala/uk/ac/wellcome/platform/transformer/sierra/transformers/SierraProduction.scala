@@ -11,7 +11,7 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
 import uk.ac.wellcome.models.parse.Marc008Parser
 import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 
-object SierraProduction extends SierraDataTransformer with SierraQueryOps {
+object SierraProduction extends SierraIdentifiedDataTransformer with SierraQueryOps {
 
   type Output = List[ProductionEvent[IdState.Unminted]]
 
@@ -32,7 +32,7 @@ object SierraProduction extends SierraDataTransformer with SierraQueryOps {
   // but it would be a cataloguing error -- we should reject it, and flag it
   // to the librarians.
   //
-  override def apply(bibId: SierraBibNumber, bibData: SierraBibData) = {
+  def apply(bibId: SierraBibNumber, bibData: SierraBibData) = {
 
     val maybeMarc260fields = bibData.varfieldsWithTag("260")
     val maybeMarc264fields = bibData.varfieldsWithTag("264")
