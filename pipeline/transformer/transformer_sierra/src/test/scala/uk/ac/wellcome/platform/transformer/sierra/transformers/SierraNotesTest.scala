@@ -87,7 +87,7 @@ class SierraNotesTest
     )
   }
 
-  it("should not concatenate seperate varfields") {
+  it("should not concatenate separate varfields") {
     val notes = List(
       "500" -> GeneralNote("1st note."),
       "500" -> GeneralNote("2nd note."),
