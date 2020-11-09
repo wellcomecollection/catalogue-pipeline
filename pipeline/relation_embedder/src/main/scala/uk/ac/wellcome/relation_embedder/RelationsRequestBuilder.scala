@@ -28,18 +28,6 @@ case class RelationsRequestBuilder(index: Index,
     "data.workType",
   )
 
-  // To reduce response size and improve Elasticsearch performance we only
-  // return core fields
-  val otherAffectedWorksFieldWhitelist = List(
-    "version",
-    "state.sourceIdentifier.identifierType.id",
-    "state.sourceIdentifier.identifierType.label",
-    "state.sourceIdentifier.value",
-    "state.sourceIdentifier.ontologyType",
-    "state.modifiedTime",
-    "data.title",
-  )
-
   lazy val relationsRequest: MultiSearchRequest =
     multi(
       relatedWorksRequest(childrenQuery),
@@ -58,7 +46,6 @@ case class RelationsRequestBuilder(index: Index,
       }
       .from(0)
       .limit(maxRelatedWorks)
-      .sourceInclude(otherAffectedWorksFieldWhitelist)
 
   /**
     * Query all direct children of the node with the given path.

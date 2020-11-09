@@ -30,7 +30,7 @@ module "relation_embedder" {
     es_denormalised_index = local.es_works_denormalised_index
 
     queue_parallelism      = 5
-    multiget_works         = 100
+    scroll_size            = 250
     batch_size             = 100
     flush_interval_seconds = 60
   }

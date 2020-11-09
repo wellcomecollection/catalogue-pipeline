@@ -1,28 +1,27 @@
 package uk.ac.wellcome.relation_embedder
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration._
-import scala.collection.mutable
-import org.scalatest.funspec.AnyFunSpec
-import org.scalatest.matchers.should.Matchers
+import com.sksamuel.elastic4s.Index
 import org.scalatest.Assertion
 import org.scalatest.concurrent.Eventually
-import com.sksamuel.elastic4s.Index
-
-import uk.ac.wellcome.pipeline_storage.{ElasticRetriever, MemoryIndexer}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
+import uk.ac.wellcome.akka.fixtures.Akka
+import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
+import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.monitoring.memory.MemoryMetrics
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.models.work.generators.WorkGenerators
-import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
-import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.akka.fixtures.Akka
-
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.Implicits._
-import WorkState.{Denormalised, Merged}
+import uk.ac.wellcome.models.work.generators.WorkGenerators
+import uk.ac.wellcome.models.work.internal.WorkState.{Denormalised, Merged}
+import uk.ac.wellcome.models.work.internal._
+import uk.ac.wellcome.monitoring.memory.MemoryMetrics
+import uk.ac.wellcome.pipeline_storage.{ElasticRetriever, MemoryIndexer}
+
+import scala.collection.mutable
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
 
 class RelationEmbedderWorkerServiceTest
     extends AnyFunSpec
@@ -85,12 +84,12 @@ class RelationEmbedderWorkerServiceTest
         eventually {
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
+          msgSender.messages.map(_.body).toSet shouldBe Set(workD.id, workE.id)
+          relations(index) shouldBe Map(
+            workD.id -> relationsD,
+            workE.id -> relationsE,
+          )
         }
-        msgSender.messages.map(_.body).toSet shouldBe Set(workD.id, workE.id)
-        relations(index) shouldBe Map(
-          workD.id -> relationsD,
-          workE.id -> relationsE,
-        )
     }
   }
 
@@ -121,7 +120,7 @@ class RelationEmbedderWorkerServiceTest
                         MemoryMessageSender),
                        R]): R =
     withLocalMergedWorksIndex { mergedIndex =>
-      storeWorks(mergedIndex)
+      storeWorks(mergedIndex, works)
       withLocalSqsQueuePair() { queuePair =>
         withActorSystem { implicit actorSystem =>
           withSQSStream[NotificationMessage, R](
@@ -136,7 +135,7 @@ class RelationEmbedderWorkerServiceTest
               workRetriever = new ElasticRetriever(elasticClient, mergedIndex),
               workIndexer = new MemoryIndexer(denormalisedIndex),
               relationsService =
-                new PathQueryRelationsService(elasticClient, mergedIndex),
+                new PathQueryRelationsService(elasticClient, mergedIndex, 10),
               flushInterval = 1 milliseconds,
             )
             workerService.run()

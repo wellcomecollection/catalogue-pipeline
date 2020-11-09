@@ -47,8 +47,7 @@ class IdMinterWorkerService[Destination](
   }
 
   def processMessage(message: NotificationMessage): Future[Unit] =
-    jsonRetriever
-      .lookupSingleId(message.body)
+    jsonRetriever(message.body)
       .flatMap(json => Future.fromTry(processJson(json)))
 
   def processJson(json: Json): Try[Unit] =

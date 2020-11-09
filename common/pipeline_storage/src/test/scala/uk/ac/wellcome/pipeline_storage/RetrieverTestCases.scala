@@ -23,7 +23,7 @@ trait RetrieverTestCases[Context, T]
     val t = createT
 
     withContext(documents = Seq(t)) { implicit context =>
-      val future = withRetriever { _.lookupSingleId(id.canonicalId(t)) }
+      val future = withRetriever { _.apply(id.canonicalId(t)) }
 
       whenReady(future) {
         _ shouldBe t
@@ -37,50 +37,11 @@ trait RetrieverTestCases[Context, T]
     val someOtherDocument = createT
 
     withContext(documents = Seq(someOtherDocument)) { implicit context =>
-      val future = withRetriever { _.lookupSingleId(missingId) }
+      val future = withRetriever { _.apply(missingId) }
 
       whenReady(future.failed) { exc =>
         exc shouldBe a[RetrieverNotFoundException]
         exc.getMessage shouldBe s"Nothing found with ID $missingId!"
-      }
-    }
-  }
-
-  it("retrieves multiple documents") {
-    val documents = (1 to 3).map { _ =>
-      createT
-    }
-    val otherDocuments = (1 to 3).map { _ =>
-      createT
-    }
-
-    val idsToLookup = documents.map { id.canonicalId }
-
-    withContext(documents ++ otherDocuments) { implicit context =>
-      val future = withRetriever { _.lookupMultipleIds(idsToLookup) }
-
-      whenReady(future) { result =>
-        result shouldBe documents.map { doc =>
-          id.canonicalId(doc) -> doc
-        }.toMap
-      }
-    }
-  }
-
-  it("throws if it can't find all the requested documents") {
-    val documents = (1 to 3).map { _ =>
-      createT
-    }
-    val missingId = id.canonicalId(createT)
-
-    val idsToLookup = documents.map { id.canonicalId } :+ missingId
-
-    withContext(documents) { implicit context =>
-      val future = withRetriever { _.lookupMultipleIds(idsToLookup) }
-
-      whenReady(future.failed) { exc =>
-        exc shouldBe a[RetrieverNotFoundException]
-        exc.getMessage shouldBe s"Nothing found with ID(s) $missingId!"
       }
     }
   }
