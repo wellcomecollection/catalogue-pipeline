@@ -65,7 +65,7 @@ object SierraContributors
 
   private def getPersonContributors(subfields: List[MarcSubfield]) =
     if (subfields.withTags("t").isEmpty)
-      "Person" -> getPerson(subfields, true)
+      "Person" -> getPerson(subfields, normalisePerson = true)
     else
       "Agent" -> getLabel(subfields).map(Agent(_))
 
