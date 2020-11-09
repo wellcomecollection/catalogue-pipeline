@@ -31,19 +31,25 @@ object FreeformDateParser extends Parser[InstantRange] with DateParserUtils {
       (month to monthAndYear).toInstantRange |
       (day to calendarDate).toInstantRange
 
-  def calendarDate[_: P] = numericDate | dayMonthYear | monthDayYear
+  def calendarDate[_: P] =
+    numericDate | dayMonthYear | monthDayYear | yearMonthDay
 
   def numericDate[_: P] =
     (dayDigits ~ "/" ~ monthDigits ~ "/" ~ yearDigits)
       .map { case (d, m, y) => CalendarDate(d, m, y) }
 
   def dayMonthYear[_: P] =
-    (writtenDay ~ ws ~ writtenMonth ~ ws ~ yearDigits)
+    (writtenDay ~ ws ~ (writtenMonth | monthDigits) ~ ",".? ~ ws ~ yearDigits)
       .map { case (d, m, y) => CalendarDate(d, m, y) }
 
   def monthDayYear[_: P] =
-    (writtenMonth ~ ws ~ writtenDay ~ ws ~ yearDigits)
+    (writtenMonth ~ ws ~ writtenDay ~ ",".? ~ ws ~ yearDigits)
       .map { case (m, d, y) => CalendarDate(d, m, y) }
+
+  def yearMonthDay[_: P] =
+    (yearDigits ~ ws ~ (writtenMonth | monthDigits) ~ ws ~ writtenDay).map {
+      case (y, m, d) => CalendarDate(d, m, y)
+    }
 
   def monthAndYear[_: P] =
     (monthFollowedByYear | yearFollowedByMonth)

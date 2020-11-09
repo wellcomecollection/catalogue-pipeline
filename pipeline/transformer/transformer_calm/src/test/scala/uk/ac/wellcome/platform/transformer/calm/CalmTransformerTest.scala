@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.transformer.calm
 
-import java.time.Instant
+import java.time.{Instant, LocalDate}
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -172,16 +172,24 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
       "AltRefNo" -> "a.b.c",
-      "Date" -> "1980-1991"
+      "Date" -> "c.1900 and 1914"
     )
     CalmTransformer(record, version).right.get.data.production shouldBe
       List(
         ProductionEvent(
-          dates = List(Period("1980-1991")),
-          label = "1980-1991",
+          dates = List(
+            Period(
+              "c.1900 and 1914",
+              Some(
+                InstantRange(
+                  LocalDate of (1890, 1, 1),
+                  LocalDate of (1914, 12, 31),
+                  "c.1900 and 1914")))),
+          label = "c.1900 and 1914",
           places = Nil,
           agents = Nil,
-          function = None))
+          function = None
+        ))
   }
 
   it("transforms subjects, stripping all HTML") {

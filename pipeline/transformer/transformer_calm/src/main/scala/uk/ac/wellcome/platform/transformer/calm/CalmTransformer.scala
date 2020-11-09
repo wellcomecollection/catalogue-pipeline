@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.transformer.calm
 
 import grizzled.slf4j.Logging
-
 import uk.ac.wellcome.models.work.internal.InvisibilityReason._
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.internal.result._
@@ -9,6 +8,7 @@ import uk.ac.wellcome.platform.transformer.calm.models.CalmTransformerException
 import uk.ac.wellcome.platform.transformer.calm.models.CalmTransformerException._
 import uk.ac.wellcome.transformer.common.worker.Transformer
 import WorkState.Source
+import uk.ac.wellcome.platform.transformer.calm.periods.PeriodParser
 
 object CalmTransformer
     extends Transformer[CalmRecord]
@@ -276,7 +276,7 @@ object CalmTransformer
       case dates =>
         List(
           ProductionEvent(
-            dates = dates.map(Period(_)),
+            dates = dates.map(date => Period(date, PeriodParser(date))),
             label = dates.mkString(" "),
             places = Nil,
             agents = Nil,

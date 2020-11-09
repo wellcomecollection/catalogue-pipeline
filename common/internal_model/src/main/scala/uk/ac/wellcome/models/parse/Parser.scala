@@ -1,11 +1,12 @@
 package uk.ac.wellcome.models.parse
 
 import fastparse._
+import grizzled.slf4j.Logging
 
 /**
   *  Trait for parsing some input into T with the FastParse library
   */
-trait Parser[T] {
+trait Parser[T] extends Logging {
 
   /**
     *  The FastParse parser combinator applied to the input
