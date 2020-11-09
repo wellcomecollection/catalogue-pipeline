@@ -18,7 +18,7 @@ object PeriodParser extends Parser[InstantRange] with DateParserUtils {
   private final val ignoreSubstrings = Seq(
     "\\[gaps\\]",
     "floruit",
-    "fl.",
+    "fl\\.",
     "fl",
     "between",
     "\\(",

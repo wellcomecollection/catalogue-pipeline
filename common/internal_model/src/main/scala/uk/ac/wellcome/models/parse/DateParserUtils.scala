@@ -69,9 +69,8 @@ trait DateParserUtils extends ParserUtils {
 
   def yearDigits[_: P] =
     digitRep(exactly = 4) ~ (ws.? ~ era).? map {
-      case (year, None)       => year
       case (year, Some("bc")) => -year
-      case (year, Some(_))    => year
+      case (year, _)          => year
     }
 
   def era[_: P] =
