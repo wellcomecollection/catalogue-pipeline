@@ -23,7 +23,11 @@ class ArchiveRelationsCache(
       .getOrElse(Relations.none)
 
   private def children(path: String): List[Relation[DataState.Unidentified]] =
-    childMapping(path).map(relations).toList
+    childMapping.get(path)
+      .getOrElse(
+        throw new Exception(s"Work with path $path not found in cache")
+      )
+      .map(relations).toList
 
   private def siblings(
     path: String): (List[Relation[DataState.Unidentified]],
