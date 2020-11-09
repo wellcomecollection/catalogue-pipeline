@@ -8,7 +8,7 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
 import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 
 case class NotesField(createNote: String => Note,
-                      supressedSubfields: Set[String] = Set.empty)
+                      suppressedSubfields: Set[String] = Set.empty)
 
 object SierraNotes extends SierraDataTransformer with SierraQueryOps {
 
@@ -35,7 +35,7 @@ object SierraNotes extends SierraDataTransformer with SierraQueryOps {
       "545" -> NotesField(BiographicalNote(_)),
       "547" -> NotesField(GeneralNote(_)),
       "562" -> NotesField(GeneralNote(_)),
-      "563" -> NotesField(BindingInformation(_), Set("5")),
+      "563" -> NotesField(BindingInformation(_), suppressedSubfields = Set("5")),
       "581" -> NotesField(PublicationsNote(_)),
       "585" -> NotesField(ExhibitionsNote(_)),
       "586" -> NotesField(AwardsNote(_)),
@@ -45,12 +45,12 @@ object SierraNotes extends SierraDataTransformer with SierraQueryOps {
   def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
     notesFields
       .flatMap {
-        case (tag, NotesField(createNote, supressedSubfields)) =>
+        case (tag, NotesField(createNote, suppressedSubfields)) =>
           bibData
             .varfieldsWithTags(tag)
             .map { varfield =>
               varfield
-                .subfieldsWithoutTags(supressedSubfields.toSeq: _*)
+                .subfieldsWithoutTags(suppressedSubfields.toSeq: _*)
                 .contents
                 .mkString(" ")
             }

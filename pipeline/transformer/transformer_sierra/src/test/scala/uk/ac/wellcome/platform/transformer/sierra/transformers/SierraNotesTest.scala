@@ -95,7 +95,7 @@ class SierraNotesTest
     SierraNotes(bibId, bibData(notes)) shouldBe notes.map(_._2)
   }
 
-  it("should supress subfield $5 in binding information") {
+  it("should suppress subfield $5 in binding information") {
     val bibData = createSierraBibDataWith(
       varFields = List(
         createVarFieldWith(
