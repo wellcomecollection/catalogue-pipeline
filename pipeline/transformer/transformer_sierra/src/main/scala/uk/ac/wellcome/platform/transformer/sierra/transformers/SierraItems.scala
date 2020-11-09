@@ -7,7 +7,7 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraItemData,
   SierraQueryOps
 }
-import uk.ac.wellcome.sierra_adapter.model.{SierraBibNumber, SierraItemNumber}
+import uk.ac.wellcome.sierra_adapter.model.SierraItemNumber
 
 case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
     extends SierraDataTransformer
@@ -23,7 +23,7 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
     * So the output is deterministic here we sort all items by the
     * sierra-identifier
     */
-  def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
+  def apply(bibData: SierraBibData) =
     getPhysicalItems(itemDataMap, bibData)
       .sortBy { item =>
         item.id match {

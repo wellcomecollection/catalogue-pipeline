@@ -10,7 +10,7 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
 }
 import uk.ac.wellcome.platform.transformer.sierra.source.sierra.SierraSourceLocation
 import uk.ac.wellcome.platform.transformer.sierra.generators.SierraDataGenerators
-import uk.ac.wellcome.sierra_adapter.model.{SierraBibNumber, SierraItemNumber}
+import uk.ac.wellcome.sierra_adapter.model.SierraItemNumber
 
 class SierraItemsTest
     extends AnyFunSpec
@@ -86,7 +86,6 @@ class SierraItemsTest
   }
 
   it("ignores all digital locations - 'dlnk', 'digi'") {
-    val bibId = createSierraBibNumber
     val bibData = createSierraBibDataWith(
       locations = Some(
         List(
@@ -95,7 +94,7 @@ class SierraItemsTest
         ))
     )
 
-    getTransformedItems(bibId = bibId, bibData = bibData) shouldBe List()
+    getTransformedItems(bibData = bibData) shouldBe List()
   }
 
   it("creates an item with a physical location") {
@@ -162,9 +161,8 @@ class SierraItemsTest
   }
 
   private def getTransformedItems(
-    bibId: SierraBibNumber = createSierraBibNumber,
     bibData: SierraBibData = createSierraBibData,
     itemDataMap: Map[SierraItemNumber, SierraItemData] = Map())
     : List[Item[IdState.Unminted]] =
-    SierraItems(itemDataMap)(bibId, bibData)
+    SierraItems(itemDataMap)(bibData)
 }

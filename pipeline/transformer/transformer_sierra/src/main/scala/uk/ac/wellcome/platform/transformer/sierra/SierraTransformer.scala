@@ -94,22 +94,22 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
   def workDataFromBibData(bibId: SierraBibNumber, bibData: SierraBibData) =
     WorkData[DataState.Unidentified](
       otherIdentifiers = SierraIdentifiers(bibId, bibData),
-      mergeCandidates = SierraMergeCandidates(bibId, bibData),
-      title = SierraTitle(bibId, bibData),
-      alternativeTitles = SierraAlternativeTitles(bibId, bibData),
-      format = SierraFormat(bibId, bibData),
-      description = SierraDescription(bibId, bibData),
-      physicalDescription = SierraPhysicalDescription(bibId, bibData),
-      lettering = SierraLettering(bibId, bibData),
+      mergeCandidates = SierraMergeCandidates(bibData),
+      title = SierraTitle(bibData),
+      alternativeTitles = SierraAlternativeTitles(bibData),
+      format = SierraFormat(bibData),
+      description = SierraDescription(bibData),
+      physicalDescription = SierraPhysicalDescription(bibData),
+      lettering = SierraLettering(bibData),
       subjects = SierraSubjects(bibId, bibData),
-      genres = SierraGenres(bibId, bibData),
-      contributors = SierraContributors(bibId, bibData),
+      genres = SierraGenres(bibData),
+      contributors = SierraContributors(bibData),
       production = SierraProduction(bibId, bibData),
-      language = SierraLanguage(bibId, bibData),
-      edition = SierraEdition(bibId, bibData),
-      notes = SierraNotes(bibId, bibData),
-      duration = SierraDuration(bibId, bibData),
-      items = SierraItems(itemDataMap)(bibId, bibData)
+      language = SierraLanguage(bibData),
+      edition = SierraEdition(bibData),
+      notes = SierraNotes(bibData),
+      duration = SierraDuration(bibData),
+      items = SierraItems(itemDataMap)(bibData)
     )
 
   lazy val bibId = sierraTransformable.sierraId

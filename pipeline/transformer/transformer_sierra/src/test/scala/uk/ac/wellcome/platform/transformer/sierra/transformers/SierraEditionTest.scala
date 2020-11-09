@@ -42,9 +42,7 @@ class SierraEditionTest
   }
 
   private def getEdition(varFields: List[VarField]) =
-    SierraEdition(
-      createSierraBibNumber,
-      createSierraBibDataWith(varFields = varFields))
+    SierraEdition(createSierraBibDataWith(varFields = varFields))
 
   private def createVarField(
     content: String,

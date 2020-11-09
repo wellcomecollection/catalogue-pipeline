@@ -4,7 +4,6 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraBibData,
   SierraQueryOps
 }
-import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 
 // Populate work:edition
 //
@@ -14,7 +13,7 @@ object SierraEdition extends SierraDataTransformer with SierraQueryOps {
 
   type Output = Option[String]
 
-  def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
+  def apply(bibData: SierraBibData) =
     bibData
       .subfieldsWithTag("250" -> "a")
       .contentString(" ")

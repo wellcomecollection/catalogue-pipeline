@@ -113,6 +113,6 @@ class SierraLetteringTest
     expectedLettering: Option[String]
   ) = {
     val bibData = createSierraBibDataWith(varFields = varFields)
-    SierraLettering(createSierraBibNumber, bibData) shouldBe expectedLettering
+    SierraLettering(bibData) shouldBe expectedLettering
   }
 }

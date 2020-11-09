@@ -13,7 +13,7 @@ class SierraLanguageTest
 
   it("ignores records which don't have a lang field") {
     val bibData = createSierraBibDataWith(lang = None)
-    SierraLanguage(createSierraBibNumber, bibData) shouldBe None
+    SierraLanguage(bibData) shouldBe None
   }
 
   it("picks up the language from the lang field") {
@@ -25,7 +25,7 @@ class SierraLanguageTest
         ))
     )
 
-    SierraLanguage(createSierraBibNumber, bibData) shouldBe Some(
+    SierraLanguage(bibData) shouldBe Some(
       Language(
         id = Some("eng"),
         label = "English"

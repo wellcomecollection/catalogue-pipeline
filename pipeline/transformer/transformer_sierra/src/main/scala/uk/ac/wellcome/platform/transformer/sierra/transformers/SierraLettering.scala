@@ -4,7 +4,6 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraBibData,
   SierraQueryOps
 }
-import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 
 // Populate wwork:lettering.
 //
@@ -33,7 +32,7 @@ object SierraLettering extends SierraDataTransformer with SierraQueryOps {
 
   type Output = Option[String]
 
-  def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
+  def apply(bibData: SierraBibData) =
     bibData
       .varfieldsWithTag("246")
       .withIndicator2("6")

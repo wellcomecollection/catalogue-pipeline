@@ -6,7 +6,6 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraBibData,
   SierraQueryOps
 }
-import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 
 /* Populate wwork:contributors. Rules:
  *
@@ -46,7 +45,7 @@ object SierraContributors
     ("711", getMeetingContributors _, "j"),
   )
 
-  def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
+  def apply(bibData: SierraBibData) =
     contributorFields.flatMap {
       case (tag, f, roleTag) =>
         bibData
@@ -65,7 +64,7 @@ object SierraContributors
 
   private def getPersonContributors(subfields: List[MarcSubfield]) =
     if (subfields.withTags("t").isEmpty)
-      "Person" -> getPerson(subfields, true)
+      "Person" -> getPerson(subfields, normalisePerson = true)
     else
       "Agent" -> getLabel(subfields).map(Agent(_))
 

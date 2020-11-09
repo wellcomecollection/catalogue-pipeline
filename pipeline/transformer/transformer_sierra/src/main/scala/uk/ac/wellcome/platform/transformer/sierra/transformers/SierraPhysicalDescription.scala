@@ -4,7 +4,6 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraBibData,
   SierraQueryOps
 }
-import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 
 // Populate wwork:physicalDescription.
 //
@@ -32,7 +31,7 @@ object SierraPhysicalDescription
 
   type Output = Option[String]
 
-  def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
+  def apply(bibData: SierraBibData) =
     bibData
       .subfieldsWithTags(
         "300" -> "a",

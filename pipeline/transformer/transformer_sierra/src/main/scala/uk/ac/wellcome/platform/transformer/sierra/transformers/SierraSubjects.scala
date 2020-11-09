@@ -11,7 +11,7 @@ import uk.ac.wellcome.platform.transformer.sierra.transformers.subjects.{
 }
 import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 
-object SierraSubjects extends SierraDataTransformer {
+object SierraSubjects extends SierraIdentifiedDataTransformer {
 
   type Output = List[Subject[IdState.Unminted]]
 

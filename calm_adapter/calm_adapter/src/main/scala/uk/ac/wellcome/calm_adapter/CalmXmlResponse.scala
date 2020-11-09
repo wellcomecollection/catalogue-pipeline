@@ -39,7 +39,7 @@ trait CalmXmlResponse[T] {
   }
 }
 
-case class CalmSearchResponse(val root: Elem, cookie: Cookie)
+case class CalmSearchResponse(root: Elem, cookie: Cookie)
     extends CalmXmlResponse[CalmSession] {
 
   val responseTag = "SearchResponse"
@@ -75,7 +75,7 @@ object CalmSearchResponse {
       .toEither
 }
 
-case class CalmSummaryResponse(val root: Elem,
+case class CalmSummaryResponse(root: Elem,
                                retrievedAt: Instant,
                                suppressedFields: Set[String] = Set.empty)
     extends CalmXmlResponse[CalmRecord] {

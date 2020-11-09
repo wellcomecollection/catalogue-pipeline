@@ -12,7 +12,6 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraQueryOps
 }
 import uk.ac.wellcome.platform.transformer.sierra.transformers.parsers.MiroIdParsing
-import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 
 import scala.util.Try
 import scala.util.matching.Regex
@@ -21,7 +20,7 @@ object SierraMergeCandidates extends SierraDataTransformer with SierraQueryOps {
 
   type Output = List[MergeCandidate]
 
-  def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
+  def apply(bibData: SierraBibData) =
     get776mergeCandidates(bibData) ++
       getSinglePageMiroMergeCandidates(bibData) ++ get035CalmMergeCandidates(
       bibData)
