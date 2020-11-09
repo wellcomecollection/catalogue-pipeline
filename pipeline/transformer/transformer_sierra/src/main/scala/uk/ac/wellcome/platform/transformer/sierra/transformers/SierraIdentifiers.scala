@@ -22,7 +22,9 @@ import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 //    -   "wellcome-digcode" from MARC tag 759 ǂa.  This is repeatable.
 //        Note: MARC 759 is not assigned by the Library of Congress.
 //
-object SierraIdentifiers extends SierraIdentifiedDataTransformer with SierraQueryOps {
+object SierraIdentifiers
+    extends SierraIdentifiedDataTransformer
+    with SierraQueryOps {
 
   type Output = List[SourceIdentifier]
 

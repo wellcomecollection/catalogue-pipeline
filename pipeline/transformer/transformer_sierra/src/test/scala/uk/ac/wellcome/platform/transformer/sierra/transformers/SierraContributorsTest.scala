@@ -654,7 +654,8 @@ class SierraContributorsTest
     varFields: List[VarField],
     expectedContributors: List[Contributor[IdState.Unminted]]
   ) = {
-    val actualContributors = SierraContributors(createSierraBibDataWith(varFields = varFields))
+    val actualContributors = SierraContributors(
+      createSierraBibDataWith(varFields = varFields))
     actualContributors shouldBe expectedContributors
   }
 }

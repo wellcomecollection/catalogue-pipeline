@@ -11,7 +11,9 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
 import uk.ac.wellcome.models.parse.Marc008Parser
 import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 
-object SierraProduction extends SierraIdentifiedDataTransformer with SierraQueryOps {
+object SierraProduction
+    extends SierraIdentifiedDataTransformer
+    with SierraQueryOps {
 
   type Output = List[ProductionEvent[IdState.Unminted]]
 

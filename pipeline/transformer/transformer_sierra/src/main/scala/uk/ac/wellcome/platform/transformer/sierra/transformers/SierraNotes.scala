@@ -45,19 +45,19 @@ object SierraNotes extends SierraDataTransformer with SierraQueryOps {
     bibData.varFields
       .map {
         case vf @ VarField(_, Some(marcTag), _, _, _, _) =>
-            Some((vf, notesFields.get(marcTag)))
+          Some((vf, notesFields.get(marcTag)))
         case _ => None
       }
       .collect {
         case Some((vf, Some(notesField))) => (vf, notesField)
       }
-      .map { case (vf, NotesField(createNote, suppressedSubfields)) =>
-        val contents =
-          vf
-            .subfieldsWithoutTags(suppressedSubfields.toSeq: _*)
-            .contents
-            .mkString(" ")
+      .map {
+        case (vf, NotesField(createNote, suppressedSubfields)) =>
+          val contents =
+            vf.subfieldsWithoutTags(suppressedSubfields.toSeq: _*)
+              .contents
+              .mkString(" ")
 
-        createNote(contents)
+          createNote(contents)
       }
 }

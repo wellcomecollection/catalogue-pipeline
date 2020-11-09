@@ -167,7 +167,8 @@ class SierraMergeCandidatesTest
         varFields = create089subfieldsWith(List("V 13889"))
       )
 
-      SierraMergeCandidates(bibData) shouldBe miroMergeCandidate(miroID = "V0013889")
+      SierraMergeCandidates(bibData) shouldBe miroMergeCandidate(
+        miroID = "V0013889")
     }
 
     it(
@@ -176,7 +177,8 @@ class SierraMergeCandidatesTest
         varFields = create089subfieldsWith(List("V 13889"))
       )
 
-      SierraMergeCandidates(bibData) shouldBe miroMergeCandidate(miroID = "V0013889")
+      SierraMergeCandidates(bibData) shouldBe miroMergeCandidate(
+        miroID = "V0013889")
     }
 
     it("Merges multiple ids in MARC tag 089") {
