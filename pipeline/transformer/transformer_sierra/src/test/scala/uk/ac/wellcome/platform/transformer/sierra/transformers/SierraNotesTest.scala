@@ -28,6 +28,7 @@ class SierraNotesTest
       "508" -> CreditsNote("credits note a"),
       "510" -> PublicationsNote("publications a"),
       "511" -> CreditsNote("credits note b"),
+      "514" -> LetteringNote("Completeness:"),
       "518" -> TimeAndPlaceNote("time and place note"),
       "524" -> CiteAsNote("cite as note"),
       "533" -> ReproductionNote("reproduction a"),
@@ -37,12 +38,14 @@ class SierraNotesTest
       "540" -> TermsOfUse("terms of use"),
       "542" -> CopyrightNote("copyright a"),
       "545" -> BiographicalNote("bib info b"),
+      "546" -> LanguageNote("Marriage certificate: German; Fraktur."),
       "547" -> GeneralNote("general note c"),
       "562" -> GeneralNote("general note d"),
       "563" -> BindingInformation("binding info note"),
       "581" -> PublicationsNote("publications b"),
       "585" -> ExhibitionsNote("exhibitions"),
       "586" -> AwardsNote("awards"),
+      "591" -> GeneralNote("A general, unspecified note"),
       "593" -> CopyrightNote("copyright b"),
     )
     SierraNotes(bibData(notes)) shouldBe notes.map(_._2)
