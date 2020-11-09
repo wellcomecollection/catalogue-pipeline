@@ -4,7 +4,7 @@ import com.sksamuel.elastic4s.analysis.TokenFilter
 import com.sksamuel.elastic4s.json.{XContentBuilder, XContentFactory}
 
 // TODO: Patch back to elastic4s
-case class AsciiFoldingTokenFilter(override val name: String,
+case class AsciiFoldingTokenFilter(name: String,
                                    preserveOriginal: Option[Boolean] = None)
     extends TokenFilter {
 

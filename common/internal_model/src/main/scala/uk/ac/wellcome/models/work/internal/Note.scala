@@ -4,50 +4,50 @@ sealed trait Note {
   val content: String
 }
 
-case class GeneralNote(val content: String) extends Note
+case class GeneralNote(content: String) extends Note
 
-case class BibliographicalInformation(val content: String) extends Note
+case class BibliographicalInformation(content: String) extends Note
 
-case class FundingInformation(val content: String) extends Note
+case class FundingInformation(content: String) extends Note
 
-case class TimeAndPlaceNote(val content: String) extends Note
+case class TimeAndPlaceNote(content: String) extends Note
 
-case class CreditsNote(val content: String) extends Note
+case class CreditsNote(content: String) extends Note
 
-case class ContentsNote(val content: String) extends Note
+case class ContentsNote(content: String) extends Note
 
-case class DissertationNote(val content: String) extends Note
+case class DissertationNote(content: String) extends Note
 
-case class CiteAsNote(val content: String) extends Note
+case class CiteAsNote(content: String) extends Note
 
-case class LocationOfOriginalNote(val content: String) extends Note
+case class LocationOfOriginalNote(content: String) extends Note
 
-case class BindingInformation(val content: String) extends Note
+case class BindingInformation(content: String) extends Note
 
-case class BiographicalNote(val content: String) extends Note
+case class BiographicalNote(content: String) extends Note
 
-case class ReproductionNote(val content: String) extends Note
+case class ReproductionNote(content: String) extends Note
 
-case class TermsOfUse(val content: String) extends Note
+case class TermsOfUse(content: String) extends Note
 
-case class CopyrightNote(val content: String) extends Note
+case class CopyrightNote(content: String) extends Note
 
-case class PublicationsNote(val content: String) extends Note
+case class PublicationsNote(content: String) extends Note
 
-case class ExhibitionsNote(val content: String) extends Note
+case class ExhibitionsNote(content: String) extends Note
 
-case class AwardsNote(val content: String) extends Note
+case class AwardsNote(content: String) extends Note
 
-case class OwnershipNote(val content: String) extends Note
+case class OwnershipNote(content: String) extends Note
 
-case class AcquisitionNote(val content: String) extends Note
+case class AcquisitionNote(content: String) extends Note
 
-case class AppraisalNote(val content: String) extends Note
+case class AppraisalNote(content: String) extends Note
 
-case class AccrualsNote(val content: String) extends Note
+case class AccrualsNote(content: String) extends Note
 
-case class RelatedMaterial(val content: String) extends Note
+case class RelatedMaterial(content: String) extends Note
 
-case class FindingAids(val content: String) extends Note
+case class FindingAids(content: String) extends Note
 
-case class ArrangementNote(val content: String) extends Note
+case class ArrangementNote(content: String) extends Note
