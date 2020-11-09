@@ -3,7 +3,6 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers.subjects
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   MarcSubfield,
-  SierraQueryOps,
   VarField
 }
 import uk.ac.wellcome.platform.transformer.sierra.transformers.SierraConcepts
@@ -46,7 +45,6 @@ import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 //
 object SierraConceptSubjects
     extends SierraSubjectsTransformer
-    with SierraQueryOps
     with SierraConcepts {
 
   val subjectVarFields = List("650", "648", "651")
