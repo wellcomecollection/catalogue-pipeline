@@ -5,7 +5,6 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraBibData,
   SierraQueryOps
 }
-import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 
 case class NotesField(createNote: String => Note,
                       suppressedSubfields: Set[String] = Set.empty)
@@ -42,7 +41,7 @@ object SierraNotes extends SierraDataTransformer with SierraQueryOps {
       "593" -> NotesField(CopyrightNote),
     )
 
-  def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
+  override def apply(bibData: SierraBibData) =
     notesFields
       .flatMap {
         case (tag, NotesField(createNote, suppressedSubfields)) =>

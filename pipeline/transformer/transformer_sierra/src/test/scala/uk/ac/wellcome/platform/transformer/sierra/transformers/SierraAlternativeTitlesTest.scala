@@ -123,7 +123,6 @@ class SierraAlternativeTitlesTest
 
   private def getAlternativeTitles(varFields: List[VarField]) =
     SierraAlternativeTitles(
-      createSierraBibNumber,
       createSierraBibDataWith(varFields = varFields))
 
   private def createVarField(

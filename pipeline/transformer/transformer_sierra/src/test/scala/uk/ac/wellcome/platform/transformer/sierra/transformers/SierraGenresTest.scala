@@ -3,10 +3,7 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.platform.transformer.sierra.source.{
-  MarcSubfield,
-  SierraBibData
-}
+import uk.ac.wellcome.platform.transformer.sierra.source.MarcSubfield
 import uk.ac.wellcome.platform.transformer.sierra.generators.{
   MarcGenerators,
   SierraDataGenerators
@@ -20,7 +17,7 @@ class SierraGenresTest
 
   it("returns zero genres if there are none") {
     val bibData = createSierraBibDataWith(varFields = List())
-    assertExtractsGenres(bibData, List())
+    SierraGenres(bibData) shouldBe List()
   }
 
   it("returns genres for tag 655 with only subfield a") {
@@ -39,7 +36,7 @@ class SierraGenresTest
       )
     )
 
-    assertExtractsGenres(bibData, expectedGenres)
+    SierraGenres(bibData) shouldBe expectedGenres
   }
 
   it("returns subjects for tag 655 with subfields a and v") {
@@ -66,7 +63,7 @@ class SierraGenresTest
       )
     )
 
-    assertExtractsGenres(bibData, expectedGenres)
+    SierraGenres(bibData) shouldBe expectedGenres
   }
 
   it(
@@ -94,7 +91,7 @@ class SierraGenresTest
       )
     )
 
-    assertExtractsGenres(bibData, expectedGenres)
+    SierraGenres(bibData) shouldBe expectedGenres
   }
 
   it("returns genres for tag 655 subfields a, v, and x") {
@@ -122,7 +119,7 @@ class SierraGenresTest
       )
     )
 
-    assertExtractsGenres(bibData, expectedGenres)
+    SierraGenres(bibData) shouldBe expectedGenres
   }
 
   it("returns subjects for tag 655 with subfields a, y") {
@@ -147,7 +144,7 @@ class SierraGenresTest
       )
     )
 
-    assertExtractsGenres(bibData, expectedGenres)
+    SierraGenres(bibData) shouldBe expectedGenres
   }
 
   it("returns subjects for tag 655 with subfields a, z") {
@@ -172,7 +169,7 @@ class SierraGenresTest
       )
     )
 
-    assertExtractsGenres(bibData, expectedGenres)
+    SierraGenres(bibData) shouldBe expectedGenres
   }
 
   it("returns subjects for multiple 655 tags with different subfields") {
@@ -210,7 +207,7 @@ class SierraGenresTest
             Concept(label = "V2 Content")
           ))
       )
-    assertExtractsGenres(bibData, expectedSubjects)
+    SierraGenres(bibData) shouldBe expectedSubjects
   }
 
   it(s"gets identifiers from subfield $$0") {
@@ -252,7 +249,7 @@ class SierraGenresTest
       )
     )
 
-    val actualSourceIdentifiers = SierraGenres(createSierraBibNumber, bibData)
+    val actualSourceIdentifiers = SierraGenres(bibData)
       .map { _.concepts.head.id }
       .map {
         case IdState.Identifiable(sourceIdentifier, _, _) =>
@@ -261,10 +258,5 @@ class SierraGenresTest
       }
 
     expectedSourceIdentifiers shouldBe actualSourceIdentifiers
-  }
-
-  private def assertExtractsGenres(bibData: SierraBibData,
-                                   expected: List[Genre[IdState.Unminted]]) = {
-    SierraGenres(createSierraBibNumber, bibData) shouldBe expected
   }
 }

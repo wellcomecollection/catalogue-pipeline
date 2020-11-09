@@ -23,7 +23,7 @@ class SierraPhysicalDescriptionTest
       "563",
       MarcSubfield("b", "The edifying extent of early emus")
     )
-    SierraPhysicalDescription(bibId, bibData(field)) shouldBe None
+    SierraPhysicalDescription(bibData(field)) shouldBe None
   }
 
   it("extracts physical description from MARC field 300 subfield $b") {
@@ -33,7 +33,7 @@ class SierraPhysicalDescriptionTest
       MarcSubfield("b", description),
       MarcSubfield("d", "The edifying extent of early emus"),
     )
-    SierraPhysicalDescription(bibId, bibData(field)) shouldBe Some(description)
+    SierraPhysicalDescription(bibData(field)) shouldBe Some(description)
   }
 
   it(
@@ -49,7 +49,7 @@ class SierraPhysicalDescriptionTest
         MarcSubfield("d", "Egad!  An early eagle is eating the earwig."),
       ),
     )
-    SierraPhysicalDescription(bibId, data) shouldBe Some(expectedDescription)
+    SierraPhysicalDescription(data) shouldBe Some(expectedDescription)
   }
 
   it(
@@ -63,10 +63,8 @@ class SierraPhysicalDescriptionTest
       varField("300", MarcSubfield("a", descriptionA)),
       varField("300", MarcSubfield("c", descriptionC)),
     )
-    SierraPhysicalDescription(bibId, data) shouldBe Some(expectedDescription)
+    SierraPhysicalDescription(data) shouldBe Some(expectedDescription)
   }
-
-  def bibId = createSierraBibNumber
 
   def bibData(varFields: VarField*): SierraBibData =
     createSierraBibDataWith(varFields = varFields.toList)

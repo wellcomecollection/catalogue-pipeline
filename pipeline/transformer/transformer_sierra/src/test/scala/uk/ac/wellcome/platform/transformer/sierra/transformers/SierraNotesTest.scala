@@ -45,7 +45,7 @@ class SierraNotesTest
       "586" -> AwardsNote("awards"),
       "593" -> CopyrightNote("copyright b"),
     )
-    SierraNotes(bibId, bibData(notes)) shouldBe notes.map(_._2)
+    SierraNotes(bibData(notes)) shouldBe notes.map(_._2)
   }
 
   it("extracts all notes when duplicate fields") {
@@ -53,7 +53,7 @@ class SierraNotesTest
       "500" -> GeneralNote("note a"),
       "500" -> GeneralNote("note b"),
     )
-    SierraNotes(bibId, bibData(notes)) shouldBe notes.map(_._2)
+    SierraNotes(bibData(notes)) shouldBe notes.map(_._2)
   }
 
   it("does not extract notes from non-note fields") {
@@ -61,12 +61,12 @@ class SierraNotesTest
       "100" -> "not a note",
       "530" -> "not a note",
     )
-    SierraNotes(bibId, bibData(notes: _*)) shouldBe Nil
+    SierraNotes(bibData(notes: _*)) shouldBe Nil
   }
 
   it("preserves HTML in notes fields") {
     val notes = List("500" -> GeneralNote("<p>note</p>"))
-    SierraNotes(bibId, bibData(notes)) shouldBe notes.map(_._2)
+    SierraNotes(bibData(notes)) shouldBe notes.map(_._2)
   }
 
   it("concatenate all the subfields on a single MARC field into a single note") {
@@ -82,7 +82,7 @@ class SierraNotesTest
         )
       )
     )
-    SierraNotes(bibId, bibData) shouldBe List(
+    SierraNotes(bibData) shouldBe List(
       GeneralNote("1st part. 2nd part. 3rd part.")
     )
   }
@@ -92,7 +92,7 @@ class SierraNotesTest
       "500" -> GeneralNote("1st note."),
       "500" -> GeneralNote("2nd note."),
     )
-    SierraNotes(bibId, bibData(notes)) shouldBe notes.map(_._2)
+    SierraNotes(bibData(notes)) shouldBe notes.map(_._2)
   }
 
   it("suppresses subfield ǂ5 in binding information") {
@@ -107,12 +107,8 @@ class SierraNotesTest
         )
       )
     )
-    SierraNotes(bibId, bibData) shouldBe List(
-      BindingInformation("Main bit.")
-    )
+    SierraNotes(bibData) shouldBe List(BindingInformation("Main bit."))
   }
-
-  def bibId = createSierraBibNumber
 
   def bibData(contents: List[(String, Note)]): SierraBibData =
     bibData(contents.map { case (tag, note) => (tag, note.content) }: _*)

@@ -12,7 +12,6 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraQueryOps,
   VarField
 }
-import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 
 // Populate wwork:genres
 //
@@ -51,7 +50,7 @@ object SierraGenres
 
   type Output = List[Genre[IdState.Unminted]]
 
-  def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
+  override def apply(bibData: SierraBibData) =
     bibData
       .varfieldsWithTag("655")
       .map { varField =>

@@ -130,7 +130,7 @@ class SierraContributorsTest
       )
 
       val bibData = createSierraBibDataWith(varFields = varFields)
-      val contributors = SierraContributors(createSierraBibNumber, bibData)
+      val contributors = SierraContributors(bibData)
       contributors should have size 1
       val contributor = contributors.head
 
@@ -654,8 +654,7 @@ class SierraContributorsTest
     varFields: List[VarField],
     expectedContributors: List[Contributor[IdState.Unminted]]
   ) = {
-    val bibId = createSierraBibNumber
-    val bibData = createSierraBibDataWith(varFields = varFields)
-    SierraContributors(bibId, bibData) shouldBe expectedContributors
+    val actualContributors = SierraContributors(createSierraBibDataWith(varFields = varFields))
+    actualContributors shouldBe expectedContributors
   }
 }

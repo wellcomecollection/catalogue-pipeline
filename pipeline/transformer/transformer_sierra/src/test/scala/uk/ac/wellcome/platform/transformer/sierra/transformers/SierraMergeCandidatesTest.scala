@@ -36,7 +36,7 @@ class SierraMergeCandidatesTest
         )
       )
 
-      SierraMergeCandidates(createSierraBibNumber, sierraData) shouldBe
+      SierraMergeCandidates(sierraData) shouldBe
         physicalAndDigitalSierraMergeCandidate(mergeCandidateBibNumber)
     }
 
@@ -47,7 +47,7 @@ class SierraMergeCandidatesTest
         )
       )
 
-      SierraMergeCandidates(createSierraBibNumber, sierraData) shouldBe
+      SierraMergeCandidates(sierraData) shouldBe
         physicalAndDigitalSierraMergeCandidate(mergeCandidateBibNumber)
     }
 
@@ -63,7 +63,7 @@ class SierraMergeCandidatesTest
         )
       )
 
-      SierraMergeCandidates(createSierraBibNumber, sierraData) shouldBe Nil
+      SierraMergeCandidates(sierraData) shouldBe Nil
     }
 
     it("ignores values in 776$$w that aren't prefixed with (UkLW)") {
@@ -73,7 +73,7 @@ class SierraMergeCandidatesTest
         )
       )
 
-      SierraMergeCandidates(createSierraBibNumber, sierraData) shouldBe Nil
+      SierraMergeCandidates(sierraData) shouldBe Nil
     }
 
     it(
@@ -84,7 +84,7 @@ class SierraMergeCandidatesTest
         )
       )
 
-      SierraMergeCandidates(createSierraBibNumber, bibData) shouldBe Nil
+      SierraMergeCandidates(bibData) shouldBe Nil
     }
 
     it(
@@ -99,7 +99,7 @@ class SierraMergeCandidatesTest
         )
       )
 
-      SierraMergeCandidates(createSierraBibNumber, bibData) shouldBe
+      SierraMergeCandidates(bibData) shouldBe
         physicalAndDigitalSierraMergeCandidate(mergeCandidateBibNumber)
     }
   }
@@ -110,7 +110,7 @@ class SierraMergeCandidatesTest
         urls = List(s"http://wellcomeimages.org/indexplus/image/$miroID.html")
       )
 
-      SierraMergeCandidates(createSierraBibNumber, bibData) shouldBe
+      SierraMergeCandidates(bibData) shouldBe
         miroMergeCandidate(miroID)
     }
 
@@ -123,7 +123,7 @@ class SierraMergeCandidatesTest
         )
       )
 
-      SierraMergeCandidates(createSierraBibNumber, bibData) should contain theSameElementsAs (
+      SierraMergeCandidates(bibData) should contain theSameElementsAs (
         miroMergeCandidate(miroID) ++ miroMergeCandidate("B0000001")
       )
     }
@@ -136,7 +136,7 @@ class SierraMergeCandidatesTest
         )
       )
 
-      SierraMergeCandidates(createSierraBibNumber, bibData) shouldBe
+      SierraMergeCandidates(bibData) shouldBe
         miroMergeCandidate(miroID)
     }
 
@@ -146,7 +146,7 @@ class SierraMergeCandidatesTest
           "http://film.wellcome.ac.uk:15151/mediaplayer.html?fug_7340-1&pw=524ph=600.html")
       )
 
-      SierraMergeCandidates(createSierraBibNumber, bibData) shouldBe Nil
+      SierraMergeCandidates(bibData) shouldBe Nil
     }
 
     it("creates a merge candidate if the material type is 'Picture'") {
@@ -157,8 +157,7 @@ class SierraMergeCandidatesTest
         )
       )
 
-      SierraMergeCandidates(createSierraBibNumber, bibData) shouldBe
-        miroMergeCandidate(miroID)
+      SierraMergeCandidates(bibData) shouldBe miroMergeCandidate(miroID)
     }
 
     // - - - - - - -  089 fields - - - - - - -
@@ -168,8 +167,7 @@ class SierraMergeCandidatesTest
         varFields = create089subfieldsWith(List("V 13889"))
       )
 
-      SierraMergeCandidates(createSierraBibNumber, bibData) shouldBe
-        miroMergeCandidate(miroID = "V0013889")
+      SierraMergeCandidates(bibData) shouldBe miroMergeCandidate(miroID = "V0013889")
     }
 
     it(
@@ -178,8 +176,7 @@ class SierraMergeCandidatesTest
         varFields = create089subfieldsWith(List("V 13889"))
       )
 
-      SierraMergeCandidates(createSierraBibNumber, bibData) shouldBe
-        miroMergeCandidate(miroID = "V0013889")
+      SierraMergeCandidates(bibData) shouldBe miroMergeCandidate(miroID = "V0013889")
     }
 
     it("Merges multiple ids in MARC tag 089") {
@@ -187,7 +184,7 @@ class SierraMergeCandidatesTest
         varFields = create089subfieldsWith(List("V 13889", "V 12"))
       )
 
-      SierraMergeCandidates(createSierraBibNumber, bibData) should contain theSameElementsAs (
+      SierraMergeCandidates(bibData) should contain theSameElementsAs (
         miroMergeCandidate("V0013889") ++ miroMergeCandidate("V0000012")
       )
     }
@@ -199,7 +196,7 @@ class SierraMergeCandidatesTest
             ++ create089subfieldsWith(List("V 13889"))
       )
 
-      SierraMergeCandidates(createSierraBibNumber, bibData) should contain theSameElementsAs
+      SierraMergeCandidates(bibData) should contain theSameElementsAs
         miroMergeCandidate(miroID) ++ miroMergeCandidate("V0013889")
     }
 
@@ -210,7 +207,7 @@ class SierraMergeCandidatesTest
           create962subfieldsForWellcomeImageUrl("V0036036EL")
       )
 
-      SierraMergeCandidates(createSierraBibNumber, bibData) should contain theSameElementsAs
+      SierraMergeCandidates(bibData) should contain theSameElementsAs
         miroMergeCandidate("V0036036EL")
     }
 
@@ -220,7 +217,7 @@ class SierraMergeCandidatesTest
           create962subfieldsForWellcomeImageUrl(miroID)
       )
 
-      val result = SierraMergeCandidates(createSierraBibNumber, bibData)
+      val result = SierraMergeCandidates(bibData)
       result should contain theSameElementsAs miroMergeCandidate(miroID)
     }
 
@@ -231,7 +228,7 @@ class SierraMergeCandidatesTest
           create962subfieldsForWellcomeImageUrl("V0012345EBR")
       )
 
-      SierraMergeCandidates(createSierraBibNumber, bibData) should contain theSameElementsAs
+      SierraMergeCandidates(bibData) should contain theSameElementsAs
         miroMergeCandidate("V0036036") ++ miroMergeCandidate("V0012345EBR")
     }
   }
@@ -252,13 +249,12 @@ class SierraMergeCandidatesTest
         physicalAndDigitalSierraMergeCandidate(mergeCandidateBibNumber) ++
           miroMergeCandidate(miroID)
 
-      SierraMergeCandidates(createSierraBibNumber, sierraData) shouldBe
-        expectedMergeCandidates
+      SierraMergeCandidates(sierraData) shouldBe expectedMergeCandidates
     }
 
     it("returns an empty list if there is no MARC tag 776 or 962") {
       val sierraData = createSierraBibDataWith(varFields = List())
-      SierraMergeCandidates(createSierraBibNumber, sierraData) shouldBe Nil
+      SierraMergeCandidates(sierraData) shouldBe Nil
     }
   }
 
@@ -292,8 +288,7 @@ class SierraMergeCandidatesTest
 
       forAll(examples) { (bibData, mergeCandidates, clue) =>
         withClue(clue) {
-          SierraMergeCandidates(createSierraBibNumber, bibData) should be(
-            mergeCandidates)
+          SierraMergeCandidates(bibData) shouldBe mergeCandidates
         }
       }
     }

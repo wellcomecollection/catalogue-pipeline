@@ -53,9 +53,7 @@ class SierraTitleTest
           )
         )
 
-        val title =
-          SierraTitle(bibId = createSierraBibNumber, bibData = bibData)
-        title shouldBe Some(expectedTitle)
+        SierraTitle(bibData = bibData) shouldBe Some(expectedTitle)
     }
   }
 
@@ -68,7 +66,7 @@ class SierraTitleTest
         )
       )
       val caught = intercept[ShouldNotTransformException] {
-        SierraTitle(createSierraBibNumber, bibData)
+        SierraTitle(bibData)
       }
       caught.getMessage should startWith(
         "Multiple instances of non-repeatable varfield with tag 245:")
@@ -79,7 +77,7 @@ class SierraTitleTest
         varFields = List.empty
       )
       val caught = intercept[ShouldNotTransformException] {
-        SierraTitle(createSierraBibNumber, bibData)
+        SierraTitle(bibData)
       }
       caught.getMessage should startWith("Could not find varField 245!")
     }
@@ -99,7 +97,7 @@ class SierraTitleTest
         )
       )
       val caught = intercept[ShouldNotTransformException] {
-        SierraTitle(createSierraBibNumber, bibData)
+        SierraTitle(bibData)
       }
       caught.getMessage should startWith(
         "Multiple instances of non-repeatable subfield with tag ǂa")
@@ -115,7 +113,7 @@ class SierraTitleTest
         )
       )
       val caught = intercept[ShouldNotTransformException] {
-        SierraTitle(createSierraBibNumber, bibData)
+        SierraTitle(bibData)
       }
       caught.getMessage should startWith("No fields to construct title!")
     }

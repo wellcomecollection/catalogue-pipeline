@@ -5,7 +5,6 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraBibData,
   SierraQueryOps
 }
-import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 
 // Populate work:alternativeTitles
 //
@@ -25,7 +24,7 @@ object SierraAlternativeTitles
 
   type Output = List[String]
 
-  def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
+  override def apply(bibData: SierraBibData): List[String] =
     bibData
       .varfieldsWithTags("240", "130", "246")
       .filterNot { varfield =>

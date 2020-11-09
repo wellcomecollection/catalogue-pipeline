@@ -23,6 +23,6 @@ object SierraSubjects extends SierraDataTransformer {
     SierraBrandNameSubjects
   )
 
-  def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
+  override def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
     subjectsTransformers.flatMap(transform => transform(bibId, bibData))
 }

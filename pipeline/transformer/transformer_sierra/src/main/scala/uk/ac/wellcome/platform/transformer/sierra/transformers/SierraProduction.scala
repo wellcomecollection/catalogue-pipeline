@@ -32,7 +32,7 @@ object SierraProduction extends SierraDataTransformer with SierraQueryOps {
   // but it would be a cataloguing error -- we should reject it, and flag it
   // to the librarians.
   //
-  def apply(bibId: SierraBibNumber, bibData: SierraBibData) = {
+  override def apply(bibId: SierraBibNumber, bibData: SierraBibData) = {
 
     val maybeMarc260fields = bibData.varfieldsWithTag("260")
     val maybeMarc264fields = bibData.varfieldsWithTag("264")

@@ -4,7 +4,6 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   MarcSubfield,
   SierraBibData
 }
-import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 
 object SierraDescription extends SierraDataTransformer {
 
@@ -23,7 +22,7 @@ object SierraDescription extends SierraDataTransformer {
   //
   // https://www.loc.gov/marc/bibliographic/bd520.html
   //
-  def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
+  override def apply(bibData: SierraBibData) =
     getSubfields(bibData, "520", List("a", "b"))
       .foldLeft[List[String]](Nil)((acc, subfields) => {
 

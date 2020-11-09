@@ -164,5 +164,5 @@ class SierraItemsTest
     bibData: SierraBibData = createSierraBibData,
     itemDataMap: Map[SierraItemNumber, SierraItemData] = Map())
     : List[Item[IdState.Unminted]] =
-    SierraItems(itemDataMap)(createSierraBibNumber, bibData)
+    SierraItems(itemDataMap)(bibData)
 }

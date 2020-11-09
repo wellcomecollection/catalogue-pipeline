@@ -17,7 +17,7 @@ trait SierraSubjectsTransformer
 
   val subjectVarFields: List[String]
 
-  def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
+  override def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
     getSubjectsFromVarFields(
       bibId,
       subjectVarFields.flatMap(bibData.varfieldsWithTag(_))

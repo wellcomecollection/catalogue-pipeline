@@ -93,8 +93,7 @@ class SierraDescriptionTest
     varFields: List[VarField],
     expectedDescription: Option[String]
   ) = {
-    val bibData = createSierraBibDataWith(varFields = varFields)
-    val bibId = createSierraBibNumber
-    SierraDescription(bibId, bibData) shouldBe expectedDescription
+    val actualDescription = SierraDescription(createSierraBibDataWith(varFields = varFields))
+    actualDescription shouldBe expectedDescription
   }
 }

@@ -26,8 +26,8 @@ object SierraIdentifiers extends SierraDataTransformer with SierraQueryOps {
 
   type Output = List[SourceIdentifier]
 
-  def apply(bibId: SierraBibNumber,
-            bibData: SierraBibData): List[SourceIdentifier] = {
+  override def apply(bibId: SierraBibNumber,
+                     bibData: SierraBibData): List[SourceIdentifier] = {
     val sierraIdentifier = SourceIdentifier(
       identifierType = IdentifierType("sierra-identifier"),
       ontologyType = "Work",

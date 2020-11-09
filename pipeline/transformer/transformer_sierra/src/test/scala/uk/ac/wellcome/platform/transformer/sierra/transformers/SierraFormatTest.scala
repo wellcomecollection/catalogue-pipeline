@@ -13,7 +13,6 @@ class SierraFormatTest
 
   it("extracts Format from bib records") {
     val formatId = "a"
-    val bibId = createSierraBibNumber
 
     val bibData = createSierraBibDataWith(
       materialType = Some(
@@ -23,6 +22,6 @@ class SierraFormatTest
 
     val expectedFormat = Books
 
-    SierraFormat(bibId, bibData) shouldBe Some(expectedFormat)
+    SierraFormat(bibData) shouldBe Some(expectedFormat)
   }
 }

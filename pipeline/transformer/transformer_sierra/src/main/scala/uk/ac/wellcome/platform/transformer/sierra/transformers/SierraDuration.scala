@@ -6,13 +6,12 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraBibData,
   SierraQueryOps
 }
-import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 
 object SierraDuration extends SierraDataTransformer with SierraQueryOps {
 
   type Output = Option[Int]
 
-  def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
+  override def apply(bibData: SierraBibData) =
     bibData
       .subfieldsWithTag("306" -> "a")
       .firstContent
