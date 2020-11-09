@@ -19,7 +19,7 @@ import uk.ac.wellcome.pipeline_storage.fixtures.{
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class ElasticRetrieverTest
-  extends RetrieverTestCases[Index, SampleDocument]
+    extends RetrieverTestCases[Index, SampleDocument]
     with ElasticsearchFixtures
     with ElasticIndexerFixtures
     with IdentifiersGenerators {
@@ -39,8 +39,8 @@ class ElasticRetrieverTest
     }
 
   override def withRetriever[R](
-                                 testWith: TestWith[Retriever[SampleDocument], R])(
-                                 implicit index: Index): R =
+    testWith: TestWith[Retriever[SampleDocument], R])(
+    implicit index: Index): R =
     testWith(
       new ElasticRetriever(elasticClient, index = index)
     )

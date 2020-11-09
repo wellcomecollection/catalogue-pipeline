@@ -17,7 +17,7 @@ import grizzled.slf4j.Logging
 class ElasticRetriever[T](client: ElasticClient, index: Index)(
   implicit ec: ExecutionContext,
   decoder: Decoder[T])
-  extends Retriever[T]
+    extends Retriever[T]
     with Logging {
 
   final def apply(id: String): Future[T] = {

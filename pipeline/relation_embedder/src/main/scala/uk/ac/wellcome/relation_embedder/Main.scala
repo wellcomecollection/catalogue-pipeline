@@ -39,7 +39,9 @@ object Main extends WellcomeTypesafeApp {
         esClient,
         denormalisedIndex,
         DenormalisedWorkIndexConfig),
-      relationsService = new PathQueryRelationsService(esClient, mergedIndex,
+      relationsService = new PathQueryRelationsService(
+        esClient,
+        mergedIndex,
         scrollSize = config.requireInt("es.works.scroll.size")),
       batchSize = config.requireInt("es.works.batch_size"),
       flushInterval =

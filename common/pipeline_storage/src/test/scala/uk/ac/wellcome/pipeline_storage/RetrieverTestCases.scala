@@ -7,7 +7,7 @@ import uk.ac.wellcome.elasticsearch.model.CanonicalId
 import uk.ac.wellcome.fixtures.TestWith
 
 trait RetrieverTestCases[Context, T]
-  extends AnyFunSpec
+    extends AnyFunSpec
     with Matchers
     with ScalaFutures {
   def withContext[R](documents: Seq[T])(testWith: TestWith[Context, R]): R

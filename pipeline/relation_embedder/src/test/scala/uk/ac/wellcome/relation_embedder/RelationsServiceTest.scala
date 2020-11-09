@@ -19,9 +19,11 @@ class RelationsServiceTest
     extends AnyFunSpec
     with Matchers
     with ElasticsearchFixtures
-    with WorkGenerators with Akka {
+    with WorkGenerators
+    with Akka {
 
-  def service[R](index: Index)(implicit as: ActorSystem) = new PathQueryRelationsService(elasticClient, index, 10)
+  def service[R](index: Index)(implicit as: ActorSystem) =
+    new PathQueryRelationsService(elasticClient, index, 10)
 
   def work(path: String) =
     mergedWork(createSourceIdentifierWith(value = path))
@@ -50,12 +52,12 @@ class RelationsServiceTest
       withLocalMergedWorksIndex { index =>
         storeWorks(index)
         withActorSystem { implicit as =>
-            whenReady(queryAffectedWorks(service(index), workE)) { result =>
-              result should contain theSameElementsAs List(
-                work2,
-                workD,
-                workF,
-              )
+          whenReady(queryAffectedWorks(service(index), workE)) { result =>
+            result should contain theSameElementsAs List(
+              work2,
+              workD,
+              workF,
+            )
 
           }
         }
@@ -68,28 +70,29 @@ class RelationsServiceTest
         storeWorks(index)
         withActorSystem { implicit as =>
           whenReady(queryAffectedWorks(service(index), workA)) { result =>
-              result should contain theSameElementsAs
-                works
-                  .filter(_.state.sourceIdentifier != workA.state.sourceIdentifier)
-            }
+            result should contain theSameElementsAs
+              works
+                .filter(
+                  _.state.sourceIdentifier != workA.state.sourceIdentifier)
           }
         }
       }
+    }
 
-
-      it("Returns no affected works when work is not part of a collection") {
-        withLocalMergedWorksIndex { index =>
-          val workX = mergedWork()
-          storeWorks(index, List(workA, work1, workX))
-          withActorSystem { implicit as =>
-            whenReady(queryAffectedWorks(service(index), workX)) { result =>
+    it("Returns no affected works when work is not part of a collection") {
+      withLocalMergedWorksIndex { index =>
+        val workX = mergedWork()
+        storeWorks(index, List(workA, work1, workX))
+        withActorSystem { implicit as =>
+          whenReady(queryAffectedWorks(service(index), workX)) { result =>
             result shouldBe Nil
           }
         }
       }
     }
-    def queryAffectedWorks(service: RelationsService, work: Work[Merged])(implicit as: ActorSystem) =
-        service.getOtherAffectedWorks(work).runWith(Sink.seq[Work[Merged]])
+    def queryAffectedWorks(service: RelationsService,
+                           work: Work[Merged])(implicit as: ActorSystem) =
+      service.getOtherAffectedWorks(work).runWith(Sink.seq[Work[Merged]])
 
   }
 
@@ -118,8 +121,10 @@ class RelationsServiceTest
           storeWorks(index)
           whenReady(service(index).getRelations(workF)) { relations =>
             relations shouldBe Relations(
-              ancestors =
-                List(Relation(workA, 0), Relation(work2, 1), Relation(workE, 2)),
+              ancestors = List(
+                Relation(workA, 0),
+                Relation(work2, 1),
+                Relation(workE, 2)),
               children = Nil,
               siblingsPreceding = Nil,
               siblingsSucceeding = Nil
@@ -127,7 +132,7 @@ class RelationsServiceTest
           }
         }
       }
-      }
+    }
 
     it("Retrieves relations correctly from root position") {
       withLocalMergedWorksIndex { index =>
@@ -146,8 +151,8 @@ class RelationsServiceTest
             )
           }
         }
-        }
       }
+    }
 
     it("Ignores missing ancestors") {
       withLocalMergedWorksIndex { index =>
@@ -165,9 +170,8 @@ class RelationsServiceTest
             )
           }
         }
-        }
       }
-
+    }
 
     it("Filters out invisible works") {
       withLocalWorksIndex { index =>
@@ -186,8 +190,7 @@ class RelationsServiceTest
           }
         }
       }
-      }
-
+    }
 
     it("Returns no related works when work is not part of a collection") {
       withLocalMergedWorksIndex { index =>
@@ -204,8 +207,7 @@ class RelationsServiceTest
           }
         }
       }
-      }
-
+    }
 
     it("Sorts works consisting of paths with an alphanumeric mixture of tokens") {
       withLocalMergedWorksIndex { index =>

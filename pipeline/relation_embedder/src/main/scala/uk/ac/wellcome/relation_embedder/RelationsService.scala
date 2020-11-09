@@ -37,13 +37,14 @@ trait RelationsService {
     work: Work[Merged]): Future[Relations[DataState.Unidentified]]
 }
 
-class PathQueryRelationsService(elasticClient: ElasticClient, index: Index, scrollSize:Int)(
-  implicit ec: ExecutionContext, as: ActorSystem)
+class PathQueryRelationsService(
+  elasticClient: ElasticClient,
+  index: Index,
+  scrollSize: Int)(implicit ec: ExecutionContext, as: ActorSystem)
     extends RelationsService
     with Logging {
 
-  def getOtherAffectedWorks(
-    work: Work[Merged]): Source[Work[Merged], NotUsed] =
+  def getOtherAffectedWorks(work: Work[Merged]): Source[Work[Merged], NotUsed] =
     work match {
       case work: Work.Visible[Merged] =>
         work.data.collectionPath match {
@@ -52,7 +53,6 @@ class PathQueryRelationsService(elasticClient: ElasticClient, index: Index, scro
               s"work ${work.id} does not belong to an archive, skipping getOtherAffectedWorks.")
             Source.empty[Work[Merged]]
           case Some(CollectionPath(path, _, _)) =>
-
             Source
               .fromPublisher(
                 elasticClient.publisher(

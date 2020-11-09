@@ -3,7 +3,7 @@ package uk.ac.wellcome.pipeline_storage
 import scala.concurrent.Future
 
 class MemoryRetriever[T](index: Map[String, T] = Map.empty)
-  extends Retriever[T] {
+    extends Retriever[T] {
 
   def apply(id: String): Future[T] =
     index.get(id) match {

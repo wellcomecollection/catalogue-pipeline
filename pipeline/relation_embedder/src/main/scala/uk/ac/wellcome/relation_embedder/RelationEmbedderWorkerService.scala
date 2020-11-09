@@ -37,7 +37,12 @@ class RelationEmbedderWorkerService[MsgDestination](
   def processMessage(message: NotificationMessage): Future[Unit] = {
     val affectedWorks: Source[Work[Merged], NotUsed] =
       Source
-        .future(workRetriever(message.body)).flatMapConcat{ work => Source.single(work).concat(relationsService.getOtherAffectedWorks(work))}
+        .future(workRetriever(message.body))
+        .flatMapConcat { work =>
+          Source
+            .single(work)
+            .concat(relationsService.getOtherAffectedWorks(work))
+        }
 
     val denormalisedWorks =
       affectedWorks
