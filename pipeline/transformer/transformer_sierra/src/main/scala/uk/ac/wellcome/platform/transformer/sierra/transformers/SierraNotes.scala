@@ -23,6 +23,7 @@ object SierraNotes extends SierraDataTransformer with SierraQueryOps {
     "508" -> NotesField(CreditsNote),
     "510" -> NotesField(PublicationsNote),
     "511" -> NotesField(CreditsNote),
+    "514" -> NotesField(LetteringNote),
     "518" -> NotesField(TimeAndPlaceNote),
     "524" -> NotesField(CiteAsNote),
     "533" -> NotesField(ReproductionNote),
@@ -32,12 +33,14 @@ object SierraNotes extends SierraDataTransformer with SierraQueryOps {
     "540" -> NotesField(TermsOfUse),
     "542" -> NotesField(CopyrightNote),
     "545" -> NotesField(BiographicalNote),
+    "546" -> NotesField(LanguageNote),
     "547" -> NotesField(GeneralNote),
     "562" -> NotesField(GeneralNote),
     "563" -> NotesField(BindingInformation, suppressedSubfields = Set("5")),
     "581" -> NotesField(PublicationsNote),
     "585" -> NotesField(ExhibitionsNote),
     "586" -> NotesField(AwardsNote),
+    "591" -> NotesField(GeneralNote),
     "593" -> NotesField(CopyrightNote),
   )
 

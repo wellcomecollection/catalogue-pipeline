@@ -51,3 +51,7 @@ case class RelatedMaterial(content: String) extends Note
 case class FindingAids(content: String) extends Note
 
 case class ArrangementNote(content: String) extends Note
+
+case class LetteringNote(content: String) extends Note
+
+case class LanguageNote(content: String) extends Note

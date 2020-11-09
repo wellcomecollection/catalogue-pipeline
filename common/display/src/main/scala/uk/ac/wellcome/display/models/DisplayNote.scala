@@ -96,5 +96,9 @@ object DisplayNoteType {
         DisplayNoteType("finding-aids", "Finding aids")
       case ArrangementNote(_) =>
         DisplayNoteType("arrangement-note", "Arrangement")
+      case LetteringNote(_) =>
+        DisplayNoteType("lettering-note", "Lettering")
+      case LanguageNote(_) =>
+        DisplayNoteType("language-note", "Language")
     }
 }
