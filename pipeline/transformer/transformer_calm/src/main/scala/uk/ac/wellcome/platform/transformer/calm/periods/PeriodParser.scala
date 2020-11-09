@@ -10,6 +10,9 @@ object PeriodParser extends Parser[InstantRange] with DateParserUtils {
   import FreeformDateParser.{calendarDate, day, month, monthAndYear}
   import QualifyFuzzyDate._
 
+  override def apply(input: String): Option[InstantRange] =
+    super.apply(preprocess(input)) map (_ withLabel input)
+
   private final val ignoreSubstrings = Seq(
     "\\[gaps\\]",
     "floruit",
@@ -26,9 +29,9 @@ object PeriodParser extends Parser[InstantRange] with DateParserUtils {
 
   private def preprocess(input: String): String =
     ignoreSubstrings
-      .foldLeft(input.toLowerCase) {
-        case (str, noop) => str.replaceAll(noop, "")
-      }
+      .reduceLeft(_ + "|" + _)
+      .r
+      .replaceAllIn(input.toLowerCase, "")
       .trim
 
   def parser[_: P]: P[InstantRange] =
@@ -40,14 +43,11 @@ object PeriodParser extends Parser[InstantRange] with DateParserUtils {
   def multiPeriodSeparator[_: P]: P[Unit] =
     ws.? ~ StringIn(";", ",", "and") ~ ws.?
 
-  override def apply(input: String): Option[InstantRange] =
-    super.apply(preprocess(input)) map (_ withLabel input)
-
-  def crisps[_: P]: P[InstantRange] = (century to decade).toInstantRange
-
   def timePeriod[_: P] =
-    dateRange |
-      calendarDate.toInstantRange |
+    dateRange | singleDate | (noopQualifier ~ ws.? ~ singleDate)
+
+  def singleDate[_: P]: P[InstantRange] =
+    calendarDate.toInstantRange |
       monthAndYear.toInstantRange |
       monthRangeYear.toInstantRange |
       qualified(century).toInstantRange |
@@ -58,21 +58,35 @@ object PeriodParser extends Parser[InstantRange] with DateParserUtils {
       yearRange.toInstantRange |
       year.toInstantRange
 
-  def dateRange[_: P] =
+  def dateRange[_: P]: P[InstantRange] =
+    calendarDateToDate |
+      monthAndYearToDate |
+      centuryToDate |
+      yearToDate |
+      decadeToDate |
+      (monthAndDay to calendarDate).toInstantRange |
+      (monthRangeYear to monthRangeYear).toInstantRange |
+      (month to monthAndYear).toInstantRange |
+      (day to calendarDate).toInstantRange
+
+  def calendarDateToDate[_: P]: P[InstantRange] =
     (calendarDate to calendarDate).toInstantRange |
       (calendarDate to year).toInstantRange |
       (calendarDate to qualified(year)).toInstantRange |
       (calendarDate to monthAndYear).toInstantRange |
       (calendarDate to monthAndDay).toInstantRange |
       (calendarDate to month).toInstantRange |
-      (calendarDate to day).toInstantRange |
-      (monthAndYear to calendarDate).toInstantRange |
+      (calendarDate to day).toInstantRange
+
+  def monthAndYearToDate[_: P]: P[InstantRange] =
+    (monthAndYear to calendarDate).toInstantRange |
       (monthAndYear to monthAndYear).toInstantRange |
       (monthAndYear to monthAndDay).toInstantRange |
       (monthAndYear to month).toInstantRange |
-      (monthAndYear to year).toInstantRange |
-      (monthAndDay to calendarDate).toInstantRange |
-      (qualified(century | inferredCentury) to century).toInstantRange |
+      (monthAndYear to year).toInstantRange
+
+  def centuryToDate[_: P]: P[InstantRange] =
+    (qualified(century | inferredCentury) to century).toInstantRange |
       ((century | inferredCentury) to qualified(century)).toInstantRange |
       (qualified(century | inferredCentury) to qualified(century)).toInstantRange |
       ((century | inferredCentury) to century).toInstantRange |
@@ -80,8 +94,10 @@ object PeriodParser extends Parser[InstantRange] with DateParserUtils {
       (century to year).toInstantRange |
       (qualified(century) to year).toInstantRange |
       (century to qualified(year)).toInstantRange |
-      (qualified(century) to qualified(year)).toInstantRange |
-      (qualified(year) to calendarDate).toInstantRange |
+      (qualified(century) to qualified(year)).toInstantRange
+
+  def yearToDate[_: P]: P[InstantRange] =
+    (qualified(year) to calendarDate).toInstantRange |
       (qualified(year) to monthAndYear).toInstantRange |
       (year to calendarDate).toInstantRange |
       (year to monthAndYear).toInstantRange |
@@ -96,18 +112,19 @@ object PeriodParser extends Parser[InstantRange] with DateParserUtils {
       (year to year).toInstantRange |
       (qualified(year) to year).toInstantRange |
       (year to qualified(year)).toInstantRange |
-      (qualified(year) to qualified(year)).toInstantRange |
-      (monthRangeYear to monthRangeYear).toInstantRange |
-      (qualified(decade) to qualified(decade)).toInstantRange |
+      (qualified(year) to qualified(year)).toInstantRange
+
+  def decadeToDate[_: P]: P[InstantRange] =
+    (qualified(decade) to qualified(decade)).toInstantRange |
       (qualified(decade) to decade).toInstantRange |
       (decade to qualified(decade)).toInstantRange |
       (decade to decade).toInstantRange |
       (qualified(decade) to qualified(year)).toInstantRange |
       (qualified(decade) to year).toInstantRange |
       (decade to qualified(year)).toInstantRange |
-      (decade to year).toInstantRange |
-      (month to monthAndYear).toInstantRange |
-      (day to calendarDate).toInstantRange
+      (decade to year).toInstantRange
+
+  def noopQualifier[_: P]: P[Unit] = Lex.qualifier map (_ => ())
 
   def inferredCentury[_: P]: P[Century] =
     P(Lex.int.filter(_ <= 999) ~ Lex.ordinalSuffix.? map { n =>

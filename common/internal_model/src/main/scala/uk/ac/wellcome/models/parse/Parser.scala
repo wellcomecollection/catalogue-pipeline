@@ -20,10 +20,10 @@ trait Parser[T] extends Logging {
     *  @return Some(output) if parse was successful, None otherwise
     */
   def apply(input: String): Option[T] =
-    parse(input, parser(_), verboseFailures = true) match {
+    parse(input, parser(_)) match {
       case Parsed.Success(value, _) => Some(value)
-      case Parsed.Failure(label, index, _) =>
-        error(s"Failed parsing $input with $label at $index")
+      case Parsed.Failure(_, index, _) =>
+        warn(s"Failed parsing $input at $index")
         None
     }
 }
