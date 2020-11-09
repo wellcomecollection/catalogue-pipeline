@@ -12,6 +12,8 @@ object Qualifier {
   case object Mid extends Qualifier
   case object Early extends Qualifier
   case object Late extends Qualifier
+  case object EarlyMid extends Qualifier
+  case object MidLate extends Qualifier
 }
 
 trait QualifyFuzzyDate[D <: FuzzyDate] {
@@ -40,6 +42,21 @@ object QualifyFuzzyDate extends ParserUtils {
           FuzzyDateRange(
             Year(100 * century + 60),
             Year(100 * century + 99),
+          )
+        case (Qualifier.EarlyMid, Century(century)) =>
+          FuzzyDateRange(
+            Year(100 * century),
+            Year(100 * century + 69),
+          )
+        case (Qualifier.MidLate, Century(century)) =>
+          FuzzyDateRange(
+            Year(100 * century + 30),
+            Year(100 * century + 99),
+          )
+        case (Qualifier.About, Century(century)) =>
+          FuzzyDateRange(
+            Year(100 * century - 10),
+            Year(100 * century + 109),
           )
       }
     }
@@ -72,6 +89,21 @@ object QualifyFuzzyDate extends ParserUtils {
           FuzzyDateRange(
             Year(century * 100 + (decade - 1) * 10),
             Year(century * 100 + (decade + 1) * 10),
+          )
+        case (Qualifier.Early, CenturyAndDecade(century, decade)) =>
+          FuzzyDateRange(
+            Year(century * 100 + decade * 10),
+            Year(century * 100 + decade * 10 + 3)
+          )
+        case (Qualifier.Mid, CenturyAndDecade(century, decade)) =>
+          FuzzyDateRange(
+            Year(century * 100 + decade * 10 + 3),
+            Year(century * 100 + decade * 10 + 6)
+          )
+        case (Qualifier.Late, CenturyAndDecade(century, decade)) =>
+          FuzzyDateRange(
+            Year(century * 100 + decade * 10 + 6),
+            Year(century * 100 + decade * 10 + 9)
           )
       }
     }

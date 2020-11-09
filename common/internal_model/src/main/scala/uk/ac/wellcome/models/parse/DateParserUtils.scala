@@ -118,7 +118,8 @@ trait ParserUtils {
   */
 object DateParserImplicits extends ParserUtils {
 
-  private def sep[_: P]: P[Unit] = P(ws.? ~ StringIn("to", "x", "-") ~ ws.?)
+  private def sep[_: P]: P[Unit] =
+    P(ws.? ~ StringIn("to", "x", "-", "/") ~ ws.?)
 
   implicit class DateToDateRangeParser[F <: FuzzyDate](from: => P[F]) {
 

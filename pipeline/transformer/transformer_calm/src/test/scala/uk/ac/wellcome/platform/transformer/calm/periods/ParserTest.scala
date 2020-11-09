@@ -363,6 +363,41 @@ class ParserTest extends AnyFunSpec with Matchers with Inspectors {
           LocalDate of (1929, 12, 31),
           "c.1920"))
     }
+
+    it("handles approximate century qualifiers") {
+      PeriodParser("circa 17th century") shouldBe Some(
+        InstantRange(
+          LocalDate of (1590, 1, 1),
+          LocalDate of (1709, 12, 31),
+          "circa 17th century"))
+    }
+
+    it("handles compound qualifiers") {
+      PeriodParser("mid-late 19th century") shouldBe Some(
+        InstantRange(
+          LocalDate of (1830, 1, 1),
+          LocalDate of (1899, 12, 31),
+          "mid-late 19th century"))
+    }
+
+    it("disambiguates centuries and decades") {
+      PeriodParser("2000s-2020s") shouldBe Some(
+        InstantRange(
+          LocalDate of (2000, 1, 1),
+          LocalDate of (2029, 12, 31),
+          "2000s-2020s"))
+    }
+
+    it("parses and combines multiple periods") {
+      PeriodParser("1952, 1953, 1955, 1957-1960") shouldBe Some(
+        InstantRange(
+          LocalDate of (1952, 1, 1),
+          LocalDate of (1960, 12, 31),
+          "1952, 1953, 1955, 1957-1960"
+        )
+      )
+    }
+
   }
 
 }

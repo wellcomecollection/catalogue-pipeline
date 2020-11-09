@@ -17,13 +17,13 @@ object Lex extends ParserUtils {
 
   // Elements
   def numericCentury[_: P]: P[Int] =
-    P(int ~ "s" filter (_ % 100 == 0) map (_ / 100))
+    P(int ~ "'".? ~ "s" filter (_ % 100 == 0) map (_ / 100))
   def textCentury[_: P]: P[Int] =
     P(int ~ ordinalSuffix.? ~ ws ~ StringIn("century", "cent.", "cent") map (_ - 1))
   def century[_: P]: P[Int] = P(numericCentury | textCentury)
 
   def decade[_: P]: P[Int] =
-    P(int ~ "s" filter (_ % 10 == 0))
+    P(int ~ "'".? ~ "s" filter (_ % 10 == 0))
 
   def season[_: P]: P[String] =
     P(StringIn("spring", "summer", "autumn", "fall", "winter").! map {
@@ -39,18 +39,25 @@ object Lex extends ParserUtils {
   def present[_: P]: P[Unit] = "present"
 
   // Qualifiers
-  def pre[_: P] = keyword(Qualifier.Pre, "pre")
-  def post[_: P] = keyword(Qualifier.Post, "post")
-  def mid[_: P] =
-    keywords(Qualifier.Mid, StringIn("middle", "mid.", "mid"))
-  def early[_: P] = keyword(Qualifier.Early, "early")
-  def late[_: P] = keyword(Qualifier.Late, "late")
   def about[_: P] =
     keywords(
       Qualifier.About,
       StringIn("about", "approx", "circa", "circ.", "circ", "c.", "c")
     )
+  def pre[_: P] = keyword(Qualifier.Pre, "pre")
+  def post[_: P] = keyword(Qualifier.Post, "post")
+  def mid[_: P] =
+    keywords(Qualifier.Mid, StringIn("middle", "mid.", "mid"))
+  def early[_: P] =
+    about.? ~ ws.? ~ keyword(Qualifier.Early, "early") map (_._2)
+  def late[_: P] = about.? ~ ws.? ~ keyword(Qualifier.Late, "late") map (_._2)
+
+  def compoundSep[_: P] = ws.? ~ ("-" | "to").? ~ ws.?
+  def earlyMid[_: P] =
+    P("early" ~ compoundSep ~ "mid" map const(Qualifier.EarlyMid))
+  def midLate[_: P] =
+    P("mid" ~ compoundSep ~ "late" map const(Qualifier.MidLate))
 
   def qualifier[_: P]: P[Qualifier] =
-    pre | post | mid | early | late | about
+    earlyMid | midLate | pre | post | mid | early | late | about
 }
