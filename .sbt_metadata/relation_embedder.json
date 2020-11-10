@@ -1,6 +1,6 @@
 {
   "id" : "relation_embedder",
-  "folder" : "pipeline/relation_embedder",
+  "folder" : "pipeline/relation_embedder/relation_embedder",
   "dependencyIds" : [
     "internal_model",
     "elasticsearch",
