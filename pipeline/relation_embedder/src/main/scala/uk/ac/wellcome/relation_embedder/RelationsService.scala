@@ -35,6 +35,13 @@ trait RelationsService {
     */
   def getRelations(
     work: Work[Merged]): Future[Relations[DataState.Unidentified]]
+
+  /** For a given work return all works in the same archive.
+    *
+    * @param work The work
+    * @return The works
+    */
+  def getAllWorksInArchive(work: Work[Merged]): Future[List[Work[Merged]]]
 }
 
 class PathQueryRelationsService(
@@ -104,6 +111,32 @@ class PathQueryRelationsService(
       case _ => Future.successful(Relations.none)
     }
 
+  def getAllWorksInArchive(work: Work[Merged]): Future[List[Work[Merged]]] =
+    work match {
+      case work: Work.Visible[Merged] => 
+        work.data.collectionPath match {
+          case None => Future.successful(Nil)
+          case Some(CollectionPath(path, _, _)) =>
+            executeSearchRequest(
+              RelationsRequestBuilder(index, path).allRelationsRequest
+            ).flatMap { case result =>
+              val works = result.left
+                .map(_.asException)
+                .flatMap { resp =>
+                  // Are you here because something is erroring when being decoded?
+                  // Check that all the fields you need are in the lists in RelationsRequestBuilder!
+                  resp.hits.hits.toList.map(toWork).toResult
+                }
+              works match {
+                case Right(works) => Future.successful(works)
+                case Left(err)    => Future.failed(err)
+              }
+            }
+        }
+      case _ => Future.successful(Nil)
+    }
+
+
   private def executeMultiSearchRequest(request: MultiSearchRequest)
     : Future[Either[ElasticError, List[SearchResponse]]] =
     elasticClient
@@ -123,6 +156,10 @@ class PathQueryRelationsService(
             }
         }
       }
+
+  private def executeSearchRequest(
+    request: SearchRequest): Future[Either[ElasticError, SearchResponse]] =
+    elasticClient.execute(request).map(toEither)
 
   private def toEither[T](response: Response[T]): Either[ElasticError, T] =
     if (response.isError)

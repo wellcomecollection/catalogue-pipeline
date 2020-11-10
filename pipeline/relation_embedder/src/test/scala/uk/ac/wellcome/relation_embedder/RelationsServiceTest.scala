@@ -96,6 +96,30 @@ class RelationsServiceTest
 
   }
 
+  describe("getAllWorksInArchive") {
+    it("Retrieves all works in archive") {
+      withLocalMergedWorksIndex { index =>
+        withActorSystem { implicit as =>
+          storeWorks(index, work("other/archive") :: works)
+          whenReady(service(index).getAllWorksInArchive(work2)) { archiveWorks =>
+            archiveWorks should contain theSameElementsAs works
+          }
+        }
+      }
+    }
+
+    it("Retrieves all works in archive from root position") {
+      withLocalMergedWorksIndex { index =>
+        withActorSystem { implicit as =>
+          storeWorks(index, work("other/archive") :: works)
+          whenReady(service(index).getAllWorksInArchive(workA)) { archiveWorks =>
+            archiveWorks should contain theSameElementsAs works
+          }
+        }
+      }
+    }
+  }
+
   describe("getRelations") {
     it(
       "Retrieves a related works for the given path with children and siblings sorted correctly") {

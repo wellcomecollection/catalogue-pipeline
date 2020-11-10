@@ -112,7 +112,7 @@ case class RelationsRequestBuilder(index: Index,
     ancestors.length + 1
 
   lazy val collectionRoot: String =
-    ancestors.head
+    ancestors.headOption.getOrElse(path)
 
   def pathQuery(path: String, depth: Int) =
     must(
