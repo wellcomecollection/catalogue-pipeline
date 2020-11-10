@@ -76,25 +76,35 @@ class MergerFeatureTest
       outcome.getMerged(sierra).data.images should contain only miro.singleImage
     }
 
-    Scenario("A Sierra picture work and METS work are matched") {
-      Given("a Sierra picture work and a METS work")
+    Scenario("A Sierra picture or ephemera work and METS work are matched") {
+      Given("a Sierra picture or ephemera work and a METS work")
       val sierraPicture = sierraSourceWork()
         .items(List(createPhysicalItem))
         .format(Format.Pictures)
+      val sierraEphemera = sierraSourceWork()
+        .items(List(createPhysicalItem))
+        .format(Format.Ephemera)
       val mets = metsSourceWork()
 
       When("the works are merged")
-      val outcome = merger.merge(Seq(sierraPicture, mets))
+      val pictureOutcome = merger.merge(Seq(sierraPicture, mets))
+      val ephemeraOutcome = merger.merge(Seq(sierraEphemera, mets))
 
       Then("the METS work is redirected to the Sierra work")
-      outcome.getMerged(mets) should beRedirectedTo(sierraPicture)
+      pictureOutcome.getMerged(mets) should beRedirectedTo(sierraPicture)
+      ephemeraOutcome.getMerged(mets) should beRedirectedTo(sierraEphemera)
 
       And("an image is created from the METS work")
-      outcome.images should contain only mets.singleImage
+      pictureOutcome.images should contain only mets.singleImage
+      ephemeraOutcome.images should contain only mets.singleImage
 
       And("the merged Sierra work contains the image")
-      outcome
+      pictureOutcome
         .getMerged(sierraPicture)
+        .data
+        .images should contain only mets.singleImage
+      ephemeraOutcome
+        .getMerged(sierraEphemera)
         .data
         .images should contain only mets.singleImage
     }
