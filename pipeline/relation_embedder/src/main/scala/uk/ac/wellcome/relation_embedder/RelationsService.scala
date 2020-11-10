@@ -28,14 +28,6 @@ trait RelationsService {
     */
   def getOtherAffectedWorks(work: Work[Merged]): Source[Work[Merged], NotUsed]
 
-  /** For a given work return all its relations.
-    *
-    * @param work The work
-    * @return The related works which are embedded into the given work
-    */
-  def getRelations(
-    work: Work[Merged]): Future[Relations[DataState.Unidentified]]
-
   /** For a given work return all works in the same archive.
     *
     * @param work The work
@@ -73,44 +65,6 @@ class PathQueryRelationsService(
       case _ => Source.empty[Work[Merged]]
     }
 
-  def getRelations(
-    work: Work[Merged]): Future[Relations[DataState.Unidentified]] =
-    work match {
-      case work: Work.Visible[Merged] =>
-        work.data.collectionPath match {
-          case None =>
-            Future.successful(Relations.none)
-          case Some(CollectionPath(path, _, _)) =>
-            executeMultiSearchRequest(
-              RelationsRequestBuilder(index, path).relationsRequest
-            ).flatMap { result =>
-              val works = result.left
-                .map(_.asException)
-                .flatMap { searchResponses =>
-                  searchResponses.map { resp =>
-                    resp.hits.hits.toList.map(toWork).toResult
-                  }.toResult
-                }
-              val relations = works.flatMap {
-                case List(children, siblings, ancestors) =>
-                  Right(
-                    ArchiveRelationsBuilder(path, children, siblings, ancestors)
-                  )
-                case _ =>
-                  Left(
-                    new Exception(
-                      "Expected multisearch response containing 3 items")
-                  )
-              }
-              relations match {
-                case Right(relations) => Future.successful(relations)
-                case Left(err)        => Future.failed(err)
-              }
-            }
-        }
-      case _ => Future.successful(Relations.none)
-    }
-
   def getAllWorksInArchive(work: Work[Merged]): Future[List[Work[Merged]]] =
     work match {
       case work: Work.Visible[Merged] => 
@@ -135,27 +89,6 @@ class PathQueryRelationsService(
         }
       case _ => Future.successful(Nil)
     }
-
-
-  private def executeMultiSearchRequest(request: MultiSearchRequest)
-    : Future[Either[ElasticError, List[SearchResponse]]] =
-    elasticClient
-      .execute(request)
-      .map(toEither)
-      .map { response =>
-        response.right.flatMap {
-          case MultiSearchResponse(items) =>
-            val results = items.map(_.response)
-            val error = results.collectFirst { case Left(err) => err }
-            error match {
-              case Some(err) => Left(err)
-              case None =>
-                Right(
-                  results.collect { case Right(resp) => resp }.toList
-                )
-            }
-        }
-      }
 
   private def executeSearchRequest(
     request: SearchRequest): Future[Either[ElasticError, SearchResponse]] =
