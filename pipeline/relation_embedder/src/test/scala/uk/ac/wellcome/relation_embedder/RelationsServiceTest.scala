@@ -101,8 +101,9 @@ class RelationsServiceTest
       withLocalMergedWorksIndex { index =>
         withActorSystem { implicit as =>
           storeWorks(index, work("other/archive") :: works)
-          whenReady(service(index).getAllWorksInArchive(work2)) { archiveWorks =>
-            archiveWorks should contain theSameElementsAs works
+          whenReady(service(index).getAllWorksInArchive(work2)) {
+            archiveWorks =>
+              archiveWorks should contain theSameElementsAs works
           }
         }
       }
@@ -112,8 +113,9 @@ class RelationsServiceTest
       withLocalMergedWorksIndex { index =>
         withActorSystem { implicit as =>
           storeWorks(index, work("other/archive") :: works)
-          whenReady(service(index).getAllWorksInArchive(workA)) { archiveWorks =>
-            archiveWorks should contain theSameElementsAs works
+          whenReady(service(index).getAllWorksInArchive(workA)) {
+            archiveWorks =>
+              archiveWorks should contain theSameElementsAs works
           }
         }
       }

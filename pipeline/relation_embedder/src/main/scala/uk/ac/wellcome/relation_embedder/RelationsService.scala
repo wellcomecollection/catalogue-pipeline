@@ -67,24 +67,25 @@ class PathQueryRelationsService(
 
   def getAllWorksInArchive(work: Work[Merged]): Future[List[Work[Merged]]] =
     work match {
-      case work: Work.Visible[Merged] => 
+      case work: Work.Visible[Merged] =>
         work.data.collectionPath match {
           case None => Future.successful(Nil)
           case Some(CollectionPath(path, _, _)) =>
             executeSearchRequest(
               RelationsRequestBuilder(index, path).allRelationsRequest
-            ).flatMap { case result =>
-              val works = result.left
-                .map(_.asException)
-                .flatMap { resp =>
-                  // Are you here because something is erroring when being decoded?
-                  // Check that all the fields you need are in the lists in RelationsRequestBuilder!
-                  resp.hits.hits.toList.map(toWork).toResult
+            ).flatMap {
+              case result =>
+                val works = result.left
+                  .map(_.asException)
+                  .flatMap { resp =>
+                    // Are you here because something is erroring when being decoded?
+                    // Check that all the fields you need are in the lists in RelationsRequestBuilder!
+                    resp.hits.hits.toList.map(toWork).toResult
+                  }
+                works match {
+                  case Right(works) => Future.successful(works)
+                  case Left(err)    => Future.failed(err)
                 }
-              works match {
-                case Right(works) => Future.successful(works)
-                case Left(err)    => Future.failed(err)
-              }
             }
         }
       case _ => Future.successful(Nil)
