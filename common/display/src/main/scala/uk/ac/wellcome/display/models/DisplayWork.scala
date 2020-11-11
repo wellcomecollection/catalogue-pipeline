@@ -89,6 +89,10 @@ case class DisplayWork(
     description = "Relates a work to its primary language."
   ) language: Option[DisplayLanguage] = None,
   @Schema(
+    `type` = "List[uk.ac.wellcome.display.models.DisplayLanguage]",
+    description = "Relates a work to its languages."
+  ) languages: Option[List[DisplayLanguage]] = None,
+  @Schema(
     `type` = "String",
     description = "Information relating to the edition of a work."
   ) edition: Option[String] = None,
@@ -169,6 +173,10 @@ case object DisplayWork {
         })
         else None,
       language = work.data.language.map { DisplayLanguage(_) },
+      languages =
+        if (includes.languages)
+          Some(work.data.languages.map { DisplayLanguage(_) })
+        else None,
       edition = work.data.edition,
       notes =
         if (includes.notes)

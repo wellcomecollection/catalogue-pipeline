@@ -9,6 +9,7 @@ object WorkInclude {
   case object Genres extends WorkInclude
   case object Contributors extends WorkInclude
   case object Production extends WorkInclude
+  case object Languages extends WorkInclude
   case object Notes extends WorkInclude
   case object Images extends WorkInclude
   case object Parts extends WorkInclude
@@ -24,6 +25,7 @@ case class WorksIncludes(
   genres: Boolean,
   contributors: Boolean,
   production: Boolean,
+  languages: Boolean,
   notes: Boolean,
   images: Boolean,
   parts: Boolean,
@@ -43,6 +45,7 @@ case object WorksIncludes {
       genres = includes.contains(WorkInclude.Genres),
       contributors = includes.contains(WorkInclude.Contributors),
       production = includes.contains(WorkInclude.Production),
+      languages = includes.contains(WorkInclude.Languages),
       notes = includes.contains(WorkInclude.Notes),
       images = includes.contains(WorkInclude.Images),
       parts = includes.contains(WorkInclude.Parts),
@@ -59,6 +62,7 @@ case object WorksIncludes {
       genres = true,
       contributors = true,
       production = true,
+      languages = true,
       notes = true,
       images = true,
       parts = true,

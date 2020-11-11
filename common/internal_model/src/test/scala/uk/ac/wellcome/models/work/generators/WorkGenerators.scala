@@ -149,6 +149,9 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
     def language(language: Language): Work.Visible[State] =
       work.map(_.copy(language = Some(language)))
 
+    def languages(languages: List[Language]): Work.Visible[State] =
+      work.map(_.copy(languages = languages))
+
     def edition(edition: String): Work.Visible[State] =
       work.map(_.copy(edition = Some(edition)))
 
