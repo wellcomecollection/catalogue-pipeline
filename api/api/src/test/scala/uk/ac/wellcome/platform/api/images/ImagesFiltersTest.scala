@@ -1,6 +1,5 @@
 package uk.ac.wellcome.platform.api.images
 
-import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.models.work.internal.License
 
 class ImagesFiltersTest extends ApiImagesTestBase {
@@ -9,8 +8,8 @@ class ImagesFiltersTest extends ApiImagesTestBase {
     val ccByNcImage = createLicensedImage(License.CCBYNC)
 
     it("filters by license") {
-      withApi {
-        case (ElasticConfig(_, imagesIndex), routes) =>
+      withImagesApi {
+        case (imagesIndex, routes) =>
           insertImagesIntoElasticsearch(imagesIndex, ccByImage, ccByNcImage)
           assertJsonResponse(
             routes,
@@ -128,8 +127,8 @@ class ImagesFiltersTest extends ApiImagesTestBase {
           ))))
 
     it("filters by color") {
-      withApi {
-        case (ElasticConfig(_, imagesIndex), routes) =>
+      withImagesApi {
+        case (imagesIndex, routes) =>
           insertImagesIntoElasticsearch(imagesIndex, redImage, blueImage)
           assertJsonResponse(routes, f"/$apiPrefix/images?color=ff0000") {
             Status.OK -> imagesListResponse(
@@ -140,8 +139,8 @@ class ImagesFiltersTest extends ApiImagesTestBase {
     }
 
     it("filters by multiple colors") {
-      withApi {
-        case (ElasticConfig(_, imagesIndex), routes) =>
+      withImagesApi {
+        case (imagesIndex, routes) =>
           insertImagesIntoElasticsearch(imagesIndex, redImage, blueImage)
           assertJsonResponse(
             routes,
@@ -155,8 +154,8 @@ class ImagesFiltersTest extends ApiImagesTestBase {
     }
 
     it("scores by number of color bin matches") {
-      withApi {
-        case (ElasticConfig(_, imagesIndex), routes) =>
+      withImagesApi {
+        case (imagesIndex, routes) =>
           insertImagesIntoElasticsearch(
             imagesIndex,
             redImage,

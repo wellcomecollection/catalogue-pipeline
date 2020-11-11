@@ -75,6 +75,18 @@ trait ApiFixture
       }
     }
 
+  def withImagesApi[R](testWith: TestWith[(Index, Route), R]): R =
+    withLocalImagesIndex { imagesIndex =>
+      val elasticConfig = ElasticConfig(
+        worksIndex = Index("worksIndex-notused"),
+        imagesIndex = imagesIndex
+      )
+
+      withRouter(elasticConfig) { route =>
+        testWith((imagesIndex, route))
+      }
+    }
+
   def assertJsonResponse(
     routes: Route,
     path: String,
