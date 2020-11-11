@@ -17,7 +17,7 @@ import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.work.internal.WorkState.{Denormalised, Merged}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
-import uk.ac.wellcome.pipeline_storage.{ElasticRetriever, MemoryIndexer}
+import uk.ac.wellcome.pipeline_storage.MemoryIndexer
 
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -132,7 +132,6 @@ class RelationEmbedderWorkerServiceTest
             val workerService = new RelationEmbedderWorkerService[String](
               sqsStream = sqsStream,
               msgSender = messageSender,
-              workRetriever = new ElasticRetriever(elasticClient, mergedIndex),
               workIndexer = new MemoryIndexer(denormalisedIndex),
               relationsService =
                 new PathQueryRelationsService(elasticClient, mergedIndex, 10),
