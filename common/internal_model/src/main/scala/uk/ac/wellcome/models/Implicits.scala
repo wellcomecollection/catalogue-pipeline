@@ -86,50 +86,52 @@ object Implicits {
     deriveConfiguredDecoder
   implicit val _dec42: Decoder[UnmergedImage[DataState.Identified]] =
     deriveConfiguredDecoder
-  implicit val _dec43: Decoder[WorkData[DataState.Unidentified]] =
+  implicit val _dec43: Decoder[CollectionPath] =
     deriveConfiguredDecoder
-  implicit val _dec44: Decoder[WorkData[DataState.Identified]] =
+  implicit val _dec44: Decoder[WorkData[DataState.Unidentified]] =
     deriveConfiguredDecoder
-  implicit val _dec45: Decoder[Work.Visible[WorkState.Source]] =
+  implicit val _dec45: Decoder[WorkData[DataState.Identified]] =
     deriveConfiguredDecoder
-  implicit val _dec46: Decoder[Work.Visible[WorkState.Merged]] =
+  implicit val _dec46: Decoder[Work.Visible[WorkState.Source]] =
     deriveConfiguredDecoder
-  implicit val _dec47: Decoder[Work.Visible[WorkState.Denormalised]] =
+  implicit val _dec47: Decoder[Work.Visible[WorkState.Merged]] =
     deriveConfiguredDecoder
-  implicit val _dec48: Decoder[Work.Visible[WorkState.Identified]] =
+  implicit val _dec48: Decoder[Work.Visible[WorkState.Denormalised]] =
     deriveConfiguredDecoder
-  implicit val _dec49: Decoder[Work.Invisible[WorkState.Source]] =
+  implicit val _dec49: Decoder[Work.Visible[WorkState.Identified]] =
     deriveConfiguredDecoder
-  implicit val _dec50: Decoder[Work.Invisible[WorkState.Merged]] =
+  implicit val _dec50: Decoder[Work.Invisible[WorkState.Source]] =
     deriveConfiguredDecoder
-  implicit val _dec51: Decoder[Work.Invisible[WorkState.Denormalised]] =
+  implicit val _dec51: Decoder[Work.Invisible[WorkState.Merged]] =
     deriveConfiguredDecoder
-  implicit val _dec52: Decoder[Work.Invisible[WorkState.Identified]] =
+  implicit val _dec52: Decoder[Work.Invisible[WorkState.Denormalised]] =
     deriveConfiguredDecoder
-  implicit val _dec53: Decoder[Work.Redirected[WorkState.Source]] =
+  implicit val _dec53: Decoder[Work.Invisible[WorkState.Identified]] =
     deriveConfiguredDecoder
-  implicit val _dec54: Decoder[Work.Redirected[WorkState.Merged]] =
+  implicit val _dec54: Decoder[Work.Redirected[WorkState.Source]] =
     deriveConfiguredDecoder
-  implicit val _dec55: Decoder[Work.Redirected[WorkState.Denormalised]] =
+  implicit val _dec55: Decoder[Work.Redirected[WorkState.Merged]] =
     deriveConfiguredDecoder
-  implicit val _dec56: Decoder[Work.Redirected[WorkState.Identified]] =
+  implicit val _dec56: Decoder[Work.Redirected[WorkState.Denormalised]] =
     deriveConfiguredDecoder
-  implicit val _dec57: Decoder[Work[WorkState.Source]] =
+  implicit val _dec57: Decoder[Work.Redirected[WorkState.Identified]] =
     deriveConfiguredDecoder
-  implicit val _dec58: Decoder[Work[WorkState.Merged]] =
+  implicit val _dec58: Decoder[Work[WorkState.Source]] =
     deriveConfiguredDecoder
-  implicit val _dec59: Decoder[Work[WorkState.Denormalised]] =
+  implicit val _dec59: Decoder[Work[WorkState.Merged]] =
     deriveConfiguredDecoder
-  implicit val _dec60: Decoder[Work[WorkState.Identified]] =
+  implicit val _dec60: Decoder[Work[WorkState.Denormalised]] =
     deriveConfiguredDecoder
-  implicit val _dec61: Decoder[MergedImage[DataState.Unidentified]] =
+  implicit val _dec61: Decoder[Work[WorkState.Identified]] =
     deriveConfiguredDecoder
-  implicit val _dec62: Decoder[MergedImage[DataState.Identified]] =
+  implicit val _dec62: Decoder[MergedImage[DataState.Unidentified]] =
     deriveConfiguredDecoder
-  implicit val _dec63: Decoder[AugmentedImage] = deriveConfiguredDecoder
-  implicit val _dec64: Decoder[BaseImage[DataState.Unidentified]] =
+  implicit val _dec63: Decoder[MergedImage[DataState.Identified]] =
     deriveConfiguredDecoder
-  implicit val _dec65: Decoder[BaseImage[DataState.Identified]] =
+  implicit val _dec64: Decoder[AugmentedImage] = deriveConfiguredDecoder
+  implicit val _dec65: Decoder[BaseImage[DataState.Unidentified]] =
+    deriveConfiguredDecoder
+  implicit val _dec66: Decoder[BaseImage[DataState.Identified]] =
     deriveConfiguredDecoder
 
   implicit val _enc00: Encoder[AccessCondition] = deriveConfiguredEncoder

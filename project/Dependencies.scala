@@ -248,6 +248,9 @@ object CatalogueDependencies {
     WellcomeDependencies.storageTypesafeLibrary ++
       WellcomeDependencies.messagingTypesafeLibrary
 
+  val routerDependencies: Seq[ModuleID] =
+      WellcomeDependencies.messagingTypesafeLibrary
+
   val miroTransformerDependencies: Seq[ModuleID] =
     ExternalDependencies.apacheCommonsDependencies
 

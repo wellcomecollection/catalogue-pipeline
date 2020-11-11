@@ -93,6 +93,9 @@ catalogue_pipeline:
     - id: ingestor_works
       services:
         - id: work-ingestor
+    - id: router
+      service:
+        - id: router
     - id: relation_embedder
       service:
         - id: relation-embedder
