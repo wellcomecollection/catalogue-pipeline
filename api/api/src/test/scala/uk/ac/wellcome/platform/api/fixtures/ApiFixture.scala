@@ -12,6 +12,7 @@ import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.platform.api.Router
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.platform.api.models.{ApiConfig, QueryConfig}
+import uk.ac.wellcome.platform.api.swagger.SwaggerDocs
 
 trait ApiFixture
     extends AnyFunSpec
@@ -29,19 +30,27 @@ trait ApiFixture
     securedConnection = if (apiScheme == "https") true else false
   )
 
+  lazy val apiConfig = ApiConfig(
+    host = apiHost,
+    scheme = apiScheme,
+    defaultPageSize = 10,
+    pathPrefix = apiName,
+    contextSuffix = "context.json"
+  )
+
+  // Note: creating new instances of the SwaggerDocs class is expensive, so
+  // we cache it and reuse it between test instances to reduce the number
+  // of times we have to create it.
+  lazy val swaggerDocs = new SwaggerDocs(apiConfig)
+
   def withApi[R](testWith: TestWith[(ElasticConfig, Route), R]): R =
     withLocalIndices { elasticConfig =>
       val router = new Router(
         elasticClient,
         elasticConfig,
         QueryConfig(paletteBinSizes = Seq(4, 6, 8)),
-        ApiConfig(
-          host = apiHost,
-          scheme = apiScheme,
-          defaultPageSize = 10,
-          pathPrefix = apiName,
-          contextSuffix = "context.json"
-        ),
+        swaggerDocs = swaggerDocs,
+        apiConfig = apiConfig
       )
       testWith((elasticConfig, router.routes))
     }

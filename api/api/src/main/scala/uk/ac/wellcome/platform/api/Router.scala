@@ -20,6 +20,7 @@ import uk.ac.wellcome.platform.api.services.ElasticsearchService
 class Router(elasticClient: ElasticClient,
              elasticConfig: ElasticConfig,
              queryConfig: QueryConfig,
+             swaggerDocs: SwaggerDocs,
              implicit val apiConfig: ApiConfig)(implicit ec: ExecutionContext)
     extends CustomDirectives {
 
@@ -96,8 +97,6 @@ class Router(elasticClient: ElasticClient,
       HttpEntity(MediaTypes.`application/json`, swaggerDocs.json)
     )
   }
-
-  val swaggerDocs = new SwaggerDocs(apiConfig)
 
   def getClusterHealth: Route = {
     import com.sksamuel.elastic4s.ElasticDsl._
