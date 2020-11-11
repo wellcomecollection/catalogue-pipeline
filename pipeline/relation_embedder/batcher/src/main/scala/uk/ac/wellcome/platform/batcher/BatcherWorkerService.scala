@@ -25,8 +25,9 @@ class BatcherWorkerService[MsgDestination](
       this.getClass.getSimpleName,
       source =>
         source
-          .map { case (msg, notificationMessage) =>
-            (msg, notificationMessage.body)
+          .map {
+            case (msg, notificationMessage) =>
+              (msg, notificationMessage.body)
           }
           .groupedWithin(batchSize, flushInterval)
           .mapAsync(1) { msgsAndPaths =>
@@ -43,7 +44,7 @@ class BatcherWorkerService[MsgDestination](
               .collect { case Some(failedPath) => failedPath }
               .runWith(Sink.seq)
               .map { failedPaths =>
-              }
+                }
           }
           .mapConcat(identity)
     )
