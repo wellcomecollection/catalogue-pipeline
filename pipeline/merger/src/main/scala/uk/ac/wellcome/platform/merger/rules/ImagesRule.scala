@@ -15,20 +15,21 @@ object ImagesRule extends FieldMergeRule {
     target: Work.Visible[Source],
     sources: Seq[Work[Source]] = Nil): FieldMergeResult[FieldData] =
     FieldMergeResult(
-      data = getPictureImages(target, sources).getOrElse(Nil) ++
+      data = getPictureAndEphemeraImages(target, sources).getOrElse(Nil) ++
         getPairedMiroImages(target, sources).getOrElse(Nil),
-      sources = List(getPictureImages, getPairedMiroImages)
+      sources = List(getPictureAndEphemeraImages, getPairedMiroImages)
         .flatMap(_.mergedSources(target, sources))
     )
 
-  private lazy val getPictureImages = new FlatImageMergeRule {
-    val isDefinedForTarget: WorkPredicate = sierraPicture
+  private lazy val getPictureAndEphemeraImages = new FlatImageMergeRule {
+    val isDefinedForTarget: WorkPredicate = sierraPictureOrEphemera
     val isDefinedForSource
       : WorkPredicate = singleDigitalItemMetsWork or singleDigitalItemMiroWork
   }
 
   private lazy val getPairedMiroImages = new FlatImageMergeRule {
-    val isDefinedForTarget: WorkPredicate = sierraWork and not(sierraPicture)
+    val isDefinedForTarget: WorkPredicate = sierraWork and not(
+      sierraPictureOrEphemera)
     val isDefinedForSource: WorkPredicate = singleDigitalItemMiroWork
   }
 

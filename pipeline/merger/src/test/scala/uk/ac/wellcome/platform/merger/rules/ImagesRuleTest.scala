@@ -47,6 +47,18 @@ class ImagesRuleTest
     }
 
     it(
+      "creates n images from a METS work containing n images, and a single Sierra ephemera work") {
+      val n = 5
+      val metsWork = createInvisibleMetsSourceWorkWith(numImages = n)
+      val sierraEphemeraWork = sierraSourceWork().format(Format.Ephemera)
+      val result = ImagesRule.merge(sierraEphemeraWork, List(metsWork)).data
+
+      result should have length n
+      result.map(_.location) should contain theSameElementsAs
+        metsWork.data.images.map(_.location)
+    }
+
+    it(
       "creates n + m images from m Miro works, a METS work containing n images, and a single Sierra picture work") {
       val n = 3
       val m = 4
@@ -63,7 +75,23 @@ class ImagesRuleTest
     }
 
     it(
-      "ignores METS images, but uses n Miro images, for a non-picture Sierra work") {
+      "creates n + m images from m Miro works, a METS work containing n images, and a single Sierra ephemera work") {
+      val n = 3
+      val m = 4
+      val miroWorks = (1 to m).map(_ => miroSourceWork()).toList
+      val metsWork = createInvisibleMetsSourceWorkWith(numImages = n)
+      val sierraEphemeraWork = sierraSourceWork().format(Format.Ephemera)
+      val result =
+        ImagesRule.merge(sierraEphemeraWork, miroWorks :+ metsWork).data
+
+      result should have length n + m
+      result.map(_.location) should contain theSameElementsAs
+        metsWork.data.images.map(_.location) ++
+          miroWorks.map(_.data.images.head.location)
+    }
+
+    it(
+      "ignores METS images, but uses n Miro images, for a non-picture/ephemera Sierra work") {
       val n = 3
       val metsWork = createInvisibleMetsSourceWorkWith(numImages = 3)
       val miroWorks = (1 to n).map(_ => miroSourceWork()).toList
