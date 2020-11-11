@@ -24,8 +24,8 @@ class RelationEmbedderWorkerService[MsgDestination](
   workRetriever: Retriever[Work[Merged]],
   workIndexer: Indexer[Work[Denormalised]],
   relationsService: RelationsService,
-  batchSize: Int = 100,
-  flushInterval: FiniteDuration = 20 seconds
+  indexBatchSize: Int = 100,
+  indexFlushInterval: FiniteDuration = 20 seconds
 )(implicit ec: ExecutionContext, materializer: Materializer)
     extends Runnable {
 
@@ -39,6 +39,7 @@ class RelationEmbedderWorkerService[MsgDestination](
       .flatMap { inputWork =>
         relationsService
           .getAllWorksInArchive(inputWork)
+          .runWith(Sink.seq)
           .map { archiveWorks =>
             (ArchiveRelationsCache(archiveWorks), inputWork)
           }
@@ -53,7 +54,7 @@ class RelationEmbedderWorkerService[MsgDestination](
             }
 
           denormalisedWorks
-            .groupedWithin(batchSize, flushInterval)
+            .groupedWithin(indexBatchSize, indexFlushInterval)
             .mapAsync(2) { works =>
               workIndexer.index(works).flatMap {
                 case Left(failedWorks) =>

@@ -6,14 +6,13 @@ import com.sksamuel.elastic4s.Index
 import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.work.internal.WorkState.Merged
 import uk.ac.wellcome.models.work.internal._
-
-import scala.concurrent.ExecutionContext.Implicits.global
 
 class RelationsServiceTest
     extends AnyFunSpec
@@ -58,7 +57,6 @@ class RelationsServiceTest
               workD,
               workF,
             )
-
           }
         }
       }
@@ -90,10 +88,25 @@ class RelationsServiceTest
         }
       }
     }
+
+    it("Ignores invisible works") {
+      withLocalMergedWorksIndex { index =>
+        withActorSystem { implicit as =>
+          storeWorks(index, work("a/2/invisible").invisible() :: works)
+          whenReady(queryAffectedWorks(service(index), workE)) { result =>
+            result should contain theSameElementsAs List(
+              work2,
+              workD,
+              workF,
+            )
+          }
+        }
+      }
+    }
+
     def queryAffectedWorks(service: RelationsService,
                            work: Work[Merged])(implicit as: ActorSystem) =
       service.getOtherAffectedWorks(work).runWith(Sink.seq[Work[Merged]])
-
   }
 
   describe("getAllWorksInArchive") {
@@ -101,7 +114,7 @@ class RelationsServiceTest
       withLocalMergedWorksIndex { index =>
         withActorSystem { implicit as =>
           storeWorks(index, work("other/archive") :: works)
-          whenReady(service(index).getAllWorksInArchive(work2)) {
+          whenReady(queryWorksInArchive(service(index), work2)) {
             archiveWorks =>
               archiveWorks should contain theSameElementsAs works
           }
@@ -113,12 +126,28 @@ class RelationsServiceTest
       withLocalMergedWorksIndex { index =>
         withActorSystem { implicit as =>
           storeWorks(index, work("other/archive") :: works)
-          whenReady(service(index).getAllWorksInArchive(workA)) {
+          whenReady(queryWorksInArchive(service(index), workA)) {
             archiveWorks =>
               archiveWorks should contain theSameElementsAs works
           }
         }
       }
     }
+
+    it("Ignores invisible works") {
+      withLocalMergedWorksIndex { index =>
+        withActorSystem { implicit as =>
+          storeWorks(index, work("a/invisible").invisible() :: works)
+          whenReady(queryWorksInArchive(service(index), workE)) {
+            archiveWorks =>
+              archiveWorks should contain theSameElementsAs works
+          }
+        }
+      }
+    }
+
+    def queryWorksInArchive(service: RelationsService,
+                            work: Work[Merged])(implicit as: ActorSystem) =
+      service.getAllWorksInArchive(work).runWith(Sink.seq[Work[Merged]])
   }
 }

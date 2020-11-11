@@ -83,7 +83,7 @@ class ArchiveRelationsCache(
 
 object ArchiveRelationsCache {
 
-  def apply(works: List[Work[Merged]]): ArchiveRelationsCache =
+  def apply(works: Seq[Work[Merged]]): ArchiveRelationsCache =
     new ArchiveRelationsCache(
       works
         .map { case work => work.data.collectionPath -> work }
