@@ -77,21 +77,21 @@ class RelationEmbedderWorkerServiceTest
     : Map[String, Relations[DataState.Unidentified]] =
     index.map { case (key, work) => key -> work.state.relations }.toMap
 
-  // it("denormalises a leaf work and its immediate parent") {
-  //   withWorkerService() {
-  //     case (QueuePair(queue, dlq), index, msgSender) =>
-  //       sendNotificationToSQS(queue = queue, body = workE.id)
-  //       eventually {
-  //         assertQueueEmpty(queue)
-  //         assertQueueEmpty(dlq)
-  //         msgSender.messages.map(_.body).toSet shouldBe Set(workD.id, workE.id)
-  //         relations(index) shouldBe Map(
-  //           workD.id -> relationsD,
-  //           workE.id -> relationsE,
-  //         )
-  //       }
-  //   }
-  // }
+  it("denormalises a leaf work and its immediate parent") {
+    withWorkerService() {
+      case (QueuePair(queue, dlq), index, msgSender) =>
+        sendNotificationToSQS(queue = queue, body = workE.id)
+        eventually {
+          assertQueueEmpty(queue)
+          assertQueueEmpty(dlq)
+          msgSender.messages.map(_.body).toSet shouldBe Set(workD.id, workE.id)
+          relations(index) shouldBe Map(
+            workD.id -> relationsD,
+            workE.id -> relationsE,
+          )
+        }
+    }
+  }
 
   it("denormalises the whole tree when given the root") {
     withWorkerService() {
