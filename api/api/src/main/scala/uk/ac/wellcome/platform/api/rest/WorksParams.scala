@@ -38,6 +38,7 @@ object SingleWorkParams extends QueryParamsUtils {
       "genres" -> WorkInclude.Genres,
       "contributors" -> WorkInclude.Contributors,
       "production" -> WorkInclude.Production,
+      "languages" -> WorkInclude.Languages,
       "notes" -> WorkInclude.Notes,
       "images" -> WorkInclude.Images,
       "parts" -> WorkInclude.Parts,

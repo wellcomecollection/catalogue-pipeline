@@ -217,6 +217,17 @@ trait DisplaySerialisationTestBase {
   def production(production: List[ProductionEvent[IdState.Minted]]) =
     production.map(productionEvent).mkString(",")
 
+  def languages(ls: List[Language]): String =
+    ls.map(lang =>
+      s"""
+         |{
+         |  "label": "${lang.label}",
+         |  ${optionalString("id", lang.id)}
+         |  "type": "Language"
+         |}
+       """.stripMargin
+    ).mkString(",")
+
   def workImageInclude(image: UnmergedImage[DataState.Identified]) =
     s"""
        {

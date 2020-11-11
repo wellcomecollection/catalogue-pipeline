@@ -379,6 +379,73 @@ class WorksIncludesTest
     }
   }
 
+  describe("languages includes") {
+    it("includes languages on a list endpoint if we pass ?include=languages") {
+      withApi {
+        case (ElasticConfig(worksIndex, _), routes) =>
+          val english = Language(label = "English")
+          val turkish = Language(label = "Turkish")
+          val swedish = Language(label = "Swedish")
+
+          val work1 = identifiedWork(canonicalId = "1").languages(List(english, turkish))
+          val work2 = identifiedWork(canonicalId = "2").languages(List(swedish))
+
+          insertIntoElasticsearch(worksIndex, work1, work2)
+
+          assertJsonResponse(routes, s"/$apiPrefix/works?include=languages") {
+            Status.OK -> s"""
+              {
+                ${resultList(apiPrefix, totalResults = 2)},
+                "results": [
+                 {
+                   "type": "Work",
+                   "id": "${work1.state.canonicalId}",
+                   "title": "${work1.data.title.get}",
+                   "alternativeTitles": [],
+                   "languages": [ ${languages(work1.data.languages)}]
+                 },
+                 {
+                   "type": "Work",
+                   "id": "${work2.state.canonicalId}",
+                   "title": "${work2.data.title.get}",
+                   "alternativeTitles": [],
+                   "languages": [ ${languages(work2.data.languages)}]
+                 }
+                ]
+              }
+            """
+          }
+      }
+    }
+
+    it("includes languages on a work endpoint if we pass ?include=languages") {
+      withApi {
+        case (ElasticConfig(worksIndex, _), routes) =>
+          val english = Language(label = "English")
+          val turkish = Language(label = "Turkish")
+          val swedish = Language(label = "Swedish")
+
+          val work = identifiedWork().languages(List(english, turkish, swedish))
+
+          insertIntoElasticsearch(worksIndex, work)
+
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works/${work.state.canonicalId}?include=languages") {
+            Status.OK -> s"""
+              {
+                ${singleWorkResult(apiPrefix)},
+                "id": "${work.state.canonicalId}",
+                "title": "${work.data.title.get}",
+                "alternativeTitles": [],
+                "languages": [ ${languages(work.data.languages)}]
+              }
+            """
+          }
+      }
+    }
+  }
+
   describe("notes includes") {
     it("includes notes on the list endpoint if we pass ?include=notes") {
       withWorksApi {
