@@ -1,0 +1,9 @@
+{
+  "id" : "router",
+  "folder" : "pipeline/relation_embedder/router",
+  "dependencyIds" : [
+    "internal_model",
+    "elasticsearch",
+    "pipeline_storage"
+  ]
+}
