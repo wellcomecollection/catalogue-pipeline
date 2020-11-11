@@ -34,7 +34,7 @@ object Aggregations extends Logging {
           genres = e4sAggregations.decodeAgg[Genre[IdState.Minted]]("genres"),
           productionDates = e4sAggregations
             .decodeAgg[Period[IdState.Minted]]("productionDates"),
-          language = e4sAggregations.decodeAgg[Language]("language"),
+          language = e4sAggregations.decodeAgg[Language]("language", documentPath = Some("language")),
           languages = e4sAggregations.decodeAgg[Language]("languages"),
           subjects = e4sAggregations
             .decodeAgg[Subject[IdState.Minted]]("subjects"),
