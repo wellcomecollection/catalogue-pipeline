@@ -131,6 +131,8 @@ object Implicits {
     deriveConfiguredDecoder
   implicit val _dec65: Decoder[BaseImage[DataState.Identified]] =
     deriveConfiguredDecoder
+  implicit val _dec66: Decoder[CollectionPath] =
+    deriveConfiguredDecoder
 
   implicit val _enc00: Encoder[AccessCondition] = deriveConfiguredEncoder
   implicit val _enc01: Encoder[Note] = deriveConfiguredEncoder
