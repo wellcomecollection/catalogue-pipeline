@@ -36,9 +36,11 @@ object Aggregations extends Logging {
           productionDates = e4sAggregations
             .decodeAgg[Period[IdState.Minted]]("productionDates"),
           language = e4sAggregations.decodeAgg[Language](
-            "language", documentPath = Some("data.language")
+            "language",
+            documentPath = Some("data.language")
           ),
-          languages = e4sAggregations.decodeAgg[Language]("languages")(decodeLanguageList),
+          languages = e4sAggregations.decodeAgg[Language]("languages")(
+            decodeLanguageList),
           subjects = e4sAggregations
             .decodeAgg[Subject[IdState.Minted]]("subjects"),
           license = e4sAggregations.decodeAgg[License]("license"),
@@ -79,8 +81,9 @@ object Aggregations extends Logging {
 
   val decodeLanguageList: Decoder[Language] =
     Decoder.decodeString.emap { code =>
-      Language.fromCode(code)
-        .left.map { _ => s"couldn't find language for code $code"}
+      Language.fromCode(code).left.map { _ =>
+        s"couldn't find language for code $code"
+      }
     }
 
   implicit val decodeGenreFromLabel: Decoder[Genre[IdState.Minted]] =
@@ -101,9 +104,8 @@ object Aggregations extends Logging {
 
   implicit class EnhancedEsAggregations(aggregations: Elastic4sAggregations) {
 
-    def decodeAgg[T](
-      name: String,
-      documentPath: Option[String] = None)(implicit decoder: Decoder[T]): Option[Aggregation[T]] = {
+    def decodeAgg[T](name: String, documentPath: Option[String] = None)(
+      implicit decoder: Decoder[T]): Option[Aggregation[T]] = {
       aggregations
         .getAgg(name)
         .flatMap(
@@ -112,13 +114,11 @@ object Aggregations extends Logging {
               println(s"@@AWLC json = $json")
               AggregationMapping.aggregationParser[T](json, documentPath)
             }
-          )
-            .recoverWith {
-              case err =>
-                warn("Failed to parse aggregation from ES", err)
-                Failure(err)
-            }
-            .toOption
+          ).recoverWith {
+            case err =>
+              warn("Failed to parse aggregation from ES", err)
+              Failure(err)
+          }.toOption
         )
     }
   }
@@ -164,8 +164,8 @@ object AggregationMapping extends Logging {
   private val bucketSampleDoc =
     root.sample_doc.hits.hits.index(0)._source.json
 
-  def aggregationParser[T](json: String,
-                           path: Option[String])(implicit decoder: Decoder[T]): Try[Aggregation[T]] =
+  def aggregationParser[T](json: String, path: Option[String])(
+    implicit decoder: Decoder[T]): Try[Aggregation[T]] =
     parse(json).toTry
       .map { parsedJson =>
         for {

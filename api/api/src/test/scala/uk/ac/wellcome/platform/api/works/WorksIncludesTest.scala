@@ -387,7 +387,8 @@ class WorksIncludesTest
           val turkish = Language(label = "Turkish")
           val swedish = Language(label = "Swedish")
 
-          val work1 = identifiedWork(canonicalId = "1").languages(List(english, turkish))
+          val work1 =
+            identifiedWork(canonicalId = "1").languages(List(english, turkish))
           val work2 = identifiedWork(canonicalId = "2").languages(List(swedish))
 
           insertIntoElasticsearch(worksIndex, work1, work2)
