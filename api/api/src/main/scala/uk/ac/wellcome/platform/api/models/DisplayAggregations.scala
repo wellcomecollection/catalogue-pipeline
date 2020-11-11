@@ -74,11 +74,11 @@ object DisplayAggregations {
         displayAggregation(aggs.productionDates, DisplayPeriod.apply),
       genres = displayAggregation[Genre[IdState.Minted], DisplayGenre](
         aggs.genres,
-        DisplayGenre(_, false)),
+        DisplayGenre(_, includesIdentifiers = false)),
       language = displayAggregation(aggs.language, DisplayLanguage.apply),
       subjects = displayAggregation[Subject[IdState.Minted], DisplaySubject](
         aggs.subjects,
-        subject => DisplaySubject(subject, false)
+        subject => DisplaySubject(subject, includesIdentifiers = false)
       ),
       license = displayAggregation(aggs.license, DisplayLicense.apply),
       locationType = displayAggregation(
