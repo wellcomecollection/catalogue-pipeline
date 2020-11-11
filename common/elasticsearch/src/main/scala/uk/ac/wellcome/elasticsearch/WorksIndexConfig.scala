@@ -104,11 +104,13 @@ trait WorksIndexConfigFields extends IndexConfigFields {
       title
     )
 
+  val languageFields: Seq[FieldDefinition] = Seq(
+    label,
+    keywordField("id")
+  )
+
   def language =
-    objectField("language").fields(
-      label,
-      keywordField("id")
-    )
+    objectField("language").fields(languageFields)
 
   def contributors(idState: ObjectField) = objectField("contributors").fields(
     idState,
@@ -159,6 +161,7 @@ trait WorksIndexConfigFields extends IndexConfigFields {
       items("items", idState),
       production(idState),
       language,
+      objectField("languages").fields(languageFields),
       location("thumbnail"),
       textField("edition"),
       notes,

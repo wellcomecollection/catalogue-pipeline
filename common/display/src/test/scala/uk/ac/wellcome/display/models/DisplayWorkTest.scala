@@ -145,6 +145,29 @@ class DisplayWorkTest
     displayLanguage.label shouldBe language.label
   }
 
+  it("gets the languages from a Work") {
+    val languages = List(
+      Language(id = Some("bsl"), label = "British Sign Language"),
+      Language(id = Some("ger"), label = "German")
+    )
+
+    val work = identifiedWork().languages(languages)
+
+    val noLanguagesInclude = WorksIncludes().copy(languages = false)
+    val languagesInclude = WorksIncludes().copy(languages = true)
+
+    DisplayWork(work, includes = noLanguagesInclude).languages shouldBe None
+
+    val displayWork = DisplayWork(work, includes = languagesInclude)
+
+    displayWork.languages shouldBe Some(
+      List(
+        DisplayLanguage(id = Some("bsl"), label = "British Sign Language"),
+        DisplayLanguage(id = Some("ger"), label = "German")
+      )
+    )
+  }
+
   it("extracts contributors from a Work with the contributors include") {
     val canonicalId = createCanonicalId
     val sourceIdentifier = createSourceIdentifierWith(

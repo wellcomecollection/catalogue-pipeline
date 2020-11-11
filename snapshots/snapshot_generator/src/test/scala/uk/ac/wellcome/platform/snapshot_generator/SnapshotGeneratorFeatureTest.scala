@@ -77,6 +77,7 @@ class SnapshotGeneratorFeatureTest
               |  "subjects": [ ],
               |  "items": [ ],
               |  "production": [ ],
+              |  "languages": [ ],
               |  "alternativeTitles": [ ],
               |  "notes": [ ],
               |  "images": [ ],

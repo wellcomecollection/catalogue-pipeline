@@ -90,6 +90,7 @@ case class WorkData[State <: DataState](
   thumbnail: Option[LocationDeprecated] = None,
   production: List[ProductionEvent[State#MaybeId]] = Nil,
   language: Option[Language] = None,
+  languages: List[Language] = Nil,
   edition: Option[String] = None,
   notes: List[Note] = Nil,
   duration: Option[Int] = None,
