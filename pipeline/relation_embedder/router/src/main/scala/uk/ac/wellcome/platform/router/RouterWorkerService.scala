@@ -25,9 +25,10 @@ class RouterWorkerService[MsgDestination](
 
   private def processMessage(message: NotificationMessage): Future[Unit] = {
     workRetriever.apply(message.body).flatMap { work =>
-      work.data.collectionPath.fold(ifEmpty = Future.fromTry(worksMsgSender.sendT(work.id))) { path =>
-        Future.fromTry(pathsMsgSender.sendT(path))
-      }
+      work.data.collectionPath
+        .fold(ifEmpty = Future.fromTry(worksMsgSender.sendT(work.id))) { path =>
+          Future.fromTry(pathsMsgSender.sendT(path))
+        }
     }
   }
 }
