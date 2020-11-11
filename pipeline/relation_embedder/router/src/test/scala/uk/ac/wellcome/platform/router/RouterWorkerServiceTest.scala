@@ -42,30 +42,55 @@ class RouterWorkerServiceTest extends AnyFunSpec with WorkGenerators with SQS wi
     }
   }
 
-  it("sends a work without collectionPath to works topic"){
+  it("sends a work without collectionPath to works topic") {
     val work = mergedWork()
     withActorSystem { implicit as =>
-    implicit val es = as.dispatcher
+      implicit val es = as.dispatcher
       withLocalSqsQueuePair() { case QueuePair(queue, dlq) =>
         val worksMessageSender = new MemoryMessageSender
         val pathsMessageSender = new MemoryMessageSender
-          withSQSStream[NotificationMessage, Assertion](queue) { stream =>
-            withLocalMergedWorksIndex { mergedIndex =>
-              insertIntoElasticsearch(mergedIndex, work)
-              sendNotificationToSQS(queue = queue, body = work.id)
-              val service = new RouterWorkerService(sqsStream = stream, worksMsgSender = worksMessageSender, pathsMsgSender = pathsMessageSender, workRetriever= new ElasticRetriever(elasticClient, mergedIndex))
-              service.run()
-              eventually{
-                assertQueueEmpty(queue)
-                assertQueueEmpty(dlq)
-                worksMessageSender.getMessages[String]() should contain(work.id)
-                pathsMessageSender.getMessages[CollectionPath]() shouldBe empty
-              }
+        withSQSStream[NotificationMessage, Assertion](queue) { stream =>
+          withLocalMergedWorksIndex { mergedIndex =>
+            insertIntoElasticsearch(mergedIndex, work)
+            sendNotificationToSQS(queue = queue, body = work.id)
+            val service = new RouterWorkerService(sqsStream = stream, worksMsgSender = worksMessageSender, pathsMsgSender = pathsMessageSender, workRetriever = new ElasticRetriever(elasticClient, mergedIndex))
+            service.run()
+            eventually {
+              assertQueueEmpty(queue)
+              assertQueueEmpty(dlq)
+              worksMessageSender.getMessages[String]() should contain(work.id)
+              pathsMessageSender.getMessages[CollectionPath]() shouldBe empty
             }
+          }
         }
       }
     }
   }
+
+    it("sends on an invisible work") {
+      val work = mergedWork().collectionPath(CollectionPath("a/2")).invisible()
+      withActorSystem { implicit as =>
+        implicit val es = as.dispatcher
+        withLocalSqsQueuePair() { case QueuePair(queue, dlq) =>
+          val worksMessageSender = new MemoryMessageSender
+          val pathsMessageSender = new MemoryMessageSender
+          withSQSStream[NotificationMessage, Assertion](queue) { stream =>
+            withLocalMergedWorksIndex { mergedIndex =>
+              insertIntoElasticsearch(mergedIndex, work)
+              sendNotificationToSQS(queue = queue, body = work.id)
+              val service = new RouterWorkerService(sqsStream = stream, worksMsgSender = worksMessageSender, pathsMsgSender = pathsMessageSender, workRetriever = new ElasticRetriever(elasticClient, mergedIndex))
+              service.run()
+              eventually {
+                assertQueueEmpty(queue)
+                assertQueueEmpty(dlq)
+                worksMessageSender.getMessages[String]() shouldBe empty
+                pathsMessageSender.getMessages[CollectionPath]() should contain(CollectionPath("a/2"))
+              }
+            }
+          }
+        }
+      }
+    }
 
 
 }

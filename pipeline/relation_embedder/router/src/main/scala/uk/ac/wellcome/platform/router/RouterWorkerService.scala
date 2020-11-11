@@ -24,8 +24,8 @@ class RouterWorkerService[MsgDestination](
     sqsStream.foreach(this.getClass.getSimpleName, processMessage)
 
   private def processMessage(message: NotificationMessage): Future[Unit] = {
-    workRetriever.apply(message.body).flatMap{ work =>
-      work.data.collectionPath.fold(ifEmpty = Future.fromTry(worksMsgSender.sendT(work.id))){ path =>
+    workRetriever.apply(message.body).flatMap { work =>
+      work.data.collectionPath.fold(ifEmpty = Future.fromTry(worksMsgSender.sendT(work.id))) { path =>
         Future.fromTry(pathsMsgSender.sendT(path))
       }
     }
