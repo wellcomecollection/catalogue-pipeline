@@ -57,10 +57,10 @@ module "catalogue_pipeline_20201023" {
   inferrer_model_data_bucket_name = aws_s3_bucket.inferrer_model_core_data.id
 }
 
-module "catalogue_pipeline_20201104" {
+module "catalogue_pipeline_20201111" {
   source = "./stack"
 
-  pipeline_date = "20201104"
+  pipeline_date = "20201111"
   release_label = "stage"
 
   account_id      = data.aws_caller_identity.current.account_id
@@ -77,23 +77,23 @@ module "catalogue_pipeline_20201104" {
   # reindexer topic names.
 
   sierra_adapter_topic_arns = [
-    # local.sierra_reindexer_topic_arn,
+    local.sierra_reindexer_topic_arn,
     local.sierra_merged_bibs_topic_arn,
     local.sierra_merged_items_topic_arn,
   ]
 
   miro_adapter_topic_arns = [
-    # local.miro_reindexer_topic_arn,
+    local.miro_reindexer_topic_arn,
     local.miro_updates_topic_arn,
   ]
 
   mets_adapter_topic_arns = [
-    # local.mets_reindexer_topic_arn,
+    local.mets_reindexer_topic_arn,
     local.mets_adapter_topic_arn,
   ]
 
   calm_adapter_topic_arns = [
-    # local.calm_reindexer_topic_arn,
+    local.calm_reindexer_topic_arn,
     local.calm_adapter_topic_arn,
   ]
 
