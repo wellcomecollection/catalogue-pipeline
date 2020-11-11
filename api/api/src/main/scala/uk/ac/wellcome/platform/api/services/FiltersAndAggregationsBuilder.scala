@@ -82,6 +82,7 @@ class FiltersAndAggregationsBuilder(
     case _: DateRangeFilter          => None
     case VisibleWorkFilter           => None
     case _: LanguageFilter           => Some(AggregationRequest.Language)
+    case _: LanguagesFilter          => Some(AggregationRequest.Languages)
     case _: GenreFilter              => Some(AggregationRequest.Genre)
     case _: SubjectFilter            => Some(AggregationRequest.Subject)
     case _: LicenseFilter            => Some(AggregationRequest.License)

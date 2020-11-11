@@ -26,7 +26,12 @@ case class DateRangeFilter(fromDate: Option[LocalDate],
 
 case object VisibleWorkFilter extends WorkFilter
 
+// Note: These two filters are for ?language= and ?languages=, respectively.
+// This is temporary while we work on adding support for multiple languages.
+// Eventually we will remove the ?language= filter.
+// See https://github.com/wellcomecollection/platform/issues/4864
 case class LanguageFilter(languageIds: Seq[String]) extends WorkFilter
+case class LanguagesFilter(languageIds: Seq[String]) extends WorkFilter
 
 case class GenreFilter(genreQuery: String) extends WorkFilter
 

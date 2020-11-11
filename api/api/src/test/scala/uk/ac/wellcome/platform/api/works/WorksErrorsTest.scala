@@ -9,7 +9,7 @@ class WorksErrorsTest extends ApiWorksTestBase {
       assertIsBadRequest(
         "/works?include=foo",
         description =
-          "include: 'foo' is not a valid value. Please choose one of: ['identifiers', 'items', 'subjects', 'genres', 'contributors', 'production', 'notes', 'images', 'parts', 'partOf', 'precededBy', 'succeededBy']"
+          "include: 'foo' is not a valid value. Please choose one of: ['identifiers', 'items', 'subjects', 'genres', 'contributors', 'production', 'languages', 'notes', 'images', 'parts', 'partOf', 'precededBy', 'succeededBy']"
       )
     }
 
@@ -17,7 +17,7 @@ class WorksErrorsTest extends ApiWorksTestBase {
       assertIsBadRequest(
         "/works?include=foo,bar",
         description =
-          "include: 'foo', 'bar' are not valid values. Please choose one of: ['identifiers', 'items', 'subjects', 'genres', 'contributors', 'production', 'notes', 'images', 'parts', 'partOf', 'precededBy', 'succeededBy']"
+          "include: 'foo', 'bar' are not valid values. Please choose one of: ['identifiers', 'items', 'subjects', 'genres', 'contributors', 'production', 'languages', 'notes', 'images', 'parts', 'partOf', 'precededBy', 'succeededBy']"
       )
     }
 
@@ -25,7 +25,7 @@ class WorksErrorsTest extends ApiWorksTestBase {
       assertIsBadRequest(
         "/works?include=foo,identifiers,bar",
         description =
-          "include: 'foo', 'bar' are not valid values. Please choose one of: ['identifiers', 'items', 'subjects', 'genres', 'contributors', 'production', 'notes', 'images', 'parts', 'partOf', 'precededBy', 'succeededBy']"
+          "include: 'foo', 'bar' are not valid values. Please choose one of: ['identifiers', 'items', 'subjects', 'genres', 'contributors', 'production', 'languages', 'notes', 'images', 'parts', 'partOf', 'precededBy', 'succeededBy']"
       )
     }
 
@@ -33,7 +33,7 @@ class WorksErrorsTest extends ApiWorksTestBase {
       assertIsBadRequest(
         "/works/nfdn7wac?include=foo",
         description =
-          "include: 'foo' is not a valid value. Please choose one of: ['identifiers', 'items', 'subjects', 'genres', 'contributors', 'production', 'notes', 'images', 'parts', 'partOf', 'precededBy', 'succeededBy']"
+          "include: 'foo' is not a valid value. Please choose one of: ['identifiers', 'items', 'subjects', 'genres', 'contributors', 'production', 'languages', 'notes', 'images', 'parts', 'partOf', 'precededBy', 'succeededBy']"
       )
     }
   }
@@ -44,7 +44,7 @@ class WorksErrorsTest extends ApiWorksTestBase {
       assertIsBadRequest(
         "/works?aggregations=foo",
         description =
-          "aggregations: 'foo' is not a valid value. Please choose one of: ['workType', 'genres', 'production.dates', 'subjects', 'language', 'license', 'locationType']"
+          "aggregations: 'foo' is not a valid value. Please choose one of: ['workType', 'genres', 'production.dates', 'subjects', 'language', 'languages', 'license', 'locationType']"
       )
     }
 
@@ -52,7 +52,7 @@ class WorksErrorsTest extends ApiWorksTestBase {
       assertIsBadRequest(
         "/works?aggregations=foo,bar",
         description =
-          "aggregations: 'foo', 'bar' are not valid values. Please choose one of: ['workType', 'genres', 'production.dates', 'subjects', 'language', 'license', 'locationType']"
+          "aggregations: 'foo', 'bar' are not valid values. Please choose one of: ['workType', 'genres', 'production.dates', 'subjects', 'language', 'languages', 'license', 'locationType']"
       )
     }
 
@@ -68,7 +68,7 @@ class WorksErrorsTest extends ApiWorksTestBase {
       assertIsBadRequest(
         "/works?aggregations=foo,workType,bar",
         description =
-          "aggregations: 'foo', 'bar' are not valid values. Please choose one of: ['workType', 'genres', 'production.dates', 'subjects', 'language', 'license', 'locationType']"
+          "aggregations: 'foo', 'bar' are not valid values. Please choose one of: ['workType', 'genres', 'production.dates', 'subjects', 'language', 'languages', 'license', 'locationType']"
       )
     }
   }

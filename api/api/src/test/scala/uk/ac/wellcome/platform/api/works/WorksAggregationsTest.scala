@@ -245,6 +245,69 @@ class WorksAggregationsTest
     }
   }
 
+  it("supports aggregating on languages") {
+    val english = Language("English", id = Some("en"))
+    val swedish = Language("Swedish", id = Some("sv"))
+    val turkish = Language("Turkish", id = Some("tr"))
+
+    val works = Seq(
+      identifiedWork().languages(List(english)),
+      identifiedWork().languages(List(english, swedish, turkish)),
+      identifiedWork().languages(List(english, swedish))
+    )
+
+    withApi {
+      case (ElasticConfig(worksIndex, _), routes) =>
+        insertIntoElasticsearch(worksIndex, works: _*)
+        assertJsonResponse(routes, s"/$apiPrefix/works?aggregations=languages") {
+          Status.OK -> s"""
+            {
+              ${resultList(apiPrefix, totalResults = works.size)},
+              "aggregations": {
+                "type" : "Aggregations",
+                "languages": {
+                  "type" : "Aggregation",
+                  "buckets": [
+                    {
+                      "data" : {
+                        "id": "en",
+                        "label": "English",
+                        "type": "Language"
+                      },
+                      "count" : 3,
+                      "type" : "AggregationBucket"
+                    },
+                    {
+                      "data" : {
+                        "id": "sv",
+                        "label": "Swedish",
+                        "type": "Language"
+                      },
+                      "count" : 2,
+                      "type" : "AggregationBucket"
+                    },
+                    {
+                      "data" : {
+                        "id": "tr",
+                        "label": "Turkish",
+                        "type": "Language"
+                      },
+                      "count" : 1,
+                      "type" : "AggregationBucket"
+                    }
+                  ]
+                }
+              },
+              "results": [${works
+            .sortBy { _.state.canonicalId }
+            .map(workResponse)
+            .mkString(",")}]
+            }
+          """
+        }
+    }
+  }
+
   it("supports aggregating on subject, ordered by frequency") {
     val paleoNeuroBiology = createSubjectWith(label = "paleoNeuroBiology")
     val realAnalysis = createSubjectWith(label = "realAnalysis")

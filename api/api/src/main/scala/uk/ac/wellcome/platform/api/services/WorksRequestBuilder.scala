@@ -75,6 +75,12 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
         .minDocCount(1)
         .additionalField("data.language.label")
 
+    case AggregationRequest.Languages =>
+      TermsAggregation("languages")
+        .size(200)
+        .field("data.languages.id")
+        .minDocCount(1)
+
     case AggregationRequest.License =>
       TermsAggregation("license")
         .size(100)
@@ -142,6 +148,8 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
         RangeQuery("data.production.dates.range.from", lte = lte, gte = gte)
       case LanguageFilter(languageIds) =>
         termsQuery(field = "data.language.id", values = languageIds)
+      case LanguagesFilter(languageIds) =>
+        termsQuery(field = "data.languages.id", values = languageIds)
       case GenreFilter(genreQuery) =>
         simpleStringQuery(genreQuery)
           .field("data.genres.label")

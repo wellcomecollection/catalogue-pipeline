@@ -11,13 +11,13 @@ import com.sksamuel.elastic4s.requests.searches.SearchResponse
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.display.models.LocationTypeQuery
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.json.JsonUtil._
 
 case class Aggregations(
   format: Option[Aggregation[Format]] = None,
   genres: Option[Aggregation[Genre[IdState.Minted]]] = None,
   productionDates: Option[Aggregation[Period[IdState.Minted]]] = None,
   language: Option[Aggregation[Language]] = None,
+  languages: Option[Aggregation[Language]] = None,
   subjects: Option[Aggregation[Subject[IdState.Minted]]] = None,
   license: Option[Aggregation[License]] = None,
   locationType: Option[Aggregation[LocationTypeQuery]] = None,
@@ -34,8 +34,8 @@ object Aggregations extends Logging {
           genres = e4sAggregations.decodeAgg[Genre[IdState.Minted]]("genres"),
           productionDates = e4sAggregations
             .decodeAgg[Period[IdState.Minted]]("productionDates"),
-          language = e4sAggregations
-            .decodeAgg[Language]("language", Some("data.language")),
+          language = e4sAggregations.decodeAgg[Language]("language"),
+          languages = e4sAggregations.decodeAgg[Language]("languages"),
           subjects = e4sAggregations
             .decodeAgg[Subject[IdState.Minted]]("subjects"),
           license = e4sAggregations.decodeAgg[License]("license"),
@@ -72,6 +72,12 @@ object Aggregations extends Logging {
         case Some(format) => Right(format)
         case None         => Left(s"couldn't find format for code '$str'")
       }
+    }
+
+  implicit val decodeLanguage: Decoder[Language] =
+    Decoder.decodeString.emap { code =>
+      Language.fromCode(code)
+        .left.map { _ => s"couldn't find language for code $code"}
     }
 
   implicit val decodeGenreFromLabel: Decoder[Genre[IdState.Minted]] =

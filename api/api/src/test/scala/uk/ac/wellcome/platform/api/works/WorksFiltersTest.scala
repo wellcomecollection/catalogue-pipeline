@@ -416,7 +416,7 @@ class WorksFiltersTest
     }
   }
 
-  describe("filtering works by language") {
+  describe("filtering works by language (old filter ?language=)") {
     val englishWork =
       identifiedWork().language(Language(label = "English", id = "eng"))
     val germanWork =
@@ -443,6 +443,42 @@ class WorksFiltersTest
             Status.OK -> worksListResponse(
               apiPrefix,
               works = Seq(englishWork, germanWork).sortBy {
+                _.state.canonicalId
+              }
+            )
+          }
+      }
+    }
+  }
+
+  describe("filtering works by language (new filter ?language=)") {
+    val english = Language("English", id = Some("en"))
+    val turkish = Language("Turkish", id = Some("tr"))
+
+    val englishWork = identifiedWork().languages(List(english))
+    val turkishWork = identifiedWork().languages(List(turkish))
+    val noLanguageWork = identifiedWork()
+
+    val works = List(englishWork, turkishWork, noLanguageWork)
+
+    it("filters by language") {
+      withApi {
+        case (ElasticConfig(worksIndex, _), routes) =>
+          insertIntoElasticsearch(worksIndex, works: _*)
+          assertJsonResponse(routes, s"/$apiPrefix/works?languages=en") {
+            Status.OK -> worksListResponse(apiPrefix, works = Seq(englishWork))
+          }
+      }
+    }
+
+    it("filters by multiple comma separated languages") {
+      withApi {
+        case (ElasticConfig(worksIndex, _), routes) =>
+          insertIntoElasticsearch(worksIndex, works: _*)
+          assertJsonResponse(routes, s"/$apiPrefix/works?languages=en,tr") {
+            Status.OK -> worksListResponse(
+              apiPrefix,
+              works = Seq(englishWork, turkishWork).sortBy {
                 _.state.canonicalId
               }
             )

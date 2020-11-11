@@ -5,23 +5,23 @@ import uk.ac.wellcome.models.work.internal.Format._
 import uk.ac.wellcome.models.Implicits._
 
 class WorksFilteredAggregationsTest extends ApiWorksTestBase {
-
-  val bark = Language(label = "Bark", id = "dogs")
-  val meow = Language(label = "Meow", id = "cats")
-  val quack = Language(label = "Quack", id = "ducks")
-  val croak = Language(label = "Croak", id = "frogs")
+  
+  val bashkir = Language(label = "Bashkir", id = "bak")
+  val marathi = Language(label = "Marathi", id = "mar")
+  val quechua = Language(label = "Quechua", id = "que")
+  val chechen = Language(label = "Chechen", id = "che")
 
   val works: List[Work.Visible[WorkState.Identified]] = List(
-    (Books, bark),
-    (Journals, meow),
-    (Pictures, quack),
-    (Audio, bark),
-    (Books, bark),
-    (Books, bark),
-    (Journals, quack),
-    (Books, meow),
-    (Journals, quack),
-    (Audio, croak)
+    (Books, bashkir),
+    (Journals, marathi),
+    (Pictures, quechua),
+    (Audio, bashkir),
+    (Books, bashkir),
+    (Books, bashkir),
+    (Journals, quechua),
+    (Books, marathi),
+    (Journals, quechua),
+    (Audio, chechen)
   ).map {
     case (format, language) =>
       identifiedWork()
@@ -50,12 +50,12 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
                   "buckets": [
                     {
                       "count" : 3,
-                      "data" : ${language(bark)},
+                      "data" : ${language(bashkir)},
                       "type" : "AggregationBucket"
                     },
                     {
                       "count" : 1,
-                      "data" : ${language(meow)},
+                      "data" : ${language(marathi)},
                       "type" : "AggregationBucket"
                     }
                   ]
@@ -93,12 +93,28 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
                   "buckets": [
                     {
                       "count" : 3,
-                      "data" : ${language(bark)},
+<<<<<<< HEAD
+                      "data" : ${language(bashkir)},
+=======
+                      "data" : {
+                        "id" : "ba",
+                        "label" : "Bashkir",
+                        "type" : "Language"
+                      },
+>>>>>>> Get aggregations and filters working for language
                       "type" : "AggregationBucket"
                     },
                     {
                       "count" : 1,
-                      "data" : ${language(meow)},
+<<<<<<< HEAD
+                      "data" : ${language(marathi)},
+=======
+                      "data" : {
+                        "id" : "mr",
+                        "label" : "Marathi",
+                        "type" : "Language"
+                      },
+>>>>>>> Get aggregations and filters working for language
                       "type" : "AggregationBucket"
                     }
                   ]
