@@ -60,7 +60,7 @@ trait ImageGenerators
   def createInferredData = {
     val features = randomVector(4096)
     val (features1, features2) = features.splitAt(features.size / 2)
-    val lshEncodedFeatures = simHasher4096.lsh(features)
+    val lshEncodedFeatures = randomHash(32)
     val palette = randomColorVector()
     Some(
       InferredData(
@@ -109,20 +109,25 @@ trait ImageGenerators
     val features = if (similarFeatures) {
       similarVectors(4096, n)
     } else { (1 to n).map(_ => randomVector(4096, maxR = 10.0f)) }
+    val lshFeatures = if (similarFeatures) {
+      similarHashes(32, n)
+    } else {
+      (1 to n).map(_ => randomHash(32))
+    }
     val palettes = if (similarPalette) {
       similarColorVectors(n)
     } else {
       (1 to n).map(_ => randomColorVector())
     }
-    (features zip palettes).map {
-      case (features, palette) =>
+    (features, lshFeatures, palettes).zipped.map {
+      case (f, l, p) =>
         createAugmentedImageWith(
           inferredData = Some(
             InferredData(
-              features1 = features.slice(0, 2048).toList,
-              features2 = features.slice(2048, 4096).toList,
-              lshEncodedFeatures = simHasher4096.lsh(features).toList,
-              palette = palette.map(_.toString).toList
+              features1 = f.slice(0, 2048).toList,
+              features2 = f.slice(2048, 4096).toList,
+              lshEncodedFeatures = l.toList,
+              palette = p.toList
             )
           )
         )
