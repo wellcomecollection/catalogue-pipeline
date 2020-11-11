@@ -42,8 +42,7 @@ object Main extends WellcomeTypesafeApp {
       relationsService = new PathQueryRelationsService(
         esClient,
         mergedIndex,
-        allArchiveWorksScroll =
-          config.requireInt("es.works.scroll.all_archive"),
+        allArchiveWorksScroll = config.requireInt("es.works.scroll.all_archive"),
         affectedWorksScroll =
           config.requireInt("es.works.scroll.affected_works")
       ),
