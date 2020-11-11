@@ -56,12 +56,16 @@ trait ApiFixture
     testWith(router.routes)
   }
 
-  def withApi[R](testWith: TestWith[(ElasticConfig, Route), R]): R =
-    withLocalIndices { elasticConfig =>
-      withRouter(elasticConfig) { route =>
-        testWith((elasticConfig, route))
-      }
+  def withApi[R](testWith: TestWith[Route, R]): R = {
+    val elasticConfig = ElasticConfig(
+      worksIndex = Index("worksIndex-notused"),
+      imagesIndex = Index("imagesIndex-notused")
+    )
+
+    withRouter(elasticConfig) { route =>
+      testWith(route)
     }
+  }
 
   def withWorksApi[R](testWith: TestWith[(Index, Route), R]): R =
     withLocalWorksIndex { worksIndex =>
