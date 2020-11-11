@@ -82,13 +82,13 @@ class Router(elasticClient: ElasticClient,
   lazy val elasticsearchService = new ElasticsearchService(elasticClient)
 
   lazy val worksController =
-    new WorksController(elasticsearchService, apiConfig, elasticConfig)
+    new WorksController(elasticsearchService, apiConfig, worksIndex = elasticConfig.worksIndex)
 
   lazy val imagesController =
     new ImagesController(
       elasticsearchService,
       apiConfig,
-      elasticConfig,
+      imagesIndex = elasticConfig.imagesIndex,
       queryConfig)
 
   def swagger: Route = get {
