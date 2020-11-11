@@ -14,7 +14,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class RouterWorkerService[MsgDestination](
   sqsStream: SQSStream[NotificationMessage],
-  msgSender: MessageSender[MsgDestination],
+  worksMsgSender: MessageSender[MsgDestination],
+  pathsMsgSender: MessageSender[MsgDestination],
   workRetriever: Retriever[Work[Merged]]
 )(implicit ec: ExecutionContext)
     extends Runnable {
@@ -23,10 +24,10 @@ class RouterWorkerService[MsgDestination](
     sqsStream.foreach(this.getClass.getSimpleName, processMessage)
 
   private def processMessage(message: NotificationMessage): Future[Unit] = {
-    workRetriever.apply(message.body).map{ work =>
-      work.data.collectionPath.get
-    }.flatMap{ path =>
-      Future.fromTry(msgSender.sendT(path))
+    workRetriever.apply(message.body).flatMap{ work =>
+      work.data.collectionPath.fold(ifEmpty = Future.fromTry(worksMsgSender.sendT(work.id))){ path =>
+        Future.fromTry(pathsMsgSender.sendT(path))
+      }
     }
   }
 }

@@ -26,9 +26,15 @@ object Main extends WellcomeTypesafeApp {
 
     new RouterWorkerService(
       sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
-      msgSender = SNSBuilder
+      worksMsgSender = SNSBuilder
         .buildSNSMessageSender(
           config,
+          namespace = "work-sender",
+          subject = "Sent from the router"),
+      pathsMsgSender = SNSBuilder
+        .buildSNSMessageSender(
+          config,
+          namespace = "path-sender",
           subject = "Sent from the router"),
       workRetriever = new ElasticRetriever(esClient, mergedIndex)
     )
