@@ -246,18 +246,20 @@ class WorksAggregationsTest
   }
 
   it("supports aggregating on languages") {
+    // The mixture of identified and non-identified languages is
+    // deliberate -- we don't aggregate over unidentified languages.
     val english = Language("English", id = Some("en"))
     val swedish = Language("Swedish", id = Some("sv"))
-    val turkish = Language("Turkish", id = Some("tr"))
+    val turkish = Language("Turkish", id = None)
 
     val works = Seq(
       identifiedWork().languages(List(english)),
-      identifiedWork().languages(List(english, swedish, turkish)),
-      identifiedWork().languages(List(english, swedish))
+      identifiedWork().languages(List(english, swedish)),
+      identifiedWork().languages(List(english, swedish, turkish))
     )
 
-    withApi {
-      case (ElasticConfig(worksIndex, _), routes) =>
+    withWorksApi {
+      case (worksIndex, routes) =>
         insertIntoElasticsearch(worksIndex, works: _*)
         assertJsonResponse(routes, s"/$apiPrefix/works?aggregations=languages") {
           Status.OK -> s"""
@@ -284,15 +286,6 @@ class WorksAggregationsTest
                         "type": "Language"
                       },
                       "count" : 2,
-                      "type" : "AggregationBucket"
-                    },
-                    {
-                      "data" : {
-                        "id": "tr",
-                        "label": "Turkish",
-                        "type": "Language"
-                      },
-                      "count" : 1,
                       "type" : "AggregationBucket"
                     }
                   ]
