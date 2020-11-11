@@ -94,23 +94,11 @@ trait ApiTestBase extends ApiFixture with RandomGenerators {
     )
 
   def assertIsBadRequest(path: String, description: String): Assertion =
-    withApi {
+    withWorksApi {
       case (_, routes) =>
         assertJsonResponse(routes, s"/$apiPrefix$path")(
           Status.BadRequest ->
             badRequest(
-              apiPrefix = apiPrefix,
-              description = description
-            )
-        )
-    }
-
-  def assertIsNotFound(path: String, description: String): Assertion =
-    withApi {
-      case (_, routes) =>
-        assertJsonResponse(routes, s"/$apiPrefix$path")(
-          Status.NotFound ->
-            notFound(
               apiPrefix = apiPrefix,
               description = description
             )

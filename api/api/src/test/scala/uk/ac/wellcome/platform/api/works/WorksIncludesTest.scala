@@ -2,7 +2,6 @@ package uk.ac.wellcome.platform.api.works
 
 import com.sksamuel.elastic4s.Index
 
-import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.models.work.generators.{
   ImageGenerators,
   ProductionEventGenerators,
@@ -20,8 +19,8 @@ class WorksIncludesTest
   describe("identifiers includes") {
     it(
       "includes a list of identifiers on a list endpoint if we pass ?include=identifiers") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           val otherIdentifier0 = createSourceIdentifier
           val otherIdentifier1 = createSourceIdentifier
           val work0 = identifiedWork(canonicalId = "0")
@@ -65,8 +64,8 @@ class WorksIncludesTest
 
     it(
       "includes a list of identifiers on a single work endpoint if we pass ?include=identifiers") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           val otherIdentifier = createSourceIdentifier
           val work = identifiedWork().otherIdentifiers(List(otherIdentifier))
           insertIntoElasticsearch(worksIndex, work)
@@ -92,8 +91,8 @@ class WorksIncludesTest
   }
 
   it("renders the items if the items include is present") {
-    withApi {
-      case (ElasticConfig(worksIndex, _), routes) =>
+    withWorksApi {
+      case (worksIndex, routes) =>
         val work = identifiedWork()
           .items(
             List(
@@ -122,8 +121,8 @@ class WorksIncludesTest
   describe("subject includes") {
     it(
       "includes a list of subjects on a list endpoint if we pass ?include=subjects") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           val subjects0 = List(createSubject)
           val subjects1 = List(createSubject)
           val work0 = identifiedWork(canonicalId = "0").subjects(subjects0)
@@ -159,8 +158,8 @@ class WorksIncludesTest
 
     it(
       "includes a list of subjects on a single work endpoint if we pass ?include=subjects") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           val work = identifiedWork().subjects(List(createSubject))
 
           insertIntoElasticsearch(worksIndex, work)
@@ -185,8 +184,8 @@ class WorksIncludesTest
   describe("genre includes") {
     it(
       "includes a list of genres on a list endpoint if we pass ?include=genres") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           val genres1 = List(Genre("ornithology", List(Concept("ornithology"))))
           val genres2 = List(Genre("flying cars", List(Concept("flying cars"))))
           val work1 = identifiedWork(canonicalId = "1").genres(genres1)
@@ -222,8 +221,8 @@ class WorksIncludesTest
 
     it(
       "includes a list of genres on a single work endpoint if we pass ?include=genres") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           val work = identifiedWork().genres(
             List(Genre("ornithology", List(Concept("ornithology")))))
 
@@ -249,8 +248,8 @@ class WorksIncludesTest
   describe("contributor includes") {
     it(
       "includes a list of contributors on a list endpoint if we pass ?include=contributors") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           val contributors1 =
             List(Contributor(Person("Ginger Rogers"), roles = Nil))
           val contributors2 =
@@ -290,8 +289,8 @@ class WorksIncludesTest
 
     it(
       "includes a list of contributors on a single work endpoint if we pass ?include=contributors") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           val work = identifiedWork()
             .contributors(
               List(Contributor(Person("Ginger Rogers"), roles = Nil)))
@@ -318,8 +317,8 @@ class WorksIncludesTest
   describe("production includes") {
     it(
       "includes a list of production events on a list endpoint if we pass ?include=production") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           val productionEvents1 = createProductionEventList()
           val productionEvents2 = createProductionEventList()
           val work1 =
@@ -357,8 +356,8 @@ class WorksIncludesTest
 
     it(
       "includes a list of production on a single work endpoint if we pass ?include=production") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           val work = identifiedWork().production(createProductionEventList())
 
           insertIntoElasticsearch(worksIndex, work)
@@ -382,8 +381,8 @@ class WorksIncludesTest
 
   describe("notes includes") {
     it("includes notes on the list endpoint if we pass ?include=notes") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           val work1 = identifiedWork(canonicalId = "1")
             .notes(List(GeneralNote("GN1"), FundingInformation("FI1")))
           val work2 = identifiedWork(canonicalId = "2")
@@ -446,8 +445,8 @@ class WorksIncludesTest
     }
 
     it("includes notes on the single work endpoint if we pass ?include=notes") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           val work =
             identifiedWork().notes(List(GeneralNote("A"), GeneralNote("B")))
           insertIntoElasticsearch(worksIndex, work)
@@ -481,8 +480,8 @@ class WorksIncludesTest
   describe("image includes") {
     it(
       "includes a list of images on the list endpoint if we pass ?include=images") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           val works = List(
             identifiedWork()
               .images(
@@ -522,8 +521,8 @@ class WorksIncludesTest
 
     it(
       "includes a list of images on a single work endpoint if we pass ?include=images") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           val images =
             (1 to 3).map(_ => createUnmergedImage.toIdentified).toList
           val work = identifiedWork().images(images)
@@ -567,9 +566,9 @@ class WorksIncludesTest
       insertIntoElasticsearch(index, work0, workA, workB, workC, workD, workE)
 
     it("includes parts") {
-      withApi {
-        case (ElasticConfig(index, _), routes) =>
-          storeWorks(index)
+      withWorksApi {
+        case (worksIndex, routes) =>
+          storeWorks(worksIndex)
           assertJsonResponse(
             routes,
             s"/$apiPrefix/works/${workC.state.canonicalId}?include=parts") {
@@ -592,9 +591,9 @@ class WorksIncludesTest
     }
 
     it("includes partOf") {
-      withApi {
-        case (ElasticConfig(index, _), routes) =>
-          storeWorks(index)
+      withWorksApi {
+        case (worksIndex, routes) =>
+          storeWorks(worksIndex)
           assertJsonResponse(
             routes,
             s"/$apiPrefix/works/${workC.state.canonicalId}?include=partOf") {
@@ -626,9 +625,9 @@ class WorksIncludesTest
     }
 
     it("includes precededBy") {
-      withApi {
-        case (ElasticConfig(index, _), routes) =>
-          storeWorks(index)
+      withWorksApi {
+        case (worksIndex, routes) =>
+          storeWorks(worksIndex)
           assertJsonResponse(
             routes,
             s"/$apiPrefix/works/${workC.state.canonicalId}?include=precededBy") {
@@ -651,9 +650,9 @@ class WorksIncludesTest
     }
 
     it("includes succeededBy") {
-      withApi {
-        case (ElasticConfig(index, _), routes) =>
-          storeWorks(index)
+      withWorksApi {
+        case (worksIndex, routes) =>
+          storeWorks(worksIndex)
           assertJsonResponse(
             routes,
             s"/$apiPrefix/works/${workC.state.canonicalId}?include=succeededBy") {

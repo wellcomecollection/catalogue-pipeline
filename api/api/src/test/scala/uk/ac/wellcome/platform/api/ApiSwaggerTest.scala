@@ -228,12 +228,11 @@ class ApiSwaggerTest extends ApiWorksTestBase with Matchers with JsonHelpers {
   }
 
   private def checkSwaggerJson(f: Json => Unit) =
-    withApi {
-      case (_, routes) =>
-        Get(s"/$apiPrefix/swagger.json") ~> routes ~> check {
-          status shouldEqual Status.OK
-          contentType shouldEqual ContentTypes.`application/json`
-          f(parseJson(responseAs[String]).toOption.get)
-        }
+    withApi { routes =>
+      Get(s"/$apiPrefix/swagger.json") ~> routes ~> check {
+        status shouldEqual Status.OK
+        contentType shouldEqual ContentTypes.`application/json`
+        f(parseJson(responseAs[String]).toOption.get)
+      }
     }
 }

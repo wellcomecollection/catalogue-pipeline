@@ -23,12 +23,11 @@ class ApiSearchTemplatesTest
   }
 
   private def checkJson(f: Json => Unit): Unit =
-    withApi {
-      case (_, routes) =>
-        Get(s"/$apiPrefix/search-templates.json") ~> routes ~> check {
-          status shouldEqual Status.OK
-          contentType shouldEqual ContentTypes.`application/json`
-          f(parseJson(responseAs[String]).toOption.get)
-        }
+    withApi { routes =>
+      Get(s"/$apiPrefix/search-templates.json") ~> routes ~> check {
+        status shouldEqual Status.OK
+        contentType shouldEqual ContentTypes.`application/json`
+        f(parseJson(responseAs[String]).toOption.get)
+      }
     }
 }

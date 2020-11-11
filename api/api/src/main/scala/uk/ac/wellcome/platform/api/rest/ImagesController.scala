@@ -5,7 +5,6 @@ import com.sksamuel.elastic4s.Index
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
 import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.display.models.Implicits._
-import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.platform.api.Tracing
 import uk.ac.wellcome.platform.api.models.{
   ApiConfig,
@@ -22,7 +21,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class ImagesController(elasticsearchService: ElasticsearchService,
                        implicit val apiConfig: ApiConfig,
-                       elasticConfig: ElasticConfig,
+                       imagesIndex: Index,
                        queryConfig: QueryConfig)(implicit ec: ExecutionContext)
     extends CustomDirectives
     with Tracing
@@ -34,7 +33,7 @@ class ImagesController(elasticsearchService: ElasticsearchService,
     getWithFuture {
       transactFuture("GET /images/{imageId}") {
         val index =
-          params._index.map(Index(_)).getOrElse(elasticConfig.imagesIndex)
+          params._index.map(Index(_)).getOrElse(imagesIndex)
         imagesService
           .findImageById(id)(index)
           .flatMap {
@@ -74,7 +73,7 @@ class ImagesController(elasticsearchService: ElasticsearchService,
       transactFuture("GET /images") {
         val searchOptions = params.searchOptions(apiConfig)
         val index =
-          params._index.map(Index(_)).getOrElse(elasticConfig.imagesIndex)
+          params._index.map(Index(_)).getOrElse(imagesIndex)
         imagesService
           .listOrSearchImages(index, searchOptions)
           .map {

@@ -1,14 +1,13 @@
 package uk.ac.wellcome.platform.api.images
 
-import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.models.work.generators.SierraWorkGenerators
 import uk.ac.wellcome.models.work.internal._
 
 class ImagesTest extends ApiImagesTestBase with SierraWorkGenerators {
 
   it("returns a list of images") {
-    withApi {
-      case (ElasticConfig(_, imagesIndex), routes) =>
+    withImagesApi {
+      case (imagesIndex, routes) =>
         val images =
           (1 to 5).map(_ => createAugmentedImage()).sortBy(_.id.canonicalId)
         insertImagesIntoElasticsearch(imagesIndex, images: _*)
@@ -19,8 +18,8 @@ class ImagesTest extends ApiImagesTestBase with SierraWorkGenerators {
   }
 
   it("returns a single image when requested with ID") {
-    withApi {
-      case (ElasticConfig(_, imagesIndex), routes) =>
+    withImagesApi {
+      case (imagesIndex, routes) =>
         val image = createAugmentedImage()
         insertImagesIntoElasticsearch(imagesIndex, image)
         assertJsonResponse(
@@ -42,8 +41,8 @@ class ImagesTest extends ApiImagesTestBase with SierraWorkGenerators {
   }
 
   it("returns only linked images when a source work ID is requested") {
-    withApi {
-      case (ElasticConfig(_, imagesIndex), routes) =>
+    withImagesApi {
+      case (imagesIndex, routes) =>
         val parentWork = sierraIdentifiedWork()
         val workImages =
           (0 to 3)
@@ -67,8 +66,8 @@ class ImagesTest extends ApiImagesTestBase with SierraWorkGenerators {
   }
 
   it("returns matching results when using work data") {
-    withApi {
-      case (ElasticConfig(_, imagesIndex), routes) =>
+    withImagesApi {
+      case (imagesIndex, routes) =>
         val baguetteImage = createAugmentedImageWith(
           imageId = IdState.Identified("a", createSourceIdentifier),
           parentWork = identifiedWork()
@@ -102,8 +101,8 @@ class ImagesTest extends ApiImagesTestBase with SierraWorkGenerators {
   }
 
   it("returns matching results when using workdata from the redirected work") {
-    withApi {
-      case (ElasticConfig(_, imagesIndex), routes) =>
+    withImagesApi {
+      case (imagesIndex, routes) =>
         val baguetteImage = createAugmentedImageWith(
           imageId = IdState.Identified("a", createSourceIdentifier),
           parentWork = identifiedWork()
@@ -137,8 +136,8 @@ class ImagesTest extends ApiImagesTestBase with SierraWorkGenerators {
   }
 
   it("searches different indices with the _index parameter") {
-    withApi {
-      case (ElasticConfig(_, defaultIndex), routes) =>
+    withImagesApi {
+      case (defaultIndex, routes) =>
         withLocalImagesIndex { alternativeIndex =>
           val defaultImage = createAugmentedImage()
           val alternativeImage = createAugmentedImage()

@@ -1,13 +1,11 @@
 package uk.ac.wellcome.platform.api.images
 
-import uk.ac.wellcome.elasticsearch.ElasticConfig
-
 class ImagesSimilarityTest extends ApiImagesTestBase {
 
   it(
     "includes visually similar images on a single image if we pass ?include=visuallySimilar") {
-    withApi {
-      case (ElasticConfig(_, imagesIndex), routes) =>
+    withImagesApi {
+      case (imagesIndex, routes) =>
         val images =
           createSimilarImages(6, similarFeatures = true, similarPalette = true)
         val image = images.head
@@ -35,8 +33,8 @@ class ImagesSimilarityTest extends ApiImagesTestBase {
 
   it(
     "includes images with similar features on a single image if we pass ?include=withSimilarFeatures") {
-    withApi {
-      case (ElasticConfig(_, imagesIndex), routes) =>
+    withImagesApi {
+      case (imagesIndex, routes) =>
         val images =
           createSimilarImages(6, similarFeatures = true, similarPalette = false)
         val image = images.head
@@ -64,8 +62,8 @@ class ImagesSimilarityTest extends ApiImagesTestBase {
 
   it(
     "includes images with similar color palettes on a single image if we pass ?include=withSimilarColors") {
-    withApi {
-      case (ElasticConfig(_, imagesIndex), routes) =>
+    withImagesApi {
+      case (imagesIndex, routes) =>
         val images =
           createSimilarImages(6, similarFeatures = false, similarPalette = true)
         val image = images.head
@@ -93,8 +91,8 @@ class ImagesSimilarityTest extends ApiImagesTestBase {
   }
 
   it("never includes visually similar images on an images search") {
-    withApi {
-      case (ElasticConfig(_, imagesIndex), routes) =>
+    withImagesApi {
+      case (imagesIndex, routes) =>
         val focacciaImage = createAugmentedImageWith(
           parentWork =
             identifiedWork().title("A Ligurian style of bread, Focaccia")

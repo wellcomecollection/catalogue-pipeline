@@ -1,5 +1,7 @@
 package uk.ac.wellcome.platform.api.works
 
+import org.scalatest.Assertion
+
 class WorksErrorsTest extends ApiWorksTestBase {
 
   describe("returns a 400 Bad Request for errors in the ?include parameter") {
@@ -101,7 +103,7 @@ class WorksErrorsTest extends ApiWorksTestBase {
   // And if there is a client with a deprecated value, we wouldn't want it to fail
   describe("returns a 200 for invalid values in the ?_queryType parameter") {
     it("200s despite being a unknown value") {
-      withApi {
+      withWorksApi {
         case (_, routes) =>
           assertJsonResponse(
             routes,
@@ -261,7 +263,7 @@ class WorksErrorsTest extends ApiWorksTestBase {
     //
     // By creating an index without a mapping, we don't have a canonicalId field
     // to sort on.  Trying to query this index of these will trigger one such exception!
-    withApi {
+    withWorksApi {
       case (_, routes) =>
         withEmptyIndex { index =>
           val path = s"/${getApiPrefix()}/works?_index=${index.name}"
@@ -280,4 +282,16 @@ class WorksErrorsTest extends ApiWorksTestBase {
         }
     }
   }
+
+  def assertIsNotFound(path: String, description: String): Assertion =
+    withWorksApi {
+      case (_, routes) =>
+        assertJsonResponse(routes, s"/$apiPrefix$path")(
+          Status.NotFound ->
+            notFound(
+              apiPrefix = apiPrefix,
+              description = description
+            )
+        )
+    }
 }

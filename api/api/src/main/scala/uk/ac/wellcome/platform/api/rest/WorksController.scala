@@ -9,7 +9,6 @@ import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
 import grizzled.slf4j.Logger
 import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.display.models.Implicits._
-import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.api.models.ApiConfig
 import uk.ac.wellcome.platform.api.services.{
@@ -20,10 +19,9 @@ import uk.ac.wellcome.platform.api.services.{
 import uk.ac.wellcome.platform.api.Tracing
 import WorkState.Identified
 
-class WorksController(
-  elasticsearchService: ElasticsearchService,
-  implicit val apiConfig: ApiConfig,
-  elasticConfig: ElasticConfig)(implicit ec: ExecutionContext)
+class WorksController(elasticsearchService: ElasticsearchService,
+                      implicit val apiConfig: ApiConfig,
+                      worksIndex: Index)(implicit ec: ExecutionContext)
     extends Tracing
     with CustomDirectives
     with FailFastCirceSupport {
@@ -35,7 +33,7 @@ class WorksController(
       transactFuture("GET /works") {
         val searchOptions = params.searchOptions(apiConfig)
         val index =
-          params._index.map(Index(_)).getOrElse(elasticConfig.worksIndex)
+          params._index.map(Index(_)).getOrElse(worksIndex)
         worksService
           .listOrSearchWorks(index, searchOptions)
           .map {
@@ -60,7 +58,7 @@ class WorksController(
     getWithFuture {
       transactFuture("GET /works/{workId}") {
         val index =
-          params._index.map(Index(_)).getOrElse(elasticConfig.worksIndex)
+          params._index.map(Index(_)).getOrElse(worksIndex)
         val includes = params.include.getOrElse(WorksIncludes())
         worksService
           .findWorkById(id)(index)

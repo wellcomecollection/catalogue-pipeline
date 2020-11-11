@@ -20,6 +20,7 @@ import uk.ac.wellcome.platform.api.services.ElasticsearchService
 class Router(elasticClient: ElasticClient,
              elasticConfig: ElasticConfig,
              queryConfig: QueryConfig,
+             swaggerDocs: SwaggerDocs,
              implicit val apiConfig: ApiConfig)(implicit ec: ExecutionContext)
     extends CustomDirectives {
 
@@ -82,13 +83,16 @@ class Router(elasticClient: ElasticClient,
   lazy val elasticsearchService = new ElasticsearchService(elasticClient)
 
   lazy val worksController =
-    new WorksController(elasticsearchService, apiConfig, elasticConfig)
+    new WorksController(
+      elasticsearchService,
+      apiConfig,
+      worksIndex = elasticConfig.worksIndex)
 
   lazy val imagesController =
     new ImagesController(
       elasticsearchService,
       apiConfig,
-      elasticConfig,
+      imagesIndex = elasticConfig.imagesIndex,
       queryConfig)
 
   def swagger: Route = get {
@@ -96,8 +100,6 @@ class Router(elasticClient: ElasticClient,
       HttpEntity(MediaTypes.`application/json`, swaggerDocs.json)
     )
   }
-
-  val swaggerDocs = new SwaggerDocs(apiConfig)
 
   def getClusterHealth: Route = {
     import com.sksamuel.elastic4s.ElasticDsl._

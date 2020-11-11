@@ -7,6 +7,7 @@ import com.typesafe.config.Config
 import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.platform.api.models.{ApiConfig, QueryConfig}
+import uk.ac.wellcome.platform.api.swagger.SwaggerDocs
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
@@ -46,8 +47,15 @@ object Main extends WellcomeTypesafeApp {
     val queryConfig =
       QueryConfig.fetchFromIndex(elasticClient, elasticConfig.imagesIndex)
 
-    val router =
-      new Router(elasticClient, elasticConfig, queryConfig, apiConfig)
+    val swaggerDocs = new SwaggerDocs(apiConfig)
+
+    val router = new Router(
+      elasticClient = elasticClient,
+      elasticConfig = elasticConfig,
+      queryConfig = queryConfig,
+      swaggerDocs = swaggerDocs,
+      apiConfig = apiConfig
+    )
 
     () =>
       Http()
