@@ -1,5 +1,7 @@
 package uk.ac.wellcome.platform.api.works
 
+import org.scalatest.Assertion
+
 class WorksErrorsTest extends ApiWorksTestBase {
 
   describe("returns a 400 Bad Request for errors in the ?include parameter") {
@@ -280,4 +282,16 @@ class WorksErrorsTest extends ApiWorksTestBase {
         }
     }
   }
+
+  def assertIsNotFound(path: String, description: String): Assertion =
+    withWorksApi {
+      case (_, routes) =>
+        assertJsonResponse(routes, s"/$apiPrefix$path")(
+          Status.NotFound ->
+            notFound(
+              apiPrefix = apiPrefix,
+              description = description
+            )
+        )
+    }
 }

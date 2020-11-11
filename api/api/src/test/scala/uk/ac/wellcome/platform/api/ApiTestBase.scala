@@ -104,16 +104,4 @@ trait ApiTestBase extends ApiFixture with RandomGenerators {
             )
         )
     }
-
-  def assertIsNotFound(path: String, description: String): Assertion =
-    withWorksApi {
-      case (_, routes) =>
-        assertJsonResponse(routes, s"/$apiPrefix$path")(
-          Status.NotFound ->
-            notFound(
-              apiPrefix = apiPrefix,
-              description = description
-            )
-        )
-    }
 }
