@@ -4,7 +4,7 @@ import uk.ac.wellcome.platform.api.works.ApiWorksTestBase
 
 class ApiErrorsTest extends ApiWorksTestBase {
 
-  it("returns a Not Found error if you try to get an API version") {
+  it("returns a Not Found error if you try to get a non-existent API version") {
     withApi {
       case (_, routes) =>
         assertJsonResponse(routes, "/catalogue/v567/works") {
