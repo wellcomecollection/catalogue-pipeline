@@ -42,7 +42,11 @@ object Main extends WellcomeTypesafeApp {
       relationsService = new PathQueryRelationsService(
         esClient,
         mergedIndex,
-        scrollSize = config.requireInt("es.works.scroll.size")),
+        allArchiveWorksScroll =
+          config.requireInt("es.works.scroll.all_archive"),
+        affectedWorksScroll =
+          config.requireInt("es.works.scroll.affected_works")
+      ),
       batchSize = config.requireInt("es.works.batch_size"),
       flushInterval =
         config.requireInt("es.works.flush_interval_seconds").seconds,
