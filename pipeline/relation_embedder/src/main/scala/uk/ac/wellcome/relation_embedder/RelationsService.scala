@@ -3,19 +3,14 @@ package uk.ac.wellcome.relation_embedder
 import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.stream.scaladsl.Source
-import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.circe._
-import com.sksamuel.elastic4s.requests.searches._
 import com.sksamuel.elastic4s.streams.ReactiveElastic._
-import com.sksamuel.elastic4s.{ElasticClient, ElasticError, Index, Response}
+import com.sksamuel.elastic4s.{ElasticClient, Index}
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.json.JsonUtil.fromJson
+
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal.WorkState.Merged
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.models.work.internal.result._
-
-import scala.concurrent.{ExecutionContext, Future}
 
 trait RelationsService {
 
@@ -33,13 +28,14 @@ trait RelationsService {
     * @param work The work
     * @return The works
     */
-  def getAllWorksInArchive(work: Work[Merged]): Future[List[Work[Merged]]]
+  def getAllWorksInArchive(work: Work[Merged]): Source[Work[Merged], NotUsed]
 }
 
 class PathQueryRelationsService(
   elasticClient: ElasticClient,
   index: Index,
-  scrollSize: Int)(implicit ec: ExecutionContext, as: ActorSystem)
+  allArchiveWorksScroll: Int = 1000,
+  affectedWorksScroll: Int = 250)(implicit as: ActorSystem)
     extends RelationsService
     with Logging {
 
@@ -55,52 +51,30 @@ class PathQueryRelationsService(
             Source
               .fromPublisher(
                 elasticClient.publisher(
-                  RelationsRequestBuilder(index, path).otherAffectedWorksRequest
-                    .scroll(keepAlive = "5m")
-                    .size(scrollSize)))
-              .map { searchHit: SearchHit =>
-                fromJson[Work[Merged]](searchHit.sourceAsString).get
-              }
+                  RelationsRequestBuilder(index, path)
+                    .otherAffectedWorksRequest(affectedWorksScroll)
+                )
+              )
+              .map(searchHit => searchHit.safeTo[Work[Merged]].get)
         }
       case _ => Source.empty[Work[Merged]]
     }
 
-  def getAllWorksInArchive(work: Work[Merged]): Future[List[Work[Merged]]] =
+  def getAllWorksInArchive(work: Work[Merged]): Source[Work[Merged], NotUsed] =
     work match {
       case work: Work.Visible[Merged] =>
         work.data.collectionPath match {
-          case None => Future.successful(Nil)
+          case None => Source.empty[Work[Merged]]
           case Some(CollectionPath(path, _, _)) =>
-            executeSearchRequest(
-              RelationsRequestBuilder(index, path).allRelationsRequest
-            ).flatMap {
-              case result =>
-                val works = result.left
-                  .map(_.asException)
-                  .flatMap { resp =>
-                    // Are you here because something is erroring when being decoded?
-                    // Check that all the fields you need are in the lists in RelationsRequestBuilder!
-                    resp.hits.hits.toList.map(toWork).toResult
-                  }
-                works match {
-                  case Right(works) => Future.successful(works)
-                  case Left(err)    => Future.failed(err)
-                }
-            }
+            Source
+              .fromPublisher(
+                elasticClient.publisher(
+                  RelationsRequestBuilder(index, path)
+                    .allRelationsRequest(allArchiveWorksScroll)
+                )
+              )
+              .map(searchHit => searchHit.safeTo[Work.Visible[Merged]].get)
         }
-      case _ => Future.successful(Nil)
+      case _ => Source.empty[Work[Merged]]
     }
-
-  private def executeSearchRequest(
-    request: SearchRequest): Future[Either[ElasticError, SearchResponse]] =
-    elasticClient.execute(request).map(toEither)
-
-  private def toEither[T](response: Response[T]): Either[ElasticError, T] =
-    if (response.isError)
-      Left(response.error)
-    else
-      Right(response.result)
-
-  private def toWork(hit: SearchHit): Result[Work.Visible[Merged]] =
-    hit.safeTo[Work.Visible[Merged]].toEither
 }

@@ -7,11 +7,11 @@ import com.sksamuel.elastic4s.requests.searches.queries.Query
 
 case class RelationsRequestBuilder(index: Index,
                                    path: String,
-                                   maxRelatedWorks: Int = 2000) {
+                                   scrollKeepAlive: String = "5m") {
 
   // To reduce response size and improve Elasticsearch performance we only
   // return core fields
-  val relationsFieldWhitelist = List(
+  private val relationsFieldWhitelist = List(
     "version",
     "state.sourceIdentifier.identifierType.id",
     "state.sourceIdentifier.identifierType.label",
@@ -25,31 +25,41 @@ case class RelationsRequestBuilder(index: Index,
     "data.workType",
   )
 
-  lazy val allRelationsRequest: SearchRequest =
+  def allRelationsRequest(scrollSize: Int): SearchRequest =
     search(index)
       .query {
-        termQuery(field = "data.collectionPath.path", value = collectionRoot)
-      }
-      .from(0)
-      .limit(maxRelatedWorks)
-      .sourceInclude(relationsFieldWhitelist)
-
-  lazy val otherAffectedWorksRequest: SearchRequest =
-    search(index)
-      .query {
-        should(
-          siblingsQuery,
-          parentQuery,
-          descendentsQuery
+        must(
+          termQuery(field = "data.collectionPath.path", value = collectionRoot),
+          visibleQuery
         )
       }
       .from(0)
-      .limit(maxRelatedWorks)
+      .sourceInclude(relationsFieldWhitelist)
+      .scroll(keepAlive = scrollKeepAlive)
+      .size(scrollSize)
+
+  def otherAffectedWorksRequest(scrollSize: Int): SearchRequest =
+    search(index)
+      .query {
+        must(
+          should(
+            siblingsQuery,
+            parentQuery,
+            descendentsQuery
+          ),
+          visibleQuery
+        )
+      }
+      .from(0)
+      .scroll(keepAlive = scrollKeepAlive)
+      .size(scrollSize)
+
+  private val visibleQuery = termQuery(field = "type", value = "Visible")
 
   /**
     * Query all siblings of the node with the given path.
     */
-  lazy val siblingsQuery: Query =
+  private lazy val siblingsQuery: Query =
     ancestors.lastOption match {
       case Some(parent) =>
         must(
@@ -62,7 +72,7 @@ case class RelationsRequestBuilder(index: Index,
   /**
     * Query the parent of the node with the given path.
     */
-  lazy val parentQuery: Query =
+  private lazy val parentQuery: Query =
     ancestors.lastOption match {
       case None         => matchNoneQuery()
       case Some(parent) => pathQuery(parent, depth - 1)
@@ -71,37 +81,28 @@ case class RelationsRequestBuilder(index: Index,
   /**
     * Query all descendents of the node with the given path.
     */
-  lazy val descendentsQuery: Query =
+  private lazy val descendentsQuery: Query =
     must(
       termQuery(field = "data.collectionPath.path", value = path),
       not(termQuery(field = "data.collectionPath.depth", value = depth)),
     )
 
-  lazy val ancestors: List[String] =
+  private lazy val ancestors: List[String] =
     pathAncestors(path)
 
-  lazy val depth: Int =
+  private lazy val depth: Int =
     ancestors.length + 1
 
-  lazy val collectionRoot: String =
+  private lazy val collectionRoot: String =
     ancestors.headOption.getOrElse(path)
 
-  def pathQuery(path: String, depth: Int) =
+  private def pathQuery(path: String, depth: Int) =
     must(
       termQuery(field = "data.collectionPath.path", value = path),
       termQuery(field = "data.collectionPath.depth", value = depth),
     )
 
-  def relatedWorksRequest(query: Query): SearchRequest =
-    search(index)
-      .query {
-        must(query, termQuery(field = "type", value = "Visible"))
-      }
-      .from(0)
-      .limit(maxRelatedWorks)
-      .sourceInclude(relationsFieldWhitelist)
-
-  def pathAncestors(path: String): List[String] =
+  private def pathAncestors(path: String): List[String] =
     tokenize(path) match {
       case head :+ tail :+ _ =>
         val ancestor = join(head :+ tail)
@@ -109,12 +110,9 @@ case class RelationsRequestBuilder(index: Index,
       case _ => Nil
     }
 
-  def pathDepth(path: String): Int =
-    tokenize(path).length
-
-  def tokenize(path: String): List[String] =
+  private def tokenize(path: String): List[String] =
     path.split("/").toList
 
-  def join(tokens: List[String]): String =
+  private def join(tokens: List[String]): String =
     tokens.mkString("/")
 }

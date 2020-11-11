@@ -39,6 +39,7 @@ class RelationEmbedderWorkerService[MsgDestination](
       .flatMap { inputWork =>
         relationsService
           .getAllWorksInArchive(inputWork)
+          .runWith(Sink.seq)
           .map { archiveWorks =>
             (ArchiveRelationsCache(archiveWorks), inputWork)
           }
