@@ -143,6 +143,13 @@ lazy val relation_embedder = setupProject(
   externalDependencies = CatalogueDependencies.relationEmbedderDependencies
 )
 
+lazy val router = setupProject(
+  project,
+  "pipeline/relation_embedder/router",
+  localDependencies = Seq(internal_model, elasticsearch, pipeline_storage),
+  externalDependencies = CatalogueDependencies.routerDependencies
+)
+
 lazy val recorder = setupProject(
   project,
   "pipeline/recorder",
