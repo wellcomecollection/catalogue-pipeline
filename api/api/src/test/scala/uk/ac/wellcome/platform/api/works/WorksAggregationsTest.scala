@@ -1,6 +1,5 @@
 package uk.ac.wellcome.platform.api.works
 
-import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.models.work.internal.Format.{Books, Journals, Pictures}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.Implicits._
@@ -15,8 +14,8 @@ class WorksAggregationsTest
     with ProductionEventGenerators {
 
   it("supports fetching the format aggregation") {
-    withApi {
-      case (ElasticConfig(worksIndex, _), routes) =>
+    withWorksApi {
+      case (worksIndex, routes) =>
         val formats = List(
           Books,
           Books,
@@ -82,8 +81,8 @@ class WorksAggregationsTest
   }
 
   it("supports fetching the genre aggregation") {
-    withApi {
-      case (ElasticConfig(worksIndex, _), routes) =>
+    withWorksApi {
+      case (worksIndex, routes) =>
         val concept0 = Concept("conceptLabel")
         val concept1 = Place("placeLabel")
         val concept2 = Period(
@@ -153,8 +152,8 @@ class WorksAggregationsTest
   }
 
   it("supports aggregating on dates by from year") {
-    withApi {
-      case (ElasticConfig(worksIndex, _), routes) =>
+    withWorksApi {
+      case (worksIndex, routes) =>
         val dates = List("1st May 1970", "1970", "1976", "1970-1979")
 
         val works = dates
@@ -212,8 +211,8 @@ class WorksAggregationsTest
 
     val works = languages.map { identifiedWork().language(_) }
 
-    withApi {
-      case (ElasticConfig(worksIndex, _), routes) =>
+    withWorksApi {
+      case (worksIndex, routes) =>
         insertIntoElasticsearch(worksIndex, works: _*)
         assertJsonResponse(routes, s"/$apiPrefix/works?aggregations=language") {
           Status.OK -> s"""
@@ -270,8 +269,8 @@ class WorksAggregationsTest
     val works = subjectLists
       .map { identifiedWork().subjects(_) }
 
-    withApi {
-      case (ElasticConfig(worksIndex, _), routes) =>
+    withWorksApi {
+      case (worksIndex, routes) =>
         insertIntoElasticsearch(worksIndex, works: _*)
         assertJsonResponse(routes, s"/$apiPrefix/works?aggregations=subjects") {
           Status.OK -> s"""
@@ -334,8 +333,8 @@ class WorksAggregationsTest
 
     val works = licenseLists.map { createLicensedWork(_) }
 
-    withApi {
-      case (ElasticConfig(worksIndex, _), routes) =>
+    withWorksApi {
+      case (worksIndex, routes) =>
         insertIntoElasticsearch(worksIndex, works: _*)
         assertJsonResponse(routes, s"/$apiPrefix/works?aggregations=license") {
           Status.OK -> s"""
@@ -393,8 +392,8 @@ class WorksAggregationsTest
         .items(List(createIdentifiedItemWith(locations = List(loc))))
     }
 
-    withApi {
-      case (ElasticConfig(worksIndex, _), routes) =>
+    withWorksApi {
+      case (worksIndex, routes) =>
         insertIntoElasticsearch(worksIndex, works: _*)
         assertJsonResponse(
           routes,

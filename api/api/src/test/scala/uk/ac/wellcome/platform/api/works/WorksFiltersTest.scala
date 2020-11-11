@@ -1,6 +1,5 @@
 package uk.ac.wellcome.platform.api.works
 
-import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.models.work.internal.Format.{
   Books,
   CDRoms,
@@ -30,8 +29,8 @@ class WorksFiltersTest
 
     val works = Seq(work1, work2, work3)
 
-    withApi {
-      case (ElasticConfig(worksIndex, _), routes) =>
+    withWorksApi {
+      case (worksIndex, routes) =>
         insertIntoElasticsearch(worksIndex, works: _*)
         assertJsonResponse(
           routes,
@@ -73,8 +72,8 @@ class WorksFiltersTest
     val works = digitalWorks ++ physicalWorks ++ comboWorks
 
     it("filters by PhysicalLocation when listing") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           insertIntoElasticsearch(worksIndex, works: _*)
 
           val matchingWorks = physicalWorks ++ comboWorks
@@ -91,8 +90,8 @@ class WorksFiltersTest
     }
 
     it("filters by PhysicalLocation when searching") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           insertIntoElasticsearch(worksIndex, works: _*)
 
           val matchingWorks = physicalWorks ++ comboWorks
@@ -109,8 +108,8 @@ class WorksFiltersTest
     }
 
     it("filters by DigitalLocation when listing") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           insertIntoElasticsearch(worksIndex, works: _*)
 
           val matchingWorks = digitalWorks ++ comboWorks
@@ -127,8 +126,8 @@ class WorksFiltersTest
     }
 
     it("filters by DigitalLocation when searching") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           insertIntoElasticsearch(worksIndex, works: _*)
 
           val matchingWorks = digitalWorks ++ comboWorks
@@ -182,8 +181,8 @@ class WorksFiltersTest
     val works = worksWithNoItem ++ Seq(work1, work2, work3)
 
     it("when listing works") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           insertIntoElasticsearch(worksIndex, works: _*)
 
           val matchingWorks = Seq(work1, work2)
@@ -200,8 +199,8 @@ class WorksFiltersTest
     }
 
     it("when searching works") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           insertIntoElasticsearch(worksIndex, works: _*)
 
           val matchingWorks = Seq(work2)
@@ -234,8 +233,8 @@ class WorksFiltersTest
     val works = noFormatWorks ++ Seq(bookWork, cdRomWork, manuscriptWork)
 
     it("when listing works") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           insertIntoElasticsearch(worksIndex, works: _*)
 
           assertJsonResponse(
@@ -249,8 +248,8 @@ class WorksFiltersTest
     }
 
     it("filters by multiple formats") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           insertIntoElasticsearch(worksIndex, works: _*)
 
           assertJsonResponse(
@@ -267,8 +266,8 @@ class WorksFiltersTest
     }
 
     it("when searching works") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           insertIntoElasticsearch(worksIndex, works: _*)
 
           assertJsonResponse(
@@ -296,8 +295,8 @@ class WorksFiltersTest
     val works = Seq(collectionWork, seriesWork, sectionWork)
 
     it("when listing works") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           insertIntoElasticsearch(worksIndex, works: _*)
 
           assertJsonResponse(routes, s"/$apiPrefix/works?type=Collection") {
@@ -310,8 +309,8 @@ class WorksFiltersTest
     }
 
     it("filters by multiple types") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           insertIntoElasticsearch(worksIndex, works: _*)
 
           assertJsonResponse(
@@ -329,8 +328,8 @@ class WorksFiltersTest
     }
 
     it("when searching works") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           insertIntoElasticsearch(worksIndex, works: _*)
 
           assertJsonResponse(
@@ -359,8 +358,8 @@ class WorksFiltersTest
     val work2000 = createDatedWork(dateLabel = "2000")
 
     it("filters by date range") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           insertIntoElasticsearch(worksIndex, work1709, work1950, work2000)
           assertJsonResponse(
             routes,
@@ -371,8 +370,8 @@ class WorksFiltersTest
     }
 
     it("filters by from date") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           insertIntoElasticsearch(worksIndex, work1709, work1950, work2000)
           assertJsonResponse(
             routes,
@@ -386,8 +385,8 @@ class WorksFiltersTest
     }
 
     it("filters by to date") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           insertIntoElasticsearch(worksIndex, work1709, work1950, work2000)
           assertJsonResponse(
             routes,
@@ -401,8 +400,8 @@ class WorksFiltersTest
     }
 
     it("errors on invalid date") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           insertIntoElasticsearch(worksIndex, work1709, work1950, work2000)
           assertJsonResponse(
             routes,
@@ -426,8 +425,8 @@ class WorksFiltersTest
     val works = List(englishWork, germanWork, noLanguageWork)
 
     it("filters by language") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           insertIntoElasticsearch(worksIndex, works: _*)
           assertJsonResponse(routes, s"/$apiPrefix/works?language=eng") {
             Status.OK -> worksListResponse(apiPrefix, works = Seq(englishWork))
@@ -436,8 +435,8 @@ class WorksFiltersTest
     }
 
     it("filters by multiple comma seperated languages") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           insertIntoElasticsearch(worksIndex, works: _*)
           assertJsonResponse(routes, s"/$apiPrefix/works?language=eng,ger") {
             Status.OK -> worksListResponse(
@@ -463,8 +462,8 @@ class WorksFiltersTest
     val works = List(horrorWork, romcomWork, romcomHorrorWork, noGenreWork)
 
     it("filters by genre with partial match") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           insertIntoElasticsearch(worksIndex, works: _*)
           assertJsonResponse(routes, s"/$apiPrefix/works?genres.label=horrible") {
             Status.OK -> worksListResponse(
@@ -478,8 +477,8 @@ class WorksFiltersTest
     }
 
     it("filters by genre using multiple terms") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           insertIntoElasticsearch(worksIndex, works: _*)
           assertJsonResponse(
             routes,
@@ -510,8 +509,8 @@ class WorksFiltersTest
       noSubjectWork)
 
     it("filters by subjects") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           insertIntoElasticsearch(worksIndex, works: _*)
           assertJsonResponse(routes, s"/$apiPrefix/works?subjects.label=paris") {
             Status.OK -> worksListResponse(
@@ -525,8 +524,8 @@ class WorksFiltersTest
     }
 
     it("filters by subjects using multiple terms") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           insertIntoElasticsearch(worksIndex, works: _*)
           assertJsonResponse(
             routes,
@@ -560,8 +559,8 @@ class WorksFiltersTest
     val works = List(ccByWork, ccByNcWork, bothLicenseWork, noLicenseWork)
 
     it("filters by license") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           insertIntoElasticsearch(worksIndex, works: _*)
           assertJsonResponse(routes, s"/$apiPrefix/works?license=cc-by") {
             Status.OK -> worksListResponse(
@@ -575,8 +574,8 @@ class WorksFiltersTest
     }
 
     it("filters by multiple licenses") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           insertIntoElasticsearch(worksIndex, works: _*)
           assertJsonResponse(
             routes,
@@ -596,8 +595,8 @@ class WorksFiltersTest
     val unknownWork = identifiedWork()
 
     it("filters by a sourceIdentifier") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           val work = identifiedWork()
           insertIntoElasticsearch(worksIndex, unknownWork, work)
 
@@ -613,8 +612,8 @@ class WorksFiltersTest
     }
 
     it("filters by multiple sourceIdentifiers") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           val work1 = identifiedWork()
           val work2 = identifiedWork()
 
@@ -632,8 +631,8 @@ class WorksFiltersTest
     }
 
     it("filters by an otherIdentifier") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           val work =
             identifiedWork().otherIdentifiers(List(createSourceIdentifier))
           insertIntoElasticsearch(worksIndex, unknownWork, work)
@@ -649,8 +648,8 @@ class WorksFiltersTest
     }
 
     it("filters by multiple otherIdentifiers") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           val work1 =
             identifiedWork().otherIdentifiers(List(createSourceIdentifier))
           val work2 =
@@ -669,8 +668,8 @@ class WorksFiltersTest
     }
 
     it("filters by mixed identifiers") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           val work1 = identifiedWork()
           val work2 =
             identifiedWork().otherIdentifiers(List(createSourceIdentifier))
@@ -714,8 +713,8 @@ class WorksFiltersTest
     val workE = work(AccessStatus.OpenWithAdvisory)
 
     it("includes works by access status") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           insertIntoElasticsearch(worksIndex, workA, workB, workC, workD, workE)
           assertJsonResponse(
             routes,
@@ -729,8 +728,8 @@ class WorksFiltersTest
     }
 
     it("excludes works by access status") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           insertIntoElasticsearch(worksIndex, workA, workB, workC, workD, workE)
           assertJsonResponse(
             routes,

@@ -1,6 +1,5 @@
 package uk.ac.wellcome.platform.api.works
 
-import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.models.work.internal.Language
 import uk.ac.wellcome.models.work.internal.Format._
 import uk.ac.wellcome.models.Implicits._
@@ -9,8 +8,8 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
 
   it(
     "filters an aggregation with a filter that is not paired to the aggregation") {
-    withApi {
-      case (ElasticConfig(worksIndex, _), routes) =>
+    withWorksApi {
+      case (worksIndex, routes) =>
         val works = List(
           (Books, Language("Bark", Some("dogs"))),
           (Journals, Language("Meow", Some("cats"))),
@@ -78,8 +77,8 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
 
   it(
     "filters an aggregation with a filter that is paired to another aggregation") {
-    withApi {
-      case (ElasticConfig(worksIndex, _), routes) =>
+    withWorksApi {
+      case (worksIndex, routes) =>
         val works = List(
           (Books, Language("Bark", Some("dogs"))),
           (Journals, Language("Meow", Some("cats"))),
@@ -187,8 +186,8 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
   }
 
   it("filters results but not aggregations paired with an applied filter") {
-    withApi {
-      case (ElasticConfig(worksIndex, _), routes) =>
+    withWorksApi {
+      case (worksIndex, routes) =>
         val works = List(
           (Books, Language("Bark", Some("dogs"))),
           (Journals, Language("Meow", Some("cats"))),

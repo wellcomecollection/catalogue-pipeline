@@ -1,14 +1,13 @@
 package uk.ac.wellcome.platform.api.works
 
-import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.ProductionEventGenerators
 
 class WorksTest extends ApiWorksTestBase with ProductionEventGenerators {
   it("returns a list of works") {
-    withApi {
-      case (ElasticConfig(worksIndex, _), routes) =>
+    withWorksApi {
+      case (worksIndex, routes) =>
         val works = identifiedWorks(count = 3).sortBy {
           _.state.canonicalId
         }
@@ -22,8 +21,8 @@ class WorksTest extends ApiWorksTestBase with ProductionEventGenerators {
   }
 
   it("returns a single work when requested with id") {
-    withApi {
-      case (ElasticConfig(worksIndex, _), routes) =>
+    withWorksApi {
+      case (worksIndex, routes) =>
         val work = identifiedWork()
 
         insertIntoElasticsearch(worksIndex, work)
@@ -44,8 +43,8 @@ class WorksTest extends ApiWorksTestBase with ProductionEventGenerators {
   }
 
   it("returns optional fields when they exist") {
-    withApi {
-      case (ElasticConfig(worksIndex, _), routes) =>
+    withWorksApi {
+      case (worksIndex, routes) =>
         val work = identifiedWork()
           .duration(3600)
           .edition("Special edition")
@@ -70,8 +69,8 @@ class WorksTest extends ApiWorksTestBase with ProductionEventGenerators {
 
   it(
     "returns the requested page of results when requested with page & pageSize") {
-    withApi {
-      case (ElasticConfig(worksIndex, _), routes) =>
+    withWorksApi {
+      case (worksIndex, routes) =>
         val works = identifiedWorks(count = 3).sortBy {
           _.state.canonicalId
         }
@@ -130,7 +129,7 @@ class WorksTest extends ApiWorksTestBase with ProductionEventGenerators {
   }
 
   it("ignores parameters that are unused when making an API request") {
-    withApi {
+    withWorksApi {
       case (_, routes) =>
         assertJsonResponse(routes, s"/$apiPrefix/works?foo=bar") {
           Status.OK -> emptyJsonResult(apiPrefix)
@@ -139,8 +138,8 @@ class WorksTest extends ApiWorksTestBase with ProductionEventGenerators {
   }
 
   it("returns matching results if doing a full-text search") {
-    withApi {
-      case (ElasticConfig(worksIndex, _), routes) =>
+    withWorksApi {
+      case (worksIndex, routes) =>
         val workDodo = identifiedWork().title("A drawing of a dodo")
         val workMouse = identifiedWork().title("A mezzotint of a mouse")
         insertIntoElasticsearch(worksIndex, workDodo, workMouse)
@@ -156,8 +155,8 @@ class WorksTest extends ApiWorksTestBase with ProductionEventGenerators {
   }
 
   it("searches different indices with the ?_index query parameter") {
-    withApi {
-      case (ElasticConfig(worksIndex, _), routes) =>
+    withWorksApi {
+      case (worksIndex, routes) =>
         withLocalWorksIndex { altIndex =>
           val work = identifiedWork()
           insertIntoElasticsearch(worksIndex, work)
@@ -195,8 +194,8 @@ class WorksTest extends ApiWorksTestBase with ProductionEventGenerators {
   }
 
   it("looks up works in different indices with the ?_index query parameter") {
-    withApi {
-      case (ElasticConfig(worksIndex, _), routes) =>
+    withWorksApi {
+      case (worksIndex, routes) =>
         withLocalWorksIndex { altIndex =>
           val work = identifiedWork().title("Playing with pangolins")
           insertIntoElasticsearch(worksIndex, work)
@@ -218,8 +217,8 @@ class WorksTest extends ApiWorksTestBase with ProductionEventGenerators {
   }
 
   it("shows the thumbnail field if available") {
-    withApi {
-      case (ElasticConfig(worksIndex, _), routes) =>
+    withWorksApi {
+      case (worksIndex, routes) =>
         val work = identifiedWork()
           .thumbnail(
             DigitalLocationDeprecated(
@@ -255,8 +254,8 @@ class WorksTest extends ApiWorksTestBase with ProductionEventGenerators {
       .production(List(createProductionEventWith(dateLabel = Some(dateLabel))))
 
   it("supports sorting by production date") {
-    withApi {
-      case (ElasticConfig(worksIndex, _), routes) =>
+    withWorksApi {
+      case (worksIndex, routes) =>
         val work1 = createDatedWork(canonicalId = "1", dateLabel = "1900")
         val work2 = createDatedWork(canonicalId = "2", dateLabel = "1976")
         val work3 = createDatedWork(canonicalId = "3", dateLabel = "1904")
@@ -274,8 +273,8 @@ class WorksTest extends ApiWorksTestBase with ProductionEventGenerators {
   }
 
   it("supports sorting of dates in descending order") {
-    withApi {
-      case (ElasticConfig(worksIndex, _), routes) =>
+    withWorksApi {
+      case (worksIndex, routes) =>
         val work1 = createDatedWork(canonicalId = "1", dateLabel = "1900")
         val work2 = createDatedWork(canonicalId = "2", dateLabel = "1976")
         val work3 = createDatedWork(canonicalId = "3", dateLabel = "1904")

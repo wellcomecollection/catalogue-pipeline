@@ -4,6 +4,7 @@ import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.http.scaladsl.model.{ContentTypes, StatusCode}
 import akka.http.scaladsl.model.headers.Host
 import akka.http.scaladsl.server.Route
+import com.sksamuel.elastic4s.Index
 import io.circe.parser.parse
 import io.circe.Json
 import org.scalatest.funspec.AnyFunSpec
@@ -43,16 +44,35 @@ trait ApiFixture
   // of times we have to create it.
   lazy val swaggerDocs = new SwaggerDocs(apiConfig)
 
+  private def withRouter[R](elasticConfig: ElasticConfig)(testWith: TestWith[Route, R]): R = {
+    val router = new Router(
+      elasticClient,
+      elasticConfig,
+      QueryConfig(paletteBinSizes = Seq(4, 6, 8)),
+      swaggerDocs = swaggerDocs,
+      apiConfig = apiConfig
+    )
+
+    testWith(router.routes)
+  }
+
   def withApi[R](testWith: TestWith[(ElasticConfig, Route), R]): R =
     withLocalIndices { elasticConfig =>
-      val router = new Router(
-        elasticClient,
-        elasticConfig,
-        QueryConfig(paletteBinSizes = Seq(4, 6, 8)),
-        swaggerDocs = swaggerDocs,
-        apiConfig = apiConfig
+      withRouter(elasticConfig) { route =>
+        testWith((elasticConfig, route))
+      }
+    }
+
+  def withWorksApi[R](testWith: TestWith[(Index, Route), R]): R =
+    withLocalWorksIndex { worksIndex =>
+      val elasticConfig = ElasticConfig(
+        worksIndex = worksIndex,
+        imagesIndex = Index("imagesIndex-notused")
       )
-      testWith((elasticConfig, router.routes))
+
+      withRouter(elasticConfig) { route =>
+        testWith((worksIndex, route))
+      }
     }
 
   def assertJsonResponse(
