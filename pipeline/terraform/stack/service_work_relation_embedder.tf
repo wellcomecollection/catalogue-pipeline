@@ -29,11 +29,11 @@ module "relation_embedder" {
     es_merged_index       = local.es_works_merged_index
     es_denormalised_index = local.es_works_denormalised_index
 
-    queue_parallelism          = 5
-    affected_works_scroll_size = 250
-    all_archive_scroll_size    = 1000
-    batch_size                 = 100
-    flush_interval_seconds     = 60
+    queue_parallelism            = 5
+    affected_works_scroll_size   = 250
+    all_archive_scroll_size      = 1000
+    index_batch_size             = 100
+    index_flush_interval_seconds = 60
   }
 
   secret_env_vars = {

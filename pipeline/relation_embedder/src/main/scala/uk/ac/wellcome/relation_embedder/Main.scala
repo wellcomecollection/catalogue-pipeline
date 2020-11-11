@@ -47,8 +47,8 @@ object Main extends WellcomeTypesafeApp {
         affectedWorksScroll =
           config.requireInt("es.works.scroll.affected_works")
       ),
-      batchSize = config.requireInt("es.works.batch_size"),
-      flushInterval =
+      indexBatchSize = config.requireInt("es.works.batch_size"),
+      indexFlushInterval =
         config.requireInt("es.works.flush_interval_seconds").seconds,
     )
   }
