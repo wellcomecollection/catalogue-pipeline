@@ -19,10 +19,9 @@ import uk.ac.wellcome.platform.api.services.{
 import uk.ac.wellcome.platform.api.Tracing
 import WorkState.Identified
 
-class WorksController(
-  elasticsearchService: ElasticsearchService,
-  implicit val apiConfig: ApiConfig,
-  worksIndex: Index)(implicit ec: ExecutionContext)
+class WorksController(elasticsearchService: ElasticsearchService,
+                      implicit val apiConfig: ApiConfig,
+                      worksIndex: Index)(implicit ec: ExecutionContext)
     extends Tracing
     with CustomDirectives
     with FailFastCirceSupport {

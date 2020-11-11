@@ -44,7 +44,8 @@ trait ApiFixture
   // of times we have to create it.
   lazy val swaggerDocs = new SwaggerDocs(apiConfig)
 
-  private def withRouter[R](elasticConfig: ElasticConfig)(testWith: TestWith[Route, R]): R = {
+  private def withRouter[R](elasticConfig: ElasticConfig)(
+    testWith: TestWith[Route, R]): R = {
     val router = new Router(
       elasticClient,
       elasticConfig,

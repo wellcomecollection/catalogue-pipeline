@@ -289,7 +289,8 @@ trait ElasticsearchFixtures
     elasticClient
       .execute { count(index.name) }
       .await
-      .result.count
+      .result
+      .count
 
   def createIndex: Index =
     Index(name = createIndexName)

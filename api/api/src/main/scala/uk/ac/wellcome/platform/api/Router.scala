@@ -83,7 +83,10 @@ class Router(elasticClient: ElasticClient,
   lazy val elasticsearchService = new ElasticsearchService(elasticClient)
 
   lazy val worksController =
-    new WorksController(elasticsearchService, apiConfig, worksIndex = elasticConfig.worksIndex)
+    new WorksController(
+      elasticsearchService,
+      apiConfig,
+      worksIndex = elasticConfig.worksIndex)
 
   lazy val imagesController =
     new ImagesController(
