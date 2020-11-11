@@ -381,8 +381,8 @@ class WorksIncludesTest
 
   describe("languages includes") {
     it("includes languages on a list endpoint if we pass ?include=languages") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           val english = Language(label = "English")
           val turkish = Language(label = "Turkish")
           val swedish = Language(label = "Swedish")
@@ -419,8 +419,8 @@ class WorksIncludesTest
     }
 
     it("includes languages on a work endpoint if we pass ?include=languages") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           val english = Language(label = "English")
           val turkish = Language(label = "Turkish")
           val swedish = Language(label = "Swedish")

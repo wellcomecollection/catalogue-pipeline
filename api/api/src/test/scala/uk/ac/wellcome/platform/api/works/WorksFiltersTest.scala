@@ -462,8 +462,8 @@ class WorksFiltersTest
     val works = List(englishWork, turkishWork, noLanguageWork)
 
     it("filters by language") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           insertIntoElasticsearch(worksIndex, works: _*)
           assertJsonResponse(routes, s"/$apiPrefix/works?languages=en") {
             Status.OK -> worksListResponse(apiPrefix, works = Seq(englishWork))
@@ -472,8 +472,8 @@ class WorksFiltersTest
     }
 
     it("filters by multiple comma separated languages") {
-      withApi {
-        case (ElasticConfig(worksIndex, _), routes) =>
+      withWorksApi {
+        case (worksIndex, routes) =>
           insertIntoElasticsearch(worksIndex, works: _*)
           assertJsonResponse(routes, s"/$apiPrefix/works?languages=en,tr") {
             Status.OK -> worksListResponse(
