@@ -8,7 +8,6 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.time.{Seconds, Span}
 import org.scalatest.{Assertion, Suite}
 import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.requests.bulk.BulkResponse
 import com.sksamuel.elastic4s.requests.cluster.ClusterHealthResponse
 import com.sksamuel.elastic4s.requests.common.VersionType.ExternalGte
 import com.sksamuel.elastic4s.requests.get.GetResponse
@@ -255,7 +254,12 @@ trait ElasticsearchFixtures
         }
       )
     )
-    assertInserted(result, works, index)
+
+    whenReady(result) { _ =>
+      eventually {
+        getSizeOf(index) shouldBe works.size
+      }
+    }
   }
 
   def insertImagesIntoElasticsearch(index: Index,
@@ -273,20 +277,19 @@ trait ElasticsearchFixtures
         }
       )
     )
-    assertInserted(result, images, index)
-  }
 
-  private def assertInserted[T](result: Future[Response[BulkResponse]],
-                                docs: Seq[T],
-                                index: Index): Assertion =
     whenReady(result) { _ =>
       eventually {
-        val response: Response[SearchResponse] = elasticClient.execute {
-          search(index.name).matchAllQuery().trackTotalHits(true)
-        }.await
-        response.result.totalHits shouldBe docs.size
+        getSizeOf(index) shouldBe images.size
       }
     }
+  }
+
+  private def getSizeOf(index: Index): Long =
+    elasticClient
+      .execute { count(index.name) }
+      .await
+      .result.count
 
   def createIndex: Index =
     Index(name = createIndexName)
