@@ -246,4 +246,6 @@ object Implicits {
     deriveConfiguredEncoder
   implicit val _enc65: Encoder[BaseImage[DataState.Identified]] =
     deriveConfiguredEncoder
+  implicit val _enc66: Encoder[CollectionPath] =
+    deriveConfiguredEncoder
 }
