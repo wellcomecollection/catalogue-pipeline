@@ -2,10 +2,7 @@ package uk.ac.wellcome.relation_embedder
 
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.Index
-import com.sksamuel.elastic4s.requests.searches.{
-  MultiSearchRequest,
-  SearchRequest
-}
+import com.sksamuel.elastic4s.requests.searches.SearchRequest
 import com.sksamuel.elastic4s.requests.searches.queries.Query
 
 case class RelationsRequestBuilder(index: Index,
@@ -28,12 +25,14 @@ case class RelationsRequestBuilder(index: Index,
     "data.workType",
   )
 
-  lazy val relationsRequest: MultiSearchRequest =
-    multi(
-      relatedWorksRequest(childrenQuery),
-      relatedWorksRequest(siblingsQuery),
-      relatedWorksRequest(ancestorsQuery)
-    )
+  lazy val allRelationsRequest: SearchRequest =
+    search(index)
+      .query {
+        termQuery(field = "data.collectionPath.path", value = collectionRoot)
+      }
+      .from(0)
+      .limit(maxRelatedWorks)
+      .sourceInclude(relationsFieldWhitelist)
 
   lazy val otherAffectedWorksRequest: SearchRequest =
     search(index)
@@ -48,12 +47,6 @@ case class RelationsRequestBuilder(index: Index,
       .limit(maxRelatedWorks)
 
   /**
-    * Query all direct children of the node with the given path.
-    */
-  lazy val childrenQuery: Query =
-    pathQuery(path, depth + 1)
-
-  /**
     * Query all siblings of the node with the given path.
     */
   lazy val siblingsQuery: Query =
@@ -64,18 +57,6 @@ case class RelationsRequestBuilder(index: Index,
           not(termQuery(field = "data.collectionPath.path", value = path))
         )
       case None => matchNoneQuery()
-    }
-
-  /**
-    * Query all ancestors of the node with the given path.
-    */
-  lazy val ancestorsQuery: Query =
-    ancestors match {
-      case Nil => matchNoneQuery()
-      case ancestors =>
-        should(
-          ancestors.map(ancestor => pathQuery(ancestor, pathDepth(ancestor)))
-        )
     }
 
   /**
@@ -101,6 +82,9 @@ case class RelationsRequestBuilder(index: Index,
 
   lazy val depth: Int =
     ancestors.length + 1
+
+  lazy val collectionRoot: String =
+    ancestors.headOption.getOrElse(path)
 
   def pathQuery(path: String, depth: Int) =
     must(

@@ -4,7 +4,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 
-import akka.{Done, NotUsed}
+import akka.Done
 import akka.stream.scaladsl._
 import akka.stream.Materializer
 
@@ -34,42 +34,43 @@ class RelationEmbedderWorkerService[MsgDestination](
       sqsStream.foreach(this.getClass.getSimpleName, processMessage)
     }
 
-  def processMessage(message: NotificationMessage): Future[Unit] = {
-    val affectedWorks: Source[Work[Merged], NotUsed] =
-      Source
-        .future(workRetriever(message.body))
-        .flatMapConcat { work =>
-          Source
-            .single(work)
-            .concat(relationsService.getOtherAffectedWorks(work))
-        }
-
-    val denormalisedWorks =
-      affectedWorks
-        .mapAsync(1) { work =>
-          debug(s"Denormalising work: ${work.data.collectionPath}")
-          relationsService.getRelations(work).map(work.transition[Denormalised])
-        }
-
-    denormalisedWorks
-      .groupedWithin(batchSize, flushInterval)
-      .mapAsync(1) { works =>
-        workIndexer.index(works).flatMap {
-          case Left(failedWorks) =>
-            Future.failed(
-              new Exception(s"Failed indexing works: $failedWorks")
-            )
-          case Right(_) => Future.successful(works.toList)
-        }
+  def processMessage(message: NotificationMessage): Future[Unit] =
+    workRetriever(message.body)
+      .flatMap { inputWork =>
+        relationsService
+          .getAllWorksInArchive(inputWork)
+          .map { archiveWorks =>
+            (ArchiveRelationsCache(archiveWorks), inputWork)
+          }
       }
-      .mapConcat(identity)
-      .mapAsync(3) { work =>
-        Future(msgSender.send(work.id)).flatMap {
-          case Success(_)   => Future.successful(())
-          case Failure(err) => Future.failed(err)
-        }
+      .flatMap {
+        case (relationsCache, inputWork) =>
+          val denormalisedWorks = Source
+            .single(inputWork)
+            .concat(relationsService.getOtherAffectedWorks(inputWork))
+            .map { work =>
+              work.transition[Denormalised](relationsCache(work))
+            }
+
+          denormalisedWorks
+            .groupedWithin(batchSize, flushInterval)
+            .mapAsync(2) { works =>
+              workIndexer.index(works).flatMap {
+                case Left(failedWorks) =>
+                  Future.failed(
+                    new Exception(s"Failed indexing works: $failedWorks")
+                  )
+                case Right(_) => Future.successful(works.toList)
+              }
+            }
+            .mapConcat(identity)
+            .mapAsync(3) { work =>
+              Future(msgSender.send(work.id)).flatMap {
+                case Success(_)   => Future.successful(())
+                case Failure(err) => Future.failed(err)
+              }
+            }
+            .runWith(Sink.ignore)
+            .map(_ => ())
       }
-      .runWith(Sink.ignore)
-      .map(_ => ())
-  }
 }

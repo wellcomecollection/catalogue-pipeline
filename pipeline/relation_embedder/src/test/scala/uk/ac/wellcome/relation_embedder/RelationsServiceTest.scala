@@ -96,138 +96,26 @@ class RelationsServiceTest
 
   }
 
-  describe("getRelations") {
-    it(
-      "Retrieves a related works for the given path with children and siblings sorted correctly") {
+  describe("getAllWorksInArchive") {
+    it("Retrieves all works in archive") {
       withLocalMergedWorksIndex { index =>
         withActorSystem { implicit as =>
-          storeWorks(index)
-          whenReady(service(index).getRelations(work2)) { relations =>
-            relations shouldBe Relations(
-              ancestors = List(Relation(workA, 0)),
-              children = List(Relation(workD, 2), Relation(workE, 2)),
-              siblingsPreceding = List(Relation(work1, 1)),
-              siblingsSucceeding = List(Relation(work3, 1), Relation(work4, 1))
-            )
+          storeWorks(index, work("other/archive") :: works)
+          whenReady(service(index).getAllWorksInArchive(work2)) {
+            archiveWorks =>
+              archiveWorks should contain theSameElementsAs works
           }
         }
       }
     }
 
-    it(
-      "Retrieves a related works for the given path with ancestors sorted correctly") {
+    it("Retrieves all works in archive from root position") {
       withLocalMergedWorksIndex { index =>
         withActorSystem { implicit as =>
-          storeWorks(index)
-          whenReady(service(index).getRelations(workF)) { relations =>
-            relations shouldBe Relations(
-              ancestors = List(
-                Relation(workA, 0),
-                Relation(work2, 1),
-                Relation(workE, 2)),
-              children = Nil,
-              siblingsPreceding = Nil,
-              siblingsSucceeding = Nil
-            )
-          }
-        }
-      }
-    }
-
-    it("Retrieves relations correctly from root position") {
-      withLocalMergedWorksIndex { index =>
-        withActorSystem { implicit as =>
-          storeWorks(index)
-          whenReady(service(index).getRelations(workA)) { relations =>
-            relations shouldBe Relations(
-              ancestors = Nil,
-              children = List(
-                Relation(work1, 1),
-                Relation(work2, 1),
-                Relation(work3, 1),
-                Relation(work4, 1)),
-              siblingsPreceding = Nil,
-              siblingsSucceeding = Nil
-            )
-          }
-        }
-      }
-    }
-
-    it("Ignores missing ancestors") {
-      withLocalMergedWorksIndex { index =>
-        withActorSystem { implicit as =>
-          storeWorks(index, List(workA, workB, workC, workD, workE, workF))
-          whenReady(service(index).getRelations(workF)) { relations =>
-            relations shouldBe Relations(
-              ancestors = List(
-                Relation(workA, 0),
-                Relation(workE, 1),
-              ),
-              children = Nil,
-              siblingsPreceding = Nil,
-              siblingsSucceeding = Nil
-            )
-          }
-        }
-      }
-    }
-
-    it("Filters out invisible works") {
-      withLocalWorksIndex { index =>
-        withActorSystem { implicit as =>
-          val workP = work("p")
-          val workQ = work("p/q").invisible()
-          val workR = work("p/r")
-          storeWorks(index, List(workP, workQ, workR))
-          whenReady(service(index).getRelations(workP)) { relations =>
-            relations shouldBe Relations(
-              children = List(Relation(workR, 1)),
-              ancestors = Nil,
-              siblingsPreceding = Nil,
-              siblingsSucceeding = Nil
-            )
-          }
-        }
-      }
-    }
-
-    it("Returns no related works when work is not part of a collection") {
-      withLocalMergedWorksIndex { index =>
-        withActorSystem { implicit as =>
-          val workX = mergedWork()
-          storeWorks(index, List(workA, work1, workX))
-          whenReady(service(index).getRelations(workX)) { relations =>
-            relations shouldBe Relations(
-              ancestors = Nil,
-              children = Nil,
-              siblingsPreceding = Nil,
-              siblingsSucceeding = Nil
-            )
-          }
-        }
-      }
-    }
-
-    it("Sorts works consisting of paths with an alphanumeric mixture of tokens") {
-      withLocalMergedWorksIndex { index =>
-        withActorSystem { implicit as =>
-          val workA = work("a")
-          val workB1 = work("a/B1")
-          val workB2 = work("a/B2")
-          val workB10 = work("a/B10")
-          storeWorks(index, List(workA, workB2, workB1, workB10))
-          whenReady(service(index).getRelations(workA)) { relations =>
-            relations shouldBe Relations(
-              ancestors = Nil,
-              children = List(
-                Relation(workB1, 1),
-                Relation(workB2, 1),
-                Relation(workB10, 1)
-              ),
-              siblingsPreceding = Nil,
-              siblingsSucceeding = Nil
-            )
+          storeWorks(index, work("other/archive") :: works)
+          whenReady(service(index).getAllWorksInArchive(workA)) {
+            archiveWorks =>
+              archiveWorks should contain theSameElementsAs works
           }
         }
       }

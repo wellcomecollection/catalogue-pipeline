@@ -28,13 +28,12 @@ trait RelationsService {
     */
   def getOtherAffectedWorks(work: Work[Merged]): Source[Work[Merged], NotUsed]
 
-  /** For a given work return all its relations.
+  /** For a given work return all works in the same archive.
     *
     * @param work The work
-    * @return The related works which are embedded into the given work
+    * @return The works
     */
-  def getRelations(
-    work: Work[Merged]): Future[Relations[DataState.Unidentified]]
+  def getAllWorksInArchive(work: Work[Merged]): Future[List[Work[Merged]]]
 }
 
 class PathQueryRelationsService(
@@ -66,63 +65,35 @@ class PathQueryRelationsService(
       case _ => Source.empty[Work[Merged]]
     }
 
-  def getRelations(
-    work: Work[Merged]): Future[Relations[DataState.Unidentified]] =
+  def getAllWorksInArchive(work: Work[Merged]): Future[List[Work[Merged]]] =
     work match {
       case work: Work.Visible[Merged] =>
         work.data.collectionPath match {
-          case None =>
-            Future.successful(Relations.none)
+          case None => Future.successful(Nil)
           case Some(CollectionPath(path, _, _)) =>
-            executeMultiSearchRequest(
-              RelationsRequestBuilder(index, path).relationsRequest
-            ).flatMap { result =>
-              val works = result.left
-                .map(_.asException)
-                .flatMap { searchResponses =>
-                  searchResponses.map { resp =>
+            executeSearchRequest(
+              RelationsRequestBuilder(index, path).allRelationsRequest
+            ).flatMap {
+              case result =>
+                val works = result.left
+                  .map(_.asException)
+                  .flatMap { resp =>
+                    // Are you here because something is erroring when being decoded?
+                    // Check that all the fields you need are in the lists in RelationsRequestBuilder!
                     resp.hits.hits.toList.map(toWork).toResult
-                  }.toResult
+                  }
+                works match {
+                  case Right(works) => Future.successful(works)
+                  case Left(err)    => Future.failed(err)
                 }
-              val relations = works.flatMap {
-                case List(children, siblings, ancestors) =>
-                  Right(
-                    ArchiveRelationsBuilder(path, children, siblings, ancestors)
-                  )
-                case _ =>
-                  Left(
-                    new Exception(
-                      "Expected multisearch response containing 3 items")
-                  )
-              }
-              relations match {
-                case Right(relations) => Future.successful(relations)
-                case Left(err)        => Future.failed(err)
-              }
             }
         }
-      case _ => Future.successful(Relations.none)
+      case _ => Future.successful(Nil)
     }
 
-  private def executeMultiSearchRequest(request: MultiSearchRequest)
-    : Future[Either[ElasticError, List[SearchResponse]]] =
-    elasticClient
-      .execute(request)
-      .map(toEither)
-      .map { response =>
-        response.right.flatMap {
-          case MultiSearchResponse(items) =>
-            val results = items.map(_.response)
-            val error = results.collectFirst { case Left(err) => err }
-            error match {
-              case Some(err) => Left(err)
-              case None =>
-                Right(
-                  results.collect { case Right(resp) => resp }.toList
-                )
-            }
-        }
-      }
+  private def executeSearchRequest(
+    request: SearchRequest): Future[Either[ElasticError, SearchResponse]] =
+    elasticClient.execute(request).map(toEither)
 
   private def toEither[T](response: Response[T]): Either[ElasticError, T] =
     if (response.isError)

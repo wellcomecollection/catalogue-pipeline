@@ -6,41 +6,13 @@ import scala.annotation.tailrec
 import uk.ac.wellcome.models.work.internal._
 import WorkState.Merged
 
-object ArchiveRelationsBuilder {
+object CollectionPathSorter {
 
-  /** Creates Relations using the collection path
-    *
-    * @param path The collection path of the work
-    * @param children Direct descendents of the work
-    * @param siblings Siblings of the work
-    * @param ancestors Ancestors of the work
-    */
-  def apply(
-    path: String,
-    children: List[Work[Merged]],
-    siblings: List[Work[Merged]],
-    ancestors: List[Work[Merged]]): Relations[DataState.Unidentified] = {
+  def sortWorks(works: List[Work[Merged]]): List[Work[Merged]] =
+    works.sortBy(tokenizePath)
 
-    val depth = ancestors.length
-
-    val (precededBy, succeededBy) = siblings.sortBy(tokenizePath).partition {
-      work =>
-        tokenizePath(work) match {
-          case None => true
-          case Some(siblingPath) =>
-            tokenizedPathOrdering.compare(tokenizePath(path), siblingPath) >= 0
-        }
-    }
-
-    Relations(
-      ancestors = ancestors.sortBy(tokenizePath).zipWithIndex.map {
-        case (work, i) => Relation(work, i)
-      },
-      children = children.sortBy(tokenizePath).map(Relation(_, depth + 1)),
-      siblingsPreceding = precededBy.map(Relation(_, depth)),
-      siblingsSucceeding = succeededBy.map(Relation(_, depth))
-    )
-  }
+  def sortPaths(paths: List[String]): List[String] =
+    paths.sortBy(tokenizePath)
 
   type TokenizedPath = List[PathToken]
   type PathToken = List[PathTokenPart]
