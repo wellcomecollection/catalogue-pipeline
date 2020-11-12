@@ -10,7 +10,6 @@ import com.sksamuel.elastic4s.requests.searches.aggs.responses.{
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.display.models.LocationTypeQuery
-import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.work.internal._
 
 case class Aggregations(
