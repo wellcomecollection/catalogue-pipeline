@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.router
+package uk.ac.wellcome.platform.batcher
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
@@ -18,14 +18,18 @@ import uk.ac.wellcome.json.JsonUtil._
 class BatcherWorkerService[MsgDestination](
   msgStream: SQSStream[NotificationMessage],
   msgSender: MessageSender[MsgDestination],
-  batchSize: Int = 100000,
-  flushInterval: FiniteDuration = 30 minutes
+  maxGroupedMessages: Int = 100000,
+  flushInterval: FiniteDuration = 30 minutes,
+  batchSize: Int = 20,
+  batchFlushInterval: FiniteDuration = 10 seconds
 )(implicit ec: ExecutionContext, materializer: Materializer)
     extends Runnable
     with Logging {
 
   type Idx = Long
   type Path = String
+
+  case class Batch(selectors: List[Selector])
 
   def run(): Future[Done] =
     msgStream.runStream(
@@ -36,60 +40,51 @@ class BatcherWorkerService[MsgDestination](
             case (msg, notificationMessage) =>
               (msg, notificationMessage.body)
           }
-          .groupedWithin(batchSize, flushInterval)
+          .groupedWithin(maxGroupedMessages, flushInterval)
           .map(_.toList.unzip)
-          .mapAsync(1) { case (msgs, paths) => processBatch(msgs, paths) }
+          .mapAsync(1) { case (msgs, paths) => processPaths(msgs, paths) }
           .flatMapConcat(identity)
     )
 
-  private def processBatch(
+  private def processPaths(
     msgs: List[SQSMessage],
     paths: List[Path]): Future[Source[SQSMessage, NotUsed]] =
-    getOutputPaths(paths)
-      .mapAsyncUnordered(10) {
-        case (path, msgIdx) =>
-          Future {
-            msgSender.send(path) match {
-              case Success(_) => None
-              case Failure(err) =>
-                error(err)
-                Some(msgIdx)
-            }
+    generateSelectors(paths)
+      .groupedWithin(batchSize, batchFlushInterval)
+      .mapAsyncUnordered(10) { selectorGroups =>
+        val (selectors, msgIndices) = selectorGroups.toList.unzip
+        Future {
+          msgSender.sendT(Batch(selectors)) match {
+            case Success(_) => None
+            case Failure(err) =>
+              error(err)
+              Some(msgIndices)
           }
+        }
       }
-      .collect { case Some(failedIdx) => failedIdx }
+      .collect { case Some(failedIndices) => failedIndices }
+      .mapConcat(identity)
       .runWith(Sink.seq)
-      .map { failedIdxs =>
-        val failedIdxSet = failedIdxs.toSet
+      .map { failedIndices =>
+        val failedIdxSet = failedIndices.toSet
         Source(msgs).zipWithIndex
           .collect {
             case (msg, idx) if !failedIdxSet.contains(idx) => msg
           }
       }
 
-  private def getOutputPaths(
-    paths: List[Path]): Source[(Path, Idx), NotUsed] = {
-    val pathSet = paths.toSet
-    Source(paths).zipWithIndex
-      .collect {
-        case (path, idx) if shouldOutputPath(path, pathSet) => (path, idx)
-      }
+  private def generateSelectors(paths: List[Path]): Source[(Selector, Idx), NotUsed] = {
+    val selectors = paths.zipWithIndex.flatMap {
+      case (path, idx) =>
+        Selector.forPath(path).map(selector => (selector, idx))
+    }
+    val selectorSet = selectors.map(_._1).toSet
+    Source(selectors).collect {
+      case (selector, idx) if !shouldSupressSelector(selector, selectorSet) =>
+        (selector, idx)
+    }
   }
 
-  private def shouldOutputPath(path: Path, pathSet: Set[Path]): Boolean =
-    !pathAncestors(path).exists(pathSet.contains(_))
-
-  private def pathAncestors(path: Path): List[Path] =
-    tokenize(path) match {
-      case head :+ tail :+ _ =>
-        val ancestor = join(head :+ tail)
-        pathAncestors(ancestor) :+ ancestor
-      case _ => Nil
-    }
-
-  private def tokenize(path: Path): List[String] =
-    path.split("/").toList
-
-  private def join(tokens: List[String]): Path =
-    tokens.mkString("/")
+  private def shouldSupressSelector(selector: Selector, selectorSet: Set[Selector]): Boolean =
+    selector.superSelectors.exists(selectorSet.contains(_))
 }
