@@ -10,7 +10,7 @@ sealed trait Selector {
 
   val path: String
 
-  /** Returns a list of all selectors which would also match this selector. 
+  /** Returns a list of all selectors which would also match this selector.
     * We use these to filter out any unnecessary selectors when another less
     * specific one already exists.
     */
@@ -51,19 +51,24 @@ object Selector {
     * |  |  |  |   |  |  |  |
     * D  X  Y  Z   1  2  3  4
     *
-    * Given the input path for node `C`, we need to denormalise `A` as it
-    * contains `C` as a child. We need to denormalise the input `C` itself, plus
-    * all of its silbings due to them containing `C` as a sibling relation, so
-    * that gives us the rule of all the parents children. Finally, we must also
-    * denormalise all descendents of `C` due to them containing `C` as an
+    * Given node `C` as an input, we need to denormalise the parent `A` as it
+    * contains `C` as a child. We need to denormalise the input `C`  itself,
+    * plus all of its sibings due to them containing `C` as a sibling relation,
+    * so that gives us the rule of all the parents children. Finally, we must
+    * also denormalise all descendents of `C` due to them containing `C` as an
     * ancestor.
+    *
+    * These rules generate the minimal set of nodes that need to be
+    * denormalised. If instead for example we took the whole subtree from the
+    * parent downwards this would result in siblings descendents being
+    * denormalised unnecessarily.
     */
   def forPath(path: Path): List[Selector] =
     parent(path)
       .map { parent =>
         List(Item(parent), Children(parent), Descendents(path))
       }
-      .getOrElse(List(Descendents(path)))
+      .getOrElse(List(Item(path), Descendents(path)))
 
   case class Item(path: Path) extends Selector
 
@@ -79,9 +84,9 @@ object Selector {
 
   private def ancestors(path: Path): List[Path] = {
     val tokens = tokenize(path).dropRight(1)
-    (0 until tokens.length)
-      .map { i => join(tokens.slice(0, i)) }
-      .toList
+    (0 until tokens.length).map { i =>
+      join(tokens.slice(0, i))
+    }.toList
   }
 
   private def tokenize(path: Path): List[String] =

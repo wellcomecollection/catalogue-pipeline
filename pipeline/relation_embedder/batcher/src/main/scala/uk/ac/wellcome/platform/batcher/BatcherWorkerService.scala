@@ -26,9 +26,6 @@ class BatcherWorkerService[MsgDestination](
     extends Runnable
     with Logging {
 
-  type Idx = Long
-  type Path = String
-
   case class Batch(selectors: List[Selector])
 
   def run(): Future[Done] =
@@ -48,7 +45,7 @@ class BatcherWorkerService[MsgDestination](
 
   private def processPaths(
     msgs: List[SQSMessage],
-    paths: List[Path]): Future[Source[SQSMessage, NotUsed]] =
+    paths: List[String]): Future[Source[SQSMessage, NotUsed]] =
     generateSelectors(paths)
       .groupedWithin(batchSize, batchFlushInterval)
       .mapAsyncUnordered(10) { selectorGroups =>
@@ -73,7 +70,8 @@ class BatcherWorkerService[MsgDestination](
           }
       }
 
-  private def generateSelectors(paths: List[Path]): Source[(Selector, Idx), NotUsed] = {
+  private def generateSelectors(
+    paths: List[String]): Source[(Selector, Long), NotUsed] = {
     val selectors = paths.zipWithIndex.flatMap {
       case (path, idx) =>
         Selector.forPath(path).map(selector => (selector, idx))
@@ -85,6 +83,7 @@ class BatcherWorkerService[MsgDestination](
     }
   }
 
-  private def shouldSupressSelector(selector: Selector, selectorSet: Set[Selector]): Boolean =
+  private def shouldSupressSelector(selector: Selector,
+                                    selectorSet: Set[Selector]): Boolean =
     selector.superSelectors.exists(selectorSet.contains(_))
 }

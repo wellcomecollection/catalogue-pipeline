@@ -252,6 +252,7 @@ object CatalogueDependencies {
       WellcomeDependencies.messagingTypesafeLibrary
 
   val batcherDependencies: Seq[ModuleID] =
+    ExternalDependencies.scalatestDependencies ++
       WellcomeDependencies.messagingTypesafeLibrary
 
   val miroTransformerDependencies: Seq[ModuleID] =
