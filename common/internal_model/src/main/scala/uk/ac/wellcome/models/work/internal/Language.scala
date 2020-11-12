@@ -4,26 +4,27 @@ import scala.io.Source
 
 import uk.ac.wellcome.models.work.internal.result.Result
 
-case class Language(
-  label: String,
-  id: Option[String] = None
-)
+case class Language(label: String, id: Option[String])
 
 object Language {
+  def apply(label: String, id: String): Language =
+    Language(label = label, id = Some(id))
 
   def fromCode(code: String): Result[Language] =
     languageCodeMap
       .get(code)
-      .map(label => Right(Language(label, Some(code))))
+      .map(label => Right(Language(label = label, id = code)))
       .getOrElse {
         Left(new Exception(s"Invalid ISO 693-2 language code: $code"))
       }
 
   def fromLabel(label: String): Result[Language] =
-    languageLabelMap.get(label) match {
-      case Some(code) => Right(Language(label, Some(code)))
-      case None       => Right(Language(label, None))
-    }
+    Right(
+      Language(
+        label = label,
+        id = languageLabelMap.get(label)
+      )
+    )
 
   private def languageCodes: List[(String, String)] =
     Source

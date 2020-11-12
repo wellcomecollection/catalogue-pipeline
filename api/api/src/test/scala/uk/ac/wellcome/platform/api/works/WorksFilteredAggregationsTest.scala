@@ -1,33 +1,38 @@
 package uk.ac.wellcome.platform.api.works
 
-import uk.ac.wellcome.models.work.internal.Language
+import uk.ac.wellcome.models.work.internal.{Language, Work, WorkState}
 import uk.ac.wellcome.models.work.internal.Format._
 import uk.ac.wellcome.models.Implicits._
 
 class WorksFilteredAggregationsTest extends ApiWorksTestBase {
 
+  val bark = Language(label = "Bark", id = "dogs")
+  val meow = Language(label = "Meow", id = "cats")
+  val quack = Language(label = "Quack", id = "ducks")
+  val croak = Language(label = "Croak", id = "frogs")
+
+  val works: List[Work.Visible[WorkState.Identified]] = List(
+    (Books, bark),
+    (Journals, meow),
+    (Pictures, quack),
+    (Audio, bark),
+    (Books, bark),
+    (Books, bark),
+    (Journals, quack),
+    (Books, meow),
+    (Journals, quack),
+    (Audio, croak)
+  ).map {
+    case (format, language) =>
+      identifiedWork()
+        .format(format)
+        .language(language)
+  }
+
   it(
     "filters an aggregation with a filter that is not paired to the aggregation") {
     withWorksApi {
       case (worksIndex, routes) =>
-        val works = List(
-          (Books, Language("Bark", Some("dogs"))),
-          (Journals, Language("Meow", Some("cats"))),
-          (Pictures, Language("Quack", Some("ducks"))),
-          (Audio, Language("Bark", Some("dogs"))),
-          (Books, Language("Bark", Some("dogs"))),
-          (Books, Language("Bark", Some("dogs"))),
-          (Journals, Language("Quack", Some("ducks"))),
-          (Books, Language("Meow", Some("cats"))),
-          (Journals, Language("Quack", Some("ducks"))),
-          (Audio, Language("Croak", Some("frogs")))
-        ).map {
-          case (format, language) =>
-            identifiedWork()
-              .format(format)
-              .language(language)
-        }
-
         insertIntoElasticsearch(worksIndex, works: _*)
         assertJsonResponse(
           routes,
@@ -45,20 +50,12 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
                   "buckets": [
                     {
                       "count" : 3,
-                      "data" : {
-                        "id" : "dogs",
-                        "label" : "Bark",
-                        "type" : "Language"
-                      },
+                      "data" : ${language(bark)},
                       "type" : "AggregationBucket"
                     },
                     {
                       "count" : 1,
-                      "data" : {
-                        "id" : "cats",
-                        "label" : "Meow",
-                        "type" : "Language"
-                      },
+                      "data" : ${language(meow)},
                       "type" : "AggregationBucket"
                     }
                   ]
@@ -79,24 +76,6 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
     "filters an aggregation with a filter that is paired to another aggregation") {
     withWorksApi {
       case (worksIndex, routes) =>
-        val works = List(
-          (Books, Language("Bark", Some("dogs"))),
-          (Journals, Language("Meow", Some("cats"))),
-          (Pictures, Language("Quack", Some("ducks"))),
-          (Audio, Language("Bark", Some("dogs"))),
-          (Books, Language("Bark", Some("dogs"))),
-          (Books, Language("Bark", Some("dogs"))),
-          (Journals, Language("Quack", Some("ducks"))),
-          (Books, Language("Meow", Some("cats"))),
-          (Journals, Language("Quack", Some("ducks"))),
-          (Audio, Language("Croak", Some("frogs")))
-        ).map {
-          case (format, language) =>
-            identifiedWork()
-              .format(format)
-              .language(language)
-        }
-
         insertIntoElasticsearch(worksIndex, works: _*)
         assertJsonResponse(
           routes,
@@ -114,20 +93,12 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
                   "buckets": [
                     {
                       "count" : 3,
-                      "data" : {
-                        "id" : "dogs",
-                        "label" : "Bark",
-                        "type" : "Language"
-                      },
+                      "data" : ${language(bark)},
                       "type" : "AggregationBucket"
                     },
                     {
                       "count" : 1,
-                      "data" : {
-                        "id" : "cats",
-                        "label" : "Meow",
-                        "type" : "Language"
-                      },
+                      "data" : ${language(meow)},
                       "type" : "AggregationBucket"
                     }
                   ]
@@ -137,38 +108,22 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
                   "buckets" : [
                     {
                       "count" : 4,
-                      "data" : {
-                        "id" : "a",
-                        "label" : "Books",
-                        "type" : "Format"
-                      },
+                      "data" : ${format(Books)},
                       "type" : "AggregationBucket"
                     },
                     {
                       "count" : 3,
-                      "data" : {
-                        "id" : "d",
-                        "label" : "Journals",
-                        "type" : "Format"
-                      },
+                      "data" : ${format(Journals)},
                       "type" : "AggregationBucket"
                     },
                     {
                       "count" : 2,
-                      "data" : {
-                        "id" : "i",
-                        "label" : "Audio",
-                        "type" : "Format"
-                      },
+                      "data" : ${format(Audio)},
                       "type" : "AggregationBucket"
                     },
                     {
                       "count" : 1,
-                      "data" : {
-                        "id" : "k",
-                        "label" : "Pictures",
-                        "type" : "Format"
-                      },
+                      "data" : ${format(Pictures)},
                       "type" : "AggregationBucket"
                     }
                   ]
@@ -188,24 +143,6 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
   it("filters results but not aggregations paired with an applied filter") {
     withWorksApi {
       case (worksIndex, routes) =>
-        val works = List(
-          (Books, Language("Bark", Some("dogs"))),
-          (Journals, Language("Meow", Some("cats"))),
-          (Pictures, Language("Quack", Some("ducks"))),
-          (Audio, Language("Bark", Some("dogs"))),
-          (Books, Language("Bark", Some("dogs"))),
-          (Books, Language("Bark", Some("dogs"))),
-          (Journals, Language("Quack", Some("ducks"))),
-          (Books, Language("Meow", Some("cats"))),
-          (Journals, Language("Quack", Some("ducks"))),
-          (Audio, Language("Croak", Some("frogs")))
-        ).map {
-          case (format, language) =>
-            identifiedWork()
-              .format(format)
-              .language(language)
-        }
-
         insertIntoElasticsearch(worksIndex, works: _*)
         assertJsonResponse(
           routes,
@@ -223,38 +160,22 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
                   "buckets": [
                     {
                       "count" : 4,
-                      "data" : {
-                        "id" : "a",
-                        "label" : "Books",
-                        "type" : "Format"
-                      },
+                      "data" : ${format(Books)},
                       "type" : "AggregationBucket"
                     },
                     {
                       "count" : 3,
-                      "data" : {
-                        "id" : "d",
-                        "label" : "Journals",
-                        "type" : "Format"
-                      },
+                      "data" : ${format(Journals)},
                       "type" : "AggregationBucket"
                     },
                     {
                       "count" : 2,
-                      "data" : {
-                        "id" : "i",
-                        "label" : "Audio",
-                        "type" : "Format"
-                      },
+                      "data" : ${format(Audio)},
                       "type" : "AggregationBucket"
                     },
                     {
                       "count" : 1,
-                      "data" : {
-                        "id" : "k",
-                        "label" : "Pictures",
-                        "type" : "Format"
-                      },
+                      "data" : ${format(Pictures)},
                       "type" : "AggregationBucket"
                     }
                   ]

@@ -203,11 +203,10 @@ class WorksAggregationsTest
   }
 
   it("supports aggregating on language") {
-    val languages = List(
-      Language("English", Some("eng")),
-      Language("German", Some("ger")),
-      Language("German", Some("ger"))
-    )
+    val english = Language(label = "English", id = "eng")
+    val german = Language(label = "German", id = "ger")
+
+    val languages = List(english, german, german)
 
     val works = languages.map { identifiedWork().language(_) }
 
@@ -224,20 +223,12 @@ class WorksAggregationsTest
                   "type" : "Aggregation",
                   "buckets": [
                     {
-                      "data" : {
-                        "id": "ger",
-                        "label": "German",
-                        "type": "Language"
-                      },
+                      "data" : ${language(german)},
                       "count" : 2,
                       "type" : "AggregationBucket"
                     },
                     {
-                      "data" : {
-                        "id": "eng",
-                        "label": "English",
-                        "type": "Language"
-                      },
+                      "data" : ${language(english)},
                       "count" : 1,
                       "type" : "AggregationBucket"
                     }
@@ -255,14 +246,14 @@ class WorksAggregationsTest
   }
 
   it("supports aggregating on subject, ordered by frequency") {
-    val paeleoNeuroBiology = createSubjectWith(label = "paeleoNeuroBiology")
+    val paleoNeuroBiology = createSubjectWith(label = "paleoNeuroBiology")
     val realAnalysis = createSubjectWith(label = "realAnalysis")
 
     val subjectLists = List(
-      List(paeleoNeuroBiology),
+      List(paleoNeuroBiology),
       List(realAnalysis),
       List(realAnalysis),
-      List(paeleoNeuroBiology, realAnalysis),
+      List(paleoNeuroBiology, realAnalysis),
       List.empty
     )
 
@@ -282,20 +273,14 @@ class WorksAggregationsTest
                   "type" : "Aggregation",
                   "buckets": [
                     {
-                      "data" : {
-                        "label": "realAnalysis",
-                        "concepts": [],
-                        "type": "Subject"
-                      },
+                      "data" : ${subject(realAnalysis, showConcepts = false)},
                       "count" : 3,
                       "type" : "AggregationBucket"
                     },
                     {
-                      "data" : {
-                        "label": "paeleoNeuroBiology",
-                        "concepts": [],
-                        "type": "Subject"
-                      },
+                      "data" : ${subject(
+                            paleoNeuroBiology,
+                            showConcepts = false)},
                       "count" : 2,
                       "type" : "AggregationBucket"
                     }
@@ -347,22 +332,12 @@ class WorksAggregationsTest
                   "buckets": [
                     {
                       "count" : 3,
-                      "data" : {
-                        "id" : "cc-by",
-                        "label" : "Attribution 4.0 International (CC BY 4.0)",
-                        "type" : "License",
-                        "url" : "http://creativecommons.org/licenses/by/4.0/"
-                      },
+                      "data" : ${license(License.CCBY)},
                       "type" : "AggregationBucket"
                     },
                     {
                       "count" : 2,
-                      "data" : {
-                        "id" : "cc-by-nc",
-                        "label" : "Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)",
-                        "type" : "License",
-                        "url" : "https://creativecommons.org/licenses/by-nc/4.0/"
-                      },
+                      "data" : ${license(License.CCBYNC)},
                       "type" : "AggregationBucket"
                     }
                   ]

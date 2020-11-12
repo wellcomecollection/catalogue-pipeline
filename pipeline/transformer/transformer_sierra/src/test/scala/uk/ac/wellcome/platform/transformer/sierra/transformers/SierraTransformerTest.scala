@@ -508,10 +508,7 @@ class SierraTransformerTest
          |  }
          |}""".stripMargin
 
-    val expectedLanguage = Language(
-      id = Some("fra"),
-      label = "French"
-    )
+    val expectedLanguage = Language(id = "fra", label = "French")
 
     val work = transformDataToSourceWork(id = id, data = data)
     work.data.language.get shouldBe expectedLanguage

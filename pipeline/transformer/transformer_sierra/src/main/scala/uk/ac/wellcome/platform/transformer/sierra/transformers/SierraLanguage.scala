@@ -19,9 +19,6 @@ object SierraLanguage extends SierraDataTransformer {
   //
   def apply(bibData: SierraBibData) =
     bibData.lang.map { lang =>
-      Language(
-        label = lang.name,
-        id = Some(lang.code)
-      )
+      Language(label = lang.name, id = lang.code)
     }
 }

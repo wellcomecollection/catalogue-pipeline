@@ -218,7 +218,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "CatalogueStatus" -> "Catalogued"
     )
     CalmTransformer(record, version).right.get.data.language shouldBe Some(
-      Language("English", Some("en"))
+      Language(label = "English", id = "en")
     )
   }
 
@@ -254,7 +254,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "CatalogueStatus" -> "Catalogued"
     )
     CalmTransformer(recordA, version).right.get.data.language shouldBe Some(
-      Language("English", Some("en"))
+      Language(label = "English", id = "en")
     )
     CalmTransformer(recordB, version).right.get.data.language shouldBe None
   }
@@ -277,10 +277,10 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "CatalogueStatus" -> "Catalogued"
     )
     CalmTransformer(recordA, version).right.get.data.language shouldBe Some(
-      Language("Dutch", Some("nl"))
+      Language(label = "Dutch", id = "nl")
     )
     CalmTransformer(recordB, version).right.get.data.language shouldBe Some(
-      Language("Flemish", Some("nl"))
+      Language(label = "Flemish", id = "nl")
     )
   }
 
@@ -485,7 +485,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "CatalogueStatus" -> "Catalogued"
     )
     CalmTransformer(record, version).right.get.data.language shouldBe Some(
-      Language("Lolol", None))
+      Language(label = "Lolol", id = None))
   }
 
   it("suppresses Archives and Manuscrupts Resource Guide works") {

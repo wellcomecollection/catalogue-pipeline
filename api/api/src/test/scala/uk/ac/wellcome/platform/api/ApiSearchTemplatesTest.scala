@@ -27,7 +27,7 @@ class ApiSearchTemplatesTest
       Get(s"/$apiPrefix/search-templates.json") ~> routes ~> check {
         status shouldEqual Status.OK
         contentType shouldEqual ContentTypes.`application/json`
-        f(parseJson(responseAs[String]).toOption.get)
+        f(parseJson(responseAs[String]))
       }
     }
 }
