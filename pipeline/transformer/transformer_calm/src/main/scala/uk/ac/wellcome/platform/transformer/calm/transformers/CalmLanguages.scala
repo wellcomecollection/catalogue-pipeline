@@ -9,9 +9,15 @@ object CalmLanguages {
 
   // Parses the "Language" field on a Calm record.
   //
-  // Returns a list of Languages for the languages field on a Work,
-  // and an optional LanguageNote if the original data cannot be
-  // fully parsed as a series of languages.
+  // Returns a list of Languages on a Work, and an optional LanguageNote.
+  //
+  // If the field is nothing more than a list of languages, then we discard
+  // the original contents of the field, e.g. "English, German and French".
+  //
+  // If the field contains a more in-depth description, then we extract any
+  // languages we can, and keep the original sentence in a note.
+  // e.g. "Mainly in German, smaller parts in English."
+  //
   def apply(languagesField: Option[String]): (List[Language], Option[LanguageNote]) =
     languagesField match {
       case Some(langField) if langField.trim.nonEmpty =>
