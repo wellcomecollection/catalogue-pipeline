@@ -52,6 +52,7 @@ object CalmLanguages {
       val components = langField
         .multisplit("\n", ";", "\\.", ",", "/", "\\band\\b", "`")
         .map { _.trim }
+        .filter { _.nonEmpty }
 
       val matchedLanguages = components
         .map { name => name -> MarcLanguageCodeList.lookupByName(name) }

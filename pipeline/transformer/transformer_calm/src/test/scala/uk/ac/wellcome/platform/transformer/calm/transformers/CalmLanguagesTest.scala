@@ -61,6 +61,13 @@ class CalmLanguagesTest extends AnyFunSpec with Matchers with TableDrivenPropert
       )
     ),
     (
+      "German, French, ",
+      List(
+        Language(label = "German", id = "ger"),
+        Language(label = "French", id = "fre")
+      )
+    ),
+    (
       "English/French",
       List(
         Language(label = "English", id = "eng"),
