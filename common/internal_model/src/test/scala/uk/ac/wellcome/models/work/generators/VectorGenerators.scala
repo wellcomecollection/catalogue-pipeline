@@ -7,7 +7,18 @@ trait VectorGenerators {
 
   private val defaultSimilarity = math.cos(Math.PI / 64).toFloat
 
-  lazy val simHasher4096 = new SimHasher(4096, bins = (256, 128))
+  def randomHash(d: Int): Seq[String] =
+    randomVector(d, 1000).map(x => f"${math.abs(x.toInt)}%03d")
+
+  def similarHashes(d: Int, n: Int): Seq[Seq[String]] = {
+    val first = randomHash(d)
+    (0 until n).map { i =>
+      first.zipWithIndex.map {
+        case (_, j) if j < i => f"${Random.nextInt(1000)}%03d"
+        case (x, _)          => x
+      }
+    }
+  }
 
   def randomColorVector(binSizes: Seq[Int] = Seq(4, 6, 8),
                         weights: Seq[Int] = Seq(2, 2, 1, 1, 1)): Seq[String] =
@@ -75,41 +86,6 @@ trait VectorGenerators {
       add(baseVec, scalarMultiply(i / 10f, direction))
     }
     baseVec +: otherVecs
-  }
-}
-
-/*
- * This implements a modified version of the SimHash algorithm,
- * splitting vectors into subspaces before applying the hashing
- * and encoding the resultant signatures into integers.
- *
- * The original (unmodified) algorithm was taken from these slides:
- * http://www.cs.jhu.edu/~vandurme/papers/VanDurmeLallACL10-slides.pdf
- */
-class SimHasher(d: Int, bins: (Int, Int) = (256, 64)) {
-  import VectorOps._
-
-  private val hashSize = log2(bins._2).toInt * (bins._1 - 1)
-  lazy private val projections = (
-    createMatrix(hashSize, d)(Random.nextGaussian().toFloat)
-  )
-
-  def lsh(vec: Vec): Seq[String] = {
-    assert(vec.size == d)
-    projections.zipWithIndex
-      .foldLeft(BigInt(0)) {
-        case (s, (row, i)) if dot(vec, row) >= 0 => s.setBit(i)
-        case (s, (_, i))                         => s.clearBit(i)
-      }
-      .toString(2)
-      .padTo(hashSize, "0")
-      .mkString
-      .grouped(hashSize / bins._1)
-      .zipWithIndex
-      .map {
-        case (str, i) => s"$i-${BigInt(str, 2).toString(10)}"
-      }
-      .toSeq
   }
 }
 
