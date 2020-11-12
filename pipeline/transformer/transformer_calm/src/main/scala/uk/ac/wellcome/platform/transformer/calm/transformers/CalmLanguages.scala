@@ -24,7 +24,10 @@ object CalmLanguages {
           // contain structured data, and we also keep the complete text from
           // the catalogue.
           case None =>
-            (guessLanguages(langField), Some(LanguageNote(langField)))
+            (
+              guessLanguages(langField),
+              Some(LanguageNote(langField.replace("recieved", "received")))
+            )
         }
 
       case _ => (List.empty, None)
