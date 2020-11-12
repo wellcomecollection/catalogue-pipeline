@@ -69,3 +69,11 @@ resource "aws_ecr_repository" "ecr_repository_elasticdump" {
 resource "aws_ecr_repository" "ecr_repository_relation_embedder" {
   name = "uk.ac.wellcome/relation_embedder"
 }
+
+resource "aws_ecr_repository" "ecr_repository_router" {
+  name = "uk.ac.wellcome/router"
+}
+
+resource "aws_ecr_repository" "ecr_repository_batcher" {
+  name = "uk.ac.wellcome/batcher"
+}
