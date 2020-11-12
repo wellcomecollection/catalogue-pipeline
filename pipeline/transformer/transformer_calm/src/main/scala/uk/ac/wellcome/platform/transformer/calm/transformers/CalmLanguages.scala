@@ -63,7 +63,8 @@ object CalmLanguages {
       //
       // Note: we need to be a little careful splitting on "and",
       // because some languages have "and" in the name.  The \b is
-      // the boundary regex.
+      // the boundary regex -- it only matches "and" if it's not
+      // part of a longer word.
       val components = langField
         .multisplit("\n", ";", "\\.", ",", "/", "\\band\\b", "`")
         .map { _.trim }
