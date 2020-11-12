@@ -2,9 +2,12 @@ package uk.ac.wellcome.platform.router
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
+import scala.util.{Success, Failure}
 import akka.{Done, NotUsed}
 import akka.stream.scaladsl._
 import akka.stream.Materializer
+import software.amazon.awssdk.services.sqs.model.{Message => SQSMessage}
+import grizzled.slf4j.Logging
 
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
@@ -18,7 +21,10 @@ class BatcherWorkerService[MsgDestination](
   batchSize: Int = 100000,
   flushInterval: FiniteDuration = 30 minutes
 )(implicit ec: ExecutionContext, materializer: Materializer)
-    extends Runnable {
+    extends Runnable with Logging {
+
+  type Idx = Long
+  type Path = String
 
   def run(): Future[Done] =
     msgStream.runStream(
@@ -30,25 +36,58 @@ class BatcherWorkerService[MsgDestination](
               (msg, notificationMessage.body)
           }
           .groupedWithin(batchSize, flushInterval)
-          .mapAsync(1) { msgsAndPaths =>
-            val (msgs, paths) = msgsAndPaths.unzip
-            batchPaths(paths)
-              .mapAsync(10) { path =>
-                Future {
-                  msgSender.send(path).toOption match {
-                    case Some(_) => None
-                    case None    => Some(path)
-                  }
-                }
-              }
-              .collect { case Some(failedPath) => failedPath }
-              .runWith(Sink.seq)
-              .map { failedPaths =>
-                }
-          }
-          .mapConcat(identity)
+          .map(_.toList.unzip)
+          .mapAsync(1) { case (msgs, paths) => processBatch(msgs, paths) }
+          .flatMapConcat(identity)
     )
 
-  def batchPaths(paths: Seq[String]): Source[String, NotUsed] =
-    ???
+
+  private def processBatch(msgs: List[SQSMessage], paths: List[Path]): Future[Source[SQSMessage, NotUsed]] =
+    getOutputPaths(paths)
+      .mapAsyncUnordered(10) { case (path, msgIdx) =>
+        Future {
+          msgSender.send(path) match {
+            case Success(_)   => None
+            case Failure(err) =>
+              error(err)
+              Some(msgIdx)
+          }
+        }
+      }
+      .collect { case Some(failedIdx) => failedIdx }
+      .runWith(Sink.seq)
+      .map { failedIdxs =>
+        val failedIdxSet = failedIdxs.toSet
+        Source(msgs)
+          .zipWithIndex
+          .collect {
+            case (msg, idx) if !failedIdxSet.contains(idx) => msg
+          }
+      }
+
+  private def getOutputPaths(paths: List[Path]): Source[(Path, Idx), NotUsed] = {
+    val pathSet = paths.toSet
+    Source(paths)
+      .zipWithIndex
+      .collect {
+        case (path, idx) if shouldOutputPath(path, pathSet) => (path, idx)
+      }
+  }
+
+  private def shouldOutputPath(path: Path, pathSet: Set[Path]): Boolean =
+    !pathAncestors(path).exists(pathSet.contains(_))
+
+  private def pathAncestors(path: Path): List[Path] =
+    tokenize(path) match {
+      case head :+ tail :+ _ =>
+        val ancestor = join(head :+ tail)
+        pathAncestors(ancestor) :+ ancestor
+      case _ => Nil
+    }
+
+  private def tokenize(path: Path): List[String] =
+    path.split("/").toList
+
+  private def join(tokens: List[String]): Path =
+    tokens.mkString("/")
 }
