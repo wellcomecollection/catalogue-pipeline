@@ -13,6 +13,7 @@ class CalmLanguagesTest extends AnyFunSpec with Matchers with TableDrivenPropert
         "languagesField",
         None,
         Some(""),
+        Some("\n\n"),
       )
 
     forAll(degenerateTestCases) { languagesField =>
@@ -30,6 +31,31 @@ class CalmLanguagesTest extends AnyFunSpec with Matchers with TableDrivenPropert
 
   it("handles exact matches") {
     runTestCases(exactMatchTestCases)
+  }
+
+  // If the language field is a combination of exact matches for languages
+  // in the MARC Language list, we just return those.
+  val multiMatchTestCases = Table(
+    ("languagesField", "expectedLanguages"),
+    (
+      "Portuguese\nSpanish",
+      List(
+        Language(label = "Portuguese", id = "por"),
+        Language(label = "Spanish", id = "spa")
+      )
+    ),
+    ("English.", List(Language(label = "English", id = "eng"))),
+    (
+      "German; French",
+      List(
+        Language(label = "German", id = "ger"),
+        Language(label = "French", id = "fre")
+      )
+    ),
+  )
+
+  it("handles multiple matches") {
+    runTestCases(multiMatchTestCases)
   }
 
   def runTestCases(testCases: TableFor2[String, List[Language]]): Assertion =
