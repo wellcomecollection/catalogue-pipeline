@@ -6,7 +6,10 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.{TableDrivenPropertyChecks, TableFor2}
 import uk.ac.wellcome.models.work.internal.{Language, LanguageNote}
 
-class CalmLanguagesTest extends AnyFunSpec with Matchers with TableDrivenPropertyChecks {
+class CalmLanguagesTest
+    extends AnyFunSpec
+    with Matchers
+    with TableDrivenPropertyChecks {
   it("handles degenerate cases") {
     val degenerateTestCases =
       Table(
@@ -101,7 +104,9 @@ class CalmLanguagesTest extends AnyFunSpec with Matchers with TableDrivenPropert
 
   val languageTagCases = Table(
     ("languagesField", "expectedLanguages"),
-    ("<language>French</language>", List(Language(label = "French", id = "fre"))),
+    (
+      "<language>French</language>",
+      List(Language(label = "French", id = "fre"))),
     // Case with multiple languages with matching langcodes
     (
       "<language langcode=\"ger\">German, </language><language langcode=\"fre\">French, </language>",
@@ -173,18 +178,20 @@ class CalmLanguagesTest extends AnyFunSpec with Matchers with TableDrivenPropert
   it("fixes spelling errors") {
     // Taken from f9f09f42-675d-4d27-8efa-1726d314f20b
     // We can remove this test and the fixup code once the record is corrected.
-    val (languages, languageNote) = CalmLanguages(Some(
-      "The majority of this collection is in English, however Kitzinger recieved " +
-        "letters from around the world and travelled widely for conferences so some " +
-        "material is not."
-    ))
+    val (languages, languageNote) = CalmLanguages(
+      Some(
+        "The majority of this collection is in English, however Kitzinger recieved " +
+          "letters from around the world and travelled widely for conferences so some " +
+          "material is not."
+      ))
 
     languages shouldBe List(Language(label = "English", id = "eng"))
-    languageNote shouldBe Some(LanguageNote(
-      "The majority of this collection is in English, however Kitzinger received " +
-        "letters from around the world and travelled widely for conferences so some " +
-        "material is not."
-    ))
+    languageNote shouldBe Some(
+      LanguageNote(
+        "The majority of this collection is in English, however Kitzinger received " +
+          "letters from around the world and travelled widely for conferences so some " +
+          "material is not."
+      ))
   }
 
   def runTestCases(testCases: TableFor2[String, List[Language]]): Assertion =

@@ -18,7 +18,8 @@ object CalmLanguages {
   // languages we can, and keep the original sentence in a note.
   // e.g. "Mainly in German, smaller parts in English."
   //
-  def apply(languagesField: Option[String]): (List[Language], Option[LanguageNote]) =
+  def apply(
+    languagesField: Option[String]): (List[Language], Option[LanguageNote]) =
     languagesField match {
       case Some(langField) if langField.trim.nonEmpty =>
         parseLanguages(langField) match {
@@ -77,8 +78,12 @@ object CalmLanguages {
         .filter { _.nonEmpty }
 
       val matchedLanguages = components
-        .map { name => name -> MarcLanguageCodeList.lookupByName(name) }
-        .collect { case (label, Some(code)) => Language(label = label, id = code) }
+        .map { name =>
+          name -> MarcLanguageCodeList.lookupByName(name)
+        }
+        .collect {
+          case (label, Some(code)) => Language(label = label, id = code)
+        }
         .toList
 
       // If there were some unmatched components, this isn't right --
@@ -102,7 +107,7 @@ object CalmLanguages {
         if (separators.isEmpty) {
           Seq(s)
         } else {
-          s.split(separators.head).flatMap { _.multisplit(separators.tail: _*)}
+          s.split(separators.head).flatMap { _.multisplit(separators.tail: _*) }
         }
     }
   }
@@ -118,7 +123,8 @@ object CalmLanguages {
   // don't match and it increases the complexity.
   private object LanguageTagMatch {
     val pattern = new Regex(
-      "<language(?: langcode=\"[a-z]+\")?>([^<]+)</language>", "label"
+      "<language(?: langcode=\"[a-z]+\")?>([^<]+)</language>",
+      "label"
     )
 
     def unapply(langField: String): Option[List[Language]] = {
@@ -154,7 +160,7 @@ object CalmLanguages {
           .replace("Norweigan", "Norwegian")
           .replace("Lugandan", "Luganda")
           .replaceAll("^Eng$", "English")
-          .replaceAll("^Language$", "")  // We can't do anything useful with this!
+          .replaceAll("^Language$", "") // We can't do anything useful with this!
 
       if (langField != correctedLangField) {
         parseLanguages(correctedLangField)
@@ -178,7 +184,9 @@ object CalmLanguages {
   private def guessLanguages(langField: String): List[Language] =
     languageNamePattern
       .findAllIn(langField)
-      .map { name => (name, MarcLanguageCodeList.lookupByName(name)) }
+      .map { name =>
+        (name, MarcLanguageCodeList.lookupByName(name))
+      }
       .collect { case (name, Some(code)) => Language(label = name, id = code) }
       .toList
 }

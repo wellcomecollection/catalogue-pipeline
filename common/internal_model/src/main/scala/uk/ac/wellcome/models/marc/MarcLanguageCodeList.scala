@@ -78,8 +78,9 @@ object MarcLanguageCodeList extends Logging {
         case (name, code) => name.text -> code.text
       }
       .groupBy { case (name, _) => name }
-      .map { case (name, pairs) =>
-        name -> pairs.collect { case (_, code) => code}
+      .map {
+        case (name, pairs) =>
+          name -> pairs.collect { case (_, code) => code }
       }
   }
 
