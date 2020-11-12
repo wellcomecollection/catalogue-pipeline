@@ -39,7 +39,7 @@ object CalmLanguages {
   private object MultiLanguageMatch {
     def unapply(langField: String): Option[List[Language]] = {
       val components = langField
-        .multisplit("\n", ";", "\\.", ",")
+        .multisplit("\n", ";", "\\.", ",", "/")
         .map { _.trim }
 
       val matchedLanguages = components
