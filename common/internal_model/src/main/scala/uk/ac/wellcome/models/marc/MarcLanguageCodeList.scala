@@ -86,7 +86,8 @@ object MarcLanguageCodeList extends Logging {
   // Returns the name of a language with the given code, if any
   def lookupByCode(code: String): Option[String] = {
     if (code.length != 3) {
-      warn(s"MARC language codes are 3 letters long; got $code (length ${code.length})")
+      warn(
+        s"MARC language codes are 3 letters long; got $code (length ${code.length})")
     }
     codeLookup.get(code)
   }
