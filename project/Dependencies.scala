@@ -202,7 +202,8 @@ object CatalogueDependencies {
       WellcomeDependencies.jsonLibrary ++
       ExternalDependencies.parseDependencies ++
       ExternalDependencies.scalacheckDependencies ++
-      ExternalDependencies.enumeratumDependencies
+      ExternalDependencies.enumeratumDependencies ++
+      ExternalDependencies.scalaXmlDependencies
 
   val displayModelDependencies =
     ExternalDependencies.swaggerDependencies ++
@@ -265,7 +266,6 @@ object CatalogueDependencies {
       ExternalDependencies.wireMockDependencies ++
       ExternalDependencies.akkaHttpDependencies ++
       ExternalDependencies.scribeJavaDependencies ++
-      ExternalDependencies.scalaXmlDependencies ++
       ExternalDependencies.awsSTSDependencies ++
       WellcomeDependencies.typesafeLibrary
 
@@ -286,8 +286,7 @@ object CatalogueDependencies {
   // CALM adapter
 
   val calmAdapterDependencies: Seq[ModuleID] =
-    ExternalDependencies.akkaHttpDependencies ++
-      ExternalDependencies.scalaXmlDependencies
+    ExternalDependencies.akkaHttpDependencies
 
   // Sierra adapter stack
 
