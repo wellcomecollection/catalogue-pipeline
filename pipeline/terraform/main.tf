@@ -1,10 +1,26 @@
-module "catalogue_pipeline_20201111" {
+locals {
+  stacks = {
+    "20201111" = {
+      release_label     = "prod"
+      enable_reindexing = false
+    }
+  }
+}
+
+module "stack" {
   source = "./stack"
 
-  pipeline_date = "20201111"
-  release_label = "prod"
+  for_each = local.stacks
 
-  enable_reindexing = false
+  pipeline_date = each.key
+  release_label = each.value.release_label
+
+  enable_reindexing = each.value.enable_reindexing
+
+  enable_sierra_reindexing = lookup(each.value, "enable_sierra_reindexing", false)
+  enable_miro_reindexing   = lookup(each.value, "enable_miro_reindexing", false)
+  enable_calm_reindexing   = lookup(each.value, "enable_calm_reindexing", false)
+  enable_mets_reindexing   = lookup(each.value, "enable_mets_reindexing", false)
 
   account_id      = data.aws_caller_identity.current.account_id
   aws_region      = local.aws_region
