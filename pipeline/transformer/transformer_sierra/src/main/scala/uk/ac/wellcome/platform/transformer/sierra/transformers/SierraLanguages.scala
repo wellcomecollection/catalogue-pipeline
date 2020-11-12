@@ -1,10 +1,11 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
+import uk.ac.wellcome.models.marc.MarcLanguageCodeList
 import uk.ac.wellcome.models.work.internal.Language
 import uk.ac.wellcome.platform.transformer.sierra.source.SierraBibData
 
 object SierraLanguages extends SierraDataTransformer {
-  type Output = Option[Seq[Language]]
+  type Output = Seq[Language]
 
   // Populate wwork:language.
   //
@@ -18,6 +19,14 @@ object SierraLanguages extends SierraDataTransformer {
   //    This is a repeatable field, as is the subfield.
   //    See https://www.loc.gov/marc/bibliographic/bd041.html
   //
-  override def apply(bibData: SierraBibData): Option[Seq[Language]] =
-    None
+  override def apply(bibData: SierraBibData): Seq[Language] = {
+    val primaryLanguage =
+      bibData.lang
+        .map { lang =>
+          (lang.code, MarcLanguageCodeList.lookupByCode(lang.code).getOrElse(lang.name))
+        }
+        .map { case (code, label) => Language(id = code, label = label) }
+
+    Seq(primaryLanguage).flatten
+  }
 }
