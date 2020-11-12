@@ -24,18 +24,31 @@ variable "release_label" {
   }
 }
 
+variable "enable_reindexing" {
+  type = bool
+}
+
 # Miro
 variable "miro_adapter_topic_arns" {
-  type = list(string)
+  type = object({reindexer_topic=string, updates_topics=list(string)})
 }
 variable "vhs_miro_read_policy" {}
+variable "enable_miro_reindexing" {
+  type    = bool
+  default = false
+}
 
 # Sierra
 variable "vhs_sierra_read_policy" {}
 variable "vhs_sierra_sourcedata_bucket_name" {}
 variable "vhs_sierra_sourcedata_table_name" {}
 variable "sierra_adapter_topic_arns" {
-  type = list(string)
+  type = object({reindexer_topic=string, updates_topics=list(string)})
+}
+
+variable "enable_sierra_reindexing" {
+  type    = bool
+  default = false
 }
 
 # Calm
@@ -43,14 +56,24 @@ variable "vhs_calm_read_policy" {}
 variable "vhs_calm_sourcedata_bucket_name" {}
 variable "vhs_calm_sourcedata_table_name" {}
 variable "calm_adapter_topic_arns" {
-  type = list(string)
+  type = object({reindexer_topic=string, updates_topics=list(string)})
+}
+
+variable "enable_calm_reindexing" {
+  type    = bool
+  default = false
 }
 
 # Mets
 variable "mets_adapter_read_policy" {}
 variable "mets_adapter_table_name" {}
 variable "mets_adapter_topic_arns" {
-  type = list(string)
+  type = object({reindexer_topic=string, updates_topics=list(string)})
+}
+
+variable "enable_mets_reindexing" {
+  type    = bool
+  default = false
 }
 
 variable "private_subnets" {

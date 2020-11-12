@@ -1,7 +1,7 @@
 module "mets_transformer_queue" {
   source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
   queue_name      = "${local.namespace_hyphen}_mets_transformer"
-  topic_arns      = var.mets_adapter_topic_arns
+  topic_arns      = local.mets_topics
   aws_region      = var.aws_region
   alarm_topic_arn = var.dlq_alarm_arn
 }
