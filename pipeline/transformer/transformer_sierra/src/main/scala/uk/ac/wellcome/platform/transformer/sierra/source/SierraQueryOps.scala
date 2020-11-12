@@ -6,11 +6,21 @@ trait SierraQueryOps {
 
   implicit class BibDataOps(bibData: SierraBibData) {
 
-    val varfields: List[VarField] = bibData.varFields
-
+    // Return a list of all the VarFields in the bib data that match
+    // any of these MARC tags.
+    //
+    // VarFields are returned in the same order as in the original bib.
     def varfieldsWithTags(tags: String*): List[VarField] =
-      bibData.varFields.withMarcTags(tags: _*)
+      tags
+        .flatMap { t => bibData.varFieldIndex.get(t) }
+        .flatten
+        .sortBy { case (position, _) => position }
+        .collect { case (_, vf) => vf }
+        .toList
 
+    // Return all the VarFields in the bib data with this MARC tag.
+    //
+    // VarFields are returned in the same order as in the original bib.
     def varfieldsWithTag(tag: String): List[VarField] =
       varfieldsWithTags(tag)
 
@@ -35,14 +45,6 @@ trait SierraQueryOps {
   }
 
   implicit class VarFieldsOps(varfields: List[VarField]) {
-
-    def withMarcTags(tags: String*): List[VarField] =
-      varfields
-        .filter { _.marcTag.exists(tag => tags.contains(tag)) }
-        .sortBy { varfield =>
-          tags.indexOf(varfield.marcTag.get)
-        }
-
     def withFieldTags(tags: String*): List[VarField] =
       varfields
         .filter { _.fieldTag.exists(tag => tags.contains(tag)) }
@@ -51,7 +53,6 @@ trait SierraQueryOps {
         }
 
     def withFieldTag(tag: String): List[VarField] = withFieldTags(tag)
-    def withMarcTag(tag: String): List[VarField] = withMarcTags(tag)
 
     def withIndicator1(ind: String): List[VarField] =
       varfields.filter(_.indicator1.contains(ind))
