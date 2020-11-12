@@ -121,11 +121,13 @@ trait ApiFixture
       }
     }
 
-  def parseJson(string: String, unordered: Boolean = false) =
-    parse(string).left
-      .map(_ => s"Invalid JSON")
-      .right
-      .map(sortedJson(unordered))
+  def parseJson(string: String, unordered: Boolean = false): Json =
+    parse(string) match {
+      case Right(json) => sortedJson(unordered)(json)
+      case Left(err) => throw new RuntimeException(
+        s"Asked to compare a string that wasn't JSON. Error: $err. JSON:\n$string"
+      )
+    }
 
   def sortedJson(unordered: Boolean)(json: Json): Json =
     json.arrayOrObject(
