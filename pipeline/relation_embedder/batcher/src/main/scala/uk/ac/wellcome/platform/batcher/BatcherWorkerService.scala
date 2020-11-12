@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.router
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
-import scala.util.{Success, Failure}
+import scala.util.{Failure, Success}
 import akka.{Done, NotUsed}
 import akka.stream.scaladsl._
 import akka.stream.Materializer
@@ -21,7 +21,8 @@ class BatcherWorkerService[MsgDestination](
   batchSize: Int = 100000,
   flushInterval: FiniteDuration = 30 minutes
 )(implicit ec: ExecutionContext, materializer: Materializer)
-    extends Runnable with Logging {
+    extends Runnable
+    with Logging {
 
   type Idx = Long
   type Path = String
@@ -41,34 +42,35 @@ class BatcherWorkerService[MsgDestination](
           .flatMapConcat(identity)
     )
 
-
-  private def processBatch(msgs: List[SQSMessage], paths: List[Path]): Future[Source[SQSMessage, NotUsed]] =
+  private def processBatch(
+    msgs: List[SQSMessage],
+    paths: List[Path]): Future[Source[SQSMessage, NotUsed]] =
     getOutputPaths(paths)
-      .mapAsyncUnordered(10) { case (path, msgIdx) =>
-        Future {
-          msgSender.send(path) match {
-            case Success(_)   => None
-            case Failure(err) =>
-              error(err)
-              Some(msgIdx)
+      .mapAsyncUnordered(10) {
+        case (path, msgIdx) =>
+          Future {
+            msgSender.send(path) match {
+              case Success(_) => None
+              case Failure(err) =>
+                error(err)
+                Some(msgIdx)
+            }
           }
-        }
       }
       .collect { case Some(failedIdx) => failedIdx }
       .runWith(Sink.seq)
       .map { failedIdxs =>
         val failedIdxSet = failedIdxs.toSet
-        Source(msgs)
-          .zipWithIndex
+        Source(msgs).zipWithIndex
           .collect {
             case (msg, idx) if !failedIdxSet.contains(idx) => msg
           }
       }
 
-  private def getOutputPaths(paths: List[Path]): Source[(Path, Idx), NotUsed] = {
+  private def getOutputPaths(
+    paths: List[Path]): Source[(Path, Idx), NotUsed] = {
     val pathSet = paths.toSet
-    Source(paths)
-      .zipWithIndex
+    Source(paths).zipWithIndex
       .collect {
         case (path, idx) if shouldOutputPath(path, pathSet) => (path, idx)
       }
