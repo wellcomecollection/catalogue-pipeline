@@ -20,10 +20,12 @@ object Language {
       }
 
   def fromLabel(label: String): Result[Language] =
-    languageLabelMap.get(label) match {
-      case Some(code) => Right(Language(label, Some(code)))
-      case None       => Right(Language(label, None))
-    }
+    Right(
+      Language(
+        label = label,
+        id = languageLabelMap.get(label)
+      )
+    )
 
   private def languageCodes: List[(String, String)] =
     Source
