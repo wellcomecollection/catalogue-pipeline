@@ -419,7 +419,8 @@ class WorksFiltersTest
   describe("filtering works by language") {
     val englishWork =
       identifiedWork().language(Language(label = "English", id = "eng"))
-    val germanWork = identifiedWork().language(Language(label = "German", id = "ger"))
+    val germanWork =
+      identifiedWork().language(Language(label = "German", id = "ger"))
     val noLanguageWork = identifiedWork()
 
     val works = List(englishWork, germanWork, noLanguageWork)

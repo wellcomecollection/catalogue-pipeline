@@ -176,7 +176,8 @@ trait DisplaySerialisationTestBase {
   def concepts(concepts: List[AbstractRootConcept[IdState.Minted]]) =
     concepts.map(abstractRootConcept).mkString(",")
 
-  def subject(s: Subject[IdState.Minted], showConcepts: Boolean = true): String =
+  def subject(s: Subject[IdState.Minted],
+              showConcepts: Boolean = true): String =
     s"""
     {
       "label": "${s.label}",

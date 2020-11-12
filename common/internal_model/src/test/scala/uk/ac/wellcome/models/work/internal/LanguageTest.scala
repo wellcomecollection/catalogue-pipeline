@@ -5,9 +5,15 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
 
-class LanguageTest extends AnyFunSpec with Matchers with EitherValues with TableDrivenPropertyChecks {
+class LanguageTest
+    extends AnyFunSpec
+    with Matchers
+    with EitherValues
+    with TableDrivenPropertyChecks {
   it("gets the language from a known code") {
-    Language.fromCode("yo").right.value shouldBe Language(label = "Yoruba", id = "yo")
+    Language.fromCode("yo").right.value shouldBe Language(
+      label = "Yoruba",
+      id = "yo")
   }
 
   it("errors if asked to retrieve an unknown code") {
@@ -23,8 +29,9 @@ class LanguageTest extends AnyFunSpec with Matchers with EitherValues with Table
   )
 
   it("gets the language from a label") {
-    forAll(labelTestCases) { case (label, expectedLanguage) =>
-      Language.fromLabel(label).right.value shouldBe expectedLanguage
+    forAll(labelTestCases) {
+      case (label, expectedLanguage) =>
+        Language.fromLabel(label).right.value shouldBe expectedLanguage
     }
   }
 }

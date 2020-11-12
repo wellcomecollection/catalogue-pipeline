@@ -278,7 +278,9 @@ class WorksAggregationsTest
                       "type" : "AggregationBucket"
                     },
                     {
-                      "data" : ${subject(paleoNeuroBiology, showConcepts = false)},
+                      "data" : ${subject(
+                            paleoNeuroBiology,
+                            showConcepts = false)},
                       "count" : 2,
                       "type" : "AggregationBucket"
                     }
