@@ -255,14 +255,14 @@ class WorksAggregationsTest
   }
 
   it("supports aggregating on subject, ordered by frequency") {
-    val paeleoNeuroBiology = createSubjectWith(label = "paeleoNeuroBiology")
+    val paleoNeuroBiology = createSubjectWith(label = "paleoNeuroBiology")
     val realAnalysis = createSubjectWith(label = "realAnalysis")
 
     val subjectLists = List(
-      List(paeleoNeuroBiology),
+      List(paleoNeuroBiology),
       List(realAnalysis),
       List(realAnalysis),
-      List(paeleoNeuroBiology, realAnalysis),
+      List(paleoNeuroBiology, realAnalysis),
       List.empty
     )
 
@@ -292,7 +292,7 @@ class WorksAggregationsTest
                     },
                     {
                       "data" : {
-                        "label": "paeleoNeuroBiology",
+                        "label": "paleoNeuroBiology",
                         "concepts": [],
                         "type": "Subject"
                       },
