@@ -18,8 +18,9 @@ object CalmLanguages {
 
   private def parseField(langField: String): (List[Language], Option[LanguageNote]) =
     langField match {
-      case ExactLanguageMatch(languages) => (languages, None)
-      case MultiLanguageMatch(languages) => (languages, None)
+      case ExactLanguageMatch(languages)       => (languages, None)
+      case MultiLanguageMatch(languages)       => (languages, None)
+      case FuzzyLanguageMatch(languages, note) => (languages, note)
       case _ => (List.empty, None)
     }
 
@@ -77,6 +78,32 @@ object CalmLanguages {
         } else {
           s.split(separators.head).flatMap { _.multisplit(separators.tail: _*)}
         }
+    }
+  }
+
+  // This has some rules tuned to our Calm data, with fixes for certain
+  // records that are close to matches, but need a bit of fixing up.
+  // e.g. typos, spelling errors, different hyphenation to the MARC list.
+  //
+  // Note: we should flag these issues and fix them in the source where
+  // appropriate.
+  private object FuzzyLanguageMatch {
+    def unapply(langField: String): Option[(List[Language], Option[LanguageNote])] = {
+      val correctedLangField =
+        langField
+          .replace("Portugese", "Portuguese")
+          .replace("Portguese", "Portuguese")
+          .replace("Swiss-German", "Swiss German")
+          .replace("Norweigan", "Norwegian")
+
+      if (langField != correctedLangField) {
+        parseField(correctedLangField) match {
+          case (Nil, None) => None
+          case other       => Some(other)
+        }
+      } else {
+        None
+      }
     }
   }
 }
