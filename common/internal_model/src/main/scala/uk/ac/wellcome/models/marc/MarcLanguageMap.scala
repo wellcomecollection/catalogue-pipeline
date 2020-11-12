@@ -13,14 +13,19 @@ object MarcLanguageMap {
     val languages =
       XML.load(getClass.getResourceAsStream("/languages.xml")) \\ "language"
 
-    languages
+    val idNamePairs = languages
       .map { lang =>
         val code = (lang \ "code").text
         val name = (lang \ "name").text
 
         code -> name
       }
-      .toMap
+
+    // This checks that we aren't repeating codes.  This should be handled
+    // by languages.xml, but check we're parsing it correctly.
+    assert(idNamePairs.size == idNamePairs.toMap.size)
+
+    idNamePairs.toMap
   }
 
   def lookupById(code: String): Option[String] =
