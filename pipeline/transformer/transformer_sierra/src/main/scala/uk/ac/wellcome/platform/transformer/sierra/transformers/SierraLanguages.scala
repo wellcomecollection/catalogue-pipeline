@@ -1,10 +1,11 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
+import grizzled.slf4j.Logging
 import uk.ac.wellcome.models.marc.MarcLanguageCodeList
 import uk.ac.wellcome.models.work.internal.Language
-import uk.ac.wellcome.platform.transformer.sierra.source.SierraBibData
+import uk.ac.wellcome.platform.transformer.sierra.source.{SierraBibData, SierraQueryOps}
 
-object SierraLanguages extends SierraDataTransformer {
+object SierraLanguages extends SierraDataTransformer with SierraQueryOps with Logging {
   type Output = Seq[Language]
 
   // Populate wwork:language.
@@ -27,6 +28,20 @@ object SierraLanguages extends SierraDataTransformer {
         }
         .map { case (code, label) => Language(id = code, label = label) }
 
-    Seq(primaryLanguage).flatten
+    val additionalLanguages =
+      bibData
+        .subfieldsWithTag("041" -> "a")
+        .contents
+        .map { code =>
+          (code, MarcLanguageCodeList.lookupByCode(code))
+        }
+        .map {
+          case (code, Some(label)) => Some(Language(id = code, label = label))
+          case (code, None) =>
+            warn(s"Unrecognised code in MARC 041 ǂa: $code")
+            None
+        }
+
+    (Seq(primaryLanguage) ++ additionalLanguages).flatten
   }
 }
