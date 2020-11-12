@@ -45,6 +45,7 @@ class CalmLanguagesTest extends AnyFunSpec with Matchers with TableDrivenPropert
       )
     ),
     ("English.", List(Language(label = "English", id = "eng"))),
+    ("English`", List(Language(label = "English", id = "eng"))),
     (
       "German; French",
       List(
@@ -64,6 +65,22 @@ class CalmLanguagesTest extends AnyFunSpec with Matchers with TableDrivenPropert
       List(
         Language(label = "English", id = "eng"),
         Language(label = "French", id = "fre")
+      )
+    ),
+    // We have to be a little bit careful splitting 'and' -- some languages
+    // have "and" as part of the name, and we don't want to lose those.
+    (
+      "English/Ganda",
+      List(
+        Language(label = "English", id = "eng"),
+        Language(label = "Ganda", id = "lug")
+      )
+    ),
+    (
+      "English and Russian",
+      List(
+        Language(label = "English", id = "eng"),
+        Language(label = "Russian", id = "rus")
       )
     ),
   )

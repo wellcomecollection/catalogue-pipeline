@@ -38,8 +38,15 @@ object CalmLanguages {
   // languages in the MARC Language Code list, then use them.
   private object MultiLanguageMatch {
     def unapply(langField: String): Option[List[Language]] = {
+
+      // These are the components that might separate languages in
+      // a string.  See the test cases for examples from Calm data.
+      //
+      // Note: we need to be a little careful splitting on "and",
+      // because some languages have "and" in the name.  The \b is
+      // the boundary regex.
       val components = langField
-        .multisplit("\n", ";", "\\.", ",", "/")
+        .multisplit("\n", ";", "\\.", ",", "/", "\\band\\b", "`")
         .map { _.trim }
 
       val matchedLanguages = components
@@ -47,6 +54,8 @@ object CalmLanguages {
         .collect { case (label, Some(code)) => Language(label = label, id = code) }
         .toList
 
+      // If there were some unmatched components, this isn't right --
+      // return nothing.
       if (matchedLanguages.size == components.size) {
         Some(matchedLanguages)
       } else {
