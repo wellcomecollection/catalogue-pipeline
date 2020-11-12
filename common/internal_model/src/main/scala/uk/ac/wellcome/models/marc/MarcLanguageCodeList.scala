@@ -8,7 +8,7 @@ import scala.xml.XML
 // This parses the XML file downloaded from:
 // https://www.loc.gov/standards/codelists/languages.xml
 //
-object MarcLanguageMap {
+object MarcLanguageCodeList {
   private val idLookup: Map[String, String] = {
     val languages =
       XML.load(getClass.getResourceAsStream("/languages.xml")) \\ "language"
