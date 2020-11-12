@@ -34,9 +34,10 @@ object MarcLanguageCodeList extends Logging {
 
   // Create a lookup from name -> code
   //
-  // Note: languages.xml includes variant names.  We don't currently
-  // consider those in this lookup, but it may be worth adding as a
-  // future enhancement.
+  // Note: languages.xml includes variant names.  I haven't implemented
+  // support for these names in this lookup, because I can't see any
+  // examples of them in Calm (where we need to parse names).  If we need
+  // to parse these variant names, that data is available.
   //
   // Note: We can't simply invert the (code -> name) map.  The MARC
   // Language Code list includes some obsoleted codes, for example:
