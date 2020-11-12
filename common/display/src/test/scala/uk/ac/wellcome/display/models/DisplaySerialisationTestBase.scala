@@ -176,17 +176,17 @@ trait DisplaySerialisationTestBase {
   def concepts(concepts: List[AbstractRootConcept[IdState.Minted]]) =
     concepts.map(abstractRootConcept).mkString(",")
 
-  def subject(s: Subject[IdState.Minted]): String =
+  def subject(s: Subject[IdState.Minted], showConcepts: Boolean = true): String =
     s"""
     {
       "label": "${s.label}",
       "type" : "Subject",
-      "concepts": [ ${concepts(s.concepts)} ]
+      "concepts": [ ${if (showConcepts) concepts(s.concepts) else ""} ]
     }
     """
 
   def subjects(subjects: List[Subject[IdState.Minted]]): String =
-    subjects.map(subject).mkString(",")
+    subjects.map(subject(_)).mkString(",")
 
   def genre(genre: Genre[IdState.Minted]) =
     s"""
@@ -238,14 +238,23 @@ trait DisplaySerialisationTestBase {
       }
     """.stripMargin
 
-  def format(w: Format) =
+  def format(fmt: Format): String =
     s"""
       {
-        "id": "${w.id}",
-        "label": "${w.label}",
+        "id": "${fmt.id}",
+        "label": "${fmt.label}",
         "type": "Format"
       }
     """.stripMargin
+
+  def language(lang: Language): String =
+    s"""
+       |{
+       |  ${optionalString("id", lang.id)}
+       |  "label": "${lang.label}",
+       |  "type": "Language"
+       |}
+     """.stripMargin
 
   def license(license: License) =
     s"""{

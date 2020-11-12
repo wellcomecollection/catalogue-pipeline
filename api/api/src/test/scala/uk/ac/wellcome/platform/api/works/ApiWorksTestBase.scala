@@ -34,9 +34,9 @@ trait ApiWorksTestBase
       |   "type": "${formatOntologyType(work.data.workType)}",
       |   "id": "${work.state.canonicalId}",
       |   "title": "${work.data.title.get}",
-      |   ${work.data.format.map(formatResponse).getOrElse("")}
-      |   ${work.data.language.map(languageResponse).getOrElse("")}
       |   "alternativeTitles": []
+      |   ${optionalObject("workType", format, work.data.format)}
+      |   ${optionalObject("language", language, work.data.language)}
       | }
     """.stripMargin
 
@@ -58,22 +58,4 @@ trait ApiWorksTestBase
       case WorkType.Series     => "Series"
       case WorkType.Section    => "Section"
     }
-
-  def formatResponse(format: Format): String =
-    s"""
-      | "workType": {
-      |   "id": "${format.id}",
-      |   "label": "${format.label}",
-      |   "type": "Format"
-      | },
-    """.stripMargin
-
-  def languageResponse(language: Language): String =
-    s"""
-      | "language": {
-      |   ${language.id.map(lang => s""""id": "$lang",""").getOrElse("")}
-      |   "label": "${language.label}",
-      |   "type": "Language"
-      | },
-    """.stripMargin
 }

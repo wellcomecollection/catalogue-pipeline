@@ -50,20 +50,12 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
                   "buckets": [
                     {
                       "count" : 3,
-                      "data" : {
-                        "id" : "dogs",
-                        "label" : "Bark",
-                        "type" : "Language"
-                      },
+                      "data" : ${language(bark)},
                       "type" : "AggregationBucket"
                     },
                     {
                       "count" : 1,
-                      "data" : {
-                        "id" : "cats",
-                        "label" : "Meow",
-                        "type" : "Language"
-                      },
+                      "data" : ${language(meow)},
                       "type" : "AggregationBucket"
                     }
                   ]
@@ -101,20 +93,12 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
                   "buckets": [
                     {
                       "count" : 3,
-                      "data" : {
-                        "id" : "dogs",
-                        "label" : "Bark",
-                        "type" : "Language"
-                      },
+                      "data" : ${language(bark)},
                       "type" : "AggregationBucket"
                     },
                     {
                       "count" : 1,
-                      "data" : {
-                        "id" : "cats",
-                        "label" : "Meow",
-                        "type" : "Language"
-                      },
+                      "data" : ${language(meow)},
                       "type" : "AggregationBucket"
                     }
                   ]
@@ -124,38 +108,22 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
                   "buckets" : [
                     {
                       "count" : 4,
-                      "data" : {
-                        "id" : "a",
-                        "label" : "Books",
-                        "type" : "Format"
-                      },
+                      "data" : ${format(Books)},
                       "type" : "AggregationBucket"
                     },
                     {
                       "count" : 3,
-                      "data" : {
-                        "id" : "d",
-                        "label" : "Journals",
-                        "type" : "Format"
-                      },
+                      "data" : ${format(Journals)},
                       "type" : "AggregationBucket"
                     },
                     {
                       "count" : 2,
-                      "data" : {
-                        "id" : "i",
-                        "label" : "Audio",
-                        "type" : "Format"
-                      },
+                      "data" : ${format(Audio)},
                       "type" : "AggregationBucket"
                     },
                     {
                       "count" : 1,
-                      "data" : {
-                        "id" : "k",
-                        "label" : "Pictures",
-                        "type" : "Format"
-                      },
+                      "data" : ${format(Pictures)},
                       "type" : "AggregationBucket"
                     }
                   ]
@@ -192,38 +160,22 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
                   "buckets": [
                     {
                       "count" : 4,
-                      "data" : {
-                        "id" : "a",
-                        "label" : "Books",
-                        "type" : "Format"
-                      },
+                      "data" : ${format(Books)},
                       "type" : "AggregationBucket"
                     },
                     {
                       "count" : 3,
-                      "data" : {
-                        "id" : "d",
-                        "label" : "Journals",
-                        "type" : "Format"
-                      },
+                      "data" : ${format(Journals)},
                       "type" : "AggregationBucket"
                     },
                     {
                       "count" : 2,
-                      "data" : {
-                        "id" : "i",
-                        "label" : "Audio",
-                        "type" : "Format"
-                      },
+                      "data" : ${format(Audio)},
                       "type" : "AggregationBucket"
                     },
                     {
                       "count" : 1,
-                      "data" : {
-                        "id" : "k",
-                        "label" : "Pictures",
-                        "type" : "Format"
-                      },
+                      "data" : ${format(Pictures)},
                       "type" : "AggregationBucket"
                     }
                   ]
