@@ -8,7 +8,7 @@ class LanguageTest extends AnyFunSpec with Matchers {
     val withValidCode = Language.fromCode("yo")
     val withInvalidCode = Language.fromCode("no such code")
 
-    withValidCode should be(Right(Language("Yoruba", Some("yo"))))
+    withValidCode should be(Right(Language(label = "Yoruba", id = "yo")))
     withInvalidCode shouldBe a[Left[_, _]]
   }
 
@@ -19,9 +19,9 @@ class LanguageTest extends AnyFunSpec with Matchers {
     val withMultiLabel2 = Language.fromLabel("Haitian Creole")
     val withInvalidLabel = Language.fromLabel("no such label")
 
-    withValidLabel shouldBe Right(Language("Yoruba", Some("yo")))
-    withMultiLabel1 shouldBe Right(Language("Haitian", Some("ht")))
-    withMultiLabel2 shouldBe Right(Language("Haitian Creole", Some("ht")))
-    withInvalidLabel shouldBe Right(Language("no such label", None))
+    withValidLabel shouldBe Right(Language(label = "Yoruba", id = "yo"))
+    withMultiLabel1 shouldBe Right(Language(label = "Haitian", id = "ht"))
+    withMultiLabel2 shouldBe Right(Language(label = "Haitian Creole", id = "ht"))
+    withInvalidLabel shouldBe Right(Language(label = "no such label", id = None))
   }
 }

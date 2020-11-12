@@ -10,11 +10,13 @@ case class Language(
 )
 
 object Language {
+  def apply(label: String, id: String): Language =
+    Language(label = label, id = Some(id))
 
   def fromCode(code: String): Result[Language] =
     languageCodeMap
       .get(code)
-      .map(label => Right(Language(label, Some(code))))
+      .map(label => Right(Language(label = label, id = code)))
       .getOrElse {
         Left(new Exception(s"Invalid ISO 693-2 language code: $code"))
       }

@@ -6,10 +6,10 @@ import uk.ac.wellcome.models.Implicits._
 
 class WorksFilteredAggregationsTest extends ApiWorksTestBase {
 
-  val bark = Language("Bark", Some("dogs"))
-  val meow = Language("Meow", Some("cats"))
-  val quack = Language("Quack", Some("ducks"))
-  val croak = Language("Croak", Some("frogs"))
+  val bark = Language(label = "Bark", id = "dogs")
+  val meow = Language(label = "Meow", id = "cats")
+  val quack = Language(label = "Quack", id = "ducks")
+  val croak = Language(label = "Croak", id = "frogs")
 
   val works: List[Work.Visible[WorkState.Identified]] = List(
     (Books, bark),

@@ -132,10 +132,7 @@ class DisplayWorkTest
   }
 
   it("gets the language from a Work") {
-    val language = Language(
-      id = Some("bsl"),
-      label = "British Sign Language"
-    )
+    val language = Language(id = "bsl", label = "British Sign Language")
 
     val work = identifiedWork().language(language)
 
@@ -147,8 +144,8 @@ class DisplayWorkTest
 
   it("gets the languages from a Work") {
     val languages = List(
-      Language(id = Some("bsl"), label = "British Sign Language"),
-      Language(id = Some("ger"), label = "German")
+      Language(id = "bsl", label = "British Sign Language"),
+      Language(id = "ger", label = "German")
     )
 
     val work = identifiedWork().languages(languages)

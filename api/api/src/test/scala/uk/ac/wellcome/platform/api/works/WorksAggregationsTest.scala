@@ -203,8 +203,8 @@ class WorksAggregationsTest
   }
 
   it("supports aggregating on language") {
-    val english = Language("English", Some("eng"))
-    val german = Language("German", Some("ger"))
+    val english = Language(label = "English", id = "eng")
+    val german = Language(label = "German", id = "ger")
 
     val languages = List(english, german, german)
 
