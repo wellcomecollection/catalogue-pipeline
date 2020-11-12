@@ -4,7 +4,7 @@ import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.{TableDrivenPropertyChecks, TableFor2}
-import uk.ac.wellcome.models.work.internal.Language
+import uk.ac.wellcome.models.work.internal.{Language, LanguageNote}
 
 class CalmLanguagesTest extends AnyFunSpec with Matchers with TableDrivenPropertyChecks {
   it("handles degenerate cases") {
@@ -29,6 +29,7 @@ class CalmLanguagesTest extends AnyFunSpec with Matchers with TableDrivenPropert
     ("Swedish", List(Language(label = "Swedish", id = "swe"))),
     // A variant name in the MARC Language list
     ("Mandarin", List(Language(label = "Mandarin", id = "chi"))),
+    ("Middle English", List(Language(label = "Middle English", id = "enm"))),
   )
 
   it("handles exact matches") {
@@ -147,10 +148,32 @@ class CalmLanguagesTest extends AnyFunSpec with Matchers with TableDrivenPropert
     runTestCases(fuzzyTestCases)
   }
 
+  val fallbackTestCases = Table(
+    ("languagesField", "expectedLanguages"),
+    (
+      "Partly in German, partly in English, some articles in French.",
+      List(
+        Language(label = "German", id = "ger"),
+        Language(label = "English", id = "eng"),
+        Language(label = "French", id = "fre")
+      )
+    ),
+    ("Nigerian", List.empty),
+  )
+
+  it("handles fallback cases") {
+    forAll(fallbackTestCases) {
+      case (languageField, expectedLanguages) =>
+        val (languages, languageNote) = CalmLanguages(Some(languageField))
+        languages shouldBe expectedLanguages
+        languageNote shouldBe Some(LanguageNote(languageField))
+    }
+  }
+
   def runTestCases(testCases: TableFor2[String, List[Language]]): Assertion =
     forAll(testCases) {
-      case (languagesField, expectedLanguages) =>
-        val (languages, languageNote) = CalmLanguages(Some(languagesField))
+      case (languageField, expectedLanguages) =>
+        val (languages, languageNote) = CalmLanguages(Some(languageField))
         languages shouldBe expectedLanguages
         languageNote shouldBe None
     }

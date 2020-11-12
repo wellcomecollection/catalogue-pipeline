@@ -14,17 +14,29 @@ object CalmLanguages {
   // fully parsed as a series of languages.
   def apply(languagesField: Option[String]): (List[Language], Option[LanguageNote]) =
     languagesField match {
-      case Some(langField) if langField.trim.nonEmpty => parseField(langField)
-      case _                                          => (List.empty, None)
+      case Some(langField) if langField.trim.nonEmpty =>
+        parseLanguages(langField) match {
+          case Some(languages) => (languages, None)
+
+          // If we're unable to parse the whole string as a list of languages,
+          // then guess at what languages it contains, then copy the field
+          // verbatim to a LanguageNote.  This means the Language list will
+          // contain structured data, and we also keep the complete text from
+          // the catalogue.
+          case None =>
+            (guessLanguages(langField), Some(LanguageNote(langField)))
+        }
+
+      case _ => (List.empty, None)
     }
 
-  private def parseField(langField: String): (List[Language], Option[LanguageNote]) =
+  private def parseLanguages(langField: String): Option[List[Language]] =
     langField match {
-      case ExactLanguageMatch(languages)       => (languages, None)
-      case MultiLanguageMatch(languages)       => (languages, None)
-      case FuzzyLanguageMatch(languages, note) => (languages, note)
-      case LanguageTagMatch(languages, note)   => (languages, note)
-      case _ => (List.empty, None)
+      case ExactLanguageMatch(languages) => Some(languages)
+      case MultiLanguageMatch(languages) => Some(languages)
+      case FuzzyLanguageMatch(languages) => Some(languages)
+      case LanguageTagMatch(languages)   => Some(languages)
+      case _                             => None
     }
 
   // If the contents of the field exactly matches the name of a
@@ -99,15 +111,12 @@ object CalmLanguages {
       "<language(?: langcode=\"[a-z]+\")?>([^<]+)</language>", "label"
     )
 
-    def unapply(langField: String): Option[(List[Language], Option[LanguageNote])] = {
+    def unapply(langField: String): Option[List[Language]] = {
       val taglessLangField =
         pattern.replaceAllIn(langField, (m: Regex.Match) => m.group("label"))
 
       if (langField != taglessLangField) {
-        parseField(taglessLangField) match {
-          case (Nil, None) => None
-          case other       => Some(other)
-        }
+        parseLanguages(taglessLangField)
       } else {
         None
       }
@@ -125,7 +134,7 @@ object CalmLanguages {
   // Note: we should flag these issues and fix them in the source where
   // appropriate.
   private object FuzzyLanguageMatch {
-    def unapply(langField: String): Option[(List[Language], Option[LanguageNote])] = {
+    def unapply(langField: String): Option[List[Language]] = {
       val correctedLangField =
         langField
           .replace("Portugese", "Portuguese")
@@ -138,13 +147,28 @@ object CalmLanguages {
           .replaceAll("^Language$", "")  // We can't do anything useful with this!
 
       if (langField != correctedLangField) {
-        parseField(correctedLangField) match {
-          case (Nil, None) => None
-          case other       => Some(other)
-        }
+        parseLanguages(correctedLangField)
       } else {
         None
       }
     }
   }
+
+  // Make a best effort guess of the languages in a particular string.
+  //
+  // We rely on the MARC Language list to tell us if a given capitalised word
+  // is actually a language, and then a language won't appear if it's not used.
+  // e.g. nobody will write "This doesn't contain English"
+  //
+  // Any capitalised word could be a language, but we can't assume it is,
+  // e.g. the word "Mostly" or "Partly" could appear in this field, but that's
+  // not a language name!
+  val languageNamePattern: Regex = "[A-Z][a-z]+".r
+
+  private def guessLanguages(langField: String): List[Language] =
+    languageNamePattern
+      .findAllIn(langField)
+      .map { name => (name, MarcLanguageCodeList.lookupByName(name)) }
+      .collect { case (name, Some(code)) => Language(label = name, id = code) }
+      .toList
 }
