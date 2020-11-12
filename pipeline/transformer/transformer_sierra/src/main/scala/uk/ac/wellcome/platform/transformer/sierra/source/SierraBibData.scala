@@ -27,7 +27,7 @@ case class SierraBibData(
   // It's more efficient to cache this lookup once, than repeatedly loop
   // through all the varFields to find it.  We record the original position
   // so we can recombine varFields with multiple tags in their original order.
-  val varFieldIndex: Map[String, List[(Int, VarField)]] =
+  lazy val varFieldIndex: Map[String, List[(Int, VarField)]] =
     varFields
       .zipWithIndex
       .collect {
