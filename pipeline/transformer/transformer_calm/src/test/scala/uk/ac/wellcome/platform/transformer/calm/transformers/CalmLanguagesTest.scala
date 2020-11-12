@@ -27,6 +27,8 @@ class CalmLanguagesTest extends AnyFunSpec with Matchers with TableDrivenPropert
     ("languagesField", "expectedLanguages"),
     ("English", List(Language(label = "English", id = "eng"))),
     ("Swedish", List(Language(label = "Swedish", id = "swe"))),
+    // A variant name in the MARC Language list
+    ("Mandarin", List(Language(label = "Mandarin", id = "chi"))),
   )
 
   it("handles exact matches") {

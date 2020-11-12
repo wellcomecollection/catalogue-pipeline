@@ -34,11 +34,6 @@ object MarcLanguageCodeList extends Logging {
 
   // Create a lookup from name -> code
   //
-  // Note: languages.xml includes variant names.  I haven't implemented
-  // support for these names in this lookup, because I can't see any
-  // examples of them in Calm (where we need to parse names).  If we need
-  // to parse these variant names, that data is available.
-  //
   // Note: We can't simply invert the (code -> name) map.  The MARC
   // Language Code list includes some obsoleted codes, for example:
   //
@@ -56,16 +51,23 @@ object MarcLanguageCodeList extends Logging {
   // We want to be able to resolve those codes to a name, but we want to
   // choose the non-obsolete code when resolving the name.
   //
-  private lazy val nameLookup: Map[String, String] = {
+  // Note: the same name might resolve to multiple codes if it is a
+  // variant name of a language, e.g. Inuit.  I've checked, and there are
+  // no cases where a variant name is *also* the primary name of a language
+  // code.  In these cases, we pick the first one -- in practice, I'm not
+  // sure our data will ever encounter this issue.
+  //
+  private lazy val nameLookup: Map[String, Seq[String]] = {
     val languages =
       XML.load(getClass.getResourceAsStream("/languages.xml")) \\ "language"
 
-    val nameCodePairs = languages
-      .map { lang =>
+    languages
+      .flatMap { lang =>
         val code = lang \ "code"
-        val name = lang \ "name"
 
-        name -> code
+        // We go down into all instances of <name> to be sure we're
+        // catching variant names, e.g. Chinese/Mandarin
+        (lang \\ "name").map { _ -> code }
       }
       .filterNot {
         case (_, code) =>
@@ -75,12 +77,10 @@ object MarcLanguageCodeList extends Logging {
       .map {
         case (name, code) => name.text -> code.text
       }
-
-    // This checks that we aren't repeating names.  This should be handled
-    // by languages.xml, but check we're parsing it correctly.
-    assert(nameCodePairs.size == nameCodePairs.toMap.size)
-
-    nameCodePairs.toMap
+      .groupBy { case (name, _) => name }
+      .map { case (name, pairs) =>
+        name -> pairs.collect { case (_, code) => code}
+      }
   }
 
   // Returns the name of a language with the given code, if any
@@ -94,5 +94,11 @@ object MarcLanguageCodeList extends Logging {
 
   // Returns the code of a language with the given name, if any
   def lookupByName(name: String): Option[String] =
-    nameLookup.get(name)
+    nameLookup.get(name) match {
+      case Some(Seq(code)) => Some(code)
+      case Some(codes) =>
+        warn(s"Multiple codes for name $name: $codes")
+        Some(codes.head)
+      case _ => None
+    }
 }

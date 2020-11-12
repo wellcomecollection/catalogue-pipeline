@@ -20,6 +20,14 @@ class MarcLanguageCodeListTest extends AnyFunSpec with Matchers {
     MarcLanguageCodeList.lookupByName(name = "German") shouldBe Some("ger")
   }
 
+  it("finds a language by variant name") {
+    MarcLanguageCodeList.lookupByName(name = "Flemish") shouldBe Some("dut")
+  }
+
+  it("finds a language with ambiguous names") {
+    MarcLanguageCodeList.lookupByName(name = "Inuit") shouldBe Some("iku")
+  }
+
   it("handles obsolete codes") {
     MarcLanguageCodeList.lookupByCode(code = "tgl") shouldBe Some("Tagalog")
     MarcLanguageCodeList.lookupByCode(code = "tag") shouldBe Some("Tagalog")
