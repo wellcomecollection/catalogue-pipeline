@@ -1,31 +1,35 @@
 package uk.ac.wellcome.platform.transformer.calm.transformers
 
+import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import org.scalatest.prop.TableDrivenPropertyChecks
+import org.scalatest.prop.{TableDrivenPropertyChecks, TableFor2}
 import uk.ac.wellcome.models.work.internal.Language
 
 class CalmLanguagesTest extends AnyFunSpec with Matchers with TableDrivenPropertyChecks {
-  val testCases = Table(
-    ("languagesField", "expectedLanguages", "expectedLanguageNote"),
+  it("handles degenerate cases") {
+    val degenerateTestCases =
+      Table(
+        "languagesField",
+        None,
+        Some(""),
+      )
 
-    // Degenerate cases: nothing in the Language field
-    (None, List.empty, None),
-    (Some(""), List.empty, None),
+    forAll(degenerateTestCases) { languagesField =>
+      CalmLanguages(languagesField) shouldBe ((List.empty, None))
+    }
+  }
 
-    // Cases where the contents of the Language field exactly matches a
-    // language in the MARC Language list.
-    (Some("English"), List(Language(label = "English", id = "eng")), None),
-    (Some("Swedish"), List(Language(label = "Swedish", id = "swe")), None),
+  // If the language field is an exact match for a language in the
+  // MARC Language list, we just return that.
+  val exactMatchTestCases = Table(
+    ("languagesField", "expectedLanguages"),
+    ("English", List(Language(label = "English", id = "eng"))),
+    ("Swedish", List(Language(label = "Swedish", id = "swe"))),
   )
 
-  it("parses the Language field") {
-    forAll(testCases) {
-      case (languagesField, expectedLanguages, expectedLanguageNote) =>
-        val (languages, languageNote) = CalmLanguages(languagesField)
-        languages shouldBe expectedLanguages
-        languageNote shouldBe expectedLanguageNote
-    }
+  it("handles exact matches") {
+    runTestCases(exactMatchTestCases)
   }
 
   it("parses everything") {
@@ -168,4 +172,12 @@ class CalmLanguagesTest extends AnyFunSpec with Matchers with TableDrivenPropert
 
     hasErrors shouldBe false
   }
+
+  def runTestCases(testCases: TableFor2[String, List[Language]]): Assertion =
+    forAll(testCases) {
+      case (languagesField, expectedLanguages) =>
+        val (languages, languageNote) = CalmLanguages(Some(languagesField))
+        languages shouldBe expectedLanguages
+        languageNote shouldBe None
+    }
 }
