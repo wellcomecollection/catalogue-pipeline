@@ -118,6 +118,10 @@ object CalmLanguages {
   // records that are close to matches, but need a bit of fixing up.
   // e.g. typos, spelling errors, different hyphenation to the MARC list.
   //
+  // This list is deliberately conservative; the intent is to handle minor
+  // errors rather than editorialise the list.  Any fixes added here should
+  // pass the sniff test "Yes, the cataloguer obviously meant X".
+  //
   // Note: we should flag these issues and fix them in the source where
   // appropriate.
   private object FuzzyLanguageMatch {
@@ -126,8 +130,12 @@ object CalmLanguages {
         langField
           .replace("Portugese", "Portuguese")
           .replace("Portguese", "Portuguese")
+          .replace("Potuguese", "Portuguese")
           .replace("Swiss-German", "Swiss German")
           .replace("Norweigan", "Norwegian")
+          .replace("Lugandan", "Luganda")
+          .replaceAll("^Eng$", "English")
+          .replaceAll("^Language$", "")  // We can't do anything useful with this!
 
       if (langField != correctedLangField) {
         parseField(correctedLangField) match {

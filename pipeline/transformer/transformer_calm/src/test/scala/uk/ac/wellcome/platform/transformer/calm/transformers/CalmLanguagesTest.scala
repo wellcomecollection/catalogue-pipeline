@@ -120,7 +120,11 @@ class CalmLanguagesTest extends AnyFunSpec with Matchers with TableDrivenPropert
   val fuzzyTestCases = Table(
     ("languagesField", "expectedLanguages"),
     ("Portguese", List(Language(label = "Portuguese", id = "por"))),
+    ("Potuguese", List(Language(label = "Portuguese", id = "por"))),
+    ("Lugandan", List(Language(label = "Luganda", id = "lug"))),
     ("Swiss-German", List(Language(label = "Swiss German", id = "gsw"))),
+    ("Eng", List(Language(label = "English", id = "eng"))),
+    ("Language", List.empty),
     (
       "English and Norweigan",
       List(
