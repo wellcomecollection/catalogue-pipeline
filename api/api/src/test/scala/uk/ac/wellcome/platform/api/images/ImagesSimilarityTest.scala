@@ -42,7 +42,8 @@ class ImagesSimilarityTest extends ApiImagesTestBase {
         insertImagesIntoElasticsearch(imagesIndex, images: _*)
         assertJsonResponse(
           routes,
-          s"/$apiPrefix/images/${images.head.id.canonicalId}?include=withSimilarFeatures") {
+          s"/$apiPrefix/images/${images.head.id.canonicalId}?include=withSimilarFeatures",
+          unordered = true) {
           Status.OK ->
             s"""
                |{
