@@ -3,11 +3,18 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.internal.Language
-import uk.ac.wellcome.platform.transformer.sierra.generators.{MarcGenerators, SierraDataGenerators}
+import uk.ac.wellcome.platform.transformer.sierra.generators.{
+  MarcGenerators,
+  SierraDataGenerators
+}
 import uk.ac.wellcome.platform.transformer.sierra.source.MarcSubfield
 import uk.ac.wellcome.platform.transformer.sierra.source.sierra.SierraSourceLanguage
 
-class SierraLanguagesTest extends AnyFunSpec with Matchers with MarcGenerators with SierraDataGenerators {
+class SierraLanguagesTest
+    extends AnyFunSpec
+    with Matchers
+    with MarcGenerators
+    with SierraDataGenerators {
   it("ignores records without any languages") {
     val bibData = createSierraBibDataWith(lang = None, varFields = List.empty)
 
@@ -23,7 +30,8 @@ class SierraLanguagesTest extends AnyFunSpec with Matchers with MarcGenerators w
       varFields = List.empty
     )
 
-    SierraLanguages(bibData) shouldBe List(Language(label = "French", id = "fre"))
+    SierraLanguages(bibData) shouldBe List(
+      Language(label = "French", id = "fre"))
   }
 
   it("combines the language from the 'lang' field and 041") {
@@ -65,7 +73,8 @@ class SierraLanguagesTest extends AnyFunSpec with Matchers with MarcGenerators w
       )
     )
 
-    SierraLanguages(bibData) shouldBe List(Language(label = "Chinese", id = "chi"))
+    SierraLanguages(bibData) shouldBe List(
+      Language(label = "Chinese", id = "chi"))
   }
 
   it("deduplicates, putting whatever's in 'lang' first") {

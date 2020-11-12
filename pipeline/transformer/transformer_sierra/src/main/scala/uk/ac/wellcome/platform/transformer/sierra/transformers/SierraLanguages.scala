@@ -3,9 +3,15 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.models.marc.MarcLanguageCodeList
 import uk.ac.wellcome.models.work.internal.Language
-import uk.ac.wellcome.platform.transformer.sierra.source.{SierraBibData, SierraQueryOps}
+import uk.ac.wellcome.platform.transformer.sierra.source.{
+  SierraBibData,
+  SierraQueryOps
+}
 
-object SierraLanguages extends SierraDataTransformer with SierraQueryOps with Logging {
+object SierraLanguages
+    extends SierraDataTransformer
+    with SierraQueryOps
+    with Logging {
   type Output = Seq[Language]
 
   // Populate wwork:language.
@@ -24,7 +30,9 @@ object SierraLanguages extends SierraDataTransformer with SierraQueryOps with Lo
     val primaryLanguage =
       bibData.lang
         .map { lang =>
-          (lang.code, MarcLanguageCodeList.lookupByCode(lang.code).getOrElse(lang.name))
+          (
+            lang.code,
+            MarcLanguageCodeList.lookupByCode(lang.code).getOrElse(lang.name))
         }
         .map { case (code, label) => Language(id = code, label = label) }
 
@@ -42,8 +50,6 @@ object SierraLanguages extends SierraDataTransformer with SierraQueryOps with Lo
             None
         }
 
-    (Seq(primaryLanguage) ++ additionalLanguages)
-      .flatten
-      .distinct
+    (Seq(primaryLanguage) ++ additionalLanguages).flatten.distinct
   }
 }
