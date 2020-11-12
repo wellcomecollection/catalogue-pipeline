@@ -132,16 +132,20 @@ class CalmLanguagesIntegrationTest extends AnyFunSpec with Matchers {
       "English and Spanish"
     )
 
-    var hasErrors = false
+    var errorCount = 0
 
     testCases.foreach { languageField =>
       val (languages, languageNote) = CalmLanguages(Some(languageField))
       if (languages.isEmpty && languageNote.isEmpty) {
         println(s"Unable to parse: <<$languageField>>")
-        hasErrors = true
+        errorCount += 1
       }
     }
 
-    hasErrors shouldBe false
+    if (errorCount > 0) {
+      println(s"There ${if (errorCount > 1) "were" else "was"} $errorCount error${if (errorCount > 1) "s" else ""}")
+    }
+
+    errorCount shouldBe 0
   }
 }
