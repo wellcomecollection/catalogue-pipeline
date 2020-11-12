@@ -11,8 +11,8 @@ object CalmLanguages {
   //
   // Returns a list of Languages on a Work, and an optional LanguageNote.
   //
-  // If the field is nothing more than a list of languages, then we discard
-  // the original contents of the field, e.g. "English, German and French".
+  // If the field can be completely parsed as a list of languages,
+  // then we discard the original field, e.g. "English, German and French".
   //
   // If the field contains a more in-depth description, then we extract any
   // languages we can, and keep the original sentence in a note.
