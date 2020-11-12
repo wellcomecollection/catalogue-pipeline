@@ -18,7 +18,29 @@ case class SierraBibData(
   locations: Option[List[SierraSourceLocation]] = None,
   fixedFields: Map[String, FixedField] = Map(),
   varFields: List[VarField] = List()
-)
+) {
+
+  // The Sierra API returns varfields as a list.  When we look up values
+  // in the Sierra transformer, we usually want to find all the varfields
+  // with a particular MARC tag.
+  //
+  // It's more efficient to cache this lookup once, than repeatedly loop
+  // through all the varFields to find it.  We record the original position
+  // so we can recombine varFields with multiple tags in their original order.
+  val varFieldIndex: Map[String, List[(Int, VarField)]] =
+    varFields
+      .zipWithIndex
+      .collect {
+        case (vf @ VarField(_, Some(marcTag), _, _, _, _), position) =>
+          (marcTag, position, vf)
+      }
+      .groupBy { case (marcTag, _, _) => marcTag }
+      .map { case (marcTag, varFieldsWithPosition) =>
+        marcTag ->
+          varFieldsWithPosition
+            .map { case (_, position, vf) => (position, vf) }
+      }
+}
 
 object SierraBibData {
 
