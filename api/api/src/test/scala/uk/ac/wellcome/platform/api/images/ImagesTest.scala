@@ -62,6 +62,12 @@ class ImagesTest extends ApiImagesTestBase with SierraWorkGenerators {
           unordered = true) {
           Status.OK -> imagesListResponse(workImages)
         }
+        assertJsonResponse(
+          routes,
+          s"/$apiPrefix/images?query=${parentWork.data.otherIdentifiers.head.value}",
+          unordered = true) {
+          Status.OK -> imagesListResponse(workImages)
+        }
     }
   }
 
