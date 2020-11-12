@@ -39,8 +39,7 @@ object Aggregations extends Logging {
             "language",
             documentPath = Some("data.language")
           ),
-          languages = e4sAggregations.decodeAgg[Language]("languages")(
-            decodeLanguageList),
+          languages = e4sAggregations.decodeAgg[Language]("languages"),
           subjects = e4sAggregations
             .decodeAgg[Subject[IdState.Minted]]("subjects"),
           license = e4sAggregations.decodeAgg[License]("license"),
@@ -79,7 +78,12 @@ object Aggregations extends Logging {
       }
     }
 
-  val decodeLanguageList: Decoder[Language] =
+  // If a language has an ID, both the Calm transformer and Sierra transformer
+  // are pulling that ID from our pre-defined list, so we can decode it
+  // by looking up the code.
+  //
+  // If a language doesn't have a code, then we can't aggregate over it.
+  implicit val decodeLanguage: Decoder[Language] =
     Decoder.decodeString.emap { code =>
       Language.fromCode(code).left.map { _ =>
         s"couldn't find language for code $code"
@@ -104,14 +108,12 @@ object Aggregations extends Logging {
 
   implicit class EnhancedEsAggregations(aggregations: Elastic4sAggregations) {
 
-    def decodeAgg[T](name: String, documentPath: Option[String] = None)(
-      implicit decoder: Decoder[T]): Option[Aggregation[T]] = {
+    def decodeAgg[T: Decoder](name: String, documentPath: Option[String] = None): Option[Aggregation[T]] = {
       aggregations
         .getAgg(name)
         .flatMap(
           _.safeTo[Aggregation[T]](
             (json: String) => {
-              println(s"@@AWLC json = $json")
               AggregationMapping.aggregationParser[T](json, documentPath)
             }
           ).recoverWith {
@@ -164,8 +166,7 @@ object AggregationMapping extends Logging {
   private val bucketSampleDoc =
     root.sample_doc.hits.hits.index(0)._source.json
 
-  def aggregationParser[T](json: String, path: Option[String])(
-    implicit decoder: Decoder[T]): Try[Aggregation[T]] =
+  def aggregationParser[T: Decoder](json: String, path: Option[String]): Try[Aggregation[T]] =
     parse(json).toTry
       .map { parsedJson =>
         for {
