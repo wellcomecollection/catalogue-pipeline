@@ -12,7 +12,9 @@ trait SierraQueryOps {
     // VarFields are returned in the same order as in the original bib.
     def varfieldsWithTags(tags: String*): List[VarField] =
       tags
-        .flatMap { t => bibData.varFieldIndex.get(t) }
+        .flatMap { t =>
+          bibData.varFieldIndex.get(t)
+        }
         .flatten
         .sortBy { case (position, _) => position }
         .collect { case (_, vf) => vf }

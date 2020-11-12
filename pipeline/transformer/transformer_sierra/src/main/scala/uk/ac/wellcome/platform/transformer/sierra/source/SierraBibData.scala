@@ -28,17 +28,17 @@ case class SierraBibData(
   // through all the varFields to find it.  We record the original position
   // so we can recombine varFields with multiple tags in their original order.
   lazy val varFieldIndex: Map[String, List[(Int, VarField)]] =
-    varFields
-      .zipWithIndex
+    varFields.zipWithIndex
       .collect {
         case (vf @ VarField(_, Some(marcTag), _, _, _, _), position) =>
           (marcTag, position, vf)
       }
       .groupBy { case (marcTag, _, _) => marcTag }
-      .map { case (marcTag, varFieldsWithPosition) =>
-        marcTag ->
-          varFieldsWithPosition
-            .map { case (_, position, vf) => (position, vf) }
+      .map {
+        case (marcTag, varFieldsWithPosition) =>
+          marcTag ->
+            varFieldsWithPosition
+              .map { case (_, position, vf) => (position, vf) }
       }
 }
 
