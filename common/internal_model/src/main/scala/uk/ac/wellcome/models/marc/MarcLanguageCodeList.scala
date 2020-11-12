@@ -13,7 +13,7 @@ import scala.xml.XML
 object MarcLanguageCodeList extends Logging {
 
   // Create a lookup from code -> name
-  private val codeLookup: Map[String, String] = {
+  private lazy val codeLookup: Map[String, String] = {
     val languages =
       XML.load(getClass.getResourceAsStream("/languages.xml")) \\ "language"
 
@@ -56,7 +56,7 @@ object MarcLanguageCodeList extends Logging {
   // We want to be able to resolve those codes to a name, but we want to
   // choose the non-obsolete code when resolving the name.
   //
-  private val nameLookup: Map[String, String] = {
+  private lazy val nameLookup: Map[String, String] = {
     val languages =
       XML.load(getClass.getResourceAsStream("/languages.xml")) \\ "language"
 
