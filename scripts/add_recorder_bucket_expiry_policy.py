@@ -51,7 +51,7 @@ if __name__ == "__main__":
                     "Prefix": "",
                     "Status": "Enabled",
                     "NoncurrentVersionExpiration": {"NoncurrentDays": 1},
-                },
+                }
             ]
         },
         ExpectedBucketOwner="760097843905",
