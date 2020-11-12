@@ -73,3 +73,7 @@ resource "aws_ecr_repository" "ecr_repository_relation_embedder" {
 resource "aws_ecr_repository" "ecr_repository_router" {
   name = "uk.ac.wellcome/router"
 }
+
+resource "aws_ecr_repository" "ecr_repository_batcher" {
+  name = "uk.ac.wellcome/batcher"
+}
