@@ -3,6 +3,8 @@ package uk.ac.wellcome.platform.transformer.calm.transformers
 import uk.ac.wellcome.models.marc.MarcLanguageCodeList
 import uk.ac.wellcome.models.work.internal.{Language, LanguageNote}
 
+import scala.util.matching.Regex
+
 object CalmLanguages {
 
   // Parses the "Language" field on a Calm record.
@@ -21,6 +23,7 @@ object CalmLanguages {
       case ExactLanguageMatch(languages)       => (languages, None)
       case MultiLanguageMatch(languages)       => (languages, None)
       case FuzzyLanguageMatch(languages, note) => (languages, note)
+      case LanguageTagMatch(languages, note)   => (languages, note)
       case _ => (List.empty, None)
     }
 
@@ -78,6 +81,35 @@ object CalmLanguages {
         } else {
           s.split(separators.head).flatMap { _.multisplit(separators.tail: _*)}
         }
+    }
+  }
+
+  // Some of our CALM records have <language> tags, of the form:
+  //
+  //    <language langcode="ger">German, </language>
+  //    <language>French</language>
+  //
+  // Throw away the <language> tags, then re-run them through the parser.
+  // We discard values of the langcode attribute.  In theory we could
+  // check them for consistency, but I haven't seen any cases where they
+  // don't match and it increases the complexity.
+  private object LanguageTagMatch {
+    val pattern = new Regex(
+      "<language(?: langcode=\"[a-z]+\")?>([^<]+)</language>", "label"
+    )
+
+    def unapply(langField: String): Option[(List[Language], Option[LanguageNote])] = {
+      val taglessLangField =
+        pattern.replaceAllIn(langField, (m: Regex.Match) => m.group("label"))
+
+      if (langField != taglessLangField) {
+        parseField(taglessLangField) match {
+          case (Nil, None) => None
+          case other       => Some(other)
+        }
+      } else {
+        None
+      }
     }
   }
 

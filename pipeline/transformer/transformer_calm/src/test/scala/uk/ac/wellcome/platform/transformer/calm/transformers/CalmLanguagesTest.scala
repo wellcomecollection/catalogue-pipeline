@@ -89,6 +89,23 @@ class CalmLanguagesTest extends AnyFunSpec with Matchers with TableDrivenPropert
     runTestCases(multiMatchTestCases)
   }
 
+  val languageTagCases = Table(
+    ("languagesField", "expectedLanguages"),
+    ("<language>French</language>", List(Language(label = "French", id = "fre"))),
+    // Case with multiple languages with matching langcodes
+    (
+      "<language langcode=\"ger\">German, </language><language langcode=\"fre\">French, </language>",
+      List(
+        Language(label = "German", id = "ger"),
+        Language(label = "French", id = "fre")
+      )
+    ),
+  )
+
+  it("handles <language> tags in the Calm data") {
+    runTestCases(languageTagCases)
+  }
+
   // It handles some edge cases, all based on real Calm records that
   // aren't quite exact matches.
   val fuzzyTestCases = Table(
