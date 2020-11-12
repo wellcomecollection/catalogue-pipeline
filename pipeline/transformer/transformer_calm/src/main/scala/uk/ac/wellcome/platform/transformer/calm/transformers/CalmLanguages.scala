@@ -65,6 +65,12 @@ object CalmLanguages {
     }
 
     implicit class StringOps(s: String) {
+
+      // Split a string on multiple separators.  Example:
+      //
+      //     > "123 and 456 or 789".multisplit("and", "or")
+      ///    Seq("123 ", " 456 ", " 789")
+      //
       def multisplit(separators: String*): Seq[String] =
         if (separators.isEmpty) {
           Seq(s)
