@@ -34,7 +34,6 @@ case object ImagesMultiMatcher {
     val sourceWorkIdFields = Seq(
       "id.canonicalId",
       "id.sourceIdentifier.value",
-      "id.otherIdentifiers.value",
       "data.otherIdentifiers.value"
     )
 
