@@ -108,7 +108,9 @@ object Aggregations extends Logging {
 
   implicit class EnhancedEsAggregations(aggregations: Elastic4sAggregations) {
 
-    def decodeAgg[T: Decoder](name: String, documentPath: Option[String] = None): Option[Aggregation[T]] = {
+    def decodeAgg[T: Decoder](
+      name: String,
+      documentPath: Option[String] = None): Option[Aggregation[T]] = {
       aggregations
         .getAgg(name)
         .flatMap(
@@ -166,7 +168,8 @@ object AggregationMapping extends Logging {
   private val bucketSampleDoc =
     root.sample_doc.hits.hits.index(0)._source.json
 
-  def aggregationParser[T: Decoder](json: String, path: Option[String]): Try[Aggregation[T]] =
+  def aggregationParser[T: Decoder](json: String,
+                                    path: Option[String]): Try[Aggregation[T]] =
     parse(json).toTry
       .map { parsedJson =>
         for {
