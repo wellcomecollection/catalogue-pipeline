@@ -67,4 +67,29 @@ class SierraLanguagesTest extends AnyFunSpec with Matchers with MarcGenerators w
 
     SierraLanguages(bibData) shouldBe List(Language(label = "Chinese", id = "chi"))
   }
+
+  it("deduplicates, putting whatever's in 'lang' first") {
+    // e.g. b11953640
+    val bibData = createSierraBibDataWith(
+      lang = Some(
+        SierraSourceLanguage(code = "ger", name = "German")
+      ),
+      varFields = List(
+        createVarFieldWith(
+          marcTag = "041",
+          subfields = List(
+            MarcSubfield(tag = "a", content = "fre"),
+            MarcSubfield(tag = "a", content = "eng"),
+            MarcSubfield(tag = "a", content = "ger")
+          )
+        )
+      )
+    )
+
+    SierraLanguages(bibData) shouldBe List(
+      Language(label = "German", id = "ger"),
+      Language(label = "French", id = "fre"),
+      Language(label = "English", id = "eng")
+    )
+  }
 }

@@ -42,6 +42,8 @@ object SierraLanguages extends SierraDataTransformer with SierraQueryOps with Lo
             None
         }
 
-    (Seq(primaryLanguage) ++ additionalLanguages).flatten
+    (Seq(primaryLanguage) ++ additionalLanguages)
+      .flatten
+      .distinct
   }
 }
