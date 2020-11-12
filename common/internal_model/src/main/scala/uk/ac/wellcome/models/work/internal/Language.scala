@@ -4,10 +4,7 @@ import scala.io.Source
 
 import uk.ac.wellcome.models.work.internal.result.Result
 
-case class Language(
-  label: String,
-  id: Option[String] = None
-)
+case class Language(label: String, id: Option[String])
 
 object Language {
   def apply(label: String, id: String): Language =
