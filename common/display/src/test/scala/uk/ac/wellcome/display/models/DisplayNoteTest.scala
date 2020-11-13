@@ -15,14 +15,14 @@ class DisplayNoteTest
       LetteringNote("Approximately 95%"),
       DisplayNote(
         contents = List("Approximately 95%"),
-        noteType = DisplayNoteType("lettering-note", "Lettering")
+        noteType = DisplayNoteType("lettering-note", "Lettering note")
       )
     ),
     (
       LanguageNote("Open signed in American Sign language."),
       DisplayNote(
         contents = List("Open signed in American Sign language."),
-        noteType = DisplayNoteType("language-note", "Language")
+        noteType = DisplayNoteType("language-note", "Language note")
       )
     ),
   )
