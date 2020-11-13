@@ -159,8 +159,8 @@ class DisplayWorkTest
 
     displayWork.languages shouldBe Some(
       List(
-        DisplayLanguage(id = Some("bsl"), label = "British Sign Language"),
-        DisplayLanguage(id = Some("ger"), label = "German")
+        DisplayLanguage(id = "bsl", label = "British Sign Language"),
+        DisplayLanguage(id = "ger", label = "German")
       )
     )
   }

@@ -58,6 +58,30 @@ class SierraLanguagesTest
     )
   }
 
+  it("gets languages from multiple instances of 041") {
+    val bibData = createSierraBibDataWith(
+      lang = Some(
+        SierraSourceLanguage(code = "fre", name = "French")
+      ),
+      varFields = List(
+        createVarFieldWith(
+          marcTag = "041",
+          subfields = List(MarcSubfield(tag = "a", content = "ger"))
+        ),
+        createVarFieldWith(
+          marcTag = "041",
+          subfields = List(MarcSubfield(tag = "a", content = "eng"))
+        )
+      )
+    )
+
+    SierraLanguages(bibData) shouldBe List(
+      Language(label = "French", id = "fre"),
+      Language(label = "German", id = "ger"),
+      Language(label = "English", id = "eng")
+    )
+  }
+
   it("ignores unrecognised language codes in 041") {
     val bibData = createSierraBibDataWith(
       lang = Some(

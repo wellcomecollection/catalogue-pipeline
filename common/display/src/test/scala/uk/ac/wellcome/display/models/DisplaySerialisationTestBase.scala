@@ -251,7 +251,7 @@ trait DisplaySerialisationTestBase {
   def language(lang: Language): String =
     s"""
        |{
-       |  ${optionalString("id", lang.id)}
+       |  "id": "${lang.id}",
        |  "label": "${lang.label}",
        |  "type": "Language"
        |}

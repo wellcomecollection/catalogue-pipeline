@@ -1,6 +1,7 @@
 package uk.ac.wellcome.models.marc
 
 import grizzled.slf4j.Logging
+import uk.ac.wellcome.models.work.internal.Language
 
 import scala.xml.XML
 
@@ -84,22 +85,27 @@ object MarcLanguageCodeList extends Logging {
       }
   }
 
-  // Returns the name of a language with the given code, if any
-  def lookupByCode(code: String): Option[String] = {
+  // Returns the language with the given code, if any
+  def lookupByCode(code: String): Option[Language] = {
     if (code.length != 3) {
       warn(
         s"MARC language codes are 3 letters long; got $code (length ${code.length})")
     }
-    codeLookup.get(code)
+
+    codeLookup
+      .get(code)
+      .map { label =>
+        Language(label = label, id = code)
+      }
   }
 
-  // Returns the code of a language with the given name, if any
-  def lookupByName(name: String): Option[String] =
+  // Returns the language with the given name, if any
+  def lookupByName(name: String): Option[Language] =
     nameLookup.get(name) match {
-      case Some(Seq(code)) => Some(code)
+      case Some(Seq(code)) => Some(Language(label = name, id = code))
       case Some(codes) =>
-        warn(s"Multiple codes for name $name: $codes")
-        Some(codes.head)
+        warn(s"Multiple language codes for name $name: $codes")
+        Some(Language(label = name, id = codes.head))
       case _ => None
     }
 }

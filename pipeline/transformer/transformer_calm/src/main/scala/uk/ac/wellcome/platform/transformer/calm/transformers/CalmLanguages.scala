@@ -19,10 +19,10 @@ object CalmLanguages {
   // e.g. "Mainly in German, smaller parts in English."
   //
   def apply(
-    languagesField: Option[String]): (List[Language], Option[LanguageNote]) =
-    languagesField match {
-      case Some(langField) if langField.trim.nonEmpty =>
-        parseLanguages(langField) match {
+    languageField: Option[String]): (List[Language], Option[LanguageNote]) =
+    languageField match {
+      case Some(value) if value.trim.nonEmpty =>
+        parseLanguages(value) match {
           case Some(languages) => (languages, None)
 
           // If we're unable to parse the whole string as a list of languages,
@@ -32,8 +32,8 @@ object CalmLanguages {
           // the catalogue.
           case None =>
             (
-              guessLanguages(langField),
-              Some(LanguageNote(langField.replace("recieved", "received")))
+              guessLanguages(value),
+              Some(LanguageNote(value.replace("recieved", "received")))
             )
         }
 
@@ -55,9 +55,7 @@ object CalmLanguages {
     def unapply(langField: String): Option[List[Language]] =
       MarcLanguageCodeList
         .lookupByName(langField)
-        .map { langCode =>
-          List(Language(id = langCode, label = langField))
-        }
+        .map { List(_) }
   }
 
   // If the contents of the field are a collection of matches for
@@ -77,14 +75,9 @@ object CalmLanguages {
         .map { _.trim }
         .filter { _.nonEmpty }
 
-      val matchedLanguages = components
-        .map { name =>
-          name -> MarcLanguageCodeList.lookupByName(name)
-        }
-        .collect {
-          case (label, Some(code)) => Language(label = label, id = code)
-        }
-        .toList
+      val matchedLanguages = components.flatMap {
+        MarcLanguageCodeList.lookupByName
+      }.toList
 
       // If there were some unmatched components, this isn't right --
       // return nothing.
@@ -184,9 +177,6 @@ object CalmLanguages {
   private def guessLanguages(langField: String): List[Language] =
     languageNamePattern
       .findAllIn(langField)
-      .map { name =>
-        (name, MarcLanguageCodeList.lookupByName(name))
-      }
-      .collect { case (name, Some(code)) => Language(label = name, id = code) }
+      .flatMap { MarcLanguageCodeList.lookupByName }
       .toList
 }

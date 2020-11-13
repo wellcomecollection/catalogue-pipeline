@@ -12,7 +12,7 @@ object SierraLanguages
     extends SierraDataTransformer
     with SierraQueryOps
     with Logging {
-  type Output = Seq[Language]
+  type Output = List[Language]
 
   // Populate wwork:language.
   //
@@ -26,15 +26,14 @@ object SierraLanguages
   //    This is a repeatable field, as is the subfield.
   //    See https://www.loc.gov/marc/bibliographic/bd041.html
   //
-  override def apply(bibData: SierraBibData): Seq[Language] = {
+  override def apply(bibData: SierraBibData): List[Language] = {
     val primaryLanguage =
       bibData.lang
         .map { lang =>
-          (
-            lang.code,
-            MarcLanguageCodeList.lookupByCode(lang.code).getOrElse(lang.name))
+          MarcLanguageCodeList
+            .lookupByCode(lang.code)
+            .getOrElse(Language(label = lang.name, id = lang.code))
         }
-        .map { case (code, label) => Language(id = code, label = label) }
 
     val additionalLanguages =
       bibData
@@ -44,12 +43,12 @@ object SierraLanguages
           (code, MarcLanguageCodeList.lookupByCode(code))
         }
         .map {
-          case (code, Some(label)) => Some(Language(id = code, label = label))
+          case (_, Some(lang)) => Some(lang)
           case (code, None) =>
             warn(s"Unrecognised code in MARC 041 ǂa: $code")
             None
         }
 
-    (Seq(primaryLanguage) ++ additionalLanguages).flatten.distinct
+    (List(primaryLanguage) ++ additionalLanguages).flatten.distinct
   }
 }

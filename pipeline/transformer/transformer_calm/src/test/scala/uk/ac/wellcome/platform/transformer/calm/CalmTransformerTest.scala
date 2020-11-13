@@ -19,7 +19,8 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
       "AltRefNo" -> "a.b.c",
-      "CatalogueStatus" -> "Catalogued"
+      "CatalogueStatus" -> "Catalogued",
+      "Language" -> "English, with Russian commentary"
     )
     CalmTransformer(record, version) shouldBe Right(
       Work.Visible[Source](
@@ -64,7 +65,17 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
               )
             )
           ),
-          workType = WorkType.Collection
+          workType = WorkType.Collection,
+          language = Some(
+            Language(label = "English", id = "eng")
+          ),
+          languages = List(
+            Language(label = "English", id = "eng"),
+            Language(label = "Russian", id = "rus")
+          ),
+          notes = List(
+            LanguageNote("English, with Russian commentary")
+          )
         )
       )
     )
@@ -218,7 +229,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "CatalogueStatus" -> "Catalogued"
     )
     CalmTransformer(record, version).right.get.data.language shouldBe Some(
-      Language(label = "English", id = "en")
+      Language(label = "English", id = "eng")
     )
   }
 
@@ -254,7 +265,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "CatalogueStatus" -> "Catalogued"
     )
     CalmTransformer(recordA, version).right.get.data.language shouldBe Some(
-      Language(label = "English", id = "en")
+      Language(label = "English", id = "eng")
     )
     CalmTransformer(recordB, version).right.get.data.language shouldBe None
   }
@@ -277,10 +288,10 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "CatalogueStatus" -> "Catalogued"
     )
     CalmTransformer(recordA, version).right.get.data.language shouldBe Some(
-      Language(label = "Dutch", id = "nl")
+      Language(label = "Dutch", id = "dut")
     )
     CalmTransformer(recordB, version).right.get.data.language shouldBe Some(
-      Language(label = "Flemish", id = "nl")
+      Language(label = "Flemish", id = "dut")
     )
   }
 
@@ -481,11 +492,16 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
       "AltRefNo" -> "a.b.c",
-      "Language" -> "Lolol",
+      "Language" -> "Some freeform discussion of the language",
       "CatalogueStatus" -> "Catalogued"
     )
-    CalmTransformer(record, version).right.get.data.language shouldBe Some(
-      Language(label = "Lolol", id = None))
+
+    val workData = CalmTransformer(record, version).right.get.data
+
+    workData.language shouldBe None
+    workData.notes should contain(
+      LanguageNote("Some freeform discussion of the language")
+    )
   }
 
   it("suppresses Archives and Manuscrupts Resource Guide works") {
