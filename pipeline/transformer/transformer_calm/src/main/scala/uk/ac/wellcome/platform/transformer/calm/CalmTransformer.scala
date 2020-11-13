@@ -9,6 +9,7 @@ import uk.ac.wellcome.platform.transformer.calm.models.CalmTransformerException.
 import uk.ac.wellcome.transformer.common.worker.Transformer
 import WorkState.Source
 import uk.ac.wellcome.platform.transformer.calm.periods.PeriodParser
+import uk.ac.wellcome.platform.transformer.calm.transformers.CalmLanguages
 
 object CalmTransformer
     extends Transformer[CalmRecord]
@@ -119,13 +120,18 @@ object CalmTransformer
         !nonSuppressedStatuses.contains(status.toLowerCase.trim)
       }
 
-  def workData(record: CalmRecord): Result[WorkData[DataState.Unidentified]] =
+  def workData(record: CalmRecord): Result[WorkData[DataState.Unidentified]] = {
+    val (languages, languageNote) = CalmLanguages(
+      languageField = record.get("Language")
+    )
+
+    val allNotes = notes(record) ++ List(languageNote).flatten
+
     for {
       accessStatus <- accessStatus(record)
       title <- title(record)
       collectionLevel <- collectionLevel(record)
       collectionPath <- collectionPath(record, collectionLevel)
-      language <- language(record)
     } yield
       WorkData[DataState.Unidentified](
         title = Some(title),
@@ -133,16 +139,18 @@ object CalmTransformer
         format = Some(Format.ArchivesAndManuscripts),
         collectionPath = Some(collectionPath),
         subjects = subjects(record),
-        language = language,
+        languages = languages,
+        language = languages.headOption,
         mergeCandidates = mergeCandidates(record),
         items = items(record, accessStatus),
         contributors = contributors(record),
         description = description(record),
         physicalDescription = physicalDescription(record),
         production = production(record),
-        notes = notes(record),
+        notes = allNotes,
         workType = workType(collectionLevel)
       )
+  }
 
   def sourceIdentifier(record: CalmRecord): SourceIdentifier =
     SourceIdentifier(
@@ -295,12 +303,6 @@ object CalmTransformer
           concepts = List(Concept(normalisedLabel))
         )
       }
-
-  def language(record: CalmRecord): Result[Option[Language]] =
-    record
-      .get("Language")
-      .map(Language.fromLabel)
-      .toResult
 
   def contributors(record: CalmRecord): List[Contributor[IdState.Unminted]] =
     record.getList("CreatorName").map { name =>
