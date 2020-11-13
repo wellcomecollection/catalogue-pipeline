@@ -40,7 +40,7 @@ case object LocationType {
 
   def apply(id: String): LocationType = {
     locationTypeMap.get(id) match {
-      case Some(id) => id
+      case Some(locType) => locType
       case None =>
         throw new IllegalArgumentException(s"Unrecognised location type: [$id]")
     }
