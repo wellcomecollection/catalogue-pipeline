@@ -452,8 +452,8 @@ class WorksFiltersTest
   }
 
   describe("filtering works by language (new filter ?language=)") {
-    val english = Language("English", id = Some("en"))
-    val turkish = Language("Turkish", id = Some("tr"))
+    val english = Language(label = "English", id = "eng")
+    val turkish = Language(label = "Turkish", id = "tur")
 
     val englishWork = identifiedWork().languages(List(english))
     val turkishWork = identifiedWork().languages(List(turkish))
@@ -465,7 +465,7 @@ class WorksFiltersTest
       withWorksApi {
         case (worksIndex, routes) =>
           insertIntoElasticsearch(worksIndex, works: _*)
-          assertJsonResponse(routes, s"/$apiPrefix/works?languages=en") {
+          assertJsonResponse(routes, s"/$apiPrefix/works?languages=eng") {
             Status.OK -> worksListResponse(apiPrefix, works = Seq(englishWork))
           }
       }
@@ -475,7 +475,7 @@ class WorksFiltersTest
       withWorksApi {
         case (worksIndex, routes) =>
           insertIntoElasticsearch(worksIndex, works: _*)
-          assertJsonResponse(routes, s"/$apiPrefix/works?languages=en,tr") {
+          assertJsonResponse(routes, s"/$apiPrefix/works?languages=eng,tur") {
             Status.OK -> worksListResponse(
               apiPrefix,
               works = Seq(englishWork, turkishWork).sortBy {

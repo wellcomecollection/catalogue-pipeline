@@ -93,28 +93,12 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
                   "buckets": [
                     {
                       "count" : 3,
-<<<<<<< HEAD
                       "data" : ${language(bashkir)},
-=======
-                      "data" : {
-                        "id" : "ba",
-                        "label" : "Bashkir",
-                        "type" : "Language"
-                      },
->>>>>>> Get aggregations and filters working for language
                       "type" : "AggregationBucket"
                     },
                     {
                       "count" : 1,
-<<<<<<< HEAD
                       "data" : ${language(marathi)},
-=======
-                      "data" : {
-                        "id" : "mr",
-                        "label" : "Marathi",
-                        "type" : "Language"
-                      },
->>>>>>> Get aggregations and filters working for language
                       "type" : "AggregationBucket"
                     }
                   ]

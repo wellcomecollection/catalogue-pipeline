@@ -383,9 +383,9 @@ class WorksIncludesTest
     it("includes languages on a list endpoint if we pass ?include=languages") {
       withWorksApi {
         case (worksIndex, routes) =>
-          val english = Language(label = "English")
-          val turkish = Language(label = "Turkish")
-          val swedish = Language(label = "Swedish")
+          val english = Language(label = "English", id = "eng")
+          val turkish = Language(label = "Turkish", id = "tur")
+          val swedish = Language(label = "Swedish", id = "swe")
 
           val work1 =
             identifiedWork(canonicalId = "1").languages(List(english, turkish))
@@ -422,9 +422,9 @@ class WorksIncludesTest
     it("includes languages on a work endpoint if we pass ?include=languages") {
       withWorksApi {
         case (worksIndex, routes) =>
-          val english = Language(label = "English")
-          val turkish = Language(label = "Turkish")
-          val swedish = Language(label = "Swedish")
+          val english = Language(label = "English", id = "eng")
+          val turkish = Language(label = "Turkish", id = "tur")
+          val swedish = Language(label = "Swedish", id = "swe")
 
           val work = identifiedWork().languages(List(english, turkish, swedish))
 

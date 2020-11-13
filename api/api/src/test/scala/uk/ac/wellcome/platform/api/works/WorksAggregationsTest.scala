@@ -246,11 +246,9 @@ class WorksAggregationsTest
   }
 
   it("supports aggregating on languages") {
-    // The mixture of identified and non-identified languages is
-    // deliberate -- we don't aggregate over unidentified languages.
-    val english = Language("English", id = Some("en"))
-    val swedish = Language("Swedish", id = Some("sv"))
-    val turkish = Language("Turkish", id = None)
+    val english = Language(label = "English", id = "eng")
+    val swedish = Language(label = "Swedish", id = "swe")
+    val turkish = Language(label = "Turkish", id = "tur")
 
     val works = Seq(
       identifiedWork().languages(List(english)),
@@ -271,21 +269,18 @@ class WorksAggregationsTest
                   "type" : "Aggregation",
                   "buckets": [
                     {
-                      "data" : {
-                        "id": "en",
-                        "label": "English",
-                        "type": "Language"
-                      },
+                      "data" : ${language(english)},
                       "count" : 3,
                       "type" : "AggregationBucket"
                     },
                     {
-                      "data" : {
-                        "id": "sv",
-                        "label": "Swedish",
-                        "type": "Language"
-                      },
+                      "data" : ${language(swedish)},
                       "count" : 2,
+                      "type" : "AggregationBucket"
+                    },
+                    {
+                      "data" : ${language(turkish)},
+                      "count" : 1,
                       "type" : "AggregationBucket"
                     }
                   ]
