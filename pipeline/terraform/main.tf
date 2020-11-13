@@ -30,6 +30,8 @@ locals {
       ]
     }
 
+    # A new pipeline with transformers that include support for multiple languages.
+    # See https://github.com/wellcomecollection/platform/issues/4864
     "2020-11-12" = {
       release_label = "stage"
 
