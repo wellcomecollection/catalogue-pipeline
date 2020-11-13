@@ -12,7 +12,7 @@ object SierraLanguages
     extends SierraDataTransformer
     with SierraQueryOps
     with Logging {
-  type Output = Seq[Language]
+  type Output = List[Language]
 
   // Populate wwork:language.
   //
@@ -26,7 +26,7 @@ object SierraLanguages
   //    This is a repeatable field, as is the subfield.
   //    See https://www.loc.gov/marc/bibliographic/bd041.html
   //
-  override def apply(bibData: SierraBibData): Seq[Language] = {
+  override def apply(bibData: SierraBibData): List[Language] = {
     val primaryLanguage =
       bibData.lang
         .map { lang =>
@@ -50,6 +50,6 @@ object SierraLanguages
             None
         }
 
-    (Seq(primaryLanguage) ++ additionalLanguages).flatten.distinct
+    (List(primaryLanguage) ++ additionalLanguages).flatten.distinct
   }
 }
