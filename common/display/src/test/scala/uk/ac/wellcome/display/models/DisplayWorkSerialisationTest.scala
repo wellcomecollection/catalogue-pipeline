@@ -37,7 +37,8 @@ class DisplayWorkSerialisationTest
       | "workType" : ${format(work.data.format.get)},
       | "lettering": "${work.data.lettering.get}",
       | "alternativeTitles": [],
-      | "createdDate": ${period(work.data.createdDate.get)}
+      | "createdDate": ${period(work.data.createdDate.get)},
+      | "availableOnline": false
       |}
     """.stripMargin
 
@@ -54,7 +55,8 @@ class DisplayWorkSerialisationTest
       | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
-      | "items": [ ${items(work.data.items)} ]
+      | "items": [ ${items(work.data.items)} ],
+      | "availableOnline": true
       |}
     """.stripMargin
 
@@ -73,7 +75,8 @@ class DisplayWorkSerialisationTest
       | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
-      | "items": [ ]
+      | "items": [ ],
+      | "availableOnline": false
       |}
     """.stripMargin
 
@@ -114,7 +117,8 @@ class DisplayWorkSerialisationTest
       |       }
       |     ]
       |   }
-      | ]
+      | ],
+      | "availableOnline": true
       |}
     """.stripMargin
 
@@ -139,7 +143,8 @@ class DisplayWorkSerialisationTest
       | "id": "${workWithSubjects.state.canonicalId}",
       | "title": "${workWithSubjects.data.title.get}",
       | "alternativeTitles": [],
-      | "subjects": [${subjects(workWithSubjects.data.subjects)}]
+      | "subjects": [${subjects(workWithSubjects.data.subjects)}],
+      | "availableOnline": false
       |}
     """.stripMargin
 
@@ -164,7 +169,8 @@ class DisplayWorkSerialisationTest
       | "id": "${workWithProduction.state.canonicalId}",
       | "title": "${workWithProduction.data.title.get}",
       | "alternativeTitles": [],
-      | "production": [${production(workWithProduction.data.production)}]
+      | "production": [${production(workWithProduction.data.production)}],
+      | "availableOnline": false
       |}
     """.stripMargin
 
@@ -200,7 +206,8 @@ class DisplayWorkSerialisationTest
       | "workType" : ${format(work.data.format.get)},
       | "lettering": "${work.data.lettering.get}",
       | "createdDate": ${period(work.data.createdDate.get)},
-      | "contributors": [${contributor(work.data.contributors.head)}]
+      | "contributors": [${contributor(work.data.contributors.head)}],
+      | "availableOnline": false
       |}
     """.stripMargin
 
@@ -227,7 +234,8 @@ class DisplayWorkSerialisationTest
       | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
-      | "genres": [ ${genres(work.data.genres)} ]
+      | "genres": [ ${genres(work.data.genres)} ],
+      | "availableOnline": false
       |}
     """.stripMargin
 
@@ -268,7 +276,8 @@ class DisplayWorkSerialisationTest
       |     "contents": ["B"],
       |     "type": "Note"
       |   }
-      | ]
+      | ],
+      | "availableOnline": false
       |}
     """.stripMargin
 
@@ -291,7 +300,8 @@ class DisplayWorkSerialisationTest
       | "identifiers": [
       |   ${identifier(work.sourceIdentifier)},
       |   ${identifier(otherIdentifier)}
-      | ]
+      | ],
+      | "availableOnline": false
       |}
     """.stripMargin
 
@@ -310,7 +320,8 @@ class DisplayWorkSerialisationTest
       | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
-      | "identifiers": [ ${identifier(work.sourceIdentifier)} ]
+      | "identifiers": [ ${identifier(work.sourceIdentifier)} ],
+      | "availableOnline": false
       |}
     """.stripMargin
 
@@ -331,7 +342,8 @@ class DisplayWorkSerialisationTest
       | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
-      | "images": [${workImageIncludes(work.data.images)}]
+      | "images": [${workImageIncludes(work.data.images)}],
+      | "availableOnline": false
       |}
     """.stripMargin
 
@@ -356,7 +368,8 @@ class DisplayWorkSerialisationTest
       | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
-      | "thumbnail": ${location(work.data.thumbnail.get)}
+      | "thumbnail": ${location(work.data.thumbnail.get)},
+      | "availableOnline": false
       |}
     """.stripMargin
 

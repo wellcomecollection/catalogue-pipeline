@@ -31,7 +31,8 @@ class DisplayLocationsSerialisationTestDeprecated
       | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
-      | "items": [ ${items(work.data.items)} ]
+      | "items": [ ${items(work.data.items)} ],
+      | "availableOnline": false
       |}
     """.stripMargin
 
@@ -54,7 +55,8 @@ class DisplayLocationsSerialisationTestDeprecated
       | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
-      | "items": [ ${items(work.data.items)} ]
+      | "items": [ ${items(work.data.items)} ],
+      | "availableOnline": true
       |}
     """.stripMargin
 
@@ -78,7 +80,8 @@ class DisplayLocationsSerialisationTestDeprecated
       | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
-      | "items": [ ${items(work.data.items)} ]
+      | "items": [ ${items(work.data.items)} ],
+      | "availableOnline": true
       |}
     """.stripMargin
 
@@ -108,7 +111,8 @@ class DisplayLocationsSerialisationTestDeprecated
       | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
-      | "items": [ ${items(work.data.items)} ]
+      | "items": [ ${items(work.data.items)} ],
+      | "availableOnline": true
       |}
     """.stripMargin
 

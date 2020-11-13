@@ -34,6 +34,7 @@ trait ApiWorksTestBase
       |   "type": "${formatOntologyType(work.data.workType)}",
       |   "id": "${work.state.canonicalId}",
       |   "title": "${work.data.title.get}",
+      |   "availableOnline": ${hasDigitalLocations(work)},
       |   "alternativeTitles": []
       |   ${optionalObject("workType", format, work.data.format)}
       |   ${optionalObject("language", language, work.data.language)}
@@ -58,4 +59,9 @@ trait ApiWorksTestBase
       case WorkType.Series     => "Series"
       case WorkType.Section    => "Section"
     }
+
+  def hasDigitalLocations(work: Work.Visible[Identified]): String =
+    work.data.items
+      .exists(_.locations.exists(_.isInstanceOf[DigitalLocationDeprecated]))
+      .toString
 }

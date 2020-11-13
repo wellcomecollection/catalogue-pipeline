@@ -2,9 +2,15 @@ package uk.ac.wellcome.platform.api.works
 
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.generators.ProductionEventGenerators
+import uk.ac.wellcome.models.work.generators.{
+  ItemsGenerators,
+  ProductionEventGenerators
+}
 
-class WorksTest extends ApiWorksTestBase with ProductionEventGenerators {
+class WorksTest
+    extends ApiWorksTestBase
+    with ProductionEventGenerators
+    with ItemsGenerators {
   it("returns a list of works") {
     withWorksApi {
       case (worksIndex, routes) =>
@@ -35,7 +41,8 @@ class WorksTest extends ApiWorksTestBase with ProductionEventGenerators {
              ${singleWorkResult(apiPrefix)},
              "id": "${work.state.canonicalId}",
              "title": "${work.data.title.get}",
-             "alternativeTitles": []
+             "alternativeTitles": [],
+             "availableOnline": false
             }
           """
         }
@@ -59,6 +66,7 @@ class WorksTest extends ApiWorksTestBase with ProductionEventGenerators {
              "id": "${work.state.canonicalId}",
              "title": "${work.data.title.get}",
              "alternativeTitles": [],
+             "availableOnline": false,
              "edition": "Special edition",
              "duration": 3600
             }
@@ -172,7 +180,8 @@ class WorksTest extends ApiWorksTestBase with ProductionEventGenerators {
                ${singleWorkResult(apiPrefix)},
                "id": "${work.state.canonicalId}",
                "title": "${work.data.title.get}",
-               "alternativeTitles": []
+               "alternativeTitles": [],
+               "availableOnline": false
               }
             """
           }
@@ -185,7 +194,8 @@ class WorksTest extends ApiWorksTestBase with ProductionEventGenerators {
                ${singleWorkResult(apiPrefix)},
                "id": "${altWork.state.canonicalId}",
                "title": "${altWork.data.title.get}",
-               "alternativeTitles": []
+               "alternativeTitles": [],
+               "availableOnline": false
               }
             """
           }
@@ -219,14 +229,15 @@ class WorksTest extends ApiWorksTestBase with ProductionEventGenerators {
   it("shows the thumbnail field if available") {
     withWorksApi {
       case (worksIndex, routes) =>
+        val thumbnailLocation = DigitalLocationDeprecated(
+          locationType = LocationType("thumbnail-image"),
+          url = "https://iiif.example.org/1234/default.jpg",
+          license = Some(License.CCBY)
+        )
         val work = identifiedWork()
-          .thumbnail(
-            DigitalLocationDeprecated(
-              locationType = LocationType("thumbnail-image"),
-              url = "https://iiif.example.org/1234/default.jpg",
-              license = Some(License.CCBY)
-            )
-          )
+          .thumbnail(thumbnailLocation)
+          .items(
+            List(createIdentifiedItemWith(locations = List(thumbnailLocation))))
         insertIntoElasticsearch(worksIndex, work)
 
         assertJsonResponse(routes, s"/$apiPrefix/works") {
@@ -239,6 +250,7 @@ class WorksTest extends ApiWorksTestBase with ProductionEventGenerators {
                  "id": "${work.state.canonicalId}",
                  "title": "${work.data.title.get}",
                  "alternativeTitles": [],
+                 "availableOnline": true,
                  "thumbnail": ${location(work.data.thumbnail.get)}
                 }
               ]
