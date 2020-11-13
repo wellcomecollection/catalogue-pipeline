@@ -30,11 +30,10 @@ object SierraLanguages
     val primaryLanguage =
       bibData.lang
         .map { lang =>
-          (
-            lang.code,
-            MarcLanguageCodeList.lookupByCode(lang.code).getOrElse(lang.name))
+          MarcLanguageCodeList
+            .lookupByCode(lang.code)
+            .getOrElse(Language(label = lang.name, id = lang.code))
         }
-        .map { case (code, label) => Language(id = code, label = label) }
 
     val additionalLanguages =
       bibData
@@ -44,7 +43,7 @@ object SierraLanguages
           (code, MarcLanguageCodeList.lookupByCode(code))
         }
         .map {
-          case (code, Some(label)) => Some(Language(id = code, label = label))
+          case (_, Some(lang)) => Some(lang)
           case (code, None) =>
             warn(s"Unrecognised code in MARC 041 ǂa: $code")
             None
