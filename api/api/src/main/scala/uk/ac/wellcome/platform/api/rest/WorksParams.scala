@@ -38,6 +38,7 @@ object SingleWorkParams extends QueryParamsUtils {
       "genres" -> WorkInclude.Genres,
       "contributors" -> WorkInclude.Contributors,
       "production" -> WorkInclude.Production,
+      "languages" -> WorkInclude.Languages,
       "notes" -> WorkInclude.Notes,
       "images" -> WorkInclude.Images,
       "parts" -> WorkInclude.Parts,
@@ -54,6 +55,7 @@ case class MultipleWorksParams(
   `production.dates.from`: Option[LocalDate],
   `production.dates.to`: Option[LocalDate],
   language: Option[LanguageFilter],
+  languages: Option[LanguagesFilter],
   `genres.label`: Option[GenreFilter],
   `subjects.label`: Option[SubjectFilter],
   license: Option[LicenseFilter],
@@ -90,6 +92,7 @@ case class MultipleWorksParams(
       workType,
       dateFilter,
       language,
+      languages,
       `genres.label`,
       `subjects.label`,
       identifiers,
@@ -125,6 +128,7 @@ object MultipleWorksParams extends QueryParamsUtils {
         "production.dates.from".as[LocalDate].?,
         "production.dates.to".as[LocalDate].?,
         "language".as[LanguageFilter].?,
+        "languages".as[LanguagesFilter].?,
         "genres.label".as[GenreFilter].?,
         "subjects.label".as[SubjectFilter].?,
         "license".as[LicenseFilter].?,
@@ -167,6 +171,8 @@ object MultipleWorksParams extends QueryParamsUtils {
 
   implicit val languageFilter: Decoder[LanguageFilter] =
     stringListFilter(LanguageFilter)
+  implicit val languagesFilter: Decoder[LanguagesFilter] =
+    stringListFilter(LanguagesFilter)
 
   implicit val genreFilter: Decoder[GenreFilter] =
     Decoder.decodeString.emap(str => Right(GenreFilter(str)))
@@ -197,6 +203,7 @@ object MultipleWorksParams extends QueryParamsUtils {
       "production.dates" -> AggregationRequest.ProductionDate,
       "subjects" -> AggregationRequest.Subject,
       "language" -> AggregationRequest.Language,
+      "languages" -> AggregationRequest.Languages,
       "license" -> AggregationRequest.License,
       "locationType" -> AggregationRequest.ItemLocationType,
     )

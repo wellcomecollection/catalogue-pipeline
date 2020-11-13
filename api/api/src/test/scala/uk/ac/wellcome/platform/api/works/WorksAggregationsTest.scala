@@ -245,6 +245,57 @@ class WorksAggregationsTest
     }
   }
 
+  it("supports aggregating on languages") {
+    val english = Language(label = "English", id = "eng")
+    val swedish = Language(label = "Swedish", id = "swe")
+    val turkish = Language(label = "Turkish", id = "tur")
+
+    val works = Seq(
+      identifiedWork().languages(List(english)),
+      identifiedWork().languages(List(english, swedish)),
+      identifiedWork().languages(List(english, swedish, turkish))
+    )
+
+    withWorksApi {
+      case (worksIndex, routes) =>
+        insertIntoElasticsearch(worksIndex, works: _*)
+        assertJsonResponse(routes, s"/$apiPrefix/works?aggregations=languages") {
+          Status.OK -> s"""
+            {
+              ${resultList(apiPrefix, totalResults = works.size)},
+              "aggregations": {
+                "type" : "Aggregations",
+                "languages": {
+                  "type" : "Aggregation",
+                  "buckets": [
+                    {
+                      "data" : ${language(english)},
+                      "count" : 3,
+                      "type" : "AggregationBucket"
+                    },
+                    {
+                      "data" : ${language(swedish)},
+                      "count" : 2,
+                      "type" : "AggregationBucket"
+                    },
+                    {
+                      "data" : ${language(turkish)},
+                      "count" : 1,
+                      "type" : "AggregationBucket"
+                    }
+                  ]
+                }
+              },
+              "results": [${works
+            .sortBy { _.state.canonicalId }
+            .map(workResponse)
+            .mkString(",")}]
+            }
+          """
+        }
+    }
+  }
+
   it("supports aggregating on subject, ordered by frequency") {
     val paleoNeuroBiology = createSubjectWith(label = "paleoNeuroBiology")
     val realAnalysis = createSubjectWith(label = "realAnalysis")

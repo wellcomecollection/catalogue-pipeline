@@ -10,14 +10,15 @@ import com.sksamuel.elastic4s.requests.searches.aggs.responses.{
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.display.models.LocationTypeQuery
+import uk.ac.wellcome.models.marc.MarcLanguageCodeList
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.json.JsonUtil._
 
 case class Aggregations(
   format: Option[Aggregation[Format]] = None,
   genres: Option[Aggregation[Genre[IdState.Minted]]] = None,
   productionDates: Option[Aggregation[Period[IdState.Minted]]] = None,
   language: Option[Aggregation[Language]] = None,
+  languages: Option[Aggregation[Language]] = None,
   subjects: Option[Aggregation[Subject[IdState.Minted]]] = None,
   license: Option[Aggregation[License]] = None,
   locationType: Option[Aggregation[LocationTypeQuery]] = None,
@@ -34,8 +35,11 @@ object Aggregations extends Logging {
           genres = e4sAggregations.decodeAgg[Genre[IdState.Minted]]("genres"),
           productionDates = e4sAggregations
             .decodeAgg[Period[IdState.Minted]]("productionDates"),
-          language = e4sAggregations
-            .decodeAgg[Language]("language", Some("data.language")),
+          language = e4sAggregations.decodeAgg[Language](
+            "language",
+            documentPath = Some("data.language.id")
+          ),
+          languages = e4sAggregations.decodeAgg[Language]("languages"),
           subjects = e4sAggregations
             .decodeAgg[Subject[IdState.Minted]]("subjects"),
           license = e4sAggregations.decodeAgg[License]("license"),
@@ -74,6 +78,17 @@ object Aggregations extends Logging {
       }
     }
 
+  // Both the Calm and Sierra transformers use the MARC language code list
+  // to populate the "languages" field, so we can use the ID (code) to
+  // unambiguously identify a language.
+  implicit val decodeLanguage: Decoder[Language] =
+    Decoder.decodeString.emap { code =>
+      MarcLanguageCodeList.lookupByCode(code) match {
+        case Some(lang) => Right(lang)
+        case None       => Left(s"couldn't find language for code $code")
+      }
+    }
+
   implicit val decodeGenreFromLabel: Decoder[Genre[IdState.Minted]] =
     Decoder.decodeString.map { str =>
       Genre(label = str)
@@ -98,9 +113,11 @@ object Aggregations extends Logging {
       aggregations
         .getAgg(name)
         .flatMap(
-          _.safeTo[Aggregation[T]]((json: String) =>
-            AggregationMapping
-              .aggregationParser[T](json, documentPath)).recoverWith {
+          _.safeTo[Aggregation[T]](
+            (json: String) => {
+              AggregationMapping.aggregationParser[T](json, documentPath)
+            }
+          ).recoverWith {
             case err =>
               warn("Failed to parse aggregation from ES", err)
               Failure(err)

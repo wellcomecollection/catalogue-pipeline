@@ -30,6 +30,9 @@ case class DisplayAggregations(
     description = "Language aggregation on a set of results."
   ) language: Option[DisplayAggregation[DisplayLanguage]],
   @Schema(
+    description = "Language aggregation on a set of results."
+  ) languages: Option[DisplayAggregation[DisplayLanguage]],
+  @Schema(
     description = "License aggregation on a set of results."
   ) license: Option[DisplayAggregation[DisplayLicense]],
   @Schema(
@@ -76,6 +79,7 @@ object DisplayAggregations {
         aggs.genres,
         DisplayGenre(_, includesIdentifiers = false)),
       language = displayAggregation(aggs.language, DisplayLanguage.apply),
+      languages = displayAggregation(aggs.languages, DisplayLanguage.apply),
       subjects = displayAggregation[Subject[IdState.Minted], DisplaySubject](
         aggs.subjects,
         subject => DisplaySubject(subject, includesIdentifiers = false)
