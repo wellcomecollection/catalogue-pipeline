@@ -4,14 +4,6 @@ module "catalogue_pipeline_20201111" {
   pipeline_date = "20201111"
   release_label = "prod"
 
-  account_id      = data.aws_caller_identity.current.account_id
-  aws_region      = local.aws_region
-  vpc_id          = local.vpc_id
-  subnets         = local.private_subnets
-  private_subnets = local.private_subnets
-
-  dlq_alarm_arn = local.dlq_alarm_arn
-
   # Transformer config
   #
   # If this pipeline is meant to be reindexed, remember to uncomment the
@@ -37,6 +29,16 @@ module "catalogue_pipeline_20201111" {
     //    local.calm_reindexer_topic_arn,
     local.calm_adapter_topic_arn,
   ]
+
+  # Boilerplate that shouldn't change between pipelines.
+
+  account_id      = data.aws_caller_identity.current.account_id
+  aws_region      = local.aws_region
+  vpc_id          = local.vpc_id
+  subnets         = local.private_subnets
+  private_subnets = local.private_subnets
+
+  dlq_alarm_arn = local.dlq_alarm_arn
 
   # RDS
   rds_ids_access_security_group_id = local.rds_access_security_group_id
