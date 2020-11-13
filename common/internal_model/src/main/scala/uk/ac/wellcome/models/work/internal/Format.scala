@@ -30,7 +30,9 @@ object Format extends Enum[Format] {
     }
 
   private lazy val formatIdIndex: Map[String, Format] = {
-    val idPairs = values.map { format => format.id -> format }
+    val idPairs = values.map { format =>
+      format.id -> format
+    }
 
     // Check we don't have any duplicate IDs
     assert(idPairs.toMap.size == idPairs.size)

@@ -30,7 +30,9 @@ object License extends Enum[License] {
   }
 
   private val licenseIdIndex = {
-    val idPairs = values.map { license => license.id -> license }
+    val idPairs = values.map { license =>
+      license.id -> license
+    }
 
     // Check we don't have any duplicate IDs
     assert(idPairs.toMap.size == idPairs.size)
