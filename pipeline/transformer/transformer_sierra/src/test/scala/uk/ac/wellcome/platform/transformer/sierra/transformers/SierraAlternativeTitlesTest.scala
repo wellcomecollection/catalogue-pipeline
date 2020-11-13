@@ -42,8 +42,8 @@ class SierraAlternativeTitlesTest
   it("should extract all alternative titles when multiple fields defined") {
     val varFields = List(field130, field240, field246)
     getAlternativeTitles(varFields) shouldBe List(
-      "Apples",
       "Bananas",
+      "Apples",
       "Cherries")
   }
 
