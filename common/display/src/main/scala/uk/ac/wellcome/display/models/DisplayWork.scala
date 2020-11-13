@@ -3,6 +3,8 @@ package uk.ac.wellcome.display.models
 import io.circe.generic.extras.JsonKey
 import io.swagger.v3.oas.annotations.media.Schema
 import uk.ac.wellcome.models.work.internal.{
+  DigitalLocationDeprecated,
+  Item,
   RelatedWork,
   RelatedWorks,
   Work,
@@ -26,7 +28,7 @@ case class DisplayWork(
   ) title: Option[String],
   @Schema(
     `type` = "List[String]",
-    description = "Alternative titles of  the work."
+    description = "Alternative titles of the work."
   ) alternativeTitles: List[String],
   @Schema(
     `type` = "String",
@@ -81,6 +83,10 @@ case class DisplayWork(
     `type` = "List[uk.ac.wellcome.Display.models.DisplayItem]",
     description = "List of items related to this work."
   ) items: Option[List[DisplayItem]] = None,
+  @Schema(
+    description = "Whether the work contains an item with a digital location",
+    `type` = "Boolean"
+  ) availableOnline: Boolean = false,
   @Schema(
     description = "Relates a work to its production events."
   ) production: Option[List[DisplayProductionEvent]] = None,
@@ -167,6 +173,7 @@ case object DisplayWork {
             DisplayItem(_, includesIdentifiers = includes.identifiers)
           })
         else None,
+      availableOnline = containsDigitalLocation(work.data.items),
       production =
         if (includes.production) Some(work.data.production.map {
           DisplayProductionEvent(_, includesIdentifiers = includes.identifiers)
@@ -230,6 +237,14 @@ case object DisplayWork {
             }
           } else None,
     )
+
+  def containsDigitalLocation(items: List[Item[_]]): Boolean =
+    items.exists { item =>
+      item.locations.exists {
+        case _: DigitalLocationDeprecated => true
+        case _                            => false
+      }
+    }
 
   def displayWorkType(workType: WorkType): String = workType match {
     case WorkType.Standard   => "Work"
