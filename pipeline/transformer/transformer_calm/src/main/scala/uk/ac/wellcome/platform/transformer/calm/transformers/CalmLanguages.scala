@@ -75,9 +75,9 @@ object CalmLanguages {
         .map { _.trim }
         .filter { _.nonEmpty }
 
-      val matchedLanguages = components
-        .flatMap { MarcLanguageCodeList.lookupByName }
-        .toList
+      val matchedLanguages = components.flatMap {
+        MarcLanguageCodeList.lookupByName
+      }.toList
 
       // If there were some unmatched components, this isn't right --
       // return nothing.
