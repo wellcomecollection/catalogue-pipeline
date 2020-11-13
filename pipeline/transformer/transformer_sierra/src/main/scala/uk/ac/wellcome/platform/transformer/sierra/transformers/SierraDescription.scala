@@ -2,10 +2,11 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   MarcSubfield,
-  SierraBibData
+  SierraBibData,
+  SierraQueryOps
 }
 
-object SierraDescription extends SierraDataTransformer {
+object SierraDescription extends SierraDataTransformer with SierraQueryOps {
 
   type Output = Option[String]
 
@@ -48,17 +49,13 @@ object SierraDescription extends SierraDataTransformer {
     bibData: SierraBibData,
     marcTag: String,
     marcSubfieldTags: List[String]
-  ): List[Map[String, MarcSubfield]] = {
-    val matchingFields = bibData.varFields
-      .filter {
-        _.marcTag.contains(marcTag)
-      }
-
-    matchingFields.map(varField => {
-      varField.subfields
-        .filter(subfield => marcSubfieldTags.contains(subfield.tag))
-        .map(subfield => subfield.tag -> subfield)
-        .toMap
-    })
-  }
+  ): List[Map[String, MarcSubfield]] =
+    bibData
+      .varfieldsWithTag(marcTag)
+      .map(varField => {
+        varField.subfields
+          .filter(subfield => marcSubfieldTags.contains(subfield.tag))
+          .map(subfield => subfield.tag -> subfield)
+          .toMap
+      })
 }
