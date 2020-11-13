@@ -271,19 +271,40 @@ class SierraTransformerTest
       )
     )
 
+    val langField = """{"code": "eng", "name": "English"}"""
+    val langVarFields = List(
+      createVarFieldWith(
+        marcTag = "041",
+        subfields = List(
+          MarcSubfield(tag = "a", content = "ger"),
+          MarcSubfield(tag = "a", content = "fre"),
+        )
+      )
+    )
+
+    val expectedSingleLanguage =
+      Language(label = "English", id = "eng")
+
+    val expectedLanguages = List(
+      expectedSingleLanguage,
+      Language(label = "German", id = "ger"),
+      Language(label = "French", id = "fre")
+    )
+
     val marcFields =
       List(
         titleField,
         productionField,
         descriptionField,
         letteringField,
-        notesField)
+        notesField) ++ langVarFields
 
     val data =
       s"""
          |{
          | "id": "$id",
-         | "varFields": ${toJson(marcFields).get}
+         | "varFields": ${toJson(marcFields).get},
+         | "lang": $langField
          |}
         """.stripMargin
 
@@ -314,6 +335,8 @@ class SierraTransformerTest
       )
       .notes(List(GeneralNote("It's a note")))
       .lettering(lettering)
+      .language(expectedSingleLanguage)
+      .languages(expectedLanguages)
   }
 
   it("makes deleted works invisible") {
