@@ -19,10 +19,10 @@ object CalmLanguages {
   // e.g. "Mainly in German, smaller parts in English."
   //
   def apply(
-    languagesField: Option[String]): (List[Language], Option[LanguageNote]) =
-    languagesField match {
-      case Some(langField) if langField.trim.nonEmpty =>
-        parseLanguages(langField) match {
+    languageField: Option[String]): (List[Language], Option[LanguageNote]) =
+    languageField match {
+      case Some(value) if value.trim.nonEmpty =>
+        parseLanguages(value) match {
           case Some(languages) => (languages, None)
 
           // If we're unable to parse the whole string as a list of languages,
@@ -32,8 +32,8 @@ object CalmLanguages {
           // the catalogue.
           case None =>
             (
-              guessLanguages(langField),
-              Some(LanguageNote(langField.replace("recieved", "received")))
+              guessLanguages(value),
+              Some(LanguageNote(value.replace("recieved", "received")))
             )
         }
 
