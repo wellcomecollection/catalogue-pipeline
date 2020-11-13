@@ -29,9 +29,17 @@ object Format extends Enum[Format] {
       maybeFormat.toRight(s"Invalid Format json $json")
     }
 
-  def fromCode(id: String): Option[Format] = {
-    values.find(format => format.id == id)
+  private lazy val formatIdIndex: Map[String, Format] = {
+    val idPairs = values.map { format => format.id -> format }
+
+    // Check we don't have any duplicate IDs
+    assert(idPairs.toMap.size == idPairs.size)
+
+    idPairs.toMap
   }
+
+  def fromCode(id: String): Option[Format] =
+    formatIdIndex.get(id)
 
   sealed trait Unlinked extends Format
   sealed trait Linked extends Format {
