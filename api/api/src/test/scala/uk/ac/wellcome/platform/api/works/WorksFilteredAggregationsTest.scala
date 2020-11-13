@@ -5,7 +5,7 @@ import uk.ac.wellcome.models.work.internal.Format._
 import uk.ac.wellcome.models.Implicits._
 
 class WorksFilteredAggregationsTest extends ApiWorksTestBase {
-  
+
   val bashkir = Language(label = "Bashkir", id = "bak")
   val marathi = Language(label = "Marathi", id = "mar")
   val quechua = Language(label = "Quechua", id = "que")
