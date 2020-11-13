@@ -1,34 +1,79 @@
-module "catalogue_pipeline_20201111" {
+locals {
+  stacks = {
+    "20201111" = {
+      release_label = "prod"
+
+      # Transformer config
+      #
+      # If this pipeline is meant to be reindexed, remember to uncomment the
+      # reindexer topic names.
+
+      sierra_adapter_topic_arns = [
+        //    local.sierra_reindexer_topic_arn,
+        local.sierra_merged_bibs_topic_arn,
+        local.sierra_merged_items_topic_arn,
+      ]
+
+      miro_adapter_topic_arns = [
+        //    local.miro_reindexer_topic_arn,
+        local.miro_updates_topic_arn,
+      ]
+
+      mets_adapter_topic_arns = [
+        //    local.mets_reindexer_topic_arn,
+        local.mets_adapter_topic_arn,
+      ]
+
+      calm_adapter_topic_arns = [
+        //    local.calm_reindexer_topic_arn,
+        local.calm_adapter_topic_arn,
+      ]
+    }
+
+    "2020-11-12" = {
+      release_label = "stage"
+
+      # Transformer config
+      #
+      # If this pipeline is meant to be reindexed, remember to uncomment the
+      # reindexer topic names.
+
+      sierra_adapter_topic_arns = [
+        local.sierra_reindexer_topic_arn,
+        local.sierra_merged_bibs_topic_arn,
+        local.sierra_merged_items_topic_arn,
+      ]
+
+      miro_adapter_topic_arns = [
+        local.miro_reindexer_topic_arn,
+        local.miro_updates_topic_arn,
+      ]
+
+      mets_adapter_topic_arns = [
+        local.mets_reindexer_topic_arn,
+        local.mets_adapter_topic_arn,
+      ]
+
+      calm_adapter_topic_arns = [
+        local.calm_reindexer_topic_arn,
+        local.calm_adapter_topic_arn,
+      ]
+    }
+  }
+}
+
+module "stack" {
   source = "./stack"
 
-  pipeline_date = "20201111"
-  release_label = "prod"
+  for_each = local.stacks
 
-  # Transformer config
-  #
-  # If this pipeline is meant to be reindexed, remember to uncomment the
-  # reindexer topic names.
+  pipeline_date = each.key
+  release_label = each.value.release_label
 
-  sierra_adapter_topic_arns = [
-    //    local.sierra_reindexer_topic_arn,
-    local.sierra_merged_bibs_topic_arn,
-    local.sierra_merged_items_topic_arn,
-  ]
-
-  miro_adapter_topic_arns = [
-    //    local.miro_reindexer_topic_arn,
-    local.miro_updates_topic_arn,
-  ]
-
-  mets_adapter_topic_arns = [
-    //    local.mets_reindexer_topic_arn,
-    local.mets_adapter_topic_arn,
-  ]
-
-  calm_adapter_topic_arns = [
-    //    local.calm_reindexer_topic_arn,
-    local.calm_adapter_topic_arn,
-  ]
+  sierra_adapter_topic_arns = each.value.sierra_adapter_topic_arns
+  miro_adapter_topic_arns   = each.value.miro_adapter_topic_arns
+  mets_adapter_topic_arns   = each.value.mets_adapter_topic_arns
+  calm_adapter_topic_arns   = each.value.calm_adapter_topic_arns
 
   # Boilerplate that shouldn't change between pipelines.
 
