@@ -10,6 +10,7 @@ import com.sksamuel.elastic4s.requests.searches.aggs.responses.{
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.display.models.LocationTypeQuery
+import uk.ac.wellcome.models.marc.MarcLanguageCodeList
 import uk.ac.wellcome.models.work.internal._
 
 case class Aggregations(
@@ -77,15 +78,14 @@ object Aggregations extends Logging {
       }
     }
 
-  // If a language has an ID, both the Calm transformer and Sierra transformer
-  // are pulling that ID from our pre-defined list, so we can decode it
-  // by looking up the code.
-  //
-  // If a language doesn't have a code, then we can't aggregate over it.
+  // Both the Calm and Sierra transformers use the MARC language code list
+  // to populate the "languages" field, so we can use the ID (code) to
+  // unambiguously identify a language.
   implicit val decodeLanguage: Decoder[Language] =
     Decoder.decodeString.emap { code =>
-      Language.fromCode(code).left.map { _ =>
-        s"couldn't find language for code $code"
+      MarcLanguageCodeList.lookupByCode(code) match {
+        case Some(lang) => Right(lang)
+        case None       => Left(s"couldn't find language for code $code")
       }
     }
 
