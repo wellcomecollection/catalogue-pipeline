@@ -34,10 +34,10 @@ class RouterWorkerService[MsgDestination](
              case Left(failedWorks) => Future.failed(new Exception(s"Failed indexing $failedWorks"))
              case Right(_) => Future.successful(())
            }
-            _ <-Future.fromTry(worksMsgSender.sendT(work.id))
+            _ <-Future.fromTry(worksMsgSender.send(work.id))
           } yield ()
         }) { path =>
-          Future.fromTry(pathsMsgSender.sendT(path))
+          Future.fromTry(pathsMsgSender.send(path.path))
         }
     }
   }

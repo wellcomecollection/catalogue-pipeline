@@ -36,9 +36,8 @@ class RouterWorkerServiceTest
      eventually {
        assertQueueEmpty(queue)
        assertQueueEmpty(dlq)
-       pathsMessageSender.getMessages[CollectionPath]() should contain(
-         CollectionPath("a"))
-       worksMessageSender.getMessages[String] shouldBe empty
+       pathsMessageSender.messages.map(_.body) should contain("a")
+       worksMessageSender.messages shouldBe empty
        indexer.index shouldBe empty
      }
    }
@@ -54,8 +53,8 @@ class RouterWorkerServiceTest
               eventually {
                 assertQueueEmpty(queue)
                 assertQueueEmpty(dlq)
-                worksMessageSender.getMessages[String]() should contain(work.id)
-                pathsMessageSender.getMessages[CollectionPath]() shouldBe empty
+                worksMessageSender.messages.map(_.body) should contain(work.id)
+                pathsMessageSender.messages shouldBe empty
                 indexer.index should contain (work.id -> work.transition[Denormalised](Relations.none))
               }
             }
@@ -72,9 +71,8 @@ class RouterWorkerServiceTest
               eventually {
                 assertQueueEmpty(queue)
                 assertQueueEmpty(dlq)
-                worksMessageSender.getMessages[String]() shouldBe empty
-                pathsMessageSender.getMessages[CollectionPath]() should contain(
-                  CollectionPath("a/2"))
+                worksMessageSender.messages shouldBe empty
+                pathsMessageSender.messages.map(_.body) should contain("a/2")
                 indexer.index shouldBe empty
               }
             }
@@ -93,8 +91,8 @@ class RouterWorkerServiceTest
               eventually{
                 assertQueueEmpty(queue)
                 assertQueueHasSize(dlq,1)
-                worksMessageSender.getMessages[String]() shouldBe empty
-                pathsMessageSender.getMessages[CollectionPath]() shouldBe empty
+                worksMessageSender.messages shouldBe empty
+                pathsMessageSender.messages shouldBe empty
               }
             }
           }
