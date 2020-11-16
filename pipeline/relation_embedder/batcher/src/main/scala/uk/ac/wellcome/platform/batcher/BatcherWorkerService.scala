@@ -21,7 +21,7 @@ class BatcherWorkerService[MsgDestination](
   maxGroupedMessages: Int = 100000,
   flushInterval: FiniteDuration = 30 minutes,
   batchSize: Int = 20,
-  batchFlushInterval: FiniteDuration = 10 seconds
+  batchFlushInterval: FiniteDuration = 100 milliseconds
 )(implicit ec: ExecutionContext, materializer: Materializer)
     extends Runnable
     with Logging {
@@ -39,17 +39,23 @@ class BatcherWorkerService[MsgDestination](
           }
           .groupedWithin(maxGroupedMessages, flushInterval)
           .map(_.toList.unzip)
-          .mapAsync(1) { case (msgs, paths) => processPaths(msgs, paths) }
+          .mapAsync(1) { case (msgs, paths) => 
+            info(s"Processing ${paths.size} input paths")
+            processPaths(msgs, paths)
+          }
           .flatMapConcat(identity)
     )
 
+  /** Process a list of input paths by generating appropriate batches to send to
+    * the relation embedder, deleting input paths from the SQS queue when the
+    * corresponding batches have been succesfully sent.
+    */
   private def processPaths(
     msgs: List[SQSMessage],
     paths: List[String]): Future[Source[SQSMessage, NotUsed]] =
-    generateSelectors(paths)
-      .groupedWithin(batchSize, batchFlushInterval)
-      .mapAsyncUnordered(10) { selectorGroups =>
-        val (selectors, msgIndices) = selectorGroups.toList.unzip
+    generateSelectorBatches(paths)
+      .map(_.toList.unzip)
+      .mapAsyncUnordered(10) { case (selectors, msgIndices) =>
         Future {
           msgSender.sendT(Batch(selectors)) match {
             case Success(_) => None
@@ -70,20 +76,20 @@ class BatcherWorkerService[MsgDestination](
           }
       }
 
-  private def generateSelectors(
-    paths: List[String]): Source[(Selector, Long), NotUsed] = {
-    val selectors = paths.zipWithIndex.flatMap {
-      case (path, idx) =>
-        Selector.forPath(path).map(selector => (selector, idx))
-    }
-    val selectorSet = selectors.map(_._1).toSet
-    Source(selectors).collect {
-      case (selector, idx) if !shouldSupressSelector(selector, selectorSet) =>
-        (selector, idx)
+  /** Given a list of input paths, generate the minimal set of selectors
+    * matching works needing to be denormalised, and group these according to
+    * tree and within a maximum `batchSize`.
+    */
+  private def generateSelectorBatches(
+    paths: List[String]): Source[Seq[(Selector, Long)], NotUsed] = {
+    val selectors = Selector.forPaths(paths)
+    val groupedSelectors = selectors.groupBy(_._1.rootPath).values.toList
+    info(
+      s"Generated ${selectors.size} selectors spanning ${groupedSelectors.size} trees from ${paths.size} paths."
+    )
+    Source(groupedSelectors).flatMapConcat {
+      selectors =>
+        Source(selectors).groupedWithin(batchSize, batchFlushInterval)
     }
   }
-
-  private def shouldSupressSelector(selector: Selector,
-                                    selectorSet: Set[Selector]): Boolean =
-    selector.superSelectors.exists(selectorSet.contains(_))
 }
