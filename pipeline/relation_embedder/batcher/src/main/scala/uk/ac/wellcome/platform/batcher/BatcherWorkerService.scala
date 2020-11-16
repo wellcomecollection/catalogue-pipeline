@@ -18,15 +18,14 @@ import uk.ac.wellcome.json.JsonUtil._
 class BatcherWorkerService[MsgDestination](
   msgStream: SQSStream[NotificationMessage],
   msgSender: MessageSender[MsgDestination],
-  maxGroupedMessages: Int = 100000,
   flushInterval: FiniteDuration = 30 minutes,
-  batchSize: Int = 20,
-  batchFlushInterval: FiniteDuration = 100 milliseconds
+  maxProcessedPaths: Int = 100000,
+  maxSelectorsPerBatch: Int = 20
 )(implicit ec: ExecutionContext, materializer: Materializer)
     extends Runnable
     with Logging {
 
-  case class Batch(selectors: List[Selector])
+  case class Batch(rootPath: String, selectors: List[Selector])
 
   def run(): Future[Done] =
     msgStream.runStream(
@@ -37,7 +36,7 @@ class BatcherWorkerService[MsgDestination](
             case (msg, notificationMessage) =>
               (msg, notificationMessage.body)
           }
-          .groupedWithin(maxGroupedMessages, flushInterval)
+          .groupedWithin(maxProcessedPaths, flushInterval)
           .map(_.toList.unzip)
           .mapAsync(1) { case (msgs, paths) => 
             info(s"Processing ${paths.size} input paths")
@@ -53,11 +52,10 @@ class BatcherWorkerService[MsgDestination](
   private def processPaths(
     msgs: List[SQSMessage],
     paths: List[String]): Future[Source[SQSMessage, NotUsed]] =
-    generateSelectorBatches(paths)
-      .map(_.toList.unzip)
-      .mapAsyncUnordered(10) { case (selectors, msgIndices) =>
+    generateBatches(paths)
+      .mapAsyncUnordered(10) { case (batch, msgIndices) =>
         Future {
-          msgSender.sendT(Batch(selectors)) match {
+          msgSender.sendT(batch) match {
             case Success(_) => None
             case Failure(err) =>
               error(err)
@@ -80,16 +78,21 @@ class BatcherWorkerService[MsgDestination](
     * matching works needing to be denormalised, and group these according to
     * tree and within a maximum `batchSize`.
     */
-  private def generateSelectorBatches(
-    paths: List[String]): Source[Seq[(Selector, Long)], NotUsed] = {
+  private def generateBatches(
+    paths: List[String]): Source[(Batch, List[Long]), NotUsed] = {
     val selectors = Selector.forPaths(paths)
-    val groupedSelectors = selectors.groupBy(_._1.rootPath).values.toList
+    val groupedSelectors = selectors.groupBy(_._1.rootPath)
     info(
       s"Generated ${selectors.size} selectors spanning ${groupedSelectors.size} trees from ${paths.size} paths."
     )
-    Source(groupedSelectors).flatMapConcat {
-      selectors =>
-        Source(selectors).groupedWithin(batchSize, batchFlushInterval)
+    Source(groupedSelectors.toList).flatMapConcat {
+      case (rootPath, selectors) =>
+        Source(selectors)
+          .grouped(maxSelectorsPerBatch)
+          .map(_.toList.unzip)
+          .map { case (selectors, msgIndices) =>
+            Batch(rootPath, selectors) -> msgIndices
+          }
     }
   }
 }
