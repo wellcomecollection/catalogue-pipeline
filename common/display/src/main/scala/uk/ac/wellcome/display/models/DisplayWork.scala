@@ -84,7 +84,7 @@ case class DisplayWork(
     description = "List of items related to this work."
   ) items: Option[List[DisplayItem]] = None,
   @Schema(
-    description = "Whether the work contains an item with a digital location",
+    description = "Whether the work contains an item which is available online",
     `type` = "Boolean"
   ) availableOnline: Boolean = false,
   @Schema(
