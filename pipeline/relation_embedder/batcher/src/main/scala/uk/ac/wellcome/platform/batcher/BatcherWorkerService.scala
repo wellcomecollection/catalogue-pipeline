@@ -15,17 +15,17 @@ import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.typesafe.Runnable
 import uk.ac.wellcome.json.JsonUtil._
 
+case class Batch(rootPath: String, selectors: List[Selector])
+
 class BatcherWorkerService[MsgDestination](
   msgStream: SQSStream[NotificationMessage],
   msgSender: MessageSender[MsgDestination],
   flushInterval: FiniteDuration = 30 minutes,
   maxProcessedPaths: Int = 100000,
-  maxSelectorsPerBatch: Int = 20
+  maxBatchSize: Int = 20
 )(implicit ec: ExecutionContext, materializer: Materializer)
     extends Runnable
     with Logging {
-
-  case class Batch(rootPath: String, selectors: List[Selector])
 
   def run(): Future[Done] =
     msgStream.runStream(
@@ -88,7 +88,7 @@ class BatcherWorkerService[MsgDestination](
     Source(groupedSelectors.toList).flatMapConcat {
       case (rootPath, selectors) =>
         Source(selectors)
-          .grouped(maxSelectorsPerBatch)
+          .grouped(maxBatchSize)
           .map(_.toList.unzip)
           .map { case (selectors, msgIndices) =>
             Batch(rootPath, selectors) -> msgIndices
