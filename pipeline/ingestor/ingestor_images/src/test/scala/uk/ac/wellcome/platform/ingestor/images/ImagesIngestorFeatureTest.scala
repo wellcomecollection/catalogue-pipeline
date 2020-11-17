@@ -34,7 +34,7 @@ class ImagesIngestorFeatureTest
             elasticClient,
             index,
             ImagesIndexConfig)
-          withWorkerService(queue, index, indexer) { _ =>
+          withWorkerService(queue, indexer) { _ =>
             assertElasticsearchEventuallyHas(index, image)
             assertQueueEmpty(queue)
             assertQueueEmpty(dlq)
@@ -55,7 +55,7 @@ class ImagesIngestorFeatureTest
             elasticClient,
             index,
             ImagesIndexConfig)
-          withWorkerService(queue, index, indexer) { _ =>
+          withWorkerService(queue, indexer) { _ =>
             assertElasticsearchEmpty(index)
             eventually(Timeout(Span(5, Seconds))) {
               assertQueueEmpty(queue)

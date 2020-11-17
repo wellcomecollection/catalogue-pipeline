@@ -195,6 +195,10 @@ trait WorksIndexConfigFields extends IndexConfigFields {
       relation("siblingsPreceding", idState),
       relation("siblingsSucceeding", idState),
     )
+
+  def derivedData = objectField("derivedData").fields(
+    booleanField("availableOnline")
+  )
 }
 
 sealed trait WorksIndexConfig extends IndexConfig with WorksIndexConfigFields {
@@ -239,6 +243,32 @@ object IdentifiedWorkIndexConfig extends WorksIndexConfig {
     sourceIdentifier,
     modifiedTime,
     relations(id("id"))
+  )
+
+  val dynamicMapping = DynamicMapping.Strict
+
+  val fields =
+    Seq(
+      state,
+      version,
+      id("redirect"),
+      keywordField("type"),
+      data(analyzedPath, id("id")),
+      objectField("invisibilityReasons").fields(
+        keywordField("type"),
+        keywordField("info")
+      )
+    )
+}
+
+object DerivedWorkIndexConfig extends WorksIndexConfig {
+
+  val state = objectField("state").fields(
+    canonicalId,
+    sourceIdentifier,
+    modifiedTime,
+    relations(id("id")),
+    derivedData
   )
 
   val dynamicMapping = DynamicMapping.Strict

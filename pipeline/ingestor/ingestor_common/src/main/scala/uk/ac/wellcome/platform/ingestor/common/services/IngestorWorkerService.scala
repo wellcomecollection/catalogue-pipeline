@@ -10,17 +10,18 @@ import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class IngestorWorkerService[T](
+class IngestorWorkerService[In, Out](
   ingestorConfig: IngestorConfig,
-  documentIndexer: Indexer[T],
-  messageStream: BigMessageStream[T]
+  documentIndexer: Indexer[Out],
+  messageStream: BigMessageStream[In],
+  transformBeforeIndex: In => Out
 )(implicit
   ec: ExecutionContext)
     extends Runnable
     with Logging {
 
   type FutureBundles = Future[List[Bundle]]
-  case class Bundle(message: Message, document: T)
+  case class Bundle(message: Message, document: In)
 
   private val className = this.getClass.getSimpleName
 
@@ -49,11 +50,25 @@ class IngestorWorkerService[T](
   private def processMessages(bundles: List[Bundle]): FutureBundles =
     for {
       documents <- Future.successful(bundles.map(m => m.document))
-      either <- documentIndexer.index(documents = documents)
+      transformedDocuments = documents.map(transformBeforeIndex)
+      either <- documentIndexer.index(documents = transformedDocuments)
     } yield {
       val failedWorks = either.left.getOrElse(Nil)
       bundles.filterNot {
         case Bundle(_, document) => failedWorks.contains(document)
       }
     }
+}
+
+object IngestorWorkerService {
+  def apply[T](
+    ingestorConfig: IngestorConfig,
+    documentIndexer: Indexer[T],
+    messageStream: BigMessageStream[T])(implicit ec: ExecutionContext) =
+    new IngestorWorkerService(
+      ingestorConfig,
+      documentIndexer,
+      messageStream,
+      identity[T]
+    )
 }

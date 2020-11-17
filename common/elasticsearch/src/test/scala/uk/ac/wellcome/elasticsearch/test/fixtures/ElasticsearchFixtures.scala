@@ -18,7 +18,6 @@ import com.sksamuel.elastic4s.{ElasticClient, Index, Response}
 import grizzled.slf4j.Logging
 import io.circe.{Decoder, Encoder, Json}
 import io.circe.parser.parse
-
 import uk.ac.wellcome.elasticsearch._
 import uk.ac.wellcome.elasticsearch.model.CanonicalId
 import uk.ac.wellcome.fixtures._
@@ -135,11 +134,11 @@ trait ElasticsearchFixtures
     }
   }
 
-  def assertElasticsearchEventuallyHasWork(
+  def assertElasticsearchEventuallyHasWork[State <: WorkState](
     index: Index,
-    works: Work[Identified]*): Seq[Assertion] = {
-    implicit val id: CanonicalId[Work[Identified]] =
-      (work: Work[Identified]) => work.state.canonicalId
+    works: Work[State]*)(implicit enc: Encoder[Work[State]]): Seq[Assertion] = {
+    implicit val id: CanonicalId[Work[State]] =
+      (work: Work[State]) => work.state.id
     assertElasticsearchEventuallyHas(index, works: _*)
   }
 

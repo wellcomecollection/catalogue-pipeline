@@ -133,6 +133,14 @@ object Implicits {
     deriveConfiguredDecoder
   implicit val _dec66: Decoder[BaseImage[DataState.Identified]] =
     deriveConfiguredDecoder
+  implicit val _dec67: Decoder[Work[WorkState.Derived]] =
+    deriveConfiguredDecoder
+  implicit val _dec68: Decoder[Work.Visible[WorkState.Derived]] =
+    deriveConfiguredDecoder
+  implicit val _dec69: Decoder[Work.Invisible[WorkState.Derived]] =
+    deriveConfiguredDecoder
+  implicit val _dec70: Decoder[Work.Redirected[WorkState.Derived]] =
+    deriveConfiguredDecoder
 
   implicit val _enc00: Encoder[AccessCondition] = deriveConfiguredEncoder
   implicit val _enc01: Encoder[Note] = deriveConfiguredEncoder
@@ -245,5 +253,13 @@ object Implicits {
   implicit val _enc64: Encoder[BaseImage[DataState.Unidentified]] =
     deriveConfiguredEncoder
   implicit val _enc65: Encoder[BaseImage[DataState.Identified]] =
+    deriveConfiguredEncoder
+  implicit val _enc66: Encoder[Work[WorkState.Derived]] =
+    deriveConfiguredEncoder
+  implicit val _enc67: Encoder[Work.Visible[WorkState.Derived]] =
+    deriveConfiguredEncoder
+  implicit val _enc68: Encoder[Work.Invisible[WorkState.Derived]] =
+    deriveConfiguredEncoder
+  implicit val _enc69: Encoder[Work.Redirected[WorkState.Derived]] =
     deriveConfiguredEncoder
 }
