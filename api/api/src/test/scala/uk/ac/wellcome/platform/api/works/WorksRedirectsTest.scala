@@ -5,7 +5,7 @@ import uk.ac.wellcome.models.Implicits._
 
 class WorksRedirectsTest extends ApiWorksTestBase {
 
-  val redirectedWork = identifiedWork().redirected(
+  val redirectedWork = derivedWork().redirected(
     IdState.Identified(
       canonicalId = createCanonicalId,
       sourceIdentifier = createSourceIdentifier

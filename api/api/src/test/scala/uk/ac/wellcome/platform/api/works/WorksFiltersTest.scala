@@ -17,13 +17,13 @@ class WorksFiltersTest
     with ItemsGenerators
     with ProductionEventGenerators {
   it("combines multiple filters") {
-    val work1 = identifiedWork()
+    val work1 = derivedWork()
       .genres(List(createGenreWith(label = "horror")))
       .subjects(List(createSubjectWith(label = "france")))
-    val work2 = identifiedWork()
+    val work2 = derivedWork()
       .genres(List(createGenreWith(label = "horror")))
       .subjects(List(createSubjectWith(label = "england")))
-    val work3 = identifiedWork()
+    val work3 = derivedWork()
       .genres(List(createGenreWith(label = "fantasy")))
       .subjects(List(createSubjectWith(label = "england")))
 
@@ -42,7 +42,7 @@ class WorksFiltersTest
 
   describe("filtering by item Location type") {
     val digitalWorks = (1 to 2).map { _ =>
-      identifiedWork()
+      derivedWork()
         .title("An example digital work")
         .items(
           List(
@@ -51,7 +51,7 @@ class WorksFiltersTest
     }
 
     val physicalWorks = (1 to 2).map { _ =>
-      identifiedWork()
+      derivedWork()
         .title("An example physical work")
         .items(
           List(
@@ -60,7 +60,7 @@ class WorksFiltersTest
     }
 
     val comboWorks = (1 to 2).map { _ =>
-      identifiedWork()
+      derivedWork()
         .title("An example combo work")
         .items(
           List(
@@ -156,22 +156,22 @@ class WorksFiltersTest
         )
       )
 
-    val worksWithNoItem = identifiedWorks(count = 3)
+    val worksWithNoItem = derivedWorks(count = 3)
 
-    val work1 = identifiedWork()
+    val work1 = derivedWork()
       .title("Crumbling carrots")
       .items(
         List(
           createItemWithLocationType(LocationType("iiif-image"))
         ))
-    val work2 = identifiedWork()
+    val work2 = derivedWork()
       .title("Crumbling carrots")
       .items(
         List(
           createItemWithLocationType(LocationType("digit")),
           createItemWithLocationType(LocationType("dimgs"))
         ))
-    val work3 = identifiedWork()
+    val work3 = derivedWork()
       .title("Crumbling carrots")
       .items(
         List(
@@ -218,15 +218,15 @@ class WorksFiltersTest
   }
 
   describe("filtering works by Format") {
-    val noFormatWorks = identifiedWorks(count = 3)
+    val noFormatWorks = derivedWorks(count = 3)
 
-    val bookWork = identifiedWork()
+    val bookWork = derivedWork()
       .title("apple")
       .format(Books)
-    val cdRomWork = identifiedWork()
+    val cdRomWork = derivedWork()
       .title("apple")
       .format(CDRoms)
-    val manuscriptWork = identifiedWork()
+    val manuscriptWork = derivedWork()
       .title("apple")
       .format(ManuscriptsAsian)
 
@@ -286,11 +286,11 @@ class WorksFiltersTest
 
   describe("filtering works by type") {
     val collectionWork =
-      identifiedWork().title("rats").workType(WorkType.Collection)
+      derivedWork().title("rats").workType(WorkType.Collection)
     val seriesWork =
-      identifiedWork().title("rats").workType(WorkType.Series)
+      derivedWork().title("rats").workType(WorkType.Series)
     val sectionWork =
-      identifiedWork().title("rats").workType(WorkType.Section)
+      derivedWork().title("rats").workType(WorkType.Section)
 
     val works = Seq(collectionWork, seriesWork, sectionWork)
 
@@ -348,8 +348,8 @@ class WorksFiltersTest
   }
 
   describe("filtering works by date range") {
-    def createDatedWork(dateLabel: String): Work.Visible[WorkState.Identified] =
-      identifiedWork()
+    def createDatedWork(dateLabel: String): Work.Visible[WorkState.Derived] =
+      derivedWork()
         .production(
           List(createProductionEventWith(dateLabel = Some(dateLabel))))
 
@@ -418,10 +418,10 @@ class WorksFiltersTest
 
   describe("filtering works by language (old filter ?language=)") {
     val englishWork =
-      identifiedWork().language(Language(label = "English", id = "eng"))
+      derivedWork().language(Language(label = "English", id = "eng"))
     val germanWork =
-      identifiedWork().language(Language(label = "German", id = "ger"))
-    val noLanguageWork = identifiedWork()
+      derivedWork().language(Language(label = "German", id = "ger"))
+    val noLanguageWork = derivedWork()
 
     val works = List(englishWork, germanWork, noLanguageWork)
 
@@ -455,9 +455,9 @@ class WorksFiltersTest
     val english = Language(label = "English", id = "eng")
     val turkish = Language(label = "Turkish", id = "tur")
 
-    val englishWork = identifiedWork().languages(List(english))
-    val turkishWork = identifiedWork().languages(List(turkish))
-    val noLanguageWork = identifiedWork()
+    val englishWork = derivedWork().languages(List(english))
+    val turkishWork = derivedWork().languages(List(turkish))
+    val noLanguageWork = derivedWork()
 
     val works = List(englishWork, turkishWork, noLanguageWork)
 
@@ -491,10 +491,10 @@ class WorksFiltersTest
     val horror = createGenreWith("horrible stuff")
     val romcom = createGenreWith("heartwarming stuff")
 
-    val horrorWork = identifiedWork().genres(List(horror))
-    val romcomWork = identifiedWork().genres(List(romcom))
-    val romcomHorrorWork = identifiedWork().genres(List(romcom, horror))
-    val noGenreWork = identifiedWork()
+    val horrorWork = derivedWork().genres(List(horror))
+    val romcomWork = derivedWork().genres(List(romcom))
+    val romcomHorrorWork = derivedWork().genres(List(romcom, horror))
+    val noGenreWork = derivedWork()
 
     val works = List(horrorWork, romcomWork, romcomHorrorWork, noGenreWork)
 
@@ -533,11 +533,11 @@ class WorksFiltersTest
     val paris = createSubjectWith("Paris")
 
     val nineteenthCenturyWork =
-      identifiedWork().subjects(List(nineteenthCentury))
-    val parisWork = identifiedWork().subjects(List(paris))
+      derivedWork().subjects(List(nineteenthCentury))
+    val parisWork = derivedWork().subjects(List(paris))
     val nineteenthCenturyParisWork =
-      identifiedWork().subjects(List(nineteenthCentury, paris))
-    val noSubjectWork = identifiedWork()
+      derivedWork().subjects(List(nineteenthCentury, paris))
+    val noSubjectWork = derivedWork()
 
     val works = List(
       nineteenthCenturyWork,
@@ -578,13 +578,13 @@ class WorksFiltersTest
 
   describe("filtering works by license") {
     def createLicensedWork(
-      licenses: Seq[License]): Work.Visible[WorkState.Identified] = {
+      licenses: Seq[License]): Work.Visible[WorkState.Derived] = {
       val items =
         licenses.map { license =>
           createDigitalItemWith(license = Some(license))
         }.toList
 
-      identifiedWork().items(items)
+      derivedWork().items(items)
     }
 
     val ccByWork = createLicensedWork(licenses = List(License.CCBY))
@@ -629,12 +629,12 @@ class WorksFiltersTest
   }
 
   describe("Identifiers filter") {
-    val unknownWork = identifiedWork()
+    val unknownWork = derivedWork()
 
     it("filters by a sourceIdentifier") {
       withWorksApi {
         case (worksIndex, routes) =>
-          val work = identifiedWork()
+          val work = derivedWork()
           insertIntoElasticsearch(worksIndex, unknownWork, work)
 
           assertJsonResponse(
@@ -651,8 +651,8 @@ class WorksFiltersTest
     it("filters by multiple sourceIdentifiers") {
       withWorksApi {
         case (worksIndex, routes) =>
-          val work1 = identifiedWork()
-          val work2 = identifiedWork()
+          val work1 = derivedWork()
+          val work2 = derivedWork()
 
           insertIntoElasticsearch(worksIndex, unknownWork, work1, work2)
 
@@ -671,7 +671,7 @@ class WorksFiltersTest
       withWorksApi {
         case (worksIndex, routes) =>
           val work =
-            identifiedWork().otherIdentifiers(List(createSourceIdentifier))
+            derivedWork().otherIdentifiers(List(createSourceIdentifier))
           insertIntoElasticsearch(worksIndex, unknownWork, work)
           assertJsonResponse(
             routes,
@@ -688,9 +688,9 @@ class WorksFiltersTest
       withWorksApi {
         case (worksIndex, routes) =>
           val work1 =
-            identifiedWork().otherIdentifiers(List(createSourceIdentifier))
+            derivedWork().otherIdentifiers(List(createSourceIdentifier))
           val work2 =
-            identifiedWork().otherIdentifiers(List(createSourceIdentifier))
+            derivedWork().otherIdentifiers(List(createSourceIdentifier))
 
           insertIntoElasticsearch(worksIndex, unknownWork, work1, work2)
           assertJsonResponse(
@@ -707,9 +707,9 @@ class WorksFiltersTest
     it("filters by mixed identifiers") {
       withWorksApi {
         case (worksIndex, routes) =>
-          val work1 = identifiedWork()
+          val work1 = derivedWork()
           val work2 =
-            identifiedWork().otherIdentifiers(List(createSourceIdentifier))
+            derivedWork().otherIdentifiers(List(createSourceIdentifier))
 
           insertIntoElasticsearch(worksIndex, unknownWork, work1, work2)
           assertJsonResponse(
@@ -725,8 +725,8 @@ class WorksFiltersTest
   }
 
   describe("Access status filter") {
-    def work(status: AccessStatus): Work.Visible[WorkState.Identified] =
-      identifiedWork()
+    def work(status: AccessStatus): Work.Visible[WorkState.Derived] =
+      derivedWork()
         .items(
           List(
             createIdentifiedItemWith(

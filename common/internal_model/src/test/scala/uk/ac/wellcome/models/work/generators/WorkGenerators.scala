@@ -96,6 +96,9 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
   def identifiedWorks(count: Int): List[Work.Visible[Identified]] =
     (1 to count).map(_ => identifiedWork()).toList
 
+  def derivedWorks(count: Int): List[Work.Visible[Derived]] =
+    (1 to count).map(_ => derivedWork()).toList
+
   implicit class WorkOps[State <: WorkState: UpdateState](
     work: Work.Visible[State]) {
 

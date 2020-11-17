@@ -9,7 +9,7 @@ import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.display.json.DisplayJsonUtil._
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.api.models._
-import WorkState.Identified
+import WorkState.Derived
 
 case class ResultResponse[T: Encoder](
   @JsonKey("@context") context: String,
@@ -55,7 +55,7 @@ object DisplayResultList {
     : Encoder[DisplayResultList[R, A]] = deriveConfiguredEncoder
 
   def apply(
-    resultList: ResultList[Work.Visible[Identified], Aggregations],
+    resultList: ResultList[Work.Visible[Derived], Aggregations],
     searchOptions: SearchOptions,
     includes: WorksIncludes,
     requestUri: Uri,

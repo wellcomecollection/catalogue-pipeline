@@ -25,7 +25,7 @@ class WorksAggregationsTest
           Journals
         )
 
-        val works = formats.map { identifiedWork().format(_) }
+        val works = formats.map { derivedWork().format(_) }
 
         insertIntoElasticsearch(worksIndex, works: _*)
 
@@ -101,7 +101,7 @@ class WorksAggregationsTest
           concepts = List(concept0, concept1, concept2)
         )
 
-        val work = identifiedWork().genres(List(genre))
+        val work = derivedWork().genres(List(genre))
 
         insertIntoElasticsearch(worksIndex, work)
 
@@ -158,7 +158,7 @@ class WorksAggregationsTest
 
         val works = dates
           .map { dateLabel =>
-            identifiedWork()
+            derivedWork()
               .production(
                 List(createProductionEventWith(dateLabel = Some(dateLabel))))
           }
@@ -208,7 +208,7 @@ class WorksAggregationsTest
 
     val languages = List(english, german, german)
 
-    val works = languages.map { identifiedWork().language(_) }
+    val works = languages.map { derivedWork().language(_) }
 
     withWorksApi {
       case (worksIndex, routes) =>
@@ -251,9 +251,9 @@ class WorksAggregationsTest
     val turkish = Language(label = "Turkish", id = "tur")
 
     val works = Seq(
-      identifiedWork().languages(List(english)),
-      identifiedWork().languages(List(english, swedish)),
-      identifiedWork().languages(List(english, swedish, turkish))
+      derivedWork().languages(List(english)),
+      derivedWork().languages(List(english, swedish)),
+      derivedWork().languages(List(english, swedish, turkish))
     )
 
     withWorksApi {
@@ -309,7 +309,7 @@ class WorksAggregationsTest
     )
 
     val works = subjectLists
-      .map { identifiedWork().subjects(_) }
+      .map { derivedWork().subjects(_) }
 
     withWorksApi {
       case (worksIndex, routes) =>
@@ -350,13 +350,13 @@ class WorksAggregationsTest
 
   it("supports aggregating on license") {
     def createLicensedWork(
-      licenses: Seq[License]): Work.Visible[WorkState.Identified] = {
+      licenses: Seq[License]): Work.Visible[WorkState.Derived] = {
       val items =
         licenses.map { license =>
           createDigitalItemWith(license = Some(license))
         }.toList
 
-      identifiedWork().items(items)
+      derivedWork().items(items)
     }
 
     val licenseLists = List(
@@ -414,7 +414,7 @@ class WorksAggregationsTest
     )
 
     val works = locations.map { loc =>
-      identifiedWork()
+      derivedWork()
         .items(List(createIdentifiedItemWith(locations = List(loc))))
     }
 
