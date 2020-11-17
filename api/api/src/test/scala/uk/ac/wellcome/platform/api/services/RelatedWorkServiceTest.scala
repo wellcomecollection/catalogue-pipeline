@@ -165,7 +165,9 @@ class RelatedWorkServiceTest
                   workQ.notes(Nil),
                   RelatedWorks.partOf(
                     RelatedWork(
-                      workP.items(Nil),
+                      // This work will still have availableOnline = true
+                      // because the items exist, but are not included in the response
+                      workP.copy(data = workP.data.copy(items = Nil)),
                       RelatedWorks(partOf = Some(Nil))
                     )
                   )
