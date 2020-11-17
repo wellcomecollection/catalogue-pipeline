@@ -21,14 +21,14 @@ trait RelationsService {
     * @param path The archive path
     * @return The IDs of the other works to denormalise
     */
-  def getAffectedWorks(path: CollectionPath): Source[Work[Merged], NotUsed]
+  def getAffectedWorks(path: String): Source[Work[Merged], NotUsed]
 
   /** For a given work return all works in the same archive.
     *
     * @param path The archive path
     * @return The works
     */
-  def getAllWorksInArchive(path: CollectionPath): Source[Work[Merged], NotUsed]
+  def getAllWorksInArchive(path: String): Source[Work[Merged], NotUsed]
 }
 
 class PathQueryRelationsService(
@@ -39,22 +39,22 @@ class PathQueryRelationsService(
     extends RelationsService
     with Logging {
 
-  def getAffectedWorks(path: CollectionPath): Source[Work[Merged], NotUsed] =
+  def getAffectedWorks(path: String): Source[Work[Merged], NotUsed] =
     Source
       .fromPublisher(
         elasticClient.publisher(
-          RelationsRequestBuilder(index, path.path)
+          RelationsRequestBuilder(index, path)
             .otherAffectedWorksRequest(affectedWorksScroll)
         )
       )
       .map(searchHit => searchHit.safeTo[Work[Merged]].get)
 
-  def getAllWorksInArchive(path: CollectionPath): Source[Work[Merged], NotUsed] =
+  def getAllWorksInArchive(path: String): Source[Work[Merged], NotUsed] =
 
     Source
       .fromPublisher(
         elasticClient.publisher(
-          RelationsRequestBuilder(index, path.path)
+          RelationsRequestBuilder(index, path)
             .allRelationsRequest(allArchiveWorksScroll)
         )
       )

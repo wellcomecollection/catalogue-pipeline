@@ -33,7 +33,7 @@ class RelationEmbedderWorkerService[MsgDestination](
     }
 
   def processMessage(message: NotificationMessage): Future[Unit] ={
-    val path = CollectionPath(message.body)
+    val path = message.body
         relationsService
           .getAllWorksInArchive(path)
           .runWith(Sink.seq)

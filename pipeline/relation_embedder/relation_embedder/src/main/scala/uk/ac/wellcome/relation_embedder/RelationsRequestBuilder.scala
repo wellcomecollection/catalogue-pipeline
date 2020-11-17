@@ -43,6 +43,7 @@ case class RelationsRequestBuilder(index: Index,
       .query {
         must(
           should(
+            exactPathQuery,
             siblingsQuery,
             parentQuery,
             descendentsQuery
@@ -54,6 +55,10 @@ case class RelationsRequestBuilder(index: Index,
       .scroll(keepAlive = scrollKeepAlive)
       .size(scrollSize)
 
+  private lazy val exactPathQuery =must(
+    termQuery(field = "data.collectionPath.path", value = path),
+    termQuery(field = "data.collectionPath.depth", value = depth)
+  )
   private val visibleQuery = termQuery(field = "type", value = "Visible")
 
   /**

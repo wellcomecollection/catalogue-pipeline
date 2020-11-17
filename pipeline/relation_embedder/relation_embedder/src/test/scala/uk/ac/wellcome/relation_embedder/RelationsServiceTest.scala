@@ -56,6 +56,7 @@ class RelationsServiceTest
               work2,
               workD,
               workF,
+              workE
             )
           }
         }
@@ -68,10 +69,7 @@ class RelationsServiceTest
         storeWorks(index)
         withActorSystem { implicit as =>
           whenReady(queryAffectedWorks(service(index), workA.data.collectionPath.get)) { result =>
-            result should contain theSameElementsAs
-              works
-                .filter(
-                  _.state.sourceIdentifier != workA.state.sourceIdentifier)
+            result should contain theSameElementsAs works
           }
         }
       }
@@ -86,6 +84,7 @@ class RelationsServiceTest
               work2,
               workD,
               workF,
+              workE
             )
           }
         }
@@ -94,7 +93,7 @@ class RelationsServiceTest
 
     def queryAffectedWorks(service: RelationsService,
                            path: CollectionPath)(implicit as: ActorSystem) =
-      service.getAffectedWorks(path).runWith(Sink.seq[Work[Merged]])
+      service.getAffectedWorks(path.path).runWith(Sink.seq[Work[Merged]])
 
   }
 
@@ -137,6 +136,6 @@ class RelationsServiceTest
 
     def queryWorksInArchive(service: RelationsService,
                             path: CollectionPath)(implicit as: ActorSystem) =
-      service.getAllWorksInArchive(path).runWith(Sink.seq[Work[Merged]])
+      service.getAllWorksInArchive(path.path).runWith(Sink.seq[Work[Merged]])
   }
 }

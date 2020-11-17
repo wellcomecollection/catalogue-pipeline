@@ -80,7 +80,7 @@ class RelationEmbedderWorkerServiceTest
   it("denormalises a leaf work and its immediate parent") {
     withWorkerService() {
       case (QueuePair(queue, dlq), index, msgSender) =>
-        sendNotificationToSQS(queue = queue, message = workE.data.collectionPath.get)
+        sendNotificationToSQS(queue = queue, body = workE.data.collectionPath.get.path)
         eventually {
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
@@ -96,7 +96,7 @@ class RelationEmbedderWorkerServiceTest
   it("denormalises the whole tree when given the root") {
     withWorkerService() {
       case (QueuePair(queue, dlq), index, msgSender) =>
-        sendNotificationToSQS(queue = queue, message = workA.data.collectionPath.get)
+        sendNotificationToSQS(queue = queue, body = workA.data.collectionPath.get.path)
         eventually {
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
