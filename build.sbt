@@ -150,6 +150,13 @@ lazy val router = setupProject(
   externalDependencies = CatalogueDependencies.routerDependencies
 )
 
+lazy val batcher = setupProject(
+  project,
+  "pipeline/relation_embedder/batcher",
+  localDependencies = Seq(),
+  externalDependencies = CatalogueDependencies.batcherDependencies
+)
+
 lazy val recorder = setupProject(
   project,
   "pipeline/recorder",
