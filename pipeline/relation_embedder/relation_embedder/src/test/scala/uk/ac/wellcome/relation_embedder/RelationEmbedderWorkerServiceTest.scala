@@ -17,7 +17,7 @@ import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.work.internal.WorkState.{Denormalised, Merged}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
-import uk.ac.wellcome.pipeline_storage.{ElasticRetriever, MemoryIndexer}
+import uk.ac.wellcome.pipeline_storage.MemoryIndexer
 
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -80,7 +80,9 @@ class RelationEmbedderWorkerServiceTest
   it("denormalises a leaf work and its immediate parent") {
     withWorkerService() {
       case (QueuePair(queue, dlq), index, msgSender) =>
-        sendNotificationToSQS(queue = queue, body = workE.id)
+        sendNotificationToSQS(
+          queue = queue,
+          body = workE.data.collectionPath.get.path)
         eventually {
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
@@ -96,7 +98,9 @@ class RelationEmbedderWorkerServiceTest
   it("denormalises the whole tree when given the root") {
     withWorkerService() {
       case (QueuePair(queue, dlq), index, msgSender) =>
-        sendNotificationToSQS(queue = queue, body = workA.id)
+        sendNotificationToSQS(
+          queue = queue,
+          body = workA.data.collectionPath.get.path)
         eventually {
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
@@ -132,7 +136,6 @@ class RelationEmbedderWorkerServiceTest
             val workerService = new RelationEmbedderWorkerService[String](
               sqsStream = sqsStream,
               msgSender = messageSender,
-              workRetriever = new ElasticRetriever(elasticClient, mergedIndex),
               workIndexer = new MemoryIndexer(denormalisedIndex),
               relationsService =
                 new PathQueryRelationsService(elasticClient, mergedIndex, 10),

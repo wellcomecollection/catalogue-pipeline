@@ -46,17 +46,20 @@ class RelationsServiceTest
   val works =
     List(workA, workB, workC, workD, workE, workF, work4, work3, work2, work1)
 
-  describe("getOtherAffectedWorks") {
+  describe("getAffectedWorks") {
     it("Retrieves all affected works") {
       withLocalMergedWorksIndex { index =>
         storeWorks(index)
         withActorSystem { implicit as =>
-          whenReady(queryAffectedWorks(service(index), workE)) { result =>
-            result should contain theSameElementsAs List(
-              work2,
-              workD,
-              workF,
-            )
+          whenReady(
+            queryAffectedWorks(service(index), workE.data.collectionPath.get)) {
+            result =>
+              result should contain theSameElementsAs List(
+                work2,
+                workD,
+                workF,
+                workE
+              )
           }
         }
       }
@@ -67,23 +70,10 @@ class RelationsServiceTest
       withLocalMergedWorksIndex { index =>
         storeWorks(index)
         withActorSystem { implicit as =>
-          whenReady(queryAffectedWorks(service(index), workA)) { result =>
-            result should contain theSameElementsAs
-              works
-                .filter(
-                  _.state.sourceIdentifier != workA.state.sourceIdentifier)
-          }
-        }
-      }
-    }
-
-    it("Returns no affected works when work is not part of a collection") {
-      withLocalMergedWorksIndex { index =>
-        val workX = mergedWork()
-        storeWorks(index, List(workA, work1, workX))
-        withActorSystem { implicit as =>
-          whenReady(queryAffectedWorks(service(index), workX)) { result =>
-            result shouldBe Nil
+          whenReady(
+            queryAffectedWorks(service(index), workA.data.collectionPath.get)) {
+            result =>
+              result should contain theSameElementsAs works
           }
         }
       }
@@ -93,20 +83,24 @@ class RelationsServiceTest
       withLocalMergedWorksIndex { index =>
         withActorSystem { implicit as =>
           storeWorks(index, work("a/2/invisible").invisible() :: works)
-          whenReady(queryAffectedWorks(service(index), workE)) { result =>
-            result should contain theSameElementsAs List(
-              work2,
-              workD,
-              workF,
-            )
+          whenReady(
+            queryAffectedWorks(service(index), workE.data.collectionPath.get)) {
+            result =>
+              result should contain theSameElementsAs List(
+                work2,
+                workD,
+                workF,
+                workE
+              )
           }
         }
       }
     }
 
     def queryAffectedWorks(service: RelationsService,
-                           work: Work[Merged])(implicit as: ActorSystem) =
-      service.getOtherAffectedWorks(work).runWith(Sink.seq[Work[Merged]])
+                           path: CollectionPath)(implicit as: ActorSystem) =
+      service.getAffectedWorks(path.path).runWith(Sink.seq[Work[Merged]])
+
   }
 
   describe("getAllWorksInArchive") {
@@ -114,9 +108,10 @@ class RelationsServiceTest
       withLocalMergedWorksIndex { index =>
         withActorSystem { implicit as =>
           storeWorks(index, work("other/archive") :: works)
-          whenReady(queryWorksInArchive(service(index), work2)) {
-            archiveWorks =>
-              archiveWorks should contain theSameElementsAs works
+          whenReady(queryWorksInArchive(
+            service(index),
+            work2.data.collectionPath.get)) { archiveWorks =>
+            archiveWorks should contain theSameElementsAs works
           }
         }
       }
@@ -126,9 +121,10 @@ class RelationsServiceTest
       withLocalMergedWorksIndex { index =>
         withActorSystem { implicit as =>
           storeWorks(index, work("other/archive") :: works)
-          whenReady(queryWorksInArchive(service(index), workA)) {
-            archiveWorks =>
-              archiveWorks should contain theSameElementsAs works
+          whenReady(queryWorksInArchive(
+            service(index),
+            workA.data.collectionPath.get)) { archiveWorks =>
+            archiveWorks should contain theSameElementsAs works
           }
         }
       }
@@ -138,16 +134,17 @@ class RelationsServiceTest
       withLocalMergedWorksIndex { index =>
         withActorSystem { implicit as =>
           storeWorks(index, work("a/invisible").invisible() :: works)
-          whenReady(queryWorksInArchive(service(index), workE)) {
-            archiveWorks =>
-              archiveWorks should contain theSameElementsAs works
+          whenReady(queryWorksInArchive(
+            service(index),
+            workE.data.collectionPath.get)) { archiveWorks =>
+            archiveWorks should contain theSameElementsAs works
           }
         }
       }
     }
 
     def queryWorksInArchive(service: RelationsService,
-                            work: Work[Merged])(implicit as: ActorSystem) =
-      service.getAllWorksInArchive(work).runWith(Sink.seq[Work[Merged]])
+                            path: CollectionPath)(implicit as: ActorSystem) =
+      service.getAllWorksInArchive(path.path).runWith(Sink.seq[Work[Merged]])
   }
 }

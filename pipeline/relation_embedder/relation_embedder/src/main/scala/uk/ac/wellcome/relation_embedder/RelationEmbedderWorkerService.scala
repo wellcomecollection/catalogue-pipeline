@@ -1,27 +1,25 @@
 package uk.ac.wellcome.relation_embedder
 
-import scala.concurrent.{ExecutionContext, Future}
-import scala.concurrent.duration._
-import scala.util.{Failure, Success}
-
 import akka.Done
-import akka.stream.scaladsl._
 import akka.stream.Materializer
-
-import uk.ac.wellcome.typesafe.Runnable
+import akka.stream.scaladsl._
+import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
-import uk.ac.wellcome.pipeline_storage.{Indexer, Retriever}
+import uk.ac.wellcome.models.work.internal.WorkFsm._
+import uk.ac.wellcome.models.work.internal.WorkState.Denormalised
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.json.JsonUtil._
-import WorkState.{Denormalised, Merged}
-import WorkFsm._
+import uk.ac.wellcome.pipeline_storage.Indexer
+import uk.ac.wellcome.typesafe.Runnable
+
+import scala.concurrent.duration._
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 class RelationEmbedderWorkerService[MsgDestination](
   sqsStream: SQSStream[NotificationMessage],
   msgSender: MessageSender[MsgDestination],
-  workRetriever: Retriever[Work[Merged]],
   workIndexer: Indexer[Work[Denormalised]],
   relationsService: RelationsService,
   indexBatchSize: Int = 100,
@@ -34,21 +32,18 @@ class RelationEmbedderWorkerService[MsgDestination](
       sqsStream.foreach(this.getClass.getSimpleName, processMessage)
     }
 
-  def processMessage(message: NotificationMessage): Future[Unit] =
-    workRetriever(message.body)
-      .flatMap { inputWork =>
-        relationsService
-          .getAllWorksInArchive(inputWork)
-          .runWith(Sink.seq)
-          .map { archiveWorks =>
-            (ArchiveRelationsCache(archiveWorks), inputWork)
-          }
+  def processMessage(message: NotificationMessage): Future[Unit] = {
+    val path = message.body
+    relationsService
+      .getAllWorksInArchive(path)
+      .runWith(Sink.seq)
+      .map { archiveWorks =>
+        (ArchiveRelationsCache(archiveWorks), path)
       }
       .flatMap {
-        case (relationsCache, inputWork) =>
-          val denormalisedWorks = Source
-            .single(inputWork)
-            .concat(relationsService.getOtherAffectedWorks(inputWork))
+        case (relationsCache, inputPath) =>
+          val denormalisedWorks = relationsService
+            .getAffectedWorks(inputPath)
             .map { work =>
               work.transition[Denormalised](relationsCache(work))
             }
@@ -74,4 +69,5 @@ class RelationEmbedderWorkerService[MsgDestination](
             .runWith(Sink.ignore)
             .map(_ => ())
       }
+  }
 }

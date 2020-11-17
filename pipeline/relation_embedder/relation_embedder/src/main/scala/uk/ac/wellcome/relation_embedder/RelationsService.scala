@@ -18,17 +18,17 @@ trait RelationsService {
     * denormalised. This should consist of the works siblings, its parent, and
     * all its descendents.
     *
-    * @param work The work
+    * @param path The archive path
     * @return The IDs of the other works to denormalise
     */
-  def getOtherAffectedWorks(work: Work[Merged]): Source[Work[Merged], NotUsed]
+  def getAffectedWorks(path: String): Source[Work[Merged], NotUsed]
 
   /** For a given work return all works in the same archive.
     *
-    * @param work The work
+    * @param path The archive path
     * @return The works
     */
-  def getAllWorksInArchive(work: Work[Merged]): Source[Work[Merged], NotUsed]
+  def getAllWorksInArchive(path: String): Source[Work[Merged], NotUsed]
 }
 
 class PathQueryRelationsService(
@@ -39,42 +39,24 @@ class PathQueryRelationsService(
     extends RelationsService
     with Logging {
 
-  def getOtherAffectedWorks(work: Work[Merged]): Source[Work[Merged], NotUsed] =
-    work match {
-      case work: Work.Visible[Merged] =>
-        work.data.collectionPath match {
-          case None =>
-            info(
-              s"work ${work.id} does not belong to an archive, skipping getOtherAffectedWorks.")
-            Source.empty[Work[Merged]]
-          case Some(CollectionPath(path, _, _)) =>
-            Source
-              .fromPublisher(
-                elasticClient.publisher(
-                  RelationsRequestBuilder(index, path)
-                    .otherAffectedWorksRequest(affectedWorksScroll)
-                )
-              )
-              .map(searchHit => searchHit.safeTo[Work[Merged]].get)
-        }
-      case _ => Source.empty[Work[Merged]]
-    }
+  def getAffectedWorks(path: String): Source[Work[Merged], NotUsed] =
+    Source
+      .fromPublisher(
+        elasticClient.publisher(
+          RelationsRequestBuilder(index, path)
+            .otherAffectedWorksRequest(affectedWorksScroll)
+        )
+      )
+      .map(searchHit => searchHit.safeTo[Work[Merged]].get)
 
-  def getAllWorksInArchive(work: Work[Merged]): Source[Work[Merged], NotUsed] =
-    work match {
-      case work: Work.Visible[Merged] =>
-        work.data.collectionPath match {
-          case None => Source.empty[Work[Merged]]
-          case Some(CollectionPath(path, _, _)) =>
-            Source
-              .fromPublisher(
-                elasticClient.publisher(
-                  RelationsRequestBuilder(index, path)
-                    .allRelationsRequest(allArchiveWorksScroll)
-                )
-              )
-              .map(searchHit => searchHit.safeTo[Work.Visible[Merged]].get)
-        }
-      case _ => Source.empty[Work[Merged]]
-    }
+  def getAllWorksInArchive(path: String): Source[Work[Merged], NotUsed] =
+    Source
+      .fromPublisher(
+        elasticClient.publisher(
+          RelationsRequestBuilder(index, path)
+            .allRelationsRequest(allArchiveWorksScroll)
+        )
+      )
+      .map(searchHit => searchHit.safeTo[Work.Visible[Merged]].get)
+
 }
