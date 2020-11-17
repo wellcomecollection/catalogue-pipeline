@@ -11,7 +11,7 @@ sealed trait Selector {
 
   val path: String
 
-  val rootPath: String =
+  lazy val rootPath: String =
     Selector.ancestors(path).headOption.getOrElse(path)
 
   /** Returns a list of all selectors which would also match this selector. We
@@ -21,10 +21,16 @@ sealed trait Selector {
   def superSelectors: List[Selector] = {
     import Selector._
     val ancestorPaths = ancestors(path)
-    val selectors = ancestorPaths.map(Descendents(_)) ++ ancestorPaths.headOption.map(Tree(_)).toList
+    val ancestorDescendents = ancestorPaths.map(Descendents(_))
+    val tree = Tree(rootPath)
     this match {
-      case Node(path) => selectors ++ parent(path).toList.map(Children(_))
-      case _          => selectors
+      case Tree(path) => Nil
+      case Node(path) =>
+        tree :: ancestorDescendents ++ parent(path).map(Children(_)).toList
+      case Children(path) =>
+        tree :: Descendents(path) :: ancestorDescendents
+      case Descendents(path) =>
+        tree :: ancestorDescendents 
     }
   }
 
@@ -114,12 +120,16 @@ object Selector {
         case (path, idx) =>
           Selector.forPath(path).map(selector => (selector, idx.toLong))
       }
+      .groupBy(_._1)
+      .map(_._2.head)
 
-    val selectorSet = selectors.map(_._1).toSet
-    selectors.collect {
-      case (selector, idx) if !selector.shouldSupress(selectorSet) =>
-        (selector, idx)
-    }
+    val selectorSet = selectors.keySet
+    selectors
+      .collect {
+        case (selector, idx) if !selector.shouldSupress(selectorSet) =>
+          (selector, idx)
+      }
+      .toList
   }
 
   private def parent(path: Path): Option[Path] =
@@ -130,7 +140,7 @@ object Selector {
 
   private def ancestors(path: Path): List[Path] = {
     val tokens = tokenize(path).dropRight(1)
-    (0 until tokens.length).map { i =>
+    (1 to tokens.length).map { i =>
       join(tokens.slice(0, i))
     }.toList
   }

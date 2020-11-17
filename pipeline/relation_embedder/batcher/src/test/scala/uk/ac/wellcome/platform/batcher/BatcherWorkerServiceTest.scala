@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.router
+package uk.ac.wellcome.platform.batcher
 
 import org.scalatest.funspec.AnyFunSpec
 
