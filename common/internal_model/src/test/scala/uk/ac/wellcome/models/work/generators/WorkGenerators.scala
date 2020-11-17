@@ -64,6 +64,26 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
       version = createVersion
     )
 
+  def derivedWork(
+    sourceIdentifier: SourceIdentifier = createSourceIdentifier,
+    canonicalId: String = createCanonicalId,
+    modifiedTime: Instant = instantInLast30Days,
+    relations: Relations[DataState.Identified] = Relations.none
+  ): Work.Visible[Derived] = {
+    val data = initData[DataState.Identified]
+    Work.Visible[Derived](
+      state = Derived(
+        sourceIdentifier = sourceIdentifier,
+        canonicalId = canonicalId,
+        modifiedTime = modifiedTime,
+        derivedData = DerivedData(data),
+        relations = relations
+      ),
+      data = data,
+      version = createVersion
+    )
+  }
+
   def sourceWorks(count: Int): List[Work.Visible[Source]] =
     (1 to count).map(_ => sourceWork()).toList
 
@@ -76,7 +96,8 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
   def identifiedWorks(count: Int): List[Work.Visible[Identified]] =
     (1 to count).map(_ => identifiedWork()).toList
 
-  implicit class WorkOps[State <: WorkState](work: Work.Visible[State]) {
+  implicit class WorkOps[State <: WorkState: UpdateState](
+    work: Work.Visible[State]) {
 
     def invisible(invisibilityReasons: List[InvisibilityReason] = Nil)
       : Work.Invisible[State] =
@@ -176,8 +197,31 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
       work.map(_.copy(duration = Some(newDuration)))
 
     def map(f: WorkData[State#WorkDataState] => WorkData[State#WorkDataState])
-      : Work.Visible[State] =
-      Work.Visible[State](work.version, f(work.data), work.state)
+      : Work.Visible[State] = {
+      val nextData = f(work.data)
+      Work.Visible[State](
+        work.version,
+        nextData,
+        implicitly[UpdateState[State]].apply(work.state, nextData)
+      )
+    }
+  }
+
+  trait UpdateState[State <: WorkState] {
+    def apply(state: State, data: WorkData[State#WorkDataState]): State
+  }
+
+  object UpdateState {
+    def identity[State <: WorkState]: UpdateState[State] =
+      (state: State, _: WorkData[State#WorkDataState]) => state
+
+    implicit val updateDerivedState: UpdateState[Derived] =
+      (state: Derived, data: WorkData[DataState.Identified]) =>
+        state.copy(derivedData = DerivedData(data))
+    implicit val updateIdentifiedState: UpdateState[Identified] = identity
+    implicit val updateDenormalisedState: UpdateState[Denormalised] = identity
+    implicit val updateMergedState: UpdateState[Merged] = identity
+    implicit val updateSourceState: UpdateState[Source] = identity
   }
 
   private def initData[State <: DataState]: WorkData[State] =

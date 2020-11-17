@@ -110,6 +110,10 @@ case class WorkData[State <: DataState](
   *      | (id minter)
   *      ▼
   *  Identified
+  *      |
+  *      | (ingestor)
+  *      ▼
+  *   Derived
   */
 sealed trait WorkState {
 
@@ -164,6 +168,20 @@ object WorkState {
 
     override def id = canonicalId
   }
+
+  case class Derived(
+    sourceIdentifier: SourceIdentifier,
+    canonicalId: String,
+    modifiedTime: Instant,
+    derivedData: DerivedData,
+    relations: Relations[DataState.Identified] = Relations.none
+  ) extends WorkState {
+
+    type WorkDataState = DataState.Identified
+    type TransitionArgs = WorkData[WorkDataState]
+
+    override def id = canonicalId
+  }
 }
 
 /** The WorkFsm contains all possible transitions between work states.
@@ -205,5 +223,20 @@ object WorkFsm {
     def data(data: WorkData[DataState.Unidentified]) = data
 
     def redirect(redirect: IdState.Identifiable) = redirect
+  }
+
+  implicit val identifiedToDerived = new Transition[Identified, Derived] {
+    def state(state: Identified, workData: WorkData[DataState.Identified]) =
+      Derived(
+        sourceIdentifier = state.sourceIdentifier,
+        canonicalId = state.canonicalId,
+        modifiedTime = state.modifiedTime,
+        derivedData = DerivedData(workData),
+        relations = state.relations
+      )
+
+    def data(data: WorkData[DataState.Identified]) = data
+
+    def redirect(redirect: IdState.Identified) = redirect
   }
 }
