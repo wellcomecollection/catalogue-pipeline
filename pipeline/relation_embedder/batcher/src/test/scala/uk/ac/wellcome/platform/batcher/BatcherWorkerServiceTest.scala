@@ -74,9 +74,6 @@ class BatcherWorkerServiceTest
         val batches = msgSender.getMessages[Batch]
         batches.size shouldBe 2
         batchRoots(batches) shouldBe Set("A", "Other")
-        batches.map(_.rootPath) should contain theSameElementsAs List(
-          "A",
-          "Other")
         batchWithRoot("A", batches) should contain theSameElementsAs List(
           Tree("A"))
         batchWithRoot("Other", batches) should contain theSameElementsAs List(
