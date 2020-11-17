@@ -3,15 +3,13 @@ package uk.ac.wellcome.display.models
 import io.circe.generic.extras.JsonKey
 import io.swagger.v3.oas.annotations.media.Schema
 import uk.ac.wellcome.models.work.internal.{
-  DigitalLocationDeprecated,
-  Item,
   RelatedWork,
   RelatedWorks,
   Work,
   WorkState,
   WorkType
 }
-import WorkState.Identified
+import WorkState.Derived
 
 @Schema(
   name = "Work",
@@ -135,8 +133,7 @@ case class DisplayWork(
 
 case object DisplayWork {
 
-  def apply(work: Work.Visible[Identified],
-            includes: WorksIncludes): DisplayWork =
+  def apply(work: Work.Visible[Derived], includes: WorksIncludes): DisplayWork =
     DisplayWork(
       id = work.state.canonicalId,
       title = work.data.title,
@@ -173,7 +170,7 @@ case object DisplayWork {
             DisplayItem(_, includesIdentifiers = includes.identifiers)
           })
         else None,
-      availableOnline = containsDigitalLocation(work.data.items),
+      availableOnline = work.state.derivedData.availableOnline,
       production =
         if (includes.production) Some(work.data.production.map {
           DisplayProductionEvent(_, includesIdentifiers = includes.identifiers)
@@ -197,10 +194,10 @@ case object DisplayWork {
       ontologyType = displayWorkType(work.data.workType),
     )
 
-  def apply(work: Work.Visible[Identified]): DisplayWork =
+  def apply(work: Work.Visible[Derived]): DisplayWork =
     DisplayWork(work = work, includes = WorksIncludes())
 
-  def apply(work: Work.Visible[Identified],
+  def apply(work: Work.Visible[Derived],
             includes: WorksIncludes,
             relatedWorks: RelatedWorks): DisplayWork =
     DisplayWork(work, includes).copy(
@@ -208,7 +205,7 @@ case object DisplayWork {
         if (includes.parts)
           relatedWorks.parts.map { parts =>
             parts.collect {
-              case RelatedWork(work: Work.Visible[Identified], related) =>
+              case RelatedWork(work: Work.Visible[Derived], related) =>
                 DisplayWork(work, includes, related)
             }
           } else None,
@@ -216,7 +213,7 @@ case object DisplayWork {
         if (includes.partOf)
           relatedWorks.partOf.map { partOf =>
             partOf.collect {
-              case RelatedWork(work: Work.Visible[Identified], related) =>
+              case RelatedWork(work: Work.Visible[Derived], related) =>
                 DisplayWork(work, includes, related)
             }
           } else None,
@@ -224,7 +221,7 @@ case object DisplayWork {
         if (includes.precededBy)
           relatedWorks.precededBy.map { precededBy =>
             precededBy.collect {
-              case RelatedWork(work: Work.Visible[Identified], related) =>
+              case RelatedWork(work: Work.Visible[Derived], related) =>
                 DisplayWork(work, includes, related)
             }
           } else None,
@@ -232,19 +229,11 @@ case object DisplayWork {
         if (includes.succeededBy)
           relatedWorks.succeededBy.map { succeededBy =>
             succeededBy.collect {
-              case RelatedWork(work: Work.Visible[Identified], related) =>
+              case RelatedWork(work: Work.Visible[Derived], related) =>
                 DisplayWork(work, includes, related)
             }
           } else None,
     )
-
-  def containsDigitalLocation(items: List[Item[_]]): Boolean =
-    items.exists { item =>
-      item.locations.exists {
-        case _: DigitalLocationDeprecated => true
-        case _                            => false
-      }
-    }
 
   def displayWorkType(workType: WorkType): String = workType match {
     case WorkType.Standard   => "Work"
