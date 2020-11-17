@@ -13,9 +13,6 @@ SBT_NO_DOCKER_LIBRARIES =
 PYTHON_APPS =
 LAMBDAS     =
 
-TF_NAME = catalogue_pipeline
-TF_PATH = $(STACK_ROOT)/terraform
-
 $(val $(call stack_setup))
 
 include $(ROOT)/pipeline/transformer/Makefile

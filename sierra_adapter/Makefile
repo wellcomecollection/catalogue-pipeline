@@ -18,9 +18,6 @@ LAMBDAS     = s3_demultiplexer \
               sierra_progress_reporter \
               sierra_window_generator
 
-TF_NAME = sierra_adapter
-TF_PATH = $(STACK_ROOT)/terraform
-
 $(val $(call stack_setup))
 
 

@@ -13,9 +13,6 @@ SBT_NO_DOCKER_LIBRARIES =
 PYTHON_APPS = feature_inferrer feature_training palette_inferrer
 LAMBDAS     =
 
-TF_NAME =
-TF_PATH =
-
 TEST_OVERRIDE := feature_inferrer feature_training palette_inferrer
 
 inference_manager-test: feature_inferrer-build palette_inferrer-build
