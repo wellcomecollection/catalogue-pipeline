@@ -30,7 +30,7 @@ sealed trait Selector {
       case Children(path) =>
         tree :: Descendents(path) :: ancestorDescendents
       case Descendents(path) =>
-        tree :: ancestorDescendents 
+        tree :: ancestorDescendents
     }
   }
 
@@ -114,8 +114,7 @@ object Selector {
     * existed.
     */
   def forPaths(paths: List[Path]): List[(Selector, Long)] = {
-    val selectors = paths
-      .zipWithIndex
+    val selectors = paths.zipWithIndex
       .flatMap {
         case (path, idx) =>
           Selector.forPath(path).map(selector => (selector, idx.toLong))
@@ -124,12 +123,10 @@ object Selector {
       .map(_._2.head)
 
     val selectorSet = selectors.keySet
-    selectors
-      .collect {
-        case (selector, idx) if !selector.shouldSupress(selectorSet) =>
-          (selector, idx)
-      }
-      .toList
+    selectors.collect {
+      case (selector, idx) if !selector.shouldSupress(selectorSet) =>
+        (selector, idx)
+    }.toList
   }
 
   private def parent(path: Path): Option[Path] =

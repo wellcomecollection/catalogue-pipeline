@@ -38,9 +38,10 @@ class BatcherWorkerService[MsgDestination](
           }
           .groupedWithin(maxProcessedPaths, flushInterval)
           .map(_.toList.unzip)
-          .mapAsync(1) { case (msgs, paths) => 
-            info(s"Processing ${paths.size} input paths")
-            processPaths(msgs, paths)
+          .mapAsync(1) {
+            case (msgs, paths) =>
+              info(s"Processing ${paths.size} input paths")
+              processPaths(msgs, paths)
           }
           .flatMapConcat(identity)
     )
@@ -53,15 +54,16 @@ class BatcherWorkerService[MsgDestination](
     msgs: List[SQSMessage],
     paths: List[String]): Future[Source[SQSMessage, NotUsed]] =
     generateBatches(paths)
-      .mapAsyncUnordered(10) { case (batch, msgIndices) =>
-        Future {
-          msgSender.sendT(batch) match {
-            case Success(_) => None
-            case Failure(err) =>
-              error(err)
-              Some(msgIndices)
+      .mapAsyncUnordered(10) {
+        case (batch, msgIndices) =>
+          Future {
+            msgSender.sendT(batch) match {
+              case Success(_) => None
+              case Failure(err) =>
+                error(err)
+                Some(msgIndices)
+            }
           }
-        }
       }
       .collect { case Some(failedIndices) => failedIndices }
       .mapConcat(identity)
@@ -90,8 +92,9 @@ class BatcherWorkerService[MsgDestination](
         Source(selectors)
           .grouped(maxBatchSize)
           .map(_.toList.unzip)
-          .map { case (selectors, msgIndices) =>
-            Batch(rootPath, selectors) -> msgIndices
+          .map {
+            case (selectors, msgIndices) =>
+              Batch(rootPath, selectors) -> msgIndices
           }
     }
   }

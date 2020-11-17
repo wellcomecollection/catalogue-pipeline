@@ -18,7 +18,6 @@ class SelectorTest extends AnyFunSpec with Matchers {
     * |  |  |  |   |  |  |  |
     * D  X  Y  Z   1  2  3  4
     */
-
   it("generates selectors for a single path") {
     Selector.forPath("A/C") should contain theSameElementsAs List(
       Node("A"),
