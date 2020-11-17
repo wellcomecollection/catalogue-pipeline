@@ -20,10 +20,10 @@ sealed trait Work[State <: WorkState] {
   def identifiers: List[SourceIdentifier] =
     sourceIdentifier :: data.otherIdentifiers
 
-  def transition[OutState <: WorkState](args: OutState#TransitionArgs)(
+  def transition[OutState <: WorkState](args: OutState#TransitionArgs = ())(
     implicit transition: WorkFsm.Transition[State, OutState])
     : Work[OutState] = {
-    val outState = transition.state(state, args)
+    val outState = transition.state(state, data, args)
     val outData = transition.data(data)
     this match {
       case Work.Visible(version, _, _) =>
@@ -178,7 +178,7 @@ object WorkState {
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified
-    type TransitionArgs = WorkData[WorkDataState]
+    type TransitionArgs = Unit
 
     override def id = canonicalId
   }
@@ -195,7 +195,9 @@ object WorkFsm {
 
   sealed trait Transition[InState <: WorkState, OutState <: WorkState] {
 
-    def state(state: InState, args: OutState#TransitionArgs): OutState
+    def state(state: InState,
+              data: WorkData[InState#WorkDataState],
+              args: OutState#TransitionArgs): OutState
 
     def data(
       data: WorkData[InState#WorkDataState]): WorkData[OutState#WorkDataState]
@@ -204,7 +206,9 @@ object WorkFsm {
   }
 
   implicit val sourceToMerged = new Transition[Source, Merged] {
-    def state(state: Source, args: Option[Instant]): Merged =
+    def state(state: Source,
+              data: WorkData[DataState.Unidentified],
+              args: Option[Instant]): Merged =
       Merged(
         state.sourceIdentifier,
         args.getOrElse(state.modifiedTime)
@@ -217,6 +221,7 @@ object WorkFsm {
 
   implicit val mergedToDenormalised = new Transition[Merged, Denormalised] {
     def state(state: Merged,
+              data: WorkData[DataState.Unidentified],
               relations: Relations[DataState.Unidentified]): Denormalised =
       Denormalised(state.sourceIdentifier, state.modifiedTime, relations)
 
@@ -226,12 +231,14 @@ object WorkFsm {
   }
 
   implicit val identifiedToDerived = new Transition[Identified, Derived] {
-    def state(state: Identified, workData: WorkData[DataState.Identified]) =
+    def state(state: Identified,
+              data: WorkData[DataState.Identified],
+              args: Unit = ()) =
       Derived(
         sourceIdentifier = state.sourceIdentifier,
         canonicalId = state.canonicalId,
         modifiedTime = state.modifiedTime,
-        derivedData = DerivedData(workData),
+        derivedData = DerivedData(data),
         relations = state.relations
       )
 
