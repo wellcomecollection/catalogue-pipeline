@@ -20,6 +20,8 @@ class MergerTest
     with MetsWorkGenerators
     with MiroWorkGenerators
     with SierraWorkGenerators {
+  import Merger.WorkMergingOps
+
   val inputWorks: Seq[Work[Source]] =
     (0 to 5).map { _ =>
       sierraDigitalSourceWork()
@@ -55,6 +57,8 @@ class MergerTest
   }
 
   object TestMerger extends Merger {
+    import Merger.WorkMergingOps
+
     override protected def findTarget(
       works: Seq[Work[Source]]): Option[Work.Visible[Source]] =
       works.headOption.map(_.asInstanceOf[Work.Visible[Source]])

@@ -119,8 +119,26 @@ trait Merger extends MergerLogging {
   }
 }
 
+object Merger {
+  // Parameter can't be `State` as that shadows the Cats type
+  implicit class WorkMergingOps[StateT <: WorkState](work: Work[StateT]) {
+    def mapData(
+      f: WorkData[StateT#WorkDataState] => WorkData[StateT#WorkDataState]
+    ): Work[StateT] =
+      work match {
+        case Work.Visible(version, data, state) =>
+          Work.Visible(version, f(data), state)
+        case Work.Invisible(version, data, state, reasons) =>
+          Work.Invisible(version, f(data), state, reasons)
+        case Work.Redirected(version, redirect, state) =>
+          Work.Redirected(version, redirect, state)
+      }
+  }
+}
+
 object PlatformMerger extends Merger {
   import SourceWork._
+  import Merger.WorkMergingOps
 
   override def findTarget(
     works: Seq[Work[Source]]): Option[Work.Visible[Source]] =

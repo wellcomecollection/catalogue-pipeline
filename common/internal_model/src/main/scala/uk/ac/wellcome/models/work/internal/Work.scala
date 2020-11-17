@@ -20,17 +20,6 @@ sealed trait Work[State <: WorkState] {
   def identifiers: List[SourceIdentifier] =
     sourceIdentifier :: data.otherIdentifiers
 
-  def mapData(f: WorkData[State#WorkDataState] => WorkData[State#WorkDataState])
-    : Work[State] =
-    this match {
-      case Work.Visible(version, data, state) =>
-        Work.Visible(version, f(data), state)
-      case Work.Invisible(version, data, state, reasons) =>
-        Work.Invisible(version, f(data), state, reasons)
-      case Work.Redirected(version, redirect, state) =>
-        Work.Redirected(version, redirect, state)
-    }
-
   def transition[OutState <: WorkState](args: OutState#TransitionArgs)(
     implicit transition: WorkFsm.Transition[State, OutState])
     : Work[OutState] = {
