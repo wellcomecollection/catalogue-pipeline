@@ -32,17 +32,18 @@ class RelationEmbedderWorkerService[MsgDestination](
       sqsStream.foreach(this.getClass.getSimpleName, processMessage)
     }
 
-  def processMessage(message: NotificationMessage): Future[Unit] ={
+  def processMessage(message: NotificationMessage): Future[Unit] = {
     val path = message.body
-        relationsService
-          .getAllWorksInArchive(path)
-          .runWith(Sink.seq)
-          .map { archiveWorks =>
-            (ArchiveRelationsCache(archiveWorks), path)
-          }
+    relationsService
+      .getAllWorksInArchive(path)
+      .runWith(Sink.seq)
+      .map { archiveWorks =>
+        (ArchiveRelationsCache(archiveWorks), path)
+      }
       .flatMap {
         case (relationsCache, inputPath) =>
-          val denormalisedWorks = relationsService.getAffectedWorks(inputPath)
+          val denormalisedWorks = relationsService
+            .getAffectedWorks(inputPath)
             .map { work =>
               work.transition[Denormalised](relationsCache(work))
             }
@@ -61,7 +62,7 @@ class RelationEmbedderWorkerService[MsgDestination](
             .mapConcat(identity)
             .mapAsync(3) { work =>
               Future(msgSender.send(work.id)).flatMap {
-                case Success(_) => Future.successful(())
+                case Success(_)   => Future.successful(())
                 case Failure(err) => Future.failed(err)
               }
             }

@@ -50,7 +50,6 @@ class PathQueryRelationsService(
       .map(searchHit => searchHit.safeTo[Work[Merged]].get)
 
   def getAllWorksInArchive(path: String): Source[Work[Merged], NotUsed] =
-
     Source
       .fromPublisher(
         elasticClient.publisher(

@@ -51,13 +51,15 @@ class RelationsServiceTest
       withLocalMergedWorksIndex { index =>
         storeWorks(index)
         withActorSystem { implicit as =>
-          whenReady(queryAffectedWorks(service(index), workE.data.collectionPath.get)) { result =>
-            result should contain theSameElementsAs List(
-              work2,
-              workD,
-              workF,
-              workE
-            )
+          whenReady(
+            queryAffectedWorks(service(index), workE.data.collectionPath.get)) {
+            result =>
+              result should contain theSameElementsAs List(
+                work2,
+                workD,
+                workF,
+                workE
+              )
           }
         }
       }
@@ -68,8 +70,10 @@ class RelationsServiceTest
       withLocalMergedWorksIndex { index =>
         storeWorks(index)
         withActorSystem { implicit as =>
-          whenReady(queryAffectedWorks(service(index), workA.data.collectionPath.get)) { result =>
-            result should contain theSameElementsAs works
+          whenReady(
+            queryAffectedWorks(service(index), workA.data.collectionPath.get)) {
+            result =>
+              result should contain theSameElementsAs works
           }
         }
       }
@@ -79,13 +83,15 @@ class RelationsServiceTest
       withLocalMergedWorksIndex { index =>
         withActorSystem { implicit as =>
           storeWorks(index, work("a/2/invisible").invisible() :: works)
-          whenReady(queryAffectedWorks(service(index), workE.data.collectionPath.get)) { result =>
-            result should contain theSameElementsAs List(
-              work2,
-              workD,
-              workF,
-              workE
-            )
+          whenReady(
+            queryAffectedWorks(service(index), workE.data.collectionPath.get)) {
+            result =>
+              result should contain theSameElementsAs List(
+                work2,
+                workD,
+                workF,
+                workE
+              )
           }
         }
       }
@@ -102,9 +108,10 @@ class RelationsServiceTest
       withLocalMergedWorksIndex { index =>
         withActorSystem { implicit as =>
           storeWorks(index, work("other/archive") :: works)
-          whenReady(queryWorksInArchive(service(index), work2.data.collectionPath.get)) {
-            archiveWorks =>
-              archiveWorks should contain theSameElementsAs works
+          whenReady(queryWorksInArchive(
+            service(index),
+            work2.data.collectionPath.get)) { archiveWorks =>
+            archiveWorks should contain theSameElementsAs works
           }
         }
       }
@@ -114,9 +121,10 @@ class RelationsServiceTest
       withLocalMergedWorksIndex { index =>
         withActorSystem { implicit as =>
           storeWorks(index, work("other/archive") :: works)
-          whenReady(queryWorksInArchive(service(index), workA.data.collectionPath.get)) {
-            archiveWorks =>
-              archiveWorks should contain theSameElementsAs works
+          whenReady(queryWorksInArchive(
+            service(index),
+            workA.data.collectionPath.get)) { archiveWorks =>
+            archiveWorks should contain theSameElementsAs works
           }
         }
       }
@@ -126,9 +134,10 @@ class RelationsServiceTest
       withLocalMergedWorksIndex { index =>
         withActorSystem { implicit as =>
           storeWorks(index, work("a/invisible").invisible() :: works)
-          whenReady(queryWorksInArchive(service(index), workE.data.collectionPath.get)) {
-            archiveWorks =>
-              archiveWorks should contain theSameElementsAs works
+          whenReady(queryWorksInArchive(
+            service(index),
+            workE.data.collectionPath.get)) { archiveWorks =>
+            archiveWorks should contain theSameElementsAs works
           }
         }
       }

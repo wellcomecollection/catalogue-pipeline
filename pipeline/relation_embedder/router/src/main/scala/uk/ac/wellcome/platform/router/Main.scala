@@ -39,7 +39,6 @@ object Main extends WellcomeTypesafeApp {
           namespace = "path-sender",
           subject = "Sent from the router"),
       workRetriever = new ElasticRetriever(esClient, mergedIndex),
-
       workIndexer = new ElasticIndexer(
         esClient,
         denormalisedIndex,
