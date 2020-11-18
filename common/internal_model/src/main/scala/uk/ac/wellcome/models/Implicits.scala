@@ -256,12 +256,12 @@ object Implicits {
     deriveConfiguredEncoder
   implicit val _enc66: Encoder[BaseImage[DataState.Identified]] =
     deriveConfiguredEncoder
-  implicit val _enc66: Encoder[Work[WorkState.Indexed]] =
+  implicit val _enc67: Encoder[Work[WorkState.Indexed]] =
     deriveConfiguredEncoder
-  implicit val _enc67: Encoder[Work.Visible[WorkState.Indexed]] =
+  implicit val _enc68: Encoder[Work.Visible[WorkState.Indexed]] =
     deriveConfiguredEncoder
-  implicit val _enc68: Encoder[Work.Invisible[WorkState.Indexed]] =
+  implicit val _enc69: Encoder[Work.Invisible[WorkState.Indexed]] =
     deriveConfiguredEncoder
-  implicit val _enc69: Encoder[Work.Redirected[WorkState.Indexed]] =
+  implicit val _enc70: Encoder[Work.Redirected[WorkState.Indexed]] =
     deriveConfiguredEncoder
 }
