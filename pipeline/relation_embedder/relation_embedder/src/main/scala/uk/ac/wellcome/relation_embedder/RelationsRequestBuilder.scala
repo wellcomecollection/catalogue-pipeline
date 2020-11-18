@@ -24,7 +24,7 @@ case class RelationsRequestBuilder(index: Index,
     "data.workType",
   )
 
-  def wholeTree(batch: Batch, scrollSize: Int): SearchRequest =
+  def completeTree(batch: Batch, scrollSize: Int): SearchRequest =
     search(index)
       .query(must(visibleQuery, pathQuery(batch.rootPath)))
       .from(0)

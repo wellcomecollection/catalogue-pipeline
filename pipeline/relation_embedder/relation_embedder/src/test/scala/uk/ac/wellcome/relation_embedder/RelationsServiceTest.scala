@@ -67,7 +67,7 @@ class RelationsServiceTest
 
     import Selector._
 
-    it("Retrieves all affected works when batch consists of a whole tree") {
+    it("Retrieves all affected works when batch consists of a complete tree") {
       withLocalMergedWorksIndex { index =>
         storeWorks(index)
         withActorSystem { implicit actorSystem =>
@@ -155,7 +155,7 @@ class RelationsServiceTest
 
   }
 
-  describe("getWholeTree") {
+  describe("getCompleteTree") {
 
     import Selector._
 
@@ -165,7 +165,7 @@ class RelationsServiceTest
       withLocalMergedWorksIndex { index =>
         withActorSystem { implicit actorSystem =>
           storeWorks(index, works)
-          whenReady(queryWholeTree(service(index), batch)) { archiveWorks =>
+          whenReady(queryCompleteTree(service(index), batch)) { archiveWorks =>
             archiveWorks should contain theSameElementsAs works
           }
         }
@@ -176,7 +176,7 @@ class RelationsServiceTest
       withLocalMergedWorksIndex { index =>
         withActorSystem { implicit actorSystem =>
           storeWorks(index, work("other/archive") :: works)
-          whenReady(queryWholeTree(service(index), batch)) { archiveWorks =>
+          whenReady(queryCompleteTree(service(index), batch)) { archiveWorks =>
             archiveWorks should contain theSameElementsAs works
           }
         }
@@ -187,15 +187,15 @@ class RelationsServiceTest
       withLocalMergedWorksIndex { index =>
         withActorSystem { implicit actorSystem =>
           storeWorks(index, work("A/Invisible").invisible() :: works)
-          whenReady(queryWholeTree(service(index), batch)) { archiveWorks =>
+          whenReady(queryCompleteTree(service(index), batch)) { archiveWorks =>
             archiveWorks should contain theSameElementsAs works
           }
         }
       }
     }
 
-    def queryWholeTree(service: RelationsService,
+    def queryCompleteTree(service: RelationsService,
                        batch: Batch)(implicit as: ActorSystem) =
-      service.getWholeTree(batch).runWith(Sink.seq[Work[Merged]])
+      service.getCompleteTree(batch).runWith(Sink.seq[Work[Merged]])
   }
 }

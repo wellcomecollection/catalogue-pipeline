@@ -28,13 +28,13 @@ trait RelationsService {
     * @param path The archive path
     * @return The works
     */
-  def getWholeTree(batch: Batch): Source[Work[Merged], NotUsed]
+  def getCompleteTree(batch: Batch): Source[Work[Merged], NotUsed]
 }
 
 class PathQueryRelationsService(
   elasticClient: ElasticClient,
   index: Index,
-  wholeTreeScroll: Int = 1000,
+  completeTreeScroll: Int = 1000,
   affectedWorksScroll: Int = 250)(implicit as: ActorSystem)
     extends RelationsService
     with Logging {
@@ -50,11 +50,11 @@ class PathQueryRelationsService(
       )
       .map(searchHit => searchHit.safeTo[Work[Merged]].get)
 
-  def getWholeTree(batch: Batch): Source[Work[Merged], NotUsed] =
+  def getCompleteTree(batch: Batch): Source[Work[Merged], NotUsed] =
     Source
       .fromPublisher(
         elasticClient.publisher(
-          requestBuilder.wholeTree(batch, wholeTreeScroll)
+          requestBuilder.completeTree(batch, completeTreeScroll)
         )
       )
       .map(searchHit => searchHit.safeTo[Work.Visible[Merged]].get)

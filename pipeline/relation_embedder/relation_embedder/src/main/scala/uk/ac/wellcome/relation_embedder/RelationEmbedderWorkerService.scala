@@ -37,7 +37,7 @@ class RelationEmbedderWorkerService[MsgDestination](
       .fromTry(fromJson[Batch](message.body))
       .map { batch =>
         relationsService
-          .getWholeTree(batch)
+          .getCompleteTree(batch)
           .runWith(Sink.seq)
           .map(ArchiveRelationsCache(_))
           .flatMap { relationsCache =>
