@@ -23,9 +23,9 @@ class WorksIncludesTest
         case (worksIndex, routes) =>
           val otherIdentifier0 = createSourceIdentifier
           val otherIdentifier1 = createSourceIdentifier
-          val work0 = identifiedWork(canonicalId = "0")
+          val work0 = indexedWork(canonicalId = "0")
             .otherIdentifiers(List(otherIdentifier0))
-          val work1 = identifiedWork(canonicalId = "1")
+          val work1 = indexedWork(canonicalId = "1")
             .otherIdentifiers(List(otherIdentifier1))
 
           insertIntoElasticsearch(worksIndex, work0, work1)
@@ -40,6 +40,7 @@ class WorksIncludesTest
                    "id": "${work0.state.canonicalId}",
                    "title": "${work0.data.title.get}",
                    "alternativeTitles": [],
+                   "availableOnline": false,
                    "identifiers": [
                      ${identifier(work0.sourceIdentifier)},
                      ${identifier(otherIdentifier0)}
@@ -50,6 +51,7 @@ class WorksIncludesTest
                    "id": "${work1.state.canonicalId}",
                    "title": "${work1.data.title.get}",
                    "alternativeTitles": [],
+                   "availableOnline": false,
                    "identifiers": [
                      ${identifier(work1.sourceIdentifier)},
                      ${identifier(otherIdentifier1)}
@@ -67,7 +69,7 @@ class WorksIncludesTest
       withWorksApi {
         case (worksIndex, routes) =>
           val otherIdentifier = createSourceIdentifier
-          val work = identifiedWork().otherIdentifiers(List(otherIdentifier))
+          val work = indexedWork().otherIdentifiers(List(otherIdentifier))
           insertIntoElasticsearch(worksIndex, work)
 
           assertJsonResponse(
@@ -79,6 +81,7 @@ class WorksIncludesTest
                 "id": "${work.state.canonicalId}",
                 "title": "${work.data.title.get}",
                 "alternativeTitles": [],
+                "availableOnline": false,
                 "identifiers": [
                   ${identifier(work.sourceIdentifier)},
                   ${identifier(otherIdentifier)}
@@ -93,7 +96,7 @@ class WorksIncludesTest
   it("renders the items if the items include is present") {
     withWorksApi {
       case (worksIndex, routes) =>
-        val work = identifiedWork()
+        val work = indexedWork()
           .items(
             List(
               createIdentifiedItemWith(title = Some("item title")),
@@ -111,6 +114,7 @@ class WorksIncludesTest
               "id": "${work.state.canonicalId}",
               "title": "${work.data.title.get}",
               "alternativeTitles": [],
+              "availableOnline": true,
               "items": [ ${items(work.data.items)} ]
             }
           """
@@ -125,8 +129,8 @@ class WorksIncludesTest
         case (worksIndex, routes) =>
           val subjects0 = List(createSubject)
           val subjects1 = List(createSubject)
-          val work0 = identifiedWork(canonicalId = "0").subjects(subjects0)
-          val work1 = identifiedWork(canonicalId = "1").subjects(subjects1)
+          val work0 = indexedWork(canonicalId = "0").subjects(subjects0)
+          val work1 = indexedWork(canonicalId = "1").subjects(subjects1)
 
           insertIntoElasticsearch(worksIndex, work0, work1)
 
@@ -140,6 +144,7 @@ class WorksIncludesTest
                    "id": "${work0.state.canonicalId}",
                    "title": "${work0.data.title.get}",
                    "alternativeTitles": [],
+                   "availableOnline": false,
                    "subjects": [ ${subjects(subjects0)}]
                  },
                  {
@@ -147,6 +152,7 @@ class WorksIncludesTest
                    "id": "${work1.state.canonicalId}",
                    "title": "${work1.data.title.get}",
                    "alternativeTitles": [],
+                   "availableOnline": false,
                    "subjects": [ ${subjects(subjects1)}]
                  }
                 ]
@@ -160,7 +166,7 @@ class WorksIncludesTest
       "includes a list of subjects on a single work endpoint if we pass ?include=subjects") {
       withWorksApi {
         case (worksIndex, routes) =>
-          val work = identifiedWork().subjects(List(createSubject))
+          val work = indexedWork().subjects(List(createSubject))
 
           insertIntoElasticsearch(worksIndex, work)
 
@@ -173,6 +179,7 @@ class WorksIncludesTest
                 "id": "${work.state.canonicalId}",
                 "title": "${work.data.title.get}",
                 "alternativeTitles": [],
+                "availableOnline": false,
                 "subjects": [ ${subjects(work.data.subjects)}]
               }
             """
@@ -188,8 +195,8 @@ class WorksIncludesTest
         case (worksIndex, routes) =>
           val genres1 = List(Genre("ornithology", List(Concept("ornithology"))))
           val genres2 = List(Genre("flying cars", List(Concept("flying cars"))))
-          val work1 = identifiedWork(canonicalId = "1").genres(genres1)
-          val work2 = identifiedWork(canonicalId = "2").genres(genres2)
+          val work1 = indexedWork(canonicalId = "1").genres(genres1)
+          val work2 = indexedWork(canonicalId = "2").genres(genres2)
 
           insertIntoElasticsearch(worksIndex, work1, work2)
 
@@ -203,6 +210,7 @@ class WorksIncludesTest
                    "id": "${work1.state.canonicalId}",
                    "title": "${work1.data.title.get}",
                    "alternativeTitles": [],
+                   "availableOnline": false,
                    "genres": [ ${genres(genres1)}]
                  },
                  {
@@ -210,6 +218,7 @@ class WorksIncludesTest
                    "id": "${work2.state.canonicalId}",
                    "title": "${work2.data.title.get}",
                    "alternativeTitles": [],
+                   "availableOnline": false,
                    "genres": [ ${genres(genres2)}]
                  }
                 ]
@@ -223,7 +232,7 @@ class WorksIncludesTest
       "includes a list of genres on a single work endpoint if we pass ?include=genres") {
       withWorksApi {
         case (worksIndex, routes) =>
-          val work = identifiedWork().genres(
+          val work = indexedWork().genres(
             List(Genre("ornithology", List(Concept("ornithology")))))
 
           insertIntoElasticsearch(worksIndex, work)
@@ -237,6 +246,7 @@ class WorksIncludesTest
                 "id": "${work.state.canonicalId}",
                 "title": "${work.data.title.get}",
                 "alternativeTitles": [],
+                "availableOnline": false,
                 "genres": [ ${genres(work.data.genres)}]
               }
             """
@@ -255,9 +265,9 @@ class WorksIncludesTest
           val contributors2 =
             List(Contributor(Person("Fred Astair"), roles = Nil))
           val work1 =
-            identifiedWork(canonicalId = "1").contributors(contributors1)
+            indexedWork(canonicalId = "1").contributors(contributors1)
           val work2 =
-            identifiedWork(canonicalId = "2").contributors(contributors2)
+            indexedWork(canonicalId = "2").contributors(contributors2)
 
           insertIntoElasticsearch(worksIndex, work1, work2)
 
@@ -271,6 +281,7 @@ class WorksIncludesTest
                    "id": "${work1.state.canonicalId}",
                    "title": "${work1.data.title.get}",
                    "alternativeTitles": [],
+                   "availableOnline": false,
                    "contributors": [ ${contributors(contributors1)}]
                  },
                  {
@@ -278,6 +289,7 @@ class WorksIncludesTest
                    "id": "${work2.state.canonicalId}",
                    "title": "${work2.data.title.get}",
                    "alternativeTitles": [],
+                   "availableOnline": false,
                    "contributors": [ ${contributors(contributors2)}]
                  }
                 ]
@@ -291,7 +303,7 @@ class WorksIncludesTest
       "includes a list of contributors on a single work endpoint if we pass ?include=contributors") {
       withWorksApi {
         case (worksIndex, routes) =>
-          val work = identifiedWork()
+          val work = indexedWork()
             .contributors(
               List(Contributor(Person("Ginger Rogers"), roles = Nil)))
 
@@ -306,6 +318,7 @@ class WorksIncludesTest
                 "id": "${work.state.canonicalId}",
                 "title": "${work.data.title.get}",
                 "alternativeTitles": [],
+                "availableOnline": false,
                 "contributors": [ ${contributors(work.data.contributors)}]
               }
             """
@@ -322,9 +335,9 @@ class WorksIncludesTest
           val productionEvents1 = createProductionEventList()
           val productionEvents2 = createProductionEventList()
           val work1 =
-            identifiedWork(canonicalId = "1").production(productionEvents1)
+            indexedWork(canonicalId = "1").production(productionEvents1)
           val work2 =
-            identifiedWork(canonicalId = "2").production(productionEvents2)
+            indexedWork(canonicalId = "2").production(productionEvents2)
 
           insertIntoElasticsearch(worksIndex, work1, work2)
 
@@ -338,6 +351,7 @@ class WorksIncludesTest
                    "id": "${work1.state.canonicalId}",
                    "title": "${work1.data.title.get}",
                    "alternativeTitles": [],
+                   "availableOnline": false,
                    "production": [ ${production(productionEvents1)}]
                  },
                  {
@@ -345,6 +359,7 @@ class WorksIncludesTest
                    "id": "${work2.state.canonicalId}",
                    "title": "${work2.data.title.get}",
                    "alternativeTitles": [],
+                   "availableOnline": false,
                    "production": [ ${production(productionEvents2)}]
                  }
                 ]
@@ -358,7 +373,7 @@ class WorksIncludesTest
       "includes a list of production on a single work endpoint if we pass ?include=production") {
       withWorksApi {
         case (worksIndex, routes) =>
-          val work = identifiedWork().production(createProductionEventList())
+          val work = indexedWork().production(createProductionEventList())
 
           insertIntoElasticsearch(worksIndex, work)
 
@@ -371,6 +386,7 @@ class WorksIncludesTest
                 "id": "${work.state.canonicalId}",
                 "title": "${work.data.title.get}",
                 "alternativeTitles": [],
+                "availableOnline": false,
                 "production": [ ${production(work.data.production)}]
               }
             """
@@ -388,8 +404,8 @@ class WorksIncludesTest
           val swedish = Language(label = "Swedish", id = "swe")
 
           val work1 =
-            identifiedWork(canonicalId = "1").languages(List(english, turkish))
-          val work2 = identifiedWork(canonicalId = "2").languages(List(swedish))
+            indexedWork(canonicalId = "1").languages(List(english, turkish))
+          val work2 = indexedWork(canonicalId = "2").languages(List(swedish))
 
           insertIntoElasticsearch(worksIndex, work1, work2)
 
@@ -403,6 +419,7 @@ class WorksIncludesTest
                    "id": "${work1.state.canonicalId}",
                    "title": "${work1.data.title.get}",
                    "alternativeTitles": [],
+                   "availableOnline": false,
                    "languages": [ ${languages(work1.data.languages)}]
                  },
                  {
@@ -410,6 +427,7 @@ class WorksIncludesTest
                    "id": "${work2.state.canonicalId}",
                    "title": "${work2.data.title.get}",
                    "alternativeTitles": [],
+                   "availableOnline": false,
                    "languages": [ ${languages(work2.data.languages)}]
                  }
                 ]
@@ -426,7 +444,7 @@ class WorksIncludesTest
           val turkish = Language(label = "Turkish", id = "tur")
           val swedish = Language(label = "Swedish", id = "swe")
 
-          val work = identifiedWork().languages(List(english, turkish, swedish))
+          val work = indexedWork().languages(List(english, turkish, swedish))
 
           insertIntoElasticsearch(worksIndex, work)
 
@@ -439,6 +457,7 @@ class WorksIncludesTest
                 "id": "${work.state.canonicalId}",
                 "title": "${work.data.title.get}",
                 "alternativeTitles": [],
+                "availableOnline": false,
                 "languages": [ ${languages(work.data.languages)}]
               }
             """
@@ -451,9 +470,9 @@ class WorksIncludesTest
     it("includes notes on the list endpoint if we pass ?include=notes") {
       withWorksApi {
         case (worksIndex, routes) =>
-          val work1 = identifiedWork(canonicalId = "1")
+          val work1 = indexedWork(canonicalId = "1")
             .notes(List(GeneralNote("GN1"), FundingInformation("FI1")))
-          val work2 = identifiedWork(canonicalId = "2")
+          val work2 = indexedWork(canonicalId = "2")
             .notes(List(GeneralNote("GN2.1"), GeneralNote("GN2.2")))
 
           insertIntoElasticsearch(worksIndex, work1, work2)
@@ -467,6 +486,7 @@ class WorksIncludesTest
                      "id": "${work1.state.canonicalId}",
                      "title": "${work1.data.title.get}",
                      "alternativeTitles": [],
+                     "availableOnline": false,
                      "notes": [
                        {
                          "noteType": {
@@ -493,6 +513,7 @@ class WorksIncludesTest
                      "id": "${work2.state.canonicalId}",
                      "title": "${work2.data.title.get}",
                      "alternativeTitles": [],
+                     "availableOnline": false,
                      "notes": [
                        {
                          "noteType": {
@@ -516,7 +537,7 @@ class WorksIncludesTest
       withWorksApi {
         case (worksIndex, routes) =>
           val work =
-            identifiedWork().notes(List(GeneralNote("A"), GeneralNote("B")))
+            indexedWork().notes(List(GeneralNote("A"), GeneralNote("B")))
           insertIntoElasticsearch(worksIndex, work)
           assertJsonResponse(
             routes,
@@ -527,6 +548,7 @@ class WorksIncludesTest
                 "id": "${work.state.canonicalId}",
                 "title": "${work.data.title.get}",
                 "alternativeTitles": [],
+                "availableOnline": false,
                 "notes": [
                    {
                      "noteType": {
@@ -551,10 +573,10 @@ class WorksIncludesTest
       withWorksApi {
         case (worksIndex, routes) =>
           val works = List(
-            identifiedWork()
+            indexedWork()
               .images(
                 (1 to 3).map(_ => createUnmergedImage.toIdentified).toList),
-            identifiedWork()
+            indexedWork()
               .images(
                 (1 to 3).map(_ => createUnmergedImage.toIdentified).toList)
           ).sortBy { _.state.canonicalId }
@@ -571,6 +593,7 @@ class WorksIncludesTest
                     "id": "${works.head.state.canonicalId}",
                     "title": "${works.head.data.title.get}",
                     "alternativeTitles": [],
+                    "availableOnline": false,
                     "images": [${workImageIncludes(works.head.data.images)}]
                   },
                   {
@@ -578,6 +601,7 @@ class WorksIncludesTest
                     "id": "${works(1).state.canonicalId}",
                     "title": "${works(1).data.title.get}",
                     "alternativeTitles": [],
+                    "availableOnline": false,
                     "images": [${workImageIncludes(works(1).data.images)}]
                   }
                 ]
@@ -593,7 +617,7 @@ class WorksIncludesTest
         case (worksIndex, routes) =>
           val images =
             (1 to 3).map(_ => createUnmergedImage.toIdentified).toList
-          val work = identifiedWork().images(images)
+          val work = indexedWork().images(images)
 
           insertIntoElasticsearch(worksIndex, work)
 
@@ -606,6 +630,7 @@ class WorksIncludesTest
                 "id": "${work.state.canonicalId}",
                 "title": "${work.data.title.get}",
                 "alternativeTitles": [],
+                "availableOnline": false,
                 "images": [${workImageIncludes(images)}]
               }
             """
@@ -616,9 +641,8 @@ class WorksIncludesTest
 
   describe("relation includes") {
     def work(path: String,
-             workType: WorkType): Work.Visible[WorkState.Identified] =
-      identifiedWork(
-        sourceIdentifier = createSourceIdentifierWith(value = path))
+             workType: WorkType): Work.Visible[WorkState.Indexed] =
+      indexedWork(sourceIdentifier = createSourceIdentifierWith(value = path))
         .collectionPath(CollectionPath(path = path))
         .title(path)
         .workType(workType)
@@ -646,10 +670,12 @@ class WorksIncludesTest
               "id": "${workC.state.canonicalId}",
               "title": "0/a/c",
               "alternativeTitles": [],
+              "availableOnline": false,
               "parts": [{
                 "id": "${workE.state.canonicalId}",
                 "title": "0/a/c/e",
                 "alternativeTitles": [],
+                "availableOnline": false,
                 "type": "Work"
               }]
             }
@@ -671,16 +697,19 @@ class WorksIncludesTest
               "id": "${workC.state.canonicalId}",
               "title": "0/a/c",
               "alternativeTitles": [],
+              "availableOnline": false,
               "partOf": [
                 {
                   "id": "${workA.state.canonicalId}",
                   "title": "0/a",
                   "alternativeTitles": [],
+                  "availableOnline": false,
                   "type": "Section",
                   "partOf": [{
                     "id": "${work0.state.canonicalId}",
                     "title": "0",
                     "alternativeTitles": [],
+                    "availableOnline": false,
                     "type": "Collection",
                     "partOf": []
                   }
@@ -705,10 +734,12 @@ class WorksIncludesTest
               "id": "${workC.state.canonicalId}",
               "title": "0/a/c",
               "alternativeTitles": [],
+              "availableOnline": false,
               "precededBy": [{
                 "id": "${workB.state.canonicalId}",
                 "title": "0/a/b",
                 "alternativeTitles": [],
+                "availableOnline": false,
                 "type": "Work"
               }]
             }
@@ -730,10 +761,12 @@ class WorksIncludesTest
               "id": "${workC.state.canonicalId}",
               "title": "0/a/c",
               "alternativeTitles": [],
+              "availableOnline": false,
               "succeededBy": [{
                 "id": "${workD.state.canonicalId}",
                 "title": "0/a/d",
                 "alternativeTitles": [],
+                "availableOnline": false,
                 "type": "Work"
               }]
             }

@@ -12,7 +12,7 @@ import uk.ac.wellcome.models.work.generators.{
   ItemsGenerators,
   WorkGenerators
 }
-import WorkState.Identified
+import WorkState.Indexed
 import org.scalatest.Assertion
 
 class RelatedWorkServiceTest
@@ -25,13 +25,12 @@ class RelatedWorkServiceTest
 
   val service = new RelatedWorkService(new ElasticsearchService(elasticClient))
 
-  def work(path: String, level: CollectionLevel): Work.Visible[Identified] =
-    identifiedWork(sourceIdentifier = createSourceIdentifierWith(value = path))
+  def work(path: String, level: CollectionLevel): Work.Visible[Indexed] =
+    indexedWork(sourceIdentifier = createSourceIdentifierWith(value = path))
       .title(path)
       .collectionPath(CollectionPath(path = path, level = Some(level)))
 
-  def storeWorks(index: Index,
-                 works: List[Work[Identified]] = works): Assertion =
+  def storeWorks(index: Index, works: List[Work[Indexed]] = works): Assertion =
     insertIntoElasticsearch(index, works: _*)
 
   val workA = work("a", CollectionLevel.Collection)
@@ -150,12 +149,10 @@ class RelatedWorkServiceTest
 
   it("Only returns core fields on related works") {
     withLocalWorksIndex { index =>
-      val workP = work("p", CollectionLevel.Collection) mapData (
-        _.copy[DataState.Identified](items = List(createIdentifiedItem))
-      )
-      val workQ = work("p/q", CollectionLevel.Series) mapData (
-        _.copy[DataState.Identified](notes = List(GeneralNote("hi")))
-      )
+      val workP =
+        work("p", CollectionLevel.Collection).items(List(createIdentifiedItem))
+      val workQ =
+        work("p/q", CollectionLevel.Series).notes(List(GeneralNote("hi")))
       val workR = work("p/q/r", CollectionLevel.Item)
       storeWorks(index, List(workP, workQ, workR))
       whenReady(service.retrieveRelatedWorks(index, workR)) { result =>
@@ -165,10 +162,12 @@ class RelatedWorkServiceTest
             partOf = Some(
               List(
                 RelatedWork(
-                  workQ.mapData(_.copy(notes = Nil)),
+                  workQ.notes(Nil),
                   RelatedWorks.partOf(
                     RelatedWork(
-                      workP.mapData(_.copy(items = Nil)),
+                      // This work will still have availableOnline = true
+                      // because the items exist, but are not included in the response
+                      workP.copy(data = workP.data.copy(items = Nil)),
                       RelatedWorks(partOf = Some(Nil))
                     )
                   )
@@ -203,7 +202,7 @@ class RelatedWorkServiceTest
 
   it("Returns no related works when work is not part of a collection") {
     withLocalWorksIndex { index =>
-      val workX = identifiedWork()
+      val workX = indexedWork()
       storeWorks(index, List(workA, work1, workX))
       whenReady(service.retrieveRelatedWorks(index, workX)) { result =>
         result shouldBe Right(RelatedWorks.nil)

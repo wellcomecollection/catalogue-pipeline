@@ -40,7 +40,7 @@ class SnapshotGeneratorFeatureTest
   it("completes a snapshot generation") {
     withFixtures {
       case (queue, messageSender, worksIndex, _, bucket) =>
-        val works = identifiedWorks(count = 3)
+        val works = indexedWorks(count = 3)
 
         insertIntoElasticsearch(worksIndex, works: _*)
 
@@ -79,6 +79,7 @@ class SnapshotGeneratorFeatureTest
               |  "production": [ ],
               |  "languages": [ ],
               |  "alternativeTitles": [ ],
+              |  "availableOnline": false,
               |  "notes": [ ],
               |  "images": [ ],
               |  "type": "Work"

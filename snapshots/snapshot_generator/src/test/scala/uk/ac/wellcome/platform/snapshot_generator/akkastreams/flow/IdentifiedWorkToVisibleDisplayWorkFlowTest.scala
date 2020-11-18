@@ -16,12 +16,12 @@ class IdentifiedWorkToVisibleDisplayWorkFlowTest
     with IntegrationPatience
     with WorkGenerators {
 
-  it("creates DisplayWorks from IdentifiedWorks") {
+  it("creates DisplayWorks from IndexedWorks") {
     withMaterializer { implicit materializer =>
-      val flow = IdentifiedWorkToVisibleDisplayWork(
+      val flow = IndexedWorkToVisibleDisplayWork(
         toDisplayWork = DisplayWork.apply(_, WorksIncludes.includeAll()))
 
-      val works = identifiedWorks(count = 3)
+      val works = indexedWorks(count = 3)
 
       val eventualDisplayWorks = Source(works)
         .via(flow)

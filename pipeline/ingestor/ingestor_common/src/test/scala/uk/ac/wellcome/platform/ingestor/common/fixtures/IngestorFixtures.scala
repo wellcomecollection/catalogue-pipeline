@@ -1,6 +1,5 @@
 package uk.ac.wellcome.platform.ingestor.common.fixtures
 
-import com.sksamuel.elastic4s.Index
 import io.circe.Decoder
 import org.scalatest.Suite
 import uk.ac.wellcome.akka.fixtures.Akka
@@ -21,12 +20,17 @@ trait IngestorFixtures
     with Akka {
   this: Suite =>
 
-  def withWorkerService[T, R](queue: Queue, index: Index, indexer: Indexer[T])(
-    testWith: TestWith[IngestorWorkerService[T], R])(
-    implicit dec: Decoder[T]): R =
+  def withWorkerService[T: Decoder, R](queue: Queue, indexer: Indexer[T])(
+    testWith: TestWith[IngestorWorkerService[T, T], R]): R =
+    withWorkerService(queue, indexer, identity[T])(testWith)
+
+  def withWorkerService[In: Decoder, Out, R](queue: Queue,
+                                             indexer: Indexer[Out],
+                                             transform: In => Out)(
+    testWith: TestWith[IngestorWorkerService[In, Out], R]): R =
     withActorSystem { implicit actorSystem =>
       {
-        withBigMessageStream[T, R](queue) { messageStream =>
+        withBigMessageStream[In, R](queue) { messageStream =>
           val ingestorConfig = IngestorConfig(
             batchSize = 100,
             flushInterval = 1 seconds
@@ -35,7 +39,8 @@ trait IngestorFixtures
           val workerService = new IngestorWorkerService(
             documentIndexer = indexer,
             ingestorConfig = ingestorConfig,
-            messageStream = messageStream
+            messageStream = messageStream,
+            transformBeforeIndex = transform
           )
 
           workerService.run()

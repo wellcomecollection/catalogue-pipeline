@@ -9,7 +9,7 @@ import uk.ac.wellcome.models.work.internal.{
   WorkState,
   WorkType
 }
-import WorkState.Identified
+import WorkState.Indexed
 
 @Schema(
   name = "Work",
@@ -26,7 +26,7 @@ case class DisplayWork(
   ) title: Option[String],
   @Schema(
     `type` = "List[String]",
-    description = "Alternative titles of  the work."
+    description = "Alternative titles of the work."
   ) alternativeTitles: List[String],
   @Schema(
     `type` = "String",
@@ -82,6 +82,10 @@ case class DisplayWork(
     description = "List of items related to this work."
   ) items: Option[List[DisplayItem]] = None,
   @Schema(
+    description = "Whether the work contains an item with a digital location",
+    `type` = "Boolean"
+  ) availableOnline: Boolean = false,
+  @Schema(
     description = "Relates a work to its production events."
   ) production: Option[List[DisplayProductionEvent]] = None,
   @Schema(
@@ -129,8 +133,7 @@ case class DisplayWork(
 
 case object DisplayWork {
 
-  def apply(work: Work.Visible[Identified],
-            includes: WorksIncludes): DisplayWork =
+  def apply(work: Work.Visible[Indexed], includes: WorksIncludes): DisplayWork =
     DisplayWork(
       id = work.state.canonicalId,
       title = work.data.title,
@@ -167,6 +170,7 @@ case object DisplayWork {
             DisplayItem(_, includesIdentifiers = includes.identifiers)
           })
         else None,
+      availableOnline = work.state.derivedData.availableOnline,
       production =
         if (includes.production) Some(work.data.production.map {
           DisplayProductionEvent(_, includesIdentifiers = includes.identifiers)
@@ -190,10 +194,10 @@ case object DisplayWork {
       ontologyType = displayWorkType(work.data.workType),
     )
 
-  def apply(work: Work.Visible[Identified]): DisplayWork =
+  def apply(work: Work.Visible[Indexed]): DisplayWork =
     DisplayWork(work = work, includes = WorksIncludes())
 
-  def apply(work: Work.Visible[Identified],
+  def apply(work: Work.Visible[Indexed],
             includes: WorksIncludes,
             relatedWorks: RelatedWorks): DisplayWork =
     DisplayWork(work, includes).copy(
@@ -201,7 +205,7 @@ case object DisplayWork {
         if (includes.parts)
           relatedWorks.parts.map { parts =>
             parts.collect {
-              case RelatedWork(work: Work.Visible[Identified], related) =>
+              case RelatedWork(work: Work.Visible[Indexed], related) =>
                 DisplayWork(work, includes, related)
             }
           } else None,
@@ -209,7 +213,7 @@ case object DisplayWork {
         if (includes.partOf)
           relatedWorks.partOf.map { partOf =>
             partOf.collect {
-              case RelatedWork(work: Work.Visible[Identified], related) =>
+              case RelatedWork(work: Work.Visible[Indexed], related) =>
                 DisplayWork(work, includes, related)
             }
           } else None,
@@ -217,7 +221,7 @@ case object DisplayWork {
         if (includes.precededBy)
           relatedWorks.precededBy.map { precededBy =>
             precededBy.collect {
-              case RelatedWork(work: Work.Visible[Identified], related) =>
+              case RelatedWork(work: Work.Visible[Indexed], related) =>
                 DisplayWork(work, includes, related)
             }
           } else None,
@@ -225,7 +229,7 @@ case object DisplayWork {
         if (includes.succeededBy)
           relatedWorks.succeededBy.map { succeededBy =>
             succeededBy.collect {
-              case RelatedWork(work: Work.Visible[Identified], related) =>
+              case RelatedWork(work: Work.Visible[Indexed], related) =>
                 DisplayWork(work, includes, related)
             }
           } else None,

@@ -20,21 +20,10 @@ sealed trait Work[State <: WorkState] {
   def identifiers: List[SourceIdentifier] =
     sourceIdentifier :: data.otherIdentifiers
 
-  def mapData(f: WorkData[State#WorkDataState] => WorkData[State#WorkDataState])
-    : Work[State] =
-    this match {
-      case Work.Visible(version, data, state) =>
-        Work.Visible(version, f(data), state)
-      case Work.Invisible(version, data, state, reasons) =>
-        Work.Invisible(version, f(data), state, reasons)
-      case Work.Redirected(version, redirect, state) =>
-        Work.Redirected(version, redirect, state)
-    }
-
-  def transition[OutState <: WorkState](args: OutState#TransitionArgs)(
+  def transition[OutState <: WorkState](args: OutState#TransitionArgs = ())(
     implicit transition: WorkFsm.Transition[State, OutState])
     : Work[OutState] = {
-    val outState = transition.state(state, args)
+    val outState = transition.state(state, data, args)
     val outData = transition.data(data)
     this match {
       case Work.Visible(version, _, _) =>
@@ -121,6 +110,10 @@ case class WorkData[State <: DataState](
   *      | (id minter)
   *      ▼
   *  Identified
+  *      |
+  *      | (ingestor)
+  *      ▼
+  *   Indexed
   */
 sealed trait WorkState {
 
@@ -175,6 +168,20 @@ object WorkState {
 
     override def id = canonicalId
   }
+
+  case class Indexed(
+    sourceIdentifier: SourceIdentifier,
+    canonicalId: String,
+    modifiedTime: Instant,
+    derivedData: DerivedData,
+    relations: Relations[DataState.Identified] = Relations.none
+  ) extends WorkState {
+
+    type WorkDataState = DataState.Identified
+    type TransitionArgs = Unit
+
+    override def id = canonicalId
+  }
 }
 
 /** The WorkFsm contains all possible transitions between work states.
@@ -188,7 +195,9 @@ object WorkFsm {
 
   sealed trait Transition[InState <: WorkState, OutState <: WorkState] {
 
-    def state(state: InState, args: OutState#TransitionArgs): OutState
+    def state(state: InState,
+              data: WorkData[InState#WorkDataState],
+              args: OutState#TransitionArgs): OutState
 
     def data(
       data: WorkData[InState#WorkDataState]): WorkData[OutState#WorkDataState]
@@ -197,7 +206,9 @@ object WorkFsm {
   }
 
   implicit val sourceToMerged = new Transition[Source, Merged] {
-    def state(state: Source, args: Option[Instant]): Merged =
+    def state(state: Source,
+              data: WorkData[DataState.Unidentified],
+              args: Option[Instant]): Merged =
       Merged(
         state.sourceIdentifier,
         args.getOrElse(state.modifiedTime)
@@ -210,11 +221,29 @@ object WorkFsm {
 
   implicit val mergedToDenormalised = new Transition[Merged, Denormalised] {
     def state(state: Merged,
+              data: WorkData[DataState.Unidentified],
               relations: Relations[DataState.Unidentified]): Denormalised =
       Denormalised(state.sourceIdentifier, state.modifiedTime, relations)
 
     def data(data: WorkData[DataState.Unidentified]) = data
 
     def redirect(redirect: IdState.Identifiable) = redirect
+  }
+
+  implicit val identifiedToDerived = new Transition[Identified, Indexed] {
+    def state(state: Identified,
+              data: WorkData[DataState.Identified],
+              args: Unit = ()) =
+      Indexed(
+        sourceIdentifier = state.sourceIdentifier,
+        canonicalId = state.canonicalId,
+        modifiedTime = state.modifiedTime,
+        derivedData = DerivedData(data),
+        relations = state.relations
+      )
+
+    def data(data: WorkData[DataState.Identified]) = data
+
+    def redirect(redirect: IdState.Identified) = redirect
   }
 }

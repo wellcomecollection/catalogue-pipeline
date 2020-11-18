@@ -21,7 +21,7 @@ class IngestorWorkerServiceTest
     val index = createIndex
     withLocalSqsQueue() { queue =>
       withElasticIndexer[SampleDocument, Any](index) { indexer =>
-        withWorkerService[SampleDocument, Any](queue, index, indexer) { _ =>
+        withWorkerService[SampleDocument, Any](queue, indexer) { _ =>
           eventuallyIndexExists(index)
         }
       }
@@ -35,7 +35,7 @@ class IngestorWorkerServiceTest
         sendMessage[SampleDocument](queue = queue, obj = document)
         val index = createIndex
         withElasticIndexer[SampleDocument, Any](index) { indexer =>
-          withWorkerService[SampleDocument, Any](queue, index, indexer) { _ =>
+          withWorkerService[SampleDocument, Any](queue, indexer) { _ =>
             assertElasticsearchEventuallyHas(index = index, document)
 
             assertQueueEmpty(queue)
@@ -43,7 +43,29 @@ class IngestorWorkerServiceTest
           }
         }
     }
+  }
 
+  it("can transform documents before indexing") {
+    val document = SampleDocument(1, createCanonicalId, randomAlphanumeric())
+    val documentTransformer = (doc: SampleDocument) => doc.copy(title = "Beep")
+    withLocalSqsQueuePair(visibilityTimeout = 10) {
+      case QueuePair(queue, dlq) =>
+        sendMessage[SampleDocument](queue = queue, obj = document)
+        val index = createIndex
+        withElasticIndexer[SampleDocument, Any](index) { indexer =>
+          withWorkerService[SampleDocument, SampleDocument, Any](
+            queue,
+            indexer,
+            documentTransformer) { _ =>
+            assertElasticsearchEventuallyHas(
+              index = index,
+              document.copy(title = "Beep"))
+
+            assertQueueEmpty(queue)
+            assertQueueEmpty(dlq)
+          }
+        }
+    }
   }
 
   it("ingests lots of documents") {
@@ -55,7 +77,7 @@ class IngestorWorkerServiceTest
           sendMessage[SampleDocument](queue = queue, obj = document))
         val index = createIndex
         withElasticIndexer[SampleDocument, Any](index) { indexer =>
-          withWorkerService[SampleDocument, Any](queue, index, indexer) { _ =>
+          withWorkerService[SampleDocument, Any](queue, indexer) { _ =>
             assertElasticsearchEventuallyHas(index = index, documents: _*)
             eventually {
               assertQueueEmpty(queue)
@@ -72,7 +94,7 @@ class IngestorWorkerServiceTest
     withLocalSqsQueuePair(visibilityTimeout = 1) {
       case QueuePair(queue, dlq) =>
         withElasticIndexer[SampleDocument, Any](index) { indexer =>
-          withWorkerService[SampleDocument, Any](queue, index, indexer) { _ =>
+          withWorkerService[SampleDocument, Any](queue, indexer) { _ =>
             sendInvalidJSONto(queue)
 
             eventually {
@@ -105,7 +127,7 @@ class IngestorWorkerServiceTest
           )
           withElasticIndexer[SampleDocument, Any](index, brokenClient) {
             indexer =>
-              val service = new IngestorWorkerService(
+              val service = IngestorWorkerService(
                 ingestorConfig = config,
                 messageStream = messageStream,
                 documentIndexer = indexer

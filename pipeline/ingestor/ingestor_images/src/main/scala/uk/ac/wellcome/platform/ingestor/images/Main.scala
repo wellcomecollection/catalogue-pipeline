@@ -28,7 +28,7 @@ object Main extends WellcomeTypesafeApp {
     val indexName = config.requireString("es.index")
     val elasticClient = ElasticBuilder.buildElasticClient(config)
     val index = Index(indexName)
-    new IngestorWorkerService(
+    IngestorWorkerService(
       ingestorConfig = IngestorConfigBuilder.buildIngestorConfig(config),
       documentIndexer =
         new ElasticIndexer(elasticClient, index, ImagesIndexConfig),

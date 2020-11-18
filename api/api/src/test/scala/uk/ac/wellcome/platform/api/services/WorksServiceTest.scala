@@ -9,7 +9,6 @@ import com.sksamuel.elastic4s.{ElasticError, Index}
 import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-
 import uk.ac.wellcome.display.models.AggregationRequest
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.models.work.generators.{
@@ -27,7 +26,7 @@ import uk.ac.wellcome.models.work.internal.Format.{
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
 import uk.ac.wellcome.platform.api.models._
-import WorkState.Identified
+import WorkState.Indexed
 
 class WorksServiceTest
     extends AnyFunSpec
@@ -47,7 +46,7 @@ class WorksServiceTest
 
   describe("listOrSearchWorks") {
     it("gets records in Elasticsearch") {
-      val works = identifiedWorks(count = 2)
+      val works = indexedWorks(count = 2)
 
       assertListOrSearchResultIsCorrect(
         allWorks = works,
@@ -66,7 +65,7 @@ class WorksServiceTest
 
     it("returns an empty result set when asked for a page that does not exist") {
       assertListOrSearchResultIsCorrect(
-        allWorks = identifiedWorks(count = 3),
+        allWorks = indexedWorks(count = 3),
         expectedWorks = Seq(),
         expectedTotalResults = 3,
         worksSearchOptions = createWorksSearchOptionsWith(pageNumber = 4)
@@ -74,8 +73,8 @@ class WorksServiceTest
     }
 
     it("does not list invisible works") {
-      val visibleWorks = identifiedWorks(count = 3)
-      val invisibleWorks = identifiedWorks(count = 3).map { _.invisible() }
+      val visibleWorks = indexedWorks(count = 3)
+      val invisibleWorks = indexedWorks(count = 3).map { _.invisible() }
 
       assertListOrSearchResultIsCorrect(
         allWorks = visibleWorks ++ invisibleWorks,
@@ -86,9 +85,9 @@ class WorksServiceTest
     }
 
     it("filters records by format") {
-      val work1 = identifiedWork().format(ManuscriptsAsian)
-      val work2 = identifiedWork().format(ManuscriptsAsian)
-      val workWithWrongFormat = identifiedWork().format(CDRoms)
+      val work1 = indexedWork().format(ManuscriptsAsian)
+      val work2 = indexedWork().format(ManuscriptsAsian)
+      val workWithWrongFormat = indexedWork().format(CDRoms)
 
       assertListOrSearchResultIsCorrect(
         allWorks = Seq(work1, work2, workWithWrongFormat),
@@ -101,10 +100,10 @@ class WorksServiceTest
     }
 
     it("filters records by multiple formats") {
-      val work1 = identifiedWork().format(ManuscriptsAsian)
-      val work2 = identifiedWork().format(ManuscriptsAsian)
-      val work3 = identifiedWork().format(Books)
-      val workWithWrongFormat = identifiedWork().format(CDRoms)
+      val work1 = indexedWork().format(ManuscriptsAsian)
+      val work2 = indexedWork().format(ManuscriptsAsian)
+      val work3 = indexedWork().format(Books)
+      val workWithWrongFormat = indexedWork().format(CDRoms)
 
       assertListOrSearchResultIsCorrect(
         allWorks = Seq(work1, work2, work3, workWithWrongFormat),
@@ -129,8 +128,8 @@ class WorksServiceTest
     }
 
     it("only finds results that match a query if doing a full-text search") {
-      val workDodo = identifiedWork().title("A drawing of a dodo")
-      val workMouse = identifiedWork().title("A mezzotint of a mouse")
+      val workDodo = indexedWork().title("A drawing of a dodo")
+      val workMouse = indexedWork().title("A mezzotint of a mouse")
 
       assertListOrSearchResultIsCorrect(
         allWorks = List(workDodo, workMouse),
@@ -150,7 +149,7 @@ class WorksServiceTest
     }
 
     it("doesn't throw an exception if passed an invalid query string") {
-      val workEmu = identifiedWork().title("An etching of an emu")
+      val workEmu = indexedWork().title("An etching of an emu")
 
       // unmatched quotes are a lexical error in the Elasticsearch parser
       assertListOrSearchResultIsCorrect(
@@ -165,7 +164,7 @@ class WorksServiceTest
 
   describe("simple query string syntax") {
     it("uses only PHRASE simple query syntax") {
-      val work = identifiedWork()
+      val work = indexedWork()
         .title(
           "+a -title | with (all the simple) query~4 syntax operators in it*")
 
@@ -181,7 +180,7 @@ class WorksServiceTest
 
     it(
       "doesn't throw a too_many_clauses exception when passed a query that creates too many clauses") {
-      val work = identifiedWork().title("(a b c d e) h")
+      val work = indexedWork().title("(a b c d e) h")
 
       // This query uses precedence and would exceed the default 1024 clauses
       assertListOrSearchResultIsCorrect(
@@ -195,10 +194,10 @@ class WorksServiceTest
 
     it("aggregates formats") {
       withLocalWorksIndex { index =>
-        val work1 = identifiedWork().format(Books)
-        val work2 = identifiedWork().format(Books)
-        val work3 = identifiedWork().format(Audio)
-        val work4 = identifiedWork().format(ArchivesAndManuscripts)
+        val work1 = indexedWork().format(Books)
+        val work2 = indexedWork().format(Books)
+        val work3 = indexedWork().format(Audio)
+        val work4 = indexedWork().format(ArchivesAndManuscripts)
 
         val worksSearchOptions =
           createWorksSearchOptionsWith(
@@ -227,8 +226,8 @@ class WorksServiceTest
   }
 
   describe("filter works by date") {
-    def createDatedWork(dateLabel: String): Work.Visible[Identified] =
-      identifiedWork()
+    def createDatedWork(dateLabel: String): Work.Visible[Indexed] =
+      indexedWork()
         .production(
           List(createProductionEventWith(dateLabel = Some(dateLabel))))
 
@@ -283,7 +282,7 @@ class WorksServiceTest
   describe("findWorkById") {
     it("gets a DisplayWork by id") {
       withLocalWorksIndex { index =>
-        val work = identifiedWork()
+        val work = indexedWork()
 
         insertIntoElasticsearch(index, work)
 
@@ -328,8 +327,8 @@ class WorksServiceTest
   }
 
   private def assertListOrSearchResultIsCorrect(
-    allWorks: Seq[Work[Identified]],
-    expectedWorks: Seq[Work[Identified]],
+    allWorks: Seq[Work[Indexed]],
+    expectedWorks: Seq[Work[Indexed]],
     expectedTotalResults: Int,
     expectedAggregations: Option[Aggregations] = None,
     worksSearchOptions: SearchOptions = createWorksSearchOptions
@@ -345,10 +344,10 @@ class WorksServiceTest
 
   private def assertResultIsCorrect(
     partialSearchFunction: (Index, SearchOptions) => Future[
-      Either[ElasticError, ResultList[Work.Visible[Identified], Aggregations]]]
+      Either[ElasticError, ResultList[Work.Visible[Indexed], Aggregations]]]
   )(
-    allWorks: Seq[Work[Identified]],
-    expectedWorks: Seq[Work[Identified]],
+    allWorks: Seq[Work[Indexed]],
+    expectedWorks: Seq[Work[Indexed]],
     expectedTotalResults: Int,
     expectedAggregations: Option[Aggregations],
     worksSearchOptions: SearchOptions

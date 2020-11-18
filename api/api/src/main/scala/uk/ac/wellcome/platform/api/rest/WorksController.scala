@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.api.rest
 
 import scala.concurrent.{ExecutionContext, Future}
-
 import akka.http.scaladsl.model.StatusCodes.Found
 import akka.http.scaladsl.server.Route
 import com.sksamuel.elastic4s.Index
@@ -17,7 +16,7 @@ import uk.ac.wellcome.platform.api.services.{
   WorksService
 }
 import uk.ac.wellcome.platform.api.Tracing
-import WorkState.Identified
+import WorkState.Indexed
 
 class WorksController(elasticsearchService: ElasticsearchService,
                       implicit val apiConfig: ApiConfig,
@@ -63,16 +62,16 @@ class WorksController(elasticsearchService: ElasticsearchService,
         worksService
           .findWorkById(id)(index)
           .flatMap {
-            case Right(Some(work: Work.Visible[Identified])) =>
+            case Right(Some(work: Work.Visible[Indexed])) =>
               if (includes.anyRelation) {
                 retrieveRelatedWorks(index, work).map { relatedWorks =>
                   workFound(work, relatedWorks, includes)
                 }
               } else
                 Future.successful(workFound(work, None, includes))
-            case Right(Some(work: Work.Redirected[Identified])) =>
+            case Right(Some(work: Work.Redirected[Indexed])) =>
               Future.successful(workRedirect(work))
-            case Right(Some(work: Work.Invisible[Identified])) =>
+            case Right(Some(work: Work.Invisible[Indexed])) =>
               Future.successful(gone("This work has been deleted"))
             case Right(None) =>
               Future.successful(notFound(s"Work not found for identifier $id"))
@@ -83,7 +82,7 @@ class WorksController(elasticsearchService: ElasticsearchService,
 
   private def retrieveRelatedWorks(
     index: Index,
-    work: Work.Visible[Identified]): Future[Option[RelatedWorks]] =
+    work: Work.Visible[Indexed]): Future[Option[RelatedWorks]] =
     relatedWorkService
       .retrieveRelatedWorks(index, work)
       .map {
@@ -95,13 +94,13 @@ class WorksController(elasticsearchService: ElasticsearchService,
         case Right(relatedWorks) => Some(relatedWorks)
       }
 
-  def workRedirect(work: Work.Redirected[Identified]): Route =
+  def workRedirect(work: Work.Redirected[Indexed]): Route =
     extractPublicUri { uri =>
       val newPath = (work.redirect.canonicalId :: uri.path.reverse.tail).reverse
       redirect(uri.withPath(newPath), Found)
     }
 
-  def workFound(work: Work.Visible[Identified],
+  def workFound(work: Work.Visible[Indexed],
                 relatedWorks: Option[RelatedWorks],
                 includes: WorksIncludes): Route =
     complete(

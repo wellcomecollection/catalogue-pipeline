@@ -2,13 +2,19 @@ package uk.ac.wellcome.platform.api.works
 
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.generators.ProductionEventGenerators
+import uk.ac.wellcome.models.work.generators.{
+  ItemsGenerators,
+  ProductionEventGenerators
+}
 
-class WorksTest extends ApiWorksTestBase with ProductionEventGenerators {
+class WorksTest
+    extends ApiWorksTestBase
+    with ProductionEventGenerators
+    with ItemsGenerators {
   it("returns a list of works") {
     withWorksApi {
       case (worksIndex, routes) =>
-        val works = identifiedWorks(count = 3).sortBy {
+        val works = indexedWorks(count = 3).sortBy {
           _.state.canonicalId
         }
 
@@ -23,7 +29,7 @@ class WorksTest extends ApiWorksTestBase with ProductionEventGenerators {
   it("returns a single work when requested with id") {
     withWorksApi {
       case (worksIndex, routes) =>
-        val work = identifiedWork()
+        val work = indexedWork()
 
         insertIntoElasticsearch(worksIndex, work)
 
@@ -35,7 +41,8 @@ class WorksTest extends ApiWorksTestBase with ProductionEventGenerators {
              ${singleWorkResult(apiPrefix)},
              "id": "${work.state.canonicalId}",
              "title": "${work.data.title.get}",
-             "alternativeTitles": []
+             "alternativeTitles": [],
+             "availableOnline": false
             }
           """
         }
@@ -45,7 +52,7 @@ class WorksTest extends ApiWorksTestBase with ProductionEventGenerators {
   it("returns optional fields when they exist") {
     withWorksApi {
       case (worksIndex, routes) =>
-        val work = identifiedWork()
+        val work = indexedWork()
           .duration(3600)
           .edition("Special edition")
 
@@ -59,6 +66,7 @@ class WorksTest extends ApiWorksTestBase with ProductionEventGenerators {
              "id": "${work.state.canonicalId}",
              "title": "${work.data.title.get}",
              "alternativeTitles": [],
+             "availableOnline": false,
              "edition": "Special edition",
              "duration": 3600
             }
@@ -71,7 +79,7 @@ class WorksTest extends ApiWorksTestBase with ProductionEventGenerators {
     "returns the requested page of results when requested with page & pageSize") {
     withWorksApi {
       case (worksIndex, routes) =>
-        val works = identifiedWorks(count = 3).sortBy {
+        val works = indexedWorks(count = 3).sortBy {
           _.state.canonicalId
         }
 
@@ -140,8 +148,8 @@ class WorksTest extends ApiWorksTestBase with ProductionEventGenerators {
   it("returns matching results if doing a full-text search") {
     withWorksApi {
       case (worksIndex, routes) =>
-        val workDodo = identifiedWork().title("A drawing of a dodo")
-        val workMouse = identifiedWork().title("A mezzotint of a mouse")
+        val workDodo = indexedWork().title("A drawing of a dodo")
+        val workMouse = indexedWork().title("A mezzotint of a mouse")
         insertIntoElasticsearch(worksIndex, workDodo, workMouse)
 
         assertJsonResponse(routes, s"/$apiPrefix/works?query=cat") {
@@ -158,10 +166,10 @@ class WorksTest extends ApiWorksTestBase with ProductionEventGenerators {
     withWorksApi {
       case (worksIndex, routes) =>
         withLocalWorksIndex { altIndex =>
-          val work = identifiedWork()
+          val work = indexedWork()
           insertIntoElasticsearch(worksIndex, work)
 
-          val altWork = identifiedWork()
+          val altWork = indexedWork()
           insertIntoElasticsearch(index = altIndex, altWork)
 
           assertJsonResponse(
@@ -172,7 +180,8 @@ class WorksTest extends ApiWorksTestBase with ProductionEventGenerators {
                ${singleWorkResult(apiPrefix)},
                "id": "${work.state.canonicalId}",
                "title": "${work.data.title.get}",
-               "alternativeTitles": []
+               "alternativeTitles": [],
+               "availableOnline": false
               }
             """
           }
@@ -185,7 +194,8 @@ class WorksTest extends ApiWorksTestBase with ProductionEventGenerators {
                ${singleWorkResult(apiPrefix)},
                "id": "${altWork.state.canonicalId}",
                "title": "${altWork.data.title.get}",
-               "alternativeTitles": []
+               "alternativeTitles": [],
+               "availableOnline": false
               }
             """
           }
@@ -197,10 +207,10 @@ class WorksTest extends ApiWorksTestBase with ProductionEventGenerators {
     withWorksApi {
       case (worksIndex, routes) =>
         withLocalWorksIndex { altIndex =>
-          val work = identifiedWork().title("Playing with pangolins")
+          val work = indexedWork().title("Playing with pangolins")
           insertIntoElasticsearch(worksIndex, work)
 
-          val altWork = identifiedWork().title("Playing with pangolins")
+          val altWork = indexedWork().title("Playing with pangolins")
           insertIntoElasticsearch(index = altIndex, altWork)
 
           assertJsonResponse(routes, s"/$apiPrefix/works?query=pangolins") {
@@ -219,14 +229,15 @@ class WorksTest extends ApiWorksTestBase with ProductionEventGenerators {
   it("shows the thumbnail field if available") {
     withWorksApi {
       case (worksIndex, routes) =>
-        val work = identifiedWork()
-          .thumbnail(
-            DigitalLocationDeprecated(
-              locationType = LocationType("thumbnail-image"),
-              url = "https://iiif.example.org/1234/default.jpg",
-              license = Some(License.CCBY)
-            )
-          )
+        val thumbnailLocation = DigitalLocationDeprecated(
+          locationType = LocationType("thumbnail-image"),
+          url = "https://iiif.example.org/1234/default.jpg",
+          license = Some(License.CCBY)
+        )
+        val work = indexedWork()
+          .thumbnail(thumbnailLocation)
+          .items(
+            List(createIdentifiedItemWith(locations = List(thumbnailLocation))))
         insertIntoElasticsearch(worksIndex, work)
 
         assertJsonResponse(routes, s"/$apiPrefix/works") {
@@ -239,6 +250,7 @@ class WorksTest extends ApiWorksTestBase with ProductionEventGenerators {
                  "id": "${work.state.canonicalId}",
                  "title": "${work.data.title.get}",
                  "alternativeTitles": [],
+                 "availableOnline": true,
                  "thumbnail": ${location(work.data.thumbnail.get)}
                 }
               ]
@@ -249,8 +261,8 @@ class WorksTest extends ApiWorksTestBase with ProductionEventGenerators {
   }
 
   def createDatedWork(canonicalId: String,
-                      dateLabel: String): Work.Visible[WorkState.Identified] =
-    identifiedWork(canonicalId = canonicalId)
+                      dateLabel: String): Work.Visible[WorkState.Indexed] =
+    indexedWork(canonicalId = canonicalId)
       .production(List(createProductionEventWith(dateLabel = Some(dateLabel))))
 
   it("supports sorting by production date") {

@@ -6,7 +6,7 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.work.generators._
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.api.ApiTestBase
-import WorkState.Identified
+import WorkState.Indexed
 
 trait ApiWorksTestBase
     extends ApiTestBase
@@ -16,8 +16,8 @@ trait ApiWorksTestBase
     with SubjectGenerators {
 
   implicit object IdentifiedWorkIndexable
-      extends Indexable[Work.Visible[Identified]] {
-    override def json(work: Work.Visible[Identified]): String =
+      extends Indexable[Work.Visible[Indexed]] {
+    override def json(work: Work.Visible[Indexed]): String =
       toJson(work).get
   }
 
@@ -28,12 +28,13 @@ trait ApiWorksTestBase
         "type": "$ontologyType"
      """.stripMargin
 
-  def workResponse(work: Work.Visible[Identified]): String =
+  def workResponse(work: Work.Visible[Indexed]): String =
     s"""
       | {
       |   "type": "${formatOntologyType(work.data.workType)}",
       |   "id": "${work.state.canonicalId}",
       |   "title": "${work.data.title.get}",
+      |   "availableOnline": ${hasDigitalLocations(work)},
       |   "alternativeTitles": []
       |   ${optionalObject("workType", format, work.data.format)}
       |   ${optionalObject("language", language, work.data.language)}
@@ -41,7 +42,7 @@ trait ApiWorksTestBase
     """.stripMargin
 
   def worksListResponse(apiPrefix: String,
-                        works: Seq[Work.Visible[Identified]]): String =
+                        works: Seq[Work.Visible[Indexed]]): String =
     s"""
        |{
        |  ${resultList(apiPrefix, totalResults = works.size)},
@@ -58,4 +59,9 @@ trait ApiWorksTestBase
       case WorkType.Series     => "Series"
       case WorkType.Section    => "Section"
     }
+
+  def hasDigitalLocations(work: Work.Visible[Indexed]): String =
+    work.data.items
+      .exists(_.locations.exists(_.isInstanceOf[DigitalLocationDeprecated]))
+      .toString
 }

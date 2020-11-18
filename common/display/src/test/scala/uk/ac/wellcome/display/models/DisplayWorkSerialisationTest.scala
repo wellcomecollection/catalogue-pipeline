@@ -22,7 +22,7 @@ class DisplayWorkSerialisationTest
     with ImageGenerators {
 
   it("serialises a DisplayWork") {
-    val work = identifiedWork()
+    val work = indexedWork()
       .format(Books)
       .description(randomAlphanumeric(100))
       .lettering(randomAlphanumeric(100))
@@ -37,7 +37,8 @@ class DisplayWorkSerialisationTest
       | "workType" : ${format(work.data.format.get)},
       | "lettering": "${work.data.lettering.get}",
       | "alternativeTitles": [],
-      | "createdDate": ${period(work.data.createdDate.get)}
+      | "createdDate": ${period(work.data.createdDate.get)},
+      | "availableOnline": false
       |}
     """.stripMargin
 
@@ -45,7 +46,7 @@ class DisplayWorkSerialisationTest
   }
 
   it("renders an item if the items include is present") {
-    val work = identifiedWork()
+    val work = indexedWork()
       .items(createIdentifiedItems(count = 1) :+ createUnidentifiableItemWith())
 
     val expectedJson = s"""
@@ -54,7 +55,8 @@ class DisplayWorkSerialisationTest
       | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
-      | "items": [ ${items(work.data.items)} ]
+      | "items": [ ${items(work.data.items)} ],
+      | "availableOnline": true
       |}
     """.stripMargin
 
@@ -65,7 +67,7 @@ class DisplayWorkSerialisationTest
   }
 
   it("includes 'items' if the items include is present, even with no items") {
-    val work = identifiedWork().items(Nil)
+    val work = indexedWork().items(Nil)
 
     val expectedJson = s"""
       |{
@@ -73,7 +75,8 @@ class DisplayWorkSerialisationTest
       | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
-      | "items": [ ]
+      | "items": [ ],
+      | "availableOnline": false
       |}
     """.stripMargin
 
@@ -91,7 +94,7 @@ class DisplayWorkSerialisationTest
       license = Some(License.CCBY)
     )
     val item = createIdentifiedItemWith(locations = List(location))
-    val workWithCopyright = identifiedWork().items(List(item))
+    val workWithCopyright = indexedWork().items(List(item))
 
     val expectedJson = s"""
       |{
@@ -114,7 +117,8 @@ class DisplayWorkSerialisationTest
       |       }
       |     ]
       |   }
-      | ]
+      | ],
+      | "availableOnline": true
       |}
     """.stripMargin
 
@@ -129,7 +133,7 @@ class DisplayWorkSerialisationTest
 
   it(
     "includes subject information in DisplayWork serialisation with the subjects include") {
-    val workWithSubjects = identifiedWork().subjects(
+    val workWithSubjects = indexedWork().subjects(
       (1 to 3).map(_ => createSubject).toList
     )
 
@@ -139,7 +143,8 @@ class DisplayWorkSerialisationTest
       | "id": "${workWithSubjects.state.canonicalId}",
       | "title": "${workWithSubjects.data.title.get}",
       | "alternativeTitles": [],
-      | "subjects": [${subjects(workWithSubjects.data.subjects)}]
+      | "subjects": [${subjects(workWithSubjects.data.subjects)}],
+      | "availableOnline": false
       |}
     """.stripMargin
 
@@ -154,7 +159,7 @@ class DisplayWorkSerialisationTest
 
   it(
     "includes production information in DisplayWork serialisation with the production include") {
-    val workWithProduction = identifiedWork().production(
+    val workWithProduction = indexedWork().production(
       createProductionEventList(count = 3)
     )
 
@@ -164,7 +169,8 @@ class DisplayWorkSerialisationTest
       | "id": "${workWithProduction.state.canonicalId}",
       | "title": "${workWithProduction.data.title.get}",
       | "alternativeTitles": [],
-      | "production": [${production(workWithProduction.data.production)}]
+      | "production": [${production(workWithProduction.data.production)}],
+      | "availableOnline": false
       |}
     """.stripMargin
 
@@ -179,7 +185,7 @@ class DisplayWorkSerialisationTest
 
   it(
     "includes the contributors in DisplayWork serialisation with the contribuotrs include") {
-    val work = identifiedWork()
+    val work = indexedWork()
       .format(EBooks)
       .description(randomAlphanumeric(100))
       .lettering(randomAlphanumeric(100))
@@ -200,7 +206,8 @@ class DisplayWorkSerialisationTest
       | "workType" : ${format(work.data.format.get)},
       | "lettering": "${work.data.lettering.get}",
       | "createdDate": ${period(work.data.createdDate.get)},
-      | "contributors": [${contributor(work.data.contributors.head)}]
+      | "contributors": [${contributor(work.data.contributors.head)}],
+      | "availableOnline": false
       |}
     """.stripMargin
 
@@ -212,7 +219,7 @@ class DisplayWorkSerialisationTest
 
   it(
     "includes genre information in DisplayWork serialisation with the genres include") {
-    val work = identifiedWork().genres(
+    val work = indexedWork().genres(
       List(
         Genre(
           label = "genre",
@@ -227,7 +234,8 @@ class DisplayWorkSerialisationTest
       | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
-      | "genres": [ ${genres(work.data.genres)} ]
+      | "genres": [ ${genres(work.data.genres)} ],
+      | "availableOnline": false
       |}
     """.stripMargin
 
@@ -239,7 +247,7 @@ class DisplayWorkSerialisationTest
 
   it(
     "includes 'notes' if the notes include is present, with similar notes grouped together") {
-    val work = identifiedWork().notes(
+    val work = indexedWork().notes(
       List(GeneralNote("A"), FundingInformation("B"), GeneralNote("C"))
     )
 
@@ -268,7 +276,8 @@ class DisplayWorkSerialisationTest
       |     "contents": ["B"],
       |     "type": "Note"
       |   }
-      | ]
+      | ],
+      | "availableOnline": false
       |}
     """.stripMargin
 
@@ -280,7 +289,7 @@ class DisplayWorkSerialisationTest
 
   it("includes a list of identifiers on DisplayWork") {
     val otherIdentifier = createSourceIdentifier
-    val work = identifiedWork().otherIdentifiers(List(otherIdentifier))
+    val work = indexedWork().otherIdentifiers(List(otherIdentifier))
 
     val expectedJson = s"""
       |{
@@ -291,7 +300,8 @@ class DisplayWorkSerialisationTest
       | "identifiers": [
       |   ${identifier(work.sourceIdentifier)},
       |   ${identifier(otherIdentifier)}
-      | ]
+      | ],
+      | "availableOnline": false
       |}
     """.stripMargin
 
@@ -302,7 +312,7 @@ class DisplayWorkSerialisationTest
   }
 
   it("always includes 'identifiers' with the identifiers include") {
-    val work = identifiedWork().otherIdentifiers(Nil)
+    val work = indexedWork().otherIdentifiers(Nil)
 
     val expectedJson = s"""
       |{
@@ -310,7 +320,8 @@ class DisplayWorkSerialisationTest
       | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
-      | "identifiers": [ ${identifier(work.sourceIdentifier)} ]
+      | "identifiers": [ ${identifier(work.sourceIdentifier)} ],
+      | "availableOnline": false
       |}
     """.stripMargin
 
@@ -321,7 +332,7 @@ class DisplayWorkSerialisationTest
   }
 
   it("includes image stubs with the images include") {
-    val work = identifiedWork().images(
+    val work = indexedWork().images(
       (1 to 3).map(_ => createUnmergedImage.toIdentified).toList
     )
 
@@ -331,7 +342,8 @@ class DisplayWorkSerialisationTest
       | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
-      | "images": [${workImageIncludes(work.data.images)}]
+      | "images": [${workImageIncludes(work.data.images)}],
+      | "availableOnline": false
       |}
     """.stripMargin
 
@@ -342,7 +354,7 @@ class DisplayWorkSerialisationTest
   }
 
   it("shows the thumbnail field if available") {
-    val work = identifiedWork().thumbnail(
+    val work = indexedWork().thumbnail(
       DigitalLocationDeprecated(
         locationType = LocationType("thumbnail-image"),
         url = "https://iiif.example.org/1234/default.jpg",
@@ -356,7 +368,8 @@ class DisplayWorkSerialisationTest
       | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
-      | "thumbnail": ${location(work.data.thumbnail.get)}
+      | "thumbnail": ${location(work.data.thumbnail.get)},
+      | "availableOnline": false
       |}
     """.stripMargin
 

@@ -36,7 +36,7 @@ class AggregationsTest
   it("returns more than 10 format aggregations") {
     val formats = Format.values
     val works = formats.flatMap { format =>
-      (0 to 4).map(_ => identifiedWork().format(format))
+      (0 to 4).map(_ => indexedWork().format(format))
     }
     withLocalWorksIndex { index =>
       insertIntoElasticsearch(index, works: _*)
@@ -64,7 +64,7 @@ class AggregationsTest
     )
 
     val works = dates.map { dateLabel =>
-      identifiedWork()
+      indexedWork()
         .production(
           List(createProductionEventWith(dateLabel = Some(dateLabel)))
         )
@@ -94,7 +94,7 @@ class AggregationsTest
   it("returns empty buckets if they exist") {
     val formats = Format.values
     val works = formats.flatMap { format =>
-      (0 to 4).map(_ => identifiedWork().format(format))
+      (0 to 4).map(_ => indexedWork().format(format))
     }
     withLocalWorksIndex { index =>
       insertIntoElasticsearch(index, works: _*)
@@ -118,7 +118,7 @@ class AggregationsTest
     val subjects = (0 to 5).map(_ => createSubject)
     val works = formats.zipWithIndex.map {
       case (format, i) =>
-        identifiedWork()
+        indexedWork()
           .format(format)
           .subjects(List(subjects(i / subjects.size)))
     }

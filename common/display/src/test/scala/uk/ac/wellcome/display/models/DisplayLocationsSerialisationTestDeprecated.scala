@@ -6,7 +6,7 @@ import uk.ac.wellcome.display.json.DisplayJsonUtil._
 import uk.ac.wellcome.display.test.util.JsonMapperTestUtil
 import uk.ac.wellcome.models.work.generators._
 import uk.ac.wellcome.models.work.internal._
-import WorkState.Identified
+import WorkState.Indexed
 
 class DisplayLocationsSerialisationTestDeprecated
     extends AnyFunSpec
@@ -21,7 +21,7 @@ class DisplayLocationsSerialisationTestDeprecated
       label = "a stack of slick slimes"
     )
 
-    val work = identifiedWork().items(
+    val work = indexedWork().items(
       List(createIdentifiedItemWith(locations = List(physicalLocation)))
     )
 
@@ -31,7 +31,8 @@ class DisplayLocationsSerialisationTestDeprecated
       | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
-      | "items": [ ${items(work.data.items)} ]
+      | "items": [ ${items(work.data.items)} ],
+      | "availableOnline": false
       |}
     """.stripMargin
 
@@ -44,7 +45,7 @@ class DisplayLocationsSerialisationTestDeprecated
       locationType = LocationType("iiif-image"),
     )
 
-    val work = identifiedWork().items(
+    val work = indexedWork().items(
       List(createIdentifiedItemWith(locations = List(digitalLocation)))
     )
 
@@ -54,7 +55,8 @@ class DisplayLocationsSerialisationTestDeprecated
       | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
-      | "items": [ ${items(work.data.items)} ]
+      | "items": [ ${items(work.data.items)} ],
+      | "availableOnline": true
       |}
     """.stripMargin
 
@@ -68,7 +70,7 @@ class DisplayLocationsSerialisationTestDeprecated
       license = Some(License.CC0)
     )
 
-    val work = identifiedWork().items(
+    val work = indexedWork().items(
       List(createIdentifiedItemWith(locations = List(digitalLocation)))
     )
 
@@ -78,7 +80,8 @@ class DisplayLocationsSerialisationTestDeprecated
       | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
-      | "items": [ ${items(work.data.items)} ]
+      | "items": [ ${items(work.data.items)} ],
+      | "availableOnline": true
       |}
     """.stripMargin
 
@@ -98,7 +101,7 @@ class DisplayLocationsSerialisationTestDeprecated
       )
     )
 
-    val work = identifiedWork().items(
+    val work = indexedWork().items(
       List(createIdentifiedItemWith(locations = List(digitalLocation)))
     )
 
@@ -108,7 +111,8 @@ class DisplayLocationsSerialisationTestDeprecated
       | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
-      | "items": [ ${items(work.data.items)} ]
+      | "items": [ ${items(work.data.items)} ],
+      | "availableOnline": true
       |}
     """.stripMargin
 
@@ -116,7 +120,7 @@ class DisplayLocationsSerialisationTestDeprecated
   }
 
   private def assertWorkMapsToJson(
-    work: Work.Visible[Identified],
+    work: Work.Visible[Indexed],
     expectedJson: String
   ): Assertion =
     assertObjectMapsToJson(

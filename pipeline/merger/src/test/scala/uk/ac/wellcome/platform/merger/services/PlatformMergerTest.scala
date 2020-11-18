@@ -17,6 +17,8 @@ class PlatformMergerTest
     with MetsWorkGenerators
     with MiroWorkGenerators
     with Matchers {
+  import Merger.WorkMergingOps
+
   val digitalLocationCCBYNC = createDigitalLocationWith(
     license = Some(License.CCBYNC))
   val digitalLocationNoLicense = digitalLocationCCBYNC.copy(license = None)

@@ -23,7 +23,7 @@ import uk.ac.wellcome.platform.api.models.{
   SearchOptions,
   SearchQuery
 }
-import WorkState.Identified
+import WorkState.Indexed
 
 class ElasticsearchServiceTest
     extends AnyFunSpec
@@ -44,7 +44,7 @@ class ElasticsearchServiceTest
   describe("findResultById") {
     it("finds a result by ID") {
       withLocalWorksIndex { index =>
-        val work = identifiedWork()
+        val work = indexedWork()
 
         insertIntoElasticsearch(index, work)
 
@@ -162,7 +162,7 @@ class ElasticsearchServiceTest
         // ID order when we search for "A".
         val works = (1 to 5)
           .map { _ =>
-            identifiedWork().title(title)
+            indexedWork().title(title)
           }
           .sortBy(_.state.canonicalId)
 
@@ -185,9 +185,9 @@ class ElasticsearchServiceTest
 
     it("sorts by canonicalId when scored = false") {
       withLocalWorksIndex { index =>
-        val work1 = identifiedWork(canonicalId = "000Z")
-        val work2 = identifiedWork(canonicalId = "000Y")
-        val work3 = identifiedWork(canonicalId = "000X")
+        val work1 = indexedWork(canonicalId = "000Z")
+        val work2 = indexedWork(canonicalId = "000Y")
+        val work3 = indexedWork(canonicalId = "000X")
 
         insertIntoElasticsearch(index, work1, work2, work3)
 
@@ -201,9 +201,9 @@ class ElasticsearchServiceTest
 
     it("sorts by score then canonicalId when scored = true") {
       withLocalWorksIndex { index =>
-        val work1 = identifiedWork(canonicalId = "000Z").title("match")
-        val work2 = identifiedWork(canonicalId = "000Y").title("match stick")
-        val work3 = identifiedWork(canonicalId = "000X").title("match")
+        val work1 = indexedWork(canonicalId = "000Z").title("match")
+        val work2 = indexedWork(canonicalId = "000Y").title("match stick")
+        val work3 = indexedWork(canonicalId = "000X").title("match")
 
         insertIntoElasticsearch(index, work1, work2, work3)
 
@@ -219,9 +219,9 @@ class ElasticsearchServiceTest
 
     it("filters list results by format") {
       withLocalWorksIndex { index =>
-        val work1 = identifiedWork().format(ManuscriptsAsian)
-        val work2 = identifiedWork().format(ManuscriptsAsian)
-        val workWithWrongFormat = identifiedWork().format(CDRoms)
+        val work1 = indexedWork().format(ManuscriptsAsian)
+        val work2 = indexedWork().format(ManuscriptsAsian)
+        val workWithWrongFormat = indexedWork().format(CDRoms)
 
         insertIntoElasticsearch(index, work1, work2, workWithWrongFormat)
 
@@ -239,10 +239,10 @@ class ElasticsearchServiceTest
 
     it("filters list results with multiple formats") {
       withLocalWorksIndex { index =>
-        val work1 = identifiedWork().format(ManuscriptsAsian)
-        val work2 = identifiedWork().format(ManuscriptsAsian)
-        val work3 = identifiedWork().format(Books)
-        val workWithWrongFormat = identifiedWork().format(CDRoms)
+        val work1 = indexedWork().format(ManuscriptsAsian)
+        val work2 = indexedWork().format(ManuscriptsAsian)
+        val work3 = indexedWork().format(Books)
+        val workWithWrongFormat = indexedWork().format(CDRoms)
 
         insertIntoElasticsearch(index, work1, work2, work3, workWithWrongFormat)
 
@@ -260,7 +260,7 @@ class ElasticsearchServiceTest
 
     it("filters results by item locationType") {
       withLocalWorksIndex { index =>
-        val work = identifiedWork()
+        val work = indexedWork()
           .title("Tumbling tangerines")
           .items(
             List(
@@ -269,7 +269,7 @@ class ElasticsearchServiceTest
             )
           )
 
-        val notMatchingWork = identifiedWork()
+        val notMatchingWork = indexedWork()
           .title("Tumbling tangerines")
           .items(
             List(
@@ -293,7 +293,7 @@ class ElasticsearchServiceTest
     it("filters results by multiple item locationTypes") {
       withLocalWorksIndex { index =>
         val work =
-          identifiedWork()
+          indexedWork()
             .title("Tumbling tangerines")
             .items(
               List(
@@ -303,7 +303,7 @@ class ElasticsearchServiceTest
             )
 
         val notMatchingWork =
-          identifiedWork()
+          indexedWork()
             .title("Tumbling tangerines")
             .items(
               List(
@@ -312,7 +312,7 @@ class ElasticsearchServiceTest
             )
 
         val work2 =
-          identifiedWork()
+          indexedWork()
             .title("Tumbling tangerines")
             .items(
               List(
@@ -363,8 +363,8 @@ class ElasticsearchServiceTest
     )
 
   private def populateElasticsearch(
-    index: Index): List[Work.Visible[Identified]] = {
-    val works = identifiedWorks(count = 10)
+    index: Index): List[Work.Visible[Indexed]] = {
+    val works = indexedWorks(count = 10)
 
     insertIntoElasticsearch(index, works: _*)
 
@@ -382,17 +382,17 @@ class ElasticsearchServiceTest
   private def assertResultsAreCorrect(
     index: Index,
     searchOptions: SearchOptions = createWorksSearchOptions,
-    expectedWorks: List[Work.Visible[Identified]],
+    expectedWorks: List[Work.Visible[Indexed]],
     scored: Option[Boolean] = None) = {
     searchResults(index, searchOptions) should contain theSameElementsAs expectedWorks
   }
 
   private def searchResponseToWorks(
-    response: Either[ElasticError, SearchResponse]): List[Work[Identified]] =
+    response: Either[ElasticError, SearchResponse]): List[Work[Indexed]] =
     response.right.get.hits.hits.map { searchHit: SearchHit =>
       jsonToWork(searchHit.sourceAsString)
     }.toList
 
-  private def jsonToWork(document: String): Work[Identified] =
-    fromJson[Work[Identified]](document).get
+  private def jsonToWork(document: String): Work[Indexed] =
+    fromJson[Work[Indexed]](document).get
 }
