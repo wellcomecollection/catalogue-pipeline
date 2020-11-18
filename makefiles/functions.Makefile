@@ -111,7 +111,7 @@ endef
 #
 define sbt_build
 	$(ROOT)/docker_run.py --sbt --root -- \
-		$(ECR_REGISTRY)wellcome/sbt_wrapper \
+		$(ECR_REGISTRY)/wellcome/sbt_wrapper \
 		"project $(1)" ";stage"
 endef
 
@@ -124,7 +124,7 @@ endef
 define docker_compose_up
 	$(ROOT)/docker_run.py --dind --sbt --root -- \
 		--net host \
-		$(ECR_REGISTRY)wellcome/sbt_wrapper \
+		$(ECR_REGISTRY)/wellcome/sbt_wrapper \
 		"project $(1)" "dockerComposeUp"
 endef
 
@@ -137,7 +137,7 @@ endef
 define docker_compose_down
 	$(ROOT)/docker_run.py --dind --sbt --root -- \
 		--net host \
-		$(ECR_REGISTRY)wellcome/sbt_wrapper \
+		$(ECR_REGISTRY)/wellcome/sbt_wrapper \
 		"project $(1)" "dockerComposeDown"
 endef
 
