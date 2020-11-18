@@ -11,7 +11,7 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
   val quechua = Language(label = "Quechua", id = "que")
   val chechen = Language(label = "Chechen", id = "che")
 
-  val works: List[Work.Visible[WorkState.Derived]] = List(
+  val works: List[Work.Visible[WorkState.Indexed]] = List(
     (Books, bashkir),
     (Journals, marathi),
     (Pictures, quechua),
@@ -24,7 +24,7 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
     (Audio, chechen)
   ).map {
     case (format, language) =>
-      derivedWork()
+      indexedWork()
         .format(format)
         .language(language)
   }

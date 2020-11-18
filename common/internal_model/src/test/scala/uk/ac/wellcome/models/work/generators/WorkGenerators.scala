@@ -64,15 +64,15 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
       version = createVersion
     )
 
-  def derivedWork(
+  def indexedWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     canonicalId: String = createCanonicalId,
     modifiedTime: Instant = instantInLast30Days,
     relations: Relations[DataState.Identified] = Relations.none
-  ): Work.Visible[Derived] = {
+  ): Work.Visible[Indexed] = {
     val data = initData[DataState.Identified]
-    Work.Visible[Derived](
-      state = Derived(
+    Work.Visible[Indexed](
+      state = Indexed(
         sourceIdentifier = sourceIdentifier,
         canonicalId = canonicalId,
         modifiedTime = modifiedTime,
@@ -96,8 +96,8 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
   def identifiedWorks(count: Int): List[Work.Visible[Identified]] =
     (1 to count).map(_ => identifiedWork()).toList
 
-  def derivedWorks(count: Int): List[Work.Visible[Derived]] =
-    (1 to count).map(_ => derivedWork()).toList
+  def indexedWorks(count: Int): List[Work.Visible[Indexed]] =
+    (1 to count).map(_ => indexedWork()).toList
 
   implicit class WorkOps[State <: WorkState: UpdateState](
     work: Work.Visible[State]) {
@@ -218,8 +218,8 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
     def identity[State <: WorkState]: UpdateState[State] =
       (state: State, _: WorkData[State#WorkDataState]) => state
 
-    implicit val updateDerivedState: UpdateState[Derived] =
-      (state: Derived, data: WorkData[DataState.Identified]) =>
+    implicit val updateCribbitsState: UpdateState[Indexed] =
+      (state: Indexed, data: WorkData[DataState.Identified]) =>
         state.copy(derivedData = DerivedData(data))
     implicit val updateIdentifiedState: UpdateState[Identified] = identity
     implicit val updateDenormalisedState: UpdateState[Denormalised] = identity

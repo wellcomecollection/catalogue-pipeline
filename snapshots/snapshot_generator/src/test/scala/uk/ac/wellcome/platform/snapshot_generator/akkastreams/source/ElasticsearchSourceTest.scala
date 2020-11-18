@@ -23,7 +23,7 @@ class ElasticsearchSourceTest
   it("outputs the entire content of the index") {
     withActorSystem { implicit actorSystem =>
       withLocalWorksIndex { index =>
-        val works = derivedWorks(count = 10)
+        val works = indexedWorks(count = 10)
         insertIntoElasticsearch(index, works: _*)
 
         withSource(index) { source =>
@@ -40,8 +40,8 @@ class ElasticsearchSourceTest
   it("filters non visible works") {
     withActorSystem { implicit actorSystem =>
       withLocalWorksIndex { index =>
-        val visibleWorks = derivedWorks(count = 10)
-        val invisibleWorks = derivedWorks(count = 3).map { _.invisible() }
+        val visibleWorks = indexedWorks(count = 10)
+        val invisibleWorks = indexedWorks(count = 3).map { _.invisible() }
 
         val works = visibleWorks ++ invisibleWorks
         insertIntoElasticsearch(index, works: _*)
@@ -58,7 +58,7 @@ class ElasticsearchSourceTest
   }
 
   private def withSource[R](index: Index)(
-    testWith: TestWith[Source[Work[WorkState.Derived], NotUsed], R])(
+    testWith: TestWith[Source[Work[WorkState.Indexed], NotUsed], R])(
     implicit actorSystem: ActorSystem): R = {
     val source = ElasticsearchWorksSource(
       elasticClient = elasticClient,

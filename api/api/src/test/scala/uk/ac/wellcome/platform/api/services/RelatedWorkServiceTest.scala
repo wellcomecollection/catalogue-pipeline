@@ -12,7 +12,7 @@ import uk.ac.wellcome.models.work.generators.{
   ItemsGenerators,
   WorkGenerators
 }
-import WorkState.Derived
+import WorkState.Indexed
 import org.scalatest.Assertion
 
 class RelatedWorkServiceTest
@@ -25,12 +25,12 @@ class RelatedWorkServiceTest
 
   val service = new RelatedWorkService(new ElasticsearchService(elasticClient))
 
-  def work(path: String, level: CollectionLevel): Work.Visible[Derived] =
-    derivedWork(sourceIdentifier = createSourceIdentifierWith(value = path))
+  def work(path: String, level: CollectionLevel): Work.Visible[Indexed] =
+    indexedWork(sourceIdentifier = createSourceIdentifierWith(value = path))
       .title(path)
       .collectionPath(CollectionPath(path = path, level = Some(level)))
 
-  def storeWorks(index: Index, works: List[Work[Derived]] = works): Assertion =
+  def storeWorks(index: Index, works: List[Work[Indexed]] = works): Assertion =
     insertIntoElasticsearch(index, works: _*)
 
   val workA = work("a", CollectionLevel.Collection)
@@ -202,7 +202,7 @@ class RelatedWorkServiceTest
 
   it("Returns no related works when work is not part of a collection") {
     withLocalWorksIndex { index =>
-      val workX = derivedWork()
+      val workX = indexedWork()
       storeWorks(index, List(workA, work1, workX))
       whenReady(service.retrieveRelatedWorks(index, workX)) { result =>
         result shouldBe Right(RelatedWorks.nil)

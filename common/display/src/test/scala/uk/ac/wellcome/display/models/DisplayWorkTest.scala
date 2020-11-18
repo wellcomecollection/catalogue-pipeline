@@ -15,7 +15,7 @@ import uk.ac.wellcome.models.work.generators.{
 }
 import uk.ac.wellcome.models.work.internal.Format.Videos
 import uk.ac.wellcome.models.work.internal._
-import WorkState.Derived
+import WorkState.Indexed
 
 class DisplayWorkTest
     extends AnyFunSpec
@@ -42,7 +42,7 @@ class DisplayWorkTest
     }
 
   it("parses a Work without any items") {
-    val work = derivedWork().items(Nil)
+    val work = indexedWork().items(Nil)
 
     val displayWork = DisplayWork(
       work = work,
@@ -53,7 +53,7 @@ class DisplayWorkTest
 
   it("parses identified items on a work") {
     val items = createIdentifiedItems(count = 1)
-    val work = derivedWork().items(items)
+    val work = indexedWork().items(items)
 
     val displayWork = DisplayWork(
       work = work,
@@ -66,7 +66,7 @@ class DisplayWorkTest
   it("parses unidentified items on a work") {
     val item = createUnidentifiableItemWith()
     val location = item.locations.head.asInstanceOf[DigitalLocationDeprecated]
-    val work = derivedWork().items(List(item))
+    val work = indexedWork().items(List(item))
 
     val displayWork = DisplayWork(
       work = work,
@@ -91,7 +91,7 @@ class DisplayWorkTest
   }
 
   it("parses a work without any extra identifiers") {
-    val work = derivedWork().otherIdentifiers(Nil)
+    val work = indexedWork().otherIdentifiers(Nil)
 
     val displayWork = DisplayWork(
       work = work,
@@ -104,7 +104,7 @@ class DisplayWorkTest
   it("gets the physicalDescription from a Work") {
     val physicalDescription = "A magnificent mural of magpies"
 
-    val work = derivedWork().physicalDescription(physicalDescription)
+    val work = indexedWork().physicalDescription(physicalDescription)
 
     val displayWork = DisplayWork(work)
     displayWork.physicalDescription shouldBe Some(physicalDescription)
@@ -118,14 +118,14 @@ class DisplayWorkTest
       label = format.label
     )
 
-    val work = derivedWork().format(format)
+    val work = indexedWork().format(format)
 
     val displayWork = DisplayWork(work)
     displayWork.workType shouldBe Some(expectedDisplayWork)
   }
 
   it("gets the ontologyType from a Work") {
-    val work = derivedWork().workType(WorkType.Section)
+    val work = indexedWork().workType(WorkType.Section)
     val displayWork = DisplayWork(work)
 
     displayWork.ontologyType shouldBe "Section"
@@ -134,7 +134,7 @@ class DisplayWorkTest
   it("gets the language from a Work") {
     val language = Language(id = "bsl", label = "British Sign Language")
 
-    val work = derivedWork().language(language)
+    val work = indexedWork().language(language)
 
     val displayWork = DisplayWork(work)
     val displayLanguage = displayWork.language.get
@@ -148,7 +148,7 @@ class DisplayWorkTest
       Language(id = "ger", label = "German")
     )
 
-    val work = derivedWork().languages(languages)
+    val work = indexedWork().languages(languages)
 
     val noLanguagesInclude = WorksIncludes().copy(languages = false)
     val languagesInclude = WorksIncludes().copy(languages = true)
@@ -171,7 +171,7 @@ class DisplayWorkTest
       ontologyType = "Person"
     )
 
-    val work = derivedWork().contributors(
+    val work = indexedWork().contributors(
       List(
         Contributor(
           agent = Person(
@@ -223,7 +223,7 @@ class DisplayWorkTest
   it("extracts production events from a work with the production include") {
     val productionEvent = createProductionEvent
 
-    val work = derivedWork().production(List(productionEvent))
+    val work = indexedWork().production(List(productionEvent))
 
     val displayWork =
       DisplayWork(work, includes = WorksIncludes(WorkInclude.Production))
@@ -232,7 +232,7 @@ class DisplayWorkTest
   }
 
   it("does not extract includes set to false") {
-    forAll { work: Work.Visible[Derived] =>
+    forAll { work: Work.Visible[Indexed] =>
       val displayWork = DisplayWork(work, includes = WorksIncludes())
 
       displayWork.production shouldNot be(defined)
@@ -273,7 +273,7 @@ class DisplayWorkTest
       ontologyType = "Concept"
     )
 
-    val work = derivedWork()
+    val work = indexedWork()
       .contributors(
         List(
           Contributor(
@@ -476,13 +476,13 @@ class DisplayWorkTest
   }
 
   describe("related works") {
-    val work = derivedWork()
-    val workA = derivedWork()
-    val workB = derivedWork()
-    val workC = derivedWork()
-    val workD = derivedWork()
-    val workE = derivedWork()
-    val workF = derivedWork()
+    val work = indexedWork()
+    val workA = indexedWork()
+    val workB = indexedWork()
+    val workC = indexedWork()
+    val workD = indexedWork()
+    val workE = indexedWork()
+    val workF = indexedWork()
 
     val relatedWorks = RelatedWorks(
       partOf = Some(

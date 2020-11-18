@@ -10,7 +10,7 @@ import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.internal.result._
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.platform.api.Tracing
-import WorkState.Derived
+import WorkState.Indexed
 
 class RelatedWorkService(elasticsearchService: ElasticsearchService)(
   implicit ec: ExecutionContext)
@@ -22,7 +22,7 @@ class RelatedWorkService(elasticsearchService: ElasticsearchService)(
 
   def retrieveRelatedWorks(
     index: Index,
-    work: Work.Visible[Derived]): Future[Result[RelatedWorks]] =
+    work: Work.Visible[Indexed]): Future[Result[RelatedWorks]] =
     work.data.collectionPath match {
       case None =>
         Future.successful(Right(RelatedWorks.nil))
@@ -51,14 +51,14 @@ class RelatedWorkService(elasticsearchService: ElasticsearchService)(
           }
     }
 
-  private def toWork(hit: SearchHit): Result[Work.Visible[Derived]] =
-    hit.safeTo[Work.Visible[Derived]].toEither
+  private def toWork(hit: SearchHit): Result[Work.Visible[Indexed]] =
+    hit.safeTo[Work.Visible[Indexed]].toEither
 
   private def toRelatedWorks(
     path: String,
-    children: List[Work.Visible[Derived]],
-    siblings: List[Work.Visible[Derived]],
-    ancestors: List[Work.Visible[Derived]]): RelatedWorks = {
+    children: List[Work.Visible[Indexed]],
+    siblings: List[Work.Visible[Indexed]],
+    ancestors: List[Work.Visible[Indexed]]): RelatedWorks = {
     val mainPath = tokenizePath(path)
     val (precededBy, succeededBy) = siblings.sortBy(tokenizePath).partition {
       work =>
@@ -97,7 +97,7 @@ class RelatedWorkService(elasticsearchService: ElasticsearchService)(
         }
     }
 
-  private def tokenizePath(work: Work.Visible[Derived]): Option[TokenizedPath] =
+  private def tokenizePath(work: Work.Visible[Indexed]): Option[TokenizedPath] =
     work.data.collectionPath
       .map { collectionPath =>
         tokenizePath(collectionPath.path)

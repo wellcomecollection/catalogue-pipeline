@@ -22,7 +22,7 @@ class DisplayWorkSerialisationTest
     with ImageGenerators {
 
   it("serialises a DisplayWork") {
-    val work = derivedWork()
+    val work = indexedWork()
       .format(Books)
       .description(randomAlphanumeric(100))
       .lettering(randomAlphanumeric(100))
@@ -46,7 +46,7 @@ class DisplayWorkSerialisationTest
   }
 
   it("renders an item if the items include is present") {
-    val work = derivedWork()
+    val work = indexedWork()
       .items(createIdentifiedItems(count = 1) :+ createUnidentifiableItemWith())
 
     val expectedJson = s"""
@@ -67,7 +67,7 @@ class DisplayWorkSerialisationTest
   }
 
   it("includes 'items' if the items include is present, even with no items") {
-    val work = derivedWork().items(Nil)
+    val work = indexedWork().items(Nil)
 
     val expectedJson = s"""
       |{
@@ -94,7 +94,7 @@ class DisplayWorkSerialisationTest
       license = Some(License.CCBY)
     )
     val item = createIdentifiedItemWith(locations = List(location))
-    val workWithCopyright = derivedWork().items(List(item))
+    val workWithCopyright = indexedWork().items(List(item))
 
     val expectedJson = s"""
       |{
@@ -133,7 +133,7 @@ class DisplayWorkSerialisationTest
 
   it(
     "includes subject information in DisplayWork serialisation with the subjects include") {
-    val workWithSubjects = derivedWork().subjects(
+    val workWithSubjects = indexedWork().subjects(
       (1 to 3).map(_ => createSubject).toList
     )
 
@@ -159,7 +159,7 @@ class DisplayWorkSerialisationTest
 
   it(
     "includes production information in DisplayWork serialisation with the production include") {
-    val workWithProduction = derivedWork().production(
+    val workWithProduction = indexedWork().production(
       createProductionEventList(count = 3)
     )
 
@@ -185,7 +185,7 @@ class DisplayWorkSerialisationTest
 
   it(
     "includes the contributors in DisplayWork serialisation with the contribuotrs include") {
-    val work = derivedWork()
+    val work = indexedWork()
       .format(EBooks)
       .description(randomAlphanumeric(100))
       .lettering(randomAlphanumeric(100))
@@ -219,7 +219,7 @@ class DisplayWorkSerialisationTest
 
   it(
     "includes genre information in DisplayWork serialisation with the genres include") {
-    val work = derivedWork().genres(
+    val work = indexedWork().genres(
       List(
         Genre(
           label = "genre",
@@ -247,7 +247,7 @@ class DisplayWorkSerialisationTest
 
   it(
     "includes 'notes' if the notes include is present, with similar notes grouped together") {
-    val work = derivedWork().notes(
+    val work = indexedWork().notes(
       List(GeneralNote("A"), FundingInformation("B"), GeneralNote("C"))
     )
 
@@ -289,7 +289,7 @@ class DisplayWorkSerialisationTest
 
   it("includes a list of identifiers on DisplayWork") {
     val otherIdentifier = createSourceIdentifier
-    val work = derivedWork().otherIdentifiers(List(otherIdentifier))
+    val work = indexedWork().otherIdentifiers(List(otherIdentifier))
 
     val expectedJson = s"""
       |{
@@ -312,7 +312,7 @@ class DisplayWorkSerialisationTest
   }
 
   it("always includes 'identifiers' with the identifiers include") {
-    val work = derivedWork().otherIdentifiers(Nil)
+    val work = indexedWork().otherIdentifiers(Nil)
 
     val expectedJson = s"""
       |{
@@ -332,7 +332,7 @@ class DisplayWorkSerialisationTest
   }
 
   it("includes image stubs with the images include") {
-    val work = derivedWork().images(
+    val work = indexedWork().images(
       (1 to 3).map(_ => createUnmergedImage.toIdentified).toList
     )
 
@@ -354,7 +354,7 @@ class DisplayWorkSerialisationTest
   }
 
   it("shows the thumbnail field if available") {
-    val work = derivedWork().thumbnail(
+    val work = indexedWork().thumbnail(
       DigitalLocationDeprecated(
         locationType = LocationType("thumbnail-image"),
         url = "https://iiif.example.org/1234/default.jpg",

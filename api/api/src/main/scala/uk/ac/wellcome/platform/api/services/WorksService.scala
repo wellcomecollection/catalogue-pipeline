@@ -11,7 +11,7 @@ import com.sksamuel.elastic4s.circe._
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.models.Implicits._
-import WorkState.Derived
+import WorkState.Indexed
 
 case class WorkQuery(query: String, queryType: SearchQueryType)
 
@@ -19,19 +19,19 @@ class WorksService(searchService: ElasticsearchService)(
   implicit ec: ExecutionContext) {
 
   def findWorkById(canonicalId: String)(
-    index: Index): Future[Either[ElasticError, Option[Work[Derived]]]] =
+    index: Index): Future[Either[ElasticError, Option[Work[Indexed]]]] =
     searchService
       .executeGet(canonicalId)(index)
       .map { result: Either[ElasticError, GetResponse] =>
         result.map { response: GetResponse =>
           if (response.exists)
-            Some(deserialize[Work[Derived]](response))
+            Some(deserialize[Work[Indexed]](response))
           else None
         }
       }
 
   def listOrSearchWorks(index: Index, searchOptions: SearchOptions): Future[
-    Either[ElasticError, ResultList[Work.Visible[Derived], Aggregations]]] =
+    Either[ElasticError, ResultList[Work.Visible[Indexed], Aggregations]]] =
     searchService
       .executeSearch(
         searchOptions = searchOptions,
@@ -41,7 +41,7 @@ class WorksService(searchService: ElasticsearchService)(
       .map { _.map(createResultList) }
 
   private def createResultList(searchResponse: SearchResponse)
-    : ResultList[Work.Visible[Derived], Aggregations] = {
+    : ResultList[Work.Visible[Indexed], Aggregations] = {
     ResultList(
       results = searchResponseToWorks(searchResponse),
       totalResults = searchResponse.totalHits.toInt,
@@ -50,9 +50,9 @@ class WorksService(searchService: ElasticsearchService)(
   }
 
   private def searchResponseToWorks(
-    searchResponse: SearchResponse): List[Work.Visible[Derived]] =
+    searchResponse: SearchResponse): List[Work.Visible[Indexed]] =
     searchResponse.hits.hits.map { hit =>
-      deserialize[Work.Visible[Derived]](hit)
+      deserialize[Work.Visible[Indexed]](hit)
     }.toList
 
   private def searchResponseToAggregationResults(

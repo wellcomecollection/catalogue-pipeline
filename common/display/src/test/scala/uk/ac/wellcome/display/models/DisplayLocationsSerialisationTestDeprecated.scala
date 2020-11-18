@@ -6,7 +6,7 @@ import uk.ac.wellcome.display.json.DisplayJsonUtil._
 import uk.ac.wellcome.display.test.util.JsonMapperTestUtil
 import uk.ac.wellcome.models.work.generators._
 import uk.ac.wellcome.models.work.internal._
-import WorkState.Derived
+import WorkState.Indexed
 
 class DisplayLocationsSerialisationTestDeprecated
     extends AnyFunSpec
@@ -21,7 +21,7 @@ class DisplayLocationsSerialisationTestDeprecated
       label = "a stack of slick slimes"
     )
 
-    val work = derivedWork().items(
+    val work = indexedWork().items(
       List(createIdentifiedItemWith(locations = List(physicalLocation)))
     )
 
@@ -45,7 +45,7 @@ class DisplayLocationsSerialisationTestDeprecated
       locationType = LocationType("iiif-image"),
     )
 
-    val work = derivedWork().items(
+    val work = indexedWork().items(
       List(createIdentifiedItemWith(locations = List(digitalLocation)))
     )
 
@@ -70,7 +70,7 @@ class DisplayLocationsSerialisationTestDeprecated
       license = Some(License.CC0)
     )
 
-    val work = derivedWork().items(
+    val work = indexedWork().items(
       List(createIdentifiedItemWith(locations = List(digitalLocation)))
     )
 
@@ -101,7 +101,7 @@ class DisplayLocationsSerialisationTestDeprecated
       )
     )
 
-    val work = derivedWork().items(
+    val work = indexedWork().items(
       List(createIdentifiedItemWith(locations = List(digitalLocation)))
     )
 
@@ -120,7 +120,7 @@ class DisplayLocationsSerialisationTestDeprecated
   }
 
   private def assertWorkMapsToJson(
-    work: Work.Visible[Derived],
+    work: Work.Visible[Indexed],
     expectedJson: String
   ): Assertion =
     assertObjectMapsToJson(

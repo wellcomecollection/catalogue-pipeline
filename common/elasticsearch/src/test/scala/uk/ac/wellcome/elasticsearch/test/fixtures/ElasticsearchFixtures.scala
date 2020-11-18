@@ -65,7 +65,7 @@ trait ElasticsearchFixtures
     }
 
   def withLocalWorksIndex[R](testWith: TestWith[Index, R]): R =
-    withLocalElasticsearchIndex[R](config = DerivedWorkIndexConfig) { index =>
+    withLocalElasticsearchIndex[R](config = IndexedWorkIndexConfig) { index =>
       testWith(index)
     }
 

@@ -3,7 +3,7 @@ package uk.ac.wellcome.platform.ingestor.works
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
-import uk.ac.wellcome.elasticsearch.DerivedWorkIndexConfig
+import uk.ac.wellcome.elasticsearch.IndexedWorkIndexConfig
 import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.work.internal._
@@ -11,7 +11,7 @@ import uk.ac.wellcome.platform.ingestor.common.fixtures.IngestorFixtures
 import uk.ac.wellcome.pipeline_storage.ElasticIndexer
 import uk.ac.wellcome.pipeline_storage.Indexable.workIndexable
 import uk.ac.wellcome.models.Implicits._
-import WorkState.{Derived, Identified}
+import WorkState.{Identified, Indexed}
 import com.sksamuel.elastic4s.Index
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
@@ -33,7 +33,7 @@ class IngestorFeatureTest
       sendMessage[Work[Identified]](queue = queue, obj = work)
       withLocalWorksIndex { index =>
         withWorkIngestorWorkerService(queue, index) { _ =>
-          assertElasticsearchEventuallyHasWork[Derived](
+          assertElasticsearchEventuallyHasWork[Indexed](
             index,
             WorkTransformer.deriveData(work))
         }
@@ -50,7 +50,7 @@ class IngestorFeatureTest
       sendMessage[Work[Identified]](queue = queue, obj = work)
       withLocalWorksIndex { index =>
         withWorkIngestorWorkerService(queue, index) { _ =>
-          assertElasticsearchEventuallyHasWork[Derived](
+          assertElasticsearchEventuallyHasWork[Indexed](
             index,
             WorkTransformer.deriveData(work))
         }
@@ -59,14 +59,14 @@ class IngestorFeatureTest
   }
 
   def withWorkIngestorWorkerService[R](queue: Queue, index: Index)(
-    testWith: TestWith[IngestorWorkerService[Work[Identified], Work[Derived]],
+    testWith: TestWith[IngestorWorkerService[Work[Identified], Work[Indexed]],
                        R]): R =
     withWorkerService(
       queue,
-      new ElasticIndexer[Work[Derived]](
+      new ElasticIndexer[Work[Indexed]](
         elasticClient,
         index,
-        DerivedWorkIndexConfig),
+        IndexedWorkIndexConfig),
       WorkTransformer.deriveData
     )(testWith)
 }

@@ -1,6 +1,6 @@
 package uk.ac.wellcome.models.work.internal
 
-import WorkState.Derived
+import WorkState.Indexed
 
 /** Holds relations for a particular work. This is a recursive data structure,
   * so related works can in turn hold their relations. An Option[List[_]] is
@@ -20,7 +20,7 @@ case class RelatedWorks(
 )
 
 case class RelatedWork(
-  work: Work[Derived],
+  work: Work[Indexed],
   relatedWorks: RelatedWorks
 )
 
@@ -54,6 +54,6 @@ object RelatedWorks {
 
 object RelatedWork {
 
-  def apply(work: Work[Derived]): RelatedWork =
+  def apply(work: Work[Indexed]): RelatedWork =
     RelatedWork(work, RelatedWorks.unknown)
 }

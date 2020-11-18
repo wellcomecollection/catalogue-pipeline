@@ -23,9 +23,9 @@ class WorksIncludesTest
         case (worksIndex, routes) =>
           val otherIdentifier0 = createSourceIdentifier
           val otherIdentifier1 = createSourceIdentifier
-          val work0 = derivedWork(canonicalId = "0")
+          val work0 = indexedWork(canonicalId = "0")
             .otherIdentifiers(List(otherIdentifier0))
-          val work1 = derivedWork(canonicalId = "1")
+          val work1 = indexedWork(canonicalId = "1")
             .otherIdentifiers(List(otherIdentifier1))
 
           insertIntoElasticsearch(worksIndex, work0, work1)
@@ -69,7 +69,7 @@ class WorksIncludesTest
       withWorksApi {
         case (worksIndex, routes) =>
           val otherIdentifier = createSourceIdentifier
-          val work = derivedWork().otherIdentifiers(List(otherIdentifier))
+          val work = indexedWork().otherIdentifiers(List(otherIdentifier))
           insertIntoElasticsearch(worksIndex, work)
 
           assertJsonResponse(
@@ -96,7 +96,7 @@ class WorksIncludesTest
   it("renders the items if the items include is present") {
     withWorksApi {
       case (worksIndex, routes) =>
-        val work = derivedWork()
+        val work = indexedWork()
           .items(
             List(
               createIdentifiedItemWith(title = Some("item title")),
@@ -129,8 +129,8 @@ class WorksIncludesTest
         case (worksIndex, routes) =>
           val subjects0 = List(createSubject)
           val subjects1 = List(createSubject)
-          val work0 = derivedWork(canonicalId = "0").subjects(subjects0)
-          val work1 = derivedWork(canonicalId = "1").subjects(subjects1)
+          val work0 = indexedWork(canonicalId = "0").subjects(subjects0)
+          val work1 = indexedWork(canonicalId = "1").subjects(subjects1)
 
           insertIntoElasticsearch(worksIndex, work0, work1)
 
@@ -166,7 +166,7 @@ class WorksIncludesTest
       "includes a list of subjects on a single work endpoint if we pass ?include=subjects") {
       withWorksApi {
         case (worksIndex, routes) =>
-          val work = derivedWork().subjects(List(createSubject))
+          val work = indexedWork().subjects(List(createSubject))
 
           insertIntoElasticsearch(worksIndex, work)
 
@@ -195,8 +195,8 @@ class WorksIncludesTest
         case (worksIndex, routes) =>
           val genres1 = List(Genre("ornithology", List(Concept("ornithology"))))
           val genres2 = List(Genre("flying cars", List(Concept("flying cars"))))
-          val work1 = derivedWork(canonicalId = "1").genres(genres1)
-          val work2 = derivedWork(canonicalId = "2").genres(genres2)
+          val work1 = indexedWork(canonicalId = "1").genres(genres1)
+          val work2 = indexedWork(canonicalId = "2").genres(genres2)
 
           insertIntoElasticsearch(worksIndex, work1, work2)
 
@@ -232,7 +232,7 @@ class WorksIncludesTest
       "includes a list of genres on a single work endpoint if we pass ?include=genres") {
       withWorksApi {
         case (worksIndex, routes) =>
-          val work = derivedWork().genres(
+          val work = indexedWork().genres(
             List(Genre("ornithology", List(Concept("ornithology")))))
 
           insertIntoElasticsearch(worksIndex, work)
@@ -265,9 +265,9 @@ class WorksIncludesTest
           val contributors2 =
             List(Contributor(Person("Fred Astair"), roles = Nil))
           val work1 =
-            derivedWork(canonicalId = "1").contributors(contributors1)
+            indexedWork(canonicalId = "1").contributors(contributors1)
           val work2 =
-            derivedWork(canonicalId = "2").contributors(contributors2)
+            indexedWork(canonicalId = "2").contributors(contributors2)
 
           insertIntoElasticsearch(worksIndex, work1, work2)
 
@@ -303,7 +303,7 @@ class WorksIncludesTest
       "includes a list of contributors on a single work endpoint if we pass ?include=contributors") {
       withWorksApi {
         case (worksIndex, routes) =>
-          val work = derivedWork()
+          val work = indexedWork()
             .contributors(
               List(Contributor(Person("Ginger Rogers"), roles = Nil)))
 
@@ -335,9 +335,9 @@ class WorksIncludesTest
           val productionEvents1 = createProductionEventList()
           val productionEvents2 = createProductionEventList()
           val work1 =
-            derivedWork(canonicalId = "1").production(productionEvents1)
+            indexedWork(canonicalId = "1").production(productionEvents1)
           val work2 =
-            derivedWork(canonicalId = "2").production(productionEvents2)
+            indexedWork(canonicalId = "2").production(productionEvents2)
 
           insertIntoElasticsearch(worksIndex, work1, work2)
 
@@ -373,7 +373,7 @@ class WorksIncludesTest
       "includes a list of production on a single work endpoint if we pass ?include=production") {
       withWorksApi {
         case (worksIndex, routes) =>
-          val work = derivedWork().production(createProductionEventList())
+          val work = indexedWork().production(createProductionEventList())
 
           insertIntoElasticsearch(worksIndex, work)
 
@@ -404,8 +404,8 @@ class WorksIncludesTest
           val swedish = Language(label = "Swedish", id = "swe")
 
           val work1 =
-            derivedWork(canonicalId = "1").languages(List(english, turkish))
-          val work2 = derivedWork(canonicalId = "2").languages(List(swedish))
+            indexedWork(canonicalId = "1").languages(List(english, turkish))
+          val work2 = indexedWork(canonicalId = "2").languages(List(swedish))
 
           insertIntoElasticsearch(worksIndex, work1, work2)
 
@@ -444,7 +444,7 @@ class WorksIncludesTest
           val turkish = Language(label = "Turkish", id = "tur")
           val swedish = Language(label = "Swedish", id = "swe")
 
-          val work = derivedWork().languages(List(english, turkish, swedish))
+          val work = indexedWork().languages(List(english, turkish, swedish))
 
           insertIntoElasticsearch(worksIndex, work)
 
@@ -470,9 +470,9 @@ class WorksIncludesTest
     it("includes notes on the list endpoint if we pass ?include=notes") {
       withWorksApi {
         case (worksIndex, routes) =>
-          val work1 = derivedWork(canonicalId = "1")
+          val work1 = indexedWork(canonicalId = "1")
             .notes(List(GeneralNote("GN1"), FundingInformation("FI1")))
-          val work2 = derivedWork(canonicalId = "2")
+          val work2 = indexedWork(canonicalId = "2")
             .notes(List(GeneralNote("GN2.1"), GeneralNote("GN2.2")))
 
           insertIntoElasticsearch(worksIndex, work1, work2)
@@ -537,7 +537,7 @@ class WorksIncludesTest
       withWorksApi {
         case (worksIndex, routes) =>
           val work =
-            derivedWork().notes(List(GeneralNote("A"), GeneralNote("B")))
+            indexedWork().notes(List(GeneralNote("A"), GeneralNote("B")))
           insertIntoElasticsearch(worksIndex, work)
           assertJsonResponse(
             routes,
@@ -573,10 +573,10 @@ class WorksIncludesTest
       withWorksApi {
         case (worksIndex, routes) =>
           val works = List(
-            derivedWork()
+            indexedWork()
               .images(
                 (1 to 3).map(_ => createUnmergedImage.toIdentified).toList),
-            derivedWork()
+            indexedWork()
               .images(
                 (1 to 3).map(_ => createUnmergedImage.toIdentified).toList)
           ).sortBy { _.state.canonicalId }
@@ -617,7 +617,7 @@ class WorksIncludesTest
         case (worksIndex, routes) =>
           val images =
             (1 to 3).map(_ => createUnmergedImage.toIdentified).toList
-          val work = derivedWork().images(images)
+          val work = indexedWork().images(images)
 
           insertIntoElasticsearch(worksIndex, work)
 
@@ -641,8 +641,8 @@ class WorksIncludesTest
 
   describe("relation includes") {
     def work(path: String,
-             workType: WorkType): Work.Visible[WorkState.Derived] =
-      derivedWork(sourceIdentifier = createSourceIdentifierWith(value = path))
+             workType: WorkType): Work.Visible[WorkState.Indexed] =
+      indexedWork(sourceIdentifier = createSourceIdentifierWith(value = path))
         .collectionPath(CollectionPath(path = path))
         .title(path)
         .workType(workType)

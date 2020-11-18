@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import akka.stream.scaladsl.Source
 import com.sksamuel.elastic4s.{ElasticClient, Index}
 import uk.ac.wellcome.display.models.{DisplayWork, WorksIncludes}
-import uk.ac.wellcome.platform.snapshot_generator.akkastreams.flow.DerivedWorkToVisibleDisplayWork
+import uk.ac.wellcome.platform.snapshot_generator.akkastreams.flow.IndexedWorkToVisibleDisplayWork
 
 object DisplayWorkSource {
   def apply(
@@ -13,6 +13,6 @@ object DisplayWorkSource {
   )(implicit actorSystem: ActorSystem): Source[DisplayWork, Any] =
     ElasticsearchWorksSource(elasticClient = elasticClient, index = index)
       .via(
-        DerivedWorkToVisibleDisplayWork(
+        IndexedWorkToVisibleDisplayWork(
           DisplayWork(_, WorksIncludes.includeAll())))
 }

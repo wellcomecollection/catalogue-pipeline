@@ -3,7 +3,7 @@ package uk.ac.wellcome.platform.ingestor.works.services
 import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.elasticsearch.DerivedWorkIndexConfig
+import uk.ac.wellcome.elasticsearch.IndexedWorkIndexConfig
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.work.internal._
@@ -11,7 +11,7 @@ import uk.ac.wellcome.platform.ingestor.common.fixtures.IngestorFixtures
 import uk.ac.wellcome.pipeline_storage.ElasticIndexer
 import uk.ac.wellcome.pipeline_storage.Indexable.workIndexable
 import uk.ac.wellcome.models.Implicits._
-import WorkState.{Derived, Identified}
+import WorkState.{Identified, Indexed}
 import uk.ac.wellcome.platform.ingestor.works.WorkTransformer
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -126,16 +126,16 @@ class IngestorWorkerServiceTest
         case QueuePair(queue, dlq) =>
           withWorkerService(
             queue,
-            new ElasticIndexer[Work[Derived]](
+            new ElasticIndexer[Work[Indexed]](
               elasticClient,
               index,
-              DerivedWorkIndexConfig),
+              IndexedWorkIndexConfig),
             WorkTransformer.deriveData) { _ =>
             works.map { work =>
               sendMessage[Work[Identified]](queue = queue, obj = work)
             }
 
-            assertElasticsearchEventuallyHasWork[Derived](
+            assertElasticsearchEventuallyHasWork[Indexed](
               index = index,
               works.map(WorkTransformer.deriveData): _*)
 

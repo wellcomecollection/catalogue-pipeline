@@ -113,7 +113,7 @@ case class WorkData[State <: DataState](
   *      |
   *      | (ingestor)
   *      ▼
-  *   Derived
+  *   Indexed
   */
 sealed trait WorkState {
 
@@ -169,7 +169,7 @@ object WorkState {
     override def id = canonicalId
   }
 
-  case class Derived(
+  case class Indexed(
     sourceIdentifier: SourceIdentifier,
     canonicalId: String,
     modifiedTime: Instant,
@@ -230,11 +230,11 @@ object WorkFsm {
     def redirect(redirect: IdState.Identifiable) = redirect
   }
 
-  implicit val identifiedToDerived = new Transition[Identified, Derived] {
+  implicit val identifiedToDerived = new Transition[Identified, Indexed] {
     def state(state: Identified,
               data: WorkData[DataState.Identified],
               args: Unit = ()) =
-      Derived(
+      Indexed(
         sourceIdentifier = state.sourceIdentifier,
         canonicalId = state.canonicalId,
         modifiedTime = state.modifiedTime,

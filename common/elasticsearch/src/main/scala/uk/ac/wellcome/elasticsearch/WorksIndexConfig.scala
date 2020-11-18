@@ -261,7 +261,7 @@ object IdentifiedWorkIndexConfig extends WorksIndexConfig {
     )
 }
 
-object DerivedWorkIndexConfig extends WorksIndexConfig {
+object IndexedWorkIndexConfig extends WorksIndexConfig {
 
   val state = objectField("state").fields(
     canonicalId,

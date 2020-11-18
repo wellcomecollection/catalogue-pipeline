@@ -9,7 +9,7 @@ import uk.ac.wellcome.models.work.internal.{
   WorkState,
   WorkType
 }
-import WorkState.Derived
+import WorkState.Indexed
 
 @Schema(
   name = "Work",
@@ -133,7 +133,7 @@ case class DisplayWork(
 
 case object DisplayWork {
 
-  def apply(work: Work.Visible[Derived], includes: WorksIncludes): DisplayWork =
+  def apply(work: Work.Visible[Indexed], includes: WorksIncludes): DisplayWork =
     DisplayWork(
       id = work.state.canonicalId,
       title = work.data.title,
@@ -194,10 +194,10 @@ case object DisplayWork {
       ontologyType = displayWorkType(work.data.workType),
     )
 
-  def apply(work: Work.Visible[Derived]): DisplayWork =
+  def apply(work: Work.Visible[Indexed]): DisplayWork =
     DisplayWork(work = work, includes = WorksIncludes())
 
-  def apply(work: Work.Visible[Derived],
+  def apply(work: Work.Visible[Indexed],
             includes: WorksIncludes,
             relatedWorks: RelatedWorks): DisplayWork =
     DisplayWork(work, includes).copy(
@@ -205,7 +205,7 @@ case object DisplayWork {
         if (includes.parts)
           relatedWorks.parts.map { parts =>
             parts.collect {
-              case RelatedWork(work: Work.Visible[Derived], related) =>
+              case RelatedWork(work: Work.Visible[Indexed], related) =>
                 DisplayWork(work, includes, related)
             }
           } else None,
@@ -213,7 +213,7 @@ case object DisplayWork {
         if (includes.partOf)
           relatedWorks.partOf.map { partOf =>
             partOf.collect {
-              case RelatedWork(work: Work.Visible[Derived], related) =>
+              case RelatedWork(work: Work.Visible[Indexed], related) =>
                 DisplayWork(work, includes, related)
             }
           } else None,
@@ -221,7 +221,7 @@ case object DisplayWork {
         if (includes.precededBy)
           relatedWorks.precededBy.map { precededBy =>
             precededBy.collect {
-              case RelatedWork(work: Work.Visible[Derived], related) =>
+              case RelatedWork(work: Work.Visible[Indexed], related) =>
                 DisplayWork(work, includes, related)
             }
           } else None,
@@ -229,7 +229,7 @@ case object DisplayWork {
         if (includes.succeededBy)
           relatedWorks.succeededBy.map { succeededBy =>
             succeededBy.collect {
-              case RelatedWork(work: Work.Visible[Derived], related) =>
+              case RelatedWork(work: Work.Visible[Indexed], related) =>
                 DisplayWork(work, includes, related)
             }
           } else None,

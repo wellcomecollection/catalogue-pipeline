@@ -61,8 +61,8 @@ class SnapshotServiceTest
   it("completes a snapshot generation") {
     withFixtures {
       case (snapshotService: SnapshotService, worksIndex, bucket) =>
-        val visibleWorks = derivedWorks(count = 3)
-        val notVisibleWorks = derivedWorks(count = 2).map { _.invisible() }
+        val visibleWorks = indexedWorks(count = 3)
+        val notVisibleWorks = indexedWorks(count = 2).map { _.invisible() }
 
         val works = visibleWorks ++ notVisibleWorks
         insertIntoElasticsearch(worksIndex, works: _*)
@@ -115,7 +115,7 @@ class SnapshotServiceTest
   it("completes a snapshot generation of an index with more than 10000 items") {
     withFixtures {
       case (snapshotService: SnapshotService, worksIndex, bucket) =>
-        val works = derivedWorks(count = 11000)
+        val works = indexedWorks(count = 11000)
           .map { _.title(randomAlphanumeric(length = 1500)) }
 
         insertIntoElasticsearch(worksIndex, works: _*)
@@ -166,7 +166,7 @@ class SnapshotServiceTest
   it("returns a failed future if the S3 upload fails") {
     withFixtures {
       case (snapshotService: SnapshotService, worksIndex, _) =>
-        val works = derivedWorks(count = 3)
+        val works = indexedWorks(count = 3)
 
         insertIntoElasticsearch(worksIndex, works: _*)
 

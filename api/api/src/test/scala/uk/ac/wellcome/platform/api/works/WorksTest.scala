@@ -14,7 +14,7 @@ class WorksTest
   it("returns a list of works") {
     withWorksApi {
       case (worksIndex, routes) =>
-        val works = derivedWorks(count = 3).sortBy {
+        val works = indexedWorks(count = 3).sortBy {
           _.state.canonicalId
         }
 
@@ -29,7 +29,7 @@ class WorksTest
   it("returns a single work when requested with id") {
     withWorksApi {
       case (worksIndex, routes) =>
-        val work = derivedWork()
+        val work = indexedWork()
 
         insertIntoElasticsearch(worksIndex, work)
 
@@ -52,7 +52,7 @@ class WorksTest
   it("returns optional fields when they exist") {
     withWorksApi {
       case (worksIndex, routes) =>
-        val work = derivedWork()
+        val work = indexedWork()
           .duration(3600)
           .edition("Special edition")
 
@@ -79,7 +79,7 @@ class WorksTest
     "returns the requested page of results when requested with page & pageSize") {
     withWorksApi {
       case (worksIndex, routes) =>
-        val works = derivedWorks(count = 3).sortBy {
+        val works = indexedWorks(count = 3).sortBy {
           _.state.canonicalId
         }
 
@@ -148,8 +148,8 @@ class WorksTest
   it("returns matching results if doing a full-text search") {
     withWorksApi {
       case (worksIndex, routes) =>
-        val workDodo = derivedWork().title("A drawing of a dodo")
-        val workMouse = derivedWork().title("A mezzotint of a mouse")
+        val workDodo = indexedWork().title("A drawing of a dodo")
+        val workMouse = indexedWork().title("A mezzotint of a mouse")
         insertIntoElasticsearch(worksIndex, workDodo, workMouse)
 
         assertJsonResponse(routes, s"/$apiPrefix/works?query=cat") {
@@ -166,10 +166,10 @@ class WorksTest
     withWorksApi {
       case (worksIndex, routes) =>
         withLocalWorksIndex { altIndex =>
-          val work = derivedWork()
+          val work = indexedWork()
           insertIntoElasticsearch(worksIndex, work)
 
-          val altWork = derivedWork()
+          val altWork = indexedWork()
           insertIntoElasticsearch(index = altIndex, altWork)
 
           assertJsonResponse(
@@ -207,10 +207,10 @@ class WorksTest
     withWorksApi {
       case (worksIndex, routes) =>
         withLocalWorksIndex { altIndex =>
-          val work = derivedWork().title("Playing with pangolins")
+          val work = indexedWork().title("Playing with pangolins")
           insertIntoElasticsearch(worksIndex, work)
 
-          val altWork = derivedWork().title("Playing with pangolins")
+          val altWork = indexedWork().title("Playing with pangolins")
           insertIntoElasticsearch(index = altIndex, altWork)
 
           assertJsonResponse(routes, s"/$apiPrefix/works?query=pangolins") {
@@ -234,7 +234,7 @@ class WorksTest
           url = "https://iiif.example.org/1234/default.jpg",
           license = Some(License.CCBY)
         )
-        val work = derivedWork()
+        val work = indexedWork()
           .thumbnail(thumbnailLocation)
           .items(
             List(createIdentifiedItemWith(locations = List(thumbnailLocation))))
@@ -261,8 +261,8 @@ class WorksTest
   }
 
   def createDatedWork(canonicalId: String,
-                      dateLabel: String): Work.Visible[WorkState.Derived] =
-    derivedWork(canonicalId = canonicalId)
+                      dateLabel: String): Work.Visible[WorkState.Indexed] =
+    indexedWork(canonicalId = canonicalId)
       .production(List(createProductionEventWith(dateLabel = Some(dateLabel))))
 
   it("supports sorting by production date") {
