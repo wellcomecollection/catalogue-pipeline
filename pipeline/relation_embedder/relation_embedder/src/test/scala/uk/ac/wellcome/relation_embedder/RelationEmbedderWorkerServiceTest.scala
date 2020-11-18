@@ -1,5 +1,9 @@
 package uk.ac.wellcome.relation_embedder
 
+import scala.collection.mutable
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
+
 import com.sksamuel.elastic4s.Index
 import org.scalatest.Assertion
 import org.scalatest.concurrent.Eventually
@@ -18,10 +22,7 @@ import uk.ac.wellcome.models.work.internal.WorkState.{Denormalised, Merged}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
 import uk.ac.wellcome.pipeline_storage.MemoryIndexer
-
-import scala.collection.mutable
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration._
+import uk.ac.wellcome.json.JsonUtil._
 
 class RelationEmbedderWorkerServiceTest
     extends AnyFunSpec
@@ -39,6 +40,20 @@ class RelationEmbedderWorkerServiceTest
 
   def storeWorks(index: Index, works: List[Work[Merged]] = works): Assertion =
     insertIntoElasticsearch(index, works: _*)
+
+  /** The following tests use works within this tree:
+    *
+    * a
+    * |---
+    * |  |
+    * 1  2
+    * |  |---
+    * |  |  |
+    * b  c  d
+    *    |
+    *    |
+    *    e
+    */
 
   val workA = work("a")
   val work1 = work("a/1")
@@ -77,30 +92,37 @@ class RelationEmbedderWorkerServiceTest
     : Map[String, Relations[DataState.Unidentified]] =
     index.map { case (key, work) => key -> work.state.relations }.toMap
 
-  it("denormalises a leaf work and its immediate parent") {
+  it("denormalises a batch containing a list of selectors") {
     withWorkerService() {
       case (QueuePair(queue, dlq), index, msgSender) =>
-        sendNotificationToSQS(
-          queue = queue,
-          body = workE.data.collectionPath.get.path)
+        import Selector._
+        val batch = Batch(rootPath = "a", selectors = List(Node("a/2"), Descendents("a/2")))
+        sendNotificationToSQS(queue = queue, message = batch)
         eventually {
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
-          msgSender.messages.map(_.body).toSet shouldBe Set(workD.id, workE.id)
-          relations(index) shouldBe Map(
-            workD.id -> relationsD,
-            workE.id -> relationsE,
-          )
         }
+        msgSender.messages.map(_.body).toSet shouldBe Set(
+          work2.id,
+          workC.id,
+          workD.id,
+          workE.id
+        )
+        relations(index) shouldBe Map(
+          work2.id -> relations2,
+          workC.id -> relationsC,
+          workD.id -> relationsD,
+          workE.id -> relationsE,
+        )
     }
   }
 
-  it("denormalises the whole tree when given the root") {
+  it("denormalises a batch containing the whole tree") {
     withWorkerService() {
       case (QueuePair(queue, dlq), index, msgSender) =>
-        sendNotificationToSQS(
-          queue = queue,
-          body = workA.data.collectionPath.get.path)
+        import Selector._
+        val batch = Batch(rootPath = "a", selectors = List(Tree("a")))
+        sendNotificationToSQS(queue = queue, message = batch)
         eventually {
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)

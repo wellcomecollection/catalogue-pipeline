@@ -252,13 +252,11 @@ trait ElasticsearchFixtures
             .id(work.id)
             .doc(jsonDoc)
         }
-      )
+      ).refreshImmediately
     )
 
     whenReady(result) { _ =>
-      eventually {
-        getSizeOf(index) shouldBe works.size
-      }
+      getSizeOf(index) shouldBe works.size
     }
   }
 
@@ -275,13 +273,11 @@ trait ElasticsearchFixtures
             .id(image.id.canonicalId)
             .doc(jsonDoc)
         }
-      )
+      ).refreshImmediately
     )
 
     whenReady(result) { _ =>
-      eventually {
-        getSizeOf(index) shouldBe images.size
-      }
+      getSizeOf(index) shouldBe images.size
     }
   }
 
