@@ -6,8 +6,7 @@ import com.sksamuel.elastic4s.requests.searches.SearchRequest
 import com.sksamuel.elastic4s.requests.searches.queries.Query
 
 case class RelationsRequestBuilder(index: Index,
-                                   path: String,
-                                   scrollKeepAlive: String = "5m") {
+                                   scrollKeepAlive: String = "2m") {
 
   // To reduce response size and improve Elasticsearch performance we only
   // return core fields
@@ -25,99 +24,41 @@ case class RelationsRequestBuilder(index: Index,
     "data.workType",
   )
 
-  def allRelationsRequest(scrollSize: Int): SearchRequest =
+  def completeTree(batch: Batch, scrollSize: Int): SearchRequest =
     search(index)
-      .query {
-        must(
-          termQuery(field = "data.collectionPath.path", value = collectionRoot),
-          visibleQuery
-        )
-      }
+      .query(must(visibleQuery, pathQuery(batch.rootPath)))
       .from(0)
       .sourceInclude(relationsFieldWhitelist)
       .scroll(keepAlive = scrollKeepAlive)
       .size(scrollSize)
 
-  def otherAffectedWorksRequest(scrollSize: Int): SearchRequest =
+  def affectedWorks(batch: Batch, scrollSize: Int): SearchRequest =
     search(index)
-      .query {
-        must(
-          should(
-            exactPathQuery,
-            siblingsQuery,
-            parentQuery,
-            descendentsQuery
-          ),
-          visibleQuery
-        )
-      }
+      .query(must(visibleQuery, should(batch.selectors.map(_.query))))
       .from(0)
       .scroll(keepAlive = scrollKeepAlive)
       .size(scrollSize)
 
-  private lazy val exactPathQuery = must(
-    termQuery(field = "data.collectionPath.path", value = path),
-    termQuery(field = "data.collectionPath.depth", value = depth)
-  )
   private val visibleQuery = termQuery(field = "type", value = "Visible")
 
-  /**
-    * Query all siblings of the node with the given path.
-    */
-  private lazy val siblingsQuery: Query =
-    ancestors.lastOption match {
-      case Some(parent) =>
-        must(
-          pathQuery(parent, depth),
-          not(termQuery(field = "data.collectionPath.path", value = path))
-        )
-      case None => matchNoneQuery()
-    }
+  private def pathQuery(path: String) =
+    termQuery(field = "data.collectionPath.path", value = path)
 
-  /**
-    * Query the parent of the node with the given path.
-    */
-  private lazy val parentQuery: Query =
-    ancestors.lastOption match {
-      case None         => matchNoneQuery()
-      case Some(parent) => pathQuery(parent, depth - 1)
-    }
+  private def depthQuery(depth: Int) =
+    termQuery(field = "data.collectionPath.depth", value = depth)
 
-  /**
-    * Query all descendents of the node with the given path.
-    */
-  private lazy val descendentsQuery: Query =
-    must(
-      termQuery(field = "data.collectionPath.path", value = path),
-      not(termQuery(field = "data.collectionPath.depth", value = depth)),
-    )
-
-  private lazy val ancestors: List[String] =
-    pathAncestors(path)
-
-  private lazy val depth: Int =
-    ancestors.length + 1
-
-  private lazy val collectionRoot: String =
-    ancestors.headOption.getOrElse(path)
-
-  private def pathQuery(path: String, depth: Int) =
-    must(
-      termQuery(field = "data.collectionPath.path", value = path),
-      termQuery(field = "data.collectionPath.depth", value = depth),
-    )
-
-  private def pathAncestors(path: String): List[String] =
-    tokenize(path) match {
-      case head :+ tail :+ _ =>
-        val ancestor = join(head :+ tail)
-        pathAncestors(ancestor) :+ ancestor
-      case _ => Nil
-    }
-
-  private def tokenize(path: String): List[String] =
-    path.split("/").toList
-
-  private def join(tokens: List[String]): String =
-    tokens.mkString("/")
+  implicit private class SelectorToQuery(selector: Selector) {
+    import Selector._
+    def query: Query =
+      selector match {
+        case Tree(path) =>
+          pathQuery(path)
+        case Node(path) =>
+          must(pathQuery(path), depthQuery(selector.depth))
+        case Children(path) =>
+          must(pathQuery(path), depthQuery(selector.depth + 1))
+        case Descendents(path) =>
+          must(pathQuery(path), not(depthQuery(selector.depth)))
+      }
+  }
 }

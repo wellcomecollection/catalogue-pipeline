@@ -32,42 +32,41 @@ class RelationEmbedderWorkerService[MsgDestination](
       sqsStream.foreach(this.getClass.getSimpleName, processMessage)
     }
 
-  def processMessage(message: NotificationMessage): Future[Unit] = {
-    val path = message.body
-    relationsService
-      .getAllWorksInArchive(path)
-      .runWith(Sink.seq)
-      .map { archiveWorks =>
-        (ArchiveRelationsCache(archiveWorks), path)
-      }
-      .flatMap {
-        case (relationsCache, inputPath) =>
-          val denormalisedWorks = relationsService
-            .getAffectedWorks(inputPath)
-            .map { work =>
-              work.transition[Denormalised](relationsCache(work))
-            }
+  def processMessage(message: NotificationMessage): Future[Unit] =
+    Future
+      .fromTry(fromJson[Batch](message.body))
+      .map { batch =>
+        relationsService
+          .getCompleteTree(batch)
+          .runWith(Sink.seq)
+          .map(ArchiveRelationsCache(_))
+          .flatMap { relationsCache =>
+            val denormalisedWorks = relationsService
+              .getAffectedWorks(batch)
+              .map { work =>
+                work.transition[Denormalised](relationsCache(work))
+              }
 
-          denormalisedWorks
-            .groupedWithin(indexBatchSize, indexFlushInterval)
-            .mapAsync(2) { works =>
-              workIndexer.index(works).flatMap {
-                case Left(failedWorks) =>
-                  Future.failed(
-                    new Exception(s"Failed indexing works: $failedWorks")
-                  )
-                case Right(_) => Future.successful(works.toList)
+            denormalisedWorks
+              .groupedWithin(indexBatchSize, indexFlushInterval)
+              .mapAsync(2) { works =>
+                workIndexer.index(works).flatMap {
+                  case Left(failedWorks) =>
+                    Future.failed(
+                      new Exception(s"Failed indexing works: $failedWorks")
+                    )
+                  case Right(_) => Future.successful(works.toList)
+                }
               }
-            }
-            .mapConcat(identity)
-            .mapAsync(3) { work =>
-              Future(msgSender.send(work.id)).flatMap {
-                case Success(_)   => Future.successful(())
-                case Failure(err) => Future.failed(err)
+              .mapConcat(identity)
+              .mapAsync(3) { work =>
+                Future(msgSender.send(work.id)).flatMap {
+                  case Success(_)   => Future.successful(())
+                  case Failure(err) => Future.failed(err)
+                }
               }
-            }
-            .runWith(Sink.ignore)
-            .map(_ => ())
+              .runWith(Sink.ignore)
+              .map(_ => ())
+          }
       }
-  }
 }

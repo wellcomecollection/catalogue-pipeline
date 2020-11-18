@@ -31,7 +31,7 @@ module "relation_embedder" {
 
     queue_parallelism            = 5
     affected_works_scroll_size   = 250
-    all_archive_scroll_size      = 1000
+    complete_tree_scroll_size    = 1000
     index_batch_size             = 100
     index_flush_interval_seconds = 60
   }
