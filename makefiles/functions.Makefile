@@ -1,6 +1,8 @@
 ROOT = $(shell git rev-parse --show-toplevel)
 INFRA_BUCKET = wellcomecollection-platform-infra
 
+ECR_REGISTRY = 760097843905.dkr.ecr.eu-west-1.amazonaws.com
+
 LAMBDA_UPLOAD_BUCKET = wellcomecollection-catalogue-infra-delta
 LAMBDA_PUBLISH_ROLE_ARN = arn:aws:iam::756629837203:role/catalogue-developer
 
@@ -16,7 +18,7 @@ endif
 #
 define publish_lambda
     $(ROOT)/docker_run.py --aws --root -- \
-        wellcome/publish_lambda:130 \
+        $(ECR_REGISTRY)/wellcome/publish_lambda:130 \
         "$(1)" --key="lambdas/$(1).zip" \
 		--bucket="$(LAMBDA_UPLOAD_BUCKET)" \
 		--role-arn="$(LAMBDA_PUBLISH_ROLE_ARN)" \
@@ -32,7 +34,7 @@ endef
 #
 define test_python
 	$(ROOT)/docker_run.py --aws --dind -- \
-		wellcome/build_test_python $(1)
+		$(ECR_REGISTRY)/wellcome/build_test_python $(1)
 
 	$(ROOT)/docker_run.py --aws --dind -- \
 		--net=host \
@@ -51,7 +53,7 @@ endef
 define build_image
 	$(ROOT)/docker_run.py \
 	    --dind -- \
-	    wellcome/image_builder:23 \
+	    $(ECR_REGISTRY)/wellcome/image_builder:23 \
             --project=$(1) \
             --file=$(2)
 endef
@@ -67,8 +69,9 @@ endef
 #
 define publish_service_ssm
 	$(ROOT)/docker_run.py \
+	# TODO: bump weco-deploy version
     	    --aws --dind -- \
-                wellcome/weco-deploy:5.5.3 \
+                $(ECR_REGISTRY)/wellcome/weco-deploy:5.5.3 \
                 --project-id="$(2)" \
                 --verbose \
                 publish \
@@ -84,7 +87,7 @@ endef
 define sbt_test
 	$(ROOT)/docker_run.py --dind --sbt --root -- \
 		--net host \
-		wellcome/sbt_wrapper \
+		$(ECR_REGISTRY)/wellcome/sbt_wrapper \
 		"project $(1)" ";dockerComposeUp;test;dockerComposeStop"
 endef
 
@@ -96,7 +99,7 @@ endef
 define sbt_test_no_docker
 	$(ROOT)/docker_run.py --dind --sbt --root -- \
 		--net host \
-		wellcome/sbt_wrapper \
+		$(ECR_REGISTRY)/wellcome/sbt_wrapper \
 		"project $(1)" "test"
 endef
 
@@ -108,7 +111,7 @@ endef
 #
 define sbt_build
 	$(ROOT)/docker_run.py --sbt --root -- \
-		wellcome/sbt_wrapper \
+		$(ECR_REGISTRY)wellcome/sbt_wrapper \
 		"project $(1)" ";stage"
 endef
 
@@ -121,7 +124,7 @@ endef
 define docker_compose_up
 	$(ROOT)/docker_run.py --dind --sbt --root -- \
 		--net host \
-		wellcome/sbt_wrapper \
+		$(ECR_REGISTRY)wellcome/sbt_wrapper \
 		"project $(1)" "dockerComposeUp"
 endef
 
@@ -134,7 +137,7 @@ endef
 define docker_compose_down
 	$(ROOT)/docker_run.py --dind --sbt --root -- \
 		--net host \
-		wellcome/sbt_wrapper \
+		$(ECR_REGISTRY)wellcome/sbt_wrapper \
 		"project $(1)" "dockerComposeDown"
 endef
 
