@@ -1,6 +1,6 @@
 locals {
   stacks = {
-    "20201111" = {
+    "2020-11-12" = {
       release_label = "prod"
 
       # Transformer config
@@ -9,30 +9,27 @@ locals {
       # reindexer topic names.
 
       sierra_adapter_topic_arns = [
-        //    local.sierra_reindexer_topic_arn,
+        //        local.sierra_reindexer_topic_arn,
         local.sierra_merged_bibs_topic_arn,
         local.sierra_merged_items_topic_arn,
       ]
 
       miro_adapter_topic_arns = [
-        //    local.miro_reindexer_topic_arn,
+        //        local.miro_reindexer_topic_arn,
         local.miro_updates_topic_arn,
       ]
 
       mets_adapter_topic_arns = [
-        //    local.mets_reindexer_topic_arn,
+        //        local.mets_reindexer_topic_arn,
         local.mets_adapter_topic_arn,
       ]
 
       calm_adapter_topic_arns = [
-        //    local.calm_reindexer_topic_arn,
+        //        local.calm_reindexer_topic_arn,
         local.calm_adapter_topic_arn,
       ]
     }
-
-    # A new pipeline with transformers that include support for multiple languages.
-    # See https://github.com/wellcomecollection/platform/issues/4864
-    "2020-11-12" = {
+    "2020-11-18" = {
       release_label = "stage"
 
       # Transformer config
