@@ -21,40 +21,40 @@ trait RelationsService {
     * @param path The archive path
     * @return The IDs of the other works to denormalise
     */
-  def getAffectedWorks(path: String): Source[Work[Merged], NotUsed]
+  def getAffectedWorks(batch: Batch): Source[Work[Merged], NotUsed]
 
   /** For a given work return all works in the same archive.
     *
     * @param path The archive path
     * @return The works
     */
-  def getAllWorksInArchive(path: String): Source[Work[Merged], NotUsed]
+  def getWholeTree(batch: Batch): Source[Work[Merged], NotUsed]
 }
 
 class PathQueryRelationsService(
   elasticClient: ElasticClient,
   index: Index,
-  allArchiveWorksScroll: Int = 1000,
+  wholeTreeScroll: Int = 1000,
   affectedWorksScroll: Int = 250)(implicit as: ActorSystem)
     extends RelationsService
     with Logging {
 
-  def getAffectedWorks(path: String): Source[Work[Merged], NotUsed] =
+  val requestBuilder = RelationsRequestBuilder(index)
+
+  def getAffectedWorks(batch: Batch): Source[Work[Merged], NotUsed] =
     Source
       .fromPublisher(
         elasticClient.publisher(
-          RelationsRequestBuilder(index, path)
-            .otherAffectedWorksRequest(affectedWorksScroll)
+          requestBuilder.affectedWorks(batch, affectedWorksScroll)
         )
       )
       .map(searchHit => searchHit.safeTo[Work[Merged]].get)
 
-  def getAllWorksInArchive(path: String): Source[Work[Merged], NotUsed] =
+  def getWholeTree(batch: Batch): Source[Work[Merged], NotUsed] =
     Source
       .fromPublisher(
         elasticClient.publisher(
-          RelationsRequestBuilder(index, path)
-            .allRelationsRequest(allArchiveWorksScroll)
+          requestBuilder.wholeTree(batch, wholeTreeScroll)
         )
       )
       .map(searchHit => searchHit.safeTo[Work.Visible[Merged]].get)
