@@ -29,7 +29,7 @@ locals {
         local.calm_adapter_topic_arn,
       ]
     }
-   
+
     ## Relation embedder pipeline
     #"2020-12-12" = {
     #  release_label = "stage"
