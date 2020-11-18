@@ -54,7 +54,6 @@ class RelationEmbedderWorkerServiceTest
     *    |
     *    e
     */
-
   val workA = work("a")
   val work1 = work("a/1")
   val workB = work("a/1/b")
@@ -96,7 +95,9 @@ class RelationEmbedderWorkerServiceTest
     withWorkerService() {
       case (QueuePair(queue, dlq), index, msgSender) =>
         import Selector._
-        val batch = Batch(rootPath = "a", selectors = List(Node("a/2"), Descendents("a/2")))
+        val batch = Batch(
+          rootPath = "a",
+          selectors = List(Node("a/2"), Descendents("a/2")))
         sendNotificationToSQS(queue = queue, message = batch)
         eventually {
           assertQueueEmpty(queue)
