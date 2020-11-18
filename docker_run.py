@@ -164,9 +164,12 @@ if __name__ == "__main__":
     if namespace.expose_host_root_folder:
         cmd += ["-e", "ROOT=%s" % ROOT]
 
-    if additional_args[0] == "--":
-        additional_args = additional_args[1:]
-    cmd += additional_args
+    try:
+        if additional_args[0] == "--":
+            additional_args = additional_args[1:]
+        cmd += additional_args
+    except IndexError:
+        assert additional_args == []
 
     try:
         print("*** Running %r" % " ".join(cmd))

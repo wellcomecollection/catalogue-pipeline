@@ -69,9 +69,8 @@ endef
 #
 define publish_service_ssm
 	$(ROOT)/docker_run.py \
-	# TODO: bump weco-deploy version
     	    --aws --dind -- \
-                $(ECR_REGISTRY)/wellcome/weco-deploy:5.5.3 \
+                $(ECR_REGISTRY)/wellcome/weco-deploy:5.6.6 \
                 --project-id="$(2)" \
                 --verbose \
                 publish \
