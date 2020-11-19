@@ -84,6 +84,12 @@ class ArchiveRelationsCacheTest
     relationsCache(workX) shouldBe Relations.none
   }
 
+  it("Returns no relations when missing parent work (e.g if it is not visible)") {
+    val works = List(workA, workD, workE, workF)
+    val relationsCache = ArchiveRelationsCache(works)
+    relationsCache(workB) shouldBe Relations.none
+  }
+
   it("Sorts works consisting of paths with an alphanumeric mixture of tokens") {
     val workA = work("a")
     val workB1 = work("a/B1")
