@@ -30,25 +30,28 @@ class PipelineStorageStream[T, D, MsgDestination](messageStream: SQSStream[T], d
     )
 
   def run(streamName: String, processFlow: Flow[(Message, T), (Message,Option[D]), NotUsed])(implicit decoder: Decoder[T], indexable: Indexable[D]) = {
-  val batchAndSendFlow = Flow[(Message, Option[D])].collect{case (message, Some(document)) => Bundle(message, document)}.groupedWithin(
-    config.batchSize,
-    config.flushInterval
-  )
-    .mapAsyncUnordered(10) { msgs =>
-      storeDocuments(msgs.toList)
-    }
-    .mapConcat(identity).mapAsyncUnordered(config.parallelism){bundle =>
-    for {
-    _ <- Future.fromTry(messageSender.send(indexable.id(bundle.document)))
-  } yield bundle.message}
-
-    val identityFlow = Flow[(Message, Option[D])].collect {case (message, None) => message}
+  val identityFlow = Flow[(Message, Option[D])].collect {case (message, None) => message}
     for {
       _ <- documentIndexer.init()
       result <- messageStream.runStream(
       streamName,
         _.via(processFlow).via(broadcastAndMerge(batchAndSendFlow, identityFlow)))
     } yield result
+  }
+
+  private def batchAndSendFlow(implicit indexable: Indexable[D]) = {
+    Flow[(Message, Option[D])].collect { case (message, Some(document)) => Bundle(message, document) }.groupedWithin(
+      config.batchSize,
+      config.flushInterval
+    )
+      .mapAsyncUnordered(10) { msgs =>
+        storeDocuments(msgs.toList)
+      }
+      .mapConcat(identity).mapAsyncUnordered(config.parallelism) { bundle =>
+      for {
+        _ <- Future.fromTry(messageSender.send(indexable.id(bundle.document)))
+      } yield bundle.message
+    }
   }
 
   private def storeDocuments(bundles: List[Bundle]): FutureBundles =
