@@ -114,7 +114,7 @@ class BatcherWorkerServiceTest
         sendNotificationToSQS(queue = queue, body = "A/B")
         sendNotificationToSQS(queue = queue, body = "A/E/1")
         sendNotificationToSQS(queue = queue, body = "Other/Tree")
-        eventually(Timeout(Span(5, Seconds))) {
+        eventually(Timeout(Span(10, Seconds))) {
           assertQueueEmpty(queue)
         }
         val failedPaths = getMessages(dlq)
@@ -150,7 +150,7 @@ class BatcherWorkerServiceTest
           val workerService = new BatcherWorkerService[String](
             msgStream = msgStream,
             msgSender = msgSender,
-            flushInterval = 50 milliseconds,
+            flushInterval = 250 milliseconds,
             maxBatchSize = maxBatchSize
           )
           workerService.run()
