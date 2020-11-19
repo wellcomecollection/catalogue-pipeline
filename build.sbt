@@ -68,7 +68,8 @@ lazy val big_messaging_typesafe = setupProject(
 lazy val pipeline_storage = setupProject(
   project,
   "common/pipeline_storage",
-  localDependencies = Seq(elasticsearch_typesafe)
+  localDependencies = Seq(elasticsearch_typesafe),
+  externalDependencies = CatalogueDependencies.pipelineStorageDependencies
 )
 
 lazy val api = setupProject(
