@@ -32,7 +32,7 @@ locals {
 
     ## Relation embedder pipeline
     "2020-11-19" = {
-      release_label = "relation_embedder"
+      release_label = "stage"
 
       # Transformer config
       #
