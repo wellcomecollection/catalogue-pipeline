@@ -2,7 +2,7 @@ package uk.ac.wellcome.pipeline_storage
 
 import akka.stream.FlowShape
 import akka.{Done, NotUsed}
-import akka.stream.scaladsl.{Broadcast, Flow, GraphDSL, Merge, Source}
+import akka.stream.scaladsl.{Broadcast, Flow, GraphDSL, Merge}
 import grizzled.slf4j.Logging
 import io.circe.Decoder
 import software.amazon.awssdk.services.sqs.model.Message
@@ -21,8 +21,7 @@ class PipelineStorageStream[T, D, MsgDestination](messageStream: SQSStream[T], d
     implicit decoderT: Decoder[T], indexable: Indexable[D]): Future[Done] =
     run(
       streamName = streamName,
-      source =>
-        source
+      Flow[(Message,T)]
           .mapAsyncUnordered(parallelism = config.parallelism) {
             case (message, t) =>
               debug(s"Processing message ${message.messageId()}")
@@ -30,7 +29,7 @@ class PipelineStorageStream[T, D, MsgDestination](messageStream: SQSStream[T], d
           }
     )
 
-  private def run(streamName: String, modifySource: Source[(Message, T), NotUsed] => Source[(Message,Option[D]), NotUsed])(implicit decoder: Decoder[T], indexable: Indexable[D]) = {
+  def run(streamName: String, processFlow: Flow[(Message, T), (Message,Option[D]), NotUsed])(implicit decoder: Decoder[T], indexable: Indexable[D]) = {
   val batchAndSendFlow = Flow[(Message, Option[D])].collect{case (message, Some(document)) => Bundle(message, document)}.groupedWithin(
     config.batchSize,
     config.flushInterval
@@ -48,7 +47,7 @@ class PipelineStorageStream[T, D, MsgDestination](messageStream: SQSStream[T], d
       _ <- documentIndexer.init()
       result <- messageStream.runStream(
       streamName,
-      modifySource(_).via(broadcastAndMerge(batchAndSendFlow, identityFlow)))
+        _.via(processFlow).via(broadcastAndMerge(batchAndSendFlow, identityFlow)))
     } yield result
   }
 
