@@ -1,21 +1,21 @@
 <configuration>
+
+  <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
+
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
-      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+      <pattern>%blue(%d{HH:mm:ss}) %magenta([%logger{0}]) %yellow(%-5level) %msg%n</pattern>
     </encoder>
   </appender>
 
   <root level="DEBUG">
-    <appender-ref ref="STDOUT" />
+    <!-- Uncomment the following line to display stdout of tests -->
+    <!-- <appender-ref ref="STDOUT"/> -->
   </root>
 
-  <logger name="com.sksamuel.elastic4s" level="INFO" />
-  <logger name="io.swagger" level="WARN" />
-  <logger name="uk.ac.wellcome.platform.api.Server" level="WARN" />
-
-  <!-- reduce external logging -->
-  <logger name="org.apache.http" level="ERROR"/>
-  <logger name="io.netty" level="ERROR"/>
-  <logger name="com.amazonaws" level="WARN"/>
-  <logger name="software.amazon.awssdk" level="WARN"/>
+  <!-- Edit these to change the log levels for external libraries -->
+  <logger name="org.apache.http" level="OFF"/>
+  <logger name="io.netty" level="OFF"/>
+  <logger name="com.amazonaws" level="OFF"/>
+  <logger name="software.amazon.awssdk" level="OFF"/>
 </configuration>
