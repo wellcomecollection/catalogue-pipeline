@@ -38,7 +38,7 @@ module "ingestor_works" {
 
   subnets = var.subnets
 
-  max_capacity        = 5
+  max_capacity        = 3
   messages_bucket_arn = aws_s3_bucket.messages.arn
   queue_read_policy   = module.ingestor_works_queue.read_policy
 
