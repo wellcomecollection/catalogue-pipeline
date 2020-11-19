@@ -35,6 +35,8 @@ steps:
     label: "relation embedder"
   - command: .buildkite/scripts/run_job.py router
     label: "router"
+  - command: .buildkite/scripts/run_job.py batcher
+    label: "batcher"
   - command: .buildkite/scripts/run_job.py matcher
     label: "matcher"
   - command: .buildkite/scripts/run_job.py merger
