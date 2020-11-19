@@ -1,7 +1,8 @@
 package uk.ac.wellcome.pipeline_storage
 
+import akka.stream.FlowShape
 import akka.{Done, NotUsed}
-import akka.stream.scaladsl.Source
+import akka.stream.scaladsl.{Broadcast, Flow, GraphDSL, Merge, Source}
 import grizzled.slf4j.Logging
 import io.circe.Decoder
 import software.amazon.awssdk.services.sqs.model.Message
@@ -17,7 +18,7 @@ class PipelineStorageStream[T, D, MsgDestination](messageStream: SQSStream[T], d
   case class Bundle(message: Message, document: D)
 
   def foreach(streamName: String, process: T => Future[Option[D]])(
-    implicit decoderT: Decoder[T]): Future[Done] =
+    implicit decoderT: Decoder[T], indexable: Indexable[D]): Future[Done] =
     run(
       streamName = streamName,
       source =>
@@ -29,26 +30,25 @@ class PipelineStorageStream[T, D, MsgDestination](messageStream: SQSStream[T], d
           }
     )
 
-  private def run(streamName: String, modifySource: Source[(Message, T), NotUsed] => Source[(Message,Option[D]), NotUsed])(implicit decoder: Decoder[T]) = {
+  private def run(streamName: String, modifySource: Source[(Message, T), NotUsed] => Source[(Message,Option[D]), NotUsed])(implicit decoder: Decoder[T], indexable: Indexable[D]) = {
+  val batchAndSendFlow = Flow[(Message, Option[D])].collect{case (message, Some(document)) => Bundle(message, document)}.groupedWithin(
+    config.batchSize,
+    config.flushInterval
+  )
+    .mapAsyncUnordered(10) { msgs =>
+      storeDocuments(msgs.toList)
+    }
+    .mapConcat(identity).mapAsyncUnordered(config.parallelism){bundle =>
+    for {
+    _ <- Future.fromTry(messageSender.send(indexable.id(bundle.document)))
+  } yield bundle.message}
 
+    val identityFlow = Flow[(Message, Option[D])].collect {case (message, None) => message}
     for {
       _ <- documentIndexer.init()
       result <- messageStream.runStream(
       streamName,
-      modifySource(_).map {
-        case (msg, Some(document)) => Bundle(msg, document)
-        case (msg, None) => ???
-      }
-        .groupedWithin(
-          config.batchSize,
-          config.flushInterval
-        )
-        .mapAsyncUnordered(10) { msgs =>
-          for { bundles <- storeDocuments(msgs.toList) } yield
-            bundles.map(_.message)
-        }
-        .mapConcat(identity)
-    )
+      modifySource(_).via(broadcastAndMerge(batchAndSendFlow, identityFlow)))
     } yield result
   }
 
@@ -61,4 +61,16 @@ class PipelineStorageStream[T, D, MsgDestination](messageStream: SQSStream[T], d
         case Bundle(_, document) => failedWorks.contains(document)
       }
     }
+
+  def broadcastAndMerge[I, O](a: Flow[I, O, NotUsed], b: Flow[I, O, NotUsed]): Flow[I, O, NotUsed] =
+    Flow.fromGraph(
+      GraphDSL.create() { implicit builder =>
+        import GraphDSL.Implicits._
+        val broadcast = builder.add(Broadcast[I](2))
+        val merge = builder.add(Merge[O](2))
+        broadcast ~> a ~> merge
+        broadcast ~> b ~> merge
+        FlowShape(broadcast.in, merge.out)
+      }
+    )
 }

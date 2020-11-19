@@ -3,6 +3,7 @@ package uk.ac.wellcome.platform.router
 import com.sksamuel.elastic4s.Index
 import org.scalatest.concurrent.Eventually
 import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.time.SpanSugar.convertIntToGrainOfTime
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.fixtures.TestWith
@@ -14,11 +15,7 @@ import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.work.internal.WorkState.Denormalised
 import uk.ac.wellcome.models.work.internal.{CollectionPath, Relations, Work}
-import uk.ac.wellcome.pipeline_storage.{
-  ElasticRetriever,
-  Indexer,
-  MemoryIndexer
-}
+import uk.ac.wellcome.pipeline_storage.{ElasticRetriever, Indexer, MemoryIndexer, PipelineStorageConfig, PipelineStorageStream}
 
 import scala.collection.mutable
 import scala.concurrent.Future
@@ -140,14 +137,13 @@ class RouterWorkerServiceTest
         val worksMessageSender = new MemoryMessageSender
         val pathsMessageSender = new MemoryMessageSender
         withSQSStream[NotificationMessage, R](queue) { stream =>
+        val pipelineStream = new PipelineStorageStream(messageStream = stream, documentIndexer = indexer, messageSender = worksMessageSender)(PipelineStorageConfig(1, 1 second, 10))
           withLocalMergedWorksIndex { mergedIndex =>
             val service =
               new RouterWorkerService(
-                sqsStream = stream,
-                worksMsgSender = worksMessageSender,
                 pathsMsgSender = pathsMessageSender,
                 workRetriever = new ElasticRetriever(elasticClient, mergedIndex),
-                workIndexer = indexer
+                pipelineStream = pipelineStream
               )
             service.run()
             testWith((mergedIndex, q, worksMessageSender, pathsMessageSender))
