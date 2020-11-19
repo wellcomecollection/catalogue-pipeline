@@ -68,13 +68,6 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
     // 0 then we cannot construct the `Language`. Therefore we have to have a
     // `min_doc_count` of 1 (the default) as we would if this were a composite
     // aggregation.
-    case AggregationRequest.Language =>
-      TermsAggregation("language")
-        .size(200)
-        .field("data.language.id")
-        .minDocCount(1)
-        .additionalField("data.language.label")
-
     case AggregationRequest.Languages =>
       TermsAggregation("languages")
         .size(200)
@@ -146,8 +139,6 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
         val (gte, lte) =
           (fromDate map ElasticDate.apply, toDate map ElasticDate.apply)
         RangeQuery("data.production.dates.range.from", lte = lte, gte = gte)
-      case LanguageFilter(languageIds) =>
-        termsQuery(field = "data.language.id", values = languageIds)
       case LanguagesFilter(languageIds) =>
         termsQuery(field = "data.languages.id", values = languageIds)
       case GenreFilter(genreQuery) =>

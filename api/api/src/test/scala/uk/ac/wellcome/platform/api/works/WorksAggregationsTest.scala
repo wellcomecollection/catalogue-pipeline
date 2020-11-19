@@ -202,49 +202,6 @@ class WorksAggregationsTest
     }
   }
 
-  it("supports aggregating on language") {
-    val english = Language(label = "English", id = "eng")
-    val german = Language(label = "German", id = "ger")
-
-    val languages = List(english, german, german)
-
-    val works = languages.map { indexedWork().language(_) }
-
-    withWorksApi {
-      case (worksIndex, routes) =>
-        insertIntoElasticsearch(worksIndex, works: _*)
-        assertJsonResponse(routes, s"/$apiPrefix/works?aggregations=language") {
-          Status.OK -> s"""
-            {
-              ${resultList(apiPrefix, totalResults = works.size)},
-              "aggregations": {
-                "type" : "Aggregations",
-                "language": {
-                  "type" : "Aggregation",
-                  "buckets": [
-                    {
-                      "data" : ${language(german)},
-                      "count" : 2,
-                      "type" : "AggregationBucket"
-                    },
-                    {
-                      "data" : ${language(english)},
-                      "count" : 1,
-                      "type" : "AggregationBucket"
-                    }
-                  ]
-                }
-              },
-              "results": [${works
-            .sortBy { _.state.canonicalId }
-            .map(workResponse)
-            .mkString(",")}]
-            }
-          """
-        }
-    }
-  }
-
   it("supports aggregating on languages") {
     val english = Language(label = "English", id = "eng")
     val swedish = Language(label = "Swedish", id = "swe")

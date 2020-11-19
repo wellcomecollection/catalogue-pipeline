@@ -37,7 +37,6 @@ trait ApiWorksTestBase
       |   "availableOnline": ${hasDigitalLocations(work)},
       |   "alternativeTitles": []
       |   ${optionalObject("workType", format, work.data.format)}
-      |   ${optionalObject("language", language, work.data.language)}
       | }
     """.stripMargin
 

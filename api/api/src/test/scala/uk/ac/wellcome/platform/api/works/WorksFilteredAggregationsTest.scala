@@ -26,7 +26,7 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
     case (format, language) =>
       indexedWork()
         .format(format)
-        .language(language)
+        .languages(List(language))
   }
 
   it(
@@ -36,7 +36,7 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
         insertIntoElasticsearch(worksIndex, works: _*)
         assertJsonResponse(
           routes,
-          s"/$apiPrefix/works?workType=a&aggregations=language") {
+          s"/$apiPrefix/works?workType=a&aggregations=languages") {
           Status.OK -> s"""
             {
               ${resultList(
@@ -45,7 +45,7 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
                               works.count(_.data.format.get == Books))},
               "aggregations": {
                 "type" : "Aggregations",
-                "language": {
+                "languages": {
                   "type" : "Aggregation",
                   "buckets": [
                     {
@@ -79,7 +79,7 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
         insertIntoElasticsearch(worksIndex, works: _*)
         assertJsonResponse(
           routes,
-          s"/$apiPrefix/works?workType=a&aggregations=language,workType") {
+          s"/$apiPrefix/works?workType=a&aggregations=languages,workType") {
           Status.OK -> s"""
             {
               ${resultList(
@@ -88,7 +88,7 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
                               works.count(_.data.format.get == Books))},
               "aggregations": {
                 "type" : "Aggregations",
-                "language": {
+                "languages": {
                   "type" : "Aggregation",
                   "buckets": [
                     {

@@ -17,7 +17,6 @@ case class Aggregations(
   format: Option[Aggregation[Format]] = None,
   genres: Option[Aggregation[Genre[IdState.Minted]]] = None,
   productionDates: Option[Aggregation[Period[IdState.Minted]]] = None,
-  language: Option[Aggregation[Language]] = None,
   languages: Option[Aggregation[Language]] = None,
   subjects: Option[Aggregation[Subject[IdState.Minted]]] = None,
   license: Option[Aggregation[License]] = None,
@@ -35,10 +34,6 @@ object Aggregations extends Logging {
           genres = e4sAggregations.decodeAgg[Genre[IdState.Minted]]("genres"),
           productionDates = e4sAggregations
             .decodeAgg[Period[IdState.Minted]]("productionDates"),
-          language = e4sAggregations.decodeAgg[Language](
-            "language",
-            documentPath = Some("data.language.id")
-          ),
           languages = e4sAggregations.decodeAgg[Language]("languages"),
           subjects = e4sAggregations
             .decodeAgg[Subject[IdState.Minted]]("subjects"),
