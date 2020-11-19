@@ -66,9 +66,6 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
             )
           ),
           workType = WorkType.Collection,
-          language = Some(
-            Language(label = "English", id = "eng")
-          ),
           languages = List(
             Language(label = "English", id = "eng"),
             Language(label = "Russian", id = "rus")
@@ -219,7 +216,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
     )
   }
 
-  it("transforms language") {
+  it("finds a single language") {
     val record = calmRecord(
       "Title" -> "abc",
       "Level" -> "Collection",
@@ -228,7 +225,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "Language" -> "English",
       "CatalogueStatus" -> "Catalogued"
     )
-    CalmTransformer(record, version).right.get.data.language shouldBe Some(
+    CalmTransformer(record, version).right.get.data.languages shouldBe Seq(
       Language(label = "English", id = "eng")
     )
   }
@@ -247,7 +244,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
     )
   }
 
-  it("strips whitespace when transforming language") {
+  it("strips whitespace from the langauge") {
     val recordA = calmRecord(
       "Title" -> "abc",
       "Level" -> "Collection",
@@ -264,10 +261,10 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "Language" -> "  ",
       "CatalogueStatus" -> "Catalogued"
     )
-    CalmTransformer(recordA, version).right.get.data.language shouldBe Some(
+    CalmTransformer(recordA, version).right.get.data.languages shouldBe Seq(
       Language(label = "English", id = "eng")
     )
-    CalmTransformer(recordB, version).right.get.data.language shouldBe None
+    CalmTransformer(recordB, version).right.get.data.languages shouldBe empty
   }
 
   it("parses language codes that can have various labels") {
@@ -287,10 +284,10 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "Language" -> "Flemish",
       "CatalogueStatus" -> "Catalogued"
     )
-    CalmTransformer(recordA, version).right.get.data.language shouldBe Some(
+    CalmTransformer(recordA, version).right.get.data.languages shouldBe Seq(
       Language(label = "Dutch", id = "dut")
     )
-    CalmTransformer(recordB, version).right.get.data.language shouldBe Some(
+    CalmTransformer(recordB, version).right.get.data.languages shouldBe Seq(
       Language(label = "Flemish", id = "dut")
     )
   }
@@ -498,13 +495,13 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
 
     val workData = CalmTransformer(record, version).right.get.data
 
-    workData.language shouldBe None
+    workData.languages shouldBe empty
     workData.notes should contain(
       LanguageNote("Some freeform discussion of the language")
     )
   }
 
-  it("suppresses Archives and Manuscrupts Resource Guide works") {
+  it("suppresses Archives and Manuscripts Resource Guide works") {
     import InvisibilityReason._
     val record = calmRecord(
       "Title" -> "Should suppress",

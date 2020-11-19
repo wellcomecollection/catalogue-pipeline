@@ -140,7 +140,6 @@ object CalmTransformer
         collectionPath = Some(collectionPath),
         subjects = subjects(record),
         languages = languages,
-        language = languages.headOption,
         mergeCandidates = mergeCandidates(record),
         items = items(record, accessStatus),
         contributors = contributors(record),
