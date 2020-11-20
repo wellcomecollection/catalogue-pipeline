@@ -29,3 +29,6 @@ variable "private_subnets" {
   type = list(string)
 }
 variable "dlq_alarm_arn" {}
+variable "shared_logging_secrets" {
+  type = map
+}

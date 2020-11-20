@@ -77,7 +77,7 @@ module "log_router_container" {
 
 module "log_router_permissions" {
   source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/secrets?ref=v3.2.0"
-  secrets   = data.terraform_remote_state.shared_infra.outputs.shared_secrets_logging
+  secrets   = var.shared_logging_secrets
   role_name = module.task_definition.task_execution_role_name
 }
 

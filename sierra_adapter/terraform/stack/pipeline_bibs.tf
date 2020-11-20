@@ -30,6 +30,7 @@ module "bibs_reader" {
 
   deployment_service_env  = var.deployment_env
   deployment_service_name = "bibs-reader"
+  shared_logging_secrets = var.shared_logging_secrets
 }
 
 module "bibs_merger" {
@@ -60,4 +61,5 @@ module "bibs_merger" {
 
   deployment_service_env  = var.deployment_env
   deployment_service_name = "bibs-merger"
+  shared_logging_secrets = var.shared_logging_secrets
 }

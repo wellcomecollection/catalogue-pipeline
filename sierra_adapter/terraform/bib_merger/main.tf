@@ -32,4 +32,6 @@ module "sierra_merger_service" {
     var.interservice_security_group_id,
     var.service_egress_security_group_id,
   ]
+
+  shared_logging_secrets = var.shared_logging_secrets
 }

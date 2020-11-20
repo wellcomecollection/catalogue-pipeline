@@ -47,6 +47,8 @@ module "ingestor_images" {
 
   deployment_service_env  = var.release_label
   deployment_service_name = "image-ingestor"
+
+  shared_logging_secrets = var.shared_logging_secrets
 }
 
 module "ingestor_images_scaling_alarm" {

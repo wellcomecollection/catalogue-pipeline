@@ -40,6 +40,7 @@ module "mets_transformer" {
 
   deployment_service_env  = var.release_label
   deployment_service_name = "mets-transformer"
+  shared_logging_secrets = var.shared_logging_secrets
 }
 
 module "mets_transformer_topic" {

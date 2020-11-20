@@ -72,4 +72,6 @@ module "stack" {
 
   # Inferrer data
   inferrer_model_data_bucket_name = aws_s3_bucket.inferrer_model_core_data.id
+
+  shared_logging_secrets = data.terraform_remote_state.shared_infra.outputs.shared_secrets_logging
 }

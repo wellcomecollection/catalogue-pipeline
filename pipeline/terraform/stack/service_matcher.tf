@@ -58,6 +58,7 @@ module "matcher" {
 
   deployment_service_env  = var.release_label
   deployment_service_name = "matcher"
+  shared_logging_secrets = var.shared_logging_secrets
 }
 
 resource "aws_iam_role_policy" "matcher_vhs_recorder_read" {

@@ -34,6 +34,7 @@ module "miro_transformer" {
 
   deployment_service_env  = var.release_label
   deployment_service_name = "miro-transformer"
+  shared_logging_secrets = var.shared_logging_secrets
 }
 
 resource "aws_iam_role_policy" "miro_transformer_vhs_miro_adapter_read" {
