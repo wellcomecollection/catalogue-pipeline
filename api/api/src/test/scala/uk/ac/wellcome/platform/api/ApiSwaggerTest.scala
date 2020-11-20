@@ -3,22 +3,32 @@ package uk.ac.wellcome.platform.api
 import org.scalatest.matchers.should.Matchers
 import akka.http.scaladsl.model.ContentTypes
 import io.circe.Json
+import org.scalatest.prop.TableDrivenPropertyChecks
+import uk.ac.wellcome.display.models.{SingleImageIncludes, WorksIncludes}
+import uk.ac.wellcome.platform.api.fixtures.ReflectionHelpers
 import uk.ac.wellcome.platform.api.models.SearchQueryType
 import uk.ac.wellcome.platform.api.rest._
 import uk.ac.wellcome.platform.api.works.ApiWorksTestBase
 
-class ApiSwaggerTest extends ApiWorksTestBase with Matchers with JsonHelpers {
-  val worksEndpoint = "/works"
-  val workEndpoint = "/works/{id}"
-  val imageEndpoint = "/images/{id}"
-  val imagesEndpoint = "/images"
-  it("should return valid json object") {
+class ApiSwaggerTest
+    extends ApiWorksTestBase
+    with Matchers
+    with JsonHelpers
+    with ReflectionHelpers
+    with TableDrivenPropertyChecks {
+
+  val multipleWorksEndpoint = "/works"
+  val singleWorkEndpoint = "/works/{id}"
+  val singleImageEndpoint = "/images/{id}"
+  val multipleImagesEndpoint = "/images"
+
+  it("returns a JSON object") {
     checkSwaggerJson { json =>
       json.isObject shouldBe true
     }
   }
 
-  it("should contain info") {
+  it("contains 'info'") {
     checkSwaggerJson { json =>
       val info = getKey(json, "info")
       info.isEmpty shouldBe false
@@ -29,7 +39,7 @@ class ApiSwaggerTest extends ApiWorksTestBase with Matchers with JsonHelpers {
     }
   }
 
-  it("should contain servers") {
+  it("contains 'servers'") {
     checkSwaggerJson { json =>
       getKey(json, "servers") shouldBe Some(
         Json.arr(
@@ -41,67 +51,152 @@ class ApiSwaggerTest extends ApiWorksTestBase with Matchers with JsonHelpers {
     }
   }
 
-  it("should contain single work endpoint in paths") {
-    checkSwaggerJson { json =>
-      val endpoint = getEndpoint(json, workEndpoint)
+  it("sets a non-empty description and summary on all paths") {
+    val testCases = Table(
+      "endpoint",
+      singleWorkEndpoint,
+      multipleWorksEndpoint,
+      singleImageEndpoint,
+      multipleImagesEndpoint
+    )
 
-      getKey(endpoint, "description").isEmpty shouldBe false
-      getKey(endpoint, "summary").isEmpty shouldBe false
-      val numParams = getKey(endpoint, "parameters")
-        .flatMap(params => getLength(params))
-      val numRouteParams = 1
-      numParams shouldBe Some(
-        getNumPublicQueryParams[SingleWorkParams] + numRouteParams
-      )
+    forAll(testCases) { endpointString =>
+      checkSwaggerJson { json =>
+        val endpoint = getEndpoint(json, endpointString)
+
+        getKey(endpoint, "description").isEmpty shouldBe false
+        getKey(endpoint, "summary").isEmpty shouldBe false
+      }
     }
   }
 
-  it("should contain multiple work endpoints in paths") {
-    checkSwaggerJson { json =>
-      val endpoint = getEndpoint(json, worksEndpoint)
+  describe("includes the route and query parameters on all paths") {
+    it("single work endpoint") {
+      val swaggerParams = getParameterNames(singleWorkEndpoint)
 
-      getKey(endpoint, "description").isEmpty shouldBe false
-      getKey(endpoint, "summary").isEmpty shouldBe false
-      val numParams = getKey(endpoint, "parameters")
-        .flatMap(params => getLength(params))
-      val numRouteParams = 0
-      numParams shouldBe Some(
-        getNumPublicQueryParams[MultipleWorksParams] + numRouteParams
+      val routeParam = "id"
+      val queryParams = getFields[SingleWorkParams]
+
+      val internalParams = queryParams :+ routeParam
+
+      assert(
+        swaggerParams.length == internalParams.length,
+        s"swaggerParams  = ${swaggerParams.sorted}internalParams = ${internalParams.sorted}"
       )
+    }
+
+    it("multiple works endpoint") {
+      val swaggerParams = getParameterNames(multipleWorksEndpoint)
+
+      val queryParams = getFields[MultipleWorksParams]
+
+      assert(
+        swaggerParams.length == queryParams.length,
+        s"swaggerParams = ${swaggerParams.sorted}\nactualParams  = ${queryParams.sorted}"
+      )
+    }
+
+    it("single image endpoint") {
+      val swaggerParams = getParameterNames(singleImageEndpoint)
+
+      val routeParam = "id"
+      val queryParams = getFields[SingleImageParams]
+
+      val internalParams = queryParams :+ routeParam
+
+      assert(
+        swaggerParams.length == internalParams.length,
+        s"swaggerParams  = ${swaggerParams.sorted}internalParams = ${internalParams.sorted}"
+      )
+    }
+
+    it("multiple images endpoint") {
+      val swaggerParams = getParameterNames(multipleImagesEndpoint)
+
+      val queryParams = getFields[MultipleImagesParams]
+
+      assert(
+        swaggerParams.length == queryParams.length,
+        s"swaggerParams = ${swaggerParams.sorted}\nactualParams  = ${queryParams.sorted}"
+      )
+    }
+
+    def getParameterNames(endpointString: String): List[String] = {
+      val names =
+        getParameters(endpointString)
+          .flatMap { getKey(_, "name") }
+          .map { _.asString.get }
+          .toList
+
+      assertDistinct(names)
+      names
     }
   }
 
-  it("should contain single image endpoint in paths") {
-    checkSwaggerJson { json =>
-      val endpoint = getEndpoint(json, imageEndpoint)
+  describe("lists all the available includes on all paths") {
+    it("single work endpoint") {
+      val swaggerIncludes = getSwaggerIncludes(singleWorkEndpoint)
 
-      getKey(endpoint, "description").isEmpty shouldBe false
-      getKey(endpoint, "summary").isEmpty shouldBe false
-      val numParams = getKey(endpoint, "parameters")
-        .flatMap(params => getLength(params))
-      val numRouteParams = 1
-      numParams shouldBe Some(
-        getNumPublicQueryParams[SingleImageParams] + numRouteParams
-      )
+      val workIncludes = getFields[WorksIncludes]
+
+      swaggerIncludes should contain theSameElementsAs workIncludes
+    }
+
+    it("multiple works endpoint") {
+      val swaggerIncludes = getSwaggerIncludes(multipleWorksEndpoint)
+
+      val workIncludes = getFields[WorksIncludes]
+
+      swaggerIncludes should contain theSameElementsAs workIncludes
+    }
+
+    // We don't currently have any ?include= fields on the multiple
+    // images endpoint.  If that changes, we should add a new test.
+
+    it("single image endpoint") {
+      val swaggerIncludes = getSwaggerIncludes(singleImageEndpoint)
+
+      val workIncludes = getFields[SingleImageIncludes]
+
+      swaggerIncludes should contain theSameElementsAs workIncludes
+    }
+
+    def getSwaggerIncludes(endpointString: String): Seq[String] = {
+      // The include parameter in the JSON is inside the "parameters"
+      // list and of the form:
+      //
+      //      {
+      //        "name" : "include",
+      //        "schema" : {
+      //          "enum" : [
+      //            ...
+      //          ],
+      //          ...
+      //        },
+      //        ...
+      //      }
+      //
+      val includeParam =
+        getParameters(endpointString).filter {
+          getKey(_, "name").get.asString.contains("include")
+        }.head
+
+      getKey(includeParam, "schema")
+        .flatMap { getKey(_, "enum") }
+        .flatMap { _.asArray }
+        .get
+        .map { _.asString.get }
     }
   }
 
-  it("should contain multiple images endpoint in paths") {
+  private def getParameters(endpointString: String): Seq[Json] =
     checkSwaggerJson { json =>
-      val endpoint = getEndpoint(json, imagesEndpoint)
+      val endpointSwagger = getEndpoint(json, endpointString)
 
-      getKey(endpoint, "description").isEmpty shouldBe false
-      getKey(endpoint, "summary").isEmpty shouldBe false
-      val numParams = getKey(endpoint, "parameters")
-        .flatMap(params => getLength(params))
-      val numRouteParams = 0
-      numParams shouldBe Some(
-        getNumPublicQueryParams[MultipleImagesParams] + numRouteParams
-      )
+      getKey(endpointSwagger, "parameters").flatMap { _.asArray }.get
     }
-  }
 
-  it("should contain schemas") {
+  it("contains 'schemas'") {
     checkSwaggerJson { json =>
       val numSchemas = getKey(json, "components")
         .flatMap(components => getKey(components, "schemas"))
@@ -111,7 +206,7 @@ class ApiSwaggerTest extends ApiWorksTestBase with Matchers with JsonHelpers {
     }
   }
 
-  it("should not contain lots of List* schemas") {
+  it("does not contain lots of List* schemas") {
     checkSwaggerJson { json =>
       val listSchemas = getKey(json, "components")
         .flatMap(components => getKey(components, "schemas"))
@@ -123,7 +218,7 @@ class ApiSwaggerTest extends ApiWorksTestBase with Matchers with JsonHelpers {
     }
   }
 
-  it("should not contain lots of Display* schemas") {
+  it("does not contain lots of Display* schemas") {
     checkSwaggerJson { json =>
       val listSchemas = getKey(json, "components")
         .flatMap(components => getKey(components, "schemas"))
@@ -135,7 +230,7 @@ class ApiSwaggerTest extends ApiWorksTestBase with Matchers with JsonHelpers {
     }
   }
 
-  it("should contain aggregation schemas") {
+  it("contains aggregation schemas") {
     checkSwaggerJson { json =>
       val schemas = getKey(json, "components")
         .flatMap(components => getKey(components, "schemas"))
@@ -158,11 +253,11 @@ class ApiSwaggerTest extends ApiWorksTestBase with Matchers with JsonHelpers {
 
   describe("includes bounds for the pageSize parameter") {
     it("images endpoint") {
-      checkBoundsOnPagesizeParameters(imagesEndpoint)
+      checkBoundsOnPagesizeParameters(multipleImagesEndpoint)
     }
 
     it("works endpoint") {
-      checkBoundsOnPagesizeParameters(worksEndpoint)
+      checkBoundsOnPagesizeParameters(multipleWorksEndpoint)
     }
 
     def checkBoundsOnPagesizeParameters(endpointString: String): Unit = {
@@ -186,11 +281,11 @@ class ApiSwaggerTest extends ApiWorksTestBase with Matchers with JsonHelpers {
 
   describe("includes bounds for the page parameter") {
     it("images endpoint") {
-      checkPageParameter(imagesEndpoint)
+      checkPageParameter(multipleImagesEndpoint)
     }
 
     it("works endpoint") {
-      checkPageParameter(worksEndpoint)
+      checkPageParameter(multipleWorksEndpoint)
     }
 
     def checkPageParameter(endpointString: String): Unit = {
@@ -210,10 +305,10 @@ class ApiSwaggerTest extends ApiWorksTestBase with Matchers with JsonHelpers {
   }
 
   //. We write this test for this specific parameter as it's used by the frontend
-  it("should contain `_queryType parameter with valid `allowedValues`") {
+  it("contains the `_queryType parameter with valid `allowedValues`") {
     checkSwaggerJson { json =>
       val _queryType =
-        getParameter(getEndpoint(json, worksEndpoint), "_queryType")
+        getParameter(getEndpoint(json, multipleWorksEndpoint), "_queryType")
 
       val queryTypeAllowedValues =
         _queryType.get.hcursor
@@ -222,12 +317,20 @@ class ApiSwaggerTest extends ApiWorksTestBase with Matchers with JsonHelpers {
           .toOption
           .getOrElse(List())
 
-      queryTypeAllowedValues should contain theSameElementsAs (SearchQueryType.allowed
-        .map(_.name))
+      queryTypeAllowedValues should contain theSameElementsAs SearchQueryType.allowed
+        .map(_.name)
     }
   }
 
-  private def checkSwaggerJson(f: Json => Unit) =
+  private def assertDistinct(values: Seq[Any]) =
+    assert(
+      values.distinct.size == values.size,
+      s"Duplicates: ${values.filter { v =>
+        values.count(v == _) > 1
+      }.distinct}"
+    )
+
+  private def checkSwaggerJson[T](f: Json => T): T =
     withApi { routes =>
       Get(s"/$apiPrefix/swagger.json") ~> routes ~> check {
         status shouldEqual Status.OK

@@ -146,7 +146,13 @@ trait SingleWorkSwagger {
             "genres",
             "contributors",
             "production",
-            "notes")),
+            "languages",
+            "notes",
+            "images",
+            "succeededBy",
+            "precededBy",
+            "partOf",
+            "parts")),
         required = false,
       )
     )
@@ -327,7 +333,13 @@ trait MultipleWorksSwagger {
             "genres",
             "contributors",
             "production",
-            "notes")),
+            "languages",
+            "notes",
+            "images",
+            "succeededBy",
+            "precededBy",
+            "partOf",
+            "parts")),
         required = false,
       ),
       new Parameter(
@@ -409,7 +421,7 @@ trait MultipleWorksSwagger {
         required = false
       ),
       new Parameter(
-        name = "identifiers",
+        name = "items.locations.accessConditions.status",
         in = ParameterIn.QUERY,
         description = "Filter the work by access status.",
         schema = new Schema(
