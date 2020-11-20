@@ -22,8 +22,8 @@ module "router" {
   env_vars = {
     metrics_namespace = "${local.namespace_hyphen}_router"
 
-    queue_url = module.router_queue.url
-    queue_parallelism            = 10
+    queue_url         = module.router_queue.url
+    queue_parallelism = 10
 
     paths_topic_arn = module.router_path_output_topic.arn
     works_topic_arn = module.router_work_output_topic.arn

@@ -27,8 +27,8 @@ module "batcher" {
     topic_arn = module.batcher_output_topic.arn
 
     flush_interval_minutes = 30
-    max_processed_paths = 50000
-    max_batch_size =  40
+    max_processed_paths    = 50000
+    max_batch_size         = 40
   }
 
   secret_env_vars = {}
