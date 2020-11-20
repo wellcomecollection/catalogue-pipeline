@@ -15,10 +15,12 @@ class ApiSwaggerTest
     with Matchers
     with JsonHelpers
     with TableDrivenPropertyChecks {
-  val worksEndpoint = "/works"
-  val workEndpoint = "/works/{id}"
-  val imageEndpoint = "/images/{id}"
-  val imagesEndpoint = "/images"
+
+  val multipleWorksEndpoint = "/works"
+  val singleWorkEndpoint = "/works/{id}"
+  val singleImageEndpoint = "/images/{id}"
+  val multipleImagesEndpoint = "/images"
+
   it("returns a JSON object") {
     checkSwaggerJson { json =>
       json.isObject shouldBe true
@@ -51,10 +53,10 @@ class ApiSwaggerTest
   it("sets a non-empty description and summary on all paths") {
     val testCases = Table(
       "endpoint",
-      workEndpoint,
-      worksEndpoint,
-      imageEndpoint,
-      imagesEndpoint
+      singleWorkEndpoint,
+      multipleWorksEndpoint,
+      singleImageEndpoint,
+      multipleImagesEndpoint
     )
 
     forAll(testCases) { endpointString =>
@@ -69,7 +71,7 @@ class ApiSwaggerTest
 
   describe("includes the route and query parameters on all paths") {
     it("single work endpoint") {
-      val swaggerParams = getParameterNames(workEndpoint)
+      val swaggerParams = getParameterNames(singleWorkEndpoint)
 
       val routeParam = "id"
       val queryParams = getPublicQueryParams[SingleWorkParams]
@@ -83,7 +85,7 @@ class ApiSwaggerTest
     }
 
     it("multiple works endpoint") {
-      val swaggerParams = getParameterNames(worksEndpoint)
+      val swaggerParams = getParameterNames(multipleWorksEndpoint)
 
       val queryParams = getPublicQueryParams[MultipleWorksParams]
 
@@ -94,7 +96,7 @@ class ApiSwaggerTest
     }
 
     it("single image endpoint") {
-      val swaggerParams = getParameterNames(imageEndpoint)
+      val swaggerParams = getParameterNames(singleImageEndpoint)
 
       val routeParam = "id"
       val queryParams = getPublicQueryParams[SingleImageParams]
@@ -108,7 +110,7 @@ class ApiSwaggerTest
     }
 
     it("multiple images endpoint") {
-      val swaggerParams = getParameterNames(imagesEndpoint)
+      val swaggerParams = getParameterNames(multipleImagesEndpoint)
 
       val queryParams = getPublicQueryParams[MultipleImagesParams]
 
@@ -203,11 +205,11 @@ class ApiSwaggerTest
 
   describe("includes bounds for the pageSize parameter") {
     it("images endpoint") {
-      checkBoundsOnPagesizeParameters(imagesEndpoint)
+      checkBoundsOnPagesizeParameters(multipleImagesEndpoint)
     }
 
     it("works endpoint") {
-      checkBoundsOnPagesizeParameters(worksEndpoint)
+      checkBoundsOnPagesizeParameters(multipleWorksEndpoint)
     }
 
     def checkBoundsOnPagesizeParameters(endpointString: String): Unit = {
@@ -231,11 +233,11 @@ class ApiSwaggerTest
 
   describe("includes bounds for the page parameter") {
     it("images endpoint") {
-      checkPageParameter(imagesEndpoint)
+      checkPageParameter(multipleImagesEndpoint)
     }
 
     it("works endpoint") {
-      checkPageParameter(worksEndpoint)
+      checkPageParameter(multipleWorksEndpoint)
     }
 
     def checkPageParameter(endpointString: String): Unit = {
@@ -258,7 +260,7 @@ class ApiSwaggerTest
   it("contains the `_queryType parameter with valid `allowedValues`") {
     checkSwaggerJson { json =>
       val _queryType =
-        getParameter(getEndpoint(json, worksEndpoint), "_queryType")
+        getParameter(getEndpoint(json, multipleWorksEndpoint), "_queryType")
 
       val queryTypeAllowedValues =
         _queryType.get.hcursor
