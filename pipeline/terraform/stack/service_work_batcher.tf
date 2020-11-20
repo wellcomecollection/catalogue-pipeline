@@ -33,6 +33,8 @@ module "batcher" {
 
   secret_env_vars = {}
 
+  shared_logging_secrets = var.shared_logging_secrets
+
   subnets             = var.subnets
   max_capacity        = 1
   messages_bucket_arn = aws_s3_bucket.messages.arn

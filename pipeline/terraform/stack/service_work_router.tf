@@ -40,6 +40,8 @@ module "router" {
     es_password = "catalogue/pipeline_storage/router/es_password"
   }
 
+  shared_logging_secrets = var.shared_logging_secrets
+
   subnets             = var.subnets
   max_capacity        = 10
   messages_bucket_arn = aws_s3_bucket.messages.arn
