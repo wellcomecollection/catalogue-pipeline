@@ -127,13 +127,18 @@ class ApiSwaggerTest extends ApiWorksTestBase with Matchers with JsonHelpers {
     }
   }
 
-  private def getParameterNames(endpoint: Json): List[String] =
-    getKey(endpoint, "parameters")
-      .flatMap { _.asArray }
-      .map { params => params.flatMap { getKey(_, "name") } }
-      .get
-      .map { _.asString.get }
-      .toList
+  private def getParameterNames(endpoint: Json): List[String] = {
+    val parameters =
+      getKey(endpoint, "parameters")
+        .flatMap { _.asArray }
+        .map { params => params.flatMap { getKey(_, "name") } }
+        .get
+        .map { _.asString.get }
+        .toList
+
+    assertDistinct(parameters)
+    parameters
+  }
 
   it("should contain schemas") {
     checkSwaggerJson { json =>
@@ -260,6 +265,12 @@ class ApiSwaggerTest extends ApiWorksTestBase with Matchers with JsonHelpers {
         .map(_.name)
     }
   }
+
+  private def assertDistinct(values: Seq[Any]) =
+    assert(
+      values.distinct.size == values.size,
+      s"Duplicates: ${values.filter { v => values.count(v == _) > 1 }.distinct}"
+    )
 
   private def checkSwaggerJson(f: Json => Unit) =
     withApi { routes =>
