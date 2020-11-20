@@ -30,3 +30,6 @@ variable "deployment_service_env" {
 variable "deployment_service_name" {
   type = string
 }
+variable "shared_logging_secrets" {
+  type = map
+}

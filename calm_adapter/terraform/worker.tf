@@ -12,8 +12,9 @@ module "worker" {
   cpu                = 512
   memory             = 1024
 
-  cluster_name = local.namespace
-  cluster_arn  = aws_ecs_cluster.cluster.arn
-  namespace_id = aws_service_discovery_private_dns_namespace.namespace.id
-  subnets      = local.private_subnets
+  cluster_name           = local.namespace
+  cluster_arn            = aws_ecs_cluster.cluster.arn
+  namespace_id           = aws_service_discovery_private_dns_namespace.namespace.id
+  subnets                = local.private_subnets
+  shared_logging_secrets = data.terraform_remote_state.shared_infra.outputs.shared_secrets_logging
 }

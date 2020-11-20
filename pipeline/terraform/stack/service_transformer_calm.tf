@@ -37,6 +37,7 @@ module "calm_transformer" {
 
   deployment_service_env  = var.release_label
   deployment_service_name = "calm-transformer"
+  shared_logging_secrets  = var.shared_logging_secrets
 }
 
 resource "aws_iam_role_policy" "calm_transformer_vhs_calm_adapter_read" {

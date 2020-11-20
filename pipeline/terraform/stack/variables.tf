@@ -5,6 +5,9 @@ variable "pipeline_date" {
 variable "subnets" {
   type = list(string)
 }
+variable "shared_logging_secrets" {
+  type = map
+}
 
 variable "vpc_id" {}
 

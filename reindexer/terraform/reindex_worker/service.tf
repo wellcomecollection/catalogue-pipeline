@@ -24,9 +24,10 @@ module "service" {
 
   subnets = var.private_subnets
 
-  desired_task_count = 0
-  min_capacity       = 0
-  max_capacity       = 7
+  desired_task_count     = 0
+  min_capacity           = 0
+  max_capacity           = 7
+  shared_logging_secrets = var.shared_logging_secrets
 }
 
 module "ingestor_works_scaling_alarm" {

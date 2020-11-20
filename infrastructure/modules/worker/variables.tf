@@ -9,7 +9,9 @@ variable "image" {
 variable "cluster_name" {
   type = string
 }
-
+variable "shared_logging_secrets" {
+  type = map
+}
 variable "cluster_arn" {
   type = string
 }

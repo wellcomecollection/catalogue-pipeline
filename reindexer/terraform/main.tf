@@ -19,4 +19,6 @@ module "reindex_worker" {
 
   service_env  = local.environment
   service_name = "reindexer"
+
+  shared_logging_secrets = data.terraform_remote_state.shared_infra.outputs.shared_secrets_logging
 }
