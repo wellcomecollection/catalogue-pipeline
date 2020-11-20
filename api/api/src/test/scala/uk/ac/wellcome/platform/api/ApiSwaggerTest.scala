@@ -4,16 +4,16 @@ import org.scalatest.matchers.should.Matchers
 import akka.http.scaladsl.model.ContentTypes
 import io.circe.Json
 import org.scalatest.prop.TableDrivenPropertyChecks
+import uk.ac.wellcome.platform.api.fixtures.ReflectionHelpers
 import uk.ac.wellcome.platform.api.models.SearchQueryType
 import uk.ac.wellcome.platform.api.rest._
 import uk.ac.wellcome.platform.api.works.ApiWorksTestBase
-
-import scala.reflect.runtime.universe._
 
 class ApiSwaggerTest
   extends ApiWorksTestBase
     with Matchers
     with JsonHelpers
+    with ReflectionHelpers
     with TableDrivenPropertyChecks {
 
   val multipleWorksEndpoint = "/works"
@@ -74,7 +74,7 @@ class ApiSwaggerTest
       val swaggerParams = getParameterNames(singleWorkEndpoint)
 
       val routeParam = "id"
-      val queryParams = getPublicQueryParams[SingleWorkParams]
+      val queryParams = getFields[SingleWorkParams]
 
       val internalParams = queryParams :+ routeParam
 
@@ -87,7 +87,7 @@ class ApiSwaggerTest
     it("multiple works endpoint") {
       val swaggerParams = getParameterNames(multipleWorksEndpoint)
 
-      val queryParams = getPublicQueryParams[MultipleWorksParams]
+      val queryParams = getFields[MultipleWorksParams]
 
       assert(
         swaggerParams.length == queryParams.length,
@@ -99,7 +99,7 @@ class ApiSwaggerTest
       val swaggerParams = getParameterNames(singleImageEndpoint)
 
       val routeParam = "id"
-      val queryParams = getPublicQueryParams[SingleImageParams]
+      val queryParams = getFields[SingleImageParams]
 
       val internalParams = queryParams :+ routeParam
 
@@ -112,7 +112,7 @@ class ApiSwaggerTest
     it("multiple images endpoint") {
       val swaggerParams = getParameterNames(multipleImagesEndpoint)
 
-      val queryParams = getPublicQueryParams[MultipleImagesParams]
+      val queryParams = getFields[MultipleImagesParams]
 
       assert(
         swaggerParams.length == queryParams.length,
@@ -120,33 +120,26 @@ class ApiSwaggerTest
       )
     }
 
-    def getPublicQueryParams[T: TypeTag]: Seq[String] =
-      typeOf[T].members
-        .collect {
-          case m: MethodSymbol if m.isCaseAccessor => m.name.toString
-        }
-        .filterNot {
-          _ == "_index"
-        }
-        .toSeq
-        .map { _.replace("$u002E", ".") }
+    def getParameterNames(endpointString: String): List[String] = {
+      val names =
+        getParameters(endpointString)
+          .flatMap { getKey(_, "name") }
+          .map { _.asString.get }
+          .toList
 
-    def getParameterNames(endpointString: String): List[String] =
-      checkSwaggerJson { json =>
-        val endpointSwagger = getEndpoint(json, endpointString)
-
-        val parameters =
-          getKey(endpointSwagger, "parameters")
-            .flatMap { _.asArray }
-            .map { params => params.flatMap { getKey(_, "name") } }
-            .get
-            .map { _.asString.get }
-            .toList
-
-        assertDistinct(parameters)
-        parameters
-      }
+      assertDistinct(names)
+      names
+    }
   }
+
+  private def getParameters(endpointString: String): Seq[Json] =
+    checkSwaggerJson { json =>
+      val endpointSwagger = getEndpoint(json, endpointString)
+
+      getKey(endpointSwagger, "parameters")
+        .flatMap { _.asArray }
+        .get
+    }
 
   it("contains 'schemas'") {
     checkSwaggerJson { json =>
