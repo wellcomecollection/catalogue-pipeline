@@ -4,6 +4,7 @@ import org.scalatest.matchers.should.Matchers
 import akka.http.scaladsl.model.ContentTypes
 import io.circe.Json
 import org.scalatest.prop.TableDrivenPropertyChecks
+import uk.ac.wellcome.display.models.{SingleImageIncludes, WorksIncludes}
 import uk.ac.wellcome.platform.api.fixtures.ReflectionHelpers
 import uk.ac.wellcome.platform.api.models.SearchQueryType
 import uk.ac.wellcome.platform.api.rest._
@@ -129,6 +130,64 @@ class ApiSwaggerTest
 
       assertDistinct(names)
       names
+    }
+  }
+
+  describe("lists all the available includes on all paths") {
+    it("single work endpoint") {
+      val swaggerIncludes = getSwaggerIncludes(singleWorkEndpoint)
+
+      val workIncludes = getFields[WorksIncludes]
+
+      swaggerIncludes should contain theSameElementsAs workIncludes
+    }
+
+    it("multiple works endpoint") {
+      val swaggerIncludes = getSwaggerIncludes(multipleWorksEndpoint)
+
+      val workIncludes = getFields[WorksIncludes]
+
+      swaggerIncludes should contain theSameElementsAs workIncludes
+    }
+
+    // We don't currently have any ?include= fields on the multiple
+    // images endpoint.  If that changes, we should add a new test.
+
+    it("single image endpoint") {
+      val swaggerIncludes = getSwaggerIncludes(singleImageEndpoint)
+
+      val workIncludes = getFields[SingleImageIncludes]
+
+      swaggerIncludes should contain theSameElementsAs workIncludes
+    }
+
+    def getSwaggerIncludes(endpointString: String): Seq[String] = {
+      // The include parameter in the JSON is inside the "parameters"
+      // list and of the form:
+      //
+      //      {
+      //        "name" : "include",
+      //        "schema" : {
+      //          "enum" : [
+      //            ...
+      //          ],
+      //          ...
+      //        },
+      //        ...
+      //      }
+      //
+      val includeParam =
+        getParameters(endpointString)
+          .filter {
+            getKey(_, "name").get.asString.contains("include")
+          }
+          .head
+
+      getKey(includeParam, "schema")
+        .flatMap { getKey(_, "enum") }
+        .flatMap { _.asArray }
+        .get
+        .map { _.asString.get }
     }
   }
 
