@@ -1,6 +1,5 @@
 package uk.ac.wellcome.platform.api
 
-import scala.reflect.runtime.universe._
 import io.circe.Json
 import uk.ac.wellcome.platform.api.works.ApiWorksTestBase
 
@@ -46,14 +45,4 @@ trait JsonHelpers extends ApiWorksTestBase {
     getKey(json, key = key)
       .flatMap { _.asNumber }
       .flatMap { _.toInt }
-
-  protected def getPublicQueryParams[T: TypeTag]: Seq[String] =
-    typeOf[T].members
-      .collect {
-        case m: MethodSymbol if m.isCaseAccessor => m.name.toString
-      }
-      .filterNot {
-        _ == "_index"
-      }
-      .toSeq
 }

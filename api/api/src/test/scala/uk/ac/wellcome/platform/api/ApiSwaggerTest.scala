@@ -8,6 +8,8 @@ import uk.ac.wellcome.platform.api.models.SearchQueryType
 import uk.ac.wellcome.platform.api.rest._
 import uk.ac.wellcome.platform.api.works.ApiWorksTestBase
 
+import scala.reflect.runtime.universe._
+
 class ApiSwaggerTest
   extends ApiWorksTestBase
     with Matchers
@@ -65,16 +67,12 @@ class ApiSwaggerTest
     }
   }
 
-  it("should contain single work endpoint in paths") {
-    checkSwaggerJson { json =>
-      val endpoint = getEndpoint(json, workEndpoint)
-
-      val swaggerParams = getParameterNames(endpoint)
+  describe("includes the route and query parameters on all paths") {
+    it("single work endpoint") {
+      val swaggerParams = getParameterNames(workEndpoint)
 
       val routeParam = "id"
-      val queryParams =
-        getPublicQueryParams[SingleWorkParams]
-          .map { _.replace("$u002E", ".") }
+      val queryParams = getPublicQueryParams[SingleWorkParams]
 
       val internalParams = queryParams :+ routeParam
 
@@ -83,35 +81,23 @@ class ApiSwaggerTest
         s"swaggerParams  = ${swaggerParams.sorted}internalParams = ${internalParams.sorted}"
       )
     }
-  }
 
-  it("should contain multiple work endpoints in paths") {
-    checkSwaggerJson { json =>
-      val endpoint = getEndpoint(json, worksEndpoint)
+    it("multiple works endpoint") {
+      val swaggerParams = getParameterNames(worksEndpoint)
 
-      val swaggerParams = getParameterNames(endpoint)
-
-      val actualParams =
-        getPublicQueryParams[MultipleWorksParams]
-          .map { _.replace("$u002E", ".") }
+      val queryParams = getPublicQueryParams[MultipleWorksParams]
 
       assert(
-        swaggerParams.length == actualParams.length,
-        s"swaggerParams = ${swaggerParams.sorted}\nactualParams  = ${actualParams.sorted}"
+        swaggerParams.length == queryParams.length,
+        s"swaggerParams = ${swaggerParams.sorted}\nactualParams  = ${queryParams.sorted}"
       )
     }
-  }
 
-  it("should contain single image endpoint in paths") {
-    checkSwaggerJson { json =>
-      val endpoint = getEndpoint(json, imageEndpoint)
-
-      val swaggerParams = getParameterNames(endpoint)
+    it("single image endpoint") {
+      val swaggerParams = getParameterNames(imageEndpoint)
 
       val routeParam = "id"
-      val queryParams =
-        getPublicQueryParams[SingleImageParams]
-          .map { _.replace("$u002E", ".") }
+      val queryParams = getPublicQueryParams[SingleImageParams]
 
       val internalParams = queryParams :+ routeParam
 
@@ -120,36 +106,44 @@ class ApiSwaggerTest
         s"swaggerParams  = ${swaggerParams.sorted}internalParams = ${internalParams.sorted}"
       )
     }
-  }
 
-  it("should contain multiple images endpoint in paths") {
-    checkSwaggerJson { json =>
-      val endpoint = getEndpoint(json, imagesEndpoint)
+    it("multiple images endpoint") {
+      val swaggerParams = getParameterNames(imagesEndpoint)
 
-      val swaggerParams = getParameterNames(endpoint)
-
-      val actualParams =
-        getPublicQueryParams[MultipleImagesParams]
-          .map { _.replace("$u002E", ".") }
+      val queryParams = getPublicQueryParams[MultipleImagesParams]
 
       assert(
-        swaggerParams.length == actualParams.length,
-        s"swaggerParams = ${swaggerParams.sorted}\nactualParams  = ${actualParams.sorted}"
+        swaggerParams.length == queryParams.length,
+        s"swaggerParams = ${swaggerParams.sorted}\nactualParams  = ${queryParams.sorted}"
       )
     }
-  }
 
-  private def getParameterNames(endpoint: Json): List[String] = {
-    val parameters =
-      getKey(endpoint, "parameters")
-        .flatMap { _.asArray }
-        .map { params => params.flatMap { getKey(_, "name") } }
-        .get
-        .map { _.asString.get }
-        .toList
+    def getPublicQueryParams[T: TypeTag]: Seq[String] =
+      typeOf[T].members
+        .collect {
+          case m: MethodSymbol if m.isCaseAccessor => m.name.toString
+        }
+        .filterNot {
+          _ == "_index"
+        }
+        .toSeq
+        .map { _.replace("$u002E", ".") }
 
-    assertDistinct(parameters)
-    parameters
+    def getParameterNames(endpointString: String): List[String] =
+      checkSwaggerJson { json =>
+        val endpointSwagger = getEndpoint(json, endpointString)
+
+        val parameters =
+          getKey(endpointSwagger, "parameters")
+            .flatMap { _.asArray }
+            .map { params => params.flatMap { getKey(_, "name") } }
+            .get
+            .map { _.asString.get }
+            .toList
+
+        assertDistinct(parameters)
+        parameters
+      }
   }
 
   it("should contain schemas") {
@@ -284,7 +278,7 @@ class ApiSwaggerTest
       s"Duplicates: ${values.filter { v => values.count(v == _) > 1 }.distinct}"
     )
 
-  private def checkSwaggerJson(f: Json => Unit) =
+  private def checkSwaggerJson[T](f: Json => T): T =
     withApi { routes =>
       Get(s"/$apiPrefix/swagger.json") ~> routes ~> check {
         status shouldEqual Status.OK
