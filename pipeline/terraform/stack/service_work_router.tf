@@ -32,8 +32,8 @@ module "router" {
     es_host     = "catalogue/pipeline_storage/es_host"
     es_port     = "catalogue/pipeline_storage/es_port"
     es_protocol = "catalogue/pipeline_storage/es_protocol"
-    es_username = "catalogue/pipeline_storage/relation_embedder/es_username"
-    es_password = "catalogue/pipeline_storage/relation_embedder/es_password"
+    es_username = "catalogue/pipeline_storage/router/es_username"
+    es_password = "catalogue/pipeline_storage/router/es_password"
   }
 
   subnets             = var.subnets
