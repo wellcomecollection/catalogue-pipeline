@@ -108,7 +108,9 @@ class BatcherWorkerServiceTest
   }
 
   it("doesn't delete paths where selectors failed sending ") {
-    withWorkerService(brokenPaths = Set("A/E", "A/B"), flushInterval = 750 milliseconds) {
+    withWorkerService(
+      brokenPaths = Set("A/E", "A/B"),
+      flushInterval = 750 milliseconds) {
       case (QueuePair(queue, dlq), msgSender) =>
         sendNotificationToSQS(queue = queue, body = "A/E")
         sendNotificationToSQS(queue = queue, body = "A/B")
