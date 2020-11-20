@@ -11,7 +11,7 @@ import uk.ac.wellcome.platform.api.rest._
 import uk.ac.wellcome.platform.api.works.ApiWorksTestBase
 
 class ApiSwaggerTest
-  extends ApiWorksTestBase
+    extends ApiWorksTestBase
     with Matchers
     with JsonHelpers
     with ReflectionHelpers
@@ -177,11 +177,9 @@ class ApiSwaggerTest
       //      }
       //
       val includeParam =
-        getParameters(endpointString)
-          .filter {
-            getKey(_, "name").get.asString.contains("include")
-          }
-          .head
+        getParameters(endpointString).filter {
+          getKey(_, "name").get.asString.contains("include")
+        }.head
 
       getKey(includeParam, "schema")
         .flatMap { getKey(_, "enum") }
@@ -195,9 +193,7 @@ class ApiSwaggerTest
     checkSwaggerJson { json =>
       val endpointSwagger = getEndpoint(json, endpointString)
 
-      getKey(endpointSwagger, "parameters")
-        .flatMap { _.asArray }
-        .get
+      getKey(endpointSwagger, "parameters").flatMap { _.asArray }.get
     }
 
   it("contains 'schemas'") {
@@ -329,7 +325,9 @@ class ApiSwaggerTest
   private def assertDistinct(values: Seq[Any]) =
     assert(
       values.distinct.size == values.size,
-      s"Duplicates: ${values.filter { v => values.count(v == _) > 1 }.distinct}"
+      s"Duplicates: ${values.filter { v =>
+        values.count(v == _) > 1
+      }.distinct}"
     )
 
   private def checkSwaggerJson[T](f: Json => T): T =
