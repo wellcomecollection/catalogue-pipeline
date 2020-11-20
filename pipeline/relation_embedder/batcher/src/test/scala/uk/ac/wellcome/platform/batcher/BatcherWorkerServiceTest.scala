@@ -108,7 +108,9 @@ class BatcherWorkerServiceTest
   }
 
   it("doesn't delete paths where selectors failed sending ") {
-    withWorkerService(brokenPaths = Set("A/E")) {
+    withWorkerService(
+      brokenPaths = Set("A/E", "A/B"),
+      flushInterval = 750 milliseconds) {
       case (QueuePair(queue, dlq), msgSender) =>
         sendNotificationToSQS(queue = queue, body = "A/E")
         sendNotificationToSQS(queue = queue, body = "A/B")
@@ -139,7 +141,8 @@ class BatcherWorkerServiceTest
     batches.find(_.rootPath == rootPath).get.selectors
 
   def withWorkerService[R](maxBatchSize: Int = 10,
-                           brokenPaths: Set[String] = Set.empty)(
+                           brokenPaths: Set[String] = Set.empty,
+                           flushInterval: FiniteDuration = 100 milliseconds)(
     testWith: TestWith[(QueuePair, MemoryMessageSender), R]): R =
     withLocalSqsQueuePair() { queuePair =>
       withActorSystem { implicit actorSystem =>
@@ -150,7 +153,7 @@ class BatcherWorkerServiceTest
           val workerService = new BatcherWorkerService[String](
             msgStream = msgStream,
             msgSender = msgSender,
-            flushInterval = 250 milliseconds,
+            flushInterval = flushInterval,
             maxBatchSize = maxBatchSize
           )
           workerService.run()

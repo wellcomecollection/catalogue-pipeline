@@ -60,7 +60,7 @@ class BatcherWorkerService[MsgDestination](
             msgSender.sendT(batch) match {
               case Success(_) => None
               case Failure(err) =>
-                error(err)
+                error(s"Failed processing batch $batch with error: $err")
                 Some(msgIndices)
             }
           }
