@@ -23,6 +23,7 @@ module "router" {
     metrics_namespace = "${local.namespace_hyphen}_router"
 
     queue_url = module.router_queue.url
+    queue_parallelism            = 10
 
     paths_topic_arn = module.router_path_output_topic.arn
     works_topic_arn = module.router_work_output_topic.arn
@@ -40,7 +41,7 @@ module "router" {
   }
 
   subnets             = var.subnets
-  max_capacity        = 5
+  max_capacity        = 10
   messages_bucket_arn = aws_s3_bucket.messages.arn
   queue_read_policy   = module.router_queue.read_policy
 
