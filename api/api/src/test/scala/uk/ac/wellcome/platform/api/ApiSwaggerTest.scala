@@ -256,8 +256,8 @@ class ApiSwaggerTest extends ApiWorksTestBase with Matchers with JsonHelpers {
           .toOption
           .getOrElse(List())
 
-      queryTypeAllowedValues should contain theSameElementsAs (SearchQueryType.allowed
-        .map(_.name))
+      queryTypeAllowedValues should contain theSameElementsAs SearchQueryType.allowed
+        .map(_.name)
     }
   }
 
