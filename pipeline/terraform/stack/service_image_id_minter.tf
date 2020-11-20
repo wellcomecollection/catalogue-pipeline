@@ -55,7 +55,7 @@ module "image_id_minter" {
 
   deployment_service_env  = var.release_label
   deployment_service_name = "image-id-minter"
-  shared_logging_secrets = var.shared_logging_secrets
+  shared_logging_secrets  = var.shared_logging_secrets
 }
 
 # Output topic

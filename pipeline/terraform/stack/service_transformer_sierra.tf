@@ -37,7 +37,7 @@ module "sierra_transformer" {
 
   deployment_service_env  = var.release_label
   deployment_service_name = "sierra-transformer"
-  shared_logging_secrets = var.shared_logging_secrets
+  shared_logging_secrets  = var.shared_logging_secrets
 }
 
 resource "aws_iam_role_policy" "sierra_transformer_vhs_sierra_adapter_read" {

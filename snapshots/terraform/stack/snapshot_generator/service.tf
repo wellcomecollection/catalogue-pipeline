@@ -35,7 +35,7 @@ module "snapshot_generator" {
 
   deployment_service_env  = var.deployment_service_env
   deployment_service_name = "snapshot-generator"
-  shared_logging_secrets = var.shared_logging_secrets
+  shared_logging_secrets  = var.shared_logging_secrets
 }
 
 module "snapshot_generator_scaling_alarm" {

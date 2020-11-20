@@ -47,7 +47,7 @@ module "ingestor_works" {
 
   deployment_service_env  = var.release_label
   deployment_service_name = "work-ingestor"
-  shared_logging_secrets = var.shared_logging_secrets
+  shared_logging_secrets  = var.shared_logging_secrets
 }
 
 module "ingestor_works_scaling_alarm" {

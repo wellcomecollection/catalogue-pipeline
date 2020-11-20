@@ -15,6 +15,6 @@ module "sierra-adapter-20200604" {
   bibs_windows_topic_arns  = [module.bibs_window_generator.topic_arn, module.bibs_reharvest_topic.arn]
   items_windows_topic_arns = [module.items_window_generator.topic_arn, module.items_reharvest_topic.arn]
 
-  deployment_env = "prod"
+  deployment_env         = "prod"
   shared_logging_secrets = data.terraform_remote_state.shared_infra.outputs.shared_secrets_logging
 }

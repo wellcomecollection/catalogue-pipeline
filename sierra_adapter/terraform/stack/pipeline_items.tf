@@ -30,7 +30,7 @@ module "items_reader" {
 
   deployment_service_env  = var.deployment_env
   deployment_service_name = "items-reader"
-  shared_logging_secrets = var.shared_logging_secrets
+  shared_logging_secrets  = var.shared_logging_secrets
 }
 
 module "items_to_dynamo" {
@@ -59,7 +59,7 @@ module "items_to_dynamo" {
 
   deployment_service_env  = var.deployment_env
   deployment_service_name = "items-to-dynamo"
-  shared_logging_secrets = var.shared_logging_secrets
+  shared_logging_secrets  = var.shared_logging_secrets
 }
 
 module "items_merger" {
@@ -92,5 +92,5 @@ module "items_merger" {
 
   deployment_service_env  = var.deployment_env
   deployment_service_name = "items-merger"
-  shared_logging_secrets = var.shared_logging_secrets
+  shared_logging_secrets  = var.shared_logging_secrets
 }

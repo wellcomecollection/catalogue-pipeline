@@ -31,5 +31,5 @@ variable "service_egress_security_group_id" {}
 variable "deployment_service_env" {}
 variable "deployment_service_name" {}
 variable "shared_logging_secrets" {
-  type= map
+  type = map
 }
