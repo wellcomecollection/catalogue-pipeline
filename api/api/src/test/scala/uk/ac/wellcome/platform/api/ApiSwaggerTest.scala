@@ -47,11 +47,19 @@ class ApiSwaggerTest extends ApiWorksTestBase with Matchers with JsonHelpers {
 
       getKey(endpoint, "description").isEmpty shouldBe false
       getKey(endpoint, "summary").isEmpty shouldBe false
-      val numParams = getKey(endpoint, "parameters")
-        .flatMap(params => getLength(params))
-      val numRouteParams = 1
-      numParams shouldBe Some(
-        getNumPublicQueryParams[SingleWorkParams] + numRouteParams
+
+      val swaggerParams = getParameterNames(endpoint)
+
+      val routeParam = "id"
+      val queryParams =
+        getPublicQueryParams[SingleWorkParams]
+          .map { _.replace("$u002E", ".") }
+
+      val internalParams = queryParams :+ routeParam
+
+      assert(
+        swaggerParams.length == internalParams.length,
+        s"swaggerParams  = ${swaggerParams.sorted}internalParams = ${internalParams.sorted}"
       )
     }
   }
@@ -62,11 +70,16 @@ class ApiSwaggerTest extends ApiWorksTestBase with Matchers with JsonHelpers {
 
       getKey(endpoint, "description").isEmpty shouldBe false
       getKey(endpoint, "summary").isEmpty shouldBe false
-      val numParams = getKey(endpoint, "parameters")
-        .flatMap(params => getLength(params))
-      val numRouteParams = 0
-      numParams shouldBe Some(
-        getNumPublicQueryParams[MultipleWorksParams] + numRouteParams
+
+      val swaggerParams = getParameterNames(endpoint)
+
+      val actualParams =
+        getPublicQueryParams[MultipleWorksParams]
+          .map { _.replace("$u002E", ".") }
+
+      assert(
+        swaggerParams.length == actualParams.length,
+        s"swaggerParams = ${swaggerParams.sorted}\nactualParams  = ${actualParams.sorted}"
       )
     }
   }
@@ -77,11 +90,19 @@ class ApiSwaggerTest extends ApiWorksTestBase with Matchers with JsonHelpers {
 
       getKey(endpoint, "description").isEmpty shouldBe false
       getKey(endpoint, "summary").isEmpty shouldBe false
-      val numParams = getKey(endpoint, "parameters")
-        .flatMap(params => getLength(params))
-      val numRouteParams = 1
-      numParams shouldBe Some(
-        getNumPublicQueryParams[SingleImageParams] + numRouteParams
+
+      val swaggerParams = getParameterNames(endpoint)
+
+      val routeParam = "id"
+      val queryParams =
+        getPublicQueryParams[SingleImageParams]
+          .map { _.replace("$u002E", ".") }
+
+      val internalParams = queryParams :+ routeParam
+
+      assert(
+        swaggerParams.length == internalParams.length,
+        s"swaggerParams  = ${swaggerParams.sorted}internalParams = ${internalParams.sorted}"
       )
     }
   }
@@ -92,14 +113,27 @@ class ApiSwaggerTest extends ApiWorksTestBase with Matchers with JsonHelpers {
 
       getKey(endpoint, "description").isEmpty shouldBe false
       getKey(endpoint, "summary").isEmpty shouldBe false
-      val numParams = getKey(endpoint, "parameters")
-        .flatMap(params => getLength(params))
-      val numRouteParams = 0
-      numParams shouldBe Some(
-        getNumPublicQueryParams[MultipleImagesParams] + numRouteParams
+
+      val swaggerParams = getParameterNames(endpoint)
+
+      val actualParams =
+        getPublicQueryParams[MultipleImagesParams]
+          .map { _.replace("$u002E", ".") }
+
+      assert(
+        swaggerParams.length == actualParams.length,
+        s"swaggerParams = ${swaggerParams.sorted}\nactualParams  = ${actualParams.sorted}"
       )
     }
   }
+
+  private def getParameterNames(endpoint: Json): List[String] =
+    getKey(endpoint, "parameters")
+      .flatMap { _.asArray }
+      .map { params => params.flatMap { getKey(_, "name") } }
+      .get
+      .map { _.asString.get }
+      .toList
 
   it("should contain schemas") {
     checkSwaggerJson { json =>

@@ -47,7 +47,7 @@ trait JsonHelpers extends ApiWorksTestBase {
       .flatMap { _.asNumber }
       .flatMap { _.toInt }
 
-  protected def getNumPublicQueryParams[T: TypeTag]: Int =
+  protected def getPublicQueryParams[T: TypeTag]: Seq[String] =
     typeOf[T].members
       .collect {
         case m: MethodSymbol if m.isCaseAccessor => m.name.toString
@@ -55,6 +55,5 @@ trait JsonHelpers extends ApiWorksTestBase {
       .filterNot {
         _ == "_index"
       }
-      .toList
-      .length
+      .toSeq
 }
