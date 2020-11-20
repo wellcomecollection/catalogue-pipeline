@@ -3,11 +3,16 @@ package uk.ac.wellcome.platform.api
 import org.scalatest.matchers.should.Matchers
 import akka.http.scaladsl.model.ContentTypes
 import io.circe.Json
+import org.scalatest.prop.TableDrivenPropertyChecks
 import uk.ac.wellcome.platform.api.models.SearchQueryType
 import uk.ac.wellcome.platform.api.rest._
 import uk.ac.wellcome.platform.api.works.ApiWorksTestBase
 
-class ApiSwaggerTest extends ApiWorksTestBase with Matchers with JsonHelpers {
+class ApiSwaggerTest
+  extends ApiWorksTestBase
+    with Matchers
+    with JsonHelpers
+    with TableDrivenPropertyChecks {
   val worksEndpoint = "/works"
   val workEndpoint = "/works/{id}"
   val imageEndpoint = "/images/{id}"
@@ -41,12 +46,28 @@ class ApiSwaggerTest extends ApiWorksTestBase with Matchers with JsonHelpers {
     }
   }
 
+  it("sets a non-empty description and summary on all paths") {
+    val testCases = Table(
+      "endpoint",
+      workEndpoint,
+      worksEndpoint,
+      imageEndpoint,
+      imagesEndpoint
+    )
+
+    forAll(testCases) { endpointString =>
+      checkSwaggerJson { json =>
+        val endpoint = getEndpoint(json, endpointString)
+
+        getKey(endpoint, "description").isEmpty shouldBe false
+        getKey(endpoint, "summary").isEmpty shouldBe false
+      }
+    }
+  }
+
   it("should contain single work endpoint in paths") {
     checkSwaggerJson { json =>
       val endpoint = getEndpoint(json, workEndpoint)
-
-      getKey(endpoint, "description").isEmpty shouldBe false
-      getKey(endpoint, "summary").isEmpty shouldBe false
 
       val swaggerParams = getParameterNames(endpoint)
 
@@ -68,9 +89,6 @@ class ApiSwaggerTest extends ApiWorksTestBase with Matchers with JsonHelpers {
     checkSwaggerJson { json =>
       val endpoint = getEndpoint(json, worksEndpoint)
 
-      getKey(endpoint, "description").isEmpty shouldBe false
-      getKey(endpoint, "summary").isEmpty shouldBe false
-
       val swaggerParams = getParameterNames(endpoint)
 
       val actualParams =
@@ -87,9 +105,6 @@ class ApiSwaggerTest extends ApiWorksTestBase with Matchers with JsonHelpers {
   it("should contain single image endpoint in paths") {
     checkSwaggerJson { json =>
       val endpoint = getEndpoint(json, imageEndpoint)
-
-      getKey(endpoint, "description").isEmpty shouldBe false
-      getKey(endpoint, "summary").isEmpty shouldBe false
 
       val swaggerParams = getParameterNames(endpoint)
 
@@ -110,9 +125,6 @@ class ApiSwaggerTest extends ApiWorksTestBase with Matchers with JsonHelpers {
   it("should contain multiple images endpoint in paths") {
     checkSwaggerJson { json =>
       val endpoint = getEndpoint(json, imagesEndpoint)
-
-      getKey(endpoint, "description").isEmpty shouldBe false
-      getKey(endpoint, "summary").isEmpty shouldBe false
 
       val swaggerParams = getParameterNames(endpoint)
 
