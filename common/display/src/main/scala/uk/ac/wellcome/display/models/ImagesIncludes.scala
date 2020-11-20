@@ -8,23 +8,28 @@ object ImageInclude {
   case object WithSimilarColors extends ImageInclude
 }
 
-case class SingleImageIncludes(includes: List[ImageInclude]) {
-  def visuallySimilar = includes.contains(ImageInclude.VisuallySimilar)
-  def withSimilarFeatures = includes.contains(ImageInclude.WithSimilarFeatures)
-  def withSimilarColors = includes.contains(ImageInclude.WithSimilarColors)
+case class SingleImageIncludes(
+  visuallySimilar: Boolean,
+  withSimilarFeatures: Boolean,
+  withSimilarColors: Boolean
+) {
+  import ImageInclude._
+
+  def includes: List[ImageInclude] =
+    List(
+      if (visuallySimilar) Some(VisuallySimilar) else None,
+      if (withSimilarFeatures) Some(WithSimilarFeatures) else None,
+      if (withSimilarColors) Some(WithSimilarColors) else None,
+    ).flatten
 }
 
 object SingleImageIncludes {
   import ImageInclude._
 
-  def apply(visuallySimilar: Boolean = false,
-            withSimilarFeatures: Boolean = false,
-            withSimilarColors: Boolean = false): SingleImageIncludes =
+  def apply(includes: List[ImageInclude]): SingleImageIncludes =
     SingleImageIncludes(
-      List(
-        if (visuallySimilar) Some(VisuallySimilar) else None,
-        if (withSimilarFeatures) Some(WithSimilarFeatures) else None,
-        if (withSimilarColors) Some(WithSimilarColors) else None,
-      ).flatten
+      visuallySimilar = includes.contains(VisuallySimilar),
+      withSimilarFeatures = includes.contains(WithSimilarFeatures),
+      withSimilarColors = includes.contains(WithSimilarColors)
     )
 }
