@@ -28,7 +28,13 @@ module "router" {
     works_topic_arn = module.router_work_output_topic.arn
   }
 
-  secret_env_vars = {}
+  secret_env_vars = {
+    es_host     = "catalogue/pipeline_storage/es_host"
+    es_port     = "catalogue/pipeline_storage/es_port"
+    es_protocol = "catalogue/pipeline_storage/es_protocol"
+    es_username = "catalogue/pipeline_storage/relation_embedder/es_username"
+    es_password = "catalogue/pipeline_storage/relation_embedder/es_password"
+  }
 
   subnets             = var.subnets
   max_capacity        = 5
