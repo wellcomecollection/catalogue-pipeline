@@ -409,7 +409,7 @@ trait MultipleWorksSwagger {
         required = false
       ),
       new Parameter(
-        name = "identifiers",
+        name = "items.locations.accessConditions.status",
         in = ParameterIn.QUERY,
         description = "Filter the work by access status.",
         schema = new Schema(
