@@ -19,13 +19,13 @@ class ApiSwaggerTest
   val workEndpoint = "/works/{id}"
   val imageEndpoint = "/images/{id}"
   val imagesEndpoint = "/images"
-  it("should return valid json object") {
+  it("returns a JSON object") {
     checkSwaggerJson { json =>
       json.isObject shouldBe true
     }
   }
 
-  it("should contain info") {
+  it("contains 'info'") {
     checkSwaggerJson { json =>
       val info = getKey(json, "info")
       info.isEmpty shouldBe false
@@ -36,7 +36,7 @@ class ApiSwaggerTest
     }
   }
 
-  it("should contain servers") {
+  it("contains 'servers'") {
     checkSwaggerJson { json =>
       getKey(json, "servers") shouldBe Some(
         Json.arr(
@@ -146,7 +146,7 @@ class ApiSwaggerTest
       }
   }
 
-  it("should contain schemas") {
+  it("contains 'schemas'") {
     checkSwaggerJson { json =>
       val numSchemas = getKey(json, "components")
         .flatMap(components => getKey(components, "schemas"))
@@ -156,7 +156,7 @@ class ApiSwaggerTest
     }
   }
 
-  it("should not contain lots of List* schemas") {
+  it("does not contain lots of List* schemas") {
     checkSwaggerJson { json =>
       val listSchemas = getKey(json, "components")
         .flatMap(components => getKey(components, "schemas"))
@@ -168,7 +168,7 @@ class ApiSwaggerTest
     }
   }
 
-  it("should not contain lots of Display* schemas") {
+  it("does not contain lots of Display* schemas") {
     checkSwaggerJson { json =>
       val listSchemas = getKey(json, "components")
         .flatMap(components => getKey(components, "schemas"))
@@ -180,7 +180,7 @@ class ApiSwaggerTest
     }
   }
 
-  it("should contain aggregation schemas") {
+  it("contains aggregation schemas") {
     checkSwaggerJson { json =>
       val schemas = getKey(json, "components")
         .flatMap(components => getKey(components, "schemas"))
@@ -255,7 +255,7 @@ class ApiSwaggerTest
   }
 
   //. We write this test for this specific parameter as it's used by the frontend
-  it("should contain `_queryType parameter with valid `allowedValues`") {
+  it("contains the `_queryType parameter with valid `allowedValues`") {
     checkSwaggerJson { json =>
       val _queryType =
         getParameter(getEndpoint(json, worksEndpoint), "_queryType")
