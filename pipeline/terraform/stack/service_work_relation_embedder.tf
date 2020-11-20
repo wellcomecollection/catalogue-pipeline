@@ -2,7 +2,7 @@ module "relation_embedder_queue" {
   source                     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
   queue_name                 = "${local.namespace_hyphen}_relation_embedder"
   topic_arns                 = [module.batcher_output_topic.arn]
-  visibility_timeout_seconds = 1200
+  visibility_timeout_seconds = 600
   aws_region                 = var.aws_region
   alarm_topic_arn            = var.dlq_alarm_arn
 }
