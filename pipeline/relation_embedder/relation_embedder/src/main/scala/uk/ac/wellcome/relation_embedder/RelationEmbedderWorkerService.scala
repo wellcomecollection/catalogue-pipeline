@@ -26,7 +26,8 @@ class RelationEmbedderWorkerService[MsgDestination](
   indexBatchSize: Int = 100,
   indexFlushInterval: FiniteDuration = 20 seconds
 )(implicit ec: ExecutionContext, materializer: Materializer)
-    extends Runnable with Logging {
+    extends Runnable
+    with Logging {
 
   def run(): Future[Done] =
     workIndexer.init().flatMap { _ =>
@@ -37,13 +38,15 @@ class RelationEmbedderWorkerService[MsgDestination](
     Future
       .fromTry(fromJson[Batch](message.body))
       .map { batch =>
-        info(s"Received batch for tree ${batch.rootPath} containing ${batch.selectors.size} selectors")
+        info(
+          s"Received batch for tree ${batch.rootPath} containing ${batch.selectors.size} selectors")
         relationsService
           .getCompleteTree(batch)
           .runWith(Sink.seq)
           .map(ArchiveRelationsCache(_))
           .flatMap { relationsCache =>
-            info(s"Built cache for tree ${batch.rootPath}, containing ${relationsCache.size} relations (${relationsCache.numParents} works map to parent works).")
+            info(
+              s"Built cache for tree ${batch.rootPath}, containing ${relationsCache.size} relations (${relationsCache.numParents} works map to parent works).")
             val denormalisedWorks = relationsService
               .getAffectedWorks(batch)
               .map { work =>
