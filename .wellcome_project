@@ -95,13 +95,13 @@ catalogue_pipeline:
         - id: work-ingestor
     - id: router
       services:
-        - id: router
+        - id: work-router
     - id: batcher
       services:
-        - id: batcher
+        - id: work-batcher
     - id: relation_embedder
       services:
-        - id: relation-embedder
+        - id: work-relation-embedder
     - id: transformer_calm
       services:
         - id: calm-transformer
