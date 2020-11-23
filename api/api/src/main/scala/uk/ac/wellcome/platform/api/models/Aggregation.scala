@@ -1,7 +1,5 @@
 package uk.ac.wellcome.platform.api.models
 
-import scala.util.{Failure, Success, Try}
-import io.circe.{Decoder, Json}
 import java.time.{Instant, LocalDateTime, ZoneOffset}
 
 import com.sksamuel.elastic4s.requests.searches.aggs.responses.{
@@ -9,9 +7,14 @@ import com.sksamuel.elastic4s.requests.searches.aggs.responses.{
 }
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
 import grizzled.slf4j.Logging
+import io.circe.generic.extras.JsonKey
+import io.circe.{Decoder, Json}
 import uk.ac.wellcome.display.models.LocationTypeQuery
+import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.marc.MarcLanguageCodeList
 import uk.ac.wellcome.models.work.internal._
+
+import scala.util.{Failure, Try}
 
 case class Aggregations(
   format: Option[Aggregation[Format]] = None,
@@ -119,73 +122,53 @@ object Aggregations extends Logging {
   }
 }
 
-// This object contains the tools required to map an aggregation result from ES
-// into our Aggregation data type.
+// This object maps an aggregation result from Elasticsearch into our
+// Aggregation data type.  The results from ES are of the form:
 //
-// There 2 independent variables in each bucket of these aggregations:
+//    {
+//      "buckets": [
+//        {
+//          "key": "chi",
+//          "doc_count": 4,
+//          "filtered": {
+//            "doc_count": 3
+//          }
+//        },
+//        ...
+//      ],
+//      ...
+//    }
 //
-// ## Root count vs filtered count
-// If aggregation buckets have a subaggregation named `filtered` from
-// [[uk.ac.wellcome.platform.api.services.FiltersAndAggregationsBuilder]] then
-// we use the count from there, otherwise we use the count from the root of the
-// bucket.
-//
-// ## Key-only vs sample document
-// For some aggregation types `T` (in `Aggregation[T]`) we can decode `T`
-// directly from the bucket key - for example with Format, we can use
-// `fromCode` to get the label of the Format given its id.
-//
-// However, sometimes
-// we need more information from the index, which is achieved using a top hits
-// aggregation of size 1 - see
-// [[uk.ac.wellcome.platform.api.services.ElasticsearchQueryBuilder]].
-//
-// In this case there is a `sample_doc` subaggregation for which we can provide
-// a `path` to the relevant data inside it. For example, the Language type uses
-// this to obtain both the label and id at the path `data.language` within
-// `sample_doc`.
-object AggregationMapping extends Logging {
-  import io.circe.parser._
-  import io.circe.optics.JsonPath._
-  import cats.syntax.traverse._
-  import cats.instances.list._
-  import cats.instances.try_._
+// If the buckets have a subaggregation named "filtered", then we use the
+// count from there; otherwise we use the count from the root of the bucket.
+object AggregationMapping {
 
-  private val buckets = root.buckets.arr
-  private val bucketFilteredCount = root.filtered.doc_count.int
-  private val bucketRootCount = root.doc_count.int
-  private val bucketKey = root.key.json
+  private case class Result(buckets: Seq[Bucket])
 
-  def aggregationParser[T: Decoder](json: String): Try[Aggregation[T]] =
-    parse(json).toTry
-      .map { parsedJson =>
-        for {
-          bucket <- getBuckets(parsedJson)
-          bucketDoc <- getBucketDoc(bucket).map(_.as[T])
-          bucketCount <- getBucketCount(bucket)
-        } yield {
-          bucketDoc match {
-            case Right(data) =>
-              Success(Some(AggregationBucket(data, bucketCount)))
-            case Left(err) => Failure(err)
-          }
-        }
+  private case class Bucket(
+    key: Json,
+    @JsonKey("doc_count") count: Int,
+    filtered: Option[FilteredResult]
+  ) {
+    def docCount: Int =
+      filtered match {
+        case Some(f) => f.count
+        case None    => count
       }
-      .flatMap {
-        _.toList.sequence.map { maybeBuckets =>
-          Aggregation(maybeBuckets.flatten)
-        }
+  }
+
+  private case class FilteredResult(@JsonKey("doc_count") count: Int)
+
+  def aggregationParser[T: Decoder](jsonString: String): Try[Aggregation[T]] =
+    fromJson[Result](jsonString)
+      .map { result =>
+        result.buckets
+          .map { b => (b.key.as[T], b.docCount) }
       }
-
-  private def getBuckets(agg: Json) = buckets.getOption(agg).getOrElse(List())
-
-  private def getBucketDoc(bucket: Json) =
-    bucketKey.getOption(bucket)
-
-  private def getBucketCount(bucket: Json) =
-    bucketFilteredCount
-      .getOption(bucket)
-      .orElse(bucketRootCount.getOption(bucket))
+      .map { tally =>
+        tally.collect { case (Right(t), count) => AggregationBucket(t, count = count) }
+      }
+      .map { buckets => Aggregation(buckets.toList) }
 }
 
 case class Aggregation[+T](buckets: List[AggregationBucket[T]])
