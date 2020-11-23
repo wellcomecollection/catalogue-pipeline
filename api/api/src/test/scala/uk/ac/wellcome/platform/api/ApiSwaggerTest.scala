@@ -162,30 +162,12 @@ class ApiSwaggerTest
     }
 
     def getSwaggerIncludes(endpointString: String): Seq[String] = {
-      // The include parameter in the JSON is inside the "parameters"
-      // list and of the form:
-      //
-      //      {
-      //        "name" : "include",
-      //        "schema" : {
-      //          "enum" : [
-      //            ...
-      //          ],
-      //          ...
-      //        },
-      //        ...
-      //      }
-      //
       val includeParam =
         getParameters(endpointString).filter {
           getKey(_, "name").get.asString.contains("include")
         }.head
 
-      getKey(includeParam, "schema")
-        .flatMap { getKey(_, "enum") }
-        .flatMap { _.asArray }
-        .get
-        .map { _.asString.get }
+      getEnumValues(includeParam)
     }
   }
 
@@ -195,6 +177,24 @@ class ApiSwaggerTest
 
       getKey(endpointSwagger, "parameters").flatMap { _.asArray }.get
     }
+
+  // Given a JSON object of the form:
+  //
+  //      {
+  //        "schema" : {
+  //          "enum" : ["value1", "value2", "value3"],
+  //          ...
+  //        },
+  //        ...
+  //      }
+  //
+  // return the list of strings in the 'enum'.
+  private def getEnumValues(json: Json): Seq[String] =
+    getKey(json, "schema")
+      .flatMap { getKey(_, "enum") }
+      .flatMap { _.asArray }
+      .get
+      .map { _.asString.get }
 
   it("contains 'schemas'") {
     checkSwaggerJson { json =>
