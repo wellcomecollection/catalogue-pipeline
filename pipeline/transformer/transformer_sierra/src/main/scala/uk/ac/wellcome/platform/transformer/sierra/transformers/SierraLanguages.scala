@@ -14,6 +14,14 @@ object SierraLanguages
     with Logging {
   type Output = List[Language]
 
+  // We only want to display languages that actually correspond to languages.
+  // These language codes don't tell us anything useful, so we suppress them.
+  private val suppressedLanguageCodes: Set[String] = Set(
+    "mul",  // Multiple languages
+    "und",  // Undetermined
+    "zxx",  // No linguistic content
+  )
+
   // Populate wwork:language.
   //
   // Rules:
@@ -49,6 +57,9 @@ object SierraLanguages
             None
         }
 
-    (List(primaryLanguage) ++ additionalLanguages).flatten.distinct
+    (List(primaryLanguage) ++ additionalLanguages)
+      .flatten
+      .filterNot { lang => suppressedLanguageCodes.contains(lang.id) }
+      .distinct
   }
 }
