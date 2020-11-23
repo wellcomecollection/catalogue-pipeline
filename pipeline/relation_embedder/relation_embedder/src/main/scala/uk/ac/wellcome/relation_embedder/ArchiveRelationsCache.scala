@@ -22,6 +22,10 @@ class ArchiveRelationsCache(
       }
       .getOrElse(Relations.none)
 
+  def size = relations.size
+
+  def numParents = parentMapping.size
+
   private def children(path: String): List[Relation[DataState.Unidentified]] =
     childMapping
       .get(path)
