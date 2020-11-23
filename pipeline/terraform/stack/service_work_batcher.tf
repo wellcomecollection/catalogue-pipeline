@@ -26,7 +26,7 @@ module "batcher" {
     queue_url        = module.batcher_queue.url
     output_topic_arn = module.batcher_output_topic.arn
 
-    flush_interval_minutes = 15 // NOTE: this needs to be less than visibility timeout
+    flush_interval_minutes = 15     // NOTE: this needs to be less than visibility timeout
     max_processed_paths    = 100000 // NOTE: SQS in flight limit is 120k
     max_batch_size         = 40
   }
