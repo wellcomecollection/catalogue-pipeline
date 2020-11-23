@@ -51,7 +51,7 @@ module "router" {
   memory = 2048
 
   deployment_service_env  = var.release_label
-  deployment_service_name = "work-relation-embedder"
+  deployment_service_name = "work-router"
 }
 
 module "router_path_output_topic" {
