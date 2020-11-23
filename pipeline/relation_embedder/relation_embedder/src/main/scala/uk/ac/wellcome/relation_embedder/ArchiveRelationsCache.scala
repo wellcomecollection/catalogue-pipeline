@@ -1,32 +1,47 @@
 package uk.ac.wellcome.relation_embedder
 
 import scala.annotation.tailrec
+import grizzled.slf4j.Logging
 
 import uk.ac.wellcome.models.work.internal._
 import WorkState.Merged
 
 class ArchiveRelationsCache(
-  relations: Map[String, Relation[DataState.Unidentified]]) {
+  relations: Map[String, Relation[DataState.Unidentified]])
+    extends Logging {
 
   def apply(work: Work[Merged]): Relations[DataState.Unidentified] =
     work.data.collectionPath
       .map {
         case CollectionPath(path, _, _) =>
-          val (siblingsPreceding, siblingsSucceeding) = siblings(path)
-          Relations(
-            ancestors = ancestors(path),
-            children = children(path),
+          val (siblingsPreceding, siblingsSucceeding) = getSiblings(path)
+          val ancestors = getAncestors(path)
+          val children = getChildren(path)
+          val relations = Relations(
+            ancestors = ancestors,
+            children = children,
             siblingsPreceding = siblingsPreceding,
             siblingsSucceeding = siblingsSucceeding
           )
+          if (relations == Relations.none)
+            info(
+              s"Found no relations for work with path $path. Parent mapping: $parentMapping")
+          else
+            info(
+              s"For work with path $path, found ${ancestors.size} ancestors, ${children.size} children, and ${siblingsPreceding.size + siblingsSucceeding.size} siblings")
+          relations
       }
-      .getOrElse(Relations.none)
+      .getOrElse {
+        warn(s"Received work with empty collectionPath field: ${work.id}")
+        Relations.none
+      }
 
   def size = relations.size
 
   def numParents = parentMapping.size
 
-  private def children(path: String): List[Relation[DataState.Unidentified]] =
+  private def getChildren(
+    path: String): List[Relation[DataState.Unidentified]] =
     childMapping
       .get(path)
       // Relations might not exist in the cache if e.g. the work is not Visible
@@ -34,7 +49,7 @@ class ArchiveRelationsCache(
       .map(relations)
       .toList
 
-  private def siblings(
+  private def getSiblings(
     path: String): (List[Relation[DataState.Unidentified]],
                     List[Relation[DataState.Unidentified]]) = {
     val siblings = parentMapping
@@ -51,13 +66,13 @@ class ArchiveRelationsCache(
   }
 
   @tailrec
-  private def ancestors(path: String,
-                        accum: List[Relation[DataState.Unidentified]] = Nil)
+  private def getAncestors(path: String,
+                           accum: List[Relation[DataState.Unidentified]] = Nil)
     : List[Relation[DataState.Unidentified]] =
     parentMapping.get(path) match {
       case None => accum
       case Some(parentPath) =>
-        ancestors(parentPath, relations(parentPath) :: accum)
+        getAncestors(parentPath, relations(parentPath) :: accum)
     }
 
   private lazy val parentMapping: Map[String, String] =
