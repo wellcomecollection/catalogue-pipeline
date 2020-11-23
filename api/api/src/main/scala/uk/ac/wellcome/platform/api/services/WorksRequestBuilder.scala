@@ -177,16 +177,4 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
           field = "data.items.locations.locationType.id",
           values = itemLocationTypeIds)
     }
-
-  implicit class EnhancedTermsAggregation(agg: TermsAggregation) {
-    def additionalField(field: String): TermsAggregation =
-      additionalFields(List(field))
-    def additionalFields(fields: List[String]): TermsAggregation = {
-      agg.subAggregations(
-        TopHitsAggregation("sample_doc")
-          .size(1)
-          .fetchSource(fields.toArray ++ agg.field, Array())
-      )
-    }
-  }
 }

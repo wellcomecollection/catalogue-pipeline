@@ -57,6 +57,16 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
                       "count" : 1,
                       "data" : ${language(marathi)},
                       "type" : "AggregationBucket"
+                    },
+                    {
+                      "count" : 0,
+                      "data" : ${language(chechen)},
+                      "type" : "AggregationBucket"
+                    },
+                    {
+                      "count" : 0,
+                      "data" : ${language(quechua)},
+                      "type" : "AggregationBucket"
                     }
                   ]
                 }
@@ -97,8 +107,18 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
                       "type" : "AggregationBucket"
                     },
                     {
+                      "count" : 0,
+                      "data" : ${language(quechua)},
+                      "type" : "AggregationBucket"
+                    },
+                    {
                       "count" : 1,
                       "data" : ${language(marathi)},
+                      "type" : "AggregationBucket"
+                    },
+                    {
+                      "count" : 0,
+                      "data" : ${language(chechen)},
                       "type" : "AggregationBucket"
                     }
                   ]
