@@ -94,13 +94,13 @@ catalogue_pipeline:
       services:
         - id: work-ingestor
     - id: router
-      service:
+      services:
         - id: router
     - id: batcher
-      service:
+      services:
         - id: batcher
     - id: relation_embedder
-      service:
+      services:
         - id: relation-embedder
     - id: transformer_calm
       services:
