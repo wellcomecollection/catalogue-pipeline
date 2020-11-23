@@ -110,8 +110,7 @@ object Aggregations extends Logging {
         .getAgg(name)
         .flatMap(
           _.safeTo[Aggregation[T]](
-            (json: String) =>
-              AggregationMapping.aggregationParser[T](json)
+            (json: String) => AggregationMapping.aggregationParser[T](json)
           ).recoverWith {
             case err =>
               warn("Failed to parse aggregation from ES", err)
@@ -163,12 +162,18 @@ object AggregationMapping {
     fromJson[Result](jsonString)
       .map { result =>
         result.buckets
-          .map { b => (b.key.as[T], b.docCount) }
+          .map { b =>
+            (b.key.as[T], b.docCount)
+          }
       }
       .map { tally =>
-        tally.collect { case (Right(t), count) => AggregationBucket(t, count = count) }
+        tally.collect {
+          case (Right(t), count) => AggregationBucket(t, count = count)
+        }
       }
-      .map { buckets => Aggregation(buckets.toList) }
+      .map { buckets =>
+        Aggregation(buckets.toList)
+      }
 }
 
 case class Aggregation[+T](buckets: List[AggregationBucket[T]])
