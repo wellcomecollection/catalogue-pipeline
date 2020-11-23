@@ -81,7 +81,7 @@ class ApiSwaggerTest
 
       assert(
         swaggerParams.length == internalParams.length,
-        s"swaggerParams  = ${swaggerParams.sorted}internalParams = ${internalParams.sorted}"
+        s"swaggerParams  = ${swaggerParams.sorted}\ninternalParams = ${internalParams.sorted}"
       )
     }
 
@@ -106,7 +106,7 @@ class ApiSwaggerTest
 
       assert(
         swaggerParams.length == internalParams.length,
-        s"swaggerParams  = ${swaggerParams.sorted}internalParams = ${internalParams.sorted}"
+        s"swaggerParams  = ${swaggerParams.sorted}\ninternalParams = ${internalParams.sorted}"
       )
     }
 
