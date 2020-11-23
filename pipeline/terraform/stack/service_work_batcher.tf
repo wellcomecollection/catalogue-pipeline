@@ -23,8 +23,8 @@ module "batcher" {
   env_vars = {
     metrics_namespace = "${local.namespace_hyphen}_batcher"
 
-    queue_url = module.batcher_queue.url
-    topic_arn = module.batcher_output_topic.arn
+    queue_url        = module.batcher_queue.url
+    output_topic_arn = module.batcher_output_topic.arn
 
     flush_interval_minutes = 30
     max_processed_paths    = 50000
