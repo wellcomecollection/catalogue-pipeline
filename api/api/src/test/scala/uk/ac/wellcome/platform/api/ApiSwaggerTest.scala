@@ -6,7 +6,7 @@ import io.circe.Json
 import org.scalatest.prop.TableDrivenPropertyChecks
 import uk.ac.wellcome.display.models.{SingleImageIncludes, WorksIncludes}
 import uk.ac.wellcome.platform.api.fixtures.ReflectionHelpers
-import uk.ac.wellcome.platform.api.models.SearchQueryType
+import uk.ac.wellcome.platform.api.models.{Aggregations, SearchQueryType}
 import uk.ac.wellcome.platform.api.rest._
 import uk.ac.wellcome.platform.api.works.ApiWorksTestBase
 
@@ -177,6 +177,22 @@ class ApiSwaggerTest
 
       getKey(endpointSwagger, "parameters").flatMap { _.asArray }.get
     }
+
+  it("lists all the available aggregations") {
+    val aggregationsParam =
+      getParameters(multipleWorksEndpoint).filter {
+        getKey(_, "name").get.asString.contains("aggregations")
+      }.head
+
+    val swaggerParams = getEnumValues(aggregationsParam)
+
+    val aggregationParams = getFields[Aggregations]
+
+    assert(
+      swaggerParams.length == aggregationParams.length,
+      s"swaggerParams     = ${swaggerParams.sorted}\naggregationParams = ${aggregationParams.sorted}"
+    )
+  }
 
   // Given a JSON object of the form:
   //
