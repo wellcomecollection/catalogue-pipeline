@@ -135,11 +135,11 @@ class SierraLanguagesTest
         createVarFieldWith(
           marcTag = "041",
           subfields = List(
-            MarcSubfield(tag = "a", content = "mul"),  // Multiple languages
+            MarcSubfield(tag = "a", content = "mul"), // Multiple languages
             MarcSubfield(tag = "a", content = "eng"),
-            MarcSubfield(tag = "a", content = "und"),  // Undetermined
+            MarcSubfield(tag = "a", content = "und"), // Undetermined
             MarcSubfield(tag = "a", content = "fre"),
-            MarcSubfield(tag = "a", content = "zxx")   // No linguistic content
+            MarcSubfield(tag = "a", content = "zxx") // No linguistic content
           )
         )
       )
