@@ -38,23 +38,27 @@ case class DisplayImage(
 
 object DisplayImage {
 
-  def apply(image: AugmentedImage): DisplayImage =
+  def apply(image: AugmentedImage, includes: ImageIncludes): DisplayImage =
     new DisplayImage(
       id = image.id.canonicalId,
       locations = Seq(DisplayDigitalLocationDeprecated(image.location)),
-      source = DisplayImageSource(image.source),
+      source = DisplayImageSource(image.source, includes),
       visuallySimilar = None,
       withSimilarColors = None,
       withSimilarFeatures = None,
     )
 
   def apply(image: AugmentedImage,
+            includes: ImageIncludes,
             visuallySimilar: Option[Seq[AugmentedImage]],
             withSimilarColors: Option[Seq[AugmentedImage]],
             withSimilarFeatures: Option[Seq[AugmentedImage]]): DisplayImage =
-    DisplayImage(image).copy(
-      visuallySimilar = visuallySimilar.map(_.map(DisplayImage.apply)),
-      withSimilarColors = withSimilarColors.map(_.map(DisplayImage.apply)),
-      withSimilarFeatures = withSimilarFeatures.map(_.map(DisplayImage.apply)),
+    DisplayImage(image, includes).copy(
+      visuallySimilar =
+        visuallySimilar.map(_.map(DisplayImage.apply(_, includes))),
+      withSimilarColors =
+        withSimilarColors.map(_.map(DisplayImage.apply(_, includes))),
+      withSimilarFeatures =
+        withSimilarFeatures.map(_.map(DisplayImage.apply(_, includes))),
     )
 }

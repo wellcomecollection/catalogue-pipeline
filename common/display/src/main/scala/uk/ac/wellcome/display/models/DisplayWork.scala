@@ -195,7 +195,7 @@ case object DisplayWork {
     )
 
   def apply(work: Work.Visible[Indexed]): DisplayWork =
-    DisplayWork(work = work, includes = WorksIncludes())
+    DisplayWork(work = work, includes = WorksIncludes.none)
 
   def apply(work: Work.Visible[Indexed],
             includes: WorksIncludes,

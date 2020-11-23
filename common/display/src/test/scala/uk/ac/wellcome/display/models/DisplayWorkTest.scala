@@ -150,8 +150,8 @@ class DisplayWorkTest
 
     val work = indexedWork().languages(languages)
 
-    val noLanguagesInclude = WorksIncludes().copy(languages = false)
-    val languagesInclude = WorksIncludes().copy(languages = true)
+    val noLanguagesInclude = WorksIncludes.none.copy(languages = false)
+    val languagesInclude = WorksIncludes.none.copy(languages = true)
 
     DisplayWork(work, includes = noLanguagesInclude).languages shouldBe None
 
@@ -233,7 +233,7 @@ class DisplayWorkTest
 
   it("does not extract includes set to false") {
     forAll { work: Work.Visible[Indexed] =>
-      val displayWork = DisplayWork(work, includes = WorksIncludes())
+      val displayWork = DisplayWork(work, includes = WorksIncludes.none)
 
       displayWork.production shouldNot be(defined)
       displayWork.subjects shouldNot be(defined)
@@ -353,7 +353,7 @@ class DisplayWorkTest
       )
 
     describe("omits identifiers if WorksIncludes.identifiers is false") {
-      val displayWork = DisplayWork(work, includes = WorksIncludes())
+      val displayWork = DisplayWork(work, includes = WorksIncludes.none)
 
       it("the top-level Work") {
         displayWork.identifiers shouldBe None
@@ -528,7 +528,7 @@ class DisplayWorkTest
     }
 
     it("does not include relations when not requested") {
-      val displayWork = DisplayWork(work, WorksIncludes(), relatedWorks)
+      val displayWork = DisplayWork(work, WorksIncludes.none, relatedWorks)
       displayWork.parts shouldBe None
       displayWork.partOf shouldBe None
       displayWork.precededBy shouldBe None

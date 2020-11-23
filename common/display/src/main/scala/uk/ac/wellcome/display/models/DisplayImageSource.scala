@@ -29,20 +29,27 @@ case class DisplayImageSource(
 
 object DisplayImageSource {
 
-  def apply(
-    imageSource: ImageSource[DataState.Identified]): DisplayImageSource =
+  def apply(imageSource: ImageSource[DataState.Identified],
+            includes: ImageIncludes): DisplayImageSource =
     imageSource match {
-      case works: SourceWorks[DataState.Identified] => DisplayImageSource(works)
+      case works: SourceWorks[DataState.Identified] =>
+        DisplayImageSource(works, includes)
     }
 
-  def apply(source: SourceWorks[DataState.Identified]): DisplayImageSource =
+  def apply(source: SourceWorks[DataState.Identified],
+            includes: ImageIncludes): DisplayImageSource =
     new DisplayImageSource(
       id = source.id.canonicalId,
       title = source.canonicalWork.data.title,
-      contributor = source.canonicalWork.data.contributors.headOption
-        .map(DisplayContributor(_, includesIdentifiers = false)),
+      contributor =
+        if (includes.sourceContributor)
+          source.canonicalWork.data.contributors.headOption
+            .map(DisplayContributor(_, includesIdentifiers = false))
+        else None,
       languages =
-        Some(source.canonicalWork.data.languages.map(DisplayLanguage(_))),
+        if (includes.sourceLanguages)
+          Some(source.canonicalWork.data.languages.map(DisplayLanguage(_)))
+        else None,
       ontologyType = "works"
     )
 }

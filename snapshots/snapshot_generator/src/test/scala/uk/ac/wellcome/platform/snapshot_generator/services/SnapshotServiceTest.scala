@@ -86,7 +86,7 @@ class SnapshotServiceTest
 
           val expectedContents = visibleWorks
             .map {
-              DisplayWork(_, includes = WorksIncludes.includeAll())
+              DisplayWork(_, includes = WorksIncludes.all)
             }
             .map(toJson[DisplayWork])
             .mkString("\n") + "\n"
@@ -138,7 +138,7 @@ class SnapshotServiceTest
 
           val expectedContents = works
             .map {
-              DisplayWork(_, includes = WorksIncludes.includeAll())
+              DisplayWork(_, includes = WorksIncludes.all)
             }
             .map(toJson[DisplayWork])
             .mkString("\n") + "\n"

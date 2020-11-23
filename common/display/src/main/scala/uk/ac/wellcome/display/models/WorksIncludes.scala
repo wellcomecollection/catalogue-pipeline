@@ -54,7 +54,9 @@ case object WorksIncludes {
       succeededBy = includes.contains(WorkInclude.SucceededBy),
     )
 
-  def includeAll(): WorksIncludes =
+  def none: WorksIncludes = WorksIncludes()
+
+  def all: WorksIncludes =
     WorksIncludes(
       identifiers = true,
       items = true,
