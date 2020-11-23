@@ -102,16 +102,13 @@ object Aggregations extends Logging {
 
   implicit class EnhancedEsAggregations(aggregations: Elastic4sAggregations) {
 
-    def decodeAgg[T: Decoder](
-      name: String,
-      documentPath: Option[String] = None): Option[Aggregation[T]] = {
+    def decodeAgg[T: Decoder](name: String): Option[Aggregation[T]] = {
       aggregations
         .getAgg(name)
         .flatMap(
           _.safeTo[Aggregation[T]](
-            (json: String) => {
-              AggregationMapping.aggregationParser[T](json, documentPath)
-            }
+            (json: String) =>
+              AggregationMapping.aggregationParser[T](json)
           ).recoverWith {
             case err =>
               warn("Failed to parse aggregation from ES", err)
@@ -149,7 +146,6 @@ object Aggregations extends Logging {
 // `sample_doc`.
 object AggregationMapping extends Logging {
   import io.circe.parser._
-  import io.circe.optics.JsonPath
   import io.circe.optics.JsonPath._
   import cats.syntax.traverse._
   import cats.instances.list._
@@ -159,16 +155,13 @@ object AggregationMapping extends Logging {
   private val bucketFilteredCount = root.filtered.doc_count.int
   private val bucketRootCount = root.doc_count.int
   private val bucketKey = root.key.json
-  private val bucketSampleDoc =
-    root.sample_doc.hits.hits.index(0)._source.json
 
-  def aggregationParser[T: Decoder](json: String,
-                                    path: Option[String]): Try[Aggregation[T]] =
+  def aggregationParser[T: Decoder](json: String): Try[Aggregation[T]] =
     parse(json).toTry
       .map { parsedJson =>
         for {
           bucket <- getBuckets(parsedJson)
-          bucketDoc <- getBucketDoc(bucket, path).map(_.as[T])
+          bucketDoc <- getBucketDoc(bucket).map(_.as[T])
           bucketCount <- getBucketCount(bucket)
         } yield {
           bucketDoc match {
@@ -184,22 +177,10 @@ object AggregationMapping extends Logging {
         }
       }
 
-  // Takes a path of format "fruit.apple.seed" and converts it to a JsonPath optic
-  private def pathToOptic(path: String): JsonPath =
-    path.split("\\.").foldLeft(root) { (optic, pathElement) =>
-      optic.selectDynamic(pathElement)
-    }
-
   private def getBuckets(agg: Json) = buckets.getOption(agg).getOrElse(List())
 
-  private def getBucketDoc(bucket: Json, path: Option[String]) =
-    bucketSampleDoc
-      .getOption(bucket)
-      .flatMap(getJsonAtPath(path))
-      .orElse(bucketKey.getOption(bucket))
-
-  private def getJsonAtPath(path: Option[String])(doc: Json) =
-    path.flatMap(pathToOptic(_).json.getOption(doc))
+  private def getBucketDoc(bucket: Json) =
+    bucketKey.getOption(bucket)
 
   private def getBucketCount(bucket: Json) =
     bucketFilteredCount
