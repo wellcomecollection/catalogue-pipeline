@@ -45,7 +45,7 @@ module "relation_embedder" {
   }
 
   subnets             = var.subnets
-  max_capacity        = 0
+  max_capacity        = 10
   messages_bucket_arn = aws_s3_bucket.messages.arn
   queue_read_policy   = module.relation_embedder_queue.read_policy
 
