@@ -7,7 +7,8 @@ import uk.ac.wellcome.models.work.internal._
 import WorkState.Merged
 
 class ArchiveRelationsCache(
-  relations: Map[String, Relation[DataState.Unidentified]]) extends Logging {
+  relations: Map[String, Relation[DataState.Unidentified]])
+    extends Logging {
 
   def apply(work: Work[Merged]): Relations[DataState.Unidentified] =
     work.data.collectionPath
@@ -23,7 +24,8 @@ class ArchiveRelationsCache(
             siblingsSucceeding = siblingsSucceeding
           )
           if (relations == Relations.none)
-            info(s"Found no relations for work with path $path. Parent mapping: $parentMapping")
+            info(
+              s"Found no relations for work with path $path. Parent mapping: $parentMapping")
           else
             info(
               s"For work with path $path, found ${ancestors.size} ancestors, ${children.size} children, and ${siblingsPreceding.size + siblingsSucceeding.size} siblings")
@@ -38,7 +40,8 @@ class ArchiveRelationsCache(
 
   def numParents = parentMapping.size
 
-  private def getChildren(path: String): List[Relation[DataState.Unidentified]] =
+  private def getChildren(
+    path: String): List[Relation[DataState.Unidentified]] =
     childMapping
       .get(path)
       // Relations might not exist in the cache if e.g. the work is not Visible
@@ -64,7 +67,7 @@ class ArchiveRelationsCache(
 
   @tailrec
   private def getAncestors(path: String,
-                        accum: List[Relation[DataState.Unidentified]] = Nil)
+                           accum: List[Relation[DataState.Unidentified]] = Nil)
     : List[Relation[DataState.Unidentified]] =
     parentMapping.get(path) match {
       case None => accum
