@@ -6,7 +6,7 @@ import io.circe.Json
 import org.scalatest.prop.TableDrivenPropertyChecks
 import uk.ac.wellcome.display.models.{SingleImageIncludes, WorksIncludes}
 import uk.ac.wellcome.platform.api.fixtures.ReflectionHelpers
-import uk.ac.wellcome.platform.api.models.SearchQueryType
+import uk.ac.wellcome.platform.api.models.{Aggregations, SearchQueryType}
 import uk.ac.wellcome.platform.api.rest._
 import uk.ac.wellcome.platform.api.works.ApiWorksTestBase
 
@@ -81,7 +81,7 @@ class ApiSwaggerTest
 
       assert(
         swaggerParams.length == internalParams.length,
-        s"swaggerParams  = ${swaggerParams.sorted}internalParams = ${internalParams.sorted}"
+        s"swaggerParams  = ${swaggerParams.sorted}\ninternalParams = ${internalParams.sorted}"
       )
     }
 
@@ -106,7 +106,7 @@ class ApiSwaggerTest
 
       assert(
         swaggerParams.length == internalParams.length,
-        s"swaggerParams  = ${swaggerParams.sorted}internalParams = ${internalParams.sorted}"
+        s"swaggerParams  = ${swaggerParams.sorted}\ninternalParams = ${internalParams.sorted}"
       )
     }
 
@@ -162,30 +162,12 @@ class ApiSwaggerTest
     }
 
     def getSwaggerIncludes(endpointString: String): Seq[String] = {
-      // The include parameter in the JSON is inside the "parameters"
-      // list and of the form:
-      //
-      //      {
-      //        "name" : "include",
-      //        "schema" : {
-      //          "enum" : [
-      //            ...
-      //          ],
-      //          ...
-      //        },
-      //        ...
-      //      }
-      //
       val includeParam =
         getParameters(endpointString).filter {
           getKey(_, "name").get.asString.contains("include")
         }.head
 
-      getKey(includeParam, "schema")
-        .flatMap { getKey(_, "enum") }
-        .flatMap { _.asArray }
-        .get
-        .map { _.asString.get }
+      getEnumValues(includeParam)
     }
   }
 
@@ -195,6 +177,40 @@ class ApiSwaggerTest
 
       getKey(endpointSwagger, "parameters").flatMap { _.asArray }.get
     }
+
+  it("lists all the available aggregations") {
+    val aggregationsParam =
+      getParameters(multipleWorksEndpoint).filter {
+        getKey(_, "name").get.asString.contains("aggregations")
+      }.head
+
+    val swaggerParams = getEnumValues(aggregationsParam)
+
+    val aggregationParams = getFields[Aggregations]
+
+    assert(
+      swaggerParams.length == aggregationParams.length,
+      s"swaggerParams     = ${swaggerParams.sorted}\naggregationParams = ${aggregationParams.sorted}"
+    )
+  }
+
+  // Given a JSON object of the form:
+  //
+  //      {
+  //        "schema" : {
+  //          "enum" : ["value1", "value2", "value3"],
+  //          ...
+  //        },
+  //        ...
+  //      }
+  //
+  // return the list of strings in the 'enum'.
+  private def getEnumValues(json: Json): Seq[String] =
+    getKey(json, "schema")
+      .flatMap { getKey(_, "enum") }
+      .flatMap { _.asArray }
+      .get
+      .map { _.asString.get }
 
   it("contains 'schemas'") {
     checkSwaggerJson { json =>
