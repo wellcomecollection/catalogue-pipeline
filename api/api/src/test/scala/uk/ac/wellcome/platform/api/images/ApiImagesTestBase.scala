@@ -2,7 +2,12 @@ package uk.ac.wellcome.platform.api.images
 
 import uk.ac.wellcome.display.models.DisplaySerialisationTestBase
 import uk.ac.wellcome.models.work.generators.ImageGenerators
-import uk.ac.wellcome.models.work.internal.AugmentedImage
+import uk.ac.wellcome.models.work.internal.{
+  AugmentedImage,
+  DataState,
+  ImageSource,
+  SourceWorks
+}
 import uk.ac.wellcome.platform.api.ApiTestBase
 
 trait ApiImagesTestBase
@@ -16,16 +21,25 @@ trait ApiImagesTestBase
        |  "type": "Image"
      """.stripMargin
 
+  def imageSource(source: ImageSource[DataState.Identified]): String =
+    source match {
+      case SourceWorks(work, _) =>
+        s"""
+             | {
+             |   "id": "${source.id.canonicalId}",
+             |   ${optionalString("title", work.data.title)}
+             |   "type": "Work"
+             | }
+           """.stripMargin
+    }
+
   def imageResponse(image: AugmentedImage): String =
     s"""
        |  {
        |    "type": "Image",
        |    "id": "${image.id.canonicalId}",
        |    "locations": [${location(image.location)}],
-       |    "source": {
-       |      "id": "${image.source.id.canonicalId}",
-       |      "type": "Work"
-       |    }
+       |    "source": ${imageSource(image.source)}
        |  }
      """.stripMargin
 

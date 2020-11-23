@@ -50,6 +50,6 @@ object DisplayImageSource {
         if (includes.sourceLanguages)
           Some(source.canonicalWork.data.languages.map(DisplayLanguage(_)))
         else None,
-      ontologyType = "works"
+      ontologyType = "Work"
     )
 }

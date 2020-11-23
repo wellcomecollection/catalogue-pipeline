@@ -31,10 +31,7 @@ class ImagesTest extends ApiImagesTestBase with SierraWorkGenerators {
              |  $singleImageResult,
              |  "id": "${image.id.canonicalId}",
              |  "locations": [${digitalLocation(image.location)}],
-             |  "source": {
-             |    "id": "${image.source.id.canonicalId}",
-             |    "type": "Work"
-             |   }
+             |  "source": ${imageSource(image.source)}
              |}""".stripMargin
         }
     }
@@ -159,11 +156,8 @@ class ImagesTest extends ApiImagesTestBase with SierraWorkGenerators {
                  |  $singleImageResult,
                  |  "id": "${defaultImage.id.canonicalId}",
                  |  "locations": [${location(defaultImage.location)}],
-                 |  "source": {
-                 |    "id": "${defaultImage.source.id.canonicalId}",
-                 |    "type": "Work"
-                 |  }
-                 |}""".stripMargin
+                 |  "source": ${imageSource(defaultImage.source)}
+                 }""".stripMargin
           }
 
           assertJsonResponse(
@@ -175,11 +169,8 @@ class ImagesTest extends ApiImagesTestBase with SierraWorkGenerators {
                  |  $singleImageResult,
                  |  "id": "${alternativeImage.id.canonicalId}",
                  |  "locations": [${location(alternativeImage.location)}],
-                 |  "source": {
-                 |    "id": "${alternativeImage.source.id.canonicalId}",
-                 |    "type": "Work"
-                 |  }
-                 |}""".stripMargin
+                 |  "source": ${imageSource(alternativeImage.source)}
+                 }""".stripMargin
           }
         }
     }
