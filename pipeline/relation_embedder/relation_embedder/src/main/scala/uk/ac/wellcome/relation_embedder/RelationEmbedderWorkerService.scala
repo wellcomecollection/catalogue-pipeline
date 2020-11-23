@@ -1,8 +1,13 @@
 package uk.ac.wellcome.relation_embedder
 
+import scala.concurrent.duration._
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 import akka.Done
 import akka.stream.Materializer
 import akka.stream.scaladsl._
+import grizzled.slf4j.Logging
+
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
@@ -13,10 +18,6 @@ import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.pipeline_storage.Indexer
 import uk.ac.wellcome.typesafe.Runnable
 
-import scala.concurrent.duration._
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
-
 class RelationEmbedderWorkerService[MsgDestination](
   sqsStream: SQSStream[NotificationMessage],
   msgSender: MessageSender[MsgDestination],
@@ -25,7 +26,7 @@ class RelationEmbedderWorkerService[MsgDestination](
   indexBatchSize: Int = 100,
   indexFlushInterval: FiniteDuration = 20 seconds
 )(implicit ec: ExecutionContext, materializer: Materializer)
-    extends Runnable {
+    extends Runnable with Logging {
 
   def run(): Future[Done] =
     workIndexer.init().flatMap { _ =>
@@ -36,11 +37,13 @@ class RelationEmbedderWorkerService[MsgDestination](
     Future
       .fromTry(fromJson[Batch](message.body))
       .map { batch =>
+        info(s"Received batch for tree ${batch.rootPath} containing ${batch.selectors.size} selectors")
         relationsService
           .getCompleteTree(batch)
           .runWith(Sink.seq)
           .map(ArchiveRelationsCache(_))
           .flatMap { relationsCache =>
+            info(s"Built cache for tree ${batch.rootPath}, containing ${relationsCache.size} relations (${relationsCache.numParents} works map to parent works).")
             val denormalisedWorks = relationsService
               .getAffectedWorks(batch)
               .map { work =>
