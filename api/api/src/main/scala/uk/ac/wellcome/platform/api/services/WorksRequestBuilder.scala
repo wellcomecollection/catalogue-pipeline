@@ -64,15 +64,11 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
         .field("data.subjects.label.keyword")
         .minDocCount(0)
 
-    // Because `Language`s are constructed using a top_hit, if the doc_count is
-    // 0 then we cannot construct the `Language`. Therefore we have to have a
-    // `min_doc_count` of 1 (the default) as we would if this were a composite
-    // aggregation.
     case AggregationRequest.Languages =>
       TermsAggregation("languages")
         .size(200)
         .field("data.languages.id")
-        .minDocCount(1)
+        .minDocCount(0)
 
     case AggregationRequest.License =>
       TermsAggregation("license")
