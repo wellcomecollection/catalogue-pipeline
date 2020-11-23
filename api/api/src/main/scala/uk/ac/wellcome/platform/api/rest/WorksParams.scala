@@ -54,7 +54,6 @@ case class MultipleWorksParams(
   workType: Option[FormatFilter],
   `production.dates.from`: Option[LocalDate],
   `production.dates.to`: Option[LocalDate],
-  language: Option[LanguageFilter],
   languages: Option[LanguagesFilter],
   `genres.label`: Option[GenreFilter],
   `subjects.label`: Option[SubjectFilter],
@@ -91,7 +90,6 @@ case class MultipleWorksParams(
     List(
       workType,
       dateFilter,
-      language,
       languages,
       `genres.label`,
       `subjects.label`,
@@ -127,7 +125,6 @@ object MultipleWorksParams extends QueryParamsUtils {
         "workType".as[FormatFilter] ?,
         "production.dates.from".as[LocalDate].?,
         "production.dates.to".as[LocalDate].?,
-        "language".as[LanguageFilter].?,
         "languages".as[LanguagesFilter].?,
         "genres.label".as[GenreFilter].?,
         "subjects.label".as[SubjectFilter].?,
@@ -169,8 +166,6 @@ object MultipleWorksParams extends QueryParamsUtils {
   implicit val itemLocationTypeIdFilter: Decoder[ItemLocationTypeIdFilter] =
     decodeCommaSeparated.emap(strs => Right(ItemLocationTypeIdFilter(strs)))
 
-  implicit val languageFilter: Decoder[LanguageFilter] =
-    stringListFilter(LanguageFilter)
   implicit val languagesFilter: Decoder[LanguagesFilter] =
     stringListFilter(LanguagesFilter)
 
@@ -202,7 +197,6 @@ object MultipleWorksParams extends QueryParamsUtils {
       "genres" -> AggregationRequest.Genre,
       "production.dates" -> AggregationRequest.ProductionDate,
       "subjects" -> AggregationRequest.Subject,
-      "language" -> AggregationRequest.Language,
       "languages" -> AggregationRequest.Languages,
       "license" -> AggregationRequest.License,
       "locationType" -> AggregationRequest.ItemLocationType,

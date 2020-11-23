@@ -170,9 +170,6 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
       : Work.Visible[State] =
       work.map(_.copy(production = production))
 
-    def language(language: Language): Work.Visible[State] =
-      work.map(_.copy(language = Some(language)))
-
     def languages(languages: List[Language]): Work.Visible[State] =
       work.map(_.copy(languages = languages))
 

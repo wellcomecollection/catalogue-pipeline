@@ -131,17 +131,6 @@ class DisplayWorkTest
     displayWork.ontologyType shouldBe "Section"
   }
 
-  it("gets the language from a Work") {
-    val language = Language(id = "bsl", label = "British Sign Language")
-
-    val work = indexedWork().language(language)
-
-    val displayWork = DisplayWork(work)
-    val displayLanguage = displayWork.language.get
-    displayLanguage.id shouldBe language.id
-    displayLanguage.label shouldBe language.label
-  }
-
   it("gets the languages from a Work") {
     val languages = List(
       Language(id = "bsl", label = "British Sign Language"),

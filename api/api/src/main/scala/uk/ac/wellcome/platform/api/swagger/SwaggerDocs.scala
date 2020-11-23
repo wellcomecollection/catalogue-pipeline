@@ -386,15 +386,8 @@ trait MultipleWorksSwagger {
             "production.dates",
             "subjects",
             "license",
-            "language",
             "languages",
             "locationType")),
-        required = false
-      ),
-      new Parameter(
-        name = "language",
-        in = ParameterIn.QUERY,
-        description = "Filter the work by language.",
         required = false
       ),
       new Parameter(

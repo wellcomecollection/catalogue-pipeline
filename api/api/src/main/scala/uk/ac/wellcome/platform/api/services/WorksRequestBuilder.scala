@@ -64,22 +64,11 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
         .field("data.subjects.label.keyword")
         .minDocCount(0)
 
-    // Because `Language`s are constructed using a top_hit, if the doc_count is
-    // 0 then we cannot construct the `Language`. Therefore we have to have a
-    // `min_doc_count` of 1 (the default) as we would if this were a composite
-    // aggregation.
-    case AggregationRequest.Language =>
-      TermsAggregation("language")
-        .size(200)
-        .field("data.language.id")
-        .minDocCount(1)
-        .additionalField("data.language.label")
-
     case AggregationRequest.Languages =>
       TermsAggregation("languages")
         .size(200)
         .field("data.languages.id")
-        .minDocCount(1)
+        .minDocCount(0)
 
     case AggregationRequest.License =>
       TermsAggregation("license")
@@ -146,8 +135,6 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
         val (gte, lte) =
           (fromDate map ElasticDate.apply, toDate map ElasticDate.apply)
         RangeQuery("data.production.dates.range.from", lte = lte, gte = gte)
-      case LanguageFilter(languageIds) =>
-        termsQuery(field = "data.language.id", values = languageIds)
       case LanguagesFilter(languageIds) =>
         termsQuery(field = "data.languages.id", values = languageIds)
       case GenreFilter(genreQuery) =>
@@ -190,16 +177,4 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
           field = "data.items.locations.locationType.id",
           values = itemLocationTypeIds)
     }
-
-  implicit class EnhancedTermsAggregation(agg: TermsAggregation) {
-    def additionalField(field: String): TermsAggregation =
-      additionalFields(List(field))
-    def additionalFields(fields: List[String]): TermsAggregation = {
-      agg.subAggregations(
-        TopHitsAggregation("sample_doc")
-          .size(1)
-          .fetchSource(fields.toArray ++ agg.field, Array())
-      )
-    }
-  }
 }

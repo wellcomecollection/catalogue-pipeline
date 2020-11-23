@@ -77,12 +77,10 @@ class SierraTransformerTest
 
     val work = transformToWork(sierraTransformable)
 
-    val language = work
+    work
       .asInstanceOf[Work.Invisible[_]]
       .data
-      .language
-
-    language shouldBe None
+      .languages shouldBe empty
   }
 
   it("trims whitespace from the materialType code") {
@@ -282,11 +280,8 @@ class SierraTransformerTest
       )
     )
 
-    val expectedSingleLanguage =
-      Language(label = "English", id = "eng")
-
     val expectedLanguages = List(
-      expectedSingleLanguage,
+      Language(label = "English", id = "eng"),
       Language(label = "German", id = "ger"),
       Language(label = "French", id = "fre")
     )
@@ -335,7 +330,6 @@ class SierraTransformerTest
       )
       .notes(List(GeneralNote("It's a note")))
       .lettering(lettering)
-      .language(expectedSingleLanguage)
       .languages(expectedLanguages)
   }
 
@@ -531,10 +525,8 @@ class SierraTransformerTest
          |  }
          |}""".stripMargin
 
-    val expectedLanguage = Language(id = "fra", label = "French")
-
     val work = transformDataToSourceWork(id = id, data = data)
-    work.data.language.get shouldBe expectedLanguage
+    work.data.languages shouldBe Seq(Language(id = "fra", label = "French"))
   }
 
   it("extracts contributor information if present") {

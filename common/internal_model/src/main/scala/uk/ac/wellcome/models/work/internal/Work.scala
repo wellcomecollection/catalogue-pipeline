@@ -78,7 +78,6 @@ case class WorkData[State <: DataState](
   contributors: List[Contributor[State#MaybeId]] = Nil,
   thumbnail: Option[LocationDeprecated] = None,
   production: List[ProductionEvent[State#MaybeId]] = Nil,
-  language: Option[Language] = None,
   languages: List[Language] = Nil,
   edition: Option[String] = None,
   notes: List[Note] = Nil,

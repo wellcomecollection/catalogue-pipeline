@@ -109,9 +109,6 @@ trait WorksIndexConfigFields extends IndexConfigFields {
     keywordField("id")
   )
 
-  def language =
-    objectField("language").fields(languageFields)
-
   def contributors(idState: ObjectField) = objectField("contributors").fields(
     idState,
     objectField("agent").fields(agent(idState)),
@@ -160,7 +157,6 @@ trait WorksIndexConfigFields extends IndexConfigFields {
       genre("genres", idState),
       items("items", idState),
       production(idState),
-      language,
       objectField("languages").fields(languageFields),
       location("thumbnail"),
       textField("edition"),
