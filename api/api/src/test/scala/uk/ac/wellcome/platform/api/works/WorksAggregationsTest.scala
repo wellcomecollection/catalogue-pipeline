@@ -13,7 +13,7 @@ class WorksAggregationsTest
     with ItemsGenerators
     with ProductionEventGenerators {
 
-  it("supports fetching the format aggregation") {
+  it("fetches the format aggregation") {
     withWorksApi {
       case (worksIndex, routes) =>
         val formats = List(
@@ -39,29 +39,17 @@ class WorksAggregationsTest
                   "type" : "Aggregation",
                   "buckets": [
                     {
-                      "data" : {
-                        "id" : "a",
-                        "label" : "Books",
-                        "type" : "Format"
-                      },
+                      "data" : ${format(Books)},
                       "count" : 3,
                       "type" : "AggregationBucket"
                     },
                     {
-                      "data" : {
-                        "id" : "k",
-                        "label" : "Pictures",
-                        "type" : "Format"
-                      },
+                      "data" : ${format(Pictures)},
                       "count" : 2,
                       "type" : "AggregationBucket"
                     },
                     {
-                      "data" : {
-                        "id" : "d",
-                        "label" : "Journals",
-                        "type" : "Format"
-                      },
+                      "data" : ${format(Journals)},
                       "count" : 1,
                       "type" : "AggregationBucket"
                     }
@@ -115,29 +103,17 @@ class WorksAggregationsTest
                   "type" : "Aggregation",
                   "buckets": [
                     {
-                      "data" : {
-                        "label" : "conceptLabel",
-                        "concepts": [],
-                        "type" : "Genre"
-                      },
+                      "data" : ${genre(Genre("conceptLabel"))},
                       "count" : 1,
                       "type" : "AggregationBucket"
                     },
-                           {
-                      "data" : {
-                        "label" : "periodLabel",
-                        "concepts": [],
-                        "type" : "Genre"
-                      },
+                    {
+                      "data" : ${genre(Genre("periodLabel"))},
                       "count" : 1,
                       "type" : "AggregationBucket"
                     },
-                           {
-                      "data" : {
-                        "label" : "placeLabel",
-                        "concepts": [],
-                        "type" : "Genre"
-                      },
+                    {
+                      "data" : ${genre(Genre("placeLabel"))},
                       "count" : 1,
                       "type" : "AggregationBucket"
                     }
@@ -177,18 +153,12 @@ class WorksAggregationsTest
                   "type" : "Aggregation",
                   "buckets": [
                     {
-                      "data" : {
-                        "label": "1970",
-                        "type": "Period"
-                      },
+                      "data" : ${period(Period("1970"))},
                       "count" : 3,
                       "type" : "AggregationBucket"
                     },
                     {
-                      "data" : {
-                        "label": "1976",
-                        "type": "Period"
-                      },
+                      "data" : ${period(Period("1976"))},
                       "count" : 1,
                       "type" : "AggregationBucket"
                     }
