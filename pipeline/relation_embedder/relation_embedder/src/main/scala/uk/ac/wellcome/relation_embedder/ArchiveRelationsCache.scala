@@ -24,8 +24,7 @@ class ArchiveRelationsCache(
             siblingsSucceeding = siblingsSucceeding
           )
           if (relations == Relations.none)
-            info(
-              s"Found no relations for work with path $path")
+            info(s"Found no relations for work with path $path")
           else
             info(
               s"Found relations for work with path $path: ${ancestors.size} ancestors, ${children.size} children, and ${siblingsPreceding.size + siblingsSucceeding.size} siblings")
