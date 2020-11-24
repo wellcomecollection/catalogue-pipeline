@@ -40,6 +40,7 @@ locals {
   vpc_id                       = local.catalogue_vpcs["catalogue_vpc_delta_id"]
   private_subnets              = local.catalogue_vpcs["catalogue_vpc_delta_private_subnets"]
   rds_access_security_group_id = data.terraform_remote_state.catalogue_infra_critical.outputs.rds_access_security_group_id
+
   services = [
     "ingestor_works",
     "ingestor_images",
@@ -52,13 +53,14 @@ locals {
     "feature_training",
     "palette_inferrer",
     "recorder",
+    "router",
+    "batcher",
     "relation_embedder",
     "transformer_miro",
     "transformer_mets",
     "transformer_sierra",
     "transformer_calm",
   ]
-
 
 }
 data "aws_ecr_repository" "service" {

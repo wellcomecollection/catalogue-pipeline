@@ -1,8 +1,8 @@
 module "relation_embedder_queue" {
   source                     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
   queue_name                 = "${local.namespace_hyphen}_relation_embedder"
-  topic_arns                 = []
-  visibility_timeout_seconds = 1200
+  topic_arns                 = [module.batcher_output_topic.arn]
+  visibility_timeout_seconds = 600
   aws_region                 = var.aws_region
   alarm_topic_arn            = var.dlq_alarm_arn
 }
@@ -45,7 +45,7 @@ module "relation_embedder" {
   }
 
   subnets             = var.subnets
-  max_capacity        = 0
+  max_capacity        = 10
   messages_bucket_arn = aws_s3_bucket.messages.arn
   queue_read_policy   = module.relation_embedder_queue.read_policy
 

@@ -19,6 +19,8 @@ locals {
   feature_inferrer_image   = local.image_ids["feature_inferrer"]
   feature_training_image   = local.image_ids["feature_training"]
   palette_inferrer_image   = local.image_ids["palette_inferrer"]
+  router_image             = local.image_ids["router"]
+  batcher_image            = local.image_ids["batcher"]
   relation_embedder_image  = local.image_ids["relation_embedder"]
   ingestor_works_image     = local.image_ids["ingestor_works"]
   ingestor_images_image    = local.image_ids["ingestor_images"]
