@@ -38,7 +38,7 @@ class StorageManifestScanner:
     def scan(self):
         for page in self.paginator.paginate(TableName=STORAGE_VHS):
             for item in page["Items"]:
-                space, externalIdentifier = item["id"].split(":")
+                space, externalIdentifier = item["id"].split("/", 1)
                 yield (space, externalIdentifier)
 
 
