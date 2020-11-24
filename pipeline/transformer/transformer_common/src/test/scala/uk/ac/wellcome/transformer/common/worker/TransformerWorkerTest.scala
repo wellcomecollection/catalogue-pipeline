@@ -89,6 +89,20 @@ class TransformerWorkerTest
       }
     }
 
+    it("if it can't parse the notification as a Version[String, Int]") {
+      withLocalSqsQueuePair() {
+        case QueuePair(queue, dlq) =>
+          withWorker(queue) { _ =>
+            sendNotificationToSQS(queue, "not-a-version")
+
+            eventually {
+              assertQueueHasSize(dlq, size = 1)
+              assertQueueEmpty(queue)
+            }
+          }
+      }
+    }
+
     it("if it can't find the source record in the store") {
       withLocalSqsQueuePair() {
         case QueuePair(queue, dlq) =>
