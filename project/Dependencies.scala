@@ -152,7 +152,7 @@ object ExternalDependencies {
   )
 
   val scalacheckDependencies = Seq(
-    "org.scalatestplus" %% "scalacheck-1-14" % versions.scalatestPlus % "test",
+    "org.scalatestplus" %% "scalacheck-1-14" % versions.scalatestlus % "test",
     "com.github.alexarchambault" %% "scalacheck-shapeless_1.13" % versions.scalacheckShapeless % "test"
   )
 
