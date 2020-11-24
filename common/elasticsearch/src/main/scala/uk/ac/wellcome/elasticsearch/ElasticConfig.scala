@@ -10,7 +10,7 @@ case class ElasticConfig(
 object ElasticConfig {
   // We use this to share config across API applications
   // i.e. The API and the snapshot generator.
-  val indexDate = "2020-11-18"
+  val indexDate = "2020-11-23"
 
   def apply(): ElasticConfig =
     ElasticConfig(
