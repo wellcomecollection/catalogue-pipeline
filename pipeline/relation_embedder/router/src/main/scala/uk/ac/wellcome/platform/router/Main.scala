@@ -40,7 +40,8 @@ object Main extends WellcomeTypesafeApp {
         .buildSNSMessageSender(
           config,
           namespace = "work-sender",
-          subject = "Sent from the router"))(config)
+          subject = "Sent from the router")
+    )(config)
 
     new RouterWorkerService(
       pathsMsgSender = SNSBuilder
