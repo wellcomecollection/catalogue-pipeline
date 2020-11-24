@@ -25,10 +25,10 @@ class ArchiveRelationsCache(
           )
           if (relations == Relations.none)
             info(
-              s"Found no relations for work with path $path. Parent mapping: $parentMapping")
+              s"Found no relations for work with path $path")
           else
             info(
-              s"For work with path $path, found ${ancestors.size} ancestors, ${children.size} children, and ${siblingsPreceding.size + siblingsSucceeding.size} siblings")
+              s"Found relations for work with path $path: ${ancestors.size} ancestors, ${children.size} children, and ${siblingsPreceding.size + siblingsSucceeding.size} siblings")
           relations
       }
       .getOrElse {

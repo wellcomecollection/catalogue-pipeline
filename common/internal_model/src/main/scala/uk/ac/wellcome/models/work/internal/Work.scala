@@ -229,7 +229,7 @@ object WorkFsm {
     def redirect(redirect: IdState.Identifiable) = redirect
   }
 
-  implicit val identifiedToDerived = new Transition[Identified, Indexed] {
+  implicit val identifiedToIndexed = new Transition[Identified, Indexed] {
     def state(state: Identified,
               data: WorkData[DataState.Identified],
               args: Unit = ()) =
