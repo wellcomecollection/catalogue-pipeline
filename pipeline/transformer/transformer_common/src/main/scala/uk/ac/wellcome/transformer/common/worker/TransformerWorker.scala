@@ -59,9 +59,9 @@ trait TransformerWorker[In, SenderDest] extends Logging {
 
   private def done(work: Work[Source],
                    key: StoreKey): Result[(Work[Source], StoreKey)] =
-    sender.sendT(work) toEither match {
-      case Left(err) => Left(MessageSendError(err.toString, work, key))
-      case Right(_)  => Right((work, key))
+    sender.sendT(work) match {
+      case Failure(err) => Left(MessageSendError(err.toString, work, key))
+      case Success(_)   => Right((work, key))
     }
 
   private def decodeKey(message: NotificationMessage): Result[StoreKey] =
