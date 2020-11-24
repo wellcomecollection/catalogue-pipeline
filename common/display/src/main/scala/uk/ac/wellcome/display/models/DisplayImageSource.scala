@@ -42,12 +42,12 @@ object DisplayImageSource {
       id = source.id.canonicalId,
       title = source.canonicalWork.data.title,
       contributor =
-        if (includes.sourceContributor)
+        if (includes.`source.contributor`)
           source.canonicalWork.data.contributors.headOption
             .map(DisplayContributor(_, includesIdentifiers = false))
         else None,
       languages =
-        if (includes.sourceLanguages)
+        if (includes.`source.languages`)
           Some(source.canonicalWork.data.languages.map(DisplayLanguage(_)))
         else None,
       ontologyType = "Work"

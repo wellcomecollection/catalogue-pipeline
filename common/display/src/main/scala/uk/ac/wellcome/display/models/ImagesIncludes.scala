@@ -14,16 +14,16 @@ sealed trait ImageIncludes {
   val visuallySimilar: Boolean
   val withSimilarFeatures: Boolean
   val withSimilarColors: Boolean
-  val sourceContributor: Boolean
-  val sourceLanguages: Boolean
+  val `source.contributor`: Boolean
+  val `source.languages`: Boolean
 }
 
 case class SingleImageIncludes(
   visuallySimilar: Boolean,
   withSimilarFeatures: Boolean,
   withSimilarColors: Boolean,
-  sourceContributor: Boolean,
-  sourceLanguages: Boolean
+  `source.contributor`: Boolean,
+  `source.languages`: Boolean
 ) extends ImageIncludes
 
 object SingleImageIncludes {
@@ -34,16 +34,16 @@ object SingleImageIncludes {
       visuallySimilar = includes.contains(VisuallySimilar),
       withSimilarFeatures = includes.contains(WithSimilarFeatures),
       withSimilarColors = includes.contains(WithSimilarColors),
-      sourceContributor = includes.contains(SourceContributor),
-      sourceLanguages = includes.contains(SourceLanguages),
+      `source.contributor` = includes.contains(SourceContributor),
+      `source.languages` = includes.contains(SourceLanguages),
     )
 
   def none: SingleImageIncludes = SingleImageIncludes()
 }
 
 case class MultipleImagesIncludes(
-  sourceContributor: Boolean,
-  sourceLanguages: Boolean
+  `source.contributor`: Boolean,
+  `source.languages`: Boolean
 ) extends ImageIncludes {
   val visuallySimilar: Boolean = false
   val withSimilarFeatures: Boolean = false
@@ -55,8 +55,8 @@ object MultipleImagesIncludes {
 
   def apply(includes: ImageInclude*): MultipleImagesIncludes =
     MultipleImagesIncludes(
-      sourceContributor = includes.contains(SourceContributor),
-      sourceLanguages = includes.contains(SourceLanguages),
+      `source.contributor` = includes.contains(SourceContributor),
+      `source.languages` = includes.contains(SourceLanguages),
     )
 
   def none: MultipleImagesIncludes = MultipleImagesIncludes()
