@@ -57,7 +57,7 @@ class ImageDownloader[Ctx](
 
   private def createImageFileRequest(
     image: MergedIdentifiedImage): (HttpRequest, MergedIdentifiedImage) = {
-    val uri = getImageUri(image.location.url)
+    val uri = getImageUri(image.locations.url)
     (HttpRequest(method = HttpMethods.GET, uri = uri), image)
   }
 
@@ -75,7 +75,7 @@ class ImageDownloader[Ctx](
     case (Success(failedResponse), image) =>
       failedResponse.discardEntityBytes()
       Future.failed(throw new RuntimeException(
-        s"Image request for ${image.location.url} failed with status ${failedResponse.status}"))
+        s"Image request for ${image.locations.url} failed with status ${failedResponse.status}"))
     case (Failure(exception), _) => Future.failed(exception)
   }
 

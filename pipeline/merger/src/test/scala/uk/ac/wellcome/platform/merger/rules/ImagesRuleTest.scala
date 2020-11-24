@@ -30,8 +30,8 @@ class ImagesRuleTest
       val result = ImagesRule.merge(sierraWork, miroWorks.toList).data
 
       result should have length n
-      result.map(_.location) should contain theSameElementsAs
-        miroWorks.map(_.data.images.head.location)
+      result.map(_.locations) should contain theSameElementsAs
+        miroWorks.map(_.data.images.head.locations)
     }
 
     it(
@@ -42,8 +42,8 @@ class ImagesRuleTest
       val result = ImagesRule.merge(sierraPictureWork, List(metsWork)).data
 
       result should have length n
-      result.map(_.location) should contain theSameElementsAs
-        metsWork.data.images.map(_.location)
+      result.map(_.locations) should contain theSameElementsAs
+        metsWork.data.images.map(_.locations)
     }
 
     it(
@@ -54,8 +54,8 @@ class ImagesRuleTest
       val result = ImagesRule.merge(sierraEphemeraWork, List(metsWork)).data
 
       result should have length n
-      result.map(_.location) should contain theSameElementsAs
-        metsWork.data.images.map(_.location)
+      result.map(_.locations) should contain theSameElementsAs
+        metsWork.data.images.map(_.locations)
     }
 
     it(
@@ -69,9 +69,9 @@ class ImagesRuleTest
         ImagesRule.merge(sierraPictureWork, miroWorks :+ metsWork).data
 
       result should have length n + m
-      result.map(_.location) should contain theSameElementsAs
-        metsWork.data.images.map(_.location) ++
-          miroWorks.map(_.data.images.head.location)
+      result.map(_.locations) should contain theSameElementsAs
+        metsWork.data.images.map(_.locations) ++
+          miroWorks.map(_.data.images.head.locations)
     }
 
     it(
@@ -85,9 +85,9 @@ class ImagesRuleTest
         ImagesRule.merge(sierraEphemeraWork, miroWorks :+ metsWork).data
 
       result should have length n + m
-      result.map(_.location) should contain theSameElementsAs
-        metsWork.data.images.map(_.location) ++
-          miroWorks.map(_.data.images.head.location)
+      result.map(_.locations) should contain theSameElementsAs
+        metsWork.data.images.map(_.locations) ++
+          miroWorks.map(_.data.images.head.locations)
     }
 
     it(
@@ -99,8 +99,8 @@ class ImagesRuleTest
       val result = ImagesRule.merge(sierraWork, miroWorks :+ metsWork).data
 
       result should have length n
-      result.map(_.location) should contain theSameElementsAs
-        miroWorks.map(_.data.images.head.location)
+      result.map(_.locations) should contain theSameElementsAs
+        miroWorks.map(_.data.images.head.locations)
     }
   }
 

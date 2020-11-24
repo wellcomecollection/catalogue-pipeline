@@ -38,7 +38,7 @@ trait ApiImagesTestBase
        |  {
        |    "type": "Image",
        |    "id": "${image.id.canonicalId}",
-       |    "locations": [${location(image.location)}],
+       |    "locations": [${location(image.locations)}],
        |    "source": ${imageSource(image.source)}
        |  }
      """.stripMargin

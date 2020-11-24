@@ -315,7 +315,7 @@ class MetsDataTest
     )
     val result = metsData.toWork(1, Instant.now())
     result shouldBe a[Right[_, _]]
-    result.right.get.data.images.head.location shouldBe DigitalLocationDeprecated(
+    result.right.get.data.images.head.locations shouldBe DigitalLocationDeprecated(
       url = s"https://dlcs.io/iiif-img/wellcome/5/location.jp2/info.json",
       locationType = LocationType("iiif-image"),
       license = Some(License.CCBYNC)

@@ -19,7 +19,7 @@ class ImagesSimilarityTest extends ApiImagesTestBase {
                |{
                |  $singleImageResult,
                |  "id": "${image.id.canonicalId}",
-               |  "locations": [${digitalLocation(image.location)}],
+               |  "locations": [${digitalLocation(image.locations)}],
                |  "visuallySimilar": [
                |    ${images.tail.map(imageResponse).mkString(",")}
                |  ],
@@ -46,7 +46,7 @@ class ImagesSimilarityTest extends ApiImagesTestBase {
                |{
                |  $singleImageResult,
                |  "id": "${image.id.canonicalId}",
-               |  "locations": [${digitalLocation(image.location)}],
+               |  "locations": [${digitalLocation(image.locations)}],
                |  "withSimilarFeatures": [
                |    ${images.tail.map(imageResponse).mkString(",")}
                |  ],
@@ -73,7 +73,7 @@ class ImagesSimilarityTest extends ApiImagesTestBase {
                |{
                |  $singleImageResult,
                |  "id": "${image.id.canonicalId}",
-               |  "locations": [${digitalLocation(image.location)}],
+               |  "locations": [${digitalLocation(image.locations)}],
                |  "withSimilarColors": [
                |    ${images.tail.map(imageResponse).mkString(",")}
                |  ],
