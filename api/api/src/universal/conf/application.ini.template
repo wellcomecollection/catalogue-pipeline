@@ -1,6 +1,0 @@
--api.host=${api_host}
--es.host=${es_host}
--es.port=${es_port}
--es.username=${es_username}
--es.password=${es_password}
--es.protocol=${es_protocol}
