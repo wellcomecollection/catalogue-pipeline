@@ -12,7 +12,9 @@ import uk.ac.wellcome.typesafe.Runnable
 import scala.concurrent.{ExecutionContext, Future}
 
 class RouterWorkerService[MsgDestination](
-  pipelineStream: PipelineStorageStream[NotificationMessage, Work[Denormalised], MsgDestination],
+  pipelineStream: PipelineStorageStream[NotificationMessage,
+                                        Work[Denormalised],
+                                        MsgDestination],
   pathsMsgSender: MessageSender[MsgDestination],
   workRetriever: Retriever[Work[Merged]],
 )(implicit ec: ExecutionContext)
@@ -21,11 +23,12 @@ class RouterWorkerService[MsgDestination](
   def run(): Future[Done] =
     pipelineStream.foreach(this.getClass.getSimpleName, processMessage)
 
-  private def processMessage(message: NotificationMessage): Future[Option[Work[Denormalised]]] = {
+  private def processMessage(
+    message: NotificationMessage): Future[Option[Work[Denormalised]]] = {
     workRetriever.apply(message.body).flatMap { work =>
       work.data.collectionPath
         .fold[Future[Option[Work[Denormalised]]]](ifEmpty = {
-          Future.successful(Some(work.transition[Denormalised] (Relations.none)))
+          Future.successful(Some(work.transition[Denormalised](Relations.none)))
         }) { path =>
           Future.fromTry(pathsMsgSender.send(path.path)).map(_ => None)
         }
