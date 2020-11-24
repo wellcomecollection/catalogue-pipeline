@@ -3,7 +3,6 @@ package uk.ac.wellcome.transformer.common.worker
 import scala.concurrent.Future
 import akka.Done
 import grizzled.slf4j.Logging
-import software.amazon.awssdk.services.sqs.model.Message
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
@@ -33,7 +32,6 @@ case class MessageSendError[T, Key](msg: String, work: Work[Source], key: Key)
   * - Emits the message via `BigMessageSender` to an SNS topic
   */
 trait TransformerWorker[In, SenderDest] extends Logging {
-  type StreamMessage = (Message, NotificationMessage)
   type Result[T] = Either[TransformerWorkerError, T]
   type StoreKey = Version[String, Int]
 
