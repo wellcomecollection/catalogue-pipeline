@@ -226,6 +226,8 @@ object CatalogueDependencies {
     WellcomeDependencies.storageTypesafeLibrary ++
       WellcomeDependencies.messagingTypesafeLibrary
 
+  val pipelineStorageDependencies = WellcomeDependencies.messagingLibrary
+
   val elasticsearchTypesafeDependencies: Seq[ModuleID] =
     WellcomeDependencies.typesafeLibrary
 
