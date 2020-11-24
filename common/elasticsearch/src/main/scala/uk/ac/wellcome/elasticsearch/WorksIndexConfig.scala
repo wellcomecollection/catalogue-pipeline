@@ -228,33 +228,20 @@ object MergedWorkIndexConfig extends WorksIndexConfig {
 
 object DenormalisedWorkIndexConfig extends WorksIndexConfig {
 
-  val fields = Seq.empty
+  val fields = Seq(
+    keywordField("type"),
+    objectField("data").fields(
+      collectionPath(analyzedPath)
+    )
+  )
+
   val dynamicMapping = DynamicMapping.False
 }
 
 object IdentifiedWorkIndexConfig extends WorksIndexConfig {
 
-  val state = objectField("state").fields(
-    canonicalId,
-    sourceIdentifier,
-    modifiedTime,
-    relations(id("id"))
-  )
-
-  val dynamicMapping = DynamicMapping.Strict
-
-  val fields =
-    Seq(
-      state,
-      version,
-      id("redirect"),
-      keywordField("type"),
-      data(analyzedPath, id("id")),
-      objectField("invisibilityReasons").fields(
-        keywordField("type"),
-        keywordField("info")
-      )
-    )
+  val fields = Seq.empty
+  val dynamicMapping = DynamicMapping.False
 }
 
 object IndexedWorkIndexConfig extends WorksIndexConfig {
