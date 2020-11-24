@@ -140,7 +140,8 @@ class MetsTransformerWorkerServiceTest
     withLocalSqsQueuePair() {
       case queuePair @ QueuePair(queue, _) =>
         val messageSender = new MemoryMessageSender()
-        val adapterStore = MemoryVersionedStore[String, MetsLocation](initialEntries = Map())
+        val adapterStore =
+          MemoryVersionedStore[String, MetsLocation](initialEntries = Map())
         val s3TypedStore = S3TypedStore[String]
 
         withLocalS3Bucket { metsBucket =>
@@ -155,8 +156,7 @@ class MetsTransformerWorkerServiceTest
 
               workerService.run()
 
-              testWith(
-                (queuePair, metsBucket, messageSender, adapterStore))
+              testWith((queuePair, metsBucket, messageSender, adapterStore))
             }
           }
         }
