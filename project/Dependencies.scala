@@ -80,8 +80,8 @@ object ExternalDependencies {
     val swagger = "2.0.10"
     val mockito = "1.9.5"
     val scalatest = "3.2.3"
-    val scalatestPlus = "3.1.2.0"
-    val scalatestPlusMockitoArtifactId = "mockito-3-2"
+    val scalatestplus = "3.1.2.0"
+    val scalatestplusMockitoArtifactId = "mockito-3-2"
     val scalacheckShapeless = "1.1.6"
     val scalacsv = "1.3.5"
     val scalaGraph = "1.12.5"
@@ -134,7 +134,7 @@ object ExternalDependencies {
 
   val mockitoDependencies: Seq[ModuleID] = Seq(
     "org.mockito" % "mockito-core" % versions.mockito % "test",
-    "org.scalatestplus" %% versions.scalatestPlusMockitoArtifactId % versions.scalatestPlus % "test")
+    "org.scalatestplus" %% versions.scalatestplusMockitoArtifactId % versions.scalatestplus % "test")
 
   val wireMockDependencies = Seq(
     "com.github.tomakehurst" % "wiremock" % "2.25.1" % Test
