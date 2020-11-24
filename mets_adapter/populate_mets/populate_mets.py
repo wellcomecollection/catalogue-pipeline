@@ -6,6 +6,13 @@ import boto3
 from wellcome_aws_utils.sns_utils import publish_sns_message
 
 
+STORAGE_ROLE = "arn:aws:iam::975596993436:role/storage-read_only"
+STORAGE_VHS = "vhs-storage-manifests-2020-07-24"
+
+CATALOGUE_ROLE = "arn:aws:iam::760097843905:role/platform-developer"
+CATALOGUE_TOPIC = "arn:aws:sns:eu-west-1:760097843905:mets_reindexer_topic"
+
+
 def aws_resource(name, role_arn):
     role = boto3.client("sts").assume_role(
         RoleArn=role_arn, RoleSessionName="AssumeRoleSession1"
@@ -21,34 +28,28 @@ def aws_resource(name, role_arn):
 
 class StorageManifestScanner:
 
-    role = "arn:aws:iam::975596993436:role/storage-read_only"
-    vhs = "vhs-storage-manifests-2020-07-24"
-
     def __init__(self):
-        self.dynamodb = aws_resource("dynamodb", self.role)
+        self.dynamodb = aws_resource("dynamodb", role_arn=STORAGE_ROLE)
 
     @property
     def paginator(self):
         return self.dynamodb.get_paginator("scan")
 
     def scan(self):
-        for page in self.paginator.paginate(TableName=self.vhs):
+        for page in self.paginator.paginate(TableName=STORAGE_VHS):
             for item in page["Items"]:
-                space, id = item["id"].split(":")
-                yield (space, id)
+                space, externalIdentifier = item["id"].split(":")
+                yield (space, externalIdentifier)
 
 
 class MessagePublisher:
 
-    role = "arn:aws:iam::760097843905:role/platform-developer"
-    topic_arn = "arn:aws:sns:eu-west-1:760097843905:mets_reindexer_topic"
-
     def __init__(self):
-        self.sns = aws_resource("sns", self.role)
+        self.sns = aws_resource("sns", role_arn=CATALOGUE_ROLE)
 
     def publish(self, space, id):
         msg = {"context": {"storageSpace": space, "externalIdentifier": id}}
-        publish_sns_message(self.sns, self.topic_arn, msg, "populate_mets.py")
+        publish_sns_message(self.sns, CATALOGUE_TOPIC, msg, "populate_mets.py")
 
 
 @click.command()
