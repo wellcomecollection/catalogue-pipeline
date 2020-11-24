@@ -2,7 +2,7 @@ import sbt._
 
 object WellcomeDependencies {
 
-  val defaultVersion = "24.1.0"
+  val defaultVersion = "24.6.0"
 
   lazy val versions = new {
     val typesafe = defaultVersion
@@ -67,7 +67,7 @@ object WellcomeDependencies {
 
 object ExternalDependencies {
   lazy val versions = new {
-    val akka = "2.6.9"
+    val akka = "2.6.10"
     val akkaHttp = "10.1.11"
     val akkaHttpCirce = "1.32.0"
     val akkaStreamAlpakka = "1.1.2"
@@ -75,15 +75,16 @@ object ExternalDependencies {
     val apacheLogging = "2.8.2"
     val aws = "1.11.504"
     val circe = "0.13.0"
-    val elastic4s = "7.9.0"
+    val elastic4s = "7.9.2"
     val fastparse = "2.3.0"
     val swagger = "2.0.10"
     val mockito = "1.9.5"
-    val scalatestplusMockito = "3.1.0.0"
+    val scalatest = "3.2.3"
+    val scalatestplus = "3.1.2.0"
+    val scalatestplusMockitoArtifactId = "mockito-3-2"
     val scalacheckShapeless = "1.1.6"
     val scalacsv = "1.3.5"
     val scalaGraph = "1.12.5"
-    val scalatest = "3.1.1"
     val apm = "1.12.0"
     val enumeratum = "1.5.13"
     val enumeratumScalacheck = "1.5.16"
@@ -133,7 +134,7 @@ object ExternalDependencies {
 
   val mockitoDependencies: Seq[ModuleID] = Seq(
     "org.mockito" % "mockito-core" % versions.mockito % "test",
-    "org.scalatestplus" %% "mockito-1-10" % versions.scalatestplusMockito % "test")
+    "org.scalatestplus" %% versions.scalatestplusMockitoArtifactId % versions.scalatestplus % "test")
 
   val wireMockDependencies = Seq(
     "com.github.tomakehurst" % "wiremock" % "2.25.1" % Test
@@ -151,7 +152,7 @@ object ExternalDependencies {
   )
 
   val scalacheckDependencies = Seq(
-    "org.scalatestplus" %% "scalacheck-1-14" % "3.1.1.1" % "test",
+    "org.scalatestplus" %% "scalacheck-1-14" % versions.scalatestplus % "test",
     "com.github.alexarchambault" %% "scalacheck-shapeless_1.13" % versions.scalacheckShapeless % "test"
   )
 

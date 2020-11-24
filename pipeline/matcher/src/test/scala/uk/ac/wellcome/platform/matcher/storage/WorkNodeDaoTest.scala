@@ -4,7 +4,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.matchers.should.Matchers
-import org.mockito.Matchers.any
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import javax.naming.ConfigurationException
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB

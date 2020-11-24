@@ -2,9 +2,9 @@ package uk.ac.wellcome.platform.transformer.mets.client
 
 import com.amazonaws.auth.BasicSessionCredentials
 import com.amazonaws.services.s3.AmazonS3
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito
 import org.mockito.invocation.InvocationOnMock
-import org.mockito.stubbing.Answer
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.matchers.should.Matchers
@@ -90,17 +90,15 @@ class AssumeRoleClientProviderTest
     val credentialsAccumulator =
       new mutable.Queue[BasicSessionCredentials]
     Mockito
-      .when(
-        mockClientFactory.buildClient(
-          org.mockito.Matchers.any[BasicSessionCredentials]))
-      .thenAnswer(new Answer[T] {
-        override def answer(invocation: InvocationOnMock): T = {
+      .when(mockClientFactory.buildClient(any[BasicSessionCredentials]))
+      .thenAnswer(
+        (invocation: InvocationOnMock) => {
           val arguments = invocation.getArguments
           val credentials = arguments.head.asInstanceOf[BasicSessionCredentials]
           credentialsAccumulator += credentials
           clientFactory.buildClient(credentials)
         }
-      })
+      )
     testWith((mockClientFactory, credentialsAccumulator))
   }
 }

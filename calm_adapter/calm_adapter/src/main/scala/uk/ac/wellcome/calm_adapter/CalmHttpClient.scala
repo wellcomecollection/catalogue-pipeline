@@ -4,7 +4,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 import akka.actor.ActorSystem
 import akka.stream.scaladsl._
-import akka.stream.Materializer
+import akka.stream.{Materializer, RestartSettings}
 import akka.http.scaladsl._
 import akka.http.scaladsl.model._
 
@@ -22,14 +22,16 @@ abstract class CalmHttpClientWithBackoff(
                          materializer: Materializer)
     extends CalmHttpClient {
 
-  def apply(request: HttpRequest): Future[HttpResponse] =
-    RestartSource
-      .onFailuresWithBackoff(
+  def apply(request: HttpRequest): Future[HttpResponse] = {
+    val restartSettings =
+      RestartSettings(
         minBackoff = minBackoff,
         maxBackoff = maxBackoff,
-        randomFactor = randomFactor,
-        maxRestarts = maxRestarts
-      ) { () =>
+        randomFactor = randomFactor
+      ).withMaxRestarts(maxRestarts, minBackoff)
+
+    RestartSource
+      .onFailuresWithBackoff(restartSettings) { () =>
         Source
           .future(singleRequest(request))
           .map { resp =>
@@ -45,6 +47,7 @@ abstract class CalmHttpClientWithBackoff(
         case _ =>
           throw new Exception("Max retries attempted when calling Calm API")
       }
+  }
 
   def singleRequest(request: HttpRequest): Future[HttpResponse]
 }

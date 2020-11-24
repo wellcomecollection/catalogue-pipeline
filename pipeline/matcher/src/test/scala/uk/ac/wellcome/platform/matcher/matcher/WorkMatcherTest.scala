@@ -4,7 +4,7 @@ import java.util.UUID
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import org.mockito.Matchers.any
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatest.EitherValues
 import org.scalatest.concurrent.ScalaFutures
@@ -57,7 +57,7 @@ class WorkMatcherTest
 
               val savedLinkedWork =
                 get[WorkNode](dynamoClient, graphTable.name)('id -> sourceId)
-                  .map(_.right.value)
+                  .map(_.value)
 
               savedLinkedWork shouldBe Some(
                 WorkNode(sourceId, version, Nil, ciHash(sourceId)))
