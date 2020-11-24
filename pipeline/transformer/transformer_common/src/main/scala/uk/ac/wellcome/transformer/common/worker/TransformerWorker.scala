@@ -46,8 +46,8 @@ trait TransformerWorker[In, SenderDest] extends Logging {
     message: NotificationMessage): Result[(Work[Source], StoreKey)] =
     for {
       key <- decodeKey(message)
-      recordAndKey <- getRecord(key)
-      work <- work(recordAndKey._1, key)
+      record <- getRecord(key)
+      work <- work(record, key)
       done <- done(work, key)
     } yield done
 
@@ -70,10 +70,10 @@ trait TransformerWorker[In, SenderDest] extends Logging {
       case Right(result) => Right(result)
     }
 
-  private def getRecord(key: StoreKey): Result[(In, StoreKey)] =
+  private def getRecord(key: StoreKey): Result[In] =
     store.getLatest(key.id) match {
-      case Left(err)                     => Left(StoreReadError(err.toString, key))
-      case Right(Identified(key, entry)) => Right((entry, key))
+      case Left(err)                   => Left(StoreReadError(err.toString, key))
+      case Right(Identified(_, entry)) => Right(entry)
     }
 
   def run(): Future[Done] =
