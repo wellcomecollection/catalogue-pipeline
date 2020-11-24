@@ -84,11 +84,11 @@ trait TransformerWorker[In, SenderDest] extends Logging {
         source.mapAsync(concurrentTransformations) {
           case (message, notification) =>
             process(notification) match {
-              case Left(err) => {
+              case Left(err) =>
                 // We do some slightly nicer logging here to give context to the errors
                 err match {
-                  case DecodeKeyError(_, message) =>
-                    error(s"$name: DecodeKeyError from $message")
+                  case DecodeKeyError(_, notificationMsg) =>
+                    error(s"$name: DecodeKeyError from $notificationMsg")
                   case StoreReadError(_, key) =>
                     error(s"$name: StoreReadError on $key")
                   case TransformerError(_, sourceData, key) =>
@@ -97,11 +97,9 @@ trait TransformerWorker[In, SenderDest] extends Logging {
                     error(s"$name: MessageSendError on $work with $key")
                 }
                 Future.failed(err)
-              }
-              case Right((work, key)) => {
+              case Right((work, key)) =>
                 info(s"$name: from $key transformed $work")
                 Future.successful(message)
-              }
             }
         }
       }
