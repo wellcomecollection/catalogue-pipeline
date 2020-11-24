@@ -28,9 +28,11 @@ class PipelineStorageStreamTest
   with IdentifiersGenerators
   with RandomGenerators with ElasticsearchFixtures with SQS with Akka{
 
-  val pipelineStorageConfig = PipelineStorageConfig(1, 1 seconds, 10)
+  val pipelineStorageConfig = PipelineStorageConfig(batchSize = 1, flushInterval = 1 seconds, parallelism = 10)
+
   def indexer(index: Index,elasticClient:ElasticClient = elasticClient) =  new ElasticIndexer[SampleDocument](elasticClient, index, NoStrictMapping)
-def withPipelineStream[R](indexer: Indexer[SampleDocument], visibilityTimeout: Int = 1, pipelineStorageConfig: PipelineStorageConfig = pipelineStorageConfig)(testWith: TestWith[(PipelineStorageStream[NotificationMessage,SampleDocument, String], QueuePair, MemoryMessageSender), R]): R =
+
+  def withPipelineStream[R](indexer: Indexer[SampleDocument], visibilityTimeout: Int = 1, pipelineStorageConfig: PipelineStorageConfig = pipelineStorageConfig)(testWith: TestWith[(PipelineStorageStream[NotificationMessage,SampleDocument, String], QueuePair, MemoryMessageSender), R]): R =
   withActorSystem { implicit ac =>
       withLocalSqsQueuePair(visibilityTimeout) { case q@QueuePair(queue, _) =>
         withSQSStream[NotificationMessage, R](queue) { stream =>

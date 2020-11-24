@@ -44,7 +44,7 @@ class PipelineStorageStream[T, D, MsgDestination](messageStream: SQSStream[T], d
       config.batchSize,
       config.flushInterval
     )
-      .mapAsyncUnordered(10) { msgs =>
+      .mapAsyncUnordered(config.parallelism) { msgs =>
         storeDocuments(msgs.toList)
       }
       .mapConcat(identity).mapAsyncUnordered(config.parallelism) { bundle =>
