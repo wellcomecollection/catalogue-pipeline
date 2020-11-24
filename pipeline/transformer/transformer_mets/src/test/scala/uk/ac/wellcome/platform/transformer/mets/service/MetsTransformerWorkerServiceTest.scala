@@ -140,34 +140,27 @@ class MetsTransformerWorkerServiceTest
     withLocalSqsQueuePair() {
       case queuePair @ QueuePair(queue, _) =>
         val messageSender = new MemoryMessageSender()
+        val adapterStore = MemoryVersionedStore[String, MetsLocation](initialEntries = Map())
         val s3TypedStore = S3TypedStore[String]
 
         withLocalS3Bucket { metsBucket =>
-          withMemoryStore { versionedStore =>
-            withActorSystem { implicit actorSystem =>
-              withSQSStream[NotificationMessage, R](queue) { sqsStream =>
-                val workerService = new MetsTransformerWorkerService(
-                  msgStream = sqsStream,
-                  messageSender = messageSender,
-                  adapterStore = versionedStore,
-                  metsXmlStore = s3TypedStore
-                )
+          withActorSystem { implicit actorSystem =>
+            withSQSStream[NotificationMessage, R](queue) { sqsStream =>
+              val workerService = new MetsTransformerWorkerService(
+                msgStream = sqsStream,
+                messageSender = messageSender,
+                adapterStore = adapterStore,
+                metsXmlStore = s3TypedStore
+              )
 
-                workerService.run()
+              workerService.run()
 
-                testWith(
-                  (queuePair, metsBucket, messageSender, versionedStore))
-              }
+              testWith(
+                (queuePair, metsBucket, messageSender, adapterStore))
             }
           }
         }
     }
-
-  // TODO: This can be deleted
-  def withMemoryStore[R](
-    testWith: TestWith[VersionedStore[String, Int, MetsLocation], R]): R = {
-    testWith(MemoryVersionedStore(Map()))
-  }
 
   private def sendWork(mets: String,
                        name: String,
