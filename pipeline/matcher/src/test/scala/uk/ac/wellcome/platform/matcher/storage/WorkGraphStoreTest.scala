@@ -5,9 +5,8 @@ import scala.concurrent.Future
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.matchers.should.Matchers
-import org.mockito.Matchers.any
-import org.mockito.Mockito.when
 import org.scalatest.funspec.AnyFunSpec
+import org.scanamo.error.DynamoReadError
 import uk.ac.wellcome.models.matcher.WorkNode
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
 import uk.ac.wellcome.platform.matcher.models.{WorkGraph, WorkUpdate}
@@ -177,11 +176,18 @@ class WorkGraphStoreTest
   }
 
   it("throws a RuntimeException if workGraphStore fails to put") {
-    val mockWorkNodeDao = mock[WorkNodeDao]
     val expectedException = new RuntimeException("FAILED")
-    when(mockWorkNodeDao.put(any[WorkNode]))
-      .thenReturn(Future.failed(expectedException))
-    val workGraphStore = new WorkGraphStore(mockWorkNodeDao)
+
+    val brokenWorkNodeDao = new WorkNodeDao(
+      dynamoClient,
+      dynamoConfig = createDynamoConfigWith(nonExistentTable)
+    ) {
+      override def put(
+        work: WorkNode): Future[Option[Either[DynamoReadError, WorkNode]]] =
+        Future.failed(expectedException)
+    }
+
+    val workGraphStore = new WorkGraphStore(brokenWorkNodeDao)
 
     whenReady(
       workGraphStore
