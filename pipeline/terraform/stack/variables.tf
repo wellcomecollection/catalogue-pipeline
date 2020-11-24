@@ -67,6 +67,8 @@ variable "private_subnets" {
   type = list(string)
 }
 
-variable "read_storage_s3_role_arn" {}
+variable "storage_bucket_name" {
+  type = string
+}
 
 variable "inferrer_model_data_bucket_name" {}
