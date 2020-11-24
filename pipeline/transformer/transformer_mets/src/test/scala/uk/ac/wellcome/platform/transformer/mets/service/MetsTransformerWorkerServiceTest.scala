@@ -2,9 +2,6 @@ package uk.ac.wellcome.platform.transformer.mets.service
 
 import java.time.Instant
 
-import com.amazonaws.auth.BasicSessionCredentials
-import com.amazonaws.services.s3.AmazonS3
-import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import software.amazon.awssdk.services.sqs.model.SendMessageResponse
 import uk.ac.wellcome.akka.fixtures.Akka
@@ -17,13 +14,7 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.mets_adapter.models.MetsLocation
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.platform.transformer.mets.client.ClientFactory
-import uk.ac.wellcome.platform.transformer.mets.fixtures.{
-  LocalStackS3Fixtures,
-  MetsGenerators,
-  STSFixtures
-}
-import uk.ac.wellcome.platform.transformer.mets.store.TemporaryCredentialsStore
+import uk.ac.wellcome.platform.transformer.mets.fixtures.MetsGenerators
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
@@ -31,28 +22,16 @@ import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.storage.{Identified, Version}
 import WorkState.Source
+import uk.ac.wellcome.storage.fixtures.S3Fixtures
 
 class MetsTransformerWorkerServiceTest
     extends AnyFunSpec
     with MetsGenerators
-    with Eventually
-    with IntegrationPatience
-    with STSFixtures
-    with LocalStackS3Fixtures
+    with S3Fixtures
     with SQS
     with Akka {
 
-  val roleArn = "arn:aws:iam::123456789012:role/new_role"
-
-  // The test S3 container requires a specific accessKey and secretKey so
-  // it fails if we use the temporary credentials
-  object BypassCredentialsClientFactory extends ClientFactory[AmazonS3] {
-    override def buildClient(credentials: BasicSessionCredentials): AmazonS3 =
-      s3Client
-  }
-
   it("retrieves a mets file from s3 and sends an invisible work") {
-
     val identifier = randomAlphanumeric(10)
     val version = randomInt(1, 10)
     val str = metsXmlWith(identifier, Some(License.CCBYNC))
@@ -161,32 +140,30 @@ class MetsTransformerWorkerServiceTest
     withLocalSqsQueuePair() {
       case queuePair @ QueuePair(queue, _) =>
         val messageSender = new MemoryMessageSender()
+        val s3TypedStore = S3TypedStore[String]
 
         withLocalS3Bucket { metsBucket =>
           withMemoryStore { versionedStore =>
             withActorSystem { implicit actorSystem =>
               withSQSStream[NotificationMessage, R](queue) { sqsStream =>
-                withAssumeRoleClientProvider(roleArn)(
-                  BypassCredentialsClientFactory) { assumeRoleclientProvider =>
-                  val workerService = new MetsTransformerWorkerService(
-                    sqsStream,
-                    messageSender,
-                    versionedStore,
-                    new TemporaryCredentialsStore[String](
-                      assumeRoleclientProvider)
-                  )
+                val workerService = new MetsTransformerWorkerService(
+                  msgStream = sqsStream,
+                  messageSender = messageSender,
+                  adapterStore = versionedStore,
+                  metsXmlStore = s3TypedStore
+                )
 
-                  workerService.run()
+                workerService.run()
 
-                  testWith(
-                    (queuePair, metsBucket, messageSender, versionedStore))
-                }
+                testWith(
+                  (queuePair, metsBucket, messageSender, versionedStore))
               }
             }
           }
         }
     }
 
+  // TODO: This can be deleted
   def withMemoryStore[R](
     testWith: TestWith[VersionedStore[String, Int, MetsLocation], R]): R = {
     testWith(MemoryVersionedStore(Map()))

@@ -147,10 +147,6 @@ object ExternalDependencies {
     "mysql" % "mysql-connector-java" % "6.0.6"
   )
 
-  val awsSTSDependencies = Seq(
-    "com.amazonaws" % "aws-java-sdk-sts" % versions.aws
-  )
-
   val scalacheckDependencies = Seq(
     "org.scalatestplus" %% "scalacheck-1-14" % versions.scalatestplus % "test",
     "com.github.alexarchambault" %% "scalacheck-shapeless_1.13" % versions.scalacheckShapeless % "test"
@@ -270,13 +266,7 @@ object CatalogueDependencies {
     ExternalDependencies.apacheCommonsDependencies
 
   val metsTransformerDependencies: Seq[ModuleID] =
-    ExternalDependencies.apacheCommonsDependencies ++
-      ExternalDependencies.mockitoDependencies ++
-      ExternalDependencies.wireMockDependencies ++
-      ExternalDependencies.akkaHttpDependencies ++
-      ExternalDependencies.scribeJavaDependencies ++
-      ExternalDependencies.awsSTSDependencies ++
-      WellcomeDependencies.typesafeLibrary
+    ExternalDependencies.apacheCommonsDependencies
 
   val calmTransformerDependencies: Seq[ModuleID] =
     ExternalDependencies.apacheCommonsDependencies ++
