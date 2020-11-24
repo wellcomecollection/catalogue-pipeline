@@ -23,10 +23,7 @@ class ImagesSimilarityTest extends ApiImagesTestBase {
                |  "visuallySimilar": [
                |    ${images.tail.map(imageResponse).mkString(",")}
                |  ],
-               |  "source": {
-               |    "id": "${image.source.id.canonicalId}",
-               |    "type": "Work"
-               |  }
+               |  "source": ${imageSource(image.source)}
                |}""".stripMargin
         }
     }
@@ -53,10 +50,7 @@ class ImagesSimilarityTest extends ApiImagesTestBase {
                |  "withSimilarFeatures": [
                |    ${images.tail.map(imageResponse).mkString(",")}
                |  ],
-               |  "source": {
-               |    "id": "${image.source.id.canonicalId}",
-               |    "type": "Work"
-               |  }
+               |  "source": ${imageSource(image.source)}
                |}""".stripMargin
         }
     }
@@ -83,10 +77,7 @@ class ImagesSimilarityTest extends ApiImagesTestBase {
                |  "withSimilarColors": [
                |    ${images.tail.map(imageResponse).mkString(",")}
                |  ],
-               |  "source": {
-               |    "id": "${image.source.id.canonicalId}",
-               |    "type": "Work"
-               |  }
+               |  "source": ${imageSource(image.source)}
                |}""".stripMargin
         }
     }
@@ -104,7 +95,9 @@ class ImagesSimilarityTest extends ApiImagesTestBase {
         assertJsonResponse(
           routes,
           s"/$apiPrefix/images?query=focaccia&include=visuallySimilar") {
-          Status.OK -> imagesListResponse(List(focacciaImage))
+          Status.BadRequest -> badRequest(
+            apiPrefix,
+            "include: 'visuallySimilar' is not a valid value. Please choose one of: ['source.contributor', 'source.languages']")
         }
     }
   }

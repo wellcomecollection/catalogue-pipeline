@@ -67,7 +67,7 @@ object DisplayResultList {
           pageSize = searchOptions.pageSize,
           totalPages = totalPages,
           totalResults = resultList.totalResults,
-          results = resultList.results.map(DisplayWork.apply(_, includes)),
+          results = resultList.results.map(DisplayWork(_, includes)),
           prevPage = prevPage,
           nextPage = nextPage,
           aggregations = resultList.aggregations.map(DisplayAggregations.apply)
@@ -76,6 +76,7 @@ object DisplayResultList {
 
   def apply(resultList: ResultList[AugmentedImage, Unit],
             searchOptions: SearchOptions,
+            includes: MultipleImagesIncludes,
             requestUri: Uri,
             contextUri: String): DisplayResultList[DisplayImage, Unit] =
     PaginationResponse(resultList, searchOptions, requestUri) match {
@@ -85,7 +86,7 @@ object DisplayResultList {
           pageSize = searchOptions.pageSize,
           totalPages = totalPages,
           totalResults = resultList.totalResults,
-          results = resultList.results.map(DisplayImage.apply),
+          results = resultList.results.map(DisplayImage(_, includes)),
           prevPage = prevPage,
           nextPage = nextPage,
           aggregations = resultList.aggregations

@@ -73,8 +73,12 @@ trait SingleImageSwagger {
         in = ParameterIn.QUERY,
         description = "A comma-separated list of extra fields to include",
         schema = new Schema(
-          allowableValues =
-            Array("visuallySimilar", "withSimilarFeatures", "withSimilarColors")
+          allowableValues = Array(
+            "visuallySimilar",
+            "withSimilarFeatures",
+            "withSimilarColors",
+            "source.contributor",
+            "source.languages")
         ),
         required = false
       )
@@ -228,6 +232,14 @@ trait MultipleImagesSwagger {
         in = ParameterIn.QUERY,
         description = "Filter the images by colors.",
         required = false
+      ),
+      new Parameter(
+        name = "include",
+        in = ParameterIn.QUERY,
+        description = "A comma-separated list of extra fields to include",
+        schema = new Schema(
+          allowableValues = Array("source.contributor", "source.languages")
+        )
       ),
       new Parameter(
         name = "page",

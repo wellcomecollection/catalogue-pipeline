@@ -17,6 +17,7 @@ class DisplayImageTest
 
     val displayImage = DisplayImage(
       image,
+      includes = SingleImageIncludes.none,
       visuallySimilar = Some(similarImages),
       withSimilarColors = None,
       withSimilarFeatures = None)

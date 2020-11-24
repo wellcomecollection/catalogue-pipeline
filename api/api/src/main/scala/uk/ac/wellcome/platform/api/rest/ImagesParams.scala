@@ -23,7 +23,9 @@ object SingleImageParams extends QueryParamsUtils {
       "visuallySimilar" -> ImageInclude.VisuallySimilar,
       "withSimilarFeatures" -> ImageInclude.WithSimilarFeatures,
       "withSimilarColors" -> ImageInclude.WithSimilarColors,
-    ).emap(values => Right(SingleImageIncludes(values)))
+      "source.contributor" -> ImageInclude.SourceContributor,
+      "source.languages" -> ImageInclude.SourceLanguages,
+    ).emap(values => Right(SingleImageIncludes(values: _*)))
 }
 
 case class MultipleImagesParams(
@@ -32,6 +34,7 @@ case class MultipleImagesParams(
   query: Option[String],
   license: Option[LicenseFilter],
   color: Option[ColorMustQuery],
+  include: Option[MultipleImagesIncludes],
   _index: Option[String]
 ) extends QueryParams
     with Paginated {
@@ -63,6 +66,7 @@ object MultipleImagesParams extends QueryParamsUtils {
         "query".as[String].?,
         "locations.license".as[LicenseFilter].?,
         "color".as[ColorMustQuery].?,
+        "include".as[MultipleImagesIncludes].?,
         "_index".as[String].?
       )
     ).tflatMap { args =>
@@ -72,4 +76,10 @@ object MultipleImagesParams extends QueryParamsUtils {
 
   implicit val colorMustQuery: Decoder[ColorMustQuery] =
     decodeCommaSeparated.emap(strs => Right(ColorMustQuery(strs)))
+
+  implicit val includesDecoder: Decoder[MultipleImagesIncludes] =
+    decodeOneOfCommaSeparated(
+      "source.contributor" -> ImageInclude.SourceContributor,
+      "source.languages" -> ImageInclude.SourceLanguages,
+    ).emap(values => Right(MultipleImagesIncludes(values: _*)))
 }

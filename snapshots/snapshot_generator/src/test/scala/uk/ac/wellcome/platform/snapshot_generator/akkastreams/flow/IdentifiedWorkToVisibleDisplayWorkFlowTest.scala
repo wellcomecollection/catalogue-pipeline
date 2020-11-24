@@ -19,7 +19,7 @@ class IdentifiedWorkToVisibleDisplayWorkFlowTest
   it("creates DisplayWorks from IndexedWorks") {
     withMaterializer { implicit materializer =>
       val flow = IndexedWorkToVisibleDisplayWork(
-        toDisplayWork = DisplayWork.apply(_, WorksIncludes.includeAll()))
+        toDisplayWork = DisplayWork.apply(_, WorksIncludes.all))
 
       val works = indexedWorks(count = 3)
 
@@ -29,7 +29,7 @@ class IdentifiedWorkToVisibleDisplayWorkFlowTest
 
       whenReady(eventualDisplayWorks) { displayWorks =>
         val expectedDisplayWorks = works.map {
-          DisplayWork(_, includes = WorksIncludes.includeAll())
+          DisplayWork(_, includes = WorksIncludes.all)
         }
         displayWorks shouldBe expectedDisplayWorks
       }

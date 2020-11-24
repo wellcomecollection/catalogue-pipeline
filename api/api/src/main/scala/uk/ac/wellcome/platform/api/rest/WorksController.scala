@@ -43,7 +43,7 @@ class WorksController(elasticsearchService: ElasticsearchService,
                   DisplayResultList(
                     resultList = resultList,
                     searchOptions = searchOptions,
-                    includes = params.include.getOrElse(WorksIncludes()),
+                    includes = params.include.getOrElse(WorksIncludes.none),
                     requestUri = requestUri,
                     contextUri = contextUri
                   )
@@ -58,7 +58,7 @@ class WorksController(elasticsearchService: ElasticsearchService,
       transactFuture("GET /works/{workId}") {
         val index =
           params._index.map(Index(_)).getOrElse(worksIndex)
-        val includes = params.include.getOrElse(WorksIncludes())
+        val includes = params.include.getOrElse(WorksIncludes.none)
         worksService
           .findWorkById(id)(index)
           .flatMap {

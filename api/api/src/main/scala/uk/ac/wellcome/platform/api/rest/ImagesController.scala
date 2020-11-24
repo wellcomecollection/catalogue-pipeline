@@ -51,6 +51,8 @@ class ImagesController(elasticsearchService: ElasticsearchService,
                       context = contextUri,
                       result = DisplayImage(
                         image = image,
+                        includes =
+                          params.include.getOrElse(SingleImageIncludes.none),
                         visuallySimilar =
                           similarImages.get(SimilarityMetric.Blended),
                         withSimilarColors =
@@ -82,10 +84,12 @@ class ImagesController(elasticsearchService: ElasticsearchService,
               extractPublicUri { uri =>
                 complete(
                   DisplayResultList(
-                    resultList,
-                    searchOptions,
-                    uri,
-                    contextUri
+                    resultList = resultList,
+                    searchOptions = searchOptions,
+                    includes =
+                      params.include.getOrElse(MultipleImagesIncludes.none),
+                    requestUri = uri,
+                    contextUri = contextUri
                   )
                 )
               }
@@ -94,13 +98,18 @@ class ImagesController(elasticsearchService: ElasticsearchService,
     }
 
   private def getSimilarityMetrics(
-    includes: Option[SingleImageIncludes]): List[SimilarityMetric] =
-    includes
-      .map(_.includes.collect {
-        case ImageInclude.VisuallySimilar     => SimilarityMetric.Blended
-        case ImageInclude.WithSimilarFeatures => SimilarityMetric.Features
-        case ImageInclude.WithSimilarColors   => SimilarityMetric.Colors
-      })
+    maybeIncludes: Option[SingleImageIncludes]): List[SimilarityMetric] =
+    maybeIncludes
+      .map { includes =>
+        List(
+          if (includes.visuallySimilar) Some(SimilarityMetric.Blended)
+          else None,
+          if (includes.withSimilarFeatures) Some(SimilarityMetric.Features)
+          else None,
+          if (includes.withSimilarColors) Some(SimilarityMetric.Colors)
+          else None,
+        ).flatten
+      }
       .getOrElse(Nil)
 
   private lazy val imagesService =

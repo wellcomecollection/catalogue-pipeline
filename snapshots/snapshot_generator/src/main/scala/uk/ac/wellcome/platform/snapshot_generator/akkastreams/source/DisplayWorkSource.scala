@@ -12,7 +12,5 @@ object DisplayWorkSource {
     index: Index
   )(implicit actorSystem: ActorSystem): Source[DisplayWork, Any] =
     ElasticsearchWorksSource(elasticClient = elasticClient, index = index)
-      .via(
-        IndexedWorkToVisibleDisplayWork(
-          DisplayWork(_, WorksIncludes.includeAll())))
+      .via(IndexedWorkToVisibleDisplayWork(DisplayWork(_, WorksIncludes.all)))
 }

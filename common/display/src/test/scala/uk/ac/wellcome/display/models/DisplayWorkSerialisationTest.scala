@@ -374,7 +374,7 @@ class DisplayWorkSerialisationTest
     """.stripMargin
 
     assertObjectMapsToJson(
-      DisplayWork(work, includes = WorksIncludes()),
+      DisplayWork(work, includes = WorksIncludes.none),
       expectedJson = expectedJson
     )
   }
