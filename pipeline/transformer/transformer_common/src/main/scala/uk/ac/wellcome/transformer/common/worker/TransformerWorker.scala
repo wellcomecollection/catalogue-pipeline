@@ -43,14 +43,13 @@ trait TransformerWorker[In, SenderDest] extends Logging {
   val concurrentTransformations: Int = 2
 
   def process(
-    message: NotificationMessage): Result[(Work[Source], StoreKey)] = {
+    message: NotificationMessage): Result[(Work[Source], StoreKey)] =
     for {
       key <- decodeKey(message)
       recordAndKey <- getRecord(key)
       work <- work(recordAndKey._1, key)
       done <- done(work, key)
     } yield done
-  }
 
   private def work(sourceData: In, key: StoreKey): Result[Work[Source]] =
     transformer(sourceData, key.version) match {
