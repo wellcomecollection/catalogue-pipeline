@@ -1,24 +1,3 @@
-locals {
-  services = [
-    "ingestor_works",
-    "ingestor_images",
-    "matcher",
-    "merger",
-    "id_minter_works",
-    "id_minter_images",
-    "inference_manager",
-    "feature_inferrer",
-    "feature_training",
-    "palette_inferrer",
-    "recorder",
-    "relation_embedder",
-    "transformer_miro",
-    "transformer_mets",
-    "transformer_sierra",
-    "transformer_calm",
-  ]
-}
-
 data "aws_ssm_parameter" "inferrer_lsh_model_key" {
   name = "/catalogue_pipeline/config/models/${var.release_label}/lsh_model"
 }
@@ -27,14 +6,9 @@ data "aws_ssm_parameter" "latest_lsh_model_key" {
   name = "/catalogue_pipeline/config/models/latest/lsh_model"
 }
 
-data "aws_ecr_repository" "service" {
-  count = length(local.services)
-  name  = "uk.ac.wellcome/${local.services[count.index]}"
-}
-
 locals {
-  repo_urls = [for repo_url in data.aws_ecr_repository.service.*.repository_url : "${repo_url}:env.${var.release_label}"]
-  image_ids = zipmap(local.services, local.repo_urls)
+  repo_urls = [for repo_url in var.repository_urls : "${repo_url}:env.${var.release_label}"]
+  image_ids = zipmap(var.services, local.repo_urls)
 
   id_minter_images_image   = local.image_ids["id_minter_images"]
   id_minter_works_image    = local.image_ids["id_minter_works"]
