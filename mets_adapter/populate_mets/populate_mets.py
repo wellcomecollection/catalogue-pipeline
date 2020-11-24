@@ -22,7 +22,7 @@ def aws_resource(name, role_arn):
 class StorageManifestScanner:
 
     role = "arn:aws:iam::975596993436:role/storage-read_only"
-    vhs = "vhs-storage-manifests"
+    vhs = "vhs-storage-manifests-2020-07-24"
 
     def __init__(self):
         self.dynamodb = aws_resource("dynamodb", self.role)
@@ -41,7 +41,7 @@ class StorageManifestScanner:
 class MessagePublisher:
 
     role = "arn:aws:iam::760097843905:role/platform-developer"
-    topic_arn = "arn:aws:sns:eu-west-1:760097843905:mets_temp_test_topic"
+    topic_arn = "arn:aws:sns:eu-west-1:760097843905:mets_reindexer_topic"
 
     def __init__(self):
         self.sns = aws_resource("sns", self.role)
