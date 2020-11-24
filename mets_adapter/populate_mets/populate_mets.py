@@ -10,7 +10,7 @@ STORAGE_ROLE = "arn:aws:iam::975596993436:role/storage-read_only"
 STORAGE_VHS = "vhs-storage-manifests-2020-07-24"
 
 CATALOGUE_ROLE = "arn:aws:iam::760097843905:role/platform-developer"
-CATALOGUE_TOPIC = "arn:aws:sns:eu-west-1:760097843905:mets_reindexer_topic"
+CATALOGUE_TOPIC = "arn:aws:sns:eu-west-1:760097843905:mets_adapter_repopulate_script_output"
 
 
 def aws_resource(name, role_arn):
