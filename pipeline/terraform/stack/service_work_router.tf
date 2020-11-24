@@ -30,6 +30,8 @@ module "router" {
 
     es_merged_index       = local.es_works_merged_index
     es_denormalised_index = local.es_works_denormalised_index
+    batch_size = 100
+    flush_interval_seconds = 30
   }
 
   secret_env_vars = {

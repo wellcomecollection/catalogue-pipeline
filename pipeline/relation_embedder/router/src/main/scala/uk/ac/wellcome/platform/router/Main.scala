@@ -10,18 +10,13 @@ import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal.Work
 import uk.ac.wellcome.models.work.internal.WorkState.Denormalised
-import uk.ac.wellcome.pipeline_storage.{
-  ElasticIndexer,
-  ElasticRetriever,
-  PipelineStorageConfig,
-  PipelineStorageStream
-}
+import uk.ac.wellcome.pipeline_storage.typesafe.PipelineStorageStreamBuilder
+import uk.ac.wellcome.pipeline_storage.{ElasticIndexer, ElasticRetriever}
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 
 import scala.concurrent.ExecutionContext
-import scala.concurrent.duration.DurationInt
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
@@ -35,7 +30,7 @@ object Main extends WellcomeTypesafeApp {
 
     val denormalisedIndex = Index(config.requireString("es.denormalised_index"))
 
-    val stream = new PipelineStorageStream(
+    val stream = PipelineStorageStreamBuilder.buildPipelineStorageStream(
       SQSBuilder.buildSQSStream[NotificationMessage](config),
       new ElasticIndexer[Work[Denormalised]](
         esClient,
@@ -45,8 +40,7 @@ object Main extends WellcomeTypesafeApp {
         .buildSNSMessageSender(
           config,
           namespace = "work-sender",
-          subject = "Sent from the router")
-    )(PipelineStorageConfig(100, 2 minutes, 10))
+          subject = "Sent from the router"))(config)
 
     new RouterWorkerService(
       pathsMsgSender = SNSBuilder
