@@ -16,8 +16,8 @@ case class DisplayImageSource(
     description = "The title of the image source"
   ) title: Option[String],
   @Schema(
-    description = "The primary contributor associated with the image source"
-  ) contributor: Option[DisplayContributor],
+    description = "The contributors associated with the image source"
+  ) contributors: Option[List[DisplayContributor]],
   @Schema(
     description = "The languages of the image source"
   ) languages: Option[List[DisplayLanguage]],
@@ -41,10 +41,11 @@ object DisplayImageSource {
     new DisplayImageSource(
       id = source.id.canonicalId,
       title = source.canonicalWork.data.title,
-      contributor =
-        if (includes.`source.contributor`)
-          source.canonicalWork.data.contributors.headOption
-            .map(DisplayContributor(_, includesIdentifiers = false))
+      contributors =
+        if (includes.`source.contributors`)
+          Some(
+            source.canonicalWork.data.contributors
+              .map(DisplayContributor(_, includesIdentifiers = false)))
         else None,
       languages =
         if (includes.`source.languages`)

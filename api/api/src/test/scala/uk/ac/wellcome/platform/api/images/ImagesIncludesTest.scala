@@ -20,14 +20,14 @@ class ImagesIncludesTest extends ApiImagesTestBase with ContributorGenerators {
     val image = createAugmentedImageWith(parentWork = source)
 
     it(
-      "includes the first source contributor on results from the list endpoint if we pass ?include=source.contributor") {
+      "includes the source contributors on results from the list endpoint if we pass ?include=source.contributors") {
       withImagesApi {
         case (imagesIndex, routes) =>
           insertImagesIntoElasticsearch(imagesIndex, image)
 
           assertJsonResponse(
             routes,
-            s"/$apiPrefix/images?include=source.contributor") {
+            s"/$apiPrefix/images?include=source.contributors") {
             Status.OK -> s"""
               |{
               |  ${resultList(apiPrefix, totalResults = 1)},
@@ -39,8 +39,7 @@ class ImagesIncludesTest extends ApiImagesTestBase with ContributorGenerators {
               |      "source": {
               |        "id": "${source.id}",
               |        "title": "Apple agitator",
-              |        "contributor": ${contributor(
-                              source.data.contributors.head)},
+              |        "contributors": [${contributors(source.data.contributors)}],
               |        "type": "Work"
               |      }
               |    }
@@ -52,14 +51,14 @@ class ImagesIncludesTest extends ApiImagesTestBase with ContributorGenerators {
     }
 
     it(
-      "includes the source contributor on a result from the single image endpoint if we pass ?include=source.contributor") {
+      "includes the source contributors on a result from the single image endpoint if we pass ?include=source.contributors") {
       withImagesApi {
         case (imagesIndex, routes) =>
           insertImagesIntoElasticsearch(imagesIndex, image)
 
           assertJsonResponse(
             routes,
-            s"/$apiPrefix/images/${image.id.canonicalId}?include=source.contributor") {
+            s"/$apiPrefix/images/${image.id.canonicalId}?include=source.contributors") {
             Status.OK -> s"""
               |{
               |  $singleImageResult,
@@ -69,7 +68,7 @@ class ImagesIncludesTest extends ApiImagesTestBase with ContributorGenerators {
               |  "source": {
               |    "id": "${source.id}",
               |    "title": "Apple agitator",
-              |    "contributor": ${contributor(source.data.contributors.head)},
+              |    "contributors": [${contributors(source.data.contributors)}],
               |    "type": "Work"
               |  }
               |}

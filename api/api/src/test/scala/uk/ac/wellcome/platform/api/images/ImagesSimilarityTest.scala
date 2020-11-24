@@ -97,7 +97,7 @@ class ImagesSimilarityTest extends ApiImagesTestBase {
           s"/$apiPrefix/images?query=focaccia&include=visuallySimilar") {
           Status.BadRequest -> badRequest(
             apiPrefix,
-            "include: 'visuallySimilar' is not a valid value. Please choose one of: ['source.contributor', 'source.languages']")
+            "include: 'visuallySimilar' is not a valid value. Please choose one of: ['source.contributors', 'source.languages']")
         }
     }
   }

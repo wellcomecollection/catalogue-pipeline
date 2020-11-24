@@ -23,7 +23,7 @@ object SingleImageParams extends QueryParamsUtils {
       "visuallySimilar" -> ImageInclude.VisuallySimilar,
       "withSimilarFeatures" -> ImageInclude.WithSimilarFeatures,
       "withSimilarColors" -> ImageInclude.WithSimilarColors,
-      "source.contributor" -> ImageInclude.SourceContributor,
+      "source.contributors" -> ImageInclude.SourceContributors,
       "source.languages" -> ImageInclude.SourceLanguages,
     ).emap(values => Right(SingleImageIncludes(values: _*)))
 }
@@ -79,7 +79,7 @@ object MultipleImagesParams extends QueryParamsUtils {
 
   implicit val includesDecoder: Decoder[MultipleImagesIncludes] =
     decodeOneOfCommaSeparated(
-      "source.contributor" -> ImageInclude.SourceContributor,
+      "source.contributors" -> ImageInclude.SourceContributors,
       "source.languages" -> ImageInclude.SourceLanguages,
     ).emap(values => Right(MultipleImagesIncludes(values: _*)))
 }
