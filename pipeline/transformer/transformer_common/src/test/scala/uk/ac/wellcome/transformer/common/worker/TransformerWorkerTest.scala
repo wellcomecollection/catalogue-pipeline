@@ -74,6 +74,29 @@ class TransformerWorkerTest
     }
   }
 
+  it("sends a message to the next service") {
+    val records = Map(
+      Version("A", 1) -> ValidTestData,
+      Version("B", 2) -> ValidTestData,
+      Version("C", 3) -> ValidTestData
+    )
+
+    val sender = new MemoryMessageSender()
+
+    withLocalSqsQueue() { queue =>
+      withWorker(queue, records = records, sender = sender) { _ =>
+        sendNotificationToSQS(queue, Version("A", 1))
+        sendNotificationToSQS(queue, Version("B", 2))
+        sendNotificationToSQS(queue, Version("C", 3))
+
+        eventually {
+          assertQueueEmpty(queue)
+          sender.getMessages[Work[Source]] should have size 3
+        }
+      }
+    }
+  }
+
   describe("sends failures to the DLQ") {
     it("if it can't parse the JSON on the queue") {
       withLocalSqsQueuePair() {
