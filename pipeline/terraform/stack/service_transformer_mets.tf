@@ -25,7 +25,6 @@ module "mets_transformer" {
     messages_bucket_name = aws_s3_bucket.messages.id
 
     mets_adapter_dynamo_table_name = var.mets_adapter_table_name
-    assume_role_arn                = var.read_storage_s3_role_arn
   }
 
   secret_env_vars = {}
@@ -66,21 +65,21 @@ resource "aws_iam_role_policy" "read_mets_adapter_table" {
   policy = var.mets_adapter_read_policy
 }
 
-data "aws_iam_policy_document" "assume_storage_read_role" {
+data "aws_iam_policy_document" "read_storage_bucket" {
   statement {
-    effect = "Allow"
-
     actions = [
-      "sts:AssumeRole",
+      "s3:ListBucket",
+      "s3:GetObject*",
     ]
 
     resources = [
-      var.read_storage_s3_role_arn,
+      "arn:aws:s3:::${var.storage_bucket_name}",
+      "arn:aws:s3:::${var.storage_bucket_name}/*",
     ]
   }
 }
 
-resource "aws_iam_role_policy" "assume_role_policy" {
+resource "aws_iam_role_policy" "read_storage_bucket" {
   role   = module.mets_transformer.task_role_name
-  policy = data.aws_iam_policy_document.assume_storage_read_role.json
+  policy = data.aws_iam_policy_document.read_storage_bucket.json
 }

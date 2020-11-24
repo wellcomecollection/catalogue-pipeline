@@ -94,7 +94,6 @@ module "stack" {
   vhs_calm_read_policy              = local.vhs_calm_read_policy
   vhs_calm_sourcedata_bucket_name   = local.vhs_calm_sourcedata_bucket_name
   vhs_calm_sourcedata_table_name    = local.vhs_calm_sourcedata_table_name
-  read_storage_s3_role_arn          = aws_iam_role.read_storage_s3.arn
 
   # Inferrer data
   inferrer_model_data_bucket_name = aws_s3_bucket.inferrer_model_core_data.id
@@ -102,4 +101,6 @@ module "stack" {
   shared_logging_secrets = data.terraform_remote_state.shared_infra.outputs.shared_secrets_logging
   repository_urls        = data.aws_ecr_repository.service.*.repository_url
   services               = local.services
+
+  storage_bucket_name = local.storage_bucket
 }
