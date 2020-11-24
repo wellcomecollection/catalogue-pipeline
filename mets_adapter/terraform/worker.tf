@@ -5,7 +5,7 @@ module "worker" {
   image = local.mets_adapter_image
 
   env_vars = {
-    sns_arn                   = module.mets_adapter_topic.arn
+    sns_arn                   = module.mets_adapter_output_topic.arn
     queue_id                  = module.queue.url
     metrics_namespace         = local.namespace
     mets_adapter_dynamo_table = local.mets_adapter_table_name
