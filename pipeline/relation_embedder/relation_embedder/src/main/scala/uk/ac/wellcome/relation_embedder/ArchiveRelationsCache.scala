@@ -37,8 +37,6 @@ class ArchiveRelationsCache(
 
   def size = relations.size
 
-  def numParents = parentMapping.size
-
   private def getChildren(
     path: String): List[Relation[DataState.Unidentified]] =
     childMapping
