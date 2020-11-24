@@ -66,8 +66,8 @@ trait TransformerWorker[In, SenderDest] extends Logging {
 
   private def decodeKey(message: NotificationMessage): Result[StoreKey] =
     fromJson[StoreKey](message.body) match {
-      case Failure(err)    => Left(DecodeKeyError(err.toString, message))
-      case Success(result) => Right(result)
+      case Failure(err)      => Left(DecodeKeyError(err.toString, message))
+      case Success(storeKey) => Right(storeKey)
     }
 
   private def getRecord(key: StoreKey): Result[In] =
