@@ -29,7 +29,7 @@ case class MessageSendError[T, Key](msg: String, work: Work[Source], key: Key)
   * - Takes an SQS stream that emits VHS keys
   * - Gets the record of type `In`
   * - Runs it through a transformer and transforms the `In` to `Work[Source]`
-  * - Emits the message via `BigMessageSender` to an SNS topic
+  * - Emits the message via `MessageSender` to SNS
   */
 trait TransformerWorker[In, SenderDest] extends Logging {
   type Result[T] = Either[TransformerWorkerError, T]
