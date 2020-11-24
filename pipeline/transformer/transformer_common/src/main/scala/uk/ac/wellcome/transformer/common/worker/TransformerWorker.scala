@@ -13,6 +13,8 @@ import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.storage.{Identified, Version}
 import WorkState.Source
 
+import scala.util.{Failure, Success}
+
 sealed abstract class TransformerWorkerError(msg: String) extends Exception(msg)
 case class DecodeKeyError[T](msg: String, message: NotificationMessage)
     extends TransformerWorkerError(msg)
@@ -65,9 +67,9 @@ trait TransformerWorker[In, SenderDest] extends Logging {
     }
 
   private def decodeKey(message: NotificationMessage): Result[StoreKey] =
-    fromJson[StoreKey](message.body).toEither match {
-      case Left(err)     => Left(DecodeKeyError(err.toString, message))
-      case Right(result) => Right(result)
+    fromJson[StoreKey](message.body) match {
+      case Failure(err)    => Left(DecodeKeyError(err.toString, message))
+      case Success(result) => Right(result)
     }
 
   private def getRecord(key: StoreKey): Result[In] =
