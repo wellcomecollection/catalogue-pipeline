@@ -62,9 +62,9 @@ class TransformerWorkerTest
     withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>
         withWorker(queue, records = records) { _ =>
-          sendNotificationToSQS[Version[String, Int]](queue, Version("A", 1))
-          sendNotificationToSQS[Version[String, Int]](queue, Version("B", 2))
-          sendNotificationToSQS[Version[String, Int]](queue, Version("C", 3))
+          sendNotificationToSQS(queue, Version("A", 1))
+          sendNotificationToSQS(queue, Version("B", 2))
+          sendNotificationToSQS(queue, Version("C", 3))
 
           eventually {
             assertQueueEmpty(dlq)
