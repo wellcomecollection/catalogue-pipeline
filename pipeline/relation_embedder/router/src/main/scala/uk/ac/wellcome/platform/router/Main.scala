@@ -1,20 +1,20 @@
 package uk.ac.wellcome.platform.router
 
 import akka.actor.ActorSystem
-import com.sksamuel.elastic4s.Index
 import com.typesafe.config.Config
 import uk.ac.wellcome.elasticsearch.DenormalisedWorkIndexConfig
-import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal.Work
-import uk.ac.wellcome.models.work.internal.WorkState.Denormalised
-import uk.ac.wellcome.pipeline_storage.typesafe.PipelineStorageStreamBuilder
-import uk.ac.wellcome.pipeline_storage.{ElasticIndexer, ElasticRetriever}
+import uk.ac.wellcome.models.work.internal.WorkState.{Denormalised, Merged}
+import uk.ac.wellcome.pipeline_storage.typesafe.{
+  ElasticIndexerBuilder,
+  ElasticRetrieverBuilder,
+  PipelineStorageStreamBuilder
+}
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
-import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 
 import scala.concurrent.ExecutionContext
 
@@ -25,17 +25,19 @@ object Main extends WellcomeTypesafeApp {
     implicit val executionContext: ExecutionContext =
       AkkaBuilder.buildExecutionContext()
 
-    val esClient = ElasticBuilder.buildElasticClient(config)
-    val mergedIndex = Index(config.requireString("es.merged_index"))
+    val indexer = ElasticIndexerBuilder.buildIndexer[Work[Denormalised]](
+      config,
+      namespace = "denormalised-works",
+      indexConfig = DenormalisedWorkIndexConfig
+    )
 
-    val denormalisedIndex = Index(config.requireString("es.denormalised_index"))
+    val retriever = ElasticRetrieverBuilder.buildRetriever[Work[Merged]](
+      config, namespace = "merged-works"
+    )
 
     val stream = PipelineStorageStreamBuilder.buildPipelineStorageStream(
       SQSBuilder.buildSQSStream[NotificationMessage](config),
-      new ElasticIndexer[Work[Denormalised]](
-        esClient,
-        denormalisedIndex,
-        DenormalisedWorkIndexConfig),
+      indexer = indexer,
       SNSBuilder
         .buildSNSMessageSender(
           config,
@@ -49,7 +51,7 @@ object Main extends WellcomeTypesafeApp {
           config,
           namespace = "path-sender",
           subject = "Sent from the router"),
-      workRetriever = new ElasticRetriever(esClient, mergedIndex),
+      workRetriever = retriever,
       pipelineStream = stream
     )
   }

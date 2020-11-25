@@ -8,7 +8,9 @@ import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.pipeline_storage.ElasticIndexer
+import uk.ac.wellcome.models.work.internal.Work
+import uk.ac.wellcome.models.work.internal.WorkState.Denormalised
+import uk.ac.wellcome.pipeline_storage.typesafe.ElasticIndexerBuilder
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
@@ -24,8 +26,13 @@ object Main extends WellcomeTypesafeApp {
       AkkaBuilder.buildExecutionContext()
 
     val esClient = ElasticBuilder.buildElasticClient(config)
-    val mergedIndex = Index(config.requireString("es.merged_index"))
-    val denormalisedIndex = Index(config.requireString("es.denormalised_index"))
+    val mergedIndex = Index(config.requireString("es.merged-works.index"))
+
+    val workIndexer = ElasticIndexerBuilder.buildIndexer[Work[Denormalised]](
+      config,
+      namespace = "denormalised-works",
+      indexConfig = DenormalisedWorkIndexConfig
+    )
 
     new RelationEmbedderWorkerService(
       sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
@@ -33,10 +40,7 @@ object Main extends WellcomeTypesafeApp {
         .buildSNSMessageSender(
           config,
           subject = "Sent from the relation_embedder"),
-      workIndexer = new ElasticIndexer(
-        esClient,
-        denormalisedIndex,
-        DenormalisedWorkIndexConfig),
+      workIndexer = workIndexer,
       relationsService = new PathQueryRelationsService(
         esClient,
         mergedIndex,
