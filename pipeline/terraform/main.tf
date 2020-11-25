@@ -4,6 +4,11 @@ module "catalogue_pipeline_2020-11-25" {
   pipeline_date = "2020-11-25"
   release_label = "stage"
 
+  # Transformer config
+  #
+  # If this pipeline is meant to be reindexed, remember to uncomment the
+  # reindexer topic names.
+
   sierra_adapter_topic_arns = [
     local.sierra_reindexer_topic_arn,
     local.sierra_merged_bibs_topic_arn,
