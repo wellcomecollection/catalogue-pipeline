@@ -258,6 +258,10 @@ object CatalogueDependencies {
       WellcomeDependencies.fixturesLibrary ++
       WellcomeDependencies.messagingTypesafeLibrary
 
+  val transformerCommonDependencies: Seq[ModuleID] =
+    WellcomeDependencies.storageTypesafeLibrary ++
+      WellcomeDependencies.messagingTypesafeLibrary
+
   val miroTransformerDependencies: Seq[ModuleID] =
     ExternalDependencies.apacheCommonsDependencies
 
