@@ -45,7 +45,7 @@ object Relation {
 
   def apply(
     work: Work[Merged],
-    depth: Int
+    depth: Int,
     numChildren: Int,
     numDescendents: Int): Relation[DataState.Unidentified] =
     Relation[DataState.Unidentified](

@@ -6,9 +6,7 @@ import grizzled.slf4j.Logging
 import uk.ac.wellcome.models.work.internal._
 import WorkState.Merged
 
-class ArchiveRelationsCache(
-  relations: Map[String, Relation[DataState.Unidentified]])
-    extends Logging {
+class ArchiveRelationsCache(works: Map[String, Work[Merged]]) extends Logging {
 
   def apply(work: Work[Merged]): Relations[DataState.Unidentified] =
     work.data.collectionPath
@@ -36,6 +34,8 @@ class ArchiveRelationsCache(
       }
 
   def size = relations.size
+
+  def numParents = parentMapping.size
 
   private def getChildren(
     path: String): List[Relation[DataState.Unidentified]] =
@@ -72,18 +72,43 @@ class ArchiveRelationsCache(
         getAncestors(parentPath, relations(parentPath) :: accum)
     }
 
+  private def getNumChildren(path: String): Int =
+    childMapping.get(path).map(_.length).getOrElse(0)
+
+  private def getNumDescendents(path: String): Int = {
+    @tailrec
+    def numDescendents(stack: List[String], accum: Int = 0): Int =
+      stack match {
+        case Nil => accum
+        case head :: tail =>
+          numDescendents(childMapping.getOrElse(head, Nil) ++ tail, 1 + accum)
+      }
+    numDescendents(childMapping.getOrElse(path, Nil))
+  }
+  
+  private lazy val relations =
+    works.map {
+      case (path, work) =>
+        path -> Relation(
+          work = work,
+          depth = path.split("/").length - 1,
+          numChildren = getNumChildren(path),
+          numDescendents = getNumDescendents(path)
+        )
+    }
+
   private lazy val parentMapping: Map[String, String] =
-    relations
+    works
       .map {
         case (path, _) =>
           val parent = tokenize(path).dropRight(1)
-          path -> relations.keys.find(tokenize(_) == parent)
+          path -> works.keys.find(tokenize(_) == parent)
       }
       .collect { case (path, Some(parentPath)) => path -> parentPath }
 
   private lazy val childMapping: Map[String, List[String]] =
-    relations.map {
-      case (path, work) =>
+    works.map {
+      case (path, _) =>
         path -> CollectionPathSorter.sortPaths(
           parentMapping.collect {
             case (childPath, parentPath) if parentPath == path =>
@@ -104,7 +129,7 @@ object ArchiveRelationsCache {
         .map { case work => work.data.collectionPath -> work }
         .collect {
           case (Some(CollectionPath(path, _, _)), work) =>
-            path -> Relation(work, path.split("/").length - 1)
+            path -> work
         }
         .toMap
     )

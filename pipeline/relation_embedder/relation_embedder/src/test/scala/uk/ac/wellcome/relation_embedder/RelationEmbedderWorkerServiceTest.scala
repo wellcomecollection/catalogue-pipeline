@@ -62,27 +62,34 @@ class RelationEmbedderWorkerServiceTest
   val workD = work("a/2/d")
   val workE = work("a/2/d/e")
 
-  val relationsA = Relations(
-    children = List(Relation(work1, 1), Relation(work2, 1)))
+  val relA = Relation(workA, depth = 0, numChildren = 2, numDescendents = 6)
+  val rel1 = Relation(work1, depth = 1, numChildren = 1, numDescendents = 1)
+  val relB = Relation(workB, depth = 2, numChildren = 0, numDescendents = 0)
+  val rel2 = Relation(work2, depth = 1, numChildren = 2, numDescendents = 3)
+  val relC = Relation(workC, depth = 2, numChildren = 0, numDescendents = 0)
+  val relD = Relation(workD, depth = 2, numChildren = 1, numDescendents = 1)
+  val relE = Relation(workE, depth = 3, numChildren = 0, numDescendents = 0)
+
+  val relationsA = Relations(children = List(rel1, rel2))
   val relations1 = Relations(
-    ancestors = List(Relation(workA, 0)),
-    children = List(Relation(workB, 2)),
-    siblingsSucceeding = List(Relation(work2, 1)))
+    ancestors = List(relA),
+    children = List(relB),
+    siblingsSucceeding = List(rel2)
+  )
   val relationsB = Relations(
-    ancestors = List(Relation(workA, 0), Relation(work1, 1)))
+    ancestors = List(relA, rel1))
   val relations2 = Relations(
-    ancestors = List(Relation(workA, 0)),
-    children = List(Relation(workC, 2), Relation(workD, 2)),
-    siblingsPreceding = List(Relation(work1, 1)))
+    ancestors = List(relA),
+    children = List(relC, relD),
+    siblingsPreceding = List(rel1))
   val relationsC = Relations(
-    ancestors = List(Relation(workA, 0), Relation(work2, 1)),
-    siblingsSucceeding = List(Relation(workD, 2)))
+    ancestors = List(relA, rel2),
+    siblingsSucceeding = List(relD))
   val relationsD = Relations(
-    ancestors = List(Relation(workA, 0), Relation(work2, 1)),
-    children = List(Relation(workE, 3)),
-    siblingsPreceding = List(Relation(workC, 2)))
-  val relationsE = Relations(ancestors =
-    List(Relation(workA, 0), Relation(work2, 1), Relation(workD, 2)))
+    ancestors = List(relA, rel2),
+    children = List(relE),
+    siblingsPreceding = List(relC))
+  val relationsE = Relations(ancestors = List(relA, rel2, relD))
 
   val works =
     List(workA, workB, workC, workD, workE, work2, work1)
