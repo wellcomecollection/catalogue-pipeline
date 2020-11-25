@@ -4,6 +4,7 @@
   "dependencyIds" : [
     "elasticsearch_typesafe",
     "big_messaging_typesafe",
-    "ingestor_common"
+    "ingestor_common",
+    "pipeline_storage_typesafe"
   ]
 }
