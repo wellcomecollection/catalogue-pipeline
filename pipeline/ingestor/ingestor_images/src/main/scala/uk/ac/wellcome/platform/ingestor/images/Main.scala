@@ -21,7 +21,8 @@ object Main extends WellcomeTypesafeApp {
       AkkaBuilder.buildExecutionContext()
 
     val documentIndexer = ElasticIndexerBuilder.buildIndexer[AugmentedImage](
-      config, indexConfig = ImagesIndexConfig
+      config,
+      indexConfig = ImagesIndexConfig
     )
 
     IngestorWorkerService(

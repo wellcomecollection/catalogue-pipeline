@@ -26,7 +26,8 @@ object Main extends WellcomeTypesafeApp {
       BigMessagingBuilder.buildMessageStream[Work[Identified]](config)
 
     val documentIndexer = ElasticIndexerBuilder.buildIndexer[Work[Indexed]](
-      config, indexConfig = IndexedWorkIndexConfig
+      config,
+      indexConfig = IndexedWorkIndexConfig
     )
 
     new IngestorWorkerService(

@@ -8,7 +8,8 @@ import uk.ac.wellcome.pipeline_storage.ElasticRetriever
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 
 object ElasticRetrieverBuilder {
-  def buildRetriever[T](config: Config, namespace: String = "")(implicit decoder: Decoder[T]): ElasticRetriever[T] =
+  def buildRetriever[T](config: Config, namespace: String = "")(
+    implicit decoder: Decoder[T]): ElasticRetriever[T] =
     new ElasticRetriever[T](
       client = ElasticBuilder.buildElasticClient(config),
       index = Index(config.requireString(s"es.$namespace.index"))

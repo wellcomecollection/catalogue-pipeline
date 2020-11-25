@@ -41,7 +41,8 @@ object Main extends WellcomeTypesafeApp {
         )
 
     val workIndexer = ElasticIndexerBuilder.buildIndexer[Work[Merged]](
-      config, indexConfig = MergedWorkIndexConfig
+      config,
+      indexConfig = MergedWorkIndexConfig
     )
 
     new MergerWorkerService(

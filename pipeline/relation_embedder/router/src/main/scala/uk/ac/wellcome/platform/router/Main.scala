@@ -32,7 +32,8 @@ object Main extends WellcomeTypesafeApp {
     )
 
     val retriever = ElasticRetrieverBuilder.buildRetriever[Work[Merged]](
-      config, namespace = "merged-works"
+      config,
+      namespace = "merged-works"
     )
 
     val stream = PipelineStorageStreamBuilder.buildPipelineStorageStream(
