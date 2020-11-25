@@ -22,11 +22,17 @@ module "miro_transformer" {
     sns_arn              = module.miro_transformer_topic.arn
     transformer_queue_id = module.miro_transformer_queue.url
     metrics_namespace    = "${local.namespace_hyphen}_miro_transformer"
-    messages_bucket_name = aws_s3_bucket.messages.id
     miro_vhs_table_name  = var.vhs_miro_table_name
+    es_index             = local.es_works_source_index
   }
 
-  secret_env_vars = {}
+  secret_env_vars = {
+    es_host     = "catalogue/pipeline_storage/es_host"
+    es_port     = "catalogue/pipeline_storage/es_port"
+    es_protocol = "catalogue/pipeline_storage/es_protocol"
+    es_username = "catalogue/pipeline_storage/transformer/es_username"
+    es_password = "catalogue/pipeline_storage/transformer/es_password"
+  }
 
   subnets             = var.subnets
   max_capacity        = 10
