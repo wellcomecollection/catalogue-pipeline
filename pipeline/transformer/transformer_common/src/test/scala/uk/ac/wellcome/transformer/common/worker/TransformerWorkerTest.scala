@@ -13,7 +13,7 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.storage.Version
+import uk.ac.wellcome.storage.{Identified, ReadError, Version}
 import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
 import WorkState.Source
@@ -37,9 +37,12 @@ object TestTransformer extends Transformer[TestData] with WorkGenerators {
 class TestTransformerWorker(
   val stream: SQSStream[NotificationMessage],
   val sender: MemoryMessageSender,
-  val store: VersionedStore[String, Int, TestData]
+  store: VersionedStore[String, Int, TestData]
 ) extends TransformerWorker[TestData, String] {
   val transformer: Transformer[TestData] = TestTransformer
+
+  override protected def lookupRecord(key: StoreKey): Either[ReadError, Identified[StoreKey, TestData]] =
+    store.getLatest(key.id)
 }
 
 class TransformerWorkerTest
