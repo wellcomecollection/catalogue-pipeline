@@ -141,6 +141,31 @@ class RelationEmbedderWorkerServiceTest
     }
   }
 
+  it("denormalises a batch containing invisible works") {
+    val invisibleWork = work("a/2/invisible").invisible()
+    withWorkerService(invisibleWork :: works) {
+      case (QueuePair(queue, dlq), index, msgSender) =>
+        import Selector._
+        val batch = Batch(rootPath = "a", selectors = List(Tree("a")))
+        sendNotificationToSQS(queue = queue, message = batch)
+        eventually {
+          assertQueueEmpty(queue)
+          assertQueueEmpty(dlq)
+        }
+        msgSender.messages.map(_.body).toSet shouldBe (invisibleWork :: works).map(_.id).toSet
+        relations(index) shouldBe Map(
+          workA.id -> relationsA,
+          work1.id -> relations1,
+          workB.id -> relationsB,
+          work2.id -> relations2,
+          workC.id -> relationsC,
+          workD.id -> relationsD,
+          workE.id -> relationsE,
+          invisibleWork.id -> Relations.none
+        )
+    }
+  }
+
   def withWorkerService[R](works: List[Work[Merged]] = works)(
     testWith: TestWith[(QueuePair,
                         mutable.Map[String, Work[Denormalised]],
