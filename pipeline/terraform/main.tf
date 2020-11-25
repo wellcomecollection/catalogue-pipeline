@@ -2,7 +2,7 @@ module "catalogue_pipeline_2020-11-25" {
   source = "./stack"
 
   pipeline_date = "2020-11-25"
-  release_label = "stage"
+  release_label = "prod"
 
   # Transformer config
   #
