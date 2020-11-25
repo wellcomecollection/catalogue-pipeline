@@ -23,6 +23,7 @@ module "miro_transformer" {
     transformer_queue_id = module.miro_transformer_queue.url
     metrics_namespace    = "${local.namespace_hyphen}_miro_transformer"
     messages_bucket_name = aws_s3_bucket.messages.id
+    miro_vhs_table_name  = var.vhs_miro_table_name
   }
 
   secret_env_vars = {}
