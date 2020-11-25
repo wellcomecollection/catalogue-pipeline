@@ -31,8 +31,7 @@ trait RetrieverTestCases[Context, T]
     }
   }
 
-  it(
-    "throws a RetrieverNotFoundException if asked to retrieve a missing document") {
+  it("throws an error if asked to retrieve a missing document") {
     val missingId = id.canonicalId(createT)
     val someOtherDocument = createT
 
@@ -42,6 +41,41 @@ trait RetrieverTestCases[Context, T]
       whenReady(future.failed) { exc =>
         exc shouldBe a[RetrieverNotFoundException]
         exc.getMessage shouldBe s"Nothing found with ID $missingId!"
+      }
+    }
+  }
+
+  it("retrieves multiple documents") {
+    val t1 = createT
+    val t2 = createT
+    val t3 = createT
+
+    val documents = Seq(t1, t2, t3)
+    val ids = documents.map { id.canonicalId }
+    val expectedResult = documents.map { t => id.canonicalId(t) -> t }.toMap
+
+    withContext(documents = documents) { implicit context =>
+      val future = withRetriever { _.apply(ids) }
+
+      whenReady(future) {
+        _ shouldBe expectedResult
+      }
+    }
+  }
+
+  it("fails if asked to find multiple documents, and one of them is missing") {
+    val t1 = createT
+    val t2 = createT
+    val t3 = createT
+
+    val documents = Seq(t1, t2, t3)
+    val ids = documents.map { id.canonicalId }
+
+    withContext(documents = Seq(t1, t2)) { implicit context =>
+      val future = withRetriever { _.apply(ids) }
+
+      whenReady(future.failed) {
+        _ shouldBe a[Throwable]
       }
     }
   }

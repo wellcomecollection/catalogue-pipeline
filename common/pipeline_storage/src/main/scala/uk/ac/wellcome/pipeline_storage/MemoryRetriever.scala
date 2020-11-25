@@ -1,8 +1,8 @@
 package uk.ac.wellcome.pipeline_storage
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class MemoryRetriever[T](index: Map[String, T] = Map.empty)
+class MemoryRetriever[T](index: Map[String, T] = Map.empty)(implicit val ec: ExecutionContext)
     extends Retriever[T] {
 
   def apply(id: String): Future[T] =
