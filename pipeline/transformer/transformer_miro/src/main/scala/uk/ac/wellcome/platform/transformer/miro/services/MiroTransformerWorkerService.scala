@@ -25,7 +25,7 @@ class MiroTransformerWorkerService[MsgDestination](
 
   private val miroLookup = new MiroLookup(miroIndexStore, typedStore)
 
-  override protected def lookupRecord(key: StoreKey): Either[ReadError, Identified[StoreKey, (MiroRecord, MiroMetadata, Int)]] =
+  override protected def lookupSourceData(key: StoreKey): Either[ReadError, Identified[StoreKey, (MiroRecord, MiroMetadata, Int)]] =
     miroLookup
       .lookupRecord(key.id)
       .map { Identified(key, _) }

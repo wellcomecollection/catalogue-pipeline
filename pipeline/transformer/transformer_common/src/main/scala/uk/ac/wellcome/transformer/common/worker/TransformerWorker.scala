@@ -42,7 +42,7 @@ trait TransformerWorker[SourceData, SenderDest] extends Logging {
   val transformer: Transformer[SourceData]
   val concurrentTransformations: Int = 2
 
-  protected def lookupRecord(key: StoreKey): Either[ReadError, Identified[StoreKey, SourceData]]
+  protected def lookupSourceData(key: StoreKey): Either[ReadError, Identified[StoreKey, SourceData]]
 
   def process(message: NotificationMessage): Result[(Work[Source], StoreKey)] =
     for {
@@ -73,7 +73,7 @@ trait TransformerWorker[SourceData, SenderDest] extends Logging {
     }
 
   private def getRecord(key: StoreKey): Result[SourceData] =
-    lookupRecord(key) match {
+    lookupSourceData(key) match {
       case Left(err)                   => Left(StoreReadError(err, key))
       case Right(Identified(_, entry)) => Right(entry)
     }
