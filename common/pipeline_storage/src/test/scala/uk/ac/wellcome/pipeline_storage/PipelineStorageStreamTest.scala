@@ -21,9 +21,11 @@ import uk.ac.wellcome.pipeline_storage.fixtures.{
   SampleDocument
 }
 
+import scala.collection.mutable
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.{Failure, Try}
 
 class PipelineStorageStreamTest
     extends AnyFunSpec
@@ -42,10 +44,13 @@ class PipelineStorageStreamTest
   def indexer(index: Index, elasticClient: ElasticClient = elasticClient) =
     new ElasticIndexer[SampleDocument](elasticClient, index, NoStrictMapping)
 
-  def withPipelineStream[R](indexer: Indexer[SampleDocument],
-                            visibilityTimeout: Int = 1,
-                            pipelineStorageConfig: PipelineStorageConfig =
-                              pipelineStorageConfig)(
+  def withPipelineStream[R](
+    indexer: Indexer[SampleDocument] = new MemoryIndexer[SampleDocument](
+      index = mutable.Map[String, SampleDocument]()
+    ),
+    sender: MemoryMessageSender = new MemoryMessageSender(),
+    visibilityTimeout: Int = 1,
+    pipelineStorageConfig: PipelineStorageConfig = pipelineStorageConfig)(
     testWith: TestWith[
       (PipelineStorageStream[NotificationMessage, SampleDocument, String],
        QueuePair,
@@ -55,13 +60,12 @@ class PipelineStorageStreamTest
       withLocalSqsQueuePair(visibilityTimeout) {
         case q @ QueuePair(queue, _) =>
           withSQSStream[NotificationMessage, R](queue) { stream =>
-            val messageSender = new MemoryMessageSender
             testWith(
               (
-                new PipelineStorageStream(stream, indexer, messageSender)(
+                new PipelineStorageStream(stream, indexer, sender)(
                   pipelineStorageConfig),
                 q,
-                messageSender))
+                sender))
           }
 
       }
@@ -248,6 +252,33 @@ class PipelineStorageStreamTest
           assertQueueHasSize(dlq, size = 5)
         }
     }
+  }
 
+  it("leaves a document on the queue if it can't send an onward message") {
+    val document = SampleDocument(
+      version = 1,
+      canonicalId = createCanonicalId,
+      title = randomAlphanumeric()
+    )
+
+    val brokenSender = new MemoryMessageSender() {
+      override def send(body: String): Try[Unit] =
+        Failure(new Throwable("BOOM!"))
+    }
+
+    withPipelineStream(sender = brokenSender) {
+      case (pipelineStream, QueuePair(queue, dlq), _) =>
+        sendNotificationToSQS(queue, document)
+
+        pipelineStream.foreach(
+          "test stream",
+          _ => Future.successful(Some(document))
+        )
+
+        eventually {
+          assertQueueEmpty(queue)
+          assertQueueHasSize(dlq, size = 1)
+        }
+    }
   }
 }
