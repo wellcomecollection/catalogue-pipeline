@@ -20,6 +20,7 @@ import org.scanamo.auto._
 import org.scanamo.time.JavaTimeFormats._
 import uk.ac.wellcome.elasticsearch.SourceWorkIndexConfig
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
+import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.work.internal.Work
 import uk.ac.wellcome.models.work.internal.WorkState.Source
 import uk.ac.wellcome.pipeline_storage.ElasticIndexer

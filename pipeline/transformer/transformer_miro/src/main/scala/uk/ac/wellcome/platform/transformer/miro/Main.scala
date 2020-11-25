@@ -8,6 +8,7 @@ import com.typesafe.config.Config
 import org.scanamo.auto._
 import uk.ac.wellcome.elasticsearch.SourceWorkIndexConfig
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
+import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.models.work.internal.Work
