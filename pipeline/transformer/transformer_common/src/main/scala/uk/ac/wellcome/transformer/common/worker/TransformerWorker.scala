@@ -19,7 +19,7 @@ case class DecodeKeyError[T](t: Throwable, message: NotificationMessage)
     extends TransformerWorkerError(t.getMessage)
 case class StoreReadError[T](err: ReadError, key: T)
     extends TransformerWorkerError(err.toString)
-case class TransformerError[In, Key](t: Throwable, sourceData: In, key: Key)
+case class TransformerError[SourceData, Key](t: Throwable, sourceData: SourceData, key: Key)
     extends TransformerWorkerError(t.getMessage)
 case class MessageSendError[T, Key](t: Throwable, work: Work[Source], key: Key)
     extends TransformerWorkerError(t.getMessage)
@@ -27,19 +27,19 @@ case class MessageSendError[T, Key](t: Throwable, work: Work[Source], key: Key)
 /**
   * A TransformerWorker:
   * - Takes an SQS stream that emits VHS keys
-  * - Gets the record of type `In`
-  * - Runs it through a transformer and transforms the `In` to `Work[Source]`
+  * - Gets the record of type `SourceData`
+  * - Runs it through a transformer and transforms the `SourceData` to `Work[Source]`
   * - Emits the message via `MessageSender` to SNS
   */
-trait TransformerWorker[In, SenderDest] extends Logging {
+trait TransformerWorker[SourceData, SenderDest] extends Logging {
   type Result[T] = Either[TransformerWorkerError, T]
   type StoreKey = Version[String, Int]
 
   def name: String = this.getClass.getSimpleName
   val stream: SQSStream[NotificationMessage]
   val sender: MessageSender[SenderDest]
-  val store: VersionedStore[String, Int, In]
-  val transformer: Transformer[In]
+  val store: VersionedStore[String, Int, SourceData]
+  val transformer: Transformer[SourceData]
   val concurrentTransformations: Int = 2
 
   def process(message: NotificationMessage): Result[(Work[Source], StoreKey)] =
@@ -50,7 +50,7 @@ trait TransformerWorker[In, SenderDest] extends Logging {
       done <- done(work, key)
     } yield done
 
-  private def work(sourceData: In, key: StoreKey): Result[Work[Source]] =
+  private def work(sourceData: SourceData, key: StoreKey): Result[Work[Source]] =
     transformer(sourceData, key.version) match {
       case Left(err)     => Left(TransformerError(err, sourceData, key))
       case Right(result) => Right(result)
@@ -69,7 +69,7 @@ trait TransformerWorker[In, SenderDest] extends Logging {
       case Success(storeKey) => Right(storeKey)
     }
 
-  private def getRecord(key: StoreKey): Result[In] =
+  private def getRecord(key: StoreKey): Result[SourceData] =
     store.getLatest(key.id) match {
       case Left(err)                   => Left(StoreReadError(err, key))
       case Right(Identified(_, entry)) => Right(entry)
