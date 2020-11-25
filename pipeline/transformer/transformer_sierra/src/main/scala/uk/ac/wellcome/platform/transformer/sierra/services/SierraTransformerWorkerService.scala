@@ -12,7 +12,9 @@ import uk.ac.wellcome.transformer.common.worker.{Transformer, TransformerWorker}
 import uk.ac.wellcome.typesafe.Runnable
 
 class SierraTransformerWorkerService[MsgDestination](
-  val pipelineStream: PipelineStorageStream[NotificationMessage, Work[Source], MsgDestination],
+  val pipelineStream: PipelineStorageStream[NotificationMessage,
+                                            Work[Source],
+                                            MsgDestination],
   store: VersionedStore[String, Int, SierraTransformable],
 ) extends Runnable
     with TransformerWorker[SierraTransformable, MsgDestination] {

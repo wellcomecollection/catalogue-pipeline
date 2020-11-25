@@ -79,8 +79,9 @@ trait MatcherFixtures
                            messageSender: MemoryMessageSender)(
     testWith: TestWith[MatcherWorkerService[String], R]): R =
     withWorkGraphTable { graphTable =>
-      withWorkerService(retriever, queue, messageSender, graphTable) { service =>
-        testWith(service)
+      withWorkerService(retriever, queue, messageSender, graphTable) {
+        service =>
+          testWith(service)
       }
     }
 
@@ -119,7 +120,9 @@ trait MatcherFixtures
     testWith(workNodeDao)
   }
 
-  def sendWork(work: Work[Source], retriever: MemoryRetriever[Work[Source]], queue: SQS.Queue): Any = {
+  def sendWork(work: Work[Source],
+               retriever: MemoryRetriever[Work[Source]],
+               queue: SQS.Queue): Any = {
     val id = work.sourceIdentifier.toString
 
     retriever.index = Map(id -> work)

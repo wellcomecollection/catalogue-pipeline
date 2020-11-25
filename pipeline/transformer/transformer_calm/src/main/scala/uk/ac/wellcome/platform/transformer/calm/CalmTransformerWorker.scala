@@ -10,7 +10,9 @@ import uk.ac.wellcome.transformer.common.worker.{Transformer, TransformerWorker}
 import uk.ac.wellcome.typesafe.Runnable
 
 class CalmTransformerWorker(
-  val pipelineStream: PipelineStorageStream[NotificationMessage, Work[Source], SNSConfig],
+  val pipelineStream: PipelineStorageStream[NotificationMessage,
+                                            Work[Source],
+                                            SNSConfig],
   store: VersionedStore[String, Int, CalmRecord],
 ) extends Runnable
     with TransformerWorker[CalmRecord, SNSConfig] {

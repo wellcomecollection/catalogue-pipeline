@@ -61,11 +61,14 @@ object Main extends WellcomeTypesafeApp {
       config = SourceWorkIndexConfig
     )
 
-    val pipelineStream = PipelineStorageStreamBuilder.buildPipelineStorageStream(
-      sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
-      indexer = indexer,
-      messageSender = SNSBuilder.buildSNSMessageSender(config, subject = "Sent from the Miro transformer")
-    )(config)
+    val pipelineStream =
+      PipelineStorageStreamBuilder.buildPipelineStorageStream(
+        sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
+        indexer = indexer,
+        messageSender = SNSBuilder.buildSNSMessageSender(
+          config,
+          subject = "Sent from the Miro transformer")
+      )(config)
 
     new MiroTransformerWorkerService(
       pipelineStream = pipelineStream,

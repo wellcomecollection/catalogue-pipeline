@@ -37,11 +37,14 @@ object Main extends WellcomeTypesafeApp with AWSClientConfigBuilder {
       config = SourceWorkIndexConfig
     )
 
-    val pipelineStream = PipelineStorageStreamBuilder.buildPipelineStorageStream(
-      sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
-      indexer = indexer,
-      messageSender = SNSBuilder.buildSNSMessageSender(config, subject = "Sent from the Calm transformer")
-    )(config)
+    val pipelineStream =
+      PipelineStorageStreamBuilder.buildPipelineStorageStream(
+        sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
+        indexer = indexer,
+        messageSender = SNSBuilder.buildSNSMessageSender(
+          config,
+          subject = "Sent from the Calm transformer")
+      )(config)
 
     new CalmTransformerWorker(pipelineStream, store)
   }

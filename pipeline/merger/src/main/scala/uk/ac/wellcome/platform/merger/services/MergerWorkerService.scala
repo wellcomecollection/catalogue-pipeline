@@ -41,7 +41,9 @@ class MergerWorkerService[WorkDestination, ImageDestination](
 
       workSets <- Future.sequence {
         identifierSets
-          .map { ids => workRetriever.apply(ids).map { _.values.toSeq } }
+          .map { ids =>
+            workRetriever.apply(ids).map { _.values.toSeq }
+          }
       }
 
       _ <- workSets match {

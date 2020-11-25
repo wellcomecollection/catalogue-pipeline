@@ -5,7 +5,10 @@ import uk.ac.wellcome.models.work.internal.Work
 import uk.ac.wellcome.models.work.internal.WorkState.Source
 import uk.ac.wellcome.pipeline_storage.PipelineStorageStream
 import uk.ac.wellcome.platform.transformer.miro.MiroRecordTransformer
-import uk.ac.wellcome.platform.transformer.miro.models.{MiroMetadata, MiroVHSRecord}
+import uk.ac.wellcome.platform.transformer.miro.models.{
+  MiroMetadata,
+  MiroVHSRecord
+}
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.Readable
@@ -14,7 +17,9 @@ import uk.ac.wellcome.transformer.common.worker.{Transformer, TransformerWorker}
 import uk.ac.wellcome.typesafe.Runnable
 
 class MiroTransformerWorkerService[MsgDestination](
-  val pipelineStream: PipelineStorageStream[NotificationMessage, Work[Source], MsgDestination],
+  val pipelineStream: PipelineStorageStream[NotificationMessage,
+                                            Work[Source],
+                                            MsgDestination],
   miroIndexStore: Readable[String, MiroVHSRecord],
   typedStore: Readable[S3ObjectLocation, MiroRecord]
 ) extends Runnable

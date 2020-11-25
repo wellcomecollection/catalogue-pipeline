@@ -11,7 +11,10 @@ import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, MatcherResult}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
-import uk.ac.wellcome.platform.merger.fixtures.{MatcherResultFixture, WorkerServiceFixture}
+import uk.ac.wellcome.platform.merger.fixtures.{
+  MatcherResultFixture,
+  WorkerServiceFixture
+}
 import WorkState.{Merged, Source}
 import WorkFsm._
 import uk.ac.wellcome.models.work.generators.MiroWorkGenerators
@@ -358,9 +361,12 @@ class MergerWorkerServiceTest
   case class Senders(works: MemoryMessageSender, images: MemoryMessageSender)
 
   def withMergerWorkerServiceFixtures[R](
-    testWith: TestWith[
-      (MemoryRetriever[Work[Source]], QueuePair, Senders, MemoryMetrics, mutable.Map[String, Work[Merged]]),
-      R]): R =
+    testWith: TestWith[(MemoryRetriever[Work[Source]],
+                        QueuePair,
+                        Senders,
+                        MemoryMetrics,
+                        mutable.Map[String, Work[Merged]]),
+                       R]): R =
     withLocalSqsQueuePair() {
       case queuePair @ QueuePair(queue, _) =>
         val workRetriever = new MemoryRetriever[Work[Source]](
@@ -373,16 +379,21 @@ class MergerWorkerServiceTest
         val metrics = new MemoryMetrics()
         val index = mutable.Map[String, Work[Merged]]()
 
-        withWorkerService(workRetriever, queue, workSender, imageSender, metrics, index) {
-          _ =>
-            testWith(
-              (
-                workRetriever,
-                queuePair,
-                Senders(workSender, imageSender),
-                metrics,
-                index)
-            )
+        withWorkerService(
+          workRetriever,
+          queue,
+          workSender,
+          imageSender,
+          metrics,
+          index) { _ =>
+          testWith(
+            (
+              workRetriever,
+              queuePair,
+              Senders(workSender, imageSender),
+              metrics,
+              index)
+          )
         }
     }
 

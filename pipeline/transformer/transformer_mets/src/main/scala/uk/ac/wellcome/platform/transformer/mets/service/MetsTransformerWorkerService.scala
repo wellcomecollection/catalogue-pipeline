@@ -13,7 +13,9 @@ import uk.ac.wellcome.transformer.common.worker.{Transformer, TransformerWorker}
 import uk.ac.wellcome.typesafe.Runnable
 
 class MetsTransformerWorkerService[MsgDestination](
-  val pipelineStream: PipelineStorageStream[NotificationMessage, Work[Source], MsgDestination],
+  val pipelineStream: PipelineStorageStream[NotificationMessage,
+                                            Work[Source],
+                                            MsgDestination],
   adapterStore: VersionedStore[String, Int, MetsLocation],
   metsXmlStore: Readable[S3ObjectLocation, String]
 ) extends Runnable
