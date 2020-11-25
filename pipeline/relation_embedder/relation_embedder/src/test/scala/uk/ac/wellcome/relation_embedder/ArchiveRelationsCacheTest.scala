@@ -27,6 +27,17 @@ class ArchiveRelationsCacheTest
   val work3 = work("a/3")
   val work4 = work("a/4")
 
+  val relA = Relation(workA, depth = 0, numChildren = 4, numDescendents = 9)
+  val rel1 = Relation(work1, depth = 1, numChildren = 2, numDescendents = 2)
+  val relB = Relation(workB, depth = 2, numChildren = 0, numDescendents = 0)
+  val relC = Relation(workC, depth = 2, numChildren = 0, numDescendents = 0)
+  val rel2 = Relation(work2, depth = 1, numChildren = 2, numDescendents = 3)
+  val relD = Relation(workD, depth = 2, numChildren = 0, numDescendents = 0)
+  val relE = Relation(workE, depth = 2, numChildren = 1, numDescendents = 1)
+  val relF = Relation(workF, depth = 3, numChildren = 0, numDescendents = 0)
+  val rel3 = Relation(work3, depth = 1, numChildren = 0, numDescendents = 0)
+  val rel4 = Relation(work4, depth = 1, numChildren = 0, numDescendents = 0)
+
   val works =
     List(workA, workB, workC, workD, workE, workF, work4, work3, work2, work1)
 
@@ -34,18 +45,17 @@ class ArchiveRelationsCacheTest
     "Retrieves relations for the given path with children and siblings sorted correctly") {
     val relationsCache = ArchiveRelationsCache(works)
     relationsCache(work2) shouldBe Relations(
-      ancestors = List(Relation(workA, 0)),
-      children = List(Relation(workD, 2), Relation(workE, 2)),
-      siblingsPreceding = List(Relation(work1, 1)),
-      siblingsSucceeding = List(Relation(work3, 1), Relation(work4, 1))
+      ancestors = List(relA),
+      children = List(relD, relE),
+      siblingsPreceding = List(rel1),
+      siblingsSucceeding = List(rel3, rel4)
     )
   }
 
   it("Retrieves relations for the given path with ancestors sorted correctly") {
     val relationsCache = ArchiveRelationsCache(works)
     relationsCache(workF) shouldBe Relations(
-      ancestors =
-        List(Relation(workA, 0), Relation(work2, 1), Relation(workE, 2)),
+      ancestors = List(relA, rel2, relE),
       children = Nil,
       siblingsPreceding = Nil,
       siblingsSucceeding = Nil
@@ -56,11 +66,7 @@ class ArchiveRelationsCacheTest
     val relationsCache = ArchiveRelationsCache(works)
     relationsCache(workA) shouldBe Relations(
       ancestors = Nil,
-      children = List(
-        Relation(work1, 1),
-        Relation(work2, 1),
-        Relation(work3, 1),
-        Relation(work4, 1)),
+      children = List(rel1, rel2, rel3, rel4),
       siblingsPreceding = Nil,
       siblingsSucceeding = Nil
     )
@@ -70,7 +76,7 @@ class ArchiveRelationsCacheTest
     val works = List(workA, workB, workC, workD, workE, workF)
     val relationsCache = ArchiveRelationsCache(works)
     relationsCache(workF) shouldBe Relations(
-      ancestors = List(Relation(workE, 2)),
+      ancestors = List(relE),
       children = Nil,
       siblingsPreceding = Nil,
       siblingsSucceeding = Nil
@@ -100,9 +106,9 @@ class ArchiveRelationsCacheTest
     relationsCache(workA) shouldBe Relations(
       ancestors = Nil,
       children = List(
-        Relation(workB1, 1),
-        Relation(workB2, 1),
-        Relation(workB10, 1)
+        Relation(workB1, depth = 1, numChildren = 0, numDescendents = 0),
+        Relation(workB2, depth = 1, numChildren = 0, numDescendents = 0),
+        Relation(workB10, depth = 1, numChildren = 0, numDescendents = 0)
       ),
       siblingsPreceding = Nil,
       siblingsSucceeding = Nil

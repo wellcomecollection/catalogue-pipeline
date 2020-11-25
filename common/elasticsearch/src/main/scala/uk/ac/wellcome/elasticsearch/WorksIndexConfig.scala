@@ -181,7 +181,9 @@ trait WorksIndexConfigFields extends IndexConfigFields {
       // now, in the future specific fields can be added as required.
       objectField("data").dynamic("false"),
       idState,
-      intField("depth")
+      intField("depth"),
+      intField("numChildren"),
+      intField("numDescendents"),
     )
 
   def relations(idState: ObjectField) =
