@@ -73,8 +73,9 @@ trait TransformerWorker[SourceData, SenderDest] extends Logging {
     }
 
   private def getRecord(key: StoreKey): Result[SourceData] =
-    lookupSourceData(key)
-      .left.map { err => StoreReadError(err, key) }
+    lookupSourceData(key).left.map { err =>
+      StoreReadError(err, key)
+    }
 
   def run(): Future[Done] =
     stream.runStream(

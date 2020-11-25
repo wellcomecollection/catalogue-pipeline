@@ -42,10 +42,16 @@ class MiroTransformerFeatureTest
 
     val record = createMiroRecordWith(title = Some(title), imageNumber = miroID)
 
-    val miroIndexStore = new MemoryStore[String, MiroVHSRecord](initialEntries = Map.empty)
-    val typedStore = new MemoryStore[S3ObjectLocation, MiroRecord](initialEntries = Map.empty)
+    val miroIndexStore =
+      new MemoryStore[String, MiroVHSRecord](initialEntries = Map.empty)
+    val typedStore =
+      new MemoryStore[S3ObjectLocation, MiroRecord](initialEntries = Map.empty)
 
-    storeRecord(id = miroID, record = record, indexStore = miroIndexStore, typedStore = typedStore)
+    storeRecord(
+      id = miroID,
+      record = record,
+      indexStore = miroIndexStore,
+      typedStore = typedStore)
 
     val messageSender = new MemoryMessageSender()
 
@@ -87,11 +93,10 @@ class MiroTransformerFeatureTest
     messageSender: MemoryMessageSender,
     queue: Queue,
     miroIndexStore: Readable[String, MiroVHSRecord] =
-    new MemoryStore[String, MiroVHSRecord](initialEntries = Map.empty),
+      new MemoryStore[String, MiroVHSRecord](initialEntries = Map.empty),
     typedStore: Readable[S3ObjectLocation, MiroRecord] =
       new MemoryStore[S3ObjectLocation, MiroRecord](initialEntries = Map.empty)
-  )(
-    testWith: TestWith[MiroTransformerWorkerService[String], R]): R =
+  )(testWith: TestWith[MiroTransformerWorkerService[String], R]): R =
     withActorSystem { implicit actorSystem =>
       withSQSStream[NotificationMessage, R](queue) { sqsStream =>
         val workerService = new MiroTransformerWorkerService(

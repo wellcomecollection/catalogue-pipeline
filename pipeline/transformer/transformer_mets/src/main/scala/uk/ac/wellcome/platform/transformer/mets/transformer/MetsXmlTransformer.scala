@@ -9,12 +9,15 @@ import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.transformer.common.worker.Transformer
 
 class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
-  extends Transformer[MetsLocation] {
+    extends Transformer[MetsLocation] {
 
-  override def apply(metsLocation: MetsLocation, version: Int): Result[Work[WorkState.Source]] =
+  override def apply(metsLocation: MetsLocation,
+                     version: Int): Result[Work[WorkState.Source]] =
     for {
       metsData <- transform(metsLocation)
-      work <- metsData.toWork(metsLocation.version, modifiedTime = metsLocation.createdDate)
+      work <- metsData.toWork(
+        metsLocation.version,
+        modifiedTime = metsLocation.createdDate)
     } yield work
 
   def transform(metsLocation: MetsLocation): Result[MetsData] =

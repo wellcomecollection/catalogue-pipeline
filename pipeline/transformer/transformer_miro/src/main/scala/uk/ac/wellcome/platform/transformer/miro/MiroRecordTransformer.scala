@@ -28,7 +28,8 @@ class MiroRecordTransformer
     with Logging
     with Transformer[(MiroRecord, MiroMetadata, Int)] {
 
-  override def apply(sourceData: (MiroRecord, MiroMetadata, Int), version: Int): Result[Work[Source]] = {
+  override def apply(sourceData: (MiroRecord, MiroMetadata, Int),
+                     version: Int): Result[Work[Source]] = {
     val (miroRecord, miroMetadata, version) = sourceData
 
     transform(miroRecord, miroMetadata, version).toEither

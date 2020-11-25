@@ -4,7 +4,10 @@ import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
-import uk.ac.wellcome.platform.transformer.miro.models.{MiroMetadata, MiroVHSRecord}
+import uk.ac.wellcome.platform.transformer.miro.models.{
+  MiroMetadata,
+  MiroVHSRecord
+}
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 import uk.ac.wellcome.storage.DoesNotExistError
 import uk.ac.wellcome.storage.generators.S3ObjectLocationGenerators
@@ -12,7 +15,7 @@ import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.memory.MemoryStore
 
 class MiroLookupTest
-  extends AnyFunSpec
+    extends AnyFunSpec
     with Matchers
     with EitherValues
     with MiroRecordGenerators
@@ -20,7 +23,8 @@ class MiroLookupTest
 
   it("fetches a Miro record from the store") {
     val record = createMiroRecord
-    val metadata = MiroMetadata(isClearedForCatalogueAPI = chooseFrom(true, false))
+    val metadata =
+      MiroMetadata(isClearedForCatalogueAPI = chooseFrom(true, false))
     val version = randomInt(from = 1, to = 10)
 
     val indexStore = createIndexStore
@@ -50,7 +54,10 @@ class MiroLookupTest
 
     val lookup = new MiroLookup(indexStore, typedStore)
 
-    lookup.lookupRecord(id = "M0000001").left.value shouldBe a[DoesNotExistError]
+    lookup
+      .lookupRecord(id = "M0000001")
+      .left
+      .value shouldBe a[DoesNotExistError]
   }
 
   it("fails if the index store has a dangling pointer") {

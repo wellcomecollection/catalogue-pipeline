@@ -42,7 +42,8 @@ object Main extends WellcomeTypesafeApp {
 
     val miroIndexStore = new Readable[String, MiroVHSRecord] {
       override def get(id: String): ReadEither =
-        dynamoStore.getLatest(id)
+        dynamoStore
+          .getLatest(id)
           .map { case Identified(_, record) => Identified(id, record) }
     }
 

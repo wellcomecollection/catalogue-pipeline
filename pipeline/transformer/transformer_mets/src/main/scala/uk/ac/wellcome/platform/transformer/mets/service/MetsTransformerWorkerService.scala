@@ -22,7 +22,8 @@ class MetsTransformerWorkerService[MsgDestination](
   override val transformer: Transformer[MetsLocation] =
     new MetsXmlTransformer(metsXmlStore)
 
-  override protected def lookupSourceData(key: StoreKey): Either[ReadError, MetsLocation] =
+  override protected def lookupSourceData(
+    key: StoreKey): Either[ReadError, MetsLocation] =
     adapterStore
       .getLatest(key.id)
       .map { case Identified(_, metsLocation) => metsLocation }
