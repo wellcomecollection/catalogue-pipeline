@@ -34,7 +34,7 @@ case class RelationsRequestBuilder(index: Index,
 
   def affectedWorks(batch: Batch, scrollSize: Int): SearchRequest =
     search(index)
-      .query(must(visibleQuery, should(batch.selectors.map(_.query))))
+      .query(should(batch.selectors.map(_.query)))
       .from(0)
       .scroll(keepAlive = scrollKeepAlive)
       .size(scrollSize)

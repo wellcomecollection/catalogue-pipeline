@@ -157,15 +157,19 @@ class RelationsServiceTest
       }
     }
 
-    it("Ignores invisible works") {
+    it("Returns invisible works") {
       withLocalMergedWorksIndex { index =>
-        storeWorks(index, work("A/C/X/5").invisible() :: works)
+        val invisibleWork = work("A/C/X/5").invisible()
+        storeWorks(index, invisibleWork :: works)
         withActorSystem { implicit actorSystem =>
           val batch = Batch(
             rootPath = "A",
             List(Children("A/C/X"), Descendents("A/C/X"), Node("A/C/X/5")))
           whenReady(queryAffectedWorks(service(index), batch)) { result =>
-            result should contain theSameElementsAs List(work3, work4)
+            result should contain theSameElementsAs List(
+              work3,
+              work4,
+              invisibleWork)
           }
         }
       }
