@@ -39,6 +39,7 @@ variable "miro_adapter_topic_arns" {
   type = list(string)
 }
 variable "vhs_miro_read_policy" {}
+variable "vhs_miro_table_name" {}
 
 # Sierra
 variable "vhs_sierra_read_policy" {}
