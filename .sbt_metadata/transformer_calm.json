@@ -3,6 +3,7 @@
   "folder" : "pipeline/transformer/transformer_calm",
   "dependencyIds" : [
     "transformer_common",
-    "calm_adapter"
+    "calm_adapter",
+    "pipeline_storage_typesafe"
   ]
 }

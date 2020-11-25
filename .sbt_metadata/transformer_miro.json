@@ -2,6 +2,7 @@
   "id" : "transformer_miro",
   "folder" : "pipeline/transformer/transformer_miro",
   "dependencyIds" : [
-    "transformer_common"
+    "transformer_common",
+    "pipeline_storage_typesafe"
   ]
 }

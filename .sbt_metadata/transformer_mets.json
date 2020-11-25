@@ -3,6 +3,7 @@
   "folder" : "pipeline/transformer/transformer_mets",
   "dependencyIds" : [
     "transformer_common",
-    "mets_adapter"
+    "mets_adapter",
+    "pipeline_storage_typesafe"
   ]
 }

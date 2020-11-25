@@ -3,6 +3,7 @@
   "folder" : "pipeline/transformer/transformer_sierra",
   "dependencyIds" : [
     "transformer_common",
-    "sierra_adapter_common"
+    "sierra_adapter_common",
+    "pipeline_storage_typesafe"
   ]
 }
