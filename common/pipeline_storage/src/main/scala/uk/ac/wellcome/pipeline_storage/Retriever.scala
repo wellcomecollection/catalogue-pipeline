@@ -11,11 +11,11 @@ trait Retriever[T] {
     * @param id The id of the document
     * @return A future containing the document
     */
-  def apply(id: String): Future[T]
+  def apply(id: String): Future[T] =
+    apply(Seq(id))
+      .map { _(id) }
+      .recover { case t: Throwable => throw new RetrieverNotFoundException(id) }
 
   /** Retrieves a series of documents from the store. */
-  def apply(ids: Seq[String]): Future[Map[String, T]] =
-    Future
-      .sequence(ids.map { apply })
-      .map { documents => ids.zip(documents).toMap }
+  def apply(ids: Seq[String]): Future[Map[String, T]]
 }
