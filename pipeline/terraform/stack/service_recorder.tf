@@ -1,6 +1,6 @@
-module "recorder_queue" {
+module "recorder_input_queue" {
   source     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
-  queue_name = "${local.namespace_hyphen}_recorder"
+  queue_name = "${local.namespace_hyphen}_recorder_input"
   topic_arns = [
     module.miro_transformer_topic.arn,
     module.sierra_transformer_topic.arn,
@@ -24,11 +24,11 @@ module "recorder" {
   cluster_arn  = aws_ecs_cluster.cluster.arn
 
   env_vars = {
-    recorder_queue_url             = module.recorder_queue.url
+    recorder_queue_url             = module.recorder_input_queue.url
     metrics_namespace              = "${local.namespace_hyphen}_recorder"
     vhs_recorder_dynamo_table_name = module.vhs_recorder.table_name
     vhs_recorder_bucket_name       = module.vhs_recorder.bucket_name
-    sns_topic                      = module.recorder_topic.arn
+    sns_topic                      = module.recorder_output_topic.arn
   }
 
   secret_env_vars = {}
@@ -48,10 +48,10 @@ resource "aws_iam_role_policy" "recorder_vhs_recorder_readwrite" {
   policy = module.vhs_recorder.full_access_policy
 }
 
-module "recorder_topic" {
+module "recorder_output_topic" {
   source = "../modules/topic"
 
-  name                = "${local.namespace_hyphen}_recorder"
+  name                = "${local.namespace_hyphen}_recorder_output"
   role_names          = [module.recorder.task_role_name]
   messages_bucket_arn = aws_s3_bucket.messages.arn
 }

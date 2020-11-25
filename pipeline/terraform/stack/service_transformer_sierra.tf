@@ -1,6 +1,6 @@
-module "sierra_transformer_queue" {
+module "sierra_transformer_input_queue" {
   source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
-  queue_name      = "${local.namespace_hyphen}_sierra_transformer"
+  queue_name      = "${local.namespace_hyphen}_sierra_transformer_input"
   topic_arns      = var.sierra_adapter_topic_arns
   alarm_topic_arn = var.dlq_alarm_arn
   aws_region      = var.aws_region
@@ -19,8 +19,8 @@ module "sierra_transformer" {
   cluster_arn  = aws_ecs_cluster.cluster.arn
 
   env_vars = {
-    sns_arn                = module.sierra_transformer_topic.arn
-    transformer_queue_id   = module.sierra_transformer_queue.url
+    sns_arn                = module.sierra_transformer_output_topic.arn
+    transformer_queue_id   = module.sierra_transformer_input_queue.url
     metrics_namespace      = "${local.namespace_hyphen}_sierra_transformer"
     vhs_sierra_bucket_name = var.vhs_sierra_sourcedata_bucket_name
     vhs_sierra_table_name  = var.vhs_sierra_sourcedata_table_name
@@ -51,10 +51,10 @@ resource "aws_iam_role_policy" "sierra_transformer_vhs_sierra_adapter_read" {
   policy = var.vhs_sierra_read_policy
 }
 
-module "sierra_transformer_topic" {
+module "sierra_transformer_output_topic" {
   source = "../modules/topic"
 
-  name       = "${local.namespace_hyphen}_sierra_transformer"
+  name       = "${local.namespace_hyphen}_sierra_transformer_output"
   role_names = [module.sierra_transformer.task_role_name]
 
   messages_bucket_arn = aws_s3_bucket.messages.arn

@@ -1,6 +1,6 @@
-module "calm_transformer_queue" {
+module "calm_transformer_input_queue" {
   source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
-  queue_name      = "${local.namespace_hyphen}_calm_transformer"
+  queue_name      = "${local.namespace_hyphen}_calm_transformer_input"
   topic_arns      = var.calm_adapter_topic_arns
   alarm_topic_arn = var.dlq_alarm_arn
   aws_region      = var.aws_region
@@ -19,8 +19,8 @@ module "calm_transformer" {
   cluster_arn  = aws_ecs_cluster.cluster.arn
 
   env_vars = {
-    sns_arn              = module.calm_transformer_topic.arn
-    transformer_queue_id = module.calm_transformer_queue.url
+    sns_arn              = module.calm_transformer_output_topic.arn
+    transformer_queue_id = module.calm_transformer_input_queue.url
     metrics_namespace    = "${local.namespace_hyphen}_calm_transformer"
     vhs_calm_bucket_name = var.vhs_calm_sourcedata_bucket_name
     vhs_calm_table_name  = var.vhs_calm_sourcedata_table_name
@@ -51,10 +51,10 @@ resource "aws_iam_role_policy" "calm_transformer_vhs_calm_adapter_read" {
   policy = var.vhs_calm_read_policy
 }
 
-module "calm_transformer_topic" {
+module "calm_transformer_output_topic" {
   source = "../modules/topic"
 
-  name       = "${local.namespace_hyphen}_calm_transformer"
+  name       = "${local.namespace_hyphen}_calm_transformer_output"
   role_names = [module.calm_transformer.task_role_name]
 
   messages_bucket_arn = aws_s3_bucket.messages.arn

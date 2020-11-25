@@ -2,9 +2,9 @@ locals {
   lock_timeout = 240
 }
 
-module "matcher_queue" {
+module "matcher_input_queue" {
   source     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
-  queue_name = "${local.namespace_hyphen}_matcher"
+  queue_name = "${local.namespace_hyphen}_matcher_input"
   topic_arns = [
     module.recorder_topic.arn,
   ]
@@ -33,10 +33,10 @@ module "matcher" {
   cluster_arn  = aws_ecs_cluster.cluster.arn
 
   env_vars = {
-    queue_url         = module.matcher_queue.url
+    queue_url         = module.matcher_input_queue.url
     metrics_namespace = "${local.namespace_hyphen}_matcher"
     vhs_bucket_name   = module.vhs_recorder.bucket_name
-    topic_arn         = module.matcher_topic.arn
+    topic_arn         = module.matcher_output_topic.arn
 
     dynamo_table            = aws_dynamodb_table.matcher_graph_table.id
     dynamo_index            = "work-sets-index"
@@ -78,10 +78,10 @@ resource "aws_iam_role_policy" "matcher_lock_readwrite" {
 
 # Output topic
 
-module "matcher_topic" {
+module "matcher_output_topic" {
   source = "../modules/topic"
 
-  name                = "${local.namespace_hyphen}_matcher"
+  name                = "${local.namespace_hyphen}_matcher_output"
   role_names          = [module.matcher.task_role_name]
   messages_bucket_arn = aws_s3_bucket.messages.arn
 }

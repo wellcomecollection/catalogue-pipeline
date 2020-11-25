@@ -1,6 +1,6 @@
-module "miro_transformer_queue" {
+module "miro_transformer_input_queue" {
   source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
-  queue_name      = "${local.namespace_hyphen}_miro_transformer"
+  queue_name      = "${local.namespace_hyphen}_miro_transformer_input"
   topic_arns      = var.miro_adapter_topic_arns
   aws_region      = var.aws_region
   alarm_topic_arn = var.dlq_alarm_arn
@@ -19,8 +19,8 @@ module "miro_transformer" {
   cluster_arn  = aws_ecs_cluster.cluster.arn
 
   env_vars = {
-    sns_arn              = module.miro_transformer_topic.arn
-    transformer_queue_id = module.miro_transformer_queue.url
+    sns_arn              = module.miro_transformer_output_topic.arn
+    transformer_queue_id = module.miro_transformer_input_queue.url
     metrics_namespace    = "${local.namespace_hyphen}_miro_transformer"
     miro_vhs_table_name  = var.vhs_miro_table_name
     es_index             = local.es_works_source_index
@@ -49,10 +49,10 @@ resource "aws_iam_role_policy" "miro_transformer_vhs_miro_adapter_read" {
   policy = var.vhs_miro_read_policy
 }
 
-module "miro_transformer_topic" {
+module "miro_transformer_output_topic" {
   source = "../modules/topic"
 
-  name       = "${local.namespace_hyphen}_miro_transformer"
+  name       = "${local.namespace_hyphen}_miro_transformer_output"
   role_names = [module.miro_transformer.task_role_name]
 
   messages_bucket_arn = aws_s3_bucket.messages.arn

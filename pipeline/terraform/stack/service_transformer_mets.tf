@@ -1,6 +1,6 @@
-module "mets_transformer_queue" {
+module "mets_transformer_input_queue" {
   source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
-  queue_name      = "${local.namespace_hyphen}_mets_transformer"
+  queue_name      = "${local.namespace_hyphen}_mets_transformer_input"
   topic_arns      = var.mets_adapter_topic_arns
   aws_region      = var.aws_region
   alarm_topic_arn = var.dlq_alarm_arn
@@ -19,8 +19,8 @@ module "mets_transformer" {
   cluster_arn  = aws_ecs_cluster.cluster.arn
 
   env_vars = {
-    sns_arn              = module.mets_transformer_topic.arn
-    transformer_queue_id = module.mets_transformer_queue.url
+    sns_arn              = module.mets_transformer_output_topic.arn
+    transformer_queue_id = module.mets_transformer_input_queue.url
     metrics_namespace    = "${local.namespace_hyphen}_mets_transformer"
     es_index             = local.es_works_source_index
 
@@ -48,10 +48,10 @@ module "mets_transformer" {
   shared_logging_secrets  = var.shared_logging_secrets
 }
 
-module "mets_transformer_topic" {
+module "mets_transformer_output_topic" {
   source = "../modules/topic"
 
-  name = "${local.namespace_hyphen}_mets_transformer"
+  name = "${local.namespace_hyphen}_mets_transformer_output"
   role_names = [
   module.mets_transformer.task_role_name]
 
