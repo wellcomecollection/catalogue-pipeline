@@ -33,6 +33,10 @@ class ElasticRetriever[T](client: ElasticClient, index: Index)(
           warn(s"Asked for ${ids.size} IDs in index $index, only got ${result.docs.size}")
           throw new RetrieverNotFoundException(ids.mkString(", "))
         case RequestSuccess(_, _, _, result) =>
+
+          // Documents are guaranteed to be returned in the same order as the
+          // original IDs.
+          // See https://www.elastic.co/guide/en/elasticsearch/reference/6.8/docs-multi-get.html
           val documents = result
             .docs
             .map { _.safeTo[T] }
