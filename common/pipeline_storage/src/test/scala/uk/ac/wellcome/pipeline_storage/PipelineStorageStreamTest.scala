@@ -16,7 +16,10 @@ import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
-import uk.ac.wellcome.pipeline_storage.fixtures.{ElasticIndexerFixtures, SampleDocument}
+import uk.ac.wellcome.pipeline_storage.fixtures.{
+  ElasticIndexerFixtures,
+  SampleDocument
+}
 
 import scala.collection.mutable
 import scala.concurrent.Future
