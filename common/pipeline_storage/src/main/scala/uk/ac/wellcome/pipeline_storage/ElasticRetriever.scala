@@ -25,16 +25,16 @@ class ElasticRetriever[T](client: ElasticClient, index: Index)(
       .execute {
         get(index, id)
       }
-      .flatMap {
-        case RequestFailure(_, _, _, error) => Future.failed(error.asException)
+      .map {
+        case RequestFailure(_, _, _, error) => throw error.asException
         case RequestSuccess(_, _, _, response) if !response.found =>
           warn(
             s"Asked to look up ID $id in index $index, got response $response")
-          Future.failed(new RetrieverNotFoundException(id))
+          throw new RetrieverNotFoundException(id)
         case RequestSuccess(_, _, _, response) =>
           response.safeTo[T] match {
-            case Success(item)  => Future.successful(item)
-            case Failure(error) => Future.failed(error)
+            case Success(item)  => item
+            case Failure(error) => throw error
           }
       }
   }
