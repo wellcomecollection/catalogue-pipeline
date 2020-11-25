@@ -17,6 +17,7 @@ import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
 import uk.ac.wellcome.models.Implicits._
 import WorkState.Source
+import uk.ac.wellcome.pipeline_storage.MemoryRetriever
 
 class MatcherWorkerServiceTest
     extends AnyFunSpec
@@ -42,13 +43,16 @@ class MatcherWorkerServiceTest
 
     implicit val messageSender: MemoryMessageSender = new MemoryMessageSender()
 
+    implicit val retriever: MemoryRetriever[Work[Source]] =
+      new MemoryRetriever[Work[Source]](
+        index = Map[String, Work[Source]]()
+      )
+
     withLocalSqsQueue() { implicit queue =>
-      withVHS { implicit vhs =>
-        withWorkerService(vhs, queue, messageSender) { _ =>
-          processAndAssertMatchedWorkIs(
-            updatedWork,
-            expectedResult = expectedMatchedWorks)
-        }
+      withWorkerService(retriever, queue, messageSender) { _ =>
+        processAndAssertMatchedWorkIs(
+          updatedWork,
+          expectedResult = expectedMatchedWorks)
       }
     }
   }
@@ -65,13 +69,16 @@ class MatcherWorkerServiceTest
 
     implicit val messageSender: MemoryMessageSender = new MemoryMessageSender()
 
+    implicit val retriever: MemoryRetriever[Work[Source]] =
+      new MemoryRetriever[Work[Source]](
+        index = Map[String, Work[Source]]()
+      )
+
     withLocalSqsQueue() { implicit queue =>
-      withVHS { implicit vhs =>
-        withWorkerService(vhs, queue, messageSender) { _ =>
-          processAndAssertMatchedWorkIs(
-            invisibleWork,
-            expectedResult = expectedMatchedWorks)
-        }
+      withWorkerService(retriever, queue, messageSender) { _ =>
+        processAndAssertMatchedWorkIs(
+          invisibleWork,
+          expectedResult = expectedMatchedWorks)
       }
     }
   }
@@ -100,13 +107,16 @@ class MatcherWorkerServiceTest
 
     implicit val messageSender: MemoryMessageSender = new MemoryMessageSender()
 
+    implicit val retriever: MemoryRetriever[Work[Source]] =
+      new MemoryRetriever[Work[Source]](
+        index = Map[String, Work[Source]]()
+      )
+
     withLocalSqsQueue() { implicit queue =>
-      withVHS { implicit vhs =>
-        withWorkerService(vhs, queue, messageSender) { _ =>
-          processAndAssertMatchedWorkIs(
-            workAv1,
-            expectedResult = expectedMatchedWorks)
-        }
+      withWorkerService(retriever, queue, messageSender) { _ =>
+        processAndAssertMatchedWorkIs(
+          workAv1,
+          expectedResult = expectedMatchedWorks)
       }
     }
   }
@@ -184,15 +194,18 @@ class MatcherWorkerServiceTest
 
     implicit val messageSender: MemoryMessageSender = new MemoryMessageSender()
 
+    implicit val retriever: MemoryRetriever[Work[Source]] =
+      new MemoryRetriever[Work[Source]](
+        index = Map[String, Work[Source]]()
+      )
+
     withLocalSqsQueue() { implicit queue =>
-      withVHS { implicit vhs =>
-        withWorkerService(vhs, queue, messageSender) { _ =>
-          processAndAssertMatchedWorkIs(workAv1, expectedMatchedWorksAv1)
-          processAndAssertMatchedWorkIs(workBv1, expectedMatchedWorksBv1)
-          processAndAssertMatchedWorkIs(workAv2, expectedMatchedWorksAv2)
-          processAndAssertMatchedWorkIs(workCv1, expectedMatcherWorksCv1)
-          processAndAssertMatchedWorkIs(workBv2, expectedMatchedWorksBv2)
-        }
+      withWorkerService(retriever, queue, messageSender) { _ =>
+        processAndAssertMatchedWorkIs(workAv1, expectedMatchedWorksAv1)
+        processAndAssertMatchedWorkIs(workBv1, expectedMatchedWorksBv1)
+        processAndAssertMatchedWorkIs(workAv2, expectedMatchedWorksAv2)
+        processAndAssertMatchedWorkIs(workCv1, expectedMatcherWorksCv1)
+        processAndAssertMatchedWorkIs(workBv2, expectedMatchedWorksBv2)
       }
     }
   }
@@ -256,18 +269,21 @@ class MatcherWorkerServiceTest
 
     implicit val messageSender: MemoryMessageSender = new MemoryMessageSender()
 
+    implicit val retriever: MemoryRetriever[Work[Source]] =
+      new MemoryRetriever[Work[Source]](
+        index = Map[String, Work[Source]]()
+      )
+
     withLocalSqsQueue() { implicit queue =>
-      withVHS { implicit vhs =>
-        withWorkerService(vhs, queue, messageSender) { _ =>
-          processAndAssertMatchedWorkIs(workAv1, expectedMatchedWorksAv1)
-          processAndAssertMatchedWorkIs(workBv1, expectedMatchedWorksBv1)
-          processAndAssertMatchedWorkIs(
-            workAv2MatchedToB,
-            expectedMatchedWorksAv2MatchedToB)
-          processAndAssertMatchedWorkIs(
-            workAv3WithNoMatchingWorks,
-            expectedMatchedWorksAv3)
-        }
+      withWorkerService(retriever, queue, messageSender) { _ =>
+        processAndAssertMatchedWorkIs(workAv1, expectedMatchedWorksAv1)
+        processAndAssertMatchedWorkIs(workBv1, expectedMatchedWorksBv1)
+        processAndAssertMatchedWorkIs(
+          workAv2MatchedToB,
+          expectedMatchedWorksAv2MatchedToB)
+        processAndAssertMatchedWorkIs(
+          workAv3WithNoMatchingWorks,
+          expectedMatchedWorksAv3)
       }
     }
   }
@@ -285,28 +301,30 @@ class MatcherWorkerServiceTest
 
     implicit val messageSender: MemoryMessageSender = new MemoryMessageSender()
 
+    implicit val retriever: MemoryRetriever[Work[Source]] =
+      new MemoryRetriever[Work[Source]](
+        index = Map[String, Work[Source]]()
+      )
+
     withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>
         implicit val q: SQS.Queue = queue
 
-        withVHS { implicit vhs =>
-          withWorkerService(vhs, queue, messageSender) { _ =>
-            processAndAssertMatchedWorkIs(workAv2, expectedMatchedWorkAv2)
+        withWorkerService(retriever, queue, messageSender) { _ =>
+          processAndAssertMatchedWorkIs(workAv2, expectedMatchedWorkAv2)
 
-            // Work V1 is sent but not matched
-            val workAv1 =
-              sourceWork(sourceIdentifier = identifierA).withVersion(1)
+          // Work V1 is sent but not matched
+          val workAv1 =
+            sourceWork(sourceIdentifier = identifierA).withVersion(1)
 
-            sendWork(workAv1, vhs, queue)
-            eventually {
-              noMessagesAreWaitingIn(queue)
-              noMessagesAreWaitingIn(dlq)
+          sendWork(workAv1, retriever, queue)
+          eventually {
+            noMessagesAreWaitingIn(queue)
+            noMessagesAreWaitingIn(dlq)
 
-              messageSender
-                .getMessages[MatcherResult]
-                .last shouldBe expectedMatchedWorkAv2
-            }
-
+            messageSender
+              .getMessages[MatcherResult]
+              .last shouldBe expectedMatchedWorkAv2
           }
         }
     }
@@ -325,25 +343,28 @@ class MatcherWorkerServiceTest
 
     implicit val messageSender: MemoryMessageSender = new MemoryMessageSender()
 
+    implicit val retriever: MemoryRetriever[Work[Source]] =
+      new MemoryRetriever[Work[Source]](
+        index = Map[String, Work[Source]]()
+      )
+
     withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>
         implicit val q: SQS.Queue = queue
 
-        withVHS { implicit vhs =>
-          withWorkerService(vhs, queue, messageSender) { _ =>
-            processAndAssertMatchedWorkIs(workAv2, expectedMatchedWorkAv2)
+        withWorkerService(retriever, queue, messageSender) { _ =>
+          processAndAssertMatchedWorkIs(workAv2, expectedMatchedWorkAv2)
 
-            // Work V1 is sent but not matched
-            val differentWorkAv2 =
-              sourceWork(sourceIdentifier = identifierA)
-                .withVersion(2)
-                .mergeCandidates(List(MergeCandidate(identifierB)))
+          // Work V1 is sent but not matched
+          val differentWorkAv2 =
+            sourceWork(sourceIdentifier = identifierA)
+              .withVersion(2)
+              .mergeCandidates(List(MergeCandidate(identifierB)))
 
-            sendWork(differentWorkAv2, vhs, queue)
-            eventually {
-              assertQueueEmpty(queue)
-              assertQueueHasSize(dlq, 1)
-            }
+          sendWork(differentWorkAv2, retriever, queue)
+          eventually {
+            assertQueueEmpty(queue)
+            assertQueueHasSize(dlq, 1)
           }
         }
     }
@@ -352,10 +373,10 @@ class MatcherWorkerServiceTest
   private def processAndAssertMatchedWorkIs(workToMatch: Work[Source],
                                             expectedResult: MatcherResult)(
     implicit
-    vhs: VHS,
+    retriever: MemoryRetriever[Work[Source]],
     queue: SQS.Queue,
     messageSender: MemoryMessageSender): Assertion = {
-    sendWork(workToMatch, vhs, queue)
+    sendWork(workToMatch, retriever, queue)
     eventually {
       messageSender.getMessages[MatcherResult].last shouldBe expectedResult
     }
