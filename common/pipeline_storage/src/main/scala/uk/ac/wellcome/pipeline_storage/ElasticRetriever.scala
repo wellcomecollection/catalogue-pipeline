@@ -15,27 +15,42 @@ import io.circe.Decoder
 import grizzled.slf4j.Logging
 
 class ElasticRetriever[T](client: ElasticClient, index: Index)(
-  implicit ec: ExecutionContext,
+  implicit val ec: ExecutionContext,
   decoder: Decoder[T])
     extends Retriever[T]
     with Logging {
 
-  final def apply(id: String): Future[T] = {
+  override final def apply(ids: Seq[String]): Future[Map[String, T]] =
     client
       .execute {
-        get(index, id)
+        multiget(
+          ids.map { id =>
+            get(index, id)
+          }
+        )
       }
-      .flatMap {
-        case RequestFailure(_, _, _, error) => Future.failed(error.asException)
-        case RequestSuccess(_, _, _, response) if !response.found =>
+      .map {
+        case RequestFailure(_, _, _, error) => throw error.asException
+        case RequestSuccess(_, _, _, result) if result.docs.size != ids.size =>
           warn(
-            s"Asked to look up ID $id in index $index, got response $response")
-          Future.failed(new RetrieverNotFoundException(id))
-        case RequestSuccess(_, _, _, response) =>
-          response.safeTo[T] match {
-            case Success(item)  => Future.successful(item)
-            case Failure(error) => Future.failed(error)
+            s"Asked for ${ids.size} IDs in index $index, only got ${result.docs.size}")
+          throw new RetrieverNotFoundException(ids.mkString(", "))
+        case RequestSuccess(_, _, _, result) =>
+          // Documents are guaranteed to be returned in the same order as the
+          // original IDs.
+          // See https://www.elastic.co/guide/en/elasticsearch/reference/6.8/docs-multi-get.html
+          val documents = result.docs
+            .map { _.safeTo[T] }
+            .zip(ids)
+
+          val successes = documents.collect { case (Success(t), id) => id -> t }
+          val failures = documents.collect { case (Failure(e), id)  => id -> e }
+
+          if (failures.isEmpty) {
+            successes.toMap
+          } else {
+            throw new RuntimeException(
+              s"Unable to decode documents from index $index: $failures")
           }
       }
-  }
 }

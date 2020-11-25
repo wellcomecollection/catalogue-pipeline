@@ -10,6 +10,8 @@ import uk.ac.wellcome.pipeline_storage.{
   RetrieverTestCases
 }
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 class MemoryRetrieverTest extends RetrieverTestCases[Map[String, UUID], UUID] {
   override def withContext[R](documents: Seq[UUID])(
     testWith: TestWith[Map[String, UUID], R]): R =
