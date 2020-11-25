@@ -152,7 +152,9 @@ class RelationEmbedderWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
         }
-        msgSender.messages.map(_.body).toSet shouldBe (invisibleWork :: works).map(_.id).toSet
+        msgSender.messages.map(_.body).toSet shouldBe (invisibleWork :: works)
+          .map(_.id)
+          .toSet
         relations(index) shouldBe Map(
           workA.id -> relationsA,
           work1.id -> relations1,

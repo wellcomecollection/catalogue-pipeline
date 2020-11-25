@@ -166,7 +166,10 @@ class RelationsServiceTest
             rootPath = "A",
             List(Children("A/C/X"), Descendents("A/C/X"), Node("A/C/X/5")))
           whenReady(queryAffectedWorks(service(index), batch)) { result =>
-            result should contain theSameElementsAs List(work3, work4, invisibleWork)
+            result should contain theSameElementsAs List(
+              work3,
+              work4,
+              invisibleWork)
           }
         }
       }
