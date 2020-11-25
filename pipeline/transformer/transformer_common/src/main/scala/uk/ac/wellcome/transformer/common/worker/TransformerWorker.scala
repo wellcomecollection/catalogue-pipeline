@@ -19,7 +19,9 @@ case class DecodeKeyError[T](t: Throwable, message: NotificationMessage)
     extends TransformerWorkerError(t.getMessage)
 case class StoreReadError[T](err: ReadError, key: T)
     extends TransformerWorkerError(err.toString)
-case class TransformerError[SourceData, Key](t: Throwable, sourceData: SourceData, key: Key)
+case class TransformerError[SourceData, Key](t: Throwable,
+                                             sourceData: SourceData,
+                                             key: Key)
     extends TransformerWorkerError(t.getMessage)
 case class MessageSendError[T, Key](t: Throwable, work: Work[Source], key: Key)
     extends TransformerWorkerError(t.getMessage)
@@ -50,7 +52,8 @@ trait TransformerWorker[SourceData, SenderDest] extends Logging {
       done <- done(work, key)
     } yield done
 
-  private def work(sourceData: SourceData, key: StoreKey): Result[Work[Source]] =
+  private def work(sourceData: SourceData,
+                   key: StoreKey): Result[Work[Source]] =
     transformer(sourceData, key.version) match {
       case Left(err)     => Left(TransformerError(err, sourceData, key))
       case Right(result) => Right(result)
