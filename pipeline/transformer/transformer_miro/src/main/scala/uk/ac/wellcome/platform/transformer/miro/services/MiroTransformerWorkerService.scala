@@ -8,7 +8,7 @@ import uk.ac.wellcome.platform.transformer.miro.models.{MiroMetadata, MiroVHSRec
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.Readable
-import uk.ac.wellcome.storage.{Identified, ReadError}
+import uk.ac.wellcome.storage.ReadError
 import uk.ac.wellcome.transformer.common.worker.{Transformer, TransformerWorker}
 import uk.ac.wellcome.typesafe.Runnable
 
@@ -25,8 +25,6 @@ class MiroTransformerWorkerService[MsgDestination](
 
   private val miroLookup = new MiroLookup(miroIndexStore, typedStore)
 
-  override protected def lookupSourceData(key: StoreKey): Either[ReadError, Identified[StoreKey, (MiroRecord, MiroMetadata, Int)]] =
-    miroLookup
-      .lookupRecord(key.id)
-      .map { Identified(key, _) }
+  override protected def lookupSourceData(key: StoreKey): Either[ReadError, (MiroRecord, MiroMetadata, Int)] =
+    miroLookup.lookupRecord(key.id)
 }

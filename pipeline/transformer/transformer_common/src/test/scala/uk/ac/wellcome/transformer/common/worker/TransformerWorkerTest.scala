@@ -41,8 +41,8 @@ class TestTransformerWorker(
 ) extends TransformerWorker[TestData, String] {
   val transformer: Transformer[TestData] = TestTransformer
 
-  override protected def lookupSourceData(key: StoreKey): Either[ReadError, Identified[StoreKey, TestData]] =
-    store.getLatest(key.id)
+  override protected def lookupSourceData(key: StoreKey): Either[ReadError, TestData] =
+    store.getLatest(key.id).map { case Identified(_, testData) => testData }
 }
 
 class TransformerWorkerTest
