@@ -9,20 +9,20 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.storage.store.VersionedStore
-import uk.ac.wellcome.storage.{Identified, Version}
+import uk.ac.wellcome.storage.{Identified, ReadError, Version}
 import WorkState.Source
 
 import scala.util.{Failure, Success}
 
 sealed abstract class TransformerWorkerError(msg: String) extends Exception(msg)
-case class DecodeKeyError[T](msg: String, message: NotificationMessage)
-    extends TransformerWorkerError(msg)
-case class StoreReadError[T](msg: String, key: T)
-    extends TransformerWorkerError(msg)
-case class TransformerError[In, Key](msg: String, sourceData: In, key: Key)
-    extends TransformerWorkerError(msg)
-case class MessageSendError[T, Key](msg: String, work: Work[Source], key: Key)
-    extends TransformerWorkerError(msg)
+case class DecodeKeyError[T](t: Throwable, message: NotificationMessage)
+    extends TransformerWorkerError(t.getMessage)
+case class StoreReadError[T](err: ReadError, key: T)
+    extends TransformerWorkerError(err.toString)
+case class TransformerError[In, Key](t: Throwable, sourceData: In, key: Key)
+    extends TransformerWorkerError(t.getMessage)
+case class MessageSendError[T, Key](t: Throwable, work: Work[Source], key: Key)
+    extends TransformerWorkerError(t.getMessage)
 
 /**
   * A TransformerWorker:
@@ -52,26 +52,26 @@ trait TransformerWorker[In, SenderDest] extends Logging {
 
   private def work(sourceData: In, key: StoreKey): Result[Work[Source]] =
     transformer(sourceData, key.version) match {
-      case Left(err)     => Left(TransformerError(err.toString, sourceData, key))
+      case Left(err)     => Left(TransformerError(err, sourceData, key))
       case Right(result) => Right(result)
     }
 
   private def done(work: Work[Source],
                    key: StoreKey): Result[(Work[Source], StoreKey)] =
     sender.sendT(work) match {
-      case Failure(err) => Left(MessageSendError(err.toString, work, key))
+      case Failure(err) => Left(MessageSendError(err, work, key))
       case Success(_)   => Right((work, key))
     }
 
   private def decodeKey(message: NotificationMessage): Result[StoreKey] =
     fromJson[StoreKey](message.body) match {
-      case Failure(err)      => Left(DecodeKeyError(err.toString, message))
+      case Failure(err)      => Left(DecodeKeyError(err, message))
       case Success(storeKey) => Right(storeKey)
     }
 
   private def getRecord(key: StoreKey): Result[In] =
     store.getLatest(key.id) match {
-      case Left(err)                   => Left(StoreReadError(err.toString, key))
+      case Left(err)                   => Left(StoreReadError(err, key))
       case Right(Identified(_, entry)) => Right(entry)
     }
 
