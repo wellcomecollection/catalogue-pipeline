@@ -76,15 +76,13 @@ class RelationEmbedderWorkerServiceTest
     children = List(relB),
     siblingsSucceeding = List(rel2)
   )
-  val relationsB = Relations(
-    ancestors = List(relA, rel1))
+  val relationsB = Relations(ancestors = List(relA, rel1))
   val relations2 = Relations(
     ancestors = List(relA),
     children = List(relC, relD),
     siblingsPreceding = List(rel1))
-  val relationsC = Relations(
-    ancestors = List(relA, rel2),
-    siblingsSucceeding = List(relD))
+  val relationsC =
+    Relations(ancestors = List(relA, rel2), siblingsSucceeding = List(relD))
   val relationsD = Relations(
     ancestors = List(relA, rel2),
     children = List(relE),

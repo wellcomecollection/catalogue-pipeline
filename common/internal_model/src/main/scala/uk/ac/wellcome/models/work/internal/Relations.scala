@@ -43,11 +43,10 @@ case class Relation[State <: DataState](
 
 object Relation {
 
-  def apply(
-    work: Work[Merged],
-    depth: Int,
-    numChildren: Int,
-    numDescendents: Int): Relation[DataState.Unidentified] =
+  def apply(work: Work[Merged],
+            depth: Int,
+            numChildren: Int,
+            numDescendents: Int): Relation[DataState.Unidentified] =
     Relation[DataState.Unidentified](
       data = work.data,
       id = IdState.Identifiable(work.state.sourceIdentifier),

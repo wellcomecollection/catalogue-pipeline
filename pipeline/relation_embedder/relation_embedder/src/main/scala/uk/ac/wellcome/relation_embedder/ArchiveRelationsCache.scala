@@ -85,7 +85,7 @@ class ArchiveRelationsCache(works: Map[String, Work[Merged]]) extends Logging {
       }
     numDescendents(childMapping.getOrElse(path, Nil))
   }
-  
+
   private lazy val relations =
     works.map {
       case (path, work) =>
