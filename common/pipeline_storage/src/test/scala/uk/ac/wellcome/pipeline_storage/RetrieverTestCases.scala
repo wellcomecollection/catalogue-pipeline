@@ -52,7 +52,9 @@ trait RetrieverTestCases[Context, T]
 
     val documents = Seq(t1, t2, t3)
     val ids = documents.map { id.canonicalId }
-    val expectedResult = documents.map { t => id.canonicalId(t) -> t }.toMap
+    val expectedResult = documents.map { t =>
+      id.canonicalId(t) -> t
+    }.toMap
 
     withContext(documents = documents) { implicit context =>
       val future = withRetriever { _.apply(ids) }

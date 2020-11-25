@@ -24,31 +24,33 @@ class ElasticRetriever[T](client: ElasticClient, index: Index)(
     client
       .execute {
         multiget(
-          ids.map { id => get(index, id) }
+          ids.map { id =>
+            get(index, id)
+          }
         )
       }
       .map {
         case RequestFailure(_, _, _, error) => throw error.asException
         case RequestSuccess(_, _, _, result) if result.docs.size != ids.size =>
-          warn(s"Asked for ${ids.size} IDs in index $index, only got ${result.docs.size}")
+          warn(
+            s"Asked for ${ids.size} IDs in index $index, only got ${result.docs.size}")
           throw new RetrieverNotFoundException(ids.mkString(", "))
         case RequestSuccess(_, _, _, result) =>
-
           // Documents are guaranteed to be returned in the same order as the
           // original IDs.
           // See https://www.elastic.co/guide/en/elasticsearch/reference/6.8/docs-multi-get.html
-          val documents = result
-            .docs
+          val documents = result.docs
             .map { _.safeTo[T] }
             .zip(ids)
 
           val successes = documents.collect { case (Success(t), id) => id -> t }
-          val failures = documents.collect { case (Failure(e), id) => id -> e }
+          val failures = documents.collect { case (Failure(e), id)  => id -> e }
 
           if (failures.isEmpty) {
             successes.toMap
           } else {
-            throw new RuntimeException(s"Unable to decode documents from index $index: $failures")
+            throw new RuntimeException(
+              s"Unable to decode documents from index $index: $failures")
           }
       }
 }
