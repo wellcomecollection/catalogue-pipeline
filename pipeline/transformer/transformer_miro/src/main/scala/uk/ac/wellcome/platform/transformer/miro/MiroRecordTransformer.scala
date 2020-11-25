@@ -11,8 +11,6 @@ import uk.ac.wellcome.platform.transformer.miro.models.MiroMetadata
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 import uk.ac.wellcome.platform.transformer.miro.transformers._
 import WorkState.Source
-import uk.ac.wellcome.models.work.internal.result.Result
-import uk.ac.wellcome.transformer.common.worker.Transformer
 
 class MiroRecordTransformer
     extends MiroContributors
@@ -25,15 +23,7 @@ class MiroRecordTransformer
     with MiroThumbnail
     with MiroTitleAndDescription
     with MiroFormat
-    with Logging
-    with Transformer[(MiroRecord, MiroMetadata, Int)] {
-
-  override def apply(sourceData: (MiroRecord, MiroMetadata, Int),
-                     version: Int): Result[Work[Source]] = {
-    val (miroRecord, miroMetadata, version) = sourceData
-
-    transform(miroRecord, miroMetadata, version).toEither
-  }
+    with Logging {
 
   def transform(miroRecord: MiroRecord,
                 miroMetadata: MiroMetadata,

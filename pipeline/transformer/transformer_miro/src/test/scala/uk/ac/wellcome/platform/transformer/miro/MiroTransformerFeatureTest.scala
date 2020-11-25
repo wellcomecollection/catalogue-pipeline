@@ -5,6 +5,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
+import uk.ac.wellcome.platform.transformer.miro.fixtures.MiroVHSRecordReceiverFixture
 import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
 import uk.ac.wellcome.platform.transformer.miro.transformers.MiroTransformableWrapper
 import uk.ac.wellcome.platform.transformer.miro.services.MiroTransformerWorkerService
@@ -15,15 +16,6 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import WorkState.Source
-import org.scalatest.Assertion
-import uk.ac.wellcome.messaging.fixtures.SQS
-import uk.ac.wellcome.platform.transformer.miro.models.MiroVHSRecord
-import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
-import uk.ac.wellcome.storage.Version
-import uk.ac.wellcome.storage.generators.S3ObjectLocationGenerators
-import uk.ac.wellcome.storage.s3.S3ObjectLocation
-import uk.ac.wellcome.storage.store.Readable
-import uk.ac.wellcome.storage.store.memory.MemoryStore
 
 class MiroTransformerFeatureTest
     extends AnyFunSpec
@@ -32,78 +24,91 @@ class MiroTransformerFeatureTest
     with IntegrationPatience
     with MiroRecordGenerators
     with MiroTransformableWrapper
-    with Akka
-    with SQS
-    with S3ObjectLocationGenerators {
+    with MiroVHSRecordReceiverFixture
+    with Akka {
 
-  it("transforms miro records and sends on the transformed result") {
+  it("transforms miro records and publishes the result to the given topic") {
     val miroID = "M0000001"
     val title = "A guide for a giraffe"
 
-    val record = createMiroRecordWith(title = Some(title), imageNumber = miroID)
-
-    val miroIndexStore =
-      new MemoryStore[String, MiroVHSRecord](initialEntries = Map.empty)
-    val typedStore =
-      new MemoryStore[S3ObjectLocation, MiroRecord](initialEntries = Map.empty)
-
-    storeRecord(
-      id = miroID,
-      record = record,
-      indexStore = miroIndexStore,
-      typedStore = typedStore)
+    val miroHybridRecordMessage =
+      createHybridRecordNotificationWith(
+        createMiroRecordWith(title = Some(title), imageNumber = miroID)
+      )
 
     val messageSender = new MemoryMessageSender()
 
-    withLocalSqsQueue(visibilityTimeout = 5) { queue =>
-      sendNotificationToSQS(queue, Version(miroID, version = 1))
+    withLocalSqsQueue() { queue =>
+      sendSqsMessage(queue, miroHybridRecordMessage)
 
-      withWorkerService(messageSender, queue, miroIndexStore, typedStore) { _ =>
+      withWorkerService(messageSender, queue) { _ =>
         eventually {
           val works = messageSender.getMessages[Work.Visible[Source]]
-          works.length shouldBe 1
+          works.length shouldBe >=(1)
 
-          val actualWork = works.head
-          actualWork.identifiers.head.value shouldBe miroID
-          actualWork.data.title shouldBe Some(title)
+          works.map { actualWork =>
+            actualWork.identifiers.head.value shouldBe miroID
+            actualWork.data.title shouldBe Some(title)
+          }
         }
       }
     }
   }
 
-  private def storeRecord(
-    id: String,
-    record: MiroRecord,
-    indexStore: MemoryStore[String, MiroVHSRecord],
-    typedStore: MemoryStore[S3ObjectLocation, MiroRecord]
-  ): Assertion = {
-    val s3Location = createS3ObjectLocation
-    typedStore.put(s3Location)(record) shouldBe a[Right[_, _]]
+  // This is based on a specific bug that we found where different records
+  // were written to the same s3 key because of the hashing algorithm clashing
+  it("sends different messages for different miro records") {
+    val miroHybridRecordMessage1 =
+      createHybridRecordNotificationWith(
+        createMiroRecordWith(
+          title = Some("Antonio Dionisi"),
+          description = Some("Antonio Dionisi"),
+          physFormat = Some("Book"),
+          copyrightCleared = Some("Y"),
+          imageNumber = "L0011975",
+          useRestrictions = Some("CC-BY"),
+          innopacID = Some("12917175"),
+          creditLine = Some("Wellcome Library, London")
+        )
+      )
 
-    val vhsRecord = MiroVHSRecord(
-      id = id,
-      version = 1,
-      isClearedForCatalogueAPI = true,
-      location = s3Location
-    )
-    indexStore.put(id)(vhsRecord) shouldBe a[Right[_, _]]
+    val miroHybridRecordMessage2 =
+      createHybridRecordNotificationWith(
+        createMiroRecordWith(
+          title = Some("Greenfield Sluder, Tonsillectomy..., use of guillotine"),
+          description = Some("Use of the guillotine"),
+          copyrightCleared = Some("Y"),
+          imageNumber = "L0023034",
+          useRestrictions = Some("CC-BY"),
+          innopacID = Some("12074536"),
+          creditLine = Some("Wellcome Library, London")
+        )
+      )
+
+    val messageSender = new MemoryMessageSender()
+
+    withLocalSqsQueue() { queue =>
+      withWorkerService(messageSender, queue) { _ =>
+        sendSqsMessage(queue = queue, obj = miroHybridRecordMessage1)
+        sendSqsMessage(queue = queue, obj = miroHybridRecordMessage2)
+
+        eventually {
+          messageSender
+            .getMessages[Work.Visible[Source]]
+            .distinct should have size 2
+        }
+      }
+    }
   }
 
-  def withWorkerService[R](
-    messageSender: MemoryMessageSender,
-    queue: Queue,
-    miroIndexStore: Readable[String, MiroVHSRecord] =
-      new MemoryStore[String, MiroVHSRecord](initialEntries = Map.empty),
-    typedStore: Readable[S3ObjectLocation, MiroRecord] =
-      new MemoryStore[S3ObjectLocation, MiroRecord](initialEntries = Map.empty)
-  )(testWith: TestWith[MiroTransformerWorkerService[String], R]): R =
+  def withWorkerService[R](messageSender: MemoryMessageSender, queue: Queue)(
+    testWith: TestWith[MiroTransformerWorkerService[String], R]): R =
     withActorSystem { implicit actorSystem =>
       withSQSStream[NotificationMessage, R](queue) { sqsStream =>
         val workerService = new MiroTransformerWorkerService(
-          stream = sqsStream,
-          sender = messageSender,
-          miroIndexStore = miroIndexStore,
-          typedStore = typedStore
+          vhsRecordReceiver = createRecordReceiverWith(messageSender),
+          miroTransformer = new MiroRecordTransformer,
+          sqsStream = sqsStream
         )
 
         workerService.run()
