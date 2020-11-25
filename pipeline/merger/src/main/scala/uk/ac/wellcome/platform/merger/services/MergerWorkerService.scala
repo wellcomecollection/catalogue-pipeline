@@ -14,13 +14,13 @@ import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
-import uk.ac.wellcome.pipeline_storage.Indexer
+import uk.ac.wellcome.pipeline_storage.{Indexer, Retriever}
 import WorkState.{Merged, Source}
 
 class MergerWorkerService[WorkDestination, ImageDestination](
   sqsStream: SQSStream[NotificationMessage],
-  playbackService: RecorderPlaybackService,
-  mergerManager: MergerManager,
+  workRetriever: Retriever[Work[Source]],
+  mergerRules: Merger,
   workIndexer: Indexer[Work[Merged]],
   workSender: MessageSender[WorkDestination],
   imageSender: MessageSender[ImageDestination]
@@ -35,27 +35,30 @@ class MergerWorkerService[WorkDestination, ImageDestination](
   private def processMessage(message: NotificationMessage): Future[Unit] =
     for {
       matcherResult <- Future.fromTry(fromJson[MatcherResult](message.body))
+
+      identifierSets: List[Seq[String]] = matcherResult.works.toList
+        .map { _.identifiers.map { _.identifier }.toSeq }
+
       workSets <- Future.sequence {
-        matcherResult.works.toList.map { matchedIdentifiers =>
-          playbackService.fetchAllWorks(matchedIdentifiers.identifiers.toList)
-        }
+        identifierSets
+          .map { ids => workRetriever.apply(ids).map { _.values.toSeq } }
       }
-      nonEmptyWorkSets = workSets.filter(_.flatten.nonEmpty)
-      _ <- nonEmptyWorkSets match {
+
+      _ <- workSets match {
         case Nil => Future.successful(Nil)
         case _ =>
-          val lastUpdated = nonEmptyWorkSets
-            .flatMap(_.flatten.map(work => work.state.modifiedTime))
+          val lastUpdated = workSets
+            .flatMap(_.map(work => work.state.modifiedTime))
             .max
           Future.sequence {
-            nonEmptyWorkSets.map(applyMerge(_, lastUpdated))
+            workSets.map(applyMerge(_, lastUpdated))
           }
       }
     } yield ()
 
-  private def applyMerge(maybeWorks: Seq[Option[Work[Source]]],
+  private def applyMerge(works: Seq[Work[Source]],
                          lastUpdated: Instant): Future[Unit] = {
-    val outcome = mergerManager.applyMerge(maybeWorks = maybeWorks)
+    val outcome = mergerRules.merge(works)
     for {
       indexResult <- workIndexer.index(outcome.mergedWorksWithTime(lastUpdated))
       works <- indexResult match {

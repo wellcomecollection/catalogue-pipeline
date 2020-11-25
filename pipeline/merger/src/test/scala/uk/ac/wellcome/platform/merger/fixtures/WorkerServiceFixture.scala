@@ -1,8 +1,5 @@
 package uk.ac.wellcome.platform.merger.fixtures
 
-import scala.collection.mutable.Map
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
@@ -10,21 +7,25 @@ import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
+import uk.ac.wellcome.models.work.internal.WorkState.{Merged, Source}
+import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.monitoring.Metrics
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
-import uk.ac.wellcome.platform.merger.services._
 import uk.ac.wellcome.pipeline_storage.{MemoryIndexer, MemoryRetriever}
-import uk.ac.wellcome.models.work.internal._
-import WorkState.{Merged, Source}
+import uk.ac.wellcome.platform.merger.services._
 
-trait WorkerServiceFixture extends LocalWorksVhs with SQS with Akka {
+import scala.collection.mutable
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+
+trait WorkerServiceFixture extends RetrieverFixtures with SQS with Akka {
   def withWorkerService[R](workRetriever: MemoryRetriever[Work[Source]],
                            queue: Queue,
                            workSender: MemoryMessageSender,
                            imageSender: MemoryMessageSender =
                              new MemoryMessageSender(),
                            metrics: Metrics[Future] = new MemoryMetrics,
-                           index: Map[String, Work[Merged]] = Map.empty())(
+                           index: mutable.Map[String, Work[Merged]] = mutable.Map[String, Work[Merged]]())(
     testWith: TestWith[MergerWorkerService[String, String], R]): R =
     withActorSystem { implicit actorSystem =>
       withSQSStream[NotificationMessage, R](queue, metrics) { sqsStream =>
