@@ -49,7 +49,7 @@ class MiroTransformerFeatureTest
 
     val messageSender = new MemoryMessageSender()
 
-    withLocalSqsQueue() { queue =>
+    withLocalSqsQueue(visibilityTimeout = 5) { queue =>
       sendNotificationToSQS(queue, Version(miroID, version = 1))
 
       withWorkerService(messageSender, queue, miroIndexStore, typedStore) { _ =>
