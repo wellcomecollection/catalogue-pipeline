@@ -53,7 +53,7 @@ class PipelineStorageStream[T, D, MsgDestination](
     } yield result
   }
 
-  private def batchAndSendFlow(implicit indexable: Indexable[D]) = {
+  private def batchAndSendFlow(implicit indexable: Indexable[D]) =
     Flow[(Message, Option[D])]
       .collect { case (message, Some(document)) => Bundle(message, document) }
       .groupedWithin(
@@ -69,7 +69,6 @@ class PipelineStorageStream[T, D, MsgDestination](
           _ <- Future.fromTry(messageSender.send(indexable.id(bundle.document)))
         } yield bundle.message
       }
-  }
 
   private def storeDocuments(bundles: List[Bundle]): FutureBundles =
     for {
