@@ -37,9 +37,9 @@ class MetsTransformerWorkerServiceTest
     val str = metsXmlWith(identifier, Some(License.CCBYNC))
 
     withWorkerService {
-      case (QueuePair(queue, _), metsBucket, messageSender, dynamoStore) =>
+      case (QueuePair(queue, _), metsBucket, messageSender, vhs) =>
         val now = Instant.now
-        sendWork(str, "mets.xml", dynamoStore, metsBucket, queue, version, now)
+        sendWork(str, "mets.xml", vhs, metsBucket, queue, version, now)
         eventually {
           val works = messageSender.getMessages[Work.Invisible[Source]]
           works.head shouldBe expectedWork(identifier, version, now)
@@ -148,8 +148,8 @@ class MetsTransformerWorkerServiceTest
           withActorSystem { implicit actorSystem =>
             withSQSStream[NotificationMessage, R](queue) { sqsStream =>
               val workerService = new MetsTransformerWorkerService(
-                msgStream = sqsStream,
-                messageSender = messageSender,
+                stream = sqsStream,
+                sender = messageSender,
                 adapterStore = adapterStore,
                 metsXmlStore = s3TypedStore
               )
@@ -174,12 +174,12 @@ class MetsTransformerWorkerServiceTest
       _ <- S3TypedStore[String].put(
         S3ObjectLocation(metsBucket.name, key = s"$rootPath/$name"))(mets)
       entry = MetsLocation(
-        metsBucket.name,
-        rootPath,
-        1,
-        name,
-        createdDate,
-        List())
+        bucket = metsBucket.name,
+        path = rootPath,
+        version = version,
+        file = name,
+        createdDate = createdDate,
+        manifestations = List())
       key <- dynamoStore.put(Version(name, version))(entry)
     } yield key
 

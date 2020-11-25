@@ -1,64 +1,27 @@
 package uk.ac.wellcome.platform.transformer.mets.service
 
-import scala.concurrent.Future
-import akka.Done
-import grizzled.slf4j.Logging
-
-import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.mets_adapter.models.MetsLocation
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.mets.transformer.MetsXmlTransformer
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.{Readable, VersionedStore}
-import uk.ac.wellcome.storage.{Identified, Version}
+import uk.ac.wellcome.storage.{Identified, ReadError}
+import uk.ac.wellcome.transformer.common.worker.{Transformer, TransformerWorker}
 import uk.ac.wellcome.typesafe.Runnable
-import WorkState.Source
 
-class MetsTransformerWorkerService[Destination](
-  msgStream: SQSStream[NotificationMessage],
-  messageSender: MessageSender[Destination],
+class MetsTransformerWorkerService[MsgDestination](
+  val stream: SQSStream[NotificationMessage],
+  val sender: MessageSender[MsgDestination],
   adapterStore: VersionedStore[String, Int, MetsLocation],
   metsXmlStore: Readable[S3ObjectLocation, String]
 ) extends Runnable
-    with Logging {
+    with TransformerWorker[MetsLocation, MsgDestination] {
 
-  type Result[T] = Either[Throwable, T]
+  override val transformer: Transformer[MetsLocation] =
+    new MetsXmlTransformer(metsXmlStore)
 
-  val className = this.getClass.getSimpleName
-
-  val xmlTransformer = new MetsXmlTransformer(metsXmlStore)
-
-  def run(): Future[Done] =
-    msgStream.foreach(this.getClass.getSimpleName, processAndLog)
-
-  def processAndLog(message: NotificationMessage): Future[Unit] = {
-    val tried = for {
-      key <- fromJson[Version[String, Int]](message.body)
-      _ <- process(key).toTry
-    } yield ()
-    Future.fromTry(tried.recover {
-      case t =>
-        error(s"There was an error processing $message: ", t)
-        throw t
-    })
-  }
-
-  private def process(key: Version[String, Int]): Either[Throwable, Unit] =
-    for {
-      metsLocation <- getMetsLocation(key)
-      metsData <- xmlTransformer.transform(metsLocation)
-      work <- metsData.toWork(key.version, metsLocation.createdDate)
-      // We send the generic type param to `sendT` so it serialises uses the
-      // discriminator `type` when read by the recorder.
-      _ <- messageSender.sendT[Work[Source]](work).toEither
-    } yield ()
-
-  private def getMetsLocation(key: Version[String, Int]): Result[MetsLocation] =
-    adapterStore.get(key) match {
-      case Left(err)                   => Left(err.e)
-      case Right(Identified(_, entry)) => Right(entry)
-    }
+  override protected def lookupRecord(key: StoreKey): Either[ReadError, Identified[StoreKey, MetsLocation]] =
+    adapterStore.get(key)
 }

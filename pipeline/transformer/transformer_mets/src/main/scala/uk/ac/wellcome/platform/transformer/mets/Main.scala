@@ -34,7 +34,7 @@ object Main extends WellcomeTypesafeApp with AWSClientConfigBuilder {
 
     new MetsTransformerWorkerService(
       SQSBuilder.buildSQSStream[NotificationMessage](config),
-      messageSender = BigMessagingBuilder.buildBigMessageSender(config),
+      sender = BigMessagingBuilder.buildBigMessageSender(config),
       adapterStore = new DynamoSingleVersionStore[String, MetsLocation](
         DynamoBuilder.buildDynamoConfig(config, namespace = "mets")
       ),
