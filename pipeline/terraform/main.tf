@@ -45,6 +45,7 @@ module "catalogue_pipeline_2020-11-25" {
 
   # Adapter VHS
   vhs_miro_read_policy              = local.vhs_miro_read_policy
+  vhs_miro_table_name               = local.vhs_miro_table_name
   vhs_sierra_read_policy            = local.vhs_sierra_read_policy
   vhs_sierra_sourcedata_bucket_name = local.vhs_sierra_sourcedata_bucket_name
   vhs_sierra_sourcedata_table_name  = local.vhs_sierra_sourcedata_table_name

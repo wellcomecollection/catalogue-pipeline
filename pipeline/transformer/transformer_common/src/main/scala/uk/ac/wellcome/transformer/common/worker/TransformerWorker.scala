@@ -8,8 +8,7 @@ import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.storage.store.VersionedStore
-import uk.ac.wellcome.storage.{Identified, ReadError, Version}
+import uk.ac.wellcome.storage.{ReadError, Version}
 import WorkState.Source
 
 import scala.util.{Failure, Success}
@@ -40,9 +39,10 @@ trait TransformerWorker[SourceData, SenderDest] extends Logging {
   def name: String = this.getClass.getSimpleName
   val stream: SQSStream[NotificationMessage]
   val sender: MessageSender[SenderDest]
-  val store: VersionedStore[String, Int, SourceData]
   val transformer: Transformer[SourceData]
   val concurrentTransformations: Int = 2
+
+  protected def lookupSourceData(key: StoreKey): Either[ReadError, SourceData]
 
   def process(message: NotificationMessage): Result[(Work[Source], StoreKey)] =
     for {
@@ -73,9 +73,8 @@ trait TransformerWorker[SourceData, SenderDest] extends Logging {
     }
 
   private def getRecord(key: StoreKey): Result[SourceData] =
-    store.getLatest(key.id) match {
-      case Left(err)                   => Left(StoreReadError(err, key))
-      case Right(Identified(_, entry)) => Right(entry)
+    lookupSourceData(key).left.map { err =>
+      StoreReadError(err, key)
     }
 
   def run(): Future[Done] =

@@ -1,6 +1,7 @@
 locals {
   miro_updates_topic_arn = data.terraform_remote_state.shared_infra.outputs.miro_updates_topic_arn
   vhs_miro_read_policy   = data.terraform_remote_state.catalogue_infra_critical.outputs.vhs_miro_read_policy
+  vhs_miro_table_name    = data.terraform_remote_state.catalogue_infra_critical.outputs.vhs_miro_table_name
   storage_bucket         = "wellcomecollection-storage"
 
   # Sierra adapter VHS

@@ -1,23 +1,34 @@
 package uk.ac.wellcome.platform.transformer.miro.services
 
-import akka.Done
-import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.platform.transformer.miro.MiroRecordTransformer
+import uk.ac.wellcome.platform.transformer.miro.models.{
+  MiroMetadata,
+  MiroVHSRecord
+}
+import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
+import uk.ac.wellcome.storage.s3.S3ObjectLocation
+import uk.ac.wellcome.storage.store.Readable
+import uk.ac.wellcome.storage.ReadError
+import uk.ac.wellcome.transformer.common.worker.{Transformer, TransformerWorker}
 import uk.ac.wellcome.typesafe.Runnable
 
-import scala.concurrent.Future
-
 class MiroTransformerWorkerService[MsgDestination](
-  vhsRecordReceiver: MiroVHSRecordReceiver[MsgDestination],
-  miroTransformer: MiroRecordTransformer,
-  sqsStream: SQSStream[NotificationMessage]
-) extends Runnable {
+  val stream: SQSStream[NotificationMessage],
+  val sender: MessageSender[MsgDestination],
+  miroIndexStore: Readable[String, MiroVHSRecord],
+  typedStore: Readable[S3ObjectLocation, MiroRecord]
+) extends Runnable
+    with TransformerWorker[(MiroRecord, MiroMetadata, Int), MsgDestination] {
 
-  def run(): Future[Done] =
-    sqsStream.foreach(this.getClass.getSimpleName, processMessage)
+  override val transformer: Transformer[(MiroRecord, MiroMetadata, Int)] =
+    new MiroRecordTransformer
 
-  private def processMessage(message: NotificationMessage): Future[Unit] =
-    vhsRecordReceiver.receiveMessage(message, miroTransformer.transform)
+  private val miroLookup = new MiroLookup(miroIndexStore, typedStore)
+
+  override protected def lookupSourceData(
+    key: StoreKey): Either[ReadError, (MiroRecord, MiroMetadata, Int)] =
+    miroLookup.lookupRecord(key.id)
 }
