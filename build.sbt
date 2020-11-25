@@ -72,6 +72,13 @@ lazy val pipeline_storage = setupProject(
   externalDependencies = CatalogueDependencies.pipelineStorageDependencies
 )
 
+lazy val pipeline_storage_typesafe = setupProject(
+  project,
+  "common/pipeline_storage_typesafe",
+  localDependencies = Seq(pipeline_storage),
+  externalDependencies = CatalogueDependencies.pipelineStorageTypesafeDependencies
+)
+
 lazy val api = setupProject(
   project,
   "api/api",
@@ -147,7 +154,7 @@ lazy val relation_embedder = setupProject(
 lazy val router = setupProject(
   project,
   "pipeline/relation_embedder/router",
-  localDependencies = Seq(internal_model, elasticsearch, pipeline_storage),
+  localDependencies = Seq(internal_model, elasticsearch, pipeline_storage_typesafe),
   externalDependencies = CatalogueDependencies.routerDependencies
 )
 

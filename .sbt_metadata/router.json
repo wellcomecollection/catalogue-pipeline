@@ -4,6 +4,6 @@
   "dependencyIds" : [
     "internal_model",
     "elasticsearch",
-    "pipeline_storage"
+    "pipeline_storage_typesafe"
   ]
 }
