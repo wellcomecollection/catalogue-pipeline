@@ -650,9 +650,24 @@ class WorksIncludesTest
     val work0 = work("0", WorkType.Collection)
     val workA = work("0/a", WorkType.Section)
     val workB = work("0/a/b", WorkType.Standard)
-    val workC = work("0/a/c", WorkType.Series)
     val workD = work("0/a/d", WorkType.Standard)
     val workE = work("0/a/c/e", WorkType.Standard)
+
+    val workC =
+      indexedWork(
+        sourceIdentifier = createSourceIdentifierWith(value = "0/a/c"),
+        relations = Relations(
+          ancestors = List(
+            Relation.fromIndexedWork(work0, 0, 1, 5),
+            Relation.fromIndexedWork(workA, 1, 3, 4),
+          ),
+          children = List(Relation.fromIndexedWork(workE, 3, 0, 0)),
+          siblingsPreceding = List(Relation.fromIndexedWork(workB, 2, 0, 0)),
+          siblingsSucceeding = List(Relation.fromIndexedWork(workD, 2, 0, 0)),
+        )
+      ).collectionPath(CollectionPath(path = "0/a/c"))
+        .title("0/a/c")
+        .workType(WorkType.Series)
 
     def storeWorks(index: Index) =
       insertIntoElasticsearch(index, work0, workA, workB, workC, workD, workE)
@@ -676,6 +691,8 @@ class WorksIncludesTest
                 "title": "0/a/c/e",
                 "alternativeTitles": [],
                 "availableOnline": false,
+                "totalParts": 0,
+                "totalDescendentParts": 0,
                 "type": "Work"
               }]
             }
@@ -704,12 +721,16 @@ class WorksIncludesTest
                   "title": "0/a",
                   "alternativeTitles": [],
                   "availableOnline": false,
+                  "totalParts": 3,
+                  "totalDescendentParts": 4,
                   "type": "Section",
                   "partOf": [{
                     "id": "${work0.state.canonicalId}",
                     "title": "0",
                     "alternativeTitles": [],
                     "availableOnline": false,
+                    "totalParts": 1,
+                    "totalDescendentParts": 5,
                     "type": "Collection",
                     "partOf": []
                   }
@@ -740,6 +761,8 @@ class WorksIncludesTest
                 "title": "0/a/b",
                 "alternativeTitles": [],
                 "availableOnline": false,
+                "totalParts": 0,
+                "totalDescendentParts": 0,
                 "type": "Work"
               }]
             }
@@ -767,6 +790,8 @@ class WorksIncludesTest
                 "title": "0/a/d",
                 "alternativeTitles": [],
                 "availableOnline": false,
+                "totalParts": 0,
+                "totalDescendentParts": 0,
                 "type": "Work"
               }]
             }

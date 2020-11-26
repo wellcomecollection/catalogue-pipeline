@@ -1,6 +1,8 @@
 package uk.ac.wellcome.models.work.internal
 
-import WorkState.Merged
+import java.time.Instant
+
+import WorkState.{Indexed, Merged}
 
 /** Holds relations for a particular work.
   *
@@ -54,4 +56,37 @@ object Relation {
       numChildren = numChildren,
       numDescendents = numDescendents,
     )
+
+  def fromIndexedWork(work: Work[Indexed],
+                      depth: Int,
+                      numChildren: Int,
+                      numDescendents: Int): Relation[DataState.Identified] =
+    Relation[DataState.Identified](
+      data = work.data,
+      id = IdState.Identified(
+        canonicalId = work.state.canonicalId,
+        sourceIdentifier = work.state.sourceIdentifier
+      ),
+      depth = depth,
+      numChildren = numChildren,
+      numDescendents = numDescendents
+    )
+
+  implicit class ToWork(relation: Relation[DataState.Identified]) {
+    def toWork: Work.Visible[Indexed] =
+      // NOTE: The numberOfSources, modifiedTime and version are not currently
+      // stored for related works, so there is no way to recover them here.
+      // Here we just initialise them to default values, which should not be an
+      // issue (at least for now), due to the API not serialising them.
+      Work.Visible[Indexed](
+        data = relation.data,
+        version = 1,
+        state = Indexed(
+          canonicalId = relation.id.canonicalId,
+          sourceIdentifier = relation.id.sourceIdentifier,
+          derivedData = DerivedData(relation.data),
+          modifiedTime = Instant.ofEpochSecond(0)
+        ),
+      )
+  }
 }

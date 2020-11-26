@@ -465,7 +465,6 @@ class DisplayWorkTest
   }
 
   describe("related works") {
-    val work = indexedWork()
     val workA = indexedWork()
     val workB = indexedWork()
     val workC = indexedWork()
@@ -473,51 +472,75 @@ class DisplayWorkTest
     val workE = indexedWork()
     val workF = indexedWork()
 
-    val relatedWorks = RelatedWorks(
-      partOf = Some(
-        List(
-          RelatedWork(
-            workB,
-            RelatedWorks.partOf(RelatedWork(workA))
-          )
-        )
-      ),
-      parts = Some(List(RelatedWork(workE), RelatedWork(workF))),
-      precededBy = Some(List(RelatedWork(workC))),
-      succeededBy = Some(List(RelatedWork(workD))),
+    val work = indexedWork(
+      relations = Relations(
+        ancestors = List(
+          Relation.fromIndexedWork(workA, 0, 1, 5),
+          Relation.fromIndexedWork(workB, 1, 3, 4)
+        ),
+        children = List(
+          Relation.fromIndexedWork(workE, 3, 0, 0),
+          Relation.fromIndexedWork(workF, 3, 0, 0)
+        ),
+        siblingsPreceding = List(Relation.fromIndexedWork(workC, 2, 0, 0)),
+        siblingsSucceeding = List(Relation.fromIndexedWork(workD, 2, 0, 0)),
+      )
     )
 
     it("includes nested partOf") {
       val displayWork =
-        DisplayWork(work, WorksIncludes(WorkInclude.PartOf), relatedWorks)
+        DisplayWork(work, WorksIncludes(WorkInclude.PartOf))
       displayWork.partOf.isEmpty shouldBe false
       val partOf: List[DisplayWork] = displayWork.partOf.get
       partOf.map(_.id) shouldBe List(workB.state.canonicalId)
-      partOf(0).partOf shouldBe Some(List(DisplayWork(workA)))
+      partOf(0).partOf shouldBe Some(
+        List(
+          DisplayWork(workA).copy(
+            totalParts = Some(1),
+            totalDescendentParts = Some(5),
+            partOf = Some(Nil)
+          )
+        )
+      )
     }
 
     it("includes parts") {
       val displayWork =
-        DisplayWork(work, WorksIncludes(WorkInclude.Parts), relatedWorks)
+        DisplayWork(work, WorksIncludes(WorkInclude.Parts))
       displayWork.parts shouldBe Some(
-        List(DisplayWork(workE), DisplayWork(workF))
+        List(
+          DisplayWork(workE)
+            .copy(totalParts = Some(0), totalDescendentParts = Some(0)),
+          DisplayWork(workF)
+            .copy(totalParts = Some(0), totalDescendentParts = Some(0)),
+        )
       )
     }
 
     it("includes precededBy") {
       val displayWork =
-        DisplayWork(work, WorksIncludes(WorkInclude.PrecededBy), relatedWorks)
-      displayWork.precededBy shouldBe Some(List(DisplayWork(workC)))
+        DisplayWork(work, WorksIncludes(WorkInclude.PrecededBy))
+      displayWork.precededBy shouldBe Some(
+        List(
+          DisplayWork(workC)
+            .copy(totalParts = Some(0), totalDescendentParts = Some(0))
+        )
+      )
     }
 
     it("includes succeededBy") {
       val displayWork =
-        DisplayWork(work, WorksIncludes(WorkInclude.SucceededBy), relatedWorks)
-      displayWork.succeededBy shouldBe Some(List(DisplayWork(workD)))
+        DisplayWork(work, WorksIncludes(WorkInclude.SucceededBy))
+      displayWork.succeededBy shouldBe Some(
+        List(
+          DisplayWork(workD)
+            .copy(totalParts = Some(0), totalDescendentParts = Some(0))
+        )
+      )
     }
 
     it("does not include relations when not requested") {
-      val displayWork = DisplayWork(work, WorksIncludes.none, relatedWorks)
+      val displayWork = DisplayWork(work, WorksIncludes())
       displayWork.parts shouldBe None
       displayWork.partOf shouldBe None
       displayWork.precededBy shouldBe None

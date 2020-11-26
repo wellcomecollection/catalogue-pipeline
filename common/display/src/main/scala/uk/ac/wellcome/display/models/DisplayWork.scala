@@ -2,13 +2,7 @@ package uk.ac.wellcome.display.models
 
 import io.circe.generic.extras.JsonKey
 import io.swagger.v3.oas.annotations.media.Schema
-import uk.ac.wellcome.models.work.internal.{
-  RelatedWork,
-  RelatedWorks,
-  Work,
-  WorkState,
-  WorkType
-}
+import uk.ac.wellcome.models.work.internal._
 import WorkState.Indexed
 
 @Schema(
@@ -124,6 +118,14 @@ case class DisplayWork(
     `type` = "List[Work]",
     description = "Sibling works later in a series."
   ) succeededBy: Option[List[DisplayWork]] = None,
+  @Schema(
+    `type` = "Integer",
+    description = "Number of child works."
+  ) totalParts: Option[Int] = None,
+  @Schema(
+    `type` = "Integer",
+    description = "Number of descendent works."
+  ) totalDescendentParts: Option[Int] = None,
   @JsonKey("type") @Schema(name = "type") ontologyType: String = "Work"
 )
 
@@ -187,48 +189,65 @@ case object DisplayWork {
           Some(work.data.images.map(DisplayWorkImageInclude(_)))
         else None,
       ontologyType = displayWorkType(work.data.workType),
+      partOf =
+        if (includes.partOf)
+          Some(
+            work.state.relations.ancestors.foldLeft(List.empty[DisplayWork]) {
+              case (partOf, relation) =>
+                List(
+                  DisplayWork(
+                    relation.toWork,
+                    relation.numChildren,
+                    relation.numDescendents).copy(partOf = Some(partOf)))
+            }
+          )
+        else None,
+      parts =
+        if (includes.parts)
+          Some(
+            work.state.relations.children.map { relation =>
+              DisplayWork(
+                relation.toWork,
+                relation.numChildren,
+                relation.numDescendents)
+            }
+          )
+        else None,
+      precededBy =
+        if (includes.precededBy)
+          Some(
+            work.state.relations.siblingsPreceding.map { relation =>
+              DisplayWork(
+                relation.toWork,
+                relation.numChildren,
+                relation.numDescendents)
+            }
+          )
+        else None,
+      succeededBy =
+        if (includes.succeededBy)
+          Some(
+            work.state.relations.siblingsSucceeding.map { relation =>
+              DisplayWork(
+                relation.toWork,
+                relation.numChildren,
+                relation.numDescendents)
+            }
+          )
+        else None,
     )
 
   def apply(work: Work.Visible[Indexed]): DisplayWork =
     DisplayWork(work = work, includes = WorksIncludes.none)
 
   def apply(work: Work.Visible[Indexed],
-            includes: WorksIncludes,
-            relatedWorks: RelatedWorks): DisplayWork =
-    DisplayWork(work, includes).copy(
-      parts =
-        if (includes.parts)
-          relatedWorks.parts.map { parts =>
-            parts.collect {
-              case RelatedWork(work: Work.Visible[Indexed], related) =>
-                DisplayWork(work, includes, related)
-            }
-          } else None,
-      partOf =
-        if (includes.partOf)
-          relatedWorks.partOf.map { partOf =>
-            partOf.collect {
-              case RelatedWork(work: Work.Visible[Indexed], related) =>
-                DisplayWork(work, includes, related)
-            }
-          } else None,
-      precededBy =
-        if (includes.precededBy)
-          relatedWorks.precededBy.map { precededBy =>
-            precededBy.collect {
-              case RelatedWork(work: Work.Visible[Indexed], related) =>
-                DisplayWork(work, includes, related)
-            }
-          } else None,
-      succeededBy =
-        if (includes.succeededBy)
-          relatedWorks.succeededBy.map { succeededBy =>
-            succeededBy.collect {
-              case RelatedWork(work: Work.Visible[Indexed], related) =>
-                DisplayWork(work, includes, related)
-            }
-          } else None,
-    )
+            totalParts: Int,
+            totalDescendentParts: Int): DisplayWork =
+    DisplayWork(work = work)
+      .copy(
+        totalParts = Some(totalParts),
+        totalDescendentParts = Some(totalDescendentParts)
+      )
 
   def displayWorkType(workType: WorkType): String = workType match {
     case WorkType.Standard   => "Work"
