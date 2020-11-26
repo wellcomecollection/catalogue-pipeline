@@ -654,16 +654,16 @@ class WorksIncludesTest
     val workE = work("0/a/c/e", WorkType.Standard)
 
     val workC =
-      identifiedWork(
+      indexedWork(
         sourceIdentifier = createSourceIdentifierWith(value = "0/a/c"),
         relations = Relations(
           ancestors = List(
-            Relation.fromIdentifiedWork(work0, 0),
-            Relation.fromIdentifiedWork(workA, 1),
+            Relation.fromIndexedWork(work0, 0, 1, 5),
+            Relation.fromIndexedWork(workA, 1, 3, 4),
           ),
-          children = List(Relation.fromIdentifiedWork(workE, 3)),
-          siblingsPreceding = List(Relation.fromIdentifiedWork(workB, 2)),
-          siblingsSucceeding = List(Relation.fromIdentifiedWork(workD, 2)),
+          children = List(Relation.fromIndexedWork(workE, 3, 0, 0)),
+          siblingsPreceding = List(Relation.fromIndexedWork(workB, 2, 0, 0)),
+          siblingsSucceeding = List(Relation.fromIndexedWork(workD, 2, 0, 0)),
         )
       ).collectionPath(CollectionPath(path = "0/a/c"))
         .title("0/a/c")

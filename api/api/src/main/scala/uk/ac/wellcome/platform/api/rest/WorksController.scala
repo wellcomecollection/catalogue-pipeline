@@ -61,9 +61,9 @@ class WorksController(elasticsearchService: ElasticsearchService,
             case Right(Some(work: Work.Visible[Indexed])) =>
               workFound(work, includes)
             case Right(Some(work: Work.Redirected[Indexed])) =>
-              Future.successful(workRedirect(work))
+              workRedirect(work)
             case Right(Some(work: Work.Invisible[Indexed])) =>
-              Future.successful(gone("This work has been deleted"))
+              gone("This work has been deleted")
             case Right(None) =>
               notFound(s"Work not found for identifier $id")
             case Left(err) => elasticError(err)
