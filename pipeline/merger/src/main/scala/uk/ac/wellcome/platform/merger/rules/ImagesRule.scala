@@ -26,6 +26,8 @@ object ImagesRule extends FieldMergeRule {
       }
     )
 
+  // In future this may be changed to `digmiro` for all works
+  // where we know that the Miro and METS images are identical
   private lazy val getOnlyMetsDigaidsImages = new FlatImageMergeRule {
     val isDefinedForTarget: WorkPredicate =
       sierraDigaids and sierraPictureOrEphemera

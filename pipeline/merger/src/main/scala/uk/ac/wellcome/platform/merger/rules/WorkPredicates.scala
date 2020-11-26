@@ -63,6 +63,8 @@ object WorkPredicates {
         format(Format.Pictures)
     )
 
+  // In future this may be changed to `digmiro` for all works
+  // where we know that the Miro and METS images are identical
   val sierraDigaids: WorkPredicate =
     satisfiesAll(sierraWork, hasDigcode("digaids"))
 

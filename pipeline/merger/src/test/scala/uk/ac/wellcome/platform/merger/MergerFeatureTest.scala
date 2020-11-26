@@ -109,6 +109,30 @@ class MergerFeatureTest
         .images should contain only mets.singleImage
     }
 
+    Scenario("An AIDS poster Sierra picture, a METS and a Miro are matched") {
+      Given(
+        "a Sierra picture with digcode `digaids`, a METS work and a Miro work")
+      val sierraDigaidsPicture = sierraSourceWork()
+        .items(List(createPhysicalItem))
+        .format(Format.Pictures)
+        .otherIdentifiers(List(createDigcodeIdentifier("digaids")))
+      val mets = metsSourceWork()
+      val miro = miroSourceWork()
+
+      When("the works are merged")
+      val outcome = merger.merge(Seq(sierraDigaidsPicture, mets, miro))
+
+      Then("the METS work and the Miro work are redirected to the Sierra work")
+      outcome.getMerged(mets) should beRedirectedTo(sierraDigaidsPicture)
+      outcome.getMerged(miro) should beRedirectedTo(sierraDigaidsPicture)
+
+      And("the Sierra work contains only the METS images")
+      outcome
+        .getMerged(sierraDigaidsPicture)
+        .data
+        .images should contain only mets.singleImage
+    }
+
     Scenario("A physical and a digital Sierra work are matched") {
       Given("a pair of a physical Sierra work and a digital Sierra work")
       val (digitalSierra, physicalSierra) = sierraSourceWorkPair()
