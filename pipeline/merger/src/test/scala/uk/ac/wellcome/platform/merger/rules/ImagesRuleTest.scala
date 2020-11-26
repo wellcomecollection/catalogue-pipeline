@@ -102,6 +102,33 @@ class ImagesRuleTest
       result.map(_.location) should contain theSameElementsAs
         miroWorks.map(_.data.images.head.location)
     }
+
+    it(
+      "does not use Miro images when a METS image is present for a digaids Sierra work") {
+      val metsWork = createInvisibleMetsSourceWorkWith(numImages = 1)
+      val miroWork = miroSourceWork()
+      val sierraDigaidsWork = sierraSourceWork()
+        .format(Format.Pictures)
+        .otherIdentifiers(List(createDigcodeIdentifier("digaids")))
+      val result =
+        ImagesRule.merge(sierraDigaidsWork, List(miroWork, metsWork)).data
+
+      result should have length 1
+      result.map(_.location) should contain only metsWork.data.images.head.location
+    }
+
+    it(
+      "will use Miro images for digaids Sierra works when no METS image is present") {
+      val miroWork = miroSourceWork()
+      val sierraDigaidsWork = sierraSourceWork()
+        .format(Format.Pictures)
+        .otherIdentifiers(List(createDigcodeIdentifier("digaids")))
+      val result =
+        ImagesRule.merge(sierraDigaidsWork, List(miroWork)).data
+
+      result should have length 1
+      result.map(_.location) should contain only miroWork.data.images.head.location
+    }
   }
 
   describe("the flat image merging rule") {
