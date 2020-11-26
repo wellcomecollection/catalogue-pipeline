@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.merger.rules
 import org.scalatest.Inside
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.generators.SierraWorkGenerators
+import uk.ac.wellcome.models.work.generators.SourceWorkGenerators
 import uk.ac.wellcome.models.work.internal.{
   AccessCondition,
   AccessStatus,
@@ -15,15 +15,14 @@ import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 class ThumbnailRuleTest
     extends AnyFunSpec
     with Matchers
-    with SierraWorkGenerators
+    with SourceWorkGenerators
     with Inside {
 
   val physicalSierraWork = sierraPhysicalSourceWork()
 
   val digitalSierraWork = sierraDigitalSourceWork()
 
-  val metsWork = sourceWork(createMetsSourceIdentifier)
-    .items(List(createDigitalItem))
+  val metsWork = metsSourceWork()
     .thumbnail(
       DigitalLocationDeprecated(
         url = "mets.com/thumbnail.jpg",
@@ -32,31 +31,7 @@ class ThumbnailRuleTest
       )
     )
 
-  val miroWorks = (0 to 3)
-    .map { i =>
-      f"V$i%04d"
-    }
-    .map { id =>
-      sourceWork(createMiroSourceIdentifierWith(id))
-        .thumbnail(
-          DigitalLocationDeprecated(
-            url = s"https://iiif.wellcomecollection.org/$id.jpg",
-            locationType = LocationType("thumbnail-image"),
-            license = Some(License.CCBY)
-          )
-        )
-        .items(
-          List(
-            createUnidentifiableItemWith(
-              locations = List(
-                createDigitalLocationWith(
-                  locationType = createImageLocationType
-                )
-              )
-            )
-          )
-        )
-    }
+  val miroWorks = (0 to 3).map(_ => miroSourceWork())
 
   val restrictedDigitalWork =
     sierraSourceWork().items(

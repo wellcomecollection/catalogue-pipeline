@@ -3,18 +3,14 @@ package uk.ac.wellcome.platform.merger.rules
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{Inside, Inspectors}
-import uk.ac.wellcome.models.work.generators.{
-  MetsWorkGenerators,
-  MiroWorkGenerators
-}
+import uk.ac.wellcome.models.work.generators.SourceWorkGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 
 class OtherIdentifiersRuleTest
     extends AnyFunSpec
     with Matchers
-    with MetsWorkGenerators
-    with MiroWorkGenerators
+    with SourceWorkGenerators
     with Inside
     with Inspectors {
   val nothingWork: Work.Visible[WorkState.Source] = sourceWork(
@@ -49,9 +45,7 @@ class OtherIdentifiersRuleTest
         createPhysicalItem
       }.toList)
 
-  val calmWork: Work.Visible[WorkState.Source] =
-    sourceWork(sourceIdentifier = createCalmSourceIdentifier)
-      .items(List(createCalmItem))
+  val calmWork: Work.Visible[WorkState.Source] = calmSourceWork()
 
   val mergeCandidate: Work.Visible[WorkState.Source] = sierraSourceWork()
 
