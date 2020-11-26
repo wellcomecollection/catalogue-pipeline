@@ -45,7 +45,8 @@ trait ImageGenerators
   def createIdentifiedMergedImageWith(
     imageId: IdState.Identified =
       IdState.Identified(createCanonicalId, createSourceIdentifier),
-    locations: List[DigitalLocationDeprecated] = List(createDigitalLocation),
+    locations: List[DigitalLocationDeprecated] = List(
+      createDigitalLocationWith(locationType = createImageLocationType)),
     version: Int = 1,
     modifiedTime: Instant = instantInLast30Days,
     parentWork: Work.Visible[WorkState.Identified] = sierraIdentifiedWork(),

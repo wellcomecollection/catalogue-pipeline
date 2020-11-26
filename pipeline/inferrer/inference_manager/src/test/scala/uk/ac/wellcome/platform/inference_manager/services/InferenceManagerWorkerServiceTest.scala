@@ -132,13 +132,14 @@ class InferenceManagerWorkerServiceTest
 
   it("places images that fail inference on the DLQ") {
     val image404 = createIdentifiedMergedImageWith(
-      location = createDigitalLocationWith(url = "lost_image")
+      locations = List(createDigitalLocationWith(url = "lost_image"))
     )
     val image400 = createIdentifiedMergedImageWith(
-      location = createDigitalLocationWith(url = "malformed_image_url")
+      locations = List(createDigitalLocationWith(url = "malformed_image_url"))
     )
     val image500 = createIdentifiedMergedImageWith(
-      location = createDigitalLocationWith(url = "extremely_cursed_image")
+      locations =
+        List(createDigitalLocationWith(url = "extremely_cursed_image"))
     )
     withResponsesAndFixtures(
       inferrer = url =>

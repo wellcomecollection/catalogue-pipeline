@@ -17,6 +17,7 @@ import akka.stream.{IOResult, Materializer}
 import akka.stream.scaladsl.{FileIO, Flow, Keep, Sink}
 import akka.util.ByteString
 import software.amazon.awssdk.services.sqs.model.Message
+import uk.ac.wellcome.models.work.internal.DigitalLocationDeprecated
 import uk.ac.wellcome.platform.inference_manager.models.DownloadedImage
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -56,10 +57,15 @@ class ImageDownloader[Ctx](
     Paths.get(root, image.id.canonicalId, "default.jpg").toAbsolutePath
 
   private def createImageFileRequest(
-    image: MergedIdentifiedImage): (HttpRequest, MergedIdentifiedImage) = {
-    val uri = getImageUri(image.locations.url)
-    (HttpRequest(method = HttpMethods.GET, uri = uri), image)
-  }
+    image: MergedIdentifiedImage): (HttpRequest, MergedIdentifiedImage) =
+    getImageUri(image.locations) match {
+      case Some(uri) =>
+        (HttpRequest(method = HttpMethods.GET, uri = uri), image)
+      case None =>
+        throw new RuntimeException(
+          s"Could not extract an image URL from locations on image ${image.id.sourceIdentifier}"
+        )
+    }
 
   private def saveImageFile: PartialFunction[
     (Try[HttpResponse], MergedIdentifiedImage),
@@ -74,34 +80,40 @@ class ImageDownloader[Ctx](
         }
     case (Success(failedResponse), image) =>
       failedResponse.discardEntityBytes()
-      Future.failed(throw new RuntimeException(
-        s"Image request for ${image.locations.url} failed with status ${failedResponse.status}"))
+      Future.failed(
+        throw new RuntimeException(s"Image request for ${getImageUri(
+          image.locations)} failed with status ${failedResponse.status}"))
     case (Failure(exception), _) => Future.failed(exception)
   }
 
-  private def getImageUri(locationUrl: String): Uri =
-    Uri(locationUrl) match {
-      case uri @ Uri(_, _, path, _, _)
-          if path.endsWith("info.json", ignoreTrailingSlash = true) =>
-        uri.withPath(
-          Uri.Path(
-            path
-              .toString()
-              .replace(
-                "info.json",
-                if (uri.authority.host.address() contains "dlcs") {
-                  // DLCS provides a thumbnails service which only serves certain sizes of image.
-                  // Requests for these don't touch the image server and so, as we're performing
-                  // lots of requests, we use 400x400 thumbnails and resize them ourselves later on.
-                  "full/!400,400/0/default.jpg"
-                } else {
-                  "full/224,224/0/default.jpg"
-                }
+  private def getImageUri(
+    locations: List[DigitalLocationDeprecated]): Option[Uri] =
+    locations
+      .find(_.locationType.id == "iiif-image")
+      .map { location =>
+        Uri(location.url) match {
+          case uri @ Uri(_, _, path, _, _)
+              if path.endsWith("info.json", ignoreTrailingSlash = true) =>
+            uri.withPath(
+              Uri.Path(
+                path
+                  .toString()
+                  .replace(
+                    "info.json",
+                    if (uri.authority.host.address() contains "dlcs") {
+                      // DLCS provides a thumbnails service which only serves certain sizes of image.
+                      // Requests for these don't touch the image server and so, as we're performing
+                      // lots of requests, we use 400x400 thumbnails and resize them ourselves later on.
+                      "full/!400,400/0/default.jpg"
+                    } else {
+                      "full/224,224/0/default.jpg"
+                    }
+                  )
               )
-          )
-        )
-      case other => other
-    }
+            )
+          case other => other
+        }
+      }
 }
 
 class DefaultFileWriter(root: String) extends FileWriter {
