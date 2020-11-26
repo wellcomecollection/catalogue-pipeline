@@ -35,7 +35,7 @@ class ImagesIncludesTest extends ApiImagesTestBase with ContributorGenerators {
               |    {
               |      "type": "Image",
               |      "id": "${image.id.canonicalId}",
-              |      "locations": [${location(image.locations)}],
+              |      "locations": [${locations(image.locations)}],
               |      "source": {
               |        "id": "${source.id}",
               |        "title": "Apple agitator",
@@ -64,7 +64,7 @@ class ImagesIncludesTest extends ApiImagesTestBase with ContributorGenerators {
               |  $singleImageResult,
               |  "type": "Image",
               |  "id": "${image.id.canonicalId}",
-              |  "locations": [${location(image.locations)}],
+              |  "locations": [${locations(image.locations)}],
               |  "source": {
               |    "id": "${source.id}",
               |    "title": "Apple agitator",
@@ -93,7 +93,7 @@ class ImagesIncludesTest extends ApiImagesTestBase with ContributorGenerators {
               |    {
               |      "type": "Image",
               |      "id": "${image.id.canonicalId}",
-              |      "locations": [${location(image.locations)}],
+              |      "locations": [${locations(image.locations)}],
               |      "source": {
               |        "id": "${source.id}",
               |        "title": "Apple agitator",
@@ -122,7 +122,7 @@ class ImagesIncludesTest extends ApiImagesTestBase with ContributorGenerators {
               |  $singleImageResult,
               |  "type": "Image",
               |  "id": "${image.id.canonicalId}",
-              |  "locations": [${location(image.locations)}],
+              |  "locations": [${locations(image.locations)}],
               |  "source": {
               |    "id": "${source.id}",
               |    "title": "Apple agitator",

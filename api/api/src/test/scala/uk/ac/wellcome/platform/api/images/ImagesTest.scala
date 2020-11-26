@@ -30,7 +30,7 @@ class ImagesTest extends ApiImagesTestBase with SierraWorkGenerators {
              |{
              |  $singleImageResult,
              |  "id": "${image.id.canonicalId}",
-             |  "locations": [${digitalLocation(image.locations)}],
+             |  "locations": [${locations(image.locations)}],
              |  "source": ${imageSource(image.source)}
              |}""".stripMargin
         }
@@ -155,7 +155,7 @@ class ImagesTest extends ApiImagesTestBase with SierraWorkGenerators {
                  |{
                  |  $singleImageResult,
                  |  "id": "${defaultImage.id.canonicalId}",
-                 |  "locations": [${location(defaultImage.locations)}],
+                 |  "locations": [${locations(defaultImage.locations)}],
                  |  "source": ${imageSource(defaultImage.source)}
                  }""".stripMargin
           }
@@ -168,7 +168,7 @@ class ImagesTest extends ApiImagesTestBase with SierraWorkGenerators {
                  |{
                  |  $singleImageResult,
                  |  "id": "${alternativeImage.id.canonicalId}",
-                 |  "locations": [${location(alternativeImage.locations)}],
+                 |  "locations": [${locations(alternativeImage.locations)}],
                  |  "source": ${imageSource(alternativeImage.source)}
                  }""".stripMargin
           }
