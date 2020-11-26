@@ -91,7 +91,7 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
                               sources: Seq[Work[Source]]) =
     (target :: sources.toList).exists { work =>
       work.data.items.exists { item =>
-        item.locations.exists(_.isRestrictedOrClosed)
+        item.locations.exists(_.hasRestrictions)
       }
     }
 }

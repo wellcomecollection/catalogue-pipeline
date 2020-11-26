@@ -24,6 +24,15 @@ class ThumbnailRuleTest
 
   val calmWork = calmSourceWork()
 
+  val calmWorkWithAdvisory = calmSourceWork().items(
+    List(
+      createUnidentifiableItemWith(locations = List(createPhysicalLocationWith(
+        locationType = LocationType("scmac"),
+        label = "Closed stores Arch. & MSS",
+        accessConditions =
+          List(AccessCondition(status = Some(AccessStatus.OpenWithAdvisory)))
+      )))))
+
   val metsWork = metsSourceWork()
     .thumbnail(
       DigitalLocationDeprecated(
@@ -100,6 +109,13 @@ class ThumbnailRuleTest
 
   it("suppresses thumbnails when restricted access status") {
     inside(ThumbnailRule.merge(restrictedDigitalWork, miroWorks :+ metsWork)) {
+      case FieldMergeResult(thumbnail, _) =>
+        thumbnail shouldBe None
+    }
+  }
+
+  it("suppresses thumbnails when an archive is open with advisory") {
+    inside(ThumbnailRule.merge(calmWorkWithAdvisory, miroWorks :+ metsWork)) {
       case FieldMergeResult(thumbnail, _) =>
         thumbnail shouldBe None
     }
