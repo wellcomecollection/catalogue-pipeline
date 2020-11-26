@@ -194,7 +194,11 @@ case object DisplayWork {
           Some(
             work.state.relations.ancestors.foldLeft(List.empty[DisplayWork]) {
               case (partOf, relation) =>
-                List(DisplayWork(relation.toWork, relation.numChildren, relation.numDescendents).copy(partOf = Some(partOf)))
+                List(
+                  DisplayWork(
+                    relation.toWork,
+                    relation.numChildren,
+                    relation.numDescendents).copy(partOf = Some(partOf)))
             }
           )
         else None,
@@ -202,7 +206,10 @@ case object DisplayWork {
         if (includes.parts)
           Some(
             work.state.relations.children.map { relation =>
-              DisplayWork(relation.toWork, relation.numChildren, relation.numDescendents)
+              DisplayWork(
+                relation.toWork,
+                relation.numChildren,
+                relation.numDescendents)
             }
           )
         else None,
@@ -210,7 +217,10 @@ case object DisplayWork {
         if (includes.precededBy)
           Some(
             work.state.relations.siblingsPreceding.map { relation =>
-              DisplayWork(relation.toWork, relation.numChildren, relation.numDescendents)
+              DisplayWork(
+                relation.toWork,
+                relation.numChildren,
+                relation.numDescendents)
             }
           )
         else None,
@@ -218,7 +228,10 @@ case object DisplayWork {
         if (includes.succeededBy)
           Some(
             work.state.relations.siblingsSucceeding.map { relation =>
-              DisplayWork(relation.toWork, relation.numChildren, relation.numDescendents)
+              DisplayWork(
+                relation.toWork,
+                relation.numChildren,
+                relation.numDescendents)
             }
           )
         else None,
@@ -227,7 +240,9 @@ case object DisplayWork {
   def apply(work: Work.Visible[Indexed]): DisplayWork =
     DisplayWork(work = work, includes = WorksIncludes.none)
 
-  def apply(work: Work.Visible[Indexed], totalParts: Int, totalDescendentParts: Int): DisplayWork =
+  def apply(work: Work.Visible[Indexed],
+            totalParts: Int,
+            totalDescendentParts: Int): DisplayWork =
     DisplayWork(work = work)
       .copy(
         totalParts = Some(totalParts),

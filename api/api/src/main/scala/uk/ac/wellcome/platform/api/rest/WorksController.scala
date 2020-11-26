@@ -71,15 +71,13 @@ class WorksController(elasticsearchService: ElasticsearchService,
       }
     }
 
-
   def workRedirect(work: Work.Redirected[Indexed]): Route =
     extractPublicUri { uri =>
       val newPath = (work.redirect.canonicalId :: uri.path.reverse.tail).reverse
       redirect(uri.withPath(newPath), Found)
     }
 
-  def workFound(work: Work.Visible[Indexed],
-                includes: WorksIncludes): Route =
+  def workFound(work: Work.Visible[Indexed], includes: WorksIncludes): Route =
     complete(
       ResultResponse(
         context = contextUri,
