@@ -495,7 +495,11 @@ class DisplayWorkTest
       partOf.map(_.id) shouldBe List(workB.state.canonicalId)
       partOf(0).partOf shouldBe Some(
         List(
-          DisplayWork(workA).copy(partOf = Some(Nil))
+          DisplayWork(workA).copy(
+            totalParts = Some(1),
+            totalDescendentParts = Some(5),
+            partOf = Some(Nil)
+          )
         )
       )
     }
@@ -504,20 +508,35 @@ class DisplayWorkTest
       val displayWork =
         DisplayWork(work, WorksIncludes(WorkInclude.Parts))
       displayWork.parts shouldBe Some(
-        List(DisplayWork(workE), DisplayWork(workF))
+        List(
+          DisplayWork(workE)
+            .copy(totalParts = Some(0), totalDescendentParts = Some(0)),
+          DisplayWork(workF)
+            .copy(totalParts = Some(0), totalDescendentParts = Some(0)),
+        )
       )
     }
 
     it("includes precededBy") {
       val displayWork =
         DisplayWork(work, WorksIncludes(WorkInclude.PrecededBy))
-      displayWork.precededBy shouldBe Some(List(DisplayWork(workC)))
+      displayWork.precededBy shouldBe Some(
+        List(
+          DisplayWork(workC)
+            .copy(totalParts = Some(0), totalDescendentParts = Some(0))
+        )
+      )
     }
 
     it("includes succeededBy") {
       val displayWork =
         DisplayWork(work, WorksIncludes(WorkInclude.SucceededBy))
-      displayWork.succeededBy shouldBe Some(List(DisplayWork(workD)))
+      displayWork.succeededBy shouldBe Some(
+        List(
+          DisplayWork(workD)
+            .copy(totalParts = Some(0), totalDescendentParts = Some(0))
+        )
+      )
     }
 
     it("does not include relations when not requested") {
