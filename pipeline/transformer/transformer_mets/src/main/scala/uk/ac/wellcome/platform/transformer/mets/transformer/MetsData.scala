@@ -122,7 +122,7 @@ case class MetsData(
       fileReference <- titlePageFileReference
         .orElse(fileReferences.find(ImageUtils.isThumbnail))
       url <- ImageUtils.buildThumbnailUrl(bnumber, fileReference)
-      if accessStatus.forall(shouldCreateImage)
+      if !accessStatus.exists(_.hasRestrictions)
     } yield
       DigitalLocationDeprecated(
         url = url,
@@ -130,18 +130,13 @@ case class MetsData(
         license = license
       )
 
-  private def shouldCreateImage(accessStatus: AccessStatus) =
-    accessStatus match {
-      case AccessStatus.Restricted => false
-      case AccessStatus.Closed     => false
-      case _                       => true
-    }
-
   private def images(version: Int,
                      license: Option[License],
                      accessStatus: Option[AccessStatus])
     : List[UnmergedImage[DataState.Unidentified]] =
-    if (accessStatus.forall(shouldCreateImage)) {
+    if (accessStatus.exists(_.hasRestrictions)) {
+      Nil
+    } else {
       fileReferences
         .filter(ImageUtils.isImage)
         .flatMap { fileReference =>
@@ -159,8 +154,6 @@ case class MetsData(
             )
           }
         }
-    } else {
-      Nil
     }
 
 }
