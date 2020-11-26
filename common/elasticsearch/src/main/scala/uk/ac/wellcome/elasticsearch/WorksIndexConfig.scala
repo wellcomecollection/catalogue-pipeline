@@ -131,7 +131,7 @@ trait WorksIndexConfigFields extends IndexConfigFields {
 
   def images(idState: ObjectField) = objectField("images").fields(
     idState,
-    location("location"),
+    location("locations"),
     version
   )
 
