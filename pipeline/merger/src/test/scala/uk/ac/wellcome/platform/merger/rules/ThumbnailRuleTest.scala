@@ -22,6 +22,8 @@ class ThumbnailRuleTest
 
   val digitalSierraWork = sierraDigitalSourceWork()
 
+  val calmWork = calmSourceWork()
+
   val metsWork = metsSourceWork()
     .thumbnail(
       DigitalLocationDeprecated(
@@ -53,6 +55,14 @@ class ThumbnailRuleTest
   it(
     "chooses the METS thumbnail from a single-item digital METS work for a digital Sierra target") {
     inside(ThumbnailRule.merge(digitalSierraWork, miroWorks :+ metsWork)) {
+      case FieldMergeResult(thumbnail, _) =>
+        thumbnail shouldBe defined
+        thumbnail shouldBe metsWork.data.thumbnail
+    }
+  }
+
+  it("chooses the METS thumbnail for a Calm target") {
+    inside(ThumbnailRule.merge(calmWork, miroWorks :+ metsWork)) {
       case FieldMergeResult(thumbnail, _) =>
         thumbnail shouldBe defined
         thumbnail shouldBe metsWork.data.thumbnail
