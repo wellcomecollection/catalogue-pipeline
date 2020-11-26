@@ -84,4 +84,11 @@ trait IdentifiersGenerators extends RandomGenerators {
       identifierType = IdentifierType("calm-record-id"),
       ontologyType = "Work"
     )
+
+  def createDigcodeIdentifier(digcode: String): SourceIdentifier =
+    SourceIdentifier(
+      value = digcode,
+      identifierType = IdentifierType("wellcome-digcode"),
+      ontologyType = "Work"
+    )
 }
