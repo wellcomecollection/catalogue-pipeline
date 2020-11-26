@@ -2,19 +2,8 @@ package uk.ac.wellcome.display.models
 
 import io.circe.generic.extras.JsonKey
 import io.swagger.v3.oas.annotations.media.Schema
-<<<<<<< HEAD
-import uk.ac.wellcome.models.work.internal.{
-  RelatedWork,
-  RelatedWorks,
-  Work,
-  WorkState,
-  WorkType
-}
-import WorkState.Indexed
-=======
 import uk.ac.wellcome.models.work.internal._
-import WorkState.Identified
->>>>>>> e77806808 (Serialise relations stored on Work)
+import WorkState.Indexed
 
 @Schema(
   name = "Work",

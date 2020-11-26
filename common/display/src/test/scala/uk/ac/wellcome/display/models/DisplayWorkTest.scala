@@ -465,7 +465,6 @@ class DisplayWorkTest
   }
 
   describe("related works") {
-    val work = indexedWork()
     val workA = indexedWork()
     val workB = indexedWork()
     val workC = indexedWork()
@@ -473,18 +472,18 @@ class DisplayWorkTest
     val workE = indexedWork()
     val workF = indexedWork()
 
-    val work = identifiedWork(
+    val work = indexedWork(
       relations = Relations(
         ancestors = List(
-          Relation.fromIdentifiedWork(workA, 0),
-          Relation.fromIdentifiedWork(workB, 1)
+          Relation.fromIndexedWork(workA, 0, 1, 5),
+          Relation.fromIndexedWork(workB, 1, 3, 4)
         ),
         children = List(
-          Relation.fromIdentifiedWork(workE, 3),
-          Relation.fromIdentifiedWork(workF, 3)
+          Relation.fromIndexedWork(workE, 3, 0, 0),
+          Relation.fromIndexedWork(workF, 3, 0, 0)
         ),
-        siblingsPreceding = List(Relation.fromIdentifiedWork(workC, 2)),
-        siblingsSucceeding = List(Relation.fromIdentifiedWork(workD, 2)),
+        siblingsPreceding = List(Relation.fromIndexedWork(workC, 2, 0, 0)),
+        siblingsSucceeding = List(Relation.fromIndexedWork(workD, 2, 0, 0)),
       )
     )
 
