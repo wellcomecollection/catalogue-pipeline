@@ -92,12 +92,13 @@ class MetsXmlTransformerTest
                 createdDate: Instant,
                 manifestations: Map[String, Option[String]] = Map.empty) = {
 
-    val metsLocation = MetsLocation(
+    val metsLocation = MetsSourceData(
       "bucket",
       "path",
       1,
       if (root.nonEmpty) "root.xml" else "nonexistent.xml",
       createdDate,
+      deleted = false,
       manifestations.toList.map { case (file, _) => file }
     )
 
