@@ -84,7 +84,7 @@ case class WorkData[State <: DataState](
   duration: Option[Int] = None,
   items: List[Item[State#MaybeId]] = Nil,
   collectionPath: Option[CollectionPath] = None,
-  images: List[UnmergedImage[State]] = Nil,
+  images: List[Image[State#WorkImage]] = Nil,
   workType: WorkType = WorkType.Standard,
 )
 

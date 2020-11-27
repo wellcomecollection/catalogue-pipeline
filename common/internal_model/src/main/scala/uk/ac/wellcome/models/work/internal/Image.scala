@@ -6,7 +6,19 @@ case class Image[State <: ImageState](
   version: Int,
   state: State,
   locations: List[DigitalLocationDeprecated]
-)
+) {
+  def id: String = state.id
+  def sourceIdentifier: SourceIdentifier = state.sourceIdentifier
+
+  def transition[OutState <: ImageState](args: OutState#TransitionArgs = ())(
+    implicit transition: ImageFsm.Transition[State, OutState])
+    : Image[OutState] =
+    Image[OutState](
+      state = transition.state(state, args),
+      version = version,
+      locations = locations
+    )
+}
 
 sealed trait ImageState {
   type SourceDataState <: DataState
@@ -23,15 +35,15 @@ sealed trait ImageState {
   *      |
   *      | (transformer)
   *      ▼
-  *    Source
-  *      |
-  *      | (matcher / merger)
-  *      ▼
-  *    Merged
-  *      |
-  *      | (id minter)
-  *      ▼
-  *  Identified
+  *    Source -----------------------------
+  *      |                                |
+  *      | (matcher / merger)             |
+  *      ▼                                |
+  *    Merged                             | (work id minter)
+  *      |                                |
+  *      | (image id minter)              |
+  *      ▼                                ▼
+  *  Identified                     IdentifiedSource
   *      |
   *      | (inferrer)
   *      ▼
@@ -44,6 +56,14 @@ object ImageState {
     sourceIdentifier: SourceIdentifier
   ) extends ImageState {
     type SourceDataState = DataState.Unidentified
+    type TransitionArgs = Unit
+  }
+
+  case class IdentifiedSource(
+    sourceIdentifier: SourceIdentifier,
+    canonicalId: String
+  ) extends ImageState {
+    type SourceDataState = DataState.Identified
     type TransitionArgs = Unit
   }
 
