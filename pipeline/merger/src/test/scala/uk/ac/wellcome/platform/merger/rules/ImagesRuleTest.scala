@@ -114,7 +114,8 @@ class ImagesRuleTest
         ImagesRule.merge(sierraDigaidsWork, List(miroWork, metsWork)).data
 
       result should have length 1
-      result.map(_.location) should contain only metsWork.data.images.head.location
+      result.map(_.locations) should contain theSameElementsAs metsWork.data.images
+        .map(_.locations)
     }
 
     it(
@@ -127,7 +128,8 @@ class ImagesRuleTest
         ImagesRule.merge(sierraDigaidsWork, List(miroWork)).data
 
       result should have length 1
-      result.map(_.location) should contain only miroWork.data.images.head.location
+      result.map(_.locations) should contain theSameElementsAs miroWork.data.images
+        .map(_.locations)
     }
   }
 
