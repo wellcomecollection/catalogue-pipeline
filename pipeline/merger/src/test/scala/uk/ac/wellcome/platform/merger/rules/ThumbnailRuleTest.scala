@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.merger.rules
 import org.scalatest.Inside
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.generators.SierraWorkGenerators
+import uk.ac.wellcome.models.work.generators.SourceWorkGenerators
 import uk.ac.wellcome.models.work.internal.{
   AccessCondition,
   AccessStatus,
@@ -15,15 +15,25 @@ import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 class ThumbnailRuleTest
     extends AnyFunSpec
     with Matchers
-    with SierraWorkGenerators
+    with SourceWorkGenerators
     with Inside {
 
   val physicalSierraWork = sierraPhysicalSourceWork()
 
   val digitalSierraWork = sierraDigitalSourceWork()
 
-  val metsWork = sourceWork(createMetsSourceIdentifier)
-    .items(List(createDigitalItem))
+  val calmWork = calmSourceWork()
+
+  val calmWorkWithAdvisory = calmSourceWork().items(
+    List(
+      createUnidentifiableItemWith(locations = List(createPhysicalLocationWith(
+        locationType = LocationType("scmac"),
+        label = "Closed stores Arch. & MSS",
+        accessConditions =
+          List(AccessCondition(status = Some(AccessStatus.OpenWithAdvisory)))
+      )))))
+
+  val metsWork = metsSourceWork()
     .thumbnail(
       DigitalLocationDeprecated(
         url = "mets.com/thumbnail.jpg",
@@ -32,31 +42,7 @@ class ThumbnailRuleTest
       )
     )
 
-  val miroWorks = (0 to 3)
-    .map { i =>
-      f"V$i%04d"
-    }
-    .map { id =>
-      sourceWork(createMiroSourceIdentifierWith(id))
-        .thumbnail(
-          DigitalLocationDeprecated(
-            url = s"https://iiif.wellcomecollection.org/$id.jpg",
-            locationType = LocationType("thumbnail-image"),
-            license = Some(License.CCBY)
-          )
-        )
-        .items(
-          List(
-            createUnidentifiableItemWith(
-              locations = List(
-                createDigitalLocationWith(
-                  locationType = createImageLocationType
-                )
-              )
-            )
-          )
-        )
-    }
+  val miroWorks = (0 to 3).map(_ => miroSourceWork())
 
   val restrictedDigitalWork =
     sierraSourceWork().items(
@@ -78,6 +64,14 @@ class ThumbnailRuleTest
   it(
     "chooses the METS thumbnail from a single-item digital METS work for a digital Sierra target") {
     inside(ThumbnailRule.merge(digitalSierraWork, miroWorks :+ metsWork)) {
+      case FieldMergeResult(thumbnail, _) =>
+        thumbnail shouldBe defined
+        thumbnail shouldBe metsWork.data.thumbnail
+    }
+  }
+
+  it("chooses the METS thumbnail for a Calm target") {
+    inside(ThumbnailRule.merge(calmWork, miroWorks :+ metsWork)) {
       case FieldMergeResult(thumbnail, _) =>
         thumbnail shouldBe defined
         thumbnail shouldBe metsWork.data.thumbnail
@@ -115,6 +109,13 @@ class ThumbnailRuleTest
 
   it("suppresses thumbnails when restricted access status") {
     inside(ThumbnailRule.merge(restrictedDigitalWork, miroWorks :+ metsWork)) {
+      case FieldMergeResult(thumbnail, _) =>
+        thumbnail shouldBe None
+    }
+  }
+
+  it("suppresses thumbnails when an archive is open with advisory") {
+    inside(ThumbnailRule.merge(calmWorkWithAdvisory, miroWorks :+ metsWork)) {
       case FieldMergeResult(thumbnail, _) =>
         thumbnail shouldBe None
     }

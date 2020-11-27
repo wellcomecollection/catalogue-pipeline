@@ -7,15 +7,11 @@ import uk.ac.wellcome.models.work.internal._
 import WorkState.{Merged, Source}
 import WorkFsm._
 import SourceWork._
-import uk.ac.wellcome.models.work.generators.{
-  MetsWorkGenerators,
-  MiroWorkGenerators
-}
+import uk.ac.wellcome.models.work.generators.SourceWorkGenerators
 
 class PlatformMergerTest
     extends AnyFunSpec
-    with MetsWorkGenerators
-    with MiroWorkGenerators
+    with SourceWorkGenerators
     with Matchers {
   import Merger.WorkMergingOps
 
@@ -88,9 +84,7 @@ class PlatformMergerTest
       )
       .invisible()
 
-  val calmWork: Work.Visible[Source] =
-    sourceWork(sourceIdentifier = createCalmSourceIdentifier)
-      .items(List(createCalmItem))
+  val calmWork: Work.Visible[Source] = calmSourceWork()
 
   private val merger = PlatformMerger
 

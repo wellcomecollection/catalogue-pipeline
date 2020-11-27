@@ -3,18 +3,14 @@ package uk.ac.wellcome.platform.merger.rules
 import org.scalatest.Inside
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.generators.{
-  MetsWorkGenerators,
-  MiroWorkGenerators
-}
+import uk.ac.wellcome.models.work.generators.SourceWorkGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 
 class ItemsRuleTest
     extends AnyFunSpec
     with Matchers
-    with MetsWorkGenerators
-    with MiroWorkGenerators
+    with SourceWorkGenerators
     with Inside {
   val physicalPictureSierra: Work.Visible[WorkState.Source] =
     sierraPhysicalSourceWork()
@@ -36,9 +32,7 @@ class ItemsRuleTest
 
   val miroWork: Work.Visible[WorkState.Source] = miroSourceWork()
 
-  val calmWork: Work.Visible[WorkState.Source] =
-    sourceWork(sourceIdentifier = createCalmSourceIdentifier)
-      .items(List(createCalmItem))
+  val calmWork: Work.Visible[WorkState.Source] = calmSourceWork()
 
   it(
     "leaves items unchanged and returns a digitised version of a Sierra work as a merged source") {

@@ -3,11 +3,7 @@ package uk.ac.wellcome.platform.merger
 import org.scalatest.GivenWhenThen
 import org.scalatest.featurespec.AnyFeatureSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.generators.{
-  MetsWorkGenerators,
-  MiroWorkGenerators,
-  SierraWorkGenerators
-}
+import uk.ac.wellcome.models.work.generators.SourceWorkGenerators
 import uk.ac.wellcome.models.work.internal.Format
 import uk.ac.wellcome.platform.merger.fixtures.FeatureTestSugar
 import uk.ac.wellcome.platform.merger.services.PlatformMerger
@@ -17,9 +13,7 @@ class MergerFeatureTest
     with GivenWhenThen
     with Matchers
     with FeatureTestSugar
-    with SierraWorkGenerators
-    with MiroWorkGenerators
-    with MetsWorkGenerators {
+    with SourceWorkGenerators {
   val merger = PlatformMerger
 
   /*
@@ -127,8 +121,7 @@ class MergerFeatureTest
     Scenario("A Calm work and a Sierra work are matched") {
       Given("a Sierra work and a Calm work")
       val sierra = sierraPhysicalSourceWork()
-      val calm = sourceWork(sourceIdentifier = createCalmSourceIdentifier)
-        .items(List(createCalmItem))
+      val calm = calmSourceWork()
 
       When("the works are merged")
       val outcome = merger.merge(Seq(sierra, calm))

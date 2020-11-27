@@ -4,14 +4,8 @@ sealed trait LocationDeprecated {
   val locationType: LocationType
   val accessConditions: List[AccessCondition]
 
-  def isRestrictedOrClosed =
-    accessConditions.exists { accessCondition =>
-      accessCondition.status match {
-        case Some(AccessStatus.Restricted) => true
-        case Some(AccessStatus.Closed)     => true
-        case _                             => false
-      }
-    }
+  def hasRestrictions: Boolean =
+    accessConditions.exists(_.hasRestrictions)
 }
 
 case class DigitalLocationDeprecated(

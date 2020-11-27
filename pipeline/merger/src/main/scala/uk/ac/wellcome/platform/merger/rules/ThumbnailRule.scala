@@ -22,6 +22,8 @@ import WorkState.Source
  * displaying something we are not meant to.
  */
 object ThumbnailRule extends FieldMergeRule with MergerLogging {
+  import WorkPredicates._
+
   type FieldData = Option[LocationDeprecated]
 
   override def merge(target: Work.Visible[Source],
@@ -47,9 +49,9 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
 
   val getMetsThumbnail =
     new PartialRule {
-      val isDefinedForTarget: WorkPredicate = WorkPredicates.sierraWork
-      val isDefinedForSource: WorkPredicate =
-        WorkPredicates.singleDigitalItemMetsWork
+      val isDefinedForTarget: WorkPredicate =
+        sierraWork or singlePhysicalItemCalmWork
+      val isDefinedForSource: WorkPredicate = singleDigitalItemMetsWork
 
       def rule(target: Work.Visible[Source],
                sources: NonEmptyList[Work[Source]]): FieldData = {
@@ -61,9 +63,8 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
   val getMinMiroThumbnail =
     new PartialRule {
       val isDefinedForTarget: WorkPredicate =
-        WorkPredicates.singleItemSierra or WorkPredicates.zeroItemSierra
-      val isDefinedForSource: WorkPredicate =
-        WorkPredicates.singleDigitalItemMiroWork
+        singleItemSierra or zeroItemSierra or singlePhysicalItemCalmWork
+      val isDefinedForSource: WorkPredicate = singleDigitalItemMiroWork
 
       def rule(target: Work.Visible[Source],
                sources: NonEmptyList[Work[Source]]): FieldData = {
@@ -90,7 +91,7 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
                               sources: Seq[Work[Source]]) =
     (target :: sources.toList).exists { work =>
       work.data.items.exists { item =>
-        item.locations.exists(_.isRestrictedOrClosed)
+        item.locations.exists(_.hasRestrictions)
       }
     }
 }

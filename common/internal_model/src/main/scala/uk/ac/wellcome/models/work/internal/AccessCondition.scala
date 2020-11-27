@@ -12,11 +12,21 @@ case class AccessCondition(
       case AccessCondition(None, None, None) => None
       case accessCondition                   => Some(accessCondition)
     }
+
+  def hasRestrictions: Boolean = status.exists(_.hasRestrictions)
 }
 
 sealed trait AccessStatus { this: AccessStatus =>
 
   def name = this.getClass.getSimpleName.stripSuffix("$")
+
+  def hasRestrictions: Boolean = this match {
+    case AccessStatus.OpenWithAdvisory   => true
+    case AccessStatus.Restricted         => true
+    case AccessStatus.Closed             => true
+    case AccessStatus.PermissionRequired => true
+    case _                               => false
+  }
 }
 
 object AccessStatus {

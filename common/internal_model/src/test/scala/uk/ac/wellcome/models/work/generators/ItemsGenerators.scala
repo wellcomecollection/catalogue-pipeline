@@ -45,8 +45,13 @@ trait ItemsGenerators extends IdentifiersGenerators {
 
   def createPhysicalLocationWith(locationType: LocationType =
                                    createStoresLocationType,
+                                 accessConditions: List[AccessCondition] = Nil,
                                  label: String = "locationLabel") =
-    PhysicalLocationDeprecated(locationType, label)
+    PhysicalLocationDeprecated(
+      locationType = locationType,
+      label = label,
+      accessConditions = accessConditions
+    )
 
   def createDigitalLocation = createDigitalLocationWith()
 
