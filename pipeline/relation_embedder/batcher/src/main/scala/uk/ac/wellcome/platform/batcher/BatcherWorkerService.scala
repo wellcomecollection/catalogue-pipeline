@@ -87,14 +87,17 @@ class BatcherWorkerService[MsgDestination](
     info(
       s"Generated ${selectors.size} selectors spanning ${groupedSelectors.size} trees from ${paths.size} paths."
     )
-    paths.sorted.grouped(1000).toList.zipWithIndex.map { case (paths, idx) =>
-      val startIdx = idx * 1000 + 1
-      info(
-        s"Input paths (${startIdx}-${startIdx + paths.length - 1}): ${paths.mkString(", ")}"
-      )
+    paths.sorted.grouped(1000).toList.zipWithIndex.map {
+      case (paths, idx) =>
+        val startIdx = idx * 1000 + 1
+        info(
+          s"Input paths (${startIdx}-${startIdx + paths.length - 1}): ${paths.mkString(", ")}"
+        )
     }
-    groupedSelectors.map { case (rootPath, selectors) =>
-      info(s"Selectors for root path $rootPath: ${selectors.map(_._1).mkString(", ")}")
+    groupedSelectors.map {
+      case (rootPath, selectors) =>
+        info(
+          s"Selectors for root path $rootPath: ${selectors.map(_._1).mkString(", ")}")
     }
     Source(groupedSelectors.toList).flatMapConcat {
       case (rootPath, selectors) =>
