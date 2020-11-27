@@ -41,7 +41,7 @@ object DisplayImage {
   def apply(image: AugmentedImage, includes: ImageIncludes): DisplayImage =
     new DisplayImage(
       id = image.id.canonicalId,
-      locations = Seq(DisplayDigitalLocationDeprecated(image.location)),
+      locations = image.locations.map(DisplayDigitalLocationDeprecated(_)),
       source = DisplayImageSource(image.source, includes),
       visuallySimilar = None,
       withSimilarColors = None,

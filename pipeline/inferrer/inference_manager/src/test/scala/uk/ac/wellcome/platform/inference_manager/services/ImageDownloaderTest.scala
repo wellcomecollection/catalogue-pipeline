@@ -36,9 +36,11 @@ class ImageDownloaderTest
         withDownloaderAndFileWriter() {
           case (downloader, requestPool, _) =>
             val image = createIdentifiedMergedImageWith(
-              location = createDigitalLocationWith(
-                url = "http://images.com/this-image.jpg"
-              )
+              locations = List(
+                createDigitalLocationWith(
+                  locationType = createImageLocationType,
+                  url = "http://images.com/this-image.jpg"
+                ))
             )
             val result = Source
               .single(image)
@@ -49,7 +51,7 @@ class ImageDownloaderTest
             whenReady(result) { _ =>
               requestPool.requests should have size 1
               requestPool.requests.keys.head.uri.toString should be(
-                image.location.url)
+                image.locations.head.url)
             }
         }
       }
@@ -87,6 +89,37 @@ class ImageDownloaderTest
               .runWith(Sink.ignore)
 
             result.failed.futureValue should not be null
+        }
+      }
+    }
+
+    it("selects iiif-image locations from a list of locations") {
+      withMaterializer { implicit materializer =>
+        withDownloaderAndFileWriter() {
+          case (downloader, requestPool, _) =>
+            val image = createIdentifiedMergedImageWith(
+              locations = List(
+                createDigitalLocationWith(
+                  locationType = createPresentationLocationType,
+                  url = "http://example.com/image/manifest"
+                ),
+                createDigitalLocationWith(
+                  locationType = createImageLocationType,
+                  url = "http://images.com/this-image.jpg"
+                )
+              )
+            )
+            val result = Source
+              .single(image)
+              .asSourceWithContext(_ => ())
+              .via(downloader.download)
+              .runWith(Sink.ignore)
+
+            whenReady(result) { _ =>
+              requestPool.requests should have size 1
+              requestPool.requests.keys.head.uri.toString should be(
+                image.locations(1).url)
+            }
         }
       }
     }

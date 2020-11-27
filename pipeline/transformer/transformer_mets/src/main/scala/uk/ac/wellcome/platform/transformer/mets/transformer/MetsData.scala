@@ -145,12 +145,13 @@ case class MetsData(
               sourceIdentifier = ImageUtils
                 .getImageSourceId(recordIdentifier, fileReference.id),
               version = version,
-              location = DigitalLocationDeprecated(
-                url = url,
-                locationType = LocationType("iiif-image"),
-                license = license,
-                accessConditions = accessConditions(accessStatus)
-              )
+              locations = List(
+                DigitalLocationDeprecated(
+                  url = url,
+                  locationType = LocationType("iiif-image"),
+                  license = license,
+                  accessConditions = accessConditions(accessStatus)
+                ))
             )
           }
         }

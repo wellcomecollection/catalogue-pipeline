@@ -14,6 +14,6 @@ trait MiroImage extends MiroLocation {
         value = miroRecord.imageNumber
       ),
       version = version,
-      location = getLocation(miroRecord)
+      locations = List(getLocation(miroRecord))
     )
 }

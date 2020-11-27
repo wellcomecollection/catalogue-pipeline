@@ -33,7 +33,7 @@ object ImagesIndexConfig extends IndexConfig with WorksIndexConfigFields {
     id(),
     version,
     modifiedTime,
-    location("location"),
+    location("locations"),
     source,
     inferredData
   ).dynamic(DynamicMapping.Strict)

@@ -58,7 +58,7 @@ class ImagesRequestBuilder(queryConfig: QueryConfig)
   def buildImageFilterQuery(filters: Seq[ImageFilter]): Seq[Query] =
     filters.map {
       case LicenseFilter(licenseIds) =>
-        termsQuery(field = "location.license.id", values = licenseIds)
+        termsQuery(field = "locations.license.id", values = licenseIds)
     }
 
   def buildImageMustQuery(queries: List[ImageMustQuery]): Seq[Query] =

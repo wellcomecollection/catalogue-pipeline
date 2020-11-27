@@ -12,7 +12,7 @@ trait ImageGenerators
     with VectorGenerators
     with SierraWorkGenerators {
   def createUnmergedImageWith(
-    location: DigitalLocationDeprecated = createDigitalLocation,
+    locations: List[DigitalLocationDeprecated] = List(createDigitalLocation),
     version: Int = 1,
     identifierValue: String = randomAlphanumeric(10),
     identifierType: IdentifierType = IdentifierType("miro-image-number")
@@ -22,29 +22,31 @@ trait ImageGenerators
         identifierType = identifierType,
         value = identifierValue),
       version = version,
-      location = location
+      locations = locations
     )
 
   def createUnmergedImage: UnmergedImage[DataState.Unidentified] =
     createUnmergedImageWith()
 
   def createUnmergedMiroImage = createUnmergedImageWith(
-    location = DigitalLocationDeprecated(
-      url = "https://iiif.wellcomecollection.org/V01234.jpg",
-      locationType = LocationType("iiif-image"),
-      license = Some(License.CCBY)
-    )
+    locations = List(
+      DigitalLocationDeprecated(
+        url = "https://iiif.wellcomecollection.org/V01234.jpg",
+        locationType = LocationType("iiif-image"),
+        license = Some(License.CCBY)
+      ))
   )
 
   def createUnmergedMetsImage = createUnmergedImageWith(
-    location = createDigitalLocation,
+    locations = List(createDigitalLocation),
     identifierType = IdentifierType("mets-image")
   )
 
   def createIdentifiedMergedImageWith(
     imageId: IdState.Identified =
       IdState.Identified(createCanonicalId, createSourceIdentifier),
-    location: DigitalLocationDeprecated = createDigitalLocation,
+    locations: List[DigitalLocationDeprecated] = List(
+      createDigitalLocationWith(locationType = createImageLocationType)),
     version: Int = 1,
     modifiedTime: Instant = instantInLast30Days,
     parentWork: Work.Visible[WorkState.Identified] = sierraIdentifiedWork(),
@@ -54,7 +56,7 @@ trait ImageGenerators
       imageId,
       version,
       modifiedTime,
-      location,
+      locations,
       SourceWorks(parentWork.toSourceWork, redirectedWork.map(_.toSourceWork)))
 
   def createInferredData = {
@@ -80,13 +82,13 @@ trait ImageGenerators
     redirectedWork: Option[Work.Visible[WorkState.Identified]] = Some(
       identifiedWork()),
     inferredData: Option[InferredData] = createInferredData,
-    location: DigitalLocationDeprecated = createDigitalLocation,
+    locations: List[DigitalLocationDeprecated] = List(createDigitalLocation),
     version: Int = 1,
     modifiedTime: Instant = instantInLast30Days,
   ) =
     createIdentifiedMergedImageWith(
       imageId,
-      location,
+      locations,
       version,
       modifiedTime,
       parentWork,
@@ -97,7 +99,7 @@ trait ImageGenerators
 
   def createLicensedImage(license: License): AugmentedImage =
     createAugmentedImageWith(
-      location = createDigitalLocationWith(license = Some(license))
+      locations = List(createDigitalLocationWith(license = Some(license)))
     )
 
   // Create a set of images with intersecting LSH lists to ensure
@@ -144,7 +146,7 @@ trait ImageGenerators
           sourceIdentifier = image.id.allSourceIdentifiers.head
         ),
         version = image.version,
-        location = image.location
+        locations = image.locations
       )
 
     val toIdentified: UnmergedImage[DataState.Identified] =

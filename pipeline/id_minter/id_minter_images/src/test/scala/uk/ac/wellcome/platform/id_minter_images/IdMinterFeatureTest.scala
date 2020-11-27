@@ -47,7 +47,7 @@ class IdMinterFeatureTest
             images.map(_.id.canonicalId).distinct should have size 1
             images.foreach { receivedImage =>
               receivedImage.id.sourceIdentifier shouldBe image.id.sourceIdentifier
-              receivedImage.location shouldBe image.location
+              receivedImage.locations shouldBe image.locations
             }
           }
         }

@@ -36,13 +36,14 @@ class MiroImageTest
           value = "B0011308"
         ),
         version = 1,
-        location = DigitalLocationDeprecated(
-          url =
-            "https://iiif.wellcomecollection.org/image/B0011308.jpg/info.json",
-          locationType = LocationType("iiif-image"),
-          license = Some(License.CC0),
-          credit = Some("Ezra Feilden")
-        )
+        locations = List(
+          DigitalLocationDeprecated(
+            url =
+              "https://iiif.wellcomecollection.org/image/B0011308.jpg/info.json",
+            locationType = LocationType("iiif-image"),
+            license = Some(License.CC0),
+            credit = Some("Ezra Feilden")
+          ))
       )
     }
   }

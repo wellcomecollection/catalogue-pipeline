@@ -4,13 +4,13 @@ import java.time.Instant
 
 sealed trait BaseImage[+State <: DataState] extends HasId[State#Id] {
   val id: State#Id
-  val location: DigitalLocationDeprecated
+  val locations: List[DigitalLocationDeprecated]
 }
 
 case class UnmergedImage[State <: DataState](
   id: State#Id,
   version: Int,
-  location: DigitalLocationDeprecated
+  locations: List[DigitalLocationDeprecated]
 ) extends BaseImage[State] {
   def mergeWith(canonicalWork: SourceWork[State],
                 redirectedWork: Option[SourceWork[State]] = None,
@@ -19,7 +19,7 @@ case class UnmergedImage[State <: DataState](
       id = id,
       version = version,
       modifiedTime = modifiedTime,
-      location = location,
+      locations = locations,
       source = SourceWorks[State](canonicalWork, redirectedWork)
     )
 
@@ -29,7 +29,7 @@ case class UnmergedImage[State <: DataState](
       id = id,
       version = version,
       modifiedTime = modifiedTime,
-      location = location,
+      locations = locations,
       source = source
     )
 }
@@ -38,7 +38,7 @@ case class MergedImage[State <: DataState](
   id: State#Id,
   version: Int,
   modifiedTime: Instant,
-  location: DigitalLocationDeprecated,
+  locations: List[DigitalLocationDeprecated],
   source: ImageSource[State]
 ) extends BaseImage[State]
 
@@ -50,7 +50,7 @@ object MergedImage {
         id = mergedImage.id,
         version = mergedImage.version,
         modifiedTime = mergedImage.modifiedTime,
-        location = mergedImage.location,
+        locations = mergedImage.locations,
         source = mergedImage.source,
         inferredData = inferredData
       )
@@ -61,7 +61,7 @@ case class AugmentedImage(
   id: IdState.Identified,
   version: Int,
   modifiedTime: Instant,
-  location: DigitalLocationDeprecated,
+  locations: List[DigitalLocationDeprecated],
   source: ImageSource[DataState.Identified],
   inferredData: Option[InferredData] = None
 ) extends BaseImage[DataState.Identified]
@@ -82,11 +82,11 @@ object InferredData {
 object UnmergedImage {
   def apply(sourceIdentifier: SourceIdentifier,
             version: Int,
-            location: DigitalLocationDeprecated)
+            locations: List[DigitalLocationDeprecated])
     : UnmergedImage[DataState.Unidentified] =
     UnmergedImage[DataState.Unidentified](
       id = IdState.Identifiable(sourceIdentifier),
       version = version,
-      location
+      locations
     )
 }

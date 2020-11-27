@@ -52,9 +52,11 @@ class ManagerInferrerIntegrationTest
         }
 
         val image = createIdentifiedMergedImageWith(
-          location = createDigitalLocationWith(
-            url = s"http://localhost:$localImageServerPort/test-image.jpg"
-          )
+          locations = List(
+            createDigitalLocationWith(
+              locationType = createImageLocationType,
+              url = s"http://localhost:$localImageServerPort/test-image.jpg"
+            ))
         )
         sendMessage(queue, image)
         eventually {
