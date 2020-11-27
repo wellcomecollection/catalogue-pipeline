@@ -5,6 +5,7 @@ import akka.actor.ActorSystem
 import akka.stream.scaladsl.Source
 import com.sksamuel.elastic4s.circe._
 import com.sksamuel.elastic4s.streams.ReactiveElastic._
+import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.{ElasticClient, Index}
 import grizzled.slf4j.Logging
 
@@ -41,22 +42,22 @@ class PathQueryRelationsService(
 
   val requestBuilder = RelationsRequestBuilder(index)
 
-  def getAffectedWorks(batch: Batch): Source[Work[Merged], NotUsed] =
+  def getAffectedWorks(batch: Batch): Source[Work[Merged], NotUsed] = {
+    val request = requestBuilder.affectedWorks(batch, affectedWorksScroll)
+    info(
+      s"Querying affected works with ES request: ${elasticClient.show(request)}")
     Source
-      .fromPublisher(
-        elasticClient.publisher(
-          requestBuilder.affectedWorks(batch, affectedWorksScroll)
-        )
-      )
+      .fromPublisher(elasticClient.publisher(request))
       .map(searchHit => searchHit.safeTo[Work[Merged]].get)
+  }
 
-  def getCompleteTree(batch: Batch): Source[Work[Merged], NotUsed] =
+  def getCompleteTree(batch: Batch): Source[Work[Merged], NotUsed] = {
+    val request = requestBuilder.completeTree(batch, completeTreeScroll)
+    info(
+      s"Querying complete tree with ES request: ${elasticClient.show(request)}")
     Source
-      .fromPublisher(
-        elasticClient.publisher(
-          requestBuilder.completeTree(batch, completeTreeScroll)
-        )
-      )
+      .fromPublisher(elasticClient.publisher(request))
       .map(searchHit => searchHit.safeTo[Work.Visible[Merged]].get)
+  }
 
 }

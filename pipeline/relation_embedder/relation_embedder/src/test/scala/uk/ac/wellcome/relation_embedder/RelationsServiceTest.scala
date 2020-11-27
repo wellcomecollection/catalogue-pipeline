@@ -21,8 +21,15 @@ class RelationsServiceTest
     with WorkGenerators
     with Akka {
 
-  def service[R](index: Index)(implicit as: ActorSystem) =
-    new PathQueryRelationsService(elasticClient, index, 10)
+  def service[R](index: Index,
+                 completeTreeScroll: Int = 20,
+                 affectedWorksScroll: Int = 20)(implicit as: ActorSystem) =
+    new PathQueryRelationsService(
+      elasticClient = elasticClient,
+      index = index,
+      completeTreeScroll = completeTreeScroll,
+      affectedWorksScroll = affectedWorksScroll
+    )
 
   def work(path: String) =
     mergedWork(createSourceIdentifierWith(value = path))
@@ -152,6 +159,20 @@ class RelationsServiceTest
               work3,
               work4,
             )
+          }
+        }
+      }
+    }
+
+    it("Retrieves all affected works across multiple scroll pages") {
+      withLocalMergedWorksIndex { index =>
+        storeWorks(index)
+        withActorSystem { implicit actorSystem =>
+          val batch = Batch(rootPath = "A", List(Tree("A")))
+          whenReady(queryAffectedWorks(
+            service(index, affectedWorksScroll = 3),
+            batch)) { result =>
+            result should contain theSameElementsAs works
           }
         }
       }
