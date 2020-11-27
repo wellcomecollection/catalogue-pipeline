@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mets:mets xmlns:mets="http://www.loc.gov/METS/" xmlns:dv="http://dfg-viewer.de/" xmlns:mods="http://www.loc.gov/mods/v3" xmlns:premis="http://www.loc.gov/premis/v3" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-3.xsd http://www.loc.gov/METS/ http://www.loc.gov/standards/mets/version17/mets.v1-7.xsd http://www.loc.gov/standards/premis/ http://www.loc.gov/standards/premis/v2/premis-v2-0.xsd http://www.loc.gov/standards/mix/ http://www.loc.gov/standards/mix/mix.xsd">
+    <mets:metsHdr CREATEDATE="2014-05-09T14:02:53">
+        <mets:agent OTHERTYPE="SOFTWARE" ROLE="CREATOR" TYPE="OTHER">
+            <mets:name>Goobi - ugh-1.10-ugh-2.0.0-2-g8f27580 - 18−February−2014</mets:name>
+            <mets:note>Goobi</mets:note>
+        </mets:agent>
+    </mets:metsHdr>
+    <mets:dmdSec ID="DMDLOG_0000">
+        <mets:mdWrap MDTYPE="MODS">
+            <mets:xmlData>
+                <mods:mods>
+                    <mods:titleInfo>
+                        <mods:title>Research on anthelmintics</mods:title>
+                    </mods:titleInfo>
+                    <mods:recordInfo>
+                        <mods:recordIdentifier source="gbv-ppn">b1665836x</mods:recordIdentifier>
+                    </mods:recordInfo>
+                    <mods:note type="leader6">g</mods:note>
+                    <mods:accessCondition type="dz">A</mods:accessCondition>
+                    <mods:accessCondition type="status">Clinical images</mods:accessCondition>
+                    <mods:originInfo>
+                        <mods:place>
+                            <mods:placeTerm type="text">Wellcome Trust</mods:placeTerm>
+                        </mods:place>
+                        <mods:publisher>Wellcome Trust</mods:publisher>
+                        <mods:edition>[Electronic ed.]</mods:edition>
+                        <mods:dateCaptured encoding="w3cdtf">2012</mods:dateCaptured>
+                    </mods:originInfo>
+                    <mods:physicalDescription>
+                        <mods:digitalOrigin>reformatted digital</mods:digitalOrigin>
+                        <mods:note type="duration">0003750</mods:note>
+                    </mods:physicalDescription>
+                </mods:mods>
+            </mets:xmlData>
+        </mets:mdWrap>
+    </mets:dmdSec>
+    <mets:dmdSec ID="DMDPHYS_0000">
+        <mets:mdWrap MDTYPE="MODS">
+            <mets:xmlData>
+                <mods:mods>
+                    <mods:originInfo>
+                        <mods:dateCaptured encoding="w3cdtf">080108</mods:dateCaptured>
+                    </mods:originInfo>
+                    <mods:physicalDescription>
+                        <mods:digitalOrigin>Wellcome Trust</mods:digitalOrigin>
+                    </mods:physicalDescription>
+                </mods:mods>
+            </mets:xmlData>
+        </mets:mdWrap>
+    </mets:dmdSec>
+    <mets:amdSec ID="AMD">
+        <mets:techMD ID="AMD_0001">
+            <mets:mdWrap MDTYPE="OTHER" MIMETYPE="text/xml">
+                <mets:xmlData>
+                    <premis:object version="3.0" xsi:schemaLocation="http://www.loc.gov/premis/v3 http://www.loc.gov/standards/premis/v3/premis.xsd" xsi:type="premis:file">
+                        <premis:objectIdentifier>
+                            <premis:objectIdentifierType>local</premis:objectIdentifierType>
+                            <premis:objectIdentifierValue>0055-0000-3661-0000-0-0000-0000-0.mpg</premis:objectIdentifierValue>
+                        </premis:objectIdentifier>
+                        <premis:objectIdentifier>
+                            <premis:objectIdentifierType>uuid</premis:objectIdentifierType>
+                            <premis:objectIdentifierValue>fbf9ec34-90d2-4c88-a225-c036853236c8</premis:objectIdentifierValue>
+                        </premis:objectIdentifier>
+                        <premis:significantProperties>
+                            <premis:significantPropertiesType>Duration</premis:significantPropertiesType>
+                            <premis:significantPropertiesValue>37mn 50s</premis:significantPropertiesValue>
+                        </premis:significantProperties>
+                        <premis:significantProperties>
+                            <premis:significantPropertiesType>Bitrate</premis:significantPropertiesType>
+                            <premis:significantPropertiesValue>50.8 Mbps</premis:significantPropertiesValue>
+                        </premis:significantProperties>
+                        <premis:objectCharacteristics>
+                            <premis:compositionLevel />
+                            <premis:fixity>
+                                <premis:messageDigestAlgorithm>SHA-1</premis:messageDigestAlgorithm>
+                                <premis:messageDigest>aa2b640c79c3971c167cff9e8617fc37cbb77861</premis:messageDigest>
+                            </premis:fixity>
+                            <premis:size>14418526212</premis:size>
+                            <premis:format>
+                                <premis:formatDesignation>
+                                    <premis:formatName>MPEG-2 Video Format</premis:formatName>
+                                </premis:formatDesignation>
+                                <premis:formatRegistry>
+                                    <premis:formatRegistryName>PRONOM</premis:formatRegistryName>
+                                    <premis:formatRegistryKey>x-fmt/386</premis:formatRegistryKey>
+                                </premis:formatRegistry>
+                            </premis:format>
+                        </premis:objectCharacteristics>
+                    </premis:object>
+                </mets:xmlData>
+            </mets:mdWrap>
+        </mets:techMD>
+        <mets:rightsMD ID="RIGHTS">
+            <mets:mdWrap MDTYPE="OTHER" MIMETYPE="text/xml" OTHERMDTYPE="DVRIGHTS">
+                <mets:xmlData>
+                    <dv:rights>
+                        <dv:owner>Wellcome Collection</dv:owner>
+                        <dv:ownerLogo>http://wellcomelibrary.org/assets/img/wellcome-logo.png</dv:ownerLogo>
+                        <dv:ownerSiteURL>http://wellcomelibrary.org</dv:ownerSiteURL>
+                        <dv:ownerContact>wdl@wellcome.ac.uk</dv:ownerContact>
+                    </dv:rights>
+                </mets:xmlData>
+            </mets:mdWrap>
+        </mets:rightsMD>
+        <mets:digiprovMD ID="DIGIPROV">
+            <mets:mdWrap MDTYPE="OTHER" MIMETYPE="text/xml" OTHERMDTYPE="DVLINKS">
+                <mets:xmlData>
+                    <dv:links>
+                        <dv:reference>b1665836x</dv:reference>
+                        <dv:presentation>b1665836x</dv:presentation>
+                    </dv:links>
+                </mets:xmlData>
+            </mets:mdWrap>
+        </mets:digiprovMD>
+        <mets:techMD ID="AMD_POSTER">
+            <mets:mdWrap MDTYPE="OTHER" MIMETYPE="text/xml">
+                <mets:xmlData>
+                    <premis:object version="3.0" xsi:schemaLocation="http://www.loc.gov/premis/v3 http://www.loc.gov/standards/premis/v3/premis.xsd" xsi:type="premis:file">
+                        <premis:objectIdentifier>
+                            <premis:objectIdentifierType>local</premis:objectIdentifierType>
+                            <premis:objectIdentifierValue>0055-0000-3661-0000-0-0000-0000-0.jpg</premis:objectIdentifierValue>
+                        </premis:objectIdentifier>
+                        <premis:significantProperties>
+                            <premis:significantPropertiesType>ImageWidth</premis:significantPropertiesType>
+                            <premis:significantPropertiesValue>600</premis:significantPropertiesValue>
+                        </premis:significantProperties>
+                        <premis:significantProperties>
+                            <premis:significantPropertiesType>ImageHeight</premis:significantPropertiesType>
+                            <premis:significantPropertiesValue>480</premis:significantPropertiesValue>
+                        </premis:significantProperties>
+                        <premis:objectCharacteristics>
+                            <premis:size>40133</premis:size>
+                            <premis:format>
+                                <premis:formatDesignation>
+                                    <premis:formatName>JPEG Format</premis:formatName>
+                                </premis:formatDesignation>
+                                <premis:formatRegistry>
+                                    <premis:formatRegistryName>PRONOM</premis:formatRegistryName>
+                                    <premis:formatRegistryKey>fmt/44</premis:formatRegistryKey>
+                                </premis:formatRegistry>
+                            </premis:format>
+                        </premis:objectCharacteristics>
+                    </premis:object>
+                </mets:xmlData>
+            </mets:mdWrap>
+        </mets:techMD>
+    </mets:amdSec>
+    <mets:fileSec>
+        <mets:fileGrp USE="OBJECTS">
+            <mets:file ID="FILE_0001_OBJECTS" MIMETYPE="video/mpeg">
+                <mets:FLocat LOCTYPE="URL" xlink:href="objects/0055-0000-3661-0000-0-0000-0000-0.mpg" />
+            </mets:file>
+        </mets:fileGrp>
+    </mets:fileSec>
+    <mets:structMap TYPE="LOGICAL">
+        <mets:div ADMID="AMD" DMDID="DMDLOG_0000" ID="LOG_0000" LABEL="Research on anthelmintics" TYPE="Video">
+            <mets:div ID="LOG_0001" LABEL="Research on anthelmintics" ORDER="1" TYPE="Video">
+                <mets:mptr LOCTYPE="URL" xlink:href="b1665836x_0001" />
+            </mets:div>
+            <mets:div ID="LOG_0002" LABEL="Research on anthelmintics" ORDER="2" TYPE="Transcript">
+                <mets:mptr LOCTYPE="URL" xlink:href="b1665836x_0002" />
+            </mets:div>
+        </mets:div>
+    </mets:structMap>
+    <mets:structMap TYPE="PHYSICAL">
+        <mets:div DMDID="DMDPHYS_0000" ID="PHYS_0000" TYPE="physSequence">
+            <mets:div ADMID="AMD_0001" ID="PHYS_0001" ORDER="1" ORDERLABEL=" - " TYPE="page">
+                <mets:fptr FILEID="FILE_0001_OBJECTS" />
+            </mets:div>
+        </mets:div>
+    </mets:structMap>
+    <mets:structLink>
+        <mets:smLink xlink:from="LOG_0000" xlink:to="PHYS_0001" />
+    </mets:structLink>
+</mets:mets>

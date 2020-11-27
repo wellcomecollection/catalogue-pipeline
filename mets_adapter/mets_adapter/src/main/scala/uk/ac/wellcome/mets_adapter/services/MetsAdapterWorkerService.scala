@@ -106,7 +106,7 @@ class MetsAdapterWorkerService[Destination](
       .mapWithContext { case (_, bag) => bag.metsLocation }
 
   def storeMetsLocation =
-    Flow[(Context, Option[MetsLocation])]
+    Flow[(Context, Option[MetsSourceData])]
       .mapWithContextAsync(concurrentDynamoConnections) {
         case (ctx, data) =>
           Future {

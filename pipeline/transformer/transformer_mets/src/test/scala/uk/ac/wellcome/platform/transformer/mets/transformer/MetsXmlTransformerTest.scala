@@ -5,7 +5,7 @@ import java.time.Instant
 import org.scalatest.matchers.should.Matchers
 import org.apache.commons.io.IOUtils
 import org.scalatest.funspec.AnyFunSpec
-import uk.ac.wellcome.mets_adapter.models.MetsLocation
+import uk.ac.wellcome.mets_adapter.models.MetsSourceData
 import uk.ac.wellcome.models.work.internal.License
 import uk.ac.wellcome.platform.transformer.mets.fixtures.MetsGenerators
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
@@ -28,6 +28,11 @@ class MetsXmlTransformerTest
         titlePageId = Some("PHYS_0006")
       )
     )
+  }
+
+  it("should transform blup") {
+    val xml = loadXmlFile("/iuyiuy.xml")
+    transform(Some(xml), Instant.now) shouldBe a [Right[_,_]]
   }
 
   it("should error when the root XML doesn't exist in the store") {

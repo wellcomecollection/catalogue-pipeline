@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.transformer.mets.service
 
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.mets_adapter.models.MetsLocation
+import uk.ac.wellcome.mets_adapter.models.MetsSourceData
 import uk.ac.wellcome.models.work.internal.Work
 import uk.ac.wellcome.models.work.internal.WorkState.Source
 import uk.ac.wellcome.pipeline_storage.PipelineStorageStream
@@ -16,16 +16,16 @@ class MetsTransformerWorkerService[MsgDestination](
   val pipelineStream: PipelineStorageStream[NotificationMessage,
                                             Work[Source],
                                             MsgDestination],
-  adapterStore: VersionedStore[String, Int, MetsLocation],
+  adapterStore: VersionedStore[String, Int, MetsSourceData],
   metsXmlStore: Readable[S3ObjectLocation, String]
 ) extends Runnable
-    with TransformerWorker[MetsLocation, MsgDestination] {
+    with TransformerWorker[MetsSourceData, MsgDestination] {
 
-  override val transformer: Transformer[MetsLocation] =
+  override val transformer: Transformer[MetsSourceData] =
     new MetsXmlTransformer(metsXmlStore)
 
   override protected def lookupSourceData(
-    key: StoreKey): Either[ReadError, MetsLocation] =
+    key: StoreKey): Either[ReadError, MetsSourceData] =
     adapterStore
       .getLatest(key.id)
       .map { case Identified(_, metsLocation) => metsLocation }

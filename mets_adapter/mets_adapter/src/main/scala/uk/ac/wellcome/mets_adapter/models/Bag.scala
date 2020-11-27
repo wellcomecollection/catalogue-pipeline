@@ -10,17 +10,18 @@ case class Bag(info: BagInfo,
                version: String,
                createdDate: Instant) {
 
-  def metsLocation: Either[Exception, MetsLocation] =
+  def metsLocation: Either[Exception, MetsSourceData] =
     file
       .flatMap { file =>
         parsedVersion.map { version =>
-          MetsLocation(
-            location.bucket,
-            location.path,
-            version,
-            file,
-            createdDate,
-            manifestations)
+          MetsSourceData(
+            bucket = location.bucket,
+            path = location.path,
+            version = version,
+            file = file,
+            createdDate = createdDate,
+            deleted = manifest.files.forall(f => f.path == file),
+            manifestations = manifestations)
         }
       }
 

@@ -7,7 +7,7 @@ import com.typesafe.config.Config
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
-import uk.ac.wellcome.mets_adapter.models.MetsLocation
+import uk.ac.wellcome.mets_adapter.models.MetsSourceData
 import uk.ac.wellcome.platform.transformer.mets.service.MetsTransformerWorkerService
 import uk.ac.wellcome.storage.store.dynamo.DynamoSingleVersionStore
 import uk.ac.wellcome.storage.typesafe.{DynamoBuilder, S3Builder}
@@ -54,7 +54,7 @@ object Main extends WellcomeTypesafeApp with AWSClientConfigBuilder {
 
     new MetsTransformerWorkerService(
       pipelineStream = pipelineStream,
-      adapterStore = new DynamoSingleVersionStore[String, MetsLocation](
+      adapterStore = new DynamoSingleVersionStore[String, MetsSourceData](
         DynamoBuilder.buildDynamoConfig(config, namespace = "mets")
       ),
       metsXmlStore = S3TypedStore[String]

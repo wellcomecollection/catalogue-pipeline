@@ -93,15 +93,33 @@ class BagTest extends AnyFunSpec with Matchers {
       val bag = createBag(
         s3Path = "digitised/b30246039",
         version = "v2",
-        files = List("data/b30246039.xml" -> "v1/data/b30246039.xml"),
+        files = List("data/b30246039.xml" -> "v1/data/b30246039.xml",
+          "objects/blahbluh.jp2" -> "v1/objects/blahbluh.jp2"),
       )
       bag.metsLocation shouldBe Right(
-        MetsLocation(
-          "bucket",
-          "digitised/b30246039",
-          2,
-          "v1/data/b30246039.xml",
-          bag.createdDate))
+        MetsSourceData(
+          bucket = "bucket",
+          path = "digitised/b30246039",
+          version = 2,
+          file = "v1/data/b30246039.xml",
+          createdDate = bag.createdDate,
+          deleted = false))
+    }
+
+    it("marks a METS data as deleted if there are no other assets except METS") {
+      val bag = createBag(
+        s3Path = "digitised/b30246039",
+        version = "v2",
+        files = List("data/b30246039.xml" -> "v1/data/b30246039.xml")
+      )
+      bag.metsLocation shouldBe Right(
+        MetsSourceData(
+          bucket = "bucket",
+          path = "digitised/b30246039",
+          version = 2,
+          file = "v1/data/b30246039.xml",
+          createdDate = bag.createdDate,
+          deleted = true))
     }
 
     it("fails extracting METS data if invalid version string") {
