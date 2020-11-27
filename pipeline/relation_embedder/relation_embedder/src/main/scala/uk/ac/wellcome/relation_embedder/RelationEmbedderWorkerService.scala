@@ -39,7 +39,7 @@ class RelationEmbedderWorkerService[MsgDestination](
       .fromTry(fromJson[Batch](message.body))
       .map { batch =>
         info(
-          s"Received batch for tree ${batch.rootPath} containing ${batch.selectors.size} selectors: $selectors")
+          s"Received batch for tree ${batch.rootPath} containing ${batch.selectors.size} selectors: ${batch.selectors.mkString(", ")}")
         relationsService
           .getCompleteTree(batch)
           .runWith(Sink.seq)
