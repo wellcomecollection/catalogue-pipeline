@@ -2,9 +2,117 @@ package uk.ac.wellcome.models.work.internal
 
 import java.time.Instant
 
-sealed trait BaseImage[+State <: DataState] extends HasId[State#Id] {
-  val id: State#Id
-  val locations: List[DigitalLocationDeprecated]
+case class Image[State <: ImageState](
+  version: Int,
+  state: State,
+  locations: List[DigitalLocationDeprecated]
+)
+
+sealed trait ImageState {
+  type SourceDataState <: DataState
+  type TransitionArgs
+
+  val sourceIdentifier: SourceIdentifier
+
+  def id: String = sourceIdentifier.toString
+}
+
+/** ImageState represents the state of the image in the pipeline.
+  * Its stages are as follows:
+  *
+  *      |
+  *      | (transformer)
+  *      ▼
+  *    Source
+  *      |
+  *      | (matcher / merger)
+  *      ▼
+  *    Merged
+  *      |
+  *      | (id minter)
+  *      ▼
+  *  Identified
+  *      |
+  *      | (inferrer)
+  *      ▼
+  *  Augmented
+  *
+  */
+object ImageState {
+
+  case class Source(
+    sourceIdentifier: SourceIdentifier
+  ) extends ImageState {
+    type SourceDataState = DataState.Unidentified
+    type TransitionArgs = Unit
+  }
+
+  case class Merged(
+    sourceIdentifier: SourceIdentifier,
+    modifiedTime: Instant,
+    source: ImageSource[DataState.Unidentified]
+  ) extends ImageState {
+    type SourceDataState = DataState.Unidentified
+    type TransitionArgs = (ImageSource[DataState.Unidentified], Instant)
+  }
+
+  case class Identified(
+    sourceIdentifier: SourceIdentifier,
+    canonicalId: String,
+    modifiedTime: Instant,
+    source: ImageSource[DataState.Identified]
+  ) extends ImageState {
+    type SourceDataState = DataState.Identified
+    type TransitionArgs = Unit
+  }
+
+  case class Augmented(
+    sourceIdentifier: SourceIdentifier,
+    canonicalId: String,
+    modifiedTime: Instant,
+    source: ImageSource[DataState.Identified],
+    inferredData: Option[InferredData] = None
+  ) extends ImageState {
+    type SourceDataState = DataState.Identified
+    type TransitionArgs = Option[InferredData]
+
+    override def id = canonicalId
+  }
+
+}
+
+// ImageFsm contains all of the possible transitions between image states
+object ImageFsm {
+  import ImageState._
+
+  sealed trait Transition[InState <: ImageState, OutState <: ImageState] {
+    def state(state: InState, args: OutState#TransitionArgs): OutState
+  }
+
+  implicit val sourceToMerged = new Transition[Source, Merged] {
+    def state(state: Source,
+              args: (ImageSource[DataState.Unidentified], Instant)): Merged =
+      args match {
+        case (source, modifiedTime) =>
+          Merged(
+            sourceIdentifier = state.sourceIdentifier,
+            modifiedTime = modifiedTime,
+            source = source
+          )
+      }
+  }
+
+  implicit val identifiedToAugmented = new Transition[Identified, Augmented] {
+    def state(state: Identified,
+              inferredData: Option[InferredData]): Augmented =
+      Augmented(
+        sourceIdentifier = state.sourceIdentifier,
+        canonicalId = state.canonicalId,
+        modifiedTime = state.modifiedTime,
+        source = state.source,
+        inferredData = inferredData
+      )
+  }
 }
 
 case class UnmergedImage[State <: DataState](
