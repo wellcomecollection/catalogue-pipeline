@@ -63,6 +63,11 @@ object WorkPredicates {
         format(Format.Pictures)
     )
 
+  // In future this may be changed to `digmiro` for all works
+  // where we know that the Miro and METS images are identical
+  val sierraDigaids: WorkPredicate =
+    satisfiesAll(sierraWork, hasDigcode("digaids"))
+
   def not(pred: WorkPredicate): WorkPredicate = !pred(_)
 
   def sierraWorkWithId(id: SourceIdentifier)(work: Work[Source]): Boolean =
@@ -96,6 +101,11 @@ object WorkPredicates {
     work.data.items.forall { item =>
       item.locations.size == 1
     }
+
+  private def hasDigcode(digcode: String)(work: Work[Source]): Boolean =
+    work.data.otherIdentifiers
+      .find(_.identifierType.id == "wellcome-digcode")
+      .exists(_.value == digcode)
 
   private def identifierTypeId(id: String)(work: Work[Source]): Boolean =
     work.sourceIdentifier.identifierType == IdentifierType(id)

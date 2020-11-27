@@ -155,12 +155,7 @@ class SierraIdentifiersTest
         )
       )
       val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
-      otherIdentifiers should contain(
-        SourceIdentifier(
-          identifierType = IdentifierType("wellcome-digcode"),
-          ontologyType = "Work",
-          value = digcode
-        ))
+      otherIdentifiers should contain(createDigcodeIdentifier(digcode))
     }
 
     it("multiple identifiers") {
@@ -174,18 +169,8 @@ class SierraIdentifiersTest
         )
       )
       val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
-      otherIdentifiers should contain(
-        SourceIdentifier(
-          identifierType = IdentifierType("wellcome-digcode"),
-          ontologyType = "Work",
-          value = digcode1
-        ))
-      otherIdentifiers should contain(
-        SourceIdentifier(
-          identifierType = IdentifierType("wellcome-digcode"),
-          ontologyType = "Work",
-          value = digcode2
-        ))
+      otherIdentifiers should contain(createDigcodeIdentifier(digcode1))
+      otherIdentifiers should contain(createDigcodeIdentifier(digcode2))
     }
 
     it("deduplicates identifiers") {
@@ -235,12 +220,7 @@ class SierraIdentifiersTest
         )
       )
       val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
-      otherIdentifiers should contain(
-        SourceIdentifier(
-          identifierType = IdentifierType("wellcome-digcode"),
-          ontologyType = "Work",
-          value = parsedDigcode
-        ))
+      otherIdentifiers should contain(createDigcodeIdentifier(parsedDigcode))
     }
 
     it("deduplicates based on the actual digcode") {

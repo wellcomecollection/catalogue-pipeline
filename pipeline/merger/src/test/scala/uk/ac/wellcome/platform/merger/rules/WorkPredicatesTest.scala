@@ -44,6 +44,8 @@ class WorkPredicatesTest
     sierraSourceWork().format(Format.DigitalImages),
     sierraSourceWork().format(Format.Pictures),
     sierraSourceWork().format(Format.Music),
+    sierraSourceWork().otherIdentifiers(
+      List(createDigcodeIdentifier("digaids")))
   )
 
   it("selects Sierra works") {
@@ -103,6 +105,16 @@ class WorkPredicatesTest
         (Format.Pictures,
         Format.DigitalImages,
         Format.`3DObjects`)
+    }
+  }
+
+  it("selects Sierra works with the `digaids` digcode") {
+    val filtered = works.filter(WorkPredicates.sierraDigaids)
+    filtered should not be empty
+    forAll(filtered) { work =>
+      work.data.otherIdentifiers.map(_.identifierType.id) should contain(
+        "wellcome-digcode")
+      work.data.otherIdentifiers.map(_.value) should contain("digaids")
     }
   }
 }
