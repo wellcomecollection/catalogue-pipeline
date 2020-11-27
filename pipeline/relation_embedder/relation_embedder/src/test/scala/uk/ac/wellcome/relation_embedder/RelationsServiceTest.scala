@@ -21,10 +21,9 @@ class RelationsServiceTest
     with WorkGenerators
     with Akka {
 
-  def service[R](
-    index: Index,
-    completeTreeScroll: Int = 20,
-    affectedWorksScroll: Int = 20)(implicit as: ActorSystem) =
+  def service[R](index: Index,
+                 completeTreeScroll: Int = 20,
+                 affectedWorksScroll: Int = 20)(implicit as: ActorSystem) =
     new PathQueryRelationsService(
       elasticClient = elasticClient,
       index = index,
@@ -170,7 +169,9 @@ class RelationsServiceTest
         storeWorks(index)
         withActorSystem { implicit actorSystem =>
           val batch = Batch(rootPath = "A", List(Tree("A")))
-          whenReady(queryAffectedWorks(service(index, affectedWorksScroll = 3), batch)) { result =>
+          whenReady(queryAffectedWorks(
+            service(index, affectedWorksScroll = 3),
+            batch)) { result =>
             result should contain theSameElementsAs works
           }
         }
