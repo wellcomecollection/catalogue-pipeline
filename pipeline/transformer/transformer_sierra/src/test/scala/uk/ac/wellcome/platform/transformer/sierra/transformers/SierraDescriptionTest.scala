@@ -20,7 +20,7 @@ class SierraDescriptionTest
 
   it("gets a description from a bib with a single instance of MARC 520") {
     val description = "A panolopy of penguins perching on a python."
-    val expectedDescription = description
+    val expectedDescription = s"<p>$description</p>"
 
     assertFindsCorrectDescription(
       varFields = List(
@@ -39,7 +39,7 @@ class SierraDescriptionTest
     val description1 = "A malcontent marc minion."
     val description2 = "A fresh fishy fruit."
 
-    val expectedDescription = s"$description1 $description2"
+    val expectedDescription = s"<p>$description1</p>\n<p>$description2</p>"
 
     assertFindsCorrectDescription(
       varFields = List(
@@ -64,7 +64,7 @@ class SierraDescriptionTest
     val description = "A panolopy of penguins perching on a python."
     val summaryDescription = "A fracas of frolicking frogs on futons."
 
-    val expectedDescription = s"$description $summaryDescription"
+    val expectedDescription = s"<p>$description $summaryDescription</p>"
 
     assertFindsCorrectDescription(
       varFields = List(
