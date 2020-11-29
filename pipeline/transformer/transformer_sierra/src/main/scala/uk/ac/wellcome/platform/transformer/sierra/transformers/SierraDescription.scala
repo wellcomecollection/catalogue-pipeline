@@ -1,9 +1,9 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import uk.ac.wellcome.platform.transformer.sierra.source.{
-  MarcSubfield,
   SierraBibData,
-  SierraQueryOps
+  SierraQueryOps,
+  VarField
 }
 
 object SierraDescription extends SierraDataTransformer with SierraQueryOps {
@@ -12,50 +12,37 @@ object SierraDescription extends SierraDataTransformer with SierraQueryOps {
 
   // Populate wwork:description.
   //
-  // We use MARC field "520"
+  // We use MARC field "520".  Rules:
   //
-  // The value comes from comes subfield $a concatenated with subfield $b.
+  //  - Join 520 ǂa and ǂb with a space
+  //  - Wrap resulting string in <p> tags
+  //  - Join each occurrence of 520 into description
   //
   // Notes:
-  //  - A bib may have multiple 520 records, in which case we join with spaces
-  //  - If $b is empty, we just use $a
-  //  - We never expect to see a record with $b but not $a
+  //  - Both ǂa (summary) and ǂb (expansion of summary note) are
+  //    non-repeatable subfields.
+  //  - We never expect to see a record with $b but not $a.
   //
   // https://www.loc.gov/marc/bibliographic/bd520.html
   //
-  def apply(bibData: SierraBibData) =
-    getSubfields(bibData, "520", List("a", "b"))
-      .foldLeft[List[String]](Nil)((acc, subfields) => {
+  def apply(bibData: SierraBibData): Option[String] = {
+    val description = bibData
+      .varfieldsWithTag("520")
+      .map { descriptionFromVarfield }
+      .mkString("\n")
 
-        (subfields.get("a"), subfields.get("b")) match {
-          case (Some(a), Some(b)) => acc :+ s"${a.content} ${b.content}"
-          case (Some(a), None)    => acc :+ a.content
-          case (None, None)       => acc
+    if (description.nonEmpty) Some(description) else None
+  }
 
-          // We never expect to see this in practice.  If we do, we should
-          // refuse to process it, and if/when we see it we can decide how
-          // it should be handled.  For now, just throw an exception.
-          case (None, Some(b)) =>
-            throw new RuntimeException(
-              s"Saw a MARC field 520 with $$b but no $$a? $bibData"
-            )
+  private def descriptionFromVarfield(vf: VarField): String = {
+    val contents =
+      Seq("a", "b")
+        .flatMap { tag =>
+          vf.nonrepeatableSubfieldWithTag(tag)
         }
-      }) match {
-      case Nil  => None
-      case list => Some(list.mkString(" "))
-    }
+        .map { _.content }
+        .mkString(" ")
 
-  def getSubfields(
-    bibData: SierraBibData,
-    marcTag: String,
-    marcSubfieldTags: List[String]
-  ): List[Map[String, MarcSubfield]] =
-    bibData
-      .varfieldsWithTag(marcTag)
-      .map(varField => {
-        varField.subfields
-          .filter(subfield => marcSubfieldTags.contains(subfield.tag))
-          .map(subfield => subfield.tag -> subfield)
-          .toMap
-      })
+    s"<p>$contents</p>"
+  }
 }
