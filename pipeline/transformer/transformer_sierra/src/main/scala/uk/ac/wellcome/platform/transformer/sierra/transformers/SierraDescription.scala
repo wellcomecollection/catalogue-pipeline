@@ -37,7 +37,9 @@ object SierraDescription extends SierraDataTransformer with SierraQueryOps {
   private def descriptionFromVarfield(vf: VarField): String = {
     val contents =
       Seq("a", "b")
-        .flatMap { tag => vf.nonrepeatableSubfieldWithTag(tag) }
+        .flatMap { tag =>
+          vf.nonrepeatableSubfieldWithTag(tag)
+        }
         .map { _.content }
         .mkString(" ")
 
