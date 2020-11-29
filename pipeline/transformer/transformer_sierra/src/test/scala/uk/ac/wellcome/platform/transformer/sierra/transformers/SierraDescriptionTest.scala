@@ -80,6 +80,30 @@ class SierraDescriptionTest
     )
   }
 
+  it("matches the example in issue #4900") {
+    // This is based on https://wellcomecollection.org/works/cd25dgvu,
+    // an example given in https://github.com/wellcomecollection/platform/issues/4900
+    val varFields = List(
+      "On the table is a tobacco label for \"Freemans Best\"",
+      "One man has two papers in his pocket: the \"London Journall\" and \"The Craftsman\"",
+      "The original is probably the painting now in the Paul Mellon Collection (Yale Center for British Art)"
+    ).map { subfieldContents =>
+      createVarFieldWith(
+        marcTag = "520",
+        subfields = List(MarcSubfield(tag = "a", content = subfieldContents))
+      )
+    }
+
+    val expectedDescription = """<p>On the table is a tobacco label for "Freemans Best"</p>
+                                |<p>One man has two papers in his pocket: the "London Journall" and "The Craftsman"</p>
+                                |<p>The original is probably the painting now in the Paul Mellon Collection (Yale Center for British Art)</p>""".stripMargin
+
+    assertFindsCorrectDescription(
+      varFields = varFields,
+      expectedDescription = Some(expectedDescription)
+    )
+  }
+
   it("does not get a description if MARC field 520 is absent") {
     assertFindsCorrectDescription(
       varFields = List(
