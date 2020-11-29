@@ -28,10 +28,10 @@ object SierraDescription extends SierraDataTransformer with SierraQueryOps {
     val description = bibData
       .varfieldsWithTag("520")
       .map { vf =>
-        val summary = vf.nonrepeatableSubfieldWithTag("a").map { _.content }
-        val expansion = vf.nonrepeatableSubfieldWithTag("b").map { _.content }
-
-        Seq(summary, expansion).flatten.mkString(" ")
+        Seq("a", "b")
+          .flatMap { tag => vf.nonrepeatableSubfieldWithTag(tag) }
+          .map { _.content }
+          .mkString(" ")
       }
       .map { description => s"<p>$description</p>" }
       .mkString("\n")
