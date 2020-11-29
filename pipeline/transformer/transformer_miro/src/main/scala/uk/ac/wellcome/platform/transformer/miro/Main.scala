@@ -9,8 +9,8 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.SQSBuilder
 import uk.ac.wellcome.platform.transformer.miro.Implicits._
 import uk.ac.wellcome.platform.transformer.miro.services.{
-  MiroTransformerWorkerService,
-  MiroDynamoVHSReader
+  MiroDynamoVHSReader,
+  MiroTransformerWorkerService
 }
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 import uk.ac.wellcome.storage.store.s3.S3TypedStore

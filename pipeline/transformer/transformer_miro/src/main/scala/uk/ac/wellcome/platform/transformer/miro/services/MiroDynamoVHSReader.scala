@@ -11,9 +11,8 @@ import uk.ac.wellcome.storage.store.Readable
 
 import scala.util.{Failure, Success, Try}
 
-class MiroDynamoVHSReader(
-  config: DynamoConfig)(
-  implicit client: AmazonDynamoDB) extends Readable[String, MiroVHSRecord]  {
+class MiroDynamoVHSReader(config: DynamoConfig)(implicit client: AmazonDynamoDB)
+    extends Readable[String, MiroVHSRecord] {
 
   private val scanamo = Scanamo(client)
 
@@ -24,7 +23,9 @@ class MiroDynamoVHSReader(
       case Success(Some(Right(record))) => Right(Identified(id, record))
 
       case Success(Some(Left(err))) =>
-        Left(StoreReadError(new Throwable(s"Error parsing the record from Scanamo: $err")))
+        Left(
+          StoreReadError(
+            new Throwable(s"Error parsing the record from Scanamo: $err")))
 
       case Success(None) => Left(DoesNotExistError())
 

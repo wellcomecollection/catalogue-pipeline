@@ -11,9 +11,16 @@ import uk.ac.wellcome.storage.{DoesNotExistError, Identified, StoreReadError}
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 
-class MiroDynamoVHSReaderTest extends AnyFunSpec with Matchers with EitherValues with DynamoFixtures {
+class MiroDynamoVHSReaderTest
+    extends AnyFunSpec
+    with Matchers
+    with EitherValues
+    with DynamoFixtures {
   override def createTable(table: DynamoFixtures.Table): DynamoFixtures.Table =
-    createTableWithHashKey(table, keyName = "id", keyType = ScalarAttributeType.S)
+    createTableWithHashKey(
+      table,
+      keyName = "id",
+      keyType = ScalarAttributeType.S)
 
   it("finds a Miro VHS record") {
     val vhsRecord = MiroVHSRecord(
@@ -21,7 +28,8 @@ class MiroDynamoVHSReaderTest extends AnyFunSpec with Matchers with EitherValues
       isClearedForCatalogueAPI = false,
       location = S3ObjectLocation(
         bucket = "wellcomecollection-vhs-sourcedata-miro",
-        key = "C0041442/318323f7c3a9ac93ce33a8179821f5e2c442d78f951b273c24f500a0ef35f093.json"
+        key =
+          "C0041442/318323f7c3a9ac93ce33a8179821f5e2c442d78f951b273c24f500a0ef35f093.json"
       ),
       version = 1
     )
@@ -50,14 +58,16 @@ class MiroDynamoVHSReaderTest extends AnyFunSpec with Matchers with EitherValues
 
       scanamo.exec(ScanamoTable[BadRecord](table.name).put(badRecord))
 
-      val reader = new MiroDynamoVHSReader(createDynamoConfigWith(nonExistentTable))
+      val reader =
+        new MiroDynamoVHSReader(createDynamoConfigWith(nonExistentTable))
 
       reader.get("V0001234").left.value shouldBe a[StoreReadError]
     }
   }
 
   it("returns a Left[StoreReadError] for a missing ID") {
-    val reader = new MiroDynamoVHSReader(createDynamoConfigWith(nonExistentTable))
+    val reader =
+      new MiroDynamoVHSReader(createDynamoConfigWith(nonExistentTable))
 
     reader.get("doesnotexist").left.value shouldBe a[StoreReadError]
   }
