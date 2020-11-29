@@ -40,7 +40,7 @@ object Main extends WellcomeTypesafeApp {
       config = DynamoBuilder.buildDynamoConfig(config)
     )
 
-    val miroIndexStore = new Readable[String, MiroVHSRecord] {
+    val miroVhsReader = new Readable[String, MiroVHSRecord] {
       override def get(id: String): ReadEither =
         dynamoStore
           .getLatest(id)
@@ -50,7 +50,7 @@ object Main extends WellcomeTypesafeApp {
     new MiroTransformerWorkerService(
       stream = SQSBuilder.buildSQSStream[NotificationMessage](config),
       sender = BigMessagingBuilder.buildBigMessageSender(config),
-      miroIndexStore = miroIndexStore,
+      miroVhsReader = miroVhsReader,
       typedStore = S3TypedStore[MiroRecord]
     )
   }

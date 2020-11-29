@@ -18,7 +18,7 @@ import uk.ac.wellcome.typesafe.Runnable
 class MiroTransformerWorkerService[MsgDestination](
   val stream: SQSStream[NotificationMessage],
   val sender: MessageSender[MsgDestination],
-  miroIndexStore: Readable[String, MiroVHSRecord],
+  miroVhsReader: Readable[String, MiroVHSRecord],
   typedStore: Readable[S3ObjectLocation, MiroRecord]
 ) extends Runnable
     with TransformerWorker[(MiroRecord, MiroMetadata, Int), MsgDestination] {
@@ -26,7 +26,7 @@ class MiroTransformerWorkerService[MsgDestination](
   override val transformer: Transformer[(MiroRecord, MiroMetadata, Int)] =
     new MiroRecordTransformer
 
-  private val miroLookup = new MiroLookup(miroIndexStore, typedStore)
+  private val miroLookup = new MiroLookup(miroVhsReader, typedStore)
 
   override protected def lookupSourceData(
     key: StoreKey): Either[ReadError, (MiroRecord, MiroMetadata, Int)] =

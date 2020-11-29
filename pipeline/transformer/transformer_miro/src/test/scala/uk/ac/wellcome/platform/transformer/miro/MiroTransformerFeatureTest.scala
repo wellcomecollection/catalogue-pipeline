@@ -42,7 +42,7 @@ class MiroTransformerFeatureTest
 
     val record = createMiroRecordWith(title = Some(title), imageNumber = miroID)
 
-    val miroIndexStore =
+    val vhsStore =
       new MemoryStore[String, MiroVHSRecord](initialEntries = Map.empty)
     val typedStore =
       new MemoryStore[S3ObjectLocation, MiroRecord](initialEntries = Map.empty)
@@ -50,7 +50,7 @@ class MiroTransformerFeatureTest
     storeRecord(
       id = miroID,
       record = record,
-      indexStore = miroIndexStore,
+      vhsStore = vhsStore,
       typedStore = typedStore)
 
     val messageSender = new MemoryMessageSender()
@@ -58,7 +58,7 @@ class MiroTransformerFeatureTest
     withLocalSqsQueue(visibilityTimeout = 5) { queue =>
       sendNotificationToSQS(queue, Version(miroID, version = 1))
 
-      withWorkerService(messageSender, queue, miroIndexStore, typedStore) { _ =>
+      withWorkerService(messageSender, queue, vhsStore, typedStore) { _ =>
         eventually {
           val works = messageSender.getMessages[Work.Visible[Source]]
           works.length shouldBe 1
@@ -74,7 +74,7 @@ class MiroTransformerFeatureTest
   private def storeRecord(
     id: String,
     record: MiroRecord,
-    indexStore: MemoryStore[String, MiroVHSRecord],
+    vhsStore: MemoryStore[String, MiroVHSRecord],
     typedStore: MemoryStore[S3ObjectLocation, MiroRecord]
   ): Assertion = {
     val s3Location = createS3ObjectLocation
@@ -86,13 +86,13 @@ class MiroTransformerFeatureTest
       isClearedForCatalogueAPI = true,
       location = s3Location
     )
-    indexStore.put(id)(vhsRecord) shouldBe a[Right[_, _]]
+    vhsStore.put(id)(vhsRecord) shouldBe a[Right[_, _]]
   }
 
   def withWorkerService[R](
     messageSender: MemoryMessageSender,
     queue: Queue,
-    miroIndexStore: Readable[String, MiroVHSRecord] =
+    miroVhsReader: Readable[String, MiroVHSRecord] =
       new MemoryStore[String, MiroVHSRecord](initialEntries = Map.empty),
     typedStore: Readable[S3ObjectLocation, MiroRecord] =
       new MemoryStore[S3ObjectLocation, MiroRecord](initialEntries = Map.empty)
@@ -102,7 +102,7 @@ class MiroTransformerFeatureTest
         val workerService = new MiroTransformerWorkerService(
           stream = sqsStream,
           sender = messageSender,
-          miroIndexStore = miroIndexStore,
+          miroVhsReader = miroVhsReader,
           typedStore = typedStore
         )
 
