@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
+import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.platform.transformer.sierra.source.{
@@ -92,7 +93,7 @@ class SierraDescriptionTest
   private def assertFindsCorrectDescription(
     varFields: List[VarField],
     expectedDescription: Option[String]
-  ) = {
+  ): Assertion = {
     val actualDescription = SierraDescription(
       createSierraBibDataWith(varFields = varFields))
     actualDescription shouldBe expectedDescription

@@ -23,7 +23,7 @@ object SierraDescription extends SierraDataTransformer with SierraQueryOps {
   //
   // https://www.loc.gov/marc/bibliographic/bd520.html
   //
-  def apply(bibData: SierraBibData) =
+  def apply(bibData: SierraBibData): Option[String] =
     getSubfields(bibData, "520", List("a", "b"))
       .foldLeft[List[String]](Nil)((acc, subfields) => {
 
