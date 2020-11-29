@@ -21,6 +21,7 @@ class SierraDescriptionTest
   it(
     "extracts a work description where MARC field 520 with subfield a is populated") {
     val description = "A panolopy of penguins perching on a python."
+    val expectedDescription = description
 
     assertFindsCorrectDescription(
       varFields = List(
@@ -31,7 +32,7 @@ class SierraDescriptionTest
           )
         )
       ),
-      expectedDescription = Some(description)
+      expectedDescription = Some(expectedDescription)
     )
   }
 
@@ -40,7 +41,7 @@ class SierraDescriptionTest
     val description2 = "A fresh fishy fruit."
     val summaryDescription2 = "A case of colloidal coffee capsules."
 
-    val description = s"$description1 $description2 $summaryDescription2"
+    val expectedDescription = s"$description1 $description2 $summaryDescription2"
 
     assertFindsCorrectDescription(
       varFields = List(
@@ -58,7 +59,7 @@ class SierraDescriptionTest
           )
         )
       ),
-      expectedDescription = Some(description)
+      expectedDescription = Some(expectedDescription)
     )
   }
 
@@ -66,6 +67,8 @@ class SierraDescriptionTest
     "extracts a work description where MARC field 520 with subfield a and b are populated") {
     val description = "A panolopy of penguins perching on a python."
     val summaryDescription = "A fracas of frolicking frogs on futons."
+
+    val expectedDescription = s"$description $summaryDescription"
 
     assertFindsCorrectDescription(
       varFields = List(
@@ -77,7 +80,7 @@ class SierraDescriptionTest
           )
         )
       ),
-      expectedDescription = Some(s"$description $summaryDescription")
+      expectedDescription = Some(expectedDescription)
     )
   }
 
