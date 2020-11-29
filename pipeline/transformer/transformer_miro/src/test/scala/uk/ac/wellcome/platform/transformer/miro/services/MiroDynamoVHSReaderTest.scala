@@ -11,7 +11,7 @@ import uk.ac.wellcome.storage.{DoesNotExistError, Identified, StoreReadError}
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 
-class MiroVHSReaderTest extends AnyFunSpec with Matchers with EitherValues with DynamoFixtures {
+class MiroDynamoVHSReaderTest extends AnyFunSpec with Matchers with EitherValues with DynamoFixtures {
   override def createTable(table: DynamoFixtures.Table): DynamoFixtures.Table =
     createTableWithHashKey(table, keyName = "id", keyType = ScalarAttributeType.S)
 
@@ -29,7 +29,7 @@ class MiroVHSReaderTest extends AnyFunSpec with Matchers with EitherValues with 
     withLocalDynamoDbTable { table =>
       scanamo.exec(ScanamoTable[MiroVHSRecord](table.name).put(vhsRecord))
 
-      val reader = new MiroVHSReader(createDynamoConfigWith(table))
+      val reader = new MiroDynamoVHSReader(createDynamoConfigWith(table))
 
       reader.get("C0041442").value shouldBe Identified("C0041442", vhsRecord)
     }
@@ -37,7 +37,7 @@ class MiroVHSReaderTest extends AnyFunSpec with Matchers with EitherValues with 
 
   it("returns a Left[DoesNotExistError] for a missing ID") {
     withLocalDynamoDbTable { table =>
-      val reader = new MiroVHSReader(createDynamoConfigWith(table))
+      val reader = new MiroDynamoVHSReader(createDynamoConfigWith(table))
 
       reader.get("doesnotexist").left.value shouldBe a[DoesNotExistError]
     }
@@ -50,14 +50,14 @@ class MiroVHSReaderTest extends AnyFunSpec with Matchers with EitherValues with 
 
       scanamo.exec(ScanamoTable[BadRecord](table.name).put(badRecord))
 
-      val reader = new MiroVHSReader(createDynamoConfigWith(nonExistentTable))
+      val reader = new MiroDynamoVHSReader(createDynamoConfigWith(nonExistentTable))
 
       reader.get("V0001234").left.value shouldBe a[StoreReadError]
     }
   }
 
   it("returns a Left[StoreReadError] for a missing ID") {
-    val reader = new MiroVHSReader(createDynamoConfigWith(nonExistentTable))
+    val reader = new MiroDynamoVHSReader(createDynamoConfigWith(nonExistentTable))
 
     reader.get("doesnotexist").left.value shouldBe a[StoreReadError]
   }

@@ -11,7 +11,7 @@ import uk.ac.wellcome.storage.store.Readable
 
 import scala.util.{Failure, Success, Try}
 
-class MiroVHSReader(
+class MiroDynamoVHSReader(
   config: DynamoConfig)(
   implicit client: AmazonDynamoDB) extends Readable[String, MiroVHSRecord]  {
 
