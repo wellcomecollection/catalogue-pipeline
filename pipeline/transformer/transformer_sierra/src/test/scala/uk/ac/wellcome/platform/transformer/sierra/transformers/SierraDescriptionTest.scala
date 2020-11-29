@@ -18,8 +18,7 @@ class SierraDescriptionTest
     with MarcGenerators
     with SierraDataGenerators {
 
-  it(
-    "extracts a work description where MARC field 520 with subfield a is populated") {
+  it("gets a description from a bib with a single instance of MARC 520") {
     val description = "A panolopy of penguins perching on a python."
     val expectedDescription = description
 
@@ -36,12 +35,11 @@ class SierraDescriptionTest
     )
   }
 
-  it("extracts a work description where there are multiple MARC field 520") {
+  it("gets a description from a bib with multiple instances of MARC 520") {
     val description1 = "A malcontent marc minion."
     val description2 = "A fresh fishy fruit."
-    val summaryDescription2 = "A case of colloidal coffee capsules."
 
-    val expectedDescription = s"$description1 $description2 $summaryDescription2"
+    val expectedDescription = s"$description1 $description2"
 
     assertFindsCorrectDescription(
       varFields = List(
@@ -54,8 +52,7 @@ class SierraDescriptionTest
         createVarFieldWith(
           marcTag = "520",
           subfields = List(
-            MarcSubfield(tag = "a", content = description2),
-            MarcSubfield(tag = "b", content = summaryDescription2)
+            MarcSubfield(tag = "a", content = description2)
           )
         )
       ),
@@ -63,8 +60,7 @@ class SierraDescriptionTest
     )
   }
 
-  it(
-    "extracts a work description where MARC field 520 with subfield a and b are populated") {
+  it("gets a description from a MARC tag 520 with ǂa and ǂb") {
     val description = "A panolopy of penguins perching on a python."
     val summaryDescription = "A fracas of frolicking frogs on futons."
 
@@ -84,7 +80,7 @@ class SierraDescriptionTest
     )
   }
 
-  it("does not extract a work description where MARC field 520 is absent") {
+  it("does not get a description if MARC field 520 is absent") {
     assertFindsCorrectDescription(
       varFields = List(
         createVarFieldWith(marcTag = "666")
