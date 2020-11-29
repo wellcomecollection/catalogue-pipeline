@@ -2,7 +2,8 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraBibData,
-  SierraQueryOps
+  SierraQueryOps,
+  VarField
 }
 
 object SierraDescription extends SierraDataTransformer with SierraQueryOps {
@@ -27,15 +28,19 @@ object SierraDescription extends SierraDataTransformer with SierraQueryOps {
   def apply(bibData: SierraBibData): Option[String] = {
     val description = bibData
       .varfieldsWithTag("520")
-      .map { vf =>
-        Seq("a", "b")
-          .flatMap { tag => vf.nonrepeatableSubfieldWithTag(tag) }
-          .map { _.content }
-          .mkString(" ")
-      }
-      .map { description => s"<p>$description</p>" }
+      .map { descriptionFromVarfield }
       .mkString("\n")
 
     if (description.nonEmpty) Some(description) else None
+  }
+
+  private def descriptionFromVarfield(vf: VarField): String = {
+    val contents =
+      Seq("a", "b")
+        .flatMap { tag => vf.nonrepeatableSubfieldWithTag(tag) }
+        .map { _.content }
+        .mkString(" ")
+
+    s"<p>$contents</p>"
   }
 }
