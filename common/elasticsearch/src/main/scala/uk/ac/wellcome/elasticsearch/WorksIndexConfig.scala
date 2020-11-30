@@ -13,10 +13,6 @@ trait WorksIndexConfigFields extends IndexConfigFields {
   import WorksAnalysis._
 
   // Fields
-  def sourceIdentifier =
-    objectField("sourceIdentifier")
-      .fields(sourceIdentifierFields)
-
   def otherIdentifiers =
     objectField("otherIdentifiers")
       .fields(sourceIdentifierFields)
@@ -129,8 +125,8 @@ trait WorksIndexConfigFields extends IndexConfigFields {
     keywordField("reason")
   )
 
-  def images(idState: ObjectField) = objectField("images").fields(
-    idState,
+  def images(imageState: ObjectField) = objectField("images").fields(
+    imageState,
     location("locations"),
     version
   )
@@ -141,7 +137,9 @@ trait WorksIndexConfigFields extends IndexConfigFields {
       .analyzer(pathAnalyzer.name)
       .fields(keywordField("keyword"))
 
-  def data(pathField: TextField, idState: ObjectField): ObjectField =
+  def data(pathField: TextField,
+           idState: ObjectField = id(),
+           imageState: ObjectField = ???): ObjectField =
     objectField("data").fields(
       otherIdentifiers,
       mergeCandidates,
@@ -163,7 +161,7 @@ trait WorksIndexConfigFields extends IndexConfigFields {
       notes,
       intField("duration"),
       collectionPath(pathField),
-      images(idState),
+      images(imageState),
       keywordField("workType")
     )
 
@@ -264,7 +262,10 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
       version,
       id("redirect"),
       keywordField("type"),
-      data(analyzedPath, id("id")),
+      data(
+        pathField = analyzedPath,
+        imageState = identifiedSourceImageState
+      ),
       objectField("invisibilityReasons").fields(
         keywordField("type"),
         keywordField("info")

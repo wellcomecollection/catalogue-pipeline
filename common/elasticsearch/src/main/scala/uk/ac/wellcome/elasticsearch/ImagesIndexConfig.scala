@@ -2,23 +2,32 @@ package uk.ac.wellcome.elasticsearch
 
 import com.sksamuel.elastic4s.ElasticDsl.{keywordField, _}
 import com.sksamuel.elastic4s.analysis.Analysis
-import com.sksamuel.elastic4s.requests.mappings.{MappingDefinition, ObjectField}
+import com.sksamuel.elastic4s.requests.mappings.{
+  FieldDefinition,
+  MappingDefinition,
+  ObjectField
+}
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
+import io.circe.Decoder.state
 
 object ImagesIndexConfig extends IndexConfig with WorksIndexConfigFields {
 
-  override val analysis: Analysis = WorksAnalysis()
+  val analysis: Analysis = WorksAnalysis()
 
   val inferredData = objectField("inferredData").fields(
     denseVectorField("features1", 2048),
     denseVectorField("features2", 2048),
     keywordField("lshEncodedFeatures"),
-    keywordField("palette"))
+    keywordField("palette")
+  )
 
-  private def sourceWork(canonicalWork: String): ObjectField =
-    objectField(canonicalWork).fields(
+  private def sourceWork(fieldName: String): ObjectField =
+    objectField(fieldName).fields(
       id(),
-      data(textField("path"), id()),
+      data(
+        pathField = textField("path"),
+        imageState = identifiedSourceImageState
+      ),
       keywordField("type"),
       version
     )
@@ -29,12 +38,18 @@ object ImagesIndexConfig extends IndexConfig with WorksIndexConfigFields {
     keywordField("type")
   )
 
-  override val mapping: MappingDefinition = properties(
-    id(),
-    version,
+  val augmentedState = objectField("state").fields(
+    sourceIdentifier,
+    canonicalId,
     modifiedTime,
-    location("locations"),
     source,
     inferredData
-  ).dynamic(DynamicMapping.Strict)
+  )
+
+  def mapping: MappingDefinition =
+    properties(
+      version,
+      augmentedState,
+      location("locations")
+    ).dynamic(DynamicMapping.Strict)
 }
