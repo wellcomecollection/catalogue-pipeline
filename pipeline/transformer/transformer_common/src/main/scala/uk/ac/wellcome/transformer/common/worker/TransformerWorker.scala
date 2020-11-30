@@ -6,10 +6,10 @@ import grizzled.slf4j.Logging
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.storage.{ReadError, Version}
 import WorkState.Source
+import uk.ac.wellcome.pipeline_storage.PipelineStorageStream
 
 import scala.util.{Failure, Success}
 
@@ -37,10 +37,12 @@ trait TransformerWorker[SourceData, SenderDest] extends Logging {
   type StoreKey = Version[String, Int]
 
   def name: String = this.getClass.getSimpleName
-  val stream: SQSStream[NotificationMessage]
   val sender: MessageSender[SenderDest]
   val transformer: Transformer[SourceData]
-  val concurrentTransformations: Int = 2
+
+  val pipelineStream: PipelineStorageStream[NotificationMessage,
+                                            Work[Source],
+                                            SenderDest]
 
   protected def lookupSourceData(key: StoreKey): Either[ReadError, SourceData]
 
@@ -78,30 +80,26 @@ trait TransformerWorker[SourceData, SenderDest] extends Logging {
     }
 
   def run(): Future[Done] =
-    stream.runStream(
+    pipelineStream.foreach(
       name,
-      source => {
-        source.mapAsync(concurrentTransformations) {
-          case (message, notification) =>
-            process(notification) match {
-              case Left(err) =>
-                // We do some slightly nicer logging here to give context to the errors
-                err match {
-                  case DecodeKeyError(_, notificationMsg) =>
-                    error(s"$name: DecodeKeyError from $notificationMsg")
-                  case StoreReadError(_, key) =>
-                    error(s"$name: StoreReadError on $key")
-                  case TransformerError(_, sourceData, key) =>
-                    error(s"$name: TransformerError on $sourceData with $key")
-                  case MessageSendError(_, work, key) =>
-                    error(s"$name: MessageSendError on $work with $key")
-                }
-                Future.failed(err)
-              case Right((work, key)) =>
-                info(s"$name: from $key transformed $work")
-                Future.successful(message)
+      (notification: NotificationMessage) =>
+        process(notification) match {
+          case Left(err) =>
+            // We do some slightly nicer logging here to give context to the errors
+            err match {
+              case DecodeKeyError(_, notificationMsg) =>
+                error(s"$name: DecodeKeyError from $notificationMsg")
+              case StoreReadError(_, key) =>
+                error(s"$name: StoreReadError on $key")
+              case TransformerError(_, sourceData, key) =>
+                error(s"$name: TransformerError on $sourceData with $key")
+              case MessageSendError(_, work, key) =>
+                error(s"$name: MessageSendError on $work with $key")
             }
-        }
+            Future.failed(err)
+          case Right((work, key)) =>
+            info(s"$name: from $key transformed $work")
+            Future.successful(Some(work))
       }
     )
 }
