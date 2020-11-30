@@ -22,13 +22,13 @@ object PipelineStorageStreamBuilder {
     )
   }
 
-  def buildPipelineStorageStream[T, D, MsgDestination](
-    sqsStream: SQSStream[T],
-    indexer: Indexer[D],
+  def buildPipelineStorageStream[In, Out, MsgDestination](
+    sqsStream: SQSStream[In],
+    indexer: Indexer[Out],
     messageSender: MessageSender[MsgDestination])(config: Config)(
     implicit ec: ExecutionContext)
-    : PipelineStorageStream[T, D, MsgDestination] = {
-    new PipelineStorageStream[T, D, MsgDestination](
+    : PipelineStorageStream[In, Out, MsgDestination] = {
+    new PipelineStorageStream[In, Out, MsgDestination](
       sqsStream,
       indexer,
       messageSender)(buildPipelineStorageConfig(config))
