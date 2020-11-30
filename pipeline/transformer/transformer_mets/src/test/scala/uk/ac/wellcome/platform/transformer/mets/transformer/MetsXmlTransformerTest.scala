@@ -30,11 +30,6 @@ class MetsXmlTransformerTest
     )
   }
 
-  it("should transform blup") {
-    val xml = loadXmlFile("/iuyiuy.xml")
-    transform(Some(xml), Instant.now) shouldBe a [Right[_,_]]
-  }
-
   it("should error when the root XML doesn't exist in the store") {
     transform(None, Instant.now) shouldBe a[Left[_, _]]
   }
