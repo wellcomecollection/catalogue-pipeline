@@ -43,7 +43,7 @@ class ImagesIndexConfigTest
     withLocalImagesIndex { index =>
       val features1 = (0 until 3000).map(_ => Random.nextFloat() * 100).toList
       val features2 = (0 until 3000).map(_ => Random.nextFloat() * 100).toList
-      val image = createIdentifiedMergedImageWith().augment(
+      val image = createIdentifiedImageWith().augment(
         Some(
           InferredData(
             features1,
@@ -59,7 +59,7 @@ class ImagesIndexConfigTest
 
   it("cannot ingest an image with image vectors that are shorter than 2048") {
     withLocalImagesIndex { index =>
-      val image = createIdentifiedMergedImageWith().augment(
+      val image = createIdentifiedImageWith().augment(
         Some(
           InferredData(
             List(2.0f),

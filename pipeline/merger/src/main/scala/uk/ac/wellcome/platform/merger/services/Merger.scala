@@ -173,19 +173,19 @@ object PlatformMerger extends Merger {
         items <- ItemsRule(target, sources).redirectSources
         thumbnail <- ThumbnailRule(target, sources).redirectSources
         otherIdentifiers <- OtherIdentifiersRule(target, sources).redirectSources
-        unmergedImages <- ImagesRule(target, sources).redirectSources
+        sourceImages <- ImagesRule(target, sources).redirectSources
         work = target.mapData { data =>
           data.copy[DataState.Unidentified](
             items = items,
             thumbnail = thumbnail,
             otherIdentifiers = otherIdentifiers,
-            images = unmergedImages
+            images = sourceImages
           )
         }
       } yield
         MergeResult(
           mergedTarget = work,
-          imagesWithSources = unmergedImages.map { image =>
+          imagesWithSources = sourceImages.map { image =>
             ImageWithSource(
               image = image,
               source = SourceWorks(
@@ -199,7 +199,7 @@ object PlatformMerger extends Merger {
         )
 
   private def standaloneImages(
-    target: Work.Visible[Source]): List[UnmergedImage[DataState.Unidentified]] =
+    target: Work.Visible[Source]): List[Image[ImageState.Source]] =
     if (WorkPredicates.singleDigitalItemMiroWork(target)) target.data.images
     else Nil
 }

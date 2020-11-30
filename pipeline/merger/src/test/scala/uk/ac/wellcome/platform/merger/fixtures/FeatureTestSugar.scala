@@ -1,9 +1,9 @@
 package uk.ac.wellcome.platform.merger.fixtures
 
 import uk.ac.wellcome.models.work.internal.{
-  DataState,
   IdState,
-  UnmergedImage,
+  Image,
+  ImageState,
   Work,
   WorkState
 }
@@ -22,12 +22,12 @@ trait FeatureTestSugar {
     def imageSourceIds: Seq[Identifiable] =
       mergerOutcome.imagesWithSources.map(_.source.id)
 
-    def images: Seq[UnmergedImage[DataState.Unidentified]] =
+    def images: Seq[Image[ImageState.Source]] =
       mergerOutcome.imagesWithSources.map(_.image)
   }
 
   implicit class VisibleWorkOps(val work: Work.Visible[Source]) {
-    def singleImage: UnmergedImage[DataState.Unidentified] =
+    def singleImage: Image[ImageState.Source] =
       work.data.images.head
   }
 

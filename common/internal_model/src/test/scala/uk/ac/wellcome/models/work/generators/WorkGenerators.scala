@@ -187,7 +187,7 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
       work.map(_.copy(collectionPath = Some(collectionPath)))
 
     def images(
-      images: List[UnmergedImage[State#WorkDataState]]): Work.Visible[State] =
+      images: List[Image[State#WorkDataState#WorkImage]]): Work.Visible[State] =
       work.map(_.copy(images = images))
 
     def workType(workType: WorkType): Work.Visible[State] =

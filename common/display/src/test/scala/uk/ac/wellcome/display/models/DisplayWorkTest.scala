@@ -338,7 +338,7 @@ class DisplayWorkTest
         )
       )
       .images(
-        (1 to 5).map(_ => createUnmergedImage.toIdentified).toList
+        (1 to 5).map(_ => createSourceImage.toIdentified).toList
       )
 
     describe("omits identifiers if WorksIncludes.identifiers is false") {

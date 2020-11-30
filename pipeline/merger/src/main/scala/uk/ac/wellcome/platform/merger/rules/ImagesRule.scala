@@ -8,7 +8,7 @@ import WorkState.Source
 object ImagesRule extends FieldMergeRule {
   import WorkPredicates._
 
-  type FieldData = List[UnmergedImage[DataState.Unidentified]]
+  type FieldData = List[Image[ImageState.Source]]
 
   override def merge(
     target: Work.Visible[Source],
@@ -47,9 +47,9 @@ object ImagesRule extends FieldMergeRule {
   }
 
   trait FlatImageMergeRule extends PartialRule {
-    final override def rule(target: Work.Visible[Source],
-                            sources: NonEmptyList[Work[Source]])
-      : List[UnmergedImage[DataState.Unidentified]] =
+    final override def rule(
+      target: Work.Visible[Source],
+      sources: NonEmptyList[Work[Source]]): List[Image[ImageState.Source]] =
       (target :: sources).toList.flatMap(_.data.images)
   }
 

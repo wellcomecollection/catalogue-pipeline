@@ -333,7 +333,7 @@ class DisplayWorkSerialisationTest
 
   it("includes image stubs with the images include") {
     val work = indexedWork().images(
-      (1 to 3).map(_ => createUnmergedImage.toIdentified).toList
+      (1 to 3).map(_ => createSourceImage.toIdentified).toList
     )
 
     val expectedJson = s"""

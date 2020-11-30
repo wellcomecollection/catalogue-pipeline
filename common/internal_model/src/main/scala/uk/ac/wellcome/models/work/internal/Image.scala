@@ -135,33 +135,6 @@ object ImageFsm {
   }
 }
 
-case class UnmergedImage[State <: DataState](
-  id: State#Id,
-  version: Int,
-  locations: List[DigitalLocationDeprecated]
-) extends BaseImage[State] {
-  def mergeWith(canonicalWork: SourceWork[State],
-                redirectedWork: Option[SourceWork[State]] = None,
-                modifiedTime: Instant): MergedImage[State] =
-    MergedImage[State](
-      id = id,
-      version = version,
-      modifiedTime = modifiedTime,
-      locations = locations,
-      source = SourceWorks[State](canonicalWork, redirectedWork)
-    )
-
-  def mergeWith(source: ImageSource[State],
-                modifiedTime: Instant): MergedImage[State] =
-    MergedImage[State](
-      id = id,
-      version = version,
-      modifiedTime = modifiedTime,
-      locations = locations,
-      source = source
-    )
-}
-
 case class MergedImage[State <: DataState](
   id: State#Id,
   version: Int,
@@ -205,16 +178,4 @@ case class InferredData(
 
 object InferredData {
   def empty: InferredData = InferredData(Nil, Nil, Nil, Nil)
-}
-
-object UnmergedImage {
-  def apply(sourceIdentifier: SourceIdentifier,
-            version: Int,
-            locations: List[DigitalLocationDeprecated])
-    : UnmergedImage[DataState.Unidentified] =
-    UnmergedImage[DataState.Unidentified](
-      id = IdState.Identifiable(sourceIdentifier),
-      version = version,
-      locations
-    )
 }

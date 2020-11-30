@@ -35,7 +35,7 @@ class ImageDownloaderTest
       withMaterializer { implicit materializer =>
         withDownloaderAndFileWriter() {
           case (downloader, requestPool, _) =>
-            val image = createIdentifiedMergedImageWith(
+            val image = createIdentifiedImageWith(
               locations = List(
                 createDigitalLocationWith(
                   locationType = createImageLocationType,
@@ -61,7 +61,7 @@ class ImageDownloaderTest
       withMaterializer { implicit materializer: Materializer =>
         withDownloaderAndFileWriter() {
           case (downloader, _, fileWriter) =>
-            val image = createIdentifiedMergedImageWith()
+            val image = createIdentifiedImageWith()
             val result = Source
               .single(image)
               .asSourceWithContext(_ => ())
@@ -81,7 +81,7 @@ class ImageDownloaderTest
       withMaterializer { implicit materializer: Materializer =>
         withDownloaderAndFileWriter(_ => None) {
           case (downloader, _, _) =>
-            val image = createIdentifiedMergedImageWith()
+            val image = createIdentifiedImageWith()
             val result = Source
               .single(image)
               .asSourceWithContext(_ => ())
@@ -97,7 +97,7 @@ class ImageDownloaderTest
       withMaterializer { implicit materializer =>
         withDownloaderAndFileWriter() {
           case (downloader, requestPool, _) =>
-            val image = createIdentifiedMergedImageWith(
+            val image = createIdentifiedImageWith(
               locations = List(
                 createDigitalLocationWith(
                   locationType = createPresentationLocationType,
@@ -127,7 +127,7 @@ class ImageDownloaderTest
 
   describe("delete") {
     it("deletes a DownloadedImage") {
-      val image = createIdentifiedMergedImageWith()
+      val image = createIdentifiedImageWith()
       val downloadedImage = DownloadedImage(
         image,
         Paths.get("a", "b", "c", "default.jpg")

@@ -4,6 +4,7 @@ import java.time.Instant
 
 import uk.ac.wellcome.models.work.internal._
 import SourceWork._
+import ImageState._
 
 trait ImageGenerators
     extends IdentifiersGenerators
@@ -11,24 +12,26 @@ trait ImageGenerators
     with InstantGenerators
     with VectorGenerators
     with SierraWorkGenerators {
-  def createUnmergedImageWith(
+  def createSourceImageWith(
     locations: List[DigitalLocationDeprecated] = List(createDigitalLocation),
     version: Int = 1,
     identifierValue: String = randomAlphanumeric(10),
     identifierType: IdentifierType = IdentifierType("miro-image-number")
-  ): UnmergedImage[DataState.Unidentified] =
-    UnmergedImage(
-      sourceIdentifier = createSourceIdentifierWith(
-        identifierType = identifierType,
-        value = identifierValue),
+  ): Image[Source] =
+    Image[Source](
+      state = Source(
+        sourceIdentifier = createSourceIdentifierWith(
+          identifierType = identifierType,
+          value = identifierValue
+        )
+      ),
       version = version,
       locations = locations
     )
 
-  def createUnmergedImage: UnmergedImage[DataState.Unidentified] =
-    createUnmergedImageWith()
+  def createSourceImage: Image[Source] = createSourceImageWith()
 
-  def createUnmergedMiroImage = createUnmergedImageWith(
+  def createSourceMiroImage = createSourceImageWith(
     locations = List(
       DigitalLocationDeprecated(
         url = "https://iiif.wellcomecollection.org/V01234.jpg",
@@ -37,27 +40,34 @@ trait ImageGenerators
       ))
   )
 
-  def createUnmergedMetsImage = createUnmergedImageWith(
+  def createSourceMetsImage = createSourceImageWith(
     locations = List(createDigitalLocation),
     identifierType = IdentifierType("mets-image")
   )
 
-  def createIdentifiedMergedImageWith(
-    imageId: IdState.Identified =
-      IdState.Identified(createCanonicalId, createSourceIdentifier),
+  def createIdentifiedImageWith(
+    sourceIdentifier: SourceIdentifier = createSourceIdentifier,
+    canonicalId: String = createCanonicalId,
     locations: List[DigitalLocationDeprecated] = List(
       createDigitalLocationWith(locationType = createImageLocationType)),
     version: Int = 1,
     modifiedTime: Instant = instantInLast30Days,
     parentWork: Work.Visible[WorkState.Identified] = sierraIdentifiedWork(),
     redirectedWork: Option[Work[WorkState.Identified]] = Some(
-      sierraIdentifiedWork())): MergedImage[DataState.Identified] =
-    MergedImage[DataState.Identified](
-      imageId,
-      version,
-      modifiedTime,
-      locations,
-      SourceWorks(parentWork.toSourceWork, redirectedWork.map(_.toSourceWork)))
+      sierraIdentifiedWork())): Image[Identified] =
+    Image[Identified](
+      version = version,
+      locations = locations,
+      state = Identified(
+        sourceIdentifier = sourceIdentifier,
+        canonicalId = canonicalId,
+        modifiedTime = modifiedTime,
+        source = SourceWorks(
+          parentWork.toSourceWork,
+          redirectedWork.map(_.toSourceWork)
+        )
+      )
+    )
 
   def createInferredData = {
     val features = randomVector(4096)
@@ -75,9 +85,9 @@ trait ImageGenerators
   }
 
   def createAugmentedImageWith(
-    imageId: IdState.Identified = IdState.Identified(
-      createCanonicalId,
-      createSourceIdentifierWith(IdentifierType("miro-image-number"))),
+    sourceIdentifier: SourceIdentifier = createSourceIdentifierWith(
+      IdentifierType("miro-image-number")),
+    canonicalId: String = createCanonicalId,
     parentWork: Work.Visible[WorkState.Identified] = sierraIdentifiedWork(),
     redirectedWork: Option[Work.Visible[WorkState.Identified]] = Some(
       identifiedWork()),
@@ -85,19 +95,20 @@ trait ImageGenerators
     locations: List[DigitalLocationDeprecated] = List(createDigitalLocation),
     version: Int = 1,
     modifiedTime: Instant = instantInLast30Days,
-  ) =
-    createIdentifiedMergedImageWith(
-      imageId,
+  ): Image[Augmented] =
+    createIdentifiedImageWith(
+      sourceIdentifier,
+      canonicalId,
       locations,
       version,
       modifiedTime,
       parentWork,
       redirectedWork
-    ).augment(inferredData)
+    ).transition[Augmented](inferredData)
 
-  def createAugmentedImage(): AugmentedImage = createAugmentedImageWith()
+  def createAugmentedImage(): Image[Augmented] = createAugmentedImageWith()
 
-  def createLicensedImage(license: License): AugmentedImage =
+  def createLicensedImage(license: License): Image[Augmented] =
     createAugmentedImageWith(
       locations = List(createDigitalLocationWith(license = Some(license)))
     )
@@ -107,7 +118,7 @@ trait ImageGenerators
   // of similarity.
   def createSimilarImages(n: Int,
                           similarFeatures: Boolean,
-                          similarPalette: Boolean): Seq[AugmentedImage] = {
+                          similarPalette: Boolean): Seq[Image[Augmented]] = {
     val features = if (similarFeatures) {
       similarVectors(4096, n)
     } else { (1 to n).map(_ => randomVector(4096, maxR = 10.0f)) }
@@ -134,22 +145,5 @@ trait ImageGenerators
           )
         )
     }
-  }
-
-  implicit class UnmergedImageIdOps(
-    val image: UnmergedImage[DataState.Unidentified]) {
-    def toIdentifiedWith(
-      id: String = createCanonicalId): UnmergedImage[DataState.Identified] =
-      UnmergedImage[DataState.Identified](
-        id = IdState.Identified(
-          canonicalId = id,
-          sourceIdentifier = image.id.allSourceIdentifiers.head
-        ),
-        version = image.version,
-        locations = image.locations
-      )
-
-    val toIdentified: UnmergedImage[DataState.Identified] =
-      toIdentifiedWith()
   }
 }

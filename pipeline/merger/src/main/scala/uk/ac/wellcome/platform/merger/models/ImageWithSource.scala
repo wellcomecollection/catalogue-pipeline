@@ -2,11 +2,12 @@ package uk.ac.wellcome.platform.merger.models
 
 import uk.ac.wellcome.models.work.internal.{
   DataState,
+  Image,
   ImageSource,
-  UnmergedImage
+  ImageState
 }
 
 case class ImageWithSource(
-  image: UnmergedImage[DataState.Unidentified],
+  image: Image[ImageState.Source],
   source: ImageSource[DataState.Unidentified]
 )

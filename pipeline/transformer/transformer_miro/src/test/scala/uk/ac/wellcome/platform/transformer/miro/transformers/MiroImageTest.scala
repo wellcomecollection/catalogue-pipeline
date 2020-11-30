@@ -6,10 +6,11 @@ import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
 import uk.ac.wellcome.models.work.internal.{
   DigitalLocationDeprecated,
   IdentifierType,
+  Image,
+  ImageState,
   License,
   LocationType,
   SourceIdentifier,
-  UnmergedImage
 }
 import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
 
@@ -29,11 +30,13 @@ class MiroImageTest
           sourceCode = Some("FDN")
         ),
         version = 1
-      ) shouldBe UnmergedImage(
-        sourceIdentifier = SourceIdentifier(
-          identifierType = IdentifierType("miro-image-number"),
-          ontologyType = "Image",
-          value = "B0011308"
+      ) shouldBe Image[ImageState.Source](
+        state = ImageState.Source(
+          sourceIdentifier = SourceIdentifier(
+            identifierType = IdentifierType("miro-image-number"),
+            ontologyType = "Image",
+            value = "B0011308"
+          )
         ),
         version = 1,
         locations = List(

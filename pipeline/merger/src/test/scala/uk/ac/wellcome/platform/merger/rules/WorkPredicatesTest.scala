@@ -24,7 +24,7 @@ class WorkPredicatesTest
       .items((0 to 3).map { _ =>
         createDigitalItem
       }.toList)
-      .images(List(createUnmergedMetsImage))
+      .images(List(createSourceMetsImage))
       .invisible(),
     sourceWork(sourceIdentifier = createMiroSourceIdentifier)
       .otherIdentifiers(List.empty)

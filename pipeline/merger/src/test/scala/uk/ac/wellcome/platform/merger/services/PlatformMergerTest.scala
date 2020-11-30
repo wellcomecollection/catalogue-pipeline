@@ -74,7 +74,7 @@ class PlatformMergerTest
   private val metsWork: Work.Invisible[Source] =
     metsSourceWork()
       .items(List(createDigitalItemWith(List(digitalLocationCCBYNC))))
-      .images(List(createUnmergedMetsImage))
+      .images(List(createSourceMetsImage))
       .thumbnail(
         DigitalLocationDeprecated(
           url = "https://path.to/thumbnail.jpg",
@@ -154,12 +154,15 @@ class PlatformMergerTest
         redirect = IdState.Identifiable(sierraPhysicalWork.sourceIdentifier)
       )
 
-    val expectedImage = miroWork.data.images.head mergeWith (
-      canonicalWork = expectedMergedWork.toSourceWork,
-      redirectedWork = Some(miroWork.toSourceWork),
-      modifiedTime = now
+    val expectedImage = miroWork.data.images.head.transition[ImageState.Merged](
+      (
+        SourceWorks(
+          canonicalWork = expectedMergedWork.toSourceWork,
+          redirectedWork = Some(expectedRedirectedWork.toSourceWork)
+        ),
+        now
+      )
     )
-
     result.mergedWorksWithTime(now) should contain theSameElementsAs List(
       expectedMergedWork,
       expectedRedirectedWork)
@@ -195,10 +198,14 @@ class PlatformMergerTest
         redirect = IdState.Identifiable(zeroItemSierraWork.sourceIdentifier)
       )
 
-    val expectedImage = miroWork.data.images.head mergeWith (
-      canonicalWork = expectedMergedWork.toSourceWork,
-      redirectedWork = Some(miroWork.toSourceWork),
-      modifiedTime = now
+    val expectedImage = miroWork.data.images.head.transition[ImageState.Merged](
+      (
+        SourceWorks(
+          canonicalWork = expectedMergedWork.toSourceWork,
+          redirectedWork = Some(miroWork.toSourceWork)
+        ),
+        now
+      )
     )
 
     result.mergedWorksWithTime(now) should contain theSameElementsAs List(
@@ -245,10 +252,14 @@ class PlatformMergerTest
         redirect = IdState.Identifiable(sierraDigitalWork.sourceIdentifier)
       )
 
-    val expectedImage = miroWork.data.images.head mergeWith (
-      canonicalWork = expectedMergedWork.toSourceWork,
-      redirectedWork = Some(miroWork.toSourceWork),
-      modifiedTime = now
+    val expectedImage = miroWork.data.images..head.transition[ImageState.Merged](
+      (
+        SourceWorks(
+          canonicalWork = expectedMergedWork.toSourceWork,
+          redirectedWork = Some(miroWork.toSourceWork)
+        ),
+        now
+      )
     )
 
     result.mergedWorksWithTime(now) should contain theSameElementsAs List(
@@ -358,10 +369,14 @@ class PlatformMergerTest
         redirect = IdState.Identifiable(sierraPictureWork.sourceIdentifier)
       )
 
-    val expectedImage = metsWork.data.images.head mergeWith (
-      canonicalWork = expectedMergedWork.toSourceWork,
-      redirectedWork = Some(metsWork.toSourceWork),
-      modifiedTime = now
+    val expectedImage = metsWork.data.images.head.transition[ImageState.Merged](
+      (
+        SourceWorks(
+          canonicalWork = expectedMergedWork.toSourceWork,
+          redirectedWork = Some(metsWork.toSourceWork)
+        ),
+        now
+      )
     )
 
     result.mergedWorksWithTime(now) should contain theSameElementsAs List(
@@ -427,10 +442,14 @@ class PlatformMergerTest
         redirect = IdState.Identifiable(sierraPhysicalWork.sourceIdentifier)
       )
 
-    val expectedImage = miroWork.data.images.head mergeWith (
-      canonicalWork = expectedMergedWork.toSourceWork,
-      redirectedWork = Some(miroWork.toSourceWork),
-      modifiedTime = now
+    val expectedImage = miroWork.data.images..head.transition[ImageState.Merged](
+      (
+        SourceWorks(
+          canonicalWork = expectedMergedWork.toSourceWork,
+          redirectedWork = Some(miroWork.toSourceWork)
+        ),
+        now
+      )
     )
 
     result.mergedWorksWithTime(now) should contain theSameElementsAs List(
@@ -535,11 +554,14 @@ class PlatformMergerTest
     result.mergedWorksWithTime(now).head shouldBe miroWork.transition[Merged](
       Some(now))
     result.mergedImagesWithTime(now) should have length 1
-    result.mergedImagesWithTime(now).head shouldBe miroWork.data.images.head
-      .mergeWith(
-        canonicalWork = miroWork.toSourceWork,
-        redirectedWork = None,
-        modifiedTime = now
+    result.mergedImagesWithTime(now).head shouldBe miroWork.data.images.head.transition[ImageState.Merged](
+      (
+        SourceWorks(
+          canonicalWork = miroWork.toSourceWork,
+          redirectedWork = None
+        ),
+        now
       )
+    )
   }
 }

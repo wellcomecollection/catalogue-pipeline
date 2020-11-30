@@ -51,7 +51,7 @@ class ManagerInferrerIntegrationTest
           inferrersAreHealthy shouldBe true
         }
 
-        val image = createIdentifiedMergedImageWith(
+        val image = createIdentifiedImageWith(
           locations = List(
             createDigitalLocationWith(
               locationType = createImageLocationType,

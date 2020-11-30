@@ -150,7 +150,7 @@ class ImagesRuleTest
     numImages: Int): Work.Invisible[Source] = {
     val images =
       (1 to numImages).map { _ =>
-        createUnmergedMetsImage
+        createSourceMetsImage
       }.toList
 
     metsSourceWork().images(images).invisible()

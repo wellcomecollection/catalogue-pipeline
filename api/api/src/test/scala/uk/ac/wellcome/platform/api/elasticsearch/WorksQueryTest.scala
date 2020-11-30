@@ -142,8 +142,8 @@ class WorksQueryTest
 
     it("searches the images.canonicalId as keyword") {
       withLocalWorksIndex { index =>
-        val image1 = createUnmergedImage.toIdentified
-        val image2 = createUnmergedImage.toIdentified
+        val image1 = createSourceImage.toIdentified
+        val image2 = createSourceImage.toIdentified
 
         val work1 = indexedWork().images(List(image1))
         val work2 = indexedWork().images(List(image2))
@@ -160,8 +160,8 @@ class WorksQueryTest
 
     it("searches the images.sourceIdentifiers") {
       withLocalWorksIndex { index =>
-        val image1 = createUnmergedImage.toIdentified
-        val image2 = createUnmergedImage.toIdentified
+        val image1 = createSourceImage.toIdentified
+        val image2 = createSourceImage.toIdentified
 
         val work1 = indexedWork().images(List(image1))
         val work2 = indexedWork().images(List(image2))
