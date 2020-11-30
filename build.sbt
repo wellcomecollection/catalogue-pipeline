@@ -256,7 +256,7 @@ lazy val mets_adapter = setupProject(
 lazy val calm_adapter = setupProject(
   project,
   folder = "calm_adapter/calm_adapter",
-  localDependencies = Seq(internal_model, big_messaging_typesafe),
+  localDependencies = Seq(internal_model),
   externalDependencies = CatalogueDependencies.calmAdapterDependencies
 )
 
