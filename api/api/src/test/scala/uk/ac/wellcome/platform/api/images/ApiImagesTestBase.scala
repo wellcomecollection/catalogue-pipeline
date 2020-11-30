@@ -3,9 +3,10 @@ package uk.ac.wellcome.platform.api.images
 import uk.ac.wellcome.display.models.DisplaySerialisationTestBase
 import uk.ac.wellcome.models.work.generators.ImageGenerators
 import uk.ac.wellcome.models.work.internal.{
-  AugmentedImage,
   DataState,
+  Image,
   ImageSource,
+  ImageState,
   SourceWorks
 }
 import uk.ac.wellcome.platform.api.ApiTestBase
@@ -33,17 +34,17 @@ trait ApiImagesTestBase
            """.stripMargin
     }
 
-  def imageResponse(image: AugmentedImage): String =
+  def imageResponse(image: Image[ImageState.Augmented]): String =
     s"""
        |  {
        |    "type": "Image",
-       |    "id": "${image.id.canonicalId}",
+       |    "id": "${image.id}",
        |    "locations": [${locations(image.locations)}],
-       |    "source": ${imageSource(image.source)}
+       |    "source": ${imageSource(image.state.source)}
        |  }
      """.stripMargin
 
-  def imagesListResponse(images: Seq[AugmentedImage]): String =
+  def imagesListResponse(images: Seq[Image[ImageState.Augmented]]): String =
     s"""
        |{
        |  ${resultList(apiPrefix, totalResults = images.size)},

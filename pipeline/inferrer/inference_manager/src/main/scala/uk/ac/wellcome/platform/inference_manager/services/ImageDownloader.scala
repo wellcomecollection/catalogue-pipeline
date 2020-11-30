@@ -54,7 +54,7 @@ class ImageDownloader[Ctx](
     Flow[DownloadedImage].map(_.path).toMat(fileWriter.delete)(Keep.right)
 
   def getLocalImagePath(image: MergedIdentifiedImage): Path =
-    Paths.get(root, image.id.canonicalId, "default.jpg").toAbsolutePath
+    Paths.get(root, image.id, "default.jpg").toAbsolutePath
 
   private def createImageFileRequest(
     image: MergedIdentifiedImage): (HttpRequest, MergedIdentifiedImage) =

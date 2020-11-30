@@ -4,12 +4,11 @@ import scala.concurrent.ExecutionContext
 import akka.actor.ActorSystem
 import com.sksamuel.elastic4s.Index
 import com.typesafe.config.Config
-
 import uk.ac.wellcome.bigmessaging.typesafe.BigMessagingBuilder
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.elasticsearch.ImagesIndexConfig
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.internal.AugmentedImage
+import uk.ac.wellcome.models.work.internal.{Image, ImageState}
 import uk.ac.wellcome.pipeline_storage.ElasticIndexer
 import uk.ac.wellcome.pipeline_storage.Indexable.imageIndexable
 import uk.ac.wellcome.platform.ingestor.common.builders.IngestorConfigBuilder
@@ -32,8 +31,8 @@ object Main extends WellcomeTypesafeApp {
       ingestorConfig = IngestorConfigBuilder.buildIngestorConfig(config),
       documentIndexer =
         new ElasticIndexer(elasticClient, index, ImagesIndexConfig),
-      messageStream =
-        BigMessagingBuilder.buildMessageStream[AugmentedImage](config)
+      messageStream = BigMessagingBuilder
+        .buildMessageStream[Image[ImageState.Augmented]](config)
     )
   }
 }

@@ -4,7 +4,7 @@ import com.sksamuel.elastic4s.ElasticApi.{existsQuery, search}
 import com.sksamuel.elastic4s.ElasticDsl.SearchHandler
 import com.sksamuel.elastic4s.circe._
 import com.sksamuel.elastic4s.{ElasticClient, Index}
-import uk.ac.wellcome.models.work.internal.AugmentedImage
+import uk.ac.wellcome.models.work.internal.{Image, ImageState}
 import uk.ac.wellcome.models.Implicits._
 
 import scala.concurrent.duration._
@@ -43,7 +43,8 @@ object QueryConfig {
           result.toEither
             .map { response =>
               response.hits.hits.headOption
-                .flatMap(_.to[AugmentedImage].inferredData.map(_.palette))
+                .flatMap(_.to[Image[ImageState.Augmented]].state.inferredData
+                  .map(_.palette))
                 .map { palette =>
                   palette
                     .flatMap(_.split("/").lastOption)

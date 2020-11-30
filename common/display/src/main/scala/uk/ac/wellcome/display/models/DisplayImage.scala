@@ -2,7 +2,7 @@ package uk.ac.wellcome.display.models
 
 import io.circe.generic.extras.JsonKey
 import io.swagger.v3.oas.annotations.media.Schema
-import uk.ac.wellcome.models.work.internal.AugmentedImage
+import uk.ac.wellcome.models.work.internal.{Image, ImageState}
 
 @Schema(
   name = "Image",
@@ -38,21 +38,23 @@ case class DisplayImage(
 
 object DisplayImage {
 
-  def apply(image: AugmentedImage, includes: ImageIncludes): DisplayImage =
+  def apply(image: Image[ImageState.Augmented],
+            includes: ImageIncludes): DisplayImage =
     new DisplayImage(
-      id = image.id.canonicalId,
+      id = image.id,
       locations = image.locations.map(DisplayDigitalLocationDeprecated(_)),
-      source = DisplayImageSource(image.source, includes),
+      source = DisplayImageSource(image.state.source, includes),
       visuallySimilar = None,
       withSimilarColors = None,
       withSimilarFeatures = None,
     )
 
-  def apply(image: AugmentedImage,
+  def apply(image: Image[ImageState.Augmented],
             includes: ImageIncludes,
-            visuallySimilar: Option[Seq[AugmentedImage]],
-            withSimilarColors: Option[Seq[AugmentedImage]],
-            withSimilarFeatures: Option[Seq[AugmentedImage]]): DisplayImage =
+            visuallySimilar: Option[Seq[Image[ImageState.Augmented]]],
+            withSimilarColors: Option[Seq[Image[ImageState.Augmented]]],
+            withSimilarFeatures: Option[Seq[Image[ImageState.Augmented]]])
+    : DisplayImage =
     DisplayImage(image, includes).copy(
       visuallySimilar =
         visuallySimilar.map(_.map(DisplayImage.apply(_, includes))),

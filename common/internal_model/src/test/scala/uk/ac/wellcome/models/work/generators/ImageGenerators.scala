@@ -69,6 +69,26 @@ trait ImageGenerators
       )
     )
 
+  def createIdentifiedImage = createIdentifiedImageWith()
+
+  def createIdentifiedSourceImageWith(
+    sourceIdentifier: SourceIdentifier = createSourceIdentifier,
+    canonicalId: String = createCanonicalId,
+    locations: List[DigitalLocationDeprecated] = List(
+      createDigitalLocationWith(locationType = createImageLocationType)),
+    version: Int = 1
+  ): Image[IdentifiedSource] =
+    Image[IdentifiedSource](
+      version = version,
+      locations = locations,
+      state = IdentifiedSource(
+        sourceIdentifier = sourceIdentifier,
+        canonicalId = canonicalId
+      )
+    )
+
+  def createIdentifiedSourceImage = createIdentifiedSourceImageWith()
+
   def createInferredData = {
     val features = randomVector(4096)
     val (features1, features2) = features.splitAt(features.size / 2)

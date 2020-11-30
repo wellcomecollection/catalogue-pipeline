@@ -142,8 +142,8 @@ class WorksQueryTest
 
     it("searches the images.canonicalId as keyword") {
       withLocalWorksIndex { index =>
-        val image1 = createSourceImage.toIdentified
-        val image2 = createSourceImage.toIdentified
+        val image1 = createIdentifiedSourceImage
+        val image2 = createIdentifiedSourceImage
 
         val work1 = indexedWork().images(List(image1))
         val work2 = indexedWork().images(List(image2))
@@ -152,7 +152,7 @@ class WorksQueryTest
 
         assertResultsMatchForAllowedQueryTypes(
           index,
-          query = image1.id.canonicalId,
+          query = image1.id,
           matches = List(work1)
         )
       }
@@ -160,8 +160,8 @@ class WorksQueryTest
 
     it("searches the images.sourceIdentifiers") {
       withLocalWorksIndex { index =>
-        val image1 = createSourceImage.toIdentified
-        val image2 = createSourceImage.toIdentified
+        val image1 = createIdentifiedSourceImage
+        val image2 = createIdentifiedSourceImage
 
         val work1 = indexedWork().images(List(image1))
         val work2 = indexedWork().images(List(image2))
@@ -170,7 +170,7 @@ class WorksQueryTest
 
         assertResultsMatchForAllowedQueryTypes(
           index,
-          query = image1.id.sourceIdentifier.value,
+          query = image1.state.sourceIdentifier.value,
           matches = List(work1)
         )
       }

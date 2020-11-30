@@ -6,7 +6,7 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.elasticsearch.ImagesIndexConfig
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.models.work.generators.ImageGenerators
-import uk.ac.wellcome.models.work.internal.AugmentedImage
+import uk.ac.wellcome.models.work.internal.{Image, ImageState}
 import uk.ac.wellcome.pipeline_storage.ElasticIndexer
 import uk.ac.wellcome.pipeline_storage.Indexable.imageIndexable
 import uk.ac.wellcome.models.Implicits._
@@ -26,7 +26,7 @@ class ImagesIndexerTest
   it("ingests an image") {
     withLocalImagesIndex { index =>
       val imagesIndexer =
-        new ElasticIndexer[AugmentedImage](
+        new ElasticIndexer[Image[ImageState.Augmented]](
           elasticClient,
           index,
           ImagesIndexConfig)
@@ -42,7 +42,7 @@ class ImagesIndexerTest
   it("ingests a list of images") {
     withLocalImagesIndex { index =>
       val imagesIndexer =
-        new ElasticIndexer[AugmentedImage](
+        new ElasticIndexer[Image[ImageState.Augmented]](
           elasticClient,
           index,
           ImagesIndexConfig)
@@ -58,13 +58,17 @@ class ImagesIndexerTest
   it("ingests a higher version of the same image") {
     withLocalImagesIndex { index =>
       val imagesIndexer =
-        new ElasticIndexer[AugmentedImage](
+        new ElasticIndexer[Image[ImageState.Augmented]](
           elasticClient,
           index,
           ImagesIndexConfig)
       val image = createAugmentedImage()
       val newerImage =
-        image.copy(modifiedTime = image.modifiedTime + (2 minutes))
+        image.copy(
+          state = image.state.copy(
+            modifiedTime = image.state.modifiedTime + (2 minutes)
+          )
+        )
       val result = for {
         _ <- imagesIndexer.index(List(image))
         res <- imagesIndexer.index(List(newerImage))
@@ -80,13 +84,17 @@ class ImagesIndexerTest
   it("doesn't replace a newer version with a lower one") {
     withLocalImagesIndex { index =>
       val imagesIndexer =
-        new ElasticIndexer[AugmentedImage](
+        new ElasticIndexer[Image[ImageState.Augmented]](
           elasticClient,
           index,
           ImagesIndexConfig)
       val image = createAugmentedImage()
       val olderImage =
-        image.copy(modifiedTime = image.modifiedTime - (2 minutes))
+        image.copy(
+          state = image.state.copy(
+            modifiedTime = image.state.modifiedTime - (2 minutes)
+          )
+        )
       val result = for {
         _ <- imagesIndexer.index(List(image))
         res <- imagesIndexer.index(List(olderImage))

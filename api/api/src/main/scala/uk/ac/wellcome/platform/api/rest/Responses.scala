@@ -74,7 +74,7 @@ object DisplayResultList {
         )
     }
 
-  def apply(resultList: ResultList[AugmentedImage, Unit],
+  def apply(resultList: ResultList[Image[ImageState.Augmented], Unit],
             searchOptions: SearchOptions,
             includes: MultipleImagesIncludes,
             requestUri: Uri,

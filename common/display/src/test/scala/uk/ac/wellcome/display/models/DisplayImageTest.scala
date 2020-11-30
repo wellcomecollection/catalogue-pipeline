@@ -24,7 +24,7 @@ class DisplayImageTest
     displayImage.visuallySimilar.value should have length similarImages.size
     displayImage.visuallySimilar.value
       .map(_.id) should contain theSameElementsAs
-      similarImages.map(_.id.canonicalId)
+      similarImages.map(_.id)
   }
 
 }

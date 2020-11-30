@@ -34,7 +34,7 @@ class ImagesIncludesTest extends ApiImagesTestBase with ContributorGenerators {
               |  "results": [
               |    {
               |      "type": "Image",
-              |      "id": "${image.id.canonicalId}",
+              |      "id": "${image.id}",
               |      "locations": [${locations(image.locations)}],
               |      "source": {
               |        "id": "${source.id}",
@@ -58,12 +58,12 @@ class ImagesIncludesTest extends ApiImagesTestBase with ContributorGenerators {
 
           assertJsonResponse(
             routes,
-            s"/$apiPrefix/images/${image.id.canonicalId}?include=source.contributors") {
+            s"/$apiPrefix/images/${image.id}?include=source.contributors") {
             Status.OK -> s"""
               |{
               |  $singleImageResult,
               |  "type": "Image",
-              |  "id": "${image.id.canonicalId}",
+              |  "id": "${image.id}",
               |  "locations": [${locations(image.locations)}],
               |  "source": {
               |    "id": "${source.id}",
@@ -92,7 +92,7 @@ class ImagesIncludesTest extends ApiImagesTestBase with ContributorGenerators {
               |  "results": [
               |    {
               |      "type": "Image",
-              |      "id": "${image.id.canonicalId}",
+              |      "id": "${image.id}",
               |      "locations": [${locations(image.locations)}],
               |      "source": {
               |        "id": "${source.id}",
@@ -116,12 +116,12 @@ class ImagesIncludesTest extends ApiImagesTestBase with ContributorGenerators {
 
           assertJsonResponse(
             routes,
-            s"/$apiPrefix/images/${image.id.canonicalId}?include=source.languages") {
+            s"/$apiPrefix/images/${image.id}?include=source.languages") {
             Status.OK -> s"""
               |{
               |  $singleImageResult,
               |  "type": "Image",
-              |  "id": "${image.id.canonicalId}",
+              |  "id": "${image.id}",
               |  "locations": [${locations(image.locations)}],
               |  "source": {
               |    "id": "${source.id}",

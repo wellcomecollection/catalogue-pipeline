@@ -33,7 +33,7 @@ class ImagesServiceTest
 
         whenReady(
           imagesService
-            .findImageById(id = image.id.canonicalId)(index)) {
+            .findImageById(id = image.id)(index)) {
           _.value.value shouldBe image
         }
       }

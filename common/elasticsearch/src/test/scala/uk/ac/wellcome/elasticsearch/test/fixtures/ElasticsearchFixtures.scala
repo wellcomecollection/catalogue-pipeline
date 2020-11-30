@@ -141,11 +141,11 @@ trait ElasticsearchFixtures
     assertElasticsearchEventuallyHas(index, works: _*)
   }
 
-  def assertElasticsearchEventuallyHasImage(
+  def assertElasticsearchEventuallyHasImage[State <: ImageState](
     index: Index,
-    images: AugmentedImage*): Seq[Assertion] = {
-    implicit val id: CanonicalId[AugmentedImage] =
-      (image: AugmentedImage) => image.id.canonicalId
+    images: Image[State]*): Seq[Assertion] = {
+    implicit val id: CanonicalId[Image[State]] =
+      (image: Image[State]) => image.state.id
     assertElasticsearchEventuallyHas(index, images: _*)
   }
 
@@ -258,8 +258,9 @@ trait ElasticsearchFixtures
     }
   }
 
-  def insertImagesIntoElasticsearch(index: Index,
-                                    images: AugmentedImage*): Assertion = {
+  def insertImagesIntoElasticsearch(
+    index: Index,
+    images: Image[ImageState.Augmented]*): Assertion = {
     val result = elasticClient.execute(
       bulk(
         images.map { image =>
@@ -268,7 +269,7 @@ trait ElasticsearchFixtures
           indexInto(index.name)
             .version(image.version)
             .versionType(ExternalGte)
-            .id(image.id.canonicalId)
+            .id(image.id)
             .doc(jsonDoc)
         }
       ).refreshImmediately

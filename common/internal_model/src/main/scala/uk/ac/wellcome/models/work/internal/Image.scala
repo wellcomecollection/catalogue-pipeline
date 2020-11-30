@@ -65,6 +65,8 @@ object ImageState {
   ) extends ImageState {
     type SourceDataState = DataState.Identified
     type TransitionArgs = Unit
+
+    override def id = canonicalId
   }
 
   case class Merged(
@@ -136,16 +138,6 @@ object ImageFsm {
       )
   }
 }
-
-case class AugmentedImage(
-  id: IdState.Identified,
-  version: Int,
-  modifiedTime: Instant,
-  locations: List[DigitalLocationDeprecated],
-  source: ImageSource[DataState.Identified],
-  inferredData: Option[InferredData] = None
-) extends BaseImage[DataState.Identified]
-
 case class InferredData(
   // We split the feature vector so that it can fit into
   // ES's dense vector type (max length 2048)

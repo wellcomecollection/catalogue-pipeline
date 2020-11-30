@@ -12,18 +12,18 @@ class ImagesSimilarityTest extends ApiImagesTestBase {
         insertImagesIntoElasticsearch(imagesIndex, images: _*)
         assertJsonResponse(
           routes,
-          s"/$apiPrefix/images/${images.head.id.canonicalId}?include=visuallySimilar",
+          s"/$apiPrefix/images/${images.head.id}?include=visuallySimilar",
           unordered = true) {
           Status.OK ->
             s"""
                |{
                |  $singleImageResult,
-               |  "id": "${image.id.canonicalId}",
+               |  "id": "${image.id}",
                |  "locations": [${locations(image.locations)}],
                |  "visuallySimilar": [
                |    ${images.tail.map(imageResponse).mkString(",")}
                |  ],
-               |  "source": ${imageSource(image.source)}
+               |  "source": ${imageSource(image.state.source)}
                |}""".stripMargin
         }
     }
@@ -39,18 +39,18 @@ class ImagesSimilarityTest extends ApiImagesTestBase {
         insertImagesIntoElasticsearch(imagesIndex, images: _*)
         assertJsonResponse(
           routes,
-          s"/$apiPrefix/images/${images.head.id.canonicalId}?include=withSimilarFeatures",
+          s"/$apiPrefix/images/${images.head.id}?include=withSimilarFeatures",
           unordered = true) {
           Status.OK ->
             s"""
                |{
                |  $singleImageResult,
-               |  "id": "${image.id.canonicalId}",
+               |  "id": "${image.id}",
                |  "locations": [${locations(image.locations)}],
                |  "withSimilarFeatures": [
                |    ${images.tail.map(imageResponse).mkString(",")}
                |  ],
-               |  "source": ${imageSource(image.source)}
+               |  "source": ${imageSource(image.state.source)}
                |}""".stripMargin
         }
     }
@@ -66,18 +66,18 @@ class ImagesSimilarityTest extends ApiImagesTestBase {
         insertImagesIntoElasticsearch(imagesIndex, images: _*)
         assertJsonResponse(
           routes,
-          s"/$apiPrefix/images/${images.head.id.canonicalId}?include=withSimilarColors",
+          s"/$apiPrefix/images/${images.head.id}?include=withSimilarColors",
           unordered = true) {
           Status.OK ->
             s"""
                |{
                |  $singleImageResult,
-               |  "id": "${image.id.canonicalId}",
+               |  "id": "${image.id}",
                |  "locations": [${locations(image.locations)}],
                |  "withSimilarColors": [
                |    ${images.tail.map(imageResponse).mkString(",")}
                |  ],
-               |  "source": ${imageSource(image.source)}
+               |  "source": ${imageSource(image.state.source)}
                |}""".stripMargin
         }
     }

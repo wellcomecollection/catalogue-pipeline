@@ -9,7 +9,7 @@ import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.ImageGenerators
-import uk.ac.wellcome.models.work.internal.AugmentedImage
+import uk.ac.wellcome.models.work.internal.{Image, ImageState}
 import uk.ac.wellcome.platform.ingestor.common.fixtures.IngestorFixtures
 import uk.ac.wellcome.pipeline_storage.ElasticIndexer
 import uk.ac.wellcome.pipeline_storage.Indexable.imageIndexable
@@ -28,9 +28,9 @@ class ImagesIngestorFeatureTest
 
     withLocalSqsQueuePair(visibilityTimeout = 10) {
       case QueuePair(queue, dlq) =>
-        sendMessage[AugmentedImage](queue = queue, obj = image)
+        sendMessage[Image[ImageState.Augmented]](queue = queue, obj = image)
         withLocalImagesIndex { index =>
-          val indexer = new ElasticIndexer[AugmentedImage](
+          val indexer = new ElasticIndexer[Image[ImageState.Augmented]](
             elasticClient,
             index,
             ImagesIndexConfig)
@@ -51,7 +51,7 @@ class ImagesIngestorFeatureTest
       case QueuePair(queue, dlq) =>
         sendMessage[Something](queue = queue, obj = wrongMessage)
         withLocalImagesIndex { index =>
-          val indexer = new ElasticIndexer[AugmentedImage](
+          val indexer = new ElasticIndexer[Image[ImageState.Augmented]](
             elasticClient,
             index,
             ImagesIndexConfig)

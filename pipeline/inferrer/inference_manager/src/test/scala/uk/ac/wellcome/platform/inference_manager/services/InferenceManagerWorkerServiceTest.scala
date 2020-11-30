@@ -9,7 +9,12 @@ import software.amazon.awssdk.services.sqs.model.Message
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.models.work.internal.{AugmentedImage, InferredData}
+import uk.ac.wellcome.models.work.internal.{
+  AugmentedImage,
+  Image,
+  ImageState,
+  InferredData
+}
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.ImageGenerators
 import uk.ac.wellcome.platform.inference_manager.adapters.{
@@ -67,26 +72,27 @@ class InferenceManagerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          forAll(messageSender.getMessages[AugmentedImage]) { image =>
-            inside(image) {
-              case AugmentedImage(id, _, _, _, _, inferredData) =>
-                images should contain key id
-                val seed = id.canonicalId.hashCode
-                inside(inferredData.value) {
-                  case InferredData(
-                      features1,
-                      features2,
-                      lshEncodedFeatures,
-                      palette) =>
-                    val featureVector =
-                      Responses.randomFeatureVector(seed)
-                    features1 should be(featureVector.slice(0, 2048))
-                    features2 should be(featureVector.slice(2048, 4096))
-                    lshEncodedFeatures should be(
-                      Responses.randomLshVector(seed))
-                    palette should be(Responses.randomPaletteVector(seed))
-                }
-            }
+          forAll(messageSender.getMessages[Image[ImageState.Augmented]]) {
+            image =>
+              inside(image.state) {
+                case ImageState.Augmented(_, id, _, _, inferredData) =>
+                  images should contain key id
+                  val seed = id.hashCode
+                  inside(inferredData.value) {
+                    case InferredData(
+                        features1,
+                        features2,
+                        lshEncodedFeatures,
+                        palette) =>
+                      val featureVector =
+                        Responses.randomFeatureVector(seed)
+                      features1 should be(featureVector.slice(0, 2048))
+                      features2 should be(featureVector.slice(2048, 4096))
+                      lshEncodedFeatures should be(
+                        Responses.randomLshVector(seed))
+                      palette should be(Responses.randomPaletteVector(seed))
+                  }
+              }
           }
         }
     }
@@ -109,21 +115,22 @@ class InferenceManagerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          forAll(messageSender.getMessages[AugmentedImage]) { image =>
-            inside(image) {
-              case AugmentedImage(_, _, _, _, _, inferredData) =>
-                inside(inferredData.value) {
-                  case InferredData(
-                      features1,
-                      features2,
-                      lshEncodedFeatures,
-                      palette) =>
-                    features1 should have length 2048
-                    features2 should have length 2048
-                    every(lshEncodedFeatures) should fullyMatch regex """(\d+)-(\d+)"""
-                    every(palette) should fullyMatch regex """\d+"""
-                }
-            }
+          forAll(messageSender.getMessages[Image[ImageState.Augmented]]) {
+            image =>
+              inside(image.state) {
+                case ImageState.Augmented(_, _, _, _, inferredData) =>
+                  inside(inferredData.value) {
+                    case InferredData(
+                        features1,
+                        features2,
+                        lshEncodedFeatures,
+                        palette) =>
+                      features1 should have length 2048
+                      features2 should have length 2048
+                      every(lshEncodedFeatures) should fullyMatch regex """(\d+)-(\d+)"""
+                      every(palette) should fullyMatch regex """\d+"""
+                  }
+              }
           }
         }
     }
