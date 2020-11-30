@@ -77,10 +77,12 @@ class RelationEmbedderWorkerService[MsgDestination](
               .map(_ => ())
           }
       }
-      .recoverWith { case err =>
-        val batchString = batch.map(_.toString).getOrElse("could not parse message")
-        error(s"Failed processing batch: $batchString", err)
-        Future.failed(err)
+      .recoverWith {
+        case err =>
+          val batchString =
+            batch.map(_.toString).getOrElse("could not parse message")
+          error(s"Failed processing batch: $batchString", err)
+          Future.failed(err)
       }
   }
 }

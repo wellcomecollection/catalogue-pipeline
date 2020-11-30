@@ -184,12 +184,13 @@ class RelationEmbedderWorkerServiceTest
         eventually {
           assertQueueEmpty(queue)
         }
-        assertQueueHasSize(dlq, size=1)
+        assertQueueHasSize(dlq, size = 1)
         msgSender.messages.map(_.body).toSet shouldBe Set()
     }
   }
 
-  def withWorkerService[R](works: List[Work[Merged]] = works, fails: Boolean = false)(
+  def withWorkerService[R](works: List[Work[Merged]] = works,
+                           fails: Boolean = false)(
     testWith: TestWith[(QueuePair,
                         mutable.Map[String, Work[Denormalised]],
                         MemoryMessageSender),
