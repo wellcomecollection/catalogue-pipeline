@@ -40,7 +40,7 @@ class PipelineStorageStream[In, Out, MsgDestination](
   def run(streamName: String,
           processFlow: Flow[(Message, In), (Message, Option[Out]), NotUsed])(
     implicit decoder: Decoder[In],
-    indexable: Indexable[Out]) = {
+    indexable: Indexable[Out]): Future[Done] = {
     val identityFlow = Flow[(Message, Option[Out])].collect {
       case (message, None) => message
     }
