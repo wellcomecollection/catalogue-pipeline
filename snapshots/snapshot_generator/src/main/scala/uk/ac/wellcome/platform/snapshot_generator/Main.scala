@@ -14,6 +14,7 @@ import uk.ac.wellcome.platform.snapshot_generator.services.{
 }
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
+import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 
 import scala.concurrent.ExecutionContext
 
@@ -24,7 +25,8 @@ object Main extends WellcomeTypesafeApp {
       AkkaBuilder.buildExecutionContext()
 
     val snapshotConfig = SnapshotGeneratorConfig(
-      index = ElasticConfig().worksIndex
+      index = ElasticConfig().worksIndex,
+      bulkSize = config.getIntOption("es.bulk-size").getOrElse(1000)
     )
 
     val snapshotService = new SnapshotService(
