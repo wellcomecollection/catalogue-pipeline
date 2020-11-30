@@ -28,3 +28,12 @@ variable "subnets" {
 variable "public_bucket_name" {
   type = string
 }
+
+variable "shared_logging_secrets" {
+  type = map(string)
+}
+
+variable "es_bulk_size" {
+  description = "How many works to fetch in a single scroll request"
+  type        = number
+}
