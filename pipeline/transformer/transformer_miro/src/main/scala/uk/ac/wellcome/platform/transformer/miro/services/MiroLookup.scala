@@ -10,17 +10,17 @@ import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.Readable
 
 class MiroLookup(
-  miroIndexStore: Readable[String, MiroVHSRecord],
+  miroVhsReader: Readable[String, MiroVHSRecord],
   typedStore: Readable[S3ObjectLocation, MiroRecord]
 ) {
   def lookupRecord(
     id: String): Either[ReadError, (MiroRecord, MiroMetadata, Int)] =
     for {
-      indexRecord <- miroIndexStore.get(id)
-      miroMetadata = indexRecord.identifiedT.toMiroMetadata
-      version = indexRecord.identifiedT.version
+      vhsRecord <- miroVhsReader.get(id)
+      miroMetadata = vhsRecord.identifiedT.toMiroMetadata
+      version = vhsRecord.identifiedT.version
 
-      typedStoreRecord <- typedStore.get(indexRecord.identifiedT.location)
+      typedStoreRecord <- typedStore.get(vhsRecord.identifiedT.location)
       miroRecord = typedStoreRecord.identifiedT
 
       result = (miroRecord, miroMetadata, version)
