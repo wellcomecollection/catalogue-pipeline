@@ -12,6 +12,8 @@ object DisplayWorkSource {
     elasticClient: ElasticClient,
     snapshotConfig: SnapshotGeneratorConfig
   )(implicit actorSystem: ActorSystem): Source[DisplayWork, Any] =
-    ElasticsearchWorksSource(elasticClient = elasticClient, snapshotConfig = snapshotConfig)
+    ElasticsearchWorksSource(
+      elasticClient = elasticClient,
+      snapshotConfig = snapshotConfig)
       .via(IndexedWorkToVisibleDisplayWork(DisplayWork(_, WorksIncludes.all)))
 }

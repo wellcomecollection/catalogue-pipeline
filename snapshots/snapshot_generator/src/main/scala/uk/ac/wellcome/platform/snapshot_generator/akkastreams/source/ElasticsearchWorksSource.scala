@@ -15,14 +15,16 @@ import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.platform.snapshot_generator.models.SnapshotGeneratorConfig
 
 object ElasticsearchWorksSource extends Logging {
-  def apply(elasticClient: ElasticClient, snapshotConfig: SnapshotGeneratorConfig)(
+  def apply(elasticClient: ElasticClient,
+            snapshotConfig: SnapshotGeneratorConfig)(
     implicit
     actorSystem: ActorSystem
   ): Source[Work[Indexed], NotUsed] = {
     val loggingSink = Flow[Work[Indexed]]
       .grouped(10000)
       .map(works => {
-        logger.info(s"Received ${works.length} works from ${snapshotConfig.index}")
+        logger.info(
+          s"Received ${works.length} works from ${snapshotConfig.index}")
         works
       })
       .to(Sink.ignore)

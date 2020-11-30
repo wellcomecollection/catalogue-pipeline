@@ -4,7 +4,6 @@ import com.sksamuel.elastic4s.Index
 
 case class SnapshotGeneratorConfig(
   index: Index,
-
   // How many documents should be fetched in a single request?
   //
   //  - If this value is too small, we have to make extra requests and
