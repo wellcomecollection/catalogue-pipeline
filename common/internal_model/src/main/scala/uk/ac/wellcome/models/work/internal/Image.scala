@@ -84,6 +84,8 @@ object ImageState {
   ) extends ImageState {
     type SourceDataState = DataState.Identified
     type TransitionArgs = Unit
+
+    override def id = canonicalId
   }
 
   case class Augmented(
@@ -130,29 +132,6 @@ object ImageFsm {
         canonicalId = state.canonicalId,
         modifiedTime = state.modifiedTime,
         source = state.source,
-        inferredData = inferredData
-      )
-  }
-}
-
-case class MergedImage[State <: DataState](
-  id: State#Id,
-  version: Int,
-  modifiedTime: Instant,
-  locations: List[DigitalLocationDeprecated],
-  source: ImageSource[State]
-) extends BaseImage[State]
-
-object MergedImage {
-  implicit class IdentifiedMergedImageOps(
-    mergedImage: MergedImage[DataState.Identified]) {
-    def augment(inferredData: => Option[InferredData]): AugmentedImage =
-      AugmentedImage(
-        id = mergedImage.id,
-        version = mergedImage.version,
-        modifiedTime = mergedImage.modifiedTime,
-        locations = mergedImage.locations,
-        source = mergedImage.source,
         inferredData = inferredData
       )
   }

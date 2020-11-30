@@ -48,7 +48,6 @@ class InferenceManagerWorkerServiceTest
     withResponsesAndFixtures(
       inferrer = req =>
         images.keys
-          .map(_.canonicalId)
           .find(req.contains(_))
           .flatMap { id =>
             if (req.contains("feature_inferrer")) {
@@ -143,9 +142,9 @@ class InferenceManagerWorkerServiceTest
     )
     withResponsesAndFixtures(
       inferrer = url =>
-        if (url.contains(image400.id.canonicalId)) {
+        if (url.contains(image400.id)) {
           Some(Responses.badRequest)
-        } else if (url.contains(image500.id.canonicalId)) {
+        } else if (url.contains(image500.id)) {
           Some(Responses.serverError)
         } else None,
       images = _ => Some(Responses.image)
