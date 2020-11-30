@@ -12,6 +12,8 @@ module "stack" {
   public_bucket_name   = local.public_data_bucket_name
   public_object_key_v2 = local.public_object_key_v2
 
+  shared_logging_secrets = local.shared_logging_secrets
+
   dlq_alarm_arn          = local.dlq_alarm_arn
   lambda_error_alarm_arn = local.lambda_error_alarm_arn
 

@@ -34,3 +34,7 @@ variable "public_bucket_name" {
 variable "public_object_key_v2" {
   type = string
 }
+
+variable "shared_logging_secrets" {
+  type = map(string)
+}

@@ -12,6 +12,8 @@ module "snapshot_generator" {
 
   snapshot_generator_input_topic_arn = module.snapshot_scheduler.topic_arn
 
+  shared_logging_secrets = var.shared_logging_secrets
+
   dlq_alarm_arn = var.dlq_alarm_arn
 
   vpc_id  = var.vpc_id

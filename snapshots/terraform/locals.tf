@@ -11,6 +11,8 @@ locals {
 
   snapshot_generator_image = data.terraform_remote_state.api_shared.outputs.ecr_snapshot_generator_repository_url
 
+  shared_logging_secrets = data.terraform_remote_state.shared.outputs.shared_secrets_logging
+
   lambda_error_alarm_arn = data.terraform_remote_state.shared.outputs.lambda_error_alarm_arn
   dlq_alarm_arn          = data.terraform_remote_state.shared.outputs.dlq_alarm_arn
 

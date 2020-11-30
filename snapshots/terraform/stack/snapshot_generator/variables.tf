@@ -28,3 +28,7 @@ variable "subnets" {
 variable "public_bucket_name" {
   type = string
 }
+
+variable "shared_logging_secrets" {
+  type = map(string)
+}
