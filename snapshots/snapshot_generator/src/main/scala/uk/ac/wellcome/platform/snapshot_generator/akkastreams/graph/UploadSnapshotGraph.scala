@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import akka.stream.ClosedShape
 import akka.stream.alpakka.s3.{MultipartUploadResult, S3Settings}
 import akka.stream.scaladsl.{Broadcast, GraphDSL, RunnableGraph}
-import com.sksamuel.elastic4s.{ElasticClient, Index}
+import com.sksamuel.elastic4s.ElasticClient
 import uk.ac.wellcome.display.models.DisplayWork
 import uk.ac.wellcome.platform.snapshot_generator.akkastreams.flow.{
   DisplayWorkToJsonStringFlow,
@@ -15,6 +15,7 @@ import uk.ac.wellcome.platform.snapshot_generator.akkastreams.sink.{
   S3Sink
 }
 import uk.ac.wellcome.platform.snapshot_generator.akkastreams.source.DisplayWorkSource
+import uk.ac.wellcome.platform.snapshot_generator.models.SnapshotGeneratorConfig
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 
 import scala.concurrent.Future
@@ -22,13 +23,16 @@ import scala.concurrent.Future
 object UploadSnapshotGraph {
   def apply(
     elasticClient: ElasticClient,
-    index: Index,
+    snapshotConfig: SnapshotGeneratorConfig,
     s3Settings: S3Settings,
     s3ObjectLocation: S3ObjectLocation)(implicit actorSystem: ActorSystem)
     : RunnableGraph[(Future[Int], Future[MultipartUploadResult])] = {
 
     // We start with a "source" of display works
-    val displayWorkSource = DisplayWorkSource(elasticClient, index)
+    val displayWorkSource = DisplayWorkSource(
+      elasticClient = elasticClient,
+      snapshotConfig = snapshotConfig
+    )
 
     // We want to route to both a counter, and to S3
     val countingSink = CountingSink()

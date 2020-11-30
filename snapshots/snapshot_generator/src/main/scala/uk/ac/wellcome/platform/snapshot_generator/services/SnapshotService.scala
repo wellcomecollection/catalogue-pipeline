@@ -9,11 +9,11 @@ import akka.stream.scaladsl.Sink
 import com.sksamuel.elastic4s.ElasticClient
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.display.models._
-import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.platform.snapshot_generator.akkastreams.graph.UploadSnapshotGraph
 import uk.ac.wellcome.platform.snapshot_generator.akkastreams.source.S3ObjectMetadataSource
 import uk.ac.wellcome.platform.snapshot_generator.models.{
   CompletedSnapshotJob,
+  SnapshotGeneratorConfig,
   SnapshotJob,
   SnapshotResult
 }
@@ -23,7 +23,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class SnapshotService(akkaS3Settings: S3Settings,
                       elasticClient: ElasticClient,
-                      elasticConfig: ElasticConfig)(
+                      snapshotConfig: SnapshotGeneratorConfig)(
   implicit actorSystem: ActorSystem,
   ec: ExecutionContext
 ) extends Logging {
@@ -44,7 +44,7 @@ class SnapshotService(akkaS3Settings: S3Settings,
         case ApiVersions.v2 =>
           UploadSnapshotGraph(
             elasticClient = elasticClient,
-            index = elasticConfig.worksIndex,
+            snapshotConfig = snapshotConfig,
             s3Settings = akkaS3Settings,
             s3ObjectLocation = snapshotJob.s3Location
           ).run()
@@ -60,7 +60,7 @@ class SnapshotService(akkaS3Settings: S3Settings,
       ).runWith(Sink.head)
 
       snapshotResult = SnapshotResult(
-        indexName = elasticConfig.worksIndex.name,
+        indexName = snapshotConfig.index.name,
         documentCount = documentCount,
         displayModel = DisplayWork.getClass.getCanonicalName,
         startedAt = startedAt,
