@@ -8,6 +8,8 @@ module "snapshot_generator" {
   snapshot_generator_image = var.snapshot_generator_image
   deployment_service_env   = var.deployment_service_env
 
+  es_bulk_size = var.es_bulk_size
+
   public_bucket_name = var.public_bucket_name
 
   snapshot_generator_input_topic_arn = module.snapshot_scheduler.topic_arn
