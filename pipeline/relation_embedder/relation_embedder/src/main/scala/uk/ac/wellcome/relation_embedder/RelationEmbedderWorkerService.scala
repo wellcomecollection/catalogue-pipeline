@@ -34,10 +34,11 @@ class RelationEmbedderWorkerService[MsgDestination](
       sqsStream.foreach(this.getClass.getSimpleName, processMessage)
     }
 
-  def processMessage(message: NotificationMessage): Future[Unit] =
+  def processMessage(message: NotificationMessage): Future[Unit] = {
+    val batch = fromJson[Batch](message.body);
     Future
-      .fromTry(fromJson[Batch](message.body))
-      .map { batch =>
+      .fromTry(batch)
+      .flatMap { batch =>
         info(
           s"Received batch for tree ${batch.rootPath} containing ${batch.selectors.size} selectors: ${batch.selectors
             .mkString(", ")}")
@@ -76,4 +77,12 @@ class RelationEmbedderWorkerService[MsgDestination](
               .map(_ => ())
           }
       }
+      .recoverWith {
+        case err =>
+          val batchString =
+            batch.map(_.toString).getOrElse("could not parse message")
+          error(s"Failed processing batch: $batchString", err)
+          Future.failed(err)
+      }
+  }
 }

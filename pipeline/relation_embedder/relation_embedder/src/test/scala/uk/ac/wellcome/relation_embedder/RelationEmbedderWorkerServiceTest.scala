@@ -3,12 +3,14 @@ package uk.ac.wellcome.relation_embedder
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
-
 import com.sksamuel.elastic4s.Index
 import org.scalatest.Assertion
 import org.scalatest.concurrent.Eventually
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import akka.NotUsed
+import akka.stream.scaladsl.Source
+
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.fixtures.TestWith
@@ -173,7 +175,22 @@ class RelationEmbedderWorkerServiceTest
     }
   }
 
-  def withWorkerService[R](works: List[Work[Merged]] = works)(
+  it("puts failed messages onto the DLQ") {
+    withWorkerService(fails = true) {
+      case (QueuePair(queue, dlq), index, msgSender) =>
+        import Selector._
+        val batch = Batch(rootPath = "a", selectors = List(Tree("a")))
+        sendNotificationToSQS(queue = queue, message = batch)
+        eventually {
+          assertQueueEmpty(queue)
+        }
+        assertQueueHasSize(dlq, size = 1)
+        msgSender.messages.map(_.body).toSet shouldBe Set()
+    }
+  }
+
+  def withWorkerService[R](works: List[Work[Merged]] = works,
+                           fails: Boolean = false)(
     testWith: TestWith[(QueuePair,
                         mutable.Map[String, Work[Denormalised]],
                         MemoryMessageSender),
@@ -188,12 +205,14 @@ class RelationEmbedderWorkerServiceTest
             val messageSender = new MemoryMessageSender
             val denormalisedIndex =
               mutable.Map.empty[String, Work[Denormalised]]
+            val relationsService =
+              if (fails) FailingRelationsService
+              else new PathQueryRelationsService(elasticClient, mergedIndex, 10)
             val workerService = new RelationEmbedderWorkerService[String](
               sqsStream = sqsStream,
               msgSender = messageSender,
               workIndexer = new MemoryIndexer(denormalisedIndex),
-              relationsService =
-                new PathQueryRelationsService(elasticClient, mergedIndex, 10),
+              relationsService = relationsService,
               indexFlushInterval = 1 milliseconds,
             )
             workerService.run()
@@ -202,4 +221,12 @@ class RelationEmbedderWorkerServiceTest
         }
       }
     }
+
+  object FailingRelationsService extends RelationsService {
+    def getAffectedWorks(batch: Batch): Source[Work[Merged], NotUsed] =
+      Source.single(()).map[Work[Merged]](throw new Exception("Failing"))
+
+    def getCompleteTree(batch: Batch): Source[Work[Merged], NotUsed] =
+      Source.single(()).map[Work[Merged]](throw new Exception("Failing"))
+  }
 }
