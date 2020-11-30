@@ -97,7 +97,7 @@ lazy val id_minter_common = setupProject(
 lazy val id_minter_works = setupProject(
   project,
   "pipeline/id_minter/id_minter_works",
-  localDependencies = Seq(id_minter_common, pipeline_storage),
+  localDependencies = Seq(id_minter_common, pipeline_storage_typesafe),
   externalDependencies = Seq()
 )
 
