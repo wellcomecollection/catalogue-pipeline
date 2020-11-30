@@ -67,6 +67,19 @@ These are:
   `Build process heap size (Mbytes)` to something large, eg 2048.
 
 
+## Deploying
+
+We deploy ECS catalogue services using the [weco-deploy](https://github.com/wellcomecollection/weco-deploy) tool.
+
+The [current latest default branch](https://buildkite.com/wellcomecollection/catalogue) build deploys to staging automatically.
+
+### Deploying to production
+
+After automated deployment to the staging environment, we run [integration tests](https://buildkite.com/wellcomecollection/integration) against the staging API and front-end.
+
+**When deploying a release from staging to production you should check these tests pass.**
+
+
 ## Things you might want to do
 
 Generally small things you might want to do irregularly involving the
