@@ -18,6 +18,24 @@ module "matcher_queue" {
   max_receive_count          = 20
 }
 
+module "matcher_input_queue" {
+  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
+  queue_name = "${local.namespace_hyphen}_matcher_input"
+
+  topic_arns = [
+    module.calm_transformer_output_topic.arn,
+  ]
+
+  aws_region      = var.aws_region
+  alarm_topic_arn = var.dlq_alarm_arn
+
+  # The records in the locktable expire after local.lock_timeout
+  # The matcher is able to override locks that have expired
+  # Wait slightly longer to make sure locks are expired
+  visibility_timeout_seconds = local.lock_timeout + 30
+  max_receive_count          = 20
+}
+
 # Service
 
 module "matcher" {
