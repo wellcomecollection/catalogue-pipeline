@@ -10,20 +10,26 @@ case class Bag(info: BagInfo,
                version: String,
                createdDate: Instant) {
 
-  def metsLocation: Either[Exception, MetsSourceData] =
-    file
-      .flatMap { file =>
+  def metsSourceData: Either[Exception, MetsSourceData] =
+    metsFile
+      .flatMap { metsFile =>
         parsedVersion.map { version =>
           MetsSourceData(
             bucket = location.bucket,
             path = location.path,
             version = version,
-            file = file,
+            file = metsFile,
             createdDate = createdDate,
-            deleted = manifest.files.forall(f => f.path == file),
+            // If the only file in the bag is the METS file, that means
+            // the bag has been deleted. Check https://github.com/wellcomecollection/platform/issues/4893
+            deleted = containsOnlyMetsFile(metsFile),
             manifestations = manifestations)
         }
       }
+
+  private def containsOnlyMetsFile(metsFile: String) = {
+    manifest.files.forall(f => f.path == metsFile)
+  }
 
   // Storage-service only stores a list of files, so we need to search for a
   // XML file in data directory named with some b-number.
@@ -35,7 +41,7 @@ case class Bag(info: BagInfo,
 
   private val versionRegex = "^v([0-9]+)".r
 
-  def file: Either[Exception, String] =
+  def metsFile: Either[Exception, String] =
     manifest.files
       .collectFirst {
         case file if metsFileRegex.findFirstIn(file.name).nonEmpty =>
