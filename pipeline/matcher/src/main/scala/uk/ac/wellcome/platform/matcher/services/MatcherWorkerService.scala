@@ -21,8 +21,7 @@ class MatcherWorkerService[MsgDestination](
   workRetriever: Retriever[Work[Source]],
   msgStream: SQSStream[NotificationMessage],
   msgSender: MessageSender[MsgDestination],
-  workMatcher: WorkMatcher)(
-  implicit ec: ExecutionContext)
+  workMatcher: WorkMatcher)(implicit ec: ExecutionContext)
     extends Logging
     with Runnable {
 

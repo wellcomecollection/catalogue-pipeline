@@ -80,8 +80,9 @@ trait MatcherFixtures
                            messageSender: MemoryMessageSender)(
     testWith: TestWith[MatcherWorkerService[String], R]): R =
     withWorkGraphTable { graphTable =>
-      withWorkerService(workRetriever, queue, messageSender, graphTable) { service =>
-        testWith(service)
+      withWorkerService(workRetriever, queue, messageSender, graphTable) {
+        service =>
+          testWith(service)
       }
     }
 
