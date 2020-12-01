@@ -16,9 +16,9 @@ import scala.concurrent.duration.DurationInt
 object PipelineStorageStreamBuilder {
   def buildPipelineStorageConfig(config: Config): PipelineStorageConfig =
     PipelineStorageConfig(
-      config.requireInt("pipeline_storage.batch_size"),
-      config.requireInt("pipeline_storage.flush_interval_seconds").seconds,
-      config.getIntOption("pipeline_storage.parallelism").getOrElse(10)
+      batchSize = config.requireInt("pipeline_storage.batch_size"),
+      flushInterval = config.requireInt("pipeline_storage.flush_interval_seconds").seconds,
+      parallelism = config.getIntOption("pipeline_storage.parallelism").getOrElse(10)
     )
 
   def buildPipelineStorageStream[In, Out, MsgDestination](
