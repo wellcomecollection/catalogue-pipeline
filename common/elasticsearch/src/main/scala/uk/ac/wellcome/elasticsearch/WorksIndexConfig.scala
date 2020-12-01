@@ -268,6 +268,10 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
       objectField("invisibilityReasons").fields(
         keywordField("type"),
         keywordField("info")
+      ),
+      objectField("deletedReasons").fields(
+        keywordField("type"),
+        keywordField("info")
       )
     )
 }
