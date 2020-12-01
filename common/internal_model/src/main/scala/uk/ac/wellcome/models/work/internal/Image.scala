@@ -21,7 +21,6 @@ case class Image[State <: ImageState](
 }
 
 sealed trait ImageState {
-  type SourceDataState <: DataState
   type TransitionArgs
 
   val sourceIdentifier: SourceIdentifier
@@ -55,7 +54,6 @@ object ImageState {
   case class Source(
     sourceIdentifier: SourceIdentifier
   ) extends ImageState {
-    type SourceDataState = Nothing
     type TransitionArgs = Unit
   }
 
@@ -63,7 +61,6 @@ object ImageState {
     sourceIdentifier: SourceIdentifier,
     canonicalId: String
   ) extends ImageState {
-    type SourceDataState = Nothing
     type TransitionArgs = Unit
 
     override def id = canonicalId
@@ -74,7 +71,6 @@ object ImageState {
     modifiedTime: Instant,
     source: ImageSource[DataState.Unidentified]
   ) extends ImageState {
-    type SourceDataState = DataState.Unidentified
     type TransitionArgs = (ImageSource[DataState.Unidentified], Instant)
   }
 
@@ -84,7 +80,6 @@ object ImageState {
     modifiedTime: Instant,
     source: ImageSource[DataState.Identified]
   ) extends ImageState {
-    type SourceDataState = DataState.Identified
     type TransitionArgs = Unit
 
     override def id = canonicalId
@@ -97,7 +92,6 @@ object ImageState {
     source: ImageSource[DataState.Identified],
     inferredData: Option[InferredData] = None
   ) extends ImageState {
-    type SourceDataState = DataState.Identified
     type TransitionArgs = Option[InferredData]
 
     override def id = canonicalId
