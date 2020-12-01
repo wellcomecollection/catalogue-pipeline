@@ -20,12 +20,12 @@ module "merger" {
   cluster_arn  = aws_ecs_cluster.cluster.arn
 
   env_vars = {
-    metrics_namespace        = "${local.namespace_hyphen}_merger"
-    messages_bucket_name     = aws_s3_bucket.messages.id
-    topic_arn                = module.matcher_topic.arn
-    merger_queue_id          = module.merger_queue.url
-    merger_works_topic_arn   = module.merger_works_topic.arn
-    merger_images_topic_arn  = module.merger_images_topic.arn
+    metrics_namespace       = "${local.namespace_hyphen}_merger"
+    messages_bucket_name    = aws_s3_bucket.messages.id
+    topic_arn               = module.matcher_topic.arn
+    merger_queue_id         = module.merger_queue.url
+    merger_works_topic_arn  = module.merger_works_topic.arn
+    merger_images_topic_arn = module.merger_images_topic.arn
 
     es_source_works_index = local.es_works_source_index
     es_merged_works_index = local.es_works_merged_index
