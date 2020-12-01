@@ -19,10 +19,8 @@ module "mets_transformer" {
   cluster_arn  = aws_ecs_cluster.cluster.arn
 
   env_vars = {
-    sns_arn              = module.mets_transformer_topic.arn
     transformer_queue_id = module.mets_transformer_queue.url
     metrics_namespace    = "${local.namespace_hyphen}_mets_transformer"
-    messages_bucket_name = aws_s3_bucket.messages.id
 
     mets_adapter_dynamo_table_name = var.mets_adapter_table_name
 
@@ -53,16 +51,6 @@ module "mets_transformer" {
   deployment_service_env  = var.release_label
   deployment_service_name = "mets-transformer"
   shared_logging_secrets  = var.shared_logging_secrets
-}
-
-module "mets_transformer_topic" {
-  source = "../modules/topic"
-
-  name = "${local.namespace_hyphen}_mets_transformer"
-  role_names = [
-  module.mets_transformer.task_role_name]
-
-  messages_bucket_arn = aws_s3_bucket.messages.arn
 }
 
 module "mets_transformer_output_topic" {

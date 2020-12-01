@@ -1,6 +1,5 @@
 package uk.ac.wellcome.platform.transformer.mets.service
 
-import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.mets_adapter.models.MetsLocation
 import uk.ac.wellcome.models.work.internal.Work
@@ -17,7 +16,6 @@ class MetsTransformerWorkerService[MsgDestination](
   val pipelineStream: PipelineStorageStream[NotificationMessage,
                                             Work[Source],
                                             MsgDestination],
-  val sender: MessageSender[MsgDestination],
   adapterStore: VersionedStore[String, Int, MetsLocation],
   metsXmlStore: Readable[S3ObjectLocation, String]
 ) extends Runnable
