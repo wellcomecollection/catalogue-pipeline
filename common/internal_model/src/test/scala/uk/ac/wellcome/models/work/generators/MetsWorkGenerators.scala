@@ -6,5 +6,5 @@ trait MetsWorkGenerators extends WorkGenerators with ImageGenerators {
   def metsSourceWork(): Work.Visible[WorkState.Source] =
     sourceWork(sourceIdentifier = createMetsSourceIdentifier)
       .items(List(createDigitalItem))
-      .images(List(createSourceMetsImage))
+      .imageData(List(createMetsImageData))
 }

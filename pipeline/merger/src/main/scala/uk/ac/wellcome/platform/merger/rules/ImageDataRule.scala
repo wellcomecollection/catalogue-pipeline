@@ -5,10 +5,10 @@ import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 import WorkState.Source
 
-object ImagesRule extends FieldMergeRule {
+object ImageDataRule extends FieldMergeRule {
   import WorkPredicates._
 
-  type FieldData = List[Image[ImageState.Source]]
+  type FieldData = List[ImageData[IdState.Identifiable]]
 
   override def merge(
     target: Work.Visible[Source],
@@ -47,10 +47,10 @@ object ImagesRule extends FieldMergeRule {
   }
 
   trait FlatImageMergeRule extends PartialRule {
-    final override def rule(
-      target: Work.Visible[Source],
-      sources: NonEmptyList[Work[Source]]): List[Image[ImageState.Source]] =
-      (target :: sources).toList.flatMap(_.data.images)
+    final override def rule(target: Work.Visible[Source],
+                            sources: NonEmptyList[Work[Source]])
+      : List[ImageData[IdState.Identifiable]] =
+      (target :: sources).toList.flatMap(_.data.imageData)
   }
 
 }

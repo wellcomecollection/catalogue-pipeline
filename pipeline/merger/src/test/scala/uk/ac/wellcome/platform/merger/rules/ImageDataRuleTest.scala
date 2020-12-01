@@ -4,7 +4,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{Inspectors, OptionValues, PrivateMethodTester}
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.platform.merger.rules.ImagesRule.FlatImageMergeRule
+import uk.ac.wellcome.platform.merger.rules.ImageDataRule.FlatImageMergeRule
 import uk.ac.wellcome.platform.merger.rules.WorkPredicates.WorkPredicate
 import WorkState.Source
 import uk.ac.wellcome.models.work.generators.{
@@ -13,7 +13,7 @@ import uk.ac.wellcome.models.work.generators.{
   SierraWorkGenerators
 }
 
-class ImagesRuleTest
+class ImageDataRuleTest
     extends AnyFunSpec
     with Matchers
     with MiroWorkGenerators
@@ -27,11 +27,11 @@ class ImagesRuleTest
       val n = 3
       val miroWorks = (1 to n).map(_ => miroSourceWork())
       val sierraWork = sierraDigitalSourceWork()
-      val result = ImagesRule.merge(sierraWork, miroWorks.toList).data
+      val result = ImageDataRule.merge(sierraWork, miroWorks.toList).data
 
       result should have length n
       result.map(_.locations) should contain theSameElementsAs
-        miroWorks.map(_.data.images.head.locations)
+        miroWorks.map(_.data.imageData.head.locations)
     }
 
     it(
@@ -39,11 +39,11 @@ class ImagesRuleTest
       val n = 5
       val metsWork = createInvisibleMetsSourceWorkWith(numImages = n)
       val sierraPictureWork = sierraSourceWork().format(Format.Pictures)
-      val result = ImagesRule.merge(sierraPictureWork, List(metsWork)).data
+      val result = ImageDataRule.merge(sierraPictureWork, List(metsWork)).data
 
       result should have length n
       result.map(_.locations) should contain theSameElementsAs
-        metsWork.data.images.map(_.locations)
+        metsWork.data.imageData.map(_.locations)
     }
 
     it(
@@ -51,11 +51,11 @@ class ImagesRuleTest
       val n = 5
       val metsWork = createInvisibleMetsSourceWorkWith(numImages = n)
       val sierraEphemeraWork = sierraSourceWork().format(Format.Ephemera)
-      val result = ImagesRule.merge(sierraEphemeraWork, List(metsWork)).data
+      val result = ImageDataRule.merge(sierraEphemeraWork, List(metsWork)).data
 
       result should have length n
       result.map(_.locations) should contain theSameElementsAs
-        metsWork.data.images.map(_.locations)
+        metsWork.data.imageData.map(_.locations)
     }
 
     it(
@@ -66,12 +66,12 @@ class ImagesRuleTest
       val metsWork = createInvisibleMetsSourceWorkWith(numImages = n)
       val sierraPictureWork = sierraSourceWork().format(Format.Pictures)
       val result =
-        ImagesRule.merge(sierraPictureWork, miroWorks :+ metsWork).data
+        ImageDataRule.merge(sierraPictureWork, miroWorks :+ metsWork).data
 
       result should have length n + m
       result.map(_.locations) should contain theSameElementsAs
-        metsWork.data.images.map(_.locations) ++
-          miroWorks.map(_.data.images.head.locations)
+        metsWork.data.imageData.map(_.locations) ++
+          miroWorks.map(_.data.imageData.head.locations)
     }
 
     it(
@@ -82,12 +82,12 @@ class ImagesRuleTest
       val metsWork = createInvisibleMetsSourceWorkWith(numImages = n)
       val sierraEphemeraWork = sierraSourceWork().format(Format.Ephemera)
       val result =
-        ImagesRule.merge(sierraEphemeraWork, miroWorks :+ metsWork).data
+        ImageDataRule.merge(sierraEphemeraWork, miroWorks :+ metsWork).data
 
       result should have length n + m
       result.map(_.locations) should contain theSameElementsAs
-        metsWork.data.images.map(_.locations) ++
-          miroWorks.map(_.data.images.head.locations)
+        metsWork.data.imageData.map(_.locations) ++
+          miroWorks.map(_.data.imageData.head.locations)
     }
 
     it(
@@ -96,11 +96,11 @@ class ImagesRuleTest
       val metsWork = createInvisibleMetsSourceWorkWith(numImages = 3)
       val miroWorks = (1 to n).map(_ => miroSourceWork()).toList
       val sierraWork = sierraDigitalSourceWork()
-      val result = ImagesRule.merge(sierraWork, miroWorks :+ metsWork).data
+      val result = ImageDataRule.merge(sierraWork, miroWorks :+ metsWork).data
 
       result should have length n
       result.map(_.locations) should contain theSameElementsAs
-        miroWorks.map(_.data.images.head.locations)
+        miroWorks.map(_.data.imageData.head.locations)
     }
 
     it(
@@ -111,10 +111,10 @@ class ImagesRuleTest
         .format(Format.Pictures)
         .otherIdentifiers(List(createDigcodeIdentifier("digaids")))
       val result =
-        ImagesRule.merge(sierraDigaidsWork, List(miroWork, metsWork)).data
+        ImageDataRule.merge(sierraDigaidsWork, List(miroWork, metsWork)).data
 
       result should have length 1
-      result.map(_.locations) should contain theSameElementsAs metsWork.data.images
+      result.map(_.locations) should contain theSameElementsAs metsWork.data.imageData
         .map(_.locations)
     }
 
@@ -125,10 +125,10 @@ class ImagesRuleTest
         .format(Format.Pictures)
         .otherIdentifiers(List(createDigcodeIdentifier("digaids")))
       val result =
-        ImagesRule.merge(sierraDigaidsWork, List(miroWork)).data
+        ImageDataRule.merge(sierraDigaidsWork, List(miroWork)).data
 
       result should have length 1
-      result.map(_.locations) should contain theSameElementsAs miroWork.data.images
+      result.map(_.locations) should contain theSameElementsAs miroWork.data.imageData
         .map(_.locations)
     }
   }
@@ -150,10 +150,10 @@ class ImagesRuleTest
     numImages: Int): Work.Invisible[Source] = {
     val images =
       (1 to numImages).map { _ =>
-        createSourceMetsImage
+        createMetsImageData
       }.toList
 
-    metsSourceWork().images(images).invisible()
+    metsSourceWork().imageData(images).invisible()
   }
 
 }

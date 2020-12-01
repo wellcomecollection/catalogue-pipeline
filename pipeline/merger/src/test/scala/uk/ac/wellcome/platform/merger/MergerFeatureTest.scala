@@ -46,7 +46,7 @@ class MergerFeatureTest
       outcome.images should contain(miro3.singleImage)
 
       And("the merged Sierra work's images contain all of the images")
-      val mergedImages = outcome.getMerged(sierra).data.images
+      val mergedImages = outcome.getMerged(sierra).data.imageData
       mergedImages should contain(miro1.singleImage)
       mergedImages should contain(miro2.singleImage)
       mergedImages should contain(miro3.singleImage)
@@ -67,7 +67,10 @@ class MergerFeatureTest
       outcome.images should contain only miro.singleImage
 
       And("the merged Sierra work contains the image")
-      outcome.getMerged(sierra).data.images should contain only miro.singleImage
+      outcome
+        .getMerged(sierra)
+        .data
+        .imageData should contain only miro.singleImage
     }
 
     Scenario("A Sierra picture or ephemera work and METS work are matched") {
@@ -96,11 +99,11 @@ class MergerFeatureTest
       pictureOutcome
         .getMerged(sierraPicture)
         .data
-        .images should contain only mets.singleImage
+        .imageData should contain only mets.singleImage
       ephemeraOutcome
         .getMerged(sierraEphemera)
         .data
-        .images should contain only mets.singleImage
+        .imageData should contain only mets.singleImage
     }
 
     Scenario("An AIDS poster Sierra picture, a METS and a Miro are matched") {
@@ -124,7 +127,7 @@ class MergerFeatureTest
       outcome
         .getMerged(sierraDigaidsPicture)
         .data
-        .images should contain only mets.singleImage
+        .imageData should contain only mets.singleImage
     }
 
     Scenario("A physical and a digital Sierra work are matched") {

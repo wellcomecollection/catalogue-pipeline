@@ -2,12 +2,12 @@ package uk.ac.wellcome.platform.merger.models
 
 import uk.ac.wellcome.models.work.internal.{
   DataState,
-  Image,
-  ImageSource,
-  ImageState
+  IdState,
+  ImageData,
+  ImageSource
 }
 
-case class ImageWithSource(
-  image: Image[ImageState.Source],
+case class ImageDataWithSource(
+  imageData: ImageData[IdState.Identifiable],
   source: ImageSource[DataState.Unidentified]
 )

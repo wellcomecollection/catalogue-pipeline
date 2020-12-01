@@ -186,9 +186,9 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
     def collectionPath(collectionPath: CollectionPath): Work.Visible[State] =
       work.map(_.copy(collectionPath = Some(collectionPath)))
 
-    def images(
-      images: List[Image[State#WorkDataState#WorkImage]]): Work.Visible[State] =
-      work.map(_.copy(images = images))
+    def imageData(
+      imageData: List[ImageData[State#WorkDataState#Id]]): Work.Visible[State] =
+      work.map(_.copy(imageData = imageData))
 
     def workType(workType: WorkType): Work.Visible[State] =
       work.map(_.copy(workType = workType))
@@ -215,7 +215,7 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
     def identity[State <: WorkState]: UpdateState[State] =
       (state: State, _: WorkData[State#WorkDataState]) => state
 
-    implicit val updateCribbitsState: UpdateState[Indexed] =
+    implicit val updateIndexedState: UpdateState[Indexed] =
       (state: Indexed, data: WorkData[DataState.Identified]) =>
         state.copy(derivedData = DerivedData(data))
     implicit val updateIdentifiedState: UpdateState[Identified] = identity

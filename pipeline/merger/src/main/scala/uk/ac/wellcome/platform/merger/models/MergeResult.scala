@@ -8,4 +8,4 @@ import WorkState.Source
  * and the images that were created in the process
  */
 case class MergeResult(mergedTarget: Work[Source],
-                       imagesWithSources: Seq[ImageWithSource])
+                       imageDataWithSources: Seq[ImageDataWithSource])

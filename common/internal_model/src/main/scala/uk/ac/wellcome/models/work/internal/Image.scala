@@ -2,6 +2,12 @@ package uk.ac.wellcome.models.work.internal
 
 import java.time.Instant
 
+case class ImageData[+State](
+  id: State,
+  version: Int,
+  locations: List[DigitalLocationDeprecated]
+) extends HasId[State]
+
 case class Image[State <: ImageState](
   version: Int,
   state: State,
@@ -30,19 +36,15 @@ sealed trait ImageState {
 
 /** ImageState represents the state of the image in the pipeline.
   * Its stages are as follows:
-  *
+
   *      |
-  *      | (transformer)
+  *      | (merger)
   *      ▼
-  *    Source -----------------------------
-  *      |                                |
-  *      | (matcher / merger)             |
-  *      ▼                                |
-  *    Merged                             | (work id minter)
-  *      |                                |
-  *      | (image id minter)              |
-  *      ▼                                ▼
-  *  Identified                     IdentifiedSource
+  *    Merged
+  *      |
+  *      | (image id minter)
+  *      ▼
+  *  Identified
   *      |
   *      | (inferrer)
   *      ▼
@@ -51,27 +53,12 @@ sealed trait ImageState {
   */
 object ImageState {
 
-  case class Source(
-    sourceIdentifier: SourceIdentifier
-  ) extends ImageState {
-    type TransitionArgs = Unit
-  }
-
-  case class IdentifiedSource(
-    sourceIdentifier: SourceIdentifier,
-    canonicalId: String
-  ) extends ImageState {
-    type TransitionArgs = Unit
-
-    override def id = canonicalId
-  }
-
   case class Merged(
     sourceIdentifier: SourceIdentifier,
     modifiedTime: Instant,
     source: ImageSource[DataState.Unidentified]
   ) extends ImageState {
-    type TransitionArgs = (ImageSource[DataState.Unidentified], Instant)
+    type TransitionArgs = Unit
   }
 
   case class Identified(
@@ -105,19 +92,6 @@ object ImageFsm {
 
   sealed trait Transition[InState <: ImageState, OutState <: ImageState] {
     def state(state: InState, args: OutState#TransitionArgs): OutState
-  }
-
-  implicit val sourceToMerged = new Transition[Source, Merged] {
-    def state(state: Source,
-              args: (ImageSource[DataState.Unidentified], Instant)): Merged =
-      args match {
-        case (source, modifiedTime) =>
-          Merged(
-            sourceIdentifier = state.sourceIdentifier,
-            modifiedTime = modifiedTime,
-            source = source
-          )
-      }
   }
 
   implicit val identifiedToAugmented = new Transition[Identified, Augmented] {

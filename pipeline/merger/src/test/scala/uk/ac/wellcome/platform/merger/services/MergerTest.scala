@@ -78,7 +78,7 @@ class MergerTest
                 otherIdentifiers = otherIdentifiers
               )
             },
-          imagesWithSources = Nil
+          imageDataWithSources = Nil
         )
   }
 

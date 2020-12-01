@@ -332,8 +332,8 @@ class DisplayWorkSerialisationTest
   }
 
   it("includes image stubs with the images include") {
-    val work = indexedWork().images(
-      (1 to 3).map(_ => createSourceImage.toIdentified).toList
+    val work = indexedWork().imageData(
+      (1 to 3).map(_ => createImageData.toIdentified).toList
     )
 
     val expectedJson = s"""
@@ -342,7 +342,7 @@ class DisplayWorkSerialisationTest
       | "id": "${work.state.canonicalId}",
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
-      | "images": [${workImageIncludes(work.data.images)}],
+      | "images": [${workImageIncludes(work.data.imageData)}],
       | "availableOnline": false
       |}
     """.stripMargin

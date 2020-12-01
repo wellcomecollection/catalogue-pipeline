@@ -337,8 +337,8 @@ class DisplayWorkTest
           )
         )
       )
-      .images(
-        (1 to 5).map(_ => createSourceImage.toIdentified).toList
+      .imageData(
+        (1 to 5).map(_ => createImageData.toIdentified).toList
       )
 
     describe("omits identifiers if WorksIncludes.identifiers is false") {
@@ -459,7 +459,7 @@ class DisplayWorkTest
         )
         displayWork.images.get
           .map(_.id) should contain theSameElementsAs
-          work.data.images.map(_.id)
+          work.data.imageData.map(_.id)
       }
     }
   }

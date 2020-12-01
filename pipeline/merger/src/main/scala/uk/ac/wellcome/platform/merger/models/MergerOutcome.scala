@@ -13,7 +13,7 @@ import WorkFsm._
  * the output entities.
  */
 case class MergerOutcome(resultWorks: Seq[Work[Source]],
-                         imagesWithSources: Seq[ImageWithSource]) {
+                         imagesWithSources: Seq[ImageDataWithSource]) {
 
   def mergedWorksWithTime(modifiedTime: Instant): Seq[Work[Merged]] =
     resultWorks.map(_.transition[Merged](Some(modifiedTime)))
@@ -21,8 +21,16 @@ case class MergerOutcome(resultWorks: Seq[Work[Source]],
   def mergedImagesWithTime(
     modifiedTime: Instant): Seq[Image[ImageState.Merged]] =
     imagesWithSources.map {
-      case ImageWithSource(image, source) =>
-        image.transition[ImageState.Merged]((source, modifiedTime))
+      case ImageDataWithSource(imageData, source) =>
+        Image[ImageState.Merged](
+          version = imageData.version,
+          locations = imageData.locations,
+          state = ImageState.Merged(
+            sourceIdentifier = imageData.id.sourceIdentifier,
+            source = source,
+            modifiedTime = modifiedTime
+          )
+        )
     }
 }
 

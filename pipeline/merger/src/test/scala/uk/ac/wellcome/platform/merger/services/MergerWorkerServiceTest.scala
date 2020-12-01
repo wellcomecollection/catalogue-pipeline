@@ -271,7 +271,7 @@ class MergerWorkerServiceTest
           mergedWorks should have size 1
           mergedWorks.head.sourceIdentifier shouldBe physicalWork.sourceIdentifier
 
-          imagesSent.head.id shouldBe miroWork.data.images.head.id
+          imagesSent.head.id shouldBe miroWork.data.imageData.head.id
         }
     }
   }

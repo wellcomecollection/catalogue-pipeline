@@ -74,7 +74,7 @@ class PlatformMergerTest
   private val metsWork: Work.Invisible[Source] =
     metsSourceWork()
       .items(List(createDigitalItemWith(List(digitalLocationCCBYNC))))
-      .images(List(createSourceMetsImage))
+      .imageData(List(createMetsImageData))
       .thumbnail(
         DigitalLocationDeprecated(
           url = "https://path.to/thumbnail.jpg",
@@ -140,7 +140,7 @@ class PlatformMergerTest
               locations = sierraItem.locations ++ miroItem.locations
             )
           ),
-          images = miroWork.data.images,
+          imageData = miroWork.data.imageData,
         )
       }
 
@@ -154,7 +154,7 @@ class PlatformMergerTest
         redirect = IdState.Identifiable(sierraPhysicalWork.sourceIdentifier)
       )
 
-    val expectedImage = miroWork.data.images.head.transition[ImageState.Merged](
+    val expectedImage = miroWork.data.imageData.head.transition[ImageState.Merged](
       (
         SourceWorks(
           canonicalWork = expectedMergedWork.toSourceWork,
@@ -185,7 +185,7 @@ class PlatformMergerTest
           otherIdentifiers = data.otherIdentifiers ++ miroWork.identifiers,
           thumbnail = miroWork.data.thumbnail,
           items = miroWork.data.items,
-          images = miroWork.data.images,
+          imageData = miroWork.data.imageData,
         )
       }
 
@@ -198,7 +198,7 @@ class PlatformMergerTest
         redirect = IdState.Identifiable(zeroItemSierraWork.sourceIdentifier)
       )
 
-    val expectedImage = miroWork.data.images.head.transition[ImageState.Merged](
+    val expectedImage = miroWork.data.imageData.head.transition[ImageState.Merged](
       (
         SourceWorks(
           canonicalWork = expectedMergedWork.toSourceWork,
@@ -239,7 +239,7 @@ class PlatformMergerTest
               locations = sierraItem.locations ++ miroItem.locations
             )
           ),
-          images = miroWork.data.images,
+          imageData = miroWork.data.imageData,
         )
       }
 
@@ -252,7 +252,7 @@ class PlatformMergerTest
         redirect = IdState.Identifiable(sierraDigitalWork.sourceIdentifier)
       )
 
-    val expectedImage = miroWork.data.images..head.transition[ImageState.Merged](
+    val expectedImage = miroWork.data.imageData..head.transition[ImageState.Merged](
       (
         SourceWorks(
           canonicalWork = expectedMergedWork.toSourceWork,
@@ -281,7 +281,7 @@ class PlatformMergerTest
       .transition[Merged](Some(now))
       .mapData { data =>
         data.copy(
-          images = miroWork.data.images,
+          imageData = miroWork.data.imageData,
         )
       }
 
@@ -355,7 +355,7 @@ class PlatformMergerTest
               locations = physicalItem.locations ++ digitalItem.locations
             )
           ),
-          images = metsWork.data.images,
+          imageData = metsWork.data.imageData,
           thumbnail = metsWork.data.thumbnail,
         )
       }
@@ -369,7 +369,7 @@ class PlatformMergerTest
         redirect = IdState.Identifiable(sierraPictureWork.sourceIdentifier)
       )
 
-    val expectedImage = metsWork.data.images.head.transition[ImageState.Merged](
+    val expectedImage = metsWork.data.imageData.head.transition[ImageState.Merged](
       (
         SourceWorks(
           canonicalWork = expectedMergedWork.toSourceWork,
@@ -411,7 +411,7 @@ class PlatformMergerTest
               locations = sierraItem.locations ++ metsItem.locations
             )
           ),
-          images = miroWork.data.images,
+          imageData = miroWork.data.imageData,
         )
       }
 
@@ -442,7 +442,7 @@ class PlatformMergerTest
         redirect = IdState.Identifiable(sierraPhysicalWork.sourceIdentifier)
       )
 
-    val expectedImage = miroWork.data.images..head.transition[ImageState.Merged](
+    val expectedImage = miroWork.data.imageData..head.transition[ImageState.Merged](
       (
         SourceWorks(
           canonicalWork = expectedMergedWork.toSourceWork,
@@ -554,7 +554,7 @@ class PlatformMergerTest
     result.mergedWorksWithTime(now).head shouldBe miroWork.transition[Merged](
       Some(now))
     result.mergedImagesWithTime(now) should have length 1
-    result.mergedImagesWithTime(now).head shouldBe miroWork.data.images.head.transition[ImageState.Merged](
+    result.mergedImagesWithTime(now).head shouldBe miroWork.data.imageData.head.transition[ImageState.Merged](
       (
         SourceWorks(
           canonicalWork = miroWork.toSourceWork,

@@ -8,6 +8,7 @@ import cats.instances.option._
 import org.apache.commons.lang3.StringUtils.equalsIgnoreCase
 import uk.ac.wellcome.models.work.internal._
 import WorkState.Source
+import io.circe.Decoder.state
 
 case class MetsData(
   recordIdentifier: String,
@@ -34,7 +35,7 @@ case class MetsData(
           items = List(item),
           mergeCandidates = List(mergeCandidate),
           thumbnail = thumbnail(sourceIdentifier.value, license, accessStatus),
-          images = images(version, license, accessStatus)
+          imageData = images(version, license, accessStatus)
         )
       )
 
@@ -133,7 +134,7 @@ case class MetsData(
   private def images(
     version: Int,
     license: Option[License],
-    accessStatus: Option[AccessStatus]): List[Image[ImageState.Source]] =
+    accessStatus: Option[AccessStatus]): List[ImageData[IdState.Identifiable]] =
     if (accessStatus.exists(_.hasRestrictions)) {
       Nil
     } else {
@@ -141,8 +142,8 @@ case class MetsData(
         .filter(ImageUtils.isImage)
         .flatMap { fileReference =>
           ImageUtils.buildImageUrl(recordIdentifier, fileReference).map { url =>
-            Image[ImageState.Source](
-              state = ImageState.Source(
+            ImageData[IdState.Identifiable](
+              id = IdState.Identifiable(
                 sourceIdentifier = ImageUtils
                   .getImageSourceId(recordIdentifier, fileReference.id)
               ),

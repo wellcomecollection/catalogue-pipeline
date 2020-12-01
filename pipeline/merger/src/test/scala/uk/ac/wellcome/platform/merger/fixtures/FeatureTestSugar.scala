@@ -28,7 +28,7 @@ trait FeatureTestSugar {
 
   implicit class VisibleWorkOps(val work: Work.Visible[Source]) {
     def singleImage: Image[ImageState.Source] =
-      work.data.images.head
+      work.data.imageData.head
   }
 
   class RedirectMatcher(expectedRedirectTo: Work.Visible[Source])

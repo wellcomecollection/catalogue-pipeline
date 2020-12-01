@@ -142,11 +142,11 @@ class WorksQueryTest
 
     it("searches the images.canonicalId as keyword") {
       withLocalWorksIndex { index =>
-        val image1 = createIdentifiedSourceImage
-        val image2 = createIdentifiedSourceImage
+        val image1 = createImageData.toIdentified
+        val image2 = createImageData.toIdentified
 
-        val work1 = indexedWork().images(List(image1))
-        val work2 = indexedWork().images(List(image2))
+        val work1 = indexedWork().imageData(List(image1))
+        val work2 = indexedWork().imageData(List(image2))
 
         insertIntoElasticsearch(index, work1, work2)
 
@@ -160,11 +160,11 @@ class WorksQueryTest
 
     it("searches the images.sourceIdentifiers") {
       withLocalWorksIndex { index =>
-        val image1 = createIdentifiedSourceImage
-        val image2 = createIdentifiedSourceImage
+        val image1 = createImageData.toIdentified
+        val image2 = createImageData.toIdentified
 
-        val work1 = indexedWork().images(List(image1))
-        val work2 = indexedWork().images(List(image2))
+        val work1 = indexedWork().imageData(List(image1))
+        val work2 = indexedWork().imageData(List(image2))
 
         insertIntoElasticsearch(index, work1, work2)
 

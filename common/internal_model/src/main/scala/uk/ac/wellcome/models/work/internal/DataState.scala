@@ -10,19 +10,16 @@ package uk.ac.wellcome.models.work.internal
 sealed trait DataState {
   type Id
   type MaybeId
-  type WorkImage
 }
 
 object DataState {
   case class Unidentified() extends DataState {
     type Id = IdState.Identifiable
     type MaybeId = IdState.Unminted
-    type WorkImage = ImageState.Source
   }
 
   case class Identified() extends DataState {
     type Id = IdState.Identified
     type MaybeId = IdState.Minted
-    type WorkImage = ImageState.IdentifiedSource
   }
 }

@@ -12,14 +12,14 @@ trait ImageGenerators
     with InstantGenerators
     with VectorGenerators
     with SierraWorkGenerators {
-  def createSourceImageWith(
+  def createImageDataWith(
     locations: List[DigitalLocationDeprecated] = List(createDigitalLocation),
     version: Int = 1,
     identifierValue: String = randomAlphanumeric(10),
     identifierType: IdentifierType = IdentifierType("miro-image-number")
-  ): Image[Source] =
-    Image[Source](
-      state = Source(
+  ): ImageData[IdState.Identifiable] =
+    ImageData[IdState.Identifiable](
+      id = IdState.Identifiable(
         sourceIdentifier = createSourceIdentifierWith(
           identifierType = identifierType,
           value = identifierValue
@@ -29,9 +29,10 @@ trait ImageGenerators
       locations = locations
     )
 
-  def createSourceImage: Image[Source] = createSourceImageWith()
+  def createImageData: ImageData[IdState.Identifiable] =
+    createImageDataWith()
 
-  def createSourceMiroImage = createSourceImageWith(
+  def createMiroImageData = createImageDataWith(
     locations = List(
       DigitalLocationDeprecated(
         url = "https://iiif.wellcomecollection.org/V01234.jpg",
@@ -40,10 +41,25 @@ trait ImageGenerators
       ))
   )
 
-  def createSourceMetsImage = createSourceImageWith(
+  def createMetsImageData = createImageDataWith(
     locations = List(createDigitalLocation),
     identifierType = IdentifierType("mets-image")
   )
+
+  implicit class UnidentifiedImageDataOps(
+    imageData: ImageData[IdState.Identifiable]) {
+
+    def toIdentifiedWith(
+      canonicalId: String = createCanonicalId): ImageData[IdState.Identified] =
+      imageData.copy(
+        id = IdState.Identified(
+          canonicalId = canonicalId,
+          sourceIdentifier = imageData.id.sourceIdentifier
+        )
+      )
+
+    def toIdentified = toIdentifiedWith()
+  }
 
   def createIdentifiedImageWith(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
@@ -70,24 +86,6 @@ trait ImageGenerators
     )
 
   def createIdentifiedImage = createIdentifiedImageWith()
-
-  def createIdentifiedSourceImageWith(
-    sourceIdentifier: SourceIdentifier = createSourceIdentifier,
-    canonicalId: String = createCanonicalId,
-    locations: List[DigitalLocationDeprecated] = List(
-      createDigitalLocationWith(locationType = createImageLocationType)),
-    version: Int = 1
-  ): Image[IdentifiedSource] =
-    Image[IdentifiedSource](
-      version = version,
-      locations = locations,
-      state = IdentifiedSource(
-        sourceIdentifier = sourceIdentifier,
-        canonicalId = canonicalId
-      )
-    )
-
-  def createIdentifiedSourceImage = createIdentifiedSourceImageWith()
 
   def createInferredData = {
     val features = randomVector(4096)
