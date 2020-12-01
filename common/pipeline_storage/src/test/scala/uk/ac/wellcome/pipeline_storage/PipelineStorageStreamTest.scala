@@ -55,9 +55,12 @@ class PipelineStorageStreamTest
 
     val sender = new MemoryMessageSender
 
-    withLocalSqsQueuePair(visibilityTimeout = 10) { case QueuePair(queue, dlq) =>
-      withPipelineStream(queue = queue, indexer = indexer(index), sender = sender) {
-        pipelineStream =>
+    withLocalSqsQueuePair(visibilityTimeout = 10) {
+      case QueuePair(queue, dlq) =>
+        withPipelineStream(
+          queue = queue,
+          indexer = indexer(index),
+          sender = sender) { pipelineStream =>
           sendNotificationToSQS(
             queue = queue,
             message = document
@@ -70,12 +73,11 @@ class PipelineStorageStreamTest
                 .map(Option(_)))
           assertElasticsearchEventuallyHas(index = index, document)
           eventually {
-            sender.messages.map(_.body) should contain(
-              document.canonicalId)
+            sender.messages.map(_.body) should contain(document.canonicalId)
             assertQueueEmpty(queue)
             assertQueueEmpty(dlq)
           }
-      }
+        }
     }
   }
 
@@ -85,9 +87,12 @@ class PipelineStorageStreamTest
 
     val sender = new MemoryMessageSender
 
-    withLocalSqsQueuePair(visibilityTimeout = 10) { case QueuePair(queue, dlq) =>
-      withPipelineStream(queue = queue, indexer = indexer(index), sender = sender) {
-        pipelineStream =>
+    withLocalSqsQueuePair(visibilityTimeout = 10) {
+      case QueuePair(queue, dlq) =>
+        withPipelineStream(
+          queue = queue,
+          indexer = indexer(index),
+          sender = sender) { pipelineStream =>
           sendNotificationToSQS(
             queue = queue,
             message = document
@@ -100,7 +105,7 @@ class PipelineStorageStreamTest
             assertQueueEmpty(queue)
             assertQueueEmpty(dlq)
           }
-      }
+        }
     }
   }
 
@@ -117,33 +122,34 @@ class PipelineStorageStreamTest
 
     val sender = new MemoryMessageSender
 
-    withLocalSqsQueuePair(visibilityTimeout = 30) { case QueuePair(queue, dlq) =>
-      withPipelineStream(
-        queue = queue,
-        indexer = indexer(index),
-        sender = sender,
-        pipelineStorageConfig = pipelineStorageConfig
-      ) { pipelineStream =>
-        documents.foreach(
-          doc =>
-            sendNotificationToSQS(
-              queue = queue,
-              message = doc
-          ))
-        pipelineStream.foreach(
-          "test stream",
-          message =>
-            Future
-              .fromTry(JsonUtil.fromJson[SampleDocument](message.body))
-              .map(Option(_)))
-        assertElasticsearchEventuallyHas(index = index, documents: _*)
-        eventually(Timeout(scaled(60 seconds))) {
-          sender.messages.map(_.body) should contain theSameElementsAs documents
-            .map(_.canonicalId)
-          assertQueueEmpty(queue)
-          assertQueueEmpty(dlq)
+    withLocalSqsQueuePair(visibilityTimeout = 30) {
+      case QueuePair(queue, dlq) =>
+        withPipelineStream(
+          queue = queue,
+          indexer = indexer(index),
+          sender = sender,
+          pipelineStorageConfig = pipelineStorageConfig
+        ) { pipelineStream =>
+          documents.foreach(
+            doc =>
+              sendNotificationToSQS(
+                queue = queue,
+                message = doc
+            ))
+          pipelineStream.foreach(
+            "test stream",
+            message =>
+              Future
+                .fromTry(JsonUtil.fromJson[SampleDocument](message.body))
+                .map(Option(_)))
+          assertElasticsearchEventuallyHas(index = index, documents: _*)
+          eventually(Timeout(scaled(60 seconds))) {
+            sender.messages.map(_.body) should contain theSameElementsAs documents
+              .map(_.canonicalId)
+            assertQueueEmpty(queue)
+            assertQueueEmpty(dlq)
+          }
         }
-      }
     }
   }
 
@@ -151,21 +157,23 @@ class PipelineStorageStreamTest
     val index = createIndex
     val sender = new MemoryMessageSender
 
-    withLocalSqsQueuePair() { case QueuePair(queue, dlq) =>
-      withPipelineStream(queue = queue, indexer = indexer(index)) { pipelineStream =>
-        sendInvalidJSONto(queue)
-        pipelineStream.foreach(
-          "test stream",
-          message =>
-            Future
-              .fromTry(JsonUtil.fromJson[SampleDocument](message.body))
-              .map(Option(_)))
-        eventually {
-          assertQueueEmpty(queue)
-          assertQueueHasSize(dlq, size = 1)
-          sender.messages shouldBe empty
+    withLocalSqsQueuePair() {
+      case QueuePair(queue, dlq) =>
+        withPipelineStream(queue = queue, indexer = indexer(index)) {
+          pipelineStream =>
+            sendInvalidJSONto(queue)
+            pipelineStream.foreach(
+              "test stream",
+              message =>
+                Future
+                  .fromTry(JsonUtil.fromJson[SampleDocument](message.body))
+                  .map(Option(_)))
+            eventually {
+              assertQueueEmpty(queue)
+              assertQueueHasSize(dlq, size = 1)
+              sender.messages shouldBe empty
+            }
         }
-      }
     }
   }
 
@@ -220,28 +228,29 @@ class PipelineStorageStreamTest
 
     val sender = new MemoryMessageSender
 
-    withLocalSqsQueuePair() { case QueuePair(queue, dlq) =>
-      withPipelineStream(queue = queue, indexer = indexer, sender = sender) {
-        pipelineStream =>
-          documents.foreach(
-            doc =>
-              sendNotificationToSQS(
-                queue = queue,
-                message = doc
+    withLocalSqsQueuePair() {
+      case QueuePair(queue, dlq) =>
+        withPipelineStream(queue = queue, indexer = indexer, sender = sender) {
+          pipelineStream =>
+            documents.foreach(
+              doc =>
+                sendNotificationToSQS(
+                  queue = queue,
+                  message = doc
               ))
-          pipelineStream.foreach(
-            "test stream",
-            message =>
-              Future
-                .fromTry(JsonUtil.fromJson[SampleDocument](message.body))
-                .map(Option(_)))
-          eventually {
-            sender.messages.map(_.body) should contain theSameElementsAs successfulDocuments
-              .map(_.canonicalId)
-            assertQueueEmpty(queue)
-            assertQueueHasSize(dlq, size = 5)
-          }
-      }
+            pipelineStream.foreach(
+              "test stream",
+              message =>
+                Future
+                  .fromTry(JsonUtil.fromJson[SampleDocument](message.body))
+                  .map(Option(_)))
+            eventually {
+              sender.messages.map(_.body) should contain theSameElementsAs successfulDocuments
+                .map(_.canonicalId)
+              assertQueueEmpty(queue)
+              assertQueueHasSize(dlq, size = 5)
+            }
+        }
     }
   }
 
@@ -257,9 +266,12 @@ class PipelineStorageStreamTest
         Failure(new Throwable("BOOM!"))
     }
 
-    withLocalSqsQueuePair() { case QueuePair(queue, dlq) =>
-      withPipelineStream(queue = queue, indexer = indexer(createIndex), sender = brokenSender) {
-        pipelineStream =>
+    withLocalSqsQueuePair() {
+      case QueuePair(queue, dlq) =>
+        withPipelineStream(
+          queue = queue,
+          indexer = indexer(createIndex),
+          sender = brokenSender) { pipelineStream =>
           sendNotificationToSQS(queue, document)
 
           pipelineStream.foreach(
@@ -271,7 +283,7 @@ class PipelineStorageStreamTest
             assertQueueEmpty(queue)
             assertQueueHasSize(dlq, size = 1)
           }
-      }
+        }
     }
   }
 }

@@ -141,18 +141,17 @@ class RouterWorkerServiceTest
           queue = queue,
           indexer = indexer,
           sender = worksMessageSender
-        ) {
-          pipelineStream =>
-            withLocalMergedWorksIndex { mergedIndex =>
-              val service =
-                new RouterWorkerService(
-                  pathsMsgSender = pathsMessageSender,
-                  workRetriever = new ElasticRetriever(elasticClient, mergedIndex),
-                  pipelineStream = pipelineStream
-                )
-              service.run()
-              testWith((mergedIndex, q, worksMessageSender, pathsMessageSender))
-            }
+        ) { pipelineStream =>
+          withLocalMergedWorksIndex { mergedIndex =>
+            val service =
+              new RouterWorkerService(
+                pathsMsgSender = pathsMessageSender,
+                workRetriever = new ElasticRetriever(elasticClient, mergedIndex),
+                pipelineStream = pipelineStream
+              )
+            service.run()
+            testWith((mergedIndex, q, worksMessageSender, pathsMessageSender))
+          }
         }
     }
 }
