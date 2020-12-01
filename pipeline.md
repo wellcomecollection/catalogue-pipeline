@@ -25,10 +25,6 @@ Each data source will have their own transformer e.g.
 
 These take the original source data from an adapter, and transform them into a Work \(Unidentified\).
 
-### [Recorder](https://github.com/wellcomecollection/catalogue/tree/864b998aae9ed3fe40515edfef061c7c7371f721/pipeline/recorder/README.md)
-
-Each transformed work is stored into a [VHS store](https://stacks.wellcomecollection.org/creating-a-data-store-from-s3-and-dynamodb-8bb9ecce8fc1).
-
 ### [Matcher](https://github.com/wellcomecollection/catalogue/tree/864b998aae9ed3fe40515edfef061c7c7371f721/pipeline/matcher/README.md)
 
 Searches for potential merge candidates, and records them on the Work.
@@ -53,7 +49,7 @@ Inserts a work or image into our query index - Elasticsearch.
 
 1. Create a new release with the [Wellcome Release Tool](https://github.com/wellcometrust/dockerfiles/tree/master/release_tooling)
 
-   to `stage` 
+   to `stage`
 
    ```bash
       wrt prepare
