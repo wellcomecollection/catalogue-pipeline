@@ -19,10 +19,8 @@ module "calm_transformer" {
   cluster_arn  = aws_ecs_cluster.cluster.arn
 
   env_vars = {
-    sns_arn              = module.calm_transformer_topic.arn
     transformer_queue_id = module.calm_transformer_queue.url
     metrics_namespace    = "${local.namespace_hyphen}_calm_transformer"
-    messages_bucket_name = aws_s3_bucket.messages.id
     vhs_calm_bucket_name = var.vhs_calm_sourcedata_bucket_name
     vhs_calm_table_name  = var.vhs_calm_sourcedata_table_name
 
@@ -56,15 +54,6 @@ module "calm_transformer" {
 resource "aws_iam_role_policy" "calm_transformer_vhs_calm_adapter_read" {
   role   = module.calm_transformer.task_role_name
   policy = var.vhs_calm_read_policy
-}
-
-module "calm_transformer_topic" {
-  source = "../modules/topic"
-
-  name       = "${local.namespace_hyphen}_calm_transformer"
-  role_names = [module.calm_transformer.task_role_name]
-
-  messages_bucket_arn = aws_s3_bucket.messages.arn
 }
 
 module "calm_transformer_output_topic" {
