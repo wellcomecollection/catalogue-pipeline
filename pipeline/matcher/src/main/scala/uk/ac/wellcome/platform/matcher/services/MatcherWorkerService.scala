@@ -21,7 +21,7 @@ class MatcherWorkerService[MsgDestination](
   store: WorkStore,
   msgStream: SQSStream[NotificationMessage],
   msgSender: MessageSender[MsgDestination],
-  workMatcher: WorkMatcher)(implicit val actorSystem: ActorSystem,
+  workMatcher: WorkMatcher)(implicit actorSystem: ActorSystem,
                             ec: ExecutionContext)
     extends Logging
     with Runnable {
