@@ -10,6 +10,7 @@ import uk.ac.wellcome.pipeline_storage.{
   RetrieverTestCases
 }
 
+import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class MemoryRetrieverTest extends RetrieverTestCases[Map[String, UUID], UUID] {
@@ -24,7 +25,7 @@ class MemoryRetrieverTest extends RetrieverTestCases[Map[String, UUID], UUID] {
   override def withRetriever[R](testWith: TestWith[Retriever[UUID], R])(
     implicit index: Map[String, UUID]): R =
     testWith(
-      new MemoryRetriever(index)
+      new MemoryRetriever(mutable.Map(index.toSeq: _*))
     )
 
   override def createT: UUID =

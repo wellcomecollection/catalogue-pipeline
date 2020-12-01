@@ -1,8 +1,9 @@
 package uk.ac.wellcome.pipeline_storage
 
+import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future}
 
-class MemoryRetriever[T](index: Map[String, T] = Map.empty)(
+class MemoryRetriever[T](val index: mutable.Map[String, T] = mutable.Map.empty)(
   implicit val ec: ExecutionContext)
     extends Retriever[T] {
 
