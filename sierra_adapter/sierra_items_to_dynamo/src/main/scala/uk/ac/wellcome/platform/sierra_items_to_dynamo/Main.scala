@@ -22,8 +22,8 @@ object Main extends WellcomeTypesafeApp {
     implicit val executionContext: ExecutionContext =
       AkkaBuilder.buildExecutionContext()
 
-    val dynamoInserter = new DynamoInserter(
-      VHSBuilder.build[SierraItemRecord](config))
+    val dynamoInserter =
+      new DynamoInserter(VHSBuilder.build[SierraItemRecord](config))
 
     new SierraItemsToDynamoWorkerService(
       sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
