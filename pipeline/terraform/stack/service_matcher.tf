@@ -68,9 +68,17 @@ module "matcher" {
 
     vhs_recorder_dynamo_table_name = module.vhs_recorder.table_name
     vhs_recorder_bucket_name       = module.vhs_recorder.bucket_name
+
+    es_index = local.es_works_source_index
   }
 
-  secret_env_vars = {}
+  secret_env_vars = {
+    es_host     = "catalogue/pipeline_storage/es_host"
+    es_port     = "catalogue/pipeline_storage/es_port"
+    es_protocol = "catalogue/pipeline_storage/es_protocol"
+    es_username = "catalogue/pipeline_storage/matcher/es_username"
+    es_password = "catalogue/pipeline_storage/matcher/es_password"
+  }
 
   subnets             = var.subnets
   max_capacity        = 10

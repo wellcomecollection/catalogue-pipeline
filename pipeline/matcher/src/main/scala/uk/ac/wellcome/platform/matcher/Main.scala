@@ -1,24 +1,18 @@
 package uk.ac.wellcome.platform.matcher
 
 import java.time.Duration
-import scala.concurrent.ExecutionContext
 
+import scala.concurrent.ExecutionContext
 import akka.actor.ActorSystem
 import com.typesafe.config.Config
-
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.matcher.matcher.WorkMatcher
 import uk.ac.wellcome.platform.matcher.services.MatcherWorkerService
-import uk.ac.wellcome.platform.matcher.storage.{
-  WorkGraphStore,
-  WorkNodeDao,
-  WorkStore
-}
+import uk.ac.wellcome.platform.matcher.storage.{WorkGraphStore, WorkNodeDao}
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.bigmessaging.typesafe.VHSBuilder
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.storage.locking.dynamo.{
   DynamoLockDao,
@@ -28,6 +22,7 @@ import uk.ac.wellcome.storage.locking.dynamo.{
 import uk.ac.wellcome.storage.typesafe.DynamoBuilder
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 import WorkState.Source
+import uk.ac.wellcome.pipeline_storage.typesafe.ElasticRetrieverBuilder
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
@@ -60,8 +55,10 @@ object Main extends WellcomeTypesafeApp {
 
     val workMatcher = new WorkMatcher(workGraphStore, new DynamoLockingService)
 
+    val workRetriever = ElasticRetrieverBuilder.apply[Work[Source]](config)
+
     new MatcherWorkerService(
-      store = new WorkStore(VHSBuilder.build[Work[Source]](config)),
+      workRetriever = workRetriever,
       msgStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
       msgSender = SNSBuilder
         .buildSNSMessageSender(config, subject = "Sent from the matcher"),
