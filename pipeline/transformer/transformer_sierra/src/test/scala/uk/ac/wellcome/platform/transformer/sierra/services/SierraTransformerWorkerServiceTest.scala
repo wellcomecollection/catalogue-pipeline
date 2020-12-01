@@ -1,16 +1,12 @@
 package uk.ac.wellcome.platform.transformer.sierra.services
 
 import scala.util.{Failure, Try}
-
 import io.circe.Encoder
-
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.{Queue, QueuePair}
-import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
 import uk.ac.wellcome.models.work.internal._
@@ -24,9 +20,12 @@ import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.storage.store.memory.{MemoryStore, MemoryVersionedStore}
 import uk.ac.wellcome.storage.{StoreReadError, StoreWriteError, Version}
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import WorkState.Source
+import uk.ac.wellcome.pipeline_storage.MemoryIndexer
+import uk.ac.wellcome.pipeline_storage.fixtures.PipelineStorageStreamFixtures
+
+import scala.collection.mutable
 
 class SierraTransformerWorkerServiceTest
     extends AnyFunSpec
@@ -34,8 +33,7 @@ class SierraTransformerWorkerServiceTest
     with Eventually
     with IntegrationPatience
     with SierraGenerators
-    with Akka
-    with SQS
+    with PipelineStorageStreamFixtures
     with IdentifiersGenerators {
 
   it("transforms sierra records and publishes the result to the given topic") {
@@ -214,16 +212,19 @@ class SierraTransformerWorkerServiceTest
     sender: MemoryMessageSender,
     queue: Queue)(
     testWith: TestWith[SierraTransformerWorkerService[String], R]): R =
-    withActorSystem { implicit actorSystem =>
-      withSQSStream[NotificationMessage, R](queue) { sqsStream =>
-        val workerService = new SierraTransformerWorkerService(
-          stream = sqsStream,
-          sender = sender,
-          store = store
-        )
-        workerService.run()
-        testWith(workerService)
-      }
+    withPipelineStream(
+      queue = queue,
+      indexer = new MemoryIndexer[Work[Source]](
+        index = mutable.Map[String, Work[Source]]()
+      )
+    ) { pipelineStream =>
+      val workerService = new SierraTransformerWorkerService(
+        pipelineStream = pipelineStream,
+        sender = sender,
+        store = store
+      )
+      workerService.run()
+      testWith(workerService)
     }
 
   def withBrokenWorkerService[R](
@@ -231,20 +232,23 @@ class SierraTransformerWorkerServiceTest
     sender: MemoryMessageSender,
     queue: Queue)(
     testWith: TestWith[SierraTransformerWorkerService[String], R]): R =
-    withActorSystem { implicit actorSystem =>
-      withSQSStream[NotificationMessage, R](queue) { sqsStream =>
-        val workerService = new SierraTransformerWorkerService(
-          stream = sqsStream,
-          sender = sender,
-          store = store
-        ) {
-          override val transformer: Transformer[SierraTransformable] =
-            (input: SierraTransformable, version: Int) =>
-              Left(new Exception("AAAAAArgh!"))
-        }
-        workerService.run()
-        testWith(workerService)
+    withPipelineStream(
+      queue = queue,
+      indexer = new MemoryIndexer[Work[Source]](
+        index = mutable.Map[String, Work[Source]]()
+      )
+    ) { pipelineStream =>
+      val workerService = new SierraTransformerWorkerService(
+        pipelineStream = pipelineStream,
+        sender = sender,
+        store = store
+      ) {
+        override val transformer: Transformer[SierraTransformable] =
+          (input: SierraTransformable, version: Int) =>
+            Left(new Exception("AAAAAArgh!"))
       }
+      workerService.run()
+      testWith(workerService)
     }
 
   private def brokenStore: MemoryVersionedStore[String, SierraTransformable] = {
@@ -260,6 +264,7 @@ class SierraTransformerWorkerServiceTest
         Left(StoreReadError(new Error("BOOM!")))
     }
   }
+
   def createStore[T](
     data: Map[Version[String, Int], T] = Map[Version[String, Int], T]())
     : MemoryVersionedStore[String, T] =
