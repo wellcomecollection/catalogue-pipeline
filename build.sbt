@@ -174,7 +174,7 @@ lazy val reindex_worker = setupProject(
 lazy val transformer_common = setupProject(
   project,
   "pipeline/transformer/transformer_common",
-  localDependencies = Seq(internal_model, big_messaging_typesafe, pipeline_storage_typesafe)
+  localDependencies = Seq(internal_model, pipeline_storage_typesafe)
 )
 
 lazy val transformer_miro = setupProject(
