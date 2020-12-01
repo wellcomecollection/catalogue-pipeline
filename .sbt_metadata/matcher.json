@@ -3,6 +3,6 @@
   "folder" : "pipeline/matcher",
   "dependencyIds" : [
     "internal_model",
-    "big_messaging_typesafe"
+    "pipeline_storage_typesafe"
   ]
 }

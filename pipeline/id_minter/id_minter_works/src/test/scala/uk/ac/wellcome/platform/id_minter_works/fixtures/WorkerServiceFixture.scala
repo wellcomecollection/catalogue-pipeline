@@ -4,7 +4,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import io.circe.Json
 import io.circe.syntax._
 import scalikejdbc.{ConnectionPool, ConnectionPoolSettings}
-
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
@@ -21,6 +20,8 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.Implicits._
 import WorkState.Denormalised
+
+import scala.collection.mutable
 
 trait WorkerServiceFixture
     extends IdentifiersDatabase
@@ -42,7 +43,8 @@ trait WorkerServiceFixture
           identifierGenerator = identifierGenerator,
           sender = messageSender,
           messageStream = messageStream,
-          jsonRetriever = new MemoryRetriever(index),
+          jsonRetriever =
+            new MemoryRetriever(index = mutable.Map(index.toSeq: _*)),
           rdsClientConfig = rdsClientConfig,
           identifiersTableConfig = identifiersTableConfig
         )

@@ -3,7 +3,6 @@ package uk.ac.wellcome.platform.matcher
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.models.Implicits._
@@ -14,8 +13,10 @@ import uk.ac.wellcome.models.matcher.{
   WorkNode
 }
 import uk.ac.wellcome.models.work.generators.WorkGenerators
+import uk.ac.wellcome.models.work.internal.Work
+import uk.ac.wellcome.models.work.internal.WorkState.Source
+import uk.ac.wellcome.pipeline_storage.MemoryRetriever
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
-import uk.ac.wellcome.storage.{Identified, Version}
 
 class MatcherFeatureTest
     extends AnyFunSpec
@@ -27,92 +28,60 @@ class MatcherFeatureTest
 
   it(
     "processes a message with a simple Work.Visible[Source] with no linked works") {
+    implicit val retriever: MemoryRetriever[Work[Source]] = createRetriever
     val messageSender = new MemoryMessageSender()
 
     withLocalSqsQueue() { queue =>
-      withVHS { vhs =>
-        withWorkerService(vhs, queue, messageSender) { _ =>
-          val work = sourceWork()
+      withWorkerService(retriever, queue, messageSender) { _ =>
+        val work = sourceWork()
 
-          val expectedResult = MatcherResult(
-            Set(
-              MatchedIdentifiers(
-                identifiers = Set(WorkIdentifier(work))
-              )
+        val expectedResult = MatcherResult(
+          Set(
+            MatchedIdentifiers(
+              identifiers = Set(WorkIdentifier(work))
             )
           )
+        )
 
-          sendWork(work, vhs, queue)
+        sendWork(work, retriever, queue)
 
-          eventually {
-            messageSender.getMessages[MatcherResult].distinct shouldBe Seq(
-              expectedResult)
-          }
+        eventually {
+          messageSender.getMessages[MatcherResult].distinct shouldBe Seq(
+            expectedResult)
         }
       }
     }
   }
 
   it("skips a message if the graph store already has a newer version") {
+    implicit val retriever: MemoryRetriever[Work[Source]] = createRetriever
     val messageSender = new MemoryMessageSender()
 
     withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>
         withWorkGraphTable { graphTable =>
-          withVHS { vhs =>
-            withWorkerService(vhs, queue, messageSender, graphTable) { _ =>
-              val existingWorkVersion = 2
-              val updatedWorkVersion = 1
+          withWorkerService(retriever, queue, messageSender, graphTable) { _ =>
+            val existingWorkVersion = 2
+            val updatedWorkVersion = 1
 
-              val workAv1 = sourceWork().withVersion(updatedWorkVersion)
+            val workAv1 = sourceWork().withVersion(updatedWorkVersion)
 
-              val existingWorkAv2 = WorkNode(
-                id = workAv1.sourceIdentifier.toString,
-                version = Some(existingWorkVersion),
-                linkedIds = Nil,
-                componentId = workAv1.sourceIdentifier.toString
-              )
-              put(dynamoClient, graphTable.name)(existingWorkAv2)
+            val existingWorkAv2 = WorkNode(
+              id = workAv1.sourceIdentifier.toString,
+              version = Some(existingWorkVersion),
+              linkedIds = Nil,
+              componentId = workAv1.sourceIdentifier.toString
+            )
+            put(dynamoClient, graphTable.name)(existingWorkAv2)
 
-              sendWork(workAv1, vhs, queue)
+            sendWork(workAv1, retriever, queue)
 
-              eventually {
-                noMessagesAreWaitingIn(queue)
-                noMessagesAreWaitingIn(dlq)
-              }
-
-              messageSender.messages shouldBe empty
+            eventually {
+              noMessagesAreWaitingIn(queue)
+              noMessagesAreWaitingIn(dlq)
             }
-          }
-        }
-    }
-  }
 
-  it("skips a message if VHS already has a newer version") {
-    val messageSender = new MemoryMessageSender()
-
-    withLocalSqsQueuePair() {
-      case QueuePair(queue, dlq) =>
-        withWorkGraphTable { graphTable =>
-          withVHS { vhs: VHS =>
-            withWorkerService(vhs, queue, messageSender, graphTable) { _ =>
-              val workv2 = sourceWork().withVersion(2)
-
-              val id = Version(workv2.sourceIdentifier.toString, workv2.version)
-
-              val key = vhs.put(id)(workv2) match {
-                case Left(err) =>
-                  throw new Exception(s"Failed storing work in VHS: $err")
-                case Right(Identified(k, _)) => k
-              }
-              sendNotificationToSQS(queue, Version(key.id, 1))
-
-              eventually {
-                assertQueueEmpty(queue)
-                assertQueueEmpty(dlq)
-              }
-              messageSender.messages shouldBe empty
-            }
+            messageSender.messages shouldBe empty
           }
         }
     }
