@@ -55,7 +55,7 @@ object ImageState {
   case class Source(
     sourceIdentifier: SourceIdentifier
   ) extends ImageState {
-    type SourceDataState = DataState.Unidentified
+    type SourceDataState = Nothing
     type TransitionArgs = Unit
   }
 
@@ -63,7 +63,7 @@ object ImageState {
     sourceIdentifier: SourceIdentifier,
     canonicalId: String
   ) extends ImageState {
-    type SourceDataState = DataState.Identified
+    type SourceDataState = Nothing
     type TransitionArgs = Unit
 
     override def id = canonicalId
