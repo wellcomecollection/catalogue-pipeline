@@ -40,7 +40,6 @@ module "matcher" {
   env_vars = {
     queue_url         = module.matcher_input_queue.url
     metrics_namespace = "${local.namespace_hyphen}_matcher"
-    vhs_bucket_name   = module.vhs_recorder.bucket_name
     topic_arn         = module.matcher_topic.arn
 
     dynamo_table            = aws_dynamodb_table.matcher_graph_table.id
@@ -49,9 +48,6 @@ module "matcher" {
     dynamo_lock_table_index = "context-ids-index"
 
     dynamo_lock_timeout = local.lock_timeout
-
-    vhs_recorder_dynamo_table_name = module.vhs_recorder.table_name
-    vhs_recorder_bucket_name       = module.vhs_recorder.bucket_name
 
     es_index = local.es_works_source_index
   }
@@ -72,11 +68,6 @@ module "matcher" {
   deployment_service_env  = var.release_label
   deployment_service_name = "matcher"
   shared_logging_secrets  = var.shared_logging_secrets
-}
-
-resource "aws_iam_role_policy" "matcher_vhs_recorder_read" {
-  role   = module.matcher.task_role_name
-  policy = module.vhs_recorder.read_policy
 }
 
 resource "aws_iam_role_policy" "matcher_graph_readwrite" {
