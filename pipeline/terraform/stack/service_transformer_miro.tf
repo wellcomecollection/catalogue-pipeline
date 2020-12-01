@@ -19,10 +19,8 @@ module "miro_transformer" {
   cluster_arn  = aws_ecs_cluster.cluster.arn
 
   env_vars = {
-    sns_arn              = module.miro_transformer_topic.arn
     transformer_queue_id = module.miro_transformer_queue.url
     metrics_namespace    = "${local.namespace_hyphen}_miro_transformer"
-    messages_bucket_name = aws_s3_bucket.messages.id
     miro_vhs_table_name  = var.vhs_miro_table_name
 
     sns_topic_arn = module.miro_transformer_output_topic.arn
@@ -54,15 +52,6 @@ module "miro_transformer" {
 resource "aws_iam_role_policy" "miro_transformer_vhs_miro_adapter_read" {
   role   = module.miro_transformer.task_role_name
   policy = var.vhs_miro_read_policy
-}
-
-module "miro_transformer_topic" {
-  source = "../modules/topic"
-
-  name       = "${local.namespace_hyphen}_miro_transformer"
-  role_names = [module.miro_transformer.task_role_name]
-
-  messages_bucket_arn = aws_s3_bucket.messages.arn
 }
 
 module "miro_transformer_output_topic" {

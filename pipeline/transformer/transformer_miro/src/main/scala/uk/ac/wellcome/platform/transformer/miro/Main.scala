@@ -4,7 +4,6 @@ import akka.actor.ActorSystem
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.s3.AmazonS3
 import com.typesafe.config.Config
-import uk.ac.wellcome.bigmessaging.typesafe.BigMessagingBuilder
 import uk.ac.wellcome.elasticsearch.SourceWorkIndexConfig
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
@@ -61,7 +60,6 @@ object Main extends WellcomeTypesafeApp {
 
     new MiroTransformerWorkerService(
       pipelineStream = pipelineStream,
-      sender = BigMessagingBuilder.buildBigMessageSender(config),
       miroVhsReader = miroVhsReader,
       typedStore = S3TypedStore[MiroRecord]
     )
