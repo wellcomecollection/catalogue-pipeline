@@ -1,10 +1,9 @@
 package uk.ac.wellcome.platform.merger.services
 
-import scala.collection.mutable.Map
+import scala.collection.mutable
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
@@ -16,11 +15,13 @@ import uk.ac.wellcome.platform.merger.fixtures.{
   MatcherResultFixture,
   WorkerServiceFixture
 }
-import WorkState.Merged
+import WorkState.{Merged, Source}
 import WorkFsm._
 import uk.ac.wellcome.models.work.generators.MiroWorkGenerators
+import uk.ac.wellcome.pipeline_storage.MemoryRetriever
 
 import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class MergerWorkerServiceTest
     extends AnyFunSpec
@@ -33,7 +34,7 @@ class MergerWorkerServiceTest
 
   it("reads matcher result messages, retrieves the works and sends on the IDs") {
     withMergerWorkerServiceFixtures {
-      case (vhs, QueuePair(queue, dlq), senders, metrics, index) =>
+      case (retriever, QueuePair(queue, dlq), senders, metrics, index) =>
         val latestUpdate = randomInstantBefore(now, 30 days)
         val work1 = sourceWork(modifiedTime = latestUpdate)
         val work2 = sourceWork(modifiedTime = latestUpdate - (1 day))
@@ -42,7 +43,9 @@ class MergerWorkerServiceTest
         val matcherResult =
           matcherResultWith(Set(Set(work3), Set(work1, work2)))
 
-        givenStoredInVhs(vhs, work1, work2, work3)
+        retriever.index ++= Map(
+          work1.id -> work1, work2.id -> work2, work3.id -> work3
+        )
 
         sendNotificationToSQS(
           queue = queue,
@@ -73,12 +76,12 @@ class MergerWorkerServiceTest
 
   it("sends InvisibleWorks unmerged") {
     withMergerWorkerServiceFixtures {
-      case (vhs, QueuePair(queue, dlq), senders, metrics, index) =>
+      case (retriever, QueuePair(queue, dlq), senders, metrics, index) =>
         val work = sourceWork().invisible()
 
         val matcherResult = matcherResultWith(Set(Set(work)))
 
-        givenStoredInVhs(vhs, work)
+        retriever.index ++= Map(work.id -> work)
 
         sendNotificationToSQS(
           queue = queue,
@@ -125,7 +128,7 @@ class MergerWorkerServiceTest
 
   it("always sends the highest version of a Work") {
     withMergerWorkerServiceFixtures {
-      case (vhs, QueuePair(queue, dlq), senders, _, index) =>
+      case (retriever, QueuePair(queue, dlq), senders, _, index) =>
         val work = sourceWork()
         val olderWork = sourceWork()
         val newerWork =
@@ -134,7 +137,7 @@ class MergerWorkerServiceTest
 
         val matcherResult = matcherResultWith(Set(Set(work, olderWork)))
 
-        givenStoredInVhs(vhs, work, newerWork)
+        retriever.index ++= Map(work.id -> work, newerWork.id -> newerWork)
 
         sendNotificationToSQS(
           queue = queue,
@@ -152,7 +155,7 @@ class MergerWorkerServiceTest
 
   it("discards Works with version 0") {
     withMergerWorkerServiceFixtures {
-      case (vhs, QueuePair(queue, dlq), senders, metrics, index) =>
+      case (retriever, QueuePair(queue, dlq), senders, metrics, index) =>
         val versionZeroWork =
           sourceWork()
             .withVersion(0)
@@ -163,7 +166,7 @@ class MergerWorkerServiceTest
 
         val matcherResult = matcherResultWith(Set(Set(work, versionZeroWork)))
 
-        givenStoredInVhs(vhs, work)
+        retriever.index ++= Map(work.id -> work)
 
         sendNotificationToSQS(
           queue = queue,
@@ -190,8 +193,8 @@ class MergerWorkerServiceTest
     val works = List(physicalWork, digitisedWork)
 
     withMergerWorkerServiceFixtures {
-      case (vhs, QueuePair(queue, dlq), senders, _, index) =>
-        givenStoredInVhs(vhs, works: _*)
+      case (retriever, QueuePair(queue, dlq), senders, _, index) =>
+        retriever.index ++= Map(physicalWork.id -> physicalWork, digitisedWork.id -> digitisedWork)
 
         val matcherResult = MatcherResult(
           Set(
@@ -234,8 +237,8 @@ class MergerWorkerServiceTest
       List(physicalWork, digitisedWork, miroWork)
 
     withMergerWorkerServiceFixtures {
-      case (vhs, QueuePair(queue, dlq), senders, _, index) =>
-        givenStoredInVhs(vhs, works: _*)
+      case (retriever, QueuePair(queue, dlq), senders, _, index) =>
+        retriever.index ++= Map(physicalWork.id -> physicalWork, digitisedWork.id -> digitisedWork, miroWork.id -> miroWork)
 
         val matcherResult = MatcherResult(
           Set(
@@ -283,11 +286,14 @@ class MergerWorkerServiceTest
     val workPair1 = List(physicalWork1, digitisedWork1)
     val workPair2 = List(physicalWork2, digitisedWork2)
 
-    val works = workPair1 ++ workPair2
-
     withMergerWorkerServiceFixtures {
-      case (vhs, QueuePair(queue, dlq), senders, _, index) =>
-        givenStoredInVhs(vhs, works: _*)
+      case (retriever, QueuePair(queue, dlq), senders, _, index) =>
+        retriever.index ++= Map(
+          physicalWork1.id -> physicalWork1,
+          digitisedWork1.id -> digitisedWork1,
+          physicalWork2.id -> physicalWork2,
+          digitisedWork2.id -> digitisedWork2
+        )
 
         val matcherResult = MatcherResult(
           Set(
@@ -332,12 +338,12 @@ class MergerWorkerServiceTest
 
   it("doesn't send anything if the works are outdated") {
     withMergerWorkerServiceFixtures {
-      case (vhs, QueuePair(queue, dlq), senders, metrics, index) =>
+      case (retriever, QueuePair(queue, dlq), senders, metrics, index) =>
         val work0 = sourceWork().withVersion(0)
         val work1 = sourceWork(sourceIdentifier = work0.sourceIdentifier)
           .withVersion(1)
         val matcherResult = matcherResultWith(Set(Set(work0)))
-        givenStoredInVhs(vhs, work1)
+        retriever.index ++= Map(work1.id -> work1)
 
         sendNotificationToSQS(
           queue = queue,
@@ -361,29 +367,29 @@ class MergerWorkerServiceTest
 
   def withMergerWorkerServiceFixtures[R](
     testWith: TestWith[
-      (VHS, QueuePair, Senders, MemoryMetrics, Map[String, Work[Merged]]),
+      (MemoryRetriever[Work[Source]], QueuePair, Senders, MemoryMetrics, mutable.Map[String, Work[Merged]]),
       R]): R =
-    withVHS { vhs =>
-      withLocalSqsQueuePair() {
-        case queuePair @ QueuePair(queue, _) =>
-          val workSender = new MemoryMessageSender()
-          val imageSender = new MemoryMessageSender()
+    withLocalSqsQueuePair() {
+      case queuePair @ QueuePair(queue, _) =>
+        val workSender = new MemoryMessageSender()
+        val imageSender = new MemoryMessageSender()
 
-          val metrics = new MemoryMetrics()
-          val index = Map.empty[String, Work[Merged]]
+        val retriever = new MemoryRetriever[Work[Source]]()
 
-          withWorkerService(vhs, queue, workSender, imageSender, metrics, index) {
-            _ =>
-              testWith(
-                (
-                  vhs,
-                  queuePair,
-                  Senders(workSender, imageSender),
-                  metrics,
-                  index)
-              )
-          }
-      }
+        val metrics = new MemoryMetrics()
+        val index = mutable.Map[String, Work[Merged]]()
+
+        withWorkerService(retriever, queue, workSender, imageSender, metrics, index) {
+          _ =>
+            testWith(
+              (
+                retriever,
+                queuePair,
+                Senders(workSender, imageSender),
+                metrics,
+                index)
+            )
+        }
     }
 
   def getWorksSent(senders: Senders): Seq[String] =
