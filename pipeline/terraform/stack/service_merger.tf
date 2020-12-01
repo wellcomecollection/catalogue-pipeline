@@ -26,8 +26,6 @@ module "merger" {
     merger_queue_id          = module.merger_queue.url
     merger_works_topic_arn   = module.merger_works_topic.arn
     merger_images_topic_arn  = module.merger_images_topic.arn
-    vhs_recorder_bucket_name = module.vhs_recorder.bucket_name
-    vhs_recorder_table_name  = module.vhs_recorder.table_name
 
     es_source_works_index = local.es_works_source_index
     es_merged_works_index = local.es_works_merged_index
@@ -49,11 +47,6 @@ module "merger" {
   deployment_service_env  = var.release_label
   deployment_service_name = "merger"
   shared_logging_secrets  = var.shared_logging_secrets
-}
-
-resource "aws_iam_role_policy" "merger_vhs_recorder_read" {
-  role   = module.merger.task_role_name
-  policy = module.vhs_recorder.read_policy
 }
 
 module "merger_works_topic" {
