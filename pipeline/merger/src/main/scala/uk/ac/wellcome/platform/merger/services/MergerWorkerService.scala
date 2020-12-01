@@ -19,7 +19,7 @@ import WorkState.{Merged, Source}
 
 class MergerWorkerService[WorkDestination, ImageDestination](
   sqsStream: SQSStream[NotificationMessage],
-  playbackService: RecorderPlaybackService,
+  sourceWorkLookup: SourceWorkLookup,
   mergerManager: MergerManager,
   workIndexer: Indexer[Work[Merged]],
   workSender: MessageSender[WorkDestination],
@@ -37,7 +37,7 @@ class MergerWorkerService[WorkDestination, ImageDestination](
       matcherResult <- Future.fromTry(fromJson[MatcherResult](message.body))
       workSets <- Future.sequence {
         matcherResult.works.toList.map { matchedIdentifiers =>
-          playbackService.fetchAllWorks(matchedIdentifiers.identifiers.toList)
+          sourceWorkLookup.fetchAllWorks(matchedIdentifiers.identifiers.toList)
         }
       }
       nonEmptyWorkSets = workSets.filter(_.flatten.nonEmpty)
