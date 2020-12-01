@@ -165,12 +165,6 @@ lazy val batcher = setupProject(
   externalDependencies = CatalogueDependencies.batcherDependencies
 )
 
-lazy val recorder = setupProject(
-  project,
-  "pipeline/recorder",
-  localDependencies = Seq(internal_model, big_messaging_typesafe)
-)
-
 lazy val reindex_worker = setupProject(
   project,
   "reindexer/reindex_worker",

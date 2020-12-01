@@ -41,8 +41,6 @@ steps:
     label: "matcher"
   - command: .buildkite/scripts/run_job.py merger
     label: "merger"
-  - command: .buildkite/scripts/run_job.py recorder
-    label: "recorder"
   - command: .buildkite/scripts/run_job.py transformer_miro
     label: "transformer (Miro)"
   - command: .buildkite/scripts/run_job.py transformer_sierra
