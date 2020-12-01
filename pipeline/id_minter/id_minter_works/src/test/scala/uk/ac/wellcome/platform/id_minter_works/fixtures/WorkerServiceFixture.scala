@@ -43,7 +43,8 @@ trait WorkerServiceFixture
           identifierGenerator = identifierGenerator,
           sender = messageSender,
           messageStream = messageStream,
-          jsonRetriever = new MemoryRetriever(index = mutable.Map(index.toSeq: _*)),
+          jsonRetriever =
+            new MemoryRetriever(index = mutable.Map(index.toSeq: _*)),
           rdsClientConfig = rdsClientConfig,
           identifiersTableConfig = identifiersTableConfig
         )
