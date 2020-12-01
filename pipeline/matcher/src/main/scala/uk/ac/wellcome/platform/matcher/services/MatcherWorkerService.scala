@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.matcher.services
 
 import akka.Done
-import akka.actor.ActorSystem
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.MessageSender
@@ -22,8 +21,8 @@ class MatcherWorkerService[MsgDestination](
   workRetriever: Retriever[Work[Source]],
   msgStream: SQSStream[NotificationMessage],
   msgSender: MessageSender[MsgDestination],
-  workMatcher: WorkMatcher)(implicit actorSystem: ActorSystem,
-                            ec: ExecutionContext)
+  workMatcher: WorkMatcher)(
+  implicit ec: ExecutionContext)
     extends Logging
     with Runnable {
 
