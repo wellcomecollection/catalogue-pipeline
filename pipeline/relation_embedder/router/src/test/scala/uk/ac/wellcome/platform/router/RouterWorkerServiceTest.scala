@@ -3,34 +3,29 @@ package uk.ac.wellcome.platform.router
 import com.sksamuel.elastic4s.Index
 import org.scalatest.concurrent.Eventually
 import org.scalatest.funspec.AnyFunSpec
-import org.scalatest.time.SpanSugar.convertIntToGrainOfTime
-import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.work.internal.WorkState.Denormalised
 import uk.ac.wellcome.models.work.internal.{CollectionPath, Relations, Work}
+import uk.ac.wellcome.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import uk.ac.wellcome.pipeline_storage.{
   ElasticRetriever,
   Indexer,
-  MemoryIndexer,
-  PipelineStorageConfig,
-  PipelineStorageStream
+  MemoryIndexer
 }
 
 import scala.collection.mutable
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class RouterWorkerServiceTest
     extends AnyFunSpec
     with WorkGenerators
-    with SQS
-    with Akka
+    with PipelineStorageStreamFixtures
     with ElasticsearchFixtures
     with Eventually {
 
@@ -136,30 +131,28 @@ class RouterWorkerServiceTest
                         QueuePair,
                         MemoryMessageSender,
                         MemoryMessageSender),
-                       R]) = withActorSystem { implicit as =>
-    implicit val es = as.dispatcher
+                       R]): R =
     withLocalSqsQueuePair(visibilityTimeout = 1) {
       case q @ QueuePair(queue, _) =>
         val worksMessageSender = new MemoryMessageSender
         val pathsMessageSender = new MemoryMessageSender
-        withSQSStream[NotificationMessage, R](queue) { stream =>
-          val pipelineStream = new PipelineStorageStream(
-            messageStream = stream,
-            documentIndexer = indexer,
-            messageSender = worksMessageSender)(
-            PipelineStorageConfig(1, 1 second, 10))
-          withLocalMergedWorksIndex { mergedIndex =>
-            val service =
-              new RouterWorkerService(
-                pathsMsgSender = pathsMessageSender,
-                workRetriever = new ElasticRetriever(elasticClient, mergedIndex),
-                pipelineStream = pipelineStream
-              )
-            service.run()
-            testWith((mergedIndex, q, worksMessageSender, pathsMessageSender))
 
-          }
+        withPipelineStream(
+          queue = queue,
+          indexer = indexer,
+          sender = worksMessageSender
+        ) {
+          pipelineStream =>
+            withLocalMergedWorksIndex { mergedIndex =>
+              val service =
+                new RouterWorkerService(
+                  pathsMsgSender = pathsMessageSender,
+                  workRetriever = new ElasticRetriever(elasticClient, mergedIndex),
+                  pipelineStream = pipelineStream
+                )
+              service.run()
+              testWith((mergedIndex, q, worksMessageSender, pathsMessageSender))
+            }
         }
     }
-  }
 }
