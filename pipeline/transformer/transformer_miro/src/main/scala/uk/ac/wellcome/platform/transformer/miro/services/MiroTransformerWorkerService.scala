@@ -2,7 +2,9 @@ package uk.ac.wellcome.platform.transformer.miro.services
 
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.messaging.sqs.SQSStream
+import uk.ac.wellcome.models.work.internal.Work
+import uk.ac.wellcome.models.work.internal.WorkState.Source
+import uk.ac.wellcome.pipeline_storage.PipelineStorageStream
 import uk.ac.wellcome.platform.transformer.miro.MiroRecordTransformer
 import uk.ac.wellcome.platform.transformer.miro.models.{
   MiroMetadata,
@@ -16,7 +18,9 @@ import uk.ac.wellcome.transformer.common.worker.{Transformer, TransformerWorker}
 import uk.ac.wellcome.typesafe.Runnable
 
 class MiroTransformerWorkerService[MsgDestination](
-  val stream: SQSStream[NotificationMessage],
+  val pipelineStream: PipelineStorageStream[NotificationMessage,
+                                            Work[Source],
+                                            MsgDestination],
   val sender: MessageSender[MsgDestination],
   miroVhsReader: Readable[String, MiroVHSRecord],
   typedStore: Readable[S3ObjectLocation, MiroRecord]

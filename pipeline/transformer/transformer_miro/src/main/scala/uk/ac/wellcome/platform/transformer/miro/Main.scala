@@ -5,8 +5,16 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.s3.AmazonS3
 import com.typesafe.config.Config
 import uk.ac.wellcome.bigmessaging.typesafe.BigMessagingBuilder
+import uk.ac.wellcome.elasticsearch.SourceWorkIndexConfig
+import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.messaging.typesafe.SQSBuilder
+import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
+import uk.ac.wellcome.models.work.internal.Work
+import uk.ac.wellcome.models.work.internal.WorkState.Source
+import uk.ac.wellcome.pipeline_storage.typesafe.{
+  ElasticIndexerBuilder,
+  PipelineStorageStreamBuilder
+}
 import uk.ac.wellcome.platform.transformer.miro.Implicits._
 import uk.ac.wellcome.platform.transformer.miro.services.{
   MiroDynamoVHSReader,
@@ -38,8 +46,21 @@ object Main extends WellcomeTypesafeApp {
       config = DynamoBuilder.buildDynamoConfig(config)
     )
 
+    val pipelineStream = PipelineStorageStreamBuilder
+      .buildPipelineStorageStream(
+        sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
+        indexer = ElasticIndexerBuilder[Work[Source]](
+          config,
+          indexConfig = SourceWorkIndexConfig
+        ),
+        messageSender = SNSBuilder
+          .buildSNSMessageSender(
+            config,
+            subject = "Sent from the Miro transformer")
+      )(config)
+
     new MiroTransformerWorkerService(
-      stream = SQSBuilder.buildSQSStream[NotificationMessage](config),
+      pipelineStream = pipelineStream,
       sender = BigMessagingBuilder.buildBigMessageSender(config),
       miroVhsReader = miroVhsReader,
       typedStore = S3TypedStore[MiroRecord]

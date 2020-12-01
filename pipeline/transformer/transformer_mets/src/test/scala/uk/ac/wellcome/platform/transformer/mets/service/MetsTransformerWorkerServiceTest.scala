@@ -4,13 +4,11 @@ import java.time.Instant
 
 import org.scalatest.funspec.AnyFunSpec
 import software.amazon.awssdk.services.sqs.model.SendMessageResponse
-import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.mets_adapter.models.MetsLocation
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal._
@@ -22,14 +20,17 @@ import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.storage.{Identified, Version}
 import WorkState.Source
+import uk.ac.wellcome.pipeline_storage.MemoryIndexer
+import uk.ac.wellcome.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import uk.ac.wellcome.storage.fixtures.S3Fixtures
+
+import scala.collection.mutable
 
 class MetsTransformerWorkerServiceTest
     extends AnyFunSpec
     with MetsGenerators
     with S3Fixtures
-    with SQS
-    with Akka {
+    with PipelineStorageStreamFixtures {
 
   it("retrieves a mets file from s3 and sends an invisible work") {
     val identifier = randomAlphanumeric(10)
@@ -50,7 +51,6 @@ class MetsTransformerWorkerServiceTest
   }
 
   it("sends failed messages to the dlq") {
-
     val version = randomInt(1, 10)
     val value1 = "this is not a valid mets file"
 
@@ -145,19 +145,22 @@ class MetsTransformerWorkerServiceTest
         val s3TypedStore = S3TypedStore[String]
 
         withLocalS3Bucket { metsBucket =>
-          withActorSystem { implicit actorSystem =>
-            withSQSStream[NotificationMessage, R](queue) { sqsStream =>
-              val workerService = new MetsTransformerWorkerService(
-                stream = sqsStream,
-                sender = messageSender,
-                adapterStore = adapterStore,
-                metsXmlStore = s3TypedStore
-              )
+          withPipelineStream(
+            queue = queue,
+            indexer = new MemoryIndexer[Work[Source]](
+              index = mutable.Map[String, Work[Source]]()
+            )
+          ) { pipelineStream =>
+            val workerService = new MetsTransformerWorkerService(
+              pipelineStream = pipelineStream,
+              sender = messageSender,
+              adapterStore = adapterStore,
+              metsXmlStore = s3TypedStore
+            )
 
-              workerService.run()
+            workerService.run()
 
-              testWith((queuePair, metsBucket, messageSender, adapterStore))
-            }
+            testWith((queuePair, metsBucket, messageSender, adapterStore))
           }
         }
     }

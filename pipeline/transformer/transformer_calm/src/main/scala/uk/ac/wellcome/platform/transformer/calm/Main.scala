@@ -3,9 +3,16 @@ package uk.ac.wellcome.platform.transformer.calm
 import akka.actor.ActorSystem
 import com.typesafe.config.Config
 import uk.ac.wellcome.bigmessaging.typesafe.{BigMessagingBuilder, VHSBuilder}
+import uk.ac.wellcome.elasticsearch.SourceWorkIndexConfig
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.messaging.typesafe.SQSBuilder
+import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
+import uk.ac.wellcome.models.work.internal.Work
+import uk.ac.wellcome.models.work.internal.WorkState.Source
+import uk.ac.wellcome.pipeline_storage.typesafe.{
+  ElasticIndexerBuilder,
+  PipelineStorageStreamBuilder
+}
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.{
   AWSClientConfigBuilder,
@@ -21,10 +28,22 @@ object Main extends WellcomeTypesafeApp with AWSClientConfigBuilder {
     implicit val ec: ExecutionContext =
       AkkaBuilder.buildExecutionContext()
 
-    val stream = SQSBuilder.buildSQSStream[NotificationMessage](config)
+    val pipelineStream = PipelineStorageStreamBuilder
+      .buildPipelineStorageStream(
+        sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
+        indexer = ElasticIndexerBuilder[Work[Source]](
+          config,
+          indexConfig = SourceWorkIndexConfig
+        ),
+        messageSender = SNSBuilder
+          .buildSNSMessageSender(
+            config,
+            subject = "Sent from the CALM transformer")
+      )(config)
+
     val sender = BigMessagingBuilder.buildBigMessageSender(config)
     val store = VHSBuilder.build[CalmRecord](config)
 
-    new CalmTransformerWorker(stream, sender, store)
+    new CalmTransformerWorker(pipelineStream, sender, store)
   }
 }
