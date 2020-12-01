@@ -2,22 +2,6 @@ locals {
   lock_timeout = 240
 }
 
-module "matcher_queue" {
-  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
-  queue_name = "${local.namespace_hyphen}_matcher"
-  topic_arns = [
-    module.recorder_topic.arn,
-  ]
-  aws_region      = var.aws_region
-  alarm_topic_arn = var.dlq_alarm_arn
-
-  // The records in the locktable expire after local.lock_timeout
-  // The matcher is able to override locks that have expired
-  // Wait slightly longer to make sure locks are expired
-  visibility_timeout_seconds = local.lock_timeout + 30
-  max_receive_count          = 20
-}
-
 module "matcher_input_queue" {
   source     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
   queue_name = "${local.namespace_hyphen}_matcher_input"
@@ -54,7 +38,7 @@ module "matcher" {
   cluster_arn  = aws_ecs_cluster.cluster.arn
 
   env_vars = {
-    queue_url         = module.matcher_queue.url
+    queue_url         = module.matcher_input_queue.url
     metrics_namespace = "${local.namespace_hyphen}_matcher"
     vhs_bucket_name   = module.vhs_recorder.bucket_name
     topic_arn         = module.matcher_topic.arn
