@@ -83,8 +83,7 @@ class TransformerWorkerTest
             sendNotificationToSQS(queue, Version("B", 2))
             sendNotificationToSQS(queue, Version("C", 3))
 
-            testWith(
-              (queuePair, workIndexer, workKeySender))
+            testWith((queuePair, workIndexer, workKeySender))
           }
       }
     }
