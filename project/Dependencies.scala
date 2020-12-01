@@ -266,7 +266,8 @@ object CatalogueDependencies {
       WellcomeDependencies.messagingTypesafeLibrary
 
   val miroTransformerDependencies: Seq[ModuleID] =
-    ExternalDependencies.apacheCommonsDependencies
+    ExternalDependencies.apacheCommonsDependencies ++
+      WellcomeDependencies.storageTypesafeLibrary
 
   val reindexWorkerDependencies: Seq[ModuleID] = Nil
 
