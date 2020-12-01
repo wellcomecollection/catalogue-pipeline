@@ -1,6 +1,5 @@
 package uk.ac.wellcome.platform.transformer.calm
 
-import uk.ac.wellcome.bigmessaging.BigMessageSender
 import uk.ac.wellcome.messaging.sns.{NotificationMessage, SNSConfig}
 import uk.ac.wellcome.models.work.internal.Work
 import uk.ac.wellcome.models.work.internal.WorkState.Source
@@ -14,7 +13,6 @@ class CalmTransformerWorker(
   val pipelineStream: PipelineStorageStream[NotificationMessage,
                                             Work[Source],
                                             SNSConfig],
-  val sender: BigMessageSender[SNSConfig],
   store: VersionedStore[String, Int, CalmRecord],
 ) extends Runnable
     with TransformerWorker[CalmRecord, SNSConfig] {

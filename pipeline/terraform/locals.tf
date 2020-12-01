@@ -53,7 +53,6 @@ locals {
     "feature_inferrer",
     "feature_training",
     "palette_inferrer",
-    "recorder",
     "router",
     "batcher",
     "relation_embedder",

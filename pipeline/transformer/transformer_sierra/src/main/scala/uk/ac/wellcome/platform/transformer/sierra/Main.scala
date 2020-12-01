@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.transformer.sierra
 
 import akka.actor.ActorSystem
 import com.typesafe.config.Config
-import uk.ac.wellcome.bigmessaging.typesafe.{BigMessagingBuilder, VHSBuilder}
+import uk.ac.wellcome.bigmessaging.typesafe.VHSBuilder
 import uk.ac.wellcome.elasticsearch.SourceWorkIndexConfig
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
@@ -44,7 +44,6 @@ object Main extends WellcomeTypesafeApp {
 
     new SierraTransformerWorkerService(
       pipelineStream = pipelineStream,
-      sender = BigMessagingBuilder.buildBigMessageSender(config),
       store = VHSBuilder.build[SierraTransformable](config)
     )
   }

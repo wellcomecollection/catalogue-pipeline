@@ -1,6 +1,5 @@
 package uk.ac.wellcome.transformer.common.worker
 
-import io.circe.Encoder
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -36,7 +35,6 @@ object TestTransformer extends Transformer[TestData] with WorkGenerators {
 }
 
 class TestTransformerWorker(
-  val sender: MemoryMessageSender,
   val pipelineStream: PipelineStorageStream[NotificationMessage,
                                             Work[Source],
                                             String],
@@ -60,7 +58,6 @@ class TransformerWorkerTest
   describe("it sends a transformed work") {
     def withTransformedWork[R](
       testWith: TestWith[(QueuePair,
-                          MemoryMessageSender,
                           MemoryIndexer[Work[Source]],
                           MemoryMessageSender),
                          R]): R = {
@@ -70,7 +67,6 @@ class TransformerWorkerTest
         Version("C", 3) -> ValidTestData
       )
 
-      val completeWorkSender = new MemoryMessageSender()
       val workIndexer =
         new MemoryIndexer[Work[Source]](
           index = mutable.Map[String, Work[Source]]())
@@ -80,7 +76,6 @@ class TransformerWorkerTest
         case queuePair @ QueuePair(queue, _) =>
           withWorker(
             queue,
-            completeWorkSender = completeWorkSender,
             workIndexer = workIndexer,
             workKeySender = workKeySender,
             records = records) { _ =>
@@ -88,15 +83,14 @@ class TransformerWorkerTest
             sendNotificationToSQS(queue, Version("B", 2))
             sendNotificationToSQS(queue, Version("C", 3))
 
-            testWith(
-              (queuePair, completeWorkSender, workIndexer, workKeySender))
+            testWith((queuePair, workIndexer, workKeySender))
           }
       }
     }
 
     it("empties the queue") {
       withTransformedWork {
-        case (QueuePair(queue, dlq), _, _, _) =>
+        case (QueuePair(queue, dlq), _, _) =>
           eventually {
             assertQueueEmpty(dlq)
             assertQueueEmpty(queue)
@@ -104,18 +98,9 @@ class TransformerWorkerTest
       }
     }
 
-    it("sends the complete work to the recorder") {
-      withTransformedWork {
-        case (_, completeWorkSender, _, _) =>
-          eventually {
-            completeWorkSender.getMessages[Work[Source]] should have size 3
-          }
-      }
-    }
-
     it("indexes the work and sends the index IDs") {
       withTransformedWork {
-        case (_, _, workIndexer, workKeySender) =>
+        case (_, workIndexer, workKeySender) =>
           eventually {
             workIndexer.index should have size 3
             workKeySender.messages.map { _.body } should contain theSameElementsAs workIndexer.index.keys
@@ -189,30 +174,6 @@ class TransformerWorkerTest
       }
     }
 
-    it("if it can't send the complete work to the recorder") {
-      val brokenSender = new MemoryMessageSender() {
-        override def sendT[T](t: T)(implicit encoder: Encoder[T]): Try[Unit] =
-          Failure(new Throwable("BOOM!"))
-      }
-
-      val records = Map(Version("A", 1) -> ValidTestData)
-
-      withLocalSqsQueuePair() {
-        case QueuePair(queue, dlq) =>
-          withWorker(
-            queue,
-            records = records,
-            completeWorkSender = brokenSender) { _ =>
-            sendNotificationToSQS(queue, Version("A", 1))
-
-            eventually {
-              assertQueueHasSize(dlq, size = 1)
-              assertQueueEmpty(queue)
-            }
-          }
-      }
-    }
-
     it("if it can't index the work") {
       val brokenIndexer = new MemoryIndexer[Work[Source]](
         index = mutable.Map[String, Work[Source]]()
@@ -271,7 +232,6 @@ class TransformerWorkerTest
   def withWorker[R](
     queue: Queue,
     records: Map[Version[String, Int], TestData] = Map.empty,
-    completeWorkSender: MemoryMessageSender = new MemoryMessageSender(),
     workIndexer: MemoryIndexer[Work[Source]] = new MemoryIndexer[Work[Source]](
       index = mutable.Map[String, Work[Source]]()),
     workKeySender: MemoryMessageSender = new MemoryMessageSender()
@@ -285,7 +245,6 @@ class TransformerWorkerTest
       val store = MemoryVersionedStore[String, TestData](records)
 
       val worker = new TestTransformerWorker(
-        sender = completeWorkSender,
         pipelineStream = pipelineStream,
         store = store
       )

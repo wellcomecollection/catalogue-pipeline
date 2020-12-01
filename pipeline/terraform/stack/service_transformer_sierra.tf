@@ -19,10 +19,8 @@ module "sierra_transformer" {
   cluster_arn  = aws_ecs_cluster.cluster.arn
 
   env_vars = {
-    sns_arn                = module.sierra_transformer_topic.arn
     transformer_queue_id   = module.sierra_transformer_queue.url
     metrics_namespace      = "${local.namespace_hyphen}_sierra_transformer"
-    messages_bucket_name   = aws_s3_bucket.messages.id
     vhs_sierra_bucket_name = var.vhs_sierra_sourcedata_bucket_name
     vhs_sierra_table_name  = var.vhs_sierra_sourcedata_table_name
 
@@ -56,15 +54,6 @@ module "sierra_transformer" {
 resource "aws_iam_role_policy" "sierra_transformer_vhs_sierra_adapter_read" {
   role   = module.sierra_transformer.task_role_name
   policy = var.vhs_sierra_read_policy
-}
-
-module "sierra_transformer_topic" {
-  source = "../modules/topic"
-
-  name       = "${local.namespace_hyphen}_sierra_transformer"
-  role_names = [module.sierra_transformer.task_role_name]
-
-  messages_bucket_arn = aws_s3_bucket.messages.arn
 }
 
 module "sierra_transformer_output_topic" {

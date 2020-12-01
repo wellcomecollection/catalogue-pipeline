@@ -1,6 +1,5 @@
 package uk.ac.wellcome.platform.transformer.miro.services
 
-import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.work.internal.Work
 import uk.ac.wellcome.models.work.internal.WorkState.Source
@@ -21,7 +20,6 @@ class MiroTransformerWorkerService[MsgDestination](
   val pipelineStream: PipelineStorageStream[NotificationMessage,
                                             Work[Source],
                                             MsgDestination],
-  val sender: MessageSender[MsgDestination],
   miroVhsReader: Readable[String, MiroVHSRecord],
   typedStore: Readable[S3ObjectLocation, MiroRecord]
 ) extends Runnable

@@ -4,7 +4,6 @@ import akka.actor.ActorSystem
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.s3.AmazonS3
 import com.typesafe.config.Config
-import uk.ac.wellcome.bigmessaging.typesafe.BigMessagingBuilder
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
@@ -55,7 +54,6 @@ object Main extends WellcomeTypesafeApp with AWSClientConfigBuilder {
 
     new MetsTransformerWorkerService(
       pipelineStream = pipelineStream,
-      sender = BigMessagingBuilder.buildBigMessageSender(config),
       adapterStore = new DynamoSingleVersionStore[String, MetsLocation](
         DynamoBuilder.buildDynamoConfig(config, namespace = "mets")
       ),
