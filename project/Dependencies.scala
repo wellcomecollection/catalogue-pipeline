@@ -223,11 +223,17 @@ object CatalogueDependencies {
     WellcomeDependencies.storageTypesafeLibrary ++
       WellcomeDependencies.messagingTypesafeLibrary
 
-  val pipelineStorageDependencies = WellcomeDependencies.messagingLibrary
-  val pipelineStorageTypesafeDependencies =   WellcomeDependencies.messagingTypesafeLibrary
+  val pipelineStorageDependencies: Seq[ModuleID] =
+    WellcomeDependencies.messagingLibrary
+
+  val pipelineStorageTypesafeDependencies: Seq[ModuleID] =
+    WellcomeDependencies.messagingTypesafeLibrary
 
   val elasticsearchTypesafeDependencies: Seq[ModuleID] =
     WellcomeDependencies.typesafeLibrary
+
+  val transformerCommonDependencies: Seq[ModuleID] =
+      WellcomeDependencies.storageLibrary
 
   val apiDependencies: Seq[ModuleID] =
     ExternalDependencies.akkaHttpDependencies ++
