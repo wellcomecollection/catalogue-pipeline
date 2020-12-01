@@ -24,6 +24,7 @@ module "matcher_input_queue" {
 
   topic_arns = [
     module.calm_transformer_output_topic.arn,
+    module.mets_transformer_output_topic.arn,
   ]
 
   aws_region      = var.aws_region

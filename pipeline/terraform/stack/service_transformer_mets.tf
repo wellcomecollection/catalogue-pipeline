@@ -25,9 +25,22 @@ module "mets_transformer" {
     messages_bucket_name = aws_s3_bucket.messages.id
 
     mets_adapter_dynamo_table_name = var.mets_adapter_table_name
+
+    sns_topic_arn = module.mets_transformer_output_topic.arn
+
+    es_index = local.es_works_source_index
+
+    batch_size             = 100
+    flush_interval_seconds = 30
   }
 
-  secret_env_vars = {}
+  secret_env_vars = {
+    es_host     = "catalogue/pipeline_storage/es_host"
+    es_port     = "catalogue/pipeline_storage/es_port"
+    es_protocol = "catalogue/pipeline_storage/es_protocol"
+    es_username = "catalogue/pipeline_storage/transformer/es_username"
+    es_password = "catalogue/pipeline_storage/transformer/es_password"
+  }
 
   subnets             = var.subnets
   max_capacity        = 10
@@ -50,6 +63,17 @@ module "mets_transformer_topic" {
   module.mets_transformer.task_role_name]
 
   messages_bucket_arn = aws_s3_bucket.messages.arn
+}
+
+module "mets_transformer_output_topic" {
+  source = "github.com/wellcomecollection/terraform-aws-sns-topic?ref=v1.0.1"
+
+  name = "${local.namespace_hyphen}_mets_transformer_output"
+}
+
+resource "aws_iam_role_policy" "allow_mets_transformer_sns_publish" {
+  role   = module.mets_transformer.task_role_name
+  policy = module.mets_transformer_output_topic.publish_policy
 }
 
 module "mets_transformer_scaling_alarm" {
