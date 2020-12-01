@@ -44,7 +44,9 @@ class MergerWorkerServiceTest
           matcherResultWith(Set(Set(work3), Set(work1, work2)))
 
         retriever.index ++= Map(
-          work1.id -> work1, work2.id -> work2, work3.id -> work3
+          work1.id -> work1,
+          work2.id -> work2,
+          work3.id -> work3
         )
 
         sendNotificationToSQS(
@@ -194,7 +196,9 @@ class MergerWorkerServiceTest
 
     withMergerWorkerServiceFixtures {
       case (retriever, QueuePair(queue, dlq), senders, _, index) =>
-        retriever.index ++= Map(physicalWork.id -> physicalWork, digitisedWork.id -> digitisedWork)
+        retriever.index ++= Map(
+          physicalWork.id -> physicalWork,
+          digitisedWork.id -> digitisedWork)
 
         val matcherResult = MatcherResult(
           Set(
@@ -238,7 +242,10 @@ class MergerWorkerServiceTest
 
     withMergerWorkerServiceFixtures {
       case (retriever, QueuePair(queue, dlq), senders, _, index) =>
-        retriever.index ++= Map(physicalWork.id -> physicalWork, digitisedWork.id -> digitisedWork, miroWork.id -> miroWork)
+        retriever.index ++= Map(
+          physicalWork.id -> physicalWork,
+          digitisedWork.id -> digitisedWork,
+          miroWork.id -> miroWork)
 
         val matcherResult = MatcherResult(
           Set(
@@ -366,9 +373,12 @@ class MergerWorkerServiceTest
   case class Senders(works: MemoryMessageSender, images: MemoryMessageSender)
 
   def withMergerWorkerServiceFixtures[R](
-    testWith: TestWith[
-      (MemoryRetriever[Work[Source]], QueuePair, Senders, MemoryMetrics, mutable.Map[String, Work[Merged]]),
-      R]): R =
+    testWith: TestWith[(MemoryRetriever[Work[Source]],
+                        QueuePair,
+                        Senders,
+                        MemoryMetrics,
+                        mutable.Map[String, Work[Merged]]),
+                       R]): R =
     withLocalSqsQueuePair() {
       case queuePair @ QueuePair(queue, _) =>
         val workSender = new MemoryMessageSender()
@@ -379,16 +389,21 @@ class MergerWorkerServiceTest
         val metrics = new MemoryMetrics()
         val index = mutable.Map[String, Work[Merged]]()
 
-        withWorkerService(retriever, queue, workSender, imageSender, metrics, index) {
-          _ =>
-            testWith(
-              (
-                retriever,
-                queuePair,
-                Senders(workSender, imageSender),
-                metrics,
-                index)
-            )
+        withWorkerService(
+          retriever,
+          queue,
+          workSender,
+          imageSender,
+          metrics,
+          index) { _ =>
+          testWith(
+            (
+              retriever,
+              queuePair,
+              Senders(workSender, imageSender),
+              metrics,
+              index)
+          )
         }
     }
 

@@ -7,14 +7,17 @@ import uk.ac.wellcome.pipeline_storage.Retriever
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class SourceWorkLookup(retriever: Retriever[Work[Source]])(implicit ec: ExecutionContext) {
-  def fetchAllWorks(workIdentifiers: Seq[WorkIdentifier]): Future[Seq[Option[Work[Source]]]] = {
+class SourceWorkLookup(retriever: Retriever[Work[Source]])(
+  implicit ec: ExecutionContext) {
+  def fetchAllWorks(
+    workIdentifiers: Seq[WorkIdentifier]): Future[Seq[Option[Work[Source]]]] = {
     assert(
       workIdentifiers.nonEmpty,
       "You should never look up an empty list of WorkIdentifiers!"
     )
 
-    retriever.apply(workIdentifiers.map { _.identifier })
+    retriever
+      .apply(workIdentifiers.map { _.identifier })
       .map { workMap =>
         workIdentifiers.map { id =>
           val work = workMap(id.identifier)

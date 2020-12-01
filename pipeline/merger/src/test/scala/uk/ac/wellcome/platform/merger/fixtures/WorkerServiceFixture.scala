@@ -24,7 +24,8 @@ trait WorkerServiceFixture extends SQS with Akka {
                            imageSender: MemoryMessageSender =
                              new MemoryMessageSender(),
                            metrics: Metrics[Future] = new MemoryMetrics,
-                           index: mutable.Map[String, Work[Merged]] = mutable.Map[String, Work[Merged]]())(
+                           index: mutable.Map[String, Work[Merged]] =
+                             mutable.Map[String, Work[Merged]]())(
     testWith: TestWith[MergerWorkerService[String, String], R]): R =
     withActorSystem { implicit actorSystem =>
       withSQSStream[NotificationMessage, R](queue, metrics) { sqsStream =>
@@ -49,8 +50,9 @@ trait WorkerServiceFixture extends SQS with Akka {
       val workSender = new MemoryMessageSender()
       val imageSender = new MemoryMessageSender()
 
-      withWorkerService(retriever, queue, workSender, imageSender) { workerService =>
-        testWith(workerService)
+      withWorkerService(retriever, queue, workSender, imageSender) {
+        workerService =>
+          testWith(workerService)
       }
     }
 

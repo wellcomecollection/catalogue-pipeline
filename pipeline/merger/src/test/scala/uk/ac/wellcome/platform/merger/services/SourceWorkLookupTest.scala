@@ -80,11 +80,15 @@ class SourceWorkLookupTest
     val storedWorks = unchangedWorks ++ updatedWorks
 
     val retriever = new MemoryRetriever[Work[Source]](
-      index = mutable.Map(storedWorks.map { w => w.id -> w }: _*)
+      index = mutable.Map(storedWorks.map { w =>
+        w.id -> w
+      }: _*)
     )
 
     val expectedLookupResult =
-      unchangedWorks.map { Some(_) } ++ (4 to 5).map { _ => None }
+      unchangedWorks.map { Some(_) } ++ (4 to 5).map { _ =>
+        None
+      }
 
     whenReady(fetchAllWorks(retriever = retriever, lookupWorks: _*)) {
       _ shouldBe expectedLookupResult

@@ -9,7 +9,10 @@ import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal.WorkState.{Merged, Source}
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.pipeline_storage.typesafe.{ElasticIndexerBuilder, ElasticRetrieverBuilder}
+import uk.ac.wellcome.pipeline_storage.typesafe.{
+  ElasticIndexerBuilder,
+  ElasticRetrieverBuilder
+}
 import uk.ac.wellcome.platform.merger.services._
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
@@ -25,7 +28,8 @@ object Main extends WellcomeTypesafeApp {
 
     val sourceWorkLookup = new SourceWorkLookup(
       retriever = ElasticRetrieverBuilder.apply[Work[Source]](
-        config, namespace = "source-works"
+        config,
+        namespace = "source-works"
       )
     )
 
