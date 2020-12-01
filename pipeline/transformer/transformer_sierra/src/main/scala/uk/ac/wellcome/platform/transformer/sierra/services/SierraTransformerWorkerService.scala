@@ -1,6 +1,5 @@
 package uk.ac.wellcome.platform.transformer.sierra.services
 
-import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.work.internal.Work
 import uk.ac.wellcome.models.work.internal.WorkState.Source
@@ -16,7 +15,6 @@ class SierraTransformerWorkerService[MsgDestination](
   val pipelineStream: PipelineStorageStream[NotificationMessage,
                                             Work[Source],
                                             MsgDestination],
-  val sender: MessageSender[MsgDestination],
   store: VersionedStore[String, Int, SierraTransformable],
 ) extends Runnable
     with TransformerWorker[SierraTransformable, MsgDestination] {
