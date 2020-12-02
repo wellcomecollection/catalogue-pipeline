@@ -95,7 +95,8 @@ class SourceWorkLookupTest
     }
   }
 
-  it("fails if the retriever fails with something other than RetrieverNotFoundException") {
+  it(
+    "fails if the retriever fails with something other than RetrieverNotFoundException") {
     val workId = WorkIdentifier(randomAlphanumeric(), version = None)
 
     val exception = new Throwable("BOOM!")
@@ -103,18 +104,22 @@ class SourceWorkLookupTest
     val retriever = new MemoryRetriever[Work[Source]](
       index = mutable.Map[String, Work[Source]]()
     ) {
-      override def apply(ids: Seq[String]): Future[RetrieverMultiResult[Work[Source]]] =
+      override def apply(
+        ids: Seq[String]): Future[RetrieverMultiResult[Work[Source]]] =
         Future.successful(
           RetrieverMultiResult(
             found = Map.empty,
-            notFound = ids.map { id => id -> exception }.toMap
+            notFound = ids.map { id =>
+              id -> exception
+            }.toMap
           )
         )
     }
 
     val sourceWorkLookup = new SourceWorkLookup(retriever)
 
-    whenReady(sourceWorkLookup.fetchAllWorks(workIdentifiers = List(workId)).failed) {
+    whenReady(
+      sourceWorkLookup.fetchAllWorks(workIdentifiers = List(workId)).failed) {
       _ shouldBe exception
     }
   }

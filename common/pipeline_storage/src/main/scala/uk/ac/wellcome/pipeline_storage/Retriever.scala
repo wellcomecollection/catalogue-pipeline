@@ -15,7 +15,8 @@ trait Retriever[T] {
     apply(Seq(id))
       .map { result =>
         result.found.getOrElse(
-          id, throw result.notFound(id)
+          id,
+          throw result.notFound(id)
         )
       }
 

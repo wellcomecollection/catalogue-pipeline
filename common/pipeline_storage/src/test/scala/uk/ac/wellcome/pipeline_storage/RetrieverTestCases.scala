@@ -53,10 +53,9 @@ trait RetrieverTestCases[Context, T]
     val documents = Seq(t1, t2, t3)
     val ids = documents.map { id.canonicalId }
     val expectedResult = RetrieverMultiResult(
-      found =
-        documents
-          .map { t => id.canonicalId(t) -> t }
-          .toMap,
+      found = documents.map { t =>
+        id.canonicalId(t) -> t
+      }.toMap,
       notFound = Map.empty
     )
 
@@ -82,11 +81,13 @@ trait RetrieverTestCases[Context, T]
 
       whenReady(future) { result =>
         result.found shouldBe Map(
-          id.canonicalId(t1) -> t1, id.canonicalId(t2) -> t2
+          id.canonicalId(t1) -> t1,
+          id.canonicalId(t2) -> t2
         )
 
         result.notFound.keySet shouldBe Set(id.canonicalId(t3))
-        result.notFound(id.canonicalId(t3)) shouldBe a[RetrieverNotFoundException]
+        result.notFound(id.canonicalId(t3)) shouldBe a[
+          RetrieverNotFoundException]
       }
     }
   }

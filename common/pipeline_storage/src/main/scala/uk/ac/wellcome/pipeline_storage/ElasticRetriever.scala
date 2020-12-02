@@ -41,17 +41,18 @@ class ElasticRetriever[T](client: ElasticClient, index: Index)(
           // See https://www.elastic.co/guide/en/elasticsearch/reference/6.8/docs-multi-get.html
           val documents = result.docs
             .zip(ids)
-            .map { case (getResponse, id) =>
-              if (getResponse.found) {
-                id -> getResponse.safeTo[T]
-              } else {
-                id -> Failure(new RetrieverNotFoundException(id))
-              }
+            .map {
+              case (getResponse, id) =>
+                if (getResponse.found) {
+                  id -> getResponse.safeTo[T]
+                } else {
+                  id -> Failure(new RetrieverNotFoundException(id))
+                }
             }
             .toMap
 
           RetrieverMultiResult(
-            found = documents.collect { case (id, Success(t)) => id -> t },
+            found = documents.collect { case (id, Success(t))    => id -> t },
             notFound = documents.collect { case (id, Failure(e)) => id -> e }
           )
       }

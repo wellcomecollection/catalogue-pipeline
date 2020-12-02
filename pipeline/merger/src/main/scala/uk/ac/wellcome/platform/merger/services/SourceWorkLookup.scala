@@ -3,7 +3,11 @@ package uk.ac.wellcome.platform.merger.services
 import uk.ac.wellcome.models.matcher.WorkIdentifier
 import uk.ac.wellcome.models.work.internal.WorkState.Source
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.pipeline_storage.{Retriever, RetrieverMultiResult, RetrieverNotFoundException}
+import uk.ac.wellcome.pipeline_storage.{
+  Retriever,
+  RetrieverMultiResult,
+  RetrieverNotFoundException
+}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -20,7 +24,9 @@ class SourceWorkLookup(retriever: Retriever[Work[Source]])(
       .apply(workIdentifiers.map { _.identifier })
       .map { result =>
         workIdentifiers
-          .map { id => getWorkFromResult(result, id) }
+          .map { id =>
+            getWorkFromResult(result, id)
+          }
       }
   }
 
@@ -45,11 +51,13 @@ class SourceWorkLookup(retriever: Retriever[Work[Source]])(
       case None =>
         result.notFound.get(id.identifier) match {
           case Some(t) if t.isInstanceOf[RetrieverNotFoundException] => None
-          case Some(t) => throw t
+          case Some(t)                                               => throw t
 
           // This should be impossible, but handle it so the compiler's happy
           // and we can spot it if it does occur.
-          case None => throw new RuntimeException(s"Could not find ID $id in retriever result")
+          case None =>
+            throw new RuntimeException(
+              s"Could not find ID $id in retriever result")
         }
     }
 }
