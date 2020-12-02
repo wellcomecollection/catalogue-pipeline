@@ -9,7 +9,10 @@ import uk.ac.wellcome.platform.transformer.calm.models.CalmTransformerException.
 import uk.ac.wellcome.transformer.common.worker.Transformer
 import WorkState.Source
 import uk.ac.wellcome.platform.transformer.calm.periods.PeriodParser
-import uk.ac.wellcome.platform.transformer.calm.transformers.CalmLanguages
+import uk.ac.wellcome.platform.transformer.calm.transformers.{
+  CalmLanguages,
+  CalmNotes
+}
 
 object CalmTransformer
     extends Transformer[CalmRecord]
@@ -20,20 +23,6 @@ object CalmTransformer
     "RefNo" -> CalmIdentifierTypes.refNo,
     "AltRefNo" -> CalmIdentifierTypes.altRefNo,
     "BNumber" -> IdentifierType("sierra-system-number")
-  )
-
-  val notesMapping = List(
-    ("AdminHistory", BiographicalNote(_)),
-    ("CustodHistory", OwnershipNote(_)),
-    ("Acquisition", AcquisitionNote(_)),
-    ("Appraisal", AppraisalNote(_)),
-    ("Accruals", AccrualsNote(_)),
-    ("RelatedMaterial", RelatedMaterial(_)),
-    ("PubInNote", PublicationsNote(_)),
-    ("UserWrapped4", FindingAids(_)),
-    ("Copyright", CopyrightNote(_)),
-    ("ReproductionConditions", TermsOfUse(_)),
-    ("Arrangement", ArrangementNote(_))
   )
 
   // As much as it might not look like it, these values mean it should
@@ -125,8 +114,6 @@ object CalmTransformer
       languageField = record.get("Language")
     )
 
-    val allNotes = notes(record) ++ List(languageNote).flatten
-
     for {
       accessStatus <- accessStatus(record)
       title <- title(record)
@@ -146,7 +133,7 @@ object CalmTransformer
         description = description(record),
         physicalDescription = physicalDescription(record),
         production = production(record),
-        notes = allNotes,
+        notes = CalmNotes(record, languageNote = languageNote),
         workType = workType(collectionLevel)
       )
   }
@@ -306,15 +293,6 @@ object CalmTransformer
   def contributors(record: CalmRecord): List[Contributor[IdState.Unminted]] =
     record.getList("CreatorName").map { name =>
       Contributor(Agent(name), Nil)
-    }
-
-  def notes(record: CalmRecord): List[Note] =
-    notesMapping.flatMap {
-      case (key, createNote) =>
-        record
-          .getList(key)
-          .map(NormaliseText(_))
-          .map(createNote)
     }
 
   def workType(level: CollectionLevel): WorkType =
