@@ -25,7 +25,7 @@ class SourceWorkLookup(retriever: Retriever[Work[Source]])(
         // We only want the exact versions of works from the matcher; if an identifier
         // doesn't have a version, don't both trying to retrieve it.
         workIdentifiers
-          .filter{ _.version.isDefined }
+          .filter { _.version.isDefined }
           .map { _.identifier }
       )
       .map { result =>
@@ -40,7 +40,8 @@ class SourceWorkLookup(retriever: Retriever[Work[Source]])(
             // e.g. if the matcher said "combine Av1 and Bv2", and we look in the retriever
             // and find {Av2, Bv3}, we shouldn't merge these -- we should wait for the matcher
             // to confirm we should still be merging these two works.
-            case (id, Some(work)) if id.version.contains(work.version) => Some(work)
+            case (id, Some(work)) if id.version.contains(work.version) =>
+              Some(work)
             case _ => None
           }
       }
@@ -56,11 +57,13 @@ class SourceWorkLookup(retriever: Retriever[Work[Source]])(
       case None =>
         result.notFound.get(id.identifier) match {
           case Some(t) if t.isInstanceOf[RetrieverNotFoundException] => None
-          case Some(t) => throw t
+          case Some(t)                                               => throw t
 
           // We didn't look up this identifier, because it doesn't have a version.
           case None =>
-            assert(id.version.isEmpty, s"Retriever failed to find an identifier: $id")
+            assert(
+              id.version.isEmpty,
+              s"Retriever failed to find an identifier: $id")
             None
         }
     }
