@@ -34,7 +34,7 @@ class ImageIndexableTest
 
   describe("updating images with merged / redirected sources") {
     it("overrides an image if modifiedTime is higher") {
-      val originalImage = createAugmentedImageWith()
+      val originalImage = createImageData.toAugmentedImage
       val updatedModifiedTimeImage = originalImage.copy(
         state = originalImage.state.copy(
           modifiedTime = originalImage.state.modifiedTime + (2 minutes)
@@ -58,7 +58,7 @@ class ImageIndexableTest
       }
     }
     it("does not override an image if modifiedTime is lower") {
-      val originalImage = createAugmentedImageWith()
+      val originalImage = createImageData.toAugmentedImage
       val updatedModifiedTimeImage = originalImage.copy(
         state = originalImage.state.copy(
           modifiedTime = originalImage.state.modifiedTime - (2 minutes)
@@ -82,7 +82,7 @@ class ImageIndexableTest
       }
     }
     it("overrides an image if modifiedTime is the same") {
-      val originalImage = createAugmentedImageWith()
+      val originalImage = createImageData.toAugmentedImage
       val updatedSourceImage = originalImage.copy(
         state = originalImage.state.copy(
           source = SourceWorks(sierraIdentifiedWork().toSourceWork, None)

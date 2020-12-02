@@ -9,12 +9,7 @@ import software.amazon.awssdk.services.sqs.model.Message
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.models.work.internal.{
-  AugmentedImage,
-  Image,
-  ImageState,
-  InferredData
-}
+import uk.ac.wellcome.models.work.internal.{Image, ImageState, InferredData}
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.ImageGenerators
 import uk.ac.wellcome.platform.inference_manager.adapters.{
@@ -47,7 +42,7 @@ class InferenceManagerWorkerServiceTest
   it(
     "reads image messages, augments them with the inferrers, and sends them to SNS") {
     val images = (1 to 5)
-      .map(_ => createIdentifiedImageWith())
+      .map(_ => createImageData.toIdentifiedImage)
       .map(image => image.id -> image)
       .toMap
     withResponsesAndFixtures(
@@ -109,7 +104,7 @@ class InferenceManagerWorkerServiceTest
       images = _ => Some(Responses.image)
     ) {
       case (QueuePair(queue, dlq), messageSender, _, _) =>
-        val image = createIdentifiedImageWith()
+        val image = createImageData.toIdentifiedImage
         (1 to 3).foreach(_ => sendMessage(queue, image))
         eventually {
           assertQueueEmpty(queue)
@@ -137,16 +132,16 @@ class InferenceManagerWorkerServiceTest
   }
 
   it("places images that fail inference on the DLQ") {
-    val image404 = createIdentifiedImageWith(
+    val image404 = createImageDataWith(
       locations = List(createDigitalLocationWith(url = "lost_image"))
-    )
-    val image400 = createIdentifiedImageWith(
+    ).toIdentifiedImage
+    val image400 = createImageDataWith(
       locations = List(createDigitalLocationWith(url = "malformed_image_url"))
-    )
-    val image500 = createIdentifiedImageWith(
+    ).toIdentifiedImage
+    val image500 = createImageDataWith(
       locations =
         List(createDigitalLocationWith(url = "extremely_cursed_image"))
-    )
+    ).toIdentifiedImage
     withResponsesAndFixtures(
       inferrer = url =>
         if (url.contains(image400.id)) {
@@ -173,7 +168,7 @@ class InferenceManagerWorkerServiceTest
       images = _ => None
     ) {
       case (QueuePair(queue, dlq), _, _, _) =>
-        val image = createIdentifiedImageWith()
+        val image = createImageData.toIdentifiedImage
         sendMessage(queue, image)
         eventually {
           assertQueueEmpty(queue)

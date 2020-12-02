@@ -12,8 +12,9 @@ class DisplayImageTest
     with ImageGenerators {
 
   it("adds a list of visuallySimilar images if specified") {
-    val image = createAugmentedImage()
-    val similarImages = (1 to 3).map(_ => createAugmentedImage()).toSeq
+    val image = createImageData.toAugmentedImage
+    val similarImages =
+      (1 to 3).map(_ => createImageData.toAugmentedImage).toSeq
 
     val displayImage = DisplayImage(
       image,

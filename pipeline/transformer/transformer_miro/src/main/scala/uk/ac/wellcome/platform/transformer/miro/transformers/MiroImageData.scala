@@ -3,10 +3,10 @@ package uk.ac.wellcome.platform.transformer.miro.transformers
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 
-trait MiroImage extends MiroLocation {
+trait MiroImageData extends MiroLocation {
 
-  def getImage(miroRecord: MiroRecord,
-               version: Int): ImageData[IdState.Identifiable] =
+  def getImageData(miroRecord: MiroRecord,
+                   version: Int): ImageData[IdState.Identifiable] =
     ImageData[IdState.Identifiable](
       id = IdState.Identifiable(
         sourceIdentifier = SourceIdentifier(

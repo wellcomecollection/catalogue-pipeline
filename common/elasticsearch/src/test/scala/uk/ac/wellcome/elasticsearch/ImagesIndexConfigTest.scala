@@ -19,7 +19,7 @@ class ImagesIndexConfigTest
 
   it("can ingest an image with large image features vectors") {
     withLocalImagesIndex { index =>
-      val image = createAugmentedImage()
+      val image = createImageData.toAugmentedImage
       whenReady(indexObject(index, image)) { response =>
         response.isError shouldBe false
         assertObjectIndexed(index, image)
@@ -30,7 +30,7 @@ class ImagesIndexConfigTest
 
   it("can ingest an image without feature vectors") {
     withLocalImagesIndex { index =>
-      val image = createAugmentedImageWith(inferredData = None)
+      val image = createImageData.toAugmentedImageWith(inferredData = None)
       whenReady(indexObject(index, image)) { response =>
         response.isError shouldBe false
         assertObjectIndexed(index, image)
@@ -43,8 +43,8 @@ class ImagesIndexConfigTest
     withLocalImagesIndex { index =>
       val features1 = (0 until 3000).map(_ => Random.nextFloat() * 100).toList
       val features2 = (0 until 3000).map(_ => Random.nextFloat() * 100).toList
-      val image = createIdentifiedImageWith().augment(
-        Some(
+      val image = createImageData.toAugmentedImageWith(
+        inferredData = Some(
           InferredData(
             features1,
             features2,
@@ -59,8 +59,8 @@ class ImagesIndexConfigTest
 
   it("cannot ingest an image with image vectors that are shorter than 2048") {
     withLocalImagesIndex { index =>
-      val image = createIdentifiedImageWith().augment(
-        Some(
+      val image = createImageData.toAugmentedImageWith(
+        inferredData = Some(
           InferredData(
             List(2.0f),
             List(2.0f),

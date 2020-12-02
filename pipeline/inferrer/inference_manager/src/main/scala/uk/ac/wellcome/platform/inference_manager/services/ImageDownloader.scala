@@ -63,7 +63,7 @@ class ImageDownloader[Ctx](
         (HttpRequest(method = HttpMethods.GET, uri = uri), image)
       case None =>
         throw new RuntimeException(
-          s"Could not extract an image URL from locations on image ${image.id.sourceIdentifier}"
+          s"Could not extract an image URL from locations on image ${image.state.sourceIdentifier}"
         )
     }
 

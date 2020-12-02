@@ -30,7 +30,7 @@ class ImagesIndexerTest
           elasticClient,
           index,
           ImagesIndexConfig)
-      val image = createAugmentedImage()
+      val image = createImageData.toAugmentedImage
       whenReady(imagesIndexer.index(List(image))) { r =>
         r.isRight shouldBe true
         r.right.get shouldBe List(image)
@@ -46,7 +46,7 @@ class ImagesIndexerTest
           elasticClient,
           index,
           ImagesIndexConfig)
-      val images = (1 to 5).map(_ => createAugmentedImage())
+      val images = (1 to 5).map(_ => createImageData.toAugmentedImage)
       whenReady(imagesIndexer.index(images)) { r =>
         r.isRight shouldBe true
         r.right.get should contain theSameElementsAs images
@@ -62,7 +62,7 @@ class ImagesIndexerTest
           elasticClient,
           index,
           ImagesIndexConfig)
-      val image = createAugmentedImage()
+      val image = createImageData.toAugmentedImage
       val newerImage =
         image.copy(
           state = image.state.copy(
@@ -88,7 +88,7 @@ class ImagesIndexerTest
           elasticClient,
           index,
           ImagesIndexConfig)
-      val image = createAugmentedImage()
+      val image = createImageData.toAugmentedImage
       val olderImage =
         image.copy(
           state = image.state.copy(

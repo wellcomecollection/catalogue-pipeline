@@ -27,13 +27,11 @@ class IdMinterFeatureTest
       withIdentifiersTable { identifiersTableConfig =>
         withWorkerService(messageSender, queue, identifiersTableConfig) { _ =>
           eventuallyTableExists(identifiersTableConfig)
-          val image = createImageData.transition[ImageState.Merged](
-            (
-              SourceWorks(
-                canonicalWork = mergedWork().toSourceWork,
-                redirectedWork = None
-              ),
-              modifiedTime
+          val image = createImageData.toMergedImageWith(
+            modifiedTime = modifiedTime,
+            sourceWorks = SourceWorks(
+              canonicalWork = mergedWork().toSourceWork,
+              redirectedWork = None
             )
           )
 
@@ -67,13 +65,11 @@ class IdMinterFeatureTest
         withWorkerService(messageSender, queue, identifiersTableConfig) { _ =>
           sendInvalidJSONto(queue)
 
-          val image = createImageData.transition[ImageState.Merged](
-            (
-              SourceWorks(
-                canonicalWork = mergedWork().toSourceWork,
-                redirectedWork = None
-              ),
-              modifiedTime
+          val image = createImageData.toMergedImageWith(
+            modifiedTime = modifiedTime,
+            sourceWorks = SourceWorks(
+              canonicalWork = mergedWork().toSourceWork,
+              redirectedWork = None
             )
           )
 

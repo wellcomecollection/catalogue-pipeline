@@ -24,7 +24,7 @@ class ImagesIngestorFeatureTest
     with ElasticsearchFixtures
     with IngestorFixtures {
   it("reads an image from the queue, ingests it and deletes the message") {
-    val image = createAugmentedImage()
+    val image = createImageData.toAugmentedImage
 
     withLocalSqsQueuePair(visibilityTimeout = 10) {
       case QueuePair(queue, dlq) =>

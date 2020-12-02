@@ -2,13 +2,8 @@ package uk.ac.wellcome.elasticsearch
 
 import com.sksamuel.elastic4s.ElasticDsl.{keywordField, _}
 import com.sksamuel.elastic4s.analysis.Analysis
-import com.sksamuel.elastic4s.requests.mappings.{
-  FieldDefinition,
-  MappingDefinition,
-  ObjectField
-}
+import com.sksamuel.elastic4s.requests.mappings.{MappingDefinition, ObjectField}
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
-import io.circe.Decoder.state
 
 object ImagesIndexConfig extends IndexConfig with WorksIndexConfigFields {
 
@@ -24,10 +19,7 @@ object ImagesIndexConfig extends IndexConfig with WorksIndexConfigFields {
   private def sourceWork(fieldName: String): ObjectField =
     objectField(fieldName).fields(
       id(),
-      data(
-        pathField = textField("path"),
-        imageState = identifiedSourceImageState
-      ),
+      data(pathField = textField("path")),
       keywordField("type"),
       version
     )

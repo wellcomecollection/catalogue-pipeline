@@ -15,12 +15,7 @@ import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.ImageGenerators
-import uk.ac.wellcome.models.work.internal.{
-  AugmentedImage,
-  Image,
-  ImageState,
-  InferredData
-}
+import uk.ac.wellcome.models.work.internal.{Image, ImageState, InferredData}
 import uk.ac.wellcome.platform.inference_manager.adapters.{
   FeatureVectorInferrerAdapter,
   InferrerAdapter,
@@ -56,13 +51,12 @@ class ManagerInferrerIntegrationTest
           inferrersAreHealthy shouldBe true
         }
 
-        val image = createIdentifiedImageWith(
+        val image = createImageDataWith(
           locations = List(
             createDigitalLocationWith(
               locationType = createImageLocationType,
               url = s"http://localhost:$localImageServerPort/test-image.jpg"
-            ))
-        )
+            ))).toIdentifiedImage
         sendMessage(queue, image)
         eventually {
           assertQueueEmpty(queue)

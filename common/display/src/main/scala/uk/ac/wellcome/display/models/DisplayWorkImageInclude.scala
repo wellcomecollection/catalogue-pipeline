@@ -14,7 +14,6 @@ case class DisplayWorkImageInclude(
 )
 
 object DisplayWorkImageInclude {
-  def apply(
-    image: Image[ImageState.IdentifiedSource]): DisplayWorkImageInclude =
-    new DisplayWorkImageInclude(id = image.id)
+  def apply(image: ImageData[IdState.Identified]): DisplayWorkImageInclude =
+    new DisplayWorkImageInclude(id = image.id.canonicalId)
 }

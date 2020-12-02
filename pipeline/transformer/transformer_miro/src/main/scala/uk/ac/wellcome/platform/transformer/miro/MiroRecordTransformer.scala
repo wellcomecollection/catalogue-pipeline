@@ -17,7 +17,7 @@ class MiroRecordTransformer
     with MiroCreatedDate
     with MiroItems
     with MiroGenres
-    with MiroImage
+    with MiroImageData
     with MiroIdentifiers
     with MiroSubjects
     with MiroThumbnail
@@ -83,7 +83,7 @@ class MiroRecordTransformer
         contributors = getContributors(miroRecord),
         thumbnail = Some(getThumbnail(miroRecord)),
         items = getItems(miroRecord),
-        imageData = List(getImage(miroRecord, version))
+        imageData = List(getImageData(miroRecord, version))
       )
 
       Work.Visible[Source](

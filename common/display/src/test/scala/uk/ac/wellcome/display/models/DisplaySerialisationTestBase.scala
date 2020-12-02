@@ -220,15 +220,15 @@ trait DisplaySerialisationTestBase {
   def languages(ls: List[Language]): String =
     ls.map(language).mkString(",")
 
-  def workImageInclude(image: Image[ImageState.IdentifiedSource]) =
+  def workImageInclude(image: ImageData[IdState.Identified]) =
     s"""
        {
-         "id": "${image.id}",
+         "id": "${image.id.canonicalId}",
          "type": "Image"
        }
     """.stripMargin
 
-  def workImageIncludes(images: List[Image[ImageState.IdentifiedSource]]) =
+  def workImageIncludes(images: List[ImageData[IdState.Identified]]) =
     images.map(workImageInclude).mkString(",")
 
   def productionEvent(event: ProductionEvent[IdState.Minted]): String =

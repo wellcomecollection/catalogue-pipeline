@@ -35,7 +35,7 @@ case class MetsData(
           items = List(item),
           mergeCandidates = List(mergeCandidate),
           thumbnail = thumbnail(sourceIdentifier.value, license, accessStatus),
-          imageData = images(version, license, accessStatus)
+          imageData = imageData(version, license, accessStatus)
         )
       )
 
@@ -131,7 +131,7 @@ case class MetsData(
         license = license
       )
 
-  private def images(
+  private def imageData(
     version: Int,
     license: Option[License],
     accessStatus: Option[AccessStatus]): List[ImageData[IdState.Identifiable]] =

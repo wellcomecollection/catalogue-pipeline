@@ -15,8 +15,8 @@ trait MergerLogging extends Logging {
   def describeWorks(works: NonEmptyList[Work[_]]): String =
     describeWorks(works.toList)
 
-  def describeImage(imageWithSource: ImageDataWithSource): String =
-    s"(id=${imageWithSource.image.id})"
+  def describeImage(imageDataWithSource: ImageDataWithSource): String =
+    s"(id=${imageDataWithSource.imageData.id.sourceIdentifier})"
 
   def describeImages(images: Seq[ImageDataWithSource]): String =
     s"[${images.map(describeImage).mkString(",")}]"

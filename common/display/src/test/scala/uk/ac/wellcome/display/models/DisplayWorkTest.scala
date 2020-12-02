@@ -459,7 +459,7 @@ class DisplayWorkTest
         )
         displayWork.images.get
           .map(_.id) should contain theSameElementsAs
-          work.data.imageData.map(_.id)
+          work.data.imageData.map(_.id.canonicalId)
       }
     }
   }

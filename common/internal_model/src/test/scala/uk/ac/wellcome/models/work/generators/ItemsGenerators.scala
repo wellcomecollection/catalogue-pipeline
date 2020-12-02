@@ -55,6 +55,10 @@ trait ItemsGenerators extends IdentifiersGenerators {
 
   def createDigitalLocation = createDigitalLocationWith()
 
+  def createImageLocation = createDigitalLocationWith(
+    locationType = createImageLocationType
+  )
+
   def createDigitalLocationWith(
     locationType: LocationType = createPresentationLocationType,
     url: String = defaultLocationUrl,

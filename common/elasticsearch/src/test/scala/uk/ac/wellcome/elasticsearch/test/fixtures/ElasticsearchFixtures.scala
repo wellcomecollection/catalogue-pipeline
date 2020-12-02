@@ -143,7 +143,8 @@ trait ElasticsearchFixtures
 
   def assertElasticsearchEventuallyHasImage[State <: ImageState](
     index: Index,
-    images: Image[State]*): Seq[Assertion] = {
+    images: Image[State]*)(
+    implicit enc: Encoder[Image[State]]): Seq[Assertion] = {
     implicit val id: CanonicalId[Image[State]] =
       (image: Image[State]) => image.state.id
     assertElasticsearchEventuallyHas(index, images: _*)

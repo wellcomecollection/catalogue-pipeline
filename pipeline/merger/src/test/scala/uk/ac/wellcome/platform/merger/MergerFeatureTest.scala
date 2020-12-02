@@ -41,9 +41,9 @@ class MergerFeatureTest
       outcome.getMerged(miro3) should beRedirectedTo(sierra)
 
       And("images are created from the Miro works")
-      outcome.images should contain(miro1.singleImage)
-      outcome.images should contain(miro2.singleImage)
-      outcome.images should contain(miro3.singleImage)
+      outcome.imageData should contain(miro1.singleImage)
+      outcome.imageData should contain(miro2.singleImage)
+      outcome.imageData should contain(miro3.singleImage)
 
       And("the merged Sierra work's images contain all of the images")
       val mergedImages = outcome.getMerged(sierra).data.imageData
@@ -64,7 +64,7 @@ class MergerFeatureTest
       outcome.getMerged(miro) should beRedirectedTo(sierra)
 
       And("an image is created from the Miro work")
-      outcome.images should contain only miro.singleImage
+      outcome.imageData should contain only miro.singleImage
 
       And("the merged Sierra work contains the image")
       outcome
@@ -92,8 +92,8 @@ class MergerFeatureTest
       ephemeraOutcome.getMerged(mets) should beRedirectedTo(sierraEphemera)
 
       And("an image is created from the METS work")
-      pictureOutcome.images should contain only mets.singleImage
-      ephemeraOutcome.images should contain only mets.singleImage
+      pictureOutcome.imageData should contain only mets.singleImage
+      ephemeraOutcome.imageData should contain only mets.singleImage
 
       And("the merged Sierra work contains the image")
       pictureOutcome
