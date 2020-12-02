@@ -324,7 +324,6 @@ class CalmTransformerTest
     )
     CalmTransformer(record, version).right.get.data.notes should contain theSameElementsAs List(
       CopyrightNote("no copyright"),
-      TermsOfUse("reproduce at will"),
       ArrangementNote("meet at midnight"),
     )
   }

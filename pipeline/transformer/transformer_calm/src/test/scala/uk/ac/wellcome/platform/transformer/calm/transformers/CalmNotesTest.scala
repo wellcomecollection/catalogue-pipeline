@@ -17,7 +17,6 @@ class CalmNotesTest extends AnyFunSpec with Matchers with CalmRecordGenerators {
       ("PubInNote", "Published in the Public Pamphlet"),
       ("UserWrapped4", "Wrapped in the Worldly Words"),
       ("Copyright", "Copyright the Creative Consortium"),
-      ("ReproductionConditions", "Reproduction is Rarely Regulated"),
       ("Arrangement", "Arranged in an Adorable Alignment")
     )
 
@@ -35,7 +34,6 @@ class CalmNotesTest extends AnyFunSpec with Matchers with CalmRecordGenerators {
       PublicationsNote("Published in the Public Pamphlet"),
       FindingAids("Wrapped in the Worldly Words"),
       CopyrightNote("Copyright the Creative Consortium"),
-      TermsOfUse("Reproduction is Rarely Regulated"),
       ArrangementNote("Arranged in an Adorable Alignment")
     )
   }
@@ -62,6 +60,17 @@ class CalmNotesTest extends AnyFunSpec with Matchers with CalmRecordGenerators {
       "Title" -> "abc",
       "Level" -> "Collection",
       "RefNo" -> "a/b/c"
+    )
+
+    CalmNotes(record, languageNote = None) shouldBe empty
+  }
+
+  // This is a field that we used to transform, but Collections Information
+  // have stopped using it.
+  // See https://github.com/wellcomecollection/platform/issues/4773
+  it("does not include the ReproductionConditions field") {
+    val record = createCalmRecordWith(
+      ("ReproductionConditions", "Reproduction is Rarely Regulated"),
     )
 
     CalmNotes(record, languageNote = None) shouldBe empty

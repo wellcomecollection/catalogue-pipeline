@@ -18,7 +18,6 @@ object CalmNotes extends CalmOps {
     ("PubInNote", PublicationsNote(_)),
     ("UserWrapped4", FindingAids(_)),
     ("Copyright", CopyrightNote(_)),
-    ("ReproductionConditions", TermsOfUse(_)),
     ("Arrangement", ArrangementNote(_))
   )
 
