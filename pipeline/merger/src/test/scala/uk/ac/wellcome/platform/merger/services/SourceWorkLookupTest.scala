@@ -7,7 +7,7 @@ import uk.ac.wellcome.models.matcher.WorkIdentifier
 import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.work.internal._
 import WorkState.Source
-import uk.ac.wellcome.pipeline_storage.MemoryRetriever
+import uk.ac.wellcome.pipeline_storage.{MemoryRetriever, RetrieverMultiResult}
 
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -92,6 +92,30 @@ class SourceWorkLookupTest
 
     whenReady(fetchAllWorks(retriever = retriever, lookupWorks: _*)) {
       _ shouldBe expectedLookupResult
+    }
+  }
+
+  it("fails if the retriever fails with something other than RetrieverNotFoundException") {
+    val workId = WorkIdentifier(randomAlphanumeric(), version = None)
+
+    val exception = new Throwable("BOOM!")
+
+    val retriever = new MemoryRetriever[Work[Source]](
+      index = mutable.Map[String, Work[Source]]()
+    ) {
+      override def apply(ids: Seq[String]): Future[RetrieverMultiResult[Work[Source]]] =
+        Future.successful(
+          RetrieverMultiResult(
+            found = Map.empty,
+            notFound = ids.map { id => id -> exception }.toMap
+          )
+        )
+    }
+
+    val sourceWorkLookup = new SourceWorkLookup(retriever)
+
+    whenReady(sourceWorkLookup.fetchAllWorks(workIdentifiers = List(workId)).failed) {
+      _ shouldBe exception
     }
   }
 
