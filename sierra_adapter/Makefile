@@ -9,6 +9,7 @@ SBT_APPS = sierra_bib_merger \
                sierra_item_merger \
                sierra_items_to_dynamo \
                sierra_reader
+SBT_NO_DOCKER_APPS =
 
 SBT_DOCKER_LIBRARIES    =
 SBT_NO_DOCKER_LIBRARIES = sierra_adapter_common
