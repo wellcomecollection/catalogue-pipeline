@@ -36,8 +36,8 @@ class SourceWorkLookupTest
 
     val retriever = new MemoryRetriever[Work[Source]]()
 
-    whenReady(fetchAllWorks(retriever = retriever, work).failed) {
-      _ shouldBe a[NoSuchElementException]
+    whenReady(fetchAllWorks(retriever = retriever, work)) {
+      _ shouldBe Seq(None)
     }
   }
 
