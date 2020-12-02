@@ -1,5 +1,5 @@
 resource "aws_dynamodb_table" "mets_adapter_table" {
-  name     = "mets-adapter-store"
+  name     = "mets-adapter-store-delta"
   hash_key = "id"
 
   attribute {
