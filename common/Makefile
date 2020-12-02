@@ -4,6 +4,7 @@ include $(ROOT)/makefiles/functions.Makefile
 STACK_ROOT  = common
 
 SBT_APPS =
+SBT_NO_DOCKER_APPS =
 
 SBT_DOCKER_LIBRARIES    = elasticsearch big_messaging pipeline_storage
 SBT_NO_DOCKER_LIBRARIES = display elasticsearch_typesafe internal_model

@@ -6,6 +6,7 @@ STACK_ROOT  = snapshots
 PROJECT_ID = catalogue_api
 
 SBT_APPS = snapshot_generator
+SBT_NO_DOCKER_APPS =
 
 SBT_DOCKER_LIBRARIES    =
 SBT_NO_DOCKER_LIBRARIES =
