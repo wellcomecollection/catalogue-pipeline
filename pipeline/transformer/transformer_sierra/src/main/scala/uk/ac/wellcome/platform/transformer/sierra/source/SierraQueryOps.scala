@@ -109,12 +109,7 @@ trait SierraQueryOps {
     def firstContent: Option[String] = subfields.contents.headOption
 
     def contentString(sep: String): Option[String] =
-      contents.mkStringOrNone(sep)
-  }
-
-  implicit class StringSeqOps(maybeStrings: Seq[String]) {
-    def mkStringOrNone(sep: String): Option[String] =
-      maybeStrings match {
+      contents match {
         case Nil     => None
         case strings => Some(strings.mkString(sep))
       }
