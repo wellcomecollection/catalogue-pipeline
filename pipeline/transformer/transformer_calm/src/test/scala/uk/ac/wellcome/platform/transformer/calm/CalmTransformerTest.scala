@@ -1,20 +1,20 @@
 package uk.ac.wellcome.platform.transformer.calm
 
-import java.time.{Instant, LocalDate}
+import java.time.LocalDate
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import uk.ac.wellcome.models.work.internal._
 import WorkState.Source
+import uk.ac.wellcome.platform.transformer.calm.generators.CalmRecordGenerators
 
-class CalmTransformerTest extends AnyFunSpec with Matchers {
+class CalmTransformerTest extends AnyFunSpec with Matchers with CalmRecordGenerators {
 
   val version = 3
-  val id = "123"
 
   it("transforms to a work") {
-    val record = calmRecord(
+    val record = createCalmRecordWith(
       "Title" -> "abc",
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
@@ -27,7 +27,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
         version = version,
         state = Source(
           SourceIdentifier(
-            value = id,
+            value = record.id,
             identifierType = CalmIdentifierTypes.recordId,
             ontologyType = "SourceIdentifier"
           ),
@@ -79,7 +79,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
   }
 
   it("transforms multiple identifiers") {
-    val record = calmRecord(
+    val record = createCalmRecordWith(
       "Title" -> "abc",
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
@@ -105,7 +105,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
   }
 
   it("transforms merge candidates") {
-    val record = calmRecord(
+    val record = createCalmRecordWith(
       "Title" -> "abc",
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
@@ -126,7 +126,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
   }
 
   it("transforms access conditions") {
-    val record = calmRecord(
+    val record = createCalmRecordWith(
       "Title" -> "abc",
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
@@ -148,7 +148,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
   }
 
   it("transforms description") {
-    val record = calmRecord(
+    val record = createCalmRecordWith(
       "Title" -> "abc",
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
@@ -161,7 +161,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
   }
 
   it("transforms physical description") {
-    val record = calmRecord(
+    val record = createCalmRecordWith(
       "Title" -> "abc",
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
@@ -175,7 +175,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
   }
 
   it("transforms production dates") {
-    val record = calmRecord(
+    val record = createCalmRecordWith(
       "Title" -> "abc",
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
@@ -201,7 +201,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
   }
 
   it("transforms subjects, stripping all HTML") {
-    val record = calmRecord(
+    val record = createCalmRecordWith(
       "Title" -> "abc",
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
@@ -217,7 +217,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
   }
 
   it("finds a single language") {
-    val record = calmRecord(
+    val record = createCalmRecordWith(
       "Title" -> "abc",
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
@@ -231,7 +231,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
   }
 
   it("only preserves i HTML tags when transforming title") {
-    val record = calmRecord(
+    val record = createCalmRecordWith(
       "Title" -> "<p> The <i>title</i> of the <strong>work</strong>",
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
@@ -245,7 +245,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
   }
 
   it("strips whitespace from the langauge") {
-    val recordA = calmRecord(
+    val recordA = createCalmRecordWith(
       "Title" -> "abc",
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
@@ -253,7 +253,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "Language" -> "English ",
       "CatalogueStatus" -> "Catalogued"
     )
-    val recordB = calmRecord(
+    val recordB = createCalmRecordWith(
       "Title" -> "abc",
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
@@ -268,7 +268,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
   }
 
   it("parses language codes that can have various labels") {
-    val recordA = calmRecord(
+    val recordA = createCalmRecordWith(
       "Title" -> "abc",
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
@@ -276,7 +276,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       "Language" -> "Dutch",
       "CatalogueStatus" -> "Catalogued"
     )
-    val recordB = calmRecord(
+    val recordB = createCalmRecordWith(
       "Title" -> "abc",
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
@@ -293,7 +293,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
   }
 
   it("transforms multiple contributors") {
-    val record = calmRecord(
+    val record = createCalmRecordWith(
       "Title" -> "abc",
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
@@ -309,7 +309,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
   }
 
   it("transforms multiple notes") {
-    val record = calmRecord(
+    val record = createCalmRecordWith(
       "Title" -> "abc",
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
@@ -327,7 +327,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
   }
 
   it("ignores case when transforming level") {
-    val record = calmRecord(
+    val record = createCalmRecordWith(
       "Title" -> "abc",
       "Level" -> "Subseries",
       "RefNo" -> "a/b/c",
@@ -340,49 +340,49 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
   }
 
   it("transforms to invisible work when CatalogueStatus is suppressible") {
-    val recordA = calmRecord(
+    val recordA = createCalmRecordWith(
       "Title" -> "abc",
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
       "CatalogueStatus" -> "Catalogued"
     )
-    val recordB = calmRecord(
+    val recordB = createCalmRecordWith(
       "Title" -> "abc",
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
       "CatalogueStatus" -> "Not yet available"
     )
-    val recordC = calmRecord(
+    val recordC = createCalmRecordWith(
       "Title" -> "abc",
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
       "CatalogueStatus" -> "Partially catalogued"
     )
-    val recordD = calmRecord(
+    val recordD = createCalmRecordWith(
       "Title" -> "abc",
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
       "CatalogueStatus" -> "   caTAlogued  "
     )
-    val recordE = calmRecord(
+    val recordE = createCalmRecordWith(
       "Title" -> "abc",
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
       "CatalogueStatus" -> "pArtialLy catalogued "
     )
-    val recordF = calmRecord(
+    val recordF = createCalmRecordWith(
       "Title" -> "abc",
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
       "CatalogueStatus" -> "Third-party metadata"
     )
-    val suppressibleRecordA = calmRecord(
+    val suppressibleRecordA = createCalmRecordWith(
       "Title" -> "abc",
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
       "CatalogueStatus" -> "Blonk"
     )
-    val suppressibleRecordB = calmRecord(
+    val suppressibleRecordB = createCalmRecordWith(
       "Title" -> "abc",
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
@@ -409,17 +409,17 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
   }
 
   it("Returns Work.Invisible[Source] when missing required source fields") {
-    val noTitle = calmRecord(
+    val noTitle = createCalmRecordWith(
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
       "CatalogueStatus" -> "Catalogued"
     )
-    val noLevel = calmRecord(
+    val noLevel = createCalmRecordWith(
       "Title" -> "Stay calm",
       "RefNo" -> "a/b/c",
       "CatalogueStatus" -> "Catalogued"
     )
-    val noRefNo = calmRecord(
+    val noRefNo = createCalmRecordWith(
       "Title" -> "Stay calm",
       "Level" -> "Collection",
       "CatalogueStatus" -> "Catalogued"
@@ -431,7 +431,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
   }
 
   it("returns a Work.Invisible[Source] if invalid access status") {
-    val record = calmRecord(
+    val record = createCalmRecordWith(
       "Title" -> "abc",
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
@@ -443,7 +443,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
   }
 
   it("returns a Work.Invisible[Source] if no title") {
-    val record = calmRecord(
+    val record = createCalmRecordWith(
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
       "AltRefNo" -> "a.b.c",
@@ -453,7 +453,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
   }
 
   it("returns a Work.Invisible[Source] if no format") {
-    val record = calmRecord(
+    val record = createCalmRecordWith(
       "Title" -> "abc",
       "RefNo" -> "a/b/c",
       "AltRefNo" -> "a.b.c",
@@ -463,7 +463,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
   }
 
   it("returns a Work.Invisible[Source] if invalid format") {
-    val record = calmRecord(
+    val record = createCalmRecordWith(
       "Title" -> "abc",
       "Level" -> "TopLevel",
       "RefNo" -> "a/b/c",
@@ -474,7 +474,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
   }
 
   it("returns a Work.Invisible[Source] if no RefNo") {
-    val record = calmRecord(
+    val record = createCalmRecordWith(
       "Title" -> "abc",
       "Level" -> "Collection",
       "AltRefNo" -> "a.b.c",
@@ -484,7 +484,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
   }
 
   it("does not add language code if language not recognised") {
-    val record = calmRecord(
+    val record = createCalmRecordWith(
       "Title" -> "abc",
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
@@ -503,7 +503,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
 
   it("suppresses Archives and Manuscripts Resource Guide works") {
     import InvisibilityReason._
-    val record = calmRecord(
+    val record = createCalmRecordWith(
       "Title" -> "Should suppress",
       "Level" -> "Section",
       "RefNo" -> "AMSG/X/Y",
@@ -513,7 +513,7 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       Work.Invisible[Source](
         state = Source(
           SourceIdentifier(
-            value = id,
+            value = record.id,
             identifierType = CalmIdentifierTypes.recordId,
             ontologyType = "SourceIdentifier"
           ),
@@ -553,14 +553,4 @@ class CalmTransformerTest extends AnyFunSpec with Matchers {
       )
     )
   }
-
-  def calmRecord(fields: (String, String)*): CalmRecord =
-    CalmRecord(
-      id = id,
-      retrievedAt = Instant.ofEpochSecond(123456789),
-      data = fields.foldLeft(Map.empty[String, List[String]]) {
-        case (map, (key, value)) =>
-          map + (key -> (value :: map.get(key).getOrElse(Nil)))
-      }
-    )
 }
