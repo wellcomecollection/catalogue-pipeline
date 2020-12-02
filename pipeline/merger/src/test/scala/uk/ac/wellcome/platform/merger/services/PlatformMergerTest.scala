@@ -155,7 +155,7 @@ class PlatformMergerTest
       )
 
     val expectedImage =
-      miroWork.data.imageData.head.toMergedImageWith(
+      miroWork.data.imageData.head.toInitialImageWith(
         modifiedTime = now,
         sourceWorks = SourceWorks(
           canonicalWork = expectedMergedWork.toSourceWork,
@@ -198,7 +198,7 @@ class PlatformMergerTest
       )
 
     val expectedImage =
-      miroWork.data.imageData.head.toMergedImageWith(
+      miroWork.data.imageData.head.toInitialImageWith(
         modifiedTime = now,
         sourceWorks = SourceWorks(
           canonicalWork = expectedMergedWork.toSourceWork,
@@ -250,7 +250,7 @@ class PlatformMergerTest
         redirect = IdState.Identifiable(sierraDigitalWork.sourceIdentifier)
       )
 
-    val expectedImage = miroWork.data.imageData.head.toMergedImageWith(
+    val expectedImage = miroWork.data.imageData.head.toInitialImageWith(
       modifiedTime = now,
       sourceWorks = SourceWorks(
         canonicalWork = expectedMergedWork.toSourceWork,
@@ -366,7 +366,7 @@ class PlatformMergerTest
       )
 
     val expectedImage =
-      metsWork.data.imageData.head.toMergedImageWith(
+      metsWork.data.imageData.head.toInitialImageWith(
         modifiedTime = now,
         sourceWorks = SourceWorks(
           canonicalWork = expectedMergedWork.toSourceWork,
@@ -437,7 +437,7 @@ class PlatformMergerTest
         redirect = IdState.Identifiable(sierraPhysicalWork.sourceIdentifier)
       )
 
-    val expectedImage = miroWork.data.imageData.head.toMergedImageWith(
+    val expectedImage = miroWork.data.imageData.head.toInitialImageWith(
       modifiedTime = now,
       sourceWorks = SourceWorks(
         canonicalWork = expectedMergedWork.toSourceWork,
@@ -548,7 +548,7 @@ class PlatformMergerTest
       Some(now))
     result.mergedImagesWithTime(now) should have length 1
     result.mergedImagesWithTime(now).head shouldBe miroWork.data.imageData.head
-      .toMergedImageWith(
+      .toInitialImageWith(
         modifiedTime = now,
         sourceWorks = SourceWorks(
           canonicalWork = miroWork.toSourceWork,

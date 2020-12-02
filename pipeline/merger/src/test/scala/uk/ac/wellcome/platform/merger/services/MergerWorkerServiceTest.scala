@@ -389,6 +389,6 @@ class MergerWorkerServiceTest
   def getWorksSent(senders: Senders): Seq[String] =
     getWorksSent(senders.works)
 
-  def getImagesSent(senders: Senders): Seq[Image[ImageState.Merged]] =
+  def getImagesSent(senders: Senders): Seq[Image[ImageState.Initial]] =
     getImagesSent(senders.images)
 }

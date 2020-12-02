@@ -40,7 +40,7 @@ sealed trait ImageState {
   *      |
   *      | (merger)
   *      ▼
-  *    Merged
+  *    Initial
   *      |
   *      | (image id minter)
   *      ▼
@@ -53,7 +53,7 @@ sealed trait ImageState {
   */
 object ImageState {
 
-  case class Merged(
+  case class Initial(
     sourceIdentifier: SourceIdentifier,
     modifiedTime: Instant,
     source: ImageSource[DataState.Unidentified]

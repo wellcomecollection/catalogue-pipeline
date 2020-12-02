@@ -58,16 +58,16 @@ trait ImageGenerators
         )
       )
 
-    def toMergedImageWith(
+    def toInitialImageWith(
       modifiedTime: Instant = instantInLast30Days,
       sourceWorks: SourceWorks[DataState.Unidentified] = SourceWorks(
         canonicalWork = mergedWork().toSourceWork,
         redirectedWork = None
       )
-    ): Image[ImageState.Merged] = Image(
+    ): Image[ImageState.Initial] = Image(
       version = imageData.version,
       locations = imageData.locations,
-      state = ImageState.Merged(
+      state = ImageState.Initial(
         sourceIdentifier = imageData.id.sourceIdentifier,
         modifiedTime = modifiedTime,
         source = sourceWorks
@@ -113,7 +113,7 @@ trait ImageGenerators
 
     def toIdentified = toIdentifiedWith()
 
-    def toMergedImage = toMergedImageWith()
+    def toInitialImage = toInitialImageWith()
 
     def toIdentifiedImage = toIdentifiedImageWith()
 

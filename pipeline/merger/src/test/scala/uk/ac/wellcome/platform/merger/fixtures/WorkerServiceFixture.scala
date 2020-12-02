@@ -59,6 +59,6 @@ trait WorkerServiceFixture extends LocalWorksVhs with SQS with Akka {
     workSender.messages.map { _.body }
 
   def getImagesSent(
-    imageSender: MemoryMessageSender): Seq[Image[ImageState.Merged]] =
-    imageSender.getMessages[Image[ImageState.Merged]]
+    imageSender: MemoryMessageSender): Seq[Image[ImageState.Initial]] =
+    imageSender.getMessages[Image[ImageState.Initial]]
 }
