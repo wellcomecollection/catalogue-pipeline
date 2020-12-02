@@ -97,7 +97,7 @@ class SourceWorkLookupTest
 
   it(
     "fails if the retriever fails with something other than RetrieverNotFoundException") {
-    val workId = WorkIdentifier(randomAlphanumeric(), version = None)
+    val workId = WorkIdentifier(randomAlphanumeric(), version = Some(1))
 
     val exception = new Throwable("BOOM!")
 
