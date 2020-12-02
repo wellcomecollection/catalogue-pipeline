@@ -69,5 +69,12 @@ class MetsStoreTest extends AnyFunSpec with Matchers {
     )
 
   def metsSourceData(file: String, createdDate: Instant, version: Int = 1) =
-    MetsSourceData(bucket = "bucket", path = "path", version = version, file = file, createdDate = createdDate, deleted = false,manifestations = Nil)
+    MetsSourceData(
+      bucket = "bucket",
+      path = "path",
+      version = version,
+      file = file,
+      createdDate = createdDate,
+      deleted = false,
+      manifestations = Nil)
 }

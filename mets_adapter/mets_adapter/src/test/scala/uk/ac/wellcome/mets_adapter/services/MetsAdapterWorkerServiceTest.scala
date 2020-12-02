@@ -257,7 +257,14 @@ class MetsAdapterWorkerServiceTest
     })
 
   def metsSourceData(file: String, createdDate: Instant, version: Int = 1) =
-    MetsSourceData(bucket = "bucket", path = "root", version = version, file = file, createdDate = createdDate, deleted = false, manifestations = Nil)
+    MetsSourceData(
+      bucket = "bucket",
+      path = "root",
+      version = version,
+      file = file,
+      createdDate = createdDate,
+      deleted = false,
+      manifestations = Nil)
 
   def createBagRegistrationNotificationWith(
     space: String,

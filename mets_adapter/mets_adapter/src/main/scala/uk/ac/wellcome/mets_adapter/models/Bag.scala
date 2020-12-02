@@ -23,7 +23,8 @@ case class Bag(info: BagInfo,
             // If the only file in the bag is the METS file, that means
             // the bag has been deleted. Check https://github.com/wellcomecollection/platform/issues/4893
             deleted = containsOnlyMetsFile(metsFile),
-            manifestations = manifestations)
+            manifestations = manifestations
+          )
         }
       }
 
