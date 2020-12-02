@@ -110,9 +110,6 @@ trait SierraQueryOps {
 
     def contentString(sep: String): Option[String] =
       contents.mkStringOrNone(sep)
-
-    def contentString: Option[String] =
-      contentString(sep = "")
   }
 
   implicit class StringSeqOps(maybeStrings: Seq[String]) {
