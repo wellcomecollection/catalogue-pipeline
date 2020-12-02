@@ -13,9 +13,13 @@ trait Retriever[T] {
     */
   def apply(id: String): Future[T] =
     apply(Seq(id))
-      .map { _(id) }
-      .recover { case t: Throwable => throw new RetrieverNotFoundException(id) }
+      .map { result =>
+        result.found.getOrElse(
+          id,
+          throw result.notFound(id)
+        )
+      }
 
   /** Retrieves a series of documents from the store. */
-  def apply(ids: Seq[String]): Future[Map[String, T]]
+  def apply(ids: Seq[String]): Future[RetrieverMultiResult[T]]
 }
