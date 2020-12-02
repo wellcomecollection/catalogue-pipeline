@@ -78,9 +78,12 @@ trait IdentifiersGenerators extends RandomGenerators {
   def createMiroSourceIdentifier: SourceIdentifier =
     createMiroSourceIdentifierWith()
 
+  def createCalmRecordID: String =
+    randomUUID.toString
+
   def createCalmSourceIdentifier: SourceIdentifier =
     SourceIdentifier(
-      value = randomAlphanumeric(length = 6),
+      value = createCalmRecordID,
       identifierType = IdentifierType("calm-record-id"),
       ontologyType = "Work"
     )
