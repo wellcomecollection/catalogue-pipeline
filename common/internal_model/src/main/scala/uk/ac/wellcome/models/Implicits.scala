@@ -15,7 +15,7 @@ object Implicits {
   // flamegraphs using the scalac-profiling plugin. See this blog post for
   // info: https://www.scala-lang.org/blog/2018/06/04/scalac-profiling.html
   //
-  // NOTE: the ordering here is important: we derive Image[Source and IdentifiedSource]
+  // NOTE: the ordering here is important: we derive ImageData[_]
   // then WorkData, then the other images and works due to the order of
   // dependencies (thus preventing duplicate work)
 
