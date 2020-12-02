@@ -31,7 +31,10 @@ trait CalmRecordGenerators extends IdentifiersGenerators {
   }
 }
 
-class CalmRecordGeneratorsTest extends AnyFunSpec with Matchers with CalmRecordGenerators {
+class CalmRecordGeneratorsTest
+    extends AnyFunSpec
+    with Matchers
+    with CalmRecordGenerators {
   it("assembles the data correctly") {
     val record = createCalmRecordWith(
       "Place" -> "London",
@@ -39,6 +42,8 @@ class CalmRecordGeneratorsTest extends AnyFunSpec with Matchers with CalmRecordG
       "Date" -> "2020"
     )
 
-    record.data shouldBe Map("Place" -> List("London", "Paris"), "Date" -> List("2020"))
+    record.data shouldBe Map(
+      "Place" -> List("London", "Paris"),
+      "Date" -> List("2020"))
   }
 }

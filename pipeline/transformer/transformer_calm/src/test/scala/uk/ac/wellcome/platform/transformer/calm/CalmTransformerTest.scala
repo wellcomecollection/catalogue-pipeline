@@ -9,7 +9,10 @@ import uk.ac.wellcome.models.work.internal._
 import WorkState.Source
 import uk.ac.wellcome.platform.transformer.calm.generators.CalmRecordGenerators
 
-class CalmTransformerTest extends AnyFunSpec with Matchers with CalmRecordGenerators {
+class CalmTransformerTest
+    extends AnyFunSpec
+    with Matchers
+    with CalmRecordGenerators {
 
   val version = 3
 

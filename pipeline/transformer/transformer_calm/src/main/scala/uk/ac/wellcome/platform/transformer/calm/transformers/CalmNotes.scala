@@ -22,7 +22,8 @@ object CalmNotes extends CalmOps {
     ("Arrangement", ArrangementNote(_))
   )
 
-  def apply(record: CalmRecord, languageNote: Option[LanguageNote]): List[Note] =
+  def apply(record: CalmRecord,
+            languageNote: Option[LanguageNote]): List[Note] =
     notesMapping.flatMap {
       case (key, createNote) =>
         record
