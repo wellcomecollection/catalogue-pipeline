@@ -36,7 +36,10 @@ class RelationEmbedderWorkerServiceTest
     with WorkGenerators {
 
   def work(path: String) =
-    identifiedWork(createSourceIdentifierWith(value = path))
+    identifiedWork(
+      sourceIdentifier =createSourceIdentifierWith(value = path),
+      canonicalId = path
+    )
       .collectionPath(CollectionPath(path = path))
       .title(path)
 
@@ -196,8 +199,8 @@ class RelationEmbedderWorkerServiceTest
                         mutable.Map[String, Work[Denormalised]],
                         MemoryMessageSender),
                        R]): R =
-    withLocalIdentifiedWorksIndex { mergedIndex =>
-      storeWorks(mergedIndex, works)
+    withLocalIdentifiedWorksIndex { identifiedIndex =>
+      storeWorks(identifiedIndex, works)
       withLocalSqsQueuePair() { queuePair =>
         withActorSystem { implicit actorSystem =>
           withSQSStream[NotificationMessage, R](
@@ -208,7 +211,7 @@ class RelationEmbedderWorkerServiceTest
               mutable.Map.empty[String, Work[Denormalised]]
             val relationsService =
               if (fails) FailingRelationsService
-              else new PathQueryRelationsService(elasticClient, mergedIndex, 10)
+              else new PathQueryRelationsService(elasticClient, identifiedIndex, 10)
             val workerService = new RelationEmbedderWorkerService[String](
               sqsStream = sqsStream,
               msgSender = messageSender,

@@ -12,6 +12,7 @@ case class RelationsRequestBuilder(index: Index,
   // return core fields
   private val relationsFieldWhitelist = List(
     "version",
+    "state.canonicalId",
     "state.sourceIdentifier.identifierType.id",
     "state.sourceIdentifier.identifierType.label",
     "state.sourceIdentifier.value",
