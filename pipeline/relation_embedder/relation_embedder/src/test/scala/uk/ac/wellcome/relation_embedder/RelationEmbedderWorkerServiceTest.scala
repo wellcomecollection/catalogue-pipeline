@@ -37,10 +37,9 @@ class RelationEmbedderWorkerServiceTest
 
   def work(path: String) =
     identifiedWork(
-      sourceIdentifier =createSourceIdentifierWith(value = path),
+      sourceIdentifier = createSourceIdentifierWith(value = path),
       canonicalId = path
-    )
-      .collectionPath(CollectionPath(path = path))
+    ).collectionPath(CollectionPath(path = path))
       .title(path)
 
   def storeWorks(index: Index,
@@ -211,7 +210,11 @@ class RelationEmbedderWorkerServiceTest
               mutable.Map.empty[String, Work[Denormalised]]
             val relationsService =
               if (fails) FailingRelationsService
-              else new PathQueryRelationsService(elasticClient, identifiedIndex, 10)
+              else
+                new PathQueryRelationsService(
+                  elasticClient,
+                  identifiedIndex,
+                  10)
             val workerService = new RelationEmbedderWorkerService[String](
               sqsStream = sqsStream,
               msgSender = messageSender,
