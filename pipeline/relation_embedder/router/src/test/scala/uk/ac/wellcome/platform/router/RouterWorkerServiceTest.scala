@@ -76,7 +76,8 @@ class RouterWorkerServiceTest
   }
 
   it("sends on an invisible work") {
-    val work = identifiedWork().collectionPath(CollectionPath("a/2")).invisible()
+    val work =
+      identifiedWork().collectionPath(CollectionPath("a/2")).invisible()
 
     val indexer = new MemoryIndexer[Work[Denormalised]](
       mutable.Map[String, Work[Denormalised]]())

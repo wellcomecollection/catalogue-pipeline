@@ -2,7 +2,7 @@ package uk.ac.wellcome.models.work.internal
 
 import java.time.Instant
 
-import WorkState.{Indexed, Identified}
+import WorkState.{Identified, Indexed}
 
 /** Holds relations for a particular work.
   *

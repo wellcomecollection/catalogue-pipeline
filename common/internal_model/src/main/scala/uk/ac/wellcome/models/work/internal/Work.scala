@@ -228,21 +228,22 @@ object WorkFsm {
     def redirect(redirect: IdState.Identifiable) = redirect
   }
 
-  implicit val identifiedToDenormalised = new Transition[Identified, Denormalised] {
-    def state(state: Identified,
-              data: WorkData[DataState.Identified],
-              relations: Relations[DataState.Identified]): Denormalised =
-      Denormalised(
-        sourceIdentifier = state.sourceIdentifier,
-        canonicalId = state.canonicalId,
-        modifiedTime = state.modifiedTime,
-        relations = relations
-      )
+  implicit val identifiedToDenormalised =
+    new Transition[Identified, Denormalised] {
+      def state(state: Identified,
+                data: WorkData[DataState.Identified],
+                relations: Relations[DataState.Identified]): Denormalised =
+        Denormalised(
+          sourceIdentifier = state.sourceIdentifier,
+          canonicalId = state.canonicalId,
+          modifiedTime = state.modifiedTime,
+          relations = relations
+        )
 
-    def data(data: WorkData[DataState.Identified]) = data
+      def data(data: WorkData[DataState.Identified]) = data
 
-    def redirect(redirect: IdState.Identified) = redirect
-  }
+      def redirect(redirect: IdState.Identified) = redirect
+    }
 
   implicit val denormalisedToIndexed = new Transition[Denormalised, Indexed] {
     def state(state: Denormalised,

@@ -36,7 +36,8 @@ class RelationsServiceTest
       .collectionPath(CollectionPath(path = path))
       .title(path)
 
-  def storeWorks(index: Index, works: List[Work[Identified]] = works): Assertion =
+  def storeWorks(index: Index,
+                 works: List[Work[Identified]] = works): Assertion =
     insertIntoElasticsearch(index, works: _*)
 
   /** The following tests use works within this tree:

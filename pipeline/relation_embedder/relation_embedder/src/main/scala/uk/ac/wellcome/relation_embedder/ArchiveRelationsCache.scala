@@ -6,7 +6,8 @@ import grizzled.slf4j.Logging
 import uk.ac.wellcome.models.work.internal._
 import WorkState.Identified
 
-class ArchiveRelationsCache(works: Map[String, Work[Identified]]) extends Logging {
+class ArchiveRelationsCache(works: Map[String, Work[Identified]])
+    extends Logging {
 
   def apply(work: Work[Identified]): Relations[DataState.Identified] =
     work.data.collectionPath
@@ -37,8 +38,7 @@ class ArchiveRelationsCache(works: Map[String, Work[Identified]]) extends Loggin
 
   def numParents = parentMapping.size
 
-  private def getChildren(
-    path: String): List[Relation[DataState.Identified]] =
+  private def getChildren(path: String): List[Relation[DataState.Identified]] =
     childMapping
       .get(path)
       // Relations might not exist in the cache if e.g. the work is not Visible
