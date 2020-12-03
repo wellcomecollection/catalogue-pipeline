@@ -2,7 +2,7 @@ package uk.ac.wellcome.models.work.internal
 
 import java.time.Instant
 
-import WorkState.{Indexed, Merged}
+import WorkState.{Indexed, Identified}
 
 /** Holds relations for a particular work.
   *
@@ -45,13 +45,16 @@ case class Relation[State <: DataState](
 
 object Relation {
 
-  def apply(work: Work[Merged],
+  def apply(work: Work[Identified],
             depth: Int,
             numChildren: Int,
-            numDescendents: Int): Relation[DataState.Unidentified] =
-    Relation[DataState.Unidentified](
+            numDescendents: Int): Relation[DataState.Identified] =
+    Relation[DataState.Identified](
       data = work.data,
-      id = IdState.Identifiable(work.state.sourceIdentifier),
+      id = IdState.Identified(
+        sourceIdentifier = work.state.sourceIdentifier,
+        canonicalId = work.state.canonicalId
+      ),
       depth = depth,
       numChildren = numChildren,
       numDescendents = numDescendents,
