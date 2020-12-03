@@ -8,8 +8,8 @@ locals {
   oauth_url   = "https://auth.wellcomecollection.org/oauth2/token"
 
   # Store
-  mets_full_access_policy = data.terraform_remote_state.catalogue_infra_critical.outputs.mets_dynamo_full_access_policy
-  mets_adapter_table_name = data.terraform_remote_state.catalogue_infra_critical.outputs.mets_dynamo_table_name
+  mets_full_access_policy = data.aws_iam_policy_document.mets_dynamo_full_access_policy.json
+  mets_adapter_table_name = aws_dynamodb_table.mets_adapter_table.id
 
   # Infra stuff
   aws_region = "eu-west-1"

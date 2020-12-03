@@ -30,17 +30,3 @@ output "vhs_miro_inventory_table_name" {
 output "vhs_miro_inventory_assumable_read_role" {
   value = module.vhs_miro_migration.assumable_read_role
 }
-
-# Mets Store
-
-output "mets_dynamo_full_access_policy" {
-  value = data.aws_iam_policy_document.mets_dynamo_full_access_policy.json
-}
-
-output "mets_dynamo_read_policy" {
-  value = data.aws_iam_policy_document.mets_dynamo_read_policy.json
-}
-
-output "mets_dynamo_table_name" {
-  value = aws_dynamodb_table.mets_adapter_table.id
-}

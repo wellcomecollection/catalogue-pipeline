@@ -5,7 +5,7 @@ import java.time.Instant
 import org.scalatest.matchers.should.Matchers
 import org.apache.commons.io.IOUtils
 import org.scalatest.funspec.AnyFunSpec
-import uk.ac.wellcome.mets_adapter.models.MetsLocation
+import uk.ac.wellcome.mets_adapter.models.MetsSourceData
 import uk.ac.wellcome.models.work.internal.License
 import uk.ac.wellcome.platform.transformer.mets.fixtures.MetsGenerators
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
@@ -87,12 +87,13 @@ class MetsXmlTransformerTest
                 createdDate: Instant,
                 manifestations: Map[String, Option[String]] = Map.empty) = {
 
-    val metsLocation = MetsLocation(
+    val metsLocation = MetsSourceData(
       "bucket",
       "path",
       1,
       if (root.nonEmpty) "root.xml" else "nonexistent.xml",
       createdDate,
+      deleted = false,
       manifestations.toList.map { case (file, _) => file }
     )
 

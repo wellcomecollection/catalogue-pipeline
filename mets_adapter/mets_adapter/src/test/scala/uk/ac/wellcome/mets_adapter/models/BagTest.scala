@@ -16,7 +16,7 @@ class BagTest extends AnyFunSpec with Matchers {
           "data/alto/b30246039_0002.xml" -> "v1/data/alto/b30246039_0002.xml",
         )
       )
-      bag.file shouldBe Right("v1/data/b30246039.xml")
+      bag.metsFile shouldBe Right("v1/data/b30246039.xml")
     }
 
     it("parses METS file from Bag when not first file") {
@@ -28,7 +28,7 @@ class BagTest extends AnyFunSpec with Matchers {
           "data/alto/b30246039_0002.xml" -> "v1/data/alto/b30246039_0002.xml",
         )
       )
-      bag.file shouldBe Right("v1/data/b30246039.xml")
+      bag.metsFile shouldBe Right("v1/data/b30246039.xml")
     }
 
     it("parses METS file from Bag when b-number ending with x") {
@@ -36,7 +36,7 @@ class BagTest extends AnyFunSpec with Matchers {
         s3Path = "digitised/b3024603x",
         files = List("data/b3024603x.xml" -> "v1/data/b3024603x.xml")
       )
-      bag.file shouldBe Right("v1/data/b3024603x.xml")
+      bag.metsFile shouldBe Right("v1/data/b3024603x.xml")
     }
 
     it("doesn't parse METS file from Bag when name not prefixed with 'data/'") {
@@ -44,7 +44,7 @@ class BagTest extends AnyFunSpec with Matchers {
         s3Path = "digitised/b30246039",
         files = List("b30246039.xml" -> "v1/data/b30246039.xml")
       )
-      bag.file shouldBe a[Left[_, _]]
+      bag.metsFile shouldBe a[Left[_, _]]
     }
 
     it("doesn't parse METS file from Bag when name isn't XML'") {
@@ -52,7 +52,7 @@ class BagTest extends AnyFunSpec with Matchers {
         s3Path = "digitised/b30246039",
         files = List("data/b30246039.txt" -> "v1/data/b30246039.xml")
       )
-      bag.file shouldBe a[Left[_, _]]
+      bag.metsFile shouldBe a[Left[_, _]]
     }
   }
 
@@ -93,15 +93,34 @@ class BagTest extends AnyFunSpec with Matchers {
       val bag = createBag(
         s3Path = "digitised/b30246039",
         version = "v2",
-        files = List("data/b30246039.xml" -> "v1/data/b30246039.xml"),
+        files = List(
+          "data/b30246039.xml" -> "v1/data/b30246039.xml",
+          "objects/blahbluh.jp2" -> "v1/objects/blahbluh.jp2"),
       )
-      bag.metsLocation shouldBe Right(
-        MetsLocation(
-          "bucket",
-          "digitised/b30246039",
-          2,
-          "v1/data/b30246039.xml",
-          bag.createdDate))
+      bag.metsSourceData shouldBe Right(
+        MetsSourceData(
+          bucket = "bucket",
+          path = "digitised/b30246039",
+          version = 2,
+          file = "v1/data/b30246039.xml",
+          createdDate = bag.createdDate,
+          deleted = false))
+    }
+
+    it("marks a METS data as deleted if there are no other assets except METS") {
+      val bag = createBag(
+        s3Path = "digitised/b30246039",
+        version = "v2",
+        files = List("data/b30246039.xml" -> "v1/data/b30246039.xml")
+      )
+      bag.metsSourceData shouldBe Right(
+        MetsSourceData(
+          bucket = "bucket",
+          path = "digitised/b30246039",
+          version = 2,
+          file = "v1/data/b30246039.xml",
+          createdDate = bag.createdDate,
+          deleted = true))
     }
 
     it("fails extracting METS data if invalid version string") {
@@ -109,14 +128,14 @@ class BagTest extends AnyFunSpec with Matchers {
         version = "oops",
         files = List("data/b30246039.xml" -> "v1/data/b30246039.xml"),
       )
-      bag.metsLocation shouldBe a[Left[_, _]]
-      bag.metsLocation.left.get.getMessage shouldBe "Couldn't parse version"
+      bag.metsSourceData shouldBe a[Left[_, _]]
+      bag.metsSourceData.left.get.getMessage shouldBe "Couldn't parse version"
     }
 
     it("fails extracting METS data if invalid no METS file") {
       val bag = createBag(files = Nil)
-      bag.metsLocation shouldBe a[Left[_, _]]
-      bag.metsLocation.left.get.getMessage shouldBe "Couldn't find METS file"
+      bag.metsSourceData shouldBe a[Left[_, _]]
+      bag.metsSourceData.left.get.getMessage shouldBe "Couldn't find METS file"
     }
   }
 

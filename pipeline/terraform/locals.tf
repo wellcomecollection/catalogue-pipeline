@@ -14,8 +14,8 @@ locals {
   sierra_merged_bibs_topic_arn  = data.terraform_remote_state.sierra_adapter.outputs.merged_bibs_topic_arn
 
   # Mets adapter VHS
-  mets_adapter_read_policy = data.terraform_remote_state.catalogue_infra_critical.outputs.mets_dynamo_read_policy
-  mets_adapter_table_name  = data.terraform_remote_state.catalogue_infra_critical.outputs.mets_dynamo_table_name
+  mets_adapter_read_policy = data.terraform_remote_state.mets_adapter.outputs.mets_dynamo_read_policy
+  mets_adapter_table_name  = data.terraform_remote_state.mets_adapter.outputs.mets_dynamo_table_name
 
   # Mets adapter topics
   mets_adapter_topic_arn = data.terraform_remote_state.mets_adapter.outputs.mets_adapter_topic_arn
