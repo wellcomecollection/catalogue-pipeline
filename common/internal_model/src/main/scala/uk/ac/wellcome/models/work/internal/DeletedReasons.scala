@@ -1,8 +1,8 @@
 package uk.ac.wellcome.models.work.internal
 
-sealed trait DeletedReasons
+sealed trait DeletedReason
 
-object DeletedReasons {
-  case class DeletedFromSource(info: String) extends DeletedReasons
-  case class SuppressedFromSource(info: String) extends DeletedReasons
+object DeletedReason {
+  case class DeletedFromSource(info: String) extends DeletedReason
+  case class SuppressedFromSource(info: String) extends DeletedReason
 }

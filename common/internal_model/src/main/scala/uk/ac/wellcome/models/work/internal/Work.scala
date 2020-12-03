@@ -64,7 +64,7 @@ object Work {
   case class Deleted[State <: WorkState](
     version: Int,
     state: State,
-    deletedReasons: Option[DeletedReasons] = None,
+    deletedReason: Option[DeletedReason] = None,
   ) extends Work[State] {
     val data = WorkData[State#WorkDataState]()
   }

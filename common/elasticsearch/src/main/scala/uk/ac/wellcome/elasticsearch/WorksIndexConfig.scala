@@ -269,7 +269,7 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
         keywordField("type"),
         keywordField("info")
       ),
-      objectField("deletedReasons").fields(
+      objectField("deletedReason").fields(
         keywordField("type"),
         keywordField("info")
       )
