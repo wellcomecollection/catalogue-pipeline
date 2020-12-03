@@ -4,11 +4,11 @@ import scala.annotation.tailrec
 import grizzled.slf4j.Logging
 
 import uk.ac.wellcome.models.work.internal._
-import WorkState.Merged
+import WorkState.Identified
 
-class ArchiveRelationsCache(works: Map[String, Work[Merged]]) extends Logging {
+class ArchiveRelationsCache(works: Map[String, Work[Identified]]) extends Logging {
 
-  def apply(work: Work[Merged]): Relations[DataState.Unidentified] =
+  def apply(work: Work[Identified]): Relations[DataState.Identified] =
     work.data.collectionPath
       .map {
         case CollectionPath(path, _, _) =>
@@ -38,7 +38,7 @@ class ArchiveRelationsCache(works: Map[String, Work[Merged]]) extends Logging {
   def numParents = parentMapping.size
 
   private def getChildren(
-    path: String): List[Relation[DataState.Unidentified]] =
+    path: String): List[Relation[DataState.Identified]] =
     childMapping
       .get(path)
       // Relations might not exist in the cache if e.g. the work is not Visible
@@ -47,8 +47,8 @@ class ArchiveRelationsCache(works: Map[String, Work[Merged]]) extends Logging {
       .toList
 
   private def getSiblings(
-    path: String): (List[Relation[DataState.Unidentified]],
-                    List[Relation[DataState.Unidentified]]) = {
+    path: String): (List[Relation[DataState.Identified]],
+                    List[Relation[DataState.Identified]]) = {
     val siblings = parentMapping
       .get(path)
       .map(childMapping)
@@ -64,8 +64,8 @@ class ArchiveRelationsCache(works: Map[String, Work[Merged]]) extends Logging {
 
   @tailrec
   private def getAncestors(path: String,
-                           accum: List[Relation[DataState.Unidentified]] = Nil)
-    : List[Relation[DataState.Unidentified]] =
+                           accum: List[Relation[DataState.Identified]] = Nil)
+    : List[Relation[DataState.Identified]] =
     parentMapping.get(path) match {
       case None => accum
       case Some(parentPath) =>
@@ -123,7 +123,7 @@ class ArchiveRelationsCache(works: Map[String, Work[Merged]]) extends Logging {
 
 object ArchiveRelationsCache {
 
-  def apply(works: Seq[Work[Merged]]): ArchiveRelationsCache =
+  def apply(works: Seq[Work[Identified]]): ArchiveRelationsCache =
     new ArchiveRelationsCache(
       works
         .map { case work => work.data.collectionPath -> work }

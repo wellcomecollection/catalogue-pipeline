@@ -20,7 +20,7 @@ import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.WorkGenerators
-import uk.ac.wellcome.models.work.internal.WorkState.{Denormalised, Merged}
+import uk.ac.wellcome.models.work.internal.WorkState.{Denormalised, Identified}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
 import uk.ac.wellcome.pipeline_storage.MemoryIndexer
@@ -36,11 +36,11 @@ class RelationEmbedderWorkerServiceTest
     with WorkGenerators {
 
   def work(path: String) =
-    mergedWork(createSourceIdentifierWith(value = path))
+    identifiedWork(createSourceIdentifierWith(value = path))
       .collectionPath(CollectionPath(path = path))
       .title(path)
 
-  def storeWorks(index: Index, works: List[Work[Merged]] = works): Assertion =
+  def storeWorks(index: Index, works: List[Work[Identified]] = works): Assertion =
     insertIntoElasticsearch(index, works: _*)
 
   /** The following tests use works within this tree:
@@ -95,7 +95,7 @@ class RelationEmbedderWorkerServiceTest
     List(workA, workB, workC, workD, workE, work2, work1)
 
   def relations(index: mutable.Map[String, Work[Denormalised]])
-    : Map[String, Relations[DataState.Unidentified]] =
+    : Map[String, Relations[DataState.Identified]] =
     index.map { case (key, work) => key -> work.state.relations }.toMap
 
   it("denormalises a batch containing a list of selectors") {
@@ -189,13 +189,13 @@ class RelationEmbedderWorkerServiceTest
     }
   }
 
-  def withWorkerService[R](works: List[Work[Merged]] = works,
+  def withWorkerService[R](works: List[Work[Identified]] = works,
                            fails: Boolean = false)(
     testWith: TestWith[(QueuePair,
                         mutable.Map[String, Work[Denormalised]],
                         MemoryMessageSender),
                        R]): R =
-    withLocalMergedWorksIndex { mergedIndex =>
+    withLocalIdentifiedWorksIndex { mergedIndex =>
       storeWorks(mergedIndex, works)
       withLocalSqsQueuePair() { queuePair =>
         withActorSystem { implicit actorSystem =>
@@ -223,10 +223,10 @@ class RelationEmbedderWorkerServiceTest
     }
 
   object FailingRelationsService extends RelationsService {
-    def getAffectedWorks(batch: Batch): Source[Work[Merged], NotUsed] =
-      Source.single(()).map[Work[Merged]](throw new Exception("Failing"))
+    def getAffectedWorks(batch: Batch): Source[Work[Identified], NotUsed] =
+      Source.single(()).map[Work[Identified]](throw new Exception("Failing"))
 
-    def getCompleteTree(batch: Batch): Source[Work[Merged], NotUsed] =
-      Source.single(()).map[Work[Merged]](throw new Exception("Failing"))
+    def getCompleteTree(batch: Batch): Source[Work[Identified], NotUsed] =
+      Source.single(()).map[Work[Identified]](throw new Exception("Failing"))
   }
 }
