@@ -102,9 +102,10 @@ class BatcherWorkerService[MsgDestination](
     Source(groupedSelectors.toList).map {
       case (rootPath, selectorsAndIndices) =>
         // For batches consisting of a really large number of selectors, we
-        // should just send the whole tree: it will avoid really long queries
-        // in the relation embedder, and it is likely pretty much all the nodes
-        // will be denormalised anyway.
+        // should just send the whole tree: this avoids really long queries
+        // in the relation embedder, or duplicate work of creating the archives
+        // cache multiple times, and it is likely pretty much all the nodes will
+        // be denormalised anyway.
         val (selectors, msgIndices) = selectorsAndIndices.unzip(identity)
         val batch =
           if (selectors.size > maxBatchSize)
