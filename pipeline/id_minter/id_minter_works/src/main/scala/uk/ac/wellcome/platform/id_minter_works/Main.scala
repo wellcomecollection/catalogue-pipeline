@@ -18,8 +18,8 @@ import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.SQSBuilder
 import uk.ac.wellcome.pipeline_storage.typesafe.{
-  ElasticRetrieverBuilder,
-  ElasticIndexerBuilder
+  ElasticIndexerBuilder,
+  ElasticRetrieverBuilder
 }
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.Implicits._

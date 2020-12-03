@@ -52,8 +52,12 @@ class IdMinterWorkerService[Destination](
 
   def processMessage(message: NotificationMessage): Future[Unit] =
     jsonRetriever(message.body)
-      .flatMap { json => Future.fromTry(embedIds(json)) }
-      .flatMap { updatedJson => Future.fromTry(decodeJson[Work[Identified]](updatedJson)) }
+      .flatMap { json =>
+        Future.fromTry(embedIds(json))
+      }
+      .flatMap { updatedJson =>
+        Future.fromTry(decodeJson[Work[Identified]](updatedJson))
+      }
       .flatMap { work =>
         workIndexer.index(work).flatMap {
           case Left(failedDocuments) =>
