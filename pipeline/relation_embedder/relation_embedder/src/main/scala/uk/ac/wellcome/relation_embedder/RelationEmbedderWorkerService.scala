@@ -57,7 +57,7 @@ class RelationEmbedderWorkerService[MsgDestination](
 
             denormalisedWorks
               .groupedWithin(indexBatchSize, indexFlushInterval)
-              .mapAsync(2) { works =>
+              .mapAsync(1) { works =>
                 workIndexer.index(works).flatMap {
                   case Left(failedWorks) =>
                     Future.failed(
@@ -66,9 +66,9 @@ class RelationEmbedderWorkerService[MsgDestination](
                   case Right(_) => Future.successful(works.toList)
                 }
               }
-              .mapConcat(identity)
-              .mapAsync(3) { work =>
-                Future(msgSender.send(work.id)).flatMap {
+              .mapConcat(_.map(_.id))
+              .mapAsync(3) { id =>
+                Future(msgSender.send(id)).flatMap {
                   case Success(_)   => Future.successful(())
                   case Failure(err) => Future.failed(err)
                 }

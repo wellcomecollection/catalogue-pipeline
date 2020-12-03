@@ -6,7 +6,7 @@ import com.sksamuel.elastic4s.requests.searches.SearchRequest
 import com.sksamuel.elastic4s.requests.searches.queries.Query
 
 case class RelationsRequestBuilder(index: Index,
-                                   scrollKeepAlive: String = "1m") {
+                                   scrollKeepAlive: String = "2m") {
 
   // To reduce response size and improve Elasticsearch performance we only
   // return core fields

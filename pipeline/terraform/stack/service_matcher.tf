@@ -63,7 +63,7 @@ module "matcher" {
   subnets             = var.subnets
   max_capacity        = 10
   messages_bucket_arn = aws_s3_bucket.messages.arn
-  queue_read_policy   = module.matcher_queue.read_policy
+  queue_read_policy   = module.matcher_input_queue.read_policy
 
   deployment_service_env  = var.release_label
   deployment_service_name = "matcher"
@@ -92,7 +92,7 @@ module "matcher_topic" {
 
 module "matcher_scaling_alarm" {
   source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.1.3"
-  queue_name = module.matcher_queue.name
+  queue_name = module.matcher_input_queue.name
 
   queue_high_actions = [module.matcher.scale_up_arn]
   queue_low_actions  = [module.matcher.scale_down_arn]
