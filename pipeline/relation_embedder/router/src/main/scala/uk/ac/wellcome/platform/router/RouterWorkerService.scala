@@ -4,7 +4,7 @@ import akka.Done
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.models.work.internal.WorkState.{Denormalised, Merged}
+import uk.ac.wellcome.models.work.internal.WorkState.{Denormalised, Identified}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.pipeline_storage.{PipelineStorageStream, Retriever}
 import uk.ac.wellcome.typesafe.Runnable
@@ -16,7 +16,7 @@ class RouterWorkerService[MsgDestination](
                                         Work[Denormalised],
                                         MsgDestination],
   pathsMsgSender: MessageSender[MsgDestination],
-  workRetriever: Retriever[Work[Merged]],
+  workRetriever: Retriever[Work[Identified]],
 )(implicit ec: ExecutionContext)
     extends Runnable {
 
