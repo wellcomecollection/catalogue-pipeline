@@ -15,7 +15,8 @@ case class MetsData(
   accessConditionStatus: Option[String] = None,
   accessConditionUsage: Option[String] = None,
   fileReferencesMapping: List[(String, FileReference)] = Nil,
-  titlePageId: Option[String] = None
+  titlePageId: Option[String] = None,
+  deleted: Boolean = false
 ) {
 
   def toWork(version: Int,
