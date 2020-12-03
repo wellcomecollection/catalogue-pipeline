@@ -1,7 +1,7 @@
 module "ingestor_works_queue" {
   source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
   queue_name      = "${local.namespace_hyphen}_ingestor_works"
-  topic_arns      = [module.work_id_minter_topic.arn]
+  topic_arns      = [module.relation_embedder_output_topic.arn, module.router_work_output_topic.arn]
   aws_region      = var.aws_region
   alarm_topic_arn = var.dlq_alarm_arn
 }
