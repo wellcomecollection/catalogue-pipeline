@@ -84,7 +84,7 @@ trait TransformerWorker[SourceData, SenderDest] extends Logging {
             }
             Future.failed(err)
           case Right((work, key)) =>
-            info(s"$name: from $key transformed $work")
+            info(s"$name: from $key transformed work with id ${work.id}")
             Future.successful(Some(work))
       }
     )

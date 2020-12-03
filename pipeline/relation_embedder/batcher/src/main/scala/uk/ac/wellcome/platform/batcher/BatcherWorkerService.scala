@@ -99,15 +99,19 @@ class BatcherWorkerService[MsgDestination](
         info(
           s"Selectors for root path $rootPath: ${selectors.map(_._1).mkString(", ")}")
     }
-    Source(groupedSelectors.toList).flatMapConcat {
-      case (rootPath, selectors) =>
-        Source(selectors)
-          .grouped(maxBatchSize)
-          .map(_.toList.unzip)
-          .map {
-            case (selectors, msgIndices) =>
-              Batch(rootPath, selectors) -> msgIndices
-          }
+    Source(groupedSelectors.toList).map {
+      case (rootPath, selectorsAndIndices) =>
+        // For batches consisting of a really large number of selectors, we
+        // should just send the whole tree: it will avoid really long queries
+        // in the relation embedder, and it is likely pretty much all the nodes
+        // will be denormalised anyway.
+        val (selectors, msgIndices) = selectorsAndIndices.unzip(identity)
+        val batch =
+          if (selectors.size > maxBatchSize)
+            Batch(rootPath, List(Selector.Tree(rootPath)))
+          else
+            Batch(rootPath, selectors)
+        batch -> msgIndices
     }
   }
 }
