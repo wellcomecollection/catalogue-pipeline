@@ -32,7 +32,7 @@ module "relation_embedder" {
     queue_parallelism            = 3   // NOTE: limit to avoid memory errors
     affected_works_scroll_size   = 100 // NOTE: limit to avoid memory errors
     complete_tree_scroll_size    = 800
-    index_batch_size             = 50  // NOTE: too large results in 413 from ES
+    index_batch_size             = 50 // NOTE: too large results in 413 from ES
     index_flush_interval_seconds = 60
   }
 
