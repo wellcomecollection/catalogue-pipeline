@@ -43,7 +43,8 @@ trait Merger extends MergerLogging {
         findTarget(matchedWorks).map { target =>
           (
             target,
-            matchedWorks.filterNot(
+            matchedWorks.filterNot{case _:Work.Deleted[Source] =>true
+            case _ => false}.filterNot(
               _.sourceIdentifier == target.sourceIdentifier
             )
           )
@@ -132,6 +133,8 @@ object Merger {
           Work.Invisible(version, f(data), state, reasons)
         case Work.Redirected(version, redirect, state) =>
           Work.Redirected(version, redirect, state)
+        case Work.Deleted(version, state, reason) =>
+          Work.Deleted(version, state, reason)
       }
   }
 }
