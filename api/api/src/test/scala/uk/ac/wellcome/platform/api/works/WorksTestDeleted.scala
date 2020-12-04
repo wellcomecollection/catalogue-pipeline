@@ -32,5 +32,5 @@ class WorksTestDeleted extends ApiWorksTestBase {
           Status.OK -> worksListResponse(apiPrefix, works = works)
         }
     }
-  }}
-
+  }
+}

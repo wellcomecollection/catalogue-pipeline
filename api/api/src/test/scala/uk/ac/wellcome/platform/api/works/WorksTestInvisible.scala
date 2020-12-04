@@ -5,7 +5,8 @@ import uk.ac.wellcome.models.Implicits._
 import WorkState.Indexed
 
 class WorksTestInvisible extends ApiWorksTestBase {
-  val invisibleWork: Work.Invisible[Indexed] = indexedWork().title("This work is invisible").invisible()
+  val invisibleWork: Work.Invisible[Indexed] =
+    indexedWork().title("This work is invisible").invisible()
 
   it("returns an HTTP 410 Gone if looking up a work with visible = false") {
     withWorksApi {
