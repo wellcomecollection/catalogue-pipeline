@@ -24,7 +24,7 @@ module "ingestor_works" {
     metrics_namespace   = "${local.namespace_hyphen}_ingestor_works"
     es_index            = local.es_works_index
     ingest_queue_id     = module.ingestor_works_queue.url
-    es_ingest_batchSize = 100
+    es_ingest_batchSize = 25
   }
 
   secret_env_vars = {
