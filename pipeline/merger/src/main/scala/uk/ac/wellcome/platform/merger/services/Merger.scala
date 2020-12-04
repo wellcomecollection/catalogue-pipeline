@@ -43,10 +43,14 @@ trait Merger extends MergerLogging {
         findTarget(matchedWorks).map { target =>
           (
             target,
-            matchedWorks.filterNot{case _:Work.Deleted[Source] =>true
-            case _ => false}.filterNot(
-              _.sourceIdentifier == target.sourceIdentifier
-            )
+            matchedWorks
+              .filterNot {
+                case _: Work.Deleted[Source] => true
+                case _                       => false
+              }
+              .filterNot(
+                _.sourceIdentifier == target.sourceIdentifier
+              )
           )
         }
     }

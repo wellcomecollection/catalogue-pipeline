@@ -32,7 +32,8 @@ class MetsXmlTransformerTest
   it("returns empty MetsData if the MetsLocation is marked as deleted") {
     val str = metsXmlWith(
       recordIdentifier = "b30246039",
-      accessConditionStatus = Some("Open"),license = Some(License.CC0))
+      accessConditionStatus = Some("Open"),
+      license = Some(License.CC0))
     transform(Some(str), Instant.now, deleted = true) shouldBe Right(
       MetsData(
         recordIdentifier = "b30246039",
@@ -96,7 +97,8 @@ class MetsXmlTransformerTest
       "b22012692_0003.xml" -> Some(loadXmlFile("/b22012692_0003.xml")),
       "b22012692_0001.xml" -> None,
     )
-    transform(Some(xml), Instant.now, manifestations = manifestations) shouldBe a[Left[_, _]]
+    transform(Some(xml), Instant.now, manifestations = manifestations) shouldBe a[
+      Left[_, _]]
   }
 
   def transform(root: Option[String],

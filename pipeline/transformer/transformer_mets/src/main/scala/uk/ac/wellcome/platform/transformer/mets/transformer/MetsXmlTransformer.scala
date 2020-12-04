@@ -27,13 +27,16 @@ class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
           xml <- getMetsXml(metsLocation.xmlLocation)
           recordIdentifier <- xml.recordIdentifier
         } yield MetsData(recordIdentifier = recordIdentifier, deleted = true)
-      case false => getMetsXml(metsLocation.xmlLocation)
-        .flatMap { root =>
-          if (metsLocation.manifestations.isEmpty)
-            transformWithoutManifestations(root)
-          else
-            transformWithManifestations(root, metsLocation.manifestationLocations)
-        }
+      case false =>
+        getMetsXml(metsLocation.xmlLocation)
+          .flatMap { root =>
+            if (metsLocation.manifestations.isEmpty)
+              transformWithoutManifestations(root)
+            else
+              transformWithManifestations(
+                root,
+                metsLocation.manifestationLocations)
+          }
     }
 
   }

@@ -72,7 +72,7 @@ class MetsDataTest
         version = version,
         state = Source(expectedSourceIdentifier, createdDate),
         deletedReason = Some(DeletedFromSource("Mets"))
-        )
+      )
 
   }
 
