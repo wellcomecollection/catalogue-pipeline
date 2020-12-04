@@ -8,6 +8,7 @@ import uk.ac.wellcome.platform.transformer.calm.models.CalmTransformerException
 import uk.ac.wellcome.platform.transformer.calm.models.CalmTransformerException._
 import uk.ac.wellcome.transformer.common.worker.Transformer
 import WorkState.Source
+import uk.ac.wellcome.models.work.internal.DeletedReason.SuppressedFromSource
 import uk.ac.wellcome.platform.transformer.calm.periods.PeriodParser
 import uk.ac.wellcome.platform.transformer.calm.transformers.{
   CalmLanguages,
@@ -37,12 +38,10 @@ object CalmTransformer
   def apply(record: CalmRecord, version: Int): Result[Work[Source]] =
     if (shouldSuppress(record)) {
       Right(
-        Work.Invisible[Source](
+        Work.Deleted[Source](
           state = Source(sourceIdentifier(record), record.retrievedAt),
           version = version,
-          data = workData(record)
-            .getOrElse(WorkData[DataState.Unidentified]()),
-          invisibilityReasons = List(SuppressedFromSource("Calm"))
+          deletedReason = Some(SuppressedFromSource("Calm"))
         )
       )
     } else {

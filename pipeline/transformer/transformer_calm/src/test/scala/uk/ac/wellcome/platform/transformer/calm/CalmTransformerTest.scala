@@ -5,6 +5,8 @@ import java.time.LocalDate
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks._
+import uk.ac.wellcome.models.work.internal.DeletedReason.SuppressedFromSource
+import uk.ac.wellcome.models.work.internal.WorkState.Source
 import uk.ac.wellcome.models.work.internal._
 import WorkState.Source
 import uk.ac.wellcome.platform.transformer.calm.generators.CalmRecordGenerators
@@ -183,7 +185,8 @@ class CalmTransformerTest
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
       "AltRefNo" -> "a.b.c",
-      "Date" -> "c.1900 and 1914"
+      "Date" -> "c.1900 and 1914",
+      "CatalogueStatus" -> "catalogued"
     )
     CalmTransformer(record, version).right.get.data.production shouldBe
       List(
@@ -341,7 +344,7 @@ class CalmTransformerTest
     )
   }
 
-  it("transforms to invisible work when CatalogueStatus is suppressible") {
+  it("transforms to deleted work when CatalogueStatus is suppressible") {
     val recordA = createCalmRecordWith(
       "Title" -> "abc",
       "Level" -> "Collection",
@@ -404,8 +407,8 @@ class CalmTransformerTest
 
     forAll(examples) { (record, suppressed) =>
       CalmTransformer(record, version).right.get match {
-        case _: Work.Invisible[Source] => suppressed shouldBe true
-        case _                         => suppressed shouldBe false
+        case _: Work.Deleted[Source] => suppressed shouldBe true
+        case _                       => suppressed shouldBe false
       }
     }
   }
@@ -504,7 +507,6 @@ class CalmTransformerTest
   }
 
   it("suppresses Archives and Manuscripts Resource Guide works") {
-    import InvisibilityReason._
     val record = createCalmRecordWith(
       "Title" -> "Should suppress",
       "Level" -> "Section",
@@ -512,7 +514,7 @@ class CalmTransformerTest
       "CatalogueStatus" -> "Catalogued"
     )
     CalmTransformer(record, version) shouldBe Right(
-      Work.Invisible[Source](
+      Work.Deleted[Source](
         state = Source(
           SourceIdentifier(
             value = record.id,
@@ -522,36 +524,7 @@ class CalmTransformerTest
           record.retrievedAt
         ),
         version = version,
-        data = WorkData[DataState.Unidentified](
-          title = Some("Should suppress"),
-          format = Some(Format.ArchivesAndManuscripts),
-          collectionPath = Some(
-            CollectionPath(
-              path = "AMSG/X/Y",
-              level = Some(CollectionLevel.Section),
-            )
-          ),
-          otherIdentifiers = List(
-            SourceIdentifier(
-              value = "AMSG/X/Y",
-              identifierType = CalmIdentifierTypes.refNo,
-              ontologyType = "SourceIdentifier"),
-          ),
-          items = List(
-            Item(
-              title = None,
-              locations = List(
-                PhysicalLocationDeprecated(
-                  locationType = LocationType("scmac"),
-                  label = "Closed stores Arch. & MSS",
-                  accessConditions = Nil
-                )
-              )
-            )
-          ),
-          workType = WorkType.Section
-        ),
-        invisibilityReasons = List(SuppressedFromSource("Calm"))
+        deletedReason = Some(SuppressedFromSource("Calm"))
       )
     )
   }
