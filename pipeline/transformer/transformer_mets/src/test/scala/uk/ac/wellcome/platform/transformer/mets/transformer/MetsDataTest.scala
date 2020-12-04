@@ -55,6 +55,26 @@ class MetsDataTest
       )
   }
 
+  it("creates a deleted work") {
+    val bNumber = randomAlphanumeric(10)
+    val metsData =
+      MetsData(recordIdentifier = bNumber, deleted = true)
+    val version = 1
+    val expectedSourceIdentifier = SourceIdentifier(
+      IdentifierType("mets", "METS"),
+      ontologyType = "Work",
+      value = bNumber)
+
+    val createdDate = Instant.now()
+
+    metsData.toWork(version, createdDate).right.get shouldBe Work
+      .Deleted[Source](
+        version = version,
+        state = Source(expectedSourceIdentifier, createdDate),
+        )
+
+  }
+
   it("creates a invisible work with an item and no license") {
     val bNumber = randomAlphanumeric(10)
     val metsData =

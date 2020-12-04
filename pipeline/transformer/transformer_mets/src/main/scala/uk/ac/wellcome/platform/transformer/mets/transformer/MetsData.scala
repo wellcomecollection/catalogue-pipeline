@@ -20,24 +20,28 @@ case class MetsData(
 ) {
 
   def toWork(version: Int,
-             modifiedTime: Instant): Either[Throwable, Work.Invisible[Source]] =
-    for {
-      license <- parseLicense
-      accessStatus <- parseAccessStatus
-      item = Item[IdState.Unminted](
-        id = IdState.Unidentifiable,
-        locations = List(digitalLocation(license, accessStatus)))
-    } yield
-      Work.Invisible[Source](
-        version = version,
-        state = Source(sourceIdentifier, modifiedTime),
-        data = WorkData[DataState.Unidentified](
-          items = List(item),
-          mergeCandidates = List(mergeCandidate),
-          thumbnail = thumbnail(sourceIdentifier.value, license, accessStatus),
-          images = images(version, license, accessStatus)
+             modifiedTime: Instant): Either[Throwable, Work[Source]] = {
+    deleted match {
+      case true => Right(Work.Deleted[Source](version, state = Source(sourceIdentifier, modifiedTime), None))
+      case false => for {
+        license <- parseLicense
+        accessStatus <- parseAccessStatus
+        item = Item[IdState.Unminted](
+          id = IdState.Unidentifiable,
+          locations = List(digitalLocation(license, accessStatus)))
+      } yield
+        Work.Invisible[Source](
+          version = version,
+          state = Source(sourceIdentifier, modifiedTime),
+          data = WorkData[DataState.Unidentified](
+            items = List(item),
+            mergeCandidates = List(mergeCandidate),
+            thumbnail = thumbnail(sourceIdentifier.value, license, accessStatus),
+            images = images(version, license, accessStatus)
+          )
         )
-      )
+    }
+  }
 
   private lazy val fileReferences: List[FileReference] =
     fileReferencesMapping.map { case (_, fileReference) => fileReference }
