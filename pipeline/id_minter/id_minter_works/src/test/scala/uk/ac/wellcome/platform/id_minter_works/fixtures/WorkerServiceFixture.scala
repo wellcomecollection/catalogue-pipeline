@@ -57,10 +57,12 @@ trait WorkerServiceFixture
       }
     }
 
-  def withWorkerService[R](messageSender: MemoryMessageSender,
-                           queue: Queue,
-                           identifiersTableConfig: IdentifiersTableConfig,
-                           index: Map[String, Json])(
+  def withWorkerService[R](
+    messageSender: MemoryMessageSender,
+    queue: Queue,
+    identifiersTableConfig: IdentifiersTableConfig,
+    denormalisedIndex: Map[String, Json],
+    identifiedIndex: mutable.Map[String, Work[Identified]])(
     testWith: TestWith[IdMinterWorkerService[String], R]): R = {
     Class.forName("com.mysql.jdbc.Driver")
     ConnectionPool.singleton(
@@ -81,7 +83,8 @@ trait WorkerServiceFixture
       queue,
       identifiersDao,
       identifiersTableConfig,
-      index) { service =>
+      denormalisedIndex,
+      identifiedIndex) { service =>
       testWith(service)
     }
   }

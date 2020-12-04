@@ -52,12 +52,8 @@ class IdMinterWorkerService[Destination](
 
   def processMessage(message: NotificationMessage): Future[Unit] =
     jsonRetriever(message.body)
-      .flatMap { json =>
-        Future.fromTry(embedIds(json))
-      }
-      .flatMap { updatedJson =>
-        Future.fromTry(decodeJson[Work[Identified]](updatedJson))
-      }
+      .flatMap(json => Future.fromTry(embedIds(json)))
+      .flatMap(updatedJson => Future.fromTry(decodeJson(updatedJson)))
       .flatMap { work =>
         workIndexer.index(work).flatMap {
           case Left(failedDocuments) =>
@@ -74,6 +70,7 @@ class IdMinterWorkerService[Destination](
       updatedJson <- SourceIdentifierEmbedder.update(json, mintedIdentifiers)
     } yield updatedJson
 
-  def decodeJson[T](json: Json)(implicit decoder: Decoder[T]): Try[T] =
-    ???
+  def decodeJson(json: Json)(
+    implicit decoder: Decoder[Work[Identified]]): Try[Work[Identified]] =
+    decoder.decodeJson(json).toTry
 }

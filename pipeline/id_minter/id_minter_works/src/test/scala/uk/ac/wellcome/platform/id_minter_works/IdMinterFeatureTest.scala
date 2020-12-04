@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.id_minter_works
 
+import scala.collection.mutable
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -27,32 +28,31 @@ class IdMinterFeatureTest
     withLocalSqsQueue() { queue =>
       withIdentifiersTable { identifiersTableConfig =>
         val work: Work[Denormalised] = denormalisedWork()
-        val index = createIndex(List(work))
-        withWorkerService(messageSender, queue, identifiersTableConfig, index) {
-          _ =>
-            eventuallyTableExists(identifiersTableConfig)
+        val inputIndex = createIndex(List(work))
+        val outputIndex = mutable.Map.empty[String, Work[Identified]]
+        withWorkerService(
+          messageSender,
+          queue,
+          identifiersTableConfig,
+          inputIndex,
+          outputIndex) { _ =>
+          eventuallyTableExists(identifiersTableConfig)
 
-            val messageCount = 5
+          val messageCount = 5
+          (1 to messageCount).foreach { _ =>
+            sendNotificationToSQS(queue = queue, body = work.id)
+          }
 
-            (1 to messageCount).foreach { _ =>
-              sendNotificationToSQS(queue = queue, body = work.id)
-            }
+          eventually {
+            messageSender.messages.length shouldBe messageCount
+          }
 
-            eventually {
-              val works = messageSender.getMessages[Work[Identified]]
-              works.length shouldBe >=(messageCount)
+          val sentIds = messageSender.messages.map(_.body).toSet
+          sentIds.size shouldBe 1
 
-              works.map(_.state.canonicalId).distinct should have size 1
-              works.foreach { receivedWork =>
-                receivedWork
-                  .asInstanceOf[Work.Visible[Identified]]
-                  .sourceIdentifier shouldBe work.sourceIdentifier
-                receivedWork
-                  .asInstanceOf[Work.Visible[Identified]]
-                  .data
-                  .title shouldBe work.data.title
-              }
-            }
+          val identifiedWork = outputIndex(sentIds.head)
+          identifiedWork.sourceIdentifier shouldBe work.sourceIdentifier
+          identifiedWork.state.canonicalId shouldBe sentIds.head
         }
       }
     }
@@ -64,23 +64,27 @@ class IdMinterFeatureTest
     withLocalSqsQueue() { queue =>
       withIdentifiersTable { identifiersTableConfig =>
         val work: Work[Denormalised] = denormalisedWork().invisible()
-        val index = createIndex(List(work))
-        withWorkerService(messageSender, queue, identifiersTableConfig, index) {
-          _ =>
-            eventuallyTableExists(identifiersTableConfig)
+        val inputIndex = createIndex(List(work))
+        val outputIndex = mutable.Map.empty[String, Work[Identified]]
+        withWorkerService(
+          messageSender,
+          queue,
+          identifiersTableConfig,
+          inputIndex,
+          outputIndex) { _ =>
+          eventuallyTableExists(identifiersTableConfig)
 
-            sendNotificationToSQS(queue = queue, body = work.id)
+          sendNotificationToSQS(queue = queue, body = work.id)
 
-            eventually {
-              val works = messageSender.getMessages[Work[Identified]]
-              works.length shouldBe >=(1)
+          eventually {
+            messageSender.messages.length shouldBe 1
+          }
 
-              val receivedWork = works.head
-              val invisibleWork =
-                receivedWork.asInstanceOf[Work.Invisible[Identified]]
-              invisibleWork.sourceIdentifier shouldBe work.sourceIdentifier
-              invisibleWork.state.canonicalId shouldNot be(empty)
-            }
+          val sentId = messageSender.messages.map(_.body).head
+
+          val identifiedWork = outputIndex(sentId)
+          identifiedWork.sourceIdentifier shouldBe work.sourceIdentifier
+          identifiedWork.state.canonicalId shouldBe sentId
         }
       }
     }
@@ -93,24 +97,31 @@ class IdMinterFeatureTest
       withIdentifiersTable { identifiersTableConfig =>
         val work: Work[Denormalised] = denormalisedWork()
           .redirected(redirect = IdState.Identifiable(createSourceIdentifier))
-        val index = createIndex(List(work))
-        withWorkerService(messageSender, queue, identifiersTableConfig, index) {
-          _ =>
-            eventuallyTableExists(identifiersTableConfig)
+        val inputIndex = createIndex(List(work))
+        val outputIndex = mutable.Map.empty[String, Work[Identified]]
+        withWorkerService(
+          messageSender,
+          queue,
+          identifiersTableConfig,
+          inputIndex,
+          outputIndex) { _ =>
+          eventuallyTableExists(identifiersTableConfig)
 
-            sendNotificationToSQS(queue = queue, body = work.id)
+          sendNotificationToSQS(queue = queue, body = work.id)
 
-            eventually {
-              val works = messageSender.getMessages[Work[Identified]]
-              works.length shouldBe >=(1)
+          eventually {
+            messageSender.messages.length shouldBe 1
+          }
 
-              val receivedWork = works.head
-              val redirectedWork =
-                receivedWork.asInstanceOf[Work.Redirected[Identified]]
-              redirectedWork.sourceIdentifier shouldBe work.sourceIdentifier
-              redirectedWork.state.canonicalId shouldNot be(empty)
-              redirectedWork.redirect.canonicalId shouldNot be(empty)
-            }
+          val sentId = messageSender.messages.map(_.body).head
+
+          val identifiedWork = outputIndex(sentId)
+          identifiedWork.sourceIdentifier shouldBe work.sourceIdentifier
+          identifiedWork.state.canonicalId shouldBe sentId
+          identifiedWork
+            .asInstanceOf[Work.Redirected[Identified]]
+            .redirect
+            .canonicalId shouldNot be(empty)
         }
       }
     }
@@ -122,18 +133,22 @@ class IdMinterFeatureTest
     withLocalSqsQueue() { queue =>
       withIdentifiersTable { identifiersTableConfig =>
         val work: Work[Denormalised] = denormalisedWork()
-        val index = createIndex(List(work))
-        withWorkerService(messageSender, queue, identifiersTableConfig, index) {
-          _ =>
-            sendInvalidJSONto(queue)
+        val inputIndex = createIndex(List(work))
+        val outputIndex = mutable.Map.empty[String, Work[Identified]]
+        withWorkerService(
+          messageSender,
+          queue,
+          identifiersTableConfig,
+          inputIndex,
+          outputIndex) { _ =>
+          sendInvalidJSONto(queue)
 
-            sendNotificationToSQS(queue = queue, body = work.id)
+          sendNotificationToSQS(queue = queue, body = work.id)
 
-            eventually {
-              messageSender.messages should not be empty
-
-              assertMessageIsNotDeleted(queue)
-            }
+          eventually {
+            messageSender.messages should not be empty
+          }
+          assertMessageIsNotDeleted(queue)
         }
       }
     }
