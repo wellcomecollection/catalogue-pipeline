@@ -32,17 +32,5 @@ class WorksTestDeleted extends ApiWorksTestBase {
           Status.OK -> worksListResponse(apiPrefix, works = works)
         }
     }
-  }
+  }}
 
-  it("excludes deleted works from search results") {
-    withWorksApi {
-      case (worksIndex, routes) =>
-        val work = indexedWork().title("This shouldn't be deleted!")
-        insertIntoElasticsearch(worksIndex, work, deletedWork)
-
-        assertJsonResponse(routes, s"/$apiPrefix/works?query=deleted") {
-          Status.OK -> worksListResponse(apiPrefix, works = Seq(work))
-        }
-    }
-  }
-}

@@ -5,7 +5,7 @@ import uk.ac.wellcome.models.Implicits._
 import WorkState.Indexed
 
 class WorksTestInvisible extends ApiWorksTestBase {
-  val invisibleWork: Work.Invisible[Indexed] = indexedWork().invisible()
+  val invisibleWork: Work.Invisible[Indexed] = indexedWork().title("This work is invisible").invisible()
 
   it("returns an HTTP 410 Gone if looking up a work with visible = false") {
     withWorksApi {
@@ -37,10 +37,10 @@ class WorksTestInvisible extends ApiWorksTestBase {
   it("excludes works with visible=false from search results") {
     withWorksApi {
       case (worksIndex, routes) =>
-        val work = indexedWork().title("This shouldn't be deleted!")
+        val work = indexedWork().title("This shouldn't be invisible!")
         insertIntoElasticsearch(worksIndex, work, invisibleWork)
 
-        assertJsonResponse(routes, s"/$apiPrefix/works?query=deleted") {
+        assertJsonResponse(routes, s"/$apiPrefix/works?query=invisible") {
           Status.OK -> worksListResponse(apiPrefix, works = Seq(work))
         }
     }
