@@ -8,7 +8,3 @@ object InvisibilityReason {
   case class InvalidValueInSourceField(info: String) extends InvisibilityReason
   case object UnlinkedHistoricalLibraryMiro extends InvisibilityReason
 }
-
-
-
-

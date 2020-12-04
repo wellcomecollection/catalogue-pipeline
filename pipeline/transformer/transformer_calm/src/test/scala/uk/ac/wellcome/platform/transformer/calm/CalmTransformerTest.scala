@@ -408,7 +408,7 @@ class CalmTransformerTest
     forAll(examples) { (record, suppressed) =>
       CalmTransformer(record, version).right.get match {
         case _: Work.Deleted[Source] => suppressed shouldBe true
-        case _                         => suppressed shouldBe false
+        case _                       => suppressed shouldBe false
       }
     }
   }
@@ -524,7 +524,6 @@ class CalmTransformerTest
           record.retrievedAt
         ),
         version = version,
-
         deletedReason = Some(SuppressedFromSource("Calm"))
       )
     )

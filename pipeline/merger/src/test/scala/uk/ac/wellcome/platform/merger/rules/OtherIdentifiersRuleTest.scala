@@ -29,7 +29,7 @@ class OtherIdentifiersRuleTest
     }.toList
 
   val metsDeletedWork: Work.Deleted[WorkState.Source] =
-      metsSourceWork().deleted()
+    metsSourceWork().deleted()
 
   val physicalSierraWork: Work.Visible[WorkState.Source] =
     sierraPhysicalSourceWork().format(Format.Pictures)
@@ -69,7 +69,7 @@ class OtherIdentifiersRuleTest
       OtherIdentifiersRule
         .merge(
           calmWork,
-          physicalSierraWork :: nothingWork :: miroWork :: metsDeletedWork :: metsWorks )) {
+          physicalSierraWork :: nothingWork :: miroWork :: metsDeletedWork :: metsWorks)) {
       case FieldMergeResult(otherIdentifiers, mergedSources) =>
         otherIdentifiers should contain theSameElementsAs
           List(physicalSierraWork.sourceIdentifier, miroWork.sourceIdentifier) ++
