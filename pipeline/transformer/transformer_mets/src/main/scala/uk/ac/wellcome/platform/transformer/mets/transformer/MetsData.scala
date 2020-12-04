@@ -1,13 +1,13 @@
 package uk.ac.wellcome.platform.transformer.mets.transformer
 
 import java.time.Instant
-
 import cats.syntax.traverse._
 import cats.instances.either._
 import cats.instances.option._
 import org.apache.commons.lang3.StringUtils.equalsIgnoreCase
 import uk.ac.wellcome.models.work.internal._
 import WorkState.Source
+import uk.ac.wellcome.models.work.internal.DeletedReason.DeletedFromSource
 
 case class MetsData(
   recordIdentifier: String,
@@ -22,7 +22,7 @@ case class MetsData(
   def toWork(version: Int,
              modifiedTime: Instant): Either[Throwable, Work[Source]] = {
     deleted match {
-      case true => Right(Work.Deleted[Source](version, state = Source(sourceIdentifier, modifiedTime), None))
+      case true => Right(Work.Deleted[Source](version = version, state = Source(sourceIdentifier, modifiedTime), deletedReason = Some(DeletedFromSource("Mets"))))
       case false => for {
         license <- parseLicense
         accessStatus <- parseAccessStatus
