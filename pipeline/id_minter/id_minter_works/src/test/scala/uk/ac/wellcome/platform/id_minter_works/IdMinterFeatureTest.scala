@@ -11,7 +11,6 @@ import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.platform.id_minter_works.fixtures.WorkerServiceFixture
-import uk.ac.wellcome.models.Implicits._
 import WorkState.{Denormalised, Identified}
 
 class IdMinterFeatureTest
