@@ -8,7 +8,7 @@ import uk.ac.wellcome.platform.transformer.calm.models.CalmTransformerException
 import uk.ac.wellcome.platform.transformer.calm.models.CalmTransformerException._
 import uk.ac.wellcome.transformer.common.worker.Transformer
 import WorkState.Source
-import uk.ac.wellcome.models.work.internal.DeletedReasons.SuppressedFromSource
+import uk.ac.wellcome.models.work.internal.DeletedReason.SuppressedFromSource
 import uk.ac.wellcome.platform.transformer.calm.periods.PeriodParser
 import uk.ac.wellcome.platform.transformer.calm.transformers.{
   CalmLanguages,
@@ -41,7 +41,7 @@ object CalmTransformer
         Work.Deleted[Source](
           state = Source(sourceIdentifier(record), record.retrievedAt),
           version = version,
-          deletedReasons = Some(SuppressedFromSource("Calm"))
+          deletedReason = Some(SuppressedFromSource("Calm"))
         )
       )
     } else {

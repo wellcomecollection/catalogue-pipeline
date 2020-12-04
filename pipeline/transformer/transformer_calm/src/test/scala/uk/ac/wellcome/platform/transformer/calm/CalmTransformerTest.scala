@@ -5,7 +5,7 @@ import java.time.LocalDate
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks._
-import uk.ac.wellcome.models.work.internal.DeletedReasons.SuppressedFromSource
+import uk.ac.wellcome.models.work.internal.DeletedReason.SuppressedFromSource
 import uk.ac.wellcome.models.work.internal.WorkState.Source
 import uk.ac.wellcome.models.work.internal._
 import WorkState.Source
@@ -185,7 +185,8 @@ class CalmTransformerTest
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
       "AltRefNo" -> "a.b.c",
-      "Date" -> "c.1900 and 1914"
+      "Date" -> "c.1900 and 1914",
+      "CatalogueStatus" -> "catalogued"
     )
     CalmTransformer(record, version).right.get.data.production shouldBe
       List(
@@ -343,7 +344,7 @@ class CalmTransformerTest
     )
   }
 
-  it("transforms to invisible work when CatalogueStatus is suppressible") {
+  it("transforms to deleted work when CatalogueStatus is suppressible") {
     val recordA = createCalmRecordWith(
       "Title" -> "abc",
       "Level" -> "Collection",
@@ -406,7 +407,7 @@ class CalmTransformerTest
 
     forAll(examples) { (record, suppressed) =>
       CalmTransformer(record, version).right.get match {
-        case _: Work.Invisible[Source] => suppressed shouldBe true
+        case _: Work.Deleted[Source] => suppressed shouldBe true
         case _                         => suppressed shouldBe false
       }
     }
@@ -524,7 +525,7 @@ class CalmTransformerTest
         ),
         version = version,
 
-        deletedReasons = Some(SuppressedFromSource("Calm"))
+        deletedReason = Some(SuppressedFromSource("Calm"))
       )
     )
   }
