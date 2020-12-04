@@ -29,10 +29,10 @@ module "relation_embedder" {
     es_merged_index       = local.es_works_merged_index
     es_denormalised_index = local.es_works_denormalised_index
 
-    queue_parallelism            = 3   // NOTE: limit to avoid memory errors
-    affected_works_scroll_size   = 100 // NOTE: limit to avoid memory errors
+    queue_parallelism            = 3  // NOTE: limit to avoid memory errors
+    affected_works_scroll_size   = 50 // NOTE: limit to avoid memory errors
     complete_tree_scroll_size    = 800
-    index_batch_size             = 50 // NOTE: too large results in 413 from ES
+    index_batch_size             = 25 // NOTE: too large results in 413 from ES
     index_flush_interval_seconds = 60
   }
 
@@ -45,7 +45,7 @@ module "relation_embedder" {
   }
 
   subnets             = var.subnets
-  max_capacity        = 15 // NOTE: limit to avoid >500 concurrent scroll contexts
+  max_capacity        = 10 // NOTE: limit to avoid >500 concurrent scroll contexts
   messages_bucket_arn = aws_s3_bucket.messages.arn
   queue_read_policy   = module.relation_embedder_queue.read_policy
 
