@@ -1,13 +1,13 @@
 package uk.ac.wellcome.platform.transformer.mets.transformer
 
 import java.time.Instant
-
 import org.scalatest.Inside
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.internal._
 import WorkState.Source
 import uk.ac.wellcome.fixtures.RandomGenerators
+import uk.ac.wellcome.models.work.internal.DeletedReason.DeletedFromSource
 
 class MetsDataTest
     extends AnyFunSpec
@@ -53,6 +53,27 @@ class MetsDataTest
           )
         )
       )
+  }
+
+  it("creates a deleted work") {
+    val bNumber = randomAlphanumeric(10)
+    val metsData =
+      MetsData(recordIdentifier = bNumber, deleted = true)
+    val version = 1
+    val expectedSourceIdentifier = SourceIdentifier(
+      IdentifierType("mets", "METS"),
+      ontologyType = "Work",
+      value = bNumber)
+
+    val createdDate = Instant.now()
+
+    metsData.toWork(version, createdDate).right.get shouldBe Work
+      .Deleted[Source](
+        version = version,
+        state = Source(expectedSourceIdentifier, createdDate),
+        deletedReason = Some(DeletedFromSource("Mets"))
+      )
+
   }
 
   it("creates a invisible work with an item and no license") {
