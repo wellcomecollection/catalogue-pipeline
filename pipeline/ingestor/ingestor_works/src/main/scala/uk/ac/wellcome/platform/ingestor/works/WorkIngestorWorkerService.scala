@@ -1,74 +1,70 @@
 package uk.ac.wellcome.platform.ingestor.works
 
+import scala.concurrent.{ExecutionContext, Future}
 import akka.Done
 import software.amazon.awssdk.services.sqs.model.Message
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.bigmessaging.message.BigMessageStream
-import uk.ac.wellcome.pipeline_storage.Indexer
+
+import uk.ac.wellcome.messaging.sqs.SQSStream
+import uk.ac.wellcome.pipeline_storage.{Indexer, Retriever}
 import uk.ac.wellcome.platform.ingestor.common.models.IngestorConfig
+import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.typesafe.Runnable
+import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.models.work.internal._
+import WorkState.{Identified, Indexed}
 
-import scala.concurrent.{ExecutionContext, Future}
-
-class WorkIngestorWorkerService[In, Out](
+class WorkIngestorWorkerService(
   ingestorConfig: IngestorConfig,
-  documentIndexer: Indexer[Out],
-  messageStream: BigMessageStream[In],
-  transformBeforeIndex: In => Out
+  msgStream: SQSStream[NotificationMessage],
+  workRetriever: Retriever[Work[Identified]],
+  workIndexer: Indexer[Work[Indexed]],
+  transformBeforeIndex: Work[Identified] => Work[Indexed] = WorkTransformer.deriveData,
 )(implicit
   ec: ExecutionContext)
     extends Runnable
     with Logging {
 
-  type FutureBundles = Future[List[Bundle]]
-  case class Bundle(message: Message, document: In)
-
-  private val className = this.getClass.getSimpleName
+  case class Bundle(message: Message, key: String)
 
   def run(): Future[Done] =
     for {
-      _ <- documentIndexer.init()
+      _ <- workIndexer.init()
       result <- runStream()
     } yield result
 
-  private def runStream(): Future[Done] = {
-    messageStream.runStream(
-      className,
-      _.map { case (msg, document) => Bundle(msg, document) }
-        .groupedWithin(
-          ingestorConfig.batchSize,
-          ingestorConfig.flushInterval
-        )
-        .mapAsyncUnordered(10) { msgs =>
-          for { bundles <- processMessages(msgs.toList) } yield
-            bundles.map(_.message)
-        }
-        .mapConcat(identity)
+  private def runStream(): Future[Done] =
+    msgStream.runStream(
+      this.getClass.getSimpleName,
+      source => {
+        source
+          .map {
+            case (msg, notificationMessage) =>
+              Bundle(msg, notificationMessage.body)
+          }
+          .groupedWithin(ingestorConfig.batchSize, ingestorConfig.flushInterval)
+          .mapAsyncUnordered(10) { bundles =>
+            processMessages(bundles.toList)
+          }
+          .mapConcat(identity)
+          .map(_.message)
+      }
     )
-  }
 
-  private def processMessages(bundles: List[Bundle]): FutureBundles =
+  private def processMessages(bundles: List[Bundle]): Future[List[Bundle]] =
     for {
-      documents <- Future.successful(bundles.map(m => m.document))
-      transformedDocuments = documents.map(transformBeforeIndex)
-      either <- documentIndexer.index(documents = transformedDocuments)
+      works <- workRetriever(bundles.map(_.key)).map { retrieverResult =>
+        if (retrieverResult.notFound.nonEmpty) {
+          error(s"Failed retrieving works: ${retrieverResult.notFound}")
+        }
+        retrieverResult.found.values.toList
+      }
+      transformedWorks = works.map(transformBeforeIndex)
+      indexResult <- workIndexer.index(documents = transformedWorks)
     } yield {
-      val failedWorks = either.left.getOrElse(Nil)
+      val failedWorks = indexResult.left.getOrElse(Nil).map(_.id)
       bundles.filterNot {
-        case Bundle(_, document) => failedWorks.contains(document)
+        case Bundle(_, key) => failedWorks.contains(key)
       }
     }
-}
-
-object WorkIngestorWorkerService {
-  def apply[T](
-    ingestorConfig: IngestorConfig,
-    documentIndexer: Indexer[T],
-    messageStream: BigMessageStream[T])(implicit ec: ExecutionContext) =
-    new WorkIngestorWorkerService(
-      ingestorConfig,
-      documentIndexer,
-      messageStream,
-      identity[T]
-    )
 }
