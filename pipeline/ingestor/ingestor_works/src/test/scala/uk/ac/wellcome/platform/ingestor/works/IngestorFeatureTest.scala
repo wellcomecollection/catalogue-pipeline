@@ -7,7 +7,7 @@ import uk.ac.wellcome.elasticsearch.IndexedWorkIndexConfig
 import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.pipeline_storage.ElasticIndexer
+import uk.ac.wellcome.pipeline_storage.{ElasticIndexer, ElasticRetriever}
 import uk.ac.wellcome.pipeline_storage.Indexable.workIndexable
 import uk.ac.wellcome.models.Implicits._
 import WorkState.{Identified, Indexed}
@@ -27,13 +27,16 @@ class IngestorFeatureTest
       sourceIdentifier = createMiroSourceIdentifier
     )
 
-    withLocalSqsQueue() { queue =>
-      sendMessage[Work[Identified]](queue = queue, obj = work)
-      withLocalWorksIndex { index =>
-        withWorkIngestorWorkerService(queue, index) { _ =>
-          assertElasticsearchEventuallyHasWork[Indexed](
-            index,
-            WorkTransformer.deriveData(work))
+    withLocalWorksIndex { indexedIndex =>
+      withLocalIdentifiedWorksIndex { identifiedIndex =>
+        insertIntoElasticsearch(identifiedIndex, work)
+        withLocalSqsQueue() { queue =>
+          withWorkIngestorWorkerService(queue, indexedIndex, identifiedIndex) { _ =>
+            sendNotificationToSQS(queue = queue, body = work.id)
+            assertElasticsearchEventuallyHasWork[Indexed](
+              indexedIndex,
+              WorkTransformer.deriveData(work))
+          }
         }
       }
     }
@@ -44,27 +47,31 @@ class IngestorFeatureTest
       sourceIdentifier = createSierraSystemSourceIdentifier
     )
 
-    withLocalSqsQueue() { queue =>
-      sendMessage[Work[Identified]](queue = queue, obj = work)
-      withLocalWorksIndex { index =>
-        withWorkIngestorWorkerService(queue, index) { _ =>
-          assertElasticsearchEventuallyHasWork[Indexed](
-            index,
-            WorkTransformer.deriveData(work))
+    withLocalWorksIndex { indexedIndex =>
+      withLocalIdentifiedWorksIndex { identifiedIndex =>
+        insertIntoElasticsearch(identifiedIndex, work)
+        withLocalSqsQueue() { queue =>
+          withWorkIngestorWorkerService(queue, indexedIndex, identifiedIndex) { _ =>
+            sendNotificationToSQS(queue = queue, body = work.id)
+            assertElasticsearchEventuallyHasWork[Indexed](
+              indexedIndex,
+              WorkTransformer.deriveData(work))
+          }
         }
       }
     }
   }
 
-  def withWorkIngestorWorkerService[R](queue: Queue, index: Index)(
-    testWith: TestWith[WorkIngestorWorkerService[Work[Identified], Work[Indexed]],
-                       R]): R =
+  def withWorkIngestorWorkerService[R](queue: Queue, indexedIndex: Index, identifiedIndex: Index)(
+    testWith: TestWith[WorkIngestorWorkerService, R]): R =
     withWorkerService(
       queue,
-      new ElasticIndexer[Work[Indexed]](
+      indexer = new ElasticIndexer[Work[Indexed]](
         elasticClient,
-        index,
+        indexedIndex,
         IndexedWorkIndexConfig),
-      WorkTransformer.deriveData
-    )(testWith)
+      retriever = new ElasticRetriever[Work[Identified]](
+        elasticClient,
+        identifiedIndex
+      ))(testWith)
 }

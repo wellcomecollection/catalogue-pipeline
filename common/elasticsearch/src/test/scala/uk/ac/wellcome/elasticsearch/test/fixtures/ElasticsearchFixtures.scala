@@ -79,6 +79,11 @@ trait ElasticsearchFixtures
       testWith(index)
     }
 
+  def withLocalIdentifiedWorksIndex[R](testWith: TestWith[Index, R]): R =
+    withLocalElasticsearchIndex[R](config = IdentifiedWorkIndexConfig) { index =>
+      testWith(index)
+    }
+
   def withLocalDenormalisedWorksIndex[R](testWith: TestWith[Index, R]): R =
     withLocalElasticsearchIndex[R](config = DenormalisedWorkIndexConfig) {
       index =>

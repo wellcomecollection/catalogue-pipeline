@@ -7,7 +7,7 @@ import uk.ac.wellcome.elasticsearch.IndexedWorkIndexConfig
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.pipeline_storage.ElasticIndexer
+import uk.ac.wellcome.pipeline_storage.{ElasticIndexer, ElasticRetriever}
 import uk.ac.wellcome.pipeline_storage.Indexable.workIndexable
 import uk.ac.wellcome.models.Implicits._
 import WorkState.{Identified, Indexed}
@@ -119,27 +119,33 @@ class IngestorWorkerServiceTest
   }
 
   private def assertWorksIndexedCorrectly(works: Work[Identified]*): Assertion =
-    withLocalWorksIndex { index =>
-      withLocalSqsQueuePair(visibilityTimeout = 10) {
-        case QueuePair(queue, dlq) =>
-          withWorkerService(
-            queue,
-            new ElasticIndexer[Work[Indexed]](
-              elasticClient,
-              index,
-              IndexedWorkIndexConfig),
-            WorkTransformer.deriveData) { _ =>
-            works.map { work =>
-              sendMessage[Work[Identified]](queue = queue, obj = work)
+    withLocalWorksIndex { indexedIndex =>
+      withLocalIdentifiedWorksIndex { identifiedIndex =>
+        insertIntoElasticsearch(identifiedIndex, works:_*)
+        withLocalSqsQueuePair(visibilityTimeout = 10) {
+          case QueuePair(queue, dlq) =>
+            withWorkerService(
+              queue,
+              indexer = new ElasticIndexer[Work[Indexed]](
+                elasticClient,
+                indexedIndex,
+                IndexedWorkIndexConfig),
+              retriever = new ElasticRetriever[Work[Identified]](
+                elasticClient,
+                identifiedIndex
+              )) { _ =>
+              works.map { work =>
+                sendNotificationToSQS(queue = queue, body = work.id)
+              }
+
+              assertElasticsearchEventuallyHasWork[Indexed](
+                index = indexedIndex,
+                works.map(WorkTransformer.deriveData): _*)
+
+              assertQueueEmpty(queue)
+              assertQueueEmpty(dlq)
             }
-
-            assertElasticsearchEventuallyHasWork[Indexed](
-              index = index,
-              works.map(WorkTransformer.deriveData): _*)
-
-            assertQueueEmpty(queue)
-            assertQueueEmpty(dlq)
-          }
+        }
       }
     }
 }
