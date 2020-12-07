@@ -26,7 +26,8 @@ object Main extends WellcomeTypesafeApp {
       AkkaBuilder.buildExecutionContext()
 
     val esClient = ElasticBuilder.buildElasticClient(config)
-    val identifiedIndex = Index(config.requireString("es.identified-works.index"))
+    val identifiedIndex =
+      Index(config.requireString("es.identified-works.index"))
 
     val workIndexer = ElasticIndexerBuilder[Work[Denormalised]](
       config,
