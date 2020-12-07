@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.ingestor.common.services
+package uk.ac.wellcome.platform.ingestor.images
 
 import akka.Done
 import software.amazon.awssdk.services.sqs.model.Message
@@ -10,7 +10,7 @@ import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class IngestorWorkerService[In, Out](
+class ImageIngestorWorkerService[In, Out](
   ingestorConfig: IngestorConfig,
   documentIndexer: Indexer[Out],
   messageStream: BigMessageStream[In],
@@ -60,12 +60,12 @@ class IngestorWorkerService[In, Out](
     }
 }
 
-object IngestorWorkerService {
+object ImageIngestorWorkerService {
   def apply[T](
     ingestorConfig: IngestorConfig,
     documentIndexer: Indexer[T],
     messageStream: BigMessageStream[T])(implicit ec: ExecutionContext) =
-    new IngestorWorkerService(
+    new ImageIngestorWorkerService(
       ingestorConfig,
       documentIndexer,
       messageStream,
