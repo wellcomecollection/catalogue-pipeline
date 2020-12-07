@@ -17,7 +17,7 @@ import uk.ac.wellcome.elasticsearch.IndexedWorkIndexConfig
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal._
-import WorkState.{Identified, Indexed}
+import WorkState.{Denormalised, Indexed}
 
 object Main extends WellcomeTypesafeApp {
   { config: Config =>
@@ -26,12 +26,12 @@ object Main extends WellcomeTypesafeApp {
     implicit val executionContext: ExecutionContext =
       AkkaBuilder.buildExecutionContext()
 
-    val identifiedWorkStream =
+    val denormalisedWorkStream =
       SQSBuilder.buildSQSStream[NotificationMessage](config)
 
-    val workRetriever = ElasticRetrieverBuilder[Work[Identified]](
+    val workRetriever = ElasticRetrieverBuilder[Work[Denormalised]](
       config,
-      namespace = "identified-works")
+      namespace = "denormalised-works")
 
     val workIndexer = ElasticIndexerBuilder[Work[Indexed]](
       config,
@@ -43,7 +43,7 @@ object Main extends WellcomeTypesafeApp {
       ingestorConfig = IngestorConfigBuilder.buildIngestorConfig(config),
       workRetriever = workRetriever,
       workIndexer = workIndexer,
-      msgStream = identifiedWorkStream,
+      msgStream = denormalisedWorkStream,
       transformBeforeIndex = WorkTransformer.deriveData
     )
   }

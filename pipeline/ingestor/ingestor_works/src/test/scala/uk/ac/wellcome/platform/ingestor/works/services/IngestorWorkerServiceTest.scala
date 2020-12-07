@@ -10,7 +10,7 @@ import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.pipeline_storage.{ElasticIndexer, ElasticRetriever}
 import uk.ac.wellcome.pipeline_storage.Indexable.workIndexable
 import uk.ac.wellcome.models.Implicits._
-import WorkState.{Identified, Indexed}
+import WorkState.{Denormalised, Indexed}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -20,33 +20,33 @@ class IngestorWorkerServiceTest
     with IngestorFixtures
     with WorkGenerators {
 
-  it("indexes a Miro identified Work") {
+  it("indexes a Miro denormalised Work") {
     val miroSourceIdentifier = createSourceIdentifier
 
-    val work = identifiedWork(sourceIdentifier = miroSourceIdentifier)
+    val work = denormalisedWork(sourceIdentifier = miroSourceIdentifier)
 
     assertWorksIndexedCorrectly(work)
   }
 
-  it("indexes a Sierra identified Work") {
-    val work = identifiedWork(
+  it("indexes a Sierra denormalised Work") {
+    val work = denormalisedWork(
       sourceIdentifier = createSierraSystemSourceIdentifier
     )
 
     assertWorksIndexedCorrectly(work)
   }
 
-  it("indexes a Sierra identified invisible Work") {
+  it("indexes a Sierra denormalised invisible Work") {
     val work =
-      identifiedWork(sourceIdentifier = createSierraSystemSourceIdentifier)
+      denormalisedWork(sourceIdentifier = createSierraSystemSourceIdentifier)
         .invisible()
 
     assertWorksIndexedCorrectly(work)
   }
 
-  it("indexes a Sierra identified redirected Work") {
+  it("indexes a Sierra denormalised redirected Work") {
     val work =
-      identifiedWork(sourceIdentifier = createSierraSystemSourceIdentifier)
+      denormalisedWork(sourceIdentifier = createSierraSystemSourceIdentifier)
         .redirected(
           IdState.Identified(
             canonicalId = createCanonicalId,
@@ -57,16 +57,16 @@ class IngestorWorkerServiceTest
   }
 
   it("indexes a mixture of Miro and Sierra works") {
-    val miroWork1 = identifiedWork(
+    val miroWork1 = denormalisedWork(
       sourceIdentifier = createMiroSourceIdentifier
     )
-    val miroWork2 = identifiedWork(
+    val miroWork2 = denormalisedWork(
       sourceIdentifier = createMiroSourceIdentifier
     )
-    val sierraWork1 = identifiedWork(
+    val sierraWork1 = denormalisedWork(
       sourceIdentifier = createSierraSystemSourceIdentifier
     )
-    val sierraWork2 = identifiedWork(
+    val sierraWork2 = denormalisedWork(
       sourceIdentifier = createSierraSystemSourceIdentifier
     )
 
@@ -75,8 +75,8 @@ class IngestorWorkerServiceTest
     assertWorksIndexedCorrectly(works: _*)
   }
 
-  it("inserts a non Sierra- or Miro- identified work") {
-    val work = identifiedWork(
+  it("inserts a non Sierra- or Miro- denormalised work") {
+    val work = denormalisedWork(
       sourceIdentifier = createSourceIdentifierWith(
         identifierType = IdentifierType("calm-altref-no")
       )
@@ -85,14 +85,14 @@ class IngestorWorkerServiceTest
     assertWorksIndexedCorrectly(work)
   }
 
-  it("indexes a mixture of Miro and Sierra, and otherly-identified Works") {
-    val miroWork = identifiedWork(
+  it("indexes a mixture of Miro and Sierra, and otherly-denormalised Works") {
+    val miroWork = denormalisedWork(
       sourceIdentifier = createMiroSourceIdentifier
     )
-    val sierraWork = identifiedWork(
+    val sierraWork = denormalisedWork(
       sourceIdentifier = createSierraSystemSourceIdentifier
     )
-    val otherWork = identifiedWork(
+    val otherWork = denormalisedWork(
       sourceIdentifier = createSourceIdentifierWith(
         identifierType = IdentifierType("calm-altref-no")
       )
@@ -105,12 +105,12 @@ class IngestorWorkerServiceTest
 
   it(
     "deletes works from the queue, including older versions of already ingested works") {
-    val oldSierraWork = identifiedWork(
+    val oldSierraWork = denormalisedWork(
       sourceIdentifier = createSierraSystemSourceIdentifier
     )
 
     val newSierraWork =
-      identifiedWork(sourceIdentifier = oldSierraWork.sourceIdentifier)
+      denormalisedWork(sourceIdentifier = oldSierraWork.sourceIdentifier)
         .withVersion(oldSierraWork.version + 1)
 
     val works = List(newSierraWork, oldSierraWork)
@@ -118,9 +118,9 @@ class IngestorWorkerServiceTest
     assertWorksIndexedCorrectly(works: _*)
   }
 
-  private def assertWorksIndexedCorrectly(works: Work[Identified]*): Assertion =
+  private def assertWorksIndexedCorrectly(works: Work[Denormalised]*): Assertion =
     withLocalWorksIndex { indexedIndex =>
-      withLocalIdentifiedWorksIndex { identifiedIndex =>
+      withLocalDenormalisedWorksIndex { identifiedIndex =>
         insertIntoElasticsearch(identifiedIndex, works: _*)
         withLocalSqsQueuePair(visibilityTimeout = 10) {
           case QueuePair(queue, dlq) =>
@@ -130,7 +130,7 @@ class IngestorWorkerServiceTest
                 elasticClient,
                 indexedIndex,
                 IndexedWorkIndexConfig),
-              retriever = new ElasticRetriever[Work[Identified]](
+              retriever = new ElasticRetriever[Work[Denormalised]](
                 elasticClient,
                 identifiedIndex
               )
