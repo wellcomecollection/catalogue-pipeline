@@ -13,7 +13,7 @@ import uk.ac.wellcome.models.work.internal.WorkState.Source
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import uk.ac.wellcome.pipeline_storage.{MemoryIndexer, PipelineStorageStream}
-import uk.ac.wellcome.storage.Version
+import uk.ac.wellcome.storage.{Identified, ReadError, Version}
 import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
 
@@ -37,9 +37,12 @@ class TestTransformerWorker(
   val pipelineStream: PipelineStorageStream[NotificationMessage,
                                             Work[Source],
                                             String],
-  val sourceStore: VersionedStore[String, Int, TestData]
+  sourceStore: VersionedStore[String, Int, TestData]
 ) extends TransformerWorker[TestData, String] {
   val transformer: Transformer[TestData] = TestTransformer
+
+  override def lookupSourceData(id: String): Either[ReadError, Identified[Version[String, Int], TestData]] =
+    sourceStore.getLatest(id)
 }
 
 class TransformerWorkerTest

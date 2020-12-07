@@ -9,7 +9,7 @@ import uk.ac.wellcome.platform.transformer.miro.models.{
   MiroVHSRecord
 }
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
-import uk.ac.wellcome.storage.DoesNotExistError
+import uk.ac.wellcome.storage.{DoesNotExistError, Identified, Version}
 import uk.ac.wellcome.storage.generators.S3ObjectLocationGenerators
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.memory.MemoryStore
@@ -45,7 +45,7 @@ class MiroLookupTest
     )
     vhsReader.put(id)(vhsRecord) shouldBe a[Right[_, _]]
 
-    lookup.lookupRecord(id).value shouldBe ((record, metadata))
+    lookup.lookupRecord(id).value shouldBe Identified(Version(id, version), (record, metadata))
   }
 
   it("fails if asked to lookup a non-existent ID") {

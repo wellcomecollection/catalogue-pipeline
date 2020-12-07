@@ -5,7 +5,7 @@ import uk.ac.wellcome.platform.transformer.miro.models.{
   MiroVHSRecord
 }
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
-import uk.ac.wellcome.storage.ReadError
+import uk.ac.wellcome.storage.{Identified, ReadError, Version}
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.Readable
 
@@ -14,14 +14,15 @@ class MiroLookup(
   typedStore: Readable[S3ObjectLocation, MiroRecord]
 ) {
   def lookupRecord(
-    id: String): Either[ReadError, (MiroRecord, MiroMetadata)] =
+    id: String): Either[ReadError, Identified[Version[String, Int], (MiroRecord, MiroMetadata)]] =
     for {
       vhsRecord <- miroVhsReader.get(id)
       miroMetadata = vhsRecord.identifiedT.toMiroMetadata
+      version = vhsRecord.identifiedT.version
 
       typedStoreRecord <- typedStore.get(vhsRecord.identifiedT.location)
       miroRecord = typedStoreRecord.identifiedT
 
       result = (miroRecord, miroMetadata)
-    } yield result
+    } yield Identified(Version(vhsRecord.id, version), result)
 }

@@ -9,7 +9,6 @@ import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.storage.{Identified, ReadError, Version}
 import WorkState.Source
 import uk.ac.wellcome.pipeline_storage.PipelineStorageStream
-import uk.ac.wellcome.storage.store.VersionedStore
 
 import scala.util.{Failure, Success}
 
@@ -41,7 +40,7 @@ trait TransformerWorker[SourceData, SenderDest] extends Logging {
                                             Work[Source],
                                             SenderDest]
 
-  val sourceStore: VersionedStore[String, Int, SourceData]
+  def lookupSourceData(id: String): Either[ReadError, Identified[Version[String, Int], SourceData]]
 
   def process(message: NotificationMessage): Result[(Work[Source], StoreKey)] =
     for {
@@ -66,13 +65,7 @@ trait TransformerWorker[SourceData, SenderDest] extends Logging {
     }
 
   private def getRecord(key: StoreKey): Result[(SourceData, Int)] =
-    lookupSourceData(key).left.map { err =>
-      StoreReadError(err, key)
-    }
-
-  private def lookupSourceData(key: StoreKey): Either[ReadError, (SourceData, Int)] =
-    sourceStore
-      .getLatest(key.id)
+    lookupSourceData(key.id)
       .map {
         case Identified(Version(storedId, storedVersion), sourceData) =>
           if (storedId != key.id) {
@@ -80,6 +73,9 @@ trait TransformerWorker[SourceData, SenderDest] extends Logging {
           }
 
           (sourceData, storedVersion)
+      }
+      .left.map { err =>
+        StoreReadError(err, key)
       }
 
   def run(): Future[Done] =
