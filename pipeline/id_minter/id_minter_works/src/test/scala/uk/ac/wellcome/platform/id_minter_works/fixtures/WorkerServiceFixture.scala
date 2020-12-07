@@ -17,7 +17,7 @@ import uk.ac.wellcome.platform.id_minter_works.services.IdMinterWorkerService
 import uk.ac.wellcome.pipeline_storage.{MemoryIndexer, MemoryRetriever}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.Implicits._
-import WorkState.{Merged, Identified}
+import WorkState.{Identified, Merged}
 import uk.ac.wellcome.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 
 trait WorkerServiceFixture

@@ -11,7 +11,7 @@ import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.platform.id_minter_works.fixtures.WorkerServiceFixture
-import WorkState.{Merged, Identified}
+import WorkState.{Identified, Merged}
 
 class IdMinterFeatureTest
     extends AnyFunSpec
