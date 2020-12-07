@@ -32,9 +32,9 @@ object VHSBuilder {
     new VHS(
       new VHSInternalStore(
         prefix = buildObjectLocationPrefix(config, namespace = namespace),
-        indexStore =
+        indexedStore =
           new DynamoHashStore[String, Int, S3ObjectLocation](dynamoConfig),
-        dataStore = S3TypedStore[T])
+        typedStore = S3TypedStore[T])
     )
   }
 

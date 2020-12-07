@@ -22,15 +22,10 @@ class VHS[T](val hybridStore: VHSInternalStore[T])
 
 class VHSInternalStore[T](
   prefix: S3ObjectLocationPrefix,
-  indexStore: Store[Version[String, Int], S3ObjectLocation] with Maxima[String,
-                                                                        Int],
-  dataStore: TypedStore[S3ObjectLocation, T]
+  val indexedStore: Store[Version[String, Int], S3ObjectLocation] with Maxima[String,
+                                                                              Int],
+  val typedStore: TypedStore[S3ObjectLocation, T]
 ) extends HybridStoreWithMaxima[String, Int, S3ObjectLocation, T] {
-
-  override val indexedStore
-    : Store[Version[String, Int], S3ObjectLocation] with Maxima[String, Int] =
-    indexStore
-  override val typedStore: TypedStore[S3ObjectLocation, T] = dataStore
 
   override protected def createTypeStoreId(
     id: Version[String, Int]): S3ObjectLocation =
