@@ -18,7 +18,6 @@ import uk.ac.wellcome.pipeline_storage.{
   MemoryIndexer
 }
 
-import scala.collection.mutable
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -31,8 +30,7 @@ class RouterWorkerServiceTest
 
   it("sends collectionPath to paths topic") {
     val work = identifiedWork().collectionPath(CollectionPath("a"))
-    val indexer = new MemoryIndexer[Work[Denormalised]](
-      mutable.Map[String, Work[Denormalised]]())
+    val indexer = new MemoryIndexer[Work[Denormalised]]()
     withWorkerService(indexer) {
       case (
           identifiedIndex,
@@ -53,8 +51,7 @@ class RouterWorkerServiceTest
 
   it("sends a work without collectionPath to works topic") {
     val work = identifiedWork()
-    val indexer = new MemoryIndexer[Work[Denormalised]](
-      mutable.Map[String, Work[Denormalised]]())
+    val indexer = new MemoryIndexer[Work[Denormalised]]()
     withWorkerService(indexer) {
       case (
           identifiedIndex,
@@ -79,8 +76,7 @@ class RouterWorkerServiceTest
     val work =
       identifiedWork().collectionPath(CollectionPath("a/2")).invisible()
 
-    val indexer = new MemoryIndexer[Work[Denormalised]](
-      mutable.Map[String, Work[Denormalised]]())
+    val indexer = new MemoryIndexer[Work[Denormalised]]()
     withWorkerService(indexer) {
       case (
           identifiedIndex,

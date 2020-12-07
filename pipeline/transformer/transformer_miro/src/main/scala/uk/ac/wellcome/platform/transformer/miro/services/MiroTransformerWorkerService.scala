@@ -12,7 +12,7 @@ import uk.ac.wellcome.platform.transformer.miro.models.{
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.Readable
-import uk.ac.wellcome.storage.ReadError
+import uk.ac.wellcome.storage.{Identified, ReadError, Version}
 import uk.ac.wellcome.transformer.common.worker.{Transformer, TransformerWorker}
 import uk.ac.wellcome.typesafe.Runnable
 
@@ -23,14 +23,15 @@ class MiroTransformerWorkerService[MsgDestination](
   miroVhsReader: Readable[String, MiroVHSRecord],
   typedStore: Readable[S3ObjectLocation, MiroRecord]
 ) extends Runnable
-    with TransformerWorker[(MiroRecord, MiroMetadata, Int), MsgDestination] {
+    with TransformerWorker[(MiroRecord, MiroMetadata), MsgDestination] {
 
-  override val transformer: Transformer[(MiroRecord, MiroMetadata, Int)] =
+  override val transformer: Transformer[(MiroRecord, MiroMetadata)] =
     new MiroRecordTransformer
 
   private val miroLookup = new MiroLookup(miroVhsReader, typedStore)
 
-  override protected def lookupSourceData(
-    key: StoreKey): Either[ReadError, (MiroRecord, MiroMetadata, Int)] =
-    miroLookup.lookupRecord(key.id)
+  override def lookupSourceData(id: String)
+    : Either[ReadError,
+             Identified[Version[String, Int], (MiroRecord, MiroMetadata)]] =
+    miroLookup.lookupRecord(id)
 }

@@ -26,11 +26,11 @@ class MiroRecordTransformer
     with MiroTitleAndDescription
     with MiroFormat
     with Logging
-    with Transformer[(MiroRecord, MiroMetadata, Int)] {
+    with Transformer[(MiroRecord, MiroMetadata)] {
 
-  override def apply(sourceData: (MiroRecord, MiroMetadata, Int),
+  override def apply(sourceData: (MiroRecord, MiroMetadata),
                      version: Int): Result[Work[Source]] = {
-    val (miroRecord, miroMetadata, version) = sourceData
+    val (miroRecord, miroMetadata) = sourceData
 
     transform(miroRecord, miroMetadata, version).toEither
   }
@@ -93,7 +93,7 @@ class MiroRecordTransformer
         contributors = getContributors(miroRecord),
         thumbnail = Some(getThumbnail(miroRecord)),
         items = getItems(miroRecord),
-        images = List(getImage(miroRecord, version))
+        images = List(getImage(miroRecord, version = version))
       )
 
       Work.Visible[Source](

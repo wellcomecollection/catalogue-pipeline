@@ -6,7 +6,7 @@ import grizzled.slf4j.Logging
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.storage.{ReadError, Version}
+import uk.ac.wellcome.storage.{Identified, ReadError, Version}
 import WorkState.Source
 import uk.ac.wellcome.pipeline_storage.PipelineStorageStream
 
@@ -40,18 +40,21 @@ trait TransformerWorker[SourceData, SenderDest] extends Logging {
                                             Work[Source],
                                             SenderDest]
 
-  protected def lookupSourceData(key: StoreKey): Either[ReadError, SourceData]
+  def lookupSourceData(
+    id: String): Either[ReadError, Identified[Version[String, Int], SourceData]]
 
   def process(message: NotificationMessage): Result[(Work[Source], StoreKey)] =
     for {
       key <- decodeKey(message)
-      record <- getRecord(key)
-      work <- work(record, key)
+      recordResult <- getRecord(key)
+      (record, version) = recordResult
+      work <- work(record, version, key)
     } yield (work, key)
 
   private def work(sourceData: SourceData,
+                   version: Int,
                    key: StoreKey): Result[Work[Source]] =
-    transformer(sourceData, key.version) match {
+    transformer(sourceData, version) match {
       case Left(err)     => Left(TransformerError(err, sourceData, key))
       case Right(result) => Right(result)
     }
@@ -62,10 +65,21 @@ trait TransformerWorker[SourceData, SenderDest] extends Logging {
       case Success(storeKey) => Right(storeKey)
     }
 
-  private def getRecord(key: StoreKey): Result[SourceData] =
-    lookupSourceData(key).left.map { err =>
-      StoreReadError(err, key)
-    }
+  private def getRecord(key: StoreKey): Result[(SourceData, Int)] =
+    lookupSourceData(key.id)
+      .map {
+        case Identified(Version(storedId, storedVersion), sourceData) =>
+          if (storedId != key.id) {
+            warn(
+              s"Stored ID ($storedId) does not match ID from message (${key.id})")
+          }
+
+          (sourceData, storedVersion)
+      }
+      .left
+      .map { err =>
+        StoreReadError(err, key)
+      }
 
   def run(): Future[Done] =
     pipelineStream.foreach(

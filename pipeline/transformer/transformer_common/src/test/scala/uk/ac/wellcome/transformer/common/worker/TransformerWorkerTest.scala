@@ -13,11 +13,10 @@ import uk.ac.wellcome.models.work.internal.WorkState.Source
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import uk.ac.wellcome.pipeline_storage.{MemoryIndexer, PipelineStorageStream}
+import uk.ac.wellcome.storage.{Identified, ReadError, Version}
 import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
-import uk.ac.wellcome.storage.{Identified, ReadError, Version}
 
-import scala.collection.mutable
 import scala.concurrent.Future
 import scala.util.{Failure, Try}
 
@@ -29,7 +28,7 @@ object TestTransformer extends Transformer[TestData] with WorkGenerators {
   def apply(data: TestData,
             version: Int): Either[Exception, Work.Visible[Source]] =
     data match {
-      case ValidTestData   => Right(sourceWork())
+      case ValidTestData   => Right(sourceWork().withVersion(version))
       case InvalidTestData => Left(new Exception("No No No"))
     }
 }
@@ -38,13 +37,13 @@ class TestTransformerWorker(
   val pipelineStream: PipelineStorageStream[NotificationMessage,
                                             Work[Source],
                                             String],
-  store: VersionedStore[String, Int, TestData]
+  sourceStore: VersionedStore[String, Int, TestData]
 ) extends TransformerWorker[TestData, String] {
   val transformer: Transformer[TestData] = TestTransformer
 
-  override protected def lookupSourceData(
-    key: StoreKey): Either[ReadError, TestData] =
-    store.getLatest(key.id).map { case Identified(_, testData) => testData }
+  override def lookupSourceData(
+    id: String): Either[ReadError, Identified[Version[String, Int], TestData]] =
+    sourceStore.getLatest(id)
 }
 
 class TransformerWorkerTest
@@ -67,9 +66,7 @@ class TransformerWorkerTest
         Version("C", 3) -> ValidTestData
       )
 
-      val workIndexer =
-        new MemoryIndexer[Work[Source]](
-          index = mutable.Map[String, Work[Source]]())
+      val workIndexer = new MemoryIndexer[Work[Source]]()
       val workKeySender = new MemoryMessageSender()
 
       withLocalSqsQueuePair() {
@@ -105,6 +102,28 @@ class TransformerWorkerTest
             workIndexer.index should have size 3
             workKeySender.messages.map { _.body } should contain theSameElementsAs workIndexer.index.keys
           }
+      }
+    }
+  }
+
+  it("uses the version from the store, not the message") {
+    val storeVersion = 5
+    val messageVersion = storeVersion - 1
+
+    val records = Map(
+      Version("A", storeVersion) -> ValidTestData,
+    )
+
+    val workIndexer = new MemoryIndexer[Work[Source]]()
+
+    withLocalSqsQueue() { queue =>
+      withWorker(queue, workIndexer = workIndexer, records = records) { _ =>
+        sendNotificationToSQS(queue, Version("A", messageVersion))
+
+        eventually {
+          workIndexer.index.values.map { _.version }.toSeq shouldBe Seq(
+            storeVersion)
+        }
       }
     }
   }
@@ -175,9 +194,7 @@ class TransformerWorkerTest
     }
 
     it("if it can't index the work") {
-      val brokenIndexer = new MemoryIndexer[Work[Source]](
-        index = mutable.Map[String, Work[Source]]()
-      ) {
+      val brokenIndexer = new MemoryIndexer[Work[Source]]() {
         override def index(documents: Seq[Work[Source]])
           : Future[Either[Seq[Work[Source]], Seq[Work[Source]]]] =
           Future.failed(new Throwable("BOOM!"))
@@ -232,8 +249,7 @@ class TransformerWorkerTest
   def withWorker[R](
     queue: Queue,
     records: Map[Version[String, Int], TestData] = Map.empty,
-    workIndexer: MemoryIndexer[Work[Source]] = new MemoryIndexer[Work[Source]](
-      index = mutable.Map[String, Work[Source]]()),
+    workIndexer: MemoryIndexer[Work[Source]] = new MemoryIndexer[Work[Source]](),
     workKeySender: MemoryMessageSender = new MemoryMessageSender()
   )(
     testWith: TestWith[Unit, R]
@@ -242,11 +258,11 @@ class TransformerWorkerTest
       queue = queue,
       indexer = workIndexer,
       sender = workKeySender) { pipelineStream =>
-      val store = MemoryVersionedStore[String, TestData](records)
+      val sourceStore = MemoryVersionedStore[String, TestData](records)
 
       val worker = new TestTransformerWorker(
         pipelineStream = pipelineStream,
-        store = store
+        sourceStore = sourceStore
       )
 
       worker.run()
