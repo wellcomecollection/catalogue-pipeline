@@ -17,7 +17,7 @@ import uk.ac.wellcome.platform.id_minter_works.services.IdMinterWorkerService
 import uk.ac.wellcome.pipeline_storage.{MemoryIndexer, MemoryRetriever}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.Implicits._
-import WorkState.{Denormalised, Identified}
+import WorkState.{Merged, Identified}
 import uk.ac.wellcome.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 
 trait WorkerServiceFixture
@@ -28,7 +28,7 @@ trait WorkerServiceFixture
     queue: Queue = Queue("url://q", "arn::q", visibilityTimeout = 1),
     identifiersDao: IdentifiersDao,
     identifiersTableConfig: IdentifiersTableConfig,
-    denormalisedIndex: Map[String, Json] = Map.empty,
+    mergedIndex: Map[String, Json] = Map.empty,
     identifiedIndex: mutable.Map[String, Work[Identified]] = mutable.Map.empty)(
     testWith: TestWith[IdMinterWorkerService[String], R]): R =
     withPipelineStream(
@@ -42,7 +42,7 @@ trait WorkerServiceFixture
         identifierGenerator = identifierGenerator,
         pipelineStream = stream,
         jsonRetriever =
-          new MemoryRetriever(index = mutable.Map(denormalisedIndex.toSeq: _*)),
+          new MemoryRetriever(index = mutable.Map(mergedIndex.toSeq: _*)),
         rdsClientConfig = rdsClientConfig,
         identifiersTableConfig = identifiersTableConfig
       )
@@ -56,7 +56,7 @@ trait WorkerServiceFixture
     messageSender: MemoryMessageSender,
     queue: Queue,
     identifiersTableConfig: IdentifiersTableConfig,
-    denormalisedIndex: Map[String, Json],
+    mergedIndex: Map[String, Json],
     identifiedIndex: mutable.Map[String, Work[Identified]])(
     testWith: TestWith[IdMinterWorkerService[String], R]): R = {
     Class.forName("com.mysql.jdbc.Driver")
@@ -78,12 +78,12 @@ trait WorkerServiceFixture
       queue,
       identifiersDao,
       identifiersTableConfig,
-      denormalisedIndex,
+      mergedIndex,
       identifiedIndex) { service =>
       testWith(service)
     }
   }
 
-  def createIndex(works: List[Work[Denormalised]]): Map[String, Json] =
+  def createIndex(works: List[Work[Merged]]): Map[String, Json] =
     works.map(work => (work.id, work.asJson)).toMap
 }

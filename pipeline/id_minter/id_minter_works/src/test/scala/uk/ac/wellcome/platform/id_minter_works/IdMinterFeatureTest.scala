@@ -11,7 +11,7 @@ import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.platform.id_minter_works.fixtures.WorkerServiceFixture
-import WorkState.{Denormalised, Identified}
+import WorkState.{Merged, Identified}
 
 class IdMinterFeatureTest
     extends AnyFunSpec
@@ -26,7 +26,7 @@ class IdMinterFeatureTest
 
     withLocalSqsQueue() { queue =>
       withIdentifiersTable { identifiersTableConfig =>
-        val work: Work[Denormalised] = denormalisedWork()
+        val work: Work[Merged] = mergedWork()
         val inputIndex = createIndex(List(work))
         val outputIndex = mutable.Map.empty[String, Work[Identified]]
         withWorkerService(
@@ -62,7 +62,7 @@ class IdMinterFeatureTest
 
     withLocalSqsQueue() { queue =>
       withIdentifiersTable { identifiersTableConfig =>
-        val work: Work[Denormalised] = denormalisedWork().invisible()
+        val work: Work[Merged] = mergedWork().invisible()
         val inputIndex = createIndex(List(work))
         val outputIndex = mutable.Map.empty[String, Work[Identified]]
         withWorkerService(
@@ -94,7 +94,7 @@ class IdMinterFeatureTest
 
     withLocalSqsQueue() { queue =>
       withIdentifiersTable { identifiersTableConfig =>
-        val work: Work[Denormalised] = denormalisedWork()
+        val work: Work[Merged] = mergedWork()
           .redirected(redirect = IdState.Identifiable(createSourceIdentifier))
         val inputIndex = createIndex(List(work))
         val outputIndex = mutable.Map.empty[String, Work[Identified]]
@@ -131,7 +131,7 @@ class IdMinterFeatureTest
 
     withLocalSqsQueue() { queue =>
       withIdentifiersTable { identifiersTableConfig =>
-        val work: Work[Denormalised] = denormalisedWork()
+        val work: Work[Merged] = mergedWork()
         val inputIndex = createIndex(List(work))
         val outputIndex = mutable.Map.empty[String, Work[Identified]]
         withWorkerService(
