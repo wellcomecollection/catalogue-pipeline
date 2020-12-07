@@ -26,7 +26,8 @@ object Main extends WellcomeTypesafeApp {
       AkkaBuilder.buildExecutionContext()
 
     val esClient = ElasticBuilder.buildElasticClient(config)
-    val mergedIndex = Index(config.requireString("es.identified-works.index"))
+    val identifiedIndex =
+      Index(config.requireString("es.identified-works.index"))
 
     val workIndexer = ElasticIndexerBuilder[Work[Denormalised]](
       config,
@@ -43,7 +44,7 @@ object Main extends WellcomeTypesafeApp {
       workIndexer = workIndexer,
       relationsService = new PathQueryRelationsService(
         esClient,
-        mergedIndex,
+        identifiedIndex,
         completeTreeScroll = config.requireInt("es.works.scroll.complete_tree"),
         affectedWorksScroll =
           config.requireInt("es.works.scroll.affected_works")
