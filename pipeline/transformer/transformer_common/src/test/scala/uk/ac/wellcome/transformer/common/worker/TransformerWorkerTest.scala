@@ -17,7 +17,6 @@ import uk.ac.wellcome.storage.Version
 import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
 
-import scala.collection.mutable
 import scala.concurrent.Future
 import scala.util.{Failure, Try}
 
@@ -63,9 +62,7 @@ class TransformerWorkerTest
         Version("C", 3) -> ValidTestData
       )
 
-      val workIndexer =
-        new MemoryIndexer[Work[Source]](
-          index = mutable.Map[String, Work[Source]]())
+      val workIndexer = new MemoryIndexer[Work[Source]]()
       val workKeySender = new MemoryMessageSender()
 
       withLocalSqsQueuePair() {
@@ -171,9 +168,7 @@ class TransformerWorkerTest
     }
 
     it("if it can't index the work") {
-      val brokenIndexer = new MemoryIndexer[Work[Source]](
-        index = mutable.Map[String, Work[Source]]()
-      ) {
+      val brokenIndexer = new MemoryIndexer[Work[Source]]() {
         override def index(documents: Seq[Work[Source]])
           : Future[Either[Seq[Work[Source]], Seq[Work[Source]]]] =
           Future.failed(new Throwable("BOOM!"))
@@ -228,8 +223,7 @@ class TransformerWorkerTest
   def withWorker[R](
     queue: Queue,
     records: Map[Version[String, Int], TestData] = Map.empty,
-    workIndexer: MemoryIndexer[Work[Source]] = new MemoryIndexer[Work[Source]](
-      index = mutable.Map[String, Work[Source]]()),
+    workIndexer: MemoryIndexer[Work[Source]] = new MemoryIndexer[Work[Source]](),
     workKeySender: MemoryMessageSender = new MemoryMessageSender()
   )(
     testWith: TestWith[Unit, R]

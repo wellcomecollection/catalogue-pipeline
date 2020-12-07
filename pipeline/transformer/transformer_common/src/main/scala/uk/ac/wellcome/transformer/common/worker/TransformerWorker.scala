@@ -46,15 +46,13 @@ trait TransformerWorker[SourceData, SenderDest] extends Logging {
   def process(message: NotificationMessage): Result[(Work[Source], StoreKey)] =
     for {
       key <- decodeKey(message)
-      recordResult <- getRecord(key)
-      (record, version) = recordResult
-      work <- work(record, version, key)
+      record <- getRecord(key)
+      work <- work(record, key)
     } yield (work, key)
 
   private def work(sourceData: SourceData,
-                   version: Int,
                    key: StoreKey): Result[Work[Source]] =
-    transformer(sourceData, version) match {
+    transformer(sourceData, key.version) match {
       case Left(err)     => Left(TransformerError(err, sourceData, key))
       case Right(result) => Right(result)
     }
@@ -65,15 +63,15 @@ trait TransformerWorker[SourceData, SenderDest] extends Logging {
       case Success(storeKey) => Right(storeKey)
     }
 
-  private def getRecord(key: StoreKey): Result[(SourceData, Int)] =
+  private def getRecord(key: StoreKey): Result[SourceData] =
     lookupSourceData(key).left.map { err =>
       StoreReadError(err, key)
     }
 
-  private def lookupSourceData(key: StoreKey): Either[ReadError, (SourceData, Int)] =
+  private def lookupSourceData(key: StoreKey): Either[ReadError, SourceData] =
     sourceStore
       .getLatest(key.id)
-      .map { case Identified(Version(_, version), sourceData) => (sourceData, version) }
+      .map { case Identified(_, sourceData) => sourceData }
 
   def run(): Future[Done] =
     pipelineStream.foreach(
