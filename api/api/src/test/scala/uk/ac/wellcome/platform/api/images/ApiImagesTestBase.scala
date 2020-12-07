@@ -39,7 +39,6 @@ trait ApiImagesTestBase
        |  {
        |    "type": "Image",
        |    "id": "${image.id}",
-       |    "thumbnail": ${location(image.state.derivedData.thumbnail)},
        |    "locations": [${locations(image.locations)}],
        |    "source": ${imageSource(image.source)}
        |  }
