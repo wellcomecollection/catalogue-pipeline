@@ -23,14 +23,14 @@ class MiroTransformerWorkerService[MsgDestination](
   miroVhsReader: Readable[String, MiroVHSRecord],
   typedStore: Readable[S3ObjectLocation, MiroRecord]
 ) extends Runnable
-    with TransformerWorker[(MiroRecord, MiroMetadata, Int), MsgDestination] {
+    with TransformerWorker[(MiroRecord, MiroMetadata), MsgDestination] {
 
-  override val transformer: Transformer[(MiroRecord, MiroMetadata, Int)] =
+  override val transformer: Transformer[(MiroRecord, MiroMetadata)] =
     new MiroRecordTransformer
 
   private val miroLookup = new MiroLookup(miroVhsReader, typedStore)
 
   override protected def lookupSourceData(
-    key: StoreKey): Either[ReadError, (MiroRecord, MiroMetadata, Int)] =
+    key: StoreKey): Either[ReadError, (MiroRecord, MiroMetadata)] =
     miroLookup.lookupRecord(key.id)
 }

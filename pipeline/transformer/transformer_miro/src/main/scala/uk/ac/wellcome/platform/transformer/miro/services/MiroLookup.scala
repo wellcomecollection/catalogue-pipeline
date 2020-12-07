@@ -14,15 +14,14 @@ class MiroLookup(
   typedStore: Readable[S3ObjectLocation, MiroRecord]
 ) {
   def lookupRecord(
-    id: String): Either[ReadError, (MiroRecord, MiroMetadata, Int)] =
+    id: String): Either[ReadError, (MiroRecord, MiroMetadata)] =
     for {
       vhsRecord <- miroVhsReader.get(id)
       miroMetadata = vhsRecord.identifiedT.toMiroMetadata
-      version = vhsRecord.identifiedT.version
 
       typedStoreRecord <- typedStore.get(vhsRecord.identifiedT.location)
       miroRecord = typedStoreRecord.identifiedT
 
-      result = (miroRecord, miroMetadata, version)
+      result = (miroRecord, miroMetadata)
     } yield result
 }
