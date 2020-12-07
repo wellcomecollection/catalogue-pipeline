@@ -45,7 +45,9 @@ class MiroLookupTest
     )
     vhsReader.put(id)(vhsRecord) shouldBe a[Right[_, _]]
 
-    lookup.lookupRecord(id).value shouldBe Identified(Version(id, version), (record, metadata))
+    lookup.lookupRecord(id).value shouldBe Identified(
+      Version(id, version),
+      (record, metadata))
   }
 
   it("fails if asked to lookup a non-existent ID") {

@@ -30,6 +30,8 @@ class MiroTransformerWorkerService[MsgDestination](
 
   private val miroLookup = new MiroLookup(miroVhsReader, typedStore)
 
-  override def lookupSourceData(id: String): Either[ReadError, Identified[Version[String, Int], (MiroRecord, MiroMetadata)]] =
+  override def lookupSourceData(id: String)
+    : Either[ReadError,
+             Identified[Version[String, Int], (MiroRecord, MiroMetadata)]] =
     miroLookup.lookupRecord(id)
 }

@@ -41,7 +41,8 @@ class TestTransformerWorker(
 ) extends TransformerWorker[TestData, String] {
   val transformer: Transformer[TestData] = TestTransformer
 
-  override def lookupSourceData(id: String): Either[ReadError, Identified[Version[String, Int], TestData]] =
+  override def lookupSourceData(
+    id: String): Either[ReadError, Identified[Version[String, Int], TestData]] =
     sourceStore.getLatest(id)
 }
 
@@ -120,7 +121,8 @@ class TransformerWorkerTest
         sendNotificationToSQS(queue, Version("A", messageVersion))
 
         eventually {
-          workIndexer.index.values.map { _.version }.toSeq shouldBe Seq(storeVersion)
+          workIndexer.index.values.map { _.version }.toSeq shouldBe Seq(
+            storeVersion)
         }
       }
     }

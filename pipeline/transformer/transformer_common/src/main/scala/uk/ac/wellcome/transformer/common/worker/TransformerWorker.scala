@@ -40,7 +40,8 @@ trait TransformerWorker[SourceData, SenderDest] extends Logging {
                                             Work[Source],
                                             SenderDest]
 
-  def lookupSourceData(id: String): Either[ReadError, Identified[Version[String, Int], SourceData]]
+  def lookupSourceData(
+    id: String): Either[ReadError, Identified[Version[String, Int], SourceData]]
 
   def process(message: NotificationMessage): Result[(Work[Source], StoreKey)] =
     for {
@@ -69,12 +70,14 @@ trait TransformerWorker[SourceData, SenderDest] extends Logging {
       .map {
         case Identified(Version(storedId, storedVersion), sourceData) =>
           if (storedId != key.id) {
-            warn(s"Stored ID ($storedId) does not match ID from message (${key.id})")
+            warn(
+              s"Stored ID ($storedId) does not match ID from message (${key.id})")
           }
 
           (sourceData, storedVersion)
       }
-      .left.map { err =>
+      .left
+      .map { err =>
         StoreReadError(err, key)
       }
 

@@ -13,8 +13,9 @@ class MiroLookup(
   miroVhsReader: Readable[String, MiroVHSRecord],
   typedStore: Readable[S3ObjectLocation, MiroRecord]
 ) {
-  def lookupRecord(
-    id: String): Either[ReadError, Identified[Version[String, Int], (MiroRecord, MiroMetadata)]] =
+  def lookupRecord(id: String)
+    : Either[ReadError,
+             Identified[Version[String, Int], (MiroRecord, MiroMetadata)]] =
     for {
       vhsRecord <- miroVhsReader.get(id)
       miroMetadata = vhsRecord.identifiedT.toMiroMetadata
