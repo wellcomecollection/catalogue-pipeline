@@ -6,9 +6,15 @@ import akka.Done
 import grizzled.slf4j.Logging
 import io.circe.{Decoder, Json}
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.platform.id_minter.config.models.{IdentifiersTableConfig, RDSClientConfig}
+import uk.ac.wellcome.platform.id_minter.config.models.{
+  IdentifiersTableConfig,
+  RDSClientConfig
+}
 import uk.ac.wellcome.platform.id_minter.database.TableProvisioner
-import uk.ac.wellcome.platform.id_minter.steps.{IdentifierGenerator, SourceIdentifierEmbedder}
+import uk.ac.wellcome.platform.id_minter.steps.{
+  IdentifierGenerator,
+  SourceIdentifierEmbedder
+}
 import uk.ac.wellcome.typesafe.Runnable
 import uk.ac.wellcome.pipeline_storage.{PipelineStorageStream, Retriever}
 import uk.ac.wellcome.json.JsonUtil._
@@ -17,12 +23,13 @@ import uk.ac.wellcome.models.Implicits._
 import WorkState.Identified
 
 class IdMinterWorkerService[Destination](
-                                          identifierGenerator: IdentifierGenerator,
-
-                                          pipelineStream: PipelineStorageStream[NotificationMessage, Work[Identified], Destination],
-                                          jsonRetriever: Retriever[Json],
-                                          rdsClientConfig: RDSClientConfig,
-                                          identifiersTableConfig: IdentifiersTableConfig
+  identifierGenerator: IdentifierGenerator,
+  pipelineStream: PipelineStorageStream[NotificationMessage,
+                                        Work[Identified],
+                                        Destination],
+  jsonRetriever: Retriever[Json],
+  rdsClientConfig: RDSClientConfig,
+  identifiersTableConfig: IdentifiersTableConfig
 )(implicit ec: ExecutionContext)
     extends Runnable
     with Logging {
@@ -40,10 +47,12 @@ class IdMinterWorkerService[Destination](
     pipelineStream.foreach(this.getClass.getSimpleName, processMessage)
   }
 
-  def processMessage(message: NotificationMessage): Future[Option[Work[Identified]]] =
+  def processMessage(
+    message: NotificationMessage): Future[Option[Work[Identified]]] =
     jsonRetriever(message.body)
       .flatMap(json => Future.fromTry(embedIds(json)))
-      .flatMap(updatedJson => Future.fromTry(decodeJson(updatedJson)).map(Some(_)))
+      .flatMap(updatedJson =>
+        Future.fromTry(decodeJson(updatedJson)).map(Some(_)))
 
   def embedIds(json: Json): Try[Json] =
     for {

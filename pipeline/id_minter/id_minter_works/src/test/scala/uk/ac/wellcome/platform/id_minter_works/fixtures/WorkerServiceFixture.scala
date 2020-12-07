@@ -22,7 +22,7 @@ import uk.ac.wellcome.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 
 trait WorkerServiceFixture
     extends IdentifiersDatabase
-    with PipelineStorageStreamFixtures{
+    with PipelineStorageStreamFixtures {
   def withWorkerService[R](
     messageSender: MemoryMessageSender = new MemoryMessageSender(),
     queue: Queue = Queue("url://q", "arn::q", visibilityTimeout = 1),
@@ -31,26 +31,26 @@ trait WorkerServiceFixture
     denormalisedIndex: Map[String, Json] = Map.empty,
     identifiedIndex: mutable.Map[String, Work[Identified]] = mutable.Map.empty)(
     testWith: TestWith[IdMinterWorkerService[String], R]): R =
-      withPipelineStream(queue, new MemoryIndexer(index = identifiedIndex), messageSender) { stream =>
+    withPipelineStream(
+      queue,
+      new MemoryIndexer(index = identifiedIndex),
+      messageSender) { stream =>
+      val identifierGenerator = new IdentifierGenerator(
+        identifiersDao = identifiersDao
+      )
+      val workerService = new IdMinterWorkerService(
+        identifierGenerator = identifierGenerator,
+        pipelineStream = stream,
+        jsonRetriever =
+          new MemoryRetriever(index = mutable.Map(denormalisedIndex.toSeq: _*)),
+        rdsClientConfig = rdsClientConfig,
+        identifiersTableConfig = identifiersTableConfig
+      )
 
-            val identifierGenerator = new IdentifierGenerator(
-              identifiersDao = identifiersDao
-            )
-            val workerService = new IdMinterWorkerService(
-              identifierGenerator = identifierGenerator,
+      workerService.run()
 
-              pipelineStream = stream,
-              jsonRetriever = new MemoryRetriever(
-                index = mutable.Map(denormalisedIndex.toSeq: _*)),
-
-              rdsClientConfig = rdsClientConfig,
-              identifiersTableConfig = identifiersTableConfig
-            )
-
-            workerService.run()
-
-            testWith(workerService)
-          }
+      testWith(workerService)
+    }
 
   def withWorkerService[R](
     messageSender: MemoryMessageSender,
