@@ -46,9 +46,9 @@ object VHSBuilder {
   private def buildObjectLocationPrefix(config: Config, namespace: String) =
     S3ObjectLocationPrefix(
       bucket = config
-        .requireString(s"aws.${namespace}.s3.bucketName"),
+        .requireString(s"aws.$namespace.s3.bucketName"),
       keyPrefix = config
-        .getStringOption(s"aws.${namespace}.s3.globalPrefix")
+        .getStringOption(s"aws.$namespace.s3.globalPrefix")
         .getOrElse("")
     )
 
