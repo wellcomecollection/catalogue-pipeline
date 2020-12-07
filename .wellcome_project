@@ -84,9 +84,6 @@ catalogue_pipeline:
     - id: merger
       services:
         - id: merger
-    - id: recorder
-      services:
-        - id: recorder
     - id: ingestor_images
       services:
         - id: image-ingestor

@@ -14,11 +14,12 @@ module "snapshot_generator" {
   memory = 8192
 
   secret_env_vars = {
-    es_host     = "catalogue/api/es_host"
-    es_port     = "catalogue/api/es_port"
-    es_protocol = "catalogue/api/es_protocol"
-    es_username = "catalogue/api/es_username"
-    es_password = "catalogue/api/es_password"
+    es_host      = "catalogue/api/es_host"
+    es_port      = "catalogue/api/es_port"
+    es_protocol  = "catalogue/api/es_protocol"
+    es_username  = "catalogue/api/es_username"
+    es_password  = "catalogue/api/es_password"
+    es_bulk_size = var.es_bulk_size
   }
 
   subnets = var.subnets

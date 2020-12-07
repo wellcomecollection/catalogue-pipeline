@@ -4,6 +4,6 @@
   "dependencyIds" : [
     "internal_model",
     "big_messaging_typesafe",
-    "pipeline_storage"
+    "pipeline_storage_typesafe"
   ]
 }

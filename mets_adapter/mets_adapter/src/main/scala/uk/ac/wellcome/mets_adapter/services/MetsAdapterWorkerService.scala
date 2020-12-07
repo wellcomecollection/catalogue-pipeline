@@ -53,8 +53,8 @@ class MetsAdapterWorkerService[Destination](
           .via(unwrapMessage)
           .via(filterDigitised)
           .via(retrieveBag)
-          .via(parseMetsLocation)
-          .via(storeMetsLocation)
+          .via(parseMetsSourceData)
+          .via(storeMetsSourceData)
           .via(publishKey)
           .map { case (Context(msg, _), _) => msg }
       }
@@ -101,12 +101,12 @@ class MetsAdapterWorkerService[Destination](
             .transform(result => Success(result.toEither))
       }
 
-  def parseMetsLocation =
+  def parseMetsSourceData =
     Flow[(Context, Option[Bag])]
-      .mapWithContext { case (_, bag) => bag.metsLocation }
+      .mapWithContext { case (_, bag) => bag.metsSourceData }
 
-  def storeMetsLocation =
-    Flow[(Context, Option[MetsLocation])]
+  def storeMetsSourceData =
+    Flow[(Context, Option[MetsSourceData])]
       .mapWithContextAsync(concurrentDynamoConnections) {
         case (ctx, data) =>
           Future {

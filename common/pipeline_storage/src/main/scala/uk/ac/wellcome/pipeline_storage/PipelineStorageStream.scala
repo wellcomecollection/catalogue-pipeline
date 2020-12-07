@@ -15,21 +15,21 @@ case class PipelineStorageConfig(batchSize: Int,
                                  flushInterval: FiniteDuration,
                                  parallelism: Int)
 
-class PipelineStorageStream[T, D, MsgDestination](
-  messageStream: SQSStream[T],
-  documentIndexer: Indexer[D],
+class PipelineStorageStream[In, Out, MsgDestination](
+  messageStream: SQSStream[In],
+  documentIndexer: Indexer[Out],
   messageSender: MessageSender[MsgDestination])(config: PipelineStorageConfig)(
   implicit ec: ExecutionContext)
     extends Logging {
   type FutureBundles = Future[List[Bundle]]
-  case class Bundle(message: Message, document: D)
+  case class Bundle(message: Message, document: Out)
 
-  def foreach(streamName: String, process: T => Future[Option[D]])(
-    implicit decoderT: Decoder[T],
-    indexable: Indexable[D]): Future[Done] =
+  def foreach(streamName: String, process: In => Future[Option[Out]])(
+    implicit decoderT: Decoder[In],
+    indexable: Indexable[Out]): Future[Done] =
     run(
       streamName = streamName,
-      Flow[(Message, T)]
+      Flow[(Message, In)]
         .mapAsyncUnordered(parallelism = config.parallelism) {
           case (message, t) =>
             debug(s"Processing message ${message.messageId()}")
@@ -38,10 +38,10 @@ class PipelineStorageStream[T, D, MsgDestination](
     )
 
   def run(streamName: String,
-          processFlow: Flow[(Message, T), (Message, Option[D]), NotUsed])(
-    implicit decoder: Decoder[T],
-    indexable: Indexable[D]) = {
-    val identityFlow = Flow[(Message, Option[D])].collect {
+          processFlow: Flow[(Message, In), (Message, Option[Out]), NotUsed])(
+    implicit decoder: Decoder[In],
+    indexable: Indexable[Out]): Future[Done] = {
+    val identityFlow = Flow[(Message, Option[Out])].collect {
       case (message, None) => message
     }
     for {
@@ -53,8 +53,8 @@ class PipelineStorageStream[T, D, MsgDestination](
     } yield result
   }
 
-  private def batchAndSendFlow(implicit indexable: Indexable[D]) =
-    Flow[(Message, Option[D])]
+  private def batchAndSendFlow(implicit indexable: Indexable[Out]) =
+    Flow[(Message, Option[Out])]
       .collect { case (message, Some(document)) => Bundle(message, document) }
       .groupedWithin(
         config.batchSize,

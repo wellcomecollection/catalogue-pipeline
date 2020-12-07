@@ -34,3 +34,12 @@ variable "public_bucket_name" {
 variable "public_object_key_v2" {
   type = string
 }
+
+variable "shared_logging_secrets" {
+  type = map(string)
+}
+
+variable "es_bulk_size" {
+  description = "How many works to fetch in a single scroll request"
+  type        = number
+}

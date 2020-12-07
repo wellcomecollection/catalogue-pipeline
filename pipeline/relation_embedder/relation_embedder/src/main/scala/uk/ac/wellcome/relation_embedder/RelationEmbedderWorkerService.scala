@@ -34,10 +34,11 @@ class RelationEmbedderWorkerService[MsgDestination](
       sqsStream.foreach(this.getClass.getSimpleName, processMessage)
     }
 
-  def processMessage(message: NotificationMessage): Future[Unit] =
+  def processMessage(message: NotificationMessage): Future[Unit] = {
+    val batch = fromJson[Batch](message.body);
     Future
-      .fromTry(fromJson[Batch](message.body))
-      .map { batch =>
+      .fromTry(batch)
+      .flatMap { batch =>
         info(
           s"Received batch for tree ${batch.rootPath} containing ${batch.selectors.size} selectors: ${batch.selectors
             .mkString(", ")}")
@@ -56,7 +57,7 @@ class RelationEmbedderWorkerService[MsgDestination](
 
             denormalisedWorks
               .groupedWithin(indexBatchSize, indexFlushInterval)
-              .mapAsync(2) { works =>
+              .mapAsync(1) { works =>
                 workIndexer.index(works).flatMap {
                   case Left(failedWorks) =>
                     Future.failed(
@@ -65,9 +66,9 @@ class RelationEmbedderWorkerService[MsgDestination](
                   case Right(_) => Future.successful(works.toList)
                 }
               }
-              .mapConcat(identity)
-              .mapAsync(3) { work =>
-                Future(msgSender.send(work.id)).flatMap {
+              .mapConcat(_.map(_.id))
+              .mapAsync(3) { id =>
+                Future(msgSender.send(id)).flatMap {
                   case Success(_)   => Future.successful(())
                   case Failure(err) => Future.failed(err)
                 }
@@ -76,4 +77,12 @@ class RelationEmbedderWorkerService[MsgDestination](
               .map(_ => ())
           }
       }
+      .recoverWith {
+        case err =>
+          val batchString =
+            batch.map(_.toString).getOrElse("could not parse message")
+          error(s"Failed processing batch: $batchString", err)
+          Future.failed(err)
+      }
+  }
 }

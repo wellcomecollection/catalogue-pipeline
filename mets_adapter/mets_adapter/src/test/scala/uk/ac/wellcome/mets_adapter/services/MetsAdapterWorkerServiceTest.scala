@@ -32,7 +32,8 @@ class MetsAdapterWorkerServiceTest
     BagInfo("external-identifier"),
     BagManifest(
       List(
-        BagFile("data/b30246039.xml", "mets.xml")
+        BagFile("data/b30246039.xml", "mets.xml"),
+        BagFile("objects/blahbluhblih.jp2", "blahbluhblih.jp2")
       )
     ),
     BagLocation(
@@ -75,7 +76,7 @@ class MetsAdapterWorkerServiceTest
           vhs.getLatest(id = externalIdentifier) shouldBe Right(
             Identified(
               expectedVersion,
-              metsLocation("mets.xml", createdDate = bag.createdDate))
+              metsSourceData("mets.xml", createdDate = bag.createdDate))
           )
         }
     }
@@ -97,7 +98,7 @@ class MetsAdapterWorkerServiceTest
         vhs.getLatest(id = externalIdentifier) shouldBe Right(
           Identified(
             expectedVersion,
-            metsLocation("mets.xml", createdDate = bag.createdDate))
+            metsSourceData("mets.xml", createdDate = bag.createdDate))
         )
     }
   }
@@ -119,7 +120,7 @@ class MetsAdapterWorkerServiceTest
         vhs.getLatest(id = externalIdentifier) shouldBe Right(
           Identified(
             expectedVersion,
-            metsLocation("existing-data", createdDate))
+            metsSourceData("existing-data", createdDate))
         )
     }
   }
@@ -141,7 +142,7 @@ class MetsAdapterWorkerServiceTest
         vhs.getLatest(id = externalIdentifier) shouldBe Right(
           Identified(
             Version(externalIdentifier, 2),
-            metsLocation("existing-data", createdDate))
+            metsSourceData("existing-data", createdDate))
         )
     }
   }
@@ -226,7 +227,7 @@ class MetsAdapterWorkerServiceTest
   }
 
   def withWorkerService[R](bagRetriever: BagRetriever,
-                           store: VersionedStore[String, Int, MetsLocation],
+                           store: VersionedStore[String, Int, MetsSourceData],
                            messageSender: MemoryMessageSender =
                              new MemoryMessageSender())(
     testWith: TestWith[(MetsAdapterWorkerService[String],
@@ -252,11 +253,18 @@ class MetsAdapterWorkerServiceTest
   def createStore(
     data: Map[Version[String, Int], (String, Instant)] = Map.empty) =
     MemoryVersionedStore(data.mapValues {
-      case (file, createdDate) => metsLocation(file, createdDate)
+      case (file, createdDate) => metsSourceData(file, createdDate)
     })
 
-  def metsLocation(file: String, createdDate: Instant, version: Int = 1) =
-    MetsLocation("bucket", "root", version, file, createdDate, Nil)
+  def metsSourceData(file: String, createdDate: Instant, version: Int = 1) =
+    MetsSourceData(
+      bucket = "bucket",
+      path = "root",
+      version = version,
+      file = file,
+      createdDate = createdDate,
+      deleted = false,
+      manifestations = Nil)
 
   def createBagRegistrationNotificationWith(
     space: String,

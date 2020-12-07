@@ -20,7 +20,7 @@ class ElasticRetriever[T](client: ElasticClient, index: Index)(
     extends Retriever[T]
     with Logging {
 
-  override final def apply(ids: Seq[String]): Future[Map[String, T]] =
+  override final def apply(ids: Seq[String]): Future[RetrieverMultiResult[T]] =
     client
       .execute {
         multiget(
@@ -40,17 +40,20 @@ class ElasticRetriever[T](client: ElasticClient, index: Index)(
           // original IDs.
           // See https://www.elastic.co/guide/en/elasticsearch/reference/6.8/docs-multi-get.html
           val documents = result.docs
-            .map { _.safeTo[T] }
             .zip(ids)
+            .map {
+              case (getResponse, id) =>
+                if (getResponse.found) {
+                  id -> getResponse.safeTo[T]
+                } else {
+                  id -> Failure(new RetrieverNotFoundException(id))
+                }
+            }
+            .toMap
 
-          val successes = documents.collect { case (Success(t), id) => id -> t }
-          val failures = documents.collect { case (Failure(e), id)  => id -> e }
-
-          if (failures.isEmpty) {
-            successes.toMap
-          } else {
-            throw new RuntimeException(
-              s"Unable to decode documents from index $index: $failures")
-          }
+          RetrieverMultiResult(
+            found = documents.collect { case (id, Success(t))    => id -> t },
+            notFound = documents.collect { case (id, Failure(e)) => id -> e }
+          )
       }
 }

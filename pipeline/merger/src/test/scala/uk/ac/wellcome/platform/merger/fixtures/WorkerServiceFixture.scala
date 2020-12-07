@@ -1,9 +1,8 @@
 package uk.ac.wellcome.platform.merger.fixtures
 
-import scala.collection.mutable.Map
+import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
@@ -14,24 +13,25 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.monitoring.Metrics
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
 import uk.ac.wellcome.platform.merger.services._
-import uk.ac.wellcome.pipeline_storage.MemoryIndexer
+import uk.ac.wellcome.pipeline_storage.{MemoryIndexer, MemoryRetriever}
 import uk.ac.wellcome.models.work.internal._
-import WorkState.Merged
+import WorkState.{Merged, Source}
 
-trait WorkerServiceFixture extends LocalWorksVhs with SQS with Akka {
-  def withWorkerService[R](vhs: VHS,
+trait WorkerServiceFixture extends SQS with Akka {
+  def withWorkerService[R](retriever: MemoryRetriever[Work[Source]],
                            queue: Queue,
                            workSender: MemoryMessageSender,
                            imageSender: MemoryMessageSender =
                              new MemoryMessageSender(),
                            metrics: Metrics[Future] = new MemoryMetrics,
-                           index: Map[String, Work[Merged]] = Map.empty)(
+                           index: mutable.Map[String, Work[Merged]] =
+                             mutable.Map[String, Work[Merged]]())(
     testWith: TestWith[MergerWorkerService[String, String], R]): R =
     withActorSystem { implicit actorSystem =>
       withSQSStream[NotificationMessage, R](queue, metrics) { sqsStream =>
         val workerService = new MergerWorkerService(
           sqsStream = sqsStream,
-          playbackService = new RecorderPlaybackService(vhs),
+          sourceWorkLookup = new SourceWorkLookup(retriever),
           mergerManager = new MergerManager(PlatformMerger),
           workIndexer = new MemoryIndexer(index),
           workSender = workSender,
@@ -44,14 +44,15 @@ trait WorkerServiceFixture extends LocalWorksVhs with SQS with Akka {
       }
     }
 
-  def withWorkerService[R](vhs: VHS)(
+  def withWorkerService[R](retriever: MemoryRetriever[Work[Source]])(
     testWith: TestWith[MergerWorkerService[String, String], R]): R =
     withLocalSqsQueue() { queue =>
       val workSender = new MemoryMessageSender()
       val imageSender = new MemoryMessageSender()
 
-      withWorkerService(vhs, queue, workSender, imageSender) { workerService =>
-        testWith(workerService)
+      withWorkerService(retriever, queue, workSender, imageSender) {
+        workerService =>
+          testWith(workerService)
       }
     }
 

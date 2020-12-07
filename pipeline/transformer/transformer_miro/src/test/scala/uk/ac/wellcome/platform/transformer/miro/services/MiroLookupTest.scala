@@ -27,10 +27,10 @@ class MiroLookupTest
       MiroMetadata(isClearedForCatalogueAPI = chooseFrom(true, false))
     val version = randomInt(from = 1, to = 10)
 
-    val indexStore = createIndexStore
+    val vhsReader = createVhsReader
     val typedStore = createTypedStore
 
-    val lookup = new MiroLookup(indexStore, typedStore)
+    val lookup = new MiroLookup(vhsReader, typedStore)
 
     // Store the record in the store
     val id = record.imageNumber
@@ -43,16 +43,16 @@ class MiroLookupTest
       isClearedForCatalogueAPI = metadata.isClearedForCatalogueAPI,
       location = s3Location
     )
-    indexStore.put(id)(vhsRecord) shouldBe a[Right[_, _]]
+    vhsReader.put(id)(vhsRecord) shouldBe a[Right[_, _]]
 
     lookup.lookupRecord(id).value shouldBe ((record, metadata, version))
   }
 
   it("fails if asked to lookup a non-existent ID") {
-    val indexStore = createIndexStore
+    val vhsReader = createVhsReader
     val typedStore = createTypedStore
 
-    val lookup = new MiroLookup(indexStore, typedStore)
+    val lookup = new MiroLookup(vhsReader, typedStore)
 
     lookup
       .lookupRecord(id = "M0000001")
@@ -61,7 +61,7 @@ class MiroLookupTest
   }
 
   it("fails if the index store has a dangling pointer") {
-    val indexStore = createIndexStore
+    val vhsReader = createVhsReader
     val typedStore = createTypedStore
 
     val id = "L1234567"
@@ -72,14 +72,14 @@ class MiroLookupTest
       isClearedForCatalogueAPI = chooseFrom(true, false),
       location = createS3ObjectLocation
     )
-    indexStore.put(id)(vhsRecord) shouldBe a[Right[_, _]]
+    vhsReader.put(id)(vhsRecord) shouldBe a[Right[_, _]]
 
-    val lookup = new MiroLookup(indexStore, typedStore)
+    val lookup = new MiroLookup(vhsReader, typedStore)
 
     lookup.lookupRecord(id).left.value shouldBe a[DoesNotExistError]
   }
 
-  private def createIndexStore: MemoryStore[String, MiroVHSRecord] =
+  private def createVhsReader: MemoryStore[String, MiroVHSRecord] =
     new MemoryStore[String, MiroVHSRecord](initialEntries = Map.empty)
 
   private def createTypedStore: MemoryStore[S3ObjectLocation, MiroRecord] =

@@ -97,7 +97,7 @@ lazy val id_minter_common = setupProject(
 lazy val id_minter_works = setupProject(
   project,
   "pipeline/id_minter/id_minter_works",
-  localDependencies = Seq(id_minter_common, pipeline_storage),
+  localDependencies = Seq(id_minter_common, pipeline_storage_typesafe),
   externalDependencies = Seq()
 )
 
@@ -112,7 +112,7 @@ lazy val ingestor_common = setupProject(
   project,
   "pipeline/ingestor/ingestor_common",
   localDependencies =
-    Seq(elasticsearch_typesafe, big_messaging_typesafe, pipeline_storage)
+    Seq(elasticsearch_typesafe, big_messaging_typesafe, pipeline_storage_typesafe)
 )
 
 lazy val ingestor_works = setupProject(
@@ -132,7 +132,7 @@ lazy val ingestor_images = setupProject(
 lazy val matcher = setupProject(
   project,
   "pipeline/matcher",
-  localDependencies = Seq(internal_model, big_messaging_typesafe),
+  localDependencies = Seq(internal_model, pipeline_storage_typesafe),
   externalDependencies = CatalogueDependencies.matcherDependencies
 )
 
@@ -140,14 +140,14 @@ lazy val merger = setupProject(
   project,
   "pipeline/merger",
   localDependencies =
-    Seq(internal_model, big_messaging_typesafe, pipeline_storage),
+    Seq(internal_model, big_messaging_typesafe, pipeline_storage_typesafe),
   externalDependencies = CatalogueDependencies.mergerDependencies
 )
 
 lazy val relation_embedder = setupProject(
   project,
   "pipeline/relation_embedder/relation_embedder",
-  localDependencies = Seq(internal_model, elasticsearch, pipeline_storage),
+  localDependencies = Seq(internal_model, elasticsearch, pipeline_storage_typesafe),
   externalDependencies = CatalogueDependencies.relationEmbedderDependencies
 )
 
@@ -165,12 +165,6 @@ lazy val batcher = setupProject(
   externalDependencies = CatalogueDependencies.batcherDependencies
 )
 
-lazy val recorder = setupProject(
-  project,
-  "pipeline/recorder",
-  localDependencies = Seq(internal_model, big_messaging_typesafe)
-)
-
 lazy val reindex_worker = setupProject(
   project,
   "reindexer/reindex_worker",
@@ -180,7 +174,8 @@ lazy val reindex_worker = setupProject(
 lazy val transformer_common = setupProject(
   project,
   "pipeline/transformer/transformer_common",
-  localDependencies = Seq(internal_model, big_messaging_typesafe)
+  localDependencies = Seq(internal_model, pipeline_storage_typesafe),
+  externalDependencies = CatalogueDependencies.transformerCommonDependencies
 )
 
 lazy val transformer_miro = setupProject(

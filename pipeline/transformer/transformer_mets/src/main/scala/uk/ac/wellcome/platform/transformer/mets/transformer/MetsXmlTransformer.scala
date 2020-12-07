@@ -2,16 +2,16 @@ package uk.ac.wellcome.platform.transformer.mets.transformer
 
 import uk.ac.wellcome.storage.store.Readable
 import uk.ac.wellcome.storage.Identified
-import uk.ac.wellcome.mets_adapter.models.MetsLocation
+import uk.ac.wellcome.mets_adapter.models.MetsSourceData
 import uk.ac.wellcome.models.work.internal.{Work, WorkState}
 import uk.ac.wellcome.models.work.internal.result.Result
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.transformer.common.worker.Transformer
 
 class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
-    extends Transformer[MetsLocation] {
+    extends Transformer[MetsSourceData] {
 
-  override def apply(metsLocation: MetsLocation,
+  override def apply(metsLocation: MetsSourceData,
                      version: Int): Result[Work[WorkState.Source]] =
     for {
       metsData <- transform(metsLocation)
@@ -20,14 +20,26 @@ class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
         modifiedTime = metsLocation.createdDate)
     } yield work
 
-  def transform(metsLocation: MetsLocation): Result[MetsData] =
-    getMetsXml(metsLocation.xmlLocation)
-      .flatMap { root =>
-        if (metsLocation.manifestations.isEmpty)
-          transformWithoutManifestations(root)
-        else
-          transformWithManifestations(root, metsLocation.manifestationLocations)
-      }
+  def transform(metsLocation: MetsSourceData): Result[MetsData] = {
+    metsLocation.deleted match {
+      case true =>
+        for {
+          xml <- getMetsXml(metsLocation.xmlLocation)
+          recordIdentifier <- xml.recordIdentifier
+        } yield MetsData(recordIdentifier = recordIdentifier, deleted = true)
+      case false =>
+        getMetsXml(metsLocation.xmlLocation)
+          .flatMap { root =>
+            if (metsLocation.manifestations.isEmpty)
+              transformWithoutManifestations(root)
+            else
+              transformWithManifestations(
+                root,
+                metsLocation.manifestationLocations)
+          }
+    }
+
+  }
 
   private def transformWithoutManifestations(root: MetsXml): Result[MetsData] =
     for {

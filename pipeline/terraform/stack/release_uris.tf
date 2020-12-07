@@ -12,7 +12,6 @@ locals {
 
   id_minter_images_image   = local.image_ids["id_minter_images"]
   id_minter_works_image    = local.image_ids["id_minter_works"]
-  recorder_image           = local.image_ids["recorder"]
   matcher_image            = local.image_ids["matcher"]
   merger_image             = local.image_ids["merger"]
   inference_manager_image  = local.image_ids["inference_manager"]

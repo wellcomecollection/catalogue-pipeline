@@ -4,7 +4,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
-import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.matcher.MatcherResult
 import uk.ac.wellcome.models.work.generators.WorkGenerators
@@ -21,7 +20,6 @@ class WorkMatcherConcurrencyTest
     with Matchers
     with MatcherFixtures
     with ScalaFutures
-    with MockitoSugar
     with WorkGenerators {
 
   it("processes one of two conflicting concurrent updates and locks the other") {

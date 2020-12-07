@@ -19,15 +19,26 @@ module "calm_transformer" {
   cluster_arn  = aws_ecs_cluster.cluster.arn
 
   env_vars = {
-    sns_arn              = module.calm_transformer_topic.arn
     transformer_queue_id = module.calm_transformer_queue.url
     metrics_namespace    = "${local.namespace_hyphen}_calm_transformer"
-    messages_bucket_name = aws_s3_bucket.messages.id
     vhs_calm_bucket_name = var.vhs_calm_sourcedata_bucket_name
     vhs_calm_table_name  = var.vhs_calm_sourcedata_table_name
+
+    sns_topic_arn = module.calm_transformer_output_topic.arn
+
+    es_index = local.es_works_source_index
+
+    batch_size             = 100
+    flush_interval_seconds = 30
   }
 
-  secret_env_vars = {}
+  secret_env_vars = {
+    es_host     = "catalogue/pipeline_storage/es_host"
+    es_port     = "catalogue/pipeline_storage/es_port"
+    es_protocol = "catalogue/pipeline_storage/es_protocol"
+    es_username = "catalogue/pipeline_storage/transformer/es_username"
+    es_password = "catalogue/pipeline_storage/transformer/es_password"
+  }
 
   subnets             = var.subnets
   max_capacity        = 10
@@ -45,13 +56,15 @@ resource "aws_iam_role_policy" "calm_transformer_vhs_calm_adapter_read" {
   policy = var.vhs_calm_read_policy
 }
 
-module "calm_transformer_topic" {
-  source = "../modules/topic"
+module "calm_transformer_output_topic" {
+  source = "github.com/wellcomecollection/terraform-aws-sns-topic?ref=v1.0.1"
 
-  name       = "${local.namespace_hyphen}_calm_transformer"
-  role_names = [module.calm_transformer.task_role_name]
+  name = "${local.namespace_hyphen}_calm_transformer_output"
+}
 
-  messages_bucket_arn = aws_s3_bucket.messages.arn
+resource "aws_iam_role_policy" "allow_calm_transformer_sns_publish" {
+  role   = module.calm_transformer.task_role_name
+  policy = module.calm_transformer_output_topic.publish_policy
 }
 
 module "calm_transformer_scaling_alarm" {

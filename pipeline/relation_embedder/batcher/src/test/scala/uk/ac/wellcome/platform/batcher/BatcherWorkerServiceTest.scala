@@ -84,7 +84,7 @@ class BatcherWorkerServiceTest
     }
   }
 
-  it("processes incoming paths into batches with max size") {
+  it("sends the whole tree when batch consists of too many selectors") {
     withWorkerService(3) {
       case (QueuePair(queue, dlq), msgSender) =>
         sendNotificationToSQS(queue = queue, body = "A/B")
@@ -94,16 +94,8 @@ class BatcherWorkerServiceTest
           assertQueueEmpty(dlq)
         }
         val batches = msgSender.getMessages[Batch]
-        batches.size shouldBe 2
-        batchRoots(batches) shouldBe Set("A")
-        batches.map(_.selectors.size).toSet shouldBe Set(2, 3)
-        batches.flatMap(_.selectors) should contain theSameElementsAs List(
-          Node("A"),
-          Children("A"),
-          Children("A/E"),
-          Descendents("A/B"),
-          Descendents("A/E/1"),
-        )
+        batches.size shouldBe 1
+        batches.head shouldBe Batch(rootPath = "A", selectors = List(Tree("A")))
     }
   }
 

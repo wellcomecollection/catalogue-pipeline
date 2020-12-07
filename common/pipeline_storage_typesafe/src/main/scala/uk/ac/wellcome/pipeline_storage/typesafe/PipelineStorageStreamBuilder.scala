@@ -12,25 +12,25 @@ import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.DurationInt
+
 object PipelineStorageStreamBuilder {
-
-  def buildPipelineStorageConfig(config: Config): PipelineStorageConfig = {
+  def buildPipelineStorageConfig(config: Config): PipelineStorageConfig =
     PipelineStorageConfig(
-      config.requireInt("pipeline_storage.batch_size"),
-      config.requireInt("pipeline_storage.flush_interval_seconds").seconds,
-      config.getIntOption("pipeline_storage.parallelism").getOrElse(10)
+      batchSize = config.requireInt("pipeline_storage.batch_size"),
+      flushInterval =
+        config.requireInt("pipeline_storage.flush_interval_seconds").seconds,
+      parallelism =
+        config.getIntOption("pipeline_storage.parallelism").getOrElse(10)
     )
-  }
 
-  def buildPipelineStorageStream[T, D, MsgDestination](
-    sqsStream: SQSStream[T],
-    indexer: Indexer[D],
+  def buildPipelineStorageStream[In, Out, MsgDestination](
+    sqsStream: SQSStream[In],
+    indexer: Indexer[Out],
     messageSender: MessageSender[MsgDestination])(config: Config)(
     implicit ec: ExecutionContext)
-    : PipelineStorageStream[T, D, MsgDestination] = {
-    new PipelineStorageStream[T, D, MsgDestination](
+    : PipelineStorageStream[In, Out, MsgDestination] =
+    new PipelineStorageStream[In, Out, MsgDestination](
       sqsStream,
       indexer,
       messageSender)(buildPipelineStorageConfig(config))
-  }
 }

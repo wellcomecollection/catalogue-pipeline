@@ -1,14 +1,13 @@
 package uk.ac.wellcome.platform.transformer.mets.transformer
 
 import java.time.Instant
-
 import cats.syntax.traverse._
 import cats.instances.either._
 import cats.instances.option._
 import org.apache.commons.lang3.StringUtils.equalsIgnoreCase
 import uk.ac.wellcome.models.work.internal._
 import WorkState.Source
-import io.circe.Decoder.state
+import uk.ac.wellcome.models.work.internal.DeletedReason.DeletedFromSource
 
 case class MetsData(
   recordIdentifier: String,
@@ -16,28 +15,40 @@ case class MetsData(
   accessConditionStatus: Option[String] = None,
   accessConditionUsage: Option[String] = None,
   fileReferencesMapping: List[(String, FileReference)] = Nil,
-  titlePageId: Option[String] = None
+  titlePageId: Option[String] = None,
+  deleted: Boolean = false
 ) {
 
   def toWork(version: Int,
-             modifiedTime: Instant): Either[Throwable, Work.Invisible[Source]] =
-    for {
-      license <- parseLicense
-      accessStatus <- parseAccessStatus
-      item = Item[IdState.Unminted](
-        id = IdState.Unidentifiable,
-        locations = List(digitalLocation(license, accessStatus)))
-    } yield
-      Work.Invisible[Source](
-        version = version,
-        state = Source(sourceIdentifier, modifiedTime),
-        data = WorkData[DataState.Unidentified](
-          items = List(item),
-          mergeCandidates = List(mergeCandidate),
-          thumbnail = thumbnail(sourceIdentifier.value, license, accessStatus),
-          imageData = imageData(version, license, accessStatus)
-        )
-      )
+             modifiedTime: Instant): Either[Throwable, Work[Source]] = {
+    deleted match {
+      case true =>
+        Right(
+          Work.Deleted[Source](
+            version = version,
+            state = Source(sourceIdentifier, modifiedTime),
+            deletedReason = Some(DeletedFromSource("Mets"))))
+      case false =>
+        for {
+          license <- parseLicense
+          accessStatus <- parseAccessStatus
+          item = Item[IdState.Unminted](
+            id = IdState.Unidentifiable,
+            locations = List(digitalLocation(license, accessStatus)))
+        } yield
+          Work.Invisible[Source](
+            version = version,
+            state = Source(sourceIdentifier, modifiedTime),
+            data = WorkData[DataState.Unidentified](
+              items = List(item),
+              mergeCandidates = List(mergeCandidate),
+              thumbnail =
+                thumbnail(sourceIdentifier.value, license, accessStatus),
+              imageData = imageData(version, license, accessStatus)
+            )
+          )
+    }
+  }
 
   private lazy val fileReferences: List[FileReference] =
     fileReferencesMapping.map { case (_, fileReference) => fileReference }

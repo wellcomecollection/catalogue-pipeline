@@ -52,7 +52,7 @@ trait SierraLocation extends SierraQueryOps {
       .map { varfield =>
         AccessCondition(
           status = getAccessStatus(varfield),
-          terms = varfield.subfieldsWithTag("a").contentString,
+          terms = varfield.nonrepeatableSubfieldWithTag("a").map { _.content },
           to = varfield.subfieldsWithTag("g").contents.headOption
         )
       }

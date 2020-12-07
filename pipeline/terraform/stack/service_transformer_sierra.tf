@@ -19,15 +19,26 @@ module "sierra_transformer" {
   cluster_arn  = aws_ecs_cluster.cluster.arn
 
   env_vars = {
-    sns_arn                = module.sierra_transformer_topic.arn
     transformer_queue_id   = module.sierra_transformer_queue.url
     metrics_namespace      = "${local.namespace_hyphen}_sierra_transformer"
-    messages_bucket_name   = aws_s3_bucket.messages.id
     vhs_sierra_bucket_name = var.vhs_sierra_sourcedata_bucket_name
     vhs_sierra_table_name  = var.vhs_sierra_sourcedata_table_name
+
+    sns_topic_arn = module.sierra_transformer_output_topic.arn
+
+    es_index = local.es_works_source_index
+
+    batch_size             = 100
+    flush_interval_seconds = 30
   }
 
-  secret_env_vars = {}
+  secret_env_vars = {
+    es_host     = "catalogue/pipeline_storage/es_host"
+    es_port     = "catalogue/pipeline_storage/es_port"
+    es_protocol = "catalogue/pipeline_storage/es_protocol"
+    es_username = "catalogue/pipeline_storage/transformer/es_username"
+    es_password = "catalogue/pipeline_storage/transformer/es_password"
+  }
 
   subnets             = var.subnets
   max_capacity        = 10
@@ -45,13 +56,15 @@ resource "aws_iam_role_policy" "sierra_transformer_vhs_sierra_adapter_read" {
   policy = var.vhs_sierra_read_policy
 }
 
-module "sierra_transformer_topic" {
-  source = "../modules/topic"
+module "sierra_transformer_output_topic" {
+  source = "github.com/wellcomecollection/terraform-aws-sns-topic?ref=v1.0.1"
 
-  name       = "${local.namespace_hyphen}_sierra_transformer"
-  role_names = [module.sierra_transformer.task_role_name]
+  name = "${local.namespace_hyphen}_sierra_transformer_output"
+}
 
-  messages_bucket_arn = aws_s3_bucket.messages.arn
+resource "aws_iam_role_policy" "allow_sierra_transformer_sns_publish" {
+  role   = module.sierra_transformer.task_role_name
+  policy = module.sierra_transformer_output_topic.publish_policy
 }
 
 module "sierra_transformer_scaling_alarm" {

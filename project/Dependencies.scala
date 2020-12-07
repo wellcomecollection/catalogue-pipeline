@@ -2,7 +2,7 @@ import sbt._
 
 object WellcomeDependencies {
 
-  val defaultVersion = "24.6.0"
+  val defaultVersion = "24.6.1"
 
   lazy val versions = new {
     val typesafe = defaultVersion
@@ -223,11 +223,17 @@ object CatalogueDependencies {
     WellcomeDependencies.storageTypesafeLibrary ++
       WellcomeDependencies.messagingTypesafeLibrary
 
-  val pipelineStorageDependencies = WellcomeDependencies.messagingLibrary
-  val pipelineStorageTypesafeDependencies =   WellcomeDependencies.messagingTypesafeLibrary
+  val pipelineStorageDependencies: Seq[ModuleID] =
+    WellcomeDependencies.messagingLibrary
+
+  val pipelineStorageTypesafeDependencies: Seq[ModuleID] =
+    WellcomeDependencies.messagingTypesafeLibrary
 
   val elasticsearchTypesafeDependencies: Seq[ModuleID] =
     WellcomeDependencies.typesafeLibrary
+
+  val transformerCommonDependencies: Seq[ModuleID] =
+      WellcomeDependencies.storageLibrary
 
   val apiDependencies: Seq[ModuleID] =
     ExternalDependencies.akkaHttpDependencies ++
@@ -241,7 +247,8 @@ object CatalogueDependencies {
 
   val matcherDependencies: Seq[ModuleID] =
     ExternalDependencies.mockitoDependencies ++
-      ExternalDependencies.scalaGraphDependencies
+      ExternalDependencies.scalaGraphDependencies ++
+      WellcomeDependencies.storageTypesafeLibrary
 
   val mergerDependencies: Seq[ModuleID] = Nil
 
@@ -259,7 +266,8 @@ object CatalogueDependencies {
       WellcomeDependencies.messagingTypesafeLibrary
 
   val miroTransformerDependencies: Seq[ModuleID] =
-    ExternalDependencies.apacheCommonsDependencies
+    ExternalDependencies.apacheCommonsDependencies ++
+      WellcomeDependencies.storageTypesafeLibrary
 
   val reindexWorkerDependencies: Seq[ModuleID] = Nil
 

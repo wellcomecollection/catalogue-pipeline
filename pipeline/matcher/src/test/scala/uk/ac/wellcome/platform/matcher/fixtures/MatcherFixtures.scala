@@ -11,20 +11,14 @@ import org.scanamo.query.UniqueKey
 import org.scanamo.semiauto._
 import org.scanamo.time.JavaTimeFormats._
 import uk.ac.wellcome.akka.fixtures.Akka
-import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.matcher.matcher.WorkMatcher
 import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, WorkNode}
 import uk.ac.wellcome.platform.matcher.services.MatcherWorkerService
-import uk.ac.wellcome.platform.matcher.storage.{
-  WorkGraphStore,
-  WorkNodeDao,
-  WorkStore
-}
+import uk.ac.wellcome.platform.matcher.storage.{WorkGraphStore, WorkNodeDao}
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.fixtures.SQS
-import uk.ac.wellcome.bigmessaging.fixtures.VHSFixture
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.storage.dynamo._
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
@@ -33,15 +27,16 @@ import uk.ac.wellcome.storage.locking.dynamo.{
   DynamoLockingService,
   ExpiringLock
 }
-import uk.ac.wellcome.storage.Identified
 import WorkState.Source
+import uk.ac.wellcome.pipeline_storage.MemoryRetriever
+
+import scala.collection.mutable
 
 trait MatcherFixtures
     extends SQS
     with Akka
     with DynamoLockDaoFixtures
-    with LocalWorkGraphDynamoDb
-    with VHSFixture[Work[Source]] {
+    with LocalWorkGraphDynamoDb {
 
   implicit val workNodeFormat: DynamoFormat[WorkNode] = deriveDynamoFormat
   implicit val lockFormat: DynamoFormat[ExpiringLock] = deriveDynamoFormat
@@ -57,7 +52,7 @@ trait MatcherFixtures
     }
 
   def withWorkerService[R](
-    vhs: VHS,
+    workRetriever: MemoryRetriever[Work[Source]],
     queue: SQS.Queue,
     messageSender: MemoryMessageSender,
     graphTable: Table)(testWith: TestWith[MatcherWorkerService[String], R]): R =
@@ -68,7 +63,7 @@ trait MatcherFixtures
             withSQSStream[NotificationMessage, R](queue) { msgStream =>
               val workerService =
                 new MatcherWorkerService(
-                  new WorkStore(vhs),
+                  workRetriever = workRetriever,
                   msgStream,
                   messageSender,
                   workMatcher)
@@ -80,13 +75,14 @@ trait MatcherFixtures
       }
     }
 
-  def withWorkerService[R](vhs: VHS,
+  def withWorkerService[R](workRetriever: MemoryRetriever[Work[Source]],
                            queue: SQS.Queue,
                            messageSender: MemoryMessageSender)(
     testWith: TestWith[MatcherWorkerService[String], R]): R =
     withWorkGraphTable { graphTable =>
-      withWorkerService(vhs, queue, messageSender, graphTable) { service =>
-        testWith(service)
+      withWorkerService(workRetriever, queue, messageSender, graphTable) {
+        service =>
+          testWith(service)
       }
     }
 
@@ -125,13 +121,13 @@ trait MatcherFixtures
     testWith(workNodeDao)
   }
 
-  def sendWork(work: Work[Source], vhs: VHS, queue: SQS.Queue): Any = {
-    val id = work.sourceIdentifier.toString
-    val key = vhs.putLatest(id)(work) match {
-      case Left(err)                 => throw new Exception(s"Failed storing work in VHS: $err")
-      case Right(Identified(key, _)) => key
-    }
-    sendNotificationToSQS(queue, key)
+  def sendWork(
+    work: Work[Source],
+    retriever: MemoryRetriever[Work[Source]],
+    queue: SQS.Queue
+  ): Any = {
+    retriever.index ++= Map(work.id -> work)
+    sendNotificationToSQS(queue, body = work.id)
   }
 
   def ciHash(str: String): String =
@@ -149,4 +145,9 @@ trait MatcherFixtures
   def scan[T](dynamoClient: AmazonDynamoDB, tableName: String)(
     implicit format: DynamoFormat[T]): List[Either[DynamoReadError, T]] =
     Scanamo(dynamoClient).exec { ScanamoTable[T](tableName).scan() }
+
+  def createRetriever: MemoryRetriever[Work[Source]] =
+    new MemoryRetriever[Work[Source]](
+      index = mutable.Map[String, Work[Source]]()
+    )
 }

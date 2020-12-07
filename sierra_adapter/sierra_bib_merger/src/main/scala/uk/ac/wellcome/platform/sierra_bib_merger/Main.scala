@@ -2,13 +2,13 @@ package uk.ac.wellcome.platform.sierra_bib_merger
 
 import akka.actor.ActorSystem
 import com.typesafe.config.Config
+import uk.ac.wellcome.bigmessaging.typesafe.VHSBuilder
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.platform.sierra_bib_merger.services.{
   SierraBibMergerUpdaterService,
   SierraBibMergerWorkerService
 }
-import uk.ac.wellcome.sierra_adapter.config.builders.SierraVHSBuilder
 import uk.ac.wellcome.sierra_adapter.model.SierraTransformable
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
@@ -23,7 +23,7 @@ object Main extends WellcomeTypesafeApp {
       AkkaBuilder.buildExecutionContext()
 
     val versionedHybridStore =
-      SierraVHSBuilder.buildSierraVHS[SierraTransformable](config)
+      VHSBuilder.build[SierraTransformable](config)
 
     val updaterService = new SierraBibMergerUpdaterService(
       versionedHybridStore = versionedHybridStore

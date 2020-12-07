@@ -86,13 +86,6 @@ trait SierraQueryOps {
     def contents: List[String] = varfields.flatMap(_.content)
 
     def subfieldContents: List[String] = varfields.subfields.contents
-
-    def firstContent: Option[String] = varfields.contents.headOption
-
-    def contentString(sep: String): Option[String] =
-      contents.mkStringOrNone(sep)
-
-    def contentString: Option[String] = contents.mkStringOrNone
   }
 
   implicit class SubfieldsOps(subfields: List[MarcSubfield]) {
@@ -116,23 +109,9 @@ trait SierraQueryOps {
     def firstContent: Option[String] = subfields.contents.headOption
 
     def contentString(sep: String): Option[String] =
-      contents.mkStringOrNone(sep)
-
-    def contentString: Option[String] = contents.mkStringOrNone
-  }
-
-  implicit class StringSeqOps(strings: Seq[String]) {
-
-    def mkStringOrNone(sep: String): Option[String] =
-      strings match {
+      contents match {
         case Nil     => None
         case strings => Some(strings.mkString(sep))
-      }
-
-    def mkStringOrNone: Option[String] =
-      strings match {
-        case Nil     => None
-        case strings => Some(strings.mkString)
       }
   }
 
