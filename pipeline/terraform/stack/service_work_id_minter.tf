@@ -28,7 +28,10 @@ module "work_id_minter" {
     queue_url       = module.work_id_minter_queue.url
     topic_arn       = module.work_id_minter_topic.arn
     max_connections = local.id_minter_task_max_connections
-    es_index        = local.es_works_denormalised_index
+    es_merged_index        = local.es_works_merged_index
+    es_identified_index        = local.es_works_identified_index
+    ingest_batch_size = 100
+    ingest_flush_interval_seconds = 30
   }
 
   secret_env_vars = {
