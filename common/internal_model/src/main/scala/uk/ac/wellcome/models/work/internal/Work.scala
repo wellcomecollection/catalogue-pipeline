@@ -112,13 +112,13 @@ case class WorkData[State <: DataState](
   *      ▼
   *   Merged
   *      |
-  *      | (relation embedder)
-  *      ▼
-  * Denormalised
-  *      |
   *      | (id minter)
   *      ▼
   *  Identified
+  *      |
+  *      | (relation embedder)
+  *      ▼
+  * Denormalised
   *      |
   *      | (ingestor)
   *      ▼
@@ -132,7 +132,7 @@ sealed trait WorkState {
   val sourceIdentifier: SourceIdentifier
   val modifiedTime: Instant
 
-  def id: String = sourceIdentifier.toString
+  def id: String
 }
 
 object WorkState {
@@ -144,6 +144,8 @@ object WorkState {
 
     type WorkDataState = DataState.Unidentified
     type TransitionArgs = Unit
+
+    def id = sourceIdentifier.toString
   }
 
   case class Merged(
@@ -153,19 +155,23 @@ object WorkState {
 
     type WorkDataState = DataState.Unidentified
     type TransitionArgs = Option[Instant]
-  }
 
-  case class Denormalised(
-    sourceIdentifier: SourceIdentifier,
-    modifiedTime: Instant,
-    relations: Relations[DataState.Unidentified] = Relations.none
-  ) extends WorkState {
-
-    type WorkDataState = DataState.Unidentified
-    type TransitionArgs = Relations[DataState.Unidentified]
+    def id = sourceIdentifier.toString
   }
 
   case class Identified(
+    sourceIdentifier: SourceIdentifier,
+    canonicalId: String,
+    modifiedTime: Instant,
+  ) extends WorkState {
+
+    type WorkDataState = DataState.Identified
+    type TransitionArgs = Unit
+
+    def id = canonicalId
+  }
+
+  case class Denormalised(
     sourceIdentifier: SourceIdentifier,
     canonicalId: String,
     modifiedTime: Instant,
@@ -173,9 +179,9 @@ object WorkState {
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified
-    type TransitionArgs = Unit
+    type TransitionArgs = Relations[DataState.Identified]
 
-    override def id = canonicalId
+    def id = canonicalId
   }
 
   case class Indexed(
@@ -189,7 +195,7 @@ object WorkState {
     type WorkDataState = DataState.Identified
     type TransitionArgs = Unit
 
-    override def id = canonicalId
+    def id = canonicalId
   }
 }
 
@@ -228,21 +234,27 @@ object WorkFsm {
     def redirect(redirect: IdState.Identifiable) = redirect
   }
 
-  implicit val mergedToDenormalised = new Transition[Merged, Denormalised] {
-    def state(state: Merged,
-              data: WorkData[DataState.Unidentified],
-              relations: Relations[DataState.Unidentified]): Denormalised =
-      Denormalised(state.sourceIdentifier, state.modifiedTime, relations)
+  implicit val identifiedToDenormalised =
+    new Transition[Identified, Denormalised] {
+      def state(state: Identified,
+                data: WorkData[DataState.Identified],
+                relations: Relations[DataState.Identified]): Denormalised =
+        Denormalised(
+          sourceIdentifier = state.sourceIdentifier,
+          canonicalId = state.canonicalId,
+          modifiedTime = state.modifiedTime,
+          relations = relations
+        )
 
-    def data(data: WorkData[DataState.Unidentified]) = data
+      def data(data: WorkData[DataState.Identified]) = data
 
-    def redirect(redirect: IdState.Identifiable) = redirect
-  }
+      def redirect(redirect: IdState.Identified) = redirect
+    }
 
-  implicit val identifiedToIndexed = new Transition[Identified, Indexed] {
-    def state(state: Identified,
+  implicit val denormalisedToIndexed = new Transition[Denormalised, Indexed] {
+    def state(state: Denormalised,
               data: WorkData[DataState.Identified],
-              args: Unit = ()) =
+              args: Unit = ()): Indexed =
       Indexed(
         sourceIdentifier = state.sourceIdentifier,
         canonicalId = state.canonicalId,

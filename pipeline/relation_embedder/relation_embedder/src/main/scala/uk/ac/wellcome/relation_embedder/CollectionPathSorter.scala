@@ -4,11 +4,11 @@ import scala.util.Try
 import scala.annotation.tailrec
 
 import uk.ac.wellcome.models.work.internal._
-import WorkState.Merged
+import WorkState.Identified
 
 object CollectionPathSorter {
 
-  def sortWorks(works: List[Work[Merged]]): List[Work[Merged]] =
+  def sortWorks(works: List[Work[Identified]]): List[Work[Identified]] =
     works.sortBy(tokenizePath)
 
   def sortPaths(paths: List[String]): List[String] =
@@ -28,7 +28,7 @@ object CollectionPathSorter {
         }
     }
 
-  private def tokenizePath(work: Work[Merged]): Option[TokenizedPath] =
+  private def tokenizePath(work: Work[Identified]): Option[TokenizedPath] =
     work.data.collectionPath
       .map { collectionPath =>
         tokenizePath(collectionPath.path)

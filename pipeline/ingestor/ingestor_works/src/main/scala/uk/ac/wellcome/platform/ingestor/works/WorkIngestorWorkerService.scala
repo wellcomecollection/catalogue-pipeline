@@ -12,14 +12,14 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.typesafe.Runnable
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.work.internal._
-import WorkState.{Identified, Indexed}
+import WorkState.{Denormalised, Indexed}
 
 class WorkIngestorWorkerService(
   ingestorConfig: IngestorConfig,
   msgStream: SQSStream[NotificationMessage],
-  workRetriever: Retriever[Work[Identified]],
+  workRetriever: Retriever[Work[Denormalised]],
   workIndexer: Indexer[Work[Indexed]],
-  transformBeforeIndex: Work[Identified] => Work[Indexed] =
+  transformBeforeIndex: Work[Denormalised] => Work[Indexed] =
     WorkTransformer.deriveData,
 )(implicit
   ec: ExecutionContext)

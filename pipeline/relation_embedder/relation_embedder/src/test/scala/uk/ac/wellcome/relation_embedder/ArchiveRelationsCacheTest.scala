@@ -12,7 +12,7 @@ class ArchiveRelationsCacheTest
     with WorkGenerators {
 
   def work(path: String) =
-    mergedWork(createSourceIdentifierWith(value = path))
+    identifiedWork(createSourceIdentifierWith(value = path))
       .collectionPath(CollectionPath(path = path))
       .title(path)
 
@@ -84,7 +84,7 @@ class ArchiveRelationsCacheTest
   }
 
   it("Returns no related works when work is not part of a collection") {
-    val workX = mergedWork()
+    val workX = identifiedWork()
     val works = List(workA, work1, workX)
     val relationsCache = ArchiveRelationsCache(works)
     relationsCache(workX) shouldBe Relations.none

@@ -61,7 +61,7 @@ object Main extends WellcomeTypesafeApp {
     new IdMinterWorkerService(
       identifierGenerator = identifierGenerator,
       jsonRetriever =
-        ElasticRetrieverBuilder[Json](config, namespace = "denormalised-works"),
+        ElasticRetrieverBuilder[Json](config, namespace = "merged-works"),
       pipelineStream = pipelineStream,
       rdsClientConfig = RDSBuilder.buildRDSClientConfig(config),
       identifiersTableConfig = identifiersTableConfig
