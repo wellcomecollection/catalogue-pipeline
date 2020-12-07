@@ -35,6 +35,7 @@ class ImagesIncludesTest extends ApiImagesTestBase with ContributorGenerators {
               |    {
               |      "type": "Image",
               |      "id": "${image.id}",
+              |      "thumbnail": ${location(image.state.derivedData.thumbnail)},
               |      "locations": [${locations(image.locations)}],
               |      "source": {
               |        "id": "${source.id}",
@@ -64,6 +65,7 @@ class ImagesIncludesTest extends ApiImagesTestBase with ContributorGenerators {
               |  $singleImageResult,
               |  "type": "Image",
               |  "id": "${image.id}",
+              |  "thumbnail": ${location(image.state.derivedData.thumbnail)},
               |  "locations": [${locations(image.locations)}],
               |  "source": {
               |    "id": "${source.id}",
@@ -93,6 +95,7 @@ class ImagesIncludesTest extends ApiImagesTestBase with ContributorGenerators {
               |    {
               |      "type": "Image",
               |      "id": "${image.id}",
+              |      "thumbnail": ${location(image.state.derivedData.thumbnail)},
               |      "locations": [${locations(image.locations)}],
               |      "source": {
               |        "id": "${source.id}",
@@ -122,6 +125,7 @@ class ImagesIncludesTest extends ApiImagesTestBase with ContributorGenerators {
               |  $singleImageResult,
               |  "type": "Image",
               |  "id": "${image.id}",
+              |  "thumbnail": ${location(image.state.derivedData.thumbnail)},
               |  "locations": [${locations(image.locations)}],
               |  "source": {
               |    "id": "${source.id}",
