@@ -46,13 +46,15 @@ trait TransformerWorker[SourceData, SenderDest] extends Logging {
   def process(message: NotificationMessage): Result[(Work[Source], StoreKey)] =
     for {
       key <- decodeKey(message)
-      record <- getRecord(key)
-      work <- work(record, key)
+      recordResult <- getRecord(key)
+      (record, version) = recordResult
+      work <- work(record, version, key)
     } yield (work, key)
 
   private def work(sourceData: SourceData,
+                   version: Int,
                    key: StoreKey): Result[Work[Source]] =
-    transformer(sourceData, key.version) match {
+    transformer(sourceData, version) match {
       case Left(err)     => Left(TransformerError(err, sourceData, key))
       case Right(result) => Right(result)
     }
@@ -63,15 +65,22 @@ trait TransformerWorker[SourceData, SenderDest] extends Logging {
       case Success(storeKey) => Right(storeKey)
     }
 
-  private def getRecord(key: StoreKey): Result[SourceData] =
+  private def getRecord(key: StoreKey): Result[(SourceData, Int)] =
     lookupSourceData(key).left.map { err =>
       StoreReadError(err, key)
     }
 
-  private def lookupSourceData(key: StoreKey): Either[ReadError, SourceData] =
+  private def lookupSourceData(key: StoreKey): Either[ReadError, (SourceData, Int)] =
     sourceStore
       .getLatest(key.id)
-      .map { case Identified(_, sourceData) => sourceData }
+      .map {
+        case Identified(Version(storedId, storedVersion), sourceData) =>
+          if (storedId != key.id) {
+            warn(s"Stored ID ($storedId) does not match ID from message (${key.id})")
+          }
+
+          (sourceData, storedVersion)
+      }
 
   def run(): Future[Done] =
     pipelineStream.foreach(

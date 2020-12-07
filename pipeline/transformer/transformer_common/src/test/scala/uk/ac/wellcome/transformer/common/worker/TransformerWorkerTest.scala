@@ -28,7 +28,7 @@ object TestTransformer extends Transformer[TestData] with WorkGenerators {
   def apply(data: TestData,
             version: Int): Either[Exception, Work.Visible[Source]] =
     data match {
-      case ValidTestData   => Right(sourceWork())
+      case ValidTestData   => Right(sourceWork().withVersion(version))
       case InvalidTestData => Left(new Exception("No No No"))
     }
 }
@@ -98,6 +98,27 @@ class TransformerWorkerTest
             workIndexer.index should have size 3
             workKeySender.messages.map { _.body } should contain theSameElementsAs workIndexer.index.keys
           }
+      }
+    }
+  }
+
+  it("uses the version from the store, not the message") {
+    val storeVersion = 5
+    val messageVersion = storeVersion - 1
+
+    val records = Map(
+      Version("A", storeVersion) -> ValidTestData,
+    )
+
+    val workIndexer = new MemoryIndexer[Work[Source]]()
+
+    withLocalSqsQueue() { queue =>
+      withWorker(queue, workIndexer = workIndexer, records = records) { _ =>
+        sendNotificationToSQS(queue, Version("A", messageVersion))
+
+        eventually {
+          workIndexer.index.values.map { _.version }.toSeq shouldBe Seq(storeVersion)
+        }
       }
     }
   }
