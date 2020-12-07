@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.ingestor.common.fixtures
+package uk.ac.wellcome.platform.ingestor.works
 
 import io.circe.Decoder
 import org.scalatest.Suite
@@ -8,7 +8,6 @@ import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.pipeline_storage.Indexer
 import uk.ac.wellcome.platform.ingestor.common.models.IngestorConfig
-import uk.ac.wellcome.platform.ingestor.common.services.IngestorWorkerService
 import uk.ac.wellcome.pipeline_storage.fixtures.ElasticIndexerFixtures
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -21,13 +20,13 @@ trait IngestorFixtures
   this: Suite =>
 
   def withWorkerService[T: Decoder, R](queue: Queue, indexer: Indexer[T])(
-    testWith: TestWith[IngestorWorkerService[T, T], R]): R =
+    testWith: TestWith[WorkIngestorWorkerService[T, T], R]): R =
     withWorkerService(queue, indexer, identity[T])(testWith)
 
   def withWorkerService[In: Decoder, Out, R](queue: Queue,
                                              indexer: Indexer[Out],
                                              transform: In => Out)(
-    testWith: TestWith[IngestorWorkerService[In, Out], R]): R =
+    testWith: TestWith[WorkIngestorWorkerService[In, Out], R]): R =
     withActorSystem { implicit actorSystem =>
       {
         withBigMessageStream[In, R](queue) { messageStream =>
@@ -36,7 +35,7 @@ trait IngestorFixtures
             flushInterval = 1 seconds
           )
 
-          val workerService = new IngestorWorkerService(
+          val workerService = new WorkIngestorWorkerService(
             documentIndexer = indexer,
             ingestorConfig = ingestorConfig,
             messageStream = messageStream,

@@ -10,7 +10,6 @@ import uk.ac.wellcome.models.work.internal.AugmentedImage
 import uk.ac.wellcome.pipeline_storage.Indexable.imageIndexable
 import uk.ac.wellcome.pipeline_storage.typesafe.ElasticIndexerBuilder
 import uk.ac.wellcome.platform.ingestor.common.builders.IngestorConfigBuilder
-import uk.ac.wellcome.platform.ingestor.common.services.IngestorWorkerService
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 
@@ -26,7 +25,7 @@ object Main extends WellcomeTypesafeApp {
       indexConfig = ImagesIndexConfig
     )
 
-    IngestorWorkerService(
+    ImageIngestorWorkerService(
       ingestorConfig = IngestorConfigBuilder.buildIngestorConfig(config),
       documentIndexer = imageIndexer,
       messageStream =

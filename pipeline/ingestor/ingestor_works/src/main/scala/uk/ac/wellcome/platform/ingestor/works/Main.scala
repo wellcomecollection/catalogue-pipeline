@@ -9,7 +9,6 @@ import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.pipeline_storage.Indexable.workIndexable
 import uk.ac.wellcome.platform.ingestor.common.builders.IngestorConfigBuilder
-import uk.ac.wellcome.platform.ingestor.common.services.IngestorWorkerService
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import WorkState.{Identified, Indexed}
@@ -30,7 +29,7 @@ object Main extends WellcomeTypesafeApp {
       indexConfig = IndexedWorkIndexConfig
     )
 
-    new IngestorWorkerService(
+    new WorkIngestorWorkerService(
       ingestorConfig = IngestorConfigBuilder.buildIngestorConfig(config),
       documentIndexer = workIndexer,
       messageStream = identifiedWorkStream,

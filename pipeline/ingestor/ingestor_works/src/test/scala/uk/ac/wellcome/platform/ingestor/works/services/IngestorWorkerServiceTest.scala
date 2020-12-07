@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.ingestor.works.services
+package uk.ac.wellcome.platform.ingestor.works
 
 import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
@@ -7,12 +7,10 @@ import uk.ac.wellcome.elasticsearch.IndexedWorkIndexConfig
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.platform.ingestor.common.fixtures.IngestorFixtures
 import uk.ac.wellcome.pipeline_storage.ElasticIndexer
 import uk.ac.wellcome.pipeline_storage.Indexable.workIndexable
 import uk.ac.wellcome.models.Implicits._
 import WorkState.{Identified, Indexed}
-import uk.ac.wellcome.platform.ingestor.works.WorkTransformer
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
