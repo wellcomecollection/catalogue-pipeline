@@ -10,7 +10,6 @@ import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.ImageGenerators
 import uk.ac.wellcome.models.work.internal.{Image, ImageState}
-import uk.ac.wellcome.platform.ingestor.common.fixtures.IngestorFixtures
 import uk.ac.wellcome.pipeline_storage.ElasticIndexer
 import uk.ac.wellcome.pipeline_storage.Indexable.imageIndexable
 

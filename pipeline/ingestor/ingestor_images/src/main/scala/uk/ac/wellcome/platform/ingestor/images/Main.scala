@@ -7,7 +7,6 @@ import uk.ac.wellcome.bigmessaging.typesafe.BigMessagingBuilder
 import uk.ac.wellcome.elasticsearch.ImagesIndexConfig
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal.{Image, ImageState}
-import uk.ac.wellcome.pipeline_storage.ElasticIndexer
 import uk.ac.wellcome.pipeline_storage.Indexable.imageIndexable
 import uk.ac.wellcome.pipeline_storage.typesafe.ElasticIndexerBuilder
 import uk.ac.wellcome.platform.ingestor.common.builders.IngestorConfigBuilder
