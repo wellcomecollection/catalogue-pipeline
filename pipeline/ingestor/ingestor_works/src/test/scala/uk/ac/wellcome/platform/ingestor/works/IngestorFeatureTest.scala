@@ -31,11 +31,12 @@ class IngestorFeatureTest
       withLocalIdentifiedWorksIndex { identifiedIndex =>
         insertIntoElasticsearch(identifiedIndex, work)
         withLocalSqsQueue() { queue =>
-          withWorkIngestorWorkerService(queue, indexedIndex, identifiedIndex) { _ =>
-            sendNotificationToSQS(queue = queue, body = work.id)
-            assertElasticsearchEventuallyHasWork[Indexed](
-              indexedIndex,
-              WorkTransformer.deriveData(work))
+          withWorkIngestorWorkerService(queue, indexedIndex, identifiedIndex) {
+            _ =>
+              sendNotificationToSQS(queue = queue, body = work.id)
+              assertElasticsearchEventuallyHasWork[Indexed](
+                indexedIndex,
+                WorkTransformer.deriveData(work))
           }
         }
       }
@@ -51,18 +52,21 @@ class IngestorFeatureTest
       withLocalIdentifiedWorksIndex { identifiedIndex =>
         insertIntoElasticsearch(identifiedIndex, work)
         withLocalSqsQueue() { queue =>
-          withWorkIngestorWorkerService(queue, indexedIndex, identifiedIndex) { _ =>
-            sendNotificationToSQS(queue = queue, body = work.id)
-            assertElasticsearchEventuallyHasWork[Indexed](
-              indexedIndex,
-              WorkTransformer.deriveData(work))
+          withWorkIngestorWorkerService(queue, indexedIndex, identifiedIndex) {
+            _ =>
+              sendNotificationToSQS(queue = queue, body = work.id)
+              assertElasticsearchEventuallyHasWork[Indexed](
+                indexedIndex,
+                WorkTransformer.deriveData(work))
           }
         }
       }
     }
   }
 
-  def withWorkIngestorWorkerService[R](queue: Queue, indexedIndex: Index, identifiedIndex: Index)(
+  def withWorkIngestorWorkerService[R](queue: Queue,
+                                       indexedIndex: Index,
+                                       identifiedIndex: Index)(
     testWith: TestWith[WorkIngestorWorkerService, R]): R =
     withWorkerService(
       queue,
@@ -73,5 +77,6 @@ class IngestorFeatureTest
       retriever = new ElasticRetriever[Work[Identified]](
         elasticClient,
         identifiedIndex
-      ))(testWith)
+      )
+    )(testWith)
 }

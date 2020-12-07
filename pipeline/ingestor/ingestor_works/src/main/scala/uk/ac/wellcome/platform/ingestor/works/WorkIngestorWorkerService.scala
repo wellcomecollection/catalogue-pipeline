@@ -19,7 +19,8 @@ class WorkIngestorWorkerService(
   msgStream: SQSStream[NotificationMessage],
   workRetriever: Retriever[Work[Identified]],
   workIndexer: Indexer[Work[Indexed]],
-  transformBeforeIndex: Work[Identified] => Work[Indexed] = WorkTransformer.deriveData,
+  transformBeforeIndex: Work[Identified] => Work[Indexed] =
+    WorkTransformer.deriveData,
 )(implicit
   ec: ExecutionContext)
     extends Runnable

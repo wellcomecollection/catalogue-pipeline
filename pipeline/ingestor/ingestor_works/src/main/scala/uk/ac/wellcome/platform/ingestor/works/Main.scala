@@ -8,7 +8,10 @@ import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.pipeline_storage.Indexable.workIndexable
 import uk.ac.wellcome.platform.ingestor.common.builders.IngestorConfigBuilder
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
-import uk.ac.wellcome.pipeline_storage.typesafe.{ElasticIndexerBuilder, ElasticRetrieverBuilder}
+import uk.ac.wellcome.pipeline_storage.typesafe.{
+  ElasticIndexerBuilder,
+  ElasticRetrieverBuilder
+}
 import uk.ac.wellcome.messaging.typesafe.SQSBuilder
 import uk.ac.wellcome.elasticsearch.IndexedWorkIndexConfig
 import uk.ac.wellcome.messaging.sns.NotificationMessage
@@ -17,7 +20,7 @@ import uk.ac.wellcome.models.work.internal._
 import WorkState.{Identified, Indexed}
 
 object Main extends WellcomeTypesafeApp {
-{ config: Config =>
+  { config: Config =>
     implicit val actorSystem: ActorSystem =
       AkkaBuilder.buildActorSystem()
     implicit val executionContext: ExecutionContext =

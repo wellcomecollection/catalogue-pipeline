@@ -16,10 +16,7 @@ import uk.ac.wellcome.pipeline_storage.fixtures.ElasticIndexerFixtures
 import uk.ac.wellcome.models.work.internal._
 import WorkState.{Identified, Indexed}
 
-trait IngestorFixtures
-    extends ElasticIndexerFixtures
-    with SQS
-    with Akka {
+trait IngestorFixtures extends ElasticIndexerFixtures with SQS with Akka {
   this: Suite =>
 
   def withWorkerService[R](queue: Queue,
@@ -27,9 +24,8 @@ trait IngestorFixtures
                            indexer: Indexer[Work[Indexed]])(
     testWith: TestWith[WorkIngestorWorkerService, R]): R =
     withActorSystem { implicit actorSystem =>
-      withSQSStream[NotificationMessage, R](
-        queue,
-        new MemoryMetrics) { msgStream =>
+      withSQSStream[NotificationMessage, R](queue, new MemoryMetrics) {
+        msgStream =>
           val ingestorConfig = IngestorConfig(
             batchSize = 100,
             flushInterval = 1 seconds

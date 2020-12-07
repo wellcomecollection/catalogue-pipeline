@@ -121,7 +121,7 @@ class IngestorWorkerServiceTest
   private def assertWorksIndexedCorrectly(works: Work[Identified]*): Assertion =
     withLocalWorksIndex { indexedIndex =>
       withLocalIdentifiedWorksIndex { identifiedIndex =>
-        insertIntoElasticsearch(identifiedIndex, works:_*)
+        insertIntoElasticsearch(identifiedIndex, works: _*)
         withLocalSqsQueuePair(visibilityTimeout = 10) {
           case QueuePair(queue, dlq) =>
             withWorkerService(
@@ -133,7 +133,8 @@ class IngestorWorkerServiceTest
               retriever = new ElasticRetriever[Work[Identified]](
                 elasticClient,
                 identifiedIndex
-              )) { _ =>
+              )
+            ) { _ =>
               works.map { work =>
                 sendNotificationToSQS(queue = queue, body = work.id)
               }
