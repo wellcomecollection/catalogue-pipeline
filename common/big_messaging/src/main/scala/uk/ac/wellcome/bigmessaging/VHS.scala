@@ -3,14 +3,13 @@ package uk.ac.wellcome.bigmessaging
 import java.util.UUID
 
 import uk.ac.wellcome.storage.s3.{S3ObjectLocation, S3ObjectLocationPrefix}
+import uk.ac.wellcome.storage.store.dynamo.DynamoHashStore
 import uk.ac.wellcome.storage.store.{
   HybridStoreWithMaxima,
-  Store,
   TypedStore,
   VersionedHybridStore
 }
 import uk.ac.wellcome.storage.Version
-import uk.ac.wellcome.storage.maxima.Maxima
 
 class VHS[T](val hybridStore: VHSInternalStore[T])
     extends VersionedHybridStore[
@@ -22,8 +21,7 @@ class VHS[T](val hybridStore: VHSInternalStore[T])
 
 class VHSInternalStore[T](
   prefix: S3ObjectLocationPrefix,
-  val indexedStore: Store[Version[String, Int], S3ObjectLocation] with Maxima[String,
-                                                                              Int],
+  val indexedStore: DynamoHashStore[String, Int, S3ObjectLocation],
   val typedStore: TypedStore[S3ObjectLocation, T]
 ) extends HybridStoreWithMaxima[String, Int, S3ObjectLocation, T] {
 
