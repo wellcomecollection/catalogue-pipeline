@@ -68,7 +68,7 @@ class ManagerInferrerIntegrationTest
             messageSender.getMessages[Image[ImageState.Augmented]].head
 
           inside(augmentedImage.state) {
-            case ImageState.Augmented(_, id, _, _, Some(inferredData)) =>
+            case ImageState.Augmented(_, id, Some(inferredData)) =>
               id should be(image.id)
               inside(inferredData) {
                 case InferredData(

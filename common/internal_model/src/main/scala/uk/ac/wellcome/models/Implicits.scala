@@ -124,19 +124,29 @@ object Implicits {
     deriveConfiguredDecoder
   implicit val _dec61: Decoder[Work[WorkState.Identified]] =
     deriveConfiguredDecoder
-  implicit val _dec62: Decoder[Image[ImageState.Initial]] =
+  implicit val _dec62: Decoder[SourceWorks[DataState.Identified]] =
     deriveConfiguredDecoder
-  implicit val _dec63: Decoder[Image[ImageState.Augmented]] =
+  implicit val _dec63: Decoder[SourceWorks[DataState.Unidentified]] =
     deriveConfiguredDecoder
-  implicit val _dec64: Decoder[Image[ImageState.Identified]] =
+  implicit val _dec64: Decoder[ImageSource[DataState.Identified]] =
     deriveConfiguredDecoder
-  implicit val _dec65: Decoder[Work[WorkState.Indexed]] =
+  implicit val _dec65: Decoder[ImageSource[DataState.Unidentified]] =
     deriveConfiguredDecoder
-  implicit val _dec66: Decoder[Work.Visible[WorkState.Indexed]] =
+  implicit val _dec66: Decoder[Image[ImageState.Initial]] =
     deriveConfiguredDecoder
-  implicit val _dec67: Decoder[Work.Invisible[WorkState.Indexed]] =
+  implicit val _dec67: Decoder[Image[ImageState.Augmented]] =
     deriveConfiguredDecoder
-  implicit val _dec68: Decoder[Work.Redirected[WorkState.Indexed]] =
+  implicit val _dec68: Decoder[Image[ImageState.Identified]] =
+    deriveConfiguredDecoder
+  implicit val _dec69: Decoder[Image[ImageState.Indexed]] =
+    deriveConfiguredDecoder
+  implicit val _dec70: Decoder[Work[WorkState.Indexed]] =
+    deriveConfiguredDecoder
+  implicit val _dec71: Decoder[Work.Visible[WorkState.Indexed]] =
+    deriveConfiguredDecoder
+  implicit val _dec72: Decoder[Work.Invisible[WorkState.Indexed]] =
+    deriveConfiguredDecoder
+  implicit val _dec73: Decoder[Work.Redirected[WorkState.Indexed]] =
     deriveConfiguredDecoder
 
   implicit val _enc00: Encoder[AccessCondition] = deriveConfiguredEncoder
@@ -244,18 +254,28 @@ object Implicits {
     deriveConfiguredEncoder
   implicit val _enc61: Encoder[Work[WorkState.Identified]] =
     deriveConfiguredEncoder
-  implicit val _enc62: Encoder[Image[ImageState.Initial]] =
+  implicit val _enc62: Encoder[SourceWorks[DataState.Identified]] =
     deriveConfiguredEncoder
-  implicit val _enc63: Encoder[Image[ImageState.Identified]] =
+  implicit val _enc63: Encoder[SourceWorks[DataState.Unidentified]] =
     deriveConfiguredEncoder
-  implicit val _enc64: Encoder[Image[ImageState.Augmented]] =
+  implicit val _enc64: Encoder[ImageSource[DataState.Identified]] =
     deriveConfiguredEncoder
-  implicit val _enc65: Encoder[Work[WorkState.Indexed]] =
+  implicit val _enc65: Encoder[ImageSource[DataState.Unidentified]] =
     deriveConfiguredEncoder
-  implicit val _enc66: Encoder[Work.Visible[WorkState.Indexed]] =
+  implicit val _enc66: Encoder[Image[ImageState.Initial]] =
     deriveConfiguredEncoder
-  implicit val _enc67: Encoder[Work.Invisible[WorkState.Indexed]] =
+  implicit val _enc67: Encoder[Image[ImageState.Augmented]] =
     deriveConfiguredEncoder
-  implicit val _enc68: Encoder[Work.Redirected[WorkState.Indexed]] =
+  implicit val _enc68: Encoder[Image[ImageState.Identified]] =
+    deriveConfiguredEncoder
+  implicit val _enc69: Encoder[Image[ImageState.Indexed]] =
+    deriveConfiguredEncoder
+  implicit val _enc70: Encoder[Work[WorkState.Indexed]] =
+    deriveConfiguredEncoder
+  implicit val _enc71: Encoder[Work.Visible[WorkState.Indexed]] =
+    deriveConfiguredEncoder
+  implicit val _enc72: Encoder[Work.Invisible[WorkState.Indexed]] =
+    deriveConfiguredEncoder
+  implicit val _enc73: Encoder[Work.Redirected[WorkState.Indexed]] =
     deriveConfiguredEncoder
 }

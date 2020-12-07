@@ -15,6 +15,11 @@ case class DisplayImage(
   ) id: String,
   @Schema(
     `type` = "uk.ac.wellcome.Display.models.DisplayDigitalLocation",
+    description =
+      "The location which provides access to an image that can be displayed directly as a thumbnnail"
+  ) thumbnail: DisplayDigitalLocationDeprecated,
+  @Schema(
+    `type` = "uk.ac.wellcome.Display.models.DisplayDigitalLocation",
     description = "The locations which provide access to the image"
   ) locations: Seq[DisplayDigitalLocationDeprecated],
   @Schema(
@@ -38,23 +43,25 @@ case class DisplayImage(
 
 object DisplayImage {
 
-  def apply(image: Image[ImageState.Augmented],
+  def apply(image: Image[ImageState.Indexed],
             includes: ImageIncludes): DisplayImage =
     new DisplayImage(
       id = image.id,
+      thumbnail =
+        DisplayDigitalLocationDeprecated(image.state.derivedData.thumbnail),
       locations = image.locations.map(DisplayDigitalLocationDeprecated(_)),
-      source = DisplayImageSource(image.state.source, includes),
+      source = DisplayImageSource(image.source, includes),
       visuallySimilar = None,
       withSimilarColors = None,
       withSimilarFeatures = None,
     )
 
-  def apply(image: Image[ImageState.Augmented],
-            includes: ImageIncludes,
-            visuallySimilar: Option[Seq[Image[ImageState.Augmented]]],
-            withSimilarColors: Option[Seq[Image[ImageState.Augmented]]],
-            withSimilarFeatures: Option[Seq[Image[ImageState.Augmented]]])
-    : DisplayImage =
+  def apply(
+    image: Image[ImageState.Indexed],
+    includes: ImageIncludes,
+    visuallySimilar: Option[Seq[Image[ImageState.Indexed]]],
+    withSimilarColors: Option[Seq[Image[ImageState.Indexed]]],
+    withSimilarFeatures: Option[Seq[Image[ImageState.Indexed]]]): DisplayImage =
     DisplayImage(image, includes).copy(
       visuallySimilar =
         visuallySimilar.map(_.map(DisplayImage.apply(_, includes))),

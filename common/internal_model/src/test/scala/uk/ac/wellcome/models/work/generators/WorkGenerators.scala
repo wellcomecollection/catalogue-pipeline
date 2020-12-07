@@ -76,7 +76,7 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
         sourceIdentifier = sourceIdentifier,
         canonicalId = canonicalId,
         modifiedTime = modifiedTime,
-        derivedData = DerivedData(data),
+        derivedData = DerivedWorkData(data),
         relations = relations
       ),
       data = data,
@@ -217,7 +217,7 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
 
     implicit val updateIndexedState: UpdateState[Indexed] =
       (state: Indexed, data: WorkData[DataState.Identified]) =>
-        state.copy(derivedData = DerivedData(data))
+        state.copy(derivedData = DerivedWorkData(data))
     implicit val updateIdentifiedState: UpdateState[Identified] = identity
     implicit val updateDenormalisedState: UpdateState[Denormalised] = identity
     implicit val updateMergedState: UpdateState[Merged] = identity

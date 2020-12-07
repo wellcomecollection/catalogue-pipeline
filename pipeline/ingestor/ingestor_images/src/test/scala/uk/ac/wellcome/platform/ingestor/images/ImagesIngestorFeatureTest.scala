@@ -35,7 +35,9 @@ class ImagesIngestorFeatureTest
             index,
             ImagesIndexConfig)
           withWorkerService(queue, indexer) { _ =>
-            assertElasticsearchEventuallyHas(index, image)
+            assertElasticsearchEventuallyHasImage[ImageState.Indexed](
+              index,
+              ImageTransformer.deriveData(image))
             assertQueueEmpty(queue)
             assertQueueEmpty(dlq)
           }

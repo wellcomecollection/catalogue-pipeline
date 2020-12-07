@@ -16,6 +16,10 @@ object ImagesIndexConfig extends IndexConfig with WorksIndexConfigFields {
     keywordField("palette")
   )
 
+  val derivedImageData = objectField("derivedData").fields(
+    location("thumbnail")
+  )
+
   private def sourceWork(fieldName: String): ObjectField =
     objectField(fieldName).fields(
       id(),
@@ -30,18 +34,19 @@ object ImagesIndexConfig extends IndexConfig with WorksIndexConfigFields {
     keywordField("type")
   )
 
-  val augmentedState = objectField("state").fields(
+  val indexedState = objectField("state").fields(
     sourceIdentifier,
     canonicalId,
-    modifiedTime,
-    source,
-    inferredData
+    inferredData,
+    derivedImageData
   )
 
   def mapping: MappingDefinition =
     properties(
       version,
-      augmentedState,
+      modifiedTime,
+      source,
+      indexedState,
       location("locations")
     ).dynamic(DynamicMapping.Strict)
 }

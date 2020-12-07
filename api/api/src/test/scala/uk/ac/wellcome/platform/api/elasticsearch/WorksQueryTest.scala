@@ -152,7 +152,7 @@ class WorksQueryTest
 
         assertResultsMatchForAllowedQueryTypes(
           index,
-          query = image1.id,
+          query = image1.id.canonicalId,
           matches = List(work1)
         )
       }
@@ -170,7 +170,7 @@ class WorksQueryTest
 
         assertResultsMatchForAllowedQueryTypes(
           index,
-          query = image1.state.sourceIdentifier.value,
+          query = image1.id.sourceIdentifier.value,
           matches = List(work1)
         )
       }

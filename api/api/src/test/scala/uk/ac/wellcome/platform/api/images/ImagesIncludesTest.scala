@@ -17,7 +17,7 @@ class ImagesIncludesTest extends ApiImagesTestBase with ContributorGenerators {
           createPersonContributorWith("Adrian Aardvark"),
           createPersonContributorWith("Beatrice Buffalo")
         ))
-    val image = createAugmentedImageWith(parentWork = source)
+    val image = createImageData.toIndexedImageWith(parentWork = source)
 
     it(
       "includes the source contributors on results from the list endpoint if we pass ?include=source.contributors") {
@@ -35,6 +35,7 @@ class ImagesIncludesTest extends ApiImagesTestBase with ContributorGenerators {
               |    {
               |      "type": "Image",
               |      "id": "${image.id}",
+              |      "thumbnail": ${location(image.state.derivedData.thumbnail)},
               |      "locations": [${locations(image.locations)}],
               |      "source": {
               |        "id": "${source.id}",
@@ -64,6 +65,7 @@ class ImagesIncludesTest extends ApiImagesTestBase with ContributorGenerators {
               |  $singleImageResult,
               |  "type": "Image",
               |  "id": "${image.id}",
+              |  "thumbnail": ${location(image.state.derivedData.thumbnail)},
               |  "locations": [${locations(image.locations)}],
               |  "source": {
               |    "id": "${source.id}",
@@ -93,6 +95,7 @@ class ImagesIncludesTest extends ApiImagesTestBase with ContributorGenerators {
               |    {
               |      "type": "Image",
               |      "id": "${image.id}",
+              |      "thumbnail": ${location(image.state.derivedData.thumbnail)},
               |      "locations": [${locations(image.locations)}],
               |      "source": {
               |        "id": "${source.id}",
@@ -122,6 +125,7 @@ class ImagesIncludesTest extends ApiImagesTestBase with ContributorGenerators {
               |  $singleImageResult,
               |  "type": "Image",
               |  "id": "${image.id}",
+              |  "thumbnail": ${location(image.state.derivedData.thumbnail)},
               |  "locations": [${locations(image.locations)}],
               |  "source": {
               |    "id": "${source.id}",

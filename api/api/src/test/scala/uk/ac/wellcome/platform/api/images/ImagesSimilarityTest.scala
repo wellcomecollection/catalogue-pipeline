@@ -19,11 +19,12 @@ class ImagesSimilarityTest extends ApiImagesTestBase {
                |{
                |  $singleImageResult,
                |  "id": "${image.id}",
+               |  "thumbnail": ${location(image.state.derivedData.thumbnail)},
                |  "locations": [${locations(image.locations)}],
                |  "visuallySimilar": [
                |    ${images.tail.map(imageResponse).mkString(",")}
                |  ],
-               |  "source": ${imageSource(image.state.source)}
+               |  "source": ${imageSource(image.source)}
                |}""".stripMargin
         }
     }
@@ -46,11 +47,12 @@ class ImagesSimilarityTest extends ApiImagesTestBase {
                |{
                |  $singleImageResult,
                |  "id": "${image.id}",
+               |  "thumbnail": ${location(image.state.derivedData.thumbnail)},
                |  "locations": [${locations(image.locations)}],
                |  "withSimilarFeatures": [
                |    ${images.tail.map(imageResponse).mkString(",")}
                |  ],
-               |  "source": ${imageSource(image.state.source)}
+               |  "source": ${imageSource(image.source)}
                |}""".stripMargin
         }
     }
@@ -73,11 +75,12 @@ class ImagesSimilarityTest extends ApiImagesTestBase {
                |{
                |  $singleImageResult,
                |  "id": "${image.id}",
+               |  "thumbnail": ${location(image.state.derivedData.thumbnail)},
                |  "locations": [${locations(image.locations)}],
                |  "withSimilarColors": [
                |    ${images.tail.map(imageResponse).mkString(",")}
                |  ],
-               |  "source": ${imageSource(image.state.source)}
+               |  "source": ${imageSource(image.source)}
                |}""".stripMargin
         }
     }
@@ -86,7 +89,7 @@ class ImagesSimilarityTest extends ApiImagesTestBase {
   it("never includes visually similar images on an images search") {
     withImagesApi {
       case (imagesIndex, routes) =>
-        val focacciaImage = createAugmentedImageWith(
+        val focacciaImage = createImageData.toIndexedImageWith(
           parentWork =
             identifiedWork().title("A Ligurian style of bread, Focaccia")
         )

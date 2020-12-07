@@ -261,7 +261,7 @@ trait ElasticsearchFixtures
 
   def insertImagesIntoElasticsearch(
     index: Index,
-    images: Image[ImageState.Augmented]*): Assertion = {
+    images: Image[ImageState.Indexed]*): Assertion = {
     val result = elasticClient.execute(
       bulk(
         images.map { image =>

@@ -28,7 +28,7 @@ class ImagesServiceTest
   describe("findImageById") {
     it("fetches an Image by ID") {
       withLocalImagesIndex { index =>
-        val image = createAugmentedImage()
+        val image = createImageData.toIndexedImage
         insertImagesIntoElasticsearch(index, image)
 
         whenReady(
@@ -137,7 +137,7 @@ class ImagesServiceTest
 
     it("returns Nil when no visually similar images can be found") {
       withLocalImagesIndex { index =>
-        val image = createAugmentedImage()
+        val image = createImageData.toIndexedImage
         insertImagesIntoElasticsearch(index, image)
 
         whenReady(imagesService.retrieveSimilarImages(index, image)) {
@@ -151,7 +151,7 @@ class ImagesServiceTest
         imagesService
           .retrieveSimilarImages(
             Index("doesn't exist"),
-            createAugmentedImage())) {
+            createImageData.toIndexedImage)) {
         _ shouldBe empty
       }
     }

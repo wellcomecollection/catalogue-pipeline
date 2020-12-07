@@ -34,17 +34,18 @@ trait ApiImagesTestBase
            """.stripMargin
     }
 
-  def imageResponse(image: Image[ImageState.Augmented]): String =
+  def imageResponse(image: Image[ImageState.Indexed]): String =
     s"""
        |  {
        |    "type": "Image",
        |    "id": "${image.id}",
+       |    "thumbnail": ${location(image.state.derivedData.thumbnail)},
        |    "locations": [${locations(image.locations)}],
-       |    "source": ${imageSource(image.state.source)}
+       |    "source": ${imageSource(image.source)}
        |  }
      """.stripMargin
 
-  def imagesListResponse(images: Seq[Image[ImageState.Augmented]]): String =
+  def imagesListResponse(images: Seq[Image[ImageState.Indexed]]): String =
     s"""
        |{
        |  ${resultList(apiPrefix, totalResults = images.size)},

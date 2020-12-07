@@ -172,7 +172,7 @@ object WorkState {
     sourceIdentifier: SourceIdentifier,
     canonicalId: String,
     modifiedTime: Instant,
-    derivedData: DerivedData,
+    derivedData: DerivedWorkData,
     relations: Relations[DataState.Identified] = Relations.none
   ) extends WorkState {
 
@@ -237,7 +237,7 @@ object WorkFsm {
         sourceIdentifier = state.sourceIdentifier,
         canonicalId = state.canonicalId,
         modifiedTime = state.modifiedTime,
-        derivedData = DerivedData(data),
+        derivedData = DerivedWorkData(data),
         relations = state.relations
       )
 

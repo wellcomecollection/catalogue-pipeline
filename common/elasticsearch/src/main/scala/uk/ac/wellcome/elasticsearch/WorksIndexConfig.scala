@@ -192,7 +192,7 @@ trait WorksIndexConfigFields extends IndexConfigFields {
       relation("siblingsSucceeding", idState),
     )
 
-  def derivedData = objectField("derivedData").fields(
+  val derivedWorkData = objectField("derivedData").fields(
     booleanField("availableOnline")
   )
 }
@@ -251,7 +251,7 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
     sourceIdentifier,
     modifiedTime,
     relations(id("id")),
-    derivedData
+    derivedWorkData
   )
 
   val dynamicMapping = DynamicMapping.Strict

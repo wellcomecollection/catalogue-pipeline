@@ -38,8 +38,8 @@ case object ImagesMultiMatcher {
     )
 
     val idFields = (Seq(
-      "id.canonicalId",
-      "id.sourceIdentifier.value",
+      "state.canonicalId",
+      "state.sourceIdentifier.value",
     ) ++ sourceWorkIdFields
       .flatMap(
         subField =>
@@ -70,13 +70,13 @@ case object ImagesMultiMatcher {
 
 case object ImageSimilarity {
   def blended: (String, Index) => Query =
-    lshQuery("inferredData.lshEncodedFeatures", "inferredData.palette")
+    lshQuery("state.inferredData.lshEncodedFeatures", "inferredData.palette")
 
   def color: (String, Index) => Query =
-    lshQuery("inferredData.palette")
+    lshQuery("state.inferredData.palette")
 
   def features: (String, Index) => Query =
-    lshQuery("inferredData.lshEncodedFeatures")
+    lshQuery("state.inferredData.lshEncodedFeatures")
 
   private def lshQuery(fields: String*)(q: String, index: Index): Query = {
     val documentRef = DocumentRef(index, q)

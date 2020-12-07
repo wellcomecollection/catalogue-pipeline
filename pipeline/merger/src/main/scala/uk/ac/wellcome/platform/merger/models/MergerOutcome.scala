@@ -25,10 +25,10 @@ case class MergerOutcome(resultWorks: Seq[Work[Source]],
         Image[ImageState.Initial](
           version = imageData.version,
           locations = imageData.locations,
+          source = source,
+          modifiedTime = modifiedTime,
           state = ImageState.Initial(
-            sourceIdentifier = imageData.id.sourceIdentifier,
-            source = source,
-            modifiedTime = modifiedTime
+            sourceIdentifier = imageData.id.sourceIdentifier
           )
         )
     }

@@ -31,12 +31,12 @@ trait Indexable[T] {
 
 object Indexable extends Logging {
 
-  implicit val imageIndexable: Indexable[Image[ImageState.Augmented]] =
-    new Indexable[Image[ImageState.Augmented]] {
-      def id(image: Image[ImageState.Augmented]): String = image.id
+  implicit def imageIndexable[State <: ImageState]: Indexable[Image[State]] =
+    new Indexable[Image[State]] {
+      def id(image: Image[State]): String = image.id
 
-      def version(image: Image[ImageState.Augmented]) =
-        image.state.modifiedTime.toEpochMilli
+      def version(image: Image[State]) =
+        image.modifiedTime.toEpochMilli
     }
 
   implicit def workIndexable[State <: WorkState]: Indexable[Work[State]] =

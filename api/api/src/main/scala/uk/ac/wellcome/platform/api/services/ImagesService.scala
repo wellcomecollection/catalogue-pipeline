@@ -19,20 +19,20 @@ class ImagesService(searchService: ElasticsearchService,
   private val imagesRequestBuilder = new ImagesRequestBuilder(queryConfig)
 
   def findImageById(id: String)(index: Index)
-    : Future[Either[ElasticError, Option[Image[ImageState.Augmented]]]] =
+    : Future[Either[ElasticError, Option[Image[ImageState.Indexed]]]] =
     searchService
       .executeGet(id)(index)
       .map {
         _.map { response =>
           if (response.exists)
-            Some(deserialize[Image[ImageState.Augmented]](response))
+            Some(deserialize[Image[ImageState.Indexed]](response))
           else
             None
         }
       }
 
   def listOrSearchImages(index: Index, searchOptions: SearchOptions): Future[
-    Either[ElasticError, ResultList[Image[ImageState.Augmented], Unit]]] =
+    Either[ElasticError, ResultList[Image[ImageState.Indexed], Unit]]] =
     searchService
       .executeSearch(
         searchOptions = searchOptions,
@@ -42,10 +42,10 @@ class ImagesService(searchService: ElasticsearchService,
       .map { _.map(createResultList) }
 
   def retrieveSimilarImages(index: Index,
-                            image: Image[ImageState.Augmented],
+                            image: Image[ImageState.Indexed],
                             similarityMetric: SimilarityMetric =
                               SimilarityMetric.Blended)
-    : Future[List[Image[ImageState.Augmented]]] =
+    : Future[List[Image[ImageState.Indexed]]] =
     searchService
       .executeSearchRequest({
         val requestBuilder = similarityMetric match {
@@ -62,17 +62,17 @@ class ImagesService(searchService: ElasticsearchService,
         result
           .map { response =>
             response.hits.hits
-              .map(hit => deserialize[Image[ImageState.Augmented]](hit))
+              .map(hit => deserialize[Image[ImageState.Indexed]](hit))
               .toList
           }
           .getOrElse(Nil)
       }
 
   def createResultList(searchResponse: SearchResponse)
-    : ResultList[Image[ImageState.Augmented], Unit] =
+    : ResultList[Image[ImageState.Indexed], Unit] =
     ResultList(
       results = searchResponse.hits.hits
-        .map(deserialize[Image[ImageState.Augmented]])
+        .map(deserialize[Image[ImageState.Indexed]])
         .toList,
       totalResults = searchResponse.totalHits.toInt,
       aggregations = None

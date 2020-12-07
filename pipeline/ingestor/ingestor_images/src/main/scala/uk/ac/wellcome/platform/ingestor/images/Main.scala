@@ -27,12 +27,15 @@ object Main extends WellcomeTypesafeApp {
     val indexName = config.requireString("es.index")
     val elasticClient = ElasticBuilder.buildElasticClient(config)
     val index = Index(indexName)
-    IngestorWorkerService(
+    new IngestorWorkerService(
       ingestorConfig = IngestorConfigBuilder.buildIngestorConfig(config),
-      documentIndexer =
-        new ElasticIndexer(elasticClient, index, ImagesIndexConfig),
+      documentIndexer = new ElasticIndexer[Image[ImageState.Indexed]](
+        elasticClient,
+        index,
+        ImagesIndexConfig),
       messageStream = BigMessagingBuilder
-        .buildMessageStream[Image[ImageState.Augmented]](config)
+        .buildMessageStream[Image[ImageState.Augmented]](config),
+      transformBeforeIndex = ImageTransformer.deriveData
     )
   }
 }

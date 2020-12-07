@@ -35,7 +35,7 @@ object QueryConfig {
     elasticClient
       .execute(
         search(index).query(
-          existsQuery("inferredData.palette")
+          existsQuery("state.inferredData.palette")
         )
       )
       .flatMap { result =>
@@ -43,7 +43,7 @@ object QueryConfig {
           result.toEither
             .map { response =>
               response.hits.hits.headOption
-                .flatMap(_.to[Image[ImageState.Augmented]].state.inferredData
+                .flatMap(_.to[Image[ImageState.Indexed]].state.inferredData
                   .map(_.palette))
                 .map { palette =>
                   palette

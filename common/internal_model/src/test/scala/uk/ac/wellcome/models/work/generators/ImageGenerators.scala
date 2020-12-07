@@ -64,13 +64,13 @@ trait ImageGenerators
         canonicalWork = mergedWork().toSourceWork,
         redirectedWork = None
       )
-    ): Image[ImageState.Initial] = Image(
+    ): Image[ImageState.Initial] = Image[ImageState.Initial](
       version = imageData.version,
       locations = imageData.locations,
+      modifiedTime = modifiedTime,
+      source = sourceWorks,
       state = ImageState.Initial(
-        sourceIdentifier = imageData.id.sourceIdentifier,
-        modifiedTime = modifiedTime,
-        source = sourceWorks
+        sourceIdentifier = imageData.id.sourceIdentifier
       )
     )
 
@@ -80,17 +80,17 @@ trait ImageGenerators
       parentWork: Work[WorkState.Identified] = sierraIdentifiedWork(),
       redirectedWork: Option[Work[WorkState.Identified]] = Some(
         sierraIdentifiedWork())
-    ): Image[ImageState.Identified] = Image(
+    ): Image[ImageState.Identified] = Image[ImageState.Identified](
       version = imageData.version,
       locations = imageData.locations,
+      modifiedTime = modifiedTime,
+      source = SourceWorks(
+        parentWork.toSourceWork,
+        redirectedWork.map(_.toSourceWork)
+      ),
       state = ImageState.Identified(
         sourceIdentifier = imageData.id.sourceIdentifier,
-        canonicalId = canonicalId,
-        modifiedTime = modifiedTime,
-        source = SourceWorks(
-          parentWork.toSourceWork,
-          redirectedWork.map(_.toSourceWork)
-        )
+        canonicalId = canonicalId
       )
     )
 
@@ -111,6 +111,23 @@ trait ImageGenerators
         )
         .transition[ImageState.Augmented](inferredData)
 
+    def toIndexedImageWith(
+      inferredData: Option[InferredData] = createInferredData,
+      canonicalId: String = createCanonicalId,
+      modifiedTime: Instant = instantInLast30Days,
+      parentWork: Work[WorkState.Identified] = sierraIdentifiedWork(),
+      redirectedWork: Option[Work[WorkState.Identified]] = Some(
+        sierraIdentifiedWork())): Image[ImageState.Indexed] =
+      imageData
+        .toAugmentedImageWith(
+          canonicalId = canonicalId,
+          modifiedTime = modifiedTime,
+          parentWork = parentWork,
+          redirectedWork = redirectedWork,
+          inferredData = inferredData
+        )
+        .transition[ImageState.Indexed]()
+
     def toIdentified = toIdentifiedWith()
 
     def toInitialImage = toInitialImageWith()
@@ -118,6 +135,8 @@ trait ImageGenerators
     def toIdentifiedImage = toIdentifiedImageWith()
 
     def toAugmentedImage = toAugmentedImageWith()
+
+    def toIndexedImage = toIndexedImageWith()
   }
 
   def createInferredData = {
@@ -135,17 +154,20 @@ trait ImageGenerators
     )
   }
 
-  def createLicensedImage(license: License): Image[Augmented] =
+  def createLicensedImage(license: License): Image[Indexed] =
     createImageDataWith(
-      locations = List(createDigitalLocationWith(license = Some(license)))
-    ).toAugmentedImage
+      locations = List(
+        createDigitalLocationWith(
+          license = Some(license),
+          locationType = createImageLocationType))
+    ).toIndexedImage
 
 //   Create a set of images with intersecting LSH lists to ensure
 //   that similarity queries will return something. Returns them in order
 //   of similarity.
   def createSimilarImages(n: Int,
                           similarFeatures: Boolean,
-                          similarPalette: Boolean): Seq[Image[Augmented]] = {
+                          similarPalette: Boolean): Seq[Image[Indexed]] = {
     val features = if (similarFeatures) {
       similarVectors(4096, n)
     } else { (1 to n).map(_ => randomVector(4096, maxR = 10.0f)) }
@@ -161,7 +183,7 @@ trait ImageGenerators
     }
     (features, lshFeatures, palettes).zipped.map {
       case (f, l, p) =>
-        createImageData.toAugmentedImageWith(
+        createImageData.toIndexedImageWith(
           inferredData = Some(
             InferredData(
               features1 = f.slice(0, 2048).toList,

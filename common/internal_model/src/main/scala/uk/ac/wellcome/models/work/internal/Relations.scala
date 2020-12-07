@@ -84,7 +84,7 @@ object Relation {
         state = Indexed(
           canonicalId = relation.id.canonicalId,
           sourceIdentifier = relation.id.sourceIdentifier,
-          derivedData = DerivedData(relation.data),
+          derivedData = DerivedWorkData(relation.data),
           modifiedTime = Instant.ofEpochSecond(0)
         ),
       )
