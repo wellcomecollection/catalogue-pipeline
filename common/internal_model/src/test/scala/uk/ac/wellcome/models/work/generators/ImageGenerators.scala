@@ -42,7 +42,7 @@ trait ImageGenerators
   )
 
   def createMetsImageData = createImageDataWith(
-    locations = List(createDigitalLocation),
+    locations = List(createImageLocation, createManifestLocation),
     identifierType = IdentifierType("mets-image")
   )
 

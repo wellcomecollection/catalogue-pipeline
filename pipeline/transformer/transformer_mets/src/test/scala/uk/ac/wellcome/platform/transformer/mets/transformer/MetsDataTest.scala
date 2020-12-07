@@ -326,7 +326,7 @@ class MetsDataTest
     result.right.get.data.thumbnail shouldBe None
   }
 
-  it("uses the IIIF info.json for image URLs") {
+  it("uses both the IIIF manifest and image for imageData locations") {
     val metsData = MetsData(
       recordIdentifier = randomAlphanumeric(10),
       accessConditionDz = Some("CC-BY-NC"),
@@ -341,7 +341,14 @@ class MetsDataTest
         url = s"https://dlcs.io/iiif-img/wellcome/5/location.jp2/info.json",
         locationType = LocationType("iiif-image"),
         license = Some(License.CCBYNC)
-      ))
+      ),
+      DigitalLocationDeprecated(
+        url =
+          s"https://wellcomelibrary.org/iiif/${metsData.recordIdentifier}/manifest",
+        locationType = LocationType("iiif-presentation"),
+        license = Some(License.CCBYNC)
+      )
+    )
   }
 
   it("creates a work with a single accessCondition") {

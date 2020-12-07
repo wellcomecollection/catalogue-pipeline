@@ -165,7 +165,9 @@ case class MetsData(
                   locationType = LocationType("iiif-image"),
                   license = license,
                   accessConditions = accessConditions(accessStatus)
-                ))
+                ),
+                digitalLocation(license, accessStatus)
+              )
             )
           }
         }
