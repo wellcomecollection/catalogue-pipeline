@@ -4,11 +4,7 @@ import scala.concurrent.ExecutionContext
 import akka.actor.ActorSystem
 import com.typesafe.config.Config
 import io.circe.Json
-import uk.ac.wellcome.bigmessaging.typesafe.BigMessagingBuilder
-import uk.ac.wellcome.platform.id_minter.config.builders.{
-  IdentifiersTableBuilder,
-  RDSBuilder
-}
+import uk.ac.wellcome.platform.id_minter.config.builders.{IdentifiersTableBuilder, RDSBuilder}
 import uk.ac.wellcome.platform.id_minter.database.IdentifiersDao
 import uk.ac.wellcome.platform.id_minter.models.IdentifiersTable
 import uk.ac.wellcome.platform.id_minter_works.services.IdMinterWorkerService
@@ -16,11 +12,8 @@ import uk.ac.wellcome.platform.id_minter.steps.IdentifierGenerator
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.messaging.typesafe.SQSBuilder
-import uk.ac.wellcome.pipeline_storage.typesafe.{
-  ElasticIndexerBuilder,
-  ElasticRetrieverBuilder
-}
+import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
+import uk.ac.wellcome.pipeline_storage.typesafe.{ElasticIndexerBuilder, ElasticRetrieverBuilder, PipelineStorageStreamBuilder}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.elasticsearch.IdentifiedWorkIndexConfig
@@ -50,13 +43,18 @@ object Main extends WellcomeTypesafeApp {
       indexConfig = IdentifiedWorkIndexConfig
     )
 
+    val messageStream = SQSBuilder.buildSQSStream[NotificationMessage](config)
+    val messageSender = SNSBuilder
+      .buildSNSMessageSender(
+        config,
+        subject = "Sent from the id-minter")
+    val pipelineStream = PipelineStorageStreamBuilder.buildPipelineStorageStream(messageStream, workIndexer, messageSender)(config)
     new IdMinterWorkerService(
       identifierGenerator = identifierGenerator,
-      sender = BigMessagingBuilder.buildBigMessageSender(config),
+
       jsonRetriever =
         ElasticRetrieverBuilder[Json](config, namespace = "denormalised-works"),
-      workIndexer = workIndexer,
-      messageStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
+      pipelineStream = pipelineStream,
       rdsClientConfig = RDSBuilder.buildRDSClientConfig(config),
       identifiersTableConfig = identifiersTableConfig
     )
