@@ -33,7 +33,7 @@ object Main extends WellcomeTypesafeApp {
 
     val workRetriever = ElasticRetrieverBuilder[Work[Identified]](
       config,
-      namespace = "merged-works"
+      namespace = "identified-works"
     )
 
     val stream = PipelineStorageStreamBuilder.buildPipelineStorageStream(
