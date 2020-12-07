@@ -46,14 +46,16 @@ object Main extends WellcomeTypesafeApp {
 
     val workIndexer = ElasticIndexerBuilder[Work[Identified]](
       config,
-      namespace = "denormalised-works",
+      namespace = "identified-works",
       indexConfig = IdentifiedWorkIndexConfig
     )
 
     new IdMinterWorkerService(
       identifierGenerator = identifierGenerator,
       sender = BigMessagingBuilder.buildBigMessageSender(config),
-      jsonRetriever = ElasticRetrieverBuilder[Json](config),
+      jsonRetriever = ElasticRetrieverBuilder[Json](
+        config,
+        namespace = "denormalised-works"),
       workIndexer = workIndexer,
       messageStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
       rdsClientConfig = RDSBuilder.buildRDSClientConfig(config),

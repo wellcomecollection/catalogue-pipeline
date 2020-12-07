@@ -29,10 +29,13 @@ object Main extends WellcomeTypesafeApp {
     val identifiedWorkStream =
       SQSBuilder.buildSQSStream[NotificationMessage](config)
 
-    val workRetriever = ElasticRetrieverBuilder[Work[Identified]](config)
+    val workRetriever = ElasticRetrieverBuilder[Work[Identified]](
+      config,
+      namespace = "identified-works")
 
     val workIndexer = ElasticIndexerBuilder[Work[Indexed]](
       config,
+      namespace = "indexed-works",
       indexConfig = IndexedWorkIndexConfig
     )
 
