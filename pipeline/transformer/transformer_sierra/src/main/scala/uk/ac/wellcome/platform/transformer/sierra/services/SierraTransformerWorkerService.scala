@@ -23,6 +23,7 @@ class SierraTransformerWorkerService[MsgDestination](
     (input: SierraTransformable, version: Int) =>
       SierraTransformer(input, version).toEither
 
-  override def lookupSourceData(id: String): Either[ReadError, Identified[Version[String, Int], SierraTransformable]] =
+  override def lookupSourceData(id: String)
+    : Either[ReadError, Identified[Version[String, Int], SierraTransformable]] =
     store.getLatest(id)
 }

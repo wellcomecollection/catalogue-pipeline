@@ -19,6 +19,7 @@ class CalmTransformerWorker(
 
   val transformer: Transformer[CalmRecord] = CalmTransformer
 
-  override def lookupSourceData(id: String): Either[ReadError, Identified[Version[String, Int], CalmRecord]] =
+  override def lookupSourceData(id: String)
+    : Either[ReadError, Identified[Version[String, Int], CalmRecord]] =
     store.getLatest(id)
 }
