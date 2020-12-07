@@ -20,7 +20,8 @@ class VHS[T](val hybridStore: VHSInternalStore[T])
     ](hybridStore)
 
 class VHSInternalStore[T](
-  prefix: S3ObjectLocationPrefix,
+  prefix: S3ObjectLocationPrefix)(
+  implicit
   val indexedStore: DynamoHashStore[String, Int, S3ObjectLocation],
   val typedStore: S3TypedStore[T]
 ) extends HybridStoreWithMaxima[String, Int, S3ObjectLocation, T] {

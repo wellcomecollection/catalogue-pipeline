@@ -23,12 +23,15 @@ object VHSBuilder {
     val dynamoConfig =
       DynamoBuilder.buildDynamoConfig(config, namespace = namespace)
 
+    implicit val indexedStore: DynamoHashStore[String, Int, S3ObjectLocation] =
+      new DynamoHashStore[String, Int, S3ObjectLocation](dynamoConfig)
+
+    implicit val typedStore: S3TypedStore[T] = S3TypedStore[T]
+
     new VHS(
       new VHSInternalStore(
-        prefix = buildObjectLocationPrefix(config, namespace = namespace),
-        indexedStore =
-          new DynamoHashStore[String, Int, S3ObjectLocation](dynamoConfig),
-        typedStore = S3TypedStore[T])
+        prefix = buildObjectLocationPrefix(config, namespace = namespace)
+      )
     )
   }
 
