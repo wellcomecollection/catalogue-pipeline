@@ -21,11 +21,13 @@ module "ingestor_works" {
   cluster_arn  = aws_ecs_cluster.cluster.arn
 
   env_vars = {
-    metrics_namespace     = "${local.namespace_hyphen}_ingestor_works"
-    es_works_index        = local.es_works_index
-    es_denormalised_index = local.es_works_denormalised_index
-    ingest_queue_id       = module.ingestor_works_queue.url
-    es_ingest_batchSize   = 25
+    metrics_namespace             = "${local.namespace_hyphen}_ingestor_works"
+    es_works_index                = local.es_works_index
+    es_denormalised_index         = local.es_works_denormalised_index
+    ingest_queue_id               = module.ingestor_works_queue.url
+    topic_arn                     = module.work_ingestor_topic.arn
+    ingest_batch_size             = 25
+    ingest_flush_interval_seconds = 60
   }
 
   secret_env_vars = {
@@ -49,6 +51,17 @@ module "ingestor_works" {
   deployment_service_env  = var.release_label
   deployment_service_name = "work-ingestor"
   shared_logging_secrets  = var.shared_logging_secrets
+}
+
+# Output topic
+
+module "work_ingestor_topic" {
+  source = "../modules/topic"
+
+  name       = "${local.namespace_hyphen}_work_ingestor"
+  role_names = [module.ingestor_works.task_role_name]
+
+  messages_bucket_arn = aws_s3_bucket.messages.arn
 }
 
 module "ingestor_works_scaling_alarm" {

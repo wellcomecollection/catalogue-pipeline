@@ -67,7 +67,7 @@ class IngestorFeatureTest
   def withWorkIngestorWorkerService[R](queue: Queue,
                                        indexedIndex: Index,
                                        denormalisedIndex: Index)(
-    testWith: TestWith[WorkIngestorWorkerService, R]): R =
+    testWith: TestWith[WorkIngestorWorkerService[String], R]): R =
     withWorkerService(
       queue,
       indexer = new ElasticIndexer[Work[Indexed]](

@@ -1,46 +1,46 @@
 package uk.ac.wellcome.platform.ingestor.works
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration._
 import org.scalatest.Suite
-
-import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
-import uk.ac.wellcome.messaging.fixtures.SQS
-import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.monitoring.memory.MemoryMetrics
-import uk.ac.wellcome.pipeline_storage.{Indexer, Retriever}
-import uk.ac.wellcome.platform.ingestor.common.models.IngestorConfig
-import uk.ac.wellcome.pipeline_storage.fixtures.ElasticIndexerFixtures
+import uk.ac.wellcome.models.work.internal.WorkState.{Denormalised, Indexed}
 import uk.ac.wellcome.models.work.internal._
-import WorkState.{Denormalised, Indexed}
+import uk.ac.wellcome.pipeline_storage.fixtures.{
+  ElasticIndexerFixtures,
+  PipelineStorageStreamFixtures
+}
+import uk.ac.wellcome.pipeline_storage.{
+  Indexer,
+  PipelineStorageConfig,
+  Retriever
+}
 
-trait IngestorFixtures extends ElasticIndexerFixtures with SQS with Akka {
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
+
+trait IngestorFixtures
+    extends ElasticIndexerFixtures
+    with PipelineStorageStreamFixtures {
   this: Suite =>
 
   def withWorkerService[R](queue: Queue,
                            retriever: Retriever[Work[Denormalised]],
                            indexer: Indexer[Work[Indexed]])(
-    testWith: TestWith[WorkIngestorWorkerService, R]): R =
-    withActorSystem { implicit actorSystem =>
-      withSQSStream[NotificationMessage, R](queue, new MemoryMetrics) {
-        msgStream =>
-          val ingestorConfig = IngestorConfig(
-            batchSize = 100,
-            flushInterval = 1 seconds
-          )
+    testWith: TestWith[WorkIngestorWorkerService[String], R]): R = {
+    val config = PipelineStorageConfig(
+      batchSize = 100,
+      flushInterval = 1 second,
+      parallelism = 10)
+    withPipelineStream(queue, indexer, pipelineStorageConfig = config) {
+      msgStream =>
+        val workerService = new WorkIngestorWorkerService(
+          pipelineStream = msgStream,
+          workRetriever = retriever
+        )
 
-          val workerService = new WorkIngestorWorkerService(
-            workIndexer = indexer,
-            workRetriever = retriever,
-            ingestorConfig = ingestorConfig,
-            msgStream = msgStream,
-          )
+        workerService.run()
 
-          workerService.run()
-
-          testWith(workerService)
-      }
+        testWith(workerService)
     }
+  }
 }

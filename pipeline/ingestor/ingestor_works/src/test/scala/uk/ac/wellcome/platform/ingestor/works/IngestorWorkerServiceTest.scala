@@ -5,12 +5,12 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.elasticsearch.IndexedWorkIndexConfig
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
-import uk.ac.wellcome.models.work.generators.WorkGenerators
-import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.pipeline_storage.{ElasticIndexer, ElasticRetriever}
-import uk.ac.wellcome.pipeline_storage.Indexable.workIndexable
 import uk.ac.wellcome.models.Implicits._
-import WorkState.{Denormalised, Indexed}
+import uk.ac.wellcome.models.work.generators.WorkGenerators
+import uk.ac.wellcome.models.work.internal.WorkState.{Denormalised, Indexed}
+import uk.ac.wellcome.models.work.internal._
+import uk.ac.wellcome.pipeline_storage.Indexable.workIndexable
+import uk.ac.wellcome.pipeline_storage.{ElasticIndexer, ElasticRetriever}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
