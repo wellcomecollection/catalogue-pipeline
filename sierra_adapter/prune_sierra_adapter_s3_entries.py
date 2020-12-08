@@ -81,22 +81,23 @@ if __name__ == "__main__":
                     dynamo_lookup[row["id"]] = {
                         "bucket": row["payload"]["namespace"],
                         "key": row["payload"]["path"],
-                        "version": int(row["version"])
+                        "version": int(row["version"]),
                     }
                 except KeyError:
                     dynamo_lookup[row["id"]] = {
                         "bucket": row["payload"]["bucket"],
                         "key": row["payload"]["key"],
-                        "version": int(row["version"])
+                        "version": int(row["version"]),
                     }
 
             print(f"Deleting objects from s3://{vhs['bucket']}...")
-            for objset in chunked(get_keys_to_delete(bucket=vhs["bucket"], dynamo_lookup=dynamo_lookup), n=1000):
+            for objset in chunked(
+                get_keys_to_delete(bucket=vhs["bucket"], dynamo_lookup=dynamo_lookup),
+                n=1000,
+            ):
                 s3.delete_objects(
                     Bucket=vhs["bucket"],
-                    Delete={
-                        "Objects": [{"Key": s3_obj["Key"]} for s3_obj in objset]
-                    }
+                    Delete={"Objects": [{"Key": s3_obj["Key"]} for s3_obj in objset]},
                 )
 
                 total_bytes_deleted += sum(s3_obj["Size"] for s3_obj in objset)
