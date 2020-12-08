@@ -2,7 +2,10 @@ package uk.ac.wellcome.platform.sierra_item_merger.services
 
 import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.platform.sierra_item_merger.fixtures.SierraItemMergerFixtures
-import uk.ac.wellcome.sierra_adapter.model.{SierraGenerators, SierraTransformable}
+import uk.ac.wellcome.sierra_adapter.model.{
+  SierraGenerators,
+  SierraTransformable
+}
 import uk.ac.wellcome.storage.{StoreWriteError, UpdateWriteError, Version}
 import uk.ac.wellcome.storage.maxima.memory.MemoryMaxima
 import uk.ac.wellcome.storage.store.memory.{MemoryStore, MemoryVersionedStore}
@@ -42,9 +45,9 @@ class SierraItemMergerUpdaterServiceTest
   }
 
   it("only updates records that have changed") {
-    val bibId1 = createSierraBibNumber  // doesn't exist yet
-    val bibId2 = createSierraBibNumber  // exists, not linked to the item
-    val bibId3 = createSierraBibNumber  // exists, linked to the item
+    val bibId1 = createSierraBibNumber // doesn't exist yet
+    val bibId2 = createSierraBibNumber // exists, not linked to the item
+    val bibId3 = createSierraBibNumber // exists, linked to the item
 
     val bibIds = List(bibId1, bibId3, bibId2)
 
@@ -54,7 +57,9 @@ class SierraItemMergerUpdaterServiceTest
       createSierraTransformableWith(sierraId = bibId2, itemRecords = List.empty)
 
     val transformable3 =
-      createSierraTransformableWith(sierraId = bibId3, itemRecords = List(itemRecord))
+      createSierraTransformableWith(
+        sierraId = bibId3,
+        itemRecords = List(itemRecord))
 
     val sierraTransformableStore = createStore[SierraTransformable](
       Map(
@@ -267,8 +272,8 @@ class SierraItemMergerUpdaterServiceTest
   }
 
   it("does not unlink an item if it receives an outdated unlink update") {
-    val bibId1 = createSierraBibNumber  // linked to the item
-    val bibId2 = createSierraBibNumber  // not linked to the item
+    val bibId1 = createSierraBibNumber // linked to the item
+    val bibId2 = createSierraBibNumber // not linked to the item
 
     val itemRecord = createSierraItemRecordWith(
       bibIds = List(bibId1)

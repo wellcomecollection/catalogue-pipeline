@@ -12,8 +12,9 @@ object ItemLinker {
     *
     * Returns the merged record.
     */
-  def linkItemRecord(sierraTransformable: SierraTransformable,
-                     itemRecord: SierraItemRecord): Option[SierraTransformable] = {
+  def linkItemRecord(
+    sierraTransformable: SierraTransformable,
+    itemRecord: SierraItemRecord): Option[SierraTransformable] = {
     if (!itemRecord.bibIds.contains(sierraTransformable.sierraId)) {
       throw new RuntimeException(
         s"Non-matching bib id ${sierraTransformable.sierraId} in item bib ${itemRecord.bibIds}")

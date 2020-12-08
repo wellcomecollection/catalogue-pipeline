@@ -30,7 +30,9 @@ class ItemUnlinkerTests extends AnyFunSpec with Matchers with SierraGenerators {
       itemRecords = Map.empty
     )
 
-    ItemUnlinker.unlinkItemRecord(sierraTransformable, unlinkedItemRecord).get shouldBe expectedSierraTransformable
+    ItemUnlinker
+      .unlinkItemRecord(sierraTransformable, unlinkedItemRecord)
+      .get shouldBe expectedSierraTransformable
   }
 
   it("returns None when merging an unlinked record which is already absent") {
@@ -54,7 +56,8 @@ class ItemUnlinkerTests extends AnyFunSpec with Matchers with SierraGenerators {
     ItemUnlinker.unlinkItemRecord(sierraTransformable, previouslyUnlinkedRecord) shouldBe None
   }
 
-  it("returns None when merging an unlinked record which has linked more recently") {
+  it(
+    "returns None when merging an unlinked record which has linked more recently") {
     val bibId = createSierraBibNumber
 
     val record = createSierraItemRecordWith(
