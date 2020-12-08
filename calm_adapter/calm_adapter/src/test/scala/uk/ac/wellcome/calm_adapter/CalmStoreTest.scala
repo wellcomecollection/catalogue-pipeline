@@ -131,6 +131,9 @@ class CalmStoreTest extends AnyFunSpec with Matchers {
   def dataStore(entries: (Key, CalmRecord)*) =
     new MemoryStore(entries.toMap) with MemoryMaxima[String, CalmRecord]
 
-  def calmStore(data: MemoryStore[Key, CalmRecord] with Maxima[String, Int]) =
+  def calmStore(
+    data: MemoryStore[Key, CalmRecord] with Maxima[String,
+                                                   Version[String, Int],
+                                                   CalmRecord]) =
     new CalmStore(new MemoryVersionedStore(data))
 }

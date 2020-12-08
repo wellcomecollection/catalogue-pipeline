@@ -134,7 +134,9 @@ class CalmAdapterWorkerServiceTest
 
   def withCalmAdapterWorkerService[R](
     retriever: CalmRetriever,
-    store: MemoryStore[Key, CalmRecord] with Maxima[String, Int] = dataStore(),
+    store: MemoryStore[Key, CalmRecord] with Maxima[String,
+                                                    Version[String, Int],
+                                                    CalmRecord] = dataStore(),
     messageSender: MemoryMessageSender = new MemoryMessageSender())(
     testWith: TestWith[(CalmAdapterWorkerService[String], QueuePair), R]): R =
     withActorSystem { implicit actorSystem =>
