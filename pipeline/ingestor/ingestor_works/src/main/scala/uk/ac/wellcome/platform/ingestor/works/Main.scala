@@ -19,7 +19,7 @@ import uk.ac.wellcome.models.work.internal._
 import WorkState.{Denormalised, Indexed}
 
 object Main extends WellcomeTypesafeApp {
-  { config: Config =>
+ runWithConfig { config: Config =>
     implicit val actorSystem: ActorSystem =
       AkkaBuilder.buildActorSystem()
     implicit val executionContext: ExecutionContext =
