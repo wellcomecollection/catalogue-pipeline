@@ -2,11 +2,8 @@ package uk.ac.wellcome.platform.sierra_item_merger.services
 
 import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.platform.sierra_item_merger.fixtures.SierraItemMergerFixtures
-import uk.ac.wellcome.sierra_adapter.model.{
-  SierraGenerators,
-  SierraTransformable
-}
-import uk.ac.wellcome.storage.{UpdateNotApplied, Version}
+import uk.ac.wellcome.sierra_adapter.model.{SierraGenerators, SierraTransformable}
+import uk.ac.wellcome.storage.{StoreWriteError, UpdateWriteError, Version}
 import uk.ac.wellcome.storage.maxima.memory.MemoryMaxima
 import uk.ac.wellcome.storage.store.memory.{MemoryStore, MemoryVersionedStore}
 
@@ -269,28 +266,27 @@ class SierraItemMergerUpdaterServiceTest
     }
   }
 
-  it("does not unlink an item if it receives an out of date unlink update") {
-    val bibId1 = createSierraBibNumber
-    val bibId2 = createSierraBibNumber
+  it("does not unlink an item if it receives an outdated unlink update") {
+    val bibId1 = createSierraBibNumber  // linked to the item
+    val bibId2 = createSierraBibNumber  // not linked to the item
 
     val itemRecord = createSierraItemRecordWith(
       bibIds = List(bibId1)
     )
 
-    val sierraTransformable1 = createSierraTransformableWith(
-      sierraId = bibId1,
-      maybeBibRecord = None,
-      itemRecords = List(itemRecord)
-    )
+    val sierraTransformable1 =
+      createSierraTransformableWith(
+        sierraId = bibId1,
+        itemRecords = List(itemRecord))
 
-    val sierraTransformable2 = createSierraTransformableWith(
-      sierraId = bibId2,
-      maybeBibRecord = None
-    )
+    val sierraTransformable2 =
+      createSierraTransformableWith(sierraId = bibId2)
+
     val sierraTransformableStore = createStore[SierraTransformable](
       Map(
         Version(bibId1.withoutCheckDigit, 0) -> sierraTransformable1,
         Version(bibId2.withoutCheckDigit, 0) -> sierraTransformable2))
+
     withSierraUpdaterService(sierraTransformableStore) { sierraUpdaterService =>
       val unlinkItemRecord = itemRecord.copy(
         bibIds = List(bibId2),
@@ -316,9 +312,8 @@ class SierraItemMergerUpdaterServiceTest
 
       val result = sierraUpdaterService.update(unlinkItemRecord)
       result shouldBe a[Right[_, _]]
-      result.right.get should contain theSameElementsAs (List(
-        Version(bibId1.withoutCheckDigit, 1),
-        Version(bibId2.withoutCheckDigit, 1)))
+      result.right.get should contain theSameElementsAs List(
+        Version(bibId2.withoutCheckDigit, 1))
 
       assertStored(
         bibId1.withoutCheckDigit,
@@ -355,8 +350,7 @@ class SierraItemMergerUpdaterServiceTest
 
       val result = sierraUpdaterService.update(oldItemRecord)
       result shouldBe a[Right[_, _]]
-      result.right.get should contain theSameElementsAs (List(
-        Version(bibId.withoutCheckDigit, 1)))
+      result.right.get shouldBe empty
 
       assertStored(
         bibId.withoutCheckDigit,
@@ -404,7 +398,7 @@ class SierraItemMergerUpdaterServiceTest
       with MemoryMaxima[String, SierraTransformable]) {
       override def upsert(id: String)(t: SierraTransformable)(
         f: UpdateFunction): UpdateEither = {
-        Left(UpdateNotApplied(exception))
+        Left(UpdateWriteError(StoreWriteError(exception)))
       }
     }
     withSierraUpdaterService(failingStore) { brokenService =>
@@ -421,7 +415,7 @@ class SierraItemMergerUpdaterServiceTest
       new MemoryStore(Map[Version[String, Int], SierraTransformable]())
       with MemoryMaxima[String, SierraTransformable]) {
       override def update(id: String)(f: UpdateFunction): UpdateEither = {
-        Left(UpdateNotApplied(exception))
+        Left(UpdateWriteError(StoreWriteError(exception)))
       }
     }
     withSierraUpdaterService(failingStore) { brokenService =>
