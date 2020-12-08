@@ -6,7 +6,11 @@ module "windows_queue" {
 
   # Ensure that messages are spread around -- if we get a timeout from the
   # Sierra API, we don't retry _too_ quickly.
-  visibility_timeout_seconds = 300
+  #
+  # We also want this to be long enough that a reader can finish processing
+  # the window it receives.  If the timeout is only 5 minutes, we've seen
+  # messages get double-sent under heavy load.  Let's avoid that.
+  visibility_timeout_seconds = 1200
 
   # In certain periods of high activity, we've seen the Sierra API timeout
   # multiple times.  Since the reader can restart a partially-completed
