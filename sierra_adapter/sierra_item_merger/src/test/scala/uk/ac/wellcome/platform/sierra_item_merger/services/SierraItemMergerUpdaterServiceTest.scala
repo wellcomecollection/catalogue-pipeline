@@ -44,79 +44,60 @@ class SierraItemMergerUpdaterServiceTest
     }
   }
 
-  it("updates multiple merged records if the item contains multiple bibIds") {
-    val bibIdNotExisting = createSierraBibNumber
-    val bibIdWithNewerData = createSierraBibNumber
-    val bibIdWithOldData = createSierraBibNumber
-    val bibIds = List(
-      bibIdNotExisting,
-      bibIdWithOldData,
-      bibIdWithNewerData
-    )
+  it("only updates records that have changed") {
+    val bibId1 = createSierraBibNumber  // doesn't exist yet
+    val bibId2 = createSierraBibNumber  // exists, not linked to the item
+    val bibId3 = createSierraBibNumber  // exists, linked to the item
 
-    val itemRecord = createSierraItemRecordWith(
-      bibIds = bibIds
-    )
+    val bibIds = List(bibId1, bibId3, bibId2)
 
-    val otherItemRecord = createSierraItemRecordWith(
-      bibIds = bibIds
-    )
-    val oldTransformable = createSierraTransformableWith(
-      sierraId = bibIdWithOldData,
-      maybeBibRecord = None,
-      itemRecords = List(itemRecord, otherItemRecord)
-    )
-    val anotherItemRecord = createSierraItemRecordWith(
-      bibIds = bibIds
-    )
+    val itemRecord = createSierraItemRecordWith(bibIds = bibIds)
 
-    val newTransformable = createSierraTransformableWith(
-      sierraId = bibIdWithNewerData,
-      maybeBibRecord = None,
-      itemRecords = List(itemRecord, anotherItemRecord)
-    )
+    val transformable2 =
+      createSierraTransformableWith(sierraId = bibId2, itemRecords = List.empty)
+
+    val transformable3 =
+      createSierraTransformableWith(sierraId = bibId3, itemRecords = List(itemRecord))
 
     val sierraTransformableStore = createStore[SierraTransformable](
       Map(
-        Version(bibIdWithOldData.withoutCheckDigit, 0) -> oldTransformable,
-        Version(bibIdWithNewerData.withoutCheckDigit, 0) -> newTransformable))
+        Version(bibId2.withoutCheckDigit, 0) -> transformable2,
+        Version(bibId3.withoutCheckDigit, 0) -> transformable3))
 
     withSierraUpdaterService(sierraTransformableStore) { sierraUpdaterService =>
-      val expectedNewSierraTransformable =
+      val expectedTransformable1 =
         createSierraTransformableWith(
-          sierraId = bibIdNotExisting,
+          sierraId = bibId1,
           maybeBibRecord = None,
           itemRecords = List(itemRecord)
         )
 
-      val expectedUpdatedSierraTransformable =
-        createSierraTransformableWith(
-          sierraId = oldTransformable.sierraId,
-          maybeBibRecord = None,
-          itemRecords = List(itemRecord, otherItemRecord)
-        )
+      val expectedTransformable2 =
+        transformable2.copy(itemRecords = Map(itemRecord.id -> itemRecord))
+
+      val expectedTransformable3 =
+        transformable3.copy(itemRecords = Map(itemRecord.id -> itemRecord))
 
       val result = sierraUpdaterService.update(itemRecord)
 
       result shouldBe a[Right[_, _]]
-      result.right.get should contain theSameElementsAs (List(
-        Version(bibIdNotExisting.withoutCheckDigit, 0),
-        Version(bibIdWithOldData.withoutCheckDigit, 1),
-        Version(bibIdWithNewerData.withoutCheckDigit, 1)))
+      result.right.get should contain theSameElementsAs List(
+        Version(bibId1.withoutCheckDigit, 0),
+        Version(bibId2.withoutCheckDigit, 1))
 
       assertStored(
-        expectedNewSierraTransformable.sierraId.withoutCheckDigit,
-        expectedNewSierraTransformable,
+        bibId1.withoutCheckDigit,
+        expectedTransformable1,
         sierraTransformableStore
       )
       assertStored(
-        expectedUpdatedSierraTransformable.sierraId.withoutCheckDigit,
-        expectedUpdatedSierraTransformable,
+        bibId2.withoutCheckDigit,
+        expectedTransformable2,
         sierraTransformableStore
       )
       assertStored(
-        newTransformable.sierraId.withoutCheckDigit,
-        newTransformable,
+        bibId3.withoutCheckDigit,
+        expectedTransformable3,
         sierraTransformableStore
       )
     }
