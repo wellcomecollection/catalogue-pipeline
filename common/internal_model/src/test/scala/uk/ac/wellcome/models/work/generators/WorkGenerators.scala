@@ -38,11 +38,16 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
 
   def denormalisedWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
+    canonicalId: String = createCanonicalId,
     modifiedTime: Instant = instantInLast30Days,
-    relations: Relations[DataState.Unidentified] = Relations.none
+    relations: Relations[DataState.Identified] = Relations.none
   ): Work.Visible[Denormalised] =
     Work.Visible[Denormalised](
-      state = Denormalised(sourceIdentifier, modifiedTime, relations),
+      state = Denormalised(
+        sourceIdentifier = sourceIdentifier,
+        canonicalId = canonicalId,
+        modifiedTime = modifiedTime,
+        relations = relations),
       data = initData,
       version = createVersion
     )
@@ -58,7 +63,6 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
         sourceIdentifier = sourceIdentifier,
         canonicalId = canonicalId,
         modifiedTime = modifiedTime,
-        relations = relations
       ),
       data = initData,
       version = createVersion

@@ -216,6 +216,12 @@ object SourceWorkIndexConfig extends WorksIndexConfig {
 
 object MergedWorkIndexConfig extends WorksIndexConfig {
 
+  val fields = Seq.empty
+  val dynamicMapping = DynamicMapping.False
+}
+
+object IdentifiedWorkIndexConfig extends WorksIndexConfig {
+
   val fields = Seq(
     keywordField("type"),
     objectField("data").fields(
@@ -235,12 +241,6 @@ object DenormalisedWorkIndexConfig extends WorksIndexConfig {
     )
   )
 
-  val dynamicMapping = DynamicMapping.False
-}
-
-object IdentifiedWorkIndexConfig extends WorksIndexConfig {
-
-  val fields = Seq.empty
   val dynamicMapping = DynamicMapping.False
 }
 

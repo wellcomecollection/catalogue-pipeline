@@ -14,13 +14,13 @@ import uk.ac.wellcome.pipeline_storage.{Indexer, Retriever}
 import uk.ac.wellcome.platform.ingestor.common.models.IngestorConfig
 import uk.ac.wellcome.pipeline_storage.fixtures.ElasticIndexerFixtures
 import uk.ac.wellcome.models.work.internal._
-import WorkState.{Identified, Indexed}
+import WorkState.{Denormalised, Indexed}
 
 trait IngestorFixtures extends ElasticIndexerFixtures with SQS with Akka {
   this: Suite =>
 
   def withWorkerService[R](queue: Queue,
-                           retriever: Retriever[Work[Identified]],
+                           retriever: Retriever[Work[Denormalised]],
                            indexer: Indexer[Work[Indexed]])(
     testWith: TestWith[WorkIngestorWorkerService, R]): R =
     withActorSystem { implicit actorSystem =>

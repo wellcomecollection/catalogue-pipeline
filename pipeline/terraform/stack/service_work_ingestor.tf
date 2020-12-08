@@ -1,7 +1,7 @@
 module "ingestor_works_queue" {
   source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
   queue_name      = "${local.namespace_hyphen}_ingestor_works"
-  topic_arns      = [module.work_id_minter_topic.arn]
+  topic_arns      = [module.router_work_output_topic.arn, module.relation_embedder_output_topic.arn]
   aws_region      = var.aws_region
   alarm_topic_arn = var.dlq_alarm_arn
 }
@@ -21,10 +21,11 @@ module "ingestor_works" {
   cluster_arn  = aws_ecs_cluster.cluster.arn
 
   env_vars = {
-    metrics_namespace   = "${local.namespace_hyphen}_ingestor_works"
-    es_index            = local.es_works_index
-    ingest_queue_id     = module.ingestor_works_queue.url
-    es_ingest_batchSize = 25
+    metrics_namespace     = "${local.namespace_hyphen}_ingestor_works"
+    es_works_index        = local.es_works_index
+    es_denormalised_index = local.es_works_denormalised_index
+    ingest_queue_id       = module.ingestor_works_queue.url
+    es_ingest_batchSize   = 25
   }
 
   secret_env_vars = {

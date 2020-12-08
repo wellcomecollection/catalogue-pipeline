@@ -5,11 +5,8 @@ import scala.collection.mutable
 import io.circe.Json
 import io.circe.syntax._
 import scalikejdbc.{ConnectionPool, ConnectionPoolSettings}
-
-import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
-import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.platform.id_minter.config.models.IdentifiersTableConfig
 import uk.ac.wellcome.platform.id_minter.database.IdentifiersDao
@@ -18,50 +15,48 @@ import uk.ac.wellcome.platform.id_minter.steps.IdentifierGenerator
 import uk.ac.wellcome.platform.id_minter.fixtures.IdentifiersDatabase
 import uk.ac.wellcome.platform.id_minter_works.services.IdMinterWorkerService
 import uk.ac.wellcome.pipeline_storage.{MemoryIndexer, MemoryRetriever}
-import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.Implicits._
-import WorkState.{Denormalised, Identified}
+import WorkState.{Identified, Merged}
+import uk.ac.wellcome.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 
 trait WorkerServiceFixture
     extends IdentifiersDatabase
-    with BigMessagingFixture
-    with Akka {
+    with PipelineStorageStreamFixtures {
   def withWorkerService[R](
     messageSender: MemoryMessageSender = new MemoryMessageSender(),
     queue: Queue = Queue("url://q", "arn::q", visibilityTimeout = 1),
     identifiersDao: IdentifiersDao,
     identifiersTableConfig: IdentifiersTableConfig,
-    denormalisedIndex: Map[String, Json] = Map.empty,
+    mergedIndex: Map[String, Json] = Map.empty,
     identifiedIndex: mutable.Map[String, Work[Identified]] = mutable.Map.empty)(
     testWith: TestWith[IdMinterWorkerService[String], R]): R =
-    withActorSystem { implicit actorSystem =>
-      withSQSStream[NotificationMessage, R](queue) { messageStream =>
-        val identifierGenerator = new IdentifierGenerator(
-          identifiersDao = identifiersDao
-        )
-        val workerService = new IdMinterWorkerService(
-          identifierGenerator = identifierGenerator,
-          sender = messageSender,
-          messageStream = messageStream,
-          jsonRetriever = new MemoryRetriever(
-            index = mutable.Map(denormalisedIndex.toSeq: _*)),
-          workIndexer = new MemoryIndexer(index = identifiedIndex),
-          rdsClientConfig = rdsClientConfig,
-          identifiersTableConfig = identifiersTableConfig
-        )
+    withPipelineStream(
+      queue,
+      new MemoryIndexer(index = identifiedIndex),
+      messageSender) { stream =>
+      val identifierGenerator = new IdentifierGenerator(
+        identifiersDao = identifiersDao
+      )
+      val workerService = new IdMinterWorkerService(
+        identifierGenerator = identifierGenerator,
+        pipelineStream = stream,
+        jsonRetriever =
+          new MemoryRetriever(index = mutable.Map(mergedIndex.toSeq: _*)),
+        rdsClientConfig = rdsClientConfig,
+        identifiersTableConfig = identifiersTableConfig
+      )
 
-        workerService.run()
+      workerService.run()
 
-        testWith(workerService)
-      }
+      testWith(workerService)
     }
 
   def withWorkerService[R](
     messageSender: MemoryMessageSender,
     queue: Queue,
     identifiersTableConfig: IdentifiersTableConfig,
-    denormalisedIndex: Map[String, Json],
+    mergedIndex: Map[String, Json],
     identifiedIndex: mutable.Map[String, Work[Identified]])(
     testWith: TestWith[IdMinterWorkerService[String], R]): R = {
     Class.forName("com.mysql.jdbc.Driver")
@@ -83,12 +78,12 @@ trait WorkerServiceFixture
       queue,
       identifiersDao,
       identifiersTableConfig,
-      denormalisedIndex,
+      mergedIndex,
       identifiedIndex) { service =>
       testWith(service)
     }
   }
 
-  def createIndex(works: List[Work[Denormalised]]): Map[String, Json] =
+  def createIndex(works: List[Work[Merged]]): Map[String, Json] =
     works.map(work => (work.id, work.asJson)).toMap
 }

@@ -25,10 +25,10 @@ SERVICES = {
     "transformer": ["source_write"],
     "matcher": ["source_read"],
     "merger": ["source_read", "merged_write"],
-    "router": ["merged_read", "denormalised_write"],
-    "relation_embedder": ["merged_read", "denormalised_write"],
     "id_minter": ["merged_read", "denormalised_read", "identified_write"],
-    "ingestor": ["identified_read"],
+    "router": ["identified_read", "merged_read", "denormalised_write"],
+    "relation_embedder": ["identified_read", "merged_read", "denormalised_write"],
+    "ingestor": ["identified_read", "denormalised_read"],
 }
 
 DEFAULT_DESCRIPTION = "Credentials for the pipeline-storage Elasticsearch cluster"

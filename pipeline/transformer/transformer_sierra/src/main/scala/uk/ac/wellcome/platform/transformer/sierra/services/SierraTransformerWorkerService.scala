@@ -6,7 +6,7 @@ import uk.ac.wellcome.models.work.internal.WorkState.Source
 import uk.ac.wellcome.pipeline_storage.PipelineStorageStream
 import uk.ac.wellcome.platform.transformer.sierra.SierraTransformer
 import uk.ac.wellcome.sierra_adapter.model.SierraTransformable
-import uk.ac.wellcome.storage.{Identified, ReadError}
+import uk.ac.wellcome.storage.{Identified, ReadError, Version}
 import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.transformer.common.worker.{Transformer, TransformerWorker}
 import uk.ac.wellcome.typesafe.Runnable
@@ -23,9 +23,7 @@ class SierraTransformerWorkerService[MsgDestination](
     (input: SierraTransformable, version: Int) =>
       SierraTransformer(input, version).toEither
 
-  override protected def lookupSourceData(
-    key: StoreKey): Either[ReadError, SierraTransformable] =
-    store
-      .getLatest(key.id)
-      .map { case Identified(_, sierraTransformable) => sierraTransformable }
+  override def lookupSourceData(id: String)
+    : Either[ReadError, Identified[Version[String, Int], SierraTransformable]] =
+    store.getLatest(id)
 }
