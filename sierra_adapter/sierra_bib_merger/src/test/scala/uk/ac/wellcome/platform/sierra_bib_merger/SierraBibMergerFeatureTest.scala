@@ -4,6 +4,7 @@ import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.platform.sierra_bib_merger.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.sierra_adapter.model.{
   SierraGenerators,
@@ -117,6 +118,49 @@ class SierraBibMergerFeatureTest
     }
   }
 
+  it("only applies an update once, even if it's sent multiple times") {
+    val oldBibRecord = createSierraBibRecordWith(
+      modifiedDate = olderDate
+    )
+
+    val oldTransformable =
+      SierraTransformable(bibRecord = oldBibRecord)
+    val store = createStore[SierraTransformable](
+      Map(
+        Version(oldTransformable.sierraId.withoutCheckDigit, 0) -> oldTransformable
+      )
+    )
+
+    withLocalSqsQueue() { queue =>
+      withWorkerService(store, queue) {
+        case (_, messageSender) =>
+          val newBibRecord = createSierraBibRecordWith(
+            id = oldBibRecord.id,
+            modifiedDate = newerDate
+          )
+
+          (1 to 5).map { _ =>
+            sendNotificationToSQS(queue = queue, message = newBibRecord)
+          }
+
+
+          val expectedTransformable =
+            SierraTransformable(bibRecord = newBibRecord)
+
+          eventually {
+            assertStoredAndSent(
+              Version(oldTransformable.sierraId.withoutCheckDigit, 1),
+              expectedTransformable,
+              store,
+              messageSender
+            )
+
+            messageSender.messages.size shouldBe 1
+          }
+      }
+    }
+  }
+
   it("does not update a bib if an older version is sent to SQS") {
     val newBibRecord = createSierraBibRecordWith(
       modifiedDate = newerDate
@@ -127,7 +171,7 @@ class SierraBibMergerFeatureTest
     val key = Version(expectedTransformable.sierraId.withoutCheckDigit, 0)
     val store =
       createStore[SierraTransformable](Map(key -> expectedTransformable))
-    withLocalSqsQueue() { queue =>
+    withLocalSqsQueuePair() { case QueuePair(queue, dlq) =>
       withWorkerService(store, queue) {
         case (_, messageSender) =>
           val oldBibRecord = createSierraBibRecordWith(
@@ -137,15 +181,12 @@ class SierraBibMergerFeatureTest
 
           sendNotificationToSQS(queue = queue, message = oldBibRecord)
 
-          // Wait so there's enough time for this update to have gone through (if it was going to).
-          Thread.sleep(5000)
+          eventually {
+            assertQueueEmpty(queue)
+            assertQueueEmpty(dlq)
 
-          assertStoredAndSent(
-            key.copy(version = 1),
-            expectedTransformable,
-            store,
-            messageSender
-          )
+            messageSender.messages shouldBe empty
+          }
       }
     }
   }

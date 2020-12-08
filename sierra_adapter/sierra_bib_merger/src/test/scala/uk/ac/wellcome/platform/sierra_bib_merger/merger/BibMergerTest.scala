@@ -18,7 +18,7 @@ class BibMergerTest extends AnyFunSpec with Matchers with SierraGenerators {
       )
 
       val newTransformable = BibMerger.mergeBibRecord(transformable, bibRecord)
-      newTransformable.maybeBibRecord.get shouldEqual bibRecord
+      newTransformable.get.maybeBibRecord.get shouldEqual bibRecord
     }
 
     it("only merges bib records with matching ids") {
@@ -31,8 +31,7 @@ class BibMergerTest extends AnyFunSpec with Matchers with SierraGenerators {
       caught.getMessage shouldEqual s"Non-matching bib ids ${bibRecord.id} != ${transformable.sierraId}"
     }
 
-    it(
-      "returns the unmerged transformable when merging bib records with stale data") {
+    it("returns None when merging a stale update") {
       val oldBibRecord = createSierraBibRecordWith(
         modifiedDate = olderDate
       )
@@ -47,7 +46,7 @@ class BibMergerTest extends AnyFunSpec with Matchers with SierraGenerators {
       )
 
       val result = BibMerger.mergeBibRecord(transformable, oldBibRecord)
-      result shouldBe transformable
+      result shouldBe None
     }
 
     it("updates bibData when merging bib records with newer data") {
@@ -65,7 +64,7 @@ class BibMergerTest extends AnyFunSpec with Matchers with SierraGenerators {
       )
 
       val result = BibMerger.mergeBibRecord(transformable, newBibRecord)
-      result.maybeBibRecord.get shouldBe newBibRecord
+      result.get.maybeBibRecord.get shouldBe newBibRecord
     }
   }
 }

@@ -9,17 +9,22 @@ import uk.ac.wellcome.sierra_adapter.model.SierraBibRecord
 import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.Future
+import scala.util.Success
 
 class SierraBibMergerWorkerService[Destination](
   sqsStream: SQSStream[NotificationMessage],
   messageSender: MessageSender[Destination],
   sierraBibMergerUpdaterService: SierraBibMergerUpdaterService
 ) extends Runnable {
+
   private def process(message: NotificationMessage): Future[Unit] =
     Future.fromTry(for {
       bibRecord <- fromJson[SierraBibRecord](message.body)
-      vhsIndexEntry <- sierraBibMergerUpdaterService.update(bibRecord).toTry
-      _ <- messageSender.sendT(vhsIndexEntry)
+      key <- sierraBibMergerUpdaterService.update(bibRecord).toTry
+      _ <- key match {
+        case Some(k) => messageSender.sendT(k)
+        case _ => Success(())
+      }
     } yield ())
 
   def run(): Future[Done] =
