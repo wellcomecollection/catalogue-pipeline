@@ -7,7 +7,7 @@ module "window_generator_lambda" {
   s3_key      = "lambdas/sierra_adapter/sierra_window_generator.zip"
   module_name = "sierra_window_generator"
 
-  description     = "Generate windows of a specified length and push them to SNS"
+  description     = "Asks the Sierra ${var.resource_type} reader to fetch new records from the API"
   alarm_topic_arn = var.lambda_error_alarm_arn
   timeout         = 10
 
