@@ -22,9 +22,6 @@ output "vhs_bucket_name" {
   value = module.sierra-adapter-20200604.vhs_bucket_name
 }
 
-output "vhs_full_access_policy" {
-  value = module.sierra-adapter-20200604.vhs_full_access_policy
-}
 output "vhs_read_policy" {
   value = module.sierra-adapter-20200604.vhs_read_policy
 }
