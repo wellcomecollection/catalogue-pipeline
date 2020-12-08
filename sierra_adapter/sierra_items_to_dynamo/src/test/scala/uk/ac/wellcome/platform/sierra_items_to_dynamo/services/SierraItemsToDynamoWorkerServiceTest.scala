@@ -40,10 +40,12 @@ class SierraItemsToDynamoWorkerServiceTest
       bibIds = bibIds2
     )
 
-    val expectedRecord = SierraItemRecordMerger.mergeItems(
-      existingRecord = record1,
-      updatedRecord = record2
-    ).get
+    val expectedRecord = SierraItemRecordMerger
+      .mergeItems(
+        existingRecord = record1,
+        updatedRecord = record2
+      )
+      .get
     val store =
       createStore(Map(Version(record1.id.withoutCheckDigit, 1) -> record1))
 
@@ -80,35 +82,39 @@ class SierraItemsToDynamoWorkerServiceTest
       bibIds = bibIds2
     )
 
-    val expectedRecord = SierraItemRecordMerger.mergeItems(
-      existingRecord = record1,
-      updatedRecord = record2
-    ).get
+    val expectedRecord = SierraItemRecordMerger
+      .mergeItems(
+        existingRecord = record1,
+        updatedRecord = record2
+      )
+      .get
 
     val store =
       createStore(Map(Version(record1.id.withoutCheckDigit, 1) -> record1))
 
-    withLocalSqsQueuePair() { case QueuePair(queue, dlq) =>
-      withWorkerService(queue, store) { case (_, messageSender) =>
-        (1 to 5).foreach { _ =>
-          sendNotificationToSQS(queue = queue, message = record2)
+    withLocalSqsQueuePair() {
+      case QueuePair(queue, dlq) =>
+        withWorkerService(queue, store) {
+          case (_, messageSender) =>
+            (1 to 5).foreach { _ =>
+              sendNotificationToSQS(queue = queue, message = record2)
+            }
+
+            eventually {
+              assertQueueEmpty(queue)
+              assertQueueEmpty(dlq)
+
+              messageSender.getMessages[Version[String, Int]]() shouldBe List(
+                Version(record1.id.withoutCheckDigit, 2)
+              )
+
+              assertStored[SierraItemRecord](
+                record1.id.withoutCheckDigit,
+                expectedRecord,
+                store
+              )
+            }
         }
-
-        eventually {
-          assertQueueEmpty(queue)
-          assertQueueEmpty(dlq)
-
-          messageSender.getMessages[Version[String, Int]]() shouldBe List(
-            Version(record1.id.withoutCheckDigit, 2)
-          )
-
-          assertStored[SierraItemRecord](
-            record1.id.withoutCheckDigit,
-            expectedRecord,
-            store
-          )
-        }
-      }
     }
   }
 

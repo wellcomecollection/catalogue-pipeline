@@ -24,7 +24,7 @@ class SierraItemsToDynamoWorkerService[Destination](
         key <- dynamoInserter.insertIntoDynamo(itemRecord).toTry
         _ <- key match {
           case Some(k) => messageSender.sendT(k)
-          case None => Success(())
+          case None    => Success(())
         }
       } yield ()
     }

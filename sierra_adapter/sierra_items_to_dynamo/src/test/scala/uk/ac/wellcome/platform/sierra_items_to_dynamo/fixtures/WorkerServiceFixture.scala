@@ -24,8 +24,7 @@ trait WorkerServiceFixture
     queue: Queue,
     store: VersionedStore[String, Int, SierraItemRecord],
     metricsSender: Metrics[Future] = new MemoryMetrics()
-  )(
-    testWith: TestWith[(SierraItemsToDynamoWorkerService[String],
+  )(testWith: TestWith[(SierraItemsToDynamoWorkerService[String],
                         MemoryMessageSender),
                        R]): R =
     withActorSystem { implicit actorSystem =>

@@ -7,14 +7,17 @@ import uk.ac.wellcome.storage.store.VersionedStore
 
 class DynamoInserter(
   versionedHybridStore: VersionedStore[String, Int, SierraItemRecord]) {
-  def insertIntoDynamo(
-    updatedRecord: SierraItemRecord): Either[Throwable, Option[Version[String, Int]]] = {
+  def insertIntoDynamo(updatedRecord: SierraItemRecord)
+    : Either[Throwable, Option[Version[String, Int]]] = {
     val upsertResult: versionedHybridStore.UpdateEither =
       versionedHybridStore
         .upsert(updatedRecord.id.withoutCheckDigit)(updatedRecord) {
           SierraItemRecordMerger.mergeItems(_, updatedRecord) match {
             case Some(mergedRecord) => Right(mergedRecord)
-            case None               => Left(UpdateNotApplied(new Throwable(s"Item ${updatedRecord.id} is already up-to-date")))
+            case None =>
+              Left(
+                UpdateNotApplied(new Throwable(
+                  s"Item ${updatedRecord.id} is already up-to-date")))
           }
         }
 

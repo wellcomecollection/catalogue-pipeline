@@ -22,9 +22,11 @@ class SierraItemRecordMergerTest
     )
 
     val mergedRecord =
-      SierraItemRecordMerger.mergeItems(
-        existingRecord = existingRecord,
-        updatedRecord = updatedRecord).get
+      SierraItemRecordMerger
+        .mergeItems(
+          existingRecord = existingRecord,
+          updatedRecord = updatedRecord)
+        .get
     mergedRecord.bibIds shouldBe bibIds
     mergedRecord.unlinkedBibIds shouldBe List()
   }
@@ -43,9 +45,11 @@ class SierraItemRecordMergerTest
     )
 
     val mergedRecord =
-      SierraItemRecordMerger.mergeItems(
-        existingRecord = existingRecord,
-        updatedRecord = updatedRecord).get
+      SierraItemRecordMerger
+        .mergeItems(
+          existingRecord = existingRecord,
+          updatedRecord = updatedRecord)
+        .get
     mergedRecord.bibIds shouldBe bibIds.slice(2, 5)
     mergedRecord.unlinkedBibIds shouldBe bibIds.slice(0, 2)
   }
@@ -65,9 +69,11 @@ class SierraItemRecordMergerTest
     )
 
     val mergedRecord =
-      SierraItemRecordMerger.mergeItems(
-        existingRecord = existingRecord,
-        updatedRecord = updatedRecord).get
+      SierraItemRecordMerger
+        .mergeItems(
+          existingRecord = existingRecord,
+          updatedRecord = updatedRecord)
+        .get
     mergedRecord.unlinkedBibIds should contain theSameElementsAs existingRecord.unlinkedBibIds
   }
 
@@ -87,9 +93,11 @@ class SierraItemRecordMergerTest
     )
 
     val mergedRecord =
-      SierraItemRecordMerger.mergeItems(
-        existingRecord = existingRecord,
-        updatedRecord = updatedRecord).get
+      SierraItemRecordMerger
+        .mergeItems(
+          existingRecord = existingRecord,
+          updatedRecord = updatedRecord)
+        .get
     mergedRecord.bibIds shouldBe bibIds.slice(0, 2)
     mergedRecord.unlinkedBibIds shouldBe List(bibIds(2))
   }
@@ -109,9 +117,11 @@ class SierraItemRecordMergerTest
     )
 
     val mergedRecord =
-      SierraItemRecordMerger.mergeItems(
-        existingRecord = existingRecord,
-        updatedRecord = updatedRecord).get
+      SierraItemRecordMerger
+        .mergeItems(
+          existingRecord = existingRecord,
+          updatedRecord = updatedRecord)
+        .get
     mergedRecord.bibIds shouldBe bibIds.slice(0, 2)
     mergedRecord.unlinkedBibIds shouldBe List(bibIds(2))
   }
