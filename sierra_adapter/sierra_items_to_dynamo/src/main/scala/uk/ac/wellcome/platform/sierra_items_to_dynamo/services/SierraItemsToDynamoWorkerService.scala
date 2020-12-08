@@ -6,10 +6,10 @@ import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.sierra_adapter.model.SierraItemRecord
-import uk.ac.wellcome.storage.Version
 import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.Future
+import scala.util.Success
 
 class SierraItemsToDynamoWorkerService[Destination](
   sqsStream: SQSStream[NotificationMessage],
@@ -17,12 +17,15 @@ class SierraItemsToDynamoWorkerService[Destination](
   messageSender: MessageSender[Destination]
 ) extends Runnable {
 
-  private def process(message: NotificationMessage) =
+  private def process(message: NotificationMessage): Future[Unit] =
     Future.fromTry {
       for {
         itemRecord <- fromJson[SierraItemRecord](message.body)
         key <- dynamoInserter.insertIntoDynamo(itemRecord).toTry
-        _ <- messageSender.sendT[Version[String, Int]](key)
+        _ <- key match {
+          case Some(k) => messageSender.sendT(k)
+          case None => Success(())
+        }
       } yield ()
     }
 

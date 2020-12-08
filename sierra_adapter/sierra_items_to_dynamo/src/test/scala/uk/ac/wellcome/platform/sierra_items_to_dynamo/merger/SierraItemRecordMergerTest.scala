@@ -24,7 +24,7 @@ class SierraItemRecordMergerTest
     val mergedRecord =
       SierraItemRecordMerger.mergeItems(
         existingRecord = existingRecord,
-        updatedRecord = updatedRecord)
+        updatedRecord = updatedRecord).get
     mergedRecord.bibIds shouldBe bibIds
     mergedRecord.unlinkedBibIds shouldBe List()
   }
@@ -45,7 +45,7 @@ class SierraItemRecordMergerTest
     val mergedRecord =
       SierraItemRecordMerger.mergeItems(
         existingRecord = existingRecord,
-        updatedRecord = updatedRecord)
+        updatedRecord = updatedRecord).get
     mergedRecord.bibIds shouldBe bibIds.slice(2, 5)
     mergedRecord.unlinkedBibIds shouldBe bibIds.slice(0, 2)
   }
@@ -67,7 +67,7 @@ class SierraItemRecordMergerTest
     val mergedRecord =
       SierraItemRecordMerger.mergeItems(
         existingRecord = existingRecord,
-        updatedRecord = updatedRecord)
+        updatedRecord = updatedRecord).get
     mergedRecord.unlinkedBibIds should contain theSameElementsAs existingRecord.unlinkedBibIds
   }
 
@@ -89,7 +89,7 @@ class SierraItemRecordMergerTest
     val mergedRecord =
       SierraItemRecordMerger.mergeItems(
         existingRecord = existingRecord,
-        updatedRecord = updatedRecord)
+        updatedRecord = updatedRecord).get
     mergedRecord.bibIds shouldBe bibIds.slice(0, 2)
     mergedRecord.unlinkedBibIds shouldBe List(bibIds(2))
   }
@@ -111,12 +111,12 @@ class SierraItemRecordMergerTest
     val mergedRecord =
       SierraItemRecordMerger.mergeItems(
         existingRecord = existingRecord,
-        updatedRecord = updatedRecord)
+        updatedRecord = updatedRecord).get
     mergedRecord.bibIds shouldBe bibIds.slice(0, 2)
     mergedRecord.unlinkedBibIds shouldBe List(bibIds(2))
   }
 
-  it("returns the existing record unchanged if the update has an older date") {
+  it("returns None if it receives an outdated update") {
     val bibIds = createSierraBibNumbers(count = 5)
 
     val existingRecord = createSierraItemRecordWith(
@@ -132,6 +132,6 @@ class SierraItemRecordMergerTest
     val mergedRecord =
       SierraItemRecordMerger.mergeItems(existingRecord, updatedRecord)
 
-    mergedRecord shouldBe existingRecord
+    mergedRecord shouldBe None
   }
 }
