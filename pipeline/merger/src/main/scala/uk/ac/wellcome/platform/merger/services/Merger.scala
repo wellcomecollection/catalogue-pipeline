@@ -6,7 +6,7 @@ import uk.ac.wellcome.platform.merger.rules._
 import uk.ac.wellcome.platform.merger.logging.MergerLogging
 import uk.ac.wellcome.platform.merger.models.{
   FieldMergeResult,
-  ImageWithSource,
+  ImageDataWithSource,
   MergeResult,
   MergerOutcome
 }
@@ -89,7 +89,7 @@ trait Merger extends MergerLogging {
 
           MergerOutcome(
             resultWorks = redirects.toList ++ remaining :+ result.mergedTarget,
-            imagesWithSources = result.imagesWithSources
+            imagesWithSources = result.imageDataWithSources
           )
       }
       .getOrElse(MergerOutcome.passThrough(works))
@@ -118,8 +118,8 @@ trait Merger extends MergerLogging {
       info(
         s"Merged ${describeMergeOutcome(result.mergedTarget, redirects, remaining)}")
     }
-    if (result.imagesWithSources.nonEmpty) {
-      info(s"Created images ${describeImages(result.imagesWithSources)}")
+    if (result.imageDataWithSources.nonEmpty) {
+      info(s"Created images ${describeImages(result.imageDataWithSources)}")
     }
   }
 }
@@ -164,8 +164,8 @@ object PlatformMerger extends Merger {
       State.pure(
         MergeResult(
           mergedTarget = target,
-          imagesWithSources = standaloneImages(target).map { image =>
-            ImageWithSource(
+          imageDataWithSources = standaloneImages(target).map { image =>
+            ImageDataWithSource(
               image,
               SourceWorks(
                 canonicalWork = target.toSourceWork,
@@ -180,25 +180,25 @@ object PlatformMerger extends Merger {
         items <- ItemsRule(target, sources).redirectSources
         thumbnail <- ThumbnailRule(target, sources).redirectSources
         otherIdentifiers <- OtherIdentifiersRule(target, sources).redirectSources
-        unmergedImages <- ImagesRule(target, sources).redirectSources
+        sourceImageData <- ImageDataRule(target, sources).redirectSources
         work = target.mapData { data =>
           data.copy[DataState.Unidentified](
             items = items,
             thumbnail = thumbnail,
             otherIdentifiers = otherIdentifiers,
-            images = unmergedImages
+            imageData = sourceImageData
           )
         }
       } yield
         MergeResult(
           mergedTarget = work,
-          imagesWithSources = unmergedImages.map { image =>
-            ImageWithSource(
-              image = image,
+          imageDataWithSources = sourceImageData.map { imageData =>
+            ImageDataWithSource(
+              imageData = imageData,
               source = SourceWorks(
                 canonicalWork = work.toSourceWork,
                 redirectedWork = sources
-                  .find { _.data.images.contains(image) }
+                  .find { _.data.imageData.contains(imageData) }
                   .map(_.toSourceWork)
               )
             )
@@ -206,7 +206,7 @@ object PlatformMerger extends Merger {
         )
 
   private def standaloneImages(
-    target: Work.Visible[Source]): List[UnmergedImage[DataState.Unidentified]] =
-    if (WorkPredicates.singleDigitalItemMiroWork(target)) target.data.images
+    target: Work.Visible[Source]): List[ImageData[IdState.Identifiable]] =
+    if (WorkPredicates.singleDigitalItemMiroWork(target)) target.data.imageData
     else Nil
 }

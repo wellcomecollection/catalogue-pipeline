@@ -23,7 +23,7 @@ import uk.ac.wellcome.platform.api.rest.PaginationQuery
 class ImagesRequestBuilder(queryConfig: QueryConfig)
     extends ElasticsearchRequestBuilder {
 
-  val idSort: FieldSort = fieldSort("id.canonicalId").order(SortOrder.ASC)
+  val idSort: FieldSort = fieldSort("state.canonicalId").order(SortOrder.ASC)
 
   lazy val colorQuery = new ColorQuery(
     binSizes = queryConfig.paletteBinSizes
@@ -64,7 +64,7 @@ class ImagesRequestBuilder(queryConfig: QueryConfig)
   def buildImageMustQuery(queries: List[ImageMustQuery]): Seq[Query] =
     queries.map {
       case ColorMustQuery(hexColors) =>
-        colorQuery(field = "inferredData.palette", hexColors)
+        colorQuery(field = "state.inferredData.palette", hexColors)
     }
 
   def requestWithBlendedSimilarity: (Index, String, Int) => SearchRequest =

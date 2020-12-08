@@ -281,7 +281,7 @@ class MergerWorkerServiceTest
           mergedWorks should have size 1
           mergedWorks.head.sourceIdentifier shouldBe physicalWork.sourceIdentifier
 
-          imagesSent.head.id shouldBe miroWork.data.images.head.id
+          imagesSent.head.id shouldBe miroWork.data.imageData.head.id.sourceIdentifier.toString
         }
     }
   }
@@ -410,7 +410,6 @@ class MergerWorkerServiceTest
   def getWorksSent(senders: Senders): Seq[String] =
     getWorksSent(senders.works)
 
-  def getImagesSent(
-    senders: Senders): Seq[MergedImage[DataState.Unidentified]] =
+  def getImagesSent(senders: Senders): Seq[Image[ImageState.Initial]] =
     getImagesSent(senders.images)
 }

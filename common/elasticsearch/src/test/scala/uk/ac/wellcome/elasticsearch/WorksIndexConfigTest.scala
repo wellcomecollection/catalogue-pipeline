@@ -131,8 +131,8 @@ class WorksIndexConfigTest
 
   it("can ingest a work with an image") {
     withLocalWorksIndex { index =>
-      val sampleWork = identifiedWork().images(
-        List(createUnmergedImage.toIdentified)
+      val sampleWork = identifiedWork().imageData(
+        List(createImageData.toIdentified)
       )
       whenReady(indexObject(index, sampleWork)) { _ =>
         assertObjectIndexed(index, sampleWork)

@@ -35,13 +35,13 @@ class ImageDownloaderTest
       withMaterializer { implicit materializer =>
         withDownloaderAndFileWriter() {
           case (downloader, requestPool, _) =>
-            val image = createIdentifiedMergedImageWith(
+            val image = createImageDataWith(
               locations = List(
                 createDigitalLocationWith(
                   locationType = createImageLocationType,
                   url = "http://images.com/this-image.jpg"
                 ))
-            )
+            ).toIdentifiedImage
             val result = Source
               .single(image)
               .asSourceWithContext(_ => ())
@@ -61,7 +61,7 @@ class ImageDownloaderTest
       withMaterializer { implicit materializer: Materializer =>
         withDownloaderAndFileWriter() {
           case (downloader, _, fileWriter) =>
-            val image = createIdentifiedMergedImageWith()
+            val image = createImageData.toIdentifiedImage
             val result = Source
               .single(image)
               .asSourceWithContext(_ => ())
@@ -81,7 +81,7 @@ class ImageDownloaderTest
       withMaterializer { implicit materializer: Materializer =>
         withDownloaderAndFileWriter(_ => None) {
           case (downloader, _, _) =>
-            val image = createIdentifiedMergedImageWith()
+            val image = createImageData.toIdentifiedImage
             val result = Source
               .single(image)
               .asSourceWithContext(_ => ())
@@ -97,7 +97,7 @@ class ImageDownloaderTest
       withMaterializer { implicit materializer =>
         withDownloaderAndFileWriter() {
           case (downloader, requestPool, _) =>
-            val image = createIdentifiedMergedImageWith(
+            val image = createImageDataWith(
               locations = List(
                 createDigitalLocationWith(
                   locationType = createPresentationLocationType,
@@ -108,7 +108,7 @@ class ImageDownloaderTest
                   url = "http://images.com/this-image.jpg"
                 )
               )
-            )
+            ).toIdentifiedImage
             val result = Source
               .single(image)
               .asSourceWithContext(_ => ())
@@ -127,7 +127,7 @@ class ImageDownloaderTest
 
   describe("delete") {
     it("deletes a DownloadedImage") {
-      val image = createIdentifiedMergedImageWith()
+      val image = createImageData.toIdentifiedImage
       val downloadedImage = DownloadedImage(
         image,
         Paths.get("a", "b", "c", "default.jpg")

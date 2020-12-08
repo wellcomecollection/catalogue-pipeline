@@ -9,7 +9,7 @@ import software.amazon.awssdk.services.sqs.model.Message
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.models.work.internal.{AugmentedImage, InferredData}
+import uk.ac.wellcome.models.work.internal.{Image, ImageState, InferredData}
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.ImageGenerators
 import uk.ac.wellcome.platform.inference_manager.adapters.{
@@ -42,13 +42,12 @@ class InferenceManagerWorkerServiceTest
   it(
     "reads image messages, augments them with the inferrers, and sends them to SNS") {
     val images = (1 to 5)
-      .map(_ => createIdentifiedMergedImageWith())
+      .map(_ => createImageData.toIdentifiedImage)
       .map(image => image.id -> image)
       .toMap
     withResponsesAndFixtures(
       inferrer = req =>
         images.keys
-          .map(_.canonicalId)
           .find(req.contains(_))
           .flatMap { id =>
             if (req.contains("feature_inferrer")) {
@@ -68,26 +67,27 @@ class InferenceManagerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          forAll(messageSender.getMessages[AugmentedImage]) { image =>
-            inside(image) {
-              case AugmentedImage(id, _, _, _, _, inferredData) =>
-                images should contain key id
-                val seed = id.canonicalId.hashCode
-                inside(inferredData.value) {
-                  case InferredData(
-                      features1,
-                      features2,
-                      lshEncodedFeatures,
-                      palette) =>
-                    val featureVector =
-                      Responses.randomFeatureVector(seed)
-                    features1 should be(featureVector.slice(0, 2048))
-                    features2 should be(featureVector.slice(2048, 4096))
-                    lshEncodedFeatures should be(
-                      Responses.randomLshVector(seed))
-                    palette should be(Responses.randomPaletteVector(seed))
-                }
-            }
+          forAll(messageSender.getMessages[Image[ImageState.Augmented]]) {
+            image =>
+              inside(image.state) {
+                case ImageState.Augmented(_, id, inferredData) =>
+                  images should contain key id
+                  val seed = id.hashCode
+                  inside(inferredData.value) {
+                    case InferredData(
+                        features1,
+                        features2,
+                        lshEncodedFeatures,
+                        palette) =>
+                      val featureVector =
+                        Responses.randomFeatureVector(seed)
+                      features1 should be(featureVector.slice(0, 2048))
+                      features2 should be(featureVector.slice(2048, 4096))
+                      lshEncodedFeatures should be(
+                        Responses.randomLshVector(seed))
+                      palette should be(Responses.randomPaletteVector(seed))
+                  }
+              }
           }
         }
     }
@@ -104,48 +104,49 @@ class InferenceManagerWorkerServiceTest
       images = _ => Some(Responses.image)
     ) {
       case (QueuePair(queue, dlq), messageSender, _, _) =>
-        val image = createIdentifiedMergedImageWith()
+        val image = createImageData.toIdentifiedImage
         (1 to 3).foreach(_ => sendMessage(queue, image))
         eventually {
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          forAll(messageSender.getMessages[AugmentedImage]) { image =>
-            inside(image) {
-              case AugmentedImage(_, _, _, _, _, inferredData) =>
-                inside(inferredData.value) {
-                  case InferredData(
-                      features1,
-                      features2,
-                      lshEncodedFeatures,
-                      palette) =>
-                    features1 should have length 2048
-                    features2 should have length 2048
-                    every(lshEncodedFeatures) should fullyMatch regex """(\d+)-(\d+)"""
-                    every(palette) should fullyMatch regex """\d+"""
-                }
-            }
+          forAll(messageSender.getMessages[Image[ImageState.Augmented]]) {
+            image =>
+              inside(image.state) {
+                case ImageState.Augmented(_, _, inferredData) =>
+                  inside(inferredData.value) {
+                    case InferredData(
+                        features1,
+                        features2,
+                        lshEncodedFeatures,
+                        palette) =>
+                      features1 should have length 2048
+                      features2 should have length 2048
+                      every(lshEncodedFeatures) should fullyMatch regex """(\d+)-(\d+)"""
+                      every(palette) should fullyMatch regex """\d+"""
+                  }
+              }
           }
         }
     }
   }
 
   it("places images that fail inference on the DLQ") {
-    val image404 = createIdentifiedMergedImageWith(
+    val image404 = createImageDataWith(
       locations = List(createDigitalLocationWith(url = "lost_image"))
-    )
-    val image400 = createIdentifiedMergedImageWith(
+    ).toIdentifiedImage
+    val image400 = createImageDataWith(
       locations = List(createDigitalLocationWith(url = "malformed_image_url"))
-    )
-    val image500 = createIdentifiedMergedImageWith(
+    ).toIdentifiedImage
+    val image500 = createImageDataWith(
       locations =
         List(createDigitalLocationWith(url = "extremely_cursed_image"))
-    )
+    ).toIdentifiedImage
     withResponsesAndFixtures(
       inferrer = url =>
-        if (url.contains(image400.id.canonicalId)) {
+        if (url.contains(image400.id)) {
           Some(Responses.badRequest)
-        } else if (url.contains(image500.id.canonicalId)) {
+        } else if (url.contains(image500.id)) {
           Some(Responses.serverError)
         } else None,
       images = _ => Some(Responses.image)
@@ -167,7 +168,7 @@ class InferenceManagerWorkerServiceTest
       images = _ => None
     ) {
       case (QueuePair(queue, dlq), _, _, _) =>
-        val image = createIdentifiedMergedImageWith()
+        val image = createImageData.toIdentifiedImage
         sendMessage(queue, image)
         eventually {
           assertQueueEmpty(queue)

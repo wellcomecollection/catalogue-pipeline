@@ -336,7 +336,7 @@ class MetsDataTest
     )
     val result = metsData.toWork(1, Instant.now())
     result shouldBe a[Right[_, _]]
-    result.right.get.data.images.head.locations shouldBe List(
+    result.right.get.data.imageData.head.locations shouldBe List(
       DigitalLocationDeprecated(
         url = s"https://dlcs.io/iiif-img/wellcome/5/location.jp2/info.json",
         locationType = LocationType("iiif-image"),
@@ -374,7 +374,7 @@ class MetsDataTest
       )
     ).toWork(1, Instant.now())
     result shouldBe a[Right[_, _]]
-    val images = result.right.get.data.images
+    val images = result.right.get.data.imageData
     images should have length 3
     images.map(_.id.allSourceIdentifiers.head.value) should contain theSameElementsAs List(
       "ID/A",
@@ -393,7 +393,7 @@ class MetsDataTest
       )
     ).toWork(1, Instant.now())
     result shouldBe a[Right[_, _]]
-    result.right.get.data.images shouldBe empty
+    result.right.get.data.imageData shouldBe empty
   }
 
   it("creates a work with a single accessCondition including usage terms") {

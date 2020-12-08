@@ -41,12 +41,12 @@ class MergerFeatureTest
       outcome.getMerged(miro3) should beRedirectedTo(sierra)
 
       And("images are created from the Miro works")
-      outcome.images should contain(miro1.singleImage)
-      outcome.images should contain(miro2.singleImage)
-      outcome.images should contain(miro3.singleImage)
+      outcome.imageData should contain(miro1.singleImage)
+      outcome.imageData should contain(miro2.singleImage)
+      outcome.imageData should contain(miro3.singleImage)
 
       And("the merged Sierra work's images contain all of the images")
-      val mergedImages = outcome.getMerged(sierra).data.images
+      val mergedImages = outcome.getMerged(sierra).data.imageData
       mergedImages should contain(miro1.singleImage)
       mergedImages should contain(miro2.singleImage)
       mergedImages should contain(miro3.singleImage)
@@ -64,10 +64,13 @@ class MergerFeatureTest
       outcome.getMerged(miro) should beRedirectedTo(sierra)
 
       And("an image is created from the Miro work")
-      outcome.images should contain only miro.singleImage
+      outcome.imageData should contain only miro.singleImage
 
       And("the merged Sierra work contains the image")
-      outcome.getMerged(sierra).data.images should contain only miro.singleImage
+      outcome
+        .getMerged(sierra)
+        .data
+        .imageData should contain only miro.singleImage
     }
 
     Scenario("A Sierra picture or ephemera work and METS work are matched") {
@@ -89,18 +92,18 @@ class MergerFeatureTest
       ephemeraOutcome.getMerged(mets) should beRedirectedTo(sierraEphemera)
 
       And("an image is created from the METS work")
-      pictureOutcome.images should contain only mets.singleImage
-      ephemeraOutcome.images should contain only mets.singleImage
+      pictureOutcome.imageData should contain only mets.singleImage
+      ephemeraOutcome.imageData should contain only mets.singleImage
 
       And("the merged Sierra work contains the image")
       pictureOutcome
         .getMerged(sierraPicture)
         .data
-        .images should contain only mets.singleImage
+        .imageData should contain only mets.singleImage
       ephemeraOutcome
         .getMerged(sierraEphemera)
         .data
-        .images should contain only mets.singleImage
+        .imageData should contain only mets.singleImage
     }
 
     Scenario("An AIDS poster Sierra picture, a METS and a Miro are matched") {
@@ -124,7 +127,7 @@ class MergerFeatureTest
       outcome
         .getMerged(sierraDigaidsPicture)
         .data
-        .images should contain only mets.singleImage
+        .imageData should contain only mets.singleImage
     }
 
     Scenario("A physical and a digital Sierra work are matched") {

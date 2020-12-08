@@ -44,7 +44,7 @@ case class MetsData(
               mergeCandidates = List(mergeCandidate),
               thumbnail =
                 thumbnail(sourceIdentifier.value, license, accessStatus),
-              images = images(version, license, accessStatus)
+              imageData = imageData(version, license, accessStatus)
             )
           )
     }
@@ -142,10 +142,10 @@ case class MetsData(
         license = license
       )
 
-  private def images(version: Int,
-                     license: Option[License],
-                     accessStatus: Option[AccessStatus])
-    : List[UnmergedImage[DataState.Unidentified]] =
+  private def imageData(
+    version: Int,
+    license: Option[License],
+    accessStatus: Option[AccessStatus]): List[ImageData[IdState.Identifiable]] =
     if (accessStatus.exists(_.hasRestrictions)) {
       Nil
     } else {
@@ -153,9 +153,11 @@ case class MetsData(
         .filter(ImageUtils.isImage)
         .flatMap { fileReference =>
           ImageUtils.buildImageUrl(recordIdentifier, fileReference).map { url =>
-            UnmergedImage(
-              sourceIdentifier = ImageUtils
-                .getImageSourceId(recordIdentifier, fileReference.id),
+            ImageData[IdState.Identifiable](
+              id = IdState.Identifiable(
+                sourceIdentifier = ImageUtils
+                  .getImageSourceId(recordIdentifier, fileReference.id)
+              ),
               version = version,
               locations = List(
                 DigitalLocationDeprecated(

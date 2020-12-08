@@ -186,7 +186,7 @@ case object DisplayWork {
       duration = work.data.duration,
       images =
         if (includes.images)
-          Some(work.data.images.map(DisplayWorkImageInclude(_)))
+          Some(work.data.imageData.map(DisplayWorkImageInclude(_)))
         else None,
       ontologyType = displayWorkType(work.data.workType),
       partOf =

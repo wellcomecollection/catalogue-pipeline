@@ -29,5 +29,5 @@ trait MiroWorkGenerators extends ImageGenerators {
     sourceWork(sourceIdentifier = sourceIdentifier)
       .thumbnail(miroThumbnail())
       .items(miroItems(count = 1))
-      .images(List(createUnmergedMiroImage))
+      .imageData(List(createMiroImageData))
 }

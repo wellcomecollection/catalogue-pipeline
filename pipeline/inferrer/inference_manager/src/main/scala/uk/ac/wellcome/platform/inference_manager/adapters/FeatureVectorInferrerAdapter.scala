@@ -14,8 +14,8 @@ import uk.ac.wellcome.platform.inference_manager.models.{
 
 import scala.util.{Success, Try}
 
-// The InferrerAdaptor for feature vectors, consuming MergedImages and
-// augmenting them into AugmentedImages
+// The InferrerAdaptor for feature vectors, consuming Image[Identified] and
+// augmenting them into Image[Augmented]
 class FeatureVectorInferrerAdapter(val host: String, port: Int)
     extends InferrerAdapter {
   type Response = FeatureVectorInferrerResponse

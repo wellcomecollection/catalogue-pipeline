@@ -57,6 +57,10 @@ trait IndexConfigFields {
     sourceIdentifierValue
   )
 
+  def sourceIdentifier =
+    objectField("sourceIdentifier")
+      .fields(sourceIdentifierFields)
+
   def id(fieldName: String = "id") =
     objectField(fieldName).fields(
       keywordField("type"),
@@ -106,6 +110,11 @@ trait IndexConfigFields {
   val canonicalId = lowercaseKeyword("canonicalId")
   val version = intField("version")
   val modifiedTime = dateField("modifiedTime")
+
+  val identifiedSourceImageState = objectField("state").fields(
+    sourceIdentifier,
+    canonicalId
+  )
 }
 
 object NoStrictMapping extends IndexConfig {

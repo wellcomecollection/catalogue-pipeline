@@ -27,10 +27,12 @@ class IdMinterFeatureTest
       withIdentifiersTable { identifiersTableConfig =>
         withWorkerService(messageSender, queue, identifiersTableConfig) { _ =>
           eventuallyTableExists(identifiersTableConfig)
-          val image = createUnmergedImage mergeWith (
-            canonicalWork = mergedWork().toSourceWork,
-            redirectedWork = None,
-            modifiedTime = now
+          val image = createImageData.toInitialImageWith(
+            modifiedTime = modifiedTime,
+            sourceWorks = SourceWorks(
+              canonicalWork = mergedWork().toSourceWork,
+              redirectedWork = None
+            )
           )
 
           val messageCount = 5
@@ -41,12 +43,12 @@ class IdMinterFeatureTest
 
           eventually {
             val images =
-              messageSender.getMessages[MergedImage[DataState.Identified]]
+              messageSender.getMessages[Image[ImageState.Identified]]
             images.length shouldBe >=(messageCount)
 
-            images.map(_.id.canonicalId).distinct should have size 1
+            images.map(_.id).distinct should have size 1
             images.foreach { receivedImage =>
-              receivedImage.id.sourceIdentifier shouldBe image.id.sourceIdentifier
+              receivedImage.sourceIdentifier shouldBe image.sourceIdentifier
               receivedImage.locations shouldBe image.locations
             }
           }
@@ -63,10 +65,12 @@ class IdMinterFeatureTest
         withWorkerService(messageSender, queue, identifiersTableConfig) { _ =>
           sendInvalidJSONto(queue)
 
-          val image = createUnmergedImage mergeWith (
-            canonicalWork = mergedWork().toSourceWork,
-            redirectedWork = None,
-            modifiedTime = now
+          val image = createImageData.toInitialImageWith(
+            modifiedTime = modifiedTime,
+            sourceWorks = SourceWorks(
+              canonicalWork = mergedWork().toSourceWork,
+              redirectedWork = None
+            )
           )
 
           sendMessage(queue = queue, obj = image)

@@ -23,7 +23,7 @@ class ImagesFiltersTest extends ApiImagesTestBase {
   }
 
   describe("filtering images by color") {
-    val redImage = createAugmentedImageWith(
+    val redImage = createImageData.toIndexedImageWith(
       inferredData = createInferredData.map(
         _.copy(
           palette = List(
@@ -49,7 +49,7 @@ class ImagesFiltersTest extends ApiImagesTestBase {
             "181/8",
             "2/8"
           ))))
-    val blueImage = createAugmentedImageWith(
+    val blueImage = createImageData.toIndexedImageWith(
       inferredData = createInferredData.map(_.copy(palette = List(
         "48/4",
         "48/4",
@@ -73,7 +73,7 @@ class ImagesFiltersTest extends ApiImagesTestBase {
         "320/8",
         "128/8"
       ))))
-    val slightlyLessRedImage = createAugmentedImageWith(
+    val slightlyLessRedImage = createImageData.toIndexedImageWith(
       inferredData = createInferredData.map(
         _.copy(
           palette = List(
@@ -99,7 +99,7 @@ class ImagesFiltersTest extends ApiImagesTestBase {
             "181/8",
             "2/8"
           ))))
-    val evenLessRedImage = createAugmentedImageWith(
+    val evenLessRedImage = createImageData.toIndexedImageWith(
       inferredData = createInferredData.map(
         _.copy(
           palette = List(

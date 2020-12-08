@@ -1,12 +1,12 @@
 package uk.ac.wellcome.models.work.internal
 
-case class DerivedData(availableOnline: Boolean)
+case class DerivedWorkData(availableOnline: Boolean)
 
-object DerivedData {
-  def none: DerivedData = DerivedData(availableOnline = false)
+object DerivedWorkData {
+  def none: DerivedWorkData = DerivedWorkData(availableOnline = false)
 
-  def apply(workData: WorkData[_]): DerivedData =
-    DerivedData(
+  def apply(workData: WorkData[_]): DerivedWorkData =
+    DerivedWorkData(
       availableOnline = containsDigitalLocation(workData.items)
     )
 

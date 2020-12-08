@@ -9,7 +9,7 @@ import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.ImageGenerators
-import uk.ac.wellcome.models.work.internal.AugmentedImage
+import uk.ac.wellcome.models.work.internal.{Image, ImageState}
 import uk.ac.wellcome.pipeline_storage.ElasticIndexer
 import uk.ac.wellcome.pipeline_storage.Indexable.imageIndexable
 
@@ -23,18 +23,20 @@ class ImagesIngestorFeatureTest
     with ElasticsearchFixtures
     with IngestorFixtures {
   it("reads an image from the queue, ingests it and deletes the message") {
-    val image = createAugmentedImage()
+    val image = createImageData.toAugmentedImage
 
     withLocalSqsQueuePair(visibilityTimeout = 10) {
       case QueuePair(queue, dlq) =>
-        sendMessage[AugmentedImage](queue = queue, obj = image)
+        sendMessage[Image[ImageState.Augmented]](queue = queue, obj = image)
         withLocalImagesIndex { index =>
-          val indexer = new ElasticIndexer[AugmentedImage](
+          val indexer = new ElasticIndexer[Image[ImageState.Augmented]](
             elasticClient,
             index,
             ImagesIndexConfig)
           withWorkerService(queue, indexer) { _ =>
-            assertElasticsearchEventuallyHas(index, image)
+            assertElasticsearchEventuallyHasImage[ImageState.Indexed](
+              index,
+              ImageTransformer.deriveData(image))
             assertQueueEmpty(queue)
             assertQueueEmpty(dlq)
           }
@@ -50,7 +52,7 @@ class ImagesIngestorFeatureTest
       case QueuePair(queue, dlq) =>
         sendMessage[Something](queue = queue, obj = wrongMessage)
         withLocalImagesIndex { index =>
-          val indexer = new ElasticIndexer[AugmentedImage](
+          val indexer = new ElasticIndexer[Image[ImageState.Augmented]](
             elasticClient,
             index,
             ImagesIndexConfig)

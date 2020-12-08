@@ -574,11 +574,15 @@ class WorksIncludesTest
         case (worksIndex, routes) =>
           val works = List(
             indexedWork()
-              .images(
-                (1 to 3).map(_ => createUnmergedImage.toIdentified).toList),
+              .imageData(
+                (1 to 3)
+                  .map(_ => createImageData.toIdentified)
+                  .toList),
             indexedWork()
-              .images(
-                (1 to 3).map(_ => createUnmergedImage.toIdentified).toList)
+              .imageData(
+                (1 to 3)
+                  .map(_ => createImageData.toIdentified)
+                  .toList)
           ).sortBy { _.state.canonicalId }
 
           insertIntoElasticsearch(worksIndex, works: _*)
@@ -594,7 +598,7 @@ class WorksIncludesTest
                     "title": "${works.head.data.title.get}",
                     "alternativeTitles": [],
                     "availableOnline": false,
-                    "images": [${workImageIncludes(works.head.data.images)}]
+                    "images": [${workImageIncludes(works.head.data.imageData)}]
                   },
                   {
                     "type": "Work",
@@ -602,7 +606,7 @@ class WorksIncludesTest
                     "title": "${works(1).data.title.get}",
                     "alternativeTitles": [],
                     "availableOnline": false,
-                    "images": [${workImageIncludes(works(1).data.images)}]
+                    "images": [${workImageIncludes(works(1).data.imageData)}]
                   }
                 ]
               }
@@ -616,8 +620,8 @@ class WorksIncludesTest
       withWorksApi {
         case (worksIndex, routes) =>
           val images =
-            (1 to 3).map(_ => createUnmergedImage.toIdentified).toList
-          val work = indexedWork().images(images)
+            (1 to 3).map(_ => createImageData.toIdentified).toList
+          val work = indexedWork().imageData(images)
 
           insertIntoElasticsearch(worksIndex, work)
 

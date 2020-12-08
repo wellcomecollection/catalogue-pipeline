@@ -94,7 +94,7 @@ case class WorkData[State <: DataState](
   duration: Option[Int] = None,
   items: List[Item[State#MaybeId]] = Nil,
   collectionPath: Option[CollectionPath] = None,
-  images: List[UnmergedImage[State]] = Nil,
+  imageData: List[ImageData[State#Id]] = Nil,
   workType: WorkType = WorkType.Standard,
 )
 
@@ -188,7 +188,7 @@ object WorkState {
     sourceIdentifier: SourceIdentifier,
     canonicalId: String,
     modifiedTime: Instant,
-    derivedData: DerivedData,
+    derivedData: DerivedWorkData,
     relations: Relations[DataState.Identified] = Relations.none
   ) extends WorkState {
 
@@ -259,7 +259,7 @@ object WorkFsm {
         sourceIdentifier = state.sourceIdentifier,
         canonicalId = state.canonicalId,
         modifiedTime = state.modifiedTime,
-        derivedData = DerivedData(data),
+        derivedData = DerivedWorkData(data),
         relations = state.relations
       )
 

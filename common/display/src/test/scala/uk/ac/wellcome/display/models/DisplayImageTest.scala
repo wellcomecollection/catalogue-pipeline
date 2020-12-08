@@ -12,8 +12,9 @@ class DisplayImageTest
     with ImageGenerators {
 
   it("adds a list of visuallySimilar images if specified") {
-    val image = createAugmentedImage()
-    val similarImages = (1 to 3).map(_ => createAugmentedImage()).toSeq
+    val image = createImageData.toIndexedImage
+    val similarImages =
+      (1 to 3).map(_ => createImageData.toIndexedImage).toSeq
 
     val displayImage = DisplayImage(
       image,
@@ -24,7 +25,7 @@ class DisplayImageTest
     displayImage.visuallySimilar.value should have length similarImages.size
     displayImage.visuallySimilar.value
       .map(_.id) should contain theSameElementsAs
-      similarImages.map(_.id.canonicalId)
+      similarImages.map(_.id)
   }
 
 }

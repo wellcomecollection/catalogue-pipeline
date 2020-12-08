@@ -8,7 +8,7 @@ import grizzled.slf4j.Logging
 import software.amazon.awssdk.services.sqs.model.Message
 import uk.ac.wellcome.bigmessaging.message.BigMessageStream
 import uk.ac.wellcome.messaging.MessageSender
-import uk.ac.wellcome.models.work.internal.{AugmentedImage, InferredData}
+import uk.ac.wellcome.models.work.internal.{Image, ImageState, InferredData}
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.platform.inference_manager.adapters.{
   InferrerAdapter,
@@ -140,7 +140,9 @@ class InferenceManagerWorkerService[Destination](
               case (
                   AdapterResponseBundle(DownloadedImage(image, _), _, _),
                   ctx) =>
-                (image.augment(Some(inferredData)), ctx)
+                (
+                  image.transition[ImageState.Augmented](Some(inferredData)),
+                  ctx)
             }
           }
           .mergeSubstreamsWithParallelism(
@@ -149,8 +151,8 @@ class InferenceManagerWorkerService[Destination](
       }
 
   private def sendAugmented[Ctx] =
-    FlowWithContext[AugmentedImage, Ctx]
-      .map(messageSender.sendT[AugmentedImage])
+    FlowWithContext[Image[ImageState.Augmented], Ctx]
+      .map(messageSender.sendT[Image[ImageState.Augmented]])
       .map(_.get)
 
 }

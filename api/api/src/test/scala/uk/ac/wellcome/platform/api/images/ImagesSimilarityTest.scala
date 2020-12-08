@@ -12,13 +12,13 @@ class ImagesSimilarityTest extends ApiImagesTestBase {
         insertImagesIntoElasticsearch(imagesIndex, images: _*)
         assertJsonResponse(
           routes,
-          s"/$apiPrefix/images/${images.head.id.canonicalId}?include=visuallySimilar",
+          s"/$apiPrefix/images/${images.head.id}?include=visuallySimilar",
           unordered = true) {
           Status.OK ->
             s"""
                |{
                |  $singleImageResult,
-               |  "id": "${image.id.canonicalId}",
+               |  "id": "${image.id}",
                |  "locations": [${locations(image.locations)}],
                |  "visuallySimilar": [
                |    ${images.tail.map(imageResponse).mkString(",")}
@@ -39,13 +39,13 @@ class ImagesSimilarityTest extends ApiImagesTestBase {
         insertImagesIntoElasticsearch(imagesIndex, images: _*)
         assertJsonResponse(
           routes,
-          s"/$apiPrefix/images/${images.head.id.canonicalId}?include=withSimilarFeatures",
+          s"/$apiPrefix/images/${images.head.id}?include=withSimilarFeatures",
           unordered = true) {
           Status.OK ->
             s"""
                |{
                |  $singleImageResult,
-               |  "id": "${image.id.canonicalId}",
+               |  "id": "${image.id}",
                |  "locations": [${locations(image.locations)}],
                |  "withSimilarFeatures": [
                |    ${images.tail.map(imageResponse).mkString(",")}
@@ -66,13 +66,13 @@ class ImagesSimilarityTest extends ApiImagesTestBase {
         insertImagesIntoElasticsearch(imagesIndex, images: _*)
         assertJsonResponse(
           routes,
-          s"/$apiPrefix/images/${images.head.id.canonicalId}?include=withSimilarColors",
+          s"/$apiPrefix/images/${images.head.id}?include=withSimilarColors",
           unordered = true) {
           Status.OK ->
             s"""
                |{
                |  $singleImageResult,
-               |  "id": "${image.id.canonicalId}",
+               |  "id": "${image.id}",
                |  "locations": [${locations(image.locations)}],
                |  "withSimilarColors": [
                |    ${images.tail.map(imageResponse).mkString(",")}
@@ -86,7 +86,7 @@ class ImagesSimilarityTest extends ApiImagesTestBase {
   it("never includes visually similar images on an images search") {
     withImagesApi {
       case (imagesIndex, routes) =>
-        val focacciaImage = createAugmentedImageWith(
+        val focacciaImage = createImageData.toIndexedImageWith(
           parentWork =
             identifiedWork().title("A Ligurian style of bread, Focaccia")
         )

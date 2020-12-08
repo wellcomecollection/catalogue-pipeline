@@ -6,7 +6,7 @@ import uk.ac.wellcome.models.work.internal.{
 }
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 
-trait MiroThumbnail extends MiroImage with MiroLicenses {
+trait MiroThumbnail extends MiroImageData with MiroLicenses {
   def getThumbnail(miroRecord: MiroRecord): DigitalLocationDeprecated =
     DigitalLocationDeprecated(
       locationType = LocationType("thumbnail-image"),

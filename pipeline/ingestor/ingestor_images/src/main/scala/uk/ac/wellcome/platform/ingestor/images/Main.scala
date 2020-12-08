@@ -6,7 +6,7 @@ import com.typesafe.config.Config
 import uk.ac.wellcome.bigmessaging.typesafe.BigMessagingBuilder
 import uk.ac.wellcome.elasticsearch.ImagesIndexConfig
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.internal.AugmentedImage
+import uk.ac.wellcome.models.work.internal.{Image, ImageState}
 import uk.ac.wellcome.pipeline_storage.Indexable.imageIndexable
 import uk.ac.wellcome.pipeline_storage.typesafe.ElasticIndexerBuilder
 import uk.ac.wellcome.platform.ingestor.common.builders.IngestorConfigBuilder
@@ -20,16 +20,17 @@ object Main extends WellcomeTypesafeApp {
     implicit val executionContext: ExecutionContext =
       AkkaBuilder.buildExecutionContext()
 
-    val imageIndexer = ElasticIndexerBuilder[AugmentedImage](
+    val imageIndexer = ElasticIndexerBuilder[Image[ImageState.Indexed]](
       config,
       indexConfig = ImagesIndexConfig
     )
 
-    ImageIngestorWorkerService(
+    new ImageIngestorWorkerService(
       ingestorConfig = IngestorConfigBuilder.buildIngestorConfig(config),
       documentIndexer = imageIndexer,
-      messageStream =
-        BigMessagingBuilder.buildMessageStream[AugmentedImage](config)
+      messageStream = BigMessagingBuilder
+        .buildMessageStream[Image[ImageState.Augmented]](config),
+      transformBeforeIndex = ImageTransformer.deriveData
     )
   }
 }

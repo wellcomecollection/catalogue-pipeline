@@ -14,8 +14,7 @@ import uk.ac.wellcome.models.work.generators.{
   InstantGenerators,
   WorkGenerators
 }
-import uk.ac.wellcome.models.work.internal.SourceWork._
-import uk.ac.wellcome.models.work.internal.{AugmentedImage, SourceWorks}
+import uk.ac.wellcome.models.work.internal.{Image, ImageState}
 import uk.ac.wellcome.pipeline_storage.Indexable.imageIndexable
 import uk.ac.wellcome.pipeline_storage.fixtures.ElasticIndexerFixtures
 
@@ -34,7 +33,7 @@ class ImageIndexableTest
 
   describe("updating images with merged / redirected sources") {
     it("overrides an image if modifiedTime is higher") {
-      val originalImage = createAugmentedImageWith()
+      val originalImage = createImageData.toIndexedImage
       val updatedModifiedTimeImage = originalImage.copy(
         modifiedTime = originalImage.modifiedTime + (2 minutes)
       )
@@ -56,7 +55,7 @@ class ImageIndexableTest
       }
     }
     it("does not override an image if modifiedTime is lower") {
-      val originalImage = createAugmentedImageWith()
+      val originalImage = createImageData.toIndexedImage
       val updatedModifiedTimeImage = originalImage.copy(
         modifiedTime = originalImage.modifiedTime - (2 minutes)
       )
@@ -78,21 +77,22 @@ class ImageIndexableTest
       }
     }
     it("overrides an image if modifiedTime is the same") {
-      val originalImage = createAugmentedImageWith()
-      val updatedSourceImage = originalImage.copy(
-        source = SourceWorks(sierraIdentifiedWork().toSourceWork, None))
+      val originalImage = createImageData.toIndexedImage
+      val updatedLocationImage = originalImage.copy(
+        locations = originalImage.locations.tail
+      )
 
       withImagesIndexAndIndexer {
         case (index, indexer) =>
           val insertFuture = ingestInOrder(indexer)(
             originalImage,
-            updatedSourceImage
+            updatedLocationImage
           )
 
           whenReady(insertFuture) { result =>
             assertIngestedImageIs(
               result = result,
-              ingestedImage = updatedSourceImage,
+              ingestedImage = updatedLocationImage,
               index = index
             )
           }
@@ -101,17 +101,21 @@ class ImageIndexableTest
   }
 
   private def assertIngestedImageIs(
-    result: Either[Seq[AugmentedImage], Seq[AugmentedImage]],
-    ingestedImage: AugmentedImage,
+    result: Either[Seq[Image[ImageState.Indexed]],
+                   Seq[Image[ImageState.Indexed]]],
+    ingestedImage: Image[ImageState.Indexed],
     index: Index): Seq[Assertion] = {
     result.isRight shouldBe true
     assertElasticsearchEventuallyHasImage(index, ingestedImage)
   }
 
   private def withImagesIndexAndIndexer[R](
-    testWith: TestWith[(Index, ElasticIndexer[AugmentedImage]), R]) =
+    testWith: TestWith[(Index, ElasticIndexer[Image[ImageState.Indexed]]), R]) =
     withLocalImagesIndex { index =>
-      val indexer = new ElasticIndexer(elasticClient, index, ImagesIndexConfig)
+      val indexer = new ElasticIndexer[Image[ImageState.Indexed]](
+        elasticClient,
+        index,
+        ImagesIndexConfig)
       testWith((index, indexer))
     }
 }

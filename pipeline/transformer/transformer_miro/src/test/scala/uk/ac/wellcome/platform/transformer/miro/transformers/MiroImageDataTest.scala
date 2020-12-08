@@ -5,35 +5,38 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
 import uk.ac.wellcome.models.work.internal.{
   DigitalLocationDeprecated,
+  IdState,
   IdentifierType,
+  ImageData,
   License,
   LocationType,
-  SourceIdentifier,
-  UnmergedImage
+  SourceIdentifier
 }
 import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
 
-class MiroImageTest
+class MiroImageDataTest
     extends AnyFunSpec
     with Matchers
     with IdentifiersGenerators
     with MiroRecordGenerators {
-  val transformer = new MiroImage {}
+  val transformer = new MiroImageData {}
 
-  describe("getImage") {
-    it("extracts the Miro image") {
-      transformer.getImage(
+  describe("getImageData") {
+    it("extracts the Miro image data") {
+      transformer.getImageData(
         createMiroRecordWith(
           imageNumber = "B0011308",
           useRestrictions = Some("CC-0"),
           sourceCode = Some("FDN")
         ),
         version = 1
-      ) shouldBe UnmergedImage(
-        sourceIdentifier = SourceIdentifier(
-          identifierType = IdentifierType("miro-image-number"),
-          ontologyType = "Image",
-          value = "B0011308"
+      ) shouldBe ImageData[IdState.Identifiable](
+        id = IdState.Identifiable(
+          sourceIdentifier = SourceIdentifier(
+            identifierType = IdentifierType("miro-image-number"),
+            ontologyType = "Image",
+            value = "B0011308"
+          )
         ),
         version = 1,
         locations = List(

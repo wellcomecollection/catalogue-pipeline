@@ -7,18 +7,23 @@ import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
 
 object ImagesIndexConfig extends IndexConfig with WorksIndexConfigFields {
 
-  override val analysis: Analysis = WorksAnalysis()
+  val analysis: Analysis = WorksAnalysis()
 
   val inferredData = objectField("inferredData").fields(
     denseVectorField("features1", 2048),
     denseVectorField("features2", 2048),
     keywordField("lshEncodedFeatures"),
-    keywordField("palette"))
+    keywordField("palette")
+  )
 
-  private def sourceWork(canonicalWork: String): ObjectField =
-    objectField(canonicalWork).fields(
+  val derivedImageData = objectField("derivedData").fields(
+    location("thumbnail")
+  )
+
+  private def sourceWork(fieldName: String): ObjectField =
+    objectField(fieldName).fields(
       id(),
-      data(textField("path"), id()),
+      data(pathField = textField("path")),
       keywordField("type"),
       version
     )
@@ -29,12 +34,19 @@ object ImagesIndexConfig extends IndexConfig with WorksIndexConfigFields {
     keywordField("type")
   )
 
-  override val mapping: MappingDefinition = properties(
-    id(),
-    version,
-    modifiedTime,
-    location("locations"),
-    source,
-    inferredData
-  ).dynamic(DynamicMapping.Strict)
+  val indexedState = objectField("state").fields(
+    sourceIdentifier,
+    canonicalId,
+    inferredData,
+    derivedImageData
+  )
+
+  def mapping: MappingDefinition =
+    properties(
+      version,
+      modifiedTime,
+      source,
+      indexedState,
+      location("locations")
+    ).dynamic(DynamicMapping.Strict)
 }

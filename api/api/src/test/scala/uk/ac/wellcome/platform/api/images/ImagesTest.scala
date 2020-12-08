@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.api.images
 
 import uk.ac.wellcome.models.work.generators.SierraWorkGenerators
-import uk.ac.wellcome.models.work.internal._
 
 class ImagesTest extends ApiImagesTestBase with SierraWorkGenerators {
 
@@ -9,7 +8,7 @@ class ImagesTest extends ApiImagesTestBase with SierraWorkGenerators {
     withImagesApi {
       case (imagesIndex, routes) =>
         val images =
-          (1 to 5).map(_ => createAugmentedImage()).sortBy(_.id.canonicalId)
+          (1 to 5).map(_ => createImageData.toIndexedImage).sortBy(_.id)
         insertImagesIntoElasticsearch(imagesIndex, images: _*)
         assertJsonResponse(routes, s"/$apiPrefix/images") {
           Status.OK -> imagesListResponse(images)
@@ -20,16 +19,14 @@ class ImagesTest extends ApiImagesTestBase with SierraWorkGenerators {
   it("returns a single image when requested with ID") {
     withImagesApi {
       case (imagesIndex, routes) =>
-        val image = createAugmentedImage()
+        val image = createImageData.toIndexedImage
         insertImagesIntoElasticsearch(imagesIndex, image)
-        assertJsonResponse(
-          routes,
-          s"/$apiPrefix/images/${image.id.canonicalId}") {
+        assertJsonResponse(routes, s"/$apiPrefix/images/${image.id}") {
           Status.OK ->
             s"""
              |{
              |  $singleImageResult,
-             |  "id": "${image.id.canonicalId}",
+             |  "id": "${image.id}",
              |  "locations": [${locations(image.locations)}],
              |  "source": ${imageSource(image.source)}
              |}""".stripMargin
@@ -43,9 +40,10 @@ class ImagesTest extends ApiImagesTestBase with SierraWorkGenerators {
         val parentWork = sierraIdentifiedWork()
         val workImages =
           (0 to 3)
-            .map(_ => createAugmentedImageWith(parentWork = parentWork))
+            .map(_ =>
+              createImageData.toIndexedImageWith(parentWork = parentWork))
             .toList
-        val otherImage = createAugmentedImage()
+        val otherImage = createImageData.toIndexedImage
         insertImagesIntoElasticsearch(imagesIndex, otherImage :: workImages: _*)
         assertJsonResponse(
           routes,
@@ -71,18 +69,18 @@ class ImagesTest extends ApiImagesTestBase with SierraWorkGenerators {
   it("returns matching results when using work data") {
     withImagesApi {
       case (imagesIndex, routes) =>
-        val baguetteImage = createAugmentedImageWith(
-          imageId = IdState.Identified("a", createSourceIdentifier),
+        val baguetteImage = createImageData.toIndexedImageWith(
+          canonicalId = "a",
           parentWork = identifiedWork()
             .title("Baguette is a French bread style")
         )
-        val focacciaImage = createAugmentedImageWith(
-          imageId = IdState.Identified("b", createSourceIdentifier),
+        val focacciaImage = createImageData.toIndexedImageWith(
+          canonicalId = "b",
           parentWork = identifiedWork()
             .title("A Ligurian style of bread, Focaccia")
         )
-        val mantouImage = createAugmentedImageWith(
-          imageId = IdState.Identified("c", createSourceIdentifier),
+        val mantouImage = createImageData.toIndexedImageWith(
+          canonicalId = "c",
           parentWork = identifiedWork()
             .title("Mantou is a steamed bread associated with Northern China")
         )
@@ -106,18 +104,18 @@ class ImagesTest extends ApiImagesTestBase with SierraWorkGenerators {
   it("returns matching results when using workdata from the redirected work") {
     withImagesApi {
       case (imagesIndex, routes) =>
-        val baguetteImage = createAugmentedImageWith(
-          imageId = IdState.Identified("a", createSourceIdentifier),
+        val baguetteImage = createImageData.toIndexedImageWith(
+          canonicalId = "a",
           parentWork = identifiedWork()
             .title("Baguette is a French bread style")
         )
-        val focacciaImage = createAugmentedImageWith(
-          imageId = IdState.Identified("b", createSourceIdentifier),
+        val focacciaImage = createImageData.toIndexedImageWith(
+          canonicalId = "b",
           parentWork = identifiedWork()
             .title("A Ligurian style of bread, Focaccia")
         )
-        val schiacciataImage = createAugmentedImageWith(
-          imageId = IdState.Identified("c", createSourceIdentifier),
+        val schiacciataImage = createImageData.toIndexedImageWith(
+          canonicalId = "c",
           parentWork = identifiedWork()
             .title("Schiacciata is a Tuscan focaccia"),
           redirectedWork = Some(
@@ -142,19 +140,17 @@ class ImagesTest extends ApiImagesTestBase with SierraWorkGenerators {
     withImagesApi {
       case (defaultIndex, routes) =>
         withLocalImagesIndex { alternativeIndex =>
-          val defaultImage = createAugmentedImage()
-          val alternativeImage = createAugmentedImage()
+          val defaultImage = createImageData.toIndexedImage
+          val alternativeImage = createImageData.toIndexedImage
           insertImagesIntoElasticsearch(defaultIndex, defaultImage)
           insertImagesIntoElasticsearch(alternativeIndex, alternativeImage)
 
-          assertJsonResponse(
-            routes,
-            s"/$apiPrefix/images/${defaultImage.id.canonicalId}") {
+          assertJsonResponse(routes, s"/$apiPrefix/images/${defaultImage.id}") {
             Status.OK ->
               s"""
                  |{
                  |  $singleImageResult,
-                 |  "id": "${defaultImage.id.canonicalId}",
+                 |  "id": "${defaultImage.id}",
                  |  "locations": [${locations(defaultImage.locations)}],
                  |  "source": ${imageSource(defaultImage.source)}
                  }""".stripMargin
@@ -162,12 +158,12 @@ class ImagesTest extends ApiImagesTestBase with SierraWorkGenerators {
 
           assertJsonResponse(
             routes,
-            s"/$apiPrefix/images/${alternativeImage.id.canonicalId}?_index=${alternativeIndex.name}") {
+            s"/$apiPrefix/images/${alternativeImage.id}?_index=${alternativeIndex.name}") {
             Status.OK ->
               s"""
                  |{
                  |  $singleImageResult,
-                 |  "id": "${alternativeImage.id.canonicalId}",
+                 |  "id": "${alternativeImage.id}",
                  |  "locations": [${locations(alternativeImage.locations)}],
                  |  "source": ${imageSource(alternativeImage.source)}
                  }""".stripMargin

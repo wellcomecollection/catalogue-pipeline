@@ -13,10 +13,6 @@ trait WorksIndexConfigFields extends IndexConfigFields {
   import WorksAnalysis._
 
   // Fields
-  def sourceIdentifier =
-    objectField("sourceIdentifier")
-      .fields(sourceIdentifierFields)
-
   def otherIdentifiers =
     objectField("otherIdentifiers")
       .fields(sourceIdentifierFields)
@@ -129,11 +125,13 @@ trait WorksIndexConfigFields extends IndexConfigFields {
     keywordField("reason")
   )
 
-  def images(idState: ObjectField) = objectField("images").fields(
-    idState,
-    location("locations"),
-    version
-  )
+  def imageData(idState: ObjectField) =
+    objectField("imageData")
+      .fields(
+        idState,
+        location("locations"),
+        version
+      )
 
   def analyzedPath: TextField =
     textField("path")
@@ -141,7 +139,7 @@ trait WorksIndexConfigFields extends IndexConfigFields {
       .analyzer(pathAnalyzer.name)
       .fields(keywordField("keyword"))
 
-  def data(pathField: TextField, idState: ObjectField): ObjectField =
+  def data(pathField: TextField, idState: ObjectField = id()): ObjectField =
     objectField("data").fields(
       otherIdentifiers,
       mergeCandidates,
@@ -163,7 +161,7 @@ trait WorksIndexConfigFields extends IndexConfigFields {
       notes,
       intField("duration"),
       collectionPath(pathField),
-      images(idState),
+      imageData(idState),
       keywordField("workType")
     )
 
@@ -194,7 +192,7 @@ trait WorksIndexConfigFields extends IndexConfigFields {
       relation("siblingsSucceeding", idState),
     )
 
-  def derivedData = objectField("derivedData").fields(
+  val derivedWorkData = objectField("derivedData").fields(
     booleanField("availableOnline")
   )
 }
@@ -253,7 +251,7 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
     sourceIdentifier,
     modifiedTime,
     relations(id("id")),
-    derivedData
+    derivedWorkData
   )
 
   val dynamicMapping = DynamicMapping.Strict
@@ -264,7 +262,7 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
       version,
       id("redirect"),
       keywordField("type"),
-      data(analyzedPath, id("id")),
+      data(pathField = analyzedPath),
       objectField("invisibilityReasons").fields(
         keywordField("type"),
         keywordField("info")
