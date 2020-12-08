@@ -23,7 +23,7 @@ class SierraBibMergerWorkerService[Destination](
       key <- sierraBibMergerUpdaterService.update(bibRecord).toTry
       _ <- key match {
         case Some(k) => messageSender.sendT(k)
-        case _ => Success(())
+        case _       => Success(())
       }
     } yield ())
 

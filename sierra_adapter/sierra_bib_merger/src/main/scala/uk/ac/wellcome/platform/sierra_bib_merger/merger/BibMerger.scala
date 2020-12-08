@@ -10,8 +10,9 @@ object BibMerger {
   /** Return the most up-to-date combination of the merged record and the
     * bib record we've just received.
     */
-  def mergeBibRecord(sierraTransformable: SierraTransformable,
-                     sierraBibRecord: SierraBibRecord): Option[SierraTransformable] = {
+  def mergeBibRecord(
+    sierraTransformable: SierraTransformable,
+    sierraBibRecord: SierraBibRecord): Option[SierraTransformable] = {
     if (sierraBibRecord.id != sierraTransformable.sierraId) {
       throw new RuntimeException(
         s"Non-matching bib ids ${sierraBibRecord.id} != ${sierraTransformable.sierraId}")

@@ -143,7 +143,6 @@ class SierraBibMergerFeatureTest
             sendNotificationToSQS(queue = queue, message = newBibRecord)
           }
 
-
           val expectedTransformable =
             SierraTransformable(bibRecord = newBibRecord)
 
@@ -171,23 +170,24 @@ class SierraBibMergerFeatureTest
     val key = Version(expectedTransformable.sierraId.withoutCheckDigit, 0)
     val store =
       createStore[SierraTransformable](Map(key -> expectedTransformable))
-    withLocalSqsQueuePair() { case QueuePair(queue, dlq) =>
-      withWorkerService(store, queue) {
-        case (_, messageSender) =>
-          val oldBibRecord = createSierraBibRecordWith(
-            id = newBibRecord.id,
-            modifiedDate = olderDate
-          )
+    withLocalSqsQueuePair() {
+      case QueuePair(queue, dlq) =>
+        withWorkerService(store, queue) {
+          case (_, messageSender) =>
+            val oldBibRecord = createSierraBibRecordWith(
+              id = newBibRecord.id,
+              modifiedDate = olderDate
+            )
 
-          sendNotificationToSQS(queue = queue, message = oldBibRecord)
+            sendNotificationToSQS(queue = queue, message = oldBibRecord)
 
-          eventually {
-            assertQueueEmpty(queue)
-            assertQueueEmpty(dlq)
+            eventually {
+              assertQueueEmpty(queue)
+              assertQueueEmpty(dlq)
 
-            messageSender.messages shouldBe empty
-          }
-      }
+              messageSender.messages shouldBe empty
+            }
+        }
     }
   }
 
