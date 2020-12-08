@@ -6,7 +6,11 @@ import com.typesafe.config.Config
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.pipeline_storage.Indexable.workIndexable
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
-import uk.ac.wellcome.pipeline_storage.typesafe.{ElasticIndexerBuilder, ElasticRetrieverBuilder, PipelineStorageStreamBuilder}
+import uk.ac.wellcome.pipeline_storage.typesafe.{
+  ElasticIndexerBuilder,
+  ElasticRetrieverBuilder,
+  PipelineStorageStreamBuilder
+}
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.elasticsearch.IndexedWorkIndexConfig
 import uk.ac.wellcome.messaging.sns.NotificationMessage
@@ -35,7 +39,11 @@ object Main extends WellcomeTypesafeApp {
     )
     val messageSender = SNSBuilder
       .buildSNSMessageSender(config, subject = "Sent from the ingestor-works")
-    val pipelineStream = PipelineStorageStreamBuilder.buildPipelineStorageStream(denormalisedWorkStream, workIndexer, messageSender)(config)
+    val pipelineStream =
+      PipelineStorageStreamBuilder.buildPipelineStorageStream(
+        denormalisedWorkStream,
+        workIndexer,
+        messageSender)(config)
 
     new WorkIngestorWorkerService(
       pipelineStream = pipelineStream,

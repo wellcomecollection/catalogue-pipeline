@@ -13,7 +13,9 @@ import uk.ac.wellcome.typesafe.Runnable
 import scala.concurrent.{ExecutionContext, Future}
 
 class WorkIngestorWorkerService[Destination](
-  pipelineStream: PipelineStorageStream[NotificationMessage, Work[Indexed], Destination],
+  pipelineStream: PipelineStorageStream[NotificationMessage,
+                                        Work[Indexed],
+                                        Destination],
   workRetriever: Retriever[Work[Denormalised]],
   transformBeforeIndex: Work[Denormalised] => Work[Indexed] =
     WorkTransformer.deriveData,
@@ -27,10 +29,11 @@ class WorkIngestorWorkerService[Destination](
   def run(): Future[Done] =
     pipelineStream.foreach(this.getClass.getSimpleName, processMessage)
 
-  private def processMessage(message: NotificationMessage): Future[Option[Work[Indexed]]] = {
+  private def processMessage(
+    message: NotificationMessage): Future[Option[Work[Indexed]]] = {
     for {
-     denormalisedWork <- workRetriever.apply(message.body)
+      denormalisedWork <- workRetriever.apply(message.body)
       indexedWork = transformBeforeIndex(denormalisedWork)
-    } yield( Some(indexedWork))
+    } yield (Some(indexedWork))
   }
 }
