@@ -5,76 +5,70 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
 import uk.ac.wellcome.storage.{Identified, Version}
 import uk.ac.wellcome.mets_adapter.models.MetsSourceData
-import java.time.Instant
 
-class MetsStoreTest extends AnyFunSpec with Matchers {
+import uk.ac.wellcome.mets_adapter.generators.MetsSourceDataGenerators
 
-  it("should store new METS data") {
-    val createdDate = Instant.now
-    val internalStore = createInternalStore()
-    val store = new MetsStore(internalStore)
-    store.storeData(Version("001", 1), metsSourceData("NEW", createdDate)) shouldBe Right(
-      Version("001", 1))
-    internalStore.getLatest("001") shouldBe Right(
-      Identified(Version("001", 1), metsSourceData("NEW", createdDate))
+class MetsStoreTest extends AnyFunSpec with Matchers with MetsSourceDataGenerators {
+
+  it("stores new METS data") {
+    val id = Version("b1234", version = 1)
+    val data = createMetsSourceData
+
+    val internalStore = MemoryVersionedStore[String, MetsSourceData](
+      initialEntries = Map.empty
     )
+    val store = new MetsStore(internalStore)
+
+    store.storeData(id, data) shouldBe Right(id)
+    internalStore.getLatest(id.id) shouldBe Right(Identified(id, data))
   }
 
-  it("should update METS data when newer version") {
-    val createdDate = Instant.now
-    val internalStore =
-      createInternalStore(Version("001", 1) -> (("OLD", createdDate)))
-    val store = new MetsStore(internalStore)
-    store.storeData(
-      Version("001", 2),
-      metsSourceData(file = "NEW", createdDate = createdDate)) shouldBe Right(
-      Version("001", 2))
-    internalStore.getLatest("001") shouldBe Right(
-      Identified(Version("001", 2), metsSourceData("NEW", createdDate))
+  it("updates the METS data when it gets a newer version") {
+    val id = "b1234"
+
+    val oldId = Version(id, version = 1)
+    val newId = Version(id, version = 2)
+
+    val oldData = createMetsSourceDataWith(createdDate = olderDate)
+    val newData = createMetsSourceDataWith(createdDate = newerDate)
+
+    val internalStore = MemoryVersionedStore[String, MetsSourceData](
+      initialEntries = Map(oldId -> oldData)
     )
+    val store = new MetsStore(internalStore)
+
+    store.storeData(newId, newData) shouldBe Right(newId)
+    internalStore.getLatest(id) shouldBe Right(Identified(newId, newData))
   }
 
-  it("should not update METS data when current version") {
-    val createdDate = Instant.now
-    val internalStore =
-      createInternalStore(Version("001", 1) -> (("OLD", createdDate)))
-    val store = new MetsStore(internalStore)
-    store.storeData(Version("001", 1), metsSourceData("NEW", Instant.now)) shouldBe Right(
-      Version("001", 1))
-    internalStore.getLatest("001") shouldBe Right(
-      Identified(Version("001", 1), metsSourceData("OLD", createdDate))
+  it("doesn't update the METS data if it's already up-to-date") {
+    val id = Version("b1234", version = 1)
+    val data = createMetsSourceData
+
+    val internalStore = MemoryVersionedStore[String, MetsSourceData](
+      initialEntries = Map(id -> data)
     )
+    val store = new MetsStore(internalStore)
+
+    store.storeData(id, data) shouldBe Right(id)
+    internalStore.getLatest(id.id) shouldBe Right(Identified(id, data))
   }
 
-  it("should error when inserting older version") {
-    val createdDate = Instant.now
-    val internalStore =
-      createInternalStore(Version("001", 2) -> (("NEW", createdDate)))
+  it("errors if you try to insert an older version") {
+    val id = "b1234"
+
+    val oldId = Version(id, version = 1)
+    val newId = Version(id, version = 2)
+
+    val oldData = createMetsSourceDataWith(createdDate = olderDate)
+    val newData = createMetsSourceDataWith(createdDate = newerDate)
+
+    val internalStore = MemoryVersionedStore[String, MetsSourceData](
+      initialEntries = Map(newId -> newData)
+    )
     val store = new MetsStore(internalStore)
-    store.storeData(Version("001", 1), metsSourceData("NEW", createdDate)) shouldBe a[
-      Left[_, _]]
-    internalStore.getLatest("001") shouldBe Right(
-      Identified(Version("001", 2), metsSourceData("NEW", createdDate))
-    )
+
+    store.storeData(oldId, oldData) shouldBe a[Left[_, _]]
+    internalStore.getLatest(id) shouldBe Right(Identified(newId, newData))
   }
-
-  def createInternalStore(data: (Version[String, Int], (String, Instant))*) =
-    MemoryVersionedStore[String, MetsSourceData](
-      Map(
-        data.map {
-          case (version, (file, createdDate)) =>
-            (version, metsSourceData(file, createdDate = createdDate))
-        }: _*
-      )
-    )
-
-  def metsSourceData(file: String, createdDate: Instant, version: Int = 1) =
-    MetsSourceData(
-      bucket = "bucket",
-      path = "path",
-      version = version,
-      file = file,
-      createdDate = createdDate,
-      deleted = false,
-      manifestations = Nil)
 }
