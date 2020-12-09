@@ -20,28 +20,28 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import java.time.Instant
 
+import uk.ac.wellcome.mets_adapter.generators.MetsSourceDataGenerators
+
 class MetsAdapterWorkerServiceTest
     extends AnyFunSpec
     with Matchers
     with Akka
     with SQS
     with Eventually
-    with IntegrationPatience {
+    with IntegrationPatience
+    with MetsSourceDataGenerators {
 
   val bag = Bag(
-    BagInfo("external-identifier"),
-    BagManifest(
+    info = BagInfo("external-identifier"),
+    manifest = BagManifest(
       List(
         BagFile("data/b30246039.xml", "mets.xml"),
         BagFile("objects/blahbluhblih.jp2", "blahbluhblih.jp2")
       )
     ),
-    BagLocation(
-      path = "root",
-      bucket = "bucket",
-    ),
-    "v1",
-    Instant.now
+    location = BagLocation(path = "root", bucket = "bucket"),
+    version = "v1",
+    createdDate = Instant.now
   )
 
   val bagRetriever =
@@ -53,16 +53,26 @@ class MetsAdapterWorkerServiceTest
   val space = "digitised"
   val externalIdentifier = "123"
   val notification: BagRegistrationNotification =
-    createBagRegistrationNotificationWith(
+    BagRegistrationNotification(
       space = space,
       externalIdentifier = externalIdentifier
     )
 
   val expectedVersion = Version(externalIdentifier, version = 1)
 
+  val expectedData: MetsSourceData = createMetsSourceDataWith(
+    bucket = bag.location.bucket,
+    path = bag.location.path,
+    file = "mets.xml",
+    createdDate = bag.createdDate
+  )
+
   it("processes ingest updates and store and publish METS data") {
-    val vhs = createStore()
-    withWorkerService(bagRetriever, vhs) {
+    val store = MemoryVersionedStore[String, MetsSourceData](
+      initialEntries = Map.empty
+    )
+
+    withWorkerService(bagRetriever, store) {
       case (_, QueuePair(queue, dlq), messageSender) =>
         sendNotificationToSQS(queue, notification)
 
@@ -73,19 +83,20 @@ class MetsAdapterWorkerServiceTest
           messageSender.getMessages[Version[String, Int]]() shouldBe Seq(
             expectedVersion)
 
-          vhs.getLatest(id = externalIdentifier) shouldBe Right(
-            Identified(
-              expectedVersion,
-              metsSourceData("mets.xml", createdDate = bag.createdDate))
+          store.getLatest(id = externalIdentifier) shouldBe Right(
+            Identified(expectedVersion, expectedData)
           )
         }
     }
   }
 
   it("publishes new METS data when old version exists in the store") {
-    val vhs = createStore(
-      Map(Version(externalIdentifier, 0) -> (("old-data", Instant.now))))
-    withWorkerService(bagRetriever, vhs) {
+    val store = MemoryVersionedStore[String, MetsSourceData](
+      initialEntries =
+        Map(Version(externalIdentifier, 0) -> createMetsSourceData)
+    )
+
+    withWorkerService(bagRetriever, store) {
       case (_, QueuePair(queue, dlq), messageSender) =>
         sendNotificationToSQS(queue, notification)
         Thread.sleep(2000)
@@ -95,20 +106,20 @@ class MetsAdapterWorkerServiceTest
         messageSender.getMessages[Version[String, Int]]() shouldBe Seq(
           expectedVersion)
 
-        vhs.getLatest(id = externalIdentifier) shouldBe Right(
-          Identified(
-            expectedVersion,
-            metsSourceData("mets.xml", createdDate = bag.createdDate))
+        store.getLatest(id = externalIdentifier) shouldBe Right(
+          Identified(expectedVersion, expectedData)
         )
     }
   }
 
   it("re-publishes existing data when current version exists in the store") {
-    val createdDate = Instant.now
-    val vhs =
-      createStore(
-        Map(Version(externalIdentifier, 1) -> (("existing-data", createdDate))))
-    withWorkerService(bagRetriever, vhs) {
+    val existingData = createMetsSourceData
+
+    val store = MemoryVersionedStore[String, MetsSourceData](
+      initialEntries = Map(Version(externalIdentifier, 1) -> existingData)
+    )
+
+    withWorkerService(bagRetriever, store) {
       case (_, QueuePair(queue, dlq), messageSender) =>
         sendNotificationToSQS(queue, notification)
         assertQueueEmpty(queue)
@@ -117,20 +128,20 @@ class MetsAdapterWorkerServiceTest
         messageSender.getMessages[Version[String, Int]]() shouldBe Seq(
           expectedVersion)
 
-        vhs.getLatest(id = externalIdentifier) shouldBe Right(
-          Identified(
-            expectedVersion,
-            metsSourceData("existing-data", createdDate))
+        store.getLatest(id = externalIdentifier) shouldBe Right(
+          Identified(expectedVersion, existingData)
         )
     }
   }
 
-  it("ignores messages when greater version exists in the store") {
-    val createdDate = Instant.now
-    val vhs =
-      createStore(
-        Map(Version(externalIdentifier, 2) -> (("existing-data", createdDate))))
-    withWorkerService(bagRetriever, vhs) {
+  it("ignores messages when a newer version exists in the store") {
+    val existingData = createMetsSourceData
+
+    val store = MemoryVersionedStore[String, MetsSourceData](
+      initialEntries = Map(Version(externalIdentifier, 2) -> existingData)
+    )
+
+    withWorkerService(bagRetriever, store) {
       case (_, QueuePair(queue, dlq), messageSender) =>
         sendNotificationToSQS(queue, notification)
         Thread.sleep(2000)
@@ -139,16 +150,17 @@ class MetsAdapterWorkerServiceTest
 
         messageSender.messages shouldBe empty
 
-        vhs.getLatest(id = externalIdentifier) shouldBe Right(
-          Identified(
-            Version(externalIdentifier, 2),
-            metsSourceData("existing-data", createdDate))
+        store.getLatest(id = externalIdentifier) shouldBe Right(
+          Identified(Version(externalIdentifier, 2), existingData)
         )
     }
   }
 
-  it("should not store / publish anything when bag retrieval fails") {
-    val vhs = createStore()
+  it("does not store / publish anything when bag retrieval fails") {
+    val store = MemoryVersionedStore[String, MetsSourceData](
+      initialEntries = Map.empty
+    )
+
     val brokenBagRetriever = new BagRetriever {
       def getBag(space: String, externalIdentifier: String): Future[Bag] =
         Future.failed(new Exception("Failed retrieving bag"))
@@ -159,7 +171,7 @@ class MetsAdapterWorkerServiceTest
         Failure(new Throwable("BOOM!"))
     }
 
-    withWorkerService(brokenBagRetriever, vhs, brokenMessageSender) {
+    withWorkerService(brokenBagRetriever, store, brokenMessageSender) {
       case (_, QueuePair(queue, dlq), messageSender) =>
         sendNotificationToSQS(queue, notification)
         Thread.sleep(2000)
@@ -168,19 +180,21 @@ class MetsAdapterWorkerServiceTest
 
         messageSender.messages shouldBe empty
 
-        vhs.getLatest(id = externalIdentifier) shouldBe a[Left[_, _]]
+        store.getLatest(id = externalIdentifier) shouldBe a[Left[_, _]]
     }
   }
 
-  it("should store METS data if publishing fails") {
-    val vhs = createStore()
+  it("stores METS data if publishing fails") {
+    val store = MemoryVersionedStore[String, MetsSourceData](
+      initialEntries = Map.empty
+    )
 
     val brokenMessageSender = new MemoryMessageSender {
       override def sendT[T](t: T)(implicit encoder: Encoder[T]): Try[Unit] =
         Failure(new Throwable("BOOM!"))
     }
 
-    withWorkerService(bagRetriever, vhs, brokenMessageSender) {
+    withWorkerService(bagRetriever, store, brokenMessageSender) {
       case (_, QueuePair(queue, dlq), messageSender) =>
         sendNotificationToSQS(queue, notification)
         Thread.sleep(2000)
@@ -189,14 +203,13 @@ class MetsAdapterWorkerServiceTest
 
         messageSender.messages shouldBe empty
 
-        vhs.getLatest(id = externalIdentifier) shouldBe a[Right[_, _]]
+        store.getLatest(id = externalIdentifier) shouldBe a[Right[_, _]]
     }
   }
 
   it(
     "sends message to the dlq if message is not wrapped in NotificationMessage") {
-    val vhs = createStore()
-    withWorkerService(bagRetriever, vhs) {
+    withWorkerService(bagRetriever) {
       case (_, QueuePair(queue, dlq), messageSender) =>
         sendSqsMessage(queue, notification)
         Thread.sleep(2000)
@@ -208,26 +221,31 @@ class MetsAdapterWorkerServiceTest
   }
 
   it("doesn't process the update when storageSpace isn't equal to 'digitised'") {
-    val vhs = createStore()
+    val store = MemoryVersionedStore[String, MetsSourceData](
+      initialEntries = Map.empty
+    )
 
-    val notification = createBagRegistrationNotificationWith(
+    val notification = BagRegistrationNotification(
       space = "something-different",
       externalIdentifier = "123"
     )
 
-    withWorkerService(bagRetriever, vhs) {
+    withWorkerService(bagRetriever, store) {
       case (_, QueuePair(queue, dlq), messageSender) =>
         sendNotificationToSQS(queue, notification)
         Thread.sleep(2000)
         assertQueueEmpty(queue)
         assertQueueEmpty(dlq)
         messageSender.messages shouldBe empty
-        vhs.getLatest(id = externalIdentifier) shouldBe a[Left[_, _]]
+        store.getLatest(id = externalIdentifier) shouldBe a[Left[_, _]]
     }
   }
 
   def withWorkerService[R](bagRetriever: BagRetriever,
-                           store: VersionedStore[String, Int, MetsSourceData],
+                           store: VersionedStore[String, Int, MetsSourceData] =
+                             MemoryVersionedStore[String, MetsSourceData](
+                               initialEntries = Map.empty
+                             ),
                            messageSender: MemoryMessageSender =
                              new MemoryMessageSender())(
     testWith: TestWith[(MetsAdapterWorkerService[String],
@@ -249,27 +267,4 @@ class MetsAdapterWorkerServiceTest
           }
       }
     }
-
-  def createStore(
-    data: Map[Version[String, Int], (String, Instant)] = Map.empty) =
-    MemoryVersionedStore(data.mapValues {
-      case (file, createdDate) => metsSourceData(file, createdDate)
-    })
-
-  def metsSourceData(file: String, createdDate: Instant, version: Int = 1) =
-    MetsSourceData(
-      bucket = "bucket",
-      path = "root",
-      version = version,
-      file = file,
-      createdDate = createdDate,
-      deleted = false,
-      manifestations = Nil)
-
-  def createBagRegistrationNotificationWith(
-    space: String,
-    externalIdentifier: String): BagRegistrationNotification =
-    BagRegistrationNotification(
-      space = space,
-      externalIdentifier = externalIdentifier)
 }
