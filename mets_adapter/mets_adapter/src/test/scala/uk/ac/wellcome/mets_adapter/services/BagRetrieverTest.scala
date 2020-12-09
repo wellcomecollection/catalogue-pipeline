@@ -142,23 +142,18 @@ class BagRetrieverTest
   def withBagRetriever[R](testWith: TestWith[BagRetriever, R])(
     implicit actorSystem: ActorSystem): Unit =
     withBagsService("localhost") { port =>
-      withTokenService(
-        s"http://localhost:$port",
-        "client",
-        "secret",
-        "https://api.wellcomecollection.org/scope") { tokenService =>
-        testWith(
-          new HttpBagRetriever(
-            s"http://localhost:$port/storage/v1/bags",
-            tokenService)
-        )
-      }
-    }
+      val tokenService = new TokenService(
+        url = s"http://localhost:$port",
+        clientId = "client",
+        secret = "secret",
+        scope = "https://api.wellcomecollection.org/scope"
+      )
 
-  def withTokenService[R](url: String,
-                          clientId: String,
-                          secret: String,
-                          scope: String)(testWith: TestWith[TokenService, R])(
-    implicit actorSystem: ActorSystem): R =
-    testWith(new TokenService(url, clientId, secret, scope))
+      testWith(
+        new HttpBagRetriever(
+          baseUrl = s"http://localhost:$port/storage/v1/bags",
+          tokenService = tokenService
+        )
+      )
+    }
 }
