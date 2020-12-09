@@ -40,7 +40,7 @@ object Main extends WellcomeTypesafeApp {
   }
 
   private def buildMetsStore(config: Config)(
-    implicit dynamoClilent: AmazonDynamoDB): MetsStore =
+    implicit dynamoClient: AmazonDynamoDB): MetsStore =
     new MetsStore(
       new DynamoSingleVersionStore(
         DynamoBuilder.buildDynamoConfig(config, namespace = "mets")
