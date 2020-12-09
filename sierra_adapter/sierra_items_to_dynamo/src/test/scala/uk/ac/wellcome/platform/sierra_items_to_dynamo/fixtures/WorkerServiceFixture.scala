@@ -23,29 +23,25 @@ trait WorkerServiceFixture
   def withWorkerService[R](
     queue: Queue,
     store: VersionedStore[String, Int, SierraItemRecord],
-    metricsSender: Metrics[Future] = new MemoryMetrics())(
-    testWith: TestWith[(SierraItemsToDynamoWorkerService[String],
+    metricsSender: Metrics[Future] = new MemoryMetrics()
+  )(testWith: TestWith[(SierraItemsToDynamoWorkerService[String],
                         MemoryMessageSender),
                        R]): R =
     withActorSystem { implicit actorSystem =>
       withSQSStream[NotificationMessage, R](queue, metricsSender) { sqsStream =>
         withDynamoInserter(store) { dynamoInserter =>
-          withSNSMessageSender { snsWriter =>
-            val workerService = new SierraItemsToDynamoWorkerService[String](
-              sqsStream = sqsStream,
-              dynamoInserter = dynamoInserter,
-              messageSender = snsWriter
-            )
+          val messageSender = new MemoryMessageSender
 
-            workerService.run()
+          val workerService = new SierraItemsToDynamoWorkerService[String](
+            sqsStream = sqsStream,
+            dynamoInserter = dynamoInserter,
+            messageSender = messageSender
+          )
 
-            testWith((workerService, snsWriter))
-          }
+          workerService.run()
+
+          testWith((workerService, messageSender))
         }
       }
     }
-
-  def withSNSMessageSender[R](testWith: TestWith[MemoryMessageSender, R]): R = {
-    testWith(new MemoryMessageSender)
-  }
 }

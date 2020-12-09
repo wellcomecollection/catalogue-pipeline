@@ -40,10 +40,12 @@ class SierraItemsToDynamoWorkerServiceTest
       bibIds = bibIds2
     )
 
-    val expectedRecord = SierraItemRecordMerger.mergeItems(
-      existingRecord = record1,
-      updatedRecord = record2
-    )
+    val expectedRecord = SierraItemRecordMerger
+      .mergeItems(
+        existingRecord = record1,
+        updatedRecord = record2
+      )
+      .get
     val store =
       createStore(Map(Version(record1.id.withoutCheckDigit, 1) -> record1))
 
@@ -59,6 +61,60 @@ class SierraItemsToDynamoWorkerServiceTest
           )
         }
       }
+    }
+  }
+
+  it("only applies an update once, even if it's sent multiple times") {
+    val bibIds = createSierraBibNumbers(count = 5)
+
+    val bibIds1 = List(bibIds(0), bibIds(1), bibIds(2))
+
+    val record1 = createSierraItemRecordWith(
+      modifiedDate = olderDate,
+      bibIds = bibIds1
+    )
+
+    val bibIds2 = List(bibIds(2), bibIds(3), bibIds(4))
+
+    val record2 = createSierraItemRecordWith(
+      id = record1.id,
+      modifiedDate = newerDate,
+      bibIds = bibIds2
+    )
+
+    val expectedRecord = SierraItemRecordMerger
+      .mergeItems(
+        existingRecord = record1,
+        updatedRecord = record2
+      )
+      .get
+
+    val store =
+      createStore(Map(Version(record1.id.withoutCheckDigit, 1) -> record1))
+
+    withLocalSqsQueuePair() {
+      case QueuePair(queue, dlq) =>
+        withWorkerService(queue, store) {
+          case (_, messageSender) =>
+            (1 to 5).foreach { _ =>
+              sendNotificationToSQS(queue = queue, message = record2)
+            }
+
+            eventually {
+              assertQueueEmpty(queue)
+              assertQueueEmpty(dlq)
+
+              messageSender.getMessages[Version[String, Int]]() shouldBe List(
+                Version(record1.id.withoutCheckDigit, 2)
+              )
+
+              assertStored[SierraItemRecord](
+                record1.id.withoutCheckDigit,
+                expectedRecord,
+                store
+              )
+            }
+        }
     }
   }
 
@@ -85,5 +141,4 @@ class SierraItemsToDynamoWorkerServiceTest
         }
     }
   }
-
 }

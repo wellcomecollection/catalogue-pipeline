@@ -7,7 +7,7 @@ import uk.ac.wellcome.sierra_adapter.model.{SierraGenerators, SierraItemRecord}
 import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
 import uk.ac.wellcome.storage.maxima.memory.MemoryMaxima
 import uk.ac.wellcome.storage.store.memory.{MemoryStore, MemoryVersionedStore}
-import uk.ac.wellcome.storage.{UpdateNotApplied, Version}
+import uk.ac.wellcome.storage.{StoreWriteError, UpdateWriteError, Version}
 
 class DynamoInserterTest
     extends AnyFunSpec
@@ -171,7 +171,7 @@ class DynamoInserterTest
       with MemoryMaxima[String, SierraItemRecord]) {
       override def upsert(id: String)(t: SierraItemRecord)(
         f: UpdateFunction): UpdateEither = {
-        Left(UpdateNotApplied(exception))
+        Left(UpdateWriteError(StoreWriteError(exception)))
       }
     }
 
