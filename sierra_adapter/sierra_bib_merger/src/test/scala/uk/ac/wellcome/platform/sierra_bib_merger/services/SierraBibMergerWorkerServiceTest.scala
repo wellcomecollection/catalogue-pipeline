@@ -20,8 +20,7 @@ class SierraBibMergerWorkerServiceTest
     with Eventually
     with IntegrationPatience {
 
-  it(
-    "records a failure if the message on the queue does not represent a SierraRecord") {
+  it("records a failure if the message isn't a SierraRecord") {
     withWorkerServiceFixtures {
       case (metrics, QueuePair(queue, dlq)) =>
         sendNotificationToSQS(
