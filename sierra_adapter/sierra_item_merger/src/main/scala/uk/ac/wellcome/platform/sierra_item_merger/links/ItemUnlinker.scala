@@ -7,8 +7,9 @@ import uk.ac.wellcome.sierra_adapter.model.{
 
 object ItemUnlinker {
 
-  def unlinkItemRecord(sierraTransformable: SierraTransformable,
-                       itemRecord: SierraItemRecord): SierraTransformable = {
+  def unlinkItemRecord(
+    sierraTransformable: SierraTransformable,
+    itemRecord: SierraItemRecord): Option[SierraTransformable] = {
     if (!itemRecord.unlinkedBibIds.contains(sierraTransformable.sierraId)) {
       throw new RuntimeException(
         s"Non-matching bib id ${sierraTransformable.sierraId} in item unlink bibs ${itemRecord.unlinkedBibIds}")
@@ -27,6 +28,10 @@ object ItemUnlinker {
             matchesCurrentItemRecord && modifiedAfter
         }
 
-    sierraTransformable.copy(itemRecords = itemRecords)
+    if (sierraTransformable.itemRecords != itemRecords) {
+      Some(sierraTransformable.copy(itemRecords = itemRecords))
+    } else {
+      None
+    }
   }
 }

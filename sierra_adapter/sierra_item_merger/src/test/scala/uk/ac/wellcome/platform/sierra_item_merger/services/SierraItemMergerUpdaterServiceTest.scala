@@ -6,7 +6,7 @@ import uk.ac.wellcome.sierra_adapter.model.{
   SierraGenerators,
   SierraTransformable
 }
-import uk.ac.wellcome.storage.{UpdateNotApplied, Version}
+import uk.ac.wellcome.storage.{StoreWriteError, UpdateWriteError, Version}
 import uk.ac.wellcome.storage.maxima.memory.MemoryMaxima
 import uk.ac.wellcome.storage.store.memory.{MemoryStore, MemoryVersionedStore}
 
@@ -44,79 +44,62 @@ class SierraItemMergerUpdaterServiceTest
     }
   }
 
-  it("updates multiple merged records if the item contains multiple bibIds") {
-    val bibIdNotExisting = createSierraBibNumber
-    val bibIdWithNewerData = createSierraBibNumber
-    val bibIdWithOldData = createSierraBibNumber
-    val bibIds = List(
-      bibIdNotExisting,
-      bibIdWithOldData,
-      bibIdWithNewerData
-    )
+  it("only updates records that have changed") {
+    val bibId1 = createSierraBibNumber // doesn't exist yet
+    val bibId2 = createSierraBibNumber // exists, not linked to the item
+    val bibId3 = createSierraBibNumber // exists, linked to the item
 
-    val itemRecord = createSierraItemRecordWith(
-      bibIds = bibIds
-    )
+    val bibIds = List(bibId1, bibId3, bibId2)
 
-    val otherItemRecord = createSierraItemRecordWith(
-      bibIds = bibIds
-    )
-    val oldTransformable = createSierraTransformableWith(
-      sierraId = bibIdWithOldData,
-      maybeBibRecord = None,
-      itemRecords = List(itemRecord, otherItemRecord)
-    )
-    val anotherItemRecord = createSierraItemRecordWith(
-      bibIds = bibIds
-    )
+    val itemRecord = createSierraItemRecordWith(bibIds = bibIds)
 
-    val newTransformable = createSierraTransformableWith(
-      sierraId = bibIdWithNewerData,
-      maybeBibRecord = None,
-      itemRecords = List(itemRecord, anotherItemRecord)
-    )
+    val transformable2 =
+      createSierraTransformableWith(sierraId = bibId2, itemRecords = List.empty)
+
+    val transformable3 =
+      createSierraTransformableWith(
+        sierraId = bibId3,
+        itemRecords = List(itemRecord))
 
     val sierraTransformableStore = createStore[SierraTransformable](
       Map(
-        Version(bibIdWithOldData.withoutCheckDigit, 0) -> oldTransformable,
-        Version(bibIdWithNewerData.withoutCheckDigit, 0) -> newTransformable))
+        Version(bibId2.withoutCheckDigit, 0) -> transformable2,
+        Version(bibId3.withoutCheckDigit, 0) -> transformable3))
 
     withSierraUpdaterService(sierraTransformableStore) { sierraUpdaterService =>
-      val expectedNewSierraTransformable =
+      val expectedTransformable1 =
         createSierraTransformableWith(
-          sierraId = bibIdNotExisting,
+          sierraId = bibId1,
           maybeBibRecord = None,
           itemRecords = List(itemRecord)
         )
 
-      val expectedUpdatedSierraTransformable =
-        createSierraTransformableWith(
-          sierraId = oldTransformable.sierraId,
-          maybeBibRecord = None,
-          itemRecords = List(itemRecord, otherItemRecord)
-        )
+      val expectedTransformable2 =
+        transformable2.copy(itemRecords = Map(itemRecord.id -> itemRecord))
+
+      val expectedTransformable3 =
+        transformable3.copy(itemRecords = Map(itemRecord.id -> itemRecord))
 
       val result = sierraUpdaterService.update(itemRecord)
 
       result shouldBe a[Right[_, _]]
-      result.right.get should contain theSameElementsAs (List(
-        Version(bibIdNotExisting.withoutCheckDigit, 0),
-        Version(bibIdWithOldData.withoutCheckDigit, 1),
-        Version(bibIdWithNewerData.withoutCheckDigit, 1)))
+      result.right.get should contain theSameElementsAs List(
+        Version(bibId1.withoutCheckDigit, 0),
+        Version(bibId2.withoutCheckDigit, 1))
 
       assertStored(
-        expectedNewSierraTransformable.sierraId.withoutCheckDigit,
-        expectedNewSierraTransformable,
+        bibId1.withoutCheckDigit,
+        expectedTransformable1,
         sierraTransformableStore
       )
       assertStored(
-        expectedUpdatedSierraTransformable.sierraId.withoutCheckDigit,
-        expectedUpdatedSierraTransformable,
+        bibId2.withoutCheckDigit,
+        expectedTransformable2,
         sierraTransformableStore
       )
       assertStored(
-        newTransformable.sierraId.withoutCheckDigit,
-        newTransformable,
+        bibId3.withoutCheckDigit,
+        expectedTransformable3,
         sierraTransformableStore
       )
     }
@@ -288,28 +271,27 @@ class SierraItemMergerUpdaterServiceTest
     }
   }
 
-  it("does not unlink an item if it receives an out of date unlink update") {
-    val bibId1 = createSierraBibNumber
-    val bibId2 = createSierraBibNumber
+  it("does not unlink an item if it receives an outdated unlink update") {
+    val bibId1 = createSierraBibNumber // linked to the item
+    val bibId2 = createSierraBibNumber // not linked to the item
 
     val itemRecord = createSierraItemRecordWith(
       bibIds = List(bibId1)
     )
 
-    val sierraTransformable1 = createSierraTransformableWith(
-      sierraId = bibId1,
-      maybeBibRecord = None,
-      itemRecords = List(itemRecord)
-    )
+    val sierraTransformable1 =
+      createSierraTransformableWith(
+        sierraId = bibId1,
+        itemRecords = List(itemRecord))
 
-    val sierraTransformable2 = createSierraTransformableWith(
-      sierraId = bibId2,
-      maybeBibRecord = None
-    )
+    val sierraTransformable2 =
+      createSierraTransformableWith(sierraId = bibId2)
+
     val sierraTransformableStore = createStore[SierraTransformable](
       Map(
         Version(bibId1.withoutCheckDigit, 0) -> sierraTransformable1,
         Version(bibId2.withoutCheckDigit, 0) -> sierraTransformable2))
+
     withSierraUpdaterService(sierraTransformableStore) { sierraUpdaterService =>
       val unlinkItemRecord = itemRecord.copy(
         bibIds = List(bibId2),
@@ -335,9 +317,8 @@ class SierraItemMergerUpdaterServiceTest
 
       val result = sierraUpdaterService.update(unlinkItemRecord)
       result shouldBe a[Right[_, _]]
-      result.right.get should contain theSameElementsAs (List(
-        Version(bibId1.withoutCheckDigit, 1),
-        Version(bibId2.withoutCheckDigit, 1)))
+      result.right.get should contain theSameElementsAs List(
+        Version(bibId2.withoutCheckDigit, 1))
 
       assertStored(
         bibId1.withoutCheckDigit,
@@ -374,8 +355,7 @@ class SierraItemMergerUpdaterServiceTest
 
       val result = sierraUpdaterService.update(oldItemRecord)
       result shouldBe a[Right[_, _]]
-      result.right.get should contain theSameElementsAs (List(
-        Version(bibId.withoutCheckDigit, 1)))
+      result.right.get shouldBe empty
 
       assertStored(
         bibId.withoutCheckDigit,
@@ -423,7 +403,7 @@ class SierraItemMergerUpdaterServiceTest
       with MemoryMaxima[String, SierraTransformable]) {
       override def upsert(id: String)(t: SierraTransformable)(
         f: UpdateFunction): UpdateEither = {
-        Left(UpdateNotApplied(exception))
+        Left(UpdateWriteError(StoreWriteError(exception)))
       }
     }
     withSierraUpdaterService(failingStore) { brokenService =>
@@ -440,7 +420,7 @@ class SierraItemMergerUpdaterServiceTest
       new MemoryStore(Map[Version[String, Int], SierraTransformable]())
       with MemoryMaxima[String, SierraTransformable]) {
       override def update(id: String)(f: UpdateFunction): UpdateEither = {
-        Left(UpdateNotApplied(exception))
+        Left(UpdateWriteError(StoreWriteError(exception)))
       }
     }
     withSierraUpdaterService(failingStore) { brokenService =>
