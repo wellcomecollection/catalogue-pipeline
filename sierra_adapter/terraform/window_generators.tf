@@ -3,7 +3,7 @@ module "bibs_window_generator" {
 
   resource_type = "bibs"
 
-  window_length_minutes    = 16
+  window_length_minutes    = 10
   trigger_interval_minutes = 7
 
   lambda_error_alarm_arn = local.lambda_error_alarm_arn
@@ -15,7 +15,7 @@ module "items_window_generator" {
 
   resource_type = "items"
 
-  window_length_minutes    = 31
+  window_length_minutes    = 20
   trigger_interval_minutes = 15
 
   lambda_error_alarm_arn = local.lambda_error_alarm_arn

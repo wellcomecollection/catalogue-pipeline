@@ -13,3 +13,19 @@ variable "deployment_env" {}
 variable "shared_logging_secrets" {
   type = map
 }
+
+variable "sierra_reader_image" {
+  type = string
+}
+
+variable "sierra_bib_merger_image" {
+  type = string
+}
+
+variable "sierra_item_merger_image" {
+  type = string
+}
+
+variable "sierra_items_to_dynamo_image" {
+  type = string
+}
