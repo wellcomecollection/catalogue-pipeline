@@ -16,6 +16,7 @@ import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
+import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.pipeline_storage.typesafe.{
   ElasticIndexerBuilder,
   ElasticRetrieverBuilder,
@@ -44,8 +45,11 @@ object Main extends WellcomeTypesafeApp {
       )
     )
 
+    val esClient = ElasticBuilder.buildElasticClient(config)
+
     val workIndexer = ElasticIndexerBuilder[Work[Identified]](
       config,
+      esClient,
       namespace = "identified-works",
       indexConfig = IdentifiedWorkIndexConfig
     )
@@ -60,8 +64,10 @@ object Main extends WellcomeTypesafeApp {
         messageSender)(config)
     new IdMinterWorkerService(
       identifierGenerator = identifierGenerator,
-      jsonRetriever =
-        ElasticRetrieverBuilder[Json](config, namespace = "merged-works"),
+      jsonRetriever = ElasticRetrieverBuilder[Json](
+        config,
+        esClient,
+        namespace = "merged-works"),
       pipelineStream = pipelineStream,
       rdsClientConfig = RDSBuilder.buildRDSClientConfig(config),
       identifiersTableConfig = identifiersTableConfig

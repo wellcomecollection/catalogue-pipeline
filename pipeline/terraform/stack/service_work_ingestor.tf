@@ -31,11 +31,17 @@ module "ingestor_works" {
   }
 
   secret_env_vars = {
-    es_host     = "catalogue/ingestor/es_host"
-    es_port     = "catalogue/ingestor/es_port"
-    es_username = "catalogue/ingestor/es_username"
-    es_password = "catalogue/ingestor/es_password"
-    es_protocol = "catalogue/ingestor/es_protocol"
+    es_host_catalogue     = "catalogue/ingestor/es_host"
+    es_port_catalogue     = "catalogue/ingestor/es_port"
+    es_username_catalogue = "catalogue/ingestor/es_username"
+    es_password_catalogue = "catalogue/ingestor/es_password"
+    es_protocol_catalogue = "catalogue/ingestor/es_protocol"
+
+    es_host_pipeline_storage     = "catalogue/pipeline_storage/es_host"
+    es_port_pipeline_storage     = "catalogue/pipeline_storage/es_port"
+    es_username_pipeline_storage = "catalogue/pipeline_storage/es_username"
+    es_password_pipeline_storage = "catalogue/pipeline_storage/es_password"
+    es_protocol_pipeline_storage = "catalogue/pipeline_storage/es_protocol"
   }
 
 

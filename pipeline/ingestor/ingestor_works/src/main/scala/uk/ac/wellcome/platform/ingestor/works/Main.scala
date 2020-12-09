@@ -6,6 +6,7 @@ import com.typesafe.config.Config
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.pipeline_storage.Indexable.workIndexable
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
+import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.pipeline_storage.typesafe.{
   ElasticIndexerBuilder,
   ElasticRetrieverBuilder,
@@ -30,10 +31,12 @@ object Main extends WellcomeTypesafeApp {
 
     val workRetriever = ElasticRetrieverBuilder[Work[Denormalised]](
       config,
+      ElasticBuilder.buildElasticClient(config, namespace = "pipeline_storage"),
       namespace = "denormalised-works")
 
     val workIndexer = ElasticIndexerBuilder[Work[Indexed]](
       config,
+      ElasticBuilder.buildElasticClient(config, namespace = "catalogue"),
       namespace = "indexed-works",
       indexConfig = IndexedWorkIndexConfig
     )

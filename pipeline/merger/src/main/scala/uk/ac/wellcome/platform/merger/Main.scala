@@ -9,6 +9,7 @@ import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal.WorkState.{Merged, Source}
 import uk.ac.wellcome.models.work.internal._
+import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.pipeline_storage.typesafe.{
   ElasticIndexerBuilder,
   ElasticRetrieverBuilder
@@ -26,9 +27,12 @@ object Main extends WellcomeTypesafeApp {
     implicit val executionContext: ExecutionContext =
       AkkaBuilder.buildExecutionContext()
 
+    val esClient = ElasticBuilder.buildElasticClient(config)
+
     val sourceWorkLookup = new SourceWorkLookup(
       retriever = ElasticRetrieverBuilder.apply[Work[Source]](
         config,
+        esClient,
         namespace = "source-works"
       )
     )
@@ -50,6 +54,7 @@ object Main extends WellcomeTypesafeApp {
 
     val workIndexer = ElasticIndexerBuilder[Work[Merged]](
       config,
+      esClient,
       namespace = "merged-works",
       indexConfig = MergedWorkIndexConfig
     )

@@ -9,6 +9,7 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.models.work.internal.Work
 import uk.ac.wellcome.models.work.internal.WorkState.Source
+import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.pipeline_storage.typesafe.{
   ElasticIndexerBuilder,
   PipelineStorageStreamBuilder
@@ -29,11 +30,14 @@ object Main extends WellcomeTypesafeApp {
     implicit val executionContext: ExecutionContext =
       AkkaBuilder.buildExecutionContext()
 
+    val esClient = ElasticBuilder.buildElasticClient(config)
+
     val pipelineStream = PipelineStorageStreamBuilder
       .buildPipelineStorageStream(
         sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
         indexer = ElasticIndexerBuilder[Work[Source]](
           config,
+          esClient,
           indexConfig = SourceWorkIndexConfig
         ),
         messageSender = SNSBuilder

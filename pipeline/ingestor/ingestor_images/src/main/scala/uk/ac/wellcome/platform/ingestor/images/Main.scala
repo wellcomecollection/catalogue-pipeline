@@ -8,6 +8,7 @@ import uk.ac.wellcome.elasticsearch.ImagesIndexConfig
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal.{Image, ImageState}
 import uk.ac.wellcome.pipeline_storage.Indexable.imageIndexable
+import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.pipeline_storage.typesafe.ElasticIndexerBuilder
 import uk.ac.wellcome.platform.ingestor.common.builders.IngestorConfigBuilder
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
@@ -20,8 +21,11 @@ object Main extends WellcomeTypesafeApp {
     implicit val executionContext: ExecutionContext =
       AkkaBuilder.buildExecutionContext()
 
+    val esClient = ElasticBuilder.buildElasticClient(config)
+
     val imageIndexer = ElasticIndexerBuilder[Image[ImageState.Indexed]](
       config,
+      esClient,
       indexConfig = ImagesIndexConfig
     )
 
