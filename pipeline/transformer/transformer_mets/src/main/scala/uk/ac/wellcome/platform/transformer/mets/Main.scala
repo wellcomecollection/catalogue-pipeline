@@ -7,7 +7,6 @@ import com.typesafe.config.Config
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
-import uk.ac.wellcome.mets_adapter.models.MetsSourceData
 import uk.ac.wellcome.platform.transformer.mets.service.MetsTransformerWorkerService
 import uk.ac.wellcome.storage.store.dynamo.DynamoSingleVersionStore
 import uk.ac.wellcome.storage.typesafe.{DynamoBuilder, S3Builder}
@@ -18,6 +17,7 @@ import scala.concurrent.ExecutionContext
 import org.scanamo.auto._
 import org.scanamo.time.JavaTimeFormats._
 import uk.ac.wellcome.elasticsearch.SourceWorkIndexConfig
+import uk.ac.wellcome.models.pipeline.MetsSourceData
 import uk.ac.wellcome.models.work.internal.Work
 import uk.ac.wellcome.models.work.internal.WorkState.Source
 import uk.ac.wellcome.pipeline_storage.typesafe.{

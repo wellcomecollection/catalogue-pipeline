@@ -1,5 +1,7 @@
 package uk.ac.wellcome.mets_adapter.models
 
+import uk.ac.wellcome.models.pipeline.MetsSourceData
+
 import java.time.Instant
 
 /** The response receiveved from the storage-service bag API.

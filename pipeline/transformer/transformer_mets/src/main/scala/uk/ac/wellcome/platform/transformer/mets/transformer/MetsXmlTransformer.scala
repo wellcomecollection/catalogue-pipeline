@@ -1,8 +1,8 @@
 package uk.ac.wellcome.platform.transformer.mets.transformer
 
+import uk.ac.wellcome.models.pipeline.MetsSourceData
 import uk.ac.wellcome.storage.store.Readable
 import uk.ac.wellcome.storage.Identified
-import uk.ac.wellcome.mets_adapter.models.MetsSourceData
 import uk.ac.wellcome.models.work.internal.{Work, WorkState}
 import uk.ac.wellcome.models.work.internal.result.Result
 import uk.ac.wellcome.storage.s3.S3ObjectLocation

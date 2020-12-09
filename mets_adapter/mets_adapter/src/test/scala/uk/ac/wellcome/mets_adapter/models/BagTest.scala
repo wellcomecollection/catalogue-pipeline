@@ -2,6 +2,8 @@ package uk.ac.wellcome.mets_adapter.models
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import uk.ac.wellcome.models.pipeline.MetsSourceData
+
 import java.time.Instant
 
 class BagTest extends AnyFunSpec with Matchers {

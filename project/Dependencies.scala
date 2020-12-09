@@ -197,6 +197,7 @@ object CatalogueDependencies {
     ExternalDependencies.scalacsvDependencies ++
       WellcomeDependencies.fixturesLibrary ++
       WellcomeDependencies.jsonLibrary ++
+      WellcomeDependencies.storageLibrary ++
       ExternalDependencies.parseDependencies ++
       ExternalDependencies.scalacheckDependencies ++
       ExternalDependencies.enumeratumDependencies ++

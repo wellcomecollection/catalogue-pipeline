@@ -21,6 +21,7 @@ import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import java.time.Instant
 
 import uk.ac.wellcome.mets_adapter.generators.MetsSourceDataGenerators
+import uk.ac.wellcome.models.pipeline.MetsSourceData
 
 class MetsAdapterWorkerServiceTest
     extends AnyFunSpec

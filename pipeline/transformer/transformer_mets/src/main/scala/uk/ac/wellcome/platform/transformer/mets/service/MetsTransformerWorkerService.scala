@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.transformer.mets.service
 
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.mets_adapter.models.MetsSourceData
+import uk.ac.wellcome.models.pipeline.MetsSourceData
 import uk.ac.wellcome.models.work.internal.Work
 import uk.ac.wellcome.models.work.internal.WorkState.Source
 import uk.ac.wellcome.pipeline_storage.PipelineStorageStream

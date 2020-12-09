@@ -3,7 +3,7 @@ package uk.ac.wellcome.mets_adapter.generators
 import java.time.Instant
 
 import uk.ac.wellcome.fixtures.RandomGenerators
-import uk.ac.wellcome.mets_adapter.models.MetsSourceData
+import uk.ac.wellcome.models.pipeline.MetsSourceData
 
 trait MetsSourceDataGenerators extends RandomGenerators {
   val olderDate: Instant = Instant.parse("1999-09-09T09:09:09Z")
