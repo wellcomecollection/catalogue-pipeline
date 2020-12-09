@@ -24,7 +24,8 @@
 
 data "template_file" "single_reindex_job_config" {
   template = <<EOF
-  "$${id}": {
+  "$${source}--$${destination}": {
+    "source": "$${source}",
     "dynamoConfig": {
       "tableName": "$${table}"
     },
@@ -37,9 +38,10 @@ EOF
   count = length(local.reindexer_jobs)
 
   vars = {
-    id       = lookup(local.reindexer_jobs[count.index], "id")
-    table    = lookup(local.reindexer_jobs[count.index], "table")
-    topicArn = lookup(local.reindexer_jobs[count.index], "topic")
+    source      = lookup(local.reindexer_jobs[count.index], "source")
+    destination = lookup(local.reindexer_jobs[count.index], "destination")
+    table       = lookup(local.reindexer_jobs[count.index], "table")
+    topicArn    = lookup(local.reindexer_jobs[count.index], "topic")
   }
 }
 
