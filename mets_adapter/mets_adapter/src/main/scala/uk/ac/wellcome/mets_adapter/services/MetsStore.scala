@@ -4,7 +4,7 @@ import grizzled.slf4j.Logging
 import uk.ac.wellcome.storage.VersionAlreadyExistsError
 import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.storage.{Identified, Version}
-import uk.ac.wellcome.mets_adapter.models.MetsSourceData
+import uk.ac.wellcome.models.pipeline.MetsSourceData
 
 class MetsStore(store: VersionedStore[String, Int, MetsSourceData])
     extends Logging {
