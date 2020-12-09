@@ -20,5 +20,5 @@
   <logger name="io.netty" level="ERROR"/>
   <logger name="com.amazonaws" level="WARN"/>
   <logger name="software.amazon.awssdk" level="WARN"/>
-  <logger name="com.sksamuel.elastic4s" level="WARN"/>
+  <logger name="com.sksamuel.elastic4s" level="${log_level:-WARN}"/>
 </configuration>
