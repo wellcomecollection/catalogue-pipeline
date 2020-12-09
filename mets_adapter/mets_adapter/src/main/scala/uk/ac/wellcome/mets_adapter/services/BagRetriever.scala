@@ -55,9 +55,9 @@ class HttpBagRetriever(baseUrl: String, tokenService: TokenService)(
           new Exception(s"Received error from storage service: $status"))
     }
 
-  private def parseResponseIntoBag(response: HttpResponse) =
+  private def parseResponseIntoBag(response: HttpResponse): Future[Bag] =
     Unmarshal(response.entity).to[Bag].recover {
-      case t =>
-        throw new Exception("Failed parsing response into a Bag")
+      case err =>
+        throw new Exception(s"Failed parsing response into a Bag: $err")
     }
 }
