@@ -8,6 +8,7 @@ import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal.Work
 import uk.ac.wellcome.models.work.internal.WorkState.{Denormalised, Identified}
+import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.pipeline_storage.typesafe.{
   ElasticIndexerBuilder,
   ElasticRetrieverBuilder,
@@ -25,14 +26,18 @@ object Main extends WellcomeTypesafeApp {
     implicit val executionContext: ExecutionContext =
       AkkaBuilder.buildExecutionContext()
 
+    val esClient = ElasticBuilder.buildElasticClient(config)
+
     val workIndexer = ElasticIndexerBuilder[Work[Denormalised]](
       config,
+      esClient,
       namespace = "denormalised-works",
       indexConfig = DenormalisedWorkIndexConfig
     )
 
     val workRetriever = ElasticRetrieverBuilder[Work[Identified]](
       config,
+      esClient,
       namespace = "identified-works"
     )
 

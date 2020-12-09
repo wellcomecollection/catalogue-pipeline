@@ -14,6 +14,7 @@ import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
+import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.storage.locking.dynamo.{
   DynamoLockDao,
   DynamoLockDaoConfig,
@@ -53,9 +54,11 @@ object Main extends WellcomeTypesafeApp {
       )
     )
 
+    val esClient = ElasticBuilder.buildElasticClient(config)
+
     val workMatcher = new WorkMatcher(workGraphStore, new DynamoLockingService)
 
-    val workRetriever = ElasticRetrieverBuilder.apply[Work[Source]](config)
+    val workRetriever = ElasticRetrieverBuilder.apply[Work[Source]](config, esClient)
 
     new MatcherWorkerService(
       workRetriever = workRetriever,
