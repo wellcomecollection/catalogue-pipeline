@@ -6,21 +6,21 @@ import uk.ac.wellcome.elasticsearch.ElasticClientBuilder
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 
 object ElasticBuilder {
-  def buildElasticClient(config: Config): ElasticClient = {
+  def buildElasticClient(config: Config, namespace: String = ""): ElasticClient = {
     val hostname = config
-      .getStringOption("es.host")
+      .getStringOption(s"es.$namespace.host")
       .getOrElse("localhost")
     val port = config
-      .getIntOption("es.port")
+      .getIntOption(s"es.$namespace.port")
       .getOrElse(9200)
     val protocol = config
-      .getStringOption("es.protocol")
+      .getStringOption(s"es.$namespace.protocol")
       .getOrElse("http")
     val username = config
-      .getStringOption("es.username")
+      .getStringOption(s"es.$namespace.username")
       .getOrElse("username")
     val password = config
-      .getStringOption("es.password")
+      .getStringOption(s"es.$namespace.password")
       .getOrElse("password")
 
     ElasticClientBuilder.create(
