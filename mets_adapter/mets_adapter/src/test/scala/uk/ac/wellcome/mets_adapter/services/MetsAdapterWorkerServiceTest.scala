@@ -92,7 +92,8 @@ class MetsAdapterWorkerServiceTest
 
   it("publishes new METS data when old version exists in the store") {
     val store = MemoryVersionedStore[String, MetsSourceData](
-      initialEntries = Map(Version(externalIdentifier, 0) -> createMetsSourceData)
+      initialEntries =
+        Map(Version(externalIdentifier, 0) -> createMetsSourceData)
     )
 
     withWorkerService(bagRetriever, store) {
@@ -240,14 +241,13 @@ class MetsAdapterWorkerServiceTest
     }
   }
 
-  def withWorkerService[R](
-    bagRetriever: BagRetriever,
-    store: VersionedStore[String, Int, MetsSourceData] =
-      MemoryVersionedStore[String, MetsSourceData](
-        initialEntries = Map.empty
-      ),
-    messageSender: MemoryMessageSender =
-      new MemoryMessageSender())(
+  def withWorkerService[R](bagRetriever: BagRetriever,
+                           store: VersionedStore[String, Int, MetsSourceData] =
+                             MemoryVersionedStore[String, MetsSourceData](
+                               initialEntries = Map.empty
+                             ),
+                           messageSender: MemoryMessageSender =
+                             new MemoryMessageSender())(
     testWith: TestWith[(MetsAdapterWorkerService[String],
                         QueuePair,
                         MemoryMessageSender),

@@ -8,7 +8,10 @@ import uk.ac.wellcome.mets_adapter.models.MetsSourceData
 
 import uk.ac.wellcome.mets_adapter.generators.MetsSourceDataGenerators
 
-class MetsStoreTest extends AnyFunSpec with Matchers with MetsSourceDataGenerators {
+class MetsStoreTest
+    extends AnyFunSpec
+    with Matchers
+    with MetsSourceDataGenerators {
 
   it("stores new METS data") {
     val id = Version("b1234", version = 1)
