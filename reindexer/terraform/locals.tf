@@ -21,7 +21,7 @@ locals {
   private_subnets = local.catalogue_vpcs["catalogue_vpc_delta_private_subnets"]
   dlq_alarm_arn   = data.terraform_remote_state.shared_infra.outputs.dlq_alarm_arn
 
-  reindex_worker_image = "${module.ecr_repository_reindex_worker.repository_url}:env.${local.environment}"
+  reindex_worker_image = "${aws_ecr_repository.reindexer.repository_url}:env.${local.environment}"
 
   # This map defines the possible reindexer configurations.
   #
