@@ -64,8 +64,10 @@ object Main extends WellcomeTypesafeApp {
         messageSender)(config)
     new IdMinterWorkerService(
       identifierGenerator = identifierGenerator,
-      jsonRetriever =
-        ElasticRetrieverBuilder[Json](config, esClient, namespace = "merged-works"),
+      jsonRetriever = ElasticRetrieverBuilder[Json](
+        config,
+        esClient,
+        namespace = "merged-works"),
       pipelineStream = pipelineStream,
       rdsClientConfig = RDSBuilder.buildRDSClientConfig(config),
       identifiersTableConfig = identifiersTableConfig

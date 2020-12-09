@@ -6,7 +6,8 @@ import uk.ac.wellcome.elasticsearch.ElasticClientBuilder
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 
 object ElasticBuilder {
-  def buildElasticClient(config: Config, namespace: String = ""): ElasticClient = {
+  def buildElasticClient(config: Config,
+                         namespace: String = ""): ElasticClient = {
     val hostname = config
       .getStringOption(s"es.$namespace.host")
       .getOrElse("localhost")

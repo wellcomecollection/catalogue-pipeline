@@ -46,7 +46,10 @@ class ElasticRetriever[T](client: ElasticClient, index: Index)(
                 if (getResponse.found) {
                   id -> getResponse.safeTo[T]
                 } else {
-                  id -> Failure(new RetrieverNotFoundException(id, Some(getResponse.sourceAsString)))
+                  id -> Failure(
+                    new RetrieverNotFoundException(
+                      id,
+                      Some(getResponse.sourceAsString)))
                 }
             }
             .toMap

@@ -58,7 +58,8 @@ object Main extends WellcomeTypesafeApp {
 
     val workMatcher = new WorkMatcher(workGraphStore, new DynamoLockingService)
 
-    val workRetriever = ElasticRetrieverBuilder.apply[Work[Source]](config, esClient)
+    val workRetriever =
+      ElasticRetrieverBuilder.apply[Work[Source]](config, esClient)
 
     new MatcherWorkerService(
       workRetriever = workRetriever,
