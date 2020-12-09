@@ -5,7 +5,7 @@ import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import java.time.Instant
 
 /** METS location data to send onwards to the transformer.
- */
+  */
 case class MetsSourceData(bucket: String,
                           path: String,
                           version: Int,
