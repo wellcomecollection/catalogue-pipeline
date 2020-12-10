@@ -11,9 +11,12 @@ import uk.ac.wellcome.messaging.sqs.SQSStream
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration.FiniteDuration
+
 case class PipelineStorageConfig(batchSize: Int,
                                  flushInterval: FiniteDuration,
                                  parallelism: Int)
+
+case class Bundle[T](message: Message, document: T)
 
 class PipelineStorageStream[In, Out, MsgDestination](
   messageStream: SQSStream[In],
@@ -21,8 +24,6 @@ class PipelineStorageStream[In, Out, MsgDestination](
   messageSender: MessageSender[MsgDestination])(config: PipelineStorageConfig)(
   implicit ec: ExecutionContext)
     extends Logging {
-  type FutureBundles = Future[List[Bundle]]
-  case class Bundle(message: Message, document: Out)
 
   def foreach(streamName: String, process: In => Future[Option[Out]])(
     implicit decoderT: Decoder[In],
@@ -56,10 +57,10 @@ class PipelineStorageStream[In, Out, MsgDestination](
   private def batchAndSendFlow(implicit indexable: Indexable[Out]) =
     Flow[(Message, Option[Out])]
       .collect { case (message, Some(document)) => Bundle(message, document) }
-      .groupedWithin(
+      .groupedWeightedWithin(
         config.batchSize,
         config.flushInterval
-      )
+      )(bundle => indexable.weight(bundle.document))
       .mapAsyncUnordered(config.parallelism) { msgs =>
         storeDocuments(msgs.toList)
       }
@@ -70,7 +71,8 @@ class PipelineStorageStream[In, Out, MsgDestination](
         } yield bundle.message
       }
 
-  private def storeDocuments(bundles: List[Bundle]): FutureBundles =
+  private def storeDocuments(
+    bundles: List[Bundle[Out]]): Future[List[Bundle[Out]]] =
     for {
       either <- documentIndexer.index(documents = bundles.map(m => m.document))
     } yield {

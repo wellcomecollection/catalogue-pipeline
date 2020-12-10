@@ -16,7 +16,15 @@ case class Relations[State <: DataState](
   children: List[Relation[State]] = Nil,
   siblingsPreceding: List[Relation[State]] = Nil,
   siblingsSucceeding: List[Relation[State]] = Nil,
-)
+) {
+  def size: Int =
+    List(
+      ancestors,
+      children,
+      siblingsPreceding,
+      siblingsSucceeding
+    ).map(_.size).sum
+}
 
 object Relations {
 
