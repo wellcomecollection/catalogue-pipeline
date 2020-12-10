@@ -68,13 +68,6 @@ object ImageState {
 
   case class Initial(
     sourceIdentifier: SourceIdentifier,
-  ) extends ImageState {
-    type SourceDataState = DataState.Unidentified
-    type TransitionArgs = Unit
-  }
-
-  case class Identified(
-    sourceIdentifier: SourceIdentifier,
     canonicalId: String
   ) extends ImageState {
     type SourceDataState = DataState.Identified
@@ -116,8 +109,8 @@ object ImageFsm {
     def state(self: Image[InState], args: OutState#TransitionArgs): OutState
   }
 
-  implicit val identifiedToAugmented = new Transition[Identified, Augmented] {
-    def state(self: Image[Identified],
+  implicit val initialToAugmented = new Transition[Initial, Augmented] {
+    def state(self: Image[Initial],
               inferredData: Option[InferredData]): Augmented =
       Augmented(
         sourceIdentifier = self.state.sourceIdentifier,
