@@ -28,10 +28,11 @@ class IdMinterFeatureTest
         withWorkerService(messageSender, queue, identifiersTableConfig) { _ =>
           eventuallyTableExists(identifiersTableConfig)
           val image = createImageData.toInitialImageWith(
+            createCanonicalId,
             modifiedTime = modifiedTime,
-            sourceWorks = SourceWorks(
-              canonicalWork = mergedWork().toSourceWork,
-              redirectedWork = None
+            sourceWorks= SourceWorks(
+            canonicalWork = mergedWork().toSourceWork,
+            redirectedWork = None
             )
           )
 
@@ -43,7 +44,7 @@ class IdMinterFeatureTest
 
           eventually {
             val images =
-              messageSender.getMessages[Image[ImageState.Identified]]
+              messageSender.getMessages[Image[ImageState.Initial]]
             images.length shouldBe >=(messageCount)
 
             images.map(_.id).distinct should have size 1

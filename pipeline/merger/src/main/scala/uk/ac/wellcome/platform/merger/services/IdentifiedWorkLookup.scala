@@ -1,16 +1,16 @@
 package uk.ac.wellcome.platform.merger.services
 
 import uk.ac.wellcome.models.matcher.WorkIdentifier
-import uk.ac.wellcome.models.work.internal.WorkState.Source
+import uk.ac.wellcome.models.work.internal.WorkState.Identified
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.pipeline_storage.{Retriever, RetrieverMultiResult}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class SourceWorkLookup(retriever: Retriever[Work[Source]])(
+class IdentifiedWorkLookup(retriever: Retriever[Work[Identified]])(
   implicit ec: ExecutionContext) {
   def fetchAllWorks(
-    workIdentifiers: Seq[WorkIdentifier]): Future[Seq[Option[Work[Source]]]] = {
+    workIdentifiers: Seq[WorkIdentifier]): Future[Seq[Option[Work[Identified]]]] = {
     assert(
       workIdentifiers.nonEmpty,
       "You should never look up an empty list of WorkIdentifiers!"

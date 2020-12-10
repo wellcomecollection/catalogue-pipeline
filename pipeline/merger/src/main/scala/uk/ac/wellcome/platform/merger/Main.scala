@@ -7,7 +7,7 @@ import uk.ac.wellcome.elasticsearch.MergedWorkIndexConfig
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.internal.WorkState.{Merged, Source}
+import uk.ac.wellcome.models.work.internal.WorkState.{Merged, Identified}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.pipeline_storage.typesafe.{
@@ -29,8 +29,8 @@ object Main extends WellcomeTypesafeApp {
 
     val esClient = ElasticBuilder.buildElasticClient(config)
 
-    val sourceWorkLookup = new SourceWorkLookup(
-      retriever = ElasticRetrieverBuilder.apply[Work[Source]](
+    val sourceWorkLookup = new IdentifiedWorkLookup(
+      retriever = ElasticRetrieverBuilder.apply[Work[Identified]](
         config,
         esClient,
         namespace = "source-works"

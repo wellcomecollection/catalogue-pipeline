@@ -3,16 +3,16 @@ package uk.ac.wellcome.platform.merger.rules
 import cats.data.NonEmptyList
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
-import WorkState.Source
+import WorkState.Identified
 
 object ImageDataRule extends FieldMergeRule {
   import WorkPredicates._
 
-  type FieldData = List[ImageData[IdState.Identifiable]]
+  type FieldData = List[ImageData[IdState.Identified]]
 
   override def merge(
-    target: Work.Visible[Source],
-    sources: Seq[Work[Source]] = Nil): FieldMergeResult[FieldData] =
+    target: Work.Visible[Identified],
+    sources: Seq[Work[Identified]] = Nil): FieldMergeResult[FieldData] =
     FieldMergeResult(
       data = getOnlyMetsDigaidsImages(target, sources).getOrElse(
         getPictureAndEphemeraImages(target, sources).getOrElse(Nil) ++
@@ -47,9 +47,9 @@ object ImageDataRule extends FieldMergeRule {
   }
 
   trait FlatImageMergeRule extends PartialRule {
-    final override def rule(target: Work.Visible[Source],
-                            sources: NonEmptyList[Work[Source]])
-      : List[ImageData[IdState.Identifiable]] =
+    final override def rule(target: Work.Visible[Identified],
+                            sources: NonEmptyList[Work[Identified]])
+      : List[ImageData[IdState.Identified]] =
       (target :: sources).toList.flatMap(_.data.imageData)
   }
 

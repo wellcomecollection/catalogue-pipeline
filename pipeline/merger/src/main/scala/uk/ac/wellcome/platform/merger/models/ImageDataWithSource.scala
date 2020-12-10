@@ -8,6 +8,6 @@ import uk.ac.wellcome.models.work.internal.{
 }
 
 case class ImageDataWithSource(
-  imageData: ImageData[IdState.Identifiable],
-  source: ImageSource[DataState.Unidentified]
+  imageData: ImageData[IdState.Identified],
+  source: ImageSource[DataState.Identified]
 )

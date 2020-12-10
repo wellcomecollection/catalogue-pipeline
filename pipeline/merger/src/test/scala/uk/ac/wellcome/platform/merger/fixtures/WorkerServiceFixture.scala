@@ -31,7 +31,7 @@ trait WorkerServiceFixture extends SQS with Akka {
       withSQSStream[NotificationMessage, R](queue, metrics) { sqsStream =>
         val workerService = new MergerWorkerService(
           sqsStream = sqsStream,
-          sourceWorkLookup = new SourceWorkLookup(retriever),
+          sourceWorkLookup = new IdentifiedWorkLookup(retriever),
           mergerManager = new MergerManager(PlatformMerger),
           workIndexer = new MemoryIndexer(index),
           workSender = workSender,

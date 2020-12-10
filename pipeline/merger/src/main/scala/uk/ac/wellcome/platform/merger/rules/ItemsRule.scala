@@ -5,7 +5,7 @@ import uk.ac.wellcome.platform.merger.logging.MergerLogging
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 import uk.ac.wellcome.platform.merger.models.Sources.findFirstLinkedDigitisedSierraWorkFor
 import cats.data.NonEmptyList
-import WorkState.Source
+import WorkState.Identified
 
 /**
   * Items are merged as follows
@@ -19,11 +19,11 @@ import WorkState.Source
 object ItemsRule extends FieldMergeRule with MergerLogging {
   import WorkPredicates._
 
-  type FieldData = List[Item[IdState.Unminted]]
+  type FieldData = List[Item[IdState.Minted]]
 
   override def merge(
-    target: Work.Visible[Source],
-    sources: Seq[Work[Source]]): FieldMergeResult[FieldData] = {
+    target: Work.Visible[Identified],
+    sources: Seq[Work[Identified]]): FieldMergeResult[FieldData] = {
     val items =
       mergeIntoCalmTarget(target, sources)
         .orElse(mergeMetsIntoSierraTarget(target, sources))
@@ -57,8 +57,8 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     val isDefinedForTarget: WorkPredicate = sierraWork
     val isDefinedForSource: WorkPredicate = singleDigitalItemMetsWork
 
-    def rule(target: Work.Visible[Source],
-             sources: NonEmptyList[Work[Source]]): FieldData =
+    def rule(target: Work.Visible[Identified],
+             sources: NonEmptyList[Work[Identified]]): FieldData =
       target.data.items match {
         case List(sierraItem) =>
           List(
@@ -90,11 +90,11 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
       val isDefinedForTarget
         : WorkPredicate = (singleItemSierra or zeroItemSierra) and sierraPictureDigitalImageOr3DObject
       val isDefinedForSource: WorkPredicate = singleDigitalItemMiroWork
-      override val isDefinedForSourceList: Seq[Work[Source]] => Boolean =
+      override val isDefinedForSourceList: Seq[Work[Identified]] => Boolean =
         _.count(singleDigitalItemMiroWork) == 1
 
-      def rule(target: Work.Visible[Source],
-               sources: NonEmptyList[Work[Source]]): FieldData =
+      def rule(target: Work.Visible[Identified],
+               sources: NonEmptyList[Work[Identified]]): FieldData =
         target.data.items match {
           case List(sierraItem) =>
             List(
@@ -120,8 +120,8 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     val isDefinedForSource
       : WorkPredicate = singleDigitalItemMetsWork or sierraWork
 
-    def rule(target: Work.Visible[Source],
-             sources: NonEmptyList[Work[Source]]): FieldData = {
+    def rule(target: Work.Visible[Identified],
+             sources: NonEmptyList[Work[Identified]]): FieldData = {
 
       // The calm Work predicate ensures this is safe
       val calmItem = target.data.items.head

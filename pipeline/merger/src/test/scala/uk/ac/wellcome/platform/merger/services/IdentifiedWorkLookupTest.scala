@@ -13,7 +13,7 @@ import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class SourceWorkLookupTest
+class IdentifiedWorkLookupTest
     extends AnyFunSpec
     with Matchers
     with ScalaFutures
@@ -49,7 +49,7 @@ class SourceWorkLookupTest
       index = mutable.Map(work.id -> work)
     )
 
-    val sourceWorkLookup = new SourceWorkLookup(retriever)
+    val sourceWorkLookup = new IdentifiedWorkLookup(retriever)
 
     whenReady(sourceWorkLookup.fetchAllWorks(workIdentifiers = List(workId))) {
       _ shouldBe Seq(None)
@@ -98,7 +98,7 @@ class SourceWorkLookupTest
   private def fetchAllWorks(
     retriever: MemoryRetriever[Work[Source]],
     works: Work[Source]*): Future[Seq[Option[Work[Source]]]] = {
-    val sourceLookup = new SourceWorkLookup(retriever)
+    val sourceLookup = new IdentifiedWorkLookup(retriever)
 
     val workIdentifiers = works
       .map { w =>
