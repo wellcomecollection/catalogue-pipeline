@@ -28,10 +28,11 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
 
   def mergedWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
+    canonicalId: String = createCanonicalId,
     modifiedTime: Instant = instantInLast30Days
   ): Work.Visible[Merged] =
     Work.Visible[Merged](
-      state = Merged(sourceIdentifier, modifiedTime),
+      state = Merged(sourceIdentifier, canonicalId, modifiedTime),
       data = initData,
       version = createVersion
     )

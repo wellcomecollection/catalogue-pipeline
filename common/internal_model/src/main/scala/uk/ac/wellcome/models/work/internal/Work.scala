@@ -108,13 +108,13 @@ case class WorkData[State <: DataState](
   *      ▼
   *    Source
   *      |
-  *      | (matcher / merger)
-  *      ▼
-  *   Merged
-  *      |
   *      | (id minter)
   *      ▼
-  *  Identified
+  *   Identified
+  *      |
+  *      | (matcher / merger)
+  *      ▼
+  *  Merged
   *      |
   *      | (relation embedder)
   *      ▼
@@ -151,10 +151,11 @@ object WorkState {
 
   case class Merged(
     sourceIdentifier: SourceIdentifier,
+    canonicalId: String,
     modifiedTime: Instant,
   ) extends WorkState {
 
-    type WorkDataState = DataState.Unidentified
+    type WorkDataState = DataState.Identified
     type TransitionArgs = Option[Instant]
 
     def id = sourceIdentifier.toString
@@ -223,23 +224,24 @@ object WorkFsm {
     def redirect(redirect: InState#WorkDataState#Id): OutState#WorkDataState#Id
   }
 
-  implicit val sourceToMerged = new Transition[Source, Merged] {
-    def state(state: Source,
-              data: WorkData[DataState.Unidentified],
+  implicit val identifiedToMerged = new Transition[Identified, Merged] {
+    def state(state: Identified,
+              data: WorkData[DataState.Identified],
               args: Option[Instant]): Merged =
       Merged(
         state.sourceIdentifier,
-        args.getOrElse(state.modifiedTime)
+        state.id,
+        args.getOrElse(state.modifiedTime),
       )
 
-    def data(data: WorkData[DataState.Unidentified]) = data
+    def data(data: WorkData[DataState.Identified]) = data
 
-    def redirect(redirect: IdState.Identifiable) = redirect
+    def redirect(redirect: IdState.Identified): IdState.Identified = redirect
   }
 
-  implicit val identifiedToDenormalised =
-    new Transition[Identified, Denormalised] {
-      def state(state: Identified,
+  implicit val mergedToDenormalised =
+    new Transition[Merged, Denormalised] {
+      def state(state: Merged,
                 data: WorkData[DataState.Identified],
                 relations: Relations): Denormalised =
         Denormalised(
