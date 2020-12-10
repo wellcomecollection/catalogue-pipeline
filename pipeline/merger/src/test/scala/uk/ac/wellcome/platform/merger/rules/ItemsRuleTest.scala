@@ -25,7 +25,7 @@ class ItemsRuleTest
   val multiItemPhysicalSierra: Work.Visible[WorkState.Source] =
     sierraSourceWork()
       .items((1 to 2).map { _ =>
-        createPhysicalItem
+        createIdentifiablePhysicalItem
       }.toList)
 
   val metsWork: Work.Invisible[WorkState.Source] = metsSourceWork().invisible()

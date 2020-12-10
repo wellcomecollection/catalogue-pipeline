@@ -59,28 +59,12 @@ trait ImageGenerators
       )
 
     def toInitialImageWith(
-      modifiedTime: Instant = instantInLast30Days,
-      sourceWorks: SourceWorks[DataState.Unidentified] = SourceWorks(
-        canonicalWork = mergedWork().toSourceWork,
-        redirectedWork = None
-      )
-    ): Image[ImageState.Initial] = Image[ImageState.Initial](
-      version = imageData.version,
-      locations = imageData.locations,
-      modifiedTime = modifiedTime,
-      source = sourceWorks,
-      state = ImageState.Initial(
-        sourceIdentifier = imageData.id.sourceIdentifier
-      )
-    )
-
-    def toIdentifiedImageWith(
       canonicalId: String = createCanonicalId,
       modifiedTime: Instant = instantInLast30Days,
       parentWork: Work[WorkState.Identified] = sierraIdentifiedWork(),
       redirectedWork: Option[Work[WorkState.Identified]] = Some(
         sierraIdentifiedWork())
-    ): Image[ImageState.Identified] = Image[ImageState.Identified](
+    ): Image[ImageState.Initial] = Image[ImageState.Initial](
       version = imageData.version,
       locations = imageData.locations,
       modifiedTime = modifiedTime,
@@ -88,7 +72,7 @@ trait ImageGenerators
         parentWork.toSourceWork,
         redirectedWork.map(_.toSourceWork)
       ),
-      state = ImageState.Identified(
+      state = ImageState.Initial(
         sourceIdentifier = imageData.id.sourceIdentifier,
         canonicalId = canonicalId
       )
@@ -103,7 +87,7 @@ trait ImageGenerators
         sierraIdentifiedWork())
     ): Image[ImageState.Augmented] =
       imageData
-        .toIdentifiedImageWith(
+        .toInitialImageWith(
           canonicalId = canonicalId,
           modifiedTime = modifiedTime,
           parentWork = parentWork,
@@ -131,8 +115,6 @@ trait ImageGenerators
     def toIdentified = toIdentifiedWith()
 
     def toInitialImage = toInitialImageWith()
-
-    def toIdentifiedImage = toIdentifiedImageWith()
 
     def toAugmentedImage = toAugmentedImageWith()
 

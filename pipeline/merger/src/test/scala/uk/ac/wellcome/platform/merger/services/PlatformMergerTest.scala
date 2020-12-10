@@ -42,7 +42,7 @@ class PlatformMergerTest
   private val multipleItemsSierraWork =
     sierraSourceWork()
       .items((1 to 2).map { _ =>
-        createPhysicalItem
+        createIdentifiablePhysicalItem
       }.toList)
       .mergeCandidates(
         List(
@@ -65,7 +65,7 @@ class PlatformMergerTest
   private val sierraPictureWork: Work.Visible[Source] =
     sierraSourceWork()
       .items(
-        List(createPhysicalItem)
+        List(createIdentifiablePhysicalItem)
       )
       .format(Format.Pictures)
 

@@ -76,10 +76,10 @@ class MergerFeatureTest
     Scenario("A Sierra picture or ephemera work and METS work are matched") {
       Given("a Sierra picture or ephemera work and a METS work")
       val sierraPicture = sierraSourceWork()
-        .items(List(createPhysicalItem))
+        .items(List(createIdentifiablePhysicalItem))
         .format(Format.Pictures)
       val sierraEphemera = sierraSourceWork()
-        .items(List(createPhysicalItem))
+        .items(List(createIdentifiablePhysicalItem))
         .format(Format.Ephemera)
       val mets = metsSourceWork()
 
@@ -110,7 +110,7 @@ class MergerFeatureTest
       Given(
         "a Sierra picture with digcode `digaids`, a METS work and a Miro work")
       val sierraDigaidsPicture = sierraSourceWork()
-        .items(List(createPhysicalItem))
+        .items(List(createIdentifiablePhysicalItem))
         .format(Format.Pictures)
         .otherIdentifiers(List(createDigcodeIdentifier("digaids")))
       val mets = metsSourceWork()

@@ -33,7 +33,7 @@ trait SierraWorkGenerators extends WorkGenerators with ItemsGenerators {
       )
 
   def sierraPhysicalSourceWork(): Work.Visible[Source] =
-    sierraSourceWork().items(List(createPhysicalItem))
+    sierraSourceWork().items(List(createIdentifiablePhysicalItem))
 
   def sierraDigitalSourceWork(): Work.Visible[Source] =
     sierraSourceWork().items(
