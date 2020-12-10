@@ -131,6 +131,7 @@ sealed trait WorkState {
 
   val sourceIdentifier: SourceIdentifier
   val modifiedTime: Instant
+  val relations: Relations[WorkDataState]
 
   def id: String
 }
@@ -146,6 +147,7 @@ object WorkState {
     type TransitionArgs = Unit
 
     def id = sourceIdentifier.toString
+    val relations = Relations.none
   }
 
   case class Merged(
@@ -157,6 +159,7 @@ object WorkState {
     type TransitionArgs = Option[Instant]
 
     def id = sourceIdentifier.toString
+    val relations = Relations.none
   }
 
   case class Identified(
@@ -169,6 +172,7 @@ object WorkState {
     type TransitionArgs = Unit
 
     def id = canonicalId
+    val relations = Relations.none
   }
 
   case class Denormalised(

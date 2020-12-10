@@ -27,6 +27,8 @@ trait Indexable[T] {
   def id(document: T): String
 
   def version(document: T): Long
+
+  def weight(document: T): Long
 }
 
 object Indexable extends Logging {
@@ -37,6 +39,9 @@ object Indexable extends Logging {
 
       def version(image: Image[State]) =
         image.modifiedTime.toEpochMilli
+
+      def weight(image: Image[State]): Long =
+        1
     }
 
   implicit def workIndexable[State <: WorkState]: Indexable[Work[State]] =
@@ -47,5 +52,14 @@ object Indexable extends Logging {
       def version(work: Work[State]) =
         work.state.modifiedTime.toEpochMilli
 
+      def weight(work: Work[State]): Long =
+        // As an estimate here we assume 50 relations (which each consist of a
+        // few key fields) is approximately the size of all the other data in a
+        // single complete work. For example there are some works with around
+        // 4000 relations, in which cases they will be considered to be
+        // equivilent to around 80 works without any relations.
+        Math.round(
+          1.0 + (work.state.relations.size / 50.0)
+        )
     }
 }

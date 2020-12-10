@@ -15,8 +15,9 @@ import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.models.work.internal.WorkFsm._
 import uk.ac.wellcome.models.work.internal.WorkState.Denormalised
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.pipeline_storage.Indexer
+import uk.ac.wellcome.pipeline_storage.{Indexable, Indexer}
 import uk.ac.wellcome.typesafe.Runnable
+import Indexable.workIndexable
 
 class RelationEmbedderWorkerService[MsgDestination](
   sqsStream: SQSStream[NotificationMessage],
@@ -56,7 +57,10 @@ class RelationEmbedderWorkerService[MsgDestination](
               }
 
             denormalisedWorks
-              .groupedWithin(indexBatchSize, indexFlushInterval)
+              .groupedWeightedWithin(
+                indexBatchSize,
+                indexFlushInterval
+              )(workIndexable.weight)
               .mapAsync(1) { works =>
                 workIndexer.index(works).flatMap {
                   case Left(failedWorks) =>
