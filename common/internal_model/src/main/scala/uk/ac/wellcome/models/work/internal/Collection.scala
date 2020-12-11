@@ -6,7 +6,6 @@ package uk.ac.wellcome.models.work.internal
   */
 case class CollectionPath(
   path: String,
-  level: Option[CollectionLevel] = None,
   label: Option[String] = None,
 ) {
 
@@ -18,13 +17,4 @@ case class CollectionPath(
 
   def isDescendent(other: CollectionPath): Boolean =
     tokens.slice(0, other.depth) == other.tokens
-}
-
-sealed trait CollectionLevel
-
-object CollectionLevel {
-  object Collection extends CollectionLevel
-  object Section extends CollectionLevel
-  object Series extends CollectionLevel
-  object Item extends CollectionLevel
 }

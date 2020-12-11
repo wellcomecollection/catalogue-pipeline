@@ -116,7 +116,7 @@ object CalmTransformer
     for {
       accessStatus <- accessStatus(record)
       title <- title(record)
-      collectionLevel <- collectionLevel(record)
+      workType <- workType(record)
       collectionPath <- collectionPath(record, collectionLevel)
     } yield
       WorkData[DataState.Unidentified](
@@ -133,7 +133,6 @@ object CalmTransformer
         physicalDescription = physicalDescription(record),
         production = production(record),
         notes = CalmNotes(record, languageNote = languageNote),
-        workType = workType(collectionLevel)
       )
   }
 
@@ -197,22 +196,22 @@ object CalmTransformer
       }
       .getOrElse(Left(RefNoMissing))
 
-  def collectionLevel(record: CalmRecord): Result[CollectionLevel] =
+  def workType(record: CalmRecord): Result[WorkType] =
     record
       .get("Level")
       .map(_.toLowerCase)
       .map {
-        case "collection"       => Right(CollectionLevel.Collection)
-        case "section"          => Right(CollectionLevel.Section)
-        case "subsection"       => Right(CollectionLevel.Section)
-        case "subsubsection"    => Right(CollectionLevel.Section)
-        case "subsubsubsection" => Right(CollectionLevel.Section)
-        case "series"           => Right(CollectionLevel.Series)
-        case "subseries"        => Right(CollectionLevel.Series)
-        case "subsubseries"     => Right(CollectionLevel.Series)
-        case "subsubsubseries"  => Right(CollectionLevel.Series)
-        case "item"             => Right(CollectionLevel.Item)
-        case "piece"            => Right(CollectionLevel.Item)
+        case "collection"       => Right(WorkType.Collection)
+        case "section"          => Right(WorkType.Section)
+        case "subsection"       => Right(WorkType.Section)
+        case "subsubsection"    => Right(WorkType.Section)
+        case "subsubsubsection" => Right(WorkType.Section)
+        case "series"           => Right(WorkType.Series)
+        case "subseries"        => Right(WorkType.Series)
+        case "subsubseries"     => Right(WorkType.Series)
+        case "subsubsubseries"  => Right(WorkType.Series)
+        case "item"             => Right(WorkType.Item)
+        case "piece"            => Right(WorkType.Item)
         case level              => Left(UnrecognisedLevel)
       }
       .getOrElse(Left(LevelMissing))
@@ -292,13 +291,5 @@ object CalmTransformer
   def contributors(record: CalmRecord): List[Contributor[IdState.Unminted]] =
     record.getList("CreatorName").map { name =>
       Contributor(Agent(name), Nil)
-    }
-
-  def workType(level: CollectionLevel): WorkType =
-    level match {
-      case CollectionLevel.Collection => WorkType.Collection
-      case CollectionLevel.Section    => WorkType.Section
-      case CollectionLevel.Series     => WorkType.Series
-      case CollectionLevel.Item       => WorkType.Standard
     }
 }
