@@ -6,8 +6,7 @@ import grizzled.slf4j.Logging
 import uk.ac.wellcome.models.work.internal._
 import WorkState.Identified
 
-class ArchiveRelationsCache(works: Map[String, RelationWork])
-    extends Logging {
+class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
 
   def apply(work: Work[Identified]): Relations =
     work.data.collectionPath
@@ -46,9 +45,7 @@ class ArchiveRelationsCache(works: Map[String, RelationWork])
       .map(relations)
       .toList
 
-  private def getSiblings(
-    path: String): (List[Relation],
-                    List[Relation]) = {
+  private def getSiblings(path: String): (List[Relation], List[Relation]) = {
     val siblings = parentMapping
       .get(path)
       .map(childMapping)
@@ -64,8 +61,7 @@ class ArchiveRelationsCache(works: Map[String, RelationWork])
 
   @tailrec
   private def getAncestors(path: String,
-                           accum: List[Relation] = Nil)
-    : List[Relation] =
+                           accum: List[Relation] = Nil): List[Relation] =
     parentMapping.get(path) match {
       case None => accum
       case Some(parentPath) =>

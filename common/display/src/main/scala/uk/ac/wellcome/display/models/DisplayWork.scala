@@ -184,12 +184,13 @@ object DisplayWork {
       partOf =
         if (includes.partOf)
           Some(
-            work.state.relations.ancestors.foldLeft(List.empty[DisplayRelation]) {
-              case (partOf, relation) =>
-                List(
-                  DisplayRelation(relation).copy(partOf = Some(partOf))
-                )
-            }
+            work.state.relations.ancestors
+              .foldLeft(List.empty[DisplayRelation]) {
+                case (partOf, relation) =>
+                  List(
+                    DisplayRelation(relation).copy(partOf = Some(partOf))
+                  )
+              }
           )
         else None,
       parts =
