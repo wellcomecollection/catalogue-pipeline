@@ -475,15 +475,15 @@ class DisplayWorkTest
     val work = indexedWork(
       relations = Relations(
         ancestors = List(
-          Relation.fromIndexedWork(workA, 0, 1, 5),
-          Relation.fromIndexedWork(workB, 1, 3, 4)
+          Relation(workA, 0, 1, 5),
+          Relation(workB, 1, 3, 4)
         ),
         children = List(
-          Relation.fromIndexedWork(workE, 3, 0, 0),
-          Relation.fromIndexedWork(workF, 3, 0, 0)
+          Relation(workE, 3, 0, 0),
+          Relation(workF, 3, 0, 0)
         ),
-        siblingsPreceding = List(Relation.fromIndexedWork(workC, 2, 0, 0)),
-        siblingsSucceeding = List(Relation.fromIndexedWork(workD, 2, 0, 0)),
+        siblingsPreceding = List(Relation(workC, 2, 0, 0)),
+        siblingsSucceeding = List(Relation(workD, 2, 0, 0)),
       )
     )
 

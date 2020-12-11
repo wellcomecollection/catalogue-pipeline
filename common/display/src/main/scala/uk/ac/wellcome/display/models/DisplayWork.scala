@@ -105,31 +105,23 @@ case class DisplayWork(
   @Schema(
     `type` = "List[Work]",
     description = "Child works."
-  ) parts: Option[List[DisplayWork]] = None,
+  ) parts: Option[List[DisplayRelation]] = None,
   @Schema(
     `type` = "List[Work]",
     description = "Ancestor works."
-  ) partOf: Option[List[DisplayWork]] = None,
+  ) partOf: Option[List[DisplayRelation]] = None,
   @Schema(
     `type` = "List[Work]",
     description = "Sibling works earlier in a series."
-  ) precededBy: Option[List[DisplayWork]] = None,
+  ) precededBy: Option[List[DisplayRelation]] = None,
   @Schema(
     `type` = "List[Work]",
     description = "Sibling works later in a series."
-  ) succeededBy: Option[List[DisplayWork]] = None,
-  @Schema(
-    `type` = "Integer",
-    description = "Number of child works."
-  ) totalParts: Option[Int] = None,
-  @Schema(
-    `type` = "Integer",
-    description = "Number of descendent works."
-  ) totalDescendentParts: Option[Int] = None,
+  ) succeededBy: Option[List[DisplayRelation]] = None,
   @JsonKey("type") @Schema(name = "type") ontologyType: String = "Work"
 )
 
-case object DisplayWork {
+object DisplayWork {
 
   def apply(work: Work.Visible[Indexed], includes: WorksIncludes): DisplayWork =
     DisplayWork(
@@ -192,62 +184,36 @@ case object DisplayWork {
       partOf =
         if (includes.partOf)
           Some(
-            work.state.relations.ancestors.foldLeft(List.empty[DisplayWork]) {
+            work.state.relations.ancestors.foldLeft(List.empty[DisplayRelation]) {
               case (partOf, relation) =>
                 List(
-                  DisplayWork(
-                    relation.toWork,
-                    relation.numChildren,
-                    relation.numDescendents).copy(partOf = Some(partOf)))
+                  DisplayRelation(relation).copy(partOf = Some(partOf))
+                )
             }
           )
         else None,
       parts =
         if (includes.parts)
           Some(
-            work.state.relations.children.map { relation =>
-              DisplayWork(
-                relation.toWork,
-                relation.numChildren,
-                relation.numDescendents)
-            }
+            work.state.relations.children.map(DisplayRelation(_))
           )
         else None,
       precededBy =
         if (includes.precededBy)
           Some(
-            work.state.relations.siblingsPreceding.map { relation =>
-              DisplayWork(
-                relation.toWork,
-                relation.numChildren,
-                relation.numDescendents)
-            }
+            work.state.relations.siblingsPreceding.map(DisplayRelation(_))
           )
         else None,
       succeededBy =
         if (includes.succeededBy)
           Some(
-            work.state.relations.siblingsSucceeding.map { relation =>
-              DisplayWork(
-                relation.toWork,
-                relation.numChildren,
-                relation.numDescendents)
-            }
+            work.state.relations.siblingsSucceeding.map(DisplayRelation(_))
           )
         else None,
     )
 
   def apply(work: Work.Visible[Indexed]): DisplayWork =
     DisplayWork(work = work, includes = WorksIncludes.none)
-
-  def apply(work: Work.Visible[Indexed],
-            totalParts: Int,
-            totalDescendentParts: Int): DisplayWork =
-    DisplayWork(work = work)
-      .copy(
-        totalParts = Some(totalParts),
-        totalDescendentParts = Some(totalDescendentParts)
-      )
 
   def displayWorkType(workType: WorkType): String = workType match {
     case WorkType.Standard   => "Work"
