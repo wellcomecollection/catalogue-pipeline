@@ -23,7 +23,7 @@ trait MiroWorkGenerators extends ImageGenerators {
       )
     }.toList
 
-  def miroSourceWork(
+  def miroIdentifiedWork(
     sourceIdentifier: SourceIdentifier = createMiroSourceIdentifier)
     : Work.Visible[WorkState.Identified] =
     identifiedWork(sourceIdentifier = sourceIdentifier)

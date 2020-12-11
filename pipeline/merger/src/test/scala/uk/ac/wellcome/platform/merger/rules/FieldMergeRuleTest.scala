@@ -7,7 +7,7 @@ import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 import uk.ac.wellcome.platform.merger.rules.WorkPredicates.WorkPredicate
-import WorkState.Source
+import WorkState.Identified
 
 class FieldMergeRuleTest
     extends AnyFunSpec
@@ -22,8 +22,8 @@ class FieldMergeRuleTest
       work => work.data.title.contains("A")
     override val isDefinedForSource: WorkPredicate = _ => true
 
-    override def rule(target: Work.Visible[Source],
-                      sources: NonEmptyList[Work[Source]]): FieldData =
+    override def rule(target: Work.Visible[Identified],
+                      sources: NonEmptyList[Work[Identified]]): FieldData =
       ()
   }
   val sourceTitleIsA = new PartialRule {
@@ -31,13 +31,13 @@ class FieldMergeRuleTest
     override val isDefinedForSource: WorkPredicate =
       work => work.data.title.contains("A")
 
-    override def rule(target: Work.Visible[Source],
-                      sources: NonEmptyList[Work[Source]]): FieldData =
+    override def rule(target: Work.Visible[Identified],
+                      sources: NonEmptyList[Work[Identified]]): FieldData =
       ()
   }
 
-  val workWithTitleA = sourceWork().title("A")
-  val workWithTitleB = sourceWork().title("B")
+  val workWithTitleA = identifiedWork().title("A")
+  val workWithTitleB = identifiedWork().title("B")
 
   describe("PartialRule") {
     it(
@@ -59,8 +59,8 @@ class FieldMergeRuleTest
         override val isDefinedForSource: WorkPredicate =
           work => work.data.title.contains("A")
 
-        override def rule(target: Work.Visible[Source],
-                          sources: NonEmptyList[Work[Source]]): FieldData = {
+        override def rule(target: Work.Visible[Identified],
+                          sources: NonEmptyList[Work[Identified]]): FieldData = {
           sources.toList should contain(workWithTitleA)
           sources.toList should not contain workWithTitleB
           None
@@ -73,7 +73,7 @@ class FieldMergeRuleTest
 
   // This is here because we are extending ComposedFieldMergeRule
   // to access the private PartialRule trait
-  override def merge(target: Work.Visible[Source],
-                     sources: Seq[Work[Source]]): FieldMergeResult[FieldData] =
+  override def merge(target: Work.Visible[Identified],
+                     sources: Seq[Work[Identified]]): FieldMergeResult[FieldData] =
     throw new NotImplementedError()
 }

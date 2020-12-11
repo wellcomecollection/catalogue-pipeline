@@ -3,11 +3,8 @@ package uk.ac.wellcome.platform.merger.rules
 import org.scalatest.Inspectors
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.generators.{
-  MetsWorkGenerators,
-  MiroWorkGenerators
-}
-import uk.ac.wellcome.models.work.internal.WorkState.Source
+import uk.ac.wellcome.models.work.generators.{MetsWorkGenerators, MiroWorkGenerators}
+import uk.ac.wellcome.models.work.internal.WorkState.Identified
 import uk.ac.wellcome.models.work.internal._
 
 class WorkPredicatesTest
@@ -16,21 +13,21 @@ class WorkPredicatesTest
     with MiroWorkGenerators
     with Matchers
     with Inspectors {
-  val works: Seq[Work[Source]] = List(
-    sierraSourceWork(),
-    miroSourceWork(),
-    metsSourceWork().invisible(),
-    metsSourceWork()
+  val works: Seq[Work[Identified]] = List(
+    sierraIdentifiedWork(),
+    miroIdentifiedWork(),
+    metsIdentifiedWork().invisible(),
+    metsIdentifiedWork()
       .items((0 to 3).map { _ =>
         createDigitalItem
       }.toList)
-      .imageData(List(createMetsImageData))
+      .imageData(List(createMetsImageData.toIdentified))
       .invisible(),
-    sourceWork(sourceIdentifier = createMiroSourceIdentifier)
+    identifiedWork(sourceIdentifier = createMiroSourceIdentifier)
       .otherIdentifiers(List.empty)
       .thumbnail(miroThumbnail())
       .items(miroItems(count = 3)),
-    sierraSourceWork()
+    sierraIdentifiedWork()
       .items(
         (0 to 3)
           .map(_ =>
@@ -38,13 +35,13 @@ class WorkPredicatesTest
               locations = List(createDigitalLocation)))
           .toList
       ),
-    sierraPhysicalSourceWork(),
-    sierraDigitalSourceWork(),
-    sierraSourceWork().format(Format.`3DObjects`),
-    sierraSourceWork().format(Format.DigitalImages),
-    sierraSourceWork().format(Format.Pictures),
-    sierraSourceWork().format(Format.Music),
-    sierraSourceWork().otherIdentifiers(
+    sierraPhysicalIdentifiedWork(),
+    sierraDigitalIdentifiedWork(),
+    sierraIdentifiedWork().format(Format.`3DObjects`),
+    sierraIdentifiedWork().format(Format.DigitalImages),
+    sierraIdentifiedWork().format(Format.Pictures),
+    sierraIdentifiedWork().format(Format.Music),
+    sierraIdentifiedWork().otherIdentifiers(
       List(createDigcodeIdentifier("digaids")))
   )
 

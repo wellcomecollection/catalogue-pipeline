@@ -27,10 +27,10 @@ class MergerFeatureTest
   Feature("Top-level merging") {
     Scenario("One Sierra and multiple Miro works are matched") {
       Given("a Sierra work and 3 Miro works")
-      val sierra = sierraPhysicalSourceWork()
-      val miro1 = miroSourceWork()
-      val miro2 = miroSourceWork()
-      val miro3 = miroSourceWork()
+      val sierra = sierraPhysicalIdentifiedWork()
+      val miro1 = miroIdentifiedWork()
+      val miro2 = miroIdentifiedWork()
+      val miro3 = miroIdentifiedWork()
 
       When("the works are merged")
       val outcome = merger.merge(Seq(sierra, miro1, miro2, miro3))
@@ -54,8 +54,8 @@ class MergerFeatureTest
 
     Scenario("One Sierra and one Miro work are matched") {
       Given("a Sierra work and a Miro work")
-      val sierra = sierraPhysicalSourceWork()
-      val miro = miroSourceWork()
+      val sierra = sierraPhysicalIdentifiedWork()
+      val miro = miroIdentifiedWork()
 
       When("the works are merged")
       val outcome = merger.merge(Seq(sierra, miro))
@@ -75,13 +75,13 @@ class MergerFeatureTest
 
     Scenario("A Sierra picture or ephemera work and METS work are matched") {
       Given("a Sierra picture or ephemera work and a METS work")
-      val sierraPicture = sierraSourceWork()
-        .items(List(createIdentifiablePhysicalItem))
+      val sierraPicture = sierraIdentifiedWork()
+        .items(List(createIdentifiedPhysicalItem))
         .format(Format.Pictures)
-      val sierraEphemera = sierraSourceWork()
-        .items(List(createIdentifiablePhysicalItem))
+      val sierraEphemera = sierraIdentifiedWork()
+        .items(List(createIdentifiedPhysicalItem))
         .format(Format.Ephemera)
-      val mets = metsSourceWork()
+      val mets = metsIdentifiedWork()
 
       When("the works are merged")
       val pictureOutcome = merger.merge(Seq(sierraPicture, mets))
@@ -109,12 +109,12 @@ class MergerFeatureTest
     Scenario("An AIDS poster Sierra picture, a METS and a Miro are matched") {
       Given(
         "a Sierra picture with digcode `digaids`, a METS work and a Miro work")
-      val sierraDigaidsPicture = sierraSourceWork()
-        .items(List(createIdentifiablePhysicalItem))
+      val sierraDigaidsPicture = sierraIdentifiedWork()
+        .items(List(createIdentifiedPhysicalItem))
         .format(Format.Pictures)
         .otherIdentifiers(List(createDigcodeIdentifier("digaids")))
-      val mets = metsSourceWork()
-      val miro = miroSourceWork()
+      val mets = metsIdentifiedWork()
+      val miro = miroIdentifiedWork()
 
       When("the works are merged")
       val outcome = merger.merge(Seq(sierraDigaidsPicture, mets, miro))
@@ -132,7 +132,7 @@ class MergerFeatureTest
 
     Scenario("A physical and a digital Sierra work are matched") {
       Given("a pair of a physical Sierra work and a digital Sierra work")
-      val (digitalSierra, physicalSierra) = sierraSourceWorkPair()
+      val (digitalSierra, physicalSierra) = sierraIdentifiedWorkPair()
 
       When("the works are merged")
       val outcome = merger.merge(Seq(physicalSierra, digitalSierra))
@@ -147,8 +147,8 @@ class MergerFeatureTest
 
     Scenario("A Calm work and a Sierra work are matched") {
       Given("a Sierra work and a Calm work")
-      val sierra = sierraPhysicalSourceWork()
-      val calm = calmSourceWork()
+      val sierra = sierraPhysicalIdentifiedWork()
+      val calm = calmIdentifiedWork()
 
       When("the works are merged")
       val outcome = merger.merge(Seq(sierra, calm))

@@ -5,15 +5,15 @@ import WorkState._
 
 trait SierraWorkGenerators extends WorkGenerators with ItemsGenerators {
 
-  def sierraSourceWork(): Work.Visible[Source] =
-    sourceWork(sourceIdentifier = createSierraSystemSourceIdentifier)
+  def sierraIdentifiedWork(): Work.Visible[Identified] =
+    identifiedWork(sourceIdentifier = createSierraSystemSourceIdentifier)
       .otherIdentifiers(
         List(createSierraSystemSourceIdentifier)
       )
 
-  def sierraSourceWorkPair(): (Work.Visible[Source], Work.Visible[Source]) = {
-    val digitisedWork = sierraDigitalSourceWork()
-    val physicalWork = sierraPhysicalSourceWork()
+  def sierraIdentifiedWorkPair(): (Work.Visible[Identified], Work.Visible[Identified]) = {
+    val digitisedWork = sierraDigitalIdentifiedWork()
+    val physicalWork = sierraPhysicalIdentifiedWork()
       .mergeCandidates(
         List(
           MergeCandidate(
@@ -26,17 +26,11 @@ trait SierraWorkGenerators extends WorkGenerators with ItemsGenerators {
     (digitisedWork, physicalWork)
   }
 
-  def sierraIdentifiedWork(): Work.Visible[Identified] =
-    identifiedWork(sourceIdentifier = createSierraSystemSourceIdentifier)
-      .otherIdentifiers(
-        List(createSierraSystemSourceIdentifier)
-      )
+  def sierraPhysicalIdentifiedWork(): Work.Visible[Identified] =
+    sierraIdentifiedWork().items(List(createIdentifiedPhysicalItem))
 
-  def sierraPhysicalSourceWork(): Work.Visible[Source] =
-    sierraSourceWork().items(List(createIdentifiablePhysicalItem))
-
-  def sierraDigitalSourceWork(): Work.Visible[Source] =
-    sierraSourceWork().items(
+  def sierraDigitalIdentifiedWork(): Work.Visible[Identified] =
+    sierraIdentifiedWork().items(
       List(
         createUnidentifiableItemWith(locations = List(createDigitalLocation))
       )

@@ -56,7 +56,7 @@ class ManagerInferrerIntegrationTest
             createDigitalLocationWith(
               locationType = createImageLocationType,
               url = s"http://localhost:$localImageServerPort/test-image.jpg"
-            ))).toIdentifiedImage
+            ))).toInitialImage
         sendMessage(queue, image)
         eventually {
           assertQueueEmpty(queue)

@@ -4,8 +4,8 @@ import uk.ac.wellcome.models.work.internal.{Work, WorkState}
 
 trait CalmWorkGenerators extends WorkGenerators with ItemsGenerators {
 
-  def calmSourceWork(): Work.Visible[WorkState.Source] =
-    sourceWork(sourceIdentifier = createCalmSourceIdentifier)
+  def calmIdentifiedWork(): Work.Visible[WorkState.Identified] =
+    identifiedWork(sourceIdentifier = createCalmSourceIdentifier)
       .items(List(createCalmItem))
 
 }

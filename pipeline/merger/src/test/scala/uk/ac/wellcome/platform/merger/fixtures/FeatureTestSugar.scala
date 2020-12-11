@@ -1,35 +1,34 @@
 package uk.ac.wellcome.platform.merger.fixtures
 
-import uk.ac.wellcome.models.work.internal.{IdState, ImageData, Work, WorkState}
+import uk.ac.wellcome.models.work.internal.{IdState, ImageData, Work}
 import uk.ac.wellcome.platform.merger.models.MergerOutcome
-import WorkState._
-import IdState._
 import org.scalatest.matchers.{MatchResult, Matcher}
+import uk.ac.wellcome.models.work.internal.WorkState.Identified
 
 trait FeatureTestSugar {
   implicit class OutcomeOps(val mergerOutcome: MergerOutcome) {
-    def getMerged(originalWork: Work.Visible[Source]): Work[Source] =
+    def getMerged(originalWork: Work.Visible[Identified]): Work[Identified] =
       mergerOutcome.resultWorks
         .find(_.sourceIdentifier == originalWork.sourceIdentifier)
         .get
 
-    def imageSourceIds: Seq[Identifiable] =
+    def imageSourceIds: Seq[IdState.Identified] =
       mergerOutcome.imagesWithSources.map(_.source.id)
 
-    def imageData: Seq[ImageData[IdState.Identifiable]] =
+    def imageData: Seq[ImageData[IdState.Identified]] =
       mergerOutcome.imagesWithSources.map(_.imageData)
   }
 
-  implicit class VisibleWorkOps(val work: Work.Visible[Source]) {
-    def singleImage: ImageData[IdState.Identifiable] =
+  implicit class VisibleWorkOps(val work: Work.Visible[Identified]) {
+    def singleImage: ImageData[IdState.Identified] =
       work.data.imageData.head
   }
 
-  class RedirectMatcher(expectedRedirectTo: Work.Visible[Source])
-      extends Matcher[Work[Source]] {
-    def apply(left: Work[Source]): MatchResult = MatchResult(
-      left.isInstanceOf[Work.Redirected[Source]] && left
-        .asInstanceOf[Work.Redirected[Source]]
+  class RedirectMatcher(expectedRedirectTo: Work.Visible[Identified])
+      extends Matcher[Work[Identified]] {
+    def apply(left: Work[Identified]): MatchResult = MatchResult(
+      left.isInstanceOf[Work.Redirected[Identified]] && left
+        .asInstanceOf[Work.Redirected[Identified]]
         .redirect
         .sourceIdentifier == expectedRedirectTo.sourceIdentifier,
       s"${left.sourceIdentifier} was not redirected to ${expectedRedirectTo.sourceIdentifier}",
@@ -37,6 +36,6 @@ trait FeatureTestSugar {
     )
   }
 
-  def beRedirectedTo(expectedRedirectTo: Work.Visible[Source]) =
+  def beRedirectedTo(expectedRedirectTo: Work.Visible[Identified]) =
     new RedirectMatcher(expectedRedirectTo)
 }
