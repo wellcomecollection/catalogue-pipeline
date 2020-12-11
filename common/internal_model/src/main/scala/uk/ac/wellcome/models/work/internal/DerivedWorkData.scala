@@ -1,6 +1,8 @@
 package uk.ac.wellcome.models.work.internal
 
-case class DerivedWorkData(availableOnline: Boolean)
+case class DerivedWorkData(
+  availableOnline: Boolean
+)
 
 object DerivedWorkData {
   def none: DerivedWorkData = DerivedWorkData(availableOnline = false)

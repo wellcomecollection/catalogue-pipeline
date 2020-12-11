@@ -44,8 +44,9 @@ object Relations {
   * @param depth The depth of the relation in the tree
   */
 case class Relation[State <: DataState](
-  data: WorkData[State],
   id: State#Id,
+  title: Option[String],
+  collectionPath: Option[CollectionPath],
   depth: Int,
   numChildren: Int,
   numDescendents: Int,
@@ -58,11 +59,12 @@ object Relation {
             numChildren: Int,
             numDescendents: Int): Relation[DataState.Identified] =
     Relation[DataState.Identified](
-      data = work.data,
       id = IdState.Identified(
         sourceIdentifier = work.state.sourceIdentifier,
         canonicalId = work.state.canonicalId
       ),
+      title = work.data.title,
+      collectionPath = work.data.collectionPath,
       depth = depth,
       numChildren = numChildren,
       numDescendents = numDescendents,
@@ -73,11 +75,12 @@ object Relation {
                       numChildren: Int,
                       numDescendents: Int): Relation[DataState.Identified] =
     Relation[DataState.Identified](
-      data = work.data,
       id = IdState.Identified(
         canonicalId = work.state.canonicalId,
         sourceIdentifier = work.state.sourceIdentifier
       ),
+      title = work.data.title,
+      collectionPath = work.data.collectionPath,
       depth = depth,
       numChildren = numChildren,
       numDescendents = numDescendents
@@ -90,12 +93,15 @@ object Relation {
       // Here we just initialise them to default values, which should not be an
       // issue (at least for now), due to the API not serialising them.
       Work.Visible[Indexed](
-        data = relation.data,
         version = 1,
+        data = WorkData(
+          title = relation.title,
+          collectionPath = relation.collectionPath,
+        ),
         state = Indexed(
           canonicalId = relation.id.canonicalId,
           sourceIdentifier = relation.id.sourceIdentifier,
-          derivedData = DerivedWorkData(relation.data),
+          derivedData = DerivedWorkData.none,
           modifiedTime = Instant.ofEpochSecond(0)
         ),
       )
