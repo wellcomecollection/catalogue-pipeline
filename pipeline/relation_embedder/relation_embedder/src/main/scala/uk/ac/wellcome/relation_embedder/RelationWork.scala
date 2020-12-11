@@ -11,11 +11,8 @@ case class RelationWork(
 ) {
 
   def toRelation(depth: Int, numChildren: Int, numDescendents: Int) =
-    Relation[DataState.Identified](
-      id = IdState.Identified(
-        sourceIdentifier = state.sourceIdentifier,
-        canonicalId = state.canonicalId
-      ),
+    Relation(
+      id = state.canonicalId,
       title = data.title,
       collectionPath = data.collectionPath,
       workType = data.workType,
@@ -27,7 +24,6 @@ case class RelationWork(
 
 case class RelationWorkState(
   canonicalId: String,
-  sourceIdentifier: SourceIdentifier
 )
 
 case class RelationWorkData(

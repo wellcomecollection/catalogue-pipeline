@@ -662,12 +662,12 @@ class WorksIncludesTest
         sourceIdentifier = createSourceIdentifierWith(value = "0/a/c"),
         relations = Relations(
           ancestors = List(
-            Relation.fromIndexedWork(work0, 0, 1, 5),
-            Relation.fromIndexedWork(workA, 1, 3, 4),
+            Relation(work0, 0, 1, 5),
+            Relation(workA, 1, 3, 4),
           ),
-          children = List(Relation.fromIndexedWork(workE, 3, 0, 0)),
-          siblingsPreceding = List(Relation.fromIndexedWork(workB, 2, 0, 0)),
-          siblingsSucceeding = List(Relation.fromIndexedWork(workD, 2, 0, 0)),
+          children = List(Relation(workE, 3, 0, 0)),
+          siblingsPreceding = List(Relation(workB, 2, 0, 0)),
+          siblingsSucceeding = List(Relation(workD, 2, 0, 0)),
         )
       ).collectionPath(CollectionPath(path = "0/a/c"))
         .title("0/a/c")

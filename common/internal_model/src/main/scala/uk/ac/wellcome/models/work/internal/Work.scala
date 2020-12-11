@@ -131,8 +131,7 @@ sealed trait WorkState {
 
   val sourceIdentifier: SourceIdentifier
   val modifiedTime: Instant
-  val relations: Relations[WorkDataState]
-
+  val relations: Relations
   def id: String
 }
 
@@ -179,11 +178,11 @@ object WorkState {
     sourceIdentifier: SourceIdentifier,
     canonicalId: String,
     modifiedTime: Instant,
-    relations: Relations[DataState.Identified] = Relations.none
+    relations: Relations = Relations.none
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified
-    type TransitionArgs = Relations[DataState.Identified]
+    type TransitionArgs = Relations
 
     def id = canonicalId
   }
@@ -193,7 +192,7 @@ object WorkState {
     canonicalId: String,
     modifiedTime: Instant,
     derivedData: DerivedWorkData,
-    relations: Relations[DataState.Identified] = Relations.none
+    relations: Relations = Relations.none
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified
@@ -242,7 +241,7 @@ object WorkFsm {
     new Transition[Identified, Denormalised] {
       def state(state: Identified,
                 data: WorkData[DataState.Identified],
-                relations: Relations[DataState.Identified]): Denormalised =
+                relations: Relations): Denormalised =
         Denormalised(
           sourceIdentifier = state.sourceIdentifier,
           canonicalId = state.canonicalId,
