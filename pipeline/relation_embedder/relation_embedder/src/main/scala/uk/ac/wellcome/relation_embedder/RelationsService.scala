@@ -10,10 +10,18 @@ import com.sksamuel.elastic4s.{ElasticClient, Index}
 import grizzled.slf4j.Logging
 
 import uk.ac.wellcome.models.Implicits._
+import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.work.internal.WorkState.Identified
 import uk.ac.wellcome.models.work.internal._
 
 trait RelationsService {
+
+  /** For a given work return all works in the same archive.
+    *
+    * @param path The archive path
+    * @return The works
+    */
+  def getRelationTree(batch: Batch): Source[RelationWork, NotUsed]
 
   /** Given some work, return the IDs of all other works which need to be
     * denormalised. This should consist of the works siblings, its parent, and
@@ -23,13 +31,6 @@ trait RelationsService {
     * @return The IDs of the other works to denormalise
     */
   def getAffectedWorks(batch: Batch): Source[Work[Identified], NotUsed]
-
-  /** For a given work return all works in the same archive.
-    *
-    * @param path The archive path
-    * @return The works
-    */
-  def getCompleteTree(batch: Batch): Source[Work[Identified], NotUsed]
 }
 
 class PathQueryRelationsService(
@@ -51,13 +52,12 @@ class PathQueryRelationsService(
       .map(searchHit => searchHit.safeTo[Work[Identified]].get)
   }
 
-  def getCompleteTree(batch: Batch): Source[Work[Identified], NotUsed] = {
+  def getRelationTree(batch: Batch): Source[RelationWork, NotUsed] = {
     val request = requestBuilder.completeTree(batch, completeTreeScroll)
     info(
       s"Querying complete tree with ES request: ${elasticClient.show(request)}")
     Source
       .fromPublisher(elasticClient.publisher(request))
-      .map(searchHit => searchHit.safeTo[Work.Visible[Identified]].get)
+      .map(searchHit => searchHit.safeTo[RelationWork].get)
   }
-
 }

@@ -44,7 +44,7 @@ class RelationEmbedderWorkerService[MsgDestination](
           s"Received batch for tree ${batch.rootPath} containing ${batch.selectors.size} selectors: ${batch.selectors
             .mkString(", ")}")
         relationsService
-          .getCompleteTree(batch)
+          .getRelationTree(batch)
           .runWith(Sink.seq)
           .map(ArchiveRelationsCache(_))
           .flatMap { relationsCache =>

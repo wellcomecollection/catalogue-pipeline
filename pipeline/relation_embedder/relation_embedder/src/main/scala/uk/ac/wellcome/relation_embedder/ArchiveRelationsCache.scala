@@ -6,13 +6,13 @@ import grizzled.slf4j.Logging
 import uk.ac.wellcome.models.work.internal._
 import WorkState.Identified
 
-class ArchiveRelationsCache(works: Map[String, Work[Identified]])
+class ArchiveRelationsCache(works: Map[String, RelationWork])
     extends Logging {
 
   def apply(work: Work[Identified]): Relations[DataState.Identified] =
     work.data.collectionPath
       .map {
-        case CollectionPath(path, _, _) =>
+        case CollectionPath(path, _) =>
           val (siblingsPreceding, siblingsSucceeding) = getSiblings(path)
           val ancestors = getAncestors(path)
           val children = getChildren(path)
@@ -86,11 +86,10 @@ class ArchiveRelationsCache(works: Map[String, Work[Identified]])
     numDescendents(childMapping.getOrElse(path, Nil))
   }
 
-  private lazy val relations =
+  private lazy val relations: Map[String, Relation[DataState.Identified]] =
     works.map {
       case (path, work) =>
-        path -> Relation(
-          work = work,
+        path -> work.toRelation(
           depth = path.split("/").length - 1,
           numChildren = getNumChildren(path),
           numDescendents = getNumDescendents(path)
@@ -123,12 +122,12 @@ class ArchiveRelationsCache(works: Map[String, Work[Identified]])
 
 object ArchiveRelationsCache {
 
-  def apply(works: Seq[Work[Identified]]): ArchiveRelationsCache =
+  def apply(works: Seq[RelationWork]): ArchiveRelationsCache =
     new ArchiveRelationsCache(
       works
         .map { case work => work.data.collectionPath -> work }
         .collect {
-          case (Some(CollectionPath(path, _, _)), work) =>
+          case (Some(CollectionPath(path, _)), work) =>
             path -> work
         }
         .toMap

@@ -11,16 +11,13 @@ case class RelationsRequestBuilder(index: Index,
   // To reduce response size and improve Elasticsearch performance we only
   // return core fields
   private val relationsFieldWhitelist = List(
-    "version",
     "state.canonicalId",
     "state.sourceIdentifier.identifierType.id",
     "state.sourceIdentifier.identifierType.label",
     "state.sourceIdentifier.value",
     "state.sourceIdentifier.ontologyType",
-    "state.modifiedTime",
     "data.title",
     "data.collectionPath.path",
-    "data.collectionPath.level.type",
     "data.collectionPath.label",
     "data.workType",
   )

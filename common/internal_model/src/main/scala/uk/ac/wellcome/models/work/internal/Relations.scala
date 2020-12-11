@@ -47,6 +47,7 @@ case class Relation[State <: DataState](
   id: State#Id,
   title: Option[String],
   collectionPath: Option[CollectionPath],
+  workType: WorkType,
   depth: Int,
   numChildren: Int,
   numDescendents: Int,
@@ -65,6 +66,7 @@ object Relation {
       ),
       title = work.data.title,
       collectionPath = work.data.collectionPath,
+      workType = work.data.workType,
       depth = depth,
       numChildren = numChildren,
       numDescendents = numDescendents,
@@ -81,6 +83,7 @@ object Relation {
       ),
       title = work.data.title,
       collectionPath = work.data.collectionPath,
+      workType = work.data.workType,
       depth = depth,
       numChildren = numChildren,
       numDescendents = numDescendents
@@ -97,6 +100,7 @@ object Relation {
         data = WorkData(
           title = relation.title,
           collectionPath = relation.collectionPath,
+          workType = relation.workType,
         ),
         state = Indexed(
           canonicalId = relation.id.canonicalId,
