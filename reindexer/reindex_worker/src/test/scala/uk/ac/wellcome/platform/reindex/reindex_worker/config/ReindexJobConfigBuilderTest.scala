@@ -3,7 +3,10 @@ package uk.ac.wellcome.platform.reindex.reindex_worker.config
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.messaging.sns.SNSConfig
-import uk.ac.wellcome.platform.reindex.reindex_worker.models.{ReindexJobConfig, ReindexSource}
+import uk.ac.wellcome.platform.reindex.reindex_worker.models.{
+  ReindexJobConfig,
+  ReindexSource
+}
 import uk.ac.wellcome.storage.dynamo.DynamoConfig
 
 class ReindexJobConfigBuilderTest extends AnyFunSpec with Matchers {
@@ -82,7 +85,8 @@ class ReindexJobConfigBuilderTest extends AnyFunSpec with Matchers {
 
     configMap("mets--catalogue") shouldBe ReindexJobConfig(
       dynamoConfig = DynamoConfig(tableName = "mets-adapter-store"),
-      destinationConfig = SNSConfig(topicArn = "arn:aws:sns:eu-west-1:760097843905:mets_reindexer_topic"),
+      destinationConfig = SNSConfig(
+        topicArn = "arn:aws:sns:eu-west-1:760097843905:mets_reindexer_topic"),
       source = ReindexSource.Mets
     )
   }

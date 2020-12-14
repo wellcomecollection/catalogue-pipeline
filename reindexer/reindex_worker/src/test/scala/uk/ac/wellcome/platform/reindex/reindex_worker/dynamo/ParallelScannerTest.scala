@@ -12,7 +12,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class ParallelScannerTest
-  extends AnyFunSpec
+    extends AnyFunSpec
     with Matchers
     with ScalaFutures
     with ReindexDynamoFixtures {

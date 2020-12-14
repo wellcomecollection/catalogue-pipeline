@@ -10,7 +10,8 @@ import scala.concurrent.{ExecutionContext, Future}
 trait ItemParser {
   implicit val ec: ExecutionContext
 
-  protected def parseItems[T](items: Seq[Item])(implicit format: DynamoFormat[T]): Future[Seq[T]] =
+  protected def parseItems[T](items: Seq[Item])(
+    implicit format: DynamoFormat[T]): Future[Seq[T]] =
     Future {
       val results = items.map { it =>
         val dynamoObject: DynamoObject =

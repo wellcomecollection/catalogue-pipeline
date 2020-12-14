@@ -9,7 +9,7 @@ import uk.ac.wellcome.platform.reindex.reindex_worker.fixtures.ReindexDynamoFixt
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class MaxRecordsScannerTest
-  extends AnyFunSpec
+    extends AnyFunSpec
     with Matchers
     with ScalaFutures
     with ReindexDynamoFixtures {

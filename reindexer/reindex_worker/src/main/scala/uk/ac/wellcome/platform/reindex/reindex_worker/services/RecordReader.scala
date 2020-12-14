@@ -4,8 +4,8 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import grizzled.slf4j.Logging
 import org.scanamo.DynamoFormat
 import uk.ac.wellcome.platform.reindex.reindex_worker.dynamo.{
-  MultiItemGetter,
   MaxRecordsScanner,
+  MultiItemGetter,
   ParallelScanner
 }
 import uk.ac.wellcome.platform.reindex.reindex_worker.models._

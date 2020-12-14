@@ -24,7 +24,8 @@ object Main extends WellcomeTypesafeApp {
     implicit val executionContext: ExecutionContext =
       AkkaBuilder.buildExecutionContext()
 
-    implicit val dynamoDBClient: AmazonDynamoDB = DynamoBuilder.buildDynamoClient(config)
+    implicit val dynamoDBClient: AmazonDynamoDB =
+      DynamoBuilder.buildDynamoClient(config)
 
     val recordReader = new RecordReader
 

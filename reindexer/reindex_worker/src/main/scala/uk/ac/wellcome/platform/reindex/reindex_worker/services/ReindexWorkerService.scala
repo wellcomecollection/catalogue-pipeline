@@ -59,21 +59,29 @@ class ReindexWorkerService[Destination](
   def run(): Future[Done] =
     sqsStream.foreach(this.getClass.getSimpleName, processMessage)
 
-  private def readRecords(source: ReindexSource, reindexParameters: ReindexParameters, tableName: String): Future[Seq[ReindexPayload]] =
+  private def readRecords(source: ReindexSource,
+                          reindexParameters: ReindexParameters,
+                          tableName: String): Future[Seq[ReindexPayload]] =
     source match {
       case ReindexSource.Calm =>
-        recordReader.findRecords[CalmReindexPayload](reindexParameters, tableName)
+        recordReader
+          .findRecords[CalmReindexPayload](reindexParameters, tableName)
 
       case ReindexSource.Mets =>
-        recordReader.findRecords[MetsReindexPayload](reindexParameters, tableName)
+        recordReader
+          .findRecords[MetsReindexPayload](reindexParameters, tableName)
 
       case ReindexSource.Miro =>
-        recordReader.findRecords[MiroReindexPayload](reindexParameters, tableName)
+        recordReader
+          .findRecords[MiroReindexPayload](reindexParameters, tableName)
 
       case ReindexSource.MiroInventory =>
-        recordReader.findRecords[MiroInventoryReindexPayload](reindexParameters, tableName)
+        recordReader.findRecords[MiroInventoryReindexPayload](
+          reindexParameters,
+          tableName)
 
       case ReindexSource.Sierra =>
-        recordReader.findRecords[SierraReindexPayload](reindexParameters, tableName)
+        recordReader
+          .findRecords[SierraReindexPayload](reindexParameters, tableName)
     }
 }

@@ -8,7 +8,8 @@ import scala.concurrent.{ExecutionContext, Future}
 class BulkMessageSender[Destination](
   underlying: IndividualMessageSender[Destination])(
   implicit ec: ExecutionContext) {
-  def send[T](messages: Seq[T], destination: Destination)(implicit encoder: Encoder[T]): Future[Seq[Unit]] =
+  def send[T](messages: Seq[T], destination: Destination)(
+    implicit encoder: Encoder[T]): Future[Seq[Unit]] =
     Future.sequence {
       messages
         .map { m =>

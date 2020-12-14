@@ -16,12 +16,12 @@ import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class RecordReaderTest
-  extends AnyFunSpec
+    extends AnyFunSpec
     with ScalaFutures
     with Matchers
     with ReindexDynamoFixtures
     with IntegrationPatience {
-  
+
   val reader = new RecordReader()
 
   it("finds records in the table with a complete reindex") {
@@ -34,7 +34,8 @@ class RecordReaderTest
       )
 
       val future = reader.findRecords[NamedRecord](
-        reindexParameters, tableName = table.name
+        reindexParameters,
+        tableName = table.name
       )
 
       whenReady(future) {
@@ -50,7 +51,8 @@ class RecordReaderTest
       val reindexParameters = PartialReindexParameters(maxRecords = 5)
 
       val future = reader.findRecords[NamedRecord](
-        reindexParameters, tableName = table.name
+        reindexParameters,
+        tableName = table.name
       )
 
       whenReady(future) {
@@ -66,7 +68,8 @@ class RecordReaderTest
       val reindexParameters = SpecificReindexParameters(List(records.head.id))
 
       val future = reader.findRecords[NamedRecord](
-        reindexParameters, tableName = table.name
+        reindexParameters,
+        tableName = table.name
       )
 
       whenReady(future) {
@@ -84,7 +87,8 @@ class RecordReaderTest
     )
 
     val future = reader.findRecords[NamedRecord](
-      reindexParameters, tableName = table.name
+      reindexParameters,
+      tableName = table.name
     )
 
     whenReady(future.failed) {

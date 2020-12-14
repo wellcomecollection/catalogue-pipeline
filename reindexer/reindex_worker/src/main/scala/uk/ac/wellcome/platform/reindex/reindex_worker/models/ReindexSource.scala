@@ -14,11 +14,11 @@ object ReindexSource {
   case object Sierra extends ReindexSource
 
   implicit val decoder: Decoder[ReindexSource] = Decoder.decodeString.emapTry {
-    case "calm" => Success(ReindexSource.Calm)
-    case "mets" => Success(ReindexSource.Mets)
-    case "miro" => Success(ReindexSource.Miro)
+    case "calm"           => Success(ReindexSource.Calm)
+    case "mets"           => Success(ReindexSource.Mets)
+    case "miro"           => Success(ReindexSource.Miro)
     case "miro_inventory" => Success(ReindexSource.MiroInventory)
-    case "sierra" => Success(ReindexSource.Sierra)
-    case other => Failure(new Throwable(s"Unrecognised ReindexSource: $other"))
+    case "sierra"         => Success(ReindexSource.Sierra)
+    case other            => Failure(new Throwable(s"Unrecognised ReindexSource: $other"))
   }
 }

@@ -11,7 +11,11 @@ import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class MultiItemGetterTest extends AnyFunSpec with Matchers with ScalaFutures with ReindexDynamoFixtures {
+class MultiItemGetterTest
+    extends AnyFunSpec
+    with Matchers
+    with ScalaFutures
+    with ReindexDynamoFixtures {
   val multiItemGetter = new MultiItemGetter()
 
   it("finds a single specified record") {
@@ -19,7 +23,8 @@ class MultiItemGetterTest extends AnyFunSpec with Matchers with ScalaFutures wit
       val records = createRecords(table, count = 5)
       val specifiedRecord = records.head
 
-      val future = multiItemGetter.get[NamedRecord](ids = Seq(specifiedRecord.id))(table.name)
+      val future = multiItemGetter.get[NamedRecord](
+        ids = Seq(specifiedRecord.id))(table.name)
 
       whenReady(future) {
         _ shouldBe Seq(specifiedRecord)
@@ -32,7 +37,9 @@ class MultiItemGetterTest extends AnyFunSpec with Matchers with ScalaFutures wit
       val records = createRecords(table, count = 5)
       val specifiedRecords = records.slice(1, 3)
 
-      val future = multiItemGetter.get[NamedRecord](specifiedRecords.map { _.id }.toList)(table.name)
+      val future = multiItemGetter.get[NamedRecord](specifiedRecords.map {
+        _.id
+      }.toList)(table.name)
 
       whenReady(future) {
         _ should contain theSameElementsAs specifiedRecords
@@ -58,7 +65,8 @@ class MultiItemGetterTest extends AnyFunSpec with Matchers with ScalaFutures wit
       val specifiedRecordIds =
         List(records.head.id, "durian", records(1).id, "jackfruit")
 
-      val future = multiItemGetter.get[NamedRecord](specifiedRecordIds)(table.name)
+      val future =
+        multiItemGetter.get[NamedRecord](specifiedRecordIds)(table.name)
 
       whenReady(future) {
         _ should contain theSameElementsAs Seq(records(0), records(1))
@@ -70,7 +78,10 @@ class MultiItemGetterTest extends AnyFunSpec with Matchers with ScalaFutures wit
     case class Shape(sides: String, name: String)
 
     val createShapeTable: Table => Table = (table: Table) =>
-      createTableWithHashKey(table, keyName = "sides", keyType = ScalarAttributeType.S)
+      createTableWithHashKey(
+        table,
+        keyName = "sides",
+        keyType = ScalarAttributeType.S)
 
     val shapes = Seq(
       Shape(sides = "3", name = "triangle"),

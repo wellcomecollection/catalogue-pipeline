@@ -31,9 +31,10 @@ trait WorkerServiceFixture extends Akka with SQS with ReindexDynamoFixtures {
   def createDestination: Destination =
     Random.alphanumeric.take(8) mkString
 
-  def withWorkerService[R](messageSender: MemoryIndividualMessageSender,
-                           queue: Queue,
-                           configMap: Map[String, (Table, Destination, ReindexSource)])(
+  def withWorkerService[R](
+    messageSender: MemoryIndividualMessageSender,
+    queue: Queue,
+    configMap: Map[String, (Table, Destination, ReindexSource)])(
     testWith: TestWith[ReindexWorkerService[Destination], R]): R =
     withActorSystem { implicit actorSystem =>
       withSQSStream[NotificationMessage, R](queue) { sqsStream =>
@@ -59,7 +60,10 @@ trait WorkerServiceFixture extends Akka with SQS with ReindexDynamoFixtures {
 
   def chooseReindexSource: ReindexSource =
     chooseFrom(
-      ReindexSource.Calm, ReindexSource.Mets, ReindexSource.Miro, ReindexSource.Sierra
+      ReindexSource.Calm,
+      ReindexSource.Mets,
+      ReindexSource.Miro,
+      ReindexSource.Sierra
     )
 
   def withWorkerService[R](messageSender: MemoryIndividualMessageSender,

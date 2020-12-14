@@ -104,9 +104,11 @@ class ReindexWorkerServiceTest
                 "createdDate" -> new AttributeValue().withN("1569103811343"),
                 "deleted" -> new AttributeValue().withBOOL(sourceData.deleted),
                 "file" -> new AttributeValue(sourceData.file),
-                "manifestations" -> new AttributeValue().withL(sourceData.manifestations.map { new AttributeValue(_) }.asJava),
+                "manifestations" -> new AttributeValue().withL(
+                  sourceData.manifestations.map { new AttributeValue(_) }.asJava),
                 "path" -> new AttributeValue(sourceData.path),
-                "version" -> new AttributeValue().withN(sourceData.version.toString)
+                "version" -> new AttributeValue().withN(
+                  sourceData.version.toString)
               ).asJava
             ),
             "version" -> new AttributeValue().withN(version.toString)
@@ -144,7 +146,8 @@ class ReindexWorkerServiceTest
                 "key" -> new AttributeValue(location.key)
               ).asJava
             ),
-            "isClearedForCatalogueAPI" -> new AttributeValue().withBOOL(isClearedForCatalogueAPI),
+            "isClearedForCatalogueAPI" -> new AttributeValue()
+              .withBOOL(isClearedForCatalogueAPI),
             "version" -> new AttributeValue().withN(version.toString)
           ).asJava
         )
@@ -232,29 +235,34 @@ class ReindexWorkerServiceTest
       }
     }
 
-    def runTest[T <: ReindexPayload](table: Table, source: ReindexSource, expectedRecord: T)(implicit decoder: Decoder[T]): Assertion = {
+    def runTest[T <: ReindexPayload](
+      table: Table,
+      source: ReindexSource,
+      expectedRecord: T)(implicit decoder: Decoder[T]): Assertion = {
       val messageSender = new MemoryIndividualMessageSender()
       val destination = createDestination
 
       withLocalSqsQueuePair() {
         case QueuePair(queue, dlq) =>
-          withWorkerService(messageSender, queue, table, destination, source) { _ =>
-            val reindexParameters = CompleteReindexParameters(
-              segment = 0,
-              totalSegments = 1
-            )
+          withWorkerService(messageSender, queue, table, destination, source) {
+            _ =>
+              val reindexParameters = CompleteReindexParameters(
+                segment = 0,
+                totalSegments = 1
+              )
 
-            sendNotificationToSQS(
-              queue = queue,
-              message = createReindexRequestWith(parameters = reindexParameters)
-            )
+              sendNotificationToSQS(
+                queue = queue,
+                message =
+                  createReindexRequestWith(parameters = reindexParameters)
+              )
 
-            eventually {
-              messageSender.getMessages[T] shouldBe Seq(expectedRecord)
+              eventually {
+                messageSender.getMessages[T] shouldBe Seq(expectedRecord)
 
-              assertQueueEmpty(queue)
-              assertQueueEmpty(dlq)
-            }
+                assertQueueEmpty(queue)
+                assertQueueEmpty(dlq)
+              }
           }
       }
     }
