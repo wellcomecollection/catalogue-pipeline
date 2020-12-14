@@ -121,7 +121,7 @@ trait WorksIndexConfigFields extends IndexConfigFields {
     )
 
   def mergeCandidates = objectField("mergeCandidates").fields(
-    objectField("identifier").fields(sourceIdentifierFields),
+    id(),
     keywordField("reason")
   )
 
