@@ -1,7 +1,10 @@
 package uk.ac.wellcome.platform.sierra_bib_merger.services
 
 import uk.ac.wellcome.platform.sierra_bib_merger.merger.BibMerger
-import uk.ac.wellcome.sierra_adapter.model.{SierraBibRecord, SierraTransformable}
+import uk.ac.wellcome.sierra_adapter.model.{
+  SierraBibRecord,
+  SierraTransformable
+}
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.{Identified, UpdateNotApplied, Version}
 import weco.catalogue.source_model.store.SourceVHS
@@ -11,7 +14,8 @@ class SierraBibMergerUpdaterService(
 ) {
 
   def update(bibRecord: SierraBibRecord)
-    : Either[Throwable, Option[Identified[Version[String, Int], S3ObjectLocation]]] = {
+    : Either[Throwable,
+             Option[Identified[Version[String, Int], S3ObjectLocation]]] = {
     val upsertResult =
       sourceVHS
         .upsert(bibRecord.id.withoutCheckDigit)(SierraTransformable(bibRecord)) {
@@ -25,9 +29,10 @@ class SierraBibMergerUpdaterService(
         }
 
     upsertResult match {
-      case Right(Identified(id, (location, _))) => Right(Some(Identified(id, location)))
-      case Left(_: UpdateNotApplied)            => Right(None)
-      case Left(err)                            => Left(err.e)
+      case Right(Identified(id, (location, _))) =>
+        Right(Some(Identified(id, location)))
+      case Left(_: UpdateNotApplied) => Right(None)
+      case Left(err)                 => Left(err.e)
     }
   }
 }

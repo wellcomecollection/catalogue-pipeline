@@ -33,7 +33,7 @@ class SierraBibMergerWorkerService[Destination](
 
           messageSender.sendT(payload)
 
-        case _       => Success(())
+        case _ => Success(())
       }
     } yield ())
 

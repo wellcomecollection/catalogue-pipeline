@@ -53,7 +53,9 @@ class SierraBibMergerFeatureTest
 
             messageSender
               .getMessages[SierraSourcePayload]
-              .map { p => Version(p.id, p.version) } shouldBe Seq(id)
+              .map { p =>
+                Version(p.id, p.version)
+              } shouldBe Seq(id)
           }
       }
     }
@@ -78,8 +80,10 @@ class SierraBibMergerFeatureTest
           val expectedTransformable2 =
             SierraTransformable(bibRecord = record2)
 
-          val id1 = Version(expectedTransformable1.sierraId.withoutCheckDigit, 0)
-          val id2 = Version(expectedTransformable2.sierraId.withoutCheckDigit, 0)
+          val id1 =
+            Version(expectedTransformable1.sierraId.withoutCheckDigit, 0)
+          val id2 =
+            Version(expectedTransformable2.sierraId.withoutCheckDigit, 0)
 
           eventually {
             assertStoredAndSent(
@@ -98,7 +102,9 @@ class SierraBibMergerFeatureTest
 
           messageSender
             .getMessages[SierraSourcePayload]
-            .map { p => Version(p.id, p.version) } shouldBe Seq(id1, id2)
+            .map { p =>
+              Version(p.id, p.version)
+            } shouldBe Seq(id1, id2)
       }
     }
   }
@@ -143,7 +149,9 @@ class SierraBibMergerFeatureTest
 
           messageSender
             .getMessages[SierraSourcePayload]
-            .map { p => Version(p.id, p.version) } shouldBe Seq(id)
+            .map { p =>
+              Version(p.id, p.version)
+            } shouldBe Seq(id)
       }
     }
   }
@@ -259,7 +267,9 @@ class SierraBibMergerFeatureTest
 
             messageSender
               .getMessages[SierraSourcePayload]
-              .map { p => Version(p.id, p.version) } shouldBe Seq(id)
+              .map { p =>
+                Version(p.id, p.version)
+              } shouldBe Seq(id)
           }
       }
     }

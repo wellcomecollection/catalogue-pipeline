@@ -29,17 +29,17 @@ trait SierraItemMergerFixtures
     with SQS
     with SierraAdapterHelpers
     with SourceVHSFixture {
-  def withSierraUpdaterService[R](
-                                   sourceVHS: SourceVHS[SierraTransformable])(
+  def withSierraUpdaterService[R](sourceVHS: SourceVHS[SierraTransformable])(
     testWith: TestWith[SierraItemMergerUpdaterService, R]): R = {
     val sierraUpdaterService = new SierraItemMergerUpdaterService(sourceVHS)
     testWith(sierraUpdaterService)
   }
 
   def withSierraWorkerService[R](
-                                  queue: Queue,
-                                  itemRecordStore: VersionedStore[String, Int, SierraItemRecord],
-                                  sourceVHS: SourceVHS[SierraTransformable] = createSourceVHS[SierraTransformable])(
+    queue: Queue,
+    itemRecordStore: VersionedStore[String, Int, SierraItemRecord],
+    sourceVHS: SourceVHS[SierraTransformable] =
+      createSourceVHS[SierraTransformable])(
     testWith: TestWith[(SierraItemMergerWorkerService[String],
                         MemoryMessageSender),
                        R]): R =
@@ -48,7 +48,8 @@ trait SierraItemMergerFixtures
         val snsWriter = new MemoryMessageSender
         val workerService = new SierraItemMergerWorkerService(
           sqsStream = sqsStream,
-          sierraItemMergerUpdaterService = new SierraItemMergerUpdaterService(sourceVHS),
+          sierraItemMergerUpdaterService =
+            new SierraItemMergerUpdaterService(sourceVHS),
           itemRecordStore = new ItemStore(itemRecordStore),
           messageSender = snsWriter
         )

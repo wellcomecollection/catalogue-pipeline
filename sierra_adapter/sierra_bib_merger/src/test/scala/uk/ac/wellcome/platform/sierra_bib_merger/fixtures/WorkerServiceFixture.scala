@@ -26,10 +26,10 @@ trait WorkerServiceFixture
     with SNS
     with SQS
     with SourceVHSFixture {
-  def withWorkerService[R](
-    sourceVHS: SourceVHS[SierraTransformable] = createSourceVHS[SierraTransformable],
-    queue: Queue,
-    metrics: Metrics[Future] = new MemoryMetrics())(
+  def withWorkerService[R](sourceVHS: SourceVHS[SierraTransformable] =
+                             createSourceVHS[SierraTransformable],
+                           queue: Queue,
+                           metrics: Metrics[Future] = new MemoryMetrics())(
     testWith: TestWith[(SierraBibMergerWorkerService[String],
                         MemoryMessageSender),
                        R]): R =

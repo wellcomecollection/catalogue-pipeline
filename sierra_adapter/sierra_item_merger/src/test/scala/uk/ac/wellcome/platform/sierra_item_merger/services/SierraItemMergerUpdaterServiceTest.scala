@@ -39,7 +39,8 @@ class SierraItemMergerUpdaterServiceTest
     val result = sierraUpdaterService.update(newItemRecord)
 
     result shouldBe a[Right[_, _]]
-    result.right.get.map { _.id } shouldBe List(Version(bibId.withoutCheckDigit, 0))
+    result.right.get.map { _.id } shouldBe List(
+      Version(bibId.withoutCheckDigit, 0))
 
     val expectedSierraTransformable =
       createSierraTransformableWith(
@@ -48,7 +49,10 @@ class SierraItemMergerUpdaterServiceTest
         itemRecords = List(newItemRecord)
       )
 
-    assertStored(bibId.withoutCheckDigit, expectedSierraTransformable, sourceVHS)
+    assertStored(
+      bibId.withoutCheckDigit,
+      expectedSierraTransformable,
+      sourceVHS)
   }
 
   it("only updates records that have changed") {
@@ -409,19 +413,28 @@ class SierraItemMergerUpdaterServiceTest
     )
   }
 
-  class BrokenStore extends HybridStoreWithMaxima[String, Int, S3ObjectLocation, SierraTransformable] {
-    override protected def createTypeStoreId(id: Version[String, Int]): S3ObjectLocation =
+  class BrokenStore
+      extends HybridStoreWithMaxima[
+        String,
+        Int,
+        S3ObjectLocation,
+        SierraTransformable] {
+    override protected def createTypeStoreId(
+      id: Version[String, Int]): S3ObjectLocation =
       createS3ObjectLocation
 
-    implicit override val indexedStore: Store[Version[String, Int], S3ObjectLocation] with Maxima[String, Version[String, Int], S3ObjectLocation] =
+    implicit override val indexedStore
+      : Store[Version[String, Int], S3ObjectLocation] with Maxima[
+        String,
+        Version[String, Int],
+        S3ObjectLocation] =
       new MemoryStore[Version[String, Int], S3ObjectLocation](
-        initialEntries = Map.empty)
-        with MemoryMaxima[String, S3ObjectLocation]
+        initialEntries = Map.empty) with MemoryMaxima[String, S3ObjectLocation]
 
-    override implicit val typedStore: TypedStore[S3ObjectLocation, SierraTransformable] =
+    override implicit val typedStore
+      : TypedStore[S3ObjectLocation, SierraTransformable] =
       MemoryTypedStore[S3ObjectLocation, SierraTransformable]()
   }
-
 
   it("fails if merging an item fails") {
     val exception = new RuntimeException("AAAAARGH!")
@@ -430,7 +443,8 @@ class SierraItemMergerUpdaterServiceTest
       underlying = new VersionedHybridStore(
         hybridStore = new BrokenStore()
       ) {
-        override def upsert(id: String)(t: SierraTransformable)(f: UpdateFunction): UpdateEither =
+        override def upsert(id: String)(t: SierraTransformable)(
+          f: UpdateFunction): UpdateEither =
           Left(UpdateWriteError(StoreWriteError(exception)))
       }
     )

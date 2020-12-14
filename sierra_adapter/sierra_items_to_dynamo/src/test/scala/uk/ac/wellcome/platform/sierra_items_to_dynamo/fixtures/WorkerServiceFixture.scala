@@ -19,10 +19,7 @@ import weco.catalogue.source_model.store.SourceVHS
 
 import scala.concurrent.Future
 
-trait WorkerServiceFixture
-    extends SQS
-    with Akka
-    with SourceVHSFixture {
+trait WorkerServiceFixture extends SQS with Akka with SourceVHSFixture {
 
   def withWorkerService[R](
     queue: Queue,

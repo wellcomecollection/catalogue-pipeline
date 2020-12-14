@@ -111,7 +111,10 @@ class SierraItemsToDynamoWorkerServiceTest
                 Version(record1.id.withoutCheckDigit, 2)
               )
 
-              assertStored(record1.id.withoutCheckDigit, expectedRecord, sourceVHS)
+              assertStored(
+                record1.id.withoutCheckDigit,
+                expectedRecord,
+                sourceVHS)
             }
         }
     }

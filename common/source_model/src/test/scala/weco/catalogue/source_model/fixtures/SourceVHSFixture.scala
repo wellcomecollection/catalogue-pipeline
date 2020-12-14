@@ -6,7 +6,12 @@ import uk.ac.wellcome.storage.generators.S3ObjectLocationGenerators
 import uk.ac.wellcome.storage.maxima.Maxima
 import uk.ac.wellcome.storage.maxima.memory.MemoryMaxima
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
-import uk.ac.wellcome.storage.store.{HybridStoreWithMaxima, Store, TypedStore, VersionedHybridStore}
+import uk.ac.wellcome.storage.store.{
+  HybridStoreWithMaxima,
+  Store,
+  TypedStore,
+  VersionedHybridStore
+}
 import uk.ac.wellcome.storage.store.memory.{MemoryStore, MemoryTypedStore}
 import uk.ac.wellcome.storage.streaming.Codec
 import weco.catalogue.source_model.store.SourceVHS
@@ -44,8 +49,9 @@ trait SourceVHSFixture extends S3ObjectLocationGenerators with Matchers {
   )(implicit codec: Codec[T]): SourceVHS[T] = {
     val vhs = new SourceVHS[T](createStore[T])
 
-    initialEntries.foreach { case (id, t) =>
-      vhs.underlying.put(id)(t) shouldBe a[Right[_, _]]
+    initialEntries.foreach {
+      case (id, t) =>
+        vhs.underlying.put(id)(t) shouldBe a[Right[_, _]]
     }
 
     vhs

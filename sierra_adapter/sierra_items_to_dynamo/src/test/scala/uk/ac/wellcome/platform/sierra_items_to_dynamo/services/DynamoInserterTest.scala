@@ -81,7 +81,10 @@ class DynamoInserterTest
 
     dynamoInserter.insertIntoDynamo(newRecord)
 
-    assertStored[SierraItemRecord](oldRecord.id.withoutCheckDigit, newRecord, sourceVHS)
+    assertStored[SierraItemRecord](
+      oldRecord.id.withoutCheckDigit,
+      newRecord,
+      sourceVHS)
   }
 
   it("records unlinked bibIds") {
@@ -169,21 +172,35 @@ class DynamoInserterTest
     dynamoInserter.insertIntoDynamo(newRecord)
 
     val actualRecord =
-      sourceVHS.underlying.getLatest(oldRecord.id.withoutCheckDigit).right.get.identifiedT
+      sourceVHS.underlying
+        .getLatest(oldRecord.id.withoutCheckDigit)
+        .right
+        .get
+        .identifiedT
 
     actualRecord.unlinkedBibIds shouldBe List(bibIds(4), bibIds(0))
   }
 
-  class BrokenStore extends HybridStoreWithMaxima[String, Int, S3ObjectLocation, SierraItemRecord] {
-    override protected def createTypeStoreId(id: Version[String, Int]): S3ObjectLocation =
+  class BrokenStore
+      extends HybridStoreWithMaxima[
+        String,
+        Int,
+        S3ObjectLocation,
+        SierraItemRecord] {
+    override protected def createTypeStoreId(
+      id: Version[String, Int]): S3ObjectLocation =
       createS3ObjectLocation
 
-    implicit override val indexedStore: Store[Version[String, Int], S3ObjectLocation] with Maxima[String, Version[String, Int], S3ObjectLocation] =
+    implicit override val indexedStore
+      : Store[Version[String, Int], S3ObjectLocation] with Maxima[
+        String,
+        Version[String, Int],
+        S3ObjectLocation] =
       new MemoryStore[Version[String, Int], S3ObjectLocation](
-        initialEntries = Map.empty)
-        with MemoryMaxima[String, S3ObjectLocation]
+        initialEntries = Map.empty) with MemoryMaxima[String, S3ObjectLocation]
 
-    override implicit val typedStore: TypedStore[S3ObjectLocation, SierraItemRecord] =
+    override implicit val typedStore
+      : TypedStore[S3ObjectLocation, SierraItemRecord] =
       MemoryTypedStore[S3ObjectLocation, SierraItemRecord]()
   }
 
@@ -193,7 +210,8 @@ class DynamoInserterTest
     )
     val exception = new RuntimeException("AAAAARGH!")
     val brokenStore = new VersionedHybridStore(new BrokenStore) {
-      override def upsert(id: String)(t: SierraItemRecord)(f: UpdateFunction): UpdateEither =
+      override def upsert(id: String)(t: SierraItemRecord)(
+        f: UpdateFunction): UpdateEither =
         Left(UpdateWriteError(StoreWriteError(exception)))
     }
 

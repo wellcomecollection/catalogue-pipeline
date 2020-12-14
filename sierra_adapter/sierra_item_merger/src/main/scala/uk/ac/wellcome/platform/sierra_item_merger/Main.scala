@@ -28,7 +28,9 @@ object Main extends WellcomeTypesafeApp {
       AkkaBuilder.buildExecutionContext()
 
     val updaterService = new SierraItemMergerUpdaterService(
-      sourceVHS = SourceVHSBuilder.build[SierraTransformable](config, namespace = "vhs-sierra-transformable")
+      sourceVHS = SourceVHSBuilder.build[SierraTransformable](
+        config,
+        namespace = "vhs-sierra-transformable")
     )
 
     new SierraItemMergerWorkerService(

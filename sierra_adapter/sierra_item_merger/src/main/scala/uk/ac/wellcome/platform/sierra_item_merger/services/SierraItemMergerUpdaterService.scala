@@ -24,7 +24,8 @@ class SierraItemMergerUpdaterService(
 ) {
 
   def update(itemRecord: SierraItemRecord)
-    : Either[StorageError, List[Identified[Version[String, Int], S3ObjectLocation]]] = {
+    : Either[StorageError,
+             List[Identified[Version[String, Int], S3ObjectLocation]]] = {
     val linkUpdates =
       itemRecord.bibIds.map { linkBib(_, itemRecord) }
 
@@ -37,9 +38,10 @@ class SierraItemMergerUpdaterService(
     }.sequence
   }
 
-  private def linkBib(
-    bibId: SierraBibNumber,
-    itemRecord: SierraItemRecord): Either[StorageError, Identified[Version[String, Int], S3ObjectLocation]] = {
+  private def linkBib(bibId: SierraBibNumber,
+                      itemRecord: SierraItemRecord): Either[
+    StorageError,
+    Identified[Version[String, Int], S3ObjectLocation]] = {
     val newTransformable =
       SierraTransformable(
         sierraId = bibId,
@@ -60,9 +62,9 @@ class SierraItemMergerUpdaterService(
       .map { case Identified(id, (location, _)) => Identified(id, location) }
   }
 
-  private def unlinkBib(
-    unlinkedBibId: SierraBibNumber,
-    itemRecord: SierraItemRecord): Either[StorageError, Identified[Version[String, Int], S3ObjectLocation]] =
+  private def unlinkBib(unlinkedBibId: SierraBibNumber,
+                        itemRecord: SierraItemRecord)
+    : Either[StorageError, Identified[Version[String, Int], S3ObjectLocation]] =
     sourceVHS
       .update(unlinkedBibId.withoutCheckDigit) { existingTransformable =>
         ItemUnlinker.unlinkItemRecord(existingTransformable, itemRecord) match {

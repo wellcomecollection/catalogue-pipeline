@@ -19,9 +19,7 @@ trait SierraAdapterHelpers extends Matchers {
     : MemoryVersionedStore[String, T] =
     new MemoryVersionedStore(new MemoryStore(data) with MemoryMaxima[String, T])
 
-  def assertStored[T](id: String,
-                      t: T,
-                      sourceVHS: SourceVHS[T]): Assertion =
+  def assertStored[T](id: String, t: T, sourceVHS: SourceVHS[T]): Assertion =
     sourceVHS.underlying.getLatest(id).right.get.identifiedT shouldBe t
 
   def assertStoredAndSent[T](id: Version[String, Int],
