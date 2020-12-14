@@ -98,7 +98,7 @@ class RelationEmbedderWorkerServiceTest
     List(workA, workB, workC, workD, workE, work2, work1)
 
   def relations(index: mutable.Map[String, Work[Denormalised]])
-    : Map[String, Relations[DataState.Identified]] =
+    : Map[String, Relations] =
     index.map { case (key, work) => key -> work.state.relations }.toMap
 
   it("denormalises a batch containing a list of selectors") {
@@ -233,7 +233,7 @@ class RelationEmbedderWorkerServiceTest
     def getAffectedWorks(batch: Batch): Source[Work[Identified], NotUsed] =
       Source.single(()).map[Work[Identified]](throw new Exception("Failing"))
 
-    def getCompleteTree(batch: Batch): Source[Work[Identified], NotUsed] =
-      Source.single(()).map[Work[Identified]](throw new Exception("Failing"))
+    def getRelationTree(batch: Batch): Source[RelationWork, NotUsed] =
+      Source.single(()).map[RelationWork](throw new Exception("Failing"))
   }
 }
