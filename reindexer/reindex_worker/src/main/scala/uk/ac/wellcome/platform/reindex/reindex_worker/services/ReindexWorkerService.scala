@@ -1,19 +1,19 @@
 package uk.ac.wellcome.platform.reindex.reindex_worker.services
 
 import akka.Done
+import org.scanamo.auto._
+import org.scanamo.time.JavaTimeFormats._
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
-import uk.ac.wellcome.platform.reindex.reindex_worker.models.{
-  ReindexJobConfig,
-  ReindexRequest
-}
+import uk.ac.wellcome.platform.reindex.reindex_worker.models.source.{CalmReindexPayload, MetsReindexPayload, MiroInventoryReindexPayload, MiroReindexPayload, ReindexPayload, SierraReindexPayload}
+import uk.ac.wellcome.platform.reindex.reindex_worker.models.{ReindexJobConfig, ReindexParameters, ReindexRequest, ReindexSource}
 import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class ReindexWorkerService[Destination](
-  recordReader: RecordReader,
+  recordReader: NewRecordReader,
   bulkMessageSender: BulkMessageSender[Destination],
   sqsStream: SQSStream[NotificationMessage],
   reindexJobConfigMap: Map[String, ReindexJobConfig[Destination]]
@@ -22,24 +22,46 @@ class ReindexWorkerService[Destination](
 
   private def processMessage(message: NotificationMessage): Future[Unit] =
     for {
-      reindexRequest: ReindexRequest <- Future.fromTry(
-        fromJson[ReindexRequest](message.body))
+      reindexRequest <- Future.fromTry {
+        fromJson[ReindexRequest](message.body)
+      }
+
       reindexJobConfig = reindexJobConfigMap.getOrElse(
         reindexRequest.jobConfigId,
         throw new RuntimeException(
           s"No such job config: ${reindexRequest.jobConfigId}")
       )
-      recordsToSend <- recordReader
-        .findRecordsForReindexing(
-          reindexParameters = reindexRequest.parameters,
-          dynamoConfig = reindexJobConfig.dynamoConfig
-        )
+
+      records <- readRecords(
+        source = reindexJobConfig.source,
+        reindexParameters = reindexRequest.parameters,
+        tableName = reindexJobConfig.dynamoConfig.tableName
+      )
+
       _ <- bulkMessageSender.send(
-        recordsToSend,
+        records,
         destination = reindexJobConfig.destinationConfig
       )
     } yield ()
 
   def run(): Future[Done] =
     sqsStream.foreach(this.getClass.getSimpleName, processMessage)
+
+  private def readRecords(source: ReindexSource, reindexParameters: ReindexParameters, tableName: String): Future[Seq[ReindexPayload]] =
+    source match {
+      case ReindexSource.Calm =>
+        recordReader.findRecords[CalmReindexPayload](reindexParameters, tableName)
+
+      case ReindexSource.Mets =>
+        recordReader.findRecords[MetsReindexPayload](reindexParameters, tableName)
+
+      case ReindexSource.Miro =>
+        recordReader.findRecords[MiroReindexPayload](reindexParameters, tableName)
+
+      case ReindexSource.MiroInventory =>
+        recordReader.findRecords[MiroInventoryReindexPayload](reindexParameters, tableName)
+
+      case ReindexSource.Sierra =>
+        recordReader.findRecords[SierraReindexPayload](reindexParameters, tableName)
+    }
 }

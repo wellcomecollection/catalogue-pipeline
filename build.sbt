@@ -168,7 +168,7 @@ lazy val batcher = setupProject(
 lazy val reindex_worker = setupProject(
   project,
   "reindexer/reindex_worker",
-  localDependencies = Seq(big_messaging_typesafe),
+  localDependencies = Seq(mets_adapter),
   externalDependencies = CatalogueDependencies.reindexWorkerDependencies)
 
 lazy val transformer_common = setupProject(
