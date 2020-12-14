@@ -223,6 +223,10 @@ object CatalogueDependencies {
     WellcomeDependencies.storageTypesafeLibrary ++
       WellcomeDependencies.messagingTypesafeLibrary
 
+  val sourceModelDependencies: Seq[sbt.ModuleID] =
+    WellcomeDependencies.storageLibrary ++
+      WellcomeDependencies.fixturesLibrary
+
   val pipelineStorageDependencies: Seq[ModuleID] =
     WellcomeDependencies.messagingLibrary
 
@@ -269,7 +273,12 @@ object CatalogueDependencies {
     ExternalDependencies.apacheCommonsDependencies ++
       WellcomeDependencies.storageTypesafeLibrary
 
-  val reindexWorkerDependencies: Seq[ModuleID] = Nil
+  val reindexWorkerDependencies: Seq[ModuleID] =
+    WellcomeDependencies.storageTypesafeLibrary ++
+      WellcomeDependencies.fixturesLibrary ++
+      WellcomeDependencies.messagingTypesafeLibrary ++
+      WellcomeDependencies.typesafeLibrary ++
+      ExternalDependencies.scalatestDependencies
 
   val sierraTransformerDependencies: Seq[ModuleID] =
     ExternalDependencies.apacheCommonsDependencies

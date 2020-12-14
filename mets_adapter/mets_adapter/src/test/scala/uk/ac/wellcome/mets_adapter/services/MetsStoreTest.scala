@@ -4,9 +4,8 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
 import uk.ac.wellcome.storage.{Identified, Version}
-import uk.ac.wellcome.mets_adapter.models.MetsSourceData
-
-import uk.ac.wellcome.mets_adapter.generators.MetsSourceDataGenerators
+import weco.catalogue.source_model.generators.MetsSourceDataGenerators
+import weco.catalogue.source_model.mets.MetsSourceData
 
 class MetsStoreTest
     extends AnyFunSpec
@@ -22,7 +21,7 @@ class MetsStoreTest
     )
     val store = new MetsStore(internalStore)
 
-    store.storeData(id, data) shouldBe Right(id)
+    store.storeData(id, data) shouldBe Right(Identified(id, data))
     internalStore.getLatest(id.id) shouldBe Right(Identified(id, data))
   }
 
@@ -40,7 +39,7 @@ class MetsStoreTest
     )
     val store = new MetsStore(internalStore)
 
-    store.storeData(newId, newData) shouldBe Right(newId)
+    store.storeData(newId, newData) shouldBe Right(Identified(newId, newData))
     internalStore.getLatest(id) shouldBe Right(Identified(newId, newData))
   }
 
@@ -53,7 +52,7 @@ class MetsStoreTest
     )
     val store = new MetsStore(internalStore)
 
-    store.storeData(id, data) shouldBe Right(id)
+    store.storeData(id, data) shouldBe Right(Identified(id, data))
     internalStore.getLatest(id.id) shouldBe Right(Identified(id, data))
   }
 

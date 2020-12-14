@@ -2,6 +2,6 @@
   "id" : "reindex_worker",
   "folder" : "reindexer/reindex_worker",
   "dependencyIds" : [
-    "mets_adapter"
+    "source_model"
   ]
 }

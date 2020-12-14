@@ -3,6 +3,7 @@ package uk.ac.wellcome.mets_adapter.models
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import java.time.Instant
+import weco.catalogue.source_model.mets.MetsSourceData
 
 class BagTest extends AnyFunSpec with Matchers {
 

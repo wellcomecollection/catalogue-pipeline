@@ -18,9 +18,11 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.storage.{Identified, Version}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import java.time.Instant
+import weco.catalogue.source_model.MetsSourcePayload
+import weco.catalogue.source_model.mets.MetsSourceData
 
-import uk.ac.wellcome.mets_adapter.generators.MetsSourceDataGenerators
+import java.time.Instant
+import weco.catalogue.source_model.generators.MetsSourceDataGenerators
 
 class MetsAdapterWorkerServiceTest
     extends AnyFunSpec
@@ -80,8 +82,13 @@ class MetsAdapterWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          messageSender.getMessages[Version[String, Int]]() shouldBe Seq(
-            expectedVersion)
+          messageSender.getMessages[MetsSourcePayload] shouldBe Seq(
+            MetsSourcePayload(
+              id = expectedVersion.id,
+              version = expectedVersion.version,
+              sourceData = expectedData
+            )
+          )
 
           store.getLatest(id = externalIdentifier) shouldBe Right(
             Identified(expectedVersion, expectedData)
@@ -103,8 +110,13 @@ class MetsAdapterWorkerServiceTest
         assertQueueEmpty(queue)
         assertQueueEmpty(dlq)
 
-        messageSender.getMessages[Version[String, Int]]() shouldBe Seq(
-          expectedVersion)
+        messageSender.getMessages[MetsSourcePayload]() shouldBe Seq(
+          MetsSourcePayload(
+            id = expectedVersion.id,
+            version = expectedVersion.version,
+            sourceData = expectedData
+          )
+        )
 
         store.getLatest(id = externalIdentifier) shouldBe Right(
           Identified(expectedVersion, expectedData)
@@ -113,10 +125,8 @@ class MetsAdapterWorkerServiceTest
   }
 
   it("re-publishes existing data when current version exists in the store") {
-    val existingData = createMetsSourceData
-
     val store = MemoryVersionedStore[String, MetsSourceData](
-      initialEntries = Map(Version(externalIdentifier, 1) -> existingData)
+      initialEntries = Map(Version(externalIdentifier, 1) -> expectedData)
     )
 
     withWorkerService(bagRetriever, store) {
@@ -125,16 +135,21 @@ class MetsAdapterWorkerServiceTest
         assertQueueEmpty(queue)
         assertQueueEmpty(dlq)
 
-        messageSender.getMessages[Version[String, Int]]() shouldBe Seq(
-          expectedVersion)
+        messageSender.getMessages[MetsSourcePayload] shouldBe Seq(
+          MetsSourcePayload(
+            id = expectedVersion.id,
+            version = expectedVersion.version,
+            sourceData = expectedData
+          )
+        )
 
         store.getLatest(id = externalIdentifier) shouldBe Right(
-          Identified(expectedVersion, existingData)
+          Identified(expectedVersion, expectedData)
         )
     }
   }
 
-  it("ignores messages when a newer version exists in the store") {
+  it("skips sending anything if there's already a newer version in the store") {
     val existingData = createMetsSourceData
 
     val store = MemoryVersionedStore[String, MetsSourceData](
@@ -212,11 +227,13 @@ class MetsAdapterWorkerServiceTest
     withWorkerService(bagRetriever) {
       case (_, QueuePair(queue, dlq), messageSender) =>
         sendSqsMessage(queue, notification)
-        Thread.sleep(2000)
-        assertQueueEmpty(queue)
-        assertQueueHasSize(dlq, 1)
 
-        messageSender.messages shouldBe empty
+        eventually {
+          assertQueueEmpty(queue)
+          assertQueueHasSize(dlq, 1)
+
+          messageSender.messages shouldBe empty
+        }
     }
   }
 
@@ -233,11 +250,15 @@ class MetsAdapterWorkerServiceTest
     withWorkerService(bagRetriever, store) {
       case (_, QueuePair(queue, dlq), messageSender) =>
         sendNotificationToSQS(queue, notification)
-        Thread.sleep(2000)
-        assertQueueEmpty(queue)
-        assertQueueEmpty(dlq)
-        messageSender.messages shouldBe empty
-        store.getLatest(id = externalIdentifier) shouldBe a[Left[_, _]]
+
+        eventually {
+          assertQueueEmpty(queue)
+          assertQueueEmpty(dlq)
+
+          messageSender.messages shouldBe empty
+
+          store.getLatest(id = externalIdentifier) shouldBe a[Left[_, _]]
+        }
     }
   }
 

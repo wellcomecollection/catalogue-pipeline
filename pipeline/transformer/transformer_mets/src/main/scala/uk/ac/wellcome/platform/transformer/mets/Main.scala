@@ -11,7 +11,6 @@ import org.scanamo.time.JavaTimeFormats._
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
-import uk.ac.wellcome.mets_adapter.models.MetsSourceData
 import uk.ac.wellcome.platform.transformer.mets.service.MetsTransformerWorkerService
 import uk.ac.wellcome.storage.store.dynamo.DynamoSingleVersionStore
 import uk.ac.wellcome.storage.typesafe.{DynamoBuilder, S3Builder}
@@ -27,6 +26,7 @@ import uk.ac.wellcome.pipeline_storage.typesafe.{
 }
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.typesafe.config.builders.AWSClientConfigBuilder
+import weco.catalogue.source_model.mets.MetsSourceData
 
 object Main extends WellcomeTypesafeApp with AWSClientConfigBuilder {
   runWithConfig { config: Config =>
