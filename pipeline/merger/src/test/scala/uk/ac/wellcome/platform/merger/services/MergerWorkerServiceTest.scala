@@ -160,7 +160,7 @@ class MergerWorkerServiceTest
             .withVersion(0)
 
         val work =
-          identifiedWork(sourceIdentifier = versionZeroWork.sourceIdentifier)
+          identifiedWork(canonicalId = versionZeroWork.state.canonicalId)
             .withVersion(1)
 
         val matcherResult = matcherResultWith(Set(Set(work, versionZeroWork)))
@@ -221,8 +221,8 @@ class MergerWorkerServiceTest
 
           redirectedWorks should have size 1
           redirectedWorks.head.sourceIdentifier shouldBe digitisedWork.sourceIdentifier
-          redirectedWorks.head.redirect shouldBe IdState.Identifiable(
-            physicalWork.sourceIdentifier)
+          redirectedWorks.head.redirect shouldBe IdState.Identified(
+            sourceIdentifier = physicalWork.sourceIdentifier, canonicalId = physicalWork.state.canonicalId)
 
           mergedWorks should have size 1
           mergedWorks.head.sourceIdentifier shouldBe physicalWork.sourceIdentifier
@@ -273,12 +273,12 @@ class MergerWorkerServiceTest
           redirectedWorks.map(_.sourceIdentifier) should contain only
             (digitisedWork.sourceIdentifier, miroWork.sourceIdentifier)
           redirectedWorks.map(_.redirect) should contain only
-            IdState.Identifiable(physicalWork.sourceIdentifier)
+            IdState.Identified(sourceIdentifier = physicalWork.sourceIdentifier, canonicalId = physicalWork.state.canonicalId)
 
           mergedWorks should have size 1
           mergedWorks.head.sourceIdentifier shouldBe physicalWork.sourceIdentifier
 
-          imagesSent.head.id shouldBe miroWork.data.imageData.head.id.sourceIdentifier.toString
+          imagesSent.head.id shouldBe miroWork.data.imageData.head.id.canonicalId
         }
     }
   }
@@ -344,7 +344,7 @@ class MergerWorkerServiceTest
     withMergerWorkerServiceFixtures {
       case (retriever, QueuePair(queue, dlq), senders, metrics, index) =>
         val work0 = identifiedWork().withVersion(0)
-        val work1 = identifiedWork(sourceIdentifier = work0.sourceIdentifier)
+        val work1 = identifiedWork(canonicalId = work0.state.canonicalId)
           .withVersion(1)
         val matcherResult = matcherResultWith(Set(Set(work0)))
         retriever.index ++= Map(work1.id -> work1)
