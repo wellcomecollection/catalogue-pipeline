@@ -118,7 +118,6 @@ class WorksIndexConfigTest
   it("puts a work with a collection") {
     val collectionPath = CollectionPath(
       path = "PATH/FOR/THE/COLLECTION",
-      level = Some(CollectionLevel.Item),
       label = Some("PATH/FOR/THE/COLLECTION")
     )
     withLocalWorksIndex { index =>
