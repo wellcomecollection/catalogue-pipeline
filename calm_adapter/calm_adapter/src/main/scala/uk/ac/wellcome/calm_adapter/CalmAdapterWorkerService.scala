@@ -5,16 +5,18 @@ import akka.stream.Materializer
 import akka.stream.scaladsl._
 import grizzled.slf4j.Logging
 import software.amazon.awssdk.services.sqs.model.{Message => SQSMessage}
-
 import uk.ac.wellcome.bigmessaging.FlowOps
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.storage.Version
+import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.typesafe.Runnable
+import weco.catalogue.source_model.CalmSourcePayload
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 /** Processes SQS messages consisting of a daily window, and publishes any CALM
   * records to the transformer that have been modified within this window.
@@ -87,12 +89,21 @@ class CalmAdapterWorkerService[Destination](
       .via(catchErrors)
 
   def publishKey =
-    Flow[Result[Option[(Key, CalmRecord)]]]
+    Flow[Result[Option[(Key, S3ObjectLocation, CalmRecord)]]]
       .map {
-        case Right(Some((key, record))) =>
-          messageSender.sendT(key).toEither.right.map(_ => Some(key -> record))
+        case Right(Some((key, location, record))) =>
+          val payload = CalmSourcePayload(
+            id = key.id,
+            location = location,
+            version = key.version
+          )
+
+          messageSender.sendT(payload) match {
+            case Success(_)   => Right(Some((key, record)))
+            case Failure(err) => Left(err)
+          }
         case Right(None) => Right(None)
-        case err         => err
+        case Left(err)   => Left(err)
       }
 
   def updatePublished =
@@ -101,7 +112,7 @@ class CalmAdapterWorkerService[Destination](
         case Right(Some((key, record))) =>
           calmStore.setRecordPublished(key, record)
         case Right(None) => Right(None)
-        case err         => err
+        case Left(err)   => Left(err)
       }
 
   def checkResultsForErrors(results: Seq[Result[_]],

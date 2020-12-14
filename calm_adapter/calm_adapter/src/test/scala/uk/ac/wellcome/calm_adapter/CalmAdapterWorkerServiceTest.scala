@@ -1,10 +1,10 @@
 package uk.ac.wellcome.calm_adapter
 
 import java.time.{Instant, LocalDate}
-
 import akka.NotUsed
 import akka.stream.scaladsl._
 import io.circe.Encoder
+import org.scalatest.EitherValues
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -18,10 +18,12 @@ import uk.ac.wellcome.messaging.memory.{
   MemoryMessageSender
 }
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.storage.Version
-import uk.ac.wellcome.storage.maxima.Maxima
+import uk.ac.wellcome.storage.{Identified, Version}
 import uk.ac.wellcome.storage.maxima.memory.MemoryMaxima
-import uk.ac.wellcome.storage.store.memory.{MemoryStore, MemoryVersionedStore}
+import uk.ac.wellcome.storage.store.memory.MemoryStore
+import weco.catalogue.source_model.CalmSourcePayload
+import weco.catalogue.source_model.fixtures.SourceVHSFixture
+import weco.catalogue.source_model.store.SourceVHS
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.language.reflectiveCalls
@@ -30,10 +32,12 @@ import scala.util.{Failure, Try}
 class CalmAdapterWorkerServiceTest
     extends AnyFunSpec
     with Matchers
+    with EitherValues
     with Akka
     with SQS
     with Eventually
-    with IntegrationPatience {
+    with IntegrationPatience
+    with SourceVHSFixture {
 
   type Key = Version[String, Int]
 
@@ -45,51 +49,61 @@ class CalmAdapterWorkerServiceTest
   val recordC = CalmRecord("C", Map("RecordID" -> List("C")), instantC)
   val queryDate = LocalDate.of(2000, 1, 1)
 
-  it("should process an incoming window, storing records and publishing keys") {
-    val store = dataStore()
+  it("processes an incoming window, storing records and publishing keys") {
+    val vhs = createSourceVHS[CalmRecord]
     val retriever = calmRetriever(List(recordA, recordB, recordC))
     val messageSender = new MemoryMessageSender()
 
-    withCalmAdapterWorkerService(retriever, store, messageSender) {
+    withCalmAdapterWorkerService(retriever, vhs, messageSender) {
       case (_, QueuePair(queue, dlq)) =>
         sendNotificationToSQS[CalmQuery](
           queue,
           CalmQuery.ModifiedDate(queryDate))
         eventually {
-          store.entries shouldBe Map(
-            Version("A", 0) -> recordA,
-            Version("A", 1) -> recordA.copy(published = true),
-            Version("B", 0) -> recordB,
-            Version("B", 1) -> recordB.copy(published = true),
-            Version("C", 0) -> recordC,
-            Version("C", 1) -> recordC.copy(published = true)
-          )
+          vhs.underlying.getLatest("A").value shouldBe Identified(
+            Version("A", 1),
+            recordA.copy(published = true))
+          vhs.underlying.getLatest("B").value shouldBe Identified(
+            Version("B", 1),
+            recordB.copy(published = true))
+          vhs.underlying.getLatest("C").value shouldBe Identified(
+            Version("C", 1),
+            recordC.copy(published = true))
+
           retriever.previousQuery shouldBe Some(
             CalmQuery.ModifiedDate(queryDate))
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          messageSender.getMessages[Version[String, Int]] shouldBe List(
+          val expectedVersions = List(
             Version("A", 0),
             Version("B", 0),
             Version("C", 0)
           )
+
+          messageSender
+            .getMessages[Version[String, Int]] shouldBe expectedVersions
+
+          messageSender
+            .getMessages[CalmSourcePayload]
+            .map { payload =>
+              Version(payload.id, payload.version)
+            } shouldBe expectedVersions
         }
     }
   }
 
-  it("should complete successfully when no records returned from the query") {
-    val store = dataStore()
+  it("completes successfully when no records returned from the query") {
     val retriever = calmRetriever(Nil)
     val messageSender = new MemoryMessageSender()
 
-    withCalmAdapterWorkerService(retriever, store, messageSender) {
+    withCalmAdapterWorkerService(retriever, messageSender = messageSender) {
       case (_, QueuePair(queue, dlq)) =>
         sendNotificationToSQS[CalmQuery](
           queue,
           CalmQuery.ModifiedDate(queryDate))
+
         Thread.sleep(1500)
-        store.entries shouldBe Map.empty
         assertQueueEmpty(queue)
         assertQueueEmpty(dlq)
 
@@ -97,7 +111,7 @@ class CalmAdapterWorkerServiceTest
     }
   }
 
-  it("should send the message to the DLQ if publishing of any record fails") {
+  it("sends the message to the DLQ if publishing of any record fails") {
     val retriever = new CalmRetriever {
       def apply(query: CalmQuery): Source[CalmRecord, NotUsed] = {
         val timestamp = Instant.now
@@ -134,9 +148,7 @@ class CalmAdapterWorkerServiceTest
 
   def withCalmAdapterWorkerService[R](
     retriever: CalmRetriever,
-    store: MemoryStore[Key, CalmRecord] with Maxima[String,
-                                                    Version[String, Int],
-                                                    CalmRecord] = dataStore(),
+    vhs: SourceVHS[CalmRecord] = createSourceVHS[CalmRecord],
     messageSender: MemoryMessageSender = new MemoryMessageSender())(
     testWith: TestWith[(CalmAdapterWorkerService[String], QueuePair), R]): R =
     withActorSystem { implicit actorSystem =>
@@ -147,7 +159,7 @@ class CalmAdapterWorkerServiceTest
               stream,
               messageSender = messageSender,
               retriever,
-              new CalmStore(new MemoryVersionedStore(store))
+              calmStore = new CalmStore(vhs)
             )
             calmAdapter.run()
             testWith((calmAdapter, QueuePair(queue, dlq)))

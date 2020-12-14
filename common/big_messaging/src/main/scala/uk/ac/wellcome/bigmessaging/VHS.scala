@@ -8,7 +8,7 @@ import uk.ac.wellcome.storage.store.{
   VersionedHybridStore
 }
 
-class VHS[T](val hybridStore: VHSInternalStore[T])
+class VHS[T](hybridStore: VHSInternalStore[T])
     extends VersionedHybridStore[
       String,
       Int,

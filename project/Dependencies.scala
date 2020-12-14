@@ -2,7 +2,7 @@ import sbt._
 
 object WellcomeDependencies {
 
-  val defaultVersion = "25.0.0"
+  val defaultVersion = "25.0.3"
 
   lazy val versions = new {
     val typesafe = defaultVersion
@@ -225,7 +225,12 @@ object CatalogueDependencies {
 
   val sourceModelDependencies: Seq[sbt.ModuleID] =
     WellcomeDependencies.storageLibrary ++
-      WellcomeDependencies.fixturesLibrary
+      WellcomeDependencies.fixturesLibrary ++
+      ExternalDependencies.scalatestDependencies
+
+  val sourceModelTypesafeDependencies: Seq[ModuleID] =
+    WellcomeDependencies.storageTypesafeLibrary ++
+      WellcomeDependencies.messagingTypesafeLibrary
 
   val pipelineStorageDependencies: Seq[ModuleID] =
     WellcomeDependencies.messagingLibrary

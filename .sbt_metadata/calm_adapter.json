@@ -3,6 +3,7 @@
   "folder" : "calm_adapter/calm_adapter",
   "dependencyIds" : [
     "internal_model",
+    "source_model_typesafe",
     "big_messaging_typesafe"
   ]
 }
