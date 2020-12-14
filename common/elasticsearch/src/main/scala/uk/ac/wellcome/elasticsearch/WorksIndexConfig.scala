@@ -174,15 +174,10 @@ trait WorksIndexConfigFields extends IndexConfigFields {
     )
 
   def relation(name: String, idState: ObjectField) =
-    objectField(name).fields(
-      // Locally override the strict mapping mode. No data fields are indexed for
-      // now, in the future specific fields can be added as required.
-      objectField("data").dynamic("false"),
-      idState,
-      intField("depth"),
-      intField("numChildren"),
-      intField("numDescendents"),
-    )
+    // Locally override the strict mapping mode. For now don't index any of the
+    // relation data, as doing so stresses the ES cluster. We can map specific
+    // bits of data in the future if required.
+    objectField(name).dynamic("false")
 
   def relations(idState: ObjectField) =
     objectField("relations").fields(

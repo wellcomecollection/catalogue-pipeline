@@ -693,8 +693,6 @@ class WorksIncludesTest
               "parts": [{
                 "id": "${workE.state.canonicalId}",
                 "title": "0/a/c/e",
-                "alternativeTitles": [],
-                "availableOnline": false,
                 "totalParts": 0,
                 "totalDescendentParts": 0,
                 "type": "Work"
@@ -723,16 +721,12 @@ class WorksIncludesTest
                 {
                   "id": "${workA.state.canonicalId}",
                   "title": "0/a",
-                  "alternativeTitles": [],
-                  "availableOnline": false,
                   "totalParts": 3,
                   "totalDescendentParts": 4,
                   "type": "Section",
                   "partOf": [{
                     "id": "${work0.state.canonicalId}",
                     "title": "0",
-                    "alternativeTitles": [],
-                    "availableOnline": false,
                     "totalParts": 1,
                     "totalDescendentParts": 5,
                     "type": "Collection",
@@ -763,8 +757,6 @@ class WorksIncludesTest
               "precededBy": [{
                 "id": "${workB.state.canonicalId}",
                 "title": "0/a/b",
-                "alternativeTitles": [],
-                "availableOnline": false,
                 "totalParts": 0,
                 "totalDescendentParts": 0,
                 "type": "Work"
@@ -792,8 +784,6 @@ class WorksIncludesTest
               "succeededBy": [{
                 "id": "${workD.state.canonicalId}",
                 "title": "0/a/d",
-                "alternativeTitles": [],
-                "availableOnline": false,
                 "totalParts": 0,
                 "totalDescendentParts": 0,
                 "type": "Work"
