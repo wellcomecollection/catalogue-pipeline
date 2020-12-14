@@ -188,9 +188,7 @@ object CalmTransformer
       .get("RefNo")
       .map { path =>
         Right(
-          CollectionPath(
-            path = path,
-            label = record.get("AltRefNo"))
+          CollectionPath(path = path, label = record.get("AltRefNo"))
         )
       }
       .getOrElse(Left(RefNoMissing))

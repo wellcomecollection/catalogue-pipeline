@@ -214,7 +214,8 @@ class RelationsServiceTest
         withActorSystem { implicit actorSystem =>
           storeWorks(index, works)
           whenReady(queryRelationTree(service(index), batch)) { relationWorks =>
-            relationWorks should contain theSameElementsAs works.map(toRelationWork)
+            relationWorks should contain theSameElementsAs works.map(
+              toRelationWork)
           }
         }
       }
@@ -225,7 +226,8 @@ class RelationsServiceTest
         withActorSystem { implicit actorSystem =>
           storeWorks(index, work("other/archive") :: works)
           whenReady(queryRelationTree(service(index), batch)) { relationWorks =>
-            relationWorks should contain theSameElementsAs works.map(toRelationWork)
+            relationWorks should contain theSameElementsAs works.map(
+              toRelationWork)
           }
         }
       }
@@ -236,7 +238,8 @@ class RelationsServiceTest
         withActorSystem { implicit actorSystem =>
           storeWorks(index, work("A/Invisible").invisible() :: works)
           whenReady(queryRelationTree(service(index), batch)) { relationWorks =>
-            relationWorks should contain theSameElementsAs works.map(toRelationWork)
+            relationWorks should contain theSameElementsAs works.map(
+              toRelationWork)
           }
         }
       }

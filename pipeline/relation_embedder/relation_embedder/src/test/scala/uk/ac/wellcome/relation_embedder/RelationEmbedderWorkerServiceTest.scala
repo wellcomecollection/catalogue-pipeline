@@ -97,8 +97,8 @@ class RelationEmbedderWorkerServiceTest
   val works =
     List(workA, workB, workC, workD, workE, work2, work1)
 
-  def relations(index: mutable.Map[String, Work[Denormalised]])
-    : Map[String, Relations] =
+  def relations(
+    index: mutable.Map[String, Work[Denormalised]]): Map[String, Relations] =
     index.map { case (key, work) => key -> work.state.relations }.toMap
 
   it("denormalises a batch containing a list of selectors") {
