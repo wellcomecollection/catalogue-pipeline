@@ -7,7 +7,7 @@ SBT_APPS =
 SBT_NO_DOCKER_APPS =
 
 SBT_DOCKER_LIBRARIES    = elasticsearch big_messaging pipeline_storage
-SBT_NO_DOCKER_LIBRARIES = display elasticsearch_typesafe internal_model
+SBT_NO_DOCKER_LIBRARIES = display elasticsearch_typesafe internal_model source_model source_model_typesafe
 
 PYTHON_APPS =
 LAMBDAS     =
