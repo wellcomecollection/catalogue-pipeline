@@ -8,7 +8,7 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal.Work
-import uk.ac.wellcome.models.work.internal.WorkState.Source
+import uk.ac.wellcome.models.work.internal.WorkState.Identified
 import uk.ac.wellcome.pipeline_storage.Retriever
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.matcher.WorkMatcher
@@ -18,7 +18,7 @@ import uk.ac.wellcome.typesafe.Runnable
 import scala.concurrent.{ExecutionContext, Future}
 
 class MatcherWorkerService[MsgDestination](
-  workRetriever: Retriever[Work[Source]],
+  workRetriever: Retriever[Work[Identified]],
   msgStream: SQSStream[NotificationMessage],
   msgSender: MessageSender[MsgDestination],
   workMatcher: WorkMatcher)(implicit ec: ExecutionContext)

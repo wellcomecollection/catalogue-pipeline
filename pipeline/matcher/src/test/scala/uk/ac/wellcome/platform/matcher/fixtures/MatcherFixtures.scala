@@ -27,7 +27,7 @@ import uk.ac.wellcome.storage.locking.dynamo.{
   DynamoLockingService,
   ExpiringLock
 }
-import WorkState.Source
+import WorkState.Identified
 import uk.ac.wellcome.pipeline_storage.MemoryRetriever
 
 import scala.collection.mutable
@@ -52,7 +52,7 @@ trait MatcherFixtures
     }
 
   def withWorkerService[R](
-    workRetriever: MemoryRetriever[Work[Source]],
+    workRetriever: MemoryRetriever[Work[Identified]],
     queue: SQS.Queue,
     messageSender: MemoryMessageSender,
     graphTable: Table)(testWith: TestWith[MatcherWorkerService[String], R]): R =
@@ -75,7 +75,7 @@ trait MatcherFixtures
       }
     }
 
-  def withWorkerService[R](workRetriever: MemoryRetriever[Work[Source]],
+  def withWorkerService[R](workRetriever: MemoryRetriever[Work[Identified]],
                            queue: SQS.Queue,
                            messageSender: MemoryMessageSender)(
     testWith: TestWith[MatcherWorkerService[String], R]): R =
@@ -122,8 +122,8 @@ trait MatcherFixtures
   }
 
   def sendWork(
-    work: Work[Source],
-    retriever: MemoryRetriever[Work[Source]],
+    work: Work[Identified],
+    retriever: MemoryRetriever[Work[Identified]],
     queue: SQS.Queue
   ): Any = {
     retriever.index ++= Map(work.id -> work)
@@ -146,8 +146,8 @@ trait MatcherFixtures
     implicit format: DynamoFormat[T]): List[Either[DynamoReadError, T]] =
     Scanamo(dynamoClient).exec { ScanamoTable[T](tableName).scan() }
 
-  def createRetriever: MemoryRetriever[Work[Source]] =
-    new MemoryRetriever[Work[Source]](
-      index = mutable.Map[String, Work[Source]]()
+  def createRetriever: MemoryRetriever[Work[Identified]] =
+    new MemoryRetriever[Work[Identified]](
+      index = mutable.Map[String, Work[Identified]]()
     )
 }

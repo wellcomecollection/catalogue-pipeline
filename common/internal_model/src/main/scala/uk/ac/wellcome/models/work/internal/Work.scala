@@ -76,7 +76,7 @@ object Work {
 case class WorkData[State <: DataState](
   title: Option[String] = None,
   otherIdentifiers: List[SourceIdentifier] = Nil,
-  mergeCandidates: List[MergeCandidate] = Nil,
+  mergeCandidates: List[MergeCandidate[State#Id]] = Nil,
   alternativeTitles: List[String] = Nil,
   format: Option[Format] = None,
   description: Option[String] = None,

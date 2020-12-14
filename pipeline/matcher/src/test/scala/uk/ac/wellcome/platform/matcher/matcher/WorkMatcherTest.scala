@@ -1,30 +1,26 @@
 package uk.ac.wellcome.platform.matcher.matcher
 
-import java.util.UUID
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatest.EitherValues
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
-import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.matchers.should.Matchers
+import org.scalatestplus.mockito.MockitoSugar
 import org.scanamo.syntax._
-import uk.ac.wellcome.models.matcher.{
-  MatchedIdentifiers,
-  MatcherResult,
-  WorkIdentifier,
-  WorkNode
-}
+import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, MatcherResult, WorkIdentifier, WorkNode}
 import uk.ac.wellcome.models.work.generators.SierraWorkGenerators
+import uk.ac.wellcome.models.work.internal.IdState.Identified
 import uk.ac.wellcome.models.work.internal.MergeCandidate
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
 import uk.ac.wellcome.platform.matcher.models.{WorkGraph, WorkUpdate}
 import uk.ac.wellcome.platform.matcher.storage.WorkGraphStore
 import uk.ac.wellcome.storage.locking.dynamo.DynamoLockingService
+
+import java.util.UUID
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class WorkMatcherTest
     extends AnyFunSpec
@@ -35,9 +31,9 @@ class WorkMatcherTest
     with SierraWorkGenerators
     with EitherValues {
 
-  private val identifierA = createSierraSystemSourceIdentifierWith(value = "A")
-  private val identifierB = createSierraSystemSourceIdentifierWith(value = "B")
-  private val identifierC = createSierraSystemSourceIdentifierWith(value = "C")
+  private val identifierA = Identified(createCanonicalId, createSierraSystemSourceIdentifierWith(value = "A"))
+  private val identifierB = Identified(createCanonicalId, createSierraSystemSourceIdentifierWith(value = "B"))
+  private val identifierC = Identified(createCanonicalId, createSierraSystemSourceIdentifierWith(value = "C"))
 
   it(
     "matches a work with no linked identifiers to itself only A and saves the updated graph A") {
@@ -45,9 +41,9 @@ class WorkMatcherTest
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
           withWorkMatcher(workGraphStore, lockTable) { workMatcher =>
-            val work = sourceWork()
+            val work = identifiedWork()
 
-            val sourceId = work.sourceIdentifier.toString
+            val sourceId = work.state.canonicalId
             val version = work.version
 
             whenReady(workMatcher.matchWork(work)) { matcherResult =>
@@ -73,9 +69,9 @@ class WorkMatcherTest
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
           withWorkMatcher(workGraphStore, lockTable) { workMatcher =>
-            val invisibleWork = sourceWork().invisible()
+            val invisibleWork = identifiedWork().invisible()
 
-            val sourceId = invisibleWork.sourceIdentifier.toString
+            val sourceId = invisibleWork.state.canonicalId
             val version = invisibleWork.version
 
             whenReady(workMatcher.matchWork(invisibleWork)) { matcherResult =>
@@ -98,7 +94,7 @@ class WorkMatcherTest
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
           withWorkMatcher(workGraphStore, lockTable) { workMatcher =>
-            val work = sourceWork(sourceIdentifier = identifierA)
+            val work = identifiedWork(canonicalId = identifierA.canonicalId, sourceIdentifier = identifierA.sourceIdentifier)
               .withVersion(1)
               .mergeCandidates(List(MergeCandidate(identifierB)))
 
@@ -106,23 +102,23 @@ class WorkMatcherTest
               identifiersList shouldBe
                 MatcherResult(
                   Set(MatchedIdentifiers(Set(
-                    WorkIdentifier("sierra-system-number/A", 1),
-                    WorkIdentifier("sierra-system-number/B", None)))))
+                    WorkIdentifier(identifierA.canonicalId, 1),
+                    WorkIdentifier(identifierB.canonicalId, None)))))
 
               val savedWorkNodes = scan[WorkNode](dynamoClient, graphTable.name)
                 .map(_.right.get)
 
               savedWorkNodes should contain theSameElementsAs List(
                 WorkNode(
-                  "sierra-system-number/A",
+                  identifierA.canonicalId,
                   1,
-                  List("sierra-system-number/B"),
-                  ciHash("sierra-system-number/A+sierra-system-number/B")),
+                  List(identifierB.canonicalId),
+                  ciHash(List(identifierA.canonicalId, identifierB.canonicalId).sorted.mkString("+"))),
                 WorkNode(
-                  "sierra-system-number/B",
+                  identifierB.canonicalId,
                   None,
                   Nil,
-                  ciHash("sierra-system-number/A+sierra-system-number/B"))
+                  ciHash(List(identifierA.canonicalId, identifierB.canonicalId).sorted.mkString("+")))
               )
             }
           }
@@ -138,26 +134,26 @@ class WorkMatcherTest
         withWorkGraphStore(graphTable) { workGraphStore =>
           withWorkMatcher(workGraphStore, lockTable) { workMatcher =>
             val existingWorkA = WorkNode(
-              "sierra-system-number/A",
+              identifierA.canonicalId,
               1,
-              List("sierra-system-number/B"),
-              ciHash("sierra-system-number/A+sierra-system-number/B"))
+              List(identifierB.canonicalId),
+              ciHash(ciHash(List(identifierA.canonicalId, identifierB.canonicalId).sorted.mkString("+"))))
             val existingWorkB = WorkNode(
-              "sierra-system-number/B",
+              identifierB.canonicalId,
               1,
               Nil,
-              ciHash("sierra-system-number/A+sierra-system-number/B"))
+              ciHash(ciHash(List(identifierA.canonicalId, identifierB.canonicalId).sorted.mkString("+"))))
             val existingWorkC = WorkNode(
-              "sierra-system-number/C",
+              identifierC.canonicalId,
               1,
               Nil,
-              ciHash("sierra-system-number/C"))
+              ciHash(identifierC.canonicalId))
             put(dynamoClient, graphTable.name)(existingWorkA)
             put(dynamoClient, graphTable.name)(existingWorkB)
             put(dynamoClient, graphTable.name)(existingWorkC)
 
             val work =
-              sourceWork(sourceIdentifier = identifierB)
+              identifiedWork(canonicalId = identifierB.canonicalId, sourceIdentifier = identifierB.sourceIdentifier)
                 .withVersion(2)
                 .mergeCandidates(List(MergeCandidate(identifierC)))
 
@@ -167,32 +163,32 @@ class WorkMatcherTest
                   Set(
                     MatchedIdentifiers(
                       Set(
-                        WorkIdentifier("sierra-system-number/A", 1),
-                        WorkIdentifier("sierra-system-number/B", 2),
-                        WorkIdentifier("sierra-system-number/C", 1)))))
+                        WorkIdentifier(identifierA.canonicalId, 1),
+                        WorkIdentifier(identifierB.canonicalId, 2),
+                        WorkIdentifier(identifierC.canonicalId, 1)))))
 
               val savedNodes = scan[WorkNode](dynamoClient, graphTable.name)
                 .map(_.right.get)
 
               savedNodes should contain theSameElementsAs List(
                 WorkNode(
-                  "sierra-system-number/A",
+                  identifierA.canonicalId,
                   1,
-                  List("sierra-system-number/B"),
+                  List(identifierB.canonicalId),
                   ciHash(
-                    "sierra-system-number/A+sierra-system-number/B+sierra-system-number/C")),
+                    List(identifierA.canonicalId, identifierB.canonicalId, identifierC.canonicalId).sorted.mkString("+"))),
                 WorkNode(
-                  "sierra-system-number/B",
+                  identifierB.canonicalId,
                   2,
-                  List("sierra-system-number/C"),
+                  List(identifierC.canonicalId),
                   ciHash(
-                    "sierra-system-number/A+sierra-system-number/B+sierra-system-number/C")),
+                    List(identifierA.canonicalId, identifierB.canonicalId, identifierC.canonicalId).sorted.mkString("+"))),
                 WorkNode(
-                  "sierra-system-number/C",
+                  identifierC.canonicalId,
                   1,
                   Nil,
                   ciHash(
-                    "sierra-system-number/A+sierra-system-number/B+sierra-system-number/C"))
+                    List(identifierA.canonicalId, identifierB.canonicalId, identifierC.canonicalId).sorted.mkString("+")))
               )
             }
           }
@@ -206,8 +202,8 @@ class WorkMatcherTest
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
           withLockDao(dynamoClient, lockTable) { implicit lockDao =>
-            val work = sierraSourceWork()
-            val workId = work.sourceIdentifier.toString
+            val work = sierraIdentifiedWork()
+            val workId = work.id
             withWorkMatcherAndLockingService(
               workGraphStore,
               new DynamoLockingService) { workMatcher =>
@@ -236,9 +232,9 @@ class WorkMatcherTest
               new DynamoLockingService) { workMatcher =>
               // A->B->C
               val componentId = "ABC"
-              val idA = "sierra-system-number/A"
-              val idB = "sierra-system-number/B"
-              val idC = "sierra-system-number/C"
+              val idA = identifierA.canonicalId
+              val idB = identifierB.canonicalId
+              val idC = identifierC.canonicalId
               workGraphStore.put(
                 WorkGraph(
                   Set(
@@ -247,7 +243,7 @@ class WorkMatcherTest
                     WorkNode(idC, 0, Nil, componentId),
                   )))
 
-              val work = sourceWork(sourceIdentifier = identifierA)
+              val work = identifiedWork(canonicalId = identifierA.canonicalId, sourceIdentifier = identifierA.sourceIdentifier)
                 .mergeCandidates(List(MergeCandidate(identifierB)))
 
               val failedLock = for {
@@ -275,7 +271,7 @@ class WorkMatcherTest
         when(mockWorkGraphStore.put(any[WorkGraph]))
           .thenThrow(expectedException)
 
-        whenReady(workMatcher.matchWork(sierraSourceWork()).failed) {
+        whenReady(workMatcher.matchWork(sierraIdentifiedWork()).failed) {
           actualException =>
             actualException shouldBe MatcherException(expectedException)
         }

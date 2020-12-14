@@ -7,13 +7,10 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.matcher.MatcherResult
 import uk.ac.wellcome.models.work.generators.WorkGenerators
-import uk.ac.wellcome.models.work.internal.MergeCandidate
+import uk.ac.wellcome.models.work.internal.{IdState, MergeCandidate}
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
-import uk.ac.wellcome.storage.locking.dynamo.{
-  DynamoLockingService,
-  ExpiringLock
-}
+import uk.ac.wellcome.storage.locking.dynamo.{DynamoLockingService, ExpiringLock}
 
 class WorkMatcherConcurrencyTest
     extends AnyFunSpec
@@ -30,15 +27,13 @@ class WorkMatcherConcurrencyTest
             withWorkMatcherAndLockingService(
               workGraphStore,
               new DynamoLockingService) { workMatcher =>
-              val identifierA =
-                createSierraSystemSourceIdentifierWith(value = "A")
-              val identifierB =
-                createSierraSystemSourceIdentifierWith(value = "B")
+              val identifierA = IdState.Identified(createCanonicalId, createSierraSystemSourceIdentifierWith(value = "A"))
+              val identifierB = IdState.Identified(createCanonicalId, createSierraSystemSourceIdentifierWith(value = "B"))
 
-              val workA = sourceWork(sourceIdentifier = identifierA)
+              val workA = identifiedWork(canonicalId = identifierA.canonicalId, sourceIdentifier = identifierA.sourceIdentifier)
                 .mergeCandidates(List(MergeCandidate(identifierB)))
 
-              val workB = sourceWork(sourceIdentifier = identifierB)
+              val workB = identifiedWork(canonicalId = identifierB.canonicalId, sourceIdentifier = identifierB.sourceIdentifier)
 
               val eventualResultA = workMatcher.matchWork(workA)
               val eventualResultB = workMatcher.matchWork(workB)
