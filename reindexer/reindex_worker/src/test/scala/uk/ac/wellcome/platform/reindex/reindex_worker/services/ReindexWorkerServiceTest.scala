@@ -9,22 +9,22 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryIndividualMessageSender
-import uk.ac.wellcome.mets_adapter.generators.MetsSourceDataGenerators
 import uk.ac.wellcome.platform.reindex.reindex_worker.fixtures.WorkerServiceFixture
-import uk.ac.wellcome.platform.reindex.reindex_worker.models.source.{
-  CalmReindexPayload,
-  MetsReindexPayload,
-  MiroInventoryReindexPayload,
-  MiroReindexPayload,
-  ReindexPayload,
-  SierraReindexPayload
-}
 import uk.ac.wellcome.platform.reindex.reindex_worker.models.{
   CompleteReindexParameters,
   ReindexSource
 }
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
 import uk.ac.wellcome.storage.generators.S3ObjectLocationGenerators
+import weco.catalogue.source_model.{
+  CalmSourcePayload,
+  MetsSourcePayload,
+  MiroInventorySourcePayload,
+  MiroSourcePayload,
+  SierraSourcePayload,
+  SourcePayload
+}
+import weco.catalogue.source_model.generators.MetsSourceDataGenerators
 
 import java.time.Instant
 import scala.collection.JavaConverters._
@@ -70,16 +70,16 @@ class ReindexWorkerServiceTest
           ).asJava
         )
 
-        val expectedRecord = CalmReindexPayload(
+        val expectedMessage = CalmSourcePayload(
           id = calmRecordId,
-          payload = location,
+          location = location,
           version = version
         )
 
         runTest(
           table = table,
           source = ReindexSource.Calm,
-          expectedRecord = expectedRecord
+          expectedMessage = expectedMessage
         )
       }
     }
@@ -115,16 +115,16 @@ class ReindexWorkerServiceTest
           ).asJava
         )
 
-        val expectedRecord = MetsReindexPayload(
+        val expectedMessage = MetsSourcePayload(
           id = bibId,
-          payload = sourceData,
+          sourceData = sourceData,
           version = version
         )
 
         runTest(
           table = table,
           source = ReindexSource.Mets,
-          expectedRecord = expectedRecord
+          expectedMessage = expectedMessage
         )
       }
     }
@@ -152,7 +152,7 @@ class ReindexWorkerServiceTest
           ).asJava
         )
 
-        val expectedRecord = MiroReindexPayload(
+        val expectedMessage = MiroSourcePayload(
           id = miroID,
           isClearedForCatalogueAPI = isClearedForCatalogueAPI,
           location = location,
@@ -162,7 +162,7 @@ class ReindexWorkerServiceTest
         runTest(
           table = table,
           source = ReindexSource.Miro,
-          expectedRecord = expectedRecord
+          expectedMessage = expectedMessage
         )
       }
     }
@@ -187,7 +187,7 @@ class ReindexWorkerServiceTest
           ).asJava
         )
 
-        val expectedRecord = MiroInventoryReindexPayload(
+        val expectedMessage = MiroInventorySourcePayload(
           id = miroID,
           location = location,
           version = version
@@ -196,7 +196,7 @@ class ReindexWorkerServiceTest
         runTest(
           table = table,
           source = ReindexSource.MiroInventory,
-          expectedRecord = expectedRecord
+          expectedMessage = expectedMessage
         )
       }
     }
@@ -204,7 +204,7 @@ class ReindexWorkerServiceTest
     it("for Sierra inventory records") {
       withLocalDynamoDbTable { table =>
         val bibId = randomAlphanumeric()
-        val payload = createS3ObjectLocation
+        val location = createS3ObjectLocation
         val version = randomInt(from = 1, to = 10)
 
         dynamoClient.putItem(
@@ -213,32 +213,32 @@ class ReindexWorkerServiceTest
             "id" -> new AttributeValue(bibId),
             "payload" -> new AttributeValue().withM(
               Map(
-                "bucket" -> new AttributeValue(payload.bucket),
-                "key" -> new AttributeValue(payload.key)
+                "bucket" -> new AttributeValue(location.bucket),
+                "key" -> new AttributeValue(location.key)
               ).asJava
             ),
             "version" -> new AttributeValue().withN(version.toString)
           ).asJava
         )
 
-        val expectedRecord = SierraReindexPayload(
+        val expectedMessage = SierraSourcePayload(
           id = bibId,
-          payload = payload,
+          location = location,
           version = version
         )
 
         runTest(
           table = table,
           source = ReindexSource.Sierra,
-          expectedRecord = expectedRecord
+          expectedMessage = expectedMessage
         )
       }
     }
 
-    def runTest[T <: ReindexPayload](
-      table: Table,
-      source: ReindexSource,
-      expectedRecord: T)(implicit decoder: Decoder[T]): Assertion = {
+    def runTest[T <: SourcePayload](
+                                     table: Table,
+                                     source: ReindexSource,
+                                     expectedMessage: T)(implicit decoder: Decoder[T]): Assertion = {
       val messageSender = new MemoryIndividualMessageSender()
       val destination = createDestination
 
@@ -258,7 +258,7 @@ class ReindexWorkerServiceTest
               )
 
               eventually {
-                messageSender.getMessages[T] shouldBe Seq(expectedRecord)
+                messageSender.getMessages[T] shouldBe Seq(expectedMessage)
 
                 assertQueueEmpty(queue)
                 assertQueueEmpty(dlq)

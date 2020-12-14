@@ -50,8 +50,10 @@ class ReindexWorkerService[Destination](
         tableName = reindexJobConfig.dynamoConfig.tableName
       )
 
+      sourcePayloads = records.map { _.toSourcePayload }
+
       _ <- bulkMessageSender.send(
-        records,
+        sourcePayloads,
         destination = reindexJobConfig.destinationConfig
       )
     } yield ()
