@@ -131,7 +131,7 @@ class MergerWorkerServiceTest
         val work = identifiedWork()
         val olderWork = identifiedWork()
         val newerWork =
-          identifiedWork(sourceIdentifier = olderWork.sourceIdentifier)
+          identifiedWork(canonicalId = olderWork.state.canonicalId)
             .withVersion(olderWork.version + 1)
 
         val matcherResult = matcherResultWith(Set(Set(work, olderWork)))

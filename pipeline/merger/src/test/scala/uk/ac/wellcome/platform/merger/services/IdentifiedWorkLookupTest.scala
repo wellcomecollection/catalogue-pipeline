@@ -98,13 +98,13 @@ class IdentifiedWorkLookupTest
   private def fetchAllWorks(
     retriever: MemoryRetriever[Work[Identified]],
     works: Work[Identified]*): Future[Seq[Option[Work[Identified]]]] = {
-    val sourceLookup = new IdentifiedWorkLookup(retriever)
+    val identifiedLookup = new IdentifiedWorkLookup(retriever)
 
     val workIdentifiers = works
       .map { w =>
         WorkIdentifier(w)
       }
 
-    sourceLookup.fetchAllWorks(workIdentifiers)
+    identifiedLookup.fetchAllWorks(workIdentifiers)
   }
 }

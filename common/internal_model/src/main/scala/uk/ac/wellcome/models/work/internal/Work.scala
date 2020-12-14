@@ -158,7 +158,7 @@ object WorkState {
     type WorkDataState = DataState.Identified
     type TransitionArgs = Option[Instant]
 
-    def id = sourceIdentifier.toString
+    def id = canonicalId
     val relations = Relations.none
   }
 
