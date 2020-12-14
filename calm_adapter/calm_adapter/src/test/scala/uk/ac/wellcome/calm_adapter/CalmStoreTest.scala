@@ -11,7 +11,11 @@ import weco.catalogue.source_model.store.SourceVHS
 
 import java.time.Instant
 
-class CalmStoreTest extends AnyFunSpec with Matchers with EitherValues with SourceVHSFixture {
+class CalmStoreTest
+    extends AnyFunSpec
+    with Matchers
+    with EitherValues
+    with SourceVHSFixture {
 
   type Key = Version[String, Int]
 
@@ -26,12 +30,14 @@ class CalmStoreTest extends AnyFunSpec with Matchers with EitherValues with Sour
 
   describe("putRecord") {
     it("stores new CALM records") {
-      implicit val sourceVHS: SourceVHS[CalmRecord] = createSourceVHS[CalmRecord]
+      implicit val sourceVHS: SourceVHS[CalmRecord] =
+        createSourceVHS[CalmRecord]
       val calmStore = new CalmStore(sourceVHS)
 
       val record = CalmRecord("A", Map("key" -> List("value")), retrievedAt)
 
-      val (storedId, storedLocation, storedRecord) = calmStore.putRecord(record).value.get
+      val (storedId, storedLocation, storedRecord) =
+        calmStore.putRecord(record).value.get
 
       storedId shouldBe Version("A", 0)
 
@@ -48,12 +54,14 @@ class CalmStoreTest extends AnyFunSpec with Matchers with EitherValues with Sour
       val oldRecord = CalmRecord("A", oldData, oldTime, published = true)
       val newRecord = CalmRecord("A", newData, newTime)
 
-      implicit val sourceVHS: SourceVHS[CalmRecord] = createSourceVHS[CalmRecord]
+      implicit val sourceVHS: SourceVHS[CalmRecord] =
+        createSourceVHS[CalmRecord]
       val calmStore = new CalmStore(sourceVHS)
 
       sourceVHS.underlying.put(Version("A", 1))(oldRecord)
 
-      val (storedId, storedLocation, storedRecord) = calmStore.putRecord(newRecord).value.get
+      val (storedId, storedLocation, storedRecord) =
+        calmStore.putRecord(newRecord).value.get
 
       storedId shouldBe Version("A", 2)
 
@@ -71,7 +79,8 @@ class CalmStoreTest extends AnyFunSpec with Matchers with EitherValues with Sour
       val oldRecord = CalmRecord("A", data, oldTime, published = true)
       val newRecord = CalmRecord("A", data, newTime)
 
-      implicit val sourceVHS: SourceVHS[CalmRecord] = createSourceVHS[CalmRecord]
+      implicit val sourceVHS: SourceVHS[CalmRecord] =
+        createSourceVHS[CalmRecord]
       val calmStore = new CalmStore(sourceVHS)
 
       sourceVHS.underlying.put(Version("A", 1))(oldRecord)
@@ -86,12 +95,14 @@ class CalmStoreTest extends AnyFunSpec with Matchers with EitherValues with Sour
       val oldRecord = CalmRecord("A", oldData, oldTime, published = false)
       val newRecord = CalmRecord("A", oldData, newTime)
 
-      implicit val sourceVHS: SourceVHS[CalmRecord] = createSourceVHS[CalmRecord]
+      implicit val sourceVHS: SourceVHS[CalmRecord] =
+        createSourceVHS[CalmRecord]
       val calmStore = new CalmStore(sourceVHS)
 
       sourceVHS.underlying.put(Version("A", 1))(oldRecord)
 
-      val (storedId, storedLocation, storedRecord) = calmStore.putRecord(newRecord).value.get
+      val (storedId, storedLocation, storedRecord) =
+        calmStore.putRecord(newRecord).value.get
 
       storedId shouldBe Version("A", 2)
 
@@ -109,7 +120,8 @@ class CalmStoreTest extends AnyFunSpec with Matchers with EitherValues with Sour
       val oldRecord = CalmRecord("A", oldData, oldTime)
       val newRecord = CalmRecord("A", newData, newTime)
 
-      implicit val sourceVHS: SourceVHS[CalmRecord] = createSourceVHS[CalmRecord]
+      implicit val sourceVHS: SourceVHS[CalmRecord] =
+        createSourceVHS[CalmRecord]
       val calmStore = new CalmStore(sourceVHS)
 
       sourceVHS.underlying.put(Version("A", 4))(newRecord)
@@ -134,7 +146,8 @@ class CalmStoreTest extends AnyFunSpec with Matchers with EitherValues with Sour
       val x = CalmRecord("A", Map("key" -> List("x")), retrievedAt)
       val y = CalmRecord("A", Map("key" -> List("y")), retrievedAt)
 
-      implicit val sourceVHS: SourceVHS[CalmRecord] = createSourceVHS[CalmRecord]
+      implicit val sourceVHS: SourceVHS[CalmRecord] =
+        createSourceVHS[CalmRecord]
       val calmStore = new CalmStore(sourceVHS)
 
       sourceVHS.underlying.put(Version("A", 2))(x)
@@ -150,21 +163,27 @@ class CalmStoreTest extends AnyFunSpec with Matchers with EitherValues with Sour
       val record = CalmRecord("A", Map("key" -> List("value")), retrievedAt)
       record.published shouldBe false
 
-      implicit val sourceVHS: SourceVHS[CalmRecord] = createSourceVHS[CalmRecord]
+      implicit val sourceVHS: SourceVHS[CalmRecord] =
+        createSourceVHS[CalmRecord]
       val calmStore = new CalmStore(sourceVHS)
 
       sourceVHS.underlying.put(Version("A", 5))(record)
 
-      calmStore.setRecordPublished(Version("A", 5), record) shouldBe a[Right[_, _]]
+      calmStore.setRecordPublished(Version("A", 5), record) shouldBe a[Right[_,
+                                                                             _]]
 
-      assertStored(id = "A", expectedVersion = 6, expectedRecord = record.copy(published = true))
+      assertStored(
+        id = "A",
+        expectedVersion = 6,
+        expectedRecord = record.copy(published = true))
     }
 
     it("fails setting Calm record as published if version already exists") {
       val record = CalmRecord("A", Map("key" -> List("value")), retrievedAt)
       record.published shouldBe false
 
-      implicit val sourceVHS: SourceVHS[CalmRecord] = createSourceVHS[CalmRecord]
+      implicit val sourceVHS: SourceVHS[CalmRecord] =
+        createSourceVHS[CalmRecord]
       val calmStore = new CalmStore(sourceVHS)
 
       sourceVHS.underlying.put(Version("A", 6))(record)
@@ -187,7 +206,10 @@ class CalmStoreTest extends AnyFunSpec with Matchers with EitherValues with Sour
   ): Assertion = {
     storedRecord shouldBe expectedRecord
 
-    sourceVHS.underlying.hybridStore.typedStore.get(storedLocation).value.identifiedT shouldBe expectedRecord
+    sourceVHS.underlying.hybridStore.typedStore
+      .get(storedLocation)
+      .value
+      .identifiedT shouldBe expectedRecord
 
     assertStored(id, expectedVersion, expectedRecord)
   }
@@ -199,5 +221,7 @@ class CalmStoreTest extends AnyFunSpec with Matchers with EitherValues with Sour
   )(
     implicit sourceVHS: SourceVHS[CalmRecord]
   ): Assertion =
-    sourceVHS.underlying.getLatest(id).value shouldBe Identified(Version(id, expectedVersion), expectedRecord)
+    sourceVHS.underlying.getLatest(id).value shouldBe Identified(
+      Version(id, expectedVersion),
+      expectedRecord)
 }

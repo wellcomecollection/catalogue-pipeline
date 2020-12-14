@@ -36,8 +36,7 @@ object SourceVHSBuilder {
       indexedStore: DynamoHashStore[String, Int, S3ObjectLocation],
       typedStore: S3TypedStore[T]
     ) extends DynamoHybridStore[T](prefix)(indexedStore, typedStore)
-      with HybridStoreWithMaxima[String, Int, S3ObjectLocation, T]
-
+        with HybridStoreWithMaxima[String, Int, S3ObjectLocation, T]
 
     val vhs =
       new VersionedHybridStore[String, Int, S3ObjectLocation, T](

@@ -10,14 +10,14 @@ import uk.ac.wellcome.storage.{
 }
 import weco.catalogue.source_model.store.SourceVHS
 
-class CalmStore(store: SourceVHS[CalmRecord])
-    extends Logging {
+class CalmStore(store: SourceVHS[CalmRecord]) extends Logging {
 
   type Key = Version[String, Int]
 
   type Result[T] = Either[Throwable, T]
 
-  def putRecord(record: CalmRecord): Result[Option[(Key, S3ObjectLocation, CalmRecord)]] = {
+  def putRecord(
+    record: CalmRecord): Result[Option[(Key, S3ObjectLocation, CalmRecord)]] = {
     val recordSummmary = s"ID=${record.id}, RefNo=${record.refNo.getOrElse(
       "NONE")}, Modified=${record.modified.getOrElse("NONE")}"
     shouldStoreRecord(record)
@@ -28,7 +28,8 @@ class CalmStore(store: SourceVHS[CalmRecord])
         case true =>
           info(s"Storing calm record: $recordSummmary")
           store.putLatest(record.id)(record) match {
-            case Right(Identified(key, (location, record))) => Right(Some((key, location, record)))
+            case Right(Identified(key, (location, record))) =>
+              Right(Some((key, location, record)))
             case Left(err) => Left(toReadableException(err))
           }
       }

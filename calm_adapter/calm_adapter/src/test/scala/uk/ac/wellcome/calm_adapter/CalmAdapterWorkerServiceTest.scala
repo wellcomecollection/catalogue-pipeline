@@ -60,9 +60,15 @@ class CalmAdapterWorkerServiceTest
           queue,
           CalmQuery.ModifiedDate(queryDate))
         eventually {
-          vhs.underlying.getLatest("A").value shouldBe Identified(Version("A", 1), recordA.copy(published = true))
-          vhs.underlying.getLatest("B").value shouldBe Identified(Version("B", 1), recordB.copy(published = true))
-          vhs.underlying.getLatest("C").value shouldBe Identified(Version("C", 1), recordC.copy(published = true))
+          vhs.underlying.getLatest("A").value shouldBe Identified(
+            Version("A", 1),
+            recordA.copy(published = true))
+          vhs.underlying.getLatest("B").value shouldBe Identified(
+            Version("B", 1),
+            recordB.copy(published = true))
+          vhs.underlying.getLatest("C").value shouldBe Identified(
+            Version("C", 1),
+            recordC.copy(published = true))
 
           retriever.previousQuery shouldBe Some(
             CalmQuery.ModifiedDate(queryDate))
@@ -75,10 +81,14 @@ class CalmAdapterWorkerServiceTest
             Version("C", 0)
           )
 
-          messageSender.getMessages[Version[String, Int]] shouldBe expectedVersions
+          messageSender
+            .getMessages[Version[String, Int]] shouldBe expectedVersions
 
-          messageSender.getMessages[CalmSourcePayload]
-            .map { payload => Version(payload.id, payload.version) } shouldBe expectedVersions
+          messageSender
+            .getMessages[CalmSourcePayload]
+            .map { payload =>
+              Version(payload.id, payload.version)
+            } shouldBe expectedVersions
         }
     }
   }

@@ -99,7 +99,7 @@ class CalmAdapterWorkerService[Destination](
           )
 
           messageSender.sendT(payload) match {
-            case Success(_) => Right(Some((key, record)))
+            case Success(_)   => Right(Some((key, record)))
             case Failure(err) => Left(err)
           }
         case Right(None) => Right(None)
@@ -109,9 +109,10 @@ class CalmAdapterWorkerService[Destination](
   def updatePublished =
     Flow[Result[Option[(Key, CalmRecord)]]]
       .map {
-        case Right(Some((key, record))) => calmStore.setRecordPublished(key, record)
-        case Right(None)                => Right(None)
-        case Left(err)                  => Left(err)
+        case Right(Some((key, record))) =>
+          calmStore.setRecordPublished(key, record)
+        case Right(None) => Right(None)
+        case Left(err)   => Left(err)
       }
 
   def checkResultsForErrors(results: Seq[Result[_]],
