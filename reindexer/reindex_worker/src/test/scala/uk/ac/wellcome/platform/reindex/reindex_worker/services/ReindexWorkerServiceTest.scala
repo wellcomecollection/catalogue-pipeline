@@ -1,38 +1,248 @@
 package uk.ac.wellcome.platform.reindex.reindex_worker.services
 
+import com.amazonaws.services.dynamodbv2.model.AttributeValue
+import io.circe.Decoder
+import org.scalatest.Assertion
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryIndividualMessageSender
+import uk.ac.wellcome.mets_adapter.generators.MetsSourceDataGenerators
 import uk.ac.wellcome.platform.reindex.reindex_worker.fixtures.WorkerServiceFixture
+import uk.ac.wellcome.platform.reindex.reindex_worker.models.source.{
+  CalmReindexPayload,
+  MetsReindexPayload,
+  MiroInventoryReindexPayload,
+  MiroReindexPayload,
+  ReindexPayload,
+  SierraReindexPayload
+}
 import uk.ac.wellcome.platform.reindex.reindex_worker.models.{
   CompleteReindexParameters,
   ReindexSource
 }
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
+import uk.ac.wellcome.storage.generators.S3ObjectLocationGenerators
+
+import java.time.Instant
+import scala.collection.JavaConverters._
+import java.util.UUID
 
 class ReindexWorkerServiceTest
     extends AnyFunSpec
     with Matchers
     with ScalaFutures
-    with WorkerServiceFixture {
+    with WorkerServiceFixture
+    with MetsSourceDataGenerators
+    with S3ObjectLocationGenerators {
 
-  it("completes a reindex") {
-    withLocalDynamoDbTable { table =>
+  // These tests are designed to check we can parse the data in DynamoDB
+  // correctly.
+  //
+  // We deliberately use a low-level, Java-ish API so we can be explicit about
+  // what the structure of the table looks like -- skipping the implicit conversions
+  // of Scanamo and the like.
+  //
+  // e.g. rather than using the Instant converter provided by Scanamo, I've used
+  // real values from our adapter tables.
+  //
+  // These examples are based on the table structure as of 14 December 2020.
+  describe("completing a reindex") {
+    it("for CALM records") {
+      withLocalDynamoDbTable { table =>
+        val calmRecordId = UUID.randomUUID().toString
+        val location = createS3ObjectLocation
+        val version = randomInt(from = 1, to = 10)
+
+        dynamoClient.putItem(
+          table.name,
+          Map(
+            "id" -> new AttributeValue(calmRecordId),
+            "payload" -> new AttributeValue().withM(
+              Map(
+                "bucket" -> new AttributeValue(location.bucket),
+                "key" -> new AttributeValue(location.key)
+              ).asJava
+            ),
+            "version" -> new AttributeValue().withN(version.toString)
+          ).asJava
+        )
+
+        val expectedRecord = CalmReindexPayload(
+          id = calmRecordId,
+          payload = location,
+          version = version
+        )
+
+        runTest(
+          table = table,
+          source = ReindexSource.Calm,
+          expectedRecord = expectedRecord
+        )
+      }
+    }
+
+    it("for METS records") {
+      withLocalDynamoDbTable { table =>
+        val bibId = randomAlphanumeric()
+        val sourceData = createMetsSourceDataWith(
+          createdDate = Instant.parse("2019-09-21T22:10:11.343Z"),
+          // DynamoDB doesn't let us pass an empty list of manifestations
+          manifestations = List(randomAlphanumeric(), randomAlphanumeric())
+        )
+        val version = randomInt(from = 1, to = 10)
+
+        dynamoClient.putItem(
+          table.name,
+          Map(
+            "id" -> new AttributeValue(bibId),
+            "payload" -> new AttributeValue().withM(
+              Map(
+                "bucket" -> new AttributeValue(sourceData.bucket),
+                "createdDate" -> new AttributeValue().withN("1569103811343"),
+                "deleted" -> new AttributeValue().withBOOL(sourceData.deleted),
+                "file" -> new AttributeValue(sourceData.file),
+                "manifestations" -> new AttributeValue().withL(sourceData.manifestations.map { new AttributeValue(_) }.asJava),
+                "path" -> new AttributeValue(sourceData.path),
+                "version" -> new AttributeValue().withN(sourceData.version.toString)
+              ).asJava
+            ),
+            "version" -> new AttributeValue().withN(version.toString)
+          ).asJava
+        )
+
+        val expectedRecord = MetsReindexPayload(
+          id = bibId,
+          payload = sourceData,
+          version = version
+        )
+
+        runTest(
+          table = table,
+          source = ReindexSource.Mets,
+          expectedRecord = expectedRecord
+        )
+      }
+    }
+
+    it("for Miro records") {
+      withLocalDynamoDbTable { table =>
+        val miroID = randomAlphanumeric()
+        val isClearedForCatalogueAPI = chooseFrom(true, false)
+        val location = createS3ObjectLocation
+        val version = randomInt(from = 1, to = 10)
+
+        dynamoClient.putItem(
+          table.name,
+          Map(
+            "id" -> new AttributeValue(miroID),
+            "location" -> new AttributeValue().withM(
+              Map(
+                "bucket" -> new AttributeValue(location.bucket),
+                "key" -> new AttributeValue(location.key)
+              ).asJava
+            ),
+            "isClearedForCatalogueAPI" -> new AttributeValue().withBOOL(isClearedForCatalogueAPI),
+            "version" -> new AttributeValue().withN(version.toString)
+          ).asJava
+        )
+
+        val expectedRecord = MiroReindexPayload(
+          id = miroID,
+          isClearedForCatalogueAPI = isClearedForCatalogueAPI,
+          location = location,
+          version = version
+        )
+
+        runTest(
+          table = table,
+          source = ReindexSource.Miro,
+          expectedRecord = expectedRecord
+        )
+      }
+    }
+
+    it("for Miro inventory records") {
+      withLocalDynamoDbTable { table =>
+        val miroID = randomAlphanumeric()
+        val location = createS3ObjectLocation
+        val version = randomInt(from = 1, to = 10)
+
+        dynamoClient.putItem(
+          table.name,
+          Map(
+            "id" -> new AttributeValue(miroID),
+            "location" -> new AttributeValue().withM(
+              Map(
+                "bucket" -> new AttributeValue(location.bucket),
+                "key" -> new AttributeValue(location.key)
+              ).asJava
+            ),
+            "version" -> new AttributeValue().withN(version.toString)
+          ).asJava
+        )
+
+        val expectedRecord = MiroInventoryReindexPayload(
+          id = miroID,
+          location = location,
+          version = version
+        )
+
+        runTest(
+          table = table,
+          source = ReindexSource.MiroInventory,
+          expectedRecord = expectedRecord
+        )
+      }
+    }
+
+    it("for Sierra inventory records") {
+      withLocalDynamoDbTable { table =>
+        val bibId = randomAlphanumeric()
+        val payload = createS3ObjectLocation
+        val version = randomInt(from = 1, to = 10)
+
+        dynamoClient.putItem(
+          table.name,
+          Map(
+            "id" -> new AttributeValue(bibId),
+            "payload" -> new AttributeValue().withM(
+              Map(
+                "bucket" -> new AttributeValue(payload.bucket),
+                "key" -> new AttributeValue(payload.key)
+              ).asJava
+            ),
+            "version" -> new AttributeValue().withN(version.toString)
+          ).asJava
+        )
+
+        val expectedRecord = SierraReindexPayload(
+          id = bibId,
+          payload = payload,
+          version = version
+        )
+
+        runTest(
+          table = table,
+          source = ReindexSource.Sierra,
+          expectedRecord = expectedRecord
+        )
+      }
+    }
+
+    def runTest[T <: ReindexPayload](table: Table, source: ReindexSource, expectedRecord: T)(implicit decoder: Decoder[T]): Assertion = {
       val messageSender = new MemoryIndividualMessageSender()
       val destination = createDestination
 
       withLocalSqsQueuePair() {
         case QueuePair(queue, dlq) =>
-          withWorkerService(messageSender, queue, table, destination, ReindexSource.Calm) { _ =>
+          withWorkerService(messageSender, queue, table, destination, source) { _ =>
             val reindexParameters = CompleteReindexParameters(
               segment = 0,
               totalSegments = 1
             )
-
-            val records = createRecords(table, count = 3)
 
             sendNotificationToSQS(
               queue = queue,
@@ -40,8 +250,7 @@ class ReindexWorkerServiceTest
             )
 
             eventually {
-              messageSender
-                .getMessages[NamedRecord] should contain theSameElementsAs records
+              messageSender.getMessages[T] shouldBe Seq(expectedRecord)
 
               assertQueueEmpty(queue)
               assertQueueEmpty(dlq)
@@ -118,65 +327,6 @@ class ReindexWorkerServiceTest
               assertQueueHasSize(dlq, 1)
             }
           }
-      }
-    }
-  }
-
-  it("selects the correct job config") {
-    withLocalDynamoDbTable { table1 =>
-      withLocalDynamoDbTable { table2 =>
-        val messageSender = new MemoryIndividualMessageSender()
-        val destination1 = createDestination
-        val destination2 = createDestination
-        val source1 = chooseReindexSource
-        val source2 = chooseReindexSource
-
-        withLocalSqsQueuePair() {
-          case QueuePair(queue, dlq) =>
-            val records1 = createRecords(table1, count = 3)
-            val records2 = createRecords(table2, count = 5)
-
-            val configMap = Map(
-              "1" -> ((table1, destination1, source1)),
-              "2" -> ((table2, destination2, source2))
-            )
-            withWorkerService(messageSender, queue, configMap) { _ =>
-              sendNotificationToSQS(
-                queue = queue,
-                message = createReindexRequestWith(jobConfigId = "1")
-              )
-
-              eventually {
-                messageSender.messages
-                  .filter { _.destination == destination1 }
-                  .map { msg =>
-                    fromJson[NamedRecord](msg.body).get
-                  } should contain theSameElementsAs records1
-
-                messageSender.messages
-                  .filter { _.destination == destination2 } shouldBe empty
-
-                assertQueueEmpty(queue)
-                assertQueueEmpty(dlq)
-              }
-
-              sendNotificationToSQS(
-                queue = queue,
-                message = createReindexRequestWith(jobConfigId = "2")
-              )
-
-              eventually {
-                messageSender.messages
-                  .filter { _.destination == destination2 }
-                  .map { msg =>
-                    fromJson[NamedRecord](msg.body).get
-                  } should contain theSameElementsAs records2
-
-                assertQueueEmpty(queue)
-                assertQueueEmpty(dlq)
-              }
-            }
-        }
       }
     }
   }

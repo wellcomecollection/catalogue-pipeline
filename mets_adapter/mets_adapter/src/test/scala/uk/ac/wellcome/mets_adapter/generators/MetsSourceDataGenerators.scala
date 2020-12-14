@@ -14,7 +14,8 @@ trait MetsSourceDataGenerators extends RandomGenerators {
     path: String = randomAlphanumeric(),
     file: String = randomAlphanumeric(),
     createdDate: Instant = Instant.now(),
-    version: Int = 1
+    version: Int = 1,
+    manifestations: List[String] = Nil
   ): MetsSourceData =
     MetsSourceData(
       bucket = bucket,
@@ -23,7 +24,7 @@ trait MetsSourceDataGenerators extends RandomGenerators {
       file = file,
       createdDate = createdDate,
       deleted = false,
-      manifestations = Nil)
+      manifestations = manifestations)
 
   def createMetsSourceData: MetsSourceData =
     createMetsSourceDataWith()
