@@ -14,6 +14,7 @@ import uk.ac.wellcome.mets_adapter.models._
 import uk.ac.wellcome.storage.Version
 import uk.ac.wellcome.bigmessaging.FlowOps
 import uk.ac.wellcome.messaging.MessageSender
+import weco.catalogue.source_model.mets.MetsSourceData
 
 import scala.concurrent.Future
 

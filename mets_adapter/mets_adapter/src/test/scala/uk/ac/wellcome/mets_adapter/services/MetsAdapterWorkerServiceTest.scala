@@ -18,9 +18,10 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.storage.{Identified, Version}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import java.time.Instant
+import weco.catalogue.source_model.mets.MetsSourceData
 
-import uk.ac.wellcome.mets_adapter.generators.MetsSourceDataGenerators
+import java.time.Instant
+import weco.catalogue.source_model.generators.MetsSourceDataGenerators
 
 class MetsAdapterWorkerServiceTest
     extends AnyFunSpec

@@ -4,9 +4,8 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
 import uk.ac.wellcome.storage.{Identified, Version}
-import uk.ac.wellcome.mets_adapter.models.MetsSourceData
-
-import uk.ac.wellcome.mets_adapter.generators.MetsSourceDataGenerators
+import weco.catalogue.source_model.generators.MetsSourceDataGenerators
+import weco.catalogue.source_model.mets.MetsSourceData
 
 class MetsStoreTest
     extends AnyFunSpec

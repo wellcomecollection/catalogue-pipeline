@@ -5,11 +5,11 @@ import java.time.Instant
 import org.scalatest.matchers.should.Matchers
 import org.apache.commons.io.IOUtils
 import org.scalatest.funspec.AnyFunSpec
-import uk.ac.wellcome.mets_adapter.models.MetsSourceData
 import uk.ac.wellcome.models.work.internal.License
 import uk.ac.wellcome.platform.transformer.mets.fixtures.MetsGenerators
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.memory.MemoryStore
+import weco.catalogue.source_model.mets.MetsSourceData
 
 class MetsXmlTransformerTest
     extends AnyFunSpec
