@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 
 import uk.ac.wellcome.models.work.internal._
 
+@Schema(name = "Work")
 case class DisplayRelation(
   @Schema(
     accessMode = Schema.AccessMode.READ_ONLY,
