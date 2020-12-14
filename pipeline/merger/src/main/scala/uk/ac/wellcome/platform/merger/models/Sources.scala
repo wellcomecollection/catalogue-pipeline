@@ -10,8 +10,8 @@ object Sources {
 
     val digitisedLinkedIds = target.data.mergeCandidates
       .filter(_.reason.contains("Physical/digitised Sierra work"))
-      .map(_.identifier)
+      .map(_.id.canonicalId)
 
-    sources.find(source => digitisedLinkedIds.contains(source.sourceIdentifier))
+    sources.find(source => digitisedLinkedIds.contains(source.state.canonicalId))
   }
 }

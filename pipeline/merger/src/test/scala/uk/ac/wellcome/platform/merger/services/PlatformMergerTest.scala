@@ -28,8 +28,8 @@ class PlatformMergerTest
       .mergeCandidates(
         List(
           MergeCandidate(
-            identifier = sierraDigitisedWork.sourceIdentifier,
-            reason = "Physical/digitised Sierra work"
+            id = IdState.Identified(sourceIdentifier = sierraDigitisedWork.sourceIdentifier, canonicalId = sierraDigitisedWork.state.canonicalId),
+            reason = Some("Physical/digitised Sierra work")
           )
         )
       )
@@ -47,8 +47,8 @@ class PlatformMergerTest
       .mergeCandidates(
         List(
           MergeCandidate(
-            identifier = sierraDigitisedWork.sourceIdentifier,
-            reason = "Physical/digitised Sierra work"
+            id = IdState.Identified(sourceIdentifier = sierraDigitisedWork.sourceIdentifier, canonicalId = sierraDigitisedWork.state.canonicalId),
+            reason = Some("Physical/digitised Sierra work")
           )
         )
       )

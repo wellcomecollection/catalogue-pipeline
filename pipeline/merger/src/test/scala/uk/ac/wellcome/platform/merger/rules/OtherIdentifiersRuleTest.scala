@@ -58,8 +58,8 @@ class OtherIdentifiersRuleTest
       .mergeCandidates(
         List(
           MergeCandidate(
-            identifier = mergeCandidate.sourceIdentifier,
-            reason = "Physical/digitised Sierra work"
+            IdState.Identified(sourceIdentifier = mergeCandidate.sourceIdentifier, canonicalId = mergeCandidate.state.canonicalId),
+            Some("Physical/digitised Sierra work")
           )
         )
       )
