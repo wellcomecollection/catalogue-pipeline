@@ -111,10 +111,11 @@ class SierraBibMergerFeatureTest
     val oldTransformable =
       SierraTransformable(bibRecord = oldBibRecord)
 
-    val sourceVHS = createSourceVHS[SierraTransformable]
-    sourceVHS.underlying.put(
-      Version(oldTransformable.sierraId.withoutCheckDigit, 0)
-    )(oldTransformable) shouldBe a[Right[_, _]]
+    val sourceVHS = createSourceVHSWith(
+      initialEntries = Map(
+        Version(oldTransformable.sierraId.withoutCheckDigit, 0) -> oldTransformable
+      )
+    )
 
     withLocalSqsQueue() { queue =>
       withWorkerService(sourceVHS, queue) {
@@ -155,10 +156,11 @@ class SierraBibMergerFeatureTest
     val oldTransformable =
       SierraTransformable(bibRecord = oldBibRecord)
 
-    val sourceVHS = createSourceVHS[SierraTransformable]
-    sourceVHS.underlying.put(
-      Version(oldTransformable.sierraId.withoutCheckDigit, 0)
-    )(oldTransformable) shouldBe a[Right[_, _]]
+    val sourceVHS = createSourceVHSWith(
+      initialEntries = Map(
+        Version(oldTransformable.sierraId.withoutCheckDigit, 0) -> oldTransformable
+      )
+    )
 
     withLocalSqsQueue() { queue =>
       withWorkerService(sourceVHS, queue) {
@@ -198,8 +200,9 @@ class SierraBibMergerFeatureTest
       SierraTransformable(bibRecord = newBibRecord)
     val key = Version(expectedTransformable.sierraId.withoutCheckDigit, 0)
 
-    val sourceVHS = createSourceVHS[SierraTransformable]
-    sourceVHS.underlying.put(key)(expectedTransformable) shouldBe a[Right[_, _]]
+    val sourceVHS = createSourceVHSWith(
+      initialEntries = Map(key -> expectedTransformable)
+    )
 
     withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>
@@ -229,8 +232,9 @@ class SierraBibMergerFeatureTest
 
     val key = Version(transformable.sierraId.withoutCheckDigit, 0)
 
-    val sourceVHS = createSourceVHS[SierraTransformable]
-    sourceVHS.underlying.put(key)(transformable) shouldBe a[Right[_, _]]
+    val sourceVHS = createSourceVHSWith(
+      initialEntries = Map(key -> transformable)
+    )
 
     withLocalSqsQueue() { queue =>
       withWorkerService(sourceVHS, queue) {
