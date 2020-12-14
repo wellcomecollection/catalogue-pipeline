@@ -33,6 +33,7 @@ class ElasticsearchIndexCreator(
       .execute {
         createIndex(index.name)
           .mapping(mapping)
+          .shards(config.shards)
           .analysis(analysis)
 
           // Because we have a relatively small number of records (compared
