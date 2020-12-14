@@ -10,7 +10,10 @@ import uk.ac.wellcome.sierra_adapter.model.{
   SierraGenerators,
   SierraTransformable
 }
+import uk.ac.wellcome.sierra_adapter.model.Implicits._
+import uk.ac.wellcome.storage.streaming.Codec._
 import uk.ac.wellcome.storage.Version
+import weco.catalogue.source_model.SierraSourcePayload
 
 class SierraBibMergerFeatureTest
     extends AnyFunSpec
@@ -22,9 +25,10 @@ class SierraBibMergerFeatureTest
     with WorkerServiceFixture {
 
   it("stores a bib in the hybrid store") {
-    val store = createStore[SierraTransformable]()
+    val sourceVHS = createSourceVHS[SierraTransformable]
+
     withLocalSqsQueue() { queue =>
-      withWorkerService(store, queue) {
+      withWorkerService(sourceVHS, queue) {
         case (_, messageSender) =>
           val bibRecord = createSierraBibRecord
 
@@ -33,24 +37,33 @@ class SierraBibMergerFeatureTest
           val expectedSierraTransformable =
             SierraTransformable(bibRecord = bibRecord)
 
+          val id =
+            Version(
+              id = expectedSierraTransformable.sierraId.withoutCheckDigit,
+              version = 0
+            )
+
           eventually {
             assertStoredAndSent(
-              Version(
-                expectedSierraTransformable.sierraId.withoutCheckDigit,
-                0),
+              id,
               expectedSierraTransformable,
-              store,
+              sourceVHS,
               messageSender
             )
+
+            messageSender
+              .getMessages[SierraSourcePayload]
+              .map { p => Version(p.id, p.version) } shouldBe Seq(id)
           }
       }
     }
   }
 
   it("stores multiple bibs from SQS") {
-    val store = createStore[SierraTransformable]()
+    val sourceVHS = createSourceVHS[SierraTransformable]
+
     withLocalSqsQueue() { queue =>
-      withWorkerService(store, queue) {
+      withWorkerService(sourceVHS, queue) {
         case (_, messageSender) =>
           val record1 = createSierraBibRecord
           sendNotificationToSQS(queue = queue, message = record1)
@@ -65,20 +78,27 @@ class SierraBibMergerFeatureTest
           val expectedTransformable2 =
             SierraTransformable(bibRecord = record2)
 
+          val id1 = Version(expectedTransformable1.sierraId.withoutCheckDigit, 0)
+          val id2 = Version(expectedTransformable2.sierraId.withoutCheckDigit, 0)
+
           eventually {
             assertStoredAndSent(
-              Version(expectedTransformable1.sierraId.withoutCheckDigit, 0),
+              id1,
               expectedTransformable1,
-              store,
+              sourceVHS,
               messageSender
             )
             assertStoredAndSent(
-              Version(expectedTransformable2.sierraId.withoutCheckDigit, 0),
+              id2,
               expectedTransformable2,
-              store,
+              sourceVHS,
               messageSender
             )
           }
+
+          messageSender
+            .getMessages[SierraSourcePayload]
+            .map { p => Version(p.id, p.version) } shouldBe Seq(id1, id2)
       }
     }
   }
@@ -90,11 +110,14 @@ class SierraBibMergerFeatureTest
 
     val oldTransformable =
       SierraTransformable(bibRecord = oldBibRecord)
-    val store = createStore[SierraTransformable](Map(Version(
-      oldTransformable.sierraId.withoutCheckDigit,
-      0) -> oldTransformable))
+
+    val sourceVHS = createSourceVHS[SierraTransformable]
+    sourceVHS.underlying.put(
+      Version(oldTransformable.sierraId.withoutCheckDigit, 0)
+    )(oldTransformable) shouldBe a[Right[_, _]]
+
     withLocalSqsQueue() { queue =>
-      withWorkerService(store, queue) {
+      withWorkerService(sourceVHS, queue) {
         case (_, messageSender) =>
           val newBibRecord = createSierraBibRecordWith(
             id = oldBibRecord.id,
@@ -106,14 +129,20 @@ class SierraBibMergerFeatureTest
           val expectedTransformable =
             SierraTransformable(bibRecord = newBibRecord)
 
+          val id = Version(oldTransformable.sierraId.withoutCheckDigit, 1)
+
           eventually {
             assertStoredAndSent(
-              Version(oldTransformable.sierraId.withoutCheckDigit, 1),
+              id,
               expectedTransformable,
-              store,
+              sourceVHS,
               messageSender
             )
           }
+
+          messageSender
+            .getMessages[SierraSourcePayload]
+            .map { p => Version(p.id, p.version) } shouldBe Seq(id)
       }
     }
   }
@@ -125,14 +154,14 @@ class SierraBibMergerFeatureTest
 
     val oldTransformable =
       SierraTransformable(bibRecord = oldBibRecord)
-    val store = createStore[SierraTransformable](
-      Map(
-        Version(oldTransformable.sierraId.withoutCheckDigit, 0) -> oldTransformable
-      )
-    )
+
+    val sourceVHS = createSourceVHS[SierraTransformable]
+    sourceVHS.underlying.put(
+      Version(oldTransformable.sierraId.withoutCheckDigit, 0)
+    )(oldTransformable) shouldBe a[Right[_, _]]
 
     withLocalSqsQueue() { queue =>
-      withWorkerService(store, queue) {
+      withWorkerService(sourceVHS, queue) {
         case (_, messageSender) =>
           val newBibRecord = createSierraBibRecordWith(
             id = oldBibRecord.id,
@@ -150,7 +179,7 @@ class SierraBibMergerFeatureTest
             assertStoredAndSent(
               Version(oldTransformable.sierraId.withoutCheckDigit, 1),
               expectedTransformable,
-              store,
+              sourceVHS,
               messageSender
             )
 
@@ -168,11 +197,13 @@ class SierraBibMergerFeatureTest
     val expectedTransformable =
       SierraTransformable(bibRecord = newBibRecord)
     val key = Version(expectedTransformable.sierraId.withoutCheckDigit, 0)
-    val store =
-      createStore[SierraTransformable](Map(key -> expectedTransformable))
+
+    val sourceVHS = createSourceVHS[SierraTransformable]
+    sourceVHS.underlying.put(key)(expectedTransformable) shouldBe a[Right[_, _]]
+
     withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>
-        withWorkerService(store, queue) {
+        withWorkerService(sourceVHS, queue) {
           case (_, messageSender) =>
             val oldBibRecord = createSierraBibRecordWith(
               id = newBibRecord.id,
@@ -195,11 +226,14 @@ class SierraBibMergerFeatureTest
     val transformable = createSierraTransformableWith(
       maybeBibRecord = None
     )
-    val store = createStore[SierraTransformable](
-      Map(
-        Version(transformable.sierraId.withoutCheckDigit, 0) -> transformable))
+
+    val key = Version(transformable.sierraId.withoutCheckDigit, 0)
+
+    val sourceVHS = createSourceVHS[SierraTransformable]
+    sourceVHS.underlying.put(key)(transformable) shouldBe a[Right[_, _]]
+
     withLocalSqsQueue() { queue =>
-      withWorkerService(store, queue) {
+      withWorkerService(sourceVHS, queue) {
         case (_, messageSender) =>
           val bibRecord =
             createSierraBibRecordWith(id = transformable.sierraId)
@@ -210,12 +244,18 @@ class SierraBibMergerFeatureTest
             SierraTransformable(bibRecord = bibRecord)
 
           eventually {
+            val id = Version(transformable.sierraId.withoutCheckDigit, 1)
+
             assertStoredAndSent(
-              Version(transformable.sierraId.withoutCheckDigit, 1),
+              id,
               expectedTransformable,
-              store,
+              sourceVHS,
               messageSender
             )
+
+            messageSender
+              .getMessages[SierraSourcePayload]
+              .map { p => Version(p.id, p.version) } shouldBe Seq(id)
           }
       }
     }

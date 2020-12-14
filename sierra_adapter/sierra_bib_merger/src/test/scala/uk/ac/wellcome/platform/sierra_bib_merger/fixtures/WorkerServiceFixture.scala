@@ -13,8 +13,10 @@ import uk.ac.wellcome.platform.sierra_bib_merger.services.{
   SierraBibMergerWorkerService
 }
 import uk.ac.wellcome.sierra_adapter.model.SierraTransformable
+import uk.ac.wellcome.sierra_adapter.model.Implicits._
 import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
-import uk.ac.wellcome.storage.store.VersionedStore
+import weco.catalogue.source_model.fixtures.SourceVHSFixture
+import weco.catalogue.source_model.store.SourceVHS
 
 import scala.concurrent.Future
 
@@ -22,18 +24,17 @@ trait WorkerServiceFixture
     extends Akka
     with SierraAdapterHelpers
     with SNS
-    with SQS {
+    with SQS
+    with SourceVHSFixture {
   def withWorkerService[R](
-    store: VersionedStore[String, Int, SierraTransformable],
+    sourceVHS: SourceVHS[SierraTransformable] = createSourceVHS[SierraTransformable],
     queue: Queue,
     metrics: Metrics[Future] = new MemoryMetrics())(
     testWith: TestWith[(SierraBibMergerWorkerService[String],
                         MemoryMessageSender),
                        R]): R =
     withActorSystem { implicit actorSystem =>
-      val updaterService = new SierraBibMergerUpdaterService(
-        versionedHybridStore = store
-      )
+      val updaterService = new SierraBibMergerUpdaterService(sourceVHS)
 
       withSQSStream[NotificationMessage, R](queue, metrics) { sqsStream =>
         val messageSender = new MemoryMessageSender

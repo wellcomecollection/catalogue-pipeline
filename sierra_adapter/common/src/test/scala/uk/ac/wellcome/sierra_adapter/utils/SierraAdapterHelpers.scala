@@ -9,6 +9,7 @@ import uk.ac.wellcome.storage.maxima.memory.MemoryMaxima
 import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.storage.store.memory.{MemoryStore, MemoryVersionedStore}
 import uk.ac.wellcome.json.JsonUtil._
+import weco.catalogue.source_model.store.SourceVHS
 
 trait SierraAdapterHelpers extends Matchers {
   type SierraVHS = VersionedStore[String, Int, SierraTransformable]
@@ -20,14 +21,14 @@ trait SierraAdapterHelpers extends Matchers {
 
   def assertStored[T](id: String,
                       t: T,
-                      store: VersionedStore[String, Int, T]): Assertion =
-    store.getLatest(id).right.get.identifiedT shouldBe t
+                      store: SourceVHS[T]): Assertion =
+    store.underlying.getLatest(id).right.get.identifiedT shouldBe t
 
   def assertStoredAndSent[T](id: Version[String, Int],
                              t: T,
-                             store: VersionedStore[String, Int, T],
+                             sourceVHS: SourceVHS[T],
                              messageSender: MemoryMessageSender): Assertion = {
-    assertStored(id.id, t, store)
+    assertStored(id.id, t, sourceVHS)
     messageSender.getMessages[Version[String, Int]] should contain(id)
   }
 }

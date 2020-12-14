@@ -36,7 +36,7 @@ class SierraItemsToDynamoFeatureTest
             assertStoredAndSent(
               id = Version(itemRecord.id.withoutCheckDigit, 0),
               t = itemRecord,
-              store = store,
+              sourceVHS = store,
               messageSender
             )
           }
