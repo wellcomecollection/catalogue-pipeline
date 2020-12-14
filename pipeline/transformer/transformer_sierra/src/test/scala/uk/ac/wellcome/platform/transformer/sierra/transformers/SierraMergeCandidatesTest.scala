@@ -2,22 +2,11 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.internal.{
-  IdentifierType,
-  MergeCandidate,
-  SourceIdentifier
-}
-import uk.ac.wellcome.platform.transformer.sierra.source.{
-  MarcSubfield,
-  SierraBibData,
-  SierraMaterialType,
-  VarField
-}
-import uk.ac.wellcome.platform.transformer.sierra.generators.{
-  MarcGenerators,
-  SierraDataGenerators
-}
+import uk.ac.wellcome.models.work.internal.{IdentifierType, MergeCandidate, SourceIdentifier}
+import uk.ac.wellcome.platform.transformer.sierra.source.{MarcSubfield, SierraBibData, SierraMaterialType, VarField}
+import uk.ac.wellcome.platform.transformer.sierra.generators.{MarcGenerators, SierraDataGenerators}
 import org.scalatest.prop.TableDrivenPropertyChecks._
+import uk.ac.wellcome.models.work.internal.IdState.Identifiable
 
 class SierraMergeCandidatesTest
     extends AnyFunSpec
@@ -366,7 +355,7 @@ class SierraMergeCandidatesTest
     }
 
   private def physicalAndDigitalSierraMergeCandidate(
-    bibNumber: String): List[MergeCandidate] =
+    bibNumber: String): List[MergeCandidate[Identifiable]] =
     List(
       MergeCandidate(
         identifier = SourceIdentifier(
@@ -380,7 +369,7 @@ class SierraMergeCandidatesTest
 
   private def miroMergeCandidate(
     miroID: String,
-    reason: String = "Miro/Sierra work"): List[MergeCandidate] =
+    reason: String = "Miro/Sierra work"): List[MergeCandidate[Identifiable]] =
     List(
       MergeCandidate(
         identifier = SourceIdentifier(

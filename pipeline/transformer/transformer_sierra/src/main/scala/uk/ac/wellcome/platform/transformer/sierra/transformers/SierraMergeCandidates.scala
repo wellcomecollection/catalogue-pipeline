@@ -1,16 +1,10 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
-import java.util.UUID
+import uk.ac.wellcome.models.work.internal.IdState.Identifiable
 
-import uk.ac.wellcome.models.work.internal.{
-  IdentifierType,
-  MergeCandidate,
-  SourceIdentifier
-}
-import uk.ac.wellcome.platform.transformer.sierra.source.{
-  SierraBibData,
-  SierraQueryOps
-}
+import java.util.UUID
+import uk.ac.wellcome.models.work.internal.{IdentifierType, MergeCandidate, SourceIdentifier}
+import uk.ac.wellcome.platform.transformer.sierra.source.{SierraBibData, SierraQueryOps}
 import uk.ac.wellcome.platform.transformer.sierra.transformers.parsers.MiroIdParsing
 
 import scala.util.Try
@@ -18,7 +12,7 @@ import scala.util.matching.Regex
 
 object SierraMergeCandidates extends SierraDataTransformer with SierraQueryOps {
 
-  type Output = List[MergeCandidate]
+  type Output = List[MergeCandidate[Identifiable]]
 
   def apply(bibData: SierraBibData) =
     get776mergeCandidates(bibData) ++
@@ -38,7 +32,7 @@ object SierraMergeCandidates extends SierraDataTransformer with SierraQueryOps {
     *
     */
   private def get776mergeCandidates(
-    bibData: SierraBibData): List[MergeCandidate] =
+    bibData: SierraBibData): List[MergeCandidate[Identifiable]] =
     bibData
       .subfieldsWithTag("776" -> "w")
       .contents
@@ -65,7 +59,7 @@ object SierraMergeCandidates extends SierraDataTransformer with SierraQueryOps {
    * We always try to merge all linked Miro and Sierra works
    */
   private def getSinglePageMiroMergeCandidates(
-    bibData: SierraBibData): List[MergeCandidate] = {
+    bibData: SierraBibData): List[MergeCandidate[Identifiable]] = {
     val allIds = (matching089Ids(bibData) ++ matching962Ids(bibData)).distinct
     removeNonSuffixedIfSuffixedExists(allIds).map {
       miroMergeCandidate(_, "Miro/Sierra work")
@@ -85,7 +79,7 @@ object SierraMergeCandidates extends SierraDataTransformer with SierraQueryOps {
     * see: `https://search.wellcomelibrary.org/iii/encore/record/C__Rb1187988?marcData=Y`
     */
   private def get035CalmMergeCandidates(
-    bibData: SierraBibData): List[MergeCandidate] =
+    bibData: SierraBibData): List[MergeCandidate[Identifiable]] =
     bibData
       .subfieldsWithTag("035" -> "a")
       .contents
