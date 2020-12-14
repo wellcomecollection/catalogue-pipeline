@@ -65,6 +65,12 @@ lazy val big_messaging_typesafe = setupProject(
   externalDependencies = CatalogueDependencies.bigMessagingTypesafeDependencies
 )
 
+lazy val source_model = setupProject(
+  project,
+  folder = "common/source_model",
+  externalDependencies = CatalogueDependencies.sourceModelDependencies
+)
+
 lazy val pipeline_storage = setupProject(
   project,
   "common/pipeline_storage",
@@ -168,7 +174,7 @@ lazy val batcher = setupProject(
 lazy val reindex_worker = setupProject(
   project,
   "reindexer/reindex_worker",
-  localDependencies = Seq(mets_adapter),
+  localDependencies = Seq(source_model),
   externalDependencies = CatalogueDependencies.reindexWorkerDependencies)
 
 lazy val transformer_common = setupProject(
@@ -242,7 +248,7 @@ lazy val sierra_items_to_dynamo = setupProject(
 lazy val mets_adapter = setupProject(
   project,
   folder = "mets_adapter/mets_adapter",
-  localDependencies = Seq(internal_model, big_messaging_typesafe),
+  localDependencies = Seq(internal_model, source_model, big_messaging_typesafe),
   externalDependencies = CatalogueDependencies.metsAdapterDependencies
 )
 

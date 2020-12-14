@@ -223,6 +223,9 @@ object CatalogueDependencies {
     WellcomeDependencies.storageTypesafeLibrary ++
       WellcomeDependencies.messagingTypesafeLibrary
 
+  val sourceModelDependencies: Seq[sbt.ModuleID] =
+    WellcomeDependencies.storageLibrary
+
   val pipelineStorageDependencies: Seq[ModuleID] =
     WellcomeDependencies.messagingLibrary
 
