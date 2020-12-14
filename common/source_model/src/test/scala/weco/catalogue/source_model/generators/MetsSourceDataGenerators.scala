@@ -28,4 +28,3 @@ trait MetsSourceDataGenerators extends S3ObjectLocationGenerators {
   def createMetsSourceData: MetsSourceData =
     createMetsSourceDataWith()
 }
-

@@ -9,8 +9,8 @@ import weco.catalogue.source_model.mets.MetsSourceData
 class MetsStore(val store: VersionedStore[String, Int, MetsSourceData])
     extends Logging {
 
-  def storeData(key: Version[String, Int],
-                data: MetsSourceData): Either[Throwable, Identified[Version[String, Int], MetsSourceData]] =
+  def storeData(key: Version[String, Int], data: MetsSourceData)
+    : Either[Throwable, Identified[Version[String, Int], MetsSourceData]] =
     store
       .put(key)(data)
       .left
