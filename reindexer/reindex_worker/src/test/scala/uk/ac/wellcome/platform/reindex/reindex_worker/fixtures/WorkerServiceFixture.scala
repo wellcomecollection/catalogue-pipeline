@@ -10,7 +10,8 @@ import uk.ac.wellcome.platform.reindex.reindex_worker.models.{
   CompleteReindexParameters,
   ReindexJobConfig,
   ReindexParameters,
-  ReindexRequest
+  ReindexRequest,
+  ReindexSource
 }
 import uk.ac.wellcome.platform.reindex.reindex_worker.services.{
   BulkMessageSender,
@@ -31,7 +32,7 @@ trait WorkerServiceFixture extends Akka with RecordReaderFixture with SQS {
 
   def withWorkerService[R](messageSender: MemoryIndividualMessageSender,
                            queue: Queue,
-                           configMap: Map[String, (Table, Destination)])(
+                           configMap: Map[String, (Table, Destination, ReindexSource)])(
     testWith: TestWith[ReindexWorkerService[Destination], R]): R =
     withActorSystem { implicit actorSystem =>
       withSQSStream[NotificationMessage, R](queue) { sqsStream =>
@@ -40,10 +41,11 @@ trait WorkerServiceFixture extends Akka with RecordReaderFixture with SQS {
           bulkMessageSender = new BulkMessageSender[Destination](messageSender),
           sqsStream = sqsStream,
           reindexJobConfigMap = configMap.map {
-            case (key: String, (table: Table, destination: Destination)) =>
+            case (key: String, (table, destination, source)) =>
               key -> ReindexJobConfig(
                 dynamoConfig = createDynamoConfigWith(table),
-                destinationConfig = destination
+                destinationConfig = destination,
+                source = source
               )
           }
         )
@@ -54,15 +56,21 @@ trait WorkerServiceFixture extends Akka with RecordReaderFixture with SQS {
       }
     }
 
+  def chooseReindexSource: ReindexSource =
+    chooseFrom(
+      ReindexSource.Calm, ReindexSource.Mets, ReindexSource.Miro, ReindexSource.Sierra
+    )
+
   def withWorkerService[R](messageSender: MemoryIndividualMessageSender,
                            queue: Queue,
                            table: Table,
-                           destination: Destination)(
+                           destination: Destination,
+                           source: ReindexSource = chooseReindexSource)(
     testWith: TestWith[ReindexWorkerService[Destination], R]): R =
     withWorkerService(
       messageSender,
       queue,
-      configMap = Map(defaultJobConfigId -> ((table, destination)))) {
+      configMap = Map(defaultJobConfigId -> ((table, destination, source)))) {
       service =>
         testWith(service)
     }

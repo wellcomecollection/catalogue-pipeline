@@ -7,7 +7,10 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryIndividualMessageSender
 import uk.ac.wellcome.platform.reindex.reindex_worker.fixtures.WorkerServiceFixture
-import uk.ac.wellcome.platform.reindex.reindex_worker.models.CompleteReindexParameters
+import uk.ac.wellcome.platform.reindex.reindex_worker.models.{
+  CompleteReindexParameters,
+  ReindexSource
+}
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
 
 class ReindexWorkerServiceTest
@@ -23,7 +26,7 @@ class ReindexWorkerServiceTest
 
       withLocalSqsQueuePair() {
         case QueuePair(queue, dlq) =>
-          withWorkerService(messageSender, queue, table, destination) { _ =>
+          withWorkerService(messageSender, queue, table, destination, ReindexSource.Calm) { _ =>
             val reindexParameters = CompleteReindexParameters(
               segment = 0,
               totalSegments = 1
@@ -95,13 +98,14 @@ class ReindexWorkerServiceTest
     withLocalDynamoDbTable { table =>
       val messageSender = new MemoryIndividualMessageSender()
       val destination = createDestination
+      val source = chooseReindexSource
 
       withLocalSqsQueuePair() {
         case QueuePair(queue, dlq) =>
           withWorkerService(
             messageSender,
             queue,
-            configMap = Map("xyz" -> ((table, destination)))) { _ =>
+            configMap = Map("xyz" -> ((table, destination, source)))) { _ =>
             sendNotificationToSQS(
               queue = queue,
               message = createReindexRequestWith(jobConfigId = "abc")
@@ -124,6 +128,8 @@ class ReindexWorkerServiceTest
         val messageSender = new MemoryIndividualMessageSender()
         val destination1 = createDestination
         val destination2 = createDestination
+        val source1 = chooseReindexSource
+        val source2 = chooseReindexSource
 
         withLocalSqsQueuePair() {
           case QueuePair(queue, dlq) =>
@@ -131,8 +137,8 @@ class ReindexWorkerServiceTest
             val records2 = createRecords(table2, count = 5)
 
             val configMap = Map(
-              "1" -> ((table1, destination1)),
-              "2" -> ((table2, destination2))
+              "1" -> ((table1, destination1, source1)),
+              "2" -> ((table2, destination2, source2))
             )
             withWorkerService(messageSender, queue, configMap) { _ =>
               sendNotificationToSQS(

@@ -8,7 +8,8 @@ import uk.ac.wellcome.messaging.memory.MemoryIndividualMessageSender
 import uk.ac.wellcome.platform.reindex.reindex_worker.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.platform.reindex.reindex_worker.models.{
   CompleteReindexParameters,
-  PartialReindexParameters
+  PartialReindexParameters,
+  ReindexSource
 }
 
 class ReindexWorkerFeatureTest
@@ -25,7 +26,7 @@ class ReindexWorkerFeatureTest
         val messageSender = new MemoryIndividualMessageSender()
         val destination = createDestination
 
-        withWorkerService(messageSender, queue, table, destination) { _ =>
+        withWorkerService(messageSender, queue, table, destination, ReindexSource.Calm) { _ =>
           val records = createRecords(table, count = 5)
 
           val reindexParameters =
@@ -51,7 +52,7 @@ class ReindexWorkerFeatureTest
         val messageSender = new MemoryIndividualMessageSender()
         val destination = createDestination
 
-        withWorkerService(messageSender, queue, table, destination) { _ =>
+        withWorkerService(messageSender, queue, table, destination, ReindexSource.Calm) { _ =>
           createRecords(table, count = 5)
 
           val reindexParameters = PartialReindexParameters(maxRecords = 1)
