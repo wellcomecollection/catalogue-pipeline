@@ -35,19 +35,6 @@ class ElasticsearchIndexCreator(
           .mapping(mapping)
           .shards(config.shards)
           .analysis(analysis)
-
-          // Because we have a relatively small number of records (compared
-          // to what Elasticsearch usually expects), we can get weird results
-          // if our records are split across multiple shards.
-          //
-          // e.g. searching for the same query multiple times gets varying results
-          //
-          // This forces all our records to be indexed into a single shard,
-          // which should avoid this problem.
-          //
-          // If/when we index more records, we should revisit this.
-          //
-          .shards(1)
           // Elasticsearch has a default maximum number of fields of 1000.
           // Because images have all of the WorkData fields defined twice in the mapping,
           // they end up having more than 1000 fields, so we increase them to 2000
