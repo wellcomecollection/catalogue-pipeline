@@ -174,15 +174,10 @@ trait WorksIndexConfigFields extends IndexConfigFields {
     )
 
   def relation(name: String, idState: ObjectField) =
-    objectField(name).fields(
-      // Locally override the strict mapping mode. No data fields are indexed for
-      // now, in the future specific fields can be added as required.
-      objectField("data").dynamic("false"),
-      idState,
-      intField("depth"),
-      intField("numChildren"),
-      intField("numDescendents"),
-    )
+    // Locally override the strict mapping mode. For now don't index any of the
+    // relation data, as doing so stresses the ES cluster. We can map specific
+    // bits of data in the future if required.
+    objectField(name).dynamic("false")
 
   def relations(idState: ObjectField) =
     objectField("relations").fields(
@@ -243,13 +238,13 @@ object DenormalisedWorkIndexConfig extends WorksIndexConfig {
 
   val dynamicMapping = DynamicMapping.False
 
-  /**
-    * Denormalised relations make index sizes explode from about 5gb without relations
-    * to 200gb with relations. According to elastic search documentation
-    * (https://www.elastic.co/guide/en/elasticsearch/reference/current/size-your-shards.html), shards sizes
-    * should be between 10gb and 50gb. Setting number of shards to 5 should result in shards of about 40gb
+  /** Denormalised relations make index sizes explode from about 5 GB without relations
+    * to an esimated 70 GB with relations. According to elastic search documentation
+    * (https://www.elastic.co/guide/en/elasticsearch/reference/current/size-your-shards.html), shards
+    * sizes should be between 10 GB and 50 GB. Setting number of shards to 2 should result in shards
+    * of about 35 GB.
     */
-  override val shards = 5
+  override val shards = 2
 }
 
 object IndexedWorkIndexConfig extends WorksIndexConfig {
@@ -281,11 +276,11 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
       )
     )
 
-  /**
-    * Denormalised relations make index sizes explode from about 5gb without relations
-    * to 200gb with relations. According to elastic search documentation
-    * (https://www.elastic.co/guide/en/elasticsearch/reference/current/size-your-shards.html), shards sizes
-    * should be between 10gb and 50gb. Setting number of shards to 5 should result in shards of about 40gb
+  /** Denormalised relations make index sizes explode from about 5 GB without relations
+    * to an esimated 70 GB with relations. According to elastic search documentation
+    * (https://www.elastic.co/guide/en/elasticsearch/reference/current/size-your-shards.html), shards
+    * sizes should be between 10 GB and 50 GB. Setting number of shards to 2 should result in shards
+    * of about 35 GB.
     */
-  override val shards = 5
+  override val shards = 2
 }

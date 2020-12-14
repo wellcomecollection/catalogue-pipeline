@@ -50,13 +50,13 @@ object Indexable extends Logging {
         work.state.modifiedTime.toEpochMilli
 
       override def weight(work: Work[State]): Long =
-        // As an estimate here we assume 50 relations (which each consist of a
+        // As an estimate here we assume 20 relations (which each consist of a
         // few key fields) is approximately the size of all the other data in a
         // single complete work. For example there are some works with around
         // 4000 relations, in which cases they will be considered to be
-        // equivilent to around 80 works without any relations.
+        // equivilent to around 200 works without any relations.
         Math.round(
-          1.0 + (work.state.relations.size / 50.0)
+          1.0 + (work.state.relations.size / 20.0)
         )
     }
 }

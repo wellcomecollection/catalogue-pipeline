@@ -203,7 +203,7 @@ class RelationsServiceTest
 
   }
 
-  describe("getCompleteTree") {
+  describe("getRelationTree") {
 
     import Selector._
 
@@ -213,8 +213,9 @@ class RelationsServiceTest
       withLocalIdentifiedWorksIndex { index =>
         withActorSystem { implicit actorSystem =>
           storeWorks(index, works)
-          whenReady(queryCompleteTree(service(index), batch)) { archiveWorks =>
-            archiveWorks should contain theSameElementsAs works
+          whenReady(queryRelationTree(service(index), batch)) { relationWorks =>
+            relationWorks should contain theSameElementsAs works.map(
+              toRelationWork)
           }
         }
       }
@@ -224,8 +225,9 @@ class RelationsServiceTest
       withLocalIdentifiedWorksIndex { index =>
         withActorSystem { implicit actorSystem =>
           storeWorks(index, work("other/archive") :: works)
-          whenReady(queryCompleteTree(service(index), batch)) { archiveWorks =>
-            archiveWorks should contain theSameElementsAs works
+          whenReady(queryRelationTree(service(index), batch)) { relationWorks =>
+            relationWorks should contain theSameElementsAs works.map(
+              toRelationWork)
           }
         }
       }
@@ -235,15 +237,28 @@ class RelationsServiceTest
       withLocalIdentifiedWorksIndex { index =>
         withActorSystem { implicit actorSystem =>
           storeWorks(index, work("A/Invisible").invisible() :: works)
-          whenReady(queryCompleteTree(service(index), batch)) { archiveWorks =>
-            archiveWorks should contain theSameElementsAs works
+          whenReady(queryRelationTree(service(index), batch)) { relationWorks =>
+            relationWorks should contain theSameElementsAs works.map(
+              toRelationWork)
           }
         }
       }
     }
 
-    def queryCompleteTree(service: RelationsService,
+    def queryRelationTree(service: RelationsService,
                           batch: Batch)(implicit as: ActorSystem) =
-      service.getCompleteTree(batch).runWith(Sink.seq[Work[Identified]])
+      service.getRelationTree(batch).runWith(Sink.seq[RelationWork])
   }
+
+  def toRelationWork(work: Work[Identified]): RelationWork =
+    RelationWork(
+      data = RelationWorkData(
+        title = work.data.title,
+        collectionPath = work.data.collectionPath,
+        workType = work.data.workType,
+      ),
+      state = RelationWorkState(
+        canonicalId = work.state.canonicalId
+      )
+    )
 }

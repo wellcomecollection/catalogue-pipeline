@@ -662,12 +662,12 @@ class WorksIncludesTest
         sourceIdentifier = createSourceIdentifierWith(value = "0/a/c"),
         relations = Relations(
           ancestors = List(
-            Relation.fromIndexedWork(work0, 0, 1, 5),
-            Relation.fromIndexedWork(workA, 1, 3, 4),
+            Relation(work0, 0, 1, 5),
+            Relation(workA, 1, 3, 4),
           ),
-          children = List(Relation.fromIndexedWork(workE, 3, 0, 0)),
-          siblingsPreceding = List(Relation.fromIndexedWork(workB, 2, 0, 0)),
-          siblingsSucceeding = List(Relation.fromIndexedWork(workD, 2, 0, 0)),
+          children = List(Relation(workE, 3, 0, 0)),
+          siblingsPreceding = List(Relation(workB, 2, 0, 0)),
+          siblingsSucceeding = List(Relation(workD, 2, 0, 0)),
         )
       ).collectionPath(CollectionPath(path = "0/a/c"))
         .title("0/a/c")
@@ -693,8 +693,6 @@ class WorksIncludesTest
               "parts": [{
                 "id": "${workE.state.canonicalId}",
                 "title": "0/a/c/e",
-                "alternativeTitles": [],
-                "availableOnline": false,
                 "totalParts": 0,
                 "totalDescendentParts": 0,
                 "type": "Work"
@@ -723,16 +721,12 @@ class WorksIncludesTest
                 {
                   "id": "${workA.state.canonicalId}",
                   "title": "0/a",
-                  "alternativeTitles": [],
-                  "availableOnline": false,
                   "totalParts": 3,
                   "totalDescendentParts": 4,
                   "type": "Section",
                   "partOf": [{
                     "id": "${work0.state.canonicalId}",
                     "title": "0",
-                    "alternativeTitles": [],
-                    "availableOnline": false,
                     "totalParts": 1,
                     "totalDescendentParts": 5,
                     "type": "Collection",
@@ -763,8 +757,6 @@ class WorksIncludesTest
               "precededBy": [{
                 "id": "${workB.state.canonicalId}",
                 "title": "0/a/b",
-                "alternativeTitles": [],
-                "availableOnline": false,
                 "totalParts": 0,
                 "totalDescendentParts": 0,
                 "type": "Work"
@@ -792,8 +784,6 @@ class WorksIncludesTest
               "succeededBy": [{
                 "id": "${workD.state.canonicalId}",
                 "title": "0/a/d",
-                "alternativeTitles": [],
-                "availableOnline": false,
                 "totalParts": 0,
                 "totalDescendentParts": 0,
                 "type": "Work"

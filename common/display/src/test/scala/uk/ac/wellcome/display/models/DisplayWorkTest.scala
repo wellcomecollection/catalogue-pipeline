@@ -472,18 +472,19 @@ class DisplayWorkTest
     val workE = indexedWork()
     val workF = indexedWork()
 
+    val relationA = Relation(workA, 0, 1, 5)
+    val relationB = Relation(workB, 1, 3, 4)
+    val relationC = Relation(workC, 3, 0, 0)
+    val relationD = Relation(workD, 3, 0, 0)
+    val relationE = Relation(workE, 2, 0, 0)
+    val relationF = Relation(workF, 2, 0, 0)
+
     val work = indexedWork(
       relations = Relations(
-        ancestors = List(
-          Relation.fromIndexedWork(workA, 0, 1, 5),
-          Relation.fromIndexedWork(workB, 1, 3, 4)
-        ),
-        children = List(
-          Relation.fromIndexedWork(workE, 3, 0, 0),
-          Relation.fromIndexedWork(workF, 3, 0, 0)
-        ),
-        siblingsPreceding = List(Relation.fromIndexedWork(workC, 2, 0, 0)),
-        siblingsSucceeding = List(Relation.fromIndexedWork(workD, 2, 0, 0)),
+        ancestors = List(relationA, relationB),
+        children = List(relationE, relationF),
+        siblingsPreceding = List(relationC),
+        siblingsSucceeding = List(relationD)
       )
     )
 
@@ -491,13 +492,11 @@ class DisplayWorkTest
       val displayWork =
         DisplayWork(work, WorksIncludes(WorkInclude.PartOf))
       displayWork.partOf.isEmpty shouldBe false
-      val partOf: List[DisplayWork] = displayWork.partOf.get
+      val partOf = displayWork.partOf.get
       partOf.map(_.id) shouldBe List(workB.state.canonicalId)
       partOf(0).partOf shouldBe Some(
         List(
-          DisplayWork(workA).copy(
-            totalParts = Some(1),
-            totalDescendentParts = Some(5),
+          DisplayRelation(relationA).copy(
             partOf = Some(Nil)
           )
         )
@@ -509,10 +508,8 @@ class DisplayWorkTest
         DisplayWork(work, WorksIncludes(WorkInclude.Parts))
       displayWork.parts shouldBe Some(
         List(
-          DisplayWork(workE)
-            .copy(totalParts = Some(0), totalDescendentParts = Some(0)),
-          DisplayWork(workF)
-            .copy(totalParts = Some(0), totalDescendentParts = Some(0)),
+          DisplayRelation(relationE),
+          DisplayRelation(relationF),
         )
       )
     }
@@ -521,10 +518,7 @@ class DisplayWorkTest
       val displayWork =
         DisplayWork(work, WorksIncludes(WorkInclude.PrecededBy))
       displayWork.precededBy shouldBe Some(
-        List(
-          DisplayWork(workC)
-            .copy(totalParts = Some(0), totalDescendentParts = Some(0))
-        )
+        List(DisplayRelation(relationC))
       )
     }
 
@@ -532,10 +526,7 @@ class DisplayWorkTest
       val displayWork =
         DisplayWork(work, WorksIncludes(WorkInclude.SucceededBy))
       displayWork.succeededBy shouldBe Some(
-        List(
-          DisplayWork(workD)
-            .copy(totalParts = Some(0), totalDescendentParts = Some(0))
-        )
+        List(DisplayRelation(relationD))
       )
     }
 

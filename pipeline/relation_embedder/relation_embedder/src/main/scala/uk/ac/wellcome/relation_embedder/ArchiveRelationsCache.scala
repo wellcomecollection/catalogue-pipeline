@@ -6,13 +6,12 @@ import grizzled.slf4j.Logging
 import uk.ac.wellcome.models.work.internal._
 import WorkState.Identified
 
-class ArchiveRelationsCache(works: Map[String, Work[Identified]])
-    extends Logging {
+class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
 
-  def apply(work: Work[Identified]): Relations[DataState.Identified] =
+  def apply(work: Work[Identified]): Relations =
     work.data.collectionPath
       .map {
-        case CollectionPath(path, _, _) =>
+        case CollectionPath(path, _) =>
           val (siblingsPreceding, siblingsSucceeding) = getSiblings(path)
           val ancestors = getAncestors(path)
           val children = getChildren(path)
@@ -38,7 +37,7 @@ class ArchiveRelationsCache(works: Map[String, Work[Identified]])
 
   def numParents = parentMapping.size
 
-  private def getChildren(path: String): List[Relation[DataState.Identified]] =
+  private def getChildren(path: String): List[Relation] =
     childMapping
       .get(path)
       // Relations might not exist in the cache if e.g. the work is not Visible
@@ -46,9 +45,7 @@ class ArchiveRelationsCache(works: Map[String, Work[Identified]])
       .map(relations)
       .toList
 
-  private def getSiblings(
-    path: String): (List[Relation[DataState.Identified]],
-                    List[Relation[DataState.Identified]]) = {
+  private def getSiblings(path: String): (List[Relation], List[Relation]) = {
     val siblings = parentMapping
       .get(path)
       .map(childMapping)
@@ -64,8 +61,7 @@ class ArchiveRelationsCache(works: Map[String, Work[Identified]])
 
   @tailrec
   private def getAncestors(path: String,
-                           accum: List[Relation[DataState.Identified]] = Nil)
-    : List[Relation[DataState.Identified]] =
+                           accum: List[Relation] = Nil): List[Relation] =
     parentMapping.get(path) match {
       case None => accum
       case Some(parentPath) =>
@@ -86,11 +82,10 @@ class ArchiveRelationsCache(works: Map[String, Work[Identified]])
     numDescendents(childMapping.getOrElse(path, Nil))
   }
 
-  private lazy val relations =
+  private lazy val relations: Map[String, Relation] =
     works.map {
       case (path, work) =>
-        path -> Relation(
-          work = work,
+        path -> work.toRelation(
           depth = path.split("/").length - 1,
           numChildren = getNumChildren(path),
           numDescendents = getNumDescendents(path)
@@ -123,12 +118,12 @@ class ArchiveRelationsCache(works: Map[String, Work[Identified]])
 
 object ArchiveRelationsCache {
 
-  def apply(works: Seq[Work[Identified]]): ArchiveRelationsCache =
+  def apply(works: Seq[RelationWork]): ArchiveRelationsCache =
     new ArchiveRelationsCache(
       works
         .map { case work => work.data.collectionPath -> work }
         .collect {
-          case (Some(CollectionPath(path, _, _)), work) =>
+          case (Some(CollectionPath(path, _)), work) =>
             path -> work
         }
         .toMap

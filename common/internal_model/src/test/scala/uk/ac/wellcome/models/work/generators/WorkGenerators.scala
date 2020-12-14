@@ -40,7 +40,7 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     canonicalId: String = createCanonicalId,
     modifiedTime: Instant = instantInLast30Days,
-    relations: Relations[DataState.Identified] = Relations.none
+    relations: Relations = Relations.none
   ): Work.Visible[Denormalised] =
     Work.Visible[Denormalised](
       state = Denormalised(
@@ -56,7 +56,7 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     canonicalId: String = createCanonicalId,
     modifiedTime: Instant = instantInLast30Days,
-    relations: Relations[DataState.Identified] = Relations.none
+    relations: Relations = Relations.none
   ): Work.Visible[Identified] =
     Work.Visible[Identified](
       state = Identified(
@@ -72,7 +72,7 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     canonicalId: String = createCanonicalId,
     modifiedTime: Instant = instantInLast30Days,
-    relations: Relations[DataState.Identified] = Relations.none
+    relations: Relations = Relations.none
   ): Work.Visible[Indexed] = {
     val data = initData[DataState.Identified]
     Work.Visible[Indexed](

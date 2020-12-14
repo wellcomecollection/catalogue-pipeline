@@ -5,6 +5,7 @@ import org.scalatest.funspec.AnyFunSpec
 
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.generators.WorkGenerators
+import WorkState.Identified
 
 class ArchiveRelationsCacheTest
     extends AnyFunSpec
@@ -40,6 +41,7 @@ class ArchiveRelationsCacheTest
 
   val works =
     List(workA, workB, workC, workD, workE, workF, work4, work3, work2, work1)
+      .map(toRelationWork)
 
   it(
     "Retrieves relations for the given path with children and siblings sorted correctly") {
@@ -74,6 +76,7 @@ class ArchiveRelationsCacheTest
 
   it("Ignores missing ancestors") {
     val works = List(workA, workB, workC, workD, workE, workF)
+      .map(toRelationWork)
     val relationsCache = ArchiveRelationsCache(works)
     relationsCache(workF) shouldBe Relations(
       ancestors = List(relE),
@@ -85,13 +88,13 @@ class ArchiveRelationsCacheTest
 
   it("Returns no related works when work is not part of a collection") {
     val workX = identifiedWork()
-    val works = List(workA, work1, workX)
+    val works = List(workA, work1, workX).map(toRelationWork)
     val relationsCache = ArchiveRelationsCache(works)
     relationsCache(workX) shouldBe Relations.none
   }
 
   it("Returns no relations when missing parent work (e.g if it is not visible)") {
-    val works = List(workA, workD, workE, workF)
+    val works = List(workA, workD, workE, workF).map(toRelationWork)
     val relationsCache = ArchiveRelationsCache(works)
     relationsCache(workB) shouldBe Relations.none
   }
@@ -101,7 +104,7 @@ class ArchiveRelationsCacheTest
     val workB1 = work("a/B1")
     val workB2 = work("a/B2")
     val workB10 = work("a/B10")
-    val works = List(workA, workB1, workB2, workB10)
+    val works = List(workA, workB1, workB2, workB10).map(toRelationWork)
     val relationsCache = ArchiveRelationsCache(works)
     relationsCache(workA) shouldBe Relations(
       ancestors = Nil,
@@ -114,4 +117,16 @@ class ArchiveRelationsCacheTest
       siblingsSucceeding = Nil
     )
   }
+
+  def toRelationWork(work: Work[Identified]): RelationWork =
+    RelationWork(
+      data = RelationWorkData(
+        title = work.data.title,
+        collectionPath = work.data.collectionPath,
+        workType = work.data.workType,
+      ),
+      state = RelationWorkState(
+        canonicalId = work.state.canonicalId
+      )
+    )
 }

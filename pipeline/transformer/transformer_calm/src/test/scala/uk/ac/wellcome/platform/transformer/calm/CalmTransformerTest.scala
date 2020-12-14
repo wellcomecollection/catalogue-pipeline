@@ -44,7 +44,6 @@ class CalmTransformerTest
           collectionPath = Some(
             CollectionPath(
               path = "a/b/c",
-              level = Some(CollectionLevel.Collection),
               label = Some("a.b.c")
             )
           ),
@@ -331,7 +330,7 @@ class CalmTransformerTest
     )
   }
 
-  it("ignores case when transforming level") {
+  it("ignores case when transforming workType") {
     val record = createCalmRecordWith(
       "Title" -> "abc",
       "Level" -> "Subseries",
@@ -339,9 +338,8 @@ class CalmTransformerTest
       "AltRefNo" -> "a.b.c",
       "CatalogueStatus" -> "Catalogued"
     )
-    CalmTransformer(record, version).right.get.data.collectionPath.get.level shouldBe Some(
-      CollectionLevel.Series
-    )
+    CalmTransformer(record, version).right.get.data.workType shouldBe
+      WorkType.Series
   }
 
   it("transforms to deleted work when CatalogueStatus is suppressible") {

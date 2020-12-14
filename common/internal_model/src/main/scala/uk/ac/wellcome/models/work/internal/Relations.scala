@@ -1,9 +1,5 @@
 package uk.ac.wellcome.models.work.internal
 
-import java.time.Instant
-
-import WorkState.{Identified, Indexed}
-
 /** Holds relations for a particular work.
   *
   * @param ancestors Ancestors from root downwards
@@ -11,11 +7,11 @@ import WorkState.{Identified, Indexed}
   * @param siblingsPreceding Siblings preceding the work
   * @param siblingsSucceeding Siblings following the work
   */
-case class Relations[State <: DataState](
-  ancestors: List[Relation[State]] = Nil,
-  children: List[Relation[State]] = Nil,
-  siblingsPreceding: List[Relation[State]] = Nil,
-  siblingsSucceeding: List[Relation[State]] = Nil,
+case class Relations(
+  ancestors: List[Relation] = Nil,
+  children: List[Relation] = Nil,
+  siblingsPreceding: List[Relation] = Nil,
+  siblingsSucceeding: List[Relation] = Nil,
 ) {
   def size: Int =
     List(
@@ -28,7 +24,7 @@ case class Relations[State <: DataState](
 
 object Relations {
 
-  def none[State <: DataState]: Relations[State] =
+  def none: Relations =
     Relations(
       ancestors = Nil,
       children = Nil,
@@ -43,9 +39,11 @@ object Relations {
   * @param id The ID
   * @param depth The depth of the relation in the tree
   */
-case class Relation[State <: DataState](
-  data: WorkData[State],
-  id: State#Id,
+case class Relation(
+  id: String,
+  title: Option[String],
+  collectionPath: Option[CollectionPath],
+  workType: WorkType,
   depth: Int,
   numChildren: Int,
   numDescendents: Int,
@@ -53,51 +51,17 @@ case class Relation[State <: DataState](
 
 object Relation {
 
-  def apply(work: Work[Identified],
-            depth: Int,
-            numChildren: Int,
-            numDescendents: Int): Relation[DataState.Identified] =
-    Relation[DataState.Identified](
-      data = work.data,
-      id = IdState.Identified(
-        sourceIdentifier = work.state.sourceIdentifier,
-        canonicalId = work.state.canonicalId
-      ),
+  def apply[State <: WorkState](work: Work[State],
+                                depth: Int,
+                                numChildren: Int,
+                                numDescendents: Int): Relation =
+    Relation(
+      id = work.id,
+      title = work.data.title,
+      collectionPath = work.data.collectionPath,
+      workType = work.data.workType,
       depth = depth,
       numChildren = numChildren,
       numDescendents = numDescendents,
     )
-
-  def fromIndexedWork(work: Work[Indexed],
-                      depth: Int,
-                      numChildren: Int,
-                      numDescendents: Int): Relation[DataState.Identified] =
-    Relation[DataState.Identified](
-      data = work.data,
-      id = IdState.Identified(
-        canonicalId = work.state.canonicalId,
-        sourceIdentifier = work.state.sourceIdentifier
-      ),
-      depth = depth,
-      numChildren = numChildren,
-      numDescendents = numDescendents
-    )
-
-  implicit class ToWork(relation: Relation[DataState.Identified]) {
-    def toWork: Work.Visible[Indexed] =
-      // NOTE: The numberOfSources, modifiedTime and version are not currently
-      // stored for related works, so there is no way to recover them here.
-      // Here we just initialise them to default values, which should not be an
-      // issue (at least for now), due to the API not serialising them.
-      Work.Visible[Indexed](
-        data = relation.data,
-        version = 1,
-        state = Indexed(
-          canonicalId = relation.id.canonicalId,
-          sourceIdentifier = relation.id.sourceIdentifier,
-          derivedData = DerivedWorkData(relation.data),
-          modifiedTime = Instant.ofEpochSecond(0)
-        ),
-      )
-  }
 }
