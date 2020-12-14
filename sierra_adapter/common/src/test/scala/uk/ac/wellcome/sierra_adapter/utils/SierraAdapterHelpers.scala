@@ -21,8 +21,8 @@ trait SierraAdapterHelpers extends Matchers {
 
   def assertStored[T](id: String,
                       t: T,
-                      store: SourceVHS[T]): Assertion =
-    store.underlying.getLatest(id).right.get.identifiedT shouldBe t
+                      sourceVHS: SourceVHS[T]): Assertion =
+    sourceVHS.underlying.getLatest(id).right.get.identifiedT shouldBe t
 
   def assertStoredAndSent[T](id: Version[String, Int],
                              t: T,

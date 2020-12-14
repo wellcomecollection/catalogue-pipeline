@@ -8,7 +8,7 @@ import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
 import uk.ac.wellcome.platform.sierra_items_to_dynamo.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.platform.sierra_items_to_dynamo.merger.SierraItemRecordMerger
-import uk.ac.wellcome.sierra_adapter.model.{SierraGenerators, SierraItemRecord}
+import uk.ac.wellcome.sierra_adapter.model.SierraGenerators
 import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
 import uk.ac.wellcome.storage.Version
 
@@ -46,19 +46,19 @@ class SierraItemsToDynamoWorkerServiceTest
         updatedRecord = record2
       )
       .get
-    val store =
-      createStore(Map(Version(record1.id.withoutCheckDigit, 1) -> record1))
+
+    val sourceVHS = createSourceVHSWith(
+      initialEntries = Map(
+        Version(record1.id.withoutCheckDigit, 1) -> record1
+      )
+    )
 
     withLocalSqsQueue() { queue =>
-      withWorkerService(queue, store) { _ =>
+      withWorkerService(queue, sourceVHS) { _ =>
         sendNotificationToSQS(queue = queue, message = record2)
 
         eventually {
-          assertStored[SierraItemRecord](
-            record1.id.withoutCheckDigit,
-            expectedRecord,
-            store
-          )
+          assertStored(record1.id.withoutCheckDigit, expectedRecord, sourceVHS)
         }
       }
     }
@@ -89,12 +89,15 @@ class SierraItemsToDynamoWorkerServiceTest
       )
       .get
 
-    val store =
-      createStore(Map(Version(record1.id.withoutCheckDigit, 1) -> record1))
+    val sourceVHS = createSourceVHSWith(
+      initialEntries = Map(
+        Version(record1.id.withoutCheckDigit, 1) -> record1
+      )
+    )
 
     withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>
-        withWorkerService(queue, store) {
+        withWorkerService(queue, sourceVHS) {
           case (_, messageSender) =>
             (1 to 5).foreach { _ =>
               sendNotificationToSQS(queue = queue, message = record2)
@@ -108,22 +111,17 @@ class SierraItemsToDynamoWorkerServiceTest
                 Version(record1.id.withoutCheckDigit, 2)
               )
 
-              assertStored[SierraItemRecord](
-                record1.id.withoutCheckDigit,
-                expectedRecord,
-                store
-              )
+              assertStored(record1.id.withoutCheckDigit, expectedRecord, sourceVHS)
             }
         }
     }
   }
 
   it("records a failure if it receives an invalid message") {
-    val store = createStore[SierraItemRecord]()
     val metrics = new MemoryMetrics()
     withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>
-        withWorkerService(queue, store, metrics) { _ =>
+        withWorkerService(queue, metrics = metrics) { _ =>
           val body =
             """
                     |{
