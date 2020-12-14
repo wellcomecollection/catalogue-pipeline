@@ -25,7 +25,7 @@ trait NewScanSpecScanner extends ItemParser {
 
   private val documentApiClient = new DynamoDB(dynamoClient)
 
-  protected def scan[T](tableName: String, spec: ScanSpec)(implicit format: DynamoFormat[T]): Future[Seq[T]] = {
+  protected def scan[T](spec: ScanSpec)(tableName: String)(implicit format: DynamoFormat[T]): Future[Seq[T]] = {
     val table = documentApiClient.getTable(tableName)
 
     for {
