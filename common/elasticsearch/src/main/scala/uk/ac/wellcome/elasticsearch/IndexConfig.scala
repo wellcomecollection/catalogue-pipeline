@@ -14,6 +14,7 @@ import uk.ac.wellcome.elasticsearch.WorksAnalysis._
 trait IndexConfig {
   def mapping: MappingDefinition
   def analysis: Analysis
+  def shards: Int = 1
 }
 
 /** Mixin for common fields used within an IndexConfig in our internal models.

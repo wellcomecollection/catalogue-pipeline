@@ -242,6 +242,14 @@ object DenormalisedWorkIndexConfig extends WorksIndexConfig {
   )
 
   val dynamicMapping = DynamicMapping.False
+
+  /**
+    * Denormalised relations make index sizes explode from about 5gb without relations
+    * to 200gb with relations. According to elastic search documentation
+    * (https://www.elastic.co/guide/en/elasticsearch/reference/current/size-your-shards.html), shards sizes
+    * should be between 10gb and 50gb. Setting number of shards to 5 should result in shards of about 40gb
+    */
+  override val shards = 5
 }
 
 object IndexedWorkIndexConfig extends WorksIndexConfig {
@@ -272,4 +280,12 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
         keywordField("info")
       )
     )
+
+  /**
+    * Denormalised relations make index sizes explode from about 5gb without relations
+    * to 200gb with relations. According to elastic search documentation
+    * (https://www.elastic.co/guide/en/elasticsearch/reference/current/size-your-shards.html), shards sizes
+    * should be between 10gb and 50gb. Setting number of shards to 5 should result in shards of about 40gb
+    */
+  override val shards = 5
 }
