@@ -21,7 +21,7 @@ class MetsStoreTest
     )
     val store = new MetsStore(internalStore)
 
-    store.storeData(id, data) shouldBe Right(id)
+    store.storeData(id, data) shouldBe Right(Identified(id, data))
     internalStore.getLatest(id.id) shouldBe Right(Identified(id, data))
   }
 
@@ -39,7 +39,7 @@ class MetsStoreTest
     )
     val store = new MetsStore(internalStore)
 
-    store.storeData(newId, newData) shouldBe Right(newId)
+    store.storeData(newId, newData) shouldBe Right(Identified(newId, newData))
     internalStore.getLatest(id) shouldBe Right(Identified(newId, newData))
   }
 
@@ -52,7 +52,7 @@ class MetsStoreTest
     )
     val store = new MetsStore(internalStore)
 
-    store.storeData(id, data) shouldBe Right(id)
+    store.storeData(id, data) shouldBe Right(Identified(id, data))
     internalStore.getLatest(id.id) shouldBe Right(Identified(id, data))
   }
 

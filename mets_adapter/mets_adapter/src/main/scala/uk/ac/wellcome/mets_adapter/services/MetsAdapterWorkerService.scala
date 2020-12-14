@@ -1,6 +1,6 @@
 package uk.ac.wellcome.mets_adapter.services
 
-import scala.util.Success
+import scala.util.{Failure, Success}
 import scala.concurrent.ExecutionContext
 import akka.Done
 import akka.stream.scaladsl._
@@ -11,9 +11,10 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.typesafe.Runnable
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.mets_adapter.models._
-import uk.ac.wellcome.storage.Version
+import uk.ac.wellcome.storage.{Identified, Version}
 import uk.ac.wellcome.bigmessaging.FlowOps
 import uk.ac.wellcome.messaging.MessageSender
+import weco.catalogue.source_model.MetsSourcePayload
 import weco.catalogue.source_model.mets.MetsSourceData
 
 import scala.concurrent.Future
@@ -116,8 +117,18 @@ class MetsAdapterWorkerService[Destination](
       }
 
   def publishKey =
-    Flow[(Context, Option[Version[String, Int]])]
+    Flow[(Context, Option[Identified[Version[String, Int], MetsSourceData]])]
       .mapWithContext {
-        case (_, data) => msgSender.sendT(data).toEither.right.map(_ => data)
+        case (_, Identified(Version(id, version), sourceData)) =>
+          val sourcePayload = MetsSourcePayload(
+            id = id,
+            version = version,
+            sourceData = sourceData
+          )
+
+          msgSender.sendT(sourcePayload) match {
+            case Success(())  => Right(Version(id, version))
+            case Failure(err) => Left(err)
+          }
       }
 }
