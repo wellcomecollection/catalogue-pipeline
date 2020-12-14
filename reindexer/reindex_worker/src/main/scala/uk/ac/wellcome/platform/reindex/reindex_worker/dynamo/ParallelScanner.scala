@@ -1,8 +1,10 @@
 package uk.ac.wellcome.platform.reindex.reindex_worker.dynamo
 
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.dynamodbv2.document.spec.ScanSpec
+import org.scanamo.DynamoFormat
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 /** Implements a wrapper for Parallel Scans of a DynamoDB table.
   * In a nutshell, this operation lets you have multiple parallel workers
@@ -11,7 +13,10 @@ import scala.concurrent.Future
   *
   * https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Scan.html#Scan.ParallelScan
   */
-class ParallelScanner(scanSpecScanner: ScanSpecScanner) {
+class ParallelScanner(implicit
+                      val dynamoClient: AmazonDynamoDB,
+                      val ec: ExecutionContext)
+    extends ScanSpecScanner {
 
   /** Run a Parallel Scan for a single worker.
     *
@@ -26,17 +31,17 @@ class ParallelScanner(scanSpecScanner: ScanSpecScanner) {
     * Note that this returns a Future[List], so results will be cached in-memory.
     * Choose segment count accordingly.
     */
-  def scan(segment: Int, totalSegments: Int)(
-    tableName: String): Future[List[String]] = {
+  def scan[T](segment: Int, totalSegments: Int)(tableName: String)(
+    implicit dynamoFormat: DynamoFormat[T]): Future[Seq[T]] = {
 
     // Create the ScanSpec configuration and the DynamoDB table.  This is
     // based on the Java example of a Parallel Scan from the AWS docs:
     // https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/ScanJavaDocumentAPI.html
     //
-    val scanSpec = new ScanSpec()
+    val spec = new ScanSpec()
       .withTotalSegments(totalSegments)
       .withSegment(segment)
 
-    scanSpecScanner.scan(scanSpec = scanSpec, tableName = tableName)
+    scan(spec)(tableName)
   }
 }

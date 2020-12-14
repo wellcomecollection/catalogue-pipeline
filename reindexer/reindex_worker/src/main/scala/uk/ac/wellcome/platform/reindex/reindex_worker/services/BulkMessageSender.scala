@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.reindex.reindex_worker.services
 
+import io.circe.Encoder
 import uk.ac.wellcome.messaging.IndividualMessageSender
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -7,12 +8,13 @@ import scala.concurrent.{ExecutionContext, Future}
 class BulkMessageSender[Destination](
   underlying: IndividualMessageSender[Destination])(
   implicit ec: ExecutionContext) {
-  def send(messages: Seq[String], destination: Destination): Future[Seq[Unit]] =
+  def send[T](messages: Seq[T], destination: Destination)(
+    implicit encoder: Encoder[T]): Future[Seq[Unit]] =
     Future.sequence {
       messages
-        .map { body =>
+        .map { m =>
           Future.fromTry {
-            underlying.send(body)(
+            underlying.sendT(m)(
               subject = "Sent from the reindex_worker",
               destination = destination)
           }

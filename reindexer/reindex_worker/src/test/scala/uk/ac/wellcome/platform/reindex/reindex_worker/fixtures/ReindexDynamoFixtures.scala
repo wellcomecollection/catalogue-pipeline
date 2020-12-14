@@ -3,15 +3,7 @@ package uk.ac.wellcome.platform.reindex.reindex_worker.fixtures
 import org.scanamo.{Scanamo, Table => ScanamoTable}
 import org.scanamo.auto._
 import uk.ac.wellcome.fixtures.RandomGenerators
-import uk.ac.wellcome.platform.reindex.reindex_worker.dynamo.{
-  BatchItemGetter,
-  MaxRecordsScanner,
-  ParallelScanner,
-  ScanSpecScanner
-}
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
-
-import scala.concurrent.ExecutionContext.Implicits.global
 
 trait ReindexDynamoFixtures extends ReindexableTable with RandomGenerators {
   case class NamedRecord(
@@ -36,20 +28,4 @@ trait ReindexDynamoFixtures extends ReindexableTable with RandomGenerators {
 
     records
   }
-
-  def createScanSpecScanner: ScanSpecScanner =
-    new ScanSpecScanner(dynamoClient)
-
-  def createParallelScanner: ParallelScanner =
-    new ParallelScanner(
-      scanSpecScanner = createScanSpecScanner
-    )
-
-  def createMaxRecordsScanner: MaxRecordsScanner =
-    new MaxRecordsScanner(
-      scanSpecScanner = createScanSpecScanner
-    )
-
-  def createBatchItemGetter: BatchItemGetter =
-    new BatchItemGetter(dynamoClient)
 }

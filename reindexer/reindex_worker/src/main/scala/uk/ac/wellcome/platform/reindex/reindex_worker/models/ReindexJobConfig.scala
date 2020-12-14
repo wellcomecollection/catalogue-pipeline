@@ -4,5 +4,6 @@ import uk.ac.wellcome.storage.dynamo.DynamoConfig
 
 case class ReindexJobConfig[Destination](
   dynamoConfig: DynamoConfig,
-  destinationConfig: Destination
+  destinationConfig: Destination,
+  source: ReindexSource
 )
