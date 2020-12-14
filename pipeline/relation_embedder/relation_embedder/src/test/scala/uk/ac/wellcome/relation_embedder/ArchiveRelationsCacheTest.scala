@@ -5,7 +5,7 @@ import org.scalatest.funspec.AnyFunSpec
 
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.generators.WorkGenerators
-import WorkState.Identified
+import WorkState.Merged
 
 class ArchiveRelationsCacheTest
     extends AnyFunSpec
@@ -13,7 +13,7 @@ class ArchiveRelationsCacheTest
     with WorkGenerators {
 
   def work(path: String) =
-    identifiedWork(createSourceIdentifierWith(value = path))
+    mergedWork(createSourceIdentifierWith(value = path))
       .collectionPath(CollectionPath(path = path))
       .title(path)
 
@@ -87,7 +87,7 @@ class ArchiveRelationsCacheTest
   }
 
   it("Returns no related works when work is not part of a collection") {
-    val workX = identifiedWork()
+    val workX = mergedWork()
     val works = List(workA, work1, workX).map(toRelationWork)
     val relationsCache = ArchiveRelationsCache(works)
     relationsCache(workX) shouldBe Relations.none
@@ -118,7 +118,7 @@ class ArchiveRelationsCacheTest
     )
   }
 
-  def toRelationWork(work: Work[Identified]): RelationWork =
+  def toRelationWork(work: Work[Merged]): RelationWork =
     RelationWork(
       data = RelationWorkData(
         title = work.data.title,
