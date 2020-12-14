@@ -1,23 +1,23 @@
 package uk.ac.wellcome.calm_adapter
 
 import grizzled.slf4j.Logging
-
+import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.{
   Identified,
   NoVersionExistsError,
   StorageError,
   Version
 }
-import uk.ac.wellcome.storage.store.VersionedStore
+import weco.catalogue.source_model.store.SourceVHS
 
-class CalmStore(store: VersionedStore[String, Int, CalmRecord])
+class CalmStore(store: SourceVHS[CalmRecord])
     extends Logging {
 
   type Key = Version[String, Int]
 
   type Result[T] = Either[Throwable, T]
 
-  def putRecord(record: CalmRecord): Result[Option[(Key, CalmRecord)]] = {
+  def putRecord(record: CalmRecord): Result[Option[(Key, S3ObjectLocation, CalmRecord)]] = {
     val recordSummmary = s"ID=${record.id}, RefNo=${record.refNo.getOrElse(
       "NONE")}, Modified=${record.modified.getOrElse("NONE")}"
     shouldStoreRecord(record)
@@ -27,36 +27,31 @@ class CalmStore(store: VersionedStore[String, Int, CalmRecord])
           Right(None)
         case true =>
           info(s"Storing calm record: $recordSummmary")
-          store
-            .putLatest(record.id)(record)
-            .map { case Identified(key, record) => Some(key -> record) }
-            .left
-            .map(toReadableException)
+          store.putLatest(record.id)(record) match {
+            case Right(Identified(key, (location, record))) => Right(Some((key, location, record)))
+            case Left(err) => Left(toReadableException(err))
+          }
       }
   }
 
   def setRecordPublished(key: Key, record: CalmRecord): Result[Key] =
-    store
+    store.underlying
       .put(Version(key.id, key.version + 1))(record.copy(published = true))
       .map { case Identified(key, _) => key }
       .left
       .map(toReadableException)
 
   def shouldStoreRecord(record: CalmRecord): Result[Boolean] =
-    store
-      .getLatest(record.id)
-      .map {
-        case Identified(_, storedRecord) =>
-          checkResolvable(record, storedRecord)
-            .map(Left(_))
-            .getOrElse(Right(compareRecords(record, storedRecord)))
-      }
-      .left
-      .flatMap {
-        case NoVersionExistsError(_) => Right(Right(true))
-        case err                     => Left(err.e)
-      }
-      .flatMap(identity)
+    store.underlying.getLatest(record.id) match {
+      case Right(Identified(_, storedRecord)) =>
+        checkResolvable(record, storedRecord)
+          .map(Left(_))
+          .getOrElse(Right(compareRecords(record, storedRecord)))
+
+      case Left(NoVersionExistsError(_)) => Right(true)
+
+      case Left(err) => Left(err.e)
+    }
 
   def checkResolvable(record: CalmRecord,
                       storedRecord: CalmRecord): Option[Exception] = {

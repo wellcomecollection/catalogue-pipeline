@@ -71,6 +71,13 @@ lazy val source_model = setupProject(
   externalDependencies = CatalogueDependencies.sourceModelDependencies
 )
 
+lazy val source_model_typesafe = setupProject(
+  project,
+  folder = "common/source_model_typesafe",
+  localDependencies = Seq(source_model),
+  externalDependencies = CatalogueDependencies.sourceModelTypesafeDependencies
+)
+
 lazy val pipeline_storage = setupProject(
   project,
   "common/pipeline_storage",
@@ -257,7 +264,7 @@ lazy val mets_adapter = setupProject(
 lazy val calm_adapter = setupProject(
   project,
   folder = "calm_adapter/calm_adapter",
-  localDependencies = Seq(internal_model, big_messaging_typesafe),
+  localDependencies = Seq(internal_model, source_model_typesafe, big_messaging_typesafe),
   externalDependencies = CatalogueDependencies.calmAdapterDependencies
 )
 

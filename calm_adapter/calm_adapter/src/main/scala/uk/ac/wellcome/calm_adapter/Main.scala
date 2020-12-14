@@ -8,8 +8,8 @@ import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
-import uk.ac.wellcome.bigmessaging.typesafe.VHSBuilder
 import uk.ac.wellcome.json.JsonUtil._
+import weco.catalogue.source_model.config.SourceVHSBuilder
 
 object Main extends WellcomeTypesafeApp {
 
@@ -27,7 +27,9 @@ object Main extends WellcomeTypesafeApp {
       SQSBuilder.buildSQSStream(config),
       SNSBuilder.buildSNSMessageSender(config, subject = "CALM adapter"),
       calmRetriever(config),
-      calmStore(config),
+      calmStore = new CalmStore(
+        SourceVHSBuilder.build[CalmRecord](config)
+      ),
     )
   }
 
@@ -43,10 +45,5 @@ object Main extends WellcomeTypesafeApp {
         .requireString("calm.suppressedFields")
         .split(",")
         .toSet
-    )
-
-  def calmStore(config: Config) =
-    new CalmStore(
-      VHSBuilder.build[CalmRecord](config)
     )
 }

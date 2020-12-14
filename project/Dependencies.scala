@@ -228,6 +228,10 @@ object CatalogueDependencies {
       WellcomeDependencies.fixturesLibrary ++
       ExternalDependencies.scalatestDependencies
 
+  val sourceModelTypesafeDependencies: Seq[ModuleID] =
+    WellcomeDependencies.storageTypesafeLibrary ++
+      WellcomeDependencies.messagingTypesafeLibrary
+
   val pipelineStorageDependencies: Seq[ModuleID] =
     WellcomeDependencies.messagingLibrary
 

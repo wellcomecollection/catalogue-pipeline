@@ -1,139 +1,203 @@
 package uk.ac.wellcome.calm_adapter
 
+import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.{Assertion, EitherValues}
+import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.storage.s3.S3ObjectLocation
+import uk.ac.wellcome.storage.{Identified, Version}
+import weco.catalogue.source_model.fixtures.SourceVHSFixture
+import weco.catalogue.source_model.store.SourceVHS
+
 import java.time.Instant
 
-import org.scalatest.funspec.AnyFunSpec
-import uk.ac.wellcome.storage.store.memory.{MemoryStore, MemoryVersionedStore}
-import uk.ac.wellcome.storage.maxima.Maxima
-import uk.ac.wellcome.storage.maxima.memory.MemoryMaxima
-import uk.ac.wellcome.storage.{StoreReadError, Version}
-
-class CalmStoreTest extends AnyFunSpec with Matchers {
+class CalmStoreTest extends AnyFunSpec with Matchers with EitherValues with SourceVHSFixture {
 
   type Key = Version[String, Int]
 
-  val retrievedAt = Instant.ofEpochSecond(123456)
+  val retrievedAt: Instant = Instant.ofEpochSecond(123456)
+
+  val oldTime: Instant = retrievedAt
+  val newTime: Instant = Instant.ofEpochSecond(retrievedAt.getEpochSecond + 2)
+
+  val data = Map("key" -> List("data"))
   val oldData = Map("key" -> List("old"))
   val newData = Map("key" -> List("new"))
 
   describe("putRecord") {
     it("stores new CALM records") {
-      val data = dataStore()
+      implicit val sourceVHS: SourceVHS[CalmRecord] = createSourceVHS[CalmRecord]
+      val calmStore = new CalmStore(sourceVHS)
+
       val record = CalmRecord("A", Map("key" -> List("value")), retrievedAt)
-      calmStore(data).putRecord(record) shouldBe Right(
-        Some(Version("A", 0) -> record))
-      data.entries shouldBe Map(Version("A", 0) -> record)
+
+      val (storedId, storedLocation, storedRecord) = calmStore.putRecord(record).value.get
+
+      storedId shouldBe Version("A", 0)
+
+      assertStored(
+        id = "A",
+        expectedVersion = 0,
+        expectedRecord = record,
+        storedRecord = storedRecord,
+        storedLocation = storedLocation
+      )
     }
 
-    it(
-      "replaces a stored CALM record if the retrieval date is newer and the data differs") {
-      val oldTime = retrievedAt
-      val newTime = Instant.ofEpochSecond(retrievedAt.getEpochSecond + 2)
+    it("replaces a stored record if the data is newer and different") {
       val oldRecord = CalmRecord("A", oldData, oldTime, published = true)
       val newRecord = CalmRecord("A", newData, newTime)
-      val data = dataStore(Version("A", 1) -> oldRecord)
-      calmStore(data).putRecord(newRecord) shouldBe Right(
-        Some(Version("A", 2) -> newRecord))
-      data.entries shouldBe Map(
-        Version("A", 1) -> oldRecord,
-        Version("A", 2) -> newRecord
+
+      implicit val sourceVHS: SourceVHS[CalmRecord] = createSourceVHS[CalmRecord]
+      val calmStore = new CalmStore(sourceVHS)
+
+      sourceVHS.underlying.put(Version("A", 1))(oldRecord)
+
+      val (storedId, storedLocation, storedRecord) = calmStore.putRecord(newRecord).value.get
+
+      storedId shouldBe Version("A", 2)
+
+      assertStored(
+        id = "A",
+        expectedVersion = 2,
+        expectedRecord = newRecord,
+        storedRecord = storedRecord,
+        storedLocation = storedLocation
       )
     }
 
     it(
       "does not replace a stored CALM record if the retrieval date is newer and the data is the same") {
-      val oldTime = retrievedAt
-      val newTime = Instant.ofEpochSecond(retrievedAt.getEpochSecond + 2)
-      val oldRecord = CalmRecord("A", oldData, oldTime, published = true)
-      val newRecord = CalmRecord("A", oldData, newTime)
-      val data = dataStore(Version("A", 1) -> oldRecord)
-      calmStore(data).putRecord(newRecord) shouldBe Right(None)
-      data.entries shouldBe Map(Version("A", 1) -> oldRecord)
+      val oldRecord = CalmRecord("A", data, oldTime, published = true)
+      val newRecord = CalmRecord("A", data, newTime)
+
+      implicit val sourceVHS: SourceVHS[CalmRecord] = createSourceVHS[CalmRecord]
+      val calmStore = new CalmStore(sourceVHS)
+
+      sourceVHS.underlying.put(Version("A", 1))(oldRecord)
+
+      calmStore.putRecord(newRecord).value shouldBe None
+
+      assertStored(id = "A", expectedVersion = 1, expectedRecord = oldRecord)
     }
 
     it(
       "replaces a stored CALM record if the data is the same but it is not recorded as published") {
-      val oldTime = retrievedAt
-      val newTime = Instant.ofEpochSecond(retrievedAt.getEpochSecond + 2)
       val oldRecord = CalmRecord("A", oldData, oldTime, published = false)
       val newRecord = CalmRecord("A", oldData, newTime)
-      val data = dataStore(Version("A", 1) -> oldRecord)
-      calmStore(data).putRecord(newRecord) shouldBe Right(
-        Some(Version("A", 2) -> newRecord))
-      data.entries shouldBe Map(
-        Version("A", 1) -> oldRecord,
-        Version("A", 2) -> newRecord
+
+      implicit val sourceVHS: SourceVHS[CalmRecord] = createSourceVHS[CalmRecord]
+      val calmStore = new CalmStore(sourceVHS)
+
+      sourceVHS.underlying.put(Version("A", 1))(oldRecord)
+
+      val (storedId, storedLocation, storedRecord) = calmStore.putRecord(newRecord).value.get
+
+      storedId shouldBe Version("A", 2)
+
+      assertStored(
+        id = "A",
+        expectedVersion = 2,
+        expectedRecord = newRecord,
+        storedRecord = storedRecord,
+        storedLocation = storedLocation
       )
     }
 
     it(
       "does not replace a stored CALM record if the retrieval date on the new record is older") {
-      val oldTime = retrievedAt
-      val newTime = Instant.ofEpochSecond(retrievedAt.getEpochSecond + 2)
       val oldRecord = CalmRecord("A", oldData, oldTime)
       val newRecord = CalmRecord("A", newData, newTime)
-      val data = dataStore(Version("A", 4) -> newRecord)
-      calmStore(data).putRecord(oldRecord) shouldBe Right(None)
-      data.entries shouldBe Map(Version("A", 4) -> newRecord)
+
+      implicit val sourceVHS: SourceVHS[CalmRecord] = createSourceVHS[CalmRecord]
+      val calmStore = new CalmStore(sourceVHS)
+
+      sourceVHS.underlying.put(Version("A", 4))(newRecord)
+
+      calmStore.putRecord(oldRecord).value shouldBe None
+
+      assertStored(id = "A", expectedVersion = 4, expectedRecord = newRecord)
     }
 
     it("doesn't store CALM records when checking the stored data fails") {
-      val data = dataStore()
       val record = CalmRecord("A", Map("key" -> List("value")), retrievedAt)
-      val calmStore = new CalmStore(
-        new MemoryVersionedStore(data) {
-          override def getLatest(id: String): ReadEither =
-            Left(StoreReadError(new Exception("Not today mate")))
-        }
-      )
+
+      val calmStore = new CalmStore(createSourceVHS[CalmRecord]) {
+        override def shouldStoreRecord(record: CalmRecord): Result[Boolean] =
+          Left(new Throwable("BOOM!"))
+      }
+
       calmStore.putRecord(record) shouldBe a[Left[_, _]]
-      data.entries shouldBe Map.empty
     }
 
     it("errors if the data differs but timestamp is the same") {
       val x = CalmRecord("A", Map("key" -> List("x")), retrievedAt)
       val y = CalmRecord("A", Map("key" -> List("y")), retrievedAt)
-      val data = dataStore(Version("A", 2) -> x)
-      calmStore(data).putRecord(y) shouldBe a[Left[_, _]]
-      data.entries shouldBe Map(Version("A", 2) -> x)
+
+      implicit val sourceVHS: SourceVHS[CalmRecord] = createSourceVHS[CalmRecord]
+      val calmStore = new CalmStore(sourceVHS)
+
+      sourceVHS.underlying.put(Version("A", 2))(x)
+
+      calmStore.putRecord(y) shouldBe a[Left[_, _]]
+
+      assertStored(id = "A", expectedVersion = 2, expectedRecord = x)
     }
   }
 
   describe("setRecordPublished") {
     it("sets Calm records as published") {
       val record = CalmRecord("A", Map("key" -> List("value")), retrievedAt)
-      val data = dataStore(Version("A", 5) -> record)
-      calmStore(data).setRecordPublished(Version("A", 5), record) shouldBe
-        Right(Version("A", 6))
-      data.entries shouldBe Map(
-        Version("A", 5) -> record,
-        Version("A", 6) -> record.copy(published = true),
-      )
+      record.published shouldBe false
+
+      implicit val sourceVHS: SourceVHS[CalmRecord] = createSourceVHS[CalmRecord]
+      val calmStore = new CalmStore(sourceVHS)
+
+      sourceVHS.underlying.put(Version("A", 5))(record)
+
+      calmStore.setRecordPublished(Version("A", 5), record) shouldBe a[Right[_, _]]
+
+      assertStored(id = "A", expectedVersion = 6, expectedRecord = record.copy(published = true))
     }
 
     it("fails setting Calm record as published if version already exists") {
       val record = CalmRecord("A", Map("key" -> List("value")), retrievedAt)
-      val data = dataStore(
-        Version("A", 5) -> record,
-        Version("A", 6) -> record.copy(data = newData)
-      )
-      val result = calmStore(data).setRecordPublished(Version("A", 5), record)
-      result shouldBe a[Left[_, _]]
-      result.left.get.getMessage shouldBe "VersionAlreadyExistsError"
-      data.entries shouldBe Map(
-        Version("A", 5) -> record,
-        Version("A", 6) -> record.copy(data = newData)
-      )
+      record.published shouldBe false
+
+      implicit val sourceVHS: SourceVHS[CalmRecord] = createSourceVHS[CalmRecord]
+      val calmStore = new CalmStore(sourceVHS)
+
+      sourceVHS.underlying.put(Version("A", 6))(record)
+
+      val err = calmStore.setRecordPublished(Version("A", 5), record).left.value
+      err.getMessage shouldBe "VersionAlreadyExistsError"
+
+      assertStored(id = "A", expectedVersion = 6, expectedRecord = record)
     }
   }
 
-  def dataStore(entries: (Key, CalmRecord)*) =
-    new MemoryStore(entries.toMap) with MemoryMaxima[String, CalmRecord]
+  private def assertStored(
+    id: String,
+    storedLocation: S3ObjectLocation,
+    storedRecord: CalmRecord,
+    expectedVersion: Int,
+    expectedRecord: CalmRecord,
+  )(
+    implicit sourceVHS: SourceVHS[CalmRecord]
+  ): Assertion = {
+    storedRecord shouldBe expectedRecord
 
-  def calmStore(
-    data: MemoryStore[Key, CalmRecord] with Maxima[String,
-                                                   Version[String, Int],
-                                                   CalmRecord]) =
-    new CalmStore(new MemoryVersionedStore(data))
+    sourceVHS.underlying.hybridStore.typedStore.get(storedLocation).value.identifiedT shouldBe expectedRecord
+
+    assertStored(id, expectedVersion, expectedRecord)
+  }
+
+  private def assertStored(
+    id: String,
+    expectedVersion: Int,
+    expectedRecord: CalmRecord,
+  )(
+    implicit sourceVHS: SourceVHS[CalmRecord]
+  ): Assertion =
+    sourceVHS.underlying.getLatest(id).value shouldBe Identified(Version(id, expectedVersion), expectedRecord)
 }
