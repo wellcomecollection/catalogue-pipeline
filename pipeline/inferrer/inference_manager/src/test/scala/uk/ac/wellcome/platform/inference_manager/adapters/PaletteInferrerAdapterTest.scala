@@ -24,7 +24,7 @@ class PaletteInferrerAdapterTest
   describe("createRequest") {
     it("creates a request with the query_url parameter as a local path") {
       val downloadedImage = DownloadedImage(
-        image = createImageData.toIdentifiedImage,
+        image = createImageData.toInitialImage,
         path = Paths.get("/", "a", "b", "c.jpg")
       )
       val request = adapter.createRequest(downloadedImage)

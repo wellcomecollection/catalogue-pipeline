@@ -42,7 +42,7 @@ class InferenceManagerWorkerServiceTest
   it(
     "reads image messages, augments them with the inferrers, and sends them to SNS") {
     val images = (1 to 5)
-      .map(_ => createImageData.toIdentifiedImage)
+      .map(_ => createImageData.toInitialImage)
       .map(image => image.id -> image)
       .toMap
     withResponsesAndFixtures(
@@ -104,7 +104,7 @@ class InferenceManagerWorkerServiceTest
       images = _ => Some(Responses.image)
     ) {
       case (QueuePair(queue, dlq), messageSender, _, _) =>
-        val image = createImageData.toIdentifiedImage
+        val image = createImageData.toInitialImage
         (1 to 3).foreach(_ => sendMessage(queue, image))
         eventually {
           assertQueueEmpty(queue)
@@ -134,14 +134,14 @@ class InferenceManagerWorkerServiceTest
   it("places images that fail inference on the DLQ") {
     val image404 = createImageDataWith(
       locations = List(createDigitalLocationWith(url = "lost_image"))
-    ).toIdentifiedImage
+    ).toInitialImage
     val image400 = createImageDataWith(
       locations = List(createDigitalLocationWith(url = "malformed_image_url"))
-    ).toIdentifiedImage
+    ).toInitialImage
     val image500 = createImageDataWith(
       locations =
         List(createDigitalLocationWith(url = "extremely_cursed_image"))
-    ).toIdentifiedImage
+    ).toInitialImage
     withResponsesAndFixtures(
       inferrer = url =>
         if (url.contains(image400.id)) {
@@ -168,7 +168,7 @@ class InferenceManagerWorkerServiceTest
       images = _ => None
     ) {
       case (QueuePair(queue, dlq), _, _, _) =>
-        val image = createImageData.toIdentifiedImage
+        val image = createImageData.toInitialImage
         sendMessage(queue, image)
         eventually {
           assertQueueEmpty(queue)
