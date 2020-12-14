@@ -62,7 +62,7 @@ class NewParallelScannerTest
     case class NumberedRecord(id: Int, text: String)
 
     withLocalDynamoDbTable { table =>
-      createRecords(table, count = 5)
+      createRecords(table, count = 10)
 
       val future = scanner.scan[NumberedRecord](
         segment = 1,
