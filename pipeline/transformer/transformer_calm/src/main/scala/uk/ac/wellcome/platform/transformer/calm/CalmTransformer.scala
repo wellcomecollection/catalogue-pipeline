@@ -117,7 +117,7 @@ object CalmTransformer
       accessStatus <- accessStatus(record)
       title <- title(record)
       workType <- workType(record)
-      collectionPath <- collectionPath(record, collectionLevel)
+      collectionPath <- collectionPath(record)
     } yield
       WorkData[DataState.Unidentified](
         title = Some(title),
@@ -182,15 +182,13 @@ object CalmTransformer
       .map(Right(_))
       .getOrElse(Left(TitleMissing))
 
-  def collectionPath(record: CalmRecord,
-                     level: CollectionLevel): Result[CollectionPath] =
+  def collectionPath(record: CalmRecord): Result[CollectionPath] =
     record
       .get("RefNo")
       .map { path =>
         Right(
           CollectionPath(
             path = path,
-            level = Some(level),
             label = record.get("AltRefNo"))
         )
       }
@@ -210,8 +208,8 @@ object CalmTransformer
         case "subseries"        => Right(WorkType.Series)
         case "subsubseries"     => Right(WorkType.Series)
         case "subsubsubseries"  => Right(WorkType.Series)
-        case "item"             => Right(WorkType.Item)
-        case "piece"            => Right(WorkType.Item)
+        case "item"             => Right(WorkType.Standard)
+        case "piece"            => Right(WorkType.Standard)
         case level              => Left(UnrecognisedLevel)
       }
       .getOrElse(Left(LevelMissing))
