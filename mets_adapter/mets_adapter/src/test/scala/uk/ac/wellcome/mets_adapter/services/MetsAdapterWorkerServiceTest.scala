@@ -82,6 +82,8 @@ class MetsAdapterWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
+          messageSender.getMessages[Version[String, Int]]() shouldBe Seq(
+            expectedVersion)
           messageSender.getMessages[MetsSourcePayload] shouldBe Seq(
             MetsSourcePayload(
               id = expectedVersion.id,
@@ -110,6 +112,8 @@ class MetsAdapterWorkerServiceTest
         assertQueueEmpty(queue)
         assertQueueEmpty(dlq)
 
+        messageSender.getMessages[Version[String, Int]]() shouldBe Seq(
+          expectedVersion)
         messageSender.getMessages[MetsSourcePayload]() shouldBe Seq(
           MetsSourcePayload(
             id = expectedVersion.id,
@@ -135,6 +139,8 @@ class MetsAdapterWorkerServiceTest
         assertQueueEmpty(queue)
         assertQueueEmpty(dlq)
 
+        messageSender.getMessages[Version[String, Int]]() shouldBe Seq(
+          expectedVersion)
         messageSender.getMessages[MetsSourcePayload] shouldBe Seq(
           MetsSourcePayload(
             id = expectedVersion.id,
