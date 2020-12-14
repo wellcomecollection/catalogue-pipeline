@@ -6,14 +6,26 @@ import org.scanamo.time.JavaTimeFormats._
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
-import uk.ac.wellcome.platform.reindex.reindex_worker.models.source.{CalmReindexPayload, MetsReindexPayload, MiroInventoryReindexPayload, MiroReindexPayload, ReindexPayload, SierraReindexPayload}
-import uk.ac.wellcome.platform.reindex.reindex_worker.models.{ReindexJobConfig, ReindexParameters, ReindexRequest, ReindexSource}
+import uk.ac.wellcome.platform.reindex.reindex_worker.models.source.{
+  CalmReindexPayload,
+  MetsReindexPayload,
+  MiroInventoryReindexPayload,
+  MiroReindexPayload,
+  ReindexPayload,
+  SierraReindexPayload
+}
+import uk.ac.wellcome.platform.reindex.reindex_worker.models.{
+  ReindexJobConfig,
+  ReindexParameters,
+  ReindexRequest,
+  ReindexSource
+}
 import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class ReindexWorkerService[Destination](
-  recordReader: NewRecordReader,
+  recordReader: RecordReader,
   bulkMessageSender: BulkMessageSender[Destination],
   sqsStream: SQSStream[NotificationMessage],
   reindexJobConfigMap: Map[String, ReindexJobConfig[Destination]]

@@ -6,7 +6,11 @@ import com.typesafe.config.Config
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.platform.reindex.reindex_worker.config.ReindexJobConfigBuilder
-import uk.ac.wellcome.platform.reindex.reindex_worker.services.{BulkMessageSender, NewRecordReader, ReindexWorkerService}
+import uk.ac.wellcome.platform.reindex.reindex_worker.services.{
+  BulkMessageSender,
+  RecordReader,
+  ReindexWorkerService
+}
 import uk.ac.wellcome.storage.typesafe.DynamoBuilder
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
@@ -22,7 +26,7 @@ object Main extends WellcomeTypesafeApp {
 
     implicit val dynamoDBClient: AmazonDynamoDB = DynamoBuilder.buildDynamoClient(config)
 
-    val recordReader = new NewRecordReader
+    val recordReader = new RecordReader
 
     val bulkMessageSender = new BulkMessageSender(
       underlying = SNSBuilder.buildSNSIndividualMessageSender(config)

@@ -6,14 +6,24 @@ import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryIndividualMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.platform.reindex.reindex_worker.models.{CompleteReindexParameters, ReindexJobConfig, ReindexParameters, ReindexRequest, ReindexSource}
-import uk.ac.wellcome.platform.reindex.reindex_worker.services.{BulkMessageSender, NewRecordReader, ReindexWorkerService}
+import uk.ac.wellcome.platform.reindex.reindex_worker.models.{
+  CompleteReindexParameters,
+  ReindexJobConfig,
+  ReindexParameters,
+  ReindexRequest,
+  ReindexSource
+}
+import uk.ac.wellcome.platform.reindex.reindex_worker.services.{
+  BulkMessageSender,
+  RecordReader,
+  ReindexWorkerService
+}
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Random
 
-trait WorkerServiceFixture extends Akka with RecordReaderFixture with SQS {
+trait WorkerServiceFixture extends Akka with SQS with ReindexDynamoFixtures {
   val defaultJobConfigId = "testing"
 
   type Destination = String
@@ -28,7 +38,7 @@ trait WorkerServiceFixture extends Akka with RecordReaderFixture with SQS {
     withActorSystem { implicit actorSystem =>
       withSQSStream[NotificationMessage, R](queue) { sqsStream =>
         val workerService = new ReindexWorkerService(
-          recordReader = new NewRecordReader(),
+          recordReader = new RecordReader,
           bulkMessageSender = new BulkMessageSender[Destination](messageSender),
           sqsStream = sqsStream,
           reindexJobConfigMap = configMap.map {

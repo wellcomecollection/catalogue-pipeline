@@ -5,31 +5,31 @@ import org.scalatest.Assertion
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.json.JsonUtil._
+import org.scanamo.auto._
 import uk.ac.wellcome.platform.reindex.reindex_worker.fixtures.ReindexDynamoFixtures
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class ParallelScannerTest
-    extends AnyFunSpec
+  extends AnyFunSpec
     with Matchers
     with ScalaFutures
     with ReindexDynamoFixtures {
 
+  val scanner = new ParallelScanner()
+
   it("reads a table with a single record") {
     withLocalDynamoDbTable { table =>
-      val parallelScanner = createParallelScanner
-
       val records = createRecords(table, count = 1)
 
-      val futureResult = parallelScanner.scan(
+      val future = scanner.scan[NamedRecord](
         segment = 0,
         totalSegments = 1
       )(table.name)
 
-      whenReady(futureResult) { result =>
-        result.map { fromJson[NamedRecord](_).get } shouldBe records
+      whenReady(future) {
+        _ shouldBe records
       }
     }
   }
@@ -42,43 +42,54 @@ class ParallelScannerTest
     runTest(recordCount = 5, segmentCount = 10)
   }
 
-  it(
-    "returns a failed future if asked for a segment that's greater than totalSegments") {
+  it("fails if asked for a segment that's greater than totalSegments") {
     withLocalDynamoDbTable { table =>
-      val parallelScanner = createParallelScanner
-
-      val future = parallelScanner.scan(
+      val future = scanner.scan[NamedRecord](
         segment = 10,
         totalSegments = 5
       )(table.name)
 
-      whenReady(future.failed) { r =>
-        r shouldBe a[AmazonDynamoDBException]
-        val message = r.asInstanceOf[AmazonDynamoDBException].getMessage
+      whenReady(future.failed) { err =>
+        err shouldBe a[AmazonDynamoDBException]
+        val message = err.asInstanceOf[AmazonDynamoDBException].getMessage
         message should include(
           "Value '10' at 'segment' failed to satisfy constraint: Member must have value less than or equal to 4")
       }
     }
   }
 
+  it("fails if the data is in the wrong format") {
+    case class NumberedRecord(id: Int, text: String)
+
+    withLocalDynamoDbTable { table =>
+      createRecords(table, count = 10)
+
+      val future = scanner.scan[NumberedRecord](
+        segment = 1,
+        totalSegments = 5
+      )(table.name)
+
+      whenReady(future.failed) { err =>
+        err shouldBe a[RuntimeException]
+        err.getMessage should startWith("Errors parsing Scanamo result")
+      }
+    }
+  }
+
   private def runTest(recordCount: Int, segmentCount: Int): Assertion = {
     withLocalDynamoDbTable { table =>
-      val parallelScanner = createParallelScanner
-
       val records = createRecords(table, count = recordCount)
 
       // Note that segments are 0-indexed
-      val futureResults = (0 until segmentCount).map { segment =>
-        parallelScanner.scan(
+      val futures = (0 until segmentCount).map { segment =>
+        scanner.scan[NamedRecord](
           segment = segment,
           totalSegments = segmentCount
         )(table.name)
       }
 
-      whenReady(Future.sequence(futureResults)) {
-        actualRecords: Seq[List[String]] =>
-          actualRecords.flatten.map { fromJson[NamedRecord](_).get } should contain theSameElementsAs records
-
+      whenReady(Future.sequence(futures)) {
+        _.flatten should contain theSameElementsAs records
       }
     }
   }

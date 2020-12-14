@@ -1,14 +1,11 @@
 package uk.ac.wellcome.platform.reindex.reindex_worker.services
 
-import com.amazonaws.services.dynamodbv2.model._
+import com.amazonaws.services.dynamodbv2.model.ResourceNotFoundException
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.platform.reindex.reindex_worker.fixtures.{
-  RecordReaderFixture,
-  ReindexableTable
-}
+import org.scanamo.auto._
+import uk.ac.wellcome.platform.reindex.reindex_worker.fixtures.ReindexDynamoFixtures
 import uk.ac.wellcome.platform.reindex.reindex_worker.models.{
   CompleteReindexParameters,
   PartialReindexParameters,
@@ -16,18 +13,19 @@ import uk.ac.wellcome.platform.reindex.reindex_worker.models.{
 }
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 class RecordReaderTest
-    extends AnyFunSpec
+  extends AnyFunSpec
     with ScalaFutures
     with Matchers
-    with RecordReaderFixture
-    with ReindexableTable
+    with ReindexDynamoFixtures
     with IntegrationPatience {
+  
+  val reader = new RecordReader()
 
   it("finds records in the table with a complete reindex") {
     withLocalDynamoDbTable { table =>
-      val reader = createRecordReader
-
       val records = createRecords(table, count = 2)
 
       val reindexParameters = CompleteReindexParameters(
@@ -35,28 +33,24 @@ class RecordReaderTest
         totalSegments = 1
       )
 
-      val future = reader.findRecordsForReindexing(
-        reindexParameters = reindexParameters,
-        dynamoConfig = createDynamoConfigWith(table)
+      val future = reader.findRecords[NamedRecord](
+        reindexParameters, tableName = table.name
       )
 
-      whenReady(future) { actualRecords =>
-        actualRecords.map { fromJson[NamedRecord](_).get } should contain theSameElementsAs records
+      whenReady(future) {
+        _ should contain theSameElementsAs records
       }
     }
   }
 
   it("finds records in the table with a maxResults reindex") {
     withLocalDynamoDbTable { table =>
-      val reader = createRecordReader
-
       createRecords(table, count = 15)
 
       val reindexParameters = PartialReindexParameters(maxRecords = 5)
 
-      val future = reader.findRecordsForReindexing(
-        reindexParameters = reindexParameters,
-        dynamoConfig = createDynamoConfigWith(table)
+      val future = reader.findRecords[NamedRecord](
+        reindexParameters, tableName = table.name
       )
 
       whenReady(future) {
@@ -67,25 +61,21 @@ class RecordReaderTest
 
   it("finds records in the table with a specified records reindex") {
     withLocalDynamoDbTable { table =>
-      val reader = createRecordReader
-
       val records = createRecords(table, count = 15)
 
       val reindexParameters = SpecificReindexParameters(List(records.head.id))
 
-      val future = reader.findRecordsForReindexing(
-        reindexParameters = reindexParameters,
-        dynamoConfig = createDynamoConfigWith(table)
+      val future = reader.findRecords[NamedRecord](
+        reindexParameters, tableName = table.name
       )
 
-      whenReady(future) { actualRecords =>
-        actualRecords should have length 1
-        fromJson[NamedRecord](actualRecords.head).get shouldEqual records.head
+      whenReady(future) {
+        _ shouldBe Seq(records.head)
       }
     }
   }
 
-  it("returns a failed Future if there's a DynamoDB error") {
+  it("fails if there's a DynamoDB error") {
     val table = Table("does-not-exist", "no-such-index")
 
     val reindexParameters = CompleteReindexParameters(
@@ -93,12 +83,10 @@ class RecordReaderTest
       totalSegments = 10
     )
 
-    val reader = createRecordReader
-
-    val future = reader.findRecordsForReindexing(
-      reindexParameters = reindexParameters,
-      dynamoConfig = createDynamoConfigWith(table)
+    val future = reader.findRecords[NamedRecord](
+      reindexParameters, tableName = table.name
     )
+
     whenReady(future.failed) {
       _ shouldBe a[ResourceNotFoundException]
     }
