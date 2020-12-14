@@ -17,6 +17,7 @@ import uk.ac.wellcome.sierra_adapter.model.{
 }
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
+import weco.catalogue.source_model.config.SourceVHSBuilder
 
 import scala.concurrent.ExecutionContext
 
@@ -26,13 +27,8 @@ object Main extends WellcomeTypesafeApp {
     implicit val executionContext: ExecutionContext =
       AkkaBuilder.buildExecutionContext()
 
-    val stransformableStore =
-      VHSBuilder.build[SierraTransformable](
-        config,
-        namespace = "vhs-sierra-transformable")
-
     val updaterService = new SierraItemMergerUpdaterService(
-      versionedHybridStore = stransformableStore
+      sourceVHS = SourceVHSBuilder.build[SierraTransformable](config, namespace = "vhs-sierra-transformable")
     )
 
     new SierraItemMergerWorkerService(
