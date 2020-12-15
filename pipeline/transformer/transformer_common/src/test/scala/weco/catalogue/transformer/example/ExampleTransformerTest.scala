@@ -62,8 +62,6 @@ class ExampleTransformerTest
     CalmSourcePayload(id = randomAlphanumeric(), version = version, location = location)
   }
 
-  override def id(p: CalmSourcePayload): String = p.id
-
   override def assertMatches(p: CalmSourcePayload,
                              w: Work[WorkState.Source])(
     implicit context: MemoryVersionedStore[S3ObjectLocation, ExampleData]): Unit = {
