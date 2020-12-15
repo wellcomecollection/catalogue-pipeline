@@ -15,10 +15,10 @@ import uk.ac.wellcome.monitoring.memory.MemoryMetrics
 import uk.ac.wellcome.platform.merger.services._
 import uk.ac.wellcome.pipeline_storage.{MemoryIndexer, MemoryRetriever}
 import uk.ac.wellcome.models.work.internal._
-import WorkState.{Merged, Source}
+import WorkState.{Identified, Merged}
 
 trait WorkerServiceFixture extends SQS with Akka {
-  def withWorkerService[R](retriever: MemoryRetriever[Work[Source]],
+  def withWorkerService[R](retriever: MemoryRetriever[Work[Identified]],
                            queue: Queue,
                            workSender: MemoryMessageSender,
                            imageSender: MemoryMessageSender =
@@ -31,7 +31,7 @@ trait WorkerServiceFixture extends SQS with Akka {
       withSQSStream[NotificationMessage, R](queue, metrics) { sqsStream =>
         val workerService = new MergerWorkerService(
           sqsStream = sqsStream,
-          sourceWorkLookup = new SourceWorkLookup(retriever),
+          sourceWorkLookup = new IdentifiedWorkLookup(retriever),
           mergerManager = new MergerManager(PlatformMerger),
           workIndexer = new MemoryIndexer(index),
           workSender = workSender,
@@ -44,7 +44,7 @@ trait WorkerServiceFixture extends SQS with Akka {
       }
     }
 
-  def withWorkerService[R](retriever: MemoryRetriever[Work[Source]])(
+  def withWorkerService[R](retriever: MemoryRetriever[Work[Identified]])(
     testWith: TestWith[MergerWorkerService[String, String], R]): R =
     withLocalSqsQueue() { queue =>
       val workSender = new MemoryMessageSender()

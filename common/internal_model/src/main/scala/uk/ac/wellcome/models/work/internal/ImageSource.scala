@@ -34,9 +34,10 @@ object SourceWork {
 
   implicit class MergedWorkToSourceWork(work: Work[WorkState.Merged]) {
 
-    def toSourceWork: SourceWork[DataState.Unidentified] =
-      SourceWork[DataState.Unidentified](
-        id = IdState.Identifiable(work.state.sourceIdentifier),
+    def toSourceWork: SourceWork[DataState.Identified] =
+      SourceWork[DataState.Identified](
+        id = IdState
+          .Identified(work.state.canonicalId, work.state.sourceIdentifier),
         data = work.data,
         version = work.version
       )

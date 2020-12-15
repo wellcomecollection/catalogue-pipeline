@@ -13,7 +13,7 @@ class OtherIdentifiersRuleTest
     with SourceWorkGenerators
     with Inside
     with Inspectors {
-  val nothingWork: Work.Visible[WorkState.Source] = sourceWork(
+  val nothingWork: Work.Visible[WorkState.Identified] = identifiedWork(
     sourceIdentifier = SourceIdentifier(
       identifierType = IdentifierType("fake", "fake"),
       value = "fake",
@@ -21,45 +21,48 @@ class OtherIdentifiersRuleTest
     )
   )
 
-  val miroWork: Work.Visible[WorkState.Source] = miroSourceWork()
+  val miroWork: Work.Visible[WorkState.Identified] = miroIdentifiedWork()
 
-  val metsWorks: List[Work.Invisible[WorkState.Source]] =
+  val metsWorks: List[Work.Invisible[WorkState.Identified]] =
     (0 to 3).map { _ =>
-      metsSourceWork().invisible()
+      metsIdentifiedWork().invisible()
     }.toList
 
-  val metsDeletedWork: Work.Deleted[WorkState.Source] =
-    metsSourceWork().deleted()
+  val metsDeletedWork: Work.Deleted[WorkState.Identified] =
+    metsIdentifiedWork().deleted()
 
-  val physicalSierraWork: Work.Visible[WorkState.Source] =
-    sierraPhysicalSourceWork().format(Format.Pictures)
+  val physicalSierraWork: Work.Visible[WorkState.Identified] =
+    sierraPhysicalIdentifiedWork().format(Format.Pictures)
 
-  val zeroItemPhysicalSierra: Work.Visible[WorkState.Source] =
-    sierraSourceWork()
+  val zeroItemPhysicalSierra: Work.Visible[WorkState.Identified] =
+    sierraIdentifiedWork()
       .items(List.empty)
       .format(Format.Pictures)
 
-  val physicalMapsSierraWork: Work.Visible[WorkState.Source] =
-    sierraPhysicalSourceWork().format(Format.Maps)
+  val physicalMapsSierraWork: Work.Visible[WorkState.Identified] =
+    sierraPhysicalIdentifiedWork().format(Format.Maps)
 
-  val sierraWorkWithTwoPhysicalItems: Work.Visible[WorkState.Source] =
-    sierraSourceWork()
+  val sierraWorkWithTwoPhysicalItems: Work.Visible[WorkState.Identified] =
+    sierraIdentifiedWork()
       .items((1 to 2).map { _ =>
-        createPhysicalItem
+        createIdentifiedPhysicalItem
       }.toList)
 
-  val calmWork: Work.Visible[WorkState.Source] = calmSourceWork()
+  val calmWork: Work.Visible[WorkState.Identified] = calmIdentifiedWork()
 
-  val mergeCandidate: Work.Visible[WorkState.Source] = sierraSourceWork()
+  val mergeCandidate: Work.Visible[WorkState.Identified] =
+    sierraIdentifiedWork()
 
-  val sierraWithMergeCandidate: Work.Visible[WorkState.Source] =
-    sierraPhysicalSourceWork()
+  val sierraWithMergeCandidate: Work.Visible[WorkState.Identified] =
+    sierraPhysicalIdentifiedWork()
       .format(Format.Pictures)
       .mergeCandidates(
         List(
           MergeCandidate(
-            identifier = mergeCandidate.sourceIdentifier,
-            reason = "Physical/digitised Sierra work"
+            IdState.Identified(
+              sourceIdentifier = mergeCandidate.sourceIdentifier,
+              canonicalId = mergeCandidate.state.canonicalId),
+            Some("Physical/digitised Sierra work")
           )
         )
       )
@@ -93,7 +96,7 @@ class OtherIdentifiersRuleTest
   }
 
   it("does not merge any Miro source IDs when there is more than 1 Miro work") {
-    val miroWork2: Work.Visible[WorkState.Source] = miroSourceWork()
+    val miroWork2: Work.Visible[WorkState.Identified] = miroIdentifiedWork()
     inside(
       OtherIdentifiersRule
         .merge(physicalSierraWork, List(nothingWork, miroWork, miroWork2))) {
@@ -143,7 +146,7 @@ class OtherIdentifiersRuleTest
 
   it("only merges miro source identifiers") {
     val miroWorkWithOtherSources =
-      miroSourceWork(sourceIdentifier = miroWork.sourceIdentifier)
+      miroIdentifiedWork(sourceIdentifier = miroWork.sourceIdentifier)
         .otherIdentifiers(
           List(
             SourceIdentifier(

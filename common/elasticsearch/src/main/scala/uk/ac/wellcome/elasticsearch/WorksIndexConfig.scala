@@ -121,7 +121,7 @@ trait WorksIndexConfigFields extends IndexConfigFields {
     )
 
   def mergeCandidates = objectField("mergeCandidates").fields(
-    objectField("identifier").fields(sourceIdentifierFields),
+    id(),
     keywordField("reason")
   )
 
@@ -211,18 +211,18 @@ object SourceWorkIndexConfig extends WorksIndexConfig {
 
 object MergedWorkIndexConfig extends WorksIndexConfig {
 
-  val fields = Seq.empty
-  val dynamicMapping = DynamicMapping.False
-}
-
-object IdentifiedWorkIndexConfig extends WorksIndexConfig {
-
   val fields = Seq(
     keywordField("type"),
     objectField("data").fields(
       collectionPath(analyzedPath)
     )
   )
+  val dynamicMapping = DynamicMapping.False
+}
+
+object IdentifiedWorkIndexConfig extends WorksIndexConfig {
+
+  val fields = Seq.empty
 
   val dynamicMapping = DynamicMapping.False
 }

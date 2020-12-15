@@ -10,7 +10,7 @@ object WorkIdentifier {
 
   def apply(work: Work[_]): WorkIdentifier =
     WorkIdentifier(
-      identifier = work.sourceIdentifier.toString,
+      identifier = work.id,
       version = Some(work.version)
     )
 

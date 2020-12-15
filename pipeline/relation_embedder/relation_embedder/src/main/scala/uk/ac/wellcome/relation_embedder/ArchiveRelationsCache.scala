@@ -1,14 +1,14 @@
 package uk.ac.wellcome.relation_embedder
 
-import scala.annotation.tailrec
 import grizzled.slf4j.Logging
-
+import uk.ac.wellcome.models.work.internal.WorkState.Merged
 import uk.ac.wellcome.models.work.internal._
-import WorkState.Identified
+
+import scala.annotation.tailrec
 
 class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
 
-  def apply(work: Work[Identified]): Relations =
+  def apply(work: Work[Merged]): Relations =
     work.data.collectionPath
       .map {
         case CollectionPath(path, _) =>

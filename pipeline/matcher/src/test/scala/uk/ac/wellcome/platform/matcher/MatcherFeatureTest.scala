@@ -14,7 +14,7 @@ import uk.ac.wellcome.models.matcher.{
 }
 import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.work.internal.Work
-import uk.ac.wellcome.models.work.internal.WorkState.Source
+import uk.ac.wellcome.models.work.internal.WorkState.Identified
 import uk.ac.wellcome.pipeline_storage.MemoryRetriever
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
 
@@ -27,13 +27,13 @@ class MatcherFeatureTest
     with WorkGenerators {
 
   it(
-    "processes a message with a simple Work.Visible[Source] with no linked works") {
-    implicit val retriever: MemoryRetriever[Work[Source]] = createRetriever
+    "processes a message with a simple Work.Visible[Identified] with no linked works") {
+    implicit val retriever: MemoryRetriever[Work[Identified]] = createRetriever
     val messageSender = new MemoryMessageSender()
 
     withLocalSqsQueue() { queue =>
       withWorkerService(retriever, queue, messageSender) { _ =>
-        val work = sourceWork()
+        val work = identifiedWork()
 
         val expectedResult = MatcherResult(
           Set(
@@ -54,7 +54,7 @@ class MatcherFeatureTest
   }
 
   it("skips a message if the graph store already has a newer version") {
-    implicit val retriever: MemoryRetriever[Work[Source]] = createRetriever
+    implicit val retriever: MemoryRetriever[Work[Identified]] = createRetriever
     val messageSender = new MemoryMessageSender()
 
     withLocalSqsQueuePair() {
@@ -64,13 +64,13 @@ class MatcherFeatureTest
             val existingWorkVersion = 2
             val updatedWorkVersion = 1
 
-            val workAv1 = sourceWork().withVersion(updatedWorkVersion)
+            val workAv1 = identifiedWork().withVersion(updatedWorkVersion)
 
             val existingWorkAv2 = WorkNode(
-              id = workAv1.sourceIdentifier.toString,
+              id = workAv1.state.canonicalId,
               version = Some(existingWorkVersion),
               linkedIds = Nil,
-              componentId = workAv1.sourceIdentifier.toString
+              componentId = workAv1.state.canonicalId
             )
             put(dynamoClient, graphTable.name)(existingWorkAv2)
 

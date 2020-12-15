@@ -15,11 +15,11 @@ import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.pipeline_storage.Indexer
-import WorkState.{Merged, Source}
+import WorkState.{Identified, Merged}
 
 class MergerWorkerService[WorkDestination, ImageDestination](
   sqsStream: SQSStream[NotificationMessage],
-  sourceWorkLookup: SourceWorkLookup,
+  sourceWorkLookup: IdentifiedWorkLookup,
   mergerManager: MergerManager,
   workIndexer: Indexer[Work[Merged]],
   workSender: MessageSender[WorkDestination],
@@ -53,7 +53,7 @@ class MergerWorkerService[WorkDestination, ImageDestination](
       }
     } yield ()
 
-  private def applyMerge(maybeWorks: Seq[Option[Work[Source]]],
+  private def applyMerge(maybeWorks: Seq[Option[Work[Identified]]],
                          lastUpdated: Instant): Future[Unit] = {
     val outcome = mergerManager.applyMerge(maybeWorks = maybeWorks)
     for {

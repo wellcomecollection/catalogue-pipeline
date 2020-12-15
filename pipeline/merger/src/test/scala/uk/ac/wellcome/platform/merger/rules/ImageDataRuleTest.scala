@@ -3,15 +3,15 @@ package uk.ac.wellcome.platform.merger.rules
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{Inspectors, OptionValues, PrivateMethodTester}
-import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.platform.merger.rules.ImageDataRule.FlatImageMergeRule
-import uk.ac.wellcome.platform.merger.rules.WorkPredicates.WorkPredicate
-import WorkState.Source
 import uk.ac.wellcome.models.work.generators.{
   MetsWorkGenerators,
   MiroWorkGenerators,
   SierraWorkGenerators
 }
+import uk.ac.wellcome.models.work.internal.WorkState.Identified
+import uk.ac.wellcome.models.work.internal._
+import uk.ac.wellcome.platform.merger.rules.ImageDataRule.FlatImageMergeRule
+import uk.ac.wellcome.platform.merger.rules.WorkPredicates.WorkPredicate
 
 class ImageDataRuleTest
     extends AnyFunSpec
@@ -25,8 +25,8 @@ class ImageDataRuleTest
   describe("image creation rules") {
     it("creates n images from n Miro works and a single Sierra work") {
       val n = 3
-      val miroWorks = (1 to n).map(_ => miroSourceWork())
-      val sierraWork = sierraDigitalSourceWork()
+      val miroWorks = (1 to n).map(_ => miroIdentifiedWork())
+      val sierraWork = sierraDigitalIdentifiedWork()
       val result = ImageDataRule.merge(sierraWork, miroWorks.toList).data
 
       result should have length n
@@ -37,8 +37,8 @@ class ImageDataRuleTest
     it(
       "creates n images from a METS work containing n images, and a single Sierra picture work") {
       val n = 5
-      val metsWork = createInvisibleMetsSourceWorkWith(numImages = n)
-      val sierraPictureWork = sierraSourceWork().format(Format.Pictures)
+      val metsWork = createInvisibleMetsIdentifiedWorkWith(numImages = n)
+      val sierraPictureWork = sierraIdentifiedWork().format(Format.Pictures)
       val result = ImageDataRule.merge(sierraPictureWork, List(metsWork)).data
 
       result should have length n
@@ -49,8 +49,8 @@ class ImageDataRuleTest
     it(
       "creates n images from a METS work containing n images, and a single Sierra ephemera work") {
       val n = 5
-      val metsWork = createInvisibleMetsSourceWorkWith(numImages = n)
-      val sierraEphemeraWork = sierraSourceWork().format(Format.Ephemera)
+      val metsWork = createInvisibleMetsIdentifiedWorkWith(numImages = n)
+      val sierraEphemeraWork = sierraIdentifiedWork().format(Format.Ephemera)
       val result = ImageDataRule.merge(sierraEphemeraWork, List(metsWork)).data
 
       result should have length n
@@ -62,9 +62,9 @@ class ImageDataRuleTest
       "creates n + m images from m Miro works, a METS work containing n images, and a single Sierra picture work") {
       val n = 3
       val m = 4
-      val miroWorks = (1 to m).map(_ => miroSourceWork()).toList
-      val metsWork = createInvisibleMetsSourceWorkWith(numImages = n)
-      val sierraPictureWork = sierraSourceWork().format(Format.Pictures)
+      val miroWorks = (1 to m).map(_ => miroIdentifiedWork()).toList
+      val metsWork = createInvisibleMetsIdentifiedWorkWith(numImages = n)
+      val sierraPictureWork = sierraIdentifiedWork().format(Format.Pictures)
       val result =
         ImageDataRule.merge(sierraPictureWork, miroWorks :+ metsWork).data
 
@@ -78,9 +78,9 @@ class ImageDataRuleTest
       "creates n + m images from m Miro works, a METS work containing n images, and a single Sierra ephemera work") {
       val n = 3
       val m = 4
-      val miroWorks = (1 to m).map(_ => miroSourceWork()).toList
-      val metsWork = createInvisibleMetsSourceWorkWith(numImages = n)
-      val sierraEphemeraWork = sierraSourceWork().format(Format.Ephemera)
+      val miroWorks = (1 to m).map(_ => miroIdentifiedWork()).toList
+      val metsWork = createInvisibleMetsIdentifiedWorkWith(numImages = n)
+      val sierraEphemeraWork = sierraIdentifiedWork().format(Format.Ephemera)
       val result =
         ImageDataRule.merge(sierraEphemeraWork, miroWorks :+ metsWork).data
 
@@ -93,9 +93,9 @@ class ImageDataRuleTest
     it(
       "ignores METS images, but uses n Miro images, for a non-picture/ephemera Sierra work") {
       val n = 3
-      val metsWork = createInvisibleMetsSourceWorkWith(numImages = 3)
-      val miroWorks = (1 to n).map(_ => miroSourceWork()).toList
-      val sierraWork = sierraDigitalSourceWork()
+      val metsWork = createInvisibleMetsIdentifiedWorkWith(numImages = 3)
+      val miroWorks = (1 to n).map(_ => miroIdentifiedWork()).toList
+      val sierraWork = sierraDigitalIdentifiedWork()
       val result = ImageDataRule.merge(sierraWork, miroWorks :+ metsWork).data
 
       result should have length n
@@ -105,9 +105,9 @@ class ImageDataRuleTest
 
     it(
       "does not use Miro images when a METS image is present for a digaids Sierra work") {
-      val metsWork = createInvisibleMetsSourceWorkWith(numImages = 1)
-      val miroWork = miroSourceWork()
-      val sierraDigaidsWork = sierraSourceWork()
+      val metsWork = createInvisibleMetsIdentifiedWorkWith(numImages = 1)
+      val miroWork = miroIdentifiedWork()
+      val sierraDigaidsWork = sierraIdentifiedWork()
         .format(Format.Pictures)
         .otherIdentifiers(List(createDigcodeIdentifier("digaids")))
       val result =
@@ -120,8 +120,8 @@ class ImageDataRuleTest
 
     it(
       "will use Miro images for digaids Sierra works when no METS image is present") {
-      val miroWork = miroSourceWork()
-      val sierraDigaidsWork = sierraSourceWork()
+      val miroWork = miroIdentifiedWork()
+      val sierraDigaidsWork = sierraIdentifiedWork()
         .format(Format.Pictures)
         .otherIdentifiers(List(createDigcodeIdentifier("digaids")))
       val result =
@@ -140,20 +140,20 @@ class ImageDataRuleTest
     }
 
     it("creates images from every source") {
-      val target = sierraDigitalSourceWork()
-      val sources = (1 to 5).map(_ => miroSourceWork())
+      val target = sierraDigitalIdentifiedWork()
+      val sources = (1 to 5).map(_ => miroIdentifiedWork())
       testRule(target, sources).get should have length 5
     }
   }
 
-  def createInvisibleMetsSourceWorkWith(
-    numImages: Int): Work.Invisible[Source] = {
+  def createInvisibleMetsIdentifiedWorkWith(
+    numImages: Int): Work.Invisible[Identified] = {
     val images =
       (1 to numImages).map { _ =>
-        createMetsImageData
+        createMetsImageData.toIdentified
       }.toList
 
-    metsSourceWork().imageData(images).invisible()
+    metsIdentifiedWork().imageData(images).invisible()
   }
 
 }

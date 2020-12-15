@@ -80,8 +80,11 @@ trait ItemsGenerators extends IdentifiersGenerators {
 
   def createStoresLocationType = LocationType("sgmed")
 
-  def createPhysicalItem =
+  def createIdentifiablePhysicalItem =
     createIdentifiableItemWith(locations = List(createPhysicalLocation))
+
+  def createIdentifiedPhysicalItem =
+    createIdentifiedItemWith(locations = List(createPhysicalLocation))
 
   def createDigitalItem =
     createUnidentifiableItemWith(locations = List(createDigitalLocation))

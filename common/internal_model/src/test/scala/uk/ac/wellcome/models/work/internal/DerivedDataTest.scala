@@ -13,7 +13,8 @@ class DerivedDataTest
   describe("DerivedWorkData") {
 
     it("sets availableOnline = true if there is a digital location on an item") {
-      val work = mergedWork().items(List(createDigitalItem, createPhysicalItem))
+      val work = mergedWork().items(
+        List(createDigitalItem, createIdentifiedPhysicalItem))
       val derivedWorkData = DerivedWorkData(work.data)
 
       derivedWorkData.availableOnline shouldBe true
@@ -21,7 +22,7 @@ class DerivedDataTest
 
     it(
       "sets availableOnline = false if there is no digital location on any items") {
-      val work = mergedWork().items(List(createPhysicalItem))
+      val work = mergedWork().items(List(createIdentifiedPhysicalItem))
       val derivedWorkData = DerivedWorkData(work.data)
 
       derivedWorkData.availableOnline shouldBe false

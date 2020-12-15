@@ -50,7 +50,7 @@ class RouterWorkerServiceTest
   }
 
   it("sends a work without collectionPath to works topic") {
-    val work = identifiedWork()
+    val work = mergedWork()
     val indexer = new MemoryIndexer[Work[Denormalised]]()
     withWorkerService(indexer) {
       case (

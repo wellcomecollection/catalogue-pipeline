@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.transformer.calm
 
 import java.time.LocalDate
-
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks._
@@ -9,6 +8,7 @@ import uk.ac.wellcome.models.work.internal.DeletedReason.SuppressedFromSource
 import uk.ac.wellcome.models.work.internal.WorkState.Source
 import uk.ac.wellcome.models.work.internal._
 import WorkState.Source
+import uk.ac.wellcome.models.work.internal.IdState.Identifiable
 import uk.ac.wellcome.platform.transformer.calm.generators.CalmRecordGenerators
 
 class CalmTransformerTest
@@ -120,10 +120,12 @@ class CalmTransformerTest
     CalmTransformer(record, version).right.get.data.mergeCandidates shouldBe
       List(
         MergeCandidate(
-          SourceIdentifier(
-            value = "b456",
-            identifierType = IdentifierType("sierra-system-number"),
-            ontologyType = "Work"
+          Identifiable(
+            SourceIdentifier(
+              value = "b456",
+              identifierType = IdentifierType("sierra-system-number"),
+              ontologyType = "Work"
+            )
           )
         )
       )

@@ -7,7 +7,7 @@ import uk.ac.wellcome.models.work.internal._
 import scala.util.Try
 
 package object services {
-  type MergedIdentifiedImage = Image[ImageState.Identified]
+  type MergedIdentifiedImage = Image[ImageState.Initial]
 
   // Because request pool flows cannot be FlowWithContexts, we have to manually
   // attach both the "usual" context object (the RequestCtx) and the context from

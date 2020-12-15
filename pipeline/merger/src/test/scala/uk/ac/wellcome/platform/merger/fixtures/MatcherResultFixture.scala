@@ -5,21 +5,23 @@ import uk.ac.wellcome.models.matcher.{
   MatcherResult,
   WorkIdentifier
 }
+import uk.ac.wellcome.models.work.internal.WorkState.Identified
 import uk.ac.wellcome.models.work.internal._
-import WorkState.Source
 
 trait MatcherResultFixture {
-  def matcherResultWith(matchedEntries: Set[Set[Work[Source]]]) =
+  def matcherResultWith(matchedEntries: Set[Set[Work[Identified]]]) =
     MatcherResult(
       matchedEntries.map { works =>
         MatchedIdentifiers(worksToWorkIdentifiers(works))
       }
     )
 
-  def worksToWorkIdentifiers(works: Seq[Work[Source]]): Set[WorkIdentifier] =
+  def worksToWorkIdentifiers(
+    works: Seq[Work[Identified]]): Set[WorkIdentifier] =
     worksToWorkIdentifiers(works.toSet)
 
-  def worksToWorkIdentifiers(works: Set[Work[Source]]): Set[WorkIdentifier] =
+  def worksToWorkIdentifiers(
+    works: Set[Work[Identified]]): Set[WorkIdentifier] =
     works
       .map { work =>
         WorkIdentifier(work)

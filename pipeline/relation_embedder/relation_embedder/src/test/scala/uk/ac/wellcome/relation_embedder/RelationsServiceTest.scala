@@ -6,12 +6,11 @@ import com.sksamuel.elastic4s.Index
 import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.WorkGenerators
-import uk.ac.wellcome.models.work.internal.WorkState.Identified
+import uk.ac.wellcome.models.work.internal.WorkState.Merged
 import uk.ac.wellcome.models.work.internal._
 
 class RelationsServiceTest
@@ -21,9 +20,9 @@ class RelationsServiceTest
     with WorkGenerators
     with Akka {
 
-  def service[R](index: Index,
-                 completeTreeScroll: Int = 20,
-                 affectedWorksScroll: Int = 20)(implicit as: ActorSystem) =
+  def service(index: Index,
+              completeTreeScroll: Int = 20,
+              affectedWorksScroll: Int = 20)(implicit as: ActorSystem) =
     new PathQueryRelationsService(
       elasticClient = elasticClient,
       index = index,
@@ -32,12 +31,11 @@ class RelationsServiceTest
     )
 
   def work(path: String) =
-    identifiedWork(createSourceIdentifierWith(value = path))
+    mergedWork(createSourceIdentifierWith(value = path))
       .collectionPath(CollectionPath(path = path))
       .title(path)
 
-  def storeWorks(index: Index,
-                 works: List[Work[Identified]] = works): Assertion =
+  def storeWorks(index: Index, works: List[Work[Merged]] = works): Assertion =
     insertIntoElasticsearch(index, works: _*)
 
   /** The following tests use works within this tree:
@@ -87,7 +85,7 @@ class RelationsServiceTest
     import Selector._
 
     it("Retrieves all affected works when batch consists of a complete tree") {
-      withLocalIdentifiedWorksIndex { index =>
+      withLocalMergedWorksIndex { index =>
         storeWorks(index)
         withActorSystem { implicit actorSystem =>
           val batch = Batch(rootPath = "A", List(Tree("A")))
@@ -99,7 +97,7 @@ class RelationsServiceTest
     }
 
     it("Retrieves all affected works when batch consists of single node") {
-      withLocalIdentifiedWorksIndex { index =>
+      withLocalMergedWorksIndex { index =>
         storeWorks(index)
         withActorSystem { implicit actorSystem =>
           val batch = Batch(rootPath = "A", List(Node("A/B")))
@@ -111,7 +109,7 @@ class RelationsServiceTest
     }
 
     it("Retrieves all affected works when batch consists of a nodes children") {
-      withLocalIdentifiedWorksIndex { index =>
+      withLocalMergedWorksIndex { index =>
         storeWorks(index)
         withActorSystem { implicit actorSystem =>
           val batch = Batch(rootPath = "A", List(Children("A/C")))
@@ -124,7 +122,7 @@ class RelationsServiceTest
 
     it(
       "Retrieves all affected works when batch consists of a nodes descendents") {
-      withLocalIdentifiedWorksIndex { index =>
+      withLocalMergedWorksIndex { index =>
         storeWorks(index)
         withActorSystem { implicit actorSystem =>
           val batch = Batch(rootPath = "A", List(Descendents("A/C")))
@@ -142,7 +140,7 @@ class RelationsServiceTest
 
     it(
       "Retrieves all affected works when batch consists of a mixture of selectors") {
-      withLocalIdentifiedWorksIndex { index =>
+      withLocalMergedWorksIndex { index =>
         storeWorks(index)
         withActorSystem { implicit actorSystem =>
           val batch = Batch(
@@ -166,7 +164,7 @@ class RelationsServiceTest
     }
 
     it("Retrieves all affected works across multiple scroll pages") {
-      withLocalIdentifiedWorksIndex { index =>
+      withLocalMergedWorksIndex { index =>
         storeWorks(index)
         withActorSystem { implicit actorSystem =>
           val batch = Batch(rootPath = "A", List(Tree("A")))
@@ -180,7 +178,7 @@ class RelationsServiceTest
     }
 
     it("Returns invisible works") {
-      withLocalIdentifiedWorksIndex { index =>
+      withLocalMergedWorksIndex { index =>
         val invisibleWork = work("A/C/X/5").invisible()
         storeWorks(index, invisibleWork :: works)
         withActorSystem { implicit actorSystem =>
@@ -199,7 +197,7 @@ class RelationsServiceTest
 
     def queryAffectedWorks(service: RelationsService,
                            batch: Batch)(implicit as: ActorSystem) =
-      service.getAffectedWorks(batch).runWith(Sink.seq[Work[Identified]])
+      service.getAffectedWorks(batch).runWith(Sink.seq[Work[Merged]])
 
   }
 
@@ -210,7 +208,7 @@ class RelationsServiceTest
     val batch = Batch("A", List(Children("A/B"), Node("A/C/X")))
 
     it("Retrieves all works in archive") {
-      withLocalIdentifiedWorksIndex { index =>
+      withLocalMergedWorksIndex { index =>
         withActorSystem { implicit actorSystem =>
           storeWorks(index, works)
           whenReady(queryRelationTree(service(index), batch)) { relationWorks =>
@@ -222,7 +220,7 @@ class RelationsServiceTest
     }
 
     it("Ignores works in other archvies") {
-      withLocalIdentifiedWorksIndex { index =>
+      withLocalMergedWorksIndex { index =>
         withActorSystem { implicit actorSystem =>
           storeWorks(index, work("other/archive") :: works)
           whenReady(queryRelationTree(service(index), batch)) { relationWorks =>
@@ -234,7 +232,7 @@ class RelationsServiceTest
     }
 
     it("Ignores invisible works") {
-      withLocalIdentifiedWorksIndex { index =>
+      withLocalMergedWorksIndex { index =>
         withActorSystem { implicit actorSystem =>
           storeWorks(index, work("A/Invisible").invisible() :: works)
           whenReady(queryRelationTree(service(index), batch)) { relationWorks =>
@@ -250,7 +248,7 @@ class RelationsServiceTest
       service.getRelationTree(batch).runWith(Sink.seq[RelationWork])
   }
 
-  def toRelationWork(work: Work[Identified]): RelationWork =
+  def toRelationWork(work: Work[Merged]): RelationWork =
     RelationWork(
       data = RelationWorkData(
         title = work.data.title,

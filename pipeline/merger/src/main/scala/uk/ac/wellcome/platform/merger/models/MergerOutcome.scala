@@ -1,9 +1,8 @@
 package uk.ac.wellcome.platform.merger.models
 
 import java.time.Instant
-
 import uk.ac.wellcome.models.work.internal._
-import WorkState.{Merged, Source}
+import WorkState.{Identified, Merged}
 import WorkFsm._
 
 /*
@@ -12,7 +11,7 @@ import WorkFsm._
  * the works/images getters must be provided with a modifiedTime to use for all
  * the output entities.
  */
-case class MergerOutcome(resultWorks: Seq[Work[Source]],
+case class MergerOutcome(resultWorks: Seq[Work[Identified]],
                          imagesWithSources: Seq[ImageDataWithSource]) {
 
   def mergedWorksWithTime(modifiedTime: Instant): Seq[Work[Merged]] =
@@ -28,7 +27,8 @@ case class MergerOutcome(resultWorks: Seq[Work[Source]],
           source = source,
           modifiedTime = modifiedTime,
           state = ImageState.Initial(
-            sourceIdentifier = imageData.id.sourceIdentifier
+            sourceIdentifier = imageData.id.sourceIdentifier,
+            canonicalId = imageData.id.canonicalId
           )
         )
     }
@@ -36,6 +36,6 @@ case class MergerOutcome(resultWorks: Seq[Work[Source]],
 
 object MergerOutcome {
 
-  def passThrough(works: Seq[Work[Source]]): MergerOutcome =
+  def passThrough(works: Seq[Work[Identified]]): MergerOutcome =
     new MergerOutcome(works, Nil)
 }

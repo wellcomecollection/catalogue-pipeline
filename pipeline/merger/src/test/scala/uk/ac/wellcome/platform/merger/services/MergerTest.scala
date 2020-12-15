@@ -5,7 +5,7 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.models.{FieldMergeResult, MergeResult}
 import uk.ac.wellcome.platform.merger.rules.FieldMergeRule
-import WorkState.{Merged, Source}
+import WorkState.{Identified, Merged}
 import WorkFsm._
 import cats.data.State
 import uk.ac.wellcome.models.work.generators.{
@@ -22,23 +22,23 @@ class MergerTest
     with SierraWorkGenerators {
   import Merger.WorkMergingOps
 
-  val inputWorks: Seq[Work[Source]] =
+  val inputWorks: Seq[Work[Identified]] =
     (0 to 5).map { _ =>
-      sierraDigitalSourceWork()
+      sierraDigitalIdentifiedWork()
     } ++
-      (0 to 5).map(_ => miroSourceWork()) ++
-      (0 to 5).map(_ => metsSourceWork().invisible())
+      (0 to 5).map(_ => miroIdentifiedWork()) ++
+      (0 to 5).map(_ => metsIdentifiedWork().invisible())
 
   val mergedTargetItems = (0 to 3).map(_ => createDigitalItem).toList
   val mergedOtherIdentifiers =
     (0 to 3).map(_ => createSierraSystemSourceIdentifier).toList
 
   object TestItemsRule extends FieldMergeRule {
-    type FieldData = List[Item[IdState.Unminted]]
+    type FieldData = List[Item[IdState.Minted]]
 
     override def merge(
-      target: Work.Visible[Source],
-      sources: Seq[Work[Source]]): FieldMergeResult[FieldData] =
+      target: Work.Visible[Identified],
+      sources: Seq[Work[Identified]]): FieldMergeResult[FieldData] =
       FieldMergeResult(
         data = mergedTargetItems,
         sources = List(sources.tail.head)
@@ -49,8 +49,8 @@ class MergerTest
     type FieldData = List[SourceIdentifier]
 
     override def merge(
-      target: Work.Visible[Source],
-      sources: Seq[Work[Source]]): FieldMergeResult[FieldData] =
+      target: Work.Visible[Identified],
+      sources: Seq[Work[Identified]]): FieldMergeResult[FieldData] =
       FieldMergeResult(
         data = mergedOtherIdentifiers,
         sources = sources.tail.tail)
@@ -60,12 +60,12 @@ class MergerTest
     import Merger.WorkMergingOps
 
     override protected def findTarget(
-      works: Seq[Work[Source]]): Option[Work.Visible[Source]] =
-      works.headOption.map(_.asInstanceOf[Work.Visible[Source]])
+      works: Seq[Work[Identified]]): Option[Work.Visible[Identified]] =
+      works.headOption.map(_.asInstanceOf[Work.Visible[Identified]])
 
     override protected def createMergeResult(
-      target: Work.Visible[Source],
-      sources: Seq[Work[Source]]): State[MergeState, MergeResult] =
+      target: Work.Visible[Identified],
+      sources: Seq[Work[Identified]]): State[MergeState, MergeResult] =
       for {
         items <- TestItemsRule(target, sources).redirectSources
         otherIdentifiers <- TestOtherIdentifiersRule(target, sources).redirectSources
@@ -73,7 +73,7 @@ class MergerTest
         MergeResult(
           mergedTarget = target
             .mapData { data =>
-              data.copy[DataState.Unidentified](
+              data.copy[DataState.Identified](
                 items = items,
                 otherIdentifiers = otherIdentifiers
               )
@@ -87,10 +87,10 @@ class MergerTest
   it("returns a single target work as specified") {
     mergedWorks.mergedWorksWithTime(now) should contain(
       inputWorks.head
-        .asInstanceOf[Work.Visible[Source]]
+        .asInstanceOf[Work.Visible[Identified]]
         .transition[Merged](Some(now))
         .mapData { data =>
-          data.copy[DataState.Unidentified](
+          data.copy[DataState.Identified](
             items = mergedTargetItems,
             otherIdentifiers = mergedOtherIdentifiers
           )

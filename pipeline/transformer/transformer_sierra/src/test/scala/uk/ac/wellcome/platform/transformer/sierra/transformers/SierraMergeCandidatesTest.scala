@@ -18,6 +18,7 @@ import uk.ac.wellcome.platform.transformer.sierra.generators.{
   SierraDataGenerators
 }
 import org.scalatest.prop.TableDrivenPropertyChecks._
+import uk.ac.wellcome.models.work.internal.IdState.Identifiable
 
 class SierraMergeCandidatesTest
     extends AnyFunSpec
@@ -366,7 +367,7 @@ class SierraMergeCandidatesTest
     }
 
   private def physicalAndDigitalSierraMergeCandidate(
-    bibNumber: String): List[MergeCandidate] =
+    bibNumber: String): List[MergeCandidate[Identifiable]] =
     List(
       MergeCandidate(
         identifier = SourceIdentifier(
@@ -380,7 +381,7 @@ class SierraMergeCandidatesTest
 
   private def miroMergeCandidate(
     miroID: String,
-    reason: String = "Miro/Sierra work"): List[MergeCandidate] =
+    reason: String = "Miro/Sierra work"): List[MergeCandidate[Identifiable]] =
     List(
       MergeCandidate(
         identifier = SourceIdentifier(

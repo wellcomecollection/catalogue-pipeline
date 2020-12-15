@@ -1,5 +1,7 @@
 package uk.ac.wellcome.models.work.internal
 
+import uk.ac.wellcome.models.work.internal.IdState.Identifiable
+
 /** Indicates that it might be possible to merge this Work with another Work.
   *
   * @param identifier The SourceIdentifier of the other Work.
@@ -10,15 +12,16 @@ package uk.ac.wellcome.models.work.internal
   *               Long-term, this might be replaced with an enum or a fixed
   *               set of strings.
   */
-case class MergeCandidate(
-  identifier: SourceIdentifier,
+case class MergeCandidate[+State](
+  id: State,
   reason: Option[String] = None
-)
+) extends HasId[State]
 
 case object MergeCandidate {
-  def apply(identifier: SourceIdentifier, reason: String): MergeCandidate =
+  def apply(identifier: SourceIdentifier,
+            reason: String): MergeCandidate[Identifiable] =
     MergeCandidate(
-      identifier = identifier,
+      id = Identifiable(sourceIdentifier = identifier),
       reason = Some(reason)
     )
 }

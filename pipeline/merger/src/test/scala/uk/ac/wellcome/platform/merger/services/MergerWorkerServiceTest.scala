@@ -15,7 +15,7 @@ import uk.ac.wellcome.platform.merger.fixtures.{
   MatcherResultFixture,
   WorkerServiceFixture
 }
-import WorkState.{Merged, Source}
+import WorkState.{Identified, Merged}
 import WorkFsm._
 import uk.ac.wellcome.models.work.generators.MiroWorkGenerators
 import uk.ac.wellcome.pipeline_storage.MemoryRetriever
@@ -36,9 +36,9 @@ class MergerWorkerServiceTest
     withMergerWorkerServiceFixtures {
       case (retriever, QueuePair(queue, dlq), senders, metrics, index) =>
         val latestUpdate = randomInstantBefore(now, 30 days)
-        val work1 = sourceWork(modifiedTime = latestUpdate)
-        val work2 = sourceWork(modifiedTime = latestUpdate - (1 day))
-        val work3 = sourceWork(modifiedTime = latestUpdate - (2 days))
+        val work1 = identifiedWork(modifiedTime = latestUpdate)
+        val work2 = identifiedWork(modifiedTime = latestUpdate - (1 day))
+        val work3 = identifiedWork(modifiedTime = latestUpdate - (2 days))
 
         val matcherResult =
           matcherResultWith(Set(Set(work3), Set(work1, work2)))
@@ -79,7 +79,7 @@ class MergerWorkerServiceTest
   it("sends InvisibleWorks unmerged") {
     withMergerWorkerServiceFixtures {
       case (retriever, QueuePair(queue, dlq), senders, metrics, index) =>
-        val work = sourceWork().invisible()
+        val work = identifiedWork().invisible()
 
         val matcherResult = matcherResultWith(Set(Set(work)))
 
@@ -107,7 +107,7 @@ class MergerWorkerServiceTest
   it("fails if the matcher result refers to a non-existent work") {
     withMergerWorkerServiceFixtures {
       case (_, QueuePair(queue, dlq), senders, metrics, _) =>
-        val work = sourceWork()
+        val work = identifiedWork()
 
         val matcherResult = matcherResultWith(Set(Set(work)))
 
@@ -131,10 +131,10 @@ class MergerWorkerServiceTest
   it("always sends the highest version of a Work") {
     withMergerWorkerServiceFixtures {
       case (retriever, QueuePair(queue, dlq), senders, _, index) =>
-        val work = sourceWork()
-        val olderWork = sourceWork()
+        val work = identifiedWork()
+        val olderWork = identifiedWork()
         val newerWork =
-          sourceWork(sourceIdentifier = olderWork.sourceIdentifier)
+          identifiedWork(canonicalId = olderWork.state.canonicalId)
             .withVersion(olderWork.version + 1)
 
         val matcherResult = matcherResultWith(Set(Set(work, olderWork)))
@@ -159,11 +159,11 @@ class MergerWorkerServiceTest
     withMergerWorkerServiceFixtures {
       case (retriever, QueuePair(queue, dlq), senders, metrics, index) =>
         val versionZeroWork =
-          sourceWork()
+          identifiedWork()
             .withVersion(0)
 
         val work =
-          sourceWork(sourceIdentifier = versionZeroWork.sourceIdentifier)
+          identifiedWork(canonicalId = versionZeroWork.state.canonicalId)
             .withVersion(1)
 
         val matcherResult = matcherResultWith(Set(Set(work, versionZeroWork)))
@@ -190,7 +190,7 @@ class MergerWorkerServiceTest
 
   it(
     "if it merges two Works, it sends two onward results (one merged, one redirected)") {
-    val (digitisedWork, physicalWork) = sierraSourceWorkPair()
+    val (digitisedWork, physicalWork) = sierraIdentifiedWorkPair()
 
     val works = List(physicalWork, digitisedWork)
 
@@ -224,8 +224,9 @@ class MergerWorkerServiceTest
 
           redirectedWorks should have size 1
           redirectedWorks.head.sourceIdentifier shouldBe digitisedWork.sourceIdentifier
-          redirectedWorks.head.redirect shouldBe IdState.Identifiable(
-            physicalWork.sourceIdentifier)
+          redirectedWorks.head.redirect shouldBe IdState.Identified(
+            sourceIdentifier = physicalWork.sourceIdentifier,
+            canonicalId = physicalWork.state.canonicalId)
 
           mergedWorks should have size 1
           mergedWorks.head.sourceIdentifier shouldBe physicalWork.sourceIdentifier
@@ -234,8 +235,8 @@ class MergerWorkerServiceTest
   }
 
   it("sends an image, a merged work, and redirected works") {
-    val (digitisedWork, physicalWork) = sierraSourceWorkPair()
-    val miroWork = miroSourceWork()
+    val (digitisedWork, physicalWork) = sierraIdentifiedWorkPair()
+    val miroWork = miroIdentifiedWork()
 
     val works =
       List(physicalWork, digitisedWork, miroWork)
@@ -276,19 +277,21 @@ class MergerWorkerServiceTest
           redirectedWorks.map(_.sourceIdentifier) should contain only
             (digitisedWork.sourceIdentifier, miroWork.sourceIdentifier)
           redirectedWorks.map(_.redirect) should contain only
-            IdState.Identifiable(physicalWork.sourceIdentifier)
+            IdState.Identified(
+              sourceIdentifier = physicalWork.sourceIdentifier,
+              canonicalId = physicalWork.state.canonicalId)
 
           mergedWorks should have size 1
           mergedWorks.head.sourceIdentifier shouldBe physicalWork.sourceIdentifier
 
-          imagesSent.head.id shouldBe miroWork.data.imageData.head.id.sourceIdentifier.toString
+          imagesSent.head.id shouldBe miroWork.data.imageData.head.id.canonicalId
         }
     }
   }
 
   it("splits the received works into multiple merged works if required") {
-    val (digitisedWork1, physicalWork1) = sierraSourceWorkPair()
-    val (digitisedWork2, physicalWork2) = sierraSourceWorkPair()
+    val (digitisedWork1, physicalWork1) = sierraIdentifiedWorkPair()
+    val (digitisedWork2, physicalWork2) = sierraIdentifiedWorkPair()
 
     val workPair1 = List(physicalWork1, digitisedWork1)
     val workPair2 = List(physicalWork2, digitisedWork2)
@@ -346,8 +349,8 @@ class MergerWorkerServiceTest
   it("doesn't send anything if the works are outdated") {
     withMergerWorkerServiceFixtures {
       case (retriever, QueuePair(queue, dlq), senders, metrics, index) =>
-        val work0 = sourceWork().withVersion(0)
-        val work1 = sourceWork(sourceIdentifier = work0.sourceIdentifier)
+        val work0 = identifiedWork().withVersion(0)
+        val work1 = identifiedWork(canonicalId = work0.state.canonicalId)
           .withVersion(1)
         val matcherResult = matcherResultWith(Set(Set(work0)))
         retriever.index ++= Map(work1.id -> work1)
@@ -373,7 +376,7 @@ class MergerWorkerServiceTest
   case class Senders(works: MemoryMessageSender, images: MemoryMessageSender)
 
   def withMergerWorkerServiceFixtures[R](
-    testWith: TestWith[(MemoryRetriever[Work[Source]],
+    testWith: TestWith[(MemoryRetriever[Work[Identified]],
                         QueuePair,
                         Senders,
                         MemoryMetrics,
@@ -384,7 +387,7 @@ class MergerWorkerServiceTest
         val workSender = new MemoryMessageSender()
         val imageSender = new MemoryMessageSender()
 
-        val retriever = new MemoryRetriever[Work[Source]]()
+        val retriever = new MemoryRetriever[Work[Identified]]()
 
         val metrics = new MemoryMetrics()
         val index = mutable.Map[String, Work[Merged]]()

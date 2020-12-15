@@ -3,15 +3,14 @@ package uk.ac.wellcome.relation_embedder
 import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.stream.scaladsl.Source
+import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.circe._
 import com.sksamuel.elastic4s.streams.ReactiveElastic._
-import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.{ElasticClient, Index}
 import grizzled.slf4j.Logging
-
-import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.models.work.internal.WorkState.Identified
+import uk.ac.wellcome.models.Implicits._
+import uk.ac.wellcome.models.work.internal.WorkState.Merged
 import uk.ac.wellcome.models.work.internal._
 
 trait RelationsService {
@@ -30,7 +29,7 @@ trait RelationsService {
     * @param path The archive path
     * @return The IDs of the other works to denormalise
     */
-  def getAffectedWorks(batch: Batch): Source[Work[Identified], NotUsed]
+  def getAffectedWorks(batch: Batch): Source[Work[Merged], NotUsed]
 }
 
 class PathQueryRelationsService(
@@ -43,13 +42,13 @@ class PathQueryRelationsService(
 
   val requestBuilder = RelationsRequestBuilder(index)
 
-  def getAffectedWorks(batch: Batch): Source[Work[Identified], NotUsed] = {
+  def getAffectedWorks(batch: Batch): Source[Work[Merged], NotUsed] = {
     val request = requestBuilder.affectedWorks(batch, affectedWorksScroll)
     info(
       s"Querying affected works with ES request: ${elasticClient.show(request)}")
     Source
       .fromPublisher(elasticClient.publisher(request))
-      .map(searchHit => searchHit.safeTo[Work[Identified]].get)
+      .map(searchHit => searchHit.safeTo[Work[Merged]].get)
   }
 
   def getRelationTree(batch: Batch): Source[RelationWork, NotUsed] = {

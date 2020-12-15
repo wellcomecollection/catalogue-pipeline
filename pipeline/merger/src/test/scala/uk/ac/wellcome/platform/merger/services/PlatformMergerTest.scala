@@ -4,7 +4,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import uk.ac.wellcome.models.work.internal._
-import WorkState.{Merged, Source}
+import WorkState.{Identified, Merged}
 import WorkFsm._
 import SourceWork._
 import uk.ac.wellcome.models.work.generators.SourceWorkGenerators
@@ -19,42 +19,46 @@ class PlatformMergerTest
     license = Some(License.CCBYNC))
   val digitalLocationNoLicense = digitalLocationCCBYNC.copy(license = None)
 
-  val sierraDigitisedWork: Work.Visible[Source] =
-    sierraDigitalSourceWork()
+  val sierraDigitisedWork: Work.Visible[Identified] =
+    sierraDigitalIdentifiedWork()
 
-  val sierraPhysicalWork: Work.Visible[Source] =
-    sierraPhysicalSourceWork()
+  val sierraPhysicalWork: Work.Visible[Identified] =
+    sierraPhysicalIdentifiedWork()
       .format(Format.`3DObjects`)
       .mergeCandidates(
         List(
           MergeCandidate(
-            identifier = sierraDigitisedWork.sourceIdentifier,
-            reason = "Physical/digitised Sierra work"
+            id = IdState.Identified(
+              sourceIdentifier = sierraDigitisedWork.sourceIdentifier,
+              canonicalId = sierraDigitisedWork.state.canonicalId),
+            reason = Some("Physical/digitised Sierra work")
           )
         )
       )
 
-  val zeroItemSierraWork: Work.Visible[Source] =
-    sierraSourceWork()
+  val zeroItemSierraWork: Work.Visible[Identified] =
+    sierraIdentifiedWork()
       .items(List.empty)
       .format(Format.Pictures)
 
   private val multipleItemsSierraWork =
-    sierraSourceWork()
+    sierraIdentifiedWork()
       .items((1 to 2).map { _ =>
-        createPhysicalItem
+        createIdentifiedPhysicalItem
       }.toList)
       .mergeCandidates(
         List(
           MergeCandidate(
-            identifier = sierraDigitisedWork.sourceIdentifier,
-            reason = "Physical/digitised Sierra work"
+            id = IdState.Identified(
+              sourceIdentifier = sierraDigitisedWork.sourceIdentifier,
+              canonicalId = sierraDigitisedWork.state.canonicalId),
+            reason = Some("Physical/digitised Sierra work")
           )
         )
       )
 
-  private val sierraDigitalWork: Work.Visible[Source] =
-    sierraSourceWork()
+  private val sierraDigitalWork: Work.Visible[Identified] =
+    sierraIdentifiedWork()
       .items(
         List(
           createDigitalItemWith(List(digitalLocationNoLicense))
@@ -62,19 +66,19 @@ class PlatformMergerTest
       )
       .format(Format.DigitalImages)
 
-  private val sierraPictureWork: Work.Visible[Source] =
-    sierraSourceWork()
+  private val sierraPictureWork: Work.Visible[Identified] =
+    sierraIdentifiedWork()
       .items(
-        List(createPhysicalItem)
+        List(createIdentifiedPhysicalItem)
       )
       .format(Format.Pictures)
 
-  private val miroWork: Work.Visible[Source] = miroSourceWork()
+  private val miroWork: Work.Visible[Identified] = miroIdentifiedWork()
 
-  private val metsWork: Work.Invisible[Source] =
-    metsSourceWork()
+  private val metsWork: Work.Invisible[Identified] =
+    metsIdentifiedWork()
       .items(List(createDigitalItemWith(List(digitalLocationCCBYNC))))
-      .imageData(List(createMetsImageData))
+      .imageData(List(createMetsImageData.toIdentified))
       .thumbnail(
         DigitalLocationDeprecated(
           url = "https://path.to/thumbnail.jpg",
@@ -84,7 +88,7 @@ class PlatformMergerTest
       )
       .invisible()
 
-  val calmWork: Work.Visible[Source] = calmSourceWork()
+  val calmWork: Work.Visible[Identified] = calmIdentifiedWork()
 
   private val merger = PlatformMerger
 
@@ -109,8 +113,8 @@ class PlatformMergerTest
     )
 
     forAll(examples) {
-      (works: Seq[Work[Source]],
-       target: Option[Work.Visible[Source]],
+      (works: Seq[Work[Identified]],
+       target: Option[Work.Visible[Identified]],
        clue: String) =>
         withClue(clue) {
           merger.findTarget(works) should be(target)
@@ -147,11 +151,14 @@ class PlatformMergerTest
     val expectedRedirectedWork =
       Work.Redirected[Merged](
         state = Merged(
+          canonicalId = miroWork.state.canonicalId,
           sourceIdentifier = miroWork.sourceIdentifier,
           modifiedTime = now
         ),
         version = miroWork.version,
-        redirect = IdState.Identifiable(sierraPhysicalWork.sourceIdentifier)
+        redirect = IdState.Identified(
+          canonicalId = sierraPhysicalWork.state.canonicalId,
+          sourceIdentifier = sierraPhysicalWork.sourceIdentifier)
       )
 
     val expectedImage =
@@ -191,10 +198,13 @@ class PlatformMergerTest
     val expectedRedirectedWork =
       Work.Redirected[Merged](
         state = Merged(
+          canonicalId = miroWork.state.canonicalId,
           sourceIdentifier = miroWork.sourceIdentifier,
           modifiedTime = now),
         version = miroWork.version,
-        redirect = IdState.Identifiable(zeroItemSierraWork.sourceIdentifier)
+        redirect = IdState.Identified(
+          canonicalId = zeroItemSierraWork.state.canonicalId,
+          sourceIdentifier = zeroItemSierraWork.sourceIdentifier)
       )
 
     val expectedImage =
@@ -244,10 +254,13 @@ class PlatformMergerTest
     val expectedRedirectedWork =
       Work.Redirected[Merged](
         state = Merged(
+          canonicalId = miroWork.state.canonicalId,
           sourceIdentifier = miroWork.sourceIdentifier,
           modifiedTime = now),
         version = miroWork.version,
-        redirect = IdState.Identifiable(sierraDigitalWork.sourceIdentifier)
+        redirect = IdState.Identified(
+          canonicalId = sierraDigitalWork.state.canonicalId,
+          sourceIdentifier = sierraDigitalWork.sourceIdentifier)
       )
 
     val expectedImage = miroWork.data.imageData.head.toInitialImageWith(
@@ -283,10 +296,13 @@ class PlatformMergerTest
 
     val expectedRedirectedMiro = Work.Redirected[Merged](
       state = Merged(
+        canonicalId = miroWork.state.canonicalId,
         sourceIdentifier = miroWork.sourceIdentifier,
         modifiedTime = now),
       version = miroWork.version,
-      redirect = IdState.Identifiable(multipleItemsSierraWork.sourceIdentifier)
+      redirect = IdState.Identified(
+        canonicalId = multipleItemsSierraWork.state.canonicalId,
+        sourceIdentifier = multipleItemsSierraWork.sourceIdentifier)
     )
 
     result.mergedWorksWithTime(now) should contain theSameElementsAs Seq(
@@ -320,10 +336,13 @@ class PlatformMergerTest
     val expectedRedirectedWork =
       Work.Redirected[Merged](
         state = Merged(
+          canonicalId = metsWork.state.canonicalId,
           sourceIdentifier = metsWork.sourceIdentifier,
           modifiedTime = now),
         version = metsWork.version,
-        redirect = IdState.Identifiable(sierraPhysicalWork.sourceIdentifier)
+        redirect = IdState.Identified(
+          canonicalId = sierraPhysicalWork.state.canonicalId,
+          sourceIdentifier = sierraPhysicalWork.sourceIdentifier)
       )
 
     result.mergedWorksWithTime(now) should contain theSameElementsAs List(
@@ -359,10 +378,13 @@ class PlatformMergerTest
     val expectedRedirectedWork =
       Work.Redirected[Merged](
         state = Merged(
+          canonicalId = metsWork.state.canonicalId,
           sourceIdentifier = metsWork.sourceIdentifier,
           modifiedTime = now),
         version = metsWork.version,
-        redirect = IdState.Identifiable(sierraPictureWork.sourceIdentifier)
+        redirect = IdState.Identified(
+          canonicalId = sierraPictureWork.state.canonicalId,
+          sourceIdentifier = sierraPictureWork.sourceIdentifier)
       )
 
     val expectedImage =
@@ -413,28 +435,37 @@ class PlatformMergerTest
     val expectedRedirectedDigitalWork =
       Work.Redirected[Merged](
         state = Merged(
+          canonicalId = sierraDigitisedWork.state.canonicalId,
           sourceIdentifier = sierraDigitisedWork.sourceIdentifier,
           modifiedTime = now),
         version = sierraDigitisedWork.version,
-        redirect = IdState.Identifiable(sierraPhysicalWork.sourceIdentifier)
+        redirect = IdState.Identified(
+          canonicalId = sierraPhysicalWork.state.canonicalId,
+          sourceIdentifier = sierraPhysicalWork.sourceIdentifier)
       )
 
     val expectedMiroRedirectedWork =
       Work.Redirected[Merged](
         state = Merged(
+          canonicalId = miroWork.state.canonicalId,
           sourceIdentifier = miroWork.sourceIdentifier,
           modifiedTime = now),
         version = miroWork.version,
-        redirect = IdState.Identifiable(sierraPhysicalWork.sourceIdentifier)
+        redirect = IdState.Identified(
+          canonicalId = sierraPhysicalWork.state.canonicalId,
+          sourceIdentifier = sierraPhysicalWork.sourceIdentifier)
       )
 
     val expectedMetsRedirectedWork =
       Work.Redirected[Merged](
         state = Merged(
+          canonicalId = metsWork.state.canonicalId,
           sourceIdentifier = metsWork.sourceIdentifier,
           modifiedTime = now),
         version = metsWork.version,
-        redirect = IdState.Identifiable(sierraPhysicalWork.sourceIdentifier)
+        redirect = IdState.Identified(
+          canonicalId = sierraPhysicalWork.state.canonicalId,
+          sourceIdentifier = sierraPhysicalWork.sourceIdentifier)
       )
 
     val expectedImage = miroWork.data.imageData.head.toInitialImageWith(
@@ -478,11 +509,13 @@ class PlatformMergerTest
     val expectedMetsRedirectedWork =
       Work.Redirected[Merged](
         state = Merged(
+          canonicalId = metsWork.state.canonicalId,
           sourceIdentifier = metsWork.sourceIdentifier,
           modifiedTime = now),
         version = metsWork.version,
-        redirect =
-          IdState.Identifiable(multipleItemsSierraWork.sourceIdentifier)
+        redirect = IdState.Identified(
+          canonicalId = multipleItemsSierraWork.state.canonicalId,
+          sourceIdentifier = multipleItemsSierraWork.sourceIdentifier)
       )
 
     result.mergedWorksWithTime(now) should contain theSameElementsAs List(
@@ -515,21 +548,25 @@ class PlatformMergerTest
     val expectedRedirectedDigitalWork =
       Work.Redirected[Merged](
         state = Merged(
+          canonicalId = sierraDigitisedWork.state.canonicalId,
           sourceIdentifier = sierraDigitisedWork.sourceIdentifier,
           modifiedTime = now),
         version = sierraDigitisedWork.version,
-        redirect =
-          IdState.Identifiable(multipleItemsSierraWork.sourceIdentifier)
+        redirect = IdState.Identified(
+          canonicalId = multipleItemsSierraWork.state.canonicalId,
+          sourceIdentifier = multipleItemsSierraWork.sourceIdentifier)
       )
 
     val expectedMetsRedirectedWork =
       Work.Redirected[Merged](
         state = Merged(
+          canonicalId = metsWork.state.canonicalId,
           sourceIdentifier = metsWork.sourceIdentifier,
           modifiedTime = now),
         version = metsWork.version,
-        redirect =
-          IdState.Identifiable(multipleItemsSierraWork.sourceIdentifier)
+        redirect = IdState.Identified(
+          canonicalId = multipleItemsSierraWork.state.canonicalId,
+          sourceIdentifier = multipleItemsSierraWork.sourceIdentifier)
       )
 
     result.mergedWorksWithTime(now) should contain theSameElementsAs List(

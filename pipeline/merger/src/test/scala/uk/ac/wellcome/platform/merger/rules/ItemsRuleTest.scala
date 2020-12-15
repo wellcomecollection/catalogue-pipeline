@@ -12,31 +12,32 @@ class ItemsRuleTest
     with Matchers
     with SourceWorkGenerators
     with Inside {
-  val physicalPictureSierra: Work.Visible[WorkState.Source] =
-    sierraPhysicalSourceWork()
+  val physicalPictureSierra: Work.Visible[WorkState.Identified] =
+    sierraPhysicalIdentifiedWork()
       .format(Format.Pictures)
 
-  val physicalMapsSierra: Work.Visible[WorkState.Source] =
-    sierraPhysicalSourceWork().format(Format.Maps)
+  val physicalMapsSierra: Work.Visible[WorkState.Identified] =
+    sierraPhysicalIdentifiedWork().format(Format.Maps)
 
-  val zeroItemPhysicalSierra: Work.Visible[WorkState.Source] =
-    sierraSourceWork().format(Format.Pictures)
+  val zeroItemPhysicalSierra: Work.Visible[WorkState.Identified] =
+    sierraIdentifiedWork().format(Format.Pictures)
 
-  val multiItemPhysicalSierra: Work.Visible[WorkState.Source] =
-    sierraSourceWork()
+  val multiItemPhysicalSierra: Work.Visible[WorkState.Identified] =
+    sierraIdentifiedWork()
       .items((1 to 2).map { _ =>
-        createPhysicalItem
+        createIdentifiedPhysicalItem
       }.toList)
 
-  val metsWork: Work.Invisible[WorkState.Source] = metsSourceWork().invisible()
+  val metsWork: Work.Invisible[WorkState.Identified] =
+    metsIdentifiedWork().invisible()
 
-  val miroWork: Work.Visible[WorkState.Source] = miroSourceWork()
+  val miroWork: Work.Visible[WorkState.Identified] = miroIdentifiedWork()
 
-  val calmWork: Work.Visible[WorkState.Source] = calmSourceWork()
+  val calmWork: Work.Visible[WorkState.Identified] = calmIdentifiedWork()
 
   it(
     "leaves items unchanged and returns a digitised version of a Sierra work as a merged source") {
-    val (digitisedWork, physicalWork) = sierraSourceWorkPair()
+    val (digitisedWork, physicalWork) = sierraIdentifiedWorkPair()
 
     inside(
       ItemsRule
@@ -95,7 +96,7 @@ class ItemsRuleTest
   it("does not merge any Miro sources when there are several of them") {
     inside(
       ItemsRule
-        .merge(physicalPictureSierra, List(miroWork, miroSourceWork()))) {
+        .merge(physicalPictureSierra, List(miroWork, miroIdentifiedWork()))) {
       case FieldMergeResult(items, mergedSources) =>
         items shouldEqual physicalPictureSierra.data.items
         mergedSources shouldBe empty

@@ -8,6 +8,7 @@ import uk.ac.wellcome.platform.transformer.calm.models.CalmTransformerException
 import uk.ac.wellcome.platform.transformer.calm.models.CalmTransformerException._
 import WorkState.Source
 import uk.ac.wellcome.models.work.internal.DeletedReason.SuppressedFromSource
+import uk.ac.wellcome.models.work.internal.IdState.Identifiable
 import uk.ac.wellcome.platform.transformer.calm.periods.PeriodParser
 import uk.ac.wellcome.platform.transformer.calm.transformers.{
   CalmLanguages,
@@ -162,15 +163,17 @@ object CalmTransformer
             ))
     }
 
-  def mergeCandidates(record: CalmRecord): List[MergeCandidate] =
+  def mergeCandidates(record: CalmRecord): List[MergeCandidate[Identifiable]] =
     record
       .get("BNumber")
       .map { id =>
         MergeCandidate(
-          SourceIdentifier(
-            identifierType = IdentifierType("sierra-system-number"),
-            ontologyType = "Work",
-            value = id
+          Identifiable(
+            SourceIdentifier(
+              identifierType = IdentifierType("sierra-system-number"),
+              ontologyType = "Work",
+              value = id
+            )
           )
         )
       }

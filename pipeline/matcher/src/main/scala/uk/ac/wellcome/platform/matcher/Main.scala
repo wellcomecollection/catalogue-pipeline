@@ -22,7 +22,7 @@ import uk.ac.wellcome.storage.locking.dynamo.{
 }
 import uk.ac.wellcome.storage.typesafe.DynamoBuilder
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
-import WorkState.Source
+import WorkState.Identified
 import uk.ac.wellcome.pipeline_storage.typesafe.ElasticRetrieverBuilder
 
 object Main extends WellcomeTypesafeApp {
@@ -59,7 +59,7 @@ object Main extends WellcomeTypesafeApp {
     val workMatcher = new WorkMatcher(workGraphStore, new DynamoLockingService)
 
     val workRetriever =
-      ElasticRetrieverBuilder.apply[Work[Source]](config, esClient)
+      ElasticRetrieverBuilder.apply[Work[Identified]](config, esClient)
 
     new MatcherWorkerService(
       workRetriever = workRetriever,

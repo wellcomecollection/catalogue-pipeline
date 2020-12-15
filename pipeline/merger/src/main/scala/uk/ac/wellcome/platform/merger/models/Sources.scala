@@ -1,17 +1,18 @@
 package uk.ac.wellcome.platform.merger.models
 
+import uk.ac.wellcome.models.work.internal.WorkState.Identified
 import uk.ac.wellcome.models.work.internal._
-import WorkState.Source
 
 object Sources {
   def findFirstLinkedDigitisedSierraWorkFor(
-    target: Work.Visible[Source],
-    sources: Seq[Work[Source]]): Option[Work[Source]] = {
+    target: Work.Visible[Identified],
+    sources: Seq[Work[Identified]]): Option[Work[Identified]] = {
 
     val digitisedLinkedIds = target.data.mergeCandidates
       .filter(_.reason.contains("Physical/digitised Sierra work"))
-      .map(_.identifier)
+      .map(_.id.canonicalId)
 
-    sources.find(source => digitisedLinkedIds.contains(source.sourceIdentifier))
+    sources.find(source =>
+      digitisedLinkedIds.contains(source.state.canonicalId))
   }
 }

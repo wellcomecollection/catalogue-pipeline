@@ -41,7 +41,7 @@ class ImageDownloaderTest
                   locationType = createImageLocationType,
                   url = "http://images.com/this-image.jpg"
                 ))
-            ).toIdentifiedImage
+            ).toInitialImage
             val result = Source
               .single(image)
               .asSourceWithContext(_ => ())
@@ -61,7 +61,7 @@ class ImageDownloaderTest
       withMaterializer { implicit materializer: Materializer =>
         withDownloaderAndFileWriter() {
           case (downloader, _, fileWriter) =>
-            val image = createImageData.toIdentifiedImage
+            val image = createImageData.toInitialImage
             val result = Source
               .single(image)
               .asSourceWithContext(_ => ())
@@ -81,7 +81,7 @@ class ImageDownloaderTest
       withMaterializer { implicit materializer: Materializer =>
         withDownloaderAndFileWriter(_ => None) {
           case (downloader, _, _) =>
-            val image = createImageData.toIdentifiedImage
+            val image = createImageData.toInitialImage
             val result = Source
               .single(image)
               .asSourceWithContext(_ => ())
@@ -108,7 +108,7 @@ class ImageDownloaderTest
                   url = "http://images.com/this-image.jpg"
                 )
               )
-            ).toIdentifiedImage
+            ).toInitialImage
             val result = Source
               .single(image)
               .asSourceWithContext(_ => ())
@@ -127,7 +127,7 @@ class ImageDownloaderTest
 
   describe("delete") {
     it("deletes a DownloadedImage") {
-      val image = createImageData.toIdentifiedImage
+      val image = createImageData.toInitialImage
       val downloadedImage = DownloadedImage(
         image,
         Paths.get("a", "b", "c", "default.jpg")

@@ -3,8 +3,8 @@ package uk.ac.wellcome.models.work.generators
 import uk.ac.wellcome.models.work.internal.{Work, WorkState}
 
 trait MetsWorkGenerators extends WorkGenerators with ImageGenerators {
-  def metsSourceWork(): Work.Visible[WorkState.Source] =
-    sourceWork(sourceIdentifier = createMetsSourceIdentifier)
+  def metsIdentifiedWork(): Work.Visible[WorkState.Identified] =
+    identifiedWork(sourceIdentifier = createMetsSourceIdentifier)
       .items(List(createDigitalItem))
-      .imageData(List(createMetsImageData))
+      .imageData(List(createMetsImageData.toIdentified))
 }
