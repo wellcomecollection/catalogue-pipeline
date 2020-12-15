@@ -21,15 +21,21 @@ import weco.catalogue.transformer.{
 import java.time.Instant
 
 class MetsTransformerWorkerTest
-  extends TransformerWorkerTestCases[MemoryTypedStore[S3ObjectLocation, String], MetsSourcePayload, MetsSourceData]
+    extends TransformerWorkerTestCases[
+      MemoryTypedStore[S3ObjectLocation, String],
+      MetsSourcePayload,
+      MetsSourceData]
     with LocalResources
     with S3ObjectLocationGenerators {
-  override def withContext[R](testWith: TestWith[MemoryTypedStore[S3ObjectLocation, String], R]): R =
+  override def withContext[R](
+    testWith: TestWith[MemoryTypedStore[S3ObjectLocation, String], R]): R =
     testWith(
       MemoryTypedStore[S3ObjectLocation, String]()
     )
 
-  override def createPayload(implicit store: MemoryTypedStore[S3ObjectLocation, String]): MetsSourcePayload = {
+  override def createPayload(
+    implicit store: MemoryTypedStore[S3ObjectLocation, String])
+    : MetsSourcePayload = {
     val xml = loadXmlFile("/b30246039.xml")
     val location = S3ObjectLocation(
       bucket = createBucketName,
@@ -52,7 +58,9 @@ class MetsTransformerWorkerTest
     )
   }
 
-  override def createBadPayload(implicit store: MemoryTypedStore[S3ObjectLocation, String]): MetsSourcePayload =
+  override def createBadPayload(
+    implicit store: MemoryTypedStore[S3ObjectLocation, String])
+    : MetsSourcePayload =
     MetsSourcePayload(
       id = randomAlphanumeric(),
       sourceData = MetsSourceData(
@@ -69,12 +77,20 @@ class MetsTransformerWorkerTest
   override implicit val encoder: Encoder[MetsSourcePayload] =
     deriveConfiguredEncoder[MetsSourcePayload]
 
-  override def assertMatches(p: MetsSourcePayload, w: Work[WorkState.Source])(implicit context: MemoryTypedStore[S3ObjectLocation, String]): Unit = {
+  override def assertMatches(p: MetsSourcePayload, w: Work[WorkState.Source])(
+    implicit context: MemoryTypedStore[S3ObjectLocation, String]): Unit = {
     w.sourceIdentifier.identifierType shouldBe IdentifierType("mets")
     p.id shouldBe w.sourceIdentifier.value
   }
 
-  override def withWorker[R](pipelineStream: PipelineStorageStream[NotificationMessage, Work[WorkState.Source], String])(testWith: TestWith[TransformerWorker[MetsSourcePayload, MetsSourceData, String], R])(implicit metsXmlStore: MemoryTypedStore[S3ObjectLocation, String]): R =
+  override def withWorker[R](
+    pipelineStream: PipelineStorageStream[NotificationMessage,
+                                          Work[WorkState.Source],
+                                          String])(
+    testWith: TestWith[
+      TransformerWorker[MetsSourcePayload, MetsSourceData, String],
+      R])(
+    implicit metsXmlStore: MemoryTypedStore[S3ObjectLocation, String]): R =
     testWith(
       new MetsTransformerWorker(
         pipelineStream = pipelineStream,

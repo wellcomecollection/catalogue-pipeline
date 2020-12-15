@@ -22,7 +22,10 @@ class SierraTransformerWorker[MsgDestination](
 )(
   implicit val decoder: Decoder[SierraSourcePayload]
 ) extends Runnable
-    with TransformerWorker[SierraSourcePayload, SierraTransformable, MsgDestination] {
+    with TransformerWorker[
+      SierraSourcePayload,
+      SierraTransformable,
+      MsgDestination] {
 
   override val transformer: Transformer[SierraTransformable] =
     (input: SierraTransformable, version: Int) =>
@@ -30,6 +33,10 @@ class SierraTransformerWorker[MsgDestination](
 
   override def lookupSourceData(p: SierraSourcePayload)
     : Either[ReadError, Identified[Version[String, Int], SierraTransformable]] =
-    sierraReadable.get(p.location)
-      .map { case Identified(_, record) => Identified(Version(p.id, p.version), record) }
+    sierraReadable
+      .get(p.location)
+      .map {
+        case Identified(_, record) =>
+          Identified(Version(p.id, p.version), record)
+      }
 }

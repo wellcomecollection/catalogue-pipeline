@@ -36,8 +36,12 @@ class ExampleTransformerWorker(
 
   override val transformer: Transformer[ExampleData] = ExampleTransformer
 
-  override def lookupSourceData(p: CalmSourcePayload): Either[ReadError, Identified[Version[String, Int], ExampleData]]
-  =
-    sourceStore.getLatest(p.location)
-      .map { case Identified(Version(_, v), data) => Identified(Version(p.id, v), data)}
+  override def lookupSourceData(p: CalmSourcePayload)
+    : Either[ReadError, Identified[Version[String, Int], ExampleData]] =
+    sourceStore
+      .getLatest(p.location)
+      .map {
+        case Identified(Version(_, v), data) =>
+          Identified(Version(p.id, v), data)
+      }
 }

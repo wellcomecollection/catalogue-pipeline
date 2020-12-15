@@ -22,17 +22,23 @@ import weco.catalogue.transformer.{
 import java.util.UUID
 
 class CalmTransformerWorkerTest
-  extends TransformerWorkerTestCases[MemoryTypedStore[S3ObjectLocation, CalmRecord], CalmSourcePayload, CalmRecord]
+    extends TransformerWorkerTestCases[
+      MemoryTypedStore[S3ObjectLocation, CalmRecord],
+      CalmSourcePayload,
+      CalmRecord]
     with EitherValues
     with CalmRecordGenerators
     with S3ObjectLocationGenerators {
 
-  override def withContext[R](testWith: TestWith[MemoryTypedStore[S3ObjectLocation, CalmRecord], R]): R =
+  override def withContext[R](
+    testWith: TestWith[MemoryTypedStore[S3ObjectLocation, CalmRecord], R]): R =
     testWith(
       MemoryTypedStore[S3ObjectLocation, CalmRecord](initialEntries = Map.empty)
     )
 
-  override def createPayload(implicit store: MemoryTypedStore[S3ObjectLocation, CalmRecord]): CalmSourcePayload = {
+  override def createPayload(
+    implicit store: MemoryTypedStore[S3ObjectLocation, CalmRecord])
+    : CalmSourcePayload = {
     val record = createCalmRecordWith(
       "Title" -> "abc",
       "Level" -> "Collection",
@@ -50,18 +56,31 @@ class CalmTransformerWorkerTest
     CalmSourcePayload(id = id, location = location, version = 1)
   }
 
-  override def createBadPayload(implicit store: MemoryTypedStore[S3ObjectLocation, CalmRecord]): CalmSourcePayload =
-    CalmSourcePayload(id = UUID.randomUUID().toString, location = createS3ObjectLocation, version = 1)
+  override def createBadPayload(
+    implicit store: MemoryTypedStore[S3ObjectLocation, CalmRecord])
+    : CalmSourcePayload =
+    CalmSourcePayload(
+      id = UUID.randomUUID().toString,
+      location = createS3ObjectLocation,
+      version = 1)
 
   override implicit val encoder: Encoder[CalmSourcePayload] =
     deriveConfiguredEncoder[CalmSourcePayload]
 
-  override def assertMatches(p: CalmSourcePayload, w: Work[WorkState.Source])(implicit store: MemoryTypedStore[S3ObjectLocation, CalmRecord]): Unit = {
+  override def assertMatches(p: CalmSourcePayload, w: Work[WorkState.Source])(
+    implicit store: MemoryTypedStore[S3ObjectLocation, CalmRecord]): Unit = {
     w.sourceIdentifier.identifierType shouldBe IdentifierType("calm-record-id")
     w.sourceIdentifier.value shouldBe p.id
   }
 
-  override def withWorker[R](pipelineStream: PipelineStorageStream[NotificationMessage, Work[WorkState.Source], String])(testWith: TestWith[TransformerWorker[CalmSourcePayload, CalmRecord, String], R])(implicit recordReadable: MemoryTypedStore[S3ObjectLocation, CalmRecord]): R =
+  override def withWorker[R](
+    pipelineStream: PipelineStorageStream[NotificationMessage,
+                                          Work[WorkState.Source],
+                                          String])(
+    testWith: TestWith[TransformerWorker[CalmSourcePayload, CalmRecord, String],
+                       R])(
+    implicit recordReadable: MemoryTypedStore[S3ObjectLocation, CalmRecord])
+    : R =
     testWith(
       new CalmTransformerWorker(
         pipelineStream = pipelineStream,

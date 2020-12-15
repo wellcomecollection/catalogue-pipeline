@@ -14,19 +14,28 @@ import uk.ac.wellcome.storage.generators.S3ObjectLocationGenerators
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.memory.MemoryTypedStore
 import weco.catalogue.source_model.MiroSourcePayload
-import weco.catalogue.transformer.{TransformerWorker, TransformerWorkerTestCases}
+import weco.catalogue.transformer.{
+  TransformerWorker,
+  TransformerWorkerTestCases
+}
 
 class MiroTransformerWorkerTest
-  extends TransformerWorkerTestCases[MemoryTypedStore[S3ObjectLocation, MiroRecord], MiroSourcePayload, (MiroRecord, MiroMetadata)]
+    extends TransformerWorkerTestCases[
+      MemoryTypedStore[S3ObjectLocation, MiroRecord],
+      MiroSourcePayload,
+      (MiroRecord, MiroMetadata)]
     with MiroRecordGenerators
     with S3ObjectLocationGenerators {
 
-  override def withContext[R](testWith: TestWith[MemoryTypedStore[S3ObjectLocation, MiroRecord], R]): R =
+  override def withContext[R](
+    testWith: TestWith[MemoryTypedStore[S3ObjectLocation, MiroRecord], R]): R =
     testWith(
       MemoryTypedStore[S3ObjectLocation, MiroRecord]()
     )
 
-  override def createPayload(implicit store: MemoryTypedStore[S3ObjectLocation, MiroRecord]): MiroSourcePayload = {
+  override def createPayload(
+    implicit store: MemoryTypedStore[S3ObjectLocation, MiroRecord])
+    : MiroSourcePayload = {
     val record = createMiroRecord
     val location = createS3ObjectLocation
 
@@ -40,7 +49,9 @@ class MiroTransformerWorkerTest
     )
   }
 
-  override def createBadPayload(implicit context: MemoryTypedStore[S3ObjectLocation, MiroRecord]): MiroSourcePayload =
+  override def createBadPayload(
+    implicit context: MemoryTypedStore[S3ObjectLocation, MiroRecord])
+    : MiroSourcePayload =
     MiroSourcePayload(
       id = randomAlphanumeric(),
       version = 1,
@@ -51,12 +62,21 @@ class MiroTransformerWorkerTest
   override implicit val encoder: Encoder[MiroSourcePayload] =
     deriveConfiguredEncoder[MiroSourcePayload]
 
-  override def assertMatches(p: MiroSourcePayload, w: Work[WorkState.Source])(implicit source: MemoryTypedStore[S3ObjectLocation, MiroRecord]): Unit = {
-    w.sourceIdentifier.identifierType shouldBe IdentifierType("miro-image-number")
+  override def assertMatches(p: MiroSourcePayload, w: Work[WorkState.Source])(
+    implicit source: MemoryTypedStore[S3ObjectLocation, MiroRecord]): Unit = {
+    w.sourceIdentifier.identifierType shouldBe IdentifierType(
+      "miro-image-number")
     p.id shouldBe w.sourceIdentifier.value
   }
 
-  override def withWorker[R](pipelineStream: PipelineStorageStream[NotificationMessage, Work[WorkState.Source], String])(testWith: TestWith[TransformerWorker[MiroSourcePayload, (MiroRecord, MiroMetadata), String], R])(implicit miroReadable: MemoryTypedStore[S3ObjectLocation, MiroRecord]): R =
+  override def withWorker[R](
+    pipelineStream: PipelineStorageStream[NotificationMessage,
+                                          Work[WorkState.Source],
+                                          String])(
+    testWith: TestWith[
+      TransformerWorker[MiroSourcePayload, (MiroRecord, MiroMetadata), String],
+      R])(
+    implicit miroReadable: MemoryTypedStore[S3ObjectLocation, MiroRecord]): R =
     testWith(
       new MiroTransformerWorker(
         pipelineStream = pipelineStream,

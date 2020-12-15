@@ -16,7 +16,7 @@ import weco.catalogue.transformer.{Transformer, TransformerWorker}
 class CalmTransformerWorker[MsgDestination](
   val pipelineStream: PipelineStorageStream[NotificationMessage,
                                             Work[Source],
-    MsgDestination],
+                                            MsgDestination],
   recordReadable: Readable[S3ObjectLocation, CalmRecord]
 )(
   implicit val decoder: Decoder[CalmSourcePayload]
@@ -25,7 +25,12 @@ class CalmTransformerWorker[MsgDestination](
 
   val transformer: Transformer[CalmRecord] = CalmTransformer
 
-  override def lookupSourceData(p: CalmSourcePayload): Either[ReadError, Identified[Version[String, Int], CalmRecord]] =
-    recordReadable.get(p.location)
-      .map { case Identified(_, record) => Identified(Version(p.id, p.version), record) }
+  override def lookupSourceData(p: CalmSourcePayload)
+    : Either[ReadError, Identified[Version[String, Int], CalmRecord]] =
+    recordReadable
+      .get(p.location)
+      .map {
+        case Identified(_, record) =>
+          Identified(Version(p.id, p.version), record)
+      }
 }

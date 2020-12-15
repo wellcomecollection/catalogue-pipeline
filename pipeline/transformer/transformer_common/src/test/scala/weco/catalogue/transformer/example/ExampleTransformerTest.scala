@@ -31,9 +31,11 @@ class ExampleTransformerTest
     deriveConfiguredEncoder[CalmSourcePayload]
 
   override def withContext[R](
-    testWith: TestWith[MemoryVersionedStore[S3ObjectLocation, ExampleData], R]): R =
+    testWith: TestWith[MemoryVersionedStore[S3ObjectLocation, ExampleData], R])
+    : R =
     testWith(
-      MemoryVersionedStore[S3ObjectLocation, ExampleData](initialEntries = Map.empty)
+      MemoryVersionedStore[S3ObjectLocation, ExampleData](
+        initialEntries = Map.empty)
     )
 
   override def createPayload(
@@ -46,7 +48,10 @@ class ExampleTransformerTest
 
     store.put(Version(location, version))(data) shouldBe a[Right[_, _]]
 
-    CalmSourcePayload(id = data.id.toString, version = version, location = location)
+    CalmSourcePayload(
+      id = data.id.toString,
+      version = version,
+      location = location)
   }
 
   override def createBadPayload(
@@ -59,12 +64,15 @@ class ExampleTransformerTest
 
     store.put(Version(location, version))(data) shouldBe a[Right[_, _]]
 
-    CalmSourcePayload(id = randomAlphanumeric(), version = version, location = location)
+    CalmSourcePayload(
+      id = randomAlphanumeric(),
+      version = version,
+      location = location)
   }
 
-  override def assertMatches(p: CalmSourcePayload,
-                             w: Work[WorkState.Source])(
-    implicit context: MemoryVersionedStore[S3ObjectLocation, ExampleData]): Unit = {
+  override def assertMatches(p: CalmSourcePayload, w: Work[WorkState.Source])(
+    implicit context: MemoryVersionedStore[S3ObjectLocation, ExampleData])
+    : Unit = {
     w.sourceIdentifier.toString shouldBe p.id
     w.version shouldBe p.version
   }
@@ -73,8 +81,11 @@ class ExampleTransformerTest
     pipelineStream: PipelineStorageStream[NotificationMessage,
                                           Work[WorkState.Source],
                                           String])(
-    testWith: TestWith[TransformerWorker[CalmSourcePayload, ExampleData, String], R])(
-    implicit sourceStore: MemoryVersionedStore[S3ObjectLocation, ExampleData]): R =
+    testWith: TestWith[
+      TransformerWorker[CalmSourcePayload, ExampleData, String],
+      R])(
+    implicit sourceStore: MemoryVersionedStore[S3ObjectLocation, ExampleData])
+    : R =
     testWith(
       new ExampleTransformerWorker(
         pipelineStream = pipelineStream,

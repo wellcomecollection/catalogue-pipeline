@@ -32,7 +32,8 @@ case class TransformerError[SourceData, Key](t: Throwable,
   * - Runs it through a transformer and transforms the `SourceData` to `Work[Source]`
   * - Emits the message via `MessageSender` to SNS
   */
-trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest] extends Logging {
+trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest]
+    extends Logging {
   type Result[T] = Either[TransformerWorkerError, T]
   type StoreKey = Version[String, Int]
 
@@ -43,7 +44,8 @@ trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest] extend
                                             Work[Source],
                                             SenderDest]
 
-  def lookupSourceData(p: Payload): Either[ReadError, Identified[Version[String, Int], SourceData]]
+  def lookupSourceData(
+    p: Payload): Either[ReadError, Identified[Version[String, Int], SourceData]]
 
   implicit val decoder: Decoder[Payload]
 

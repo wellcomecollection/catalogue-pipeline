@@ -85,7 +85,8 @@ class TransformerWorkerTest
     workIndexer: MemoryIndexer[Work[Source]] = new MemoryIndexer[Work[Source]](),
     workKeySender: MemoryMessageSender = new MemoryMessageSender(),
     sourceStore: MemoryVersionedStore[S3ObjectLocation, ExampleData] =
-      MemoryVersionedStore[S3ObjectLocation, ExampleData](initialEntries = Map.empty)
+      MemoryVersionedStore[S3ObjectLocation, ExampleData](
+        initialEntries = Map.empty)
   )(
     testWith: TestWith[Unit, R]
   ): R =

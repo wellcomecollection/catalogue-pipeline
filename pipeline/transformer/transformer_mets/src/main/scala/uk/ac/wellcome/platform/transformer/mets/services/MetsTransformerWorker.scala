@@ -27,6 +27,7 @@ class MetsTransformerWorker[MsgDestination](
   override val transformer: Transformer[MetsSourceData] =
     new MetsXmlTransformer(metsXmlStore)
 
-  override def lookupSourceData(p: MetsSourcePayload): Either[ReadError, Identified[Version[String, Int], MetsSourceData]] =
+  override def lookupSourceData(p: MetsSourcePayload)
+    : Either[ReadError, Identified[Version[String, Int], MetsSourceData]] =
     Right(Identified(Version(p.id, p.version), p.sourceData))
 }
