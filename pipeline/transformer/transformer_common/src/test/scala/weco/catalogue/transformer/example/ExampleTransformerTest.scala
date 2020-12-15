@@ -7,7 +7,7 @@ import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
 import uk.ac.wellcome.models.work.internal.{Work, WorkState}
-import uk.ac.wellcome.pipeline_storage.PipelineStorageStream
+import uk.ac.wellcome.pipeline_storage.{PipelineStorageStream, Retriever}
 import uk.ac.wellcome.storage.Version
 import uk.ac.wellcome.storage.generators.S3ObjectLocationGenerators
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
@@ -17,6 +17,8 @@ import weco.catalogue.transformer.{
   TransformerWorker,
   TransformerWorkerTestCases
 }
+
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class ExampleTransformerTest
     extends TransformerWorkerTestCases[
@@ -80,7 +82,9 @@ class ExampleTransformerTest
   override def withWorker[R](
     pipelineStream: PipelineStorageStream[NotificationMessage,
                                           Work[WorkState.Source],
-                                          String])(
+                                          String],
+    retriever: Retriever[Work[WorkState.Source]]
+  )(
     testWith: TestWith[
       TransformerWorker[CalmSourcePayload, ExampleData, String],
       R])(
@@ -89,7 +93,8 @@ class ExampleTransformerTest
     testWith(
       new ExampleTransformerWorker(
         pipelineStream = pipelineStream,
-        sourceStore = sourceStore
+        sourceStore = sourceStore,
+        retriever = retriever
       )
     )
 }

@@ -10,7 +10,7 @@ import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
 import uk.ac.wellcome.models.work.internal.Work
 import uk.ac.wellcome.models.work.internal.WorkState.Source
-import uk.ac.wellcome.pipeline_storage.MemoryIndexer
+import uk.ac.wellcome.pipeline_storage.{MemoryIndexer, MemoryRetriever}
 import uk.ac.wellcome.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import uk.ac.wellcome.storage.Version
 import uk.ac.wellcome.storage.generators.S3ObjectLocationGenerators
@@ -22,6 +22,8 @@ import weco.catalogue.transformer.example.{
   ExampleTransformerWorker,
   ValidExampleData
 }
+
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class TransformerWorkerTest
     extends AnyFunSpec
@@ -96,7 +98,8 @@ class TransformerWorkerTest
       sender = workKeySender) { pipelineStream =>
       val worker = new ExampleTransformerWorker(
         pipelineStream = pipelineStream,
-        sourceStore = sourceStore
+        sourceStore = sourceStore,
+        retriever = new MemoryRetriever[Work[Source]](index = workIndexer.index)
       )
 
       worker.run()
