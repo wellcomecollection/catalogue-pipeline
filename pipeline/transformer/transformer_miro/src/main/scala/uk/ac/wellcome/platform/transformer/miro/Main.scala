@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.transformer.miro
 
 import akka.actor.ActorSystem
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.s3.AmazonS3
 import com.typesafe.config.Config
 import uk.ac.wellcome.elasticsearch.SourceWorkIndexConfig
@@ -16,14 +15,11 @@ import uk.ac.wellcome.pipeline_storage.typesafe.{
   PipelineStorageStreamBuilder
 }
 import uk.ac.wellcome.platform.transformer.miro.Implicits._
-import uk.ac.wellcome.platform.transformer.miro.services.{
-  MiroDynamoVHSReader,
-  MiroTransformerWorkerService
-}
+import uk.ac.wellcome.platform.transformer.miro.services.MiroTransformerWorker
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.storage.streaming.Codec._
-import uk.ac.wellcome.storage.typesafe.{DynamoBuilder, S3Builder}
+import uk.ac.wellcome.storage.typesafe.S3Builder
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 
@@ -38,13 +34,6 @@ object Main extends WellcomeTypesafeApp {
 
     implicit val s3Client: AmazonS3 =
       S3Builder.buildS3Client(config)
-
-    implicit val dynamoClient: AmazonDynamoDB =
-      DynamoBuilder.buildDynamoClient(config)
-
-    val miroVhsReader = new MiroDynamoVHSReader(
-      config = DynamoBuilder.buildDynamoConfig(config)
-    )
 
     val esClient = ElasticBuilder.buildElasticClient(config)
 
@@ -62,10 +51,9 @@ object Main extends WellcomeTypesafeApp {
             subject = "Sent from the Miro transformer")
       )(config)
 
-    new MiroTransformerWorkerService(
+    new MiroTransformerWorker(
       pipelineStream = pipelineStream,
-      miroVhsReader = miroVhsReader,
-      typedStore = S3TypedStore[MiroRecord]
+      miroReadable = S3TypedStore[MiroRecord]
     )
   }
 }
