@@ -6,7 +6,6 @@ import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.internal.result._
 import uk.ac.wellcome.platform.transformer.calm.models.CalmTransformerException
 import uk.ac.wellcome.platform.transformer.calm.models.CalmTransformerException._
-import uk.ac.wellcome.transformer.common.worker.Transformer
 import WorkState.Source
 import uk.ac.wellcome.models.work.internal.DeletedReason.SuppressedFromSource
 import uk.ac.wellcome.platform.transformer.calm.periods.PeriodParser
@@ -14,6 +13,7 @@ import uk.ac.wellcome.platform.transformer.calm.transformers.{
   CalmLanguages,
   CalmNotes
 }
+import weco.catalogue.transformer.Transformer
 
 object CalmTransformer
     extends Transformer[CalmRecord]

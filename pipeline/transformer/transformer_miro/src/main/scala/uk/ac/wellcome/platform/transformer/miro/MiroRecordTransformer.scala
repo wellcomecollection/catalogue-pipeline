@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.transformer.miro
 
 import java.time.Instant
-
 import scala.util.Try
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.json.JsonUtil._
@@ -12,7 +11,7 @@ import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 import uk.ac.wellcome.platform.transformer.miro.transformers._
 import WorkState.Source
 import uk.ac.wellcome.models.work.internal.result.Result
-import uk.ac.wellcome.transformer.common.worker.Transformer
+import weco.catalogue.transformer.Transformer
 
 class MiroRecordTransformer
     extends MiroContributors

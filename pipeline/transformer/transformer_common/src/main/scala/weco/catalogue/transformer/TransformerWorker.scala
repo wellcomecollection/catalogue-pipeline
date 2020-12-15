@@ -1,15 +1,16 @@
-package uk.ac.wellcome.transformer.common.worker
+package weco.catalogue.transformer
 
-import scala.concurrent.Future
 import akka.Done
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
+import uk.ac.wellcome.models.work.internal.WorkState.Source
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.storage.{Identified, ReadError, Version}
-import WorkState.Source
 import uk.ac.wellcome.pipeline_storage.PipelineStorageStream
+import uk.ac.wellcome.storage.{Identified, ReadError, Version}
+import weco.catalogue
 
+import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 sealed abstract class TransformerWorkerError(msg: String) extends Exception(msg)
@@ -55,7 +56,7 @@ trait TransformerWorker[SourceData, SenderDest] extends Logging {
                    version: Int,
                    key: StoreKey): Result[Work[Source]] =
     transformer(sourceData, version) match {
-      case Left(err)     => Left(TransformerError(err, sourceData, key))
+      case Left(err)     => Left(catalogue.transformer.TransformerError(err, sourceData, key))
       case Right(result) => Right(result)
     }
 

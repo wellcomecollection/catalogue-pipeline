@@ -7,7 +7,7 @@ import uk.ac.wellcome.pipeline_storage.PipelineStorageStream
 import uk.ac.wellcome.storage.{Identified, ReadError, Version}
 import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.typesafe.Runnable
-import uk.ac.wellcome.transformer.common.worker.{Transformer, TransformerWorker}
+import weco.catalogue.transformer.{Transformer, TransformerWorker}
 
 class CalmTransformerWorker(
   val pipelineStream: PipelineStorageStream[NotificationMessage,

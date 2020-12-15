@@ -1,4 +1,4 @@
-package uk.ac.wellcome.transformer.common.worker
+package weco.catalogue.transformer
 
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
@@ -13,9 +13,9 @@ import uk.ac.wellcome.models.work.internal.WorkState.Source
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import uk.ac.wellcome.pipeline_storage.{MemoryIndexer, PipelineStorageStream}
-import uk.ac.wellcome.storage.{Identified, ReadError, Version}
 import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
+import uk.ac.wellcome.storage.{Identified, ReadError, Version}
 
 import scala.concurrent.Future
 import scala.util.{Failure, Try}
