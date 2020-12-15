@@ -20,7 +20,16 @@ object ExampleTransformer extends Transformer[ExampleData] with WorkGenerators {
   def apply(data: ExampleData,
             version: Int): Either[Exception, Work.Visible[Source]] =
     data match {
-      case ValidExampleData(id) => Right(sourceWork(id).withVersion(version))
+      case ValidExampleData(id) => Right(
+        Work.Visible[Source](
+          state = Source(id, modifiedTime),
+          data = WorkData(
+            title = Some(s"Title: $id")
+          ),
+          version = version
+        )
+      )
+
       case InvalidExampleData   => Left(new Exception("No No No"))
     }
 }
