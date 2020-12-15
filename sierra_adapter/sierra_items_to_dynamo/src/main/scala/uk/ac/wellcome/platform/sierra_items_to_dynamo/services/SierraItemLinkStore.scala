@@ -6,8 +6,10 @@ import uk.ac.wellcome.sierra_adapter.model.{SierraItemNumber, SierraItemRecord}
 import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.storage.{Identified, UpdateNotApplied}
 
-class SierraItemLinkStore(store: VersionedStore[SierraItemNumber, Int, SierraItemLink]) {
-  def update(newRecord: SierraItemRecord): Either[Throwable, Option[SierraItemRecord]] = {
+class SierraItemLinkStore(
+  store: VersionedStore[SierraItemNumber, Int, SierraItemLink]) {
+  def update(newRecord: SierraItemRecord)
+    : Either[Throwable, Option[SierraItemRecord]] = {
     val newLink = SierraItemLink(newRecord)
 
     val upsertResult: store.UpdateEither =
@@ -16,8 +18,8 @@ class SierraItemLinkStore(store: VersionedStore[SierraItemNumber, Int, SierraIte
           case Some(updatedLink) => Right(updatedLink)
           case None =>
             Left(
-              UpdateNotApplied(new Throwable(
-                s"Item ${newRecord.id} is already up-to-date")))
+              UpdateNotApplied(
+                new Throwable(s"Item ${newRecord.id} is already up-to-date")))
         }
       }
 

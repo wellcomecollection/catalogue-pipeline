@@ -23,18 +23,18 @@ class SierraItemsToDynamoFeatureTest
 
     withLocalSqsQueue() { queue =>
       withWorkerService(queue, messageSender = messageSender) { _ =>
-          val itemRecord = createSierraItemRecordWith(
-            bibIds = List(createSierraBibNumber)
-          )
+        val itemRecord = createSierraItemRecordWith(
+          bibIds = List(createSierraBibNumber)
+        )
 
-          sendNotificationToSQS(
-            queue = queue,
-            message = itemRecord
-          )
+        sendNotificationToSQS(
+          queue = queue,
+          message = itemRecord
+        )
 
-          eventually {
-            messageSender.getMessages[SierraItemRecord] shouldBe Seq(itemRecord)
-          }
+        eventually {
+          messageSender.getMessages[SierraItemRecord] shouldBe Seq(itemRecord)
+        }
       }
     }
   }

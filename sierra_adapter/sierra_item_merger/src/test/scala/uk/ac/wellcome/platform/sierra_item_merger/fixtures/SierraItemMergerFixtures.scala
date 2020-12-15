@@ -29,10 +29,9 @@ trait SierraItemMergerFixtures
     testWith(sierraUpdaterService)
   }
 
-  def withSierraWorkerService[R](
-    queue: Queue,
-    sourceVHS: SourceVHS[SierraTransformable] =
-      createSourceVHS[SierraTransformable])(
+  def withSierraWorkerService[R](queue: Queue,
+                                 sourceVHS: SourceVHS[SierraTransformable] =
+                                   createSourceVHS[SierraTransformable])(
     testWith: TestWith[(SierraItemMergerWorkerService[String],
                         MemoryMessageSender),
                        R]): R =

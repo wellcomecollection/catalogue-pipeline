@@ -30,9 +30,10 @@ object Main extends WellcomeTypesafeApp {
     implicit val dynamoClient: AmazonDynamoDB =
       DynamoBuilder.buildDynamoClient(config)
 
-    val versionedStore = new DynamoSingleVersionStore[SierraItemNumber, SierraItemLink](
-      config = DynamoBuilder.buildDynamoConfig(config)
-    )
+    val versionedStore =
+      new DynamoSingleVersionStore[SierraItemNumber, SierraItemLink](
+        config = DynamoBuilder.buildDynamoConfig(config)
+      )
 
     new SierraItemsToDynamoWorkerService(
       sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),

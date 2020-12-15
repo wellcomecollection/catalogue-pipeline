@@ -23,7 +23,8 @@ trait WorkerServiceFixture extends SQS with Akka {
   def withWorkerService[R](
     queue: Queue,
     store: MemoryVersionedStore[SierraItemNumber, SierraItemLink] =
-      MemoryVersionedStore[SierraItemNumber, SierraItemLink](initialEntries = Map.empty),
+      MemoryVersionedStore[SierraItemNumber, SierraItemLink](
+        initialEntries = Map.empty),
     metrics: Metrics[Future] = new MemoryMetrics(),
     messageSender: MemoryMessageSender = new MemoryMessageSender
   )(testWith: TestWith[SierraItemsToDynamoWorkerService[String], R]): R =
