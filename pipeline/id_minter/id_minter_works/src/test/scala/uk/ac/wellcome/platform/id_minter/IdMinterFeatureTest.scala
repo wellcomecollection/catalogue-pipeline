@@ -1,17 +1,17 @@
-package uk.ac.wellcome.platform.id_minter_works
+package uk.ac.wellcome.platform.id_minter
 
-import scala.collection.mutable
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import software.amazon.awssdk.services.sqs.model.QueueAttributeName
-
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.generators.WorkGenerators
-import uk.ac.wellcome.platform.id_minter_works.fixtures.WorkerServiceFixture
-import WorkState.{Identified, Merged}
+import uk.ac.wellcome.models.work.internal.WorkState.{Identified, Merged}
+import uk.ac.wellcome.models.work.internal._
+import uk.ac.wellcome.platform.id_minter.fixtures.WorkerServiceFixture
+
+import scala.collection.mutable
 
 class IdMinterFeatureTest
     extends AnyFunSpec

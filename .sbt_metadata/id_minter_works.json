@@ -2,7 +2,7 @@
   "id" : "id_minter_works",
   "folder" : "pipeline/id_minter/id_minter_works",
   "dependencyIds" : [
-    "id_minter_common",
+    "internal_model",
     "pipeline_storage_typesafe"
   ]
 }

@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.id_minter_works
+package uk.ac.wellcome.platform.id_minter
 
 import scala.concurrent.ExecutionContext
 import akka.actor.ActorSystem
@@ -10,7 +10,7 @@ import uk.ac.wellcome.platform.id_minter.config.builders.{
 }
 import uk.ac.wellcome.platform.id_minter.database.IdentifiersDao
 import uk.ac.wellcome.platform.id_minter.models.IdentifiersTable
-import uk.ac.wellcome.platform.id_minter_works.services.IdMinterWorkerService
+import uk.ac.wellcome.platform.id_minter.services.IdMinterWorkerService
 import uk.ac.wellcome.platform.id_minter.steps.IdentifierGenerator
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder

@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.id_minter_works.fixtures
+package uk.ac.wellcome.platform.id_minter.fixtures
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.collection.mutable
@@ -12,8 +12,7 @@ import uk.ac.wellcome.platform.id_minter.config.models.IdentifiersTableConfig
 import uk.ac.wellcome.platform.id_minter.database.IdentifiersDao
 import uk.ac.wellcome.platform.id_minter.models.IdentifiersTable
 import uk.ac.wellcome.platform.id_minter.steps.IdentifierGenerator
-import uk.ac.wellcome.platform.id_minter.fixtures.IdentifiersDatabase
-import uk.ac.wellcome.platform.id_minter_works.services.IdMinterWorkerService
+import uk.ac.wellcome.platform.id_minter.services.IdMinterWorkerService
 import uk.ac.wellcome.pipeline_storage.{MemoryIndexer, MemoryRetriever}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.Implicits._

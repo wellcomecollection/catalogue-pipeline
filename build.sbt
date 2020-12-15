@@ -100,18 +100,11 @@ lazy val api = setupProject(
   externalDependencies = CatalogueDependencies.apiDependencies
 )
 
-lazy val id_minter_common = setupProject(
-  project,
-  "pipeline/id_minter/id_minter_common",
-  localDependencies = Seq(internal_model, big_messaging_typesafe),
-  externalDependencies = CatalogueDependencies.idminterDependencies
-)
-
 lazy val id_minter_works = setupProject(
   project,
   "pipeline/id_minter/id_minter_works",
-  localDependencies = Seq(id_minter_common, pipeline_storage_typesafe),
-  externalDependencies = Seq()
+  localDependencies = Seq(internal_model, pipeline_storage_typesafe),
+  externalDependencies = CatalogueDependencies.idminterDependencies
 )
 
 lazy val ingestor_common = setupProject(

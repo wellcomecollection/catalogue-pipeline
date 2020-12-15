@@ -1,14 +1,11 @@
-package uk.ac.wellcome.platform.id_minter_works.services
+package uk.ac.wellcome.platform.id_minter.services
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import scalikejdbc._
-import uk.ac.wellcome.platform.id_minter.database.{
-  FieldDescription,
-  IdentifiersDao
-}
+import uk.ac.wellcome.platform.id_minter.database.{FieldDescription, IdentifiersDao}
+import uk.ac.wellcome.platform.id_minter.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.platform.id_minter.models.IdentifiersTable
-import uk.ac.wellcome.platform.id_minter_works.fixtures.WorkerServiceFixture
 
 class IdMinterWorkerServiceTest
     extends AnyFunSpec
