@@ -11,12 +11,11 @@ trait IdentifiersGenerators extends RandomGenerators {
   def createSourceIdentifier: SourceIdentifier = createSourceIdentifierWith()
 
   def createSourceIdentifierWith(
-    identifierType: IdentifierType =
-      chooseFrom(
-        IdentifierType("miro-image-number"),
-        IdentifierType("sierra-system-number"),
-        IdentifierType("calm-record-id")
-      ),
+    identifierType: IdentifierType = chooseFrom(
+      IdentifierType("miro-image-number"),
+      IdentifierType("sierra-system-number"),
+      IdentifierType("calm-record-id")
+    ),
     value: String = randomAlphanumeric(length = 10),
     ontologyType: String = "Work"): SourceIdentifier =
     SourceIdentifier(

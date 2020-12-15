@@ -14,7 +14,11 @@ import uk.ac.wellcome.pipeline_storage.MemoryIndexer
 import uk.ac.wellcome.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import uk.ac.wellcome.storage.Version
 import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
-import weco.catalogue.transformer.example.{ExampleData, ExampleTransformerWorker, ValidExampleData}
+import weco.catalogue.transformer.example.{
+  ExampleData,
+  ExampleTransformerWorker,
+  ValidExampleData
+}
 
 class TransformerWorkerTest
     extends AnyFunSpec
@@ -51,13 +55,14 @@ class TransformerWorkerTest
     val workIndexer = new MemoryIndexer[Work[Source]]()
 
     withLocalSqsQueue() { queue =>
-      withWorker(queue, workIndexer = workIndexer, sourceStore = sourceStore) { _ =>
-        sendNotificationToSQS(queue, Version("A", messageVersion))
+      withWorker(queue, workIndexer = workIndexer, sourceStore = sourceStore) {
+        _ =>
+          sendNotificationToSQS(queue, Version("A", messageVersion))
 
-        eventually {
-          workIndexer.index.values.map { _.version }.toSeq shouldBe Seq(
-            storeVersion)
-        }
+          eventually {
+            workIndexer.index.values.map { _.version }.toSeq shouldBe Seq(
+              storeVersion)
+          }
       }
     }
   }
@@ -75,13 +80,13 @@ class TransformerWorkerTest
       queue = queue,
       indexer = workIndexer,
       sender = workKeySender) { pipelineStream =>
-        val worker = new ExampleTransformerWorker(
-          pipelineStream = pipelineStream,
-          sourceStore = sourceStore
-        )
+      val worker = new ExampleTransformerWorker(
+        pipelineStream = pipelineStream,
+        sourceStore = sourceStore
+      )
 
-        worker.run()
+      worker.run()
 
-        testWith(())
+      testWith(())
     }
 }

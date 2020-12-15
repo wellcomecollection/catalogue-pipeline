@@ -57,7 +57,8 @@ trait TransformerWorker[SourceData, SenderDest] extends Logging {
                    key: StoreKey): Result[Work[Source]] =
     transformer(sourceData, version) match {
       case Right(result) => Right(result)
-      case Left(err)     => Left(catalogue.transformer.TransformerError(err, sourceData, key))
+      case Left(err) =>
+        Left(catalogue.transformer.TransformerError(err, sourceData, key))
     }
 
   private def decodeKey(message: NotificationMessage): Result[StoreKey] =

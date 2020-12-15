@@ -16,7 +16,7 @@ import scala.concurrent.Future
 import scala.util.{Failure, Try}
 
 trait TransformerWorkerTestCases[Context, Payload, SourceData]
-  extends AnyFunSpec
+    extends AnyFunSpec
     with Eventually
     with IntegrationPatience
     with PipelineStorageStreamFixtures {
@@ -35,8 +35,9 @@ trait TransformerWorkerTestCases[Context, Payload, SourceData]
 
   def assertMatches(p: Payload, w: Work[Source])(implicit context: Context)
 
-  def withWorker[R](
-    pipelineStream: PipelineStorageStream[NotificationMessage, Work[Source], String])(
+  def withWorker[R](pipelineStream: PipelineStorageStream[NotificationMessage,
+                                                          Work[Source],
+                                                          String])(
     testWith: TestWith[TransformerWorker[SourceData, String], R]
   )(
     implicit context: Context
@@ -45,30 +46,33 @@ trait TransformerWorkerTestCases[Context, Payload, SourceData]
   describe("behaves as a TransformerWorker") {
     it("transforms works, indexes them, and removes them from the queue") {
       withContext { implicit context =>
-        val payloads = (1 to 5).map { _ => createPayload }
+        val payloads = (1 to 5).map { _ =>
+          createPayload
+        }
 
         val workIndexer = new MemoryIndexer[Work[Source]]()
         val workKeySender = new MemoryMessageSender()
 
-        withLocalSqsQueuePair() { case QueuePair(queue, dlq) =>
-          withWorkerImpl(queue, workIndexer, workKeySender) { _ =>
-            payloads.foreach { sendNotificationToSQS(queue, _) }
+        withLocalSqsQueuePair() {
+          case QueuePair(queue, dlq) =>
+            withWorkerImpl(queue, workIndexer, workKeySender) { _ =>
+              payloads.foreach { sendNotificationToSQS(queue, _) }
 
-            eventually {
-              assertQueueEmpty(dlq)
-              assertQueueEmpty(queue)
+              eventually {
+                assertQueueEmpty(dlq)
+                assertQueueEmpty(queue)
 
-              workIndexer.index should have size payloads.size
+                workIndexer.index should have size payloads.size
 
-              val sentKeys = workKeySender.messages.map { _.body }
-              val storedKeys = workIndexer.index.keys
-              sentKeys should contain theSameElementsAs storedKeys
+                val sentKeys = workKeySender.messages.map { _.body }
+                val storedKeys = workIndexer.index.keys
+                sentKeys should contain theSameElementsAs storedKeys
 
-              payloads.foreach { p =>
-                assertMatches(p, workIndexer.index(id(p)))
+                payloads.foreach { p =>
+                  assertMatches(p, workIndexer.index(id(p)))
+                }
               }
             }
-          }
         }
       }
     }
@@ -76,15 +80,16 @@ trait TransformerWorkerTestCases[Context, Payload, SourceData]
     describe("sending failures to the DLQ") {
       it("if it can't parse the JSON on the queue") {
         withContext { implicit context =>
-          withLocalSqsQueuePair() { case QueuePair(queue, dlq) =>
-            withWorkerImpl(queue) { _ =>
-              sendInvalidJSONto(queue)
+          withLocalSqsQueuePair() {
+            case QueuePair(queue, dlq) =>
+              withWorkerImpl(queue) { _ =>
+                sendInvalidJSONto(queue)
 
-              eventually {
-                assertQueueHasSize(dlq, size = 1)
-                assertQueueEmpty(queue)
+                eventually {
+                  assertQueueHasSize(dlq, size = 1)
+                  assertQueueEmpty(queue)
+                }
               }
-            }
           }
         }
       }
@@ -96,15 +101,16 @@ trait TransformerWorkerTestCases[Context, Payload, SourceData]
       // parsed as a notification.
       it("if it can't parse the notification on the queue") {
         withContext { implicit context =>
-          withLocalSqsQueuePair() { case QueuePair(queue, dlq) =>
-            withWorkerImpl(queue) { _ =>
-              sendNotificationToSQS(queue, "this-is-not-json")
+          withLocalSqsQueuePair() {
+            case QueuePair(queue, dlq) =>
+              withWorkerImpl(queue) { _ =>
+                sendNotificationToSQS(queue, "this-is-not-json")
 
-              eventually {
-                assertQueueHasSize(dlq, size = 1)
-                assertQueueEmpty(queue)
+                eventually {
+                  assertQueueHasSize(dlq, size = 1)
+                  assertQueueEmpty(queue)
+                }
               }
-            }
           }
         }
       }
@@ -112,7 +118,9 @@ trait TransformerWorkerTestCases[Context, Payload, SourceData]
       it("if the payload can't be transformed") {
         withContext { implicit context =>
           val payloads = Seq(
-            createPayload, createPayload, createBadPayload
+            createPayload,
+            createPayload,
+            createBadPayload
           )
 
           withLocalSqsQueuePair() {
@@ -133,7 +141,8 @@ trait TransformerWorkerTestCases[Context, Payload, SourceData]
 
       it("if it can't index the work") {
         val brokenIndexer = new MemoryIndexer[Work[Source]]() {
-          override def index(documents: Seq[Work[Source]]): Future[Either[Seq[Work[Source]], Seq[Work[Source]]]] =
+          override def index(documents: Seq[Work[Source]])
+            : Future[Either[Seq[Work[Source]], Seq[Work[Source]]]] =
             Future.failed(new Throwable("BOOM!"))
         }
 
@@ -144,7 +153,10 @@ trait TransformerWorkerTestCases[Context, Payload, SourceData]
 
           withLocalSqsQueuePair() {
             case QueuePair(queue, dlq) =>
-              withWorkerImpl(queue, workIndexer = brokenIndexer, workKeySender = workKeySender) { _ =>
+              withWorkerImpl(
+                queue,
+                workIndexer = brokenIndexer,
+                workKeySender = workKeySender) { _ =>
                 sendNotificationToSQS(queue, payload)
 
                 eventually {
@@ -169,14 +181,13 @@ trait TransformerWorkerTestCases[Context, Payload, SourceData]
 
           withLocalSqsQueuePair() {
             case QueuePair(queue, dlq) =>
-              withWorkerImpl(queue, workKeySender = brokenSender) {
-                _ =>
-                  sendNotificationToSQS(queue, payload)
+              withWorkerImpl(queue, workKeySender = brokenSender) { _ =>
+                sendNotificationToSQS(queue, payload)
 
-                  eventually {
-                    assertQueueEmpty(queue)
-                    assertQueueHasSize(dlq, size = 1)
-                  }
+                eventually {
+                  assertQueueEmpty(queue)
+                  assertQueueHasSize(dlq, size = 1)
+                }
               }
           }
         }
@@ -192,7 +203,7 @@ trait TransformerWorkerTestCases[Context, Payload, SourceData]
     testWith: TestWith[Unit, R]
   )(
     implicit context: Context
- ): R =
+  ): R =
     withPipelineStream[Work[Source], R](
       queue = queue,
       indexer = workIndexer,

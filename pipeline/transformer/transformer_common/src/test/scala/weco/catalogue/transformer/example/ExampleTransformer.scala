@@ -31,6 +31,7 @@ class ExampleTransformerWorker(
 
   override val transformer: Transformer[ExampleData] = ExampleTransformer
 
-  override def lookupSourceData(id: String): Either[ReadError, Identified[Version[String, Int], ExampleData]] =
+  override def lookupSourceData(id: String)
+    : Either[ReadError, Identified[Version[String, Int], ExampleData]] =
     sourceStore.getLatest(id)
 }
