@@ -1,202 +1,86 @@
 package uk.ac.wellcome.elasticsearch
 
 import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.requests.mappings.{
-  FieldDefinition,
-  ObjectField,
-  TextField
-}
+import com.sksamuel.elastic4s.requests.mappings.{FieldDefinition, ObjectField}
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
 
 trait WorksIndexConfigFields extends IndexConfigFields {
 
   import WorksAnalysis._
 
-  // Fields
-  def otherIdentifiers =
-    objectField("otherIdentifiers")
-      .fields(sourceIdentifierFields)
-
-  def format =
-    objectField("format")
-      .fields(
-        label,
-        keywordField("id")
-      )
-
-  def title =
-    asciifoldingTextFieldWithKeyword("title")
-      .fields(
+  // Indexing lots of individual fields on Elasticsearch can be very CPU
+  // intensive, so here only include fields that are needed for querying in the
+  // API.
+  def data: ObjectField =
+    objectField("data").fields(
+      objectField("otherIdentifiers").fields(lowercaseKeyword("value")),
+      objectField("format").fields(keywordField("id")),
+      asciifoldingTextFieldWithKeyword("title").fields(
         keywordField("keyword"),
         textField("english").analyzer(englishAnalyzer.name),
         textField("shingles").analyzer(shingleAsciifoldingAnalyzer.name)
-      )
-
-  def notes =
-    objectField("notes")
-      .fields(
-        keywordField("type"),
-        englishTextField("content")
-      )
-
-  def period(idState: ObjectField) = Seq(
-    label,
-    idState,
-    objectField("range").fields(
-      label,
-      dateField("from"),
-      dateField("to"),
-      booleanField("inferred")
-    )
-  )
-
-  def place(idState: ObjectField) = Seq(
-    label,
-    idState
-  )
-
-  def concept(idState: ObjectField) = Seq(
-    label,
-    idState,
-    keywordField("type")
-  )
-
-  def agent(idState: ObjectField) = Seq(
-    label,
-    idState,
-    keywordField("type"),
-    keywordField("prefix"),
-    keywordField("numeration")
-  )
-
-  def rootConcept(idState: ObjectField) =
-    concept(idState) ++ agent(idState) ++ period(idState)
-
-  def subject(idState: ObjectField): Seq[FieldDefinition] = Seq(
-    idState,
-    label,
-    objectField("concepts").fields(rootConcept(idState))
-  )
-
-  def subjects(idState: ObjectField): ObjectField =
-    objectField("subjects").fields(subject(idState))
-
-  def genre(fieldName: String, idState: ObjectField) =
-    objectField(fieldName).fields(
-      label,
-      objectField("concepts").fields(rootConcept(idState))
-    )
-
-  def labelledTextField(fieldName: String) = objectField(fieldName).fields(
-    label
-  )
-
-  def period(fieldName: String) = labelledTextField(fieldName)
-
-  def items(fieldName: String, idState: ObjectField) =
-    objectField(fieldName).fields(
-      idState,
-      location(),
-      title
-    )
-
-  val languageFields: Seq[FieldDefinition] = Seq(
-    label,
-    keywordField("id")
-  )
-
-  def contributors(idState: ObjectField) = objectField("contributors").fields(
-    idState,
-    objectField("agent").fields(agent(idState)),
-    objectField("roles").fields(label),
-  )
-
-  def production(idState: ObjectField): ObjectField =
-    objectField("production").fields(
-      label,
-      objectField("places").fields(place(idState)),
-      objectField("agents").fields(agent(idState)),
-      objectField("dates").fields(period(idState)),
-      objectField("function").fields(concept(idState))
-    )
-
-  def mergeCandidates = objectField("mergeCandidates").fields(
-    id(),
-    keywordField("reason")
-  )
-
-  def imageData(idState: ObjectField) =
-    objectField("imageData")
-      .fields(
-        idState,
-        location("locations"),
-        version
-      )
-
-  def analyzedPath: TextField =
-    textField("path")
-      .copyTo("data.collectionPath.depth")
-      .analyzer(pathAnalyzer.name)
-      .fields(keywordField("keyword"))
-
-  def data(pathField: TextField, idState: ObjectField = id()): ObjectField =
-    objectField("data").fields(
-      otherIdentifiers,
-      mergeCandidates,
-      format,
-      title,
+      ),
       englishTextKeywordField("alternativeTitles"),
       englishTextField("description"),
       englishTextKeywordField("physicalDescription"),
       englishTextKeywordField("lettering"),
-      objectField("createdDate").fields(period(idState)),
-      contributors(idState),
-      subjects(idState),
-      genre("genres", idState),
-      items("items", idState),
-      production(idState),
-      objectField("languages").fields(languageFields),
-      location("thumbnail"),
+      objectField("contributors").fields(
+        objectField("agent").fields(label),
+      ),
+      objectField("subjects").fields(
+        label,
+        objectField("concepts").fields(label)
+      ),
+      objectField("genre").fields(
+        label,
+        objectField("concepts").fields(label)
+      ),
+      objectField("items").fields(
+        objectField("locations").fields(
+          keywordField("type"),
+          objectField("locationType").fields(keywordField("id")),
+          objectField("accessConditions").fields(
+            objectField("status").fields(keywordField("type"))
+          ),
+          objectField("license").fields(keywordField("id"))
+        )
+      ),
+      objectField("production").fields(
+        label,
+        objectField("places").fields(label),
+        objectField("agents").fields(label),
+        objectField("dates").fields(
+          label,
+          objectField("range").fields(dateField("from"))
+        ),
+        objectField("function").fields(label)
+      ),
+      objectField("languages").fields(
+        label,
+        keywordField("id")
+      ),
       textField("edition"),
-      notes,
+      objectField("notes").fields(englishTextField("content")),
       intField("duration"),
-      collectionPath(pathField),
-      imageData(idState),
+      objectField("collectionPath").fields(
+        label,
+        textField("path"),
+      ),
+      objectField("imageData").fields(
+        objectField("id").fields(
+          canonicalId,
+          objectField("sourceIdentifier").fields(lowercaseKeyword("value")),
+        )
+      ),
       keywordField("workType")
     )
-
-  def collectionPath(pathField: TextField) =
-    objectField("collectionPath").fields(
-      label,
-      objectField("level").fields(keywordField("type")),
-      pathField,
-      tokenCountField("depth").analyzer("standard")
-    )
-
-  def relation(name: String, idState: ObjectField) =
-    // Locally override the strict mapping mode. For now don't index any of the
-    // relation data, as doing so stresses the ES cluster. We can map specific
-    // bits of data in the future if required.
-    objectField(name).dynamic("false")
-
-  def relations(idState: ObjectField) =
-    objectField("relations").fields(
-      relation("ancestors", idState),
-      relation("children", idState),
-      relation("siblingsPreceding", idState),
-      relation("siblingsSucceeding", idState),
-    )
-
-  val derivedWorkData = objectField("derivedData").fields(
-    booleanField("availableOnline")
-  )
 }
 
 sealed trait WorksIndexConfig extends IndexConfig with WorksIndexConfigFields {
 
   val analysis = WorksAnalysis()
 
-  val dynamicMapping: DynamicMapping
+  val dynamicMapping: DynamicMapping = DynamicMapping.False
 
   def fields: Seq[FieldDefinition with Product with Serializable]
 
@@ -206,37 +90,36 @@ sealed trait WorksIndexConfig extends IndexConfig with WorksIndexConfigFields {
 object SourceWorkIndexConfig extends WorksIndexConfig {
 
   val fields = Seq.empty
-  val dynamicMapping = DynamicMapping.False
 }
 
 object MergedWorkIndexConfig extends WorksIndexConfig {
 
-  val fields = Seq(
-    keywordField("type"),
-    objectField("data").fields(
-      collectionPath(analyzedPath)
+  import WorksAnalysis._
+
+  val fields =
+    Seq(
+      keywordField("type"),
+      objectField("data").fields(
+        objectField("collectionPath").fields(
+          textField("path")
+            .copyTo("data.collectionPath.depth")
+            .analyzer(pathAnalyzer.name)
+            .fields(keywordField("keyword")
+          ),
+          tokenCountField("depth").analyzer("standard")
+        )
+      )
     )
-  )
-  val dynamicMapping = DynamicMapping.False
 }
 
 object IdentifiedWorkIndexConfig extends WorksIndexConfig {
 
   val fields = Seq.empty
-
-  val dynamicMapping = DynamicMapping.False
 }
 
 object DenormalisedWorkIndexConfig extends WorksIndexConfig {
 
-  val fields = Seq(
-    keywordField("type"),
-    objectField("data").fields(
-      collectionPath(analyzedPath)
-    )
-  )
-
-  val dynamicMapping = DynamicMapping.False
+  val fields = Seq.empty
 
   /** Denormalised relations make index sizes explode from about 5 GB without relations
     * to an esimated 70 GB with relations. According to elastic search documentation
@@ -251,28 +134,19 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
 
   val state = objectField("state").fields(
     canonicalId,
-    sourceIdentifier,
-    modifiedTime,
-    relations(id("id")),
-    derivedWorkData
+    objectField("sourceIdentifier").fields(lowercaseKeyword("value")),
   )
-
-  val dynamicMapping = DynamicMapping.Strict
 
   val fields =
     Seq(
       state,
-      version,
-      id("redirect"),
       keywordField("type"),
-      data(pathField = analyzedPath),
+      data,
       objectField("invisibilityReasons").fields(
         keywordField("type"),
-        keywordField("info")
       ),
       objectField("deletedReason").fields(
         keywordField("type"),
-        keywordField("info")
       )
     )
 
