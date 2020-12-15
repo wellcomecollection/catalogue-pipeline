@@ -12,6 +12,9 @@ import uk.ac.wellcome.models.work.internal.WorkState.Source
 import uk.ac.wellcome.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import uk.ac.wellcome.pipeline_storage.{MemoryIndexer, PipelineStorageStream}
 
+import scala.concurrent.Future
+import scala.util.{Failure, Try}
+
 trait TransformerWorkerTestCases[Context, Payload, SourceData]
   extends AnyFunSpec
     with Eventually
@@ -20,7 +23,11 @@ trait TransformerWorkerTestCases[Context, Payload, SourceData]
 
   def withContext[R](testWith: TestWith[Context, R]): R
 
+  // Create a payload which can be transformer
   def createPayload(implicit context: Context): Payload
+
+  // Create a payload which cannot be transformed
+  def createBadPayload(implicit context: Context): Payload
 
   implicit val encoder: Encoder[Payload]
 
@@ -62,6 +69,96 @@ trait TransformerWorkerTestCases[Context, Payload, SourceData]
                 assertMatches(p, workIndexer.index(id(p)))
               }
             }
+          }
+        }
+      }
+    }
+
+    describe("sending failures to the DLQ") {
+      it("if it can't parse the JSON on the queue") {
+        withContext { implicit context =>
+          withLocalSqsQueuePair() { case QueuePair(queue, dlq) =>
+            withWorkerImpl(queue) { _ =>
+              sendInvalidJSONto(queue)
+
+              eventually {
+                assertQueueHasSize(dlq, size = 1)
+                assertQueueEmpty(queue)
+              }
+            }
+          }
+        }
+      }
+
+      it("if the payload can't be transformed") {
+        withContext { implicit context =>
+          val payloads = Seq(
+            createPayload, createPayload, createBadPayload
+          )
+
+          withLocalSqsQueuePair() {
+            case QueuePair(queue, dlq) =>
+              withWorkerImpl(queue) { _ =>
+                payloads.foreach {
+                  sendNotificationToSQS(queue, _)
+                }
+
+                eventually {
+                  assertQueueHasSize(dlq, size = 1)
+                  assertQueueEmpty(queue)
+                }
+              }
+          }
+        }
+      }
+
+      it("if it can't index the work") {
+        val brokenIndexer = new MemoryIndexer[Work[Source]]() {
+          override def index(documents: Seq[Work[Source]]): Future[Either[Seq[Work[Source]], Seq[Work[Source]]]] =
+            Future.failed(new Throwable("BOOM!"))
+        }
+
+        val workKeySender = new MemoryMessageSender
+
+        withContext { implicit context =>
+          val payload = createPayload
+
+          withLocalSqsQueuePair() {
+            case QueuePair(queue, dlq) =>
+              withWorkerImpl(queue, workIndexer = brokenIndexer, workKeySender = workKeySender) { _ =>
+                sendNotificationToSQS(queue, payload)
+
+                eventually {
+                  assertQueueEmpty(queue)
+                  assertQueueHasSize(dlq, size = 1)
+
+                  workKeySender.messages shouldBe empty
+                }
+              }
+          }
+        }
+      }
+
+      it("if it can't send the key of the indexed work") {
+        val brokenSender = new MemoryMessageSender() {
+          override def send(body: String): Try[Unit] =
+            Failure(new Throwable("BOOM!"))
+        }
+
+        withContext { implicit context =>
+          val payload = createPayload
+
+          withLocalSqsQueuePair() {
+            case QueuePair(queue, dlq) =>
+              withWorkerImpl(queue, workKeySender = brokenSender) {
+                _ =>
+                  sendNotificationToSQS(queue, payload)
+
+                  eventually {
+                    assertQueueEmpty(queue)
+                    assertQueueHasSize(dlq, size = 1)
+                  }
+              }
           }
         }
       }

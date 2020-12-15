@@ -38,6 +38,17 @@ class ExampleTransformerTest extends TransformerWorkerTestCases[
     id
   }
 
+  override def createBadPayload(implicit store: MemoryVersionedStore[String, ExampleData]): Version[String, Int] = {
+    val data = InvalidExampleData
+    val version = randomInt(from = 1, to = 10)
+
+    val id = Version(id = randomAlphanumeric(), version)
+
+    store.put(id)(data) shouldBe a[Right[_, _]]
+
+    id
+  }
+
   override def id(p: Version[String, Int]): String = p.id
   override def version(p: Version[String, Int]): Int = p.version
 
