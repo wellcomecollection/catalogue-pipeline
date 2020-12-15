@@ -10,7 +10,7 @@ locals {
   repo_urls = [for repo_url in var.repository_urls : "${repo_url}:env.${var.release_label}"]
   image_ids = zipmap(var.services, local.repo_urls)
 
-  id_minter_image    = local.image_ids["id_minter"]
+  id_minter_image          = local.image_ids["id_minter"]
   matcher_image            = local.image_ids["matcher"]
   merger_image             = local.image_ids["merger"]
   inference_manager_image  = local.image_ids["inference_manager"]
