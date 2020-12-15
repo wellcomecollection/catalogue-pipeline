@@ -1,12 +1,13 @@
 package uk.ac.wellcome.platform.transformer.mets.transformer
 
 import java.time.Instant
-
 import org.scalatest.matchers.should.Matchers
-import org.apache.commons.io.IOUtils
 import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.models.work.internal.License
-import uk.ac.wellcome.platform.transformer.mets.fixtures.MetsGenerators
+import uk.ac.wellcome.platform.transformer.mets.fixtures.{
+  LocalResources,
+  MetsGenerators
+}
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.memory.MemoryStore
 import weco.catalogue.source_model.mets.MetsSourceData
@@ -14,7 +15,8 @@ import weco.catalogue.source_model.mets.MetsSourceData
 class MetsXmlTransformerTest
     extends AnyFunSpec
     with Matchers
-    with MetsGenerators {
+    with MetsGenerators
+    with LocalResources {
 
   it("should transform METS XML") {
     val xml = loadXmlFile("/b30246039.xml")
@@ -141,9 +143,6 @@ class MetsXmlTransformerTest
         Some("image/jp2")
       )
     }
-
-  def loadXmlFile(path: String) =
-    IOUtils.toString(getClass.getResourceAsStream(path), "UTF-8")
 
   def createIds(n: Int): List[String] =
     (1 to n).map { idx =>
