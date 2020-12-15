@@ -9,7 +9,10 @@ import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
 import uk.ac.wellcome.models.work.internal.{Work, WorkState}
 import uk.ac.wellcome.pipeline_storage.PipelineStorageStream
 import uk.ac.wellcome.storage.Version
+import uk.ac.wellcome.storage.generators.S3ObjectLocationGenerators
+import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
+import weco.catalogue.source_model.CalmSourcePayload
 import weco.catalogue.transformer.{
   TransformerWorker,
   TransformerWorkerTestCases
@@ -17,52 +20,59 @@ import weco.catalogue.transformer.{
 
 class ExampleTransformerTest
     extends TransformerWorkerTestCases[
-      MemoryVersionedStore[String, ExampleData],
-      Version[String, Int],
+      MemoryVersionedStore[S3ObjectLocation, ExampleData],
+      CalmSourcePayload,
       ExampleData
     ]
+    with S3ObjectLocationGenerators
     with IdentifiersGenerators {
 
-  implicit lazy val encoder: Encoder[Version[String, Int]] =
-    deriveConfiguredEncoder[Version[String, Int]]
+  implicit lazy val encoder: Encoder[CalmSourcePayload] =
+    deriveConfiguredEncoder[CalmSourcePayload]
 
   override def withContext[R](
-    testWith: TestWith[MemoryVersionedStore[String, ExampleData], R]): R =
+    testWith: TestWith[MemoryVersionedStore[S3ObjectLocation, ExampleData], R])
+    : R =
     testWith(
-      MemoryVersionedStore[String, ExampleData](initialEntries = Map.empty)
+      MemoryVersionedStore[S3ObjectLocation, ExampleData](
+        initialEntries = Map.empty)
     )
 
   override def createPayload(
-    implicit store: MemoryVersionedStore[String, ExampleData])
-    : Version[String, Int] = {
+    implicit store: MemoryVersionedStore[S3ObjectLocation, ExampleData])
+    : CalmSourcePayload = {
     val data = ValidExampleData(id = createSourceIdentifier)
     val version = randomInt(from = 1, to = 10)
 
-    val id: Version[String, Int] = Version(data.id.toString, version)
+    val location = createS3ObjectLocation
 
-    store.put(id)(data) shouldBe a[Right[_, _]]
+    store.put(Version(location, version))(data) shouldBe a[Right[_, _]]
 
-    id
+    CalmSourcePayload(
+      id = data.id.toString,
+      version = version,
+      location = location)
   }
 
   override def createBadPayload(
-    implicit store: MemoryVersionedStore[String, ExampleData])
-    : Version[String, Int] = {
+    implicit store: MemoryVersionedStore[S3ObjectLocation, ExampleData])
+    : CalmSourcePayload = {
     val data = InvalidExampleData
     val version = randomInt(from = 1, to = 10)
 
-    val id = Version(id = randomAlphanumeric(), version)
+    val location = createS3ObjectLocation
 
-    store.put(id)(data) shouldBe a[Right[_, _]]
+    store.put(Version(location, version))(data) shouldBe a[Right[_, _]]
 
-    id
+    CalmSourcePayload(
+      id = randomAlphanumeric(),
+      version = version,
+      location = location)
   }
 
-  override def id(p: Version[String, Int]): String = p.id
-
-  override def assertMatches(p: Version[String, Int],
-                             w: Work[WorkState.Source])(
-    implicit context: MemoryVersionedStore[String, ExampleData]): Unit = {
+  override def assertMatches(p: CalmSourcePayload, w: Work[WorkState.Source])(
+    implicit context: MemoryVersionedStore[S3ObjectLocation, ExampleData])
+    : Unit = {
     w.sourceIdentifier.toString shouldBe p.id
     w.version shouldBe p.version
   }
@@ -71,8 +81,11 @@ class ExampleTransformerTest
     pipelineStream: PipelineStorageStream[NotificationMessage,
                                           Work[WorkState.Source],
                                           String])(
-    testWith: TestWith[TransformerWorker[ExampleData, String], R])(
-    implicit sourceStore: MemoryVersionedStore[String, ExampleData]): R =
+    testWith: TestWith[
+      TransformerWorker[CalmSourcePayload, ExampleData, String],
+      R])(
+    implicit sourceStore: MemoryVersionedStore[S3ObjectLocation, ExampleData])
+    : R =
     testWith(
       new ExampleTransformerWorker(
         pipelineStream = pipelineStream,

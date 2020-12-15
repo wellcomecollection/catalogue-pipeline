@@ -11,11 +11,12 @@ import uk.ac.wellcome.models.work.internal.Work
 import uk.ac.wellcome.models.work.internal.WorkState.Source
 import uk.ac.wellcome.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import uk.ac.wellcome.pipeline_storage.{MemoryIndexer, PipelineStorageStream}
+import weco.catalogue.source_model.SourcePayload
 
 import scala.concurrent.Future
 import scala.util.{Failure, Try}
 
-trait TransformerWorkerTestCases[Context, Payload, SourceData]
+trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
     extends AnyFunSpec
     with Eventually
     with IntegrationPatience
@@ -31,24 +32,20 @@ trait TransformerWorkerTestCases[Context, Payload, SourceData]
 
   implicit val encoder: Encoder[Payload]
 
-  def id(p: Payload): String
-
   def assertMatches(p: Payload, w: Work[Source])(implicit context: Context)
 
   def withWorker[R](pipelineStream: PipelineStorageStream[NotificationMessage,
                                                           Work[Source],
                                                           String])(
-    testWith: TestWith[TransformerWorker[SourceData, String], R]
+    testWith: TestWith[TransformerWorker[Payload, SourceData, String], R]
   )(
     implicit context: Context
   ): R
 
   describe("behaves as a TransformerWorker") {
-    it("transforms works, indexes them, and removes them from the queue") {
+    it("transforms a work, indexes it, and removes it from the queue") {
       withContext { implicit context =>
-        val payloads = (1 to 5).map { _ =>
-          createPayload
-        }
+        val payload = createPayload
 
         val workIndexer = new MemoryIndexer[Work[Source]]()
         val workKeySender = new MemoryMessageSender()
@@ -56,21 +53,19 @@ trait TransformerWorkerTestCases[Context, Payload, SourceData]
         withLocalSqsQueuePair() {
           case QueuePair(queue, dlq) =>
             withWorkerImpl(queue, workIndexer, workKeySender) { _ =>
-              payloads.foreach { sendNotificationToSQS(queue, _) }
+              sendNotificationToSQS(queue, payload)
 
               eventually {
                 assertQueueEmpty(dlq)
                 assertQueueEmpty(queue)
 
-                workIndexer.index should have size payloads.size
+                workIndexer.index should have size 1
 
                 val sentKeys = workKeySender.messages.map { _.body }
                 val storedKeys = workIndexer.index.keys
                 sentKeys should contain theSameElementsAs storedKeys
 
-                payloads.foreach { p =>
-                  assertMatches(p, workIndexer.index(id(p)))
-                }
+                assertMatches(payload, workIndexer.index.values.head)
               }
             }
         }

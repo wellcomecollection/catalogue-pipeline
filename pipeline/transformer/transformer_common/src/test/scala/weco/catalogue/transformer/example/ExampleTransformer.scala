@@ -1,12 +1,15 @@
 package weco.catalogue.transformer.example
 
+import io.circe.Decoder
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.work.internal.WorkState.Source
 import uk.ac.wellcome.models.work.internal.{SourceIdentifier, Work}
 import uk.ac.wellcome.pipeline_storage.PipelineStorageStream
+import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.storage.{Identified, ReadError, Version}
+import weco.catalogue.source_model.CalmSourcePayload
 import weco.catalogue.transformer.{Transformer, TransformerWorker}
 
 sealed trait ExampleData
@@ -26,12 +29,19 @@ class ExampleTransformerWorker(
   val pipelineStream: PipelineStorageStream[NotificationMessage,
                                             Work[Source],
                                             String],
-  sourceStore: VersionedStore[String, Int, ExampleData]
-) extends TransformerWorker[ExampleData, String] {
+  sourceStore: VersionedStore[S3ObjectLocation, Int, ExampleData]
+)(
+  implicit val decoder: Decoder[CalmSourcePayload]
+) extends TransformerWorker[CalmSourcePayload, ExampleData, String] {
 
   override val transformer: Transformer[ExampleData] = ExampleTransformer
 
-  override def lookupSourceData(id: String)
+  override def lookupSourceData(p: CalmSourcePayload)
     : Either[ReadError, Identified[Version[String, Int], ExampleData]] =
-    sourceStore.getLatest(id)
+    sourceStore
+      .getLatest(p.location)
+      .map {
+        case Identified(Version(_, v), data) =>
+          Identified(Version(p.id, v), data)
+      }
 }

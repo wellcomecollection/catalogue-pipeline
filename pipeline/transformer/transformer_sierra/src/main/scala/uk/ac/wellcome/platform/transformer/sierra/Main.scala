@@ -1,21 +1,23 @@
 package uk.ac.wellcome.platform.transformer.sierra
 
 import akka.actor.ActorSystem
+import com.amazonaws.services.s3.AmazonS3
 import com.typesafe.config.Config
-import uk.ac.wellcome.bigmessaging.typesafe.VHSBuilder
 import uk.ac.wellcome.elasticsearch.SourceWorkIndexConfig
+import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.models.work.internal.Work
 import uk.ac.wellcome.models.work.internal.WorkState.Source
-import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.pipeline_storage.typesafe.{
   ElasticIndexerBuilder,
   PipelineStorageStreamBuilder
 }
-import uk.ac.wellcome.platform.transformer.sierra.services.SierraTransformerWorkerService
+import uk.ac.wellcome.platform.transformer.sierra.services.SierraTransformerWorker
 import uk.ac.wellcome.sierra_adapter.model.SierraTransformable
+import uk.ac.wellcome.storage.store.s3.S3TypedStore
+import uk.ac.wellcome.storage.typesafe.S3Builder
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 
@@ -46,9 +48,12 @@ object Main extends WellcomeTypesafeApp {
             subject = "Sent from the Sierra transformer")
       )(config)
 
-    new SierraTransformerWorkerService(
+    implicit val s3Client: AmazonS3 =
+      S3Builder.buildS3Client(config)
+
+    new SierraTransformerWorker(
       pipelineStream = pipelineStream,
-      store = VHSBuilder.build[SierraTransformable](config)
+      sierraReadable = S3TypedStore[SierraTransformable]
     )
   }
 }

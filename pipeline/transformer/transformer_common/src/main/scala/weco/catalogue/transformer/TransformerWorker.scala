@@ -2,6 +2,7 @@ package weco.catalogue.transformer
 
 import akka.Done
 import grizzled.slf4j.Logging
+import io.circe.Decoder
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.work.internal.WorkState.Source
@@ -9,12 +10,13 @@ import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.pipeline_storage.PipelineStorageStream
 import uk.ac.wellcome.storage.{Identified, ReadError, Version}
 import weco.catalogue
+import weco.catalogue.source_model.SourcePayload
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 sealed abstract class TransformerWorkerError(msg: String) extends Exception(msg)
-case class DecodeKeyError[T](t: Throwable, message: NotificationMessage)
+case class DecodePayloadError[T](t: Throwable, message: NotificationMessage)
     extends TransformerWorkerError(t.getMessage)
 case class StoreReadError[T](err: ReadError, key: T)
     extends TransformerWorkerError(err.toString)
@@ -30,7 +32,8 @@ case class TransformerError[SourceData, Key](t: Throwable,
   * - Runs it through a transformer and transforms the `SourceData` to `Work[Source]`
   * - Emits the message via `MessageSender` to SNS
   */
-trait TransformerWorker[SourceData, SenderDest] extends Logging {
+trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest]
+    extends Logging {
   type Result[T] = Either[TransformerWorkerError, T]
   type StoreKey = Version[String, Int]
 
@@ -42,12 +45,15 @@ trait TransformerWorker[SourceData, SenderDest] extends Logging {
                                             SenderDest]
 
   def lookupSourceData(
-    id: String): Either[ReadError, Identified[Version[String, Int], SourceData]]
+    p: Payload): Either[ReadError, Identified[Version[String, Int], SourceData]]
+
+  implicit val decoder: Decoder[Payload]
 
   def process(message: NotificationMessage): Result[(Work[Source], StoreKey)] =
     for {
-      key <- decodeKey(message)
-      recordResult <- getRecord(key)
+      payload <- decodePayload(message)
+      key = Version(payload.id, payload.version)
+      recordResult <- getRecord(payload)
       (record, version) = recordResult
       work <- work(record, version, key)
     } yield (work, key)
@@ -61,26 +67,26 @@ trait TransformerWorker[SourceData, SenderDest] extends Logging {
         Left(catalogue.transformer.TransformerError(err, sourceData, key))
     }
 
-  private def decodeKey(message: NotificationMessage): Result[StoreKey] =
-    fromJson[StoreKey](message.body) match {
+  private def decodePayload(message: NotificationMessage): Result[Payload] =
+    fromJson[Payload](message.body) match {
       case Success(storeKey) => Right(storeKey)
-      case Failure(err)      => Left(DecodeKeyError(err, message))
+      case Failure(err)      => Left(DecodePayloadError(err, message))
     }
 
-  private def getRecord(key: StoreKey): Result[(SourceData, Int)] =
-    lookupSourceData(key.id)
+  private def getRecord(p: Payload): Result[(SourceData, Int)] =
+    lookupSourceData(p)
       .map {
         case Identified(Version(storedId, storedVersion), sourceData) =>
-          if (storedId != key.id) {
+          if (storedId != p.id) {
             warn(
-              s"Stored ID ($storedId) does not match ID from message (${key.id})")
+              s"Stored ID ($storedId) does not match ID from message (${p.id})")
           }
 
           (sourceData, storedVersion)
       }
       .left
       .map { err =>
-        StoreReadError(err, key)
+        StoreReadError(err, p)
       }
 
   def run(): Future[Done] =
@@ -91,8 +97,8 @@ trait TransformerWorker[SourceData, SenderDest] extends Logging {
           case Left(err) =>
             // We do some slightly nicer logging here to give context to the errors
             err match {
-              case DecodeKeyError(_, notificationMsg) =>
-                error(s"$name: DecodeKeyError from $notificationMsg")
+              case DecodePayloadError(_, notificationMsg) =>
+                error(s"$name: DecodePayloadError from $notificationMsg")
               case StoreReadError(_, key) =>
                 error(s"$name: StoreReadError on $key")
               case TransformerError(_, sourceData, key) =>

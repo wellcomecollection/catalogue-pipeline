@@ -11,16 +11,17 @@ import weco.catalogue.transformer.Transformer
 class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
     extends Transformer[MetsSourceData] {
 
-  override def apply(metsLocation: MetsSourceData,
+  override def apply(metsSourceData: MetsSourceData,
                      version: Int): Result[Work[WorkState.Source]] =
     for {
-      metsData <- transform(metsLocation)
+      metsData <- transform(metsSourceData)
       work <- metsData.toWork(
-        metsLocation.version,
-        modifiedTime = metsLocation.createdDate)
+        version = metsSourceData.version,
+        modifiedTime = metsSourceData.createdDate
+      )
     } yield work
 
-  def transform(metsLocation: MetsSourceData): Result[MetsData] = {
+  def transform(metsLocation: MetsSourceData): Result[MetsData] =
     metsLocation.deleted match {
       case true =>
         for {
@@ -38,8 +39,6 @@ class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
                 metsLocation.manifestationLocations)
           }
     }
-
-  }
 
   private def transformWithoutManifestations(root: MetsXml): Result[MetsData] =
     for {

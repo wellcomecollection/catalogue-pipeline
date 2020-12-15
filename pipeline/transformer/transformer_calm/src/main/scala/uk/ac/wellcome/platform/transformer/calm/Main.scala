@@ -1,8 +1,8 @@
 package uk.ac.wellcome.platform.transformer.calm
 
 import akka.actor.ActorSystem
+import com.amazonaws.services.s3.AmazonS3
 import com.typesafe.config.Config
-import uk.ac.wellcome.bigmessaging.typesafe.VHSBuilder
 import uk.ac.wellcome.elasticsearch.SourceWorkIndexConfig
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
@@ -14,6 +14,9 @@ import uk.ac.wellcome.pipeline_storage.typesafe.{
   ElasticIndexerBuilder,
   PipelineStorageStreamBuilder
 }
+import uk.ac.wellcome.platform.transformer.calm.services.CalmTransformerWorker
+import uk.ac.wellcome.storage.store.s3.S3TypedStore
+import uk.ac.wellcome.storage.typesafe.S3Builder
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.{
   AWSClientConfigBuilder,
@@ -45,11 +48,11 @@ object Main extends WellcomeTypesafeApp with AWSClientConfigBuilder {
             subject = "Sent from the CALM transformer")
       )(config)
 
-    val store = VHSBuilder.build[CalmRecord](config)
+    implicit val s3Client: AmazonS3 = S3Builder.buildS3Client(config)
 
     new CalmTransformerWorker(
       pipelineStream = pipelineStream,
-      store = store
+      recordReadable = S3TypedStore[CalmRecord]
     )
   }
 }
