@@ -12,6 +12,7 @@ import uk.ac.wellcome.models.work.internal.WorkState.Source
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.pipeline_storage.typesafe.{
   ElasticIndexerBuilder,
+  ElasticRetrieverBuilder,
   PipelineStorageStreamBuilder
 }
 import uk.ac.wellcome.platform.transformer.calm.services.CalmTransformerWorker
@@ -52,7 +53,8 @@ object Main extends WellcomeTypesafeApp with AWSClientConfigBuilder {
 
     new CalmTransformerWorker(
       pipelineStream = pipelineStream,
-      recordReadable = S3TypedStore[CalmRecord]
+      recordReadable = S3TypedStore[CalmRecord],
+      retriever = ElasticRetrieverBuilder.apply[Work[Source]](config, esClient)
     )
   }
 }
