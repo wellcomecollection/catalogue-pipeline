@@ -8,39 +8,36 @@ import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.monitoring.Metrics
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
+import uk.ac.wellcome.platform.sierra_items_to_dynamo.models.SierraItemLink
 import uk.ac.wellcome.platform.sierra_items_to_dynamo.services.{
-  DynamoInserter,
+  SierraItemLinkStore,
   SierraItemsToDynamoWorkerService
 }
-import uk.ac.wellcome.sierra_adapter.model.SierraItemRecord
-import uk.ac.wellcome.sierra_adapter.model.Implicits._
-import weco.catalogue.source_model.fixtures.SourceVHSFixture
-import weco.catalogue.source_model.store.SourceVHS
+import uk.ac.wellcome.sierra_adapter.model.SierraItemNumber
+import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
 
 import scala.concurrent.Future
 
-trait WorkerServiceFixture extends SQS with Akka with SourceVHSFixture {
+trait WorkerServiceFixture extends SQS with Akka {
 
   def withWorkerService[R](
     queue: Queue,
-    sourceVHS: SourceVHS[SierraItemRecord] = createSourceVHS[SierraItemRecord],
-    metrics: Metrics[Future] = new MemoryMetrics()
-  )(testWith: TestWith[(SierraItemsToDynamoWorkerService[String],
-                        MemoryMessageSender),
-                       R]): R =
+    store: MemoryVersionedStore[SierraItemNumber, SierraItemLink] =
+      MemoryVersionedStore[SierraItemNumber, SierraItemLink](initialEntries = Map.empty),
+    metrics: Metrics[Future] = new MemoryMetrics(),
+    messageSender: MemoryMessageSender = new MemoryMessageSender
+  )(testWith: TestWith[SierraItemsToDynamoWorkerService[String], R]): R =
     withActorSystem { implicit actorSystem =>
       withSQSStream[NotificationMessage, R](queue, metrics) { sqsStream =>
-        val messageSender = new MemoryMessageSender
-
         val workerService = new SierraItemsToDynamoWorkerService[String](
           sqsStream = sqsStream,
-          dynamoInserter = new DynamoInserter(sourceVHS),
+          itemLinkStore = new SierraItemLinkStore(store),
           messageSender = messageSender
         )
 
         workerService.run()
 
-        testWith((workerService, messageSender))
+        testWith(workerService)
       }
     }
 }

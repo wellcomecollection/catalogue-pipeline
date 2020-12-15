@@ -2,6 +2,7 @@ package uk.ac.wellcome.platform.sierra_items_to_dynamo.merger
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import uk.ac.wellcome.platform.sierra_items_to_dynamo.models.SierraItemLink
 import uk.ac.wellcome.sierra_adapter.model.SierraGenerators
 
 class SierraItemRecordMergerTest
@@ -15,7 +16,7 @@ class SierraItemRecordMergerTest
       modifiedDate = olderDate,
       bibIds = bibIds.slice(0, 3)
     )
-    val updatedRecord = createSierraItemRecordWith(
+    val newRecord = createSierraItemRecordWith(
       id = existingRecord.id,
       modifiedDate = newerDate,
       bibIds = bibIds
@@ -24,8 +25,8 @@ class SierraItemRecordMergerTest
     val mergedRecord =
       SierraItemRecordMerger
         .mergeItems(
-          existingRecord = existingRecord,
-          updatedRecord = updatedRecord)
+          existingLink = SierraItemLink(existingRecord),
+          newRecord = newRecord)
         .get
     mergedRecord.bibIds shouldBe bibIds
     mergedRecord.unlinkedBibIds shouldBe List()
@@ -38,7 +39,7 @@ class SierraItemRecordMergerTest
       modifiedDate = olderDate,
       bibIds = bibIds.slice(0, 3)
     )
-    val updatedRecord = createSierraItemRecordWith(
+    val newRecord = createSierraItemRecordWith(
       id = existingRecord.id,
       modifiedDate = newerDate,
       bibIds = bibIds.slice(2, 5)
@@ -47,8 +48,8 @@ class SierraItemRecordMergerTest
     val mergedRecord =
       SierraItemRecordMerger
         .mergeItems(
-          existingRecord = existingRecord,
-          updatedRecord = updatedRecord)
+          existingLink = SierraItemLink(existingRecord),
+          newRecord = newRecord)
         .get
     mergedRecord.bibIds shouldBe bibIds.slice(2, 5)
     mergedRecord.unlinkedBibIds shouldBe bibIds.slice(0, 2)
@@ -62,7 +63,7 @@ class SierraItemRecordMergerTest
       bibIds = bibIds.slice(0, 3),
       unlinkedBibIds = bibIds.slice(3, 5)
     )
-    val updatedRecord = createSierraItemRecordWith(
+    val newRecord = createSierraItemRecordWith(
       id = existingRecord.id,
       modifiedDate = newerDate,
       bibIds = existingRecord.bibIds
@@ -71,8 +72,8 @@ class SierraItemRecordMergerTest
     val mergedRecord =
       SierraItemRecordMerger
         .mergeItems(
-          existingRecord = existingRecord,
-          updatedRecord = updatedRecord)
+          existingLink = SierraItemLink(existingRecord),
+          newRecord = newRecord)
         .get
     mergedRecord.unlinkedBibIds should contain theSameElementsAs existingRecord.unlinkedBibIds
   }
@@ -86,7 +87,7 @@ class SierraItemRecordMergerTest
       bibIds = bibIds,
       unlinkedBibIds = List(bibIds(2))
     )
-    val updatedRecord = createSierraItemRecordWith(
+    val newRecord = createSierraItemRecordWith(
       id = existingRecord.id,
       modifiedDate = newerDate,
       bibIds = bibIds.slice(0, 2)
@@ -95,8 +96,8 @@ class SierraItemRecordMergerTest
     val mergedRecord =
       SierraItemRecordMerger
         .mergeItems(
-          existingRecord = existingRecord,
-          updatedRecord = updatedRecord)
+          existingLink = SierraItemLink(existingRecord),
+          newRecord = newRecord)
         .get
     mergedRecord.bibIds shouldBe bibIds.slice(0, 2)
     mergedRecord.unlinkedBibIds shouldBe List(bibIds(2))
@@ -110,7 +111,7 @@ class SierraItemRecordMergerTest
       bibIds = List(),
       unlinkedBibIds = bibIds
     )
-    val updatedRecord = createSierraItemRecordWith(
+    val newRecord = createSierraItemRecordWith(
       id = existingRecord.id,
       modifiedDate = newerDate,
       bibIds = bibIds.slice(0, 2)
@@ -119,8 +120,8 @@ class SierraItemRecordMergerTest
     val mergedRecord =
       SierraItemRecordMerger
         .mergeItems(
-          existingRecord = existingRecord,
-          updatedRecord = updatedRecord)
+          existingLink = SierraItemLink(existingRecord),
+          newRecord = newRecord)
         .get
     mergedRecord.bibIds shouldBe bibIds.slice(0, 2)
     mergedRecord.unlinkedBibIds shouldBe List(bibIds(2))
@@ -133,14 +134,16 @@ class SierraItemRecordMergerTest
       modifiedDate = newerDate,
       bibIds = bibIds.slice(0, 3)
     )
-    val updatedRecord = createSierraItemRecordWith(
+    val newRecord = createSierraItemRecordWith(
       id = existingRecord.id,
       modifiedDate = newerDate,
       bibIds = bibIds
     )
 
     val mergedRecord =
-      SierraItemRecordMerger.mergeItems(existingRecord, updatedRecord)
+      SierraItemRecordMerger.mergeItems(
+        existingLink = SierraItemLink(existingRecord),
+        newRecord = newRecord)
 
     mergedRecord shouldBe None
   }
