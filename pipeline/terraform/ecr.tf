@@ -17,6 +17,15 @@ resource "aws_ecr_repository" "ecr_repository_transformer_mets" {
 resource "aws_ecr_repository" "ecr_repository_transformer_calm" {
   name = "uk.ac.wellcome/transformer_calm"
 }
+//The image id minter and the work id minter are deprecated.
+// TODO remove them when the current prod pipeline (catalogue-2020-11-25) is updated
+resource "aws_ecr_repository" "ecr_repository_id_minter_works" {
+  name = "uk.ac.wellcome/id_minter_works"
+}
+
+resource "aws_ecr_repository" "ecr_repository_id_minter_images" {
+  name = "uk.ac.wellcome/id_minter_images"
+}
 
 resource "aws_ecr_repository" "ecr_repository_id_minter" {
   name = "uk.ac.wellcome/id_minter"
