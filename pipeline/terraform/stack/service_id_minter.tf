@@ -1,4 +1,4 @@
-module "work_id_minter_queue" {
+module "id_minter_queue" {
   source     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
   queue_name = "${local.namespace_hyphen}_work_id_minter"
   topic_arns = [module.calm_transformer_output_topic.arn,
@@ -10,10 +10,10 @@ module "work_id_minter_queue" {
   visibility_timeout_seconds = 120
 }
 
-module "work_id_minter" {
+module "id_minter" {
   source          = "../modules/service"
-  service_name    = "${local.namespace_hyphen}_work_id_minter"
-  container_image = local.id_minter_works_image
+  service_name    = "${local.namespace_hyphen}_id_minter"
+  container_image = local.id_minter_image
 
   security_group_ids = [
     aws_security_group.service_egress.id,
@@ -25,11 +25,11 @@ module "work_id_minter" {
   cluster_arn  = aws_ecs_cluster.cluster.id
 
   env_vars = {
-    metrics_namespace    = "${local.namespace_hyphen}_work_id_minter"
+    metrics_namespace    = "${local.namespace_hyphen}_id_minter"
     messages_bucket_name = aws_s3_bucket.messages.id
 
-    queue_url                     = module.work_id_minter_queue.url
-    topic_arn                     = module.work_id_minter_topic.arn
+    queue_url                     = module.id_minter_queue.url
+    topic_arn                     = module.id_minter_topic.arn
     max_connections               = local.id_minter_task_max_connections
     es_source_index               = local.es_works_source_index
     es_identified_index           = local.es_works_identified_index
@@ -61,7 +61,7 @@ module "work_id_minter" {
 
   subnets             = var.subnets
   messages_bucket_arn = aws_s3_bucket.messages.arn
-  queue_read_policy   = module.work_id_minter_queue.read_policy
+  queue_read_policy   = module.id_minter_queue.read_policy
 
   cpu    = 1024
   memory = 2048
@@ -73,19 +73,19 @@ module "work_id_minter" {
 
 # Output topic
 
-module "work_id_minter_topic" {
+module "id_minter_topic" {
   source = "../modules/topic"
 
   name       = "${local.namespace_hyphen}_work_id_minter"
-  role_names = [module.work_id_minter.task_role_name]
+  role_names = [module.id_minter.task_role_name]
 
   messages_bucket_arn = aws_s3_bucket.messages.arn
 }
 
-module "work_id_minter_scaling_alarm" {
+module "id_minter_scaling_alarm" {
   source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.1.3"
-  queue_name = module.work_id_minter_queue.name
+  queue_name = module.id_minter_queue.name
 
-  queue_high_actions = [module.work_id_minter.scale_up_arn]
-  queue_low_actions  = [module.work_id_minter.scale_down_arn]
+  queue_high_actions = [module.id_minter.scale_up_arn]
+  queue_low_actions  = [module.id_minter.scale_down_arn]
 }
