@@ -12,6 +12,7 @@ import uk.ac.wellcome.models.work.internal.Work
 import uk.ac.wellcome.models.work.internal.WorkState.Source
 import uk.ac.wellcome.pipeline_storage.typesafe.{
   ElasticIndexerBuilder,
+  ElasticRetrieverBuilder,
   PipelineStorageStreamBuilder
 }
 import uk.ac.wellcome.platform.transformer.sierra.services.SierraTransformerWorker
@@ -53,7 +54,8 @@ object Main extends WellcomeTypesafeApp {
 
     new SierraTransformerWorker(
       pipelineStream = pipelineStream,
-      sierraReadable = S3TypedStore[SierraTransformable]
+      sierraReadable = S3TypedStore[SierraTransformable],
+      retriever = ElasticRetrieverBuilder.apply[Work[Source]](config, esClient)
     )
   }
 }
