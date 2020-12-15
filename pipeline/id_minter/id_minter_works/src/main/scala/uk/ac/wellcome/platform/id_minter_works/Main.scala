@@ -67,7 +67,7 @@ object Main extends WellcomeTypesafeApp {
       jsonRetriever = ElasticRetrieverBuilder[Json](
         config,
         esClient,
-        namespace = "merged-works"),
+        namespace = "source-works"),
       pipelineStream = pipelineStream,
       rdsClientConfig = RDSBuilder.buildRDSClientConfig(config),
       identifiersTableConfig = identifiersTableConfig

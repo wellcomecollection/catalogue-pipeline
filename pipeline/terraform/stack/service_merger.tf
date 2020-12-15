@@ -27,7 +27,7 @@ module "merger" {
     merger_works_topic_arn  = module.merger_works_topic.arn
     merger_images_topic_arn = module.merger_images_topic.arn
 
-    es_source_works_index = local.es_works_source_index
+    es_identified_works_index = local.es_works_identified_index
     es_merged_works_index = local.es_works_merged_index
   }
 

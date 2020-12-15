@@ -23,11 +23,11 @@ INDEX_PATTERN = "works-{work_type}*"
 
 SERVICES = {
     "transformer": ["source_write"],
-    "matcher": ["source_read"],
-    "merger": ["source_read", "merged_write"],
-    "id_minter": ["merged_read", "denormalised_read", "identified_write"],
-    "router": ["identified_read", "merged_read", "denormalised_write"],
-    "relation_embedder": ["identified_read", "merged_read", "denormalised_write"],
+    "matcher": ["identified_read", "source_read"],
+    "merger": ["identified_read", "source_read", "merged_write"],
+    "id_minter": ["source_read", "denormalised_read", "identified_write"],
+    "router": ["merged_read","denormalised_write"],
+    "relation_embedder": ["merged_read", "denormalised_write"],
     "ingestor": ["identified_read", "denormalised_read"],
 }
 

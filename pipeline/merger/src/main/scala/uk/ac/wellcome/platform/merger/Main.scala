@@ -33,7 +33,7 @@ object Main extends WellcomeTypesafeApp {
       retriever = ElasticRetrieverBuilder.apply[Work[Identified]](
         config,
         esClient,
-        namespace = "source-works"
+        namespace = "identified-works"
       )
     )
 

@@ -7,10 +7,7 @@ module "matcher_input_queue" {
   queue_name = "${local.namespace_hyphen}_matcher_input"
 
   topic_arns = [
-    module.calm_transformer_output_topic.arn,
-    module.mets_transformer_output_topic.arn,
-    module.miro_transformer_output_topic.arn,
-    module.sierra_transformer_output_topic.arn,
+    module.work_id_minter_topic.arn
   ]
 
   aws_region      = var.aws_region
@@ -49,7 +46,7 @@ module "matcher" {
 
     dynamo_lock_timeout = local.lock_timeout
 
-    es_index = local.es_works_source_index
+    es_index = local.es_works_identified_index
   }
 
   secret_env_vars = {

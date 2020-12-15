@@ -15,7 +15,7 @@ locals {
 module "image_inferrer_queue" {
   source                     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
   queue_name                 = "${local.namespace_hyphen}_image_inferrer"
-  topic_arns                 = [module.image_id_minter_topic.arn]
+  topic_arns                 = [module.merger_images_topic.arn]
   aws_region                 = var.aws_region
   alarm_topic_arn            = var.dlq_alarm_arn
   visibility_timeout_seconds = local.queue_visibility_timeout

@@ -1,7 +1,7 @@
 module "image_id_minter_queue" {
   source                     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
   queue_name                 = "${local.namespace_hyphen}_image_id_minter"
-  topic_arns                 = [module.merger_images_topic.arn]
+  topic_arns                 = []
   aws_region                 = var.aws_region
   alarm_topic_arn            = var.dlq_alarm_arn
   visibility_timeout_seconds = 120

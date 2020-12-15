@@ -1,7 +1,10 @@
 module "work_id_minter_queue" {
   source                     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
   queue_name                 = "${local.namespace_hyphen}_work_id_minter"
-  topic_arns                 = [module.merger_works_topic.arn]
+  topic_arns                 = [module.calm_transformer_output_topic.arn,
+    module.mets_transformer_output_topic.arn,
+    module.miro_transformer_output_topic.arn,
+    module.sierra_transformer_output_topic.arn,]
   aws_region                 = var.aws_region
   alarm_topic_arn            = var.dlq_alarm_arn
   visibility_timeout_seconds = 120
@@ -28,7 +31,7 @@ module "work_id_minter" {
     queue_url                     = module.work_id_minter_queue.url
     topic_arn                     = module.work_id_minter_topic.arn
     max_connections               = local.id_minter_task_max_connections
-    es_merged_index               = local.es_works_merged_index
+    es_source_index           = local.es_works_source_index
     es_identified_index           = local.es_works_identified_index
     ingest_batch_size             = 100
     ingest_flush_interval_seconds = 30
