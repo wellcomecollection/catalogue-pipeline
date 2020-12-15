@@ -32,7 +32,6 @@ trait TransformerWorkerTestCases[Context, Payload, SourceData]
   implicit val encoder: Encoder[Payload]
 
   def id(p: Payload): String
-  def version(p: Payload): Int
 
   def assertMatches(p: Payload, w: Work[Source])(implicit context: Context)
 
@@ -80,6 +79,26 @@ trait TransformerWorkerTestCases[Context, Payload, SourceData]
           withLocalSqsQueuePair() { case QueuePair(queue, dlq) =>
             withWorkerImpl(queue) { _ =>
               sendInvalidJSONto(queue)
+
+              eventually {
+                assertQueueHasSize(dlq, size = 1)
+                assertQueueEmpty(queue)
+              }
+            }
+          }
+        }
+      }
+
+      // Note: this is meaningfully different to the previous test.
+      //
+      // This message sends a not-JSON string that's wrapped in an SNS notification;
+      // the previous tests ends something that didn't come from SNS and can't be
+      // parsed as a notification.
+      it("if it can't parse the notification on the queue") {
+        withContext { implicit context =>
+          withLocalSqsQueuePair() { case QueuePair(queue, dlq) =>
+            withWorkerImpl(queue) { _ =>
+              sendNotificationToSQS(queue, "this-is-not-json")
 
               eventually {
                 assertQueueHasSize(dlq, size = 1)

@@ -50,7 +50,6 @@ class ExampleTransformerTest extends TransformerWorkerTestCases[
   }
 
   override def id(p: Version[String, Int]): String = p.id
-  override def version(p: Version[String, Int]): Int = p.version
 
   override def assertMatches(p: Version[String, Int], w: Work[WorkState.Source])(implicit context: MemoryVersionedStore[String, ExampleData]): Unit = {
     w.sourceIdentifier.toString shouldBe p.id

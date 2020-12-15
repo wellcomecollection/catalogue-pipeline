@@ -56,14 +56,14 @@ trait TransformerWorker[SourceData, SenderDest] extends Logging {
                    version: Int,
                    key: StoreKey): Result[Work[Source]] =
     transformer(sourceData, version) match {
-      case Left(err)     => Left(catalogue.transformer.TransformerError(err, sourceData, key))
       case Right(result) => Right(result)
+      case Left(err)     => Left(catalogue.transformer.TransformerError(err, sourceData, key))
     }
 
   private def decodeKey(message: NotificationMessage): Result[StoreKey] =
     fromJson[StoreKey](message.body) match {
-      case Failure(err)      => Left(DecodeKeyError(err, message))
       case Success(storeKey) => Right(storeKey)
+      case Failure(err)      => Left(DecodeKeyError(err, message))
     }
 
   private def getRecord(key: StoreKey): Result[(SourceData, Int)] =
