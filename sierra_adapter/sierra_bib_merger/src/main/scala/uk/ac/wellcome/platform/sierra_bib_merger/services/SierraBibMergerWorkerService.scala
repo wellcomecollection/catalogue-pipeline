@@ -6,7 +6,9 @@ import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.sierra_adapter.model.SierraBibRecord
+import uk.ac.wellcome.storage.{Identified, Version}
 import uk.ac.wellcome.typesafe.Runnable
+import weco.catalogue.source_model.SierraSourcePayload
 
 import scala.concurrent.Future
 import scala.util.Success
@@ -22,8 +24,16 @@ class SierraBibMergerWorkerService[Destination](
       bibRecord <- fromJson[SierraBibRecord](message.body)
       key <- sierraBibMergerUpdaterService.update(bibRecord).toTry
       _ <- key match {
-        case Some(k) => messageSender.sendT(k)
-        case _       => Success(())
+        case Some(Identified(Version(id, version), location)) =>
+          val payload = SierraSourcePayload(
+            id = id,
+            location = location,
+            version = version
+          )
+
+          messageSender.sendT(payload)
+
+        case _ => Success(())
       }
     } yield ())
 

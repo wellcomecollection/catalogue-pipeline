@@ -2,33 +2,39 @@ package uk.ac.wellcome.platform.sierra_items_to_dynamo.services
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.platform.sierra_items_to_dynamo.fixtures.DynamoInserterFixture
+import uk.ac.wellcome.sierra_adapter.model.Implicits._
 import uk.ac.wellcome.sierra_adapter.model.{SierraGenerators, SierraItemRecord}
 import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
+import uk.ac.wellcome.storage.maxima.Maxima
 import uk.ac.wellcome.storage.maxima.memory.MemoryMaxima
-import uk.ac.wellcome.storage.store.memory.{MemoryStore, MemoryVersionedStore}
+import uk.ac.wellcome.storage.s3.S3ObjectLocation
+import uk.ac.wellcome.storage.store.memory.{MemoryStore, MemoryTypedStore}
+import uk.ac.wellcome.storage.store.{
+  HybridStoreWithMaxima,
+  Store,
+  TypedStore,
+  VersionedHybridStore
+}
 import uk.ac.wellcome.storage.{StoreWriteError, UpdateWriteError, Version}
+import weco.catalogue.source_model.fixtures.SourceVHSFixture
+import weco.catalogue.source_model.store.SourceVHS
 
 class DynamoInserterTest
     extends AnyFunSpec
     with Matchers
-    with DynamoInserterFixture
     with SierraGenerators
-    with SierraAdapterHelpers {
+    with SierraAdapterHelpers
+    with SourceVHSFixture {
 
   it("inserts an ItemRecord into the VHS") {
-    val store = createStore[SierraItemRecord]()
-    withDynamoInserter(store) { dynamoInserter =>
-      val record = createSierraItemRecord
+    val sourceVHS = createSourceVHS[SierraItemRecord]
+    val dynamoInserter = new DynamoInserter(sourceVHS)
 
-      dynamoInserter.insertIntoDynamo(record)
+    val record = createSierraItemRecord
 
-      assertStored[SierraItemRecord](
-        id = record.id.withoutCheckDigit,
-        t = record,
-        store = store
-      )
-    }
+    dynamoInserter.insertIntoDynamo(record)
+
+    assertStored(record.id.withoutCheckDigit, record, sourceVHS)
   }
 
   it("does not overwrite new data with old data") {
@@ -36,9 +42,13 @@ class DynamoInserterTest
       modifiedDate = newerDate,
       bibIds = List(createSierraBibNumber)
     )
-    val store =
-      createStore(Map(Version(newRecord.id.withoutCheckDigit, 1) -> newRecord))
-    val dynamoInserter = new DynamoInserter(store)
+
+    val sourceVHS = createSourceVHSWith(
+      initialEntries = Map(
+        Version(newRecord.id.withoutCheckDigit, 1) -> newRecord
+      )
+    )
+    val dynamoInserter = new DynamoInserter(sourceVHS)
 
     val oldRecord = createSierraItemRecordWith(
       id = newRecord.id,
@@ -47,11 +57,7 @@ class DynamoInserterTest
     )
     dynamoInserter.insertIntoDynamo(oldRecord)
 
-    assertStored[SierraItemRecord](
-      oldRecord.id.withoutCheckDigit,
-      newRecord,
-      store
-    )
+    assertStored(oldRecord.id.withoutCheckDigit, newRecord, sourceVHS)
   }
 
   it("overwrites old data with new data") {
@@ -59,9 +65,13 @@ class DynamoInserterTest
       modifiedDate = olderDate,
       bibIds = List(createSierraBibNumber)
     )
-    val store =
-      createStore(Map(Version(oldRecord.id.withoutCheckDigit, 1) -> oldRecord))
-    val dynamoInserter = new DynamoInserter(store)
+
+    val sourceVHS = createSourceVHSWith(
+      initialEntries = Map(
+        Version(oldRecord.id.withoutCheckDigit, 1) -> oldRecord
+      )
+    )
+    val dynamoInserter = new DynamoInserter(sourceVHS)
 
     val newRecord = createSierraItemRecordWith(
       id = oldRecord.id,
@@ -74,9 +84,7 @@ class DynamoInserterTest
     assertStored[SierraItemRecord](
       oldRecord.id.withoutCheckDigit,
       newRecord,
-      store
-    )
-
+      sourceVHS)
   }
 
   it("records unlinked bibIds") {
@@ -85,10 +93,13 @@ class DynamoInserterTest
       modifiedDate = olderDate,
       bibIds = bibIds
     )
-    val store =
-      createStore(Map(Version(oldRecord.id.withoutCheckDigit, 1) -> oldRecord))
 
-    val dynamoInserter = new DynamoInserter(store)
+    val sourceVHS = createSourceVHSWith(
+      initialEntries = Map(
+        Version(oldRecord.id.withoutCheckDigit, 1) -> oldRecord
+      )
+    )
+    val dynamoInserter = new DynamoInserter(sourceVHS)
 
     val newRecord = createSierraItemRecordWith(
       id = oldRecord.id,
@@ -101,22 +112,24 @@ class DynamoInserterTest
     assertStored[SierraItemRecord](
       oldRecord.id.withoutCheckDigit,
       newRecord.copy(unlinkedBibIds = List(bibIds(2))),
-      store
+      sourceVHS
     )
-
   }
 
   it("adds new bibIds and records unlinked bibIds in the same update") {
-
     val bibIds = createSierraBibNumbers(count = 4)
 
     val oldRecord = createSierraItemRecordWith(
       modifiedDate = olderDate,
       bibIds = List(bibIds(0), bibIds(1), bibIds(2))
     )
-    val store =
-      createStore(Map(Version(oldRecord.id.withoutCheckDigit, 1) -> oldRecord))
-    val dynamoInserter = new DynamoInserter(store)
+
+    val sourceVHS = createSourceVHSWith(
+      initialEntries = Map(
+        Version(oldRecord.id.withoutCheckDigit, 1) -> oldRecord
+      )
+    )
+    val dynamoInserter = new DynamoInserter(sourceVHS)
 
     val newRecord = createSierraItemRecordWith(
       id = oldRecord.id,
@@ -129,12 +142,11 @@ class DynamoInserterTest
     assertStored[SierraItemRecord](
       id = oldRecord.id.withoutCheckDigit,
       newRecord.copy(unlinkedBibIds = List(bibIds(0))),
-      store
+      sourceVHS
     )
   }
 
   it("preserves existing unlinked bibIds in DynamoDB") {
-
     val bibIds = createSierraBibNumbers(count = 5)
 
     val oldRecord = createSierraItemRecordWith(
@@ -142,9 +154,13 @@ class DynamoInserterTest
       bibIds = List(bibIds(0), bibIds(1), bibIds(2)),
       unlinkedBibIds = List(bibIds(4))
     )
-    val store =
-      createStore(Map(Version(oldRecord.id.withoutCheckDigit, 1) -> oldRecord))
-    val dynamoInserter = new DynamoInserter(store)
+
+    val sourceVHS = createSourceVHSWith(
+      initialEntries = Map(
+        Version(oldRecord.id.withoutCheckDigit, 1) -> oldRecord
+      )
+    )
+    val dynamoInserter = new DynamoInserter(sourceVHS)
 
     val newRecord = createSierraItemRecordWith(
       id = oldRecord.id,
@@ -156,9 +172,36 @@ class DynamoInserterTest
     dynamoInserter.insertIntoDynamo(newRecord)
 
     val actualRecord =
-      store.getLatest(oldRecord.id.withoutCheckDigit).right.get.identifiedT
+      sourceVHS.underlying
+        .getLatest(oldRecord.id.withoutCheckDigit)
+        .right
+        .get
+        .identifiedT
 
     actualRecord.unlinkedBibIds shouldBe List(bibIds(4), bibIds(0))
+  }
+
+  class BrokenStore
+      extends HybridStoreWithMaxima[
+        String,
+        Int,
+        S3ObjectLocation,
+        SierraItemRecord] {
+    override protected def createTypeStoreId(
+      id: Version[String, Int]): S3ObjectLocation =
+      createS3ObjectLocation
+
+    implicit override val indexedStore
+      : Store[Version[String, Int], S3ObjectLocation] with Maxima[
+        String,
+        Version[String, Int],
+        S3ObjectLocation] =
+      new MemoryStore[Version[String, Int], S3ObjectLocation](
+        initialEntries = Map.empty) with MemoryMaxima[String, S3ObjectLocation]
+
+    override implicit val typedStore
+      : TypedStore[S3ObjectLocation, SierraItemRecord] =
+      MemoryTypedStore[S3ObjectLocation, SierraItemRecord]()
   }
 
   it("fails if the VHS returns an error when updating an item") {
@@ -166,20 +209,18 @@ class DynamoInserterTest
       modifiedDate = newerDate
     )
     val exception = new RuntimeException("AAAAARGH!")
-    val failingStore = new MemoryVersionedStore(
-      new MemoryStore(Map[Version[String, Int], SierraItemRecord]())
-      with MemoryMaxima[String, SierraItemRecord]) {
+    val brokenStore = new VersionedHybridStore(new BrokenStore) {
       override def upsert(id: String)(t: SierraItemRecord)(
-        f: UpdateFunction): UpdateEither = {
+        f: UpdateFunction): UpdateEither =
         Left(UpdateWriteError(StoreWriteError(exception)))
-      }
     }
 
-    withDynamoInserter(failingStore) { dynamoInserter =>
-      val either = dynamoInserter.insertIntoDynamo(record)
-      either shouldBe a[Left[_, _]]
-      either.left.get shouldBe exception
-    }
+    val sourceVHS = new SourceVHS[SierraItemRecord](brokenStore)
+    val dynamoInserter = new DynamoInserter(sourceVHS)
+
+    val either = dynamoInserter.insertIntoDynamo(record)
+    either shouldBe a[Left[_, _]]
+    either.left.get shouldBe exception
   }
 
 }

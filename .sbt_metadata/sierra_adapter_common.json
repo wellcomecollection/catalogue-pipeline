@@ -2,6 +2,7 @@
   "id" : "sierra_adapter_common",
   "folder" : "sierra_adapter/common",
   "dependencyIds" : [
-    "big_messaging_typesafe"
+    "big_messaging_typesafe",
+    "source_model_typesafe"
   ]
 }

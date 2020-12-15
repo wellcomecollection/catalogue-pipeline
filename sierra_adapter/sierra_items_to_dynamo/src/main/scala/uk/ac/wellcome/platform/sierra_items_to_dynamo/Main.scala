@@ -2,7 +2,6 @@ package uk.ac.wellcome.platform.sierra_items_to_dynamo
 
 import akka.actor.ActorSystem
 import com.typesafe.config.Config
-import uk.ac.wellcome.bigmessaging.typesafe.VHSBuilder
 import uk.ac.wellcome.sierra_adapter.model.Implicits._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
@@ -13,6 +12,7 @@ import uk.ac.wellcome.platform.sierra_items_to_dynamo.services.{
 import uk.ac.wellcome.sierra_adapter.model.SierraItemRecord
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
+import weco.catalogue.source_model.config.SourceVHSBuilder
 
 import scala.concurrent.ExecutionContext
 
@@ -23,7 +23,7 @@ object Main extends WellcomeTypesafeApp {
       AkkaBuilder.buildExecutionContext()
 
     val dynamoInserter =
-      new DynamoInserter(VHSBuilder.build[SierraItemRecord](config))
+      new DynamoInserter(SourceVHSBuilder.build[SierraItemRecord](config))
 
     new SierraItemsToDynamoWorkerService(
       sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),

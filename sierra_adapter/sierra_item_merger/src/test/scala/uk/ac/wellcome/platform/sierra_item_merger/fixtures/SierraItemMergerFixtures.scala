@@ -15,8 +15,11 @@ import uk.ac.wellcome.sierra_adapter.model.{
   SierraItemRecord,
   SierraTransformable
 }
+import uk.ac.wellcome.sierra_adapter.model.Implicits._
 import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
 import uk.ac.wellcome.storage.store.VersionedStore
+import weco.catalogue.source_model.fixtures.SourceVHSFixture
+import weco.catalogue.source_model.store.SourceVHS
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -24,37 +27,34 @@ trait SierraItemMergerFixtures
     extends Akka
     with SNS
     with SQS
-    with SierraAdapterHelpers {
-  def withSierraUpdaterService[R](
-    hybridStore: VersionedStore[String, Int, SierraTransformable])(
+    with SierraAdapterHelpers
+    with SourceVHSFixture {
+  def withSierraUpdaterService[R](sourceVHS: SourceVHS[SierraTransformable])(
     testWith: TestWith[SierraItemMergerUpdaterService, R]): R = {
-    val sierraUpdaterService = new SierraItemMergerUpdaterService(
-      versionedHybridStore = hybridStore
-    )
+    val sierraUpdaterService = new SierraItemMergerUpdaterService(sourceVHS)
     testWith(sierraUpdaterService)
   }
 
   def withSierraWorkerService[R](
     queue: Queue,
     itemRecordStore: VersionedStore[String, Int, SierraItemRecord],
-    sierraTransformableStore: VersionedStore[String, Int, SierraTransformable])(
+    sourceVHS: SourceVHS[SierraTransformable] =
+      createSourceVHS[SierraTransformable])(
     testWith: TestWith[(SierraItemMergerWorkerService[String],
                         MemoryMessageSender),
                        R]): R =
-    withSierraUpdaterService(sierraTransformableStore) { updaterService =>
-      withActorSystem { implicit actorSystem =>
-        withSQSStream[NotificationMessage, R](queue) { sqsStream =>
-          val snsWriter = new MemoryMessageSender
-          val workerService = new SierraItemMergerWorkerService(
-            sqsStream = sqsStream,
-            sierraItemMergerUpdaterService = updaterService,
-            itemRecordStore = new ItemStore(itemRecordStore),
-            messageSender = snsWriter
-          )
+    withActorSystem { implicit actorSystem =>
+      withSQSStream[NotificationMessage, R](queue) { sqsStream =>
+        val snsWriter = new MemoryMessageSender
+        val workerService = new SierraItemMergerWorkerService(
+          sqsStream = sqsStream,
+          sierraItemMergerUpdaterService =
+            new SierraItemMergerUpdaterService(sourceVHS),
+          itemRecordStore = new ItemStore(itemRecordStore),
+          messageSender = snsWriter
+        )
 
-          testWith((workerService, snsWriter))
-        }
+        testWith((workerService, snsWriter))
       }
     }
-
 }

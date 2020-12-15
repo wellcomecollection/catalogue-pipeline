@@ -7,10 +7,7 @@ import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
 import uk.ac.wellcome.platform.sierra_bib_merger.fixtures.WorkerServiceFixture
-import uk.ac.wellcome.sierra_adapter.model.{
-  SierraGenerators,
-  SierraTransformable
-}
+import uk.ac.wellcome.sierra_adapter.model.SierraGenerators
 
 class SierraBibMergerWorkerServiceTest
     extends AnyFunSpec
@@ -43,8 +40,7 @@ class SierraBibMergerWorkerServiceTest
     val metrics = new MemoryMetrics()
     withLocalSqsQueuePair() {
       case queuePair @ QueuePair(queue, _) =>
-        val store = createStore[SierraTransformable]()
-        withWorkerService(store, queue, metrics) { _ =>
+        withWorkerService(queue = queue, metrics = metrics) { _ =>
           testWith((metrics, queuePair))
         }
     }

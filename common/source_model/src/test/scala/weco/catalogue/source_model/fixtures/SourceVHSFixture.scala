@@ -1,5 +1,6 @@
 package weco.catalogue.source_model.fixtures
 
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.storage.Version
 import uk.ac.wellcome.storage.generators.S3ObjectLocationGenerators
 import uk.ac.wellcome.storage.maxima.Maxima
@@ -15,7 +16,7 @@ import uk.ac.wellcome.storage.store.memory.{MemoryStore, MemoryTypedStore}
 import uk.ac.wellcome.storage.streaming.Codec
 import weco.catalogue.source_model.store.SourceVHS
 
-trait SourceVHSFixture extends S3ObjectLocationGenerators {
+trait SourceVHSFixture extends S3ObjectLocationGenerators with Matchers {
   def createStore[T](implicit codec: Codec[T])
     : VersionedHybridStore[String, Int, S3ObjectLocation, T] = {
     val hybridStore =
@@ -41,5 +42,18 @@ trait SourceVHSFixture extends S3ObjectLocationGenerators {
   }
 
   def createSourceVHS[T](implicit codec: Codec[T]): SourceVHS[T] =
-    new SourceVHS[T](createStore[T])
+    createSourceVHSWith[T](initialEntries = Map.empty)
+
+  def createSourceVHSWith[T](
+    initialEntries: Map[Version[String, Int], T]
+  )(implicit codec: Codec[T]): SourceVHS[T] = {
+    val vhs = new SourceVHS[T](createStore[T])
+
+    initialEntries.foreach {
+      case (id, t) =>
+        vhs.underlying.put(id)(t) shouldBe a[Right[_, _]]
+    }
+
+    vhs
+  }
 }

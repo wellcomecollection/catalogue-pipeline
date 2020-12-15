@@ -55,10 +55,11 @@ class CalmStoreTest
       val newRecord = CalmRecord("A", newData, newTime)
 
       implicit val sourceVHS: SourceVHS[CalmRecord] =
-        createSourceVHS[CalmRecord]
-      val calmStore = new CalmStore(sourceVHS)
+        createSourceVHSWith(
+          initialEntries = Map(Version("A", 1) -> oldRecord)
+        )
 
-      sourceVHS.underlying.put(Version("A", 1))(oldRecord)
+      val calmStore = new CalmStore(sourceVHS)
 
       val (storedId, storedLocation, storedRecord) =
         calmStore.putRecord(newRecord).value.get
@@ -80,10 +81,11 @@ class CalmStoreTest
       val newRecord = CalmRecord("A", data, newTime)
 
       implicit val sourceVHS: SourceVHS[CalmRecord] =
-        createSourceVHS[CalmRecord]
-      val calmStore = new CalmStore(sourceVHS)
+        createSourceVHSWith(
+          initialEntries = Map(Version("A", 1) -> oldRecord)
+        )
 
-      sourceVHS.underlying.put(Version("A", 1))(oldRecord)
+      val calmStore = new CalmStore(sourceVHS)
 
       calmStore.putRecord(newRecord).value shouldBe None
 
@@ -96,10 +98,11 @@ class CalmStoreTest
       val newRecord = CalmRecord("A", oldData, newTime)
 
       implicit val sourceVHS: SourceVHS[CalmRecord] =
-        createSourceVHS[CalmRecord]
-      val calmStore = new CalmStore(sourceVHS)
+        createSourceVHSWith(
+          initialEntries = Map(Version("A", 1) -> oldRecord)
+        )
 
-      sourceVHS.underlying.put(Version("A", 1))(oldRecord)
+      val calmStore = new CalmStore(sourceVHS)
 
       val (storedId, storedLocation, storedRecord) =
         calmStore.putRecord(newRecord).value.get
@@ -121,10 +124,11 @@ class CalmStoreTest
       val newRecord = CalmRecord("A", newData, newTime)
 
       implicit val sourceVHS: SourceVHS[CalmRecord] =
-        createSourceVHS[CalmRecord]
-      val calmStore = new CalmStore(sourceVHS)
+        createSourceVHSWith(
+          initialEntries = Map(Version("A", 4) -> newRecord)
+        )
 
-      sourceVHS.underlying.put(Version("A", 4))(newRecord)
+      val calmStore = new CalmStore(sourceVHS)
 
       calmStore.putRecord(oldRecord).value shouldBe None
 
@@ -147,10 +151,11 @@ class CalmStoreTest
       val y = CalmRecord("A", Map("key" -> List("y")), retrievedAt)
 
       implicit val sourceVHS: SourceVHS[CalmRecord] =
-        createSourceVHS[CalmRecord]
-      val calmStore = new CalmStore(sourceVHS)
+        createSourceVHSWith(
+          initialEntries = Map(Version("A", 2) -> x)
+        )
 
-      sourceVHS.underlying.put(Version("A", 2))(x)
+      val calmStore = new CalmStore(sourceVHS)
 
       calmStore.putRecord(y) shouldBe a[Left[_, _]]
 
@@ -164,10 +169,11 @@ class CalmStoreTest
       record.published shouldBe false
 
       implicit val sourceVHS: SourceVHS[CalmRecord] =
-        createSourceVHS[CalmRecord]
-      val calmStore = new CalmStore(sourceVHS)
+        createSourceVHSWith(
+          initialEntries = Map(Version("A", 5) -> record)
+        )
 
-      sourceVHS.underlying.put(Version("A", 5))(record)
+      val calmStore = new CalmStore(sourceVHS)
 
       calmStore.setRecordPublished(Version("A", 5), record) shouldBe a[Right[_,
                                                                              _]]
@@ -183,10 +189,11 @@ class CalmStoreTest
       record.published shouldBe false
 
       implicit val sourceVHS: SourceVHS[CalmRecord] =
-        createSourceVHS[CalmRecord]
-      val calmStore = new CalmStore(sourceVHS)
+        createSourceVHSWith(
+          initialEntries = Map(Version("A", 6) -> record)
+        )
 
-      sourceVHS.underlying.put(Version("A", 6))(record)
+      val calmStore = new CalmStore(sourceVHS)
 
       val err = calmStore.setRecordPublished(Version("A", 5), record).left.value
       err.getMessage shouldBe "VersionAlreadyExistsError"

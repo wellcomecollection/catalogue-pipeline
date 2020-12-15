@@ -11,8 +11,10 @@ import uk.ac.wellcome.sierra_adapter.model.{
   SierraItemRecord,
   SierraTransformable
 }
+import uk.ac.wellcome.sierra_adapter.model.Implicits._
 import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
 import uk.ac.wellcome.storage.Version
+import weco.catalogue.source_model.fixtures.SourceVHSFixture
 
 class SierraItemMergerFeatureTest
     extends AnyFunSpec
@@ -22,7 +24,8 @@ class SierraItemMergerFeatureTest
     with SQS
     with SierraGenerators
     with SierraAdapterHelpers
-    with SierraItemMergerFixtures {
+    with SierraItemMergerFixtures
+    with SourceVHSFixture {
 
   it("stores an item from SQS") {
     withLocalSqsQueue() { queue =>
@@ -33,8 +36,10 @@ class SierraItemMergerFeatureTest
       val key = Version(itemRecord.id.withoutCheckDigit, 0)
       val itemRecordStore =
         createStore[SierraItemRecord](Map(key -> itemRecord))
-      val sierraTransformableStore = createStore[SierraTransformable]()
-      withSierraWorkerService(queue, itemRecordStore, sierraTransformableStore) {
+
+      val sourceVHS = createSourceVHS[SierraTransformable]
+
+      withSierraWorkerService(queue, itemRecordStore, sourceVHS) {
         case (service, messageSender) =>
           service.run()
 
@@ -53,7 +58,7 @@ class SierraItemMergerFeatureTest
                 expectedSierraTransformable.sierraId.withoutCheckDigit,
                 0),
               expectedSierraTransformable,
-              sierraTransformableStore,
+              sourceVHS,
               messageSender
             )
           }
@@ -71,8 +76,8 @@ class SierraItemMergerFeatureTest
       val key = Version(id, 0)
       val itemRecordStore =
         createStore[SierraItemRecord](Map(key.copy(version = 1) -> itemRecord))
-      val sierraTransformableStore = createStore[SierraTransformable]()
-      withSierraWorkerService(queue, itemRecordStore, sierraTransformableStore) {
+
+      withSierraWorkerService(queue, itemRecordStore) {
         case (service, messageSender) =>
           service.run()
 
@@ -103,8 +108,10 @@ class SierraItemMergerFeatureTest
       val key2 = Version(itemRecord2.id.withoutCheckDigit, 0)
       val itemRecordStore = createStore[SierraItemRecord](
         Map(key1 -> itemRecord1, key2 -> itemRecord2))
-      val sierraTransformableStore = createStore[SierraTransformable]()
-      withSierraWorkerService(queue, itemRecordStore, sierraTransformableStore) {
+
+      val sourceVHS = createSourceVHS[SierraTransformable]
+
+      withSierraWorkerService(queue, itemRecordStore, sourceVHS) {
         case (service, messageSender) =>
           service.run()
           sendNotificationToSQS(queue, key1)
@@ -128,13 +135,13 @@ class SierraItemMergerFeatureTest
             assertStoredAndSent(
               Version(bibId1.withoutCheckDigit, 0),
               expectedSierraTransformable1,
-              sierraTransformableStore,
+              sourceVHS,
               messageSender
             )
             assertStoredAndSent(
               Version(bibId2.withoutCheckDigit, 0),
               expectedSierraTransformable2,
-              sierraTransformableStore,
+              sourceVHS,
               messageSender
             )
           }
@@ -151,8 +158,10 @@ class SierraItemMergerFeatureTest
       val key = Version(itemRecord.id.withoutCheckDigit, 0)
       val itemRecordStore =
         createStore[SierraItemRecord](Map(key -> itemRecord))
-      val sierraTransformableStore = createStore[SierraTransformable]()
-      withSierraWorkerService(queue, itemRecordStore, sierraTransformableStore) {
+
+      val sourceVHS = createSourceVHS[SierraTransformable]
+
+      withSierraWorkerService(queue, itemRecordStore, sourceVHS) {
         case (service, messageSender) =>
           service.run()
 
@@ -171,7 +180,7 @@ class SierraItemMergerFeatureTest
               assertStoredAndSent(
                 Version(tranformable.sierraId.withoutCheckDigit, 0),
                 tranformable,
-                sierraTransformableStore,
+                sourceVHS,
                 messageSender
               )
             }
