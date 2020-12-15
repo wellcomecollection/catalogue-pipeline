@@ -63,9 +63,9 @@ catalogue_pipeline:
     - id: stage
       name: Staging
   image_repositories:
-    - id: id_minter_works
+    - id: id_minter
       services:
-        - id: work-id-minter
+        - id: id-minter
     - id: inference_manager
       services:
         - id: image-inferrer

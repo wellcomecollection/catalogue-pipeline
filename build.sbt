@@ -100,9 +100,9 @@ lazy val api = setupProject(
   externalDependencies = CatalogueDependencies.apiDependencies
 )
 
-lazy val id_minter_works = setupProject(
+lazy val id_minter = setupProject(
   project,
-  "pipeline/id_minter/id_minter_works",
+  "pipeline/id_minter",
   localDependencies = Seq(internal_model, pipeline_storage_typesafe),
   externalDependencies = CatalogueDependencies.idminterDependencies
 )
