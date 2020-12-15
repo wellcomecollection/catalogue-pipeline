@@ -39,12 +39,15 @@ trait ElasticsearchFixtures
   private val esHost = "localhost"
   private val esPort = 9200
 
-  val elasticClient: ElasticClient = ElasticClientBuilder.create(
+  val compressionEnabled: Boolean = false
+
+  lazy val elasticClient: ElasticClient = ElasticClientBuilder.create(
     hostname = esHost,
     port = esPort,
     protocol = "http",
     username = "elastic",
-    password = "changeme"
+    password = "changeme",
+    compressionEnabled = compressionEnabled,
   )
 
   // Elasticsearch takes a while to start up so check that it actually started
