@@ -66,9 +66,6 @@ catalogue_pipeline:
     - id: id_minter_works
       services:
         - id: work-id-minter
-    - id: id_minter_images
-      services:
-        - id: image-id-minter
     - id: inference_manager
       services:
         - id: image-inferrer
