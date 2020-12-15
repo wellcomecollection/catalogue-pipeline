@@ -15,15 +15,15 @@ import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.pipeline_storage.Indexer
-import WorkState.{Merged, Identified}
+import WorkState.{Identified, Merged}
 
 class MergerWorkerService[WorkDestination, ImageDestination](
-                                                              sqsStream: SQSStream[NotificationMessage],
-                                                              sourceWorkLookup: IdentifiedWorkLookup,
-                                                              mergerManager: MergerManager,
-                                                              workIndexer: Indexer[Work[Merged]],
-                                                              workSender: MessageSender[WorkDestination],
-                                                              imageSender: MessageSender[ImageDestination]
+  sqsStream: SQSStream[NotificationMessage],
+  sourceWorkLookup: IdentifiedWorkLookup,
+  mergerManager: MergerManager,
+  workIndexer: Indexer[Work[Merged]],
+  workSender: MessageSender[WorkDestination],
+  imageSender: MessageSender[ImageDestination]
 )(implicit ec: ExecutionContext)
     extends Runnable {
 

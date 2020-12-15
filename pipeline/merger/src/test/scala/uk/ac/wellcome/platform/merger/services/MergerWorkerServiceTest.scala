@@ -11,7 +11,10 @@ import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, MatcherResult}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
-import uk.ac.wellcome.platform.merger.fixtures.{MatcherResultFixture, WorkerServiceFixture}
+import uk.ac.wellcome.platform.merger.fixtures.{
+  MatcherResultFixture,
+  WorkerServiceFixture
+}
 import WorkState.{Identified, Merged}
 import WorkFsm._
 import uk.ac.wellcome.models.work.generators.MiroWorkGenerators
@@ -222,7 +225,8 @@ class MergerWorkerServiceTest
           redirectedWorks should have size 1
           redirectedWorks.head.sourceIdentifier shouldBe digitisedWork.sourceIdentifier
           redirectedWorks.head.redirect shouldBe IdState.Identified(
-            sourceIdentifier = physicalWork.sourceIdentifier, canonicalId = physicalWork.state.canonicalId)
+            sourceIdentifier = physicalWork.sourceIdentifier,
+            canonicalId = physicalWork.state.canonicalId)
 
           mergedWorks should have size 1
           mergedWorks.head.sourceIdentifier shouldBe physicalWork.sourceIdentifier
@@ -273,7 +277,9 @@ class MergerWorkerServiceTest
           redirectedWorks.map(_.sourceIdentifier) should contain only
             (digitisedWork.sourceIdentifier, miroWork.sourceIdentifier)
           redirectedWorks.map(_.redirect) should contain only
-            IdState.Identified(sourceIdentifier = physicalWork.sourceIdentifier, canonicalId = physicalWork.state.canonicalId)
+            IdState.Identified(
+              sourceIdentifier = physicalWork.sourceIdentifier,
+              canonicalId = physicalWork.state.canonicalId)
 
           mergedWorks should have size 1
           mergedWorks.head.sourceIdentifier shouldBe physicalWork.sourceIdentifier

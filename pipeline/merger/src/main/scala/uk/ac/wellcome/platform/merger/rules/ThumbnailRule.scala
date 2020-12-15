@@ -26,8 +26,9 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
 
   type FieldData = Option[LocationDeprecated]
 
-  override def merge(target: Work.Visible[Identified],
-                     sources: Seq[Work[Identified]]): FieldMergeResult[FieldData] =
+  override def merge(
+    target: Work.Visible[Identified],
+    sources: Seq[Work[Identified]]): FieldMergeResult[FieldData] =
     FieldMergeResult(
       data = getThumbnail(target, sources),
       sources = List(

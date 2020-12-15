@@ -28,7 +28,7 @@ module "merger" {
     merger_images_topic_arn = module.merger_images_topic.arn
 
     es_identified_works_index = local.es_works_identified_index
-    es_merged_works_index = local.es_works_merged_index
+    es_merged_works_index     = local.es_works_merged_index
   }
 
   secret_env_vars = {

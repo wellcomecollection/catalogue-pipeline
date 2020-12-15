@@ -12,6 +12,7 @@ object Sources {
       .filter(_.reason.contains("Physical/digitised Sierra work"))
       .map(_.id.canonicalId)
 
-    sources.find(source => digitisedLinkedIds.contains(source.state.canonicalId))
+    sources.find(source =>
+      digitisedLinkedIds.contains(source.state.canonicalId))
   }
 }

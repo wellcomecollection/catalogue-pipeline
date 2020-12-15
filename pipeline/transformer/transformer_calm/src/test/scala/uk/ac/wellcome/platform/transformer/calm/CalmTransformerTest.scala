@@ -121,11 +121,11 @@ class CalmTransformerTest
       List(
         MergeCandidate(
           Identifiable(
-          SourceIdentifier(
-            value = "b456",
-            identifierType = IdentifierType("sierra-system-number"),
-            ontologyType = "Work"
-          )
+            SourceIdentifier(
+              value = "b456",
+              identifierType = IdentifierType("sierra-system-number"),
+              ontologyType = "Work"
+            )
           )
         )
       )

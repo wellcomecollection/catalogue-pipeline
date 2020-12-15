@@ -30,8 +30,10 @@ object Implicits {
   implicit val _dec07: Decoder[PhysicalLocationDeprecated] =
     deriveConfiguredDecoder
   implicit val _dec08: Decoder[LocationDeprecated] = deriveConfiguredDecoder
-  implicit val _dec11: Decoder[MergeCandidate[IdState.Identifiable]] = deriveConfiguredDecoder
-  implicit val _dec12: Decoder[MergeCandidate[IdState.Identified]] = deriveConfiguredDecoder
+  implicit val _dec11: Decoder[MergeCandidate[IdState.Identifiable]] =
+    deriveConfiguredDecoder
+  implicit val _dec12: Decoder[MergeCandidate[IdState.Identified]] =
+    deriveConfiguredDecoder
   implicit val _dec13: Decoder[MatcherResult] = deriveConfiguredDecoder
   implicit val _dec14: Decoder[Person[IdState.Unminted]] =
     deriveConfiguredDecoder
@@ -159,8 +161,11 @@ object Implicits {
   implicit val _enc07: Encoder[PhysicalLocationDeprecated] =
     deriveConfiguredEncoder
   implicit val _enc08: Encoder[LocationDeprecated] = deriveConfiguredEncoder
-  implicit val _enc11: Encoder[MergeCandidate[ImageData[IdState.Identifiable]]] = deriveConfiguredEncoder
-  implicit val _enc12: Encoder[MergeCandidate[ImageData[IdState.Identified]]] = deriveConfiguredEncoder
+  implicit val _enc11
+    : Encoder[MergeCandidate[ImageData[IdState.Identifiable]]] =
+    deriveConfiguredEncoder
+  implicit val _enc12: Encoder[MergeCandidate[ImageData[IdState.Identified]]] =
+    deriveConfiguredEncoder
   implicit val _enc13: Encoder[MatcherResult] = deriveConfiguredEncoder
   implicit val _enc14: Encoder[Person[IdState.Unminted]] =
     deriveConfiguredEncoder

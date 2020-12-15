@@ -95,7 +95,10 @@ class IdMinterFeatureTest
     withLocalSqsQueue() { queue =>
       withIdentifiersTable { identifiersTableConfig =>
         val work: Work[Merged] = mergedWork()
-          .redirected(redirect = IdState.Identified(canonicalId = createCanonicalId,sourceIdentifier = createSourceIdentifier))
+          .redirected(
+            redirect = IdState.Identified(
+              canonicalId = createCanonicalId,
+              sourceIdentifier = createSourceIdentifier))
         val inputIndex = createIndex(List(work))
         val outputIndex = mutable.Map.empty[String, Work[Identified]]
         withWorkerService(

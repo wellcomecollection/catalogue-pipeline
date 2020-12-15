@@ -143,7 +143,8 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
       work.map(_.copy(otherIdentifiers = otherIdentifiers))
 
     def mergeCandidates(
-      mergeCandidates: List[MergeCandidate[State#WorkDataState#Id]]): Work.Visible[State] =
+      mergeCandidates: List[MergeCandidate[State#WorkDataState#Id]])
+      : Work.Visible[State] =
       work.map(_.copy(mergeCandidates = mergeCandidates))
 
     def format(format: Format): Work.Visible[State] =

@@ -3,8 +3,15 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 import uk.ac.wellcome.models.work.internal.IdState.Identifiable
 
 import java.util.UUID
-import uk.ac.wellcome.models.work.internal.{IdentifierType, MergeCandidate, SourceIdentifier}
-import uk.ac.wellcome.platform.transformer.sierra.source.{SierraBibData, SierraQueryOps}
+import uk.ac.wellcome.models.work.internal.{
+  IdentifierType,
+  MergeCandidate,
+  SourceIdentifier
+}
+import uk.ac.wellcome.platform.transformer.sierra.source.{
+  SierraBibData,
+  SierraQueryOps
+}
 import uk.ac.wellcome.platform.transformer.sierra.transformers.parsers.MiroIdParsing
 
 import scala.util.Try

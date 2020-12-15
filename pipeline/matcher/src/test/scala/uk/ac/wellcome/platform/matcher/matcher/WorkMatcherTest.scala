@@ -8,7 +8,12 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import org.scanamo.syntax._
-import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, MatcherResult, WorkIdentifier, WorkNode}
+import uk.ac.wellcome.models.matcher.{
+  MatchedIdentifiers,
+  MatcherResult,
+  WorkIdentifier,
+  WorkNode
+}
 import uk.ac.wellcome.models.work.generators.SierraWorkGenerators
 import uk.ac.wellcome.models.work.internal.IdState.Identified
 import uk.ac.wellcome.models.work.internal.MergeCandidate
@@ -31,9 +36,15 @@ class WorkMatcherTest
     with SierraWorkGenerators
     with EitherValues {
 
-  private val identifierA = Identified(createCanonicalId, createSierraSystemSourceIdentifierWith(value = "A"))
-  private val identifierB = Identified(createCanonicalId, createSierraSystemSourceIdentifierWith(value = "B"))
-  private val identifierC = Identified(createCanonicalId, createSierraSystemSourceIdentifierWith(value = "C"))
+  private val identifierA = Identified(
+    createCanonicalId,
+    createSierraSystemSourceIdentifierWith(value = "A"))
+  private val identifierB = Identified(
+    createCanonicalId,
+    createSierraSystemSourceIdentifierWith(value = "B"))
+  private val identifierC = Identified(
+    createCanonicalId,
+    createSierraSystemSourceIdentifierWith(value = "C"))
 
   it(
     "matches a work with no linked identifiers to itself only A and saves the updated graph A") {
@@ -94,7 +105,9 @@ class WorkMatcherTest
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
           withWorkMatcher(workGraphStore, lockTable) { workMatcher =>
-            val work = identifiedWork(canonicalId = identifierA.canonicalId, sourceIdentifier = identifierA.sourceIdentifier)
+            val work = identifiedWork(
+              canonicalId = identifierA.canonicalId,
+              sourceIdentifier = identifierA.sourceIdentifier)
               .withVersion(1)
               .mergeCandidates(List(MergeCandidate(identifierB)))
 
@@ -113,12 +126,16 @@ class WorkMatcherTest
                   identifierA.canonicalId,
                   1,
                   List(identifierB.canonicalId),
-                  ciHash(List(identifierA.canonicalId, identifierB.canonicalId).sorted.mkString("+"))),
+                  ciHash(
+                    List(identifierA.canonicalId, identifierB.canonicalId).sorted
+                      .mkString("+"))),
                 WorkNode(
                   identifierB.canonicalId,
                   None,
                   Nil,
-                  ciHash(List(identifierA.canonicalId, identifierB.canonicalId).sorted.mkString("+")))
+                  ciHash(
+                    List(identifierA.canonicalId, identifierB.canonicalId).sorted
+                      .mkString("+")))
               )
             }
           }
@@ -137,12 +154,18 @@ class WorkMatcherTest
               identifierA.canonicalId,
               1,
               List(identifierB.canonicalId),
-              ciHash(ciHash(List(identifierA.canonicalId, identifierB.canonicalId).sorted.mkString("+"))))
+              ciHash(
+                ciHash(
+                  List(identifierA.canonicalId, identifierB.canonicalId).sorted
+                    .mkString("+"))))
             val existingWorkB = WorkNode(
               identifierB.canonicalId,
               1,
               Nil,
-              ciHash(ciHash(List(identifierA.canonicalId, identifierB.canonicalId).sorted.mkString("+"))))
+              ciHash(
+                ciHash(
+                  List(identifierA.canonicalId, identifierB.canonicalId).sorted
+                    .mkString("+"))))
             val existingWorkC = WorkNode(
               identifierC.canonicalId,
               1,
@@ -153,7 +176,9 @@ class WorkMatcherTest
             put(dynamoClient, graphTable.name)(existingWorkC)
 
             val work =
-              identifiedWork(canonicalId = identifierB.canonicalId, sourceIdentifier = identifierB.sourceIdentifier)
+              identifiedWork(
+                canonicalId = identifierB.canonicalId,
+                sourceIdentifier = identifierB.sourceIdentifier)
                 .withVersion(2)
                 .mergeCandidates(List(MergeCandidate(identifierC)))
 
@@ -176,19 +201,30 @@ class WorkMatcherTest
                   1,
                   List(identifierB.canonicalId),
                   ciHash(
-                    List(identifierA.canonicalId, identifierB.canonicalId, identifierC.canonicalId).sorted.mkString("+"))),
+                    List(
+                      identifierA.canonicalId,
+                      identifierB.canonicalId,
+                      identifierC.canonicalId).sorted.mkString("+"))
+                ),
                 WorkNode(
                   identifierB.canonicalId,
                   2,
                   List(identifierC.canonicalId),
                   ciHash(
-                    List(identifierA.canonicalId, identifierB.canonicalId, identifierC.canonicalId).sorted.mkString("+"))),
+                    List(
+                      identifierA.canonicalId,
+                      identifierB.canonicalId,
+                      identifierC.canonicalId).sorted.mkString("+"))
+                ),
                 WorkNode(
                   identifierC.canonicalId,
                   1,
                   Nil,
                   ciHash(
-                    List(identifierA.canonicalId, identifierB.canonicalId, identifierC.canonicalId).sorted.mkString("+")))
+                    List(
+                      identifierA.canonicalId,
+                      identifierB.canonicalId,
+                      identifierC.canonicalId).sorted.mkString("+")))
               )
             }
           }
@@ -243,7 +279,9 @@ class WorkMatcherTest
                     WorkNode(idC, 0, Nil, componentId),
                   )))
 
-              val work = identifiedWork(canonicalId = identifierA.canonicalId, sourceIdentifier = identifierA.sourceIdentifier)
+              val work = identifiedWork(
+                canonicalId = identifierA.canonicalId,
+                sourceIdentifier = identifierA.sourceIdentifier)
                 .mergeCandidates(List(MergeCandidate(identifierB)))
 
               val failedLock = for {

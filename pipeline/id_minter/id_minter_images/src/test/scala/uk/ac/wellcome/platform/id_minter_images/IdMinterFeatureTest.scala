@@ -30,9 +30,9 @@ class IdMinterFeatureTest
           val image = createImageData.toInitialImageWith(
             createCanonicalId,
             modifiedTime = modifiedTime,
-            sourceWorks= SourceWorks(
-            canonicalWork = mergedWork().toSourceWork,
-            redirectedWork = None
+            sourceWorks = SourceWorks(
+              canonicalWork = mergedWork().toSourceWork,
+              redirectedWork = None
             )
           )
 

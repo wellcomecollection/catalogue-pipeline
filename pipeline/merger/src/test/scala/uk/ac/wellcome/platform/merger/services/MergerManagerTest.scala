@@ -61,9 +61,14 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorkGenerators {
     override def merge(works: Seq[Work[Identified]]): MergerOutcome = {
       val outputWorks = works.head +: works.tail.map { work =>
         Work.Redirected[Identified](
-          state = Identified(work.sourceIdentifier, work.state.canonicalId, work.state.modifiedTime),
+          state = Identified(
+            work.sourceIdentifier,
+            work.state.canonicalId,
+            work.state.modifiedTime),
           version = work.version,
-          redirect = IdState.Identified(works.head.state.canonicalId, works.head.sourceIdentifier)
+          redirect = IdState.Identified(
+            works.head.state.canonicalId,
+            works.head.sourceIdentifier)
         )
       }
       MergerOutcome(

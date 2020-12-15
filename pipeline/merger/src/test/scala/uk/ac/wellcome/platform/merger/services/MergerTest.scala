@@ -8,7 +8,11 @@ import uk.ac.wellcome.platform.merger.rules.FieldMergeRule
 import WorkState.{Identified, Merged}
 import WorkFsm._
 import cats.data.State
-import uk.ac.wellcome.models.work.generators.{MetsWorkGenerators, MiroWorkGenerators, SierraWorkGenerators}
+import uk.ac.wellcome.models.work.generators.{
+  MetsWorkGenerators,
+  MiroWorkGenerators,
+  SierraWorkGenerators
+}
 
 class MergerTest
     extends AnyFunSpec

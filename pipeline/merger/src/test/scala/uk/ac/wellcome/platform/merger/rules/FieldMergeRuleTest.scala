@@ -59,8 +59,9 @@ class FieldMergeRuleTest
         override val isDefinedForSource: WorkPredicate =
           work => work.data.title.contains("A")
 
-        override def rule(target: Work.Visible[Identified],
-                          sources: NonEmptyList[Work[Identified]]): FieldData = {
+        override def rule(
+          target: Work.Visible[Identified],
+          sources: NonEmptyList[Work[Identified]]): FieldData = {
           sources.toList should contain(workWithTitleA)
           sources.toList should not contain workWithTitleB
           None
@@ -73,7 +74,8 @@ class FieldMergeRuleTest
 
   // This is here because we are extending ComposedFieldMergeRule
   // to access the private PartialRule trait
-  override def merge(target: Work.Visible[Identified],
-                     sources: Seq[Work[Identified]]): FieldMergeResult[FieldData] =
+  override def merge(
+    target: Work.Visible[Identified],
+    sources: Seq[Work[Identified]]): FieldMergeResult[FieldData] =
     throw new NotImplementedError()
 }

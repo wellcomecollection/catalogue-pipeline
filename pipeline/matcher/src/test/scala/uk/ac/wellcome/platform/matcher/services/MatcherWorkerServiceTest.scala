@@ -7,7 +7,11 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, MatcherResult, WorkIdentifier}
+import uk.ac.wellcome.models.matcher.{
+  MatchedIdentifiers,
+  MatcherResult,
+  WorkIdentifier
+}
 import uk.ac.wellcome.models.work.generators.SierraWorkGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
@@ -25,9 +29,15 @@ class MatcherWorkerServiceTest
     with MatcherFixtures
     with SierraWorkGenerators {
 
-  private val identifierA = IdState.Identified(createCanonicalId,createSierraSystemSourceIdentifierWith(value = "A"))
-  private val identifierB = IdState.Identified(createCanonicalId,createSierraSystemSourceIdentifierWith(value = "B"))
-  private val identifierC = IdState.Identified(createCanonicalId,createSierraSystemSourceIdentifierWith(value = "C"))
+  private val identifierA = IdState.Identified(
+    createCanonicalId,
+    createSierraSystemSourceIdentifierWith(value = "A"))
+  private val identifierB = IdState.Identified(
+    createCanonicalId,
+    createSierraSystemSourceIdentifierWith(value = "B"))
+  private val identifierC = IdState.Identified(
+    createCanonicalId,
+    createSierraSystemSourceIdentifierWith(value = "C"))
 
   it("creates a work without identifiers") {
     // Work Av1 created without any matched works
@@ -79,7 +89,9 @@ class MatcherWorkerServiceTest
     "work A with one link to B and no existing works returns a single matched work") {
     // Work Av1
     val workAv1 =
-      identifiedWork(sourceIdentifier = identifierA.sourceIdentifier, canonicalId = identifierA.canonicalId)
+      identifiedWork(
+        sourceIdentifier = identifierA.sourceIdentifier,
+        canonicalId = identifierA.canonicalId)
         .withVersion(1)
         .mergeCandidates(List(MergeCandidate(identifierB)))
 
@@ -113,29 +125,37 @@ class MatcherWorkerServiceTest
   it(
     "matches a work with one link then matches the combined work to a new work") {
     // Work Av1
-    val workAv1 = identifiedWork(sourceIdentifier = identifierA.sourceIdentifier, canonicalId = identifierA.canonicalId).withVersion(1)
+    val workAv1 = identifiedWork(
+      sourceIdentifier = identifierA.sourceIdentifier,
+      canonicalId = identifierA.canonicalId).withVersion(1)
 
     val expectedMatchedWorksAv1 = MatcherResult(
       Set(
         MatchedIdentifiers(
-          identifiers = Set(WorkIdentifier(identifierA.canonicalId, version = 1))
+          identifiers =
+            Set(WorkIdentifier(identifierA.canonicalId, version = 1))
         )
       )
     )
 
     // Work Bv1
-    val workBv1 = identifiedWork(sourceIdentifier = identifierB.sourceIdentifier, canonicalId = identifierB.canonicalId).withVersion(1)
+    val workBv1 = identifiedWork(
+      sourceIdentifier = identifierB.sourceIdentifier,
+      canonicalId = identifierB.canonicalId).withVersion(1)
 
     val expectedMatchedWorksBv1 = MatcherResult(
       Set(
         MatchedIdentifiers(
-          identifiers = Set(WorkIdentifier(identifierB.canonicalId, version = 1))
+          identifiers =
+            Set(WorkIdentifier(identifierB.canonicalId, version = 1))
         )
       )
     )
 
     // Work Av1 matched to B
-    val workAv2 = identifiedWork(sourceIdentifier = identifierA.sourceIdentifier, canonicalId = identifierA.canonicalId)
+    val workAv2 = identifiedWork(
+      sourceIdentifier = identifierA.sourceIdentifier,
+      canonicalId = identifierA.canonicalId)
       .withVersion(2)
       .mergeCandidates(List(MergeCandidate(identifierB)))
 
@@ -151,20 +171,25 @@ class MatcherWorkerServiceTest
     )
 
     // Work Cv1
-    val workCv1 = identifiedWork(sourceIdentifier = identifierC.sourceIdentifier, canonicalId = identifierC.canonicalId)
+    val workCv1 = identifiedWork(
+      sourceIdentifier = identifierC.sourceIdentifier,
+      canonicalId = identifierC.canonicalId)
       .withVersion(1)
 
     val expectedMatcherWorksCv1 =
       MatcherResult(
         Set(
           MatchedIdentifiers(
-            identifiers = Set(WorkIdentifier(identifierC.canonicalId, version = 1))
+            identifiers =
+              Set(WorkIdentifier(identifierC.canonicalId, version = 1))
           )
         )
       )
 
     // Work Bv2 matched to C
-    val workBv2 = identifiedWork(sourceIdentifier = identifierB.sourceIdentifier, canonicalId = identifierB.canonicalId)
+    val workBv2 = identifiedWork(
+      sourceIdentifier = identifierB.sourceIdentifier,
+      canonicalId = identifierB.canonicalId)
       .withVersion(2)
       .mergeCandidates(List(MergeCandidate(identifierC)))
 
@@ -198,30 +223,38 @@ class MatcherWorkerServiceTest
 
   it("breaks matched works into individual works") {
     // Work Av1
-    val workAv1 = identifiedWork(sourceIdentifier = identifierA.sourceIdentifier, canonicalId = identifierA.canonicalId).withVersion(1)
+    val workAv1 = identifiedWork(
+      sourceIdentifier = identifierA.sourceIdentifier,
+      canonicalId = identifierA.canonicalId).withVersion(1)
 
     val expectedMatchedWorksAv1 = MatcherResult(
       Set(
         MatchedIdentifiers(
-          identifiers = Set(WorkIdentifier(identifierA.canonicalId, version = 1))
+          identifiers =
+            Set(WorkIdentifier(identifierA.canonicalId, version = 1))
         )
       )
     )
 
     // Work Bv1
-    val workBv1 = identifiedWork(sourceIdentifier = identifierB.sourceIdentifier, canonicalId = identifierB.canonicalId).withVersion(1)
+    val workBv1 = identifiedWork(
+      sourceIdentifier = identifierB.sourceIdentifier,
+      canonicalId = identifierB.canonicalId).withVersion(1)
 
     val expectedMatchedWorksBv1 = MatcherResult(
       Set(
         MatchedIdentifiers(
-          identifiers = Set(WorkIdentifier(identifierB.canonicalId, version = 1))
+          identifiers =
+            Set(WorkIdentifier(identifierB.canonicalId, version = 1))
         )
       )
     )
 
     // Match Work A to Work B
     val workAv2MatchedToB =
-      identifiedWork(sourceIdentifier = identifierA.sourceIdentifier, canonicalId = identifierA.canonicalId)
+      identifiedWork(
+        sourceIdentifier = identifierA.sourceIdentifier,
+        canonicalId = identifierA.canonicalId)
         .withVersion(2)
         .mergeCandidates(List(MergeCandidate(identifierB)))
 
@@ -239,16 +272,20 @@ class MatcherWorkerServiceTest
 
     // A no longer matches B
     val workAv3WithNoMatchingWorks =
-      identifiedWork(sourceIdentifier = identifierA.sourceIdentifier, canonicalId = identifierA.canonicalId).withVersion(3)
+      identifiedWork(
+        sourceIdentifier = identifierA.sourceIdentifier,
+        canonicalId = identifierA.canonicalId).withVersion(3)
 
     val expectedMatchedWorksAv3 =
       MatcherResult(
         Set(
           MatchedIdentifiers(
-            identifiers = Set(WorkIdentifier(identifierA.canonicalId, version = 3))
+            identifiers =
+              Set(WorkIdentifier(identifierA.canonicalId, version = 3))
           ),
           MatchedIdentifiers(
-            identifiers = Set(WorkIdentifier(identifierB.canonicalId, version = 1))
+            identifiers =
+              Set(WorkIdentifier(identifierB.canonicalId, version = 1))
           )
         )
       )
@@ -272,12 +309,15 @@ class MatcherWorkerServiceTest
   }
 
   it("does not match a lower version") {
-    val workAv2 = identifiedWork(sourceIdentifier = identifierA.sourceIdentifier, canonicalId = identifierA.canonicalId).withVersion(2)
+    val workAv2 = identifiedWork(
+      sourceIdentifier = identifierA.sourceIdentifier,
+      canonicalId = identifierA.canonicalId).withVersion(2)
 
     val expectedMatchedWorkAv2 = MatcherResult(
       Set(
         MatchedIdentifiers(
-          identifiers = Set(WorkIdentifier(identifierA.canonicalId, version = 2))
+          identifiers =
+            Set(WorkIdentifier(identifierA.canonicalId, version = 2))
         )
       )
     )
@@ -295,7 +335,9 @@ class MatcherWorkerServiceTest
 
           // Work V1 is sent but not matched
           val workAv1 =
-            identifiedWork(sourceIdentifier = identifierA.sourceIdentifier, canonicalId = identifierA.canonicalId).withVersion(1)
+            identifiedWork(
+              sourceIdentifier = identifierA.sourceIdentifier,
+              canonicalId = identifierA.canonicalId).withVersion(1)
 
           sendWork(workAv1, retriever, queue)
           eventually {
@@ -311,12 +353,15 @@ class MatcherWorkerServiceTest
   }
 
   it("does not match an existing version with different information") {
-    val workAv2 = identifiedWork(sourceIdentifier = identifierA.sourceIdentifier, canonicalId = identifierA.canonicalId).withVersion(2)
+    val workAv2 = identifiedWork(
+      sourceIdentifier = identifierA.sourceIdentifier,
+      canonicalId = identifierA.canonicalId).withVersion(2)
 
     val expectedMatchedWorkAv2 = MatcherResult(
       Set(
         MatchedIdentifiers(
-          identifiers = Set(WorkIdentifier(identifierA.canonicalId, version = 2))
+          identifiers =
+            Set(WorkIdentifier(identifierA.canonicalId, version = 2))
         )
       )
     )
@@ -334,7 +379,9 @@ class MatcherWorkerServiceTest
 
           // Work V1 is sent but not matched
           val differentWorkAv2 =
-            identifiedWork(sourceIdentifier = identifierA.sourceIdentifier, canonicalId = identifierA.canonicalId)
+            identifiedWork(
+              sourceIdentifier = identifierA.sourceIdentifier,
+              canonicalId = identifierA.canonicalId)
               .withVersion(2)
               .mergeCandidates(List(MergeCandidate(identifierB)))
 

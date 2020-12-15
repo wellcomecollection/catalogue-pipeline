@@ -50,7 +50,8 @@ class OtherIdentifiersRuleTest
 
   val calmWork: Work.Visible[WorkState.Identified] = calmIdentifiedWork()
 
-  val mergeCandidate: Work.Visible[WorkState.Identified] = sierraIdentifiedWork()
+  val mergeCandidate: Work.Visible[WorkState.Identified] =
+    sierraIdentifiedWork()
 
   val sierraWithMergeCandidate: Work.Visible[WorkState.Identified] =
     sierraPhysicalIdentifiedWork()
@@ -58,7 +59,9 @@ class OtherIdentifiersRuleTest
       .mergeCandidates(
         List(
           MergeCandidate(
-            IdState.Identified(sourceIdentifier = mergeCandidate.sourceIdentifier, canonicalId = mergeCandidate.state.canonicalId),
+            IdState.Identified(
+              sourceIdentifier = mergeCandidate.sourceIdentifier,
+              canonicalId = mergeCandidate.state.canonicalId),
             Some("Physical/digitised Sierra work")
           )
         )

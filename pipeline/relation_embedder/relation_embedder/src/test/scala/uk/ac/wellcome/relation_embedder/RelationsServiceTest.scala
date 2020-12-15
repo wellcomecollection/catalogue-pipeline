@@ -21,8 +21,8 @@ class RelationsServiceTest
     with Akka {
 
   def service(index: Index,
-                 completeTreeScroll: Int = 20,
-                 affectedWorksScroll: Int = 20)(implicit as: ActorSystem) =
+              completeTreeScroll: Int = 20,
+              affectedWorksScroll: Int = 20)(implicit as: ActorSystem) =
     new PathQueryRelationsService(
       elasticClient = elasticClient,
       index = index,
@@ -35,8 +35,7 @@ class RelationsServiceTest
       .collectionPath(CollectionPath(path = path))
       .title(path)
 
-  def storeWorks(index: Index,
-                 works: List[Work[Merged]] = works): Assertion =
+  def storeWorks(index: Index, works: List[Work[Merged]] = works): Assertion =
     insertIntoElasticsearch(index, works: _*)
 
   /** The following tests use works within this tree:

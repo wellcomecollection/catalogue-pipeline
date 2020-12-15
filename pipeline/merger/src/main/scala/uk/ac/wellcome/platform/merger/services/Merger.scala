@@ -4,7 +4,12 @@ import cats.data.State
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.rules._
 import uk.ac.wellcome.platform.merger.logging.MergerLogging
-import uk.ac.wellcome.platform.merger.models.{FieldMergeResult, ImageDataWithSource, MergeResult, MergerOutcome}
+import uk.ac.wellcome.platform.merger.models.{
+  FieldMergeResult,
+  ImageDataWithSource,
+  MergeResult,
+  MergerOutcome
+}
 import WorkState.Identified
 
 /*
@@ -41,7 +46,7 @@ trait Merger extends MergerLogging {
             matchedWorks
               .filterNot {
                 case _: Work.Deleted[Identified] => true
-                case _                       => false
+                case _                           => false
               }
               .filterNot(
                 _.sourceIdentifier == target.sourceIdentifier
@@ -93,8 +98,12 @@ trait Merger extends MergerLogging {
     source: Work[Identified]): Work.Redirected[Identified] =
     Work.Redirected[Identified](
       version = source.version,
-      state = Identified(source.sourceIdentifier, source.state.canonicalId, source.state.modifiedTime),
-      redirect = IdState.Identified(target.state.canonicalId, target.sourceIdentifier)
+      state = Identified(
+        source.sourceIdentifier,
+        source.state.canonicalId,
+        source.state.modifiedTime),
+      redirect =
+        IdState.Identified(target.state.canonicalId, target.sourceIdentifier)
     )
 
   private def logIntentions(target: Work.Visible[Identified],
@@ -149,7 +158,7 @@ object PlatformMerger extends Merger {
       .orElse(works.find(WorkPredicates.physicalSierra))
       .orElse(works.find(WorkPredicates.sierraWork)) match {
       case Some(target: Work.Visible[Identified]) => Some(target)
-      case _                                  => None
+      case _                                      => None
     }
 
   override def createMergeResult(

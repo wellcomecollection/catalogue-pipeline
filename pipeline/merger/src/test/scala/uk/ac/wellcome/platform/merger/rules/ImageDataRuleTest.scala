@@ -3,7 +3,11 @@ package uk.ac.wellcome.platform.merger.rules
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{Inspectors, OptionValues, PrivateMethodTester}
-import uk.ac.wellcome.models.work.generators.{MetsWorkGenerators, MiroWorkGenerators, SierraWorkGenerators}
+import uk.ac.wellcome.models.work.generators.{
+  MetsWorkGenerators,
+  MiroWorkGenerators,
+  SierraWorkGenerators
+}
 import uk.ac.wellcome.models.work.internal.WorkState.Identified
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.rules.ImageDataRule.FlatImageMergeRule

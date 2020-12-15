@@ -27,7 +27,8 @@ case class MergerOutcome(resultWorks: Seq[Work[Identified]],
           source = source,
           modifiedTime = modifiedTime,
           state = ImageState.Initial(
-            sourceIdentifier = imageData.id.sourceIdentifier,canonicalId = imageData.id.canonicalId
+            sourceIdentifier = imageData.id.sourceIdentifier,
+            canonicalId = imageData.id.canonicalId
           )
         )
     }

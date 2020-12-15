@@ -51,7 +51,8 @@ class IdentifiedWorkLookupTest
 
     val identifiedWorkLookup = new IdentifiedWorkLookup(retriever)
 
-    whenReady(identifiedWorkLookup.fetchAllWorks(workIdentifiers = List(workId))) {
+    whenReady(
+      identifiedWorkLookup.fetchAllWorks(workIdentifiers = List(workId))) {
       _ shouldBe Seq(None)
     }
   }

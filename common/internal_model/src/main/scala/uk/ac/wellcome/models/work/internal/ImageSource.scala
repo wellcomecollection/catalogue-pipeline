@@ -36,7 +36,8 @@ object SourceWork {
 
     def toSourceWork: SourceWork[DataState.Identified] =
       SourceWork[DataState.Identified](
-        id = IdState.Identified(work.state.canonicalId,work.state.sourceIdentifier),
+        id = IdState
+          .Identified(work.state.canonicalId, work.state.sourceIdentifier),
         data = work.data,
         version = work.version
       )

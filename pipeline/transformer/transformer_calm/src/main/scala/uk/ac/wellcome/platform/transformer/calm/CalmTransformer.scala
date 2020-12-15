@@ -169,11 +169,11 @@ object CalmTransformer
       .map { id =>
         MergeCandidate(
           Identifiable(
-          SourceIdentifier(
-            identifierType = IdentifierType("sierra-system-number"),
-            ontologyType = "Work",
-            value = id
-          )
+            SourceIdentifier(
+              identifierType = IdentifierType("sierra-system-number"),
+              ontologyType = "Work",
+              value = id
+            )
           )
         )
       }

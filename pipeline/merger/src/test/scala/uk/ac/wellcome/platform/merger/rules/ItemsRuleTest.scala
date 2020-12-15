@@ -28,7 +28,8 @@ class ItemsRuleTest
         createIdentifiedPhysicalItem
       }.toList)
 
-  val metsWork: Work.Invisible[WorkState.Identified] = metsIdentifiedWork().invisible()
+  val metsWork: Work.Invisible[WorkState.Identified] =
+    metsIdentifiedWork().invisible()
 
   val miroWork: Work.Visible[WorkState.Identified] = miroIdentifiedWork()
 

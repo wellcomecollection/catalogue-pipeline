@@ -18,7 +18,8 @@ case class MergeCandidate[+State](
 ) extends HasId[State]
 
 case object MergeCandidate {
-  def apply(identifier: SourceIdentifier, reason: String): MergeCandidate[Identifiable] =
+  def apply(identifier: SourceIdentifier,
+            reason: String): MergeCandidate[Identifiable] =
     MergeCandidate(
       id = Identifiable(sourceIdentifier = identifier),
       reason = Some(reason)
