@@ -65,8 +65,8 @@ class ParallelScannerTest
       createRecords(table, count = 10)
 
       val future = scanner.scan[NumberedRecord](
-        segment = 1,
-        totalSegments = 5
+        segment = 0,
+        totalSegments = 1
       )(table.name)
 
       whenReady(future.failed) { err =>
