@@ -7,7 +7,7 @@ module "matcher_input_queue" {
   queue_name = "${local.namespace_hyphen}_matcher_input"
 
   topic_arns = [
-    module.work_id_minter_topic.arn
+    module.id_minter_topic.arn
   ]
 
   aws_region      = var.aws_region
