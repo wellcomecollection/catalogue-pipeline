@@ -4,7 +4,7 @@ import io.circe.Decoder
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.work.internal.Work
 import uk.ac.wellcome.models.work.internal.WorkState.Source
-import uk.ac.wellcome.pipeline_storage.PipelineStorageStream
+import uk.ac.wellcome.pipeline_storage.{PipelineStorageStream, Retriever}
 import uk.ac.wellcome.platform.transformer.miro.MiroRecordTransformer
 import uk.ac.wellcome.platform.transformer.miro.models.MiroMetadata
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
@@ -15,13 +15,18 @@ import uk.ac.wellcome.typesafe.Runnable
 import weco.catalogue.source_model.MiroSourcePayload
 import weco.catalogue.transformer.{Transformer, TransformerWorker}
 
+import scala.concurrent.ExecutionContext
+
 class MiroTransformerWorker[MsgDestination](
   val pipelineStream: PipelineStorageStream[NotificationMessage,
                                             Work[Source],
                                             MsgDestination],
-  miroReadable: Readable[S3ObjectLocation, MiroRecord]
+  miroReadable: Readable[S3ObjectLocation, MiroRecord],
+  val retriever: Retriever[Work[Source]]
 )(
-  implicit val decoder: Decoder[MiroSourcePayload]
+  implicit
+  val decoder: Decoder[MiroSourcePayload],
+  val ec: ExecutionContext
 ) extends Runnable
     with TransformerWorker[
       MiroSourcePayload,
