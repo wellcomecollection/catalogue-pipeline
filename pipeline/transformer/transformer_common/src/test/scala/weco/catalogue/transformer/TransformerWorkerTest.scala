@@ -13,7 +13,10 @@ import uk.ac.wellcome.models.work.internal.WorkState.Source
 import uk.ac.wellcome.pipeline_storage.MemoryIndexer
 import uk.ac.wellcome.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import uk.ac.wellcome.storage.Version
+import uk.ac.wellcome.storage.generators.S3ObjectLocationGenerators
+import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
+import weco.catalogue.source_model.CalmSourcePayload
 import weco.catalogue.transformer.example.{
   ExampleData,
   ExampleTransformerWorker,
@@ -26,7 +29,8 @@ class TransformerWorkerTest
     with Eventually
     with IntegrationPatience
     with PipelineStorageStreamFixtures
-    with IdentifiersGenerators {
+    with IdentifiersGenerators
+    with S3ObjectLocationGenerators {
 
   it("if it can't look up the source data, it fails") {
     withLocalSqsQueuePair() {
@@ -46,10 +50,19 @@ class TransformerWorkerTest
     val storeVersion = 5
     val messageVersion = storeVersion - 1
 
-    val sourceStore = MemoryVersionedStore[String, ExampleData](
+    val location = createS3ObjectLocation
+    val data = ValidExampleData(createSourceIdentifier)
+
+    val sourceStore = MemoryVersionedStore[S3ObjectLocation, ExampleData](
       initialEntries = Map(
-        Version("A", storeVersion) -> ValidExampleData(createSourceIdentifier)
+        Version(location, storeVersion) -> data
       )
+    )
+
+    val payload = CalmSourcePayload(
+      id = data.id.toString,
+      location = location,
+      version = messageVersion
     )
 
     val workIndexer = new MemoryIndexer[Work[Source]]()
@@ -57,7 +70,7 @@ class TransformerWorkerTest
     withLocalSqsQueue() { queue =>
       withWorker(queue, workIndexer = workIndexer, sourceStore = sourceStore) {
         _ =>
-          sendNotificationToSQS(queue, Version("A", messageVersion))
+          sendNotificationToSQS(queue, payload)
 
           eventually {
             workIndexer.index.values.map { _.version }.toSeq shouldBe Seq(
@@ -71,8 +84,8 @@ class TransformerWorkerTest
     queue: Queue,
     workIndexer: MemoryIndexer[Work[Source]] = new MemoryIndexer[Work[Source]](),
     workKeySender: MemoryMessageSender = new MemoryMessageSender(),
-    sourceStore: MemoryVersionedStore[String, ExampleData] =
-      MemoryVersionedStore[String, ExampleData](initialEntries = Map.empty)
+    sourceStore: MemoryVersionedStore[S3ObjectLocation, ExampleData] =
+      MemoryVersionedStore[S3ObjectLocation, ExampleData](initialEntries = Map.empty)
   )(
     testWith: TestWith[Unit, R]
   ): R =

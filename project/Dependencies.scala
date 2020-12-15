@@ -323,7 +323,7 @@ object CatalogueDependencies {
       ExternalDependencies.circeOpticsDependencies ++
       WellcomeDependencies.messagingTypesafeLibrary
 
-  // Inference  manager
+  // Inference manager
   val inferenceManagerDependencies: Seq[ModuleID] =
     ExternalDependencies.akkaHttpDependencies ++
       ExternalDependencies.wireMockDependencies

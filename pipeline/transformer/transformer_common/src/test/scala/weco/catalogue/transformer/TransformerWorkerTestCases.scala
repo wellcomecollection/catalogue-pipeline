@@ -11,11 +11,12 @@ import uk.ac.wellcome.models.work.internal.Work
 import uk.ac.wellcome.models.work.internal.WorkState.Source
 import uk.ac.wellcome.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import uk.ac.wellcome.pipeline_storage.{MemoryIndexer, PipelineStorageStream}
+import weco.catalogue.source_model.SourcePayload
 
 import scala.concurrent.Future
 import scala.util.{Failure, Try}
 
-trait TransformerWorkerTestCases[Context, Payload, SourceData]
+trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
     extends AnyFunSpec
     with Eventually
     with IntegrationPatience
@@ -38,7 +39,7 @@ trait TransformerWorkerTestCases[Context, Payload, SourceData]
   def withWorker[R](pipelineStream: PipelineStorageStream[NotificationMessage,
                                                           Work[Source],
                                                           String])(
-    testWith: TestWith[TransformerWorker[SourceData, String], R]
+    testWith: TestWith[TransformerWorker[Payload, SourceData, String], R]
   )(
     implicit context: Context
   ): R
