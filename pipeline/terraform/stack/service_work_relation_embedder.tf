@@ -26,7 +26,7 @@ module "relation_embedder" {
     queue_url = module.relation_embedder_queue.url
     topic_arn = module.relation_embedder_output_topic.arn
 
-    es_identified_index   = local.es_works_identified_index
+    es_merged_index    = local.es_works_merged_index
     es_denormalised_index = local.es_works_denormalised_index
 
     queue_parallelism            = 3  // NOTE: limit to avoid memory errors
