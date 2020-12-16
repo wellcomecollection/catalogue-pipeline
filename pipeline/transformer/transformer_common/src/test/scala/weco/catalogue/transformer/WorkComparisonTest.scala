@@ -22,24 +22,30 @@ class WorkComparisonTest extends AnyFunSpec with Matchers with WorkGenerators {
       newerWork.shouldReplace(olderWork) shouldBe false
     }
 
-    it("if the proposed work is older than the stored work, then the stored work should not be replaced") {
+    it(
+      "if the proposed work is older than the stored work, then the stored work should not be replaced") {
       val work = sourceWork()
-      val storedWork = sourceWork(sourceIdentifier = work.sourceIdentifier).withVersion(work.version + 1)
+      val storedWork = sourceWork(sourceIdentifier = work.sourceIdentifier)
+        .withVersion(work.version + 1)
 
       work.shouldReplace(storedWork) shouldBe false
       storedWork.shouldReplace(work) shouldBe true
     }
 
-    it("if a proposed work has the same version and different data, then it should replace the stored work") {
+    it(
+      "if a proposed work has the same version and different data, then it should replace the stored work") {
       val work = sourceWork()
-      val storedWork = sourceWork(sourceIdentifier = work.sourceIdentifier).withVersion(work.version)
+      val storedWork = sourceWork(sourceIdentifier = work.sourceIdentifier)
+        .withVersion(work.version)
 
       work.shouldReplace(storedWork) shouldBe true
     }
 
-    it("if a proposed work has a higher version and different data, then it should replace the stored work") {
+    it(
+      "if a proposed work has a higher version and different data, then it should replace the stored work") {
       val work = sourceWork()
-      val storedWork = sourceWork(sourceIdentifier = work.sourceIdentifier).withVersion(work.version - 1)
+      val storedWork = sourceWork(sourceIdentifier = work.sourceIdentifier)
+        .withVersion(work.version - 1)
 
       work.shouldReplace(storedWork) shouldBe true
     }

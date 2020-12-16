@@ -84,8 +84,7 @@ class ExampleTransformerTest
                                           Work[WorkState.Source],
                                           String],
     retriever: Retriever[Work[WorkState.Source]]
-  )(
-    testWith: TestWith[
+  )(testWith: TestWith[
       TransformerWorker[CalmSourcePayload, ExampleData, String],
       R])(
     implicit sourceStore: MemoryVersionedStore[S3ObjectLocation, ExampleData])

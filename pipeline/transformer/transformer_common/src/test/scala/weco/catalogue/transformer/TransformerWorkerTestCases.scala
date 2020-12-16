@@ -120,8 +120,8 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
 
     it("transforms multiple works") {
       withContext { implicit context =>
-        val payloads = (1 to 10).map {
-          _ => createPayload
+        val payloads = (1 to 10).map { _ =>
+          createPayload
         }
 
         val workIndexer = new MemoryIndexer[Work[Source]]()
@@ -278,7 +278,6 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
       queue = queue,
       indexer = workIndexer,
       sender = workKeySender) { pipelineStream =>
-
       val retriever = new MemoryRetriever[Work[Source]](index = mutable.Map()) {
         override def apply(id: String): Future[Work[Source]] =
           workIndexer.index.get(id) match {
