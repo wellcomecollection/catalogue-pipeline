@@ -36,10 +36,7 @@ class RouterWorkerServiceTest
     )
 
     withWorkerService(indexer, retriever) {
-      case (
-          QueuePair(queue, dlq),
-          worksMessageSender,
-          pathsMessageSender) =>
+      case (QueuePair(queue, dlq), worksMessageSender, pathsMessageSender) =>
         sendNotificationToSQS(queue = queue, body = work.id)
         eventually {
           assertQueueEmpty(queue)
@@ -60,10 +57,7 @@ class RouterWorkerServiceTest
     )
 
     withWorkerService(indexer, retriever) {
-      case (
-          QueuePair(queue, dlq),
-          worksMessageSender,
-          pathsMessageSender) =>
+      case (QueuePair(queue, dlq), worksMessageSender, pathsMessageSender) =>
         sendNotificationToSQS(queue = queue, body = work.id)
 
         eventually {
@@ -88,10 +82,7 @@ class RouterWorkerServiceTest
     )
 
     withWorkerService(indexer, retriever) {
-      case (
-          QueuePair(queue, dlq),
-          worksMessageSender,
-          pathsMessageSender) =>
+      case (QueuePair(queue, dlq), worksMessageSender, pathsMessageSender) =>
         sendNotificationToSQS(queue = queue, body = work.id)
 
         eventually {
@@ -119,10 +110,7 @@ class RouterWorkerServiceTest
     )
 
     withWorkerService(failingIndexer, retriever) {
-      case (
-          QueuePair(queue, dlq),
-          worksMessageSender,
-          pathsMessageSender) =>
+      case (QueuePair(queue, dlq), worksMessageSender, pathsMessageSender) =>
         sendNotificationToSQS(queue = queue, body = work.id)
 
         eventually {
@@ -134,12 +122,9 @@ class RouterWorkerServiceTest
     }
   }
 
-  def withWorkerService[R](
-    indexer: Indexer[Work[Denormalised]],
-    retriever: Retriever[Work[Merged]])(
-    testWith: TestWith[(QueuePair,
-                        MemoryMessageSender,
-                        MemoryMessageSender),
+  def withWorkerService[R](indexer: Indexer[Work[Denormalised]],
+                           retriever: Retriever[Work[Merged]])(
+    testWith: TestWith[(QueuePair, MemoryMessageSender, MemoryMessageSender),
                        R]): R =
     withLocalSqsQueuePair(visibilityTimeout = 1) {
       case q @ QueuePair(queue, _) =>

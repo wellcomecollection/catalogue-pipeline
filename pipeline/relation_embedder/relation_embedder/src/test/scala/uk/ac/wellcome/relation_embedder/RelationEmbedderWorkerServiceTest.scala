@@ -199,8 +199,7 @@ class RelationEmbedderWorkerServiceTest
       storeWorks(mergedIndex, works)
       withLocalSqsQueuePair() { queuePair =>
         withActorSystem { implicit actorSystem =>
-          withSQSStream[NotificationMessage, R](
-            queuePair.queue) { sqsStream =>
+          withSQSStream[NotificationMessage, R](queuePair.queue) { sqsStream =>
             val messageSender = new MemoryMessageSender
             val denormalisedIndex =
               mutable.Map.empty[String, Work[Denormalised]]
