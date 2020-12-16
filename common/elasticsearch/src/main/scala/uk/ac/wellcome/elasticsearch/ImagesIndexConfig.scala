@@ -22,7 +22,8 @@ object ImagesIndexConfig extends IndexConfig with WorksIndexConfigFields {
         objectField("id").fields(canonicalId, sourceIdentifier),
         data,
         keywordField("type"),
-      ).dynamic("false")
+      )
+      .dynamic("false")
 
   val source = objectField("source").fields(
     sourceWork("canonicalWork"),

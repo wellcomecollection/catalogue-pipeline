@@ -101,8 +101,7 @@ object MergedWorkIndexConfig extends WorksIndexConfig {
           textField("path")
             .copyTo("data.collectionPath.depth")
             .analyzer(pathAnalyzer.name)
-            .fields(keywordField("keyword")
-          ),
+            .fields(keywordField("keyword")),
           tokenCountField("depth").analyzer("standard")
         )
       )
