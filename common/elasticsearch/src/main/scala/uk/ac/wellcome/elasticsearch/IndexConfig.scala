@@ -1,6 +1,6 @@
 package uk.ac.wellcome.elasticsearch
 
-import com.sksamuel.elastic4s.ElasticDsl.{keywordField, textField}
+import com.sksamuel.elastic4s.ElasticDsl.{intField, keywordField, objectField, textField}
 import com.sksamuel.elastic4s.analysis.Analysis
 import com.sksamuel.elastic4s.requests.mappings.MappingDefinition
 import uk.ac.wellcome.elasticsearch.WorksAnalysis._
@@ -46,6 +46,12 @@ trait IndexConfigFields {
   val label = asciifoldingTextFieldWithKeyword("label")
 
   val canonicalId = lowercaseKeyword("canonicalId")
+
+  val version = intField("version")
+
+  val sourceIdentifier = objectField("sourceIdentifier")
+        .fields(lowercaseKeyword("value"))
+        .dynamic("false")
 }
 
 object NoStrictMapping extends IndexConfig {

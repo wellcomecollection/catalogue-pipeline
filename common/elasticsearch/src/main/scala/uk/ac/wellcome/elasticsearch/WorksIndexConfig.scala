@@ -67,10 +67,7 @@ trait WorksIndexConfigFields extends IndexConfigFields {
         textField("path"),
       ),
       objectField("imageData").fields(
-        objectField("id").fields(
-          canonicalId,
-          objectField("sourceIdentifier").fields(lowercaseKeyword("value")),
-        )
+        objectField("id").fields(canonicalId, sourceIdentifier)
       ),
       keywordField("workType")
     )
@@ -137,9 +134,7 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
   val state = objectField("state")
     .fields(
       canonicalId,
-      objectField("sourceIdentifier")
-        .fields(lowercaseKeyword("value"))
-        .dynamic("false"),
+      sourceIdentifier,
       dateField("modifiedTime"),
       objectField("relations")
         .dynamic("false"),
@@ -160,7 +155,7 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
         .fields(keywordField("type"))
         .dynamic("false"),
       objectField("redirect").dynamic("false"),
-      intField("version")
+      version
     )
 
   /** Denormalised relations make index sizes explode from about 5 GB without relations
