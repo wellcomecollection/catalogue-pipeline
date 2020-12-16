@@ -3,16 +3,17 @@ module "worker" {
 
   name = local.namespace
 
-  image              = local.calm_adapter_image
-  env_vars           = local.env_vars
-  secret_env_vars    = local.secret_env_vars
-  min_capacity       = 1
-  max_capacity       = 2
-  desired_task_count = 1
-  cpu                = 512
-  memory             = 1024
+  image           = local.calm_adapter_image
+  env_vars        = local.env_vars
+  secret_env_vars = local.secret_env_vars
 
-  cluster_name           = local.namespace
+  min_capacity = 0
+  max_capacity = 2
+
+  cpu    = 512
+  memory = 1024
+
+  cluster_name           = aws_ecs_cluster.cluster.name
   cluster_arn            = aws_ecs_cluster.cluster.arn
   namespace_id           = aws_service_discovery_private_dns_namespace.namespace.id
   subnets                = local.private_subnets
