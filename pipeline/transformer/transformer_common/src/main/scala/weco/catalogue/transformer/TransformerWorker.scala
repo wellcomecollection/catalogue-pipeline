@@ -97,6 +97,8 @@ trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest]
         StoreReadError(err, p)
       }
 
+  import WorkComparison._
+
   private def compareToStored(workResult: Result[(Work[Source], StoreKey)]): Future[Result[(Option[Work[Source]], StoreKey)]] =
     workResult match {
 
@@ -106,10 +108,15 @@ trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest]
       //
       // The pipeline is meant to be idempotent, so sending the work forward would
       // be a no-op.
+      //
+      // This is particularly meant to reduce the amount of work we do after the
+      // nightly Sierra reharvest, when ~250k Sierra source records get synced with
+      // Calm.  The records get a new modifiedDate from Sierra, but none of the data
+      // we care about for the pipeline is changed.
       case Right((newWork, key)) =>
         retriever.apply(workIndexable.id(newWork))
           .map { storedWork =>
-            if (WorkComparison.isNewer(storedWork, newWork)) {
+            if (newWork.shouldReplace(storedWork)) {
               Right((Some(newWork), key))
             } else {
               Right((None, key))

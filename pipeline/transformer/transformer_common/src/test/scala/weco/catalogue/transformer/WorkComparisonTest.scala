@@ -5,38 +5,43 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.generators.WorkGenerators
 
 class WorkComparisonTest extends AnyFunSpec with Matchers with WorkGenerators {
-  it("a work is not newer than itself") {
-    val work = sourceWork()
+  import WorkComparison._
 
-    WorkComparison.isNewer(work, work) shouldBe false
-  }
+  describe("SourceWork.shouldReplace") {
+    it("a work should not replace itself") {
+      val work = sourceWork()
 
-  it("if a work is the same up to version, then it is not newer") {
-    val olderWork = sourceWork()
-    val newerWork = olderWork.withVersion(olderWork.version + 1)
+      work.shouldReplace(work) shouldBe false
+    }
 
-    WorkComparison.isNewer(olderWork, newerWork) shouldBe false
-    WorkComparison.isNewer(newerWork, olderWork) shouldBe false
-  }
+    it("if only the version has changed, then a work should not be replaced") {
+      val olderWork = sourceWork()
+      val newerWork = olderWork.withVersion(olderWork.version + 1)
 
-  it("a work is never newer than a work with a higher version") {
-    val work = sourceWork()
-    val storedWork = sourceWork(sourceIdentifier = work.sourceIdentifier).withVersion(work.version + 1)
+      olderWork.shouldReplace(newerWork) shouldBe false
+      newerWork.shouldReplace(olderWork) shouldBe false
+    }
 
-    WorkComparison.isNewer(storedWork, work) shouldBe false
-  }
+    it("if the proposed work is older than the stored work, then the stored work should not be replaced") {
+      val work = sourceWork()
+      val storedWork = sourceWork(sourceIdentifier = work.sourceIdentifier).withVersion(work.version + 1)
 
-  it("a work is newer than a work with the same version if it has different data") {
-    val work = sourceWork()
-    val storedWork = sourceWork(sourceIdentifier = work.sourceIdentifier).withVersion(work.version)
+      work.shouldReplace(storedWork) shouldBe false
+      storedWork.shouldReplace(work) shouldBe true
+    }
 
-    WorkComparison.isNewer(storedWork, work) shouldBe true
-  }
+    it("if a proposed work has the same version and different data, then it should replace the stored work") {
+      val work = sourceWork()
+      val storedWork = sourceWork(sourceIdentifier = work.sourceIdentifier).withVersion(work.version)
 
-  it("a work is newer than a work with a lower version if it has different data") {
-    val work = sourceWork()
-    val storedWork = sourceWork(sourceIdentifier = work.sourceIdentifier).withVersion(work.version - 1)
+      work.shouldReplace(storedWork) shouldBe true
+    }
 
-    WorkComparison.isNewer(storedWork, work) shouldBe true
+    it("if a proposed work has a higher version and different data, then it should replace the stored work") {
+      val work = sourceWork()
+      val storedWork = sourceWork(sourceIdentifier = work.sourceIdentifier).withVersion(work.version - 1)
+
+      work.shouldReplace(storedWork) shouldBe true
+    }
   }
 }
