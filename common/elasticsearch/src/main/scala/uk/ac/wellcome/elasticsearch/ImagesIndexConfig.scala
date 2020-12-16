@@ -17,14 +17,15 @@ object ImagesIndexConfig extends IndexConfig with WorksIndexConfigFields {
   )
 
   private def sourceWork(fieldName: String): ObjectField =
-    objectField(fieldName).fields(
-      objectField("id").fields(
-        canonicalId,
-        objectField("sourceIdentifier").fields(lowercaseKeyword("value")),
-      ),
-      data,
-      keywordField("type"),
-    )
+    objectField(fieldName)
+      .fields(
+        objectField("id").fields(
+          canonicalId,
+          objectField("sourceIdentifier").fields(lowercaseKeyword("value")),
+        ),
+        data,
+        keywordField("type"),
+      ).dynamic("false")
 
   val source = objectField("source").fields(
     sourceWork("canonicalWork"),
@@ -32,15 +33,21 @@ object ImagesIndexConfig extends IndexConfig with WorksIndexConfigFields {
     keywordField("type")
   )
 
-  val indexedState = objectField("state").fields(
-    objectField("sourceIdentifier").fields(lowercaseKeyword("value")),
-    canonicalId,
-    inferredData,
-  )
+  val indexedState = objectField("state")
+    .fields(
+      objectField("sourceIdentifier")
+        .fields(lowercaseKeyword("value"))
+        .dynamic("false"),
+      canonicalId,
+      inferredData,
+    )
 
   def mapping: MappingDefinition =
     properties(
+      intField("version"),
+      dateField("modifiedTime"),
       source,
       indexedState,
-    ).dynamic(DynamicMapping.False)
+      objectField("locations").dynamic("false")
+    ).dynamic(DynamicMapping.Strict)
 }

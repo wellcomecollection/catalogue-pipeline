@@ -132,22 +132,35 @@ object DenormalisedWorkIndexConfig extends WorksIndexConfig {
 
 object IndexedWorkIndexConfig extends WorksIndexConfig {
 
-  val state = objectField("state").fields(
-    canonicalId,
-    objectField("sourceIdentifier").fields(lowercaseKeyword("value")),
-  )
+  override val dynamicMapping: DynamicMapping = DynamicMapping.Strict
+
+  val state = objectField("state")
+    .fields(
+      canonicalId,
+      objectField("sourceIdentifier")
+        .fields(lowercaseKeyword("value"))
+        .dynamic("false"),
+      dateField("modifiedTime"),
+      objectField("relations")
+        .dynamic("false"),
+      objectField("derivedData")
+        .fields(booleanField("availableOnline"))
+        .dynamic("false")
+    )
 
   val fields =
     Seq(
       state,
       keywordField("type"),
-      data,
-      objectField("invisibilityReasons").fields(
-        keywordField("type"),
-      ),
-      objectField("deletedReason").fields(
-        keywordField("type"),
-      )
+      data.dynamic("false"),
+      objectField("invisibilityReasons")
+        .fields(keywordField("type"))
+        .dynamic("false"),
+      objectField("deletedReason")
+        .fields(keywordField("type"))
+        .dynamic("false"),
+      objectField("redirect").dynamic("false"),
+      intField("version")
     )
 
   /** Denormalised relations make index sizes explode from about 5 GB without relations
