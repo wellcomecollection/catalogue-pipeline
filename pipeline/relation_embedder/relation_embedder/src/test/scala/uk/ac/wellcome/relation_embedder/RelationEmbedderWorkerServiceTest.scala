@@ -21,7 +21,6 @@ import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.work.internal.WorkState.{Denormalised, Merged}
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.monitoring.memory.MemoryMetrics
 import uk.ac.wellcome.pipeline_storage.MemoryIndexer
 import uk.ac.wellcome.json.JsonUtil._
 
@@ -201,8 +200,7 @@ class RelationEmbedderWorkerServiceTest
       withLocalSqsQueuePair() { queuePair =>
         withActorSystem { implicit actorSystem =>
           withSQSStream[NotificationMessage, R](
-            queuePair.queue,
-            new MemoryMetrics) { sqsStream =>
+            queuePair.queue) { sqsStream =>
             val messageSender = new MemoryMessageSender
             val denormalisedIndex =
               mutable.Map.empty[String, Work[Denormalised]]
