@@ -58,7 +58,7 @@ object DenormalisedWorkIndexConfig extends WorksIndexConfig {
 }
 
 object IndexedWorkIndexConfig extends WorksIndexConfig {
-  
+
   import WorksAnalysis._
 
   // Here we set dynamic strict to be sure the object vaguely looks like a work
@@ -106,7 +106,7 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
           canonicalId,
           sourceIdentifier,
           objectField("otherIdentifiers").fields(lowercaseKeyword("value"))
-          )
+        )
       ),
       objectField("production").fields(
         label,
