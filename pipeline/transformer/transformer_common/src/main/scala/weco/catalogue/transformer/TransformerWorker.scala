@@ -7,12 +7,13 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.work.internal.WorkState.Source
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.pipeline_storage.PipelineStorageStream
+import uk.ac.wellcome.pipeline_storage.{PipelineStorageStream, Retriever}
+import uk.ac.wellcome.pipeline_storage.Indexable._
 import uk.ac.wellcome.storage.{Identified, ReadError, Version}
 import weco.catalogue
 import weco.catalogue.source_model.SourcePayload
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 sealed abstract class TransformerWorkerError(msg: String) extends Exception(msg)
@@ -37,8 +38,12 @@ trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest]
   type Result[T] = Either[TransformerWorkerError, T]
   type StoreKey = Version[String, Int]
 
+  implicit val ec: ExecutionContext
+
   def name: String = this.getClass.getSimpleName
   val transformer: Transformer[SourceData]
+
+  val retriever: Retriever[Work[Source]]
 
   val pipelineStream: PipelineStorageStream[NotificationMessage,
                                             Work[Source],
@@ -49,14 +54,17 @@ trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest]
 
   implicit val decoder: Decoder[Payload]
 
-  def process(message: NotificationMessage): Result[(Work[Source], StoreKey)] =
-    for {
-      payload <- decodePayload(message)
-      key = Version(payload.id, payload.version)
-      recordResult <- getRecord(payload)
-      (record, version) = recordResult
-      work <- work(record, version, key)
-    } yield (work, key)
+  def process(message: NotificationMessage)
+    : Future[Result[Option[(Work[Source], StoreKey)]]] =
+    Future {
+      for {
+        payload <- decodePayload(message)
+        key = Version(payload.id, payload.version)
+        recordResult <- getRecord(payload)
+        (record, version) = recordResult
+        newWork <- work(record, version, key)
+      } yield (newWork, key)
+    }.flatMap { compareToStored }
 
   private def work(sourceData: SourceData,
                    version: Int,
@@ -89,11 +97,49 @@ trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest]
         StoreReadError(err, p)
       }
 
+  import WorkComparison._
+
+  private def compareToStored(workResult: Result[(Work[Source], StoreKey)])
+    : Future[Result[Option[(Work[Source], StoreKey)]]] =
+    workResult match {
+
+      // Once we've transformed the Work, we query forward -- is this a work we've
+      // seen before?  If it's a Work the pipeline already knows about, we can skip
+      // a bunch of unnecessary processing by not sending it on.
+      //
+      // The pipeline is meant to be idempotent, so sending the work forward would
+      // be a no-op.
+      //
+      // This is particularly meant to reduce the amount of work we do after the
+      // nightly Sierra reharvest, when ~250k Sierra source records get synced with
+      // Calm.  The records get a new modifiedDate from Sierra, but none of the data
+      // we care about for the pipeline is changed.
+      case Right((newWork, key)) =>
+        retriever
+          .apply(workIndexable.id(newWork))
+          .map { storedWork =>
+            if (newWork.shouldReplace(storedWork)) {
+              info(
+                s"$name: from $key transformed work; already in pipeline so not re-sending")
+              Right(Some((newWork, key)))
+            } else {
+              Right(None)
+            }
+          }
+          .recover {
+            case err: Throwable =>
+              debug(s"Unable to retrieve work $key: $err")
+              Right(Some((newWork, key)))
+          }
+
+      case Left(err) => Future.successful(Left(err))
+    }
+
   def run(): Future[Done] =
     pipelineStream.foreach(
       name,
       (notification: NotificationMessage) =>
-        process(notification) match {
+        process(notification).map {
           case Left(err) =>
             // We do some slightly nicer logging here to give context to the errors
             err match {
@@ -104,10 +150,16 @@ trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest]
               case TransformerError(_, sourceData, key) =>
                 error(s"$name: TransformerError on $sourceData with $key")
             }
-            Future.failed(err)
-          case Right((work, key)) =>
+
+            throw err
+
+          case Right(None) =>
+            debug(s"$name: no transformed work returned for $notification")
+            None
+
+          case Right(Some((work, key))) =>
             info(s"$name: from $key transformed work with id ${work.id}")
-            Future.successful(Some(work))
+            Some(work)
       }
     )
 }

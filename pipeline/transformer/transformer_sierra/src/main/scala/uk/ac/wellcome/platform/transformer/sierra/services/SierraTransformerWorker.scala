@@ -4,7 +4,7 @@ import io.circe.Decoder
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.work.internal.Work
 import uk.ac.wellcome.models.work.internal.WorkState.Source
-import uk.ac.wellcome.pipeline_storage.PipelineStorageStream
+import uk.ac.wellcome.pipeline_storage.{PipelineStorageStream, Retriever}
 import uk.ac.wellcome.platform.transformer.sierra.SierraTransformer
 import uk.ac.wellcome.sierra_adapter.model.SierraTransformable
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
@@ -14,13 +14,18 @@ import uk.ac.wellcome.typesafe.Runnable
 import weco.catalogue.source_model.SierraSourcePayload
 import weco.catalogue.transformer.{Transformer, TransformerWorker}
 
+import scala.concurrent.ExecutionContext
+
 class SierraTransformerWorker[MsgDestination](
   val pipelineStream: PipelineStorageStream[NotificationMessage,
                                             Work[Source],
                                             MsgDestination],
-  sierraReadable: Readable[S3ObjectLocation, SierraTransformable]
+  sierraReadable: Readable[S3ObjectLocation, SierraTransformable],
+  val retriever: Retriever[Work[Source]]
 )(
-  implicit val decoder: Decoder[SierraSourcePayload]
+  implicit
+  val decoder: Decoder[SierraSourcePayload],
+  val ec: ExecutionContext
 ) extends Runnable
     with TransformerWorker[
       SierraSourcePayload,

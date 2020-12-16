@@ -18,6 +18,7 @@ import uk.ac.wellcome.models.work.internal.WorkState.Source
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.pipeline_storage.typesafe.{
   ElasticIndexerBuilder,
+  ElasticRetrieverBuilder,
   PipelineStorageStreamBuilder
 }
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
@@ -50,7 +51,8 @@ object Main extends WellcomeTypesafeApp with AWSClientConfigBuilder {
 
     new MetsTransformerWorker(
       pipelineStream = pipelineStream,
-      metsXmlStore = S3TypedStore[String]
+      metsXmlStore = S3TypedStore[String],
+      retriever = ElasticRetrieverBuilder.apply[Work[Source]](config, esClient)
     )
   }
 }

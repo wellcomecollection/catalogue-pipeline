@@ -4,7 +4,7 @@ import io.circe.Decoder
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.work.internal.Work
 import uk.ac.wellcome.models.work.internal.WorkState.Source
-import uk.ac.wellcome.pipeline_storage.PipelineStorageStream
+import uk.ac.wellcome.pipeline_storage.{PipelineStorageStream, Retriever}
 import uk.ac.wellcome.platform.transformer.calm.{CalmRecord, CalmTransformer}
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.Readable
@@ -13,13 +13,18 @@ import uk.ac.wellcome.typesafe.Runnable
 import weco.catalogue.source_model.CalmSourcePayload
 import weco.catalogue.transformer.{Transformer, TransformerWorker}
 
+import scala.concurrent.ExecutionContext
+
 class CalmTransformerWorker[MsgDestination](
   val pipelineStream: PipelineStorageStream[NotificationMessage,
                                             Work[Source],
                                             MsgDestination],
-  recordReadable: Readable[S3ObjectLocation, CalmRecord]
+  recordReadable: Readable[S3ObjectLocation, CalmRecord],
+  val retriever: Retriever[Work[Source]]
 )(
-  implicit val decoder: Decoder[CalmSourcePayload]
+  implicit
+  val decoder: Decoder[CalmSourcePayload],
+  val ec: ExecutionContext
 ) extends Runnable
     with TransformerWorker[CalmSourcePayload, CalmRecord, MsgDestination] {
 

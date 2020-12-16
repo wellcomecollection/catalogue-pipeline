@@ -6,7 +6,7 @@ import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.work.internal.{IdentifierType, Work, WorkState}
-import uk.ac.wellcome.pipeline_storage.PipelineStorageStream
+import uk.ac.wellcome.pipeline_storage.{PipelineStorageStream, Retriever}
 import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
 import uk.ac.wellcome.platform.transformer.miro.models.MiroMetadata
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
@@ -18,6 +18,8 @@ import weco.catalogue.transformer.{
   TransformerWorker,
   TransformerWorkerTestCases
 }
+
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class MiroTransformerWorkerTest
     extends TransformerWorkerTestCases[
@@ -72,7 +74,8 @@ class MiroTransformerWorkerTest
   override def withWorker[R](
     pipelineStream: PipelineStorageStream[NotificationMessage,
                                           Work[WorkState.Source],
-                                          String])(
+                                          String],
+    retriever: Retriever[Work[WorkState.Source]])(
     testWith: TestWith[
       TransformerWorker[MiroSourcePayload, (MiroRecord, MiroMetadata), String],
       R])(
@@ -80,7 +83,8 @@ class MiroTransformerWorkerTest
     testWith(
       new MiroTransformerWorker(
         pipelineStream = pipelineStream,
-        miroReadable = miroReadable
+        miroReadable = miroReadable,
+        retriever = retriever
       )
     )
 }

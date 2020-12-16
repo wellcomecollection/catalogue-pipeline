@@ -10,9 +10,17 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.work.internal.Work
 import uk.ac.wellcome.models.work.internal.WorkState.Source
 import uk.ac.wellcome.pipeline_storage.fixtures.PipelineStorageStreamFixtures
-import uk.ac.wellcome.pipeline_storage.{MemoryIndexer, PipelineStorageStream}
+import uk.ac.wellcome.pipeline_storage.{
+  MemoryIndexer,
+  MemoryRetriever,
+  PipelineStorageStream,
+  Retriever,
+  RetrieverNotFoundException
+}
 import weco.catalogue.source_model.SourcePayload
 
+import scala.collection.mutable
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Try}
 
@@ -36,7 +44,8 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
 
   def withWorker[R](pipelineStream: PipelineStorageStream[NotificationMessage,
                                                           Work[Source],
-                                                          String])(
+                                                          String],
+                    retriever: Retriever[Work[Source]])(
     testWith: TestWith[TransformerWorker[Payload, SourceData, String], R]
   )(
     implicit context: Context
@@ -66,6 +75,72 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
                 sentKeys should contain theSameElementsAs storedKeys
 
                 assertMatches(payload, workIndexer.index.values.head)
+              }
+            }
+        }
+      }
+    }
+
+    it("is lazy -- if a work is already stored, it doesn't resend it") {
+      withContext { implicit context =>
+        val payload = createPayload
+
+        val workIndexer = new MemoryIndexer[Work[Source]]()
+        val workKeySender = new MemoryMessageSender()
+
+        // We need to wait for the pipeline storage stream to save the works.
+        // If we're too quick in retrying, we'll retry before a work is in the index!
+        withLocalSqsQueuePair(visibilityTimeout = 2) {
+          case QueuePair(queue, dlq) =>
+            withWorkerImpl(queue, workIndexer, workKeySender) { _ =>
+              (1 to 5).foreach { _ =>
+                sendNotificationToSQS(queue, payload)
+              }
+
+              eventually {
+                assertQueueEmpty(dlq)
+                assertQueueEmpty(queue)
+
+                // Only one work is indexed
+                workIndexer.index should have size 1
+
+                // Only one message was sent
+                workKeySender.messages should have size 1
+
+                val sentKeys = workKeySender.messages.map { _.body }
+                val storedKeys = workIndexer.index.keys
+                sentKeys should contain theSameElementsAs storedKeys
+
+                assertMatches(payload, workIndexer.index.values.head)
+              }
+            }
+        }
+      }
+    }
+
+    it("transforms multiple works") {
+      withContext { implicit context =>
+        val payloads = (1 to 10).map { _ =>
+          createPayload
+        }
+
+        val workIndexer = new MemoryIndexer[Work[Source]]()
+        val workKeySender = new MemoryMessageSender()
+
+        withLocalSqsQueuePair() {
+          case QueuePair(queue, dlq) =>
+            withWorkerImpl(queue, workIndexer, workKeySender) { _ =>
+              payloads.foreach { sendNotificationToSQS(queue, _) }
+
+              eventually {
+                assertQueueEmpty(dlq)
+                assertQueueEmpty(queue)
+
+                workIndexer.index should have size payloads.size
+
+                val sentKeys = workKeySender.messages.map { _.body }
+                val storedKeys = workIndexer.index.keys
+                sentKeys should contain theSameElementsAs storedKeys
               }
             }
         }
@@ -203,7 +278,15 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
       queue = queue,
       indexer = workIndexer,
       sender = workKeySender) { pipelineStream =>
-      withWorker(pipelineStream) { worker =>
+      val retriever = new MemoryRetriever[Work[Source]](index = mutable.Map()) {
+        override def apply(id: String): Future[Work[Source]] =
+          workIndexer.index.get(id) match {
+            case Some(w) => Future.successful(w)
+            case None    => Future.failed(new RetrieverNotFoundException(id))
+          }
+      }
+
+      withWorker(pipelineStream, retriever) { worker =>
         worker.run()
 
         testWith(())

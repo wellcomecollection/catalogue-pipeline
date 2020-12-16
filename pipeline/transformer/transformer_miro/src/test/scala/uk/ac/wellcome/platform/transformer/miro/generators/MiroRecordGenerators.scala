@@ -1,8 +1,17 @@
 package uk.ac.wellcome.platform.transformer.miro.generators
 
+import org.apache.commons.lang3.StringUtils
+import uk.ac.wellcome.fixtures.RandomGenerators
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 
-trait MiroRecordGenerators {
+trait MiroRecordGenerators extends RandomGenerators {
+  def createImageNumber: String = {
+    val prefix = chooseFrom("A", "B", "L", "M")
+    val number = randomInt(from = 1, to = 9999999)
+
+    s"$prefix${StringUtils.leftPad(number.toString, 7, "0")}"
+  }
+
   def createMiroRecordWith(
     title: Option[String] = Some("Auto-created title in MiroRecordGenerators"),
     creator: Option[List[Option[String]]] = None,
@@ -24,7 +33,7 @@ trait MiroRecordGenerators {
     libraryRefId: List[Option[String]] = Nil,
     award: List[Option[String]] = Nil,
     awardDate: List[Option[String]] = Nil,
-    imageNumber: String = "M0000001"
+    imageNumber: String = createImageNumber
   ): MiroRecord =
     MiroRecord(
       title = title,
