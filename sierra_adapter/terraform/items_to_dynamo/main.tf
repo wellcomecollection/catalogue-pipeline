@@ -12,8 +12,7 @@ module "sierra_to_dynamo_service" {
     demultiplexer_queue_url = module.demultiplexer_queue.url
     metrics_namespace       = local.service_name
 
-    vhs_table_name  = var.vhs_sierra_items_table_name
-    vhs_bucket_name = var.vhs_sierra_items_bucket_name
+    dynamo_table_name = aws_dynamodb_table.items.name
 
     topic_arn = module.sierra_to_dynamo_updates_topic.arn
   }
