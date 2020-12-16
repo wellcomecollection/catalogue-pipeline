@@ -54,7 +54,8 @@ trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest]
 
   implicit val decoder: Decoder[Payload]
 
-  def process(message: NotificationMessage): Future[Result[Option[(Work[Source], StoreKey)]]] =
+  def process(message: NotificationMessage)
+    : Future[Result[Option[(Work[Source], StoreKey)]]] =
     Future {
       for {
         payload <- decodePayload(message)
@@ -63,8 +64,7 @@ trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest]
         (record, version) = recordResult
         newWork <- work(record, version, key)
       } yield (newWork, key)
-    }
-      .flatMap { compareToStored }
+    }.flatMap { compareToStored }
 
   private def work(sourceData: SourceData,
                    version: Int,
@@ -99,7 +99,8 @@ trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest]
 
   import WorkComparison._
 
-  private def compareToStored(workResult: Result[(Work[Source], StoreKey)]): Future[Result[Option[(Work[Source], StoreKey)]]] =
+  private def compareToStored(workResult: Result[(Work[Source], StoreKey)])
+    : Future[Result[Option[(Work[Source], StoreKey)]]] =
     workResult match {
 
       // Once we've transformed the Work, we query forward -- is this a work we've
@@ -114,10 +115,12 @@ trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest]
       // Calm.  The records get a new modifiedDate from Sierra, but none of the data
       // we care about for the pipeline is changed.
       case Right((newWork, key)) =>
-        retriever.apply(workIndexable.id(newWork))
+        retriever
+          .apply(workIndexable.id(newWork))
           .map { storedWork =>
             if (newWork.shouldReplace(storedWork)) {
-              info(s"$name: from $key transformed work; already in pipeline so not re-sending")
+              info(
+                s"$name: from $key transformed work; already in pipeline so not re-sending")
               Right(Some((newWork, key)))
             } else {
               Right(None)
