@@ -5,7 +5,7 @@ import com.sksamuel.elastic4s.analysis.Analysis
 import com.sksamuel.elastic4s.requests.mappings.{MappingDefinition, ObjectField}
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
 
-object ImagesIndexConfig extends IndexConfig with WorksIndexConfigFields {
+object ImagesIndexConfig extends IndexConfig with IndexConfigFields {
 
   val analysis: Analysis = WorksAnalysis()
 
@@ -16,17 +16,42 @@ object ImagesIndexConfig extends IndexConfig with WorksIndexConfigFields {
     keywordField("palette")
   )
 
-  val derivedImageData = objectField("derivedData").fields(
-    location("thumbnail")
-  )
-
-  private def sourceWork(fieldName: String): ObjectField =
-    objectField(fieldName).fields(
-      id(),
-      data(pathField = textField("path")),
-      keywordField("type"),
-      version
-    )
+  def sourceWork(fieldName: String): ObjectField =
+    objectField(fieldName)
+      .fields(
+        objectField("id").fields(canonicalId, sourceIdentifier),
+        objectField("data").fields(
+          objectField("otherIdentifiers").fields(lowercaseKeyword("value")),
+          englishTextKeywordField("title"),
+          englishTextKeywordField("alternativeTitles"),
+          englishTextField("description"),
+          englishTextKeywordField("physicalDescription"),
+          objectField("contributors").fields(
+            objectField("agent").fields(label),
+          ),
+          objectField("subjects").fields(
+            objectField("concepts").fields(label)
+          ),
+          objectField("genres").fields(
+            objectField("concepts").fields(label)
+          ),
+          objectField("production").fields(
+            objectField("places").fields(label),
+            objectField("agents").fields(label),
+            objectField("dates").fields(label),
+            objectField("function").fields(label)
+          ),
+          objectField("languages").fields(
+            label,
+            keywordField("id")
+          ),
+          textField("edition"),
+          objectField("notes").fields(englishTextField("content")),
+          objectField("collectionPath").fields(label, textField("path")),
+        ),
+        keywordField("type"),
+      )
+      .dynamic("false")
 
   val source = objectField("source").fields(
     sourceWork("canonicalWork"),
@@ -34,19 +59,29 @@ object ImagesIndexConfig extends IndexConfig with WorksIndexConfigFields {
     keywordField("type")
   )
 
-  val indexedState = objectField("state").fields(
-    sourceIdentifier,
-    canonicalId,
-    inferredData,
-    derivedImageData
+  val state = objectField("state")
+    .fields(
+      canonicalId,
+      sourceIdentifier,
+      inferredData,
+      objectField("derivedData").dynamic("false")
+    )
+
+  val fields = Seq(
+    version,
+    dateField("modifiedTime"),
+    source,
+    state,
+    objectField("locations")
+      .fields(
+        objectField("license").fields(keywordField("id")),
+      )
+      .dynamic("false")
   )
 
+  // Here we set dynamic strict to be sure the object vaguely looks like an
+  // image and contains the core fields, adding DynamicMapping.False in places
+  // where we do not need to map every field and can save CPU.
   def mapping: MappingDefinition =
-    properties(
-      version,
-      modifiedTime,
-      source,
-      indexedState,
-      location("locations")
-    ).dynamic(DynamicMapping.Strict)
+    properties(fields).dynamic(DynamicMapping.Strict)
 }
