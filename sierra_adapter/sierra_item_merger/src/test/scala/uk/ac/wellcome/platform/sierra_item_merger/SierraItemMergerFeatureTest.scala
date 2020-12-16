@@ -4,11 +4,9 @@ import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.messaging.fixtures.SQS
-import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.platform.sierra_item_merger.fixtures.SierraItemMergerFixtures
 import uk.ac.wellcome.sierra_adapter.model.{
   SierraGenerators,
-  SierraItemRecord,
   SierraTransformable
 }
 import uk.ac.wellcome.sierra_adapter.model.Implicits._
@@ -33,17 +31,14 @@ class SierraItemMergerFeatureTest
       val itemRecord = createSierraItemRecordWith(
         bibIds = List(bibId)
       )
-      val key = Version(itemRecord.id.withoutCheckDigit, 0)
-      val itemRecordStore =
-        createStore[SierraItemRecord](Map(key -> itemRecord))
 
       val sourceVHS = createSourceVHS[SierraTransformable]
 
-      withSierraWorkerService(queue, itemRecordStore, sourceVHS) {
+      withSierraWorkerService(queue, sourceVHS) {
         case (service, messageSender) =>
           service.run()
 
-          sendNotificationToSQS(queue = queue, key)
+          sendNotificationToSQS(queue = queue, itemRecord)
 
           val expectedSierraTransformable =
             createSierraTransformableWith(
@@ -66,56 +61,25 @@ class SierraItemMergerFeatureTest
     }
   }
 
-  it("drops the message if the version in the items VHS has advanced") {
-    withLocalSqsQueue() { queue =>
-      val bibId = createSierraBibNumber
-      val itemRecord = createSierraItemRecordWith(
-        bibIds = List(bibId)
-      )
-      val id = itemRecord.id.withoutCheckDigit
-      val key = Version(id, 0)
-      val itemRecordStore =
-        createStore[SierraItemRecord](Map(key.copy(version = 1) -> itemRecord))
-
-      withSierraWorkerService(queue, itemRecordStore) {
-        case (service, messageSender) =>
-          service.run()
-
-          sendNotificationToSQS(queue = queue, key)
-
-          Thread.sleep(500)
-
-          eventually {
-            itemRecordStore.getLatest(id).right.get.id.version shouldBe 1
-            messageSender.getMessages[Version[String, Int]] shouldBe empty
-          }
-      }
-    }
-  }
-
   it("stores multiple items from SQS") {
     withLocalSqsQueue() { queue =>
       val bibId1 = createSierraBibNumber
       val itemRecord1 = createSierraItemRecordWith(
         bibIds = List(bibId1)
       )
-      val key1 = Version(itemRecord1.id.withoutCheckDigit, 0)
 
       val bibId2 = createSierraBibNumber
       val itemRecord2 = createSierraItemRecordWith(
         bibIds = List(bibId2)
       )
-      val key2 = Version(itemRecord2.id.withoutCheckDigit, 0)
-      val itemRecordStore = createStore[SierraItemRecord](
-        Map(key1 -> itemRecord1, key2 -> itemRecord2))
 
       val sourceVHS = createSourceVHS[SierraTransformable]
 
-      withSierraWorkerService(queue, itemRecordStore, sourceVHS) {
+      withSierraWorkerService(queue, sourceVHS) {
         case (service, messageSender) =>
           service.run()
-          sendNotificationToSQS(queue, key1)
-          sendNotificationToSQS(queue, key2)
+          sendNotificationToSQS(queue, itemRecord1)
+          sendNotificationToSQS(queue, itemRecord2)
 
           eventually {
             val expectedSierraTransformable1 =
@@ -155,17 +119,14 @@ class SierraItemMergerFeatureTest
       val itemRecord = createSierraItemRecordWith(
         bibIds = bibIds
       )
-      val key = Version(itemRecord.id.withoutCheckDigit, 0)
-      val itemRecordStore =
-        createStore[SierraItemRecord](Map(key -> itemRecord))
 
       val sourceVHS = createSourceVHS[SierraTransformable]
 
-      withSierraWorkerService(queue, itemRecordStore, sourceVHS) {
+      withSierraWorkerService(queue, sourceVHS) {
         case (service, messageSender) =>
           service.run()
 
-          sendNotificationToSQS(queue = queue, key)
+          sendNotificationToSQS(queue = queue, itemRecord)
 
           val expectedTransformables = bibIds.map { bibId =>
             createSierraTransformableWith(

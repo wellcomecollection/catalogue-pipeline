@@ -6,10 +6,7 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
-import uk.ac.wellcome.platform.sierra_item_merger.store.{
-  ItemStore,
-  VersionExpectedConflictException
-}
+import uk.ac.wellcome.sierra_adapter.model.SierraItemRecord
 import uk.ac.wellcome.storage.{Identified, Version}
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.typesafe.Runnable
@@ -20,7 +17,6 @@ import scala.concurrent.{ExecutionContext, Future}
 class SierraItemMergerWorkerService[Destination](
   sqsStream: SQSStream[NotificationMessage],
   sierraItemMergerUpdaterService: SierraItemMergerUpdaterService,
-  itemRecordStore: ItemStore,
   messageSender: MessageSender[Destination]
 )(implicit ec: ExecutionContext)
     extends Runnable
@@ -28,18 +24,16 @@ class SierraItemMergerWorkerService[Destination](
 
   private def process(message: NotificationMessage): Future[Unit] = {
     val f = for {
-      key <- fromJson[Version[String, Int]](message.body).toEither
-      itemRecord <- itemRecordStore.get(key)
+      itemRecord <- fromJson[SierraItemRecord](message.body).toEither
       updatedKeys <- sierraItemMergerUpdaterService
         .update(itemRecord)
         .left
         .map(id => id.e)
-    } yield (updatedKeys)
+    } yield updatedKeys
 
     f match {
-      case Right(updates)                           => sendUpdates(updates)
-      case Left(VersionExpectedConflictException()) => Future.successful(())
-      case Left(e)                                  => Future.failed(e)
+      case Right(updates) => sendUpdates(updates)
+      case Left(e)        => Future.failed(e)
     }
   }
 

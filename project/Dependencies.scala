@@ -316,6 +316,7 @@ object CatalogueDependencies {
     WellcomeDependencies.storageTypesafeLibrary ++
       WellcomeDependencies.messagingTypesafeLibrary ++
       WellcomeDependencies.jsonLibrary ++
+      WellcomeDependencies.typesafeLibrary ++
       ExternalDependencies.javaxDependencies
 
   val sierraReaderDependencies: Seq[ModuleID] =

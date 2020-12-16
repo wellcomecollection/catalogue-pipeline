@@ -1,13 +1,22 @@
 package uk.ac.wellcome.platform.sierra_items_to_dynamo.merger
 
+import uk.ac.wellcome.platform.sierra_items_to_dynamo.models.SierraItemLink
 import uk.ac.wellcome.sierra_adapter.model.SierraItemRecord
 
 object SierraItemRecordMerger {
-  def mergeItems(existingRecord: SierraItemRecord,
-                 updatedRecord: SierraItemRecord): Option[SierraItemRecord] = {
-    if (existingRecord.modifiedDate.isBefore(updatedRecord.modifiedDate)) {
+  def mergeItems(existingLink: SierraItemLink,
+                 newRecord: SierraItemRecord): Option[SierraItemLink] = {
+    assert(
+      existingLink.id == newRecord.id,
+      s"Identifiers don't match: existingLink (${existingLink.id}) != itemRecord (${newRecord.id})"
+    )
+
+    if (existingLink.modifiedDate.isBefore(newRecord.modifiedDate)) {
       Some(
-        updatedRecord.copy(
+        SierraItemLink(
+          id = newRecord.id,
+          modifiedDate = newRecord.modifiedDate,
+          bibIds = newRecord.bibIds,
           // Let's suppose we have
           //
           //    oldRecord = (linked = {1, 2, 3}, unlinked = {4, 5})
@@ -26,8 +35,9 @@ object SierraItemRecordMerger {
           //      = {1, 2, 5}
           //
           unlinkedBibIds = subList(
-            addList(existingRecord.unlinkedBibIds, existingRecord.bibIds),
-            updatedRecord.bibIds)
+            addList(existingLink.unlinkedBibIds, existingLink.bibIds),
+            newRecord.bibIds
+          ),
         )
       )
     } else {
@@ -35,11 +45,9 @@ object SierraItemRecordMerger {
     }
   }
 
-  private def addList[T](x: List[T], y: List[T]): List[T] = {
+  private def addList[T](x: List[T], y: List[T]): List[T] =
     (x.toSet ++ y.toSet).toList
-  }
 
-  private def subList[T](x: List[T], y: List[T]): List[T] = {
+  private def subList[T](x: List[T], y: List[T]): List[T] =
     (x.toSet -- y.toSet).toList
-  }
 }

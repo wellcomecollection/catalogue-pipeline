@@ -5,12 +5,19 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
+import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
 import uk.ac.wellcome.platform.sierra_items_to_dynamo.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.platform.sierra_items_to_dynamo.merger.SierraItemRecordMerger
-import uk.ac.wellcome.sierra_adapter.model.SierraGenerators
+import uk.ac.wellcome.platform.sierra_items_to_dynamo.models.SierraItemLink
+import uk.ac.wellcome.sierra_adapter.model.{
+  SierraGenerators,
+  SierraItemNumber,
+  SierraItemRecord
+}
 import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
 import uk.ac.wellcome.storage.Version
+import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
 
 class SierraItemsToDynamoWorkerServiceTest
     extends AnyFunSpec
@@ -40,25 +47,26 @@ class SierraItemsToDynamoWorkerServiceTest
       bibIds = bibIds2
     )
 
-    val expectedRecord = SierraItemRecordMerger
-      .mergeItems(
-        existingRecord = record1,
-        updatedRecord = record2
-      )
+    val expectedLink = SierraItemRecordMerger
+      .mergeItems(existingLink = SierraItemLink(record1), newRecord = record2)
       .get
 
-    val sourceVHS = createSourceVHSWith(
+    val store = MemoryVersionedStore[SierraItemNumber, SierraItemLink](
       initialEntries = Map(
-        Version(record1.id.withoutCheckDigit, 1) -> record1
+        Version(record1.id, 1) -> SierraItemLink(record1)
       )
     )
 
+    val messageSender = new MemoryMessageSender
+
     withLocalSqsQueue() { queue =>
-      withWorkerService(queue, sourceVHS) { _ =>
+      withWorkerService(queue, store, messageSender = messageSender) { _ =>
         sendNotificationToSQS(queue = queue, message = record2)
 
         eventually {
-          assertStored(record1.id.withoutCheckDigit, expectedRecord, sourceVHS)
+          messageSender.getMessages[SierraItemRecord] shouldBe Seq(
+            record2.copy(unlinkedBibIds = expectedLink.unlinkedBibIds)
+          )
         }
       }
     }
@@ -82,40 +90,33 @@ class SierraItemsToDynamoWorkerServiceTest
       bibIds = bibIds2
     )
 
-    val expectedRecord = SierraItemRecordMerger
-      .mergeItems(
-        existingRecord = record1,
-        updatedRecord = record2
-      )
+    val expectedLink = SierraItemRecordMerger
+      .mergeItems(existingLink = SierraItemLink(record1), newRecord = record2)
       .get
 
-    val sourceVHS = createSourceVHSWith(
+    val store = MemoryVersionedStore[SierraItemNumber, SierraItemLink](
       initialEntries = Map(
-        Version(record1.id.withoutCheckDigit, 1) -> record1
+        Version(record1.id, 1) -> SierraItemLink(record1)
       )
     )
 
+    val messageSender = new MemoryMessageSender
+
     withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>
-        withWorkerService(queue, sourceVHS) {
-          case (_, messageSender) =>
-            (1 to 5).foreach { _ =>
-              sendNotificationToSQS(queue = queue, message = record2)
-            }
+        withWorkerService(queue, store, messageSender = messageSender) { _ =>
+          (1 to 5).foreach { _ =>
+            sendNotificationToSQS(queue = queue, message = record2)
+          }
 
-            eventually {
-              assertQueueEmpty(queue)
-              assertQueueEmpty(dlq)
+          eventually {
+            assertQueueEmpty(queue)
+            assertQueueEmpty(dlq)
 
-              messageSender.getMessages[Version[String, Int]]() shouldBe List(
-                Version(record1.id.withoutCheckDigit, 2)
-              )
-
-              assertStored(
-                record1.id.withoutCheckDigit,
-                expectedRecord,
-                sourceVHS)
-            }
+            messageSender.getMessages[SierraItemRecord] shouldBe Seq(
+              record2.copy(unlinkedBibIds = expectedLink.unlinkedBibIds)
+            )
+          }
         }
     }
   }

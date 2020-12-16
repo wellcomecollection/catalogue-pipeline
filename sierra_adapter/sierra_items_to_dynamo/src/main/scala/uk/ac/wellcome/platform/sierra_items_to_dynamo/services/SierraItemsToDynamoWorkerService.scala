@@ -13,7 +13,7 @@ import scala.util.Success
 
 class SierraItemsToDynamoWorkerService[Destination](
   sqsStream: SQSStream[NotificationMessage],
-  dynamoInserter: DynamoInserter,
+  itemLinkStore: SierraItemLinkStore,
   messageSender: MessageSender[Destination]
 ) extends Runnable {
 
@@ -21,8 +21,8 @@ class SierraItemsToDynamoWorkerService[Destination](
     Future.fromTry {
       for {
         itemRecord <- fromJson[SierraItemRecord](message.body)
-        key <- dynamoInserter.insertIntoDynamo(itemRecord).toTry
-        _ <- key match {
+        record <- itemLinkStore.update(itemRecord).toTry
+        _ <- record match {
           case Some(k) => messageSender.sendT(k)
           case None    => Success(())
         }
