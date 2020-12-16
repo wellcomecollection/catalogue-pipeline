@@ -1,5 +1,5 @@
 resource "aws_dynamodb_table" "items" {
-  name = "sourcedata-sierra-items-${replace(var.namespace, "sierra-adapter-", "")}"
+  name     = "sourcedata-sierra-items-${replace(var.namespace, "sierra-adapter-", "")}"
   hash_key = "id"
 
   attribute {

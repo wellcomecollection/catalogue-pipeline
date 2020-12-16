@@ -1,9 +1,6 @@
 package uk.ac.wellcome.platform.sierra_items_to_dynamo.models
 
-import uk.ac.wellcome.sierra_adapter.model.{
-  SierraBibNumber,
-  SierraItemRecord
-}
+import uk.ac.wellcome.sierra_adapter.model.{SierraBibNumber, SierraItemRecord}
 
 import java.time.Instant
 
