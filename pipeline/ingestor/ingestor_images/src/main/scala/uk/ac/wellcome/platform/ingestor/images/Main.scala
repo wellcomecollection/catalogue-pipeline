@@ -10,9 +10,12 @@ import uk.ac.wellcome.models.work.internal.{Image, ImageState}
 import uk.ac.wellcome.pipeline_storage.Indexable.imageIndexable
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.pipeline_storage.typesafe.ElasticIndexerBuilder
-import uk.ac.wellcome.platform.ingestor.common.builders.IngestorConfigBuilder
+import uk.ac.wellcome.platform.ingestor.common.models.IngestorConfig
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
+import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
+
+import scala.concurrent.duration._
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
@@ -29,8 +32,14 @@ object Main extends WellcomeTypesafeApp {
       indexConfig = ImagesIndexConfig
     )
 
+    val ingestorConfig = IngestorConfig(
+      batchSize = config.requireInt("es.ingest.batchSize"),
+      // TODO: Work out how to get a Duration from a Typesafe flag.
+      flushInterval = 1 minute
+    )
+
     new ImageIngestorWorkerService(
-      ingestorConfig = IngestorConfigBuilder.buildIngestorConfig(config),
+      ingestorConfig = ingestorConfig,
       documentIndexer = imageIndexer,
       messageStream = BigMessagingBuilder
         .buildMessageStream[Image[ImageState.Augmented]](config),

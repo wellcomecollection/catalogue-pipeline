@@ -14,7 +14,6 @@ import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.monitoring.memory.MemoryMetrics
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.json.JsonUtil._
 
@@ -138,9 +137,7 @@ class BatcherWorkerServiceTest
     testWith: TestWith[(QueuePair, MemoryMessageSender), R]): R =
     withLocalSqsQueuePair() { queuePair =>
       withActorSystem { implicit actorSystem =>
-        withSQSStream[NotificationMessage, R](
-          queuePair.queue,
-          new MemoryMetrics) { msgStream =>
+        withSQSStream[NotificationMessage, R](queuePair.queue) { msgStream =>
           val msgSender = new MessageSender(brokenPaths)
           val workerService = new BatcherWorkerService[String](
             msgStream = msgStream,
