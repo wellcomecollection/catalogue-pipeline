@@ -38,12 +38,17 @@ object ImagesIndexConfig extends IndexConfig with WorksIndexConfigFields {
       objectField("derivedData").dynamic("false")
     )
 
+  val fields = Seq(
+    version,
+    dateField("modifiedTime"),
+    source,
+    state,
+    objectField("locations").dynamic("false")
+  )
+
+  // Here we set dynamic strict to be sure the object vaguely looks like an
+  // image and contains the core fields, adding DynamicMapping.False in places
+  // where we do not need to map every field and can save CPU.
   def mapping: MappingDefinition =
-    properties(
-      version,
-      dateField("modifiedTime"),
-      source,
-      state,
-      objectField("locations").dynamic("false")
-    ).dynamic(DynamicMapping.Strict)
+    properties(fields).dynamic(DynamicMapping.Strict)
 }

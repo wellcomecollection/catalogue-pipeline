@@ -129,6 +129,9 @@ object DenormalisedWorkIndexConfig extends WorksIndexConfig {
 
 object IndexedWorkIndexConfig extends WorksIndexConfig {
 
+  // Here we set dynamic strict to be sure the object vaguely looks like a work
+  // and contains the core fields, adding DynamicMapping.False in places where
+  // we do not need to map every field and can save CPU.
   override val dynamicMapping: DynamicMapping = DynamicMapping.Strict
 
   val state = objectField("state")
@@ -136,8 +139,7 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
       canonicalId,
       sourceIdentifier,
       dateField("modifiedTime"),
-      objectField("relations")
-        .dynamic("false"),
+      objectField("relations").dynamic("false"),
       objectField("derivedData")
         .fields(booleanField("availableOnline"))
         .dynamic("false")
