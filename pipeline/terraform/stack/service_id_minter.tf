@@ -1,6 +1,6 @@
 module "id_minter_queue" {
   source     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
-  queue_name = "${local.namespace_hyphen}_work_id_minter"
+  queue_name = "${local.namespace_hyphen}_id_minter"
   topic_arns = [module.calm_transformer_output_topic.arn,
     module.mets_transformer_output_topic.arn,
     module.miro_transformer_output_topic.arn,
@@ -67,7 +67,7 @@ module "id_minter" {
   memory = 2048
 
   deployment_service_env  = var.release_label
-  deployment_service_name = "work-id-minter"
+  deployment_service_name = "id-minter"
   shared_logging_secrets  = var.shared_logging_secrets
 }
 

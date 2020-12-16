@@ -28,7 +28,7 @@ module "router" {
     paths_topic_arn = module.router_path_output_topic.arn
     works_topic_arn = module.router_work_output_topic.arn
 
-    es_identified_index    = local.es_works_identified_index
+    es_merged_index        = local.es_works_merged_index
     es_denormalised_index  = local.es_works_denormalised_index
     batch_size             = 100
     flush_interval_seconds = 30

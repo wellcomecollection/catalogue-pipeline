@@ -8,13 +8,6 @@ variable "subnets" {
 variable "shared_logging_secrets" {
   type = map
 }
-variable "repository_urls" {
-  type = list(string)
-}
-
-variable "services" {
-  type = list(string)
-}
 
 variable "vpc_id" {}
 
