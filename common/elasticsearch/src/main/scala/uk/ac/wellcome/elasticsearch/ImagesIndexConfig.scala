@@ -5,7 +5,7 @@ import com.sksamuel.elastic4s.analysis.Analysis
 import com.sksamuel.elastic4s.requests.mappings.{MappingDefinition, ObjectField}
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
 
-object ImagesIndexConfig extends IndexConfig with WorksIndexConfigFields {
+object ImagesIndexConfig extends IndexConfig with IndexConfigFields {
 
   val analysis: Analysis = WorksAnalysis()
 
@@ -16,11 +16,39 @@ object ImagesIndexConfig extends IndexConfig with WorksIndexConfigFields {
     keywordField("palette")
   )
 
-  private def sourceWork(fieldName: String): ObjectField =
+  def sourceWork(fieldName: String): ObjectField =
     objectField(fieldName)
       .fields(
         objectField("id").fields(canonicalId, sourceIdentifier),
-        data,
+        objectField("data").fields(
+          objectField("otherIdentifiers").fields(lowercaseKeyword("value")),
+          englishTextKeywordField("title"),
+          englishTextKeywordField("alternativeTitles"),
+          englishTextField("description"),
+          englishTextKeywordField("physicalDescription"),
+          objectField("contributors").fields(
+            objectField("agent").fields(label),
+          ),
+          objectField("subjects").fields(
+            objectField("concepts").fields(label)
+          ),
+          objectField("genres").fields(
+            objectField("concepts").fields(label)
+          ),
+          objectField("production").fields(
+            objectField("places").fields(label),
+            objectField("agents").fields(label),
+            objectField("dates").fields(label),
+            objectField("function").fields(label)
+          ),
+          objectField("languages").fields(
+            label,
+            keywordField("id")
+          ),
+          textField("edition"),
+          objectField("notes").fields(englishTextField("content")),
+          objectField("collectionPath").fields(label, textField("path")),
+        ),
         keywordField("type"),
       )
       .dynamic("false")
@@ -44,7 +72,11 @@ object ImagesIndexConfig extends IndexConfig with WorksIndexConfigFields {
     dateField("modifiedTime"),
     source,
     state,
-    objectField("locations").dynamic("false")
+    objectField("locations")
+      .fields(
+        objectField("license").fields(keywordField("id")),
+      )
+      .dynamic("false")
   )
 
   // Here we set dynamic strict to be sure the object vaguely looks like an

@@ -4,76 +4,7 @@ import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.mappings.{FieldDefinition, ObjectField}
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
 
-trait WorksIndexConfigFields extends IndexConfigFields {
-
-  import WorksAnalysis._
-
-  // Indexing lots of individual fields on Elasticsearch can be very CPU
-  // intensive, so here only include fields that are needed for querying in the
-  // API.
-  def data: ObjectField =
-    objectField("data").fields(
-      objectField("otherIdentifiers").fields(lowercaseKeyword("value")),
-      objectField("format").fields(keywordField("id")),
-      asciifoldingTextFieldWithKeyword("title").fields(
-        keywordField("keyword"),
-        textField("english").analyzer(englishAnalyzer.name),
-        textField("shingles").analyzer(shingleAsciifoldingAnalyzer.name)
-      ),
-      englishTextKeywordField("alternativeTitles"),
-      englishTextField("description"),
-      englishTextKeywordField("physicalDescription"),
-      englishTextKeywordField("lettering"),
-      objectField("contributors").fields(
-        objectField("agent").fields(label),
-      ),
-      objectField("subjects").fields(
-        label,
-        objectField("concepts").fields(label)
-      ),
-      objectField("genre").fields(
-        label,
-        objectField("concepts").fields(label)
-      ),
-      objectField("items").fields(
-        objectField("locations").fields(
-          keywordField("type"),
-          objectField("locationType").fields(keywordField("id")),
-          objectField("accessConditions").fields(
-            objectField("status").fields(keywordField("type"))
-          ),
-          objectField("license").fields(keywordField("id"))
-        )
-      ),
-      objectField("production").fields(
-        label,
-        objectField("places").fields(label),
-        objectField("agents").fields(label),
-        objectField("dates").fields(
-          label,
-          objectField("range").fields(dateField("from"))
-        ),
-        objectField("function").fields(label)
-      ),
-      objectField("languages").fields(
-        label,
-        keywordField("id")
-      ),
-      textField("edition"),
-      objectField("notes").fields(englishTextField("content")),
-      intField("duration"),
-      objectField("collectionPath").fields(
-        label,
-        textField("path"),
-      ),
-      objectField("imageData").fields(
-        objectField("id").fields(canonicalId, sourceIdentifier)
-      ),
-      keywordField("workType")
-    )
-}
-
-sealed trait WorksIndexConfig extends IndexConfig with WorksIndexConfigFields {
+sealed trait WorksIndexConfig extends IndexConfig with IndexConfigFields {
 
   val analysis = WorksAnalysis()
 
@@ -127,11 +58,76 @@ object DenormalisedWorkIndexConfig extends WorksIndexConfig {
 }
 
 object IndexedWorkIndexConfig extends WorksIndexConfig {
+  
+  import WorksAnalysis._
 
   // Here we set dynamic strict to be sure the object vaguely looks like a work
   // and contains the core fields, adding DynamicMapping.False in places where
   // we do not need to map every field and can save CPU.
   override val dynamicMapping: DynamicMapping = DynamicMapping.Strict
+
+  // Indexing lots of individual fields on Elasticsearch can be very CPU
+  // intensive, so here only include fields that are needed for querying in the
+  // API.
+  def data: ObjectField =
+    objectField("data").fields(
+      objectField("otherIdentifiers").fields(lowercaseKeyword("value")),
+      objectField("format").fields(keywordField("id")),
+      asciifoldingTextFieldWithKeyword("title").fields(
+        keywordField("keyword"),
+        textField("english").analyzer(englishAnalyzer.name),
+        textField("shingles").analyzer(shingleAsciifoldingAnalyzer.name)
+      ),
+      englishTextKeywordField("alternativeTitles"),
+      englishTextField("description"),
+      englishTextKeywordField("physicalDescription"),
+      englishTextKeywordField("lettering"),
+      objectField("contributors").fields(
+        objectField("agent").fields(label),
+      ),
+      objectField("subjects").fields(
+        label,
+        objectField("concepts").fields(label)
+      ),
+      objectField("genres").fields(
+        label,
+        objectField("concepts").fields(label)
+      ),
+      objectField("items").fields(
+        objectField("locations").fields(
+          keywordField("type"),
+          objectField("locationType").fields(keywordField("id")),
+          objectField("license").fields(keywordField("id")),
+          objectField("accessConditions").fields(
+            objectField("status").fields(keywordField("type"))
+          ),
+        ),
+        objectField("id").fields(
+          canonicalId,
+          sourceIdentifier,
+          objectField("otherIdentifiers").fields(lowercaseKeyword("value"))
+          )
+      ),
+      objectField("production").fields(
+        label,
+        objectField("places").fields(label),
+        objectField("agents").fields(label),
+        objectField("dates").fields(
+          label,
+          objectField("range").fields(dateField("from"))
+        ),
+        objectField("function").fields(label)
+      ),
+      objectField("languages").fields(label, keywordField("id")),
+      textField("edition"),
+      objectField("notes").fields(englishTextField("content")),
+      intField("duration"),
+      objectField("collectionPath").fields(label, textField("path")),
+      objectField("imageData").fields(
+        objectField("id").fields(canonicalId, sourceIdentifier)
+      ),
+      keywordField("workType")
+    )
 
   val state = objectField("state")
     .fields(
