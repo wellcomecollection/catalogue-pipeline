@@ -27,7 +27,7 @@ object Main extends WellcomeTypesafeApp {
       AkkaBuilder.buildExecutionContext()
 
     val identifiedIndex =
-      Index(config.requireString("es.identified-works.index"))
+      Index(config.requireString("es.merged-works.index"))
 
     val esClient = ElasticBuilder.buildElasticClient(config)
 
