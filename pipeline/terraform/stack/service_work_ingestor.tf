@@ -26,7 +26,7 @@ module "ingestor_works" {
     es_denormalised_index         = local.es_works_denormalised_index
     ingest_queue_id               = module.ingestor_works_queue.url
     topic_arn                     = module.work_ingestor_topic.arn
-    ingest_batch_size             = 25
+    ingest_batch_size             = 100
     ingest_flush_interval_seconds = 60
   }
 
@@ -46,7 +46,7 @@ module "ingestor_works" {
 
   subnets = var.subnets
 
-  max_capacity        = 3
+  max_capacity        = 10
   messages_bucket_arn = aws_s3_bucket.messages.arn
   queue_read_policy   = module.ingestor_works_queue.read_policy
 
