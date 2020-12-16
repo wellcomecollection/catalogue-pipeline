@@ -59,16 +59,14 @@ module "catalogue_pipeline_2020-11-25" {
   inferrer_model_data_bucket_name = aws_s3_bucket.inferrer_model_core_data.id
 
   shared_logging_secrets = data.terraform_remote_state.shared_infra.outputs.shared_secrets_logging
-  repository_urls        = data.aws_ecr_repository.service.*.repository_url
-  services               = local.services
 
   storage_bucket_name = local.storage_bucket
 }
 
-module "catalogue_pipeline_2020-12-10" {
+module "catalogue_pipeline_2020-12-16" {
   source = "./stack"
 
-  pipeline_date = "2020-12-10"
+  pipeline_date = "2020-12-16"
   release_label = "stage"
 
   # Transformer config
@@ -126,8 +124,6 @@ module "catalogue_pipeline_2020-12-10" {
   inferrer_model_data_bucket_name = aws_s3_bucket.inferrer_model_core_data.id
 
   shared_logging_secrets = data.terraform_remote_state.shared_infra.outputs.shared_secrets_logging
-  repository_urls        = data.aws_ecr_repository.service.*.repository_url
-  services               = local.services
 
   storage_bucket_name = local.storage_bucket
 }

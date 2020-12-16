@@ -14,4 +14,22 @@ locals {
   // The max number of connections allowed by the instance
   // specified at /infrastructure/critical/rds_id_minter.tf
   id_minter_rds_max_connections = 90
+  services = [
+    "ingestor_works",
+    "ingestor_images",
+    "matcher",
+    "merger",
+    "id_minter",
+    "inference_manager",
+    "feature_inferrer",
+    "feature_training",
+    "palette_inferrer",
+    "router",
+    "batcher",
+    "relation_embedder",
+    "transformer_miro",
+    "transformer_mets",
+    "transformer_sierra",
+    "transformer_calm",
+  ]
 }

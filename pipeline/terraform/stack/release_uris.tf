@@ -6,9 +6,14 @@ data "aws_ssm_parameter" "latest_lsh_model_key" {
   name = "/catalogue_pipeline/config/models/latest/lsh_model"
 }
 
+data "aws_ecr_repository" "service" {
+  count = length(local.services)
+  name  = "uk.ac.wellcome/${local.services[count.index]}"
+}
+
 locals {
-  repo_urls = [for repo_url in var.repository_urls : "${repo_url}:env.${var.release_label}"]
-  image_ids = zipmap(var.services, local.repo_urls)
+  repo_urls = [for repo_url in data.aws_ecr_repository.service.*.repository_url : "${repo_url}:env.${var.release_label}"]
+  image_ids = zipmap(local.services, local.repo_urls)
 
   id_minter_image          = local.image_ids["id_minter"]
   matcher_image            = local.image_ids["matcher"]
