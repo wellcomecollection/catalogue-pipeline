@@ -119,10 +119,10 @@ trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest]
           .apply(workIndexable.id(newWork))
           .map { storedWork =>
             if (newWork.shouldReplace(storedWork)) {
-              info(
-                s"$name: from $key transformed work; already in pipeline so not re-sending")
               Right(Some((newWork, key)))
             } else {
+              info(
+                s"$name: from $key transformed work; already in pipeline so not re-sending")
               Right(None)
             }
           }
