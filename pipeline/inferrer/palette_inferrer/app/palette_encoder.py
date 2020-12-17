@@ -17,7 +17,7 @@ class PaletteEncoder:
         self.delayed_process_image = delayed(self.process_image)
 
     @staticmethod
-    def get_significant_colours(image, n):
+    def get_significant_colors(image, n):
         """
         extract n significant colours from the image pixels by taking the
         centres of n kmeans clusters of the image's pixels arranged in colour
@@ -27,27 +27,27 @@ class PaletteEncoder:
 
         # Only cluster distinct colours but weight them by their frequency
         # As per https://arxiv.org/pdf/1101.0395.pdf
-        distinct_colours, distinct_colour_freqs = np.unique(
+        distinct_colors, distinct_color_freqs = np.unique(
             pixels, axis=0, return_counts=True
         )
 
         # Fewer distinct colours than clusters
-        if len(distinct_colours) <= n:
-            sort_indices = distinct_colour_freqs.argsort()[::-1]
-            sorted_by_freq = distinct_colours[sort_indices]
-            size_diff = n - len(distinct_colours)
+        if len(distinct_colors) <= n:
+            sort_indices = distinct_color_freqs.argsort()[::-1]
+            sorted_by_freq = distinct_colors[sort_indices]
+            size_diff = n - len(distinct_colors)
             # pad with the most frequently occurring distinct colour
             return np.pad(
                 sorted_by_freq, pad_width=((size_diff, 0), (0, 0)), mode="edge"
             )
 
         clusters = KMeans(n_clusters=n).fit(
-            distinct_colours, sample_weight=distinct_colour_freqs
+            distinct_colors, sample_weight=distinct_color_freqs
         )
 
         # Sort clusters by the sum of the weights they contain
         label_weights = Counter()
-        for label, weight in zip(clusters.labels_, distinct_colour_freqs):
+        for label, weight in zip(clusters.labels_, distinct_color_freqs):
             label_weights[label] += weight
         labels_by_weight = [label for label, _ in label_weights.most_common()]
 
@@ -62,8 +62,8 @@ class PaletteEncoder:
         return consistently_indexed_centroids[labels_by_weight]
 
     @staticmethod
-    def get_bin_index(colour, d):
-        indices = np.floor(d * colour / 256).astype(int)
+    def get_bin_index(color, d):
+        indices = np.floor(d * color / 256).astype(int)
         return indices[0] + d * indices[1] + d * d * indices[2]
 
     @staticmethod
@@ -82,11 +82,11 @@ class PaletteEncoder:
         """
         extract presence of colour in the image at multiple precision levels
         """
-        colours = self.get_significant_colours(image, self.palette_size)
+        colors = self.get_significant_colors(image, self.palette_size)
         combined_results = [
-            (self.get_bin_index(colour, n), n, weight)
+            (self.get_bin_index(color, n), n, weight)
             for n in self.bin_sizes
-            for colour, weight in zip(colours, self.palette_weights)
+            for color, weight in zip(colors, self.palette_weights)
         ]
 
         return self.encode_for_elasticsearch(combined_results)
