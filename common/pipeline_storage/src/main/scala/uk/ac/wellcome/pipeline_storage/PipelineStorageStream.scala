@@ -55,16 +55,17 @@ class PipelineStorageStream[In, Out, MsgDestination](
               broadcastAndMerge(
                 batchAndSendFlow(config, messageSender, indexer),
                 identityFlow)
-              )
-            )
+          )
+      )
     } yield done
 
   private val identityFlow: Flow[(Message, Option[Out]), Message, NotUsed] =
     Flow[(Message, Option[Out])]
       .collect { case (message, None) => message }
 
-  private def broadcastAndMerge[I, O](a: Flow[I, O, NotUsed],
-                              b: Flow[I, O, NotUsed]): Flow[I, O, NotUsed] =
+  private def broadcastAndMerge[I, O](
+    a: Flow[I, O, NotUsed],
+    b: Flow[I, O, NotUsed]): Flow[I, O, NotUsed] =
     Flow.fromGraph(
       GraphDSL.create() { implicit builder =>
         import GraphDSL.Implicits._
@@ -79,9 +80,8 @@ class PipelineStorageStream[In, Out, MsgDestination](
 
 object PipelineStorageStream extends Logging {
 
-  def batchRetrieveFlow[T](
-    config: PipelineStorageConfig,
-    retriever: Retriever[T])(
+  def batchRetrieveFlow[T](config: PipelineStorageConfig,
+                           retriever: Retriever[T])(
     implicit ec: ExecutionContext): Flow[Bundle[String], Bundle[T], NotUsed] =
     Flow[Bundle[String]]
       .groupedWithin(config.batchSize, config.flushInterval)
@@ -90,22 +90,21 @@ object PipelineStorageStream extends Logging {
         retriever(ids)
           .map { result =>
             ids.zipWithIndex
-              .map { case (id, idx) =>
-                result(id) match {
-                  case Left(err) =>
-                    error(s"Could not retrieve document with id: $id", err)
-                    None
-                  case Right(doc) => Some((messages(idx), doc))
-                }
+              .map {
+                case (id, idx) =>
+                  result(id) match {
+                    case Left(err) =>
+                      error(s"Could not retrieve document with id: $id", err)
+                      None
+                    case Right(doc) => Some((messages(idx), doc))
+                  }
               }
               .collect { case Some((msg, doc)) => Bundle(msg, doc) }
           }
       }
       .mapConcat(identity)
 
-  def batchIndexFlow[T](
-    config: PipelineStorageConfig,
-    indexer: Indexer[T])(
+  def batchIndexFlow[T](config: PipelineStorageConfig, indexer: Indexer[T])(
     implicit
     ec: ExecutionContext,
     indexable: Indexable[T]): Flow[Bundle[T], Bundle[String], NotUsed] =
@@ -117,24 +116,23 @@ object PipelineStorageStream extends Logging {
         case Bundle(msg, item) => indexable.weight(item)
       }
       .mapAsyncUnordered(config.parallelism) { bundles =>
-          val (messages, items) = unzipBundles(bundles)
-          indexer(items).map { result =>
-            val failed = result.left.getOrElse(Nil)
-            bundles.collect {
-              case Bundle(msg, doc) if !failed.contains(doc) =>
-                Bundle(msg, indexable.id(doc))
-            }
+        val (messages, items) = unzipBundles(bundles)
+        indexer(items).map { result =>
+          val failed = result.left.getOrElse(Nil)
+          bundles.collect {
+            case Bundle(msg, doc) if !failed.contains(doc) =>
+              Bundle(msg, indexable.id(doc))
           }
+        }
       }
       .mapConcat(identity)
 
   def batchAndSendFlow[T, MsgDestination](
     config: PipelineStorageConfig,
     msgSender: MessageSender[MsgDestination],
-    indexer: Indexer[T])(
-    implicit
-    ec: ExecutionContext,
-    indexable: Indexable[T]) =
+    indexer: Indexer[T])(implicit
+                         ec: ExecutionContext,
+                         indexable: Indexable[T]) =
     Flow[(Message, Option[T])]
       .collect { case (msg, Some(document)) => Bundle(msg, document) }
       .via(batchIndexFlow(config, indexer))
@@ -143,8 +141,8 @@ object PipelineStorageStream extends Logging {
           Future.fromTry(msgSender.send(id).map(_ => msg))
       }
 
-  private def unzipBundles[T](bundles: Seq[Bundle[T]]): (List[Message], List[T]) =
-      bundles
-        .toList
-        .unzip(bundle => bundle.message -> bundle.item)
+  private def unzipBundles[T](
+    bundles: Seq[Bundle[T]]): (List[Message], List[T]) =
+    bundles.toList
+      .unzip(bundle => bundle.message -> bundle.item)
 }

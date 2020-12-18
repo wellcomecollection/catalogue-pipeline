@@ -16,5 +16,6 @@ case class RetrieverMultiResult[T](
       .get(id)
       .map(Right(_))
       .orElse(notFound.get(id).map(Left(_)))
-      .getOrElse(Left(new Exception(s"ID not found in RetrieverMultiResult: $id")))
+      .getOrElse(
+        Left(new Exception(s"ID not found in RetrieverMultiResult: $id")))
 }
