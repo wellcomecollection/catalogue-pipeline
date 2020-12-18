@@ -51,7 +51,7 @@ class ImageIngestorWorkerService[In, Out](
     for {
       documents <- Future.successful(bundles.map(m => m.document))
       transformedDocuments = documents.map(transformBeforeIndex)
-      either <- documentIndexer.index(documents = transformedDocuments)
+      either <- documentIndexer(documents = transformedDocuments)
     } yield {
       val failedWorks = either.left.getOrElse(Nil)
       bundles.filterNot {

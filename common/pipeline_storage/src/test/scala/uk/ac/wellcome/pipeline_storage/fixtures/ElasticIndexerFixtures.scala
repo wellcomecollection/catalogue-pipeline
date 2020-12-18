@@ -56,10 +56,10 @@ trait ElasticIndexerFixtures extends ElasticsearchFixtures with Akka {
 
   def ingestInOrder[T](indexer: ElasticIndexer[T])(documents: T*)(
     implicit ec: ExecutionContext): Future[Either[Seq[T], Seq[T]]] =
-    documents.tail.foldLeft(indexer.index(List(documents.head))) {
+    documents.tail.foldLeft(indexer(List(documents.head))) {
       (future, doc) =>
         future.flatMap { _ =>
-          indexer.index(List(doc))
+          indexer(List(doc))
         }
     }
 }

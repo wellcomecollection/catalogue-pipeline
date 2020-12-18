@@ -57,7 +57,7 @@ class MergerWorkerService[WorkDestination, ImageDestination](
                          lastUpdated: Instant): Future[Unit] = {
     val outcome = mergerManager.applyMerge(maybeWorks = maybeWorks)
     for {
-      indexResult <- workIndexer.index(outcome.mergedWorksWithTime(lastUpdated))
+      indexResult <- workIndexer(outcome.mergedWorksWithTime(lastUpdated))
       works <- indexResult match {
         case Left(failedWorks) =>
           Future.failed(

@@ -219,7 +219,7 @@ class PipelineStorageStreamTest
     val indexer = new Indexer[SampleDocument] {
       override def init(): Future[Unit] = Future.successful(())
 
-      override def index(documents: Seq[SampleDocument])
+      override def apply(documents: Seq[SampleDocument])
         : Future[Either[Seq[SampleDocument], Seq[SampleDocument]]] = {
         Future.successful(Left(documents.filter(d =>
           failingDocuments.keySet.contains(d.canonicalId))))

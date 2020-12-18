@@ -30,7 +30,7 @@ class ElasticRetrieverTest
     testWith: TestWith[Index, R]): R =
     withLocalElasticsearchIndex(config = NoStrictMapping) { index =>
       withElasticIndexer[SampleDocument, R](index) { indexer =>
-        whenReady(indexer.index(documents)) { _ =>
+        whenReady(indexer(documents)) { _ =>
           assertElasticsearchEventuallyHas(index, documents: _*)
 
           testWith(index)
