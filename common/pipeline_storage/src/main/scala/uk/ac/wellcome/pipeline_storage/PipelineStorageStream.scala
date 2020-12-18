@@ -32,10 +32,43 @@ class PipelineStorageStream[In, Out, MsgDestination](
       streamName = streamName,
       Flow[(Message, In)]
         .mapAsyncUnordered(parallelism = config.parallelism) {
-          case (message, t) =>
+          case (message, in) =>
             debug(s"Processing message ${message.messageId()}")
-            process(t).map(w => (message, w))
+            process(in).map(w => (message, w))
         }
+    )
+
+  def processBatched(
+    streamName: String,
+    process: List[In] => Future[List[Either[Exception, Out]]],
+    batchSize: Int,
+    flushInterval: FiniteDuration)(
+    implicit decoderT: Decoder[In],
+    indexable: Indexable[Out]): Future[Done] =
+    run(
+      streamName = streamName,
+      Flow[(Message, In)]
+        .groupedWithin(batchSize, flushInterval)
+        .mapAsyncUnordered(parallelism = config.parallelism) {
+          batch: Seq[(Message, In)] =>
+            val (messages, input) = batch.toList.unzip(identity)
+            debug(s"Processing batch ${messages.map(_.messageId())}")
+            process(input).map { output: List[Either[Exception, Out]] =>
+              if (output.length != messages.length)
+                throw new RuntimeException(
+                  "processBatched expects output length to equal input length")
+              messages
+                .zip(output)
+                .map {
+                  case (msg, Left(err)) =>
+                    info(s"Encountered exception batch processing msg ${msg.messageId}: $err")
+                    (msg, Option.empty[Out])
+                  case (msg, Right(out)) =>
+                    (msg, Some(out))
+                }
+            }
+        }
+        .mapConcat(identity)
     )
 
   def run(streamName: String,
