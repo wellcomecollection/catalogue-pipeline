@@ -581,7 +581,8 @@ class PlatformMergerTest
     val result = merger.merge(List(miroWork))
 
     result.mergedWorksWithTime(now) should have length 1
-    result.mergedWorksWithTime(now).head shouldBe miroWork.transition[Merged](now)
+    result.mergedWorksWithTime(now).head shouldBe miroWork.transition[Merged](
+      now)
     result.mergedImagesWithTime(now) should have length 1
     result.mergedImagesWithTime(now).head shouldBe miroWork.data.imageData.head
       .toInitialImageWith(

@@ -16,8 +16,7 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorkGenerators {
 
     val result = mergerManager.applyMerge(maybeWorks = List(Some(work)))
 
-    result.mergedWorksWithTime(now) shouldBe List(
-      work.transition[Merged](now))
+    result.mergedWorksWithTime(now) shouldBe List(work.transition[Merged](now))
   }
 
   it("performs a merge with multiple works") {

@@ -96,7 +96,8 @@ class MergerWorkerServiceTest
 
           getWorksSent(senders) should contain only work.id
 
-          index shouldBe Map(work.id -> work.transition[Merged](work.state.modifiedTime))
+          index shouldBe Map(
+            work.id -> work.transition[Merged](work.state.modifiedTime))
 
           metrics.incrementedCounts.length shouldBe 1
           metrics.incrementedCounts.last should endWith("_success")
@@ -150,7 +151,8 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
           getWorksSent(senders) should contain only work.id
-          index shouldBe Map(work.id -> work.transition[Merged](work.state.modifiedTime))
+          index shouldBe Map(
+            work.id -> work.transition[Merged](work.state.modifiedTime))
         }
     }
   }
@@ -180,7 +182,8 @@ class MergerWorkerServiceTest
           assertQueueEmpty(dlq)
 
           getWorksSent(senders) should contain only work.id
-          index shouldBe Map(work.id -> work.transition[Merged](work.state.modifiedTime))
+          index shouldBe Map(
+            work.id -> work.transition[Merged](work.state.modifiedTime))
 
           metrics.incrementedCounts.length shouldBe 1
           metrics.incrementedCounts.last should endWith("_success")
