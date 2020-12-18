@@ -16,7 +16,7 @@ import uk.ac.wellcome.platform.id_minter.services.IdMinterWorkerService
 import uk.ac.wellcome.pipeline_storage.{MemoryIndexer, MemoryRetriever}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.Implicits._
-import WorkState.{Identified, Merged}
+import WorkState.{Identified, Source}
 import uk.ac.wellcome.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 
 trait WorkerServiceFixture
@@ -83,6 +83,6 @@ trait WorkerServiceFixture
     }
   }
 
-  def createIndex(works: List[Work[Merged]]): Map[String, Json] =
+  def createIndex(works: List[Work[Source]]): Map[String, Json] =
     works.map(work => (work.id, work.asJson)).toMap
 }
