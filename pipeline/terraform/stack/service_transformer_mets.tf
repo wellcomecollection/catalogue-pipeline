@@ -45,8 +45,10 @@ module "mets_transformer" {
   messages_bucket_arn = aws_s3_bucket.messages.arn
   queue_read_policy   = module.mets_transformer_queue.read_policy
 
-  cpu    = 1024
-  memory = 2048
+  # The METS transformer is quite CPU intensive, and if it doesn't have enough CPU,
+  # the Akka scheduler gets resource-starved and the whole app stops doing anything.
+  cpu    = 2048
+  memory = 4096
 
   deployment_service_env  = var.release_label
   deployment_service_name = "mets-transformer"
