@@ -15,7 +15,7 @@ case class MergerOutcome(resultWorks: Seq[Work[Identified]],
                          imagesWithSources: Seq[ImageDataWithSource]) {
 
   def mergedWorksWithTime(modifiedTime: Instant): Seq[Work[Merged]] =
-    resultWorks.map(_.transition[Merged](Some(modifiedTime)))
+    resultWorks.map(_.transition[Merged](modifiedTime))
 
   def mergedImagesWithTime(
     modifiedTime: Instant): Seq[Image[ImageState.Initial]] =

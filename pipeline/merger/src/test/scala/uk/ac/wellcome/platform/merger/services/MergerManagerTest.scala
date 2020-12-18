@@ -17,7 +17,7 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorkGenerators {
     val result = mergerManager.applyMerge(maybeWorks = List(Some(work)))
 
     result.mergedWorksWithTime(now) shouldBe List(
-      work.transition[Merged](Some(now)))
+      work.transition[Merged](now))
   }
 
   it("performs a merge with multiple works") {
@@ -29,7 +29,7 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorkGenerators {
     val result = mergerManager.applyMerge(maybeWorks = works)
     val resultWorks = result.mergedWorksWithTime(now)
 
-    resultWorks.head shouldBe work.transition[Merged](Some(now))
+    resultWorks.head shouldBe work.transition[Merged](now)
 
     resultWorks.tail.zip(otherWorks).map {
       case (baseWork: Work[Merged], unmergedWork: Work.Visible[Identified]) =>
@@ -50,7 +50,7 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorkGenerators {
     val result = mergerManager.applyMerge(maybeWorks = maybeWorks.toList)
 
     result.mergedWorksWithTime(now) should contain theSameElementsAs
-      expectedWorks.map(_.transition[Merged](Some(now)))
+      expectedWorks.map(_.transition[Merged](now))
   }
 
   val mergerRules = new Merger {

@@ -169,7 +169,7 @@ object WorkState {
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified
-    type TransitionArgs = Option[Instant]
+    type TransitionArgs = Instant
 
     def id: String = canonicalId
     val relations: Relations = Relations.none
@@ -227,11 +227,11 @@ object WorkFsm {
   implicit val identifiedToMerged = new Transition[Identified, Merged] {
     def state(state: Identified,
               data: WorkData[DataState.Identified],
-              args: Option[Instant]): Merged =
+              modifiedTime: Instant): Merged =
       Merged(
-        state.sourceIdentifier,
-        state.id,
-        args.getOrElse(state.modifiedTime),
+        sourceIdentifier = state.sourceIdentifier,
+        canonicalId = state.id,
+        modifiedTime = modifiedTime
       )
 
     def data(data: WorkData[DataState.Identified]) = data

@@ -134,7 +134,7 @@ class PlatformMergerTest
     val miroItem = miroWork.data.items.head
 
     val expectedMergedWork = sierraPhysicalWork
-      .transition[Merged](Some(now))
+      .transition[Merged](now)
       .mapData { data =>
         data.copy(
           otherIdentifiers = sierraPhysicalWork.data.otherIdentifiers ++ miroWork.identifiers,
@@ -185,7 +185,7 @@ class PlatformMergerTest
     result.mergedWorksWithTime(now).size shouldBe 2
 
     val expectedMergedWork = zeroItemSierraWork
-      .transition[Merged](Some(now))
+      .transition[Merged](now)
       .mapData { data =>
         data.copy(
           otherIdentifiers = data.otherIdentifiers ++ miroWork.identifiers,
@@ -237,7 +237,7 @@ class PlatformMergerTest
     val miroItem = miroWork.data.items.head
 
     val expectedMergedWork = sierraDigitalWork
-      .transition[Merged](Some(now))
+      .transition[Merged](now)
       .mapData { data =>
         data.copy(
           otherIdentifiers = sierraDigitalWork.data.otherIdentifiers ++ miroWork.identifiers,
@@ -287,7 +287,7 @@ class PlatformMergerTest
     result.mergedWorksWithTime(now).size shouldBe 2
 
     val expectedMergedWork = multipleItemsSierraWork
-      .transition[Merged](Some(now))
+      .transition[Merged](now)
       .mapData { data =>
         data.copy(
           imageData = miroWork.data.imageData,
@@ -321,7 +321,7 @@ class PlatformMergerTest
     val digitalItem = metsWork.data.items.head
 
     val expectedMergedWork = sierraPhysicalWork
-      .transition[Merged](Some(now))
+      .transition[Merged](now)
       .mapData { data =>
         data.copy(
           items = List(
@@ -362,7 +362,7 @@ class PlatformMergerTest
     val digitalItem = metsWork.data.items.head
 
     val expectedMergedWork = sierraPictureWork
-      .transition[Merged](Some(now))
+      .transition[Merged](now)
       .mapData { data =>
         data.copy(
           items = List(
@@ -416,7 +416,7 @@ class PlatformMergerTest
     val metsItem = metsWork.data.items.head
 
     val expectedMergedWork = sierraPhysicalWork
-      .transition[Merged](Some(now))
+      .transition[Merged](now)
       .mapData { data =>
         data.copy(
           otherIdentifiers = sierraPhysicalWork.data.otherIdentifiers
@@ -498,7 +498,7 @@ class PlatformMergerTest
     val metsItem = metsWork.data.items.head
 
     val expectedMergedWork = multipleItemsSierraWork
-      .transition[Merged](Some(now))
+      .transition[Merged](now)
       .mapData { data =>
         data.copy(
           thumbnail = metsWork.data.thumbnail,
@@ -536,7 +536,7 @@ class PlatformMergerTest
     val metsItem = metsWork.data.items.head
 
     val expectedMergedWork = multipleItemsSierraWork
-      .transition[Merged](Some(now))
+      .transition[Merged](now)
       .mapData { data =>
         data.copy(
           otherIdentifiers = multipleItemsSierraWork.data.otherIdentifiers ++ sierraDigitisedWork.identifiers,
@@ -581,8 +581,7 @@ class PlatformMergerTest
     val result = merger.merge(List(miroWork))
 
     result.mergedWorksWithTime(now) should have length 1
-    result.mergedWorksWithTime(now).head shouldBe miroWork.transition[Merged](
-      Some(now))
+    result.mergedWorksWithTime(now).head shouldBe miroWork.transition[Merged](now)
     result.mergedImagesWithTime(now) should have length 1
     result.mergedImagesWithTime(now).head shouldBe miroWork.data.imageData.head
       .toInitialImageWith(

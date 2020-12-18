@@ -88,7 +88,7 @@ class MergerTest
     mergedWorks.mergedWorksWithTime(now) should contain(
       inputWorks.head
         .asInstanceOf[Work.Visible[Identified]]
-        .transition[Merged](Some(now))
+        .transition[Merged](now)
         .mapData { data =>
           data.copy[DataState.Identified](
             items = mergedTargetItems,
@@ -108,7 +108,7 @@ class MergerTest
 
   it("returns all non-redirected and non-target works untouched") {
     mergedWorks.mergedWorksWithTime(now) should contain(
-      inputWorks.tail.head.transition[Merged](Some(now))
+      inputWorks.tail.head.transition[Merged](now)
     )
   }
 }
