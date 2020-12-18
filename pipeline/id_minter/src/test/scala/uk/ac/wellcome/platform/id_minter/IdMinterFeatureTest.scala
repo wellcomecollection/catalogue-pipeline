@@ -7,7 +7,7 @@ import software.amazon.awssdk.services.sqs.model.QueueAttributeName
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.models.work.generators.WorkGenerators
-import uk.ac.wellcome.models.work.internal.WorkState.{Identified, Merged}
+import uk.ac.wellcome.models.work.internal.WorkState.Identified
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.id_minter.fixtures.WorkerServiceFixture
 
@@ -26,7 +26,7 @@ class IdMinterFeatureTest
 
     withLocalSqsQueue() { queue =>
       withIdentifiersTable { identifiersTableConfig =>
-        val work: Work[Merged] = mergedWork()
+        val work = sourceWork()
         val inputIndex = createIndex(List(work))
         val outputIndex = mutable.Map.empty[String, Work[Identified]]
         withWorkerService(
@@ -62,7 +62,7 @@ class IdMinterFeatureTest
 
     withLocalSqsQueue() { queue =>
       withIdentifiersTable { identifiersTableConfig =>
-        val work: Work[Merged] = mergedWork().invisible()
+        val work = sourceWork().invisible()
         val inputIndex = createIndex(List(work))
         val outputIndex = mutable.Map.empty[String, Work[Identified]]
         withWorkerService(
@@ -94,10 +94,9 @@ class IdMinterFeatureTest
 
     withLocalSqsQueue() { queue =>
       withIdentifiersTable { identifiersTableConfig =>
-        val work: Work[Merged] = mergedWork()
+        val work = sourceWork()
           .redirected(
-            redirect = IdState.Identified(
-              canonicalId = createCanonicalId,
+            redirect = IdState.Identifiable(
               sourceIdentifier = createSourceIdentifier))
         val inputIndex = createIndex(List(work))
         val outputIndex = mutable.Map.empty[String, Work[Identified]]
@@ -134,7 +133,7 @@ class IdMinterFeatureTest
 
     withLocalSqsQueue() { queue =>
       withIdentifiersTable { identifiersTableConfig =>
-        val work: Work[Merged] = mergedWork()
+        val work = sourceWork()
         val inputIndex = createIndex(List(work))
         val outputIndex = mutable.Map.empty[String, Work[Identified]]
         withWorkerService(
