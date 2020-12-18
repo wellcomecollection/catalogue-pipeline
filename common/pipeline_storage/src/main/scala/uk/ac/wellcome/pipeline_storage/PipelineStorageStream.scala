@@ -41,18 +41,16 @@ class PipelineStorageStream[In, Out, MsgDestination](
   def run(streamName: String,
           processFlow: Flow[(Message, In), (Message, Option[Out]), NotUsed])(
     implicit decoder: Decoder[In],
-    indexable: Indexable[Out]): Future[Done] = {
-    val identityFlow = Flow[(Message, Option[Out])].collect {
-      case (message, None) => message
-    }
+    indexable: Indexable[Out]): Future[Done] =
     for {
       _ <- documentIndexer.init()
-      result <- messageStream.runStream(
+      done: Done <- messageStream.runStream(
         streamName,
-        _.via(processFlow)
-          .via(broadcastAndMerge(batchAndSendFlow, identityFlow)))
-    } yield result
-  }
+        source =>
+          source
+            .via(processFlow)
+            .via(broadcastAndMerge(batchAndSendFlow, identityFlow)))
+    } yield done
 
   private def batchAndSendFlow(implicit indexable: Indexable[Out]) =
     Flow[(Message, Option[Out])]
@@ -71,6 +69,10 @@ class PipelineStorageStream[In, Out, MsgDestination](
         } yield bundle.message
       }
 
+  private val identityFlow: Flow[(Message, Option[Out]), Message, NotUsed] =
+    Flow[(Message, Option[Out])]
+      .collect { case (message, None) => message }
+
   private def storeDocuments(
     bundles: List[Bundle[Out]]): Future[List[Bundle[Out]]] =
     for {
@@ -82,7 +84,7 @@ class PipelineStorageStream[In, Out, MsgDestination](
       }
     }
 
-  def broadcastAndMerge[I, O](a: Flow[I, O, NotUsed],
+  private def broadcastAndMerge[I, O](a: Flow[I, O, NotUsed],
                               b: Flow[I, O, NotUsed]): Flow[I, O, NotUsed] =
     Flow.fromGraph(
       GraphDSL.create() { implicit builder =>
