@@ -60,9 +60,14 @@ trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest]
       for {
         payload <- decodePayload(message)
         key = Version(payload.id, payload.version)
-        recordResult <- getRecord(payload)
-        (record, version) = recordResult
-        newWork <- work(record, version, key)
+
+        _ = debug(s"Decoded payload $payload and key $key")
+
+        getResult <- getSourceData(payload)
+        (sourceData, version) = getResult
+        _ = debug(s"Retrieved sourceData version $version for key $key")
+
+        newWork <- work(sourceData, version, key)
       } yield (newWork, key)
     }.flatMap { compareToStored }
 
@@ -81,7 +86,7 @@ trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest]
       case Failure(err)      => Left(DecodePayloadError(err, message))
     }
 
-  private def getRecord(p: Payload): Result[(SourceData, Int)] =
+  private def getSourceData(p: Payload): Result[(SourceData, Int)] =
     lookupSourceData(p)
       .map {
         case Identified(Version(storedId, storedVersion), sourceData) =>
@@ -154,7 +159,8 @@ trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest]
             throw err
 
           case Right(None) =>
-            debug(s"$name: no transformed work returned for $notification")
+            debug(
+              s"$name: no transformed Work returned for $notification (this means the Work is already in the pipeline)")
             None
 
           case Right(Some((work, key))) =>
