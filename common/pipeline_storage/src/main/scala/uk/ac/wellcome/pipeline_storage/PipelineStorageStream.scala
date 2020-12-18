@@ -16,14 +16,16 @@ case class PipelineStorageConfig(batchSize: Int,
                                  flushInterval: FiniteDuration,
                                  parallelism: Int)
 
-case class Bundle[T](message: Message, document: T)
+case class Bundle[T](message: Message, item: T)
 
 class PipelineStorageStream[In, Out, MsgDestination](
   messageStream: SQSStream[In],
-  documentIndexer: Indexer[Out],
+  indexer: Indexer[Out],
   messageSender: MessageSender[MsgDestination])(config: PipelineStorageConfig)(
   implicit ec: ExecutionContext)
     extends Logging {
+
+  import PipelineStorageStream._
 
   def foreach(streamName: String, process: In => Future[Option[Out]])(
     implicit decoderT: Decoder[In],
@@ -38,84 +40,28 @@ class PipelineStorageStream[In, Out, MsgDestination](
         }
     )
 
-  def processBatched(
-    streamName: String,
-    process: List[In] => Future[List[Either[Exception, Out]]],
-    batchSize: Int,
-    flushInterval: FiniteDuration)(
-    implicit decoderT: Decoder[In],
-    indexable: Indexable[Out]): Future[Done] =
-    run(
-      streamName = streamName,
-      Flow[(Message, In)]
-        .groupedWithin(batchSize, flushInterval)
-        .mapAsyncUnordered(parallelism = config.parallelism) {
-          batch: Seq[(Message, In)] =>
-            val (messages, input) = batch.toList.unzip(identity)
-            debug(s"Processing batch ${messages.map(_.messageId())}")
-            process(input).map { output: List[Either[Exception, Out]] =>
-              if (output.length != messages.length)
-                throw new RuntimeException(
-                  "processBatched expects output length to equal input length")
-              messages
-                .zip(output)
-                .map {
-                  case (msg, Left(err)) =>
-                    info(s"Encountered exception batch processing msg ${msg.messageId}: $err")
-                    (msg, Option.empty[Out])
-                  case (msg, Right(out)) =>
-                    (msg, Some(out))
-                }
-            }
-        }
-        .mapConcat(identity)
-    )
-
   def run(streamName: String,
           processFlow: Flow[(Message, In), (Message, Option[Out]), NotUsed])(
     implicit decoder: Decoder[In],
     indexable: Indexable[Out]): Future[Done] =
     for {
-      _ <- documentIndexer.init()
+      _ <- indexer.init()
       done: Done <- messageStream.runStream(
         streamName,
         source =>
           source
             .via(processFlow)
-            .via(broadcastAndMerge(batchAndSendFlow, identityFlow)))
+            .via(
+              broadcastAndMerge(
+                batchAndSendFlow(config, messageSender, indexer),
+                identityFlow)
+              )
+            )
     } yield done
-
-  private def batchAndSendFlow(implicit indexable: Indexable[Out]) =
-    Flow[(Message, Option[Out])]
-      .collect { case (message, Some(document)) => Bundle(message, document) }
-      .groupedWeightedWithin(
-        config.batchSize,
-        config.flushInterval
-      )(bundle => indexable.weight(bundle.document))
-      .mapAsyncUnordered(config.parallelism) { msgs =>
-        storeDocuments(msgs.toList)
-      }
-      .mapConcat(identity)
-      .mapAsyncUnordered(config.parallelism) { bundle =>
-        for {
-          _ <- Future.fromTry(messageSender.send(indexable.id(bundle.document)))
-        } yield bundle.message
-      }
 
   private val identityFlow: Flow[(Message, Option[Out]), Message, NotUsed] =
     Flow[(Message, Option[Out])]
       .collect { case (message, None) => message }
-
-  private def storeDocuments(
-    bundles: List[Bundle[Out]]): Future[List[Bundle[Out]]] =
-    for {
-      either <- documentIndexer.index(documents = bundles.map(m => m.document))
-    } yield {
-      val failedWorks = either.left.getOrElse(Nil)
-      bundles.filterNot {
-        case Bundle(_, document) => failedWorks.contains(document)
-      }
-    }
 
   private def broadcastAndMerge[I, O](a: Flow[I, O, NotUsed],
                               b: Flow[I, O, NotUsed]): Flow[I, O, NotUsed] =
@@ -129,4 +75,76 @@ class PipelineStorageStream[In, Out, MsgDestination](
         FlowShape(broadcast.in, merge.out)
       }
     )
+}
+
+object PipelineStorageStream extends Logging {
+
+  def batchRetrieveFlow[T](
+    config: PipelineStorageConfig,
+    retriever: Retriever[T])(
+    implicit ec: ExecutionContext): Flow[Bundle[String], Bundle[T], NotUsed] =
+    Flow[Bundle[String]]
+      .groupedWithin(config.batchSize, config.flushInterval)
+      .mapAsyncUnordered(parallelism = config.parallelism) { bundles =>
+        val (messages, ids) = unzipBundles(bundles)
+        retriever(ids)
+          .map { result =>
+            ids.zipWithIndex
+              .map { case (id, idx) =>
+                result(id) match {
+                  case Left(err) =>
+                    error(s"Could not retrieve document with id: $id", err)
+                    None
+                  case Right(doc) => Some((messages(idx), doc))
+                }
+              }
+              .collect { case Some((msg, doc)) => Bundle(msg, doc) }
+          }
+      }
+      .mapConcat(identity)
+
+  def batchIndexFlow[T](
+    config: PipelineStorageConfig,
+    indexer: Indexer[T])(
+    implicit
+    ec: ExecutionContext,
+    indexable: Indexable[T]): Flow[Bundle[T], Bundle[String], NotUsed] =
+    Flow[Bundle[T]]
+      .groupedWeightedWithin(
+        config.batchSize,
+        config.flushInterval
+      ) {
+        case Bundle(msg, item) => indexable.weight(item)
+      }
+      .mapAsyncUnordered(config.parallelism) { bundles =>
+          val (messages, items) = unzipBundles(bundles)
+          indexer(items).map { result =>
+            val failed = result.left.getOrElse(Nil)
+            bundles.collect {
+              case Bundle(msg, doc) if !failed.contains(doc) =>
+                Bundle(msg, indexable.id(doc))
+            }
+          }
+      }
+      .mapConcat(identity)
+
+  def batchAndSendFlow[T, MsgDestination](
+    config: PipelineStorageConfig,
+    msgSender: MessageSender[MsgDestination],
+    indexer: Indexer[T])(
+    implicit
+    ec: ExecutionContext,
+    indexable: Indexable[T]) =
+    Flow[(Message, Option[T])]
+      .collect { case (msg, Some(document)) => Bundle(msg, document) }
+      .via(batchIndexFlow(config, indexer))
+      .mapAsyncUnordered(config.parallelism) {
+        case Bundle(msg, id) =>
+          Future.fromTry(msgSender.send(id).map(_ => msg))
+      }
+
+  private def unzipBundles[T](bundles: Seq[Bundle[T]]): (List[Message], List[T]) =
+      bundles
+        .toList
+        .unzip(bundle => bundle.message -> bundle.item)
 }

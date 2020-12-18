@@ -10,7 +10,7 @@ class MemoryIndexer[T: Indexable](
   def init(): Future[Unit] =
     Future.successful(())
 
-  def index(documents: Seq[T]): Future[Either[Seq[T], Seq[T]]] = {
+  def apply(documents: Seq[T]): Future[Either[Seq[T], Seq[T]]] = {
     documents.foreach { doc =>
       index.get(indexable.id(doc)) match {
         case Some(storedDoc)
