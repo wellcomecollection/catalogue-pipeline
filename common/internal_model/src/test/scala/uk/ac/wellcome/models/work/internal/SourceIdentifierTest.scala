@@ -13,4 +13,10 @@ class SourceIdentifierTest extends AnyFunSpec with Matchers {
 
     sourceIdentifier.toString shouldBe "miro-image-number/A0001234"
   }
+
+  it("fails creating a sourceIdentifier with a trailing space in the value"){
+    intercept[AssertionError]{
+      SourceIdentifier(identifierType = IdentifierType("sierra-system-number"), value = "b1234567  ", ontologyType = "Work")
+    }
+  }
 }

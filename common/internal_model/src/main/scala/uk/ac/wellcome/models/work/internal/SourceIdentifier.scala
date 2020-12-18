@@ -6,5 +6,7 @@ case class SourceIdentifier(
   ontologyType: String,
   value: String
 ) {
+  assert(!value.endsWith(" "))
+
   override def toString = s"${identifierType.id}/$value"
 }
