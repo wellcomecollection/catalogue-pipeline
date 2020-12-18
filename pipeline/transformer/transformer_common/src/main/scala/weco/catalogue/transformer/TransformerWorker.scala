@@ -154,7 +154,7 @@ trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest]
             throw err
 
           case Right(None) =>
-            debug(s"$name: no transformed work returned for $notification")
+            debug(s"$name: no transformed Work returned for $notification (this means the Work is already in the pipeline)")
             None
 
           case Right(Some((work, key))) =>
