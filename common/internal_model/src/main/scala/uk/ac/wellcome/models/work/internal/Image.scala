@@ -9,11 +9,11 @@ case class ImageData[+State](
 ) extends HasId[State]
 
 case class Image[State <: ImageState](
-                                       version: Int,
-                                       state: State,
-                                       locations: List[DigitalLocationDeprecated],
-                                       source: ImageSource,
-                                       modifiedTime: Instant
+  version: Int,
+  state: State,
+  locations: List[DigitalLocationDeprecated],
+  source: ImageSource,
+  modifiedTime: Instant
 ) {
   def id: String = state.id
   def sourceIdentifier: SourceIdentifier = state.sourceIdentifier

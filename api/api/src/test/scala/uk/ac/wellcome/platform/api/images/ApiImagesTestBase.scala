@@ -2,7 +2,12 @@ package uk.ac.wellcome.platform.api.images
 
 import uk.ac.wellcome.display.models.DisplaySerialisationTestBase
 import uk.ac.wellcome.models.work.generators.ImageGenerators
-import uk.ac.wellcome.models.work.internal.{Image, ImageSource, ImageState, SourceWorks}
+import uk.ac.wellcome.models.work.internal.{
+  Image,
+  ImageSource,
+  ImageState,
+  SourceWorks
+}
 import uk.ac.wellcome.platform.api.ApiTestBase
 
 trait ApiImagesTestBase

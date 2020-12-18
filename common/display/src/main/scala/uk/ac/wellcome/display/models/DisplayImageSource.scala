@@ -36,8 +36,7 @@ object DisplayImageSource {
         DisplayImageSource(works, includes)
     }
 
-  def apply(source: SourceWorks,
-            includes: ImageIncludes): DisplayImageSource =
+  def apply(source: SourceWorks, includes: ImageIncludes): DisplayImageSource =
     new DisplayImageSource(
       id = source.id.canonicalId,
       title = source.canonicalWork.data.title,
