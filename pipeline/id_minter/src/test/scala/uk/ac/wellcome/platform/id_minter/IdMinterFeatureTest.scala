@@ -96,8 +96,8 @@ class IdMinterFeatureTest
       withIdentifiersTable { identifiersTableConfig =>
         val work = sourceWork()
           .redirected(
-            redirect = IdState.Identifiable(
-              sourceIdentifier = createSourceIdentifier))
+            redirect =
+              IdState.Identifiable(sourceIdentifier = createSourceIdentifier))
         val inputIndex = createIndex(List(work))
         val outputIndex = mutable.Map.empty[String, Work[Identified]]
         withWorkerService(
