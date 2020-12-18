@@ -2,23 +2,10 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.internal.{
-  IdentifierType,
-  MergeCandidate,
-  SourceIdentifier
-}
-import uk.ac.wellcome.platform.transformer.sierra.source.{
-  MarcSubfield,
-  SierraBibData,
-  SierraMaterialType,
-  VarField
-}
-import uk.ac.wellcome.platform.transformer.sierra.generators.{
-  MarcGenerators,
-  SierraDataGenerators
-}
-import org.scalatest.prop.TableDrivenPropertyChecks._
 import uk.ac.wellcome.models.work.internal.IdState.Identifiable
+import uk.ac.wellcome.models.work.internal.{IdentifierType, MergeCandidate, SourceIdentifier}
+import uk.ac.wellcome.platform.transformer.sierra.generators.{MarcGenerators, SierraDataGenerators}
+import uk.ac.wellcome.platform.transformer.sierra.source.{MarcSubfield, SierraBibData, SierraMaterialType, VarField}
 
 class SierraMergeCandidatesTest
     extends AnyFunSpec
@@ -34,6 +21,17 @@ class SierraMergeCandidatesTest
       val sierraData = createSierraBibDataWith(
         varFields = create776subfieldsWith(
           ids = List(s"(UkLW)$mergeCandidateBibNumber")
+        )
+      )
+
+      SierraMergeCandidates(sierraData) shouldBe
+        physicalAndDigitalSierraMergeCandidate(mergeCandidateBibNumber)
+    }
+
+    it("trims spaces at the end of the bnumber of the mergeCandidate") {
+      val sierraData = createSierraBibDataWith(
+        varFields = create776subfieldsWith(
+          ids = List(s"(UkLW)$mergeCandidateBibNumber ")
         )
       )
 
@@ -262,38 +260,38 @@ class SierraMergeCandidatesTest
   }
 
   describe("Calm/Sierra harvest") {
-    it("Assumes UUIDs in 035 a are from calm and attaches the merge candidate") {
-      def calmId = randomUUID.toString
 
-      val calmIds = (1 to 5).map(_ => calmId)
-      val calmMergeCandidates = calmIds map createCalmMergeCandidate
+    it("adds a single Calm ID as a mergeCandidate"){
+      val calmId = randomUUID.toString
+      val bibData = bibDataWith035(List(calmId))
+
+      SierraMergeCandidates(bibData) shouldBe List(createCalmMergeCandidate(calmId))
+    }
+    it("adds multiple Calm IDs as mergeCandidates"){
+      val calmIds = (1 to 5).map(_ => randomUUID.toString)
+      val bibData = bibDataWith035(calmIds)
+
+      SierraMergeCandidates(bibData) shouldBe calmIds.map(createCalmMergeCandidate)
+    }
+    it("dedupes Calm IDs and adds as mergeCandidates"){
+      val calmIds = (1 to 5).map(_ => randomUUID.toString)
+
+      val bibData = bibDataWith035(calmIds ++ calmIds)
+
+      SierraMergeCandidates(bibData) shouldBe calmIds.map(createCalmMergeCandidate)
+    }
+    it("creates clam merge candidates if it has a mix of calm and non calm identifiers"){
+      val calmIds = (1 to 5).map(_ => randomUUID.toString)
       val otherIds = (1 to 5).map(_.toString)
-      val examples = Table(
-        ("-bibData-", "-mergeCandidates-", "-test-"),
-        (
-          bibDataWith035(calmIds.take(1)),
-          calmMergeCandidates.take(1),
-          "Single Calm ID"),
-        (
-          bibDataWith035(calmIds.take(5)),
-          calmMergeCandidates.take(5),
-          "Multiple Calm IDs"),
-        (
-          bibDataWith035(calmIds ++ calmIds),
-          calmMergeCandidates.take(5),
-          "Duped Calm IDs"),
-        (
-          bibDataWith035(otherIds ++ calmIds),
-          calmMergeCandidates.take(5),
-          "Mixed Calm and not Calm IDs"),
-        (bibDataWith035(otherIds), Nil, "No calm IDs"),
-      )
+      val bibData = bibDataWith035(otherIds ++ calmIds)
 
-      forAll(examples) { (bibData, mergeCandidates, clue) =>
-        withClue(clue) {
-          SierraMergeCandidates(bibData) shouldBe mergeCandidates
-        }
-      }
+      SierraMergeCandidates(bibData) shouldBe calmIds.map(createCalmMergeCandidate)
+    }
+    it("doesn't create merge candidates if there are no calm ids"){
+      val otherIds = (1 to 5).map(_.toString)
+      val bibData = bibDataWith035(otherIds)
+
+      SierraMergeCandidates(bibData) shouldBe Nil
     }
   }
 
