@@ -2,13 +2,7 @@ package uk.ac.wellcome.platform.api.images
 
 import uk.ac.wellcome.display.models.DisplaySerialisationTestBase
 import uk.ac.wellcome.models.work.generators.ImageGenerators
-import uk.ac.wellcome.models.work.internal.{
-  DataState,
-  Image,
-  ImageSource,
-  ImageState,
-  SourceWorks
-}
+import uk.ac.wellcome.models.work.internal.{Image, ImageSource, ImageState, SourceWorks}
 import uk.ac.wellcome.platform.api.ApiTestBase
 
 trait ApiImagesTestBase
@@ -22,7 +16,7 @@ trait ApiImagesTestBase
        |  "type": "Image"
      """.stripMargin
 
-  def imageSource(source: ImageSource[DataState.Identified]): String =
+  def imageSource(source: ImageSource): String =
     source match {
       case SourceWorks(work, _) =>
         s"""

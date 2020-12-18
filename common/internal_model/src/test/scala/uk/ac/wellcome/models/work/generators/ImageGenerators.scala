@@ -1,10 +1,10 @@
 package uk.ac.wellcome.models.work.generators
 
-import java.time.Instant
-
+import uk.ac.wellcome.models.work.internal.ImageState._
+import uk.ac.wellcome.models.work.internal.SourceWork._
 import uk.ac.wellcome.models.work.internal._
-import SourceWork._
-import ImageState._
+
+import java.time.Instant
 
 trait ImageGenerators
     extends IdentifiersGenerators
@@ -59,7 +59,7 @@ trait ImageGenerators
       )
     def toInitialImageWith(canonicalId: String = createCanonicalId,
                            modifiedTime: Instant = instantInLast30Days,
-                           sourceWorks: SourceWorks[DataState.Identified] =
+                           sourceWorks: SourceWorks =
                              SourceWorks(
                                canonicalWork = mergedWork().toSourceWork,
                                redirectedWork = None
@@ -110,7 +110,7 @@ trait ImageGenerators
     imageData: ImageData[IdState.Identified]) {
     def toInitialImageWith(
       modifiedTime: Instant = instantInLast30Days,
-      sourceWorks: SourceWorks[DataState.Identified] = SourceWorks(
+      sourceWorks: SourceWorks = SourceWorks(
         canonicalWork = mergedWork().toSourceWork,
         redirectedWork = None
       )
