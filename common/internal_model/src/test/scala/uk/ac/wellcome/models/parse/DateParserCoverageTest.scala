@@ -31,7 +31,7 @@ class DateParserCoverageTest extends AnyFunSpec with Matchers {
     * able to parse.  Use this if you're trying to measure the scope of the parser.
     *
     */
-  it("parses all the dates in the public catalogue") {
+  ignore("parses all the dates in the public catalogue") {
     val lines: Iterator[String] =
       new BufferedReaderIterator(
         new BufferedReader(
