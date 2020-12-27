@@ -10,7 +10,8 @@ import java.util.zip._
 class DateParserCoverageTest extends AnyFunSpec with Matchers {
 
   // See https://stackoverflow.com/q/17436549/1558022
-  class BufferedReaderIterator(reader: BufferedReader) extends Iterator[String] {
+  class BufferedReaderIterator(reader: BufferedReader)
+      extends Iterator[String] {
     override def hasNext: Boolean = reader.ready
     override def next: String = reader.readLine()
   }
