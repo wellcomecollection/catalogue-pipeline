@@ -39,24 +39,42 @@ trait DateParserUtils extends ParserUtils {
       "sep",
       "oct",
       "nov",
-      "dec"
+      "dec",
+
+      // Sometimes a month is followed by a trailing period, e.g. "17 Nov. 1492"
+      "jan.", "feb.", "mar.", "apr.", "jun.", "jul.", "aug.", "sep.", "oct.", "nov.", "dec.",
+
+      // All the weird misspellings of months in the catalogue
+      "jan.y", "feb.y", "mar.h", "ap.l", "aug.t", "sep.r", "oct.r", "nov.r", "dec.r",
+      "jany", "janvier", "janaury", "janauri", "ianuarri", "ianiuer", "januarii",
+      "februarii", "février", "febuary",
+      "martio", "marche",
+      "apl", "avril", "aprili", "aprilis", "aprill", "aprile",
+      "mai", "maii", "maij",
+      "juin", "iunio", "iunij",
+      "juillet", "iuli",
+      "augt", "augusto", "augst",
+      "sepr", "sept", "septr", "september", "septembri", "septembris", "settembre",
+      "octr", "octr.", "octubre", "octob",
+      "novr", "nouemb", "novembre", "nouember", "novre",
+      "decr", "décembre", "decembris", "decem", "decembre", "dezember", "decemr", "decemb"
     ).!.map { name =>
       monthMapping.get(name.toLowerCase.substring(0, 3)).get
     }
 
   val monthMapping = Map(
-    "jan" -> 1,
-    "feb" -> 2,
+    "jan" -> 1, "ian" -> 1,
+    "feb" -> 2, "fév" -> 2,
     "mar" -> 3,
-    "apr" -> 4,
-    "may" -> 5,
-    "jun" -> 6,
-    "jul" -> 7,
+    "apr" -> 4, "ap." -> 4, "apl" -> 4, "avr" -> 4,
+    "may" -> 5, "mai" -> 5,
+    "jun" -> 6, "iun" -> 6,
+    "jul" -> 7, "jui" -> 7, "iul" -> 7,
     "aug" -> 8,
-    "sep" -> 9,
+    "sep" -> 9, "set" -> 9,
     "oct" -> 10,
-    "nov" -> 11,
-    "dec" -> 12,
+    "nov" -> 11, "nou" -> 11,
+    "dec" -> 12, "déc" -> 12, "dez" -> 12,
   )
 
   def year[_: P] = yearDigits map (Year(_))

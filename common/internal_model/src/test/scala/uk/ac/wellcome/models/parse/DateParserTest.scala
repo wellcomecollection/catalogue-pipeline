@@ -133,6 +133,23 @@ class DateParserTest extends AnyFunSpec with Matchers {
         "Jan-Mar 1940"))
   }
 
+  it("parses month names followed by a period") {
+    DateParser("17 Nov. 1492") shouldBe Some(
+      InstantRange(
+        LocalDate of (1492, 11, 17),
+        LocalDate of (1492, 11, 17),
+        "17 Nov. 1492"))
+  }
+
+  it("parses month names which are abbreviated") {
+    // https://wellcomecollection.org/works/kntad7tz
+    DateParser("Feb.y 11th 1782") shouldBe Some(
+      InstantRange(
+        LocalDate of (1782, 2, 11),
+        LocalDate of (1782, 2, 11),
+        "Feb.y 11th 1782"))
+  }
+
   it("fails when day is not valid for a particular month") {
     DateParser("31 June 2000") shouldBe None
   }
