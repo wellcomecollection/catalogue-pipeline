@@ -46,18 +46,18 @@ trait DateParserUtils extends ParserUtils {
 
       // All the weird misspellings of months in the catalogue
       "jan.y", "feb.y", "mar.h", "ap.l", "aug.t", "sep.r", "oct.r", "nov.r", "dec.r",
-      "jany", "janvier", "janaury", "janauri", "ianuarri", "ianiuer", "januarii",
-      "februarii", "février", "febuary",
+      "jany", "jany.", "janry.", "janvier", "janaury", "janauri", "ianuarri", "ianiuer", "januarii",
+      "feby", "feby.", "februarii", "février", "febuary",
       "martio", "marche",
       "apl", "avril", "aprili", "aprilis", "aprill", "aprile",
       "mai", "maii", "maij",
       "juin", "iunio", "iunij",
       "juillet", "iuli",
       "augt", "augusto", "augst",
-      "sepr", "sept", "septr", "september", "septembri", "septembris", "settembre",
+      "sepr", "sepr.", "sept.r", "sept", "septr", "septr.", "september", "septembri", "septembris", "settembre", "septembre",
       "octr", "octr.", "octubre", "octob",
-      "novr", "nouemb", "novembre", "nouember", "novre",
-      "decr", "décembre", "decembris", "decem", "decembre", "dezember", "decemr", "decemb"
+      "novr", "novr.", "novem.r", "nouemb", "novembre", "nouember", "novre",
+      "decr", "decr.", "décembre", "decembris", "decem", "decembre", "dezember", "decemr", "decemb"
     ).!.map { name =>
       monthMapping.get(name.toLowerCase.substring(0, 3)).get
     }
