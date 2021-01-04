@@ -6,7 +6,7 @@ case class SourceIdentifier(
   ontologyType: String,
   value: String
 ) {
-  assert(!value.endsWith(" "))
+  require(value == value.trim, s"SourceIdentifier value contains trailing whitespace: <$value>")
 
   override def toString = s"${identifierType.id}/$value"
 }
