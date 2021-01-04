@@ -280,7 +280,7 @@ class SierraMergeCandidatesTest
 
       SierraMergeCandidates(bibData) shouldBe calmIds.map(createCalmMergeCandidate)
     }
-    it("creates clam merge candidates if it has a mix of calm and non calm identifiers"){
+    it("creates calm merge candidates if it has a mix of calm and non calm identifiers"){
       val calmIds = (1 to 5).map(_ => randomUUID.toString)
       val otherIds = (1 to 5).map(_.toString)
       val bibData = bibDataWith035(otherIds ++ calmIds)
