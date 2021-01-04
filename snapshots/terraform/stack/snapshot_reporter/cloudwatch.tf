@@ -1,7 +1,7 @@
 resource "aws_cloudwatch_event_rule" "snapshot_reporter_rule" {
   name                = "snapshot_reporter_rule-${var.deployment_service_env}"
   description         = "Starts the snapshot_reporter (${var.deployment_service_env}) lambda"
-  schedule_expression = "cron(0 6 * * ? *)"
+  schedule_expression = "cron(0 6 ? * MON-FRI *)"
 }
 
 resource "aws_lambda_permission" "allow_cloudwatch_trigger" {
