@@ -3,9 +3,21 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.internal.IdState.Identifiable
-import uk.ac.wellcome.models.work.internal.{IdentifierType, MergeCandidate, SourceIdentifier}
-import uk.ac.wellcome.platform.transformer.sierra.generators.{MarcGenerators, SierraDataGenerators}
-import uk.ac.wellcome.platform.transformer.sierra.source.{MarcSubfield, SierraBibData, SierraMaterialType, VarField}
+import uk.ac.wellcome.models.work.internal.{
+  IdentifierType,
+  MergeCandidate,
+  SourceIdentifier
+}
+import uk.ac.wellcome.platform.transformer.sierra.generators.{
+  MarcGenerators,
+  SierraDataGenerators
+}
+import uk.ac.wellcome.platform.transformer.sierra.source.{
+  MarcSubfield,
+  SierraBibData,
+  SierraMaterialType,
+  VarField
+}
 
 class SierraMergeCandidatesTest
     extends AnyFunSpec
@@ -261,33 +273,38 @@ class SierraMergeCandidatesTest
 
   describe("Calm/Sierra harvest") {
 
-    it("adds a single Calm ID as a mergeCandidate"){
+    it("adds a single Calm ID as a mergeCandidate") {
       val calmId = randomUUID.toString
       val bibData = bibDataWith035(List(calmId))
 
-      SierraMergeCandidates(bibData) shouldBe List(createCalmMergeCandidate(calmId))
+      SierraMergeCandidates(bibData) shouldBe List(
+        createCalmMergeCandidate(calmId))
     }
-    it("adds multiple Calm IDs as mergeCandidates"){
+    it("adds multiple Calm IDs as mergeCandidates") {
       val calmIds = (1 to 5).map(_ => randomUUID.toString)
       val bibData = bibDataWith035(calmIds)
 
-      SierraMergeCandidates(bibData) shouldBe calmIds.map(createCalmMergeCandidate)
+      SierraMergeCandidates(bibData) shouldBe calmIds.map(
+        createCalmMergeCandidate)
     }
-    it("dedupes Calm IDs and adds as mergeCandidates"){
+    it("dedupes Calm IDs and adds as mergeCandidates") {
       val calmIds = (1 to 5).map(_ => randomUUID.toString)
 
       val bibData = bibDataWith035(calmIds ++ calmIds)
 
-      SierraMergeCandidates(bibData) shouldBe calmIds.map(createCalmMergeCandidate)
+      SierraMergeCandidates(bibData) shouldBe calmIds.map(
+        createCalmMergeCandidate)
     }
-    it("creates calm merge candidates if it has a mix of calm and non calm identifiers"){
+    it(
+      "creates calm merge candidates if it has a mix of calm and non calm identifiers") {
       val calmIds = (1 to 5).map(_ => randomUUID.toString)
       val otherIds = (1 to 5).map(_.toString)
       val bibData = bibDataWith035(otherIds ++ calmIds)
 
-      SierraMergeCandidates(bibData) shouldBe calmIds.map(createCalmMergeCandidate)
+      SierraMergeCandidates(bibData) shouldBe calmIds.map(
+        createCalmMergeCandidate)
     }
-    it("doesn't create merge candidates if there are no calm ids"){
+    it("doesn't create merge candidates if there are no calm ids") {
       val otherIds = (1 to 5).map(_.toString)
       val bibData = bibDataWith035(otherIds)
 
