@@ -122,7 +122,14 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
       textField("edition"),
       objectField("notes").fields(englishTextField("content")),
       intField("duration"),
-      objectField("collectionPath").fields(label, textField("path")),
+      objectField("collectionPath").fields(
+        label,
+        textField("path")
+          .copyTo("data.collectionPath.depth")
+          .analyzer(pathAnalyzer.name)
+          .fields(keywordField("keyword")),
+        tokenCountField("depth").analyzer("standard")
+      ),
       objectField("imageData").fields(
         objectField("id").fields(canonicalId, sourceIdentifier)
       ),
