@@ -73,7 +73,13 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
   }
 
   private val mergeDigitalIntoPhysicalSierraTarget = new PartialRule {
-    val isDefinedForTarget: WorkPredicate = physicalSierra
+
+    // We don't merge physical/digitised audiovisual works, because the
+    // original bib records often contain different data.
+    //
+    // See the comment on Sources.findFirstLinkedDigitisedSierraWorkFor
+    val isDefinedForTarget: WorkPredicate = physicalSierra and not(isAudiovisual)
+
     val isDefinedForSource: WorkPredicate = sierraWork
 
     def rule(target: Work.Visible[Identified],

@@ -3,7 +3,7 @@ package uk.ac.wellcome.platform.merger.models
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.generators.{CalmWorkGenerators, SierraWorkGenerators}
-import uk.ac.wellcome.models.work.internal.{IdState, MergeCandidate}
+import uk.ac.wellcome.models.work.internal.{Format, IdState, MergeCandidate}
 
 class SourcesTest extends AnyFunSpec with Matchers with CalmWorkGenerators with SierraWorkGenerators {
   describe("findFirstLinkedDigitisedSierraWorkFor") {
@@ -121,6 +121,29 @@ class SourcesTest extends AnyFunSpec with Matchers with CalmWorkGenerators with 
 
       val physicalWork =
         sierraDigitalIdentifiedWork()
+          .mergeCandidates(
+            List(
+              MergeCandidate(
+                id = IdState.Identified(
+                  sourceIdentifier = digitisedWork.sourceIdentifier,
+                  canonicalId = digitisedWork.state.canonicalId),
+                reason = Some("Physical/digitised Sierra work")
+              )
+            )
+          )
+
+      val result =
+        Sources.findFirstLinkedDigitisedSierraWorkFor(physicalWork, sources = Seq(digitisedWork))
+
+      result shouldBe None
+    }
+
+    it("skips a target work which is an AV work") {
+      val digitisedWork = sierraDigitalIdentifiedWork()
+
+      val physicalWork =
+        sierraPhysicalIdentifiedWork()
+          .format(Format.Videos)
           .mergeCandidates(
             List(
               MergeCandidate(
