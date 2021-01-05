@@ -616,9 +616,6 @@ class PlatformMergerTest
       works = Seq(digitisedVideo, physicalVideo)
     )
 
-    result.mergedWorksWithTime(now) should contain theSameElementsAs Seq(
-      digitisedVideo.transition[Merged](now),
-      physicalVideo.transition[Merged](now)
-    )
+    result.resultWorks should contain theSameElementsAs Seq(physicalVideo, digitisedVideo)
   }
 }
