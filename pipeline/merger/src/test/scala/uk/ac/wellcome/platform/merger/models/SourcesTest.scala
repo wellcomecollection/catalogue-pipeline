@@ -10,7 +10,9 @@ class SourcesTest extends AnyFunSpec with Matchers with SierraWorkGenerators {
     it("returns None if there are no source Works") {
       val physicalWork = sierraPhysicalIdentifiedWork()
 
-      Sources.findFirstLinkedDigitisedSierraWorkFor(physicalWork, sources = Seq.empty) shouldBe None
+      Sources.findFirstLinkedDigitisedSierraWorkFor(
+        physicalWork,
+        sources = Seq.empty) shouldBe None
     }
 
     it("returns the first source work with a matching merge candidate") {
@@ -37,7 +39,9 @@ class SourcesTest extends AnyFunSpec with Matchers with SierraWorkGenerators {
           )
 
       val result =
-        Sources.findFirstLinkedDigitisedSierraWorkFor(physicalWork, sources = Seq(digitisedWork1, digitisedWork2))
+        Sources.findFirstLinkedDigitisedSierraWorkFor(
+          physicalWork,
+          sources = Seq(digitisedWork1, digitisedWork2))
 
       result shouldBe Some(digitisedWork1)
     }
@@ -59,7 +63,9 @@ class SourcesTest extends AnyFunSpec with Matchers with SierraWorkGenerators {
           )
 
       val result =
-        Sources.findFirstLinkedDigitisedSierraWorkFor(physicalWork, sources = Seq(digitisedWork))
+        Sources.findFirstLinkedDigitisedSierraWorkFor(
+          physicalWork,
+          sources = Seq(digitisedWork))
 
       result shouldBe None
     }
@@ -81,7 +87,9 @@ class SourcesTest extends AnyFunSpec with Matchers with SierraWorkGenerators {
           )
 
       val result =
-        Sources.findFirstLinkedDigitisedSierraWorkFor(physicalWork, sources = Seq(digitisedWork))
+        Sources.findFirstLinkedDigitisedSierraWorkFor(
+          physicalWork,
+          sources = Seq(digitisedWork))
 
       result shouldBe None
     }
