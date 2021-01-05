@@ -226,7 +226,7 @@ class PlatformMergerTest
   }
 
   it(
-    "merges a Sierra Sierra picture/digital image/3D object digital work with a Miro work") {
+    "merges a Sierra picture/digital image/3D object digital work with a Miro work") {
     val result = merger.merge(
       works = Seq(sierraDigitalWork, miroWork)
     )
