@@ -17,10 +17,10 @@ abstract class Indexer[T: Indexable] {
     * @return A future either containing a Left with the failed documents or a
     *         Right with the succesfully indexed documents
     */
-  def index(documents: Seq[T]): Future[Either[Seq[T], Seq[T]]]
+  def apply(documents: Seq[T]): Future[Either[Seq[T], Seq[T]]]
 
-  def index(document: T): Future[Either[Seq[T], Seq[T]]] =
-    index(documents = Seq(document))
+  def apply(document: T): Future[Either[Seq[T], Seq[T]]] =
+    apply(documents = Seq(document))
 }
 
 trait Indexable[T] {

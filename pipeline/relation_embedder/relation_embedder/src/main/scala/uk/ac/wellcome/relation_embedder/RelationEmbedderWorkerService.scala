@@ -62,7 +62,7 @@ class RelationEmbedderWorkerService[MsgDestination](
                 indexFlushInterval
               )(workIndexable.weight)
               .mapAsync(1) { works =>
-                workIndexer.index(works).flatMap {
+                workIndexer(works).flatMap {
                   case Left(failedWorks) =>
                     Future.failed(
                       new Exception(s"Failed indexing works: $failedWorks")

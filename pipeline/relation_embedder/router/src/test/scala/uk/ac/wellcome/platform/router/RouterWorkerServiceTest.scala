@@ -100,7 +100,7 @@ class RouterWorkerServiceTest
     val work = mergedWork()
     val failingIndexer = new Indexer[Work[Denormalised]] {
       override def init(): Future[Unit] = Future.successful(())
-      override def index(documents: Seq[Work[Denormalised]])
+      override def apply(documents: Seq[Work[Denormalised]])
         : Future[Either[Seq[Work[Denormalised]], Seq[Work[Denormalised]]]] =
         Future.successful(Left(documents))
     }

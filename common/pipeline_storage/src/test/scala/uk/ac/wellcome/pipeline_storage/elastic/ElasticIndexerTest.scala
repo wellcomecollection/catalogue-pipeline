@@ -37,7 +37,7 @@ class ElasticIndexerTest
     withLocalElasticsearchIndex(config = NoStrictMapping) { implicit index =>
       if (documents.nonEmpty) {
         withIndexer { indexer =>
-          indexer.index(documents).await shouldBe a[Right[_, _]]
+          indexer(documents).await shouldBe a[Right[_, _]]
         }
       }
 
@@ -114,7 +114,7 @@ class ElasticIndexerTest
     withLocalElasticsearchIndex(config = StrictWithNoDataIndexConfig) {
       implicit index =>
         withIndexer { indexer =>
-          val future = indexer.index(validDocuments ++ invalidDocuments)
+          val future = indexer(validDocuments ++ invalidDocuments)
 
           whenReady(future) { result =>
             result.left.get should contain only (invalidDocuments: _*)
@@ -160,7 +160,7 @@ class ElasticIndexerTest
     withLocalElasticsearchIndex(config = UnmappedDataMappingIndexConfig) {
       implicit index =>
         withIndexer { indexer =>
-          val future = indexer.index(documents)
+          val future = indexer(documents)
 
           whenReady(future) { result =>
             result.right.get should contain only (documents: _*)

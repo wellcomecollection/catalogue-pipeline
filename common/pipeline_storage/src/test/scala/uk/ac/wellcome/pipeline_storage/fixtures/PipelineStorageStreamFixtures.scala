@@ -30,7 +30,7 @@ trait PipelineStorageStreamFixtures extends Akka with SQS {
         val pipelineStream =
           new PipelineStorageStream[NotificationMessage, T, String](
             messageStream = messageStream,
-            documentIndexer = indexer,
+            indexer = indexer,
             messageSender = sender
           )(
             config = pipelineStorageConfig

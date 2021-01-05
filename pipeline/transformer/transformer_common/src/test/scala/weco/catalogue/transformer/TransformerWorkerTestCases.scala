@@ -211,7 +211,7 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
 
       it("if it can't index the work") {
         val brokenIndexer = new MemoryIndexer[Work[Source]]() {
-          override def index(documents: Seq[Work[Source]])
+          override def apply(documents: Seq[Work[Source]])
             : Future[Either[Seq[Work[Source]], Seq[Work[Source]]]] =
             Future.failed(new Throwable("BOOM!"))
         }
