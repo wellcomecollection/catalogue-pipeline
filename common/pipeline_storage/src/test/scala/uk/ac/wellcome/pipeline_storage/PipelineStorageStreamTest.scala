@@ -43,7 +43,7 @@ class PipelineStorageStreamTest
     withLocalSqsQueue() { queue =>
       withPipelineStream(queue = queue, indexer = indexer(index)) {
         pipelineStream =>
-          pipelineStream.foreach("test_stream", _ => Future.successful(None))
+          pipelineStream.foreach("test_stream", _ => Future.successful(Nil))
           eventuallyIndexExists(index)
       }
     }
@@ -70,7 +70,7 @@ class PipelineStorageStreamTest
             message =>
               Future
                 .fromTry(JsonUtil.fromJson[SampleDocument](message.body))
-                .map(Option(_)))
+                .map(List(_)))
           assertElasticsearchEventuallyHas(index = index, document)
           eventually {
             sender.messages.map(_.body) should contain(document.canonicalId)
@@ -81,7 +81,46 @@ class PipelineStorageStreamTest
     }
   }
 
-  it("processes a message and does not ingest if result of process is a None") {
+  it("supports multiple documents for a single input") {
+    val index = createIndex
+    val documents = (1 to 5).map(_ =>
+      SampleDocument(1, createCanonicalId, randomAlphanumeric())).toList
+
+    val sender = new MemoryMessageSender
+
+    withLocalSqsQueuePair(visibilityTimeout = 10) {
+      case QueuePair(queue, dlq) =>
+        withPipelineStream(
+          queue = queue,
+          indexer = indexer(index),
+          sender = sender) { pipelineStream =>
+          sendNotificationToSQS(
+            queue = queue,
+            message = "bu!"
+          )
+          pipelineStream.foreach(
+            "test stream",
+            _ =>
+              Future.successful(documents))
+          assertElasticsearchEventuallyHas(index = index, documents: _*)
+          eventually {
+            sender.messages.map(_.body) should contain theSameElementsAs documents.map(_.canonicalId)
+            assertQueueEmpty(queue)
+            assertQueueEmpty(dlq)
+          }
+        }
+    }
+  }
+
+  it("does not delete a message if some of spawns fail ingesting"){
+
+  }
+
+  it("does not delete a message if some of spawns fail sending"){
+
+  }
+
+  it("processes a message and does not ingest if result of process is an empty List") {
     val index = createIndex
     val document = SampleDocument(1, createCanonicalId, randomAlphanumeric())
 
@@ -97,7 +136,7 @@ class PipelineStorageStreamTest
             queue = queue,
             message = document
           )
-          pipelineStream.foreach("test stream", _ => Future.successful(None))
+          pipelineStream.foreach("test stream", _ => Future.successful(Nil))
 
           eventually {
             assertElasticsearchEmpty(index = index)
@@ -141,7 +180,7 @@ class PipelineStorageStreamTest
             message =>
               Future
                 .fromTry(JsonUtil.fromJson[SampleDocument](message.body))
-                .map(Option(_)))
+                .map(List(_)))
           assertElasticsearchEventuallyHas(index = index, documents: _*)
           eventually(Timeout(scaled(60 seconds))) {
             sender.messages.map(_.body) should contain theSameElementsAs documents
@@ -167,7 +206,7 @@ class PipelineStorageStreamTest
               message =>
                 Future
                   .fromTry(JsonUtil.fromJson[SampleDocument](message.body))
-                  .map(Option(_)))
+                  .map(List(_)))
             eventually {
               assertQueueEmpty(queue)
               assertQueueHasSize(dlq, size = 1)
@@ -192,7 +231,7 @@ class PipelineStorageStreamTest
         pipelineStream =>
           whenReady(
             pipelineStream
-              .foreach("test stream", _ => Future.successful(None))
+              .foreach("test stream", _ => Future.successful(Nil))
               .failed) { exception =>
             exception shouldBe a[RuntimeException]
           }
@@ -243,7 +282,7 @@ class PipelineStorageStreamTest
               message =>
                 Future
                   .fromTry(JsonUtil.fromJson[SampleDocument](message.body))
-                  .map(Option(_)))
+                  .map(List(_)))
             eventually {
               sender.messages.map(_.body) should contain theSameElementsAs successfulDocuments
                 .map(_.canonicalId)
@@ -276,7 +315,7 @@ class PipelineStorageStreamTest
 
           pipelineStream.foreach(
             "test stream",
-            _ => Future.successful(Some(document))
+            _ => Future.successful(List(document))
           )
 
           eventually {
