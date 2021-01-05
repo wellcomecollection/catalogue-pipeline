@@ -2,10 +2,10 @@ package uk.ac.wellcome.platform.merger.models
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.generators.SierraWorkGenerators
+import uk.ac.wellcome.models.work.generators.{CalmWorkGenerators, SierraWorkGenerators}
 import uk.ac.wellcome.models.work.internal.{IdState, MergeCandidate}
 
-class SourcesTest extends AnyFunSpec with Matchers with SierraWorkGenerators {
+class SourcesTest extends AnyFunSpec with Matchers with CalmWorkGenerators with SierraWorkGenerators {
   describe("findFirstLinkedDigitisedSierraWorkFor") {
     it("returns None if there are no source Works") {
       val physicalWork = sierraPhysicalIdentifiedWork()
@@ -90,6 +90,50 @@ class SourcesTest extends AnyFunSpec with Matchers with SierraWorkGenerators {
         Sources.findFirstLinkedDigitisedSierraWorkFor(
           physicalWork,
           sources = Seq(digitisedWork))
+
+      result shouldBe None
+    }
+
+    it("skips a target work which isn't a Sierra work") {
+      val digitisedWork = sierraDigitalIdentifiedWork()
+
+      val physicalWork =
+        calmIdentifiedWork()
+          .mergeCandidates(
+            List(
+              MergeCandidate(
+                id = IdState.Identified(
+                  sourceIdentifier = digitisedWork.sourceIdentifier,
+                  canonicalId = digitisedWork.state.canonicalId),
+                reason = Some("Physical/digitised Sierra work")
+              )
+            )
+          )
+
+      val result =
+        Sources.findFirstLinkedDigitisedSierraWorkFor(physicalWork, sources = Seq(digitisedWork))
+
+      result shouldBe None
+    }
+
+    it("skips a target work which isn't a Sierra physical work") {
+      val digitisedWork = sierraDigitalIdentifiedWork()
+
+      val physicalWork =
+        sierraDigitalIdentifiedWork()
+          .mergeCandidates(
+            List(
+              MergeCandidate(
+                id = IdState.Identified(
+                  sourceIdentifier = digitisedWork.sourceIdentifier,
+                  canonicalId = digitisedWork.state.canonicalId),
+                reason = Some("Physical/digitised Sierra work")
+              )
+            )
+          )
+
+      val result =
+        Sources.findFirstLinkedDigitisedSierraWorkFor(physicalWork, sources = Seq(digitisedWork))
 
       result shouldBe None
     }
