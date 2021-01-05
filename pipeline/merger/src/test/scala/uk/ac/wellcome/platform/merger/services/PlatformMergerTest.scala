@@ -593,4 +593,31 @@ class PlatformMergerTest
         )
       )
   }
+
+  it("doesn't merge Sierra audiovisual works") {
+    val digitisedVideo =
+      sierraDigitalIdentifiedWork().format(Format.EVideos)
+
+    val physicalVideo =
+      sierraPhysicalIdentifiedWork()
+        .format(Format.Videos)
+        .mergeCandidates(
+          List(
+            MergeCandidate(
+              id = IdState.Identified(
+                sourceIdentifier = digitisedVideo.sourceIdentifier,
+                canonicalId = digitisedVideo.state.canonicalId),
+              reason = Some("Physical/digitised Sierra work")
+            )
+          )
+        )
+
+    val result = merger.merge(
+      works = Seq(digitisedVideo, physicalVideo)
+    )
+
+    result.resultWorks should contain theSameElementsAs Seq(
+      physicalVideo,
+      digitisedVideo)
+  }
 }
