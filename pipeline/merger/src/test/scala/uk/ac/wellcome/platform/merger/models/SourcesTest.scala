@@ -2,10 +2,17 @@ package uk.ac.wellcome.platform.merger.models
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.generators.{CalmWorkGenerators, SierraWorkGenerators}
+import uk.ac.wellcome.models.work.generators.{
+  CalmWorkGenerators,
+  SierraWorkGenerators
+}
 import uk.ac.wellcome.models.work.internal.{Format, IdState, MergeCandidate}
 
-class SourcesTest extends AnyFunSpec with Matchers with CalmWorkGenerators with SierraWorkGenerators {
+class SourcesTest
+    extends AnyFunSpec
+    with Matchers
+    with CalmWorkGenerators
+    with SierraWorkGenerators {
   describe("findFirstLinkedDigitisedSierraWorkFor") {
     it("returns None if there are no source Works") {
       val physicalWork = sierraPhysicalIdentifiedWork()
@@ -111,7 +118,9 @@ class SourcesTest extends AnyFunSpec with Matchers with CalmWorkGenerators with 
           )
 
       val result =
-        Sources.findFirstLinkedDigitisedSierraWorkFor(physicalWork, sources = Seq(digitisedWork))
+        Sources.findFirstLinkedDigitisedSierraWorkFor(
+          physicalWork,
+          sources = Seq(digitisedWork))
 
       result shouldBe None
     }
@@ -133,7 +142,9 @@ class SourcesTest extends AnyFunSpec with Matchers with CalmWorkGenerators with 
           )
 
       val result =
-        Sources.findFirstLinkedDigitisedSierraWorkFor(physicalWork, sources = Seq(digitisedWork))
+        Sources.findFirstLinkedDigitisedSierraWorkFor(
+          physicalWork,
+          sources = Seq(digitisedWork))
 
       result shouldBe None
     }
@@ -156,7 +167,9 @@ class SourcesTest extends AnyFunSpec with Matchers with CalmWorkGenerators with 
           )
 
       val result =
-        Sources.findFirstLinkedDigitisedSierraWorkFor(physicalWork, sources = Seq(digitisedWork))
+        Sources.findFirstLinkedDigitisedSierraWorkFor(
+          physicalWork,
+          sources = Seq(digitisedWork))
 
       result shouldBe None
     }

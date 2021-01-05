@@ -168,7 +168,9 @@ class MergerFeatureTest
       val outcome = merger.merge(Seq(physicalVideo, digitisedVideo))
 
       Then("both original works are preserved")
-      outcome.resultWorks should contain theSameElementsAs Seq(physicalVideo, digitisedVideo)
+      outcome.resultWorks should contain theSameElementsAs Seq(
+        physicalVideo,
+        digitisedVideo)
     }
 
     Scenario("A Calm work and a Sierra work are matched") {

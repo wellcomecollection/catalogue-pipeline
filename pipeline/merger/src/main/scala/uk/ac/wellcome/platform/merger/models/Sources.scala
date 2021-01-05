@@ -10,8 +10,7 @@ object Sources {
   def findFirstLinkedDigitisedSierraWorkFor(
     target: Work.Visible[Identified],
     sources: Seq[Work[Identified]]): Option[Work[Identified]] =
-    if (
-      physicalSierra(target)
+    if (physicalSierra(target)
 
         // Audiovisual works are catalogued as multiple bib records, one for the physical
         // format and another for the digitised version, where available.
@@ -23,8 +22,7 @@ object Sources {
         // they catalogue AV works.
         //
         // See https://github.com/wellcomecollection/platform/issues/4876
-        && !isAudiovisual(target)
-    ) {
+        && !isAudiovisual(target)) {
       val digitisedLinkedIds = target.data.mergeCandidates
         .filter(_.reason.contains("Physical/digitised Sierra work"))
         .map(_.id.canonicalId)

@@ -117,7 +117,7 @@ object WorkPredicates {
   def isAudiovisual(work: Work[Identified]): Boolean =
     work.data.format match {
       case Some(f) if f.isInstanceOf[Audiovisual] => true
-      case _ => false
+      case _                                      => false
     }
 
   private def satisfiesAll(predicates: (Work[Identified] => Boolean)*)(
