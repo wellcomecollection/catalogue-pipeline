@@ -12,8 +12,8 @@ import com.sksamuel.elastic4s.ElasticClient
 import com.sksamuel.elastic4s.ElasticDsl._
 import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.platform.api.elasticsearch.{
-  WorksMultiMatcher, 
-  ImagesMultiMatcher
+  ImagesMultiMatcher,
+  WorksMultiMatcher
 }
 import uk.ac.wellcome.platform.api.swagger.SwaggerDocs
 import uk.ac.wellcome.platform.api.models._
@@ -56,9 +56,9 @@ class Router(elasticClient: ElasticClient,
               path("work-search-templates.json") {
                 getWorkSearchTemplates
               }
-              path("image-search-templates.json") {
-                getImageSearchTemplates
-              }
+                path ("image-search-templates.json") {
+                  getImageSearchTemplates
+                }
             )
           },
           path("v1" / Remaining) { _ =>
@@ -126,7 +126,7 @@ class Router(elasticClient: ElasticClient,
     complete(SearchTemplateResponse(List(searchTemplate)))
   }
 
-def getImageSearchTemplates: Route = get {
+  def getImageSearchTemplates: Route = get {
     val searchTemplate = SearchTemplate(
       "image_search_query",
       elasticConfig.imagesIndex.name,

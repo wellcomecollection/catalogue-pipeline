@@ -32,7 +32,7 @@ class ApiSearchTemplatesTest
       }
     }
   }
-  
+
   private def checkWorkJson(f: Json => Unit): Unit =
     withApi { routes =>
       Get(s"/$apiPrefix/work-search-templates.json") ~> routes ~> check {
@@ -41,7 +41,7 @@ class ApiSearchTemplatesTest
         f(parseJson(responseAs[String]))
       }
     }
-  
+
   private def checkImageJson(f: Json => Unit): Unit =
     withApi { routes =>
       Get(s"/$apiPrefix/image-search-templates.json") ~> routes ~> check {
