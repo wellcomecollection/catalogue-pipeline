@@ -161,11 +161,11 @@ trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest]
           case Right(None) =>
             debug(
               s"$name: no transformed Work returned for $notification (this means the Work is already in the pipeline)")
-            None
+            Nil
 
           case Right(Some((work, key))) =>
             info(s"$name: from $key transformed work with id ${work.id}")
-            Some(work)
+            List(work)
       }
     )
 }
