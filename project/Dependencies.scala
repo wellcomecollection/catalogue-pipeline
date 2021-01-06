@@ -123,8 +123,6 @@ object ExternalDependencies {
   )
 
   val elasticsearchDependencies = Seq(
-    "org.apache.logging.log4j" % "log4j-core" % versions.apacheLogging,
-    "org.apache.logging.log4j" % "log4j-api" % versions.apacheLogging,
     "com.sksamuel.elastic4s" %% "elastic4s-core" % versions.elastic4s,
     "com.sksamuel.elastic4s" %% "elastic4s-client-esjava" % versions.elastic4s,
     "com.sksamuel.elastic4s" %% "elastic4s-http-streams" % versions.elastic4s,
@@ -209,7 +207,8 @@ object CatalogueDependencies {
   val elasticsearchDependencies: Seq[ModuleID] =
     ExternalDependencies.elasticsearchDependencies ++
       ExternalDependencies.scalacheckDependencies ++
-      WellcomeDependencies.fixturesLibrary
+      WellcomeDependencies.fixturesLibrary ++
+      WellcomeDependencies.typesafeLibrary
 
   val bigMessagingDependencies: Seq[ModuleID] =
     ExternalDependencies.scalatestDependencies ++
