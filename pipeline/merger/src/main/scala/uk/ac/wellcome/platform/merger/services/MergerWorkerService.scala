@@ -1,47 +1,41 @@
 package uk.ac.wellcome.platform.merger.services
 
-import java.time.Instant
-
 import akka.Done
 import io.circe.Encoder
-
-import scala.concurrent.{ExecutionContext, Future}
-import uk.ac.wellcome.models.matcher.MatcherResult
-import uk.ac.wellcome.typesafe.Runnable
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.messaging.sqs.SQSStream
-import uk.ac.wellcome.pipeline_storage.Indexer
-import WorkState.{Identified, Merged}
+import uk.ac.wellcome.models.Implicits._
+import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, MatcherResult}
+import uk.ac.wellcome.models.work.internal.WorkState.{Identified, Merged}
+import uk.ac.wellcome.models.work.internal._
+import uk.ac.wellcome.pipeline_storage.PipelineStorageStream
+import uk.ac.wellcome.typesafe.Runnable
+
+import java.time.Instant
+import scala.concurrent.{ExecutionContext, Future}
 
 class MergerWorkerService[WorkDestination, ImageDestination](
-  sqsStream: SQSStream[NotificationMessage],
-  sourceWorkLookup: IdentifiedWorkLookup,
-  mergerManager: MergerManager,
-  workIndexer: Indexer[Work[Merged]],
-  workSender: MessageSender[WorkDestination],
-  imageSender: MessageSender[ImageDestination]
+                                                              pipelineStorageStream: PipelineStorageStream[NotificationMessage, Work[Merged], WorkDestination],
+                                                              sourceWorkLookup: IdentifiedWorkLookup,
+                                                              mergerManager: MergerManager,
+                                                              imageSender: MessageSender[ImageDestination]
 )(implicit ec: ExecutionContext)
     extends Runnable {
 
   def run(): Future[Done] =
-    workIndexer.init().flatMap { _ =>
-      sqsStream.foreach(this.getClass.getSimpleName, processMessage)
-    }
+      pipelineStorageStream.foreach(this.getClass.getSimpleName, processMessage)
 
-  private def processMessage(message: NotificationMessage): Future[Unit] =
+  private def processMessage(message: NotificationMessage): Future[List[Work[Merged]]] =
     for {
       matcherResult <- Future.fromTry(fromJson[MatcherResult](message.body))
       workSets <- Future.sequence {
-        matcherResult.works.toList.map { matchedIdentifiers =>
+        matcherResult.works.toList.map { matchedIdentifiers: MatchedIdentifiers =>
           sourceWorkLookup.fetchAllWorks(matchedIdentifiers.identifiers.toList)
         }
       }
       nonEmptyWorkSets = workSets.filter(_.flatten.nonEmpty)
-      _ <- nonEmptyWorkSets match {
+      worksToSend <- nonEmptyWorkSets match {
         case Nil => Future.successful(Nil)
         case _ =>
           val lastUpdated = nonEmptyWorkSets
@@ -51,36 +45,16 @@ class MergerWorkerService[WorkDestination, ImageDestination](
             nonEmptyWorkSets.map(applyMerge(_, lastUpdated))
           }
       }
-    } yield ()
+    } yield worksToSend.flatten
 
   private def applyMerge(maybeWorks: Seq[Option[Work[Identified]]],
-                         lastUpdated: Instant): Future[Unit] = {
+                         lastUpdated: Instant): Future[Seq[Work[Merged]]] = {
     val outcome = mergerManager.applyMerge(maybeWorks = maybeWorks)
-    for {
-      indexResult <- workIndexer(outcome.mergedWorksWithTime(lastUpdated))
-      works <- indexResult match {
-        case Left(failedWorks) =>
-          Future.failed(
-            new Exception(
-              s"Failed indexing works: $failedWorks (tried to ingest ${outcome.mergedWorksWithTime(lastUpdated)})")
-          )
-        case Right(works) => Future.successful(works)
-      }
-      (worksFuture, imagesFuture) = (
-        sendWorks(works),
-        sendMessages(imageSender, outcome.mergedImagesWithTime(lastUpdated))
-      )
-      _ <- worksFuture
-      _ <- imagesFuture
-    } yield ()
-  }
 
-  private def sendWorks(works: Seq[Work[Merged]]): Future[Seq[Unit]] =
-    Future.sequence(
-      works.map { w =>
-        Future.fromTry(workSender.send(w.id))
-      }
-    )
+    for {
+      _ <- sendMessages(imageSender, outcome.mergedImagesWithTime(lastUpdated))
+    } yield outcome.mergedWorksWithTime(lastUpdated)
+  }
 
   private def sendMessages[Destination, T](
     sender: MessageSender[Destination],
