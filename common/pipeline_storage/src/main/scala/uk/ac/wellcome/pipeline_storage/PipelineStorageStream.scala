@@ -1,16 +1,16 @@
 package uk.ac.wellcome.pipeline_storage
 
 import akka.stream.FlowShape
-import akka.{Done, NotUsed}
 import akka.stream.scaladsl.{Broadcast, Flow, GraphDSL, Merge}
+import akka.{Done, NotUsed}
 import grizzled.slf4j.Logging
 import io.circe.Decoder
 import software.amazon.awssdk.services.sqs.model.Message
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sqs.SQSStream
 
-import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.{ExecutionContext, Future}
 
 case class PipelineStorageConfig(batchSize: Int,
                                  flushInterval: FiniteDuration,
@@ -120,8 +120,9 @@ object PipelineStorageStream extends Logging {
         val (_, items) = unzipBundles(bundles)
         indexer(items).map { result =>
           val failed = result.left.getOrElse(Nil)
+          if (failed.nonEmpty) warn(s"Some documents failed ingesting: $failed")
           bundles.collect {
-            case bundle@Bundle(message, doc, numberOfItems) if !failed.contains(doc) =>
+            case Bundle(message, doc, numberOfItems) if !failed.contains(doc) =>
               Bundle(message, indexable.id(doc), numberOfItems)
           }
         }
@@ -138,18 +139,29 @@ object PipelineStorageStream extends Logging {
       .collect { case (msg, items@_::_) => items.map(item => Bundle[T](message = msg,item = item, numberOfItems = items.size)) }
       .mapConcat[Bundle[T]](identity)
       .via(batchIndexFlow(config, indexer))
+      .via(groupByMessage
+        .mapConcat(identity)
+        .mergeSubstreams
+      )
       .mapAsyncUnordered(config.parallelism) {
         bundle =>
           for {
             _ <- Future.fromTry(msgSender.send(bundle.item))
           } yield bundle
       }
+      .via(groupByMessage
+      .map(_.head.message)
+      .mergeSubstreams)
+
+
+  def groupByMessage =
+    Flow[Bundle[String]]
       .groupBy(Integer.MAX_VALUE, _.message.messageId())
-      .scan(Nil: List[Bundle[String]]){ case (bundleList, b) => b :: bundleList }
-      .collect{
-        case list@head::_ if list.size == head.numberOfItems => list.head.message
-      }
-      .mergeSubstreams
+    .scan(Nil: List[Bundle[String]]){ case (bundleList, b) => b :: bundleList }
+      .filter {
+      list => list.nonEmpty && list.map(_.item).distinct.size == list.head.numberOfItems
+    }
+
 
   private def unzipBundles[T](
     bundles: Seq[Bundle[T]]): (List[Message], List[T]) =
