@@ -11,9 +11,9 @@ class ApiSearchTemplatesTest
     with JsonHelpers {
 
   it("renders a list of available work search templates") {
-    checkWorkJson { json =>
+    checkJson { json =>
       json.isObject shouldBe true
-      val templates = getKey(json, "templates")
+      val templates = getKey(json, "workTemplates")
       templates should not be empty
       templates map { json =>
         getLength(json).get should be > 0
@@ -23,9 +23,9 @@ class ApiSearchTemplatesTest
   }
 
   it("renders a list of available image search templates") {
-    checkImageJson { json =>
+    checkJson { json =>
       json.isObject shouldBe true
-      val templates = getKey(json, "templates")
+      val templates = getKey(json, "imageTemplates")
       templates should not be empty
       templates map { json =>
         getLength(json).get should be > 0
@@ -33,21 +33,12 @@ class ApiSearchTemplatesTest
     }
   }
   
-  private def checkWorkJson(f: Json => Unit): Unit =
+  private def checkJson(f: Json => Unit): Unit =
     withApi { routes =>
-      Get(s"/$apiPrefix/work-search-templates.json") ~> routes ~> check {
+      Get(s"/$apiPrefix/search-templates.json") ~> routes ~> check {
         status shouldEqual Status.OK
         contentType shouldEqual ContentTypes.`application/json`
         f(parseJson(responseAs[String]))
       }
     }
   
-  private def checkImageJson(f: Json => Unit): Unit =
-    withApi { routes =>
-      Get(s"/$apiPrefix/image-search-templates.json") ~> routes ~> check {
-        status shouldEqual Status.OK
-        contentType shouldEqual ContentTypes.`application/json`
-        f(parseJson(responseAs[String]))
-      }
-    }
-}

@@ -53,11 +53,8 @@ class Router(elasticClient: ElasticClient,
               path("swagger.json") {
                 swagger
               },
-              path("work-search-templates.json") {
-                getWorkSearchTemplates
-              }
-              path("image-search-templates.json") {
-                getImageSearchTemplates
+              path("search-templates.json") {
+                getSearchTemplates
               }
             )
           },
@@ -116,24 +113,23 @@ class Router(elasticClient: ElasticClient,
     }
   }
 
-  def getWorkSearchTemplates: Route = get {
-    val searchTemplate = SearchTemplate(
+  def getSearchTemplates: Route = get {
+    val worksSearchTemplate = SearchTemplate(
       "multi_matcher_search_query",
       elasticConfig.worksIndex.name,
       WorksMultiMatcher("{{query}}").filter(
-        termQuery(field = "type", value = "Visible")))
+        termQuery(field = "type", value = "Visible")),
+      )
 
-    complete(SearchTemplateResponse(List(searchTemplate)))
-  }
-
-def getImageSearchTemplates: Route = get {
-    val searchTemplate = SearchTemplate(
+    val imageSearchTemplate = SearchTemplate(
       "image_search_query",
       elasticConfig.imagesIndex.name,
-      ImagesMultiMatcher("{{query}}")
+      ImagesMultiMatcher("{{query}}"),
     )
 
-    complete(SearchTemplateResponse(List(searchTemplate)))
+    complete(SearchTemplateResponse(
+      List(worksSearchTemplate), List(imageSearchTemplate)
+    ))
   }
 
   def rejectionHandler =
