@@ -4,7 +4,7 @@
 
 A variant of the scoring tiers query introduced in Test 5 was tested. The variant adds an english analyser \(to capture peculiarities of apostrophes in queries like `gray's anatomy`\), and includes contributors in the list of queried fields.
 
-![rough form of a scoring tiers query](../../.gitbook/assets/scoring_tiers_v1%20%281%29.png)
+![rough form of a scoring tiers query](../../.gitbook/assets/scoring_tiers_v1%20%283%29.png)
 
 ## Results
 
