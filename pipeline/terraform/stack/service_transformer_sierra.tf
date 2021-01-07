@@ -41,7 +41,7 @@ module "sierra_transformer" {
   }
 
   subnets             = var.subnets
-  max_capacity        = 10
+  max_capacity        = var.max_capacity
   messages_bucket_arn = aws_s3_bucket.messages.arn
 
   queue_read_policy = module.sierra_transformer_queue.read_policy

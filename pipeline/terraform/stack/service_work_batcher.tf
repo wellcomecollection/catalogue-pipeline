@@ -36,7 +36,7 @@ module "batcher" {
   shared_logging_secrets = var.shared_logging_secrets
 
   subnets             = var.subnets
-  max_capacity        = 1
+  max_capacity        = min(1, var.max_capacity)
   messages_bucket_arn = aws_s3_bucket.messages.arn
   queue_read_policy   = module.batcher_queue.read_policy
 

@@ -45,7 +45,7 @@ module "router" {
   shared_logging_secrets = var.shared_logging_secrets
 
   subnets             = var.subnets
-  max_capacity        = 10
+  max_capacity        = min(10, var.max_capacity)
   messages_bucket_arn = aws_s3_bucket.messages.arn
   queue_read_policy   = module.router_queue.read_policy
 
