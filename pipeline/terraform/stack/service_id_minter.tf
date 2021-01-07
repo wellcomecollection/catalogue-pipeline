@@ -53,10 +53,12 @@ module "id_minter" {
 
   // The total number of connections to RDS across all tasks from all ID minter
   // services must not exceed the maximum supported by the RDS instance.
-  max_capacity = floor(
-    local.id_minter_rds_max_connections / local.id_minter_task_max_connections
+  max_capacity = min(
+    floor(
+      local.id_minter_rds_max_connections / local.id_minter_task_max_connections
+    ),
+    var.max_capacity
   )
-
 
   subnets             = var.subnets
   messages_bucket_arn = aws_s3_bucket.messages.arn

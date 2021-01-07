@@ -44,8 +44,10 @@ module "relation_embedder" {
     es_password = "catalogue/pipeline_storage/relation_embedder/es_password"
   }
 
+  # NOTE: limit to avoid >500 concurrent scroll contexts
+  max_capacity = min(10, var.max_capacity)
+
   subnets             = var.subnets
-  max_capacity        = 10 // NOTE: limit to avoid >500 concurrent scroll contexts
   messages_bucket_arn = aws_s3_bucket.messages.arn
   queue_read_policy   = module.relation_embedder_queue.read_policy
 

@@ -2,6 +2,12 @@ variable "pipeline_date" {
   type = string
 }
 
+variable "max_capacity" {
+  type        = number
+  default     = 10
+  description = "The max capacity of every ECS service will be less than or equal to this value"
+}
+
 variable "subnets" {
   type = list(string)
 }
