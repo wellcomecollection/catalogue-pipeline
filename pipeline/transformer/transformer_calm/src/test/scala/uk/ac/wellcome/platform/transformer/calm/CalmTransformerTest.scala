@@ -34,7 +34,7 @@ class CalmTransformerTest
           SourceIdentifier(
             value = record.id,
             identifierType = CalmIdentifierTypes.recordId,
-            ontologyType = "SourceIdentifier"
+            ontologyType = "Work"
           ),
           record.retrievedAt
         ),
@@ -51,11 +51,11 @@ class CalmTransformerTest
             SourceIdentifier(
               value = "a/b/c",
               identifierType = CalmIdentifierTypes.refNo,
-              ontologyType = "SourceIdentifier"),
+              ontologyType = "Work"),
             SourceIdentifier(
               value = "a.b.c",
               identifierType = CalmIdentifierTypes.altRefNo,
-              ontologyType = "SourceIdentifier"),
+              ontologyType = "Work"),
           ),
           items = List(
             Item(
@@ -96,15 +96,15 @@ class CalmTransformerTest
         SourceIdentifier(
           value = "a/b/c",
           identifierType = CalmIdentifierTypes.refNo,
-          ontologyType = "SourceIdentifier"),
+          ontologyType = "Work"),
         SourceIdentifier(
           value = "a.b.c",
           identifierType = CalmIdentifierTypes.altRefNo,
-          ontologyType = "SourceIdentifier"),
+          ontologyType = "Work"),
         SourceIdentifier(
           value = "b456",
           identifierType = IdentifierType("sierra-system-number"),
-          ontologyType = "SourceIdentifier"),
+          ontologyType = "Work"),
       )
   }
 
@@ -519,7 +519,7 @@ class CalmTransformerTest
           SourceIdentifier(
             value = record.id,
             identifierType = CalmIdentifierTypes.recordId,
-            ontologyType = "SourceIdentifier"
+            ontologyType = "Work"
           ),
           record.retrievedAt
         ),
