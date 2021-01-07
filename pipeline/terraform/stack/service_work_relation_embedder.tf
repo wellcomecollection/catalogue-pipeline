@@ -45,7 +45,7 @@ module "relation_embedder" {
   }
 
   # NOTE: limit to avoid >500 concurrent scroll contexts
-  max_capacity        = min(10, var.max_capacity)
+  max_capacity = min(10, var.max_capacity)
 
   subnets             = var.subnets
   messages_bucket_arn = aws_s3_bucket.messages.arn
