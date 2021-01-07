@@ -141,12 +141,7 @@ object CalmTransformer
   def sourceIdentifier(record: CalmRecord): SourceIdentifier =
     SourceIdentifier(
       value = record.id,
-      identifierType = CalmIdentifierTypes.recordId,
-      // Although this is a Work, we have previously created Calm-identified
-      // works with ontologyType "SourceIdentifier".  We need to keep using
-      // this ontologyType, or those works will be assigned new identifiers
-      // by the ID minter.
-      ontologyType = "SourceIdentifier"
+      ontologyType = "Work"
     )
 
   def otherIdentifiers(record: CalmRecord): List[SourceIdentifier] =
