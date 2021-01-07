@@ -156,7 +156,7 @@ object CalmTransformer
                 identifierType = idType,
                 value = id,
                 ontologyType = "Work"
-              )
+            )
           )
     }
 
