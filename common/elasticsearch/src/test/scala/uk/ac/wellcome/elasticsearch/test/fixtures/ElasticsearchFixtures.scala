@@ -14,7 +14,7 @@ import com.sksamuel.elastic4s.requests.get.GetResponse
 import com.sksamuel.elastic4s.requests.indexes.IndexResponse
 import com.sksamuel.elastic4s.requests.indexes.admin.IndexExistsResponse
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
-import com.sksamuel.elastic4s.{ElasticClient, Index, Response}
+import com.sksamuel.elastic4s.{Index, Response}
 import grizzled.slf4j.Logging
 import io.circe.{Decoder, Encoder, Json}
 import io.circe.parser.parse
@@ -39,12 +39,22 @@ trait ElasticsearchFixtures
   private val esHost = "localhost"
   private val esPort = 9200
 
-  val elasticClient: ElasticClient = ElasticClientBuilder.create(
+  lazy val elasticClient = ElasticClientBuilder.create(
     hostname = esHost,
     port = esPort,
     protocol = "http",
     username = "elastic",
-    password = "changeme"
+    password = "changeme",
+    compressionEnabled = false,
+  )
+
+  lazy val elasticClientWithCompression = ElasticClientBuilder.create(
+    hostname = esHost,
+    port = esPort,
+    protocol = "http",
+    username = "elastic",
+    password = "changeme",
+    compressionEnabled = true,
   )
 
   // Elasticsearch takes a while to start up so check that it actually started
@@ -241,7 +251,22 @@ trait ElasticsearchFixtures
         }
         r
       }
+  }
 
+  def indexObjectCompressed[T](index: Index, t: T)(
+    implicit encoder: Encoder[T]): Future[Response[IndexResponse]] = {
+    val doc = toJson(t).get
+    debug(s"ingesting: $doc")
+    elasticClientWithCompression
+      .execute {
+        indexInto(index.name).doc(doc)
+      }
+      .map { r =>
+        if (r.isError) {
+          error(s"Error from Elasticsearch: $r")
+        }
+        r
+      }
   }
 
   def insertIntoElasticsearch[State <: WorkState](

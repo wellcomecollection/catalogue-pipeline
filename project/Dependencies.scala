@@ -75,7 +75,7 @@ object ExternalDependencies {
     val apacheLogging = "2.8.2"
     val aws = "1.11.504"
     val circe = "0.13.0"
-    val elastic4s = "7.9.2"
+    val elastic4s = "7.10.1"
     val fastparse = "2.3.0"
     val swagger = "2.0.10"
     val mockito = "1.9.5"
@@ -123,8 +123,6 @@ object ExternalDependencies {
   )
 
   val elasticsearchDependencies = Seq(
-    "org.apache.logging.log4j" % "log4j-core" % versions.apacheLogging,
-    "org.apache.logging.log4j" % "log4j-api" % versions.apacheLogging,
     "com.sksamuel.elastic4s" %% "elastic4s-core" % versions.elastic4s,
     "com.sksamuel.elastic4s" %% "elastic4s-client-esjava" % versions.elastic4s,
     "com.sksamuel.elastic4s" %% "elastic4s-http-streams" % versions.elastic4s,
@@ -209,7 +207,8 @@ object CatalogueDependencies {
   val elasticsearchDependencies: Seq[ModuleID] =
     ExternalDependencies.elasticsearchDependencies ++
       ExternalDependencies.scalacheckDependencies ++
-      WellcomeDependencies.fixturesLibrary
+      WellcomeDependencies.fixturesLibrary ++
+      WellcomeDependencies.typesafeLibrary
 
   val bigMessagingDependencies: Seq[ModuleID] =
     ExternalDependencies.scalatestDependencies ++
