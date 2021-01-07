@@ -68,7 +68,7 @@ object WellcomeDependencies {
 object ExternalDependencies {
   lazy val versions = new {
     val akka = "2.6.10"
-    val akkaHttp = "10.1.11"
+    val akkaHttp = "10.2.2"
     val akkaHttpCirce = "1.32.0"
     val akkaStreamAlpakka = "1.1.2"
     val apacheCommons = "3.7"
@@ -242,7 +242,7 @@ object CatalogueDependencies {
     WellcomeDependencies.typesafeLibrary
 
   val transformerCommonDependencies: Seq[ModuleID] =
-      WellcomeDependencies.storageLibrary
+    WellcomeDependencies.storageLibrary
 
   val apiDependencies: Seq[ModuleID] =
     ExternalDependencies.akkaHttpDependencies ++
@@ -266,7 +266,7 @@ object CatalogueDependencies {
       WellcomeDependencies.messagingTypesafeLibrary
 
   val routerDependencies: Seq[ModuleID] =
-      WellcomeDependencies.messagingTypesafeLibrary
+    WellcomeDependencies.messagingTypesafeLibrary
 
   val batcherDependencies: Seq[ModuleID] =
     ExternalDependencies.scalatestDependencies ++

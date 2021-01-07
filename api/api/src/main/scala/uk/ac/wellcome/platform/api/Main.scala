@@ -13,6 +13,7 @@ import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 
 import scala.concurrent.{ExecutionContext, Promise}
+import scala.concurrent.duration._
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
@@ -59,7 +60,9 @@ object Main extends WellcomeTypesafeApp {
 
     () =>
       Http()
-        .bindAndHandle(router.routes, "0.0.0.0", 8888)
+        .newServerAt("0.0.0.0", 8888)
+        .bind(router.routes)
+        .map(_.addToCoordinatedShutdown(hardTerminationDeadline = 10 seconds))
         .flatMap(_ => Promise[Done].future)
   }
 }

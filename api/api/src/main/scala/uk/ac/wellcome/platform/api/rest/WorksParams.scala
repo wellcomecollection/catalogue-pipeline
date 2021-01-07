@@ -21,10 +21,8 @@ object SingleWorkParams extends QueryParamsUtils {
   // https://doc.akka.io/docs/akka-http/current/routing-dsl/directives/custom-directives.html
   def parse =
     parameter(
-      (
-        "include".as[WorksIncludes].?,
-        "_index".as[String].?
-      )
+      "include".as[WorksIncludes].?,
+      "_index".as[String].?
     ).tmap((SingleWorkParams.apply _).tupled(_))
 
   implicit val decodePaths: Decoder[List[String]] =
@@ -119,29 +117,27 @@ object MultipleWorksParams extends QueryParamsUtils {
   // https://doc.akka.io/docs/akka-http/current/routing-dsl/directives/custom-directives.html
   def parse =
     parameter(
-      (
-        "page".as[Int].?,
-        "pageSize".as[Int].?,
-        "workType".as[FormatFilter] ?,
-        "production.dates.from".as[LocalDate].?,
-        "production.dates.to".as[LocalDate].?,
-        "languages".as[LanguagesFilter].?,
-        "genres.label".as[GenreFilter].?,
-        "subjects.label".as[SubjectFilter].?,
-        "license".as[LicenseFilter].?,
-        "include".as[WorksIncludes].?,
-        "aggregations".as[List[AggregationRequest]].?,
-        "sort".as[List[SortRequest]].?,
-        "sortOrder".as[SortingOrder].?,
-        "query".as[String].?,
-        "identifiers".as[IdentifiersFilter].?,
-        "items.locations.type".as[ItemLocationTypeFilter].?,
-        "items.locations.locationType".as[ItemLocationTypeIdFilter].?,
-        "items.locations.accessConditions.status".as[AccessStatusFilter].?,
-        "type".as[WorkTypeFilter].?,
-        "_queryType".as[SearchQueryType].?,
-        "_index".as[String].?,
-      )
+      "page".as[Int].?,
+      "pageSize".as[Int].?,
+      "workType".as[FormatFilter] ?,
+      "production.dates.from".as[LocalDate].?,
+      "production.dates.to".as[LocalDate].?,
+      "languages".as[LanguagesFilter].?,
+      "genres.label".as[GenreFilter].?,
+      "subjects.label".as[SubjectFilter].?,
+      "license".as[LicenseFilter].?,
+      "include".as[WorksIncludes].?,
+      "aggregations".as[List[AggregationRequest]].?,
+      "sort".as[List[SortRequest]].?,
+      "sortOrder".as[SortingOrder].?,
+      "query".as[String].?,
+      "identifiers".as[IdentifiersFilter].?,
+      "items.locations.type".as[ItemLocationTypeFilter].?,
+      "items.locations.locationType".as[ItemLocationTypeIdFilter].?,
+      "items.locations.accessConditions.status".as[AccessStatusFilter].?,
+      "type".as[WorkTypeFilter].?,
+      "_queryType".as[SearchQueryType].?,
+      "_index".as[String].?,
     ).tflatMap { args =>
       val params = (MultipleWorksParams.apply _).tupled(args)
       validated(params.paginationErrors, params)
