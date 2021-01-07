@@ -10,7 +10,11 @@ import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal.WorkState.{Identified, Merged}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
-import uk.ac.wellcome.pipeline_storage.typesafe.{ElasticIndexerBuilder, ElasticRetrieverBuilder, PipelineStorageStreamBuilder}
+import uk.ac.wellcome.pipeline_storage.typesafe.{
+  ElasticIndexerBuilder,
+  ElasticRetrieverBuilder,
+  PipelineStorageStreamBuilder
+}
 import uk.ac.wellcome.platform.merger.services._
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder

@@ -16,22 +16,27 @@ import java.time.Instant
 import scala.concurrent.{ExecutionContext, Future}
 
 class MergerWorkerService[WorkDestination, ImageDestination](
-                                                              pipelineStorageStream: PipelineStorageStream[NotificationMessage, Work[Merged], WorkDestination],
-                                                              sourceWorkLookup: IdentifiedWorkLookup,
-                                                              mergerManager: MergerManager,
-                                                              imageSender: MessageSender[ImageDestination]
+  pipelineStorageStream: PipelineStorageStream[NotificationMessage,
+                                               Work[Merged],
+                                               WorkDestination],
+  sourceWorkLookup: IdentifiedWorkLookup,
+  mergerManager: MergerManager,
+  imageSender: MessageSender[ImageDestination]
 )(implicit ec: ExecutionContext)
     extends Runnable {
 
   def run(): Future[Done] =
-      pipelineStorageStream.foreach(this.getClass.getSimpleName, processMessage)
+    pipelineStorageStream.foreach(this.getClass.getSimpleName, processMessage)
 
-  private def processMessage(message: NotificationMessage): Future[List[Work[Merged]]] =
+  private def processMessage(
+    message: NotificationMessage): Future[List[Work[Merged]]] =
     for {
       matcherResult <- Future.fromTry(fromJson[MatcherResult](message.body))
       workSets <- Future.sequence {
-        matcherResult.works.toList.map { matchedIdentifiers: MatchedIdentifiers =>
-          sourceWorkLookup.fetchAllWorks(matchedIdentifiers.identifiers.toList)
+        matcherResult.works.toList.map {
+          matchedIdentifiers: MatchedIdentifiers =>
+            sourceWorkLookup.fetchAllWorks(
+              matchedIdentifiers.identifiers.toList)
         }
       }
       nonEmptyWorkSets = workSets.filter(_.flatten.nonEmpty)

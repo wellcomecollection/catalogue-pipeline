@@ -16,7 +16,7 @@ import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-trait WorkerServiceFixture extends PipelineStorageStreamFixtures{
+trait WorkerServiceFixture extends PipelineStorageStreamFixtures {
   def withWorkerService[R](retriever: MemoryRetriever[Work[Identified]],
                            queue: Queue,
                            workSender: MemoryMessageSender,
@@ -26,24 +26,23 @@ trait WorkerServiceFixture extends PipelineStorageStreamFixtures{
                            index: mutable.Map[String, Work[Merged]] =
                              mutable.Map[String, Work[Merged]]())(
     testWith: TestWith[MergerWorkerService[String, String], R]): R =
-      withPipelineStream(
-        queue = queue,
-        indexer = new MemoryIndexer(index),
-        sender = workSender,
-        metrics = metrics
-      ) { pipelineStream =>
-        val workerService = new MergerWorkerService(
-          pipelineStorageStream = pipelineStream,
-          sourceWorkLookup = new IdentifiedWorkLookup(retriever),
-          mergerManager = new MergerManager(PlatformMerger),
-          imageSender = imageSender
-        )
+    withPipelineStream(
+      queue = queue,
+      indexer = new MemoryIndexer(index),
+      sender = workSender,
+      metrics = metrics
+    ) { pipelineStream =>
+      val workerService = new MergerWorkerService(
+        pipelineStorageStream = pipelineStream,
+        sourceWorkLookup = new IdentifiedWorkLookup(retriever),
+        mergerManager = new MergerManager(PlatformMerger),
+        imageSender = imageSender
+      )
 
-        workerService.run()
+      workerService.run()
 
-        testWith(workerService)
-      }
-
+      testWith(workerService)
+    }
 
   def withWorkerService[R](retriever: MemoryRetriever[Work[Identified]])(
     testWith: TestWith[MergerWorkerService[String, String], R]): R =

@@ -12,7 +12,11 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
-import uk.ac.wellcome.pipeline_storage.fixtures.{ElasticIndexerFixtures, PipelineStorageStreamFixtures, SampleDocument}
+import uk.ac.wellcome.pipeline_storage.fixtures.{
+  ElasticIndexerFixtures,
+  PipelineStorageStreamFixtures,
+  SampleDocument
+}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -79,10 +83,12 @@ class PipelineStorageStreamTest
 
   it("supports multiple documents for a single input") {
     val index = createIndex
-    val documentsFirstMessage = (1 to 2).map(_ =>
-      SampleDocument(1, createCanonicalId, randomAlphanumeric())).toList
-    val documentsSecondMessage = (1 to 3).map(_ =>
-      SampleDocument(1, createCanonicalId, randomAlphanumeric())).toList
+    val documentsFirstMessage = (1 to 2)
+      .map(_ => SampleDocument(1, createCanonicalId, randomAlphanumeric()))
+      .toList
+    val documentsSecondMessage = (1 to 3)
+      .map(_ => SampleDocument(1, createCanonicalId, randomAlphanumeric()))
+      .toList
     val documents = documentsFirstMessage ++ documentsSecondMessage
 
     val sender = new MemoryMessageSender
@@ -101,15 +107,15 @@ class PipelineStorageStreamTest
             queue = queue,
             message = 2
           )
-          pipelineStream.foreach(
-            "test stream",
-            msg => {if (Integer.parseInt(msg.body) ==1 )
+          pipelineStream.foreach("test stream", msg => {
+            if (Integer.parseInt(msg.body) == 1)
               Future.successful(documentsFirstMessage)
-              else Future.successful(documentsSecondMessage)
-            })
+            else Future.successful(documentsSecondMessage)
+          })
           assertElasticsearchEventuallyHas(index = index, documents: _*)
           eventually {
-            sender.messages.map(_.body) should contain theSameElementsAs documents.map(_.canonicalId)
+            sender.messages.map(_.body) should contain theSameElementsAs documents
+              .map(_.canonicalId)
             assertQueueEmpty(queue)
             assertQueueEmpty(dlq)
           }
@@ -117,19 +123,21 @@ class PipelineStorageStreamTest
     }
   }
 
-  it("does not delete a message if some of the process results fail ingesting"){
-    val documentsFailingMessage = (1 to 2).map(_ =>
-      SampleDocument(1, createCanonicalId, randomAlphanumeric())).toList
-    val documentsSuccessfulMessage = (1 to 3).map(_ =>
-      SampleDocument(1, createCanonicalId, randomAlphanumeric())).toList
+  it("does not delete a message if some of the process results fail ingesting") {
+    val documentsFailingMessage = (1 to 2)
+      .map(_ => SampleDocument(1, createCanonicalId, randomAlphanumeric()))
+      .toList
+    val documentsSuccessfulMessage = (1 to 3)
+      .map(_ => SampleDocument(1, createCanonicalId, randomAlphanumeric()))
+      .toList
 
     val failingDocument = documentsFailingMessage.head
     val indexer = new Indexer[SampleDocument] {
       override def init(): Future[Unit] = Future.successful(())
 
       override def apply(documents: Seq[SampleDocument])
-      : Future[Either[Seq[SampleDocument], Seq[SampleDocument]]] = {
-        if(documents.map(_.canonicalId).contains(failingDocument.canonicalId))
+        : Future[Either[Seq[SampleDocument], Seq[SampleDocument]]] = {
+        if (documents.map(_.canonicalId).contains(failingDocument.canonicalId))
           Future.successful(Left(List(failingDocument)))
         else Future.successful(Right(documents))
       }
@@ -139,40 +147,39 @@ class PipelineStorageStreamTest
 
     withLocalSqsQueuePair(visibilityTimeout = 1) {
       case QueuePair(queue, dlq) =>
-        withPipelineStream(
-          queue = queue,
-          indexer = indexer,
-          sender = sender) { pipelineStream =>
-          sendNotificationToSQS(
-            queue = queue,
-            message = 1
-          )
-          sendNotificationToSQS(
-            queue = queue,
-            message = 2
-          )
-          pipelineStream.foreach(
-            "test stream",
-            msg => {
-              if (Integer.parseInt(msg.body) ==1 )
+        withPipelineStream(queue = queue, indexer = indexer, sender = sender) {
+          pipelineStream =>
+            sendNotificationToSQS(
+              queue = queue,
+              message = 1
+            )
+            sendNotificationToSQS(
+              queue = queue,
+              message = 2
+            )
+            pipelineStream.foreach("test stream", msg => {
+              if (Integer.parseInt(msg.body) == 1)
                 Future.successful(documentsFailingMessage)
               else Future.successful(documentsSuccessfulMessage)
             })
-          eventually {
-            sender.messages.map(_.body) should contain theSameElementsAs documentsSuccessfulMessage.map(_.canonicalId)
-            assertQueueEmpty(queue)
-            assertQueueHasSize(dlq, 1)
-          }
+            eventually {
+              sender.messages.map(_.body) should contain theSameElementsAs documentsSuccessfulMessage
+                .map(_.canonicalId)
+              assertQueueEmpty(queue)
+              assertQueueHasSize(dlq, 1)
+            }
         }
     }
   }
 
-  it("does not delete a message if some of the process results fail sending"){
+  it("does not delete a message if some of the process results fail sending") {
     val index = createIndex
-    val documentsFailingMessage = (1 to 2).map(_ =>
-      SampleDocument(1, createCanonicalId, randomAlphanumeric())).toList
-    val documentsSuccessfulMessage = (1 to 3).map(_ =>
-      SampleDocument(1, createCanonicalId, randomAlphanumeric())).toList
+    val documentsFailingMessage = (1 to 2)
+      .map(_ => SampleDocument(1, createCanonicalId, randomAlphanumeric()))
+      .toList
+    val documentsSuccessfulMessage = (1 to 3)
+      .map(_ => SampleDocument(1, createCanonicalId, randomAlphanumeric()))
+      .toList
 
     val sentDocuments = documentsFailingMessage.tail ++ documentsSuccessfulMessage
 
@@ -180,12 +187,11 @@ class PipelineStorageStreamTest
 
     val brokenSender = new MemoryMessageSender() {
       override def send(body: String): Try[Unit] = {
-        if(failingDocument.canonicalId.equals(body))
-        Failure(new Exception("BOOM!"))
+        if (failingDocument.canonicalId.equals(body))
+          Failure(new Exception("BOOM!"))
         else super.send(body)
       }
     }
-
 
     withLocalSqsQueuePair(visibilityTimeout = 1) {
       case QueuePair(queue, dlq) =>
@@ -201,17 +207,20 @@ class PipelineStorageStreamTest
             queue = queue,
             message = 2
           )
-          pipelineStream.foreach(
-            "test stream",
-            msg => {
-              if (Integer.parseInt(msg.body) ==1 )
-                Future.successful(documentsFailingMessage)
-              else Future.successful(documentsSuccessfulMessage)
-            })
+          pipelineStream.foreach("test stream", msg => {
+            if (Integer.parseInt(msg.body) == 1)
+              Future.successful(documentsFailingMessage)
+            else Future.successful(documentsSuccessfulMessage)
+          })
 
-          assertElasticsearchEventuallyHas(index = index, failingDocument +: sentDocuments: _*)
+          assertElasticsearchEventuallyHas(
+            index = index,
+            failingDocument +: sentDocuments: _*)
           eventually {
-            brokenSender.messages.map(_.body).distinct should contain theSameElementsAs sentDocuments.map(_.canonicalId)
+            brokenSender.messages
+              .map(_.body)
+              .distinct should contain theSameElementsAs sentDocuments.map(
+              _.canonicalId)
             assertQueueEmpty(queue)
             assertQueueHasSize(dlq, 1)
           }
@@ -219,7 +228,8 @@ class PipelineStorageStreamTest
     }
   }
 
-  it("processes a message and does not ingest if result of process is an empty List") {
+  it(
+    "processes a message and does not ingest if result of process is an empty List") {
     val index = createIndex
     val document = SampleDocument(1, createCanonicalId, randomAlphanumeric())
 

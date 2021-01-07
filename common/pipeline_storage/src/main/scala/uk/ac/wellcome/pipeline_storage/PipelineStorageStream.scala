@@ -55,7 +55,7 @@ class PipelineStorageStream[In, Out, MsgDestination](
               broadcastAndMerge(
                 batchAndSendFlow(config, messageSender, indexer),
                 identityFlow)
-            )
+          )
       )
     } yield done
 
@@ -64,8 +64,8 @@ class PipelineStorageStream[In, Out, MsgDestination](
       .collect { case (message, Nil) => message }
 
   private def broadcastAndMerge[I, O](
-                                       a: Flow[I, O, NotUsed],
-                                       b: Flow[I, O, NotUsed]): Flow[I, O, NotUsed] =
+    a: Flow[I, O, NotUsed],
+    b: Flow[I, O, NotUsed]): Flow[I, O, NotUsed] =
     Flow.fromGraph(
       GraphDSL.create() { implicit builder =>
         import GraphDSL.Implicits._
@@ -77,7 +77,6 @@ class PipelineStorageStream[In, Out, MsgDestination](
       }
     )
 }
-
 
 object PipelineStorageStream extends Logging {
 
@@ -136,32 +135,37 @@ object PipelineStorageStream extends Logging {
                          ec: ExecutionContext,
                          indexable: Indexable[T]) =
     Flow[(Message, List[T])]
-      .collect { case (msg, items@_::_) => items.map(item => Bundle[T](message = msg,item = item, numberOfItems = items.size)) }
+      .collect {
+        case (msg, items @ _ :: _) =>
+          items.map(item =>
+            Bundle[T](message = msg, item = item, numberOfItems = items.size))
+      }
       .mapConcat[Bundle[T]](identity)
       .via(batchIndexFlow(config, indexer))
       .via(groupByMessage
         .mapConcat(identity)
-        .mergeSubstreams
-      )
-      .mapAsyncUnordered(config.parallelism) {
-        bundle =>
-          for {
-            _ <- Future.fromTry(msgSender.send(bundle.item))
-          } yield bundle
+        .mergeSubstreams)
+      .mapAsyncUnordered(config.parallelism) { bundle =>
+        for {
+          _ <- Future.fromTry(msgSender.send(bundle.item))
+        } yield bundle
       }
       .via(groupByMessage
-      .map(_.head.message)
-      .mergeSubstreams)
-
+        .map(_.head.message)
+        .mergeSubstreams)
 
   def groupByMessage =
     Flow[Bundle[String]]
       .groupBy(Integer.MAX_VALUE, _.message.messageId())
-    .scan(Nil: List[Bundle[String]]){ case (bundleList, b) => b :: bundleList }
-      .filter {
-      list => list.nonEmpty && list.map(_.item).distinct.size == list.head.numberOfItems
-    }
-
+      .scan(Nil: List[Bundle[String]]) {
+        case (bundleList, b) => b :: bundleList
+      }
+      .filter { list =>
+        list.nonEmpty && list
+          .map(_.item)
+          .distinct
+          .size == list.head.numberOfItems
+      }
 
   private def unzipBundles[T](
     bundles: Seq[Bundle[T]]): (List[Message], List[T]) =
