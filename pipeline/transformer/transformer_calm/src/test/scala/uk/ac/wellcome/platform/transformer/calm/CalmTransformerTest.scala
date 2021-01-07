@@ -515,7 +515,7 @@ class CalmTransformerTest
     )
     CalmTransformer(record, version) shouldBe Right(
       Work.Deleted[Source](
-          data = WorkData[DataState.Unidentified](
+        data = WorkData[DataState.Unidentified](
           title = Some("Should suppress"),
           format = Some(Format.ArchivesAndManuscripts),
           collectionPath = Some(
