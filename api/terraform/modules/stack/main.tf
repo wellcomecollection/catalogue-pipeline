@@ -27,6 +27,7 @@ module "service" {
   load_balancer_listener_port = var.listener_port
 
   desired_task_count = var.desired_task_count
+  healthcheck_path = "/management/healthcheck"
 
   security_group_ids = [
     var.lb_ingress_sg_id,

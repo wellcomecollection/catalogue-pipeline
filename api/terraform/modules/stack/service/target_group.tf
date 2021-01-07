@@ -9,14 +9,17 @@ resource "aws_lb_target_group" "tcp" {
   port     = module.nginx_container.container_port
   vpc_id   = var.vpc_id
 
-  # The default deregistration delay is 5 minutes, which means that ECS
-  # takes around 5–7 mins to fully drain connections to and deregister
-  # the old task in the course of its blue/green. deployment of an
-  # updated service.  Reducing this parameter to 90s makes deployments faster.
-  deregistration_delay = 90
+  # This is the amount of time that ECS will wait before killing a
+  # deregistered target and so should be longer than the longest
+  # expected request but not much more than that.
+  deregistration_delay = 10
 
   health_check {
     protocol = "TCP"
+    path = var.healthcheck_path
+    interval = 10
+    healthy_threshold = 3
+    unhealthy_threshold = 3
   }
 }
 
