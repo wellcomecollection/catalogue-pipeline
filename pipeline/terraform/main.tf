@@ -69,6 +69,9 @@ module "catalogue_pipeline_2021-01-04" {
   pipeline_date = "2021-01-04"
   release_label = "stage"
 
+  # This stack is paused while we work on fixing the ID minter database.
+  max_capacity = 0
+
   # Transformer config
   #
   # If this pipeline is meant to be reindexed, remember to uncomment the
