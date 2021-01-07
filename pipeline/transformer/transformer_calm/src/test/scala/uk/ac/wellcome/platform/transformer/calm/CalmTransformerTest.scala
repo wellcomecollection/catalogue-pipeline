@@ -515,6 +515,32 @@ class CalmTransformerTest
     )
     CalmTransformer(record, version) shouldBe Right(
       Work.Deleted[Source](
+          data = WorkData[DataState.Unidentified](
+          title = Some("Should suppress"),
+          format = Some(Format.ArchivesAndManuscripts),
+          collectionPath = Some(
+            CollectionPath(path = "AMSG/X/Y")
+          ),
+          otherIdentifiers = List(
+            SourceIdentifier(
+              value = "AMSG/X/Y",
+              identifierType = CalmIdentifierTypes.refNo,
+              ontologyType = "Work"),
+          ),
+          items = List(
+            Item(
+              title = None,
+              locations = List(
+                PhysicalLocationDeprecated(
+                  locationType = LocationType("scmac"),
+                  label = "Closed stores Arch. & MSS",
+                  accessConditions = Nil
+                )
+              )
+            )
+          ),
+          workType = WorkType.Section
+        ),
         state = Source(
           SourceIdentifier(
             value = record.id,
