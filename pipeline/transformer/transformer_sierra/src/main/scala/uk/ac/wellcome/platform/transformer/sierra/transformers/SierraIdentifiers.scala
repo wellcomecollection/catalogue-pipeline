@@ -51,7 +51,7 @@ object SierraIdentifiers
         SourceIdentifier(
           identifierType = IdentifierType("isbn"),
           ontologyType = "Work",
-          value = value
+          value = value.trim
         )
       }
 
