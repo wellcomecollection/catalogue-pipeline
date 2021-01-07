@@ -141,8 +141,8 @@ object Merger {
           Work.Invisible(version, f(data), state, reasons)
         case Work.Redirected(version, redirect, state) =>
           Work.Redirected(version, redirect, state)
-        case Work.Deleted(version, state, reason) =>
-          Work.Deleted(version, state, reason)
+        case Work.Deleted(version, data, state, reason) =>
+          Work.Deleted(version, f(data), state, reason)
       }
   }
 }

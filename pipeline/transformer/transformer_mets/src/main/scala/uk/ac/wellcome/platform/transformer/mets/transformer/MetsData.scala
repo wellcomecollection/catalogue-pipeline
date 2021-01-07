@@ -26,6 +26,7 @@ case class MetsData(
         Right(
           Work.Deleted[Source](
             version = version,
+            data = WorkData[DataState.Unidentified](),
             state = Source(sourceIdentifier, modifiedTime),
             deletedReason = Some(DeletedFromSource("Mets"))))
       case false =>
