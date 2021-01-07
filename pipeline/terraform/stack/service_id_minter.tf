@@ -38,9 +38,9 @@ module "id_minter" {
   }
 
   secret_env_vars = {
-    cluster_url          = "catalogue/id_minter/rds_host"
-    cluster_url_readonly = "catalogue/id_minter/rds_host_readonly"
-    db_port              = "catalogue/id_minter/rds_port"
+    cluster_url          = "rds/identifiers-delta-cluster/endpoint"
+    cluster_url_readonly = "rds/identifiers-delta-cluster/reader_endpoint"
+    db_port              = "rds/identifiers-delta-cluster/port"
     db_username          = "catalogue/id_minter/rds_user"
     db_password          = "catalogue/id_minter/rds_password"
 
