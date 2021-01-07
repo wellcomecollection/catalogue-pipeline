@@ -5,7 +5,7 @@ module "merger_queue" {
   module.matcher_topic.arn]
   aws_region      = var.aws_region
   alarm_topic_arn = var.dlq_alarm_arn
-  
+
   # This has to be longer than the flush interval in the merger
   visibility_timeout = 120
 }
