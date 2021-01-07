@@ -41,6 +41,7 @@ object CalmTransformer
       Right(
         Work.Deleted[Source](
           state = Source(sourceIdentifier(record), record.retrievedAt),
+          data = workData(record).getOrElse(WorkData[DataState.Unidentified]()),
           version = version,
           deletedReason = Some(SuppressedFromSource("Calm"))
         )

@@ -120,6 +120,7 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
       deletedReason: Option[DeletedReason] = None): Work.Deleted[State] =
       Work.Deleted[State](
         state = work.state,
+        data = work.data,
         version = work.version,
         deletedReason = deletedReason
       )
