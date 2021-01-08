@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.transformer.mets.transformer
 
 import java.time.Instant
-import org.scalatest.Inside
+import org.scalatest.{EitherValues, Inside}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.internal._
@@ -13,6 +13,7 @@ class MetsDataTest
     extends AnyFunSpec
     with RandomGenerators
     with Matchers
+    with EitherValues
     with Inside {
 
   it("creates a invisible work with an item and a license") {
@@ -457,5 +458,29 @@ class MetsDataTest
       accessConditionStatus = Some("Kanye West"),
     ).toWork(1, Instant.now())
     result shouldBe a[Left[_, _]]
+  }
+
+  it("lowercases the b number") {
+    val data = MetsData(
+      recordIdentifier = "B1234"
+    )
+
+    val work = data.toWork(version = 1, modifiedTime = Instant.now()).value
+
+    work.sourceIdentifier shouldBe SourceIdentifier(
+      identifierType = IdentifierType("mets"),
+      ontologyType = "Work",
+      value = "b1234"
+    )
+
+    val mergeCandidates = work.asInstanceOf[Work[Source]].data.mergeCandidates
+    mergeCandidates should have size 1
+
+    mergeCandidates.head.id.sourceIdentifier shouldBe
+      SourceIdentifier(
+        identifierType = IdentifierType("sierra-system-number"),
+        ontologyType = "Work",
+        value = "b1234"
+      )
   }
 }
