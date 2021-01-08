@@ -473,7 +473,7 @@ class MetsDataTest
       value = "b1234"
     )
 
-    val mergeCandidates = work.asInstanceOf[Work[Source]].data.mergeCandidates
+    val mergeCandidates = work.data.mergeCandidates
     mergeCandidates should have size 1
 
     mergeCandidates.head.id.sourceIdentifier shouldBe
