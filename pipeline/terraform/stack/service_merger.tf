@@ -22,6 +22,9 @@ module "merger" {
   cluster_name = aws_ecs_cluster.cluster.name
   cluster_arn  = aws_ecs_cluster.cluster.arn
 
+  cpu    = 1024
+  memory = 2048
+
   env_vars = {
     metrics_namespace       = "${local.namespace_hyphen}_merger"
     messages_bucket_name    = aws_s3_bucket.messages.id
