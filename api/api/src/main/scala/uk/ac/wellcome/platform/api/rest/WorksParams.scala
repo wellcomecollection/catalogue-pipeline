@@ -99,7 +99,8 @@ case class MultipleWorksParams(
       `items.locations.locationType`,
       `items.locations.accessConditions.status`,
       license,
-      `type`
+      `type`,
+      partOf
     ).flatten
 
   private def dateFilter: Option[DateRangeFilter] =

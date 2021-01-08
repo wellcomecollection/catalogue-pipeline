@@ -222,6 +222,26 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
     }
   }
 
+  implicit class IndexedWorkOps(
+    work: Work.Visible[Indexed])(implicit updateState: UpdateState[Indexed]) {
+
+    def ancestors(works: Work.Visible[Indexed]*): Work.Visible[Indexed] =
+      Work.Visible[Indexed](
+        work.version,
+        work.data,
+        updateState(
+          work.state.copy(
+            relations = work.state.relations.copy(
+              ancestors = works.toList.zipWithIndex.map { case (work, idx) =>
+                Relation(work, idx + 1, 1, works.length - idx)
+              }
+            )
+          ),
+          work.data
+        )
+      )
+  }
+
   trait UpdateState[State <: WorkState] {
     def apply(state: State, data: WorkData[State#WorkDataState]): State
   }
