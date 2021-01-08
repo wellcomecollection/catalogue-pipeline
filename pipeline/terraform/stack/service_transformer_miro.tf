@@ -18,6 +18,9 @@ module "miro_transformer" {
   cluster_name = aws_ecs_cluster.cluster.name
   cluster_arn  = aws_ecs_cluster.cluster.arn
 
+  cpu    = 1024
+  memory = 2048
+
   env_vars = {
     transformer_queue_id = module.miro_transformer_queue.url
     metrics_namespace    = "${local.namespace_hyphen}_miro_transformer"
