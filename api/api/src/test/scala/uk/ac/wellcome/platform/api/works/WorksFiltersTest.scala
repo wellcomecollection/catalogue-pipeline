@@ -11,11 +11,13 @@ import uk.ac.wellcome.models.work.generators.{
   ItemsGenerators,
   ProductionEventGenerators
 }
+import WorkState.Indexed
 
 class WorksFiltersTest
     extends ApiWorksTestBase
     with ItemsGenerators
     with ProductionEventGenerators {
+
   it("combines multiple filters") {
     val work1 = indexedWork()
       .genres(List(createGenreWith(label = "horror")))
@@ -690,7 +692,7 @@ class WorksFiltersTest
   }
 
   describe("Access status filter") {
-    def work(status: AccessStatus): Work.Visible[WorkState.Indexed] =
+    def work(status: AccessStatus): Work.Visible[Indexed] =
       indexedWork()
         .items(
           List(

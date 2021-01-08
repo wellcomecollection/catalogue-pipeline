@@ -16,11 +16,7 @@ import uk.ac.wellcome.models.work.generators.{
 }
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
-import uk.ac.wellcome.platform.api.models.{
-  SearchOptions,
-  SearchQuery,
-  SearchQueryType
-}
+import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.platform.api.services.{
   ElasticsearchService,
@@ -358,7 +354,7 @@ class WorksQueryTest
 
   private def searchResults(
     index: Index,
-    searchOptions: SearchOptions): List[Work[Indexed]] = {
+    searchOptions: SearchOptions[WorkFilter, WorkMustQuery]): List[Work[Indexed]] = {
     val searchResponseFuture =
       searchService.executeSearch(searchOptions, WorksRequestBuilder, index)
     whenReady(searchResponseFuture) { response =>

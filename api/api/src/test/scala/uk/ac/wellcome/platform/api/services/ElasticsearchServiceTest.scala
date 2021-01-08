@@ -17,12 +17,7 @@ import uk.ac.wellcome.models.work.internal.Format.{
 }
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
-import uk.ac.wellcome.platform.api.models.{
-  FormatFilter,
-  ItemLocationTypeIdFilter,
-  SearchOptions,
-  SearchQuery
-}
+import uk.ac.wellcome.platform.api.models._
 import WorkState.Indexed
 
 class ElasticsearchServiceTest
@@ -38,7 +33,7 @@ class ElasticsearchServiceTest
 
   val searchService = new ElasticsearchService(elasticClient)
 
-  val defaultSearchOptions: SearchOptions =
+  val defaultSearchOptions =
     createWorksSearchOptions
 
   describe("findResultById") {
@@ -371,7 +366,7 @@ class ElasticsearchServiceTest
     works.sortBy(_.state.canonicalId).toList
   }
 
-  private def searchResults(index: Index, searchOptions: SearchOptions) = {
+  private def searchResults(index: Index, searchOptions: SearchOptions[WorkFilter, WorkMustQuery]) = {
     val searchResponseFuture =
       searchService.executeSearch(searchOptions, WorksRequestBuilder, index)
     whenReady(searchResponseFuture) { response =>
@@ -381,7 +376,7 @@ class ElasticsearchServiceTest
 
   private def assertResultsAreCorrect(
     index: Index,
-    searchOptions: SearchOptions = createWorksSearchOptions,
+    searchOptions: SearchOptions[WorkFilter, WorkMustQuery] = createWorksSearchOptions,
     expectedWorks: List[Work.Visible[Indexed]],
     scored: Option[Boolean] = None) = {
     searchResults(index, searchOptions) should contain theSameElementsAs expectedWorks
