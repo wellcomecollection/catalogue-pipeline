@@ -170,19 +170,27 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
   // for works with a large number of IDs.
   private def readOnlySession: ReadOnlyNamedAutoSession = {
 
-    // For some reason, we sometimes see a NoSuchElementException thrown
-    // from .next(), even though this should be an infinite iterator.
-    // We can't reproduce the issue locally.
+    // The old version of this code was
     //
-    // For now, if we see this error, we log a warning and then choose the
-    // primary.  It means we can rule this out as a source of problems, and
-    // reduce noise in the ID minter logs.
+    //    val name = poolNames.next()
+    //
+    // We would sometimes see a NoSuchElementException thrown, even though
+    // this should be an infinite iterator.
+    //
+    // Our guess is that the iterator isn't thread-safe, so we wrap it in
+    // synchronized() to make it so.  See https://stackoverflow.com/q/30639945/1558022
+    //
+    // In case this still doesn't fix the error, we catch it, log a warning
+    // and then choose the primary.  It means we can rule this out as a
+    // source of problems, and reduce noise in the ID minter logs.
+    //
+    // If we don't see the warning, we can come back and remove the try block.
     //
     // For more discussion, see
     // https://github.com/wellcomecollection/platform/issues/4957
     // https://github.com/wellcomecollection/platform/issues/4851
     val name = try {
-      poolNames.next()
+      synchronized(poolNames.next())
     } catch {
       case exc: NoSuchElementException =>
         warn(s"Unexpected NoSuchElementException when picking session: $exc")
