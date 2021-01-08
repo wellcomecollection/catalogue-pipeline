@@ -7,7 +7,7 @@ module "merger_queue" {
   alarm_topic_arn = var.dlq_alarm_arn
 
   # This has to be longer than the flush interval in the merger
-  visibility_timeout = 120
+  visibility_timeout_seconds = 10 * 60
 }
 
 module "merger" {
