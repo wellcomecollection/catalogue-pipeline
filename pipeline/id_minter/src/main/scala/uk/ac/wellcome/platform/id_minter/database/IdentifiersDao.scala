@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.id_minter.database
 
 import java.sql.{BatchUpdateException, Statement}
-
 import grizzled.slf4j.Logging
 import scalikejdbc._
 import uk.ac.wellcome.models.work.internal.SourceIdentifier
@@ -170,7 +169,26 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
   // If we use a single endpoint, we see the ID minter get slow, especially
   // for works with a large number of IDs.
   private def readOnlySession: ReadOnlyNamedAutoSession = {
-    val name = poolNames.next()
+
+    // For some reason, we sometimes see a NoSuchElementException thrown
+    // from .next(), even though this should be an infinite iterator.
+    // We can't reproduce the issue locally.
+    //
+    // For now, if we see this error, we log a warning and then choose the
+    // primary.  It means we can rule this out as a source of problems, and
+    // reduce noise in the ID minter logs.
+    //
+    // For more discussion, see
+    // https://github.com/wellcomecollection/platform/issues/4957
+    // https://github.com/wellcomecollection/platform/issues/4851
+    val name = try {
+      poolNames.next()
+    } catch {
+      case exc: NoSuchElementException =>
+        warn(s"Unexpected NoSuchElementException when picking session: $exc")
+        'primary
+    }
+
     ReadOnlyNamedAutoSession(name)
   }
 
