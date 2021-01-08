@@ -5,10 +5,9 @@ import java.time.LocalDate
 
 import uk.ac.wellcome.display.models.LocationTypeQuery
 
-sealed trait DocumentFilter
+sealed trait WorkFilter
 
-sealed trait WorkFilter extends DocumentFilter
-sealed trait ImageFilter extends DocumentFilter
+sealed trait ImageFilter
 
 case class ItemLocationTypeFilter(locationTypes: Seq[LocationTypeQuery])
     extends WorkFilter
