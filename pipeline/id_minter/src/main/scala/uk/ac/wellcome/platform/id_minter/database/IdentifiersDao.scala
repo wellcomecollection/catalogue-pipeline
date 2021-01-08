@@ -73,7 +73,7 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
                       case None =>
                         // this should be impossible in practice
                         throw new RuntimeException(
-                          s"The row $row returned by the query could not be matched to a sourceIdentifier")
+                          s"The row returned by the query ($row) could not be matched to a sourceIdentifier in $sourceIdentifiers")
                     }
 
                   })
