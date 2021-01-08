@@ -1,10 +1,14 @@
 package uk.ac.wellcome.platform.transformer.mets.fixtures
 
+import uk.ac.wellcome.fixtures.RandomGenerators
 import uk.ac.wellcome.models.work.internal.License
 
 import scala.xml.NodeSeq
 
-trait MetsGenerators {
+trait MetsGenerators extends RandomGenerators {
+  def createBibNumber: String =
+    s"b%08d.test".format(randomInt(from = 1, to = 99999999))
+
   def metsXmlWith(recordIdentifier: String,
                   license: Option[License] = None,
                   accessConditionStatus: Option[String] = None,

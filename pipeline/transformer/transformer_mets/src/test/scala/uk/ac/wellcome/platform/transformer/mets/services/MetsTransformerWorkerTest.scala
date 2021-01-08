@@ -42,7 +42,7 @@ class MetsTransformerWorkerTest
   override def createPayload(
     implicit store: MemoryTypedStore[S3ObjectLocation, String])
     : MetsSourcePayload = {
-    val bibId = randomAlphanumeric()
+    val bibId = createBibNumber
 
     val metsXML = metsXmlWith(
       recordIdentifier = bibId,
