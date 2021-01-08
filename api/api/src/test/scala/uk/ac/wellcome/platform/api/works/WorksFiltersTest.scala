@@ -769,12 +769,11 @@ class WorksFiltersTest
       withWorksApi {
         case (worksIndex, routes) =>
           storeWorks(worksIndex)
-          assertJsonResponse(
-            routes,
-            s"/$apiPrefix/works?partOf=${workA.id}") {
+          assertJsonResponse(routes, s"/$apiPrefix/works?partOf=${workA.id}") {
             Status.OK -> worksListResponse(
               apiPrefix = apiPrefix,
-              works = Seq(workB, workC, workD, workE).sortBy(_.state.canonicalId)
+              works =
+                Seq(workB, workC, workD, workE).sortBy(_.state.canonicalId)
             )
           }
       }
@@ -784,9 +783,7 @@ class WorksFiltersTest
       withWorksApi {
         case (worksIndex, routes) =>
           storeWorks(worksIndex)
-          assertJsonResponse(
-            routes,
-            s"/$apiPrefix/works?partOf=${workC.id}") {
+          assertJsonResponse(routes, s"/$apiPrefix/works?partOf=${workC.id}") {
             Status.OK -> worksListResponse(
               apiPrefix = apiPrefix,
               works = Seq(workD, workE).sortBy(_.state.canonicalId)

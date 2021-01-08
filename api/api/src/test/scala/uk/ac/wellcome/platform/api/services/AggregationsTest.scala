@@ -190,7 +190,9 @@ class AggregationsTest
     }
   }
 
-  private def aggregationQuery(index: Index, searchOptions: SearchOptions[WorkFilter, WorkMustQuery]) =
+  private def aggregationQuery(
+    index: Index,
+    searchOptions: SearchOptions[WorkFilter, WorkMustQuery]) =
     worksService
       .listOrSearchWorks(index, searchOptions)
       .map(_.right.get.aggregations.get)

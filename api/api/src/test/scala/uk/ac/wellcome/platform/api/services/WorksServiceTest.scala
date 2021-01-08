@@ -331,7 +331,8 @@ class WorksServiceTest
     expectedWorks: Seq[Work[Indexed]],
     expectedTotalResults: Int,
     expectedAggregations: Option[Aggregations] = None,
-    worksSearchOptions: SearchOptions[WorkFilter, WorkMustQuery] = createWorksSearchOptions
+    worksSearchOptions: SearchOptions[WorkFilter, WorkMustQuery] =
+      createWorksSearchOptions
   ): Assertion =
     assertResultIsCorrect(
       worksService.listOrSearchWorks
@@ -343,7 +344,8 @@ class WorksServiceTest
       worksSearchOptions)
 
   private def assertResultIsCorrect(
-    partialSearchFunction: (Index, SearchOptions[WorkFilter, WorkMustQuery]) => Future[
+    partialSearchFunction: (Index,
+                            SearchOptions[WorkFilter, WorkMustQuery]) => Future[
       Either[ElasticError, ResultList[Work.Visible[Indexed], Aggregations]]]
   )(
     allWorks: Seq[Work[Indexed]],
