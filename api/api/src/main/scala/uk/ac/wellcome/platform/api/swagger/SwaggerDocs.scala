@@ -427,6 +427,12 @@ trait MultipleWorksSwagger {
         required = false
       ),
       new Parameter(
+        name = "partOf",
+        in = ParameterIn.QUERY,
+        description = "Filter the work by partOf relation.",
+        required = false
+      ),
+      new Parameter(
         name = "items.locations.accessConditions.status",
         in = ParameterIn.QUERY,
         description = "Filter the work by access status.",
