@@ -234,7 +234,12 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
             relations = work.state.relations.copy(
               ancestors = works.toList.zipWithIndex.map {
                 case (work, idx) =>
-                  Relation(work, idx + 1, 1, works.length - idx)
+                  Relation(
+                    work = work,
+                    depth = idx + 1,
+                    numChildren = 1,
+                    numDescendents = works.length - idx
+                  )
               }
             )
           ),
