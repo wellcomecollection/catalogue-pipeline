@@ -11,13 +11,15 @@ import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.models.work.internal.WorkType
 import uk.ac.wellcome.platform.api.rest.PaginationQuery
 
-object WorksRequestBuilder extends ElasticsearchRequestBuilder {
+object WorksRequestBuilder
+    extends ElasticsearchRequestBuilder[WorkFilter, WorkMustQuery] {
 
   import ElasticsearchRequestBuilder._
 
   val idSort: FieldSort = fieldSort("state.canonicalId").order(SortOrder.ASC)
 
-  def request(searchOptions: SearchOptions, index: Index): SearchRequest = {
+  def request(searchOptions: SearchOptions[WorkFilter, WorkMustQuery],
+              index: Index): SearchRequest = {
     implicit val s = searchOptions
     search(index)
       .aggs { filteredAggregationBuilder.filteredAggregations }
@@ -29,10 +31,10 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
   }
 
   private def filteredAggregationBuilder(
-    implicit searchOptions: SearchOptions) =
+    implicit searchOptions: SearchOptions[WorkFilter, WorkMustQuery]) =
     new FiltersAndAggregationsBuilder(
       searchOptions.aggregations,
-      searchOptions.safeFilters[WorkFilter],
+      searchOptions.filters,
       toAggregation,
       buildWorkFilterQuery
     )
@@ -83,33 +85,39 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
         .minDocCount(0)
   }
 
-  private def sortBy(implicit searchOptions: SearchOptions) =
+  private def sortBy(
+    implicit searchOptions: SearchOptions[WorkFilter, WorkMustQuery]) =
     if (searchOptions.searchQuery.isDefined || searchOptions.mustQueries.nonEmpty) {
       sort :+ scoreSort(SortOrder.DESC) :+ idSort
     } else {
       sort :+ idSort
     }
 
-  private def sort(implicit searchOptions: SearchOptions) =
+  private def sort(
+    implicit searchOptions: SearchOptions[WorkFilter, WorkMustQuery]) =
     searchOptions.sortBy
       .map {
         case ProductionDateSortRequest => "data.production.dates.range.from"
       }
       .map { FieldSort(_).order(sortOrder) }
 
-  private def sortOrder(implicit searchOptions: SearchOptions) =
+  private def sortOrder(
+    implicit searchOptions: SearchOptions[WorkFilter, WorkMustQuery]) =
     searchOptions.sortOrder match {
       case SortingOrder.Ascending  => SortOrder.ASC
       case SortingOrder.Descending => SortOrder.DESC
     }
 
   private def postFilterQuery(
-    implicit searchOptions: SearchOptions): BoolQuery =
+    implicit searchOptions: SearchOptions[WorkFilter, WorkMustQuery])
+    : BoolQuery =
     boolQuery.filter {
       filteredAggregationBuilder.pairedFilters.map(buildWorkFilterQuery)
     }
 
-  private def filteredQuery(implicit searchOptions: SearchOptions): BoolQuery =
+  private def filteredQuery(
+    implicit searchOptions: SearchOptions[WorkFilter, WorkMustQuery])
+    : BoolQuery =
     searchOptions.searchQuery
       .map {
         case SearchQuery(query, queryType) =>
@@ -164,10 +172,6 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
           includes = includes.map(_.name),
           excludes = excludes.map(_.name),
         )
-      case CollectionPathFilter(path) =>
-        termQuery(field = "data.collectionPath.path", value = path)
-      case CollectionDepthFilter(depth) =>
-        termQuery(field = "data.collectionPath.depth", value = depth)
       case ItemLocationTypeFilter(locationTypes) =>
         termsQuery(
           field = "data.items.locations.type",
@@ -176,5 +180,7 @@ object WorksRequestBuilder extends ElasticsearchRequestBuilder {
         termsQuery(
           field = "data.items.locations.locationType.id",
           values = itemLocationTypeIds)
+      case PartOfFilter(id) =>
+        termQuery(field = "state.relations.ancestors.id", value = id)
     }
 }

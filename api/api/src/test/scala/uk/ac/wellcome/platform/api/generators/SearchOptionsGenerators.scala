@@ -5,11 +5,7 @@ import uk.ac.wellcome.display.models.{
   SortRequest,
   SortingOrder
 }
-import uk.ac.wellcome.platform.api.models.{
-  SearchOptions,
-  SearchQuery,
-  WorkFilter
-}
+import uk.ac.wellcome.platform.api.models._
 
 trait SearchOptionsGenerators {
   def createWorksSearchOptionsWith(
@@ -20,7 +16,7 @@ trait SearchOptionsGenerators {
     sort: List[SortRequest] = Nil,
     sortOrder: SortingOrder = SortingOrder.Ascending,
     searchQuery: Option[SearchQuery] = None
-  ): SearchOptions =
+  ): SearchOptions[WorkFilter, WorkMustQuery] =
     SearchOptions(
       filters = filters,
       pageSize = pageSize,
@@ -31,6 +27,6 @@ trait SearchOptionsGenerators {
       searchQuery = searchQuery
     )
 
-  def createWorksSearchOptions: SearchOptions =
+  def createWorksSearchOptions: SearchOptions[WorkFilter, WorkMustQuery] =
     createWorksSearchOptionsWith()
 }

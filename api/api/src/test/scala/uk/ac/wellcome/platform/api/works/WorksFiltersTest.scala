@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.api.works
 
+import com.sksamuel.elastic4s.Index
 import uk.ac.wellcome.models.work.internal.Format.{
   Books,
   CDRoms,
@@ -11,11 +12,13 @@ import uk.ac.wellcome.models.work.generators.{
   ItemsGenerators,
   ProductionEventGenerators
 }
+import WorkState.Indexed
 
 class WorksFiltersTest
     extends ApiWorksTestBase
     with ItemsGenerators
     with ProductionEventGenerators {
+
   it("combines multiple filters") {
     val work1 = indexedWork()
       .genres(List(createGenreWith(label = "horror")))
@@ -690,7 +693,7 @@ class WorksFiltersTest
   }
 
   describe("Access status filter") {
-    def work(status: AccessStatus): Work.Visible[WorkState.Indexed] =
+    def work(status: AccessStatus): Work.Visible[Indexed] =
       indexedWork()
         .items(
           List(
@@ -736,6 +739,51 @@ class WorksFiltersTest
           assertJsonResponse(
             routes,
             s"/$apiPrefix/works?items.locations.accessConditions.status=!restricted,!closed") {
+            Status.OK -> worksListResponse(
+              apiPrefix = apiPrefix,
+              works = Seq(workD, workE).sortBy(_.state.canonicalId)
+            )
+          }
+      }
+    }
+  }
+
+  describe("relation filters") {
+
+    def work(path: String): Work.Visible[Indexed] =
+      indexedWork(sourceIdentifier = createSourceIdentifierWith(value = path))
+        .collectionPath(CollectionPath(path = path))
+        .title(path)
+
+    val workA = work("A")
+    val workB = work("A/B").ancestors(workA)
+    val workC = work("A/C").ancestors(workA)
+    val workD = work("A/C/D").ancestors(workA, workC)
+    val workE = work("A/C/D/E").ancestors(workA, workC, workD)
+    val workX = work("X")
+
+    def storeWorks(index: Index) =
+      insertIntoElasticsearch(index, workA, workB, workC, workD, workE, workX)
+
+    it("filters partOf from root position") {
+      withWorksApi {
+        case (worksIndex, routes) =>
+          storeWorks(worksIndex)
+          assertJsonResponse(routes, s"/$apiPrefix/works?partOf=${workA.id}") {
+            Status.OK -> worksListResponse(
+              apiPrefix = apiPrefix,
+              works =
+                Seq(workB, workC, workD, workE).sortBy(_.state.canonicalId)
+            )
+          }
+      }
+    }
+
+    it("filters partOf from non root position") {
+      withWorksApi {
+        case (worksIndex, routes) =>
+          storeWorks(worksIndex)
+          assertJsonResponse(routes, s"/$apiPrefix/works?partOf=${workC.id}") {
             Status.OK -> worksListResponse(
               apiPrefix = apiPrefix,
               works = Seq(workD, workE).sortBy(_.state.canonicalId)

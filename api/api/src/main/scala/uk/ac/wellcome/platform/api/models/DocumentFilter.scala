@@ -5,10 +5,9 @@ import java.time.LocalDate
 
 import uk.ac.wellcome.display.models.LocationTypeQuery
 
-sealed trait DocumentFilter
+sealed trait WorkFilter
 
-sealed trait WorkFilter extends DocumentFilter
-sealed trait ImageFilter extends DocumentFilter
+sealed trait ImageFilter
 
 case class ItemLocationTypeFilter(locationTypes: Seq[LocationTypeQuery])
     extends WorkFilter
@@ -38,10 +37,8 @@ case class LicenseFilter(licenseIds: Seq[String])
 
 case class IdentifiersFilter(values: Seq[String]) extends WorkFilter
 
-case class CollectionPathFilter(path: String) extends WorkFilter
-
-case class CollectionDepthFilter(depth: Int) extends WorkFilter
-
 case class AccessStatusFilter(includes: List[AccessStatus],
                               excludes: List[AccessStatus])
     extends WorkFilter
+
+case class PartOfFilter(id: String) extends WorkFilter
