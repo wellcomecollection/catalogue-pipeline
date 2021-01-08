@@ -172,10 +172,6 @@ object WorksRequestBuilder
           includes = includes.map(_.name),
           excludes = excludes.map(_.name),
         )
-      case CollectionPathFilter(path) =>
-        termQuery(field = "data.collectionPath.path", value = path)
-      case CollectionDepthFilter(depth) =>
-        termQuery(field = "data.collectionPath.depth", value = depth)
       case ItemLocationTypeFilter(locationTypes) =>
         termsQuery(
           field = "data.items.locations.type",

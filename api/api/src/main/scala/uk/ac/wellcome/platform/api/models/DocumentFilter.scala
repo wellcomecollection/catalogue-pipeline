@@ -37,10 +37,6 @@ case class LicenseFilter(licenseIds: Seq[String])
 
 case class IdentifiersFilter(values: Seq[String]) extends WorkFilter
 
-case class CollectionPathFilter(path: String) extends WorkFilter
-
-case class CollectionDepthFilter(depth: Int) extends WorkFilter
-
 case class AccessStatusFilter(includes: List[AccessStatus],
                               excludes: List[AccessStatus])
     extends WorkFilter

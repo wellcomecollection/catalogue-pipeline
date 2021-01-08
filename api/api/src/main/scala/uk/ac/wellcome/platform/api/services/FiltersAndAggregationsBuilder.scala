@@ -86,8 +86,6 @@ class FiltersAndAggregationsBuilder(
     case _: SubjectFilter            => Some(AggregationRequest.Subject)
     case _: LicenseFilter            => Some(AggregationRequest.License)
     case _: IdentifiersFilter        => None
-    case _: CollectionPathFilter     => None
-    case _: CollectionDepthFilter    => None
     case _: AccessStatusFilter       => None
     case _: ItemLocationTypeFilter   => Some(AggregationRequest.ItemLocationType)
     case _: ItemLocationTypeIdFilter => None
