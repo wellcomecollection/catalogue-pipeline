@@ -58,7 +58,6 @@ case class MetsData(
     identifier = SourceIdentifier(
       identifierType = IdentifierType("sierra-system-number"),
       ontologyType = "Work",
-
       // We lowercase the b number in the METS file so it matches the
       // case used by Sierra.
       // e.g. b20442233 has the identifier "B20442233" in the METS file,
@@ -122,7 +121,6 @@ case class MetsData(
     SourceIdentifier(
       identifierType = IdentifierType("mets"),
       ontologyType = "Work",
-
       // We lowercase the b number in the METS file so it matches the
       // case used by Sierra.
       // e.g. b20442233 has the identifier "B20442233" in the METS file,

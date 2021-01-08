@@ -19,7 +19,9 @@ class MetsDataTest
   it("creates a invisible work with an item and a license") {
     val bibNumber = createBibNumber
     val metsData =
-      MetsData(recordIdentifier = bibNumber, accessConditionDz = Some("CC-BY-NC"))
+      MetsData(
+        recordIdentifier = bibNumber,
+        accessConditionDz = Some("CC-BY-NC"))
     val version = 1
     val expectedSourceIdentifier = SourceIdentifier(
       IdentifierType("mets", "METS"),
