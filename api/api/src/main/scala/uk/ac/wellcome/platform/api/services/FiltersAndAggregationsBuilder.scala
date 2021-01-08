@@ -89,6 +89,7 @@ class FiltersAndAggregationsBuilder(
     case _: AccessStatusFilter       => None
     case _: ItemLocationTypeFilter   => Some(AggregationRequest.ItemLocationType)
     case _: ItemLocationTypeIdFilter => None
+    case _: PartOfFilter             => None
   }
 
   private sealed trait FilterCategory

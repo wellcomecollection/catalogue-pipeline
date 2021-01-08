@@ -40,3 +40,5 @@ case class IdentifiersFilter(values: Seq[String]) extends WorkFilter
 case class AccessStatusFilter(includes: List[AccessStatus],
                               excludes: List[AccessStatus])
     extends WorkFilter
+
+case class PartOfFilter(id: String) extends WorkFilter

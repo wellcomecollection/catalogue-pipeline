@@ -180,5 +180,9 @@ object WorksRequestBuilder
         termsQuery(
           field = "data.items.locations.locationType.id",
           values = itemLocationTypeIds)
+      case PartOfFilter(id) =>
+        termQuery(
+          field = "state.relations.ancestors.id",
+          value = id)
     }
 }
