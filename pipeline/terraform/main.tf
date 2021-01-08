@@ -65,10 +65,10 @@ module "catalogue_pipeline_2020-11-25" {
   storage_bucket_name = local.storage_bucket
 }
 
-module "catalogue_pipeline_2021-01-07" {
+module "catalogue_pipeline_2021-01-08" {
   source = "./stack"
 
-  pipeline_date = "2021-01-07"
+  pipeline_date = "2021-01-08"
   release_label = "stage"
 
   # Transformer config
