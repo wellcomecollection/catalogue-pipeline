@@ -53,7 +53,7 @@ class PipelineStorageStream[In, Out, MsgDestination](
             .via(processFlow)
             .via(
               broadcastAndMerge(
-                batchAndSendFlow(config, messageSender, indexer),
+                batchIndexAndSendFlow(config, messageSender, indexer),
                 identityFlow)
           )
       )
@@ -128,7 +128,7 @@ object PipelineStorageStream extends Logging {
       }
       .mapConcat(identity)
 
-  def batchAndSendFlow[T, MsgDestination](
+  def batchIndexAndSendFlow[T, MsgDestination](
     config: PipelineStorageConfig,
     msgSender: MessageSender[MsgDestination],
     indexer: Indexer[T])(implicit
