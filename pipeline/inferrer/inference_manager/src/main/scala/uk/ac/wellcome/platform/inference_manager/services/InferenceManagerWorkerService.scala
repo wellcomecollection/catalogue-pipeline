@@ -1,25 +1,33 @@
 package uk.ac.wellcome.platform.inference_manager.services
 
+import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration._
+import scala.util.{Failure, Success, Try}
 import akka.Done
 import akka.http.scaladsl.model.HttpResponse
 import akka.actor.ActorSystem
 import akka.stream.scaladsl.{Flow, FlowWithContext, Source}
 import grizzled.slf4j.Logging
 import software.amazon.awssdk.services.sqs.model.Message
-import uk.ac.wellcome.bigmessaging.message.BigMessageStream
+
+import uk.ac.wellcome.messaging.sns.NotificationMessage
+import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.models.work.internal.{Image, ImageState, InferredData}
-import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.platform.inference_manager.adapters.{
   InferrerAdapter,
   InferrerResponse
 }
 import uk.ac.wellcome.platform.inference_manager.models.DownloadedImage
 import uk.ac.wellcome.typesafe.Runnable
-
-import scala.concurrent.{ExecutionContext, Future}
-import scala.concurrent.duration._
-import scala.util.{Failure, Success, Try}
+import uk.ac.wellcome.pipeline_storage.{
+  Indexer,
+  PipelineStorageConfig,
+  PipelineStorageStream,
+  Retriever
+}
+import uk.ac.wellcome.json.JsonUtil._
+import ImageState.{Augmented, Initial}
 
 case class AdapterResponseBundle[ImageType](
   image: ImageType,
@@ -28,8 +36,11 @@ case class AdapterResponseBundle[ImageType](
 )
 
 class InferenceManagerWorkerService[Destination](
-  msgStream: BigMessageStream[MergedIdentifiedImage],
-  messageSender: MessageSender[Destination],
+  msgStream: SQSStream[NotificationMessage],
+  msgSender: MessageSender[Destination],
+  imageRetriever: Retriever[Image[Initial]],
+  imageIndexer: Indexer[Image[Augmented]],
+  pipelineStorageConfig: PipelineStorageConfig,
   imageDownloader: ImageDownloader[Message],
   inferrerAdapters: Set[InferrerAdapter],
   requestPool: RequestPoolFlow[(DownloadedImage, InferrerAdapter), Message]
@@ -43,22 +54,29 @@ class InferenceManagerWorkerService[Destination](
   val maxOpenRequests = actorSystem.settings.config
     .getInt("akka.http.host-connection-pool.max-open-requests")
 
+  val indexAndSend = PipelineStorageStream.batchIndexAndSendFlow(
+    pipelineStorageConfig,
+    msgSender,
+    imageIndexer
+  )
+
   def run(): Future[Done] =
     msgStream.runStream(
       className,
-      _.asSourceWithContext {
-        case (message, _) => message
-      }.map {
-          case (_, image) => image
-        }
-        .via(imageDownloader.download)
-        .via(createRequests)
-        .via(requestPool.asContextFlow)
-        .via(unmarshalResponse)
-        .via(collectAndAugment)
-        .via(sendAugmented)
-        .asSource
-        .map { case (_, msg) => msg }
+      source =>
+        source
+          .asSourceWithContext { case (message, _) => message }
+          .mapAsync(5) {
+            case (_, message) => imageRetriever(message.body)
+          }
+          .via(imageDownloader.download)
+          .via(createRequests)
+          .via(requestPool.asContextFlow)
+          .via(unmarshalResponse)
+          .via(collectAndAugment)
+          .asSource
+          .map { case (image, message) => (message, List(image)) }
+          .via(indexAndSend)
     )
 
   private def createRequests[Ctx] =
@@ -149,10 +167,4 @@ class InferenceManagerWorkerService[Destination](
             maxOpenRequests * inferrerAdapters.size
           )
       }
-
-  private def sendAugmented[Ctx] =
-    FlowWithContext[Image[ImageState.Augmented], Ctx]
-      .map(messageSender.sendT[Image[ImageState.Augmented]])
-      .map(_.get)
-
 }

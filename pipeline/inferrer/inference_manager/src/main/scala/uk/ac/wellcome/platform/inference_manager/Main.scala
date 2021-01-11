@@ -1,11 +1,13 @@
 package uk.ac.wellcome.platform.inference_manager
 
+import scala.concurrent.ExecutionContext
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import com.typesafe.config.Config
 import software.amazon.awssdk.services.sqs.model.Message
-import uk.ac.wellcome.bigmessaging.typesafe.BigMessagingBuilder
+
 import uk.ac.wellcome.models.Implicits._
+import uk.ac.wellcome.elasticsearch.AugmentedImageIndexConfig
 import uk.ac.wellcome.platform.inference_manager.adapters.{
   FeatureVectorInferrerAdapter,
   InferrerAdapter,
@@ -14,14 +16,21 @@ import uk.ac.wellcome.platform.inference_manager.adapters.{
 import uk.ac.wellcome.platform.inference_manager.models.DownloadedImage
 import uk.ac.wellcome.platform.inference_manager.services.{
   ImageDownloader,
-  InferenceManagerWorkerService,
-  MergedIdentifiedImage
+  InferenceManagerWorkerService
 }
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
+import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
+import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
-
-import scala.concurrent.ExecutionContext
+import uk.ac.wellcome.pipeline_storage.typesafe.{
+  ElasticIndexerBuilder,
+  ElasticRetrieverBuilder,
+  PipelineStorageStreamBuilder
+}
+import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
+import uk.ac.wellcome.models.work.internal.{Image, ImageState}
+import ImageState.{Augmented, Initial}
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
@@ -47,10 +56,32 @@ object Main extends WellcomeTypesafeApp {
     val inferrerClientFlow =
       Http().superPool[((DownloadedImage, InferrerAdapter), Message)]()
 
+    val esClient = ElasticBuilder.buildElasticClient(config)
+
+    val imageRetriever = ElasticRetrieverBuilder.apply[Image[Initial]](
+      config,
+      esClient,
+      namespace = "initial-images"
+    )
+
+    val imageIndexer = ElasticIndexerBuilder[Image[Augmented]](
+      config,
+      esClient,
+      namespace = "augmented-images",
+      indexConfig = AugmentedImageIndexConfig
+    )
+
+    val pipelineStorageConfig = PipelineStorageStreamBuilder
+      .buildPipelineStorageConfig(config)
+
     new InferenceManagerWorkerService(
-      msgStream = BigMessagingBuilder
-        .buildMessageStream[MergedIdentifiedImage](config),
-      messageSender = BigMessagingBuilder.buildBigMessageSender(config),
+      msgStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
+      msgSender = SNSBuilder.buildSNSMessageSender(
+        config,
+        subject = "Sent from the inference_manager"),
+      imageRetriever = imageRetriever,
+      imageIndexer = imageIndexer,
+      pipelineStorageConfig = pipelineStorageConfig,
       imageDownloader = imageDownloader,
       inferrerAdapters = Set(
         featureInferrerAdapter,
