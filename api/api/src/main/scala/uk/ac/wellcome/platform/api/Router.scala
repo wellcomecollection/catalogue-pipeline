@@ -119,7 +119,7 @@ class Router(elasticClient: ElasticClient,
       elasticConfig.worksIndex.name,
       WorksMultiMatcher("{{query}}").filter(
         termQuery(field = "type", value = "Visible")),
-      )
+    )
 
     val imageSearchTemplate = SearchTemplate(
       "image_search_query",
@@ -127,9 +127,10 @@ class Router(elasticClient: ElasticClient,
       ImagesMultiMatcher("{{query}}"),
     )
 
-    complete(SearchTemplateResponse(
-      List(worksSearchTemplate, imageSearchTemplate)
-    ))
+    complete(
+      SearchTemplateResponse(
+        List(worksSearchTemplate, imageSearchTemplate)
+      ))
   }
 
   def rejectionHandler =
