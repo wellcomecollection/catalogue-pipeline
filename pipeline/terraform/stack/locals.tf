@@ -11,7 +11,7 @@ locals {
 
   # The max number of connections allowed by the instance
   # specified at /infrastructure/critical/rds_id_minter.tf
-  id_minter_rds_max_connections  = 4 * 45
+  id_minter_rds_max_connections  = 3 * 45
   id_minter_task_max_connections = min(local.id_minter_rds_max_connections / 10, var.max_capacity)
 
   services = [
