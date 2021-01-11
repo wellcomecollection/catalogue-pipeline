@@ -71,6 +71,8 @@ module "catalogue_pipeline_2021-01-08" {
   pipeline_date = "2021-01-08"
   release_label = "stage"
 
+  max_capacity = 5
+
   # Transformer config
   #
   # If this pipeline is meant to be reindexed, remember to uncomment the
