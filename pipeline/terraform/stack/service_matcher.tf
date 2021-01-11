@@ -34,6 +34,9 @@ module "matcher" {
   cluster_name = aws_ecs_cluster.cluster.name
   cluster_arn  = aws_ecs_cluster.cluster.arn
 
+  cpu    = 1024
+  memory = 2048
+
   env_vars = {
     queue_url         = module.matcher_input_queue.url
     metrics_namespace = "${local.namespace_hyphen}_matcher"
