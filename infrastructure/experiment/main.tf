@@ -32,6 +32,8 @@ provider "aws" {
 }
 
 locals {
+  # The correct endpoints are provided by Elastic Cloud
+  # https://www.elastic.co/guide/en/cloud/current/ec-traffic-filtering-vpc.html
   ec_eu_west_1_service_name = "com.amazonaws.vpce.eu-west-1.vpce-svc-01f2afe87944eb12b"
   catalogue_outputs         = data.terraform_remote_state.accounts_catalogue.outputs
 
