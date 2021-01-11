@@ -10,29 +10,17 @@ class ApiSearchTemplatesTest
     with Matchers
     with JsonHelpers {
 
-  it("renders a list of available work search templates") {
+  it("renders a list of available search templates") {
     checkJson { json =>
       json.isObject shouldBe true
-      val templates = getKey(json, "workTemplates")
-      templates should not be empty
-      templates map { json =>
-        getLength(json).get should be > 0
-      }
-
-    }
-  }
-
-  it("renders a list of available image search templates") {
-    checkJson { json =>
-      json.isObject shouldBe true
-      val templates = getKey(json, "imageTemplates")
+      val templates = getKey(json, "templates")
       templates should not be empty
       templates map { json =>
         getLength(json).get should be > 0
       }
     }
   }
-  
+
   private def checkJson(f: Json => Unit): Unit =
     withApi { routes =>
       Get(s"/$apiPrefix/search-templates.json") ~> routes ~> check {
@@ -41,4 +29,5 @@ class ApiSearchTemplatesTest
         f(parseJson(responseAs[String]))
       }
     }
+}
   

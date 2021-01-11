@@ -53,18 +53,9 @@ class Router(elasticClient: ElasticClient,
               path("swagger.json") {
                 swagger
               },
-<<<<<<< HEAD
               path("search-templates.json") {
                 getSearchTemplates
               }
-=======
-              path("work-search-templates.json") {
-                getWorkSearchTemplates
-              }
-                path ("image-search-templates.json") {
-                  getImageSearchTemplates
-                }
->>>>>>> 7a14093341d5b70b011f6c5cea07caa0c0e49e2b
             )
           },
           path("v1" / Remaining) { _ =>
@@ -137,7 +128,7 @@ class Router(elasticClient: ElasticClient,
     )
 
     complete(SearchTemplateResponse(
-      List(worksSearchTemplate), List(imageSearchTemplate)
+      List(worksSearchTemplate, imageSearchTemplate)
     ))
   }
 
