@@ -164,6 +164,26 @@ class SierraIdentifiersTest
       }
       issnIdentifiers should have size 1
     }
+
+    it("strips whitespace") {
+      // Based on https://api.wellcomecollection.org/catalogue/v2/works/t9wua9ys?include=identifiers
+      val issn = "0945-7704"
+
+      val expectedIdentifier = SourceIdentifier(
+        identifierType = IdentifierType("issn"),
+        ontologyType = "Work",
+        value = issn
+      )
+
+      val bibData = createSierraBibDataWith(
+        varFields = List(
+          createVarFieldWith(marcTag = "022", subfieldA = s"$issn ")
+        )
+      )
+
+      val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
+      otherIdentifiers should contain(expectedIdentifier)
+    }
   }
 
   describe("finds digcodes from MARC 759 ǂa") {

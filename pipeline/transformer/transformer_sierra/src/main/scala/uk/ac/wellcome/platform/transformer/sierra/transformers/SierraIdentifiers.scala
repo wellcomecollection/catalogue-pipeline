@@ -66,7 +66,7 @@ object SierraIdentifiers
         SourceIdentifier(
           identifierType = IdentifierType("issn"),
           ontologyType = "Work",
-          value = value
+          value = value.trim
         )
       }
 
