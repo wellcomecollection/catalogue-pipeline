@@ -49,11 +49,11 @@ class IdMinterWorkerService[Destination](
   }
 
   def processMessage(
-    message: NotificationMessage): Future[List[Work[Identified]]] =
+    message: NotificationMessage): Future[Option[Work[Identified]]] =
     jsonRetriever(message.body)
       .flatMap(json => Future.fromTry(embedIds(json)))
       .flatMap(updatedJson =>
-        Future.fromTry(decodeJson(updatedJson)).map(List(_)))
+        Future.fromTry(decodeJson(updatedJson)).map(Some(_)))
 
   def embedIds(json: Json): Try[Json] =
     for {

@@ -30,10 +30,10 @@ class WorkIngestorWorkerService[Destination](
     pipelineStream.foreach(this.getClass.getSimpleName, processMessage)
 
   private def processMessage(
-    message: NotificationMessage): Future[List[Work[Indexed]]] = {
+    message: NotificationMessage): Future[Option[Work[Indexed]]] = {
     for {
       denormalisedWork <- workRetriever.apply(message.body)
       indexedWork = transformBeforeIndex(denormalisedWork)
-    } yield (List(indexedWork))
+    } yield (Some(indexedWork))
   }
 }
