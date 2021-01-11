@@ -37,8 +37,8 @@ locals {
   ec_eu_west_1_service_name = "com.amazonaws.vpce.eu-west-1.vpce-svc-01f2afe87944eb12b"
   catalogue_outputs         = data.terraform_remote_state.accounts_catalogue.outputs
 
-  public_subnets = local.catalogue_outputs["catalogue_vpc_public_subnets"]
-  private_subnets  = local.catalogue_outputs["catalogue_vpc_private_subnets"]
+  public_subnets  = local.catalogue_outputs["catalogue_vpc_public_subnets"]
+  private_subnets = local.catalogue_outputs["catalogue_vpc_private_subnets"]
   vpc_id          = local.catalogue_outputs["catalogue_vpc_id"]
 
   ifconfig_co_json = jsondecode(data.http.my_public_ip.body)
@@ -129,7 +129,7 @@ resource "aws_route53_record" "cname_ec" {
 # Where deployment_id is the id found for that deployment in the Elastic Cloud console.
 
 resource "aws_instance" "dev_instance" {
-  ami = data.aws_ami.amazon_linux.id
+  ami           = data.aws_ami.amazon_linux.id
   instance_type = "t3.medium"
 
   iam_instance_profile = aws_iam_instance_profile.dev_instance_profile.name
@@ -137,8 +137,8 @@ resource "aws_instance" "dev_instance" {
   key_name = local.ssh_key_name
 
   tags = {
-    Name = "ElasticCloudPrivateLinkTest"
-    LastUpdated   = timestamp()
+    Name        = "ElasticCloudPrivateLinkTest"
+    LastUpdated = timestamp()
   }
 
   vpc_security_group_ids = [
