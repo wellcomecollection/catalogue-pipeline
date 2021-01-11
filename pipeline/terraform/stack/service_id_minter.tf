@@ -77,7 +77,7 @@ module "id_minter" {
 module "id_minter_topic" {
   source = "../modules/topic"
 
-  name       = "${local.namespace_hyphen}_work_id_minter"
+  name       = "${local.namespace_hyphen}_id_minter_output"
   role_names = [module.id_minter.task_role_name]
 
   messages_bucket_arn = aws_s3_bucket.messages.arn
