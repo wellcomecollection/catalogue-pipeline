@@ -258,7 +258,7 @@ lazy val calm_adapter = setupProject(
 lazy val inference_manager = setupProject(
   project,
   folder = "pipeline/inferrer/inference_manager",
-  localDependencies = Seq(internal_model, big_messaging_typesafe),
+  localDependencies = Seq(internal_model, pipeline_storage_typesafe),
   externalDependencies = CatalogueDependencies.inferenceManagerDependencies
 )
 
