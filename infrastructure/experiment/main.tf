@@ -24,7 +24,7 @@ data "terraform_remote_state" "accounts_catalogue" {
 provider "ec" {}
 
 provider "aws" {
-  region  = "eu-west-1"
+  region = "eu-west-1"
 
   assume_role {
     role_arn = "arn:aws:iam::756629837203:role/catalogue-developer"
@@ -47,7 +47,7 @@ locals {
 resource "aws_security_group" "allow_ec_vpce" {
   provider = aws
 
-  name = "allow_ec_vpce"
+  name   = "allow_ec_vpce"
   vpc_id = local.vpc_id
 
   ingress {
