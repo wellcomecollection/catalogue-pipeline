@@ -8,10 +8,12 @@ locals {
   es_works_merged_index          = "works-merged-${var.pipeline_date}"
   es_works_identified_index      = "works-identified-${var.pipeline_date}"
   es_works_denormalised_index    = "works-denormalised-${var.pipeline_date}"
-  id_minter_task_max_connections = 9
-  // The max number of connections allowed by the instance
-  // specified at /infrastructure/critical/rds_id_minter.tf
-  id_minter_rds_max_connections = 90
+
+  # The max number of connections allowed by the instance
+  # specified at /infrastructure/critical/rds_id_minter.tf
+  id_minter_rds_max_connections  = 4 * 45
+  id_minter_task_max_connections = min(local.id_minter_rds_max_connections / 10, var.max_capacity)
+
   services = [
     "ingestor_works",
     "ingestor_images",
