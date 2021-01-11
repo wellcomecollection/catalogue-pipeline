@@ -178,7 +178,7 @@ if __name__ == "__main__":
     if proportion < 99:
         print(
             click.style(
-                "Approximately %d%% records have been reindexed successfully"
+                "Approximately %d%% of records have been reindexed successfully"
                 % int(proportion),
                 "yellow",
             )
@@ -186,7 +186,7 @@ if __name__ == "__main__":
     else:
         print(
             click.style(
-                "Approximately %d%% records have been reindexed successfully (counts may not be exact)"
+                "Approximately %d%% of records have been reindexed successfully (counts may not be exact)"
                 % int(proportion),
                 "green",
             )
