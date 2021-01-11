@@ -24,13 +24,13 @@ class RouterWorkerService[MsgDestination](
     pipelineStream.foreach(this.getClass.getSimpleName, processMessage)
 
   private def processMessage(
-    message: NotificationMessage): Future[Option[Work[Denormalised]]] = {
+    message: NotificationMessage): Future[List[Work[Denormalised]]] = {
     workRetriever.apply(message.body).flatMap { work =>
       work.data.collectionPath
-        .fold[Future[Option[Work[Denormalised]]]](ifEmpty = {
-          Future.successful(Some(work.transition[Denormalised](Relations.none)))
+        .fold[Future[List[Work[Denormalised]]]](ifEmpty = {
+          Future.successful(List(work.transition[Denormalised](Relations.none)))
         }) { path =>
-          Future.fromTry(pathsMsgSender.send(path.path)).map(_ => None)
+          Future.fromTry(pathsMsgSender.send(path.path)).map(_ => Nil)
         }
     }
   }

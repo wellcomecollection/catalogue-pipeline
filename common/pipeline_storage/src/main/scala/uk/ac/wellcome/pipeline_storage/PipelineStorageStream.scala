@@ -1,22 +1,22 @@
 package uk.ac.wellcome.pipeline_storage
 
 import akka.stream.FlowShape
-import akka.{Done, NotUsed}
 import akka.stream.scaladsl.{Broadcast, Flow, GraphDSL, Merge}
+import akka.{Done, NotUsed}
 import grizzled.slf4j.Logging
 import io.circe.Decoder
 import software.amazon.awssdk.services.sqs.model.Message
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sqs.SQSStream
 
-import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.{ExecutionContext, Future}
 
 case class PipelineStorageConfig(batchSize: Int,
                                  flushInterval: FiniteDuration,
                                  parallelism: Int)
 
-case class Bundle[T](message: Message, item: T)
+case class Bundle[T](message: Message, item: T, numberOfItems: Int)
 
 class PipelineStorageStream[In, Out, MsgDestination](
   messageStream: SQSStream[In],
@@ -27,7 +27,7 @@ class PipelineStorageStream[In, Out, MsgDestination](
 
   import PipelineStorageStream._
 
-  def foreach(streamName: String, process: In => Future[Option[Out]])(
+  def foreach(streamName: String, process: In => Future[List[Out]])(
     implicit decoderT: Decoder[In],
     indexable: Indexable[Out]): Future[Done] =
     run(
@@ -41,7 +41,7 @@ class PipelineStorageStream[In, Out, MsgDestination](
     )
 
   def run(streamName: String,
-          processFlow: Flow[(Message, In), (Message, Option[Out]), NotUsed])(
+          processFlow: Flow[(Message, In), (Message, List[Out]), NotUsed])(
     implicit decoder: Decoder[In],
     indexable: Indexable[Out]): Future[Done] =
     for {
@@ -59,9 +59,9 @@ class PipelineStorageStream[In, Out, MsgDestination](
       )
     } yield done
 
-  private val identityFlow: Flow[(Message, Option[Out]), Message, NotUsed] =
-    Flow[(Message, Option[Out])]
-      .collect { case (message, None) => message }
+  private val identityFlow: Flow[(Message, List[Out]), Message, NotUsed] =
+    Flow[(Message, List[Out])]
+      .collect { case (message, Nil) => message }
 
   private def broadcastAndMerge[I, O](
     a: Flow[I, O, NotUsed],
@@ -99,7 +99,7 @@ object PipelineStorageStream extends Logging {
                     case Right(doc) => Some((messages(idx), doc))
                   }
               }
-              .collect { case Some((msg, doc)) => Bundle(msg, doc) }
+              .collect { case Some((msg, doc)) => Bundle(msg, doc, 1) }
           }
       }
       .mapConcat(identity)
@@ -113,15 +113,16 @@ object PipelineStorageStream extends Logging {
         config.batchSize,
         config.flushInterval
       ) {
-        case Bundle(msg, item) => indexable.weight(item)
+        case Bundle(_, item, _) => indexable.weight(item)
       }
       .mapAsyncUnordered(config.parallelism) { bundles =>
-        val (messages, items) = unzipBundles(bundles)
+        val (_, items) = unzipBundles(bundles)
         indexer(items).map { result =>
           val failed = result.left.getOrElse(Nil)
+          if (failed.nonEmpty) warn(s"Some documents failed ingesting: $failed")
           bundles.collect {
-            case Bundle(msg, doc) if !failed.contains(doc) =>
-              Bundle(msg, indexable.id(doc))
+            case Bundle(message, doc, numberOfItems) if !failed.contains(doc) =>
+              Bundle(message, indexable.id(doc), numberOfItems)
           }
         }
       }
@@ -133,12 +134,37 @@ object PipelineStorageStream extends Logging {
     indexer: Indexer[T])(implicit
                          ec: ExecutionContext,
                          indexable: Indexable[T]) =
-    Flow[(Message, Option[T])]
-      .collect { case (msg, Some(document)) => Bundle(msg, document) }
+    Flow[(Message, List[T])]
+      .collect {
+        case (msg, items @ _ :: _) =>
+          items.map(item =>
+            Bundle[T](message = msg, item = item, numberOfItems = items.size))
+      }
+      .mapConcat[Bundle[T]](identity)
       .via(batchIndexFlow(config, indexer))
-      .mapAsyncUnordered(config.parallelism) {
-        case Bundle(msg, id) =>
-          Future.fromTry(msgSender.send(id).map(_ => msg))
+      .via(groupByMessage
+        .mapConcat(identity)
+        .mergeSubstreams)
+      .mapAsyncUnordered(config.parallelism) { bundle =>
+        for {
+          _ <- Future.fromTry(msgSender.send(bundle.item))
+        } yield bundle
+      }
+      .via(groupByMessage
+        .map(_.head.message)
+        .mergeSubstreams)
+
+  def groupByMessage =
+    Flow[Bundle[String]]
+      .groupBy(Integer.MAX_VALUE, _.message.messageId())
+      .scan(Nil: List[Bundle[String]]) {
+        case (bundleList, b) => b :: bundleList
+      }
+      .filter { list =>
+        list.nonEmpty && list
+          .map(_.item)
+          .distinct
+          .size == list.head.numberOfItems
       }
 
   private def unzipBundles[T](
