@@ -29,6 +29,9 @@ SERVICES = {
     "router": ["merged_read", "denormalised_write"],
     "relation_embedder": ["merged_read", "denormalised_write"],
     "ingestor": ["identified_read", "denormalised_read"],
+    # This role isn't used by applications, but instead provided to give developer scripts
+    # read-only access to the pipeline_storage cluster.
+    "dev": [f"{work_type}_read" for work_type in WORK_TYPES],
 }
 
 DEFAULT_DESCRIPTION = "Credentials for the pipeline-storage Elasticsearch cluster"
