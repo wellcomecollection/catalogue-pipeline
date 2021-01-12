@@ -6,8 +6,8 @@ module "merger_queue" {
   aws_region      = var.aws_region
   alarm_topic_arn = var.dlq_alarm_arn
 
-  # This has to be longer than the flush interval in the merger
-  visibility_timeout = 120
+  # This has to be longer than the `flush_interval_seconds` in the merger
+  visibility_timeout_seconds = 10 * 60
 }
 
 module "merger" {
@@ -22,6 +22,9 @@ module "merger" {
   cluster_name = aws_ecs_cluster.cluster.name
   cluster_arn  = aws_ecs_cluster.cluster.arn
 
+  cpu    = 1024
+  memory = 2048
+
   env_vars = {
     metrics_namespace       = "${local.namespace_hyphen}_merger"
     messages_bucket_name    = aws_s3_bucket.messages.id
@@ -32,6 +35,9 @@ module "merger" {
 
     es_identified_works_index = local.es_works_identified_index
     es_merged_works_index     = local.es_works_merged_index
+
+    batch_size             = 100
+    flush_interval_seconds = 120
   }
 
   secret_env_vars = {

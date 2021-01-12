@@ -19,3 +19,8 @@ variable "instance_class" {}
 variable "aws_db_subnet_group_name" {
   type = string
 }
+
+variable "instance_count" {
+  type    = number
+  default = 2
+}

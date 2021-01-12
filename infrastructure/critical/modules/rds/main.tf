@@ -1,5 +1,5 @@
 resource "aws_rds_cluster_instance" "cluster_instances" {
-  count = 2
+  count = var.instance_count
 
   identifier           = "${var.cluster_identifier}-${count.index}"
   cluster_identifier   = aws_rds_cluster.default.id

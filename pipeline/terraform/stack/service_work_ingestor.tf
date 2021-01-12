@@ -4,6 +4,8 @@ module "ingestor_works_queue" {
   topic_arns      = [module.router_work_output_topic.arn, module.relation_embedder_output_topic.arn]
   aws_region      = var.aws_region
   alarm_topic_arn = var.dlq_alarm_arn
+
+  max_receive_count = 6
 }
 
 # Service
