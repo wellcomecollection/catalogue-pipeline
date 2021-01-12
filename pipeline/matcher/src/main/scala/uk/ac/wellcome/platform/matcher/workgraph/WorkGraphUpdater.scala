@@ -12,8 +12,6 @@ import uk.ac.wellcome.platform.matcher.models.{
   WorkUpdate
 }
 
-import scala.collection.immutable.Iterable
-
 object WorkGraphUpdater extends Logging {
   def update(workUpdate: WorkUpdate, existingGraph: WorkGraph): WorkGraph = {
     checkVersionConflicts(workUpdate, existingGraph)
@@ -42,41 +40,93 @@ object WorkGraphUpdater extends Logging {
   }
 
   private def doUpdate(workUpdate: WorkUpdate, existingGraph: WorkGraph) = {
-    val linkedNodes =
+
+    // Find everything that's in the existing graph, but which isn't
+    // the node we're updating.
+    //
+    // e.g.     A   B
+    //           \ /
+    //            C
+    //           / \
+    //          D   E
+    //
+    // If we're updating work B, then this list will be (A C D E).
+    //
+    val linkedWorks =
       existingGraph.nodes.filterNot(_.id == workUpdate.workId)
 
-    val nodeVersions: Map[String, Int] =
-      linkedNodes.collect {
+    // Create a map (work ID) -> (version) for every work in the graph.
+    //
+    // Every work in the existing graph will be in this list.
+    //
+    val workVersions: Map[String, Int] =
+      linkedWorks.collect {
         case WorkNode(id, Some(version), _, _) => (id, version)
       }.toMap + (workUpdate.workId -> workUpdate.version)
 
-    val edges =
-      linkedNodes
-        .flatMap { node =>
-          toEdges(node.id, node.linkedIds)
-        } ++ toEdges(workUpdate.workId, workUpdate.referencedWorkIds)
+    // Create a list of all the connections between works in the graph.
+    //
+    // e.g.     A → B → C
+    //              ↓
+    //              D → E
+    //
+    // If we're updating work D, then the lists will be:
+    //
+    //    updateLinks = (D → E)
+    //    otherLinks  = (A → B, B → C, B → D)
+    //
+    val updateLinks =
+      workUpdate.referencedWorkIds.map {
+        workUpdate.workId ~> _
+      }
 
-    val nodeIds =
+    val otherLinks =
+      linkedWorks
+        .flatMap { node =>
+          node.linkedIds.map { node.id ~> _ }
+        }
+
+    val links = updateLinks ++ otherLinks
+
+    // Get the IDs of all the works in this graph, and construct a Graph object.
+    val workIds =
       existingGraph.nodes
         .flatMap { node =>
           node.id +: node.linkedIds
         } + workUpdate.workId
 
-    val g = Graph.from(edges = edges, nodes = nodeIds)
+    val g = Graph.from(edges = links, nodes = workIds)
 
-    def adjacentNodeIds(n: g.NodeT) =
+    // Find all the works that this node links to.
+    //
+    // e.g.     A → B → C
+    //              ↓
+    //              D → E
+    //
+    // In this example, linkedWorkIds(B) = {C, D}
+    //
+    def linkedWorkIds(n: g.NodeT): List[String] =
       n.diSuccessors.map(_.value).toList.sorted
 
+    // Go through the components of the graph, and turn each of them into
+    // a set of WorkNode instances.
+    //
+    // e.g.     A - B - C       D - E
+    //              |           |
+    //              F - G       H
+    //
+    // Here there are two components: (A B C F G) and (D E H)
+    //
     WorkGraph(
       g.componentTraverser()
         .flatMap(component => {
           val nodeIds = component.nodes.map(_.value).toList
           component.nodes.map(node => {
             WorkNode(
-              node.value,
-              nodeVersions.get(node.value),
-              adjacentNodeIds(node),
-              componentIdentifier(nodeIds))
+              id = node.value,
+              version = workVersions.get(node.value),
+              linkedIds = linkedWorkIds(node),
+              componentId = componentIdentifier(nodeIds))
           })
         })
         .toSet
@@ -86,7 +136,4 @@ object WorkGraphUpdater extends Logging {
   private def componentIdentifier(nodeIds: List[String]) = {
     DigestUtils.sha256Hex(nodeIds.sorted.mkString("+"))
   }
-
-  private def toEdges(workId: String, linkedIds: Iterable[String]) =
-    linkedIds.map(workId ~> _)
 }
