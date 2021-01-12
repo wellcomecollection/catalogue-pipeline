@@ -155,9 +155,12 @@ object PipelineStorageStream extends Logging {
         }
         .mergeSubstreams)
 
+  // Splits the flow into a substream for each messageId.
+  // Each substream emits one message with the complete of bundles for a messageId
+  // or no message if it failed to collect the correct number of bundles
   def groupByMessage[T] =
     Flow[Bundle[T]]
-      .groupBy(Integer.MAX_VALUE, _.message.messageId(), true)
+      .groupBy(maxSubstreams = Integer.MAX_VALUE, f = _.message.messageId(), allowClosedSubstreamRecreation = true)
       .scan(Nil: List[Bundle[T]]) {
         case (bundleList, b) => b :: bundleList
       }
@@ -167,6 +170,8 @@ object PipelineStorageStream extends Logging {
           .distinct
           .size == list.head.numberOfItems
       }
+    // Close the substream with take if it succeeds
+    // or after 5 minutes if it fails
       .take(1)
       .initialTimeout(5 minutes).recover{
       case e: TimeoutException =>
