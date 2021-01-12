@@ -9,8 +9,8 @@ import software.amazon.awssdk.services.sqs.model.Message
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sqs.SQSStream
 
-import scala.concurrent.duration.FiniteDuration
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration._
+import scala.concurrent.{ExecutionContext, Future, TimeoutException}
 
 case class PipelineStorageConfig(batchSize: Int,
                                  flushInterval: FiniteDuration,
@@ -151,12 +151,12 @@ object PipelineStorageStream extends Logging {
         } yield bundle
       }
       .via(groupByMessage
-        .map(_.head.message)
+        .collect{case head::_ => head.message}
         .mergeSubstreams)
 
   def groupByMessage =
     Flow[Bundle[String]]
-      .groupBy(Integer.MAX_VALUE, _.message.messageId())
+      .groupBy(Integer.MAX_VALUE, _.message.messageId(), true)
       .scan(Nil: List[Bundle[String]]) {
         case (bundleList, b) => b :: bundleList
       }
@@ -166,6 +166,11 @@ object PipelineStorageStream extends Logging {
           .distinct
           .size == list.head.numberOfItems
       }
+      .initialTimeout(10 minutes).recover{
+      case e: TimeoutException =>
+        warn("Timeout when processing substream",e)
+        Nil
+    }
 
   private def unzipBundles[T](
     bundles: Seq[Bundle[T]]): (List[Message], List[T]) =
