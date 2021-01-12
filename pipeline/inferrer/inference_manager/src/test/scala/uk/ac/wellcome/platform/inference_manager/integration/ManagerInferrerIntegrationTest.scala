@@ -57,7 +57,7 @@ class ManagerInferrerIntegrationTest
               locationType = createImageLocationType,
               url = s"http://localhost:$localImageServerPort/test-image.jpg"
             ))).toInitialImage
-        sendMessage(queue, image)
+        sendNotificationToSQS(queue = queue, body = image.id)
         eventually {
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)

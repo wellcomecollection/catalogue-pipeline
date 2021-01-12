@@ -62,7 +62,8 @@ class InferenceManagerWorkerServiceTest
       images = _ => Some(Responses.image)
     ) {
       case (QueuePair(queue, dlq), messageSender, _, _) =>
-        images.values.foreach(image => sendMessage(queue, image))
+        images.values.foreach(image =>
+          sendNotificationToSQS(queue = queue, body = image.id))
         eventually {
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
@@ -105,7 +106,8 @@ class InferenceManagerWorkerServiceTest
     ) {
       case (QueuePair(queue, dlq), messageSender, _, _) =>
         val image = createImageData.toInitialImage
-        (1 to 3).foreach(_ => sendMessage(queue, image))
+        (1 to 3).foreach(_ =>
+          sendNotificationToSQS(queue = queue, body = image.id))
         eventually {
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
@@ -152,9 +154,9 @@ class InferenceManagerWorkerServiceTest
       images = _ => Some(Responses.image)
     ) {
       case (QueuePair(queue, dlq), _, _, _) =>
-        sendMessage(queue, image404)
-        sendMessage(queue, image400)
-        sendMessage(queue, image500)
+        sendNotificationToSQS(queue = queue, body = image404.id)
+        sendNotificationToSQS(queue = queue, body = image400.id)
+        sendNotificationToSQS(queue = queue, body = image500.id)
         eventually {
           assertQueueEmpty(queue)
           assertQueueHasSize(dlq, 3)
@@ -169,7 +171,7 @@ class InferenceManagerWorkerServiceTest
     ) {
       case (QueuePair(queue, dlq), _, _, _) =>
         val image = createImageData.toInitialImage
-        sendMessage(queue, image)
+        sendNotificationToSQS(queue = queue, body = image.id)
         eventually {
           assertQueueEmpty(queue)
           assertQueueHasSize(dlq, 1)
@@ -213,12 +215,12 @@ class InferenceManagerWorkerServiceTest
     imageRequestPool: RequestPoolFlow[MergedIdentifiedImage, Message])(
     testWith: TestWith[(QueuePair, MemoryMessageSender), R]): R =
     withLocalSqsQueuePair() { queuePair =>
-      val messageSender = new MemoryMessageSender()
+      val msgSender = new MemoryMessageSender()
       val fileWriter = new MemoryFileWriter()
 
       withWorkerService(
         queue = queuePair.queue,
-        messageSender = messageSender,
+        msgSender = msgSender,
         adapters = Set(
           new FeatureVectorInferrerAdapter("feature_inferrer", 80),
           new PaletteInferrerAdapter("palette_inferrer", 80),
@@ -227,7 +229,7 @@ class InferenceManagerWorkerServiceTest
         inferrerRequestPool = inferrerRequestPool,
         imageRequestPool = imageRequestPool
       ) { _ =>
-        testWith((queuePair, messageSender))
+        testWith((queuePair, msgSender))
       }
     }
 }

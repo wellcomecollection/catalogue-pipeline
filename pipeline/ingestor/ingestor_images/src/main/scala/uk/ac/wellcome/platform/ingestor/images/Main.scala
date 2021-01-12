@@ -4,7 +4,7 @@ import scala.concurrent.ExecutionContext
 import akka.actor.ActorSystem
 import com.typesafe.config.Config
 import uk.ac.wellcome.bigmessaging.typesafe.BigMessagingBuilder
-import uk.ac.wellcome.elasticsearch.ImagesIndexConfig
+import uk.ac.wellcome.elasticsearch.IndexedImageIndexConfig
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal.{Image, ImageState}
 import uk.ac.wellcome.pipeline_storage.Indexable.imageIndexable
@@ -29,7 +29,7 @@ object Main extends WellcomeTypesafeApp {
     val imageIndexer = ElasticIndexerBuilder[Image[ImageState.Indexed]](
       config,
       esClient,
-      indexConfig = ImagesIndexConfig
+      indexConfig = IndexedImageIndexConfig
     )
 
     val ingestorConfig = IngestorConfig(

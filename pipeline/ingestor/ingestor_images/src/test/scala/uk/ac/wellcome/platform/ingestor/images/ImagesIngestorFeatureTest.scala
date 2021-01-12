@@ -4,7 +4,7 @@ import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.time.{Seconds, Span}
 import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
-import uk.ac.wellcome.elasticsearch.ImagesIndexConfig
+import uk.ac.wellcome.elasticsearch.IndexedImageIndexConfig
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.models.Implicits._
@@ -32,7 +32,7 @@ class ImagesIngestorFeatureTest
           val indexer = new ElasticIndexer[Image[ImageState.Augmented]](
             elasticClient,
             index,
-            ImagesIndexConfig)
+            IndexedImageIndexConfig)
           withWorkerService(queue, indexer) { _ =>
             assertElasticsearchEventuallyHasImage[ImageState.Indexed](
               index,
@@ -55,7 +55,7 @@ class ImagesIngestorFeatureTest
           val indexer = new ElasticIndexer[Image[ImageState.Augmented]](
             elasticClient,
             index,
-            ImagesIndexConfig)
+            IndexedImageIndexConfig)
           withWorkerService(queue, indexer) { _ =>
             assertElasticsearchEmpty(index)
             eventually(Timeout(Span(5, Seconds))) {

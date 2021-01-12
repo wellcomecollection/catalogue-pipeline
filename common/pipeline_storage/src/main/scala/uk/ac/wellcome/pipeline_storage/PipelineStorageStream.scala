@@ -1,16 +1,16 @@
 package uk.ac.wellcome.pipeline_storage
 
+import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.{ExecutionContext, Future, TimeoutException}
 import akka.stream.FlowShape
 import akka.stream.scaladsl.{Broadcast, Flow, GraphDSL, Merge}
 import akka.{Done, NotUsed}
 import grizzled.slf4j.Logging
 import io.circe.Decoder
+
 import software.amazon.awssdk.services.sqs.model.Message
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sqs.SQSStream
-
-import scala.concurrent.duration._
-import scala.concurrent.{ExecutionContext, Future, TimeoutException}
 
 case class PipelineStorageConfig(batchSize: Int,
                                  flushInterval: FiniteDuration,

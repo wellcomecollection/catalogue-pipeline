@@ -101,8 +101,19 @@ trait ElasticsearchFixtures
         testWith(index)
     }
 
+  def withLocalInitialImagesIndex[R](testWith: TestWith[Index, R]): R =
+    withLocalElasticsearchIndex[R](config = InitialImageIndexConfig) { index =>
+      testWith(index)
+    }
+
+  def withLocalAugmentedImageIndex[R](testWith: TestWith[Index, R]): R =
+    withLocalElasticsearchIndex[R](config = AugmentedImageIndexConfig) {
+      index =>
+        testWith(index)
+    }
+
   def withLocalImagesIndex[R](testWith: TestWith[Index, R]): R =
-    withLocalElasticsearchIndex[R](config = ImagesIndexConfig) { index =>
+    withLocalElasticsearchIndex[R](config = IndexedImageIndexConfig) { index =>
       testWith(index)
     }
 
