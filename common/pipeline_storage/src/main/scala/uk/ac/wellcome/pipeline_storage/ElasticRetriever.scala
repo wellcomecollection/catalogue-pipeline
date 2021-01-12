@@ -20,7 +20,8 @@ class ElasticRetriever[T](client: ElasticClient, index: Index)(
     extends Retriever[T]
     with Logging {
 
-  override final def apply(ids: Seq[String]): Future[RetrieverMultiResult[T]] = {
+  override final def apply(
+    ids: Seq[String]): Future[RetrieverMultiResult[T]] = {
     assert(
       ids.nonEmpty,
       "You should never look up an empty list of IDs!"
