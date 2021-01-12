@@ -34,11 +34,9 @@ module "catalogue_pipeline_2020-11-25" {
 
   # Boilerplate that shouldn't change between pipelines.
 
-  account_id      = data.aws_caller_identity.current.account_id
-  aws_region      = local.aws_region
-  vpc_id          = local.vpc_id
-  subnets         = local.private_subnets
-  private_subnets = local.private_subnets
+  aws_region = local.aws_region
+  vpc_id     = local.vpc_id
+  subnets    = local.private_subnets
 
   dlq_alarm_arn = local.dlq_alarm_arn
 
@@ -46,16 +44,9 @@ module "catalogue_pipeline_2020-11-25" {
   rds_ids_access_security_group_id = local.rds_access_security_group_id
 
   # Adapter VHS
-  vhs_miro_read_policy              = local.vhs_miro_read_policy
-  vhs_miro_table_name               = local.vhs_miro_table_name
-  vhs_sierra_read_policy            = local.vhs_sierra_read_policy
-  vhs_sierra_sourcedata_bucket_name = local.vhs_sierra_sourcedata_bucket_name
-  vhs_sierra_sourcedata_table_name  = local.vhs_sierra_sourcedata_table_name
-  mets_adapter_read_policy          = local.mets_adapter_read_policy
-  mets_adapter_table_name           = local.mets_adapter_table_name
-  vhs_calm_read_policy              = local.vhs_calm_read_policy
-  vhs_calm_sourcedata_bucket_name   = local.vhs_calm_sourcedata_bucket_name
-  vhs_calm_sourcedata_table_name    = local.vhs_calm_sourcedata_table_name
+  vhs_miro_read_policy   = local.vhs_miro_read_policy
+  vhs_sierra_read_policy = local.vhs_sierra_read_policy
+  vhs_calm_read_policy   = local.vhs_calm_read_policy
 
   # Inferrer data
   inferrer_model_data_bucket_name = aws_s3_bucket.inferrer_model_core_data.id
@@ -99,11 +90,9 @@ module "catalogue_pipeline_2021-01-12" {
 
   # Boilerplate that shouldn't change between pipelines.
 
-  account_id      = data.aws_caller_identity.current.account_id
-  aws_region      = local.aws_region
-  vpc_id          = local.vpc_id
-  subnets         = local.private_subnets
-  private_subnets = local.private_subnets
+  aws_region = local.aws_region
+  vpc_id     = local.vpc_id
+  subnets    = local.private_subnets
 
   dlq_alarm_arn = local.dlq_alarm_arn
 
@@ -111,16 +100,9 @@ module "catalogue_pipeline_2021-01-12" {
   rds_ids_access_security_group_id = local.rds_access_security_group_id
 
   # Adapter VHS
-  vhs_miro_read_policy              = local.vhs_miro_read_policy
-  vhs_miro_table_name               = local.vhs_miro_table_name
-  vhs_sierra_read_policy            = local.vhs_sierra_read_policy
-  vhs_sierra_sourcedata_bucket_name = local.vhs_sierra_sourcedata_bucket_name
-  vhs_sierra_sourcedata_table_name  = local.vhs_sierra_sourcedata_table_name
-  mets_adapter_read_policy          = local.mets_adapter_read_policy
-  mets_adapter_table_name           = local.mets_adapter_table_name
-  vhs_calm_read_policy              = local.vhs_calm_read_policy
-  vhs_calm_sourcedata_bucket_name   = local.vhs_calm_sourcedata_bucket_name
-  vhs_calm_sourcedata_table_name    = local.vhs_calm_sourcedata_table_name
+  vhs_miro_read_policy   = local.vhs_miro_read_policy
+  vhs_sierra_read_policy = local.vhs_sierra_read_policy
+  vhs_calm_read_policy   = local.vhs_calm_read_policy
 
   # Inferrer data
   inferrer_model_data_bucket_name = aws_s3_bucket.inferrer_model_core_data.id

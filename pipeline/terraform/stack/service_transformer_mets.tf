@@ -22,8 +22,6 @@ module "mets_transformer" {
     transformer_queue_id = module.mets_transformer_queue.url
     metrics_namespace    = "${local.namespace_hyphen}_mets_transformer"
 
-    mets_adapter_dynamo_table_name = var.mets_adapter_table_name
-
     sns_topic_arn = module.mets_transformer_output_topic.arn
 
     es_index = local.es_works_source_index
@@ -72,11 +70,6 @@ module "mets_transformer_scaling_alarm" {
 
   queue_high_actions = [module.mets_transformer.scale_up_arn]
   queue_low_actions  = [module.mets_transformer.scale_down_arn]
-}
-
-resource "aws_iam_role_policy" "read_mets_adapter_table" {
-  role   = module.mets_transformer.task_role_name
-  policy = var.mets_adapter_read_policy
 }
 
 data "aws_iam_policy_document" "read_storage_bucket" {

@@ -21,8 +21,6 @@ module "calm_transformer" {
   env_vars = {
     transformer_queue_id = module.calm_transformer_queue.url
     metrics_namespace    = "${local.namespace_hyphen}_calm_transformer"
-    vhs_calm_bucket_name = var.vhs_calm_sourcedata_bucket_name
-    vhs_calm_table_name  = var.vhs_calm_sourcedata_table_name
 
     sns_topic_arn = module.calm_transformer_output_topic.arn
 
