@@ -67,8 +67,7 @@ trait MiroIdentifiers extends MiroTransformableUtils {
     val libraryRefsList: List[SourceIdentifier] =
       zipMiroFields(
         keys = miroRecord.libraryRefDepartment,
-        values = miroRecord.libraryRefId)
-        .distinct
+        values = miroRecord.libraryRefId).distinct
         .collect {
           case (Some(label), Some(value)) =>
             SourceIdentifier(
