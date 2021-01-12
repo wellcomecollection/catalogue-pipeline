@@ -107,7 +107,7 @@ object PipelineStorageStream extends Logging {
   def batchIndexFlow[T](config: PipelineStorageConfig, indexer: Indexer[T])(
     implicit
     ec: ExecutionContext,
-    indexable: Indexable[T]): Flow[Bundle[T], Bundle[String], NotUsed] =
+    indexable: Indexable[T]): Flow[Bundle[T], Bundle[T], NotUsed] =
     Flow[Bundle[T]]
       .groupedWeightedWithin(
         config.batchSize,
@@ -122,7 +122,7 @@ object PipelineStorageStream extends Logging {
           if (failed.nonEmpty) warn(s"Some documents failed ingesting: $failed")
           bundles.collect {
             case Bundle(message, doc, numberOfItems) if !failed.contains(doc) =>
-              Bundle(message, indexable.id(doc), numberOfItems)
+              Bundle(message, doc, numberOfItems)
           }
         }
       }
@@ -142,22 +142,23 @@ object PipelineStorageStream extends Logging {
       }
       .mapConcat[Bundle[T]](identity)
       .via(batchIndexFlow(config, indexer))
-      .via(groupByMessage
-        .mapConcat(identity)
-        .mergeSubstreams)
+      .via(groupByMessage.mergeSubstreams)
+      .mapConcat(identity)
       .mapAsyncUnordered(config.parallelism) { bundle =>
         for {
-          _ <- Future.fromTry(msgSender.send(bundle.item))
+          _ <- Future.fromTry(msgSender.send(indexable.id(bundle.item)))
         } yield bundle
       }
-      .via(groupByMessage
-        .collect{case head::_ => head.message}
+      .via(groupByMessage[T]
+        .collect{
+          case head::_ => head.message
+        }
         .mergeSubstreams)
 
-  def groupByMessage =
-    Flow[Bundle[String]]
+  def groupByMessage[T] =
+    Flow[Bundle[T]]
       .groupBy(Integer.MAX_VALUE, _.message.messageId(), true)
-      .scan(Nil: List[Bundle[String]]) {
+      .scan(Nil: List[Bundle[T]]) {
         case (bundleList, b) => b :: bundleList
       }
       .filter { list =>
@@ -166,6 +167,7 @@ object PipelineStorageStream extends Logging {
           .distinct
           .size == list.head.numberOfItems
       }
+      .take(1)
       .initialTimeout(5 minutes).recover{
       case e: TimeoutException =>
         warn("Timeout when processing substream",e)
