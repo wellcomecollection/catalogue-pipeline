@@ -21,6 +21,25 @@ class IdentifiedWorkLookup(retriever: Retriever[Work[Identified]])(
         case WorkIdentifier(identifier, Some(_)) => identifier
       }
 
+    // A WorkIdentifier can have a version "None" if a Work in the pipeline points to
+    // it, but we haven't seen a Work with this identifier yet.
+    //
+    // e.g. Suppose a Work with identifier A says "I am matched to identifier B", but
+    // the pipeline hasn't seen a Work with identifier B yet.  Then the merger would
+    // receive something like:
+    //
+    //      WorkIdentifier("A", version = Some(1)), WorkIdentifier("B", version = None)
+    //
+    // Every message from the matcher should be triggered by a Work in the pipeline,
+    // so every set of identifiers it sends should include at least one WorkIdentifier
+    // with a non-empty version.
+    //
+    // If it doesn't, something has gone wrong and we should give up immediately.
+    assert(
+      workIds.nonEmpty,
+      s"At least one of the WorkIdentifiers should have a version ($workIdentifiers)"
+    )
+
     retriever(workIds)
       .map {
         case RetrieverMultiResult(works, notFound) if notFound.isEmpty =>
