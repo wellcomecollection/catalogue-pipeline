@@ -1,0 +1,75 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    body {
+      max-width: 950px;
+      margin-right: auto;
+      margin-left:  auto;
+      font: 13pt sans-serif;
+      padding: 1em;
+    }
+
+    details {
+      border: 1px solid #999;
+      margin-bottom: 1em;
+      border-radius: 5px;
+      padding: 0.5em 1em;
+      background: #f3f3f3;
+    }
+
+    details.match {
+      background: #eeffef;
+    }
+
+    pre {
+      overflow: scroll;
+    }
+
+    .addition {
+      color: green;
+    }
+
+    .removal {
+      color: red;
+    }
+
+    .meta {
+      color: brown;
+    }
+  </style>
+
+  <title>API diff for {{ now.strftime("%A %-d %B %Y @ %H:%M:%S") }}</title>
+</head>
+
+<body>
+  <h1>API diff for {{ now.strftime("%A %-d %B %Y @ %H:%M:%S") }}</h1>
+
+  {% for d in diffs %}
+  <details {% if d.status == "match" %}class="match"{% else %}open{% endif %}>
+    <summary>
+      <strong>
+        {% if d.status == "match" %}✅{% else %}❌{% endif %}
+        {{ d.display_url }}
+      </strong>
+    </summary>
+
+    <p>
+      <a href="https://api.wellcomecollection.org{{ d.display_url }}">prod API</a> /
+      <a href="https://api-stage.wellcomecollection.org{{ d.display_url }}">staging API</a>
+    </p>
+
+    {% if d.diff_lines %}
+<pre>{% for line in d.diff_lines -%}
+<code
+  {% if line.startswith("+") %}class="addition"{% endif %}
+  {% if line.startswith("-") %}class="removal"{% endif %}
+  {% if line.startswith("@") %}class="meta"{% endif %}
+>{{ line.rstrip() }}</code><br/>{% endfor %}</pre>
+    {% endif %}
+  </details>
+  {% endfor %}
+</body>
