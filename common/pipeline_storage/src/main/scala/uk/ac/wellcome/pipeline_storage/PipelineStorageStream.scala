@@ -166,7 +166,7 @@ object PipelineStorageStream extends Logging {
           .distinct
           .size == list.head.numberOfItems
       }
-      .initialTimeout(10 minutes).recover{
+      .initialTimeout(5 minutes).recover{
       case e: TimeoutException =>
         warn("Timeout when processing substream",e)
         Nil
