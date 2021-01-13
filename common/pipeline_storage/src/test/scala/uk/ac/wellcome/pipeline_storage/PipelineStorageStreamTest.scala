@@ -1,10 +1,13 @@
 package uk.ac.wellcome.pipeline_storage
 
+import akka.stream.OverflowStrategy
+import akka.stream.scaladsl.{Keep, Sink, Source}
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.indexes.admin.IndexExistsResponse
 import com.sksamuel.elastic4s.{ElasticClient, Index, Response}
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.funspec.AnyFunSpec
+import software.amazon.awssdk.services.sqs.model.Message
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.elasticsearch.{ElasticClientBuilder, NoStrictMapping}
 import uk.ac.wellcome.json.JsonUtil
@@ -12,11 +15,7 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
-import uk.ac.wellcome.pipeline_storage.fixtures.{
-  ElasticIndexerFixtures,
-  PipelineStorageStreamFixtures,
-  SampleDocument
-}
+import uk.ac.wellcome.pipeline_storage.fixtures.{ElasticIndexerFixtures, PipelineStorageStreamFixtures, SampleDocument}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -136,7 +135,7 @@ class PipelineStorageStreamTest
       override def init(): Future[Unit] = Future.successful(())
 
       override def apply(documents: Seq[SampleDocument])
-        : Future[Either[Seq[SampleDocument], Seq[SampleDocument]]] = {
+      : Future[Either[Seq[SampleDocument], Seq[SampleDocument]]] = {
         if (documents.map(_.canonicalId).contains(failingDocument.canonicalId))
           Future.successful(Left(List(failingDocument)))
         else Future.successful(Right(documents))
@@ -283,7 +282,7 @@ class PipelineStorageStreamTest
               sendNotificationToSQS(
                 queue = queue,
                 message = doc
-            ))
+              ))
           pipelineStream.foreach(
             "test stream",
             message =>
@@ -368,7 +367,7 @@ class PipelineStorageStreamTest
       override def init(): Future[Unit] = Future.successful(())
 
       override def apply(documents: Seq[SampleDocument])
-        : Future[Either[Seq[SampleDocument], Seq[SampleDocument]]] = {
+      : Future[Either[Seq[SampleDocument], Seq[SampleDocument]]] = {
         Future.successful(Left(documents.filter(d =>
           failingDocuments.keySet.contains(d.canonicalId))))
       }
@@ -385,7 +384,7 @@ class PipelineStorageStreamTest
                 sendNotificationToSQS(
                   queue = queue,
                   message = doc
-              ))
+                ))
             pipelineStream.foreach(
               "test stream",
               message =>
@@ -434,4 +433,57 @@ class PipelineStorageStreamTest
         }
     }
   }
+
+  describe("groupByMessage") {
+    it("can receive more messageIds than maxSubStreams") {
+      withActorSystem { implicit ac =>
+        val messages = (1 to 5).map(i => Message.builder().messageId(i.toString).body(i.toString).build())
+        val bundles = messages.map(message => Bundle(message, SampleDocument(1, message.messageId(), "title"), 1))
+        // set maxSubstreams lower than the number of messages
+        val maxSubStreams = 3
+        val (queue, result) = Source.queue[Bundle[SampleDocument]](bufferSize = maxSubStreams, overflowStrategy = OverflowStrategy.backpressure)
+          .viaMat(PipelineStorageStream.groupByMessage(maxSubStreams, 100 millisecond).mergeSubstreams)(Keep.left)
+          .mapConcat(identity)
+          .toMat(Sink.seq)(Keep.both)
+          .run()
+
+        bundles.map(queue.offer)
+        queue.complete()
+
+        whenReady(result) { res =>
+          res shouldBe bundles
+        }
+      }
+    }
+
+
+  it("can receive more messageIds than maxSubStreams even if some aren't complete") {
+    withActorSystem { implicit ac =>
+      val successfulMessages = (1 to 2).map(i => Message.builder().messageId(i.toString).body(i.toString).build())
+      val failingMessages = (3 to 5).map(i => Message.builder().messageId(i.toString).body(i.toString).build())
+      val successfulBundles = successfulMessages.map(message => Bundle(message, SampleDocument(1, message.messageId(), "title"), numberOfItems = 1))
+      //  number of items doesn't match on the Bundles
+      val failingBundles = failingMessages.map(message => Bundle(message, SampleDocument(1, message.messageId(), "title"), numberOfItems = 2))
+
+      val maxSubStreams = 3
+
+      val (queue, result) = Source.queue[Bundle[SampleDocument]](bufferSize = maxSubStreams, overflowStrategy = OverflowStrategy.backpressure)
+        .viaMat(PipelineStorageStream.groupByMessage(maxSubStreams, 100 millisecond).mergeSubstreams)(Keep.left)
+        .mapConcat(identity)
+        .toMat(Sink.seq)(Keep.both)
+        .run()
+
+      failingBundles.map(queue.offer)
+      // wait for timeout to expire
+      Thread.sleep((300 millisecond).toMillis)
+      successfulBundles.map(queue.offer)
+      queue.complete()
+
+      whenReady(result) { res =>
+        res shouldBe successfulBundles
+      }
+    }
+  }
+}
+
 }
