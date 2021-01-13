@@ -16,30 +16,23 @@ class DynamoBatchWriter[T](config: DynamoConfig)(
 
   def batchWrite(items: Seq[T]): Future[Unit] =
     Future {
-      // We can write up to 25 nodes at once as part of a DynamoDB BatchWriteItem
-      // operation.  Since nodes are small, we expect this not to exceed the
-      // 16MB total limit / 400KB limit for a single node.
-      items.grouped(25)
-        .flatMap { batch =>
-          val ops = table.putAll(batch.toSet)
-          scanamo.exec(ops)
-        }
-        .foreach { result =>
+      val ops = table.putAll(items.toSet)
 
-          // Note: this is based on a description of how BatchWriteItems works, and
-          // isn't tested.  Unfortunately, the local DynamoDB instance we use ignores
-          // provisioned throughput settings, so we can't test what happens if we
-          // write too quickly.
-          //
-          // We could be more intelligent about this, but I'm hoping we never actually
-          // hit this branch in practice.  If we do, we'll think about how to handle it then.
-          //
-          // See https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.UsageNotes.html#DynamoDBLocal.Differences
-          if (result.getUnprocessedItems.isEmpty) {
-            ()
-          } else {
-            throw new Throwable(s"Not all items were written correctly: ${result.getUnprocessedItems}")
-          }
+      scanamo.exec(ops).foreach { result =>
+        // Note: this is based on a description of how BatchWriteItems works, and
+        // isn't tested.  Unfortunately, the local DynamoDB instance we use ignores
+        // provisioned throughput settings, so we can't test what happens if we
+        // write too quickly.
+        //
+        // We could be more intelligent about this, but I'm hoping we never actually
+        // hit this branch in practice.  If we do, we'll think about how to handle it then.
+        //
+        // See https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.UsageNotes.html#DynamoDBLocal.Differences
+        if (result.getUnprocessedItems.isEmpty) {
+          ()
+        } else {
+          throw new Throwable(s"Not all items were written correctly: ${result.getUnprocessedItems}")
         }
+      }
     }
 }
