@@ -8,6 +8,7 @@ module "snapshot_generator" {
     queue_url        = module.snapshot_generator_input_queue.url
     topic_arn        = module.snapshot_generator_output_topic.arn
     metric_namespace = "snapshot_generator-${var.deployment_service_env}"
+    es_bulk_size     = var.es_bulk_size
   }
 
   cpu    = 4096
@@ -19,7 +20,6 @@ module "snapshot_generator" {
     es_protocol  = "catalogue/api/es_protocol"
     es_username  = "catalogue/api/es_username"
     es_password  = "catalogue/api/es_password"
-    es_bulk_size = var.es_bulk_size
   }
 
   subnets = var.subnets
