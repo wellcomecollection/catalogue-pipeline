@@ -30,6 +30,10 @@ class DynamoBatchWriter[T](config: DynamoConfig)(
           // isn't tested.  Unfortunately, the local DynamoDB instance we use ignores
           // provisioned throughput settings, so we can't test what happens if we
           // write too quickly.
+          //
+          // We could be more intelligent about this, but I'm hoping we never actually
+          // hit this branch in practice.  If we do, we'll think about how to handle it then.
+          //
           // See https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.UsageNotes.html#DynamoDBLocal.Differences
           if (result.getUnprocessedItems.isEmpty) {
             ()
