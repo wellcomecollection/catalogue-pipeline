@@ -161,28 +161,29 @@ object PipelineStorageStream extends Logging {
   // Each substream emits one message with the complete list of bundles for the same messageId
   // or no message if it didn't receive the correct number of bundles
   // The result is a flow of list of _complete_ bundles
-  def takeSuccessfulListOfBundles[T](maxSubStreams: Int, t: FiniteDuration): Flow[Bundle[T], List[Bundle[T]], NotUsed] =
-    Flow[Bundle[T]]
+  def takeSuccessfulListOfBundles[T](maxSubStreams: Int, t: FiniteDuration): Flow[Bundle[T], List[Bundle[T]], NotUsed] = {
+    val groupByMessage = Flow[Bundle[T]]
       .groupBy(maxSubstreams = maxSubStreams, f = _.message.messageId(), allowClosedSubstreamRecreation = true)
       .scan(Nil: List[Bundle[T]]) {
         case (bundleList, b) => b :: bundleList
       }
-      .filter { list =>
-        list.nonEmpty && list
+    groupByMessage
+      .filter {list => list.nonEmpty && list
           .map(_.item)
           .distinct
           .size == list.head.numberOfItems
       }
-    // There's a maximum number of substreams that you can have,
+      // There's a maximum number of substreams that you can have,
       // so we need to close them or eventually we will run out of substreams.
       //Because they always emit one or no message, close the substream with take if it succeeds
-    // or after timeout if it fails
+      // or after timeout if it fails
       .take(1)
-      .initialTimeout(t).recover{
+      .initialTimeout(t).recover {
       case e: TimeoutException =>
-        warn("Timeout when processing substream",e)
+        warn("Timeout when processing substream", e)
         Nil
     }.mergeSubstreams
+  }
 
   private def unzipBundles[T](
     bundles: Seq[Bundle[T]]): (List[Message], List[T]) =

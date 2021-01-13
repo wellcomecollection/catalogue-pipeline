@@ -17,10 +17,11 @@ import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
 import uk.ac.wellcome.pipeline_storage.fixtures.{ElasticIndexerFixtures, PipelineStorageStreamFixtures, SampleDocument}
 
+import scala.collection.immutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
-import scala.util.{Failure, Try}
+import scala.util.{Failure, Random, Try}
 
 class PipelineStorageStreamTest
     extends AnyFunSpec
@@ -435,6 +436,38 @@ class PipelineStorageStreamTest
   }
 
   describe("takeSuccessfulListOfBundles") {
+    it("regroups bundles by messageId"){
+      withActorSystem { implicit ac =>
+        val messages = (1 to 5).map(i => Message.builder().messageId(i.toString).body(i.toString).build())
+        val bundlesMap = messages.map(message => message->(1 to 2).map(i => Bundle(message, SampleDocument(1, message.messageId()+i, "title"), 2))).toMap
+
+        val result = Source(Random.shuffle(bundlesMap.values.flatten.toList))
+          .via(PipelineStorageStream.takeSuccessfulListOfBundles(Integer.MAX_VALUE, 100 millisecond))
+          .runWith(Sink.seq)
+
+        whenReady(result) { res: Seq[List[Bundle[SampleDocument]]] =>
+          res.map(bundles => bundles should contain theSameElementsAs bundlesMap(bundles.head.message))
+        }
+
+    }}
+
+    it("regroups bundles by messageId and filters the bundles that don't belong to a complete group"){
+      withActorSystem { implicit ac =>
+        val successfulMessages = (1 to 2).map(i => Message.builder().messageId(i.toString).body(i.toString).build())
+        val completeBundlesMap = successfulMessages.map(message => message->(1 to 2).map(i => Bundle(message, SampleDocument(1, message.messageId()+i, "title"), 2))).toMap
+        val failingMessages = (3 to 5).map(i => Message.builder().messageId(i.toString).body(i.toString).build())
+        val failingBundles = failingMessages.map(message => Bundle(message, SampleDocument(1, message.messageId(), "title"), numberOfItems = 2))
+
+        val result = Source(Random.shuffle(completeBundlesMap.values.flatten.toList ++ failingBundles))
+          .via(PipelineStorageStream.takeSuccessfulListOfBundles(Integer.MAX_VALUE, 100 millisecond))
+          .runWith(Sink.seq)
+
+        whenReady(result) { res: Seq[List[Bundle[SampleDocument]]] =>
+          res.map(bundles => bundles should contain theSameElementsAs completeBundlesMap(bundles.head.message))
+        }
+
+    }}
+
     it("can receive more messageIds than maxSubStreams") {
       withActorSystem { implicit ac =>
         val messages = (1 to 5).map(i => Message.builder().messageId(i.toString).body(i.toString).build())
