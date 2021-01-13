@@ -38,6 +38,9 @@ def should_run_sbt_project(repo, project_name, changed_paths):
         if path.endswith((".py", ".tf", ".md")):
             continue
 
+        if path.startswith("api/diff_tool"):
+            continue
+
         if path.endswith("Makefile"):
             if os.path.dirname(project.folder) == os.path.dirname(path):
                 print("*** %s is defined by %s" % (project.name, path))
