@@ -7,7 +7,7 @@ locals {
   public_subnets_new  = local.catalogue_vpcs["catalogue_vpc_delta_public_subnets"]
   private_subnets_new = local.catalogue_vpcs["catalogue_vpc_delta_private_subnets"]
 
-  catalogue_pipeline_ec_vpce_domain = "vpce.eu-west-1.aws.elastic-cloud.com"
+  catalogue_pipeline_ec_vpce_domain      = "vpce.eu-west-1.aws.elastic-cloud.com"
   catalogue_pipeline_ec_privatelink_host = "${ec_deployment.pipeline_storage.id}.${local.catalogue_pipeline_ec_vpce_domain}"
 
   # The correct endpoints are provided by Elastic Cloud
