@@ -1,7 +1,7 @@
 package uk.ac.wellcome.pipeline_storage
 
 import akka.stream.FlowShape
-import akka.stream.scaladsl.{Broadcast, Flow, GraphDSL, Merge}
+import akka.stream.scaladsl.{Broadcast, Flow, GraphDSL, Merge, Sink, SubFlow}
 import akka.{Done, NotUsed}
 import grizzled.slf4j.Logging
 import io.circe.Decoder
@@ -160,7 +160,7 @@ object PipelineStorageStream extends Logging {
   // Splits the flow into a substream for each messageId.
   // Each substream emits one message with the complete list of bundles for the same messageId
   // or no message if it didn't receive the correct number of bundles
-  def groupByMessage[T](maxSubStreams: Int, t: FiniteDuration) =
+  def groupByMessage[T](maxSubStreams: Int, t: FiniteDuration): SubFlow[List[Bundle[T]], NotUsed, Flow[Bundle[T], Bundle[T], NotUsed]#Repr, Sink[Bundle[T], NotUsed]] =
     Flow[Bundle[T]]
       .groupBy(maxSubstreams = maxSubStreams, f = _.message.messageId(), allowClosedSubstreamRecreation = true)
       .scan(Nil: List[Bundle[T]]) {
