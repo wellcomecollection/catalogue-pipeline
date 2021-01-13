@@ -51,7 +51,7 @@ object Main extends WellcomeTypesafeApp {
     new WorkIngestorWorkerService(
       pipelineStream = pipelineStream,
       workRetriever = workRetriever,
-      transformBeforeIndex = WorkTransformer.deriveData
+      transform = WorkTransformer.deriveData
     )
   }
 }
