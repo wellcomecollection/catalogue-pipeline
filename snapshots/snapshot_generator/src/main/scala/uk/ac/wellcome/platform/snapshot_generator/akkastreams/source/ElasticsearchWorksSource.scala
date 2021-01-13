@@ -14,6 +14,8 @@ import WorkState.Indexed
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.platform.snapshot_generator.models.SnapshotGeneratorConfig
 
+import java.text.NumberFormat
+
 object ElasticsearchWorksSource extends Logging {
   def apply(elasticClient: ElasticClient,
             snapshotConfig: SnapshotGeneratorConfig)(
@@ -26,9 +28,10 @@ object ElasticsearchWorksSource extends Logging {
       .grouped(10000)
       .map(indices =>
         info(
-          s"Received another ${indices.length} works (${indices.max} so far) from ${snapshotConfig.index}")
+          s"Received another ${intComma(indices.length)} works (${intComma(indices.max)} so far) from ${snapshotConfig.index}")
       )
       .to(Sink.ignore)
+
     Source
       .fromPublisher(
         elasticClient.publisher(
@@ -42,4 +45,7 @@ object ElasticsearchWorksSource extends Logging {
       }
       .alsoTo(loggingSink)
   }
+
+  private def intComma(number: Long): String =
+    NumberFormat.getInstance().format(number)
 }
