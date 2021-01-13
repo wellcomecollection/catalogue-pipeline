@@ -104,7 +104,11 @@ class ManagerInferrerIntegrationTest
     }
 
   def withWorkerServiceFixtures[R](
-    testWith: TestWith[(QueuePair, MemoryMessageSender, mutable.Map[String, Image[Augmented]], File), R]): R =
+    testWith: TestWith[(QueuePair,
+                        MemoryMessageSender,
+                        mutable.Map[String, Image[Augmented]],
+                        File),
+                       R]): R =
     // We would like a timeout longer than 1s here because the inferrer
     // may need to warm up.
     withLocalSqsQueuePair(visibilityTimeout = 5) { queuePair =>

@@ -70,28 +70,27 @@ class InferenceManagerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          forAll(messageSender.messages.map(_.body)) {
-            id =>
-              val image = augmentedImages(id)
-              inside(image.state) {
-                case ImageState.Augmented(_, id, inferredData) =>
-                  images should contain key id
-                  val seed = id.hashCode
-                  inside(inferredData.value) {
-                    case InferredData(
-                        features1,
-                        features2,
-                        lshEncodedFeatures,
-                        palette) =>
-                      val featureVector =
-                        Responses.randomFeatureVector(seed)
-                      features1 should be(featureVector.slice(0, 2048))
-                      features2 should be(featureVector.slice(2048, 4096))
-                      lshEncodedFeatures should be(
-                        Responses.randomLshVector(seed))
-                      palette should be(Responses.randomPaletteVector(seed))
-                  }
-              }
+          forAll(messageSender.messages.map(_.body)) { id =>
+            val image = augmentedImages(id)
+            inside(image.state) {
+              case ImageState.Augmented(_, id, inferredData) =>
+                images should contain key id
+                val seed = id.hashCode
+                inside(inferredData.value) {
+                  case InferredData(
+                      features1,
+                      features2,
+                      lshEncodedFeatures,
+                      palette) =>
+                    val featureVector =
+                      Responses.randomFeatureVector(seed)
+                    features1 should be(featureVector.slice(0, 2048))
+                    features2 should be(featureVector.slice(2048, 4096))
+                    lshEncodedFeatures should be(
+                      Responses.randomLshVector(seed))
+                    palette should be(Responses.randomPaletteVector(seed))
+                }
+            }
           }
         }
     }
@@ -115,23 +114,22 @@ class InferenceManagerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          forAll(messageSender.messages.map(_.body)) {
-            id =>
-              val image = augmentedImages(id)
-              inside(image.state) {
-                case ImageState.Augmented(_, _, inferredData) =>
-                  inside(inferredData.value) {
-                    case InferredData(
-                        features1,
-                        features2,
-                        lshEncodedFeatures,
-                        palette) =>
-                      features1 should have length 2048
-                      features2 should have length 2048
-                      every(lshEncodedFeatures) should fullyMatch regex """(\d+)-(\d+)"""
-                      every(palette) should fullyMatch regex """\d+"""
-                  }
-              }
+          forAll(messageSender.messages.map(_.body)) { id =>
+            val image = augmentedImages(id)
+            inside(image.state) {
+              case ImageState.Augmented(_, _, inferredData) =>
+                inside(inferredData.value) {
+                  case InferredData(
+                      features1,
+                      features2,
+                      lshEncodedFeatures,
+                      palette) =>
+                    features1 should have length 2048
+                    features2 should have length 2048
+                    every(lshEncodedFeatures) should fullyMatch regex """(\d+)-(\d+)"""
+                    every(palette) should fullyMatch regex """\d+"""
+                }
+            }
           }
         }
     }
@@ -200,7 +198,8 @@ class InferenceManagerWorkerServiceTest
           imagesMock.pool,
           augmentedImages) {
           case (queuePair, sender) =>
-            testWith((queuePair, sender, augmentedImages, inferrerMock, imagesMock))
+            testWith(
+              (queuePair, sender, augmentedImages, inferrerMock, imagesMock))
         }
     }
 
