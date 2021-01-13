@@ -26,7 +26,7 @@ import uk.ac.wellcome.platform.inference_manager.services.{
   MergedIdentifiedImage,
   RequestPoolFlow
 }
-import ImageState.Initial
+import ImageState.{Augmented, Initial}
 
 trait InferenceManagerWorkerServiceFixture extends SQS with Akka {
 
@@ -39,7 +39,8 @@ trait InferenceManagerWorkerServiceFixture extends SQS with Akka {
                                          Message],
     imageRequestPool: RequestPoolFlow[MergedIdentifiedImage, Message],
     fileRoot: String = "/",
-    initialImages: List[Image[Initial]] = Nil)(
+    initialImages: List[Image[Initial]] = Nil,
+    augmentedImages: mutable.Map[String, Image[Augmented]])(
     testWith: TestWith[InferenceManagerWorkerService[String], R]): R =
     withActorSystem { implicit actorSystem =>
       withSQSStream[NotificationMessage, R](queue) { msgStream =>
@@ -51,7 +52,7 @@ trait InferenceManagerWorkerServiceFixture extends SQS with Akka {
               initialImages.map(image => image.id -> image): _*
             )
           ),
-          imageIndexer = new MemoryIndexer(),
+          imageIndexer = new MemoryIndexer(augmentedImages),
           pipelineStorageConfig = PipelineStorageConfig(
             batchSize = 1,
             flushInterval = 1 milliseconds,
