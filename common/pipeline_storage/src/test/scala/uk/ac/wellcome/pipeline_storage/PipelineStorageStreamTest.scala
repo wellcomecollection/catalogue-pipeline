@@ -434,7 +434,7 @@ class PipelineStorageStreamTest
     }
   }
 
-  describe("groupByMessage") {
+  describe("takeSuccessfulListOfBundles") {
     it("can receive more messageIds than maxSubStreams") {
       withActorSystem { implicit ac =>
         val messages = (1 to 5).map(i => Message.builder().messageId(i.toString).body(i.toString).build())
@@ -442,7 +442,7 @@ class PipelineStorageStreamTest
         // set maxSubstreams lower than the number of messages
         val maxSubStreams = 3
         val (queue, result) = Source.queue[Bundle[SampleDocument]](bufferSize = maxSubStreams, overflowStrategy = OverflowStrategy.backpressure)
-          .viaMat(PipelineStorageStream.groupByMessage(maxSubStreams, 100 millisecond))(Keep.left)
+          .viaMat(PipelineStorageStream.takeSuccessfulListOfBundles(maxSubStreams, 100 millisecond))(Keep.left)
           .mapConcat(identity)
           .toMat(Sink.seq)(Keep.both)
           .run()
@@ -468,7 +468,7 @@ class PipelineStorageStreamTest
       val maxSubStreams = 3
 
       val (queue, result) = Source.queue[Bundle[SampleDocument]](bufferSize = maxSubStreams, overflowStrategy = OverflowStrategy.backpressure)
-        .viaMat(PipelineStorageStream.groupByMessage(maxSubStreams, 100 millisecond))(Keep.left)
+        .viaMat(PipelineStorageStream.takeSuccessfulListOfBundles(maxSubStreams, 100 millisecond))(Keep.left)
         .mapConcat(identity)
         .toMat(Sink.seq)(Keep.both)
         .run()

@@ -143,14 +143,14 @@ object PipelineStorageStream extends Logging {
       }
       .mapConcat[Bundle[T]](identity)
       .via(batchIndexFlow(config, indexer))
-      .via(groupByMessage(maxSubStreams, 5 minutes))
+      .via(takeSuccessfulListOfBundles(maxSubStreams, 5 minutes))
       .mapConcat(identity)
       .mapAsyncUnordered(config.parallelism) { bundle =>
         for {
           _ <- Future.fromTry(msgSender.send(indexable.id(bundle.item)))
         } yield bundle
       }
-      .via(groupByMessage[T](maxSubStreams, 5 minutes)
+      .via(takeSuccessfulListOfBundles[T](maxSubStreams, 5 minutes)
         .collect {
           case head :: _ => head.message
         }
@@ -161,7 +161,7 @@ object PipelineStorageStream extends Logging {
   // Each substream emits one message with the complete list of bundles for the same messageId
   // or no message if it didn't receive the correct number of bundles
   // The result is a flow of list of _complete_ bundles
-  def groupByMessage[T](maxSubStreams: Int, t: FiniteDuration): Flow[Bundle[T], List[Bundle[T]], NotUsed] =
+  def takeSuccessfulListOfBundles[T](maxSubStreams: Int, t: FiniteDuration): Flow[Bundle[T], List[Bundle[T]], NotUsed] =
     Flow[Bundle[T]]
       .groupBy(maxSubstreams = maxSubStreams, f = _.message.messageId(), allowClosedSubstreamRecreation = true)
       .scan(Nil: List[Bundle[T]]) {
