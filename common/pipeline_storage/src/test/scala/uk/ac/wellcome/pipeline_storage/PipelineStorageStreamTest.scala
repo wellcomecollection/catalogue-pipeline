@@ -17,7 +17,6 @@ import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
 import uk.ac.wellcome.pipeline_storage.fixtures.{ElasticIndexerFixtures, PipelineStorageStreamFixtures, SampleDocument}
 
-import scala.collection.immutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
@@ -435,14 +434,14 @@ class PipelineStorageStreamTest
     }
   }
 
-  describe("takeSuccessfulListOfBundles") {
+  describe("takeCompleteListOfBundles") {
     it("regroups bundles by messageId"){
       withActorSystem { implicit ac =>
         val messages = (1 to 5).map(i => Message.builder().messageId(i.toString).body(i.toString).build())
         val bundlesMap = messages.map(message => message->(1 to 2).map(i => Bundle(message, SampleDocument(1, message.messageId()+i, "title"), 2))).toMap
 
         val result = Source(Random.shuffle(bundlesMap.values.flatten.toList))
-          .via(PipelineStorageStream.takeSuccessfulListOfBundles(Integer.MAX_VALUE, 100 millisecond))
+          .via(PipelineStorageStream.takeCompleteListOfBundles(Integer.MAX_VALUE, 100 millisecond))
           .runWith(Sink.seq)
 
         whenReady(result) { res: Seq[List[Bundle[SampleDocument]]] =>
@@ -459,7 +458,7 @@ class PipelineStorageStreamTest
         val failingBundles = failingMessages.map(message => Bundle(message, SampleDocument(1, message.messageId(), "title"), numberOfItems = 2))
 
         val result = Source(Random.shuffle(completeBundlesMap.values.flatten.toList ++ failingBundles))
-          .via(PipelineStorageStream.takeSuccessfulListOfBundles(Integer.MAX_VALUE, 100 millisecond))
+          .via(PipelineStorageStream.takeCompleteListOfBundles(Integer.MAX_VALUE, 100 millisecond))
           .runWith(Sink.seq)
 
         whenReady(result) { res: Seq[List[Bundle[SampleDocument]]] =>
@@ -475,7 +474,7 @@ class PipelineStorageStreamTest
         // set maxSubstreams lower than the number of messages
         val maxSubStreams = 3
         val (queue, result) = Source.queue[Bundle[SampleDocument]](bufferSize = maxSubStreams, overflowStrategy = OverflowStrategy.backpressure)
-          .viaMat(PipelineStorageStream.takeSuccessfulListOfBundles(maxSubStreams, 100 millisecond))(Keep.left)
+          .viaMat(PipelineStorageStream.takeCompleteListOfBundles(maxSubStreams, 100 millisecond))(Keep.left)
           .mapConcat(identity)
           .toMat(Sink.seq)(Keep.both)
           .run()
@@ -501,7 +500,7 @@ class PipelineStorageStreamTest
       val maxSubStreams = 3
 
       val (queue, result) = Source.queue[Bundle[SampleDocument]](bufferSize = maxSubStreams, overflowStrategy = OverflowStrategy.backpressure)
-        .viaMat(PipelineStorageStream.takeSuccessfulListOfBundles(maxSubStreams, 100 millisecond))(Keep.left)
+        .viaMat(PipelineStorageStream.takeCompleteListOfBundles(maxSubStreams, 100 millisecond))(Keep.left)
         .mapConcat(identity)
         .toMat(Sink.seq)(Keep.both)
         .run()
