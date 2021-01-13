@@ -16,5 +16,7 @@ class ImageIngestorWorkerService[Destination](
   transform: Image[Augmented] => Image[Indexed] = ImageTransformer.deriveData,
 )(implicit
   ec: ExecutionContext)
-  extends IngestorWorkerService[Destination, Image[Augmented], Image[Indexed]](
-    pipelineStream, imageRetriever, transform)
+    extends IngestorWorkerService[
+      Destination,
+      Image[Augmented],
+      Image[Indexed]](pipelineStream, imageRetriever, transform)

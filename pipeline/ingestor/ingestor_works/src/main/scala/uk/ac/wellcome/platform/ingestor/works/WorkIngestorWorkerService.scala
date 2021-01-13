@@ -13,9 +13,10 @@ class WorkIngestorWorkerService[Destination](
                                         Work[Indexed],
                                         Destination],
   workRetriever: Retriever[Work[Denormalised]],
-  transform: Work[Denormalised] => Work[Indexed] =
-    WorkTransformer.deriveData,
+  transform: Work[Denormalised] => Work[Indexed] = WorkTransformer.deriveData,
 )(implicit
   ec: ExecutionContext)
-  extends IngestorWorkerService[Destination, Work[Denormalised], Work[Indexed]](
-    pipelineStream, workRetriever, transform)
+    extends IngestorWorkerService[
+      Destination,
+      Work[Denormalised],
+      Work[Indexed]](pipelineStream, workRetriever, transform)

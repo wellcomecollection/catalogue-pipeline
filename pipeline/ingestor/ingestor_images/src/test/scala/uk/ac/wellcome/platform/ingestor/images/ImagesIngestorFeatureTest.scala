@@ -11,7 +11,7 @@ import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.ImageGenerators
 import uk.ac.wellcome.models.work.internal.{Image, ImageState}
-import uk.ac.wellcome.pipeline_storage.{ElasticRetriever, ElasticIndexer}
+import uk.ac.wellcome.pipeline_storage.{ElasticIndexer, ElasticRetriever}
 import uk.ac.wellcome.pipeline_storage.Indexable.imageIndexable
 import ImageState.{Augmented, Indexed}
 
