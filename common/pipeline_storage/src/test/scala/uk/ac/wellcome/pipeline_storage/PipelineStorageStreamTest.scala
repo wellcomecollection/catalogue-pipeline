@@ -438,7 +438,7 @@ class PipelineStorageStreamTest
     }
   }
 
-  describe("takeCompleteListOfBundles") {
+  describe("takeListsOfCompleteBundles") {
     it("regroups bundles by messageId") {
       withActorSystem { implicit ac =>
         val messages = (1 to 5).map(i =>
@@ -456,7 +456,7 @@ class PipelineStorageStreamTest
 
         val result = Source(Random.shuffle(bundlesMap.values.flatten.toList))
           .via(PipelineStorageStream
-            .takeCompleteListOfBundles(Integer.MAX_VALUE, 100 millisecond))
+            .takeListsOfCompleteBundles(Integer.MAX_VALUE, 100 millisecond))
           .runWith(Sink.seq)
 
         whenReady(result) { res: Seq[List[Bundle[SampleDocument]]] =>
@@ -497,7 +497,7 @@ class PipelineStorageStreamTest
           Random.shuffle(
             completeBundlesMap.values.flatten.toList ++ failingBundles))
           .via(PipelineStorageStream
-            .takeCompleteListOfBundles(Integer.MAX_VALUE, 100 millisecond))
+            .takeListsOfCompleteBundles(Integer.MAX_VALUE, 100 millisecond))
           .runWith(Sink.seq)
 
         whenReady(result) { res: Seq[List[Bundle[SampleDocument]]] =>
@@ -522,7 +522,7 @@ class PipelineStorageStreamTest
           .queue[Bundle[SampleDocument]](
             bufferSize = maxSubStreams,
             overflowStrategy = OverflowStrategy.backpressure)
-          .viaMat(PipelineStorageStream.takeCompleteListOfBundles(
+          .viaMat(PipelineStorageStream.takeListsOfCompleteBundles(
             maxSubStreams,
             100 millisecond))(Keep.left)
           .mapConcat(identity)
@@ -565,7 +565,7 @@ class PipelineStorageStreamTest
           .queue[Bundle[SampleDocument]](
             bufferSize = maxSubStreams,
             overflowStrategy = OverflowStrategy.backpressure)
-          .viaMat(PipelineStorageStream.takeCompleteListOfBundles(
+          .viaMat(PipelineStorageStream.takeListsOfCompleteBundles(
             maxSubStreams,
             100 millisecond))(Keep.left)
           .mapConcat(identity)
