@@ -172,7 +172,9 @@ object PipelineStorageStream extends Logging {
           .distinct
           .size == list.head.numberOfItems
       }
-    // Close the substream with take if it succeeds
+    // There's a maximum number of substreams that you can have,
+      // so we need to close them or eventually we will run out of substreams.
+      //Because they always emit one or no message, close the substream with take if it succeeds
     // or after timeout if it fails
       .take(1)
       .initialTimeout(t).recover{
