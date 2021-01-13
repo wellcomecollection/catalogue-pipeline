@@ -4,7 +4,7 @@ module "snapshot_generator_input_queue" {
   topic_arns = [var.snapshot_generator_input_topic_arn]
 
   # This should be longer than the time we expect a snapshot to take
-  visibility_timeout_seconds = 60 * 30
+  visibility_timeout_seconds = 60 * 60
 
   aws_region      = var.aws_region
   alarm_topic_arn = var.dlq_alarm_arn
