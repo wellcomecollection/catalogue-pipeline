@@ -133,34 +133,36 @@ object PipelineStorageStream extends Logging {
     msgSender: MessageSender[MsgDestination],
     indexer: Indexer[T])(implicit
                          ec: ExecutionContext,
-                         indexable: Indexable[T]) =
+                         indexable: Indexable[T]) = {
+    val maxSubStreams = Integer.MAX_VALUE
     Flow[(Message, List[T])]
       .collect {
-        case (msg, items @ _ :: _) =>
+        case (msg, items@_ :: _) =>
           items.map(item =>
             Bundle[T](message = msg, item = item, numberOfItems = items.size))
       }
       .mapConcat[Bundle[T]](identity)
       .via(batchIndexFlow(config, indexer))
-      .via(groupByMessage.mergeSubstreams)
+      .via(groupByMessage(maxSubStreams, 5 minutes).mergeSubstreams)
       .mapConcat(identity)
       .mapAsyncUnordered(config.parallelism) { bundle =>
         for {
           _ <- Future.fromTry(msgSender.send(indexable.id(bundle.item)))
         } yield bundle
       }
-      .via(groupByMessage[T]
-        .collect{
-          case head::_ => head.message
+      .via(groupByMessage[T](maxSubStreams, 5 minutes)
+        .collect {
+          case head :: _ => head.message
         }
         .mergeSubstreams)
+  }
 
   // Splits the flow into a substream for each messageId.
-  // Each substream emits one message with the complete of bundles for a messageId
-  // or no message if it failed to collect the correct number of bundles
-  def groupByMessage[T] =
+  // Each substream emits one message with the complete list of bundles for the same messageId
+  // or no message if it didn't receive the correct number of bundles
+  def groupByMessage[T](maxSubStreams: Int, t: FiniteDuration) =
     Flow[Bundle[T]]
-      .groupBy(maxSubstreams = Integer.MAX_VALUE, f = _.message.messageId(), allowClosedSubstreamRecreation = true)
+      .groupBy(maxSubstreams = maxSubStreams, f = _.message.messageId(), allowClosedSubstreamRecreation = true)
       .scan(Nil: List[Bundle[T]]) {
         case (bundleList, b) => b :: bundleList
       }
@@ -171,9 +173,9 @@ object PipelineStorageStream extends Logging {
           .size == list.head.numberOfItems
       }
     // Close the substream with take if it succeeds
-    // or after 5 minutes if it fails
+    // or after timeout if it fails
       .take(1)
-      .initialTimeout(5 minutes).recover{
+      .initialTimeout(t).recover{
       case e: TimeoutException =>
         warn("Timeout when processing substream",e)
         Nil
