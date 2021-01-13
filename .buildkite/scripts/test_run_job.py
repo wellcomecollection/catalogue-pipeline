@@ -1,15 +1,18 @@
 #!/usr/bin/env python
-# -*- encoding: utf-8
+
+import os
 
 import pytest
 
+from commands import git
 from run_job import should_run_sbt_project
 from sbt_dependency_tree import Repository
 
 
 @pytest.fixture(scope="session")
 def repo():
-    yield Repository(".sbt_metadata")
+    root = git("rev-parse", "--show-toplevel")
+    yield Repository(os.path.join(root, ".sbt_metadata"))
 
 
 @pytest.mark.parametrize(
