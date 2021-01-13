@@ -24,7 +24,6 @@ module "miro_transformer" {
   env_vars = {
     transformer_queue_id = module.miro_transformer_queue.url
     metrics_namespace    = "${local.namespace_hyphen}_miro_transformer"
-    miro_vhs_table_name  = var.vhs_miro_table_name
 
     sns_topic_arn = module.miro_transformer_output_topic.arn
 

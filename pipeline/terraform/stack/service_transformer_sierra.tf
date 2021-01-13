@@ -19,10 +19,8 @@ module "sierra_transformer" {
   cluster_arn  = aws_ecs_cluster.cluster.arn
 
   env_vars = {
-    transformer_queue_id   = module.sierra_transformer_queue.url
-    metrics_namespace      = "${local.namespace_hyphen}_sierra_transformer"
-    vhs_sierra_bucket_name = var.vhs_sierra_sourcedata_bucket_name
-    vhs_sierra_table_name  = var.vhs_sierra_sourcedata_table_name
+    transformer_queue_id = module.sierra_transformer_queue.url
+    metrics_namespace    = "${local.namespace_hyphen}_sierra_transformer"
 
     sns_topic_arn = module.sierra_transformer_output_topic.arn
 
