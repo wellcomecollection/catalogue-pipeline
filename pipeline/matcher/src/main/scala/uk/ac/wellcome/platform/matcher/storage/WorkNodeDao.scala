@@ -15,7 +15,8 @@ import uk.ac.wellcome.storage.dynamo.DynamoConfig
 import scala.concurrent.{ExecutionContext, Future}
 
 class WorkNodeDao(dynamoClient: AmazonDynamoDB, dynamoConfig: DynamoConfig)(
-  implicit ec: ExecutionContext, format: DynamoFormat[WorkNode])
+  implicit ec: ExecutionContext,
+  format: DynamoFormat[WorkNode])
     extends Logging {
 
   private val scanamo = Scanamo(dynamoClient)
@@ -31,7 +32,8 @@ class WorkNodeDao(dynamoClient: AmazonDynamoDB, dynamoConfig: DynamoConfig)(
   )(ec, dynamoClient, format)
 
   def put(workNodes: Set[WorkNode]): Future[Unit] =
-    batchWriter.batchWrite(workNodes.toSeq)
+    batchWriter
+      .batchWrite(workNodes.toSeq)
       .recover {
         case exception: ProvisionedThroughputExceededException =>
           throw MatcherException(exception)

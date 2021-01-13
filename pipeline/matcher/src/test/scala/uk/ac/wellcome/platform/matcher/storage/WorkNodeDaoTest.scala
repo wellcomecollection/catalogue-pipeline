@@ -211,7 +211,8 @@ class WorkNodeDaoTest
           DynamoConfig(table.name, table.index)
         )
 
-        whenReady(workNodeDao.put(Set(WorkNode("A", 1, List("B"), "A+B"))).failed) {
+        whenReady(
+          workNodeDao.put(Set(WorkNode("A", 1, List("B"), "A+B"))).failed) {
           failedException =>
             failedException shouldBe expectedException
         }
@@ -229,7 +230,8 @@ class WorkNodeDaoTest
           DynamoConfig(table.name, table.index)
         )
 
-        whenReady(workNodeDao.put(Set(WorkNode("A", 1, List("B"), "A+B"))).failed) {
+        whenReady(
+          workNodeDao.put(Set(WorkNode("A", 1, List("B"), "A+B"))).failed) {
           failedException =>
             failedException shouldBe a[MatcherException]
         }

@@ -31,7 +31,8 @@ class DynamoBatchWriter[T](config: DynamoConfig)(
         if (result.getUnprocessedItems.isEmpty) {
           ()
         } else {
-          throw new Throwable(s"Not all items were written correctly: ${result.getUnprocessedItems}")
+          throw new Throwable(
+            s"Not all items were written correctly: ${result.getUnprocessedItems}")
         }
       }
     }
