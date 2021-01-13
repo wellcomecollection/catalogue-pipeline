@@ -87,18 +87,19 @@ def main(routes_file):
 
     diffs = []
 
-    for route in tqdm.tqdm(routes):
+    def get_diff(route):
         work_id, params = route.get("workId"), route.get("params")
         differ = ApiDiffer(work_id, params)
         status, diff_lines = differ.get_html_diff()
 
-        diffs.append(
-            {
-                "display_url": differ.display_url,
-                "status": status,
-                "diff_lines": diff_lines,
-            }
-        )
+        return {
+            "display_url": differ.display_url,
+            "status": status,
+            "diff_lines": diff_lines,
+        }
+
+    for route in tqdm.tqdm(routes):
+        diffs.append(get_diff(route))
 
     env = Environment(
         loader=FileSystemLoader("."), autoescape=select_autoescape(["html", "xml"])
