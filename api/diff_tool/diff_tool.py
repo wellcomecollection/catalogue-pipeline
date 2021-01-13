@@ -1,5 +1,6 @@
 #!/bin/env python3
 
+import concurrent.futures
 import datetime
 import difflib
 import json
@@ -10,7 +11,6 @@ import urllib.parse
 import click
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 import requests
-import tqdm
 
 
 class ApiDiffer:
@@ -85,8 +85,6 @@ def main(routes_file):
     with open(routes_file) as f:
         routes = json.load(f)
 
-    diffs = []
-
     def get_diff(route):
         work_id, params = route.get("workId"), route.get("params")
         differ = ApiDiffer(work_id, params)
@@ -98,8 +96,11 @@ def main(routes_file):
             "diff_lines": diff_lines,
         }
 
-    for route in tqdm.tqdm(routes):
-        diffs.append(get_diff(route))
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = [executor.submit(get_diff, r) for r in routes]
+        concurrent.futures.wait(futures, return_when=concurrent.futures.ALL_COMPLETED)
+
+        diffs = [fut.result() for fut in futures]
 
     env = Environment(
         loader=FileSystemLoader("."), autoescape=select_autoescape(["html", "xml"])
