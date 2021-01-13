@@ -21,12 +21,13 @@ object ElasticsearchWorksSource extends Logging {
     actorSystem: ActorSystem
   ): Source[Work[Indexed], NotUsed] = {
     val loggingSink = Flow[Work[Indexed]]
+      .zipWithIndex
+      .map { case (_, index) => index + 1 }
       .grouped(10000)
-      .map(works => {
-        logger.info(
-          s"Received ${works.length} works from ${snapshotConfig.index}")
-        works
-      })
+      .map(indices =>
+        info(
+          s"Received another ${indices.length} works (${indices.max} so far) from ${snapshotConfig.index}")
+      )
       .to(Sink.ignore)
     Source
       .fromPublisher(
