@@ -75,7 +75,7 @@ class InferenceManagerWorkerService[Destination](
           .via(unmarshalResponse)
           .via(collectAndAugment)
           .asSource
-          .map { case (image, message) => (message, List(image)) }
+          .map { case (image, message) => (message, Some(image)) }
           .via(indexAndSend)
     )
 

@@ -26,7 +26,7 @@ import uk.ac.wellcome.platform.inference_manager.fixtures.{
   Responses
 }
 import uk.ac.wellcome.platform.inference_manager.models.DownloadedImage
-import ImageState.Augmented
+import ImageState.{Augmented, Initial}
 
 class InferenceManagerWorkerServiceTest
     extends AnyFunSpec
@@ -48,6 +48,7 @@ class InferenceManagerWorkerServiceTest
       .map(image => image.id -> image)
       .toMap
     withResponsesAndFixtures(
+      images.values.toList,
       inferrer = req =>
         images.keys
           .find(req.contains(_))
@@ -97,7 +98,9 @@ class InferenceManagerWorkerServiceTest
   }
 
   it("correctly handles messages that are received more than once") {
+    val image = createImageData.toInitialImage
     withResponsesAndFixtures(
+      List(image),
       inferrer = req =>
         if (req.contains("feature_inferrer")) {
           Some(Responses.featureInferrer)
@@ -107,7 +110,6 @@ class InferenceManagerWorkerServiceTest
       images = _ => Some(Responses.image)
     ) {
       case (QueuePair(queue, dlq), messageSender, augmentedImages, _, _) =>
-        val image = createImageData.toInitialImage
         (1 to 3).foreach(_ =>
           sendNotificationToSQS(queue = queue, body = image.id))
         eventually {
@@ -147,6 +149,7 @@ class InferenceManagerWorkerServiceTest
         List(createDigitalLocationWith(url = "extremely_cursed_image"))
     ).toInitialImage
     withResponsesAndFixtures(
+      List(image404, image400, image500),
       inferrer = url =>
         if (url.contains(image400.id)) {
           Some(Responses.badRequest)
@@ -168,6 +171,7 @@ class InferenceManagerWorkerServiceTest
 
   it("places images that cannot be downloaded on the DLQ") {
     withResponsesAndFixtures(
+      Nil,
       inferrer = _ => Some(Responses.featureInferrer),
       images = _ => None
     ) {
@@ -181,7 +185,8 @@ class InferenceManagerWorkerServiceTest
     }
   }
 
-  def withResponsesAndFixtures[R](inferrer: String => Option[HttpResponse],
+  def withResponsesAndFixtures[R](initialImages: List[Image[Initial]],
+                                  inferrer: String => Option[HttpResponse],
                                   images: String => Option[HttpResponse])(
     testWith: TestWith[
       (QueuePair,
@@ -194,6 +199,7 @@ class InferenceManagerWorkerServiceTest
       case (inferrerMock, imagesMock) =>
         val augmentedImages = mutable.Map.empty[String, Image[Augmented]]
         withWorkerServiceFixtures(
+          initialImages,
           inferrerMock.pool,
           imagesMock.pool,
           augmentedImages) {
@@ -218,6 +224,7 @@ class InferenceManagerWorkerServiceTest
     }
 
   def withWorkerServiceFixtures[R](
+    initialImages: List[Image[Initial]],
     inferrerRequestPool: RequestPoolFlow[(DownloadedImage, InferrerAdapter),
                                          Message],
     imageRequestPool: RequestPoolFlow[MergedIdentifiedImage, Message],
@@ -237,6 +244,7 @@ class InferenceManagerWorkerServiceTest
         fileWriter = fileWriter,
         inferrerRequestPool = inferrerRequestPool,
         imageRequestPool = imageRequestPool,
+        initialImages = initialImages,
         augmentedImages = augmentedImages
       ) { _ =>
         testWith((queuePair, msgSender))

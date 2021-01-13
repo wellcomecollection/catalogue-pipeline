@@ -29,7 +29,7 @@ import uk.ac.wellcome.platform.inference_manager.services.{
   DefaultFileWriter,
   MergedIdentifiedImage
 }
-import ImageState.Augmented
+import ImageState.{Augmented, Initial}
 
 class ManagerInferrerIntegrationTest
     extends AnyFunSpec
@@ -43,7 +43,14 @@ class ManagerInferrerIntegrationTest
     with InferenceManagerWorkerServiceFixture {
 
   it("augments images with feature and palette vectors") {
-    withWorkerServiceFixtures {
+    val image = createImageDataWith(
+      locations = List(
+        createDigitalLocationWith(
+          locationType = createImageLocationType,
+          url = s"http://localhost:$localImageServerPort/test-image.jpg"
+        ))).toInitialImage
+
+    withWorkerServiceFixtures(image) {
       case (QueuePair(queue, dlq), messageSender, augmentedImages, rootDir) =>
         // This is (more than) enough time for the inferrer to have
         // done its prestart work and be ready to use
@@ -51,12 +58,6 @@ class ManagerInferrerIntegrationTest
           inferrersAreHealthy shouldBe true
         }
 
-        val image = createImageDataWith(
-          locations = List(
-            createDigitalLocationWith(
-              locationType = createImageLocationType,
-              url = s"http://localhost:$localImageServerPort/test-image.jpg"
-            ))).toInitialImage
         sendNotificationToSQS(queue = queue, body = image.id)
         eventually {
           assertQueueEmpty(queue)
@@ -103,7 +104,7 @@ class ManagerInferrerIntegrationTest
       } finally source.close()
     }
 
-  def withWorkerServiceFixtures[R](
+  def withWorkerServiceFixtures[R](image: Image[Initial])(
     testWith: TestWith[(QueuePair,
                         MemoryMessageSender,
                         mutable.Map[String, Image[Augmented]],
@@ -121,6 +122,7 @@ class ManagerInferrerIntegrationTest
           queuePair.queue,
           messageSender,
           augmentedImages = augmentedImages,
+          initialImages = List(image),
           adapters = Set(
             new FeatureVectorInferrerAdapter(
               "localhost",
