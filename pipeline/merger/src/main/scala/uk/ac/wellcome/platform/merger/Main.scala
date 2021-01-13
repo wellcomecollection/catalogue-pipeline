@@ -12,7 +12,8 @@ import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.pipeline_storage.typesafe.{
   ElasticIndexerBuilder,
-  ElasticRetrieverBuilder
+  ElasticRetrieverBuilder,
+  PipelineStorageStreamBuilder
 }
 import uk.ac.wellcome.platform.merger.services._
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
@@ -59,12 +60,16 @@ object Main extends WellcomeTypesafeApp {
       indexConfig = MergedWorkIndexConfig
     )
 
-    new MergerWorkerService(
+    val stream = PipelineStorageStreamBuilder.buildPipelineStorageStream(
       sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
+      indexer = workIndexer,
+      messageSender = workSender
+    )(config)
+
+    new MergerWorkerService(
+      pipelineStorageStream = stream,
       sourceWorkLookup = sourceWorkLookup,
       mergerManager = mergerManager,
-      workIndexer = workIndexer,
-      workSender = workSender,
       imageSender = imageSender
     )
   }
