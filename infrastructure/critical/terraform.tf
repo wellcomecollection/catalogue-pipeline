@@ -25,6 +25,8 @@ locals {
   catalogue_vpcs = data.terraform_remote_state.accounts_catalogue.outputs
 }
 
+provider "ec" {}
+
 provider "aws" {
   region = "eu-west-1"
 
