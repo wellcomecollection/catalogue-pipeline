@@ -1,32 +1,32 @@
-sqs:
-  image: "760097843905.dkr.ecr.eu-west-1.amazonaws.com/s12v/elasticmq"
-  ports:
-    - "9324:9324"
+services:
+  sqs:
+    image: "760097843905.dkr.ecr.eu-west-1.amazonaws.com/s12v/elasticmq"
+    ports:
+      - "9324:9324"
 
-feature_inferrer:
-  image: feature_inferrer
-  ports:
-    - "3141:80"
-  environment:
-    MODEL_OBJECT_KEY: test-model.pkl
-  volumes:
-    - ../test_data:/app/data
-    - $ROOT:$ROOT
-  links:
-    - "image_server:image_server"
+  feature_inferrer:
+    image: feature_inferrer
+    ports:
+      - "3141:80"
+    environment:
+      MODEL_OBJECT_KEY: test-model.pkl
+    volumes:
+      - ../test_data:/app/data
+      - $ROOT:$ROOT
+    links:
+      - "image_server:image_server"
 
-palette_inferrer:
-  image: palette_inferrer
-  ports:
-    - "3142:80"
-  volumes:
-    - $ROOT:$ROOT
-  links:
-    - "image_server:image_server"
+  palette_inferrer:
+    ports:
+      - "3142:80"
+    volumes:
+      - $ROOT:$ROOT
+    links:
+      - "image_server:image_server"
 
-image_server:
-  image: nginx
-  ports:
-    - "2718:80"
-  volumes:
-    - ../test_data:/usr/share/nginx/html:ro
+  image_server:
+    image: nginx
+    ports:
+      - "2718:80"
+    volumes:
+      - ../test_data:/usr/share/nginx/html:ro
