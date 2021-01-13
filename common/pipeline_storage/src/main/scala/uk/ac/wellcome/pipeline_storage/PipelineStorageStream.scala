@@ -1,7 +1,7 @@
 package uk.ac.wellcome.pipeline_storage
 
 import akka.stream.FlowShape
-import akka.stream.scaladsl.{Broadcast, Flow, GraphDSL, Merge, Sink, SubFlow}
+import akka.stream.scaladsl.{Broadcast, Flow, GraphDSL, Merge}
 import akka.{Done, NotUsed}
 import grizzled.slf4j.Logging
 import io.circe.Decoder
@@ -143,7 +143,7 @@ object PipelineStorageStream extends Logging {
       }
       .mapConcat[Bundle[T]](identity)
       .via(batchIndexFlow(config, indexer))
-      .via(groupByMessage(maxSubStreams, 5 minutes).mergeSubstreams)
+      .via(groupByMessage(maxSubStreams, 5 minutes))
       .mapConcat(identity)
       .mapAsyncUnordered(config.parallelism) { bundle =>
         for {
@@ -154,13 +154,14 @@ object PipelineStorageStream extends Logging {
         .collect {
           case head :: _ => head.message
         }
-        .mergeSubstreams)
+        )
   }
 
-  // Splits the flow into a substream for each messageId.
+  // Splits the flow into a subsflow for each messageId.
   // Each substream emits one message with the complete list of bundles for the same messageId
   // or no message if it didn't receive the correct number of bundles
-  def groupByMessage[T](maxSubStreams: Int, t: FiniteDuration): SubFlow[List[Bundle[T]], NotUsed, Flow[Bundle[T], Bundle[T], NotUsed]#Repr, Sink[Bundle[T], NotUsed]] =
+  // The result is a flow of list of _complete_ bundles
+  def groupByMessage[T](maxSubStreams: Int, t: FiniteDuration): Flow[Bundle[T], List[Bundle[T]], NotUsed] =
     Flow[Bundle[T]]
       .groupBy(maxSubstreams = maxSubStreams, f = _.message.messageId(), allowClosedSubstreamRecreation = true)
       .scan(Nil: List[Bundle[T]]) {
@@ -181,7 +182,7 @@ object PipelineStorageStream extends Logging {
       case e: TimeoutException =>
         warn("Timeout when processing substream",e)
         Nil
-    }
+    }.mergeSubstreams
 
   private def unzipBundles[T](
     bundles: Seq[Bundle[T]]): (List[Message], List[T]) =

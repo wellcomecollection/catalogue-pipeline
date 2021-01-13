@@ -442,7 +442,7 @@ class PipelineStorageStreamTest
         // set maxSubstreams lower than the number of messages
         val maxSubStreams = 3
         val (queue, result) = Source.queue[Bundle[SampleDocument]](bufferSize = maxSubStreams, overflowStrategy = OverflowStrategy.backpressure)
-          .viaMat(PipelineStorageStream.groupByMessage(maxSubStreams, 100 millisecond).mergeSubstreams)(Keep.left)
+          .viaMat(PipelineStorageStream.groupByMessage(maxSubStreams, 100 millisecond))(Keep.left)
           .mapConcat(identity)
           .toMat(Sink.seq)(Keep.both)
           .run()
@@ -468,7 +468,7 @@ class PipelineStorageStreamTest
       val maxSubStreams = 3
 
       val (queue, result) = Source.queue[Bundle[SampleDocument]](bufferSize = maxSubStreams, overflowStrategy = OverflowStrategy.backpressure)
-        .viaMat(PipelineStorageStream.groupByMessage(maxSubStreams, 100 millisecond).mergeSubstreams)(Keep.left)
+        .viaMat(PipelineStorageStream.groupByMessage(maxSubStreams, 100 millisecond))(Keep.left)
         .mapConcat(identity)
         .toMat(Sink.seq)(Keep.both)
         .run()
