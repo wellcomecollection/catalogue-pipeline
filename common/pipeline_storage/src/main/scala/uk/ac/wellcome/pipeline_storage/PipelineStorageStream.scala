@@ -137,7 +137,7 @@ object PipelineStorageStream extends Logging {
     val maxSubStreams = Integer.MAX_VALUE
     Flow[(Message, List[T])]
       .collect {
-        case (msg, items@_ :: _) =>
+        case (msg, items @ _ :: _) =>
           items.map(item =>
             Bundle[T](message = msg, item = item, numberOfItems = items.size))
       }
@@ -153,22 +153,27 @@ object PipelineStorageStream extends Logging {
       .via(takeCompleteListOfBundles[T](maxSubStreams, 5 minutes)
         .collect {
           case head :: _ => head.message
-        }
-        )
+        })
   }
 
   // Splits the flow into a subsflow for each messageId.
   // Each substream emits one message with the complete list of bundles for the same messageId
   // or no message if it didn't receive the correct number of bundles
   // The result is a flow of list of _complete_ bundles
-  def takeCompleteListOfBundles[T](maxSubStreams: Int, t: FiniteDuration): Flow[Bundle[T], List[Bundle[T]], NotUsed] = {
+  def takeCompleteListOfBundles[T](
+    maxSubStreams: Int,
+    t: FiniteDuration): Flow[Bundle[T], List[Bundle[T]], NotUsed] = {
     val groupByMessage = Flow[Bundle[T]]
-      .groupBy(maxSubstreams = maxSubStreams, f = _.message.messageId(), allowClosedSubstreamRecreation = true)
+      .groupBy(
+        maxSubstreams = maxSubStreams,
+        f = _.message.messageId(),
+        allowClosedSubstreamRecreation = true)
       .scan(Nil: List[Bundle[T]]) {
         case (bundleList, b) => b :: bundleList
       }
     groupByMessage
-      .filter {list => list.nonEmpty && list
+      .filter { list =>
+        list.nonEmpty && list
           .map(_.item)
           .distinct
           .size == list.head.numberOfItems
@@ -178,11 +183,13 @@ object PipelineStorageStream extends Logging {
       //Because they always emit one or no message, close the substream with take if it succeeds
       // or after timeout if it fails
       .take(1)
-      .initialTimeout(t).recover {
-      case e: TimeoutException =>
-        warn("Timeout when processing substream", e)
-        Nil
-    }.mergeSubstreams
+      .initialTimeout(t)
+      .recover {
+        case e: TimeoutException =>
+          warn("Timeout when processing substream", e)
+          Nil
+      }
+      .mergeSubstreams
   }
 
   private def unzipBundles[T](
