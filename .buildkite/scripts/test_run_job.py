@@ -24,8 +24,8 @@ def repo():
         ("elasticsearch", ["common/Makefile"], True),
         ("elasticsearch", ["common/Makefile", "pipeline/Makefile"], True),
         ("elasticsearch", ["common/Makefile", "pipeline/Makefile"], True),
-        ("big_messaging_typesafe", ["common/big_messaging/file.scala"], False),
-        ("merger", ["common/big_messaging/file.scala"], False),
+        ("big_messaging_typesafe", ["common/big_messaging/file.scala"], True),
+        ("merger", ["common/big_messaging/file.scala"], True),
         ("merger", ["common/big_messaging_typesafe/file.scala"], True),
     ],
 )
