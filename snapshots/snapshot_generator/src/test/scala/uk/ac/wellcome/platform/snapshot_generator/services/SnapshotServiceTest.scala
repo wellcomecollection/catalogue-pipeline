@@ -153,7 +153,7 @@ class SnapshotServiceTest
 
           result.snapshotResult.startedAt shouldBe >(
             result.snapshotJob.requestedAt)
-          result.snapshotResult.finishedAt shouldBe >(
+          result.snapshotResult.finishedAt shouldBe >=(
             result.snapshotResult.startedAt)
 
           result.snapshotResult.s3Etag shouldBe s3Etag
