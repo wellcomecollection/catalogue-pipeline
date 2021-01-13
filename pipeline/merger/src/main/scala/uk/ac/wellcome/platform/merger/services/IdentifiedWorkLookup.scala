@@ -25,7 +25,9 @@ class IdentifiedWorkLookup(retriever: Retriever[Work[Identified]])(
     // we get from the retriever, so skip going out to it.
     if (workIds.isEmpty) {
       Future.successful(
-        workIdentifiers.map { _ => None }
+        workIdentifiers.map { _ =>
+          None
+        }
       )
     } else {
       retriever(workIds)
