@@ -1,22 +1,21 @@
 package uk.ac.wellcome.platform.matcher.storage
 
 import grizzled.slf4j.Logging
+
 import javax.naming.ConfigurationException
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughputExceededException
-import org.scanamo.{Scanamo, Table}
-import org.scanamo.error.DynamoReadError
+import org.scanamo.{DynamoFormat, Scanamo, Table}
 import org.scanamo.syntax._
-import org.scanamo.auto._
-
 import uk.ac.wellcome.models.matcher.WorkNode
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
+import uk.ac.wellcome.platform.matcher.storage.dynamo.DynamoBatchWriter
 import uk.ac.wellcome.storage.dynamo.DynamoConfig
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class WorkNodeDao(dynamoClient: AmazonDynamoDB, dynamoConfig: DynamoConfig)(
-  implicit ec: ExecutionContext)
+  implicit ec: ExecutionContext, format: DynamoFormat[WorkNode])
     extends Logging {
 
   private val scanamo = Scanamo(dynamoClient)
@@ -27,8 +26,12 @@ class WorkNodeDao(dynamoClient: AmazonDynamoDB, dynamoConfig: DynamoConfig)(
     }
   )
 
-  def put(work: WorkNode): Future[Option[Either[DynamoReadError, WorkNode]]] =
-    Future { scanamo.exec { nodes.put(work) } }
+  private val batchWriter = new DynamoBatchWriter[WorkNode](
+    dynamoConfig
+  )(ec, dynamoClient, format)
+
+  def put(workNodes: Set[WorkNode]): Future[Unit] =
+    batchWriter.batchWrite(workNodes.toSeq)
       .recover {
         case exception: ProvisionedThroughputExceededException =>
           throw MatcherException(exception)
