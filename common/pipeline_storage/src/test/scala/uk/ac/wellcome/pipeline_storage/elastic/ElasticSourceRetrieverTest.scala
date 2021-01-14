@@ -72,7 +72,7 @@ class ElasticSourceRetrieverTest
       val future = withRetriever { _.apply(List()) }
 
       whenReady(future.failed) { ex =>
-          ex shouldBe a [IllegalArgumentException]
+        ex shouldBe a[IllegalArgumentException]
       }
     }
   }
