@@ -59,3 +59,8 @@ variable "storage_bucket_name" {
 }
 
 variable "inferrer_model_data_bucket_name" {}
+
+variable "pipeline_storage_es_host_secret_id" {
+  default = "catalogue/pipeline_storage/es_host"
+  description = "The id of the secret where the es_host is stored"
+}

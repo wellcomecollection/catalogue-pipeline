@@ -44,7 +44,7 @@ module "id_minter" {
     db_username          = "catalogue/id_minter/rds_user"
     db_password          = "catalogue/id_minter/rds_password"
 
-    es_host     = "catalogue/pipeline_storage/es_host"
+    es_host     = var.pipeline_storage_es_host_secret_id
     es_port     = "catalogue/pipeline_storage/es_port"
     es_protocol = "catalogue/pipeline_storage/es_protocol"
     es_username = "catalogue/pipeline_storage/id_minter/es_username"
