@@ -33,7 +33,7 @@ object Main extends WellcomeTypesafeApp with AWSClientConfigBuilder {
     implicit val ec: ExecutionContext =
       AkkaBuilder.buildExecutionContext()
 
-    implicit val esClient = ElasticBuilder.buildElasticClient(config)
+    val esClient = ElasticBuilder.buildElasticClient(config)
 
     val pipelineStream = PipelineStorageStreamBuilder
       .buildPipelineStorageStream(
@@ -55,7 +55,7 @@ object Main extends WellcomeTypesafeApp with AWSClientConfigBuilder {
       pipelineStream = pipelineStream,
       recordReadable = S3TypedStore[CalmRecord],
       retriever =
-        ElasticSourceRetrieverBuilder.apply[Work[Source]](esClient, config)
+        ElasticSourceRetrieverBuilder.apply[Work[Source]](config, esClient)
     )
   }
 }

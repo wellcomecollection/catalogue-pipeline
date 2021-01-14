@@ -33,7 +33,7 @@ object Main extends WellcomeTypesafeApp with AWSClientConfigBuilder {
 
     implicit val s3Client: AmazonS3 = S3Builder.buildS3Client(config)
 
-    implicit val esClient = ElasticBuilder.buildElasticClient(config)
+    val esClient = ElasticBuilder.buildElasticClient(config)
 
     val pipelineStream = PipelineStorageStreamBuilder
       .buildPipelineStorageStream(
@@ -53,7 +53,7 @@ object Main extends WellcomeTypesafeApp with AWSClientConfigBuilder {
       pipelineStream = pipelineStream,
       metsXmlStore = S3TypedStore[String],
       retriever =
-        ElasticSourceRetrieverBuilder.apply[Work[Source]](esClient, config)
+        ElasticSourceRetrieverBuilder.apply[Work[Source]](config, esClient)
     )
   }
 }

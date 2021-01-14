@@ -56,7 +56,7 @@ object Main extends WellcomeTypesafeApp {
       pipelineStream = pipelineStream,
       miroReadable = S3TypedStore[MiroRecord],
       retriever =
-        ElasticSourceRetrieverBuilder.apply[Work[Source]](esClient, config)
+        ElasticSourceRetrieverBuilder.apply[Work[Source]](config, esClient)
     )
   }
 }

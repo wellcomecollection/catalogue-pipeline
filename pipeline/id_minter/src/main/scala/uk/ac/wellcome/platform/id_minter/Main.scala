@@ -26,7 +26,6 @@ import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.elasticsearch.IdentifiedWorkIndexConfig
 import WorkState.Identified
-import com.sksamuel.elastic4s.ElasticClient
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
@@ -46,8 +45,7 @@ object Main extends WellcomeTypesafeApp {
       )
     )
 
-    implicit val esClient: ElasticClient =
-      ElasticBuilder.buildElasticClient(config)
+    val esClient = ElasticBuilder.buildElasticClient(config)
 
     val workIndexer = ElasticIndexerBuilder[Work[Identified]](
       config,
@@ -67,7 +65,7 @@ object Main extends WellcomeTypesafeApp {
     new IdMinterWorkerService(
       identifierGenerator = identifierGenerator,
       jsonRetriever =
-        ElasticSourceRetrieverBuilder[Json](config, namespace = "source-works"),
+        ElasticSourceRetrieverBuilder[Json](config, esClient, namespace = "source-works"),
       pipelineStream = pipelineStream,
       rdsClientConfig = RDSBuilder.buildRDSClientConfig(config),
       identifiersTableConfig = identifiersTableConfig

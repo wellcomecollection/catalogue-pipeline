@@ -18,7 +18,6 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal._
 import WorkState.{Denormalised, Indexed}
-import com.sksamuel.elastic4s.ElasticClient
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
@@ -30,16 +29,12 @@ object Main extends WellcomeTypesafeApp {
     val denormalisedWorkStream =
       SQSBuilder.buildSQSStream[NotificationMessage](config)
 
-    val workRetriever = {
-      implicit val esClient: ElasticClient =
-        ElasticBuilder.buildElasticClient(
-          config,
-          namespace = "pipeline_storage")
-
-      ElasticSourceRetrieverBuilder[Work[Denormalised]](
+    val workRetriever = ElasticSourceRetrieverBuilder[Work[Denormalised]](
+      config,
+      client = ElasticBuilder.buildElasticClient(
         config,
-        namespace = "denormalised-works")
-    }
+        namespace = "pipeline_storage"),
+      namespace = "denormalised-works")
 
     val workIndexer = ElasticIndexerBuilder[Work[Indexed]](
       config,
