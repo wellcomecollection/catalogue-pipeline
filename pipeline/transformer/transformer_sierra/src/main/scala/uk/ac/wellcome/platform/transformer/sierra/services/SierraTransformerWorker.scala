@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.transformer.sierra.services
 
 import io.circe.Decoder
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.models.work.internal.Work
+import uk.ac.wellcome.models.work.internal.{result, Work}
 import uk.ac.wellcome.models.work.internal.WorkState.Source
 import uk.ac.wellcome.pipeline_storage.{PipelineStorageStream, Retriever}
 import uk.ac.wellcome.platform.transformer.sierra.SierraTransformer
@@ -33,8 +33,11 @@ class SierraTransformerWorker[MsgDestination](
       MsgDestination] {
 
   override val transformer: Transformer[SierraTransformable] =
-    (input: SierraTransformable, version: Int) =>
-      SierraTransformer(input, version).toEither
+    new Transformer[SierraTransformable] {
+      override def apply(transformable: SierraTransformable,
+                         version: Int): result.Result[Work[Source]] =
+        SierraTransformer(transformable, version).toEither
+    }
 
   override def lookupSourceData(p: SierraSourcePayload)
     : Either[ReadError, Identified[Version[String, Int], SierraTransformable]] =

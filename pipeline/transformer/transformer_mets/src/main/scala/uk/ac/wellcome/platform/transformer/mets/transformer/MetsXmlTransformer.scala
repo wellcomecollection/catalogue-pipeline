@@ -5,38 +5,42 @@ import uk.ac.wellcome.storage.Identified
 import uk.ac.wellcome.models.work.internal.{Work, WorkState}
 import uk.ac.wellcome.models.work.internal.result.Result
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
-import weco.catalogue.source_model.mets.MetsSourceData
+import weco.catalogue.source_model.mets.{
+  DeletedMetsFile,
+  MetsFileWithImages,
+  MetsSourceData
+}
 import weco.catalogue.transformer.Transformer
 
 class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
     extends Transformer[MetsSourceData] {
 
-  override def apply(metsSourceData: MetsSourceData,
+  override def apply(id: String,
+                     metsSourceData: MetsSourceData,
                      version: Int): Result[Work[WorkState.Source]] =
     for {
-      metsData <- transform(metsSourceData)
+      metsData <- transform(id, metsSourceData)
       work <- metsData.toWork(
         version = metsSourceData.version,
         modifiedTime = metsSourceData.createdDate
       )
     } yield work
 
-  def transform(metsSourceData: MetsSourceData): Result[MetsData] =
-    metsSourceData.deleted match {
-      case true =>
-        for {
-          xml <- getMetsXml(metsSourceData.xmlLocation)
-          recordIdentifier <- xml.recordIdentifier
-        } yield MetsData(recordIdentifier = recordIdentifier, deleted = true)
-      case false =>
-        getMetsXml(metsSourceData.xmlLocation)
+  def transform(id: String, metsSourceData: MetsSourceData): Result[MetsData] =
+    metsSourceData match {
+      case DeletedMetsFile(_, _) =>
+        Right(
+          MetsData(recordIdentifier = id, deleted = true)
+        )
+
+      case metsFile @ MetsFileWithImages(_, _, manifestations, _, _) =>
+        getMetsXml(metsFile.xmlLocation)
           .flatMap { root =>
-            if (metsSourceData.manifestations.isEmpty)
+            if (manifestations.isEmpty) {
               transformWithoutManifestations(root)
-            else
-              transformWithManifestations(
-                root,
-                metsSourceData.manifestationLocations)
+            } else {
+              transformWithManifestations(root, metsFile.manifestationLocations)
+            }
           }
     }
 

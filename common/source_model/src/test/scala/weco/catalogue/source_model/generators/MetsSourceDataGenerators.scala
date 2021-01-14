@@ -2,7 +2,8 @@ package weco.catalogue.source_model.generators
 
 import java.time.Instant
 import uk.ac.wellcome.storage.generators.S3ObjectLocationGenerators
-import weco.catalogue.source_model.mets.MetsSourceData
+import uk.ac.wellcome.storage.s3.S3ObjectLocationPrefix
+import weco.catalogue.source_model.mets.MetsFileWithImages
 
 trait MetsSourceDataGenerators extends S3ObjectLocationGenerators {
   val olderDate: Instant = Instant.parse("1999-09-09T09:09:09Z")
@@ -15,16 +16,18 @@ trait MetsSourceDataGenerators extends S3ObjectLocationGenerators {
     createdDate: Instant = Instant.now(),
     version: Int = 1,
     manifestations: List[String] = Nil
-  ): MetsSourceData =
-    MetsSourceData(
-      bucket = bucket,
-      path = path,
-      version = version,
-      file = file,
+  ): MetsFileWithImages =
+    MetsFileWithImages(
+      root = S3ObjectLocationPrefix(
+        bucket = bucket,
+        keyPrefix = path
+      ),
+      filename = file,
       createdDate = createdDate,
-      deleted = false,
-      manifestations = manifestations)
+      version = version,
+      manifestations = manifestations
+    )
 
-  def createMetsSourceData: MetsSourceData =
+  def createMetsSourceData: MetsFileWithImages =
     createMetsSourceDataWith()
 }

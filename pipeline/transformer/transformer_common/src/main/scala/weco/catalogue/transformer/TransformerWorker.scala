@@ -74,7 +74,7 @@ trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest]
   private def work(sourceData: SourceData,
                    version: Int,
                    key: StoreKey): Result[Work[Source]] =
-    transformer(sourceData, version) match {
+    transformer(id = key.id, sourceData, version) match {
       case Right(result) => Right(result)
       case Left(err) =>
         Left(catalogue.transformer.TransformerError(err, sourceData, key))
