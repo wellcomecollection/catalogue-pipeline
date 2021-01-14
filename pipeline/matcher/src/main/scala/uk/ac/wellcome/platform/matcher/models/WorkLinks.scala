@@ -3,14 +3,14 @@ package uk.ac.wellcome.platform.matcher.models
 import uk.ac.wellcome.models.work.internal._
 import WorkState.Identified
 
-case class WorkUpdate(workId: String,
-                      version: Int,
-                      referencedWorkIds: Set[String]) {
+case class WorkLinks(workId: String,
+                     version: Int,
+                     referencedWorkIds: Set[String]) {
   lazy val ids: Set[String] = referencedWorkIds + workId
 }
 
-case object WorkUpdate {
-  def apply(work: Work[Identified]): WorkUpdate = {
+case object WorkLinks {
+  def apply(work: Work[Identified]): WorkLinks = {
     val id = work.id
     val referencedWorkIds = work.data.mergeCandidates
       .map { mergeCandidate =>
@@ -19,6 +19,6 @@ case object WorkUpdate {
       .filterNot { _ == id }
       .toSet
 
-    WorkUpdate(id, work.version, referencedWorkIds)
+    WorkLinks(id, work.version, referencedWorkIds)
   }
 }

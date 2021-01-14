@@ -2,11 +2,11 @@ package uk.ac.wellcome.platform.matcher.storage
 
 import scala.concurrent.{ExecutionContext, Future}
 
-import uk.ac.wellcome.platform.matcher.models.{WorkGraph, WorkUpdate}
+import uk.ac.wellcome.platform.matcher.models.{WorkGraph, WorkLinks}
 
 class WorkGraphStore(workNodeDao: WorkNodeDao)(implicit _ec: ExecutionContext) {
 
-  def findAffectedWorks(workUpdate: WorkUpdate): Future[WorkGraph] =
+  def findAffectedWorks(workUpdate: WorkLinks): Future[WorkGraph] =
     for {
       directlyAffectedWorks <- workNodeDao.get(workUpdate.ids)
       affectedComponentIds = directlyAffectedWorks.map(workNode =>

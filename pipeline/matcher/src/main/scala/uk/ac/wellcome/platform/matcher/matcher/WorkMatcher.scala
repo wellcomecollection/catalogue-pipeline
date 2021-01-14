@@ -10,7 +10,6 @@ import uk.ac.wellcome.models.matcher.{
   WorkIdentifier,
   WorkNode
 }
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.models._
 import uk.ac.wellcome.platform.matcher.storage.WorkGraphStore
@@ -21,7 +20,6 @@ import uk.ac.wellcome.storage.locking.{
   FailedProcess,
   FailedUnlock
 }
-import WorkState.Identified
 
 class WorkMatcher(
   workGraphStore: WorkGraphStore,
@@ -31,17 +29,16 @@ class WorkMatcher(
 
   type Out = Set[MatchedIdentifiers]
 
-  def matchWork(work: Work[Identified]): Future[MatcherResult] =
-    doMatch(work).map(MatcherResult)
+  def matchWork(links: WorkLinks): Future[MatcherResult] =
+    doMatch(links).map(MatcherResult)
 
-  private def doMatch(work: Work[Identified]): Future[Out] = {
-    val update = WorkUpdate(work)
-    withLocks(update, update.ids) {
+  private def doMatch(links: WorkLinks): Future[Out] =
+    withLocks(links, links.ids) {
       for {
-        graphBeforeUpdate <- workGraphStore.findAffectedWorks(update)
-        updatedGraph = WorkGraphUpdater.update(update, graphBeforeUpdate)
+        graphBeforeUpdate <- workGraphStore.findAffectedWorks(links)
+        updatedGraph = WorkGraphUpdater.update(links, graphBeforeUpdate)
         _ <- withLocks(
-          update,
+          links,
           getGraphComponentIds(graphBeforeUpdate, updatedGraph)) {
           // We are returning empty set here, as LockingService is tied to a
           // single `Out` type, here set to `Set[MatchedIdentifiers]`.
@@ -52,13 +49,12 @@ class WorkMatcher(
         convertToIdentifiersList(updatedGraph)
       }
     }
-  }
 
   private def getGraphComponentIds(graphBefore: WorkGraph,
                                    graphAfter: WorkGraph): Set[String] =
     graphBefore.nodes.map(_.componentId) ++ graphAfter.nodes.map(_.componentId)
 
-  private def withLocks(update: WorkUpdate, ids: Set[String])(
+  private def withLocks(update: WorkLinks, ids: Set[String])(
     f: => Future[Out]): Future[Out] =
     lockingService
       .withLocks(ids)(f)
@@ -78,13 +74,14 @@ class WorkMatcher(
       case _                     => new RuntimeException(failure.toString)
     }
 
-  private def convertToIdentifiersList(graph: WorkGraph) = {
+  private def convertToIdentifiersList(
+    graph: WorkGraph): Set[MatchedIdentifiers] =
     groupBySetId(graph).map {
       case (_, workNodes: Set[WorkNode]) =>
         MatchedIdentifiers(workNodes.map(WorkIdentifier(_)))
     }.toSet
-  }
 
-  private def groupBySetId(updatedGraph: WorkGraph) =
+  private def groupBySetId(
+    updatedGraph: WorkGraph): Map[String, Set[WorkNode]] =
     updatedGraph.nodes.groupBy(_.componentId)
 }

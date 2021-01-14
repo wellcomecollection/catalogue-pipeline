@@ -1,26 +1,26 @@
 package uk.ac.wellcome.platform.matcher.matcher
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.matcher.MatcherResult
-import uk.ac.wellcome.models.work.generators.WorkGenerators
-import uk.ac.wellcome.models.work.internal.{IdState, MergeCandidate}
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
+import uk.ac.wellcome.platform.matcher.generators.WorkLinksGenerators
 import uk.ac.wellcome.storage.locking.dynamo.{
   DynamoLockingService,
   ExpiringLock
 }
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class WorkMatcherConcurrencyTest
     extends AnyFunSpec
     with Matchers
     with MatcherFixtures
     with ScalaFutures
-    with WorkGenerators {
+    with WorkLinksGenerators {
 
   it("processes one of two conflicting concurrent updates and locks the other") {
     withLockTable { lockTable =>
@@ -30,24 +30,20 @@ class WorkMatcherConcurrencyTest
             withWorkMatcherAndLockingService(
               workGraphStore,
               new DynamoLockingService) { workMatcher =>
-              val identifierA = IdState.Identified(
-                createCanonicalId,
-                createSierraSystemSourceIdentifierWith(value = "A"))
-              val identifierB = IdState.Identified(
-                createCanonicalId,
-                createSierraSystemSourceIdentifierWith(value = "B"))
+              val identifierA = createIdentifier(id = "A")
+              val identifierB = createIdentifier(id = "B")
 
-              val workA = identifiedWork(
-                canonicalId = identifierA.canonicalId,
-                sourceIdentifier = identifierA.sourceIdentifier)
-                .mergeCandidates(List(MergeCandidate(identifierB)))
+              val linksA = createWorkLinksWith(
+                id = identifierA,
+                referencedIds = Set(identifierB)
+              )
 
-              val workB = identifiedWork(
-                canonicalId = identifierB.canonicalId,
-                sourceIdentifier = identifierB.sourceIdentifier)
+              val linksB = createWorkLinksWith(
+                id = identifierB
+              )
 
-              val eventualResultA = workMatcher.matchWork(workA)
-              val eventualResultB = workMatcher.matchWork(workB)
+              val eventualResultA = workMatcher.matchWork(linksA)
+              val eventualResultB = workMatcher.matchWork(linksB)
 
               val eventualResults = for {
                 resultA <- eventualResultA recoverWith {

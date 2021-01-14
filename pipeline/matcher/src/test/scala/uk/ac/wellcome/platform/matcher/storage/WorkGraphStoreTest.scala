@@ -7,7 +7,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.models.matcher.WorkNode
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
-import uk.ac.wellcome.platform.matcher.models.{WorkGraph, WorkUpdate}
+import uk.ac.wellcome.platform.matcher.models.{WorkGraph, WorkLinks}
 
 class WorkGraphStoreTest
     extends AnyFunSpec
@@ -21,7 +21,7 @@ class WorkGraphStoreTest
         withWorkGraphStore(graphTable) { workGraphStore =>
           whenReady(
             workGraphStore.findAffectedWorks(
-              WorkUpdate("Not-there", 0, Set.empty))) { workGraph =>
+              WorkLinks("Not-there", 0, Set.empty))) { workGraph =>
             workGraph shouldBe WorkGraph(Set.empty)
           }
         }
@@ -37,7 +37,7 @@ class WorkGraphStoreTest
           put(dynamoClient, graphTable.name)(work)
 
           whenReady(
-            workGraphStore.findAffectedWorks(WorkUpdate("A", 0, Set.empty))) {
+            workGraphStore.findAffectedWorks(WorkLinks("A", 0, Set.empty))) {
             workGraph =>
               workGraph shouldBe WorkGraph(Set(work))
           }
@@ -56,7 +56,7 @@ class WorkGraphStoreTest
           put(dynamoClient, graphTable.name)(workB)
 
           whenReady(
-            workGraphStore.findAffectedWorks(WorkUpdate("A", 0, Set("B")))) {
+            workGraphStore.findAffectedWorks(WorkLinks("A", 0, Set("B")))) {
             workGraph =>
               workGraph.nodes shouldBe Set(workA, workB)
           }
@@ -80,7 +80,7 @@ class WorkGraphStoreTest
           put(dynamoClient, graphTable.name)(workB)
 
           whenReady(
-            workGraphStore.findAffectedWorks(WorkUpdate("A", 0, Set.empty))) {
+            workGraphStore.findAffectedWorks(WorkLinks("A", 0, Set.empty))) {
             workGraph =>
               workGraph.nodes shouldBe Set(workA, workB)
           }
@@ -115,7 +115,7 @@ class WorkGraphStoreTest
           put(dynamoClient, graphTable.name)(workC)
 
           whenReady(
-            workGraphStore.findAffectedWorks(WorkUpdate("A", 0, Set.empty))) {
+            workGraphStore.findAffectedWorks(WorkLinks("A", 0, Set.empty))) {
             workGraph =>
               workGraph.nodes shouldBe Set(workA, workB, workC)
           }
@@ -143,7 +143,7 @@ class WorkGraphStoreTest
           put(dynamoClient, graphTable.name)(workC)
 
           whenReady(
-            workGraphStore.findAffectedWorks(WorkUpdate("B", 0, Set("C")))) {
+            workGraphStore.findAffectedWorks(WorkLinks("B", 0, Set("C")))) {
             workGraph =>
               workGraph.nodes shouldBe Set(workA, workB, workC)
           }

@@ -12,11 +12,12 @@ import uk.ac.wellcome.models.matcher.{
   WorkIdentifier,
   WorkNode
 }
-import uk.ac.wellcome.models.work.generators.WorkGenerators
-import uk.ac.wellcome.models.work.internal.Work
-import uk.ac.wellcome.models.work.internal.WorkState.Identified
 import uk.ac.wellcome.pipeline_storage.MemoryRetriever
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
+import uk.ac.wellcome.platform.matcher.generators.WorkLinksGenerators
+import uk.ac.wellcome.platform.matcher.models.WorkLinks
+
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class MatcherFeatureTest
     extends AnyFunSpec
@@ -24,26 +25,27 @@ class MatcherFeatureTest
     with Eventually
     with IntegrationPatience
     with MatcherFixtures
-    with WorkGenerators {
+    with WorkLinksGenerators {
 
-  it(
-    "processes a message with a simple Work.Visible[Identified] with no linked works") {
-    implicit val retriever: MemoryRetriever[Work[Identified]] = createRetriever
+  it("processes a message with a single WorkLinks with no linked works") {
+    implicit val retriever: MemoryRetriever[WorkLinks] =
+      new MemoryRetriever[WorkLinks]()
     val messageSender = new MemoryMessageSender()
 
     withLocalSqsQueue() { queue =>
       withWorkerService(retriever, queue, messageSender) { _ =>
-        val work = identifiedWork()
+        val links = createWorkLinksWith(referencedIds = Set.empty)
 
         val expectedResult = MatcherResult(
           Set(
             MatchedIdentifiers(
-              identifiers = Set(WorkIdentifier(work))
+              identifiers =
+                Set(WorkIdentifier(links.workId, version = links.version))
             )
           )
         )
 
-        sendWork(work, retriever, queue)
+        sendWork(links, retriever, queue)
 
         eventually {
           messageSender.getMessages[MatcherResult].distinct shouldBe Seq(
@@ -54,7 +56,8 @@ class MatcherFeatureTest
   }
 
   it("skips a message if the graph store already has a newer version") {
-    implicit val retriever: MemoryRetriever[Work[Identified]] = createRetriever
+    implicit val retriever: MemoryRetriever[WorkLinks] =
+      new MemoryRetriever[WorkLinks]()
     val messageSender = new MemoryMessageSender()
 
     withLocalSqsQueuePair() {
@@ -64,17 +67,17 @@ class MatcherFeatureTest
             val existingWorkVersion = 2
             val updatedWorkVersion = 1
 
-            val workAv1 = identifiedWork().withVersion(updatedWorkVersion)
+            val linksV1 = createWorkLinksWith(version = updatedWorkVersion)
 
-            val existingWorkAv2 = WorkNode(
-              id = workAv1.state.canonicalId,
+            val nodeV2 = WorkNode(
+              id = linksV1.workId,
               version = Some(existingWorkVersion),
               linkedIds = Nil,
-              componentId = workAv1.state.canonicalId
+              componentId = linksV1.workId
             )
-            put(dynamoClient, graphTable.name)(existingWorkAv2)
+            put(dynamoClient, graphTable.name)(nodeV2)
 
-            sendWork(workAv1, retriever, queue)
+            sendWork(linksV1, retriever, queue)
 
             eventually {
               noMessagesAreWaitingIn(queue)
