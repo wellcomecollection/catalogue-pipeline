@@ -2,6 +2,7 @@ package uk.ac.wellcome.pipeline_storage
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future, TimeoutException}
+import scala.util.Try
 import akka.stream.FlowShape
 import akka.stream.scaladsl.{Broadcast, Flow, GraphDSL, Merge}
 import akka.{Done, NotUsed}
@@ -45,7 +46,11 @@ class PipelineStorageStream[In, Out, MsgDestination](
             .via(processFlow)
             .via(
               broadcastAndMerge(
-                batchIndexAndSendFlow(config, messageSender, indexer),
+                batchIndexAndSendFlow(
+                  config, 
+                  (item: Out) => messageSender.send(indexable.id(item)),
+                  indexer
+                ),
                 identityFlow)
           )
       )
@@ -114,7 +119,7 @@ object PipelineStorageStream extends Logging {
 
   def batchIndexAndSendFlow[T, MsgDestination](
     config: PipelineStorageConfig,
-    msgSender: MessageSender[MsgDestination],
+    send: T => Try[Unit],
     indexer: Indexer[T])(implicit
                          ec: ExecutionContext,
                          indexable: Indexable[T]) = {
@@ -131,7 +136,7 @@ object PipelineStorageStream extends Logging {
       .mapConcat(identity)
       .mapAsyncUnordered(config.parallelism) { bundle =>
         for {
-          _ <- Future.fromTry(msgSender.send(indexable.id(bundle.item)))
+          _ <- Future.fromTry(send(bundle.item))
         } yield bundle
       }
       .via(takeListsOfCompleteBundles[T](maxSubStreams, 5 minutes)
