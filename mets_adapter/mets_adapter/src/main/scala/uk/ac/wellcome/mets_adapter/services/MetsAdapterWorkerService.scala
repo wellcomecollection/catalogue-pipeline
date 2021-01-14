@@ -15,7 +15,7 @@ import uk.ac.wellcome.storage.{Identified, Version}
 import uk.ac.wellcome.bigmessaging.FlowOps
 import uk.ac.wellcome.messaging.MessageSender
 import weco.catalogue.source_model.MetsSourcePayload
-import weco.catalogue.source_model.mets.MetsSourceData
+import weco.catalogue.source_model.mets.NewMetsSourceData
 
 import scala.concurrent.Future
 
@@ -108,7 +108,7 @@ class MetsAdapterWorkerService[Destination](
       .mapWithContext { case (_, bag) => bag.metsSourceData }
 
   def storeMetsSourceData =
-    Flow[(Context, Option[MetsSourceData])]
+    Flow[(Context, Option[NewMetsSourceData])]
       .mapWithContextAsync(concurrentDynamoConnections) {
         case (ctx, data) =>
           Future {
@@ -117,7 +117,7 @@ class MetsAdapterWorkerService[Destination](
       }
 
   def publishKey =
-    Flow[(Context, Option[Identified[Version[String, Int], MetsSourceData]])]
+    Flow[(Context, Option[Identified[Version[String, Int], NewMetsSourceData]])]
       .mapWithContext {
         case (_, Identified(Version(id, version), sourceData)) =>
           val sourcePayload = MetsSourcePayload(
