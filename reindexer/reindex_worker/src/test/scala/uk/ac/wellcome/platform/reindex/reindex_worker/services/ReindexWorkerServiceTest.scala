@@ -25,6 +25,7 @@ import weco.catalogue.source_model.{
   SourcePayload
 }
 import weco.catalogue.source_model.generators.MetsSourceDataGenerators
+import weco.catalogue.source_model.mets.DeletedMetsFile
 
 import java.time.Instant
 import scala.collection.JavaConverters._
@@ -84,7 +85,7 @@ class ReindexWorkerServiceTest
       }
     }
 
-    it("for METS records") {
+    it("for extant METS records") {
       withLocalDynamoDbTable { table =>
         val bibId = randomAlphanumeric()
         val sourceData = createMetsSourceDataWith(
@@ -100,15 +101,65 @@ class ReindexWorkerServiceTest
             "id" -> new AttributeValue(bibId),
             "payload" -> new AttributeValue().withM(
               Map(
-                "bucket" -> new AttributeValue(sourceData.bucket),
-                "createdDate" -> new AttributeValue().withN("1569103811343"),
-                "deleted" -> new AttributeValue().withBOOL(sourceData.deleted),
-                "file" -> new AttributeValue(sourceData.file),
-                "manifestations" -> new AttributeValue().withL(
-                  sourceData.manifestations.map { new AttributeValue(_) }.asJava),
-                "path" -> new AttributeValue(sourceData.path),
-                "version" -> new AttributeValue().withN(
-                  sourceData.version.toString)
+                "MetsFileWithImages" -> new AttributeValue().withM(
+                  Map(
+                    "root" -> new AttributeValue().withM(
+                      Map(
+                        "bucket" -> new AttributeValue(sourceData.root.bucket),
+                        "keyPrefix" -> new AttributeValue(sourceData.root.keyPrefix),
+                      ).asJava
+                    ),
+                    "createdDate" -> new AttributeValue().withN("1569103811343"),
+                    "filename" -> new AttributeValue(sourceData.filename),
+                    "manifestations" -> new AttributeValue().withL(
+                      sourceData.manifestations.map { new AttributeValue(_) }.asJava),
+                    "version" -> new AttributeValue().withN(
+                      sourceData.version.toString)
+                  ).asJava
+                )
+              ).asJava
+            ),
+            "version" -> new AttributeValue().withN(version.toString)
+          ).asJava
+        )
+
+        val expectedMessage = MetsSourcePayload(
+          id = bibId,
+          sourceData = sourceData,
+          version = version
+        )
+
+        runTest(
+          table = table,
+          source = ReindexSource.Mets,
+          expectedMessage = expectedMessage
+        )
+      }
+    }
+
+    it("for deleted METS records") {
+      withLocalDynamoDbTable { table =>
+        val bibId = randomAlphanumeric()
+        val version = randomInt(from = 1, to = 10)
+
+        val sourceData = DeletedMetsFile(
+          createdDate = Instant.parse("2019-09-21T22:10:11.343Z"),
+          version = version
+        )
+
+        dynamoClient.putItem(
+          table.name,
+          Map(
+            "id" -> new AttributeValue(bibId),
+            "payload" -> new AttributeValue().withM(
+              Map(
+                "DeletedMetsFile" -> new AttributeValue().withM(
+                  Map(
+                    "createdDate" -> new AttributeValue().withN("1569103811343"),
+                    "version" -> new AttributeValue().withN(
+                      sourceData.version.toString)
+                  ).asJava
+                )
               ).asJava
             ),
             "version" -> new AttributeValue().withN(version.toString)

@@ -36,7 +36,7 @@ object CalmTransformer
     "third-party metadata"
   )
 
-  def apply(record: CalmRecord, version: Int): Result[Work[Source]] =
+  override def apply(record: CalmRecord, version: Int): Result[Work[Source]] =
     if (shouldSuppress(record)) {
       Right(
         Work.Deleted[Source](
