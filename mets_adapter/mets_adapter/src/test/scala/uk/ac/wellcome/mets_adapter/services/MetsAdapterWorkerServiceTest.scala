@@ -19,7 +19,7 @@ import uk.ac.wellcome.storage.{Identified, Version}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import weco.catalogue.source_model.MetsSourcePayload
-import weco.catalogue.source_model.mets.NewMetsSourceData
+import weco.catalogue.source_model.mets.MetsSourceData
 
 import java.time.Instant
 import weco.catalogue.source_model.generators.MetsSourceDataGenerators
@@ -62,7 +62,7 @@ class MetsAdapterWorkerServiceTest
 
   val expectedVersion = Version(externalIdentifier, version = 1)
 
-  val expectedData: NewMetsSourceData = createMetsSourceDataWith(
+  val expectedData: MetsSourceData = createMetsSourceDataWith(
     bucket = bag.location.bucket,
     path = bag.location.path,
     file = "mets.xml",
@@ -70,7 +70,7 @@ class MetsAdapterWorkerServiceTest
   )
 
   it("processes ingest updates and store and publish METS data") {
-    val store = MemoryVersionedStore[String, NewMetsSourceData](
+    val store = MemoryVersionedStore[String, MetsSourceData](
       initialEntries = Map.empty
     )
 
@@ -100,7 +100,7 @@ class MetsAdapterWorkerServiceTest
   }
 
   it("publishes new METS data when old version exists in the store") {
-    val store = MemoryVersionedStore[String, NewMetsSourceData](
+    val store = MemoryVersionedStore[String, MetsSourceData](
       initialEntries =
         Map(Version(externalIdentifier, 0) -> createMetsSourceData)
     )
@@ -129,7 +129,7 @@ class MetsAdapterWorkerServiceTest
   }
 
   it("re-publishes existing data when current version exists in the store") {
-    val store = MemoryVersionedStore[String, NewMetsSourceData](
+    val store = MemoryVersionedStore[String, MetsSourceData](
       initialEntries = Map(Version(externalIdentifier, 1) -> expectedData)
     )
 
@@ -158,7 +158,7 @@ class MetsAdapterWorkerServiceTest
   it("skips sending anything if there's already a newer version in the store") {
     val existingData = createMetsSourceData
 
-    val store = MemoryVersionedStore[String, NewMetsSourceData](
+    val store = MemoryVersionedStore[String, MetsSourceData](
       initialEntries = Map(Version(externalIdentifier, 2) -> existingData)
     )
 
@@ -178,7 +178,7 @@ class MetsAdapterWorkerServiceTest
   }
 
   it("does not store / publish anything when bag retrieval fails") {
-    val store = MemoryVersionedStore[String, NewMetsSourceData](
+    val store = MemoryVersionedStore[String, MetsSourceData](
       initialEntries = Map.empty
     )
 
@@ -206,7 +206,7 @@ class MetsAdapterWorkerServiceTest
   }
 
   it("stores METS data if publishing fails") {
-    val store = MemoryVersionedStore[String, NewMetsSourceData](
+    val store = MemoryVersionedStore[String, MetsSourceData](
       initialEntries = Map.empty
     )
 
@@ -244,7 +244,7 @@ class MetsAdapterWorkerServiceTest
   }
 
   it("doesn't process the update when storageSpace isn't equal to 'digitised'") {
-    val store = MemoryVersionedStore[String, NewMetsSourceData](
+    val store = MemoryVersionedStore[String, MetsSourceData](
       initialEntries = Map.empty
     )
 
@@ -269,8 +269,8 @@ class MetsAdapterWorkerServiceTest
   }
 
   def withWorkerService[R](bagRetriever: BagRetriever,
-                           store: VersionedStore[String, Int, NewMetsSourceData] =
-                             MemoryVersionedStore[String, NewMetsSourceData](
+                           store: VersionedStore[String, Int, MetsSourceData] =
+                             MemoryVersionedStore[String, MetsSourceData](
                                initialEntries = Map.empty
                              ),
                            messageSender: MemoryMessageSender =

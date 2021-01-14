@@ -4,13 +4,13 @@ import grizzled.slf4j.Logging
 import uk.ac.wellcome.storage.VersionAlreadyExistsError
 import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.storage.{Identified, Version}
-import weco.catalogue.source_model.mets.NewMetsSourceData
+import weco.catalogue.source_model.mets.MetsSourceData
 
-class MetsStore(val store: VersionedStore[String, Int, NewMetsSourceData])
+class MetsStore(val store: VersionedStore[String, Int, MetsSourceData])
     extends Logging {
 
-  def storeData(key: Version[String, Int], data: NewMetsSourceData)
-    : Either[Throwable, Identified[Version[String, Int], NewMetsSourceData]] =
+  def storeData(key: Version[String, Int], data: MetsSourceData)
+    : Either[Throwable, Identified[Version[String, Int], MetsSourceData]] =
     store
       .put(key)(data)
       .left

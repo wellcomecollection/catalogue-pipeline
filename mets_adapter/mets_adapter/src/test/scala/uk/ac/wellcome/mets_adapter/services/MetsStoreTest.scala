@@ -5,7 +5,7 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
 import uk.ac.wellcome.storage.{Identified, Version}
 import weco.catalogue.source_model.generators.MetsSourceDataGenerators
-import weco.catalogue.source_model.mets.NewMetsSourceData
+import weco.catalogue.source_model.mets.MetsSourceData
 
 class MetsStoreTest
     extends AnyFunSpec
@@ -16,7 +16,7 @@ class MetsStoreTest
     val id = Version("b1234", version = 1)
     val data = createMetsSourceData
 
-    val internalStore = MemoryVersionedStore[String, NewMetsSourceData](
+    val internalStore = MemoryVersionedStore[String, MetsSourceData](
       initialEntries = Map.empty
     )
     val store = new MetsStore(internalStore)
@@ -34,7 +34,7 @@ class MetsStoreTest
     val oldData = createMetsSourceDataWith(createdDate = olderDate)
     val newData = createMetsSourceDataWith(createdDate = newerDate)
 
-    val internalStore = MemoryVersionedStore[String, NewMetsSourceData](
+    val internalStore = MemoryVersionedStore[String, MetsSourceData](
       initialEntries = Map(oldId -> oldData)
     )
     val store = new MetsStore(internalStore)
@@ -47,7 +47,7 @@ class MetsStoreTest
     val id = Version("b1234", version = 1)
     val data = createMetsSourceData
 
-    val internalStore = MemoryVersionedStore[String, NewMetsSourceData](
+    val internalStore = MemoryVersionedStore[String, MetsSourceData](
       initialEntries = Map(id -> data)
     )
     val store = new MetsStore(internalStore)
@@ -65,7 +65,7 @@ class MetsStoreTest
     val oldData = createMetsSourceDataWith(createdDate = olderDate)
     val newData = createMetsSourceDataWith(createdDate = newerDate)
 
-    val internalStore = MemoryVersionedStore[String, NewMetsSourceData](
+    val internalStore = MemoryVersionedStore[String, MetsSourceData](
       initialEntries = Map(newId -> newData)
     )
     val store = new MetsStore(internalStore)

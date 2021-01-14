@@ -8,15 +8,15 @@ import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import weco.catalogue.source_model.mets.{
   DeletedMetsFile,
   MetsFileWithImages,
-  NewMetsSourceData
+  MetsSourceData
 }
 import weco.catalogue.transformer.Transformer
 
 class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
-    extends Transformer[NewMetsSourceData] {
+    extends Transformer[MetsSourceData] {
 
   override def apply(id: String,
-                     metsSourceData: NewMetsSourceData,
+                     metsSourceData: MetsSourceData,
                      version: Int): Result[Work[WorkState.Source]] =
     for {
       metsData <- transform(id, metsSourceData)
@@ -26,7 +26,7 @@ class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
       )
     } yield work
 
-  def transform(id: String, metsSourceData: NewMetsSourceData): Result[MetsData] =
+  def transform(id: String, metsSourceData: MetsSourceData): Result[MetsData] =
     metsSourceData match {
       case DeletedMetsFile(_, _) =>
         Right(

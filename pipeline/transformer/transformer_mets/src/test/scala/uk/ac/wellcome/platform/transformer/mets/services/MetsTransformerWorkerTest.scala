@@ -18,7 +18,7 @@ import uk.ac.wellcome.storage.s3.{S3ObjectLocation, S3ObjectLocationPrefix}
 import uk.ac.wellcome.storage.store.memory.MemoryTypedStore
 import weco.catalogue.source_model.MetsSourcePayload
 import weco.catalogue.source_model.generators.MetsSourceDataGenerators
-import weco.catalogue.source_model.mets.{MetsFileWithImages, NewMetsSourceData}
+import weco.catalogue.source_model.mets.{MetsFileWithImages, MetsSourceData}
 import weco.catalogue.transformer.{
   TransformerWorker,
   TransformerWorkerTestCases
@@ -31,7 +31,7 @@ class MetsTransformerWorkerTest
     extends TransformerWorkerTestCases[
       MemoryTypedStore[S3ObjectLocation, String],
       MetsSourcePayload,
-      NewMetsSourceData]
+      MetsSourceData]
     with MetsGenerators
     with MetsSourceDataGenerators
     with S3ObjectLocationGenerators {
@@ -99,7 +99,7 @@ class MetsTransformerWorkerTest
                                           String],
     retriever: Retriever[Work[WorkState.Source]])(
     testWith: TestWith[
-      TransformerWorker[MetsSourcePayload, NewMetsSourceData, String],
+      TransformerWorker[MetsSourcePayload, MetsSourceData, String],
       R])(
     implicit metsXmlStore: MemoryTypedStore[S3ObjectLocation, String]): R =
     testWith(

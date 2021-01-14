@@ -6,7 +6,7 @@ import java.time.Instant
 import weco.catalogue.source_model.mets.{
   DeletedMetsFile,
   MetsFileWithImages,
-  NewMetsSourceData
+  MetsSourceData
 }
 
 /** The response received from the storage-service bag API.
@@ -17,7 +17,7 @@ case class Bag(info: BagInfo,
                version: String,
                createdDate: Instant) {
 
-  def metsSourceData: Either[Throwable, NewMetsSourceData] =
+  def metsSourceData: Either[Throwable, MetsSourceData] =
     parsedVersion.flatMap { version =>
       // If the bag doesn't contain any files, then it's empty and the
       // METS file has been deleted.
