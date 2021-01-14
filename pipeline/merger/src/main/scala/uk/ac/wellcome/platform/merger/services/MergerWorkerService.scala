@@ -1,7 +1,10 @@
 package uk.ac.wellcome.platform.merger.services
 
+import scala.concurrent.{ExecutionContext, Future}
+import java.time.Instant
 import akka.Done
 import io.circe.Encoder
+
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
@@ -11,9 +14,6 @@ import uk.ac.wellcome.models.work.internal.WorkState.{Identified, Merged}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.pipeline_storage.PipelineStorageStream
 import uk.ac.wellcome.typesafe.Runnable
-
-import java.time.Instant
-import scala.concurrent.{ExecutionContext, Future}
 
 class MergerWorkerService[WorkDestination, ImageDestination](
   pipelineStorageStream: PipelineStorageStream[NotificationMessage,

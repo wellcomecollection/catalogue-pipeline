@@ -7,8 +7,8 @@ import akka.stream.scaladsl.{Broadcast, Flow, GraphDSL, Merge}
 import akka.{Done, NotUsed}
 import grizzled.slf4j.Logging
 import io.circe.Decoder
-
 import software.amazon.awssdk.services.sqs.model.Message
+
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sqs.SQSStream
 
@@ -30,15 +30,7 @@ class PipelineStorageStream[In, Out, MsgDestination](
   def foreach(streamName: String, process: In => Future[List[Out]])(
     implicit decoderT: Decoder[In],
     indexable: Indexable[Out]): Future[Done] =
-    run(
-      streamName = streamName,
-      Flow[(Message, In)]
-        .mapAsyncUnordered(parallelism = config.parallelism) {
-          case (message, in) =>
-            debug(s"Processing message ${message.messageId()}")
-            process(in).map(w => (message, w))
-        }
-    )
+    run(streamName = streamName, processFlow(config, process))
 
   def run(streamName: String,
           processFlow: Flow[(Message, In), (Message, List[Out]), NotUsed])(
@@ -58,27 +50,19 @@ class PipelineStorageStream[In, Out, MsgDestination](
           )
       )
     } yield done
-
-  private val identityFlow: Flow[(Message, List[Out]), Message, NotUsed] =
-    Flow[(Message, List[Out])]
-      .collect { case (message, Nil) => message }
-
-  private def broadcastAndMerge[I, O](
-    a: Flow[I, O, NotUsed],
-    b: Flow[I, O, NotUsed]): Flow[I, O, NotUsed] =
-    Flow.fromGraph(
-      GraphDSL.create() { implicit builder =>
-        import GraphDSL.Implicits._
-        val broadcast = builder.add(Broadcast[I](2))
-        val merge = builder.add(Merge[O](2))
-        broadcast ~> a ~> merge
-        broadcast ~> b ~> merge
-        FlowShape(broadcast.in, merge.out)
-      }
-    )
 }
 
 object PipelineStorageStream extends Logging {
+
+  def processFlow[In, Out](
+    config: PipelineStorageConfig,
+    process: In => Future[List[Out]])(
+    implicit ec: ExecutionContext): Flow[(Message, In), (Message, List[Out]), NotUsed] =
+      Flow[(Message, In)].mapAsyncUnordered(parallelism = config.parallelism) {
+        case (message, in) =>
+          debug(s"Processing message ${message.messageId()}")
+          process(in).map(w => (message, w))
+      }
 
   def batchRetrieveFlow[T](config: PipelineStorageConfig,
                            retriever: Retriever[T])(
@@ -191,6 +175,24 @@ object PipelineStorageStream extends Logging {
       }
       .mergeSubstreams
   }
+
+  def identityFlow[Out]: Flow[(Message, List[Out]), Message, NotUsed] =
+    Flow[(Message, List[Out])]
+      .collect { case (message, Nil) => message }
+
+  def broadcastAndMerge[I, O](
+    a: Flow[I, O, NotUsed],
+    b: Flow[I, O, NotUsed]): Flow[I, O, NotUsed] =
+    Flow.fromGraph(
+      GraphDSL.create() { implicit builder =>
+        import GraphDSL.Implicits._
+        val broadcast = builder.add(Broadcast[I](2))
+        val merge = builder.add(Merge[O](2))
+        broadcast ~> a ~> merge
+        broadcast ~> b ~> merge
+        FlowShape(broadcast.in, merge.out)
+      }
+    )
 
   private def unzipBundles[T](
     bundles: Seq[Bundle[T]]): (List[Message], List[T]) =
