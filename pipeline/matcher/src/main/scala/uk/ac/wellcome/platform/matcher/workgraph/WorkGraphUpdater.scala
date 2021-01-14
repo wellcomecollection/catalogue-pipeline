@@ -19,7 +19,7 @@ object WorkGraphUpdater extends Logging {
   }
 
   private def checkVersionConflicts(links: WorkLinks,
-                                    existingGraph: WorkGraph) = {
+                                    existingGraph: WorkGraph): Unit = {
     val maybeExistingNode = existingGraph.nodes.find(_.id == links.workId)
     maybeExistingNode match {
       case Some(WorkNode(_, Some(existingVersion), linkedIds, _)) =>
@@ -39,7 +39,7 @@ object WorkGraphUpdater extends Logging {
     }
   }
 
-  private def doUpdate(workUpdate: WorkLinks, existingGraph: WorkGraph) = {
+  private def doUpdate(workUpdate: WorkLinks, existingGraph: WorkGraph): WorkGraph = {
 
     // Find everything that's in the existing graph, but which isn't
     // the node we're updating.
