@@ -133,6 +133,7 @@ class IngestorWorkerServiceTest
                 indexedIndex,
                 IndexedWorkIndexConfig),
               retriever = new ElasticSourceRetriever[Work[Denormalised]](
+                elasticClient,
                 identifiedIndex
               )
             ) { _ =>
