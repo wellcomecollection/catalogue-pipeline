@@ -66,4 +66,14 @@ class ElasticSourceRetrieverTest
       }
     }
   }
+
+  it("fails if asking for an empty list of ids") {
+    withContext(Seq(createT)) { implicit context =>
+      val future = withRetriever { _.apply(List()) }
+
+      whenReady(future.failed) { ex =>
+          ex shouldBe a [IllegalArgumentException]
+      }
+    }
+  }
 }

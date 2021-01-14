@@ -26,13 +26,14 @@ trait ElasticRetriever[T] extends Retriever[T] with Logging {
   def parseGetResponse(response: GetResponse): Try[T]
 
   override final def apply(
-    ids: Seq[String]): Future[RetrieverMultiResult[T]] = {
-    assert(
+    ids: Seq[String]): Future[RetrieverMultiResult[T]] = for {
+    _ <- Future.fromTry(
+      Try(require(
       ids.nonEmpty,
       "You should never look up an empty list of IDs!"
-    )
+      )))
 
-    client
+    result <- client
       .execute {
         multiget(
           ids.map { createGetRequest }
@@ -63,10 +64,10 @@ trait ElasticRetriever[T] extends Retriever[T] with Logging {
             }
             .toMap
 
-          RetrieverMultiResult(
-            found = documents.collect { case (id, Success(t))    => id -> t },
-            notFound = documents.collect { case (id, Failure(e)) => id -> e }
-          )
-      }
-  }
+            RetrieverMultiResult(
+              found = documents.collect { case (id, Success(t)) => id -> t },
+              notFound = documents.collect { case (id, Failure(e)) => id -> e }
+            )
+        }
+    } yield result
 }

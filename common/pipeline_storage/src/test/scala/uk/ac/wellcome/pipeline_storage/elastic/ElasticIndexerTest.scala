@@ -192,4 +192,18 @@ class ElasticIndexerTest
         }
     }
   }
+
+  it("returns a failed future if indexing an empty list of ids"){
+
+    withContext() { implicit context =>
+      withIndexer {
+        indexer =>
+        val future = indexer(Seq())
+
+        whenReady(future.failed) { ex =>
+          ex shouldBe a [IllegalArgumentException]
+        }
+      }
+    }
+  }
 }
