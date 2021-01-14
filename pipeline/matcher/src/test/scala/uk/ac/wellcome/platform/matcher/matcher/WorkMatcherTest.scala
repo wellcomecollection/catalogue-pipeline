@@ -19,7 +19,7 @@ import uk.ac.wellcome.models.work.internal.IdState.Identified
 import uk.ac.wellcome.models.work.internal.MergeCandidate
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
-import uk.ac.wellcome.platform.matcher.models.{WorkGraph, WorkUpdate}
+import uk.ac.wellcome.platform.matcher.models.{WorkGraph, WorkLinks}
 import uk.ac.wellcome.platform.matcher.storage.WorkGraphStore
 import uk.ac.wellcome.storage.locking.dynamo.DynamoLockingService
 
@@ -304,7 +304,7 @@ class WorkMatcherTest
       val mockWorkGraphStore = mock[WorkGraphStore]
       withWorkMatcher(mockWorkGraphStore, lockTable) { workMatcher =>
         val expectedException = new RuntimeException("Failed to put")
-        when(mockWorkGraphStore.findAffectedWorks(any[WorkUpdate]))
+        when(mockWorkGraphStore.findAffectedWorks(any[WorkLinks]))
           .thenReturn(Future.successful(WorkGraph(Set.empty)))
         when(mockWorkGraphStore.put(any[WorkGraph]))
           .thenThrow(expectedException)

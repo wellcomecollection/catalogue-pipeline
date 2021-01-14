@@ -35,7 +35,7 @@ class WorkMatcher(
     doMatch(work).map(MatcherResult)
 
   private def doMatch(work: Work[Identified]): Future[Out] = {
-    val update = WorkUpdate(work)
+    val update = WorkLinks(work)
     withLocks(update, update.ids) {
       for {
         graphBeforeUpdate <- workGraphStore.findAffectedWorks(update)
@@ -58,7 +58,7 @@ class WorkMatcher(
                                    graphAfter: WorkGraph): Set[String] =
     graphBefore.nodes.map(_.componentId) ++ graphAfter.nodes.map(_.componentId)
 
-  private def withLocks(update: WorkUpdate, ids: Set[String])(
+  private def withLocks(update: WorkLinks, ids: Set[String])(
     f: => Future[Out]): Future[Out] =
     lockingService
       .withLocks(ids)(f)
