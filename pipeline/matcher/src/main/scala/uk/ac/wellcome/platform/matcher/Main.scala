@@ -5,6 +5,7 @@ import java.time.Duration
 import scala.concurrent.ExecutionContext
 import akka.actor.ActorSystem
 import com.typesafe.config.Config
+import org.scanamo.auto._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.matcher.matcher.WorkMatcher

@@ -5,7 +5,6 @@ import scala.concurrent.Future
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
-import org.scanamo.error.DynamoReadError
 import uk.ac.wellcome.models.matcher.WorkNode
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
 import uk.ac.wellcome.platform.matcher.models.{WorkGraph, WorkUpdate}
@@ -180,8 +179,7 @@ class WorkGraphStoreTest
       dynamoClient,
       dynamoConfig = createDynamoConfigWith(nonExistentTable)
     ) {
-      override def put(
-        work: WorkNode): Future[Option[Either[DynamoReadError, WorkNode]]] =
+      override def put(nodes: Set[WorkNode]): Future[Unit] =
         Future.failed(expectedException)
     }
 

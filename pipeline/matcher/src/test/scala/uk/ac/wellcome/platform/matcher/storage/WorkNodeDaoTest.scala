@@ -177,7 +177,7 @@ class WorkNodeDaoTest
       withWorkGraphTable { table =>
         withWorkNodeDao(table) { workNodeDao =>
           val work = WorkNode("A", 1, List("B"), "A+B")
-          whenReady(workNodeDao.put(work)) { _ =>
+          whenReady(workNodeDao.put(Set(work))) { _ =>
             val savedLinkedWork =
               get[WorkNode](dynamoClient, table.name)('id -> "A")
             savedLinkedWork shouldBe Some(Right(work))
@@ -204,14 +204,15 @@ class WorkNodeDaoTest
       withWorkGraphTable { table =>
         val dynamoClient = mock[AmazonDynamoDB]
         val expectedException = new RuntimeException("FAILED")
-        when(dynamoClient.putItem(any[PutItemRequest]))
+        when(dynamoClient.batchWriteItem(any[BatchWriteItemRequest]))
           .thenThrow(expectedException)
         val workNodeDao = new WorkNodeDao(
           dynamoClient,
           DynamoConfig(table.name, table.index)
         )
 
-        whenReady(workNodeDao.put(WorkNode("A", 1, List("B"), "A+B")).failed) {
+        whenReady(
+          workNodeDao.put(Set(WorkNode("A", 1, List("B"), "A+B"))).failed) {
           failedException =>
             failedException shouldBe expectedException
         }
@@ -222,14 +223,15 @@ class WorkNodeDaoTest
       "returns a GracefulFailure if ProvisionedThroughputExceededException occurs during put to dynamo") {
       withWorkGraphTable { table =>
         val dynamoClient = mock[AmazonDynamoDB]
-        when(dynamoClient.putItem(any[PutItemRequest]))
+        when(dynamoClient.batchWriteItem(any[BatchWriteItemRequest]))
           .thenThrow(new ProvisionedThroughputExceededException("test"))
         val workNodeDao = new WorkNodeDao(
           dynamoClient,
           DynamoConfig(table.name, table.index)
         )
 
-        whenReady(workNodeDao.put(WorkNode("A", 1, List("B"), "A+B")).failed) {
+        whenReady(
+          workNodeDao.put(Set(WorkNode("A", 1, List("B"), "A+B"))).failed) {
           failedException =>
             failedException shouldBe a[MatcherException]
         }
