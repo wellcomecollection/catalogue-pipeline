@@ -1,6 +1,6 @@
 package uk.ac.wellcome.pipeline_storage
 
-import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future, TimeoutException}
 import akka.stream.FlowShape
 import akka.stream.scaladsl.{Broadcast, Flow, GraphDSL, Merge}
