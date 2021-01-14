@@ -4,6 +4,7 @@ import java.time.Instant
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.models.work.internal.License
+import uk.ac.wellcome.models.work.internal.result.Result
 import uk.ac.wellcome.platform.transformer.mets.fixtures.{
   LocalResources,
   MetsGenerators
@@ -20,7 +21,7 @@ class MetsXmlTransformerTest
 
   it("should transform METS XML") {
     val xml = loadXmlFile("/b30246039.xml")
-    transform(Some(xml), Instant.now) shouldBe Right(
+    transform(root = Some(xml), createdDate = Instant.now) shouldBe Right(
       MetsData(
         recordIdentifier = "b30246039",
         accessConditionDz = Some("CC-BY-NC"),
@@ -36,7 +37,7 @@ class MetsXmlTransformerTest
       recordIdentifier = "b30246039",
       accessConditionStatus = Some("Open"),
       license = Some(License.CC0))
-    transform(Some(str), Instant.now, deleted = true) shouldBe Right(
+    transform(root = Some(str), createdDate = Instant.now, deleted = true) shouldBe Right(
       MetsData(
         recordIdentifier = "b30246039",
         accessConditionDz = None,
@@ -50,7 +51,7 @@ class MetsXmlTransformerTest
   }
 
   it("should error when the root XML doesn't exist in the store") {
-    transform(None, Instant.now) shouldBe a[Left[_, _]]
+    transform(root = None, createdDate = Instant.now) shouldBe a[Left[_, _]]
   }
 
   it("should transform METS XML with manifestations") {
@@ -59,7 +60,7 @@ class MetsXmlTransformerTest
       "b22012692_0003.xml" -> Some(loadXmlFile("/b22012692_0003.xml")),
       "b22012692_0001.xml" -> Some(loadXmlFile("/b22012692_0001.xml")),
     )
-    transform(Some(xml), Instant.now, manifestations = manifestations) shouldBe Right(
+    transform(root = Some(xml), createdDate = Instant.now, manifestations = manifestations) shouldBe Right(
       MetsData(
         recordIdentifier = "b22012692",
         accessConditionDz = Some("PDM"),
@@ -83,7 +84,7 @@ class MetsXmlTransformerTest
           structMap = structMap)),
       "second.xml" -> Some(metsXmlWith("b30246039")),
     )
-    transform(Some(xml), Instant.now, manifestations = manifestations) shouldBe Right(
+    transform(root = Some(xml), createdDate = Instant.now, manifestations = manifestations) shouldBe Right(
       MetsData(
         recordIdentifier = "b30246039",
         accessConditionDz = Some("INC"),
@@ -99,23 +100,23 @@ class MetsXmlTransformerTest
       "b22012692_0003.xml" -> Some(loadXmlFile("/b22012692_0003.xml")),
       "b22012692_0001.xml" -> None,
     )
-    transform(Some(xml), Instant.now, manifestations = manifestations) shouldBe a[
+    transform(root = Some(xml), createdDate = Instant.now, manifestations = manifestations) shouldBe a[
       Left[_, _]]
   }
 
   def transform(root: Option[String],
                 createdDate: Instant,
                 deleted: Boolean = false,
-                manifestations: Map[String, Option[String]] = Map.empty) = {
+                manifestations: Map[String, Option[String]] = Map.empty): Result[MetsData] = {
 
     val metsSourceData = MetsSourceData(
-      "bucket",
-      "path",
-      1,
-      if (root.nonEmpty) "root.xml" else "nonexistent.xml",
-      createdDate,
+      bucket = "bucket",
+      path = "path",
+      version = 1,
+      file = if (root.nonEmpty) "root.xml" else "nonexistent.xml",
+      createdDate = createdDate,
       deleted = deleted,
-      manifestations.toList.map { case (file, _) => file }
+      manifestations = manifestations.toList.map { case (file, _) => file }
     )
 
     val store = new MemoryStore(
