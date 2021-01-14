@@ -21,22 +21,22 @@ class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
       )
     } yield work
 
-  def transform(metsLocation: MetsSourceData): Result[MetsData] =
-    metsLocation.deleted match {
+  def transform(metsSourceData: MetsSourceData): Result[MetsData] =
+    metsSourceData.deleted match {
       case true =>
         for {
-          xml <- getMetsXml(metsLocation.xmlLocation)
+          xml <- getMetsXml(metsSourceData.xmlLocation)
           recordIdentifier <- xml.recordIdentifier
         } yield MetsData(recordIdentifier = recordIdentifier, deleted = true)
       case false =>
-        getMetsXml(metsLocation.xmlLocation)
+        getMetsXml(metsSourceData.xmlLocation)
           .flatMap { root =>
-            if (metsLocation.manifestations.isEmpty)
+            if (metsSourceData.manifestations.isEmpty)
               transformWithoutManifestations(root)
             else
               transformWithManifestations(
                 root,
-                metsLocation.manifestationLocations)
+                metsSourceData.manifestationLocations)
           }
     }
 

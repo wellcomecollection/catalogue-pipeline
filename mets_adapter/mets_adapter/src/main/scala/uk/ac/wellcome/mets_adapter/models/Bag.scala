@@ -3,7 +3,7 @@ package uk.ac.wellcome.mets_adapter.models
 import java.time.Instant
 import weco.catalogue.source_model.mets.MetsSourceData
 
-/** The response receiveved from the storage-service bag API.
+/** The response received from the storage-service bag API.
   */
 case class Bag(info: BagInfo,
                manifest: BagManifest,
@@ -29,9 +29,8 @@ case class Bag(info: BagInfo,
         }
       }
 
-  private def containsOnlyMetsFile(metsFile: String) = {
+  private def containsOnlyMetsFile(metsFile: String): Boolean =
     manifest.files.forall(f => f.path == metsFile)
-  }
 
   // Storage-service only stores a list of files, so we need to search for a
   // XML file in data directory named with some b-number.
