@@ -300,9 +300,9 @@ trait ElasticsearchFixtures
     }
   }
 
-  def insertImagesIntoElasticsearch[State <: ImageState](
-    index: Index,
-    images: Image[State]*)(implicit encoder: Encoder[Image[State]]): Assertion = {
+  def insertImagesIntoElasticsearch[State <: ImageState](index: Index,
+                                                         images: Image[State]*)(
+    implicit encoder: Encoder[Image[State]]): Assertion = {
     val result = elasticClient.execute(
       bulk(
         images.map { image =>
