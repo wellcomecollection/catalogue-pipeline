@@ -76,7 +76,8 @@ class IngestorFeatureTest
         indexedIndex,
         IndexedWorkIndexConfig),
       retriever = new ElasticSourceRetriever[Work[Denormalised]](
-        elasticClient, denormalisedIndex
+        elasticClient,
+        denormalisedIndex
       )
     )(testWith)
 }

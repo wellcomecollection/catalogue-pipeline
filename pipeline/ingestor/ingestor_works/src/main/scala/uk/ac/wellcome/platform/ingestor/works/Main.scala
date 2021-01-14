@@ -31,9 +31,8 @@ object Main extends WellcomeTypesafeApp {
 
     val workRetriever = ElasticSourceRetrieverBuilder[Work[Denormalised]](
       config,
-      client = ElasticBuilder.buildElasticClient(
-        config,
-        namespace = "pipeline_storage"),
+      client = ElasticBuilder
+        .buildElasticClient(config, namespace = "pipeline_storage"),
       namespace = "denormalised-works")
 
     val workIndexer = ElasticIndexerBuilder[Work[Indexed]](
