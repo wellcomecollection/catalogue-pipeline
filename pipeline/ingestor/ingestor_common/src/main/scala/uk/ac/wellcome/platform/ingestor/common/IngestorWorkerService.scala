@@ -22,10 +22,10 @@ class IngestorWorkerService[Destination, In, Out](
   def run(): Future[Done] =
     pipelineStream.foreach(this.getClass.getSimpleName, processMessage)
 
-  private def processMessage(message: NotificationMessage): Future[List[Out]] =
+  private def processMessage(message: NotificationMessage): Future[Option[Out]] =
     workRetriever
       .apply(message.body)
       .map { item =>
-        List(transform(item))
+        Some(transform(item))
       }
 }

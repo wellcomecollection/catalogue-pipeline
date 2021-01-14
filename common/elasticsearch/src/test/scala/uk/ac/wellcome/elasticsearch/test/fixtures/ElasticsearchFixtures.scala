@@ -24,7 +24,6 @@ import uk.ac.wellcome.fixtures._
 import uk.ac.wellcome.json.JsonUtil.{fromJson, toJson}
 import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.models.Implicits._
 import WorkState.Identified
 
 trait ElasticsearchFixtures
@@ -164,7 +163,7 @@ trait ElasticsearchFixtures
     index: Index,
     works: Work[State]*)(implicit enc: Encoder[Work[State]]): Seq[Assertion] = {
     implicit val id: CanonicalId[Work[State]] =
-      (work: Work[State]) => work.state.id
+      (work: Work[State]) => work.id
     assertElasticsearchEventuallyHas(index, works: _*)
   }
 
@@ -173,7 +172,7 @@ trait ElasticsearchFixtures
     images: Image[State]*)(
     implicit enc: Encoder[Image[State]]): Seq[Assertion] = {
     implicit val id: CanonicalId[Image[State]] =
-      (image: Image[State]) => image.state.id
+      (image: Image[State]) => image.id
     assertElasticsearchEventuallyHas(index, images: _*)
   }
 
@@ -301,9 +300,9 @@ trait ElasticsearchFixtures
     }
   }
 
-  def insertImagesIntoElasticsearch(
+  def insertImagesIntoElasticsearch[State <: ImageState](
     index: Index,
-    images: Image[ImageState.Indexed]*): Assertion = {
+    images: Image[State]*)(implicit encoder: Encoder[Image[State]]): Assertion = {
     val result = elasticClient.execute(
       bulk(
         images.map { image =>

@@ -28,14 +28,15 @@ class ImagesIngestorFeatureTest
         sendNotificationToSQS(queue = queue, body = image.id)
         withLocalImagesIndex { index =>
           withLocalAugmentedImageIndex { augmentedIndex =>
-            val indexer = new ElasticIndexer[Image[Indexed]](
-              elasticClient,
-              index,
-              IndexedImageIndexConfig)
+            insertImagesIntoElasticsearch(augmentedIndex, image)
             val retriever = new ElasticRetriever[Image[Augmented]](
               elasticClient,
               augmentedIndex
             )
+            val indexer = new ElasticIndexer[Image[Indexed]](
+              elasticClient,
+              index,
+              IndexedImageIndexConfig)
             withWorkerService(queue, retriever, indexer) { _ =>
               assertElasticsearchEventuallyHasImage[Indexed](
                 index,
