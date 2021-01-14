@@ -60,7 +60,10 @@ class MetsXmlTransformerTest
       "b22012692_0003.xml" -> Some(loadXmlFile("/b22012692_0003.xml")),
       "b22012692_0001.xml" -> Some(loadXmlFile("/b22012692_0001.xml")),
     )
-    transform(root = Some(xml), createdDate = Instant.now, manifestations = manifestations) shouldBe Right(
+    transform(
+      root = Some(xml),
+      createdDate = Instant.now,
+      manifestations = manifestations) shouldBe Right(
       MetsData(
         recordIdentifier = "b22012692",
         accessConditionDz = Some("PDM"),
@@ -84,7 +87,10 @@ class MetsXmlTransformerTest
           structMap = structMap)),
       "second.xml" -> Some(metsXmlWith("b30246039")),
     )
-    transform(root = Some(xml), createdDate = Instant.now, manifestations = manifestations) shouldBe Right(
+    transform(
+      root = Some(xml),
+      createdDate = Instant.now,
+      manifestations = manifestations) shouldBe Right(
       MetsData(
         recordIdentifier = "b30246039",
         accessConditionDz = Some("INC"),
@@ -100,14 +106,17 @@ class MetsXmlTransformerTest
       "b22012692_0003.xml" -> Some(loadXmlFile("/b22012692_0003.xml")),
       "b22012692_0001.xml" -> None,
     )
-    transform(root = Some(xml), createdDate = Instant.now, manifestations = manifestations) shouldBe a[
-      Left[_, _]]
+    transform(
+      root = Some(xml),
+      createdDate = Instant.now,
+      manifestations = manifestations) shouldBe a[Left[_, _]]
   }
 
   def transform(root: Option[String],
                 createdDate: Instant,
                 deleted: Boolean = false,
-                manifestations: Map[String, Option[String]] = Map.empty): Result[MetsData] = {
+                manifestations: Map[String, Option[String]] = Map.empty)
+    : Result[MetsData] = {
 
     val metsSourceData = MetsSourceData(
       bucket = "bucket",
