@@ -27,15 +27,14 @@ class MatcherFeatureTest
     with MatcherFixtures
     with WorkLinksGenerators {
 
-  it(
-    "processes a message with a simple Work.Visible[Identified] with no linked works") {
+  it("processes a message with a single WorkLinks with no linked works") {
     implicit val retriever: MemoryRetriever[WorkLinks] =
       new MemoryRetriever[WorkLinks]()
     val messageSender = new MemoryMessageSender()
 
     withLocalSqsQueue() { queue =>
       withWorkerService(retriever, queue, messageSender) { _ =>
-        val links = createWorkLinks
+        val links = createWorkLinksWith(referencedIds = Set.empty)
 
         val expectedResult = MatcherResult(
           Set(
