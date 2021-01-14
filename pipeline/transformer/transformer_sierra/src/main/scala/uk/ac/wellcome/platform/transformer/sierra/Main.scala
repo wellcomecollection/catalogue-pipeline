@@ -55,7 +55,8 @@ object Main extends WellcomeTypesafeApp {
     new SierraTransformerWorker(
       pipelineStream = pipelineStream,
       sierraReadable = S3TypedStore[SierraTransformable],
-      retriever = ElasticSourceRetrieverBuilder.apply[Work[Source]](esClient, config)
+      retriever =
+        ElasticSourceRetrieverBuilder.apply[Work[Source]](esClient, config)
     )
   }
 }

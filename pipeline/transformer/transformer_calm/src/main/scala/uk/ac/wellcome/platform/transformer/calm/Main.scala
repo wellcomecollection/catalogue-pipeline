@@ -54,7 +54,8 @@ object Main extends WellcomeTypesafeApp with AWSClientConfigBuilder {
     new CalmTransformerWorker(
       pipelineStream = pipelineStream,
       recordReadable = S3TypedStore[CalmRecord],
-      retriever = ElasticSourceRetrieverBuilder.apply[Work[Source]](esClient, config)
+      retriever =
+        ElasticSourceRetrieverBuilder.apply[Work[Source]](esClient, config)
     )
   }
 }

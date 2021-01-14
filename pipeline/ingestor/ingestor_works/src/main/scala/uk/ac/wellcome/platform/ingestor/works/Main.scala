@@ -30,10 +30,11 @@ object Main extends WellcomeTypesafeApp {
     val denormalisedWorkStream =
       SQSBuilder.buildSQSStream[NotificationMessage](config)
 
-
     val workRetriever = {
       implicit val esClient: ElasticClient =
-        ElasticBuilder.buildElasticClient(config, namespace = "pipeline_storage")
+        ElasticBuilder.buildElasticClient(
+          config,
+          namespace = "pipeline_storage")
 
       ElasticSourceRetrieverBuilder[Work[Denormalised]](
         config,

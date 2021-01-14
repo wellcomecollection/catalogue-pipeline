@@ -55,7 +55,8 @@ object Main extends WellcomeTypesafeApp {
     new MiroTransformerWorker(
       pipelineStream = pipelineStream,
       miroReadable = S3TypedStore[MiroRecord],
-      retriever = ElasticSourceRetrieverBuilder.apply[Work[Source]](esClient, config)
+      retriever =
+        ElasticSourceRetrieverBuilder.apply[Work[Source]](esClient, config)
     )
   }
 }

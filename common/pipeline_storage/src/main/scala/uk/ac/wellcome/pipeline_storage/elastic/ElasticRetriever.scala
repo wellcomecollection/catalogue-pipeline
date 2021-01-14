@@ -25,7 +25,8 @@ trait ElasticRetriever[T] extends Retriever[T] with Logging {
   def createGetRequest(id: String): GetRequest
   def parseGetResponse(response: GetResponse): Try[T]
 
-  override final def apply(ids: Seq[String]): Future[RetrieverMultiResult[T]] = {
+  override final def apply(
+    ids: Seq[String]): Future[RetrieverMultiResult[T]] = {
     assert(
       ids.nonEmpty,
       "You should never look up an empty list of IDs!"

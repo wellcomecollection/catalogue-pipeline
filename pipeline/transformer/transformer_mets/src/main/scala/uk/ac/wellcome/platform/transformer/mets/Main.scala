@@ -52,7 +52,8 @@ object Main extends WellcomeTypesafeApp with AWSClientConfigBuilder {
     new MetsTransformerWorker(
       pipelineStream = pipelineStream,
       metsXmlStore = S3TypedStore[String],
-      retriever = ElasticSourceRetrieverBuilder.apply[Work[Source]](esClient, config)
+      retriever =
+        ElasticSourceRetrieverBuilder.apply[Work[Source]](esClient, config)
     )
   }
 }

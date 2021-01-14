@@ -9,9 +9,7 @@ import io.circe.Decoder
 import scala.concurrent.ExecutionContext
 import scala.util.Try
 
-class ElasticSourceRetriever[T](
-  val client: ElasticClient,
-  val index: Index)(
+class ElasticSourceRetriever[T](val client: ElasticClient, val index: Index)(
   implicit
   val ec: ExecutionContext,
   decoder: Decoder[T]
