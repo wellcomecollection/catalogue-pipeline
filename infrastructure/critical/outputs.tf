@@ -30,3 +30,13 @@ output "vhs_miro_inventory_table_name" {
 output "vhs_miro_inventory_assumable_read_role" {
   value = module.vhs_miro_migration.assumable_read_role
 }
+
+# Catalogue Pipeline Elastic Cloud
+
+output "catalogue_pipeline_storage_elastic_cloud_sg_id" {
+  value = aws_security_group.allow_catalogue_pipeline_elastic_cloud_vpce.id
+}
+
+output "catalogue_pipeline_ec_privatelink_host" {
+  value = local.catalogue_pipeline_ec_privatelink_host
+}
