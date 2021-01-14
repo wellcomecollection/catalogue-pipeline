@@ -60,15 +60,12 @@ object Main extends WellcomeTypesafeApp {
       indexConfig = MergedWorkIndexConfig
     )
 
-    val stream = PipelineStorageStreamBuilder.buildPipelineStorageStream(
-      sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
-      indexer = workIndexer,
-      messageSender = workSender
-    )(config)
-
     new MergerWorkerService(
-      pipelineStorageStream = stream,
       sourceWorkLookup = sourceWorkLookup,
+      msgStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
+      config = PipelineStorageStreamBuilder.buildPipelineStorageConfig(config),
+      workIndexer = workIndexer,
+      workMsgSender = workSender,
       mergerManager = mergerManager,
       imageSender = imageSender
     )

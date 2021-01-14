@@ -12,21 +12,35 @@ import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, MatcherResult}
 import uk.ac.wellcome.models.work.internal.WorkState.{Identified, Merged}
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.pipeline_storage.PipelineStorageStream
+import uk.ac.wellcome.messaging.sqs.SQSStream
+import uk.ac.wellcome.pipeline_storage.{Indexer, PipelineStorageStream, PipelineStorageConfig}
 import uk.ac.wellcome.typesafe.Runnable
 
 class MergerWorkerService[WorkDestination, ImageDestination](
-  pipelineStorageStream: PipelineStorageStream[NotificationMessage,
-                                               Work[Merged],
-                                               WorkDestination],
+  msgStream: SQSStream[NotificationMessage],
+  workMsgSender: MessageSender[WorkDestination],
+  config: PipelineStorageConfig,
+  workIndexer: Indexer[Work[Merged]],
   sourceWorkLookup: IdentifiedWorkLookup,
   mergerManager: MergerManager,
   imageSender: MessageSender[ImageDestination]
 )(implicit ec: ExecutionContext)
     extends Runnable {
 
+  import PipelineStorageStream._
+
   def run(): Future[Done] =
-    pipelineStorageStream.foreach(this.getClass.getSimpleName, processMessage)
+    msgStream.runStream(
+      this.getClass.getSimpleName,
+      source =>
+        source
+          .via(processFlow(config, processMessage))
+          .via(
+            broadcastAndMerge(
+              batchIndexAndSendFlow(config, workMsgSender, workIndexer),
+              identityFlow)
+            )
+    )
 
   private def processMessage(
     message: NotificationMessage): Future[List[Work[Merged]]] =
