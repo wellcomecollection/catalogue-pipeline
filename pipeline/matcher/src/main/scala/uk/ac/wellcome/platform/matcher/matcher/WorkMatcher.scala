@@ -74,12 +74,14 @@ class WorkMatcher(
       case _                     => new RuntimeException(failure.toString)
     }
 
-  private def convertToIdentifiersList(graph: WorkGraph): Set[MatchedIdentifiers] =
+  private def convertToIdentifiersList(
+    graph: WorkGraph): Set[MatchedIdentifiers] =
     groupBySetId(graph).map {
       case (_, workNodes: Set[WorkNode]) =>
         MatchedIdentifiers(workNodes.map(WorkIdentifier(_)))
     }.toSet
 
-  private def groupBySetId(updatedGraph: WorkGraph): Map[String, Set[WorkNode]] =
+  private def groupBySetId(
+    updatedGraph: WorkGraph): Map[String, Set[WorkNode]] =
     updatedGraph.nodes.groupBy(_.componentId)
 }

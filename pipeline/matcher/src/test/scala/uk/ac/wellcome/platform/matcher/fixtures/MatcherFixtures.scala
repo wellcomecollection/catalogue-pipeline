@@ -49,7 +49,7 @@ trait MatcherFixtures
     }
 
   def withWorkerService[R](
-                            workLinksRetriever: MemoryRetriever[WorkLinks],
+    workLinksRetriever: MemoryRetriever[WorkLinks],
     queue: SQS.Queue,
     messageSender: MemoryMessageSender,
     graphTable: Table)(testWith: TestWith[MatcherWorkerService[String], R]): R =

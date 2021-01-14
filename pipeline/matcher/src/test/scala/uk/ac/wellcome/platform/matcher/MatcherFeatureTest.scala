@@ -29,7 +29,8 @@ class MatcherFeatureTest
 
   it(
     "processes a message with a simple Work.Visible[Identified] with no linked works") {
-    implicit val retriever: MemoryRetriever[WorkLinks] = new MemoryRetriever[WorkLinks]()
+    implicit val retriever: MemoryRetriever[WorkLinks] =
+      new MemoryRetriever[WorkLinks]()
     val messageSender = new MemoryMessageSender()
 
     withLocalSqsQueue() { queue =>
@@ -39,7 +40,8 @@ class MatcherFeatureTest
         val expectedResult = MatcherResult(
           Set(
             MatchedIdentifiers(
-              identifiers = Set(WorkIdentifier(links.workId, version = links.version))
+              identifiers =
+                Set(WorkIdentifier(links.workId, version = links.version))
             )
           )
         )
@@ -55,7 +57,8 @@ class MatcherFeatureTest
   }
 
   it("skips a message if the graph store already has a newer version") {
-    implicit val retriever: MemoryRetriever[WorkLinks] = new MemoryRetriever[WorkLinks]()
+    implicit val retriever: MemoryRetriever[WorkLinks] =
+      new MemoryRetriever[WorkLinks]()
     val messageSender = new MemoryMessageSender()
 
     withLocalSqsQueuePair() {

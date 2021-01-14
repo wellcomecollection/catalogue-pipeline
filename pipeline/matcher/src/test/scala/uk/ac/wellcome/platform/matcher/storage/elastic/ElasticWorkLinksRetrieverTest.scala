@@ -17,7 +17,7 @@ import uk.ac.wellcome.platform.matcher.models.WorkLinks
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class ElasticWorkLinksRetrieverTest
-  extends RetrieverTestCases[Index, WorkLinks]
+    extends RetrieverTestCases[Index, WorkLinks]
     with ElasticsearchFixtures
     with ElasticIndexerFixtures
     with WorkGenerators
@@ -31,14 +31,15 @@ class ElasticWorkLinksRetrieverTest
           identifiedWork(canonicalId = lk.workId)
             .withVersion(lk.version)
             .mergeCandidates(
-              lk.referencedWorkIds.map {
-                id => MergeCandidate(
+              lk.referencedWorkIds.map { id =>
+                MergeCandidate(
                   id = Identified(
                     canonicalId = id,
                     sourceIdentifier = createSourceIdentifier
                   ),
                   reason = None
-                ) }.toList
+                )
+              }.toList
             )
         }
 
@@ -53,8 +54,7 @@ class ElasticWorkLinksRetrieverTest
       }
     }
 
-  override def withRetriever[R](
-    testWith: TestWith[Retriever[WorkLinks], R])(
+  override def withRetriever[R](testWith: TestWith[Retriever[WorkLinks], R])(
     implicit index: Index): R =
     testWith(
       new ElasticWorkLinksRetriever(elasticClient, index)

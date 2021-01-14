@@ -37,7 +37,8 @@ class MatcherWorkerServiceTest
     val expectedResult =
       MatcherResult(
         Set(
-          MatchedIdentifiers(identifiers = Set(WorkIdentifier(workLinks.workId, version = workLinks.version)))
+          MatchedIdentifiers(identifiers =
+            Set(WorkIdentifier(workLinks.workId, version = workLinks.version)))
         )
       )
 

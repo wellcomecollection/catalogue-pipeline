@@ -49,15 +49,20 @@ class WorkMatcherTest
 
             whenReady(workMatcher.matchWork(links)) { matcherResult =>
               matcherResult shouldBe
-                MatcherResult(Set(
-                  MatchedIdentifiers(Set(WorkIdentifier(links.workId, links.version)))))
+                MatcherResult(Set(MatchedIdentifiers(
+                  Set(WorkIdentifier(links.workId, links.version)))))
 
               val savedLinkedWork =
-                get[WorkNode](dynamoClient, graphTable.name)('id -> links.workId)
+                get[WorkNode](dynamoClient, graphTable.name)(
+                  'id -> links.workId)
                   .map(_.value)
 
               savedLinkedWork shouldBe Some(
-                WorkNode(links.workId, links.version, Nil, ciHash(links.workId)))
+                WorkNode(
+                  links.workId,
+                  links.version,
+                  Nil,
+                  ciHash(links.workId)))
             }
           }
         }
@@ -96,7 +101,8 @@ class WorkMatcherTest
                   List(identifierB.canonicalId),
                   ciHash(
                     List(identifierA.canonicalId, identifierB.canonicalId).sorted
-                      .mkString("+"))),
+                      .mkString("+"))
+                ),
                 WorkNode(
                   identifierB.canonicalId,
                   None,
@@ -211,7 +217,8 @@ class WorkMatcherTest
               workGraphStore,
               new DynamoLockingService) { workMatcher =>
               val failedLock = for {
-                _ <- Future.successful(lockDao.lock(links.workId, UUID.randomUUID))
+                _ <- Future.successful(
+                  lockDao.lock(links.workId, UUID.randomUUID))
                 result <- workMatcher.matchWork(links)
               } yield result
               whenReady(failedLock.failed) { failedMatch =>
@@ -277,9 +284,8 @@ class WorkMatcherTest
 
         val links = createWorkLinks
 
-        whenReady(workMatcher.matchWork(links).failed) {
-          actualException =>
-            actualException shouldBe MatcherException(expectedException)
+        whenReady(workMatcher.matchWork(links).failed) { actualException =>
+          actualException shouldBe MatcherException(expectedException)
         }
       }
     }

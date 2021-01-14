@@ -57,7 +57,9 @@ object Main extends WellcomeTypesafeApp {
     val workMatcher = new WorkMatcher(workGraphStore, new DynamoLockingService)
 
     val workLinksRetriever =
-      new ElasticWorkLinksRetriever(esClient, index = Index(config.requireString("es.index")))
+      new ElasticWorkLinksRetriever(
+        esClient,
+        index = Index(config.requireString("es.index")))
 
     new MatcherWorkerService(
       workLinksRetriever = workLinksRetriever,

@@ -24,6 +24,8 @@ trait WorkLinksGenerators extends IdentifiersGenerators {
 
   def createWorkLinks: WorkLinks =
     createWorkLinksWith(
-      referencedIds = collectionOf(min = 0) { createIdentifier(randomAlphanumeric()) }.toSet
+      referencedIds = collectionOf(min = 0) {
+        createIdentifier(randomAlphanumeric())
+      }.toSet
     )
 }
