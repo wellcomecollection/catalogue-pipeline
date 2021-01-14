@@ -9,9 +9,9 @@ import uk.ac.wellcome.platform.transformer.mets.fixtures.{
   LocalResources,
   MetsGenerators
 }
-import uk.ac.wellcome.storage.s3.S3ObjectLocation
+import uk.ac.wellcome.storage.s3.{S3ObjectLocation, S3ObjectLocationPrefix}
 import uk.ac.wellcome.storage.store.memory.MemoryStore
-import weco.catalogue.source_model.mets.MetsSourceData
+import weco.catalogue.source_model.mets.{DeletedMetsFile, MetsFileWithImages}
 
 class MetsXmlTransformerTest
     extends AnyFunSpec
@@ -37,7 +37,7 @@ class MetsXmlTransformerTest
       recordIdentifier = "b30246039",
       accessConditionStatus = Some("Open"),
       license = Some(License.CC0))
-    transform(root = Some(str), createdDate = Instant.now, deleted = true) shouldBe Right(
+    transform(id = "b30246039", root = Some(str), createdDate = Instant.now, deleted = true) shouldBe Right(
       MetsData(
         recordIdentifier = "b30246039",
         accessConditionDz = None,
@@ -112,21 +112,27 @@ class MetsXmlTransformerTest
       manifestations = manifestations) shouldBe a[Left[_, _]]
   }
 
-  def transform(root: Option[String],
+  def transform(id: String = randomAlphanumeric(),
+                root: Option[String],
                 createdDate: Instant,
                 deleted: Boolean = false,
                 manifestations: Map[String, Option[String]] = Map.empty)
     : Result[MetsData] = {
 
-    val metsSourceData = MetsSourceData(
-      bucket = "bucket",
-      path = "path",
-      version = 1,
-      file = if (root.nonEmpty) "root.xml" else "nonexistent.xml",
-      createdDate = createdDate,
-      deleted = deleted,
-      manifestations = manifestations.toList.map { case (file, _) => file }
-    )
+    val metsSourceData = if (deleted) {
+      DeletedMetsFile(
+        createdDate = createdDate,
+        version = 1
+      )
+    } else {
+      MetsFileWithImages(
+        root = S3ObjectLocationPrefix(bucket = "bucket", keyPrefix = "path"),
+        version = 1,
+        filename = if (root.nonEmpty) "root.xml" else "nonexistent.xml",
+        createdDate = createdDate,
+        manifestations = manifestations.toList.map { case (file, _) => file }
+      )
+    }
 
     val store = new MemoryStore(
       (manifestations ++ root
@@ -136,7 +142,7 @@ class MetsXmlTransformerTest
       }
     )
 
-    new MetsXmlTransformer(store).transform(metsSourceData)
+    new MetsXmlTransformer(store).transform(id, metsSourceData)
   }
 
   def createFileReferences(
