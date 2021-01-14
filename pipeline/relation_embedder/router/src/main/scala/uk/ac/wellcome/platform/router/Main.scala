@@ -11,7 +11,7 @@ import uk.ac.wellcome.models.work.internal.Work
 import uk.ac.wellcome.models.work.internal.WorkState.{Denormalised, Merged}
 import uk.ac.wellcome.pipeline_storage.typesafe.{
   ElasticIndexerBuilder,
-  ElasticRetrieverBuilder,
+  ElasticSourceRetrieverBuilder,
   PipelineStorageStreamBuilder
 }
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
@@ -35,7 +35,7 @@ object Main extends WellcomeTypesafeApp {
       indexConfig = DenormalisedWorkIndexConfig
     )
 
-    val workRetriever = ElasticRetrieverBuilder[Work[Merged]](
+    val workRetriever = ElasticSourceRetrieverBuilder[Work[Merged]](
       config,
       esClient,
       namespace = "merged-works"

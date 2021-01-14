@@ -10,7 +10,8 @@ import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.work.internal.WorkState.{Denormalised, Indexed}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.pipeline_storage.Indexable.workIndexable
-import uk.ac.wellcome.pipeline_storage.{ElasticIndexer, ElasticRetriever}
+import uk.ac.wellcome.pipeline_storage.elastic.ElasticSourceRetriever
+import uk.ac.wellcome.pipeline_storage.ElasticIndexer
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -131,8 +132,7 @@ class IngestorWorkerServiceTest
                 elasticClient,
                 indexedIndex,
                 IndexedWorkIndexConfig),
-              retriever = new ElasticRetriever[Work[Denormalised]](
-                elasticClient,
+              retriever = new ElasticSourceRetriever[Work[Denormalised]](
                 identifiedIndex
               )
             ) { _ =>

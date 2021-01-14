@@ -19,13 +19,14 @@ import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.pipeline_storage.typesafe.{
   ElasticIndexerBuilder,
-  ElasticRetrieverBuilder,
+  ElasticSourceRetrieverBuilder,
   PipelineStorageStreamBuilder
 }
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.elasticsearch.IdentifiedWorkIndexConfig
 import WorkState.Identified
+import com.sksamuel.elastic4s.ElasticClient
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
@@ -45,7 +46,8 @@ object Main extends WellcomeTypesafeApp {
       )
     )
 
-    val esClient = ElasticBuilder.buildElasticClient(config)
+    implicit val esClient: ElasticClient =
+      ElasticBuilder.buildElasticClient(config)
 
     val workIndexer = ElasticIndexerBuilder[Work[Identified]](
       config,
@@ -64,9 +66,8 @@ object Main extends WellcomeTypesafeApp {
         messageSender)(config)
     new IdMinterWorkerService(
       identifierGenerator = identifierGenerator,
-      jsonRetriever = ElasticRetrieverBuilder[Json](
+      jsonRetriever = ElasticSourceRetrieverBuilder[Json](
         config,
-        esClient,
         namespace = "source-works"),
       pipelineStream = pipelineStream,
       rdsClientConfig = RDSBuilder.buildRDSClientConfig(config),
