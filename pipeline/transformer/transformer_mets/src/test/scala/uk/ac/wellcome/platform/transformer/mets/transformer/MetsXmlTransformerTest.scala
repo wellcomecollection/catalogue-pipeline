@@ -108,7 +108,7 @@ class MetsXmlTransformerTest
                 deleted: Boolean = false,
                 manifestations: Map[String, Option[String]] = Map.empty) = {
 
-    val metsLocation = MetsSourceData(
+    val metsSourceData = MetsSourceData(
       "bucket",
       "path",
       1,
@@ -126,7 +126,7 @@ class MetsXmlTransformerTest
       }
     )
 
-    new MetsXmlTransformer(store).transform(metsLocation)
+    new MetsXmlTransformer(store).transform(metsSourceData)
   }
 
   def createFileReferences(
