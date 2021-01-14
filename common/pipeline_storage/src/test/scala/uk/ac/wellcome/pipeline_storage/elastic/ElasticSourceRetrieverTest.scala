@@ -71,8 +71,8 @@ class ElasticSourceRetrieverTest
     withContext(Seq(createT)) { implicit context =>
       val future = withRetriever { _.apply(List()) }
 
-      whenReady(future.failed) { ex =>
-        ex shouldBe a[IllegalArgumentException]
+      whenReady(future.failed) {
+        _ shouldBe a[IllegalArgumentException]
       }
     }
   }
