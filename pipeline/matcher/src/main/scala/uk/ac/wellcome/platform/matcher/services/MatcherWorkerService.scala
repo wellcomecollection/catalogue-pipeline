@@ -7,8 +7,6 @@ import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.internal.Work
-import uk.ac.wellcome.models.work.internal.WorkState.Identified
 import uk.ac.wellcome.pipeline_storage.Retriever
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.matcher.WorkMatcher
@@ -21,7 +19,7 @@ import uk.ac.wellcome.typesafe.Runnable
 import scala.concurrent.{ExecutionContext, Future}
 
 class MatcherWorkerService[MsgDestination](
-  workRetriever: Retriever[Work[Identified]],
+  workLinksRetriever: Retriever[WorkLinks],
   msgStream: SQSStream[NotificationMessage],
   msgSender: MessageSender[MsgDestination],
   workMatcher: WorkMatcher)(implicit ec: ExecutionContext)
@@ -33,8 +31,7 @@ class MatcherWorkerService[MsgDestination](
 
   def processMessage(message: NotificationMessage): Future[Unit] = {
     (for {
-      work: Work[Identified] <- workRetriever.apply(id = message.body)
-      workLinks = WorkLinks(work)
+      workLinks <- workLinksRetriever.apply(id = message.body)
       identifiersList <- workMatcher.matchWork(workLinks)
       _ <- Future.fromTry(msgSender.sendT(identifiersList))
     } yield ()).recover {

@@ -12,7 +12,6 @@ import org.scanamo.semiauto._
 import org.scanamo.time.JavaTimeFormats._
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.matcher.matcher.WorkMatcher
 import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, WorkNode}
 import uk.ac.wellcome.platform.matcher.services.MatcherWorkerService
@@ -27,10 +26,8 @@ import uk.ac.wellcome.storage.locking.dynamo.{
   DynamoLockingService,
   ExpiringLock
 }
-import WorkState.Identified
 import uk.ac.wellcome.pipeline_storage.MemoryRetriever
-
-import scala.collection.mutable
+import uk.ac.wellcome.platform.matcher.models.WorkLinks
 
 trait MatcherFixtures
     extends SQS
@@ -52,7 +49,7 @@ trait MatcherFixtures
     }
 
   def withWorkerService[R](
-    workRetriever: MemoryRetriever[Work[Identified]],
+                            workLinksRetriever: MemoryRetriever[WorkLinks],
     queue: SQS.Queue,
     messageSender: MemoryMessageSender,
     graphTable: Table)(testWith: TestWith[MatcherWorkerService[String], R]): R =
@@ -63,7 +60,7 @@ trait MatcherFixtures
             withSQSStream[NotificationMessage, R](queue) { msgStream =>
               val workerService =
                 new MatcherWorkerService(
-                  workRetriever = workRetriever,
+                  workLinksRetriever = workLinksRetriever,
                   msgStream,
                   messageSender,
                   workMatcher)
@@ -75,12 +72,12 @@ trait MatcherFixtures
       }
     }
 
-  def withWorkerService[R](workRetriever: MemoryRetriever[Work[Identified]],
+  def withWorkerService[R](workLinksRetriever: MemoryRetriever[WorkLinks],
                            queue: SQS.Queue,
                            messageSender: MemoryMessageSender)(
     testWith: TestWith[MatcherWorkerService[String], R]): R =
     withWorkGraphTable { graphTable =>
-      withWorkerService(workRetriever, queue, messageSender, graphTable) {
+      withWorkerService(workLinksRetriever, queue, messageSender, graphTable) {
         service =>
           testWith(service)
       }
@@ -122,12 +119,12 @@ trait MatcherFixtures
   }
 
   def sendWork(
-    work: Work[Identified],
-    retriever: MemoryRetriever[Work[Identified]],
+    links: WorkLinks,
+    retriever: MemoryRetriever[WorkLinks],
     queue: SQS.Queue
   ): Any = {
-    retriever.index ++= Map(work.id -> work)
-    sendNotificationToSQS(queue, body = work.id)
+    retriever.index ++= Map(links.workId -> links)
+    sendNotificationToSQS(queue, body = links.workId)
   }
 
   def ciHash(str: String): String =
@@ -145,9 +142,4 @@ trait MatcherFixtures
   def scan[T](dynamoClient: AmazonDynamoDB, tableName: String)(
     implicit format: DynamoFormat[T]): List[Either[DynamoReadError, T]] =
     Scanamo(dynamoClient).exec { ScanamoTable[T](tableName).scan() }
-
-  def createRetriever: MemoryRetriever[Work[Identified]] =
-    new MemoryRetriever[Work[Identified]](
-      index = mutable.Map[String, Work[Identified]]()
-    )
 }

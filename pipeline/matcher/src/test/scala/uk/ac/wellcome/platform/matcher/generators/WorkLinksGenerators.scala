@@ -12,7 +12,7 @@ trait WorkLinksGenerators extends IdentifiersGenerators {
     )
 
   def createWorkLinksWith(
-    id: IdState.Identified,
+    id: IdState.Identified = createIdentifier(randomAlphanumeric()),
     version: Int = randomInt(from = 1, to = 10),
     referencedIds: Set[IdState.Identified] = Set.empty
   ): WorkLinks =
@@ -24,7 +24,6 @@ trait WorkLinksGenerators extends IdentifiersGenerators {
 
   def createWorkLinks: WorkLinks =
     createWorkLinksWith(
-      id = createIdentifier(randomAlphanumeric()),
       referencedIds = collectionOf(min = 0) { createIdentifier(randomAlphanumeric()) }.toSet
     )
 }
