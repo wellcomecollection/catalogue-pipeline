@@ -12,7 +12,10 @@ import uk.ac.wellcome.models.work.internal.WorkState.Identified
 import uk.ac.wellcome.pipeline_storage.Retriever
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.matcher.WorkMatcher
-import uk.ac.wellcome.platform.matcher.models.VersionExpectedConflictException
+import uk.ac.wellcome.platform.matcher.models.{
+  VersionExpectedConflictException,
+  WorkLinks
+}
 import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -30,8 +33,9 @@ class MatcherWorkerService[MsgDestination](
 
   def processMessage(message: NotificationMessage): Future[Unit] = {
     (for {
-      work <- workRetriever.apply(id = message.body)
-      identifiersList <- workMatcher.matchWork(work)
+      work: Work[Identified] <- workRetriever.apply(id = message.body)
+      workLinks = WorkLinks(work)
+      identifiersList <- workMatcher.matchWork(workLinks)
       _ <- Future.fromTry(msgSender.sendT(identifiersList))
     } yield ()).recover {
       case MatcherException(e: VersionExpectedConflictException) =>
