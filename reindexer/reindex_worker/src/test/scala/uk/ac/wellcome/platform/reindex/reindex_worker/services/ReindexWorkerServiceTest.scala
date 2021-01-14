@@ -106,13 +106,17 @@ class ReindexWorkerServiceTest
                     "root" -> new AttributeValue().withM(
                       Map(
                         "bucket" -> new AttributeValue(sourceData.root.bucket),
-                        "keyPrefix" -> new AttributeValue(sourceData.root.keyPrefix),
+                        "keyPrefix" -> new AttributeValue(
+                          sourceData.root.keyPrefix),
                       ).asJava
                     ),
-                    "createdDate" -> new AttributeValue().withN("1569103811343"),
+                    "createdDate" -> new AttributeValue().withN(
+                      "1569103811343"),
                     "filename" -> new AttributeValue(sourceData.filename),
-                    "manifestations" -> new AttributeValue().withL(
-                      sourceData.manifestations.map { new AttributeValue(_) }.asJava),
+                    "manifestations" -> new AttributeValue()
+                      .withL(sourceData.manifestations.map {
+                        new AttributeValue(_)
+                      }.asJava),
                     "version" -> new AttributeValue().withN(
                       sourceData.version.toString)
                   ).asJava
@@ -155,7 +159,8 @@ class ReindexWorkerServiceTest
               Map(
                 "DeletedMetsFile" -> new AttributeValue().withM(
                   Map(
-                    "createdDate" -> new AttributeValue().withN("1569103811343"),
+                    "createdDate" -> new AttributeValue().withN(
+                      "1569103811343"),
                     "version" -> new AttributeValue().withN(
                       sourceData.version.toString)
                   ).asJava
