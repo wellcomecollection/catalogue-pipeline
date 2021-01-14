@@ -4,7 +4,7 @@ resource "ec_deployment" "pipeline_storage" {
   name = "catalogue-pipeline-storage-tf-managed"
 
   region                 = "eu-west-1"
-  version                = "7.10.1"
+  version                = "7.10.2"
   deployment_template_id = "aws-io-optimized-v2"
 
   traffic_filter = [

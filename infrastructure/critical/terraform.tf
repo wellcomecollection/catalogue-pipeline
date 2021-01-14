@@ -1,4 +1,13 @@
 terraform {
+  required_version = ">= 0.12.29"
+
+  required_providers {
+    ec = {
+      source  = "elastic/ec"
+      version = "0.1.0-beta"
+    }
+  }
+
   backend "s3" {
     role_arn = "arn:aws:iam::760097843905:role/platform-developer"
 
