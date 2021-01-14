@@ -3,7 +3,7 @@ package uk.ac.wellcome.mets_adapter.models
 import java.time.Instant
 import weco.catalogue.source_model.mets.MetsSourceData
 
-/** The response receiveved from the storage-service bag API.
+/** The response received from the storage-service bag API.
   */
 case class Bag(info: BagInfo,
                manifest: BagManifest,
