@@ -19,7 +19,7 @@ class MetsXmlTransformerTest
     with MetsGenerators
     with LocalResources {
 
-  it("should transform METS XML") {
+  it("transforms METS XML") {
     val xml = loadXmlFile("/b30246039.xml")
     transform(root = Some(xml), createdDate = Instant.now) shouldBe Right(
       MetsData(
@@ -50,11 +50,11 @@ class MetsXmlTransformerTest
     )
   }
 
-  it("should error when the root XML doesn't exist in the store") {
+  it("errors when the root XML doesn't exist in the store") {
     transform(root = None, createdDate = Instant.now) shouldBe a[Left[_, _]]
   }
 
-  it("should transform METS XML with manifestations") {
+  it("transforms METS XML with manifestations") {
     val xml = loadXmlFile("/b22012692.xml")
     val manifestations = Map(
       "b22012692_0003.xml" -> Some(loadXmlFile("/b22012692_0003.xml")),
@@ -71,7 +71,7 @@ class MetsXmlTransformerTest
     )
   }
 
-  it("should transform METS XML with manifestations without .xml in the name") {
+  it("transforms METS XML with manifestations without .xml in the name") {
     val xml = xmlWithManifestations(
       List(("LOG_0001", "01", "first"), ("LOG_0002", "02", "second.xml"))
     ).toString()
@@ -94,7 +94,7 @@ class MetsXmlTransformerTest
     )
   }
 
-  it("should error if first manifestation doesn't exist in store") {
+  it("errors if first manifestation doesn't exist in store") {
     val xml = loadXmlFile("/b22012692.xml")
     val manifestations = Map(
       "b22012692_0003.xml" -> Some(loadXmlFile("/b22012692_0003.xml")),
