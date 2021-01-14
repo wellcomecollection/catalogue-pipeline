@@ -199,8 +199,8 @@ class ElasticIndexerTest
       withIndexer { indexer =>
         val future = indexer(Seq())
 
-        whenReady(future.failed) { ex =>
-          ex shouldBe a[IllegalArgumentException]
+        whenReady(future.failed) {
+          _ shouldBe a[IllegalArgumentException]
         }
       }
     }
