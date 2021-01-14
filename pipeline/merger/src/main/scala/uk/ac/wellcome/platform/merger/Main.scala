@@ -12,7 +12,7 @@ import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.pipeline_storage.typesafe.{
   ElasticIndexerBuilder,
-  ElasticRetrieverBuilder,
+  ElasticSourceRetrieverBuilder,
   PipelineStorageStreamBuilder
 }
 import uk.ac.wellcome.platform.merger.services._
@@ -31,7 +31,7 @@ object Main extends WellcomeTypesafeApp {
     val esClient = ElasticBuilder.buildElasticClient(config)
 
     val sourceWorkLookup = new IdentifiedWorkLookup(
-      retriever = ElasticRetrieverBuilder.apply[Work[Identified]](
+      retriever = ElasticSourceRetrieverBuilder.apply[Work[Identified]](
         config,
         esClient,
         namespace = "identified-works"

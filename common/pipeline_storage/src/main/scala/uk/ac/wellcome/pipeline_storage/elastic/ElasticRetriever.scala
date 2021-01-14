@@ -1,8 +1,9 @@
-package uk.ac.wellcome.pipeline_storage
+package uk.ac.wellcome.pipeline_storage.elastic
 
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
+import scala.concurrent.Future
+import scala.util.{Failure, Success, Try}
 
+import com.sksamuel.elastic4s.requests.get.{GetRequest, GetResponse}
 import com.sksamuel.elastic4s.{
   ElasticClient,
   Index,
@@ -10,15 +11,19 @@ import com.sksamuel.elastic4s.{
   RequestSuccess
 }
 import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.circe._
-import io.circe.Decoder
 import grizzled.slf4j.Logging
+import uk.ac.wellcome.pipeline_storage.{
+  Retriever,
+  RetrieverMultiResult,
+  RetrieverNotFoundException
+}
 
-class ElasticRetriever[T](client: ElasticClient, index: Index)(
-  implicit val ec: ExecutionContext,
-  decoder: Decoder[T])
-    extends Retriever[T]
-    with Logging {
+trait ElasticRetriever[T] extends Retriever[T] with Logging {
+  val client: ElasticClient
+  val index: Index
+
+  def createGetRequest(id: String): GetRequest
+  def parseGetResponse(response: GetResponse): Try[T]
 
   override final def apply(
     ids: Seq[String]): Future[RetrieverMultiResult[T]] = {
@@ -30,9 +35,7 @@ class ElasticRetriever[T](client: ElasticClient, index: Index)(
     client
       .execute {
         multiget(
-          ids.map { id =>
-            get(index, id)
-          }
+          ids.map { createGetRequest }
         )
       }
       .map {
@@ -50,7 +53,7 @@ class ElasticRetriever[T](client: ElasticClient, index: Index)(
             .map {
               case (getResponse, id) =>
                 if (getResponse.found) {
-                  id -> getResponse.safeTo[T]
+                  id -> parseGetResponse(getResponse)
                 } else {
                   id -> Failure(
                     new RetrieverNotFoundException(

@@ -90,7 +90,7 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
 
         // We need to wait for the pipeline storage stream to save the works.
         // If we're too quick in retrying, we'll retry before a work is in the index!
-        withLocalSqsQueuePair(visibilityTimeout = 2) {
+        withLocalSqsQueuePair(visibilityTimeout = 5) {
           case QueuePair(queue, dlq) =>
             withWorkerImpl(queue, workIndexer, workKeySender) { _ =>
               (1 to 5).foreach { _ =>

@@ -12,7 +12,7 @@ import uk.ac.wellcome.models.work.internal.WorkState.Source
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.pipeline_storage.typesafe.{
   ElasticIndexerBuilder,
-  ElasticRetrieverBuilder,
+  ElasticSourceRetrieverBuilder,
   PipelineStorageStreamBuilder
 }
 import uk.ac.wellcome.platform.transformer.miro.Implicits._
@@ -55,7 +55,8 @@ object Main extends WellcomeTypesafeApp {
     new MiroTransformerWorker(
       pipelineStream = pipelineStream,
       miroReadable = S3TypedStore[MiroRecord],
-      retriever = ElasticRetrieverBuilder.apply[Work[Source]](config, esClient)
+      retriever =
+        ElasticSourceRetrieverBuilder.apply[Work[Source]](config, esClient)
     )
   }
 }

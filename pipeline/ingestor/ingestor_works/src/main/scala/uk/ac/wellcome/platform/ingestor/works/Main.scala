@@ -9,7 +9,7 @@ import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.pipeline_storage.typesafe.{
   ElasticIndexerBuilder,
-  ElasticRetrieverBuilder,
+  ElasticSourceRetrieverBuilder,
   PipelineStorageStreamBuilder
 }
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
@@ -29,9 +29,10 @@ object Main extends WellcomeTypesafeApp {
     val denormalisedWorkStream =
       SQSBuilder.buildSQSStream[NotificationMessage](config)
 
-    val workRetriever = ElasticRetrieverBuilder[Work[Denormalised]](
+    val workRetriever = ElasticSourceRetrieverBuilder[Work[Denormalised]](
       config,
-      ElasticBuilder.buildElasticClient(config, namespace = "pipeline_storage"),
+      client = ElasticBuilder
+        .buildElasticClient(config, namespace = "pipeline_storage"),
       namespace = "denormalised-works")
 
     val workIndexer = ElasticIndexerBuilder[Work[Indexed]](

@@ -7,13 +7,14 @@ import uk.ac.wellcome.elasticsearch.IndexedWorkIndexConfig
 import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.pipeline_storage.{ElasticIndexer, ElasticRetriever}
+import uk.ac.wellcome.pipeline_storage.ElasticIndexer
 import uk.ac.wellcome.pipeline_storage.Indexable.workIndexable
 import uk.ac.wellcome.models.Implicits._
 import WorkState.{Denormalised, Indexed}
 import com.sksamuel.elastic4s.Index
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
+import uk.ac.wellcome.pipeline_storage.elastic.ElasticSourceRetriever
 
 class IngestorFeatureTest
     extends AnyFunSpec
@@ -74,7 +75,7 @@ class IngestorFeatureTest
         elasticClient,
         indexedIndex,
         IndexedWorkIndexConfig),
-      retriever = new ElasticRetriever[Work[Denormalised]](
+      retriever = new ElasticSourceRetriever[Work[Denormalised]](
         elasticClient,
         denormalisedIndex
       )
