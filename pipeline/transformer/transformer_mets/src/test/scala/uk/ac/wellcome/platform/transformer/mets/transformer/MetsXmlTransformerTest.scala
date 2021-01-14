@@ -37,7 +37,11 @@ class MetsXmlTransformerTest
       recordIdentifier = "b30246039",
       accessConditionStatus = Some("Open"),
       license = Some(License.CC0))
-    transform(id = "b30246039", root = Some(str), createdDate = Instant.now, deleted = true) shouldBe Right(
+    transform(
+      id = "b30246039",
+      root = Some(str),
+      createdDate = Instant.now,
+      deleted = true) shouldBe Right(
       MetsData(
         recordIdentifier = "b30246039",
         accessConditionDz = None,

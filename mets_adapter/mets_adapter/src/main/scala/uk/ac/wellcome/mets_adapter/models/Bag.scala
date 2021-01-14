@@ -32,7 +32,6 @@ case class Bag(info: BagInfo,
       } else {
 
         metsFile.map { filename =>
-
           // If the only file in the bag is the METS file, that means
           // the bag has been deleted.
           // See https://github.com/wellcomecollection/platform/issues/4893
