@@ -1,15 +1,16 @@
 package uk.ac.wellcome.platform.merger
 
+import scala.concurrent.ExecutionContext
 import akka.actor.ActorSystem
 import com.typesafe.config.Config
-import uk.ac.wellcome.bigmessaging.typesafe.BigMessagingBuilder
-import uk.ac.wellcome.elasticsearch.MergedWorkIndexConfig
+
+import uk.ac.wellcome.elasticsearch.{MergedWorkIndexConfig, InitialImageIndexConfig}
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.internal.WorkState.{Identified, Merged}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
+import uk.ac.wellcome.pipeline_storage.EitherIndexer
 import uk.ac.wellcome.pipeline_storage.typesafe.{
   ElasticIndexerBuilder,
   ElasticRetrieverBuilder,
@@ -18,8 +19,9 @@ import uk.ac.wellcome.pipeline_storage.typesafe.{
 import uk.ac.wellcome.platform.merger.services._
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
+import WorkState.{Identified, Merged}
+import ImageState.Initial
 
-import scala.concurrent.ExecutionContext
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
@@ -41,33 +43,45 @@ object Main extends WellcomeTypesafeApp {
     val mergerManager = new MergerManager(
       mergerRules = PlatformMerger
     )
-    val workSender =
+
+    val workMsgSender =
       SNSBuilder.buildSNSMessageSender(
         config,
         namespace = "work-sender",
         subject = "Sent by the merger"
       )
-    val imageSender =
-      BigMessagingBuilder
-        .buildBigMessageSender(
-          config.getConfig("image-sender").withFallback(config)
-        )
 
-    val workIndexer = ElasticIndexerBuilder[Work[Merged]](
-      config,
-      esClient,
-      namespace = "merged-works",
-      indexConfig = MergedWorkIndexConfig
+    val imageMsgSender =
+      SNSBuilder.buildSNSMessageSender(
+        config,
+        namespace = "image-sender",
+        subject = "Sent by the merger"
+      )
+
+    val workOrImageIndexer =
+      new EitherIndexer[Work[Merged], Image[Initial]](
+        ElasticIndexerBuilder[Work[Merged]](
+          config,
+          esClient,
+          namespace = "merged-works",
+          indexConfig = MergedWorkIndexConfig
+        ),
+        ElasticIndexerBuilder[Image[Initial]](
+          config,
+          esClient,
+          namespace = "initial-images",
+          indexConfig = InitialImageIndexConfig
+        )
     )
 
     new MergerWorkerService(
-      sourceWorkLookup = sourceWorkLookup,
       msgStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
-      config = PipelineStorageStreamBuilder.buildPipelineStorageConfig(config),
-      workIndexer = workIndexer,
-      workMsgSender = workSender,
+      sourceWorkLookup = sourceWorkLookup,
       mergerManager = mergerManager,
-      imageSender = imageSender
+      workOrImageIndexer = workOrImageIndexer,
+      workMsgSender = workMsgSender,
+      imageMsgSender = imageMsgSender,
+      config = PipelineStorageStreamBuilder.buildPipelineStorageConfig(config),
     )
   }
 }
