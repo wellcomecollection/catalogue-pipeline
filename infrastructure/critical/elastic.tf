@@ -70,6 +70,8 @@ resource "ec_deployment_traffic_filter" "allow_catalogue_pipeline_vpce" {
   }
 }
 
+# This enables public access to the ES cluster (with the usual x-pack auth proviso)
+# TODO: Restrict this to Wellcome internal IP addresses when physical office access is restored
 resource "ec_deployment_traffic_filter" "public_internet" {
   name   = "public_access"
   region = "eu-west-1"
