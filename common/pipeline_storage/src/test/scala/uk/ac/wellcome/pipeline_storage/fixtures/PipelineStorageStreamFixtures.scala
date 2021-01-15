@@ -17,8 +17,8 @@ import scala.concurrent.Future
 trait PipelineStorageStreamFixtures extends Akka with SQS {
   val pipelineStorageConfig = PipelineStorageConfig(
     batchSize = 1,
-    flushInterval = 1 seconds,
-    parallelism = 10
+    flushInterval = 1 milliseconds,
+    parallelism = 1
   )
 
   def withPipelineStream[T: Indexable, R](

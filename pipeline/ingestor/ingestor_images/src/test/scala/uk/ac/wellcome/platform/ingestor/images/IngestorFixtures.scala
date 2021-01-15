@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.ingestor.images
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration._
 import org.scalatest.Suite
 
 import uk.ac.wellcome.fixtures.TestWith
@@ -11,11 +10,7 @@ import uk.ac.wellcome.pipeline_storage.fixtures.{
   ElasticIndexerFixtures,
   PipelineStorageStreamFixtures
 }
-import uk.ac.wellcome.pipeline_storage.{
-  Indexer,
-  PipelineStorageConfig,
-  Retriever
-}
+import uk.ac.wellcome.pipeline_storage.{Indexer, Retriever}
 import ImageState.{Augmented, Indexed}
 
 trait IngestorFixtures
@@ -27,11 +22,7 @@ trait IngestorFixtures
                            retriever: Retriever[Image[Augmented]],
                            indexer: Indexer[Image[Indexed]])(
     testWith: TestWith[ImageIngestorWorkerService[String], R]): R = {
-    val config = PipelineStorageConfig(
-      batchSize = 100,
-      flushInterval = 1 second,
-      parallelism = 10)
-    withPipelineStream(queue, indexer, pipelineStorageConfig = config) {
+    withPipelineStream(queue, indexer, pipelineStorageConfig = pipelineStorageConfig) {
       msgStream =>
         val workerService = new ImageIngestorWorkerService(
           pipelineStream = msgStream,

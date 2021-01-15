@@ -22,12 +22,14 @@ import uk.ac.wellcome.platform.inference_manager.models.DownloadedImage
 import uk.ac.wellcome.typesafe.Runnable
 import uk.ac.wellcome.pipeline_storage.{
   Indexer,
+  Indexable,
   PipelineStorageConfig,
   PipelineStorageStream,
   Retriever
 }
 import uk.ac.wellcome.json.JsonUtil._
 import ImageState.{Augmented, Initial}
+import Indexable.imageIndexable
 
 case class AdapterResponseBundle[ImageType](
   image: ImageType,
@@ -56,7 +58,7 @@ class InferenceManagerWorkerService[Destination](
 
   val indexAndSend = PipelineStorageStream.batchIndexAndSendFlow(
     pipelineStorageConfig,
-    msgSender,
+    (image: Image[Augmented]) => msgSender.send(imageIndexable.id(image)),
     imageIndexer
   )
 

@@ -26,9 +26,10 @@ import uk.ac.wellcome.platform.inference_manager.services.{
   MergedIdentifiedImage,
   RequestPoolFlow
 }
+import uk.ac.wellcome.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import ImageState.{Augmented, Initial}
 
-trait InferenceManagerWorkerServiceFixture extends SQS with Akka {
+trait InferenceManagerWorkerServiceFixture extends PipelineStorageStreamFixtures {
 
   def withWorkerService[R](
     queue: Queue,
@@ -53,11 +54,7 @@ trait InferenceManagerWorkerServiceFixture extends SQS with Akka {
             )
           ),
           imageIndexer = new MemoryIndexer(augmentedImages),
-          pipelineStorageConfig = PipelineStorageConfig(
-            batchSize = 1,
-            flushInterval = 1 milliseconds,
-            parallelism = 1
-          ),
+          pipelineStorageConfig = pipelineStorageConfig,
           inferrerAdapters = adapters,
           imageDownloader = new ImageDownloader(
             root = fileRoot,

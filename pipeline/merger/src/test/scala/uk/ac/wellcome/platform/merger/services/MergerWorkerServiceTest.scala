@@ -65,9 +65,9 @@ class MergerWorkerServiceTest
           )
 
           index shouldBe Map(
-            work1.id -> work1.transition[Merged](latestUpdate),
-            work2.id -> work2.transition[Merged](latestUpdate),
-            work3.id -> work3.transition[Merged](latestUpdate)
+            work1.id -> Left(work1.transition[Merged](latestUpdate)),
+            work2.id -> Left(work2.transition[Merged](latestUpdate)),
+            work3.id -> Left(work3.transition[Merged](latestUpdate))
           )
 
           metrics.incrementedCounts.length should be >= 1
@@ -97,7 +97,7 @@ class MergerWorkerServiceTest
           getWorksSent(senders) should contain only work.id
 
           index shouldBe Map(
-            work.id -> work.transition[Merged](work.state.modifiedTime))
+            work.id -> Left(work.transition[Merged](work.state.modifiedTime)))
 
           metrics.incrementedCounts.length shouldBe 1
           metrics.incrementedCounts.last should endWith("_success")
@@ -152,7 +152,7 @@ class MergerWorkerServiceTest
           assertQueueEmpty(dlq)
           getWorksSent(senders) should contain only work.id
           index shouldBe Map(
-            work.id -> work.transition[Merged](work.state.modifiedTime))
+            work.id -> Left(work.transition[Merged](work.state.modifiedTime)))
         }
     }
   }
@@ -183,7 +183,7 @@ class MergerWorkerServiceTest
 
           getWorksSent(senders) should contain only work.id
           index shouldBe Map(
-            work.id -> work.transition[Merged](work.state.modifiedTime))
+            work.id -> Left(work.transition[Merged](work.state.modifiedTime)))
 
           metrics.incrementedCounts.length shouldBe 1
           metrics.incrementedCounts.last should endWith("_success")
@@ -219,10 +219,10 @@ class MergerWorkerServiceTest
           index should have size 2
 
           val redirectedWorks = index.collect {
-            case (_, work: Work.Redirected[Merged]) => work
+            case (_, Left(work: Work.Redirected[Merged])) => work
           }
           val mergedWorks = index.collect {
-            case (_, work: Work.Visible[Merged]) => work
+            case (_, Left(work: Work.Visible[Merged])) => work
           }
 
           redirectedWorks should have size 1
@@ -264,16 +264,19 @@ class MergerWorkerServiceTest
           assertQueueEmpty(dlq)
 
           getWorksSent(senders).distinct should have size 3
-          index should have size 3
+          index should have size 4
 
           val imagesSent = getImagesSent(senders).distinct
           imagesSent should have size 1
 
           val redirectedWorks = index.collect {
-            case (_, work: Work.Redirected[Merged]) => work
+            case (_, Left(work: Work.Redirected[Merged])) => work
           }
           val mergedWorks = index.collect {
-            case (_, work: Work.Visible[Merged]) => work
+            case (_, Left(work: Work.Visible[Merged])) => work
+          }
+          val images = index.collect {
+            case (_, Right(image)) => image
           }
 
           redirectedWorks should have size 2
@@ -287,7 +290,9 @@ class MergerWorkerServiceTest
           mergedWorks should have size 1
           mergedWorks.head.sourceIdentifier shouldBe physicalWork.sourceIdentifier
 
-          imagesSent.head.id shouldBe miroWork.data.imageData.head.id.canonicalId
+          imagesSent.head shouldBe miroWork.data.imageData.head.id.canonicalId
+          images should have size 1
+          images.head.id shouldBe miroWork.data.imageData.head.id.canonicalId
         }
     }
   }
@@ -323,10 +328,10 @@ class MergerWorkerServiceTest
           getWorksSent(senders) should have size 4
 
           val redirectedWorks = index.collect {
-            case (_, work: Work.Redirected[Merged]) => work
+            case (_, Left(work: Work.Redirected[Merged])) => work
           }
           val mergedWorks = index.collect {
-            case (_, work: Work.Visible[Merged]) => work
+            case (_, Left(work: Work.Visible[Merged])) => work
           }
 
           redirectedWorks should have size 2
@@ -383,7 +388,7 @@ class MergerWorkerServiceTest
                         QueuePair,
                         Senders,
                         MemoryMetrics,
-                        mutable.Map[String, Work[Merged]]),
+                        mutable.Map[String, WorkOrImage]),
                        R]): R =
     withLocalSqsQueuePair() {
       case queuePair @ QueuePair(queue, _) =>
@@ -393,7 +398,7 @@ class MergerWorkerServiceTest
         val retriever = new MemoryRetriever[Work[Identified]]()
 
         val metrics = new MemoryMetrics()
-        val index = mutable.Map[String, Work[Merged]]()
+        val index = mutable.Map.empty[String, WorkOrImage]
 
         withWorkerService(
           retriever,
@@ -416,6 +421,6 @@ class MergerWorkerServiceTest
   def getWorksSent(senders: Senders): Seq[String] =
     getWorksSent(senders.works)
 
-  def getImagesSent(senders: Senders): Seq[Image[ImageState.Initial]] =
+  def getImagesSent(senders: Senders): Seq[String] =
     getImagesSent(senders.images)
 }
