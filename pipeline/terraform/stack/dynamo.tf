@@ -26,6 +26,7 @@ data "aws_iam_policy_document" "graph_table_readwrite" {
   statement {
     actions = [
       "dynamodb:BatchGetItem",
+      "dynamodb:BatchWriteItem",
       "dynamodb:GetItem",
       "dynamodb:UpdateItem",
       "dynamodb:PutItem",
@@ -84,6 +85,7 @@ data "aws_iam_policy_document" "lock_table_readwrite" {
       "dynamodb:PutItem",
       "dynamodb:GetItem",
       "dynamodb:DeleteItem",
+      "dynamodb:BatchWriteItem",
     ]
 
     resources = [
