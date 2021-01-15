@@ -163,7 +163,9 @@ class SierraDescriptionTest
     expectedDescription: Option[String]
   ): Assertion = {
     val actualDescription = SierraDescription(
-      createSierraBibDataWith(varFields = varFields))
+      bibId = createSierraBibNumber,
+      bibData = createSierraBibDataWith(varFields = varFields)
+    )
     actualDescription shouldBe expectedDescription
   }
 }

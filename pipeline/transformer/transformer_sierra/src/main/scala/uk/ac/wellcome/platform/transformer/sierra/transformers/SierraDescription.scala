@@ -1,12 +1,14 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
-import uk.ac.wellcome.platform.transformer.sierra.source.{
-  SierraBibData,
-  SierraQueryOps,
-  VarField
-}
+import grizzled.slf4j.Logging
 
-object SierraDescription extends SierraDataTransformer with SierraQueryOps {
+import java.net.URL
+import uk.ac.wellcome.platform.transformer.sierra.source.{MarcSubfield, SierraBibData, SierraQueryOps, VarField}
+import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
+
+import scala.util.Try
+
+object SierraDescription extends SierraIdentifiedDataTransformer with SierraQueryOps with Logging {
 
   type Output = Option[String]
 
@@ -14,35 +16,59 @@ object SierraDescription extends SierraDataTransformer with SierraQueryOps {
   //
   // We use MARC field "520".  Rules:
   //
-  //  - Join 520 ǂa and ǂb with a space
+  //  - Join 520 ǂa, ǂb and ǂu with a space
+  //  - If the ǂu looks like a URL, we wrap it in <a> tags with the URL as the
+  //    link text
   //  - Wrap resulting string in <p> tags
   //  - Join each occurrence of 520 into description
   //
   // Notes:
   //  - Both ǂa (summary) and ǂb (expansion of summary note) are
-  //    non-repeatable subfields.
+  //    non-repeatable subfields.  ǂu (Uniform Resource Identifier)
+  //    is repeatable.
   //  - We never expect to see a record with $b but not $a.
   //
   // https://www.loc.gov/marc/bibliographic/bd520.html
   //
-  def apply(bibData: SierraBibData): Option[String] = {
+  def apply(bibId: SierraBibNumber, bibData: SierraBibData): Option[String] = {
     val description = bibData
       .varfieldsWithTag("520")
-      .map { descriptionFromVarfield }
+      .map { descriptionFromVarfield(bibId, _) }
       .mkString("\n")
 
     if (description.nonEmpty) Some(description) else None
   }
 
-  private def descriptionFromVarfield(vf: VarField): String = {
+  private def descriptionFromVarfield(bibId: SierraBibNumber, vf: VarField): String = {
+    val subfields =
+      Seq(
+        vf.nonrepeatableSubfieldWithTag(tag = "a"),
+        vf.nonrepeatableSubfieldWithTag(tag = "b")
+      ).flatten ++ vf.subfieldsWithTag("u")
+
     val contents =
-      Seq("a", "b")
-        .flatMap { tag =>
-          vf.nonrepeatableSubfieldWithTag(tag)
+      subfields
+        .map {
+          case MarcSubfield("u", contents) if isUrl(contents) =>
+            s"""<a href="$contents">$contents</a>"""
+
+          // The spec says that MARC 520 ǂu is "Uniform Resource Identifier", which
+          // isn't the same as being a URL.  We don't want to make non-URL text
+          // clickable; we're also not sure what the data that isn't a URL looks like.
+          //
+          // For now, log the value and don't make it clickable -- we can decide how
+          // best to handle it later.
+          case MarcSubfield("u", contents) =>
+            warn(s"Bib $bibId has MARC 520 ǂu which doesn't look like a URL: $contents")
+            contents
+
+          case MarcSubfield(_, contents) => contents
         }
-        .map { _.content }
         .mkString(" ")
 
     s"<p>$contents</p>"
   }
+
+  private def isUrl(s: String): Boolean =
+    Try { new URL(s)}.isSuccess
 }
