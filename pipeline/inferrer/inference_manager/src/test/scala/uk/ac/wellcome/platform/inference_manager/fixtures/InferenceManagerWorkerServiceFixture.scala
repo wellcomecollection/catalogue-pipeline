@@ -2,23 +2,16 @@ package uk.ac.wellcome.platform.inference_manager.fixtures
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.collection.mutable
-import scala.concurrent.duration._
 import software.amazon.awssdk.services.sqs.model.Message
 
-import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
-import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.inference_manager.adapters.InferrerAdapter
 import uk.ac.wellcome.platform.inference_manager.models.DownloadedImage
-import uk.ac.wellcome.pipeline_storage.{
-  MemoryIndexer,
-  MemoryRetriever,
-  PipelineStorageConfig
-}
+import uk.ac.wellcome.pipeline_storage.{MemoryIndexer, MemoryRetriever}
 import uk.ac.wellcome.platform.inference_manager.services.{
   FileWriter,
   ImageDownloader,
