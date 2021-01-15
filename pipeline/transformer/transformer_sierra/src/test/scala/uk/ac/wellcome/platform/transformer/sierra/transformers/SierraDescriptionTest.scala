@@ -80,6 +80,75 @@ class SierraDescriptionTest
     )
   }
 
+  describe("getting URLs from MARC 520 ǂu") {
+    val description = "Picking particular pears in Poland."
+    val summaryDescription = "Selecting sumptious starfruit in Spain."
+
+    it("wraps a single URL in <a> tags") {
+      val url = "https://fruitpicking.org/"
+
+      val expectedDescription = s"""<p>$description $summaryDescription <a href="$url">$url</a></p>"""
+
+      assertFindsCorrectDescription(
+        varFields = List(
+          createVarFieldWith(
+            marcTag = "520",
+            subfields = List(
+              MarcSubfield(tag = "a", content = description),
+              MarcSubfield(tag = "b", content = summaryDescription),
+              MarcSubfield(tag = "u", content = url)
+            )
+          )
+        ),
+        expectedDescription = Some(expectedDescription)
+      )
+    }
+
+    it("wraps multiple URLs in <a> tags") {
+      val url1 = "https://fruitpicking.org/"
+      val url2 = "https://fruitpicking.org/"
+
+      val expectedDescription = s"""<p>$description $summaryDescription <a href="$url1">$url1</a> <a href="$url2">$url2</a></p>"""
+
+      assertFindsCorrectDescription(
+        varFields = List(
+          createVarFieldWith(
+            marcTag = "520",
+            subfields = List(
+              MarcSubfield(tag = "a", content = description),
+              MarcSubfield(tag = "b", content = summaryDescription),
+              MarcSubfield(tag = "u", content = url1),
+              MarcSubfield(tag = "u", content = url2)
+            )
+          )
+        ),
+        expectedDescription = Some(expectedDescription)
+      )
+    }
+
+    it("does not wrap the contents of ǂu in <a> tags if it doesn't look like a URL") {
+      val url1 = "https://fruitpicking.org/"
+      val uContents = "A website about fruitpicking"
+
+      val expectedDescription = s"""<p>$description $summaryDescription <a href="$url1">$url1</a> $uContents</p>"""
+
+      assertFindsCorrectDescription(
+        varFields = List(
+          createVarFieldWith(
+            marcTag = "520",
+            subfields = List(
+              MarcSubfield(tag = "a", content = description),
+              MarcSubfield(tag = "b", content = summaryDescription),
+              MarcSubfield(tag = "u", content = url1),
+              MarcSubfield(tag = "u", content = uContents)
+            )
+          )
+        ),
+        expectedDescription = Some(expectedDescription)
+      )
+    }
+  }
+
   it("does not get a description if MARC field 520 is absent") {
     assertFindsCorrectDescription(
       varFields = List(
