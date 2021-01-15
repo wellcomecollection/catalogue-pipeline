@@ -3,12 +3,20 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 import grizzled.slf4j.Logging
 
 import java.net.URL
-import uk.ac.wellcome.platform.transformer.sierra.source.{MarcSubfield, SierraBibData, SierraQueryOps, VarField}
+import uk.ac.wellcome.platform.transformer.sierra.source.{
+  MarcSubfield,
+  SierraBibData,
+  SierraQueryOps,
+  VarField
+}
 import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 
 import scala.util.Try
 
-object SierraDescription extends SierraIdentifiedDataTransformer with SierraQueryOps with Logging {
+object SierraDescription
+    extends SierraIdentifiedDataTransformer
+    with SierraQueryOps
+    with Logging {
 
   type Output = Option[String]
 
@@ -39,7 +47,8 @@ object SierraDescription extends SierraIdentifiedDataTransformer with SierraQuer
     if (description.nonEmpty) Some(description) else None
   }
 
-  private def descriptionFromVarfield(bibId: SierraBibNumber, vf: VarField): String = {
+  private def descriptionFromVarfield(bibId: SierraBibNumber,
+                                      vf: VarField): String = {
     val subfields =
       Seq(
         vf.nonrepeatableSubfieldWithTag(tag = "a"),
@@ -59,7 +68,8 @@ object SierraDescription extends SierraIdentifiedDataTransformer with SierraQuer
           // For now, log the value and don't make it clickable -- we can decide how
           // best to handle it later.
           case MarcSubfield("u", contents) =>
-            warn(s"Bib $bibId has MARC 520 ǂu which doesn't look like a URL: $contents")
+            warn(
+              s"Bib $bibId has MARC 520 ǂu which doesn't look like a URL: $contents")
             contents
 
           case MarcSubfield(_, contents) => contents
@@ -70,5 +80,5 @@ object SierraDescription extends SierraIdentifiedDataTransformer with SierraQuer
   }
 
   private def isUrl(s: String): Boolean =
-    Try { new URL(s)}.isSuccess
+    Try { new URL(s) }.isSuccess
 }

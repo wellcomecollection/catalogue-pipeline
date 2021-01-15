@@ -87,7 +87,8 @@ class SierraDescriptionTest
     it("wraps a single URL in <a> tags") {
       val url = "https://fruitpicking.org/"
 
-      val expectedDescription = s"""<p>$description $summaryDescription <a href="$url">$url</a></p>"""
+      val expectedDescription =
+        s"""<p>$description $summaryDescription <a href="$url">$url</a></p>"""
 
       assertFindsCorrectDescription(
         varFields = List(
@@ -108,7 +109,8 @@ class SierraDescriptionTest
       val url1 = "https://fruitpicking.org/"
       val url2 = "https://fruitpicking.org/"
 
-      val expectedDescription = s"""<p>$description $summaryDescription <a href="$url1">$url1</a> <a href="$url2">$url2</a></p>"""
+      val expectedDescription =
+        s"""<p>$description $summaryDescription <a href="$url1">$url1</a> <a href="$url2">$url2</a></p>"""
 
       assertFindsCorrectDescription(
         varFields = List(
@@ -126,11 +128,13 @@ class SierraDescriptionTest
       )
     }
 
-    it("does not wrap the contents of ǂu in <a> tags if it doesn't look like a URL") {
+    it(
+      "does not wrap the contents of ǂu in <a> tags if it doesn't look like a URL") {
       val url1 = "https://fruitpicking.org/"
       val uContents = "A website about fruitpicking"
 
-      val expectedDescription = s"""<p>$description $summaryDescription <a href="$url1">$url1</a> $uContents</p>"""
+      val expectedDescription =
+        s"""<p>$description $summaryDescription <a href="$url1">$url1</a> $uContents</p>"""
 
       assertFindsCorrectDescription(
         varFields = List(
