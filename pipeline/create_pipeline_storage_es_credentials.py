@@ -136,7 +136,8 @@ def create_user(es, username, roles):
     "--password", hide_input=True, prompt="What is your Elasticsearch password?"
 )
 @click.option("--endpoint", prompt="What is your Elasticsearch endpoint?")
-def main(username, password, endpoint):
+@click.option("--deployment-id", default="pipeline_storage", prompt="What is your Elasticsearch deployment ID?")
+def main(username, password, endpoint, deployment_id):
     url = hyperlink.URL.from_text(endpoint)
     host = url.host
     protocol = url.scheme
@@ -150,12 +151,12 @@ def main(username, password, endpoint):
 
     print("")
 
-    store_secret(secret_id="catalogue/pipeline_storage/es_host", secret_value=host)
+    store_secret(secret_id=f"catalogue/{deployment_id}/es_host", secret_value=host)
 
-    store_secret(secret_id="catalogue/pipeline_storage/es_port", secret_value=port)
+    store_secret(secret_id=f"catalogue/{deployment_id}/es_port", secret_value=port)
 
     store_secret(
-        secret_id="catalogue/pipeline_storage/es_protocol", secret_value=protocol
+        secret_id=f"catalogue/{deployment_id}/es_protocol", secret_value=protocol
     )
 
     print("")
@@ -185,12 +186,12 @@ def main(username, password, endpoint):
 
     for username, password in newly_created_usernames:
         store_secret(
-            secret_id=f"catalogue/pipeline_storage/{username}/es_username",
+            secret_id=f"catalogue/{deployment_id}}/{username}/es_username",
             secret_value=username,
         )
 
         store_secret(
-            secret_id=f"catalogue/pipeline_storage/{username}/es_password",
+            secret_id=f"catalogue/{deployment_id}/{username}/es_password",
             secret_value=password,
         )
 

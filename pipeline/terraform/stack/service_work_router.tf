@@ -34,13 +34,7 @@ module "router" {
     flush_interval_seconds = 30
   }
 
-  secret_env_vars = {
-    es_host     = var.pipeline_storage_es_host_secret_id
-    es_port     = "catalogue/pipeline_storage/es_port"
-    es_protocol = "catalogue/pipeline_storage/es_protocol"
-    es_username = "catalogue/pipeline_storage/router/es_username"
-    es_password = "catalogue/pipeline_storage/router/es_password"
-  }
+  secret_env_vars = local.pipeline_storage_es_service_secrets["router"]
 
   shared_logging_secrets = var.shared_logging_secrets
 
