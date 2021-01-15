@@ -7,5 +7,3 @@ variable "listener_port" {}
 variable "domain_name" {}
 
 variable "certificate_arn" {}
-
-variable "aws_region" {}

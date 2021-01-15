@@ -21,8 +21,4 @@ module "catalogue_api_staging_20201008" {
   service_discovery_namespace_id = local.service_discovery_namespace_id
 
   api_container_image = local.api_container_image
-
-  providers = {
-    aws.platform = aws.platform
-  }
 }
