@@ -6,14 +6,6 @@ Contains critical infrastructure for the catalogue services
 
 In order to run terraform the Elastic Cloud terraform provider requires that the EC_API_KEY environment variable be set.
 
-To retrieve the API key you can run 
+You can run `run_terraform.sh` to set the correct environment variable and run terraform. Any parameters you pass to that script will be passed to `terraform`.
 
-```
-aws secretsmanager get-secret-value \
-    --secret-id elastic_cloud/api_key \
-    --profile platform \
-    --output text \
-    --query 'SecretString'
-```
-
-Where the AWS profile used gives you read access to secrets in the platform account.
+The script will by default set AWS_PROFILE to "platform", but you can use a different value by setting AWS_PROFILE yourself.
