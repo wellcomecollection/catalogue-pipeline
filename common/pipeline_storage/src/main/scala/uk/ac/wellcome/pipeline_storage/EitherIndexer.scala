@@ -32,7 +32,7 @@ class EitherIndexer[L: Indexable, R: Indexable](
 
   def index[T](indexer: Indexer[T], docs: Seq[T]): Future[Result[T]] =
     docs match {
-      case Nil => Future.successful(Right(Nil))
+      case Nil  => Future.successful(Right(Nil))
       case docs => indexer(docs)
     }
 
@@ -42,15 +42,16 @@ class EitherIndexer[L: Indexable, R: Indexable](
   def errors[T](result: Result[T]): Seq[T] =
     result match {
       case Left(errors) => errors
-      case Right(_) => Nil
+      case Right(_)     => Nil
     }
 
-  def successes(leftResult: Result[L], rightResult: Result[R]): Seq[Either[L, R]] =
+  def successes(leftResult: Result[L],
+                rightResult: Result[R]): Seq[Either[L, R]] =
     successes(leftResult).map(Left(_)) ++ successes(rightResult).map(Right(_))
 
   def successes[T](result: Result[T]): Seq[T] =
     result match {
-      case Left(_) => Nil
+      case Left(_)          => Nil
       case Right(successes) => successes
     }
 }
