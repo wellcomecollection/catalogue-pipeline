@@ -12,19 +12,21 @@ class EitherIndexer[L: Indexable, R: Indexable](
   def init(): Future[Unit] =
     leftIndexer.init().flatMap(_ => rightIndexer.init())
 
-  def apply(documents: Seq[Either[L, R]]): Future[Either[Seq[Either[L, R]], Seq[Either[L, R]]]] = {
-    val leftDocs = documents.collect { case Left(doc) => doc }
+  def apply(documents: Seq[Either[L, R]])
+    : Future[Either[Seq[Either[L, R]], Seq[Either[L, R]]]] = {
+    val leftDocs = documents.collect { case Left(doc)   => doc }
     val rightDocs = documents.collect { case Right(doc) => doc }
     for {
       leftResult <- leftIndexer(leftDocs)
       rightResult <- rightIndexer(rightDocs)
-    } yield (leftResult, rightResult) match {
-      case (Right(leftDocs), Right(rightDocs)) =>
-        Right(leftDocs.map(Left(_)) ++ rightDocs.map(Right(_)))
-      case (Left(leftDocs), Left(rightDocs)) =>
-        Left(leftDocs.map(Left(_)) ++ rightDocs.map(Right(_)))
-      case (Left(leftDocs), Right(_)) => Left(leftDocs.map(Left(_)))
-      case (Right(_), Left(rightDocs)) => Left(rightDocs.map(Right(_)))
-    }
+    } yield
+      (leftResult, rightResult) match {
+        case (Right(leftDocs), Right(rightDocs)) =>
+          Right(leftDocs.map(Left(_)) ++ rightDocs.map(Right(_)))
+        case (Left(leftDocs), Left(rightDocs)) =>
+          Left(leftDocs.map(Left(_)) ++ rightDocs.map(Right(_)))
+        case (Left(leftDocs), Right(_))  => Left(leftDocs.map(Left(_)))
+        case (Right(_), Left(rightDocs)) => Left(rightDocs.map(Right(_)))
+      }
   }
 }

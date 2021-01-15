@@ -21,8 +21,8 @@ import uk.ac.wellcome.platform.inference_manager.adapters.{
 import uk.ac.wellcome.platform.inference_manager.models.DownloadedImage
 import uk.ac.wellcome.typesafe.Runnable
 import uk.ac.wellcome.pipeline_storage.{
-  Indexer,
   Indexable,
+  Indexer,
   PipelineStorageConfig,
   PipelineStorageStream,
   Retriever

@@ -15,14 +15,15 @@ import WorkFsm._
 case class MergerOutcome(resultWorks: Seq[Work[Identified]],
                          imagesWithSources: Seq[ImageDataWithSource]) {
 
-  def mergedWorksAndImagesWithTime(modifiedTime: Instant): Seq[Either[Work[Merged], Image[Initial]]] =
-    mergedWorksWithTime(modifiedTime).map(Left(_)) ++ mergedImagesWithTime(modifiedTime).map(Right(_))
+  def mergedWorksAndImagesWithTime(
+    modifiedTime: Instant): Seq[Either[Work[Merged], Image[Initial]]] =
+    mergedWorksWithTime(modifiedTime).map(Left(_)) ++ mergedImagesWithTime(
+      modifiedTime).map(Right(_))
 
   def mergedWorksWithTime(modifiedTime: Instant): Seq[Work[Merged]] =
     resultWorks.map(_.transition[Merged](modifiedTime))
 
-  def mergedImagesWithTime(
-    modifiedTime: Instant): Seq[Image[Initial]] =
+  def mergedImagesWithTime(modifiedTime: Instant): Seq[Image[Initial]] =
     imagesWithSources.map {
       case ImageDataWithSource(imageData, source) =>
         Image[Initial](

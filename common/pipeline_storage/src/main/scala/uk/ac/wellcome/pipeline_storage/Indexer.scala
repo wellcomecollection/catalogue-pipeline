@@ -60,17 +60,18 @@ object Indexable extends Logging {
         )
     }
 
-  implicit def eitherIndexable[L: Indexable, R: Indexable]: Indexable[Either[L, R]] =
+  implicit def eitherIndexable[L: Indexable, R: Indexable]
+    : Indexable[Either[L, R]] =
     new Indexable[Either[L, R]] {
       def id(either: Either[L, R]): String =
         either match {
-          case Left(left) => implicitly[Indexable[L]].id(left)
+          case Left(left)   => implicitly[Indexable[L]].id(left)
           case Right(right) => implicitly[Indexable[R]].id(right)
         }
 
       def version(either: Either[L, R]) =
         either match {
-          case Left(left) => implicitly[Indexable[L]].version(left)
+          case Left(left)   => implicitly[Indexable[L]].version(left)
           case Right(right) => implicitly[Indexable[R]].version(right)
         }
     }

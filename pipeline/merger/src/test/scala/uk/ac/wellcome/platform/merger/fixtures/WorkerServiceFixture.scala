@@ -21,16 +21,14 @@ trait WorkerServiceFixture extends PipelineStorageStreamFixtures {
 
   type WorkOrImage = Either[Work[Merged], Image[Initial]]
 
-  def withWorkerService[R](retriever: MemoryRetriever[Work[Identified]],
-                           queue: Queue,
-                           workSender: MemoryMessageSender,
-                           imageSender: MemoryMessageSender =
-                             new MemoryMessageSender(),
-                           metrics: Metrics[Future] = new MemoryMetrics,
-                           index: mutable.Map[String, WorkOrImage] =
-                             mutable.Map.empty)(
+  def withWorkerService[R](
+    retriever: MemoryRetriever[Work[Identified]],
+    queue: Queue,
+    workSender: MemoryMessageSender,
+    imageSender: MemoryMessageSender = new MemoryMessageSender(),
+    metrics: Metrics[Future] = new MemoryMetrics,
+    index: mutable.Map[String, WorkOrImage] = mutable.Map.empty)(
     testWith: TestWith[MergerWorkerService[String, String], R]): R =
-
     withActorSystem { implicit actorSystem =>
       withSQSStream[NotificationMessage, R](queue, metrics) { msgStream =>
         val workerService = new MergerWorkerService(

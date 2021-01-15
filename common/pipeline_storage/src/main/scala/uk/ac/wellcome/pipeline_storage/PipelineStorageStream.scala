@@ -47,7 +47,7 @@ class PipelineStorageStream[In, Out, MsgDestination](
             .via(
               broadcastAndMerge(
                 batchIndexAndSendFlow(
-                  config, 
+                  config,
                   (item: Out) => messageSender.send(indexable.id(item)),
                   indexer
                 ),
@@ -61,13 +61,13 @@ object PipelineStorageStream extends Logging {
 
   def processFlow[In, Out](
     config: PipelineStorageConfig,
-    process: In => Future[List[Out]])(
-    implicit ec: ExecutionContext): Flow[(Message, In), (Message, List[Out]), NotUsed] =
-      Flow[(Message, In)].mapAsyncUnordered(parallelism = config.parallelism) {
-        case (message, in) =>
-          debug(s"Processing message ${message.messageId()}")
-          process(in).map(w => (message, w))
-      }
+    process: In => Future[List[Out]])(implicit ec: ExecutionContext)
+    : Flow[(Message, In), (Message, List[Out]), NotUsed] =
+    Flow[(Message, In)].mapAsyncUnordered(parallelism = config.parallelism) {
+      case (message, in) =>
+        debug(s"Processing message ${message.messageId()}")
+        process(in).map(w => (message, w))
+    }
 
   def batchRetrieveFlow[T](config: PipelineStorageConfig,
                            retriever: Retriever[T])(
@@ -117,12 +117,12 @@ object PipelineStorageStream extends Logging {
       }
       .mapConcat(identity)
 
-  def batchIndexAndSendFlow[T, MsgDestination](
-    config: PipelineStorageConfig,
-    send: T => Try[Unit],
-    indexer: Indexer[T])(implicit
-                         ec: ExecutionContext,
-                         indexable: Indexable[T]) = {
+  def batchIndexAndSendFlow[T, MsgDestination](config: PipelineStorageConfig,
+                                               send: T => Try[Unit],
+                                               indexer: Indexer[T])(
+    implicit
+    ec: ExecutionContext,
+    indexable: Indexable[T]) = {
     val maxSubStreams = Integer.MAX_VALUE
     Flow[(Message, List[T])]
       .collect {
@@ -185,9 +185,8 @@ object PipelineStorageStream extends Logging {
     Flow[(Message, List[Out])]
       .collect { case (message, Nil) => message }
 
-  def broadcastAndMerge[I, O](
-    a: Flow[I, O, NotUsed],
-    b: Flow[I, O, NotUsed]): Flow[I, O, NotUsed] =
+  def broadcastAndMerge[I, O](a: Flow[I, O, NotUsed],
+                              b: Flow[I, O, NotUsed]): Flow[I, O, NotUsed] =
     Flow.fromGraph(
       GraphDSL.create() { implicit builder =>
         import GraphDSL.Implicits._

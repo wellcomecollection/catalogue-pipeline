@@ -29,7 +29,8 @@ import uk.ac.wellcome.platform.inference_manager.services.{
 import uk.ac.wellcome.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import ImageState.{Augmented, Initial}
 
-trait InferenceManagerWorkerServiceFixture extends PipelineStorageStreamFixtures {
+trait InferenceManagerWorkerServiceFixture
+    extends PipelineStorageStreamFixtures {
 
   def withWorkerService[R](
     queue: Queue,

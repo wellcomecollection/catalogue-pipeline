@@ -22,16 +22,18 @@ trait IngestorFixtures
                            retriever: Retriever[Image[Augmented]],
                            indexer: Indexer[Image[Indexed]])(
     testWith: TestWith[ImageIngestorWorkerService[String], R]): R = {
-    withPipelineStream(queue, indexer, pipelineStorageConfig = pipelineStorageConfig) {
-      msgStream =>
-        val workerService = new ImageIngestorWorkerService(
-          pipelineStream = msgStream,
-          imageRetriever = retriever
-        )
+    withPipelineStream(
+      queue,
+      indexer,
+      pipelineStorageConfig = pipelineStorageConfig) { msgStream =>
+      val workerService = new ImageIngestorWorkerService(
+        pipelineStream = msgStream,
+        imageRetriever = retriever
+      )
 
-        workerService.run()
+      workerService.run()
 
-        testWith(workerService)
+      testWith(workerService)
     }
   }
 }

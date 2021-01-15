@@ -4,7 +4,10 @@ import scala.concurrent.ExecutionContext
 import akka.actor.ActorSystem
 import com.typesafe.config.Config
 
-import uk.ac.wellcome.elasticsearch.{MergedWorkIndexConfig, InitialImageIndexConfig}
+import uk.ac.wellcome.elasticsearch.{
+  InitialImageIndexConfig,
+  MergedWorkIndexConfig
+}
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.models.Implicits._
@@ -21,7 +24,6 @@ import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import WorkState.{Identified, Merged}
 import ImageState.Initial
-
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
@@ -72,7 +74,7 @@ object Main extends WellcomeTypesafeApp {
           namespace = "initial-images",
           indexConfig = InitialImageIndexConfig
         )
-    )
+      )
 
     new MergerWorkerService(
       msgStream = SQSBuilder.buildSQSStream[NotificationMessage](config),

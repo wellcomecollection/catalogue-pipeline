@@ -15,7 +15,10 @@ import uk.ac.wellcome.models.matcher.MatcherResult
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.pipeline_storage.{
-  Indexer, Indexable, PipelineStorageStream, PipelineStorageConfig
+  Indexable,
+  Indexer,
+  PipelineStorageConfig,
+  PipelineStorageStream
 }
 import uk.ac.wellcome.typesafe.Runnable
 import WorkState.{Identified, Merged}
@@ -48,7 +51,8 @@ class MergerWorkerService[WorkDestination, ImageDestination](
           .via(broadcastAndMerge(batchIndexAndSendWorksAndImages, identityFlow))
     )
 
-  val batchIndexAndSendWorksAndImages: Flow[(Message, List[WorkOrImage]), Message, NotUsed] =
+  val batchIndexAndSendWorksAndImages
+    : Flow[(Message, List[WorkOrImage]), Message, NotUsed] =
     batchIndexAndSendFlow(config, sendWorkOrImage, workOrImageIndexer)
 
   private def processMessage(
@@ -68,9 +72,8 @@ class MergerWorkerService[WorkDestination, ImageDestination](
 
   private def getWorkSets(matcherResult: MatcherResult): Future[List[WorkSet]] =
     Future.sequence {
-      matcherResult.works.toList.map {
-        matchedIdentifiers =>
-          sourceWorkLookup.fetchAllWorks(matchedIdentifiers.identifiers.toList)
+      matcherResult.works.toList.map { matchedIdentifiers =>
+        sourceWorkLookup.fetchAllWorks(matchedIdentifiers.identifiers.toList)
       }
     }
 
@@ -82,7 +85,7 @@ class MergerWorkerService[WorkDestination, ImageDestination](
 
   private def sendWorkOrImage(workOrImage: WorkOrImage): Try[Unit] =
     workOrImage match {
-      case Left(work) => workMsgSender.send(workIndexable.id(work))
+      case Left(work)   => workMsgSender.send(workIndexable.id(work))
       case Right(image) => imageMsgSender.send(imageIndexable.id(image))
     }
 

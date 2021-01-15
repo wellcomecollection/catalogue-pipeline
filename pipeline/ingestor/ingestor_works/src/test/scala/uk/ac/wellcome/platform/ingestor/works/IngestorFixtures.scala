@@ -22,16 +22,18 @@ trait IngestorFixtures
                            retriever: Retriever[Work[Denormalised]],
                            indexer: Indexer[Work[Indexed]])(
     testWith: TestWith[WorkIngestorWorkerService[String], R]): R = {
-    withPipelineStream(queue, indexer, pipelineStorageConfig = pipelineStorageConfig) {
-      msgStream =>
-        val workerService = new WorkIngestorWorkerService(
-          pipelineStream = msgStream,
-          workRetriever = retriever
-        )
+    withPipelineStream(
+      queue,
+      indexer,
+      pipelineStorageConfig = pipelineStorageConfig) { msgStream =>
+      val workerService = new WorkIngestorWorkerService(
+        pipelineStream = msgStream,
+        workRetriever = retriever
+      )
 
-        workerService.run()
+      workerService.run()
 
-        testWith(workerService)
+      testWith(workerService)
     }
   }
 }
