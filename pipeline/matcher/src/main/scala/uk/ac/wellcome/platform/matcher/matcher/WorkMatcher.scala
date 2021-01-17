@@ -35,24 +35,25 @@ class WorkMatcher(
   private def doMatch(links: WorkLinks): Future[Out] =
     withLocks(links, links.ids) {
       for {
-        graphBeforeUpdate <- workGraphStore.findAffectedWorks(links)
-        updatedGraph = WorkGraphUpdater.update(links, graphBeforeUpdate)
+        beforeGraph <- workGraphStore.findAffectedWorks(links)
+        afterGraph = WorkGraphUpdater.update(links, beforeGraph)
         _ <- withLocks(
           links,
-          getGraphComponentIds(graphBeforeUpdate, updatedGraph)) {
+          getGraphComponentIds(beforeGraph, afterGraph)) {
           // We are returning empty set here, as LockingService is tied to a
           // single `Out` type, here set to `Set[MatchedIdentifiers]`.
           // See issue here: https://github.com/wellcometrust/platform/issues/3873
-          workGraphStore.put(updatedGraph).map(_ => Set.empty)
+          // TODO: Could we check to see if there are any updated nodes here?
+          workGraphStore.put(afterGraph).map(_ => Set.empty)
         }
       } yield {
-        convertToIdentifiersList(updatedGraph)
+        convertToIdentifiersList(afterGraph)
       }
     }
 
-  private def getGraphComponentIds(graphBefore: WorkGraph,
-                                   graphAfter: WorkGraph): Set[String] =
-    graphBefore.nodes.map(_.componentId) ++ graphAfter.nodes.map(_.componentId)
+  private def getGraphComponentIds(beforeGraph: WorkGraph,
+                                   afterGraph: WorkGraph): Set[String] =
+    beforeGraph.nodes.map(_.componentId) ++ afterGraph.nodes.map(_.componentId)
 
   private def withLocks(links: WorkLinks, ids: Set[String])(
     f: => Future[Out]): Future[Out] =
