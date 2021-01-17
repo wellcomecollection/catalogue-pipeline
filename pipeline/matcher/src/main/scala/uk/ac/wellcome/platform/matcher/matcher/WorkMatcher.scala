@@ -22,9 +22,10 @@ import uk.ac.wellcome.storage.locking.{
 
 import java.util.UUID
 
-class WorkMatcher(
-  workGraphStore: WorkGraphStore,
-  lockingService: LockingService[Set[MatchedIdentifiers], Future, LockDao[String, UUID]])(
+class WorkMatcher(workGraphStore: WorkGraphStore,
+                  lockingService: LockingService[Set[MatchedIdentifiers],
+                                                 Future,
+                                                 LockDao[String, UUID]])(
   implicit ec: ExecutionContext)
     extends Logging {
 
@@ -38,9 +39,7 @@ class WorkMatcher(
       for {
         beforeGraph <- workGraphStore.findAffectedWorks(links)
         afterGraph = WorkGraphUpdater.update(links, beforeGraph)
-        _ <- withLocks(
-          links,
-          getGraphComponentIds(beforeGraph, afterGraph)) {
+        _ <- withLocks(links, getGraphComponentIds(beforeGraph, afterGraph)) {
           // We are returning empty set here, as LockingService is tied to a
           // single `Out` type, here set to `Set[MatchedIdentifiers]`.
           // See issue here: https://github.com/wellcometrust/platform/issues/3873
@@ -62,8 +61,7 @@ class WorkMatcher(
       .withLocks(ids)(f)
       .map {
         case Left(failure) =>
-          debug(
-            s"Locking failed while matching work ${links.workId}: $failure")
+          debug(s"Locking failed while matching work ${links.workId}: $failure")
           throw MatcherException(failureToException(failure))
         case Right(out) => out
       }
@@ -79,7 +77,8 @@ class WorkMatcher(
     g.nodes
       .groupBy { _.componentId }
       .map {
-        case (_, workNodes) => MatchedIdentifiers(workNodes.map(WorkIdentifier(_)))
+        case (_, workNodes) =>
+          MatchedIdentifiers(workNodes.map(WorkIdentifier(_)))
       }
       .toSet
 }

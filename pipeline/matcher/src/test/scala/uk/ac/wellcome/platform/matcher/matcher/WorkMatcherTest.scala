@@ -56,16 +56,11 @@ class WorkMatcherTest
                 Set(WorkIdentifier(links.workId, links.version)))))
 
             val savedLinkedWork =
-              get[WorkNode](dynamoClient, graphTable.name)(
-                'id -> links.workId)
+              get[WorkNode](dynamoClient, graphTable.name)('id -> links.workId)
                 .map(_.value)
 
             savedLinkedWork shouldBe Some(
-              WorkNode(
-                links.workId,
-                links.version,
-                Nil,
-                ciHash(links.workId)))
+              WorkNode(links.workId, links.version, Nil, ciHash(links.workId)))
           }
         }
       }
@@ -88,9 +83,10 @@ class WorkMatcherTest
           whenReady(workMatcher.matchWork(links)) { identifiersList =>
             identifiersList shouldBe
               MatcherResult(
-                Set(MatchedIdentifiers(Set(
-                  WorkIdentifier(identifierA.canonicalId, links.version),
-                  WorkIdentifier(identifierB.canonicalId, None)))))
+                Set(
+                  MatchedIdentifiers(Set(
+                    WorkIdentifier(identifierA.canonicalId, links.version),
+                    WorkIdentifier(identifierB.canonicalId, None)))))
 
             val savedWorkNodes = scan[WorkNode](dynamoClient, graphTable.name)
               .map(_.right.get)
@@ -205,12 +201,14 @@ class WorkMatcherTest
   }
 
   it("throws MatcherException if it fails to lock primary works") {
-    implicit val lockDao: MemoryLockDao[String, UUID] = new MemoryLockDao[String, UUID] {
-      override def lock(id: String, contextId: UUID): LockResult =
-        Left(LockFailure(id, e = new Throwable("BOOM!")))
-    }
+    implicit val lockDao: MemoryLockDao[String, UUID] =
+      new MemoryLockDao[String, UUID] {
+        override def lock(id: String, contextId: UUID): LockResult =
+          Left(LockFailure(id, e = new Throwable("BOOM!")))
+      }
 
-    val lockingService = new MemoryLockingService[Set[MatchedIdentifiers], Future]()
+    val lockingService =
+      new MemoryLockingService[Set[MatchedIdentifiers], Future]()
 
     withWorkGraphTable { graphTable =>
       withWorkGraphStore(graphTable) { workGraphStore =>
@@ -247,16 +245,18 @@ class WorkMatcherTest
           referencedIds = Set(identifierB)
         )
 
-        implicit val lockDao: MemoryLockDao[String, UUID] = new MemoryLockDao[String, UUID] {
-          override def lock(id: String, contextId: UUID): LockResult =
-            if (id == componentId) {
-              Left(LockFailure(id, e = new Throwable("BOOM!")))
-            } else {
-              super.lock(id, contextId)
-            }
-        }
+        implicit val lockDao: MemoryLockDao[String, UUID] =
+          new MemoryLockDao[String, UUID] {
+            override def lock(id: String, contextId: UUID): LockResult =
+              if (id == componentId) {
+                Left(LockFailure(id, e = new Throwable("BOOM!")))
+              } else {
+                super.lock(id, contextId)
+              }
+          }
 
-        val lockingService = new MemoryLockingService[Set[MatchedIdentifiers], Future]()
+        val lockingService =
+          new MemoryLockingService[Set[MatchedIdentifiers], Future]()
 
         val workMatcher = new WorkMatcher(workGraphStore, lockingService)
 

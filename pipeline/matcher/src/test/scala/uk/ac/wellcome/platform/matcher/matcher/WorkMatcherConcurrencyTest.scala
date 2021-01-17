@@ -24,8 +24,10 @@ class WorkMatcherConcurrencyTest
     with WorkLinksGenerators {
 
   it("processes one of two conflicting concurrent updates and locks the other") {
-    implicit val lockDao: MemoryLockDao[String, UUID] = new MemoryLockDao[String, UUID]
-    val lockingService = new MemoryLockingService[Set[MatchedIdentifiers], Future]()
+    implicit val lockDao: MemoryLockDao[String, UUID] =
+      new MemoryLockDao[String, UUID]
+    val lockingService =
+      new MemoryLockingService[Set[MatchedIdentifiers], Future]()
 
     withWorkGraphTable { graphTable =>
       withWorkGraphStore(graphTable) { workGraphStore =>

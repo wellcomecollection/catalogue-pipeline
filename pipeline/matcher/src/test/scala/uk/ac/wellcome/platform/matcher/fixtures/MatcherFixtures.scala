@@ -83,8 +83,10 @@ trait MatcherFixtures
 
   def withWorkMatcher[R](workGraphStore: WorkGraphStore)(
     testWith: TestWith[WorkMatcher, R]): R = {
-    implicit val lockDao: MemoryLockDao[String, UUID] = new MemoryLockDao[String, UUID]
-    val lockingService = new MemoryLockingService[Set[MatchedIdentifiers], Future]()
+    implicit val lockDao: MemoryLockDao[String, UUID] =
+      new MemoryLockDao[String, UUID]
+    val lockingService =
+      new MemoryLockingService[Set[MatchedIdentifiers], Future]()
 
     val workMatcher = new WorkMatcher(
       workGraphStore = workGraphStore,
