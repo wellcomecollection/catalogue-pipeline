@@ -6,9 +6,9 @@ import uk.ac.wellcome.platform.matcher.models.{WorkGraph, WorkLinks}
 
 class WorkGraphStore(workNodeDao: WorkNodeDao)(implicit _ec: ExecutionContext) {
 
-  def findAffectedWorks(workUpdate: WorkLinks): Future[WorkGraph] =
+  def findAffectedWorks(workLinks: WorkLinks): Future[WorkGraph] =
     for {
-      directlyAffectedWorks <- workNodeDao.get(workUpdate.ids)
+      directlyAffectedWorks <- workNodeDao.get(workLinks.ids)
       affectedComponentIds = directlyAffectedWorks.map(workNode =>
         workNode.componentId)
       affectedWorks <- workNodeDao.getByComponentIds(affectedComponentIds)

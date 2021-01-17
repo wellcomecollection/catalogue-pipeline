@@ -54,14 +54,14 @@ class WorkMatcher(
                                    graphAfter: WorkGraph): Set[String] =
     graphBefore.nodes.map(_.componentId) ++ graphAfter.nodes.map(_.componentId)
 
-  private def withLocks(update: WorkLinks, ids: Set[String])(
+  private def withLocks(links: WorkLinks, ids: Set[String])(
     f: => Future[Out]): Future[Out] =
     lockingService
       .withLocks(ids)(f)
       .map {
         case Left(failure) => {
           debug(
-            s"Locking failed while matching work ${update.workId}: ${failure}")
+            s"Locking failed while matching work ${links.workId}: ${failure}")
           throw MatcherException(failureToException(failure))
         }
         case Right(out) => out
