@@ -2,7 +2,6 @@ package uk.ac.wellcome.platform.matcher.storage
 
 import grizzled.slf4j.Logging
 
-import javax.naming.ConfigurationException
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughputExceededException
 import org.scanamo.{DynamoFormat, Scanamo, Table}
@@ -21,11 +20,7 @@ class WorkNodeDao(dynamoClient: AmazonDynamoDB, dynamoConfig: DynamoConfig)(
 
   private val scanamo = Scanamo(dynamoClient)
   private val nodes = Table[WorkNode](dynamoConfig.tableName)
-  private val index = nodes.index(
-    dynamoConfig.maybeIndexName.getOrElse {
-      throw new ConfigurationException("Index not specified")
-    }
-  )
+  private val index = nodes.index(dynamoConfig.indexName)
 
   private val batchWriter = new DynamoBatchWriter[WorkNode](
     dynamoConfig
