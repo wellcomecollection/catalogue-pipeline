@@ -248,10 +248,12 @@ class WorkMatcherTest
         implicit val lockDao: MemoryLockDao[String, UUID] =
           new MemoryLockDao[String, UUID] {
             override def lock(id: String, contextId: UUID): LockResult =
-              if (id == componentId) {
-                Left(LockFailure(id, e = new Throwable("BOOM!")))
-              } else {
-                super.lock(id, contextId)
+              synchronized {
+                if (id == componentId) {
+                  Left(LockFailure(id, e = new Throwable("BOOM!")))
+                } else {
+                  super.lock(id, contextId)
+                }
               }
           }
 
