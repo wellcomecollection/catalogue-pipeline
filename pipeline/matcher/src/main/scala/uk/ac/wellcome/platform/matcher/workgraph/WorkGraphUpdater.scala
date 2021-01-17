@@ -141,6 +141,9 @@ object WorkGraphUpdater extends Logging {
     *
     * Note that this is based on the *unversioned* identifiers.  This means the
     * component identifier is stable across different versions of a Work.
+    *
+    * TODO: Does this need to be a SHA-256 value?
+    * Could we just concatenate all the IDs?
     */
   private def componentIdentifier(nodeIds: List[String]): String =
     DigestUtils.sha256Hex(nodeIds.sorted.mkString("+"))
