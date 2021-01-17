@@ -19,7 +19,6 @@ import uk.ac.wellcome.platform.matcher.storage.{WorkGraphStore, WorkNodeDao}
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.storage.dynamo._
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
 import uk.ac.wellcome.storage.locking.dynamo.{
   DynamoLockDaoFixtures,
@@ -113,8 +112,8 @@ trait MatcherFixtures
   def withWorkNodeDao[R](table: Table)(
     testWith: TestWith[WorkNodeDao, R]): R = {
     val workNodeDao = new WorkNodeDao(
-      dynamoClient,
-      DynamoConfig(table.name, table.index)
+      dynamoClient = dynamoClient,
+      dynamoConfig = createDynamoConfigWith(table)
     )
     testWith(workNodeDao)
   }
