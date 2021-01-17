@@ -19,7 +19,11 @@ import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
 import uk.ac.wellcome.platform.matcher.generators.WorkLinksGenerators
 import uk.ac.wellcome.platform.matcher.models.{WorkGraph, WorkLinks}
 import uk.ac.wellcome.platform.matcher.storage.WorkGraphStore
-import uk.ac.wellcome.storage.locking.dynamo.DynamoLockingService
+import uk.ac.wellcome.storage.locking.LockFailure
+import uk.ac.wellcome.storage.locking.memory.{
+  MemoryLockDao,
+  MemoryLockingService
+}
 
 import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -201,66 +205,65 @@ class WorkMatcherTest
   }
 
   it("throws MatcherException if it fails to lock primary works") {
-    withLockTable { lockTable =>
-      withWorkGraphTable { graphTable =>
-        withWorkGraphStore(graphTable) { workGraphStore =>
-          withLockDao(dynamoClient, lockTable) { implicit lockDao =>
-            val links = createWorkLinks
+    implicit val lockDao: MemoryLockDao[String, UUID] = new MemoryLockDao[String, UUID] {
+      override def lock(id: String, contextId: UUID): LockResult =
+        Left(LockFailure(id, e = new Throwable("BOOM!")))
+    }
 
-            withWorkMatcherAndLockingService(
-              workGraphStore,
-              new DynamoLockingService) { workMatcher =>
-              val failedLock = for {
-                _ <- Future.successful(
-                  lockDao.lock(links.workId, UUID.randomUUID))
-                result <- workMatcher.matchWork(links)
-              } yield result
-              whenReady(failedLock.failed) { failedMatch =>
-                failedMatch shouldBe a[MatcherException]
-              }
-            }
-          }
+    val lockingService = new MemoryLockingService[Set[MatchedIdentifiers], Future]()
+
+    withWorkGraphTable { graphTable =>
+      withWorkGraphStore(graphTable) { workGraphStore =>
+        val links = createWorkLinks
+
+        val workMatcher = new WorkMatcher(workGraphStore, lockingService)
+
+        val result = workMatcher.matchWork(links)
+
+        whenReady(result.failed) {
+          _ shouldBe a[MatcherException]
         }
       }
     }
   }
 
   it("throws MatcherException if it fails to lock secondary works") {
-    withLockTable { lockTable =>
-      withWorkGraphTable { graphTable =>
-        withWorkGraphStore(graphTable) { workGraphStore =>
-          withLockDao(dynamoClient, lockTable) { implicit lockDao =>
-            withWorkMatcherAndLockingService(
-              workGraphStore,
-              new DynamoLockingService) { workMatcher =>
-              // A->B->C
-              val componentId = "ABC"
-              val idA = identifierA.canonicalId
-              val idB = identifierB.canonicalId
-              val idC = identifierC.canonicalId
-              workGraphStore.put(
-                WorkGraph(
-                  Set(
-                    WorkNode(idA, 0, List(idB), componentId),
-                    WorkNode(idB, 0, List(idC), componentId),
-                    WorkNode(idC, 0, Nil, componentId),
-                  )))
+    withWorkGraphTable { graphTable =>
+      withWorkGraphStore(graphTable) { workGraphStore =>
+        val componentId = "ABC"
+        val idA = identifierA.canonicalId
+        val idB = identifierB.canonicalId
+        val idC = identifierC.canonicalId
+        workGraphStore.put(
+          WorkGraph(
+            Set(
+              WorkNode(idA, 0, List(idB), componentId),
+              WorkNode(idB, 0, List(idC), componentId),
+              WorkNode(idC, 0, Nil, componentId),
+            )))
 
-              val links = createWorkLinksWith(
-                id = identifierA,
-                referencedIds = Set(identifierB)
-              )
+        val links = createWorkLinksWith(
+          id = identifierA,
+          referencedIds = Set(identifierB)
+        )
 
-              val failedLock = for {
-                _ <- Future.successful(
-                  lockDao.lock(componentId, UUID.randomUUID))
-                result <- workMatcher.matchWork(links)
-              } yield result
-              whenReady(failedLock.failed) { failedMatch =>
-                failedMatch shouldBe a[MatcherException]
-              }
+        implicit val lockDao: MemoryLockDao[String, UUID] = new MemoryLockDao[String, UUID] {
+          override def lock(id: String, contextId: UUID): LockResult =
+            if (id == componentId) {
+              Left(LockFailure(id, e = new Throwable("BOOM!")))
+            } else {
+              super.lock(id, contextId)
             }
-          }
+        }
+
+        val lockingService = new MemoryLockingService[Set[MatchedIdentifiers], Future]()
+
+        val workMatcher = new WorkMatcher(workGraphStore, lockingService)
+
+        val result = workMatcher.matchWork(links)
+
+        whenReady(result.failed) {
+          _ shouldBe a[MatcherException]
         }
       }
     }
