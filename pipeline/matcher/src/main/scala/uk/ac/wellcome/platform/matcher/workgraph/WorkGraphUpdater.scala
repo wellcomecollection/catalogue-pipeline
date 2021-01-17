@@ -134,7 +134,6 @@ object WorkGraphUpdater extends Logging {
     )
   }
 
-  private def componentIdentifier(nodeIds: List[String]) = {
+  private def componentIdentifier(nodeIds: List[String]): String =
     DigestUtils.sha256Hex(nodeIds.sorted.mkString("+"))
-  }
 }
