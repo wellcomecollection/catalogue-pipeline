@@ -59,11 +59,10 @@ class WorkMatcher(
     lockingService
       .withLocks(ids)(f)
       .map {
-        case Left(failure) => {
+        case Left(failure) =>
           debug(
-            s"Locking failed while matching work ${links.workId}: ${failure}")
+            s"Locking failed while matching work ${links.workId}: $failure")
           throw MatcherException(failureToException(failure))
-        }
         case Right(out) => out
       }
 
