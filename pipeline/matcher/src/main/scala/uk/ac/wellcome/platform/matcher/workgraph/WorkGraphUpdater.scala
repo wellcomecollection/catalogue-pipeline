@@ -134,6 +134,14 @@ object WorkGraphUpdater extends Logging {
     )
   }
 
+  /** Create the "component identifier".
+    *
+    * This is shared by all the Works in the same component -- i.e., all the
+    * Works that are matched together.
+    *
+    * Note that this is based on the *unversioned* identifiers.  This means the
+    * component identifier is stable across different versions of a Work.
+    */
   private def componentIdentifier(nodeIds: List[String]): String =
     DigestUtils.sha256Hex(nodeIds.sorted.mkString("+"))
 }
