@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.matcher.matcher
 
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
+import org.mockito.Mockito.{spy, times, verify, when}
 import org.scalatest.EitherValues
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
@@ -282,6 +282,41 @@ class WorkMatcherTest
 
       whenReady(workMatcher.matchWork(links).failed) { actualException =>
         actualException shouldBe MatcherException(expectedException)
+      }
+    }
+  }
+
+  it("skips writing to the store if there are no changes") {
+    withWorkGraphTable { graphTable =>
+      withWorkGraphStore(graphTable) { workGraphStore =>
+        val spyStore = spy(workGraphStore)
+
+        val links = createWorkLinks
+
+        withWorkMatcher(spyStore) { workMatcher =>
+          // Try to match the links more than once.  We have to match in sequence,
+          // not in parallel, or the locking will block all but one of them from
+          // doing anything non-trivial.
+          val futures =
+            workMatcher
+              .matchWork(links)
+              .flatMap { _ =>
+                workMatcher.matchWork(links)
+              }
+              .flatMap { _ =>
+                workMatcher.matchWork(links)
+              }
+              .flatMap { _ =>
+                workMatcher.matchWork(links)
+              }
+              .flatMap { _ =>
+                workMatcher.matchWork(links)
+              }
+
+          whenReady(futures) { _ =>
+            verify(spyStore, times(1)).put(any[Set[WorkNode]])
+          }
+        }
       }
     }
   }
