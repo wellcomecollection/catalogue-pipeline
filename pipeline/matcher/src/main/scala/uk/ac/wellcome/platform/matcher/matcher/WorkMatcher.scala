@@ -3,7 +3,6 @@ package uk.ac.wellcome.platform.matcher.matcher
 import scala.concurrent.{ExecutionContext, Future}
 import cats.implicits._
 import grizzled.slf4j.Logging
-
 import uk.ac.wellcome.models.matcher.{
   MatchedIdentifiers,
   MatcherResult,
@@ -14,16 +13,19 @@ import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.models._
 import uk.ac.wellcome.platform.matcher.storage.WorkGraphStore
 import uk.ac.wellcome.platform.matcher.workgraph.WorkGraphUpdater
-import uk.ac.wellcome.storage.locking.dynamo.DynamoLockingService
 import uk.ac.wellcome.storage.locking.{
   FailedLockingServiceOp,
   FailedProcess,
-  FailedUnlock
+  FailedUnlock,
+  LockDao,
+  LockingService
 }
+
+import java.util.UUID
 
 class WorkMatcher(
   workGraphStore: WorkGraphStore,
-  lockingService: DynamoLockingService[Set[MatchedIdentifiers], Future])(
+  lockingService: LockingService[Set[MatchedIdentifiers], Future, LockDao[String, UUID]])(
   implicit ec: ExecutionContext)
     extends Logging {
 
