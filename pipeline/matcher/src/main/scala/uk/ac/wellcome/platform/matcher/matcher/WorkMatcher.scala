@@ -6,8 +6,7 @@ import grizzled.slf4j.Logging
 import uk.ac.wellcome.models.matcher.{
   MatchedIdentifiers,
   MatcherResult,
-  WorkIdentifier,
-  WorkNode
+  WorkIdentifier
 }
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.models._
@@ -49,7 +48,7 @@ class WorkMatcher(
           workGraphStore.put(afterGraph).map(_ => Set.empty)
         }
       } yield {
-        convertToIdentifiersList(afterGraph)
+        toMatchedIdentifiers(afterGraph)
       }
     }
 
@@ -76,14 +75,11 @@ class WorkMatcher(
       case _                     => new RuntimeException(failure.toString)
     }
 
-  private def convertToIdentifiersList(
-    graph: WorkGraph): Set[MatchedIdentifiers] =
-    groupBySetId(graph).map {
-      case (_, workNodes: Set[WorkNode]) =>
-        MatchedIdentifiers(workNodes.map(WorkIdentifier(_)))
-    }.toSet
-
-  private def groupBySetId(
-    updatedGraph: WorkGraph): Map[String, Set[WorkNode]] =
-    updatedGraph.nodes.groupBy(_.componentId)
+  private def toMatchedIdentifiers(g: WorkGraph): Set[MatchedIdentifiers] =
+    g.nodes
+      .groupBy { _.componentId }
+      .map {
+        case (_, workNodes) => MatchedIdentifiers(workNodes.map(WorkIdentifier(_)))
+      }
+      .toSet
 }
