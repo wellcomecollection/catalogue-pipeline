@@ -5,7 +5,6 @@ module "staging_routing" {
   listener_port   = 1236
   domain_name     = "catalogue.api-stage.wellcomecollection.org"
   certificate_arn = aws_acm_certificate_validation.catalogue_api_validation.certificate_arn
-  aws_region      = "eu-west-1"
 
   providers = {
     aws.dns = aws.dns
@@ -19,7 +18,6 @@ module "prod_routing" {
   listener_port   = 8082
   domain_name     = "catalogue.api.wellcomecollection.org"
   certificate_arn = aws_acm_certificate_validation.catalogue_api_validation.certificate_arn
-  aws_region      = "eu-west-1"
 
   providers = {
     aws.dns = aws.dns

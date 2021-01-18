@@ -16,16 +16,6 @@ variable "secrets" {
   default = {}
 }
 
-variable "cpu" {
-  type    = number
-  default = 1024
-}
-
-variable "memory" {
-  type    = number
-  default = 2048
-}
-
 variable "container_port" {
   type    = number
   default = 9001
