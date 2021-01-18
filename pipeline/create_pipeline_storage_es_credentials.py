@@ -17,21 +17,29 @@ from elasticsearch import Elasticsearch
 import hyperlink
 
 
-WORK_TYPES = ["source", "merged", "denormalised", "identified"]
+WORK_INDICES = ["source", "merged", "denormalised", "identified"]
 
-INDEX_PATTERN = "works-{work_type}*"
+IMAGE_INDICES = ["initial", "augmented"]
+
+WORK_INDEX_PATTERN = "works-{index}*"
+
+IMAGE_INDEX_PATTERN = "images-{index}*"
+
+
 
 SERVICES = {
     "transformer": ["source_write"],
-    "matcher": ["identified_read", "source_read"],
-    "merger": ["identified_read", "source_read", "merged_write"],
-    "id_minter": ["source_read", "denormalised_read", "identified_write"],
+    "id_minter": ["source_read", "identified_write"],
+    "matcher": ["identified_read"],
+    "merger": ["identified_read", "merged_write"],
     "router": ["merged_read", "denormalised_write"],
     "relation_embedder": ["merged_read", "denormalised_write"],
-    "ingestor": ["identified_read", "denormalised_read"],
+    "work_ingestor": ["denormalised_read"],
+    "inferrer": ["initial_read", "augmented_write"],
+    "image_ingestor": ["augmented_read"],
     # This role isn't used by applications, but instead provided to give developer scripts
     # read-only access to the pipeline_storage cluster.
-    "dev": [f"{work_type}_read" for work_type in WORK_TYPES],
+    "dev": [f"{index}_read" for index in IMAGE_INDICES + WORK_INDICES],
 }
 
 DEFAULT_DESCRIPTION = "Credentials for the pipeline-storage Elasticsearch cluster"
@@ -92,23 +100,24 @@ def store_secret(secret_id, secret_value, description=DEFAULT_DESCRIPTION):
     click.echo(f"Stored secret {click.style(secret_id, 'yellow')}")
 
 
-def create_roles(es, *, work_type):
+def create_roles(es, index):
     """
     Create read and write roles for a given work type.
     """
     for role_suffix, privileges in [("read", ["read"]), ("write", ["all"])]:
-        role_name = f"{work_type}_{role_suffix}"
-        index_pattern = INDEX_PATTERN.format(work_type=work_type)
+        role_name = f"{index}_{role_suffix}"
+        index_pattern = IMAGE_INDEX_PATTERN if index in IMAGE_INDICES else WORK_INDEX_PATTERN
+        index_name = index_pattern.format(index=index)
 
         es.security.put_role(
             role_name,
-            body={"indices": [{"names": [index_pattern], "privileges": privileges}]},
+            body={"indices": [{"names": [index_name], "privileges": privileges}]},
         )
 
         yield role_name
 
 
-def create_user(es, *, username, roles):
+def create_user(es, username, roles):
     """
     Creates a user with the given roles.  Returns a (username, password) pair.
     """
@@ -153,8 +162,8 @@ def main(username, password, endpoint):
     es = Elasticsearch(endpoint, http_auth=(username, password))
 
     newly_created_roles = set()
-    for work_type in WORK_TYPES:
-        for r in create_roles(es, work_type=work_type):
+    for index in WORK_INDICES + IMAGE_INDICES:
+        for r in create_roles(es, index=index):
             newly_created_roles.add(r)
             click.echo(f"Created role {click.style(r, 'green')}")
 
