@@ -25,7 +25,9 @@ trait ScanRequestScanner extends ItemParser {
   protected def scan[T](request: ScanRequest)(
     implicit format: DynamoFormat[T]): Future[Seq[T]] =
     for {
-      response: ScanResponse <- Future { dynamoClient.scan(request).asInstanceOf[ScanResponse] }
+      response: ScanResponse <- Future {
+        dynamoClient.scan(request).asInstanceOf[ScanResponse]
+      }
       items = response.items().asScala
       result <- parseItems[T](items)
     } yield result

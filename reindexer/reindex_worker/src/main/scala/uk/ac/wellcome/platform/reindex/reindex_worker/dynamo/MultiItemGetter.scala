@@ -34,7 +34,8 @@ class MultiItemGetter(implicit
       if (failures.isEmpty) {
         successes.toSeq
       } else {
-        throw new Throwable(s"Errors parsing Scanamo result: ${failures.mkString(", ")}")
+        throw new Throwable(
+          s"Errors parsing Scanamo result: ${failures.mkString(", ")}")
       }
     }
   }

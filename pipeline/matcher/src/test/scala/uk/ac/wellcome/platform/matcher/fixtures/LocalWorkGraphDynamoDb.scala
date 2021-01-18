@@ -16,40 +16,48 @@ trait LocalWorkGraphDynamoDb extends DynamoFixtures with RandomGenerators {
 
     createTableFromRequest(
       table,
-      CreateTableRequest.builder()
+      CreateTableRequest
+        .builder()
         .tableName(table.name)
         .keySchema(
-          KeySchemaElement.builder()
+          KeySchemaElement
+            .builder()
             .attributeName("id")
             .keyType(KeyType.HASH)
             .build()
         )
         .attributeDefinitions(
-          AttributeDefinition.builder()
+          AttributeDefinition
+            .builder()
             .attributeName("id")
             .attributeType("S")
             .build(),
-          AttributeDefinition.builder()
+          AttributeDefinition
+            .builder()
             .attributeName("componentId")
             .attributeType("S")
             .build()
         )
         .globalSecondaryIndexes(
-          GlobalSecondaryIndex.builder()
+          GlobalSecondaryIndex
+            .builder()
             .indexName(table.index)
             .projection(
-              Projection.builder()
+              Projection
+                .builder()
                 .projectionType(ProjectionType.ALL)
                 .build()
             )
             .keySchema(
-              KeySchemaElement.builder()
+              KeySchemaElement
+                .builder()
                 .attributeName("componentId")
                 .keyType(KeyType.HASH)
                 .build()
             )
             .provisionedThroughput(
-              ProvisionedThroughput.builder()
+              ProvisionedThroughput
+                .builder()
                 .readCapacityUnits(1L)
                 .writeCapacityUnits(1L)
                 .build()

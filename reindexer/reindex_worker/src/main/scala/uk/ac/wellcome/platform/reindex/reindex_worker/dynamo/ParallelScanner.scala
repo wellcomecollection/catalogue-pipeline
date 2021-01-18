@@ -38,7 +38,8 @@ class ParallelScanner(implicit
     // based on the Java example of a Parallel Scan from the AWS docs:
     // https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/ScanJavaDocumentAPI.html
     //
-    val request = ScanRequest.builder()
+    val request = ScanRequest
+      .builder()
       .tableName(tableName)
       .totalSegments(totalSegments)
       .segment(segment)

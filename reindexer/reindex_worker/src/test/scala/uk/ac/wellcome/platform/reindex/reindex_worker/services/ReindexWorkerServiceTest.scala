@@ -49,19 +49,24 @@ class ReindexWorkerServiceTest
       case n: Int        => AttributeValue.builder().n(n.toString).build()
       case n: Long       => AttributeValue.builder().n(n.toString).build()
       case bool: Boolean => AttributeValue.builder().bool(bool).build()
-      case m: Map[_, _]  =>
-        val convertedMap = toAttributeValue(m.asInstanceOf[Map[String, Any]].toSeq: _*)
+      case m: Map[_, _] =>
+        val convertedMap = toAttributeValue(
+          m.asInstanceOf[Map[String, Any]].toSeq: _*)
         AttributeValue.builder().m(convertedMap).build()
       case l: List[_] =>
         val convertedList = l.map { toSingleAttributeValue }
         AttributeValue.builder().l(convertedList: _*).build()
     }
 
-  def toAttributeValue(m: Tuple2[String, Any]*): util.Map[String, AttributeValue] =
+  def toAttributeValue(
+    m: Tuple2[String, Any]*): util.Map[String, AttributeValue] =
     m.map {
-      case (key, value) => key -> toSingleAttributeValue(value)
-      case other        => throw new IllegalArgumentException(s"Unexpected type in $m ($other)")
-    }.toMap.asJava
+        case (key, value) => key -> toSingleAttributeValue(value)
+        case other =>
+          throw new IllegalArgumentException(s"Unexpected type in $m ($other)")
+      }
+      .toMap
+      .asJava
 
   // These tests are designed to check we can parse the data in DynamoDB
   // correctly.
@@ -82,7 +87,8 @@ class ReindexWorkerServiceTest
         val version = randomInt(from = 1, to = 10)
 
         dynamoClient.putItem(
-          PutItemRequest.builder()
+          PutItemRequest
+            .builder()
             .tableName(table.name)
             .item(
               toAttributeValue(
@@ -122,7 +128,8 @@ class ReindexWorkerServiceTest
         val version = randomInt(from = 1, to = 10)
 
         dynamoClient.putItem(
-          PutItemRequest.builder()
+          PutItemRequest
+            .builder()
             .tableName(table.name)
             .item(
               toAttributeValue(
@@ -170,7 +177,8 @@ class ReindexWorkerServiceTest
         )
 
         dynamoClient.putItem(
-          PutItemRequest.builder()
+          PutItemRequest
+            .builder()
             .tableName(table.name)
             .item(
               toAttributeValue(
@@ -209,7 +217,8 @@ class ReindexWorkerServiceTest
         val version = randomInt(from = 1, to = 10)
 
         dynamoClient.putItem(
-          PutItemRequest.builder()
+          PutItemRequest
+            .builder()
             .tableName(table.name)
             .item(
               toAttributeValue(
@@ -247,7 +256,8 @@ class ReindexWorkerServiceTest
         val version = randomInt(from = 1, to = 10)
 
         dynamoClient.putItem(
-          PutItemRequest.builder()
+          PutItemRequest
+            .builder()
             .tableName(table.name)
             .item(
               toAttributeValue(
@@ -283,7 +293,8 @@ class ReindexWorkerServiceTest
         val version = randomInt(from = 1, to = 10)
 
         dynamoClient.putItem(
-          PutItemRequest.builder()
+          PutItemRequest
+            .builder()
             .tableName(table.name)
             .item(
               toAttributeValue(

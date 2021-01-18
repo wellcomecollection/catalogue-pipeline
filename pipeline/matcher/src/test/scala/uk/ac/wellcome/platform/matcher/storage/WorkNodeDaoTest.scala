@@ -84,7 +84,11 @@ class WorkNodeDaoTest
       withWorkGraphTable { table =>
         val dynamoClient = mock[DynamoDbClient]
         when(dynamoClient.batchGetItem(any[BatchGetItemRequest]))
-          .thenThrow(ProvisionedThroughputExceededException.builder().message("BOOM!").build())
+          .thenThrow(
+            ProvisionedThroughputExceededException
+              .builder()
+              .message("BOOM!")
+              .build())
         val workNodeDao = new WorkNodeDao(
           dynamoClient,
           DynamoConfig(table.name, table.index)
@@ -151,7 +155,11 @@ class WorkNodeDaoTest
       withWorkGraphTable { table =>
         val dynamoClient = mock[DynamoDbClient]
         when(dynamoClient.query(any[QueryRequest]))
-          .thenThrow(ProvisionedThroughputExceededException.builder().message("BOOM!").build())
+          .thenThrow(
+            ProvisionedThroughputExceededException
+              .builder()
+              .message("BOOM!")
+              .build())
         val workNodeDao = new WorkNodeDao(
           dynamoClient,
           DynamoConfig(table.name, table.index)
@@ -168,7 +176,8 @@ class WorkNodeDaoTest
       withWorkGraphTable { table =>
         withWorkNodeDao(table) { workNodeDao =>
           case class BadRecord(id: String, componentId: String, version: String)
-          val badRecord: BadRecord = BadRecord(id = "A", componentId = "A+B", version = "five")
+          val badRecord: BadRecord =
+            BadRecord(id = "A", componentId = "A+B", version = "five")
           put(dynamoClient, table.name)(badRecord)
 
           whenReady(workNodeDao.getByComponentIds(Set("A+B")).failed) {
@@ -230,7 +239,11 @@ class WorkNodeDaoTest
       withWorkGraphTable { table =>
         val dynamoClient = mock[DynamoDbClient]
         when(dynamoClient.batchWriteItem(any[BatchWriteItemRequest]))
-          .thenThrow(ProvisionedThroughputExceededException.builder().message("BOOM!").build())
+          .thenThrow(
+            ProvisionedThroughputExceededException
+              .builder()
+              .message("BOOM!")
+              .build())
         val workNodeDao = new WorkNodeDao(
           dynamoClient,
           DynamoConfig(table.name, table.index)

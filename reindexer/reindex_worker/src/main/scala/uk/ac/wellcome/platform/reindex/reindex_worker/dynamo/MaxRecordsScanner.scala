@@ -14,7 +14,8 @@ class MaxRecordsScanner(implicit
 
   def scan[T](maxRecords: Int)(tableName: String)(
     implicit format: DynamoFormat[T]): Future[Seq[T]] = {
-    val request = ScanRequest.builder()
+    val request = ScanRequest
+      .builder()
       .tableName(tableName)
       .limit(maxRecords)
       .build()
