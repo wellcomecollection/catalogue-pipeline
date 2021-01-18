@@ -31,7 +31,7 @@ module "stack" {
   #      500 ~ too big in January 2021
   #
   # See https://github.com/wellcomecollection/platform/issues/4901
-  es_bulk_size = 250
+  es_bulk_size = 150
 
   shared_logging_secrets = local.shared_logging_secrets
 
