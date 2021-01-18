@@ -18,6 +18,7 @@ import com.sksamuel.elastic4s.{Index, Response}
 import grizzled.slf4j.Logging
 import io.circe.{Decoder, Encoder, Json}
 import io.circe.parser.parse
+
 import uk.ac.wellcome.elasticsearch._
 import uk.ac.wellcome.elasticsearch.model.CanonicalId
 import uk.ac.wellcome.fixtures._

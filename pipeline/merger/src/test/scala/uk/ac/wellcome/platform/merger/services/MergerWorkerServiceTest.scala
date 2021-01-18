@@ -4,6 +4,9 @@ import scala.collection.mutable
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
+
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
@@ -19,9 +22,6 @@ import WorkState.{Identified, Merged}
 import WorkFsm._
 import uk.ac.wellcome.models.work.generators.MiroWorkGenerators
 import uk.ac.wellcome.pipeline_storage.MemoryRetriever
-
-import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext.Implicits.global
 
 class MergerWorkerServiceTest
     extends AnyFunSpec
