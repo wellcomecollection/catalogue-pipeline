@@ -8,7 +8,8 @@ resource "ec_deployment" "pipeline_storage" {
   deployment_template_id = "aws-io-optimized-v2"
 
   traffic_filter = [
-    ec_deployment_traffic_filter.allow_catalogue_pipeline_vpce.id
+    ec_deployment_traffic_filter.allow_catalogue_pipeline_vpce.id,
+    ec_deployment_traffic_filter.public_internet.id
   ]
 
   elasticsearch {
@@ -66,6 +67,18 @@ resource "ec_deployment_traffic_filter" "allow_catalogue_pipeline_vpce" {
 
   rule {
     source = aws_vpc_endpoint.catalogue_pipeline_elastic_cloud_vpce.id
+  }
+}
+
+# This enables public access to the ES cluster (with the usual x-pack auth proviso)
+# TODO: Restrict this to Wellcome internal IP addresses when physical office access is restored
+resource "ec_deployment_traffic_filter" "public_internet" {
+  name   = "public_access"
+  region = "eu-west-1"
+  type   = "ip"
+
+  rule {
+    source = "0.0.0.0/0"
   }
 }
 
