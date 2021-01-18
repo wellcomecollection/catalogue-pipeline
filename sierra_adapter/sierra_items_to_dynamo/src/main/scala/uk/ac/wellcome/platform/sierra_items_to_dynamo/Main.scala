@@ -1,10 +1,9 @@
 package uk.ac.wellcome.platform.sierra_items_to_dynamo
 
 import akka.actor.ActorSystem
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.typesafe.config.Config
-import org.scanamo.auto._
-import org.scanamo.time.JavaTimeFormats._
+import org.scanamo.generic.auto._
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import uk.ac.wellcome.platform.sierra_items_to_dynamo.dynamo.Implicits._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
@@ -20,6 +19,7 @@ import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 
 import scala.concurrent.ExecutionContext
+import scala.language.higherKinds
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
@@ -27,7 +27,7 @@ object Main extends WellcomeTypesafeApp {
     implicit val executionContext: ExecutionContext =
       AkkaBuilder.buildExecutionContext()
 
-    implicit val dynamoClient: AmazonDynamoDB =
+    implicit val dynamoClient: DynamoDbClient =
       DynamoBuilder.buildDynamoClient(config)
 
     val versionedStore =
