@@ -1,5 +1,9 @@
+locals {
+  table_name = "mets-adapter-store-delta"
+}
+
 resource "aws_dynamodb_table" "mets_adapter_table" {
-  name     = "mets-adapter-store-delta"
+  name     = local.table_name
   hash_key = "id"
 
   attribute {
@@ -11,6 +15,10 @@ resource "aws_dynamodb_table" "mets_adapter_table" {
 
   lifecycle {
     prevent_destroy = true
+  }
+
+  tags = {
+    Name = local.table_name
   }
 }
 
