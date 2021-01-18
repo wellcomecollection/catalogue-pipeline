@@ -62,7 +62,7 @@ variable "inferrer_model_data_bucket_name" {}
 
 variable "pipeline_storage_id" {
   default     = "pipeline_storage"
-  description = "The id of the secret where the es_host is stored"
+  description = "The ID of the pipeline_storage instance used for secrets"
 }
 
 locals {
