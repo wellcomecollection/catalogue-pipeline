@@ -3,8 +3,6 @@
 Reports some stats about the state of a reindex.
 """
 
-import sys
-
 import boto3
 import click
 from elasticsearch import Elasticsearch
