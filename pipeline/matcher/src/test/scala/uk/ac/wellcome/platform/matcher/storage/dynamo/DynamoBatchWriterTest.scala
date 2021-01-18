@@ -1,19 +1,20 @@
 package uk.ac.wellcome.platform.matcher.storage.dynamo
 
-import com.amazonaws.services.dynamodbv2.model.{
-  ResourceNotFoundException,
-  ScalarAttributeType
-}
 import org.scalatest.EitherValues
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import org.scanamo.auto._
+import org.scanamo.generic.auto._
 import org.scanamo.syntax._
 import org.scanamo.{Table => ScanamoTable}
+import software.amazon.awssdk.services.dynamodb.model.{
+  ResourceNotFoundException,
+  ScalarAttributeType
+}
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.language.higherKinds
 
 class DynamoBatchWriterTest
     extends AnyFunSpec
@@ -42,7 +43,7 @@ class DynamoBatchWriterTest
       whenReady(writer.batchWrite(shapes)) { _ =>
         shapes.foreach { s =>
           scanamo
-            .exec(ScanamoTable[Shape](table.name).get('sides -> s.sides))
+            .exec(ScanamoTable[Shape](table.name).get("sides" === s.sides))
             .get
             .value shouldBe s
         }
@@ -61,7 +62,7 @@ class DynamoBatchWriterTest
       whenReady(writer.batchWrite(shapes)) { _ =>
         shapes.foreach { s =>
           scanamo
-            .exec(ScanamoTable[Shape](table.name).get('sides -> s.sides))
+            .exec(ScanamoTable[Shape](table.name).get("sides" === s.sides))
             .get
             .value shouldBe s
         }
