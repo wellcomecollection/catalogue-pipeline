@@ -13,4 +13,8 @@ resource "aws_dynamodb_table" "table" {
   lifecycle {
     prevent_destroy = true
   }
+
+  tags = {
+    Name = local.table_name
+  }
 }
