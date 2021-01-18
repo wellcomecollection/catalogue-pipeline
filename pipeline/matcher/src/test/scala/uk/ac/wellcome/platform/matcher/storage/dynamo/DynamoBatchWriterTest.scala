@@ -98,7 +98,8 @@ class DynamoBatchWriterTest
 
       whenReady(writer.batchWrite(shapes).failed) { err =>
         err shouldBe a[DynamoDbException]
-        err.getMessage should startWith("One of the required keys was not given a value")
+        err.getMessage should startWith(
+          "One of the required keys was not given a value")
       }
     }
   }
