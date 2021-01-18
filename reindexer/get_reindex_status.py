@@ -108,7 +108,9 @@ def get_index_stats(session, *, deployment_id, reindex_date):
     """
     Returns a map (step) -> (ES documents count).
     """
-    pipeline_client = get_pipeline_storage_es_client(session, deployment_id=deployment_id)
+    pipeline_client = get_pipeline_storage_es_client(
+        session, deployment_id=deployment_id
+    )
 
     pipeline_steps = ["source", "identified", "merged", "denormalised"]
     result = {}
@@ -151,7 +153,9 @@ def main(reindex_date, deployment_id):
 
     print("")
 
-    index_stats = get_index_stats(session_dev, deployment_id=deployment_id, reindex_date=reindex_date)
+    index_stats = get_index_stats(
+        session_dev, deployment_id=deployment_id, reindex_date=reindex_date
+    )
 
     rows = [[step, count] for step, count in index_stats.items()]
     rows.insert(0, ["source records", source_counts["TOTAL"], ""])
@@ -191,5 +195,5 @@ def main(reindex_date, deployment_id):
         )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

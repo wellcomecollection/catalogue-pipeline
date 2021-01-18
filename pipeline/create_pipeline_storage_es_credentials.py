@@ -136,7 +136,11 @@ def create_user(es, username, roles):
     "--password", hide_input=True, prompt="What is your Elasticsearch password?"
 )
 @click.option("--endpoint", prompt="What is your Elasticsearch endpoint?")
-@click.option("--deployment-id", default="pipeline_storage", prompt="What is your Elasticsearch deployment ID?")
+@click.option(
+    "--deployment-id",
+    default="pipeline_storage",
+    prompt="What is your Elasticsearch deployment ID?",
+)
 def main(username, password, endpoint, deployment_id):
     url = hyperlink.URL.from_text(endpoint)
     host = url.host

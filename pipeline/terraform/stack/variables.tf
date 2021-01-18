@@ -81,13 +81,13 @@ locals {
   ]
 
   pipeline_storage_es_service_secrets = zipmap(local.pipeline_storage_service_list, [
-    for service in local.pipeline_storage_service_list:
-      {
-        es_host     = local.pipeline_storage_es_host
-        es_port     = local.pipeline_storage_es_port
-        es_protocol = local.pipeline_storage_es_protocol
-        es_username = "catalogue/${var.pipeline_storage_id}/${service}/es_username"
-        es_password = "catalogue/${var.pipeline_storage_id}/${service}/es_password"
-      }
+    for service in local.pipeline_storage_service_list :
+    {
+      es_host     = local.pipeline_storage_es_host
+      es_port     = local.pipeline_storage_es_port
+      es_protocol = local.pipeline_storage_es_protocol
+      es_username = "catalogue/${var.pipeline_storage_id}/${service}/es_username"
+      es_password = "catalogue/${var.pipeline_storage_id}/${service}/es_password"
+    }
   ])
 }

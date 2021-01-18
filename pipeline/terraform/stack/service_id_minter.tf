@@ -38,11 +38,11 @@ module "id_minter" {
   }
 
   secret_env_vars = merge({
-    cluster_url = "rds/identifiers-delta-cluster/endpoint"
+    cluster_url          = "rds/identifiers-delta-cluster/endpoint"
     cluster_url_readonly = "rds/identifiers-delta-cluster/reader_endpoint"
-    db_port = "rds/identifiers-delta-cluster/port"
-    db_username = "catalogue/id_minter/rds_user"
-    db_password = "catalogue/id_minter/rds_password"
+    db_port              = "rds/identifiers-delta-cluster/port"
+    db_username          = "catalogue/id_minter/rds_user"
+    db_password          = "catalogue/id_minter/rds_password"
   }, local.pipeline_storage_es_service_secrets["id_minter"])
 
   // The total number of connections to RDS across all tasks from all ID minter
