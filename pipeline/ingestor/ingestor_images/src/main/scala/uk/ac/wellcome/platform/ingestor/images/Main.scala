@@ -8,7 +8,7 @@ import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.pipeline_storage.typesafe.{
   ElasticIndexerBuilder,
-  ElasticRetrieverBuilder,
+  ElasticSourceRetrieverBuilder,
   PipelineStorageStreamBuilder
 }
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
@@ -28,7 +28,7 @@ object Main extends WellcomeTypesafeApp {
     val msgStream =
       SQSBuilder.buildSQSStream[NotificationMessage](config)
 
-    val imageRetriever = ElasticRetrieverBuilder[Image[Augmented]](
+    val imageRetriever = ElasticSourceRetrieverBuilder[Image[Augmented]](
       config,
       ElasticBuilder.buildElasticClient(config, namespace = "pipeline_storage"),
       namespace = "augmented-images")

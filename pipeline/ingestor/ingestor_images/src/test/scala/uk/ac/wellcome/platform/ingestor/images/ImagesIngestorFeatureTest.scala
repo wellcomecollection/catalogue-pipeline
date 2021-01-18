@@ -4,16 +4,16 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.time.{Seconds, Span}
-
 import uk.ac.wellcome.elasticsearch.IndexedImageIndexConfig
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.ImageGenerators
 import uk.ac.wellcome.models.work.internal.{Image, ImageState}
-import uk.ac.wellcome.pipeline_storage.{ElasticIndexer, ElasticRetriever}
+import uk.ac.wellcome.pipeline_storage.ElasticIndexer
 import uk.ac.wellcome.pipeline_storage.Indexable.imageIndexable
 import ImageState.{Augmented, Indexed}
+import uk.ac.wellcome.pipeline_storage.elastic.ElasticSourceRetriever
 
 class ImagesIngestorFeatureTest
     extends AnyFunSpec
@@ -29,7 +29,7 @@ class ImagesIngestorFeatureTest
         withLocalImagesIndex { index =>
           withLocalAugmentedImageIndex { augmentedIndex =>
             insertImagesIntoElasticsearch(augmentedIndex, image)
-            val retriever = new ElasticRetriever[Image[Augmented]](
+            val retriever = new ElasticSourceRetriever[Image[Augmented]](
               elasticClient,
               augmentedIndex
             )
@@ -59,7 +59,7 @@ class ImagesIngestorFeatureTest
               elasticClient,
               index,
               IndexedImageIndexConfig)
-            val retriever = new ElasticRetriever[Image[Augmented]](
+            val retriever = new ElasticSourceRetriever[Image[Augmented]](
               elasticClient,
               augmentedIndex
             )

@@ -1,9 +1,9 @@
 package uk.ac.wellcome.bigmessaging.typesafe
 
-import org.scanamo.auto._
 import com.typesafe.config.Config
 import com.amazonaws.services.s3.AmazonS3
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
+import org.scanamo.generic.auto._
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 import uk.ac.wellcome.storage.store.dynamo.DynamoHashStore
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
@@ -12,12 +12,14 @@ import uk.ac.wellcome.storage.streaming.Codec
 import uk.ac.wellcome.bigmessaging.{VHS, VHSInternalStore}
 import uk.ac.wellcome.storage.s3.{S3ObjectLocation, S3ObjectLocationPrefix}
 
+import scala.language.higherKinds
+
 object VHSBuilder {
 
   def build[T](config: Config, namespace: String = "vhs")(
     implicit codec: Codec[T]): VHS[T] = {
     implicit val s3Client: AmazonS3 = S3Builder.buildS3Client(config)
-    implicit val dynamoClient: AmazonDynamoDB =
+    implicit val dynamoClient: DynamoDbClient =
       DynamoBuilder.buildDynamoClient(config)
 
     val dynamoConfig =

@@ -4,7 +4,7 @@ import java.time.Duration
 import scala.concurrent.ExecutionContext
 import akka.actor.ActorSystem
 import com.typesafe.config.Config
-import org.scanamo.auto._
+import org.scanamo.generic.auto._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.platform.matcher.matcher.WorkMatcher
 import uk.ac.wellcome.platform.matcher.services.MatcherWorkerService
@@ -22,6 +22,8 @@ import uk.ac.wellcome.storage.typesafe.DynamoBuilder
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 import com.sksamuel.elastic4s.Index
 import uk.ac.wellcome.platform.matcher.storage.elastic.ElasticWorkLinksRetriever
+
+import scala.language.higherKinds
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>

@@ -1,11 +1,10 @@
 package uk.ac.wellcome.platform.matcher.storage
 
 import grizzled.slf4j.Logging
-
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
-import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughputExceededException
 import org.scanamo.{DynamoFormat, Scanamo, Table}
 import org.scanamo.syntax._
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient
+import software.amazon.awssdk.services.dynamodb.model.ProvisionedThroughputExceededException
 import uk.ac.wellcome.models.matcher.WorkNode
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.storage.dynamo.DynamoBatchWriter
@@ -13,7 +12,7 @@ import uk.ac.wellcome.storage.dynamo.DynamoConfig
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class WorkNodeDao(dynamoClient: AmazonDynamoDB, dynamoConfig: DynamoConfig)(
+class WorkNodeDao(dynamoClient: DynamoDbClient, dynamoConfig: DynamoConfig)(
   implicit ec: ExecutionContext,
   format: DynamoFormat[WorkNode])
     extends Logging {
@@ -37,7 +36,7 @@ class WorkNodeDao(dynamoClient: AmazonDynamoDB, dynamoConfig: DynamoConfig)(
   def get(ids: Set[String]): Future[Set[WorkNode]] =
     Future {
       scanamo
-        .exec { nodes.getAll('id -> ids) }
+        .exec { nodes.getAll("id" in ids) }
         .map {
           case Right(works) => works
           case Left(scanamoError) => {
@@ -59,7 +58,7 @@ class WorkNodeDao(dynamoClient: AmazonDynamoDB, dynamoConfig: DynamoConfig)(
   private def getByComponentId(componentId: String) =
     Future {
       scanamo
-        .exec { index.query('componentId -> componentId) }
+        .exec { index.query("componentId" === componentId) }
         .map {
           case Right(record) => { record }
           case Left(scanamoError) => {

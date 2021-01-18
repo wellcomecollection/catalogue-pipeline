@@ -1,7 +1,9 @@
 package uk.ac.wellcome.platform.reindex.reindex_worker.dynamo
 
-import com.amazonaws.services.dynamodbv2.document.{Item, ItemUtils}
+import java.util
+
 import org.scanamo.{DynamoFormat, DynamoObject, ScanamoFree}
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -10,12 +12,11 @@ import scala.concurrent.{ExecutionContext, Future}
 trait ItemParser {
   implicit val ec: ExecutionContext
 
-  protected def parseItems[T](items: Seq[Item])(
+  protected def parseItems[T](items: Seq[util.Map[String, AttributeValue]])(
     implicit format: DynamoFormat[T]): Future[Seq[T]] =
     Future {
       val results = items.map { it =>
-        val dynamoObject: DynamoObject =
-          DynamoObject(ItemUtils.toAttributeValues(it))
+        val dynamoObject: DynamoObject = DynamoObject(it)
 
         ScanamoFree.read[T](dynamoObject)
       }

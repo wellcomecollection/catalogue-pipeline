@@ -2,14 +2,12 @@ package uk.ac.wellcome.platform.matcher.fixtures
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import org.apache.commons.codec.digest.DigestUtils
 import org.scanamo.{Scanamo, Table => ScanamoTable}
-import org.scanamo.DynamoFormat
-import org.scanamo.error.DynamoReadError
+import org.scanamo.{DynamoFormat, DynamoReadError}
 import org.scanamo.query.UniqueKey
-import org.scanamo.semiauto._
-import org.scanamo.time.JavaTimeFormats._
+import org.scanamo.generic.semiauto.deriveDynamoFormat
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.platform.matcher.matcher.WorkMatcher
@@ -32,6 +30,7 @@ import uk.ac.wellcome.storage.locking.memory.{
   MemoryLockingService
 }
 
+import scala.language.higherKinds
 import java.util.UUID
 
 trait MatcherFixtures
@@ -132,16 +131,16 @@ trait MatcherFixtures
   def ciHash(str: String): String =
     DigestUtils.sha256Hex(str)
 
-  def get[T](dynamoClient: AmazonDynamoDB, tableName: String)(
+  def get[T](dynamoClient: DynamoDbClient, tableName: String)(
     key: UniqueKey[_])(
     implicit format: DynamoFormat[T]): Option[Either[DynamoReadError, T]] =
     Scanamo(dynamoClient).exec { ScanamoTable[T](tableName).get(key) }
 
-  def put[T](dynamoClient: AmazonDynamoDB, tableName: String)(obj: T)(
+  def put[T](dynamoClient: DynamoDbClient, tableName: String)(obj: T)(
     implicit format: DynamoFormat[T]) =
     Scanamo(dynamoClient).exec { ScanamoTable[T](tableName).put(obj) }
 
-  def scan[T](dynamoClient: AmazonDynamoDB, tableName: String)(
+  def scan[T](dynamoClient: DynamoDbClient, tableName: String)(
     implicit format: DynamoFormat[T]): List[Either[DynamoReadError, T]] =
     Scanamo(dynamoClient).exec { ScanamoTable[T](tableName).scan() }
 }

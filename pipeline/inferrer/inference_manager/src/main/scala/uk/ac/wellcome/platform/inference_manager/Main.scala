@@ -25,7 +25,7 @@ import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 import uk.ac.wellcome.pipeline_storage.typesafe.{
   ElasticIndexerBuilder,
-  ElasticRetrieverBuilder,
+  ElasticSourceRetrieverBuilder,
   PipelineStorageStreamBuilder
 }
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
@@ -58,7 +58,7 @@ object Main extends WellcomeTypesafeApp {
 
     val esClient = ElasticBuilder.buildElasticClient(config)
 
-    val imageRetriever = ElasticRetrieverBuilder.apply[Image[Initial]](
+    val imageRetriever = ElasticSourceRetrieverBuilder.apply[Image[Initial]](
       config,
       esClient,
       namespace = "initial-images"
