@@ -172,8 +172,7 @@ class WorkNodeDaoTest
           put(dynamoClient, table.name)(badRecord)
 
           whenReady(workNodeDao.getByComponentIds(Set("A+B")).failed) {
-            failedException =>
-              failedException shouldBe a[RuntimeException]
+            _ shouldBe a[RuntimeException]
           }
         }
       }
@@ -201,8 +200,8 @@ class WorkNodeDaoTest
           val badRecord: BadRecord = BadRecord(id = "A")
           put(dynamoClient, table.name)(badRecord)
 
-          whenReady(workNodeDao.get(Set("A")).failed) { failedException =>
-            failedException shouldBe a[RuntimeException]
+          whenReady(workNodeDao.get(Set("A")).failed) {
+            _ shouldBe a[RuntimeException]
           }
         }
       }
@@ -221,8 +220,7 @@ class WorkNodeDaoTest
 
         whenReady(
           workNodeDao.put(Set(WorkNode("A", 1, List("B"), "A+B"))).failed) {
-          failedException =>
-            failedException shouldBe expectedException
+          _ shouldBe expectedException
         }
       }
     }
@@ -240,8 +238,7 @@ class WorkNodeDaoTest
 
         whenReady(
           workNodeDao.put(Set(WorkNode("A", 1, List("B"), "A+B"))).failed) {
-          failedException =>
-            failedException shouldBe a[MatcherException]
+          _ shouldBe a[MatcherException]
         }
       }
     }
