@@ -25,17 +25,27 @@ module "ingestor_images" {
 
   env_vars = {
     metrics_namespace   = "${local.namespace_hyphen}_ingestor_images"
-    es_index            = local.es_images_index
     ingest_queue_id     = module.ingestor_images_queue.url
-    es_ingest_batchSize = 100
+
+    es_images_index    = local.es_images_index
+    es_augmented_index = local.es_images_augmented_index
+
+    ingest_batch_size             = 100
+    ingest_flush_interval_seconds = 60
   }
 
   secret_env_vars = {
-    es_host     = "catalogue/ingestor/es_host"
-    es_port     = "catalogue/ingestor/es_port"
-    es_username = "catalogue/ingestor/es_username"
-    es_password = "catalogue/ingestor/es_password"
-    es_protocol = "catalogue/ingestor/es_protocol"
+    es_host_catalogue     = "catalogue/ingestor/es_host"
+    es_port_catalogue     = "catalogue/ingestor/es_port"
+    es_username_catalogue = "catalogue/ingestor/es_username"
+    es_password_catalogue = "catalogue/ingestor/es_password"
+    es_protocol_catalogue = "catalogue/ingestor/es_protocol"
+
+    es_host_pipeline_storage     = var.pipeline_storage_es_host_secret_id
+    es_port_pipeline_storage     = "catalogue/pipeline_storage/es_port"
+    es_protocol_pipeline_storage = "catalogue/pipeline_storage/es_protocol"
+    es_username_pipeline_storage = "catalogue/pipeline_storage/work_ingestor/es_username"
+    es_password_pipeline_storage = "catalogue/pipeline_storage/work_ingestor/es_password"
   }
 
 

@@ -114,6 +114,17 @@ module "image_inferrer" {
     messages_bucket_name  = aws_s3_bucket.messages.id
     queue_url             = module.image_inferrer_queue.url
     images_root           = local.shared_storage_path
+
+    es_initial_images_index   = local.es_initial_images_index
+    es_augmented_images_index = local.es_augmented_images_index
+  }
+
+  manager_secret_env_vars = {
+    es_host     = var.pipeline_storage_es_host_secret_id
+    es_port     = "catalogue/pipeline_storage/es_port"
+    es_protocol = "catalogue/pipeline_storage/es_protocol"
+    es_username = "catalogue/pipeline_storage/merger/es_username"
+    es_password = "catalogue/pipeline_storage/merger/es_password"
   }
 
   subnets = var.subnets
