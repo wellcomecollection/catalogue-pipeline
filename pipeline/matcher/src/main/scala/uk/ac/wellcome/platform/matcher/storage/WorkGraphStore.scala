@@ -1,7 +1,8 @@
 package uk.ac.wellcome.platform.matcher.storage
 
-import scala.concurrent.{ExecutionContext, Future}
+import uk.ac.wellcome.models.matcher.WorkNode
 
+import scala.concurrent.{ExecutionContext, Future}
 import uk.ac.wellcome.platform.matcher.models.{WorkGraph, WorkLinks}
 
 class WorkGraphStore(workNodeDao: WorkNodeDao)(implicit _ec: ExecutionContext) {
@@ -15,5 +16,8 @@ class WorkGraphStore(workNodeDao: WorkNodeDao)(implicit _ec: ExecutionContext) {
     } yield WorkGraph(affectedWorks)
 
   def put(graph: WorkGraph): Future[Unit] =
-    workNodeDao.put(graph.nodes)
+    put(graph.nodes)
+
+  def put(nodes: Set[WorkNode]): Future[Unit] =
+    workNodeDao.put(nodes)
 }

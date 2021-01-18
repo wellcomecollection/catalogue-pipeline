@@ -39,21 +39,37 @@ class WorkMatcher(workGraphStore: WorkGraphStore,
       for {
         beforeGraph <- workGraphStore.findAffectedWorks(links)
         afterGraph = WorkGraphUpdater.update(links, beforeGraph)
-        _ <- withLocks(links, getGraphComponentIds(beforeGraph, afterGraph)) {
-          // We are returning empty set here, as LockingService is tied to a
-          // single `Out` type, here set to `Set[MatchedIdentifiers]`.
-          // See issue here: https://github.com/wellcometrust/platform/issues/3873
-          // TODO: Could we check to see if there are any updated nodes here?
-          workGraphStore.put(afterGraph).map(_ => Set.empty)
+
+        updatedNodes = afterGraph.nodes -- beforeGraph.nodes
+
+        // It's possible that the matcher graph hasn't changed -- for example, if
+        // we received an update to a work that changes an attribute unrelated to
+        // matching/merging.  If so, we can reduce the load we put on the graph
+        // store by skipping the write.
+        //
+        // Note: if the graph has changed at all, we rewrite the whole thing.
+        // It's possible we could get away with only writing changed nodes here,
+        // but I haven't thought hard enough about whether it might introduce a
+        // hard-to-debug consistency error if another process updates the graph
+        // between us reading it and writing it.
+        _ <- if (updatedNodes.isEmpty) {
+          Future.successful(())
+        } else {
+          val affectedComponentIds =
+            (beforeGraph.nodes ++ afterGraph.nodes)
+              .map { _.componentId }
+
+          withLocks(links, ids = affectedComponentIds) {
+            // We are returning empty set here, as LockingService is tied to a
+            // single `Out` type, here set to `Set[MatchedIdentifiers]`.
+            // See issue here: https://github.com/wellcometrust/platform/issues/3873
+            workGraphStore.put(afterGraph).map(_ => Set.empty)
+          }
         }
       } yield {
         toMatchedIdentifiers(afterGraph)
       }
     }
-
-  private def getGraphComponentIds(beforeGraph: WorkGraph,
-                                   afterGraph: WorkGraph): Set[String] =
-    beforeGraph.nodes.map(_.componentId) ++ afterGraph.nodes.map(_.componentId)
 
   private def withLocks(links: WorkLinks, ids: Set[String])(
     f: => Future[Out]): Future[Out] =
