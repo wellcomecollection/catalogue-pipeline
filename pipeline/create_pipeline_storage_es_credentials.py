@@ -26,7 +26,6 @@ WORK_INDEX_PATTERN = "works-{index}*"
 IMAGE_INDEX_PATTERN = "images-{index}*"
 
 
-
 SERVICES = {
     "transformer": ["source_write"],
     "id_minter": ["source_read", "identified_write"],
@@ -106,7 +105,9 @@ def create_roles(es, index):
     """
     for role_suffix, privileges in [("read", ["read"]), ("write", ["all"])]:
         role_name = f"{index}_{role_suffix}"
-        index_pattern = IMAGE_INDEX_PATTERN if index in IMAGE_INDICES else WORK_INDEX_PATTERN
+        index_pattern = (
+            IMAGE_INDEX_PATTERN if index in IMAGE_INDICES else WORK_INDEX_PATTERN
+        )
         index_name = index_pattern.format(index=index)
 
         es.security.put_role(
