@@ -186,7 +186,7 @@ def main(username, password, endpoint, deployment_id):
 
     for username, password in newly_created_usernames:
         store_secret(
-            secret_id=f"catalogue/{deployment_id}}/{username}/es_username",
+            secret_id=f"catalogue/{deployment_id}/{username}/es_username",
             secret_value=username,
         )
 
