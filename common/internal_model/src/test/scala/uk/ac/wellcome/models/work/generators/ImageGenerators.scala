@@ -12,6 +12,7 @@ trait ImageGenerators
     with InstantGenerators
     with VectorGenerators
     with SierraWorkGenerators {
+
   def createImageDataWith(
     locations: List[DigitalLocationDeprecated] = List(createImageLocation),
     version: Int = 1,
@@ -185,9 +186,9 @@ trait ImageGenerators
           locationType = createImageLocationType))
     ).toIndexedImage
 
-//   Create a set of images with intersecting LSH lists to ensure
-//   that similarity queries will return something. Returns them in order
-//   of similarity.
+  //   Create a set of images with intersecting LSH lists to ensure
+  //   that similarity queries will return something. Returns them in order
+  //   of similarity.
   def createSimilarImages(n: Int,
                           similarFeatures: Boolean,
                           similarPalette: Boolean): Seq[Image[Indexed]] = {

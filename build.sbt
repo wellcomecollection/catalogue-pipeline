@@ -110,22 +110,19 @@ lazy val id_minter = setupProject(
 lazy val ingestor_common = setupProject(
   project,
   "pipeline/ingestor/ingestor_common",
-  localDependencies =
-    Seq(elasticsearch_typesafe, big_messaging_typesafe, pipeline_storage_typesafe)
+  localDependencies = Seq(elasticsearch_typesafe, pipeline_storage_typesafe)
 )
 
 lazy val ingestor_works = setupProject(
   project,
   "pipeline/ingestor/ingestor_works",
-  localDependencies =
-    Seq(elasticsearch_typesafe, big_messaging_typesafe, ingestor_common)
+  localDependencies = Seq(ingestor_common)
 )
 
 lazy val ingestor_images = setupProject(
   project,
   "pipeline/ingestor/ingestor_images",
-  localDependencies =
-    Seq(elasticsearch_typesafe, big_messaging_typesafe, ingestor_common)
+  localDependencies = Seq(ingestor_common)
 )
 
 lazy val matcher = setupProject(
@@ -139,7 +136,7 @@ lazy val merger = setupProject(
   project,
   "pipeline/merger",
   localDependencies =
-    Seq(internal_model, big_messaging_typesafe, pipeline_storage_typesafe),
+    Seq(internal_model, pipeline_storage_typesafe),
   externalDependencies = CatalogueDependencies.mergerDependencies
 )
 
@@ -258,7 +255,7 @@ lazy val calm_adapter = setupProject(
 lazy val inference_manager = setupProject(
   project,
   folder = "pipeline/inferrer/inference_manager",
-  localDependencies = Seq(internal_model, big_messaging_typesafe),
+  localDependencies = Seq(internal_model, pipeline_storage_typesafe),
   externalDependencies = CatalogueDependencies.inferenceManagerDependencies
 )
 

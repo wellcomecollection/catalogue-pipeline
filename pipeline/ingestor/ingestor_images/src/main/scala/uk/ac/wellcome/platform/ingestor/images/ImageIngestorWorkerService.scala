@@ -1,74 +1,22 @@
 package uk.ac.wellcome.platform.ingestor.images
 
-import akka.Done
-import software.amazon.awssdk.services.sqs.model.Message
-import grizzled.slf4j.Logging
-import uk.ac.wellcome.bigmessaging.message.BigMessageStream
-import uk.ac.wellcome.pipeline_storage.Indexer
-import uk.ac.wellcome.platform.ingestor.common.models.IngestorConfig
-import uk.ac.wellcome.typesafe.Runnable
+import uk.ac.wellcome.messaging.sns.NotificationMessage
+import uk.ac.wellcome.models.work.internal._
+import uk.ac.wellcome.pipeline_storage.{PipelineStorageStream, Retriever}
+import uk.ac.wellcome.platform.ingestor.common.IngestorWorkerService
+import ImageState.{Augmented, Indexed}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
-class ImageIngestorWorkerService[In, Out](
-  ingestorConfig: IngestorConfig,
-  documentIndexer: Indexer[Out],
-  messageStream: BigMessageStream[In],
-  transformBeforeIndex: In => Out
+class ImageIngestorWorkerService[Destination](
+  pipelineStream: PipelineStorageStream[NotificationMessage,
+                                        Image[Indexed],
+                                        Destination],
+  imageRetriever: Retriever[Image[Augmented]],
+  transform: Image[Augmented] => Image[Indexed] = ImageTransformer.deriveData,
 )(implicit
   ec: ExecutionContext)
-    extends Runnable
-    with Logging {
-
-  type FutureBundles = Future[List[Bundle]]
-  case class Bundle(message: Message, document: In)
-
-  private val className = this.getClass.getSimpleName
-
-  def run(): Future[Done] =
-    for {
-      _ <- documentIndexer.init()
-      result <- runStream()
-    } yield result
-
-  private def runStream(): Future[Done] = {
-    messageStream.runStream(
-      className,
-      _.map { case (msg, document) => Bundle(msg, document) }
-        .groupedWithin(
-          ingestorConfig.batchSize,
-          ingestorConfig.flushInterval
-        )
-        .mapAsyncUnordered(10) { msgs =>
-          for { bundles <- processMessages(msgs.toList) } yield
-            bundles.map(_.message)
-        }
-        .mapConcat(identity)
-    )
-  }
-
-  private def processMessages(bundles: List[Bundle]): FutureBundles =
-    for {
-      documents <- Future.successful(bundles.map(m => m.document))
-      transformedDocuments = documents.map(transformBeforeIndex)
-      either <- documentIndexer(documents = transformedDocuments)
-    } yield {
-      val failedWorks = either.left.getOrElse(Nil)
-      bundles.filterNot {
-        case Bundle(_, document) => failedWorks.contains(document)
-      }
-    }
-}
-
-object ImageIngestorWorkerService {
-  def apply[T](
-    ingestorConfig: IngestorConfig,
-    documentIndexer: Indexer[T],
-    messageStream: BigMessageStream[T])(implicit ec: ExecutionContext) =
-    new ImageIngestorWorkerService(
-      ingestorConfig,
-      documentIndexer,
-      messageStream,
-      identity[T]
-    )
-}
+    extends IngestorWorkerService[
+      Destination,
+      Image[Augmented],
+      Image[Indexed]](pipelineStream, imageRetriever, transform)

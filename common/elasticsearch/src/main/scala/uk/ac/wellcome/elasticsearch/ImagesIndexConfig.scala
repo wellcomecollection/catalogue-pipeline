@@ -5,7 +5,21 @@ import com.sksamuel.elastic4s.analysis.Analysis
 import com.sksamuel.elastic4s.requests.mappings.{MappingDefinition, ObjectField}
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
 
-object ImagesIndexConfig extends IndexConfig with IndexConfigFields {
+object InitialImageIndexConfig extends IndexConfig {
+
+  val analysis: Analysis = WorksAnalysis()
+
+  def mapping: MappingDefinition = properties(Seq())
+}
+
+object AugmentedImageIndexConfig extends IndexConfig {
+
+  val analysis: Analysis = WorksAnalysis()
+
+  def mapping: MappingDefinition = properties(Seq())
+}
+
+object IndexedImageIndexConfig extends IndexConfig with IndexConfigFields {
 
   val analysis: Analysis = WorksAnalysis()
 

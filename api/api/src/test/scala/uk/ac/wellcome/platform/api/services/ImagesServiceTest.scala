@@ -1,14 +1,15 @@
 package uk.ac.wellcome.platform.api.services
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import com.sksamuel.elastic4s.{ElasticError, Index}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.{EitherValues, OptionValues}
+
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.models.work.generators.ImageGenerators
 import uk.ac.wellcome.platform.api.models.{QueryConfig, SimilarityMetric}
-
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.ac.wellcome.models.Implicits._
 
 class ImagesServiceTest
     extends AnyFunSpec

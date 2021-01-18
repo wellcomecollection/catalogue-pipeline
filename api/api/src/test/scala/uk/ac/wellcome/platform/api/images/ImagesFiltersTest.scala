@@ -1,6 +1,7 @@
 package uk.ac.wellcome.platform.api.images
 
 import uk.ac.wellcome.models.work.internal.License
+import uk.ac.wellcome.models.Implicits._
 
 class ImagesFiltersTest extends ApiImagesTestBase {
   describe("filtering images by license") {
