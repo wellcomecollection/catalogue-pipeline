@@ -19,7 +19,6 @@ import uk.ac.wellcome.platform.matcher.storage.{WorkGraphStore, WorkNodeDao}
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.storage.dynamo._
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
 import uk.ac.wellcome.storage.locking.dynamo.{
   DynamoLockDaoFixtures,
@@ -28,6 +27,12 @@ import uk.ac.wellcome.storage.locking.dynamo.{
 }
 import uk.ac.wellcome.pipeline_storage.MemoryRetriever
 import uk.ac.wellcome.platform.matcher.models.WorkLinks
+import uk.ac.wellcome.storage.locking.memory.{
+  MemoryLockDao,
+  MemoryLockingService
+}
+
+import java.util.UUID
 
 trait MatcherFixtures
     extends SQS
@@ -37,11 +42,6 @@ trait MatcherFixtures
 
   implicit val workNodeFormat: DynamoFormat[WorkNode] = deriveDynamoFormat
   implicit val lockFormat: DynamoFormat[ExpiringLock] = deriveDynamoFormat
-
-  def withLockTable[R](testWith: TestWith[Table, R]): R =
-    withSpecifiedLocalDynamoDbTable(createLockTable) { table =>
-      testWith(table)
-    }
 
   def withWorkGraphTable[R](testWith: TestWith[Table, R]): R =
     withSpecifiedLocalDynamoDbTable(createWorkGraphTable) { table =>
@@ -53,20 +53,18 @@ trait MatcherFixtures
     queue: SQS.Queue,
     messageSender: MemoryMessageSender,
     graphTable: Table)(testWith: TestWith[MatcherWorkerService[String], R]): R =
-    withLockTable { lockTable =>
-      withWorkGraphStore(graphTable) { workGraphStore =>
-        withWorkMatcher(workGraphStore, lockTable) { workMatcher =>
-          withActorSystem { implicit actorSystem =>
-            withSQSStream[NotificationMessage, R](queue) { msgStream =>
-              val workerService =
-                new MatcherWorkerService(
-                  workLinksRetriever = workLinksRetriever,
-                  msgStream,
-                  messageSender,
-                  workMatcher)
-              workerService.run()
-              testWith(workerService)
-            }
+    withWorkGraphStore(graphTable) { workGraphStore =>
+      withWorkMatcher(workGraphStore) { workMatcher =>
+        withActorSystem { implicit actorSystem =>
+          withSQSStream[NotificationMessage, R](queue) { msgStream =>
+            val workerService =
+              new MatcherWorkerService(
+                workLinksRetriever = workLinksRetriever,
+                msgStream,
+                messageSender,
+                workMatcher)
+            workerService.run()
+            testWith(workerService)
           }
         }
       }
@@ -83,15 +81,20 @@ trait MatcherFixtures
       }
     }
 
-  def withWorkMatcher[R](workGraphStore: WorkGraphStore, lockTable: Table)(
-    testWith: TestWith[WorkMatcher, R]): R =
-    withLockDao(dynamoClient, lockTable) { implicit lockDao =>
-      val workMatcher = new WorkMatcher(
-        workGraphStore = workGraphStore,
-        lockingService = new DynamoLockingService
-      )
-      testWith(workMatcher)
-    }
+  def withWorkMatcher[R](workGraphStore: WorkGraphStore)(
+    testWith: TestWith[WorkMatcher, R]): R = {
+    implicit val lockDao: MemoryLockDao[String, UUID] =
+      new MemoryLockDao[String, UUID]
+    val lockingService =
+      new MemoryLockingService[Set[MatchedIdentifiers], Future]()
+
+    val workMatcher = new WorkMatcher(
+      workGraphStore = workGraphStore,
+      lockingService = lockingService
+    )
+
+    testWith(workMatcher)
+  }
 
   def withWorkMatcherAndLockingService[R](
     workGraphStore: WorkGraphStore,
@@ -102,18 +105,17 @@ trait MatcherFixtures
   }
 
   def withWorkGraphStore[R](graphTable: Table)(
-    testWith: TestWith[WorkGraphStore, R]): R = {
+    testWith: TestWith[WorkGraphStore, R]): R =
     withWorkNodeDao(graphTable) { workNodeDao =>
       val workGraphStore = new WorkGraphStore(workNodeDao)
       testWith(workGraphStore)
     }
-  }
 
   def withWorkNodeDao[R](table: Table)(
     testWith: TestWith[WorkNodeDao, R]): R = {
     val workNodeDao = new WorkNodeDao(
-      dynamoClient,
-      DynamoConfig(table.name, table.index)
+      dynamoClient = dynamoClient,
+      dynamoConfig = createDynamoConfigWith(table)
     )
     testWith(workNodeDao)
   }

@@ -39,7 +39,7 @@ object WorkGraphUpdater extends Logging {
     }
   }
 
-  private def doUpdate(workUpdate: WorkLinks,
+  private def doUpdate(workLinks: WorkLinks,
                        existingGraph: WorkGraph): WorkGraph = {
 
     // Find everything that's in the existing graph, but which isn't
@@ -54,7 +54,7 @@ object WorkGraphUpdater extends Logging {
     // If we're updating work B, then this list will be (A C D E).
     //
     val linkedWorks =
-      existingGraph.nodes.filterNot(_.id == workUpdate.workId)
+      existingGraph.nodes.filterNot(_.id == workLinks.workId)
 
     // Create a map (work ID) -> (version) for every work in the graph.
     //
@@ -63,7 +63,7 @@ object WorkGraphUpdater extends Logging {
     val workVersions: Map[String, Int] =
       linkedWorks.collect {
         case WorkNode(id, Some(version), _, _) => (id, version)
-      }.toMap + (workUpdate.workId -> workUpdate.version)
+      }.toMap + (workLinks.workId -> workLinks.version)
 
     // Create a list of all the connections between works in the graph.
     //
@@ -77,8 +77,8 @@ object WorkGraphUpdater extends Logging {
     //    otherLinks  = (A → B, B → C, B → D)
     //
     val updateLinks =
-      workUpdate.referencedWorkIds.map {
-        workUpdate.workId ~> _
+      workLinks.referencedWorkIds.map {
+        workLinks.workId ~> _
       }
 
     val otherLinks =
@@ -94,7 +94,7 @@ object WorkGraphUpdater extends Logging {
       existingGraph.nodes
         .flatMap { node =>
           node.id +: node.linkedIds
-        } + workUpdate.workId
+        } + workLinks.workId
 
     val g = Graph.from(edges = links, nodes = workIds)
 
@@ -134,7 +134,17 @@ object WorkGraphUpdater extends Logging {
     )
   }
 
-  private def componentIdentifier(nodeIds: List[String]) = {
+  /** Create the "component identifier".
+    *
+    * This is shared by all the Works in the same component -- i.e., all the
+    * Works that are matched together.
+    *
+    * Note that this is based on the *unversioned* identifiers.  This means the
+    * component identifier is stable across different versions of a Work.
+    *
+    * TODO: Does this need to be a SHA-256 value?
+    * Could we just concatenate all the IDs?
+    */
+  private def componentIdentifier(nodeIds: List[String]): String =
     DigestUtils.sha256Hex(nodeIds.sorted.mkString("+"))
-  }
 }
