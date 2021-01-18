@@ -35,6 +35,7 @@
     * [Test 8 - BoolBoosted vs PhaserBeam](search/tests/008-boolboosted-vs-phaserbeam.md)
   * [Collecting data](search/collecting-data.md)
   * [Reporting and metrics](search/reporting-and-metrics.md)
+  * [Work IDs crib sheet](search/work-ids-crib-sheet.md)
 * [Adapters](adapters/README.md)
   * [Adapter lifecycle](adapters/adapter_lifecycle.md)
   * [Fetching records from Sierra](adapters/fetching_records_from_sierra.md)
