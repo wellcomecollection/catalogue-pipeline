@@ -167,8 +167,8 @@ class WorkNodeDaoTest
     it("returns an error if Scanamo fails during a getByComponentIds") {
       withWorkGraphTable { table =>
         withWorkNodeDao(table) { workNodeDao =>
-          case class BadRecord(id: String, componentId: String)
-          val badRecord: BadRecord = BadRecord(id = "A", componentId = "A+B")
+          case class BadRecord(id: String, componentId: String, version: String)
+          val badRecord: BadRecord = BadRecord(id = "A", componentId = "A+B", version = "five")
           put(dynamoClient, table.name)(badRecord)
 
           whenReady(workNodeDao.getByComponentIds(Set("A+B")).failed) {
@@ -196,8 +196,8 @@ class WorkNodeDaoTest
     it("returns an error if Scanamo fails to put a record") {
       withWorkGraphTable { table =>
         withWorkNodeDao(table) { workNodeDao =>
-          case class BadRecord(id: String)
-          val badRecord: BadRecord = BadRecord(id = "A")
+          case class BadRecord(id: String, version: String)
+          val badRecord: BadRecord = BadRecord(id = "A", version = "six")
           put(dynamoClient, table.name)(badRecord)
 
           whenReady(workNodeDao.get(Set("A")).failed) {
