@@ -117,7 +117,7 @@ class MultiItemGetterTest
       val future = multiItemGetter.get[NumberedRecord](ids = ids)(table.name)
 
       whenReady(future.failed) { err =>
-        err shouldBe a[RuntimeException]
+        err shouldBe a[Throwable]
         err.getMessage should startWith("Errors parsing Scanamo result")
       }
     }

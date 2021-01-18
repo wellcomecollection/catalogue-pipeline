@@ -43,15 +43,24 @@ class ReindexWorkerServiceTest
     with MetsSourceDataGenerators
     with S3ObjectLocationGenerators {
 
+  def toSingleAttributeValue(v: Any): AttributeValue =
+    v match {
+      case s: String     => AttributeValue.builder().s(s).build()
+      case n: Int        => AttributeValue.builder().n(n.toString).build()
+      case n: Long       => AttributeValue.builder().n(n.toString).build()
+      case bool: Boolean => AttributeValue.builder().bool(bool).build()
+      case m: Map[_, _]  =>
+        val convertedMap = toAttributeValue(m.asInstanceOf[Map[String, Any]].toSeq: _*)
+        AttributeValue.builder().m(convertedMap).build()
+      case l: List[_] =>
+        val convertedList = l.map { toSingleAttributeValue }
+        AttributeValue.builder().l(convertedList: _*).build()
+    }
+
   def toAttributeValue(m: Tuple2[String, Any]*): util.Map[String, AttributeValue] =
     m.map {
-      case (key, s: String)     => key -> AttributeValue.builder().s(s).build()
-      case (key, n: Long)       => key -> AttributeValue.builder().n(n.toString).build()
-      case (key, bool: Boolean) => key -> AttributeValue.builder().bool(bool).build()
-      case (key, m: Map[_, _])  =>
-        val convertedMap = toAttributeValue(m.asInstanceOf[Map[String, Any]].toSeq: _*)
-        key -> AttributeValue.builder().m(convertedMap).build()
-      case _ => throw new IllegalArgumentException(s"Unexpected type in $m")
+      case (key, value) => key -> toSingleAttributeValue(value)
+      case other        => throw new IllegalArgumentException(s"Unexpected type in $m ($other)")
     }.toMap.asJava
 
   // These tests are designed to check we can parse the data in DynamoDB
@@ -205,7 +214,7 @@ class ReindexWorkerServiceTest
             .item(
               toAttributeValue(
                 "id" -> miroID,
-                "payload" -> Map(
+                "location" -> Map(
                   "bucket" -> location.bucket,
                   "key" -> location.key
                 ),
