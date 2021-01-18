@@ -1,8 +1,8 @@
 package uk.ac.wellcome.platform.reindex.reindex_worker.dynamo
 
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
-import com.amazonaws.services.dynamodbv2.document.spec.ScanSpec
 import org.scanamo.DynamoFormat
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient
+import software.amazon.awssdk.services.dynamodb.model.ScanRequest
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -14,9 +14,9 @@ import scala.concurrent.{ExecutionContext, Future}
   * https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Scan.html#Scan.ParallelScan
   */
 class ParallelScanner(implicit
-                      val dynamoClient: AmazonDynamoDB,
+                      val dynamoClient: DynamoDbClient,
                       val ec: ExecutionContext)
-    extends ScanSpecScanner {
+    extends ScanRequestScanner {
 
   /** Run a Parallel Scan for a single worker.
     *
@@ -38,10 +38,12 @@ class ParallelScanner(implicit
     // based on the Java example of a Parallel Scan from the AWS docs:
     // https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/ScanJavaDocumentAPI.html
     //
-    val spec = new ScanSpec()
-      .withTotalSegments(totalSegments)
-      .withSegment(segment)
+    val request = ScanRequest.builder()
+      .tableName(tableName)
+      .totalSegments(totalSegments)
+      .segment(segment)
+      .build()
 
-    scan(spec)(tableName)
+    scan(request)
   }
 }

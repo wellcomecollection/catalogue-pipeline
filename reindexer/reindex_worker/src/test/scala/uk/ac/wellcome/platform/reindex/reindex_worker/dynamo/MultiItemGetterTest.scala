@@ -1,15 +1,16 @@
 package uk.ac.wellcome.platform.reindex.reindex_worker.dynamo
 
-import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType
-import org.scanamo.auto._
+import org.scanamo.generic.auto._
 import org.scanamo.{Scanamo, Table => ScanamoTable}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType
 import uk.ac.wellcome.platform.reindex.reindex_worker.fixtures.ReindexDynamoFixtures
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.language.higherKinds
 
 class MultiItemGetterTest
     extends AnyFunSpec

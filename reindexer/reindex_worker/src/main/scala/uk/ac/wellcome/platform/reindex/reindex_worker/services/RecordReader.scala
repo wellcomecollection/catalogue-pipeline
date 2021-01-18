@@ -1,8 +1,8 @@
 package uk.ac.wellcome.platform.reindex.reindex_worker.services
 
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import grizzled.slf4j.Logging
 import org.scanamo.DynamoFormat
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import uk.ac.wellcome.platform.reindex.reindex_worker.dynamo.{
   MaxRecordsScanner,
   MultiItemGetter,
@@ -14,7 +14,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class RecordReader(
   implicit
-  dynamoClient: AmazonDynamoDB,
+  dynamoClient: DynamoDbClient,
   ec: ExecutionContext
 ) extends Logging {
 
