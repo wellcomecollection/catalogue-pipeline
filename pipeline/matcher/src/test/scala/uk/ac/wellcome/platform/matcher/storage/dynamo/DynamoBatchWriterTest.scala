@@ -8,6 +8,7 @@ import org.scanamo.generic.auto._
 import org.scanamo.syntax._
 import org.scanamo.{Table => ScanamoTable}
 import software.amazon.awssdk.services.dynamodb.model.{
+  DynamoDbException,
   ResourceNotFoundException,
   ScalarAttributeType
 }
@@ -80,6 +81,25 @@ class DynamoBatchWriterTest
 
     whenReady(writer.batchWrite(shapes).failed) {
       _ shouldBe a[ResourceNotFoundException]
+    }
+  }
+
+  it("fails if we try to write to a table with the wrong format") {
+    val shapes = Seq(
+      Shape(sides = 3, description = "yellow triangle"),
+      Shape(sides = 4, description = "red square"),
+      Shape(sides = 5, description = "blue pentagon")
+    )
+
+    withSpecifiedTable(
+      createTableWithHashKey(_, keyName = "id", keyType = ScalarAttributeType.S)
+    ) { table =>
+      val writer = new DynamoBatchWriter[Shape](createDynamoConfigWith(table))
+
+      whenReady(writer.batchWrite(shapes).failed) { err =>
+        err shouldBe a[DynamoDbException]
+        err.getMessage should startWith("One of the required keys was not given a value")
+      }
     }
   }
 }
