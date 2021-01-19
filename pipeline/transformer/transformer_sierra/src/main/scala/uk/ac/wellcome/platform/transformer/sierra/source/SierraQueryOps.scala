@@ -1,8 +1,9 @@
 package uk.ac.wellcome.platform.transformer.sierra.source
 
+import grizzled.slf4j.Logging
 import uk.ac.wellcome.platform.transformer.sierra.exceptions.ShouldNotTransformException
 
-trait SierraQueryOps {
+trait SierraQueryOps extends Logging {
 
   implicit class BibDataOps(bibData: SierraBibData) {
 
@@ -30,10 +31,11 @@ trait SierraQueryOps {
       varfieldsWithTag(tag) match {
         case Seq(vf) => Some(vf)
         case Nil     => None
-        case fields =>
-          throw new ShouldNotTransformException(
-            s"Multiple instances of non-repeatable varfield with tag $tag: $fields"
+        case multiple =>
+          warn(
+            s"Multiple instances of non-repeatable varfield with tag $tag: $multiple"
           )
+          Some(multiple.head)
       }
 
     def subfieldsWithTags(tags: (String, String)*): List[MarcSubfield] =

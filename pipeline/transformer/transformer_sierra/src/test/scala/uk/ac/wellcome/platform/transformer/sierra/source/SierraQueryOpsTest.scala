@@ -31,4 +31,19 @@ class SierraQueryOpsTest
     bibData.varfieldsWithTags("0", "1") shouldBe varFields
     bibData.varfieldsWithTags("1", "0") shouldBe varFields
   }
+
+  it("finds instances of a non-repeatable varfield") {
+    val varFields = List(
+      createVarFieldWith(marcTag = "0", content = Some("Field 0A")),
+      createVarFieldWith(marcTag = "1", content = Some("Field 1")),
+      createVarFieldWith(marcTag = "0", content = Some("Field 0B")),
+    )
+
+    val bibData = createSierraBibDataWith(varFields = varFields)
+
+    bibData.nonrepeatableVarfieldWithTag(tag = "1") shouldBe Some(varFields(1))
+    bibData.nonrepeatableVarfieldWithTag(tag = "2") shouldBe None
+
+    bibData.nonrepeatableVarfieldWithTag(tag = "0") shouldBe Some(varFields(0))
+  }
 }
