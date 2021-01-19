@@ -58,7 +58,8 @@ class CalmTransformerWorkerTest
   }
 
   override def setPayloadVersion(p: CalmSourcePayload, version: Int)(
-    implicit store: MemoryTypedStore[S3ObjectLocation, CalmRecord]): CalmSourcePayload = {
+    implicit store: MemoryTypedStore[S3ObjectLocation, CalmRecord])
+    : CalmSourcePayload = {
     val storedData: CalmRecord = store.get(p.location).value.identifiedT
 
     val location = createS3ObjectLocation

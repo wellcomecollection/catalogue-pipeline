@@ -15,7 +15,8 @@ import weco.catalogue.transformer.{Transformer, TransformerWorker}
 import scala.concurrent.ExecutionContext
 
 sealed trait ExampleData
-case class ValidExampleData(id: SourceIdentifier, title: String) extends ExampleData
+case class ValidExampleData(id: SourceIdentifier, title: String)
+    extends ExampleData
 case object InvalidExampleData extends ExampleData
 
 object ExampleTransformer extends Transformer[ExampleData] with WorkGenerators {

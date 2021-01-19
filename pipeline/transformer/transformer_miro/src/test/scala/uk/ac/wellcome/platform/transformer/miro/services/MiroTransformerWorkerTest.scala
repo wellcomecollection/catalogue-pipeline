@@ -15,7 +15,10 @@ import uk.ac.wellcome.storage.generators.S3ObjectLocationGenerators
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.memory.MemoryTypedStore
 import weco.catalogue.source_model.MiroSourcePayload
-import weco.catalogue.transformer.{TransformerWorker, TransformerWorkerTestCases}
+import weco.catalogue.transformer.{
+  TransformerWorker,
+  TransformerWorkerTestCases
+}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -53,7 +56,8 @@ class MiroTransformerWorkerTest
   }
 
   override def setPayloadVersion(p: MiroSourcePayload, version: Int)(
-    implicit store: MemoryTypedStore[S3ObjectLocation, MiroRecord]): MiroSourcePayload = {
+    implicit store: MemoryTypedStore[S3ObjectLocation, MiroRecord])
+    : MiroSourcePayload = {
     val storedRecord: MiroRecord = store.get(p.location).value.identifiedT
 
     val location = createS3ObjectLocation

@@ -57,15 +57,14 @@ class ExampleTransformerTest
 
     store.put(Version(location, version))(data) shouldBe a[Right[_, _]]
 
-    CalmSourcePayload(
-      id = id,
-      version = version,
-      location = location)
+    CalmSourcePayload(id = id, version = version, location = location)
   }
 
   override def setPayloadVersion(p: CalmSourcePayload, version: Int)(
-    implicit store: MemoryVersionedStore[S3ObjectLocation, ExampleData]): CalmSourcePayload = {
-    val storedData: ExampleData = store.get(Version(p.location, p.version)).value.identifiedT
+    implicit store: MemoryVersionedStore[S3ObjectLocation, ExampleData])
+    : CalmSourcePayload = {
+    val storedData: ExampleData =
+      store.get(Version(p.location, p.version)).value.identifiedT
 
     val location = createS3ObjectLocation
     store.put(Version(location, version))(storedData) shouldBe a[Right[_, _]]

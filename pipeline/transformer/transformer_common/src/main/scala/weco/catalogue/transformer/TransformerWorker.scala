@@ -121,10 +121,10 @@ trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest]
         retriever
           .apply(workIndexable.id(transformedWork))
           .map { storedWork =>
-
             val shouldSend = {
               if (transformedWork.version < storedWork.version) {
-                debug(s"${transformedWork.id}: transformed Work is older than the stored Work")
+                debug(
+                  s"${transformedWork.id}: transformed Work is older than the stored Work")
                 false
               }
 
@@ -134,12 +134,12 @@ trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest]
               //
               // Send the work, just to be sure it got through the pipeline.
               else if (storedWork.version == transformedWork.version) {
-                debug(s"${transformedWork.id}: transformed Work and stored Work have the same version")
+                debug(
+                  s"${transformedWork.id}: transformed Work and stored Work have the same version")
                 true
-              }
-
-              else if (storedWork.data != transformedWork.data) {
-                println(s"${transformedWork.id}: transformed Work has different data to the stored Work")
+              } else if (storedWork.data != transformedWork.data) {
+                println(
+                  s"${transformedWork.id}: transformed Work has different data to the stored Work")
                 true
               }
 
@@ -149,7 +149,8 @@ trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest]
               // Nothing in the pipeline will change if we send this work, and we
               // can assume the previous version of the work was sent successfully.
               else {
-                println(s"${transformedWork.id}: transformed Work has newer version/same data as the stored Work")
+                println(
+                  s"${transformedWork.id}: transformed Work has newer version/same data as the stored Work")
                 assert(storedWork.data == transformedWork.data)
                 assert(storedWork.version < transformedWork.version)
                 false

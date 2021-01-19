@@ -40,9 +40,11 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
       version = randomInt(from = 1, to = 10)
     )
 
-  def createPayloadWith(id: String = createId, version: Int)(implicit context: Context): Payload
+  def createPayloadWith(id: String = createId, version: Int)(
+    implicit context: Context): Payload
 
-  def setPayloadVersion(p: Payload, version: Int)(implicit context: Context): Payload
+  def setPayloadVersion(p: Payload, version: Int)(
+    implicit context: Context): Payload
 
   // Create a payload which cannot be transformed
   def createBadPayload(implicit context: Context): Payload
@@ -103,7 +105,6 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
           withLocalSqsQueuePair() {
             case QueuePair(queue, dlq) =>
               withWorkerImpl(queue, workIndexer, workKeySender) { _ =>
-
                 // First we transform the new payload, and check it stores successfully.
                 sendNotificationToSQS(queue, newPayload)
 
@@ -138,7 +139,6 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
           withLocalSqsQueuePair() {
             case QueuePair(queue, dlq) =>
               withWorkerImpl(queue, workIndexer, workKeySender) { _ =>
-
                 // Transform the first payload, and check it stores successfully.
                 val payloadA = createPayloadWith(id = id, version = 1)
                 sendNotificationToSQS(queue, payloadA)
@@ -175,7 +175,6 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
           withLocalSqsQueuePair() {
             case QueuePair(queue, dlq) =>
               withWorkerImpl(queue, workIndexer, workKeySender) { _ =>
-
                 // Transform the first payload, and check it stores successfully.
                 sendNotificationToSQS(queue, payload)
 
@@ -211,7 +210,6 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
           withLocalSqsQueuePair(visibilityTimeout = 2) {
             case QueuePair(queue, dlq) =>
               withWorkerImpl(queue, workIndexer, workKeySender) { _ =>
-
                 // Transform the first payload, and check it stores successfully.
                 sendNotificationToSQS(queue, oldPayload)
 
