@@ -117,24 +117,15 @@ trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest]
       // nightly Sierra reharvest, when ~250k Sierra source records get synced with
       // Calm.  The records get a new modifiedDate from Sierra, but none of the data
       // we care about for the pipeline is changed.
-      case Right((newWork, key)) =>
+      case Right((transformedWork, key)) =>
         retriever
-          .apply(workIndexable.id(newWork))
+          .apply(workIndexable.id(transformedWork))
           .map { storedWork =>
 
             val shouldSend = {
-              // If the new work has a strictly lower version than the stored work,
-              // then the new work is out-of-date.  Discard it.
-              if (newWork.version < storedWork.version) {
-                debug(s"${newWork.id}: new work has a lower version than the stored work")
+              if (transformedWork.version < storedWork.version) {
+                debug(s"${transformedWork.id}: transformed Work is older than the stored Work")
                 false
-              }
-
-              // If the new work is up-to-date with the stored work, but contains
-              // different data, then it should replace the stored work.  Send it.
-              else if (storedWork.data != newWork.data) {
-                debug(s"${newWork.id}: new work has different data to the stored work")
-                true
               }
 
               // If the new work and the stored work have the same version and the
@@ -142,8 +133,13 @@ trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest]
               // last time.  e.g. we indexed the work but didn't send an ID to SNS.
               //
               // Send the work, just to be sure it got through the pipeline.
-              else if (storedWork.version == newWork.version) {
-                debug(s"${newWork.id}: new work has the same version as the stored work")
+              else if (storedWork.version == transformedWork.version) {
+                debug(s"${transformedWork.id}: transformed Work and stored Work have the same version")
+                true
+              }
+
+              else if (storedWork.data != transformedWork.data) {
+                println(s"${transformedWork.id}: transformed Work has different data to the stored Work")
                 true
               }
 
@@ -151,27 +147,27 @@ trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest]
               // the same data, but the stored work has a strictly lower version.
               //
               // Nothing in the pipeline will change if we send this work, and we
-              // assume the previous version of the work was sent successfully.
+              // can assume the previous version of the work was sent successfully.
               else {
-                debug(s"${newWork.id}: new work has newer version/same data as the stored work")
-                assert(storedWork.data == newWork.data)
-                assert(storedWork.version < newWork.version)
+                println(s"${transformedWork.id}: transformed Work has newer version/same data as the stored Work")
+                assert(storedWork.data == transformedWork.data)
+                assert(storedWork.version < transformedWork.version)
                 false
               }
             }
 
             if (shouldSend) {
-              Right(Some((newWork, key)))
+              Right(Some((transformedWork, key)))
             } else {
               info(
-                s"$name: from $key transformed work with id ${newWork.id}; already in pipeline so not re-sending")
+                s"$name: from $key transformed work with id ${transformedWork.id}; already in pipeline so not re-sending")
               Right(None)
             }
           }
           .recover {
             case err: Throwable =>
               debug(s"Unable to retrieve work $key: $err")
-              Right(Some((newWork, key)))
+              Right(Some((transformedWork, key)))
           }
 
       case Left(err) => Future.successful(Left(err))
