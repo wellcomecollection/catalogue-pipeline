@@ -65,7 +65,7 @@ module "ingestor_images" {
 module "image_ingestor_topic" {
   source = "../modules/topic"
 
-  name       = "${local.namespace_hyphen}_image_ingestor"
+  name       = "${local.namespace_hyphen}_image_ingestor_output"
   role_names = [module.ingestor_images.task_role_name]
 
   messages_bucket_arn = aws_s3_bucket.messages.arn
