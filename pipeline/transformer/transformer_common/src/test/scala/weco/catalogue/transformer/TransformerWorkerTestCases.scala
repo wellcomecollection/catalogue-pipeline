@@ -92,31 +92,6 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
       }
     }
 
-    it("leaves a message on the queue if it can't be sent successfully") {
-      withContext { implicit context =>
-        val payload = createPayload
-
-        val workIndexer = new MemoryIndexer[Work[Source]]()
-
-        val brokenSender = new MemoryMessageSender() {
-          override def send(body: String): Try[Unit] =
-            Failure(new Throwable("BOOM!"))
-        }
-
-        withLocalSqsQueuePair() {
-          case QueuePair(queue, dlq) =>
-            withWorkerImpl(queue, workIndexer, brokenSender) { _ =>
-              sendNotificationToSQS(queue, payload)
-
-              eventually {
-                assertQueueEmpty(queue)
-                assertQueueHasSize(dlq, size = 1)
-              }
-            }
-        }
-      }
-    }
-
     describe("decides when to skip sending a work") {
       it("skips sending a Work if there's a strictly newer Work already stored") {
         withContext { implicit context =>
