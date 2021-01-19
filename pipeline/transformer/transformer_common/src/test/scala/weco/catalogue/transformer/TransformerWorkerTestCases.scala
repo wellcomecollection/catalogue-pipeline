@@ -169,6 +169,51 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
           }
         }
       }
+
+      it("re-sends a Work if the stored Work has the same version but different data") {
+        withContext { implicit context =>
+          val id = randomAlphanumeric()
+          val payloadA = createPayloadWith(id = id, version = 1)
+          val payloadB = createPayloadWith(id = id, version = 1)
+
+          val workIndexer = new MemoryIndexer[Work[Source]]()
+          val workKeySender = new MemoryMessageSender()
+
+          withLocalSqsQueuePair(visibilityTimeout = 5) {
+            case QueuePair(queue, dlq) =>
+              withWorkerImpl(queue, workIndexer, workKeySender) { _ =>
+
+                // Transform the first payload, and check it stores successfully.
+                sendNotificationToSQS(queue, payloadA)
+
+                eventually {
+                  assertQueueEmpty(dlq)
+                  assertQueueEmpty(queue)
+                  workIndexer.index should have size 1
+                  workKeySender.messages should have size 1
+                }
+
+                // Transform the second payload, and check an ID gets re-sent
+                sendNotificationToSQS(queue, payloadB)
+
+                eventually {
+                  assertQueueEmpty(dlq)
+                  assertQueueEmpty(queue)
+                  workIndexer.index should have size 1
+                  workKeySender.messages should have size 2
+                }
+              }
+          }
+        }
+      }
+
+      it("re-sends a Work if the stored Work has the same version and the same data") {
+        true shouldBe false
+      }
+
+      it("skips sending a Work if the stored Work has a strictly older Version and the same data") {
+        true shouldBe false
+      }
     }
 
     it("is lazy -- if a work is already stored, it doesn't resend it") {
