@@ -26,6 +26,7 @@ module "ingestor_images" {
   env_vars = {
     metrics_namespace = "${local.namespace_hyphen}_ingestor_images"
     ingest_queue_id   = module.ingestor_images_queue.url
+    topic_arn         = module.image_ingestor_topic.arn
 
     es_images_index    = local.es_images_index
     es_augmented_index = local.es_images_augmented_index
@@ -59,6 +60,15 @@ module "ingestor_images" {
   deployment_service_name = "image-ingestor"
 
   shared_logging_secrets = var.shared_logging_secrets
+}
+
+module "image_ingestor_topic" {
+  source = "../modules/topic"
+
+  name       = "${local.namespace_hyphen}_image_ingestor_output"
+  role_names = [module.ingestor_images.task_role_name]
+
+  messages_bucket_arn = aws_s3_bucket.messages.arn
 }
 
 module "ingestor_images_scaling_alarm" {
