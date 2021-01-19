@@ -6,6 +6,7 @@ provider "registry.terraform.io/elastic/ec" {
   constraints = "0.1.0-beta"
   hashes = [
     "h1:FeIlgFFtDoVwNJ5sIBWCmuURRopyXXX9DqC7s0AwubQ=",
+    "h1:P+PLqKqHdHrp8VksUFN7x16OKXzBGq5L2Ze/40DA5TM=",
     "zh:091d59c4ea25a8f9ea4046c7b1eee2fbe9fe107d715b060f2659cf7aebd6d437",
     "zh:09efa6fecbc27039604a75be5e31ed886bcf67a0e031f40da40edf5875f6aa98",
     "zh:32869c4bb353f9f9550689c56ea8d88d2d46f4e11ec7860261251680c38b9982",
@@ -23,6 +24,7 @@ provider "registry.terraform.io/elastic/ec" {
 provider "registry.terraform.io/hashicorp/aws" {
   version = "2.70.0"
   hashes = [
+    "h1:6tf4jg37RrMHyVCql+fEgAFvX8JiqDognr+lk6rx7To=",
     "h1:mM6eIaG1Gcrk47TveViXBO9YjY6nDaGukbED2bdo8Mk=",
     "zh:01a5f351146434b418f9ff8d8cc956ddc801110f1cc8b139e01be2ff8c544605",
     "zh:1ec08abbaf09e3e0547511d48f77a1e2c89face2d55886b23f643011c76cb247",
