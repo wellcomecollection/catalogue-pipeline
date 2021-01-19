@@ -77,7 +77,8 @@ locals {
     "transformer",
     "ingestor",
     "relation_embedder",
-    "router"
+    "router",
+    "inferrer"
   ]
 
   pipeline_storage_es_service_secrets = zipmap(local.pipeline_storage_service_list, [

@@ -114,7 +114,12 @@ module "image_inferrer" {
     messages_bucket_name  = aws_s3_bucket.messages.id
     queue_url             = module.image_inferrer_queue.url
     images_root           = local.shared_storage_path
+
+    es_initial_images_index   = local.es_images_initial_index
+    es_augmented_images_index = local.es_images_augmented_index
   }
+
+  manager_secret_env_vars = local.pipeline_storage_es_service_secrets["inferrer"]
 
   subnets = var.subnets
 
