@@ -95,7 +95,7 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
     describe("decides when to skip sending a work") {
       it("skips sending a Work if there's a strictly newer Work already stored") {
         withContext { implicit context =>
-          val id = randomAlphanumeric()
+          val id = createId
           val oldPayload = createPayloadWith(id = id, version = 1)
           val newPayload = createPayloadWith(id = id, version = 2)
 
@@ -131,7 +131,7 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
 
       it("re-sends a Work if the stored Work has the same version but different data") {
         withContext { implicit context =>
-          val id = randomAlphanumeric()
+          val id = createId
 
           val workIndexer = new MemoryIndexer[Work[Source]]()
           val workKeySender = new MemoryMessageSender()
