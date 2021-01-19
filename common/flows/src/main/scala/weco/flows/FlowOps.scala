@@ -1,9 +1,9 @@
-package uk.ac.wellcome.bigmessaging
+package weco.flows
 
 import grizzled.slf4j.Logging
 import scala.concurrent.{ExecutionContext, Future}
 import akka.NotUsed
-import akka.stream.scaladsl._
+import akka.stream.scaladsl.Flow
 
 trait FlowOps extends Logging {
 

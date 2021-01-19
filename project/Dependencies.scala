@@ -210,17 +210,8 @@ object CatalogueDependencies {
       WellcomeDependencies.fixturesLibrary ++
       WellcomeDependencies.typesafeLibrary
 
-  val bigMessagingDependencies: Seq[ModuleID] =
-    ExternalDependencies.scalatestDependencies ++
-      WellcomeDependencies.typesafeLibrary ++
-      WellcomeDependencies.monitoringLibrary ++
-      WellcomeDependencies.messagingLibrary ++
-      WellcomeDependencies.storageLibrary ++
-      WellcomeDependencies.fixturesLibrary
-
-  val bigMessagingTypesafeDependencies: Seq[ModuleID] =
-    WellcomeDependencies.storageTypesafeLibrary ++
-      WellcomeDependencies.messagingTypesafeLibrary
+  val flowDependencies: Seq[ModuleID] =
+    WellcomeDependencies.typesafeLibrary
 
   val sourceModelDependencies: Seq[sbt.ModuleID] =
     WellcomeDependencies.storageLibrary ++
@@ -302,7 +293,9 @@ object CatalogueDependencies {
       ExternalDependencies.akkaHttpDependencies ++
       ExternalDependencies.mockitoDependencies ++
       ExternalDependencies.wireMockDependencies ++
-      ExternalDependencies.scribeJavaDependencies
+      ExternalDependencies.scribeJavaDependencies ++
+      WellcomeDependencies.messagingTypesafeLibrary ++
+      WellcomeDependencies.storageTypesafeLibrary
 
   // CALM adapter
 
