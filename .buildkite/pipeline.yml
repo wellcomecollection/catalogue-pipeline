@@ -8,8 +8,6 @@ steps:
     label: "display"
   - command: .buildkite/scripts/run_job.py elasticsearch
     label: "elasticsearch"
-  - command: .buildkite/scripts/run_job.py big_messaging
-    label: "big messaging"
   - command: .buildkite/scripts/run_job.py source_model
     label: "source model"
   - command: .buildkite/scripts/run_job.py pipeline_storage
