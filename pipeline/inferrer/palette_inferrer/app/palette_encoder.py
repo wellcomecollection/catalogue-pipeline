@@ -45,17 +45,19 @@ class PaletteEncoder:
         }
 
     @staticmethod
-    def hsv_ints_to_cartesian(hsv):
-        hsv_scaled = hsv / [max_hue, max_sat, max_val]
-        h_x = hsv_scaled[..., 1] * np.cos(hsv_scaled[..., 0])
-        s_y = hsv_scaled[..., 1] * np.sin(hsv_scaled[..., 0])
-        v_z = hsv_scaled[..., 2]
+    def hsv_to_cartesian(hsv):
+        h_scaled = tau * hsv[..., 0]
+        h_x = hsv[..., 1] * np.cos(h_scaled)
+        s_y = hsv[..., 1] * np.sin(h_scaled)
+        v_z = hsv[..., 2]
         return np.stack([h_x, s_y, v_z], axis=-1)
 
     @staticmethod
-    def cartesian_to_hsv_floats(cartesian):
-        h = np.arctan2(cartesian[..., 1], cartesian[..., 0])
-        s = np.linalg.norm(cartesian[..., 0:2], axis=-1)
+    def cartesian_to_hsv(cartesian):
+        atan2 = np.arctan2(cartesian[..., 1], cartesian[..., 0])  # (-pi, pi]
+        h = ((tau + atan2) % tau) / tau  # (0, 1]
+        # The min(s, 1) is a guard against rounding errors here
+        s = min(np.linalg.norm(cartesian[..., 0:2], axis=-1), 1.0)
         v = cartesian[..., 2]
         return np.stack([h, s, v], axis=-1)
 
