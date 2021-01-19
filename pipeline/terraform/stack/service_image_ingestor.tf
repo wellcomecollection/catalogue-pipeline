@@ -24,8 +24,8 @@ module "ingestor_images" {
   memory = 4096
 
   env_vars = {
-    metrics_namespace   = "${local.namespace_hyphen}_ingestor_images"
-    ingest_queue_id     = module.ingestor_images_queue.url
+    metrics_namespace = "${local.namespace_hyphen}_ingestor_images"
+    ingest_queue_id   = module.ingestor_images_queue.url
 
     es_images_index    = local.es_images_index
     es_augmented_index = local.es_images_augmented_index
