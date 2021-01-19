@@ -42,8 +42,8 @@ module "ingestor_works" {
     es_host_pipeline_storage     = local.pipeline_storage_es_host
     es_port_pipeline_storage     = local.pipeline_storage_es_port
     es_protocol_pipeline_storage = local.pipeline_storage_es_protocol
-    es_username_pipeline_storage = "catalogue/${var.pipeline_storage_id}/ingestor/es_username"
-    es_password_pipeline_storage = "catalogue/${var.pipeline_storage_id}/ingestor/es_password"
+    es_username_pipeline_storage = "catalogue/${var.pipeline_storage_id}/work_ingestor/es_username"
+    es_password_pipeline_storage = "catalogue/${var.pipeline_storage_id}/work_ingestor/es_password"
   })
 
   subnets = var.subnets
