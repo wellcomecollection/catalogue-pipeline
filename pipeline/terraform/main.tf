@@ -54,13 +54,11 @@ module "catalogue_pipeline_2021-01-12" {
   storage_bucket_name = local.storage_bucket
 }
 
-module "catalogue_pipeline_2021-01-18" {
+module "catalogue_pipeline_2021-01-19" {
   source = "./stack"
 
-  pipeline_date = "2021-01-18"
+  pipeline_date = "2021-01-19"
   release_label = "stage"
-
-  pipeline_storage_id = "pipeline_storage_delta"
 
   # Transformer config
   #
