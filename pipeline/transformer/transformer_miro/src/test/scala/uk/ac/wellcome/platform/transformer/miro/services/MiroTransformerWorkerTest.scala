@@ -63,9 +63,7 @@ class MiroTransformerWorkerTest
     val location = createS3ObjectLocation
     store.put(location)(storedRecord) shouldBe a[Right[_, _]]
 
-    // We don't actually copy the version here -- the Miro transformer
-    // embeds the version directly in the Work data.
-    p.copy(location = location)
+    p.copy(location = location, version = version)
   }
 
   override def createBadPayload(
