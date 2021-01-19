@@ -56,7 +56,9 @@ class SierraTitleTest
         MarcSubfield(tag = "a", content = "Quain's elements of anatomy."),
         MarcSubfield(tag = "n", content = "Vol. I, Part I,"),
         MarcSubfield(tag = "n", content = "Embryology /"),
-        MarcSubfield(tag = "c", content = "edited by Edward Albert Schäfer and George Dancer Thane.")
+        MarcSubfield(
+          tag = "c",
+          content = "edited by Edward Albert Schäfer and George Dancer Thane.")
       ),
       "Quain's elements of anatomy. Vol. I, Part I, Embryology / edited by Edward Albert Schäfer and George Dancer Thane."
     ),

@@ -29,7 +29,9 @@ object SierraTitle extends SierraDataTransformer with SierraQueryOps {
 
     val components =
       marc245Field.subfields
-        .filter { sf => Seq("a", "b", "c", "n", "p").contains { sf.tag }}
+        .filter { sf =>
+          Seq("a", "b", "c", "n", "p").contains { sf.tag }
+        }
         .map { _.content }
 
     if (components.isEmpty) {
