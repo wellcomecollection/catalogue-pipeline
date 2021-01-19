@@ -54,12 +54,14 @@ class MiroTransformerWorkerTest
 
   override def setPayloadVersion(p: MiroSourcePayload, version: Int)(
     implicit store: MemoryTypedStore[S3ObjectLocation, MiroRecord]): MiroSourcePayload = {
-    val storedData: MiroRecord = store.get(p.location).value.identifiedT
+    val storedRecord: MiroRecord = store.get(p.location).value.identifiedT
 
     val location = createS3ObjectLocation
-    store.put(location)(storedData) shouldBe a[Right[_, _]]
+    store.put(location)(storedRecord) shouldBe a[Right[_, _]]
 
-    p.copy(location = location, version = version)
+    // We don't actually copy the version here -- the Miro transformer
+    // embeds the version directly in the Work data.
+    p.copy(location = location)
   }
 
   override def createBadPayload(
