@@ -60,6 +60,8 @@ module "catalogue_pipeline_2021-01-19" {
   pipeline_date = "2021-01-19"
   release_label = "stage"
 
+  pipeline_storage_id = "pipeline_storage_delta"
+
   # Transformer config
   #
   # If this pipeline is meant to be reindexed, remember to uncomment the
