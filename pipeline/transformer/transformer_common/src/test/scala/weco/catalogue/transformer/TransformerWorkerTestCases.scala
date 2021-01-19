@@ -90,7 +90,7 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
       }
     }
 
-    it("sends a payload to the DLQ if it can't be sent successfully") {
+    it("leaves a message on the queue if it can't be sent successfully") {
       withContext { implicit context =>
         val payload = createPayload
 
@@ -107,8 +107,8 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
               sendNotificationToSQS(queue, payload)
 
               eventually {
-                assertQueueHasSize(dlq, size = 1)
                 assertQueueEmpty(queue)
+                assertQueueHasSize(dlq, size = 1)
               }
             }
         }
