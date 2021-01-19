@@ -218,10 +218,6 @@ object CatalogueDependencies {
       WellcomeDependencies.storageLibrary ++
       WellcomeDependencies.fixturesLibrary
 
-  val bigMessagingTypesafeDependencies: Seq[ModuleID] =
-    WellcomeDependencies.storageTypesafeLibrary ++
-      WellcomeDependencies.messagingTypesafeLibrary
-
   val sourceModelDependencies: Seq[sbt.ModuleID] =
     WellcomeDependencies.storageLibrary ++
       WellcomeDependencies.fixturesLibrary ++

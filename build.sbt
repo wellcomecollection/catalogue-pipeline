@@ -58,13 +58,6 @@ lazy val big_messaging = setupProject(
   "common/big_messaging",
   externalDependencies = CatalogueDependencies.bigMessagingDependencies)
 
-lazy val big_messaging_typesafe = setupProject(
-  project,
-  "common/big_messaging_typesafe",
-  localDependencies = Seq(big_messaging),
-  externalDependencies = CatalogueDependencies.bigMessagingTypesafeDependencies
-)
-
 lazy val source_model = setupProject(
   project,
   folder = "common/source_model",
@@ -238,7 +231,7 @@ lazy val sierra_items_to_dynamo = setupProject(
 lazy val mets_adapter = setupProject(
   project,
   folder = "mets_adapter/mets_adapter",
-  localDependencies = Seq(internal_model, source_model, big_messaging_typesafe),
+  localDependencies = Seq(internal_model, source_model, big_messaging),
   externalDependencies = CatalogueDependencies.metsAdapterDependencies
 )
 
@@ -247,7 +240,7 @@ lazy val mets_adapter = setupProject(
 lazy val calm_adapter = setupProject(
   project,
   folder = "calm_adapter/calm_adapter",
-  localDependencies = Seq(internal_model, source_model_typesafe, big_messaging_typesafe),
+  localDependencies = Seq(internal_model, source_model_typesafe, big_messaging),
   externalDependencies = CatalogueDependencies.calmAdapterDependencies
 )
 
