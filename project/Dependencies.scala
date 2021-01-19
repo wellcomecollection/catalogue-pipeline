@@ -71,7 +71,7 @@ object ExternalDependencies {
     val akkaHttp = "10.1.11"
     val akkaHttpCirce = "1.32.0"
     val akkaStreamAlpakka = "1.1.2"
-    val apacheCommons = "3.7"
+    val apacheCommons = "1.9"
     val apacheLogging = "2.8.2"
     val aws = "1.11.504"
     val circe = "0.13.0"
@@ -115,7 +115,7 @@ object ExternalDependencies {
   )
 
   val apacheCommonsDependencies = Seq(
-    "org.apache.commons" % "commons-lang3" % versions.apacheCommons
+    "org.apache.commons" % "commons-text" % versions.apacheCommons
   )
 
   val circeOpticsDependencies = Seq(
