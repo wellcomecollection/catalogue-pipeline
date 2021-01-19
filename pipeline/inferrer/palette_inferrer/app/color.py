@@ -65,4 +65,4 @@ def rgb_to_hsv(arr):
         out[..., 1] = s
         out[..., 2] = arr_max
 
-    return out
+    return out / [max_hue, max_sat, max_val]

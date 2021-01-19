@@ -3,23 +3,46 @@ import numpy as np
 from sklearn.cluster import KMeans
 from joblib import Parallel, delayed
 
-from .color import rgb_to_hsv, max_hue, max_sat, max_val
+from .color import rgb_to_hsv
+
+tau = 2 * np.pi
+min_bin_width = 1.0 / 256
 
 
 class PaletteEncoder:
     def __init__(
-        self, palette_size, bin_sizes, sat_min, val_min, max_tokens=1000
+        self,
+        palette_size,
+        hue_bins,
+        sat_bins,
+        val_bins,
+        sat_min,
+        val_min,
+        max_tokens=1000,
     ):
         """
-        Instantiate a palette encoder that looks for len(palette_weights) colours,
-        weighted by palette_weights in descending order of cluster cardinality,
-        and quantises the resultant colors across bin_sizes bins, respectively.
+        Instantiate a palette encoder that looks for palette_size colours,
+        and quantises the resultant colors across <component>_bins, for each
+        HSV component respectively (these must all be arrays of the same length).
+
+        Saturations/values below sat_min and val_min (8-bit integers) are binned
+        separately. Images which would produce more than max_tokens will have their
+        colour weights scaled down accordingly.
         """
         self.palette_size = palette_size
-        self.bin_sizes = bin_sizes
-        self.bin_minima = np.array([0.0, sat_min, val_min])
+        self.bin_sizes = np.array([hue_bins, sat_bins, val_bins]).transpose()
+        if self.bin_sizes.shape[0] != self.bin_sizes.shape[1]:
+            raise Exception("All dimensions must have the same number of bins")
+
+        self.bin_minima = np.array([0, sat_min / 256, val_min / 256])
         self.max_tokens = max_tokens
         self.delayed_process_image = delayed(self.process_image)
+
+    def get_hash_params(self):
+        return {
+            "bin_sizes": [row.tolist() for row in self.bin_sizes.transpose()],
+            "bin_minima": self.bin_minima.tolist(),
+        }
 
     @staticmethod
     def hsv_ints_to_cartesian(hsv):
@@ -45,27 +68,27 @@ class PaletteEncoder:
         """
         rgb_image = image.convert("RGB")  # Should be RGB already but make sure
         rgb_pixels = np.array(rgb_image).reshape(-1, 3)
+        hsv_pixels = rgb_to_hsv(rgb_pixels)
 
         # Only cluster distinct colours but weight them by their frequency
         # As per https://arxiv.org/pdf/1101.0395.pdf
-        distinct_rgb_colors, distinct_color_freqs = np.unique(
-            rgb_pixels, axis=0, return_counts=True
+        distinct_colors, distinct_color_freqs = np.unique(
+            hsv_pixels, axis=0, return_counts=True
         )
 
         # Fewer distinct colours than clusters
-        if len(distinct_rgb_colors) <= n:
+        if len(distinct_colors) <= n:
             sort_indices = distinct_color_freqs.argsort()[::-1]
-            sorted_by_freq = distinct_rgb_colors[sort_indices]
-            size_diff = n - len(distinct_rgb_colors)
+            sorted_by_freq = distinct_colors[sort_indices]
+            size_diff = n - len(distinct_colors)
             # pad with the most frequently occurring distinct colour
-            return np.pad(
+            padded = np.pad(
                 sorted_by_freq, pad_width=((size_diff, 0), (0, 0)), mode="edge"
             )
+            padded_indices = np.pad(sort_indices, pad_width=(size_diff, 0), mode="edge")
+            return zip(padded, distinct_color_freqs[padded_indices])
 
-        distinct_hsv_colors = rgb_to_hsv(distinct_rgb_colors)
-        distinct_cartesian_hsv_colors = PaletteEncoder.hsv_ints_to_cartesian(
-            distinct_hsv_colors
-        )
+        distinct_cartesian_hsv_colors = PaletteEncoder.hsv_to_cartesian(distinct_colors)
         clusters = KMeans(n_clusters=n).fit(
             distinct_cartesian_hsv_colors, sample_weight=distinct_color_freqs
         )
@@ -85,16 +108,15 @@ class PaletteEncoder:
 
         return [
             (
-                PaletteEncoder.cartesian_to_hsv_floats(
-                    consistently_indexed_centroids[label]
-                ),
+                PaletteEncoder.cartesian_to_hsv(consistently_indexed_centroids[label]),
                 weight,
             )
             for label, weight in label_weights.most_common()
         ]
 
-    def get_bin_index(self, color, n_bins):
+    def get_bin_index(self, color, bin_sizes):
         h, s, v = color[0], color[1], color[2]
+        n_val_bins = bin_sizes[1]
         sat_min, val_min = self.bin_minima[1], self.bin_minima[2]
         next_bin = 0
 
@@ -105,13 +127,22 @@ class PaletteEncoder:
 
         # Next, bin values with low saturation irrespective of hue (shades of grey)
         if s < sat_min:
-            return next_bin + np.floor(n_bins * (v - val_min)).astype(int)
-        next_bin += n_bins
+            return next_bin + np.floor(
+                n_val_bins * (v - val_min) / (1.0 - val_min + min_bin_width)
+            ).astype(int)
+        next_bin += n_val_bins
 
         # Finally, bin the remainder of the space uniformly
-        indices = np.floor(n_bins * (color - self.bin_minima)).astype(int)
+        indices = np.floor(
+            bin_sizes
+            * (color - self.bin_minima)
+            / (1.0 - self.bin_minima + min_bin_width)
+        ).astype(int)
         return (
-            next_bin + indices[0] + n_bins * indices[1] + n_bins * n_bins * indices[2]
+            next_bin
+            + indices[0]
+            + bin_sizes[0] * indices[1]
+            + bin_sizes[0] * bin_sizes[1] * indices[2]
         )
 
     @staticmethod
@@ -121,17 +152,13 @@ class PaletteEncoder:
         weighting is performed by repeating elements `weight` times
         """
         return [
-            f"{index}/{n_bins}"
-            for index, n_bins, weight in values
-            for _ in range(weight)
+            f"{index}/{bin_i}" for index, bin_i, weight in values for _ in range(weight)
         ]
 
     def scale_weights(self, weights):
         total_weight = np.sum(weights) * len(self.bin_sizes)
         if total_weight > self.max_tokens:
-            return np.round(
-                self.max_tokens * (weights / total_weight)
-            ).astype("uint32")
+            return np.round(self.max_tokens * (weights / total_weight)).astype("uint32")
         return weights
 
     def process_image(self, image):
@@ -141,8 +168,8 @@ class PaletteEncoder:
         colors, weights = zip(*self.get_significant_colors(image, self.palette_size))
         scaled_weights = self.scale_weights(weights)
         combined_results = [
-            (self.get_bin_index(color, n), n, weight)
-            for n in self.bin_sizes
+            (self.get_bin_index(color, bin_sizes), bin_i, weight)
+            for bin_i, bin_sizes in enumerate(self.bin_sizes)
             for color, weight in zip(colors, scaled_weights)
         ]
 
