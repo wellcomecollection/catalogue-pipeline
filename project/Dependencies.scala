@@ -72,7 +72,6 @@ object ExternalDependencies {
     val akkaHttpCirce = "1.32.0"
     val akkaStreamAlpakka = "1.1.2"
     val apacheCommons = "1.9"
-    val aws = "1.11.504"
     val circe = "0.13.0"
     val elastic4s = "7.10.1"
     val fastparse = "2.3.0"
@@ -138,7 +137,6 @@ object ExternalDependencies {
   )
 
   val mySqlDependencies = Seq(
-    "com.amazonaws" % "aws-java-sdk-rds" % versions.aws,
     "org.flywaydb" % "flyway-core" % "4.2.0",
     "org.scalikejdbc" %% "scalikejdbc" % "3.4.0",
     "mysql" % "mysql-connector-java" % "6.0.6"
