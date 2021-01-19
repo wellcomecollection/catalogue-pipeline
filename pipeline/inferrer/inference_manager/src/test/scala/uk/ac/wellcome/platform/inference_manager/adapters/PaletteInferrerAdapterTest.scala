@@ -10,6 +10,7 @@ import uk.ac.wellcome.models.work.generators.ImageGenerators
 import uk.ac.wellcome.models.work.internal.InferredData
 import uk.ac.wellcome.platform.inference_manager.models.{
   DownloadedImage,
+  HashParams,
   PaletteInferrerResponse
 }
 
@@ -41,13 +42,27 @@ class PaletteInferrerAdapterTest
   describe("augment") {
     it("augments InferredData with the data from the inferrer response") {
       val palette = (0 to 25).map(n => f"$n%03d").toList
+      val binSizes = List(List(1, 2, 3), List(4, 5, 6), List(7, 8, 9))
+      val binMinima = List(0.1f, 0.2f, 0.3f)
       val response = PaletteInferrerResponse(
-        palette = palette
+        palette = palette,
+        hash_params = HashParams(
+          bin_sizes = binSizes,
+          bin_minima = binMinima
+        )
       )
       val inferredData = adapter.augment(InferredData.empty, response)
       inside(inferredData) {
-        case InferredData(_, _, _, paletteResponse) =>
+        case InferredData(
+            _,
+            _,
+            _,
+            paletteResponse,
+            binSizesResponse,
+            binMinimaResponse) =>
           paletteResponse should be(palette)
+          binSizesResponse should be(binSizes)
+          binMinimaResponse should be(binMinima)
       }
     }
   }

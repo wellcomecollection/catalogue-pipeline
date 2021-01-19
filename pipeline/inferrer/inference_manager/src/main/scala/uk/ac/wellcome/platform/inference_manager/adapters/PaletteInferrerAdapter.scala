@@ -6,6 +6,7 @@ import io.circe.generic.semiauto.deriveDecoder
 import uk.ac.wellcome.models.work.internal.InferredData
 import uk.ac.wellcome.platform.inference_manager.models.{
   DownloadedImage,
+  HashParams,
   PaletteInferrerResponse
 }
 
@@ -30,9 +31,14 @@ class PaletteInferrerAdapter(host: String, port: Int) extends InferrerAdapter {
   def augment(inferredData: InferredData,
               inferrerResponse: Response): InferredData =
     inferrerResponse match {
-      case PaletteInferrerResponse(palette) =>
-        inferredData.copy(palette = palette)
+      case PaletteInferrerResponse(palette, params) =>
+        inferredData.copy(
+          palette = palette,
+          binSizes = params.bin_sizes,
+          binMinima = params.bin_minima
+        )
     }
 
+  implicit val hashParamsDecoder: Decoder[HashParams] = deriveDecoder
   implicit val responseDecoder: Decoder[PaletteInferrerResponse] = deriveDecoder
 }

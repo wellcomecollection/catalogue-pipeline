@@ -6,6 +6,8 @@ import uk.ac.wellcome.models.work.internal._
 import SourceWork._
 import ImageState._
 
+import scala.util.Random
+
 trait ImageGenerators
     extends IdentifiersGenerators
     with ItemsGenerators
@@ -163,6 +165,11 @@ trait ImageGenerators
     def toIndexedImage = toIndexedImageWith()
   }
 
+  lazy private val inferredDataBinSizes =
+    List.fill(9)(Random.nextInt(10)).grouped(3).toList
+
+  lazy private val inferredDataBinMinima = List.fill(3)(Random.nextFloat)
+
   def createInferredData = {
     val features = randomVector(4096)
     val (features1, features2) = features.splitAt(features.size / 2)
@@ -173,7 +180,9 @@ trait ImageGenerators
         features1 = features1.toList,
         features2 = features2.toList,
         lshEncodedFeatures = lshEncodedFeatures.toList,
-        palette = palette.toList
+        palette = palette.toList,
+        binSizes = inferredDataBinSizes,
+        binMinima = inferredDataBinMinima
       )
     )
   }
@@ -213,7 +222,9 @@ trait ImageGenerators
               features1 = f.slice(0, 2048).toList,
               features2 = f.slice(2048, 4096).toList,
               lshEncodedFeatures = l.toList,
-              palette = p.toList
+              palette = p.toList,
+              binSizes = inferredDataBinSizes,
+              binMinima = inferredDataBinMinima
             )
           )
         )
