@@ -81,8 +81,6 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
 
                 val sentKeys = workKeySender.messages.map { _.body }
                 val storedKeys = workIndexer.index.keys
-                println(s"@@AWLC sentKeys = $sentKeys")
-                println(s"@@AWLC storedKeys = $storedKeys")
                 sentKeys should contain theSameElementsAs storedKeys
 
                 assertMatches(payload, workIndexer.index.values.head)
@@ -210,7 +208,7 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
           val workIndexer = new MemoryIndexer[Work[Source]]()
           val workKeySender = new MemoryMessageSender()
 
-          withLocalSqsQueuePair() {
+          withLocalSqsQueuePair(visibilityTimeout = 2) {
             case QueuePair(queue, dlq) =>
               withWorkerImpl(queue, workIndexer, workKeySender) { _ =>
 

@@ -77,7 +77,9 @@ class MetsTransformerWorkerTest
 
   override def setPayloadVersion(p: MetsSourcePayload, version: Int)(
     implicit store: MemoryTypedStore[S3ObjectLocation, String]): MetsSourcePayload =
-    p.copy(version = version)
+    p.copy(
+      sourceData = p.sourceData.asInstanceOf[MetsFileWithImages].copy(version = version)
+    )
 
   override def createBadPayload(
     implicit store: MemoryTypedStore[S3ObjectLocation, String])

@@ -125,21 +125,27 @@ trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest]
             val shouldSend = {
               // If the new work has a strictly lower version than the stored work,
               // then the new work is out-of-date.  Discard it.
-              if (newWork.version < storedWork.version)
+              if (newWork.version < storedWork.version) {
+                debug(s"${newWork.id}: new work has a lower version than the stored work")
                 false
+              }
 
               // If the new work is up-to-date with the stored work, but contains
               // different data, then it should replace the stored work.  Send it.
-              else if (storedWork.data != newWork.data)
+              else if (storedWork.data != newWork.data) {
+                debug(s"${newWork.id}: new work has different data to the stored work")
                 true
+              }
 
               // If the new work and the stored work have the same version and the
               // same data, it's possible this is SQS retrying a message that failed
               // last time.  e.g. we indexed the work but didn't send an ID to SNS.
               //
               // Send the work, just to be sure it got through the pipeline.
-              else if (storedWork.version == newWork.version)
+              else if (storedWork.version == newWork.version) {
+                debug(s"${newWork.id}: new work has the same version as the stored work")
                 true
+              }
 
               // If we get here, it means the new work and the stored work should have
               // the same data, but the stored work has a strictly lower version.
@@ -147,6 +153,7 @@ trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest]
               // Nothing in the pipeline will change if we send this work, and we
               // assume the previous version of the work was sent successfully.
               else {
+                debug(s"${newWork.id}: new work has newer version/same data as the stored work")
                 assert(storedWork.data == newWork.data)
                 assert(storedWork.version < newWork.version)
                 false
