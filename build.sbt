@@ -53,10 +53,10 @@ lazy val elasticsearch_typesafe = setupProject(
   externalDependencies = CatalogueDependencies.elasticsearchTypesafeDependencies
 )
 
-lazy val big_messaging = setupProject(
+lazy val flows = setupProject(
   project,
-  "common/big_messaging",
-  externalDependencies = CatalogueDependencies.bigMessagingDependencies)
+  "common/flows",
+  externalDependencies = CatalogueDependencies.flowDependencies)
 
 lazy val source_model = setupProject(
   project,
@@ -231,7 +231,7 @@ lazy val sierra_items_to_dynamo = setupProject(
 lazy val mets_adapter = setupProject(
   project,
   folder = "mets_adapter/mets_adapter",
-  localDependencies = Seq(internal_model, source_model, big_messaging),
+  localDependencies = Seq(internal_model, source_model, flows),
   externalDependencies = CatalogueDependencies.metsAdapterDependencies
 )
 
@@ -240,7 +240,7 @@ lazy val mets_adapter = setupProject(
 lazy val calm_adapter = setupProject(
   project,
   folder = "calm_adapter/calm_adapter",
-  localDependencies = Seq(internal_model, source_model_typesafe, big_messaging),
+  localDependencies = Seq(internal_model, source_model_typesafe, flows),
   externalDependencies = CatalogueDependencies.calmAdapterDependencies
 )
 
