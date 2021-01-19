@@ -2,6 +2,7 @@ package uk.ac.wellcome.platform.transformer.miro.services
 
 import io.circe.Encoder
 import io.circe.generic.extras.semiauto.deriveConfiguredEncoder
+import org.scalatest.EitherValues
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
@@ -14,10 +15,7 @@ import uk.ac.wellcome.storage.generators.S3ObjectLocationGenerators
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.memory.MemoryTypedStore
 import weco.catalogue.source_model.MiroSourcePayload
-import weco.catalogue.transformer.{
-  TransformerWorker,
-  TransformerWorkerTestCases
-}
+import weco.catalogue.transformer.{TransformerWorker, TransformerWorkerTestCases}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -27,7 +25,10 @@ class MiroTransformerWorkerTest
       MiroSourcePayload,
       (MiroRecord, MiroMetadata)]
     with MiroRecordGenerators
-    with S3ObjectLocationGenerators {
+    with S3ObjectLocationGenerators
+    with EitherValues {
+
+  override def createId: String = createImageNumber
 
   override def withContext[R](
     testWith: TestWith[MemoryTypedStore[S3ObjectLocation, MiroRecord], R]): R =
@@ -35,20 +36,30 @@ class MiroTransformerWorkerTest
       MemoryTypedStore[S3ObjectLocation, MiroRecord]()
     )
 
-  override def createPayload(
+  override def createPayloadWith(id: String, version: Int)(
     implicit store: MemoryTypedStore[S3ObjectLocation, MiroRecord])
     : MiroSourcePayload = {
-    val record = createMiroRecord
+    val record = createMiroRecordWith(imageNumber = id)
     val location = createS3ObjectLocation
 
     store.put(location)(record) shouldBe a[Right[_, _]]
 
     MiroSourcePayload(
-      id = record.imageNumber,
-      version = 1,
+      id = id,
+      version = version,
       location = location,
       isClearedForCatalogueAPI = chooseFrom(true, false)
     )
+  }
+
+  override def setPayloadVersion(p: MiroSourcePayload, version: Int)(
+    implicit store: MemoryTypedStore[S3ObjectLocation, MiroRecord]): MiroSourcePayload = {
+    val storedData: MiroRecord = store.get(p.location).value.identifiedT
+
+    val location = createS3ObjectLocation
+    store.put(location)(storedData) shouldBe a[Right[_, _]]
+
+    p.copy(location = location, version = version)
   }
 
   override def createBadPayload(

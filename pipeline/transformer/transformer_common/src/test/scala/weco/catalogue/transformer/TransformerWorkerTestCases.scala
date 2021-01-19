@@ -32,13 +32,15 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
 
   def withContext[R](testWith: TestWith[Context, R]): R
 
+  def createId: String = randomAlphanumeric()
+
   // Create a payload which can be transformer
   def createPayload(implicit context: Context): Payload =
     createPayloadWith(
       version = randomInt(from = 1, to = 10)
     )
 
-  def createPayloadWith(id: String = randomAlphanumeric(), version: Int)(implicit context: Context): Payload
+  def createPayloadWith(id: String = createId, version: Int)(implicit context: Context): Payload
 
   def setPayloadVersion(p: Payload, version: Int)(implicit context: Context): Payload
 

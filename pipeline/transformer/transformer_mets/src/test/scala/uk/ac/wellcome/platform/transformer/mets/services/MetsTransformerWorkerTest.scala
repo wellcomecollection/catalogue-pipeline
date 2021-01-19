@@ -41,39 +41,43 @@ class MetsTransformerWorkerTest
       MemoryTypedStore[S3ObjectLocation, String]()
     )
 
-  override def createPayload(
+  override def createId: String = createBibNumber
+
+  override def createPayloadWith(id: String, version: Int)(
     implicit store: MemoryTypedStore[S3ObjectLocation, String])
     : MetsSourcePayload = {
-    val bibId = createBibNumber
-
     val metsXML = metsXmlWith(
-      recordIdentifier = bibId,
+      recordIdentifier = id,
       accessConditionStatus = Some("Open"),
       license = Some(License.CC0)
     )
 
     val location = S3ObjectLocation(
       bucket = createBucketName,
-      key = s"digitised/$bibId/v1/METS.xml"
+      key = s"digitised/$id/v1/METS.xml"
     )
 
     store.put(location)(metsXML) shouldBe a[Right[_, _]]
 
     MetsSourcePayload(
-      id = bibId,
+      id = id,
       sourceData = MetsFileWithImages(
         root = S3ObjectLocationPrefix(
           bucket = location.bucket,
-          keyPrefix = s"digitised/$bibId"
+          keyPrefix = s"digitised/$id"
         ),
         filename = "v1/METS.xml",
         manifestations = List.empty,
-        version = 1,
+        version = version,
         createdDate = Instant.now()
       ),
       version = 1
     )
   }
+
+  override def setPayloadVersion(p: MetsSourcePayload, version: Int)(
+    implicit store: MemoryTypedStore[S3ObjectLocation, String]): MetsSourcePayload =
+    p.copy(version = version)
 
   override def createBadPayload(
     implicit store: MemoryTypedStore[S3ObjectLocation, String])
