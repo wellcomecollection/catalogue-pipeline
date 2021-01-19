@@ -40,18 +40,17 @@ class ExampleTransformerTest
         initialEntries = Map.empty)
     )
 
-  override def createPayload(
+  override def createPayloadWith(id: String, version: Int)(
     implicit store: MemoryVersionedStore[S3ObjectLocation, ExampleData])
     : CalmSourcePayload = {
-    val data = ValidExampleData(id = createSourceIdentifier)
-    val version = randomInt(from = 1, to = 10)
+    val data = ValidExampleData(id = createSourceIdentifierWith(value = id))
 
     val location = createS3ObjectLocation
 
     store.put(Version(location, version))(data) shouldBe a[Right[_, _]]
 
     CalmSourcePayload(
-      id = data.id.toString,
+      id = id,
       version = version,
       location = location)
   }

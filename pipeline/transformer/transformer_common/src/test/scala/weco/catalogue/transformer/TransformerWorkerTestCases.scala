@@ -33,7 +33,13 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
   def withContext[R](testWith: TestWith[Context, R]): R
 
   // Create a payload which can be transformer
-  def createPayload(implicit context: Context): Payload
+  def createPayload(implicit context: Context): Payload =
+    createPayloadWith(
+      id = randomAlphanumeric(),
+      version = randomInt(from = 1, to = 10)
+    )
+
+  def createPayloadWith(id: String, version: Int)(implicit context: Context): Payload
 
   // Create a payload which cannot be transformed
   def createBadPayload(implicit context: Context): Payload
@@ -121,6 +127,43 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
                   sentKeys should contain theSameElementsAs storedKeys
 
                   assertMatches(payload, workIndexer.index.values.head)
+                }
+              }
+          }
+        }
+      }
+
+      it("skips sending a Work if there's a strictly newer Work already stored") {
+        withContext { implicit context =>
+          val id = randomAlphanumeric()
+          val oldPayload = createPayloadWith(id = id, version = 1)
+          val newPayload = createPayloadWith(id = id, version = 2)
+
+          val workIndexer = new MemoryIndexer[Work[Source]]()
+          val workKeySender = new MemoryMessageSender()
+
+          withLocalSqsQueuePair(visibilityTimeout = 5) {
+            case QueuePair(queue, dlq) =>
+              withWorkerImpl(queue, workIndexer, workKeySender) { _ =>
+
+                // First we transform the new payload, and check it stores successfully.
+                sendNotificationToSQS(queue, newPayload)
+
+                eventually {
+                  assertQueueEmpty(dlq)
+                  assertQueueEmpty(queue)
+                  workIndexer.index should have size 1
+                  workKeySender.messages should have size 1
+                }
+
+                // Now we transform the new payload, and check nothing new got send
+                sendNotificationToSQS(queue, oldPayload)
+
+                eventually {
+                  assertQueueEmpty(dlq)
+                  assertQueueEmpty(queue)
+                  workIndexer.index should have size 1
+                  workKeySender.messages should have size 1
                 }
               }
           }
