@@ -35,11 +35,12 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
   // Create a payload which can be transformer
   def createPayload(implicit context: Context): Payload =
     createPayloadWith(
-      id = randomAlphanumeric(),
       version = randomInt(from = 1, to = 10)
     )
 
-  def createPayloadWith(id: String, version: Int)(implicit context: Context): Payload
+  def createPayloadWith(id: String = randomAlphanumeric(), version: Int)(implicit context: Context): Payload
+
+  def setPayloadVersion(p: Payload, version: Int)(implicit context: Context): Payload
 
   // Create a payload which cannot be transformed
   def createBadPayload(implicit context: Context): Payload
@@ -78,6 +79,8 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
 
                 val sentKeys = workKeySender.messages.map { _.body }
                 val storedKeys = workIndexer.index.keys
+                println(s"@@AWLC sentKeys = $sentKeys")
+                println(s"@@AWLC storedKeys = $storedKeys")
                 sentKeys should contain theSameElementsAs storedKeys
 
                 assertMatches(payload, workIndexer.index.values.head)
@@ -106,7 +109,7 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
             }
           }
 
-          withLocalSqsQueuePair(visibilityTimeout = 5) {
+          withLocalSqsQueuePair() {
             case QueuePair(queue, dlq) =>
               withWorkerImpl(queue, workIndexer, flakySender) { _ =>
                 sendNotificationToSQS(queue, payload)
@@ -142,7 +145,7 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
           val workIndexer = new MemoryIndexer[Work[Source]]()
           val workKeySender = new MemoryMessageSender()
 
-          withLocalSqsQueuePair(visibilityTimeout = 5) {
+          withLocalSqsQueuePair() {
             case QueuePair(queue, dlq) =>
               withWorkerImpl(queue, workIndexer, workKeySender) { _ =>
 
@@ -173,17 +176,16 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
       it("re-sends a Work if the stored Work has the same version but different data") {
         withContext { implicit context =>
           val id = randomAlphanumeric()
-          val payloadA = createPayloadWith(id = id, version = 1)
-          val payloadB = createPayloadWith(id = id, version = 1)
 
           val workIndexer = new MemoryIndexer[Work[Source]]()
           val workKeySender = new MemoryMessageSender()
 
-          withLocalSqsQueuePair(visibilityTimeout = 5) {
+          withLocalSqsQueuePair() {
             case QueuePair(queue, dlq) =>
               withWorkerImpl(queue, workIndexer, workKeySender) { _ =>
 
                 // Transform the first payload, and check it stores successfully.
+                val payloadA = createPayloadWith(id = id, version = 1)
                 sendNotificationToSQS(queue, payloadA)
 
                 eventually {
@@ -194,6 +196,7 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
                 }
 
                 // Transform the second payload, and check an ID gets re-sent
+                val payloadB = createPayloadWith(id = id, version = 1)
                 sendNotificationToSQS(queue, payloadB)
 
                 eventually {
@@ -208,47 +211,73 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
       }
 
       it("re-sends a Work if the stored Work has the same version and the same data") {
-        true shouldBe false
+        withContext { implicit context =>
+          val payload = createPayload
+
+          val workIndexer = new MemoryIndexer[Work[Source]]()
+          val workKeySender = new MemoryMessageSender()
+
+          withLocalSqsQueuePair() {
+            case QueuePair(queue, dlq) =>
+              withWorkerImpl(queue, workIndexer, workKeySender) { _ =>
+
+                // Transform the first payload, and check it stores successfully.
+                sendNotificationToSQS(queue, payload)
+
+                eventually {
+                  assertQueueEmpty(dlq)
+                  assertQueueEmpty(queue)
+                  workIndexer.index should have size 1
+                  workKeySender.messages should have size 1
+                }
+
+                // Transform the second payload, and check an ID gets re-sent
+                sendNotificationToSQS(queue, payload)
+
+                eventually {
+                  assertQueueEmpty(dlq)
+                  assertQueueEmpty(queue)
+                  workIndexer.index should have size 1
+                  workKeySender.messages should have size 2
+                }
+              }
+          }
+        }
       }
 
       it("skips sending a Work if the stored Work has a strictly older Version and the same data") {
-        true shouldBe false
-      }
-    }
+        withContext { implicit context =>
+          val oldPayload = createPayloadWith(version = 1)
+          val newPayload = setPayloadVersion(oldPayload, version = 2)
 
-    it("is lazy -- if a work is already stored, it doesn't resend it") {
-      withContext { implicit context =>
-        val payload = createPayload
+          val workIndexer = new MemoryIndexer[Work[Source]]()
+          val workKeySender = new MemoryMessageSender()
 
-        val workIndexer = new MemoryIndexer[Work[Source]]()
-        val workKeySender = new MemoryMessageSender()
+          withLocalSqsQueuePair() {
+            case QueuePair(queue, dlq) =>
+              withWorkerImpl(queue, workIndexer, workKeySender) { _ =>
 
-        // We need to wait for the pipeline storage stream to save the works.
-        // If we're too quick in retrying, we'll retry before a work is in the index!
-        withLocalSqsQueuePair(visibilityTimeout = 5) {
-          case QueuePair(queue, dlq) =>
-            withWorkerImpl(queue, workIndexer, workKeySender) { _ =>
-              (1 to 5).foreach { _ =>
-                sendNotificationToSQS(queue, payload)
+                // Transform the first payload, and check it stores successfully.
+                sendNotificationToSQS(queue, oldPayload)
+
+                eventually {
+                  assertQueueEmpty(dlq)
+                  assertQueueEmpty(queue)
+                  workIndexer.index should have size 1
+                  workKeySender.messages should have size 1
+                }
+
+                // Now we transform the new payload, and check nothing new got send
+                sendNotificationToSQS(queue, newPayload)
+
+                eventually {
+                  assertQueueEmpty(dlq)
+                  assertQueueEmpty(queue)
+                  workIndexer.index should have size 1
+                  workKeySender.messages should have size 1
+                }
               }
-
-              eventually {
-                assertQueueEmpty(dlq)
-                assertQueueEmpty(queue)
-
-                // Only one work is indexed
-                workIndexer.index should have size 1
-
-                // Only one message was sent
-                workKeySender.messages should have size 1
-
-                val sentKeys = workKeySender.messages.map { _.body }
-                val storedKeys = workIndexer.index.keys
-                sentKeys should contain theSameElementsAs storedKeys
-
-                assertMatches(payload, workIndexer.index.values.head)
-              }
-            }
+          }
         }
       }
     }
