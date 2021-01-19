@@ -102,15 +102,13 @@ trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest]
         StoreReadError(err, p)
       }
 
-  import WorkComparison._
-
   private def compareToStored(workResult: Result[(Work[Source], StoreKey)])
     : Future[Result[Option[(Work[Source], StoreKey)]]] =
     workResult match {
 
       // Once we've transformed the Work, we query forward -- is this a work we've
-      // seen before?  If it's a Work the pipeline already knows about, we can skip
-      // a bunch of unnecessary processing by not sending it on.
+      // seen before?  If it's the same as a Work the pipeline already knows about,
+      // we can skip a bunch of unnecessary processing by not sending it on.
       //
       // The pipeline is meant to be idempotent, so sending the work forward would
       // be a no-op.
@@ -123,11 +121,43 @@ trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest]
         retriever
           .apply(workIndexable.id(newWork))
           .map { storedWork =>
-            if (newWork.shouldReplace(storedWork)) {
+
+            val shouldSend = {
+              // If the new work has a strictly lower version than the stored work,
+              // then the new work is out-of-date.  Discard it.
+              if (newWork.version < storedWork.version)
+                false
+
+              // If the new work is up-to-date with the stored work, but contains
+              // different data, then it should replace the stored work.  Send it.
+              else if (storedWork.data != newWork.data)
+                true
+
+              // If the new work and the stored work have the same version and the
+              // same data, it's possible this is SQS retrying a message that failed
+              // last time.  e.g. we indexed the work but didn't send an ID to SNS.
+              //
+              // Send the work, just to be sure it got through the pipeline.
+              else if (storedWork.version == newWork.version)
+                true
+
+              // If we get here, it means the new work and the stored work should have
+              // the same data, but the stored work has a strictly lower version.
+              //
+              // Nothing in the pipeline will change if we send this work, and we
+              // assume the previous version of the work was sent successfully.
+              else {
+                assert(storedWork.data == newWork.data)
+                assert(storedWork.version < newWork.version)
+                false
+              }
+            }
+
+            if (shouldSend) {
               Right(Some((newWork, key)))
             } else {
               info(
-                s"$name: from $key transformed work; already in pipeline so not re-sending")
+                s"$name: from $key transformed work with id ${newWork.id}; already in pipeline so not re-sending")
               Right(None)
             }
           }

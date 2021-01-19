@@ -90,52 +90,32 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
       }
     }
 
-    describe("decides when to skip sending a work") {
-      it("re-sends a Work if it failed to send on the first attempt") {
-        withContext { implicit context =>
-          val payload = createPayload
+    it("sends a payload to the DLQ if it can't be sent successfully") {
+      withContext { implicit context =>
+        val payload = createPayload
 
-          val workIndexer = new MemoryIndexer[Work[Source]]()
+        val workIndexer = new MemoryIndexer[Work[Source]]()
 
-          var sendingAttempts = 0
-          val flakySender = new MemoryMessageSender() {
-            override def send(body: String): Try[Unit] = {
-              sendingAttempts += 1
-              if (sendingAttempts == 1) {
-                Failure(new Throwable("BOOM!"))
-              } else {
-                super.send(body)
+        val brokenSender = new MemoryMessageSender() {
+          override def send(body: String): Try[Unit] =
+            Failure(new Throwable("BOOM!"))
+        }
+
+        withLocalSqsQueuePair() {
+          case QueuePair(queue, dlq) =>
+            withWorkerImpl(queue, workIndexer, brokenSender) { _ =>
+              sendNotificationToSQS(queue, payload)
+
+              eventually {
+                assertQueueHasSize(dlq, size = 1)
+                assertQueueEmpty(queue)
               }
             }
-          }
-
-          withLocalSqsQueuePair() {
-            case QueuePair(queue, dlq) =>
-              withWorkerImpl(queue, workIndexer, flakySender) { _ =>
-                sendNotificationToSQS(queue, payload)
-                sendNotificationToSQS(queue, payload)
-
-                eventually {
-                  assertQueueEmpty(dlq)
-                  assertQueueEmpty(queue)
-
-                  // Only one work is indexed
-                  workIndexer.index should have size 1
-
-                  // Only one message was sent
-                  flakySender.messages should have size 1
-
-                  val sentKeys = flakySender.messages.map { _.body }
-                  val storedKeys = workIndexer.index.keys
-                  sentKeys should contain theSameElementsAs storedKeys
-
-                  assertMatches(payload, workIndexer.index.values.head)
-                }
-              }
-          }
         }
       }
+    }
 
+    describe("decides when to skip sending a work") {
       it("skips sending a Work if there's a strictly newer Work already stored") {
         withContext { implicit context =>
           val id = randomAlphanumeric()
