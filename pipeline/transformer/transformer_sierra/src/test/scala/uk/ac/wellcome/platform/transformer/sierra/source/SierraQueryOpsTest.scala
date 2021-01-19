@@ -46,4 +46,25 @@ class SierraQueryOpsTest
 
     bibData.nonrepeatableVarfieldWithTag(tag = "0") shouldBe Some(varFields(0))
   }
+
+  it("finds non-repeatable subfields") {
+    val varField = createVarFieldWith(
+      marcTag = "0",
+      subfields = List(
+        MarcSubfield(tag = "a", content = "Ablative armadillos"),
+        MarcSubfield(tag = "b", content = "Brave butterflies"),
+        MarcSubfield(tag = "b", content = "Billowing bison"),
+      )
+    )
+
+    varField.nonrepeatableSubfieldWithTag(tag = "a") shouldBe Some(
+      MarcSubfield(tag = "a", content = "Ablative armadillos")
+    )
+
+    varField.nonrepeatableSubfieldWithTag(tag = "b") shouldBe Some(
+      MarcSubfield(tag = "b", content = "Brave butterflies Billowing bison")
+    )
+
+    varField.nonrepeatableSubfieldWithTag(tag = "c") shouldBe None
+  }
 }

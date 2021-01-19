@@ -73,6 +73,26 @@ class SierraTitleTest
     SierraTitle(bibData = bibData) shouldBe Some("A book with multiple covers")
   }
 
+  it("joins the subfields if one of them is repeated") {
+    // This is based on https://search.wellcomelibrary.org/iii/encore/record/C__Rb1057466?lang=eng&marcData=Y
+    val bibData = createSierraBibDataWith(
+      varFields = List(
+        createVarFieldWith(
+          marcTag = "245",
+          subfields = List(
+            MarcSubfield(tag = "a", content = "The Book of common prayer:"),
+            MarcSubfield(tag = "b", content = "together with the Psalter or Psalms of David,"),
+            MarcSubfield(tag = "b", content = "and the form and manner of making bishops")
+          )
+        )
+      )
+    )
+
+    SierraTitle(bibData = bibData) shouldBe Some(
+      "The Book of common prayer: together with the Psalter or Psalms of David, and the form and manner of making bishops"
+    )
+  }
+
   describe("throws a ShouldNotTransformException if it can't create a title") {
     it("if there is no MARC field 245") {
       val bibData = createSierraBibDataWith(
@@ -82,27 +102,6 @@ class SierraTitleTest
         SierraTitle(bibData)
       }
       caught.getMessage should startWith("Could not find varField 245!")
-    }
-
-    it("if one of the subfields is repeated") {
-      val bibData = createSierraBibDataWith(
-        varFields = List(
-          createVarFieldWith(
-            marcTag = "245",
-            subfields = List(
-              MarcSubfield(tag = "a", content = "The “winter mind” :"),
-              MarcSubfield(tag = "a", content = "The “spring mind” :"),
-              MarcSubfield(tag = "a", content = "The “autumn mind” :"),
-              MarcSubfield(tag = "a", content = "The “summer mind” :")
-            )
-          )
-        )
-      )
-      val caught = intercept[ShouldNotTransformException] {
-        SierraTitle(bibData)
-      }
-      caught.getMessage should startWith(
-        "Multiple instances of non-repeatable subfield with tag ǂa")
     }
 
     it("if there are no subfields a, b or c") {
