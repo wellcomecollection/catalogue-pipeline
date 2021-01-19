@@ -83,7 +83,9 @@ trait SierraQueryOps extends Logging {
             s"Multiple instances of non-repeatable subfield with tag ǂ$tag: $multiple"
           )
           Some(
-            MarcSubfield(tag = tag, content = multiple.map { _.content }.mkString(" "))
+            MarcSubfield(
+              tag = tag,
+              content = multiple.map { _.content }.mkString(" "))
           )
       }
 

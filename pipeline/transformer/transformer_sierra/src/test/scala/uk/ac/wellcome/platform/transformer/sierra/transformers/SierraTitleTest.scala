@@ -81,8 +81,12 @@ class SierraTitleTest
           marcTag = "245",
           subfields = List(
             MarcSubfield(tag = "a", content = "The Book of common prayer:"),
-            MarcSubfield(tag = "b", content = "together with the Psalter or Psalms of David,"),
-            MarcSubfield(tag = "b", content = "and the form and manner of making bishops")
+            MarcSubfield(
+              tag = "b",
+              content = "together with the Psalter or Psalms of David,"),
+            MarcSubfield(
+              tag = "b",
+              content = "and the form and manner of making bishops")
           )
         )
       )
