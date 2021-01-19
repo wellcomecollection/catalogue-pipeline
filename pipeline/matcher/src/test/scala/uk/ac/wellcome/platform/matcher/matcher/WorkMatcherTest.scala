@@ -246,10 +246,21 @@ class WorkMatcherTest
           referencedIds = Set(identifierB)
         )
 
+        // AWLC: This test is flaky in CI, and I'm unable to reproduce it locally.
+        // This logging is an attempt to get some helpful information out when it
+        // next fails.  We should remove this once the flaky test is fixed.
+        //
+        // See https://github.com/wellcomecollection/platform/issues/4979
+        println(s"idA = $idA")
+        println(s"idB = $idB")
+        println(s"idC = $idC")
+        println(s"links = $links")
+
         implicit val lockDao: MemoryLockDao[String, UUID] =
           new MemoryLockDao[String, UUID] {
             override def lock(id: String, contextId: UUID): LockResult =
               synchronized {
+                println(s"Calling lockDao.lock(id=$id, contextId=$contextId)")
                 if (id == componentId) {
                   Left(LockFailure(id, e = new Throwable("BOOM!")))
                 } else {
