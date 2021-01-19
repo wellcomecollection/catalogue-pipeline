@@ -53,6 +53,8 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
 
   def assertMatches(p: Payload, w: Work[Source])(implicit context: Context)
 
+  val workDataDependsOnVersion: Boolean = false
+
   def withWorker[R](pipelineStream: PipelineStorageStream[NotificationMessage,
                                                           Work[Source],
                                                           String],
@@ -220,14 +222,16 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
                   workKeySender.messages should have size 1
                 }
 
-                // Now we transform the new payload, and check nothing new got send
-                sendNotificationToSQS(queue, newPayload)
+                // Now we transform the new payload, and check nothing new got sent
+                if (!workDataDependsOnVersion) {
+                  sendNotificationToSQS(queue, newPayload)
 
-                eventually {
-                  assertQueueEmpty(dlq)
-                  assertQueueEmpty(queue)
-                  workIndexer.index should have size 1
-                  workKeySender.messages should have size 1
+                  eventually {
+                    assertQueueEmpty(dlq)
+                    assertQueueEmpty(queue)
+                    workIndexer.index should have size 1
+                    workKeySender.messages should have size 1
+                  }
                 }
               }
           }

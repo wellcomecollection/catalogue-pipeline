@@ -39,6 +39,10 @@ class MiroTransformerWorkerTest
       MemoryTypedStore[S3ObjectLocation, MiroRecord]()
     )
 
+  // The WorkData for a Miro Work is based on the stored version of the work,
+  // which is copied onto the Image data.
+  override val workDataDependsOnVersion: Boolean = true
+
   override def createPayloadWith(id: String, version: Int)(
     implicit store: MemoryTypedStore[S3ObjectLocation, MiroRecord])
     : MiroSourcePayload = {
