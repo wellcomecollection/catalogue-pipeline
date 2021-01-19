@@ -60,7 +60,34 @@ variable "storage_bucket_name" {
 
 variable "inferrer_model_data_bucket_name" {}
 
-variable "pipeline_storage_es_host_secret_id" {
-  default     = "catalogue/pipeline_storage/es_host"
-  description = "The id of the secret where the es_host is stored"
+variable "pipeline_storage_id" {
+  default     = "pipeline_storage"
+  description = "The ID of the pipeline_storage instance used for secrets"
+}
+
+locals {
+  pipeline_storage_es_host     = "catalogue/${var.pipeline_storage_id}/es_host"
+  pipeline_storage_es_port     = "catalogue/${var.pipeline_storage_id}/es_port"
+  pipeline_storage_es_protocol = "catalogue/${var.pipeline_storage_id}/es_protocol"
+
+  pipeline_storage_service_list = [
+    "id_minter",
+    "matcher",
+    "merger",
+    "transformer",
+    "ingestor",
+    "relation_embedder",
+    "router"
+  ]
+
+  pipeline_storage_es_service_secrets = zipmap(local.pipeline_storage_service_list, [
+    for service in local.pipeline_storage_service_list :
+    {
+      es_host     = local.pipeline_storage_es_host
+      es_port     = local.pipeline_storage_es_port
+      es_protocol = local.pipeline_storage_es_protocol
+      es_username = "catalogue/${var.pipeline_storage_id}/${service}/es_username"
+      es_password = "catalogue/${var.pipeline_storage_id}/${service}/es_password"
+    }
+  ])
 }

@@ -3,8 +3,6 @@
 Reports some stats about the state of a reindex.
 """
 
-import sys
-
 import boto3
 import click
 from elasticsearch import Elasticsearch
@@ -63,20 +61,20 @@ def get_secret_string(session, *, secret_id):
     return secrets.get_secret_value(SecretId=secret_id)["SecretString"]
 
 
-def get_pipeline_storage_es_client(session):
+def get_pipeline_storage_es_client(session, *, deployment_id):
     """
     Returns an Elasticsearch client for the pipeline-storage cluster.
     """
-    host = get_secret_string(session, secret_id="catalogue/pipeline_storage/es_host")
-    port = get_secret_string(session, secret_id="catalogue/pipeline_storage/es_port")
+    host = get_secret_string(session, secret_id=f"catalogue/{deployment_id}/es_host")
+    port = get_secret_string(session, secret_id=f"catalogue/{deployment_id}/es_port")
     protocol = get_secret_string(
-        session, secret_id="catalogue/pipeline_storage/es_protocol"
+        session, secret_id=f"catalogue/{deployment_id}/es_protocol"
     )
     username = get_secret_string(
-        session, secret_id="catalogue/pipeline_storage/dev/es_username"
+        session, secret_id=f"catalogue/{deployment_id}/dev/es_username"
     )
     password = get_secret_string(
-        session, secret_id="catalogue/pipeline_storage/dev/es_password"
+        session, secret_id=f"catalogue/{deployment_id}/dev/es_password"
     )
 
     return Elasticsearch(f"{protocol}://{username}:{password}@{host}:{port}")
@@ -104,11 +102,13 @@ def count_documents_in_index(es_client, *, index_name):
     return int(count_resp[0]["count"])
 
 
-def get_index_stats(session, *, reindex_date):
+def get_index_stats(session, *, deployment_id, reindex_date):
     """
     Returns a map (step) -> (ES documents count).
     """
-    pipeline_client = get_pipeline_storage_es_client(session)
+    pipeline_client = get_pipeline_storage_es_client(
+        session, deployment_id=deployment_id
+    )
 
     pipeline_steps = ["source", "identified", "merged", "denormalised"]
     result = {}
@@ -126,12 +126,10 @@ def get_index_stats(session, *, reindex_date):
     return result
 
 
-if __name__ == "__main__":
-    try:
-        reindex_date = sys.argv[1]
-    except IndexError:
-        sys.exit(f"Usage: {__file__} <REINDEX_DATE>")
-
+@click.command()
+@click.option("--deployment-id", default="pipeline_storage")
+@click.argument("reindex_date")
+def main(reindex_date, deployment_id):
     session_read_only = get_session_with_role(
         "arn:aws:iam::760097843905:role/platform-read_only"
     )
@@ -153,7 +151,9 @@ if __name__ == "__main__":
 
     print("")
 
-    index_stats = get_index_stats(session_dev, reindex_date=reindex_date)
+    index_stats = get_index_stats(
+        session_dev, deployment_id=deployment_id, reindex_date=reindex_date
+    )
 
     rows = [[step, count] for step, count in index_stats.items()]
     rows.insert(0, ["source records", source_counts["TOTAL"], ""])
@@ -191,3 +191,7 @@ if __name__ == "__main__":
                 "green",
             )
         )
+
+
+if __name__ == "__main__":
+    main()

@@ -37,19 +37,13 @@ module "id_minter" {
     ingest_flush_interval_seconds = 30
   }
 
-  secret_env_vars = {
+  secret_env_vars = merge({
     cluster_url          = "rds/identifiers-delta-cluster/endpoint"
     cluster_url_readonly = "rds/identifiers-delta-cluster/reader_endpoint"
     db_port              = "rds/identifiers-delta-cluster/port"
     db_username          = "catalogue/id_minter/rds_user"
     db_password          = "catalogue/id_minter/rds_password"
-
-    es_host     = var.pipeline_storage_es_host_secret_id
-    es_port     = "catalogue/pipeline_storage/es_port"
-    es_protocol = "catalogue/pipeline_storage/es_protocol"
-    es_username = "catalogue/pipeline_storage/id_minter/es_username"
-    es_password = "catalogue/pipeline_storage/id_minter/es_password"
-  }
+  }, local.pipeline_storage_es_service_secrets["id_minter"])
 
   // The total number of connections to RDS across all tasks from all ID minter
   // services must not exceed the maximum supported by the RDS instance.

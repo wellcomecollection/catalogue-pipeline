@@ -32,19 +32,19 @@ module "ingestor_works" {
     ingest_flush_interval_seconds = 60
   }
 
-  secret_env_vars = {
+  secret_env_vars = merge({
     es_host_catalogue     = "catalogue/ingestor/es_host"
     es_port_catalogue     = "catalogue/ingestor/es_port"
     es_username_catalogue = "catalogue/ingestor/es_username"
     es_password_catalogue = "catalogue/ingestor/es_password"
     es_protocol_catalogue = "catalogue/ingestor/es_protocol"
 
-    es_host_pipeline_storage     = var.pipeline_storage_es_host_secret_id
-    es_port_pipeline_storage     = "catalogue/pipeline_storage/es_port"
-    es_protocol_pipeline_storage = "catalogue/pipeline_storage/es_protocol"
-    es_username_pipeline_storage = "catalogue/pipeline_storage/work_ingestor/es_username"
-    es_password_pipeline_storage = "catalogue/pipeline_storage/work_ingestor/es_password"
-  }
+    es_host_pipeline_storage     = local.pipeline_storage_es_host
+    es_port_pipeline_storage     = local.pipeline_storage_es_port
+    es_protocol_pipeline_storage = local.pipeline_storage_es_protocol
+    es_username_pipeline_storage = "catalogue/${var.pipeline_storage_id}/ingestor/es_username"
+    es_password_pipeline_storage = "catalogue/${var.pipeline_storage_id}/ingestor/es_password"
+  })
 
   subnets = var.subnets
 
