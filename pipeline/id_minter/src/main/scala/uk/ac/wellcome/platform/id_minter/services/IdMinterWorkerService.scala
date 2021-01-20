@@ -10,9 +10,15 @@ import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal.WorkState.Identified
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.pipeline_storage.{PipelineStorageStream, Retriever}
-import uk.ac.wellcome.platform.id_minter.config.models.{IdentifiersTableConfig, RDSClientConfig}
+import uk.ac.wellcome.platform.id_minter.config.models.{
+  IdentifiersTableConfig,
+  RDSClientConfig
+}
 import uk.ac.wellcome.platform.id_minter.database.TableProvisioner
-import uk.ac.wellcome.platform.id_minter.steps.{IdentifierGenerator, SourceIdentifierEmbedder}
+import uk.ac.wellcome.platform.id_minter.steps.{
+  IdentifierGenerator,
+  SourceIdentifierEmbedder
+}
 import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.{ExecutionContext, Future}

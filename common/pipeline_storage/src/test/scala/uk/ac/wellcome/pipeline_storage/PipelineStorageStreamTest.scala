@@ -16,7 +16,11 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
-import uk.ac.wellcome.pipeline_storage.fixtures.{ElasticIndexerFixtures, PipelineStorageStreamFixtures, SampleDocument}
+import uk.ac.wellcome.pipeline_storage.fixtures.{
+  ElasticIndexerFixtures,
+  PipelineStorageStreamFixtures,
+  SampleDocument
+}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -273,7 +277,9 @@ class PipelineStorageStreamTest
             queue = queue,
             message = document
           )
-          pipelineStream.foreach("test stream", _ => throw new Exception("Boom!"))
+          pipelineStream.foreach(
+            "test stream",
+            _ => throw new Exception("Boom!"))
 
           eventually(Timeout(Span(30, Seconds))) {
             sender.messages.map(_.body) shouldBe empty
