@@ -15,19 +15,20 @@ import weco.catalogue.transformer.{Transformer, TransformerWorker}
 import scala.concurrent.ExecutionContext
 
 sealed trait ExampleData
-case class ValidExampleData(id: SourceIdentifier) extends ExampleData
+case class ValidExampleData(id: SourceIdentifier, title: String)
+    extends ExampleData
 case object InvalidExampleData extends ExampleData
 
 object ExampleTransformer extends Transformer[ExampleData] with WorkGenerators {
   override def apply(data: ExampleData,
                      version: Int): Either[Exception, Work.Visible[Source]] =
     data match {
-      case ValidExampleData(id) =>
+      case ValidExampleData(id, title) =>
         Right(
           Work.Visible[Source](
             state = Source(id, modifiedTime),
             data = WorkData(
-              title = Some(s"Title: $id")
+              title = Some(s"ID: $id / title=$title")
             ),
             version = version
           )

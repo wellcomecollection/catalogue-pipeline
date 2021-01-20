@@ -32,8 +32,19 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
 
   def withContext[R](testWith: TestWith[Context, R]): R
 
+  def createId: String = randomAlphanumeric()
+
   // Create a payload which can be transformer
-  def createPayload(implicit context: Context): Payload
+  def createPayload(implicit context: Context): Payload =
+    createPayloadWith(
+      version = randomInt(from = 1, to = 10)
+    )
+
+  def createPayloadWith(id: String = createId, version: Int)(
+    implicit context: Context): Payload
+
+  def setPayloadVersion(p: Payload, version: Int)(
+    implicit context: Context): Payload
 
   // Create a payload which cannot be transformed
   def createBadPayload(implicit context: Context): Payload
@@ -41,6 +52,8 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
   implicit val encoder: Encoder[Payload]
 
   def assertMatches(p: Payload, w: Work[Source])(implicit context: Context)
+
+  val workDataDependsOnVersion: Boolean = false
 
   def withWorker[R](pipelineStream: PipelineStorageStream[NotificationMessage,
                                                           Work[Source],
@@ -81,39 +94,147 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
       }
     }
 
-    it("is lazy -- if a work is already stored, it doesn't resend it") {
-      withContext { implicit context =>
-        val payload = createPayload
+    describe("decides when to skip sending a work") {
+      it("skips sending a Work if there's a strictly newer Work already stored") {
+        withContext { implicit context =>
+          val id = createId
+          val oldPayload = createPayloadWith(id = id, version = 1)
+          val newPayload = createPayloadWith(id = id, version = 2)
 
-        val workIndexer = new MemoryIndexer[Work[Source]]()
-        val workKeySender = new MemoryMessageSender()
+          val workIndexer = new MemoryIndexer[Work[Source]]()
+          val workKeySender = new MemoryMessageSender()
 
-        // We need to wait for the pipeline storage stream to save the works.
-        // If we're too quick in retrying, we'll retry before a work is in the index!
-        withLocalSqsQueuePair(visibilityTimeout = 5) {
-          case QueuePair(queue, dlq) =>
-            withWorkerImpl(queue, workIndexer, workKeySender) { _ =>
-              (1 to 5).foreach { _ =>
+          withLocalSqsQueuePair() {
+            case QueuePair(queue, dlq) =>
+              withWorkerImpl(queue, workIndexer, workKeySender) { _ =>
+                // First we transform the new payload, and check it stores successfully.
+                sendNotificationToSQS(queue, newPayload)
+
+                eventually {
+                  assertQueueEmpty(dlq)
+                  assertQueueEmpty(queue)
+                  workIndexer.index should have size 1
+                  workKeySender.messages should have size 1
+                }
+
+                // Now we transform the new payload, and check nothing new got send
+                sendNotificationToSQS(queue, oldPayload)
+
+                eventually {
+                  assertQueueEmpty(dlq)
+                  assertQueueEmpty(queue)
+                  workIndexer.index should have size 1
+                  workKeySender.messages should have size 1
+                }
+              }
+          }
+        }
+      }
+
+      it("re-sends a Work if the stored Work has the same version but different data") {
+        withContext { implicit context =>
+          val id = createId
+
+          val workIndexer = new MemoryIndexer[Work[Source]]()
+          val workKeySender = new MemoryMessageSender()
+
+          withLocalSqsQueuePair() {
+            case QueuePair(queue, dlq) =>
+              withWorkerImpl(queue, workIndexer, workKeySender) { _ =>
+                // Transform the first payload, and check it stores successfully.
+                val payloadA = createPayloadWith(id = id, version = 1)
+                sendNotificationToSQS(queue, payloadA)
+
+                eventually {
+                  assertQueueEmpty(dlq)
+                  assertQueueEmpty(queue)
+                  workIndexer.index should have size 1
+                  workKeySender.messages should have size 1
+                }
+
+                // Transform the second payload, and check an ID gets re-sent
+                val payloadB = createPayloadWith(id = id, version = 1)
+                sendNotificationToSQS(queue, payloadB)
+
+                eventually {
+                  assertQueueEmpty(dlq)
+                  assertQueueEmpty(queue)
+                  workIndexer.index should have size 1
+                  workKeySender.messages should have size 2
+                }
+              }
+          }
+        }
+      }
+
+      it("re-sends a Work if the stored Work has the same version and the same data") {
+        withContext { implicit context =>
+          val payload = createPayload
+
+          val workIndexer = new MemoryIndexer[Work[Source]]()
+          val workKeySender = new MemoryMessageSender()
+
+          withLocalSqsQueuePair() {
+            case QueuePair(queue, dlq) =>
+              withWorkerImpl(queue, workIndexer, workKeySender) { _ =>
+                // Transform the first payload, and check it stores successfully.
                 sendNotificationToSQS(queue, payload)
+
+                eventually {
+                  assertQueueEmpty(dlq)
+                  assertQueueEmpty(queue)
+                  workIndexer.index should have size 1
+                  workKeySender.messages should have size 1
+                }
+
+                // Transform the second payload, and check an ID gets re-sent
+                sendNotificationToSQS(queue, payload)
+
+                eventually {
+                  assertQueueEmpty(dlq)
+                  assertQueueEmpty(queue)
+                  workIndexer.index should have size 1
+                  workKeySender.messages should have size 2
+                }
               }
+          }
+        }
+      }
 
-              eventually {
-                assertQueueEmpty(dlq)
-                assertQueueEmpty(queue)
+      it("skips sending a Work if the stored Work has a strictly older Version and the same data") {
+        withContext { implicit context =>
+          val oldPayload = createPayloadWith(version = 1)
+          val newPayload = setPayloadVersion(oldPayload, version = 2)
 
-                // Only one work is indexed
-                workIndexer.index should have size 1
+          val workIndexer = new MemoryIndexer[Work[Source]]()
+          val workKeySender = new MemoryMessageSender()
 
-                // Only one message was sent
-                workKeySender.messages should have size 1
+          withLocalSqsQueuePair(visibilityTimeout = 2) {
+            case QueuePair(queue, dlq) =>
+              withWorkerImpl(queue, workIndexer, workKeySender) { _ =>
+                // Transform the first payload, and check it stores successfully.
+                sendNotificationToSQS(queue, oldPayload)
 
-                val sentKeys = workKeySender.messages.map { _.body }
-                val storedKeys = workIndexer.index.keys
-                sentKeys should contain theSameElementsAs storedKeys
+                eventually {
+                  assertQueueEmpty(dlq)
+                  assertQueueEmpty(queue)
+                  workIndexer.index should have size 1
+                  workKeySender.messages should have size 1
+                }
 
-                assertMatches(payload, workIndexer.index.values.head)
+                // Now we transform the new payload, and check nothing new got sent
+                if (!workDataDependsOnVersion) {
+                  sendNotificationToSQS(queue, newPayload)
+
+                  eventually {
+                    assertQueueEmpty(dlq)
+                    assertQueueEmpty(queue)
+                    workIndexer.index should have size 1
+                    workKeySender.messages should have size 1
+                  }
+                }
               }
-            }
+          }
         }
       }
     }

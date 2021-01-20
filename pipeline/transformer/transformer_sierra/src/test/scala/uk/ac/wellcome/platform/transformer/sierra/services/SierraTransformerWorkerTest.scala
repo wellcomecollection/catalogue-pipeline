@@ -2,6 +2,7 @@ package uk.ac.wellcome.platform.transformer.sierra.services
 
 import io.circe.Encoder
 import io.circe.generic.extras.semiauto.deriveConfiguredEncoder
+import org.scalatest.EitherValues
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
@@ -30,7 +31,8 @@ class SierraTransformerWorkerTest
       SierraSourcePayload,
       SierraTransformable]
     with SierraGenerators
-    with S3ObjectLocationGenerators {
+    with S3ObjectLocationGenerators
+    with EitherValues {
 
   override def withContext[R](
     testWith: TestWith[MemoryTypedStore[S3ObjectLocation, SierraTransformable],
@@ -40,10 +42,13 @@ class SierraTransformerWorkerTest
         initialEntries = Map.empty)
     )
 
-  override def createPayload(
+  override def createId: String = createSierraBibNumber.withoutCheckDigit
+
+  override def createPayloadWith(id: String, version: Int)(
     implicit store: MemoryTypedStore[S3ObjectLocation, SierraTransformable])
     : SierraSourcePayload = {
-    val transformable = createSierraTransformable
+    val transformable = createSierraTransformableWith(
+      sierraId = SierraBibNumber(id))
     val location = createS3ObjectLocation
 
     store.put(location)(transformable) shouldBe a[Right[_, _]]
@@ -51,8 +56,20 @@ class SierraTransformerWorkerTest
     SierraSourcePayload(
       id = transformable.sierraId.withoutCheckDigit,
       location = location,
-      version = 1
+      version = version
     )
+  }
+
+  override def setPayloadVersion(p: SierraSourcePayload, version: Int)(
+    implicit store: MemoryTypedStore[S3ObjectLocation, SierraTransformable])
+    : SierraSourcePayload = {
+    val transformable: SierraTransformable =
+      store.get(p.location).value.identifiedT
+
+    val location = createS3ObjectLocation
+    store.put(location)(transformable) shouldBe a[Right[_, _]]
+
+    p.copy(location = location, version = version)
   }
 
   override def createBadPayload(
