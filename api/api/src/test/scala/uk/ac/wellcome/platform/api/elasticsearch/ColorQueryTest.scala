@@ -4,17 +4,20 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
 class ColorQueryTest extends AnyFunSpec with Matchers {
-  val colorQuery = new ColorQuery(binSizes = Seq(4, 6, 8))
+  val colorQuery = new ColorQuery(
+    binSizes = Seq(Seq(4, 6, 9), Seq(2, 4, 6), Seq(1, 3, 5)),
+    binMinima = Seq(0f, 10f / 256, 10f / 256)
+  )
 
-  it("converts hex colors to rgb tuples") {
+  it("converts hex colors to hsv tuples") {
     val hexes = Seq("ff0000", "00ff00", "0000ff", "00fa9a")
-    val tuples = hexes.map(ColorQuery.hexToRgb)
+    val tuples = hexes.map(ColorQuery.hexToHsv)
 
     tuples shouldBe Seq(
-      (255, 0, 0),
-      (0, 255, 0),
-      (0, 0, 255),
-      (0, 250, 154),
+      (0f, 1f, 1f),
+      (120f / 360f, 1f, 1f),
+      (240f / 360f, 1f, 1f),
+      (0.43600f, 1f, 0.98039216f),
     )
   }
 
@@ -24,9 +27,9 @@ class ColorQueryTest extends AnyFunSpec with Matchers {
 
     q.fields should contain only "colorField"
     q.likeTexts shouldBe Seq(
-      "15/4",
-      "35/6",
-      "63/8"
+      "7/0",
+      "71/1",
+      "269/2"
     )
   }
 
@@ -35,7 +38,7 @@ class ColorQueryTest extends AnyFunSpec with Matchers {
     val q = colorQuery("colorField", Seq(hexCode), binIndices = Seq(2))
 
     q.fields should contain only "colorField"
-    q.likeTexts shouldBe Seq("63/8")
+    q.likeTexts shouldBe Seq("269/2")
   }
 
   it("creates queries for multiple colors") {
@@ -44,15 +47,15 @@ class ColorQueryTest extends AnyFunSpec with Matchers {
 
     q.fields should contain only "colorField"
     q.likeTexts shouldBe Seq(
-      "3/4",
-      "12/4",
-      "48/4",
-      "5/6",
-      "30/6",
-      "180/6",
-      "7/8",
-      "56/8",
-      "448/8"
+      "7/0",
+      "8/0",
+      "9/0",
+      "71/1",
+      "72/1",
+      "74/1",
+      "268/2",
+      "270/2",
+      "273/2"
     )
   }
 }

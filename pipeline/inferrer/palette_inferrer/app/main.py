@@ -15,8 +15,8 @@ palette_encoder = PaletteEncoder(
     hue_bins=[4, 6, 9],
     sat_bins=[2, 4, 6],
     val_bins=[1, 3, 5],
-    sat_min=10,
-    val_min=10,
+    sat_min=(10 / 256),
+    val_min=(10 / 256),
 )
 palette_hash_params = palette_encoder.get_hash_params()
 

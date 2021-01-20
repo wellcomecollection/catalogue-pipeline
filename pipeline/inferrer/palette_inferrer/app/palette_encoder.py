@@ -25,7 +25,7 @@ class PaletteEncoder:
         and quantises the resultant colors across <component>_bins, for each
         HSV component respectively (these must all be arrays of the same length).
 
-        Saturations/values below sat_min and val_min (8-bit integers) are binned
+        Saturations/values below sat_min and val_min (floats between 0 and 1) are binned
         separately. Images which would produce more than max_tokens will have their
         colour weights scaled down accordingly.
         """
@@ -34,7 +34,7 @@ class PaletteEncoder:
         if self.bin_sizes.shape[0] != self.bin_sizes.shape[1]:
             raise Exception("All dimensions must have the same number of bins")
 
-        self.bin_minima = np.array([0, sat_min / 256, val_min / 256])
+        self.bin_minima = np.array([0, sat_min, val_min])
         self.max_tokens = max_tokens
         self.delayed_process_image = delayed(self.process_image)
 
