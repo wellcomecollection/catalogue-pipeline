@@ -7,6 +7,7 @@ import com.sksamuel.elastic4s.requests.indexes.admin.IndexExistsResponse
 import com.sksamuel.elastic4s.{ElasticClient, Index, Response}
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.time.{Seconds, Span}
 import software.amazon.awssdk.services.sqs.model.Message
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.elasticsearch.{ElasticClientBuilder, NoStrictMapping}
@@ -255,6 +256,35 @@ class PipelineStorageStreamTest
             sender.messages.map(_.body) shouldBe empty
             assertQueueEmpty(queue)
             assertQueueEmpty(dlq)
+          }
+        }
+    }
+  }
+
+  it(
+    "does not delete the message if the processFunction throws an exception not wrapped in a future") {
+    val document = SampleDocument(1, createCanonicalId, randomAlphanumeric())
+
+    val sender = new MemoryMessageSender
+
+    withLocalSqsQueuePair(visibilityTimeout = 5) {
+      case QueuePair(queue, dlq) =>
+        withPipelineStream(
+          queue = queue,
+          indexer = new MemoryIndexer[SampleDocument](),
+          sender = sender) { pipelineStream =>
+          sendNotificationToSQS(
+            queue = queue,
+            message = document
+          )
+          pipelineStream.foreach(
+            "test stream",
+            _ => throw new Exception("Boom!"))
+
+          eventually(Timeout(Span(30, Seconds))) {
+            sender.messages.map(_.body) shouldBe empty
+            assertQueueEmpty(queue)
+            assertQueueHasSize(dlq, 1)
           }
         }
     }

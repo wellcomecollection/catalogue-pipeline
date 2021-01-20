@@ -51,7 +51,7 @@ class PipelineStorageStream[In, Out, MsgDestination](
                   (item: Out) => messageSender.send(indexable.id(item)),
                   indexer
                 ),
-                identityFlow)
+                noOutputFlow)
           )
       )
     } yield done
@@ -181,7 +181,7 @@ object PipelineStorageStream extends Logging {
       .mergeSubstreams
   }
 
-  def identityFlow[Out]: Flow[(Message, List[Out]), Message, NotUsed] =
+  def noOutputFlow[Out]: Flow[(Message, List[Out]), Message, NotUsed] =
     Flow[(Message, List[Out])]
       .collect { case (message, Nil) => message }
 

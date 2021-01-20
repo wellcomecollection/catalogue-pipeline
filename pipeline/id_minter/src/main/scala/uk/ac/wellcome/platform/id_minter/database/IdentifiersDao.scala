@@ -1,13 +1,13 @@
 package uk.ac.wellcome.platform.id_minter.database
 
-import java.sql.{BatchUpdateException, Statement}
 import grizzled.slf4j.Logging
 import scalikejdbc._
 import uk.ac.wellcome.models.work.internal.SourceIdentifier
 import uk.ac.wellcome.platform.id_minter.models.{Identifier, IdentifiersTable}
 
+import java.sql.{BatchUpdateException, Statement}
 import scala.concurrent.blocking
-import scala.util.Try
+import scala.util.{Failure, Try}
 
 object IdentifiersDao {
   case class LookupResult(
@@ -112,7 +112,7 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
         }.batch(values: _*).apply()
         InsertResult(ids)
       }
-    } recover {
+    } recoverWith {
       case e: BatchUpdateException =>
         val insertError = getInsertErrorFromException(e, ids)
         val failedIds = insertError.failed.map(_.SourceId)
@@ -120,10 +120,10 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
         error(
           s"Batch update failed for [$failedIds], succeeded for [$succeededIds]",
           e)
-        throw insertError
+        Failure(insertError)
       case e =>
         error(s"Failed inserting IDs: [${ids.map(_.SourceId)}]")
-        throw e
+        Failure(e)
     }
 
   private def getInsertErrorFromException(
