@@ -138,7 +138,7 @@ trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest]
                   s"${transformedWork.id}: transformed Work and stored Work have the same version")
                 true
               } else if (storedWork.data != transformedWork.data) {
-                println(
+                debug(
                   s"${transformedWork.id}: transformed Work has different data to the stored Work")
                 true
               }
@@ -149,7 +149,7 @@ trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest]
               // Nothing in the pipeline will change if we send this work, and we
               // can assume the previous version of the work was sent successfully.
               else {
-                println(
+                debug(
                   s"${transformedWork.id}: transformed Work has newer version/same data as the stored Work")
                 assert(storedWork.data == transformedWork.data)
                 assert(storedWork.version < transformedWork.version)
