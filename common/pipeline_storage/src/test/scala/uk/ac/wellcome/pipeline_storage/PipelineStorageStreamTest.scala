@@ -7,6 +7,7 @@ import com.sksamuel.elastic4s.requests.indexes.admin.IndexExistsResponse
 import com.sksamuel.elastic4s.{ElasticClient, Index, Response}
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.time.{Seconds, Span}
 import software.amazon.awssdk.services.sqs.model.Message
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.elasticsearch.{ElasticClientBuilder, NoStrictMapping}
@@ -15,11 +16,7 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
-import uk.ac.wellcome.pipeline_storage.fixtures.{
-  ElasticIndexerFixtures,
-  PipelineStorageStreamFixtures,
-  SampleDocument
-}
+import uk.ac.wellcome.pipeline_storage.fixtures.{ElasticIndexerFixtures, PipelineStorageStreamFixtures, SampleDocument}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -255,6 +252,33 @@ class PipelineStorageStreamTest
             sender.messages.map(_.body) shouldBe empty
             assertQueueEmpty(queue)
             assertQueueEmpty(dlq)
+          }
+        }
+    }
+  }
+
+  it(
+    "does not delete the message if the processFunction throws an exception not wrapped in a future") {
+    val document = SampleDocument(1, createCanonicalId, randomAlphanumeric())
+
+    val sender = new MemoryMessageSender
+
+    withLocalSqsQueuePair(visibilityTimeout = 5) {
+      case QueuePair(queue, dlq) =>
+        withPipelineStream(
+          queue = queue,
+          indexer = new MemoryIndexer[SampleDocument](),
+          sender = sender) { pipelineStream =>
+          sendNotificationToSQS(
+            queue = queue,
+            message = document
+          )
+          pipelineStream.foreach("test stream", _ => throw new Exception("Boom!"))
+
+          eventually(Timeout(Span(30, Seconds))) {
+            sender.messages.map(_.body) shouldBe empty
+            assertQueueEmpty(queue)
+            assertQueueHasSize(dlq, 1)
           }
         }
     }
