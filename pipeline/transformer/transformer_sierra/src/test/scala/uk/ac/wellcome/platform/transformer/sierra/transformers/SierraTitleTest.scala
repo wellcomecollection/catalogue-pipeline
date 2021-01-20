@@ -42,9 +42,29 @@ class SierraTitleTest
       ),
       "The “winter mind” : William Bronk and American letters / Burt Kimmelman."
     ),
+    // This example is based on Sierra bib b20053538
+    (
+      List(
+        MarcSubfield(tag = "a", content = "One & other."),
+        MarcSubfield(tag = "p", content = "Mark Jordan post-plinth interview.")
+      ),
+      "One & other. Mark Jordan post-plinth interview."
+    ),
+    // This example is based on Sierra bib b11000466
+    (
+      List(
+        MarcSubfield(tag = "a", content = "Quain's elements of anatomy."),
+        MarcSubfield(tag = "n", content = "Vol. I, Part I,"),
+        MarcSubfield(tag = "n", content = "Embryology /"),
+        MarcSubfield(
+          tag = "c",
+          content = "edited by Edward Albert Schäfer and George Dancer Thane.")
+      ),
+      "Quain's elements of anatomy. Vol. I, Part I, Embryology / edited by Edward Albert Schäfer and George Dancer Thane."
+    ),
   )
 
-  it("constructs a title from 245 subfields a, b and c") {
+  it("constructs a title from MARC 245") {
     forAll(titleTestCases) {
       case (subfields, expectedTitle) =>
         val bibData = createSierraBibDataWith(
