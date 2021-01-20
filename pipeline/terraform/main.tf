@@ -38,8 +38,9 @@ module "catalogue_pipeline_2021-01-12" {
 
   dlq_alarm_arn = local.dlq_alarm_arn
 
-  # RDS
-  rds_ids_access_security_group_id = local.rds_access_security_group_id
+  # Security groups
+  rds_ids_access_security_group_id   = local.rds_access_security_group_id
+  pipeline_storage_security_group_id = local.pipeline_storage_security_group_id
 
   # Adapter VHS
   vhs_miro_read_policy   = local.vhs_miro_read_policy
@@ -61,6 +62,7 @@ module "catalogue_pipeline_2021-01-19" {
   release_label = "stage"
 
   pipeline_storage_id = "pipeline_storage_delta"
+  max_capacity = 1
 
   # Transformer config
   #
@@ -96,8 +98,9 @@ module "catalogue_pipeline_2021-01-19" {
 
   dlq_alarm_arn = local.dlq_alarm_arn
 
-  # RDS
-  rds_ids_access_security_group_id = local.rds_access_security_group_id
+  # Security groups
+  rds_ids_access_security_group_id   = local.rds_access_security_group_id
+  pipeline_storage_security_group_id = local.pipeline_storage_security_group_id
 
   # Adapter VHS
   vhs_miro_read_policy   = local.vhs_miro_read_policy

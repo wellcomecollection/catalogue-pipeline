@@ -22,6 +22,9 @@ variable "aws_region" {}
 variable "dlq_alarm_arn" {}
 
 variable "rds_ids_access_security_group_id" {}
+variable "pipeline_storage_security_group_id" {
+  type = string
+}
 
 variable "release_label" {
   type = string
