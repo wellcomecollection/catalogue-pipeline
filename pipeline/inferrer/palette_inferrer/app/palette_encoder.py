@@ -117,7 +117,7 @@ class PaletteEncoder:
         ]
 
     def get_bin_index(self, color, bin_sizes):
-        h, s, v = color[0], color[1], color[2]
+        s, v = color[1], color[2]
         n_val_bins = bin_sizes[1]
         sat_min, val_min = self.bin_minima[1], self.bin_minima[2]
         next_bin = 0
