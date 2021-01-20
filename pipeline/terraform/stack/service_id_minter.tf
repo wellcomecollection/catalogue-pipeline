@@ -19,6 +19,7 @@ module "id_minter" {
     aws_security_group.service_egress.id,
     aws_security_group.interservice.id,
     var.rds_ids_access_security_group_id,
+    var.pipeline_storage_security_group_id,
   ]
 
   cluster_name = aws_ecs_cluster.cluster.name

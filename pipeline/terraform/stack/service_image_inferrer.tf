@@ -27,7 +27,8 @@ module "image_inferrer" {
   service_name = "${local.namespace_hyphen}_image_inferrer"
   security_group_ids = [
     aws_security_group.service_egress.id,
-    aws_security_group.interservice.id
+    aws_security_group.interservice.id,
+    var.pipeline_storage_security_group_id,
   ]
 
   cluster_name = aws_ecs_cluster.cluster.name

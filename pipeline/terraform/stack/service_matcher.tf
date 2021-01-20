@@ -29,6 +29,7 @@ module "matcher" {
   security_group_ids = [
     aws_security_group.service_egress.id,
     aws_security_group.interservice.id,
+    var.pipeline_storage_security_group_id,
   ]
 
   cluster_name = aws_ecs_cluster.cluster.name
