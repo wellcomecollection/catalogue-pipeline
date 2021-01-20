@@ -14,7 +14,7 @@ resource "ec_deployment" "pipeline_storage" {
 
   elasticsearch {
     topology {
-      zone_count = 2
+      zone_count = 3
       size       = "15g"
     }
   }

@@ -34,4 +34,6 @@ locals {
   vpc_id                       = local.catalogue_vpcs["catalogue_vpc_delta_id"]
   private_subnets              = local.catalogue_vpcs["catalogue_vpc_delta_private_subnets"]
   rds_access_security_group_id = data.terraform_remote_state.catalogue_infra_critical.outputs.rds_access_security_group_id
+
+  pipeline_storage_security_group_id = data.terraform_remote_state.catalogue_infra_critical.outputs["catalogue_pipeline_storage_elastic_cloud_sg_id"]
 }
