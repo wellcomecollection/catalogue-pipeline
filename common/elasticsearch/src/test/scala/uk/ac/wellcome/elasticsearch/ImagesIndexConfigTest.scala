@@ -49,7 +49,9 @@ class ImagesIndexConfigTest
             features1,
             features2,
             List(randomAlphanumeric(10)),
-            List(randomAlphanumeric(10)))))
+            List(randomAlphanumeric(10)),
+            List(List(4, 6, 9), List(2, 4, 6), List(1, 3, 5)),
+            List(0f, 10f / 256, 10f / 256))))
       whenReady(indexObject(index, image)) { response =>
         response.isError shouldBe true
         response.error shouldBe a[ElasticError]
@@ -65,7 +67,9 @@ class ImagesIndexConfigTest
             List(2.0f),
             List(2.0f),
             List(randomAlphanumeric(10)),
-            List(randomAlphanumeric(10)))))
+            List(randomAlphanumeric(10)),
+            List(List(4, 6, 9), List(2, 4, 6), List(1, 3, 5)),
+            List(0f, 10f / 256, 10f / 256))))
       whenReady(indexObject(index, image)) { response =>
         response.isError shouldBe true
         response.error shouldBe a[ElasticError]

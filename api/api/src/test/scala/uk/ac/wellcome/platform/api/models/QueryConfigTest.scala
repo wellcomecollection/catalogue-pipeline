@@ -18,17 +18,13 @@ class QueryConfigTest
 
     it("fetches query config from a given index") {
       withLocalImagesIndex { index =>
-        val binSizes = Seq(10, 11, 12)
-        val image = createImageData.toIndexedImageWith(
-          inferredData = createInferredData.map(
-            _.copy(
-              palette = randomColorVector(binSizes = binSizes).toList
-            ))
-        )
+        val image = createImageData.toIndexedImage
+        val inferredData = image.state.inferredData.get
         insertImagesIntoElasticsearch(index, image)
 
         val result = QueryConfig.fetchFromIndex(elasticClient, index)
-        result.paletteBinSizes shouldBe binSizes
+        result.paletteBinSizes shouldBe inferredData.binSizes
+        result.paletteBinMinima shouldBe inferredData.binMinima
       }
     }
 
@@ -56,7 +52,8 @@ class QueryConfigTest
         val image = createImageData.toIndexedImageWith(
           inferredData = createInferredData.map(
             _.copy(
-              palette = List("123", "hello", "bad data")
+              binMinima = List(1f),
+              binSizes = List(List(1))
             ))
         )
         insertImagesIntoElasticsearch(index, image)

@@ -27,103 +27,55 @@ class ImagesFiltersTest extends ApiImagesTestBase {
       inferredData = createInferredData.map(
         _.copy(
           palette = List(
-            "3/4",
-            "3/4",
-            "6/4",
-            "6/4",
-            "30/4",
-            "18/4",
-            "1/4",
-            "5/6",
-            "5/6",
-            "34/6",
-            "34/6",
-            "130/6",
-            "70/6",
-            "2/6",
-            "7/8",
-            "7/8",
-            "69/8",
-            "69/8",
-            "301/8",
-            "181/8",
-            "2/8"
+            "7/0",
+            "7/0",
+            "7/0",
+            "71/1",
+            "71/1",
+            "71/1",
+            "268/2",
+            "268/2",
+            "268/2",
           ))))
     val blueImage = createImageData.toIndexedImageWith(
-      inferredData = createInferredData.map(_.copy(palette = List(
-        "48/4",
-        "48/4",
-        "5/4",
-        "5/4",
-        "26/4",
-        "32/4",
-        "16/4",
-        "180/6",
-        "180/6",
-        "50/6",
-        "50/6",
-        "93/6",
-        "144/6",
-        "36/6",
-        "448/8",
-        "448/8",
-        "83/8",
-        "83/8",
-        "164/8",
-        "320/8",
-        "128/8"
-      ))))
+      inferredData = createInferredData.map(
+        _.copy(
+          palette = List(
+            "9/0",
+            "9/0",
+            "9/0",
+            "5/0",
+            "74/1",
+            "74/1",
+            "74/1",
+            "35/1",
+            "50/1",
+            "29/1",
+            "38/1",
+            "273/2",
+            "273/2",
+            "273/2",
+            "187/2",
+            "165/2",
+            "115/2",
+            "129/2",
+          ))))
     val slightlyLessRedImage = createImageData.toIndexedImageWith(
       inferredData = createInferredData.map(
         _.copy(
           palette = List(
-            "0/0",
-            "0/0",
-            "6/4",
-            "6/4",
-            "30/4",
-            "18/4",
-            "1/4",
-            "5/6",
-            "5/6",
-            "34/6",
-            "34/6",
-            "130/6",
-            "70/6",
-            "2/6",
-            "7/8",
-            "7/8",
-            "69/8",
-            "69/8",
-            "301/8",
-            "181/8",
-            "2/8"
+            "7/0",
+            "71/1",
+            "71/1",
+            "71/1",
           ))))
     val evenLessRedImage = createImageData.toIndexedImageWith(
       inferredData = createInferredData.map(
         _.copy(
           palette = List(
-            "0/0",
-            "0/0",
-            "6/4",
-            "6/4",
-            "30/4",
-            "18/4",
-            "1/4",
-            "0/0",
-            "0/0",
-            "34/6",
-            "34/6",
-            "130/6",
-            "70/6",
-            "2/6",
-            "7/8",
-            "7/8",
-            "69/8",
-            "69/8",
-            "301/8",
-            "181/8",
-            "2/8"
+            "7/0",
+            "7/0",
+            "7/0",
           ))))
 
     it("filters by color") {

@@ -26,7 +26,8 @@ class ImagesRequestBuilder(queryConfig: QueryConfig)
   val idSort: FieldSort = fieldSort("state.canonicalId").order(SortOrder.ASC)
 
   lazy val colorQuery = new ColorQuery(
-    binSizes = queryConfig.paletteBinSizes
+    binSizes = queryConfig.paletteBinSizes,
+    binMinima = queryConfig.paletteBinMinima
   )
 
   def request(searchOptions: SearchOptions, index: Index): SearchRequest =
