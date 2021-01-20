@@ -121,43 +121,7 @@ trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest]
         retriever
           .apply(workIndexable.id(transformedWork))
           .map { storedWork =>
-            val shouldSend = {
-              if (transformedWork.version < storedWork.version) {
-                debug(
-                  s"${transformedWork.id}: transformed Work is older than the stored Work")
-                false
-              }
-
-              // If the new work and the stored work have the same version and the
-              // same data, it's possible this is SQS retrying a message that failed
-              // last time.  e.g. we indexed the work but didn't send an ID to SNS.
-              //
-              // Send the work, just to be sure it got through the pipeline.
-              else if (storedWork.version == transformedWork.version) {
-                debug(
-                  s"${transformedWork.id}: transformed Work and stored Work have the same version")
-                true
-              } else if (storedWork.data != transformedWork.data) {
-                debug(
-                  s"${transformedWork.id}: transformed Work has different data to the stored Work")
-                true
-              }
-
-              // If we get here, it means the new work and the stored work should have
-              // the same data, but the stored work has a strictly lower version.
-              //
-              // Nothing in the pipeline will change if we send this work, and we
-              // can assume the previous version of the work was sent successfully.
-              else {
-                debug(
-                  s"${transformedWork.id}: transformed Work has newer version/same data as the stored Work")
-                assert(storedWork.data == transformedWork.data)
-                assert(storedWork.version < transformedWork.version)
-                false
-              }
-            }
-
-            if (shouldSend) {
+            if (shouldSend(transformedWork, storedWork)) {
               Right(Some((transformedWork, key)))
             } else {
               info(
@@ -173,6 +137,44 @@ trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest]
 
       case Left(err) => Future.successful(Left(err))
     }
+
+  protected def shouldSend(transformedWork: Work[Source], storedWork: Work[Source]): Boolean = {
+    if (transformedWork.version < storedWork.version) {
+      debug(
+        s"${transformedWork.id}: transformed Work is older than the stored Work")
+      false
+    }
+
+    // We cannot guarantee that storing a work results in a message being sent to SNS.
+    // If this is the same version of the Work as was previously stored, resend it to
+    // ensure it gets through the pipeline.
+    else if (storedWork.version == transformedWork.version) {
+      debug(
+        s"${transformedWork.id}: transformed Work and stored Work have the same version")
+      true
+    }
+
+    // Different data is always worth sending along the pipeline.
+    else if (storedWork.data != transformedWork.data) {
+      assert(storedWork.version < transformedWork.version)
+      debug(
+        s"${transformedWork.id}: transformed Work has different data to the stored Work")
+      true
+    }
+
+    // If we get here, it means the new work and the stored work should have
+    // the same data, but the stored work has a strictly lower version.
+    //
+    // Nothing in the pipeline will change if we send this work, and we
+    // can assume the previous version of the work was sent successfully.
+    else {
+      debug(
+        s"${transformedWork.id}: transformed Work has newer version/same data as the stored Work")
+      assert(storedWork.data == transformedWork.data)
+      assert(storedWork.version < transformedWork.version)
+      false
+    }
+  }
 
   def run(): Future[Done] =
     pipelineStream.foreach(
