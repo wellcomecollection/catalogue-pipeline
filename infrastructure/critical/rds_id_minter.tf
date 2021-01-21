@@ -72,7 +72,7 @@ module "identifiers_delta_rds_cluster" {
   password           = local.rds_password
 
   # This instance class provides us with 45 connections per instance.
-  instance_count = 3
+  instance_count = 1
   instance_class = "db.t3.medium"
 
   db_security_group_id = aws_security_group.database_sg.id
