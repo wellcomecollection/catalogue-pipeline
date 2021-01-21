@@ -155,8 +155,6 @@ def main(username, password, endpoint, deployment_id):
 
     print("")
 
-    store_secret(secret_id=f"catalogue/{deployment_id}/es_host", secret_value=host)
-
     store_secret(secret_id=f"catalogue/{deployment_id}/es_port", secret_value=port)
 
     store_secret(
