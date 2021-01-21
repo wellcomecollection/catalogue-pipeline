@@ -30,7 +30,7 @@ SERVICES = {
     "transformer": ["source_write"],
     "id_minter": ["source_read", "identified_write"],
     "matcher": ["identified_read"],
-    "merger": ["identified_read", "merged_write"],
+    "merger": ["identified_read", "merged_write", "initial_write"],
     "router": ["merged_read", "denormalised_write"],
     "relation_embedder": ["merged_read", "denormalised_write"],
     "work_ingestor": ["denormalised_read"],
