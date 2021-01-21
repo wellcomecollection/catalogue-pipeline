@@ -69,7 +69,7 @@ variable "pipeline_storage_id" {
 }
 
 locals {
-  pipeline_storage_es_host     = "catalogue/${var.pipeline_storage_id}/es_host"
+  pipeline_storage_es_host     = "elasticsearch/${var.pipeline_storage_id}/private_host"
   pipeline_storage_es_port     = "catalogue/${var.pipeline_storage_id}/es_port"
   pipeline_storage_es_protocol = "catalogue/${var.pipeline_storage_id}/es_protocol"
 
@@ -78,10 +78,9 @@ locals {
     "matcher",
     "merger",
     "transformer",
-    "ingestor",
     "relation_embedder",
     "router",
-    "inferrer"
+    "inferrer",
   ]
 
   pipeline_storage_es_service_secrets = zipmap(local.pipeline_storage_service_list, [

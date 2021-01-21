@@ -108,7 +108,11 @@ object PipelineStorageStream extends Logging {
         val (_, items) = unzipBundles(bundles)
         indexer(items).map { result =>
           val failed = result.left.getOrElse(Nil)
-          if (failed.nonEmpty) warn(s"Some documents failed ingesting: $failed")
+          if (failed.nonEmpty) {
+            val failedIds = failed.map { indexable.id }
+            warn(
+              s"Some documents failed ingesting: ${failedIds.mkString(", ")}")
+          }
           bundles.collect {
             case Bundle(message, doc, numberOfItems) if !failed.contains(doc) =>
               Bundle(message, doc, numberOfItems)

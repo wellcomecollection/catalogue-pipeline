@@ -118,6 +118,9 @@ module "image_inferrer" {
 
     es_initial_images_index   = local.es_images_initial_index
     es_augmented_images_index = local.es_images_augmented_index
+
+    batch_size             = 10
+    flush_interval_seconds = 30
   }
 
   manager_secret_env_vars = local.pipeline_storage_es_service_secrets["inferrer"]

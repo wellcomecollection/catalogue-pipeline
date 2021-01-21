@@ -14,7 +14,7 @@ resource "ec_deployment" "pipeline_storage" {
 
   elasticsearch {
     topology {
-      zone_count = 3
+      zone_count = 2
       size       = "15g"
     }
   }
@@ -24,6 +24,22 @@ resource "ec_deployment" "pipeline_storage" {
       zone_count = 1
       size       = "1g"
     }
+  }
+}
+
+locals {
+  pipeline_storage_elastic_id     = ec_deployment.pipeline_storage.elasticsearch[0].resource_id
+  pipeline_storage_elastic_region = ec_deployment.pipeline_storage.elasticsearch[0].region
+}
+
+module "pipeline_storage_secrets" {
+  source = "./modules/secrets"
+
+  key_value_map = {
+    "elasticsearch/pipeline_storage_delta/public_host" = "${local.pipeline_storage_elastic_id}.${local.pipeline_storage_elastic_region}.aws.found.io"
+
+    # See https://www.elastic.co/guide/en/cloud/current/ec-traffic-filtering-vpc.html
+    "elasticsearch/pipeline_storage_delta/private_host" = "${local.pipeline_storage_elastic_id}.vpce.${local.pipeline_storage_elastic_region}.aws.elastic-cloud.com"
   }
 }
 

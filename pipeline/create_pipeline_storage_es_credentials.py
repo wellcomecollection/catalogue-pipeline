@@ -30,7 +30,7 @@ SERVICES = {
     "transformer": ["source_write"],
     "id_minter": ["source_read", "identified_write"],
     "matcher": ["identified_read"],
-    "merger": ["identified_read", "merged_write"],
+    "merger": ["identified_read", "merged_write", "initial_write"],
     "router": ["merged_read", "denormalised_write"],
     "relation_embedder": ["merged_read", "denormalised_write"],
     "work_ingestor": ["denormalised_read"],
@@ -143,19 +143,15 @@ def create_user(es, username, roles):
 )
 def main(username, password, endpoint, deployment_id):
     url = hyperlink.URL.from_text(endpoint)
-    host = url.host
     protocol = url.scheme
     port = str(url.port)
 
     click.echo(
-        f"Detected the host as {click.style(url.host, 'blue')}, the port as "
-        f"{click.style(port, 'blue')} and the protocol as {click.style(protocol, 'blue')}."
+        f"Detected the port as {click.style(port, 'blue')} and the protocol as {click.style(protocol, 'blue')}."
     )
     click.confirm("Are these correct?", abort=True)
 
     print("")
-
-    store_secret(secret_id=f"catalogue/{deployment_id}/es_host", secret_value=host)
 
     store_secret(secret_id=f"catalogue/{deployment_id}/es_port", secret_value=port)
 
