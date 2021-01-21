@@ -8,8 +8,9 @@ import com.sksamuel.elastic4s.{ElasticClient, Index, Response}
 import com.sksamuel.elastic4s.{Indexable => ElasticIndexable}
 import io.circe.{Encoder, Printer}
 import grizzled.slf4j.Logging
-
 import uk.ac.wellcome.elasticsearch.{ElasticsearchIndexCreator, IndexConfig}
+
+import scala.util.Try
 
 class ElasticIndexer[T: Indexable](
   client: ElasticClient,
@@ -32,47 +33,49 @@ class ElasticIndexer[T: Indexable](
   final def init(): Future[Unit] =
     new ElasticsearchIndexCreator(client, index, config).create
 
-  final def index(documents: Seq[T]): Future[Either[Seq[T], Seq[T]]] = {
-    assert(documents.nonEmpty, "Cannot index an empty list of documents")
-
-    debug(s"Indexing ${documents.map(doc => indexable.id(doc)).mkString(", ")}")
-
-    val inserts = documents.map { document =>
-      indexInto(index.name)
-        .version(indexable.version(document))
-        .versionType(ExternalGte)
-        .id(indexable.id(document))
-        .doc(document)
-    }
-
-    client
-      .execute {
-        bulk(inserts)
-      }
-      .map { response: Response[BulkResponse] =>
-        if (response.isError) {
-          error(s"Error from Elasticsearch: $response")
-          Left(documents)
-        } else {
-          debug(s"Bulk response = $response")
-          val bulkResponse = response.result
-          val actualFailures = bulkResponse.failures.filterNot {
-            isVersionConflictException
-          }
-
-          if (actualFailures.nonEmpty) {
-            val failedIds = actualFailures.map { failure =>
-              error(s"Failed ingesting ${failure.id}: ${failure.error}")
-              failure.id
-            }
-
-            Left(documents.filter(doc => {
-              failedIds.contains(indexable.id(doc))
-            }))
-          } else Right(documents)
+  final def apply(documents: Seq[T]): Future[Either[Seq[T], Seq[T]]] =
+    Future
+      .fromTry(Try(
+        require(documents.nonEmpty, "Cannot index an empty list of documents")))
+      .flatMap { _ =>
+        debug(
+          s"Indexing ${documents.map(doc => indexable.id(doc)).mkString(", ")}")
+        val inserts = documents.map { document =>
+          indexInto(index.name)
+            .version(indexable.version(document))
+            .versionType(ExternalGte)
+            .id(indexable.id(document))
+            .doc(document)
         }
+
+        client
+          .execute {
+            bulk(inserts)
+          }
+          .map { response: Response[BulkResponse] =>
+            if (response.isError) {
+              error(s"Error from Elasticsearch: $response")
+              Left(documents)
+            } else {
+              debug(s"Bulk response = $response")
+              val bulkResponse = response.result
+              val actualFailures = bulkResponse.failures.filterNot {
+                isVersionConflictException
+              }
+
+              if (actualFailures.nonEmpty) {
+                val failedIds = actualFailures.map { failure =>
+                  error(s"Failed ingesting ${failure.id}: ${failure.error}")
+                  failure.id
+                }
+
+                Left(documents.filter(doc => {
+                  failedIds.contains(indexable.id(doc))
+                }))
+              } else Right(documents)
+            }
+          }
       }
-  }
 
   /** Did we try to PUT a document with a lower version than the existing version?
     *

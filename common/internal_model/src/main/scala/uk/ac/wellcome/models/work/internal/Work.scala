@@ -30,8 +30,8 @@ sealed trait Work[State <: WorkState] {
         Work.Visible(version, outData, outState)
       case Work.Invisible(version, _, _, invisibilityReasons) =>
         Work.Invisible(version, outData, outState, invisibilityReasons)
-      case Work.Deleted(version, _, deletedReasons) =>
-        Work.Deleted(version, outState, deletedReasons)
+      case Work.Deleted(version, _, _, deletedReasons) =>
+        Work.Deleted(version, outData, outState, deletedReasons)
       case Work.Redirected(version, redirect, _) =>
         Work.Redirected(version, transition.redirect(redirect), outState)
     }
@@ -63,11 +63,10 @@ object Work {
 
   case class Deleted[State <: WorkState](
     version: Int,
+    data: WorkData[State#WorkDataState],
     state: State,
     deletedReason: Option[DeletedReason] = None,
-  ) extends Work[State] {
-    val data = WorkData[State#WorkDataState]()
-  }
+  ) extends Work[State]
 }
 
 /** WorkData contains data common to all types of works that can exist at any
@@ -149,19 +148,6 @@ object WorkState {
     val relations = Relations.none
   }
 
-  case class Merged(
-    sourceIdentifier: SourceIdentifier,
-    canonicalId: String,
-    modifiedTime: Instant,
-  ) extends WorkState {
-
-    type WorkDataState = DataState.Identified
-    type TransitionArgs = Option[Instant]
-
-    def id = canonicalId
-    val relations = Relations.none
-  }
-
   case class Identified(
     sourceIdentifier: SourceIdentifier,
     canonicalId: String,
@@ -173,6 +159,19 @@ object WorkState {
 
     def id = canonicalId
     val relations = Relations.none
+  }
+
+  case class Merged(
+    sourceIdentifier: SourceIdentifier,
+    canonicalId: String,
+    modifiedTime: Instant,
+  ) extends WorkState {
+
+    type WorkDataState = DataState.Identified
+    type TransitionArgs = Instant
+
+    def id: String = canonicalId
+    val relations: Relations = Relations.none
   }
 
   case class Denormalised(
@@ -227,11 +226,11 @@ object WorkFsm {
   implicit val identifiedToMerged = new Transition[Identified, Merged] {
     def state(state: Identified,
               data: WorkData[DataState.Identified],
-              args: Option[Instant]): Merged =
+              modifiedTime: Instant): Merged =
       Merged(
-        state.sourceIdentifier,
-        state.id,
-        args.getOrElse(state.modifiedTime),
+        sourceIdentifier = state.sourceIdentifier,
+        canonicalId = state.id,
+        modifiedTime = modifiedTime
       )
 
     def data(data: WorkData[DataState.Identified]) = data

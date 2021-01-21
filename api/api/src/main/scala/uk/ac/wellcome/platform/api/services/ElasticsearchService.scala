@@ -29,9 +29,9 @@ class ElasticsearchService(elasticClient: ElasticClient)(
   /** Given a set of query options, build a SearchDefinition for Elasticsearch
     * using the elastic4s query DSL, then execute the search.
     */
-  def executeSearch(
-    searchOptions: SearchOptions,
-    requestBuilder: ElasticsearchRequestBuilder,
+  def executeSearch[DocumentFilter, MustQuery](
+    searchOptions: SearchOptions[DocumentFilter, MustQuery],
+    requestBuilder: ElasticsearchRequestBuilder[DocumentFilter, MustQuery],
     index: Index): Future[Either[ElasticError, SearchResponse]] = {
     val searchRequest = requestBuilder
       .request(searchOptions, index)
@@ -90,7 +90,8 @@ class ElasticsearchService(elasticClient: ElasticClient)(
     }
 
   implicit class EnhancedTransaction(transaction: Transaction) {
-    def addQueryOptionLabels(searchOptions: SearchOptions): Transaction = {
+    def addQueryOptionLabels(
+      searchOptions: SearchOptions[_, _]): Transaction = {
       transaction.addLabel("pageSize", searchOptions.pageSize)
       transaction.addLabel("pageNumber", searchOptions.pageNumber)
       transaction.addLabel("sortOrder", searchOptions.sortOrder.toString)

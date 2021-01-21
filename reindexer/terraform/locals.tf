@@ -4,7 +4,7 @@ locals {
   vhs_sierra_table_name         = data.terraform_remote_state.sierra_adapter.outputs.vhs_table_name
   vhs_miro_table_name           = data.terraform_remote_state.catalogue_infra_critical.outputs.vhs_miro_table_name
   vhs_miro_inventory_table_name = data.terraform_remote_state.catalogue_infra_critical.outputs.vhs_miro_inventory_table_name
-  mets_dynamo_table_name        = data.terraform_remote_state.catalogue_infra_critical.outputs.mets_dynamo_table_name
+  mets_dynamo_table_name        = data.terraform_remote_state.mets_adapter.outputs.mets_dynamo_table_name
   vhs_calm_table_name           = data.terraform_remote_state.calm_adapter.outputs.vhs_table_name
 
   reporting_miro_hybrid_records_topic_arn           = data.terraform_remote_state.shared_infra.outputs.reporting_miro_reindex_topic_arn

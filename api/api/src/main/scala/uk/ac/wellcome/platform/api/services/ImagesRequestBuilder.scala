@@ -21,7 +21,7 @@ import uk.ac.wellcome.platform.api.models.{
 import uk.ac.wellcome.platform.api.rest.PaginationQuery
 
 class ImagesRequestBuilder(queryConfig: QueryConfig)
-    extends ElasticsearchRequestBuilder {
+    extends ElasticsearchRequestBuilder[ImageFilter, ImageMustQuery] {
 
   val idSort: FieldSort = fieldSort("state.canonicalId").order(SortOrder.ASC)
 
@@ -30,7 +30,8 @@ class ImagesRequestBuilder(queryConfig: QueryConfig)
     binMinima = queryConfig.paletteBinMinima
   )
 
-  def request(searchOptions: SearchOptions, index: Index): SearchRequest =
+  def request(searchOptions: SearchOptions[ImageFilter, ImageMustQuery],
+              index: Index): SearchRequest =
     search(index)
       .query(
         searchOptions.searchQuery
@@ -39,17 +40,18 @@ class ImagesRequestBuilder(queryConfig: QueryConfig)
           }
           .getOrElse(boolQuery)
           .must(
-            buildImageMustQuery(searchOptions.safeMustQueries[ImageMustQuery])
+            buildImageMustQuery(searchOptions.mustQueries)
           )
           .filter(
-            buildImageFilterQuery(searchOptions.safeFilters[ImageFilter])
+            buildImageFilterQuery(searchOptions.filters)
           )
       )
       .sortBy { sortBy(searchOptions) }
       .limit(searchOptions.pageSize)
       .from(PaginationQuery.safeGetFrom(searchOptions))
 
-  def sortBy(searchOptions: SearchOptions): Seq[Sort] =
+  def sortBy(
+    searchOptions: SearchOptions[ImageFilter, ImageMustQuery]): Seq[Sort] =
     if (searchOptions.searchQuery.isDefined || searchOptions.mustQueries.nonEmpty) {
       List(scoreSort(SortOrder.DESC), idSort)
     } else {

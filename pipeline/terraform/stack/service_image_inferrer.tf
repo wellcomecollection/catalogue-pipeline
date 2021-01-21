@@ -27,7 +27,8 @@ module "image_inferrer" {
   service_name = "${local.namespace_hyphen}_image_inferrer"
   security_group_ids = [
     aws_security_group.service_egress.id,
-    aws_security_group.interservice.id
+    aws_security_group.interservice.id,
+    var.pipeline_storage_security_group_id,
   ]
 
   cluster_name = aws_ecs_cluster.cluster.name
@@ -114,12 +115,17 @@ module "image_inferrer" {
     messages_bucket_name  = aws_s3_bucket.messages.id
     queue_url             = module.image_inferrer_queue.url
     images_root           = local.shared_storage_path
+
+    es_initial_images_index   = local.es_images_initial_index
+    es_augmented_images_index = local.es_images_augmented_index
   }
+
+  manager_secret_env_vars = local.pipeline_storage_es_service_secrets["inferrer"]
 
   subnets = var.subnets
 
   # Any higher than this currently causes latency spikes from Loris
-  max_capacity = 6
+  max_capacity = min(6, var.max_capacity)
 
   messages_bucket_arn = aws_s3_bucket.messages.arn
   queue_read_policy   = module.image_inferrer_queue.read_policy

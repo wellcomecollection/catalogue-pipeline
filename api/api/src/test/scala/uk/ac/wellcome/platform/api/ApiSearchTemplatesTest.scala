@@ -18,7 +18,6 @@ class ApiSearchTemplatesTest
       templates map { json =>
         getLength(json).get should be > 0
       }
-
     }
   }
 

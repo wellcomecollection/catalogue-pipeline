@@ -1,8 +1,16 @@
 #!/bin/env python3
 
-import requests
-import click
+import concurrent.futures
+import datetime
+import difflib
 import json
+import os
+import tempfile
+import urllib.parse
+
+import click
+from jinja2 import Environment, FileSystemLoader, select_autoescape
+import requests
 
 
 class ApiDiffer:
@@ -13,26 +21,24 @@ class ApiDiffer:
     prod = "api.wellcomecollection.org"
     stage = "api-stage.wellcomecollection.org"
 
-    def __init__(self, work_id=None, params=None, show_colour=True, verbose=False):
+    def __init__(self, work_id=None, params=None):
         suffix = f"/{work_id}" if work_id else ""
         self.path = f"/catalogue/v2/works{suffix}"
         self.params = params or {}
-        self.show_colour = show_colour
-        self.verbose = verbose
 
-    def display_diff(self):
-        click.echo(
-            "================================================================================"
-        )
-        click.echo(f"Performing diff on {self.path} with params:")
-        click.echo(self.params)
-        click.echo(
-            "================================================================================"
-        )
-        click.echo()
-        click.echo("* Calling prod API")
+    @property
+    def display_url(self):
+        display_params = urllib.parse.urlencode(list(self.params.items()))
+        if display_params:
+            return f"{self.path}?{display_params}"
+        else:
+            return self.path
+
+    def get_html_diff(self):
+        """
+        Fetches a URL from the prod/staging API, and returns a (status, HTML diff).
+        """
         (prod_status, prod_json) = self.call_api(self.prod)
-        click.echo("* Calling stage API")
         (stage_status, stage_json) = self.call_api(self.stage)
         if prod_status != stage_status:
             lines = [
@@ -44,17 +50,24 @@ class ApiDiffer:
                 "stage:",
                 f"{json.dumps(stage_json, indent=2)}",
             ]
-            msg = "\n".join(lines)
-            if self.show_colour:
-                msg = click.style(msg, fg="red")
-            click.echo(msg)
+            return ("different status", "\n".join(lines))
+        elif prod_json == stage_json:
+            return ("match", "")
         else:
-            click.echo(f"* Recived {prod_status} status from both APIs")
-            click.echo("* Generating diff")
-            click.echo()
-            differ = ObjDiffer(prod_json, stage_json, "prod", "stage", self.show_colour)
-            differ.display_diff()
-        click.echo()
+            prod_pretty = json.dumps(prod_json, indent=2, sort_keys=True)
+            stage_pretty = json.dumps(stage_json, indent=2, sort_keys=True)
+
+            return (
+                "different JSON",
+                list(
+                    difflib.unified_diff(
+                        prod_pretty.splitlines(),
+                        stage_pretty.splitlines(),
+                        fromfile="prod",
+                        tofile="stage",
+                    )
+                ),
+            )
 
     def call_api(self, api_base):
         url = f"https://{api_base}{self.path}"
@@ -62,105 +75,45 @@ class ApiDiffer:
         return (response.status_code, response.json())
 
 
-class ObjDiffer:
-    """Performs a diff between 2 json-like Python objects, and prints changes
-    between the two to stdout. It does this by flattening out any nesting within
-    the objects so each nested item is referenced by a single top level key
-    (represented as a variable length tuple containing string keys and array
-    indices).
-    """
-
-    def __init__(self, obj_a, obj_b, name_a, name_b, show_colour=True, verbose=False):
-        self.obj_a = dict(self.flatten(obj_a))
-        self.obj_b = dict(self.flatten(obj_b))
-        self.name_a = name_a
-        self.name_b = name_b
-        self.show_colour = show_colour
-        self.verbose = verbose
-
-    def display_diff(self):
-        results = list(self.diff_results)
-        if not self.verbose and not any(results):
-            msg = "Unchanged between stage and prod"
-            if self.show_colour:
-                msg = click.style(msg, fg="green")
-            click.echo(msg)
-        else:
-            self.display_results(results)
-
-    def display_results(self, results):
-        for (key, result) in zip(self.combined_keys, results):
-            if result:
-                a, b = map(self.format_value, result)
-                msg = f"changed from {a} on {self.name_a} to {b} on {self.name_b}"
-                col = "red"
-            else:
-                msg = f"unchanged between {self.name_a} and {self.name_b}"
-                col = "green"
-            if self.show_colour:
-                msg = click.style(msg, fg=col)
-            click.echo(f"{self.format_key(key)}: {msg}")
-
-    def format_key(self, key):
-        return ".".join(f"[{part}]" if isinstance(part, int) else part for part in key)
-
-    def format_value(self, value):
-        if isinstance(value, str):
-            return f'"{value}"'
-        if value is None:
-            return "null"
-        return str(value)
-
-    @property
-    def combined_keys(self):
-        return sorted(set(self.obj_a.keys()) | set(self.obj_b.keys()))
-
-    @property
-    def diff_results(self):
-        for key in self.combined_keys:
-            a, b = self.obj_a.get(key), self.obj_b.get(key)
-            yield None if a == b else (a, b)
-
-    def flatten(self, obj):
-        def flatten_tupled(obj):
-            nested = [join_subitems(key, self.flatten(value)) for key, value in obj]
-            return sum(nested, [])
-
-        def join_subitems(key, subitems):
-            return [((key, *subkey), value) for (subkey, value) in subitems]
-
-        if isinstance(obj, list):
-            return flatten_tupled(enumerate(obj))
-        if isinstance(obj, dict):
-            return flatten_tupled(obj.items())
-        return [((), obj)]
-
-
 @click.command()
-@click.option(
-    "--colour/--no-colour",
-    default=True,
-    help="Whether to display in terminal with colours or not",
-)
 @click.option(
     "--routes-file",
     default="routes.json",
     help="What routes file to use (default=routes.json)",
 )
-@click.option(
-    "--verbose",
-    default=False,
-    help="Displays full diffs even when there are no changes.",
-)
-@click.option("--repeats", default=1, help="How many times to call each route")
-def main(colour, routes_file, repeats, verbose):
+def main(routes_file):
     with open(routes_file) as f:
         routes = json.load(f)
-    for route in routes:
+
+    def get_diff(route):
         work_id, params = route.get("workId"), route.get("params")
-        for _ in range(repeats):
-            differ = ApiDiffer(work_id, params, show_colour=colour, verbose=verbose)
-            differ.display_diff()
+        differ = ApiDiffer(work_id, params)
+        status, diff_lines = differ.get_html_diff()
+
+        return {
+            "display_url": differ.display_url,
+            "status": status,
+            "diff_lines": diff_lines,
+        }
+
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = [executor.submit(get_diff, r) for r in routes]
+        concurrent.futures.wait(futures, return_when=concurrent.futures.ALL_COMPLETED)
+
+        diffs = [fut.result() for fut in futures]
+
+    env = Environment(
+        loader=FileSystemLoader("."), autoescape=select_autoescape(["html", "xml"])
+    )
+
+    template = env.get_template("template.html")
+    html = template.render(now=datetime.datetime.now(), diffs=diffs)
+
+    _, tmp_path = tempfile.mkstemp(suffix=".html")
+    with open(tmp_path, "w") as outfile:
+        outfile.write(html)
+
+    os.system(f"open {tmp_path}")
 
 
 if __name__ == "__main__":

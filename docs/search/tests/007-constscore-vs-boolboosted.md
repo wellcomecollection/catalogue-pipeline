@@ -14,7 +14,7 @@ To do this we wrap the tiers in a `bool` query and boost each tier respectively.
 
 ### `ConstScore`
 
-![ConstScore calculation](../../.gitbook/assets/scoring-constscore%20%281%29.png)
+![ConstScore calculation](../../.gitbook/assets/scoring-constscore.png)
 
 ### `BoolBoosted`
 

@@ -29,10 +29,14 @@ module "matcher" {
   security_group_ids = [
     aws_security_group.service_egress.id,
     aws_security_group.interservice.id,
+    var.pipeline_storage_security_group_id,
   ]
 
   cluster_name = aws_ecs_cluster.cluster.name
   cluster_arn  = aws_ecs_cluster.cluster.arn
+
+  cpu    = 1024
+  memory = 2048
 
   env_vars = {
     queue_url         = module.matcher_input_queue.url
@@ -49,16 +53,10 @@ module "matcher" {
     es_index = local.es_works_identified_index
   }
 
-  secret_env_vars = {
-    es_host     = "catalogue/pipeline_storage/es_host"
-    es_port     = "catalogue/pipeline_storage/es_port"
-    es_protocol = "catalogue/pipeline_storage/es_protocol"
-    es_username = "catalogue/pipeline_storage/matcher/es_username"
-    es_password = "catalogue/pipeline_storage/matcher/es_password"
-  }
+  secret_env_vars = local.pipeline_storage_es_service_secrets["matcher"]
 
   subnets             = var.subnets
-  max_capacity        = 10
+  max_capacity        = var.max_capacity
   messages_bucket_arn = aws_s3_bucket.messages.arn
   queue_read_policy   = module.matcher_input_queue.read_policy
 

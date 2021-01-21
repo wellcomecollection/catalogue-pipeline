@@ -36,11 +36,12 @@ object CalmTransformer
     "third-party metadata"
   )
 
-  def apply(record: CalmRecord, version: Int): Result[Work[Source]] =
+  override def apply(record: CalmRecord, version: Int): Result[Work[Source]] =
     if (shouldSuppress(record)) {
       Right(
         Work.Deleted[Source](
           state = Source(sourceIdentifier(record), record.retrievedAt),
+          data = workData(record).getOrElse(WorkData[DataState.Unidentified]()),
           version = version,
           deletedReason = Some(SuppressedFromSource("Calm"))
         )
@@ -142,11 +143,7 @@ object CalmTransformer
     SourceIdentifier(
       value = record.id,
       identifierType = CalmIdentifierTypes.recordId,
-      // Although this is a Work, we have previously created Calm-identified
-      // works with ontologyType "SourceIdentifier".  We need to keep using
-      // this ontologyType, or those works will be assigned new identifiers
-      // by the ID minter.
-      ontologyType = "SourceIdentifier"
+      ontologyType = "Work"
     )
 
   def otherIdentifiers(record: CalmRecord): List[SourceIdentifier] =
@@ -159,8 +156,9 @@ object CalmTransformer
               SourceIdentifier(
                 identifierType = idType,
                 value = id,
-                ontologyType = "SourceIdentifier"
-            ))
+                ontologyType = "Work"
+            )
+          )
     }
 
   def mergeCandidates(record: CalmRecord): List[MergeCandidate[Identifiable]] =

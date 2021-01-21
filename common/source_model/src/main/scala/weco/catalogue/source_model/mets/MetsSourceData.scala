@@ -1,22 +1,30 @@
 package weco.catalogue.source_model.mets
 
-import uk.ac.wellcome.storage.s3.S3ObjectLocation
+import uk.ac.wellcome.storage.s3.{S3ObjectLocation, S3ObjectLocationPrefix}
 
 import java.time.Instant
 
-/** METS location data to send onwards to the transformer.
-  */
-case class MetsSourceData(bucket: String,
-                          path: String,
-                          version: Int,
-                          file: String,
-                          createdDate: Instant,
-                          deleted: Boolean,
-                          manifestations: List[String] = Nil) {
+sealed trait MetsSourceData {
+  val createdDate: Instant
+  val version: Int
+}
+
+case class MetsFileWithImages(
+  root: S3ObjectLocationPrefix,
+  filename: String,
+  manifestations: List[String],
+  createdDate: Instant,
+  version: Int
+) extends MetsSourceData {
 
   def xmlLocation: S3ObjectLocation =
-    S3ObjectLocation(bucket, key = s"$path/$file")
+    root.asLocation(filename)
 
   def manifestationLocations: List[S3ObjectLocation] =
-    manifestations.map(mf => S3ObjectLocation(bucket, key = s"$path/$mf"))
+    manifestations.map { root.asLocation(_) }
 }
+
+case class DeletedMetsFile(
+  createdDate: Instant,
+  version: Int
+) extends MetsSourceData

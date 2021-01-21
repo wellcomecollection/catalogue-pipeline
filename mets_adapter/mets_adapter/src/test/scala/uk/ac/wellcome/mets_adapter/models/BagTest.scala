@@ -2,8 +2,10 @@ package uk.ac.wellcome.mets_adapter.models
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import uk.ac.wellcome.storage.s3.S3ObjectLocationPrefix
+
 import java.time.Instant
-import weco.catalogue.source_model.mets.MetsSourceData
+import weco.catalogue.source_model.mets.{DeletedMetsFile, MetsFileWithImages}
 
 class BagTest extends AnyFunSpec with Matchers {
 
@@ -92,39 +94,54 @@ class BagTest extends AnyFunSpec with Matchers {
   describe("METS data") {
     it("extracts all METS data from Bag") {
       val bag = createBag(
-        s3Path = "digitised/b30246039",
+        bucket = "wellcomecollection-example-storage",
+        s3Path = "digitised/b1234",
         version = "v2",
         files = List(
           "data/b30246039.xml" -> "v1/data/b30246039.xml",
           "objects/blahbluh.jp2" -> "v1/objects/blahbluh.jp2"),
       )
       bag.metsSourceData shouldBe Right(
-        MetsSourceData(
-          bucket = "bucket",
-          path = "digitised/b30246039",
-          version = 2,
-          file = "v1/data/b30246039.xml",
+        MetsFileWithImages(
+          root = S3ObjectLocationPrefix(
+            bucket = "wellcomecollection-example-storage",
+            keyPrefix = "digitised/b1234",
+          ),
+          filename = "v1/data/b30246039.xml",
+          manifestations = List.empty,
           createdDate = bag.createdDate,
-          deleted = false))
+          version = 2
+        )
+      )
     }
 
     it("marks a METS data as deleted if there are no other assets except METS") {
       val bag = createBag(
-        s3Path = "digitised/b30246039",
         version = "v2",
         files = List("data/b30246039.xml" -> "v1/data/b30246039.xml")
       )
       bag.metsSourceData shouldBe Right(
-        MetsSourceData(
-          bucket = "bucket",
-          path = "digitised/b30246039",
-          version = 2,
-          file = "v1/data/b30246039.xml",
+        DeletedMetsFile(
           createdDate = bag.createdDate,
-          deleted = true))
+          version = 2
+        )
+      )
     }
 
-    it("fails extracting METS data if invalid version string") {
+    it("marks a METS data as deleted if the bag manifest is empty") {
+      val bag = createBag(
+        version = "v3",
+        files = List()
+      )
+      bag.metsSourceData shouldBe Right(
+        DeletedMetsFile(
+          createdDate = bag.createdDate,
+          version = 3
+        )
+      )
+    }
+
+    it("fails extracting METS data if the version string is invalid") {
       val bag = createBag(
         version = "oops",
         files = List("data/b30246039.xml" -> "v1/data/b30246039.xml"),
@@ -132,15 +149,10 @@ class BagTest extends AnyFunSpec with Matchers {
       bag.metsSourceData shouldBe a[Left[_, _]]
       bag.metsSourceData.left.get.getMessage shouldBe "Couldn't parse version"
     }
-
-    it("fails extracting METS data if invalid no METS file") {
-      val bag = createBag(files = Nil)
-      bag.metsSourceData shouldBe a[Left[_, _]]
-      bag.metsSourceData.left.get.getMessage shouldBe "Couldn't find METS file"
-    }
   }
 
   def createBag(s3Path: String = "digitised/b30246039",
+                bucket: String = "bucket",
                 version: String = "v1",
                 files: List[(String, String)] = List(
                   "data/b30246039.xml" -> "v1/data/b30246039.xml")) =
@@ -151,7 +163,7 @@ class BagTest extends AnyFunSpec with Matchers {
       ),
       BagLocation(
         path = s3Path,
-        bucket = "bucket",
+        bucket = bucket,
       ),
       version,
       createdDate = Instant.now

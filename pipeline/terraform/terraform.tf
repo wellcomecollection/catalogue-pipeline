@@ -1,15 +1,16 @@
 provider "aws" {
-  region  = "eu-west-1"
-  version = "~> 2.0"
+  region = "eu-west-1"
 
   assume_role {
     role_arn = "arn:aws:iam::760097843905:role/platform-admin"
   }
+
+  ignore_tags {
+    keys = ["deployment:label"]
+  }
 }
 
-provider "template" {
-  version = "~> 2.1"
-}
+provider "template" {}
 
 terraform {
   backend "s3" {
@@ -102,7 +103,4 @@ data "terraform_remote_state" "reindexer" {
     key      = "terraform/catalogue/reindexer.tfstate"
     region   = "eu-west-1"
   }
-}
-
-data "aws_caller_identity" "current" {
 }

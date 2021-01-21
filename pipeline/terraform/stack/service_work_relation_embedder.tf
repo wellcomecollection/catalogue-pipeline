@@ -15,6 +15,7 @@ module "relation_embedder" {
   security_group_ids = [
     aws_security_group.service_egress.id,
     aws_security_group.interservice.id,
+    var.pipeline_storage_security_group_id,
   ]
 
   cluster_name = aws_ecs_cluster.cluster.name
@@ -32,20 +33,16 @@ module "relation_embedder" {
     queue_parallelism            = 3  // NOTE: limit to avoid memory errors
     affected_works_scroll_size   = 50 // NOTE: limit to avoid memory errors
     complete_tree_scroll_size    = 800
-    index_batch_size             = 25 // NOTE: too large results in 413 from ES
+    index_batch_size             = 100 // NOTE: too large results in 413 from ES
     index_flush_interval_seconds = 60
   }
 
-  secret_env_vars = {
-    es_host     = "catalogue/pipeline_storage/es_host"
-    es_port     = "catalogue/pipeline_storage/es_port"
-    es_protocol = "catalogue/pipeline_storage/es_protocol"
-    es_username = "catalogue/pipeline_storage/relation_embedder/es_username"
-    es_password = "catalogue/pipeline_storage/relation_embedder/es_password"
-  }
+  secret_env_vars = local.pipeline_storage_es_service_secrets["relation_embedder"]
+
+  # NOTE: limit to avoid >500 concurrent scroll contexts
+  max_capacity = min(10, var.max_capacity)
 
   subnets             = var.subnets
-  max_capacity        = 10 // NOTE: limit to avoid >500 concurrent scroll contexts
   messages_bucket_arn = aws_s3_bucket.messages.arn
   queue_read_policy   = module.relation_embedder_queue.read_policy
 

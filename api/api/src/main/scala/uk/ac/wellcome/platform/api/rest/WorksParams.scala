@@ -68,13 +68,14 @@ case class MultipleWorksParams(
   `items.locations.locationType`: Option[ItemLocationTypeIdFilter],
   `items.locations.accessConditions.status`: Option[AccessStatusFilter],
   `type`: Option[WorkTypeFilter],
+  partOf: Option[PartOfFilter],
   _queryType: Option[SearchQueryType],
   _index: Option[String],
 ) extends QueryParams
     with Paginated {
 
-  def searchOptions(apiConfig: ApiConfig): SearchOptions =
-    SearchOptions(
+  def searchOptions(apiConfig: ApiConfig) =
+    SearchOptions[WorkFilter, WorkMustQuery](
       searchQuery = query map { query =>
         SearchQuery(query, _queryType)
       },
@@ -98,7 +99,8 @@ case class MultipleWorksParams(
       `items.locations.locationType`,
       `items.locations.accessConditions.status`,
       license,
-      `type`
+      `type`,
+      partOf
     ).flatten
 
   private def dateFilter: Option[DateRangeFilter] =
@@ -139,6 +141,7 @@ object MultipleWorksParams extends QueryParamsUtils {
         "items.locations.locationType".as[ItemLocationTypeIdFilter].?,
         "items.locations.accessConditions.status".as[AccessStatusFilter].?,
         "type".as[WorkTypeFilter].?,
+        "partOf".as[PartOfFilter].?,
         "_queryType".as[SearchQueryType].?,
         "_index".as[String].?,
       )
@@ -177,6 +180,9 @@ object MultipleWorksParams extends QueryParamsUtils {
 
   implicit val identifiersFilter: Decoder[IdentifiersFilter] =
     stringListFilter(IdentifiersFilter)
+
+  implicit val partOf: Decoder[PartOfFilter] =
+    Decoder.decodeString.map(PartOfFilter(_))
 
   implicit val accessStatusFilter: Decoder[AccessStatusFilter] =
     decodeIncludesAndExcludes(

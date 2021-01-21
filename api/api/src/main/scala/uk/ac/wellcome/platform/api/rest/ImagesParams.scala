@@ -39,8 +39,8 @@ case class MultipleImagesParams(
 ) extends QueryParams
     with Paginated {
 
-  def searchOptions(apiConfig: ApiConfig): SearchOptions =
-    SearchOptions(
+  def searchOptions(apiConfig: ApiConfig) =
+    SearchOptions[ImageFilter, ImageMustQuery](
       searchQuery = query.map(SearchQuery(_)),
       filters = filters,
       mustQueries = mustQueries,

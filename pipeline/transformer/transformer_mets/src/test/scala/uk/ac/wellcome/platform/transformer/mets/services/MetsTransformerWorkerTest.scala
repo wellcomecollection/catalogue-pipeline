@@ -14,10 +14,11 @@ import uk.ac.wellcome.models.work.internal.{
 import uk.ac.wellcome.pipeline_storage.{PipelineStorageStream, Retriever}
 import uk.ac.wellcome.platform.transformer.mets.fixtures.MetsGenerators
 import uk.ac.wellcome.storage.generators.S3ObjectLocationGenerators
-import uk.ac.wellcome.storage.s3.S3ObjectLocation
+import uk.ac.wellcome.storage.s3.{S3ObjectLocation, S3ObjectLocationPrefix}
 import uk.ac.wellcome.storage.store.memory.MemoryTypedStore
 import weco.catalogue.source_model.MetsSourcePayload
-import weco.catalogue.source_model.mets.MetsSourceData
+import weco.catalogue.source_model.generators.MetsSourceDataGenerators
+import weco.catalogue.source_model.mets.{MetsFileWithImages, MetsSourceData}
 import weco.catalogue.transformer.{
   TransformerWorker,
   TransformerWorkerTestCases
@@ -32,6 +33,7 @@ class MetsTransformerWorkerTest
       MetsSourcePayload,
       MetsSourceData]
     with MetsGenerators
+    with MetsSourceDataGenerators
     with S3ObjectLocationGenerators {
   override def withContext[R](
     testWith: TestWith[MemoryTypedStore[S3ObjectLocation, String], R]): R =
@@ -39,51 +41,54 @@ class MetsTransformerWorkerTest
       MemoryTypedStore[S3ObjectLocation, String]()
     )
 
-  override def createPayload(
+  override def createId: String = createBibNumber
+
+  override def createPayloadWith(id: String, version: Int)(
     implicit store: MemoryTypedStore[S3ObjectLocation, String])
     : MetsSourcePayload = {
-    val bibId = randomAlphanumeric()
-
     val metsXML = metsXmlWith(
-      recordIdentifier = bibId,
+      recordIdentifier = id,
       accessConditionStatus = Some("Open"),
       license = Some(License.CC0)
     )
 
     val location = S3ObjectLocation(
       bucket = createBucketName,
-      key = s"digitised/$bibId/v1/METS.xml"
+      key = s"digitised/$id/v1/METS.xml"
     )
 
     store.put(location)(metsXML) shouldBe a[Right[_, _]]
 
     MetsSourcePayload(
-      id = bibId,
-      sourceData = MetsSourceData(
-        bucket = location.bucket,
-        path = s"digitised/$bibId/v1",
-        version = 1,
-        file = "METS.xml",
-        createdDate = Instant.now(),
-        deleted = false
+      id = id,
+      sourceData = MetsFileWithImages(
+        root = S3ObjectLocationPrefix(
+          bucket = location.bucket,
+          keyPrefix = s"digitised/$id"
+        ),
+        filename = "v1/METS.xml",
+        manifestations = List.empty,
+        version = version,
+        createdDate = Instant.now()
       ),
       version = 1
     )
   }
+
+  override def setPayloadVersion(p: MetsSourcePayload, version: Int)(
+    implicit store: MemoryTypedStore[S3ObjectLocation, String])
+    : MetsSourcePayload =
+    p.copy(
+      sourceData =
+        p.sourceData.asInstanceOf[MetsFileWithImages].copy(version = version)
+    )
 
   override def createBadPayload(
     implicit store: MemoryTypedStore[S3ObjectLocation, String])
     : MetsSourcePayload =
     MetsSourcePayload(
       id = randomAlphanumeric(),
-      sourceData = MetsSourceData(
-        bucket = createBucketName,
-        path = "",
-        version = 1,
-        file = randomAlphanumeric(),
-        createdDate = Instant.now(),
-        deleted = false
-      ),
+      sourceData = createMetsSourceData,
       version = 1
     )
 

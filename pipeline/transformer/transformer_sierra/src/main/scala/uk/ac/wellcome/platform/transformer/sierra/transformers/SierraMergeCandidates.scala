@@ -54,7 +54,7 @@ object SierraMergeCandidates extends SierraDataTransformer with SierraQueryOps {
             identifier = SourceIdentifier(
               identifierType = IdentifierType("sierra-system-number"),
               ontologyType = "Work",
-              value = bibNumber
+              value = bibNumber.trim
             ),
             reason = "Physical/digitised Sierra work"
           )

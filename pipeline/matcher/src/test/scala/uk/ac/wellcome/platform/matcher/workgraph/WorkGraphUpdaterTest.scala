@@ -34,7 +34,7 @@ class WorkGraphUpdaterTest
     it("updating nothing with A gives A:A") {
       WorkGraphUpdater
         .update(
-          workUpdate = WorkUpdate("A", 1, Set.empty),
+          links = WorkLinks("A", 1, Set.empty),
           existingGraph = WorkGraph(Set.empty)
         )
         .nodes shouldBe Set(WorkNode("A", 1, List(), hashed_A))
@@ -43,7 +43,7 @@ class WorkGraphUpdaterTest
     it("updating nothing with A->B gives A+B:A->B") {
       WorkGraphUpdater
         .update(
-          workUpdate = WorkUpdate("A", 1, Set("B")),
+          links = WorkLinks("A", 1, Set("B")),
           existingGraph = WorkGraph(Set.empty)
         )
         .nodes shouldBe Set(
@@ -54,7 +54,7 @@ class WorkGraphUpdaterTest
     it("updating nothing with B->A gives A+B:B->A") {
       WorkGraphUpdater
         .update(
-          workUpdate = WorkUpdate("B", 1, Set("A")),
+          links = WorkLinks("B", 1, Set("A")),
           existingGraph = WorkGraph(Set.empty)
         )
         .nodes shouldBe Set(
@@ -67,7 +67,7 @@ class WorkGraphUpdaterTest
     it("updating A, B with A->B gives A+B:(A->B, B)") {
       WorkGraphUpdater
         .update(
-          workUpdate = WorkUpdate("A", 2, Set("B")),
+          links = WorkLinks("A", 2, Set("B")),
           existingGraph = WorkGraph(
             Set(WorkNode("A", 1, Nil, "A"), WorkNode("B", 1, Nil, "B")))
         )
@@ -80,7 +80,7 @@ class WorkGraphUpdaterTest
     it("updating A->B with A->B gives A+B:(A->B, B)") {
       WorkGraphUpdater
         .update(
-          workUpdate = WorkUpdate("A", 2, Set("B")),
+          links = WorkLinks("A", 2, Set("B")),
           existingGraph = WorkGraph(
             Set(
               WorkNode("A", 1, List("B"), "A+B"),
@@ -95,7 +95,7 @@ class WorkGraphUpdaterTest
     it("updating A->B, B, C with B->C gives A+B+C:(A->B, B->C, C)") {
       WorkGraphUpdater
         .update(
-          workUpdate = WorkUpdate("B", 2, Set("C")),
+          links = WorkLinks("B", 2, Set("C")),
           existingGraph = WorkGraph(
             Set(
               WorkNode("A", 2, List("B"), "A+B"),
@@ -112,7 +112,7 @@ class WorkGraphUpdaterTest
     it("updating A->B, C->D with B->C gives A+B+C+D:(A->B, B->C, C->D, D)") {
       WorkGraphUpdater
         .update(
-          workUpdate = WorkUpdate("B", 2, Set("C")),
+          links = WorkLinks("B", 2, Set("C")),
           existingGraph = WorkGraph(
             Set(
               WorkNode("A", 1, List("B"), "A+B"),
@@ -132,7 +132,7 @@ class WorkGraphUpdaterTest
     it("updating A->B with B->[C,D] gives A+B+C+D:(A->B, B->C&D, C, D") {
       WorkGraphUpdater
         .update(
-          workUpdate = WorkUpdate("B", 2, Set("C", "D")),
+          links = WorkLinks("B", 2, Set("C", "D")),
           existingGraph = WorkGraph(
             Set(
               WorkNode("A", 2, List("B"), "A+B"),
@@ -153,7 +153,7 @@ class WorkGraphUpdaterTest
     it("updating A->B->C with A->C gives A+B+C:(A->B, B->C, C->A") {
       WorkGraphUpdater
         .update(
-          workUpdate = WorkUpdate("C", 2, Set("A")),
+          links = WorkLinks("C", 2, Set("A")),
           existingGraph = WorkGraph(
             Set(
               WorkNode("A", 2, List("B"), "A+B+C"),
@@ -174,7 +174,7 @@ class WorkGraphUpdaterTest
       val updateVersion = 2
       WorkGraphUpdater
         .update(
-          workUpdate = WorkUpdate("A", updateVersion, Set("B")),
+          links = WorkLinks("A", updateVersion, Set("B")),
           existingGraph =
             WorkGraph(Set(WorkNode("A", existingVersion, Nil, "A")))
         )
@@ -191,7 +191,7 @@ class WorkGraphUpdaterTest
       val thrown = intercept[VersionExpectedConflictException] {
         WorkGraphUpdater
           .update(
-            workUpdate = WorkUpdate("A", updateVersion, Set("B")),
+            links = WorkLinks("A", updateVersion, Set("B")),
             existingGraph =
               WorkGraph(Set(WorkNode("A", existingVersion, Nil, "A")))
           )
@@ -206,7 +206,7 @@ class WorkGraphUpdaterTest
 
       WorkGraphUpdater
         .update(
-          workUpdate = WorkUpdate("A", updateVersion, Set("B")),
+          links = WorkLinks("A", updateVersion, Set("B")),
           existingGraph = WorkGraph(
             Set(
               WorkNode("A", existingVersion, List("B"), hashed_AB),
@@ -226,7 +226,7 @@ class WorkGraphUpdaterTest
       val thrown = intercept[VersionUnexpectedConflictException] {
         WorkGraphUpdater
           .update(
-            workUpdate = WorkUpdate("A", updateVersion, Set("A")),
+            links = WorkLinks("A", updateVersion, Set("A")),
             existingGraph = WorkGraph(
               Set(
                 WorkNode("A", existingVersion, List("B"), hashed_AB),
@@ -241,7 +241,7 @@ class WorkGraphUpdaterTest
     it("updating  A->B with A gives A:A and B:B") {
       WorkGraphUpdater
         .update(
-          workUpdate = WorkUpdate("A", 2, Set.empty),
+          links = WorkLinks("A", 2, Set.empty),
           existingGraph = WorkGraph(
             Set(
               WorkNode("A", 1, List("B"), "A+B"),
@@ -256,7 +256,7 @@ class WorkGraphUpdaterTest
     it("updating A->B with A but NO B (*should* not occur) gives A:A and B:B") {
       WorkGraphUpdater
         .update(
-          workUpdate = WorkUpdate("A", 2, Set.empty),
+          links = WorkLinks("A", 2, Set.empty),
           existingGraph = WorkGraph(
             Set(
               WorkNode("A", 1, List("B"), "A+B")
@@ -271,7 +271,7 @@ class WorkGraphUpdaterTest
     it("updating A->B->C with B gives A+B:(A->B, B) and C:C") {
       WorkGraphUpdater
         .update(
-          workUpdate = WorkUpdate("B", 3, Set.empty),
+          links = WorkLinks("B", 3, Set.empty),
           existingGraph = WorkGraph(
             Set(
               WorkNode("A", 2, List("B"), "A+B+C"),
@@ -288,7 +288,7 @@ class WorkGraphUpdaterTest
     it("updating A<->B->C with B->C gives A+B+C:(A->B, B->C, C)") {
       WorkGraphUpdater
         .update(
-          workUpdate = WorkUpdate("B", 3, Set("C")),
+          links = WorkLinks("B", 3, Set("C")),
           existingGraph = WorkGraph(
             Set(
               WorkNode("A", 2, List("B"), "A+B+C"),

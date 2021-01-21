@@ -13,15 +13,18 @@ module "miro_transformer" {
   security_group_ids = [
     aws_security_group.service_egress.id,
     aws_security_group.interservice.id,
+    var.pipeline_storage_security_group_id,
   ]
 
   cluster_name = aws_ecs_cluster.cluster.name
   cluster_arn  = aws_ecs_cluster.cluster.arn
 
+  cpu    = 1024
+  memory = 2048
+
   env_vars = {
     transformer_queue_id = module.miro_transformer_queue.url
     metrics_namespace    = "${local.namespace_hyphen}_miro_transformer"
-    miro_vhs_table_name  = var.vhs_miro_table_name
 
     sns_topic_arn = module.miro_transformer_output_topic.arn
 
@@ -31,16 +34,10 @@ module "miro_transformer" {
     flush_interval_seconds = 30
   }
 
-  secret_env_vars = {
-    es_host     = "catalogue/pipeline_storage/es_host"
-    es_port     = "catalogue/pipeline_storage/es_port"
-    es_protocol = "catalogue/pipeline_storage/es_protocol"
-    es_username = "catalogue/pipeline_storage/transformer/es_username"
-    es_password = "catalogue/pipeline_storage/transformer/es_password"
-  }
+  secret_env_vars = local.pipeline_storage_es_service_secrets["transformer"]
 
   subnets             = var.subnets
-  max_capacity        = 10
+  max_capacity        = var.max_capacity
   messages_bucket_arn = aws_s3_bucket.messages.arn
   queue_read_policy   = module.miro_transformer_queue.read_policy
 

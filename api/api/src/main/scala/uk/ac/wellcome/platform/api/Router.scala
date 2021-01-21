@@ -11,7 +11,10 @@ import akka.http.scaladsl.server.{
 import com.sksamuel.elastic4s.ElasticClient
 import com.sksamuel.elastic4s.ElasticDsl._
 import uk.ac.wellcome.elasticsearch.ElasticConfig
-import uk.ac.wellcome.platform.api.elasticsearch.WorksMultiMatcher
+import uk.ac.wellcome.platform.api.elasticsearch.{
+  ImagesMultiMatcher,
+  WorksMultiMatcher
+}
 import uk.ac.wellcome.platform.api.swagger.SwaggerDocs
 import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.platform.api.rest._
@@ -111,13 +114,23 @@ class Router(elasticClient: ElasticClient,
   }
 
   def getSearchTemplates: Route = get {
-    val searchTemplate = SearchTemplate(
+    val worksSearchTemplate = SearchTemplate(
       "multi_matcher_search_query",
       elasticConfig.worksIndex.name,
       WorksMultiMatcher("{{query}}").filter(
-        termQuery(field = "type", value = "Visible")))
+        termQuery(field = "type", value = "Visible")),
+    )
 
-    complete(SearchTemplateResponse(List(searchTemplate)))
+    val imageSearchTemplate = SearchTemplate(
+      "image_search_query",
+      elasticConfig.imagesIndex.name,
+      ImagesMultiMatcher("{{query}}"),
+    )
+
+    complete(
+      SearchTemplateResponse(
+        List(worksSearchTemplate, imageSearchTemplate)
+      ))
   }
 
   def rejectionHandler =

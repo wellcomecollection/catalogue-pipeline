@@ -1,6 +1,6 @@
-resource "aws_iam_role_policy" "allow_vhs_access" {
+resource "aws_iam_role_policy" "allow_dynamo_access" {
   role   = module.sierra_to_dynamo_service.task_role_name
-  policy = var.vhs_sierra_items_full_access_policy
+  policy = data.aws_iam_policy_document.allow_dynamodb_access.json
 }
 
 resource "aws_iam_role_policy" "allow_read_from_demux_q" {

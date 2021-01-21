@@ -20,7 +20,6 @@ import weco.catalogue.transformer.{
 }
 
 import java.util.UUID
-
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class CalmTransformerWorkerTest
@@ -38,7 +37,9 @@ class CalmTransformerWorkerTest
       MemoryTypedStore[S3ObjectLocation, CalmRecord](initialEntries = Map.empty)
     )
 
-  override def createPayload(
+  override def createId: String = UUID.randomUUID().toString
+
+  override def createPayloadWith(id: String, version: Int)(
     implicit store: MemoryTypedStore[S3ObjectLocation, CalmRecord])
     : CalmSourcePayload = {
     val record = createCalmRecordWith(
@@ -51,11 +52,20 @@ class CalmTransformerWorkerTest
 
     val location = createS3ObjectLocation
 
-    val id = UUID.randomUUID().toString
-
     store.put(location)(record.copy(id = id)) shouldBe a[Right[_, _]]
 
-    CalmSourcePayload(id = id, location = location, version = 1)
+    CalmSourcePayload(id = id, location = location, version = version)
+  }
+
+  override def setPayloadVersion(p: CalmSourcePayload, version: Int)(
+    implicit store: MemoryTypedStore[S3ObjectLocation, CalmRecord])
+    : CalmSourcePayload = {
+    val storedData: CalmRecord = store.get(p.location).value.identifiedT
+
+    val location = createS3ObjectLocation
+    store.put(location)(storedData) shouldBe a[Right[_, _]]
+
+    p.copy(location = location, version = version)
   }
 
   override def createBadPayload(

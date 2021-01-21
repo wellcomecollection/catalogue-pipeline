@@ -19,6 +19,7 @@ module "id_minter" {
     aws_security_group.service_egress.id,
     aws_security_group.interservice.id,
     var.rds_ids_access_security_group_id,
+    var.pipeline_storage_security_group_id,
   ]
 
   cluster_name = aws_ecs_cluster.cluster.name
@@ -37,27 +38,22 @@ module "id_minter" {
     ingest_flush_interval_seconds = 30
   }
 
-  secret_env_vars = {
-    cluster_url          = "catalogue/id_minter/rds_host"
-    cluster_url_readonly = "catalogue/id_minter/rds_host_readonly"
-    db_port              = "catalogue/id_minter/rds_port"
+  secret_env_vars = merge({
+    cluster_url          = "rds/identifiers-delta-cluster/endpoint"
+    cluster_url_readonly = "rds/identifiers-delta-cluster/reader_endpoint"
+    db_port              = "rds/identifiers-delta-cluster/port"
     db_username          = "catalogue/id_minter/rds_user"
     db_password          = "catalogue/id_minter/rds_password"
-
-    es_host     = "catalogue/pipeline_storage/es_host"
-    es_port     = "catalogue/pipeline_storage/es_port"
-    es_protocol = "catalogue/pipeline_storage/es_protocol"
-    es_username = "catalogue/pipeline_storage/id_minter/es_username"
-    es_password = "catalogue/pipeline_storage/id_minter/es_password"
-  }
+  }, local.pipeline_storage_es_service_secrets["id_minter"])
 
   // The total number of connections to RDS across all tasks from all ID minter
   // services must not exceed the maximum supported by the RDS instance.
-  max_capacity = floor(
-    local.id_minter_rds_max_connections /
-    (local.id_minter_service_count * local.id_minter_task_max_connections)
+  max_capacity = min(
+    floor(
+      local.id_minter_rds_max_connections / local.id_minter_task_max_connections
+    ),
+    var.max_capacity
   )
-
 
   subnets             = var.subnets
   messages_bucket_arn = aws_s3_bucket.messages.arn
@@ -76,7 +72,7 @@ module "id_minter" {
 module "id_minter_topic" {
   source = "../modules/topic"
 
-  name       = "${local.namespace_hyphen}_work_id_minter"
+  name       = "${local.namespace_hyphen}_id_minter_output"
   role_names = [module.id_minter.task_role_name]
 
   messages_bucket_arn = aws_s3_bucket.messages.arn

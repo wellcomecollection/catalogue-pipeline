@@ -4,6 +4,6 @@
   "dependencyIds" : [
     "internal_model",
     "source_model",
-    "big_messaging_typesafe"
+    "flows"
   ]
 }

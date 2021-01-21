@@ -1,8 +1,7 @@
 package uk.ac.wellcome.platform.reindex.reindex_worker.services
 
 import akka.Done
-import org.scanamo.auto._
-import org.scanamo.time.JavaTimeFormats._
+import org.scanamo.generic.auto._
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
@@ -23,6 +22,7 @@ import uk.ac.wellcome.platform.reindex.reindex_worker.models.{
 import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.language.higherKinds
 
 class ReindexWorkerService[Destination](
   recordReader: RecordReader,

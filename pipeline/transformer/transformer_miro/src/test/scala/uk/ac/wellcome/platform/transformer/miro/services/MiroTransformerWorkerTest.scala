@@ -2,6 +2,7 @@ package uk.ac.wellcome.platform.transformer.miro.services
 
 import io.circe.Encoder
 import io.circe.generic.extras.semiauto.deriveConfiguredEncoder
+import org.scalatest.EitherValues
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
@@ -27,7 +28,10 @@ class MiroTransformerWorkerTest
       MiroSourcePayload,
       (MiroRecord, MiroMetadata)]
     with MiroRecordGenerators
-    with S3ObjectLocationGenerators {
+    with S3ObjectLocationGenerators
+    with EitherValues {
+
+  override def createId: String = createImageNumber
 
   override def withContext[R](
     testWith: TestWith[MemoryTypedStore[S3ObjectLocation, MiroRecord], R]): R =
@@ -35,20 +39,35 @@ class MiroTransformerWorkerTest
       MemoryTypedStore[S3ObjectLocation, MiroRecord]()
     )
 
-  override def createPayload(
+  // The WorkData for a Miro Work is based on the stored version of the work,
+  // which is copied onto the Image data.
+  override val workDataDependsOnVersion: Boolean = true
+
+  override def createPayloadWith(id: String, version: Int)(
     implicit store: MemoryTypedStore[S3ObjectLocation, MiroRecord])
     : MiroSourcePayload = {
-    val record = createMiroRecord
+    val record = createMiroRecordWith(imageNumber = id)
     val location = createS3ObjectLocation
 
     store.put(location)(record) shouldBe a[Right[_, _]]
 
     MiroSourcePayload(
-      id = record.imageNumber,
-      version = 1,
+      id = id,
+      version = version,
       location = location,
       isClearedForCatalogueAPI = chooseFrom(true, false)
     )
+  }
+
+  override def setPayloadVersion(p: MiroSourcePayload, version: Int)(
+    implicit store: MemoryTypedStore[S3ObjectLocation, MiroRecord])
+    : MiroSourcePayload = {
+    val storedRecord: MiroRecord = store.get(p.location).value.identifiedT
+
+    val location = createS3ObjectLocation
+    store.put(location)(storedRecord) shouldBe a[Right[_, _]]
+
+    p.copy(location = location, version = version)
   }
 
   override def createBadPayload(

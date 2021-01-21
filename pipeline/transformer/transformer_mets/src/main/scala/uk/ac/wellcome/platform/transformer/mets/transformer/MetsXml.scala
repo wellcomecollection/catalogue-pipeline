@@ -137,7 +137,7 @@ case class MetsXml(root: Elem) {
     * file IDs in the (normalised) fileObjects mapping
     */
   def fileReferencesMapping(bnumber: String): List[(String, FileReference)] =
-    physicalFileIdsMapping.par.flatMap {
+    physicalFileIdsMapping.flatMap {
       case (id, fileId) =>
         getFileReferences(fileId)
           .map(ref => (id, normaliseLocation(bnumber, ref)))

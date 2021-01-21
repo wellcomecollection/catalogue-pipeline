@@ -98,7 +98,7 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
       title = SierraTitle(bibData),
       alternativeTitles = SierraAlternativeTitles(bibData),
       format = SierraFormat(bibData),
-      description = SierraDescription(bibData),
+      description = SierraDescription(bibId, bibData),
       physicalDescription = SierraPhysicalDescription(bibData),
       lettering = SierraLettering(bibData),
       subjects = SierraSubjects(bibId, bibData),

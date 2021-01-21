@@ -86,6 +86,26 @@ class SierraIdentifiersTest
       }
       isbnIdentifiers should have size 1
     }
+
+    it("strips whitespace") {
+      // Based on https://api.wellcomecollection.org/catalogue/v2/works/mhvnscj7?include=identifiers
+      val isbn = "978-1479144075"
+
+      val expectedIdentifier = SourceIdentifier(
+        identifierType = IdentifierType("isbn"),
+        ontologyType = "Work",
+        value = isbn
+      )
+
+      val bibData = createSierraBibDataWith(
+        varFields = List(
+          createVarFieldWith(marcTag = "020", subfieldA = s" $isbn")
+        )
+      )
+
+      val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
+      otherIdentifiers should contain(expectedIdentifier)
+    }
   }
 
   describe("finds ISSN identifiers from MARC 022 ǂa") {
@@ -143,6 +163,26 @@ class SierraIdentifiersTest
         _.identifierType.id == "issn"
       }
       issnIdentifiers should have size 1
+    }
+
+    it("strips whitespace") {
+      // Based on https://api.wellcomecollection.org/catalogue/v2/works/t9wua9ys?include=identifiers
+      val issn = "0945-7704"
+
+      val expectedIdentifier = SourceIdentifier(
+        identifierType = IdentifierType("issn"),
+        ontologyType = "Work",
+        value = issn
+      )
+
+      val bibData = createSierraBibDataWith(
+        varFields = List(
+          createVarFieldWith(marcTag = "022", subfieldA = s"$issn ")
+        )
+      )
+
+      val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
+      otherIdentifiers should contain(expectedIdentifier)
     }
   }
 

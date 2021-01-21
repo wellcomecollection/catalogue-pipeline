@@ -1,9 +1,9 @@
 package weco.catalogue.source_model.config
 
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.s3.AmazonS3
 import com.typesafe.config.Config
-import org.scanamo.auto._
+import org.scanamo.generic.auto._
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import uk.ac.wellcome.storage.s3.{S3ObjectLocation, S3ObjectLocationPrefix}
 import uk.ac.wellcome.storage.store.{
   HybridStoreWithMaxima,
@@ -16,11 +16,13 @@ import uk.ac.wellcome.storage.typesafe.{DynamoBuilder, S3Builder}
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 import weco.catalogue.source_model.store.SourceVHS
 
+import scala.language.higherKinds
+
 object SourceVHSBuilder {
   def build[T](config: Config, namespace: String = "vhs")(
     implicit codec: Codec[T]): SourceVHS[T] = {
     implicit val s3Client: AmazonS3 = S3Builder.buildS3Client(config)
-    implicit val dynamoClient: AmazonDynamoDB =
+    implicit val dynamoClient: DynamoDbClient =
       DynamoBuilder.buildDynamoClient(config)
 
     val dynamoConfig =

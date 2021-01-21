@@ -1,31 +1,34 @@
 package uk.ac.wellcome.platform.transformer.mets.transformer
 
 import java.time.Instant
-import org.scalatest.Inside
+import org.scalatest.{EitherValues, Inside}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.internal._
 import WorkState.Source
-import uk.ac.wellcome.fixtures.RandomGenerators
 import uk.ac.wellcome.models.work.internal.DeletedReason.DeletedFromSource
+import uk.ac.wellcome.platform.transformer.mets.fixtures.MetsGenerators
 
 class MetsDataTest
     extends AnyFunSpec
-    with RandomGenerators
+    with MetsGenerators
     with Matchers
+    with EitherValues
     with Inside {
 
   it("creates a invisible work with an item and a license") {
-    val bNumber = randomAlphanumeric(10)
+    val bibNumber = createBibNumber
     val metsData =
-      MetsData(recordIdentifier = bNumber, accessConditionDz = Some("CC-BY-NC"))
+      MetsData(
+        recordIdentifier = bibNumber,
+        accessConditionDz = Some("CC-BY-NC"))
     val version = 1
     val expectedSourceIdentifier = SourceIdentifier(
       IdentifierType("mets", "METS"),
       ontologyType = "Work",
-      value = bNumber)
+      value = bibNumber)
 
-    val url = s"https://wellcomelibrary.org/iiif/$bNumber/manifest"
+    val url = s"https://wellcomelibrary.org/iiif/$bibNumber/manifest"
     val digitalLocation = DigitalLocationDeprecated(
       url,
       LocationType("iiif-presentation"),
@@ -46,7 +49,7 @@ class MetsDataTest
               identifier = SourceIdentifier(
                 identifierType = IdentifierType("sierra-system-number"),
                 ontologyType = "Work",
-                value = bNumber
+                value = bibNumber
               ),
               reason = "METS work"
             )
@@ -56,20 +59,21 @@ class MetsDataTest
   }
 
   it("creates a deleted work") {
-    val bNumber = randomAlphanumeric(10)
+    val bibNumber = createBibNumber
     val metsData =
-      MetsData(recordIdentifier = bNumber, deleted = true)
+      MetsData(recordIdentifier = bibNumber, deleted = true)
     val version = 1
     val expectedSourceIdentifier = SourceIdentifier(
       IdentifierType("mets", "METS"),
       ontologyType = "Work",
-      value = bNumber)
+      value = bibNumber)
 
     val createdDate = Instant.now()
 
     metsData.toWork(version, createdDate).right.get shouldBe Work
       .Deleted[Source](
         version = version,
+        data = WorkData[DataState.Unidentified](),
         state = Source(expectedSourceIdentifier, createdDate),
         deletedReason = Some(DeletedFromSource("Mets"))
       )
@@ -77,16 +81,16 @@ class MetsDataTest
   }
 
   it("creates a invisible work with an item and no license") {
-    val bNumber = randomAlphanumeric(10)
+    val bibNumber = createBibNumber
     val metsData =
-      MetsData(recordIdentifier = bNumber, accessConditionDz = None)
+      MetsData(recordIdentifier = bibNumber, accessConditionDz = None)
     val version = 1
     val expectedSourceIdentifier = SourceIdentifier(
       IdentifierType("mets", "METS"),
       ontologyType = "Work",
-      value = bNumber)
+      value = bibNumber)
 
-    val url = s"https://wellcomelibrary.org/iiif/$bNumber/manifest"
+    val url = s"https://wellcomelibrary.org/iiif/$bibNumber/manifest"
     val digitalLocation =
       DigitalLocationDeprecated(
         url,
@@ -108,7 +112,7 @@ class MetsDataTest
               identifier = SourceIdentifier(
                 identifierType = IdentifierType("sierra-system-number"),
                 ontologyType = "Work",
-                value = bNumber
+                value = bibNumber
               ),
               reason = "METS work"
             )
@@ -118,9 +122,9 @@ class MetsDataTest
   }
 
   it("fails creating a work if it cannot parse the license") {
-    val bNumber = randomAlphanumeric(10)
+    val bibNumber = createBibNumber
     val metsData =
-      MetsData(recordIdentifier = bNumber, accessConditionDz = Some("blah"))
+      MetsData(recordIdentifier = bibNumber, accessConditionDz = Some("blah"))
     val version = 1
 
     metsData.toWork(version, Instant.now()).left.get shouldBe a[Exception]
@@ -130,7 +134,7 @@ class MetsDataTest
   it("can create a license if it matches the license label lowercase") {
     val metsData =
       MetsData(
-        recordIdentifier = randomAlphanumeric(10),
+        recordIdentifier = createBibNumber,
         accessConditionDz = Some("in copyright"))
 
     inside(metsData.toWork(1, Instant.now()).right.get.data.items) {
@@ -146,7 +150,7 @@ class MetsDataTest
   it("can create a license if it matches the license label") {
     val metsData =
       MetsData(
-        recordIdentifier = randomAlphanumeric(10),
+        recordIdentifier = createBibNumber,
         accessConditionDz = Some("In copyright"))
 
     inside(metsData.toWork(1, Instant.now()).right.get.data.items) {
@@ -162,7 +166,7 @@ class MetsDataTest
   it("can create a license if it matches the license url") {
     val metsData =
       MetsData(
-        recordIdentifier = randomAlphanumeric(10),
+        recordIdentifier = createBibNumber,
         accessConditionDz = Some(License.InCopyright.url))
     inside(metsData.toWork(1, Instant.now()).right.get.data.items) {
       case List(
@@ -176,7 +180,7 @@ class MetsDataTest
 
   it("maps Copyright not cleared to In copyright") {
     val metsData = MetsData(
-      recordIdentifier = randomAlphanumeric(10),
+      recordIdentifier = createBibNumber,
       accessConditionDz = Some("Copyright not cleared"))
     val result = metsData.toWork(1, Instant.now())
 
@@ -193,7 +197,7 @@ class MetsDataTest
   it("can create a license for rightsstatements.org/page/InC/1.0/?language=en") {
     val metsData =
       MetsData(
-        recordIdentifier = randomAlphanumeric(10),
+        recordIdentifier = createBibNumber,
         accessConditionDz =
           Some("rightsstatements.org/page/InC/1.0/?language=en"))
     val result = metsData.toWork(1, Instant.now())
@@ -211,7 +215,7 @@ class MetsDataTest
   it("maps All Rights Reserved to In Copyright license") {
     val metsData =
       MetsData(
-        recordIdentifier = randomAlphanumeric(10),
+        recordIdentifier = createBibNumber,
         accessConditionDz = Some("All Rights Reserved"))
     val result = metsData.toWork(1, Instant.now())
 
@@ -227,7 +231,7 @@ class MetsDataTest
 
   it("creates a invisible work with a thumbnail location") {
     val metsData = MetsData(
-      recordIdentifier = randomAlphanumeric(10),
+      recordIdentifier = createBibNumber,
       accessConditionDz = Some("CC-BY-NC"),
       fileReferencesMapping = List(
         "id" -> FileReference("l", "location.jp2", Some("image/jp2"))
@@ -246,7 +250,7 @@ class MetsDataTest
 
   it("creates a invisible work with a title page thumbnail") {
     val metsData = MetsData(
-      recordIdentifier = randomAlphanumeric(10),
+      recordIdentifier = createBibNumber,
       accessConditionDz = Some("CC-BY-NC"),
       fileReferencesMapping = List(
         "id" -> FileReference("l", "location.jp2", Some("image/jp2")),
@@ -267,7 +271,7 @@ class MetsDataTest
 
   it("creates a invisible work without a thumbnail for restricted works") {
     val metsData = MetsData(
-      recordIdentifier = randomAlphanumeric(10),
+      recordIdentifier = createBibNumber,
       accessConditionDz = Some("CC-BY-NC"),
       accessConditionStatus = Some("restricted"),
       fileReferencesMapping = List(
@@ -280,10 +284,10 @@ class MetsDataTest
   }
 
   it("serves the thumbnail from wellcomelibrary for PDFs") {
-    val bnumber = randomAlphanumeric(10)
+    val bibNumber = createBibNumber
     val assetId = "location.pdf"
     val metsData = MetsData(
-      recordIdentifier = bnumber,
+      recordIdentifier = bibNumber,
       accessConditionDz = Some("CC-BY-NC"),
       fileReferencesMapping = List(
         "id" -> FileReference("l", "location.pdf")
@@ -293,7 +297,7 @@ class MetsDataTest
     result shouldBe a[Right[_, _]]
     result.right.get.data.thumbnail shouldBe Some(
       DigitalLocationDeprecated(
-        s"https://wellcomelibrary.org/pdfthumbs/${bnumber}/0/${assetId}.jpg",
+        s"https://wellcomelibrary.org/pdfthumbs/$bibNumber/0/$assetId.jpg",
         LocationType("thumbnail-image"),
         license = Some(License.CCBYNC)
       )
@@ -302,7 +306,7 @@ class MetsDataTest
 
   it("does not add a thumbnail if the file is a video") {
     val metsData = MetsData(
-      recordIdentifier = randomAlphanumeric(10),
+      recordIdentifier = createBibNumber,
       accessConditionDz = Some("CC-BY-NC"),
       fileReferencesMapping = List(
         "id" -> FileReference("v", "video.mpg", Some("video/mpeg"))
@@ -315,7 +319,7 @@ class MetsDataTest
 
   it("does not add a thumbnail if the file is an audio") {
     val metsData = MetsData(
-      recordIdentifier = randomAlphanumeric(10),
+      recordIdentifier = createBibNumber,
       accessConditionDz = Some("CC-BY-NC"),
       fileReferencesMapping = List(
         "id" -> FileReference("v", "video.mp3", Some("audio/x-mpeg-3"))
@@ -328,7 +332,7 @@ class MetsDataTest
 
   it("uses both the IIIF manifest and image for imageData locations") {
     val metsData = MetsData(
-      recordIdentifier = randomAlphanumeric(10),
+      recordIdentifier = createBibNumber,
       accessConditionDz = Some("CC-BY-NC"),
       fileReferencesMapping = List(
         "id" -> FileReference("l", "location.jp2", Some("image/jp2"))
@@ -456,5 +460,29 @@ class MetsDataTest
       accessConditionStatus = Some("Kanye West"),
     ).toWork(1, Instant.now())
     result shouldBe a[Left[_, _]]
+  }
+
+  it("lowercases the b number") {
+    val data = MetsData(
+      recordIdentifier = "B1234"
+    )
+
+    val work = data.toWork(version = 1, modifiedTime = Instant.now()).value
+
+    work.sourceIdentifier shouldBe SourceIdentifier(
+      identifierType = IdentifierType("mets"),
+      ontologyType = "Work",
+      value = "b1234"
+    )
+
+    val mergeCandidates = work.data.mergeCandidates
+    mergeCandidates should have size 1
+
+    mergeCandidates.head.id.sourceIdentifier shouldBe
+      SourceIdentifier(
+        identifierType = IdentifierType("sierra-system-number"),
+        ontologyType = "Work",
+        value = "b1234"
+      )
   }
 }

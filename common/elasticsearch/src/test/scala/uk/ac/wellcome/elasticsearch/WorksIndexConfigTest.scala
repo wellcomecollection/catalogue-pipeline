@@ -152,4 +152,14 @@ class WorksIndexConfigTest
       }
     }
   }
+
+  it("puts a valid work using compression") {
+    forAll { sampleWork: Work[Identified] =>
+      withLocalWorksIndex { index =>
+        whenReady(indexObjectCompressed(index, sampleWork)) { resp =>
+          assertObjectIndexed(index, sampleWork)
+        }
+      }
+    }
+  }
 }

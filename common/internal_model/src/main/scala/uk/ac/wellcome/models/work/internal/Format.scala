@@ -48,6 +48,8 @@ object Format extends Enum[Format] {
     val linksTo: Unlinked
   }
 
+  sealed trait Audiovisual extends Format
+
   case object Books extends Unlinked {
     override val id: String = "a"
     override val label: String = "Books"
@@ -98,12 +100,12 @@ object Format extends Enum[Format] {
     override val label: String = "Mixed materials"
   }
 
-  case object Audio extends Unlinked {
+  case object Audio extends Unlinked with Audiovisual {
     override val id: String = "i"
     override val label: String = "Audio"
   }
 
-  case object Videos extends Unlinked {
+  case object Videos extends Unlinked with Audiovisual {
     override val id: String = "g"
     override val label: String = "Videos"
   }
@@ -113,7 +115,7 @@ object Format extends Enum[Format] {
     override val label: String = "Archives and manuscripts"
   }
 
-  case object Film extends Unlinked {
+  case object Film extends Unlinked with Audiovisual {
     override val id: String = "n"
     override val label: String = "Film"
   }
@@ -123,7 +125,7 @@ object Format extends Enum[Format] {
     override val label: String = "Manuscripts"
   }
 
-  case object Music extends Unlinked {
+  case object Music extends Unlinked with Audiovisual {
     override val id: String = "c"
     override val label: String = "Music"
   }
@@ -144,7 +146,7 @@ object Format extends Enum[Format] {
     override val linksTo: Unlinked = Books
   }
 
-  case object ESound extends Linked {
+  case object ESound extends Linked with Audiovisual {
     override val id: String = "s"
     override val label: String = "E-sound"
     override val linksTo: Unlinked = Audio
@@ -156,7 +158,7 @@ object Format extends Enum[Format] {
     override val linksTo: Unlinked = Journals
   }
 
-  case object EVideos extends Linked {
+  case object EVideos extends Linked with Audiovisual {
     override val id: String = "f"
     override val label: String = "E-videos"
     override val linksTo: Unlinked = Videos

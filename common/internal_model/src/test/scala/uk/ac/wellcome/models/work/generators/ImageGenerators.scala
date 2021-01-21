@@ -1,10 +1,10 @@
 package uk.ac.wellcome.models.work.generators
 
-import java.time.Instant
-
+import uk.ac.wellcome.models.work.internal.ImageState._
+import uk.ac.wellcome.models.work.internal.SourceWork._
 import uk.ac.wellcome.models.work.internal._
-import SourceWork._
-import ImageState._
+
+import java.time.Instant
 
 import scala.util.Random
 
@@ -14,6 +14,7 @@ trait ImageGenerators
     with InstantGenerators
     with VectorGenerators
     with SierraWorkGenerators {
+
   def createImageDataWith(
     locations: List[DigitalLocationDeprecated] = List(createImageLocation),
     version: Int = 1,
@@ -61,11 +62,10 @@ trait ImageGenerators
       )
     def toInitialImageWith(canonicalId: String = createCanonicalId,
                            modifiedTime: Instant = instantInLast30Days,
-                           sourceWorks: SourceWorks[DataState.Identified] =
-                             SourceWorks(
-                               canonicalWork = mergedWork().toSourceWork,
-                               redirectedWork = None
-                             )): Image[Initial] =
+                           sourceWorks: SourceWorks = SourceWorks(
+                             canonicalWork = mergedWork().toSourceWork,
+                             redirectedWork = None
+                           )): Image[Initial] =
       imageData
         .toIdentifiedWith(canonicalId)
         .toInitialImageWith(modifiedTime, sourceWorks)
@@ -112,7 +112,7 @@ trait ImageGenerators
     imageData: ImageData[IdState.Identified]) {
     def toInitialImageWith(
       modifiedTime: Instant = instantInLast30Days,
-      sourceWorks: SourceWorks[DataState.Identified] = SourceWorks(
+      sourceWorks: SourceWorks = SourceWorks(
         canonicalWork = mergedWork().toSourceWork,
         redirectedWork = None
       )
@@ -195,9 +195,9 @@ trait ImageGenerators
           locationType = createImageLocationType))
     ).toIndexedImage
 
-//   Create a set of images with intersecting LSH lists to ensure
-//   that similarity queries will return something. Returns them in order
-//   of similarity.
+  //   Create a set of images with intersecting LSH lists to ensure
+  //   that similarity queries will return something. Returns them in order
+  //   of similarity.
   def createSimilarImages(n: Int,
                           similarFeatures: Boolean,
                           similarPalette: Boolean): Seq[Image[Indexed]] = {

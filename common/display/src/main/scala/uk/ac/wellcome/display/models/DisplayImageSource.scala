@@ -29,15 +29,14 @@ case class DisplayImageSource(
 
 object DisplayImageSource {
 
-  def apply(imageSource: ImageSource[DataState.Identified],
+  def apply(imageSource: ImageSource,
             includes: ImageIncludes): DisplayImageSource =
     imageSource match {
-      case works: SourceWorks[DataState.Identified] =>
+      case works: SourceWorks =>
         DisplayImageSource(works, includes)
     }
 
-  def apply(source: SourceWorks[DataState.Identified],
-            includes: ImageIncludes): DisplayImageSource =
+  def apply(source: SourceWorks, includes: ImageIncludes): DisplayImageSource =
     new DisplayImageSource(
       id = source.id.canonicalId,
       title = source.canonicalWork.data.title,

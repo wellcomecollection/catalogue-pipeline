@@ -26,6 +26,7 @@ case class MetsData(
         Right(
           Work.Deleted[Source](
             version = version,
+            data = WorkData[DataState.Unidentified](),
             state = Source(sourceIdentifier, modifiedTime),
             deletedReason = Some(DeletedFromSource("Mets"))))
       case false =>
@@ -57,7 +58,11 @@ case class MetsData(
     identifier = SourceIdentifier(
       identifierType = IdentifierType("sierra-system-number"),
       ontologyType = "Work",
-      value = recordIdentifier
+      // We lowercase the b number in the METS file so it matches the
+      // case used by Sierra.
+      // e.g. b20442233 has the identifier "B20442233" in the METS file,
+      //
+      value = recordIdentifier.toLowerCase
     ),
     reason = "METS work"
   )
@@ -114,9 +119,14 @@ case class MetsData(
 
   private def sourceIdentifier =
     SourceIdentifier(
-      IdentifierType("mets"),
+      identifierType = IdentifierType("mets"),
       ontologyType = "Work",
-      value = recordIdentifier)
+      // We lowercase the b number in the METS file so it matches the
+      // case used by Sierra.
+      // e.g. b20442233 has the identifier "B20442233" in the METS file,
+      //
+      value = recordIdentifier.toLowerCase
+    )
 
   private def titlePageFileReference: Option[FileReference] =
     titlePageId

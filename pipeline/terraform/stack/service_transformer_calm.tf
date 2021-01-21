@@ -13,6 +13,7 @@ module "calm_transformer" {
   security_group_ids = [
     aws_security_group.service_egress.id,
     aws_security_group.interservice.id,
+    var.pipeline_storage_security_group_id,
   ]
 
   cluster_name = aws_ecs_cluster.cluster.name
@@ -21,8 +22,6 @@ module "calm_transformer" {
   env_vars = {
     transformer_queue_id = module.calm_transformer_queue.url
     metrics_namespace    = "${local.namespace_hyphen}_calm_transformer"
-    vhs_calm_bucket_name = var.vhs_calm_sourcedata_bucket_name
-    vhs_calm_table_name  = var.vhs_calm_sourcedata_table_name
 
     sns_topic_arn = module.calm_transformer_output_topic.arn
 
@@ -32,16 +31,10 @@ module "calm_transformer" {
     flush_interval_seconds = 30
   }
 
-  secret_env_vars = {
-    es_host     = "catalogue/pipeline_storage/es_host"
-    es_port     = "catalogue/pipeline_storage/es_port"
-    es_protocol = "catalogue/pipeline_storage/es_protocol"
-    es_username = "catalogue/pipeline_storage/transformer/es_username"
-    es_password = "catalogue/pipeline_storage/transformer/es_password"
-  }
+  secret_env_vars = local.pipeline_storage_es_service_secrets["transformer"]
 
   subnets             = var.subnets
-  max_capacity        = 10
+  max_capacity        = var.max_capacity
   messages_bucket_arn = aws_s3_bucket.messages.arn
 
   queue_read_policy = module.calm_transformer_queue.read_policy

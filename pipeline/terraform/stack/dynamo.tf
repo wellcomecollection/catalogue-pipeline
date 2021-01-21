@@ -1,6 +1,10 @@
 # Graph table
+locals {
+  graph_table_name = "${local.namespace_hyphen}_works-graph"
+}
+
 resource "aws_dynamodb_table" "matcher_graph_table" {
-  name     = "${local.namespace_hyphen}_works-graph"
+  name     = local.graph_table_name
   hash_key = "id"
 
   attribute {
@@ -20,12 +24,17 @@ resource "aws_dynamodb_table" "matcher_graph_table" {
     hash_key        = "componentId"
     projection_type = "ALL"
   }
+
+  tags = {
+    Name = local.graph_table_name
+  }
 }
 
 data "aws_iam_policy_document" "graph_table_readwrite" {
   statement {
     actions = [
       "dynamodb:BatchGetItem",
+      "dynamodb:BatchWriteItem",
       "dynamodb:GetItem",
       "dynamodb:UpdateItem",
       "dynamodb:PutItem",
@@ -49,8 +58,12 @@ data "aws_iam_policy_document" "graph_table_readwrite" {
 
 # Lock table
 
+locals {
+  lock_table_name = "${local.namespace_hyphen}_matcher-lock-table"
+}
+
 resource "aws_dynamodb_table" "matcher_lock_table" {
-  name     = "${local.namespace_hyphen}_matcher-lock-table"
+  name     = local.lock_table_name
   hash_key = "id"
 
   billing_mode = "PAY_PER_REQUEST"
@@ -75,6 +88,10 @@ resource "aws_dynamodb_table" "matcher_lock_table" {
     attribute_name = "expires"
     enabled        = true
   }
+
+  tags = {
+    Name = local.lock_table_name
+  }
 }
 
 data "aws_iam_policy_document" "lock_table_readwrite" {
@@ -84,6 +101,7 @@ data "aws_iam_policy_document" "lock_table_readwrite" {
       "dynamodb:PutItem",
       "dynamodb:GetItem",
       "dynamodb:DeleteItem",
+      "dynamodb:BatchWriteItem",
     ]
 
     resources = [

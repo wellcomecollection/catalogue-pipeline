@@ -120,6 +120,7 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
       deletedReason: Option[DeletedReason] = None): Work.Deleted[State] =
       Work.Deleted[State](
         state = work.state,
+        data = work.data,
         version = work.version,
         deletedReason = deletedReason
       )
@@ -219,6 +220,32 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
         implicitly[UpdateState[State]].apply(work.state, nextData)
       )
     }
+  }
+
+  implicit class IndexedWorkOps(work: Work.Visible[Indexed])(
+    implicit updateState: UpdateState[Indexed]) {
+
+    def ancestors(works: Work.Visible[Indexed]*): Work.Visible[Indexed] =
+      Work.Visible[Indexed](
+        work.version,
+        work.data,
+        updateState(
+          work.state.copy(
+            relations = work.state.relations.copy(
+              ancestors = works.toList.zipWithIndex.map {
+                case (work, idx) =>
+                  Relation(
+                    work = work,
+                    depth = idx + 1,
+                    numChildren = 1,
+                    numDescendents = works.length - idx
+                  )
+              }
+            )
+          ),
+          work.data
+        )
+      )
   }
 
   trait UpdateState[State <: WorkState] {

@@ -15,9 +15,6 @@ variable "aws_region" {
 variable "sierra_transformable_vhs_full_access_policy" {}
 variable "sierra_transformable_vhs_dynamo_table_name" {}
 variable "sierra_transformable_vhs_bucket_name" {}
-variable "sierra_items_vhs_read_policy" {}
-variable "sierra_items_vhs_dynamo_table_name" {}
-variable "sierra_items_vhs_bucket_name" {}
 
 variable "subnets" {
   type = list(string)

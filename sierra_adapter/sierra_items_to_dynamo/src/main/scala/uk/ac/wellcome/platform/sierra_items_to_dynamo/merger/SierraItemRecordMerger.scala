@@ -6,15 +6,9 @@ import uk.ac.wellcome.sierra_adapter.model.SierraItemRecord
 object SierraItemRecordMerger {
   def mergeItems(existingLink: SierraItemLink,
                  newRecord: SierraItemRecord): Option[SierraItemLink] = {
-    assert(
-      existingLink.id == newRecord.id,
-      s"Identifiers don't match: existingLink (${existingLink.id}) != itemRecord (${newRecord.id})"
-    )
-
     if (existingLink.modifiedDate.isBefore(newRecord.modifiedDate)) {
       Some(
         SierraItemLink(
-          id = newRecord.id,
           modifiedDate = newRecord.modifiedDate,
           bibIds = newRecord.bibIds,
           // Let's suppose we have

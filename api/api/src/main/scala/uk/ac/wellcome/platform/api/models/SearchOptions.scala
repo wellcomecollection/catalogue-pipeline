@@ -6,7 +6,7 @@ import uk.ac.wellcome.display.models.{
   SortingOrder
 }
 
-case class SearchOptions(
+case class SearchOptions[DocumentFilter, MustQuery](
   searchQuery: Option[SearchQuery] = None,
   filters: List[DocumentFilter] = Nil,
   aggregations: List[AggregationRequest] = Nil,

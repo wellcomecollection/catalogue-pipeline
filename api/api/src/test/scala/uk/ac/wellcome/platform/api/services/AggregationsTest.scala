@@ -40,7 +40,7 @@ class AggregationsTest
     }
     withLocalWorksIndex { index =>
       insertIntoElasticsearch(index, works: _*)
-      val searchOptions = SearchOptions(
+      val searchOptions = SearchOptions[WorkFilter, WorkMustQuery](
         aggregations = List(AggregationRequest.Format)
       )
       whenReady(aggregationQuery(index, searchOptions)) { aggs =>
@@ -72,7 +72,7 @@ class AggregationsTest
 
     withLocalWorksIndex { index =>
       insertIntoElasticsearch(index, works: _*)
-      val searchOptions = SearchOptions(
+      val searchOptions = SearchOptions[WorkFilter, WorkMustQuery](
         aggregations = List(AggregationRequest.ProductionDate),
         filters = List(
           DateRangeFilter(Some(LocalDate.of(1960, 1, 1)), None)
@@ -98,7 +98,7 @@ class AggregationsTest
     }
     withLocalWorksIndex { index =>
       insertIntoElasticsearch(index, works: _*)
-      val searchOptions = SearchOptions(
+      val searchOptions = SearchOptions[WorkFilter, WorkMustQuery](
         searchQuery = Some(SearchQuery("anything will give zero results")),
         aggregations = List(AggregationRequest.Format)
       )
@@ -126,7 +126,7 @@ class AggregationsTest
     it("applies filters to their related aggregations") {
       withLocalWorksIndex { index =>
         insertIntoElasticsearch(index, works: _*)
-        val searchOptions = SearchOptions(
+        val searchOptions = SearchOptions[WorkFilter, WorkMustQuery](
           aggregations =
             List(AggregationRequest.Format, AggregationRequest.Subject),
           filters = List(
@@ -149,7 +149,7 @@ class AggregationsTest
           case Subject(IdState.Unidentifiable, label, _) => label
           case _                                         => "bilberry"
         }
-        val searchOptions = SearchOptions(
+        val searchOptions = SearchOptions[WorkFilter, WorkMustQuery](
           aggregations =
             List(AggregationRequest.Format, AggregationRequest.Subject),
           filters = List(
@@ -173,7 +173,7 @@ class AggregationsTest
           case Subject(IdState.Unidentifiable, label, _) => label
           case _                                         => "passionfruit"
         }
-        val searchOptions = SearchOptions(
+        val searchOptions = SearchOptions[WorkFilter, WorkMustQuery](
           aggregations =
             List(AggregationRequest.Format, AggregationRequest.Subject),
           filters = List(
@@ -190,7 +190,9 @@ class AggregationsTest
     }
   }
 
-  private def aggregationQuery(index: Index, searchOptions: SearchOptions) =
+  private def aggregationQuery(
+    index: Index,
+    searchOptions: SearchOptions[WorkFilter, WorkMustQuery]) =
     worksService
       .listOrSearchWorks(index, searchOptions)
       .map(_.right.get.aggregations.get)

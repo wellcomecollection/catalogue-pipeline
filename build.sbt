@@ -53,17 +53,10 @@ lazy val elasticsearch_typesafe = setupProject(
   externalDependencies = CatalogueDependencies.elasticsearchTypesafeDependencies
 )
 
-lazy val big_messaging = setupProject(
+lazy val flows = setupProject(
   project,
-  "common/big_messaging",
-  externalDependencies = CatalogueDependencies.bigMessagingDependencies)
-
-lazy val big_messaging_typesafe = setupProject(
-  project,
-  "common/big_messaging_typesafe",
-  localDependencies = Seq(big_messaging),
-  externalDependencies = CatalogueDependencies.bigMessagingTypesafeDependencies
-)
+  "common/flows",
+  externalDependencies = CatalogueDependencies.flowDependencies)
 
 lazy val source_model = setupProject(
   project,
@@ -110,22 +103,19 @@ lazy val id_minter = setupProject(
 lazy val ingestor_common = setupProject(
   project,
   "pipeline/ingestor/ingestor_common",
-  localDependencies =
-    Seq(elasticsearch_typesafe, big_messaging_typesafe, pipeline_storage_typesafe)
+  localDependencies = Seq(elasticsearch_typesafe, pipeline_storage_typesafe)
 )
 
 lazy val ingestor_works = setupProject(
   project,
   "pipeline/ingestor/ingestor_works",
-  localDependencies =
-    Seq(elasticsearch_typesafe, big_messaging_typesafe, ingestor_common)
+  localDependencies = Seq(ingestor_common)
 )
 
 lazy val ingestor_images = setupProject(
   project,
   "pipeline/ingestor/ingestor_images",
-  localDependencies =
-    Seq(elasticsearch_typesafe, big_messaging_typesafe, ingestor_common)
+  localDependencies = Seq(ingestor_common)
 )
 
 lazy val matcher = setupProject(
@@ -139,7 +129,7 @@ lazy val merger = setupProject(
   project,
   "pipeline/merger",
   localDependencies =
-    Seq(internal_model, big_messaging_typesafe, pipeline_storage_typesafe),
+    Seq(internal_model, pipeline_storage_typesafe),
   externalDependencies = CatalogueDependencies.mergerDependencies
 )
 
@@ -241,7 +231,7 @@ lazy val sierra_items_to_dynamo = setupProject(
 lazy val mets_adapter = setupProject(
   project,
   folder = "mets_adapter/mets_adapter",
-  localDependencies = Seq(internal_model, source_model, big_messaging_typesafe),
+  localDependencies = Seq(internal_model, source_model, flows),
   externalDependencies = CatalogueDependencies.metsAdapterDependencies
 )
 
@@ -250,7 +240,7 @@ lazy val mets_adapter = setupProject(
 lazy val calm_adapter = setupProject(
   project,
   folder = "calm_adapter/calm_adapter",
-  localDependencies = Seq(internal_model, source_model_typesafe, big_messaging_typesafe),
+  localDependencies = Seq(internal_model, source_model_typesafe, flows),
   externalDependencies = CatalogueDependencies.calmAdapterDependencies
 )
 
@@ -258,7 +248,7 @@ lazy val calm_adapter = setupProject(
 lazy val inference_manager = setupProject(
   project,
   folder = "pipeline/inferrer/inference_manager",
-  localDependencies = Seq(internal_model, big_messaging_typesafe),
+  localDependencies = Seq(internal_model, pipeline_storage_typesafe),
   externalDependencies = CatalogueDependencies.inferenceManagerDependencies
 )
 

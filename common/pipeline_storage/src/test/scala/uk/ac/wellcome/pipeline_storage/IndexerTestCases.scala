@@ -36,7 +36,7 @@ trait IndexerTestCases[Context, Document]
 
       withContext() { implicit context =>
         withIndexer { indexer =>
-          val future = indexer.index(doc)
+          val future = indexer(doc)
 
           whenReady(future) { result =>
             result.right.get should contain(doc)
@@ -53,7 +53,7 @@ trait IndexerTestCases[Context, Document]
         withIndexer { indexer =>
           val futures = Future.sequence(
             (1 to 3).map { _ =>
-              indexer.index(doc)
+              indexer(doc)
             }
           )
 
@@ -72,7 +72,7 @@ trait IndexerTestCases[Context, Document]
 
       withContext(documents = Seq(doc2)) { implicit context =>
         withIndexer { indexer =>
-          val future = indexer.index(doc1)
+          val future = indexer(doc1)
 
           whenReady(future) { result =>
             result.isRight shouldBe true
@@ -91,7 +91,7 @@ trait IndexerTestCases[Context, Document]
 
       withContext(documents = Seq(doc1)) { implicit context =>
         withIndexer { indexer =>
-          val future = indexer.index(doc2)
+          val future = indexer(doc2)
 
           whenReady(future) { result =>
             result.isRight shouldBe true
@@ -110,7 +110,7 @@ trait IndexerTestCases[Context, Document]
 
       withContext(documents = Seq(doc1a)) { implicit context =>
         withIndexer { indexer =>
-          val future = indexer.index(doc1b)
+          val future = indexer(doc1b)
 
           whenReady(future) { result =>
             result.isRight shouldBe true
@@ -128,7 +128,7 @@ trait IndexerTestCases[Context, Document]
 
       withContext() { implicit context =>
         withIndexer { indexer =>
-          val future = indexer.index(documents)
+          val future = indexer(documents)
 
           whenReady(future) { result =>
             result.right.get should contain theSameElementsAs documents

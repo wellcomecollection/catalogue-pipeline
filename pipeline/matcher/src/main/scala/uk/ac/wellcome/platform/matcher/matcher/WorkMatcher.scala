@@ -3,71 +3,82 @@ package uk.ac.wellcome.platform.matcher.matcher
 import scala.concurrent.{ExecutionContext, Future}
 import cats.implicits._
 import grizzled.slf4j.Logging
-
 import uk.ac.wellcome.models.matcher.{
   MatchedIdentifiers,
   MatcherResult,
-  WorkIdentifier,
-  WorkNode
+  WorkIdentifier
 }
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.models._
 import uk.ac.wellcome.platform.matcher.storage.WorkGraphStore
 import uk.ac.wellcome.platform.matcher.workgraph.WorkGraphUpdater
-import uk.ac.wellcome.storage.locking.dynamo.DynamoLockingService
 import uk.ac.wellcome.storage.locking.{
   FailedLockingServiceOp,
   FailedProcess,
-  FailedUnlock
+  FailedUnlock,
+  LockDao,
+  LockingService
 }
-import WorkState.Identified
 
-class WorkMatcher(
-  workGraphStore: WorkGraphStore,
-  lockingService: DynamoLockingService[Set[MatchedIdentifiers], Future])(
+import java.util.UUID
+
+class WorkMatcher(workGraphStore: WorkGraphStore,
+                  lockingService: LockingService[Set[MatchedIdentifiers],
+                                                 Future,
+                                                 LockDao[String, UUID]])(
   implicit ec: ExecutionContext)
     extends Logging {
 
   type Out = Set[MatchedIdentifiers]
 
-  def matchWork(work: Work[Identified]): Future[MatcherResult] =
-    doMatch(work).map(MatcherResult)
+  def matchWork(links: WorkLinks): Future[MatcherResult] =
+    doMatch(links).map(MatcherResult)
 
-  private def doMatch(work: Work[Identified]): Future[Out] = {
-    val update = WorkUpdate(work)
-    withLocks(update, update.ids) {
+  private def doMatch(links: WorkLinks): Future[Out] =
+    withLocks(links, links.ids) {
       for {
-        graphBeforeUpdate <- workGraphStore.findAffectedWorks(update)
-        updatedGraph = WorkGraphUpdater.update(update, graphBeforeUpdate)
-        _ <- withLocks(
-          update,
-          getGraphComponentIds(graphBeforeUpdate, updatedGraph)) {
-          // We are returning empty set here, as LockingService is tied to a
-          // single `Out` type, here set to `Set[MatchedIdentifiers]`.
-          // See issue here: https://github.com/wellcometrust/platform/issues/3873
-          workGraphStore.put(updatedGraph).map(_ => Set.empty)
+        beforeGraph <- workGraphStore.findAffectedWorks(links)
+        afterGraph = WorkGraphUpdater.update(links, beforeGraph)
+
+        updatedNodes = afterGraph.nodes -- beforeGraph.nodes
+
+        // It's possible that the matcher graph hasn't changed -- for example, if
+        // we received an update to a work that changes an attribute unrelated to
+        // matching/merging.  If so, we can reduce the load we put on the graph
+        // store by skipping the write.
+        //
+        // Note: if the graph has changed at all, we rewrite the whole thing.
+        // It's possible we could get away with only writing changed nodes here,
+        // but I haven't thought hard enough about whether it might introduce a
+        // hard-to-debug consistency error if another process updates the graph
+        // between us reading it and writing it.
+        _ <- if (updatedNodes.isEmpty) {
+          Future.successful(())
+        } else {
+          val affectedComponentIds =
+            (beforeGraph.nodes ++ afterGraph.nodes)
+              .map { _.componentId }
+
+          withLocks(links, ids = affectedComponentIds) {
+            // We are returning empty set here, as LockingService is tied to a
+            // single `Out` type, here set to `Set[MatchedIdentifiers]`.
+            // See issue here: https://github.com/wellcometrust/platform/issues/3873
+            workGraphStore.put(afterGraph).map(_ => Set.empty)
+          }
         }
       } yield {
-        convertToIdentifiersList(updatedGraph)
+        toMatchedIdentifiers(afterGraph)
       }
     }
-  }
 
-  private def getGraphComponentIds(graphBefore: WorkGraph,
-                                   graphAfter: WorkGraph): Set[String] =
-    graphBefore.nodes.map(_.componentId) ++ graphAfter.nodes.map(_.componentId)
-
-  private def withLocks(update: WorkUpdate, ids: Set[String])(
+  private def withLocks(links: WorkLinks, ids: Set[String])(
     f: => Future[Out]): Future[Out] =
     lockingService
       .withLocks(ids)(f)
       .map {
-        case Left(failure) => {
-          debug(
-            s"Locking failed while matching work ${update.workId}: ${failure}")
+        case Left(failure) =>
+          debug(s"Locking failed while matching work ${links.workId}: $failure")
           throw MatcherException(failureToException(failure))
-        }
         case Right(out) => out
       }
 
@@ -78,13 +89,12 @@ class WorkMatcher(
       case _                     => new RuntimeException(failure.toString)
     }
 
-  private def convertToIdentifiersList(graph: WorkGraph) = {
-    groupBySetId(graph).map {
-      case (_, workNodes: Set[WorkNode]) =>
-        MatchedIdentifiers(workNodes.map(WorkIdentifier(_)))
-    }.toSet
-  }
-
-  private def groupBySetId(updatedGraph: WorkGraph) =
-    updatedGraph.nodes.groupBy(_.componentId)
+  private def toMatchedIdentifiers(g: WorkGraph): Set[MatchedIdentifiers] =
+    g.nodes
+      .groupBy { _.componentId }
+      .map {
+        case (_, workNodes) =>
+          MatchedIdentifiers(workNodes.map(WorkIdentifier(_)))
+      }
+      .toSet
 }

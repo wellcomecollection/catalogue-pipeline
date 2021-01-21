@@ -17,10 +17,10 @@ abstract class Indexer[T: Indexable] {
     * @return A future either containing a Left with the failed documents or a
     *         Right with the succesfully indexed documents
     */
-  def index(documents: Seq[T]): Future[Either[Seq[T], Seq[T]]]
+  def apply(documents: Seq[T]): Future[Either[Seq[T], Seq[T]]]
 
-  def index(document: T): Future[Either[Seq[T], Seq[T]]] =
-    index(documents = Seq(document))
+  def apply(document: T): Future[Either[Seq[T], Seq[T]]] =
+    apply(documents = Seq(document))
 }
 
 trait Indexable[T] {
@@ -58,5 +58,21 @@ object Indexable extends Logging {
         Math.round(
           1.0 + (work.state.relations.size / 20.0)
         )
+    }
+
+  implicit def eitherIndexable[L: Indexable, R: Indexable]
+    : Indexable[Either[L, R]] =
+    new Indexable[Either[L, R]] {
+      def id(either: Either[L, R]): String =
+        either match {
+          case Left(left)   => implicitly[Indexable[L]].id(left)
+          case Right(right) => implicitly[Indexable[R]].id(right)
+        }
+
+      def version(either: Either[L, R]) =
+        either match {
+          case Left(left)   => implicitly[Indexable[L]].version(left)
+          case Right(right) => implicitly[Indexable[R]].version(right)
+        }
     }
 }

@@ -16,10 +16,6 @@ variable "subnets" {
   type = list(string)
 }
 
-variable "vhs_sierra_items_full_access_policy" {}
-variable "vhs_sierra_items_table_name" {}
-variable "vhs_sierra_items_bucket_name" {}
-
 variable "namespace_id" {}
 variable "namespace" {}
 variable "interservice_security_group_id" {}
