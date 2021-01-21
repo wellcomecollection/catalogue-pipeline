@@ -63,23 +63,26 @@ class InferenceManagerWorkerService[Destination](
   )
 
   def run(): Future[Done] =
-    msgStream.runStream(
-      className,
-      source =>
-        source
-          .asSourceWithContext { case (message, _) => message }
-          .mapAsync(5) {
-            case (_, message) => imageRetriever(message.body)
-          }
-          .via(imageDownloader.download)
-          .via(createRequests)
-          .via(requestPool.asContextFlow)
-          .via(unmarshalResponse)
-          .via(collectAndAugment)
-          .asSource
-          .map { case (image, message) => (message, List(image)) }
-          .via(indexAndSend)
-    )
+    for {
+      _ <- imageIndexer.init()
+      _ <- msgStream.runStream(
+        className,
+        source =>
+          source
+            .asSourceWithContext { case (message, _) => message }
+            .mapAsync(5) {
+              case (_, message) => imageRetriever(message.body)
+            }
+            .via(imageDownloader.download)
+            .via(createRequests)
+            .via(requestPool.asContextFlow)
+            .via(unmarshalResponse)
+            .via(collectAndAugment)
+            .asSource
+            .map { case (image, message) => (message, List(image)) }
+            .via(indexAndSend)
+      )
+    } yield Done
 
   private def createRequests[Ctx] =
     FlowWithContext[DownloadedImage, Ctx].mapConcat { image =>

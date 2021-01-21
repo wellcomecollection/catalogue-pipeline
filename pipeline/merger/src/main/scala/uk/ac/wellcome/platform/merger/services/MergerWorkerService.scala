@@ -43,13 +43,16 @@ class MergerWorkerService[WorkDestination, ImageDestination](
   type WorkSet = Seq[Option[Work[Identified]]]
 
   def run(): Future[Done] =
-    msgStream.runStream(
-      this.getClass.getSimpleName,
-      source =>
-        source
-          .via(processFlow(config, processMessage))
-          .via(broadcastAndMerge(batchIndexAndSendWorksAndImages, noOutputFlow))
-    )
+    for {
+      _ <- workOrImageIndexer.init()
+      _ <- msgStream.runStream(
+        this.getClass.getSimpleName,
+        source =>
+          source
+            .via(processFlow(config, processMessage))
+            .via(broadcastAndMerge(batchIndexAndSendWorksAndImages, noOutputFlow))
+      )
+    } yield Done
 
   val batchIndexAndSendWorksAndImages
     : Flow[(Message, List[WorkOrImage]), Message, NotUsed] =
