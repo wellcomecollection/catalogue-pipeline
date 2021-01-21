@@ -6,6 +6,7 @@ Reports some stats about the state of a reindex.
 import boto3
 import click
 from elasticsearch import Elasticsearch
+from elasticsearch.exceptions import NotFoundError
 import humanize
 import tabulate
 
@@ -97,9 +98,13 @@ def count_documents_in_index(es_client, *, index_name):
     """
     Returns the number of documents in an Elasticsearch index.
     """
-    count_resp = es_client.cat.count(index_name, format="json")
-    assert len(count_resp) == 1, (index_name, count_resp)
-    return int(count_resp[0]["count"])
+    try:
+        count_resp = es_client.cat.count(index_name, format="json")
+    except NotFoundError:
+        return 0
+    else:
+        assert len(count_resp) == 1, (index_name, count_resp)
+        return int(count_resp[0]["count"])
 
 
 def get_index_stats(session, *, deployment_id, reindex_date):
