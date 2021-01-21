@@ -9,14 +9,16 @@ object InitialImageIndexConfig extends IndexConfig {
 
   val analysis: Analysis = WorksAnalysis()
 
-  def mapping: MappingDefinition = properties(Seq())
+  def mapping: MappingDefinition =
+    properties(Seq()).dynamic(DynamicMapping.False)
 }
 
 object AugmentedImageIndexConfig extends IndexConfig {
 
   val analysis: Analysis = WorksAnalysis()
 
-  def mapping: MappingDefinition = properties(Seq())
+  def mapping: MappingDefinition =
+    properties(Seq()).dynamic(DynamicMapping.False)
 }
 
 object IndexedImageIndexConfig extends IndexConfig with IndexConfigFields {
