@@ -66,7 +66,9 @@ def get_pipeline_storage_es_client(session, *, deployment_id):
     """
     Returns an Elasticsearch client for the pipeline-storage cluster.
     """
-    host = get_secret_string(session, secret_id=f"elasticsearch/{deployment_id}/public_host")
+    host = get_secret_string(
+        session, secret_id=f"elasticsearch/{deployment_id}/public_host"
+    )
     port = get_secret_string(session, secret_id=f"catalogue/{deployment_id}/es_port")
     protocol = get_secret_string(
         session, secret_id=f"catalogue/{deployment_id}/es_protocol"
@@ -115,15 +117,12 @@ def get_works_index_stats(session, *, deployment_id, reindex_date):
         session, deployment_id=deployment_id
     )
 
-    indexes = [
-        "works-source",
-        "works-identified",
-        "works-merged",
-        "works-denormalised",
-    ]
+    indexes = ["works-source", "works-identified", "works-merged", "works-denormalised"]
 
     result = {
-        idx: count_documents_in_index(pipeline_client, index_name=f"{idx}-{reindex_date}")
+        idx: count_documents_in_index(
+            pipeline_client, index_name=f"{idx}-{reindex_date}"
+        )
         for idx in indexes
     }
 
@@ -143,13 +142,12 @@ def get_images_index_stats(session, *, deployment_id, reindex_date):
         session, deployment_id=deployment_id
     )
 
-    indexes = [
-        "images-initial",
-        "images-augmented",
-    ]
+    indexes = ["images-initial", "images-augmented"]
 
     result = {
-        idx: count_documents_in_index(pipeline_client, index_name=f"{idx}-{reindex_date}")
+        idx: count_documents_in_index(
+            pipeline_client, index_name=f"{idx}-{reindex_date}"
+        )
         for idx in indexes
     }
 
