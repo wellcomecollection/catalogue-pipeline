@@ -66,7 +66,7 @@ def get_pipeline_storage_es_client(session, *, deployment_id):
     """
     Returns an Elasticsearch client for the pipeline-storage cluster.
     """
-    host = get_secret_string(session, secret_id=f"catalogue/{deployment_id}/es_host")
+    host = get_secret_string(session, secret_id=f"elasticsearch/{deployment_id}/public_host")
     port = get_secret_string(session, secret_id=f"catalogue/{deployment_id}/es_port")
     protocol = get_secret_string(
         session, secret_id=f"catalogue/{deployment_id}/es_protocol"
