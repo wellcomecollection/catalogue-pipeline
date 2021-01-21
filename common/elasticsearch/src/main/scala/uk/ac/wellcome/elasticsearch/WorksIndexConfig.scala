@@ -59,14 +59,6 @@ object IdentifiedWorkIndexConfig extends WorksIndexConfig {
 object DenormalisedWorkIndexConfig extends WorksIndexConfig {
 
   val fields = Seq.empty
-
-  /** Denormalised relations make index sizes explode from about 5 GB without relations
-    * to an esimated 70 GB with relations. According to elastic search documentation
-    * (https://www.elastic.co/guide/en/elasticsearch/reference/current/size-your-shards.html), shards
-    * sizes should be between 10 GB and 50 GB. Setting number of shards to 2 should result in shards
-    * of about 35 GB.
-    */
-  override val shards = 2
 }
 
 object IndexedWorkIndexConfig extends WorksIndexConfig {
@@ -177,12 +169,4 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
       objectField("redirect").dynamic("false"),
       version
     )
-
-  /** Denormalised relations make index sizes explode from about 5 GB without relations
-    * to an esimated 70 GB with relations. According to elastic search documentation
-    * (https://www.elastic.co/guide/en/elasticsearch/reference/current/size-your-shards.html), shards
-    * sizes should be between 10 GB and 50 GB. Setting number of shards to 2 should result in shards
-    * of about 35 GB.
-    */
-  override val shards = 2
 }
