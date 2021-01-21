@@ -50,7 +50,8 @@ class MergerWorkerService[WorkDestination, ImageDestination](
         source =>
           source
             .via(processFlow(config, processMessage))
-            .via(broadcastAndMerge(batchIndexAndSendWorksAndImages, noOutputFlow))
+            .via(
+              broadcastAndMerge(batchIndexAndSendWorksAndImages, noOutputFlow))
       )
     } yield Done
 
