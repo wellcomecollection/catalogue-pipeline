@@ -107,7 +107,7 @@ def count_documents_in_index(es_client, *, index_name):
         return int(count_resp[0]["count"])
 
 
-def get_index_stats(session, *, deployment_id, reindex_date):
+def get_works_index_stats(session, *, deployment_id, reindex_date):
     """
     Returns a map (step) -> (ES documents count).
     """
@@ -115,17 +115,47 @@ def get_index_stats(session, *, deployment_id, reindex_date):
         session, deployment_id=deployment_id
     )
 
-    pipeline_steps = ["source", "identified", "merged", "denormalised"]
-    result = {}
+    indexes = [
+        "works-source",
+        "works-identified",
+        "works-merged",
+        "works-denormalised",
+    ]
 
-    for step in pipeline_steps:
-        result[f"works-{step}"] = count_documents_in_index(
-            pipeline_client, index_name=f"works-{step}-{reindex_date}"
-        )
+    result = {
+        idx: count_documents_in_index(pipeline_client, index_name=f"{idx}-{reindex_date}")
+        for idx in indexes
+    }
 
     api_client = get_api_es_client(session)
     result["API"] = count_documents_in_index(
         api_client, index_name=f"works-{reindex_date}"
+    )
+
+    return result
+
+
+def get_images_index_stats(session, *, deployment_id, reindex_date):
+    """
+    Returns a map (step) -> (ES documents count).
+    """
+    pipeline_client = get_pipeline_storage_es_client(
+        session, deployment_id=deployment_id
+    )
+
+    indexes = [
+        "images-initial",
+        "images-augmented",
+    ]
+
+    result = {
+        idx: count_documents_in_index(pipeline_client, index_name=f"{idx}-{reindex_date}")
+        for idx in indexes
+    }
+
+    api_client = get_api_es_client(session)
+    result["API"] = count_documents_in_index(
+        api_client, index_name=f"images-{reindex_date}"
     )
 
     return result
@@ -156,11 +186,13 @@ def main(reindex_date, deployment_id):
 
     print("")
 
-    index_stats = get_index_stats(
+    print("*** Work index stats ***")
+
+    work_index_stats = get_works_index_stats(
         session_dev, deployment_id=deployment_id, reindex_date=reindex_date
     )
 
-    rows = [[step, count] for step, count in index_stats.items()]
+    rows = [[step, count] for step, count in work_index_stats.items()]
     rows.insert(0, ["source records", source_counts["TOTAL"], ""])
 
     for idx, r in enumerate(rows[1:], start=1):
@@ -174,12 +206,35 @@ def main(reindex_date, deployment_id):
 
     rows = [(name, humanize.intcomma(count), diff) for (name, count, diff) in rows]
 
-    print("*** Work index stats ***")
     print(tabulate.tabulate(rows, tablefmt="plain", colalign=("left", "right")))
 
     print("")
 
-    proportion = index_stats["API"] / source_counts["TOTAL"] * 100
+    print("*** Image index stats ***")
+
+    image_index_stats = get_images_index_stats(
+        session_dev, deployment_id=deployment_id, reindex_date=reindex_date
+    )
+
+    rows = [[step, count] for step, count in image_index_stats.items()]
+    rows[0].append("")
+
+    for idx, r in enumerate(rows[1:], start=1):
+        this_count = r[1]
+        prev_count = rows[idx - 1][1]
+        if prev_count > this_count:
+            diff = prev_count - this_count
+            r.append(click.style(f"▼ {humanize.intcomma(diff)}", "red"))
+        else:
+            r.append("")
+
+    rows = [(name, humanize.intcomma(count), diff) for (name, count, diff) in rows]
+
+    print(tabulate.tabulate(rows, tablefmt="plain", colalign=("left", "right")))
+
+    print("")
+
+    proportion = work_index_stats["API"] / source_counts["TOTAL"] * 100
     if proportion < 99:
         print(
             click.style(
