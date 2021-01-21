@@ -143,13 +143,11 @@ def create_user(es, username, roles):
 )
 def main(username, password, endpoint, deployment_id):
     url = hyperlink.URL.from_text(endpoint)
-    host = url.host
     protocol = url.scheme
     port = str(url.port)
 
     click.echo(
-        f"Detected the host as {click.style(url.host, 'blue')}, the port as "
-        f"{click.style(port, 'blue')} and the protocol as {click.style(protocol, 'blue')}."
+        f"Detected the port as {click.style(port, 'blue')} and the protocol as {click.style(protocol, 'blue')}."
     )
     click.confirm("Are these correct?", abort=True)
 
