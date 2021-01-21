@@ -55,13 +55,15 @@ module "catalogue_pipeline_2021-01-12" {
   storage_bucket_name = local.storage_bucket
 }
 
-module "catalogue_pipeline_2021-01-21" {
+module "catalogue_pipeline_2021-01-22" {
   source = "./stack"
 
-  pipeline_date = "2021-01-21"
+  pipeline_date = "2021-01-22"
   release_label = "stage"
 
   pipeline_storage_id = "pipeline_storage_delta"
+
+  # max_capacity = 10
 
   # Transformer config
   #
