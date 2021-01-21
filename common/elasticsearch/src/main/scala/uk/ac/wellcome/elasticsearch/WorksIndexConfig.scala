@@ -1,8 +1,8 @@
 package uk.ac.wellcome.elasticsearch
 
 import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.requests.mappings.{FieldDefinition, ObjectField}
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
+import com.sksamuel.elastic4s.requests.mappings.{FieldDefinition, ObjectField}
 
 sealed trait WorksIndexConfig extends IndexConfig with IndexConfigFields {
 
@@ -41,7 +41,19 @@ object MergedWorkIndexConfig extends WorksIndexConfig {
 
 object IdentifiedWorkIndexConfig extends WorksIndexConfig {
 
-  val fields = Seq.empty
+  // These are not necessary for the services but are useful for debugging.
+  // Because works in the source index don't have a canonical id, they are
+  // indexed with the sourceIdentifier as an id. If we want to look them up
+  // on the identifier index, we need to be able to search
+  // by sourceIdentifier (and otherIdentifiers sometimes)
+  val fields =
+    Seq(
+      objectField("data").fields(
+        objectField("otherIdentifiers").fields(lowercaseKeyword("value")),
+      ),
+      objectField("state")
+        .fields(sourceIdentifier)
+    )
 }
 
 object DenormalisedWorkIndexConfig extends WorksIndexConfig {
