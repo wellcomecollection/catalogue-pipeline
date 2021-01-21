@@ -29,7 +29,9 @@ object IndexedImageIndexConfig extends IndexConfig with IndexConfigFields {
     denseVectorField("features1", 2048),
     denseVectorField("features2", 2048),
     keywordField("lshEncodedFeatures"),
-    keywordField("palette")
+    keywordField("palette"),
+    intField("binSizes").index(false),
+    floatField("binMinima").index(false)
   )
 
   def sourceWork(fieldName: String): ObjectField =

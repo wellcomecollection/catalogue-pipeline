@@ -76,12 +76,16 @@ class ManagerInferrerIntegrationTest
                     features1,
                     features2,
                     lshEncodedFeatures,
-                    palette) =>
+                    palette,
+                    binSizes,
+                    binMinima) =>
                   features1 should have length 2048
                   features2 should have length 2048
                   forAll(features1 ++ features2) { _.isNaN shouldBe false }
                   every(lshEncodedFeatures) should fullyMatch regex """(\d+)-(\d+)"""
                   every(palette) should fullyMatch regex """\d+/\d+"""
+                  every(binSizes) should not be empty
+                  binMinima should not be empty
               }
           }
         }

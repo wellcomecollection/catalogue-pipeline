@@ -123,9 +123,11 @@ case class InferredData(
   features1: List[Float],
   features2: List[Float],
   lshEncodedFeatures: List[String],
-  palette: List[String]
+  palette: List[String],
+  binSizes: List[List[Int]],
+  binMinima: List[Float],
 )
 
 object InferredData {
-  def empty: InferredData = InferredData(Nil, Nil, Nil, Nil)
+  def empty: InferredData = InferredData(Nil, Nil, Nil, Nil, Nil, Nil)
 }

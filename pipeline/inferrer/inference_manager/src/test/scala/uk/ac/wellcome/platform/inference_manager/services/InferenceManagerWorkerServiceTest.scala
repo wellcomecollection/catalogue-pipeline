@@ -82,7 +82,9 @@ class InferenceManagerWorkerServiceTest
                       features1,
                       features2,
                       lshEncodedFeatures,
-                      palette) =>
+                      palette,
+                      binSizes,
+                      binMinima) =>
                     val featureVector =
                       Responses.randomFeatureVector(seed)
                     features1 should be(featureVector.slice(0, 2048))
@@ -90,6 +92,8 @@ class InferenceManagerWorkerServiceTest
                     lshEncodedFeatures should be(
                       Responses.randomLshVector(seed))
                     palette should be(Responses.randomPaletteVector(seed))
+                    binSizes should be(Responses.randomBinSizes(seed))
+                    binMinima should be(Responses.randomBinMinima(seed))
                 }
             }
           }
@@ -125,11 +129,15 @@ class InferenceManagerWorkerServiceTest
                       features1,
                       features2,
                       lshEncodedFeatures,
-                      palette) =>
+                      palette,
+                      binSizes,
+                      binMinima) =>
                     features1 should have length 2048
                     features2 should have length 2048
                     every(lshEncodedFeatures) should fullyMatch regex """(\d+)-(\d+)"""
                     every(palette) should fullyMatch regex """\d+"""
+                    every(binSizes) should not be empty
+                    binMinima should not be empty
                 }
             }
           }

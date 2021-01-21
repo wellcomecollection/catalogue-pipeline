@@ -20,30 +20,31 @@ trait VectorGenerators {
     }
   }
 
-  def randomColorVector(binSizes: Seq[Int] = Seq(4, 6, 8),
-                        weights: Seq[Int] = Seq(2, 2, 1, 1, 1)): Seq[String] =
-    binSizes.flatMap { binSize =>
-      weights.flatMap { weight =>
-        val maxIndex = (math.pow(binSize, 3) - 1).toInt
-        val c = Random.nextInt(maxIndex)
-        Seq.fill(weight)(s"$c/$binSize")
-      }
+  def randomColorVector(binSizes: Seq[Seq[Int]] =
+                          Seq(Seq(4, 6, 9), Seq(2, 4, 6), Seq(1, 3, 5)),
+                        nTokens: Int = 100): Seq[String] =
+    binSizes.transpose.zipWithIndex.flatMap {
+      case (bins, binIndex) =>
+        List.fill(nTokens / binSizes.size) {
+          val maxIndex = bins(1) + (bins(0) * bins(1) * bins(2))
+          val c = Random.nextInt(maxIndex)
+          s"$c/$binIndex"
+        }
     }
 
-  def similarColorVectors(
-    n: Int,
-    binSizes: Seq[Int] = Seq(4, 6, 8),
-    weights: Seq[Int] = Seq(2, 2, 1, 1, 1)): Seq[Seq[String]] = {
-    val baseIndices = binSizes.flatMap { binSize =>
-      val maxIndex = (math.pow(binSize, 3) - 1).toInt
-      weights.flatMap { weight =>
-        Seq.fill(weight)((Random.nextInt(maxIndex), maxIndex, binSize))
-      }
+  def similarColorVectors(n: Int,
+                          binSizes: Seq[Seq[Int]] =
+                            Seq(Seq(4, 6, 9), Seq(2, 4, 6), Seq(1, 3, 5)),
+                          nTokens: Int = 100): Seq[Seq[String]] = {
+    val baseIndices = binSizes.transpose.zipWithIndex.flatMap {
+      case (bins, binIndex) =>
+        val maxIndex = bins(1) + (bins(0) * bins(1) * bins(2))
+        Seq.fill(nTokens / binSizes.size)(
+          (Random.nextInt(maxIndex), maxIndex, binIndex))
     }
-    val nElements = binSizes.size * weights.sum
     (0 until n)
       .map { i =>
-        Random.shuffle(Seq.fill(nElements - i)(0).padTo(nElements, 1))
+        Random.shuffle(Seq.fill(nTokens - i)(0).padTo(nTokens, 1))
       }
       .map { offsets =>
         (baseIndices zip offsets).map {
