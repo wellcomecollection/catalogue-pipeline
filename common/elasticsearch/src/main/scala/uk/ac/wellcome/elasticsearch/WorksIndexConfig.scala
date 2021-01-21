@@ -52,8 +52,7 @@ object IdentifiedWorkIndexConfig extends WorksIndexConfig {
         objectField("otherIdentifiers").fields(lowercaseKeyword("value")),
       ),
       objectField("state")
-        .fields(
-          sourceIdentifier)
+        .fields(sourceIdentifier)
     )
 }
 
