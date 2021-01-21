@@ -61,7 +61,6 @@ module "catalogue_pipeline_2021-01-21" {
   pipeline_date = "2021-01-21"
   release_label = "stage"
 
-  max_capacity = 1
   pipeline_storage_id = "pipeline_storage_delta"
 
   # Transformer config
