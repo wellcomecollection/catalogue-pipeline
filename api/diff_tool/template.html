@@ -54,6 +54,7 @@
       <strong>
         {% if d.status == "match" %}✅{% else %}❌{% endif %}
         {{ d.display_url }}
+        {% if d.route.comment %}({{ d.route.comment }}){% endif %}
       </strong>
     </summary>
 
