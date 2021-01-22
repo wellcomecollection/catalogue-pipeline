@@ -7,7 +7,10 @@ import uk.ac.wellcome.platform.transformer.sierra.generators.{
   MarcGenerators,
   SierraDataGenerators
 }
-import uk.ac.wellcome.platform.transformer.sierra.source.MarcSubfield
+import uk.ac.wellcome.platform.transformer.sierra.source.{
+  MarcSubfield,
+  SierraBibData
+}
 import uk.ac.wellcome.platform.transformer.sierra.source.sierra.SierraSourceLanguage
 
 class SierraLanguagesTest
@@ -18,7 +21,7 @@ class SierraLanguagesTest
   it("ignores records without any languages") {
     val bibData = createSierraBibDataWith(lang = None, varFields = List.empty)
 
-    SierraLanguages(bibData) shouldBe empty
+    getLanguages(bibData) shouldBe empty
   }
 
   it("parses a single language from the 'lang' field") {
@@ -30,7 +33,7 @@ class SierraLanguagesTest
       varFields = List.empty
     )
 
-    SierraLanguages(bibData) shouldBe List(
+    getLanguages(bibData) shouldBe List(
       Language(label = "French", id = "fre"))
   }
 
@@ -51,7 +54,7 @@ class SierraLanguagesTest
       )
     )
 
-    SierraLanguages(bibData) shouldBe List(
+    getLanguages(bibData) shouldBe List(
       Language(label = "French", id = "fre"),
       Language(label = "German", id = "ger"),
       Language(label = "English", id = "eng")
@@ -75,7 +78,7 @@ class SierraLanguagesTest
       )
     )
 
-    SierraLanguages(bibData) shouldBe List(
+    getLanguages(bibData) shouldBe List(
       Language(label = "French", id = "fre"),
       Language(label = "German", id = "ger"),
       Language(label = "English", id = "eng")
@@ -97,7 +100,7 @@ class SierraLanguagesTest
       )
     )
 
-    SierraLanguages(bibData) shouldBe List(
+    getLanguages(bibData) shouldBe List(
       Language(label = "Chinese", id = "chi"))
   }
 
@@ -119,7 +122,7 @@ class SierraLanguagesTest
       )
     )
 
-    SierraLanguages(bibData) shouldBe List(
+    getLanguages(bibData) shouldBe List(
       Language(label = "German", id = "ger"),
       Language(label = "French", id = "fre"),
       Language(label = "English", id = "eng")
@@ -145,10 +148,13 @@ class SierraLanguagesTest
       )
     )
 
-    SierraLanguages(bibData) shouldBe List(
+    getLanguages(bibData) shouldBe List(
       Language(label = "Chinese", id = "chi"),
       Language(label = "English", id = "eng"),
       Language(label = "French", id = "fre")
     )
   }
+
+  private def getLanguages(bibData: SierraBibData): List[Language] =
+    SierraLanguages(bibId = createSierraBibNumber, bibData = bibData)
 }
