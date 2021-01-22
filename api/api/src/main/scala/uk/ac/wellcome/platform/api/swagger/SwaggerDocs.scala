@@ -422,6 +422,12 @@ trait MultipleWorksSwagger {
         required = false
       ),
       new Parameter(
+        name = "contributors.agent.label",
+        in = ParameterIn.QUERY,
+        description = "Filter the work by contributor.",
+        required = false
+      ),
+      new Parameter(
         name = "identifiers",
         in = ParameterIn.QUERY,
         description = "Filter the work by identifiers.",
