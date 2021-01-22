@@ -78,3 +78,8 @@ variable "deployment_service_env" {
 variable "deployment_service_name" {
   type = string
 }
+
+variable "use_fargate_spot" {
+  type    = bool
+  default = false
+}

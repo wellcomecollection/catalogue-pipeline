@@ -36,6 +36,8 @@ module "miro_transformer" {
 
   secret_env_vars = local.pipeline_storage_es_service_secrets["transformer"]
 
+  use_fargate_spot = true
+
   subnets             = var.subnets
   max_capacity        = var.max_capacity
   messages_bucket_arn = aws_s3_bucket.messages.arn

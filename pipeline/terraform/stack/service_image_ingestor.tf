@@ -50,6 +50,7 @@ module "ingestor_images" {
     es_password_pipeline_storage = "catalogue/${var.pipeline_storage_id}/image_ingestor/es_password"
   }
 
+  use_fargate_spot = true
 
   subnets = var.subnets
 

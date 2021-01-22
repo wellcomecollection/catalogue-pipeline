@@ -56,6 +56,8 @@ module "ingestor_works" {
   cpu    = 1024
   memory = 2048
 
+  use_fargate_spot = true
+
   deployment_service_env  = var.release_label
   deployment_service_name = "work-ingestor"
   shared_logging_secrets  = var.shared_logging_secrets
