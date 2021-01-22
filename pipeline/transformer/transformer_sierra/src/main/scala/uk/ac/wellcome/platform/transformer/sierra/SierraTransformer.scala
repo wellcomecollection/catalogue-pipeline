@@ -105,7 +105,7 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
       genres = SierraGenres(bibData),
       contributors = SierraContributors(bibData),
       production = SierraProduction(bibId, bibData),
-      languages = SierraLanguages(bibData),
+      languages = SierraLanguages(bibId, bibData),
       edition = SierraEdition(bibData),
       notes = SierraNotes(bibData),
       duration = SierraDuration(bibData),
