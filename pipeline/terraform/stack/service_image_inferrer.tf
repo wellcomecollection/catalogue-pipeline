@@ -8,11 +8,11 @@ locals {
   shared_storage_name      = "shared_storage"
   shared_storage_path      = "/data"
 
-  total_cpu    = 8192
-  total_memory = 7512
-  manager_memory = 768
-  manager_cpu = 512
-  inferrer_cpu = floor(0.5 * (local.total_cpu - local.manager_cpu))
+  total_cpu       = 8192
+  total_memory    = 7512
+  manager_memory  = 768
+  manager_cpu     = 512
+  inferrer_cpu    = floor(0.5 * (local.total_cpu - local.manager_cpu))
   inferrer_memory = floor(0.5 * (local.total_memory - local.manager_memory))
 }
 
