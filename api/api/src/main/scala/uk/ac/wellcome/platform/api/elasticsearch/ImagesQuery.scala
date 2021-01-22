@@ -5,8 +5,14 @@ import com.sksamuel.elastic4s.Index
 import com.sksamuel.elastic4s.requests.common.DocumentRef
 import com.sksamuel.elastic4s.requests.common.Operator.{AND, OR}
 import com.sksamuel.elastic4s.requests.searches.queries.{BoolQuery, Query}
-import com.sksamuel.elastic4s.requests.searches.queries.matches.MultiMatchQueryBuilderType.{BEST_FIELDS, CROSS_FIELDS}
-import com.sksamuel.elastic4s.requests.searches.queries.matches.{FieldWithOptionalBoost, MultiMatchQuery}
+import com.sksamuel.elastic4s.requests.searches.queries.matches.MultiMatchQueryBuilderType.{
+  BEST_FIELDS,
+  CROSS_FIELDS
+}
+import com.sksamuel.elastic4s.requests.searches.queries.matches.{
+  FieldWithOptionalBoost,
+  MultiMatchQuery
+}
 import uk.ac.wellcome.elasticsearch.WorksAnalysis.whitespaceAnalyzer
 
 case object ImagesMultiMatcher {
@@ -28,10 +34,12 @@ case object ImagesMultiMatcher {
       ("data.lettering", None),
       ("data.collectionPath.path", None),
       ("data.collectionPath.label", None),
-    ) flatMap { case (field, boost) =>
-      toWorkField(field).map(workField => (workField, boost))
-    } map { case (field, boost) =>
-      FieldWithOptionalBoost(field, boost.map(_.toDouble))
+    ) flatMap {
+      case (field, boost) =>
+        toWorkField(field).map(workField => (workField, boost))
+    } map {
+      case (field, boost) =>
+        FieldWithOptionalBoost(field, boost.map(_.toDouble))
     }
 
     val sourceWorkIdFields = Seq(
