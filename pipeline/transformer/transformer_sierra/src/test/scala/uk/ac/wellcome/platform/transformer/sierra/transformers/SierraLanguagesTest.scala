@@ -33,8 +33,7 @@ class SierraLanguagesTest
       varFields = List.empty
     )
 
-    getLanguages(bibData) shouldBe List(
-      Language(label = "French", id = "fre"))
+    getLanguages(bibData) shouldBe List(Language(label = "French", id = "fre"))
   }
 
   it("combines the language from the 'lang' field and 041") {
@@ -100,8 +99,7 @@ class SierraLanguagesTest
       )
     )
 
-    getLanguages(bibData) shouldBe List(
-      Language(label = "Chinese", id = "chi"))
+    getLanguages(bibData) shouldBe List(Language(label = "Chinese", id = "chi"))
   }
 
   it("deduplicates, putting whatever's in 'lang' first") {
