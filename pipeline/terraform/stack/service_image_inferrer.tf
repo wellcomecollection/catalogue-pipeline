@@ -8,8 +8,12 @@ locals {
   shared_storage_name      = "shared_storage"
   shared_storage_path      = "/data"
 
-  total_cpu    = 7680
-  total_memory = 7000
+  total_cpu    = 8192
+  total_memory = 7512
+  manager_memory = 768
+  manager_cpu = 512
+  inferrer_cpu = floor(0.5 * (local.total_cpu - local.manager_cpu))
+  inferrer_memory = floor(0.5 * (local.total_memory - local.manager_memory))
 }
 
 module "image_inferrer_queue" {
@@ -53,8 +57,8 @@ module "image_inferrer" {
 
   manager_container_name  = "inference_manager"
   manager_container_image = local.inference_manager_image
-  manager_cpu             = 512
-  manager_memory          = 512
+  manager_cpu             = local.manager_cpu
+  manager_memory          = local.manager_memory
   manager_mount_points = [{
     containerPath = local.shared_storage_path,
     sourceVolume  = local.shared_storage_name
@@ -63,8 +67,8 @@ module "image_inferrer" {
   apps = {
     feature_inferrer = {
       image  = local.feature_inferrer_image
-      cpu    = floor(0.5 * local.total_cpu)
-      memory = floor(0.5 * local.total_memory)
+      cpu    = local.inferrer_cpu
+      memory = local.inferrer_memory
       env_vars = {
         PORT              = local.feature_inferrer_port
         MODEL_OBJECT_KEY  = data.aws_ssm_parameter.inferrer_lsh_model_key.value
@@ -85,8 +89,8 @@ module "image_inferrer" {
     }
     palette_inferrer = {
       image  = local.palette_inferrer_image
-      cpu    = floor(0.5 * local.total_cpu)
-      memory = floor(0.5 * local.total_memory)
+      cpu    = local.inferrer_cpu
+      memory = local.inferrer_memory
       env_vars = {
         PORT = local.palette_inferrer_port
       }
@@ -119,7 +123,7 @@ module "image_inferrer" {
     es_initial_images_index   = local.es_images_initial_index
     es_augmented_images_index = local.es_images_augmented_index
 
-    batch_size             = 10
+    batch_size             = 8
     flush_interval_seconds = 30
   }
 
