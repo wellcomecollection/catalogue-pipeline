@@ -155,6 +155,23 @@ class SierraLanguagesTest
     )
   }
 
+  it("strips whitespace from values in the 041 field") {
+    val bibData = createSierraBibDataWith(
+      varFields = List(
+        createVarFieldWith(
+          marcTag = "041",
+          subfields = List(
+            MarcSubfield(tag = "a", content = "eng "),
+          )
+        )
+      )
+    )
+
+    getLanguages(bibData) shouldBe List(
+      Language(label = "English", id = "eng"),
+    )
+  }
+
   private def getLanguages(bibData: SierraBibData): List[Language] =
     SierraLanguages(bibId = createSierraBibNumber, bibData = bibData)
 }

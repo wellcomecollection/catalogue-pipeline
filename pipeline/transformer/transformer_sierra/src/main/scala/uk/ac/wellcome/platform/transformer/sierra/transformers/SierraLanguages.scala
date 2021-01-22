@@ -48,6 +48,11 @@ object SierraLanguages
       bibData
         .subfieldsWithTag("041" -> "a")
         .contents
+        .map {
+          // Some of our records include whitespace in this field, but it's irrelevant
+          // and can be safely discarded.  e.g. "ger " means the same as "ger"
+          _.trim
+        }
         .map { code =>
           (code, MarcLanguageCodeList.lookupByCode(code))
         }
