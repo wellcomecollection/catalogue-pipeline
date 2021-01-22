@@ -172,6 +172,25 @@ class SierraLanguagesTest
     )
   }
 
+  it("lowercases values in the 041 field") {
+    val bibData = createSierraBibDataWith(
+      varFields = List(
+        createVarFieldWith(
+          marcTag = "041",
+          subfields = List(
+            MarcSubfield(tag = "a", content = "ENG"),
+            MarcSubfield(tag = "a", content = "Lat"),
+          )
+        )
+      )
+    )
+
+    getLanguages(bibData) shouldBe List(
+      Language(label = "English", id = "eng"),
+      Language(label = "Latin", id = "lat"),
+    )
+  }
+
   private def getLanguages(bibData: SierraBibData): List[Language] =
     SierraLanguages(bibId = createSierraBibNumber, bibData = bibData)
 }

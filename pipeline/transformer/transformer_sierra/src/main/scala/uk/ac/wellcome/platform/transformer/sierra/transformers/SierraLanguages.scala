@@ -53,6 +53,11 @@ object SierraLanguages
           // and can be safely discarded.  e.g. "ger " means the same as "ger"
           _.trim
         }
+        .map {
+          // Most of our records use a lowercase code, but if not we can safely lowercase
+          // the code.  e.g. "Lat" means the same as "lat"
+          _.toLowerCase()
+        }
         .map { code =>
           (code, MarcLanguageCodeList.lookupByCode(code))
         }
