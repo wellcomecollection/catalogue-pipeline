@@ -147,22 +147,64 @@ object MultipleWorksParams extends QueryParamsUtils {
         "type".as[WorkTypeFilter].?,
         "partOf".as[PartOfFilter].?,
       )
-    ).tflatMap { case (page, pageSize, format, dateFrom, dateTo, languages, genre, subjects, contributors, license, includes, aggregations, sort, sortOrder, query, identifiers, itemLocationType, itemLocationTypeId, accessStatus, workType, partOf)  =>
-      // Scala has a max tuple size of 22 so this is nested to get around this limit
-      parameter(
-        (
-          "_queryType".as[SearchQueryType].?,
-          "_index".as[String].?,
-        )
-      ).tflatMap { case (queryType, index) =>
-        val params = MultipleWorksParams(
-          page, pageSize, format, dateFrom, dateTo, languages, genre, subjects,
-          contributors, license, includes, aggregations, sort, sortOrder, query,
-          identifiers,itemLocationType, itemLocationTypeId, accessStatus,
-          workType, partOf, queryType, index
-        )
-        validated(params.paginationErrors, params)
-      }
+    ).tflatMap {
+      case (
+          page,
+          pageSize,
+          format,
+          dateFrom,
+          dateTo,
+          languages,
+          genre,
+          subjects,
+          contributors,
+          license,
+          includes,
+          aggregations,
+          sort,
+          sortOrder,
+          query,
+          identifiers,
+          itemLocationType,
+          itemLocationTypeId,
+          accessStatus,
+          workType,
+          partOf) =>
+        // Scala has a max tuple size of 22 so this is nested to get around this limit
+        parameter(
+          (
+            "_queryType".as[SearchQueryType].?,
+            "_index".as[String].?,
+          )
+        ).tflatMap {
+          case (queryType, index) =>
+            val params = MultipleWorksParams(
+              page,
+              pageSize,
+              format,
+              dateFrom,
+              dateTo,
+              languages,
+              genre,
+              subjects,
+              contributors,
+              license,
+              includes,
+              aggregations,
+              sort,
+              sortOrder,
+              query,
+              identifiers,
+              itemLocationType,
+              itemLocationTypeId,
+              accessStatus,
+              workType,
+              partOf,
+              queryType,
+              index
+            )
+            validated(params.paginationErrors, params)
+        }
     }
 
   implicit val formatFilter: Decoder[FormatFilter] =
