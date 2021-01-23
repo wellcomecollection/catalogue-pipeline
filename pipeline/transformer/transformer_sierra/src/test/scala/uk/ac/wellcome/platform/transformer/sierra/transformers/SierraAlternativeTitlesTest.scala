@@ -121,6 +121,28 @@ class SierraAlternativeTitlesTest
     result.head should include("Carrots")
   }
 
+  it("deduplicates alternative titles") {
+    // This is based on the MARC record for b1301898x, as retrieved 23 January 2021
+    val varFields = List(
+      createVarFieldWith(
+        marcTag = "240",
+        indicator2 = "1",
+        subfields = List(
+          MarcSubfield(tag = "a", content = "De rerum natura")
+        )
+      ),
+      createVarFieldWith(
+        marcTag = "246",
+        indicator2 = "1",
+        subfields = List(
+          MarcSubfield(tag = "a", content = "De rerum natura")
+        )
+      )
+    )
+
+    getAlternativeTitles(varFields) shouldBe List("De rerum natura")
+  }
+
   private def getAlternativeTitles(varFields: List[VarField]) =
     SierraAlternativeTitles(createSierraBibDataWith(varFields = varFields))
 
