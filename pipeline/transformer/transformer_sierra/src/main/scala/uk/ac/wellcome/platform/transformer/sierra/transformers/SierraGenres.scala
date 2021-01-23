@@ -65,6 +65,7 @@ object SierraGenres
 
         Genre(label = label, concepts = concepts)
       }
+      .distinct
 
   // Extract the primary concept, which comes from subfield $a.  This is the
   // only concept which might be identified.
