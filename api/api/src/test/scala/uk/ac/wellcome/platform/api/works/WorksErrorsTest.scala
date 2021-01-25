@@ -4,12 +4,14 @@ import org.scalatest.Assertion
 
 class WorksErrorsTest extends ApiWorksTestBase {
 
+  val includesString = "['identifiers', 'items', 'subjects', 'genres', 'contributors', 'production', 'languages', 'notes', 'images', 'parts', 'partOf', 'precededBy', 'succeededBy']"
+
   describe("returns a 400 Bad Request for errors in the ?include parameter") {
     it("a single invalid include") {
       assertIsBadRequest(
         "/works?include=foo",
         description =
-          "include: 'foo' is not a valid value. Please choose one of: ['identifiers', 'items', 'subjects', 'genres', 'contributors', 'production', 'languages', 'notes', 'images', 'parts', 'partOf', 'precededBy', 'succeededBy']"
+          s"include: 'foo' is not a valid value. Please choose one of: $includesString"
       )
     }
 
@@ -17,7 +19,7 @@ class WorksErrorsTest extends ApiWorksTestBase {
       assertIsBadRequest(
         "/works?include=foo,bar",
         description =
-          "include: 'foo', 'bar' are not valid values. Please choose one of: ['identifiers', 'items', 'subjects', 'genres', 'contributors', 'production', 'languages', 'notes', 'images', 'parts', 'partOf', 'precededBy', 'succeededBy']"
+          s"include: 'foo', 'bar' are not valid values. Please choose one of: $includesString"
       )
     }
 
@@ -25,7 +27,7 @@ class WorksErrorsTest extends ApiWorksTestBase {
       assertIsBadRequest(
         "/works?include=foo,identifiers,bar",
         description =
-          "include: 'foo', 'bar' are not valid values. Please choose one of: ['identifiers', 'items', 'subjects', 'genres', 'contributors', 'production', 'languages', 'notes', 'images', 'parts', 'partOf', 'precededBy', 'succeededBy']"
+          s"include: 'foo', 'bar' are not valid values. Please choose one of: $includesString"
       )
     }
 
@@ -33,10 +35,12 @@ class WorksErrorsTest extends ApiWorksTestBase {
       assertIsBadRequest(
         "/works/nfdn7wac?include=foo",
         description =
-          "include: 'foo' is not a valid value. Please choose one of: ['identifiers', 'items', 'subjects', 'genres', 'contributors', 'production', 'languages', 'notes', 'images', 'parts', 'partOf', 'precededBy', 'succeededBy']"
+          s"include: 'foo' is not a valid value. Please choose one of: $includesString"
       )
     }
   }
+
+  val aggregationsString = "['workType', 'genres', 'production.dates', 'subjects', 'languages', 'contributors', 'license', 'locationType', 'items.locations.type']"
 
   describe(
     "returns a 400 Bad Request for errors in the ?aggregations parameter") {
@@ -44,7 +48,7 @@ class WorksErrorsTest extends ApiWorksTestBase {
       assertIsBadRequest(
         "/works?aggregations=foo",
         description =
-          "aggregations: 'foo' is not a valid value. Please choose one of: ['workType', 'genres', 'production.dates', 'subjects', 'languages', 'license', 'locationType', 'items.locations.type']"
+          s"aggregations: 'foo' is not a valid value. Please choose one of: $aggregationsString"
       )
     }
 
@@ -52,9 +56,18 @@ class WorksErrorsTest extends ApiWorksTestBase {
       assertIsBadRequest(
         "/works?aggregations=foo,bar",
         description =
-          "aggregations: 'foo', 'bar' are not valid values. Please choose one of: ['workType', 'genres', 'production.dates', 'subjects', 'languages', 'license', 'locationType', 'items.locations.type']"
+          s"aggregations: 'foo', 'bar' are not valid values. Please choose one of: $aggregationsString"
       )
     }
+
+    it("a mixture of valid and invalid aggregations") {
+      assertIsBadRequest(
+        "/works?aggregations=foo,workType,bar",
+        description =
+          s"aggregations: 'foo', 'bar' are not valid values. Please choose one of: $aggregationsString"
+      )
+    }
+  }
 
     it("multiple invalid sorts") {
       assertIsBadRequest(
@@ -63,15 +76,6 @@ class WorksErrorsTest extends ApiWorksTestBase {
           "sort: 'foo', 'bar' are not valid values. Please choose one of: ['production.dates']"
       )
     }
-
-    it("a mixture of valid and invalid aggregations") {
-      assertIsBadRequest(
-        "/works?aggregations=foo,workType,bar",
-        description =
-          "aggregations: 'foo', 'bar' are not valid values. Please choose one of: ['workType', 'genres', 'production.dates', 'subjects', 'languages', 'license', 'locationType', 'items.locations.type']"
-      )
-    }
-  }
 
   describe("returns a 400 Bad Request for errors in the ?sort parameter") {
     it("a single invalid sort") {
