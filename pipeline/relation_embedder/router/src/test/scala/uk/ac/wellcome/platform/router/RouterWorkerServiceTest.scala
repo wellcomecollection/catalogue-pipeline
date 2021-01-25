@@ -2,31 +2,35 @@ package uk.ac.wellcome.platform.router
 
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
+import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
+import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
+import uk.ac.wellcome.messaging.sns.NotificationMessage
+import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.work.internal.WorkState.{Denormalised, Merged}
 import uk.ac.wellcome.models.work.internal.{CollectionPath, Relations, Work}
-import uk.ac.wellcome.pipeline_storage.fixtures.PipelineStorageStreamFixtures
-import uk.ac.wellcome.pipeline_storage.{
-  Indexer,
-  MemoryIndexer,
-  MemoryRetriever,
-  Retriever
-}
+import uk.ac.wellcome.pipeline_storage._
 
 import scala.collection.mutable
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.concurrent.duration._
 
 class RouterWorkerServiceTest
     extends AnyFunSpec
     with WorkGenerators
-    with PipelineStorageStreamFixtures
+    with SQS
+    with Akka
     with Eventually
     with IntegrationPatience {
-
+  val pipelineStorageConfig = PipelineStorageConfig(
+    batchSize = 1,
+    flushInterval = 1 milliseconds,
+    parallelism = 1
+  )
   it("sends collectionPath to paths topic") {
     val work = mergedWork().collectionPath(CollectionPath("a"))
     val indexer = new MemoryIndexer[Work[Denormalised]]()
@@ -130,20 +134,22 @@ class RouterWorkerServiceTest
       case q @ QueuePair(queue, _) =>
         val worksMessageSender = new MemoryMessageSender
         val pathsMessageSender = new MemoryMessageSender
-
-        withPipelineStream(
+      withActorSystem{ implicit ac =>
+        withSQSStream(
           queue = queue,
-          indexer = indexer,
-          sender = worksMessageSender
-        ) { pipelineStream =>
+        ) { stream: SQSStream[NotificationMessage] =>
           val service =
             new RouterWorkerService(
+              indexer = indexer,
+              messageSender = worksMessageSender,
               pathsMsgSender = pathsMessageSender,
               workRetriever = retriever,
-              pipelineStream = pipelineStream
+              msgStream = stream,
+              config = pipelineStorageConfig
             )
           service.run()
           testWith((q, worksMessageSender, pathsMessageSender))
         }
+      }
     }
 }

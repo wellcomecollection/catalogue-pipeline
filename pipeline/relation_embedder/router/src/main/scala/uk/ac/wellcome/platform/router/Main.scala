@@ -9,11 +9,7 @@ import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal.Work
 import uk.ac.wellcome.models.work.internal.WorkState.{Denormalised, Merged}
-import uk.ac.wellcome.pipeline_storage.typesafe.{
-  ElasticIndexerBuilder,
-  ElasticSourceRetrieverBuilder,
-  PipelineStorageStreamBuilder
-}
+import uk.ac.wellcome.pipeline_storage.typesafe.{ElasticIndexerBuilder, ElasticSourceRetrieverBuilder, PipelineStorageStreamBuilder}
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 
@@ -41,24 +37,21 @@ object Main extends WellcomeTypesafeApp {
       namespace = "merged-works"
     )
 
-    val stream = PipelineStorageStreamBuilder.buildPipelineStorageStream(
-      SQSBuilder.buildSQSStream[NotificationMessage](config),
-      indexer = workIndexer,
-      SNSBuilder
-        .buildSNSMessageSender(
-          config,
-          namespace = "work-sender",
-          subject = "Sent from the router")
-    )(config)
-
     new RouterWorkerService(
+      msgStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
+      indexer = workIndexer,
+      config = PipelineStorageStreamBuilder.buildPipelineStorageConfig(config),
+messageSender = SNSBuilder
+  .buildSNSMessageSender(
+    config,
+    namespace = "work-sender",
+    subject = "Sent from the router"),
       pathsMsgSender = SNSBuilder
         .buildSNSMessageSender(
           config,
           namespace = "path-sender",
           subject = "Sent from the router"),
-      workRetriever = workRetriever,
-      pipelineStream = stream
+      workRetriever = workRetriever
     )
   }
 }
