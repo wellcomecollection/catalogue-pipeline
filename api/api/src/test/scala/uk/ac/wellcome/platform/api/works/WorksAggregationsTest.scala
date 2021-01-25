@@ -300,7 +300,63 @@ class WorksAggregationsTest
                             .map(workResponse)
                             .mkString(",")}]
             }
-          """.stripMargin
+          """
+        }
+    }
+  }
+
+  it("supports aggregating on contributors") {
+    val agent47 = Contributor(agent = Agent("47"), roles = Nil)
+    val jamesBond = Contributor(agent = Agent("007"), roles = Nil)
+    val mi5 = Contributor(agent = Organisation("MI5"), roles = Nil)
+    val gchq = Contributor(agent = Organisation("GCHQ"), roles = Nil)
+
+    val works =
+      List(List(agent47), List(agent47), List(jamesBond, mi5), List(mi5, gchq))
+        .zipWithIndex
+        .map {
+          case (contributors, idx) =>
+            indexedWork(canonicalId = idx.toString).contributors(contributors)
+        }
+
+    withWorksApi {
+      case (worksIndex, routes) =>
+        insertIntoElasticsearch(worksIndex, works: _*)
+        assertJsonResponse(routes, s"/$apiPrefix/works?aggregations=contributors") {
+          Status.OK -> s"""
+            {
+              ${resultList(apiPrefix, totalResults = works.size)},
+              "aggregations": {
+                "type" : "Aggregations",
+                "license": {
+                  "type" : "Aggregation",
+                  "buckets": [
+                    {
+                      "count" : 2,
+                      "data" : ${contributor(agent47)},
+                      "type" : "AggregationBucket"
+                    },
+                    {
+                      "count" : 1,
+                      "data" : ${contributor(jamesBond)},
+                      "type" : "AggregationBucket"
+                    },
+                    {
+                      "count" : 2,
+                      "data" : ${contributor(mi5)},
+                      "type" : "AggregationBucket"
+                    },
+                    {
+                      "count" : 1,
+                      "data" : ${contributor(gchq)},
+                      "type" : "AggregationBucket"
+                    }
+                  ]
+                }
+              },
+              "results": [${works.map(workResponse).mkString(",")}]
+            }
+          """
         }
     }
   }
@@ -356,7 +412,7 @@ class WorksAggregationsTest
                             .map(workResponse)
                             .mkString(",")}]
             }
-          """.stripMargin
+          """
         }
     }
   }
@@ -413,7 +469,7 @@ class WorksAggregationsTest
                             .map(workResponse)
                             .mkString(",")}]
             }
-          """.stripMargin
+          """
         }
     }
   }

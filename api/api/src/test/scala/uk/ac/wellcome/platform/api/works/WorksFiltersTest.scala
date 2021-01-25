@@ -544,6 +544,48 @@ class WorksFiltersTest
     }
   }
 
+  describe("filtering works by contributors") {
+    val karlMarx = Contributor(agent = Person("Karl Marx"), roles = Nil)
+    val jakePaul = Contributor(agent = Person("Jake Paul"), roles = Nil)
+
+    val workA = indexedWork(canonicalId = "A").contributors(List(karlMarx))
+    val workB = indexedWork(canonicalId = "B").contributors(List(jakePaul))
+    val workC = indexedWork(canonicalId = "C")
+      .contributors(List(karlMarx, jakePaul))
+    val workD = indexedWork(canonicalId = "D").contributors(Nil)
+    val works = List(workA, workB, workC, workD)
+
+    it("filters by a single contributor") {
+      withWorksApi {
+        case (worksIndex, routes) =>
+          insertIntoElasticsearch(worksIndex, works: _*)
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works?contributors.agent.label=marx") {
+            Status.OK -> worksListResponse(
+              apiPrefix,
+              works = Seq(workA, workC)
+            )
+          }
+      }
+    }
+
+    it("filters by a multiple contributors") {
+      withWorksApi {
+        case (worksIndex, routes) =>
+          insertIntoElasticsearch(worksIndex, works: _*)
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works?contributors.agent.label=marx,paul") {
+            Status.OK -> worksListResponse(
+              apiPrefix,
+              works = Seq(workA, workB, workC)
+            )
+          }
+      }
+    }
+  }
+
   describe("filtering works by license") {
     def createLicensedWork(
       licenses: Seq[License]): Work.Visible[WorkState.Indexed] = {
