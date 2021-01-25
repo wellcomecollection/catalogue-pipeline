@@ -30,5 +30,5 @@ variable "private_subnets" {
 }
 variable "dlq_alarm_arn" {}
 variable "shared_logging_secrets" {
-  type = map
+  type = map(any)
 }

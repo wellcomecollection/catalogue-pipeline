@@ -42,9 +42,8 @@ module "relation_embedder" {
   # NOTE: limit to avoid >500 concurrent scroll contexts
   max_capacity = min(10, var.max_capacity)
 
-  subnets             = var.subnets
-  messages_bucket_arn = aws_s3_bucket.messages.arn
-  queue_read_policy   = module.relation_embedder_queue.read_policy
+  subnets           = var.subnets
+  queue_read_policy = module.relation_embedder_queue.read_policy
 
   cpu    = 1024
   memory = 2048
@@ -63,8 +62,6 @@ module "relation_embedder_output_topic" {
 
   name       = "${local.namespace_hyphen}_relation_embedder_output"
   role_names = [module.relation_embedder.task_role_name]
-
-  messages_bucket_arn = aws_s3_bucket.messages.arn
 }
 
 module "relation_embedder_scaling_alarm" {

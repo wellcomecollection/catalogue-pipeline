@@ -35,10 +35,9 @@ module "batcher" {
 
   shared_logging_secrets = var.shared_logging_secrets
 
-  subnets             = var.subnets
-  max_capacity        = min(1, var.max_capacity)
-  messages_bucket_arn = aws_s3_bucket.messages.arn
-  queue_read_policy   = module.batcher_queue.read_policy
+  subnets           = var.subnets
+  max_capacity      = min(1, var.max_capacity)
+  queue_read_policy = module.batcher_queue.read_policy
 
   cpu    = 1024
   memory = 2048
@@ -52,8 +51,6 @@ module "batcher_output_topic" {
 
   name       = "${local.namespace_hyphen}_batcher_output"
   role_names = [module.batcher.task_role_name]
-
-  messages_bucket_arn = aws_s3_bucket.messages.arn
 }
 
 module "batcher_scaling_alarm" {

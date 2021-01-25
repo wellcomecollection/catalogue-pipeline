@@ -77,8 +77,6 @@ variable "manager_mount_points" {
   default = []
 }
 
-variable "messages_bucket_arn" {}
-
 variable "queue_read_policy" {}
 
 variable "apps" {
