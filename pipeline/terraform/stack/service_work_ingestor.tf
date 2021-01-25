@@ -49,9 +49,8 @@ module "ingestor_works" {
 
   subnets = var.subnets
 
-  max_capacity        = min(6, var.max_capacity)
-  messages_bucket_arn = aws_s3_bucket.messages.arn
-  queue_read_policy   = module.ingestor_works_queue.read_policy
+  max_capacity      = min(6, var.max_capacity)
+  queue_read_policy = module.ingestor_works_queue.read_policy
 
   cpu    = 1024
   memory = 2048
@@ -70,8 +69,6 @@ module "work_ingestor_topic" {
 
   name       = "${local.namespace_hyphen}_work_ingestor"
   role_names = [module.ingestor_works.task_role_name]
-
-  messages_bucket_arn = aws_s3_bucket.messages.arn
 }
 
 module "ingestor_works_scaling_alarm" {

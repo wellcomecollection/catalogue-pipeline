@@ -23,8 +23,6 @@ variable "security_group_ids" {
   type    = list(string)
 }
 
-variable "messages_bucket_arn" {}
-
 variable "queue_read_policy" {}
 
 variable "max_capacity" {

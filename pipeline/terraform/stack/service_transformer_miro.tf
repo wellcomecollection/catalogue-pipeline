@@ -38,10 +38,9 @@ module "miro_transformer" {
 
   use_fargate_spot = true
 
-  subnets             = var.subnets
-  max_capacity        = var.max_capacity
-  messages_bucket_arn = aws_s3_bucket.messages.arn
-  queue_read_policy   = module.miro_transformer_queue.read_policy
+  subnets           = var.subnets
+  max_capacity      = var.max_capacity
+  queue_read_policy = module.miro_transformer_queue.read_policy
 
   deployment_service_env  = var.release_label
   deployment_service_name = "miro-transformer"

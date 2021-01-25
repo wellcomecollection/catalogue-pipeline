@@ -33,10 +33,9 @@ module "mets_transformer" {
 
   secret_env_vars = local.pipeline_storage_es_service_secrets["transformer"]
 
-  subnets             = var.subnets
-  max_capacity        = var.max_capacity
-  messages_bucket_arn = aws_s3_bucket.messages.arn
-  queue_read_policy   = module.mets_transformer_queue.read_policy
+  subnets           = var.subnets
+  max_capacity      = var.max_capacity
+  queue_read_policy = module.mets_transformer_queue.read_policy
 
   # The METS transformer is quite CPU intensive, and if it doesn't have enough CPU,
   # the Akka scheduler gets resource-starved and the whole app stops doing anything.

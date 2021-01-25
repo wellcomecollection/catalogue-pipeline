@@ -26,8 +26,7 @@ module "id_minter" {
   cluster_arn  = aws_ecs_cluster.cluster.id
 
   env_vars = {
-    metrics_namespace    = "${local.namespace_hyphen}_id_minter"
-    messages_bucket_name = aws_s3_bucket.messages.id
+    metrics_namespace = "${local.namespace_hyphen}_id_minter"
 
     queue_url                     = module.id_minter_queue.url
     topic_arn                     = module.id_minter_topic.arn
@@ -55,9 +54,8 @@ module "id_minter" {
     var.max_capacity
   )
 
-  subnets             = var.subnets
-  messages_bucket_arn = aws_s3_bucket.messages.arn
-  queue_read_policy   = module.id_minter_queue.read_policy
+  subnets           = var.subnets
+  queue_read_policy = module.id_minter_queue.read_policy
 
   cpu    = 1024
   memory = 2048
@@ -76,8 +74,6 @@ module "id_minter_topic" {
 
   name       = "${local.namespace_hyphen}_id_minter_output"
   role_names = [module.id_minter.task_role_name]
-
-  messages_bucket_arn = aws_s3_bucket.messages.arn
 }
 
 module "id_minter_scaling_alarm" {

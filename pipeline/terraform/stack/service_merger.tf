@@ -25,7 +25,6 @@ module "merger" {
 
   env_vars = {
     metrics_namespace       = "${local.namespace_hyphen}_merger"
-    messages_bucket_name    = aws_s3_bucket.messages.id
     topic_arn               = module.matcher_topic.arn
     merger_queue_id         = module.merger_queue.url
     merger_works_topic_arn  = module.merger_works_topic.arn
@@ -46,10 +45,9 @@ module "merger" {
 
   use_fargate_spot = true
 
-  subnets             = var.subnets
-  max_capacity        = var.max_capacity
-  messages_bucket_arn = aws_s3_bucket.messages.arn
-  queue_read_policy   = module.merger_queue.read_policy
+  subnets           = var.subnets
+  max_capacity      = var.max_capacity
+  queue_read_policy = module.merger_queue.read_policy
 
   deployment_service_env  = var.release_label
   deployment_service_name = "merger"
@@ -59,17 +57,15 @@ module "merger" {
 module "merger_works_topic" {
   source = "../modules/topic"
 
-  name                = "${local.namespace_hyphen}_merger_works"
-  role_names          = [module.merger.task_role_name]
-  messages_bucket_arn = aws_s3_bucket.messages.arn
+  name       = "${local.namespace_hyphen}_merger_works"
+  role_names = [module.merger.task_role_name]
 }
 
 module "merger_images_topic" {
   source = "../modules/topic"
 
-  name                = "${local.namespace_hyphen}_merger_images"
-  role_names          = [module.merger.task_role_name]
-  messages_bucket_arn = aws_s3_bucket.messages.arn
+  name       = "${local.namespace_hyphen}_merger_images"
+  role_names = [module.merger.task_role_name]
 }
 
 module "merger_scaling_alarm" {

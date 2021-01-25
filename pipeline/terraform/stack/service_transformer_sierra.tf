@@ -35,9 +35,8 @@ module "sierra_transformer" {
 
   use_fargate_spot = true
 
-  subnets             = var.subnets
-  max_capacity        = var.max_capacity
-  messages_bucket_arn = aws_s3_bucket.messages.arn
+  subnets      = var.subnets
+  max_capacity = var.max_capacity
 
   queue_read_policy = module.sierra_transformer_queue.read_policy
 

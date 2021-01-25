@@ -116,7 +116,6 @@ module "image_inferrer" {
     palette_inferrer_port = local.palette_inferrer_port
     metrics_namespace     = "${local.namespace_hyphen}_image_inferrer"
     topic_arn             = module.image_inferrer_topic.arn
-    messages_bucket_name  = aws_s3_bucket.messages.id
     queue_url             = module.image_inferrer_queue.url
     images_root           = local.shared_storage_path
 
@@ -134,8 +133,7 @@ module "image_inferrer" {
   # Any higher than this currently causes latency spikes from Loris
   max_capacity = min(6, var.max_capacity)
 
-  messages_bucket_arn = aws_s3_bucket.messages.arn
-  queue_read_policy   = module.image_inferrer_queue.read_policy
+  queue_read_policy = module.image_inferrer_queue.read_policy
 
   deployment_service_env  = var.release_label
   deployment_service_name = "image-inferrer"
@@ -165,8 +163,6 @@ module "image_inferrer_topic" {
 
   name       = "${local.namespace_hyphen}_image_inferrer"
   role_names = [module.image_inferrer.task_role_name]
-
-  messages_bucket_arn = aws_s3_bucket.messages.arn
 }
 
 module "image_inferrer_scaling_alarm" {

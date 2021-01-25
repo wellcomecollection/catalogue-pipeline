@@ -57,10 +57,9 @@ module "matcher" {
 
   secret_env_vars = local.pipeline_storage_es_service_secrets["matcher"]
 
-  subnets             = var.subnets
-  max_capacity        = var.max_capacity
-  messages_bucket_arn = aws_s3_bucket.messages.arn
-  queue_read_policy   = module.matcher_input_queue.read_policy
+  subnets           = var.subnets
+  max_capacity      = var.max_capacity
+  queue_read_policy = module.matcher_input_queue.read_policy
 
   deployment_service_env  = var.release_label
   deployment_service_name = "matcher"
@@ -82,9 +81,8 @@ resource "aws_iam_role_policy" "matcher_lock_readwrite" {
 module "matcher_topic" {
   source = "../modules/topic"
 
-  name                = "${local.namespace_hyphen}_matcher"
-  role_names          = [module.matcher.task_role_name]
-  messages_bucket_arn = aws_s3_bucket.messages.arn
+  name       = "${local.namespace_hyphen}_matcher"
+  role_names = [module.matcher.task_role_name]
 }
 
 module "matcher_scaling_alarm" {

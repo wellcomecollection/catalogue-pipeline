@@ -54,9 +54,8 @@ module "ingestor_images" {
 
   subnets = var.subnets
 
-  max_capacity        = min(5, var.max_capacity)
-  messages_bucket_arn = aws_s3_bucket.messages.arn
-  queue_read_policy   = module.ingestor_images_queue.read_policy
+  max_capacity      = min(5, var.max_capacity)
+  queue_read_policy = module.ingestor_images_queue.read_policy
 
   deployment_service_env  = var.release_label
   deployment_service_name = "image-ingestor"
@@ -69,8 +68,6 @@ module "image_ingestor_topic" {
 
   name       = "${local.namespace_hyphen}_image_ingestor_output"
   role_names = [module.ingestor_images.task_role_name]
-
-  messages_bucket_arn = aws_s3_bucket.messages.arn
 }
 
 module "ingestor_images_scaling_alarm" {

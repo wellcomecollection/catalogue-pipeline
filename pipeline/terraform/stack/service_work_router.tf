@@ -39,10 +39,9 @@ module "router" {
 
   shared_logging_secrets = var.shared_logging_secrets
 
-  subnets             = var.subnets
-  max_capacity        = min(10, var.max_capacity)
-  messages_bucket_arn = aws_s3_bucket.messages.arn
-  queue_read_policy   = module.router_queue.read_policy
+  subnets           = var.subnets
+  max_capacity      = min(10, var.max_capacity)
+  queue_read_policy = module.router_queue.read_policy
 
   cpu    = 1024
   memory = 2048
@@ -58,8 +57,6 @@ module "router_path_output_topic" {
 
   name       = "${local.namespace_hyphen}_router_path_output"
   role_names = [module.router.task_role_name]
-
-  messages_bucket_arn = aws_s3_bucket.messages.arn
 }
 
 module "router_work_output_topic" {
@@ -67,8 +64,6 @@ module "router_work_output_topic" {
 
   name       = "${local.namespace_hyphen}_router_work_output"
   role_names = [module.router.task_role_name]
-
-  messages_bucket_arn = aws_s3_bucket.messages.arn
 }
 
 module "router_scaling_alarm" {
