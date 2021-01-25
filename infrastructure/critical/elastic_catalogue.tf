@@ -6,8 +6,8 @@ resource "ec_deployment" "catalogue" {
   deployment_template_id = "aws-io-optimized"
 
   traffic_filter = [
-    ec_deployment_traffic_filter.allow_catalogue_pipeline_vpce.id,
     ec_deployment_traffic_filter.public_internet.id,
+    module.platform_privatelink.traffic_filter_vpce_id,
   ]
 
   elasticsearch {

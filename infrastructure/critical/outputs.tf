@@ -42,11 +42,11 @@ output "vhs_miro_inventory_assumable_read_role" {
 # Catalogue Pipeline Elastic Cloud
 
 output "catalogue_pipeline_storage_elastic_cloud_sg_id" {
-  value = aws_security_group.allow_catalogue_pipeline_elastic_cloud_vpce.id
+  value = module.platform_privatelink.security_group_id
 }
 
-output "traffic_filter_catalogue_vpce_id" {
-  value = ec_deployment_traffic_filter.allow_catalogue_pipeline_vpce.id
+output "traffic_filter_platform_vpce_id" {
+  value = module.platform_privatelink.traffic_filter_vpce_id
 }
 
 output "traffic_filter_public_internet_id" {

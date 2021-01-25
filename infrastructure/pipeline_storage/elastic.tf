@@ -1,5 +1,5 @@
 locals {
-  traffic_filter_catalogue_vpce_id  = data.terraform_remote_state.infra_critical.outputs["traffic_filter_catalogue_vpce_id"]
+  traffic_filter_platform_vpce_id  = data.terraform_remote_state.infra_critical.outputs["traffic_filter_platform_vpce_id"]
   traffic_filter_public_internet_id = data.terraform_remote_state.infra_critical.outputs["traffic_filter_public_internet_id"]
 }
 
@@ -11,7 +11,7 @@ resource "ec_deployment" "pipeline_storage" {
   deployment_template_id = "aws-io-optimized-v2"
 
   traffic_filter = [
-    local.traffic_filter_catalogue_vpce_id,
+    local.traffic_filter_platform_vpce_id,
     local.traffic_filter_public_internet_id,
   ]
 
