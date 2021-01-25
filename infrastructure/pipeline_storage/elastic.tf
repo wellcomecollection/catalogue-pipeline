@@ -1,5 +1,5 @@
 locals {
-  traffic_filter_platform_vpce_id  = data.terraform_remote_state.infra_critical.outputs["traffic_filter_platform_vpce_id"]
+  traffic_filter_platform_vpce_id   = data.terraform_remote_state.infra_critical.outputs["traffic_filter_platform_vpce_id"]
   traffic_filter_public_internet_id = data.terraform_remote_state.infra_critical.outputs["traffic_filter_public_internet_id"]
 }
 
