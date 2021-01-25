@@ -399,7 +399,8 @@ trait MultipleWorksSwagger {
             "subjects",
             "license",
             "languages",
-            "locationType")),
+            "locationType",
+            "items.locations.type")),
         required = false
       ),
       new Parameter(
