@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.api.models
 
+import scala.util.{Failure, Try}
 import java.time.{Instant, LocalDateTime, ZoneOffset}
-
 import com.sksamuel.elastic4s.requests.searches.aggs.responses.{
   Aggregations => Elastic4sAggregations
 }
@@ -9,13 +9,12 @@ import com.sksamuel.elastic4s.requests.searches.SearchResponse
 import grizzled.slf4j.Logging
 import io.circe.generic.extras.JsonKey
 import io.circe.{Decoder, Json}
+
 import uk.ac.wellcome.display.models.LocationTypeQuery
-import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.json.JsonUtil.fromJson
 import uk.ac.wellcome.models.marc.MarcLanguageCodeList
 import uk.ac.wellcome.models.work.internal._
 import IdState.Minted
-
-import scala.util.{Failure, Try}
 
 case class Aggregations(
   format: Option[Aggregation[Format]] = None,
@@ -150,6 +149,8 @@ object Aggregations extends Logging {
 // If the buckets have a subaggregation named "filtered", then we use the
 // count from there; otherwise we use the count from the root of the bucket.
 object AggregationMapping {
+  
+  import uk.ac.wellcome.json.JsonUtil._
 
   private case class Result(buckets: Seq[Bucket])
 
