@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.display.json.DisplayJsonUtil._
 import uk.ac.wellcome.models.work.internal._
+import IdState.Minted
 
 @Schema(
   name = "Aggregations",
@@ -26,6 +27,9 @@ case class DisplayAggregations(
   @Schema(
     description = "Subject aggregation on a set of results."
   ) subjects: Option[DisplayAggregation[DisplaySubject]],
+  @Schema(
+    description = "Contributor aggregation on a set of results."
+  ) contributors: Option[DisplayAggregation[DisplayContributor]],
   @Schema(
     description = "Language aggregation on a set of results."
   ) languages: Option[DisplayAggregation[DisplayLanguage]],
@@ -72,13 +76,17 @@ object DisplayAggregations {
       workType = displayAggregation(aggs.format, DisplayFormat.apply),
       productionDates =
         displayAggregation(aggs.productionDates, DisplayPeriod.apply),
-      genres = displayAggregation[Genre[IdState.Minted], DisplayGenre](
+      genres = displayAggregation[Genre[Minted], DisplayGenre](
         aggs.genres,
         DisplayGenre(_, includesIdentifiers = false)),
       languages = displayAggregation(aggs.languages, DisplayLanguage.apply),
-      subjects = displayAggregation[Subject[IdState.Minted], DisplaySubject](
+      subjects = displayAggregation[Subject[Minted], DisplaySubject](
         aggs.subjects,
         subject => DisplaySubject(subject, includesIdentifiers = false)
+      ),
+      contributors = displayAggregation[Contributor[Minted], DisplayContributor](
+        aggs.contributors,
+        contributor => DisplayContributor(contributor, includesIdentifiers = false)
       ),
       license = displayAggregation(aggs.license, DisplayLicense.apply),
       locationType = displayAggregation(
