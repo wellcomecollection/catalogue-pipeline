@@ -45,6 +45,10 @@ output "catalogue_pipeline_storage_elastic_cloud_sg_id" {
   value = module.platform_privatelink.security_group_id
 }
 
+output "catalogue_elastic_cloud_sg_id" {
+  value = module.catalogue_privatelink.security_group_id
+}
+
 output "traffic_filter_platform_vpce_id" {
   value = module.platform_privatelink.traffic_filter_vpce_id
 }
