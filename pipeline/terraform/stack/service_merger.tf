@@ -44,6 +44,8 @@ module "merger" {
   cpu    = 2048
   memory = 4096
 
+  use_fargate_spot = true
+
   subnets             = var.subnets
   max_capacity        = var.max_capacity
   messages_bucket_arn = aws_s3_bucket.messages.arn

@@ -66,5 +66,33 @@
   {
     "workId": "sqensfpm",
     "params": {}
+  },
+  {
+    "workId": "japtptkk",
+    "params": {
+      "include": "identifiers,items,subjects,genres,contributors,production,languages,notes,images,succeededBy,precededBy,partOf,parts"
+    },
+    "comment": "A Sierra <> Miro merged work"
+  },
+  {
+    "workId": "nbsqzbba",
+    "params": {
+      "include": "identifiers,items,subjects,genres,contributors,production,languages,notes,images,succeededBy,precededBy,partOf,parts"
+    },
+    "comment": "A Sierra <> METS merged work"
+  },
+  {
+    "workId": "tuzsytuh",
+    "params": {
+      "include": "identifiers,items,subjects,genres,contributors,production,languages,notes,images,succeededBy,precededBy,partOf,parts"
+    },
+    "comment": "A Sierra physical <> digital <> METS merged work"
+  },
+  {
+    "workId": "ugmmch83",
+    "params": {
+      "include": "identifiers,items,subjects,genres,contributors,production,languages,notes,images,succeededBy,precededBy,partOf,parts"
+    },
+    "comment": "A Sierra work with lots of items"
   }
 ]

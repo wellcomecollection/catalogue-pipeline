@@ -43,6 +43,8 @@ module "mets_transformer" {
   cpu    = 2048
   memory = 4096
 
+  use_fargate_spot = true
+
   deployment_service_env  = var.release_label
   deployment_service_name = "mets-transformer"
   shared_logging_secrets  = var.shared_logging_secrets

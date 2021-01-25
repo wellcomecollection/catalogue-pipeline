@@ -91,6 +91,7 @@ def main(routes_file):
         status, diff_lines = differ.get_html_diff()
 
         return {
+            "route": route,
             "display_url": differ.display_url,
             "status": status,
             "diff_lines": diff_lines,

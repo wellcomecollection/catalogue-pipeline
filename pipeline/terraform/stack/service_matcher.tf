@@ -38,6 +38,8 @@ module "matcher" {
   cpu    = 1024
   memory = 2048
 
+  use_fargate_spot = true
+
   env_vars = {
     queue_url         = module.matcher_input_queue.url
     metrics_namespace = "${local.namespace_hyphen}_matcher"
