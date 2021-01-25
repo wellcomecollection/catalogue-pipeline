@@ -81,31 +81,33 @@ class SierraContributorsTest
 
   describe("Person") {
     it("extracts and combines only subfields $$a $$b $$c $$d for the label") {
-      // Based on https://search.wellcomelibrary.org/iii/encore/record/C__Rb1795764?lang=eng
-      // as retrieved on 25 April 2019.
-
-      val name = "Charles Emmanuel"
-      val numeration = "III,"
-      val titlesAndOtherWords = "King of Sardinia,"
-      val dates = "1701-1773,"
-      val varField100 = createVarFieldWith(
-        marcTag = "100",
-        subfields = List(
-          MarcSubfield(tag = "a", content = name),
-          MarcSubfield(tag = "b", content = numeration),
-          MarcSubfield(tag = "c", content = titlesAndOtherWords),
-          MarcSubfield(tag = "d", content = dates),
+      val varFields = List(
+        createVarFieldWith(
+          marcTag = "100",
+          subfields = List(
+            MarcSubfield(tag = "a", content = "Charles Emmanuel"),
+            MarcSubfield(tag = "b", content = "III,"),
+            MarcSubfield(tag = "c", content = "King of Sardinia,"),
+            MarcSubfield(tag = "d", content = "1701-1773"),
+          )
+        ),
+        createVarFieldWith(
+          marcTag = "700",
+          subfields = List(
+            MarcSubfield(tag = "a", content = "Charles Emmanuel"),
+            MarcSubfield(tag = "b", content = "IV,"),
+            MarcSubfield(tag = "c", content = "King of Sardinia,"),
+            MarcSubfield(tag = "d", content = "1796-1802"),
+          )
         )
       )
-      val varField700 = varField100.copy(marcTag = Some("700"))
-      val varFields = List(varField100, varField700)
 
       val expectedContributors = List(
         Contributor(
           Person(label = "Charles Emmanuel III, King of Sardinia, 1701-1773"),
           roles = Nil),
         Contributor(
-          Person(label = "Charles Emmanuel III, King of Sardinia, 1701-1773"),
+          Person(label = "Charles Emmanuel IV, King of Sardinia, 1796-1802"),
           roles = Nil)
       )
 
@@ -648,6 +650,38 @@ class SierraContributorsTest
       )
       transformAndCheckContributors(List(varField), List(contributor))
     }
+  }
+
+  // This is based on the MARC record for b24541758, as of 23 January 2021
+  // The same contributor was listed in both 100 and 700 fields
+  it("deduplicates contributors") {
+    val varFields = List(
+      createVarFieldWith(
+        marcTag = "100",
+        subfields = List(
+          MarcSubfield(tag = "a", content = "Steele, Richard,"),
+          MarcSubfield(tag = "c", content = "Sir,"),
+          MarcSubfield(tag = "d", content = "1672-1729.")
+        )
+      ),
+      createVarFieldWith(
+        marcTag = "700",
+        subfields = List(
+          MarcSubfield(tag = "a", content = "Steele, Richard,"),
+          MarcSubfield(tag = "c", content = "Sir,"),
+          MarcSubfield(tag = "d", content = "1672-1729.")
+        )
+      )
+    )
+
+    val bibData = createSierraBibDataWith(varFields = varFields)
+
+    SierraContributors(bibData) shouldBe List(
+      Contributor(
+        agent = Person(label = "Steele, Richard, Sir, 1672-1729."),
+        roles = List.empty
+      )
+    )
   }
 
   private def transformAndCheckContributors(

@@ -60,7 +60,7 @@ object SierraContributors
               )
             }
           }
-    }
+    }.distinct
 
   private def getPersonContributors(subfields: List[MarcSubfield]) =
     if (subfields.withTags("t").isEmpty)
