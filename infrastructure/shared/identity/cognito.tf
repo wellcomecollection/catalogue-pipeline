@@ -133,7 +133,7 @@ resource "aws_cognito_user_pool_client" "web_auth" {
   allowed_oauth_scopes                 = concat(["openid", "email"], aws_cognito_resource_server.stacks_api.scope_identifiers)
   explicit_auth_flows                  = ["USER_PASSWORD_AUTH"]
 
-  user_pool_id    = "${aws_cognito_user_pool.pool.id}"
+  user_pool_id    = aws_cognito_user_pool.pool.id
   generate_secret = false
 
   callback_urls                = ["https://wellcomecollection.org/works/auth-code"]
