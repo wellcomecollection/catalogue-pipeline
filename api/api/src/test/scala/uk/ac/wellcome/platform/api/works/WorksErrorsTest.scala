@@ -4,7 +4,8 @@ import org.scalatest.Assertion
 
 class WorksErrorsTest extends ApiWorksTestBase {
 
-  val includesString = "['identifiers', 'items', 'subjects', 'genres', 'contributors', 'production', 'languages', 'notes', 'images', 'parts', 'partOf', 'precededBy', 'succeededBy']"
+  val includesString =
+    "['identifiers', 'items', 'subjects', 'genres', 'contributors', 'production', 'languages', 'notes', 'images', 'parts', 'partOf', 'precededBy', 'succeededBy']"
 
   describe("returns a 400 Bad Request for errors in the ?include parameter") {
     it("a single invalid include") {
@@ -40,7 +41,8 @@ class WorksErrorsTest extends ApiWorksTestBase {
     }
   }
 
-  val aggregationsString = "['workType', 'genres', 'production.dates', 'subjects', 'languages', 'contributors', 'license', 'locationType', 'items.locations.type']"
+  val aggregationsString =
+    "['workType', 'genres', 'production.dates', 'subjects', 'languages', 'contributors', 'license', 'locationType', 'items.locations.type']"
 
   describe(
     "returns a 400 Bad Request for errors in the ?aggregations parameter") {
@@ -69,13 +71,13 @@ class WorksErrorsTest extends ApiWorksTestBase {
     }
   }
 
-    it("multiple invalid sorts") {
-      assertIsBadRequest(
-        "/works?sort=foo,bar",
-        description =
-          "sort: 'foo', 'bar' are not valid values. Please choose one of: ['production.dates']"
-      )
-    }
+  it("multiple invalid sorts") {
+    assertIsBadRequest(
+      "/works?sort=foo,bar",
+      description =
+        "sort: 'foo', 'bar' are not valid values. Please choose one of: ['production.dates']"
+    )
+  }
 
   describe("returns a 400 Bad Request for errors in the ?sort parameter") {
     it("a single invalid sort") {
