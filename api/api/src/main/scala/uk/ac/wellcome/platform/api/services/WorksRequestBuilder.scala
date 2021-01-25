@@ -66,6 +66,12 @@ object WorksRequestBuilder
         .field("data.subjects.label.keyword")
         .minDocCount(0)
 
+    case AggregationRequest.Contributor =>
+      TermsAggregation("contributors")
+        .size(20)
+        .field("data.contributors.agent.label.keyword")
+        .minDocCount(0)
+
     case AggregationRequest.Languages =>
       TermsAggregation("languages")
         .size(200)

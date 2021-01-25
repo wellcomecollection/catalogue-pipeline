@@ -78,11 +78,12 @@ class FiltersAndAggregationsBuilder(
   private def pairedAggregationRequest(
     filter: WorkFilter): Option[AggregationRequest] =
     filter match {
-      case _: FormatFilter    => Some(AggregationRequest.Format)
-      case _: LanguagesFilter => Some(AggregationRequest.Languages)
-      case _: GenreFilter     => Some(AggregationRequest.Genre)
-      case _: SubjectFilter   => Some(AggregationRequest.Subject)
-      case _: LicenseFilter   => Some(AggregationRequest.License)
+      case _: FormatFilter       => Some(AggregationRequest.Format)
+      case _: LanguagesFilter    => Some(AggregationRequest.Languages)
+      case _: GenreFilter        => Some(AggregationRequest.Genre)
+      case _: SubjectFilter      => Some(AggregationRequest.Subject)
+      case _: ContributorsFilter => Some(AggregationRequest.Contributor)
+      case _: LicenseFilter      => Some(AggregationRequest.License)
       case _: ItemLocationTypeFilter =>
         Some(AggregationRequest.ItemLocationType)
       case _ => None
