@@ -37,3 +37,7 @@ variable "es_bulk_size" {
   description = "How many works to fetch in a single scroll request"
   type        = number
 }
+
+variable "elastic_cloud_vpce_sg_id" {
+  type = string
+}

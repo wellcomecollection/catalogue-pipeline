@@ -21,6 +21,18 @@ variable "aws_region" {}
 
 variable "dlq_alarm_arn" {}
 
+variable "rds_cluster_id" {
+  type = string
+}
+variable "rds_subnet_group_name" {
+  type = string
+}
+variable "extra_rds_instances" {
+  type        = number
+  default     = 0
+  description = "How many *extra* RDS instances to add to enable greater ID minter throughput"
+}
+
 variable "rds_ids_access_security_group_id" {}
 variable "pipeline_storage_security_group_id" {
   type = string

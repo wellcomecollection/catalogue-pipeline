@@ -15,7 +15,7 @@ module "snapshot_generator" {
   memory = 8192
 
   secret_env_vars = {
-    es_host     = "catalogue/api/es_host"
+    es_host     = "elasticsearch/catalogue/private_host"
     es_port     = "catalogue/api/es_port"
     es_protocol = "catalogue/api/es_protocol"
     es_username = "catalogue/api/es_username"
@@ -28,7 +28,8 @@ module "snapshot_generator" {
   cluster_arn  = var.cluster_arn
 
   security_group_ids = [
-    aws_security_group.egress.id
+    var.elastic_cloud_vpce_sg_id,
+    aws_security_group.egress.id,
   ]
 
   min_capacity = 0

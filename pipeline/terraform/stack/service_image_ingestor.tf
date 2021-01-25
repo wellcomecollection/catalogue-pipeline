@@ -37,7 +37,7 @@ module "ingestor_images" {
   }
 
   secret_env_vars = {
-    es_host_catalogue     = "catalogue/ingestor/es_host"
+    es_host_catalogue     = "elasticsearch/catalogue/private_host"
     es_port_catalogue     = "catalogue/ingestor/es_port"
     es_username_catalogue = "catalogue/ingestor/es_username"
     es_password_catalogue = "catalogue/ingestor/es_password"

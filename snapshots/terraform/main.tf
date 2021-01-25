@@ -38,6 +38,8 @@ module "stack" {
   dlq_alarm_arn          = local.dlq_alarm_arn
   lambda_error_alarm_arn = local.lambda_error_alarm_arn
 
+  elastic_cloud_vpce_sg_id = local.elastic_cloud_vpce_sg_id
+
   vpc_id  = local.vpc_id
   subnets = local.subnets
 
