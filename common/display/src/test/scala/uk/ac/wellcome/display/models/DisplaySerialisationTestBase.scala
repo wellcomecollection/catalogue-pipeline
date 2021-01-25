@@ -285,6 +285,6 @@ trait DisplaySerialisationTestBase {
          "label": "${locType.label}",
          "type": "LocationType"
        }
-     """stripMargin
+     """ stripMargin
 
 }

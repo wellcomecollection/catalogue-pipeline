@@ -84,10 +84,12 @@ object DisplayAggregations {
         aggs.subjects,
         subject => DisplaySubject(subject, includesIdentifiers = false)
       ),
-      contributors = displayAggregation[Contributor[Minted], DisplayContributor](
-        aggs.contributors,
-        contributor => DisplayContributor(contributor, includesIdentifiers = false)
-      ),
+      contributors =
+        displayAggregation[Contributor[Minted], DisplayContributor](
+          aggs.contributors,
+          contributor =>
+            DisplayContributor(contributor, includesIdentifiers = false)
+        ),
       license = displayAggregation(aggs.license, DisplayLicense.apply),
       locationType = displayAggregation(
         aggs.locationType,

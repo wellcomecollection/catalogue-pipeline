@@ -287,8 +287,8 @@ class WorksAggregationsTest
                     },
                     {
                       "data" : ${subject(
-                            paleoNeuroBiology,
-                            showConcepts = false)},
+            paleoNeuroBiology,
+            showConcepts = false)},
                       "count" : 2,
                       "type" : "AggregationBucket"
                     }
@@ -296,9 +296,9 @@ class WorksAggregationsTest
                 }
               },
               "results": [${works
-                            .sortBy { _.state.canonicalId }
-                            .map(workResponse)
-                            .mkString(",")}]
+            .sortBy { _.state.canonicalId }
+            .map(workResponse)
+            .mkString(",")}]
             }
           """
         }
@@ -312,8 +312,7 @@ class WorksAggregationsTest
     val gchq = Contributor(agent = Organisation("GCHQ"), roles = Nil)
 
     val works =
-      List(List(agent47), List(agent47), List(jamesBond, mi5), List(mi5, gchq))
-        .zipWithIndex
+      List(List(agent47), List(agent47), List(jamesBond, mi5), List(mi5, gchq)).zipWithIndex
         .map {
           case (contributors, idx) =>
             indexedWork(canonicalId = idx.toString).contributors(contributors)
@@ -322,7 +321,9 @@ class WorksAggregationsTest
     withWorksApi {
       case (worksIndex, routes) =>
         insertIntoElasticsearch(worksIndex, works: _*)
-        assertJsonResponse(routes, s"/$apiPrefix/works?aggregations=contributors") {
+        assertJsonResponse(
+          routes,
+          s"/$apiPrefix/works?aggregations=contributors") {
           Status.OK -> s"""
             {
               ${resultList(apiPrefix, totalResults = works.size)},
@@ -408,9 +409,9 @@ class WorksAggregationsTest
                 }
               },
               "results": [${works
-                            .sortBy { _.state.canonicalId }
-                            .map(workResponse)
-                            .mkString(",")}]
+            .sortBy { _.state.canonicalId }
+            .map(workResponse)
+            .mkString(",")}]
             }
           """
         }
@@ -465,9 +466,9 @@ class WorksAggregationsTest
                 "type" : "Aggregations"
               },
               "results": [${works
-                            .sortBy { _.state.canonicalId }
-                            .map(workResponse)
-                            .mkString(",")}]
+            .sortBy { _.state.canonicalId }
+            .map(workResponse)
+            .mkString(",")}]
             }
           """
         }
