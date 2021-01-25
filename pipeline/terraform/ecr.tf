@@ -31,10 +31,6 @@ resource "aws_ecr_repository" "ecr_repository_id_minter" {
   name = "uk.ac.wellcome/id_minter"
 }
 
-resource "aws_ecr_repository" "ecr_repository_recorder" {
-  name = "uk.ac.wellcome/recorder"
-}
-
 resource "aws_ecr_repository" "ecr_repository_matcher" {
   name = "uk.ac.wellcome/matcher"
 }
