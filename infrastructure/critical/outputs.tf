@@ -37,6 +37,10 @@ output "catalogue_pipeline_storage_elastic_cloud_sg_id" {
   value = aws_security_group.allow_catalogue_pipeline_elastic_cloud_vpce.id
 }
 
-output "catalogue_pipeline_ec_privatelink_host" {
-  value = local.catalogue_pipeline_ec_privatelink_host
+output "traffic_filter_catalogue_vpce_id" {
+  value = ec_deployment_traffic_filter.allow_catalogue_pipeline_vpce.id
+}
+
+output "traffic_filter_public_internet_id" {
+  value = ec_deployment_traffic_filter.public_internet.id
 }
