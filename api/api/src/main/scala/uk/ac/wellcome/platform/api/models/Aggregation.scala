@@ -149,7 +149,7 @@ object Aggregations extends Logging {
 // If the buckets have a subaggregation named "filtered", then we use the
 // count from there; otherwise we use the count from the root of the bucket.
 object AggregationMapping {
-  
+
   import uk.ac.wellcome.json.JsonUtil._
 
   private case class Result(buckets: Seq[Bucket])

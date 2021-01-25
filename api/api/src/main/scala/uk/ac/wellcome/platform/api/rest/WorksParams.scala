@@ -264,6 +264,7 @@ object MultipleWorksParams extends QueryParamsUtils {
       "production.dates" -> AggregationRequest.ProductionDate,
       "subjects" -> AggregationRequest.Subject,
       "languages" -> AggregationRequest.Languages,
+      "contributors" -> AggregationRequest.Contributor,
       "license" -> AggregationRequest.License,
       "locationType" -> AggregationRequest.ItemLocationType,
       "items.locations.type" -> AggregationRequest.ItemLocationType,

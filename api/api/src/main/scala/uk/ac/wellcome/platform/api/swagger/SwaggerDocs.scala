@@ -397,6 +397,7 @@ trait MultipleWorksSwagger {
             "genres",
             "production.dates",
             "subjects",
+            "contributors",
             "license",
             "languages",
             "locationType",
