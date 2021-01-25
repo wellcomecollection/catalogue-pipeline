@@ -1,5 +1,13 @@
 # RDS
 
+output "rds_cluster_id" {
+  value = module.identifiers_delta_rds_cluster.rds_cluster_id
+}
+
+output "rds_subnet_group_name" {
+  value = aws_db_subnet_group.default.name
+}
+
 output "rds_access_security_group_id" {
   value = aws_security_group.rds_ingress_security_group.id
 }

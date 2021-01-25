@@ -38,6 +38,9 @@ module "catalogue_pipeline_2021-01-12" {
 
   dlq_alarm_arn = local.dlq_alarm_arn
 
+  rds_cluster_id        = local.rds_cluster_id
+  rds_subnet_group_name = local.rds_subnet_group_name
+
   # Security groups
   rds_ids_access_security_group_id   = local.rds_access_security_group_id
   pipeline_storage_security_group_id = local.pipeline_storage_security_group_id
@@ -91,6 +94,8 @@ module "catalogue_pipeline_2021-01-22" {
     local.calm_adapter_topic_arn,
   ]
 
+  extra_rds_instances = 0
+
   # Boilerplate that shouldn't change between pipelines.
 
   aws_region = local.aws_region
@@ -98,6 +103,9 @@ module "catalogue_pipeline_2021-01-22" {
   subnets    = local.private_subnets
 
   dlq_alarm_arn = local.dlq_alarm_arn
+
+  rds_cluster_id        = local.rds_cluster_id
+  rds_subnet_group_name = local.rds_subnet_group_name
 
   # Security groups
   rds_ids_access_security_group_id   = local.rds_access_security_group_id
