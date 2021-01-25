@@ -32,6 +32,7 @@ module "service" {
     var.lb_ingress_sg_id,
     var.egress_security_group_id,
     var.interservice_sg_id,
+    var.elastic_cloud_vpce_sg_id,
   ]
 
   environment = {
@@ -40,7 +41,7 @@ module "service" {
   }
 
   secrets = {
-    es_host        = "catalogue/api/es_host"
+    es_host        = "elasticsearch/catalogue/private_host"
     es_port        = "catalogue/api/es_port"
     es_protocol    = "catalogue/api/es_protocol"
     es_username    = "catalogue/api/es_username"

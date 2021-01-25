@@ -14,6 +14,7 @@ locals {
   egress_security_group_id             = data.terraform_remote_state.catalogue_api_shared.outputs.egress_security_group_id
   interservice_security_group_id       = data.terraform_remote_state.catalogue_api_shared.outputs.interservice_security_group_id
   service_lb_ingress_security_group_id = data.terraform_remote_state.catalogue_api_shared.outputs.service_lb_ingress_security_group_id
+  elastic_cloud_vpce_sg_id             = data.terraform_remote_state.infra_critical.outputs["catalogue_elastic_cloud_sg_id"]
 
   service_discovery_namespace_id = data.terraform_remote_state.catalogue_api_shared.outputs.prod_namespace
 }

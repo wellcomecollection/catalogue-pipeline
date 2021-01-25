@@ -18,6 +18,8 @@ module "catalogue_api_staging_20201008" {
 
   interservice_sg_id = local.interservice_security_group_id
 
+  elastic_cloud_vpce_sg_id = local.elastic_cloud_vpce_sg_id
+
   service_discovery_namespace_id = local.service_discovery_namespace_id
 
   api_container_image = local.api_container_image
