@@ -48,7 +48,8 @@ class PipelineStorageStream[In, Out, MsgDestination](
               broadcastAndMerge(
                 batchIndexAndSendFlow(
                   config,
-                  (item: Out) => sendIndexable[Out, MsgDestination](messageSender)(item),
+                  (item: Out) =>
+                    sendIndexable[Out, MsgDestination](messageSender)(item),
                   indexer
                 ),
                 noOutputFlow)
@@ -62,9 +63,9 @@ object PipelineStorageStream extends Logging {
   def batchIndexAndSendFlow[T, MsgDestination](config: PipelineStorageConfig,
                                                send: T => Try[Unit],
                                                indexer: Indexer[T])(
-                                                implicit
-                                                ec: ExecutionContext,
-                                                indexable: Indexable[T]) = {
+    implicit
+    ec: ExecutionContext,
+    indexable: Indexable[T]) = {
     val maxSubStreams = Integer.MAX_VALUE
     Flow[(Message, List[T])]
       .collect {
@@ -97,11 +98,15 @@ object PipelineStorageStream extends Logging {
         process(in).map(w => (message, w))
     }
 
-  def batchRetrieveFlow[T](config: PipelineStorageConfig,
-                           retriever: Retriever[T])(
-    implicit ec: ExecutionContext): Flow[(Message, NotificationMessage), (Message, Bundle[T]), NotUsed] =
+  def batchRetrieveFlow[T](
+    config: PipelineStorageConfig,
+    retriever: Retriever[T])(implicit ec: ExecutionContext)
+    : Flow[(Message, NotificationMessage), (Message, Bundle[T]), NotUsed] =
     Flow[(Message, NotificationMessage)]
-      .map{case (message, notificationMessage) => Bundle(message, notificationMessage.body, 1)}
+      .map {
+        case (message, notificationMessage) =>
+          Bundle(message, notificationMessage.body, 1)
+      }
       .groupedWithin(config.batchSize, config.flushInterval)
       .mapAsyncUnordered(parallelism = config.parallelism) { bundles =>
         val (messages, ids) = unzipBundles(bundles)
@@ -149,8 +154,6 @@ object PipelineStorageStream extends Logging {
         }
       }
       .mapConcat(identity)
-
-
 
   // Splits the flow into a subsflow for each messageId.
   // Each substream emits one message with the complete list of bundles for the same messageId
@@ -210,5 +213,7 @@ object PipelineStorageStream extends Logging {
     bundles.toList
       .unzip(bundle => bundle.message -> bundle.item)
 
-  def sendIndexable[T, Destination](messageSender: MessageSender[Destination])(item: T)(implicit indexable: Indexable[T]) = messageSender.send(indexable.id(item))
+  def sendIndexable[T, Destination](messageSender: MessageSender[Destination])(
+    item: T)(implicit indexable: Indexable[T]) =
+    messageSender.send(indexable.id(item))
 }

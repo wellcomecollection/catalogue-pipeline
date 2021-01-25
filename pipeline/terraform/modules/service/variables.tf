@@ -2,7 +2,7 @@ variable "service_name" {}
 variable "cluster_arn" {}
 variable "cluster_name" {}
 variable "shared_logging_secrets" {
-  type = map
+  type = map(any)
 }
 variable "subnets" {
   type = list(string)

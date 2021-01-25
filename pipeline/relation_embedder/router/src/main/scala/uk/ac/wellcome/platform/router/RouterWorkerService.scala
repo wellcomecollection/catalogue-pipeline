@@ -10,16 +10,21 @@ import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.models.work.internal.WorkState.{Denormalised, Merged}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.pipeline_storage.PipelineStorageStream._
-import uk.ac.wellcome.pipeline_storage.{Indexable, Indexer, PipelineStorageConfig, Retriever}
+import uk.ac.wellcome.pipeline_storage.{
+  Indexable,
+  Indexer,
+  PipelineStorageConfig,
+  Retriever
+}
 import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class RouterWorkerService[MsgDestination](
-                                           msgStream: SQSStream[NotificationMessage],
-                                           indexer: Indexer[Work[Denormalised]],
-                                           config: PipelineStorageConfig,
-                                           messageSender: MessageSender[MsgDestination],
+  msgStream: SQSStream[NotificationMessage],
+  indexer: Indexer[Work[Denormalised]],
+  config: PipelineStorageConfig,
+  messageSender: MessageSender[MsgDestination],
   pathsMsgSender: MessageSender[MsgDestination],
   workRetriever: Retriever[Work[Merged]],
 )(implicit ec: ExecutionContext, indexable: Indexable[Work[Denormalised]])
@@ -34,18 +39,24 @@ class RouterWorkerService[MsgDestination](
             .via(batchRetrieveFlow(config, workRetriever))
             .via(processFlow(config, bundle => processMessage(bundle.item)))
             .via(
-              broadcastAndMerge(batchIndexAndSendFlow(config, (doc: Work[Denormalised]) => sendIndexable(messageSender)(doc),indexer),  noOutputFlow))
+              broadcastAndMerge(
+                batchIndexAndSendFlow(
+                  config,
+                  (doc: Work[Denormalised]) =>
+                    sendIndexable(messageSender)(doc),
+                  indexer),
+                noOutputFlow))
       )
     } yield Done
 
   private def processMessage(
     work: Work[Merged]): Future[List[Work[Denormalised]]] = {
-      work.data.collectionPath
-        .fold[Future[List[Work[Denormalised]]]](ifEmpty = {
-          Future.successful(List(work.transition[Denormalised](Relations.none)))
-        }) { path =>
-          Future.fromTry(pathsMsgSender.send(path.path)).map(_ => Nil)
-        }
-    }
+    work.data.collectionPath
+      .fold[Future[List[Work[Denormalised]]]](ifEmpty = {
+        Future.successful(List(work.transition[Denormalised](Relations.none)))
+      }) { path =>
+        Future.fromTry(pathsMsgSender.send(path.path)).map(_ => Nil)
+      }
+  }
 
 }

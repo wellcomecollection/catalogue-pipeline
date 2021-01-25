@@ -134,22 +134,22 @@ class RouterWorkerServiceTest
       case q @ QueuePair(queue, _) =>
         val worksMessageSender = new MemoryMessageSender
         val pathsMessageSender = new MemoryMessageSender
-      withActorSystem{ implicit ac =>
-        withSQSStream(
-          queue = queue,
-        ) { stream: SQSStream[NotificationMessage] =>
-          val service =
-            new RouterWorkerService(
-              indexer = indexer,
-              messageSender = worksMessageSender,
-              pathsMsgSender = pathsMessageSender,
-              workRetriever = retriever,
-              msgStream = stream,
-              config = pipelineStorageConfig
-            )
-          service.run()
-          testWith((q, worksMessageSender, pathsMessageSender))
+        withActorSystem { implicit ac =>
+          withSQSStream(
+            queue = queue,
+          ) { stream: SQSStream[NotificationMessage] =>
+            val service =
+              new RouterWorkerService(
+                indexer = indexer,
+                messageSender = worksMessageSender,
+                pathsMsgSender = pathsMessageSender,
+                workRetriever = retriever,
+                msgStream = stream,
+                config = pipelineStorageConfig
+              )
+            service.run()
+            testWith((q, worksMessageSender, pathsMessageSender))
+          }
         }
-      }
     }
 }

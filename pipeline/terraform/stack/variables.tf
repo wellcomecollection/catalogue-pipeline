@@ -12,7 +12,7 @@ variable "subnets" {
   type = list(string)
 }
 variable "shared_logging_secrets" {
-  type = map
+  type = map(any)
 }
 
 variable "vpc_id" {}
