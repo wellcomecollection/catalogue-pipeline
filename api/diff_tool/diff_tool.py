@@ -13,13 +13,14 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 import requests
 
 
+PROD_URL = "api.wellcomecollection.org"
+STAGING_URL = "api-stage.wellcomecollection.org"
+
+
 class ApiDiffer:
     """Performs a diff against the same call to both prod and stage works API,
     printing the results to stdout.
     """
-
-    prod = "api.wellcomecollection.org"
-    stage = "api-stage.wellcomecollection.org"
 
     def __init__(self, work_id=None, params=None):
         suffix = f"/{work_id}" if work_id else ""
@@ -38,8 +39,8 @@ class ApiDiffer:
         """
         Fetches a URL from the prod/staging API, and returns a (status, HTML diff).
         """
-        (prod_status, prod_json) = self.call_api(self.prod)
-        (stage_status, stage_json) = self.call_api(self.stage)
+        (prod_status, prod_json) = self.call_api(PROD_URL)
+        (stage_status, stage_json) = self.call_api(STAGING_URL)
         if prod_status != stage_status:
             lines = [
                 f"* Received {prod_status} on prod and {stage_status} on stage",
