@@ -218,14 +218,13 @@ def remove_image_from_es_indexes(catalogue_id, indices, dry_run):
                 else:
                     blank_data[key] = None
 
+            # This is the format that Circe wants to decode
+            json_isotime = dt.datetime.now(dt.timezone.utc).isoformat()[:-6] + "Z"
             new_work = {
                 "type": "Invisible",
                 "data": blank_data,
                 "version": existing_work["version"],
-                "state": {
-                    **existing_work["state"],
-                    "modifiedTime": dt.datetime.now().isoformat(),
-                },
+                "state": {**existing_work["state"], "modifiedTime": json_isotime},
             }
 
             print("··· Replacing work with an Invisible work")
