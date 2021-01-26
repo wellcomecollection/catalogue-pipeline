@@ -19,7 +19,8 @@ object DerivedWorkData {
       contributorAgents = contributorAgents(data.contributors)
     )
 
-  private def contributorAgents(contributors: List[Contributor[_]]): List[String] =
+  private def contributorAgents(
+    contributors: List[Contributor[_]]): List[String] =
     contributors.map {
       case Contributor(_, agent, _) =>
         val ontologyType = agent.getClass.getSimpleName
