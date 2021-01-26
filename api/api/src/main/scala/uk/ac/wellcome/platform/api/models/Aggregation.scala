@@ -101,8 +101,18 @@ object Aggregations extends Logging {
     }
 
   implicit val decodeContributorFromLabel: Decoder[Contributor[Minted]] =
-    Decoder.decodeString.map { str =>
-      Contributor(agent = Agent(label = str), roles = Nil)
+    Decoder.decodeString.emap { str =>
+      val splitIdx = str.indexOf(':')
+      val ontologyType = str.slice(0, splitIdx)
+      val label = str.slice(splitIdx + 1, Int.MaxValue)
+      val agent = ontologyType match {
+        case "Agent" => Right(Agent(label = label))
+        case "Person" => Right(Person(label = label))
+        case "Organisation" => Right(Organisation(label = label))
+        case "Meeting" => Right(Meeting(label = label))
+        case ontologyType => Left(s"Illegal agent type: $ontologyType")
+      }
+      agent.map(agent => Contributor(agent = agent, roles = Nil))
     }
 
   implicit val decodeLocationTypeFromLabel: Decoder[LocationTypeQuery] =

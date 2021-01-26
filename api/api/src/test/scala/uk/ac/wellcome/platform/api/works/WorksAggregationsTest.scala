@@ -329,7 +329,7 @@ class WorksAggregationsTest
               ${resultList(apiPrefix, totalResults = works.size)},
               "aggregations": {
                 "type" : "Aggregations",
-                "license": {
+                "contributors": {
                   "type" : "Aggregation",
                   "buckets": [
                     {
@@ -338,13 +338,13 @@ class WorksAggregationsTest
                       "type" : "AggregationBucket"
                     },
                     {
-                      "count" : 1,
-                      "data" : ${contributor(jamesBond)},
+                      "count" : 2,
+                      "data" : ${contributor(mi5)},
                       "type" : "AggregationBucket"
                     },
                     {
-                      "count" : 2,
-                      "data" : ${contributor(mi5)},
+                      "count" : 1,
+                      "data" : ${contributor(jamesBond)},
                       "type" : "AggregationBucket"
                     },
                     {

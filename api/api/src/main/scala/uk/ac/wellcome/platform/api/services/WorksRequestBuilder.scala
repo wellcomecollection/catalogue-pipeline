@@ -69,7 +69,7 @@ object WorksRequestBuilder
     case AggregationRequest.Contributor =>
       TermsAggregation("contributors")
         .size(20)
-        .field("data.contributors.agent.label.keyword")
+        .field("state.derivedData.contributorAgents")
         .minDocCount(0)
 
     case AggregationRequest.Languages =>
