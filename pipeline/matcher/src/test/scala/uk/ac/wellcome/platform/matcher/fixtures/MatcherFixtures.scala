@@ -1,41 +1,32 @@
 package uk.ac.wellcome.platform.matcher.fixtures
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 import org.apache.commons.codec.digest.DigestUtils
-import org.scanamo.{Scanamo, Table => ScanamoTable}
-import org.scanamo.{DynamoFormat, DynamoReadError}
-import org.scanamo.query.UniqueKey
 import org.scanamo.generic.semiauto.deriveDynamoFormat
+import org.scanamo.query.UniqueKey
+import org.scanamo.{DynamoFormat, DynamoReadError, Scanamo, Table => ScanamoTable}
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.platform.matcher.matcher.WorkMatcher
-import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, WorkNode}
-import uk.ac.wellcome.platform.matcher.services.MatcherWorkerService
-import uk.ac.wellcome.platform.matcher.storage.{WorkGraphStore, WorkNodeDao}
-import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
-import uk.ac.wellcome.storage.locking.dynamo.{
-  DynamoLockDaoFixtures,
-  DynamoLockingService,
-  ExpiringLock
-}
+import uk.ac.wellcome.messaging.sns.NotificationMessage
+import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, WorkNode}
 import uk.ac.wellcome.pipeline_storage.MemoryRetriever
+import uk.ac.wellcome.pipeline_storage.fixtures.PipelineStorageStreamFixtures
+import uk.ac.wellcome.platform.matcher.matcher.WorkMatcher
 import uk.ac.wellcome.platform.matcher.models.WorkLinks
-import uk.ac.wellcome.storage.locking.memory.{
-  MemoryLockDao,
-  MemoryLockingService
-}
+import uk.ac.wellcome.platform.matcher.services.MatcherWorkerService
+import uk.ac.wellcome.platform.matcher.storage.{WorkGraphStore, WorkNodeDao}
+import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
+import uk.ac.wellcome.storage.locking.dynamo.{DynamoLockDaoFixtures, DynamoLockingService, ExpiringLock}
+import uk.ac.wellcome.storage.locking.memory.{MemoryLockDao, MemoryLockingService}
 
-import scala.language.higherKinds
 import java.util.UUID
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.language.higherKinds
 
 trait MatcherFixtures
-    extends SQS
-    with Akka
+    extends PipelineStorageStreamFixtures
     with DynamoLockDaoFixtures
     with LocalWorkGraphDynamoDb {
 
@@ -58,6 +49,7 @@ trait MatcherFixtures
           withSQSStream[NotificationMessage, R](queue) { msgStream =>
             val workerService =
               new MatcherWorkerService(
+                pipelineStorageConfig,
                 workLinksRetriever = workLinksRetriever,
                 msgStream,
                 messageSender,

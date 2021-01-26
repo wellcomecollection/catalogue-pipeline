@@ -7,18 +7,17 @@ import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.pipeline_storage.Retriever
+import uk.ac.wellcome.pipeline_storage.PipelineStorageStream._
+import uk.ac.wellcome.pipeline_storage.{PipelineStorageConfig, Retriever}
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.matcher.WorkMatcher
-import uk.ac.wellcome.platform.matcher.models.{
-  VersionExpectedConflictException,
-  WorkLinks
-}
+import uk.ac.wellcome.platform.matcher.models.{VersionExpectedConflictException, WorkLinks}
 import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class MatcherWorkerService[MsgDestination](
+                                            config: PipelineStorageConfig,
   workLinksRetriever: Retriever[WorkLinks],
   msgStream: SQSStream[NotificationMessage],
   msgSender: MessageSender[MsgDestination],
@@ -27,11 +26,16 @@ class MatcherWorkerService[MsgDestination](
     with Runnable {
 
   def run(): Future[Done] =
-    msgStream.foreach(this.getClass.getSimpleName, processMessage)
+    msgStream.runStream(this.getClass.getSimpleName, source =>
+      source
+        .via(batchRetrieveFlow(config, workLinksRetriever))
+        .mapAsync(config.parallelism){ case (message, bundleWorkLinks) =>
+      processMessage(bundleWorkLinks.item).map(_ => message)
+        }
+    )
 
-  def processMessage(message: NotificationMessage): Future[Unit] = {
+  def processMessage(workLinks: WorkLinks): Future[Unit] = {
     (for {
-      workLinks <- workLinksRetriever.apply(id = message.body)
       identifiersList <- workMatcher.matchWork(workLinks)
       _ <- Future.fromTry(msgSender.sendT(identifiersList))
     } yield ()).recover {
