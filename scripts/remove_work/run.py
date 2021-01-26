@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8
 """
 This script can "spike" an image on wellcomecollection.org/works -- remove
@@ -48,7 +48,7 @@ def catalogue_client(service_name):
     )
 
 
-def remove_image_from_es_indexes(catalogue_id, indices):
+def remove_image_from_es_indexes(catalogue_id, indices, dry_run):
     print("*** Removing the image from our Elasticsearch indexes")
 
     ecs_client = catalogue_client("ecs")
@@ -168,23 +168,27 @@ def remove_image_from_es_indexes(catalogue_id, indices):
             }
 
             print("··· Replacing work with an Invisible work")
-            resp = requests.put(
-                f"{es_host}{index_name}/_doc/{catalogue_id}",
-                auth=es_auth,
-                json=new_work,
-            )
-            resp.raise_for_status()
+            if not dry_run:
+                resp = requests.put(
+                    f"{es_host}{index_name}/_doc/{catalogue_id}",
+                    auth=es_auth,
+                    json=new_work,
+                )
+                resp.raise_for_status()
 
-            print("··· Asserting work was made invisible")
-            resp = requests.get(
-                f"{es_host}{index_name}/_doc/{catalogue_id}", auth=es_auth
-            )
-            assert resp.json()["_source"]["type"] == "Invisible"
+                print("··· Asserting work was made invisible")
+                resp = requests.get(
+                    f"{es_host}{index_name}/_doc/{catalogue_id}", auth=es_auth
+                )
+                assert resp.json()["_source"]["type"] == "Invisible"
+            else:
+                print("Dry run, new work is:")
+                print(json.dumps(new_work))
 
     return miro_id
 
 
-def suppress_work_in_miro_vhs(miro_id):
+def suppress_work_in_miro_vhs(miro_id, dry_run):
     print("*** Marking the image as withdrawn in the Miro VHS")
     dynamodb_client = platform_client("dynamodb")
 
@@ -202,15 +206,19 @@ def suppress_work_in_miro_vhs(miro_id):
 
     # AWLC: I should do a conditional PutItem here because it's a VHS, but I CBA.
     # This table isn't usually changing much.
-    resp = dynamodb_client.put_item(TableName="vhs-sourcedata-miro", Item=item)
+    if not dry_run:
+        resp = dynamodb_client.put_item(TableName="vhs-sourcedata-miro", Item=item)
 
-    resp = dynamodb_client.get_item(
-        TableName="vhs-sourcedata-miro", Key={"id": {"S": miro_id}}
-    )
-    assert not resp["Item"]["isClearedForCatalogueAPI"]["BOOL"]
+        resp = dynamodb_client.get_item(
+            TableName="vhs-sourcedata-miro", Key={"id": {"S": miro_id}}
+        )
+        assert not resp["Item"]["isClearedForCatalogueAPI"]["BOOL"]
+    else:
+        print("Dry run, new VHS entry is:")
+        print(json.dumps(item));
 
 
-def remove_image_from_loris_s3_bucket(miro_id):
+def remove_image_from_loris_s3_bucket(miro_id, dry_run):
     print("*** Removing the image from the Loris S3 bucket")
     s3_client = platform_client("s3")
 
@@ -231,10 +239,11 @@ def remove_image_from_loris_s3_bucket(miro_id):
     assert key.endswith(".jpg")
 
     print("··· Detected object in S3 bucket, deleting: %s" % key)
-    s3_client.delete_object(Bucket=bucket, Key=key)
+    if not dry_run:
+        s3_client.delete_object(Bucket=bucket, Key=key)
 
 
-def create_cloudfront_invalidations(miro_id):
+def create_cloudfront_invalidations(miro_id, dry_run):
     print("*** Creating a CloudFront invalidation for Loris")
     cloudfront_client = platform_client("cloudfront")
 
@@ -253,17 +262,18 @@ def create_cloudfront_invalidations(miro_id):
     url = "/image/%s.jpg/*" % miro_id
     print("··· Issuing an invalidation for %s" % url)
 
-    resp = cloudfront_client.create_invalidation(
-        DistributionId=distribution_id,
-        InvalidationBatch={
-            "Paths": {"Quantity": 1, "Items": [url]},
-            "CallerReference": dt.datetime.now().isoformat(),
-        },
-    )
-    assert resp["ResponseMetadata"]["HTTPStatusCode"] == 201
+    if not dry_run:
+        resp = cloudfront_client.create_invalidation(
+            DistributionId=distribution_id,
+            InvalidationBatch={
+                "Paths": {"Quantity": 1, "Items": [url]},
+                "CallerReference": dt.datetime.now().isoformat(),
+            },
+        )
+        assert resp["ResponseMetadata"]["HTTPStatusCode"] == 201
 
 
-def update_miro_inventory(miro_id):
+def update_miro_inventory(miro_id, dry_run):
     print("*** Updating the Miro inventory")
     dynamodb_client = platform_client("dynamodb")
     s3_client = platform_client("s3")
@@ -291,29 +301,35 @@ def update_miro_inventory(miro_id):
         return
 
     print("··· Updating VHS inventory entry")
-    s3_client.put_object(Bucket=s3_bucket, Key=new_key, Body=new_entry)
+    if not dry_run:
+        s3_client.put_object(Bucket=s3_bucket, Key=new_key, Body=new_entry)
 
     item["location"]["M"]["key"]["S"] = new_key
     item["version"]["N"] = str(int(item["version"]["N"]) + 1)
 
-    resp = dynamodb_client.put_item(TableName="vhs-miro-migration", Item=item)
+    if not dry_run:
+        dynamodb_client.put_item(TableName="vhs-miro-migration", Item=item)
+    else:
+        print("Dry run, new VHS item is:")
+        print(json.dumps(item))
 
 
 @click.command()
 @click.argument("catalogue_id")
 @click.option("-i", "--index", multiple=True, required=True)
-def main(catalogue_id, index):
+@click.option("--dry-run", default=False)
+def main(catalogue_id, index, dry_run):
     print("*** Suppressing Miro ID %s" % catalogue_id)
 
-    miro_id = remove_image_from_es_indexes(catalogue_id=catalogue_id, indices=index)
+    miro_id = remove_image_from_es_indexes(catalogue_id=catalogue_id, indices=index, dry_run=dry_run)
     assert miro_id is not None, "Don't know the Miro ID!"
     print("*** Detected Miro ID as %s" % miro_id)
 
-    suppress_work_in_miro_vhs(miro_id)
+    suppress_work_in_miro_vhs(miro_id, dry_run)
 
-    remove_image_from_loris_s3_bucket(miro_id)
-    create_cloudfront_invalidations(miro_id)
-    update_miro_inventory(miro_id)
+    remove_image_from_loris_s3_bucket(miro_id, dry_run)
+    create_cloudfront_invalidations(miro_id, dry_run)
+    update_miro_inventory(miro_id, dry_run)
 
     print(
         "*** You also need to (manually) create a CloudFront invalidation for the /works page on wellcomecollection.org"
