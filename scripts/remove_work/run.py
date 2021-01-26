@@ -117,14 +117,14 @@ def remove_image_from_es_indexes(catalogue_id, indices):
 
             existing_work = resp.json()["_source"]
 
-            if existing_work["type"] == "IdentifiedInvisibleWork":
+            if existing_work["type"] == "Invisible":
                 print(
-                    "··· Work is already suppressed as an IdentifiedInvisibleWork, skipping"
+                    "··· Work is already suppressed as Invisible, skipping"
                 )
                 continue
 
             # While we're looking at API responses, try to get the Miro ID.
-            identifiers = [existing_work["sourceIdentifier"]] + existing_work["data"][
+            identifiers = [existing_work["state"]["sourceIdentifier"]] + existing_work["data"][
                 "otherIdentifiers"
             ]
             miro_identifiers = [
@@ -145,7 +145,7 @@ def remove_image_from_es_indexes(catalogue_id, indices):
             assert existing_work["type"] == "Visible"
 
             # It's necessary to fill in the data field so that Circe can
-            # decode IdentifiedInvisibleWorks
+            # decode Invisible works
             blank_data = {}
             for key, value in existing_work["data"].items():
                 if isinstance(value, list):
@@ -156,16 +156,18 @@ def remove_image_from_es_indexes(catalogue_id, indices):
                     blank_data[key] = None
 
             new_work = {
+                "type": "Invisible",
+                "data": blank_data,
+                "version": existing_work["version"],
+                "state": {
+                    **existing_work["state"],
+                    "modifiedTime": dt.datetime.now().isoformat()
+                },
                 "canonicalId": existing_work["canonicalId"],
                 "sourceIdentifier": existing_work["sourceIdentifier"],
-                "type": "IdentifiedInvisibleWork",
-                # We bump the version so any in-flight works won't overwrite
-                # this one.
-                "version": existing_work["version"] + 1,
-                "data": blank_data,
             }
 
-            print("··· Replacing work with an IdentifiedInvisibleWork")
+            print("··· Replacing work with an Invisible work")
             resp = requests.put(
                 f"{es_host}{index_name}/_doc/{catalogue_id}",
                 auth=es_auth,
@@ -177,7 +179,7 @@ def remove_image_from_es_indexes(catalogue_id, indices):
             resp = requests.get(
                 f"{es_host}{index_name}/_doc/{catalogue_id}", auth=es_auth
             )
-            assert resp.json()["_source"]["type"] == "IdentifiedInvisibleWork"
+            assert resp.json()["_source"]["type"] == "Invisible"
 
     return miro_id
 
