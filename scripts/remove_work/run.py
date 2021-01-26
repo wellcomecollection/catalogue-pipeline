@@ -61,25 +61,29 @@ def get_associated_image_remover(es_host, es_auth, catalogue_id, works_indices):
                     "query": catalogue_id,
                     "fields": [
                         "source.canonicalWork.id.canonicalId",
-                        "source.redirectedWork.id.canonicalId"
-                    ]
+                        "source.redirectedWork.id.canonicalId",
+                    ],
                 }
             },
-            "_source": False
+            "_source": False,
         }
         resp = requests.get(
-            f"{es_host}{index_name}/_doc/{catalogue_id}", auth=es_auth, data=request_body
+            f"{es_host}{index_name}/_search", auth=es_auth, json=request_body
         )
 
         if resp.status_code == 403 or resp.status_code == 404:
             print(f"··· Index {index_name} does not exist")
-            print("··· (This is likely due to index names not being of the form works-*, images-*")
+            print(
+                "··· (This is likely due to index names not being of the form works-*, images-*"
+            )
             continue
 
         data = resp.json()
         associated_image_ids = [hit["_id"] for hit in data["hits"]["hits"]]
         if associated_image_ids:
-            print(f"··· Found {len(associated_image_ids)} associated images in {index_name}")
+            print(
+                f"··· Found {len(associated_image_ids)} associated images in {index_name}"
+            )
         else:
             print(f"··· Did not find any associated images in {index_name}")
 
@@ -91,6 +95,8 @@ def get_associated_image_remover(es_host, es_auth, catalogue_id, works_indices):
             for id in ids:
                 if click.confirm(f"Remove associated image {id} from {index}?"):
                     deletions.append((index, id))
+        if not deletions:
+            return
 
         if not dry_run:
             for index, id in deletions:
@@ -103,7 +109,6 @@ def get_associated_image_remover(es_host, es_auth, catalogue_id, works_indices):
                 print(f"- {index}/{id}")
 
     return remove_associated_images
-
 
 
 def remove_image_from_es_indexes(catalogue_id, indices, dry_run):
@@ -151,7 +156,8 @@ def remove_image_from_es_indexes(catalogue_id, indices, dry_run):
             continue
 
         for name, value_from in app_secrets.items():
-            resp = ssm_client.get_parameter(Name=value_from, WithDecryption=True)
+            public_value = value_from.replace("private", "public")
+            resp = ssm_client.get_parameter(Name=public_value, WithDecryption=True)
             app_secrets[name] = resp["Parameter"]["Value"]
 
         # 3. Once we have the config and password, we can remove the work from
@@ -177,15 +183,13 @@ def remove_image_from_es_indexes(catalogue_id, indices, dry_run):
             existing_work = resp.json()["_source"]
 
             if existing_work["type"] == "Invisible":
-                print(
-                    "··· Work is already suppressed as Invisible, skipping"
-                )
+                print("··· Work is already suppressed as Invisible, skipping")
                 continue
 
             # While we're looking at API responses, try to get the Miro ID.
-            identifiers = [existing_work["state"]["sourceIdentifier"]] + existing_work["data"][
-                "otherIdentifiers"
-            ]
+            identifiers = [existing_work["state"]["sourceIdentifier"]] + existing_work[
+                "data"
+            ]["otherIdentifiers"]
             miro_identifiers = [
                 idf
                 for idf in identifiers
@@ -220,10 +224,8 @@ def remove_image_from_es_indexes(catalogue_id, indices, dry_run):
                 "version": existing_work["version"],
                 "state": {
                     **existing_work["state"],
-                    "modifiedTime": dt.datetime.now().isoformat()
+                    "modifiedTime": dt.datetime.now().isoformat(),
                 },
-                "canonicalId": existing_work["canonicalId"],
-                "sourceIdentifier": existing_work["sourceIdentifier"],
             }
 
             print("··· Replacing work with an Invisible work")
@@ -242,9 +244,15 @@ def remove_image_from_es_indexes(catalogue_id, indices, dry_run):
                 assert resp.json()["_source"]["type"] == "Invisible"
             else:
                 print("Dry run, new work is:")
-                print(json.dumps(new_work))
+                print(json.dumps(new_work, indent=2))
 
-        remove_associated_images = get_associated_image_remover(es_host, es_auth, catalogue_id, indices)
+        remove_associated_images = get_associated_image_remover(
+            es_host, es_auth, catalogue_id, indices
+        )
+
+        # Don't bother going through all task definitions if we've done everything
+        # It's just duplication between staging and prod
+        break
 
     return miro_id, remove_associated_images
 
@@ -276,7 +284,7 @@ def suppress_work_in_miro_vhs(miro_id, dry_run):
         assert not resp["Item"]["isClearedForCatalogueAPI"]["BOOL"]
     else:
         print("Dry run, new VHS entry is:")
-        print(json.dumps(item));
+        print(json.dumps(item, indent=2))
 
 
 def remove_image_from_loris_s3_bucket(miro_id, dry_run):
@@ -313,25 +321,27 @@ def create_cloudfront_invalidations(miro_id, dry_run):
     matching = [
         item
         for item in resp["DistributionList"]["Items"]
-        if item["Origins"]["Items"][0]["DomainName"]
-        == "iiif-origin.wellcomecollection.org"
-    ]
-    assert len(matching) == 1
-    distribution_id = matching[0]["Id"]
-    print("··· Detected Loris CloudFront distribution as %s" % distribution_id)
-
-    url = "/image/%s.jpg/*" % miro_id
-    print("··· Issuing an invalidation for %s" % url)
-
-    if not dry_run:
-        resp = cloudfront_client.create_invalidation(
-            DistributionId=distribution_id,
-            InvalidationBatch={
-                "Paths": {"Quantity": 1, "Items": [url]},
-                "CallerReference": dt.datetime.now().isoformat(),
-            },
+        if any(
+            i["DomainName"] == "iiif-origin.wellcomecollection.org"
+            for i in item["Origins"]["Items"]
         )
-        assert resp["ResponseMetadata"]["HTTPStatusCode"] == 201
+    ]
+
+    invalidation_path = "/image/%s.jpg/*" % miro_id
+    for loris_distribution in matching:
+        distribution_id = loris_distribution["Id"]
+        print("··· Detected a Loris CloudFront distribution as %s" % distribution_id)
+        print("··· Issuing an invalidation for %s" % invalidation_path)
+
+        if not dry_run:
+            resp = cloudfront_client.create_invalidation(
+                DistributionId=distribution_id,
+                InvalidationBatch={
+                    "Paths": {"Quantity": 1, "Items": [invalidation_path]},
+                    "CallerReference": dt.datetime.now().isoformat(),
+                },
+            )
+            assert resp["ResponseMetadata"]["HTTPStatusCode"] == 201
 
 
 def update_miro_inventory(miro_id, dry_run):
@@ -344,7 +354,7 @@ def update_miro_inventory(miro_id, dry_run):
     )
     item = resp["Item"]
 
-    s3_bucket = item["location"]["M"]["namespace"]["S"]
+    s3_bucket = item["location"]["M"]["bucket"]["S"]
     s3_key = item["location"]["M"]["key"]["S"]
     print("··· Detected VHS inventory entry as s3://%s/%s" % (s3_bucket, s3_key))
 
@@ -372,7 +382,7 @@ def update_miro_inventory(miro_id, dry_run):
         dynamodb_client.put_item(TableName="vhs-miro-migration", Item=item)
     else:
         print("Dry run, new VHS item is:")
-        print(json.dumps(item))
+        print(json.dumps(item, indent=2))
 
 
 @click.command()
@@ -381,7 +391,9 @@ def update_miro_inventory(miro_id, dry_run):
 @click.option("--dry-run", default=False, is_flag=True)
 def main(catalogue_id, index, dry_run):
     print("*** Suppressing work ID %s" % catalogue_id)
-    miro_id, remove_associated_images = remove_image_from_es_indexes(catalogue_id=catalogue_id, indices=index, dry_run=dry_run)
+    miro_id, remove_associated_images = remove_image_from_es_indexes(
+        catalogue_id=catalogue_id, indices=index, dry_run=dry_run
+    )
     assert miro_id is not None, "Don't know the Miro ID!"
     print("*** Detected Miro ID as %s" % miro_id)
 
