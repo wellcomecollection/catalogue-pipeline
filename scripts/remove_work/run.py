@@ -48,6 +48,64 @@ def catalogue_client(service_name):
     )
 
 
+def get_associated_image_remover(es_host, es_auth, catalogue_id, works_indices):
+    print("*** Trying to find associated images")
+    images_indices = [idx.replace("works", "images") for idx in works_indices]
+
+    all_associated_images = {}
+    for index_name in images_indices:
+        print(f"··· Searching for {catalogue_id} in index {index_name}")
+        request_body = {
+            "query": {
+                "multi_match": {
+                    "query": catalogue_id,
+                    "fields": [
+                        "source.canonicalWork.id.canonicalId",
+                        "source.redirectedWork.id.canonicalId"
+                    ]
+                }
+            },
+            "_source": False
+        }
+        resp = requests.get(
+            f"{es_host}{index_name}/_doc/{catalogue_id}", auth=es_auth, data=request_body
+        )
+
+        if resp.status_code == 403 or resp.status_code == 404:
+            print(f"··· Index {index_name} does not exist")
+            print("··· (This is likely due to index names not being of the form works-*, images-*")
+            continue
+
+        data = resp.json()
+        associated_image_ids = [hit["_id"] for hit in data["hits"]["hits"]]
+        if associated_image_ids:
+            print(f"··· Found {len(associated_image_ids)} associated images in {index_name}")
+        else:
+            print(f"··· Did not find any associated images in {index_name}")
+
+        all_associated_images[index_name] = associated_image_ids
+
+    def remove_associated_images(dry_run):
+        deletions = []
+        for index, ids in all_associated_images.items():
+            for id in ids:
+                if click.confirm(f"Remove associated image {id} from {index}?"):
+                    deletions.append((index, id))
+
+        if not dry_run:
+            for index, id in deletions:
+                resp = requests.delete(f"{es_host}{index}/_doc/{id}", auth=es_auth)
+                assert resp.status_code == 200, resp.json()
+                print(f"··· Deleted {index}/{id}")
+        else:
+            print("Dry run, deletions are:")
+            for index, id in deletions:
+                print(f"- {index}/{id}")
+
+    return remove_associated_images
+
+
+
 def remove_image_from_es_indexes(catalogue_id, indices, dry_run):
     print("*** Removing the image from our Elasticsearch indexes")
 
@@ -77,6 +135,7 @@ def remove_image_from_es_indexes(catalogue_id, indices, dry_run):
     task_definitions = [service["taskDefinition"] for service in services]
 
     miro_id = None
+    remove_associated_images = None
 
     print("··· Reading Elastic Cloud config for the catalogue API (read credentials)")
     for td in task_definitions:
@@ -185,7 +244,9 @@ def remove_image_from_es_indexes(catalogue_id, indices, dry_run):
                 print("Dry run, new work is:")
                 print(json.dumps(new_work))
 
-    return miro_id
+        remove_associated_images = get_associated_image_remover(es_host, es_auth, catalogue_id, indices)
+
+    return miro_id, remove_associated_images
 
 
 def suppress_work_in_miro_vhs(miro_id, dry_run):
@@ -317,14 +378,14 @@ def update_miro_inventory(miro_id, dry_run):
 @click.command()
 @click.argument("catalogue_id")
 @click.option("-i", "--index", multiple=True, required=True)
-@click.option("--dry-run", default=False)
+@click.option("--dry-run", default=False, is_flag=True)
 def main(catalogue_id, index, dry_run):
-    print("*** Suppressing Miro ID %s" % catalogue_id)
-
-    miro_id = remove_image_from_es_indexes(catalogue_id=catalogue_id, indices=index, dry_run=dry_run)
+    print("*** Suppressing work ID %s" % catalogue_id)
+    miro_id, remove_associated_images = remove_image_from_es_indexes(catalogue_id=catalogue_id, indices=index, dry_run=dry_run)
     assert miro_id is not None, "Don't know the Miro ID!"
     print("*** Detected Miro ID as %s" % miro_id)
 
+    remove_associated_images(dry_run)
     suppress_work_in_miro_vhs(miro_id, dry_run)
 
     remove_image_from_loris_s3_bucket(miro_id, dry_run)
