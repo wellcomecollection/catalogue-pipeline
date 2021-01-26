@@ -5,34 +5,55 @@ import com.sksamuel.elastic4s.Index
 import com.sksamuel.elastic4s.requests.common.DocumentRef
 import com.sksamuel.elastic4s.requests.common.Operator.{AND, OR}
 import com.sksamuel.elastic4s.requests.searches.queries.{BoolQuery, Query}
-import com.sksamuel.elastic4s.requests.searches.queries.matches.MultiMatchQueryBuilderType.{BEST_FIELDS, CROSS_FIELDS}
-import com.sksamuel.elastic4s.requests.searches.queries.matches.{FieldWithOptionalBoost, MultiMatchQuery}
+import com.sksamuel.elastic4s.requests.searches.queries.matches.MultiMatchQueryBuilderType.{
+  BEST_FIELDS,
+  CROSS_FIELDS
+}
+import com.sksamuel.elastic4s.requests.searches.queries.matches.{
+  FieldWithOptionalBoost,
+  MultiMatchQuery
+}
 import uk.ac.wellcome.elasticsearch.WorksAnalysis.whitespaceAnalyzer
 
 case object ImagesMultiMatcher {
   def apply(q: String): BoolQuery = {
-    val fields = Seq(
-      ("data.contributors.agent.label", Some(1000)),
-      ("data.title", Some(100)),
-      ("data.title.english", Some(100)),
-      ("data.title.shingles", Some(100)),
-      ("data.alternativeTitles", Some(100)),
-      ("data.subjects.concepts.label", Some(10)),
-      ("data.genres.concepts.label", Some(10)),
-      ("data.production.*.label", Some(10)),
-      ("data.description", None),
-      ("data.physicalDescription", None),
-      ("data.language.label", None),
-      ("data.edition", None),
-      ("data.notes.content", None),
-      ("data.lettering", None),
-      ("data.collectionPath.path", None),
-      ("data.collectionPath.label", None),
-    ) flatMap { case (field, boost) =>
-      toWorkField(field).map(workField => (workField, boost))
-    } map { case (field, boost) =>
-      FieldWithOptionalBoost(field, boost.map(_.toDouble))
-    }
+    val fields = Map(
+      Some(1000) -> Seq(
+        "data.contributors.agent.label"
+      ),
+      Some(100) -> Seq(
+        "data.title",
+        "data.title.english",
+        "data.title.shingles",
+        "data.alternativeTitles",
+      ),
+      Some(10) -> Seq(
+        "data.subjects.concepts.label",
+        "data.genres.concepts.label",
+        "data.production.*.label",
+      ),
+      None -> Seq(
+        "data.description",
+        "data.physicalDescription",
+        "data.language.label",
+        "data.edition",
+        "data.notes.content",
+        "data.lettering",
+        "data.collectionPath.path",
+        "data.collectionPath.label"
+      )
+    ) flatMap {
+      case (boost, fieldNames) =>
+        fieldNames.map { _ -> boost }
+    } flatMap {
+      case (fieldName, boost) =>
+        toWorkField(fieldName).map { workField =>
+          (workField, boost)
+        }
+    } map {
+      case (field, boost) =>
+        FieldWithOptionalBoost(field, boost.map(_.toDouble))
+    } toSeq
 
     val sourceWorkIdFields = Seq(
       "id.canonicalId",
