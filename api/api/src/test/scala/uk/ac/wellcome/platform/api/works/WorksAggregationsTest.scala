@@ -362,6 +362,41 @@ class WorksAggregationsTest
     }
   }
 
+  it("does not bring down the API when unknown contributor type") {
+
+    val work = indexedWork()
+
+    val workWithContributor = work.copy(
+      state = work.state.copy(
+        derivedData = work.state.derivedData.copy(
+          contributorAgents = List("Producer:Keith")
+        )
+      )
+    )
+
+    withWorksApi {
+      case (worksIndex, routes) =>
+        insertIntoElasticsearch(worksIndex, workWithContributor)
+        assertJsonResponse(
+          routes,
+          s"/$apiPrefix/works?aggregations=contributors") {
+          Status.OK -> s"""
+            {
+              ${resultList(apiPrefix, totalResults = 1)},
+              "aggregations": {
+                "type" : "Aggregations",
+                "contributors": {
+                  "type" : "Aggregation",
+                  "buckets": []
+                }
+              },
+              "results": [${workResponse(workWithContributor)}]
+            }
+          """
+        }
+    }
+  }
+
   it("supports aggregating on license") {
     def createLicensedWork(
       licenses: Seq[License]): Work.Visible[WorkState.Indexed] = {
