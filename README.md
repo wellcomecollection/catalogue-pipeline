@@ -71,7 +71,7 @@ These are:
   You'll need to log into ECR before local docker can pull from there:
   ```bash
   # bash etc
-  eval $(AWS_PROFILE=platform-dev aws ecr get-login --no-include-email)
+  eval $(AWS_PROFILE=platform-developer aws ecr get-login --no-include-email)
   
   # fish
   eval (env AWS_PROFILE=platform-dev aws ecr get-login --no-include-email)
