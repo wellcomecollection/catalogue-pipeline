@@ -16,7 +16,7 @@ import uk.ac.wellcome.models.marc.MarcLanguageCodeList
 import uk.ac.wellcome.models.work.internal._
 import IdState.Minted
 
-case class Aggregations(
+case class WorkAggregations(
   format: Option[Aggregation[Format]] = None,
   genres: Option[Aggregation[Genre[Minted]]] = None,
   productionDates: Option[Aggregation[Period[Minted]]] = None,
@@ -27,13 +27,13 @@ case class Aggregations(
   locationType: Option[Aggregation[LocationTypeQuery]] = None,
 )
 
-object Aggregations extends Logging {
+object WorkAggregations extends Logging {
 
-  def apply(searchResponse: SearchResponse): Option[Aggregations] = {
+  def apply(searchResponse: SearchResponse): Option[WorkAggregations] = {
     val e4sAggregations = searchResponse.aggregations
     if (e4sAggregations.data.nonEmpty) {
       Some(
-        Aggregations(
+        WorkAggregations(
           format = e4sAggregations.decodeAgg[Format]("format"),
           genres = e4sAggregations.decodeAgg[Genre[Minted]]("genres"),
           productionDates = e4sAggregations

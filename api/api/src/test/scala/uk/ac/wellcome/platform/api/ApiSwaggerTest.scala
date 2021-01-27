@@ -6,7 +6,7 @@ import io.circe.Json
 import org.scalatest.prop.TableDrivenPropertyChecks
 import uk.ac.wellcome.display.models.{SingleImageIncludes, WorksIncludes}
 import uk.ac.wellcome.platform.api.fixtures.ReflectionHelpers
-import uk.ac.wellcome.platform.api.models.{Aggregations, SearchQueryType}
+import uk.ac.wellcome.platform.api.models.{WorkAggregations, SearchQueryType}
 import uk.ac.wellcome.platform.api.rest._
 import uk.ac.wellcome.platform.api.works.ApiWorksTestBase
 
@@ -186,7 +186,7 @@ class ApiSwaggerTest
 
     val swaggerParams = getEnumValues(aggregationsParam)
 
-    val aggregationParams = getFields[Aggregations]
+    val aggregationParams = getFields[WorkAggregations]
 
     // We temporarily have one more Swagger parameter than aggregation parameter,
     // because both `locationType` and `items.locations.type` parameters map

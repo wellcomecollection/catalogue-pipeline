@@ -71,7 +71,7 @@ object DisplayAggregations {
 
   implicit def encoder: Encoder[DisplayAggregations] = deriveConfiguredEncoder
 
-  def apply(aggs: Aggregations): DisplayAggregations =
+  def apply(aggs: WorkAggregations): DisplayAggregations =
     DisplayAggregations(
       workType = displayAggregation(aggs.format, DisplayFormat.apply),
       productionDates =

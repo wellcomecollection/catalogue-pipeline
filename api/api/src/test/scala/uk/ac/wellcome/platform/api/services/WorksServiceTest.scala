@@ -203,7 +203,7 @@ class WorksServiceTest
           createWorksSearchOptionsWith(
             aggregations = List(WorkAggregationRequest.Format))
 
-        val expectedAggregations = Aggregations(
+        val expectedAggregations = WorkAggregations(
           Some(
             Aggregation(
               List(
@@ -330,7 +330,7 @@ class WorksServiceTest
     allWorks: Seq[Work[Indexed]],
     expectedWorks: Seq[Work[Indexed]],
     expectedTotalResults: Int,
-    expectedAggregations: Option[Aggregations] = None,
+    expectedAggregations: Option[WorkAggregations] = None,
     worksSearchOptions: WorkSearchOptions =
       createWorksSearchOptions
   ): Assertion =
@@ -345,12 +345,12 @@ class WorksServiceTest
 
   private def assertResultIsCorrect(
     partialSearchFunction: (Index, WorkSearchOptions) => Future[
-      Either[ElasticError, ResultList[Work.Visible[Indexed], Aggregations]]]
+      Either[ElasticError, ResultList[Work.Visible[Indexed], WorkAggregations]]]
   )(
     allWorks: Seq[Work[Indexed]],
     expectedWorks: Seq[Work[Indexed]],
     expectedTotalResults: Int,
-    expectedAggregations: Option[Aggregations],
+    expectedAggregations: Option[WorkAggregations],
     worksSearchOptions: WorkSearchOptions
   ): Assertion =
     withLocalWorksIndex { index =>
