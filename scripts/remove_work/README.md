@@ -3,6 +3,7 @@
 This script:
 
 - replaces works with InvisibleIdentifiedWorks in ES indices (thereby preventing further reindexing)
+- (optionally) removes associated images from the image indices
 - suppresses Miro works in the VHS
 - removes images from Loris's S3 buckets
 - creates CloudFront invalidations for Loris
