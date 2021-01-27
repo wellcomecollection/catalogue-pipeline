@@ -1,23 +1,20 @@
 package uk.ac.wellcome.platform.ingestor.works
 
-import scala.concurrent.ExecutionContext
 import akka.actor.ActorSystem
 import com.typesafe.config.Config
-import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
-import uk.ac.wellcome.pipeline_storage.Indexable.workIndexable
-import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
-import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
-import uk.ac.wellcome.pipeline_storage.typesafe.{
-  ElasticIndexerBuilder,
-  ElasticSourceRetrieverBuilder,
-  PipelineStorageStreamBuilder
-}
-import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.elasticsearch.IndexedWorkIndexConfig
+import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.messaging.sns.NotificationMessage
+import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.models.Implicits._
+import uk.ac.wellcome.models.work.internal.WorkState.{Denormalised, Indexed}
 import uk.ac.wellcome.models.work.internal._
-import WorkState.{Denormalised, Indexed}
+import uk.ac.wellcome.pipeline_storage.Indexable.workIndexable
+import uk.ac.wellcome.pipeline_storage.typesafe.{ElasticIndexerBuilder, ElasticSourceRetrieverBuilder, PipelineStorageStreamBuilder}
+import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
+import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
+
+import scala.concurrent.ExecutionContext
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
@@ -43,14 +40,12 @@ object Main extends WellcomeTypesafeApp {
     )
     val messageSender = SNSBuilder
       .buildSNSMessageSender(config, subject = "Sent from the ingestor-works")
-    val pipelineStream =
-      PipelineStorageStreamBuilder.buildPipelineStorageStream(
-        denormalisedWorkStream,
-        workIndexer,
-        messageSender)(config)
 
     new WorkIngestorWorkerService(
-      pipelineStream = pipelineStream,
+      denormalisedWorkStream,
+      workIndexer,
+      PipelineStorageStreamBuilder.buildPipelineStorageConfig(config),
+      messageSender,
       workRetriever = workRetriever,
       transform = WorkTransformer.deriveData
     )

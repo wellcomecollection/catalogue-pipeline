@@ -1,22 +1,19 @@
 package uk.ac.wellcome.platform.ingestor.images
 
-import scala.concurrent.ExecutionContext
 import akka.actor.ActorSystem
 import com.typesafe.config.Config
+import uk.ac.wellcome.elasticsearch.IndexedImageIndexConfig
+import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
+import uk.ac.wellcome.messaging.sns.NotificationMessage
+import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
+import uk.ac.wellcome.models.Implicits._
+import uk.ac.wellcome.models.work.internal.ImageState.{Augmented, Indexed}
+import uk.ac.wellcome.models.work.internal._
+import uk.ac.wellcome.pipeline_storage.typesafe.{ElasticIndexerBuilder, ElasticSourceRetrieverBuilder, PipelineStorageStreamBuilder}
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
-import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
-import uk.ac.wellcome.pipeline_storage.typesafe.{
-  ElasticIndexerBuilder,
-  ElasticSourceRetrieverBuilder,
-  PipelineStorageStreamBuilder
-}
-import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
-import uk.ac.wellcome.elasticsearch.IndexedImageIndexConfig
-import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.internal._
-import ImageState.{Augmented, Indexed}
+
+import scala.concurrent.ExecutionContext
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
@@ -42,14 +39,11 @@ object Main extends WellcomeTypesafeApp {
     val msgSender = SNSBuilder
       .buildSNSMessageSender(config, subject = "Sent from the ingestor-images")
 
-    val pipelineStream =
-      PipelineStorageStreamBuilder.buildPipelineStorageStream(
-        msgStream,
-        imageIndexer,
-        msgSender)(config)
-
     new ImageIngestorWorkerService(
-      pipelineStream = pipelineStream,
+      msgStream,
+      imageIndexer,
+      PipelineStorageStreamBuilder.buildPipelineStorageConfig(config),
+      msgSender,
       imageRetriever = imageRetriever,
       transform = ImageTransformer.deriveData
     )
