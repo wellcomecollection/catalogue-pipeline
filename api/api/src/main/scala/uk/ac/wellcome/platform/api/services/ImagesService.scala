@@ -34,7 +34,7 @@ class ImagesService(searchService: ElasticsearchService,
   def listOrSearchImages(
     index: Index,
     searchOptions: ImageSearchOptions): Future[
-    Either[ElasticError, ResultList[Image[ImageState.Indexed], Unit]]] =
+    Either[ElasticError, ResultList[Image[ImageState.Indexed], ImageAggregations]]] =
     searchService
       .executeSearch(
         searchOptions = searchOptions,
@@ -71,13 +71,13 @@ class ImagesService(searchService: ElasticsearchService,
       }
 
   def createResultList(searchResponse: SearchResponse)
-    : ResultList[Image[ImageState.Indexed], Unit] =
+    : ResultList[Image[ImageState.Indexed], ImageAggregations] =
     ResultList(
       results = searchResponse.hits.hits
         .map(deserialize[Image[ImageState.Indexed]])
         .toList,
       totalResults = searchResponse.totalHits.toInt,
-      aggregations = None
+      aggregations = ImageAggregations(searchResponse)
     )
 
   private def deserialize[T](hit: Hit)(implicit decoder: Decoder[T]): T =
