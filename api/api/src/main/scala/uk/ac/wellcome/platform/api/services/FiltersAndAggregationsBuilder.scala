@@ -7,7 +7,7 @@ import com.sksamuel.elastic4s.requests.searches.aggs.{
   FilterAggregation
 }
 import com.sksamuel.elastic4s.requests.searches.queries.Query
-import uk.ac.wellcome.display.models.AggregationRequest
+import uk.ac.wellcome.display.models.WorkAggregationRequest
 import uk.ac.wellcome.platform.api.models._
 
 import scala.collection.immutable._
@@ -29,10 +29,10 @@ import scala.collection.immutable._
   *   of the given aggregations. These can be used as the ES post-query filters.
   */
 class FiltersAndAggregationsBuilder(
-  aggregationRequests: List[AggregationRequest],
-  filters: List[WorkFilter],
-  requestToAggregation: AggregationRequest => Aggregation,
-  filterToQuery: WorkFilter => Query) {
+                                     aggregationRequests: List[WorkAggregationRequest],
+                                     filters: List[WorkFilter],
+                                     requestToAggregation: WorkAggregationRequest => Aggregation,
+                                     filterToQuery: WorkFilter => Query) {
 
   lazy val unpairedFilters: List[WorkFilter] =
     filterSets.getOrElse(FilterCategory.Unpaired, List())
@@ -66,7 +66,7 @@ class FiltersAndAggregationsBuilder(
     }
 
   private def pairedFilter(
-    aggregationRequest: AggregationRequest): Option[WorkFilter] =
+    aggregationRequest: WorkAggregationRequest): Option[WorkFilter] =
     pairedFilters.find {
       pairedAggregationRequest(_) match {
         case Some(agg) => agg == aggregationRequest
@@ -76,16 +76,16 @@ class FiltersAndAggregationsBuilder(
 
   // This pattern matching defines the pairings of filters <-> aggregations
   private def pairedAggregationRequest(
-    filter: WorkFilter): Option[AggregationRequest] =
+    filter: WorkFilter): Option[WorkAggregationRequest] =
     filter match {
-      case _: FormatFilter       => Some(AggregationRequest.Format)
-      case _: LanguagesFilter    => Some(AggregationRequest.Languages)
-      case _: GenreFilter        => Some(AggregationRequest.Genre)
-      case _: SubjectFilter      => Some(AggregationRequest.Subject)
-      case _: ContributorsFilter => Some(AggregationRequest.Contributor)
-      case _: LicenseFilter      => Some(AggregationRequest.License)
+      case _: FormatFilter       => Some(WorkAggregationRequest.Format)
+      case _: LanguagesFilter    => Some(WorkAggregationRequest.Languages)
+      case _: GenreFilter        => Some(WorkAggregationRequest.Genre)
+      case _: SubjectFilter      => Some(WorkAggregationRequest.Subject)
+      case _: ContributorsFilter => Some(WorkAggregationRequest.Contributor)
+      case _: LicenseFilter      => Some(WorkAggregationRequest.License)
       case _: ItemLocationTypeFilter =>
-        Some(AggregationRequest.ItemLocationType)
+        Some(WorkAggregationRequest.ItemLocationType)
       case _ => None
     }
 

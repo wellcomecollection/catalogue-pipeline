@@ -8,7 +8,7 @@ import com.sksamuel.elastic4s.requests.searches.aggs.{
 import com.sksamuel.elastic4s.requests.searches.queries.{BoolQuery, Query}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.display.models.AggregationRequest
+import uk.ac.wellcome.display.models.WorkAggregationRequest
 import uk.ac.wellcome.platform.api.models._
 
 class FiltersAndAggregationsBuilderTest extends AnyFunSpec with Matchers {
@@ -20,7 +20,7 @@ class FiltersAndAggregationsBuilderTest extends AnyFunSpec with Matchers {
       val formatFilter = FormatFilter(Seq("bananas"))
       val languagesFilter = LanguagesFilter(Seq("eng"))
       val sut = new FiltersAndAggregationsBuilder(
-        List(AggregationRequest.Format, AggregationRequest.License),
+        List(WorkAggregationRequest.Format, WorkAggregationRequest.License),
         List(formatFilter, languagesFilter, VisibleWorkFilter),
         requestToAggregation,
         filterToQuery
@@ -34,7 +34,7 @@ class FiltersAndAggregationsBuilderTest extends AnyFunSpec with Matchers {
       val formatFilter = FormatFilter(Seq("bananas"))
       val languagesFilter = LanguagesFilter(Seq("eng"))
       val sut = new FiltersAndAggregationsBuilder(
-        List(AggregationRequest.License),
+        List(WorkAggregationRequest.License),
         List(formatFilter, languagesFilter, VisibleWorkFilter),
         requestToAggregation,
         filterToQuery
@@ -48,7 +48,7 @@ class FiltersAndAggregationsBuilderTest extends AnyFunSpec with Matchers {
       val formatFilter = FormatFilter(Seq("bananas"))
       val languagesFilter = LanguagesFilter(Seq("en"))
       val sut = new FiltersAndAggregationsBuilder(
-        List(AggregationRequest.Format, AggregationRequest.Languages),
+        List(WorkAggregationRequest.Format, WorkAggregationRequest.Languages),
         List(formatFilter, languagesFilter),
         requestToAggregation,
         filterToQuery
@@ -64,7 +64,7 @@ class FiltersAndAggregationsBuilderTest extends AnyFunSpec with Matchers {
       val formatFilter = FormatFilter(Seq("bananas"))
       val languagesFilter = LanguagesFilter(Seq("en"))
       val sut = new FiltersAndAggregationsBuilder(
-        List(AggregationRequest.Format, AggregationRequest.Languages),
+        List(WorkAggregationRequest.Format, WorkAggregationRequest.Languages),
         List(formatFilter, languagesFilter),
         requestToAggregation,
         filterToQuery
@@ -74,13 +74,13 @@ class FiltersAndAggregationsBuilderTest extends AnyFunSpec with Matchers {
       sut.filteredAggregations.head shouldBe a[MockAggregation]
       val agg = sut.filteredAggregations.head.asInstanceOf[MockAggregation]
       agg.subaggs.head shouldBe a[FilterAggregation]
-      agg.request shouldBe AggregationRequest.Format
+      agg.request shouldBe WorkAggregationRequest.Format
     }
 
     it("does not apply to aggregations without a paired filter") {
       val languagesFilter = LanguagesFilter(Seq("en"))
       val sut = new FiltersAndAggregationsBuilder(
-        List(AggregationRequest.Format),
+        List(WorkAggregationRequest.Format),
         List(languagesFilter),
         requestToAggregation,
         filterToQuery
@@ -96,7 +96,7 @@ class FiltersAndAggregationsBuilderTest extends AnyFunSpec with Matchers {
     it("applies paired filters to non-paired aggregations") {
       val formatFilter = FormatFilter(Seq("bananas"))
       val sut = new FiltersAndAggregationsBuilder(
-        List(AggregationRequest.Format, AggregationRequest.Languages),
+        List(WorkAggregationRequest.Format, WorkAggregationRequest.Languages),
         List(formatFilter),
         requestToAggregation,
         filterToQuery
@@ -121,9 +121,9 @@ class FiltersAndAggregationsBuilderTest extends AnyFunSpec with Matchers {
       val genreFilter = GenreFilter("durian")
       val sut = new FiltersAndAggregationsBuilder(
         List(
-          AggregationRequest.Format,
-          AggregationRequest.Languages,
-          AggregationRequest.Genre),
+          WorkAggregationRequest.Format,
+          WorkAggregationRequest.Languages,
+          WorkAggregationRequest.Genre),
         List(formatFilter, languagesFilter, genreFilter),
         requestToAggregation,
         filterToQuery
@@ -143,7 +143,7 @@ class FiltersAndAggregationsBuilderTest extends AnyFunSpec with Matchers {
     }
   }
 
-  private def requestToAggregation(request: AggregationRequest): Aggregation =
+  private def requestToAggregation(request: WorkAggregationRequest): Aggregation =
     MockAggregation("cabbage", request)
 
   private def filterToQuery(filter: WorkFilter): Query = MockQuery(filter)
@@ -151,7 +151,7 @@ class FiltersAndAggregationsBuilderTest extends AnyFunSpec with Matchers {
   private case class MockQuery(filter: WorkFilter) extends Query
 
   private case class MockAggregation(name: String,
-                                     request: AggregationRequest,
+                                     request: WorkAggregationRequest,
                                      subaggs: Seq[AbstractAggregation] = Nil,
                                      metadata: Map[String, AnyRef] = Map.empty)
       extends Aggregation {

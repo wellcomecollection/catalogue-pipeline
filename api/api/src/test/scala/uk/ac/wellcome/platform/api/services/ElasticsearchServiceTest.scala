@@ -19,6 +19,7 @@ import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
 import uk.ac.wellcome.platform.api.models._
 import WorkState.Indexed
+import uk.ac.wellcome.display.models.WorkAggregationRequest
 
 class ElasticsearchServiceTest
     extends AnyFunSpec
@@ -368,7 +369,7 @@ class ElasticsearchServiceTest
 
   private def searchResults(
     index: Index,
-    searchOptions: SearchOptions[WorkFilter, WorkMustQuery]) = {
+    searchOptions: SearchOptions[WorkFilter, WorkAggregationRequest, WorkMustQuery]) = {
     val searchResponseFuture =
       searchService.executeSearch(searchOptions, WorksRequestBuilder, index)
     whenReady(searchResponseFuture) { response =>
@@ -378,7 +379,7 @@ class ElasticsearchServiceTest
 
   private def assertResultsAreCorrect(
     index: Index,
-    searchOptions: SearchOptions[WorkFilter, WorkMustQuery] =
+    searchOptions: SearchOptions[WorkFilter, WorkAggregationRequest, WorkMustQuery] =
       createWorksSearchOptions,
     expectedWorks: List[Work.Visible[Indexed]],
     scored: Option[Boolean] = None) = {

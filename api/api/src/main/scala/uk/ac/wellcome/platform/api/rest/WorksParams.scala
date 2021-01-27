@@ -61,7 +61,7 @@ case class MultipleWorksParams(
   `contributors.agent.label`: Option[ContributorsFilter],
   license: Option[LicenseFilter],
   include: Option[WorksIncludes],
-  aggregations: Option[List[AggregationRequest]],
+  aggregations: Option[List[WorkAggregationRequest]],
   sort: Option[List[SortRequest]],
   sortOrder: Option[SortingOrder],
   query: Option[String],
@@ -77,7 +77,7 @@ case class MultipleWorksParams(
     with Paginated {
 
   def searchOptions(apiConfig: ApiConfig) =
-    SearchOptions[WorkFilter, WorkMustQuery](
+    SearchOptions[WorkFilter, WorkAggregationRequest, WorkMustQuery](
       searchQuery = query map { query =>
         SearchQuery(query, _queryType)
       },
@@ -136,7 +136,7 @@ object MultipleWorksParams extends QueryParamsUtils {
         "contributors.agent.label".as[ContributorsFilter].?,
         "license".as[LicenseFilter].?,
         "include".as[WorksIncludes].?,
-        "aggregations".as[List[AggregationRequest]].?,
+        "aggregations".as[List[WorkAggregationRequest]].?,
         "sort".as[List[SortRequest]].?,
         "sortOrder".as[SortingOrder].?,
         "query".as[String].?,
@@ -257,17 +257,17 @@ object MultipleWorksParams extends QueryParamsUtils {
       case (includes, excludes) => Right(AccessStatusFilter(includes, excludes))
     }
 
-  implicit val aggregationsDecoder: Decoder[List[AggregationRequest]] =
+  implicit val aggregationsDecoder: Decoder[List[WorkAggregationRequest]] =
     decodeOneOfCommaSeparated(
-      "workType" -> AggregationRequest.Format,
-      "genres" -> AggregationRequest.Genre,
-      "production.dates" -> AggregationRequest.ProductionDate,
-      "subjects" -> AggregationRequest.Subject,
-      "languages" -> AggregationRequest.Languages,
-      "contributors" -> AggregationRequest.Contributor,
-      "license" -> AggregationRequest.License,
-      "locationType" -> AggregationRequest.ItemLocationType,
-      "items.locations.type" -> AggregationRequest.ItemLocationType,
+      "workType" -> WorkAggregationRequest.Format,
+      "genres" -> WorkAggregationRequest.Genre,
+      "production.dates" -> WorkAggregationRequest.ProductionDate,
+      "subjects" -> WorkAggregationRequest.Subject,
+      "languages" -> WorkAggregationRequest.Languages,
+      "contributors" -> WorkAggregationRequest.Contributor,
+      "license" -> WorkAggregationRequest.License,
+      "locationType" -> WorkAggregationRequest.ItemLocationType,
+      "items.locations.type" -> WorkAggregationRequest.ItemLocationType,
     )
 
   implicit val sortDecoder: Decoder[List[SortRequest]] =

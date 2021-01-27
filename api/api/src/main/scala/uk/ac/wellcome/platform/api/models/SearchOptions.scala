@@ -1,12 +1,8 @@
 package uk.ac.wellcome.platform.api.models
 
-import uk.ac.wellcome.display.models.{
-  AggregationRequest,
-  SortRequest,
-  SortingOrder
-}
+import uk.ac.wellcome.display.models.{SortRequest, SortingOrder}
 
-case class SearchOptions[DocumentFilter, MustQuery](
+case class SearchOptions[DocumentFilter, AggregationRequest, MustQuery](
   searchQuery: Option[SearchQuery] = None,
   filters: List[DocumentFilter] = Nil,
   aggregations: List[AggregationRequest] = Nil,

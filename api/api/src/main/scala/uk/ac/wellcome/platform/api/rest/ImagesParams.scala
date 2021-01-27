@@ -40,7 +40,7 @@ case class MultipleImagesParams(
     with Paginated {
 
   def searchOptions(apiConfig: ApiConfig) =
-    SearchOptions[ImageFilter, ImageMustQuery](
+    SearchOptions[ImageFilter, ImageAggregationRequest, ImageMustQuery](
       searchQuery = query.map(SearchQuery(_)),
       filters = filters,
       mustQueries = mustQueries,

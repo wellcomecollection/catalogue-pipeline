@@ -7,11 +7,10 @@ import com.sksamuel.elastic4s.requests.searches.queries.Query
 import com.sksamuel.elastic4s.ElasticDsl._
 import uk.ac.wellcome.platform.api.models.SearchOptions
 
-trait ElasticsearchRequestBuilder[DocumentFilter, MustQuery] {
-
+trait ElasticsearchRequestBuilder[DocumentFilter, AggregationRequest, MustQuery] {
   val idSort: FieldSort
 
-  def request(searchOptions: SearchOptions[DocumentFilter, MustQuery],
+  def request(searchOptions: SearchOptions[DocumentFilter, AggregationRequest, MustQuery],
               index: Index): SearchRequest
 }
 

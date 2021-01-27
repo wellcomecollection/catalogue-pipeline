@@ -24,6 +24,7 @@ import uk.ac.wellcome.platform.api.services.{
 }
 import WorkState.Indexed
 import org.scalatest.Assertion
+import uk.ac.wellcome.display.models.WorkAggregationRequest
 
 class WorksQueryTest
     extends AnyFunSpec
@@ -354,7 +355,7 @@ class WorksQueryTest
 
   private def searchResults(
     index: Index,
-    searchOptions: SearchOptions[WorkFilter, WorkMustQuery])
+    searchOptions: SearchOptions[WorkFilter, WorkAggregationRequest, WorkMustQuery])
     : List[Work[Indexed]] = {
     val searchResponseFuture =
       searchService.executeSearch(searchOptions, WorksRequestBuilder, index)

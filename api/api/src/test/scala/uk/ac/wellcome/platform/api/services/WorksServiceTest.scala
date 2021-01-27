@@ -9,7 +9,7 @@ import com.sksamuel.elastic4s.{ElasticError, Index}
 import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.display.models.AggregationRequest
+import uk.ac.wellcome.display.models.WorkAggregationRequest
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.models.work.generators.{
   ProductionEventGenerators,
@@ -201,7 +201,7 @@ class WorksServiceTest
 
         val worksSearchOptions =
           createWorksSearchOptionsWith(
-            aggregations = List(AggregationRequest.Format))
+            aggregations = List(WorkAggregationRequest.Format))
 
         val expectedAggregations = Aggregations(
           Some(
@@ -331,7 +331,7 @@ class WorksServiceTest
     expectedWorks: Seq[Work[Indexed]],
     expectedTotalResults: Int,
     expectedAggregations: Option[Aggregations] = None,
-    worksSearchOptions: SearchOptions[WorkFilter, WorkMustQuery] =
+    worksSearchOptions: SearchOptions[WorkFilter, WorkAggregationRequest, WorkMustQuery] =
       createWorksSearchOptions
   ): Assertion =
     assertResultIsCorrect(
@@ -345,14 +345,14 @@ class WorksServiceTest
 
   private def assertResultIsCorrect(
     partialSearchFunction: (Index,
-                            SearchOptions[WorkFilter, WorkMustQuery]) => Future[
+                            SearchOptions[WorkFilter, WorkAggregationRequest, WorkMustQuery]) => Future[
       Either[ElasticError, ResultList[Work.Visible[Indexed], Aggregations]]]
   )(
     allWorks: Seq[Work[Indexed]],
     expectedWorks: Seq[Work[Indexed]],
     expectedTotalResults: Int,
     expectedAggregations: Option[Aggregations],
-    worksSearchOptions: SearchOptions[WorkFilter, WorkMustQuery]
+    worksSearchOptions: SearchOptions[WorkFilter, WorkAggregationRequest, WorkMustQuery]
   ): Assertion =
     withLocalWorksIndex { index =>
       if (allWorks.nonEmpty) {
