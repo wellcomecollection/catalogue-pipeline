@@ -12,7 +12,6 @@ import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.models.Implicits._
 import WorkState.Indexed
-import uk.ac.wellcome.display.models.WorkAggregationRequest
 
 class WorksService(searchService: ElasticsearchService)(
   implicit ec: ExecutionContext) {
@@ -31,7 +30,7 @@ class WorksService(searchService: ElasticsearchService)(
 
   def listOrSearchWorks(
     index: Index,
-    searchOptions: SearchOptions[WorkFilter, WorkAggregationRequest, WorkMustQuery]): Future[
+    searchOptions: WorkSearchOptions): Future[
     Either[ElasticError, ResultList[Work.Visible[Indexed], Aggregations]]] =
     searchService
       .executeSearch(

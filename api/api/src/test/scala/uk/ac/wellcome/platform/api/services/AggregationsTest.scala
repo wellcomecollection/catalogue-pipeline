@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.api.services
 
 import java.time.LocalDate
-
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.concurrent.ScalaFutures
@@ -18,6 +17,7 @@ import uk.ac.wellcome.models.work.generators.{
   SubjectGenerators,
   WorkGenerators
 }
+import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
 
 class AggregationsTest
     extends AnyFunSpec
@@ -27,6 +27,7 @@ class AggregationsTest
     with SubjectGenerators
     with GenreGenerators
     with ProductionEventGenerators
+    with SearchOptionsGenerators
     with WorkGenerators {
 
   val worksService = new WorksService(
@@ -40,7 +41,7 @@ class AggregationsTest
     }
     withLocalWorksIndex { index =>
       insertIntoElasticsearch(index, works: _*)
-      val searchOptions = SearchOptions[WorkFilter, WorkAggregationRequest, WorkMustQuery](
+      val searchOptions = createWorksSearchOptionsWith(
         aggregations = List(WorkAggregationRequest.Format)
       )
       whenReady(aggregationQuery(index, searchOptions)) { aggs =>
@@ -72,7 +73,7 @@ class AggregationsTest
 
     withLocalWorksIndex { index =>
       insertIntoElasticsearch(index, works: _*)
-      val searchOptions = SearchOptions[WorkFilter, WorkAggregationRequest, WorkMustQuery](
+      val searchOptions = createWorksSearchOptionsWith(
         aggregations = List(WorkAggregationRequest.ProductionDate),
         filters = List(
           DateRangeFilter(Some(LocalDate.of(1960, 1, 1)), None)
@@ -98,7 +99,7 @@ class AggregationsTest
     }
     withLocalWorksIndex { index =>
       insertIntoElasticsearch(index, works: _*)
-      val searchOptions = SearchOptions[WorkFilter, WorkAggregationRequest, WorkMustQuery](
+      val searchOptions = createWorksSearchOptionsWith(
         searchQuery = Some(SearchQuery("anything will give zero results")),
         aggregations = List(WorkAggregationRequest.Format)
       )
@@ -126,7 +127,7 @@ class AggregationsTest
     it("applies filters to their related aggregations") {
       withLocalWorksIndex { index =>
         insertIntoElasticsearch(index, works: _*)
-        val searchOptions = SearchOptions[WorkFilter, WorkAggregationRequest, WorkMustQuery](
+        val searchOptions = createWorksSearchOptionsWith(
           aggregations =
             List(WorkAggregationRequest.Format, WorkAggregationRequest.Subject),
           filters = List(
@@ -149,7 +150,7 @@ class AggregationsTest
           case Subject(IdState.Unidentifiable, label, _) => label
           case _                                         => "bilberry"
         }
-        val searchOptions = SearchOptions[WorkFilter, WorkAggregationRequest, WorkMustQuery](
+        val searchOptions = createWorksSearchOptionsWith(
           aggregations =
             List(WorkAggregationRequest.Format, WorkAggregationRequest.Subject),
           filters = List(
@@ -173,7 +174,7 @@ class AggregationsTest
           case Subject(IdState.Unidentifiable, label, _) => label
           case _                                         => "passionfruit"
         }
-        val searchOptions = SearchOptions[WorkFilter, WorkAggregationRequest, WorkMustQuery](
+        val searchOptions = createWorksSearchOptionsWith(
           aggregations =
             List(WorkAggregationRequest.Format, WorkAggregationRequest.Subject),
           filters = List(
@@ -190,9 +191,7 @@ class AggregationsTest
     }
   }
 
-  private def aggregationQuery(
-    index: Index,
-    searchOptions: SearchOptions[WorkFilter, WorkAggregationRequest, WorkMustQuery]) =
+  private def aggregationQuery(index: Index, searchOptions: WorkSearchOptions) =
     worksService
       .listOrSearchWorks(index, searchOptions)
       .map(_.right.get.aggregations.get)

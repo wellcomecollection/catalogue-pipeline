@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.api.rest
 
 import akka.http.scaladsl.model.Uri
-import uk.ac.wellcome.platform.api.models.{ResultList, SearchOptions}
+import uk.ac.wellcome.platform.api.models.{SearchOptions, ResultList}
 
 object PaginationLimits {
   val minSize = 1

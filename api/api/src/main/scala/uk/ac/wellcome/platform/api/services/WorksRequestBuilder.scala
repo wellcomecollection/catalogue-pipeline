@@ -12,13 +12,13 @@ import uk.ac.wellcome.models.work.internal.WorkType
 import uk.ac.wellcome.platform.api.rest.PaginationQuery
 
 object WorksRequestBuilder
-    extends ElasticsearchRequestBuilder[WorkFilter, WorkAggregationRequest, WorkMustQuery] {
+    extends ElasticsearchRequestBuilder[WorkSearchOptions] {
 
   import ElasticsearchRequestBuilder._
 
   val idSort: FieldSort = fieldSort("state.canonicalId").order(SortOrder.ASC)
 
-  def request(searchOptions: SearchOptions[WorkFilter, WorkAggregationRequest, WorkMustQuery],
+  def request(searchOptions: WorkSearchOptions,
               index: Index): SearchRequest = {
     implicit val s = searchOptions
     search(index)
@@ -31,7 +31,7 @@ object WorksRequestBuilder
   }
 
   private def filteredAggregationBuilder(
-    implicit searchOptions: SearchOptions[WorkFilter, WorkAggregationRequest, WorkMustQuery]) =
+    implicit searchOptions: WorkSearchOptions) =
     new FiltersAndAggregationsBuilder(
       aggregationRequests = searchOptions.aggregations,
       filters = searchOptions.filters,
@@ -92,7 +92,7 @@ object WorksRequestBuilder
   }
 
   private def sortBy(
-    implicit searchOptions: SearchOptions[WorkFilter, WorkAggregationRequest, WorkMustQuery]) =
+    implicit searchOptions: WorkSearchOptions) =
     if (searchOptions.searchQuery.isDefined || searchOptions.mustQueries.nonEmpty) {
       sort :+ scoreSort(SortOrder.DESC) :+ idSort
     } else {
@@ -100,7 +100,7 @@ object WorksRequestBuilder
     }
 
   private def sort(
-    implicit searchOptions: SearchOptions[WorkFilter, WorkAggregationRequest, WorkMustQuery]) =
+    implicit searchOptions: WorkSearchOptions) =
     searchOptions.sortBy
       .map {
         case ProductionDateSortRequest => "data.production.dates.range.from"
@@ -108,21 +108,21 @@ object WorksRequestBuilder
       .map { FieldSort(_).order(sortOrder) }
 
   private def sortOrder(
-    implicit searchOptions: SearchOptions[WorkFilter, WorkAggregationRequest, WorkMustQuery]) =
+    implicit searchOptions: WorkSearchOptions) =
     searchOptions.sortOrder match {
       case SortingOrder.Ascending  => SortOrder.ASC
       case SortingOrder.Descending => SortOrder.DESC
     }
 
   private def postFilterQuery(
-    implicit searchOptions: SearchOptions[WorkFilter, WorkAggregationRequest, WorkMustQuery])
+    implicit searchOptions: WorkSearchOptions)
     : BoolQuery =
     boolQuery.filter {
       filteredAggregationBuilder.pairedFilters.map(buildWorkFilterQuery)
     }
 
   private def filteredQuery(
-    implicit searchOptions: SearchOptions[WorkFilter, WorkAggregationRequest, WorkMustQuery])
+    implicit searchOptions: WorkSearchOptions)
     : BoolQuery =
     searchOptions.searchQuery
       .map {

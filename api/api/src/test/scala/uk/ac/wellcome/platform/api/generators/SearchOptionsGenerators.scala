@@ -16,8 +16,8 @@ trait SearchOptionsGenerators {
                                     sort: List[SortRequest] = Nil,
                                     sortOrder: SortingOrder = SortingOrder.Ascending,
                                     searchQuery: Option[SearchQuery] = None
-  ): SearchOptions[WorkFilter, WorkAggregationRequest, WorkMustQuery] =
-    SearchOptions(
+  ): WorkSearchOptions =
+    WorkSearchOptions(
       filters = filters,
       pageSize = pageSize,
       pageNumber = pageNumber,
@@ -27,6 +27,6 @@ trait SearchOptionsGenerators {
       searchQuery = searchQuery
     )
 
-  def createWorksSearchOptions: SearchOptions[WorkFilter, WorkAggregationRequest, WorkMustQuery] =
+  def createWorksSearchOptions: WorkSearchOptions =
     createWorksSearchOptionsWith()
 }

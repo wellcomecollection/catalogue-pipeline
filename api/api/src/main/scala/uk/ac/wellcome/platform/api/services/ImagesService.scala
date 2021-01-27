@@ -6,7 +6,6 @@ import com.sksamuel.elastic4s.requests.searches.SearchResponse
 import com.sksamuel.elastic4s.{ElasticError, Hit, Index}
 import com.sksamuel.elastic4s.circe._
 import io.circe.Decoder
-import uk.ac.wellcome.display.models.ImageAggregationRequest
 import uk.ac.wellcome.models.work.internal.{Image, ImageState}
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.platform.api.Tracing
@@ -34,7 +33,7 @@ class ImagesService(searchService: ElasticsearchService,
 
   def listOrSearchImages(
     index: Index,
-    searchOptions: SearchOptions[ImageFilter, ImageAggregationRequest, ImageMustQuery]): Future[
+    searchOptions: ImageSearchOptions): Future[
     Either[ElasticError, ResultList[Image[ImageState.Indexed], Unit]]] =
     searchService
       .executeSearch(

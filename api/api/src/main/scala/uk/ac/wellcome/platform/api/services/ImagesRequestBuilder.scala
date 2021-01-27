@@ -5,7 +5,6 @@ import com.sksamuel.elastic4s._
 import com.sksamuel.elastic4s.requests.searches._
 import com.sksamuel.elastic4s.requests.searches.queries.Query
 import com.sksamuel.elastic4s.requests.searches.sort._
-import uk.ac.wellcome.display.models.ImageAggregationRequest
 import uk.ac.wellcome.platform.api.elasticsearch.{
   ColorQuery,
   ImageSimilarity,
@@ -15,14 +14,14 @@ import uk.ac.wellcome.platform.api.models.{
   ColorMustQuery,
   ImageFilter,
   ImageMustQuery,
+  ImageSearchOptions,
   LicenseFilter,
-  QueryConfig,
-  SearchOptions
+  QueryConfig
 }
 import uk.ac.wellcome.platform.api.rest.PaginationQuery
 
 class ImagesRequestBuilder(queryConfig: QueryConfig)
-    extends ElasticsearchRequestBuilder[ImageFilter, ImageAggregationRequest, ImageMustQuery] {
+    extends ElasticsearchRequestBuilder[ImageSearchOptions] {
 
   val idSort: FieldSort = fieldSort("state.canonicalId").order(SortOrder.ASC)
 
@@ -31,7 +30,7 @@ class ImagesRequestBuilder(queryConfig: QueryConfig)
     binMinima = queryConfig.paletteBinMinima
   )
 
-  def request(searchOptions: SearchOptions[ImageFilter, ImageAggregationRequest, ImageMustQuery],
+  def request(searchOptions: ImageSearchOptions,
               index: Index): SearchRequest =
     search(index)
       .query(
@@ -52,7 +51,7 @@ class ImagesRequestBuilder(queryConfig: QueryConfig)
       .from(PaginationQuery.safeGetFrom(searchOptions))
 
   def sortBy(
-    searchOptions: SearchOptions[ImageFilter, ImageAggregationRequest, ImageMustQuery]): Seq[Sort] =
+    searchOptions: ImageSearchOptions): Seq[Sort] =
     if (searchOptions.searchQuery.isDefined || searchOptions.mustQueries.nonEmpty) {
       List(scoreSort(SortOrder.DESC), idSort)
     } else {

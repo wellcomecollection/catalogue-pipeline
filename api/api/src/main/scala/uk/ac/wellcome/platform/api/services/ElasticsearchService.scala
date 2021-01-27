@@ -29,9 +29,9 @@ class ElasticsearchService(elasticClient: ElasticClient)(
   /** Given a set of query options, build a SearchDefinition for Elasticsearch
     * using the elastic4s query DSL, then execute the search.
     */
-  def executeSearch[DocumentFilter, AggregationRequest, MustQuery](
-    searchOptions: SearchOptions[DocumentFilter, AggregationRequest, MustQuery],
-    requestBuilder: ElasticsearchRequestBuilder[DocumentFilter, AggregationRequest, MustQuery],
+  def executeSearch[S <: SearchOptions[_, _, _]](
+    searchOptions: S,
+    requestBuilder: ElasticsearchRequestBuilder[S],
     index: Index): Future[Either[ElasticError, SearchResponse]] = {
     val searchRequest = requestBuilder
       .request(searchOptions, index)

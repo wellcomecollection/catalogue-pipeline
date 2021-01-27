@@ -76,8 +76,8 @@ case class MultipleWorksParams(
 ) extends QueryParams
     with Paginated {
 
-  def searchOptions(apiConfig: ApiConfig) =
-    SearchOptions[WorkFilter, WorkAggregationRequest, WorkMustQuery](
+  def searchOptions(apiConfig: ApiConfig): WorkSearchOptions =
+    WorkSearchOptions(
       searchQuery = query map { query =>
         SearchQuery(query, _queryType)
       },
