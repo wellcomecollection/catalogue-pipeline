@@ -31,9 +31,8 @@ class ImagesService(searchService: ElasticsearchService,
         }
       }
 
-  def listOrSearchImages(
-    index: Index,
-    searchOptions: ImageSearchOptions): Future[
+  def listOrSearchImages(index: Index,
+                         searchOptions: ImageSearchOptions): Future[
     Either[ElasticError, ResultList[Image[ImageState.Indexed], Unit]]] =
     searchService
       .executeSearch(

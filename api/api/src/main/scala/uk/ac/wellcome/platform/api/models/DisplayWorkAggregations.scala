@@ -43,7 +43,8 @@ case class DisplayWorkAggregations(
 
 object DisplayWorkAggregations {
 
-  implicit def encoder: Encoder[DisplayWorkAggregations] = deriveConfiguredEncoder
+  implicit def encoder: Encoder[DisplayWorkAggregations] =
+    deriveConfiguredEncoder
 
   def apply(aggs: WorkAggregations): DisplayWorkAggregations =
     DisplayWorkAggregations(

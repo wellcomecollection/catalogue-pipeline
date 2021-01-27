@@ -77,12 +77,12 @@ object WorkAggregations extends ElasticAggregations {
   // to populate the "languages" field, so we can use the ID (code) to
   // unambiguously identify a language.
   implicit val decodeLanguage: Decoder[Language] =
-  Decoder.decodeString.emap { code =>
-    MarcLanguageCodeList.lookupByCode(code) match {
-      case Some(lang) => Right(lang)
-      case None       => Left(s"couldn't find language for code $code")
+    Decoder.decodeString.emap { code =>
+      MarcLanguageCodeList.lookupByCode(code) match {
+        case Some(lang) => Right(lang)
+        case None       => Left(s"couldn't find language for code $code")
+      }
     }
-  }
 
   implicit val decodeGenreFromLabel: Decoder[Genre[Minted]] =
     Decoder.decodeString.map { str =>

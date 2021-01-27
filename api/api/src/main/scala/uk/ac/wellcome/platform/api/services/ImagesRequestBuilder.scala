@@ -30,8 +30,7 @@ class ImagesRequestBuilder(queryConfig: QueryConfig)
     binMinima = queryConfig.paletteBinMinima
   )
 
-  def request(searchOptions: ImageSearchOptions,
-              index: Index): SearchRequest =
+  def request(searchOptions: ImageSearchOptions, index: Index): SearchRequest =
     search(index)
       .query(
         searchOptions.searchQuery
@@ -50,8 +49,7 @@ class ImagesRequestBuilder(queryConfig: QueryConfig)
       .limit(searchOptions.pageSize)
       .from(PaginationQuery.safeGetFrom(searchOptions))
 
-  def sortBy(
-    searchOptions: ImageSearchOptions): Seq[Sort] =
+  def sortBy(searchOptions: ImageSearchOptions): Seq[Sort] =
     if (searchOptions.searchQuery.isDefined || searchOptions.mustQueries.nonEmpty) {
       List(scoreSort(SortOrder.DESC), idSort)
     } else {

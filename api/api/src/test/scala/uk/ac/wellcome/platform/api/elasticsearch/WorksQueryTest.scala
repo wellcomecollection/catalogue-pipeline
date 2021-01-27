@@ -352,7 +352,9 @@ class WorksQueryTest
       }
     }
 
-  private def searchResults(index: Index, searchOptions: WorkSearchOptions): List[Work[Indexed]] = {
+  private def searchResults(
+    index: Index,
+    searchOptions: WorkSearchOptions): List[Work[Indexed]] = {
     val searchResponseFuture =
       searchService.executeSearch(searchOptions, WorksRequestBuilder, index)
     whenReady(searchResponseFuture) { response =>

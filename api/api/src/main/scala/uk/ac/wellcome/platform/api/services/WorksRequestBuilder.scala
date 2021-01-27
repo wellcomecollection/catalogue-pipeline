@@ -18,8 +18,7 @@ object WorksRequestBuilder
 
   val idSort: FieldSort = fieldSort("state.canonicalId").order(SortOrder.ASC)
 
-  def request(searchOptions: WorkSearchOptions,
-              index: Index): SearchRequest = {
+  def request(searchOptions: WorkSearchOptions, index: Index): SearchRequest = {
     implicit val s = searchOptions
     search(index)
       .aggs { filteredAggregationBuilder.filteredAggregations }
@@ -91,39 +90,34 @@ object WorksRequestBuilder
         .minDocCount(0)
   }
 
-  private def sortBy(
-    implicit searchOptions: WorkSearchOptions) =
+  private def sortBy(implicit searchOptions: WorkSearchOptions) =
     if (searchOptions.searchQuery.isDefined || searchOptions.mustQueries.nonEmpty) {
       sort :+ scoreSort(SortOrder.DESC) :+ idSort
     } else {
       sort :+ idSort
     }
 
-  private def sort(
-    implicit searchOptions: WorkSearchOptions) =
+  private def sort(implicit searchOptions: WorkSearchOptions) =
     searchOptions.sortBy
       .map {
         case ProductionDateSortRequest => "data.production.dates.range.from"
       }
       .map { FieldSort(_).order(sortOrder) }
 
-  private def sortOrder(
-    implicit searchOptions: WorkSearchOptions) =
+  private def sortOrder(implicit searchOptions: WorkSearchOptions) =
     searchOptions.sortOrder match {
       case SortingOrder.Ascending  => SortOrder.ASC
       case SortingOrder.Descending => SortOrder.DESC
     }
 
   private def postFilterQuery(
-    implicit searchOptions: WorkSearchOptions)
-    : BoolQuery =
+    implicit searchOptions: WorkSearchOptions): BoolQuery =
     boolQuery.filter {
       filteredAggregationBuilder.pairedFilters.map(buildWorkFilterQuery)
     }
 
   private def filteredQuery(
-    implicit searchOptions: WorkSearchOptions)
-    : BoolQuery =
+    implicit searchOptions: WorkSearchOptions): BoolQuery =
     searchOptions.searchQuery
       .map {
         case SearchQuery(query, queryType) =>

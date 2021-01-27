@@ -54,12 +54,12 @@ object DisplayResultList {
   implicit def encoder[R: Encoder, A: Encoder]
     : Encoder[DisplayResultList[R, A]] = deriveConfiguredEncoder
 
-  def apply(
-    resultList: ResultList[Work.Visible[Indexed], WorkAggregations],
-    searchOptions: SearchOptions[_, _, _],
-    includes: WorksIncludes,
-    requestUri: Uri,
-    contextUri: String): DisplayResultList[DisplayWork, DisplayWorkAggregations] =
+  def apply(resultList: ResultList[Work.Visible[Indexed], WorkAggregations],
+            searchOptions: SearchOptions[_, _, _],
+            includes: WorksIncludes,
+            requestUri: Uri,
+            contextUri: String)
+    : DisplayResultList[DisplayWork, DisplayWorkAggregations] =
     PaginationResponse(resultList, searchOptions, requestUri) match {
       case PaginationResponse(totalPages, prevPage, nextPage) =>
         DisplayResultList(
@@ -70,7 +70,8 @@ object DisplayResultList {
           results = resultList.results.map(DisplayWork(_, includes)),
           prevPage = prevPage,
           nextPage = nextPage,
-          aggregations = resultList.aggregations.map(DisplayWorkAggregations.apply)
+          aggregations =
+            resultList.aggregations.map(DisplayWorkAggregations.apply)
         )
     }
 

@@ -29,10 +29,10 @@ import scala.collection.immutable._
   *   of the given aggregations. These can be used as the ES post-query filters.
   */
 class FiltersAndAggregationsBuilder(
-                                     aggregationRequests: List[WorkAggregationRequest],
-                                     filters: List[WorkFilter],
-                                     requestToAggregation: WorkAggregationRequest => Aggregation,
-                                     filterToQuery: WorkFilter => Query) {
+  aggregationRequests: List[WorkAggregationRequest],
+  filters: List[WorkFilter],
+  requestToAggregation: WorkAggregationRequest => Aggregation,
+  filterToQuery: WorkFilter => Query) {
 
   lazy val unpairedFilters: List[WorkFilter] =
     filterSets.getOrElse(FilterCategory.Unpaired, List())

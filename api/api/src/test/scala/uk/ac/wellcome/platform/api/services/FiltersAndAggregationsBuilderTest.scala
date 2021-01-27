@@ -18,7 +18,8 @@ class FiltersAndAggregationsBuilderTest extends AnyFunSpec with Matchers {
       val formatFilter = FormatFilter(Seq("bananas"))
       val languagesFilter = LanguagesFilter(Seq("eng"))
       val builder = new FiltersAndAggregationsBuilder(
-        aggregationRequests = List(WorkAggregationRequest.Format, WorkAggregationRequest.License),
+        aggregationRequests =
+          List(WorkAggregationRequest.Format, WorkAggregationRequest.License),
         filters = List(formatFilter, languagesFilter, VisibleWorkFilter),
         requestToAggregation = requestToAggregation,
         filterToQuery = filterToQuery
@@ -46,7 +47,8 @@ class FiltersAndAggregationsBuilderTest extends AnyFunSpec with Matchers {
       val formatFilter = FormatFilter(Seq("bananas"))
       val languagesFilter = LanguagesFilter(Seq("en"))
       val builder = new FiltersAndAggregationsBuilder(
-        aggregationRequests = List(WorkAggregationRequest.Format, WorkAggregationRequest.Languages),
+        aggregationRequests =
+          List(WorkAggregationRequest.Format, WorkAggregationRequest.Languages),
         filters = List(formatFilter, languagesFilter),
         requestToAggregation = requestToAggregation,
         filterToQuery = filterToQuery
@@ -62,7 +64,8 @@ class FiltersAndAggregationsBuilderTest extends AnyFunSpec with Matchers {
       val formatFilter = FormatFilter(Seq("bananas"))
       val languagesFilter = LanguagesFilter(Seq("en"))
       val builder = new FiltersAndAggregationsBuilder(
-        aggregationRequests = List(WorkAggregationRequest.Format, WorkAggregationRequest.Languages),
+        aggregationRequests =
+          List(WorkAggregationRequest.Format, WorkAggregationRequest.Languages),
         filters = List(formatFilter, languagesFilter),
         requestToAggregation = requestToAggregation,
         filterToQuery = filterToQuery
@@ -94,7 +97,8 @@ class FiltersAndAggregationsBuilderTest extends AnyFunSpec with Matchers {
     it("applies paired filters to non-paired aggregations") {
       val formatFilter = FormatFilter(Seq("bananas"))
       val builder = new FiltersAndAggregationsBuilder(
-        aggregationRequests = List(WorkAggregationRequest.Format, WorkAggregationRequest.Languages),
+        aggregationRequests =
+          List(WorkAggregationRequest.Format, WorkAggregationRequest.Languages),
         filters = List(formatFilter),
         requestToAggregation = requestToAggregation,
         filterToQuery = filterToQuery
@@ -141,7 +145,8 @@ class FiltersAndAggregationsBuilderTest extends AnyFunSpec with Matchers {
     }
   }
 
-  private def requestToAggregation(request: WorkAggregationRequest): Aggregation =
+  private def requestToAggregation(
+    request: WorkAggregationRequest): Aggregation =
     MockAggregation("cabbage", request)
 
   private def filterToQuery(filter: WorkFilter): Query = MockQuery(filter)

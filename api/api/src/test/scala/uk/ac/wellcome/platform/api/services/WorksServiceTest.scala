@@ -331,8 +331,7 @@ class WorksServiceTest
     expectedWorks: Seq[Work[Indexed]],
     expectedTotalResults: Int,
     expectedAggregations: Option[WorkAggregations] = None,
-    worksSearchOptions: WorkSearchOptions =
-      createWorksSearchOptions
+    worksSearchOptions: WorkSearchOptions = createWorksSearchOptions
   ): Assertion =
     assertResultIsCorrect(
       worksService.listOrSearchWorks
