@@ -101,9 +101,10 @@ class WorkFiltersAndAggregationsBuilder(
   val filters: List[WorkFilter],
   val requestToAggregation: WorkAggregationRequest => Aggregation,
   val filterToQuery: WorkFilter => Query
-) extends FiltersAndAggregationsBuilder[WorkFilter, WorkAggregationRequest]{
+) extends FiltersAndAggregationsBuilder[WorkFilter, WorkAggregationRequest] {
 
-  override def pairedAggregationRequest(filter: WorkFilter): Option[WorkAggregationRequest] =
+  override def pairedAggregationRequest(
+    filter: WorkFilter): Option[WorkAggregationRequest] =
     filter match {
       case _: FormatFilter       => Some(WorkAggregationRequest.Format)
       case _: LanguagesFilter    => Some(WorkAggregationRequest.Languages)
@@ -124,9 +125,10 @@ class ImageFiltersAndAggregationsBuilder(
   val filterToQuery: ImageFilter => Query
 ) extends FiltersAndAggregationsBuilder[ImageFilter, ImageAggregationRequest] {
 
-  override def pairedAggregationRequest(filter: ImageFilter): Option[ImageAggregationRequest] =
+  override def pairedAggregationRequest(
+    filter: ImageFilter): Option[ImageAggregationRequest] =
     filter match {
       case _: LicenseFilter => Some(ImageAggregationRequest.License)
-      case _ => None
+      case _                => None
     }
 }

@@ -19,7 +19,9 @@ class ImagesAggregationsTest extends ApiImagesTestBase {
       case (imagesIndex, routes) =>
         insertImagesIntoElasticsearch(imagesIndex, images: _*)
 
-        assertJsonResponse(routes, s"/$apiPrefix/images?aggregations=locations.license") {
+        assertJsonResponse(
+          routes,
+          s"/$apiPrefix/images?aggregations=locations.license") {
           Status.OK -> s"""
             {
               ${resultList(apiPrefix, totalResults = images.size)},
@@ -43,9 +45,9 @@ class ImagesAggregationsTest extends ApiImagesTestBase {
               },
               "results": [
                 ${images
-                    .sortBy { _.state.canonicalId }
-                    .map(imageResponse)
-                    .mkString(",")}
+            .sortBy { _.state.canonicalId }
+            .map(imageResponse)
+            .mkString(",")}
               ]
             }
           """

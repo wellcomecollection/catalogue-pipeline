@@ -20,7 +20,8 @@ case class DisplayImageAggregations(
 
 object DisplayImageAggregations {
 
-  implicit def encoder: Encoder[DisplayImageAggregations] = deriveConfiguredEncoder
+  implicit def encoder: Encoder[DisplayImageAggregations] =
+    deriveConfiguredEncoder
 
   def apply(aggs: ImageAggregations): DisplayImageAggregations =
     DisplayImageAggregations(

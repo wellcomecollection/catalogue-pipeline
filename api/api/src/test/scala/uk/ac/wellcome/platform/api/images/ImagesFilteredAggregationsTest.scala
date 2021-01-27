@@ -24,7 +24,9 @@ class ImagesFilteredAggregationsTest extends ApiImagesTestBase {
         insertImagesIntoElasticsearch(imagesIndex, images: _*)
         val expectedImages = ccByImages ++ pdmImages
 
-        assertJsonResponse(routes, s"/$apiPrefix/images?aggregations=locations.license&locations.license=cc-by,pdm") {
+        assertJsonResponse(
+          routes,
+          s"/$apiPrefix/images?aggregations=locations.license&locations.license=cc-by,pdm") {
           Status.OK -> s"""
             {
               ${resultList(apiPrefix, totalResults = expectedImages.size)},
