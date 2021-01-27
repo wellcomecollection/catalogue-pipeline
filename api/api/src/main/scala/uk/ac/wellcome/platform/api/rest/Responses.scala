@@ -75,11 +75,11 @@ object DisplayResultList {
         )
     }
 
-  def apply(resultList: ResultList[Image[ImageState.Indexed], Unit],
+  def apply(resultList: ResultList[Image[ImageState.Indexed], ImageAggregations],
             searchOptions: SearchOptions[_, _, _],
             includes: MultipleImagesIncludes,
             requestUri: Uri,
-            contextUri: String): DisplayResultList[DisplayImage, Unit] =
+            contextUri: String): DisplayResultList[DisplayImage, DisplayImageAggregations] =
     PaginationResponse(resultList, searchOptions, requestUri) match {
       case PaginationResponse(totalPages, prevPage, nextPage) =>
         DisplayResultList(
@@ -90,7 +90,7 @@ object DisplayResultList {
           results = resultList.results.map(DisplayImage(_, includes)),
           prevPage = prevPage,
           nextPage = nextPage,
-          aggregations = resultList.aggregations
+          aggregations = resultList.aggregations.map(DisplayImageAggregations.apply)
         )
     }
 }
