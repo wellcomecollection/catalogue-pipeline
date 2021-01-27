@@ -13,8 +13,6 @@ import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.models.Implicits._
 import WorkState.Indexed
 
-case class WorkQuery(query: String, queryType: SearchQueryType)
-
 class WorksService(searchService: ElasticsearchService)(
   implicit ec: ExecutionContext) {
 
