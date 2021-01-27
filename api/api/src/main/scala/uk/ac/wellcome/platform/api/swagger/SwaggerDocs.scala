@@ -247,8 +247,7 @@ trait MultipleImagesSwagger {
         description =
           "What aggregated data in correlation to the results should we return.",
         schema = new Schema(
-          allowableValues = Array(
-            "locations.license")
+          allowableValues = Array("locations.license")
         ),
         required = false
       ),
@@ -633,12 +632,12 @@ trait MultipleWorksSwagger {
     description = "A paginated list of works."
   )
   class DisplayImagesResultList
-    extends DisplayResultList[DisplayImage, DisplayImageAggregations](
-      context = "",
-      pageSize = 0,
-      totalPages = 0,
-      totalResults = 0,
-      results = Nil)
+      extends DisplayResultList[DisplayImage, DisplayImageAggregations](
+        context = "",
+        pageSize = 0,
+        totalPages = 0,
+        totalResults = 0,
+        results = Nil)
 
   val i = new DisplayImagesResultList
 }
