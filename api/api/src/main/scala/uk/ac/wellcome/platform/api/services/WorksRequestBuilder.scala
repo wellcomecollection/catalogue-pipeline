@@ -66,6 +66,12 @@ object WorksRequestBuilder
         .field("data.subjects.label.keyword")
         .minDocCount(0)
 
+    case AggregationRequest.Contributor =>
+      TermsAggregation("contributors")
+        .size(20)
+        .field("state.derivedData.contributorAgents")
+        .minDocCount(0)
+
     case AggregationRequest.Languages =>
       TermsAggregation("languages")
         .size(200)
@@ -146,13 +152,15 @@ object WorksRequestBuilder
       case LanguagesFilter(languageIds) =>
         termsQuery(field = "data.languages.id", values = languageIds)
       case GenreFilter(genreQuery) =>
-        simpleStringQuery(genreQuery)
-          .field("data.genres.label")
-          .defaultOperator("AND")
+        searchQueryFilter("data.genres.label", genreQuery)
       case SubjectFilter(subjectQuery) =>
-        simpleStringQuery(subjectQuery)
-          .field("data.subjects.label")
-          .defaultOperator("AND")
+        searchQueryFilter("data.subjects.label", subjectQuery)
+      case ContributorsFilter(contributorQueries) =>
+        should(
+          contributorQueries.map { query =>
+            searchQueryFilter("data.contributors.agent.label", query)
+          }
+        )
       case LicenseFilter(licenseIds) =>
         termsQuery(
           field = "data.items.locations.license.id",
@@ -183,4 +191,9 @@ object WorksRequestBuilder
       case PartOfFilter(id) =>
         termQuery(field = "state.relations.ancestors.id", value = id)
     }
+
+  private def searchQueryFilter(field: String, query: String) =
+    simpleStringQuery(query)
+      .field(field)
+      .defaultOperator("AND")
 }

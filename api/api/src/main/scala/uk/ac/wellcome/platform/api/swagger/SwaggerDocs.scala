@@ -397,6 +397,7 @@ trait MultipleWorksSwagger {
             "genres",
             "production.dates",
             "subjects",
+            "contributors",
             "license",
             "languages",
             "locationType",
@@ -419,6 +420,12 @@ trait MultipleWorksSwagger {
         name = "subjects.label",
         in = ParameterIn.QUERY,
         description = "Filter the work by subject.",
+        required = false
+      ),
+      new Parameter(
+        name = "contributors.agent.label",
+        in = ParameterIn.QUERY,
+        description = "Filter the work by contributor.",
         required = false
       ),
       new Parameter(

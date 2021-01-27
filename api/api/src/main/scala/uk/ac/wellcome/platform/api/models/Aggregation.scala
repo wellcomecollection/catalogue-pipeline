@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.api.models
 
+import scala.util.{Failure, Try}
 import java.time.{Instant, LocalDateTime, ZoneOffset}
-
 import com.sksamuel.elastic4s.requests.searches.aggs.responses.{
   Aggregations => Elastic4sAggregations
 }
@@ -9,19 +9,20 @@ import com.sksamuel.elastic4s.requests.searches.SearchResponse
 import grizzled.slf4j.Logging
 import io.circe.generic.extras.JsonKey
 import io.circe.{Decoder, Json}
+
 import uk.ac.wellcome.display.models.LocationTypeQuery
-import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.json.JsonUtil.fromJson
 import uk.ac.wellcome.models.marc.MarcLanguageCodeList
 import uk.ac.wellcome.models.work.internal._
-
-import scala.util.{Failure, Try}
+import IdState.Minted
 
 case class Aggregations(
   format: Option[Aggregation[Format]] = None,
-  genres: Option[Aggregation[Genre[IdState.Minted]]] = None,
-  productionDates: Option[Aggregation[Period[IdState.Minted]]] = None,
+  genres: Option[Aggregation[Genre[Minted]]] = None,
+  productionDates: Option[Aggregation[Period[Minted]]] = None,
   languages: Option[Aggregation[Language]] = None,
-  subjects: Option[Aggregation[Subject[IdState.Minted]]] = None,
+  subjects: Option[Aggregation[Subject[Minted]]] = None,
+  contributors: Option[Aggregation[Contributor[Minted]]] = None,
   license: Option[Aggregation[License]] = None,
   locationType: Option[Aggregation[LocationTypeQuery]] = None,
 )
@@ -34,12 +35,14 @@ object Aggregations extends Logging {
       Some(
         Aggregations(
           format = e4sAggregations.decodeAgg[Format]("format"),
-          genres = e4sAggregations.decodeAgg[Genre[IdState.Minted]]("genres"),
+          genres = e4sAggregations.decodeAgg[Genre[Minted]]("genres"),
           productionDates = e4sAggregations
-            .decodeAgg[Period[IdState.Minted]]("productionDates"),
+            .decodeAgg[Period[Minted]]("productionDates"),
           languages = e4sAggregations.decodeAgg[Language]("languages"),
           subjects = e4sAggregations
-            .decodeAgg[Subject[IdState.Minted]]("subjects"),
+            .decodeAgg[Subject[Minted]]("subjects"),
+          contributors = e4sAggregations
+            .decodeAgg[Contributor[Minted]]("contributors"),
           license = e4sAggregations.decodeAgg[License]("license"),
           locationType =
             e4sAggregations.decodeAgg[LocationTypeQuery]("locationType")
@@ -50,7 +53,7 @@ object Aggregations extends Logging {
   }
 
   // Elasticsearch encodes the date key as milliseconds since the epoch
-  implicit val decodePeriod: Decoder[Period[IdState.Minted]] =
+  implicit val decodePeriod: Decoder[Period[Minted]] =
     Decoder.decodeLong.emap { epochMilli =>
       Try { Instant.ofEpochMilli(epochMilli) }
         .map { instant =>
@@ -87,14 +90,29 @@ object Aggregations extends Logging {
       }
     }
 
-  implicit val decodeGenreFromLabel: Decoder[Genre[IdState.Minted]] =
+  implicit val decodeGenreFromLabel: Decoder[Genre[Minted]] =
     Decoder.decodeString.map { str =>
       Genre(label = str)
     }
 
-  implicit val decodeSubjectFromLabel: Decoder[Subject[IdState.Minted]] =
+  implicit val decodeSubjectFromLabel: Decoder[Subject[Minted]] =
     Decoder.decodeString.map { str =>
       Subject(label = str, concepts = Nil)
+    }
+
+  implicit val decodeContributorFromLabel: Decoder[Contributor[Minted]] =
+    Decoder.decodeString.emap { str =>
+      val splitIdx = str.indexOf(':')
+      val ontologyType = str.slice(0, splitIdx)
+      val label = str.slice(splitIdx + 1, Int.MaxValue)
+      val agent = ontologyType match {
+        case "Agent"        => Right(Agent(label = label))
+        case "Person"       => Right(Person(label = label))
+        case "Organisation" => Right(Organisation(label = label))
+        case "Meeting"      => Right(Meeting(label = label))
+        case ontologyType   => Left(s"Illegal agent type: $ontologyType")
+      }
+      agent.map(agent => Contributor(agent = agent, roles = Nil))
     }
 
   implicit val decodeLocationTypeFromLabel: Decoder[LocationTypeQuery] =
@@ -141,6 +159,8 @@ object Aggregations extends Logging {
 // If the buckets have a subaggregation named "filtered", then we use the
 // count from there; otherwise we use the count from the root of the bucket.
 object AggregationMapping {
+
+  import uk.ac.wellcome.json.JsonUtil._
 
   private case class Result(buckets: Seq[Bucket])
 

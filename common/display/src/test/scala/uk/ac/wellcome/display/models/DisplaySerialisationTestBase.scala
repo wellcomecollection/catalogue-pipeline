@@ -209,7 +209,7 @@ trait DisplaySerialisationTestBase {
         "roles": ${toJson(contributor.roles).get},
         "type": "Contributor"
       }
-    """.stripMargin
+    """
 
   def contributors(contributors: List[Contributor[IdState.Minted]]) =
     contributors.map(contributor).mkString(",")
@@ -226,7 +226,7 @@ trait DisplaySerialisationTestBase {
          "id": "${image.id.canonicalId}",
          "type": "Image"
        }
-    """.stripMargin
+    """
 
   def workImageIncludes(images: List[ImageData[IdState.Identified]]) =
     images.map(workImageInclude).mkString(",")
@@ -240,7 +240,7 @@ trait DisplaySerialisationTestBase {
         "places": [${event.places.map(place).mkString(",")}],
         "type": "ProductionEvent"
       }
-    """.stripMargin
+    """
 
   def format(fmt: Format): String =
     s"""
@@ -249,16 +249,16 @@ trait DisplaySerialisationTestBase {
         "label": "${fmt.label}",
         "type": "Format"
       }
-    """.stripMargin
+    """
 
   def language(lang: Language): String =
     s"""
-       |{
-       |  "id": "${lang.id}",
-       |  "label": "${lang.label}",
-       |  "type": "Language"
-       |}
-     """.stripMargin
+       {
+         "id": "${lang.id}",
+         "label": "${lang.label}",
+         "type": "Language"
+       }
+     """
 
   def license(license: License) =
     s"""{
@@ -281,10 +281,10 @@ trait DisplaySerialisationTestBase {
 
   def locationType(locType: LocationType): String =
     s"""{
-       |  "id": "${locType.id}",
-       |  "label": "${locType.label}",
-       |  "type": "LocationType"
-       |}
-     """.stripMargin
+         "id": "${locType.id}",
+         "label": "${locType.label}",
+         "type": "LocationType"
+       }
+     """ stripMargin
 
 }
