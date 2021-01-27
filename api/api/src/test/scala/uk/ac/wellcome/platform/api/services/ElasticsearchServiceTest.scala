@@ -363,7 +363,7 @@ class ElasticsearchServiceTest
 
     insertIntoElasticsearch(index, works: _*)
 
-    works.sortBy(_.state.canonicalId).toList
+    works.sortBy(_.state.canonicalId)
   }
 
   private def searchResults(
