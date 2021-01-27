@@ -6,14 +6,14 @@ import io.circe.generic.extras.JsonKey
 import io.swagger.v3.oas.annotations.media.Schema
 import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.display.json.DisplayJsonUtil._
+import uk.ac.wellcome.models.work.internal.IdState.Minted
 import uk.ac.wellcome.models.work.internal._
-import IdState.Minted
 
 @Schema(
   name = "Aggregations",
   description = "A map containing the requested aggregations."
 )
-case class DisplayAggregations(
+case class DisplayWorkAggregations(
   @Schema(
     description = "Format aggregation on a set of results."
   ) workType: Option[DisplayAggregation[DisplayFormat]],
@@ -39,40 +39,14 @@ case class DisplayAggregations(
   @Schema(
     description = "Location type aggregation on a set of results."
   ) locationType: Option[DisplayAggregation[DisplayLocationTypeAggregation]],
-  @JsonKey("type") @Schema(name = "type") ontologyType: String = "Aggregations"
-)
+  @JsonKey("type") @Schema(name = "type") ontologyType: String = "Aggregations")
 
-@Schema(
-  name = "Aggregation",
-  description = "An aggregation over the results."
-)
-case class DisplayAggregation[T](
-  @Schema(description = "An aggregation on a set of results") buckets: List[
-    DisplayAggregationBucket[T]],
-  @JsonKey("type") @Schema(name = "type") ontologyType: String = "Aggregation"
-)
+object DisplayWorkAggregations {
 
-@Schema(
-  name = "AggregationBucket",
-  description = "An individual bucket within an aggregation."
-)
-case class DisplayAggregationBucket[T](
-  @Schema(
-    description = "The data that this aggregation is of."
-  ) data: T,
-  @Schema(
-    description =
-      "The count of how often this data occurs in this set of results."
-  ) count: Int,
-  @JsonKey("type") @Schema(name = "type") ontologyType: String =
-    "AggregationBucket")
+  implicit def encoder: Encoder[DisplayWorkAggregations] = deriveConfiguredEncoder
 
-object DisplayAggregations {
-
-  implicit def encoder: Encoder[DisplayAggregations] = deriveConfiguredEncoder
-
-  def apply(aggs: WorkAggregations): DisplayAggregations =
-    DisplayAggregations(
+  def apply(aggs: WorkAggregations): DisplayWorkAggregations =
+    DisplayWorkAggregations(
       workType = displayAggregation(aggs.format, DisplayFormat.apply),
       productionDates =
         displayAggregation(aggs.productionDates, DisplayPeriod.apply),

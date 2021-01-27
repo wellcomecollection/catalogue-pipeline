@@ -59,7 +59,7 @@ object DisplayResultList {
     searchOptions: SearchOptions[_, _, _],
     includes: WorksIncludes,
     requestUri: Uri,
-    contextUri: String): DisplayResultList[DisplayWork, DisplayAggregations] =
+    contextUri: String): DisplayResultList[DisplayWork, DisplayWorkAggregations] =
     PaginationResponse(resultList, searchOptions, requestUri) match {
       case PaginationResponse(totalPages, prevPage, nextPage) =>
         DisplayResultList(
@@ -70,7 +70,7 @@ object DisplayResultList {
           results = resultList.results.map(DisplayWork(_, includes)),
           prevPage = prevPage,
           nextPage = nextPage,
-          aggregations = resultList.aggregations.map(DisplayAggregations.apply)
+          aggregations = resultList.aggregations.map(DisplayWorkAggregations.apply)
         )
     }
 
