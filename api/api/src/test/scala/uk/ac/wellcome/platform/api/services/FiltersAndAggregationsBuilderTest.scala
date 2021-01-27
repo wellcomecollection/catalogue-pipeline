@@ -13,17 +13,15 @@ import uk.ac.wellcome.platform.api.models._
 
 class FiltersAndAggregationsBuilderTest extends AnyFunSpec with Matchers {
 
-  // TODO: Use keyword arguments
-
   describe("filter discrimination") {
     it("separates paired and unpaired filters") {
       val formatFilter = FormatFilter(Seq("bananas"))
       val languagesFilter = LanguagesFilter(Seq("eng"))
       val sut = new FiltersAndAggregationsBuilder(
-        List(WorkAggregationRequest.Format, WorkAggregationRequest.License),
-        List(formatFilter, languagesFilter, VisibleWorkFilter),
-        requestToAggregation,
-        filterToQuery
+        aggregationRequests = List(WorkAggregationRequest.Format, WorkAggregationRequest.License),
+        filters = List(formatFilter, languagesFilter, VisibleWorkFilter),
+        requestToAggregation = requestToAggregation,
+        filterToQuery = filterToQuery
       )
 
       sut.pairedFilters should contain only formatFilter
@@ -34,10 +32,10 @@ class FiltersAndAggregationsBuilderTest extends AnyFunSpec with Matchers {
       val formatFilter = FormatFilter(Seq("bananas"))
       val languagesFilter = LanguagesFilter(Seq("eng"))
       val sut = new FiltersAndAggregationsBuilder(
-        List(WorkAggregationRequest.License),
-        List(formatFilter, languagesFilter, VisibleWorkFilter),
-        requestToAggregation,
-        filterToQuery
+        aggregationRequests = List(WorkAggregationRequest.License),
+        filters = List(formatFilter, languagesFilter, VisibleWorkFilter),
+        requestToAggregation = requestToAggregation,
+        filterToQuery = filterToQuery
       )
 
       sut.pairedFilters should have length 0
@@ -48,10 +46,10 @@ class FiltersAndAggregationsBuilderTest extends AnyFunSpec with Matchers {
       val formatFilter = FormatFilter(Seq("bananas"))
       val languagesFilter = LanguagesFilter(Seq("en"))
       val sut = new FiltersAndAggregationsBuilder(
-        List(WorkAggregationRequest.Format, WorkAggregationRequest.Languages),
-        List(formatFilter, languagesFilter),
-        requestToAggregation,
-        filterToQuery
+        aggregationRequests = List(WorkAggregationRequest.Format, WorkAggregationRequest.Languages),
+        filters = List(formatFilter, languagesFilter),
+        requestToAggregation = requestToAggregation,
+        filterToQuery = filterToQuery
       )
 
       sut.pairedFilters should contain only (formatFilter, languagesFilter)
@@ -64,10 +62,10 @@ class FiltersAndAggregationsBuilderTest extends AnyFunSpec with Matchers {
       val formatFilter = FormatFilter(Seq("bananas"))
       val languagesFilter = LanguagesFilter(Seq("en"))
       val sut = new FiltersAndAggregationsBuilder(
-        List(WorkAggregationRequest.Format, WorkAggregationRequest.Languages),
-        List(formatFilter, languagesFilter),
-        requestToAggregation,
-        filterToQuery
+        aggregationRequests = List(WorkAggregationRequest.Format, WorkAggregationRequest.Languages),
+        filters = List(formatFilter, languagesFilter),
+        requestToAggregation = requestToAggregation,
+        filterToQuery = filterToQuery
       )
 
       sut.filteredAggregations should have length 2
@@ -96,10 +94,10 @@ class FiltersAndAggregationsBuilderTest extends AnyFunSpec with Matchers {
     it("applies paired filters to non-paired aggregations") {
       val formatFilter = FormatFilter(Seq("bananas"))
       val sut = new FiltersAndAggregationsBuilder(
-        List(WorkAggregationRequest.Format, WorkAggregationRequest.Languages),
-        List(formatFilter),
-        requestToAggregation,
-        filterToQuery
+        aggregationRequests = List(WorkAggregationRequest.Format, WorkAggregationRequest.Languages),
+        filters = List(formatFilter),
+        requestToAggregation = requestToAggregation,
+        filterToQuery = filterToQuery
       )
 
       sut.filteredAggregations should have length 2
@@ -120,13 +118,13 @@ class FiltersAndAggregationsBuilderTest extends AnyFunSpec with Matchers {
       val languagesFilter = LanguagesFilter(Seq("en"))
       val genreFilter = GenreFilter("durian")
       val sut = new FiltersAndAggregationsBuilder(
-        List(
+        aggregationRequests = List(
           WorkAggregationRequest.Format,
           WorkAggregationRequest.Languages,
           WorkAggregationRequest.Genre),
-        List(formatFilter, languagesFilter, genreFilter),
-        requestToAggregation,
-        filterToQuery
+        filters = List(formatFilter, languagesFilter, genreFilter),
+        requestToAggregation = requestToAggregation,
+        filterToQuery = filterToQuery
       )
 
       val agg =
