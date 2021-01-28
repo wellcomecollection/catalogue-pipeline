@@ -9,24 +9,30 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.work.internal.WorkState.{Denormalised, Merged}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.pipeline_storage.PipelineStorageStream._
-import uk.ac.wellcome.pipeline_storage.{Indexable, PipelineStorageStream, Retriever}
+import uk.ac.wellcome.pipeline_storage.{
+  Indexable,
+  PipelineStorageStream,
+  Retriever
+}
 import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class RouterWorkerService[MsgDestination](
-                                           pipelineStream: PipelineStorageStream[NotificationMessage,
-    Work[Denormalised],
-    MsgDestination],
+  pipelineStream: PipelineStorageStream[NotificationMessage,
+                                        Work[Denormalised],
+                                        MsgDestination],
   pathsMsgSender: MessageSender[MsgDestination],
   workRetriever: Retriever[Work[Merged]],
 )(implicit ec: ExecutionContext, indexable: Indexable[Work[Denormalised]])
     extends Runnable {
   def run(): Future[Done] = {
-    pipelineStream.run(this.getClass.getSimpleName,
+    pipelineStream.run(
+      this.getClass.getSimpleName,
       Flow[(Message, NotificationMessage)]
-      .via(batchRetrieveFlow(pipelineStream.config, workRetriever))
-      .via(processFlow(pipelineStream.config, item => processMessage(item))))
+        .via(batchRetrieveFlow(pipelineStream.config, workRetriever))
+        .via(processFlow(pipelineStream.config, item => processMessage(item)))
+    )
   }
 
   private def processMessage(

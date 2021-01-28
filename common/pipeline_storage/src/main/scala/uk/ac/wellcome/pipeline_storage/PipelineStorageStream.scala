@@ -22,8 +22,8 @@ case class Bundle[T](message: Message, item: T, numberOfItems: Int)
 class PipelineStorageStream[In, Out, MsgDestination](
   messageStream: SQSStream[In],
   indexer: Indexer[Out],
-  messageSender: MessageSender[MsgDestination])(val config: PipelineStorageConfig)(
-  implicit ec: ExecutionContext)
+  messageSender: MessageSender[MsgDestination])(
+  val config: PipelineStorageConfig)(implicit ec: ExecutionContext)
     extends Logging {
 
   import PipelineStorageStream._
