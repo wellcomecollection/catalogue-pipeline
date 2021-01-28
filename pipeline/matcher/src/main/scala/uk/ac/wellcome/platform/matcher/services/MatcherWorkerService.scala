@@ -29,8 +29,8 @@ class MatcherWorkerService[MsgDestination](
     msgStream.runStream(this.getClass.getSimpleName, source =>
       source
         .via(batchRetrieveFlow(config, workLinksRetriever))
-        .mapAsync(config.parallelism){ case (message, bundleWorkLinks) =>
-      processMessage(bundleWorkLinks.item).map(_ => message)
+        .mapAsync(config.parallelism){ case (message, item) =>
+      processMessage(item).map(_ => message)
         }
     )
 
