@@ -363,12 +363,10 @@ class ElasticsearchServiceTest
 
     insertIntoElasticsearch(index, works: _*)
 
-    works.sortBy(_.state.canonicalId).toList
+    works.sortBy(_.state.canonicalId)
   }
 
-  private def searchResults(
-    index: Index,
-    searchOptions: SearchOptions[WorkFilter, WorkMustQuery]) = {
+  private def searchResults(index: Index, searchOptions: WorkSearchOptions) = {
     val searchResponseFuture =
       searchService.executeSearch(searchOptions, WorksRequestBuilder, index)
     whenReady(searchResponseFuture) { response =>
@@ -378,8 +376,7 @@ class ElasticsearchServiceTest
 
   private def assertResultsAreCorrect(
     index: Index,
-    searchOptions: SearchOptions[WorkFilter, WorkMustQuery] =
-      createWorksSearchOptions,
+    searchOptions: WorkSearchOptions = createWorksSearchOptions,
     expectedWorks: List[Work.Visible[Indexed]],
     scored: Option[Boolean] = None) = {
     searchResults(index, searchOptions) should contain theSameElementsAs expectedWorks

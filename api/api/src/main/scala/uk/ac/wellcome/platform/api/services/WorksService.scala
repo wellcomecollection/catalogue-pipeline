@@ -13,8 +13,6 @@ import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.models.Implicits._
 import WorkState.Indexed
 
-case class WorkQuery(query: String, queryType: SearchQueryType)
-
 class WorksService(searchService: ElasticsearchService)(
   implicit ec: ExecutionContext) {
 
@@ -30,10 +28,8 @@ class WorksService(searchService: ElasticsearchService)(
         }
       }
 
-  def listOrSearchWorks(
-    index: Index,
-    searchOptions: SearchOptions[WorkFilter, WorkMustQuery]): Future[
-    Either[ElasticError, ResultList[Work.Visible[Indexed], Aggregations]]] =
+  def listOrSearchWorks(index: Index, searchOptions: WorkSearchOptions): Future[
+    Either[ElasticError, ResultList[Work.Visible[Indexed], WorkAggregations]]] =
     searchService
       .executeSearch(
         searchOptions = searchOptions,
@@ -43,11 +39,11 @@ class WorksService(searchService: ElasticsearchService)(
       .map { _.map(createResultList) }
 
   private def createResultList(searchResponse: SearchResponse)
-    : ResultList[Work.Visible[Indexed], Aggregations] = {
+    : ResultList[Work.Visible[Indexed], WorkAggregations] = {
     ResultList(
       results = searchResponseToWorks(searchResponse),
       totalResults = searchResponse.totalHits.toInt,
-      aggregations = searchResponseToAggregationResults(searchResponse)
+      aggregations = WorkAggregations(searchResponse)
     )
   }
 
@@ -56,11 +52,6 @@ class WorksService(searchService: ElasticsearchService)(
     searchResponse.hits.hits.map { hit =>
       deserialize[Work.Visible[Indexed]](hit)
     }.toList
-
-  private def searchResponseToAggregationResults(
-    searchResponse: SearchResponse): Option[Aggregations] = {
-    Aggregations(searchResponse)
-  }
 
   private def deserialize[T](hit: Hit)(implicit decoder: Decoder[T]): T =
     hit.safeTo[T] match {

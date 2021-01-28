@@ -608,7 +608,7 @@ trait MultipleWorksSwagger {
     description = "A paginated list of works."
   )
   class DisplayWorksResultList
-      extends DisplayResultList[DisplayWork, DisplayAggregations](
+      extends DisplayResultList[DisplayWork, DisplayWorkAggregations](
         context = "",
         pageSize = 0,
         totalPages = 0,
