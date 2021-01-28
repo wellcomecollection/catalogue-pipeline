@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
+import grizzled.slf4j.Logging
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.sierra.exceptions.SierraTransformerException
 import uk.ac.wellcome.platform.transformer.sierra.source.{
@@ -10,7 +11,7 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
 }
 import uk.ac.wellcome.platform.transformer.sierra.source.sierra.SierraSourceLocation
 
-trait SierraLocation extends SierraQueryOps {
+trait SierraLocation extends SierraQueryOps with Logging {
 
   def getPhysicalLocation(
     itemData: SierraItemData,
@@ -57,7 +58,7 @@ trait SierraLocation extends SierraQueryOps {
           .map { _.content.trim }
 
         AccessCondition(
-          status = getAccessStatus(varfield),
+          status = getAccessStatus(varfield, terms),
           terms = terms,
           to = varfield.subfieldsWithTag("g").contents.headOption
         )
@@ -74,18 +75,44 @@ trait SierraLocation extends SierraQueryOps {
   //  - look in subfield ǂf for the standardised terminology
   //
   // See https://www.loc.gov/marc/bibliographic/bd506.html
-  private def getAccessStatus(varfield: VarField): Option[AccessStatus] =
-    if (varfield.indicator1.contains("0"))
-      Some(AccessStatus.Open)
-    else
-      varfield
-        .subfieldsWithTag("f")
-        .contents
-        .headOption
-        .map { str =>
-          AccessStatus(str) match {
-            case Left(err)     => throw err
-            case Right(status) => status
+  private def getAccessStatus(varfield: VarField, terms: Option[String]): Option[AccessStatus] = {
+
+    // If the first indicator is 0, then there are no restrictions
+    val indicator0 =
+      if (varfield.indicator1.contains("0"))
+        Some(AccessStatus.Open)
+      else
+        None
+
+    // Look in subfield ǂf for the standardised terminology
+    val subfieldF =
+      varfield.subfieldsWithTag("f").contents.headOption
+        .flatMap { contents =>
+          AccessStatus(contents) match {
+            case Right(status) => Some(status)
+            case Left(err) =>
+              warn(s"Unable to parse access status from subfield ǂf: $contents")
+              None
           }
         }
+
+    // Look at the terms for the standardised terminology
+    val termsStatus = terms.map { AccessStatus(_) }.collect { case Right(status) => status }
+
+    // Finally, we look at all three fields together.  If the data is inconsistent
+    // we should drop a warning and not set an access status, rather than set one that's
+    // wrong.  This presumes that:
+    //
+    //  1. The data in the "terms" field is more likely to be accurate
+    //  2. Sins of omission (skipping the field) are better than sins of commission
+    //     (e.g. claiming an Item is open when it's actually restricted)
+    //
+    Seq(indicator0, subfieldF, termsStatus).flatten.distinct match {
+      case Nil => None
+      case Seq(status) => Some(status)
+      case multiple =>
+        warn(s"Multiple, conflicting access statuses: $multiple")
+        None
+    }
+  }
 }
