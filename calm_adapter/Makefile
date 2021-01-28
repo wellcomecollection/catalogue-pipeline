@@ -12,6 +12,6 @@ SBT_DOCKER_LIBRARIES =
 SBT_NO_DOCKER_LIBRARIES =
 
 PYTHON_APPS =
-LAMBDAS = calm_window_generator
+LAMBDAS = calm_window_generator calm_deletion_check_initiator
 
 $(val $(call stack_setup))
