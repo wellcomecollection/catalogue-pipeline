@@ -15,12 +15,9 @@ import uk.ac.wellcome.json.JsonUtil
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
+import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
-import uk.ac.wellcome.pipeline_storage.fixtures.{
-  ElasticIndexerFixtures,
-  PipelineStorageStreamFixtures,
-  SampleDocument
-}
+import uk.ac.wellcome.pipeline_storage.fixtures.{ElasticIndexerFixtures, PipelineStorageStreamFixtures, SampleDocument}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -610,6 +607,53 @@ class PipelineStorageStreamTest
 
         whenReady(result) { res =>
           res shouldBe successfulBundles
+        }
+      }
+    }
+  }
+
+  describe("batchRetrieveFlow"){
+    it("retrieves multiple documents"){
+      val documents = (1 to 5).map(i=> (i.toString, SampleDocument(1, i.toString, 1.toString)))
+      val retriever = new MemoryRetriever[SampleDocument](collection.mutable.Map(documents:_*))
+
+          withActorSystem { implicit ac =>
+          val expectedResult = documents.map{ case (k, doc)  =>
+            (Message.builder().messageId(k).body(k).build(), doc)}
+            val messages = expectedResult.map {case (message, _) => (message, NotificationMessage(message.body()))}
+
+
+          val result = Source(messages)
+            .via(PipelineStorageStream
+              .batchRetrieveFlow(pipelineStorageConfig, retriever))
+            .runWith(Sink.seq)
+
+          whenReady(result) { res: Seq[(Message, SampleDocument)] =>
+            res shouldBe expectedResult
+          }
+        }
+      }
+
+    it("filters out documents that it fails to retrieve"){
+      val successfulDocuments = (1 to 3).map(i=> (i.toString, SampleDocument(1, i.toString, 1.toString)))
+      val retriever = new MemoryRetriever[SampleDocument](collection.mutable.Map(successfulDocuments:_*))
+      val failingDocuments = (4 to 5).map(i=> (i.toString, SampleDocument(1, i.toString, 1.toString)))
+      val documents = successfulDocuments ++ failingDocuments
+
+      withActorSystem { implicit ac =>
+        val messageDocsMap = documents.map{ case (k, doc)  =>
+          (Message.builder().messageId(k).body(k).build(), doc)}
+        val messages = messageDocsMap.map {case (message, _) => (message, NotificationMessage(message.body()))}
+        val expectedResult= messageDocsMap.filter{case (message, doc) => successfulDocuments.contains((message.body, doc)) }
+
+
+        val result = Source(messages)
+          .via(PipelineStorageStream
+            .batchRetrieveFlow(pipelineStorageConfig, retriever))
+          .runWith(Sink.seq)
+
+        whenReady(result) { res: Seq[(Message, SampleDocument)] =>
+          res shouldBe expectedResult
         }
       }
     }
