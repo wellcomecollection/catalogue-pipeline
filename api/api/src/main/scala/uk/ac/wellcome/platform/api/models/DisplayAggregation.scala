@@ -13,6 +13,19 @@ case class DisplayAggregation[T](
   @JsonKey("type") @Schema(name = "type") ontologyType: String = "Aggregation"
 )
 
+case object DisplayAggregation {
+  def apply[T, DisplayT](agg: Aggregation[T],
+                         display: T => DisplayT): DisplayAggregation[DisplayT] =
+    DisplayAggregation(
+      buckets = agg.buckets.map { bucket =>
+        DisplayAggregationBucket(
+          data = display(bucket.data),
+          count = bucket.count
+        )
+      }
+    )
+}
+
 @Schema(
   name = "AggregationBucket",
   description = "An individual bucket within an aggregation."

@@ -35,6 +35,7 @@ case class MultipleImagesParams(
   license: Option[LicenseFilter],
   color: Option[ColorMustQuery],
   include: Option[MultipleImagesIncludes],
+  aggregations: Option[List[ImageAggregationRequest]],
   _index: Option[String]
 ) extends QueryParams
     with Paginated {
@@ -44,6 +45,7 @@ case class MultipleImagesParams(
       searchQuery = query.map(SearchQuery(_)),
       filters = filters,
       mustQueries = mustQueries,
+      aggregations = aggregations.getOrElse(Nil),
       pageSize = pageSize.getOrElse(apiConfig.defaultPageSize),
       pageNumber = page.getOrElse(1)
     )
@@ -67,6 +69,7 @@ object MultipleImagesParams extends QueryParamsUtils {
         "locations.license".as[LicenseFilter].?,
         "color".as[ColorMustQuery].?,
         "include".as[MultipleImagesIncludes].?,
+        "aggregations".as[List[ImageAggregationRequest]].?,
         "_index".as[String].?
       )
     ).tflatMap { args =>
@@ -82,4 +85,9 @@ object MultipleImagesParams extends QueryParamsUtils {
       "source.contributors" -> ImageInclude.SourceContributors,
       "source.languages" -> ImageInclude.SourceLanguages,
     ).emap(values => Right(MultipleImagesIncludes(values: _*)))
+
+  implicit val aggregationsDecoder: Decoder[List[ImageAggregationRequest]] =
+    decodeOneOfCommaSeparated(
+      "locations.license" -> ImageAggregationRequest.License
+    )
 }

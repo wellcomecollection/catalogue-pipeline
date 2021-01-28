@@ -242,6 +242,16 @@ trait MultipleImagesSwagger {
         )
       ),
       new Parameter(
+        name = "aggregations",
+        in = ParameterIn.QUERY,
+        description =
+          "What aggregated data in correlation to the results should we return.",
+        schema = new Schema(
+          allowableValues = Array("locations.license")
+        ),
+        required = false
+      ),
+      new Parameter(
         name = "page",
         in = ParameterIn.QUERY,
         description = "The page to return from the result list",
@@ -614,5 +624,20 @@ trait MultipleWorksSwagger {
         totalPages = 0,
         totalResults = 0,
         results = Nil)
-  val _ = new DisplayWorksResultList
+
+  val w = new DisplayWorksResultList
+
+  @Schema(
+    name = "ImageResultList",
+    description = "A paginated list of works."
+  )
+  class DisplayImagesResultList
+      extends DisplayResultList[DisplayImage, DisplayImageAggregations](
+        context = "",
+        pageSize = 0,
+        totalPages = 0,
+        totalResults = 0,
+        results = Nil)
+
+  val i = new DisplayImagesResultList
 }

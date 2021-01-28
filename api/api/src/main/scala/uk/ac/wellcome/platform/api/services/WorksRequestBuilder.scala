@@ -31,7 +31,7 @@ object WorksRequestBuilder
 
   private def filteredAggregationBuilder(
     implicit searchOptions: WorkSearchOptions) =
-    new FiltersAndAggregationsBuilder(
+    new WorkFiltersAndAggregationsBuilder(
       aggregationRequests = searchOptions.aggregations,
       filters = searchOptions.filters,
       requestToAggregation = toAggregation,

@@ -7,8 +7,21 @@ import com.sksamuel.elastic4s.requests.searches.aggs.{
   FilterAggregation
 }
 import com.sksamuel.elastic4s.requests.searches.queries.Query
-import uk.ac.wellcome.display.models.WorkAggregationRequest
-import uk.ac.wellcome.platform.api.models._
+import uk.ac.wellcome.display.models.{
+  ImageAggregationRequest,
+  WorkAggregationRequest
+}
+import uk.ac.wellcome.platform.api.models.{
+  ContributorsFilter,
+  FormatFilter,
+  GenreFilter,
+  ImageFilter,
+  ItemLocationTypeFilter,
+  LanguagesFilter,
+  LicenseFilter,
+  SubjectFilter,
+  WorkFilter
+}
 
 import scala.collection.immutable._
 
@@ -28,15 +41,17 @@ import scala.collection.immutable._
   * - `pairedFilters`: a list of all of the given filters which are paired to one
   *   of the given aggregations. These can be used as the ES post-query filters.
   */
-class FiltersAndAggregationsBuilder(
-  aggregationRequests: List[WorkAggregationRequest],
-  filters: List[WorkFilter],
-  requestToAggregation: WorkAggregationRequest => Aggregation,
-  filterToQuery: WorkFilter => Query) {
+trait FiltersAndAggregationsBuilder[Filter, AggregationRequest] {
+  val aggregationRequests: List[AggregationRequest]
+  val filters: List[Filter]
+  val requestToAggregation: AggregationRequest => Aggregation
+  val filterToQuery: Filter => Query
 
-  lazy val unpairedFilters: List[WorkFilter] =
+  def pairedAggregationRequest(filter: Filter): Option[AggregationRequest]
+
+  lazy val unpairedFilters: List[Filter] =
     filterSets.getOrElse(FilterCategory.Unpaired, List())
-  lazy val pairedFilters: List[WorkFilter] =
+  lazy val pairedFilters: List[Filter] =
     filterSets.getOrElse(FilterCategory.Paired, List())
 
   lazy val filteredAggregations: List[AbstractAggregation] =
@@ -55,7 +70,7 @@ class FiltersAndAggregationsBuilder(
       }
     }
 
-  private lazy val filterSets: Map[FilterCategory, List[WorkFilter]] =
+  private lazy val filterSets: Map[FilterCategory, List[Filter]] =
     filters.groupBy {
       pairedAggregationRequest(_) match {
         case Some(aggregationRequest)
@@ -66,7 +81,7 @@ class FiltersAndAggregationsBuilder(
     }
 
   private def pairedFilter(
-    aggregationRequest: WorkAggregationRequest): Option[WorkFilter] =
+    aggregationRequest: AggregationRequest): Option[Filter] =
     pairedFilters.find {
       pairedAggregationRequest(_) match {
         case Some(agg) => agg == aggregationRequest
@@ -74,8 +89,21 @@ class FiltersAndAggregationsBuilder(
       }
     }
 
-  // This pattern matching defines the pairings of filters <-> aggregations
-  private def pairedAggregationRequest(
+  private sealed trait FilterCategory
+  private object FilterCategory {
+    case object Unpaired extends FilterCategory
+    case object Paired extends FilterCategory
+  }
+}
+
+class WorkFiltersAndAggregationsBuilder(
+  val aggregationRequests: List[WorkAggregationRequest],
+  val filters: List[WorkFilter],
+  val requestToAggregation: WorkAggregationRequest => Aggregation,
+  val filterToQuery: WorkFilter => Query
+) extends FiltersAndAggregationsBuilder[WorkFilter, WorkAggregationRequest] {
+
+  override def pairedAggregationRequest(
     filter: WorkFilter): Option[WorkAggregationRequest] =
     filter match {
       case _: FormatFilter       => Some(WorkAggregationRequest.Format)
@@ -88,10 +116,19 @@ class FiltersAndAggregationsBuilder(
         Some(WorkAggregationRequest.ItemLocationType)
       case _ => None
     }
+}
 
-  private sealed trait FilterCategory
-  private object FilterCategory {
-    case object Unpaired extends FilterCategory
-    case object Paired extends FilterCategory
-  }
+class ImageFiltersAndAggregationsBuilder(
+  val aggregationRequests: List[ImageAggregationRequest],
+  val filters: List[ImageFilter],
+  val requestToAggregation: ImageAggregationRequest => Aggregation,
+  val filterToQuery: ImageFilter => Query
+) extends FiltersAndAggregationsBuilder[ImageFilter, ImageAggregationRequest] {
+
+  override def pairedAggregationRequest(
+    filter: ImageFilter): Option[ImageAggregationRequest] =
+    filter match {
+      case _: LicenseFilter => Some(ImageAggregationRequest.License)
+      case _                => None
+    }
 }

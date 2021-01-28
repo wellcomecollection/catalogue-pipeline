@@ -266,6 +266,7 @@ class ApiSwaggerTest
         "PeriodAggregationBucket",
         "SubjectAggregationBucket",
         "LanguageAggregationBucket",
+        "LicenseAggregationBucket",
       )
     }
   }
