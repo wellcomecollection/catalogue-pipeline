@@ -26,10 +26,7 @@ class ElasticsearchServiceTest
     with ElasticsearchFixtures
     with SearchOptionsGenerators
     with ItemsGenerators
-    with SubjectGenerators
-    with GenreGenerators
-    with WorkGenerators
-    with ContributorGenerators {
+    with WorkGenerators {
 
   val searchService = new ElasticsearchService(elasticClient)
 

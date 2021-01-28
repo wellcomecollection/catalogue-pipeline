@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.id_minter.steps
 
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
 import io.circe.parser._
 import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.json.utils.JsonAssertions
@@ -12,7 +11,6 @@ import scala.util.{Failure, Success}
 
 class SourceIdentifierEmbedderTest
     extends AnyFunSpec
-    with IdentifiersGenerators
     with Matchers
     with JsonAssertions
     with SqlIdentifiersGenerators {
