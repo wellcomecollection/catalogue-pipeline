@@ -7,10 +7,10 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraItemData,
   SierraQueryOps
 }
-import uk.ac.wellcome.sierra_adapter.model.SierraItemNumber
+import uk.ac.wellcome.sierra_adapter.model.{SierraBibNumber, SierraItemNumber}
 
 case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
-    extends SierraDataTransformer
+    extends SierraIdentifiedDataTransformer
     with Logging
     with SierraLocation
     with SierraQueryOps {
@@ -23,8 +23,8 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
     * So the output is deterministic here we sort all items by the
     * sierra-identifier
     */
-  def apply(bibData: SierraBibData) =
-    getPhysicalItems(itemDataMap, bibData)
+  def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
+    getPhysicalItems(bibId, itemDataMap, bibData)
       .sortBy { item =>
         item.id match {
           case IdState.Unidentifiable          => None
@@ -33,6 +33,7 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
       }
 
   private def getPhysicalItems(
+    bibId: SierraBibNumber,
     sierraItemDataMap: Map[SierraItemNumber, SierraItemData],
     bibData: SierraBibData): List[Item[IdState.Unminted]] =
     sierraItemDataMap
@@ -41,18 +42,24 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
       }
       .map {
         case (itemId: SierraItemNumber, itemData: SierraItemData) =>
-          transformItemData(itemId, itemData, bibData)
+          transformItemData(
+            bibId = bibId,
+            itemId = itemId,
+            itemData = itemData,
+            bibData = bibData
+          )
       }
       .toList
 
   private def transformItemData(
+    bibId: SierraBibNumber,
     itemId: SierraItemNumber,
     itemData: SierraItemData,
     bibData: SierraBibData): Item[IdState.Unminted] = {
     debug(s"Attempting to transform $itemId")
     Item(
       title = getItemTitle(itemData),
-      locations = getPhysicalLocation(itemData, bibData).toList,
+      locations = getPhysicalLocation(bibId, itemData, bibData).toList,
       id = IdState.Identifiable(
         sourceIdentifier = SourceIdentifier(
           identifierType = IdentifierType("sierra-system-number"),

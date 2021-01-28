@@ -10,10 +10,12 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   VarField
 }
 import uk.ac.wellcome.platform.transformer.sierra.source.sierra.SierraSourceLocation
+import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 
 trait SierraLocation extends SierraQueryOps with Logging {
 
   def getPhysicalLocation(
+    bibNumber: SierraBibNumber,
     itemData: SierraItemData,
     bibData: SierraBibData): Option[PhysicalLocationDeprecated] =
     itemData.location.flatMap {
@@ -26,7 +28,7 @@ trait SierraLocation extends SierraQueryOps with Logging {
         Some(
           PhysicalLocationDeprecated(
             locationType = LocationType(code),
-            accessConditions = getAccessConditions(bibData),
+            accessConditions = getAccessConditions(bibNumber, bibData),
             label = name
           )
         )
@@ -47,6 +49,7 @@ trait SierraLocation extends SierraQueryOps with Logging {
   }
 
   private def getAccessConditions(
+    bibId: SierraBibNumber,
     bibData: SierraBibData): List[AccessCondition] =
     bibData
       .varfieldsWithTag("506")
@@ -58,7 +61,7 @@ trait SierraLocation extends SierraQueryOps with Logging {
           .map { _.content.trim }
 
         AccessCondition(
-          status = getAccessStatus(varfield, terms),
+          status = getAccessStatus(bibId, varfield, terms),
           terms = terms,
           to = varfield.subfieldsWithTag("g").contents.headOption
         )
@@ -75,7 +78,7 @@ trait SierraLocation extends SierraQueryOps with Logging {
   //  - look in subfield ǂf for the standardised terminology
   //
   // See https://www.loc.gov/marc/bibliographic/bd506.html
-  private def getAccessStatus(varfield: VarField, terms: Option[String]): Option[AccessStatus] = {
+  private def getAccessStatus(bibId: SierraBibNumber, varfield: VarField, terms: Option[String]): Option[AccessStatus] = {
 
     // If the first indicator is 0, then there are no restrictions
     val indicator0 =
@@ -91,7 +94,7 @@ trait SierraLocation extends SierraQueryOps with Logging {
           AccessStatus(contents) match {
             case Right(status) => Some(status)
             case Left(err) =>
-              warn(s"Unable to parse access status from subfield ǂf: $contents")
+              warn(s"$bibId: Unable to parse access status from subfield ǂf: $contents ($err)")
               None
           }
         }
@@ -111,7 +114,7 @@ trait SierraLocation extends SierraQueryOps with Logging {
       case Nil => None
       case Seq(status) => Some(status)
       case multiple =>
-        warn(s"Multiple, conflicting access statuses: $multiple")
+        warn(s"$bibId: Multiple, conflicting access statuses: $multiple")
         None
     }
   }
