@@ -14,7 +14,8 @@ case class DisplayAggregation[T](
 )
 
 case object DisplayAggregation {
-  def apply[T, DisplayT](agg: Aggregation[T], display: T => DisplayT): DisplayAggregation[DisplayT] =
+  def apply[T, DisplayT](agg: Aggregation[T],
+                         display: T => DisplayT): DisplayAggregation[DisplayT] =
     DisplayAggregation(
       buckets = agg.buckets.map { bucket =>
         DisplayAggregationBucket(
