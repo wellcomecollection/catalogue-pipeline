@@ -61,6 +61,13 @@ trait SierraLocation extends SierraQueryOps {
         case _                                 => true
       }
 
+  // Get an AccessStatus that draws from our list of types.
+  //
+  // Rules:
+  //  - if the first indicator is 0, then there are no restrictions
+  //  - look in subfield ǂf for the standardised terminology
+  //
+  // See https://www.loc.gov/marc/bibliographic/bd506.html
   private def getAccessStatus(varfield: VarField): Option[AccessStatus] =
     if (varfield.indicator1.contains("0"))
       Some(AccessStatus.Open)
