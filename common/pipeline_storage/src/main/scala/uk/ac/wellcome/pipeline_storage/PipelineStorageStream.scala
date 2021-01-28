@@ -22,7 +22,7 @@ case class Bundle[T](message: Message, item: T, numberOfItems: Int)
 class PipelineStorageStream[In, Out, MsgDestination](
   messageStream: SQSStream[In],
   indexer: Indexer[Out],
-  messageSender: MessageSender[MsgDestination])(config: PipelineStorageConfig)(
+  messageSender: MessageSender[MsgDestination])(val config: PipelineStorageConfig)(
   implicit ec: ExecutionContext)
     extends Logging {
 
@@ -101,7 +101,7 @@ object PipelineStorageStream extends Logging {
   def batchRetrieveFlow[T](
     config: PipelineStorageConfig,
     retriever: Retriever[T])(implicit ec: ExecutionContext)
-    : Flow[(Message, NotificationMessage), (Message, Bundle[T]), NotUsed] =
+    : Flow[(Message, NotificationMessage), (Message, T), NotUsed] =
     Flow[(Message, NotificationMessage)]
       .map {
         case (message, notificationMessage) =>
@@ -122,7 +122,7 @@ object PipelineStorageStream extends Logging {
                     case Right(doc) => Some((messages(idx), doc))
                   }
               }
-              .collect { case Some((msg, doc)) => (msg, Bundle(msg, doc, 1)) }
+              .collect { case Some((msg, doc)) => (msg, doc) }
           }
       }
       .mapConcat(identity)
