@@ -10,7 +10,9 @@ class AccessConditionTest extends AnyFunSpec with Matchers {
       "Restricted access (Data Protection Act)",
       "Cannot Be Produced - View Digitised Version",
       "Certain restrictions apply.",
-      "By Appointment.")
+      "By Appointment.",
+      "Restricted: currently undergoing conservation."
+    )
     restrictedValues.foreach { str =>
       AccessStatus.apply(str) shouldBe Right(AccessStatus.Restricted)
     }
@@ -22,10 +24,14 @@ class AccessConditionTest extends AnyFunSpec with Matchers {
     }
   }
   it("creates PermissionRequired access condition") {
-    val restrictedValues = List("Permission Required.", "Donor Permission.")
+    val restrictedValues = List("Permission Required.", "Donor Permission.", "Permission is required to view this item.")
     restrictedValues.foreach { str =>
       AccessStatus.apply(str) shouldBe Right(AccessStatus.PermissionRequired)
     }
+  }
+
+  it("creates the Open access condition") {
+    AccessStatus("Unrestricted / Open.") shouldBe Right(AccessStatus.Open)
   }
 
   it("strips punctuation from access condition if present") {
