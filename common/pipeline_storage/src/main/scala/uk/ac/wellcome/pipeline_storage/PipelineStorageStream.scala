@@ -9,8 +9,8 @@ import akka.{Done, NotUsed}
 import grizzled.slf4j.Logging
 import io.circe.Decoder
 import software.amazon.awssdk.services.sqs.model.Message
-
 import uk.ac.wellcome.messaging.MessageSender
+import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
 
 case class PipelineStorageConfig(batchSize: Int,
@@ -22,8 +22,8 @@ case class Bundle[T](message: Message, item: T, numberOfItems: Int)
 class PipelineStorageStream[In, Out, MsgDestination](
   messageStream: SQSStream[In],
   indexer: Indexer[Out],
-  messageSender: MessageSender[MsgDestination])(config: PipelineStorageConfig)(
-  implicit ec: ExecutionContext)
+  messageSender: MessageSender[MsgDestination])(
+  val config: PipelineStorageConfig)(implicit ec: ExecutionContext)
     extends Logging {
 
   import PipelineStorageStream._
@@ -48,16 +48,45 @@ class PipelineStorageStream[In, Out, MsgDestination](
               broadcastAndMerge(
                 batchIndexAndSendFlow(
                   config,
-                  (item: Out) => messageSender.send(indexable.id(item)),
+                  (item: Out) =>
+                    sendIndexable[Out, MsgDestination](messageSender)(item),
                   indexer
                 ),
                 noOutputFlow)
           )
       )
     } yield done
+
 }
 
 object PipelineStorageStream extends Logging {
+  def batchIndexAndSendFlow[T, MsgDestination](config: PipelineStorageConfig,
+                                               send: T => Try[Unit],
+                                               indexer: Indexer[T])(
+    implicit
+    ec: ExecutionContext,
+    indexable: Indexable[T]) = {
+    val maxSubStreams = Integer.MAX_VALUE
+    Flow[(Message, List[T])]
+      .collect {
+        case (msg, items @ _ :: _) =>
+          items.map(item =>
+            Bundle[T](message = msg, item = item, numberOfItems = items.size))
+      }
+      .mapConcat[Bundle[T]](identity)
+      .via(batchIndexFlow(config, indexer))
+      .via(takeListsOfCompleteBundles(maxSubStreams, 5 minutes))
+      .mapConcat(identity)
+      .mapAsyncUnordered(config.parallelism) { bundle =>
+        for {
+          _ <- Future.fromTry(send(bundle.item))
+        } yield bundle
+      }
+      .via(takeListsOfCompleteBundles[T](maxSubStreams, 5 minutes)
+        .collect {
+          case head :: _ => head.message
+        })
+  }
 
   def processFlow[In, Out](
     config: PipelineStorageConfig,
@@ -69,10 +98,15 @@ object PipelineStorageStream extends Logging {
         process(in).map(w => (message, w))
     }
 
-  def batchRetrieveFlow[T](config: PipelineStorageConfig,
-                           retriever: Retriever[T])(
-    implicit ec: ExecutionContext): Flow[Bundle[String], Bundle[T], NotUsed] =
-    Flow[Bundle[String]]
+  def batchRetrieveFlow[T](
+    config: PipelineStorageConfig,
+    retriever: Retriever[T])(implicit ec: ExecutionContext)
+    : Flow[(Message, NotificationMessage), (Message, T), NotUsed] =
+    Flow[(Message, NotificationMessage)]
+      .map {
+        case (message, notificationMessage) =>
+          Bundle(message, notificationMessage.body, 1)
+      }
       .groupedWithin(config.batchSize, config.flushInterval)
       .mapAsyncUnordered(parallelism = config.parallelism) { bundles =>
         val (messages, ids) = unzipBundles(bundles)
@@ -88,7 +122,7 @@ object PipelineStorageStream extends Logging {
                     case Right(doc) => Some((messages(idx), doc))
                   }
               }
-              .collect { case Some((msg, doc)) => Bundle(msg, doc, 1) }
+              .collect { case Some((msg, doc)) => (msg, doc) }
           }
       }
       .mapConcat(identity)
@@ -120,34 +154,6 @@ object PipelineStorageStream extends Logging {
         }
       }
       .mapConcat(identity)
-
-  def batchIndexAndSendFlow[T, MsgDestination](config: PipelineStorageConfig,
-                                               send: T => Try[Unit],
-                                               indexer: Indexer[T])(
-    implicit
-    ec: ExecutionContext,
-    indexable: Indexable[T]) = {
-    val maxSubStreams = Integer.MAX_VALUE
-    Flow[(Message, List[T])]
-      .collect {
-        case (msg, items @ _ :: _) =>
-          items.map(item =>
-            Bundle[T](message = msg, item = item, numberOfItems = items.size))
-      }
-      .mapConcat[Bundle[T]](identity)
-      .via(batchIndexFlow(config, indexer))
-      .via(takeListsOfCompleteBundles(maxSubStreams, 5 minutes))
-      .mapConcat(identity)
-      .mapAsyncUnordered(config.parallelism) { bundle =>
-        for {
-          _ <- Future.fromTry(send(bundle.item))
-        } yield bundle
-      }
-      .via(takeListsOfCompleteBundles[T](maxSubStreams, 5 minutes)
-        .collect {
-          case head :: _ => head.message
-        })
-  }
 
   // Splits the flow into a subsflow for each messageId.
   // Each substream emits one message with the complete list of bundles for the same messageId
@@ -206,4 +212,8 @@ object PipelineStorageStream extends Logging {
     bundles: Seq[Bundle[T]]): (List[Message], List[T]) =
     bundles.toList
       .unzip(bundle => bundle.message -> bundle.item)
+
+  def sendIndexable[T, Destination](messageSender: MessageSender[Destination])(
+    item: T)(implicit indexable: Indexable[T]) =
+    messageSender.send(indexable.id(item))
 }
