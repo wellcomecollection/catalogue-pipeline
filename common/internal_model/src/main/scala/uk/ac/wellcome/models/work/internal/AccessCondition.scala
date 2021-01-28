@@ -53,6 +53,9 @@ object AccessStatus {
       case lowerCaseStatus
           if lowerCaseStatus.startsWith("requires registration") =>
         Right(AccessStatus.OpenWithAdvisory)
+      case lowerCaseStatus
+          if lowerCaseStatus.startsWith("unrestricted / open") =>
+        Right(AccessStatus.Open)
       case lowerCaseStatus if lowerCaseStatus.startsWith("open") =>
         Right(AccessStatus.Open)
       case lowerCaseStatus if lowerCaseStatus.startsWith("restricted") =>
@@ -80,6 +83,9 @@ object AccessStatus {
         Right(AccessStatus.LicensedResources)
       case lowerCaseStatus
           if lowerCaseStatus.startsWith("permission required") =>
+        Right(AccessStatus.PermissionRequired)
+      case lowerCaseStatus
+          if lowerCaseStatus.startsWith("permission is required") =>
         Right(AccessStatus.PermissionRequired)
       case lowerCaseStatus if lowerCaseStatus.startsWith("donor permission") =>
         Right(AccessStatus.PermissionRequired)
