@@ -18,6 +18,9 @@ calm_adapter:
     - id: calm_adapter
       services:
         - id: calm-adapter
+    - id: calm_deletion_checker
+      services:
+        - id: deletion-checker
   name: Calm Adapter
   role_arn: arn:aws:iam::760097843905:role/platform-ci
   github_repository: wellcometrust/catalogue
