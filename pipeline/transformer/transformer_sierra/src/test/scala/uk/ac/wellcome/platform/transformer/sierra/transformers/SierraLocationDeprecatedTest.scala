@@ -146,13 +146,16 @@ class SierraLocationDeprecatedTest
         )
       )
 
-      val location = transformer.getPhysicalLocation(bibId, itemData, bibData).get
+      val location =
+        transformer.getPhysicalLocation(bibId, itemData, bibData).get
       location.accessConditions should have size 1
 
-      location.accessConditions.head.status shouldBe Some(AccessStatus.Restricted)
+      location.accessConditions.head.status shouldBe Some(
+        AccessStatus.Restricted)
     }
 
-    it("sets an access status based on the contents of subfield ǂa if ǂf is missing") {
+    it(
+      "sets an access status based on the contents of subfield ǂa if ǂf is missing") {
       val bibData = createSierraBibDataWith(
         varFields = List(
           VarField(
@@ -164,10 +167,12 @@ class SierraLocationDeprecatedTest
         )
       )
 
-      val location = transformer.getPhysicalLocation(bibId, itemData, bibData).get
+      val location =
+        transformer.getPhysicalLocation(bibId, itemData, bibData).get
       location.accessConditions should have size 1
 
-      location.accessConditions.head.status shouldBe Some(AccessStatus.Restricted)
+      location.accessConditions.head.status shouldBe Some(
+        AccessStatus.Restricted)
       location.accessConditions.head.terms shouldBe Some("Restricted")
     }
 
@@ -184,14 +189,16 @@ class SierraLocationDeprecatedTest
         )
       )
 
-      val location = transformer.getPhysicalLocation(bibId, itemData, bibData).get
+      val location =
+        transformer.getPhysicalLocation(bibId, itemData, bibData).get
       location.accessConditions should have size 1
 
       location.accessConditions.head.status shouldBe None
       location.accessConditions.head.terms shouldBe Some("Restricted")
     }
 
-    it("does not set an AccessStatus if the indicator 0 and the contents of subfield ǂf disagree") {
+    it(
+      "does not set an AccessStatus if the indicator 0 and the contents of subfield ǂf disagree") {
       val bibData = createSierraBibDataWith(
         varFields = List(
           VarField(
@@ -205,14 +212,17 @@ class SierraLocationDeprecatedTest
         )
       )
 
-      val location = transformer.getPhysicalLocation(bibId, itemData, bibData).get
+      val location =
+        transformer.getPhysicalLocation(bibId, itemData, bibData).get
       location.accessConditions should have size 1
 
       location.accessConditions.head.status shouldBe None
-      location.accessConditions.head.terms shouldBe Some("This item is inconsistent and weird")
+      location.accessConditions.head.terms shouldBe Some(
+        "This item is inconsistent and weird")
     }
 
-    it("does not set an AccessStatus if the contents of subfield ǂf can't be parsed") {
+    it(
+      "does not set an AccessStatus if the contents of subfield ǂf can't be parsed") {
       val bibData = createSierraBibDataWith(
         varFields = List(
           VarField(
@@ -225,11 +235,13 @@ class SierraLocationDeprecatedTest
         )
       )
 
-      val location = transformer.getPhysicalLocation(bibId, itemData, bibData).get
+      val location =
+        transformer.getPhysicalLocation(bibId, itemData, bibData).get
       location.accessConditions should have size 1
 
       location.accessConditions.head.status shouldBe None
-      location.accessConditions.head.terms shouldBe Some("This item is inconsistent and weird")
+      location.accessConditions.head.terms shouldBe Some(
+        "This item is inconsistent and weird")
     }
 
     it(
@@ -265,10 +277,12 @@ class SierraLocationDeprecatedTest
         )
       )
 
-      val location = transformer.getPhysicalLocation(bibId, itemData, bibData).get
+      val location =
+        transformer.getPhysicalLocation(bibId, itemData, bibData).get
       location.accessConditions should have size 1
 
-      location.accessConditions.head.terms shouldBe Some("Permission is required to view this item.")
+      location.accessConditions.head.terms shouldBe Some(
+        "Permission is required to view this item.")
     }
   }
 
