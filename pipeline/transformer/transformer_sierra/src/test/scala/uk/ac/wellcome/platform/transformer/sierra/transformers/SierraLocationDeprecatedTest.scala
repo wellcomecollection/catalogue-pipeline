@@ -133,6 +133,105 @@ class SierraLocationDeprecatedTest
       )
     }
 
+    it("sets an access status based on the contents of subfield ǂf") {
+      val bibData = createSierraBibDataWith(
+        varFields = List(
+          VarField(
+            marcTag = Some("506"),
+            subfields = List(
+              MarcSubfield("a", "You're not allowed yet"),
+              MarcSubfield("f", "Restricted"),
+            )
+          )
+        )
+      )
+
+      val location = transformer.getPhysicalLocation(itemData, bibData).get
+      location.accessConditions should have size 1
+
+      location.accessConditions.head.status shouldBe Some(AccessStatus.Restricted)
+    }
+
+    it("sets an access status based on the contents of subfield ǂa if ǂf is missing") {
+      val bibData = createSierraBibDataWith(
+        varFields = List(
+          VarField(
+            marcTag = Some("506"),
+            subfields = List(
+              MarcSubfield("a", "Restricted"),
+            )
+          )
+        )
+      )
+
+      val location = transformer.getPhysicalLocation(itemData, bibData).get
+      location.accessConditions should have size 1
+
+      location.accessConditions.head.status shouldBe Some(AccessStatus.Restricted)
+      location.accessConditions.head.terms shouldBe Some("Restricted")
+    }
+
+    it("does not set an AccessStatus if the contents of ǂa and ǂf disagree") {
+      val bibData = createSierraBibDataWith(
+        varFields = List(
+          VarField(
+            marcTag = Some("506"),
+            subfields = List(
+              MarcSubfield("a", "Restricted"),
+              MarcSubfield("f", "Open"),
+            )
+          )
+        )
+      )
+
+      val location = transformer.getPhysicalLocation(itemData, bibData).get
+      location.accessConditions should have size 1
+
+      location.accessConditions.head.status shouldBe None
+      location.accessConditions.head.terms shouldBe Some("Restricted")
+    }
+
+    it("does not set an AccessStatus if the indicator 0 and the contents of subfield ǂf disagree") {
+      val bibData = createSierraBibDataWith(
+        varFields = List(
+          VarField(
+            marcTag = Some("506"),
+            indicator1 = Some("0"),
+            subfields = List(
+              MarcSubfield("a", "This item is inconsistent and weird"),
+              MarcSubfield("f", "Restricted"),
+            )
+          )
+        )
+      )
+
+      val location = transformer.getPhysicalLocation(itemData, bibData).get
+      location.accessConditions should have size 1
+
+      location.accessConditions.head.status shouldBe None
+      location.accessConditions.head.terms shouldBe Some("This item is inconsistent and weird")
+    }
+
+    it("does not set an AccessStatus if the contents of subfield ǂf can't be parsed") {
+      val bibData = createSierraBibDataWith(
+        varFields = List(
+          VarField(
+            marcTag = Some("506"),
+            subfields = List(
+              MarcSubfield("a", "This item is inconsistent and weird"),
+              MarcSubfield("f", "fffffff my cat sat on the keyboard"),
+            )
+          )
+        )
+      )
+
+      val location = transformer.getPhysicalLocation(itemData, bibData).get
+      location.accessConditions should have size 1
+
+      location.accessConditions.head.status shouldBe None
+      location.accessConditions.head.terms shouldBe Some("This item is inconsistent and weird")
+    }
+
     it(
       "does not add an access condition if none of the relevant subfields are present") {
       val bibData = createSierraBibDataWith(
