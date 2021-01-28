@@ -50,9 +50,15 @@ trait SierraLocation extends SierraQueryOps {
     bibData
       .varfieldsWithTag("506")
       .map { varfield =>
+        // MARC 506 subfield ǂa contains "terms governing access".  This is a
+        // non-repeatable field.  See https://www.loc.gov/marc/bibliographic/bd506.html
+        val terms = varfield
+          .nonrepeatableSubfieldWithTag("a")
+          .map { _.content.trim }
+
         AccessCondition(
           status = getAccessStatus(varfield),
-          terms = varfield.nonrepeatableSubfieldWithTag("a").map { _.content },
+          terms = terms,
           to = varfield.subfieldsWithTag("g").contents.headOption
         )
       }

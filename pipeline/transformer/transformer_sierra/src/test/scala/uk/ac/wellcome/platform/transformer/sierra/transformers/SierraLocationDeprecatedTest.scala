@@ -154,6 +154,23 @@ class SierraLocationDeprecatedTest
       )
     }
 
+    it("strips whitespace from the access conditions") {
+      val bibData = createSierraBibDataWith(
+        varFields = List(
+          VarField(
+            marcTag = Some("506"),
+            subfields = List(
+              MarcSubfield("a", "Permission is required to view this item. "),
+            )
+          )
+        )
+      )
+
+      val location = transformer.getPhysicalLocation(itemData, bibData).get
+      location.accessConditions should have size 1
+
+      location.accessConditions.head.terms shouldBe Some("Permission is required to view this item.")
+    }
   }
 
   describe("Digital locations") {
