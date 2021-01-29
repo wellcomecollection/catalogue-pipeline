@@ -115,13 +115,15 @@ def get_reindexer_job_config(session):
     # The container definition contains two containers: the reindexer app, and the
     # logstash router.
     container_definition = next(
-    cd for cd in resp["taskDefinition"]["containerDefinitions"] if cd["name"] == "reindexer"
+        cd
+        for cd in resp["taskDefinition"]["containerDefinitions"]
+        if cd["name"] == "reindexer"
     )
 
     job_config_str = next(
         ev["value"]
         for ev in container_definition["environment"]
-        if ev['name'] == 'reindexer_job_config_json'
+        if ev["name"] == "reindexer_job_config_json"
     )
 
     return json.loads(job_config_str)
@@ -132,10 +134,9 @@ def has_subscriptions(session, *, topic_arn):
     Returns True if a topic ARN has any subscriptions (e.g. an SQS queue), False otherwise.
     """
     sns_client = session.client("sns")
-    resp = sns_client.list_subscriptions_by_topic(
-    TopicArn=topic_arn)
+    resp = sns_client.list_subscriptions_by_topic(TopicArn=topic_arn)
 
-    return len(resp['Subscriptions']) > 0
+    return len(resp["Subscriptions"]) > 0
 
 
 @click.command()
@@ -188,7 +189,7 @@ def start_reindex(ctx, src, dst, mode):
             return sys.exit("You need to specify at least 1 record ID")
         parameters = specific_reindex_parameters(specified_records)
 
-    job_config_id=f"{src}--{dst}"
+    job_config_id = f"{src}--{dst}"
     reindexer_job_config = get_reindexer_job_config(session)
 
     # It's incredibly frustrating to run a reindex using this script, see nothing come
@@ -216,7 +217,9 @@ def start_reindex(ctx, src, dst, mode):
     reindexer_topic_arn = get_reindexer_topic_arn()
 
     publish_messages(
-        job_config_id=job_config_id, topic_arn=reindexer_topic_arn, parameters=parameters
+        job_config_id=job_config_id,
+        topic_arn=reindexer_topic_arn,
+        parameters=parameters,
     )
 
 
