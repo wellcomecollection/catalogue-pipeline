@@ -3,7 +3,12 @@ package uk.ac.wellcome.platform.matcher.fixtures
 import org.apache.commons.codec.digest.DigestUtils
 import org.scanamo.generic.semiauto.deriveDynamoFormat
 import org.scanamo.query.UniqueKey
-import org.scanamo.{DynamoFormat, DynamoReadError, Scanamo, Table => ScanamoTable}
+import org.scanamo.{
+  DynamoFormat,
+  DynamoReadError,
+  Scanamo,
+  Table => ScanamoTable
+}
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS
@@ -17,8 +22,15 @@ import uk.ac.wellcome.platform.matcher.models.WorkLinks
 import uk.ac.wellcome.platform.matcher.services.MatcherWorkerService
 import uk.ac.wellcome.platform.matcher.storage.{WorkGraphStore, WorkNodeDao}
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
-import uk.ac.wellcome.storage.locking.dynamo.{DynamoLockDaoFixtures, DynamoLockingService, ExpiringLock}
-import uk.ac.wellcome.storage.locking.memory.{MemoryLockDao, MemoryLockingService}
+import uk.ac.wellcome.storage.locking.dynamo.{
+  DynamoLockDaoFixtures,
+  DynamoLockingService,
+  ExpiringLock
+}
+import uk.ac.wellcome.storage.locking.memory.{
+  MemoryLockDao,
+  MemoryLockingService
+}
 
 import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global

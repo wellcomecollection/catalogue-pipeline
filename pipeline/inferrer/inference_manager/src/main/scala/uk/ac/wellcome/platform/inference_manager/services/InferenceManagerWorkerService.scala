@@ -14,8 +14,15 @@ import uk.ac.wellcome.models.work.internal.ImageState.{Augmented, Initial}
 import uk.ac.wellcome.models.work.internal.{Image, ImageState, InferredData}
 import uk.ac.wellcome.pipeline_storage.Indexable.imageIndexable
 import uk.ac.wellcome.pipeline_storage.PipelineStorageStream._
-import uk.ac.wellcome.pipeline_storage.{Indexer, PipelineStorageConfig, Retriever}
-import uk.ac.wellcome.platform.inference_manager.adapters.{InferrerAdapter, InferrerResponse}
+import uk.ac.wellcome.pipeline_storage.{
+  Indexer,
+  PipelineStorageConfig,
+  Retriever
+}
+import uk.ac.wellcome.platform.inference_manager.adapters.{
+  InferrerAdapter,
+  InferrerResponse
+}
 import uk.ac.wellcome.platform.inference_manager.models.DownloadedImage
 import uk.ac.wellcome.typesafe.Runnable
 
@@ -59,10 +66,11 @@ class InferenceManagerWorkerService[Destination](
       _ <- imageIndexer.init()
       _ <- msgStream.runStream(
         className,
-        source => source
-  .via(batchRetrieveFlow(pipelineStorageConfig, imageRetriever))
-  .asSourceWithContext { case (message, _) => message }
-                      .map{ case (_, item) => item}
+        source =>
+          source
+            .via(batchRetrieveFlow(pipelineStorageConfig, imageRetriever))
+            .asSourceWithContext { case (message, _) => message }
+            .map { case (_, item) => item }
             .via(imageDownloader.download)
             .via(createRequests)
             .via(requestPool.asContextFlow)
@@ -71,7 +79,6 @@ class InferenceManagerWorkerService[Destination](
             .asSource
             .map { case (image, message) => (message, List(image)) }
             .via(indexAndSend)
-
       )
     } yield Done
 

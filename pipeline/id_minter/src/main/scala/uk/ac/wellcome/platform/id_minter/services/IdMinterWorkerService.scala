@@ -11,11 +11,20 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal.WorkState.Identified
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.pipeline_storage.PipelineStorageStream.{batchRetrieveFlow, processFlow}
+import uk.ac.wellcome.pipeline_storage.PipelineStorageStream.{
+  batchRetrieveFlow,
+  processFlow
+}
 import uk.ac.wellcome.pipeline_storage.{PipelineStorageStream, Retriever}
-import uk.ac.wellcome.platform.id_minter.config.models.{IdentifiersTableConfig, RDSClientConfig}
+import uk.ac.wellcome.platform.id_minter.config.models.{
+  IdentifiersTableConfig,
+  RDSClientConfig
+}
 import uk.ac.wellcome.platform.id_minter.database.TableProvisioner
-import uk.ac.wellcome.platform.id_minter.steps.{IdentifierGenerator, SourceIdentifierEmbedder}
+import uk.ac.wellcome.platform.id_minter.steps.{
+  IdentifierGenerator,
+  SourceIdentifierEmbedder
+}
 import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -43,14 +52,16 @@ class IdMinterWorkerService[Destination](
       tableName = identifiersTableConfig.tableName
     )
 
-    pipelineStream.run(this.getClass.getSimpleName,
+    pipelineStream.run(
+      this.getClass.getSimpleName,
       Flow[(Message, NotificationMessage)]
         .via(batchRetrieveFlow(pipelineStream.config, jsonRetriever))
-        .via(processFlow(pipelineStream.config, item => processMessage(item))))
+        .via(processFlow(pipelineStream.config, item => processMessage(item)))
+    )
   }
 
-  def processMessage(
-    json:Json): Future[List[Work[Identified]]] = for {
+  def processMessage(json: Json): Future[List[Work[Identified]]] =
+    for {
       updatedJson <- Future.fromTry(embedIds(json))
       work <- Future.fromTry(decodeJson(updatedJson))
     } yield List(work)

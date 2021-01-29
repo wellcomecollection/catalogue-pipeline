@@ -11,13 +11,16 @@ import uk.ac.wellcome.pipeline_storage.PipelineStorageStream._
 import uk.ac.wellcome.pipeline_storage.{PipelineStorageConfig, Retriever}
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.matcher.WorkMatcher
-import uk.ac.wellcome.platform.matcher.models.{VersionExpectedConflictException, WorkLinks}
+import uk.ac.wellcome.platform.matcher.models.{
+  VersionExpectedConflictException,
+  WorkLinks
+}
 import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class MatcherWorkerService[MsgDestination](
-                                            config: PipelineStorageConfig,
+  config: PipelineStorageConfig,
   workLinksRetriever: Retriever[WorkLinks],
   msgStream: SQSStream[NotificationMessage],
   msgSender: MessageSender[MsgDestination],
@@ -26,11 +29,14 @@ class MatcherWorkerService[MsgDestination](
     with Runnable {
 
   def run(): Future[Done] =
-    msgStream.runStream(this.getClass.getSimpleName, source =>
-      source
-        .via(batchRetrieveFlow(config, workLinksRetriever))
-        .mapAsync(config.parallelism){ case (message, item) =>
-      processMessage(item).map(_ => message)
+    msgStream.runStream(
+      this.getClass.getSimpleName,
+      source =>
+        source
+          .via(batchRetrieveFlow(config, workLinksRetriever))
+          .mapAsync(config.parallelism) {
+            case (message, item) =>
+              processMessage(item).map(_ => message)
         }
     )
 
