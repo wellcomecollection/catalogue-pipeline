@@ -154,7 +154,6 @@ def start_reindex(ctx, src, dst, mode):
         parameters = specific_reindex_parameters(specified_records)
 
     topic_arn = get_reindexer_topic_arn()
-    print
 
     publish_messages(
         job_config_id=f"{src}--{dst}", topic_arn=topic_arn, parameters=parameters
