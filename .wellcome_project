@@ -8,7 +8,6 @@ mets_adapter:
         - id: mets-adapter
   name: METS Adapter
   role_arn: arn:aws:iam::760097843905:role/platform-ci
-  github_repository: wellcometrust/catalogue
 
 calm_adapter:
   environments:
@@ -20,7 +19,6 @@ calm_adapter:
         - id: calm-adapter
   name: Calm Adapter
   role_arn: arn:aws:iam::760097843905:role/platform-ci
-  github_repository: wellcometrust/catalogue
 
 sierra_adapter:
   environments:
@@ -42,7 +40,6 @@ sierra_adapter:
         - id: bibs-reader
   name: Sierra Adapter
   role_arn: arn:aws:iam::760097843905:role/platform-ci
-  github_repository: wellcometrust/catalogue
 
 reindexer:
   environments:
@@ -54,7 +51,6 @@ reindexer:
         - id: reindexer
   name: Reindexer
   role_arn: arn:aws:iam::760097843905:role/platform-ci
-  github_repository: wellcometrust/catalogue
 
 catalogue_pipeline:
   environments:
@@ -110,7 +106,6 @@ catalogue_pipeline:
         - id: sierra-transformer
   name: Catalogue pipeline
   role_arn: arn:aws:iam::760097843905:role/platform-ci
-  github_repository: wellcometrust/catalogue
 
 catalogue_api:
   environments:
@@ -129,4 +124,3 @@ catalogue_api:
   account_id: '756629837203'
   role_arn: arn:aws:iam::756629837203:role/catalogue-ci
   aws_region_name: eu-west-1
-  github_repository: wellcometrust/catalogue
