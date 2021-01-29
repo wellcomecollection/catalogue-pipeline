@@ -6,8 +6,6 @@ import sys
 
 import boto3
 import click
-import hcl
-import requests
 import tqdm
 
 
@@ -66,31 +64,6 @@ def read_from_s3(bucket, key):
     s3 = session.client("s3")
     obj = s3.get_object(Bucket=bucket, Key=key)
     return obj["Body"].read()
-
-
-def post_to_slack(slack_message):
-    """
-    Posts a message about the reindex in Slack, so we can track them.
-    """
-    # Get the non-critical Slack token.
-    tfvars_body = read_from_s3(
-        bucket="wellcomecollection-platform-infra", key="terraform.tfvars"
-    )
-    tfvars = hcl.loads(tfvars_body)
-    webhook_url = tfvars["non_critical_slack_webhook"]
-
-    slack_data = {
-        "username": "reindex-tracker",
-        "icon_emoji": ":dynamodb:",
-        "color": "#2E72B8",
-        "title": "reindexer",
-        "fields": [{"value": slack_message}],
-    }
-
-    resp = requests.post(
-        webhook_url, json=slack_data, headers={"Content-Type": "application/json"}
-    )
-    resp.raise_for_status()
 
 
 def get_reindexer_topic_arn():
@@ -179,18 +152,6 @@ def start_reindex(ctx, src, dst, mode):
         if not specified_records:
             return sys.exit("You need to specify at least 1 record ID")
         parameters = specific_reindex_parameters(specified_records)
-
-    # TODO: This was broken by the move to AssumeRole, because the GetUser call
-    # doesn't work in an IAM role.  When we agree a replacement, we should apply
-    # it globally, including here.
-
-    # username = boto3.client("iam").get_user()["User"]["UserName"]
-    # slack_message = (
-    #     f"*{username}* started a {mode} reindex *{src!r}* ~> *{dst!r}*\n"
-    #     f"Reason: *{reason}*"
-    # )
-
-    # post_to_slack(slack_message)
 
     topic_arn = get_reindexer_topic_arn()
     print
