@@ -141,6 +141,7 @@ module "image_inferrer" {
 
   deployment_service_env  = var.release_label
   deployment_service_name = "image-inferrer"
+  shared_logging_secrets  = var.shared_logging_secrets
 }
 
 resource "aws_iam_role_policy" "read_inferrer_data" {

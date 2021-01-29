@@ -10,6 +10,10 @@ variable "cluster_arn" {
   type = string
 }
 
+variable "shared_logging_secrets" {
+  type = map(any)
+}
+
 variable "namespace_id" {
   type    = string
   default = null
