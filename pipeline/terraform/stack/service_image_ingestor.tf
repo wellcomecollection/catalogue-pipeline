@@ -43,11 +43,11 @@ module "ingestor_images" {
     es_password_catalogue = "catalogue/ingestor/es_password"
     es_protocol_catalogue = "catalogue/ingestor/es_protocol"
 
-    es_host_pipeline_storage     = local.pipeline_storage_es_host
-    es_port_pipeline_storage     = local.pipeline_storage_es_port
-    es_protocol_pipeline_storage = local.pipeline_storage_es_protocol
-    es_username_pipeline_storage = "catalogue/${var.pipeline_storage_id}/image_ingestor/es_username"
-    es_password_pipeline_storage = "catalogue/${var.pipeline_storage_id}/image_ingestor/es_password"
+    es_host_pipeline_storage     = local.pipeline_storage_private_host
+    es_port_pipeline_storage     = local.pipeline_storage_port
+    es_protocol_pipeline_storage = local.pipeline_storage_protocol
+    es_username_pipeline_storage = "elasticsearch/pipeline_storage_${var.pipeline_date}/image_ingestor/es_username"
+    es_password_pipeline_storage = "elasticsearch/pipeline_storage_${var.pipeline_date}/image_ingestor/es_password"
   }
 
   use_fargate_spot = true
@@ -59,6 +59,10 @@ module "ingestor_images" {
 
   deployment_service_env  = var.release_label
   deployment_service_name = "image-ingestor"
+
+  depends_on = [
+    null_resource.elasticsearch_users,
+  ]
 
   shared_logging_secrets = var.shared_logging_secrets
 }

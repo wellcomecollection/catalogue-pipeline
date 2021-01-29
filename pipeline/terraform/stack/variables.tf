@@ -27,10 +27,10 @@ variable "rds_cluster_id" {
 variable "rds_subnet_group_name" {
   type = string
 }
-variable "extra_rds_instances" {
-  type        = number
-  default     = 0
-  description = "How many *extra* RDS instances to add to enable greater ID minter throughput"
+
+variable "is_reindexing" {
+  type        = bool
+  description = "Are you reindexing through this pipeline right now?"
 }
 
 variable "rds_ids_access_security_group_id" {}
@@ -80,29 +80,10 @@ variable "pipeline_storage_id" {
   description = "The ID of the pipeline_storage instance used for secrets"
 }
 
-locals {
-  pipeline_storage_es_host     = "elasticsearch/${var.pipeline_storage_id}/private_host"
-  pipeline_storage_es_port     = "catalogue/${var.pipeline_storage_id}/es_port"
-  pipeline_storage_es_protocol = "catalogue/${var.pipeline_storage_id}/es_protocol"
+variable "traffic_filter_platform_vpce_id" {
+  type = string
+}
 
-  pipeline_storage_service_list = [
-    "id_minter",
-    "matcher",
-    "merger",
-    "transformer",
-    "relation_embedder",
-    "router",
-    "inferrer",
-  ]
-
-  pipeline_storage_es_service_secrets = zipmap(local.pipeline_storage_service_list, [
-    for service in local.pipeline_storage_service_list :
-    {
-      es_host     = local.pipeline_storage_es_host
-      es_port     = local.pipeline_storage_es_port
-      es_protocol = local.pipeline_storage_es_protocol
-      es_username = "catalogue/${var.pipeline_storage_id}/${service}/es_username"
-      es_password = "catalogue/${var.pipeline_storage_id}/${service}/es_password"
-    }
-  ])
+variable "traffic_filter_public_internet_id" {
+  type = string
 }

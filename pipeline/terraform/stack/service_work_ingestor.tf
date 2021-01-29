@@ -40,11 +40,11 @@ module "ingestor_works" {
     es_password_catalogue = "catalogue/ingestor/es_password"
     es_protocol_catalogue = "catalogue/ingestor/es_protocol"
 
-    es_host_pipeline_storage     = local.pipeline_storage_es_host
-    es_port_pipeline_storage     = local.pipeline_storage_es_port
-    es_protocol_pipeline_storage = local.pipeline_storage_es_protocol
-    es_username_pipeline_storage = "catalogue/${var.pipeline_storage_id}/work_ingestor/es_username"
-    es_password_pipeline_storage = "catalogue/${var.pipeline_storage_id}/work_ingestor/es_password"
+    es_host_pipeline_storage     = local.pipeline_storage_private_host
+    es_port_pipeline_storage     = local.pipeline_storage_port
+    es_protocol_pipeline_storage = local.pipeline_storage_protocol
+    es_username_pipeline_storage = "elasticsearch/pipeline_storage_${var.pipeline_date}/work_ingestor/es_username"
+    es_password_pipeline_storage = "elasticsearch/pipeline_storage_${var.pipeline_date}/work_ingestor/es_password"
   })
 
   subnets = var.subnets
@@ -56,6 +56,10 @@ module "ingestor_works" {
   memory = 2048
 
   use_fargate_spot = true
+
+  depends_on = [
+    null_resource.elasticsearch_users,
+  ]
 
   deployment_service_env  = var.release_label
   deployment_service_name = "work-ingestor"

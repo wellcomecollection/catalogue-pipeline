@@ -79,15 +79,3 @@ module "log_router_permissions" {
   secrets   = var.shared_logging_secrets
   role_name = module.task_definition.task_execution_role_name
 }
-
-data "terraform_remote_state" "shared_infra" {
-  backend = "s3"
-
-  config = {
-    role_arn = "arn:aws:iam::760097843905:role/platform-read_only"
-
-    bucket = "wellcomecollection-platform-infra"
-    key    = "terraform/platform-infrastructure/shared.tfstate"
-    region = "eu-west-1"
-  }
-}

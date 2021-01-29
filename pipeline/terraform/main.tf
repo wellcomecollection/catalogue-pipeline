@@ -13,6 +13,8 @@ module "catalogue_pipeline_2021-01-22" {
   # If this pipeline is meant to be reindexed, remember to uncomment the
   # reindexer topic names.
 
+  is_reindexing = false
+
   sierra_adapter_topic_arns = [
     /*local.sierra_reindexer_topic_arn,*/
     local.sierra_merged_bibs_topic_arn,
@@ -34,8 +36,6 @@ module "catalogue_pipeline_2021-01-22" {
     local.calm_adapter_topic_arn,
   ]
 
-  extra_rds_instances = 0
-
   # Boilerplate that shouldn't change between pipelines.
 
   aws_region = local.aws_region
@@ -50,6 +50,9 @@ module "catalogue_pipeline_2021-01-22" {
   # Security groups
   rds_ids_access_security_group_id   = local.rds_access_security_group_id
   pipeline_storage_security_group_id = local.pipeline_storage_security_group_id
+
+  traffic_filter_platform_vpce_id   = local.traffic_filter_platform_vpce_id
+  traffic_filter_public_internet_id = local.traffic_filter_public_internet_id
 
   # Adapter VHS
   vhs_miro_read_policy   = local.vhs_miro_read_policy

@@ -115,18 +115,6 @@ module "log_router_container" {
 
 module "log_router_permissions" {
   source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/secrets?ref=v3.3.1"
-  secrets   = data.terraform_remote_state.shared_infra.outputs.shared_secrets_logging
+  secrets   = var.shared_logging_secrets
   role_name = module.task_definition.task_execution_role_name
-}
-
-data "terraform_remote_state" "shared_infra" {
-  backend = "s3"
-
-  config = {
-    role_arn = "arn:aws:iam::760097843905:role/platform-read_only"
-
-    bucket = "wellcomecollection-platform-infra"
-    key    = "terraform/platform-infrastructure/shared.tfstate"
-    region = "eu-west-1"
-  }
 }

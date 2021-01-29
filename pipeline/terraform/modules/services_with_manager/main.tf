@@ -35,4 +35,6 @@ module "worker" {
 
   deployment_service_env  = var.deployment_service_env
   deployment_service_name = var.deployment_service_name
+
+  shared_logging_secrets = var.shared_logging_secrets
 }
