@@ -33,9 +33,15 @@ locals {
   dlq_alarm_arn                = data.terraform_remote_state.shared_infra.outputs.dlq_alarm_arn
   vpc_id                       = local.catalogue_vpcs["catalogue_vpc_delta_id"]
   private_subnets              = local.catalogue_vpcs["catalogue_vpc_delta_private_subnets"]
-  rds_access_security_group_id = data.terraform_remote_state.catalogue_infra_critical.outputs.rds_access_security_group_id
-  rds_cluster_id               = data.terraform_remote_state.catalogue_infra_critical.outputs.rds_cluster_id
-  rds_subnet_group_name        = data.terraform_remote_state.catalogue_infra_critical.outputs.rds_subnet_group_name
 
-  pipeline_storage_security_group_id = data.terraform_remote_state.catalogue_infra_critical.outputs["catalogue_pipeline_storage_elastic_cloud_sg_id"]
+  infra_critical = data.terraform_remote_state.catalogue_infra_critical.outputs
+
+  rds_access_security_group_id = local.infra_critical.rds_access_security_group_id
+  rds_cluster_id               = local.infra_critical.rds_cluster_id
+  rds_subnet_group_name        = local.infra_critical.rds_subnet_group_name
+
+  pipeline_storage_security_group_id = local.infra_critical["catalogue_pipeline_storage_elastic_cloud_sg_id"]
+
+  traffic_filter_platform_vpce_id   = local.infra_critical["traffic_filter_platform_vpce_id"]
+  traffic_filter_public_internet_id = local.infra_critical["traffic_filter_public_internet_id"]
 }

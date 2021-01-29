@@ -80,6 +80,14 @@ variable "pipeline_storage_id" {
   description = "The ID of the pipeline_storage instance used for secrets"
 }
 
+variable "traffic_filter_platform_vpce_id" {
+  type = string
+}
+
+variable "traffic_filter_public_internet_id" {
+  type = string
+}
+
 locals {
   pipeline_storage_es_host     = "elasticsearch/${var.pipeline_storage_id}/private_host"
   pipeline_storage_es_port     = "catalogue/${var.pipeline_storage_id}/es_port"

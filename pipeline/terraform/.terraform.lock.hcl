@@ -1,6 +1,14 @@
 # This file is maintained automatically by "terraform init".
 # Manual edits may be lost in future updates.
 
+provider "registry.terraform.io/elastic/ec" {
+  version     = "0.1.0-beta"
+  constraints = "0.1.0-beta"
+  hashes = [
+    "h1:FeIlgFFtDoVwNJ5sIBWCmuURRopyXXX9DqC7s0AwubQ=",
+  ]
+}
+
 provider "registry.terraform.io/hashicorp/aws" {
   version = "2.70.0"
   hashes = [
@@ -18,6 +26,13 @@ provider "registry.terraform.io/hashicorp/aws" {
     "zh:ba394a7c391a26c4a91da63ad680e83bde0bc1ecc0a0856e26e9d62a4e77c408",
     "zh:e243c9d91feb0979638f28eb26f89ebadc179c57a2bd299b5729fb52bd1902f2",
     "zh:f6c05e20d9a3fba76ca5f47206dde35e5b43b6821c6cbf57186164ce27ba9f15",
+  ]
+}
+
+provider "registry.terraform.io/hashicorp/null" {
+  version = "3.0.0"
+  hashes = [
+    "h1:V1tzrSG6t3e7zWvUwRbGbhsWU2Jd/anrJpOl9XM+R/8=",
   ]
 }
 
