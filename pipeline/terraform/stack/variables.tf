@@ -27,10 +27,10 @@ variable "rds_cluster_id" {
 variable "rds_subnet_group_name" {
   type = string
 }
-variable "extra_rds_instances" {
-  type        = number
-  default     = 0
-  description = "How many *extra* RDS instances to add to enable greater ID minter throughput"
+
+variable "is_reindexing" {
+  type        = bool
+  description = "Are you reindexing through this pipeline right now?"
 }
 
 variable "rds_ids_access_security_group_id" {}

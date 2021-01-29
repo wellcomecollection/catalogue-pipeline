@@ -13,6 +13,8 @@ module "catalogue_pipeline_2021-01-22" {
   # If this pipeline is meant to be reindexed, remember to uncomment the
   # reindexer topic names.
 
+  is_reindexing = false
+
   sierra_adapter_topic_arns = [
     /*local.sierra_reindexer_topic_arn,*/
     local.sierra_merged_bibs_topic_arn,
@@ -33,8 +35,6 @@ module "catalogue_pipeline_2021-01-22" {
     /*local.calm_reindexer_topic_arn,*/
     local.calm_adapter_topic_arn,
   ]
-
-  extra_rds_instances = 0
 
   # Boilerplate that shouldn't change between pipelines.
 
