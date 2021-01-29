@@ -170,7 +170,7 @@ def start_reindex(ctx, src, dst, mode):
     elif src == "all" and mode != "complete":
         sys.exit("All-source reindexes only support --mode=complete")
 
-    print(f"Starting a reindex {src!r} ~> {dst!r}")
+    print(f"Starting a reindex {src} ~> {dst}")
 
     if mode == "complete":
         total_segments = how_many_segments(table_name=SOURCES[src])
