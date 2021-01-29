@@ -135,6 +135,10 @@ module "image_inferrer" {
 
   queue_read_policy = module.image_inferrer_queue.read_policy
 
+  depends_on = [
+    null_resource.elasticsearch_users,
+  ]
+
   deployment_service_env  = var.release_label
   deployment_service_name = "image-inferrer"
 }

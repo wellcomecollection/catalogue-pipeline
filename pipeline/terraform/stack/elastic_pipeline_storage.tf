@@ -99,3 +99,26 @@ module "pipeline_storage_secrets" {
     (local.pipeline_storage_private_host) = "${local.pipeline_storage_elastic_id}.vpce.${local.pipeline_storage_elastic_region}.aws.elastic-cloud.com"
   }
 }
+
+locals {
+  pipeline_storage_service_list = [
+    "id_minter",
+    "matcher",
+    "merger",
+    "transformer",
+    "relation_embedder",
+    "router",
+    "inferrer",
+  ]
+
+  pipeline_storage_es_service_secrets = zipmap(local.pipeline_storage_service_list, [
+    for service in local.pipeline_storage_service_list :
+    {
+      es_host     = local.pipeline_storage_private_host
+      es_port     = local.pipeline_storage_port
+      es_protocol = local.pipeline_storage_protocol
+      es_username = "elasticsearch/pipeline_storage_${var.pipeline_date}/${service}/es_username"
+      es_password = "elasticsearch/pipeline_storage_${var.pipeline_date}/${service}/es_password"
+    }
+  ])
+}
