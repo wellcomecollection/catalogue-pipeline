@@ -104,6 +104,40 @@ def publish_messages(job_config_id, topic_arn, parameters):
         assert resp["ResponseMetadata"]["HTTPStatusCode"] == 200, resp
 
 
+def get_reindexer_job_config(session):
+    """
+    Get the reindexer job config passed to the reindexer task.
+    """
+    ecs_client = session.client("ecs")
+
+    resp = ecs_client.describe_task_definition(taskDefinition="reindexer")
+
+    # The container definition contains two containers: the reindexer app, and the
+    # logstash router.
+    container_definition = next(
+    cd for cd in resp["taskDefinition"]["containerDefinitions"] if cd["name"] == "reindexer"
+    )
+
+    job_config_str = next(
+        ev["value"]
+        for ev in container_definition["environment"]
+        if ev['name'] == 'reindexer_job_config_json'
+    )
+
+    return json.loads(job_config_str)
+
+
+def has_subscriptions(session, *, topic_arn):
+    """
+    Returns True if a topic ARN has any subscriptions (e.g. an SQS queue), False otherwise.
+    """
+    sns_client = session.client("sns")
+    resp = sns_client.list_subscriptions_by_topic(
+    TopicArn=topic_arn)
+
+    return len(resp['Subscriptions']) > 0
+
+
 @click.command()
 @click.option(
     "--src",
@@ -131,6 +165,7 @@ def start_reindex(ctx, src, dst, mode):
     if src == "all" and mode == "complete":
         for source in SOURCES.keys():
             ctx.invoke(start_reindex, src=source, dst=dst, mode=mode)
+            print("")
         sys.exit(0)
     elif src == "all" and mode != "complete":
         sys.exit("All-source reindexes only support --mode=complete")
@@ -153,10 +188,35 @@ def start_reindex(ctx, src, dst, mode):
             return sys.exit("You need to specify at least 1 record ID")
         parameters = specific_reindex_parameters(specified_records)
 
-    topic_arn = get_reindexer_topic_arn()
+    job_config_id=f"{src}--{dst}"
+    reindexer_job_config = get_reindexer_job_config(session)
+
+    # It's incredibly frustrating to run a reindex using this script, see nothing come
+    # through the pipeline, and realise that nothing is listening to the reindexer output.
+    # (Ask me how I know.)
+    #
+    # This probably isn't what the user is trying to do, so if we detect there's nothing
+    # subscribed to the reindexer output, double-check that's correct.  It will save us
+    # time, frustration, and money.
+    try:
+        job_config = reindexer_job_config[job_config_id]
+    except KeyError:
+        raise RuntimeError(f"Unrecognised job config ID: {job_config_id}")
+    else:
+        destination_topic_arn = job_config["destinationConfig"]["topicArn"]
+
+        if not has_subscriptions(session, topic_arn=destination_topic_arn):
+            topic_name = destination_topic_arn.split(":")[-1]
+            warning_message = (
+                f"Warning: This reindex will send records to {topic_name}, "
+                "but nothing is subscribed to that topic.\nContinue?"
+            )
+            click.confirm(click.style(warning_message, "yellow"), abort=True)
+
+    reindexer_topic_arn = get_reindexer_topic_arn()
 
     publish_messages(
-        job_config_id=f"{src}--{dst}", topic_arn=topic_arn, parameters=parameters
+        job_config_id=job_config_id, topic_arn=reindexer_topic_arn, parameters=parameters
     )
 
 
