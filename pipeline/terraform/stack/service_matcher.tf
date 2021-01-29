@@ -52,7 +52,9 @@ module "matcher" {
 
     dynamo_lock_timeout = local.lock_timeout
 
-    es_index = local.es_works_identified_index
+    es_index                           = local.es_works_identified_index
+    read_ingest_batch_size             = 100
+    read_ingest_flush_interval_seconds = 30
   }
 
   secret_env_vars = local.pipeline_storage_es_service_secrets["matcher"]

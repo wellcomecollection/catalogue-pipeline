@@ -2,9 +2,14 @@ package uk.ac.wellcome.platform.ingestor.common
 
 import scala.concurrent.{ExecutionContext, Future}
 import akka.Done
-
+import akka.stream.scaladsl.Flow
+import software.amazon.awssdk.services.sqs.model.Message
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
+import uk.ac.wellcome.pipeline_storage.PipelineStorageStream.{
+  batchRetrieveFlow,
+  processFlow
+}
 import uk.ac.wellcome.pipeline_storage.{
   Indexable,
   PipelineStorageStream,
@@ -20,12 +25,14 @@ class IngestorWorkerService[Destination, In, Out](
     extends Runnable {
 
   def run(): Future[Done] =
-    pipelineStream.foreach(this.getClass.getSimpleName, processMessage)
+    pipelineStream.run(
+      this.getClass.getSimpleName,
+      Flow[(Message, NotificationMessage)]
+        .via(batchRetrieveFlow(pipelineStream.config, workRetriever))
+        .via(processFlow(pipelineStream.config, item => processMessage(item)))
+    )
 
-  private def processMessage(message: NotificationMessage): Future[List[Out]] =
-    workRetriever
-      .apply(message.body)
-      .map { item =>
-        List(transform(item))
-      }
+  private def processMessage(item: In): Future[List[Out]] =
+    Future.successful(List(transform(item)))
+
 }

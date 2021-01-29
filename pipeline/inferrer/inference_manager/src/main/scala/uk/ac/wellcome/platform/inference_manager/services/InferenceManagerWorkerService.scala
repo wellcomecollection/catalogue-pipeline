@@ -1,35 +1,34 @@
 package uk.ac.wellcome.platform.inference_manager.services
 
-import scala.concurrent.{ExecutionContext, Future}
-import scala.concurrent.duration._
-import scala.util.{Failure, Success, Try}
 import akka.Done
-import akka.http.scaladsl.model.HttpResponse
 import akka.actor.ActorSystem
+import akka.http.scaladsl.model.HttpResponse
 import akka.stream.scaladsl.{Flow, FlowWithContext, Source}
 import grizzled.slf4j.Logging
 import software.amazon.awssdk.services.sqs.model.Message
-
+import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
-import uk.ac.wellcome.messaging.MessageSender
+import uk.ac.wellcome.models.work.internal.ImageState.{Augmented, Initial}
 import uk.ac.wellcome.models.work.internal.{Image, ImageState, InferredData}
+import uk.ac.wellcome.pipeline_storage.Indexable.imageIndexable
+import uk.ac.wellcome.pipeline_storage.PipelineStorageStream._
+import uk.ac.wellcome.pipeline_storage.{
+  Indexer,
+  PipelineStorageConfig,
+  Retriever
+}
 import uk.ac.wellcome.platform.inference_manager.adapters.{
   InferrerAdapter,
   InferrerResponse
 }
 import uk.ac.wellcome.platform.inference_manager.models.DownloadedImage
 import uk.ac.wellcome.typesafe.Runnable
-import uk.ac.wellcome.pipeline_storage.{
-  Indexable,
-  Indexer,
-  PipelineStorageConfig,
-  PipelineStorageStream,
-  Retriever
-}
-import uk.ac.wellcome.json.JsonUtil._
-import ImageState.{Augmented, Initial}
-import Indexable.imageIndexable
+
+import scala.concurrent.duration._
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success, Try}
 
 case class AdapterResponseBundle[ImageType](
   image: ImageType,
@@ -56,7 +55,7 @@ class InferenceManagerWorkerService[Destination](
   val maxOpenRequests = actorSystem.settings.config
     .getInt("akka.http.host-connection-pool.max-open-requests")
 
-  val indexAndSend = PipelineStorageStream.batchIndexAndSendFlow(
+  val indexAndSend = batchIndexAndSendFlow(
     pipelineStorageConfig,
     (image: Image[Augmented]) => msgSender.send(imageIndexable.id(image)),
     imageIndexer
@@ -69,10 +68,9 @@ class InferenceManagerWorkerService[Destination](
         className,
         source =>
           source
+            .via(batchRetrieveFlow(pipelineStorageConfig, imageRetriever))
             .asSourceWithContext { case (message, _) => message }
-            .mapAsync(5) {
-              case (_, message) => imageRetriever(message.body)
-            }
+            .map { case (_, item) => item }
             .via(imageDownloader.download)
             .via(createRequests)
             .via(requestPool.asContextFlow)
