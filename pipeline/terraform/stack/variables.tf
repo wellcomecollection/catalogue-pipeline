@@ -4,7 +4,7 @@ variable "pipeline_date" {
 
 variable "max_capacity" {
   type        = number
-  default     = 10
+  default     = 15
   description = "The max capacity of every ECS service will be less than or equal to this value"
 }
 
