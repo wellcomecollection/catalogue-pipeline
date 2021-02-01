@@ -1,4 +1,4 @@
-package uk.ac.wellcome.calm_adapter
+package uk.ac.wellcome.platform.calm_api_client
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter

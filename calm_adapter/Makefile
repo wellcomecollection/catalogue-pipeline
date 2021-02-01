@@ -9,7 +9,7 @@ SBT_APPS = calm_adapter calm_deletion_checker
 SBT_NO_DOCKER_APPS =
 
 SBT_DOCKER_LIBRARIES =
-SBT_NO_DOCKER_LIBRARIES =
+SBT_NO_DOCKER_LIBRARIES = calm_api_client
 
 PYTHON_APPS =
 LAMBDAS = calm_window_generator calm_deletion_check_initiator

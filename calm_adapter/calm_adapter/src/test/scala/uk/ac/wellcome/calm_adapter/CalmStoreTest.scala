@@ -8,8 +8,10 @@ import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.{Identified, Version}
 import weco.catalogue.source_model.fixtures.SourceVHSFixture
 import weco.catalogue.source_model.store.SourceVHS
-
 import java.time.Instant
+
+import uk.ac.wellcome.platform.calm_api_client
+import uk.ac.wellcome.platform.calm_api_client.CalmRecord
 
 class CalmStoreTest
     extends AnyFunSpec
@@ -34,7 +36,10 @@ class CalmStoreTest
         createSourceVHS[CalmRecord]
       val calmStore = new CalmStore(sourceVHS)
 
-      val record = CalmRecord("A", Map("key" -> List("value")), retrievedAt)
+      val record = calm_api_client.CalmRecord(
+        "A",
+        Map("key" -> List("value")),
+        retrievedAt)
 
       val (storedId, storedLocation, storedRecord) =
         calmStore.putRecord(record).value.get
@@ -51,8 +56,9 @@ class CalmStoreTest
     }
 
     it("replaces a stored record if the data is newer and different") {
-      val oldRecord = CalmRecord("A", oldData, oldTime, published = true)
-      val newRecord = CalmRecord("A", newData, newTime)
+      val oldRecord =
+        calm_api_client.CalmRecord("A", oldData, oldTime, published = true)
+      val newRecord = calm_api_client.CalmRecord("A", newData, newTime)
 
       implicit val sourceVHS: SourceVHS[CalmRecord] =
         createSourceVHSWith(
@@ -77,8 +83,9 @@ class CalmStoreTest
 
     it(
       "does not replace a stored CALM record if the retrieval date is newer and the data is the same") {
-      val oldRecord = CalmRecord("A", data, oldTime, published = true)
-      val newRecord = CalmRecord("A", data, newTime)
+      val oldRecord =
+        calm_api_client.CalmRecord("A", data, oldTime, published = true)
+      val newRecord = calm_api_client.CalmRecord("A", data, newTime)
 
       implicit val sourceVHS: SourceVHS[CalmRecord] =
         createSourceVHSWith(
@@ -94,8 +101,9 @@ class CalmStoreTest
 
     it(
       "replaces a stored CALM record if the data is the same but it is not recorded as published") {
-      val oldRecord = CalmRecord("A", oldData, oldTime, published = false)
-      val newRecord = CalmRecord("A", oldData, newTime)
+      val oldRecord =
+        calm_api_client.CalmRecord("A", oldData, oldTime, published = false)
+      val newRecord = calm_api_client.CalmRecord("A", oldData, newTime)
 
       implicit val sourceVHS: SourceVHS[CalmRecord] =
         createSourceVHSWith(
@@ -120,8 +128,8 @@ class CalmStoreTest
 
     it(
       "does not replace a stored CALM record if the retrieval date on the new record is older") {
-      val oldRecord = CalmRecord("A", oldData, oldTime)
-      val newRecord = CalmRecord("A", newData, newTime)
+      val oldRecord = calm_api_client.CalmRecord("A", oldData, oldTime)
+      val newRecord = calm_api_client.CalmRecord("A", newData, newTime)
 
       implicit val sourceVHS: SourceVHS[CalmRecord] =
         createSourceVHSWith(
@@ -136,7 +144,10 @@ class CalmStoreTest
     }
 
     it("doesn't store CALM records when checking the stored data fails") {
-      val record = CalmRecord("A", Map("key" -> List("value")), retrievedAt)
+      val record = calm_api_client.CalmRecord(
+        "A",
+        Map("key" -> List("value")),
+        retrievedAt)
 
       val calmStore = new CalmStore(createSourceVHS[CalmRecord]) {
         override def shouldStoreRecord(record: CalmRecord): Result[Boolean] =
@@ -147,8 +158,10 @@ class CalmStoreTest
     }
 
     it("errors if the data differs but timestamp is the same") {
-      val x = CalmRecord("A", Map("key" -> List("x")), retrievedAt)
-      val y = CalmRecord("A", Map("key" -> List("y")), retrievedAt)
+      val x =
+        calm_api_client.CalmRecord("A", Map("key" -> List("x")), retrievedAt)
+      val y =
+        calm_api_client.CalmRecord("A", Map("key" -> List("y")), retrievedAt)
 
       implicit val sourceVHS: SourceVHS[CalmRecord] =
         createSourceVHSWith(
@@ -165,7 +178,10 @@ class CalmStoreTest
 
   describe("setRecordPublished") {
     it("sets Calm records as published") {
-      val record = CalmRecord("A", Map("key" -> List("value")), retrievedAt)
+      val record = calm_api_client.CalmRecord(
+        "A",
+        Map("key" -> List("value")),
+        retrievedAt)
       record.published shouldBe false
 
       implicit val sourceVHS: SourceVHS[CalmRecord] =
@@ -185,7 +201,10 @@ class CalmStoreTest
     }
 
     it("fails setting Calm record as published if version already exists") {
-      val record = CalmRecord("A", Map("key" -> List("value")), retrievedAt)
+      val record = calm_api_client.CalmRecord(
+        "A",
+        Map("key" -> List("value")),
+        retrievedAt)
       record.published shouldBe false
 
       implicit val sourceVHS: SourceVHS[CalmRecord] =

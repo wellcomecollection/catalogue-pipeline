@@ -1,15 +1,16 @@
-package uk.ac.wellcome.calm_adapter
+package uk.ac.wellcome.platform.calm_api_client
 
-import scala.concurrent.{ExecutionContext, Future}
 import java.time.Instant
-import grizzled.slf4j.Logging
 
 import akka.NotUsed
-import akka.stream.Materializer
-import akka.stream.scaladsl._
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers._
 import akka.http.scaladsl.unmarshalling.Unmarshal
+import akka.stream.Materializer
+import akka.stream.scaladsl._
+import grizzled.slf4j.Logging
+
+import scala.concurrent.{ExecutionContext, Future}
 
 trait CalmRetriever {
 

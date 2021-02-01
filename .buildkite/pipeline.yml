@@ -16,6 +16,8 @@ steps:
     label: "ingestor common"
   - command: .buildkite/scripts/run_job.py transformer_common
     label: "transformer common"
+  - command: .buildkite/scripts/run_job.py calm_api_client
+    label: "calm api client"
   - wait
   - command: .buildkite/scripts/run_job.py api
     label: "API"

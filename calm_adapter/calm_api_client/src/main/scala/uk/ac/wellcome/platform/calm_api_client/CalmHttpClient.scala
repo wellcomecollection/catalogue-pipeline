@@ -1,12 +1,13 @@
-package uk.ac.wellcome.calm_adapter
+package uk.ac.wellcome.platform.calm_api_client
 
-import scala.concurrent.{ExecutionContext, Future}
-import scala.concurrent.duration._
 import akka.actor.ActorSystem
 import akka.stream.scaladsl._
 import akka.stream.{Materializer, RestartSettings}
 import akka.http.scaladsl._
 import akka.http.scaladsl.model._
+
+import scala.concurrent.duration._
+import scala.concurrent.{ExecutionContext, Future}
 
 trait CalmHttpClient {
 

@@ -2,6 +2,7 @@
   "id" : "calm_deletion_checker",
   "folder" : "calm_adapter/calm_deletion_checker",
   "dependencyIds" : [
+    "calm_api_client",
     "source_model_typesafe"
   ]
 }
