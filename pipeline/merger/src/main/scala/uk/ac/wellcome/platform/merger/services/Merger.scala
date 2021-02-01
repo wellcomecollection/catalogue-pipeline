@@ -43,7 +43,8 @@ trait Merger extends MergerLogging {
     require(deleted.intersect(sources).isEmpty)
   }
 
-  private def categoriseWorks(works: Seq[Work[Identified]]): Option[CategorisedWorks] =
+  private def categoriseWorks(
+    works: Seq[Work[Identified]]): Option[CategorisedWorks] =
     works match {
       case List(unmatchedWork: Work.Visible[Identified]) =>
         Some(CategorisedWorks(target = unmatchedWork))
@@ -51,12 +52,12 @@ trait Merger extends MergerLogging {
         findTarget(matchedWorks).map { target =>
           CategorisedWorks(
             target = target,
-            sources =
-              matchedWorks
-                .filterNot { _.isInstanceOf[Work.Deleted[Identified]]}
-                .filterNot { _.sourceIdentifier == target.sourceIdentifier },
-            deleted =
-              matchedWorks.collect { case w: Work.Deleted[Identified] => w},
+            sources = matchedWorks
+              .filterNot { _.isInstanceOf[Work.Deleted[Identified]] }
+              .filterNot { _.sourceIdentifier == target.sourceIdentifier },
+            deleted = matchedWorks.collect {
+              case w: Work.Deleted[Identified] => w
+            },
           )
         }
     }

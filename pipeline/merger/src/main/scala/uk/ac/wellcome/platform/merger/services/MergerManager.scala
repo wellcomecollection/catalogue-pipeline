@@ -19,8 +19,7 @@ class MergerManager(mergerRules: Merger) {
       val result = mergerRules.merge(works)
       assert(result.resultWorks.size == works.size)
       result
-    }
-    else
+    } else
       MergerOutcome.passThrough(works)
   }
 }

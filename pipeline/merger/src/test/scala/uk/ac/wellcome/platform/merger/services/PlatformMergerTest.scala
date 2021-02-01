@@ -363,7 +363,8 @@ class PlatformMergerTest
 
       result.mergedWorksWithTime(now) should contain(expectedMergedWork)
       result.mergedWorksWithTime(now) should contain(expectedRedirectedWork)
-      result.mergedWorksWithTime(now) should contain(deletedWork.transition[Merged](now))
+      result.mergedWorksWithTime(now) should contain(
+        deletedWork.transition[Merged](now))
 
       result.mergedImagesWithTime(now) shouldBe empty
     }
@@ -647,6 +648,8 @@ class PlatformMergerTest
       works = Seq(visibleWork, deletedWork)
     )
 
-    result.resultWorks should contain theSameElementsAs Seq(visibleWork, deletedWork)
+    result.resultWorks should contain theSameElementsAs Seq(
+      visibleWork,
+      deletedWork)
   }
 }

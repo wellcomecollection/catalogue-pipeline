@@ -363,7 +363,8 @@ class MergerWorkerServiceTest
 
         val matcherResult = MatcherResult(
           Set(
-            MatchedIdentifiers(worksToWorkIdentifiers(List(visibleWork, deletedWork)))
+            MatchedIdentifiers(
+              worksToWorkIdentifiers(List(visibleWork, deletedWork)))
           ))
 
         sendNotificationToSQS(queue = queue, message = matcherResult)
