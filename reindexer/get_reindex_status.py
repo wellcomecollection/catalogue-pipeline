@@ -62,23 +62,17 @@ def get_secret_string(session, *, secret_id):
     return secrets.get_secret_value(SecretId=secret_id)["SecretString"]
 
 
-def get_pipeline_storage_es_client(session, *, deployment_id):
+def get_pipeline_storage_es_client(session, *, reindex_date):
     """
     Returns an Elasticsearch client for the pipeline-storage cluster.
     """
-    host = get_secret_string(
-        session, secret_id=f"elasticsearch/{deployment_id}/public_host"
-    )
-    port = get_secret_string(session, secret_id=f"catalogue/{deployment_id}/es_port")
-    protocol = get_secret_string(
-        session, secret_id=f"catalogue/{deployment_id}/es_protocol"
-    )
-    username = get_secret_string(
-        session, secret_id=f"catalogue/{deployment_id}/dev/es_username"
-    )
-    password = get_secret_string(
-        session, secret_id=f"catalogue/{deployment_id}/dev/es_password"
-    )
+    secret_prefix = f"elasticsearch/pipeline_storage_{reindex_date}"
+
+    host = get_secret_string(session, secret_id=f"{secret_prefix}/public_host")
+    port = get_secret_string(session, secret_id=f"{secret_prefix}/port")
+    protocol = get_secret_string(session, secret_id=f"{secret_prefix}/protocol")
+    username = get_secret_string(session, secret_id=f"{secret_prefix}/read_only/es_username")
+    password = get_secret_string(session, secret_id=f"{secret_prefix}/read_only/es_password")
 
     return Elasticsearch(f"{protocol}://{username}:{password}@{host}:{port}")
 
@@ -109,13 +103,11 @@ def count_documents_in_index(es_client, *, index_name):
         return int(count_resp[0]["count"])
 
 
-def get_works_index_stats(session, *, deployment_id, reindex_date):
+def get_works_index_stats(session, *, reindex_date):
     """
     Returns a map (step) -> (ES documents count).
     """
-    pipeline_client = get_pipeline_storage_es_client(
-        session, deployment_id=deployment_id
-    )
+    pipeline_client = get_pipeline_storage_es_client(session, reindex_date=reindex_date)
 
     indexes = ["works-source", "works-identified", "works-merged", "works-denormalised"]
 
@@ -134,13 +126,11 @@ def get_works_index_stats(session, *, deployment_id, reindex_date):
     return result
 
 
-def get_images_index_stats(session, *, deployment_id, reindex_date):
+def get_images_index_stats(session, *, reindex_date):
     """
     Returns a map (step) -> (ES documents count).
     """
-    pipeline_client = get_pipeline_storage_es_client(
-        session, deployment_id=deployment_id
-    )
+    pipeline_client = get_pipeline_storage_es_client(session, reindex_date=reindex_date)
 
     indexes = ["images-initial", "images-augmented"]
 
@@ -160,9 +150,8 @@ def get_images_index_stats(session, *, deployment_id, reindex_date):
 
 
 @click.command()
-@click.option("--deployment-id", default="pipeline_storage")
 @click.argument("reindex_date")
-def main(reindex_date, deployment_id):
+def main(reindex_date):
     session_read_only = get_session_with_role(
         "arn:aws:iam::760097843905:role/platform-read_only"
     )
@@ -186,9 +175,7 @@ def main(reindex_date, deployment_id):
 
     print("*** Work index stats ***")
 
-    work_index_stats = get_works_index_stats(
-        session_dev, deployment_id=deployment_id, reindex_date=reindex_date
-    )
+    work_index_stats = get_works_index_stats(session_dev, reindex_date=reindex_date)
 
     rows = [[step, count] for step, count in work_index_stats.items()]
     rows.insert(0, ["source records", source_counts["TOTAL"], ""])
@@ -210,9 +197,7 @@ def main(reindex_date, deployment_id):
 
     print("*** Image index stats ***")
 
-    image_index_stats = get_images_index_stats(
-        session_dev, deployment_id=deployment_id, reindex_date=reindex_date
-    )
+    image_index_stats = get_images_index_stats(session_dev, reindex_date=reindex_date)
 
     rows = [[step, count] for step, count in image_index_stats.items()]
     rows[0].append("")
