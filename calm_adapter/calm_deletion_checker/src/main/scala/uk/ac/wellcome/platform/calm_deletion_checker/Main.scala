@@ -7,11 +7,14 @@ import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.platform.calm_api_client.{
   CalmAkkaHttpClient,
   CalmHttpClient,
+  CalmRecord,
   HttpCalmRetriever
 }
+import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
+import weco.catalogue.source_model.config.SourceVHSBuilder
 
 import scala.concurrent.ExecutionContext
 
@@ -29,6 +32,7 @@ object Main extends WellcomeTypesafeApp {
       msgStream = SQSBuilder.buildSQSStream(config),
       messageSender = SNSBuilder
         .buildSNSMessageSender(config, subject = "CALM deletion checker"),
+      calmVHS = SourceVHSBuilder.build[CalmRecord](config),
       calmRetriever = calmRetriever(config),
       batchSize =
         config.getIntOption("calm.deletion_checker.batch_size").getOrElse(500)
