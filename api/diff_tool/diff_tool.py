@@ -25,9 +25,8 @@ class ApiDiffer:
     printing the results to stdout.
     """
 
-    def __init__(self, work_id=None, params=None):
-        suffix = f"/{work_id}" if work_id else ""
-        self.path = f"/catalogue/v2/works{suffix}"
+    def __init__(self, path=None, params=None, **kwargs):
+        self.path = f"/catalogue/v2{path}"
         self.params = params or {}
 
     @property
@@ -94,8 +93,7 @@ def main(routes_file):
         routes = json.load(f)
 
     def get_diff(route):
-        work_id, params = route.get("workId"), route.get("params")
-        differ = ApiDiffer(work_id, params)
+        differ = ApiDiffer(**route)
         status, diff_lines = differ.get_html_diff()
 
         return {
