@@ -1,0 +1,7 @@
+{
+  "id" : "calm_deletion_checker",
+  "folder" : "calm_adapter/calm_deletion_checker",
+  "dependencyIds" : [
+    "source_model_typesafe"
+  ]
+}
