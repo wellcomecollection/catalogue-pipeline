@@ -106,5 +106,12 @@
   },
   {
     "path": "/images"
+  },
+  {
+    "path": "/works/qfkgyy9c",
+    "params": {
+      "include": "items,genres,identifiers"
+    },
+    "comment": "A redirected Work that had issues in the 2021-02-01 reindex"
   }
 ]
