@@ -54,7 +54,7 @@ class ApiDiffer:
                 "stage:",
                 f"{json.dumps(stage_json, indent=2)}",
             ]
-            return ("different status", "\n".join(lines))
+            return ("different status", lines)
         elif prod_json == stage_json:
             return ("match", "")
         else:
