@@ -46,6 +46,7 @@ trait ElasticIndexerFixtures extends ElasticsearchFixtures with Akka {
                                config: IndexConfig = NoStrictMapping)(
     testWith: TestWith[ElasticIndexer[T], R])(implicit
                                               ec: ExecutionContext,
+                                              decoder: Decoder[T],
                                               encoder: Encoder[T],
                                               indexable: Indexable[T]): R =
     testWith(new ElasticIndexer[T](esClient, idx, config))

@@ -6,16 +6,18 @@ import com.sksamuel.elastic4s.requests.bulk.{BulkResponse, BulkResponseItem}
 import com.sksamuel.elastic4s.requests.common.VersionType.ExternalGte
 import com.sksamuel.elastic4s.{ElasticClient, Index, Response}
 import com.sksamuel.elastic4s.{Indexable => ElasticIndexable}
-import io.circe.{Encoder, Printer}
+import io.circe.{Decoder, Encoder, Printer}
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.elasticsearch.{ElasticsearchIndexCreator, IndexConfig}
+import uk.ac.wellcome.pipeline_storage.elastic.ElasticSourceRetriever
 
 import scala.util.Try
 
 class ElasticIndexer[T: Indexable](
   client: ElasticClient,
   index: Index,
-  config: IndexConfig)(implicit ec: ExecutionContext, encoder: Encoder[T])
+  config: IndexConfig,
+  skipReindexingIdenticalDocuments: Boolean = false)(implicit ec: ExecutionContext, encoder: Encoder[T], decoder: Decoder[T])
     extends Indexer[T]
     with Logging {
 
@@ -30,6 +32,8 @@ class ElasticIndexer[T: Indexable](
     }
   }
 
+  private lazy val retriever = new ElasticSourceRetriever[T](client, index)
+
   final def init(): Future[Unit] =
     new ElasticsearchIndexCreator(client, index, config).create
 
@@ -42,8 +46,35 @@ class ElasticIndexer[T: Indexable](
       ids = documents.map(doc => indexable.id(doc))
       _ = debug(s"Indexing ${ids.mkString(", ")}")
 
-      result <- indexDocuments(documents)
+      existingDocuments <- if (skipReindexingIdenticalDocuments) {
+        getExistingDocuments(documents)
+      } else {
+        Future(Seq[T]())
+      }
+
+      documentsToIndex = (documents.toSet -- existingDocuments.toSet).toSeq
+
+      result <- indexDocuments(documentsToIndex)
+        .map {
+          // If everything got indexed correctly, then we should return the
+          // complete list of documents we were asked to index.
+          case Right(_) => Right(documents)
+          case Left(failedDocuments) => Left(failedDocuments)
+        }
     } yield result
+
+  // Returns a list of documents we want to index that are *identical*
+  // to the documents already in the index.
+  private def getExistingDocuments(documents: Seq[T]): Future[Seq[T]] = {
+    val ids = documents.map(doc => indexable.id(doc))
+
+    retriever.apply(ids)
+      .map { case RetrieverMultiResult(found, _) => found }
+      .map { found =>
+        documents.filterNot { doc => found(indexable.id(doc)) == doc }
+      }
+      .recover { case _ => Seq[T]() }
+  }
 
   private def indexDocuments(documents: Seq[T]): Future[Either[Seq[T], Seq[T]]] = {
     val inserts = documents.map { document =>
