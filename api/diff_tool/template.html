@@ -102,8 +102,11 @@
     <summary>
       <strong>
         {% if d.status == "match" %}✅{% else %}❌{% endif %}
-        {{ d.display_url }}
-        {% if d.route.comment %}({{ d.route.comment }}){% endif %}
+        {% if d.route.comment %}
+          {{ d.route.comment }}
+        {% else %}
+          {{ d.display_url }}
+        {% endif %}
       </strong>
     </summary>
 
