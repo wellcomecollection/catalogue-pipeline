@@ -56,10 +56,7 @@ trait Merger extends MergerLogging {
                 .filterNot { _.isInstanceOf[Work.Deleted[Identified]]}
                 .filterNot { _.sourceIdentifier == target.sourceIdentifier },
             deleted =
-              matchedWorks
-                .filter { _.isInstanceOf[Work.Deleted[Identified]]}
-                .filterNot { _.sourceIdentifier == target.sourceIdentifier }
-                .map { _.asInstanceOf[Work.Deleted[Identified]] },
+              matchedWorks.collect { case w: Work.Deleted[Identified] => w},
           )
         }
     }
