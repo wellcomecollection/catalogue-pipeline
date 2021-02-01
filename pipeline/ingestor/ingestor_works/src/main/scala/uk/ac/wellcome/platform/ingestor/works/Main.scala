@@ -40,7 +40,6 @@ object Main extends WellcomeTypesafeApp {
       ElasticBuilder.buildElasticClient(config, namespace = "catalogue"),
       namespace = "indexed-works",
       indexConfig = IndexedWorkIndexConfig,
-
       // The relation embedder will re-send an ID for a Work every time it adds
       // a new relation.  This is why we see way more IDs than there are Works on
       // the ingestor queue during a reindex.

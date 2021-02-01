@@ -20,8 +20,7 @@ class ElasticIndexer[T: Indexable](
   // This flag defaults to false because it adds extra work, and we should
   // only enable it that if we think it's likely to save a lot of indexing.
   skipReindexingIdenticalDocuments: Boolean = false
-)(
-  implicit
+)(implicit
   ec: ExecutionContext,
   encoder: Encoder[T],
   decoder: Decoder[T])
@@ -47,8 +46,7 @@ class ElasticIndexer[T: Indexable](
   final def apply(documents: Seq[T]): Future[Either[Seq[T], Seq[T]]] =
     for {
       _ <- Future.fromTry(Try(
-        require(documents.nonEmpty, "Cannot index an empty list of documents"))
-      )
+        require(documents.nonEmpty, "Cannot index an empty list of documents")))
 
       ids = documents.map(doc => indexable.id(doc))
       _ = debug(s"Indexing ${ids.mkString(", ")}")
@@ -65,7 +63,7 @@ class ElasticIndexer[T: Indexable](
         .map {
           // If everything got indexed correctly, then we should return the
           // complete list of documents we were asked to index.
-          case Right(_) => Right(documents)
+          case Right(_)              => Right(documents)
           case Left(failedDocuments) => Left(failedDocuments)
         }
     } yield result
@@ -75,15 +73,19 @@ class ElasticIndexer[T: Indexable](
   private def getExistingDocuments(documents: Seq[T]): Future[Seq[T]] = {
     val ids = documents.map(doc => indexable.id(doc))
 
-    retriever.apply(ids)
+    retriever
+      .apply(ids)
       .map { case RetrieverMultiResult(found, _) => found }
       .map { found =>
-        documents.filterNot { doc => found(indexable.id(doc)) == doc }
+        documents.filterNot { doc =>
+          found(indexable.id(doc)) == doc
+        }
       }
       .recover { case _ => Seq[T]() }
   }
 
-  private def indexDocuments(documents: Seq[T]): Future[Either[Seq[T], Seq[T]]] = {
+  private def indexDocuments(
+    documents: Seq[T]): Future[Either[Seq[T], Seq[T]]] = {
     val inserts = documents.map { document =>
       indexInto(index.name)
         .version(indexable.version(document))

@@ -27,7 +27,7 @@ import uk.ac.wellcome.pipeline_storage.{
 import scala.concurrent.ExecutionContext.Implicits.global
 
 trait ElasticIndexerTestBase
-  extends IndexerTestCases[Index, SampleDocument]
+    extends IndexerTestCases[Index, SampleDocument]
     with ElasticsearchFixtures {
   val skipReindexingIdenticalDocuments: Boolean
 
@@ -98,7 +98,7 @@ trait ElasticIndexerTestBase
     }
 
     object StrictWithNoDataIndexConfig
-      extends IndexConfig
+        extends IndexConfig
         with IndexConfigFields {
 
       import com.sksamuel.elastic4s.ElasticDsl._
@@ -144,7 +144,7 @@ trait ElasticIndexerTestBase
     )
 
     object UnmappedDataMappingIndexConfig
-      extends IndexConfig
+        extends IndexConfig
         with IndexConfigFields {
 
       import com.sksamuel.elastic4s.ElasticDsl._
