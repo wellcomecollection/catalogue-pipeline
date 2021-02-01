@@ -19,7 +19,6 @@ import uk.ac.wellcome.messaging.memory.{
   MemoryMessageSender
 }
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.platform.calm_api_client
 import uk.ac.wellcome.platform.calm_api_client.{
   CalmQuery,
   CalmRecord,
@@ -53,9 +52,9 @@ class CalmAdapterWorkerServiceTest
   val instantC = Instant.ofEpochSecond(instantA.getEpochSecond + 2)
   val recordA = CalmRecord("A", Map("RecordID" -> List("A")), instantA)
   val recordB =
-    calm_api_client.CalmRecord("B", Map("RecordID" -> List("B")), instantB)
+    CalmRecord("B", Map("RecordID" -> List("B")), instantB)
   val recordC =
-    calm_api_client.CalmRecord("C", Map("RecordID" -> List("C")), instantC)
+    CalmRecord("C", Map("RecordID" -> List("C")), instantC)
   val queryDate = LocalDate.of(2000, 1, 1)
 
   it("processes an incoming window, storing records and publishing keys") {
@@ -125,9 +124,9 @@ class CalmAdapterWorkerServiceTest
       def apply(query: CalmQuery): Source[CalmRecord, NotUsed] = {
         val timestamp = Instant.now
         val records = List(
-          calm_api_client.CalmRecord("A", Map.empty, timestamp),
-          calm_api_client.CalmRecord("B", Map.empty, timestamp),
-          calm_api_client.CalmRecord("C", Map.empty, timestamp),
+          CalmRecord("A", Map.empty, timestamp),
+          CalmRecord("B", Map.empty, timestamp),
+          CalmRecord("C", Map.empty, timestamp),
         )
         Source.fromIterator(() => records.toIterator)
       }
