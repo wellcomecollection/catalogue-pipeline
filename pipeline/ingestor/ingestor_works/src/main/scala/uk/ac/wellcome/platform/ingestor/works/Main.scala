@@ -39,7 +39,17 @@ object Main extends WellcomeTypesafeApp {
       config,
       ElasticBuilder.buildElasticClient(config, namespace = "catalogue"),
       namespace = "indexed-works",
-      indexConfig = IndexedWorkIndexConfig
+      indexConfig = IndexedWorkIndexConfig,
+
+      // The relation embedder will re-send an ID for a Work every time it adds
+      // a new relation.  This is why we see way more IDs than there are Works on
+      // the ingestor queue during a reindex.
+      //
+      // Depending on when the ingestor picks up those IDs, it might skip
+      // the intermediate versions.  If so, we end up reindexing the same Work
+      // repeatedly, which puts unnecessary pressure on Elasticsearch and
+      // slows down the reindex.
+      skipReindexingIdenticalDocuments = true
     )
     val messageSender = SNSBuilder
       .buildSNSMessageSender(config, subject = "Sent from the ingestor-works")

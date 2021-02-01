@@ -17,7 +17,14 @@ class ElasticIndexer[T: Indexable](
   client: ElasticClient,
   index: Index,
   config: IndexConfig,
-  skipReindexingIdenticalDocuments: Boolean = false)(implicit ec: ExecutionContext, encoder: Encoder[T], decoder: Decoder[T])
+  // This flag defaults to false because it adds extra work, and we should
+  // only enable it that if we think it's likely to save a lot of indexing.
+  skipReindexingIdenticalDocuments: Boolean = false
+)(
+  implicit
+  ec: ExecutionContext,
+  encoder: Encoder[T],
+  decoder: Decoder[T])
     extends Indexer[T]
     with Logging {
 
