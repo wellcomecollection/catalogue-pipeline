@@ -26,10 +26,12 @@ object Main extends WellcomeTypesafeApp {
       new CalmAkkaHttpClient()
 
     new DeletionCheckerWorkerService(
-      SQSBuilder.buildSQSStream(config),
-      SNSBuilder
+      msgStream = SQSBuilder.buildSQSStream(config),
+      messageSender = SNSBuilder
         .buildSNSMessageSender(config, subject = "CALM deletion checker"),
-      calmRetriever(config)
+      calmRetriever = calmRetriever(config),
+      batchSize =
+        config.getIntOption("calm.deletion_checker.batch_size").getOrElse(500)
     )
   }
 
