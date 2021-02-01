@@ -310,13 +310,7 @@ class PlatformMergerTest
       expectedMergedWork)
   }
 
-  it("merges a non-picture Sierra work with a METS work") {
-    val result = merger.merge(
-      works = Seq(sierraPhysicalWork, metsWork)
-    )
-
-    result.mergedWorksWithTime(now).size shouldBe 2
-
+  describe("merges a non-picture Sierra work with a METS work") {
     val physicalItem = sierraPhysicalWork.data.items.head
     val digitalItem = metsWork.data.items.head
 
@@ -345,10 +339,34 @@ class PlatformMergerTest
           sourceIdentifier = sierraPhysicalWork.sourceIdentifier)
       )
 
-    result.mergedWorksWithTime(now) should contain theSameElementsAs List(
-      expectedMergedWork,
-      expectedRedirectedWork)
-    result.mergedImagesWithTime(now) shouldBe empty
+    it("merges the two Works") {
+      val result = merger.merge(
+        works = Seq(sierraPhysicalWork, metsWork)
+      )
+
+      result.mergedWorksWithTime(now).size shouldBe 2
+
+      result.mergedWorksWithTime(now) should contain(expectedMergedWork)
+      result.mergedWorksWithTime(now) should contain(expectedRedirectedWork)
+
+      result.mergedImagesWithTime(now) shouldBe empty
+    }
+
+    it("ignores a deleted Work when deciding how to merge the other Works") {
+      val deletedWork = identifiedWork().deleted()
+
+      val result = merger.merge(
+        works = Seq(sierraPhysicalWork, metsWork, deletedWork)
+      )
+
+      result.mergedWorksWithTime(now).size shouldBe 3
+
+      result.mergedWorksWithTime(now) should contain(expectedMergedWork)
+      result.mergedWorksWithTime(now) should contain(expectedRedirectedWork)
+      result.mergedWorksWithTime(now) should contain(deletedWork.transition[Merged](now))
+
+      result.mergedImagesWithTime(now) shouldBe empty
+    }
   }
 
   it("merges a picture Sierra work with a METS work") {
