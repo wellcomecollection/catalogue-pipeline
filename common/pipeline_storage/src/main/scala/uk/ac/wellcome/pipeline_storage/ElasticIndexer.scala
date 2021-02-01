@@ -34,48 +34,54 @@ class ElasticIndexer[T: Indexable](
     new ElasticsearchIndexCreator(client, index, config).create
 
   final def apply(documents: Seq[T]): Future[Either[Seq[T], Seq[T]]] =
-    Future
-      .fromTry(Try(
-        require(documents.nonEmpty, "Cannot index an empty list of documents")))
-      .flatMap { _ =>
-        debug(
-          s"Indexing ${documents.map(doc => indexable.id(doc)).mkString(", ")}")
-        val inserts = documents.map { document =>
-          indexInto(index.name)
-            .version(indexable.version(document))
-            .versionType(ExternalGte)
-            .id(indexable.id(document))
-            .doc(document)
-        }
+    for {
+      _ <- Future.fromTry(Try(
+        require(documents.nonEmpty, "Cannot index an empty list of documents"))
+      )
 
-        client
-          .execute {
-            bulk(inserts)
-          }
-          .map { response: Response[BulkResponse] =>
-            if (response.isError) {
-              error(s"Error from Elasticsearch: $response")
-              Left(documents)
-            } else {
-              debug(s"Bulk response = $response")
-              val bulkResponse = response.result
-              val actualFailures = bulkResponse.failures.filterNot {
-                isVersionConflictException
-              }
+      ids = documents.map(doc => indexable.id(doc))
+      _ = debug(s"Indexing ${ids.mkString(", ")}")
 
-              if (actualFailures.nonEmpty) {
-                val failedIds = actualFailures.map { failure =>
-                  error(s"Failed ingesting ${failure.id}: ${failure.error}")
-                  failure.id
-                }
+      result <- indexDocuments(documents)
+    } yield result
 
-                Left(documents.filter(doc => {
-                  failedIds.contains(indexable.id(doc))
-                }))
-              } else Right(documents)
-            }
-          }
+  private def indexDocuments(documents: Seq[T]): Future[Either[Seq[T], Seq[T]]] = {
+    val inserts = documents.map { document =>
+      indexInto(index.name)
+        .version(indexable.version(document))
+        .versionType(ExternalGte)
+        .id(indexable.id(document))
+        .doc(document)
+    }
+
+    client
+      .execute {
+        bulk(inserts)
       }
+      .map { response: Response[BulkResponse] =>
+        if (response.isError) {
+          error(s"Error from Elasticsearch: $response")
+          Left(documents)
+        } else {
+          debug(s"Bulk response = $response")
+          val bulkResponse = response.result
+          val actualFailures = bulkResponse.failures.filterNot {
+            isVersionConflictException
+          }
+
+          if (actualFailures.nonEmpty) {
+            val failedIds = actualFailures.map { failure =>
+              error(s"Failed ingesting ${failure.id}: ${failure.error}")
+              failure.id
+            }
+
+            Left(documents.filter(doc => {
+              failedIds.contains(indexable.id(doc))
+            }))
+          } else Right(documents)
+        }
+      }
+  }
 
   /** Did we try to PUT a document with a lower version than the existing version?
     *
