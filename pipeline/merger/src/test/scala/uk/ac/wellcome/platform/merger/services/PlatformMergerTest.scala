@@ -620,4 +620,15 @@ class PlatformMergerTest
       physicalVideo,
       digitisedVideo)
   }
+
+  it("returns both Works unmodified if one of the Works is deleted") {
+    val visibleWork = identifiedWork()
+    val deletedWork = identifiedWork().deleted()
+
+    val result = merger.merge(
+      works = Seq(visibleWork, deletedWork)
+    )
+
+    result.resultWorks should contain theSameElementsAs Seq(visibleWork, deletedWork)
+  }
 }
