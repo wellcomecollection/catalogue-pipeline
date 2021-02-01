@@ -34,23 +34,32 @@ trait Merger extends MergerLogging {
     target: Work.Visible[Identified],
     sources: Seq[Work[Identified]]): State[MergeState, MergeResult]
 
-  protected def getTargetAndSources(works: Seq[Work[Identified]])
-    : Option[(Work.Visible[Identified], Seq[Work[Identified]])] =
+  private case class CategorisedWorks(
+    target: Work.Visible[Identified],
+    sources: Seq[Work[Identified]] = Nil,
+    deleted: Seq[Work.Deleted[Identified]] = Nil
+  ) {
+    require(!sources.contains(target))
+    require(deleted.intersect(sources).isEmpty)
+  }
+
+  private def categoriseWorks(works: Seq[Work[Identified]]): Option[CategorisedWorks] =
     works match {
       case List(unmatchedWork: Work.Visible[Identified]) =>
-        Some((unmatchedWork, Nil))
+        Some(CategorisedWorks(target = unmatchedWork))
       case matchedWorks =>
         findTarget(matchedWorks).map { target =>
-          (
-            target,
-            matchedWorks
-              .filterNot {
-                case _: Work.Deleted[Identified] => true
-                case _                           => false
-              }
-              .filterNot(
-                _.sourceIdentifier == target.sourceIdentifier
-              )
+          CategorisedWorks(
+            target = target,
+            sources =
+              matchedWorks
+                .filterNot { _.isInstanceOf[Work.Deleted[Identified]]}
+                .filterNot { _.sourceIdentifier == target.sourceIdentifier },
+            deleted =
+              matchedWorks
+                .filter { _.isInstanceOf[Work.Deleted[Identified]]}
+                .filterNot { _.sourceIdentifier == target.sourceIdentifier }
+                .map { _.asInstanceOf[Work.Deleted[Identified]] },
           )
         }
     }
@@ -72,9 +81,11 @@ trait Merger extends MergerLogging {
   }
 
   def merge(works: Seq[Work[Identified]]): MergerOutcome =
-    getTargetAndSources(works)
+    categoriseWorks(works)
       .map {
-        case (target, sources) =>
+        case CategorisedWorks(target, sources, deleted) =>
+          assert((sources ++ deleted :+ target).toSet == works.toSet)
+
           logIntentions(target, sources)
           val (mergeResultSources, result) = createMergeResult(target, sources)
             .run(Map.empty)
@@ -88,7 +99,7 @@ trait Merger extends MergerLogging {
           logResult(result, redirects.toList, remaining.toList)
 
           MergerOutcome(
-            resultWorks = redirects.toList ++ remaining :+ result.mergedTarget,
+            resultWorks = redirects.toList ++ remaining ++ deleted :+ result.mergedTarget,
             imagesWithSources = result.imageDataWithSources
           )
       }
