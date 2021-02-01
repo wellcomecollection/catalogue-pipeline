@@ -26,9 +26,10 @@ import uk.ac.wellcome.pipeline_storage.{
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class ElasticIndexerTest
-    extends IndexerTestCases[Index, SampleDocument]
+trait ElasticIndexerTestBase
+  extends IndexerTestCases[Index, SampleDocument]
     with ElasticsearchFixtures {
+  val skipReindexingIdenticalDocuments: Boolean
 
   import SampleDocument._
 
@@ -97,7 +98,7 @@ class ElasticIndexerTest
     }
 
     object StrictWithNoDataIndexConfig
-        extends IndexConfig
+      extends IndexConfig
         with IndexConfigFields {
 
       import com.sksamuel.elastic4s.ElasticDsl._
@@ -143,7 +144,7 @@ class ElasticIndexerTest
     )
 
     object UnmappedDataMappingIndexConfig
-        extends IndexConfig
+      extends IndexConfig
         with IndexConfigFields {
 
       import com.sksamuel.elastic4s.ElasticDsl._
@@ -205,4 +206,12 @@ class ElasticIndexerTest
       }
     }
   }
+}
+
+class ElasticIndexerTest extends ElasticIndexerTestBase {
+  val skipReindexingIdenticalDocuments = true
+}
+
+class ElasticIndexerWithSkipReindexTest extends ElasticIndexerTestBase {
+  val skipReindexingIdenticalDocuments = false
 }
