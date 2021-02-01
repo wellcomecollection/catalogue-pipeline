@@ -71,8 +71,12 @@ def get_pipeline_storage_es_client(session, *, reindex_date):
     host = get_secret_string(session, secret_id=f"{secret_prefix}/public_host")
     port = get_secret_string(session, secret_id=f"{secret_prefix}/port")
     protocol = get_secret_string(session, secret_id=f"{secret_prefix}/protocol")
-    username = get_secret_string(session, secret_id=f"{secret_prefix}/read_only/es_username")
-    password = get_secret_string(session, secret_id=f"{secret_prefix}/read_only/es_password")
+    username = get_secret_string(
+        session, secret_id=f"{secret_prefix}/read_only/es_username"
+    )
+    password = get_secret_string(
+        session, secret_id=f"{secret_prefix}/read_only/es_password"
+    )
 
     return Elasticsearch(f"{protocol}://{username}:{password}@{host}:{port}")
 
