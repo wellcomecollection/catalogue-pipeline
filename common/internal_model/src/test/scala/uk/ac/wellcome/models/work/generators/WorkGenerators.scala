@@ -57,7 +57,6 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     canonicalId: String = createCanonicalId,
     modifiedTime: Instant = instantInLast30Days,
-    relations: Relations = Relations.none
   ): Work.Visible[Identified] =
     Work.Visible[Identified](
       state = Identified(

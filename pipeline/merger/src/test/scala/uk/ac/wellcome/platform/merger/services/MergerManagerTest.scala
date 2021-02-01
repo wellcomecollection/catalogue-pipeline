@@ -23,7 +23,7 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorkGenerators {
     val work = identifiedWork()
     val otherWorks = identifiedWorks(3)
 
-    val works = (work +: otherWorks).map { Some(_) }.toList
+    val works = (work +: otherWorks).map { Some(_) }
 
     val result = mergerManager.applyMerge(maybeWorks = works)
     val resultWorks = result.mergedWorksWithTime(now)

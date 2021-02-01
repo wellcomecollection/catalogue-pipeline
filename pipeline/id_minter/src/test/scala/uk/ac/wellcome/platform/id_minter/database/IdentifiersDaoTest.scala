@@ -6,7 +6,6 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import scalikejdbc._
 import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
 import uk.ac.wellcome.platform.id_minter.fixtures
 import uk.ac.wellcome.platform.id_minter.fixtures.SqlIdentifiersGenerators
 import uk.ac.wellcome.platform.id_minter.models.{Identifier, IdentifiersTable}
@@ -17,7 +16,6 @@ class IdentifiersDaoTest
     extends AnyFunSpec
     with fixtures.IdentifiersDatabase
     with Matchers
-    with IdentifiersGenerators
     with SqlIdentifiersGenerators {
 
   implicit val session: DBSession = NamedAutoSession('primary)
