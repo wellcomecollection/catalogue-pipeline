@@ -71,7 +71,7 @@ module "catalogue_pipeline_2021-02-01" {
   source = "./stack"
 
   pipeline_date = "2021-02-01"
-  release_label = "stage"
+  release_label = "prod"
 
   pipeline_storage_id = "pipeline_storage_delta"
 
