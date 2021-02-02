@@ -240,17 +240,24 @@ lazy val mets_adapter = setupProject(
 
 // CALM adapter
 
+lazy val calm_api_client = setupProject(
+  project,
+  folder = "calm_adapter/calm_api_client",
+  localDependencies = Seq(flows),
+  externalDependencies = CatalogueDependencies.calmApiClientDependencies
+)
+
 lazy val calm_adapter = setupProject(
   project,
   folder = "calm_adapter/calm_adapter",
-  localDependencies = Seq(internal_model, source_model_typesafe, flows),
-  externalDependencies = CatalogueDependencies.calmAdapterDependencies
+  localDependencies =
+    Seq(calm_api_client, internal_model, source_model_typesafe)
 )
 
 lazy val calm_deletion_checker = setupProject(
   project,
   folder = "calm_adapter/calm_deletion_checker",
-  localDependencies = Seq(source_model_typesafe)
+  localDependencies = Seq(calm_api_client, source_model_typesafe)
 )
 
 // Inference manager

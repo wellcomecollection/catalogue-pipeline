@@ -1,15 +1,16 @@
-package uk.ac.wellcome.calm_adapter
+package uk.ac.wellcome.platform.calm_api_client
 
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration._
+import akka.http.scaladsl.model._
+import akka.stream.Materializer
+import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.concurrent.ScalaFutures
-import akka.stream.Materializer
-import akka.http.scaladsl.model._
-import org.scalatest.funspec.AnyFunSpec
-import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.akka.fixtures.Akka
+import uk.ac.wellcome.fixtures.TestWith
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.concurrent.duration._
 
 class CalmHttpClientTest
     extends AnyFunSpec

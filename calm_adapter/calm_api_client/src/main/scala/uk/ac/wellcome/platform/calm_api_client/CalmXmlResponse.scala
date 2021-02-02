@@ -1,8 +1,9 @@
-package uk.ac.wellcome.calm_adapter
+package uk.ac.wellcome.platform.calm_api_client
 
 import scala.util.Try
 import scala.xml.{Elem, Node, NodeSeq, XML}
 import java.time.Instant
+
 import akka.http.scaladsl.model.headers.Cookie
 
 trait CalmXmlResponse[T] {
@@ -113,9 +114,10 @@ case class CalmSummaryResponse(root: Elem,
       .flatMap { nodes =>
         val data = toMapping(nodes)
         data.get("RecordID") match {
-          case Some(List(id)) => Right(CalmRecord(id, data, retrievedAt))
-          case Some(_)        => Left(new Exception("Multiple RecordIDs found"))
-          case None           => Left(new Exception("RecordID not found"))
+          case Some(List(id)) =>
+            Right(CalmRecord(id, data, retrievedAt))
+          case Some(_) => Left(new Exception("Multiple RecordIDs found"))
+          case None    => Left(new Exception("RecordID not found"))
         }
       }
 

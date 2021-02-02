@@ -1,11 +1,12 @@
-package uk.ac.wellcome.calm_adapter
+package uk.ac.wellcome.platform.calm_api_client
 
-import scala.xml.Elem
-import scala.xml.Utility.trim
 import java.time.LocalDate
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+
+import scala.xml.Elem
+import scala.xml.Utility.trim
 
 class CalmXmlRequestTest extends AnyFunSpec with Matchers {
 

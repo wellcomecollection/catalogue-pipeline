@@ -1,20 +1,21 @@
-package uk.ac.wellcome.calm_adapter
+package uk.ac.wellcome.platform.calm_api_client
 
-import scala.concurrent.{Await, Future}
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration._
-import scala.xml.XML
 import java.time.{Instant, LocalDate}
 
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.concurrent.ScalaFutures
-import akka.stream.Materializer
-import akka.stream.scaladsl._
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers._
+import akka.stream.Materializer
+import akka.stream.scaladsl._
+import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
+import scala.concurrent.{Await, Future}
+import scala.xml.XML
 
 class CalmRetrieverTest
     extends AnyFunSpec

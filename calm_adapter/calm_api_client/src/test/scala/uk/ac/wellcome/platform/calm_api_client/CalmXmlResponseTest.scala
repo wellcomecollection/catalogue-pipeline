@@ -1,10 +1,10 @@
-package uk.ac.wellcome.calm_adapter
+package uk.ac.wellcome.platform.calm_api_client
 
-import org.scalatest.matchers.should.Matchers
 import java.time.Instant
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
 import akka.http.scaladsl.model.headers.{Cookie, HttpCookiePair}
-import org.scalatest.funspec.AnyFunSpec
 
 class CalmXmlResponseTest extends AnyFunSpec with Matchers {
 
@@ -55,6 +55,7 @@ class CalmXmlResponseTest extends AnyFunSpec with Matchers {
             </UnexpectedResponse>
           </soap:Body>
         </soap:Envelope>
+
       CalmSearchResponse(xml, cookie).parse shouldBe a[Left[_, _]]
     }
   }
@@ -155,6 +156,7 @@ class CalmXmlResponseTest extends AnyFunSpec with Matchers {
             </SummaryHeaderResponse>
           </soap:Body>
         </soap:Envelope>
+
       CalmSummaryResponse(xml, retrievedAt).parse shouldBe Right(
         CalmRecord(
           "123",

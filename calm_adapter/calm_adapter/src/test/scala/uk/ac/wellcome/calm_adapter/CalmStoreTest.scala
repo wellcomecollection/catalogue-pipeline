@@ -8,8 +8,9 @@ import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.{Identified, Version}
 import weco.catalogue.source_model.fixtures.SourceVHSFixture
 import weco.catalogue.source_model.store.SourceVHS
-
 import java.time.Instant
+
+import uk.ac.wellcome.platform.calm_api_client.CalmRecord
 
 class CalmStoreTest
     extends AnyFunSpec
@@ -51,7 +52,8 @@ class CalmStoreTest
     }
 
     it("replaces a stored record if the data is newer and different") {
-      val oldRecord = CalmRecord("A", oldData, oldTime, published = true)
+      val oldRecord =
+        CalmRecord("A", oldData, oldTime, published = true)
       val newRecord = CalmRecord("A", newData, newTime)
 
       implicit val sourceVHS: SourceVHS[CalmRecord] =
@@ -77,7 +79,8 @@ class CalmStoreTest
 
     it(
       "does not replace a stored CALM record if the retrieval date is newer and the data is the same") {
-      val oldRecord = CalmRecord("A", data, oldTime, published = true)
+      val oldRecord =
+        CalmRecord("A", data, oldTime, published = true)
       val newRecord = CalmRecord("A", data, newTime)
 
       implicit val sourceVHS: SourceVHS[CalmRecord] =
@@ -94,7 +97,8 @@ class CalmStoreTest
 
     it(
       "replaces a stored CALM record if the data is the same but it is not recorded as published") {
-      val oldRecord = CalmRecord("A", oldData, oldTime, published = false)
+      val oldRecord =
+        CalmRecord("A", oldData, oldTime, published = false)
       val newRecord = CalmRecord("A", oldData, newTime)
 
       implicit val sourceVHS: SourceVHS[CalmRecord] =
@@ -147,8 +151,10 @@ class CalmStoreTest
     }
 
     it("errors if the data differs but timestamp is the same") {
-      val x = CalmRecord("A", Map("key" -> List("x")), retrievedAt)
-      val y = CalmRecord("A", Map("key" -> List("y")), retrievedAt)
+      val x =
+        CalmRecord("A", Map("key" -> List("x")), retrievedAt)
+      val y =
+        CalmRecord("A", Map("key" -> List("y")), retrievedAt)
 
       implicit val sourceVHS: SourceVHS[CalmRecord] =
         createSourceVHSWith(

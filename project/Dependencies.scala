@@ -229,7 +229,7 @@ object CatalogueDependencies {
     WellcomeDependencies.typesafeLibrary
 
   val transformerCommonDependencies: Seq[ModuleID] =
-      WellcomeDependencies.storageLibrary
+    WellcomeDependencies.storageLibrary
 
   val apiDependencies: Seq[ModuleID] =
     ExternalDependencies.akkaHttpDependencies ++
@@ -253,7 +253,7 @@ object CatalogueDependencies {
       WellcomeDependencies.messagingTypesafeLibrary
 
   val routerDependencies: Seq[ModuleID] =
-      WellcomeDependencies.messagingTypesafeLibrary
+    WellcomeDependencies.messagingTypesafeLibrary
 
   val batcherDependencies: Seq[ModuleID] =
     ExternalDependencies.scalatestDependencies ++
@@ -296,8 +296,10 @@ object CatalogueDependencies {
 
   // CALM adapter
 
-  val calmAdapterDependencies: Seq[ModuleID] =
-    ExternalDependencies.akkaHttpDependencies
+  val calmApiClientDependencies: Seq[ModuleID] =
+    ExternalDependencies.akkaHttpDependencies ++
+      ExternalDependencies.scalaXmlDependencies ++
+      ExternalDependencies.scalatestDependencies
 
   // Sierra adapter stack
 
