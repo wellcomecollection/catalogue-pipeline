@@ -53,6 +53,10 @@ resource "aws_secretsmanager_secret" "es_password" {
 #
 # Note: this must run *after* the cluster and secrets are created, or the script
 # won't work.
+#
+# TODO: Investigate why we can't attach the provisioner directly to the ec_deployment resource.
+# Some informal testing with a minimal TF configuration that just uses the EC provider
+# shows that this *should* work.
 resource "null_resource" "elasticsearch_users" {
   triggers = {
     pipeline_storage_elastic_id = local.pipeline_storage_elastic_id

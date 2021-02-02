@@ -12,9 +12,10 @@ locals {
   es_images_augmented_index = "images-augmented-${var.pipeline_date}"
   es_images_index           = "images-${var.pipeline_date}"
 
-  # The max number of connections allowed by the instance
+  # The max number of connections allowed by the instance.
   # specified at /infrastructure/critical/rds_id_minter.tf
-  id_minter_rds_max_connections  = 2 * 45
+  base_rds_instances             = 1
+  id_minter_rds_max_connections  = (local.base_rds_instances + local.extra_rds_instances) * 45
   id_minter_task_max_connections = min(9, var.max_capacity)
 
   services = [
