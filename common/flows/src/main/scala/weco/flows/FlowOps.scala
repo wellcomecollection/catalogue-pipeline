@@ -23,7 +23,7 @@ trait FlowOps extends Logging {
     def mapWithContext[T](f: (Ctx, Out) => Result[T]) =
       flow
         .map {
-          case (ctx, Some(data)) => (ctx, (f(ctx, data).map(Some(_))))
+          case (ctx, Some(data)) => (ctx, f(ctx, data).map(Some(_)))
           case (ctx, None)       => (ctx, Right(None))
         }
         .via(catchErrors)

@@ -170,7 +170,7 @@ class OtherIdentifiersRuleTest
     inside(OtherIdentifiersRule.merge(physicalSierraWork, metsWorks)) {
       case FieldMergeResult(otherIdentifiers, mergedSources) =>
         forAll(otherIdentifiers) { id =>
-          id.identifierType.id should not be ("mets")
+          id.identifierType.id should not be "mets"
         }
 
         mergedSources shouldBe empty
