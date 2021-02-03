@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.calm_deletion_checker
 
 import akka.Done
-import akka.stream.scaladsl.Flow
+import akka.stream.scaladsl.{Flow, Keep}
 import software.amazon.awssdk.services.sqs.model.Message
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
@@ -27,16 +27,19 @@ class DeletionCheckerWorkerService[Destination](
   private val batchDuration = 3 minutes
   private val parallelism = 5
 
-  def run(): Future[Done] = msgStream.runStream(
-    className,
-    source =>
-      source
-        .via(parseBody)
-        .groupedWithin(batchSize, batchDuration)
-        .via(checkDeletions)
-        .mapConcat(identity)
-        .via(updateSourceData)
-  )
+  def run(): Future[Done] = msgStream.runGraph(className) { (source, sink) =>
+    source
+      .via(parseBody)
+      .divertTo(
+        sink.contramap(Keep.left.tupled),
+        Keep.right.tupled.andThen(_.isDeleted)
+      )
+      .groupedWithin(batchSize, batchDuration)
+      .via(checkDeletions)
+      .mapConcat(identity)
+      .via(updateSourceData)
+      .toMat(sink)(Keep.right)
+  }
 
   private def parseBody =
     Flow[(Message, NotificationMessage)]
