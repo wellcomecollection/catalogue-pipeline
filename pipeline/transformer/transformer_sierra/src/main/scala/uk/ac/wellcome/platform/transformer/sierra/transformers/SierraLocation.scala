@@ -76,6 +76,7 @@ trait SierraLocation extends SierraQueryOps with Logging {
   // Rules:
   //  - if the first indicator is 0, then there are no restrictions
   //  - look in subfield ǂf for the standardised terminology
+  //  - look at the "terms governing access" from 506 ǂa
   //
   // See https://www.loc.gov/marc/bibliographic/bd506.html
   private def getAccessStatus(bibId: SierraBibNumber,
