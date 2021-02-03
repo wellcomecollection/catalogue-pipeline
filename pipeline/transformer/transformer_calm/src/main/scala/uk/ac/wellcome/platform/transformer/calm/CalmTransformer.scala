@@ -68,6 +68,7 @@ object CalmTransformer
                     List(knownErrToUntransformableReason(knownErr))
                 ))
             case unknownStatus: UnknownAccessStatus =>
+              warn(s"${record.id}: unknown access status: ${unknownStatus.getMessage}")
               Right(
                 Work.Invisible[Source](
                   state = Source(sourceIdentifier(record), record.retrievedAt),
