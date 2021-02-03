@@ -46,24 +46,6 @@ resource "aws_security_group" "database_sg" {
   }
 }
 
-module "identifiers_rds_cluster" {
-  source             = "./modules/rds"
-  cluster_identifier = "identifiers"
-  database_name      = "identifiers"
-  username           = local.rds_username
-  password           = local.rds_password
-
-  // This instance class provides us with 90 connections: this is useful
-  // because we have 2 separate minters for works and images.
-  instance_class = "db.t3.medium"
-
-  db_security_group_id = aws_security_group.database_sg.id
-
-  aws_db_subnet_group_name = aws_db_subnet_group.default.name
-
-  vpc_security_group_ids = []
-}
-
 module "identifiers_delta_rds_cluster" {
   source             = "./modules/rds"
   cluster_identifier = "identifiers-delta-cluster"
