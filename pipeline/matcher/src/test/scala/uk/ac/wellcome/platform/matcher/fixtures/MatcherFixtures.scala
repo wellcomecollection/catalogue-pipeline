@@ -46,7 +46,7 @@ trait MatcherFixtures
   implicit val lockFormat: DynamoFormat[ExpiringLock] = deriveDynamoFormat
 
   def withWorkGraphTable[R](testWith: TestWith[Table, R]): R =
-    withSpecifiedLocalDynamoDbTable(createWorkGraphTable) { table =>
+    withSpecifiedTable(createWorkGraphTable) { table =>
       testWith(table)
     }
 
