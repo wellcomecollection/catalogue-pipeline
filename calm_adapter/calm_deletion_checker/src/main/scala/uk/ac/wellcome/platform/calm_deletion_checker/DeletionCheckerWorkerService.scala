@@ -7,20 +7,18 @@ import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.platform.calm_api_client.{CalmRecord, CalmRetriever}
+import uk.ac.wellcome.platform.calm_api_client.CalmRetriever
 import uk.ac.wellcome.typesafe.Runnable
 import weco.catalogue.source_model.CalmSourcePayload
-import weco.catalogue.source_model.store.SourceVHS
 
 import scala.collection.immutable
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
-import scala.util.Try
 
 class DeletionCheckerWorkerService[Destination](
   msgStream: SQSStream[NotificationMessage],
   messageSender: MessageSender[Destination],
-  calmVHS: SourceVHS[CalmRecord],
+  markDeleted: DeletionMarker,
   calmRetriever: CalmRetriever,
   batchSize: Int)(implicit ec: ExecutionContext)
     extends Runnable {
@@ -66,14 +64,11 @@ class DeletionCheckerWorkerService[Destination](
       .mapAsyncUnordered(parallelism) {
         case (msg, record, Deleted) =>
           Future
-            .fromTry(markRecordDeleted(record))
+            .fromTry(markDeleted(record))
             .map(messageSender.sendT)
             .map(_ => msg)
         case (msg, _, Extant) => Future.successful(msg)
       }
-
-  private def markRecordDeleted(
-    record: CalmSourcePayload): Try[CalmSourcePayload] = ???
 
   private lazy val deletionChecker = new DeletionChecker(calmRetriever)
 

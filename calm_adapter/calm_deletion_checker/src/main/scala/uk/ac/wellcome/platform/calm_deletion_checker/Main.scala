@@ -3,18 +3,20 @@ package uk.ac.wellcome.platform.calm_deletion_checker
 import akka.actor.ActorSystem
 import akka.stream.Materializer
 import com.typesafe.config.Config
+import org.scanamo.Table
+import org.scanamo.generic.auto._
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.platform.calm_api_client.{
   CalmAkkaHttpClient,
   CalmHttpClient,
-  CalmRecord,
   HttpCalmRetriever
 }
-import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.storage.typesafe.DynamoBuilder
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
-import weco.catalogue.source_model.config.SourceVHSBuilder
+import weco.catalogue.source_model.CalmSourcePayload
 
 import scala.concurrent.ExecutionContext
 
@@ -28,11 +30,17 @@ object Main extends WellcomeTypesafeApp {
     implicit val httpClient: CalmHttpClient =
       new CalmAkkaHttpClient()
 
+    implicit val dynamoClient: DynamoDbClient =
+      DynamoBuilder.buildDynamoClient(config)
+    val dynamoConfig =
+      DynamoBuilder.buildDynamoConfig(config, namespace = "vhs")
+
     new DeletionCheckerWorkerService(
       msgStream = SQSBuilder.buildSQSStream(config),
       messageSender = SNSBuilder
         .buildSNSMessageSender(config, subject = "CALM deletion checker"),
-      calmVHS = SourceVHSBuilder.build[CalmRecord](config),
+      markDeleted =
+        new DeletionMarker(Table[CalmSourcePayload](dynamoConfig.tableName)),
       calmRetriever = calmRetriever(config),
       batchSize =
         config.getIntOption("calm.deletion_checker.batch_size").getOrElse(500)
