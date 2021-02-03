@@ -26,7 +26,7 @@ object ImageUtils {
   private final val thumbnailDim = "200"
 
   def buildThumbnailUrl(bnumber: String,
-                        validThumbnailFile: FileReference): Option[String] = {
+                        validThumbnailFile: FileReference): Option[String] =
     validThumbnailFile.mimeType match {
       case Some("application/pdf") =>
         Some(
@@ -35,14 +35,7 @@ object ImageUtils {
         Some(
           s"https://dlcs.io/thumbs/wellcome/5/${validThumbnailFile.location}/full/!$thumbnailDim,$thumbnailDim/0/default.jpg")
     }
-  }
 
-  def buildImageUrl(bnumber: String,
-                    validImageFile: FileReference): Option[String] = {
-    validImageFile.mimeType match {
-      case _ =>
-        Some(
-          s"https://dlcs.io/iiif-img/wellcome/5/${validImageFile.location}/info.json")
-    }
-  }
+  def buildImageUrl(validImageFile: FileReference): Option[String] =
+    Some(s"https://dlcs.io/iiif-img/wellcome/5/${validImageFile.location}/info.json")
 }
