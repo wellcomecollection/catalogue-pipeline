@@ -37,5 +37,6 @@ object ImageUtils {
     }
 
   def buildImageUrl(validImageFile: FileReference): Option[String] =
-    Some(s"https://dlcs.io/iiif-img/wellcome/5/${validImageFile.location}/info.json")
+    Some(
+      s"https://dlcs.io/iiif-img/wellcome/5/${validImageFile.location}/info.json")
 }
