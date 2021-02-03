@@ -3,8 +3,6 @@ package uk.ac.wellcome.platform.calm_deletion_checker
 import akka.actor.ActorSystem
 import akka.stream.Materializer
 import com.typesafe.config.Config
-import org.scanamo.Table
-import org.scanamo.generic.auto._
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.platform.calm_api_client.{
@@ -16,7 +14,6 @@ import uk.ac.wellcome.storage.typesafe.DynamoBuilder
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
-import weco.catalogue.source_model.CalmSourcePayload
 
 import scala.concurrent.ExecutionContext
 
@@ -39,8 +36,7 @@ object Main extends WellcomeTypesafeApp {
       msgStream = SQSBuilder.buildSQSStream(config),
       messageSender = SNSBuilder
         .buildSNSMessageSender(config, subject = "CALM deletion checker"),
-      markDeleted =
-        new DeletionMarker(Table[CalmSourcePayload](dynamoConfig.tableName)),
+      markDeleted = new DeletionMarker(dynamoConfig.tableName),
       calmRetriever = calmRetriever(config),
       batchSize =
         config.getIntOption("calm.deletion_checker.batch_size").getOrElse(500)

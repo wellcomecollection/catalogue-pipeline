@@ -65,7 +65,7 @@ class DeletionCheckerWorkerService[Destination](
         case (msg, record, Deleted) =>
           Future
             .fromTry(markDeleted(record))
-            .map(messageSender.sendT)
+            .map(messageSender.sendT[CalmSourcePayload])
             .map(_ => msg)
         case (msg, _, Extant) => Future.successful(msg)
       }
