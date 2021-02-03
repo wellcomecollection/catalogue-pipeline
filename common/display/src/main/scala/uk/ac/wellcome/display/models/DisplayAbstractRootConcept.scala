@@ -40,7 +40,7 @@ case object DisplayAbstractConcept extends GetIdentifiers {
           label = label,
           identifiers = getIdentifiers(id, includesIdentifiers)
         )
-      case Period(id, label, range) =>
+      case Period(id, label, _) =>
         DisplayPeriod(
           id = id.maybeCanonicalId,
           label = label,
