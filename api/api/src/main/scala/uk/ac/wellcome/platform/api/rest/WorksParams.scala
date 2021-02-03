@@ -230,10 +230,10 @@ object MultipleWorksParams extends QueryParamsUtils {
     stringListFilter(LanguagesFilter)
 
   implicit val genreFilter: Decoder[GenreFilter] =
-    Decoder.decodeString.emap(str => Right(GenreFilter(str)))
+    decodeCommaSeparated.emap(strs => Right(GenreFilter(strs)))
 
   implicit val subjectFilter: Decoder[SubjectFilter] =
-    Decoder.decodeString.emap(str => Right(SubjectFilter(str)))
+    decodeCommaSeparated.emap(strs => Right(SubjectFilter(strs)))
 
   implicit val contributorsFilter: Decoder[ContributorsFilter] =
     decodeCommaSeparated.emap(strs => Right(ContributorsFilter(strs)))
@@ -242,7 +242,7 @@ object MultipleWorksParams extends QueryParamsUtils {
     stringListFilter(IdentifiersFilter)
 
   implicit val partOf: Decoder[PartOfFilter] =
-    Decoder.decodeString.map(PartOfFilter(_))
+    Decoder.decodeString.map(PartOfFilter)
 
   implicit val accessStatusFilter: Decoder[AccessStatusFilter] =
     decodeIncludesAndExcludes(

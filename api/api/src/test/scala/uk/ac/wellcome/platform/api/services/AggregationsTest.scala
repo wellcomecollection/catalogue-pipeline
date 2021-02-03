@@ -155,7 +155,7 @@ class AggregationsTest
             List(WorkAggregationRequest.Format, WorkAggregationRequest.Subject),
           filters = List(
             FormatFilter(List(Format.Books.id)),
-            SubjectFilter(subjectQuery)
+            SubjectFilter(Seq(subjectQuery))
           )
         )
         whenReady(aggregationQuery(index, searchOptions)) { aggs =>
@@ -179,7 +179,7 @@ class AggregationsTest
             List(WorkAggregationRequest.Format, WorkAggregationRequest.Subject),
           filters = List(
             FormatFilter(List(Format.Books.id)),
-            SubjectFilter(subjectQuery)
+            SubjectFilter(Seq(subjectQuery))
           )
         )
         whenReady(worksService.listOrSearchWorks(index, searchOptions)) { res =>
