@@ -12,14 +12,17 @@ import uk.ac.wellcome.models.work.internal.result._
 import uk.ac.wellcome.platform.transformer.calm.{CalmOps, CalmRecord}
 
 object CalmItems extends CalmOps {
-  def items(record: CalmRecord,
-            status: Option[AccessStatus]): List[Item[IdState.Unminted]] =
-    List(
-      Item(
-        title = None,
-        locations = List(physicalLocation(record, status))
+  def apply(record: CalmRecord): Result[List[Item[IdState.Unminted]]] =
+    for {
+      status <- accessStatus(record)
+
+      items = List(
+        Item(
+          title = None,
+          locations = List(physicalLocation(record, status))
+        )
       )
-    )
+    } yield items
 
   private def physicalLocation(
     record: CalmRecord,
@@ -42,7 +45,7 @@ object CalmItems extends CalmOps {
       }
     )
 
-  def accessStatus(record: CalmRecord): Result[Option[AccessStatus]] =
+  private def accessStatus(record: CalmRecord): Result[Option[AccessStatus]] =
     record
       .get("AccessStatus")
       .map(AccessStatus(_))

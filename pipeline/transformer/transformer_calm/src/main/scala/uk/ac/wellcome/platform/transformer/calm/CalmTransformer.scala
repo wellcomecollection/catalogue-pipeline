@@ -118,7 +118,7 @@ object CalmTransformer
     )
 
     for {
-      accessStatus <- CalmItems.accessStatus(record)
+      items <- CalmItems(record)
       title <- title(record)
       workType <- workType(record)
       collectionPath <- collectionPath(record)
@@ -131,7 +131,7 @@ object CalmTransformer
         subjects = subjects(record),
         languages = languages,
         mergeCandidates = mergeCandidates(record),
-        items = CalmItems.items(record, accessStatus),
+        items = items,
         contributors = contributors(record),
         description = description(record),
         physicalDescription = physicalDescription(record),
