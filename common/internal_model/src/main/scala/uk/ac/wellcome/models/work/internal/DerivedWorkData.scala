@@ -2,7 +2,7 @@ package uk.ac.wellcome.models.work.internal
 
 case class DerivedWorkData(
   availableOnline: Boolean,
-  contributorAgents: List[String],
+  contributorAgents: List[String] = Nil,
 )
 
 object DerivedWorkData {
