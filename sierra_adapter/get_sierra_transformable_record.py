@@ -94,7 +94,7 @@ def main(bnumber, skip_decoding):
             for item_record in transformable["itemRecords"].values():
                 item_record["data"] = json.loads(item_record["data"])
 
-        _, tmp_path = tempfile.mkstemp(suffix=".json", prefix=bnumber)
+        _, tmp_path = tempfile.mkstemp(suffix=".json", prefix=f"b{bnumber}_")
         with open(tmp_path, "w") as outfile:
             outfile.write(json.dumps(transformable, indent=2))
 
