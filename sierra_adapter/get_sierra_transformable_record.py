@@ -68,9 +68,7 @@ def get_transformable(bnumber):
     return json.load(s3_obj["Body"])
 
 
-@click.command(
-    help="Retrieve the JSON for a Sierra record in VHS."
-)
+@click.command(help="Retrieve the JSON for a Sierra record in VHS.")
 @click.argument("bnumber")
 @click.option(
     "--skip-decoding",
