@@ -120,7 +120,7 @@ class FiltersAndAggregationsBuilderTest extends AnyFunSpec with Matchers {
     it("applies all other aggregation-dependent filters to the paired filter") {
       val formatFilter = FormatFilter(Seq("bananas"))
       val languagesFilter = LanguagesFilter(Seq("en"))
-      val genreFilter = GenreFilter("durian")
+      val genreFilter = GenreFilter(Seq("durian"))
       val builder = new WorkFiltersAndAggregationsBuilder(
         aggregationRequests = List(
           WorkAggregationRequest.Format,

@@ -1,9 +1,9 @@
 package uk.ac.wellcome.platform.api.rest
 
 import java.time.LocalDate
-
 import akka.http.scaladsl.server.{Directive, Directives, ValidationRejection}
 import akka.http.scaladsl.unmarshalling.Unmarshaller
+import com.github.tototoshi.csv.CSVParser
 import io.circe.{Decoder, Json}
 import uk.ac.wellcome.platform.api.models.LicenseFilter
 import uk.ac.wellcome.platform.api.rest.MultipleWorksParams.decodeCommaSeparated
@@ -35,7 +35,17 @@ trait QueryParamsUtils extends Directives {
     Decoder.decodeInt.withErrorMessage("must be a valid Integer")
 
   def decodeCommaSeparated: Decoder[List[String]] =
-    Decoder.decodeString.emap(str => Right(str.split(",").toList))
+    Decoder.decodeString.emap(
+      str =>
+        Right(
+          CSVParser
+            .parse(
+              input = str,
+              escapeChar = '\\',
+              delimiter = ',',
+              quoteChar = '"'
+            )
+            .getOrElse(List(str))))
 
   def decodeOneOf[T](values: (String, T)*): Decoder[T] =
     Decoder.decodeString.emap { str =>

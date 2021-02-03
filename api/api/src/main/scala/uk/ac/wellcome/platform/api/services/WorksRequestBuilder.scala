@@ -145,16 +145,12 @@ object WorksRequestBuilder
         RangeQuery("data.production.dates.range.from", lte = lte, gte = gte)
       case LanguagesFilter(languageIds) =>
         termsQuery(field = "data.languages.id", values = languageIds)
-      case GenreFilter(genreQuery) =>
-        searchQueryFilter("data.genres.label", genreQuery)
-      case SubjectFilter(subjectQuery) =>
-        searchQueryFilter("data.subjects.label", subjectQuery)
+      case GenreFilter(genreQueries) =>
+        termsQuery("data.genres.label.keyword", genreQueries)
+      case SubjectFilter(subjectQueries) =>
+        termsQuery("data.subjects.label.keyword", subjectQueries)
       case ContributorsFilter(contributorQueries) =>
-        should(
-          contributorQueries.map { query =>
-            searchQueryFilter("data.contributors.agent.label", query)
-          }
-        )
+        termsQuery("data.contributors.agent.label.keyword", contributorQueries)
       case LicenseFilter(licenseIds) =>
         termsQuery(
           field = "data.items.locations.license.id",
@@ -185,9 +181,4 @@ object WorksRequestBuilder
       case PartOfFilter(id) =>
         termQuery(field = "state.relations.ancestors.id", value = id)
     }
-
-  private def searchQueryFilter(field: String, query: String) =
-    simpleStringQuery(query)
-      .field(field)
-      .defaultOperator("AND")
 }
