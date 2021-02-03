@@ -210,7 +210,9 @@ object CalmTransformer
         case "subsubsubseries"  => Right(WorkType.Series)
         case "item"             => Right(WorkType.Standard)
         case "piece"            => Right(WorkType.Standard)
-        case level              => Left(UnrecognisedLevel)
+        case level              =>
+          warn(s"${record.id} has an unrecognised level: $level")
+          Left(UnrecognisedLevel)
       }
       .getOrElse(Left(LevelMissing))
 
