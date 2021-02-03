@@ -11,7 +11,6 @@ import uk.ac.wellcome.models.work.internal._
 case class DisplayItem(
   @Schema(
     `type` = "String",
-    readOnly = true,
     description = "The canonical identifier given to a thing.") id: Option[
     String],
   @Schema(
@@ -20,7 +19,6 @@ case class DisplayItem(
       "Relates the item to a unique system-generated identifier that governs interaction between systems and is regarded as canonical within the Wellcome data ecosystem."
   ) identifiers: Option[List[DisplayIdentifier]] = None,
   @Schema(
-    readOnly = true,
     description = "A human readable title."
   ) title: Option[String] = None,
   @Schema(
