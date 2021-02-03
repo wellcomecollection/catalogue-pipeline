@@ -11,6 +11,7 @@ import uk.ac.wellcome.models.work.internal.DeletedReason.SuppressedFromSource
 import uk.ac.wellcome.models.work.internal.IdState.Identifiable
 import uk.ac.wellcome.platform.transformer.calm.periods.PeriodParser
 import uk.ac.wellcome.platform.transformer.calm.transformers.{
+  CalmItems,
   CalmLanguages,
   CalmNotes
 }
@@ -117,7 +118,7 @@ object CalmTransformer
     )
 
     for {
-      accessStatus <- accessStatus(record)
+      accessStatus <- CalmItems.accessStatus(record)
       title <- title(record)
       workType <- workType(record)
       collectionPath <- collectionPath(record)
@@ -130,7 +131,7 @@ object CalmTransformer
         subjects = subjects(record),
         languages = languages,
         mergeCandidates = mergeCandidates(record),
-        items = items(record, accessStatus),
+        items = CalmItems.items(record, accessStatus),
         contributors = contributors(record),
         description = description(record),
         physicalDescription = physicalDescription(record),
@@ -216,42 +217,6 @@ object CalmTransformer
           Left(UnrecognisedLevel)
       }
       .getOrElse(Left(LevelMissing))
-
-  def items(record: CalmRecord,
-            status: Option[AccessStatus]): List[Item[IdState.Unminted]] =
-    List(
-      Item(
-        title = None,
-        locations = List(physicalLocation(record, status))
-      )
-    )
-
-  def physicalLocation(
-    record: CalmRecord,
-    status: Option[AccessStatus]): PhysicalLocationDeprecated =
-    PhysicalLocationDeprecated(
-      locationType = LocationType("scmac"),
-      label = "Closed stores Arch. & MSS",
-      accessConditions = accessCondition(record, status).filterEmpty.toList
-    )
-
-  def accessCondition(record: CalmRecord,
-                      status: Option[AccessStatus]): AccessCondition =
-    AccessCondition(
-      status = status,
-      terms = record.getJoined("AccessConditions"),
-      to = status match {
-        case Some(AccessStatus.Closed)     => record.get("ClosedUntil")
-        case Some(AccessStatus.Restricted) => record.get("UserDate1")
-        case _                             => None
-      }
-    )
-
-  def accessStatus(record: CalmRecord): Result[Option[AccessStatus]] =
-    record
-      .get("AccessStatus")
-      .map(AccessStatus(_))
-      .toResult
 
   def description(record: CalmRecord): Option[String] =
     record.getJoined("Description").map(NormaliseText(_))
