@@ -112,7 +112,7 @@ catalogue_pipeline:
 
 catalogue_api:
   environments:
-    - id: staging
+    - id: stage
       name: Staging
     - id: prod
       name: Production

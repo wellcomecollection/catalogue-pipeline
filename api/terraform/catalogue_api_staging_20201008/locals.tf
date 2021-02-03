@@ -1,5 +1,5 @@
 locals {
-  environment = "staging"
+  environment = "stage"
   namespace   = "catalogue_api"
 
   vpc_id          = local.catalogue_vpcs["catalogue_vpc_id"]
