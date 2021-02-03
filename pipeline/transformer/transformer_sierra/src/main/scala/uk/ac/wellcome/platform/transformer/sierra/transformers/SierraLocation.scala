@@ -2,7 +2,6 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.platform.transformer.sierra.exceptions.SierraTransformerException
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraBibData,
   SierraItemData,
@@ -33,20 +32,6 @@ trait SierraLocation extends SierraQueryOps with Logging {
           )
         )
     }
-
-  def getDigitalLocation(identifier: String): DigitalLocationDeprecated = {
-    // This is a defensive check, it may not be needed since an identifier should always be present.
-    if (!identifier.isEmpty) {
-      DigitalLocationDeprecated(
-        url = s"https://wellcomelibrary.org/iiif/$identifier/manifest",
-        license = None,
-        locationType = LocationType("iiif-presentation")
-      )
-    } else {
-      throw SierraTransformerException(
-        "id required by DigitalLocation has not been provided")
-    }
-  }
 
   private def getAccessConditions(
     bibId: SierraBibNumber,
