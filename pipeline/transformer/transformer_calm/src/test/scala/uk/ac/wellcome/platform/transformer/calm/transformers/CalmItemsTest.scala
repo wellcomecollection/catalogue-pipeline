@@ -3,10 +3,19 @@ package uk.ac.wellcome.platform.transformer.calm.transformers
 import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.internal.{AccessCondition, IdState, Item, UnknownAccessStatus}
+import uk.ac.wellcome.models.work.internal.{
+  AccessCondition,
+  IdState,
+  Item,
+  UnknownAccessStatus
+}
 import uk.ac.wellcome.platform.transformer.calm.generators.CalmRecordGenerators
 
-class CalmItemsTest extends AnyFunSpec with Matchers with EitherValues with CalmRecordGenerators {
+class CalmItemsTest
+    extends AnyFunSpec
+    with Matchers
+    with EitherValues
+    with CalmRecordGenerators {
   it("returns a Left[UnknownAccessStatus] if it can't parse the AccessStatus") {
     val record = createCalmRecordWith(
       "AccessStatus" -> "Unknown???"
@@ -80,7 +89,8 @@ class CalmItemsTest extends AnyFunSpec with Matchers with EitherValues with Calm
       accessConditions.head.to shouldBe None
     }
 
-    def getAccessConditions(items: Seq[Item[IdState.Unminted]]): List[AccessCondition] = {
+    def getAccessConditions(
+      items: Seq[Item[IdState.Unminted]]): List[AccessCondition] = {
       items should have size 1
 
       val locations = items.head.locations

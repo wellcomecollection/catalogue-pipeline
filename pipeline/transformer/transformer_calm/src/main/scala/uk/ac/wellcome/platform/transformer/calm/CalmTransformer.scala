@@ -69,7 +69,8 @@ object CalmTransformer
                     List(knownErrToUntransformableReason(knownErr))
                 ))
             case unknownStatus: UnknownAccessStatus =>
-              warn(s"${record.id}: unknown access status: ${unknownStatus.getMessage}")
+              warn(
+                s"${record.id}: unknown access status: ${unknownStatus.getMessage}")
               Right(
                 Work.Invisible[Source](
                   state = Source(sourceIdentifier(record), record.retrievedAt),
@@ -212,7 +213,7 @@ object CalmTransformer
         case "subsubsubseries"  => Right(WorkType.Series)
         case "item"             => Right(WorkType.Standard)
         case "piece"            => Right(WorkType.Standard)
-        case level              =>
+        case level =>
           warn(s"${record.id} has an unrecognised level: $level")
           Left(UnrecognisedLevel)
       }
