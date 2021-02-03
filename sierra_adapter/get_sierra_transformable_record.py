@@ -85,6 +85,10 @@ def main(bnumber, skip_decoding):
         bnumber = get_bnumber_from_user_input(bnumber)
         transformable = get_transformable(bnumber)
 
+        # The SierraTransformable format stores the raw JSON responses from the
+        # Sierra API, so we don't lose any data when decoding/encoding using our Scala models.
+        # This is a pain to deal with if you want to inspect the JSON by hand, so
+        # decode it before saving the result.
         if not skip_decoding:
             if transformable.get("maybeBibRecord") is not None:
                 transformable["maybeBibRecord"]["data"] = json.loads(
