@@ -79,7 +79,7 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
       .recover {
         case e: JsonDecodingError =>
           throw SierraTransformerException(
-            s"Unable to parse bib data for ${bibRecord.id} as JSON: <<${bibRecord.data}>>"
+            s"Unable to parse bib data for ${bibRecord.id} as JSON: <<${bibRecord.data}>> ($e)"
           )
         case e: ShouldNotTransformException =>
           debug(s"Should not transform $bibId: ${e.getMessage}")
