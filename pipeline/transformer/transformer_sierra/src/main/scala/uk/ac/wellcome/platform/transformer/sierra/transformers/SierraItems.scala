@@ -21,7 +21,8 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
     * The `dlnk` was previously used, but we now use the METS source.
     *
     * So the output is deterministic here we sort all items by the
-    * sierra-identifier
+    * sierra-identifier.  We want to revisit this at some point.
+    * See https://github.com/wellcomecollection/platform/issues/4993
     */
   def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
     getPhysicalItems(bibId, itemDataMap, bibData)

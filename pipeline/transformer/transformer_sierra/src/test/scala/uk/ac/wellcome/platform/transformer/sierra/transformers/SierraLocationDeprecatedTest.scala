@@ -5,11 +5,9 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.internal.{
   AccessCondition,
   AccessStatus,
-  DigitalLocationDeprecated,
   LocationType,
   PhysicalLocationDeprecated
 }
-import uk.ac.wellcome.platform.transformer.sierra.exceptions.SierraTransformerException
 import uk.ac.wellcome.platform.transformer.sierra.source.sierra.SierraSourceLocation
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   MarcSubfield,
@@ -283,25 +281,6 @@ class SierraLocationDeprecatedTest
 
       location.accessConditions.head.terms shouldBe Some(
         "Permission is required to view this item.")
-    }
-  }
-
-  describe("Digital locations") {
-    it("returns a digital location based on the id") {
-      val id = "b2201508"
-      val expectedLocation = DigitalLocationDeprecated(
-        url = "https://wellcomelibrary.org/iiif/b2201508/manifest",
-        license = None,
-        locationType = LocationType("iiif-presentation")
-      )
-      transformer.getDigitalLocation(id) shouldBe expectedLocation
-    }
-
-    it("throws an exception if no resource identifier is supplied") {
-      val caught = intercept[SierraTransformerException] {
-        transformer.getDigitalLocation(identifier = "")
-      }
-      caught.e.getMessage shouldEqual "id required by DigitalLocation has not been provided"
     }
   }
 }
