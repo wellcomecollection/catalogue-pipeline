@@ -56,7 +56,7 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
       .recover {
         case e: Throwable =>
           error(
-            s"Failed to perform transform to unified item of ${sourceIdentifier}",
+            s"Failed to perform transform to unified item of $sourceIdentifier",
             e)
           throw e
       }

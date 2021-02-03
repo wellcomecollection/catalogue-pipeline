@@ -30,7 +30,7 @@ object ImageUtils {
     validThumbnailFile.mimeType match {
       case Some("application/pdf") =>
         Some(
-          s"https://wellcomelibrary.org/pdfthumbs/${bnumber}/0/${validThumbnailFile.location}.jpg")
+          s"https://wellcomelibrary.org/pdfthumbs/$bnumber/0/${validThumbnailFile.location}.jpg")
       case _ =>
         Some(
           s"https://dlcs.io/thumbs/wellcome/5/${validThumbnailFile.location}/full/!$thumbnailDim,$thumbnailDim/0/default.jpg")

@@ -45,7 +45,7 @@ trait FlowOps extends Logging {
         case (ctx, result) =>
           result.left.map { err =>
             error(
-              s"Error encountered processing SQS message. [Error]: ${err.getMessage} [Context]: ${ctx}",
+              s"Error encountered processing SQS message. [Error]: ${err.getMessage} [Context]: $ctx",
               err)
           }
           (ctx, result)
