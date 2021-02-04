@@ -26,7 +26,10 @@ class DerivedDataTest
 
       it("is true if the digital location isn't on the first item") {
         val work = denormalisedWork().items(
-          List(createIdentifiedPhysicalItem, createDigitalItem, createIdentifiedPhysicalItem))
+          List(
+            createIdentifiedPhysicalItem,
+            createDigitalItem,
+            createIdentifiedPhysicalItem))
         val derivedWorkData = DerivedWorkData(work.data)
 
         derivedWorkData.availableOnline shouldBe true
@@ -58,18 +61,20 @@ class DerivedDataTest
             denormalisedWork()
               .items(List(
                 createDigitalItemWith(
-                  locations = List(createDigitalLocationWith(
-                    accessConditions = List(
-                      AccessCondition(status = Some(status))
-                    )
-                  ))
+                  locations = List(
+                    createDigitalLocationWith(
+                      accessConditions = List(
+                        AccessCondition(status = Some(status))
+                      )
+                    ))
                 ),
                 createDigitalItemWith(
-                  locations = List(createDigitalLocationWith(
-                    accessConditions = List(
-                      AccessCondition(status = Some(status))
-                    )
-                  ))
+                  locations = List(
+                    createDigitalLocationWith(
+                      accessConditions = List(
+                        AccessCondition(status = Some(status))
+                      )
+                    ))
                 ),
                 createIdentifiedPhysicalItem
               ))
@@ -86,18 +91,20 @@ class DerivedDataTest
             denormalisedWork()
               .items(List(
                 createDigitalItemWith(
-                  locations = List(createDigitalLocationWith(
-                    accessConditions = List(
-                      AccessCondition(status = Some(status)),
-                    )
-                  ))
+                  locations = List(
+                    createDigitalLocationWith(
+                      accessConditions = List(
+                        AccessCondition(status = Some(status)),
+                      )
+                    ))
                 ),
                 createDigitalItemWith(
-                  locations = List(createDigitalLocationWith(
-                    accessConditions = List(
-                      AccessCondition(status = None)
-                    )
-                  ))
+                  locations = List(
+                    createDigitalLocationWith(
+                      accessConditions = List(
+                        AccessCondition(status = None)
+                      )
+                    ))
                 ),
                 createIdentifiedPhysicalItem
               ))
@@ -114,19 +121,21 @@ class DerivedDataTest
             denormalisedWork()
               .items(List(
                 createDigitalItemWith(
-                  locations = List(createDigitalLocationWith(
-                    accessConditions = List(
-                      AccessCondition(status = Some(status)),
-                      AccessCondition(status = Some(AccessStatus.Open))
-                    )
-                  ))
+                  locations = List(
+                    createDigitalLocationWith(
+                      accessConditions = List(
+                        AccessCondition(status = Some(status)),
+                        AccessCondition(status = Some(AccessStatus.Open))
+                      )
+                    ))
                 ),
                 createDigitalItemWith(
-                  locations = List(createDigitalLocationWith(
-                    accessConditions = List(
-                      AccessCondition(status = Some(status)),
-                    )
-                  ))
+                  locations = List(
+                    createDigitalLocationWith(
+                      accessConditions = List(
+                        AccessCondition(status = Some(status)),
+                      )
+                    ))
                 ),
                 createIdentifiedPhysicalItem
               ))

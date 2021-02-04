@@ -44,8 +44,7 @@ object DerivedWorkData {
   //
   private def isAvailableOnline(items: List[Item[_]]): Boolean =
     items.exists { item =>
-      item
-        .locations
+      item.locations
         .collect { case loc: DigitalLocationDeprecated => loc }
         .exists { locationIsAvailable }
     }
@@ -53,13 +52,13 @@ object DerivedWorkData {
   private def locationIsAvailable(loc: DigitalLocationDeprecated): Boolean =
     loc.accessConditions.isEmpty || !allAccessConditionsAreUnavailable(loc)
 
-  private def allAccessConditionsAreUnavailable(loc: DigitalLocationDeprecated): Boolean =
-    loc
-      .accessConditions
+  private def allAccessConditionsAreUnavailable(
+    loc: DigitalLocationDeprecated): Boolean =
+    loc.accessConditions
       .map { _.status }
       .forall {
-        case Some(AccessStatus.Closed) => true
+        case Some(AccessStatus.Closed)      => true
         case Some(AccessStatus.Unavailable) => true
-        case _ => false
+        case _                              => false
       }
 }
