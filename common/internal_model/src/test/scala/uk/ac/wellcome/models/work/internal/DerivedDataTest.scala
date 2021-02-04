@@ -20,6 +20,14 @@ class DerivedDataTest
         derivedWorkData.availableOnline shouldBe true
       }
 
+      it("is true if the digital location isn't on the first item") {
+        val work = denormalisedWork().items(
+          List(createIdentifiedPhysicalItem, createDigitalItem, createIdentifiedPhysicalItem))
+        val derivedWorkData = DerivedWorkData(work.data)
+
+        derivedWorkData.availableOnline shouldBe true
+      }
+
       it("is false if there isn't a digital location on any items") {
         val work = denormalisedWork().items(List(createIdentifiedPhysicalItem))
         val derivedWorkData = DerivedWorkData(work.data)
