@@ -47,54 +47,60 @@ object AccessStatus {
 
   def apply(status: String): Either[Exception, AccessStatus] =
     status.toLowerCase match {
-      case lowerCaseStatus if lowerCaseStatus.startsWith(
-        "open with advisory",
-        "requires registration"
-      ) =>
+      case lowerCaseStatus
+          if lowerCaseStatus.startsWith(
+            "open with advisory",
+            "requires registration"
+          ) =>
         Right(AccessStatus.OpenWithAdvisory)
 
-      case lowerCaseStatus if lowerCaseStatus.startsWith(
-        "unrestricted",
-        "open"
-      ) =>
+      case lowerCaseStatus
+          if lowerCaseStatus.startsWith(
+            "unrestricted",
+            "open"
+          ) =>
         Right(AccessStatus.Open)
 
-      case lowerCaseStatus if lowerCaseStatus.startsWith(
-        "restricted",
-        "cannot be produced",
-        "certain restrictions apply",
-        "clinical images",
-        "by appointment",
-        "the file is restricted",
-        "this file is restricted"
-      ) =>
+      case lowerCaseStatus
+          if lowerCaseStatus.startsWith(
+            "restricted",
+            "cannot be produced",
+            "certain restrictions apply",
+            "clinical images",
+            "by appointment",
+            "the file is restricted",
+            "this file is restricted"
+          ) =>
         Right(AccessStatus.Restricted)
 
-      case lowerCaseStatus if lowerCaseStatus.startsWith(
-        "closed",
-        "the file is closed",
-        "this file is closed",
-        "the papers are closed",
-        "the files in this series are closed"
-      ) =>
+      case lowerCaseStatus
+          if lowerCaseStatus.startsWith(
+            "closed",
+            "the file is closed",
+            "this file is closed",
+            "the papers are closed",
+            "the files in this series are closed"
+          ) =>
         Right(AccessStatus.Closed)
 
-      case lowerCaseStatus if lowerCaseStatus.startsWith(
-        "missing",
-        "temporarily unavailable",
-        "deaccessioned"
-      ) =>
+      case lowerCaseStatus
+          if lowerCaseStatus.startsWith(
+            "missing",
+            "temporarily unavailable",
+            "deaccessioned"
+          ) =>
         Right(AccessStatus.Unavailable)
 
       case lowerCaseStatus if lowerCaseStatus.startsWith("in copyright") =>
         Right(AccessStatus.LicensedResources)
 
-      case lowerCaseStatus if lowerCaseStatus.startsWith(
-        "permission required",
-        "permission is required",
-        "donor permission",
-        "permission must be obtained"
-      ) =>
+      case lowerCaseStatus
+          if lowerCaseStatus.startsWith(
+            "permission required",
+            "permission is required",
+            "donor permission",
+            "permission must be obtained"
+          ) =>
         Right(AccessStatus.PermissionRequired)
 
       case _ =>
