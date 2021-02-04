@@ -339,7 +339,7 @@ trait ElasticsearchFixtures
   def assertJsonStringsAreEqualIgnoringNulls(a: String,
                                              b: String): Assertion = {
     val jsonA = parseOrElse(a)
-    val jsonB = parseOrElse(a)
+    val jsonB = parseOrElse(b)
     jsonA shouldBe jsonB
   }
 
