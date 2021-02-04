@@ -2,13 +2,15 @@ package uk.ac.wellcome.models.work.internal
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.prop.TableDrivenPropertyChecks
 import uk.ac.wellcome.models.work.generators.{ImageGenerators, WorkGenerators}
 
 class DerivedDataTest
     extends AnyFunSpec
     with Matchers
     with WorkGenerators
-    with ImageGenerators {
+    with ImageGenerators
+    with TableDrivenPropertyChecks {
 
   describe("DerivedWorkData") {
     describe("availableOnline") {
@@ -16,6 +18,8 @@ class DerivedDataTest
         val work = denormalisedWork().items(
           List(createDigitalItem, createIdentifiedPhysicalItem))
         val derivedWorkData = DerivedWorkData(work.data)
+
+        println(work.data.items)
 
         derivedWorkData.availableOnline shouldBe true
       }
@@ -40,6 +44,97 @@ class DerivedDataTest
         val derivedWorkData = DerivedWorkData(work.data)
 
         derivedWorkData.availableOnline shouldBe false
+      }
+
+      val unavailableStatuses = Table(
+        "condition",
+        AccessStatus.Closed,
+        AccessStatus.Unavailable,
+      )
+
+      it("is false if all the items have an unavailable access status") {
+        unavailableStatuses.forEvery { status =>
+          val work =
+            denormalisedWork()
+              .items(List(
+                createDigitalItemWith(
+                  locations = List(createDigitalLocationWith(
+                    accessConditions = List(
+                      AccessCondition(status = Some(status))
+                    )
+                  ))
+                ),
+                createDigitalItemWith(
+                  locations = List(createDigitalLocationWith(
+                    accessConditions = List(
+                      AccessCondition(status = Some(status))
+                    )
+                  ))
+                ),
+                createIdentifiedPhysicalItem
+              ))
+
+          val derivedWorkData = DerivedWorkData(work.data)
+
+          derivedWorkData.availableOnline shouldBe false
+        }
+      }
+
+      it("is true if not every item has an unavailable status") {
+        unavailableStatuses.forEvery { status =>
+          val work =
+            denormalisedWork()
+              .items(List(
+                createDigitalItemWith(
+                  locations = List(createDigitalLocationWith(
+                    accessConditions = List(
+                      AccessCondition(status = Some(status)),
+                    )
+                  ))
+                ),
+                createDigitalItemWith(
+                  locations = List(createDigitalLocationWith(
+                    accessConditions = List(
+                      AccessCondition(status = None)
+                    )
+                  ))
+                ),
+                createIdentifiedPhysicalItem
+              ))
+
+          val derivedWorkData = DerivedWorkData(work.data)
+
+          derivedWorkData.availableOnline shouldBe true
+        }
+      }
+
+      it("is true if not every access condition has an unavailable status") {
+        unavailableStatuses.forEvery { status =>
+          val work =
+            denormalisedWork()
+              .items(List(
+                createDigitalItemWith(
+                  locations = List(createDigitalLocationWith(
+                    accessConditions = List(
+                      AccessCondition(status = Some(status)),
+                      AccessCondition(status = Some(AccessStatus.Open))
+                    )
+                  ))
+                ),
+                createDigitalItemWith(
+                  locations = List(createDigitalLocationWith(
+                    accessConditions = List(
+                      AccessCondition(status = Some(status)),
+                    )
+                  ))
+                ),
+                createIdentifiedPhysicalItem
+              ))
+
+          val derivedWorkData = DerivedWorkData(work.data)
+
+          derivedWorkData.availableOnline shouldBe true
+        }
       }
     }
 

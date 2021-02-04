@@ -15,7 +15,7 @@ object DerivedWorkData {
 
   def apply(data: WorkData[_]): DerivedWorkData =
     DerivedWorkData(
-      availableOnline = containsDigitalLocation(data.items),
+      availableOnline = isAvailableOnline(data.items),
       contributorAgents = contributorAgents(data.contributors)
     )
 
@@ -28,11 +28,38 @@ object DerivedWorkData {
         s"$ontologyType:$label"
     }
 
-  private def containsDigitalLocation(items: List[Item[_]]): Boolean =
+  // The rule for determining if a Work is available online is:
+  //
+  //    It has at least one item with a digital location which might be available.
+  //
+  // We're deliberately a bit conservative about saying a Work isn't available
+  // online.  If we have an item with a digital location, we only say that location
+  // isn't available if:
+  //
+  //    - it has at least one access condition
+  //    - every access condition has a non-empty AccessStatus, and the status is
+  //      some flavour of unavailable
+  //
+  // See the test cases in DerivedDataTest for examples.
+  //
+  private def isAvailableOnline(items: List[Item[_]]): Boolean =
     items.exists { item =>
-      item.locations.exists {
-        case _: DigitalLocationDeprecated => true
-        case _                            => false
-      }
+      item
+        .locations
+        .collect { case loc: DigitalLocationDeprecated => loc }
+        .exists { locationIsAvailable }
     }
+
+  private def locationIsAvailable(loc: DigitalLocationDeprecated): Boolean =
+    loc.accessConditions.isEmpty || !allAccessConditionsAreUnavailable(loc)
+
+  private def allAccessConditionsAreUnavailable(loc: DigitalLocationDeprecated): Boolean =
+    loc
+      .accessConditions
+      .map { _.status }
+      .forall {
+        case Some(AccessStatus.Closed) => true
+        case Some(AccessStatus.Unavailable) => true
+        case _ => false
+      }
 }
