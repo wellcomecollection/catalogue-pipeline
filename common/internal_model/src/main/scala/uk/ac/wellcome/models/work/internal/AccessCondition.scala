@@ -84,7 +84,8 @@ object AccessStatus {
       case lowerCaseStatus if lowerCaseStatus.startsWith(
         "permission required",
         "permission is required",
-        "donor permission"
+        "donor permission",
+        "permission must be obtained"
       ) =>
         Right(AccessStatus.PermissionRequired)
 

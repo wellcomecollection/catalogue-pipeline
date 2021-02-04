@@ -27,7 +27,9 @@ class AccessConditionTest extends AnyFunSpec with Matchers {
     val restrictedValues = List(
       "Permission Required.",
       "Donor Permission.",
-      "Permission is required to view this item.")
+      "Permission is required to view this item.",
+      "Permission must be obtained from the Winnicott Trust before access can be granted"
+    )
     restrictedValues.foreach { str =>
       AccessStatus.apply(str) shouldBe Right(AccessStatus.PermissionRequired)
     }
