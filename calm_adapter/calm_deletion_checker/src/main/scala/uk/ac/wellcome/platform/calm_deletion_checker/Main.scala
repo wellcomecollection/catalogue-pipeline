@@ -2,13 +2,12 @@ package uk.ac.wellcome.platform.calm_deletion_checker
 
 import akka.actor.ActorSystem
 import akka.stream.Materializer
-import com.typesafe.config.Config
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.platform.calm_api_client.{
   CalmAkkaHttpClient,
-  CalmHttpClient,
-  HttpCalmRetriever
+  CalmApiClient,
+  CalmHttpClient
 }
 import uk.ac.wellcome.storage.typesafe.DynamoBuilder
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
@@ -37,19 +36,13 @@ object Main extends WellcomeTypesafeApp {
       messageSender = SNSBuilder
         .buildSNSMessageSender(config, subject = "CALM deletion checker"),
       markDeleted = new DeletionMarker(dynamoConfig.tableName),
-      calmRetriever = calmRetriever(config),
+      calmApiClient = new CalmApiClient(
+        url = config.requireString("calm.api.url"),
+        username = config.requireString("calm.api.username"),
+        password = config.requireString("calm.api.password")
+      ),
       batchSize =
         config.getIntOption("calm.deletion_checker.batch_size").getOrElse(500)
     )
   }
-
-  def calmRetriever(config: Config)(implicit
-                                    ec: ExecutionContext,
-                                    materializer: Materializer,
-                                    httpClient: CalmHttpClient) =
-    new HttpCalmRetriever(
-      url = config.requireString("calm.api.url"),
-      username = config.requireString("calm.api.username"),
-      password = config.requireString("calm.api.password"),
-    )
 }

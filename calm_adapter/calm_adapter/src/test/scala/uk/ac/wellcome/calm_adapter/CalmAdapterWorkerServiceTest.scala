@@ -19,11 +19,7 @@ import uk.ac.wellcome.messaging.memory.{
   MemoryMessageSender
 }
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.platform.calm_api_client.{
-  CalmQuery,
-  CalmRecord,
-  CalmRetriever
-}
+import uk.ac.wellcome.platform.calm_api_client.{CalmQuery, CalmRecord}
 import uk.ac.wellcome.storage.{Identified, Version}
 import uk.ac.wellcome.storage.maxima.memory.MemoryMaxima
 import uk.ac.wellcome.storage.store.memory.MemoryStore
