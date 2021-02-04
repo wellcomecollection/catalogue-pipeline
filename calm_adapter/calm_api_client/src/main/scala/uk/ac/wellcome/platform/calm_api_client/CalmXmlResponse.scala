@@ -127,7 +127,6 @@ case class CalmSummaryResponse(root: Elem,
       .filterNot { case (name, _) => suppressedFields.contains(name) }
       .groupBy(_._1)
       .mapValues(_.map(_._2).toList)
-      .toMap
 }
 
 object CalmSummaryResponse {
