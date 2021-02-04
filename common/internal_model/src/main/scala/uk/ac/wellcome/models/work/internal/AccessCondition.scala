@@ -54,7 +54,7 @@ object AccessStatus {
         Right(AccessStatus.OpenWithAdvisory)
 
       case lowerCaseStatus if lowerCaseStatus.startsWith(
-        "unrestricted / open",
+        "unrestricted",
         "open"
       ) =>
         Right(AccessStatus.Open)
@@ -64,11 +64,19 @@ object AccessStatus {
         "cannot be produced",
         "certain restrictions apply",
         "clinical images",
-        "by appointment"
+        "by appointment",
+        "the file is restricted",
+        "this file is restricted"
       ) =>
         Right(AccessStatus.Restricted)
 
-      case lowerCaseStatus if lowerCaseStatus.startsWith("closed") =>
+      case lowerCaseStatus if lowerCaseStatus.startsWith(
+        "closed",
+        "the file is closed",
+        "this file is closed",
+        "the papers are closed",
+        "the files in this series are closed"
+      ) =>
         Right(AccessStatus.Closed)
 
       case lowerCaseStatus if lowerCaseStatus.startsWith(
