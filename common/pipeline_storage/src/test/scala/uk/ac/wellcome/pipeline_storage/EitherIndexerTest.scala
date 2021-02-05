@@ -23,18 +23,19 @@ class EitherIndexerTest
     with WorkGenerators
     with ImageGenerators {
 
-  implicit val workId: CanonicalId[Work.Visible[Merged]] =
+  implicit val workId: CanonicalId[Work[Merged]] =
     (work: Work[Merged]) => work.id
   implicit val imageId: CanonicalId[Image[Initial]] = (image: Image[Initial]) =>
     image.id
 
-  val works = (1 to 3).map(_ => mergedWork()).toList
-  val images = (1 to 3).map(_ => createImageData.toInitialImage).toList
+  val works: Seq[Work[Merged]] = (1 to 3).map(_ => mergedWork()).toList
+  val images: Seq[Image[Initial]] =
+    (1 to 3).map(_ => createImageData.toInitialImage).toList
 
-  val worksAndImages = works.map(Left(_)) ++ images.map(Right(_))
+  val worksAndImages: Seq[Either[Work[Merged], Image[Initial]]] = works.map(
+    Left(_)) ++ images.map(Right(_))
 
   it("indexes a list of either works or images") {
-
     withLocalInitialImagesIndex { imageIndex =>
       withLocalMergedWorksIndex { workIndex =>
         val indexer = new EitherIndexer(
