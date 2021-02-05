@@ -34,12 +34,10 @@ trait CalmResponseGenerators {
       protocol
     )
 
-  def summaryResponse(
-    data: List[(String, String)],
-    timestamp: Option[Instant] = Some(retrievedAt)): HttpResponse =
+  def summaryResponse(data: (String, String)*): HttpResponse =
     HttpResponse(
       200,
-      timestamp.map(ts => Date(DateTime(ts.toEpochMilli))).toList,
+      List(Date(DateTime(retrievedAt.toEpochMilli))),
       <soap:Envelope
       xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"

@@ -36,7 +36,7 @@ class CalmApiClientTest
 
   it("performs search requests") {
     val nResults = 10
-    val responses = List(searchResponse(nResults))
+    val responses = List(searchResponse(n = nResults))
     withApiClient(responses) {
       case (apiClient, _) =>
         whenReady(apiClient.search(query)) { response =>
@@ -46,7 +46,7 @@ class CalmApiClientTest
   }
 
   it("performs summary requests") {
-    val responses = List(summaryResponse(List("RecordID" -> "1")))
+    val responses = List(summaryResponse("RecordID" -> "1"))
     withApiClient(responses) {
       case (apiClient, _) =>
         whenReady(apiClient.summary(1)) { response =>
@@ -60,17 +60,23 @@ class CalmApiClientTest
 
   it("uses basic auth credentials for requests") {
     val responses =
-      List(searchResponse(1), summaryResponse(List("RecordID" -> "1")))
+      List(searchResponse(n = 1), summaryResponse("RecordID" -> "1"))
     withApiClient(responses) {
       case (apiClient, testHttpClient) =>
-        whenReady(for {
+        val requestFuture = for {
           _ <- apiClient.search(query)
           _ <- apiClient.summary(1)
-        } yield ()) { _ =>
-          testHttpClient.requests.map(_.headers.collect {
-            case auth: Authorization => auth
-          }) should contain only List(
-            Authorization(BasicHttpCredentials(username, password))
+        } yield ()
+
+        whenReady(requestFuture) { _ =>
+          val authHeaders = testHttpClient.requests
+            .flatMap(_.headers)
+            .collect {
+              case auth: Authorization => auth
+            }
+
+          every(authHeaders) should have(
+            'credentials (BasicHttpCredentials(username, password))
           )
         }
     }
@@ -78,30 +84,32 @@ class CalmApiClientTest
 
   it("sets the SOAPAction header for requests") {
     val responses =
-      List(searchResponse(1), summaryResponse(List("RecordID" -> "1")))
+      List(searchResponse(n = 1), summaryResponse("RecordID" -> "1"))
     withApiClient(responses) {
       case (apiClient, testHttpClient) =>
-        whenReady(for {
+        val requestFuture = for {
           _ <- apiClient.search(query)
           _ <- apiClient.summary(1)
-        } yield ()) { _ =>
-          testHttpClient.requests.map(_.headers.collect {
-            case auth: RawHeader => auth
-          }) shouldBe List(
-            List(
-              RawHeader("SOAPAction", "http://ds.co.uk/cs/webservices/Search")),
-            List(
-              RawHeader(
-                "SOAPAction",
-                "http://ds.co.uk/cs/webservices/SummaryHeader"))
-          )
+        } yield ()
+
+        whenReady(requestFuture) { _ =>
+          val rawHeaders = testHttpClient.requests
+            .flatMap(_.headers)
+            .collect {
+              case auth: RawHeader => auth
+            }
+
+          every(rawHeaders) should have('name ("SOAPAction"))
+          rawHeaders.map(_.value) shouldBe List(
+            "http://ds.co.uk/cs/webservices/Search",
+            "http://ds.co.uk/cs/webservices/SummaryHeader")
         }
     }
   }
 
   it("removes suppressed fields from summary responses") {
     val responses =
-      List(summaryResponse(List("RecordID" -> "1", suppressedField)))
+      List(summaryResponse("RecordID" -> "1", suppressedField))
     withApiClient(responses) {
       case (apiClient, _) =>
         whenReady(apiClient.summary(1)) { response =>
@@ -112,7 +120,7 @@ class CalmApiClientTest
   }
 
   it("fails if there is no cookie in a search response") {
-    val responses = List(searchResponse(1, None))
+    val responses = List(searchResponse(n = 1, cookiePair = None))
     withApiClient(responses) {
       case (apiClient, _) =>
         whenReady(apiClient.search(query).failed) { error =>
@@ -132,7 +140,7 @@ class CalmApiClientTest
   }
 
   it("fails if there is no RecordID in a summary response") {
-    val responses = List(summaryResponse(List("Beep" -> "Boop")))
+    val responses = List(summaryResponse("Beep" -> "Boop"))
     withApiClient(responses) {
       case (apiClient, _) =>
         whenReady(apiClient.summary(1).failed) { error =>

@@ -36,10 +36,12 @@ class CalmRetrieverTest
 
   it("generates a list of CALM records from the API") {
     val responses = List(
-      searchResponse(2),
+      searchResponse(n = 2),
       summaryResponse(
-        List("RecordID" -> "1", "keyA" -> "valueA", "keyB" -> "valueB")),
-      summaryResponse(List("RecordID" -> "2", "keyC" -> "valueC"))
+        "RecordID" -> "1",
+        "keyA" -> "valueA",
+        "keyB" -> "valueB"),
+      summaryResponse("RecordID" -> "2", "keyC" -> "valueC")
     )
     withMaterializer { implicit materializer =>
       withCalmRetriever(responses) {
@@ -66,9 +68,9 @@ class CalmRetrieverTest
 
   it("uses the cookie from the first response for subsequent API requests") {
     val responses = List(
-      searchResponse(2),
-      summaryResponse(List("RecordID" -> "1")),
-      summaryResponse(List("RecordID" -> "2"))
+      searchResponse(n = 2),
+      summaryResponse("RecordID" -> "1"),
+      summaryResponse("RecordID" -> "2")
     )
     withMaterializer { implicit materializer =>
       withCalmRetriever(responses) {
@@ -89,10 +91,10 @@ class CalmRetrieverTest
 
   it("uses num hits from the first response for subsequent API requests") {
     val responses = List(
-      searchResponse(3),
-      summaryResponse(List("RecordID" -> "1")),
-      summaryResponse(List("RecordID" -> "2")),
-      summaryResponse(List("RecordID" -> "3"))
+      searchResponse(n = 3),
+      summaryResponse("RecordID" -> "1"),
+      summaryResponse("RecordID" -> "2"),
+      summaryResponse("RecordID" -> "3")
     )
     withMaterializer { implicit materializer =>
       withCalmRetriever(responses) {
