@@ -3,6 +3,7 @@ package uk.ac.wellcome.platform.calm_api_client
 import scala.xml.Elem
 
 trait CalmXmlRequest {
+  type Response
 
   val action: String
 
@@ -21,7 +22,7 @@ trait CalmXmlRequest {
 
 case class CalmSearchRequest(query: CalmQuery, dbName: String = "Catalog")
     extends CalmXmlRequest {
-
+  type Response = CalmSession
   val action = "Search"
 
   def body: Elem =
@@ -34,7 +35,7 @@ case class CalmSearchRequest(query: CalmQuery, dbName: String = "Catalog")
 
 case class CalmSummaryRequest(pos: Int, dbName: String = "Catalog")
     extends CalmXmlRequest {
-
+  type Response = CalmRecord
   val action = "SummaryHeader"
 
   def body: Elem =

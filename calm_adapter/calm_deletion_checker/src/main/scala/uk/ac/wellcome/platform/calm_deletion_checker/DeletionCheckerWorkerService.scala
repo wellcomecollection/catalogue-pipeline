@@ -7,7 +7,7 @@ import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.platform.calm_api_client.CalmRetriever
+import uk.ac.wellcome.platform.calm_api_client.CalmApiClient
 import uk.ac.wellcome.typesafe.Runnable
 import weco.catalogue.source_model.CalmSourcePayload
 
@@ -19,7 +19,7 @@ class DeletionCheckerWorkerService[Destination](
   msgStream: SQSStream[NotificationMessage],
   messageSender: MessageSender[Destination],
   markDeleted: DeletionMarker,
-  calmRetriever: CalmRetriever,
+  calmApiClient: CalmApiClient,
   batchSize: Int)(implicit ec: ExecutionContext)
     extends Runnable {
 
@@ -73,7 +73,7 @@ class DeletionCheckerWorkerService[Destination](
         case (msg, _, Extant) => Future.successful(msg)
       }
 
-  private lazy val deletionChecker = new DeletionChecker(calmRetriever)
+  private lazy val deletionChecker = new DeletionChecker(calmApiClient)
 
   sealed trait DeletionStatus extends Product with Serializable
   case object Deleted extends DeletionStatus
