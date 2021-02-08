@@ -64,11 +64,16 @@ object AccessStatus {
             "cannot be produced",
             "certain restrictions apply",
             "clinical images",
-            "by appointment",
             "the file is restricted",
             "this file is restricted"
           ) =>
         Right(AccessStatus.Restricted)
+
+      case lowerCaseStatus
+          if lowerCaseStatus.startsWith(
+            "by appointment"
+          ) =>
+        Right(AccessStatus.ByAppointment)
 
       case lowerCaseStatus
           if lowerCaseStatus.startsWith(
@@ -83,10 +88,15 @@ object AccessStatus {
       case lowerCaseStatus
           if lowerCaseStatus.startsWith(
             "missing",
-            "temporarily unavailable",
             "deaccessioned"
           ) =>
         Right(AccessStatus.Unavailable)
+
+      case lowerCaseStatus
+          if lowerCaseStatus.startsWith(
+            "temporarily unavailable"
+          ) =>
+        Right(AccessStatus.TemporarilyUnavailable)
 
       case lowerCaseStatus if lowerCaseStatus.startsWith("in copyright") =>
         Right(AccessStatus.LicensedResources)
