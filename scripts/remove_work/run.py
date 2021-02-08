@@ -48,6 +48,10 @@ def catalogue_client(service_name):
     )
 
 
+def experience_client(service_name):
+    return aws_client(service_name, role_arn="arn:aws:iam::130871440101:role/experience-developer")
+
+
 def get_associated_image_remover(es_host, es_auth, catalogue_id, works_indices):
     print("*** Trying to find associated images")
     images_indices = [idx.replace("works", "images") for idx in works_indices]
@@ -311,36 +315,57 @@ def remove_image_from_loris_s3_bucket(miro_id, dry_run):
         s3_client.delete_object(Bucket=bucket, Key=key)
 
 
-def create_cloudfront_invalidations(miro_id, dry_run):
-    print("*** Creating a CloudFront invalidation for Loris")
-    cloudfront_client = platform_client("cloudfront")
-
+def invalidate_cloudfront_path(cloudfront_client, *, domain_name, invalidation_path, dry_run):
     resp = cloudfront_client.list_distributions()
     assert not resp["DistributionList"]["IsTruncated"]
+
+    def is_matching_cloudfront_distribution(item):
+        has_origin_domain_name = any(
+            i["DomainName"] == domain_name
+            for i in item["Origins"]["Items"]
+        )
+
+        has_alias_domain_name = domain_name in item["Aliases"]["Items"]
+
+        return has_origin_domain_name or has_alias_domain_name
+
     matching = [
         item
         for item in resp["DistributionList"]["Items"]
-        if any(
-            i["DomainName"] == "iiif-origin.wellcomecollection.org"
-            for i in item["Origins"]["Items"]
-        )
+        if is_matching_cloudfront_distribution(item)
     ]
 
-    invalidation_path = "/image/%s.jpg/*" % miro_id
-    for loris_distribution in matching:
-        distribution_id = loris_distribution["Id"]
-        print("··· Detected a Loris CloudFront distribution as %s" % distribution_id)
+    for distribution in matching:
+        print("··· Detected a CloudFront distribution for %s as %s" % (domain_name, distribution["Id"]))
         print("··· Issuing an invalidation for %s" % invalidation_path)
 
         if not dry_run:
             resp = cloudfront_client.create_invalidation(
-                DistributionId=distribution_id,
+                DistributionId=distribution["Id"],
                 InvalidationBatch={
                     "Paths": {"Quantity": 1, "Items": [invalidation_path]},
                     "CallerReference": dt.datetime.now().isoformat(),
                 },
             )
             assert resp["ResponseMetadata"]["HTTPStatusCode"] == 201
+
+
+def create_cloudfront_invalidations(*, catalogue_id, miro_id, dry_run):
+    print("*** Creating a CloudFront invalidation for Loris")
+    invalidate_cloudfront_path(
+        platform_client("cloudfront"),
+        domain_name="iiif-origin.wellcomecollection.org",
+        invalidation_path="/image/%s.jpg/*" % miro_id,
+        dry_run=dry_run
+    )
+
+    print(f"*** Creating a CloudFront invalidation for /works/{catalogue_id}")
+    invalidate_cloudfront_path(
+        experience_client("cloudfront"),
+        domain_name="wellcomecollection.org",
+        invalidation_path=f"/works/{catalogue_id}",
+        dry_run=dry_run
+    )
 
 
 def update_miro_inventory(miro_id, dry_run):
@@ -400,12 +425,8 @@ def main(catalogue_id, index, dry_run):
     suppress_work_in_miro_vhs(miro_id, dry_run)
 
     remove_image_from_loris_s3_bucket(miro_id, dry_run)
-    create_cloudfront_invalidations(miro_id, dry_run)
+    create_cloudfront_invalidations(catalogue_id=catalogue_id, miro_id=miro_id, dry_run=dry_run)
     update_miro_inventory(miro_id, dry_run)
-
-    print(
-        "*** You also need to (manually) create a CloudFront invalidation for the /works page on wellcomecollection.org"
-    )
 
 
 if __name__ == "__main__":
