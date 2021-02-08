@@ -9,6 +9,9 @@ This script:
 - creates CloudFront invalidations for Loris and wellcomecollection.org
 - updates the Miro VHS inventory
 
+Note: Loris may continue to serve an image from its own cache, even if the original image has been removed from S3.
+Since we're decommissioning Loris soon, we aren't planning to fix this.
+
 ### Usage
 
 ```
