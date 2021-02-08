@@ -55,10 +55,10 @@ trait DisplayJsonUtil extends AutoDerivation {
     case concept: DisplayAbstractConcept => concept.asJson
   }
 
-  implicit val locationDeprecatedEncoder: Encoder[DisplayLocationDeprecated] = {
-    case digitalLocation: DisplayDigitalLocationDeprecated =>
+  implicit val locationEncoder: Encoder[DisplayLocation] = {
+    case digitalLocation: DisplayDigitalLocation =>
       digitalLocation.asJson
-    case physicalLocation: DisplayPhysicalLocationDeprecated =>
+    case physicalLocation: DisplayPhysicalLocation =>
       physicalLocation.asJson
   }
 }

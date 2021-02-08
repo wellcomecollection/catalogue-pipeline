@@ -31,7 +31,7 @@ object DerivedWorkData {
   private def containsDigitalLocation(items: List[Item[_]]): Boolean =
     items.exists { item =>
       item.locations.exists {
-        case _: DigitalLocationDeprecated => true
+        case _: DigitalLocation => true
         case _                            => false
       }
     }

@@ -80,7 +80,7 @@ class PlatformMergerTest
       .items(List(createDigitalItemWith(List(digitalLocationCCBYNC))))
       .imageData(List(createMetsImageData.toIdentified))
       .thumbnail(
-        DigitalLocationDeprecated(
+        DigitalLocation(
           url = "https://path.to/thumbnail.jpg",
           locationType = LocationType("thumbnail-image"),
           license = Some(License.CCBY)

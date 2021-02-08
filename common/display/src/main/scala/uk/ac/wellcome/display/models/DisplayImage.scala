@@ -17,11 +17,11 @@ case class DisplayImage(
     `type` = "uk.ac.wellcome.Display.models.DisplayDigitalLocation",
     description =
       "The location which provides access to an image that can be displayed directly as a thumbnnail"
-  ) thumbnail: DisplayDigitalLocationDeprecated,
+  ) thumbnail: DisplayDigitalLocation,
   @Schema(
     `type` = "uk.ac.wellcome.Display.models.DisplayDigitalLocation",
     description = "The locations which provide access to the image"
-  ) locations: Seq[DisplayDigitalLocationDeprecated],
+  ) locations: Seq[DisplayDigitalLocation],
   @Schema(
     `type` = "uk.ac.wellcome.Display.models.DisplayImageSource",
     description = "A description of the image's source"
@@ -48,8 +48,8 @@ object DisplayImage {
     new DisplayImage(
       id = image.id,
       thumbnail =
-        DisplayDigitalLocationDeprecated(image.state.derivedData.thumbnail),
-      locations = image.locations.map(DisplayDigitalLocationDeprecated(_)),
+        DisplayDigitalLocation(image.state.derivedData.thumbnail),
+      locations = image.locations.map(DisplayDigitalLocation(_)),
       source = DisplayImageSource(image.source, includes),
       visuallySimilar = None,
       withSimilarColors = None,

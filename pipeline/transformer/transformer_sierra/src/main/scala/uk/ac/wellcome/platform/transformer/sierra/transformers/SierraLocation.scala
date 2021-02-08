@@ -16,7 +16,7 @@ trait SierraLocation extends SierraQueryOps with Logging {
   def getPhysicalLocation(
     bibNumber: SierraBibNumber,
     itemData: SierraItemData,
-    bibData: SierraBibData): Option[PhysicalLocationDeprecated] =
+    bibData: SierraBibData): Option[PhysicalLocation] =
     itemData.location.flatMap {
       // We've seen records where the "location" field is populated in
       // the JSON, but the code and name are both empty strings or "none".
@@ -25,7 +25,7 @@ trait SierraLocation extends SierraQueryOps with Logging {
       case SierraSourceLocation("none", "none") => None
       case SierraSourceLocation(code, name) =>
         Some(
-          PhysicalLocationDeprecated(
+          PhysicalLocation(
             locationType = LocationType(code),
             accessConditions = getAccessConditions(bibNumber, bibData),
             label = name

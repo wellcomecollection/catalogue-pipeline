@@ -16,7 +16,7 @@ class DisplayItemTest extends AnyFunSpec with Matchers with ItemsGenerators {
 
     displayItem.id shouldBe Some(item.id.canonicalId)
     displayItem.locations shouldBe List(
-      DisplayLocationDeprecated(item.locations.head))
+      DisplayLocation(item.locations.head))
     displayItem.identifiers shouldBe Some(
       List(DisplayIdentifier(item.id.sourceIdentifier)))
     displayItem.ontologyType shouldBe "Item"
@@ -32,7 +32,7 @@ class DisplayItemTest extends AnyFunSpec with Matchers with ItemsGenerators {
     displayItem shouldBe DisplayItem(
       id = None,
       identifiers = None,
-      locations = List(DisplayLocationDeprecated(item.locations.head)))
+      locations = List(DisplayLocation(item.locations.head)))
   }
 
   it("parses an unidentified Item without any locations") {

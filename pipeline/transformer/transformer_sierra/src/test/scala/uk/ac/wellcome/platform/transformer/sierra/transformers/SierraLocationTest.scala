@@ -6,7 +6,7 @@ import uk.ac.wellcome.models.work.internal.{
   AccessCondition,
   AccessStatus,
   LocationType,
-  PhysicalLocationDeprecated
+  PhysicalLocation
 }
 import uk.ac.wellcome.platform.transformer.sierra.source.sierra.SierraSourceLocation
 import uk.ac.wellcome.platform.transformer.sierra.source.{
@@ -15,7 +15,7 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
 }
 import uk.ac.wellcome.platform.transformer.sierra.generators.SierraDataGenerators
 
-class SierraLocationDeprecatedTest
+class SierraLocationTest
     extends AnyFunSpec
     with Matchers
     with SierraDataGenerators {
@@ -33,7 +33,7 @@ class SierraLocationDeprecatedTest
     )
 
     it("extracts location from item data") {
-      val expectedLocation = PhysicalLocationDeprecated(locationType, label)
+      val expectedLocation = PhysicalLocation(locationType, label)
       transformer.getPhysicalLocation(bibId, itemData, bibData) shouldBe Some(
         expectedLocation)
     }
@@ -75,7 +75,7 @@ class SierraLocationDeprecatedTest
         )
       )
       transformer.getPhysicalLocation(bibId, itemData, bibData) shouldBe Some(
-        PhysicalLocationDeprecated(
+        PhysicalLocation(
           locationType = locationType,
           label = label,
           accessConditions = List(
@@ -96,7 +96,7 @@ class SierraLocationDeprecatedTest
         )
       )
       transformer.getPhysicalLocation(bibId, itemData, bibData) shouldBe Some(
-        PhysicalLocationDeprecated(
+        PhysicalLocation(
           locationType = locationType,
           label = label,
           accessConditions = List(AccessCondition(Some(AccessStatus.Open)))
@@ -117,7 +117,7 @@ class SierraLocationDeprecatedTest
         )
       )
       transformer.getPhysicalLocation(bibId, itemData, bibData) shouldBe Some(
-        PhysicalLocationDeprecated(
+        PhysicalLocation(
           locationType = locationType,
           label = label,
           accessConditions = List(
@@ -255,7 +255,7 @@ class SierraLocationDeprecatedTest
         )
       )
       transformer.getPhysicalLocation(bibId, itemData, bibData) shouldBe Some(
-        PhysicalLocationDeprecated(
+        PhysicalLocation(
           locationType = locationType,
           label = label,
           accessConditions = List()

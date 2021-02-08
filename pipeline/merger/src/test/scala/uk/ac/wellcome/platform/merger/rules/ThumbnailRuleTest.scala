@@ -6,7 +6,7 @@ import uk.ac.wellcome.models.work.generators.SourceWorkGenerators
 import uk.ac.wellcome.models.work.internal.{
   AccessCondition,
   AccessStatus,
-  DigitalLocationDeprecated,
+  DigitalLocation,
   License,
   LocationType
 }
@@ -35,7 +35,7 @@ class ThumbnailRuleTest
 
   val metsWork = metsIdentifiedWork()
     .thumbnail(
-      DigitalLocationDeprecated(
+      DigitalLocation(
         url = "mets.com/thumbnail.jpg",
         locationType = LocationType("thumbnail-image"),
         license = Some(License.CCBY)

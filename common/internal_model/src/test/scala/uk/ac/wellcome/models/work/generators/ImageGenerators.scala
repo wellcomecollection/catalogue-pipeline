@@ -16,7 +16,7 @@ trait ImageGenerators
     with SierraWorkGenerators {
 
   def createImageDataWith(
-    locations: List[DigitalLocationDeprecated] = List(createImageLocation),
+    locations: List[DigitalLocation] = List(createImageLocation),
     version: Int = 1,
     identifierValue: String = randomAlphanumeric(10),
     identifierType: IdentifierType = IdentifierType("miro-image-number")
@@ -37,7 +37,7 @@ trait ImageGenerators
 
   def createMiroImageData = createImageDataWith(
     locations = List(
-      DigitalLocationDeprecated(
+      DigitalLocation(
         url = "https://iiif.wellcomecollection.org/V01234.jpg",
         locationType = LocationType("iiif-image"),
         license = Some(License.CCBY)

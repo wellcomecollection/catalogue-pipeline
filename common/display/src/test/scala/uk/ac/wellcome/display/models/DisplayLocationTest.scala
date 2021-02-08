@@ -3,29 +3,29 @@ package uk.ac.wellcome.display.models
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.internal.{
-  DigitalLocationDeprecated,
+  DigitalLocation,
   License,
   LocationType,
-  PhysicalLocationDeprecated
+  PhysicalLocation
 }
 
-class DisplayLocationDeprecatedDeprecatedTest extends AnyFunSpec with Matchers {
+class DisplayLocationTest extends AnyFunSpec with Matchers {
 
   describe("DisplayDigitalLocation") {
     it("reads a DigitalLocation as a DisplayDigitalLocation") {
       val thumbnailUrl = "https://iiif.example.org/V0000001/default.jpg"
       val locationType = LocationType("thumbnail-image")
 
-      val internalLocation = DigitalLocationDeprecated(
+      val internalLocation = DigitalLocation(
         locationType = locationType,
         url = thumbnailUrl,
         license = Some(License.CCBY)
       )
-      val displayLocation = DisplayLocationDeprecated(internalLocation)
+      val displayLocation = DisplayLocation(internalLocation)
 
-      displayLocation shouldBe a[DisplayDigitalLocationDeprecated]
+      displayLocation shouldBe a[DisplayDigitalLocation]
       val displayDigitalLocation =
-        displayLocation.asInstanceOf[DisplayDigitalLocationDeprecated]
+        displayLocation.asInstanceOf[DisplayDigitalLocation]
       displayDigitalLocation.locationType shouldBe DisplayLocationType(
         locationType)
       displayDigitalLocation.url shouldBe thumbnailUrl
@@ -35,17 +35,17 @@ class DisplayLocationDeprecatedDeprecatedTest extends AnyFunSpec with Matchers {
     }
 
     it("reads the credit field from a Location") {
-      val location = DigitalLocationDeprecated(
+      val location = DigitalLocation(
         locationType = LocationType("thumbnail-image"),
         url = "",
         credit = Some("Science Museum, Wellcome"),
         license = Some(License.CCBY)
       )
-      val displayLocation = DisplayLocationDeprecated(location)
+      val displayLocation = DisplayLocation(location)
 
-      displayLocation shouldBe a[DisplayDigitalLocationDeprecated]
+      displayLocation shouldBe a[DisplayDigitalLocation]
       val displayDigitalLocation =
-        displayLocation.asInstanceOf[DisplayDigitalLocationDeprecated]
+        displayLocation.asInstanceOf[DisplayDigitalLocation]
       displayDigitalLocation.credit shouldBe location.credit
     }
   }
@@ -55,13 +55,13 @@ class DisplayLocationDeprecatedDeprecatedTest extends AnyFunSpec with Matchers {
       val locationType = LocationType("sgmed")
       val locationLabel = "The collection of cold cauldrons"
       val physicalLocation =
-        PhysicalLocationDeprecated(
+        PhysicalLocation(
           locationType = locationType,
           label = locationLabel)
 
-      val displayLocation = DisplayLocationDeprecated(physicalLocation)
+      val displayLocation = DisplayLocation(physicalLocation)
 
-      displayLocation shouldBe DisplayPhysicalLocationDeprecated(
+      displayLocation shouldBe DisplayPhysicalLocation(
         locationType = DisplayLocationType(locationType),
         locationLabel)
     }
@@ -72,9 +72,9 @@ class DisplayLocationDeprecatedDeprecatedTest extends AnyFunSpec with Matchers {
       val locationType = LocationType("iiif-image")
       val url = "https://wellcomelibrary.org/iiif/b2201508/manifest"
 
-      val digitalLocation = DigitalLocationDeprecated(url, locationType)
+      val digitalLocation = DigitalLocation(url, locationType)
 
-      DisplayLocationDeprecated(digitalLocation) shouldBe DisplayDigitalLocationDeprecated(
+      DisplayLocation(digitalLocation) shouldBe DisplayDigitalLocation(
         locationType = DisplayLocationType(locationType),
         url = url)
     }
