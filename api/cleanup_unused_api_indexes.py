@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
 import click
-import datetime
 import json
 
 import boto3
 import httpx
+import humanize
 
 
 def get_session_with_role(role_arn):
@@ -55,7 +55,7 @@ def list_indexes(es_client):
             {
                 "name": r["index"],
                 "size": r["store.size"],
-                "doc_count": int(r['docs.count']),
+                "doc_count": int(r["docs.count"]),
             }
             for r in resp.json()
         ],
@@ -63,19 +63,73 @@ def list_indexes(es_client):
     )
 
 
-def get_index_date(api_url):
+def get_index_name(api_url):
     """
-    Return the date of the index that this
+    Return the name of the index that this instance of the API is reading from.
     """
-    search_templates_resp = httpx.get(f"https://{api_url}/catalogue/v2/search-templates.json")
-    index_name = search_templates_resp.json()["templates"][0]["index"]
+    search_templates_resp = httpx.get(
+        f"https://{api_url}/catalogue/v2/search-templates.json"
+    )
+    return search_templates_resp.json()["templates"][0]["index"]
 
-    # Check it looks like works-YYYY-MM-DD
-    prefix, date = index_name.split("-", 1)
-    assert prefix == "works"
-    datetime.datetime.strptime(date, "%Y-%M-%d")
 
-    return date
+def maybe_cleanup_index(es_client, *, idx, prod_index_name, stage_index_name):
+    if not idx["name"].startswith(("works-", "images-")):
+        return
+
+    prod_works_index_name = prod_index_name
+    prod_images_index_name = prod_index_name.replace("works-", "images-")
+
+    stage_works_index_name = stage_index_name
+    stage_images_index_name = stage_index_name.replace("works-", "images-")
+
+    click.echo(
+        f"\nConsidering %s (%s docs, %s)"
+        % (
+            click.style(idx["name"], "blue"),
+            humanize.intcomma(idx["doc_count"]),
+            idx["size"],
+        )
+    )
+
+    if idx["name"] == prod_works_index_name or idx["name"] == prod_images_index_name:
+        click.echo(
+            f"This index will {click.style('not be deleted', 'green')} -- it is the prod API"
+        )
+        return
+
+    if idx["name"] == stage_works_index_name or idx["name"] == stage_images_index_name:
+        click.echo(
+            f"This index will {click.style('not be deleted', 'green')} -- it is the stage API"
+        )
+        return
+
+    if (
+        idx["name"].startswith("works-")
+        and idx["name"] < prod_works_index_name
+        and idx["name"] < stage_works_index_name
+    ):
+        result = click.confirm(
+            f"This index is {click.style('older', 'red')} than the current APIs.  Delete it?"
+        )
+        if result:
+            es_client.delete(f"/{idx['name']}")
+        return
+
+    if (
+        idx["name"].startswith("images-")
+        and idx["name"] < prod_images_index_name
+        and idx["name"] < stage_images_index_name
+    ):
+        result = click.confirm(
+            f"This index is {click.style('older', 'red')} than the current APIs.  Delete it?"
+        )
+        if result:
+            es_client.delete(f"/{idx['name']}")
+        return
+
+    click.echo(f"This index will {click.style('not be deleted', 'green')}")
+    return
 
 
 if __name__ == "__main__":
@@ -85,14 +139,25 @@ if __name__ == "__main__":
 
     es_client = get_api_es_client(session)
 
-    prod_index_date = get_index_date("api.wellcomecollection.org")
-    stage_index_date = get_index_date("api-stage.wellcomecollection.org")
+    prod_index_name = get_index_name("api.wellcomecollection.org")
+    stage_index_name = get_index_name("api-stage.wellcomecollection.org")
 
     click.echo(
-        "The prod API is reading from %s; the staging API is reading from %s" %
-        (click.style(f"works-{prod_index_date}"), click.style(f"works-{stage_index_date}"))
+        "The prod API  is reading from %s" % click.style(prod_index_name, "blue")
+    )
+    click.echo(
+        "The stage API is reading from %s" % click.style(stage_index_name, "blue")
     )
 
-    from pprint import pprint
+    for idx in list_indexes(es_client):
+        maybe_cleanup_index(
+            es_client,
+            idx=idx,
+            prod_index_name=prod_index_name,
+            stage_index_name=stage_index_name,
+        )
 
-    pprint(list_indexes(es_client))
+    #
+    # from pprint import pprint
+    #
+    # pprint(list_indexes(es_client))
