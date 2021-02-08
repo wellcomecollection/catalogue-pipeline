@@ -4,7 +4,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
 class AccessStatusTest extends AnyFunSpec with Matchers {
-  it("creates the Closed access status") {
+  it("creates the Closed AccessStatus") {
     val closedValues = List(
       "Closed",
       "The file is closed until 2059",
@@ -16,7 +16,7 @@ class AccessStatusTest extends AnyFunSpec with Matchers {
     }
   }
 
-  it("creates restricted access condition") {
+  it("creates the Restricted AccessStatus") {
     val restrictedValues = List(
       "Restricted",
       "Restricted access (Data Protection Act)",
@@ -32,13 +32,14 @@ class AccessStatusTest extends AnyFunSpec with Matchers {
     }
   }
 
-  it("creates Unavailable access condition") {
+  it("creates the Unavailable AccessStatus") {
     val restrictedValues = List("Missing.", "Temporarily Unavailable.")
     restrictedValues.foreach { str =>
       AccessStatus.apply(str) shouldBe Right(AccessStatus.Unavailable)
     }
   }
-  it("creates PermissionRequired access condition") {
+
+  it("creates the PermissionRequired AccessStatus") {
     val restrictedValues = List(
       "Permission Required.",
       "Donor Permission.",
@@ -50,7 +51,7 @@ class AccessStatusTest extends AnyFunSpec with Matchers {
     }
   }
 
-  it("creates the Open access condition") {
+  it("creates the Open AccessStatus") {
     val openValues = List(
       "Unrestricted",
       "Open",
@@ -61,7 +62,7 @@ class AccessStatusTest extends AnyFunSpec with Matchers {
     }
   }
 
-  it("strips punctuation from access condition if present") {
+  it("strips punctuation from the AccessStatus") {
     AccessStatus.apply("Open.") shouldBe Right(AccessStatus.Open)
   }
 
