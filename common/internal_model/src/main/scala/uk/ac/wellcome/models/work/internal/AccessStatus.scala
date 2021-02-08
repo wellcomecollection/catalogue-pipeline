@@ -4,7 +4,7 @@ class UnknownAccessStatus(status: String) extends Exception(status)
 
 sealed trait AccessStatus { this: AccessStatus =>
 
-  def name = this.getClass.getSimpleName.stripSuffix("$")
+  def name: String = this.getClass.getSimpleName.stripSuffix("$")
 
   def hasRestrictions: Boolean = this match {
     case AccessStatus.OpenWithAdvisory   => true

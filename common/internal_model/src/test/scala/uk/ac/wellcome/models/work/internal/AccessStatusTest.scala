@@ -4,6 +4,11 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
 class AccessStatusTest extends AnyFunSpec with Matchers {
+  it("sets the name of an AccessStatus") {
+    AccessStatus.Open.name shouldBe "Open"
+    AccessStatus.Restricted.name shouldBe "Restricted"
+  }
+
   it("creates the Closed AccessStatus") {
     val closedValues = List(
       "Closed",
