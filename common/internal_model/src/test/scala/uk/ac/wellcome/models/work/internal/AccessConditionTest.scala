@@ -4,6 +4,18 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
 class AccessConditionTest extends AnyFunSpec with Matchers {
+  it("creates the Closed access status") {
+    val closedValues = List(
+      "Closed",
+      "The file is closed until 2059",
+      "This file is closed until 2060",
+      "The papers are closed until some future date"
+    )
+    closedValues.foreach { str =>
+      AccessStatus.apply(str) shouldBe Right(AccessStatus.Closed)
+    }
+  }
+
   it("creates restricted access condition") {
     val restrictedValues = List(
       "Restricted",
@@ -11,12 +23,15 @@ class AccessConditionTest extends AnyFunSpec with Matchers {
       "Cannot Be Produced - View Digitised Version",
       "Certain restrictions apply.",
       "By Appointment.",
-      "Restricted: currently undergoing conservation."
+      "Restricted: currently undergoing conservation.",
+      "The file is restricted for data protection reasons",
+      "This file is restricted for sensitivity reasons"
     )
     restrictedValues.foreach { str =>
       AccessStatus.apply(str) shouldBe Right(AccessStatus.Restricted)
     }
   }
+
   it("creates Unavailable access condition") {
     val restrictedValues = List("Missing.", "Temporarily Unavailable.")
     restrictedValues.foreach { str =>
@@ -27,14 +42,23 @@ class AccessConditionTest extends AnyFunSpec with Matchers {
     val restrictedValues = List(
       "Permission Required.",
       "Donor Permission.",
-      "Permission is required to view this item.")
+      "Permission is required to view this item.",
+      "Permission must be obtained from the Winnicott Trust before access can be granted"
+    )
     restrictedValues.foreach { str =>
       AccessStatus.apply(str) shouldBe Right(AccessStatus.PermissionRequired)
     }
   }
 
   it("creates the Open access condition") {
-    AccessStatus("Unrestricted / Open.") shouldBe Right(AccessStatus.Open)
+    val openValues = List(
+      "Unrestricted",
+      "Open",
+      "Unrestricted / Open"
+    )
+    openValues.foreach { str =>
+      AccessStatus.apply(str) shouldBe Right(AccessStatus.Open)
+    }
   }
 
   it("strips punctuation from access condition if present") {

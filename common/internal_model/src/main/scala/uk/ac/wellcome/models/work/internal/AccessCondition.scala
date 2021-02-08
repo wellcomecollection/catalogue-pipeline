@@ -48,48 +48,67 @@ object AccessStatus {
   def apply(status: String): Either[Exception, AccessStatus] =
     status.toLowerCase match {
       case lowerCaseStatus
-          if lowerCaseStatus.startsWith("open with advisory") =>
+          if lowerCaseStatus.startsWith(
+            "open with advisory",
+            "requires registration"
+          ) =>
         Right(AccessStatus.OpenWithAdvisory)
+
       case lowerCaseStatus
-          if lowerCaseStatus.startsWith("requires registration") =>
-        Right(AccessStatus.OpenWithAdvisory)
-      case lowerCaseStatus
-          if lowerCaseStatus.startsWith("unrestricted / open") =>
+          if lowerCaseStatus.startsWith(
+            "unrestricted",
+            "open"
+          ) =>
         Right(AccessStatus.Open)
-      case lowerCaseStatus if lowerCaseStatus.startsWith("open") =>
-        Right(AccessStatus.Open)
-      case lowerCaseStatus if lowerCaseStatus.startsWith("restricted") =>
-        Right(AccessStatus.Restricted)
+
       case lowerCaseStatus
-          if lowerCaseStatus.startsWith("cannot be produced") =>
+          if lowerCaseStatus.startsWith(
+            "restricted",
+            "cannot be produced",
+            "certain restrictions apply",
+            "clinical images",
+            "by appointment",
+            "the file is restricted",
+            "this file is restricted"
+          ) =>
         Right(AccessStatus.Restricted)
+
       case lowerCaseStatus
-          if lowerCaseStatus.startsWith("certain restrictions apply") =>
-        Right(AccessStatus.Restricted)
-      case lowerCaseStatus if lowerCaseStatus.startsWith("clinical images") =>
-        Right(AccessStatus.Restricted)
-      case lowerCaseStatus if lowerCaseStatus.startsWith("by appointment") =>
-        Right(AccessStatus.Restricted)
-      case lowerCaseStatus if lowerCaseStatus.startsWith("closed") =>
+          if lowerCaseStatus.startsWith(
+            "closed",
+            "the file is closed",
+            "this file is closed",
+            "the papers are closed",
+            "the files in this series are closed"
+          ) =>
         Right(AccessStatus.Closed)
-      case lowerCaseStatus if lowerCaseStatus.startsWith("missing") =>
-        Right(AccessStatus.Unavailable)
+
       case lowerCaseStatus
-          if lowerCaseStatus.startsWith("temporarily unavailable") =>
+          if lowerCaseStatus.startsWith(
+            "missing",
+            "temporarily unavailable",
+            "deaccessioned"
+          ) =>
         Right(AccessStatus.Unavailable)
-      case lowerCaseStatus if lowerCaseStatus.startsWith("deaccessioned") =>
-        Right(AccessStatus.Unavailable)
+
       case lowerCaseStatus if lowerCaseStatus.startsWith("in copyright") =>
         Right(AccessStatus.LicensedResources)
+
       case lowerCaseStatus
-          if lowerCaseStatus.startsWith("permission required") =>
+          if lowerCaseStatus.startsWith(
+            "permission required",
+            "permission is required",
+            "donor permission",
+            "permission must be obtained"
+          ) =>
         Right(AccessStatus.PermissionRequired)
-      case lowerCaseStatus
-          if lowerCaseStatus.startsWith("permission is required") =>
-        Right(AccessStatus.PermissionRequired)
-      case lowerCaseStatus if lowerCaseStatus.startsWith("donor permission") =>
-        Right(AccessStatus.PermissionRequired)
+
       case _ =>
         Left(new UnknownAccessStatus(status))
     }
+
+  implicit class StringOps(s: String) {
+    def startsWith(prefixes: String*): Boolean =
+      prefixes.exists { s.startsWith }
+  }
 }
