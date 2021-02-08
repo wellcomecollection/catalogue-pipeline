@@ -5,13 +5,13 @@ import java.time.Instant
 case class ImageData[+State](
   id: State,
   version: Int,
-  locations: List[DigitalLocationDeprecated]
+  locations: List[DigitalLocation]
 ) extends HasId[State]
 
 case class Image[State <: ImageState](
   version: Int,
   state: State,
-  locations: List[DigitalLocationDeprecated],
+  locations: List[DigitalLocation],
   source: ImageSource,
   modifiedTime: Instant
 ) {

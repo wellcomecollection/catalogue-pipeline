@@ -268,7 +268,7 @@ class MiroRecordTransformerTest
       )
     )
 
-    val expectedDigitalLocation = DigitalLocationDeprecated(
+    val expectedDigitalLocation = DigitalLocation(
       url = "https://iiif.wellcomecollection.org/image/B0011308.jpg/info.json",
       license = Some(License.CCBY),
       credit = Some("Ezra Feilden"),
@@ -282,7 +282,7 @@ class MiroRecordTransformerTest
       createMiroRecordWith(imageNumber = "B0011308")
     )
 
-    val expectedLocation = DigitalLocationDeprecated(
+    val expectedLocation = DigitalLocation(
       "https://iiif.wellcomecollection.org/image/B0011308.jpg/info.json",
       LocationType("iiif-image"),
       Some(License.CCBY),
@@ -306,7 +306,7 @@ class MiroRecordTransformerTest
     )
 
     work.data.thumbnail shouldBe Some(
-      DigitalLocationDeprecated(
+      DigitalLocation(
         url =
           s"https://iiif.wellcomecollection.org/image/$miroId.jpg/full/300,/0/default.jpg",
         locationType = LocationType("thumbnail-image"),

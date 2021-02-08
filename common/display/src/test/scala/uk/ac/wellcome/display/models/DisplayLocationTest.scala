@@ -1,65 +1,80 @@
 package uk.ac.wellcome.display.models
 
 import org.scalatest.funspec.AnyFunSpec
-import uk.ac.wellcome.display.json.DisplayJsonUtil._
-import uk.ac.wellcome.display.test.util.JsonMapperTestUtil
-import uk.ac.wellcome.models.work.internal._
+import org.scalatest.matchers.should.Matchers
+import uk.ac.wellcome.models.work.internal.{
+  DigitalLocation,
+  License,
+  LocationType,
+  PhysicalLocation
+}
 
-class DisplayLocationTest extends AnyFunSpec with JsonMapperTestUtil {
+class DisplayLocationTest extends AnyFunSpec with Matchers {
 
-  it("Encodes the DisplayLocation ADT correctly") {
-    val digitalResource = DisplayLocation(
-      Location.DigitalResource(
-        accessConditions = Nil,
-        url = "https://api.wellcomecollection.org",
-        license = None,
-        credit = None,
-        format = Some(DigitalResourceFormat.IIIFPresentation)))
+  describe("DisplayDigitalLocation") {
+    it("reads a DigitalLocation as a DisplayDigitalLocation") {
+      val thumbnailUrl = "https://iiif.example.org/V0000001/default.jpg"
+      val locationType = LocationType("thumbnail-image")
 
-    val openShelves = DisplayLocation(
-      Location.OpenShelves(
-        accessConditions = Nil,
-        shelfmark = "shelf mark",
-        shelfLocation = "shelf location"))
+      val internalLocation = DigitalLocation(
+        locationType = locationType,
+        url = thumbnailUrl,
+        license = Some(License.CCBY)
+      )
+      val displayLocation = DisplayLocation(internalLocation)
 
-    val closedStores =
-      DisplayLocation(Location.ClosedStores(accessConditions = Nil))
+      displayLocation shouldBe a[DisplayDigitalLocation]
+      val displayDigitalLocation =
+        displayLocation.asInstanceOf[DisplayDigitalLocation]
+      displayDigitalLocation.locationType shouldBe DisplayLocationType(
+        locationType)
+      displayDigitalLocation.url shouldBe thumbnailUrl
+      displayDigitalLocation.license shouldBe Some(
+        DisplayLicense(internalLocation.license.get))
+      displayDigitalLocation.ontologyType shouldBe "DigitalLocation"
+    }
 
-    assertObjectMapsToJson(
-      digitalResource,
-      expectedJson = """{
-                       |  "accessConditions" : [
-                       |  ],
-                       |  "url" : "https://api.wellcomecollection.org",
-                       |  "format" : {
-                       |    "label" : "IIIF presentation",
-                       |    "type" : "IIIFPresentation"
-                       |  },
-                       |  "label" : "Online",
-                       |  "type" : "DigitalLocation"
-                       |}""".stripMargin
-    )
+    it("reads the credit field from a Location") {
+      val location = DigitalLocation(
+        locationType = LocationType("thumbnail-image"),
+        url = "",
+        credit = Some("Science Museum, Wellcome"),
+        license = Some(License.CCBY)
+      )
+      val displayLocation = DisplayLocation(location)
 
-    assertObjectMapsToJson(
-      openShelves,
-      expectedJson = """{
-                       |  "accessConditions" : [
-                       |  ],
-                       |  "shelfmark" : "shelf mark",
-                       |  "shelfLocation" : "shelf location",
-                       |  "label" : "Open shelves",
-                       |  "type" : "OpenShelves"
-                       |}""".stripMargin
-    )
+      displayLocation shouldBe a[DisplayDigitalLocation]
+      val displayDigitalLocation =
+        displayLocation.asInstanceOf[DisplayDigitalLocation]
+      displayDigitalLocation.credit shouldBe location.credit
+    }
+  }
 
-    assertObjectMapsToJson(
-      closedStores,
-      expectedJson = """{
-                       |  "accessConditions" : [
-                       |  ],
-                       |  "label" : "Closed stores",
-                       |  "type" : "ClosedStores"
-                       |}""".stripMargin
-    )
+  describe("DisplayPhysicalLocation") {
+    it("creates a DisplayPhysicalLocation from a PhysicalLocation") {
+      val locationType = LocationType("sgmed")
+      val locationLabel = "The collection of cold cauldrons"
+      val physicalLocation =
+        PhysicalLocation(locationType = locationType, label = locationLabel)
+
+      val displayLocation = DisplayLocation(physicalLocation)
+
+      displayLocation shouldBe DisplayPhysicalLocation(
+        locationType = DisplayLocationType(locationType),
+        locationLabel)
+    }
+  }
+
+  describe("DisplayDigitalLocation") {
+    it("creates a DisplayDigitalLocation from a DigitalLocation") {
+      val locationType = LocationType("iiif-image")
+      val url = "https://wellcomelibrary.org/iiif/b2201508/manifest"
+
+      val digitalLocation = DigitalLocation(url, locationType)
+
+      DisplayLocation(digitalLocation) shouldBe DisplayDigitalLocation(
+        locationType = DisplayLocationType(locationType),
+        url = url)
+    }
   }
 }

@@ -160,7 +160,7 @@ class SierraTransformerTest
       id = IdState.Identifiable(
         sourceIdentifier = expectedSourceIdentifier,
         otherIdentifiers = expectedOtherIdentifiers),
-      locations = List(PhysicalLocationDeprecated(locationType, locationLabel))
+      locations = List(PhysicalLocation(locationType, locationLabel))
     )
   }
 

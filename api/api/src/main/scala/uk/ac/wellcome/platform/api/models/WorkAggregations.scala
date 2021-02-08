@@ -111,7 +111,7 @@ object WorkAggregations extends ElasticAggregations {
 
   implicit val decodeLocationTypeFromLabel: Decoder[LocationTypeQuery] =
     Decoder.decodeString.map {
-      case "DigitalLocationDeprecated"  => LocationTypeQuery.DigitalLocation
-      case "PhysicalLocationDeprecated" => LocationTypeQuery.PhysicalLocation
+      case "DigitalLocation"  => LocationTypeQuery.DigitalLocation
+      case "PhysicalLocation" => LocationTypeQuery.PhysicalLocation
     }
 }

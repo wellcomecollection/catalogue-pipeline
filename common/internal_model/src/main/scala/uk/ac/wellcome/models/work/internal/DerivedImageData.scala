@@ -1,7 +1,7 @@
 package uk.ac.wellcome.models.work.internal
 
 case class DerivedImageData(
-  thumbnail: DigitalLocationDeprecated
+  thumbnail: DigitalLocation
 )
 
 object DerivedImageData {

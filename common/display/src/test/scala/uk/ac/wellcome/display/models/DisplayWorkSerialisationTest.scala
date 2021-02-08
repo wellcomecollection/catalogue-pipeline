@@ -87,7 +87,7 @@ class DisplayWorkSerialisationTest
   }
 
   it("includes credit information in DisplayWork serialisation") {
-    val location = DigitalLocationDeprecated(
+    val location = DigitalLocation(
       locationType = LocationType("thumbnail-image"),
       url = "",
       credit = Some("Wellcome Collection"),
@@ -355,7 +355,7 @@ class DisplayWorkSerialisationTest
 
   it("shows the thumbnail field if available") {
     val work = indexedWork().thumbnail(
-      DigitalLocationDeprecated(
+      DigitalLocation(
         locationType = LocationType("thumbnail-image"),
         url = "https://iiif.example.org/1234/default.jpg",
         license = Some(License.CCBY)

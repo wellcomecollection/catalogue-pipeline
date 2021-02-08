@@ -44,16 +44,16 @@ trait DisplaySerialisationTestBase {
      }
     """
 
-  def locations(locations: List[LocationDeprecated]) =
+  def locations(locations: List[Location]) =
     locations.map(location).mkString(",")
 
-  def location(loc: LocationDeprecated) =
+  def location(loc: Location) =
     loc match {
-      case l: DigitalLocationDeprecated  => digitalLocation(l)
-      case l: PhysicalLocationDeprecated => physicalLocation(l)
+      case l: DigitalLocation  => digitalLocation(l)
+      case l: PhysicalLocation => physicalLocation(l)
     }
 
-  def digitalLocation(digitalLocation: DigitalLocationDeprecated) =
+  def digitalLocation(digitalLocation: DigitalLocation) =
     s"""{
       "type": "DigitalLocation",
       "locationType": ${locationType(digitalLocation.locationType)},
@@ -62,7 +62,7 @@ trait DisplaySerialisationTestBase {
       "accessConditions": ${accessConditions(digitalLocation.accessConditions)}
     }"""
 
-  def physicalLocation(loc: PhysicalLocationDeprecated) =
+  def physicalLocation(loc: PhysicalLocation) =
     s"""
        {
         "type": "PhysicalLocation",

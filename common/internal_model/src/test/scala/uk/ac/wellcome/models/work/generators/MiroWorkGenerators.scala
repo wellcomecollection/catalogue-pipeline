@@ -6,7 +6,7 @@ import scala.util.Random
 
 trait MiroWorkGenerators extends ImageGenerators {
   def miroThumbnail() =
-    DigitalLocationDeprecated(
+    DigitalLocation(
       url =
         s"https://iiif.wellcomecollection.org/${randomAlphanumeric(length = 8)}.jpg",
       locationType = LocationType("thumbnail-image"),

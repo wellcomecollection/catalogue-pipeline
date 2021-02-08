@@ -69,7 +69,7 @@ case class MetsData(
 
   private def digitalLocation(license: Option[License],
                               accessStatus: Option[AccessStatus]) =
-    DigitalLocationDeprecated(
+    DigitalLocation(
       url = s"https://wellcomelibrary.org/iiif/$recordIdentifier/manifest",
       locationType = LocationType("iiif-presentation"),
       license = license,
@@ -139,14 +139,14 @@ case class MetsData(
   private def thumbnail(
     bnumber: String,
     license: Option[License],
-    accessStatus: Option[AccessStatus]): Option[DigitalLocationDeprecated] =
+    accessStatus: Option[AccessStatus]): Option[DigitalLocation] =
     for {
       fileReference <- titlePageFileReference
         .orElse(fileReferences.find(ImageUtils.isThumbnail))
       url <- ImageUtils.buildThumbnailUrl(bnumber, fileReference)
       if !accessStatus.exists(_.hasRestrictions)
     } yield
-      DigitalLocationDeprecated(
+      DigitalLocation(
         url = url,
         locationType = LocationType("thumbnail-image"),
         license = license
@@ -170,7 +170,7 @@ case class MetsData(
               ),
               version = version,
               locations = List(
-                DigitalLocationDeprecated(
+                DigitalLocation(
                   url = url,
                   locationType = LocationType("iiif-image"),
                   license = license,

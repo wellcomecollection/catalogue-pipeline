@@ -23,7 +23,7 @@ case class DisplayItem(
   ) title: Option[String] = None,
   @Schema(
     description = "List of locations that provide access to the item"
-  ) locations: List[DisplayLocationDeprecated] = List(),
+  ) locations: List[DisplayLocation] = List(),
   @JsonKey("type") @Schema(name = "type") ontologyType: String = "Item"
 )
 
@@ -37,7 +37,7 @@ object DisplayItem extends GetIdentifiers {
           id = id.maybeCanonicalId,
           identifiers = getIdentifiers(id, includesIdentifiers),
           title = title,
-          locations = locations.map(DisplayLocationDeprecated(_))
+          locations = locations.map(DisplayLocation(_))
         )
     }
 }

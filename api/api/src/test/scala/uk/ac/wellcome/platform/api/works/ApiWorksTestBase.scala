@@ -61,6 +61,6 @@ trait ApiWorksTestBase
 
   def hasDigitalLocations(work: Work.Visible[Indexed]): String =
     work.data.items
-      .exists(_.locations.exists(_.isInstanceOf[DigitalLocationDeprecated]))
+      .exists(_.locations.exists(_.isInstanceOf[DigitalLocation]))
       .toString
 }
