@@ -6,10 +6,11 @@ This script:
 - (optionally) removes associated images from the image indices
 - suppresses Miro works in the VHS
 - removes images from Loris's S3 buckets
-- creates CloudFront invalidations for Loris
+- creates CloudFront invalidations for Loris and wellcomecollection.org
 - updates the Miro VHS inventory
 
-You also need to create a CloudFront invalidation for `works/<id>` in the wellcomecollection.org distribution.
+Note: Loris may continue to serve an image from its own cache, even if the original image has been removed from S3.
+Since we're decommissioning Loris soon, we aren't planning to fix this.
 
 ### Usage
 
