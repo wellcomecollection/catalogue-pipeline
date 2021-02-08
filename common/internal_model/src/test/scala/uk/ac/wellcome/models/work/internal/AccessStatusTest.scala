@@ -3,7 +3,7 @@ package uk.ac.wellcome.models.work.internal
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class AccessConditionTest extends AnyFunSpec with Matchers {
+class AccessStatusTest extends AnyFunSpec with Matchers {
   it("creates the Closed access status") {
     val closedValues = List(
       "Closed",
