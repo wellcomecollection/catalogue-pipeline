@@ -3,8 +3,13 @@ package uk.ac.wellcome.models.work.internal
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class AccessConditionTest extends AnyFunSpec with Matchers {
-  it("creates the Closed access status") {
+class AccessStatusTest extends AnyFunSpec with Matchers {
+  it("sets the name of an AccessStatus") {
+    AccessStatus.Open.name shouldBe "Open"
+    AccessStatus.Restricted.name shouldBe "Restricted"
+  }
+
+  it("creates the Closed AccessStatus") {
     val closedValues = List(
       "Closed",
       "The file is closed until 2059",
@@ -16,7 +21,7 @@ class AccessConditionTest extends AnyFunSpec with Matchers {
     }
   }
 
-  it("creates restricted access condition") {
+  it("creates the Restricted AccessStatus") {
     val restrictedValues = List(
       "Restricted",
       "Restricted access (Data Protection Act)",
@@ -32,25 +37,30 @@ class AccessConditionTest extends AnyFunSpec with Matchers {
     }
   }
 
-  it("creates Unavailable access condition") {
-    val restrictedValues = List("Missing.", "Temporarily Unavailable.")
-    restrictedValues.foreach { str =>
+  it("creates the Unavailable AccessStatus") {
+    val unavailableValues = List(
+      "Missing.",
+      "Temporarily Unavailable.",
+      "Deaccessioned on 01/01/2001"
+    )
+    unavailableValues.foreach { str =>
       AccessStatus.apply(str) shouldBe Right(AccessStatus.Unavailable)
     }
   }
-  it("creates PermissionRequired access condition") {
-    val restrictedValues = List(
+
+  it("creates the PermissionRequired AccessStatus") {
+    val permissionRequiredValues = List(
       "Permission Required.",
       "Donor Permission.",
       "Permission is required to view this item.",
       "Permission must be obtained from the Winnicott Trust before access can be granted"
     )
-    restrictedValues.foreach { str =>
+    permissionRequiredValues.foreach { str =>
       AccessStatus.apply(str) shouldBe Right(AccessStatus.PermissionRequired)
     }
   }
 
-  it("creates the Open access condition") {
+  it("creates the Open AccessStatus") {
     val openValues = List(
       "Unrestricted",
       "Open",
@@ -61,7 +71,26 @@ class AccessConditionTest extends AnyFunSpec with Matchers {
     }
   }
 
-  it("strips punctuation from access condition if present") {
+  it("creates the OpenWithAdvisory AccessStatus") {
+    val openWithAdvisoryValues = List(
+      "Open with advisory",
+      "Requires registration to view"
+    )
+    openWithAdvisoryValues.foreach { str =>
+      AccessStatus.apply(str) shouldBe Right(AccessStatus.OpenWithAdvisory)
+    }
+  }
+
+  it("creates the LicensedResources AccessStatus") {
+    val licensedResourcesValues = List(
+      "In copyright to the Earl of Ownership"
+    )
+    licensedResourcesValues.foreach { str =>
+      AccessStatus.apply(str) shouldBe Right(AccessStatus.LicensedResources)
+    }
+  }
+
+  it("strips punctuation from the AccessStatus") {
     AccessStatus.apply("Open.") shouldBe Right(AccessStatus.Open)
   }
 
