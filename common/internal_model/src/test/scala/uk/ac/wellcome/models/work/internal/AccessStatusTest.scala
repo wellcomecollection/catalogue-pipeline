@@ -67,6 +67,25 @@ class AccessStatusTest extends AnyFunSpec with Matchers {
     }
   }
 
+  it("creates the OpenWithAdvisory AccessStatus") {
+    val openValues = List(
+      "Open with advisory",
+      "Requires registration to view"
+    )
+    openValues.foreach { str =>
+      AccessStatus.apply(str) shouldBe Right(AccessStatus.OpenWithAdvisory)
+    }
+  }
+
+  it("creates the LicensedResources AccessStatus") {
+    val openValues = List(
+      "In copyright to the Earl of Ownership"
+    )
+    openValues.foreach { str =>
+      AccessStatus.apply(str) shouldBe Right(AccessStatus.LicensedResources)
+    }
+  }
+
   it("strips punctuation from the AccessStatus") {
     AccessStatus.apply("Open.") shouldBe Right(AccessStatus.Open)
   }
