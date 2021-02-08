@@ -13,4 +13,3 @@ case class AccessCondition(
 
   def hasRestrictions: Boolean = status.exists(_.hasRestrictions)
 }
-
