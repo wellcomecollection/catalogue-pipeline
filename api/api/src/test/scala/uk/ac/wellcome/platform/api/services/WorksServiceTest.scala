@@ -193,7 +193,7 @@ class WorksServiceTest
     }
 
     it("aggregates formats") {
-      withLocalWorksIndex { index =>
+      withLocalWorksIndex { _ =>
         val work1 = indexedWork().format(Books)
         val work2 = indexedWork().format(Books)
         val work3 = indexedWork().format(Audio)

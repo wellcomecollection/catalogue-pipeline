@@ -162,7 +162,7 @@ case class MetsData(
       fileReferences
         .filter(ImageUtils.isImage)
         .flatMap { fileReference =>
-          ImageUtils.buildImageUrl(recordIdentifier, fileReference).map { url =>
+          ImageUtils.buildImageUrl(fileReference).map { url =>
             ImageData[IdState.Identifiable](
               id = IdState.Identifiable(
                 sourceIdentifier = ImageUtils

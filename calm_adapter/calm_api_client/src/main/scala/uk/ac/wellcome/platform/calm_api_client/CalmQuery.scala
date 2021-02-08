@@ -10,7 +10,7 @@ sealed trait CalmQuery {
   def relationalOperator = "="
   def queryExpression =
     keys
-      .map(key => s"($key${relationalOperator}$value)")
+      .map(key => s"($key$relationalOperator$value)")
       .mkString(logicalOperator)
 }
 

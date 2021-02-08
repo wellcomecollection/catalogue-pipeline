@@ -92,7 +92,7 @@ class SourceIdentifierEmbedderTest
       val json = parse(jsonString).right.get
       SourceIdentifierEmbedder
         .scan(json)
-        .get should contain theSameElementsAs (sourceIdentifiers)
+        .get should contain theSameElementsAs sourceIdentifiers
     }
 
     it("throws an exception if it cannot parse a sourceIdentifier") {
