@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 
+import click
+import datetime
 import json
 
 import boto3
+import httpx
 
 
 def get_session_with_role(role_arn):
@@ -34,7 +37,45 @@ def get_api_es_client(session):
         ]
     )
 
-    return credentials
+    return httpx.Client(
+        base_url=credentials["endpoint"],
+        auth=(credentials["username"], credentials["password"]),
+    )
+
+
+def list_indexes(es_client):
+    """
+    Returns a list of indexes in the Elasticsearch cluster, sorted by index name.
+    """
+    resp = es_client.get("/_cat/indices", params={"format": "json"})
+    resp.raise_for_status()
+
+    return sorted(
+        [
+            {
+                "name": r["index"],
+                "size": r["store.size"],
+                "doc_count": int(r['docs.count']),
+            }
+            for r in resp.json()
+        ],
+        key=lambda r: r["name"],
+    )
+
+
+def get_index_date(api_url):
+    """
+    Return the date of the index that this
+    """
+    search_templates_resp = httpx.get(f"https://{api_url}/catalogue/v2/search-templates.json")
+    index_name = search_templates_resp.json()["templates"][0]["index"]
+
+    # Check it looks like works-YYYY-MM-DD
+    prefix, date = index_name.split("-", 1)
+    assert prefix == "works"
+    datetime.datetime.strptime(date, "%Y-%M-%d")
+
+    return date
 
 
 if __name__ == "__main__":
@@ -42,4 +83,16 @@ if __name__ == "__main__":
         role_arn="arn:aws:iam::760097843905:role/platform-developer"
     )
 
-    print(get_api_es_client(session))
+    es_client = get_api_es_client(session)
+
+    prod_index_date = get_index_date("api.wellcomecollection.org")
+    stage_index_date = get_index_date("api-stage.wellcomecollection.org")
+
+    click.echo(
+        "The prod API is reading from %s; the staging API is reading from %s" %
+        (click.style(f"works-{prod_index_date}"), click.style(f"works-{stage_index_date}"))
+    )
+
+    from pprint import pprint
+
+    pprint(list_indexes(es_client))
