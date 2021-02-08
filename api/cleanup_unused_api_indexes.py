@@ -1,4 +1,13 @@
 #!/usr/bin/env python
+"""
+This script deletes unused indexes in the API cluster.
+
+This reduces disk usage, and in our experience reduces CPU and memory pressure in the cluster.
+
+This script will go through all the indexes in the cluster.  If it thinks an index is safe
+to delete (i.e. it's not being used in the API and is older than the API indexes), it will
+ask you to confirm you want to delete it.
+"""
 
 import click
 import json
@@ -74,6 +83,9 @@ def get_index_name(api_url):
 
 
 def maybe_cleanup_index(es_client, *, idx, prod_index_name, stage_index_name):
+    """
+    Decide if we're going to clean up this index, and if so, double-check with the user.
+    """
     if not idx["name"].startswith(("works-", "images-")):
         return
 
@@ -92,6 +104,8 @@ def maybe_cleanup_index(es_client, *, idx, prod_index_name, stage_index_name):
         )
     )
 
+    # We should never delete the prod or staging indexes -- this would cause an instant
+    # outage in the API, which is very bad.
     if idx["name"] == prod_works_index_name or idx["name"] == prod_images_index_name:
         click.echo(
             f"This index will {click.style('not be deleted', 'green')} -- it is the prod API"
@@ -104,6 +118,17 @@ def maybe_cleanup_index(es_client, *, idx, prod_index_name, stage_index_name):
         )
         return
 
+    # We consider deleting an index if it sorts lexicographically lower than both the
+    # prod and staging APIs.  e.g. works-2001-01-01 < works-2002-02-02
+    #
+    # We skip indexes that sort higher, because this might be an index that we're currently
+    # reindexing into, but we haven't pointed an API at yet.  In general, indexes go forward,
+    # not backward.
+    #
+    # We still ask the user to confirm they really want to delete this index, just in case.
+    # We should never offer to delete an index that would cause an outage, but they might
+    # skip an index if, say, they've only just promoted a new index to prod and they
+    # want to be able to roll back to this index.
     if (
         idx["name"].startswith("works-")
         and idx["name"] < prod_works_index_name
@@ -128,6 +153,7 @@ def maybe_cleanup_index(es_client, *, idx, prod_index_name, stage_index_name):
             es_client.delete(f"/{idx['name']}")
         return
 
+    # If we get this far, we're not going to delete this index. Log and return.
     click.echo(f"This index will {click.style('not be deleted', 'green')}")
     return
 
