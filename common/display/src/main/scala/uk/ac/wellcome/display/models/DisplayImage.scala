@@ -47,8 +47,7 @@ object DisplayImage {
             includes: ImageIncludes): DisplayImage =
     new DisplayImage(
       id = image.id,
-      thumbnail =
-        DisplayDigitalLocation(image.state.derivedData.thumbnail),
+      thumbnail = DisplayDigitalLocation(image.state.derivedData.thumbnail),
       locations = image.locations.map(DisplayDigitalLocation(_)),
       source = DisplayImageSource(image.source, includes),
       visuallySimilar = None,

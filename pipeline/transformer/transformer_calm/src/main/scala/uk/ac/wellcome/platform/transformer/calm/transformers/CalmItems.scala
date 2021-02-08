@@ -24,9 +24,8 @@ object CalmItems extends CalmOps {
       )
     } yield items
 
-  private def physicalLocation(
-    record: CalmRecord,
-    status: Option[AccessStatus]): PhysicalLocation =
+  private def physicalLocation(record: CalmRecord,
+                               status: Option[AccessStatus]): PhysicalLocation =
     PhysicalLocation(
       locationType = LocationType("scmac"),
       label = "Closed stores Arch. & MSS",

@@ -32,7 +32,7 @@ object DerivedWorkData {
     items.exists { item =>
       item.locations.exists {
         case _: DigitalLocation => true
-        case _                            => false
+        case _                  => false
       }
     }
 }

@@ -55,9 +55,7 @@ class DisplayLocationTest extends AnyFunSpec with Matchers {
       val locationType = LocationType("sgmed")
       val locationLabel = "The collection of cold cauldrons"
       val physicalLocation =
-        PhysicalLocation(
-          locationType = locationType,
-          label = locationLabel)
+        PhysicalLocation(locationType = locationType, label = locationLabel)
 
       val displayLocation = DisplayLocation(physicalLocation)
 

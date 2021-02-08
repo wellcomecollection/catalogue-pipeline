@@ -12,9 +12,8 @@ import uk.ac.wellcome.models.work.internal.{
   name = "Location",
   description = "A location that provides access to an item",
   discriminatorProperty = "type",
-  allOf = Array(
-    classOf[DisplayDigitalLocation],
-    classOf[DisplayPhysicalLocation])
+  allOf =
+    Array(classOf[DisplayDigitalLocation], classOf[DisplayPhysicalLocation])
 )
 sealed trait DisplayLocation
 
@@ -57,8 +56,7 @@ case class DisplayDigitalLocation(
 ) extends DisplayLocation
 
 object DisplayDigitalLocation {
-  def apply(
-    location: DigitalLocation): DisplayDigitalLocation =
+  def apply(location: DigitalLocation): DisplayDigitalLocation =
     DisplayDigitalLocation(
       locationType = DisplayLocationType(location.locationType),
       url = location.url,
@@ -89,8 +87,7 @@ case class DisplayPhysicalLocation(
 ) extends DisplayLocation
 
 object DisplayPhysicalLocation {
-  def apply(
-    location: PhysicalLocation): DisplayPhysicalLocation =
+  def apply(location: PhysicalLocation): DisplayPhysicalLocation =
     DisplayPhysicalLocation(
       locationType = DisplayLocationType(location.locationType),
       label = location.label,

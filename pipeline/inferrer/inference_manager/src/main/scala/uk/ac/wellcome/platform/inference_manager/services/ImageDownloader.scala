@@ -86,8 +86,7 @@ class ImageDownloader[Ctx](
     case (Failure(exception), _) => Future.failed(exception)
   }
 
-  private def getImageUri(
-    locations: List[DigitalLocation]): Option[Uri] =
+  private def getImageUri(locations: List[DigitalLocation]): Option[Uri] =
     locations
       .find(_.locationType.id == "iiif-image")
       .map { location =>

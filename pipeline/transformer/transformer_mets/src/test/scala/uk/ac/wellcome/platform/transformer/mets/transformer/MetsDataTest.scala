@@ -92,10 +92,7 @@ class MetsDataTest
 
     val url = s"https://wellcomelibrary.org/iiif/$bibNumber/manifest"
     val digitalLocation =
-      DigitalLocation(
-        url,
-        LocationType("iiif-presentation"),
-        license = None)
+      DigitalLocation(url, LocationType("iiif-presentation"), license = None)
 
     val createdDate = Instant.now()
 

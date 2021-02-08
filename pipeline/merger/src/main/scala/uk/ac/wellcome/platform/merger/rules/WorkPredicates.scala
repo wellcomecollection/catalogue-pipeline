@@ -78,7 +78,7 @@ object WorkPredicates {
     work.data.items.exists { item =>
       item.locations.exists {
         case _: PhysicalLocation => true
-        case _                             => false
+        case _                   => false
       }
     }
 
@@ -86,7 +86,7 @@ object WorkPredicates {
     work.data.items.forall { item =>
       item.locations.forall {
         case _: DigitalLocation => true
-        case _                            => false
+        case _                  => false
       }
     }
 
@@ -94,7 +94,7 @@ object WorkPredicates {
     work.data.items.forall { item =>
       item.locations.forall {
         case _: PhysicalLocation => true
-        case _                             => false
+        case _                   => false
       }
     }
 

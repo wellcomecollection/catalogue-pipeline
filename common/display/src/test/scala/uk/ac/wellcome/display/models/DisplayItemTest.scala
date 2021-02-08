@@ -15,8 +15,7 @@ class DisplayItemTest extends AnyFunSpec with Matchers with ItemsGenerators {
     )
 
     displayItem.id shouldBe Some(item.id.canonicalId)
-    displayItem.locations shouldBe List(
-      DisplayLocation(item.locations.head))
+    displayItem.locations shouldBe List(DisplayLocation(item.locations.head))
     displayItem.identifiers shouldBe Some(
       List(DisplayIdentifier(item.id.sourceIdentifier)))
     displayItem.ontologyType shouldBe "Item"
