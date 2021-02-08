@@ -38,20 +38,24 @@ class AccessStatusTest extends AnyFunSpec with Matchers {
   }
 
   it("creates the Unavailable AccessStatus") {
-    val restrictedValues = List("Missing.", "Temporarily Unavailable.")
-    restrictedValues.foreach { str =>
+    val unavailableValues = List(
+      "Missing.",
+      "Temporarily Unavailable.",
+      "Deaccessioned on 01/01/2001"
+    )
+    unavailableValues.foreach { str =>
       AccessStatus.apply(str) shouldBe Right(AccessStatus.Unavailable)
     }
   }
 
   it("creates the PermissionRequired AccessStatus") {
-    val restrictedValues = List(
+    val permissionRequiredValues = List(
       "Permission Required.",
       "Donor Permission.",
       "Permission is required to view this item.",
       "Permission must be obtained from the Winnicott Trust before access can be granted"
     )
-    restrictedValues.foreach { str =>
+    permissionRequiredValues.foreach { str =>
       AccessStatus.apply(str) shouldBe Right(AccessStatus.PermissionRequired)
     }
   }
@@ -68,20 +72,20 @@ class AccessStatusTest extends AnyFunSpec with Matchers {
   }
 
   it("creates the OpenWithAdvisory AccessStatus") {
-    val openValues = List(
+    val openWithAdvisoryValues = List(
       "Open with advisory",
       "Requires registration to view"
     )
-    openValues.foreach { str =>
+    openWithAdvisoryValues.foreach { str =>
       AccessStatus.apply(str) shouldBe Right(AccessStatus.OpenWithAdvisory)
     }
   }
 
   it("creates the LicensedResources AccessStatus") {
-    val openValues = List(
+    val licensedResourcesValues = List(
       "In copyright to the Earl of Ownership"
     )
-    openValues.foreach { str =>
+    licensedResourcesValues.foreach { str =>
       AccessStatus.apply(str) shouldBe Right(AccessStatus.LicensedResources)
     }
   }
