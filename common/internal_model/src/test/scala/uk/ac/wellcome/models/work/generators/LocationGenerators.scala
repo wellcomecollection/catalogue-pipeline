@@ -18,6 +18,12 @@ trait LocationGenerators extends RandomGenerators {
     PhysicalLocation(
       locationType = locationType,
       label = label,
+      license = chooseFrom(
+        None,
+        Some(License.CCBY),
+        Some(License.OGL),
+        Some(License.PDM)
+      ),
       accessConditions = accessConditions
     )
 
