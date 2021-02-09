@@ -24,7 +24,6 @@ trait SierraLocation extends SierraQueryOps with Logging {
               locationType = locationType,
               accessConditions = getAccessConditions(bibNumber, bibData),
               label = label,
-
               // This is meant to be a "good enough" implementation of a shelfmark.
               // We may revisit this in future, and populate it directly from the
               // MARC fields if we want to be more picky about our rules.

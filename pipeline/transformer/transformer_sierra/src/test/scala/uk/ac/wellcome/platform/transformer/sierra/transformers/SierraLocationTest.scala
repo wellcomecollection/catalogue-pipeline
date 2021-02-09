@@ -96,7 +96,8 @@ class SierraLocationTest
         callNumber = Some("AX1234:Box 1")
       )
 
-      val location = transformer.getPhysicalLocation(bibId, itemData, bibData).get
+      val location =
+        transformer.getPhysicalLocation(bibId, itemData, bibData).get
 
       location.shelfmark shouldBe Some("AX1234:Box 1")
     }
