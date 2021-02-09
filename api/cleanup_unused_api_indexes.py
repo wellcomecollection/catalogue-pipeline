@@ -56,7 +56,7 @@ def list_indexes(es_client):
     """
     Returns a list of indexes in the Elasticsearch cluster, sorted by index name.
     """
-    resp = es_client.get("/_cat/indices", params={"format": "json"})
+    resp = es_client.get("/_cat/indices/works-*,images-*", params={"format": "json"})
     resp.raise_for_status()
 
     return sorted(
