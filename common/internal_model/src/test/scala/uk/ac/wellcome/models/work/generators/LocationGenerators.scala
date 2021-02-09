@@ -24,6 +24,7 @@ trait LocationGenerators extends RandomGenerators {
         Some(License.OGL),
         Some(License.PDM)
       ),
+      shelfmark = chooseFrom(None, Some(s"Shelfmark: ${randomAlphanumeric()}")),
       accessConditions = accessConditions
     )
 
