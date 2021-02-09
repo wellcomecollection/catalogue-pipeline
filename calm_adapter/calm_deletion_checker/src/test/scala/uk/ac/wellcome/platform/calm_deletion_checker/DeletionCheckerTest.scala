@@ -65,7 +65,7 @@ class DeletionCheckerTest
         protected def nDeleted(records: Records): Future[Int] = {
           nTests += 1
           if (nTests < 50) {
-            Future.successful(Random.nextInt(10))
+            Future.successful(records.size / 4)
           } else {
             Future.failed(new RuntimeException("oops"))
           }
