@@ -5,7 +5,7 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.internal.{
   DigitalLocation,
   License,
-  LocationType
+  OldLocationType
 }
 import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
 
@@ -24,7 +24,7 @@ class MiroLocationTest
       )
     ) shouldBe DigitalLocation(
       "https://iiif.wellcomecollection.org/image/B0011308.jpg/info.json",
-      LocationType("iiif-image"),
+      OldLocationType("iiif-image"),
       Some(License.CC0),
       credit = Some("Ezra Feilden")
     )

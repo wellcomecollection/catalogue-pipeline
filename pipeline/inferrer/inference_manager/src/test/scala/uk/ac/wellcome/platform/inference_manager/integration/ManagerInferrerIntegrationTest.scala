@@ -20,7 +20,7 @@ import uk.ac.wellcome.models.work.internal.{
   Image,
   ImageState,
   InferredData,
-  LocationType
+  OldLocationType
 }
 import uk.ac.wellcome.platform.inference_manager.adapters.{
   FeatureVectorInferrerAdapter,
@@ -50,7 +50,7 @@ class ManagerInferrerIntegrationTest
     val image = createImageDataWith(
       locations = List(
         createDigitalLocationWith(
-          locationType = LocationType("iiif-image"),
+          locationType = OldLocationType("iiif-image"),
           url = s"http://localhost:$localImageServerPort/test-image.jpg"
         ))).toInitialImage
 

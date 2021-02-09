@@ -82,7 +82,7 @@ class PlatformMergerTest
       .thumbnail(
         DigitalLocation(
           url = "https://path.to/thumbnail.jpg",
-          locationType = LocationType("thumbnail-image"),
+          locationType = OldLocationType("thumbnail-image"),
           license = Some(License.CCBY)
         )
       )

@@ -109,7 +109,7 @@ class SierraItemsTest
     val item = getTransformedItems(itemDataMap = itemDataMap).head
     item.locations shouldBe List(
       PhysicalLocation(
-        locationType = LocationType(sierraLocation.code),
+        locationType = OldLocationType(sierraLocation.code),
         label = sierraLocation.name
       )
     )
@@ -137,7 +137,7 @@ class SierraItemsTest
     results.head.locations should be(
       List(
         PhysicalLocation(
-          locationType = LocationType(sierraPhysicalLocation1.code),
+          locationType = OldLocationType(sierraPhysicalLocation1.code),
           label = sierraPhysicalLocation1.name
         )
       ))

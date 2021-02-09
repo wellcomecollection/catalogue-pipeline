@@ -5,7 +5,7 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.internal.{
   AccessCondition,
   AccessStatus,
-  LocationType,
+  OldLocationType,
   PhysicalLocation
 }
 import uk.ac.wellcome.platform.transformer.sierra.source.sierra.SierraSourceLocation
@@ -26,7 +26,7 @@ class SierraLocationTest
     val bibId = createSierraBibNumber
     val bibData = createSierraBibData
 
-    val locationType = LocationType("sgmed")
+    val locationType = OldLocationType("sgmed")
     val label = "A museum of mermaids"
     val itemData = createSierraItemDataWith(
       location = Some(SierraSourceLocation("sgmed", label))

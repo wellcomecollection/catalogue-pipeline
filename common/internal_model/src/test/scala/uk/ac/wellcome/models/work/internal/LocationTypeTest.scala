@@ -5,7 +5,7 @@ import org.scalatest.matchers.should.Matchers
 
 class LocationTypeTest extends AnyFunSpec with Matchers {
   it("looks up a location type") {
-    LocationType("arch") shouldBe LocationType(
+    OldLocationType("arch") shouldBe OldLocationType(
       id = "arch",
       label = "Archives Collection"
     )
@@ -13,7 +13,7 @@ class LocationTypeTest extends AnyFunSpec with Matchers {
 
   it("throws an error if looking up a non-existent location type") {
     val caught = intercept[IllegalArgumentException] {
-      LocationType(id = "DoesNotExist")
+      OldLocationType(id = "DoesNotExist")
     }
     caught.getMessage shouldBe "Unrecognised location type: [DoesNotExist]"
   }

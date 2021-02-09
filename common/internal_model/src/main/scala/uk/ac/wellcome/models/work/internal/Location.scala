@@ -1,7 +1,7 @@
 package uk.ac.wellcome.models.work.internal
 
 sealed trait Location {
-  val locationType: NewLocationType
+  val locationType: LocationType
   val accessConditions: List[AccessCondition]
   val license: Option[License]
 

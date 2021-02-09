@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.transformer.miro.transformers
 
-import uk.ac.wellcome.models.work.internal.{DigitalLocation, LocationType}
+import uk.ac.wellcome.models.work.internal.{DigitalLocation, OldLocationType}
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 
 trait MiroLocation extends MiroLicenses with MiroContributorCodes {
@@ -22,7 +22,7 @@ trait MiroLocation extends MiroLicenses with MiroContributorCodes {
 
   def getLocation(miroRecord: MiroRecord): DigitalLocation =
     DigitalLocation(
-      locationType = LocationType("iiif-image"),
+      locationType = OldLocationType("iiif-image"),
       url = buildImageApiURL(
         miroId = miroRecord.imageNumber,
         templateName = "info"

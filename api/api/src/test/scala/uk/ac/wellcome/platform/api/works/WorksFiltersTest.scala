@@ -153,7 +153,7 @@ class WorksFiltersTest
 
   describe("filtering works by item LocationType") {
     def createItemWithLocationType(
-      locationType: LocationType): Item[IdState.Minted] =
+      locationType: OldLocationType): Item[IdState.Minted] =
       createIdentifiedItemWith(
         locations = List(
           chooseFrom(
@@ -169,20 +169,20 @@ class WorksFiltersTest
       .title("Crumbling carrots")
       .items(
         List(
-          createItemWithLocationType(LocationType("iiif-image"))
+          createItemWithLocationType(OldLocationType("iiif-image"))
         ))
     val work2 = indexedWork()
       .title("Crumbling carrots")
       .items(
         List(
-          createItemWithLocationType(LocationType("digit")),
-          createItemWithLocationType(LocationType("dimgs"))
+          createItemWithLocationType(OldLocationType("digit")),
+          createItemWithLocationType(OldLocationType("dimgs"))
         ))
     val work3 = indexedWork()
       .title("Crumbling carrots")
       .items(
         List(
-          createItemWithLocationType(LocationType("dpoaa"))
+          createItemWithLocationType(OldLocationType("dpoaa"))
         ))
 
     val works = worksWithNoItem ++ Seq(work1, work2, work3)

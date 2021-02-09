@@ -25,7 +25,7 @@ trait SierraLocation extends SierraQueryOps with Logging {
       case SierraSourceLocation(code, name) =>
         Some(
           PhysicalLocation(
-            locationType = LocationType(code),
+            locationType = OldLocationType(code),
             accessConditions = getAccessConditions(bibNumber, bibData),
             label = name
           )

@@ -230,7 +230,7 @@ class WorksTest
     withWorksApi {
       case (worksIndex, routes) =>
         val thumbnailLocation = DigitalLocation(
-          locationType = LocationType("thumbnail-image"),
+          locationType = OldLocationType("thumbnail-image"),
           url = "https://iiif.example.org/1234/default.jpg",
           license = Some(License.CCBY)
         )

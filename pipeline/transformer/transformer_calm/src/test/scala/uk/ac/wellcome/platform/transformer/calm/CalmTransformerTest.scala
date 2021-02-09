@@ -62,7 +62,7 @@ class CalmTransformerTest
               title = None,
               locations = List(
                 PhysicalLocation(
-                  locationType = LocationType("scmac"),
+                  locationType = OldLocationType("scmac"),
                   label = "Closed stores Arch. & MSS",
                   accessConditions = Nil
                 )
@@ -532,7 +532,7 @@ class CalmTransformerTest
               title = None,
               locations = List(
                 PhysicalLocation(
-                  locationType = LocationType("scmac"),
+                  locationType = OldLocationType("scmac"),
                   label = "Closed stores Arch. & MSS",
                   accessConditions = Nil
                 )

@@ -39,7 +39,7 @@ trait ImageGenerators
     locations = List(
       DigitalLocation(
         url = "https://iiif.wellcomecollection.org/V01234.jpg",
-        locationType = LocationType("iiif-image"),
+        locationType = OldLocationType("iiif-image"),
         license = Some(License.CCBY)
       ))
   )
@@ -192,7 +192,7 @@ trait ImageGenerators
       locations = List(
         createDigitalLocationWith(
           license = Some(license),
-          locationType = LocationType("iiif-image")))
+          locationType = OldLocationType("iiif-image")))
     ).toIndexedImage
 
   //   Create a set of images with intersecting LSH lists to ensure

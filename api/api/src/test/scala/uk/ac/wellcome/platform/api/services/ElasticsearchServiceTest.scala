@@ -256,8 +256,8 @@ class ElasticsearchServiceTest
           .title("Tumbling tangerines")
           .items(
             List(
-              createItemWithLocationType(LocationType("iiif-image")),
-              createItemWithLocationType(LocationType("acqi"))
+              createItemWithLocationType(OldLocationType("iiif-image")),
+              createItemWithLocationType(OldLocationType("acqi"))
             )
           )
 
@@ -265,7 +265,7 @@ class ElasticsearchServiceTest
           .title("Tumbling tangerines")
           .items(
             List(
-              createItemWithLocationType(LocationType("acqi"))
+              createItemWithLocationType(OldLocationType("acqi"))
             )
           )
 
@@ -289,8 +289,8 @@ class ElasticsearchServiceTest
             .title("Tumbling tangerines")
             .items(
               List(
-                createItemWithLocationType(LocationType("iiif-image")),
-                createItemWithLocationType(LocationType("acqi"))
+                createItemWithLocationType(OldLocationType("iiif-image")),
+                createItemWithLocationType(OldLocationType("acqi"))
               )
             )
 
@@ -299,7 +299,7 @@ class ElasticsearchServiceTest
             .title("Tumbling tangerines")
             .items(
               List(
-                createItemWithLocationType(LocationType("acqi"))
+                createItemWithLocationType(OldLocationType("acqi"))
               )
             )
 
@@ -308,7 +308,7 @@ class ElasticsearchServiceTest
             .title("Tumbling tangerines")
             .items(
               List(
-                createItemWithLocationType(LocationType("digit"))
+                createItemWithLocationType(OldLocationType("digit"))
               )
             )
 
@@ -342,7 +342,7 @@ class ElasticsearchServiceTest
   }
 
   private def createItemWithLocationType(
-    locationType: LocationType): Item[IdState.Minted] =
+    locationType: OldLocationType): Item[IdState.Minted] =
     createIdentifiedItemWith(
       locations = List(
         // This test really shouldn't be affected by physical/digital locations;

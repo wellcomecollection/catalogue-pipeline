@@ -110,7 +110,7 @@ class SierraTransformerTest
   it("extracts information from items") {
     val bibId = createSierraBibNumber
     val itemId = createSierraItemNumber
-    val locationType = LocationType("sgmed")
+    val locationType = OldLocationType("sgmed")
     val locationLabel = "A museum of mermaids"
     def itemData(itemId: SierraItemNumber,
                  modifiedDate: Instant,
@@ -167,7 +167,7 @@ class SierraTransformerTest
   it("extracts title from items") {
     val bibId = createSierraBibNumber
     val itemId = createSierraItemNumber
-    val locationType = LocationType("sgmed")
+    val locationType = OldLocationType("sgmed")
     val locationLabel = "A museum of mermaids"
     def itemData(itemId: SierraItemNumber,
                  modifiedDate: Instant,

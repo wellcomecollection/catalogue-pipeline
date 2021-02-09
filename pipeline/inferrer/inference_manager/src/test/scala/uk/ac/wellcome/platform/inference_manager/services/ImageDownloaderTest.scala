@@ -11,7 +11,7 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.work.generators.ImageGenerators
-import uk.ac.wellcome.models.work.internal.LocationType
+import uk.ac.wellcome.models.work.internal.OldLocationType
 import uk.ac.wellcome.platform.inference_manager.fixtures.{
   MemoryFileWriter,
   RequestPoolFixtures,
@@ -38,7 +38,7 @@ class ImageDownloaderTest
             val image = createImageDataWith(
               locations = List(
                 createDigitalLocationWith(
-                  locationType = LocationType("iiif-image"),
+                  locationType = OldLocationType("iiif-image"),
                   url = "http://images.com/this-image.jpg"
                 ))
             ).toInitialImage
@@ -100,11 +100,11 @@ class ImageDownloaderTest
             val image = createImageDataWith(
               locations = List(
                 createDigitalLocationWith(
-                  locationType = LocationType("iiif-presentation"),
+                  locationType = OldLocationType("iiif-presentation"),
                   url = "http://example.com/image/manifest"
                 ),
                 createDigitalLocationWith(
-                  locationType = LocationType("iiif-image"),
+                  locationType = OldLocationType("iiif-image"),
                   url = "http://images.com/this-image.jpg"
                 )
               )

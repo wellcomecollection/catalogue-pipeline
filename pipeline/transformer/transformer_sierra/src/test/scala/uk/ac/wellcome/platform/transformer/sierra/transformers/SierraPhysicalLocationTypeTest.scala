@@ -3,7 +3,7 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
-import uk.ac.wellcome.models.work.internal.NewLocationType
+import uk.ac.wellcome.models.work.internal.LocationType
 
 class SierraPhysicalLocationTypeTest
     extends AnyFunSpec
@@ -32,7 +32,7 @@ class SierraPhysicalLocationTypeTest
 
     forAll(testCases) {
       SierraPhysicalLocationType.fromName(_) shouldBe Some(
-        NewLocationType.ClosedStores)
+        LocationType.ClosedStores)
     }
   }
 
@@ -54,13 +54,13 @@ class SierraPhysicalLocationTypeTest
 
     forAll(testCases) {
       SierraPhysicalLocationType.fromName(_) shouldBe Some(
-        NewLocationType.OpenShelves)
+        LocationType.OpenShelves)
     }
   }
 
   it("maps to the OnExhibition type") {
     SierraPhysicalLocationType.fromName("On Exhibition") shouldBe Some(
-      NewLocationType.OnExhibition)
+      LocationType.OnExhibition)
   }
 
   it("returns None if it can't pick a LocationType") {

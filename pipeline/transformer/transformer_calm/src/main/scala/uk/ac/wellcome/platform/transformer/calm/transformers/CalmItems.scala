@@ -5,7 +5,7 @@ import uk.ac.wellcome.models.work.internal.{
   AccessStatus,
   IdState,
   Item,
-  LocationType,
+  OldLocationType,
   PhysicalLocation
 }
 import uk.ac.wellcome.models.work.internal.result._
@@ -27,7 +27,7 @@ object CalmItems extends CalmOps {
   private def physicalLocation(record: CalmRecord,
                                status: Option[AccessStatus]): PhysicalLocation =
     PhysicalLocation(
-      locationType = LocationType("scmac"),
+      locationType = OldLocationType("scmac"),
       label = "Closed stores Arch. & MSS",
       accessConditions = accessCondition(record, status).filterEmpty.toList
     )

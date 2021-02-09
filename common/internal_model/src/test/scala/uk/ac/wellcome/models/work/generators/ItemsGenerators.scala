@@ -54,7 +54,7 @@ trait ItemsGenerators extends IdentifiersGenerators with LocationGenerators {
     createUnidentifiableItemWith(
       locations = List(
         createPhysicalLocationWith(
-          locationType = LocationType("scmac"),
+          locationType = OldLocationType("scmac"),
           label = "Closed stores Arch. & MSS",
         )
       )

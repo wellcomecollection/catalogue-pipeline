@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.models.work.internal.{
-  NewLocationType,
+  LocationType,
   PhysicalLocationType
 }
 
@@ -21,7 +21,7 @@ object SierraPhysicalLocationType extends Logging {
             "offsite",
             "unrequestable"
           ) =>
-        Some(NewLocationType.ClosedStores)
+        Some(LocationType.ClosedStores)
 
       case lowerCaseName
           if lowerCaseName.hasSubstring(
@@ -37,13 +37,13 @@ object SierraPhysicalLocationType extends Logging {
             "rare materials room",
             "student coll"
           ) =>
-        Some(NewLocationType.OpenShelves)
+        Some(LocationType.OpenShelves)
 
       case lowerCaseName
           if lowerCaseName.hasSubstring(
             "exhibition"
           ) =>
-        Some(NewLocationType.OnExhibition)
+        Some(LocationType.OnExhibition)
 
       case lowerCaseName if lowerCaseName == "" || lowerCaseName == "none" =>
         None
