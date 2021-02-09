@@ -64,7 +64,7 @@ class DisplayWorkTest
   }
 
   it("parses unidentified items on a work") {
-    val item = createUnidentifiableItemWith()
+    val item = createUnidentifiableItem
     val location = item.locations.head.asInstanceOf[DigitalLocation]
     val work = indexedWork().items(List(item))
 

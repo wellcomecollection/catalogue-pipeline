@@ -59,6 +59,7 @@ trait DisplaySerialisationTestBase {
       "locationType": ${locationType(digitalLocation.locationType)},
       "url": "${digitalLocation.url}"
       ${optionalObject("license", license, digitalLocation.license)},
+      ${optionalString("credit", digitalLocation.credit)}
       "accessConditions": ${accessConditions(digitalLocation.accessConditions)}
     }"""
 
