@@ -92,7 +92,8 @@ class DisplayLocationTest extends AnyFunSpec with Matchers {
       val locationType = LocationType("iiif-image")
       val url = "https://wellcomelibrary.org/iiif/b2201508/manifest"
 
-      val digitalLocation = DigitalLocation(url = url, locationType = locationType)
+      val digitalLocation =
+        DigitalLocation(url = url, locationType = locationType)
 
       DisplayLocation(digitalLocation) shouldBe DisplayDigitalLocation(
         locationType = DisplayLocationType(locationType),
