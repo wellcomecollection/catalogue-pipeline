@@ -4,14 +4,19 @@ import uk.ac.wellcome.fixtures.RandomGenerators
 import uk.ac.wellcome.models.work.internal.{
   AccessCondition,
   DigitalLocation,
+  DigitalLocationType,
   License,
-  OldLocationType,
-  PhysicalLocation
+  LocationType,
+  PhysicalLocation,
+  PhysicalLocationType
 }
 
 trait LocationGenerators extends RandomGenerators {
   def createPhysicalLocationWith(
-    locationType: OldLocationType = OldLocationType("sgmed"),
+    locationType: PhysicalLocationType = chooseFrom(
+      LocationType.ClosedStores,
+      LocationType.OpenShelves
+    ),
     accessConditions: List[AccessCondition] = Nil,
     label: String = "locationLabel"
   ): PhysicalLocation =
@@ -34,7 +39,7 @@ trait LocationGenerators extends RandomGenerators {
     s"https://iiif.wellcomecollection.org/image/${randomAlphanumeric(3)}.jpg/info.json"
 
   def createDigitalLocationWith(
-    locationType: OldLocationType = OldLocationType("iiif-presentation"),
+    locationType: DigitalLocationType = LocationType.IIIFPresentationAPI,
     url: String = defaultLocationUrl,
     license: Option[License] = Some(License.CCBY),
     accessConditions: List[AccessCondition] = Nil
@@ -51,11 +56,11 @@ trait LocationGenerators extends RandomGenerators {
 
   def createImageLocation: DigitalLocation =
     createDigitalLocationWith(
-      locationType = OldLocationType("iiif-image")
+      locationType = LocationType.IIIFImageAPI
     )
 
   def createManifestLocation: DigitalLocation =
     createDigitalLocationWith(
-      locationType = OldLocationType("iiif-presentation")
+      locationType = LocationType.IIIFPresentationAPI
     )
 }
