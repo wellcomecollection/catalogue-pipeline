@@ -5,7 +5,10 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
 import uk.ac.wellcome.models.work.internal.NewLocationType
 
-class SierraPhysicalLocationTypeTest extends AnyFunSpec with Matchers with TableDrivenPropertyChecks {
+class SierraPhysicalLocationTypeTest
+    extends AnyFunSpec
+    with Matchers
+    with TableDrivenPropertyChecks {
   // These test cases are based on location names from every item in the
   // Sierra catalogue, as retrieved at the start of February 2021.
 
@@ -28,7 +31,8 @@ class SierraPhysicalLocationTypeTest extends AnyFunSpec with Matchers with Table
     )
 
     forAll(testCases) {
-      SierraPhysicalLocationType.fromName(_) shouldBe Some(NewLocationType.ClosedStores)
+      SierraPhysicalLocationType.fromName(_) shouldBe Some(
+        NewLocationType.ClosedStores)
     }
   }
 
@@ -49,12 +53,14 @@ class SierraPhysicalLocationTypeTest extends AnyFunSpec with Matchers with Table
     )
 
     forAll(testCases) {
-      SierraPhysicalLocationType.fromName(_) shouldBe Some(NewLocationType.OpenShelves)
+      SierraPhysicalLocationType.fromName(_) shouldBe Some(
+        NewLocationType.OpenShelves)
     }
   }
 
   it("maps to the OnExhibition type") {
-    SierraPhysicalLocationType.fromName("On Exhibition") shouldBe Some(NewLocationType.OnExhibition)
+    SierraPhysicalLocationType.fromName("On Exhibition") shouldBe Some(
+      NewLocationType.OnExhibition)
   }
 
   it("returns None if it can't pick a LocationType") {
