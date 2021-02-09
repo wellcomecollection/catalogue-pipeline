@@ -256,8 +256,8 @@ class ElasticsearchServiceTest
           .title("Tumbling tangerines")
           .items(
             List(
-              createItemWithLocationType(OldLocationType("iiif-image")),
-              createItemWithLocationType(OldLocationType("acqi"))
+              createItemWithLocationType(LocationType.IIIFImageAPI),
+              createItemWithLocationType(LocationType.ClosedStores)
             )
           )
 
@@ -265,7 +265,7 @@ class ElasticsearchServiceTest
           .title("Tumbling tangerines")
           .items(
             List(
-              createItemWithLocationType(OldLocationType("acqi"))
+              createItemWithLocationType(LocationType.ClosedStores)
             )
           )
 
@@ -289,8 +289,8 @@ class ElasticsearchServiceTest
             .title("Tumbling tangerines")
             .items(
               List(
-                createItemWithLocationType(OldLocationType("iiif-image")),
-                createItemWithLocationType(OldLocationType("acqi"))
+                createItemWithLocationType(LocationType.IIIFImageAPI),
+                createItemWithLocationType(LocationType.ClosedStores)
               )
             )
 
@@ -299,7 +299,7 @@ class ElasticsearchServiceTest
             .title("Tumbling tangerines")
             .items(
               List(
-                createItemWithLocationType(OldLocationType("acqi"))
+                createItemWithLocationType(LocationType.ClosedStores)
               )
             )
 
@@ -308,7 +308,7 @@ class ElasticsearchServiceTest
             .title("Tumbling tangerines")
             .items(
               List(
-                createItemWithLocationType(OldLocationType("digit"))
+                createItemWithLocationType(LocationType.OpenShelves)
               )
             )
 
@@ -320,7 +320,7 @@ class ElasticsearchServiceTest
             searchQuery = Some(SearchQuery("tangerines")),
             filters = List(
               ItemLocationTypeIdFilter(
-                locationTypeIds = List("iiif-image", "digit")))
+                locationTypeIds = List("iiif-image", "open-shelves")))
           ),
           expectedWorks = List(work, work2)
         )
@@ -341,16 +341,17 @@ class ElasticsearchServiceTest
     }
   }
 
-  private def createItemWithLocationType(
-    locationType: OldLocationType): Item[IdState.Minted] =
+  def createItemWithLocationType(
+    locationType: LocationType): Item[IdState.Minted] =
     createIdentifiedItemWith(
       locations = List(
-        // This test really shouldn't be affected by physical/digital locations;
-        // we just pick randomly here to ensure we get a good mixture.
-        chooseFrom(
-          createPhysicalLocationWith(locationType = locationType),
-          createDigitalLocationWith(locationType = locationType)
-        )
+        locationType match {
+          case physicalLocationType: PhysicalLocationType =>
+            createPhysicalLocationWith(locationType = physicalLocationType)
+
+          case digitalLocationType: DigitalLocationType =>
+            createDigitalLocationWith(locationType = digitalLocationType)
+        }
       )
     )
 

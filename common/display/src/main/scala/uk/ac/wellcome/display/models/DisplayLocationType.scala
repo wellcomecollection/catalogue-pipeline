@@ -15,26 +15,5 @@ case class DisplayLocationType(
 
 object DisplayLocationType {
   def apply(locationType: LocationType): DisplayLocationType =
-    locationType match {
-      case LocationType.ClosedStores =>
-        DisplayLocationType("closed-stores", "Closed Stores")
-
-      case LocationType.OpenShelves =>
-        DisplayLocationType("open-shelves", "Open Shelves")
-
-      case LocationType.OnExhibition =>
-        DisplayLocationType("on-exhibition", "On Exhibition")
-
-      case LocationType.IIIFImageAPI =>
-        DisplayLocationType("iiif-image", "IIIF Image API")
-
-      case LocationType.IIIFPresentationAPI =>
-        DisplayLocationType("iiif-presentation", "IIIF Presentation API")
-
-      case LocationType.ThumbnailImage =>
-        DisplayLocationType("thumbnail-image", "Thumbnail image")
-
-      case LocationType.OnlineResource =>
-        DisplayLocationType("online-resource", "Online Resource")
-    }
+    DisplayLocationType(id = locationType.id, label = locationType.label)
 }
