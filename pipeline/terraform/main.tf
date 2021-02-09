@@ -74,7 +74,7 @@ module "catalogue_pipeline_2021-02-09" {
   # If this pipeline is meant to be reindexed, remember to uncomment the
   # reindexer topic names.
 
-  is_reindexing = true
+  is_reindexing = false
 
   sierra_adapter_topic_arns = [
     local.sierra_reindexer_topic_arn,
