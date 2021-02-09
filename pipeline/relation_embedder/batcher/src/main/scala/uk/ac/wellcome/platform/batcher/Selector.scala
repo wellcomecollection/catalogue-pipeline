@@ -24,12 +24,12 @@ sealed trait Selector {
     val ancestorDescendents = ancestorPaths.map(Descendents(_))
     val tree = Tree(rootPath)
     this match {
-      case Tree(path) => Nil
+      case Tree(_) => Nil
       case Node(path) =>
         tree :: ancestorDescendents ++ parent(path).map(Children(_)).toList
       case Children(path) =>
         tree :: Descendents(path) :: ancestorDescendents
-      case Descendents(path) =>
+      case Descendents(_) =>
         tree :: ancestorDescendents
     }
   }

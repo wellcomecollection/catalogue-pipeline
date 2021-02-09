@@ -3,13 +3,13 @@ package uk.ac.wellcome.platform.transformer.miro.transformers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.internal.{
-  DigitalLocationDeprecated,
+  DigitalLocation,
   License,
   LocationType
 }
 import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
 
-class MiroLocationDeprecatedTest
+class MiroLocationTest
     extends AnyFunSpec
     with Matchers
     with MiroRecordGenerators {
@@ -22,10 +22,10 @@ class MiroLocationDeprecatedTest
         useRestrictions = Some("CC-0"),
         imageNumber = "B0011308"
       )
-    ) shouldBe DigitalLocationDeprecated(
-      "https://iiif.wellcomecollection.org/image/B0011308.jpg/info.json",
-      LocationType("iiif-image"),
-      Some(License.CC0),
+    ) shouldBe DigitalLocation(
+      url = "https://iiif.wellcomecollection.org/image/B0011308.jpg/info.json",
+      locationType = LocationType.IIIFImageAPI,
+      license = Some(License.CC0),
       credit = Some("Ezra Feilden")
     )
   }

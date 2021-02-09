@@ -7,7 +7,7 @@ import NoWhitespace._
 trait DateParserUtils extends ParserUtils {
 
   def monthFollowedByYear[_: P] =
-    (writtenMonth ~ ws ~ yearDigits)
+    writtenMonth ~ ws ~ yearDigits
 
   def yearFollowedByMonth[_: P] =
     (yearDigits ~ ws ~ writtenMonth) map { case (y, m) => (m, y) }

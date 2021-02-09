@@ -229,8 +229,8 @@ class WorksTest
   it("shows the thumbnail field if available") {
     withWorksApi {
       case (worksIndex, routes) =>
-        val thumbnailLocation = DigitalLocationDeprecated(
-          locationType = LocationType("thumbnail-image"),
+        val thumbnailLocation = DigitalLocation(
+          locationType = LocationType.ThumbnailImage,
           url = "https://iiif.example.org/1234/default.jpg",
           license = Some(License.CCBY)
         )

@@ -11,7 +11,6 @@ import uk.ac.wellcome.models.work.internal._
 case class DisplayItem(
   @Schema(
     `type` = "String",
-    readOnly = true,
     description = "The canonical identifier given to a thing.") id: Option[
     String],
   @Schema(
@@ -20,12 +19,11 @@ case class DisplayItem(
       "Relates the item to a unique system-generated identifier that governs interaction between systems and is regarded as canonical within the Wellcome data ecosystem."
   ) identifiers: Option[List[DisplayIdentifier]] = None,
   @Schema(
-    readOnly = true,
     description = "A human readable title."
   ) title: Option[String] = None,
   @Schema(
     description = "List of locations that provide access to the item"
-  ) locations: List[DisplayLocationDeprecated] = List(),
+  ) locations: List[DisplayLocation] = List(),
   @JsonKey("type") @Schema(name = "type") ontologyType: String = "Item"
 )
 
@@ -39,7 +37,7 @@ object DisplayItem extends GetIdentifiers {
           id = id.maybeCanonicalId,
           identifiers = getIdentifiers(id, includesIdentifiers),
           title = title,
-          locations = locations.map(DisplayLocationDeprecated(_))
+          locations = locations.map(DisplayLocation(_))
         )
     }
 }

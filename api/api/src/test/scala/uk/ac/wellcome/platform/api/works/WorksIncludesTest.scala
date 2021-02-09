@@ -100,7 +100,7 @@ class WorksIncludesTest
           .items(
             List(
               createIdentifiedItemWith(title = Some("item title")),
-              createUnidentifiableItemWith()
+              createUnidentifiableItem
             ))
 
         insertIntoElasticsearch(worksIndex, work)

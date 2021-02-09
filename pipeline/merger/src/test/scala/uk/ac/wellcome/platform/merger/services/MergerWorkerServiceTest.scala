@@ -390,7 +390,7 @@ class MergerWorkerServiceTest
 
   it("fails if the message sent is not a matcher result") {
     withMergerWorkerServiceFixtures {
-      case (_, QueuePair(queue, dlq), _, metrics, index) =>
+      case (_, QueuePair(queue, dlq), _, metrics, _) =>
         sendInvalidJSONto(queue)
 
         eventually {

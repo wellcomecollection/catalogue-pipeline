@@ -6,16 +6,17 @@ import uk.ac.wellcome.models.work.internal.{
   AccessCondition,
   AccessStatus,
   LocationType,
-  PhysicalLocationDeprecated
+  PhysicalLocation
 }
 import uk.ac.wellcome.platform.transformer.sierra.source.sierra.SierraSourceLocation
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   MarcSubfield,
+  SierraItemData,
   VarField
 }
 import uk.ac.wellcome.platform.transformer.sierra.generators.SierraDataGenerators
 
-class SierraLocationDeprecatedTest
+class SierraLocationTest
     extends AnyFunSpec
     with Matchers
     with SierraDataGenerators {
@@ -26,14 +27,14 @@ class SierraLocationDeprecatedTest
     val bibId = createSierraBibNumber
     val bibData = createSierraBibData
 
-    val locationType = LocationType("sgmed")
-    val label = "A museum of mermaids"
+    val locationType = LocationType.ClosedStores
+    val label = "Closed stores Med."
     val itemData = createSierraItemDataWith(
       location = Some(SierraSourceLocation("sgmed", label))
     )
 
     it("extracts location from item data") {
-      val expectedLocation = PhysicalLocationDeprecated(locationType, label)
+      val expectedLocation = PhysicalLocation(locationType, label)
       transformer.getPhysicalLocation(bibId, itemData, bibData) shouldBe Some(
         expectedLocation)
     }
@@ -75,7 +76,7 @@ class SierraLocationDeprecatedTest
         )
       )
       transformer.getPhysicalLocation(bibId, itemData, bibData) shouldBe Some(
-        PhysicalLocationDeprecated(
+        PhysicalLocation(
           locationType = locationType,
           label = label,
           accessConditions = List(
@@ -89,6 +90,18 @@ class SierraLocationDeprecatedTest
       )
     }
 
+    it("uses the callNumber as the shelfmark") {
+      val itemData: SierraItemData = createSierraItemDataWith(
+        location = Some(SierraSourceLocation("info", "Open shelves")),
+        callNumber = Some("AX1234:Box 1")
+      )
+
+      val location =
+        transformer.getPhysicalLocation(bibId, itemData, bibData).get
+
+      location.shelfmark shouldBe Some("AX1234:Box 1")
+    }
+
     it("adds 'Open' access condition if ind1 is 0") {
       val bibData = createSierraBibDataWith(
         varFields = List(
@@ -96,7 +109,7 @@ class SierraLocationDeprecatedTest
         )
       )
       transformer.getPhysicalLocation(bibId, itemData, bibData) shouldBe Some(
-        PhysicalLocationDeprecated(
+        PhysicalLocation(
           locationType = locationType,
           label = label,
           accessConditions = List(AccessCondition(Some(AccessStatus.Open)))
@@ -117,7 +130,7 @@ class SierraLocationDeprecatedTest
         )
       )
       transformer.getPhysicalLocation(bibId, itemData, bibData) shouldBe Some(
-        PhysicalLocationDeprecated(
+        PhysicalLocation(
           locationType = locationType,
           label = label,
           accessConditions = List(
@@ -255,7 +268,7 @@ class SierraLocationDeprecatedTest
         )
       )
       transformer.getPhysicalLocation(bibId, itemData, bibData) shouldBe Some(
-        PhysicalLocationDeprecated(
+        PhysicalLocation(
           locationType = locationType,
           label = label,
           accessConditions = List()

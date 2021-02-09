@@ -3,11 +3,6 @@ package uk.ac.wellcome.display.json
 import io.circe.generic.extras.{AutoDerivation, Configuration}
 import io.circe.{Encoder, Printer}
 import io.circe.syntax._
-import uk.ac.wellcome.display.models.DisplayLocation.{
-  DisplayClosedStores,
-  DisplayDigitalResource,
-  DisplayOpenShelves
-}
 import uk.ac.wellcome.display.models._
 
 /** Format JSON objects as suitable for display.
@@ -60,17 +55,11 @@ trait DisplayJsonUtil extends AutoDerivation {
     case concept: DisplayAbstractConcept => concept.asJson
   }
 
-  implicit val locationDeprecatedEncoder: Encoder[DisplayLocationDeprecated] = {
-    case digitalLocation: DisplayDigitalLocationDeprecated =>
-      digitalLocation.asJson
-    case physicalLocation: DisplayPhysicalLocationDeprecated =>
-      physicalLocation.asJson
-  }
-
   implicit val locationEncoder: Encoder[DisplayLocation] = {
-    case closedStores: DisplayClosedStores       => closedStores.asJson
-    case openShelves: DisplayOpenShelves         => openShelves.asJson
-    case digitalResource: DisplayDigitalResource => digitalResource.asJson
+    case digitalLocation: DisplayDigitalLocation =>
+      digitalLocation.asJson
+    case physicalLocation: DisplayPhysicalLocation =>
+      physicalLocation.asJson
   }
 }
 

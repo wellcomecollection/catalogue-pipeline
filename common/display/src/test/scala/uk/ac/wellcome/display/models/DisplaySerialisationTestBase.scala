@@ -44,30 +44,34 @@ trait DisplaySerialisationTestBase {
      }
     """
 
-  def locations(locations: List[LocationDeprecated]) =
+  def locations(locations: List[Location]) =
     locations.map(location).mkString(",")
 
-  def location(loc: LocationDeprecated) =
+  def location(loc: Location) =
     loc match {
-      case l: DigitalLocationDeprecated  => digitalLocation(l)
-      case l: PhysicalLocationDeprecated => physicalLocation(l)
+      case l: DigitalLocation  => digitalLocation(l)
+      case l: PhysicalLocation => physicalLocation(l)
     }
 
-  def digitalLocation(digitalLocation: DigitalLocationDeprecated) =
+  def digitalLocation(digitalLocation: DigitalLocation) =
     s"""{
       "type": "DigitalLocation",
       "locationType": ${locationType(digitalLocation.locationType)},
       "url": "${digitalLocation.url}"
       ${optionalObject("license", license, digitalLocation.license)},
+      ${optionalString("credit", digitalLocation.credit)}
+      ${optionalString("linkText", digitalLocation.linkText)}
       "accessConditions": ${accessConditions(digitalLocation.accessConditions)}
     }"""
 
-  def physicalLocation(loc: PhysicalLocationDeprecated) =
+  def physicalLocation(loc: PhysicalLocation) =
     s"""
        {
         "type": "PhysicalLocation",
         "locationType": ${locationType(loc.locationType)},
         "label": "${loc.label}",
+        ${optionalObject("license", license, loc.license)}
+        ${optionalString("shelfmark", loc.shelfmark)}
         "accessConditions": ${accessConditions(loc.accessConditions)}
        }
      """
@@ -281,10 +285,9 @@ trait DisplaySerialisationTestBase {
 
   def locationType(locType: LocationType): String =
     s"""{
-         "id": "${locType.id}",
-         "label": "${locType.label}",
+         "id": "${DisplayLocationType(locType).id}",
+         "label": "${DisplayLocationType(locType).label}",
          "type": "LocationType"
        }
      """ stripMargin
-
 }

@@ -176,7 +176,7 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
       : Work.Visible[State] =
       work.map(_.copy(contributors = contributors))
 
-    def thumbnail(thumbnail: LocationDeprecated): Work.Visible[State] =
+    def thumbnail(thumbnail: Location): Work.Visible[State] =
       work.map(_.copy(thumbnail = Some(thumbnail)))
 
     def production(

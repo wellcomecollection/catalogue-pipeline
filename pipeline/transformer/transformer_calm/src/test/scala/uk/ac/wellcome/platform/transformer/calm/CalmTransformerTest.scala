@@ -61,8 +61,8 @@ class CalmTransformerTest
             Item(
               title = None,
               locations = List(
-                PhysicalLocationDeprecated(
-                  locationType = LocationType("scmac"),
+                PhysicalLocation(
+                  locationType = LocationType.ClosedStores,
                   label = "Closed stores Arch. & MSS",
                   accessConditions = Nil
                 )
@@ -531,8 +531,8 @@ class CalmTransformerTest
             Item(
               title = None,
               locations = List(
-                PhysicalLocationDeprecated(
-                  locationType = LocationType("scmac"),
+                PhysicalLocation(
+                  locationType = LocationType.ClosedStores,
                   label = "Closed stores Arch. & MSS",
                   accessConditions = Nil
                 )

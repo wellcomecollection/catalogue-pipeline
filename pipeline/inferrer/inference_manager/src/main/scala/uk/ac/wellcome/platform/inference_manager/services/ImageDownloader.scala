@@ -17,7 +17,7 @@ import akka.stream.{IOResult, Materializer}
 import akka.stream.scaladsl.{FileIO, Flow, Keep, Sink}
 import akka.util.ByteString
 import software.amazon.awssdk.services.sqs.model.Message
-import uk.ac.wellcome.models.work.internal.DigitalLocationDeprecated
+import uk.ac.wellcome.models.work.internal.{DigitalLocation, LocationType}
 import uk.ac.wellcome.platform.inference_manager.models.DownloadedImage
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -86,10 +86,9 @@ class ImageDownloader[Ctx](
     case (Failure(exception), _) => Future.failed(exception)
   }
 
-  private def getImageUri(
-    locations: List[DigitalLocationDeprecated]): Option[Uri] =
+  private def getImageUri(locations: List[DigitalLocation]): Option[Uri] =
     locations
-      .find(_.locationType.id == "iiif-image")
+      .find(_.locationType == LocationType.IIIFImageAPI)
       .map { location =>
         Uri(location.url) match {
           case uri @ Uri(_, _, path, _, _)

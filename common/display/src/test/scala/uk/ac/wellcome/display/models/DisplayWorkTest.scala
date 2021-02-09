@@ -64,8 +64,8 @@ class DisplayWorkTest
   }
 
   it("parses unidentified items on a work") {
-    val item = createUnidentifiableItemWith()
-    val location = item.locations.head.asInstanceOf[DigitalLocationDeprecated]
+    val item = createUnidentifiableItem
+    val location = item.locations.head.asInstanceOf[DigitalLocation]
     val work = indexedWork().items(List(item))
 
     val displayWork = DisplayWork(
@@ -78,11 +78,12 @@ class DisplayWorkTest
       id = None,
       identifiers = None,
       locations = List(
-        DisplayDigitalLocationDeprecated(
+        DisplayDigitalLocation(
           DisplayLocationType(location.locationType),
           url = location.url,
           credit = location.credit,
           license = location.license.map(DisplayLicense(_)),
+          linkText = location.linkText,
           accessConditions =
             location.accessConditions.map(DisplayAccessCondition(_))
         )

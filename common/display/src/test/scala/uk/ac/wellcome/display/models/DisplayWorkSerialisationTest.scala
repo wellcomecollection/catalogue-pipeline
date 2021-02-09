@@ -47,7 +47,7 @@ class DisplayWorkSerialisationTest
 
   it("renders an item if the items include is present") {
     val work = indexedWork()
-      .items(createIdentifiedItems(count = 1) :+ createUnidentifiableItemWith())
+      .items(createIdentifiedItems(count = 1) :+ createUnidentifiableItem)
 
     val expectedJson = s"""
       |{
@@ -87,8 +87,8 @@ class DisplayWorkSerialisationTest
   }
 
   it("includes credit information in DisplayWork serialisation") {
-    val location = DigitalLocationDeprecated(
-      locationType = LocationType("thumbnail-image"),
+    val location = DigitalLocation(
+      locationType = LocationType.OnlineResource,
       url = "",
       credit = Some("Wellcome Collection"),
       license = Some(License.CCBY)
@@ -355,8 +355,8 @@ class DisplayWorkSerialisationTest
 
   it("shows the thumbnail field if available") {
     val work = indexedWork().thumbnail(
-      DigitalLocationDeprecated(
-        locationType = LocationType("thumbnail-image"),
+      DigitalLocation(
+        locationType = LocationType.ThumbnailImage,
         url = "https://iiif.example.org/1234/default.jpg",
         license = Some(License.CCBY)
       )

@@ -121,7 +121,9 @@ object ArchiveRelationsCache {
   def apply(works: Seq[RelationWork]): ArchiveRelationsCache =
     new ArchiveRelationsCache(
       works
-        .map { case work => work.data.collectionPath -> work }
+        .map { work =>
+          work.data.collectionPath -> work
+        }
         .collect {
           case (Some(CollectionPath(path, _)), work) =>
             path -> work

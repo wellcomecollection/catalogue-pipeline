@@ -17,7 +17,7 @@ object Responses {
       "features_b64": "${Encoding.toLittleEndianBase64(
          randomFeatureVector(seed))}",
       "lsh_encoded_features": [${randomLshVector(seed)
-         .map(str => s""""${str}"""")
+         .map(str => s""""$str"""")
          .mkString(", ")}]
     }""".stripMargin
   )
@@ -28,7 +28,7 @@ object Responses {
   def paletteInferrerDeterministic(seed: Int): HttpResponse = json(
     s"""{
        "palette": [${randomPaletteVector(seed)
-      .map(str => s""""${str}"""")
+      .map(str => s""""$str"""")
       .mkString(", ")}],
        "hash_params": {
          "bin_sizes": [${randomBinSizes(seed)
