@@ -2,7 +2,7 @@ package uk.ac.wellcome.display.models
 
 import io.circe.generic.extras.JsonKey
 import io.swagger.v3.oas.annotations.media.Schema
-import uk.ac.wellcome.models.work.internal.{OldLocationType, LocationType}
+import uk.ac.wellcome.models.work.internal.LocationType
 
 @Schema(
   name = "LocationType"
@@ -14,12 +14,6 @@ case class DisplayLocationType(
 )
 
 object DisplayLocationType {
-  def apply(locationType: OldLocationType): DisplayLocationType =
-    DisplayLocationType(
-      id = locationType.id,
-      label = locationType.label
-    )
-
   def apply(locationType: LocationType): DisplayLocationType =
     locationType match {
       case LocationType.ClosedStores =>
