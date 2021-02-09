@@ -26,7 +26,9 @@ object DisplayAccessStatus {
       case AccessStatus.ByAppointment =>
         DisplayAccessStatus("by-appointment", "By Appointment")
       case AccessStatus.TemporarilyUnavailable =>
-        DisplayAccessStatus("temporarily-unavailable", "Temporarily Unavailable")
+        DisplayAccessStatus(
+          "temporarily-unavailable",
+          "Temporarily Unavailable")
       case AccessStatus.Unavailable =>
         DisplayAccessStatus("unavailable", "Unavailable")
       case AccessStatus.Closed =>

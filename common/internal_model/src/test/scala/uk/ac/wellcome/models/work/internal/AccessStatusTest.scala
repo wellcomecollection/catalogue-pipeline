@@ -102,7 +102,8 @@ class AccessStatusTest extends AnyFunSpec with Matchers {
       "Temporarily Unavailable.",
     )
     temporarilyUnavailableValues.foreach { str =>
-      AccessStatus.apply(str) shouldBe Right(AccessStatus.TemporarilyUnavailable)
+      AccessStatus.apply(str) shouldBe Right(
+        AccessStatus.TemporarilyUnavailable)
     }
   }
 
