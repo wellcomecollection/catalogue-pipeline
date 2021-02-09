@@ -4,8 +4,6 @@ module "catalogue_pipeline_2021-02-01" {
   pipeline_date = "2021-02-01"
   release_label = "prod"
 
-  pipeline_storage_id = "pipeline_storage_delta"
-
   # Transformer config
   #
   # If this pipeline is meant to be reindexed, remember to uncomment the
