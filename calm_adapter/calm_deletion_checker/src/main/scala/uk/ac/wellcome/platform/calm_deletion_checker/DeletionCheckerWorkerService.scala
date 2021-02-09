@@ -54,7 +54,7 @@ class DeletionCheckerWorkerService[Destination](
     Flow[immutable.Seq[(Message, CalmSourcePayload)]]
       .mapAsyncUnordered(parallelism) { messages =>
         val (_, batch) = messages.unzip
-        deletionChecker.deletedRecords(batch).map { deleted =>
+        deletionChecker.deletedRecords(batch.toSet).map { deleted =>
           messages.map {
             case (m, record) if deleted.contains(record) => (m, record, Deleted)
             case (m, record)                             => (m, record, Extant)
@@ -73,7 +73,7 @@ class DeletionCheckerWorkerService[Destination](
         case (msg, _, Extant) => Future.successful(msg)
       }
 
-  private lazy val deletionChecker = new DeletionChecker(calmApiClient)
+  private lazy val deletionChecker = new ApiDeletionChecker(calmApiClient)
 
   sealed trait DeletionStatus extends Product with Serializable
   case object Deleted extends DeletionStatus
