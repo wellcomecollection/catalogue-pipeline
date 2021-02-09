@@ -233,7 +233,8 @@ class WorkMatcherTest
         val idA = identifierA.canonicalId
         val idB = identifierB.canonicalId
         val idC = identifierC.canonicalId
-        workGraphStore.put(
+
+        val future = workGraphStore.put(
           WorkGraph(
             Set(
               WorkNode(idA, 0, List(idB), componentId),
@@ -241,43 +242,34 @@ class WorkMatcherTest
               WorkNode(idC, 0, Nil, componentId),
             )))
 
-        val links = createWorkLinksWith(
-          id = identifierA,
-          referencedIds = Set(identifierB)
-        )
+        whenReady(future) { _ =>
+          val links = createWorkLinksWith(
+            id = identifierA,
+            referencedIds = Set(identifierB)
+          )
 
-        // AWLC: This test is flaky in CI, and I'm unable to reproduce it locally.
-        // This logging is an attempt to get some helpful information out when it
-        // next fails.  We should remove this once the flaky test is fixed.
-        //
-        // See https://github.com/wellcomecollection/platform/issues/4979
-        println(s"idA = $idA")
-        println(s"idB = $idB")
-        println(s"idC = $idC")
-        println(s"links = $links")
-
-        implicit val lockDao: MemoryLockDao[String, UUID] =
-          new MemoryLockDao[String, UUID] {
-            override def lock(id: String, contextId: UUID): LockResult =
-              synchronized {
-                println(s"Calling lockDao.lock(id=$id, contextId=$contextId)")
-                if (id == componentId) {
-                  Left(LockFailure(id, e = new Throwable("BOOM!")))
-                } else {
-                  super.lock(id, contextId)
+          implicit val lockDao: MemoryLockDao[String, UUID] =
+            new MemoryLockDao[String, UUID] {
+              override def lock(id: String, contextId: UUID): LockResult =
+                synchronized {
+                  if (id == componentId) {
+                    Left(LockFailure(id, e = new Throwable("BOOM!")))
+                  } else {
+                    super.lock(id, contextId)
+                  }
                 }
-              }
+            }
+
+          val lockingService =
+            new MemoryLockingService[Set[MatchedIdentifiers], Future]()
+
+          val workMatcher = new WorkMatcher(workGraphStore, lockingService)
+
+          val result = workMatcher.matchWork(links)
+
+          whenReady(result.failed) {
+            _ shouldBe a[MatcherException]
           }
-
-        val lockingService =
-          new MemoryLockingService[Set[MatchedIdentifiers], Future]()
-
-        val workMatcher = new WorkMatcher(workGraphStore, lockingService)
-
-        val result = workMatcher.matchWork(links)
-
-        whenReady(result.failed) {
-          _ shouldBe a[MatcherException]
         }
       }
     }
