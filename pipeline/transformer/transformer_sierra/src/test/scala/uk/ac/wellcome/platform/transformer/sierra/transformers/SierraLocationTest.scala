@@ -11,6 +11,7 @@ import uk.ac.wellcome.models.work.internal.{
 import uk.ac.wellcome.platform.transformer.sierra.source.sierra.SierraSourceLocation
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   MarcSubfield,
+  SierraItemData,
   VarField
 }
 import uk.ac.wellcome.platform.transformer.sierra.generators.SierraDataGenerators
@@ -87,6 +88,18 @@ class SierraLocationTest
           )
         )
       )
+    }
+
+    it("uses the callNumber as the shelfmark") {
+      val itemData: SierraItemData = createSierraItemDataWith(
+        location = Some(SierraSourceLocation("info", "Open shelves")),
+        callNumber = Some("AX1234:Box 1")
+      )
+
+      val location =
+        transformer.getPhysicalLocation(bibId, itemData, bibData).get
+
+      location.shelfmark shouldBe Some("AX1234:Box 1")
     }
 
     it("adds 'Open' access condition if ind1 is 0") {
