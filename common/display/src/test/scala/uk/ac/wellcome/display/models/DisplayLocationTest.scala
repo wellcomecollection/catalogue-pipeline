@@ -10,7 +10,10 @@ import uk.ac.wellcome.models.work.internal.{
   PhysicalLocation
 }
 
-class DisplayLocationTest extends AnyFunSpec with Matchers with LocationGenerators {
+class DisplayLocationTest
+    extends AnyFunSpec
+    with Matchers
+    with LocationGenerators {
 
   // TODO: These tests could be rewritten to use generators
 

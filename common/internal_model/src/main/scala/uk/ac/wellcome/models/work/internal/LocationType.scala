@@ -14,12 +14,12 @@ sealed trait DigitalLocationType extends LocationType
 object LocationType extends Enum[LocationType] {
   val values = findValues
 
-  implicit val locationTypeEncoder: Encoder[LocationType] = Encoder.instance[LocationType] {
-    locationType =>
+  implicit val locationTypeEncoder: Encoder[LocationType] =
+    Encoder.instance[LocationType] { locationType =>
       Json.obj(
         ("id", Json.fromString(locationType.id))
       )
-  }
+    }
 
   implicit val physicalLocationTypeEncoder: Encoder[PhysicalLocationType] =
     locType => locationTypeEncoder.apply(locType)
@@ -38,8 +38,8 @@ object LocationType extends Enum[LocationType] {
     idPairs.toMap
   }
 
-  implicit val locationTypeDecoder: Decoder[LocationType] = Decoder.instance[LocationType] {
-    cursor =>
+  implicit val locationTypeDecoder: Decoder[LocationType] =
+    Decoder.instance[LocationType] { cursor =>
       for {
         id <- cursor.downField("id").as[String]
       } yield {
@@ -48,13 +48,19 @@ object LocationType extends Enum[LocationType] {
           throw new Exception(s"$id is not a valid LocationType ID")
         )
       }
-  }
+    }
 
   implicit val physicalLocationTypeDecoder: Decoder[PhysicalLocationType] =
-    cursor => locationTypeDecoder.apply(cursor).map { _.asInstanceOf[PhysicalLocationType] }
+    cursor =>
+      locationTypeDecoder.apply(cursor).map {
+        _.asInstanceOf[PhysicalLocationType]
+    }
 
   implicit val digitalLocationTypeDecoder: Decoder[DigitalLocationType] =
-    cursor => locationTypeDecoder.apply(cursor).map { _.asInstanceOf[DigitalLocationType] }
+    cursor =>
+      locationTypeDecoder.apply(cursor).map {
+        _.asInstanceOf[DigitalLocationType]
+    }
 
   case object ClosedStores extends PhysicalLocationType {
     val id = "closed-stores"

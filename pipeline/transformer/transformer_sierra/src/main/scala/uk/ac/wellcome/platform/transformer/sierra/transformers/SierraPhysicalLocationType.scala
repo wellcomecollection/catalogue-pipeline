@@ -1,10 +1,7 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.models.work.internal.{
-  LocationType,
-  PhysicalLocationType
-}
+import uk.ac.wellcome.models.work.internal.{LocationType, PhysicalLocationType}
 
 object SierraPhysicalLocationType extends Logging {
   def fromName(name: String): Option[PhysicalLocationType] =
