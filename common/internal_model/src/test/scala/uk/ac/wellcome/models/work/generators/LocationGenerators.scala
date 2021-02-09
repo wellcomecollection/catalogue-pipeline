@@ -35,6 +35,7 @@ trait LocationGenerators extends RandomGenerators {
     locationType = locationType,
     url = url,
     license = license,
+    credit = chooseFrom(None, Some(s"Credit line: ${randomAlphanumeric()}")),
     accessConditions = accessConditions
   )
 
