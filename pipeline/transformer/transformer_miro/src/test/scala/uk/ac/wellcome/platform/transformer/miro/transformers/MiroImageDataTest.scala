@@ -9,7 +9,7 @@ import uk.ac.wellcome.models.work.internal.{
   IdentifierType,
   ImageData,
   License,
-  OldLocationType,
+  LocationType,
   SourceIdentifier
 }
 import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
@@ -43,7 +43,7 @@ class MiroImageDataTest
           DigitalLocation(
             url =
               "https://iiif.wellcomecollection.org/image/B0011308.jpg/info.json",
-            locationType = OldLocationType("iiif-image"),
+            locationType = LocationType.IIIFImageAPI,
             license = Some(License.CC0),
             credit = Some("Ezra Feilden")
           ))
