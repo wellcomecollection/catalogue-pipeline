@@ -4,7 +4,6 @@ import java.time.LocalDate
 
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers._
-import akka.stream.Materializer
 import akka.stream.scaladsl._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
@@ -13,11 +12,10 @@ import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.platform.calm_api_client._
 import uk.ac.wellcome.platform.calm_api_client.fixtures.{
-  CalmHttpTestClient,
+  CalmApiTestClient,
   CalmResponseGenerators
 }
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.Await
 import scala.xml.XML
@@ -27,11 +25,9 @@ class CalmRetrieverTest
     with Matchers
     with ScalaFutures
     with Akka
+    with CalmApiTestClient
     with CalmResponseGenerators {
 
-  val url = "calm.api"
-  val username = "calm-user"
-  val password = "calm-password"
   val query = CalmQuery.ModifiedDate(LocalDate.of(2000, 1, 1))
 
   it("generates a list of CALM records from the API") {
@@ -119,10 +115,10 @@ class CalmRetrieverTest
   }
 
   def withCalmRetriever[R](responses: List[HttpResponse])(
-    testWith: TestWith[(CalmRetriever, CalmHttpTestClient), R])(
-    implicit mat: Materializer): R = {
-    implicit val httpClient = new CalmHttpTestClient(responses)
-    val apiClient = new CalmApiClient(url, username, password)
-    testWith((new ApiCalmRetriever(apiClient), httpClient))
+    testWith: TestWith[(CalmRetriever, TestHttpClient), R]): R = {
+    withCalmClients(responses) {
+      case (apiClient, httpClient) =>
+        testWith((new ApiCalmRetriever(apiClient), httpClient))
+    }
   }
 }
