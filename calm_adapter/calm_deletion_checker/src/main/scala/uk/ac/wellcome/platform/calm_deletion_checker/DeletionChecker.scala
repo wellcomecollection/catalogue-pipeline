@@ -50,11 +50,12 @@ trait DeletionChecker {
     } else M(n, n - d)
 
   // See equation (5) in https://arxiv.org/abs/1407.2283
-  // We have removed the -1 term to account for the initial
-  // count that we must perform .
+  // To account for the initial count (outside of the algorithm proper)
+  // we remove the (-1) term and ensure a minimum of 1 test.
   //
   // This is only used for testing the implementation
-  def upperBound(n: Int, d: Int): Int = (l(n, d) + 1) * d + k(n, d)
+  def nTestsUpperBound(n: Int, d: Int): Int =
+    math.max((l(n, d) + 1) * d + k(n, d), 1)
 
   private def log2(x: Float): Float = (math.log(x) / math.log(2)).toFloat
 }

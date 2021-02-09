@@ -53,7 +53,7 @@ class DeletionCheckerTest
           val testChecker = new TestDeletionChecker(deletedRecords)
 
           whenReady(testChecker.deletedRecords(records.toSet)) { _ =>
-            testChecker.nTests should be <= testChecker.upperBound(n, d)
+            testChecker.nTests should be <= testChecker.nTestsUpperBound(n, d)
           }
       }
     }
