@@ -1,14 +1,14 @@
 package uk.ac.wellcome.models.work.generators
 
-import uk.ac.wellcome.models.work.internal.{DigitalLocation, _}
+import uk.ac.wellcome.models.work.internal._
 
-trait ItemsGenerators extends IdentifiersGenerators {
+trait ItemsGenerators extends IdentifiersGenerators with LocationGenerators {
 
   def createIdentifiedItemWith[I >: IdState.Identified](
     canonicalId: String = createCanonicalId,
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     otherIdentifiers: List[SourceIdentifier] = Nil,
-    locations: List[Location] = List(defaultLocation),
+    locations: List[Location] = List(createDigitalLocation),
     title: Option[String] = None,
   ): Item[I] =
     Item(
@@ -30,7 +30,7 @@ trait ItemsGenerators extends IdentifiersGenerators {
 
   def createIdentifiableItemWith[I >: IdState.Identifiable](
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
-    locations: List[Location] = List(defaultLocation)
+    locations: List[Location] = List(createDigitalLocation)
   ): Item[I] =
     Item(
       id = IdState.Identifiable(sourceIdentifier),
@@ -38,22 +38,8 @@ trait ItemsGenerators extends IdentifiersGenerators {
     )
 
   def createUnidentifiableItemWith[I >: IdState.Unidentifiable.type](
-    locations: List[Location] = List(defaultLocation)): Item[I] =
+    locations: List[Location] = List(createDigitalLocation)): Item[I] =
     Item(id = IdState.Unidentifiable, locations = locations)
-
-  def createPhysicalLocation = createPhysicalLocationWith()
-
-  def createPhysicalLocationWith(locationType: LocationType =
-                                   createStoresLocationType,
-                                 accessConditions: List[AccessCondition] = Nil,
-                                 label: String = "locationLabel") =
-    PhysicalLocation(
-      locationType = locationType,
-      label = label,
-      accessConditions = accessConditions
-    )
-
-  def createDigitalLocation = createDigitalLocationWith()
 
   def createImageLocation = createDigitalLocationWith(
     locationType = createImageLocationType
@@ -61,17 +47,6 @@ trait ItemsGenerators extends IdentifiersGenerators {
 
   def createManifestLocation = createDigitalLocationWith(
     locationType = createPresentationLocationType
-  )
-
-  def createDigitalLocationWith(
-    locationType: LocationType = createPresentationLocationType,
-    url: String = defaultLocationUrl,
-    license: Option[License] = Some(License.CCBY),
-    accessConditions: List[AccessCondition] = Nil) = DigitalLocation(
-    locationType = locationType,
-    url = url,
-    license = license,
-    accessConditions = accessConditions
   )
 
   def createImageLocationType = LocationType("iiif-image")
@@ -106,9 +81,4 @@ trait ItemsGenerators extends IdentifiersGenerators {
         )
       )
     )
-
-  private def defaultLocation = createDigitalLocationWith()
-
-  private def defaultLocationUrl =
-    s"https://iiif.wellcomecollection.org/image/${randomAlphanumeric(3)}.jpg/info.json"
 }
