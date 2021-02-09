@@ -39,4 +39,14 @@ trait LocationGenerators extends RandomGenerators {
   )
 
   def createDigitalLocation: DigitalLocation = createDigitalLocationWith()
+
+  def createImageLocation: DigitalLocation =
+    createDigitalLocationWith(
+      locationType = LocationType("iiif-image")
+    )
+
+  def createManifestLocation: DigitalLocation =
+    createDigitalLocationWith(
+      locationType = LocationType("iiif-presentation")
+    )
 }

@@ -18,7 +18,7 @@ trait MiroWorkGenerators extends ImageGenerators {
     (1 to count).map { _ =>
       createUnidentifiableItemWith(
         locations = List(
-          createDigitalLocationWith(locationType = createImageLocationType)
+          createDigitalLocationWith(locationType = LocationType("iiif-image"))
         )
       )
     }.toList

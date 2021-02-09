@@ -10,7 +10,7 @@ import scala.util.Random
 
 trait ImageGenerators
     extends IdentifiersGenerators
-    with ItemsGenerators
+    with LocationGenerators
     with InstantGenerators
     with VectorGenerators
     with SierraWorkGenerators {
@@ -192,7 +192,7 @@ trait ImageGenerators
       locations = List(
         createDigitalLocationWith(
           license = Some(license),
-          locationType = createImageLocationType))
+          locationType = LocationType("iiif-image")))
     ).toIndexedImage
 
   //   Create a set of images with intersecting LSH lists to ensure

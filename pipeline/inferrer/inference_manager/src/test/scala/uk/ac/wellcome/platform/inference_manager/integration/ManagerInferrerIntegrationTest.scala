@@ -12,12 +12,16 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{Inside, Inspectors, OptionValues}
 import software.amazon.awssdk.services.sqs.model.Message
-
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.models.work.generators.ImageGenerators
-import uk.ac.wellcome.models.work.internal.{Image, ImageState, InferredData}
+import uk.ac.wellcome.models.work.internal.{
+  Image,
+  ImageState,
+  InferredData,
+  LocationType
+}
 import uk.ac.wellcome.platform.inference_manager.adapters.{
   FeatureVectorInferrerAdapter,
   InferrerAdapter,
@@ -46,7 +50,7 @@ class ManagerInferrerIntegrationTest
     val image = createImageDataWith(
       locations = List(
         createDigitalLocationWith(
-          locationType = createImageLocationType,
+          locationType = LocationType("iiif-image"),
           url = s"http://localhost:$localImageServerPort/test-image.jpg"
         ))).toInitialImage
 

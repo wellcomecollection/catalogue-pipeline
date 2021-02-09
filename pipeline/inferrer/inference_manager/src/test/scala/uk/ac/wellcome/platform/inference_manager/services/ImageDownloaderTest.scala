@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.inference_manager.services
 
 import java.nio.file.{Path, Paths}
-
 import akka.http.scaladsl.model.HttpResponse
 import akka.stream.Materializer
 import akka.stream.scaladsl.{Sink, Source}
@@ -12,6 +11,7 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.work.generators.ImageGenerators
+import uk.ac.wellcome.models.work.internal.LocationType
 import uk.ac.wellcome.platform.inference_manager.fixtures.{
   MemoryFileWriter,
   RequestPoolFixtures,
@@ -38,7 +38,7 @@ class ImageDownloaderTest
             val image = createImageDataWith(
               locations = List(
                 createDigitalLocationWith(
-                  locationType = createImageLocationType,
+                  locationType = LocationType("iiif-image"),
                   url = "http://images.com/this-image.jpg"
                 ))
             ).toInitialImage
@@ -100,11 +100,11 @@ class ImageDownloaderTest
             val image = createImageDataWith(
               locations = List(
                 createDigitalLocationWith(
-                  locationType = createPresentationLocationType,
+                  locationType = LocationType("iiif-presentation"),
                   url = "http://example.com/image/manifest"
                 ),
                 createDigitalLocationWith(
-                  locationType = createImageLocationType,
+                  locationType = LocationType("iiif-image"),
                   url = "http://images.com/this-image.jpg"
                 )
               )
