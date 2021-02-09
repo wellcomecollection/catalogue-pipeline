@@ -31,7 +31,7 @@ class MetsDataTest
     val url = s"https://wellcomelibrary.org/iiif/$bibNumber/manifest"
     val digitalLocation = DigitalLocation(
       url = url,
-      locationType = OldLocationType("iiif-presentation"),
+      locationType = LocationType.IIIFPresentationAPI,
       license = Some(License.CCBYNC))
 
     val createdDate = Instant.now()
@@ -94,7 +94,7 @@ class MetsDataTest
     val digitalLocation =
       DigitalLocation(
         url = url,
-        locationType = OldLocationType("iiif-presentation"),
+        locationType = LocationType.IIIFPresentationAPI,
         license = None
       )
 
@@ -244,7 +244,7 @@ class MetsDataTest
       DigitalLocation(
         url =
           s"https://dlcs.io/thumbs/wellcome/5/location.jp2/full/!200,200/0/default.jpg",
-        locationType = OldLocationType("thumbnail-image"),
+        locationType = LocationType.ThumbnailImage,
         license = Some(License.CCBYNC)
       )
     )
@@ -266,7 +266,7 @@ class MetsDataTest
       DigitalLocation(
         url =
           s"https://dlcs.io/thumbs/wellcome/5/title.jp2/full/!200,200/0/default.jpg",
-        locationType = OldLocationType("thumbnail-image"),
+        locationType = LocationType.ThumbnailImage,
         license = Some(License.CCBYNC)
       )
     )
@@ -301,7 +301,7 @@ class MetsDataTest
     result.right.get.data.thumbnail shouldBe Some(
       DigitalLocation(
         url = s"https://wellcomelibrary.org/pdfthumbs/$bibNumber/0/$assetId.jpg",
-        locationType = OldLocationType("thumbnail-image"),
+        locationType = LocationType.ThumbnailImage,
         license = Some(License.CCBYNC)
       )
     )
@@ -346,13 +346,13 @@ class MetsDataTest
     result.right.get.data.imageData.head.locations shouldBe List(
       DigitalLocation(
         url = s"https://dlcs.io/iiif-img/wellcome/5/location.jp2/info.json",
-        locationType = OldLocationType("iiif-image"),
+        locationType = LocationType.IIIFImageAPI,
         license = Some(License.CCBYNC)
       ),
       DigitalLocation(
         url =
           s"https://wellcomelibrary.org/iiif/${metsData.recordIdentifier}/manifest",
-        locationType = OldLocationType("iiif-presentation"),
+        locationType = LocationType.IIIFPresentationAPI,
         license = Some(License.CCBYNC)
       )
     )
