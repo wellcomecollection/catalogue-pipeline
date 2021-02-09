@@ -12,5 +12,6 @@ object LocationType {
 
   case object IIIFPresentationAPI extends DigitalLocationType
   case object IIIFImageAPI extends DigitalLocationType
+  case object ThumbnailImage extends DigitalLocationType
   case object OnlineResource extends DigitalLocationType
 }

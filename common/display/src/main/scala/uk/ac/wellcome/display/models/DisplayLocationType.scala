@@ -37,6 +37,9 @@ object DisplayLocationType {
       case LocationType.IIIFPresentationAPI =>
         DisplayLocationType("iiif-presentation", "IIIF Presentation API")
 
+      case LocationType.ThumbnailImage =>
+        DisplayLocationType("thumbnail-image", "Thumbnail image")
+
       case LocationType.OnlineResource =>
         DisplayLocationType("online-resource", "Online Resource")
     }
