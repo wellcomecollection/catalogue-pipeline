@@ -291,4 +291,11 @@ trait DisplaySerialisationTestBase {
        }
      """ stripMargin
 
+  def locationType(locType: NewLocationType): String =
+    s"""{
+         "id": "${DisplayLocationType(locType).id}",
+         "label": "${DisplayLocationType(locType).label}",
+         "type": "LocationType"
+       }
+     """ stripMargin
 }
