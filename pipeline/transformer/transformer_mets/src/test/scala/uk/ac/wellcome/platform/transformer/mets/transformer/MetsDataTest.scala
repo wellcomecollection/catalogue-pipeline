@@ -30,8 +30,8 @@ class MetsDataTest
 
     val url = s"https://wellcomelibrary.org/iiif/$bibNumber/manifest"
     val digitalLocation = DigitalLocation(
-      url,
-      LocationType("iiif-presentation"),
+      url = url,
+      locationType = LocationType("iiif-presentation"),
       license = Some(License.CCBYNC))
 
     val createdDate = Instant.now()
@@ -92,7 +92,11 @@ class MetsDataTest
 
     val url = s"https://wellcomelibrary.org/iiif/$bibNumber/manifest"
     val digitalLocation =
-      DigitalLocation(url, LocationType("iiif-presentation"), license = None)
+      DigitalLocation(
+        url = url,
+        locationType = LocationType("iiif-presentation"),
+        license = None
+      )
 
     val createdDate = Instant.now()
 
@@ -139,7 +143,7 @@ class MetsDataTest
           Item(
             IdState.Unidentifiable,
             _,
-            List(DigitalLocation(_, _, license, _, _)))) =>
+            List(DigitalLocation(_, _, license, _, _, _)))) =>
         license shouldBe Some(License.InCopyright)
     }
   }
@@ -155,7 +159,7 @@ class MetsDataTest
           Item(
             IdState.Unidentifiable,
             _,
-            List(DigitalLocation(_, _, license, _, _)))) =>
+            List(DigitalLocation(_, _, license, _, _, _)))) =>
         license shouldBe Some(License.InCopyright)
     }
   }
@@ -170,7 +174,7 @@ class MetsDataTest
           Item(
             IdState.Unidentifiable,
             _,
-            List(DigitalLocation(_, _, license, _, _)))) =>
+            List(DigitalLocation(_, _, license, _, _, _)))) =>
         license shouldBe Some(License.InCopyright)
     }
   }
@@ -186,7 +190,7 @@ class MetsDataTest
           Item(
             IdState.Unidentifiable,
             _,
-            List(DigitalLocation(_, _, license, _, _)))) =>
+            List(DigitalLocation(_, _, license, _, _, _)))) =>
         license shouldBe Some(License.InCopyright)
     }
   }
@@ -204,7 +208,7 @@ class MetsDataTest
           Item(
             IdState.Unidentifiable,
             _,
-            List(DigitalLocation(_, _, license, _, _)))) =>
+            List(DigitalLocation(_, _, license, _, _, _)))) =>
         license shouldBe Some(License.InCopyright)
     }
   }
@@ -221,7 +225,7 @@ class MetsDataTest
           Item(
             IdState.Unidentifiable,
             _,
-            List(DigitalLocation(_, _, license, _, _)))) =>
+            List(DigitalLocation(_, _, license, _, _, _)))) =>
         license shouldBe Some(License.InCopyright)
     }
   }
@@ -238,8 +242,9 @@ class MetsDataTest
     result shouldBe a[Right[_, _]]
     result.right.get.data.thumbnail shouldBe Some(
       DigitalLocation(
-        s"https://dlcs.io/thumbs/wellcome/5/location.jp2/full/!200,200/0/default.jpg",
-        LocationType("thumbnail-image"),
+        url =
+          s"https://dlcs.io/thumbs/wellcome/5/location.jp2/full/!200,200/0/default.jpg",
+        locationType = LocationType("thumbnail-image"),
         license = Some(License.CCBYNC)
       )
     )
@@ -259,8 +264,9 @@ class MetsDataTest
     result shouldBe a[Right[_, _]]
     result.right.get.data.thumbnail shouldBe Some(
       DigitalLocation(
-        s"https://dlcs.io/thumbs/wellcome/5/title.jp2/full/!200,200/0/default.jpg",
-        LocationType("thumbnail-image"),
+        url =
+          s"https://dlcs.io/thumbs/wellcome/5/title.jp2/full/!200,200/0/default.jpg",
+        locationType = LocationType("thumbnail-image"),
         license = Some(License.CCBYNC)
       )
     )
@@ -294,8 +300,8 @@ class MetsDataTest
     result shouldBe a[Right[_, _]]
     result.right.get.data.thumbnail shouldBe Some(
       DigitalLocation(
-        s"https://wellcomelibrary.org/pdfthumbs/$bibNumber/0/$assetId.jpg",
-        LocationType("thumbnail-image"),
+        url = s"https://wellcomelibrary.org/pdfthumbs/$bibNumber/0/$assetId.jpg",
+        locationType = LocationType("thumbnail-image"),
         license = Some(License.CCBYNC)
       )
     )
@@ -359,7 +365,7 @@ class MetsDataTest
     ).toWork(1, Instant.now())
     result shouldBe a[Right[_, _]]
     inside(result.right.get.data.items.head.locations.head) {
-      case DigitalLocation(_, _, _, _, accessConditions) =>
+      case DigitalLocation(_, _, _, _, _, accessConditions) =>
         accessConditions shouldBe List(
           AccessCondition(
             status = Some(AccessStatus.OpenWithAdvisory)
@@ -412,7 +418,7 @@ class MetsDataTest
     ).toWork(1, Instant.now())
     result shouldBe a[Right[_, _]]
     inside(result.right.get.data.items.head.locations.head) {
-      case DigitalLocation(_, _, _, _, accessConditions) =>
+      case DigitalLocation(_, _, _, _, _, accessConditions) =>
         accessConditions shouldBe List(
           AccessCondition(
             status = Some(AccessStatus.Restricted),
@@ -429,7 +435,7 @@ class MetsDataTest
     ).toWork(1, Instant.now())
     result shouldBe a[Right[_, _]]
     inside(result.right.get.data.items.head.locations.head) {
-      case DigitalLocation(_, _, _, _, accessConditions) =>
+      case DigitalLocation(_, _, _, _, _, accessConditions) =>
         accessConditions shouldBe List()
     }
   }
@@ -441,7 +447,7 @@ class MetsDataTest
     ).toWork(1, Instant.now())
     result shouldBe a[Right[_, _]]
     inside(result.right.get.data.items.head.locations.head) {
-      case DigitalLocation(_, _, _, _, accessConditions) =>
+      case DigitalLocation(_, _, _, _, _, accessConditions) =>
         accessConditions shouldBe
           List(
             AccessCondition(

@@ -45,6 +45,11 @@ case class DisplayDigitalLocation(
     description = "Who to credit the image to"
   ) credit: Option[String] = None,
   @Schema(
+    `type` = "String",
+    description =
+      "Text that can be used when linking to the item - for example, 'View this journal' rather than the raw URL"
+  ) linkText: Option[String] = None,
+  @Schema(
     description =
       "The specific license under which the work in question is released to the public - for example, one of the forms of Creative Commons - if it is a precise license to which a link can be made."
   ) license: Option[DisplayLicense] = None,
@@ -60,6 +65,7 @@ object DisplayDigitalLocation {
     DisplayDigitalLocation(
       locationType = DisplayLocationType(location.locationType),
       url = location.url,
+      linkText = location.linkText,
       credit = location.credit,
       license = location.license.map(DisplayLicense(_)),
       accessConditions =
@@ -80,6 +86,13 @@ case class DisplayPhysicalLocation(
     description = "The title or other short name of the location."
   ) label: String,
   @Schema(
+    description =
+      "The specific license under which the work in question is released to the public - for example, one of the forms of Creative Commons - if it is a precise license to which a link can be made."
+  ) license: Option[DisplayLicense] = None,
+  @Schema(
+    description = "The specific shelf where this item can be found"
+  ) shelfmark: Option[String] = None,
+  @Schema(
     description = "Information about any access restrictions placed on the work"
   ) accessConditions: List[DisplayAccessCondition] = Nil,
   @JsonKey("type") @Schema(name = "type") ontologyType: String =
@@ -91,6 +104,8 @@ object DisplayPhysicalLocation {
     DisplayPhysicalLocation(
       locationType = DisplayLocationType(location.locationType),
       label = location.label,
+      license = location.license.map(DisplayLicense(_)),
+      shelfmark = location.shelfmark,
       accessConditions =
         location.accessConditions.map(DisplayAccessCondition(_))
     )

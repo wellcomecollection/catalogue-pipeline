@@ -18,6 +18,13 @@ trait LocationGenerators extends RandomGenerators {
     PhysicalLocation(
       locationType = locationType,
       label = label,
+      license = chooseFrom(
+        None,
+        Some(License.CCBY),
+        Some(License.OGL),
+        Some(License.PDM)
+      ),
+      shelfmark = chooseFrom(None, Some(s"Shelfmark: ${randomAlphanumeric()}")),
       accessConditions = accessConditions
     )
 
@@ -36,6 +43,7 @@ trait LocationGenerators extends RandomGenerators {
     url = url,
     license = license,
     credit = chooseFrom(None, Some(s"Credit line: ${randomAlphanumeric()}")),
+    linkText = chooseFrom(None, Some(s"Link text: ${randomAlphanumeric()}")),
     accessConditions = accessConditions
   )
 

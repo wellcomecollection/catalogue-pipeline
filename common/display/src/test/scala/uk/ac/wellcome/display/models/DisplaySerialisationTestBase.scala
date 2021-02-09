@@ -60,6 +60,7 @@ trait DisplaySerialisationTestBase {
       "url": "${digitalLocation.url}"
       ${optionalObject("license", license, digitalLocation.license)},
       ${optionalString("credit", digitalLocation.credit)}
+      ${optionalString("linkText", digitalLocation.linkText)}
       "accessConditions": ${accessConditions(digitalLocation.accessConditions)}
     }"""
 
@@ -69,6 +70,8 @@ trait DisplaySerialisationTestBase {
         "type": "PhysicalLocation",
         "locationType": ${locationType(loc.locationType)},
         "label": "${loc.label}",
+        ${optionalObject("license", license, loc.license)}
+        ${optionalString("shelfmark", loc.shelfmark)}
         "accessConditions": ${accessConditions(loc.accessConditions)}
        }
      """
