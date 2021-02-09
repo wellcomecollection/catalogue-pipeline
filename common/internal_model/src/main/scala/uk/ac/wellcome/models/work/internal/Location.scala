@@ -22,5 +22,6 @@ case class PhysicalLocation(
   locationType: LocationType,
   label: String,
   license: Option[License] = None,
+  shelfmark: Option[String] = None,
   accessConditions: List[AccessCondition] = Nil
 ) extends Location

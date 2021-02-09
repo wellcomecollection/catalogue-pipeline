@@ -71,6 +71,7 @@ trait DisplaySerialisationTestBase {
         "locationType": ${locationType(loc.locationType)},
         "label": "${loc.label}",
         ${optionalObject("license", license, loc.license)}
+        ${optionalString("shelfmark", loc.shelfmark)}
         "accessConditions": ${accessConditions(loc.accessConditions)}
        }
      """

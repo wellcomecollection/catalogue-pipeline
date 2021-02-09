@@ -74,6 +74,17 @@ class DisplayLocationTest extends AnyFunSpec with Matchers {
       val displayLocation = DisplayPhysicalLocation(physicalLocation)
       displayLocation.license shouldBe Some(DisplayLicense(License.CCBY))
     }
+
+    it("copies the shelfmark from a PhysicalLocation") {
+      val physicalLocation = PhysicalLocation(
+        locationType = LocationType("sgmed"),
+        label = "A shelved summary of signed stories",
+        shelfmark = Some("PP/Shelved:Box 1")
+      )
+
+      val displayLocation = DisplayPhysicalLocation(physicalLocation)
+      displayLocation.shelfmark shouldBe Some("PP/Shelved:Box 1")
+    }
   }
 
   describe("DisplayDigitalLocation") {

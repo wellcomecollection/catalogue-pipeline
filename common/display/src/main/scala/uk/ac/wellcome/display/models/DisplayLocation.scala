@@ -89,6 +89,10 @@ case class DisplayPhysicalLocation(
       "The specific license under which the work in question is released to the public - for example, one of the forms of Creative Commons - if it is a precise license to which a link can be made."
   ) license: Option[DisplayLicense] = None,
   @Schema(
+    description =
+      "The specific shelf where this item can be found"
+  ) shelfmark: Option[String] = None,
+  @Schema(
     description = "Information about any access restrictions placed on the work"
   ) accessConditions: List[DisplayAccessCondition] = Nil,
   @JsonKey("type") @Schema(name = "type") ontologyType: String =
@@ -101,6 +105,7 @@ object DisplayPhysicalLocation {
       locationType = DisplayLocationType(location.locationType),
       label = location.label,
       license = location.license.map(DisplayLicense(_)),
+      shelfmark = location.shelfmark,
       accessConditions =
         location.accessConditions.map(DisplayAccessCondition(_))
     )
