@@ -47,7 +47,7 @@ class DisplayWorkSerialisationTest
 
   it("renders an item if the items include is present") {
     val work = indexedWork()
-      .items(createIdentifiedItems(count = 1) :+ createUnidentifiableItemWith())
+      .items(createIdentifiedItems(count = 1) :+ createUnidentifiableItem)
 
     val expectedJson = s"""
       |{

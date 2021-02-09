@@ -21,7 +21,7 @@ class DisplayItemTest extends AnyFunSpec with Matchers with ItemsGenerators {
     displayItem.ontologyType shouldBe "Item"
   }
   it("parses an unidentified Item as a displayItem") {
-    val item = createUnidentifiableItemWith()
+    val item = createUnidentifiableItem
 
     val displayItem = DisplayItem(
       item = item,
