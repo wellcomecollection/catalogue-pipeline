@@ -37,8 +37,8 @@ trait ItemsGenerators extends IdentifiersGenerators with LocationGenerators {
       locations = locations
     )
 
-  def createUnidentifiableItemWith[I >: IdState.Unidentifiable.type](
-    locations: List[Location] = List(createDigitalLocation)): Item[I] =
+  def createUnidentifiableItemWith(
+    locations: List[Location] = List(createDigitalLocation)): Item[IdState.Unidentifiable.type] =
     Item(id = IdState.Unidentifiable, locations = locations)
 
   def createIdentifiablePhysicalItem =
