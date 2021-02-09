@@ -27,7 +27,6 @@ class AccessStatusTest extends AnyFunSpec with Matchers {
       "Restricted access (Data Protection Act)",
       "Cannot Be Produced - View Digitised Version",
       "Certain restrictions apply.",
-      "By Appointment.",
       "Restricted: currently undergoing conservation.",
       "The file is restricted for data protection reasons",
       "This file is restricted for sensitivity reasons"
@@ -40,7 +39,6 @@ class AccessStatusTest extends AnyFunSpec with Matchers {
   it("creates the Unavailable AccessStatus") {
     val unavailableValues = List(
       "Missing.",
-      "Temporarily Unavailable.",
       "Deaccessioned on 01/01/2001"
     )
     unavailableValues.foreach { str =>
@@ -87,6 +85,25 @@ class AccessStatusTest extends AnyFunSpec with Matchers {
     )
     licensedResourcesValues.foreach { str =>
       AccessStatus.apply(str) shouldBe Right(AccessStatus.LicensedResources)
+    }
+  }
+
+  it("creates the ByAppointment AccessStatus") {
+    val byAppointmentValues = List(
+      "By Appointment.",
+    )
+    byAppointmentValues.foreach { str =>
+      AccessStatus.apply(str) shouldBe Right(AccessStatus.ByAppointment)
+    }
+  }
+
+  it("creates the TemporarilyUnavailable AccessStatus") {
+    val temporarilyUnavailableValues = List(
+      "Temporarily Unavailable.",
+    )
+    temporarilyUnavailableValues.foreach { str =>
+      AccessStatus.apply(str) shouldBe Right(
+        AccessStatus.TemporarilyUnavailable)
     }
   }
 
