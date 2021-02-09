@@ -182,8 +182,3 @@ if __name__ == "__main__":
             prod_index_name=prod_index_name,
             stage_index_name=stage_index_name,
         )
-
-    #
-    # from pprint import pprint
-    #
-    # pprint(list_indexes(es_client))
