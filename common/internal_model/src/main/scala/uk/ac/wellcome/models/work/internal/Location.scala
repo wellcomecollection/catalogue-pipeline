@@ -3,6 +3,7 @@ package uk.ac.wellcome.models.work.internal
 sealed trait Location {
   val locationType: LocationType
   val accessConditions: List[AccessCondition]
+  val license: Option[License]
 
   def hasRestrictions: Boolean =
     accessConditions.exists(_.hasRestrictions)
@@ -19,5 +20,6 @@ case class DigitalLocation(
 case class PhysicalLocation(
   locationType: LocationType,
   label: String,
+  license: Option[License] = None,
   accessConditions: List[AccessCondition] = Nil
 ) extends Location

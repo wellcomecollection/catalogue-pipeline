@@ -69,6 +69,7 @@ trait DisplaySerialisationTestBase {
         "type": "PhysicalLocation",
         "locationType": ${locationType(loc.locationType)},
         "label": "${loc.label}",
+        ${optionalObject("license", license, loc.license)}
         "accessConditions": ${accessConditions(loc.accessConditions)}
        }
      """
