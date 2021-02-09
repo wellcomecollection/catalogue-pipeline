@@ -1,7 +1,7 @@
 package uk.ac.wellcome.models.work.internal
 
 sealed trait Location {
-  val locationType: LocationType
+  val locationType: NewLocationType
   val accessConditions: List[AccessCondition]
   val license: Option[License]
 
@@ -11,7 +11,7 @@ sealed trait Location {
 
 case class DigitalLocation(
   url: String,
-  locationType: LocationType,
+  locationType: DigitalLocationType,
   license: Option[License] = None,
   credit: Option[String] = None,
   linkText: Option[String] = None,
@@ -19,7 +19,7 @@ case class DigitalLocation(
 ) extends Location
 
 case class PhysicalLocation(
-  locationType: LocationType,
+  locationType: PhysicalLocationType,
   label: String,
   license: Option[License] = None,
   shelfmark: Option[String] = None,
