@@ -71,7 +71,7 @@ case class MetsData(
                               accessStatus: Option[AccessStatus]) =
     DigitalLocation(
       url = s"https://wellcomelibrary.org/iiif/$recordIdentifier/manifest",
-      locationType = LocationType("iiif-presentation"),
+      locationType = LocationType.IIIFPresentationAPI,
       license = license,
       accessConditions = accessConditions(accessStatus)
     )
@@ -148,7 +148,7 @@ case class MetsData(
     } yield
       DigitalLocation(
         url = url,
-        locationType = LocationType("thumbnail-image"),
+        locationType = LocationType.ThumbnailImage,
         license = license
       )
 
@@ -172,7 +172,7 @@ case class MetsData(
               locations = List(
                 DigitalLocation(
                   url = url,
-                  locationType = LocationType("iiif-image"),
+                  locationType = LocationType.IIIFImageAPI,
                   license = license,
                   accessConditions = accessConditions(accessStatus)
                 ),

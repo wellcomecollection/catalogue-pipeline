@@ -38,7 +38,7 @@ class ImageDownloaderTest
             val image = createImageDataWith(
               locations = List(
                 createDigitalLocationWith(
-                  locationType = LocationType("iiif-image"),
+                  locationType = LocationType.IIIFImageAPI,
                   url = "http://images.com/this-image.jpg"
                 ))
             ).toInitialImage
@@ -100,11 +100,11 @@ class ImageDownloaderTest
             val image = createImageDataWith(
               locations = List(
                 createDigitalLocationWith(
-                  locationType = LocationType("iiif-presentation"),
+                  locationType = LocationType.IIIFPresentationAPI,
                   url = "http://example.com/image/manifest"
                 ),
                 createDigitalLocationWith(
-                  locationType = LocationType("iiif-image"),
+                  locationType = LocationType.IIIFImageAPI,
                   url = "http://images.com/this-image.jpg"
                 )
               )

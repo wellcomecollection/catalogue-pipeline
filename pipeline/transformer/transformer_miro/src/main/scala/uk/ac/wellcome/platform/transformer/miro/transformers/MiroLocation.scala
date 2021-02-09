@@ -22,7 +22,7 @@ trait MiroLocation extends MiroLicenses with MiroContributorCodes {
 
   def getLocation(miroRecord: MiroRecord): DigitalLocation =
     DigitalLocation(
-      locationType = LocationType("iiif-image"),
+      locationType = LocationType.IIIFImageAPI,
       url = buildImageApiURL(
         miroId = miroRecord.imageNumber,
         templateName = "info"

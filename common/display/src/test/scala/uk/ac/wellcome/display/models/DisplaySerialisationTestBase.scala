@@ -285,10 +285,9 @@ trait DisplaySerialisationTestBase {
 
   def locationType(locType: LocationType): String =
     s"""{
-         "id": "${locType.id}",
-         "label": "${locType.label}",
+         "id": "${DisplayLocationType(locType).id}",
+         "label": "${DisplayLocationType(locType).label}",
          "type": "LocationType"
        }
      """ stripMargin
-
 }

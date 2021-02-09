@@ -8,7 +8,7 @@ object DerivedImageData {
   def apply(image: Image[_]): DerivedImageData =
     DerivedImageData(
       thumbnail = image.locations
-        .find(_.locationType.id == "iiif-image")
+        .find(_.locationType == LocationType.IIIFImageAPI)
         .getOrElse(
           // This should never happen
           throw new RuntimeException(

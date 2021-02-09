@@ -24,9 +24,10 @@ class MiroItemsTest
         Item(
           id = IdState.Unidentifiable,
           locations = List(DigitalLocation(
-            "https://iiif.wellcomecollection.org/image/B0011308.jpg/info.json",
-            LocationType("iiif-image"),
-            Some(License.CC0),
+            url =
+              "https://iiif.wellcomecollection.org/image/B0011308.jpg/info.json",
+            locationType = LocationType.IIIFImageAPI,
+            license = Some(License.CC0),
             credit = Some("Ezra Feilden")
           ))
         ))

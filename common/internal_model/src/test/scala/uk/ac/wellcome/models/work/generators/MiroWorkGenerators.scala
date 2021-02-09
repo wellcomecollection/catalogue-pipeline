@@ -9,7 +9,7 @@ trait MiroWorkGenerators extends ImageGenerators {
     DigitalLocation(
       url =
         s"https://iiif.wellcomecollection.org/${randomAlphanumeric(length = 8)}.jpg",
-      locationType = LocationType("thumbnail-image"),
+      locationType = LocationType.ThumbnailImage,
       license = Some(License.CCBY)
     )
 
@@ -17,9 +17,7 @@ trait MiroWorkGenerators extends ImageGenerators {
     count: Int = Random.nextInt(5)): List[Item[IdState.Unidentifiable.type]] =
     (1 to count).map { _ =>
       createUnidentifiableItemWith(
-        locations = List(
-          createDigitalLocationWith(locationType = LocationType("iiif-image"))
-        )
+        locations = List(createImageLocation)
       )
     }.toList
 

@@ -6,7 +6,7 @@ import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 trait MiroThumbnail extends MiroImageData with MiroLicenses {
   def getThumbnail(miroRecord: MiroRecord): DigitalLocation =
     DigitalLocation(
-      locationType = LocationType("thumbnail-image"),
+      locationType = LocationType.ThumbnailImage,
       url = buildImageApiURL(
         miroId = miroRecord.imageNumber,
         templateName = "thumbnail"),

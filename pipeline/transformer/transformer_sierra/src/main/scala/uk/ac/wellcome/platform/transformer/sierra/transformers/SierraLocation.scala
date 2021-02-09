@@ -17,19 +17,16 @@ trait SierraLocation extends SierraQueryOps with Logging {
                           itemData: SierraItemData,
                           bibData: SierraBibData): Option[PhysicalLocation] =
     itemData.location.flatMap {
-      // We've seen records where the "location" field is populated in
-      // the JSON, but the code and name are both empty strings or "none".
-      // We can't do anything useful with this, so don't return a location.
-      case SierraSourceLocation("", "")         => None
-      case SierraSourceLocation("none", "none") => None
-      case SierraSourceLocation(code, name) =>
-        Some(
-          PhysicalLocation(
-            locationType = LocationType(code),
-            accessConditions = getAccessConditions(bibNumber, bibData),
-            label = name
+      case SierraSourceLocation(_, label) =>
+        SierraPhysicalLocationType.fromName(label).flatMap { locationType =>
+          Some(
+            PhysicalLocation(
+              locationType = locationType,
+              accessConditions = getAccessConditions(bibNumber, bibData),
+              label = label
+            )
           )
-        )
+        }
     }
 
   private def getAccessConditions(

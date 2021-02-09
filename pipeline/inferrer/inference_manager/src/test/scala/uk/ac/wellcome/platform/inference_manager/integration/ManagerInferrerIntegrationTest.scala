@@ -50,7 +50,7 @@ class ManagerInferrerIntegrationTest
     val image = createImageDataWith(
       locations = List(
         createDigitalLocationWith(
-          locationType = LocationType("iiif-image"),
+          locationType = LocationType.IIIFImageAPI,
           url = s"http://localhost:$localImageServerPort/test-image.jpg"
         ))).toInitialImage
 

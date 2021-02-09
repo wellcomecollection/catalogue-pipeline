@@ -2,6 +2,7 @@ package uk.ac.wellcome.display.models
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import uk.ac.wellcome.models.work.generators.LocationGenerators
 import uk.ac.wellcome.models.work.internal.{
   DigitalLocation,
   License,
@@ -9,12 +10,17 @@ import uk.ac.wellcome.models.work.internal.{
   PhysicalLocation
 }
 
-class DisplayLocationTest extends AnyFunSpec with Matchers {
+class DisplayLocationTest
+    extends AnyFunSpec
+    with Matchers
+    with LocationGenerators {
+
+  // TODO: These tests could be rewritten to use generators
 
   describe("DisplayDigitalLocation") {
     it("reads a DigitalLocation as a DisplayDigitalLocation") {
       val thumbnailUrl = "https://iiif.example.org/V0000001/default.jpg"
-      val locationType = LocationType("thumbnail-image")
+      val locationType = LocationType.ThumbnailImage
 
       val internalLocation = DigitalLocation(
         locationType = locationType,
@@ -36,7 +42,7 @@ class DisplayLocationTest extends AnyFunSpec with Matchers {
 
     it("reads the credit field from a Location") {
       val location = DigitalLocation(
-        locationType = LocationType("thumbnail-image"),
+        locationType = LocationType.ThumbnailImage,
         url = "",
         credit = Some("Science Museum, Wellcome"),
         license = Some(License.CCBY)
@@ -52,7 +58,7 @@ class DisplayLocationTest extends AnyFunSpec with Matchers {
 
   describe("DisplayPhysicalLocation") {
     it("creates a DisplayPhysicalLocation from a PhysicalLocation") {
-      val locationType = LocationType("sgmed")
+      val locationType = LocationType.ClosedStores
       val locationLabel = "The collection of cold cauldrons"
       val physicalLocation =
         PhysicalLocation(locationType = locationType, label = locationLabel)
@@ -66,7 +72,7 @@ class DisplayLocationTest extends AnyFunSpec with Matchers {
 
     it("copies the License from a PhysicalLocation") {
       val physicalLocation = PhysicalLocation(
-        locationType = LocationType("sgmed"),
+        locationType = LocationType.ClosedStores,
         label = "A licensed letter of liberal leanings",
         license = Some(License.CCBY)
       )
@@ -77,7 +83,7 @@ class DisplayLocationTest extends AnyFunSpec with Matchers {
 
     it("copies the shelfmark from a PhysicalLocation") {
       val physicalLocation = PhysicalLocation(
-        locationType = LocationType("sgmed"),
+        locationType = LocationType.ClosedStores,
         label = "A shelved summary of signed stories",
         shelfmark = Some("PP/Shelved:Box 1")
       )
@@ -89,7 +95,7 @@ class DisplayLocationTest extends AnyFunSpec with Matchers {
 
   describe("DisplayDigitalLocation") {
     it("creates a DisplayDigitalLocation from a DigitalLocation") {
-      val locationType = LocationType("iiif-image")
+      val locationType = LocationType.IIIFPresentationAPI
       val url = "https://wellcomelibrary.org/iiif/b2201508/manifest"
 
       val digitalLocation =
@@ -102,7 +108,7 @@ class DisplayLocationTest extends AnyFunSpec with Matchers {
 
     it("copies the license from a DigitalLocation") {
       val digitalLocation = DigitalLocation(
-        locationType = LocationType("iiif-image"),
+        locationType = LocationType.OnlineResource,
         url = "https://example.org/public-works/page.html",
         license = Some(License.PDM)
       )
@@ -113,7 +119,7 @@ class DisplayLocationTest extends AnyFunSpec with Matchers {
 
     it("copies the link_text from a DigitalLocation") {
       val digitalLocation = DigitalLocation(
-        locationType = LocationType("iiif-image"),
+        locationType = LocationType.OnlineResource,
         url = "https://example.org/journals/browse.aspx",
         linkText = Some("View this journal")
       )

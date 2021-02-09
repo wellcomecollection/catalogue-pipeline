@@ -43,7 +43,7 @@ class MiroImageDataTest
           DigitalLocation(
             url =
               "https://iiif.wellcomecollection.org/image/B0011308.jpg/info.json",
-            locationType = LocationType("iiif-image"),
+            locationType = LocationType.IIIFImageAPI,
             license = Some(License.CC0),
             credit = Some("Ezra Feilden")
           ))

@@ -145,6 +145,11 @@ object Implicits {
     deriveConfiguredDecoder
   implicit val _dec71: Decoder[Work.Redirected[WorkState.Indexed]] =
     deriveConfiguredDecoder
+  implicit val _dec72: Decoder[LocationType] = LocationType.locationTypeDecoder
+  implicit val _dec73: Decoder[DigitalLocationType] =
+    LocationType.digitalLocationTypeDecoder
+  implicit val _dec74: Decoder[PhysicalLocationType] =
+    LocationType.physicalLocationTypeDecoder
 
   implicit val _enc00: Encoder[AccessCondition] = deriveConfiguredEncoder
   implicit val _enc01: Encoder[Note] = deriveConfiguredEncoder
@@ -273,4 +278,9 @@ object Implicits {
     deriveConfiguredEncoder
   implicit val _enc71: Encoder[Work.Redirected[WorkState.Indexed]] =
     deriveConfiguredEncoder
+  implicit val _enc72: Encoder[LocationType] = LocationType.locationTypeEncoder
+  implicit val _enc73: Encoder[DigitalLocationType] =
+    LocationType.digitalLocationTypeEncoder
+  implicit val _enc74: Encoder[PhysicalLocationType] =
+    LocationType.physicalLocationTypeEncoder
 }

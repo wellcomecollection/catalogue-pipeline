@@ -27,7 +27,7 @@ object CalmItems extends CalmOps {
   private def physicalLocation(record: CalmRecord,
                                status: Option[AccessStatus]): PhysicalLocation =
     PhysicalLocation(
-      locationType = LocationType("scmac"),
+      locationType = LocationType.ClosedStores,
       label = "Closed stores Arch. & MSS",
       accessConditions = accessCondition(record, status).filterEmpty.toList
     )

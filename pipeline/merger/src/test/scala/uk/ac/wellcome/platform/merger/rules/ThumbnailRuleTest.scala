@@ -27,7 +27,7 @@ class ThumbnailRuleTest
   val calmWorkWithAdvisory = calmIdentifiedWork().items(
     List(
       createUnidentifiableItemWith(locations = List(createPhysicalLocationWith(
-        locationType = LocationType("scmac"),
+        locationType = LocationType.ClosedStores,
         label = "Closed stores Arch. & MSS",
         accessConditions =
           List(AccessCondition(status = Some(AccessStatus.OpenWithAdvisory)))
@@ -37,7 +37,7 @@ class ThumbnailRuleTest
     .thumbnail(
       DigitalLocation(
         url = "mets.com/thumbnail.jpg",
-        locationType = LocationType("thumbnail-image"),
+        locationType = LocationType.ThumbnailImage,
         license = Some(License.CCBY)
       )
     )

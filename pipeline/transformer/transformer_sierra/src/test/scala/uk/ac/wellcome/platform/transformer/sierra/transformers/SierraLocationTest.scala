@@ -26,8 +26,8 @@ class SierraLocationTest
     val bibId = createSierraBibNumber
     val bibData = createSierraBibData
 
-    val locationType = LocationType("sgmed")
-    val label = "A museum of mermaids"
+    val locationType = LocationType.ClosedStores
+    val label = "Closed stores Med."
     val itemData = createSierraItemDataWith(
       location = Some(SierraSourceLocation("sgmed", label))
     )

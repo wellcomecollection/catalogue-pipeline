@@ -17,7 +17,7 @@ class DisplayLocationsSerialisationTest
 
   it("serialises a physical location") {
     val physicalLocation = PhysicalLocation(
-      locationType = LocationType("sgmed"),
+      locationType = LocationType.ClosedStores,
       label = "a stack of slick slimes"
     )
 
@@ -42,7 +42,7 @@ class DisplayLocationsSerialisationTest
   it("serialises a digital location") {
     val digitalLocation = DigitalLocation(
       url = "https://wellcomelibrary.org/iiif/b22015085/manifest",
-      locationType = LocationType("iiif-image"),
+      locationType = LocationType.IIIFPresentationAPI
     )
 
     val work = indexedWork().items(
@@ -66,7 +66,7 @@ class DisplayLocationsSerialisationTest
   it("serialises a digital location with a license") {
     val digitalLocation = DigitalLocation(
       url = "https://wellcomelibrary.org/iiif/b22015085/manifest",
-      locationType = LocationType("iiif-image"),
+      locationType = LocationType.IIIFPresentationAPI,
       license = Some(License.CC0)
     )
 
@@ -91,7 +91,7 @@ class DisplayLocationsSerialisationTest
   it("serialises a digital location with an access condition") {
     val digitalLocation = DigitalLocation(
       url = "https://wellcomelibrary.org/iiif/b22015085/manifest",
-      locationType = LocationType("iiif-image"),
+      locationType = LocationType.IIIFPresentationAPI,
       accessConditions = List(
         AccessCondition(
           status = Some(AccessStatus.Restricted),

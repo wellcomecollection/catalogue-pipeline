@@ -156,10 +156,13 @@ class WorksFiltersTest
       locationType: LocationType): Item[IdState.Minted] =
       createIdentifiedItemWith(
         locations = List(
-          chooseFrom(
-            createPhysicalLocationWith(locationType = locationType),
-            createDigitalLocationWith(locationType = locationType)
-          )
+          locationType match {
+            case physicalLocationType: PhysicalLocationType =>
+              createPhysicalLocationWith(locationType = physicalLocationType)
+
+            case digitalLocationType: DigitalLocationType =>
+              createDigitalLocationWith(locationType = digitalLocationType)
+          }
         )
       )
 
@@ -169,20 +172,20 @@ class WorksFiltersTest
       .title("Crumbling carrots")
       .items(
         List(
-          createItemWithLocationType(LocationType("iiif-image"))
+          createItemWithLocationType(LocationType.IIIFImageAPI)
         ))
     val work2 = indexedWork()
       .title("Crumbling carrots")
       .items(
         List(
-          createItemWithLocationType(LocationType("digit")),
-          createItemWithLocationType(LocationType("dimgs"))
+          createItemWithLocationType(LocationType.IIIFImageAPI),
+          createItemWithLocationType(LocationType.IIIFPresentationAPI)
         ))
     val work3 = indexedWork()
       .title("Crumbling carrots")
       .items(
         List(
-          createItemWithLocationType(LocationType("dpoaa"))
+          createItemWithLocationType(LocationType.ClosedStores)
         ))
 
     val works = worksWithNoItem ++ Seq(work1, work2, work3)
@@ -196,7 +199,7 @@ class WorksFiltersTest
 
           assertJsonResponse(
             routes,
-            s"/$apiPrefix/works?items.locations.locationType=iiif-image,digit") {
+            s"/$apiPrefix/works?items.locations.locationType=iiif-image,iiif-presentation") {
             Status.OK -> worksListResponse(
               apiPrefix,
               works = matchingWorks.sortBy { _.state.canonicalId }
@@ -214,7 +217,7 @@ class WorksFiltersTest
 
           assertJsonResponse(
             routes,
-            s"/$apiPrefix/works?query=carrots&items.locations.locationType=digit") {
+            s"/$apiPrefix/works?query=carrots&items.locations.locationType=iiif-presentation") {
             Status.OK -> worksListResponse(
               apiPrefix,
               works = matchingWorks.sortBy { _.state.canonicalId }
