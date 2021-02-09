@@ -14,6 +14,7 @@ case class DigitalLocation(
   locationType: LocationType,
   license: Option[License] = None,
   credit: Option[String] = None,
+  linkText: Option[String] = None,
   accessConditions: List[AccessCondition] = Nil
 ) extends Location
 

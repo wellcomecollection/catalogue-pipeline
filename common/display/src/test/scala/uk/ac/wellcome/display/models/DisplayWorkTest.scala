@@ -83,6 +83,7 @@ class DisplayWorkTest
           url = location.url,
           credit = location.credit,
           license = location.license.map(DisplayLicense(_)),
+          linkText = location.linkText,
           accessConditions =
             location.accessConditions.map(DisplayAccessCondition(_))
         )
