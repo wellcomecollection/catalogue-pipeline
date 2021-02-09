@@ -110,8 +110,9 @@ class SierraTransformerTest
   it("extracts information from items") {
     val bibId = createSierraBibNumber
     val itemId = createSierraItemNumber
-    val locationType = OldLocationType("sgmed")
-    val locationLabel = "A museum of mermaids"
+    val locationType = LocationType.ClosedStores
+    val locationLabel = "Closed stores Med."
+
     def itemData(itemId: SierraItemNumber,
                  modifiedDate: Instant,
                  bibIds: List[SierraBibNumber]) =
@@ -119,7 +120,7 @@ class SierraTransformerTest
          |{
          |  "id": "$itemId",
          |  "location": {
-         |    "code": "${locationType.id}",
+         |    "code": "sgmed",
          |    "name": "$locationLabel"
          |  }
          |}
@@ -167,7 +168,7 @@ class SierraTransformerTest
   it("extracts title from items") {
     val bibId = createSierraBibNumber
     val itemId = createSierraItemNumber
-    val locationType = OldLocationType("sgmed")
+    val locationType = LocationType.ClosedStores
     val locationLabel = "A museum of mermaids"
     def itemData(itemId: SierraItemNumber,
                  modifiedDate: Instant,
