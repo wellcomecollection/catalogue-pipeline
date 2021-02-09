@@ -28,24 +28,12 @@ trait ItemsGenerators extends IdentifiersGenerators with LocationGenerators {
       createIdentifiedItem
     }.toList
 
-  def createIdentifiableItemWith[I >: IdState.Identifiable](
-    sourceIdentifier: SourceIdentifier = createSourceIdentifier,
-    locations: List[Location] = List(createDigitalLocation)
-  ): Item[I] =
-    Item(
-      id = IdState.Identifiable(sourceIdentifier),
-      locations = locations
-    )
-
   def createUnidentifiableItemWith(
     locations: List[Location] = List(createDigitalLocation)): Item[IdState.Unidentifiable.type] =
     Item(id = IdState.Unidentifiable, locations = locations)
 
   def createUnidentifiableItem: Item[IdState.Unidentifiable.type] =
     createUnidentifiableItemWith()
-
-  def createIdentifiablePhysicalItem =
-    createIdentifiableItemWith(locations = List(createPhysicalLocation))
 
   def createIdentifiedPhysicalItem =
     createIdentifiedItemWith(locations = List(createPhysicalLocation))
