@@ -8,7 +8,7 @@ import uk.ac.wellcome.models.work.internal.{
   AccessStatus,
   DigitalLocation,
   License,
-  OldLocationType
+  LocationType
 }
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 
@@ -27,7 +27,7 @@ class ThumbnailRuleTest
   val calmWorkWithAdvisory = calmIdentifiedWork().items(
     List(
       createUnidentifiableItemWith(locations = List(createPhysicalLocationWith(
-        locationType = OldLocationType("scmac"),
+        locationType = LocationType.ClosedStores,
         label = "Closed stores Arch. & MSS",
         accessConditions =
           List(AccessCondition(status = Some(AccessStatus.OpenWithAdvisory)))
@@ -37,7 +37,7 @@ class ThumbnailRuleTest
     .thumbnail(
       DigitalLocation(
         url = "mets.com/thumbnail.jpg",
-        locationType = OldLocationType("thumbnail-image"),
+        locationType = LocationType.ThumbnailImage,
         license = Some(License.CCBY)
       )
     )
