@@ -53,7 +53,7 @@ class SierraPhysicalDescriptionTest
   }
 
   it(
-    f"extracts a physical description frorm MARC 300 subfields $$a, $$b and $$c") {
+    f"extracts a physical description from MARC 300 subfields $$a, $$b and $$c") {
     val descriptionA = "The queer quolls quits and quarrels"
     val descriptionB = "A quintessential quadraped is quick"
     val descriptionC = "The edifying extent of early emus"
