@@ -8,7 +8,6 @@ import akka.stream.scaladsl._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.platform.calm_api_client._
 import uk.ac.wellcome.platform.calm_api_client.fixtures.{
