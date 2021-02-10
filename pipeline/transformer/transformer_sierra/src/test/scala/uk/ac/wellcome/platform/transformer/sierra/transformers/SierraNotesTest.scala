@@ -116,7 +116,7 @@ class SierraNotesTest
       .map(notesField => notesField.createNote("Main bit."))
       .toList
 
-    SierraNotes(bibData) should contain theSameElementsAs(notes)
+    SierraNotes(bibData) should contain theSameElementsAs notes
   }
 
   def bibData(contents: List[(String, Note)]): SierraBibData =
