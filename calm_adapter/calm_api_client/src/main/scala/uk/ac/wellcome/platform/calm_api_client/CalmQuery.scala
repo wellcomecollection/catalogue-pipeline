@@ -3,12 +3,25 @@ package uk.ac.wellcome.platform.calm_api_client
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+/*
+ * CalmQuery is used to construct the "Expr" parameter of
+ * Calm search queries. These look something like:
+ * (key=value)OR(key!=value)
+ *
+ * Some documentation of this parameter is available in the
+ * "Search" section here: https://wt-calm.wellcome.ac.uk/CalmAPI/help/
+ *
+ * Where this fits into a SOAP query is documented here:
+ * https://wt-calm.wellcome.ac.uk/CalmAPI/help/example_search.htm
+ */
 sealed trait CalmQuery {
   def queryExpression: String
 }
 
 // These general classes need to be sealed so we can derive codecs for
 // the specific cases in the companion object
+
+// Query leaves become expressions like `(key=value)` in full queries
 sealed class QueryLeaf(
   key: String,
   value: String,
@@ -16,6 +29,7 @@ sealed class QueryLeaf(
 ) extends CalmQuery {
   def queryExpression: String = s"($key$relationalOperator$value)"
 }
+// Query nodes join query leaves together with booleans like `(a=b)OR(c=d)`
 sealed class QueryNode(
   left: CalmQuery,
   right: CalmQuery,
@@ -28,12 +42,15 @@ sealed class QueryNode(
 object CalmQuery {
   // Keep these as case classes rather than `def`s so they're easy to (de)serialize
 
+  // (Modified=<date>)
   case class ModifiedDate(date: LocalDate)
       extends QueryLeaf(key = "Modified", value = formatDate(date))
 
+  // (Created=<date>)
   case class CreatedDate(date: LocalDate)
       extends QueryLeaf(key = "Created", value = formatDate(date))
 
+  // (Modified=<date>)OR(Created=<date>)
   case class CreatedOrModifiedDate(date: LocalDate)
       extends QueryNode(
         left = CreatedDate(date),
@@ -41,6 +58,7 @@ object CalmQuery {
         logicalOperator = "OR"
       )
 
+  // (Created!=*)AND(Modified!=*)
   case object EmptyCreatedAndModifiedDate
       extends QueryNode(
         left = emptyKey("Created"),
@@ -48,13 +66,16 @@ object CalmQuery {
         logicalOperator = "AND"
       )
 
+  // (RefNo=refNo)
   case class RefNo(refNo: String)
       extends QueryLeaf(key = "RefNo", value = refNo)
 
   // RecordId queries need to have double quotes for some reason
+  // (RecordId="<id>")
   case class RecordId(id: String)
       extends QueryLeaf(key = "RecordId", value = s""""$id"""")
 
+  // (key!=*)
   def emptyKey(key: String) =
     new QueryLeaf(key = key, value = "*", relationalOperator = "!=")
 
