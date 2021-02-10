@@ -2,9 +2,10 @@ package uk.ac.wellcome.platform.calm_deletion_checker
 
 import akka.http.scaladsl.model.headers.RawHeader
 import org.scalacheck.{Gen, Shrink}
-import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.time.{Milliseconds, Span}
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import uk.ac.wellcome.platform.calm_api_client.fixtures.{
   CalmApiTestClient,
@@ -20,10 +21,16 @@ class DeletionCheckerTest
     extends AnyFunSpec
     with Matchers
     with ScalaFutures
+    with PatienceConfiguration
     with ScalaCheckPropertyChecks
     with CalmSourcePayloadGenerators
     with CalmApiTestClient
     with CalmResponseGenerators {
+
+  override implicit def patienceConfig: PatienceConfig = PatienceConfig(
+    timeout = scaled(Span(500, Milliseconds)),
+    interval = scaled(Span(25, Milliseconds))
+  )
 
   describe("DeletionChecker") {
     implicit val noShrink: Shrink[Int] = Shrink.shrinkAny
@@ -83,7 +90,7 @@ class DeletionCheckerTest
       var nTests = 0
       protected def nDeleted(records: this.Records): Future[Int] = {
         nTests += 1
-        Future.successful(records.count(deletedSet.contains))
+        Future.successful((records intersect deletedSet).size)
       }
     }
 
