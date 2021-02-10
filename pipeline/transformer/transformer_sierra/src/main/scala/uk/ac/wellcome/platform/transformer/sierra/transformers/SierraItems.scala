@@ -56,7 +56,8 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
         }
         .map { loc =>
           SierraPhysicalLocationType.fromName(loc.name) match {
-            case Some(LocationType.ClosedStores) => (Some(LocationType.ClosedStores), LocationType.ClosedStores.label)
+            case Some(LocationType.ClosedStores) =>
+              (Some(LocationType.ClosedStores), LocationType.ClosedStores.label)
             case other => (other, loc.name)
           }
         }
@@ -65,7 +66,7 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
 
     val fallbackLocation = otherLocations match {
       case Seq((Some(locationType), label)) => Some((locationType, label))
-      case _  => None
+      case _                                => None
     }
 
     sierraItemDataMap
@@ -90,11 +91,13 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
     itemId: SierraItemNumber,
     itemData: SierraItemData,
     bibData: SierraBibData,
-    fallbackLocation: Option[(PhysicalLocationType, String)]): Item[IdState.Unminted] = {
+    fallbackLocation: Option[(PhysicalLocationType, String)])
+    : Item[IdState.Unminted] = {
     debug(s"Attempting to transform $itemId")
     Item(
       title = getItemTitle(itemData),
-      locations = getPhysicalLocation(bibId, itemData, bibData, fallbackLocation).toList,
+      locations =
+        getPhysicalLocation(bibId, itemData, bibData, fallbackLocation).toList,
       id = IdState.Identifiable(
         sourceIdentifier = SourceIdentifier(
           identifierType = IdentifierType("sierra-system-number"),

@@ -16,18 +16,20 @@ trait SierraLocation extends SierraQueryOps with Logging {
     bibNumber: SierraBibNumber,
     itemData: SierraItemData,
     bibData: SierraBibData,
-    fallbackLocation: Option[(PhysicalLocationType, String)] = None): Option[PhysicalLocation] =
+    fallbackLocation: Option[(PhysicalLocationType, String)] = None)
+    : Option[PhysicalLocation] =
     for {
       sourceLocation <- itemData.location
 
       (locationType, label) <- {
-        val parsedLocationType = SierraPhysicalLocationType.fromName(sourceLocation.name)
+        val parsedLocationType =
+          SierraPhysicalLocationType.fromName(sourceLocation.name)
 
         (parsedLocationType, fallbackLocation) match {
           case (Some(locationType), _) =>
             val label = locationType match {
               case LocationType.ClosedStores => LocationType.ClosedStores.label
-              case _ => sourceLocation.name
+              case _                         => sourceLocation.name
             }
 
             Some((locationType, label))
