@@ -7,13 +7,12 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   VarField
 }
 
-case class NotesField(createNote: String => Note,
-                      suppressedSubfields: Set[String] = Set.empty)
+case class NotesField(createNote: String => Note)
 
 object SierraNotes extends SierraDataTransformer with SierraQueryOps {
 
   type Output = List[Note]
-  val universallySuppressedSubfields = Set("5")
+  val suppressedSubfields = Set("5")
 
   val notesFields = Map(
     "500" -> NotesField(GeneralNote),
@@ -56,10 +55,10 @@ object SierraNotes extends SierraDataTransformer with SierraQueryOps {
         case Some((vf, Some(notesField))) => (vf, notesField)
       }
       .map {
-        case (vf, NotesField(createNote, suppressedSubfields)) =>
+        case (vf, NotesField(createNote)) =>
           val contents =
             vf.subfieldsWithoutTags(
-                universallySuppressedSubfields.toSeq ++ suppressedSubfields.toSeq: _*)
+                universallySuppressedSubfields.toSeq: _*)
               .contents
               .mkString(" ")
 
