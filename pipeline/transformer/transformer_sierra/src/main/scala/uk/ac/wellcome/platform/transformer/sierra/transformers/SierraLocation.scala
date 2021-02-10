@@ -21,7 +21,7 @@ trait SierraLocation extends SierraQueryOps with Logging {
         SierraPhysicalLocationType.fromName(name).flatMap { locationType =>
           val label = locationType match {
             case LocationType.ClosedStores => LocationType.ClosedStores.label
-            case _ => name
+            case _                         => name
           }
 
           Some(
