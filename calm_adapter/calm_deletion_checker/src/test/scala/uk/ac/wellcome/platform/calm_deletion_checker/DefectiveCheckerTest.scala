@@ -11,13 +11,12 @@ import uk.ac.wellcome.platform.calm_api_client.fixtures.{
   CalmApiTestClient,
   CalmResponseGenerators
 }
-import weco.catalogue.source_model.CalmSourcePayload
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.Random
 
-class DeletionCheckerTest
+class DefectiveCheckerTest
     extends AnyFunSpec
     with Matchers
     with ScalaFutures
@@ -32,22 +31,23 @@ class DeletionCheckerTest
     interval = scaled(Span(25, Milliseconds))
   )
 
-  describe("DeletionChecker") {
+  describe("DefectiveChecker") {
     implicit val noShrink: Shrink[Int] = Shrink.shrinkAny
     val batches = for {
       n <- Gen.choose(1, 1000)
       d <- Gen.choose(0, n)
     } yield (n, d)
 
-    it("correctly finds deletions in a set of records") {
+    it("correctly finds defectives in a set of items") {
       forAll(batches) {
         case (n, d) =>
-          val records = (1 to n).map(_ => calmSourcePayload)
-          val deletedRecords = randomSample(records, size = d)
-          val testChecker = new TestDeletionChecker(deletedRecords)
+          val items = (1 to n).map(_ => randomAlphanumeric(10))
+          val defectiveItems = randomSample(items, size = d)
+          val testChecker = new TestDefectiveChecker(defectiveItems)
 
-          whenReady(testChecker.deletedRecords(records.toSet)) { foundDeleted =>
-            foundDeleted shouldBe deletedRecords.toSet
+          whenReady(testChecker.defectiveRecords(items.toSet)) {
+            foundDefective =>
+              foundDefective shouldBe defectiveItems.toSet
           }
       }
     }
@@ -55,42 +55,42 @@ class DeletionCheckerTest
     it("makes fewer queries than the known upper bound") {
       forAll(batches) {
         case (n, d) =>
-          val records = (1 to n).map(_ => calmSourcePayload)
-          val deletedRecords = randomSample(records, size = d)
-          val testChecker = new TestDeletionChecker(deletedRecords)
+          val items = (1 to n).map(_ => randomAlphanumeric(10))
+          val defectiveItems = randomSample(items, size = d)
+          val testChecker = new TestDefectiveChecker(defectiveItems)
 
-          whenReady(testChecker.deletedRecords(records.toSet)) { _ =>
+          whenReady(testChecker.defectiveRecords(items.toSet)) { _ =>
             testChecker.nTests should be <= testChecker.nTestsUpperBound(n, d)
           }
       }
     }
 
     it("fails when one of its tests fails") {
-      val records = (1 to 100).map(_ => calmSourcePayload)
-      val failingChecker = new DeletionChecker {
+      val items = (1 to 100).map(_ => randomAlphanumeric(10))
+      val failingChecker = new DefectiveChecker[String] {
         var nTests = 0
-        protected def nDeleted(records: Records): Future[Int] = {
+        protected def test(items: Set[String]): Future[Int] = {
           nTests += 1
           if (nTests < 50) {
-            Future.successful(records.size / 4)
+            Future.successful(items.size / 4)
           } else {
             Future.failed(new RuntimeException("oops"))
           }
         }
       }
 
-      whenReady(failingChecker.deletedRecords(records.toSet).failed) { e =>
+      whenReady(failingChecker.defectiveRecords(items.toSet).failed) { e =>
         e shouldBe a[RuntimeException]
       }
     }
 
-    class TestDeletionChecker(deleted: Seq[CalmSourcePayload])
-        extends DeletionChecker {
+    class TestDefectiveChecker(deleted: Seq[String])
+        extends DefectiveChecker[String] {
       val deletedSet = deleted.toSet
       var nTests = 0
-      protected def nDeleted(records: this.Records): Future[Int] = {
+      protected def test(items: Set[String]): Future[Int] = {
         nTests += 1
-        Future.successful((records intersect deletedSet).size)
+        Future.successful((items intersect deletedSet).size)
       }
     }
 
@@ -107,7 +107,7 @@ class DeletionCheckerTest
           val records = (1 to nRecords).map(_ => calmSourcePayload)
           val deletionChecker = new ApiDeletionChecker(apiClient)
 
-          whenReady(deletionChecker.deletedRecords(records.toSet)) { _ =>
+          whenReady(deletionChecker.defectiveRecords(records.toSet)) { _ =>
             httpClient.requests should have length 1 // Because all records are deleted
             val soapAction = httpClient.requests.head.headers.collectFirst {
               case RawHeader("SOAPAction", value) => value
@@ -125,8 +125,9 @@ class DeletionCheckerTest
           val records = (1 to nRecords).map(_ => calmSourcePayload)
           val deletionChecker = new ApiDeletionChecker(apiClient)
 
-          whenReady(deletionChecker.deletedRecords(records.toSet).failed) { e =>
-            e.getMessage should startWith("More results returned")
+          whenReady(deletionChecker.defectiveRecords(records.toSet).failed) {
+            e =>
+              e.getMessage should startWith("More results returned")
           }
       }
     }

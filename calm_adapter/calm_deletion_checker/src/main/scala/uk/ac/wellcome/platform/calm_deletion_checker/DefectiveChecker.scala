@@ -9,32 +9,35 @@ import weco.catalogue.source_model.CalmSourcePayload
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait DeletionChecker {
-  type Record = CalmSourcePayload
-  type Records = Set[Record]
+/*
+ * With a `test` method implemented to return the number of defectives in a
+ * set of Items, a DefectiveChecker provides `defectiveRecords` which returns
+ * a set of all defectives in the given items.
+ *
+ * The implementation here is based on the algorithm given in Wang et al (2017)
+ * Found at: https://arxiv.org/abs/1407.2283, see `Algorithm 1`
+ * While there are more optimal algorithms that exist, the implementation of
+ * this one is very simple.
+ */
+trait DefectiveChecker[Item] {
+  protected def test(items: Set[Item]): Future[Int]
 
-  protected def nDeleted(records: Records): Future[Int]
-
-  // The implementation here is based on the algorithm given in Wang et al (2017)
-  // Found at: https://arxiv.org/abs/1407.2283, see `Algorithm 1`
-  //
-  // While there are more optimal algorithms that exist, the implementation of this one is very simple
-  def deletedRecords(batch: Records)(
-    implicit ec: ExecutionContext): Future[Records] = {
-    def findDeleted(records: Records, d: Int): Future[Records] = d match {
-      case 0                      => Future.successful(Set.empty)
-      case n if n == records.size => Future.successful(records)
+  def defectiveRecords(allItems: Set[Item])(
+    implicit ec: ExecutionContext): Future[Set[Item]] = {
+    def nested(items: Set[Item], d: Int): Future[Set[Item]] = d match {
+      case 0                    => Future.successful(Set.empty)
+      case n if n == items.size => Future.successful(items)
       case _ =>
-        val testSet = records.take(M(records.size, d))
+        val testSet = items.take(M(items.size, d))
         for {
-          d1 <- nDeleted(testSet)
-          deletions1 <- findDeleted(testSet, d1)
-          deletions2 <- findDeleted(records -- testSet, d - d1)
+          d1 <- test(testSet)
+          deletions1 <- nested(testSet, d1)
+          deletions2 <- nested(items -- testSet, d - d1)
         } yield deletions1 ++ deletions2
     }
 
-    nDeleted(batch).flatMap { d =>
-      findDeleted(batch, d)
+    test(allItems).flatMap { d =>
+      nested(allItems, d)
     }
   }
 
@@ -62,9 +65,9 @@ trait DeletionChecker {
 
 class ApiDeletionChecker(calmApiClient: CalmApiClient)(
   implicit ec: ExecutionContext)
-    extends DeletionChecker {
+    extends DefectiveChecker[CalmSourcePayload] {
 
-  def nDeleted(records: Records): Future[Int] =
+  def test(records: Set[CalmSourcePayload]): Future[Int] =
     calmApiClient
       .search(
         records
