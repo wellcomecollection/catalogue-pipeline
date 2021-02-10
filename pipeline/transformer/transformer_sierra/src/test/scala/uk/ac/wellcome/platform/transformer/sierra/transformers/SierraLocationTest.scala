@@ -28,13 +28,35 @@ class SierraLocationTest
     val bibData = createSierraBibData
 
     val locationType = LocationType.ClosedStores
-    val label = "Closed stores Med."
+    val label = LocationType.ClosedStores.label
     val itemData = createSierraItemDataWith(
-      location = Some(SierraSourceLocation("sgmed", label))
+      location = Some(SierraSourceLocation("sgmed", "Closed stores Med."))
     )
 
     it("extracts location from item data") {
-      val expectedLocation = PhysicalLocation(locationType, label)
+      val itemData = createSierraItemDataWith(
+        location = Some(SierraSourceLocation("sgmed", "Closed stores Med."))
+      )
+
+      val expectedLocation = PhysicalLocation(
+        locationType = LocationType.ClosedStores,
+        label = LocationType.ClosedStores.label
+      )
+
+      transformer.getPhysicalLocation(bibId, itemData, bibData) shouldBe Some(
+        expectedLocation)
+    }
+
+    it("uses the name as the label for non-closed locations") {
+      val itemData = createSierraItemDataWith(
+        location = Some(SierraSourceLocation("wghxg", "Folios"))
+      )
+
+      val expectedLocation = PhysicalLocation(
+        locationType = LocationType.OpenShelves,
+        label = "Folios"
+      )
+
       transformer.getPhysicalLocation(bibId, itemData, bibData) shouldBe Some(
         expectedLocation)
     }
