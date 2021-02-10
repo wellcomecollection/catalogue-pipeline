@@ -161,6 +161,102 @@ class SierraItemsTest
       ))
   }
 
+  describe("handling locations which are 'contained in above' or 'bound in above'") {
+    it("skips adding a location if the Sierra location is 'bound in above'") {
+      val itemDataMap = Map(
+        createSierraItemNumber -> createSierraItemDataWith(
+          location = Some(SierraSourceLocation("bwith", "bound in above"))
+        )
+      )
+
+      val items = getTransformedItems(itemDataMap = itemDataMap)
+
+      items should have size 1
+      items.head.locations shouldBe empty
+    }
+
+    it("adds a location to 'bound/contained in above' if the other locations are unambiguous") {
+      val itemDataMap = Map(
+        createSierraItemNumber -> createSierraItemDataWith(
+          location = Some(SierraSourceLocation("bwith", "bound in above"))
+        ),
+        createSierraItemNumber -> createSierraItemDataWith(
+          location = Some(SierraSourceLocation("sicon", "Closed stores Iconographic"))
+        ),
+        createSierraItemNumber -> createSierraItemDataWith(
+          location = Some(SierraSourceLocation("cwith", "contained in above"))
+          ),
+        createSierraItemNumber -> createSierraItemDataWith(
+          location = Some(SierraSourceLocation("sicon", "Closed stores Iconographic"))
+        )
+      )
+
+      val items = getTransformedItems(itemDataMap = itemDataMap)
+
+      items should have size 4
+      items.foreach {
+        _.locations shouldBe List(
+          PhysicalLocation(
+            locationType = LocationType.ClosedStores,
+            label = LocationType.ClosedStores.label
+          )
+        )
+      }
+    }
+
+    it("adds a location to 'bound/contained in above' if the other locations are all closed") {
+      val itemDataMap = Map(
+        createSierraItemNumber -> createSierraItemDataWith(
+          location = Some(SierraSourceLocation("bwith", "bound in above"))
+        ),
+        createSierraItemNumber -> createSierraItemDataWith(
+          location = Some(SierraSourceLocation("sicon", "Closed stores Iconographic"))
+        ),
+        createSierraItemNumber -> createSierraItemDataWith(
+          location = Some(SierraSourceLocation("cwith", "contained in above"))
+        ),
+        createSierraItemNumber -> createSierraItemDataWith(
+          location = Some(SierraSourceLocation("sobhi", "Closed stores P.B. Hindi"))
+        )
+      )
+
+      val items = getTransformedItems(itemDataMap = itemDataMap)
+
+      items should have size 4
+      items.foreach {
+        _.locations shouldBe List(
+          PhysicalLocation(
+            locationType = LocationType.ClosedStores,
+            label = LocationType.ClosedStores.label
+          )
+        )
+      }
+    }
+
+    it("skips adding a location to 'bound/contained in above' if the other locations are ambiguous") {
+      val itemDataMap = Map(
+        createSierraItemNumber -> createSierraItemDataWith(
+          location = Some(SierraSourceLocation("bwith", "bound in above"))
+        ),
+        createSierraItemNumber -> createSierraItemDataWith(
+          location = Some(SierraSourceLocation("sicon", "Closed stores Iconographic"))
+        ),
+        createSierraItemNumber -> createSierraItemDataWith(
+          location = Some(SierraSourceLocation("cwith", "contained in above"))
+        ),
+        createSierraItemNumber -> createSierraItemDataWith(
+          location = Some(SierraSourceLocation("info", "Open shelves"))
+        )
+      )
+
+      val items = getTransformedItems(itemDataMap = itemDataMap)
+
+      items should have size 4
+
+      items.map { _.locations.length }.sorted shouldBe List(0, 0, 1, 1)
+    }
+  }
+
   it("sorts items by sierra-identifier") {
     val itemData = Map(
       SierraItemNumber("0000002") -> createSierraItemData,
