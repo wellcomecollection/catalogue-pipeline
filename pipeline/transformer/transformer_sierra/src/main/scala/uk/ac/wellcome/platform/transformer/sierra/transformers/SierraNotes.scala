@@ -57,7 +57,7 @@ object SierraNotes extends SierraDataTransformer with SierraQueryOps {
       .map {
         case (vf, NotesField(createNote)) =>
           val contents =
-            vf.subfieldsWithoutTags(universallySuppressedSubfields.toSeq: _*)
+            vf.subfieldsWithoutTags(suppressedSubfields.toSeq: _*)
               .contents
               .mkString(" ")
 
