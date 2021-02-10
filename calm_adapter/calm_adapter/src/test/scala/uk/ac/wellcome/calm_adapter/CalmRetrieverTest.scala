@@ -24,7 +24,6 @@ class CalmRetrieverTest
     extends AnyFunSpec
     with Matchers
     with ScalaFutures
-    with Akka
     with CalmApiTestClient
     with CalmResponseGenerators {
 

@@ -1,5 +1,8 @@
 package uk.ac.wellcome.platform.calm_api_client
 
+import java.time.LocalDate
+import java.util.UUID
+
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -24,6 +27,18 @@ class CalmQueryTest extends AnyFunSpec with Matchers {
     things
       .reduce(_ or _)
       .queryExpression shouldBe "(Key=bing)OR(Key=bong)OR(Key=bang)OR(Key=beep)OR(Key=boop)"
+  }
+
+  it("dates are formatted correctly") {
+    val date = LocalDate.of(1917, 2, 23)
+    val formattedDate = CalmQuery.formatDate(date)
+    formattedDate shouldBe "23/02/1917"
+  }
+
+  it("RecordIds are wrapped in double quotes when serialised") {
+    val id = UUID.randomUUID().toString
+    val idQuery = CalmQuery.RecordId(id)
+    idQuery.queryExpression shouldBe s"""(RecordId="$id")"""
   }
 
 }
