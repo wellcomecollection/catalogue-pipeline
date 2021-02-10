@@ -55,7 +55,7 @@ trait ItemsGenerators extends IdentifiersGenerators with LocationGenerators {
       locations = List(
         createPhysicalLocationWith(
           locationType = LocationType.ClosedStores,
-          label = "Closed stores Arch. & MSS",
+          label = LocationType.ClosedStores.label
         )
       )
     )

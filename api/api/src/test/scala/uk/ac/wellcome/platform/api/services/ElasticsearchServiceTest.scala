@@ -346,6 +346,12 @@ class ElasticsearchServiceTest
     createIdentifiedItemWith(
       locations = List(
         locationType match {
+          case LocationType.ClosedStores =>
+            createPhysicalLocationWith(
+              locationType = LocationType.ClosedStores,
+              label = LocationType.ClosedStores.label
+            )
+
           case physicalLocationType: PhysicalLocationType =>
             createPhysicalLocationWith(locationType = physicalLocationType)
 

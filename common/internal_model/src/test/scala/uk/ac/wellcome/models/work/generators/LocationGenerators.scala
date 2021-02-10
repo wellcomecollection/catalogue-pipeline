@@ -13,10 +13,7 @@ import uk.ac.wellcome.models.work.internal.{
 
 trait LocationGenerators extends RandomGenerators {
   def createPhysicalLocationWith(
-    locationType: PhysicalLocationType = chooseFrom(
-      LocationType.ClosedStores,
-      LocationType.OpenShelves
-    ),
+    locationType: PhysicalLocationType = LocationType.OpenShelves,
     accessConditions: List[AccessCondition] = Nil,
     label: String = "locationLabel"
   ): PhysicalLocation =
