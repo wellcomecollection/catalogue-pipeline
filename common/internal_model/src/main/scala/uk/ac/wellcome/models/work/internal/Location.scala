@@ -24,4 +24,12 @@ case class PhysicalLocation(
   license: Option[License] = None,
   shelfmark: Option[String] = None,
   accessConditions: List[AccessCondition] = Nil
-) extends Location
+) extends Location {
+
+  if (locationType == LocationType.ClosedStores) {
+    require(
+      label == LocationType.ClosedStores.label,
+      s"Label is '$label', but we don't want to expose the layout of our Closed Stores"
+    )
+  }
+}
