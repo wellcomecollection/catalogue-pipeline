@@ -13,9 +13,8 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
-import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.platform.calm_api_client.fixtures.{
-  CalmHttpTestClient,
+  CalmApiTestClient,
   CalmResponseGenerators
 }
 
@@ -26,18 +25,16 @@ class CalmApiClientTest
     with Matchers
     with ScalaFutures
     with CalmResponseGenerators
+    with CalmApiTestClient
     with Akka {
 
-  val url = "calm.api"
-  val username = "calm-user"
-  val password = "calm-password"
   val query = CalmQuery.ModifiedDate(LocalDate.of(2000, 1, 1))
   val suppressedField = "Secret" -> "Shhhh"
 
   it("performs search requests") {
     val nResults = 10
     val responses = List(searchResponse(n = nResults))
-    withApiClient(responses) {
+    withCalmClients(responses) {
       case (apiClient, _) =>
         whenReady(apiClient.search(query)) { response =>
           response shouldBe CalmSession(nResults, Cookie(cookie))
@@ -47,7 +44,7 @@ class CalmApiClientTest
 
   it("performs summary requests") {
     val responses = List(summaryResponse("RecordID" -> "1"))
-    withApiClient(responses) {
+    withCalmClients(responses) {
       case (apiClient, _) =>
         whenReady(apiClient.summary(1)) { response =>
           response shouldBe CalmRecord(
@@ -61,7 +58,7 @@ class CalmApiClientTest
   it("uses basic auth credentials for requests") {
     val responses =
       List(searchResponse(n = 1), summaryResponse("RecordID" -> "1"))
-    withApiClient(responses) {
+    withCalmClients(responses) {
       case (apiClient, testHttpClient) =>
         val requestFuture = for {
           _ <- apiClient.search(query)
@@ -85,7 +82,7 @@ class CalmApiClientTest
   it("sets the SOAPAction header for requests") {
     val responses =
       List(searchResponse(n = 1), summaryResponse("RecordID" -> "1"))
-    withApiClient(responses) {
+    withCalmClients(responses) {
       case (apiClient, testHttpClient) =>
         val requestFuture = for {
           _ <- apiClient.search(query)
@@ -110,7 +107,7 @@ class CalmApiClientTest
   it("removes suppressed fields from summary responses") {
     val responses =
       List(summaryResponse("RecordID" -> "1", suppressedField))
-    withApiClient(responses) {
+    withCalmClients(responses) {
       case (apiClient, _) =>
         whenReady(apiClient.summary(1)) { response =>
           response.id shouldBe "1"
@@ -121,7 +118,7 @@ class CalmApiClientTest
 
   it("fails if there is no cookie in a search response") {
     val responses = List(searchResponse(n = 1, cookiePair = None))
-    withApiClient(responses) {
+    withCalmClients(responses) {
       case (apiClient, _) =>
         whenReady(apiClient.search(query).failed) { error =>
           error.getMessage shouldBe "Session cookie not found in CALM response"
@@ -131,17 +128,17 @@ class CalmApiClientTest
 
   it("fails on error responses from the API") {
     val responses = List(HttpResponse(500, Nil, "Oops", protocol))
-    withApiClient(responses) {
+    withCalmClients(responses) {
       case (apiClient, _) =>
         whenReady(apiClient.search(query).failed) { error =>
-          error.getMessage shouldBe "Unexpected status from CALM API: 500 Internal Server Error"
+          error.getMessage shouldBe "Max retries attempted when calling Calm API"
         }
     }
   }
 
   it("fails if there is no RecordID in a summary response") {
     val responses = List(summaryResponse("Beep" -> "Boop"))
-    withApiClient(responses) {
+    withCalmClients(responses) {
       case (apiClient, _) =>
         whenReady(apiClient.summary(1).failed) { error =>
           error.getMessage shouldBe "RecordID not found"
@@ -151,13 +148,5 @@ class CalmApiClientTest
 
   implicit val summaryParser: CalmHttpResponseParser[CalmSummaryRequest] =
     CalmHttpResponseParser.createSummaryResponseParser(Set(suppressedField._1))
-
-  def withApiClient[R](responses: List[HttpResponse])(
-    testWith: TestWith[(CalmApiClient, CalmHttpTestClient), R]): R =
-    withMaterializer { implicit mat =>
-      implicit val ec = mat.executionContext
-      implicit val httpClient = new CalmHttpTestClient(responses)
-      testWith((new CalmApiClient(url, username, password), httpClient))
-    }
 
 }

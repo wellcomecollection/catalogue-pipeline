@@ -257,7 +257,8 @@ lazy val calm_adapter = setupProject(
 lazy val calm_deletion_checker = setupProject(
   project,
   folder = "calm_adapter/calm_deletion_checker",
-  localDependencies = Seq(calm_api_client, source_model_typesafe)
+  localDependencies = Seq(calm_api_client, source_model_typesafe),
+  externalDependencies = ExternalDependencies.scalacheckDependencies
 )
 
 // Inference manager
