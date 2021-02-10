@@ -13,6 +13,7 @@ case class NotesField(createNote: String => Note,
 object SierraNotes extends SierraDataTransformer with SierraQueryOps {
 
   type Output = List[Note]
+  val universallySuppressedSubfields = Set("5")
 
   val notesFields = Map(
     "500" -> NotesField(GeneralNote),
@@ -36,7 +37,7 @@ object SierraNotes extends SierraDataTransformer with SierraQueryOps {
     "546" -> NotesField(LanguageNote),
     "547" -> NotesField(GeneralNote),
     "562" -> NotesField(GeneralNote),
-    "563" -> NotesField(BindingInformation, suppressedSubfields = Set("5")),
+    "563" -> NotesField(BindingInformation),
     "581" -> NotesField(PublicationsNote),
     "585" -> NotesField(ExhibitionsNote),
     "586" -> NotesField(AwardsNote),
@@ -57,7 +58,8 @@ object SierraNotes extends SierraDataTransformer with SierraQueryOps {
       .map {
         case (vf, NotesField(createNote, suppressedSubfields)) =>
           val contents =
-            vf.subfieldsWithoutTags(suppressedSubfields.toSeq: _*)
+            vf.subfieldsWithoutTags(
+                universallySuppressedSubfields.toSeq ++ suppressedSubfields.toSeq: _*)
               .contents
               .mkString(" ")
 
