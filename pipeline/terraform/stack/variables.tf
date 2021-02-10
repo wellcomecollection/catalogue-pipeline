@@ -75,11 +75,6 @@ variable "storage_bucket_name" {
 
 variable "inferrer_model_data_bucket_name" {}
 
-variable "pipeline_storage_id" {
-  default     = "pipeline_storage"
-  description = "The ID of the pipeline_storage instance used for secrets"
-}
-
 variable "traffic_filter_platform_vpce_id" {
   type = string
 }
