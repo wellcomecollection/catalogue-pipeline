@@ -45,8 +45,8 @@ module "relation_embedder" {
   subnets           = var.subnets
   queue_read_policy = module.relation_embedder_queue.read_policy
 
-  cpu    = 1024
-  memory = 2048
+  cpu    = 2048
+  memory = 4096
 
   use_fargate_spot = true
 

@@ -52,8 +52,8 @@ module "ingestor_works" {
   max_capacity      = min(6, var.max_capacity)
   queue_read_policy = module.ingestor_works_queue.read_policy
 
-  cpu    = 1024
-  memory = 2048
+  cpu    = 2048
+  memory = 4096
 
   use_fargate_spot = true
 
