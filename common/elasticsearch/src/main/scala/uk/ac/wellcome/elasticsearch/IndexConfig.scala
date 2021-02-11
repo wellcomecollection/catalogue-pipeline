@@ -8,6 +8,10 @@ import com.sksamuel.elastic4s.ElasticDsl.{
 }
 import com.sksamuel.elastic4s.analysis.Analysis
 import com.sksamuel.elastic4s.requests.mappings.MappingDefinition
+import uk.ac.wellcome.elasticsearch.IndexedWorkIndexConfig.{
+  lowercaseKeyword,
+  textWithKeyword
+}
 import uk.ac.wellcome.elasticsearch.WorksAnalysis._
 
 trait IndexConfig {
@@ -39,6 +43,18 @@ trait IndexConfigFields {
   def englishTextField(name: String) =
     textField(name).fields(
       textField("english").analyzer("english")
+    )
+
+  def multilingualField(name: String) =
+    textWithKeyword(name).fields(
+      textField("english").analyzer(englishAnalyzer.name),
+      textField("french").analyzer(frenchAnalyzer.name),
+      textField("italian").analyzer(italianAnalyzer.name),
+      textField("german").analyzer(germanAnalyzer.name),
+      textField("hindi").analyzer(hindiAnalyzer.name),
+      textField("arabic").analyzer(arabicAnalyzer.name),
+      textField("bengali").analyzer(bengaliAnalyzer.name),
+      textField("shingles").analyzer(shingleAsciifoldingAnalyzer.name)
     )
 
   def frenchTextField(name: String) =

@@ -77,38 +77,15 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
     objectField("data").fields(
       objectField("otherIdentifiers").fields(lowercaseKeyword("value")),
       objectField("format").fields(keywordField("id")),
-      textWithKeyword("title").fields(
+      multilingualField("title").fields(
         lowercaseKeyword("keyword"),
-        textField("english").analyzer(englishAnalyzer.name),
-        textField("french").analyzer(frenchAnalyzer.name),
-        textField("italian").analyzer(italianAnalyzer.name),
-        textField("german").analyzer(germanAnalyzer.name),
-        textField("hindi").analyzer(hindiAnalyzer.name),
-        textField("arabic").analyzer(arabicAnalyzer.name),
-        textField("bengali").analyzer(bengaliAnalyzer.name),
-        textField("shingles").analyzer(shingleAsciifoldingAnalyzer.name)
       ),
-      textWithKeyword("alternativeTitles").fields(
+      multilingualField("alternativeTitles").fields(
         lowercaseKeyword("keyword"),
-        textField("english").analyzer(englishAnalyzer.name),
-        textField("french").analyzer(frenchAnalyzer.name),
-        textField("italian").analyzer(italianAnalyzer.name),
-        textField("german").analyzer(germanAnalyzer.name),
-        textField("hindi").analyzer(hindiAnalyzer.name),
-        textField("arabic").analyzer(arabicAnalyzer.name),
-        textField("bengali").analyzer(bengaliAnalyzer.name),
       ),
       englishTextField("description"),
       englishTextKeywordField("physicalDescription"),
-      textField("lettering").fields(
-        textField("english").analyzer(englishAnalyzer.name),
-        textField("french").analyzer(frenchAnalyzer.name),
-        textField("italian").analyzer(italianAnalyzer.name),
-        textField("german").analyzer(germanAnalyzer.name),
-        textField("hindi").analyzer(hindiAnalyzer.name),
-        textField("arabic").analyzer(arabicAnalyzer.name),
-        textField("bengali").analyzer(bengaliAnalyzer.name),
-      ),
+      multilingualField("lettering"),
       objectField("contributors").fields(
         objectField("agent").fields(label),
       ),
