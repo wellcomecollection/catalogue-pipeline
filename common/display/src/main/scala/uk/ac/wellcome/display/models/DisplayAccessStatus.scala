@@ -20,22 +20,22 @@ object DisplayAccessStatus {
       case AccessStatus.Open =>
         DisplayAccessStatus("open", "Open")
       case AccessStatus.OpenWithAdvisory =>
-        DisplayAccessStatus("open-with-advisory", "Open with Advisory")
+        DisplayAccessStatus("open-with-advisory", "Open with advisory")
       case AccessStatus.Restricted =>
         DisplayAccessStatus("restricted", "Restricted")
       case AccessStatus.ByAppointment =>
-        DisplayAccessStatus("by-appointment", "By Appointment")
+        DisplayAccessStatus("by-appointment", "By appointment")
       case AccessStatus.TemporarilyUnavailable =>
         DisplayAccessStatus(
           "temporarily-unavailable",
-          "Temporarily Unavailable")
+          "Temporarily unavailable")
       case AccessStatus.Unavailable =>
         DisplayAccessStatus("unavailable", "Unavailable")
       case AccessStatus.Closed =>
         DisplayAccessStatus("closed", "Closed")
       case AccessStatus.LicensedResources =>
-        DisplayAccessStatus("licensed-resources", "Licensed Resources")
+        DisplayAccessStatus("licensed-resources", "Licensed resources")
       case AccessStatus.PermissionRequired =>
-        DisplayAccessStatus("permission-required", "Permission Required")
+        DisplayAccessStatus("permission-required", "Permission required")
     }
 }
