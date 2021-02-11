@@ -77,12 +77,8 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
     objectField("data").fields(
       objectField("otherIdentifiers").fields(lowercaseKeyword("value")),
       objectField("format").fields(keywordField("id")),
-      multilingualField("title").fields(
-        lowercaseKeyword("keyword"),
-      ),
-      multilingualField("alternativeTitles").fields(
-        lowercaseKeyword("keyword"),
-      ),
+      multilingualKeywordField("title"),
+      multilingualKeywordField("alternativeTitles"),
       englishTextField("description"),
       englishTextKeywordField("physicalDescription"),
       multilingualField("lettering"),

@@ -45,12 +45,19 @@ trait IndexConfigFields {
     languages.map(lang => textField(lang).analyzer(s"${lang}_analyzer"))
 
   def multilingualField(name: String) =
-    textWithKeyword(name)
+    textField(name)
       .fields(
-        textField("english").analyzer(englishAnalyzer.name),
-        textField("shingles").analyzer(shingleAsciifoldingAnalyzer.name),
+        List(
+          textField("english").analyzer(englishAnalyzer.name),
+          textField("shingles").analyzer(shingleAsciifoldingAnalyzer.name)) ++
+          languagesTextFields,
       )
-      .fields(languagesTextFields)
+
+  def multilingualKeywordField(name: String) = textField(name).fields(
+    lowercaseKeyword("keyword"),
+    // we don't care about the name, we just want to compose the fields parameter
+    multilingualField("").fields: _*
+  )
 
   def lowercaseKeyword(name: String) =
     keywordField(name).normalizer(lowercaseNormalizer.name)
