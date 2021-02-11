@@ -110,8 +110,7 @@ class SierraTransformerTest
   it("extracts information from items") {
     val bibId = createSierraBibNumber
     val itemId = createSierraItemNumber
-    val locationType = LocationType("sgmed")
-    val locationLabel = "A museum of mermaids"
+
     def itemData(itemId: SierraItemNumber,
                  modifiedDate: Instant,
                  bibIds: List[SierraBibNumber]) =
@@ -119,8 +118,8 @@ class SierraTransformerTest
          |{
          |  "id": "$itemId",
          |  "location": {
-         |    "code": "${locationType.id}",
-         |    "name": "$locationLabel"
+         |    "code": "sgmed",
+         |    "name": "Closed stores Med."
          |  }
          |}
          |""".stripMargin
@@ -160,14 +159,19 @@ class SierraTransformerTest
       id = IdState.Identifiable(
         sourceIdentifier = expectedSourceIdentifier,
         otherIdentifiers = expectedOtherIdentifiers),
-      locations = List(PhysicalLocationDeprecated(locationType, locationLabel))
+      locations = List(
+        PhysicalLocation(
+          locationType = LocationType.ClosedStores,
+          label = LocationType.ClosedStores.label
+        )
+      )
     )
   }
 
   it("extracts title from items") {
     val bibId = createSierraBibNumber
     val itemId = createSierraItemNumber
-    val locationType = LocationType("sgmed")
+    val locationType = LocationType.ClosedStores
     val locationLabel = "A museum of mermaids"
     def itemData(itemId: SierraItemNumber,
                  modifiedDate: Instant,

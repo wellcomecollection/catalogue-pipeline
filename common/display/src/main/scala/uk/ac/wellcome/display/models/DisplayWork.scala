@@ -70,7 +70,7 @@ case class DisplayWork(
     `type` = "uk.ac.wellcome.Display.models.DisplayLocation",
     description =
       "Relates any thing to the location of a representative thumbnail image"
-  ) thumbnail: Option[DisplayLocationDeprecated] = None,
+  ) thumbnail: Option[DisplayLocation] = None,
   @Schema(
     `type` = "List[uk.ac.wellcome.Display.models.DisplayItem]",
     description = "List of items related to this work."
@@ -153,7 +153,7 @@ object DisplayWork {
           Some(work.identifiers.map { DisplayIdentifier(_) })
         else None,
       workType = work.data.format.map { DisplayFormat(_) },
-      thumbnail = work.data.thumbnail.map { DisplayLocationDeprecated(_) },
+      thumbnail = work.data.thumbnail.map { DisplayLocation(_) },
       items =
         if (includes.items)
           Some(work.data.items.map {

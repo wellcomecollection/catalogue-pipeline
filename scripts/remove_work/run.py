@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8
 """
 This script can "spike" an image on wellcomecollection.org/works -- remove
@@ -48,7 +48,76 @@ def catalogue_client(service_name):
     )
 
 
-def remove_image_from_es_indexes(catalogue_id, indices):
+def experience_client(service_name):
+    return aws_client(
+        service_name, role_arn="arn:aws:iam::130871440101:role/experience-developer"
+    )
+
+
+def get_associated_image_remover(es_host, es_auth, catalogue_id, works_indices):
+    print("*** Trying to find associated images")
+    images_indices = [idx.replace("works", "images") for idx in works_indices]
+
+    all_associated_images = {}
+    for index_name in images_indices:
+        print(f"··· Searching for {catalogue_id} in index {index_name}")
+        request_body = {
+            "query": {
+                "multi_match": {
+                    "query": catalogue_id,
+                    "fields": [
+                        "source.canonicalWork.id.canonicalId",
+                        "source.redirectedWork.id.canonicalId",
+                    ],
+                }
+            },
+            "_source": False,
+        }
+        resp = requests.get(
+            f"{es_host}{index_name}/_search", auth=es_auth, json=request_body
+        )
+
+        if resp.status_code == 403 or resp.status_code == 404:
+            print(f"··· Index {index_name} does not exist")
+            print(
+                "··· (This is likely due to index names not being of the form works-*, images-*"
+            )
+            continue
+
+        data = resp.json()
+        associated_image_ids = [hit["_id"] for hit in data["hits"]["hits"]]
+        if associated_image_ids:
+            print(
+                f"··· Found {len(associated_image_ids)} associated images in {index_name}"
+            )
+        else:
+            print(f"··· Did not find any associated images in {index_name}")
+
+        all_associated_images[index_name] = associated_image_ids
+
+    def remove_associated_images(dry_run):
+        deletions = []
+        for index, ids in all_associated_images.items():
+            for id in ids:
+                if click.confirm(f"Remove associated image {id} from {index}?"):
+                    deletions.append((index, id))
+        if not deletions:
+            return
+
+        if not dry_run:
+            for index, id in deletions:
+                resp = requests.delete(f"{es_host}{index}/_doc/{id}", auth=es_auth)
+                assert resp.status_code == 200, resp.json()
+                print(f"··· Deleted {index}/{id}")
+        else:
+            print("Dry run, deletions are:")
+            for index, id in deletions:
+                print(f"- {index}/{id}")
+
+    return remove_associated_images
+
+
+def remove_image_from_es_indexes(catalogue_id, indices, dry_run):
     print("*** Removing the image from our Elasticsearch indexes")
 
     ecs_client = catalogue_client("ecs")
@@ -77,6 +146,7 @@ def remove_image_from_es_indexes(catalogue_id, indices):
     task_definitions = [service["taskDefinition"] for service in services]
 
     miro_id = None
+    remove_associated_images = None
 
     print("··· Reading Elastic Cloud config for the catalogue API (read credentials)")
     for td in task_definitions:
@@ -92,7 +162,8 @@ def remove_image_from_es_indexes(catalogue_id, indices):
             continue
 
         for name, value_from in app_secrets.items():
-            resp = ssm_client.get_parameter(Name=value_from, WithDecryption=True)
+            public_value = value_from.replace("private", "public")
+            resp = ssm_client.get_parameter(Name=public_value, WithDecryption=True)
             app_secrets[name] = resp["Parameter"]["Value"]
 
         # 3. Once we have the config and password, we can remove the work from
@@ -117,16 +188,14 @@ def remove_image_from_es_indexes(catalogue_id, indices):
 
             existing_work = resp.json()["_source"]
 
-            if existing_work["type"] == "IdentifiedInvisibleWork":
-                print(
-                    "··· Work is already suppressed as an IdentifiedInvisibleWork, skipping"
-                )
+            if existing_work["type"] == "Invisible":
+                print("··· Work is already suppressed as Invisible, skipping")
                 continue
 
             # While we're looking at API responses, try to get the Miro ID.
-            identifiers = [existing_work["sourceIdentifier"]] + existing_work["data"][
-                "otherIdentifiers"
-            ]
+            identifiers = [existing_work["state"]["sourceIdentifier"]] + existing_work[
+                "data"
+            ]["otherIdentifiers"]
             miro_identifiers = [
                 idf
                 for idf in identifiers
@@ -145,7 +214,7 @@ def remove_image_from_es_indexes(catalogue_id, indices):
             assert existing_work["type"] == "Visible"
 
             # It's necessary to fill in the data field so that Circe can
-            # decode IdentifiedInvisibleWorks
+            # decode Invisible works
             blank_data = {}
             for key, value in existing_work["data"].items():
                 if isinstance(value, list):
@@ -155,34 +224,45 @@ def remove_image_from_es_indexes(catalogue_id, indices):
                 else:
                     blank_data[key] = None
 
+            # This is the format that Circe wants to decode
+            json_isotime = dt.datetime.now(dt.timezone.utc).isoformat()[:-6] + "Z"
             new_work = {
-                "canonicalId": existing_work["canonicalId"],
-                "sourceIdentifier": existing_work["sourceIdentifier"],
-                "type": "IdentifiedInvisibleWork",
-                # We bump the version so any in-flight works won't overwrite
-                # this one.
-                "version": existing_work["version"] + 1,
+                "type": "Invisible",
                 "data": blank_data,
+                "version": existing_work["version"],
+                "state": {**existing_work["state"], "modifiedTime": json_isotime},
             }
 
-            print("··· Replacing work with an IdentifiedInvisibleWork")
-            resp = requests.put(
-                f"{es_host}{index_name}/_doc/{catalogue_id}",
-                auth=es_auth,
-                json=new_work,
-            )
-            resp.raise_for_status()
+            print("··· Replacing work with an Invisible work")
+            if not dry_run:
+                resp = requests.put(
+                    f"{es_host}{index_name}/_doc/{catalogue_id}",
+                    auth=es_auth,
+                    json=new_work,
+                )
+                resp.raise_for_status()
 
-            print("··· Asserting work was made invisible")
-            resp = requests.get(
-                f"{es_host}{index_name}/_doc/{catalogue_id}", auth=es_auth
-            )
-            assert resp.json()["_source"]["type"] == "IdentifiedInvisibleWork"
+                print("··· Asserting work was made invisible")
+                resp = requests.get(
+                    f"{es_host}{index_name}/_doc/{catalogue_id}", auth=es_auth
+                )
+                assert resp.json()["_source"]["type"] == "Invisible"
+            else:
+                print("Dry run, new work is:")
+                print(json.dumps(new_work, indent=2))
 
-    return miro_id
+        remove_associated_images = get_associated_image_remover(
+            es_host, es_auth, catalogue_id, indices
+        )
+
+        # Don't bother going through all task definitions if we've done everything
+        # It's just duplication between staging and prod
+        break
+
+    return miro_id, remove_associated_images
 
 
-def suppress_work_in_miro_vhs(miro_id):
+def suppress_work_in_miro_vhs(miro_id, dry_run):
     print("*** Marking the image as withdrawn in the Miro VHS")
     dynamodb_client = platform_client("dynamodb")
 
@@ -200,15 +280,19 @@ def suppress_work_in_miro_vhs(miro_id):
 
     # AWLC: I should do a conditional PutItem here because it's a VHS, but I CBA.
     # This table isn't usually changing much.
-    resp = dynamodb_client.put_item(TableName="vhs-sourcedata-miro", Item=item)
+    if not dry_run:
+        resp = dynamodb_client.put_item(TableName="vhs-sourcedata-miro", Item=item)
 
-    resp = dynamodb_client.get_item(
-        TableName="vhs-sourcedata-miro", Key={"id": {"S": miro_id}}
-    )
-    assert not resp["Item"]["isClearedForCatalogueAPI"]["BOOL"]
+        resp = dynamodb_client.get_item(
+            TableName="vhs-sourcedata-miro", Key={"id": {"S": miro_id}}
+        )
+        assert not resp["Item"]["isClearedForCatalogueAPI"]["BOOL"]
+    else:
+        print("Dry run, new VHS entry is:")
+        print(json.dumps(item, indent=2))
 
 
-def remove_image_from_loris_s3_bucket(miro_id):
+def remove_image_from_loris_s3_bucket(miro_id, dry_run):
     print("*** Removing the image from the Loris S3 bucket")
     s3_client = platform_client("s3")
 
@@ -229,39 +313,68 @@ def remove_image_from_loris_s3_bucket(miro_id):
     assert key.endswith(".jpg")
 
     print("··· Detected object in S3 bucket, deleting: %s" % key)
-    s3_client.delete_object(Bucket=bucket, Key=key)
+    if not dry_run:
+        s3_client.delete_object(Bucket=bucket, Key=key)
 
 
-def create_cloudfront_invalidations(miro_id):
-    print("*** Creating a CloudFront invalidation for Loris")
-    cloudfront_client = platform_client("cloudfront")
-
+def invalidate_cloudfront_path(
+    cloudfront_client, *, domain_name, invalidation_path, dry_run
+):
     resp = cloudfront_client.list_distributions()
     assert not resp["DistributionList"]["IsTruncated"]
+
+    def is_matching_cloudfront_distribution(item):
+        has_origin_domain_name = any(
+            i["DomainName"] == domain_name for i in item["Origins"]["Items"]
+        )
+
+        has_alias_domain_name = domain_name in item["Aliases"]["Items"]
+
+        return has_origin_domain_name or has_alias_domain_name
+
     matching = [
         item
         for item in resp["DistributionList"]["Items"]
-        if item["Origins"]["Items"][0]["DomainName"]
-        == "iiif-origin.wellcomecollection.org"
+        if is_matching_cloudfront_distribution(item)
     ]
-    assert len(matching) == 1
-    distribution_id = matching[0]["Id"]
-    print("··· Detected Loris CloudFront distribution as %s" % distribution_id)
 
-    url = "/image/%s.jpg/*" % miro_id
-    print("··· Issuing an invalidation for %s" % url)
+    for distribution in matching:
+        print(
+            "··· Detected a CloudFront distribution for %s as %s"
+            % (domain_name, distribution["Id"])
+        )
+        print("··· Issuing an invalidation for %s" % invalidation_path)
 
-    resp = cloudfront_client.create_invalidation(
-        DistributionId=distribution_id,
-        InvalidationBatch={
-            "Paths": {"Quantity": 1, "Items": [url]},
-            "CallerReference": dt.datetime.now().isoformat(),
-        },
+        if not dry_run:
+            resp = cloudfront_client.create_invalidation(
+                DistributionId=distribution["Id"],
+                InvalidationBatch={
+                    "Paths": {"Quantity": 1, "Items": [invalidation_path]},
+                    "CallerReference": dt.datetime.now().isoformat(),
+                },
+            )
+            assert resp["ResponseMetadata"]["HTTPStatusCode"] == 201
+
+
+def create_cloudfront_invalidations(*, catalogue_id, miro_id, dry_run):
+    print("*** Creating a CloudFront invalidation for Loris")
+    invalidate_cloudfront_path(
+        platform_client("cloudfront"),
+        domain_name="iiif-origin.wellcomecollection.org",
+        invalidation_path="/image/%s.jpg/*" % miro_id,
+        dry_run=dry_run,
     )
-    assert resp["ResponseMetadata"]["HTTPStatusCode"] == 201
+
+    print(f"*** Creating a CloudFront invalidation for /works/{catalogue_id}")
+    invalidate_cloudfront_path(
+        experience_client("cloudfront"),
+        domain_name="wellcomecollection.org",
+        invalidation_path=f"/works/{catalogue_id}",
+        dry_run=dry_run,
+    )
 
 
-def update_miro_inventory(miro_id):
+def update_miro_inventory(miro_id, dry_run):
     print("*** Updating the Miro inventory")
     dynamodb_client = platform_client("dynamodb")
     s3_client = platform_client("s3")
@@ -271,7 +384,7 @@ def update_miro_inventory(miro_id):
     )
     item = resp["Item"]
 
-    s3_bucket = item["location"]["M"]["namespace"]["S"]
+    s3_bucket = item["location"]["M"]["bucket"]["S"]
     s3_key = item["location"]["M"]["key"]["S"]
     print("··· Detected VHS inventory entry as s3://%s/%s" % (s3_bucket, s3_key))
 
@@ -289,33 +402,39 @@ def update_miro_inventory(miro_id):
         return
 
     print("··· Updating VHS inventory entry")
-    s3_client.put_object(Bucket=s3_bucket, Key=new_key, Body=new_entry)
+    if not dry_run:
+        s3_client.put_object(Bucket=s3_bucket, Key=new_key, Body=new_entry)
 
     item["location"]["M"]["key"]["S"] = new_key
     item["version"]["N"] = str(int(item["version"]["N"]) + 1)
 
-    resp = dynamodb_client.put_item(TableName="vhs-miro-migration", Item=item)
+    if not dry_run:
+        dynamodb_client.put_item(TableName="vhs-miro-migration", Item=item)
+    else:
+        print("Dry run, new VHS item is:")
+        print(json.dumps(item, indent=2))
 
 
 @click.command()
 @click.argument("catalogue_id")
 @click.option("-i", "--index", multiple=True, required=True)
-def main(catalogue_id, index):
-    print("*** Suppressing Miro ID %s" % catalogue_id)
-
-    miro_id = remove_image_from_es_indexes(catalogue_id=catalogue_id, indices=index)
+@click.option("--dry-run", default=False, is_flag=True)
+def main(catalogue_id, index, dry_run):
+    print("*** Suppressing work ID %s" % catalogue_id)
+    miro_id, remove_associated_images = remove_image_from_es_indexes(
+        catalogue_id=catalogue_id, indices=index, dry_run=dry_run
+    )
     assert miro_id is not None, "Don't know the Miro ID!"
     print("*** Detected Miro ID as %s" % miro_id)
 
-    suppress_work_in_miro_vhs(miro_id)
+    remove_associated_images(dry_run)
+    suppress_work_in_miro_vhs(miro_id, dry_run)
 
-    remove_image_from_loris_s3_bucket(miro_id)
-    create_cloudfront_invalidations(miro_id)
-    update_miro_inventory(miro_id)
-
-    print(
-        "*** You also need to (manually) create a CloudFront invalidation for the /works page on wellcomecollection.org"
+    remove_image_from_loris_s3_bucket(miro_id, dry_run)
+    create_cloudfront_invalidations(
+        catalogue_id=catalogue_id, miro_id=miro_id, dry_run=dry_run
     )
+    update_miro_inventory(miro_id, dry_run)
 
 
 if __name__ == "__main__":

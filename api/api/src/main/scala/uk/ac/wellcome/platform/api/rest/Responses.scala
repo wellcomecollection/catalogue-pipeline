@@ -54,12 +54,12 @@ object DisplayResultList {
   implicit def encoder[R: Encoder, A: Encoder]
     : Encoder[DisplayResultList[R, A]] = deriveConfiguredEncoder
 
-  def apply(
-    resultList: ResultList[Work.Visible[Indexed], Aggregations],
-    searchOptions: SearchOptions[_, _],
-    includes: WorksIncludes,
-    requestUri: Uri,
-    contextUri: String): DisplayResultList[DisplayWork, DisplayAggregations] =
+  def apply(resultList: ResultList[Work.Visible[Indexed], WorkAggregations],
+            searchOptions: SearchOptions[_, _, _],
+            includes: WorksIncludes,
+            requestUri: Uri,
+            contextUri: String)
+    : DisplayResultList[DisplayWork, DisplayWorkAggregations] =
     PaginationResponse(resultList, searchOptions, requestUri) match {
       case PaginationResponse(totalPages, prevPage, nextPage) =>
         DisplayResultList(
@@ -70,15 +70,18 @@ object DisplayResultList {
           results = resultList.results.map(DisplayWork(_, includes)),
           prevPage = prevPage,
           nextPage = nextPage,
-          aggregations = resultList.aggregations.map(DisplayAggregations.apply)
+          aggregations =
+            resultList.aggregations.map(DisplayWorkAggregations.apply)
         )
     }
 
-  def apply(resultList: ResultList[Image[ImageState.Indexed], Unit],
-            searchOptions: SearchOptions[_, _],
-            includes: MultipleImagesIncludes,
-            requestUri: Uri,
-            contextUri: String): DisplayResultList[DisplayImage, Unit] =
+  def apply(
+    resultList: ResultList[Image[ImageState.Indexed], ImageAggregations],
+    searchOptions: SearchOptions[_, _, _],
+    includes: MultipleImagesIncludes,
+    requestUri: Uri,
+    contextUri: String)
+    : DisplayResultList[DisplayImage, DisplayImageAggregations] =
     PaginationResponse(resultList, searchOptions, requestUri) match {
       case PaginationResponse(totalPages, prevPage, nextPage) =>
         DisplayResultList(
@@ -89,7 +92,8 @@ object DisplayResultList {
           results = resultList.results.map(DisplayImage(_, includes)),
           prevPage = prevPage,
           nextPage = nextPage,
-          aggregations = resultList.aggregations
+          aggregations =
+            resultList.aggregations.map(DisplayImageAggregations.apply)
         )
     }
 }

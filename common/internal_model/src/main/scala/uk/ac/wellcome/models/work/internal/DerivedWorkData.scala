@@ -2,7 +2,7 @@ package uk.ac.wellcome.models.work.internal
 
 case class DerivedWorkData(
   availableOnline: Boolean,
-  contributorAgents: List[String],
+  contributorAgents: List[String] = Nil,
 )
 
 object DerivedWorkData {
@@ -31,8 +31,8 @@ object DerivedWorkData {
   private def containsDigitalLocation(items: List[Item[_]]): Boolean =
     items.exists { item =>
       item.locations.exists {
-        case _: DigitalLocationDeprecated => true
-        case _                            => false
+        case _: DigitalLocation => true
+        case _                  => false
       }
     }
 }

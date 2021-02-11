@@ -100,7 +100,7 @@ class IdentifierGeneratorTest
         triedIds shouldBe a[Success[_]]
 
         val ids = triedIds.get
-        ids.size shouldBe (sourceIdentifiers.length)
+        ids.size shouldBe sourceIdentifiers.length
 
         val i = identifiersTable.i
         val maybeIdentifiers = withSQL {
@@ -177,7 +177,7 @@ class IdentifierGeneratorTest
         )
 
         val id = triedId.get.values.head.CanonicalId
-        id should not be (empty)
+        id should not be empty
 
         val i = identifiersTable.i
         val maybeIdentifier = withSQL {

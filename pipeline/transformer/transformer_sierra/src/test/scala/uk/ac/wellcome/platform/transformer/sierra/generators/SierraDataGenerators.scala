@@ -26,11 +26,13 @@ trait SierraDataGenerators extends IdentifiersGenerators with SierraGenerators {
 
   def createSierraItemDataWith(
     deleted: Boolean = false,
-    location: Option[SierraSourceLocation] = None
+    location: Option[SierraSourceLocation] = None,
+    callNumber: Option[String] = None
   ): SierraItemData =
     SierraItemData(
       deleted = deleted,
-      location = location
+      location = location,
+      callNumber = callNumber
     )
 
   def createSierraItemData: SierraItemData = createSierraItemDataWith()

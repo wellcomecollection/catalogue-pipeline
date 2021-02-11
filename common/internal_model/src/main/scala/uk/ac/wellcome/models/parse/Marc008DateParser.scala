@@ -25,7 +25,7 @@ object Marc008DateParser extends Parser[InstantRange] with DateParserUtils {
       differingReleaseAndProduction.toInstantRange
 
   def singleKnownDate[_: P] =
-    ("s" ~ partialYear ~ emptyDate)
+    "s" ~ partialYear ~ emptyDate
 
   def multipleDates[_: P] =
     ("m" ~ year ~ year) map { case (from, to) => FuzzyDateRange(from, to) }

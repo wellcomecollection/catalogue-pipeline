@@ -340,9 +340,57 @@ class MergerWorkerServiceTest
     }
   }
 
+  it("passes through a deleted work unmodified") {
+    val deletedWork = identifiedWork().deleted()
+    val visibleWork = sierraPhysicalIdentifiedWork()
+      .mergeCandidates(
+        List(
+          MergeCandidate(
+            id = IdState.Identified(
+              deletedWork.state.canonicalId,
+              deletedWork.sourceIdentifier),
+            reason = Some("Physical/digitised Sierra work")
+          )
+        )
+      )
+
+    withMergerWorkerServiceFixtures {
+      case (retriever, QueuePair(queue, dlq), senders, _, index) =>
+        retriever.index ++= Map(
+          visibleWork.id -> visibleWork,
+          deletedWork.id -> deletedWork
+        )
+
+        val matcherResult = MatcherResult(
+          Set(
+            MatchedIdentifiers(
+              worksToWorkIdentifiers(List(visibleWork, deletedWork)))
+          ))
+
+        sendNotificationToSQS(queue = queue, message = matcherResult)
+
+        eventually {
+          assertQueueEmpty(queue)
+          assertQueueEmpty(dlq)
+
+          getWorksSent(senders) should have size 2
+
+          val visibleWorks = index.collect {
+            case (_, Left(work: Work.Visible[Merged])) => work
+          }
+          val deletedWorks = index.collect {
+            case (_, Left(work: Work.Deleted[Merged])) => work
+          }
+
+          visibleWorks.map { _.id } shouldBe Seq(visibleWork.id)
+          deletedWorks.map { _.id } shouldBe Seq(deletedWork.id)
+        }
+    }
+  }
+
   it("fails if the message sent is not a matcher result") {
     withMergerWorkerServiceFixtures {
-      case (_, QueuePair(queue, dlq), _, metrics, index) =>
+      case (_, QueuePair(queue, dlq), _, metrics, _) =>
         sendInvalidJSONto(queue)
 
         eventually {

@@ -42,6 +42,10 @@ module "batcher" {
   cpu    = 1024
   memory = 2048
 
+  depends_on = [
+    null_resource.elasticsearch_users,
+  ]
+
   deployment_service_env  = var.release_label
   deployment_service_name = "work-batcher"
 }

@@ -62,7 +62,7 @@ class WorkPredicatesTest
     forAll(filtered) { work =>
       work.sourceIdentifier.identifierType.id shouldBe "mets"
       work.data.items should have size 1
-      work.data.items.head.locations.head shouldBe a[DigitalLocationDeprecated]
+      work.data.items.head.locations.head shouldBe a[DigitalLocation]
     }
   }
 
@@ -72,7 +72,7 @@ class WorkPredicatesTest
     forAll(filtered) { work =>
       work.sourceIdentifier.identifierType.id shouldBe "miro-image-number"
       work.data.items should have size 1
-      work.data.items.head.locations.head shouldBe a[DigitalLocationDeprecated]
+      work.data.items.head.locations.head shouldBe a[DigitalLocation]
     }
   }
 
@@ -91,7 +91,7 @@ class WorkPredicatesTest
     forAll(filtered) { work =>
       work.sourceIdentifier.identifierType.id shouldBe "sierra-system-number"
       atLeast(1, work.data.items.flatMap(_.locations)) should matchPattern {
-        case _: PhysicalLocationDeprecated =>
+        case _: PhysicalLocation =>
       }
     }
   }

@@ -9,8 +9,15 @@ import tempfile
 import urllib.parse
 
 import click
+import humanize
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 import requests
+
+import api_stats
+
+
+PROD_URL = "api.wellcomecollection.org"
+STAGING_URL = "api-stage.wellcomecollection.org"
 
 
 class ApiDiffer:
@@ -18,12 +25,8 @@ class ApiDiffer:
     printing the results to stdout.
     """
 
-    prod = "api.wellcomecollection.org"
-    stage = "api-stage.wellcomecollection.org"
-
-    def __init__(self, work_id=None, params=None):
-        suffix = f"/{work_id}" if work_id else ""
-        self.path = f"/catalogue/v2/works{suffix}"
+    def __init__(self, path=None, params=None, **kwargs):
+        self.path = f"/catalogue/v2{path}"
         self.params = params or {}
 
     @property
@@ -38,8 +41,8 @@ class ApiDiffer:
         """
         Fetches a URL from the prod/staging API, and returns a (status, HTML diff).
         """
-        (prod_status, prod_json) = self.call_api(self.prod)
-        (stage_status, stage_json) = self.call_api(self.stage)
+        (prod_status, prod_json) = self.call_api(PROD_URL)
+        (stage_status, stage_json) = self.call_api(STAGING_URL)
         if prod_status != stage_status:
             lines = [
                 f"* Received {prod_status} on prod and {stage_status} on stage",
@@ -50,7 +53,7 @@ class ApiDiffer:
                 "stage:",
                 f"{json.dumps(stage_json, indent=2)}",
             ]
-            return ("different status", "\n".join(lines))
+            return ("different status", lines)
         elif prod_json == stage_json:
             return ("match", "")
         else:
@@ -82,12 +85,15 @@ class ApiDiffer:
     help="What routes file to use (default=routes.json)",
 )
 def main(routes_file):
+    session = api_stats.get_session_with_role(
+        role_arn="arn:aws:iam::760097843905:role/platform-developer"
+    )
+
     with open(routes_file) as f:
         routes = json.load(f)
 
     def get_diff(route):
-        work_id, params = route.get("workId"), route.get("params")
-        differ = ApiDiffer(work_id, params)
+        differ = ApiDiffer(**route)
         status, diff_lines = differ.get_html_diff()
 
         return {
@@ -103,12 +109,19 @@ def main(routes_file):
 
         diffs = [fut.result() for fut in futures]
 
+    stats = {
+        label: api_stats.get_api_stats(session, api_url=api_url)
+        for (label, api_url) in [("prod", PROD_URL), ("staging", STAGING_URL)]
+    }
+
     env = Environment(
         loader=FileSystemLoader("."), autoescape=select_autoescape(["html", "xml"])
     )
 
+    env.filters["intcomma"] = humanize.intcomma
+
     template = env.get_template("template.html")
-    html = template.render(now=datetime.datetime.now(), diffs=diffs)
+    html = template.render(now=datetime.datetime.now(), diffs=diffs, stats=stats)
 
     _, tmp_path = tempfile.mkstemp(suffix=".html")
     with open(tmp_path, "w") as outfile:

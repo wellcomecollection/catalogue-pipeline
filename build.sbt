@@ -82,7 +82,8 @@ lazy val pipeline_storage_typesafe = setupProject(
   project,
   "common/pipeline_storage_typesafe",
   localDependencies = Seq(pipeline_storage),
-  externalDependencies = CatalogueDependencies.pipelineStorageTypesafeDependencies
+  externalDependencies =
+    CatalogueDependencies.pipelineStorageTypesafeDependencies
 )
 
 lazy val api = setupProject(
@@ -128,22 +129,23 @@ lazy val matcher = setupProject(
 lazy val merger = setupProject(
   project,
   "pipeline/merger",
-  localDependencies =
-    Seq(internal_model, pipeline_storage_typesafe),
+  localDependencies = Seq(internal_model, pipeline_storage_typesafe),
   externalDependencies = CatalogueDependencies.mergerDependencies
 )
 
 lazy val relation_embedder = setupProject(
   project,
   "pipeline/relation_embedder/relation_embedder",
-  localDependencies = Seq(internal_model, elasticsearch, pipeline_storage_typesafe),
+  localDependencies =
+    Seq(internal_model, elasticsearch, pipeline_storage_typesafe),
   externalDependencies = CatalogueDependencies.relationEmbedderDependencies
 )
 
 lazy val router = setupProject(
   project,
   "pipeline/relation_embedder/router",
-  localDependencies = Seq(internal_model, elasticsearch, pipeline_storage_typesafe),
+  localDependencies =
+    Seq(internal_model, elasticsearch, pipeline_storage_typesafe),
   externalDependencies = CatalogueDependencies.routerDependencies
 )
 
@@ -163,7 +165,8 @@ lazy val reindex_worker = setupProject(
 lazy val transformer_common = setupProject(
   project,
   "pipeline/transformer/transformer_common",
-  localDependencies = Seq(internal_model, source_model_typesafe, pipeline_storage_typesafe),
+  localDependencies =
+    Seq(internal_model, source_model_typesafe, pipeline_storage_typesafe),
   externalDependencies = CatalogueDependencies.transformerCommonDependencies
 )
 
@@ -237,11 +240,25 @@ lazy val mets_adapter = setupProject(
 
 // CALM adapter
 
+lazy val calm_api_client = setupProject(
+  project,
+  folder = "calm_adapter/calm_api_client",
+  localDependencies = Seq(flows),
+  externalDependencies = CatalogueDependencies.calmApiClientDependencies
+)
+
 lazy val calm_adapter = setupProject(
   project,
   folder = "calm_adapter/calm_adapter",
-  localDependencies = Seq(internal_model, source_model_typesafe, flows),
-  externalDependencies = CatalogueDependencies.calmAdapterDependencies
+  localDependencies =
+    Seq(calm_api_client, internal_model, source_model_typesafe)
+)
+
+lazy val calm_deletion_checker = setupProject(
+  project,
+  folder = "calm_adapter/calm_deletion_checker",
+  localDependencies = Seq(calm_api_client, source_model_typesafe),
+  externalDependencies = ExternalDependencies.scalacheckDependencies
 )
 
 // Inference manager

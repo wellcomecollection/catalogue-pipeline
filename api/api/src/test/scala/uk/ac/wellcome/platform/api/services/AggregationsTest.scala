@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.api.services
 
 import java.time.LocalDate
-
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.concurrent.ScalaFutures
@@ -18,6 +17,7 @@ import uk.ac.wellcome.models.work.generators.{
   SubjectGenerators,
   WorkGenerators
 }
+import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
 
 class AggregationsTest
     extends AnyFunSpec
@@ -27,6 +27,7 @@ class AggregationsTest
     with SubjectGenerators
     with GenreGenerators
     with ProductionEventGenerators
+    with SearchOptionsGenerators
     with WorkGenerators {
 
   val worksService = new WorksService(
@@ -40,8 +41,8 @@ class AggregationsTest
     }
     withLocalWorksIndex { index =>
       insertIntoElasticsearch(index, works: _*)
-      val searchOptions = SearchOptions[WorkFilter, WorkMustQuery](
-        aggregations = List(AggregationRequest.Format)
+      val searchOptions = createWorksSearchOptionsWith(
+        aggregations = List(WorkAggregationRequest.Format)
       )
       whenReady(aggregationQuery(index, searchOptions)) { aggs =>
         aggs.format should not be empty
@@ -72,8 +73,8 @@ class AggregationsTest
 
     withLocalWorksIndex { index =>
       insertIntoElasticsearch(index, works: _*)
-      val searchOptions = SearchOptions[WorkFilter, WorkMustQuery](
-        aggregations = List(AggregationRequest.ProductionDate),
+      val searchOptions = createWorksSearchOptionsWith(
+        aggregations = List(WorkAggregationRequest.ProductionDate),
         filters = List(
           DateRangeFilter(Some(LocalDate.of(1960, 1, 1)), None)
         )
@@ -98,9 +99,9 @@ class AggregationsTest
     }
     withLocalWorksIndex { index =>
       insertIntoElasticsearch(index, works: _*)
-      val searchOptions = SearchOptions[WorkFilter, WorkMustQuery](
+      val searchOptions = createWorksSearchOptionsWith(
         searchQuery = Some(SearchQuery("anything will give zero results")),
-        aggregations = List(AggregationRequest.Format)
+        aggregations = List(WorkAggregationRequest.Format)
       )
       whenReady(aggregationQuery(index, searchOptions)) { aggs =>
         aggs.format should not be empty
@@ -126,9 +127,9 @@ class AggregationsTest
     it("applies filters to their related aggregations") {
       withLocalWorksIndex { index =>
         insertIntoElasticsearch(index, works: _*)
-        val searchOptions = SearchOptions[WorkFilter, WorkMustQuery](
+        val searchOptions = createWorksSearchOptionsWith(
           aggregations =
-            List(AggregationRequest.Format, AggregationRequest.Subject),
+            List(WorkAggregationRequest.Format, WorkAggregationRequest.Subject),
           filters = List(
             FormatFilter(List(Format.Books.id)),
           )
@@ -149,12 +150,12 @@ class AggregationsTest
           case Subject(IdState.Unidentifiable, label, _) => label
           case _                                         => "bilberry"
         }
-        val searchOptions = SearchOptions[WorkFilter, WorkMustQuery](
+        val searchOptions = createWorksSearchOptionsWith(
           aggregations =
-            List(AggregationRequest.Format, AggregationRequest.Subject),
+            List(WorkAggregationRequest.Format, WorkAggregationRequest.Subject),
           filters = List(
             FormatFilter(List(Format.Books.id)),
-            SubjectFilter(subjectQuery)
+            SubjectFilter(Seq(subjectQuery))
           )
         )
         whenReady(aggregationQuery(index, searchOptions)) { aggs =>
@@ -173,12 +174,12 @@ class AggregationsTest
           case Subject(IdState.Unidentifiable, label, _) => label
           case _                                         => "passionfruit"
         }
-        val searchOptions = SearchOptions[WorkFilter, WorkMustQuery](
+        val searchOptions = createWorksSearchOptionsWith(
           aggregations =
-            List(AggregationRequest.Format, AggregationRequest.Subject),
+            List(WorkAggregationRequest.Format, WorkAggregationRequest.Subject),
           filters = List(
             FormatFilter(List(Format.Books.id)),
-            SubjectFilter(subjectQuery)
+            SubjectFilter(Seq(subjectQuery))
           )
         )
         whenReady(worksService.listOrSearchWorks(index, searchOptions)) { res =>
@@ -190,9 +191,7 @@ class AggregationsTest
     }
   }
 
-  private def aggregationQuery(
-    index: Index,
-    searchOptions: SearchOptions[WorkFilter, WorkMustQuery]) =
+  private def aggregationQuery(index: Index, searchOptions: WorkSearchOptions) =
     worksService
       .listOrSearchWorks(index, searchOptions)
       .map(_.right.get.aggregations.get)

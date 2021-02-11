@@ -27,9 +27,12 @@ case object VisibleWorkFilter extends WorkFilter
 
 case class LanguagesFilter(languageIds: Seq[String]) extends WorkFilter
 
-case class GenreFilter(genreQuery: String) extends WorkFilter
+case class GenreFilter(genreQuery: Seq[String]) extends WorkFilter
 
-case class SubjectFilter(subjectQuery: String) extends WorkFilter
+case class SubjectFilter(subjectQuery: Seq[String]) extends WorkFilter
+
+case class ContributorsFilter(contributorQueries: Seq[String])
+    extends WorkFilter
 
 case class LicenseFilter(licenseIds: Seq[String])
     extends WorkFilter

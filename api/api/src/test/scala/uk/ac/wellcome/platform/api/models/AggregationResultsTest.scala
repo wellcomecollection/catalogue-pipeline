@@ -49,7 +49,7 @@ class AggregationResultsTest extends AnyFunSpec with Matchers {
         )
       )
     )
-    val singleAgg = Aggregations(searchResponse)
+    val singleAgg = WorkAggregations(searchResponse)
     singleAgg.get.format shouldBe Some(
       Aggregation[Format](
         List(
@@ -87,7 +87,7 @@ class AggregationResultsTest extends AnyFunSpec with Matchers {
         )
       )
     )
-    val singleAgg = Aggregations(searchResponse)
+    val singleAgg = WorkAggregations(searchResponse)
     singleAgg.get.format shouldBe Some(
       Aggregation[Format](List(AggregationBucket(data = Books, count = 1234))))
   }

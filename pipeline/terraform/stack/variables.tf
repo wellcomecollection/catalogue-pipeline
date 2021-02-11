@@ -4,7 +4,7 @@ variable "pipeline_date" {
 
 variable "max_capacity" {
   type        = number
-  default     = 10
+  default     = 15
   description = "The max capacity of every ECS service will be less than or equal to this value"
 }
 
@@ -27,10 +27,10 @@ variable "rds_cluster_id" {
 variable "rds_subnet_group_name" {
   type = string
 }
-variable "extra_rds_instances" {
-  type        = number
-  default     = 0
-  description = "How many *extra* RDS instances to add to enable greater ID minter throughput"
+
+variable "is_reindexing" {
+  type        = bool
+  description = "Are you reindexing through this pipeline right now?"
 }
 
 variable "rds_ids_access_security_group_id" {}
@@ -75,34 +75,10 @@ variable "storage_bucket_name" {
 
 variable "inferrer_model_data_bucket_name" {}
 
-variable "pipeline_storage_id" {
-  default     = "pipeline_storage"
-  description = "The ID of the pipeline_storage instance used for secrets"
+variable "traffic_filter_platform_vpce_id" {
+  type = string
 }
 
-locals {
-  pipeline_storage_es_host     = "elasticsearch/${var.pipeline_storage_id}/private_host"
-  pipeline_storage_es_port     = "catalogue/${var.pipeline_storage_id}/es_port"
-  pipeline_storage_es_protocol = "catalogue/${var.pipeline_storage_id}/es_protocol"
-
-  pipeline_storage_service_list = [
-    "id_minter",
-    "matcher",
-    "merger",
-    "transformer",
-    "relation_embedder",
-    "router",
-    "inferrer",
-  ]
-
-  pipeline_storage_es_service_secrets = zipmap(local.pipeline_storage_service_list, [
-    for service in local.pipeline_storage_service_list :
-    {
-      es_host     = local.pipeline_storage_es_host
-      es_port     = local.pipeline_storage_es_port
-      es_protocol = local.pipeline_storage_es_protocol
-      es_username = "catalogue/${var.pipeline_storage_id}/${service}/es_username"
-      es_password = "catalogue/${var.pipeline_storage_id}/${service}/es_password"
-    }
-  ])
+variable "traffic_filter_public_internet_id" {
+  type = string
 }

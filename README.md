@@ -1,6 +1,9 @@
 # Catalogue
 
-[![Build status](https://badge.buildkite.com/0ca819db1215b66ecb17019d8ee5331d8e537094d051141219.svg?branch=master)](https://buildkite.com/wellcomecollection/catalogue)
+| CI Pipeline       | Status                                                                                                                                                                    |
+|-------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Build             | [![Build status](https://badge.buildkite.com/0ca819db1215b66ecb17019d8ee5331d8e537094d051141219.svg?branch=master)](https://buildkite.com/wellcomecollection/catalogue)   |
+| Integration tests | [![Build status](https://badge.buildkite.com/31a06ac64ab4f09ca5bc5930e21a57889c3f02561260f18ae6.svg?branch=main)](https://buildkite.com/wellcomecollection/integration) |
 
 ## Purpose
 

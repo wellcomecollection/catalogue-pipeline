@@ -40,6 +40,27 @@
     .meta {
       color: brown;
     }
+
+    th, td {
+      padding-left:  10px;
+      padding-right: 10px;
+    }
+
+    th.row_header {
+      text-align: left;
+    }
+
+    td.stat {
+      text-align: right;
+    }
+
+    td.diff_increase {
+      color: green;
+    }
+
+    td.diff_decrease {
+      color: red;
+    }
   </style>
 
   <title>API diff for {{ now.strftime("%A %-d %B %Y @ %H:%M:%S") }}</title>
@@ -48,13 +69,44 @@
 <body>
   <h1>API diff for {{ now.strftime("%A %-d %B %Y @ %H:%M:%S") }}</h1>
 
+  <details open>
+    <summary><strong>ℹ️ Index statistics</strong></summary>
+    <table>
+      <tr>
+        <th></th>
+        <th>prod ({{ stats.prod.index_name }})</th>
+        <th>staging ({{ stats.staging.index_name }})</th>
+      </tr>
+
+      {% for work_type in ["Visible", "Redirected", "Invisible", "Deleted", "TOTAL"] %}
+      <tr>
+        <th class="row_header">{{ work_type }}</th>
+        <td class="stat">{{ stats.prod.work_types[work_type] | intcomma }}</td>
+        <td class="stat">{{ stats.staging.work_types[work_type] | intcomma }}</td>
+
+        {% set diff = stats.staging.work_types[work_type] - stats.prod.work_types[work_type] %}
+        <td class="stat {% if diff > 0 %}diff_increase{% else %}diff_decrease{% endif %}">
+          {% if diff > 0 %}
+            {{ diff | intcomma }} ▲
+          {% elif diff < 0 %}
+            {{ diff | intcomma }} ▼
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </details>
+
   {% for d in diffs %}
   <details {% if d.status == "match" %}class="match"{% else %}open{% endif %}>
     <summary>
       <strong>
         {% if d.status == "match" %}✅{% else %}❌{% endif %}
-        {{ d.display_url }}
-        {% if d.route.comment %}({{ d.route.comment }}){% endif %}
+        {% if d.route.comment %}
+          {{ d.route.comment }}
+        {% else %}
+          {{ d.display_url }}
+        {% endif %}
       </strong>
     </summary>
 

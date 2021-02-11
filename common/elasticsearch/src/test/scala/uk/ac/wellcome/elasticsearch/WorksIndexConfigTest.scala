@@ -57,7 +57,7 @@ class WorksIndexConfigTest
   it("puts a valid work") {
     forAll { sampleWork: Work[Identified] =>
       withLocalWorksIndex { index =>
-        whenReady(indexObject(index, sampleWork)) { resp =>
+        whenReady(indexObject(index, sampleWork)) { _ =>
           assertObjectIndexed(index, sampleWork)
         }
       }
@@ -156,7 +156,7 @@ class WorksIndexConfigTest
   it("puts a valid work using compression") {
     forAll { sampleWork: Work[Identified] =>
       withLocalWorksIndex { index =>
-        whenReady(indexObjectCompressed(index, sampleWork)) { resp =>
+        whenReady(indexObjectCompressed(index, sampleWork)) { _ =>
           assertObjectIndexed(index, sampleWork)
         }
       }

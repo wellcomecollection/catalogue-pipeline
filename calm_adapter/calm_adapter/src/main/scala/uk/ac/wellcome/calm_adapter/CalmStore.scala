@@ -1,6 +1,7 @@
 package uk.ac.wellcome.calm_adapter
 
 import grizzled.slf4j.Logging
+import uk.ac.wellcome.platform.calm_api_client.CalmRecord
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.{
   Identified,

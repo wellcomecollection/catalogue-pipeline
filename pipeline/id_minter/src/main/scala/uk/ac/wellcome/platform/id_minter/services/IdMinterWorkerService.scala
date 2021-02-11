@@ -1,14 +1,20 @@
 package uk.ac.wellcome.platform.id_minter.services
 
 import akka.Done
+import akka.stream.scaladsl.Flow
 import grizzled.slf4j.Logging
 import io.circe.{Decoder, Json}
+import software.amazon.awssdk.services.sqs.model.Message
 import uk.ac.wellcome.json.JsonUtil
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal.WorkState.Identified
 import uk.ac.wellcome.models.work.internal._
+import uk.ac.wellcome.pipeline_storage.PipelineStorageStream.{
+  batchRetrieveFlow,
+  processFlow
+}
 import uk.ac.wellcome.pipeline_storage.{PipelineStorageStream, Retriever}
 import uk.ac.wellcome.platform.id_minter.config.models.{
   IdentifiersTableConfig,
@@ -46,13 +52,16 @@ class IdMinterWorkerService[Destination](
       tableName = identifiersTableConfig.tableName
     )
 
-    pipelineStream.foreach(this.getClass.getSimpleName, processMessage)
+    pipelineStream.run(
+      this.getClass.getSimpleName,
+      Flow[(Message, NotificationMessage)]
+        .via(batchRetrieveFlow(pipelineStream.config, jsonRetriever))
+        .via(processFlow(pipelineStream.config, item => processMessage(item)))
+    )
   }
 
-  def processMessage(
-    message: NotificationMessage): Future[List[Work[Identified]]] =
+  def processMessage(json: Json): Future[List[Work[Identified]]] =
     for {
-      json <- jsonRetriever(message.body)
       updatedJson <- Future.fromTry(embedIds(json))
       work <- Future.fromTry(decodeJson(updatedJson))
     } yield List(work)

@@ -23,7 +23,7 @@ trait FlowOps extends Logging {
     def mapWithContext[T](f: (Ctx, Out) => Result[T]) =
       flow
         .map {
-          case (ctx, Some(data)) => (ctx, (f(ctx, data).map(Some(_))))
+          case (ctx, Some(data)) => (ctx, f(ctx, data).map(Some(_)))
           case (ctx, None)       => (ctx, Right(None))
         }
         .via(catchErrors)
@@ -45,7 +45,7 @@ trait FlowOps extends Logging {
         case (ctx, result) =>
           result.left.map { err =>
             error(
-              s"Error encountered processing SQS message. [Error]: ${err.getMessage} [Context]: ${ctx}",
+              s"Error encountered processing SQS message. [Error]: ${err.getMessage} [Context]: $ctx",
               err)
           }
           (ctx, result)

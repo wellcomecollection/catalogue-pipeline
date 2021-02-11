@@ -1,9 +1,6 @@
 package uk.ac.wellcome.platform.transformer.miro.transformers
 
-import uk.ac.wellcome.models.work.internal.{
-  DigitalLocationDeprecated,
-  LocationType
-}
+import uk.ac.wellcome.models.work.internal.{DigitalLocation, LocationType}
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 
 trait MiroLocation extends MiroLicenses with MiroContributorCodes {
@@ -23,9 +20,9 @@ trait MiroLocation extends MiroLicenses with MiroContributorCodes {
     imageUriTemplate.format(iiifImageApiBaseUri, miroId)
   }
 
-  def getLocation(miroRecord: MiroRecord): DigitalLocationDeprecated =
-    DigitalLocationDeprecated(
-      locationType = LocationType("iiif-image"),
+  def getLocation(miroRecord: MiroRecord): DigitalLocation =
+    DigitalLocation(
+      locationType = LocationType.IIIFImageAPI,
       url = buildImageApiURL(
         miroId = miroRecord.imageNumber,
         templateName = "info"

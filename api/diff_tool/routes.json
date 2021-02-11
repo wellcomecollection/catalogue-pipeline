@@ -1,98 +1,117 @@
 [
   {
+    "path": "/works",
     "params": {
       "include": "notes"
     }
   },
   {
+    "path": "/works",
     "params": {
       "page": 4,
       "pageSize": 5
     }
   },
   {
+    "path": "/works",
     "params": {
       "query": "botany"
     }
   },
   {
+    "path": "/works",
     "params": {
       "dateFrom": "1890-12-03",
       "dateTo": "1896-03-03"
     }
   },
   {
+    "path": "/works",
     "params": {
       "sort": "production.dates",
       "sortOrder": "desc"
     }
   },
   {
+    "path": "/works",
     "params": {
       "sort": "INVALID"
     }
   },
   {
+    "path": "/works",
     "params": {
       "aggregations": "workType,genres"
     }
   },
   {
+    "path": "/works",
     "params": {
       "language": "ger"
     }
   },
   {
+    "path": "/works",
     "params": {
       "workType": "b"
     }
   },
   {
-    "workId": "a224tb56",
+    "path": "/works/a224tb56",
     "params": {
       "include": "notes"
     }
   },
   {
-    "workId": "a22au6yn",
+    "path": "/works/a22au6yn",
     "params": {
       "include": "items,genres,identifiers"
     }
   },
   {
-    "workId": "nonexistent",
+    "path": "/works/nonexistent",
     "params": {}
   },
   {
-    "workId": "sqensfpm",
+    "path": "/works/sqensfpm",
     "params": {}
   },
   {
-    "workId": "japtptkk",
+    "path": "/works/japtptkk",
     "params": {
       "include": "identifiers,items,subjects,genres,contributors,production,languages,notes,images,succeededBy,precededBy,partOf,parts"
     },
     "comment": "A Sierra <> Miro merged work"
   },
   {
-    "workId": "nbsqzbba",
+    "path": "/works/nbsqzbba",
     "params": {
       "include": "identifiers,items,subjects,genres,contributors,production,languages,notes,images,succeededBy,precededBy,partOf,parts"
     },
     "comment": "A Sierra <> METS merged work"
   },
   {
-    "workId": "tuzsytuh",
+    "path": "/works/tuzsytuh",
     "params": {
       "include": "identifiers,items,subjects,genres,contributors,production,languages,notes,images,succeededBy,precededBy,partOf,parts"
     },
     "comment": "A Sierra physical <> digital <> METS merged work"
   },
   {
-    "workId": "ugmmch83",
+    "path": "/works/ugmmch83",
     "params": {
       "include": "identifiers,items,subjects,genres,contributors,production,languages,notes,images,succeededBy,precededBy,partOf,parts"
     },
     "comment": "A Sierra work with lots of items"
+  },
+  {
+    "path": "/images"
+  },
+  {
+    "path": "/works/qfkgyy9c",
+    "params": {
+      "include": "items,genres,identifiers"
+    },
+    "comment": "A redirected Work that had issues in the 2021-02-01 reindex"
   }
 ]

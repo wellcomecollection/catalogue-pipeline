@@ -21,6 +21,7 @@ import uk.ac.wellcome.storage.locking.dynamo.{
 import uk.ac.wellcome.storage.typesafe.DynamoBuilder
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 import com.sksamuel.elastic4s.Index
+import uk.ac.wellcome.pipeline_storage.typesafe.PipelineStorageStreamBuilder
 import uk.ac.wellcome.platform.matcher.storage.elastic.ElasticWorkLinksRetriever
 
 import scala.language.higherKinds
@@ -64,6 +65,7 @@ object Main extends WellcomeTypesafeApp {
         index = Index(config.requireString("es.index")))
 
     new MatcherWorkerService(
+      PipelineStorageStreamBuilder.buildPipelineStorageConfig(config),
       workLinksRetriever = workLinksRetriever,
       msgStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
       msgSender = SNSBuilder

@@ -69,9 +69,9 @@ case class MetsData(
 
   private def digitalLocation(license: Option[License],
                               accessStatus: Option[AccessStatus]) =
-    DigitalLocationDeprecated(
+    DigitalLocation(
       url = s"https://wellcomelibrary.org/iiif/$recordIdentifier/manifest",
-      locationType = LocationType("iiif-presentation"),
+      locationType = LocationType.IIIFPresentationAPI,
       license = license,
       accessConditions = accessConditions(accessStatus)
     )
@@ -139,16 +139,16 @@ case class MetsData(
   private def thumbnail(
     bnumber: String,
     license: Option[License],
-    accessStatus: Option[AccessStatus]): Option[DigitalLocationDeprecated] =
+    accessStatus: Option[AccessStatus]): Option[DigitalLocation] =
     for {
       fileReference <- titlePageFileReference
         .orElse(fileReferences.find(ImageUtils.isThumbnail))
       url <- ImageUtils.buildThumbnailUrl(bnumber, fileReference)
       if !accessStatus.exists(_.hasRestrictions)
     } yield
-      DigitalLocationDeprecated(
+      DigitalLocation(
         url = url,
-        locationType = LocationType("thumbnail-image"),
+        locationType = LocationType.ThumbnailImage,
         license = license
       )
 
@@ -162,7 +162,7 @@ case class MetsData(
       fileReferences
         .filter(ImageUtils.isImage)
         .flatMap { fileReference =>
-          ImageUtils.buildImageUrl(recordIdentifier, fileReference).map { url =>
+          ImageUtils.buildImageUrl(fileReference).map { url =>
             ImageData[IdState.Identifiable](
               id = IdState.Identifiable(
                 sourceIdentifier = ImageUtils
@@ -170,9 +170,9 @@ case class MetsData(
               ),
               version = version,
               locations = List(
-                DigitalLocationDeprecated(
+                DigitalLocation(
                   url = url,
-                  locationType = LocationType("iiif-image"),
+                  locationType = LocationType.IIIFImageAPI,
                   license = license,
                   accessConditions = accessConditions(accessStatus)
                 ),

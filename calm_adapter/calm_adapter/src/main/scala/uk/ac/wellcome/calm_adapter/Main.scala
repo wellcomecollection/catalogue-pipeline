@@ -9,6 +9,12 @@ import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.platform.calm_api_client.{
+  CalmAkkaHttpClient,
+  CalmApiClient,
+  CalmHttpClient,
+  CalmRecord,
+}
 import weco.catalogue.source_model.config.SourceVHSBuilder
 
 object Main extends WellcomeTypesafeApp {
@@ -37,10 +43,12 @@ object Main extends WellcomeTypesafeApp {
                                     ec: ExecutionContext,
                                     materializer: Materializer,
                                     httpClient: CalmHttpClient) =
-    new HttpCalmRetriever(
-      url = config.requireString("calm.api.url"),
-      username = config.requireString("calm.api.username"),
-      password = config.requireString("calm.api.password"),
+    new ApiCalmRetriever(
+      apiClient = new CalmApiClient(
+        url = config.requireString("calm.api.url"),
+        username = config.requireString("calm.api.username"),
+        password = config.requireString("calm.api.password"),
+      ),
       suppressedFields = config
         .requireString("calm.suppressedFields")
         .split(",")

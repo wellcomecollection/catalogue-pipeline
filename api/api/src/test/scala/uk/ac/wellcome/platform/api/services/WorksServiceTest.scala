@@ -9,7 +9,7 @@ import com.sksamuel.elastic4s.{ElasticError, Index}
 import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.display.models.AggregationRequest
+import uk.ac.wellcome.display.models.WorkAggregationRequest
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.models.work.generators.{
   ProductionEventGenerators,
@@ -193,7 +193,7 @@ class WorksServiceTest
     }
 
     it("aggregates formats") {
-      withLocalWorksIndex { index =>
+      withLocalWorksIndex { _ =>
         val work1 = indexedWork().format(Books)
         val work2 = indexedWork().format(Books)
         val work3 = indexedWork().format(Audio)
@@ -201,9 +201,9 @@ class WorksServiceTest
 
         val worksSearchOptions =
           createWorksSearchOptionsWith(
-            aggregations = List(AggregationRequest.Format))
+            aggregations = List(WorkAggregationRequest.Format))
 
-        val expectedAggregations = Aggregations(
+        val expectedAggregations = WorkAggregations(
           Some(
             Aggregation(
               List(
@@ -330,9 +330,8 @@ class WorksServiceTest
     allWorks: Seq[Work[Indexed]],
     expectedWorks: Seq[Work[Indexed]],
     expectedTotalResults: Int,
-    expectedAggregations: Option[Aggregations] = None,
-    worksSearchOptions: SearchOptions[WorkFilter, WorkMustQuery] =
-      createWorksSearchOptions
+    expectedAggregations: Option[WorkAggregations] = None,
+    worksSearchOptions: WorkSearchOptions = createWorksSearchOptions
   ): Assertion =
     assertResultIsCorrect(
       worksService.listOrSearchWorks
@@ -344,15 +343,14 @@ class WorksServiceTest
       worksSearchOptions)
 
   private def assertResultIsCorrect(
-    partialSearchFunction: (Index,
-                            SearchOptions[WorkFilter, WorkMustQuery]) => Future[
-      Either[ElasticError, ResultList[Work.Visible[Indexed], Aggregations]]]
+    partialSearchFunction: (Index, WorkSearchOptions) => Future[
+      Either[ElasticError, ResultList[Work.Visible[Indexed], WorkAggregations]]]
   )(
     allWorks: Seq[Work[Indexed]],
     expectedWorks: Seq[Work[Indexed]],
     expectedTotalResults: Int,
-    expectedAggregations: Option[Aggregations],
-    worksSearchOptions: SearchOptions[WorkFilter, WorkMustQuery]
+    expectedAggregations: Option[WorkAggregations],
+    worksSearchOptions: WorkSearchOptions
   ): Assertion =
     withLocalWorksIndex { index =>
       if (allWorks.nonEmpty) {

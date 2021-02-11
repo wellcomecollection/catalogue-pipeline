@@ -77,24 +77,24 @@ object WorkPredicates {
   private def physicalLocationExists(work: Work[Identified]): Boolean =
     work.data.items.exists { item =>
       item.locations.exists {
-        case _: PhysicalLocationDeprecated => true
-        case _                             => false
+        case _: PhysicalLocation => true
+        case _                   => false
       }
     }
 
   private def allDigitalLocations(work: Work[Identified]): Boolean =
     work.data.items.forall { item =>
       item.locations.forall {
-        case _: DigitalLocationDeprecated => true
-        case _                            => false
+        case _: DigitalLocation => true
+        case _                  => false
       }
     }
 
   private def allPhysicalLocations(work: Work[Identified]): Boolean =
     work.data.items.forall { item =>
       item.locations.forall {
-        case _: PhysicalLocationDeprecated => true
-        case _                             => false
+        case _: PhysicalLocation => true
+        case _                   => false
       }
     }
 

@@ -29,6 +29,8 @@ trait CalmRecordGenerators extends IdentifiersGenerators {
       data = data
     )
   }
+
+  def createCalmRecord: CalmRecord = createCalmRecordWith()
 }
 
 class CalmRecordGeneratorsTest

@@ -42,6 +42,10 @@ module "miro_transformer" {
   max_capacity      = var.max_capacity
   queue_read_policy = module.miro_transformer_queue.read_policy
 
+  depends_on = [
+    null_resource.elasticsearch_users,
+  ]
+
   deployment_service_env  = var.release_label
   deployment_service_name = "miro-transformer"
   shared_logging_secrets  = var.shared_logging_secrets

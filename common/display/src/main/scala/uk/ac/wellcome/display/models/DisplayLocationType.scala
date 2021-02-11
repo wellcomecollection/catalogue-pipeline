@@ -15,8 +15,5 @@ case class DisplayLocationType(
 
 object DisplayLocationType {
   def apply(locationType: LocationType): DisplayLocationType =
-    DisplayLocationType(
-      id = locationType.id,
-      label = locationType.label
-    )
+    DisplayLocationType(id = locationType.id, label = locationType.label)
 }

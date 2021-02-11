@@ -52,7 +52,9 @@ module "matcher" {
 
     dynamo_lock_timeout = local.lock_timeout
 
-    es_index = local.es_works_identified_index
+    es_index                    = local.es_works_identified_index
+    read_batch_size             = 100
+    read_flush_interval_seconds = 30
   }
 
   secret_env_vars = local.pipeline_storage_es_service_secrets["matcher"]
@@ -60,6 +62,10 @@ module "matcher" {
   subnets           = var.subnets
   max_capacity      = var.max_capacity
   queue_read_policy = module.matcher_input_queue.read_policy
+
+  depends_on = [
+    null_resource.elasticsearch_users,
+  ]
 
   deployment_service_env  = var.release_label
   deployment_service_name = "matcher"

@@ -10,13 +10,13 @@ import scala.util.Random
 
 trait ImageGenerators
     extends IdentifiersGenerators
-    with ItemsGenerators
+    with LocationGenerators
     with InstantGenerators
     with VectorGenerators
     with SierraWorkGenerators {
 
   def createImageDataWith(
-    locations: List[DigitalLocationDeprecated] = List(createImageLocation),
+    locations: List[DigitalLocation] = List(createImageLocation),
     version: Int = 1,
     identifierValue: String = randomAlphanumeric(10),
     identifierType: IdentifierType = IdentifierType("miro-image-number")
@@ -37,9 +37,9 @@ trait ImageGenerators
 
   def createMiroImageData = createImageDataWith(
     locations = List(
-      DigitalLocationDeprecated(
+      DigitalLocation(
         url = "https://iiif.wellcomecollection.org/V01234.jpg",
-        locationType = LocationType("iiif-image"),
+        locationType = LocationType.IIIFImageAPI,
         license = Some(License.CCBY)
       ))
   )
@@ -192,7 +192,7 @@ trait ImageGenerators
       locations = List(
         createDigitalLocationWith(
           license = Some(license),
-          locationType = createImageLocationType))
+          locationType = LocationType.IIIFImageAPI))
     ).toIndexedImage
 
   //   Create a set of images with intersecting LSH lists to ensure

@@ -57,7 +57,6 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     canonicalId: String = createCanonicalId,
     modifiedTime: Instant = instantInLast30Days,
-    relations: Relations = Relations.none
   ): Work.Visible[Identified] =
     Work.Visible[Identified](
       state = Identified(
@@ -177,7 +176,7 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
       : Work.Visible[State] =
       work.map(_.copy(contributors = contributors))
 
-    def thumbnail(thumbnail: LocationDeprecated): Work.Visible[State] =
+    def thumbnail(thumbnail: Location): Work.Visible[State] =
       work.map(_.copy(thumbnail = Some(thumbnail)))
 
     def production(

@@ -11,6 +11,7 @@ import uk.ac.wellcome.models.work.internal.DeletedReason.SuppressedFromSource
 import uk.ac.wellcome.models.work.internal.IdState.Identifiable
 import uk.ac.wellcome.platform.transformer.calm.periods.PeriodParser
 import uk.ac.wellcome.platform.transformer.calm.transformers.{
+  CalmItems,
   CalmLanguages,
   CalmNotes
 }
@@ -68,6 +69,8 @@ object CalmTransformer
                     List(knownErrToUntransformableReason(knownErr))
                 ))
             case unknownStatus: UnknownAccessStatus =>
+              warn(
+                s"${record.id}: unknown access status: ${unknownStatus.getMessage}")
               Right(
                 Work.Invisible[Source](
                   state = Source(sourceIdentifier(record), record.retrievedAt),
@@ -116,7 +119,7 @@ object CalmTransformer
     )
 
     for {
-      accessStatus <- accessStatus(record)
+      items <- CalmItems(record)
       title <- title(record)
       workType <- workType(record)
       collectionPath <- collectionPath(record)
@@ -129,7 +132,7 @@ object CalmTransformer
         subjects = subjects(record),
         languages = languages,
         mergeCandidates = mergeCandidates(record),
-        items = items(record, accessStatus),
+        items = items,
         contributors = contributors(record),
         description = description(record),
         physicalDescription = physicalDescription(record),
@@ -210,45 +213,11 @@ object CalmTransformer
         case "subsubsubseries"  => Right(WorkType.Series)
         case "item"             => Right(WorkType.Standard)
         case "piece"            => Right(WorkType.Standard)
-        case level              => Left(UnrecognisedLevel)
+        case level =>
+          warn(s"${record.id} has an unrecognised level: $level")
+          Left(UnrecognisedLevel)
       }
       .getOrElse(Left(LevelMissing))
-
-  def items(record: CalmRecord,
-            status: Option[AccessStatus]): List[Item[IdState.Unminted]] =
-    List(
-      Item(
-        title = None,
-        locations = List(physicalLocation(record, status))
-      )
-    )
-
-  def physicalLocation(
-    record: CalmRecord,
-    status: Option[AccessStatus]): PhysicalLocationDeprecated =
-    PhysicalLocationDeprecated(
-      locationType = LocationType("scmac"),
-      label = "Closed stores Arch. & MSS",
-      accessConditions = accessCondition(record, status).filterEmpty.toList
-    )
-
-  def accessCondition(record: CalmRecord,
-                      status: Option[AccessStatus]): AccessCondition =
-    AccessCondition(
-      status = status,
-      terms = record.getJoined("AccessConditions"),
-      to = status match {
-        case Some(AccessStatus.Closed)     => record.get("ClosedUntil")
-        case Some(AccessStatus.Restricted) => record.get("UserDate1")
-        case _                             => None
-      }
-    )
-
-  def accessStatus(record: CalmRecord): Result[Option[AccessStatus]] =
-    record
-      .get("AccessStatus")
-      .map(AccessStatus(_))
-      .toResult
 
   def description(record: CalmRecord): Option[String] =
     record.getJoined("Description").map(NormaliseText(_))
