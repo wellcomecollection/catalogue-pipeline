@@ -48,7 +48,10 @@ case object WorksMultiMatcher {
             (Some(100), "data.title.shingles"),
             (Some(100), "data.alternativeTitles"),
             (None, "data.lettering"),
-          ).map( case (weight, fieldName) => FieldWithOptionalBoost(fieldname, weight.map(_.toDouble))),
+          ).map {
+            case (weight, fieldName) =>
+              FieldWithOptionalBoost(fieldName, weight.map(_.toDouble))
+          },
           fuzziness = Some("AUTO")
         ),
         MultiMatchQuery(
