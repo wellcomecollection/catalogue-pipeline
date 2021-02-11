@@ -78,7 +78,7 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
       objectField("otherIdentifiers").fields(lowercaseKeyword("value")),
       objectField("format").fields(keywordField("id")),
       textWithKeyword("title").fields(
-        keywordField("keyword"),
+        lowercaseKeyword("keyword"),
         textField("english").analyzer(englishAnalyzer.name),
         textField("french").analyzer(frenchAnalyzer.name),
         textField("italian").analyzer(italianAnalyzer.name),
@@ -89,7 +89,7 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
         textField("shingles").analyzer(shingleAsciifoldingAnalyzer.name)
       ),
       textWithKeyword("alternativeTitles").fields(
-        keywordField("keyword"),
+        lowercaseKeyword("keyword"),
         textField("english").analyzer(englishAnalyzer.name),
         textField("french").analyzer(frenchAnalyzer.name),
         textField("italian").analyzer(italianAnalyzer.name),
