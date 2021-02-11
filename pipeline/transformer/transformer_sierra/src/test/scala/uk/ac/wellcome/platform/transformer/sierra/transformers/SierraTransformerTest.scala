@@ -110,8 +110,6 @@ class SierraTransformerTest
   it("extracts information from items") {
     val bibId = createSierraBibNumber
     val itemId = createSierraItemNumber
-    val locationType = LocationType.ClosedStores
-    val locationLabel = "Closed stores Med."
 
     def itemData(itemId: SierraItemNumber,
                  modifiedDate: Instant,
@@ -121,7 +119,7 @@ class SierraTransformerTest
          |  "id": "$itemId",
          |  "location": {
          |    "code": "sgmed",
-         |    "name": "$locationLabel"
+         |    "name": "Closed stores Med."
          |  }
          |}
          |""".stripMargin
@@ -161,7 +159,12 @@ class SierraTransformerTest
       id = IdState.Identifiable(
         sourceIdentifier = expectedSourceIdentifier,
         otherIdentifiers = expectedOtherIdentifiers),
-      locations = List(PhysicalLocation(locationType, locationLabel))
+      locations = List(
+        PhysicalLocation(
+          locationType = LocationType.ClosedStores,
+          label = LocationType.ClosedStores.label
+        )
+      )
     )
   }
 

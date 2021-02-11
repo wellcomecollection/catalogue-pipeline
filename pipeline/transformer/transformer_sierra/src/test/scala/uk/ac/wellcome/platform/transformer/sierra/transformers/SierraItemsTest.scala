@@ -110,7 +110,25 @@ class SierraItemsTest
     item.locations shouldBe List(
       PhysicalLocation(
         locationType = LocationType.ClosedStores,
-        label = sierraLocation.name
+        label = LocationType.ClosedStores.label
+      )
+    )
+  }
+
+  it("uses the Sierra location name as the label for non-closed locations") {
+    val openLocation = SierraSourceLocation(
+      code = "wghib",
+      name = "Biographies"
+    )
+    val itemData = createSierraItemDataWith(location = Some(openLocation))
+
+    val itemDataMap = Map(createSierraItemNumber -> itemData)
+
+    val item = getTransformedItems(itemDataMap = itemDataMap).head
+    item.locations shouldBe List(
+      PhysicalLocation(
+        locationType = LocationType.OpenShelves,
+        label = openLocation.name
       )
     )
   }
@@ -138,7 +156,7 @@ class SierraItemsTest
       List(
         PhysicalLocation(
           locationType = LocationType.ClosedStores,
-          label = sierraPhysicalLocation1.name
+          label = LocationType.ClosedStores.label
         )
       ))
   }

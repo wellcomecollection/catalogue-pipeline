@@ -59,7 +59,7 @@ class DisplayLocationTest
   describe("DisplayPhysicalLocation") {
     it("creates a DisplayPhysicalLocation from a PhysicalLocation") {
       val locationType = LocationType.ClosedStores
-      val locationLabel = "The collection of cold cauldrons"
+      val locationLabel = LocationType.ClosedStores.label
       val physicalLocation =
         PhysicalLocation(locationType = locationType, label = locationLabel)
 
@@ -73,7 +73,7 @@ class DisplayLocationTest
     it("copies the License from a PhysicalLocation") {
       val physicalLocation = PhysicalLocation(
         locationType = LocationType.ClosedStores,
-        label = "A licensed letter of liberal leanings",
+        label = LocationType.ClosedStores.label,
         license = Some(License.CCBY)
       )
 
@@ -84,7 +84,7 @@ class DisplayLocationTest
     it("copies the shelfmark from a PhysicalLocation") {
       val physicalLocation = PhysicalLocation(
         locationType = LocationType.ClosedStores,
-        label = "A shelved summary of signed stories",
+        label = LocationType.ClosedStores.label,
         shelfmark = Some("PP/Shelved:Box 1")
       )
 

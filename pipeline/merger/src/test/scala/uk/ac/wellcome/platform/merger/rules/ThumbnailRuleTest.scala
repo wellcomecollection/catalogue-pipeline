@@ -28,7 +28,7 @@ class ThumbnailRuleTest
     List(
       createUnidentifiableItemWith(locations = List(createPhysicalLocationWith(
         locationType = LocationType.ClosedStores,
-        label = "Closed stores Arch. & MSS",
+        label = LocationType.ClosedStores.label,
         accessConditions =
           List(AccessCondition(status = Some(AccessStatus.OpenWithAdvisory)))
       )))))

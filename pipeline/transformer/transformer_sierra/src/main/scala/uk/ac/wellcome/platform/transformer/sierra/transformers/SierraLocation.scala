@@ -17,8 +17,13 @@ trait SierraLocation extends SierraQueryOps with Logging {
                           itemData: SierraItemData,
                           bibData: SierraBibData): Option[PhysicalLocation] =
     itemData.location.flatMap {
-      case SierraSourceLocation(_, label) =>
-        SierraPhysicalLocationType.fromName(label).flatMap { locationType =>
+      case SierraSourceLocation(_, name) =>
+        SierraPhysicalLocationType.fromName(name).flatMap { locationType =>
+          val label = locationType match {
+            case LocationType.ClosedStores => LocationType.ClosedStores.label
+            case _                         => name
+          }
+
           Some(
             PhysicalLocation(
               locationType = locationType,

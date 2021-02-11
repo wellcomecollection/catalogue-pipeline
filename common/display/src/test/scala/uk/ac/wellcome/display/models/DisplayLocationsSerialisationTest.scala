@@ -18,7 +18,7 @@ class DisplayLocationsSerialisationTest
   it("serialises a physical location") {
     val physicalLocation = PhysicalLocation(
       locationType = LocationType.ClosedStores,
-      label = "a stack of slick slimes"
+      label = LocationType.ClosedStores.label
     )
 
     val work = indexedWork().items(
