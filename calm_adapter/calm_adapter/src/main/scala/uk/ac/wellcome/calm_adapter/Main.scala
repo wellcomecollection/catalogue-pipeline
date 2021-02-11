@@ -10,10 +10,8 @@ import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.platform.calm_api_client.{
-  CalmAkkaHttpClient,
-  CalmApiClient,
-  CalmHttpClient,
-  CalmRecord,
+  AkkaHttpCalmApiClient,
+  CalmRecord
 }
 import weco.catalogue.source_model.config.SourceVHSBuilder
 
@@ -26,8 +24,6 @@ object Main extends WellcomeTypesafeApp {
       AkkaBuilder.buildActorSystem()
     implicit val materializer: Materializer =
       AkkaBuilder.buildMaterializer()
-    implicit val httpClient: CalmHttpClient =
-      new CalmAkkaHttpClient()
 
     new CalmAdapterWorkerService(
       SQSBuilder.buildSQSStream(config),
@@ -39,12 +35,9 @@ object Main extends WellcomeTypesafeApp {
     )
   }
 
-  def calmRetriever(config: Config)(implicit
-                                    ec: ExecutionContext,
-                                    materializer: Materializer,
-                                    httpClient: CalmHttpClient) =
+  def calmRetriever(config: Config)(implicit materializer: Materializer) =
     new ApiCalmRetriever(
-      apiClient = new CalmApiClient(
+      apiClient = new AkkaHttpCalmApiClient(
         url = config.requireString("calm.api.url"),
         username = config.requireString("calm.api.username"),
         password = config.requireString("calm.api.password"),
