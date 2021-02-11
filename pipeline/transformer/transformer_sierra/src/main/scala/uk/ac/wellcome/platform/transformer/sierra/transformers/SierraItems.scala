@@ -36,7 +36,39 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
   private def getPhysicalItems(
     bibId: SierraBibNumber,
     sierraItemDataMap: Map[SierraItemNumber, SierraItemData],
-    bibData: SierraBibData): List[Item[IdState.Unminted]] =
+    bibData: SierraBibData): List[Item[IdState.Unminted]] = {
+
+    // Some of the Sierra items have a location like "contained in above"
+    // or "bound in above".
+    //
+    // This is only useful if you know the correct ordering of items on the bib,
+    // which we don't.  This information isn't available in the REST API that
+    // we use to get Sierra data.  See https://github.com/wellcomecollection/platform/issues/4993
+    //
+    // We assume that "in above" refers to another item on the same bib, so if the
+    // non-above locations are unambiguous, we use them instead.
+    val otherLocations =
+      sierraItemDataMap.values
+        .filterNot { _.deleted }
+        .collect { case SierraItemData(_, Some(location), _, _, _) => location }
+        .filterNot { loc =>
+          loc.name.toLowerCase.contains("above") || loc.name == "-" || loc.name == ""
+        }
+        .map { loc =>
+          SierraPhysicalLocationType.fromName(loc.name) match {
+            case Some(LocationType.ClosedStores) =>
+              (Some(LocationType.ClosedStores), LocationType.ClosedStores.label)
+            case other => (other, loc.name)
+          }
+        }
+        .toSeq
+        .distinct
+
+    val fallbackLocation = otherLocations match {
+      case Seq((Some(locationType), label)) => Some((locationType, label))
+      case _                                => None
+    }
+
     sierraItemDataMap
       .filterNot {
         case (_: SierraItemNumber, itemData: SierraItemData) => itemData.deleted
@@ -47,20 +79,25 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
             bibId = bibId,
             itemId = itemId,
             itemData = itemData,
-            bibData = bibData
+            bibData = bibData,
+            fallbackLocation = fallbackLocation
           )
       }
       .toList
+  }
 
   private def transformItemData(
     bibId: SierraBibNumber,
     itemId: SierraItemNumber,
     itemData: SierraItemData,
-    bibData: SierraBibData): Item[IdState.Unminted] = {
+    bibData: SierraBibData,
+    fallbackLocation: Option[(PhysicalLocationType, String)])
+    : Item[IdState.Unminted] = {
     debug(s"Attempting to transform $itemId")
     Item(
       title = getItemTitle(itemData),
-      locations = getPhysicalLocation(bibId, itemData, bibData).toList,
+      locations =
+        getPhysicalLocation(bibId, itemData, bibData, fallbackLocation).toList,
       id = IdState.Identifiable(
         sourceIdentifier = SourceIdentifier(
           identifierType = IdentifierType("sierra-system-number"),

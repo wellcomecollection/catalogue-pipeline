@@ -8,35 +8,49 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraQueryOps,
   VarField
 }
-import uk.ac.wellcome.platform.transformer.sierra.source.sierra.SierraSourceLocation
 import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 
 trait SierraLocation extends SierraQueryOps with Logging {
 
-  def getPhysicalLocation(bibNumber: SierraBibNumber,
-                          itemData: SierraItemData,
-                          bibData: SierraBibData): Option[PhysicalLocation] =
-    itemData.location.flatMap {
-      case SierraSourceLocation(_, name) =>
-        SierraPhysicalLocationType.fromName(name).flatMap { locationType =>
-          val label = locationType match {
-            case LocationType.ClosedStores => LocationType.ClosedStores.label
-            case _                         => name
-          }
+  def getPhysicalLocation(
+    bibNumber: SierraBibNumber,
+    itemData: SierraItemData,
+    bibData: SierraBibData,
+    fallbackLocation: Option[(PhysicalLocationType, String)] = None)
+    : Option[PhysicalLocation] =
+    for {
+      sourceLocation <- itemData.location
 
-          Some(
-            PhysicalLocation(
-              locationType = locationType,
-              accessConditions = getAccessConditions(bibNumber, bibData),
-              label = label,
-              // This is meant to be a "good enough" implementation of a shelfmark.
-              // We may revisit this in future, and populate it directly from the
-              // MARC fields if we want to be more picky about our rules.
-              shelfmark = itemData.callNumber
-            )
-          )
+      (locationType, label) <- {
+        val parsedLocationType =
+          SierraPhysicalLocationType.fromName(sourceLocation.name)
+
+        (parsedLocationType, fallbackLocation) match {
+          case (Some(locationType), _) =>
+            val label = locationType match {
+              case LocationType.ClosedStores => LocationType.ClosedStores.label
+              case _                         => sourceLocation.name
+            }
+
+            Some((locationType, label))
+
+          case (_, Some(fallbackLocation)) =>
+            Some(fallbackLocation)
+
+          case _ => None
         }
-    }
+      }
+
+      physicalLocation = PhysicalLocation(
+        locationType = locationType,
+        accessConditions = getAccessConditions(bibNumber, bibData),
+        label = label,
+        // This is meant to be a "good enough" implementation of a shelfmark.
+        // We may revisit this in future, and populate it directly from the
+        // MARC fields if we want to be more picky about our rules.
+        shelfmark = itemData.callNumber
+      )
+    } yield physicalLocation
 
   private def getAccessConditions(
     bibId: SierraBibNumber,

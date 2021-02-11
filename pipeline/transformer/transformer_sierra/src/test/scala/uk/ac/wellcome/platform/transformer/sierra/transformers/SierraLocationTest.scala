@@ -124,6 +124,64 @@ class SierraLocationTest
       location.shelfmark shouldBe Some("AX1234:Box 1")
     }
 
+    describe("uses fallback locations") {
+      it("returns an empty location if location name is 'bound in above'") {
+        val result = transformer.getPhysicalLocation(
+          bibNumber = createSierraBibNumber,
+          bibData = createSierraBibData,
+          itemData = createSierraItemDataWith(
+            location = Some(SierraSourceLocation("bwith", "bound in above"))
+          )
+        )
+
+        result shouldBe None
+      }
+
+      it("uses the fallback location if location name is 'bound in above'") {
+        val result = transformer.getPhysicalLocation(
+          bibNumber = createSierraBibNumber,
+          bibData = createSierraBibData,
+          itemData = createSierraItemDataWith(
+            location = Some(SierraSourceLocation("bwith", "bound in above"))
+          ),
+          fallbackLocation = Some(
+            (LocationType.OpenShelves, "History of Medicine")
+          )
+        )
+
+        result.get.locationType shouldBe LocationType.OpenShelves
+        result.get.label shouldBe "History of Medicine"
+      }
+
+      it("returns an empty location if location name is 'contained in above'") {
+        val result = transformer.getPhysicalLocation(
+          bibNumber = createSierraBibNumber,
+          bibData = createSierraBibData,
+          itemData = createSierraItemDataWith(
+            location = Some(SierraSourceLocation("cwith", "contained in above"))
+          )
+        )
+
+        result shouldBe None
+      }
+
+      it("uses the fallback location if location name is 'contained in above'") {
+        val result = transformer.getPhysicalLocation(
+          bibNumber = createSierraBibNumber,
+          bibData = createSierraBibData,
+          itemData = createSierraItemDataWith(
+            location = Some(SierraSourceLocation("cwith", "contained in above"))
+          ),
+          fallbackLocation = Some(
+            (LocationType.OpenShelves, "History of Medicine")
+          )
+        )
+
+        result.get.locationType shouldBe LocationType.OpenShelves
+        result.get.label shouldBe "History of Medicine"
+      }
+    }
+
     it("adds 'Open' access condition if ind1 is 0") {
       val bibData = createSierraBibDataWith(
         varFields = List(
