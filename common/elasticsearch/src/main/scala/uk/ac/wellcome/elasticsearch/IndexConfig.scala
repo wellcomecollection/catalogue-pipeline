@@ -8,10 +8,6 @@ import com.sksamuel.elastic4s.ElasticDsl.{
 }
 import com.sksamuel.elastic4s.analysis.Analysis
 import com.sksamuel.elastic4s.requests.mappings.MappingDefinition
-import uk.ac.wellcome.elasticsearch.IndexedWorkIndexConfig.{
-  lowercaseKeyword,
-  textWithKeyword
-}
 import uk.ac.wellcome.elasticsearch.WorksAnalysis._
 
 trait IndexConfig {
@@ -45,17 +41,16 @@ trait IndexConfigFields {
       textField("english").analyzer("english")
     )
 
+  val languagesTextFields =
+    languages.map(lang => textField(lang).analyzer(s"${lang}_analyzer"))
+
   def multilingualField(name: String) =
-    textWithKeyword(name).fields(
-      textField("english").analyzer(englishAnalyzer.name),
-      textField("french").analyzer(frenchAnalyzer.name),
-      textField("italian").analyzer(italianAnalyzer.name),
-      textField("german").analyzer(germanAnalyzer.name),
-      textField("hindi").analyzer(hindiAnalyzer.name),
-      textField("arabic").analyzer(arabicAnalyzer.name),
-      textField("bengali").analyzer(bengaliAnalyzer.name),
-      textField("shingles").analyzer(shingleAsciifoldingAnalyzer.name)
-    )
+    textWithKeyword(name)
+      .fields(
+        textField("english").analyzer(englishAnalyzer.name),
+        textField("shingles").analyzer(shingleAsciifoldingAnalyzer.name),
+      )
+      .fields(languagesTextFields)
 
   def frenchTextField(name: String) =
     textField(name).fields(
