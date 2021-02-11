@@ -17,6 +17,10 @@ case object WorksMultiMatcher {
   def apply(q: String): BoolQuery = {
     boolQuery()
       .should(
+        // we're running elasticsearch 7.9 at the moment - upgrading to 7.11 will give us the ability to run case
+        // insensitive prefixQueries, which will solve our "old and new london" problem
+        // (see https://github.com/wellcomecollection/catalogue/issues/1336)
+        prefixQuery("data.title.keyword", q).boost(1000),
         MultiMatchQuery(
           q,
           `type` = Some(BEST_FIELDS),
@@ -34,17 +38,25 @@ case object WorksMultiMatcher {
             (Some(1000), "data.imageData.id.otherIdentifiers.value"),
           ).map(f => FieldWithOptionalBoost(f._2, f._1.map(_.toDouble)))
         ),
-        prefixQuery("data.title.keyword", q).boost(1000),
+        MultiMatchQuery(
+          q,
+          `type` = Some(BEST_FIELDS),
+          operator = Some(OR),
+          fields = Seq(
+            (Some(100), "data.title"),
+            (Some(100), "data.title.english"),
+            (Some(100), "data.title.shingles"),
+            (Some(100), "data.alternativeTitles"),
+            (None, "data.lettering"),
+          ).map(f => FieldWithOptionalBoost(f._2, f._1.map(_.toDouble))),
+          fuzziness=Some("AUTO")
+        ),
         MultiMatchQuery(
           q,
           `type` = Some(CROSS_FIELDS),
           operator = Some(AND),
           fields = Seq(
             (Some(1000), "data.contributors.agent.label"),
-            (Some(100), "data.title"),
-            (Some(100), "data.title.english"),
-            (Some(100), "data.title.shingles"),
-            (Some(100), "data.alternativeTitles"),
             (Some(10), "data.subjects.concepts.label"),
             (Some(10), "data.genres.concepts.label"),
             (Some(10), "data.production.*.label"),
@@ -53,7 +65,6 @@ case object WorksMultiMatcher {
             (None, "data.language.label"),
             (None, "data.edition"),
             (None, "data.notes.content"),
-            (None, "data.lettering"),
             (None, "data.collectionPath.path"),
             (None, "data.collectionPath.label"),
           ).map(f => FieldWithOptionalBoost(f._2, f._1.map(_.toDouble)))

@@ -5,7 +5,7 @@ import com.sksamuel.elastic4s.analysis.{
   CustomNormalizer,
   PathHierarchyTokenizer,
   ShingleTokenFilter,
-  StemmerTokenFilter,
+  StemmerTokenFilter
 }
 import uk.ac.wellcome.elasticsearch.elastic4s.AsciiFoldingTokenFilter
 
@@ -24,15 +24,30 @@ object WorksAnalysis {
   val shingleTokenFilter = ShingleTokenFilter(
     "shingle_token_filter",
     minShingleSize = Some(2),
-    maxShingleSize = Some(4))
+    maxShingleSize = Some(4)
+  )
 
   val englishStemmerTokenFilter =
     StemmerTokenFilter("english_token_filter", lang = "english")
-
   val englishPossessiveStemmerTokenFilter =
     StemmerTokenFilter(
       "english_possessive_token_filter",
-      lang = "possessive_english")
+      lang = "possessive_english"
+    )
+  val frenchStemmerTokenFilter =
+    StemmerTokenFilter("french_token_filter", lang = "french")
+  val italianStemmerTokenFilter =
+    StemmerTokenFilter("italian_token_filter", lang = "italian")
+  val germanStemmerTokenFilter =
+    StemmerTokenFilter("german_token_filter", lang = "german")
+  val hindiStemmerTokenFilter =
+    StemmerTokenFilter("hindi_token_filter", lang = "hindi")
+  val arabicStemmerTokenFilter =
+    StemmerTokenFilter("arabic_token_filter", lang = "arabic")
+  // val persianStemmerTokenFilter =
+  //   StemmerTokenFilter("persian_token_filter", lang = "persian")
+  val bengaliStemmerTokenFilter =
+    StemmerTokenFilter("bengali_token_filter", lang = "bengali")
 
   val asciifoldingAnalyzer = CustomAnalyzer(
     "asciifolding_analyzer",
@@ -46,9 +61,74 @@ object WorksAnalysis {
     tokenizer = "standard",
     tokenFilters = List(
       "lowercase",
-      asciiFoldingTokenFilter.name,
       englishStemmerTokenFilter.name,
-      englishPossessiveStemmerTokenFilter.name),
+      englishPossessiveStemmerTokenFilter.name
+    ),
+    charFilters = Nil
+  )
+
+  val frenchAnalyzer = CustomAnalyzer(
+    "french_analyzer",
+    tokenizer = "standard",
+    tokenFilters = List(
+      "lowercase",
+      frenchStemmerTokenFilter.name
+    ),
+    charFilters = Nil
+  )
+
+  val italianAnalyzer = CustomAnalyzer(
+    "italian_analyzer",
+    tokenizer = "standard",
+    tokenFilters = List(
+      "lowercase",
+      italianStemmerTokenFilter.name
+    ),
+    charFilters = Nil
+  )
+  val germanAnalyzer = CustomAnalyzer(
+    "german_analyzer",
+    tokenizer = "standard",
+    tokenFilters = List(
+      "lowercase",
+      germanStemmerTokenFilter.name
+    ),
+    charFilters = Nil
+  )
+  val hindiAnalyzer = CustomAnalyzer(
+    "hindi_analyzer",
+    tokenizer = "standard",
+    tokenFilters = List(
+      "lowercase",
+      hindiStemmerTokenFilter.name
+    ),
+    charFilters = Nil
+  )
+  val arabicAnalyzer = CustomAnalyzer(
+    "arabic_analyzer",
+    tokenizer = "standard",
+    tokenFilters = List(
+      "lowercase",
+      arabicStemmerTokenFilter.name
+    ),
+    charFilters = Nil
+  )
+  // val persianAnalyzer = CustomAnalyzer(
+  //   "persian_analyzer",
+  //   tokenizer = "standard",
+  //   tokenFilters = List(
+  //     "lowercase",
+  //     persianStemmerTokenFilter.name
+  //   ),
+  //   charFilters = Nil
+  // )
+  val bengaliAnalyzer = CustomAnalyzer(
+    "bengali_analyzer",
+    tokenizer = "standard",
+    tokenFilters = List(
+      "lowercase",
+      bengaliStemmerTokenFilter.name
+    ),
     charFilters = Nil
   )
 
@@ -64,7 +144,7 @@ object WorksAnalysis {
     "whitespace_analyzer",
     tokenizer = "whitespace",
     tokenFilters = Nil,
-    charFilters = Nil,
+    charFilters = Nil
   )
 
   val lowercaseNormalizer = CustomNormalizer(
@@ -80,13 +160,28 @@ object WorksAnalysis {
         asciifoldingAnalyzer,
         shingleAsciifoldingAnalyzer,
         englishAnalyzer,
-        whitespaceAnalyzer,
+        frenchAnalyzer,
+        italianAnalyzer,
+        germanAnalyzer,
+        hindiAnalyzer,
+        arabicAnalyzer,
+        // persianAnalyzer,
+        bengaliAnalyzer,
+        whitespaceAnalyzer
       ),
       tokenFilters = List(
         asciiFoldingTokenFilter,
         shingleTokenFilter,
         englishStemmerTokenFilter,
-        englishPossessiveStemmerTokenFilter),
+        englishPossessiveStemmerTokenFilter,
+        frenchStemmerTokenFilter,
+        italianStemmerTokenFilter,
+        germanStemmerTokenFilter,
+        hindiStemmerTokenFilter,
+        arabicStemmerTokenFilter,
+        // persianStemmerTokenFilter,
+        bengaliStemmerTokenFilter
+      ),
       tokenizers = List(pathTokenizer),
       normalizers = List(lowercaseNormalizer)
     )

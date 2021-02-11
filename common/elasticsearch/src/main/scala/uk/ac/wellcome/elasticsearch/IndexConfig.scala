@@ -41,6 +41,41 @@ trait IndexConfigFields {
       textField("english").analyzer("english")
     )
 
+  def frenchTextField(name: String) =
+    textField(name).fields(
+      textField("french").analyzer("french")
+    )
+
+  def italianTextField(name: String) =
+    textField(name).fields(
+      textField("italian").analyzer("italian")
+    )
+
+  def germanTextField(name: String) =
+    textField(name).fields(
+      textField("german").analyzer("german")
+    )
+
+  def hindiTextField(name: String) =
+    textField(name).fields(
+      textField("hindi").analyzer("hindi")
+    )
+
+  def arabicTextField(name: String) =
+    textField(name).fields(
+      textField("arabic").analyzer("arabic")
+    )
+
+  // def persianTextField(name: String) =
+  //   textField(name).fields(
+  //     textField("persian").analyzer("persian")
+  //   )
+
+  def bengaliTextField(name: String) =
+    textField(name).fields(
+      textField("bengali").analyzer("bengali")
+    )
+
   def lowercaseKeyword(name: String) =
     keywordField(name).normalizer(lowercaseNormalizer.name)
 
