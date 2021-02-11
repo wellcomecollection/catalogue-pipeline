@@ -49,7 +49,7 @@ case object WorksMultiMatcher {
             (Some(100), "data.alternativeTitles"),
             (None, "data.lettering"),
           ).map(f => FieldWithOptionalBoost(f._2, f._1.map(_.toDouble))),
-          fuzziness=Some("AUTO")
+          fuzziness = Some("AUTO")
         ),
         MultiMatchQuery(
           q,
