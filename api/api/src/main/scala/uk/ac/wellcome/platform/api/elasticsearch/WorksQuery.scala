@@ -41,7 +41,7 @@ case object WorksMultiMatcher {
         MultiMatchQuery(
           q,
           `type` = Some(BEST_FIELDS),
-          operator = Some(OR),
+          operator = Some(AND),
           fields = Seq(
             (Some(100), "data.title"),
             (Some(100), "data.title.english"),
