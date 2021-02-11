@@ -224,9 +224,19 @@ lazy val sierra_item_merger = setupProject(
   "sierra_adapter/sierra_item_merger",
   localDependencies = Seq(sierra_adapter_common))
 
+lazy val sierra_holdings_merger = setupProject(
+  project,
+  "sierra_adapter/sierra_holdings_merger",
+  localDependencies = Seq(sierra_adapter_common))
+
 lazy val sierra_items_to_dynamo = setupProject(
   project,
   folder = "sierra_adapter/sierra_items_to_dynamo",
+  localDependencies = Seq(sierra_adapter_common))
+
+lazy val sierra_holdings_linker = setupProject(
+  project,
+  folder = "sierra_adapter/sierra_holdings_linker",
   localDependencies = Seq(sierra_adapter_common))
 
 // METS adapter
