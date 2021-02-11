@@ -66,11 +66,6 @@ trait IndexConfigFields {
       textField("arabic").analyzer("arabic")
     )
 
-  // def persianTextField(name: String) =
-  //   textField(name).fields(
-  //     textField("persian").analyzer("persian")
-  //   )
-
   def bengaliTextField(name: String) =
     textField(name).fields(
       textField("bengali").analyzer("bengali")

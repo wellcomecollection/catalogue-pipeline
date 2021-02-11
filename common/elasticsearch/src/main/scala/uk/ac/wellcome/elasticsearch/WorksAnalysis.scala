@@ -44,8 +44,6 @@ object WorksAnalysis {
     StemmerTokenFilter("hindi_token_filter", lang = "hindi")
   val arabicStemmerTokenFilter =
     StemmerTokenFilter("arabic_token_filter", lang = "arabic")
-  // val persianStemmerTokenFilter =
-  //   StemmerTokenFilter("persian_token_filter", lang = "persian")
   val bengaliStemmerTokenFilter =
     StemmerTokenFilter("bengali_token_filter", lang = "bengali")
 
@@ -113,15 +111,6 @@ object WorksAnalysis {
     ),
     charFilters = Nil
   )
-  // val persianAnalyzer = CustomAnalyzer(
-  //   "persian_analyzer",
-  //   tokenizer = "standard",
-  //   tokenFilters = List(
-  //     "lowercase",
-  //     persianStemmerTokenFilter.name
-  //   ),
-  //   charFilters = Nil
-  // )
   val bengaliAnalyzer = CustomAnalyzer(
     "bengali_analyzer",
     tokenizer = "standard",
@@ -165,7 +154,6 @@ object WorksAnalysis {
         germanAnalyzer,
         hindiAnalyzer,
         arabicAnalyzer,
-        // persianAnalyzer,
         bengaliAnalyzer,
         whitespaceAnalyzer
       ),
@@ -179,7 +167,6 @@ object WorksAnalysis {
         germanStemmerTokenFilter,
         hindiStemmerTokenFilter,
         arabicStemmerTokenFilter,
-        // persianStemmerTokenFilter,
         bengaliStemmerTokenFilter
       ),
       tokenizers = List(pathTokenizer),

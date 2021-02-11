@@ -85,7 +85,6 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
         textField("german").analyzer(germanAnalyzer.name),
         textField("hindi").analyzer(hindiAnalyzer.name),
         textField("arabic").analyzer(arabicAnalyzer.name),
-        // textField("persian").analyzer(persianAnalyzer.name),
         textField("bengali").analyzer(bengaliAnalyzer.name),
         textField("shingles").analyzer(shingleAsciifoldingAnalyzer.name)
       ),
@@ -97,7 +96,6 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
         textField("german").analyzer(germanAnalyzer.name),
         textField("hindi").analyzer(hindiAnalyzer.name),
         textField("arabic").analyzer(arabicAnalyzer.name),
-        // textField("persian").analyzer(persianAnalyzer.name),
         textField("bengali").analyzer(bengaliAnalyzer.name),
       ),
       englishTextField("description"),
@@ -109,7 +107,6 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
         textField("german").analyzer(germanAnalyzer.name),
         textField("hindi").analyzer(hindiAnalyzer.name),
         textField("arabic").analyzer(arabicAnalyzer.name),
-        // textField("persian").analyzer(persianAnalyzer.name),
         textField("bengali").analyzer(bengaliAnalyzer.name),
       ),
       objectField("contributors").fields(
