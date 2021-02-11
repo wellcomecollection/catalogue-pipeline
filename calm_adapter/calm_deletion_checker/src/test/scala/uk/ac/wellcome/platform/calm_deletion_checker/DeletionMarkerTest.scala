@@ -8,6 +8,7 @@ import org.scanamo.syntax._
 import org.scanamo.generic.auto._
 import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException
 import uk.ac.wellcome.fixtures.TestWith
+import uk.ac.wellcome.platform.calm_deletion_checker.fixtures.CalmSourcePayloadGenerators
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
 import uk.ac.wellcome.storage.s3.S3ObjectLocation

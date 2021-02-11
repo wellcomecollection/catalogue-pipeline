@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.calm_deletion_checker
+package uk.ac.wellcome.platform.calm_deletion_checker.fixtures
 
 import java.util.UUID
 
