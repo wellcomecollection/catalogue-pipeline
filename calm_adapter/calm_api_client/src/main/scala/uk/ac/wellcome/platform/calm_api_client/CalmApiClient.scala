@@ -36,13 +36,12 @@ trait CalmApiClient {
 // HttpClients turn HttpRequests into HttpResponses via their
 // singleRequest method
 trait HttpClient {
-  def singleRequest(request: HttpRequest)(
-    implicit actorSystem: ActorSystem): Future[HttpResponse]
+  def singleRequest(request: HttpRequest): Future[HttpResponse]
 }
 
 trait AkkaHttpClient extends HttpClient {
-  def singleRequest(request: HttpRequest)(
-    implicit actorSystem: ActorSystem): Future[HttpResponse] =
+  implicit val actorSystem: ActorSystem
+  def singleRequest(request: HttpRequest): Future[HttpResponse] =
     Http().singleRequest(request)
 }
 
@@ -57,7 +56,6 @@ class HttpCalmApiClient(
 )(implicit materializer: Materializer)
     extends CalmApiClient { this: HttpClient =>
 
-  private implicit val actorSystem: ActorSystem = materializer.system
   private implicit val ec: ExecutionContext = materializer.executionContext
 
   private implicit val restartSettings: RestartSettings = RestartSettings(
@@ -120,4 +118,6 @@ class AkkaHttpCalmApiClient(
       maxBackoff,
       randomFactor,
       maxRestarts)
-    with AkkaHttpClient
+    with AkkaHttpClient {
+  implicit val actorSystem: ActorSystem = mat.system
+}

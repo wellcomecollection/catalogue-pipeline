@@ -1,6 +1,5 @@
 package uk.ac.wellcome.platform.calm_api_client.fixtures
 
-import akka.actor.ActorSystem
 import akka.http.scaladsl.model.headers.Cookie
 import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
 import akka.stream.Materializer
@@ -41,8 +40,7 @@ trait CalmApiClientFixtures extends Akka {
     val responses: Iterator[HttpResponse]
     final var requests: List[HttpRequest] = Nil
 
-    def singleRequest(request: HttpRequest)(
-      implicit actorSystem: ActorSystem): Future[HttpResponse] = {
+    def singleRequest(request: HttpRequest): Future[HttpResponse] = {
       requests = requests :+ request
       if (responses.hasNext) {
         Future.successful(responses.next())
