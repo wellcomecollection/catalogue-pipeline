@@ -9,7 +9,7 @@ import uk.ac.wellcome.models.work.internal.{
   Item,
   UnknownAccessStatus
 }
-import uk.ac.wellcome.platform.transformer.calm.generators.CalmRecordGenerators
+import weco.catalogue.source_model.generators.CalmRecordGenerators
 
 class CalmItemsTest
     extends AnyFunSpec

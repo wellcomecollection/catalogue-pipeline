@@ -9,6 +9,7 @@ import akka.http.scaladsl.model.headers.{
   RawHeader
 }
 import akka.stream.{Materializer, RestartSettings}
+import weco.catalogue.source_model.calm.CalmRecord
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}

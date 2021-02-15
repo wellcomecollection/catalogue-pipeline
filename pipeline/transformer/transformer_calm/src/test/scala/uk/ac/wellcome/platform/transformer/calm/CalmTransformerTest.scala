@@ -1,15 +1,15 @@
 package uk.ac.wellcome.platform.transformer.calm
 
 import java.time.LocalDate
+
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import uk.ac.wellcome.models.work.internal.DeletedReason.SuppressedFromSource
-import uk.ac.wellcome.models.work.internal.WorkState.Source
 import uk.ac.wellcome.models.work.internal._
-import WorkState.Source
 import uk.ac.wellcome.models.work.internal.IdState.Identifiable
-import uk.ac.wellcome.platform.transformer.calm.generators.CalmRecordGenerators
+import weco.catalogue.source_model.generators.CalmRecordGenerators
+import WorkState.Source
 
 class CalmTransformerTest
     extends AnyFunSpec

@@ -9,9 +9,10 @@ import uk.ac.wellcome.models.work.internal.{
   PhysicalLocation
 }
 import uk.ac.wellcome.models.work.internal.result._
-import uk.ac.wellcome.platform.transformer.calm.{CalmOps, CalmRecord}
+import uk.ac.wellcome.platform.transformer.calm.CalmRecordOps
+import weco.catalogue.source_model.calm.CalmRecord
 
-object CalmItems extends CalmOps {
+object CalmItems extends CalmRecordOps {
   def apply(record: CalmRecord): Result[List[Item[IdState.Unminted]]] =
     for {
       status <- accessStatus(record)

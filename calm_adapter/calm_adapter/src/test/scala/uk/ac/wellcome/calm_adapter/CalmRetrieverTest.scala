@@ -10,6 +10,7 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.fixtures.{RandomGenerators, TestWith}
 import uk.ac.wellcome.platform.calm_api_client._
 import uk.ac.wellcome.platform.calm_api_client.fixtures.CalmApiClientFixtures
+import weco.catalogue.source_model.calm.CalmRecord
 
 class CalmRetrieverTest
     extends AnyFunSpec

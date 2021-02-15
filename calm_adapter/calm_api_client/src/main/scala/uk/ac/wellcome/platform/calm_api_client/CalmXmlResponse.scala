@@ -5,6 +5,7 @@ import scala.xml.{Elem, Node, NodeSeq, XML}
 import java.time.Instant
 
 import akka.http.scaladsl.model.headers.Cookie
+import weco.catalogue.source_model.calm.CalmRecord
 
 trait CalmXmlResponse[T] {
   val root: Elem

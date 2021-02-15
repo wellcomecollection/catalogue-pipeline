@@ -4,6 +4,7 @@ import akka.NotUsed
 import akka.stream.scaladsl.Source
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.platform.calm_api_client._
+import weco.catalogue.source_model.calm.CalmRecord
 
 trait CalmRetriever {
   def apply(query: CalmQuery): Source[CalmRecord, NotUsed]

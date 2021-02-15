@@ -3,7 +3,7 @@ package uk.ac.wellcome.platform.transformer.calm.transformers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.platform.transformer.calm.generators.CalmRecordGenerators
+import weco.catalogue.source_model.generators.CalmRecordGenerators
 
 class CalmNotesTest extends AnyFunSpec with Matchers with CalmRecordGenerators {
   it("extracts all the notes fields") {

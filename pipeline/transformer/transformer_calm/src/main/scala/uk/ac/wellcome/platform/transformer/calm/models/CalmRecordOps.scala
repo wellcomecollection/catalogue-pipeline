@@ -1,6 +1,8 @@
 package uk.ac.wellcome.platform.transformer.calm
 
-trait CalmOps {
+import weco.catalogue.source_model.calm.CalmRecord
+
+trait CalmRecordOps {
 
   implicit class CalmRecordOps(record: CalmRecord) {
 
