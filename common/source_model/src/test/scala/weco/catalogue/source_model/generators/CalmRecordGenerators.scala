@@ -1,5 +1,7 @@
 package weco.catalogue.source_model.generators
 
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.fixtures.RandomGenerators
 import weco.catalogue.source_model.calm.CalmRecord
 
@@ -31,4 +33,21 @@ trait CalmRecordGenerators extends RandomGenerators {
   }
 
   def createCalmRecord: CalmRecord = createCalmRecordWith()
+}
+
+class CalmRecordGeneratorsTest
+    extends AnyFunSpec
+    with Matchers
+    with CalmRecordGenerators {
+  it("assembles the data correctly") {
+    val record = createCalmRecordWith(
+      "Place" -> "London",
+      "Place" -> "Paris",
+      "Date" -> "2020"
+    )
+
+    record.data shouldBe Map(
+      "Place" -> List("London", "Paris"),
+      "Date" -> List("2020"))
+  }
 }
