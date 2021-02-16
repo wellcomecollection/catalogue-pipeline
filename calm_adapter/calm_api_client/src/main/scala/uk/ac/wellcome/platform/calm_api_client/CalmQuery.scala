@@ -23,20 +23,30 @@ sealed trait CalmQuery {
 
 // Query leaves become expressions like `(key=value)` in full queries
 sealed class QueryLeaf(
-  key: String,
-  value: String,
-  relationalOperator: String = "="
+  val key: String,
+  val value: String,
+  val relationalOperator: String = "="
 ) extends CalmQuery {
   def queryExpression: String = s"($key$relationalOperator$value)"
 }
 // Query nodes join query leaves together with booleans like `(a=b)OR(c=d)`
 sealed class QueryNode(
-  left: CalmQuery,
-  right: CalmQuery,
-  logicalOperator: String = "OR"
+  val left: CalmQuery,
+  val right: CalmQuery,
+  val logicalOperator: String = "OR"
 ) extends CalmQuery {
   def queryExpression: String =
     left.queryExpression + logicalOperator + right.queryExpression
+}
+
+object QueryLeaf {
+  def unapply(q: QueryLeaf): Option[(String, String, String)] =
+    Some((q.key, q.value, q.relationalOperator))
+}
+
+object QueryNode {
+  def unapply(q: QueryNode): Option[(CalmQuery, CalmQuery, String)] =
+    Some((q.left, q.right, q.logicalOperator))
 }
 
 object CalmQuery {
