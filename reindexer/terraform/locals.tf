@@ -16,6 +16,8 @@ locals {
   mets_reindexer_topic_arn                          = module.mets_reindexer_topic.arn
   calm_reindexer_topic_name                         = module.calm_reindexer_topic.name
   calm_reindexer_topic_arn                          = module.calm_reindexer_topic.arn
+  calm_deletion_checker_topic_name = module.calm_deletion_checker_topic.name
+  calm_deletion_checker_topic_arn = module.calm_deletion_checker_topic.arn
 
   vpc_id          = local.catalogue_vpcs["catalogue_vpc_delta_id"]
   private_subnets = local.catalogue_vpcs["catalogue_vpc_delta_private_subnets"]
@@ -72,5 +74,11 @@ locals {
       table       = local.vhs_calm_table_name
       topic       = local.calm_reindexer_topic_arn
     },
+    {
+      source = "calm"
+      destination = "calm_deletion_checker"
+      table = local.vhs_calm_table_name
+      topic = local.calm_deletion_checker_topic_arn
+    }
   ]
 }
