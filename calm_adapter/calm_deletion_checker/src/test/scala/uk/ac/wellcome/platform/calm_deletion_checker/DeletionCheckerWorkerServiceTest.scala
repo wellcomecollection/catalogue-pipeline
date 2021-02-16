@@ -28,7 +28,6 @@ import weco.catalogue.source_model.generators.CalmRecordGenerators
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import scala.language.higherKinds
-import scala.util.Random
 
 class DeletionCheckerWorkerServiceTest
     extends AnyFunSpec
@@ -200,9 +199,6 @@ class DeletionCheckerWorkerServiceTest
           }
       }
     }
-
-  def randomSample[T](seq: Seq[T], size: Int): Seq[T] =
-    Random.shuffle(seq).take(size)
 
   def searchHandler(idsInApi: Set[String]): CalmQuery => CalmSession =
     (q: CalmQuery) => {
