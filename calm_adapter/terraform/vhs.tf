@@ -7,7 +7,12 @@ module "vhs" {
   read_principals    = ["arn:aws:iam::269807742353:root"]
 }
 
-resource "aws_iam_role_policy" "vhs_readwrite" {
-  role   = module.worker.task_role_name
+resource "aws_iam_role_policy" "vhs_adapter_readwrite" {
+  role   = module.adapter_worker.task_role_name
   policy = module.vhs.full_access_policy
+}
+
+resource "aws_iam_role_policy" "vhs_delection_checker_dynamo_update" {
+  role = module.deletion_checker_worker.task_role_name
+  policy = module.vhs.dynamodb_update_policy.json
 }
