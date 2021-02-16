@@ -39,8 +39,10 @@ trait DynamoCalmVHSFixture
     val hybridStore = {
       new HybridStoreWithMaxima[String, Int, S3ObjectLocation, T] {
         implicit override val indexedStore
-          : Store[Version[String, Int], S3ObjectLocation]
-            with Maxima[String, Version[String, Int], S3ObjectLocation] =
+          : Store[Version[String, Int], S3ObjectLocation] with Maxima[
+            String,
+            Version[String, Int],
+            S3ObjectLocation] =
           new DynamoHashRangeStore[String, Int, S3ObjectLocation](dynamoConfig)
 
         override implicit val typedStore: TypedStore[S3ObjectLocation, T] =
