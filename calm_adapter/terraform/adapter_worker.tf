@@ -12,7 +12,7 @@ module "adapter_worker" {
 
   name = local.namespace
 
-  image           = local.calm_adapter_image
+  image = local.calm_adapter_image
 
   env_vars = {
     calm_api_url          = local.calm_api_url

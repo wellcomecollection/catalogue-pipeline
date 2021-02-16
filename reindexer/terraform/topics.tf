@@ -10,6 +10,6 @@ module "calm_reindexer_topic" {
 }
 
 module "calm_deletion_checker_topic" {
-  source                         = "github.com/wellcomecollection/terraform-aws-sns-topic.git?ref=v1.0.0"
-  name                           = "calm_deletion_checker_topic"
+  source = "github.com/wellcomecollection/terraform-aws-sns-topic.git?ref=v1.0.0"
+  name   = "calm_deletion_checker_topic"
 }

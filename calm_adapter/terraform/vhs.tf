@@ -13,6 +13,6 @@ resource "aws_iam_role_policy" "vhs_adapter_readwrite" {
 }
 
 resource "aws_iam_role_policy" "vhs_delection_checker_dynamo_update" {
-  role = module.deletion_checker_worker.task_role_name
+  role   = module.deletion_checker_worker.task_role_name
   policy = module.vhs.dynamodb_update_policy.json
 }
