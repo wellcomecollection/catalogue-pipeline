@@ -4,11 +4,7 @@ import akka.actor.ActorSystem
 import akka.stream.Materializer
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
-import uk.ac.wellcome.platform.calm_api_client.{
-  CalmAkkaHttpClient,
-  CalmApiClient,
-  CalmHttpClient
-}
+import uk.ac.wellcome.platform.calm_api_client.AkkaHttpCalmApiClient
 import uk.ac.wellcome.storage.typesafe.DynamoBuilder
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
@@ -23,8 +19,6 @@ object Main extends WellcomeTypesafeApp {
       AkkaBuilder.buildActorSystem()
     implicit val materializer: Materializer =
       AkkaBuilder.buildMaterializer()
-    implicit val httpClient: CalmHttpClient =
-      new CalmAkkaHttpClient()
 
     implicit val dynamoClient: DynamoDbClient =
       DynamoBuilder.buildDynamoClient(config)
@@ -36,7 +30,7 @@ object Main extends WellcomeTypesafeApp {
       messageSender = SNSBuilder
         .buildSNSMessageSender(config, subject = "CALM deletion checker"),
       markDeleted = new DeletionMarker(dynamoConfig.tableName),
-      calmApiClient = new CalmApiClient(
+      calmApiClient = new AkkaHttpCalmApiClient(
         url = config.requireString("calm.api.url"),
         username = config.requireString("calm.api.username"),
         password = config.requireString("calm.api.password")

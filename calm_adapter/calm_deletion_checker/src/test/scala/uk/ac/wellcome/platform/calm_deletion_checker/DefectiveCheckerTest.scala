@@ -1,16 +1,15 @@
 package uk.ac.wellcome.platform.calm_deletion_checker
 
-import akka.http.scaladsl.model.headers.RawHeader
+import akka.http.scaladsl.model.headers.Cookie
 import org.scalacheck.{Gen, Shrink}
 import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.time.{Milliseconds, Span}
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
-import uk.ac.wellcome.platform.calm_api_client.fixtures.{
-  CalmApiTestClient,
-  CalmResponseGenerators
-}
+import uk.ac.wellcome.platform.calm_api_client.{CalmSearchRequest, CalmSession}
+import uk.ac.wellcome.platform.calm_api_client.fixtures.CalmApiClientFixtures
+import uk.ac.wellcome.platform.calm_deletion_checker.fixtures.CalmSourcePayloadGenerators
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -23,13 +22,14 @@ class DefectiveCheckerTest
     with PatienceConfiguration
     with ScalaCheckPropertyChecks
     with CalmSourcePayloadGenerators
-    with CalmApiTestClient
-    with CalmResponseGenerators {
+    with CalmApiClientFixtures {
 
   override implicit def patienceConfig: PatienceConfig = PatienceConfig(
     timeout = scaled(Span(500, Milliseconds)),
     interval = scaled(Span(25, Milliseconds))
   )
+
+  val cookie = Cookie("name", "value")
 
   describe("DefectiveChecker") {
     implicit val noShrink: Shrink[Int] = Shrink.shrinkAny
@@ -101,34 +101,30 @@ class DefectiveCheckerTest
   describe("ApiDeletionChecker") {
     it("performs Calm API searches to count deletions") {
       val nRecords = 10
-      val responses = List(searchResponse(n = nRecords))
-      withCalmClients(responses) {
-        case (apiClient, httpClient) =>
-          val records = (1 to nRecords).map(_ => calmSourcePayload)
-          val deletionChecker = new ApiDeletionChecker(apiClient)
+      withTestCalmApiClient(
+        handleSearch = _ => CalmSession(nRecords, cookie)
+      ) { apiClient =>
+        val records = (1 to nRecords).map(_ => calmSourcePayload)
+        val deletionChecker = new ApiDeletionChecker(apiClient)
 
-          whenReady(deletionChecker.defectiveRecords(records.toSet)) { _ =>
-            httpClient.requests should have length 1 // Because all records are deleted
-            val soapAction = httpClient.requests.head.headers.collectFirst {
-              case RawHeader("SOAPAction", value) => value
-            }
-            soapAction shouldBe Some("http://ds.co.uk/cs/webservices/Search")
-          }
+        whenReady(deletionChecker.defectiveRecords(records.toSet)) { _ =>
+          apiClient.requests should have length 1 // Because all records are deleted
+          every(apiClient.requests.map(_._1)) shouldBe a[CalmSearchRequest]
+        }
       }
     }
 
     it("fails if the count doesn't make sense") {
       val nRecords = 10
-      val responses = List(searchResponse(n = nRecords + 1))
-      withCalmClients(responses) {
-        case (apiClient, _) =>
-          val records = (1 to nRecords).map(_ => calmSourcePayload)
-          val deletionChecker = new ApiDeletionChecker(apiClient)
+      withTestCalmApiClient(
+        handleSearch = _ => CalmSession(nRecords + 1, cookie)
+      ) { apiClient =>
+        val records = (1 to nRecords).map(_ => calmSourcePayload)
+        val deletionChecker = new ApiDeletionChecker(apiClient)
 
-          whenReady(deletionChecker.defectiveRecords(records.toSet).failed) {
-            e =>
-              e.getMessage should startWith("More results returned")
-          }
+        whenReady(deletionChecker.defectiveRecords(records.toSet).failed) { e =>
+          e.getMessage should startWith("More results returned")
+        }
       }
     }
   }
