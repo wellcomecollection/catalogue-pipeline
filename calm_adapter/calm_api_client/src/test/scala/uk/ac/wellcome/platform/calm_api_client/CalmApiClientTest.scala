@@ -16,6 +16,7 @@ import uk.ac.wellcome.platform.calm_api_client.fixtures.{
   CalmApiClientFixtures,
   CalmResponseGenerators
 }
+import weco.catalogue.source_model.calm.CalmRecord
 
 import scala.concurrent.ExecutionContext.Implicits.global
 

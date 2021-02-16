@@ -1,5 +1,7 @@
 package uk.ac.wellcome.platform.calm_api_client
 
+import weco.catalogue.source_model.calm.CalmRecord
+
 import scala.xml.Elem
 
 trait CalmXmlRequest {

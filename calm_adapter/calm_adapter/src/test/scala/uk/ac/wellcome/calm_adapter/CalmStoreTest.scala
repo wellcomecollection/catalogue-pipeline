@@ -6,11 +6,10 @@ import org.scalatest.{Assertion, EitherValues}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.{Identified, Version}
+import weco.catalogue.source_model.calm.CalmRecord
 import weco.catalogue.source_model.fixtures.SourceVHSFixture
 import weco.catalogue.source_model.store.SourceVHS
 import java.time.Instant
-
-import uk.ac.wellcome.platform.calm_api_client.CalmRecord
 
 class CalmStoreTest
     extends AnyFunSpec

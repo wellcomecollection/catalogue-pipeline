@@ -243,7 +243,7 @@ lazy val mets_adapter = setupProject(
 lazy val calm_api_client = setupProject(
   project,
   folder = "calm_adapter/calm_api_client",
-  localDependencies = Seq(flows),
+  localDependencies = Seq(source_model, flows),
   externalDependencies = CatalogueDependencies.calmApiClientDependencies
 )
 

@@ -23,6 +23,7 @@ import uk.ac.wellcome.typesafe.config.builders.{
   AWSClientConfigBuilder,
   AkkaBuilder
 }
+import weco.catalogue.source_model.calm.CalmRecord
 
 import scala.concurrent.ExecutionContext
 

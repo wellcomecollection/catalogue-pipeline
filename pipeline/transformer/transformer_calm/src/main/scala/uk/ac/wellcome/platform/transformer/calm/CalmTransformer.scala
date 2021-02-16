@@ -6,7 +6,6 @@ import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.internal.result._
 import uk.ac.wellcome.platform.transformer.calm.models.CalmTransformerException
 import uk.ac.wellcome.platform.transformer.calm.models.CalmTransformerException._
-import WorkState.Source
 import uk.ac.wellcome.models.work.internal.DeletedReason.SuppressedFromSource
 import uk.ac.wellcome.models.work.internal.IdState.Identifiable
 import uk.ac.wellcome.platform.transformer.calm.periods.PeriodParser
@@ -15,11 +14,13 @@ import uk.ac.wellcome.platform.transformer.calm.transformers.{
   CalmLanguages,
   CalmNotes
 }
+import weco.catalogue.source_model.calm.CalmRecord
 import weco.catalogue.transformer.Transformer
+import WorkState.Source
 
 object CalmTransformer
     extends Transformer[CalmRecord]
-    with CalmOps
+    with CalmRecordOps
     with Logging {
 
   val identifierMapping = Map(

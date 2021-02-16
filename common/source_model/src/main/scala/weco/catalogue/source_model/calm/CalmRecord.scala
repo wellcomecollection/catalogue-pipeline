@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.calm_api_client
+package weco.catalogue.source_model.calm
 
 import java.time.Instant
 

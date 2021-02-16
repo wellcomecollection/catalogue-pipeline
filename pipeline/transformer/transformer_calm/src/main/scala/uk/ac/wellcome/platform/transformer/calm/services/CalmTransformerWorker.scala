@@ -5,12 +5,13 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.work.internal.Work
 import uk.ac.wellcome.models.work.internal.WorkState.Source
 import uk.ac.wellcome.pipeline_storage.{PipelineStorageStream, Retriever}
-import uk.ac.wellcome.platform.transformer.calm.{CalmRecord, CalmTransformer}
+import uk.ac.wellcome.platform.transformer.calm.CalmTransformer
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.Readable
 import uk.ac.wellcome.storage.{Identified, ReadError, Version}
 import uk.ac.wellcome.typesafe.Runnable
 import weco.catalogue.source_model.CalmSourcePayload
+import weco.catalogue.source_model.calm.CalmRecord
 import weco.catalogue.transformer.{Transformer, TransformerWorker}
 
 import scala.concurrent.ExecutionContext

@@ -6,6 +6,7 @@ import akka.stream.Materializer
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.platform.calm_api_client._
+import weco.catalogue.source_model.calm.CalmRecord
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
