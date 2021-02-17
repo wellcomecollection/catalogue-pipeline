@@ -57,20 +57,43 @@ class SierraItemsTest
       .sourceIdentifier shouldBe sourceIdentifier
   }
 
-  it("extracts the title from item varfield $v") {
-    val itemId = createSierraItemNumber
-    val itemData = createSierraItemDataWith(
-      varFields = List(
-        VarField(fieldTag = Some("b"), content = Some("S11.1L")),
-        VarField(fieldTag = Some("v"), content = Some("Envelope")),
+  describe("gets the title") {
+    it("skips the title if it can't find one") {
+      val itemData = createSierraItemData
+
+      getTitle(itemData) shouldBe None
+    }
+
+    it("uses the contents of the varfield with field tag v") {
+      val itemData = createSierraItemDataWith(
+        varFields = List(
+          VarField(fieldTag = Some("b"), content = Some("S11.1L")),
+          VarField(fieldTag = Some("v"), content = Some("Envelope")),
+        )
       )
-    )
 
-    val transformedItem = getTransformedItems(
-      itemDataMap = Map(itemId -> itemData)
-    ).head
+      getTitle(itemData) shouldBe Some("Envelope")
+    }
 
-    transformedItem.title shouldBe Some("Envelope")
+    it("skips instances of field tag that are empty") {
+      val itemData = createSierraItemDataWith(
+        varFields = List(
+          VarField(fieldTag = Some("b"), content = Some("S11.1L")),
+          VarField(fieldTag = Some("v"), content = Some("Envelope")),
+          VarField(fieldTag = Some("v"), content = Some("")),
+        )
+      )
+
+      getTitle(itemData) shouldBe Some("Envelope")
+    }
+
+    def getTitle(itemData: SierraItemData): Option[String] = {
+      val transformedItem = getTransformedItems(
+        itemDataMap = Map(createSierraItemNumber -> itemData)
+      ).head
+
+      transformedItem.title
+    }
   }
 
   it("removes items with deleted=true") {
