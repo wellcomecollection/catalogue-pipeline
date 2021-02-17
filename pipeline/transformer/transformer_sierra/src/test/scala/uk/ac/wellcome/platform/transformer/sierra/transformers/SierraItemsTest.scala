@@ -59,7 +59,7 @@ class SierraItemsTest
 
   it("extracts the title from item varfield $v") {
     val itemId = createSierraItemNumber
-    val itemData = createSierraItemData.copy(
+    val itemData = createSierraItemDataWith(
       varFields = List(
         VarField(fieldTag = Some("b"), content = Some("S11.1L")),
         VarField(fieldTag = Some("v"), content = Some("Envelope")),
