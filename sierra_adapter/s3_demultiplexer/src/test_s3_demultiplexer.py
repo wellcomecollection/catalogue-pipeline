@@ -1,11 +1,38 @@
 # -*- encoding: utf-8 -*-
 
+import boto3
 import json
+from moto import mock_s3, mock_sns, mock_sqs
+import os
+from unittest import mock
 
 from s3_demultiplexer import main
 
 
-def test_end_to_end_demultiplexer(s3_client, sns_client, topic_arn):
+@mock_s3
+@mock_sns
+@mock_sqs
+def test_end_to_end_demultiplexer():
+    s3_client = boto3.client("s3", region_name="eu-west-1")
+    sns_client = boto3.client("sns", region_name="eu-west-1")
+    sqs_client = boto3.client("sqs", region_name="eu-west-1")
+
+    resp = sns_client.create_topic(Name="test-topic")
+    topic_arn = resp["TopicArn"]
+
+    test_queue = sqs_client.create_queue(QueueName="test-queue")
+    test_queue_url = test_queue["QueueUrl"]
+    test_queue_attributes = sqs_client.get_queue_attributes(
+        QueueUrl=test_queue_url,
+        AttributeNames=["QueueArn"]
+    )
+    test_queue_arn = test_queue_attributes["Attributes"]["QueueArn"]
+    sns_client.subscribe(
+        TopicArn=topic_arn,
+        Protocol="sqs",
+        Endpoint=test_queue_arn
+    )
+
     records = [
         {"colour": "red", "letter": "R"},
         {"colour": "green", "letter": "G"},
@@ -32,7 +59,15 @@ def test_end_to_end_demultiplexer(s3_client, sns_client, topic_arn):
         ]
     }
 
-    main(event=event, s3_client=s3_client, sns_client=sns_client)
+    with mock.patch.dict(os.environ, {"TOPIC_ARN": topic_arn}):
+        main(event=event, s3_client=s3_client, sns_client=sns_client)
 
-    actual_messages = [m[":message"] for m in sns_client.list_messages()]
+    test_queue_messages = sqs_client.receive_message(
+        QueueUrl=test_queue_url,
+        MaxNumberOfMessages=10
+    )
+    actual_messages = [
+        json.loads(json.loads(json.loads(m["Body"])["Message"])["default"])
+        for m in test_queue_messages["Messages"]
+    ]
     assert actual_messages == records

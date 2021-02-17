@@ -1,8 +1,0 @@
-s3:
-  image: "760097843905.dkr.ecr.eu-west-1.amazonaws.com/scality/s3server:mem-latest"
-  ports:
-    - "33333:8000"
-sns:
-  image: "760097843905.dkr.ecr.eu-west-1.amazonaws.com/wellcome/fake-sns"
-  ports:
-    - "9292:9292"
