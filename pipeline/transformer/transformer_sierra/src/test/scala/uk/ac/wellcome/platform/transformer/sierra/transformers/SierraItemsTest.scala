@@ -88,13 +88,16 @@ class SierraItemsTest
       getTitle(itemData) shouldBe Some("Envelope")
     }
 
-    it("uses the contents of subfield ǂa if field tag ǂv doesn't have a contents field") {
+    it(
+      "uses the contents of subfield ǂa if field tag ǂv doesn't have a contents field") {
       val itemData = createSierraItemDataWith(
         varFields = List(
           VarField(fieldTag = Some("b"), content = Some("S11.1L")),
-          VarField(fieldTag = Some("v"), subfields = List(
-            MarcSubfield(tag = "a", content = "Vol 1–5")
-          ))
+          VarField(
+            fieldTag = Some("v"),
+            subfields = List(
+              MarcSubfield(tag = "a", content = "Vol 1–5")
+            ))
         )
       )
 
@@ -106,9 +109,11 @@ class SierraItemsTest
         varFields = List(
           VarField(fieldTag = Some("b"), content = Some("S11.1L")),
           VarField(fieldTag = Some("v"), content = Some("Volumes 1–5")),
-          VarField(fieldTag = Some("v"), subfields = List(
-            MarcSubfield(tag = "a", content = "Vol 1–5")
-          ))
+          VarField(
+            fieldTag = Some("v"),
+            subfields = List(
+              MarcSubfield(tag = "a", content = "Vol 1–5")
+            ))
         )
       )
 

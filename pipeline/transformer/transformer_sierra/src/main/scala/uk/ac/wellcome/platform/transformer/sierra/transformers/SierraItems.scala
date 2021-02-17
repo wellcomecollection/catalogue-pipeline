@@ -115,7 +115,8 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
     )
   }
 
-  private def getItemTitle(itemId: SierraItemNumber, data: SierraItemData): Option[String] = {
+  private def getItemTitle(itemId: SierraItemNumber,
+                           data: SierraItemData): Option[String] = {
     // For the title of the item, we look at the varfields with
     // field tag ǂv, and use either their "contents" or the content of
     // the subfield with tag ǂa.
@@ -123,7 +124,9 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
       data.varFields
         .filter { _.fieldTag.contains("v") }
         .flatMap { vf =>
-          List(vf.content) ++ vf.subfieldsWithTag("a").map { sf => Some(sf.content) }
+          List(vf.content) ++ vf.subfieldsWithTag("a").map { sf =>
+            Some(sf.content)
+          }
         }
         .flatten
         .map { _.trim }
@@ -132,9 +135,10 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
 
     titleCandidates match {
       case Seq(title) => Some(title)
-      case Nil => None
+      case Nil        => None
       case multipleTitles =>
-        warn(s"Multiple title candidates on item $itemId: ${titleCandidates.mkString("; ")}")
+        warn(
+          s"Multiple title candidates on item $itemId: ${titleCandidates.mkString("; ")}")
         Some(multipleTitles.head)
     }
   }
