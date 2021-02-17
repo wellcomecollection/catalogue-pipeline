@@ -4,6 +4,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.sierra.source.{
+  MarcSubfield,
   SierraBibData,
   SierraItemData,
   VarField
@@ -79,12 +80,39 @@ class SierraItemsTest
       val itemData = createSierraItemDataWith(
         varFields = List(
           VarField(fieldTag = Some("b"), content = Some("S11.1L")),
-          VarField(fieldTag = Some("v"), content = Some("Envelope")),
           VarField(fieldTag = Some("v"), content = Some("")),
+          VarField(fieldTag = Some("v"), content = Some("Envelope")),
         )
       )
 
       getTitle(itemData) shouldBe Some("Envelope")
+    }
+
+    it("uses the contents of subfield ǂa if field tag ǂv doesn't have a contents field") {
+      val itemData = createSierraItemDataWith(
+        varFields = List(
+          VarField(fieldTag = Some("b"), content = Some("S11.1L")),
+          VarField(fieldTag = Some("v"), subfields = List(
+            MarcSubfield(tag = "a", content = "Vol 1–5")
+          ))
+        )
+      )
+
+      getTitle(itemData) shouldBe Some("Vol 1–5")
+    }
+
+    it("picks the first suitable varfield if there are multiple options") {
+      val itemData = createSierraItemDataWith(
+        varFields = List(
+          VarField(fieldTag = Some("b"), content = Some("S11.1L")),
+          VarField(fieldTag = Some("v"), content = Some("Volumes 1–5")),
+          VarField(fieldTag = Some("v"), subfields = List(
+            MarcSubfield(tag = "a", content = "Vol 1–5")
+          ))
+        )
+      )
+
+      getTitle(itemData) shouldBe Some("Volumes 1–5")
     }
 
     def getTitle(itemData: SierraItemData): Option[String] = {
