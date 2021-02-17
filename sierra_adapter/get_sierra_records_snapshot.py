@@ -145,11 +145,13 @@ def get_new_records(session, *, locations, snapshot_path):
             for line in infile:
                 row = json.loads(line)
 
-                latest_location = locations.pop(row['id'])
+                latest_location = locations.pop(row["id"])
 
-                if latest_location != row['location']:
-                    row['location'] = latest_location
-                    row['record'] = fetch_transformable(s3_client, location=latest_location)
+                if latest_location != row["location"]:
+                    row["location"] = latest_location
+                    row["record"] = fetch_transformable(
+                        s3_client, location=latest_location
+                    )
 
                 yield row
     except FileNotFoundError:
@@ -161,18 +163,14 @@ def get_new_records(session, *, locations, snapshot_path):
         record = fetch_transformable(s3_client, location=location)
 
         record = {
-            'bib': record.get('maybeBibRecord'),
-            'items': {
-                item_id: item_record['data']
-                for item_id, item_record in record['itemRecords'].items()
-            }
+            "bib": record.get("maybeBibRecord"),
+            "items": {
+                item_id: item_record["data"]
+                for item_id, item_record in record["itemRecords"].items()
+            },
         }
 
-        yield {
-            'id': id,
-            'location': location,
-            'record': record,
-        }
+        yield {"id": id, "location": location, "record": record}
 
 
 def freshen_sierra_records_snapshot(session, *, snapshot_path):
@@ -185,7 +183,7 @@ def freshen_sierra_records_snapshot(session, *, snapshot_path):
     with gzip.open(tmp_path, "wb") as outfile:
         for record in tqdm.tqdm(
             get_new_records(session, locations=locations, snapshot_path=snapshot_path),
-            total=len(locations)
+            total=len(locations),
         ):
             line = json.dumps(record) + "\n"
             outfile.write(line.encode("utf8"))
@@ -207,9 +205,7 @@ if __name__ == "__main__":
         )
 
         upload_file_to_s3(
-            bucket=SNAPSHOT_BUCKET,
-            key=SNAPSHOT_KEY,
-            filename=LOCAL_SNAPSHOT_PATH
+            bucket=SNAPSHOT_BUCKET, key=SNAPSHOT_KEY, filename=LOCAL_SNAPSHOT_PATH
         )
 
     print("")
