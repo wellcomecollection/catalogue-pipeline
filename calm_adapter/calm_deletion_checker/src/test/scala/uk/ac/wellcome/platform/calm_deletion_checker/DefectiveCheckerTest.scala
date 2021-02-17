@@ -13,7 +13,6 @@ import uk.ac.wellcome.platform.calm_deletion_checker.fixtures.CalmSourcePayloadG
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.util.Random
 
 class DefectiveCheckerTest
     extends AnyFunSpec
@@ -93,9 +92,6 @@ class DefectiveCheckerTest
         Future.successful((items intersect deletedSet).size)
       }
     }
-
-    def randomSample[T](seq: Seq[T], size: Int): Seq[T] =
-      Random.shuffle(seq).take(size)
   }
 
   describe("ApiDeletionChecker") {

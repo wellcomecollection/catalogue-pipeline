@@ -11,22 +11,9 @@ import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.platform.calm_deletion_checker.fixtures.CalmSourcePayloadGenerators
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
-import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import weco.catalogue.source_model.CalmSourcePayload
 
 import scala.language.higherKinds
-
-case class CalmSourcePayloadWithoutDeletionFlag(
-  id: String,
-  version: Int,
-  location: S3ObjectLocation
-) {
-  def toCalmSourcePayload = CalmSourcePayload(
-    id = id,
-    version = version,
-    location = location,
-  )
-}
 
 class DeletionMarkerTest
     extends AnyFunSpec
@@ -38,10 +25,10 @@ class DeletionMarkerTest
     with CalmSourcePayloadGenerators {
 
   it("marks a record with isDeleted = false as deleted") {
-    val records = Seq.fill(5)(calmSourcePayload)
-    withExistingRecords(records) {
+    val rows = Seq.fill(5)(calmSourcePayload).map(_.toDynamoRow)
+    withExistingRecords(rows) {
       case (deletionMarker, table) =>
-        val targetRecord = records.head
+        val targetRecord = rows.head.toPayload
         val result = deletionMarker(targetRecord)
 
         result.success.value shouldBe targetRecord.copy(isDeleted = true)
@@ -50,13 +37,11 @@ class DeletionMarkerTest
   }
 
   it("marks a record with no isDeleted attribute as deleted") {
-    val records = Seq.fill(5)(calmSourcePayload).map {
-      case CalmSourcePayload(id, location, version, _) =>
-        CalmSourcePayloadWithoutDeletionFlag(id, version, location)
-    }
-    withExistingRecords(records) {
+    val rows =
+      Seq.fill(5)(calmSourcePayload).map(_.toDynamoRowWithoutDeletionFlag)
+    withExistingRecords(rows) {
       case (deletionMarker, table) =>
-        val targetRecord = records.head.toCalmSourcePayload
+        val targetRecord = rows.head.toPayload
         val result = deletionMarker(targetRecord)
 
         result.success.value shouldBe targetRecord.copy(isDeleted = true)
@@ -64,25 +49,26 @@ class DeletionMarkerTest
     }
   }
 
-  it("fails if the item is already marked as deleted") {
-    val records = calmSourcePayloadWith(isDeleted = true) +:
-      Seq.fill(4)(calmSourcePayload)
+  it("succeeds if the item is already marked as deleted") {
+    val records = (calmSourcePayloadWith(isDeleted = true) +:
+      Seq.fill(4)(calmSourcePayload)).map(_.toDynamoRow)
     withExistingRecords(records) {
-      case (deletionMarker, _) =>
-        val targetRecord = records.head
+      case (deletionMarker, table) =>
+        val targetRecord = records.head.toPayload
         val result = deletionMarker(targetRecord)
 
-        result.failure.exception shouldBe a[ConditionalCheckFailedException]
+        result.success.value shouldBe targetRecord.copy(isDeleted = true)
+        getRecordFromTable(targetRecord.id, targetRecord.version, table) shouldEqual result.success.value
     }
   }
 
   it("fails if the item does not exist") {
-    withExistingRecords(Seq.fill(5)(calmSourcePayload)) {
+    withExistingRecords(Seq.fill(5)(calmSourcePayload).map(_.toDynamoRow)) {
       case (deletionMarker, _) =>
         val anotherRecord = calmSourcePayload
         val result = deletionMarker(anotherRecord)
 
-        result.failure.exception shouldBe a[RuntimeException]
+        result.failure.exception shouldBe a[ConditionalCheckFailedException]
     }
   }
 
@@ -103,9 +89,10 @@ class DeletionMarkerTest
   ): CalmSourcePayload =
     scanamo
       .exec(
-        ScanamoTable[CalmSourcePayload](table.name)
+        ScanamoTable[CalmSourceDynamoRow](table.name)
           .get("id" === id and "version" === version)
       )
       .value
       .value
+      .toPayload
 }

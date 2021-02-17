@@ -26,7 +26,7 @@ object Main extends WellcomeTypesafeApp {
       DynamoBuilder.buildDynamoConfig(config, namespace = "vhs")
 
     new DeletionCheckerWorkerService(
-      msgStream = SQSBuilder.buildSQSStream(config),
+      messageStream = SQSBuilder.buildSQSStream(config),
       messageSender = SNSBuilder
         .buildSNSMessageSender(config, subject = "CALM deletion checker"),
       markDeleted = new DeletionMarker(dynamoConfig.tableName),

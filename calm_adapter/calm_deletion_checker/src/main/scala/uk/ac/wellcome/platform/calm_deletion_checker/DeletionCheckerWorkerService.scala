@@ -14,31 +14,34 @@ import weco.catalogue.source_model.CalmSourcePayload
 import scala.collection.immutable
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
+import scala.util.Success
 
 class DeletionCheckerWorkerService[Destination](
-  msgStream: SQSStream[NotificationMessage],
+  messageStream: SQSStream[NotificationMessage],
   messageSender: MessageSender[Destination],
   markDeleted: DeletionMarker,
   calmApiClient: CalmApiClient,
-  batchSize: Int)(implicit ec: ExecutionContext)
+  batchSize: Int,
+  batchDuration: FiniteDuration = 3 minutes
+)(implicit ec: ExecutionContext)
     extends Runnable {
 
   private val className = this.getClass.getSimpleName
-  private val batchDuration = 3 minutes
   private val parallelism = 5
 
-  def run(): Future[Done] = msgStream.runGraph(className) { (source, sink) =>
-    source
-      .via(parseBody)
-      .divertTo(
-        sink.contramap(Keep.left.tupled),
-        Keep.right.tupled.andThen(_.isDeleted)
-      )
-      .groupedWithin(batchSize, batchDuration)
-      .via(checkDeletions)
-      .mapConcat(identity)
-      .via(updateSourceData)
-      .toMat(sink)(Keep.right)
+  def run(): Future[Done] = messageStream.runGraph(className) {
+    (source, sink) =>
+      source
+        .via(parseBody)
+        .divertTo(
+          sink.contramap(Keep.left.tupled),
+          Keep.right.tupled.andThen(_.isDeleted)
+        )
+        .groupedWithin(batchSize, batchDuration)
+        .via(checkDeletions)
+        .mapConcat(identity)
+        .via(updateSourceData)
+        .toMat(sink)(Keep.right)
   }
 
   private def parseBody =
@@ -64,14 +67,14 @@ class DeletionCheckerWorkerService[Destination](
 
   private def updateSourceData =
     Flow[(Message, CalmSourcePayload, DeletionStatus)]
-      .mapAsyncUnordered(parallelism) {
+      .map {
         case (msg, record, Deleted) =>
-          Future
-            .fromTry(markDeleted(record))
-            .map(messageSender.sendT[CalmSourcePayload])
+          markDeleted(record)
+            .flatMap(messageSender.sendT[CalmSourcePayload])
             .map(_ => msg)
-        case (msg, _, Extant) => Future.successful(msg)
+        case (msg, _, Extant) => Success(msg)
       }
+      .map(_.get) // Let akka-streams handle the thrown exception
 
   private lazy val deletionChecker = new ApiDeletionChecker(calmApiClient)
 
