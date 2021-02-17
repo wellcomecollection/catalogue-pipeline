@@ -1,1 +1,11 @@
+# This dependency pinning is required to get moto
+# to install without updating non-test deps
 mock
+moto==1.3.6
+boto3==1.7.31
+botocore==1.10.31
+docutils==0.14
+jmespath==0.9.3
+python-dateutil==2.7.3
+pytz==2018.4
+six==1.11.0

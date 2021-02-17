@@ -17,8 +17,8 @@ def test_end_to_end_demultiplexer():
     sns_client = boto3.client("sns", region_name="eu-west-1")
     sqs_client = boto3.client("sqs", region_name="eu-west-1")
 
-    resp = sns_client.create_topic(Name="test-topic")
-    topic_arn = resp["TopicArn"]
+    test_topic = sns_client.create_topic(Name="test-topic")
+    topic_arn = test_topic["TopicArn"]
 
     test_queue = sqs_client.create_queue(QueueName="test-queue")
     test_queue_url = test_queue["QueueUrl"]
