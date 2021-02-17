@@ -77,15 +77,11 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
     objectField("data").fields(
       objectField("otherIdentifiers").fields(lowercaseKeyword("value")),
       objectField("format").fields(keywordField("id")),
-      asciifoldingTextFieldWithKeyword("title").fields(
-        keywordField("keyword"),
-        textField("english").analyzer(englishAnalyzer.name),
-        textField("shingles").analyzer(shingleAsciifoldingAnalyzer.name)
-      ),
-      englishTextKeywordField("alternativeTitles"),
+      multilingualKeywordField("title"),
+      multilingualKeywordField("alternativeTitles"),
       englishTextField("description"),
       englishTextKeywordField("physicalDescription"),
-      englishTextKeywordField("lettering"),
+      multilingualField("lettering"),
       objectField("contributors").fields(
         objectField("agent").fields(label),
       ),
