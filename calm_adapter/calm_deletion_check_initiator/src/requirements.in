@@ -1,0 +1,4 @@
+boto3
+click
+tqdm
+wellcome_aws_utils
