@@ -14,14 +14,8 @@ def mock_dynamo_client():
 def test_dynamo_table(mock_dynamo_client):
     table = mock_dynamo_client.create_table(
         TableName="test-table",
-        AttributeDefinitions=[{
-            "AttributeName": "id",
-            "AttributeType": "S"
-        }],
-        KeySchema=[{
-            "AttributeName": "id",
-            "KeyType": "HASH"
-        }]
+        AttributeDefinitions=[{"AttributeName": "id", "AttributeType": "S"}],
+        KeySchema=[{"AttributeName": "id", "KeyType": "HASH"}],
     )
     table_name = table["TableDescription"]["TableName"]
 
@@ -35,19 +29,21 @@ def put_records(mock_dynamo_client, test_dynamo_table):
     def _put_records(records):
         for record in records:
             mock_dynamo_client.put_item(
-                TableName=test_dynamo_table,
-                Item={"id": {"S": record["id"]}}
+                TableName=test_dynamo_table, Item={"id": {"S": record["id"]}}
             )
+
     yield _put_records
 
 
 @pytest.fixture(scope="function")
-def deletion_check_initiator(mock_dynamo_client, mock_sns_client, test_topic_arn, test_dynamo_table):
+def deletion_check_initiator(
+    mock_dynamo_client, mock_sns_client, test_topic_arn, test_dynamo_table
+):
     yield DeletionCheckInitiator(
         dynamo_client=mock_dynamo_client,
         sns_client=mock_sns_client,
         reindexer_topic_arn=test_topic_arn,
-        source_table_name=test_dynamo_table
+        source_table_name=test_dynamo_table,
     )
 
 
@@ -69,7 +65,9 @@ def test_all_records(deletion_check_initiator, put_records, get_test_topic_messa
     assert max([m["parameters"]["segment"] for m in messages]) == (total_segments - 1)
 
 
-def test_specific_records(deletion_check_initiator, put_records, get_test_topic_messages):
+def test_specific_records(
+    deletion_check_initiator, put_records, get_test_topic_messages
+):
     records = [{"id": f"{i:05d}"} for i in range(10)]
     put_records(records)
 
@@ -90,4 +88,3 @@ def test_specific_records_existence_check(deletion_check_initiator, put_records)
         deletion_check_initiator.specific_records(["not-stored-record"])
 
     assert "does not exist" in str(e.value)
-

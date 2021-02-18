@@ -48,7 +48,7 @@ def cli(ctx, topic_arn, table_name):
         dynamo_client=dynamo_client,
         sns_client=sns_client,
         reindexer_topic_arn=topic_arn,
-        source_table_name=table_name
+        source_table_name=table_name,
     )
 
 

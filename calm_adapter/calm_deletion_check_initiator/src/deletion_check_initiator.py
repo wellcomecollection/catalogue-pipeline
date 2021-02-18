@@ -9,7 +9,9 @@ class DeletionCheckInitiator:
     reindex_dest = "calm_deletion_checker"
     reindex_job_config_id = f"{reindex_src}--{reindex_dest}"
 
-    def __init__(self, dynamo_client, sns_client, reindexer_topic_arn, source_table_name):
+    def __init__(
+        self, dynamo_client, sns_client, reindexer_topic_arn, source_table_name
+    ):
         self.dynamo_client = dynamo_client
         self.sns_client = sns_client
         self.reindexer_topic_arn = reindexer_topic_arn
