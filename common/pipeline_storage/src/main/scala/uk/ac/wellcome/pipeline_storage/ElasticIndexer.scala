@@ -2,9 +2,9 @@ package uk.ac.wellcome.pipeline_storage
 
 import scala.concurrent.{ExecutionContext, Future}
 import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.requests.bulk.{BulkResponse, BulkResponseItem}
+import com.sksamuel.elastic4s.requests.bulk.BulkResponseItem
 import com.sksamuel.elastic4s.requests.common.VersionType.ExternalGte
-import com.sksamuel.elastic4s.{ElasticClient, Index, Response}
+import com.sksamuel.elastic4s.{ElasticClient, Index}
 import com.sksamuel.elastic4s.{Indexable => ElasticIndexable}
 import io.circe.{Encoder, Printer}
 import grizzled.slf4j.Logging
@@ -52,11 +52,47 @@ class ElasticIndexer[T: Indexable](
           .execute {
             bulk(inserts)
           }
-          .map { response: Response[BulkResponse] =>
-            if (response.isError) {
+          .flatMap {
+
+            // An HTTP 413 Request Too Large error means we tried to index too
+            // many documents at once.  In this case, we split the list in half
+            // and try to index both halves separately.
+            //
+            // Either we'll narrow it down to a single document that's to big to be
+            // indexed, or we'll index everything successfully.
+            case response if response.status == 413 =>
+              // If there's only one document left, there's nothing to do --
+              // this document is Just Too Big.
+              // https://twitter.com/smolrobots/status/1001226918107246592
+              if (documents.size == 1) {
+                warn(s"HTTP 413 from Elasticsearch for a single document (${indexable
+                  .id(documents.head)})")
+                Future.successful(Left(documents))
+              }
+
+              // Slice the documents in two, and index them both separately.
+              // We'll combine the results.
+              else {
+                warn(
+                  s"HTTP 413 from Elasticsearch (${documents.size} documents); trying smaller slices")
+                val (slice0, slice1) = documents.splitAt(documents.size / 2)
+
+                val futures: Future[Seq[Either[Seq[T], Seq[T]]]] =
+                  Future.sequence(Seq(apply(slice0), apply(slice1)))
+
+                futures.map {
+                  case Seq(Right(docs0), Right(docs1)) => Right(docs0 ++ docs1)
+                  case Seq(Left(docs0), Left(docs1))   => Left(docs0 ++ docs1)
+                  case Seq(Left(docs0), _)             => Left(docs0)
+                  case Seq(_, Left(docs1))             => Left(docs1)
+                }
+              }
+
+            case response if response.isError =>
               error(s"Error from Elasticsearch: $response")
-              Left(documents)
-            } else {
+              Future.successful(Left(documents))
+
+            case response =>
               debug(s"Bulk response = $response")
               val bulkResponse = response.result
               val actualFailures = bulkResponse.failures.filterNot {
@@ -69,11 +105,12 @@ class ElasticIndexer[T: Indexable](
                   failure.id
                 }
 
-                Left(documents.filter(doc => {
-                  failedIds.contains(indexable.id(doc))
-                }))
-              } else Right(documents)
-            }
+                Future.successful(
+                  Left(documents.filter(doc => {
+                    failedIds.contains(indexable.id(doc))
+                  }))
+                )
+              } else Future.successful(Right(documents))
           }
       }
 
@@ -95,5 +132,4 @@ class ElasticIndexer[T: Indexable](
 
     alreadyIndexedHasHigherVersion
   }
-
 }

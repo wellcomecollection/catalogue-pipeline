@@ -41,6 +41,8 @@ sierra_adapter:
       services:
         - id: items-reader
         - id: bibs-reader
+    - id: sierra_holdings_merger
+    - id: sierra_holdings_linker
   name: Sierra Adapter
   role_arn: arn:aws:iam::760097843905:role/platform-ci
 

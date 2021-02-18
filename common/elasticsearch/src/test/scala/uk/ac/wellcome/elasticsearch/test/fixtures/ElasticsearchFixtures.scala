@@ -296,7 +296,9 @@ trait ElasticsearchFixtures
       ).refreshImmediately
     )
 
-    whenReady(result) { _ =>
+    // With a large number of works this can take a long time
+    // 30 seconds should be enough
+    whenReady(result, Timeout(Span(30, Seconds))) { _ =>
       getSizeOf(index) shouldBe works.size
     }
   }
