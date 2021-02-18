@@ -29,7 +29,7 @@ trait FileWriter {
 }
 
 class ImageDownloader[Ctx](
-  requestPool: RequestPoolFlow[MergedIdentifiedImage, Ctx],
+  requestPool: RequestPoolFlow[(Uri, MergedIdentifiedImage), Ctx],
   fileWriter: FileWriter,
   root: String = "/")(implicit materializer: Materializer) {
 
@@ -57,10 +57,10 @@ class ImageDownloader[Ctx](
     Paths.get(root, image.id, "default.jpg").toAbsolutePath
 
   private def createImageFileRequest(
-    image: MergedIdentifiedImage): (HttpRequest, MergedIdentifiedImage) =
+    image: MergedIdentifiedImage): (HttpRequest, (Uri, MergedIdentifiedImage)) =
     getImageUri(image.locations) match {
       case Some(uri) =>
-        (HttpRequest(method = HttpMethods.GET, uri = uri), image)
+        (HttpRequest(method = HttpMethods.GET, uri = uri), (uri, image))
       case None =>
         throw new RuntimeException(
           s"Could not extract an image URL from locations on image ${image.state.sourceIdentifier}"
@@ -68,21 +68,24 @@ class ImageDownloader[Ctx](
     }
 
   private def saveImageFile: PartialFunction[
-    (Try[HttpResponse], MergedIdentifiedImage),
+    (Try[HttpResponse], (Uri, MergedIdentifiedImage)),
     Future[(MergedIdentifiedImage, Path)]
   ] = {
-    case (Success(response @ HttpResponse(StatusCodes.OK, _, _, _)), image) =>
+    case (
+        Success(response @ HttpResponse(StatusCodes.OK, _, _, _)),
+        (_, image)) =>
       val path = getLocalImagePath(image)
       response.entity.dataBytes
         .runWith(fileWriter.write(path))
         .map { _ =>
           (image, path)
         }
-    case (Success(failedResponse), image) =>
+    case (Success(failedResponse), (uri, image)) =>
       failedResponse.discardEntityBytes()
       Future.failed(
-        throw new RuntimeException(s"Image request for ${getImageUri(
-          image.locations)} failed with status ${failedResponse.status}"))
+        throw new RuntimeException(
+          s"Image request for $uri failed with status ${failedResponse.status}"
+        ))
     case (Failure(exception), _) => Future.failed(exception)
   }
 
@@ -140,6 +143,6 @@ object ImageDownloader {
     new ImageDownloader(
       root = root,
       fileWriter = new DefaultFileWriter(root),
-      requestPool = Http().superPool[(MergedIdentifiedImage, Message)]()
+      requestPool = Http().superPool[((Uri, MergedIdentifiedImage), Message)]()
     )
 }

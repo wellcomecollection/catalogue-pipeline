@@ -1,13 +1,12 @@
 package uk.ac.wellcome.platform.inference_manager.services
 
 import scala.collection.mutable
-import akka.http.scaladsl.model.HttpResponse
+import akka.http.scaladsl.model.{HttpResponse, Uri}
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{BeforeAndAfterAll, Inside, Inspectors, OptionValues}
 import software.amazon.awssdk.services.sqs.model.Message
-
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
@@ -201,7 +200,7 @@ class InferenceManagerWorkerServiceTest
        MemoryMessageSender,
        mutable.Map[String, Image[Augmented]],
        RequestPoolMock[(DownloadedImage, InferrerAdapter), Message],
-       RequestPoolMock[MergedIdentifiedImage, Message]),
+       RequestPoolMock[(Uri, MergedIdentifiedImage), Message]),
       R]): R =
     withResponses(inferrer, images) {
       case (inferrerMock, imagesMock) =>
@@ -221,11 +220,11 @@ class InferenceManagerWorkerServiceTest
                        images: String => Option[HttpResponse])(
     testWith: TestWith[
       (RequestPoolMock[(DownloadedImage, InferrerAdapter), Message],
-       RequestPoolMock[MergedIdentifiedImage, Message]),
+       RequestPoolMock[(Uri, MergedIdentifiedImage), Message]),
       R]): R =
     withRequestPool[(DownloadedImage, InferrerAdapter), Message, R](inferrer) {
       inferrerPoolMock =>
-        withRequestPool[MergedIdentifiedImage, Message, R](images) {
+        withRequestPool[(Uri, MergedIdentifiedImage), Message, R](images) {
           imagesPoolMock =>
             testWith((inferrerPoolMock, imagesPoolMock))
         }
@@ -235,7 +234,7 @@ class InferenceManagerWorkerServiceTest
     initialImages: List[Image[Initial]],
     inferrerRequestPool: RequestPoolFlow[(DownloadedImage, InferrerAdapter),
                                          Message],
-    imageRequestPool: RequestPoolFlow[MergedIdentifiedImage, Message],
+    imageRequestPool: RequestPoolFlow[(Uri, MergedIdentifiedImage), Message],
     augmentedImages: mutable.Map[String, Image[Augmented]])(
     testWith: TestWith[(QueuePair, MemoryMessageSender), R]): R =
     withLocalSqsQueuePair() { queuePair =>

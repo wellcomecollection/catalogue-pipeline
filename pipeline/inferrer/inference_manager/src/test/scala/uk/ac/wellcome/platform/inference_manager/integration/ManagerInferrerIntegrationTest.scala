@@ -34,6 +34,7 @@ import uk.ac.wellcome.platform.inference_manager.services.{
   MergedIdentifiedImage
 }
 import ImageState.{Augmented, Initial}
+import akka.http.scaladsl.model.Uri
 
 class ManagerInferrerIntegrationTest
     extends AnyFunSpec
@@ -144,7 +145,7 @@ class ManagerInferrerIntegrationTest
           inferrerRequestPool =
             Http().superPool[((DownloadedImage, InferrerAdapter), Message)](),
           imageRequestPool =
-            Http().superPool[(MergedIdentifiedImage, Message)](),
+            Http().superPool[((Uri, MergedIdentifiedImage), Message)](),
           fileRoot = root.getPath
         ) { _ =>
           try {
