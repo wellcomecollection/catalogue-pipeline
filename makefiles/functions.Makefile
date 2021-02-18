@@ -33,12 +33,11 @@ endef
 #        of the repo.
 #
 define test_python
-	$(ROOT)/docker_run.py --dind -- \
-	    --workdir /src \
-	    --volume $(ROOT)/$(1):/src \
+	$(ROOT)/docker_run.py --dind --root -- \
+	    --workdir $(ROOT)/$(1) \
 	    --tty \
 		wellcome/tox:latest \
-		--workdir /tmp/.tox
+		    --workdir /tmp/.tox
 endef
 
 
