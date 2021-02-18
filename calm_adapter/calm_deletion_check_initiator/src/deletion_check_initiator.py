@@ -28,7 +28,7 @@ class DeletionCheckInitiator:
                 TableName=self.source_table_name
             )
             item_count = table_description["Table"]["ItemCount"]
-        except (KeyError, self.dynamo_client.exceptions.ResourceNotFoundException) as e:
+        except (KeyError, self.dynamo_client.exceptions.ResourceNotFoundException):
             raise Exception(f"No such table: {self.source_table_name}") from None
 
         return int(math.ceil(item_count / 900))
@@ -72,7 +72,7 @@ class DeletionCheckInitiator:
                 resp = self.dynamo_client.get_item(
                     TableName=self.source_table_name, Key={"id": {"S": identifier}}
                 )
-            except self.dynamo_client.exceptions.ResourceNotFoundException as e:
+            except self.dynamo_client.exceptions.ResourceNotFoundException:
                 raise Exception(f"No such table: {self.source_table_name}") from None
             if not resp or "Item" not in resp:
                 raise Exception(
