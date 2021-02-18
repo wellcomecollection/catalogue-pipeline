@@ -25,6 +25,15 @@ def test_topic_arn(mock_sns_client):
 
 @pytest.fixture(scope="function")
 def get_test_topic_messages(test_topic_arn, mock_sqs_client, mock_sns_client):
+    """
+    Because sns topics don't know what messages they're broadcasting, we need
+    to subscribe something (an SQS queue in this case) to our test topic in order
+    to see the messages. This is the method used in the moto tests:
+    https://github.com/spulec/moto/blob/8befcb6a48e5e8040058391190c3d6a50ea40c69/tests/test_sns/test_publishing_boto3.py#L35-L49
+
+    This fixture provides a function that, once called, yields until there
+    are no more messages on the internal queue.
+    """
     test_queue = mock_sqs_client.create_queue(
         QueueName=f"test-queue-{randint(0, 999):03d}"
     )
