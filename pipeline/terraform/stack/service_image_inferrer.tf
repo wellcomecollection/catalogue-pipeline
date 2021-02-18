@@ -10,8 +10,8 @@ locals {
 
   total_cpu       = 8192
   total_memory    = 7512
-  manager_memory  = 768
-  manager_cpu     = 512
+  manager_memory  = 2048
+  manager_cpu     = 1024
   inferrer_cpu    = floor(0.5 * (local.total_cpu - local.manager_cpu))
   inferrer_memory = floor(0.5 * (local.total_memory - local.manager_memory))
 }
@@ -122,8 +122,13 @@ module "image_inferrer" {
     es_initial_images_index   = local.es_images_initial_index
     es_augmented_images_index = local.es_images_augmented_index
 
-    batch_size             = 8
     flush_interval_seconds = 30
+
+    # This was previously set at 6, I've tried turning it down to stem
+    # the number of out-of-memory errors we get from the image inferrer.
+    #
+    # See https://github.com/wellcomecollection/platform/issues/5020
+    batch_size = 1
   }
 
   manager_secret_env_vars = local.pipeline_storage_es_service_secrets["inferrer"]
