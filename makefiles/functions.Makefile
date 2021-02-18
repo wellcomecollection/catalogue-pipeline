@@ -260,7 +260,7 @@ define __python_ssm_target
 $(1)-build:
 	$(call build_image,$(1),$(2))
 
-ifneq ($(filter $$(1),$$(TEST_OVERRIDE)),)
+ifeq ($(filter $(1),$(TEST_OVERRIDE)),)
 $(1)-test:
 	$(call test_python,$(STACK_ROOT)/$(1))
 endif
