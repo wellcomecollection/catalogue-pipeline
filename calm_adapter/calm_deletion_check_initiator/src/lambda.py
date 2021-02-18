@@ -7,7 +7,8 @@ from .deletion_check_initiator import DeletionCheckInitiator
 source_table_name = os.environ.get("SOURCE_TABLE_NAME")
 reindexer_topic_arn = os.environ.get("REINDEXER_TOPIC_ARN")
 deletion_check_initiator = DeletionCheckInitiator(
-    session=boto3,
+    dynamo_client=boto3.client("dynamodb"),
+    sns_client=boto3.client("sns"),
     source_table_name=source_table_name,
     reindexer_topic_arn=reindexer_topic_arn,
 )

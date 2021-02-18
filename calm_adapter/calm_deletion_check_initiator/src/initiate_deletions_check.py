@@ -42,8 +42,13 @@ def get_reindexer_topic_arn():
 @click.option("--topic-arn", default=get_reindexer_topic_arn)
 @click.pass_context
 def cli(ctx, topic_arn, table_name):
+    dynamo_client = session.client("dynamodb")
+    sns_client = session.client("sns")
     ctx.obj = DeletionCheckInitiator(
-        session=session, reindexer_topic_arn=topic_arn, source_table_name=table_name
+        dynamo_client=dynamo_client,
+        sns_client=sns_client,
+        reindexer_topic_arn=topic_arn,
+        source_table_name=table_name
     )
 
 

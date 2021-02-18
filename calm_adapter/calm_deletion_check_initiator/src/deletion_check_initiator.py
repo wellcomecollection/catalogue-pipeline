@@ -9,8 +9,9 @@ class DeletionCheckInitiator:
     reindex_dest = "calm_deletion_checker"
     reindex_job_config_id = f"{reindex_src}--{reindex_dest}"
 
-    def __init__(self, session, reindexer_topic_arn, source_table_name):
-        self.session = session
+    def __init__(self, dynamo_client, sns_client, reindexer_topic_arn, source_table_name):
+        self.dynamo_client = dynamo_client
+        self.sns_client = sns_client
         self.reindexer_topic_arn = reindexer_topic_arn
         self.source_table_name = source_table_name
 
@@ -20,21 +21,19 @@ class DeletionCheckInitiator:
         Each segment should contain ~1000 records, so we don't
         exhaust the memory in the reindexer.
         """
-        dynamodb = self.session.client("dynamodb")
         try:
-            table_description = dynamodb.describe_table(
+            table_description = self.dynamo_client.describe_table(
                 TableName=self.source_table_name
             )
             item_count = table_description["Table"]["ItemCount"]
-        except (KeyError, dynamodb.exceptions.ResourceNotFoundException) as e:
+        except (KeyError, self.dynamo_client.exceptions.ResourceNotFoundException) as e:
             raise Exception(f"No such table: {self.source_table_name}") from None
 
         return int(math.ceil(item_count / 900))
 
     def __publish_messages(self, messages, n_messages=None):
-        sns = self.session.client("sns")
         for message in tqdm(messages, total=n_messages):
-            resp = sns.publish(
+            resp = self.sns_client.publish(
                 TopicArn=self.reindexer_topic_arn,
                 MessageStructure="json",
                 Message=json.dumps(
@@ -64,17 +63,16 @@ class DeletionCheckInitiator:
         self.__publish_messages(reindexer_segments, n_messages=n_reindexer_segments)
 
     def specific_records(self, ids):
-        dynamodb = self.session.client("dynamodb")
         for identifier in ids:
             # While this requires an extra DynamoDB query per ID, it saves
             # the time/confusion of having to wait for the reindexer to do nothing
             try:
-                resp = dynamodb.get_item(
-                    TableName=self.source_table_name, Key={"id": identifier}
+                resp = self.dynamo_client.get_item(
+                    TableName=self.source_table_name, Key={"id": {"S": identifier}}
                 )
-            except dynamodb.exceptions.ResourceNotFoundException as e:
+            except self.dynamo_client.exceptions.ResourceNotFoundException as e:
                 raise Exception(f"No such table: {self.source_table_name}") from None
-            if resp is None:
+            if not resp or "Item" not in resp:
                 raise Exception(
                     f"Specified ID {identifier} does not exist in source table {self.source_table_name}"
                 )
