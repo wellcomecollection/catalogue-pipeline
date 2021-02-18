@@ -4,7 +4,7 @@ import boto3
 import datetime as dt
 import json
 import os
-import mock
+from unittest import mock
 from moto import mock_sns, mock_sqs
 
 from sierra_window_generator import build_window, main
