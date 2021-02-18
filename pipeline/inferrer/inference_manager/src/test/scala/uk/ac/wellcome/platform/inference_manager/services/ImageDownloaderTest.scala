@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.inference_manager.services
 
 import java.nio.file.{Path, Paths}
-import akka.http.scaladsl.model.HttpResponse
+import akka.http.scaladsl.model.{HttpResponse, Uri}
 import akka.stream.Materializer
 import akka.stream.scaladsl.{Sink, Source}
 import akka.util.ByteString
@@ -152,10 +152,10 @@ class ImageDownloaderTest
                                        _ => Some(Responses.image),
                                      existingFilePaths: Set[Path] = Set.empty)(
     testWith: TestWith[(ImageDownloader[Unit],
-                        RequestPoolMock[MergedIdentifiedImage, Unit],
+                        RequestPoolMock[(Uri, MergedIdentifiedImage), Unit],
                         MemoryFileWriter),
                        R])(implicit materializer: Materializer): R =
-    withRequestPool[MergedIdentifiedImage, Unit, R](response) { requestPool =>
+    withRequestPool[(Uri, MergedIdentifiedImage), Unit, R](response) { requestPool =>
       val fileWriter = new MemoryFileWriter
       existingFilePaths.foreach { existingFile =>
         fileWriter.files

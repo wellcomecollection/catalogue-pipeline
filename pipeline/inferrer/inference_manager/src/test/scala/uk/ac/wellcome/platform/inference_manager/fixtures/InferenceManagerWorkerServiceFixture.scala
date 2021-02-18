@@ -21,6 +21,7 @@ import uk.ac.wellcome.platform.inference_manager.services.{
 }
 import uk.ac.wellcome.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import ImageState.{Augmented, Initial}
+import akka.http.scaladsl.model.Uri
 
 trait InferenceManagerWorkerServiceFixture
     extends PipelineStorageStreamFixtures {
@@ -32,7 +33,7 @@ trait InferenceManagerWorkerServiceFixture
     fileWriter: FileWriter,
     inferrerRequestPool: RequestPoolFlow[(DownloadedImage, InferrerAdapter),
                                          Message],
-    imageRequestPool: RequestPoolFlow[MergedIdentifiedImage, Message],
+    imageRequestPool: RequestPoolFlow[(Uri, MergedIdentifiedImage), Message],
     fileRoot: String = "/",
     initialImages: List[Image[Initial]] = Nil,
     augmentedImages: mutable.Map[String, Image[Augmented]])(
