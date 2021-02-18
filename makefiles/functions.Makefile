@@ -35,7 +35,7 @@ endef
 define test_python
 	$(ROOT)/docker_run.py --dind -- \
 	    --workdir /src \
-	    --volume $(ROOT)/$(1)/src:/src \
+	    --volume $(ROOT)/$(1):/src \
 	    --tty \
 		wellcome/tox:latest \
 		--workdir /tmp/.tox
