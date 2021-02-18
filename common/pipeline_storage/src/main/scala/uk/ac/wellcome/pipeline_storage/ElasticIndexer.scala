@@ -10,6 +10,7 @@ import io.circe.{Encoder, Printer}
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.elasticsearch.{ElasticsearchIndexCreator, IndexConfig}
 
+import java.security.MessageDigest
 import scala.util.Try
 
 class ElasticIndexer[T: Indexable](
@@ -72,13 +73,23 @@ class ElasticIndexer[T: Indexable](
 
               // Slice the documents in two, and index them both separately.
               // We'll combine the results.
+              //
+              // The "trace ID" allows us to follow multiple requests through the logs.
+              // It's a hashed version of all the IDs in each slice, which should be
+              // easier to follow than dumping all the IDs to the logs.
               else {
-                warn(
-                  s"HTTP 413 from Elasticsearch (${documents.size} documents); trying smaller slices")
                 val (slice0, slice1) = documents.splitAt(documents.size / 2)
+
+                val traceId = s"${createTraceId(documents)} => ${createTraceId(slice0)} / ${createTraceId(slice1)}}"
+                warn(
+                  s"HTTP 413 from Elasticsearch (${documents.size} documents); trying smaller slices (trace $traceId)")
 
                 val futures: Future[Seq[Either[Seq[T], Seq[T]]]] =
                   Future.sequence(Seq(apply(slice0), apply(slice1)))
+                    .map { result =>
+                      info(s"Received both results from HTTP 413 retry (trace $traceId)")
+                      result
+                    }
 
                 futures.map {
                   case Seq(Right(docs0), Right(docs1)) => Right(docs0 ++ docs1)
@@ -131,5 +142,14 @@ class ElasticIndexer[T: Indexable](
     }
 
     alreadyIndexedHasHigherVersion
+  }
+
+  private def createTraceId(documents: Seq[T]): String = {
+    val concatenatedIds =
+      documents.map { indexable.id }.sorted.mkString("::")
+
+    MessageDigest.getInstance("MD5")
+      .digest(concatenatedIds.getBytes("UTF-8"))
+      .map("%02x".format(_)).mkString
   }
 }
