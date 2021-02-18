@@ -71,7 +71,9 @@ class ImageDownloader[Ctx](
     (Try[HttpResponse], (Uri, MergedIdentifiedImage)),
     Future[(MergedIdentifiedImage, Path)]
   ] = {
-    case (Success(response @ HttpResponse(StatusCodes.OK, _, _, _)), (_, image)) =>
+    case (
+        Success(response @ HttpResponse(StatusCodes.OK, _, _, _)),
+        (_, image)) =>
       val path = getLocalImagePath(image)
       response.entity.dataBytes
         .runWith(fileWriter.write(path))

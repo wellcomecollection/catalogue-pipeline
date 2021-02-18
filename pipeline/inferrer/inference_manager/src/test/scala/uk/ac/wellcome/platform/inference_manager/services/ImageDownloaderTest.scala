@@ -155,16 +155,17 @@ class ImageDownloaderTest
                         RequestPoolMock[(Uri, MergedIdentifiedImage), Unit],
                         MemoryFileWriter),
                        R])(implicit materializer: Materializer): R =
-    withRequestPool[(Uri, MergedIdentifiedImage), Unit, R](response) { requestPool =>
-      val fileWriter = new MemoryFileWriter
-      existingFilePaths.foreach { existingFile =>
-        fileWriter.files
-          .put(existingFile, ByteString(Responses.randomImageBytes()))
-      }
-      val downloader =
-        new ImageDownloader(
-          requestPool = requestPool.pool,
-          fileWriter = fileWriter)
-      testWith((downloader, requestPool, fileWriter))
+    withRequestPool[(Uri, MergedIdentifiedImage), Unit, R](response) {
+      requestPool =>
+        val fileWriter = new MemoryFileWriter
+        existingFilePaths.foreach { existingFile =>
+          fileWriter.files
+            .put(existingFile, ByteString(Responses.randomImageBytes()))
+        }
+        val downloader =
+          new ImageDownloader(
+            requestPool = requestPool.pool,
+            fileWriter = fileWriter)
+        testWith((downloader, requestPool, fileWriter))
     }
 }
