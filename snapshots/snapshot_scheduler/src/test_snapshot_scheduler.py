@@ -6,6 +6,8 @@ from unittest.mock import patch
 
 import snapshot_scheduler
 
+pytest_plugins = "catalogue_aws_fixtures"
+
 
 def test_writes_message_to_sqs(
     test_topic_arn, mock_sns_client, get_test_topic_messages

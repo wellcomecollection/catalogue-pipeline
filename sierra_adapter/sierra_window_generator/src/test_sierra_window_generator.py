@@ -6,6 +6,8 @@ from unittest import mock
 
 from sierra_window_generator import build_window, main
 
+pytest_plugins = "catalogue_aws_fixtures"
+
 
 class patched_datetime(dt.datetime):
     @classmethod
