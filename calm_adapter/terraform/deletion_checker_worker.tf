@@ -1,6 +1,6 @@
 module "calm_deletions_checker_queue" {
   source                     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
-  queue_name                 = "calm-deletions-checker"
+  queue_name                 = "calm-deletions-checker-input"
   topic_arns                 = [local.calm_deletion_checker_topic_arn]
   aws_region                 = local.aws_region
   alarm_topic_arn            = local.dlq_alarm_arn
