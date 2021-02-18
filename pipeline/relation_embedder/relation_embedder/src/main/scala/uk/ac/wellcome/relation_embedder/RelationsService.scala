@@ -44,7 +44,7 @@ class PathQueryRelationsService(
 
   def getAffectedWorks(batch: Batch): Source[Work[Merged], NotUsed] = {
     val request = requestBuilder.affectedWorks(batch, affectedWorksScroll)
-    info(
+    debug(
       s"Querying affected works with ES request: ${elasticClient.show(request)}")
     Source
       .fromPublisher(elasticClient.publisher(request))
@@ -53,7 +53,7 @@ class PathQueryRelationsService(
 
   def getRelationTree(batch: Batch): Source[RelationWork, NotUsed] = {
     val request = requestBuilder.completeTree(batch, completeTreeScroll)
-    info(
+    debug(
       s"Querying complete tree with ES request: ${elasticClient.show(request)}")
     Source
       .fromPublisher(elasticClient.publisher(request))
