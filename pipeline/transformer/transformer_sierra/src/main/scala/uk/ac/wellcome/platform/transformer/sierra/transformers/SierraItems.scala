@@ -95,7 +95,7 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
     : Item[IdState.Unminted] = {
     debug(s"Attempting to transform $itemId")
     Item(
-      title = getItemTitle(itemData),
+      title = getItemTitle(itemId, itemData),
       locations =
         getPhysicalLocation(bibId, itemData, bibData, fallbackLocation).toList,
       id = IdState.Identifiable(
@@ -115,6 +115,31 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
     )
   }
 
-  private def getItemTitle(data: SierraItemData) =
-    data.varFields.withFieldTag("v").contents.headOption
+  private def getItemTitle(itemId: SierraItemNumber,
+                           data: SierraItemData): Option[String] = {
+    // For the title of the item, we look at the varfields with
+    // field tag ǂv, and use either their "contents" or the content of
+    // the subfield with tag ǂa.
+    val titleCandidates: List[String] =
+      data.varFields
+        .filter { _.fieldTag.contains("v") }
+        .flatMap { vf =>
+          List(vf.content) ++ vf.subfieldsWithTag("a").map { sf =>
+            Some(sf.content)
+          }
+        }
+        .flatten
+        .map { _.trim }
+        .filterNot { _ == "" }
+        .distinct
+
+    titleCandidates match {
+      case Seq(title) => Some(title)
+      case Nil        => None
+      case multipleTitles =>
+        warn(
+          s"Multiple title candidates on item $itemId: ${titleCandidates.mkString("; ")}")
+        Some(multipleTitles.head)
+    }
+  }
 }

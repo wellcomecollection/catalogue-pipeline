@@ -4,6 +4,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.sierra.source.{
+  MarcSubfield,
   SierraBibData,
   SierraItemData,
   VarField
@@ -57,20 +58,75 @@ class SierraItemsTest
       .sourceIdentifier shouldBe sourceIdentifier
   }
 
-  it("extracts the title from item varfield $v") {
-    val itemId = createSierraItemNumber
-    val itemData = createSierraItemData.copy(
-      varFields = List(
-        VarField(fieldTag = Some("b"), content = Some("S11.1L")),
-        VarField(fieldTag = Some("v"), content = Some("Envelope")),
+  describe("gets the title") {
+    it("skips the title if it can't find one") {
+      val itemData = createSierraItemData
+
+      getTitle(itemData) shouldBe None
+    }
+
+    it("uses the contents of the varfield with field tag v") {
+      val itemData = createSierraItemDataWith(
+        varFields = List(
+          VarField(fieldTag = Some("b"), content = Some("S11.1L")),
+          VarField(fieldTag = Some("v"), content = Some("Envelope")),
+        )
       )
-    )
 
-    val transformedItem = getTransformedItems(
-      itemDataMap = Map(itemId -> itemData)
-    ).head
+      getTitle(itemData) shouldBe Some("Envelope")
+    }
 
-    transformedItem.title shouldBe Some("Envelope")
+    it("skips instances of field tag that are empty") {
+      val itemData = createSierraItemDataWith(
+        varFields = List(
+          VarField(fieldTag = Some("b"), content = Some("S11.1L")),
+          VarField(fieldTag = Some("v"), content = Some("")),
+          VarField(fieldTag = Some("v"), content = Some("Envelope")),
+        )
+      )
+
+      getTitle(itemData) shouldBe Some("Envelope")
+    }
+
+    it(
+      "uses the contents of subfield ǂa if field tag ǂv doesn't have a contents field") {
+      val itemData = createSierraItemDataWith(
+        varFields = List(
+          VarField(fieldTag = Some("b"), content = Some("S11.1L")),
+          VarField(
+            fieldTag = Some("v"),
+            subfields = List(
+              MarcSubfield(tag = "a", content = "Vol 1–5")
+            ))
+        )
+      )
+
+      getTitle(itemData) shouldBe Some("Vol 1–5")
+    }
+
+    it("picks the first suitable varfield if there are multiple options") {
+      val itemData = createSierraItemDataWith(
+        varFields = List(
+          VarField(fieldTag = Some("b"), content = Some("S11.1L")),
+          VarField(fieldTag = Some("v"), content = Some("Volumes 1–5")),
+          VarField(
+            fieldTag = Some("v"),
+            subfields = List(
+              MarcSubfield(tag = "a", content = "Vol 1–5")
+            ))
+        )
+      )
+
+      getTitle(itemData) shouldBe Some("Volumes 1–5")
+    }
+
+    def getTitle(itemData: SierraItemData): Option[String] = {
+      val transformedItem = getTransformedItems(
+        itemDataMap = Map(createSierraItemNumber -> itemData)
+      ).head
+
+      transformedItem.title
+    }
   }
 
   it("removes items with deleted=true") {
