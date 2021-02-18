@@ -5,8 +5,5 @@ setup(
     description="Pytest fixtures used across catalogue apps",
     packages=["fixtures"],
     entry_points={"pytest11": ["catalogue_aws_fixtures = fixtures.aws"]},
-    install_requires=[
-        "pytest",
-        "moto"
-    ]
+    install_requires=["pytest", "moto"],
 )

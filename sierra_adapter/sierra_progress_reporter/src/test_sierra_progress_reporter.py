@@ -19,10 +19,7 @@ def s3_client():
 def bucket(s3_client):
     bucket = "test-python-bucket-%d" % random.randint(0, 10000)
     s3_client.create_bucket(
-        Bucket=bucket,
-        CreateBucketConfiguration={
-            "LocationConstraint": "eu-west-1"
-        }
+        Bucket=bucket, CreateBucketConfiguration={"LocationConstraint": "eu-west-1"}
     )
     yield bucket
 

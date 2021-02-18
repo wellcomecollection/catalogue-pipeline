@@ -10,7 +10,9 @@ from s3_demultiplexer import main
 
 
 @mock_s3
-def test_end_to_end_demultiplexer(mock_sns_client, test_topic_arn, get_test_topic_messages):
+def test_end_to_end_demultiplexer(
+    mock_sns_client, test_topic_arn, get_test_topic_messages
+):
     s3_client = boto3.client("s3", region_name="eu-west-1")
 
     records = [

@@ -7,7 +7,9 @@ from unittest.mock import patch
 import snapshot_scheduler
 
 
-def test_writes_message_to_sqs(test_topic_arn, mock_sns_client, get_test_topic_messages):
+def test_writes_message_to_sqs(
+    test_topic_arn, mock_sns_client, get_test_topic_messages
+):
     public_bucket_name = "public-bukkit"
     public_object_key_v2 = "v2/works.json.gz"
 
