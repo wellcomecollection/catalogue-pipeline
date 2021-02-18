@@ -217,7 +217,9 @@ class ElasticIndexerTest
       // Docker Compose file for these tests.
       val title = randomAlphanumeric(length = 20000)
       val documents = (1 to 100)
-        .map { _ => createDocument.copy(title = title) }
+        .map { _ =>
+          createDocument.copy(title = title)
+        }
 
       withContext() { implicit index: Index =>
         withIndexer { indexer =>
@@ -277,7 +279,8 @@ class ElasticIndexerTest
     }
 
     val smallDocument = createDocument
-    val bigDocument = createDocument.copy(title = randomAlphanumeric(length = 2000000))
+    val bigDocument =
+      createDocument.copy(title = randomAlphanumeric(length = 2000000))
 
     it("indexes everything except the single big document (big document last)") {
       val documents = Seq(smallDocument, bigDocument)

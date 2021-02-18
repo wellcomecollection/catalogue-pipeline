@@ -61,19 +61,20 @@ class ElasticIndexer[T: Indexable](
             // Either we'll narrow it down to a single document that's to big to be
             // indexed, or we'll index everything successfully.
             case response if response.status == 413 =>
-
               // If there's only one document left, there's nothing to do --
               // this document is Just Too Big.
               // https://twitter.com/smolrobots/status/1001226918107246592
               if (documents.size == 1) {
-                warn(s"HTTP 413 from Elasticsearch for a single document (${indexable.id(documents.head)})")
+                warn(s"HTTP 413 from Elasticsearch for a single document (${indexable
+                  .id(documents.head)})")
                 Future.successful(Left(documents))
               }
 
               // Slice the documents in two, and index them both separately.
               // We'll combine the results.
               else {
-                warn(s"HTTP 413 from Elasticsearch (${documents.size} documents); trying smaller slices")
+                warn(
+                  s"HTTP 413 from Elasticsearch (${documents.size} documents); trying smaller slices")
                 val (slice0, slice1) = documents.splitAt(documents.size / 2)
 
                 val futures: Future[Seq[Either[Seq[T], Seq[T]]]] =
