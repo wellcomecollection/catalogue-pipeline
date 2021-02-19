@@ -8,6 +8,8 @@ from unittest import mock
 
 from s3_demultiplexer import main
 
+pytest_plugins = "catalogue_aws_fixtures"
+
 
 @mock_s3
 def test_end_to_end_demultiplexer(
