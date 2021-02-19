@@ -1,11 +1,22 @@
 # -*- encoding: utf-8 -*-
 
+import boto3
 import json
+import os
+from moto import mock_s3
+from unittest import mock
 
 from s3_demultiplexer import main
 
+pytest_plugins = "catalogue_aws_fixtures"
 
-def test_end_to_end_demultiplexer(s3_client, sns_client, topic_arn):
+
+@mock_s3
+def test_end_to_end_demultiplexer(
+    mock_sns_client, test_topic_arn, get_test_topic_messages
+):
+    s3_client = boto3.client("s3", region_name="eu-west-1")
+
     records = [
         {"colour": "red", "letter": "R"},
         {"colour": "green", "letter": "G"},
@@ -32,7 +43,8 @@ def test_end_to_end_demultiplexer(s3_client, sns_client, topic_arn):
         ]
     }
 
-    main(event=event, s3_client=s3_client, sns_client=sns_client)
+    with mock.patch.dict(os.environ, {"TOPIC_ARN": test_topic_arn}):
+        main(event=event, s3_client=s3_client, sns_client=mock_sns_client)
 
-    actual_messages = [m[":message"] for m in sns_client.list_messages()]
-    assert actual_messages == records
+    messages = get_test_topic_messages()
+    assert list(messages) == records
