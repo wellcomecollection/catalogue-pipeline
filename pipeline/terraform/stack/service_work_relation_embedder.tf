@@ -1,10 +1,13 @@
 module "relation_embedder_queue" {
-  source                     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
-  queue_name                 = "${local.namespace_hyphen}_relation_embedder"
-  topic_arns                 = [module.batcher_output_topic.arn]
-  visibility_timeout_seconds = 600
-  aws_region                 = var.aws_region
-  alarm_topic_arn            = var.dlq_alarm_arn
+  source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
+  queue_name      = "${local.namespace_hyphen}_relation_embedder"
+  topic_arns      = [module.batcher_output_topic.arn]
+  aws_region      = var.aws_region
+  alarm_topic_arn = var.dlq_alarm_arn
+
+  # We know that 10 minutes is too short; some big archives can't be
+  # processed in that time, and they end up on a DLQ.
+  visibility_timeout_seconds = 30 * 60
 }
 
 module "relation_embedder" {

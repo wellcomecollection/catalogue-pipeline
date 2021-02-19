@@ -32,8 +32,22 @@ module "ingestor_images" {
     es_images_index    = local.es_images_index
     es_augmented_index = local.es_images_augmented_index
 
-    ingest_batch_size             = 100
-    ingest_flush_interval_seconds = 60
+    ingest_flush_interval_seconds = 30
+
+    # We initially had this set to 100, and we saw errors like:
+    #
+    #     com.sksamuel.elastic4s.http.JavaClientExceptionWrapper:
+    #     org.apache.http.ContentTooLongException: entity content is too long
+    #     [130397743] for the configured buffer limit [104857600]
+    #
+    # My guess is that turning down the batch size will sort out these
+    # errors, because I think this error is caused by getting a response
+    # that's >100MB.
+    #
+    # I cranked it down to 50, still saw the error sometimes.
+    #
+    # See https://github.com/wellcomecollection/platform/issues/5038
+    ingest_batch_size = 10
   }
 
   secret_env_vars = {

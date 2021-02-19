@@ -34,7 +34,7 @@ module "merger" {
     es_merged_works_index     = local.es_works_merged_index
     es_initial_images_index   = local.es_images_initial_index
 
-    batch_size             = 100
+    batch_size             = 50
     flush_interval_seconds = 120
   }
 
