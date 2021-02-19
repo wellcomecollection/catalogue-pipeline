@@ -1,5 +1,5 @@
 locals {
-  es_memory = var.is_reindexing ? "29g" : "8g"
+  es_memory = var.is_reindexing ? "29g" : "15g"
 }
 
 resource "ec_deployment" "pipeline_storage" {
