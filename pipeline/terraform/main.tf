@@ -30,6 +30,7 @@ module "catalogue_pipeline_2021-02-09" {
   calm_adapter_topic_arns = [
     /*local.calm_reindexer_topic_arn,*/
     local.calm_adapter_topic_arn,
+    local.calm_deletions_topic_arn,
   ]
 
   # Boilerplate that shouldn't change between pipelines.
@@ -95,6 +96,7 @@ module "catalogue_pipeline_2021-02-17" {
   calm_adapter_topic_arns = [
     /*local.calm_reindexer_topic_arn,*/
     local.calm_adapter_topic_arn,
+    local.calm_deletions_topic_arn,
   ]
 
   # Boilerplate that shouldn't change between pipelines.
