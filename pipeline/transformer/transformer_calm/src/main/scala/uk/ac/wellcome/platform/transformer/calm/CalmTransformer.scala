@@ -46,11 +46,11 @@ object CalmTransformer
 
   override def apply(sourceData: CalmSourceData,
                      version: Int): Result[Work[Source]] = sourceData match {
-    case CalmSourceData(record, true) =>
+    case CalmSourceData(record, isDeleted) if isDeleted =>
       Right(deletedWork(version, record, DeletedFromSource("Calm")))
-    case CalmSourceData(record, false) if shouldSuppress(record) =>
+    case CalmSourceData(record, _) if shouldSuppress(record) =>
       Right(deletedWork(version, record, SuppressedFromSource("Calm")))
-    case CalmSourceData(record, false) =>
+    case CalmSourceData(record, _) =>
       tryParseValidWork(record, version)
   }
 
