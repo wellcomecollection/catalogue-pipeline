@@ -1,0 +1,23 @@
+variable "name" {
+  type = string
+}
+
+variable "description" {
+  type = string
+}
+
+variable "s3_bucket" {
+  type = string
+}
+
+variable "s3_key" {
+  type = string
+}
+
+variable "env_vars" {
+  type = map(string)
+}
+
+variable "schedule_interval" {
+  type = string
+}
