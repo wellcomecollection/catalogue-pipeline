@@ -1,11 +1,11 @@
 module "window_generator_lambda" {
   source = "./modules/scheduled_lambda"
 
-  name = "calm_window_generator"
+  name        = "calm_window_generator"
   description = "Sends windows to the Calm adapter"
 
-  s3_bucket = local.infra_bucket
-  s3_key = "lambdas/calm_adapter/calm_window_generator.zip"
+  s3_bucket         = local.infra_bucket
+  s3_key            = "lambdas/calm_adapter/calm_window_generator.zip"
   schedule_interval = local.window_generator_interval
 
   env_vars = {
