@@ -7,7 +7,7 @@ from deletion_check_initiator import DeletionCheckInitiator
 @pytest.fixture(scope="function")
 def mock_dynamo_client():
     with mock_dynamodb2():
-        yield boto3.client("dynamodb")
+        yield boto3.client("dynamodb", region_name="eu-west-1")
 
 
 @pytest.fixture(scope="function")

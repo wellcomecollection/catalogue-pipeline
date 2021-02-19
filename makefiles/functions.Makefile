@@ -3,8 +3,8 @@ INFRA_BUCKET = wellcomecollection-platform-infra
 
 ECR_REGISTRY = 760097843905.dkr.ecr.eu-west-1.amazonaws.com
 
-LAMBDA_UPLOAD_BUCKET = wellcomecollection-catalogue-infra-delta
-LAMBDA_PUBLISH_ROLE_ARN = arn:aws:iam::756629837203:role/catalogue-developer
+LAMBDA_UPLOAD_BUCKET ?= wellcomecollection-catalogue-infra-delta
+LAMBDA_PUBLISH_ROLE_ARN ?= arn:aws:iam::756629837203:role/catalogue-developer
 
 ifneq ($(CI),true)
 DEV_ROLE_ARN := arn:aws:iam::760097843905:role/platform-developer

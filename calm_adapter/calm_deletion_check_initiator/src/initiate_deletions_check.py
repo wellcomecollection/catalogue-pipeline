@@ -1,8 +1,10 @@
+#!/usr/bin/env python3
+
 import boto3
 import click
 import json
 
-from .deletion_check_initiator import DeletionCheckInitiator
+from deletion_check_initiator import DeletionCheckInitiator
 
 session = boto3.Session(profile_name="platform-developer")
 
@@ -53,13 +55,14 @@ def cli(ctx, topic_arn, table_name):
 
 
 @cli.command()
-@cli.pass_obj
+@click.pass_obj
 def complete(deletion_check_initiator):
     deletion_check_initiator.all_records()
 
 
 @cli.command()
-@cli.argument("targets", nargs=-1)
+@click.argument("targets", nargs=-1)
+@click.pass_obj
 def targeted(deletion_check_initiator, targets):
     deletion_check_initiator.specific_records(list(targets))
 
