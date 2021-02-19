@@ -2,6 +2,7 @@ resource "aws_cloudwatch_event_rule" "scheduled_lambda_rule" {
   name                = "${var.name}_rule"
   description         = "Starts the ${var.name} lambda"
   schedule_expression = "rate(${var.schedule_interval})"
+  is_enabled          = var.events_enabled
 }
 
 resource "aws_cloudwatch_event_target" "scheduled_lambda_event_target" {

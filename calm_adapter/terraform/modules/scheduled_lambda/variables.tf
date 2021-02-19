@@ -21,3 +21,8 @@ variable "env_vars" {
 variable "schedule_interval" {
   type = string
 }
+
+variable "events_enabled" {
+  type    = bool
+  default = true
+}
