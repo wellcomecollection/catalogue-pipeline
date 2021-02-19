@@ -80,14 +80,17 @@ class ElasticIndexer[T: Indexable](
               else {
                 val (slice0, slice1) = documents.splitAt(documents.size / 2)
 
-                val traceId = s"${createTraceId(documents)} => ${createTraceId(slice0)} / ${createTraceId(slice1)}}"
+                val traceId =
+                  s"${createTraceId(documents)} => ${createTraceId(slice0)} / ${createTraceId(slice1)}}"
                 warn(
                   s"HTTP 413 from Elasticsearch (${documents.size} documents); trying smaller slices (trace $traceId)")
 
                 val futures: Future[Seq[Either[Seq[T], Seq[T]]]] =
-                  Future.sequence(Seq(apply(slice0), apply(slice1)))
+                  Future
+                    .sequence(Seq(apply(slice0), apply(slice1)))
                     .map { result =>
-                      info(s"Received both results from HTTP 413 retry (trace $traceId)")
+                      info(
+                        s"Received both results from HTTP 413 retry (trace $traceId)")
                       result
                     }
 
@@ -148,8 +151,10 @@ class ElasticIndexer[T: Indexable](
     val concatenatedIds =
       documents.map { indexable.id }.sorted.mkString("::")
 
-    MessageDigest.getInstance("MD5")
+    MessageDigest
+      .getInstance("MD5")
       .digest(concatenatedIds.getBytes("UTF-8"))
-      .map("%02x".format(_)).mkString
+      .map("%02x".format(_))
+      .mkString
   }
 }

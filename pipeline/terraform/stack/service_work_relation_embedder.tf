@@ -4,7 +4,7 @@ module "relation_embedder_queue" {
   topic_arns      = [module.batcher_output_topic.arn]
   aws_region      = var.aws_region
   alarm_topic_arn = var.dlq_alarm_arn
-  
+
   # We know that 10 minutes is too short; some big archives can't be
   # processed in that time, and they end up on a DLQ.
   visibility_timeout_seconds = 30 * 60
