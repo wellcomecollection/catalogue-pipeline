@@ -12,9 +12,9 @@ import scala.concurrent.Future
 import scala.util.Success
 
 class SierraItemsToDynamoWorkerService[Destination](
-  sqsStream: SQSStream[NotificationMessage],
-  itemLinkStore: SierraItemLinkStore,
-  messageSender: MessageSender[Destination]
+                                                     sqsStream: SQSStream[NotificationMessage],
+                                                     itemLinkStore: ItemLinkingRecordStore,
+                                                     messageSender: MessageSender[Destination]
 ) extends Runnable {
 
   private def process(message: NotificationMessage): Future[Unit] =

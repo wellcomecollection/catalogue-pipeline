@@ -8,7 +8,7 @@ import uk.ac.wellcome.platform.sierra_items_to_dynamo.dynamo.Implicits._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.platform.sierra_items_to_dynamo.services.{
-  SierraItemLinkStore,
+  ItemLinkingRecordStore,
   SierraItemsToDynamoWorkerService
 }
 import uk.ac.wellcome.sierra_adapter.model.SierraItemNumber
@@ -37,7 +37,7 @@ object Main extends WellcomeTypesafeApp {
 
     new SierraItemsToDynamoWorkerService(
       sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
-      itemLinkStore = new SierraItemLinkStore(versionedStore),
+      itemLinkStore = new ItemLinkingRecordStore(versionedStore),
       messageSender = SNSBuilder
         .buildSNSMessageSender(config, subject = "Sierra Items to Dynamo")
     )
