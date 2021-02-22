@@ -1,8 +1,8 @@
 package uk.ac.wellcome.platform.sierra_item_merger.services
 
 import uk.ac.wellcome.platform.sierra_item_merger.links.{
-  ItemLinker,
-  ItemUnlinker
+  ItemMerger,
+  ItemUnmerger
 }
 import uk.ac.wellcome.sierra_adapter.model.{
   SierraBibNumber,
@@ -51,7 +51,7 @@ class SierraItemMergerUpdaterService(
     sourceVHS
       .upsert(bibId.withoutCheckDigit)(newTransformable) {
         existingTransformable =>
-          ItemLinker.linkItemRecord(existingTransformable, itemRecord) match {
+          ItemMerger.mergeItemRecord(existingTransformable, itemRecord) match {
             case Some(updatedRecord) => Right(updatedRecord)
             case None =>
               Left(
@@ -67,7 +67,7 @@ class SierraItemMergerUpdaterService(
     : Either[StorageError, Identified[Version[String, Int], S3ObjectLocation]] =
     sourceVHS
       .update(unlinkedBibId.withoutCheckDigit) { existingTransformable =>
-        ItemUnlinker.unlinkItemRecord(existingTransformable, itemRecord) match {
+        ItemUnmerger.unmergeItemRecord(existingTransformable, itemRecord) match {
           case Some(updatedRecord) => Right(updatedRecord)
           case None =>
             Left(

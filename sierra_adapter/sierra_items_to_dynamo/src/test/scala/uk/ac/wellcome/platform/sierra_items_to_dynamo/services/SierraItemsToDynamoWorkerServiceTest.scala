@@ -29,7 +29,7 @@ class SierraItemsToDynamoWorkerServiceTest
     with WorkerServiceFixture
     with SierraAdapterHelpers {
 
-  it("reads a sierra record from SQS and inserts it into DynamoDB") {
+  it("reads a Sierra record from SQS and stores it") {
     val bibIds = createSierraBibNumbers(count = 5)
 
     val bibIds1 = List(bibIds(0), bibIds(1), bibIds(2))

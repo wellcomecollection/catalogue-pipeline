@@ -5,9 +5,9 @@ import uk.ac.wellcome.sierra_adapter.model.{
   SierraTransformable
 }
 
-object ItemUnlinker {
+object ItemUnmerger {
 
-  def unlinkItemRecord(
+  def unmergeItemRecord(
     sierraTransformable: SierraTransformable,
     itemRecord: SierraItemRecord): Option[SierraTransformable] = {
     if (!itemRecord.unlinkedBibIds.contains(sierraTransformable.sierraId)) {
