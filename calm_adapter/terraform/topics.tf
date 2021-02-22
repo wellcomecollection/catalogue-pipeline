@@ -28,7 +28,7 @@ data "aws_iam_policy_document" "publish_to_deletions_topic" {
     ]
 
     resources = [
-      module.calm_adapter_topic.arn
+      module.calm_deletions_topic.arn
     ]
   }
 }
