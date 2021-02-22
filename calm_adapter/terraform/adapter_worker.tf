@@ -10,7 +10,7 @@ module "calm_windows_queue" {
 module "adapter_worker" {
   source = "../../infrastructure/modules/worker"
 
-  name = local.namespace
+  name = "calm_adapter"
 
   image = local.calm_adapter_image
 
@@ -36,7 +36,10 @@ module "adapter_worker" {
   cluster_name           = aws_ecs_cluster.cluster.name
   cluster_arn            = aws_ecs_cluster.cluster.arn
   subnets                = local.private_subnets
-  shared_logging_secrets = data.terraform_remote_state.shared_infra.outputs.shared_secrets_logging
+  shared_logging_secrets = local.shared_logging_secrets
+
+  deployment_service_env  = local.release_label
+  deployment_service_name = "calm-adapter"
 }
 
 resource "aws_iam_role_policy" "read_from_adapter_queue" {

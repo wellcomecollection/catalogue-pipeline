@@ -10,7 +10,7 @@ module "calm_deletion_checker_queue" {
 module "deletion_checker_worker" {
   source = "../../infrastructure/modules/worker"
 
-  name = "calm-deletion-checker"
+  name = "calm_deletion_checker"
 
   image = local.calm_deletion_checker_image
 
@@ -35,7 +35,10 @@ module "deletion_checker_worker" {
   cluster_name           = aws_ecs_cluster.cluster.name
   cluster_arn            = aws_ecs_cluster.cluster.arn
   subnets                = local.private_subnets
-  shared_logging_secrets = data.terraform_remote_state.shared_infra.outputs.shared_secrets_logging
+  shared_logging_secrets = local.shared_logging_secrets
+
+  deployment_service_env  = local.release_label
+  deployment_service_name = "calm-deletion-checker"
 }
 
 resource "aws_iam_role_policy" "read_from_deletion_checker_queue" {
