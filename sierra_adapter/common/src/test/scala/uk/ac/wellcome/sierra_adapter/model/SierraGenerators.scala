@@ -40,6 +40,9 @@ trait SierraGenerators extends RandomGenerators {
   def createSierraItemNumber: SierraItemNumber =
     SierraItemNumber(createSierraRecordNumberString)
 
+  def createSierraHoldingsNumber: SierraHoldingsNumber =
+    SierraHoldingsNumber(createSierraRecordNumberString)
+
   protected def createTitleVarfield(
     title: String = s"title-${randomAlphanumeric()}"): String =
     s"""
@@ -78,7 +81,7 @@ trait SierraGenerators extends RandomGenerators {
   def createSierraItemRecordWith(
     id: SierraItemNumber = createSierraItemNumber,
     data: (SierraItemNumber, Instant, List[SierraBibNumber]) => String =
-      defaultItemData,
+      defaultData,
     modifiedDate: Instant = Instant.now,
     bibIds: List[SierraBibNumber] = List(),
     unlinkedBibIds: List[SierraBibNumber] = List()
@@ -94,9 +97,29 @@ trait SierraGenerators extends RandomGenerators {
     )
   }
 
-  private def defaultItemData(id: SierraItemNumber,
-                              modifiedDate: Instant,
-                              bibIds: List[SierraBibNumber]) =
+  def createSierraHoldingsRecordWith(
+    id: SierraHoldingsNumber = createSierraHoldingsNumber,
+    data: (SierraHoldingsNumber, Instant, List[SierraBibNumber]) => String =
+      defaultData,
+    modifiedDate: Instant = Instant.now,
+    bibIds: List[SierraBibNumber] = List(),
+    unlinkedBibIds: List[SierraBibNumber] = List()
+  ): SierraHoldingsRecord = {
+    val recordData = data(id, modifiedDate, bibIds)
+
+    SierraHoldingsRecord(
+      id = id,
+      data = recordData,
+      modifiedDate = modifiedDate,
+      bibIds = bibIds,
+      unlinkedBibIds = unlinkedBibIds
+    )
+  }
+
+
+  private def defaultData(id: SierraTypedRecordNumber,
+                          modifiedDate: Instant,
+                          bibIds: List[SierraBibNumber]): String =
     s"""
        |{
        |  "id": "$id",
