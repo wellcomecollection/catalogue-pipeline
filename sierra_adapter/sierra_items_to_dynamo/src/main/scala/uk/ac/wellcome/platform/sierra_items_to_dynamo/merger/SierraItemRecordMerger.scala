@@ -5,7 +5,7 @@ import uk.ac.wellcome.sierra_adapter.model.SierraItemRecord
 
 object SierraItemRecordMerger {
   def mergeItems(existingLink: SierraItemLink,
-                 newRecord: SierraItemRecord): Option[SierraItemLink] = {
+                 newRecord: SierraItemRecord): Option[SierraItemLink] =
     if (existingLink.modifiedDate.isBefore(newRecord.modifiedDate)) {
       Some(
         SierraItemLink(
@@ -37,7 +37,6 @@ object SierraItemRecordMerger {
     } else {
       None
     }
-  }
 
   private def addList[T](x: List[T], y: List[T]): List[T] =
     (x.toSet ++ y.toSet).toList
