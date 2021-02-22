@@ -4,7 +4,7 @@ module "calm_deletion_checker_queue" {
   topic_arns                 = [local.calm_deletion_checker_topic_arn]
   aws_region                 = local.aws_region
   alarm_topic_arn            = local.dlq_alarm_arn
-  visibility_timeout_seconds = 30 * 60 * 60
+  visibility_timeout_seconds = 30 * 60
 }
 
 module "deletion_checker_worker" {
