@@ -6,7 +6,6 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.platform.sierra_items_to_dynamo.fixtures.WorkerServiceFixture
-import uk.ac.wellcome.platform.sierra_items_to_dynamo.models.SierraItemLink
 import uk.ac.wellcome.sierra_adapter.model.Implicits._
 import uk.ac.wellcome.sierra_adapter.model.{
   SierraGenerators,
@@ -15,6 +14,7 @@ import uk.ac.wellcome.sierra_adapter.model.{
 }
 import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
 import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
+import weco.catalogue.sierra_adapter.linker.LinkingRecord
 
 class SierraItemsToDynamoFeatureTest
     extends AnyFunSpec
@@ -33,9 +33,9 @@ class SierraItemsToDynamoFeatureTest
       bibIds = List(createSierraBibNumber)
     )
 
-    val expectedLink = SierraItemLink(record)
+    val expectedLink = LinkingRecord(record)
 
-    val store = MemoryVersionedStore[SierraItemNumber, SierraItemLink](
+    val store = MemoryVersionedStore[SierraItemNumber, LinkingRecord](
       initialEntries = Map.empty
     )
 

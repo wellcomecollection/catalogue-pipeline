@@ -1,16 +1,16 @@
 package uk.ac.wellcome.platform.sierra_items_to_dynamo.services
 
 import uk.ac.wellcome.platform.sierra_items_to_dynamo.merger.SierraItemRecordMerger
-import uk.ac.wellcome.platform.sierra_items_to_dynamo.models.SierraItemLink
 import uk.ac.wellcome.sierra_adapter.model.{SierraItemNumber, SierraItemRecord}
 import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.storage.{Identified, UpdateNotApplied}
+import weco.catalogue.sierra_adapter.linker.LinkingRecord
 
 class SierraItemLinkStore(
-  store: VersionedStore[SierraItemNumber, Int, SierraItemLink]) {
+  store: VersionedStore[SierraItemNumber, Int, LinkingRecord]) {
   def update(newRecord: SierraItemRecord)
     : Either[Throwable, Option[SierraItemRecord]] = {
-    val newLink = SierraItemLink(newRecord)
+    val newLink = LinkingRecord(newRecord)
 
     val upsertResult: store.UpdateEither =
       store.upsert(newRecord.id)(newLink) {

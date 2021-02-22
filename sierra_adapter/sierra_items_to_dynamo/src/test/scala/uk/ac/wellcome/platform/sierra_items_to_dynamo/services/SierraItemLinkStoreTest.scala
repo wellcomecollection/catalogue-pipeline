@@ -3,7 +3,6 @@ package uk.ac.wellcome.platform.sierra_items_to_dynamo.services
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{Assertion, EitherValues}
-import uk.ac.wellcome.platform.sierra_items_to_dynamo.models.SierraItemLink
 import uk.ac.wellcome.sierra_adapter.model.{
   SierraGenerators,
   SierraItemNumber,
@@ -18,6 +17,7 @@ import uk.ac.wellcome.storage.{
   UpdateWriteError,
   Version
 }
+import weco.catalogue.sierra_adapter.linker.LinkingRecord
 
 class SierraItemLinkStoreTest
     extends AnyFunSpec
@@ -27,7 +27,7 @@ class SierraItemLinkStoreTest
     with SierraAdapterHelpers {
 
   it("inserts an ItemRecord into the VHS") {
-    implicit val store = MemoryVersionedStore[SierraItemNumber, SierraItemLink](
+    implicit val store = MemoryVersionedStore[SierraItemNumber, LinkingRecord](
       initialEntries = Map.empty)
     val linkStore = new SierraItemLinkStore(store)
 
@@ -44,9 +44,9 @@ class SierraItemLinkStoreTest
       bibIds = List(createSierraBibNumber)
     )
 
-    implicit val store = MemoryVersionedStore[SierraItemNumber, SierraItemLink](
+    implicit val store = MemoryVersionedStore[SierraItemNumber, LinkingRecord](
       initialEntries = Map(
-        Version(newRecord.id, 1) -> SierraItemLink(newRecord)
+        Version(newRecord.id, 1) -> LinkingRecord(newRecord)
       )
     )
     val linkStore = new SierraItemLinkStore(store)
@@ -67,9 +67,9 @@ class SierraItemLinkStoreTest
       bibIds = List(createSierraBibNumber)
     )
 
-    implicit val store = MemoryVersionedStore[SierraItemNumber, SierraItemLink](
+    implicit val store = MemoryVersionedStore[SierraItemNumber, LinkingRecord](
       initialEntries = Map(
-        Version(oldRecord.id, 1) -> SierraItemLink(oldRecord)
+        Version(oldRecord.id, 1) -> LinkingRecord(oldRecord)
       )
     )
     val linkStore = new SierraItemLinkStore(store)
@@ -92,9 +92,9 @@ class SierraItemLinkStoreTest
       bibIds = bibIds
     )
 
-    implicit val store = MemoryVersionedStore[SierraItemNumber, SierraItemLink](
+    implicit val store = MemoryVersionedStore[SierraItemNumber, LinkingRecord](
       initialEntries = Map(
-        Version(oldRecord.id, 1) -> SierraItemLink(oldRecord)
+        Version(oldRecord.id, 1) -> LinkingRecord(oldRecord)
       )
     )
     val linkStore = new SierraItemLinkStore(store)
@@ -121,9 +121,9 @@ class SierraItemLinkStoreTest
       bibIds = List(bibIds(0), bibIds(1), bibIds(2))
     )
 
-    implicit val store = MemoryVersionedStore[SierraItemNumber, SierraItemLink](
+    implicit val store = MemoryVersionedStore[SierraItemNumber, LinkingRecord](
       initialEntries = Map(
-        Version(oldRecord.id, 1) -> SierraItemLink(oldRecord)
+        Version(oldRecord.id, 1) -> LinkingRecord(oldRecord)
       )
     )
     val linkStore = new SierraItemLinkStore(store)
@@ -152,9 +152,9 @@ class SierraItemLinkStoreTest
       unlinkedBibIds = List(bibIds(4))
     )
 
-    implicit val store = MemoryVersionedStore[SierraItemNumber, SierraItemLink](
+    implicit val store = MemoryVersionedStore[SierraItemNumber, LinkingRecord](
       initialEntries = Map(
-        Version(oldRecord.id, 1) -> SierraItemLink(oldRecord)
+        Version(oldRecord.id, 1) -> LinkingRecord(oldRecord)
       )
     )
     val linkStore = new SierraItemLinkStore(store)
@@ -186,11 +186,11 @@ class SierraItemLinkStoreTest
     val exception = new RuntimeException("AAAAARGH!")
 
     val brokenStore = new MemoryVersionedStore(
-      new MemoryStore[Version[SierraItemNumber, Int], SierraItemLink](
+      new MemoryStore[Version[SierraItemNumber, Int], LinkingRecord](
         initialEntries = Map.empty)
-      with MemoryMaxima[SierraItemNumber, SierraItemLink]
+      with MemoryMaxima[SierraItemNumber, LinkingRecord]
     ) {
-      override def upsert(id: SierraItemNumber)(t: SierraItemLink)(
+      override def upsert(id: SierraItemNumber)(t: LinkingRecord)(
         f: UpdateFunction): UpdateEither =
         Left(UpdateWriteError(StoreWriteError(exception)))
     }
@@ -205,14 +205,14 @@ class SierraItemLinkStoreTest
   private def assertStored(id: SierraItemNumber,
                            record: SierraItemRecord,
                            version: Int)(
-    implicit store: MemoryVersionedStore[SierraItemNumber, SierraItemLink])
+    implicit store: MemoryVersionedStore[SierraItemNumber, LinkingRecord])
     : Assertion =
     store.getLatest(id).value shouldBe Identified(
       Version(record.id, version),
-      SierraItemLink(record))
+      LinkingRecord(record))
 
   private def assertStored(record: SierraItemRecord, version: Int)(
-    implicit store: MemoryVersionedStore[SierraItemNumber, SierraItemLink])
+    implicit store: MemoryVersionedStore[SierraItemNumber, LinkingRecord])
     : Assertion =
     assertStored(id = record.id, record = record, version = version)
 }
