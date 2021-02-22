@@ -41,7 +41,7 @@ class ItemMergerTest extends AnyFunSpec with Matchers with SierraGenerators {
       itemRecords = Map(itemRecord.id -> newerRecord))
   }
 
-  it("returns None if you apply the same update more than once") {
+  it("returns the record if you apply the same update more than once") {
     val bibId = createSierraBibNumber
     val record = createSierraItemRecordWith(
       bibIds = List(bibId)
@@ -52,7 +52,7 @@ class ItemMergerTest extends AnyFunSpec with Matchers with SierraGenerators {
     val transformable1 = ItemMerger.mergeItemRecord(sierraTransformable, record)
     val transformable2 = ItemMerger.mergeItemRecord(transformable1.get, record)
 
-    transformable2 shouldBe None
+    transformable2 shouldBe transformable1
   }
 
   it("returns None when merging item records with stale data") {

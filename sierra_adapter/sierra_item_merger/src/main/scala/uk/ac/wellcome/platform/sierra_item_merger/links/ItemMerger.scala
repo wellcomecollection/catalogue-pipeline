@@ -30,7 +30,8 @@ object ItemMerger {
     //
     val isNewerData = sierraTransformable.itemRecords.get(itemRecord.id) match {
       case Some(existing) =>
-        itemRecord.modifiedDate.isAfter(existing.modifiedDate)
+        itemRecord.modifiedDate.isAfter(existing.modifiedDate) ||
+          itemRecord.modifiedDate == existing.modifiedDate
       case None => true
     }
 
