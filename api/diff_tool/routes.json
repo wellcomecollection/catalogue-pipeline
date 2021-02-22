@@ -113,5 +113,14 @@
       "include": "items,genres,identifiers"
     },
     "comment": "A redirected Work that had issues in the 2021-02-01 reindex"
+  },
+  {
+    "path": "/works",
+    "params": {
+      "include": "items,genres,identifiers",
+      "aggregations": "items.locations.type",
+      "pageSize": "1"
+    },
+    "comment": "Aggregation of locationType"
   }
 ]
