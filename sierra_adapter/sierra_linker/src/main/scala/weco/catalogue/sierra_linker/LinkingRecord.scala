@@ -1,7 +1,7 @@
 package weco.catalogue.sierra_linker
 
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.sierra_adapter.model.{SierraBibNumber, SierraItemRecord, SierraTypedRecordNumber}
+import uk.ac.wellcome.sierra_adapter.model.{SierraBibNumber, SierraHoldingsRecord, SierraItemRecord, SierraTypedRecordNumber}
 
 import java.time.Instant
 
@@ -63,6 +63,13 @@ case class LinkingRecord(
       newModifiedDate = itemRecord.modifiedDate
     )
 
+  def update(holdingsRecord: SierraHoldingsRecord): Option[LinkingRecord] =
+    update(
+      id = holdingsRecord.id,
+      newBibIds = holdingsRecord.bibIds,
+      newModifiedDate = holdingsRecord.modifiedDate
+    )
+
   private def addList[T](x: List[T], y: List[T]): List[T] =
     (x.toSet ++ y.toSet).toList
 
@@ -71,10 +78,17 @@ case class LinkingRecord(
 }
 
 case object LinkingRecord {
-  def apply(record: SierraItemRecord): LinkingRecord =
+  def apply(itemRecord: SierraItemRecord): LinkingRecord =
     LinkingRecord(
-      bibIds = record.bibIds,
-      unlinkedBibIds = record.unlinkedBibIds,
-      modifiedDate = record.modifiedDate
+      bibIds = itemRecord.bibIds,
+      unlinkedBibIds = itemRecord.unlinkedBibIds,
+      modifiedDate = itemRecord.modifiedDate
+    )
+
+  def apply(holdingsRecord: SierraHoldingsRecord): LinkingRecord =
+    LinkingRecord(
+      bibIds = holdingsRecord.bibIds,
+      unlinkedBibIds = holdingsRecord.unlinkedBibIds,
+      modifiedDate = holdingsRecord.modifiedDate
     )
 }
