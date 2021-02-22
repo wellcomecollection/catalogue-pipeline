@@ -1,7 +1,7 @@
 package uk.ac.wellcome.sierra_adapter.model
 
 object SierraRecordTypes extends Enumeration {
-  val bibs, items = Value
+  val bibs, items, holdings = Value
 }
 
 trait SierraRecordNumber {
@@ -27,6 +27,7 @@ sealed trait SierraTypedRecordNumber extends SierraRecordNumber {
     val prefix = recordType match {
       case SierraRecordTypes.bibs  => "b"
       case SierraRecordTypes.items => "i"
+      case SierraRecordTypes.holdings => "h"
       case _ =>
         throw new RuntimeException(
           s"Received unrecognised record type: $recordType"
@@ -73,4 +74,9 @@ case class SierraBibNumber(recordNumber: String)
 case class SierraItemNumber(recordNumber: String)
     extends SierraTypedRecordNumber {
   val recordType: SierraRecordTypes.Value = SierraRecordTypes.items
+}
+
+case class SierraHoldingsNumber(recordNumber: String)
+  extends SierraTypedRecordNumber {
+  val recordType: SierraRecordTypes.Value = SierraRecordTypes.holdings
 }

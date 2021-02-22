@@ -7,7 +7,7 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
-import uk.ac.wellcome.platform.sierra_items_to_dynamo.dynamo.Implicits._
+import weco.catalogue.sierra_adapter.dynamo.Implicits._
 import uk.ac.wellcome.platform.sierra_items_to_dynamo.services.ItemLinkingRecordStore
 import uk.ac.wellcome.sierra_adapter.model.SierraItemNumber
 import uk.ac.wellcome.storage.store.dynamo.DynamoSingleVersionStore
