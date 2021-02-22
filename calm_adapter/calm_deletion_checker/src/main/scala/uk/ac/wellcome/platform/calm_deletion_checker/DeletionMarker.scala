@@ -19,9 +19,9 @@ class DeletionMarker(sourceTable: String)(implicit client: DynamoDbClient)
       scanamo
         .exec(
           table
-            .when(attributeExists("id") and attributeExists("version"))
+            .when(attributeExists("id"))
             .update(
-              "id" === record.id and "version" === record.version,
+              "id" === record.id,
               set("isDeleted", true)
             )
         )
