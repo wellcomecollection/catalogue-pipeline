@@ -1,7 +1,0 @@
-{
-  "id" : "sierra_holdings_linker",
-  "folder" : "sierra_adapter/sierra_holdings_linker",
-  "dependencyIds" : [
-    "sierra_adapter_common"
-  ]
-}
