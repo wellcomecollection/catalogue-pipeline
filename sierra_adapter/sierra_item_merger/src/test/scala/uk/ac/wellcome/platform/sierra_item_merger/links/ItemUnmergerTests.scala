@@ -53,7 +53,9 @@ class ItemUnmergerTests extends AnyFunSpec with Matchers with SierraGenerators {
       itemRecords = List(record)
     )
 
-    ItemUnmerger.unmergeItemRecord(sierraTransformable, previouslyUnlinkedRecord) shouldBe None
+    ItemUnmerger.unmergeItemRecord(
+      sierraTransformable,
+      previouslyUnlinkedRecord) shouldBe None
   }
 
   it(

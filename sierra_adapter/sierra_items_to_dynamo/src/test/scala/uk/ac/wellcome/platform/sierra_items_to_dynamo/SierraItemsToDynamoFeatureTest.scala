@@ -40,14 +40,15 @@ class SierraItemsToDynamoFeatureTest
     )
 
     withLocalSqsQueue() { queue =>
-      withWorkerService(queue, store = store, messageSender = messageSender) { _ =>
-        sendNotificationToSQS(queue, record)
+      withWorkerService(queue, store = store, messageSender = messageSender) {
+        _ =>
+          sendNotificationToSQS(queue, record)
 
-        eventually {
-          messageSender.getMessages[SierraItemRecord] shouldBe Seq(record)
+          eventually {
+            messageSender.getMessages[SierraItemRecord] shouldBe Seq(record)
 
-          store.getLatest(record.id).value.identifiedT shouldBe expectedLink
-        }
+            store.getLatest(record.id).value.identifiedT shouldBe expectedLink
+          }
       }
     }
   }
