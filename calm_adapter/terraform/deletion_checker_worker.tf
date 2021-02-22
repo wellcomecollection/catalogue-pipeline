@@ -27,7 +27,7 @@ module "deletion_checker_worker" {
   }
 
   min_capacity = 0
-  max_capacity = 2
+  max_capacity = local.deletion_checking_enabled ? 2 : 0
 
   cpu    = 512
   memory = 1024

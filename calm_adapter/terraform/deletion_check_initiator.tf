@@ -14,8 +14,7 @@ module "deletion_check_initiator_lambda" {
     SOURCE_TABLE_NAME   = module.vhs.table_name
   }
 
-  // Todo should be enabled
-  events_enabled = false
+  events_enabled = local.deletion_checking_enabled
 }
 
 data "aws_iam_policy_document" "publish_to_reindex_jobs_topic" {
