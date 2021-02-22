@@ -1,4 +1,4 @@
-package weco.catalogue.sierra_adapter.linker
+package weco.catalogue.sierra_linker
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers

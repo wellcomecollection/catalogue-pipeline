@@ -1,4 +1,4 @@
-package weco.catalogue.sierra_adapter.linker
+package weco.catalogue.sierra_linker
 
 import akka.Done
 import io.circe.{Decoder, Encoder}

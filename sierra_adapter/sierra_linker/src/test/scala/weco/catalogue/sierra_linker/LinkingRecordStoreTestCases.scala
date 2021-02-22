@@ -1,27 +1,39 @@
-package weco.catalogue.sierra_adapter.linker
+package weco.catalogue.sierra_linker
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{Assertion, EitherValues}
-import uk.ac.wellcome.sierra_adapter.model.{AbstractSierraRecord, SierraGenerators, SierraTypedRecordNumber}
+import uk.ac.wellcome.sierra_adapter.model.{
+  AbstractSierraRecord,
+  SierraGenerators,
+  SierraTypedRecordNumber
+}
 import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
 import uk.ac.wellcome.storage.maxima.memory.MemoryMaxima
 import uk.ac.wellcome.storage.store.memory.{MemoryStore, MemoryVersionedStore}
-import uk.ac.wellcome.storage.{Identified, StoreWriteError, UpdateWriteError, Version}
+import uk.ac.wellcome.storage.{
+  Identified,
+  StoreWriteError,
+  UpdateWriteError,
+  Version
+}
 
-trait LinkingRecordStoreTestCases[Id <: SierraTypedRecordNumber, Record <: AbstractSierraRecord[Id]]
-  extends AnyFunSpec
+trait LinkingRecordStoreTestCases[
+  Id <: SierraTypedRecordNumber, Record <: AbstractSierraRecord[Id]]
+    extends AnyFunSpec
     with Matchers
     with EitherValues
     with LinkerFixtures[Id, Record]
     with SierraGenerators
     with SierraAdapterHelpers {
 
-  def createLinkStore(implicit store: MemoryVersionedStore[Id, LinkingRecord]): LinkingRecordStore[Id, Record]
+  def createLinkStore(implicit store: MemoryVersionedStore[Id, LinkingRecord])
+    : LinkingRecordStore[Id, Record]
 
   describe("behaves as a LinkingRecordStore") {
     it("stores a single record") {
-      implicit val store = MemoryVersionedStore[Id, LinkingRecord](initialEntries = Map.empty)
+      implicit val store =
+        MemoryVersionedStore[Id, LinkingRecord](initialEntries = Map.empty)
 
       val linkStore = createLinkStore
 
@@ -179,8 +191,7 @@ trait LinkingRecordStoreTestCases[Id <: SierraTypedRecordNumber, Record <: Abstr
 
       val brokenStore = new MemoryVersionedStore(
         new MemoryStore[Version[Id, Int], LinkingRecord](
-          initialEntries = Map.empty)
-          with MemoryMaxima[Id, LinkingRecord]
+          initialEntries = Map.empty) with MemoryMaxima[Id, LinkingRecord]
       ) {
         override def upsert(id: Id)(t: LinkingRecord)(
           f: UpdateFunction): UpdateEither =
@@ -195,16 +206,13 @@ trait LinkingRecordStoreTestCases[Id <: SierraTypedRecordNumber, Record <: Abstr
     }
   }
 
-  private def assertStored(id: Id,
-                           record: Record,
-                           version: Int)(
+  private def assertStored(id: Id, record: Record, version: Int)(
     implicit store: MemoryVersionedStore[Id, LinkingRecord]): Assertion =
     store.getLatest(id).value shouldBe Identified(
       Version(record.id, version),
       createLinkingRecord(record))
 
   private def assertStored(record: Record, version: Int)(
-    implicit store: MemoryVersionedStore[Id, LinkingRecord])
-  : Assertion =
+    implicit store: MemoryVersionedStore[Id, LinkingRecord]): Assertion =
     assertStored(id = record.id, record = record, version = version)
 }

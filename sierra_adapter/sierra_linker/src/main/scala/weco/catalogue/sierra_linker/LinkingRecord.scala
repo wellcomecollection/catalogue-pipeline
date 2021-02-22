@@ -1,4 +1,4 @@
-package weco.catalogue.sierra_adapter.linker
+package weco.catalogue.sierra_linker
 
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.sierra_adapter.model.{SierraBibNumber, SierraItemRecord, SierraTypedRecordNumber}

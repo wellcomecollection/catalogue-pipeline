@@ -1,4 +1,4 @@
-package weco.catalogue.sierra_adapter.linker
+package weco.catalogue.sierra_linker
 
 import io.circe.{Decoder, Encoder}
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
@@ -9,14 +9,19 @@ import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.{Queue, QueuePair}
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
-import uk.ac.wellcome.sierra_adapter.model.{AbstractSierraRecord, SierraGenerators, SierraTypedRecordNumber}
+import uk.ac.wellcome.sierra_adapter.model.{
+  AbstractSierraRecord,
+  SierraGenerators,
+  SierraTypedRecordNumber
+}
 import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
 import uk.ac.wellcome.storage.Version
 import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
 
-trait SierraLinkerWorkerServiceTestCases[Id <: SierraTypedRecordNumber, Record <: AbstractSierraRecord[Id]]
-  extends AnyFunSpec
+trait SierraLinkerWorkerServiceTestCases[
+  Id <: SierraTypedRecordNumber, Record <: AbstractSierraRecord[Id]]
+    extends AnyFunSpec
     with Matchers
     with Eventually
     with IntegrationPatience
@@ -29,9 +34,15 @@ trait SierraLinkerWorkerServiceTestCases[Id <: SierraTypedRecordNumber, Record <
   implicit val decoder: Decoder[Record]
   implicit val encoder: Encoder[Record]
 
-  def withWorkerService[R](queue: Queue, store: VersionedStore[Id, Int, LinkingRecord] = MemoryVersionedStore[Id, LinkingRecord](
-    initialEntries = Map.empty
-  ), messageSender: MemoryMessageSender = new MemoryMessageSender, metrics: MemoryMetrics = new MemoryMetrics)(testWith: TestWith[SierraLinkerWorkerService[Id, Record, String], R]): R
+  def withWorkerService[R](queue: Queue,
+                           store: VersionedStore[Id, Int, LinkingRecord] =
+                             MemoryVersionedStore[Id, LinkingRecord](
+                               initialEntries = Map.empty
+                             ),
+                           messageSender: MemoryMessageSender =
+                             new MemoryMessageSender,
+                           metrics: MemoryMetrics = new MemoryMetrics)(
+    testWith: TestWith[SierraLinkerWorkerService[Id, Record, String], R]): R
 
   describe("behaves as a SierraLinkerWorkerService") {
     it("reads a Sierra record from SQS and stores it") {
@@ -52,10 +63,12 @@ trait SierraLinkerWorkerServiceTestCases[Id <: SierraTypedRecordNumber, Record <
         bibIds = bibIds2
       )
 
-      val expectedLink = createLinkingRecord(record1).update(
-        id = record2.id,
-        newBibIds = getBibIds(record2),
-        newModifiedDate = record2.modifiedDate).get
+      val expectedLink = createLinkingRecord(record1)
+        .update(
+          id = record2.id,
+          newBibIds = getBibIds(record2),
+          newModifiedDate = record2.modifiedDate)
+        .get
 
       val store = MemoryVersionedStore[Id, LinkingRecord](
         initialEntries = Map(
@@ -71,7 +84,9 @@ trait SierraLinkerWorkerServiceTestCases[Id <: SierraTypedRecordNumber, Record <
 
           eventually {
             messageSender.getMessages[Record] shouldBe Seq(
-              updateRecord(record2, unlinkedBibIds = expectedLink.unlinkedBibIds)
+              updateRecord(
+                record2,
+                unlinkedBibIds = expectedLink.unlinkedBibIds)
             )
           }
         }
@@ -94,9 +109,8 @@ trait SierraLinkerWorkerServiceTestCases[Id <: SierraTypedRecordNumber, Record <
               assertQueueEmpty(queue)
               assertQueueEmpty(dlq)
 
-              messageSender.getMessages[Record] shouldBe (1 to 5).map {
-                _ =>
-                  record
+              messageSender.getMessages[Record] shouldBe (1 to 5).map { _ =>
+                record
               }
             }
           }
@@ -161,7 +175,9 @@ trait SierraLinkerWorkerServiceTestCases[Id <: SierraTypedRecordNumber, Record <
             eventually {
               assertQueueEmpty(queue)
               assertQueueHasSize(dlq, size = 1)
-              metrics.incrementedCounts.find { _.endsWith("_ProcessMessage_failure") } shouldBe None
+              metrics.incrementedCounts.find {
+                _.endsWith("_ProcessMessage_failure")
+              } shouldBe None
             }
           }
       }
