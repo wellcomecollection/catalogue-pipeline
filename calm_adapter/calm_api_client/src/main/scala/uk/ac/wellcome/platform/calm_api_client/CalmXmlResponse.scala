@@ -1,9 +1,12 @@
 package uk.ac.wellcome.platform.calm_api_client
 
+import java.io.ByteArrayInputStream
+
 import scala.util.Try
 import scala.xml.{Elem, Node, NodeSeq, XML}
 import java.time.Instant
 
+import akka.Done
 import akka.http.scaladsl.model.headers.Cookie
 import weco.catalogue.source_model.calm.CalmRecord
 
@@ -147,4 +150,26 @@ object CalmSummaryResponse {
     Try(XML.load(new java.io.ByteArrayInputStream(bytes)))
       .map(CalmSummaryResponse(_, retrievedAt, suppressedFields))
       .toEither
+}
+
+case class CalmAbandonResponse(root: Elem) extends CalmXmlResponse[Done] {
+  val responseTag = "AbandonResponse"
+
+  /** The session abandonment response XML is of the form:
+    *
+    *  <AbandonResponse xmlns="http://ds.co.uk/cs/webservices/" />
+    *
+    *  We just want to make sure it exists here.
+    */
+  def parse: Either[Throwable, Done] =
+    responseNode.map(_ => Done)
+}
+
+object CalmAbandonResponse {
+
+  def apply(bytes: Array[Byte]): Either[Throwable, CalmAbandonResponse] =
+    Try(XML.load(new ByteArrayInputStream(bytes)))
+      .map(CalmAbandonResponse.apply)
+      .toEither
+
 }

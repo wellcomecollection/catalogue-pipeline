@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.calm_api_client
 
+import akka.Done
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
@@ -32,6 +33,9 @@ trait CalmApiClient {
     implicit p: CalmHttpResponseParser[CalmSummaryRequest])
     : Future[CalmRecord] =
     request(CalmSummaryRequest(pos), cookie)
+
+  def abandon(cookie: Cookie): Future[Done] =
+    request(CalmAbandonRequest, Some(cookie))
 }
 
 // HttpClients turn HttpRequests into HttpResponses via their

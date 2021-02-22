@@ -2,6 +2,7 @@ package uk.ac.wellcome.platform.calm_api_client
 
 import java.time.LocalDate
 
+import akka.Done
 import akka.http.scaladsl.model.HttpResponse
 import akka.http.scaladsl.model.headers.{
   Authorization,
@@ -51,6 +52,15 @@ class CalmApiClientTest
             "1",
             Map("RecordID" -> List("1")),
             retrievedAt)
+        }
+      }
+    }
+
+    it("performs abandon requests") {
+      val responses = List(abandonResponse)
+      withTestHttpCalmApiClient(responses) { apiClient =>
+        whenReady(apiClient.abandon(Cookie(cookie))) { response =>
+          response shouldBe Done
         }
       }
     }

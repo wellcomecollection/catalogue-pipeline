@@ -57,4 +57,19 @@ trait CalmResponseGenerators {
       </soap:Envelope>.toString,
       protocol
     )
+
+  def abandonResponse: HttpResponse =
+    HttpResponse(
+      200,
+      Nil,
+      <soap:Envelope
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+      xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+        <soap:Body>
+          <AbandonResponse xmlns="http://ds.co.uk/cs/webservices/" />
+        </soap:Body>
+      </soap:Envelope>.toString,
+      protocol
+    )
 }

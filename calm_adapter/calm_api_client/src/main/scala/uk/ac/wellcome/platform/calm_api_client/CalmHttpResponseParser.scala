@@ -41,6 +41,10 @@ object CalmHttpResponseParser {
     (resp: HttpResponse, bytes: Array[Byte]) =>
       CalmSearchResponse(bytes, parseCookie(resp))
 
+  implicit val abandonResponseParser
+    : CalmHttpResponseParser[CalmAbandonRequest.type] =
+    (_, bytes: Array[Byte]) => CalmAbandonResponse(bytes)
+
   def createSummaryResponseParser(
     suppressedFields: Set[String]): CalmHttpResponseParser[CalmSummaryRequest] =
     (resp: HttpResponse, bytes: Array[Byte]) =>
