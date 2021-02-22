@@ -1,9 +1,10 @@
 package uk.ac.wellcome.platform.sierra_items_to_dynamo.merger
 
+import grizzled.slf4j.Logging
 import uk.ac.wellcome.platform.sierra_items_to_dynamo.models.SierraItemLink
 import uk.ac.wellcome.sierra_adapter.model.SierraItemRecord
 
-object SierraItemRecordMerger {
+object SierraItemRecordMerger extends Logging {
   def mergeItems(existingLink: SierraItemLink,
                  newRecord: SierraItemRecord): Option[SierraItemLink] =
     if (existingLink.modifiedDate.isBefore(newRecord.modifiedDate)) {
@@ -35,6 +36,9 @@ object SierraItemRecordMerger {
         )
       )
     } else {
+      warn(
+        s"Discarding update to record ${newRecord.id}; updated date (${newRecord.modifiedDate}) is older than existing link (${existingLink.modifiedDate})"
+      )
       None
     }
 
