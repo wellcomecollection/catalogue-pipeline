@@ -4,7 +4,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.sierra_adapter.model.SierraGenerators
 
-class ItemLinkerTest extends AnyFunSpec with Matchers with SierraGenerators {
+class ItemMergerTest extends AnyFunSpec with Matchers with SierraGenerators {
 
   it("adds the item if it doesn't exist already") {
     val bibId = createSierraBibNumber
@@ -13,7 +13,7 @@ class ItemLinkerTest extends AnyFunSpec with Matchers with SierraGenerators {
     )
 
     val sierraTransformable = createSierraTransformableWith(sierraId = bibId)
-    val result = ItemLinker.linkItemRecord(sierraTransformable, record)
+    val result = ItemMerger.mergeItemRecord(sierraTransformable, record)
 
     result.get.itemRecords shouldBe Map(record.id -> record)
   }
@@ -35,7 +35,7 @@ class ItemLinkerTest extends AnyFunSpec with Matchers with SierraGenerators {
       modifiedDate = newerDate,
       bibIds = List(bibId)
     )
-    val result = ItemLinker.linkItemRecord(sierraTransformable, newerRecord)
+    val result = ItemMerger.mergeItemRecord(sierraTransformable, newerRecord)
 
     result.get shouldBe sierraTransformable.copy(
       itemRecords = Map(itemRecord.id -> newerRecord))
@@ -49,8 +49,8 @@ class ItemLinkerTest extends AnyFunSpec with Matchers with SierraGenerators {
 
     val sierraTransformable = createSierraTransformableWith(sierraId = bibId)
 
-    val transformable1 = ItemLinker.linkItemRecord(sierraTransformable, record)
-    val transformable2 = ItemLinker.linkItemRecord(transformable1.get, record)
+    val transformable1 = ItemMerger.mergeItemRecord(sierraTransformable, record)
+    val transformable2 = ItemMerger.mergeItemRecord(transformable1.get, record)
 
     transformable2 shouldBe None
   }
@@ -71,7 +71,7 @@ class ItemLinkerTest extends AnyFunSpec with Matchers with SierraGenerators {
       modifiedDate = olderDate,
       data = """{"older": "data goes here"}"""
     )
-    val result = ItemLinker.linkItemRecord(sierraTransformable, oldRecord)
+    val result = ItemMerger.mergeItemRecord(sierraTransformable, oldRecord)
     result shouldBe None
   }
 
@@ -85,8 +85,8 @@ class ItemLinkerTest extends AnyFunSpec with Matchers with SierraGenerators {
     )
 
     val sierraTransformable = createSierraTransformableWith(sierraId = bibId)
-    val result1 = ItemLinker.linkItemRecord(sierraTransformable, record1)
-    val result2 = ItemLinker.linkItemRecord(result1.get, record2)
+    val result1 = ItemMerger.mergeItemRecord(sierraTransformable, record1)
+    val result2 = ItemMerger.mergeItemRecord(result1.get, record2)
 
     result1.get.itemRecords(record1.id) shouldBe record1
     result2.get.itemRecords(record2.id) shouldBe record2
@@ -104,7 +104,7 @@ class ItemLinkerTest extends AnyFunSpec with Matchers with SierraGenerators {
     val sierraTransformable = createSierraTransformableWith(sierraId = bibId)
 
     val caught = intercept[RuntimeException] {
-      ItemLinker.linkItemRecord(sierraTransformable, record)
+      ItemMerger.mergeItemRecord(sierraTransformable, record)
     }
 
     caught.getMessage shouldEqual s"Non-matching bib id $bibId in item bib List($unrelatedBibId)"

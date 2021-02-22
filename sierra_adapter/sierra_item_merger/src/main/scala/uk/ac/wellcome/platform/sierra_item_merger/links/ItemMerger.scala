@@ -5,14 +5,14 @@ import uk.ac.wellcome.sierra_adapter.model.{
   SierraTransformable
 }
 
-object ItemLinker {
+object ItemMerger {
 
   /** Given a new item record, construct the new merged row that we should
     * insert into the merged database.
     *
     * Returns the merged record.
     */
-  def linkItemRecord(
+  def mergeItemRecord(
     sierraTransformable: SierraTransformable,
     itemRecord: SierraItemRecord): Option[SierraTransformable] = {
     if (!itemRecord.bibIds.contains(sierraTransformable.sierraId)) {

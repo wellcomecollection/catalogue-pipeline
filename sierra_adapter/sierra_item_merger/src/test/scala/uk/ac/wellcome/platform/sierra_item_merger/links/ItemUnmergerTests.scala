@@ -4,7 +4,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.sierra_adapter.model.SierraGenerators
 
-class ItemUnlinkerTests extends AnyFunSpec with Matchers with SierraGenerators {
+class ItemUnmergerTests extends AnyFunSpec with Matchers with SierraGenerators {
 
   it("removes the item if it already exists") {
     val bibId = createSierraBibNumber
@@ -30,8 +30,8 @@ class ItemUnlinkerTests extends AnyFunSpec with Matchers with SierraGenerators {
       itemRecords = Map.empty
     )
 
-    ItemUnlinker
-      .unlinkItemRecord(sierraTransformable, unlinkedItemRecord)
+    ItemUnmerger
+      .unmergeItemRecord(sierraTransformable, unlinkedItemRecord)
       .get shouldBe expectedSierraTransformable
   }
 
@@ -53,7 +53,7 @@ class ItemUnlinkerTests extends AnyFunSpec with Matchers with SierraGenerators {
       itemRecords = List(record)
     )
 
-    ItemUnlinker.unlinkItemRecord(sierraTransformable, previouslyUnlinkedRecord) shouldBe None
+    ItemUnmerger.unmergeItemRecord(sierraTransformable, previouslyUnlinkedRecord) shouldBe None
   }
 
   it(
@@ -77,7 +77,7 @@ class ItemUnlinkerTests extends AnyFunSpec with Matchers with SierraGenerators {
       itemRecords = List(record)
     )
 
-    ItemUnlinker.unlinkItemRecord(sierraTransformable, outOfDateUnlinkedRecord) shouldBe None
+    ItemUnmerger.unmergeItemRecord(sierraTransformable, outOfDateUnlinkedRecord) shouldBe None
   }
 
   it("only unlinks item records with matching bib IDs") {
@@ -100,7 +100,7 @@ class ItemUnlinkerTests extends AnyFunSpec with Matchers with SierraGenerators {
     )
 
     val caught = intercept[RuntimeException] {
-      ItemUnlinker.unlinkItemRecord(sierraTransformable, unrelatedItemRecord)
+      ItemUnmerger.unmergeItemRecord(sierraTransformable, unrelatedItemRecord)
     }
 
     caught.getMessage shouldEqual s"Non-matching bib id $bibId in item unlink bibs List($unrelatedBibId)"
