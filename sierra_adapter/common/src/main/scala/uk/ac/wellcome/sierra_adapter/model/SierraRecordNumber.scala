@@ -25,8 +25,8 @@ sealed trait SierraTypedRecordNumber extends SierraRecordNumber {
   /** Returns the ID with the check digit and prefix. */
   def withCheckDigit: String = {
     val prefix = recordType match {
-      case SierraRecordTypes.bibs  => "b"
-      case SierraRecordTypes.items => "i"
+      case SierraRecordTypes.bibs     => "b"
+      case SierraRecordTypes.items    => "i"
       case SierraRecordTypes.holdings => "h"
       case _ =>
         throw new RuntimeException(
@@ -77,6 +77,6 @@ case class SierraItemNumber(recordNumber: String)
 }
 
 case class SierraHoldingsNumber(recordNumber: String)
-  extends SierraTypedRecordNumber {
+    extends SierraTypedRecordNumber {
   val recordType: SierraRecordTypes.Value = SierraRecordTypes.holdings
 }
