@@ -3,48 +3,21 @@ package weco.catalogue.sierra_adapter.linker
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{Assertion, EitherValues}
-import uk.ac.wellcome.sierra_adapter.model.{
-  AbstractSierraRecord,
-  SierraBibNumber,
-  SierraGenerators,
-  SierraTypedRecordNumber
-}
+import uk.ac.wellcome.sierra_adapter.model.{AbstractSierraRecord, SierraGenerators, SierraTypedRecordNumber}
 import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
 import uk.ac.wellcome.storage.maxima.memory.MemoryMaxima
 import uk.ac.wellcome.storage.store.memory.{MemoryStore, MemoryVersionedStore}
-import uk.ac.wellcome.storage.{
-  Identified,
-  StoreWriteError,
-  UpdateWriteError,
-  Version
-}
-
-import java.time.Instant
+import uk.ac.wellcome.storage.{Identified, StoreWriteError, UpdateWriteError, Version}
 
 trait LinkingRecordStoreTestCases[Id <: SierraTypedRecordNumber, Record <: AbstractSierraRecord[Id]]
   extends AnyFunSpec
     with Matchers
     with EitherValues
+    with LinkerFixtures[Id, Record]
     with SierraGenerators
     with SierraAdapterHelpers {
 
   def createLinkStore(implicit store: MemoryVersionedStore[Id, LinkingRecord]): LinkingRecordStore[Id, Record]
-
-  def createId: Id
-
-  def createRecord: Record =
-    createRecordWith(
-      modifiedDate = Instant.now(),
-      bibIds = List.empty
-    )
-
-  def createRecordWith(id: Id = createId, modifiedDate: Instant, bibIds: List[SierraBibNumber], unlinkedBibIds: List[SierraBibNumber] = List.empty): Record
-
-  def createLinkingRecord(record: Record): LinkingRecord
-
-  def updateRecord(record: Record, unlinkedBibIds: List[SierraBibNumber]): Record
-
-  def getBibIds(record: Record): List[SierraBibNumber]
 
   describe("behaves as a LinkingRecordStore") {
     it("stores a single record") {

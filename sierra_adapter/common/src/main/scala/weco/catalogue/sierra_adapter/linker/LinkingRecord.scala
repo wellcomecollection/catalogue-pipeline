@@ -11,7 +11,7 @@ case class LinkingRecord(
   modifiedDate: Instant
 ) extends Logging {
 
-  protected def update(
+  def update(
     id: SierraTypedRecordNumber,
     newBibIds: List[SierraBibNumber],
     newModifiedDate: Instant
