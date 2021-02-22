@@ -8,8 +8,8 @@ import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 object ReaderConfigBuilder {
   def buildReaderConfig(config: Config): ReaderConfig = {
     val resourceType = config.requireString("reader.resourceType") match {
-      case s: String if s == bibs.toString  => bibs
-      case s: String if s == items.toString => items
+      case s: String if s == bibs.toString     => bibs
+      case s: String if s == items.toString    => items
       case s: String if s == holdings.toString => holdings
       case s: String =>
         throw new IllegalArgumentException(

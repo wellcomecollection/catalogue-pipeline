@@ -1,7 +1,12 @@
 package weco.catalogue.sierra_linker
 
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.sierra_adapter.model.{SierraBibNumber, SierraHoldingsRecord, SierraItemRecord, SierraTypedRecordNumber}
+import uk.ac.wellcome.sierra_adapter.model.{
+  SierraBibNumber,
+  SierraHoldingsRecord,
+  SierraItemRecord,
+  SierraTypedRecordNumber
+}
 
 import java.time.Instant
 

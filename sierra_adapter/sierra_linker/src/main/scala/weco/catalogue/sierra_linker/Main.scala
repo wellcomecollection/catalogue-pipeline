@@ -8,7 +8,11 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
-import uk.ac.wellcome.sierra_adapter.model.{SierraHoldingsNumber, SierraItemNumber, SierraRecordTypes}
+import uk.ac.wellcome.sierra_adapter.model.{
+  SierraHoldingsNumber,
+  SierraItemNumber,
+  SierraRecordTypes
+}
 import uk.ac.wellcome.storage.store.dynamo.DynamoSingleVersionStore
 import uk.ac.wellcome.storage.typesafe.DynamoBuilder
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
@@ -27,7 +31,8 @@ object Main extends WellcomeTypesafeApp {
       AkkaBuilder.buildExecutionContext()
 
     val sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config)
-    val messageSender = SNSBuilder.buildSNSMessageSender(config, subject = "Sierra linker")
+    val messageSender =
+      SNSBuilder.buildSNSMessageSender(config, subject = "Sierra linker")
 
     config.requireString("reader.resourceType") match {
       case s: String if s == SierraRecordTypes.items.toString =>
@@ -46,7 +51,9 @@ object Main extends WellcomeTypesafeApp {
     }
   }
 
-  def createVersionedStore[Id](config: Config)(implicit format: DynamoFormat[Id]): DynamoSingleVersionStore[Id, LinkingRecord] = {
+  def createVersionedStore[Id](config: Config)(
+    implicit format: DynamoFormat[Id])
+    : DynamoSingleVersionStore[Id, LinkingRecord] = {
     implicit val dynamoClient: DynamoDbClient =
       DynamoBuilder.buildDynamoClient(config)
 

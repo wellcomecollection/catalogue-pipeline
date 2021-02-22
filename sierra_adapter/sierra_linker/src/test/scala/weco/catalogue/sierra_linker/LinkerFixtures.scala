@@ -1,6 +1,10 @@
 package weco.catalogue.sierra_linker
 
-import uk.ac.wellcome.sierra_adapter.model.{AbstractSierraRecord, SierraBibNumber, SierraTypedRecordNumber}
+import uk.ac.wellcome.sierra_adapter.model.{
+  AbstractSierraRecord,
+  SierraBibNumber,
+  SierraTypedRecordNumber
+}
 
 import java.time.Instant
 

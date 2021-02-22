@@ -4,10 +4,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.sierra_adapter.model.SierraGenerators
 
-class LinkingRecordTest
-  extends AnyFunSpec
-    with Matchers
-    with SierraGenerators {
+class LinkingRecordTest extends AnyFunSpec with Matchers with SierraGenerators {
 
   it("combines the bibIds in the final result") {
     val bibIds = createSierraBibNumbers(count = 5)
@@ -130,4 +127,3 @@ class LinkingRecordTest
     newLink.update(oldRecord) shouldBe None
   }
 }
-

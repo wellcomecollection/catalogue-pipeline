@@ -1,6 +1,11 @@
 package weco.catalogue.sierra_linker.holdings
 
-import uk.ac.wellcome.sierra_adapter.model.{SierraBibNumber, SierraGenerators, SierraHoldingsNumber, SierraHoldingsRecord}
+import uk.ac.wellcome.sierra_adapter.model.{
+  SierraBibNumber,
+  SierraGenerators,
+  SierraHoldingsNumber,
+  SierraHoldingsRecord
+}
 import weco.catalogue.sierra_linker.{LinkerFixtures, LinkingRecord}
 
 import java.time.Instant
@@ -26,7 +31,8 @@ trait HoldingsLinkerFixtures
     holdingsRecord: SierraHoldingsRecord): LinkingRecord =
     LinkingRecord(holdingsRecord)
 
-  override def getBibIds(holdingsRecord: SierraHoldingsRecord): List[SierraBibNumber] =
+  override def getBibIds(
+    holdingsRecord: SierraHoldingsRecord): List[SierraBibNumber] =
     holdingsRecord.bibIds
 
   override def updateRecord(
