@@ -88,7 +88,10 @@ class SierraItemsToDynamoWorkerServiceTest
             assertQueueEmpty(queue)
             assertQueueEmpty(dlq)
 
-            messageSender.getMessages[SierraItemRecord] shouldBe (1 to 5).map { _ => record }
+            messageSender.getMessages[SierraItemRecord] shouldBe (1 to 5).map {
+              _ =>
+                record
+            }
           }
         }
     }

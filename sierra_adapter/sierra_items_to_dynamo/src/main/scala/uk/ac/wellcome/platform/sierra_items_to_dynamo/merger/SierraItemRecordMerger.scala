@@ -8,7 +8,7 @@ object SierraItemRecordMerger extends Logging {
   def mergeItems(existingLink: SierraItemLink,
                  newRecord: SierraItemRecord): Option[SierraItemLink] =
     if (existingLink.modifiedDate.isBefore(newRecord.modifiedDate) ||
-      existingLink.modifiedDate == newRecord.modifiedDate) {
+        existingLink.modifiedDate == newRecord.modifiedDate) {
       Some(
         SierraItemLink(
           modifiedDate = newRecord.modifiedDate,

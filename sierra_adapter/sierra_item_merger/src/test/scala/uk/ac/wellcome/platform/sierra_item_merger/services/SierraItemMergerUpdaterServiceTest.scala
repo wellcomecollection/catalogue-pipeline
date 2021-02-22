@@ -343,11 +343,12 @@ class SierraItemMergerUpdaterServiceTest
 
     (1 to 5).foreach { _ =>
       val result = sierraUpdaterService.update(itemRecord)
-        result shouldBe a[Right[_, _]]
+      result shouldBe a[Right[_, _]]
       result.value should not be empty
     }
 
-    sourceVHS.underlying.getLatest(bibId.withoutCheckDigit) shouldBe a[Right[_, _]]
+    sourceVHS.underlying.getLatest(bibId.withoutCheckDigit) shouldBe a[Right[_,
+                                                                             _]]
   }
 
   it("adds an item to the record if the bibId exists but has no itemData") {

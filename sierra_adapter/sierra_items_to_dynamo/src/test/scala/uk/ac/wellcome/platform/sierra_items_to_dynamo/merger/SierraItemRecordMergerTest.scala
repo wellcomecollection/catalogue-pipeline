@@ -127,7 +127,8 @@ class SierraItemRecordMergerTest
     mergedRecord.unlinkedBibIds shouldBe List(bibIds(2))
   }
 
-  it("returns the link if it has the same modified date as the one already stored") {
+  it(
+    "returns the link if it has the same modified date as the one already stored") {
     val record = createSierraItemRecord
     val link = SierraItemLink(record)
 

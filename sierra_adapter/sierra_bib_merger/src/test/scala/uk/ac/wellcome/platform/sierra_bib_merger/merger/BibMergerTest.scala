@@ -38,9 +38,9 @@ class BibMergerTest extends AnyFunSpec with Matchers with SierraGenerators {
         bibRecord = bibRecord
       )
 
-      BibMerger.mergeBibRecord(transformable, bibRecord) shouldBe Some(transformable)
+      BibMerger.mergeBibRecord(transformable, bibRecord) shouldBe Some(
+        transformable)
     }
-
 
     it("returns None when merging a stale update") {
       val oldBibRecord = createSierraBibRecordWith(
