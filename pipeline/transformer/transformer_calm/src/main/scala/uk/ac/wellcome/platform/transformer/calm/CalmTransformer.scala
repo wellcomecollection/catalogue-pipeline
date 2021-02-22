@@ -4,9 +4,15 @@ import grizzled.slf4j.Logging
 import uk.ac.wellcome.models.work.internal.InvisibilityReason._
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.internal.result._
-import uk.ac.wellcome.platform.transformer.calm.models.CalmTransformerException
+import uk.ac.wellcome.platform.transformer.calm.models.{
+  CalmSourceData,
+  CalmTransformerException
+}
 import uk.ac.wellcome.platform.transformer.calm.models.CalmTransformerException._
-import uk.ac.wellcome.models.work.internal.DeletedReason.SuppressedFromSource
+import uk.ac.wellcome.models.work.internal.DeletedReason.{
+  DeletedFromSource,
+  SuppressedFromSource
+}
 import uk.ac.wellcome.models.work.internal.IdState.Identifiable
 import uk.ac.wellcome.platform.transformer.calm.periods.PeriodParser
 import uk.ac.wellcome.platform.transformer.calm.transformers.{
@@ -19,7 +25,7 @@ import weco.catalogue.transformer.Transformer
 import WorkState.Source
 
 object CalmTransformer
-    extends Transformer[CalmRecord]
+    extends Transformer[CalmSourceData]
     with CalmRecordOps
     with Logging {
 
@@ -38,51 +44,66 @@ object CalmTransformer
     "third-party metadata"
   )
 
-  override def apply(record: CalmRecord, version: Int): Result[Work[Source]] =
-    if (shouldSuppress(record)) {
-      Right(
-        Work.Deleted[Source](
-          state = Source(sourceIdentifier(record), record.retrievedAt),
-          data = workData(record).getOrElse(WorkData[DataState.Unidentified]()),
-          version = version,
-          deletedReason = Some(SuppressedFromSource("Calm"))
-        )
-      )
-    } else {
-      workData(record) match {
-        case Right(data) =>
-          Right(
-            Work.Visible[Source](
-              state = Source(sourceIdentifier(record), record.retrievedAt),
-              version = version,
-              data = data
-            ))
+  override def apply(sourceData: CalmSourceData,
+                     version: Int): Result[Work[Source]] = sourceData match {
+    case CalmSourceData(record, isDeleted) if isDeleted =>
+      Right(deletedWork(version, record, DeletedFromSource("Calm")))
+    case CalmSourceData(record, _) if shouldSuppress(record) =>
+      Right(deletedWork(version, record, SuppressedFromSource("Calm")))
+    case CalmSourceData(record, _) =>
+      tryParseValidWork(record, version)
+  }
 
-        case Left(err) =>
-          err match {
-            case knownErr: CalmTransformerException =>
-              Right(
-                Work.Invisible[Source](
-                  state = Source(sourceIdentifier(record), record.retrievedAt),
-                  version = version,
-                  data = WorkData(),
-                  invisibilityReasons =
-                    List(knownErrToUntransformableReason(knownErr))
-                ))
-            case unknownStatus: UnknownAccessStatus =>
-              warn(
-                s"${record.id}: unknown access status: ${unknownStatus.getMessage}")
-              Right(
-                Work.Invisible[Source](
-                  state = Source(sourceIdentifier(record), record.retrievedAt),
-                  version = version,
-                  data = WorkData(),
-                  invisibilityReasons =
-                    List(InvalidValueInSourceField("Calm:AccessStatus"))
-                ))
-            case err: Exception => Left(err)
-          }
-      }
+  def apply(record: CalmRecord, version: Int): Result[Work[Source]] =
+    CalmTransformer(CalmSourceData(record), version)
+
+  def deletedWork(
+    version: Int,
+    record: CalmRecord,
+    reason: DeletedReason
+  ): Work.Deleted[Source] =
+    Work.Deleted[Source](
+      state = Source(sourceIdentifier(record), record.retrievedAt),
+      data = workData(record).getOrElse(WorkData[DataState.Unidentified]()),
+      version = version,
+      deletedReason = Some(reason)
+    )
+
+  private def tryParseValidWork(record: CalmRecord,
+                                version: Int): Either[Exception, Work[Source]] =
+    workData(record) match {
+      case Right(data) =>
+        Right(
+          Work.Visible[Source](
+            state = Source(sourceIdentifier(record), record.retrievedAt),
+            version = version,
+            data = data
+          ))
+
+      case Left(err) =>
+        err match {
+          case knownErr: CalmTransformerException =>
+            Right(
+              Work.Invisible[Source](
+                state = Source(sourceIdentifier(record), record.retrievedAt),
+                version = version,
+                data = WorkData(),
+                invisibilityReasons =
+                  List(knownErrToUntransformableReason(knownErr))
+              ))
+          case unknownStatus: UnknownAccessStatus =>
+            warn(
+              s"${record.id}: unknown access status: ${unknownStatus.getMessage}")
+            Right(
+              Work.Invisible[Source](
+                state = Source(sourceIdentifier(record), record.retrievedAt),
+                version = version,
+                data = WorkData(),
+                invisibilityReasons =
+                  List(InvalidValueInSourceField("Calm:AccessStatus"))
+              ))
+          case err: Exception => Left(err)
+        }
     }
 
   private def knownErrToUntransformableReason(

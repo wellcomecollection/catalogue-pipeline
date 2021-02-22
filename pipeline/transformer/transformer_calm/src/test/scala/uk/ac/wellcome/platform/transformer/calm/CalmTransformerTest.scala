@@ -5,9 +5,13 @@ import java.time.LocalDate
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks._
-import uk.ac.wellcome.models.work.internal.DeletedReason.SuppressedFromSource
+import uk.ac.wellcome.models.work.internal.DeletedReason.{
+  DeletedFromSource,
+  SuppressedFromSource
+}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.internal.IdState.Identifiable
+import uk.ac.wellcome.platform.transformer.calm.models.CalmSourceData
 import weco.catalogue.source_model.generators.CalmRecordGenerators
 import WorkState.Source
 
@@ -342,6 +346,25 @@ class CalmTransformerTest
     )
     CalmTransformer(record, version).right.get.data.workType shouldBe
       WorkType.Series
+  }
+
+  it("Returns a deleted work when isDeleted = true") {
+    val record = createCalmRecordWith(
+      "Title" -> "abc",
+      "Level" -> "Subseries",
+      "RefNo" -> "a/b/c",
+      "AltRefNo" -> "a.b.c",
+      "CatalogueStatus" -> "Catalogued"
+    )
+
+    val result = CalmTransformer(
+      CalmSourceData(record, isDeleted = true),
+      version).right.get
+    result shouldBe a[Work.Deleted[_]]
+    result
+      .asInstanceOf[Work.Deleted[_]]
+      .deletedReason
+      .get shouldBe DeletedFromSource("Calm")
   }
 
   it("transforms to deleted work when CatalogueStatus is suppressible") {

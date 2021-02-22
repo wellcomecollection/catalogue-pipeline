@@ -7,7 +7,11 @@ import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.work.internal.{IdentifierType, Work, WorkState}
-import uk.ac.wellcome.pipeline_storage.{PipelineStorageStream, Retriever}
+import uk.ac.wellcome.pipeline_storage.{
+  MemoryIndexer,
+  PipelineStorageStream,
+  Retriever
+}
 import uk.ac.wellcome.storage.generators.S3ObjectLocationGenerators
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.memory.MemoryTypedStore
@@ -18,6 +22,10 @@ import weco.catalogue.transformer.{
 }
 import java.util.UUID
 
+import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
+import uk.ac.wellcome.messaging.memory.MemoryMessageSender
+import uk.ac.wellcome.models.work.internal.WorkState.Source
+import uk.ac.wellcome.platform.transformer.calm.models.CalmSourceData
 import weco.catalogue.source_model.calm.CalmRecord
 import weco.catalogue.source_model.generators.CalmRecordGenerators
 
@@ -27,10 +35,38 @@ class CalmTransformerWorkerTest
     extends TransformerWorkerTestCases[
       MemoryTypedStore[S3ObjectLocation, CalmRecord],
       CalmSourcePayload,
-      CalmRecord]
+      CalmSourceData]
     with EitherValues
     with CalmRecordGenerators
     with S3ObjectLocationGenerators {
+
+  it("creates a deleted work when the CalmSourcePayload has isDeleted = true") {
+    withContext { implicit context =>
+      val payload = createPayload.copy(isDeleted = true)
+      val workIndexer = new MemoryIndexer[Work[Source]]()
+      val workKeySender = new MemoryMessageSender()
+
+      withLocalSqsQueuePair() {
+        case QueuePair(queue, dlq) =>
+          withWorkerImpl(queue, workIndexer, workKeySender) { _ =>
+            sendNotificationToSQS(queue, payload)
+
+            eventually {
+              assertQueueEmpty(dlq)
+              assertQueueEmpty(queue)
+
+              workIndexer.index should have size 1
+
+              val sentKeys = workKeySender.messages.map { _.body }
+              val storedKeys = workIndexer.index.keys
+              sentKeys should contain theSameElementsAs storedKeys
+
+              workIndexer.index.values.head shouldBe a[Work.Deleted[_]]
+            }
+          }
+      }
+    }
+  }
 
   override def withContext[R](
     testWith: TestWith[MemoryTypedStore[S3ObjectLocation, CalmRecord], R]): R =
@@ -91,8 +127,9 @@ class CalmTransformerWorkerTest
                                           Work[WorkState.Source],
                                           String],
     retriever: Retriever[Work[WorkState.Source]])(
-    testWith: TestWith[TransformerWorker[CalmSourcePayload, CalmRecord, String],
-                       R])(
+    testWith: TestWith[
+      TransformerWorker[CalmSourcePayload, CalmSourceData, String],
+      R])(
     implicit recordReadable: MemoryTypedStore[S3ObjectLocation, CalmRecord])
     : R =
     testWith(
