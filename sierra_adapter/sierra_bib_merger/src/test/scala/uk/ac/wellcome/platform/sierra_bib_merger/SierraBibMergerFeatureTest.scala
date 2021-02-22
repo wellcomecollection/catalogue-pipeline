@@ -156,44 +156,26 @@ class SierraBibMergerFeatureTest
     }
   }
 
-  it("only applies an update once, even if it's sent multiple times") {
-    val oldBibRecord = createSierraBibRecordWith(
-      modifiedDate = olderDate
-    )
+  it("always sends the same update, even if it's sent multiple times") {
+    val bibRecord = createSierraBibRecord
 
-    val oldTransformable =
-      SierraTransformable(bibRecord = oldBibRecord)
-
-    val sourceVHS = createSourceVHSWith(
-      initialEntries = Map(
-        Version(oldTransformable.sierraId.withoutCheckDigit, 0) -> oldTransformable
-      )
-    )
+    val sourceVHS = createSourceVHS[SierraTransformable]
 
     withLocalSqsQueue() { queue =>
       withWorkerService(sourceVHS, queue) {
         case (_, messageSender) =>
-          val newBibRecord = createSierraBibRecordWith(
-            id = oldBibRecord.id,
-            modifiedDate = newerDate
-          )
-
           (1 to 5).map { _ =>
-            sendNotificationToSQS(queue = queue, message = newBibRecord)
+            sendNotificationToSQS(queue = queue, message = bibRecord)
           }
 
-          val expectedTransformable =
-            SierraTransformable(bibRecord = newBibRecord)
-
           eventually {
-            assertStoredAndSent(
-              Version(oldTransformable.sierraId.withoutCheckDigit, 1),
-              expectedTransformable,
-              sourceVHS,
-              messageSender
+            assertStored(
+              id = bibRecord.id.withoutCheckDigit,
+              t = SierraTransformable(bibRecord = bibRecord),
+              sourceVHS = sourceVHS
             )
 
-            messageSender.messages.size shouldBe 1
+            messageSender.messages should have size 5
           }
       }
     }

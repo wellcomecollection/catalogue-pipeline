@@ -72,7 +72,32 @@ class SierraItemsToDynamoWorkerServiceTest
     }
   }
 
-  it("only applies an update once, even if it's sent multiple times") {
+  it("always forwards the newest item, even if it's sent multiple times") {
+    val record = createSierraItemRecord
+
+    val messageSender = new MemoryMessageSender
+
+    withLocalSqsQueuePair() {
+      case QueuePair(queue, dlq) =>
+        withWorkerService(queue, messageSender = messageSender) { _ =>
+          (1 to 5).foreach { _ =>
+            sendNotificationToSQS(queue = queue, message = record)
+          }
+
+          eventually {
+            assertQueueEmpty(queue)
+            assertQueueEmpty(dlq)
+
+            messageSender.getMessages[SierraItemRecord] shouldBe (1 to 5).map {
+              _ =>
+                record
+            }
+          }
+        }
+    }
+  }
+
+  it("skips an item which is older than the stored link") {
     val bibIds = createSierraBibNumbers(count = 5)
 
     val bibIds1 = List(bibIds(0), bibIds(1), bibIds(2))
@@ -90,13 +115,9 @@ class SierraItemsToDynamoWorkerServiceTest
       bibIds = bibIds2
     )
 
-    val expectedLink = SierraItemRecordMerger
-      .mergeItems(existingLink = SierraItemLink(record1), newRecord = record2)
-      .get
-
     val store = MemoryVersionedStore[SierraItemNumber, SierraItemLink](
       initialEntries = Map(
-        Version(record1.id, 1) -> SierraItemLink(record1)
+        Version(record2.id, 1) -> SierraItemLink(record2)
       )
     )
 
@@ -105,17 +126,13 @@ class SierraItemsToDynamoWorkerServiceTest
     withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>
         withWorkerService(queue, store, messageSender = messageSender) { _ =>
-          (1 to 5).foreach { _ =>
-            sendNotificationToSQS(queue = queue, message = record2)
-          }
+          sendNotificationToSQS(queue = queue, message = record1)
 
           eventually {
             assertQueueEmpty(queue)
             assertQueueEmpty(dlq)
 
-            messageSender.getMessages[SierraItemRecord] shouldBe Seq(
-              record2.copy(unlinkedBibIds = expectedLink.unlinkedBibIds)
-            )
+            messageSender.messages shouldBe empty
           }
         }
     }

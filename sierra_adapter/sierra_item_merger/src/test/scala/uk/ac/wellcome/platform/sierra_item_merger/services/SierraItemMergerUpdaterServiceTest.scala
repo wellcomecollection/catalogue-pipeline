@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.sierra_item_merger.services
 
+import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.platform.sierra_item_merger.fixtures.SierraItemMergerFixtures
 import uk.ac.wellcome.sierra_adapter.model.Implicits._
@@ -23,6 +24,7 @@ import weco.catalogue.source_model.store.SourceVHS
 
 class SierraItemMergerUpdaterServiceTest
     extends AnyFunSpec
+    with EitherValues
     with SierraGenerators
     with SierraItemMergerFixtures
     with SourceVHSFixture {
@@ -53,56 +55,6 @@ class SierraItemMergerUpdaterServiceTest
       bibId.withoutCheckDigit,
       expectedSierraTransformable,
       sourceVHS)
-  }
-
-  it("only updates records that have changed") {
-    val bibId1 = createSierraBibNumber // doesn't exist yet
-    val bibId2 = createSierraBibNumber // exists, not linked to the item
-    val bibId3 = createSierraBibNumber // exists, linked to the item
-
-    val bibIds = List(bibId1, bibId3, bibId2)
-
-    val itemRecord = createSierraItemRecordWith(bibIds = bibIds)
-
-    val transformable2 =
-      createSierraTransformableWith(sierraId = bibId2, itemRecords = List.empty)
-
-    val transformable3 =
-      createSierraTransformableWith(
-        sierraId = bibId3,
-        itemRecords = List(itemRecord))
-
-    val sourceVHS = createSourceVHSWith(
-      initialEntries = Map(
-        Version(bibId2.withoutCheckDigit, 0) -> transformable2,
-        Version(bibId3.withoutCheckDigit, 0) -> transformable3
-      )
-    )
-    val sierraUpdaterService = new SierraItemMergerUpdaterService(sourceVHS)
-
-    val expectedTransformable1 =
-      createSierraTransformableWith(
-        sierraId = bibId1,
-        maybeBibRecord = None,
-        itemRecords = List(itemRecord)
-      )
-
-    val expectedTransformable2 =
-      transformable2.copy(itemRecords = Map(itemRecord.id -> itemRecord))
-
-    val expectedTransformable3 =
-      transformable3.copy(itemRecords = Map(itemRecord.id -> itemRecord))
-
-    val result = sierraUpdaterService.update(itemRecord)
-
-    result shouldBe a[Right[_, _]]
-    result.right.get.map { _.id } should contain theSameElementsAs List(
-      Version(bibId1.withoutCheckDigit, 0),
-      Version(bibId2.withoutCheckDigit, 1))
-
-    assertStored(bibId1.withoutCheckDigit, expectedTransformable1, sourceVHS)
-    assertStored(bibId2.withoutCheckDigit, expectedTransformable2, sourceVHS)
-    assertStored(bibId3.withoutCheckDigit, expectedTransformable3, sourceVHS)
   }
 
   it("updates an item if it receives an update with a newer date") {
@@ -376,6 +328,27 @@ class SierraItemMergerUpdaterServiceTest
       transformable,
       sourceVHS
     )
+  }
+
+  it("re-sends an item if it receives the same update twice") {
+    val bibId = createSierraBibNumber
+
+    val itemRecord = createSierraItemRecordWith(
+      modifiedDate = newerDate,
+      bibIds = List(bibId)
+    )
+
+    val sourceVHS = createSourceVHS[SierraTransformable]
+    val sierraUpdaterService = new SierraItemMergerUpdaterService(sourceVHS)
+
+    (1 to 5).foreach { _ =>
+      val result = sierraUpdaterService.update(itemRecord)
+      result shouldBe a[Right[_, _]]
+      result.value should not be empty
+    }
+
+    sourceVHS.underlying.getLatest(bibId.withoutCheckDigit) shouldBe a[Right[_,
+                                                                             _]]
   }
 
   it("adds an item to the record if the bibId exists but has no itemData") {
