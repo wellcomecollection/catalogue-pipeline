@@ -73,7 +73,7 @@ class DeletionMarkerTest
   }
 
   override def createTable(table: DynamoFixtures.Table): DynamoFixtures.Table =
-    createTableWithHashRangeKey(table)
+    createTableWithHashKey(table)
 
   def withExistingRecords[T: DynamoFormat, R](records: Seq[T])(
     testWith: TestWith[(DeletionMarker, Table), R]): R =
@@ -90,7 +90,7 @@ class DeletionMarkerTest
     scanamo
       .exec(
         ScanamoTable[CalmSourceDynamoRow](table.name)
-          .get("id" === id and "version" === version)
+          .get("id" === id)
       )
       .value
       .value

@@ -14,7 +14,7 @@ import uk.ac.wellcome.storage.fixtures.DynamoFixtures
 import uk.ac.wellcome.storage.generators.S3ObjectLocationGenerators
 import uk.ac.wellcome.storage.maxima.Maxima
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
-import uk.ac.wellcome.storage.store.dynamo.DynamoHashRangeStore
+import uk.ac.wellcome.storage.store.dynamo.DynamoHashStore
 import uk.ac.wellcome.storage.store.memory.MemoryTypedStore
 import uk.ac.wellcome.storage.store.{
   HybridStoreWithMaxima,
@@ -43,7 +43,7 @@ trait DynamoCalmVHSFixture
             String,
             Version[String, Int],
             S3ObjectLocation] =
-          new DynamoHashRangeStore[String, Int, S3ObjectLocation](dynamoConfig)
+          new DynamoHashStore[String, Int, S3ObjectLocation](dynamoConfig)
 
         override implicit val typedStore: TypedStore[S3ObjectLocation, T] =
           MemoryTypedStore[S3ObjectLocation, T]()
@@ -56,7 +56,7 @@ trait DynamoCalmVHSFixture
   }
 
   override def createTable(table: DynamoFixtures.Table): DynamoFixtures.Table =
-    createTableWithHashRangeKey(table)
+    createTableWithHashKey(table)
 
   def withDynamoSourceVHS[R](entries: Seq[CalmRecord])(
     testWith: TestWith[(SourceVHS[CalmRecord],
@@ -72,11 +72,11 @@ trait DynamoCalmVHSFixture
 
     def getRows: Seq[CalmSourceDynamoRow] =
       ids.flatMap {
-        case Version(id, version) =>
+        case Version(id, _) =>
           scanamo
             .exec {
               ScanamoTable[CalmSourceDynamoRow](table.name)
-                .get("id" === id and "version" === version)
+                .get("id" === id)
             }
             .map(_.value)
       }
