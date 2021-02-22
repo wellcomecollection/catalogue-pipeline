@@ -7,7 +7,8 @@ import uk.ac.wellcome.sierra_adapter.model.SierraItemRecord
 object SierraItemRecordMerger extends Logging {
   def mergeItems(existingLink: SierraItemLink,
                  newRecord: SierraItemRecord): Option[SierraItemLink] =
-    if (existingLink.modifiedDate.isBefore(newRecord.modifiedDate)) {
+    if (existingLink.modifiedDate.isBefore(newRecord.modifiedDate) ||
+      existingLink.modifiedDate == newRecord.modifiedDate) {
       Some(
         SierraItemLink(
           modifiedDate = newRecord.modifiedDate,
@@ -36,6 +37,11 @@ object SierraItemRecordMerger extends Logging {
         )
       )
     } else {
+      // We only discard the update if it is strictly older than the stored link.
+      //
+      // This ensures the linker is idempotent -- if for some reason we're unable to send
+      // a message after it gets stored, we'll re-send it if we re-receive the update.
+      assert(existingLink.modifiedDate.isAfter(newRecord.modifiedDate))
       warn(
         s"Discarding update to record ${newRecord.id}; updated date (${newRecord.modifiedDate}) is older than existing link (${existingLink.modifiedDate})"
       )

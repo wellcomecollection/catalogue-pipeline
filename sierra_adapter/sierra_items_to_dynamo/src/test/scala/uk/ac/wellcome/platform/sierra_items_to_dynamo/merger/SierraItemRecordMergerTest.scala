@@ -127,24 +127,28 @@ class SierraItemRecordMergerTest
     mergedRecord.unlinkedBibIds shouldBe List(bibIds(2))
   }
 
+  it("returns the link if it has the same modified date as the one already stored") {
+    val record = createSierraItemRecord
+    val link = SierraItemLink(record)
+
+    SierraItemRecordMerger.mergeItems(link, record) shouldBe Some(link)
+  }
+
   it("returns None if it receives an outdated update") {
     val bibIds = createSierraBibNumbers(count = 5)
 
-    val existingRecord = createSierraItemRecordWith(
-      modifiedDate = newerDate,
+    val oldRecord = createSierraItemRecordWith(
+      modifiedDate = olderDate,
       bibIds = bibIds.slice(0, 3)
     )
+
     val newRecord = createSierraItemRecordWith(
-      id = existingRecord.id,
+      id = oldRecord.id,
       modifiedDate = newerDate,
       bibIds = bibIds
     )
+    val newLink = SierraItemLink(newRecord)
 
-    val mergedRecord =
-      SierraItemRecordMerger.mergeItems(
-        existingLink = SierraItemLink(existingRecord),
-        newRecord = newRecord)
-
-    mergedRecord shouldBe None
+    SierraItemRecordMerger.mergeItems(newLink, oldRecord) shouldBe None
   }
 }
