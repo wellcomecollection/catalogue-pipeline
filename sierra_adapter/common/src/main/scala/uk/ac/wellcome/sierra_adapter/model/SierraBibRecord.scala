@@ -6,7 +6,7 @@ case class SierraBibRecord(
   id: SierraBibNumber,
   data: String,
   modifiedDate: Instant
-) extends AbstractSierraRecord
+) extends AbstractSierraRecord[SierraBibNumber]
 
 case object SierraBibRecord {
   def apply(id: String, data: String, modifiedDate: Instant): SierraBibRecord =

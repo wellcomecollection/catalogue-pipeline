@@ -31,7 +31,7 @@ class SierraRecordWrapperFlowTest
     with JsonAssertions
     with SierraGenerators {
 
-  private def withRecordWrapperFlow[T <: AbstractSierraRecord](
+  private def withRecordWrapperFlow[T <: AbstractSierraRecord[_]](
     createRecord: (String, String, Instant) => T)(
     testWith: TestWith[Flow[Json, T, NotUsed], Assertion]) = {
     val wrapperFlow = SierraRecordWrapperFlow(
@@ -138,8 +138,8 @@ class SierraRecordWrapperFlowTest
   }
 
   private def assertSierraRecordsAreEqual(
-    x: AbstractSierraRecord,
-    y: AbstractSierraRecord): Assertion = {
+    x: AbstractSierraRecord[_],
+    y: AbstractSierraRecord[_]): Assertion = {
     x.id shouldBe x.id
     assertJsonStringsAreEqual(x.data, y.data)
     x.modifiedDate shouldBe y.modifiedDate

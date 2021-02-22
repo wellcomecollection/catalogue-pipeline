@@ -137,8 +137,8 @@ class SierraRecordParserTest
   }
 
   private def assertSierraRecordsAreEqual(
-    x: AbstractSierraRecord,
-    y: AbstractSierraRecord): Assertion = {
+    x: AbstractSierraRecord[_],
+    y: AbstractSierraRecord[_]): Assertion = {
     x.id shouldBe x.id
     assertJsonStringsAreEqual(x.data, y.data)
     x.modifiedDate shouldBe y.modifiedDate

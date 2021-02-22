@@ -116,13 +116,13 @@ class SierraReaderWorkerService(
     }
   }
 
-  private def createRecord: (String, String, Instant) => AbstractSierraRecord =
+  private def createRecord: (String, String, Instant) => AbstractSierraRecord[_] =
     readerConfig.resourceType match {
       case SierraResourceTypes.bibs  => SierraBibRecord.apply
       case SierraResourceTypes.items => SierraItemRecord.apply
     }
 
-  private def toJson(records: Seq[AbstractSierraRecord]): Json =
+  private def toJson(records: Seq[AbstractSierraRecord[_]]): Json =
     readerConfig.resourceType match {
       case SierraResourceTypes.bibs =>
         records.asInstanceOf[Seq[SierraBibRecord]].asJson
