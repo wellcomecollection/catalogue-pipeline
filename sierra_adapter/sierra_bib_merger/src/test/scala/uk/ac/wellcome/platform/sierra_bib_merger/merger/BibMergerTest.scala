@@ -31,6 +31,17 @@ class BibMergerTest extends AnyFunSpec with Matchers with SierraGenerators {
       caught.getMessage shouldEqual s"Non-matching bib ids ${bibRecord.id} != ${transformable.sierraId}"
     }
 
+    it("returns the transformable if you merge the same record more than once") {
+      val bibRecord = createSierraBibRecord
+
+      val transformable = SierraTransformable(
+        bibRecord = bibRecord
+      )
+
+      BibMerger.mergeBibRecord(transformable, bibRecord) shouldBe Some(transformable)
+    }
+
+
     it("returns None when merging a stale update") {
       val oldBibRecord = createSierraBibRecordWith(
         modifiedDate = olderDate

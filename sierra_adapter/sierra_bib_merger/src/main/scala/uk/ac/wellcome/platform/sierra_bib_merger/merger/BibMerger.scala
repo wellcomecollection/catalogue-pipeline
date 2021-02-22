@@ -20,7 +20,8 @@ object BibMerger {
 
     val isNewerData = sierraTransformable.maybeBibRecord match {
       case Some(bibData) =>
-        sierraBibRecord.modifiedDate.isAfter(bibData.modifiedDate)
+        sierraBibRecord.modifiedDate.isAfter(bibData.modifiedDate) ||
+          sierraBibRecord.modifiedDate == bibData.modifiedDate
       case None => true
     }
 
