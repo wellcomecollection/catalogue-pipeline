@@ -2,7 +2,7 @@ import boto3
 import os
 from wellcome_aws_utils.lambda_utils import log_on_error
 
-from .deletion_check_initiator import DeletionCheckInitiator
+from deletion_check_initiator import DeletionCheckInitiator
 
 source_table_name = os.environ.get("SOURCE_TABLE_NAME")
 reindexer_topic_arn = os.environ.get("REINDEXER_TOPIC_ARN")

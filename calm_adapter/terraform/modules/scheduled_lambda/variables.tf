@@ -18,6 +18,11 @@ variable "env_vars" {
   type = map(string)
 }
 
+variable "timeout" {
+  type    = number
+  default = 3
+}
+
 variable "schedule_interval" {
   type = string
 }

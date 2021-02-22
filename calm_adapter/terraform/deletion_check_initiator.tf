@@ -7,6 +7,7 @@ module "deletion_check_initiator_lambda" {
   s3_bucket         = local.infra_bucket
   s3_key            = "lambdas/calm_adapter/calm_deletion_check_initiator.zip"
   schedule_interval = local.deletion_check_interval
+  timeout           = 60 * 3
 
   env_vars = {
     REINDEXER_TOPIC_ARN = local.reindex_jobs_topic_arn

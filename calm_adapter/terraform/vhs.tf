@@ -16,3 +16,23 @@ resource "aws_iam_role_policy" "vhs_deletion_checker_dynamo_update" {
   role   = module.deletion_checker_worker.task_role_name
   policy = module.vhs.dynamodb_update_policy.json
 }
+
+data "aws_iam_policy_document" "vhs_dynamo_read_policy" {
+  statement {
+    actions = [
+      "dynamodb:BatchGetItem",
+      "dynamodb:DescribeTable",
+      "dynamodb:GetItem",
+      "dynamodb:ListTables",
+      "dynamodb:Query",
+      "dynamodb:Scan",
+    ]
+
+    resources = [module.vhs.table_arn]
+  }
+}
+
+resource "aws_iam_role_policy" "vhs_deletion_check_initiator_dynamo_read" {
+  role   = module.deletion_check_initiator_lambda.role_name
+  policy = data.aws_iam_policy_document.vhs_dynamo_read_policy.json
+}

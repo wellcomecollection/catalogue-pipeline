@@ -7,6 +7,7 @@ resource "aws_lambda_function" "scheduled_lambda" {
 
   handler = "lambda.main"
   runtime = "python3.7"
+  timeout = var.timeout
 
   s3_bucket         = data.aws_s3_bucket_object.package.bucket
   s3_key            = data.aws_s3_bucket_object.package.key
