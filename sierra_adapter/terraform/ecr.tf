@@ -49,3 +49,11 @@ resource "aws_ecr_repository" "sierra_holdings_linker" {
     prevent_destroy = true
   }
 }
+
+resource "aws_ecr_repository" "sierra_linker" {
+  name = "${local.repository_prefix}/sierra_linker"
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}

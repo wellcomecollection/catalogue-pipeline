@@ -8,8 +8,7 @@ PROJECT_ID = sierra_adapter
 SBT_APPS = sierra_bib_merger \
                sierra_item_merger \
                sierra_holdings_merger \
-               sierra_items_to_dynamo \
-               sierra_holdings_linker \
+               sierra_linker \
                sierra_reader
 SBT_NO_DOCKER_APPS =
 
