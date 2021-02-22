@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.calm_deletion_checker
 
+import akka.Done
 import akka.http.scaladsl.model.headers.Cookie
 import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
@@ -44,7 +45,10 @@ class DeletionCheckerWorkerServiceTest
     val deletedRecords = randomSample(storeRecords, size = 5)
     val extantRecordIds = (storeRecords.toSet -- deletedRecords.toSet).map(_.id)
 
-    withTestCalmApiClient(searchHandler(extantRecordIds)) { apiClient =>
+    withTestCalmApiClient(
+      handleSearch = searchHandler(extantRecordIds),
+      handleAbandon = abandonHandler
+    ) { apiClient =>
       withDynamoSourceVHS(storeRecords) {
         case (_, sourceTable, getRows) =>
           withDeletionCheckerWorkerService(apiClient, sourceTable) {
@@ -74,7 +78,10 @@ class DeletionCheckerWorkerServiceTest
     val deletedRecords = randomSample(storeRecords, size = 5)
     val extantRecordIds = (storeRecords.toSet -- deletedRecords.toSet).map(_.id)
 
-    withTestCalmApiClient(searchHandler(extantRecordIds)) { apiClient =>
+    withTestCalmApiClient(
+      handleSearch = searchHandler(extantRecordIds),
+      handleAbandon = abandonHandler
+    ) { apiClient =>
       withDynamoSourceVHS(storeRecords) {
         case (_, sourceTable, getRows) =>
           val alreadyDeletedIds =
@@ -122,7 +129,10 @@ class DeletionCheckerWorkerServiceTest
       }
     }
 
-    withTestCalmApiClient(handleSearch) { apiClient =>
+    withTestCalmApiClient(
+      handleSearch = handleSearch,
+      handleAbandon = abandonHandler
+    ) { apiClient =>
       withDynamoSourceVHS(storeRecords) {
         case (_, sourceTable, getRows) =>
           withDeletionCheckerWorkerService(apiClient, sourceTable) {
@@ -146,30 +156,32 @@ class DeletionCheckerWorkerServiceTest
   it("sends messages to the DLQ if marking records as deleted fails") {
     val storeRecords = (1 to 10).map(_ => createCalmRecord)
 
-    withTestCalmApiClient(searchHandler(storeRecords.map(_.id).toSet)) {
-      apiClient =>
-        withDynamoSourceVHS(storeRecords) {
-          case (_, sourceTable, getRows) =>
-            withDeletionCheckerWorkerService(apiClient, sourceTable) {
-              case (QueuePair(queue, dlq), _) =>
-                val storedPayloads = getRows().map(_.toPayload)
-                val phantomPayloads = (1 to 3).map(_ => calmSourcePayload)
-                (storedPayloads ++ phantomPayloads).foreach { payload =>
-                  sendNotificationToSQS(queue, payload)
-                }
+    withTestCalmApiClient(
+      handleSearch = searchHandler(storeRecords.map(_.id).toSet),
+      handleAbandon = abandonHandler
+    ) { apiClient =>
+      withDynamoSourceVHS(storeRecords) {
+        case (_, sourceTable, getRows) =>
+          withDeletionCheckerWorkerService(apiClient, sourceTable) {
+            case (QueuePair(queue, dlq), _) =>
+              val storedPayloads = getRows().map(_.toPayload)
+              val phantomPayloads = (1 to 3).map(_ => calmSourcePayload)
+              (storedPayloads ++ phantomPayloads).foreach { payload =>
+                sendNotificationToSQS(queue, payload)
+              }
 
-                eventually {
-                  assertQueueEmpty(queue)
+              eventually {
+                assertQueueEmpty(queue)
 
-                  getRows().map(_.id) should contain noElementsOf phantomPayloads
-                    .map(_.id)
+                getRows().map(_.id) should contain noElementsOf phantomPayloads
+                  .map(_.id)
 
-                  // Because of the batching the total number of DLQ messages
-                  // will almost certainly be larger than the number of bad records
-                  getMessages(dlq).size should be >= phantomPayloads.size
-                }
-            }
-        }
+                // Because of the batching the total number of DLQ messages
+                // will almost certainly be larger than the number of bad records
+                getMessages(dlq).size should be >= phantomPayloads.size
+              }
+          }
+      }
     }
   }
 
@@ -208,6 +220,8 @@ class DeletionCheckerWorkerServiceTest
         cookie = Cookie("key", "value")
       )
     }
+
+  def abandonHandler: Cookie => Done = _ => Done
 
   def recordIds(q: CalmQuery): Seq[String] = q match {
     case CalmQuery.RecordId(id) => Seq(id)

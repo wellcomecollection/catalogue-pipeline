@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.calm_api_client.fixtures
 
+import akka.Done
 import akka.http.scaladsl.model.headers.Cookie
 import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
 import akka.stream.Materializer
@@ -30,11 +31,13 @@ trait CalmApiClientFixtures extends Akka {
 
   def withTestCalmApiClient[R](
     handleSearch: CalmQuery => CalmSession = _ => throw new NotImplementedError,
-    handleSummary: Int => CalmRecord = _ => throw new NotImplementedError
+    handleSummary: Int => CalmRecord = _ => throw new NotImplementedError,
+    handleAbandon: Cookie => Done = _ => throw new NotImplementedError,
   )(testWith: TestWith[TestCalmApiClient, R]): R =
     withMaterializer { mat =>
       implicit val ec: ExecutionContext = mat.executionContext
-      testWith(new TestCalmApiClient(handleSearch, handleSummary))
+      testWith(
+        new TestCalmApiClient(handleSearch, handleSummary, handleAbandon))
     }
 
   trait TestHttpClient extends HttpClient {
@@ -67,7 +70,8 @@ trait CalmApiClientFixtures extends Akka {
 
   class TestCalmApiClient(
     handleSearch: CalmQuery => CalmSession,
-    handleSummary: Int => CalmRecord
+    handleSummary: Int => CalmRecord,
+    handleAbandon: Cookie => Done
   )(implicit ec: ExecutionContext)
       extends CalmApiClient {
     var requests: List[(CalmXmlRequest, Option[Cookie])] = Nil
@@ -83,6 +87,8 @@ trait CalmApiClientFixtures extends Akka {
             handleSearch(query).asInstanceOf[Request#Response]
           case CalmSummaryRequest(pos, _) =>
             handleSummary(pos).asInstanceOf[Request#Response]
+          case CalmAbandonRequest =>
+            handleAbandon(cookie.get).asInstanceOf[Request#Response]
         }
       }
     }
