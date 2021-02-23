@@ -11,5 +11,7 @@ case class AccessCondition(
       case accessCondition                   => Some(accessCondition)
     }
 
+  def isAvailable: Boolean = status.exists(_.isAvailable)
+
   def hasRestrictions: Boolean = status.exists(_.hasRestrictions)
 }

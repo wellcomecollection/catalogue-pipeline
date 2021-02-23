@@ -36,21 +36,30 @@ trait ItemsGenerators extends IdentifiersGenerators with LocationGenerators {
   def createUnidentifiableItem: Item[IdState.Unidentifiable.type] =
     createUnidentifiableItemWith()
 
-  def createIdentifiedPhysicalItem =
+  def createIdentifiedPhysicalItem: Item[IdState.Identified] =
     createIdentifiedItemWith(locations = List(createPhysicalLocation))
 
-  def createDigitalItem =
+  def createDigitalItem: Item[IdState.Unidentifiable.type] =
     createUnidentifiableItemWith(locations = List(createDigitalLocation))
 
-  def createDigitalItemWith(locations: List[Location]) =
+  def createDigitalItemWith(
+    accessStatus: AccessStatus): Item[IdState.Unidentifiable.type] =
+    createDigitalItemWith(
+      locations = List(
+        createDigitalLocationWith(accessConditions =
+          List(createAccessConditionWith(status = Some(accessStatus))))))
+
+  def createDigitalItemWith(
+    locations: List[Location]): Item[IdState.Unidentifiable.type] =
     createUnidentifiableItemWith(locations = locations)
 
-  def createDigitalItemWith(license: Option[License]) =
+  def createDigitalItemWith(
+    license: Option[License]): Item[IdState.Unidentifiable.type] =
     createUnidentifiableItemWith(
       locations = List(createDigitalLocationWith(license = license))
     )
 
-  def createCalmItem =
+  def createCalmItem: Item[IdState.Unidentifiable.type] =
     createUnidentifiableItemWith(
       locations = List(
         createPhysicalLocationWith(

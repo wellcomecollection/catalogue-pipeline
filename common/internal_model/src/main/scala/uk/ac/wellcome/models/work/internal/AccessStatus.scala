@@ -6,6 +6,12 @@ sealed trait AccessStatus { this: AccessStatus =>
 
   def name: String = this.getClass.getSimpleName.stripSuffix("$")
 
+  def isAvailable: Boolean = this match {
+    case AccessStatus.Open             => true
+    case AccessStatus.OpenWithAdvisory => true
+    case _                             => false
+  }
+
   def hasRestrictions: Boolean = this match {
     case AccessStatus.OpenWithAdvisory   => true
     case AccessStatus.Restricted         => true
