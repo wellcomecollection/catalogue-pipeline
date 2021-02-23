@@ -55,6 +55,12 @@ class MiroRecordTransformer
       value = originalMiroRecord.imageNumber
     )
 
+    val state = Source(
+      sourceIdentifier = sourceIdentifier,
+      // Miro records are static so we just send 0 as a last modification timestamp
+      modifiedTime = Instant.EPOCH
+    )
+
     Try {
       // Any records that aren't cleared for the Catalogue API should be
       // discarded immediately.
@@ -97,17 +103,14 @@ class MiroRecordTransformer
 
       Work.Visible[Source](
         version = version,
-        state = Source(
-          sourceIdentifier,
-          // Miro records are static so we just send 0 as a last modification timestamp
-          Instant.EPOCH),
+        state = state,
         data = data
       )
     }.recover {
       case e: ShouldNotTransformException =>
         debug(s"Should not transform: ${e.getMessage}")
         Work.Invisible[Source](
-          state = Source(sourceIdentifier, Instant.EPOCH),
+          state = state,
           version = version,
           data = WorkData()
         )
