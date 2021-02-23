@@ -70,7 +70,8 @@ trait MiroContributorCodes {
     )
 
     if (creditCode == "GUS" && gusMiroIds.contains(miroId)) {
-      throw new ShouldSuppressException("we do not expose image_source_code = GUS")
+      throw new ShouldSuppressException(
+        "we do not expose image_source_code = GUS")
     }
 
     contributorMap.get(creditCode) match {

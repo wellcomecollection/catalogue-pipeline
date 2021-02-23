@@ -50,9 +50,11 @@ trait MiroLicenses {
           // catalogue data -- for now, explicitly mark these as "do not transform"
           // so they don't end up on the DLQ.
           case "Do not use" =>
-            throw new ShouldSuppressException("image_use_restrictions = 'Do not use'")
+            throw new ShouldSuppressException(
+              "image_use_restrictions = 'Do not use'")
           case "Image withdrawn, see notes" =>
-            throw new ShouldSuppressException("image_use_restrictions = 'Image withdrawn, see notes'")
+            throw new ShouldSuppressException(
+              "image_use_restrictions = 'Image withdrawn, see notes'")
         }
     }
 

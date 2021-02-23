@@ -366,7 +366,7 @@ class SierraTransformerTest
     deletedWork.deletedReason shouldBe DeletedFromSource("Sierra")
   }
 
-  it("deletes works with 'suppressed': true")  {
+  it("deletes works with 'suppressed': true") {
     val id = createSierraBibNumber
     val title = "Hi Diddle Dee Dee"
     val data =
@@ -872,7 +872,8 @@ class SierraTransformerTest
     assertTransformReturnsInvisibleWork(
       maybeBibRecord = Some(bibRecord),
       modifiedDate = bibRecord.modifiedDate,
-      invisibilityReasons = List(UnableToTransform("Could not find field 245 to create title"))
+      invisibilityReasons =
+        List(UnableToTransform("Could not find field 245 to create title"))
     )
   }
 

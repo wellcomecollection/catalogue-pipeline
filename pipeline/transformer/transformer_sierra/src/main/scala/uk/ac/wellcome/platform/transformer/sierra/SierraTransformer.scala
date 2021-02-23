@@ -29,7 +29,10 @@ import uk.ac.wellcome.models.work.internal.DeletedReason.{
   DeletedFromSource,
   SuppressedFromSource
 }
-import uk.ac.wellcome.models.work.internal.InvisibilityReason.{SourceFieldMissing, UnableToTransform}
+import uk.ac.wellcome.models.work.internal.InvisibilityReason.{
+  SourceFieldMissing,
+  UnableToTransform
+}
 
 class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
     extends Logging {

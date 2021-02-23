@@ -109,10 +109,11 @@ object CalmTransformer
   private def knownErrToUntransformableReason(
     err: CalmTransformerException): InvisibilityReason =
     err match {
-      case TitleMissing      => SourceFieldMissing("Calm:Title")
-      case RefNoMissing      => SourceFieldMissing("Calm:RefNo")
-      case LevelMissing      => SourceFieldMissing("Calm:Level")
-      case UnrecognisedLevel(level) => InvalidValueInSourceField(s"Calm:Level - $level")
+      case TitleMissing => SourceFieldMissing("Calm:Title")
+      case RefNoMissing => SourceFieldMissing("Calm:RefNo")
+      case LevelMissing => SourceFieldMissing("Calm:Level")
+      case UnrecognisedLevel(level) =>
+        InvalidValueInSourceField(s"Calm:Level - $level")
     }
 
   def shouldSuppress(record: CalmRecord): Boolean =

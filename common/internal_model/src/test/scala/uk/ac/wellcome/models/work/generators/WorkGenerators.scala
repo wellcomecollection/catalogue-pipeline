@@ -115,8 +115,8 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
         invisibilityReasons = invisibilityReasons
       )
 
-    def deleted(
-      deletedReason: DeletedReason = DeletedFromSource("tests")): Work.Deleted[State] =
+    def deleted(deletedReason: DeletedReason = DeletedFromSource("tests"))
+      : Work.Deleted[State] =
       Work.Deleted[State](
         state = work.state,
         data = work.data,

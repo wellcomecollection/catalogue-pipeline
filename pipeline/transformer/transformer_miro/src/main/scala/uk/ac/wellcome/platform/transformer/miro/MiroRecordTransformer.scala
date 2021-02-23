@@ -72,7 +72,8 @@ class MiroRecordTransformer
           version = version,
           data = WorkData(),
           state = state,
-          deletedReason = SuppressedFromSource("Miro: isClearedForCatalogueAPI = false")
+          deletedReason =
+            SuppressedFromSource("Miro: isClearedForCatalogueAPI = false")
         )
       )
     }
@@ -86,11 +87,12 @@ class MiroRecordTransformer
           version = version,
           data = WorkData(),
           state = state,
-          deletedReason = SuppressedFromSource(s"Miro: image_copyright_cleared = ${originalMiroRecord.copyrightCleared.getOrElse("<empty>")}")
+          deletedReason = SuppressedFromSource(
+            s"Miro: image_copyright_cleared = ${originalMiroRecord.copyrightCleared
+              .getOrElse("<empty>")}")
         )
       )
-    }
-    else {
+    } else {
       Try {
         // This is an utterly awful hack we have to live with until we get
         // these corrected in the source data.
@@ -118,8 +120,7 @@ class MiroRecordTransformer
           state = state,
           data = data
         )
-      }
-        .recover {
+      }.recover {
           case e: ShouldSuppressException =>
             Work.Deleted[Source](
               version = version,
