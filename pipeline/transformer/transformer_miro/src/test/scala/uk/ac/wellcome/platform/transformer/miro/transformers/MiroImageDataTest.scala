@@ -41,8 +41,7 @@ class MiroImageDataTest
         version = 1,
         locations = List(
           DigitalLocation(
-            url =
-              "https://iiif.wellcomecollection.org/image/B0011308/info.json",
+            url = "https://iiif.wellcomecollection.org/image/B0011308/info.json",
             locationType = LocationType.IIIFImageAPI,
             license = Some(License.CC0),
             credit = Some("Ezra Feilden")
