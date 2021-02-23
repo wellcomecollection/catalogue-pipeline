@@ -42,7 +42,9 @@ class WorksTest
              "id": "${work.state.canonicalId}",
              "title": "${work.data.title.get}",
              "alternativeTitles": [],
-             "availableOnline": false
+             "availableOnline": false,
+             "availabilities": [${availabilities(
+            work.state.derivedData.availabilities)}]
             }
           """
         }
@@ -67,6 +69,8 @@ class WorksTest
              "title": "${work.data.title.get}",
              "alternativeTitles": [],
              "availableOnline": false,
+             "availabilities": [${availabilities(
+            work.state.derivedData.availabilities)}],
              "edition": "Special edition",
              "duration": 3600
             }
@@ -181,7 +185,9 @@ class WorksTest
                "id": "${work.state.canonicalId}",
                "title": "${work.data.title.get}",
                "alternativeTitles": [],
-               "availableOnline": false
+               "availableOnline": false,
+               "availabilities": [${availabilities(
+              work.state.derivedData.availabilities)}]
               }
             """
           }
@@ -195,7 +201,9 @@ class WorksTest
                "id": "${altWork.state.canonicalId}",
                "title": "${altWork.data.title.get}",
                "alternativeTitles": [],
-               "availableOnline": false
+               "availableOnline": false,
+               "availabilities": [${availabilities(
+              work.state.derivedData.availabilities)}]
               }
             """
           }
@@ -251,6 +259,8 @@ class WorksTest
                  "title": "${work.data.title.get}",
                  "alternativeTitles": [],
                  "availableOnline": true,
+                 "availabilities": [${availabilities(
+            work.state.derivedData.availabilities)}],
                  "thumbnail": ${location(work.data.thumbnail.get)}
                 }
               ]

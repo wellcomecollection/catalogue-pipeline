@@ -149,6 +149,7 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
       objectField("derivedData")
         .fields(
           booleanField("availableOnline"),
+          objectField("availabilities").fields(keywordField("id")),
           keywordField("contributorAgents")
         )
         .dynamic("false")

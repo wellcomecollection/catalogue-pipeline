@@ -41,6 +41,8 @@ class WorksIncludesTest
                    "title": "${work0.data.title.get}",
                    "alternativeTitles": [],
                    "availableOnline": false,
+                   "availabilities": [${availabilities(
+              work0.state.derivedData.availabilities)}],
                    "identifiers": [
                      ${identifier(work0.sourceIdentifier)},
                      ${identifier(otherIdentifier0)}
@@ -52,6 +54,8 @@ class WorksIncludesTest
                    "title": "${work1.data.title.get}",
                    "alternativeTitles": [],
                    "availableOnline": false,
+                   "availabilities": [${availabilities(
+              work1.state.derivedData.availabilities)}],
                    "identifiers": [
                      ${identifier(work1.sourceIdentifier)},
                      ${identifier(otherIdentifier1)}
@@ -82,6 +86,8 @@ class WorksIncludesTest
                 "title": "${work.data.title.get}",
                 "alternativeTitles": [],
                 "availableOnline": false,
+                "availabilities": [${availabilities(
+              work.state.derivedData.availabilities)}],
                 "identifiers": [
                   ${identifier(work.sourceIdentifier)},
                   ${identifier(otherIdentifier)}
@@ -115,6 +121,8 @@ class WorksIncludesTest
               "title": "${work.data.title.get}",
               "alternativeTitles": [],
               "availableOnline": true,
+              "availabilities": [${availabilities(
+            work.state.derivedData.availabilities)}],
               "items": [ ${items(work.data.items)} ]
             }
           """
@@ -145,6 +153,8 @@ class WorksIncludesTest
                    "title": "${work0.data.title.get}",
                    "alternativeTitles": [],
                    "availableOnline": false,
+                   "availabilities": [${availabilities(
+              work0.state.derivedData.availabilities)}],
                    "subjects": [ ${subjects(subjects0)}]
                  },
                  {
@@ -153,6 +163,8 @@ class WorksIncludesTest
                    "title": "${work1.data.title.get}",
                    "alternativeTitles": [],
                    "availableOnline": false,
+                   "availabilities": [${availabilities(
+              work1.state.derivedData.availabilities)}],
                    "subjects": [ ${subjects(subjects1)}]
                  }
                 ]
@@ -180,6 +192,8 @@ class WorksIncludesTest
                 "title": "${work.data.title.get}",
                 "alternativeTitles": [],
                 "availableOnline": false,
+                "availabilities": [${availabilities(
+              work.state.derivedData.availabilities)}],
                 "subjects": [ ${subjects(work.data.subjects)}]
               }
             """
@@ -211,6 +225,8 @@ class WorksIncludesTest
                    "title": "${work1.data.title.get}",
                    "alternativeTitles": [],
                    "availableOnline": false,
+                   "availabilities": [${availabilities(
+              work1.state.derivedData.availabilities)}],
                    "genres": [ ${genres(genres1)}]
                  },
                  {
@@ -219,6 +235,8 @@ class WorksIncludesTest
                    "title": "${work2.data.title.get}",
                    "alternativeTitles": [],
                    "availableOnline": false,
+                   "availabilities": [${availabilities(
+              work2.state.derivedData.availabilities)}],
                    "genres": [ ${genres(genres2)}]
                  }
                 ]
@@ -247,6 +265,8 @@ class WorksIncludesTest
                 "title": "${work.data.title.get}",
                 "alternativeTitles": [],
                 "availableOnline": false,
+                "availabilities": [${availabilities(
+              work.state.derivedData.availabilities)}],
                 "genres": [ ${genres(work.data.genres)}]
               }
             """
@@ -282,6 +302,8 @@ class WorksIncludesTest
                    "title": "${work1.data.title.get}",
                    "alternativeTitles": [],
                    "availableOnline": false,
+                   "availabilities": [${availabilities(
+              work1.state.derivedData.availabilities)}],
                    "contributors": [ ${contributors(contributors1)}]
                  },
                  {
@@ -290,6 +312,8 @@ class WorksIncludesTest
                    "title": "${work2.data.title.get}",
                    "alternativeTitles": [],
                    "availableOnline": false,
+                   "availabilities": [${availabilities(
+              work2.state.derivedData.availabilities)}],
                    "contributors": [ ${contributors(contributors2)}]
                  }
                 ]
@@ -319,6 +343,8 @@ class WorksIncludesTest
                 "title": "${work.data.title.get}",
                 "alternativeTitles": [],
                 "availableOnline": false,
+                "availabilities": [${availabilities(
+              work.state.derivedData.availabilities)}],
                 "contributors": [ ${contributors(work.data.contributors)}]
               }
             """
@@ -352,6 +378,8 @@ class WorksIncludesTest
                    "title": "${work1.data.title.get}",
                    "alternativeTitles": [],
                    "availableOnline": false,
+                   "availabilities": [${availabilities(
+              work1.state.derivedData.availabilities)}],
                    "production": [ ${production(productionEvents1)}]
                  },
                  {
@@ -360,6 +388,8 @@ class WorksIncludesTest
                    "title": "${work2.data.title.get}",
                    "alternativeTitles": [],
                    "availableOnline": false,
+                   "availabilities": [${availabilities(
+              work2.state.derivedData.availabilities)}],
                    "production": [ ${production(productionEvents2)}]
                  }
                 ]
@@ -387,6 +417,8 @@ class WorksIncludesTest
                 "title": "${work.data.title.get}",
                 "alternativeTitles": [],
                 "availableOnline": false,
+                "availabilities": [${availabilities(
+              work.state.derivedData.availabilities)}],
                 "production": [ ${production(work.data.production)}]
               }
             """
@@ -420,6 +452,8 @@ class WorksIncludesTest
                    "title": "${work1.data.title.get}",
                    "alternativeTitles": [],
                    "availableOnline": false,
+                   "availabilities": [${availabilities(
+              work1.state.derivedData.availabilities)}],
                    "languages": [ ${languages(work1.data.languages)}]
                  },
                  {
@@ -428,6 +462,8 @@ class WorksIncludesTest
                    "title": "${work2.data.title.get}",
                    "alternativeTitles": [],
                    "availableOnline": false,
+                   "availabilities": [${availabilities(
+              work2.state.derivedData.availabilities)}],
                    "languages": [ ${languages(work2.data.languages)}]
                  }
                 ]
@@ -458,6 +494,8 @@ class WorksIncludesTest
                 "title": "${work.data.title.get}",
                 "alternativeTitles": [],
                 "availableOnline": false,
+                "availabilities": [${availabilities(
+              work.state.derivedData.availabilities)}],
                 "languages": [ ${languages(work.data.languages)}]
               }
             """
@@ -487,6 +525,8 @@ class WorksIncludesTest
                      "title": "${work1.data.title.get}",
                      "alternativeTitles": [],
                      "availableOnline": false,
+                     "availabilities": [${availabilities(
+              work1.state.derivedData.availabilities)}],
                      "notes": [
                        {
                          "noteType": {
@@ -514,6 +554,8 @@ class WorksIncludesTest
                      "title": "${work2.data.title.get}",
                      "alternativeTitles": [],
                      "availableOnline": false,
+                     "availabilities": [${availabilities(
+              work2.state.derivedData.availabilities)}],
                      "notes": [
                        {
                          "noteType": {
@@ -549,6 +591,8 @@ class WorksIncludesTest
                 "title": "${work.data.title.get}",
                 "alternativeTitles": [],
                 "availableOnline": false,
+                "availabilities": [${availabilities(
+              work.state.derivedData.availabilities)}],
                 "notes": [
                    {
                      "noteType": {
@@ -598,6 +642,8 @@ class WorksIncludesTest
                     "title": "${works.head.data.title.get}",
                     "alternativeTitles": [],
                     "availableOnline": false,
+                    "availabilities": [${availabilities(
+              works.head.state.derivedData.availabilities)}],
                     "images": [${workImageIncludes(works.head.data.imageData)}]
                   },
                   {
@@ -606,6 +652,8 @@ class WorksIncludesTest
                     "title": "${works(1).data.title.get}",
                     "alternativeTitles": [],
                     "availableOnline": false,
+                    "availabilities": [${availabilities(
+              works(1).state.derivedData.availabilities)}],
                     "images": [${workImageIncludes(works(1).data.imageData)}]
                   }
                 ]
@@ -635,6 +683,8 @@ class WorksIncludesTest
                 "title": "${work.data.title.get}",
                 "alternativeTitles": [],
                 "availableOnline": false,
+                "availabilities": [${availabilities(
+              work.state.derivedData.availabilities)}],
                 "images": [${workImageIncludes(images)}]
               }
             """
@@ -690,6 +740,8 @@ class WorksIncludesTest
               "title": "0/a/c",
               "alternativeTitles": [],
               "availableOnline": false,
+              "availabilities": [${availabilities(
+              workC.state.derivedData.availabilities)}],
               "parts": [{
                 "id": "${workE.state.canonicalId}",
                 "title": "0/a/c/e",
@@ -717,6 +769,8 @@ class WorksIncludesTest
               "title": "0/a/c",
               "alternativeTitles": [],
               "availableOnline": false,
+              "availabilities": [${availabilities(
+              workC.state.derivedData.availabilities)}],
               "partOf": [
                 {
                   "id": "${workA.state.canonicalId}",
@@ -754,6 +808,8 @@ class WorksIncludesTest
               "title": "0/a/c",
               "alternativeTitles": [],
               "availableOnline": false,
+              "availabilities": [${availabilities(
+              workC.state.derivedData.availabilities)}],
               "precededBy": [{
                 "id": "${workB.state.canonicalId}",
                 "title": "0/a/b",
@@ -781,6 +837,8 @@ class WorksIncludesTest
               "title": "0/a/c",
               "alternativeTitles": [],
               "availableOnline": false,
+              "availabilities": [${availabilities(
+              workC.state.derivedData.availabilities)}],
               "succeededBy": [{
                 "id": "${workD.state.canonicalId}",
                 "title": "0/a/d",

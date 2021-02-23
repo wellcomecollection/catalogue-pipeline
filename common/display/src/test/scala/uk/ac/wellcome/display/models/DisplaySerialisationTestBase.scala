@@ -221,6 +221,9 @@ trait DisplaySerialisationTestBase {
   def production(production: List[ProductionEvent[IdState.Minted]]) =
     production.map(productionEvent).mkString(",")
 
+  def availabilities(availabilities: List[Availability]) =
+    availabilities.map(availability).mkString(",")
+
   def languages(ls: List[Language]): String =
     ls.map(language).mkString(",")
 
@@ -234,6 +237,15 @@ trait DisplaySerialisationTestBase {
 
   def workImageIncludes(images: List[ImageData[IdState.Identified]]) =
     images.map(workImageInclude).mkString(",")
+
+  def availability(availability: Availability): String =
+    s"""
+      {
+        "id": "${availability.id}",
+        "label": "${availability.label}",
+        "type": "Availability"
+      }
+     """.stripMargin
 
   def productionEvent(event: ProductionEvent[IdState.Minted]): String =
     s"""
