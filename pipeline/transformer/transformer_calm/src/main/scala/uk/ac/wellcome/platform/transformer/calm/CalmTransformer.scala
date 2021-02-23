@@ -112,7 +112,7 @@ object CalmTransformer
       case TitleMissing      => SourceFieldMissing("Calm:Title")
       case RefNoMissing      => SourceFieldMissing("Calm:RefNo")
       case LevelMissing      => SourceFieldMissing("Calm:Level")
-      case UnrecognisedLevel => InvalidValueInSourceField("Calm:Level")
+      case UnrecognisedLevel(level) => InvalidValueInSourceField(s"Calm:Level - $level")
     }
 
   def shouldSuppress(record: CalmRecord): Boolean =
@@ -237,7 +237,7 @@ object CalmTransformer
         case "piece"            => Right(WorkType.Standard)
         case level =>
           warn(s"${record.id} has an unrecognised level: $level")
-          Left(UnrecognisedLevel)
+          Left(UnrecognisedLevel(level))
       }
       .getOrElse(Left(LevelMissing))
 
