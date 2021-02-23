@@ -306,7 +306,7 @@ class MiroRecordTransformerTest
     )
 
     val expectedDigitalLocation = DigitalLocation(
-      url = "https://iiif.wellcomecollection.org/image/B0011308.jpg/info.json",
+      url = "https://iiif.wellcomecollection.org/image/B0011308/info.json",
       license = Some(License.CCBY),
       credit = Some("Ezra Feilden"),
       locationType = LocationType.IIIFImageAPI
@@ -320,7 +320,7 @@ class MiroRecordTransformerTest
     )
 
     val expectedLocation = DigitalLocation(
-      url = "https://iiif.wellcomecollection.org/image/B0011308.jpg/info.json",
+      url = "https://iiif.wellcomecollection.org/image/B0011308/info.json",
       locationType = LocationType.IIIFImageAPI,
       license = Some(License.CCBY),
       credit = None
@@ -345,7 +345,7 @@ class MiroRecordTransformerTest
     work.data.thumbnail shouldBe Some(
       DigitalLocation(
         url =
-          s"https://iiif.wellcomecollection.org/image/$miroId.jpg/full/300,/0/default.jpg",
+          s"https://iiif.wellcomecollection.org/image/$miroId/full/300,/0/default.jpg",
         locationType = LocationType.ThumbnailImage,
         license = Some(License.CCBY)
       )
