@@ -8,6 +8,8 @@ import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.sierra_adapter.model.Implicits._
 import uk.ac.wellcome.sierra_adapter.model.{
   SierraGenerators,
+  SierraHoldingsNumber,
+  SierraHoldingsRecord,
   SierraItemNumber,
   SierraItemRecord
 }
@@ -46,6 +48,33 @@ class SierraItemsToDynamoFeatureTest
 
           eventually {
             messageSender.getMessages[SierraItemRecord] shouldBe Seq(record)
+
+            store.getLatest(record.id).value.identifiedT shouldBe expectedLink
+          }
+      }
+    }
+  }
+
+  it("reads holdings from SQS, stores the link, and sends the record onward") {
+    val messageSender = new MemoryMessageSender
+
+    val record = createSierraHoldingsRecordWith(
+      bibIds = List(createSierraBibNumber)
+    )
+
+    val expectedLink = Link(record)
+
+    val store = MemoryVersionedStore[SierraHoldingsNumber, Link](
+      initialEntries = Map.empty
+    )
+
+    withLocalSqsQueue() { queue =>
+      withHoldingsWorker(queue, store = store, messageSender = messageSender) {
+        _ =>
+          sendNotificationToSQS(queue, record)
+
+          eventually {
+            messageSender.getMessages[SierraHoldingsRecord] shouldBe Seq(record)
 
             store.getLatest(record.id).value.identifiedT shouldBe expectedLink
           }

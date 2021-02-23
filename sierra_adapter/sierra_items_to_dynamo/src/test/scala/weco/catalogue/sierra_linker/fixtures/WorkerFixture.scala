@@ -12,6 +12,8 @@ import uk.ac.wellcome.monitoring.Metrics
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
 import uk.ac.wellcome.sierra_adapter.model.{
   AbstractSierraRecord,
+  SierraHoldingsNumber,
+  SierraHoldingsRecord,
   SierraItemNumber,
   SierraItemRecord,
   TypedSierraRecordNumber
@@ -60,6 +62,17 @@ trait WorkerFixture extends SQS with Akka {
     messageSender: MemoryMessageSender = new MemoryMessageSender
   )(testWith: TestWith[SierraLinkerWorker[SierraItemNumber, SierraItemRecord, String], R]): R =
     withWorker[SierraItemNumber, SierraItemRecord, R](queue, store, metrics, messageSender) { worker =>
+      testWith(worker)
+    }
+
+  def withHoldingsWorker[R](
+    queue: Queue,
+    store: MemoryVersionedStore[SierraHoldingsNumber, Link] =
+      MemoryVersionedStore[SierraHoldingsNumber, Link](initialEntries = Map.empty),
+    metrics: Metrics[Future] = new MemoryMetrics(),
+    messageSender: MemoryMessageSender = new MemoryMessageSender
+  )(testWith: TestWith[SierraLinkerWorker[SierraHoldingsNumber, SierraHoldingsRecord, String], R]): R =
+    withWorker[SierraHoldingsNumber, SierraHoldingsRecord, R](queue, store, metrics, messageSender) { worker =>
       testWith(worker)
     }
 }
