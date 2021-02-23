@@ -234,11 +234,6 @@ lazy val sierra_items_to_dynamo = setupProject(
   folder = "sierra_adapter/sierra_items_to_dynamo",
   localDependencies = Seq(sierra_adapter_common))
 
-lazy val sierra_holdings_linker = setupProject(
-  project,
-  folder = "sierra_adapter/sierra_holdings_linker",
-  localDependencies = Seq(sierra_adapter_common))
-
 // METS adapter
 
 lazy val mets_adapter = setupProject(

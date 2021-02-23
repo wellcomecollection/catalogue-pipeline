@@ -41,11 +41,3 @@ resource "aws_ecr_repository" "sierra_holdings_merger" {
     prevent_destroy = true
   }
 }
-
-resource "aws_ecr_repository" "sierra_holdings_linker" {
-  name = "${local.repository_prefix}/sierra_holdings_linker"
-
-  lifecycle {
-    prevent_destroy = true
-  }
-}
