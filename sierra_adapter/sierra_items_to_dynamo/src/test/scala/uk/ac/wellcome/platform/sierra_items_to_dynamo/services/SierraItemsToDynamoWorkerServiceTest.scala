@@ -9,7 +9,6 @@ import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
 import uk.ac.wellcome.platform.sierra_items_to_dynamo.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.platform.sierra_items_to_dynamo.merger.SierraItemRecordMerger
-import uk.ac.wellcome.platform.sierra_items_to_dynamo.models.SierraItemLink
 import uk.ac.wellcome.sierra_adapter.model.{
   SierraGenerators,
   SierraItemNumber,
@@ -18,6 +17,7 @@ import uk.ac.wellcome.sierra_adapter.model.{
 import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
 import uk.ac.wellcome.storage.Version
 import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
+import weco.catalogue.sierra_linker.models.Link
 
 class SierraItemsToDynamoWorkerServiceTest
     extends AnyFunSpec
@@ -48,12 +48,12 @@ class SierraItemsToDynamoWorkerServiceTest
     )
 
     val expectedLink = SierraItemRecordMerger
-      .mergeItems(existingLink = SierraItemLink(record1), newRecord = record2)
+      .mergeItems(existingLink = Link(record1), newRecord = record2)
       .get
 
-    val store = MemoryVersionedStore[SierraItemNumber, SierraItemLink](
+    val store = MemoryVersionedStore[SierraItemNumber, Link](
       initialEntries = Map(
-        Version(record1.id, 1) -> SierraItemLink(record1)
+        Version(record1.id, 1) -> Link(record1)
       )
     )
 
@@ -115,9 +115,9 @@ class SierraItemsToDynamoWorkerServiceTest
       bibIds = bibIds2
     )
 
-    val store = MemoryVersionedStore[SierraItemNumber, SierraItemLink](
+    val store = MemoryVersionedStore[SierraItemNumber, Link](
       initialEntries = Map(
-        Version(record2.id, 1) -> SierraItemLink(record2)
+        Version(record2.id, 1) -> Link(record2)
       )
     )
 

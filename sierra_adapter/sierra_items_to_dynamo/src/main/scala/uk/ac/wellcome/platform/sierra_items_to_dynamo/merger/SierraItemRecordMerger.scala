@@ -1,16 +1,16 @@
 package uk.ac.wellcome.platform.sierra_items_to_dynamo.merger
 
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.platform.sierra_items_to_dynamo.models.SierraItemLink
 import uk.ac.wellcome.sierra_adapter.model.SierraItemRecord
+import weco.catalogue.sierra_linker.models.Link
 
 object SierraItemRecordMerger extends Logging {
-  def mergeItems(existingLink: SierraItemLink,
-                 newRecord: SierraItemRecord): Option[SierraItemLink] =
+  def mergeItems(existingLink: Link,
+                 newRecord: SierraItemRecord): Option[Link] =
     if (existingLink.modifiedDate.isBefore(newRecord.modifiedDate) ||
         existingLink.modifiedDate == newRecord.modifiedDate) {
       Some(
-        SierraItemLink(
+        Link(
           modifiedDate = newRecord.modifiedDate,
           bibIds = newRecord.bibIds,
           // Let's suppose we have

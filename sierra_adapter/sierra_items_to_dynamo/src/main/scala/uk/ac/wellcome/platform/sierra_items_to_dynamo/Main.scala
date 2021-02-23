@@ -7,7 +7,6 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import uk.ac.wellcome.platform.sierra_items_to_dynamo.dynamo.Implicits._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
-import uk.ac.wellcome.platform.sierra_items_to_dynamo.models.SierraItemLink
 import uk.ac.wellcome.platform.sierra_items_to_dynamo.services.{
   SierraItemLinkStore,
   SierraItemsToDynamoWorkerService
@@ -17,6 +16,7 @@ import uk.ac.wellcome.storage.store.dynamo.DynamoSingleVersionStore
 import uk.ac.wellcome.storage.typesafe.DynamoBuilder
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
+import weco.catalogue.sierra_linker.models.Link
 
 import scala.concurrent.ExecutionContext
 import scala.language.higherKinds
@@ -31,7 +31,7 @@ object Main extends WellcomeTypesafeApp {
       DynamoBuilder.buildDynamoClient(config)
 
     val versionedStore =
-      new DynamoSingleVersionStore[SierraItemNumber, SierraItemLink](
+      new DynamoSingleVersionStore[SierraItemNumber, Link](
         config = DynamoBuilder.buildDynamoConfig(config)
       )
 
