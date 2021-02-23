@@ -61,7 +61,7 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
           throw e
       }
 
-  def workFromBibRecord(bibRecord: SierraBibRecord): Try[Work[Source]] = {
+  def workFromBibRecord(bibRecord: SierraBibRecord): Try[Work[Source]] =
     fromJson[SierraBibData](bibRecord.data)
       .map { bibData =>
         if (bibData.deleted || bibData.suppressed) {
@@ -89,7 +89,6 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
             data = WorkData()
           )
       }
-  }
 
   def workDataFromBibData(bibId: SierraBibNumber, bibData: SierraBibData) =
     WorkData[DataState.Unidentified](
