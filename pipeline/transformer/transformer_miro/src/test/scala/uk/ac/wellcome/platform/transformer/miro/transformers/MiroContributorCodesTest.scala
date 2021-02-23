@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.transformer.miro.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.platform.transformer.miro.exceptions.ShouldNotTransformException
+import uk.ac.wellcome.platform.transformer.miro.exceptions.ShouldSuppressException
 
 class MiroContributorCodesTest extends AnyFunSpec with Matchers {
   it("looks up a contributor code in the general map") {
@@ -26,10 +26,10 @@ class MiroContributorCodesTest extends AnyFunSpec with Matchers {
   }
 
   it("rejects some images from contributor code GUS") {
-    val caught = intercept[ShouldNotTransformException] {
+    val caught = intercept[ShouldSuppressException] {
       transformer.lookupContributorCode(miroId = "B0009891", code = "GUS")
     }
-    caught.getMessage shouldBe s"Image B0009891 from contributor GUS should not be sent to the pipeline"
+    caught.getMessage shouldBe "we do not expose image_source_code = GUS"
   }
 
   it("allows images from contributor code GUS which aren't on the ban list") {

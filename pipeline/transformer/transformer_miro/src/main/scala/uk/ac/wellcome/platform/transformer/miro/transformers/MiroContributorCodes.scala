@@ -1,10 +1,9 @@
 package uk.ac.wellcome.platform.transformer.miro.transformers
 
-import java.io.InputStream
-
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.platform.transformer.miro.exceptions.ShouldNotTransformException
+import uk.ac.wellcome.platform.transformer.miro.exceptions.ShouldSuppressException
 
+import java.io.InputStream
 import scala.io.Source
 
 trait MiroContributorCodes {
@@ -71,9 +70,7 @@ trait MiroContributorCodes {
     )
 
     if (creditCode == "GUS" && gusMiroIds.contains(miroId)) {
-      throw new ShouldNotTransformException(
-        s"Image $miroId from contributor GUS should not be sent to the pipeline"
-      )
+      throw new ShouldSuppressException("we do not expose image_source_code = GUS")
     }
 
     contributorMap.get(creditCode) match {

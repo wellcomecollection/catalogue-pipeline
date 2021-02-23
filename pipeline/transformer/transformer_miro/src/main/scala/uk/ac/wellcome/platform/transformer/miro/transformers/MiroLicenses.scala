@@ -1,7 +1,10 @@
 package uk.ac.wellcome.platform.transformer.miro.transformers
 
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.platform.transformer.miro.exceptions.ShouldNotTransformException
+import uk.ac.wellcome.platform.transformer.miro.exceptions.{
+  ShouldNotTransformException,
+  ShouldSuppressException
+}
 
 trait MiroLicenses {
 
@@ -26,7 +29,7 @@ trait MiroLicenses {
       // These images need more data.
       case None =>
         throw new ShouldNotTransformException(
-          s"Image $miroId has no usage restriction specified!")
+          "Nothing in the image_use_restrictions field")
 
       case Some(useRestrictions) =>
         useRestrictions match {
@@ -47,11 +50,9 @@ trait MiroLicenses {
           // catalogue data -- for now, explicitly mark these as "do not transform"
           // so they don't end up on the DLQ.
           case "Do not use" =>
-            throw new ShouldNotTransformException(
-              s"Image $miroId has usage restriction 'Do not use'")
+            throw new ShouldSuppressException("image_use_restrictions = 'Do not use'")
           case "Image withdrawn, see notes" =>
-            throw new ShouldNotTransformException(
-              s"Image $miroId has usage restriction 'Image withdrawn'")
+            throw new ShouldSuppressException("image_use_restrictions = 'Image withdrawn, see notes'")
         }
     }
 
