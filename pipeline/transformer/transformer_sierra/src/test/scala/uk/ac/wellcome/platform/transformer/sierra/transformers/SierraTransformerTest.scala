@@ -30,7 +30,7 @@ class SierraTransformerTest
     with SierraTransformableTestBase
     with WorkGenerators {
 
-  it("performs a transformation on a work with physical items") {
+  it("transforms a work with physical items") {
     val itemRecords = List(
       createSierraItemRecord,
       createSierraItemRecord
@@ -60,7 +60,7 @@ class SierraTransformerTest
 
     actualIdentifiers should contain theSameElementsAs expectedIdentifiers
   }
-  it("performs a transformation on a work with empty code in the lang field") {
+  it("transforms a work with empty code in the lang field") {
     val number = createSierraBibNumber
     val data =
       s"""
@@ -219,8 +219,7 @@ class SierraTransformerTest
     )
   }
 
-  it(
-    "does not perform a transformation without bibData, even if some itemData is present") {
+  it("does not transform without bibData, even if some itemData is present") {
     assertTransformReturnsInvisibleWork(
       maybeBibRecord = None,
       Instant.EPOCH,
@@ -228,7 +227,7 @@ class SierraTransformerTest
     )
   }
 
-  it("performs a transformation on a work using all varfields") {
+  it("transforms a work using all varfields") {
     val id = createSierraBibNumber
     val title = "Hi Diddle Dee Dee"
     val lettering = "An actor's life for me"
