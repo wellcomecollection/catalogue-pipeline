@@ -7,6 +7,7 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.internal._
 import WorkState.Source
 import uk.ac.wellcome.models.work.internal.DeletedReason.DeletedFromSource
+import uk.ac.wellcome.models.work.internal.InvisibilityReason.MetsWorksAreNotVisible
 import uk.ac.wellcome.platform.transformer.mets.fixtures.MetsGenerators
 
 class MetsDataTest
@@ -54,7 +55,8 @@ class MetsDataTest
               reason = "METS work"
             )
           )
-        )
+        ),
+        invisibilityReasons = List(MetsWorksAreNotVisible)
       )
   }
 
@@ -118,7 +120,8 @@ class MetsDataTest
               reason = "METS work"
             )
           )
-        )
+        ),
+        invisibilityReasons = List(MetsWorksAreNotVisible)
       )
   }
 

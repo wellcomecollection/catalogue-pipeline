@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils.equalsIgnoreCase
 import uk.ac.wellcome.models.work.internal._
 import WorkState.Source
 import uk.ac.wellcome.models.work.internal.DeletedReason.DeletedFromSource
+import uk.ac.wellcome.models.work.internal.InvisibilityReason.MetsWorksAreNotVisible
 
 case class MetsData(
   recordIdentifier: String,
@@ -48,7 +49,8 @@ case class MetsData(
               thumbnail =
                 thumbnail(sourceIdentifier.value, license, accessStatus),
               imageData = imageData(version, license, accessStatus)
-            )
+            ),
+            invisibilityReasons = List(MetsWorksAreNotVisible)
           )
     }
   }
