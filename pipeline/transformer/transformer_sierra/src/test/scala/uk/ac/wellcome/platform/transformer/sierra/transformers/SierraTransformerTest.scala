@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import java.time.Instant
-
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.generators.WorkGenerators
@@ -22,6 +21,10 @@ import uk.ac.wellcome.sierra_adapter.model.{
 }
 import WorkState.Source
 import org.scalatest.Assertion
+import uk.ac.wellcome.models.work.internal.DeletedReason.{
+  DeletedFromSource,
+  SuppressedFromSource
+}
 
 class SierraTransformerTest
     extends AnyFunSpec
@@ -337,7 +340,7 @@ class SierraTransformerTest
       .languages(expectedLanguages)
   }
 
-  it("makes deleted works invisible") {
+  it("deletes works with 'deleted': true") {
     val id = createSierraBibNumber
     val title = "Hi Diddle Dee Dee"
     val data =
@@ -351,10 +354,13 @@ class SierraTransformerTest
         """.stripMargin
 
     val work = transformDataToWork(id = id, data = data)
-    work shouldBe a[Work.Invisible[_]]
+
+    work shouldBe a[Work.Deleted[_]]
+    val deletedWork = work.asInstanceOf[Work.Deleted[_]]
+    deletedWork.deletedReason shouldBe Some(DeletedFromSource("Sierra"))
   }
 
-  it("makes suppressed works invisible") {
+  it("deletes works with 'suppressed': true")  {
     val id = createSierraBibNumber
     val title = "Hi Diddle Dee Dee"
     val data =
@@ -368,7 +374,10 @@ class SierraTransformerTest
         """.stripMargin
 
     val work = transformDataToWork(id = id, data = data)
-    work shouldBe a[Work.Invisible[_]]
+
+    work shouldBe a[Work.Deleted[_]]
+    val deletedWork = work.asInstanceOf[Work.Deleted[_]]
+    deletedWork.deletedReason shouldBe Some(SuppressedFromSource("Sierra"))
   }
 
   it("transforms bib records that don't have a title") {
@@ -379,8 +388,7 @@ class SierraTransformerTest
       s"""
          |{
          |  "id": "$id",
-         |  "deletedDate": "2017-02-20",
-         |  "deleted": true,
+         |  "deleted": false,
          |  "orders": [],
          |  "locations": [],
          |  "fixedFields": {},
