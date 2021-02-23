@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.sierra_items_to_dynamo.services
+package weco.catalogue.sierra_linker.services
 
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
@@ -7,7 +7,6 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
-import uk.ac.wellcome.platform.sierra_items_to_dynamo.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.sierra_adapter.model.{
   SierraGenerators,
   SierraItemNumber,
@@ -16,16 +15,17 @@ import uk.ac.wellcome.sierra_adapter.model.{
 import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
 import uk.ac.wellcome.storage.Version
 import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
+import weco.catalogue.sierra_linker.fixtures.WorkerFixture
 import weco.catalogue.sierra_linker.models.{Link, LinkOps}
 
-class SierraItemsToDynamoWorkerServiceTest
+class SierraLinkerWorkerTest
     extends AnyFunSpec
     with Matchers
     with Eventually
     with IntegrationPatience
     with ScalaFutures
     with SierraGenerators
-    with WorkerServiceFixture
+    with WorkerFixture
     with SierraAdapterHelpers {
 
   it("reads a Sierra record from SQS and stores it") {
@@ -59,7 +59,7 @@ class SierraItemsToDynamoWorkerServiceTest
     val messageSender = new MemoryMessageSender
 
     withLocalSqsQueue() { queue =>
-      withWorkerService(queue, store, messageSender = messageSender) { _ =>
+      withWorker(queue, store, messageSender = messageSender) { _ =>
         sendNotificationToSQS(queue = queue, message = record2)
 
         eventually {
@@ -78,7 +78,7 @@ class SierraItemsToDynamoWorkerServiceTest
 
     withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>
-        withWorkerService(queue, messageSender = messageSender) { _ =>
+        withWorker(queue, messageSender = messageSender) { _ =>
           (1 to 5).foreach { _ =>
             sendNotificationToSQS(queue = queue, message = record)
           }
@@ -124,7 +124,7 @@ class SierraItemsToDynamoWorkerServiceTest
 
     withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>
-        withWorkerService(queue, store, messageSender = messageSender) { _ =>
+        withWorker(queue, store, messageSender = messageSender) { _ =>
           sendNotificationToSQS(queue = queue, message = record1)
 
           eventually {
@@ -141,7 +141,7 @@ class SierraItemsToDynamoWorkerServiceTest
     val metrics = new MemoryMetrics()
     withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>
-        withWorkerService(queue, metrics = metrics) { _ =>
+        withWorker(queue, metrics = metrics) { _ =>
           val body =
             """
                     |{

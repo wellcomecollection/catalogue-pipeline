@@ -1,42 +1,41 @@
-package uk.ac.wellcome.platform.sierra_items_to_dynamo.fixtures
+package weco.catalogue.sierra_linker.fixtures
 
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
+import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.monitoring.Metrics
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
-import uk.ac.wellcome.platform.sierra_items_to_dynamo.services.SierraItemsToDynamoWorkerService
-import uk.ac.wellcome.sierra_adapter.model.SierraItemNumber
+import uk.ac.wellcome.sierra_adapter.model.{SierraItemNumber, SierraItemRecord}
 import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
 import weco.catalogue.sierra_linker.models.Link
-import weco.catalogue.sierra_linker.services.LinkStore
+import weco.catalogue.sierra_linker.services.{LinkStore, SierraLinkerWorker}
 
 import scala.concurrent.Future
 
-trait WorkerServiceFixture extends SQS with Akka {
+trait WorkerFixture extends SQS with Akka {
 
-  def withWorkerService[R](
+  def withWorker[R](
     queue: Queue,
     store: MemoryVersionedStore[SierraItemNumber, Link] =
-      MemoryVersionedStore[SierraItemNumber, Link](
-        initialEntries = Map.empty),
+      MemoryVersionedStore[SierraItemNumber, Link](initialEntries = Map.empty),
     metrics: Metrics[Future] = new MemoryMetrics(),
     messageSender: MemoryMessageSender = new MemoryMessageSender
-  )(testWith: TestWith[SierraItemsToDynamoWorkerService[String], R]): R =
+  )(testWith: TestWith[SierraLinkerWorker[SierraItemNumber, SierraItemRecord, String], R]): R =
     withActorSystem { implicit actorSystem =>
       withSQSStream[NotificationMessage, R](queue, metrics) { sqsStream =>
-        val workerService = new SierraItemsToDynamoWorkerService[String](
+        val worker = new SierraLinkerWorker(
           sqsStream = sqsStream,
-          itemLinkStore = new LinkStore(store),
+          linkStore = new LinkStore(store),
           messageSender = messageSender
         )
 
-        workerService.run()
+        worker.run()
 
-        testWith(workerService)
+        testWith(worker)
       }
     }
 }

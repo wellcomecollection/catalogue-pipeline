@@ -5,7 +5,6 @@ import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.platform.sierra_items_to_dynamo.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.sierra_adapter.model.Implicits._
 import uk.ac.wellcome.sierra_adapter.model.{
   SierraGenerators,
@@ -14,6 +13,7 @@ import uk.ac.wellcome.sierra_adapter.model.{
 }
 import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
 import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
+import weco.catalogue.sierra_linker.fixtures.WorkerFixture
 import weco.catalogue.sierra_linker.models.Link
 
 class SierraItemsToDynamoFeatureTest
@@ -24,7 +24,7 @@ class SierraItemsToDynamoFeatureTest
     with IntegrationPatience
     with SierraAdapterHelpers
     with SierraGenerators
-    with WorkerServiceFixture {
+    with WorkerFixture {
 
   it("reads items from SQS, stores the link, and sends the record onward") {
     val messageSender = new MemoryMessageSender
@@ -40,7 +40,7 @@ class SierraItemsToDynamoFeatureTest
     )
 
     withLocalSqsQueue() { queue =>
-      withWorkerService(queue, store = store, messageSender = messageSender) {
+      withWorker(queue, store = store, messageSender = messageSender) {
         _ =>
           sendNotificationToSQS(queue, record)
 
