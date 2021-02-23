@@ -102,14 +102,10 @@ class ImageDownloader[Ctx](
                   .toString()
                   .replace(
                     "info.json",
-                    if (uri.authority.host.address() contains "dlcs") {
-                      // DLCS provides a thumbnails service which only serves certain sizes of image.
-                      // Requests for these don't touch the image server and so, as we're performing
-                      // lots of requests, we use 400x400 thumbnails and resize them ourselves later on.
-                      "full/!400,400/0/default.jpg"
-                    } else {
-                      "full/224,224/0/default.jpg"
-                    }
+                    // DLCS provides a thumbnails service which only serves certain sizes of image.
+                    // Requests for these don't touch the image server and so, as we're performing
+                    // lots of requests, we use 400x400 thumbnails and resize them ourselves later on.
+                    "full/!400,400/0/default.jpg"
                   )
               )
             )
