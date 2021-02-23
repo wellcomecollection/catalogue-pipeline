@@ -125,7 +125,7 @@ class SierraTitleTest
       val caught = intercept[ShouldNotTransformException] {
         SierraTitle(bibData)
       }
-      caught.getMessage should startWith("Could not find varField 245!")
+      caught.getMessage should startWith("Could not find field 245 to create title")
     }
 
     it("if there are no subfields a, b or c") {
@@ -140,7 +140,7 @@ class SierraTitleTest
       val caught = intercept[ShouldNotTransformException] {
         SierraTitle(bibData)
       }
-      caught.getMessage should startWith("No fields to construct title!")
+      caught.getMessage should startWith("No subfields in field 245 for constructing the title")
     }
   }
 }

@@ -872,7 +872,7 @@ class SierraTransformerTest
     assertTransformReturnsInvisibleWork(
       maybeBibRecord = Some(bibRecord),
       modifiedDate = bibRecord.modifiedDate,
-      invisibilityReasons = List(UnableToTransform("Could not find varField 245!"))
+      invisibilityReasons = List(UnableToTransform("Could not find field 245 to create title"))
     )
   }
 

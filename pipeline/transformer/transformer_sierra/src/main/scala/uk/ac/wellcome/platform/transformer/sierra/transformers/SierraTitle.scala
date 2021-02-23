@@ -24,7 +24,7 @@ object SierraTitle extends SierraDataTransformer with SierraQueryOps {
     val marc245Field = bibData
       .nonrepeatableVarfieldWithTag("245")
       .getOrElse(
-        throw new ShouldNotTransformException("Could not find varField 245!")
+        throw new ShouldNotTransformException("Could not find field 245 to create title")
       )
 
     val components =
@@ -35,7 +35,7 @@ object SierraTitle extends SierraDataTransformer with SierraQueryOps {
         .map { _.content }
 
     if (components.isEmpty) {
-      throw new ShouldNotTransformException("No fields to construct title!")
+      throw new ShouldNotTransformException("No subfields in field 245 for constructing the title")
     }
 
     Some(components.mkString(" "))
