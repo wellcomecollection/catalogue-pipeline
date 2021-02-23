@@ -20,7 +20,8 @@ locals {
   vhs_calm_read_policy = data.terraform_remote_state.calm_adapter.outputs.vhs_read_policy
 
   # Calm adapter topics
-  calm_adapter_topic_arn = data.terraform_remote_state.calm_adapter.outputs.calm_adapter_topic_arn
+  calm_adapter_topic_arn   = data.terraform_remote_state.calm_adapter.outputs.calm_adapter_topic_arn
+  calm_deletions_topic_arn = data.terraform_remote_state.calm_adapter.outputs.calm_deletions_topic_arn
 
   # Reindexer topics
   miro_reindexer_topic_arn   = data.terraform_remote_state.shared_infra.outputs.catalogue_miro_reindex_topic_arn

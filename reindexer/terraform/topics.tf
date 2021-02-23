@@ -8,3 +8,8 @@ module "calm_reindexer_topic" {
   name                           = "calm_reindexer_topic"
   cross_account_subscription_ids = ["269807742353"]
 }
+
+module "calm_deletion_checker_topic" {
+  source = "github.com/wellcomecollection/terraform-aws-sns-topic.git?ref=v1.0.0"
+  name   = "calm_deletion_checker_topic"
+}
