@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.calm_api_client
 
+import akka.Done
 import weco.catalogue.source_model.calm.CalmRecord
 
 import scala.xml.Elem
@@ -45,4 +46,12 @@ case class CalmSummaryRequest(pos: Int, dbName: String = "Catalog")
       <dbname>{dbName}</dbname>
       <HitLstPos>{pos}</HitLstPos>
     </SummaryHeader>
+}
+
+case object CalmAbandonRequest extends CalmXmlRequest {
+  type Response = Done
+  val action = "Abandon"
+
+  def body: Elem =
+    <Abandon xmlns="http://ds.co.uk/cs/webservices/" />
 }

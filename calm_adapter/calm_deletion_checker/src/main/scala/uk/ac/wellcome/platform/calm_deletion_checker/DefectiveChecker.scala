@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.calm_deletion_checker
 
+import grizzled.slf4j.Logging
 import uk.ac.wellcome.platform.calm_api_client.{
   CalmApiClient,
   CalmQuery,
@@ -65,16 +66,25 @@ trait DefectiveChecker[Item] {
 
 class ApiDeletionChecker(calmApiClient: CalmApiClient)(
   implicit ec: ExecutionContext)
-    extends DefectiveChecker[CalmSourcePayload] {
+    extends DefectiveChecker[CalmSourcePayload]
+    with Logging {
 
   def test(records: Set[CalmSourcePayload]): Future[Int] =
-    calmApiClient
-      .search(
-        records
-          .map(record => CalmQuery.RecordId(record.id))
-          .reduce[CalmQuery](_ or _)
-      )
-      .map {
+    for {
+      session <- calmApiClient
+        .search(
+          records
+            .map(record => CalmQuery.RecordId(record.id))
+            .reduce[CalmQuery](_ or _)
+        )
+      // Performing a search creates a new session which we'll never use.
+      // Abandon it here to give the Calm API a chance.
+      _ <- calmApiClient.abandon(session.cookie).recover {
+        case abandonError =>
+          warn(s"Error abandoning session: ${abandonError.getMessage}")
+      }
+    } yield
+      session match {
         case CalmSession(n, _) if n <= records.size => records.size - n
         case CalmSession(n, _) =>
           throw new RuntimeException(

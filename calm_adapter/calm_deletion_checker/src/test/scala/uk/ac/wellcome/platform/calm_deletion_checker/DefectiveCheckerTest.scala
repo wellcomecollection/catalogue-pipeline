@@ -1,5 +1,8 @@
 package uk.ac.wellcome.platform.calm_deletion_checker
 
+import java.util.concurrent.ConcurrentHashMap
+
+import akka.Done
 import akka.http.scaladsl.model.headers.Cookie
 import org.scalacheck.{Gen, Shrink}
 import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures}
@@ -98,14 +101,57 @@ class DefectiveCheckerTest
     it("performs Calm API searches to count deletions") {
       val nRecords = 10
       withTestCalmApiClient(
-        handleSearch = _ => CalmSession(nRecords, cookie)
+        handleSearch = _ => CalmSession(nRecords, cookie),
+        handleAbandon = _ => Done
       ) { apiClient =>
         val records = (1 to nRecords).map(_ => calmSourcePayload)
         val deletionChecker = new ApiDeletionChecker(apiClient)
 
         whenReady(deletionChecker.defectiveRecords(records.toSet)) { _ =>
-          apiClient.requests should have length 1 // Because all records are deleted
-          every(apiClient.requests.map(_._1)) shouldBe a[CalmSearchRequest]
+          apiClient.requests.collect {
+            case (req: CalmSearchRequest, _) => req
+          } should have length 1
+        }
+      }
+    }
+
+    it("abandons the sessions created by the searches") {
+      val abandonedCookies = new ConcurrentHashMap[Cookie, Unit]()
+      withTestCalmApiClient(
+        handleSearch = _ =>
+          CalmSession(
+            1,
+            Cookie("name", randomAlphanumeric())
+        ),
+        handleAbandon = cookie => {
+          abandonedCookies.put(cookie, ())
+          Done
+        }
+      ) { apiClient =>
+        val records = (1 to 10).map(_ => calmSourcePayload)
+        val deletionChecker = new ApiDeletionChecker(apiClient)
+
+        whenReady(deletionChecker.defectiveRecords(records.toSet)) { _ =>
+          val requestCookies = apiClient.requests.flatMap(_._2)
+          abandonedCookies
+            .keySet()
+            .toArray
+            .toList should contain theSameElementsAs requestCookies
+        }
+      }
+    }
+
+    it("doesn't fail if session abandonment fails") {
+      val nRecords = 10
+      withTestCalmApiClient(
+        handleSearch = _ => CalmSession(nRecords, cookie),
+        handleAbandon = _ => throw new RuntimeException("oops!")
+      ) { apiClient =>
+        val records = (1 to nRecords).map(_ => calmSourcePayload)
+        val deletionChecker = new ApiDeletionChecker(apiClient)
+
+        whenReady(deletionChecker.defectiveRecords(records.toSet)) { result =>
+          result shouldBe a[Set[_]]
         }
       }
     }
@@ -113,7 +159,8 @@ class DefectiveCheckerTest
     it("fails if the count doesn't make sense") {
       val nRecords = 10
       withTestCalmApiClient(
-        handleSearch = _ => CalmSession(nRecords + 1, cookie)
+        handleSearch = _ => CalmSession(nRecords + 1, cookie),
+        handleAbandon = _ => Done
       ) { apiClient =>
         val records = (1 to nRecords).map(_ => calmSourcePayload)
         val deletionChecker = new ApiDeletionChecker(apiClient)
