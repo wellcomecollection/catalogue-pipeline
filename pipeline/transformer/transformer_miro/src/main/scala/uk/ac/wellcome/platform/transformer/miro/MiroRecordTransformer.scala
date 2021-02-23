@@ -121,25 +121,25 @@ class MiroRecordTransformer
           data = data
         )
       }.recover {
-          case e: ShouldSuppressException =>
-            Work.Deleted[Source](
-              version = version,
-              data = WorkData(),
-              state = state,
-              deletedReason = SuppressedFromSource(s"Miro: ${e.getMessage}")
-            )
+        case e: ShouldSuppressException =>
+          Work.Deleted[Source](
+            version = version,
+            data = WorkData(),
+            state = state,
+            deletedReason = SuppressedFromSource(s"Miro: ${e.getMessage}")
+          )
 
-          case e: ShouldNotTransformException =>
-            debug(s"Should not transform: ${e.getMessage}")
-            Work.Invisible[Source](
-              state = state,
-              version = version,
-              data = WorkData(),
-              invisibilityReasons = List(
-                UnableToTransform(s"Miro: ${e.getMessage}")
-              )
+        case e: ShouldNotTransformException =>
+          debug(s"Should not transform: ${e.getMessage}")
+          Work.Invisible[Source](
+            state = state,
+            version = version,
+            data = WorkData(),
+            invisibilityReasons = List(
+              UnableToTransform(s"Miro: ${e.getMessage}")
             )
-        }
+          )
+      }
     }
   }
 }
