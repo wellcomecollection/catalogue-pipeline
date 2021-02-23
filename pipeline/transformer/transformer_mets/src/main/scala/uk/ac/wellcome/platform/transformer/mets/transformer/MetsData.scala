@@ -28,7 +28,9 @@ case class MetsData(
             version = version,
             data = WorkData[DataState.Unidentified](),
             state = Source(sourceIdentifier, modifiedTime),
-            deletedReason = Some(DeletedFromSource("Mets"))))
+            deletedReason = DeletedFromSource("Mets")
+          )
+        )
       case false =>
         for {
           license <- parseLicense

@@ -66,7 +66,7 @@ object CalmTransformer
       state = Source(sourceIdentifier(record), record.retrievedAt),
       data = workData(record).getOrElse(WorkData[DataState.Unidentified]()),
       version = version,
-      deletedReason = Some(reason)
+      deletedReason = reason
     )
 
   private def tryParseValidWork(record: CalmRecord,

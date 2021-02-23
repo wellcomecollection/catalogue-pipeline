@@ -363,8 +363,7 @@ class CalmTransformerTest
     result shouldBe a[Work.Deleted[_]]
     result
       .asInstanceOf[Work.Deleted[_]]
-      .deletedReason
-      .get shouldBe DeletedFromSource("Calm")
+      .deletedReason shouldBe DeletedFromSource("Calm")
   }
 
   it("transforms to deleted work when CatalogueStatus is suppressible") {
@@ -573,7 +572,7 @@ class CalmTransformerTest
           record.retrievedAt
         ),
         version = version,
-        deletedReason = Some(SuppressedFromSource("Calm"))
+        deletedReason = SuppressedFromSource("Calm")
       )
     )
   }

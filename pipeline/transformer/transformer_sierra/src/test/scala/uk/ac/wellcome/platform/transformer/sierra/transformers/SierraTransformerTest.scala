@@ -357,7 +357,7 @@ class SierraTransformerTest
 
     work shouldBe a[Work.Deleted[_]]
     val deletedWork = work.asInstanceOf[Work.Deleted[_]]
-    deletedWork.deletedReason shouldBe Some(DeletedFromSource("Sierra"))
+    deletedWork.deletedReason shouldBe DeletedFromSource("Sierra")
   }
 
   it("deletes works with 'suppressed': true")  {
@@ -377,7 +377,7 @@ class SierraTransformerTest
 
     work shouldBe a[Work.Deleted[_]]
     val deletedWork = work.asInstanceOf[Work.Deleted[_]]
-    deletedWork.deletedReason shouldBe Some(SuppressedFromSource("Sierra"))
+    deletedWork.deletedReason shouldBe SuppressedFromSource("Sierra")
   }
 
   it("transforms bib records that don't have a title") {

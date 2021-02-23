@@ -1,9 +1,9 @@
 package uk.ac.wellcome.models.work.generators
 
 import java.time.Instant
-
 import uk.ac.wellcome.models.work.internal._
 import WorkState._
+import uk.ac.wellcome.models.work.internal.DeletedReason.DeletedFromSource
 
 import scala.util.Random
 
@@ -116,7 +116,7 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
       )
 
     def deleted(
-      deletedReason: Option[DeletedReason] = None): Work.Deleted[State] =
+      deletedReason: DeletedReason = DeletedFromSource("tests")): Work.Deleted[State] =
       Work.Deleted[State](
         state = work.state,
         data = work.data,

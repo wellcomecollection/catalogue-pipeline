@@ -75,7 +75,7 @@ class MetsDataTest
         version = version,
         data = WorkData[DataState.Unidentified](),
         state = Source(expectedSourceIdentifier, createdDate),
-        deletedReason = Some(DeletedFromSource("Mets"))
+        deletedReason = DeletedFromSource("Mets")
       )
 
   }
