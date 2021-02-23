@@ -28,7 +28,9 @@ trait WorkerFixture extends SQS with Akka {
 
   import LinkOps._
 
-  def withWorker[Id <: TypedSierraRecordNumber, Record <: AbstractSierraRecord[Id], R](
+  def withWorker[Id <: TypedSierraRecordNumber,
+                 Record <: AbstractSierraRecord[Id],
+                 R](
     queue: Queue,
     store: MemoryVersionedStore[Id, Link] =
       MemoryVersionedStore[Id, Link](initialEntries = Map.empty),
@@ -60,19 +62,32 @@ trait WorkerFixture extends SQS with Akka {
       MemoryVersionedStore[SierraItemNumber, Link](initialEntries = Map.empty),
     metrics: Metrics[Future] = new MemoryMetrics(),
     messageSender: MemoryMessageSender = new MemoryMessageSender
-  )(testWith: TestWith[SierraLinkerWorker[SierraItemNumber, SierraItemRecord, String], R]): R =
-    withWorker[SierraItemNumber, SierraItemRecord, R](queue, store, metrics, messageSender) { worker =>
+  )(testWith: TestWith[
+      SierraLinkerWorker[SierraItemNumber, SierraItemRecord, String],
+      R]): R =
+    withWorker[SierraItemNumber, SierraItemRecord, R](
+      queue,
+      store,
+      metrics,
+      messageSender) { worker =>
       testWith(worker)
     }
 
   def withHoldingsWorker[R](
     queue: Queue,
     store: MemoryVersionedStore[SierraHoldingsNumber, Link] =
-      MemoryVersionedStore[SierraHoldingsNumber, Link](initialEntries = Map.empty),
+      MemoryVersionedStore[SierraHoldingsNumber, Link](
+        initialEntries = Map.empty),
     metrics: Metrics[Future] = new MemoryMetrics(),
     messageSender: MemoryMessageSender = new MemoryMessageSender
-  )(testWith: TestWith[SierraLinkerWorker[SierraHoldingsNumber, SierraHoldingsRecord, String], R]): R =
-    withWorker[SierraHoldingsNumber, SierraHoldingsRecord, R](queue, store, metrics, messageSender) { worker =>
+  )(testWith: TestWith[
+      SierraLinkerWorker[SierraHoldingsNumber, SierraHoldingsRecord, String],
+      R]): R =
+    withWorker[SierraHoldingsNumber, SierraHoldingsRecord, R](
+      queue,
+      store,
+      metrics,
+      messageSender) { worker =>
       testWith(worker)
     }
 }

@@ -76,24 +76,26 @@ class SierraLinkerWorkerTest
 
     val messageSender = new MemoryMessageSender
 
-    val store = MemoryVersionedStore[SierraItemNumber, Link](initialEntries = Map.empty)
+    val store =
+      MemoryVersionedStore[SierraItemNumber, Link](initialEntries = Map.empty)
 
     withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>
-        withItemWorker(queue, store = store, messageSender = messageSender) { _ =>
-          (1 to 5).foreach { _ =>
-            sendNotificationToSQS(queue = queue, message = record)
-          }
-
-          eventually {
-            assertQueueEmpty(queue)
-            assertQueueEmpty(dlq)
-
-            messageSender.getMessages[SierraItemRecord] shouldBe (1 to 5).map {
-              _ =>
-                record
+        withItemWorker(queue, store = store, messageSender = messageSender) {
+          _ =>
+            (1 to 5).foreach { _ =>
+              sendNotificationToSQS(queue = queue, message = record)
             }
-          }
+
+            eventually {
+              assertQueueEmpty(queue)
+              assertQueueEmpty(dlq)
+
+              messageSender
+                .getMessages[SierraItemRecord] shouldBe (1 to 5).map { _ =>
+                record
+              }
+            }
         }
     }
   }
@@ -142,7 +144,8 @@ class SierraLinkerWorkerTest
   it("records a failure if it receives an invalid message") {
     val metrics = new MemoryMetrics()
 
-    val store = MemoryVersionedStore[SierraItemNumber, Link](initialEntries = Map.empty)
+    val store =
+      MemoryVersionedStore[SierraItemNumber, Link](initialEntries = Map.empty)
 
     withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>

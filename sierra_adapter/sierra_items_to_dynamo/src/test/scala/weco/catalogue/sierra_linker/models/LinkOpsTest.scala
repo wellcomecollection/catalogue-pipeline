@@ -2,15 +2,9 @@ package weco.catalogue.sierra_linker.models
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.sierra_adapter.model.{
-  SierraGenerators,
-  SierraItemRecord
-}
+import uk.ac.wellcome.sierra_adapter.model.{SierraGenerators, SierraItemRecord}
 
-class LinkOpsTest
-    extends AnyFunSpec
-    with Matchers
-    with SierraGenerators {
+class LinkOpsTest extends AnyFunSpec with Matchers with SierraGenerators {
 
   val linkOps: LinkOps[SierraItemRecord] = LinkOps.itemLinksOps
 
@@ -28,9 +22,7 @@ class LinkOpsTest
 
     val mergedRecord =
       linkOps
-        .updateLink(
-          existingLink = Link(existingRecord),
-          newRecord = newRecord)
+        .updateLink(existingLink = Link(existingRecord), newRecord = newRecord)
         .get
     mergedRecord.bibIds shouldBe bibIds
     mergedRecord.unlinkedBibIds shouldBe List()
@@ -51,9 +43,7 @@ class LinkOpsTest
 
     val mergedRecord =
       linkOps
-        .updateLink(
-          existingLink = Link(existingRecord),
-          newRecord = newRecord)
+        .updateLink(existingLink = Link(existingRecord), newRecord = newRecord)
         .get
     mergedRecord.bibIds shouldBe bibIds.slice(2, 5)
     mergedRecord.unlinkedBibIds shouldBe bibIds.slice(0, 2)
@@ -75,9 +65,7 @@ class LinkOpsTest
 
     val mergedRecord =
       linkOps
-        .updateLink(
-          existingLink = Link(existingRecord),
-          newRecord = newRecord)
+        .updateLink(existingLink = Link(existingRecord), newRecord = newRecord)
         .get
     mergedRecord.unlinkedBibIds should contain theSameElementsAs existingRecord.unlinkedBibIds
   }
@@ -99,9 +87,7 @@ class LinkOpsTest
 
     val mergedRecord =
       linkOps
-        .updateLink(
-          existingLink = Link(existingRecord),
-          newRecord = newRecord)
+        .updateLink(existingLink = Link(existingRecord), newRecord = newRecord)
         .get
     mergedRecord.bibIds shouldBe bibIds.slice(0, 2)
     mergedRecord.unlinkedBibIds shouldBe List(bibIds(2))
@@ -123,9 +109,7 @@ class LinkOpsTest
 
     val mergedRecord =
       linkOps
-        .updateLink(
-          existingLink = Link(existingRecord),
-          newRecord = newRecord)
+        .updateLink(existingLink = Link(existingRecord), newRecord = newRecord)
         .get
     mergedRecord.bibIds shouldBe bibIds.slice(0, 2)
     mergedRecord.unlinkedBibIds shouldBe List(bibIds(2))

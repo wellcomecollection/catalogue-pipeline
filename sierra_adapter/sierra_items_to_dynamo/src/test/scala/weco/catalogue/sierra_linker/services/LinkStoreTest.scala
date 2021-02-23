@@ -27,8 +27,8 @@ class LinkStoreTest
     with SierraAdapterHelpers {
 
   it("inserts an ItemRecord into the VHS") {
-    implicit val store = MemoryVersionedStore[SierraItemNumber, Link](
-      initialEntries = Map.empty)
+    implicit val store =
+      MemoryVersionedStore[SierraItemNumber, Link](initialEntries = Map.empty)
     val linkStore = new LinkStore(store)
 
     val record = createSierraItemRecord
@@ -187,8 +187,7 @@ class LinkStoreTest
 
     val brokenStore = new MemoryVersionedStore(
       new MemoryStore[Version[SierraItemNumber, Int], Link](
-        initialEntries = Map.empty)
-      with MemoryMaxima[SierraItemNumber, Link]
+        initialEntries = Map.empty) with MemoryMaxima[SierraItemNumber, Link]
     ) {
       override def upsert(id: SierraItemNumber)(t: Link)(
         f: UpdateFunction): UpdateEither =
@@ -205,14 +204,12 @@ class LinkStoreTest
   private def assertStored(id: SierraItemNumber,
                            record: SierraItemRecord,
                            version: Int)(
-    implicit store: MemoryVersionedStore[SierraItemNumber, Link])
-    : Assertion =
+    implicit store: MemoryVersionedStore[SierraItemNumber, Link]): Assertion =
     store.getLatest(id).value shouldBe Identified(
       Version(record.id, version),
       Link(record))
 
   private def assertStored(record: SierraItemRecord, version: Int)(
-    implicit store: MemoryVersionedStore[SierraItemNumber, Link])
-    : Assertion =
+    implicit store: MemoryVersionedStore[SierraItemNumber, Link]): Assertion =
     assertStored(id = record.id, record = record, version = version)
 }

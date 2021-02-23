@@ -116,7 +116,8 @@ class SierraReaderWorkerService(
     }
   }
 
-  private def createRecord: (String, String, Instant) => AbstractSierraRecord[_] =
+  private def createRecord
+    : (String, String, Instant) => AbstractSierraRecord[_] =
     readerConfig.resourceType match {
       case SierraResourceTypes.bibs     => SierraBibRecord.apply
       case SierraResourceTypes.items    => SierraItemRecord.apply

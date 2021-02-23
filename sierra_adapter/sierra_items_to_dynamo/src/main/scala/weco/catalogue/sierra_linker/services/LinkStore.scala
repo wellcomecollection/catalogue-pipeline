@@ -8,13 +8,13 @@ import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.storage.{Identified, UpdateNotApplied}
 import weco.catalogue.sierra_linker.models.{Link, LinkOps}
 
-class LinkStore[Id <: TypedSierraRecordNumber, Record <: AbstractSierraRecord[Id]](
+class LinkStore[Id <: TypedSierraRecordNumber,
+                Record <: AbstractSierraRecord[Id]](
   store: VersionedStore[Id, Int, Link]
 )(
   implicit linkOps: LinkOps[Record]
 ) {
-  def update(newRecord: Record)
-    : Either[Throwable, Option[Record]] = {
+  def update(newRecord: Record): Either[Throwable, Option[Record]] = {
     val newLink = linkOps.createLink(newRecord)
 
     val upsertResult: store.UpdateEither =
@@ -30,9 +30,10 @@ class LinkStore[Id <: TypedSierraRecordNumber, Record <: AbstractSierraRecord[Id
 
     upsertResult match {
       case Right(Identified(_, updatedLink)) =>
-        Right(Some(
-          linkOps.copyUnlinkedBibIds(updatedLink, newRecord)
-        ))
+        Right(
+          Some(
+            linkOps.copyUnlinkedBibIds(updatedLink, newRecord)
+          ))
 
       case Left(_: UpdateNotApplied) => Right(None)
       case Left(err)                 => Left(err.e)
