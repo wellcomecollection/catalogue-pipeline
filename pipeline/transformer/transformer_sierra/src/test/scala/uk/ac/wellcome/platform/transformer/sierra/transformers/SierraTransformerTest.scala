@@ -25,6 +25,10 @@ import uk.ac.wellcome.models.work.internal.DeletedReason.{
   DeletedFromSource,
   SuppressedFromSource
 }
+import uk.ac.wellcome.models.work.internal.InvisibilityReason.{
+  SourceFieldMissing,
+  UnableToTransform
+}
 
 class SierraTransformerTest
     extends AnyFunSpec
@@ -219,7 +223,8 @@ class SierraTransformerTest
   it("returns an InvisibleWork if there isn't any bib data") {
     assertTransformReturnsInvisibleWork(
       maybeBibRecord = None,
-      modifiedDate = Instant.EPOCH
+      modifiedDate = Instant.EPOCH,
+      invisibilityReasons = List(SourceFieldMissing("bibData"))
     )
   }
 
@@ -227,7 +232,8 @@ class SierraTransformerTest
     assertTransformReturnsInvisibleWork(
       maybeBibRecord = None,
       modifiedDate = Instant.EPOCH,
-      itemRecords = List(createSierraItemRecord)
+      itemRecords = List(createSierraItemRecord),
+      invisibilityReasons = List(SourceFieldMissing("bibData"))
     )
   }
 
@@ -865,7 +871,8 @@ class SierraTransformerTest
 
     assertTransformReturnsInvisibleWork(
       maybeBibRecord = Some(bibRecord),
-      modifiedDate = bibRecord.modifiedDate
+      modifiedDate = bibRecord.modifiedDate,
+      invisibilityReasons = List(UnableToTransform("Could not find varField 245!"))
     )
   }
 
@@ -985,7 +992,8 @@ class SierraTransformerTest
   private def assertTransformReturnsInvisibleWork(
     maybeBibRecord: Option[SierraBibRecord],
     modifiedDate: Instant,
-    itemRecords: List[SierraItemRecord] = List()): Assertion = {
+    itemRecords: List[SierraItemRecord] = List(),
+    invisibilityReasons: List[InvisibilityReason]): Assertion = {
     val id = createSierraBibNumber
 
     val sierraTransformable = createSierraTransformableWith(
@@ -1006,7 +1014,8 @@ class SierraTransformerTest
         modifiedDate
       ),
       version = 1,
-      data = WorkData()
+      data = WorkData(),
+      invisibilityReasons = invisibilityReasons
     )
   }
 

@@ -29,6 +29,7 @@ import uk.ac.wellcome.models.work.internal.DeletedReason.{
   DeletedFromSource,
   SuppressedFromSource
 }
+import uk.ac.wellcome.models.work.internal.InvisibilityReason.{SourceFieldMissing, UnableToTransform}
 
 class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
     extends Logging {
@@ -48,7 +49,8 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
           Work.Invisible[Source](
             state = Source(sourceIdentifier, Instant.EPOCH),
             version = version,
-            data = WorkData()
+            data = WorkData(),
+            invisibilityReasons = List(SourceFieldMissing("bibData"))
           )
         )
       }
@@ -101,7 +103,8 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
           Work.Invisible[Source](
             state = state,
             version = version,
-            data = WorkData()
+            data = WorkData(),
+            invisibilityReasons = List(UnableToTransform(e.getMessage))
           )
       }
   }

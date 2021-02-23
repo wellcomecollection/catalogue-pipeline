@@ -7,4 +7,5 @@ object InvisibilityReason {
   case class SourceFieldMissing(info: String) extends InvisibilityReason
   case class InvalidValueInSourceField(info: String) extends InvisibilityReason
   case object UnlinkedHistoricalLibraryMiro extends InvisibilityReason
+  case class UnableToTransform(message: String) extends InvisibilityReason
 }
