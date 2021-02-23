@@ -215,14 +215,14 @@ class SierraTransformerTest
   it("returns an InvisibleWork if there isn't any bib data") {
     assertTransformReturnsInvisibleWork(
       maybeBibRecord = None,
-      Instant.EPOCH
+      modifiedDate = Instant.EPOCH
     )
   }
 
   it("does not transform without bibData, even if some itemData is present") {
     assertTransformReturnsInvisibleWork(
       maybeBibRecord = None,
-      Instant.EPOCH,
+      modifiedDate = Instant.EPOCH,
       itemRecords = List(createSierraItemRecord)
     )
   }
@@ -856,7 +856,7 @@ class SierraTransformerTest
 
     assertTransformReturnsInvisibleWork(
       maybeBibRecord = Some(bibRecord),
-      bibRecord.modifiedDate
+      modifiedDate = bibRecord.modifiedDate
     )
   }
 
