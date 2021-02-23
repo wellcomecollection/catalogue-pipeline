@@ -1,47 +1,28 @@
 package uk.ac.wellcome.models.work.internal
 
 import enumeratum.{Enum, EnumEntry}
-import io.circe.{Decoder, Encoder, Json}
+import io.circe.{Decoder, Encoder}
 
 sealed trait Format extends EnumEntry {
   val id: String
   val label: String
+
+  override lazy val entryName: String = id
 }
 
 object Format extends Enum[Format] {
   val values = findValues
 
-  implicit val formatEncoder: Encoder[Format] = Encoder.instance[Format] {
-    format =>
-      Json.obj(
-        ("id", Json.fromString(format.id)),
-        ("label", Json.fromString(format.label))
-      )
-  }
+  implicit val formatEncoder: Encoder[Format] =
+    Encoder.forProduct2("id", "label")(format => (format.id, format.label))
 
   implicit val formatDecoder: Decoder[Format] =
-    Decoder.decodeJsonObject.emap { json =>
-      val maybeFormat = for {
-        idJson <- json("id")
-        id <- idJson.asString
-        format <- fromCode(id)
-      } yield format
-      maybeFormat.toRight(s"Invalid Format json $json")
-    }
-
-  private lazy val formatIdIndex: Map[String, Format] = {
-    val idPairs = values.map { format =>
-      format.id -> format
-    }
-
-    // Check we don't have any duplicate IDs
-    assert(idPairs.toMap.size == idPairs.size)
-
-    idPairs.toMap
-  }
+    Decoder.forProduct2("id", "label")(
+      (id: String, _: String) => Format.withName(id)
+    )
 
   def fromCode(id: String): Option[Format] =
-    formatIdIndex.get(id)
+    Format.withNameOption(id)
 
   sealed trait Unlinked extends Format
   sealed trait Linked extends Format {

@@ -1,11 +1,13 @@
 package uk.ac.wellcome.models.work.internal
 
 import enumeratum.{Enum, EnumEntry}
-import io.circe.{Decoder, Encoder, Json}
+import io.circe.{Decoder, Encoder}
 
 sealed trait LocationType extends EnumEntry {
   val id: String
   val label: String
+
+  override lazy val entryName: String = id
 }
 
 sealed trait PhysicalLocationType extends LocationType
@@ -15,11 +17,7 @@ object LocationType extends Enum[LocationType] {
   val values = findValues
 
   implicit val locationTypeEncoder: Encoder[LocationType] =
-    Encoder.instance[LocationType] { locationType =>
-      Json.obj(
-        ("id", Json.fromString(locationType.id))
-      )
-    }
+    Encoder.forProduct1("id")(_.id)
 
   implicit val physicalLocationTypeEncoder: Encoder[PhysicalLocationType] =
     locType => locationTypeEncoder.apply(locType)
@@ -27,28 +25,8 @@ object LocationType extends Enum[LocationType] {
   implicit val digitalLocationTypeEncoder: Encoder[DigitalLocationType] =
     locType => locationTypeEncoder.apply(locType)
 
-  private val locationTypeIdMap = {
-    val idPairs = values.map { locationType =>
-      locationType.id -> locationType
-    }
-
-    // Check we don't have any duplicate IDs
-    assert(idPairs.toMap.size == idPairs.size)
-
-    idPairs.toMap
-  }
-
   implicit val locationTypeDecoder: Decoder[LocationType] =
-    Decoder.instance[LocationType] { cursor =>
-      for {
-        id <- cursor.downField("id").as[String]
-      } yield {
-        locationTypeIdMap.getOrElse(
-          id,
-          throw new Exception(s"$id is not a valid LocationType ID")
-        )
-      }
-    }
+    Decoder.forProduct1("id")(LocationType.withName)
 
   implicit val physicalLocationTypeDecoder: Decoder[PhysicalLocationType] =
     cursor =>
