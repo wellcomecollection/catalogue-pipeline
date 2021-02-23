@@ -116,7 +116,7 @@ trait SierraGenerators extends RandomGenerators {
     )
   }
 
-  private def defaultData(id: SierraTypedRecordNumber,
+  private def defaultData(id: TypedSierraRecordNumber,
                           modifiedDate: Instant,
                           bibIds: List[SierraBibNumber]): String =
     s"""

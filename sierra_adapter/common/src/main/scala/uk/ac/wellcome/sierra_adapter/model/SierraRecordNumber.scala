@@ -19,7 +19,7 @@ trait SierraRecordNumber {
   def withoutCheckDigit: String = recordNumber
 }
 
-sealed trait SierraTypedRecordNumber extends SierraRecordNumber {
+sealed trait TypedSierraRecordNumber extends SierraRecordNumber {
   val recordType: SierraRecordTypes.Value
 
   /** Returns the ID with the check digit and prefix. */
@@ -67,16 +67,16 @@ case class UntypedSierraRecordNumber(recordNumber: String)
     extends SierraRecordNumber
 
 case class SierraBibNumber(recordNumber: String)
-    extends SierraTypedRecordNumber {
+    extends TypedSierraRecordNumber {
   val recordType: SierraRecordTypes.Value = SierraRecordTypes.bibs
 }
 
 case class SierraItemNumber(recordNumber: String)
-    extends SierraTypedRecordNumber {
+    extends TypedSierraRecordNumber {
   val recordType: SierraRecordTypes.Value = SierraRecordTypes.items
 }
 
 case class SierraHoldingsNumber(recordNumber: String)
-    extends SierraTypedRecordNumber {
+    extends TypedSierraRecordNumber {
   val recordType: SierraRecordTypes.Value = SierraRecordTypes.holdings
 }
