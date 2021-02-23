@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.transformer.sierra
 
 import java.time.Instant
-
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.exceptions.JsonDecodingError
 import uk.ac.wellcome.models.work.internal._
@@ -26,6 +25,14 @@ import uk.ac.wellcome.sierra_adapter.model.{
 
 import scala.util.{Failure, Success, Try}
 import WorkState.Source
+import uk.ac.wellcome.models.work.internal.DeletedReason.{
+  DeletedFromSource,
+  SuppressedFromSource
+}
+import uk.ac.wellcome.models.work.internal.InvisibilityReason.{
+  SourceFieldMissing,
+  UnableToTransform
+}
 
 class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
     extends Logging {
@@ -45,7 +52,8 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
           Work.Invisible[Source](
             state = Source(sourceIdentifier, Instant.EPOCH),
             version = version,
-            data = WorkData()
+            data = WorkData(),
+            invisibilityReasons = List(SourceFieldMissing("bibData"))
           )
         )
       }
@@ -61,20 +69,32 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
           throw e
       }
 
-  def workFromBibRecord(bibRecord: SierraBibRecord): Try[Work[Source]] =
+  def workFromBibRecord(bibRecord: SierraBibRecord): Try[Work[Source]] = {
+    val state = Source(sourceIdentifier, bibRecord.modifiedDate)
+
     fromJson[SierraBibData](bibRecord.data)
       .map { bibData =>
-        if (bibData.deleted || bibData.suppressed) {
-          throw new ShouldNotTransformException(
-            s"Sierra record $bibId is either deleted or suppressed!"
+        if (bibData.deleted) {
+          Work.Deleted[Source](
+            version = version,
+            state = state,
+            deletedReason = DeletedFromSource("Sierra"),
+            data = WorkData()
+          )
+        } else if (bibData.suppressed) {
+          Work.Deleted[Source](
+            version = version,
+            state = state,
+            deletedReason = SuppressedFromSource("Sierra"),
+            data = WorkData()
+          )
+        } else {
+          Work.Visible[Source](
+            version = version,
+            state = state,
+            data = workDataFromBibData(bibId, bibData)
           )
         }
-        val data = workDataFromBibData(bibId, bibData)
-        Work.Visible[Source](
-          version = version,
-          state = Source(sourceIdentifier, bibRecord.modifiedDate),
-          data = data
-        )
       }
       .recover {
         case e: JsonDecodingError =>
@@ -84,11 +104,13 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
         case e: ShouldNotTransformException =>
           debug(s"Should not transform $bibId: ${e.getMessage}")
           Work.Invisible[Source](
-            state = Source(sourceIdentifier, bibRecord.modifiedDate),
+            state = state,
             version = version,
-            data = WorkData()
+            data = WorkData(),
+            invisibilityReasons = List(UnableToTransform(e.getMessage))
           )
       }
+  }
 
   def workDataFromBibData(bibId: SierraBibNumber, bibData: SierraBibData) =
     WorkData[DataState.Unidentified](

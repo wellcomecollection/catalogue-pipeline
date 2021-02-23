@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import java.time.Instant
-
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.generators.WorkGenerators
@@ -22,6 +21,14 @@ import uk.ac.wellcome.sierra_adapter.model.{
 }
 import WorkState.Source
 import org.scalatest.Assertion
+import uk.ac.wellcome.models.work.internal.DeletedReason.{
+  DeletedFromSource,
+  SuppressedFromSource
+}
+import uk.ac.wellcome.models.work.internal.InvisibilityReason.{
+  SourceFieldMissing,
+  UnableToTransform
+}
 
 class SierraTransformerTest
     extends AnyFunSpec
@@ -216,7 +223,8 @@ class SierraTransformerTest
   it("returns an InvisibleWork if there isn't any bib data") {
     assertTransformReturnsInvisibleWork(
       maybeBibRecord = None,
-      modifiedDate = Instant.EPOCH
+      modifiedDate = Instant.EPOCH,
+      invisibilityReasons = List(SourceFieldMissing("bibData"))
     )
   }
 
@@ -224,7 +232,8 @@ class SierraTransformerTest
     assertTransformReturnsInvisibleWork(
       maybeBibRecord = None,
       modifiedDate = Instant.EPOCH,
-      itemRecords = List(createSierraItemRecord)
+      itemRecords = List(createSierraItemRecord),
+      invisibilityReasons = List(SourceFieldMissing("bibData"))
     )
   }
 
@@ -337,7 +346,7 @@ class SierraTransformerTest
       .languages(expectedLanguages)
   }
 
-  it("makes deleted works invisible") {
+  it("deletes works with 'deleted': true") {
     val id = createSierraBibNumber
     val title = "Hi Diddle Dee Dee"
     val data =
@@ -351,10 +360,13 @@ class SierraTransformerTest
         """.stripMargin
 
     val work = transformDataToWork(id = id, data = data)
-    work shouldBe a[Work.Invisible[_]]
+
+    work shouldBe a[Work.Deleted[_]]
+    val deletedWork = work.asInstanceOf[Work.Deleted[_]]
+    deletedWork.deletedReason shouldBe DeletedFromSource("Sierra")
   }
 
-  it("makes suppressed works invisible") {
+  it("deletes works with 'suppressed': true") {
     val id = createSierraBibNumber
     val title = "Hi Diddle Dee Dee"
     val data =
@@ -368,7 +380,10 @@ class SierraTransformerTest
         """.stripMargin
 
     val work = transformDataToWork(id = id, data = data)
-    work shouldBe a[Work.Invisible[_]]
+
+    work shouldBe a[Work.Deleted[_]]
+    val deletedWork = work.asInstanceOf[Work.Deleted[_]]
+    deletedWork.deletedReason shouldBe SuppressedFromSource("Sierra")
   }
 
   it("transforms bib records that don't have a title") {
@@ -379,8 +394,7 @@ class SierraTransformerTest
       s"""
          |{
          |  "id": "$id",
-         |  "deletedDate": "2017-02-20",
-         |  "deleted": true,
+         |  "deleted": false,
          |  "orders": [],
          |  "locations": [],
          |  "fixedFields": {},
@@ -857,7 +871,9 @@ class SierraTransformerTest
 
     assertTransformReturnsInvisibleWork(
       maybeBibRecord = Some(bibRecord),
-      modifiedDate = bibRecord.modifiedDate
+      modifiedDate = bibRecord.modifiedDate,
+      invisibilityReasons =
+        List(UnableToTransform("Could not find field 245 to create title"))
     )
   }
 
@@ -977,7 +993,8 @@ class SierraTransformerTest
   private def assertTransformReturnsInvisibleWork(
     maybeBibRecord: Option[SierraBibRecord],
     modifiedDate: Instant,
-    itemRecords: List[SierraItemRecord] = List()): Assertion = {
+    itemRecords: List[SierraItemRecord] = List(),
+    invisibilityReasons: List[InvisibilityReason]): Assertion = {
     val id = createSierraBibNumber
 
     val sierraTransformable = createSierraTransformableWith(
@@ -998,7 +1015,8 @@ class SierraTransformerTest
         modifiedDate
       ),
       version = 1,
-      data = WorkData()
+      data = WorkData(),
+      invisibilityReasons = invisibilityReasons
     )
   }
 

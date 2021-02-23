@@ -65,7 +65,7 @@ object Work {
     version: Int,
     data: WorkData[State#WorkDataState],
     state: State,
-    deletedReason: Option[DeletedReason] = None,
+    deletedReason: DeletedReason,
   ) extends Work[State]
 }
 

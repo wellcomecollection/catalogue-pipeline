@@ -3,7 +3,10 @@ package uk.ac.wellcome.platform.transformer.miro.transformers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.internal.License
-import uk.ac.wellcome.platform.transformer.miro.exceptions.ShouldNotTransformException
+import uk.ac.wellcome.platform.transformer.miro.exceptions.{
+  ShouldNotTransformException,
+  ShouldSuppressException
+}
 
 class MiroLicensesTest extends AnyFunSpec with Matchers {
   it("finds a recognised license") {
@@ -15,13 +18,13 @@ class MiroLicensesTest extends AnyFunSpec with Matchers {
   }
 
   it("rejects restrictions 'Do not use'") {
-    intercept[ShouldNotTransformException] {
+    intercept[ShouldSuppressException] {
       chooseLicense(Some("Do not use"))
     }
   }
 
   it("rejects restrictions 'Image withdrawn, see notes'") {
-    intercept[ShouldNotTransformException] {
+    intercept[ShouldSuppressException] {
       chooseLicense(Some("Image withdrawn, see notes"))
     }
   }

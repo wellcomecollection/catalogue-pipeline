@@ -66,7 +66,7 @@ object CalmTransformer
       state = Source(sourceIdentifier(record), record.retrievedAt),
       data = workData(record).getOrElse(WorkData[DataState.Unidentified]()),
       version = version,
-      deletedReason = Some(reason)
+      deletedReason = reason
     )
 
   private def tryParseValidWork(record: CalmRecord,
@@ -109,10 +109,11 @@ object CalmTransformer
   private def knownErrToUntransformableReason(
     err: CalmTransformerException): InvisibilityReason =
     err match {
-      case TitleMissing      => SourceFieldMissing("Calm:Title")
-      case RefNoMissing      => SourceFieldMissing("Calm:RefNo")
-      case LevelMissing      => SourceFieldMissing("Calm:Level")
-      case UnrecognisedLevel => InvalidValueInSourceField("Calm:Level")
+      case TitleMissing => SourceFieldMissing("Calm:Title")
+      case RefNoMissing => SourceFieldMissing("Calm:RefNo")
+      case LevelMissing => SourceFieldMissing("Calm:Level")
+      case UnrecognisedLevel(level) =>
+        InvalidValueInSourceField(s"Calm:Level - $level")
     }
 
   def shouldSuppress(record: CalmRecord): Boolean =
@@ -237,7 +238,7 @@ object CalmTransformer
         case "piece"            => Right(WorkType.Standard)
         case level =>
           warn(s"${record.id} has an unrecognised level: $level")
-          Left(UnrecognisedLevel)
+          Left(UnrecognisedLevel(level))
       }
       .getOrElse(Left(LevelMissing))
 
