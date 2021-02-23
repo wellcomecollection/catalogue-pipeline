@@ -40,7 +40,7 @@ class SierraItemsToDynamoFeatureTest
     )
 
     withLocalSqsQueue() { queue =>
-      withWorker(queue, store = store, messageSender = messageSender) {
+      withItemWorker(queue, store = store, messageSender = messageSender) {
         _ =>
           sendNotificationToSQS(queue, record)
 

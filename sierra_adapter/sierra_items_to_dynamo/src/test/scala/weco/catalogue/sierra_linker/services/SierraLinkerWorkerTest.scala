@@ -59,7 +59,7 @@ class SierraLinkerWorkerTest
     val messageSender = new MemoryMessageSender
 
     withLocalSqsQueue() { queue =>
-      withWorker(queue, store, messageSender = messageSender) { _ =>
+      withItemWorker(queue, store, messageSender = messageSender) { _ =>
         sendNotificationToSQS(queue = queue, message = record2)
 
         eventually {
@@ -76,9 +76,11 @@ class SierraLinkerWorkerTest
 
     val messageSender = new MemoryMessageSender
 
+    val store = MemoryVersionedStore[SierraItemNumber, Link](initialEntries = Map.empty)
+
     withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>
-        withWorker(queue, messageSender = messageSender) { _ =>
+        withItemWorker(queue, store = store, messageSender = messageSender) { _ =>
           (1 to 5).foreach { _ =>
             sendNotificationToSQS(queue = queue, message = record)
           }
@@ -124,7 +126,7 @@ class SierraLinkerWorkerTest
 
     withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>
-        withWorker(queue, store, messageSender = messageSender) { _ =>
+        withItemWorker(queue, store, messageSender = messageSender) { _ =>
           sendNotificationToSQS(queue = queue, message = record1)
 
           eventually {
@@ -139,9 +141,12 @@ class SierraLinkerWorkerTest
 
   it("records a failure if it receives an invalid message") {
     val metrics = new MemoryMetrics()
+
+    val store = MemoryVersionedStore[SierraItemNumber, Link](initialEntries = Map.empty)
+
     withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>
-        withWorker(queue, metrics = metrics) { _ =>
+        withItemWorker(queue, store = store, metrics = metrics) { _ =>
           val body =
             """
                     |{
