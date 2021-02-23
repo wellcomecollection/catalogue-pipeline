@@ -8,7 +8,6 @@ import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
 import uk.ac.wellcome.platform.sierra_items_to_dynamo.fixtures.WorkerServiceFixture
-import uk.ac.wellcome.platform.sierra_items_to_dynamo.merger.SierraItemRecordMerger
 import uk.ac.wellcome.sierra_adapter.model.{
   SierraGenerators,
   SierraItemNumber,
@@ -17,7 +16,7 @@ import uk.ac.wellcome.sierra_adapter.model.{
 import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
 import uk.ac.wellcome.storage.Version
 import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
-import weco.catalogue.sierra_linker.models.Link
+import weco.catalogue.sierra_linker.models.{Link, LinkOps}
 
 class SierraItemsToDynamoWorkerServiceTest
     extends AnyFunSpec
@@ -47,8 +46,8 @@ class SierraItemsToDynamoWorkerServiceTest
       bibIds = bibIds2
     )
 
-    val expectedLink = SierraItemRecordMerger
-      .mergeItems(existingLink = Link(record1), newRecord = record2)
+    val expectedLink = LinkOps.itemLinksOps
+      .updateLink(existingLink = Link(record1), newRecord = record2)
       .get
 
     val store = MemoryVersionedStore[SierraItemNumber, Link](

@@ -1,14 +1,19 @@
-package uk.ac.wellcome.platform.sierra_items_to_dynamo.merger
+package weco.catalogue.sierra_linker.models
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.sierra_adapter.model.SierraGenerators
-import weco.catalogue.sierra_linker.models.Link
+import uk.ac.wellcome.sierra_adapter.model.{
+  SierraGenerators,
+  SierraItemNumber,
+  SierraItemRecord
+}
 
-class SierraItemRecordMergerTest
+class LinkOpsTest
     extends AnyFunSpec
     with Matchers
     with SierraGenerators {
+
+  val linkOps: LinkOps[SierraItemRecord] = LinkOps.itemLinksOps
 
   it("combines the bibIds in the final result") {
     val bibIds = createSierraBibNumbers(count = 5)
@@ -23,8 +28,8 @@ class SierraItemRecordMergerTest
     )
 
     val mergedRecord =
-      SierraItemRecordMerger
-        .mergeItems(
+      linkOps
+        .updateLink(
           existingLink = Link(existingRecord),
           newRecord = newRecord)
         .get
@@ -46,8 +51,8 @@ class SierraItemRecordMergerTest
     )
 
     val mergedRecord =
-      SierraItemRecordMerger
-        .mergeItems(
+      linkOps
+        .updateLink(
           existingLink = Link(existingRecord),
           newRecord = newRecord)
         .get
@@ -70,8 +75,8 @@ class SierraItemRecordMergerTest
     )
 
     val mergedRecord =
-      SierraItemRecordMerger
-        .mergeItems(
+      linkOps
+        .updateLink(
           existingLink = Link(existingRecord),
           newRecord = newRecord)
         .get
@@ -94,8 +99,8 @@ class SierraItemRecordMergerTest
     )
 
     val mergedRecord =
-      SierraItemRecordMerger
-        .mergeItems(
+      linkOps
+        .updateLink(
           existingLink = Link(existingRecord),
           newRecord = newRecord)
         .get
@@ -118,8 +123,8 @@ class SierraItemRecordMergerTest
     )
 
     val mergedRecord =
-      SierraItemRecordMerger
-        .mergeItems(
+      linkOps
+        .updateLink(
           existingLink = Link(existingRecord),
           newRecord = newRecord)
         .get
@@ -132,7 +137,7 @@ class SierraItemRecordMergerTest
     val record = createSierraItemRecord
     val link = Link(record)
 
-    SierraItemRecordMerger.mergeItems(link, record) shouldBe Some(link)
+    linkOps.updateLink(link, record) shouldBe Some(link)
   }
 
   it("returns None if it receives an outdated update") {
@@ -150,6 +155,6 @@ class SierraItemRecordMergerTest
     )
     val newLink = Link(newRecord)
 
-    SierraItemRecordMerger.mergeItems(newLink, oldRecord) shouldBe None
+    linkOps.updateLink(newLink, oldRecord) shouldBe None
   }
 }
