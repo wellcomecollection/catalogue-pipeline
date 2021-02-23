@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.sierra_reader.services
 
 import java.time.Instant
-
 import akka.Done
 import akka.actor.ActorSystem
 import com.amazonaws.services.s3.AmazonS3
@@ -25,6 +24,7 @@ import uk.ac.wellcome.sierra.{SierraSource, ThrottleRate}
 import uk.ac.wellcome.sierra_adapter.model.{
   AbstractSierraRecord,
   SierraBibRecord,
+  SierraHoldingsRecord,
   SierraItemRecord
 }
 import uk.ac.wellcome.storage.Identified
@@ -118,8 +118,9 @@ class SierraReaderWorkerService(
 
   private def createRecord: (String, String, Instant) => AbstractSierraRecord =
     readerConfig.resourceType match {
-      case SierraResourceTypes.bibs  => SierraBibRecord.apply
-      case SierraResourceTypes.items => SierraItemRecord.apply
+      case SierraResourceTypes.bibs     => SierraBibRecord.apply
+      case SierraResourceTypes.items    => SierraItemRecord.apply
+      case SierraResourceTypes.holdings => SierraHoldingsRecord.apply
     }
 
   private def toJson(records: Seq[AbstractSierraRecord]): Json =
@@ -128,5 +129,7 @@ class SierraReaderWorkerService(
         records.asInstanceOf[Seq[SierraBibRecord]].asJson
       case SierraResourceTypes.items =>
         records.asInstanceOf[Seq[SierraItemRecord]].asJson
+      case SierraResourceTypes.holdings =>
+        records.asInstanceOf[Seq[SierraHoldingsRecord]].asJson
     }
 }
