@@ -1,19 +1,25 @@
-package uk.ac.wellcome.platform.sierra_items_to_dynamo.services
+package weco.catalogue.sierra_linker.services
 
-import uk.ac.wellcome.sierra_adapter.model.{SierraItemNumber, SierraItemRecord}
+import uk.ac.wellcome.sierra_adapter.model.{
+  AbstractSierraRecord,
+  TypedSierraRecordNumber
+}
 import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.storage.{Identified, UpdateNotApplied}
 import weco.catalogue.sierra_linker.models.{Link, LinkOps}
 
-class SierraItemLinkStore(
-  store: VersionedStore[SierraItemNumber, Int, Link]) {
-  def update(newRecord: SierraItemRecord)
-    : Either[Throwable, Option[SierraItemRecord]] = {
-    val newLink = Link(newRecord)
+class LinkStore[Id <: TypedSierraRecordNumber, Record <: AbstractSierraRecord[Id]](
+  store: VersionedStore[Id, Int, Link]
+)(
+  implicit linkOps: LinkOps[Record]
+) {
+  def update(newRecord: Record)
+    : Either[Throwable, Option[Record]] = {
+    val newLink = linkOps.createLink(newRecord)
 
     val upsertResult: store.UpdateEither =
       store.upsert(newRecord.id)(newLink) {
-        LinkOps.itemLinksOps.updateLink(_, newRecord) match {
+        linkOps.updateLink(_, newRecord) match {
           case Some(updatedLink) => Right(updatedLink)
           case None =>
             Left(
@@ -24,10 +30,9 @@ class SierraItemLinkStore(
 
     upsertResult match {
       case Right(Identified(_, updatedLink)) =>
-        val updatedRecord = newRecord.copy(
-          unlinkedBibIds = updatedLink.unlinkedBibIds
-        )
-        Right(Some(updatedRecord))
+        Right(Some(
+          linkOps.copyUnlinkedBibIds(updatedLink, newRecord)
+        ))
 
       case Left(_: UpdateNotApplied) => Right(None)
       case Left(err)                 => Left(err.e)

@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.sierra_items_to_dynamo.services
+package weco.catalogue.sierra_linker.services
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -19,7 +19,7 @@ import uk.ac.wellcome.storage.{
 }
 import weco.catalogue.sierra_linker.models.Link
 
-class SierraItemLinkStoreTest
+class LinkStoreTest
     extends AnyFunSpec
     with Matchers
     with EitherValues
@@ -29,7 +29,7 @@ class SierraItemLinkStoreTest
   it("inserts an ItemRecord into the VHS") {
     implicit val store = MemoryVersionedStore[SierraItemNumber, Link](
       initialEntries = Map.empty)
-    val linkStore = new SierraItemLinkStore(store)
+    val linkStore = new LinkStore(store)
 
     val record = createSierraItemRecord
 
@@ -49,7 +49,7 @@ class SierraItemLinkStoreTest
         Version(newRecord.id, 1) -> Link(newRecord)
       )
     )
-    val linkStore = new SierraItemLinkStore(store)
+    val linkStore = new LinkStore(store)
 
     val oldRecord = createSierraItemRecordWith(
       id = newRecord.id,
@@ -72,7 +72,7 @@ class SierraItemLinkStoreTest
         Version(oldRecord.id, 1) -> Link(oldRecord)
       )
     )
-    val linkStore = new SierraItemLinkStore(store)
+    val linkStore = new LinkStore(store)
 
     val newRecord = createSierraItemRecordWith(
       id = oldRecord.id,
@@ -97,7 +97,7 @@ class SierraItemLinkStoreTest
         Version(oldRecord.id, 1) -> Link(oldRecord)
       )
     )
-    val linkStore = new SierraItemLinkStore(store)
+    val linkStore = new LinkStore(store)
 
     val newRecord = createSierraItemRecordWith(
       id = oldRecord.id,
@@ -126,7 +126,7 @@ class SierraItemLinkStoreTest
         Version(oldRecord.id, 1) -> Link(oldRecord)
       )
     )
-    val linkStore = new SierraItemLinkStore(store)
+    val linkStore = new LinkStore(store)
 
     val newRecord = createSierraItemRecordWith(
       id = oldRecord.id,
@@ -157,7 +157,7 @@ class SierraItemLinkStoreTest
         Version(oldRecord.id, 1) -> Link(oldRecord)
       )
     )
-    val linkStore = new SierraItemLinkStore(store)
+    val linkStore = new LinkStore(store)
 
     val newRecord = createSierraItemRecordWith(
       id = oldRecord.id,
@@ -195,7 +195,7 @@ class SierraItemLinkStoreTest
         Left(UpdateWriteError(StoreWriteError(exception)))
     }
 
-    val linkStore = new SierraItemLinkStore(brokenStore)
+    val linkStore = new LinkStore(brokenStore)
 
     val either = linkStore.update(record)
     either shouldBe a[Left[_, _]]

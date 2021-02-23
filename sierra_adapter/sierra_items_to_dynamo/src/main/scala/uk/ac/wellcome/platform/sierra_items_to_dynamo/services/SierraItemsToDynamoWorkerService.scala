@@ -5,15 +5,16 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
-import uk.ac.wellcome.sierra_adapter.model.SierraItemRecord
+import uk.ac.wellcome.sierra_adapter.model.{SierraItemNumber, SierraItemRecord}
 import uk.ac.wellcome.typesafe.Runnable
+import weco.catalogue.sierra_linker.services.LinkStore
 
 import scala.concurrent.Future
 import scala.util.Success
 
 class SierraItemsToDynamoWorkerService[Destination](
   sqsStream: SQSStream[NotificationMessage],
-  itemLinkStore: SierraItemLinkStore,
+  itemLinkStore: LinkStore[SierraItemNumber, SierraItemRecord],
   messageSender: MessageSender[Destination]
 ) extends Runnable {
 
