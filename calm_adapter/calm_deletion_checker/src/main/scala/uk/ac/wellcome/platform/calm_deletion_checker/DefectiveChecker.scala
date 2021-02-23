@@ -77,6 +77,8 @@ class ApiDeletionChecker(calmApiClient: CalmApiClient)(
             .map(record => CalmQuery.RecordId(record.id))
             .reduce[CalmQuery](_ or _)
         )
+      // Performing a search creates a new session which we'll never use.
+      // Abandon it here to give the Calm API a chance.
       _ <- calmApiClient.abandon(session.cookie).recover {
         case abandonError =>
           warn(s"Error abandoning session: ${abandonError.getMessage}")

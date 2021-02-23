@@ -26,16 +26,16 @@ trait CalmApiClient {
 
   def search(query: CalmQuery,
              cookie: Option[Cookie] = None): Future[CalmSession] =
-    request(CalmSearchRequest(query), cookie)
+    request(request = CalmSearchRequest(query), cookie = cookie)
 
   // We defer resolution of the summary parser so consumers can suppress fields
   def summary(pos: Int, cookie: Option[Cookie] = None)(
     implicit p: CalmHttpResponseParser[CalmSummaryRequest])
     : Future[CalmRecord] =
-    request(CalmSummaryRequest(pos), cookie)
+    request(request = CalmSummaryRequest(pos), cookie = cookie)
 
   def abandon(cookie: Cookie): Future[Done] =
-    request(CalmAbandonRequest, Some(cookie))
+    request(request = CalmAbandonRequest, cookie = Some(cookie))
 }
 
 // HttpClients turn HttpRequests into HttpResponses via their
