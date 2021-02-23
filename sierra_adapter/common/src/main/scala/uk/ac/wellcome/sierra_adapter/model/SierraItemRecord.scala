@@ -12,7 +12,7 @@ case class SierraItemRecord(
   modifiedDate: Instant,
   bibIds: List[SierraBibNumber],
   unlinkedBibIds: List[SierraBibNumber] = List()
-) extends AbstractSierraRecord
+) extends AbstractSierraRecord[SierraItemNumber]
 
 case object SierraItemRecord {
 
