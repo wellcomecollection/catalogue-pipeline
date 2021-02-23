@@ -21,6 +21,7 @@ import uk.ac.wellcome.sierra_adapter.model.{
   SierraTransformable
 }
 import WorkState.Source
+import org.scalatest.Assertion
 
 class SierraTransformerTest
     extends AnyFunSpec
@@ -976,7 +977,7 @@ class SierraTransformerTest
   private def assertTransformReturnsInvisibleWork(
     maybeBibRecord: Option[SierraBibRecord],
     modifiedDate: Instant,
-    itemRecords: List[SierraItemRecord] = List()) = {
+    itemRecords: List[SierraItemRecord] = List()): Assertion = {
     val id = createSierraBibNumber
 
     val sierraTransformable = createSierraTransformableWith(
