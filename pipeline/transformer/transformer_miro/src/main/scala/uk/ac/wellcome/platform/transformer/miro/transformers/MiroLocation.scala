@@ -6,8 +6,8 @@ import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 trait MiroLocation extends MiroLicenses with MiroContributorCodes {
 
   private val imageUriTemplates = Map(
-    "thumbnail" -> "%s/image/%s.jpg/full/300,/0/default.jpg",
-    "info" -> "%s/image/%s.jpg/info.json"
+    "thumbnail" -> "%s/image/%s/full/300,/0/default.jpg",
+    "info" -> "%s/image/%s/info.json"
   )
 
   def buildImageApiURL(miroId: String, templateName: String): String = {
