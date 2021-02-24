@@ -55,8 +55,8 @@ steps:
     label: "Sierra item merger"
   - command: .buildkite/scripts/run_job.py sierra_holdings_merger
     label: "Sierra holdings merger"
-  - command: .buildkite/scripts/run_job.py sierra_items_to_dynamo
-    label: "Sierra items to Dynamo"
+  - command: .buildkite/scripts/run_job.py sierra_linker
+    label: "Sierra linker"
   - command: .buildkite/scripts/run_job.py mets_adapter
     label: "METS adapter"
   - command: .buildkite/scripts/run_job.py calm_adapter
