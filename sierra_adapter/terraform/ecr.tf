@@ -10,16 +10,8 @@ resource "aws_ecr_repository" "sierra_reader" {
   }
 }
 
-resource "aws_ecr_repository" "sierra_bib_merger" {
-  name = "${local.repository_prefix}/sierra_bib_merger"
-
-  lifecycle {
-    prevent_destroy = true
-  }
-}
-
-resource "aws_ecr_repository" "sierra_item_merger" {
-  name = "${local.repository_prefix}/sierra_item_merger"
+resource "aws_ecr_repository" "sierra_merger" {
+  name = "${local.repository_prefix}/sierra_merger"
 
   lifecycle {
     prevent_destroy = true
@@ -36,14 +28,6 @@ resource "aws_ecr_repository" "sierra_items_to_dynamo" {
 
 resource "aws_ecr_repository" "sierra_linker" {
   name = "${local.repository_prefix}/sierra_linker"
-
-  lifecycle {
-    prevent_destroy = true
-  }
-}
-
-resource "aws_ecr_repository" "sierra_holdings_merger" {
-  name = "${local.repository_prefix}/sierra_holdings_merger"
 
   lifecycle {
     prevent_destroy = true
