@@ -5,6 +5,7 @@ import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.sierra_adapter.model.Implicits._
 import uk.ac.wellcome.sierra_adapter.model.{
   SierraGenerators,
+  SierraItemRecord,
   SierraTransformable
 }
 import uk.ac.wellcome.storage.maxima.Maxima
@@ -31,7 +32,7 @@ class UpdaterTest
 
   it("creates a record if it receives an item with a bibId that doesn't exist") {
     val sourceVHS = createSourceVHS[SierraTransformable]
-    val updater = new Updater(sourceVHS)
+    val updater = new Updater[SierraItemRecord](sourceVHS)
 
     val bibId = createSierraBibNumber
     val newItemRecord = createSierraItemRecordWith(
@@ -76,7 +77,7 @@ class UpdaterTest
         Version(bibId.withoutCheckDigit, 0) -> oldTransformable
       )
     )
-    val updater = new Updater(sourceVHS)
+    val updater = new Updater[SierraItemRecord](sourceVHS)
 
     val newItemRecord = itemRecord.copy(
       data = """{"data": "newer"}""",
@@ -124,7 +125,7 @@ class UpdaterTest
         Version(bibId2.withoutCheckDigit, 0) -> sierraTransformable2
       )
     )
-    val updater = new Updater(sourceVHS)
+    val updater = new Updater[SierraItemRecord](sourceVHS)
 
     val unlinkItemRecord = itemRecord.copy(
       bibIds = List(bibId2),
@@ -192,7 +193,7 @@ class UpdaterTest
         Version(bibId2.withoutCheckDigit, 0) -> sierraTransformable2
       )
     )
-    val updater = new Updater(sourceVHS)
+    val updater = new Updater[SierraItemRecord](sourceVHS)
 
     val unlinkItemRecord = itemRecord.copy(
       bibIds = List(bibId2),
@@ -253,7 +254,7 @@ class UpdaterTest
         Version(bibId2.withoutCheckDigit, 0) -> sierraTransformable2
       )
     )
-    val updater = new Updater(sourceVHS)
+    val updater = new Updater[SierraItemRecord](sourceVHS)
 
     val unlinkItemRecord = itemRecord.copy(
       bibIds = List(bibId2),
@@ -313,7 +314,7 @@ class UpdaterTest
         Version(bibId.withoutCheckDigit, 0) -> transformable
       )
     )
-    val updater = new Updater(sourceVHS)
+    val updater = new Updater[SierraItemRecord](sourceVHS)
 
     val oldItemRecord = itemRecord.copy(
       modifiedDate = olderDate
@@ -339,7 +340,7 @@ class UpdaterTest
     )
 
     val sourceVHS = createSourceVHS[SierraTransformable]
-    val updater = new Updater(sourceVHS)
+    val updater = new Updater[SierraItemRecord](sourceVHS)
 
     (1 to 5).foreach { _ =>
       val result = updater.update(itemRecord)
@@ -363,7 +364,7 @@ class UpdaterTest
         Version(bibId.withoutCheckDigit, 0) -> transformable
       )
     )
-    val updater = new Updater(sourceVHS)
+    val updater = new Updater[SierraItemRecord](sourceVHS)
 
     val itemRecord = createSierraItemRecordWith(
       bibIds = List(bibId)
@@ -422,7 +423,7 @@ class UpdaterTest
       }
     )
 
-    val brokenUpdater = new Updater(sourceVHS)
+    val brokenUpdater = new Updater[SierraItemRecord](sourceVHS)
 
     val itemRecord = createSierraItemRecordWith(
       bibIds = List(createSierraBibNumber)
@@ -442,7 +443,7 @@ class UpdaterTest
       }
     )
 
-    val brokenUpdater = new Updater(sourceVHS)
+    val brokenUpdater = new Updater[SierraItemRecord](sourceVHS)
 
     val itemRecord = createSierraItemRecordWith(
       bibIds = List(createSierraBibNumber)

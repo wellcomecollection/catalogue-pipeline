@@ -4,6 +4,8 @@ import grizzled.slf4j.Logging
 import uk.ac.wellcome.sierra_adapter.model.{
   AbstractSierraRecord,
   SierraBibNumber,
+  SierraBibRecord,
+  SierraHoldingsRecord,
   SierraItemRecord
 }
 
@@ -23,13 +25,28 @@ object RecordOps {
       ops.getUnlinkedBibIds(r)
   }
 
+  implicit val bibRecordOps = new RecordOps[SierraBibRecord] {
+    override def getBibIds(r: SierraBibRecord): List[SierraBibNumber] =
+      List(r.id)
+
+    override def getUnlinkedBibIds(r: SierraBibRecord): List[SierraBibNumber] =
+      List()
+  }
+
   implicit val itemRecordOps = new RecordOps[SierraItemRecord] {
-    override def getBibIds(
-      itemRecord: SierraItemRecord): List[SierraBibNumber] =
-      itemRecord.bibIds
+    override def getBibIds(r: SierraItemRecord): List[SierraBibNumber] =
+      r.bibIds
+
+    override def getUnlinkedBibIds(r: SierraItemRecord): List[SierraBibNumber] =
+      r.unlinkedBibIds
+  }
+
+  implicit val holdingsRecordOps = new RecordOps[SierraHoldingsRecord] {
+    override def getBibIds(r: SierraHoldingsRecord): List[SierraBibNumber] =
+      r.bibIds
 
     override def getUnlinkedBibIds(
-      itemRecord: SierraItemRecord): List[SierraBibNumber] =
-      itemRecord.unlinkedBibIds
+      r: SierraHoldingsRecord): List[SierraBibNumber] =
+      r.unlinkedBibIds
   }
 }
