@@ -5,6 +5,7 @@ import uk.ac.wellcome.sierra_adapter.model.{
   AbstractSierraRecord,
   SierraBibNumber,
   SierraBibRecord,
+  SierraHoldingsRecord,
   SierraItemRecord
 }
 
@@ -35,6 +36,14 @@ object RecordOps {
       r.bibIds
 
     override def getUnlinkedBibIds(r: SierraItemRecord): List[SierraBibNumber] =
+      r.unlinkedBibIds
+  }
+
+  implicit val holdingsRecordOps = new RecordOps[SierraHoldingsRecord] {
+    override def getBibIds(r: SierraHoldingsRecord): List[SierraBibNumber] =
+      r.bibIds
+
+    override def getUnlinkedBibIds(r: SierraHoldingsRecord): List[SierraBibNumber] =
       r.unlinkedBibIds
   }
 }

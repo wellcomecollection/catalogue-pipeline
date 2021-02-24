@@ -304,4 +304,217 @@ class TransformableOpsTest
       }
     }
   }
+
+  describe("holdingsTransformableOps") {
+    describe("add") {
+      it("adds the holdings if it doesn't exist already") {
+        val bibId = createSierraBibNumber
+        val record = createSierraHoldingsRecordWith(
+          bibIds = List(bibId)
+        )
+
+        val sierraTransformable =
+          createSierraTransformableWith(sierraId = bibId)
+        val result = sierraTransformable.add(record)
+
+        result.get.holdingsRecords shouldBe Map(record.id -> record)
+      }
+
+      it("updates the holdings when merging records with newer data") {
+        val bibId = createSierraBibNumber
+        val olderRecord = createSierraHoldingsRecordWith(
+          modifiedDate = olderDate,
+          bibIds = List(bibId)
+        )
+
+        val sierraTransformable = createSierraTransformableWith(
+          sierraId = bibId,
+          holdingsRecords = List(olderRecord)
+        )
+
+        val newerRecord = olderRecord.copy(
+          data = """{"hey": "some new data"}""",
+          modifiedDate = newerDate,
+          bibIds = List(bibId)
+        )
+        val result = sierraTransformable.add(newerRecord)
+
+        result.get shouldBe sierraTransformable.copy(
+          holdingsRecords = Map(olderRecord.id -> newerRecord))
+      }
+
+      it("returns the record if you apply the same update more than once") {
+        val bibId = createSierraBibNumber
+        val record = createSierraHoldingsRecordWith(
+          bibIds = List(bibId)
+        )
+
+        val sierraTransformable =
+          createSierraTransformableWith(sierraId = bibId)
+
+        val transformable1 = sierraTransformable.add(record)
+        val transformable2 = transformable1.get.add(record)
+
+        transformable2 shouldBe transformable1
+      }
+
+      it("returns None when merging item records with stale data") {
+        val bibId = createSierraBibNumber
+        val newerRecord = createSierraHoldingsRecordWith(
+          modifiedDate = newerDate,
+          bibIds = List(bibId)
+        )
+
+        val sierraTransformable = createSierraTransformableWith(
+          sierraId = bibId,
+          holdingsRecords = List(newerRecord)
+        )
+
+        val oldRecord = newerRecord.copy(
+          modifiedDate = olderDate,
+          data = """{"older": "data goes here"}"""
+        )
+        val result = sierraTransformable.add(oldRecord)
+        result shouldBe None
+      }
+
+      it("supports adding multiple holdings to a merged record") {
+        val bibId = createSierraBibNumber
+        val record1 = createSierraHoldingsRecordWith(
+          bibIds = List(bibId)
+        )
+        val record2 = createSierraHoldingsRecordWith(
+          bibIds = List(bibId)
+        )
+
+        val sierraTransformable =
+          createSierraTransformableWith(sierraId = bibId)
+        val result1 = sierraTransformable.add(record1)
+        val result2 = result1.get.add(record2)
+
+        result1.get.holdingsRecords(record1.id) shouldBe record1
+        result2.get.holdingsRecords(record2.id) shouldBe record2
+      }
+
+      it("only merges item records with matching bib IDs") {
+        val bibId = createSierraBibNumber
+        val unrelatedBibId = createSierraBibNumber
+
+        val record = createSierraHoldingsRecordWith(
+          bibIds = List(unrelatedBibId),
+          unlinkedBibIds = List()
+        )
+
+        val sierraTransformable =
+          createSierraTransformableWith(sierraId = bibId)
+
+        val caught = intercept[RuntimeException] {
+          sierraTransformable.add(record)
+        }
+
+        caught.getMessage shouldEqual s"Non-matching bib id $bibId in holdings bib List($unrelatedBibId)"
+      }
+    }
+
+    describe("remove") {
+      it("removes the holdings if it already exists") {
+        val bibId = createSierraBibNumber
+
+        val record = createSierraHoldingsRecordWith(
+          bibIds = List(bibId),
+          unlinkedBibIds = List()
+        )
+
+        val unlinkedRecord = createSierraHoldingsRecordWith(
+          id = record.id,
+          bibIds = List(),
+          modifiedDate = record.modifiedDate.plusSeconds(1),
+          unlinkedBibIds = List(bibId)
+        )
+
+        val sierraTransformable = createSierraTransformableWith(
+          sierraId = bibId,
+          holdingsRecords = List(record)
+        )
+
+        val expectedSierraTransformable = sierraTransformable.copy(
+          holdingsRecords = Map.empty
+        )
+
+        sierraTransformable
+          .remove(unlinkedRecord)
+          .get shouldBe expectedSierraTransformable
+      }
+
+      it("returns None when merging an unlinked record which is already absent") {
+        val bibId = createSierraBibNumber
+
+        val record = createSierraHoldingsRecordWith(
+          bibIds = List(bibId),
+          unlinkedBibIds = List()
+        )
+
+        val previouslyUnlinkedRecord = createSierraHoldingsRecordWith(
+          bibIds = List(),
+          unlinkedBibIds = List(bibId)
+        )
+
+        val sierraTransformable = createSierraTransformableWith(
+          sierraId = bibId,
+          holdingsRecords = List(record)
+        )
+
+        sierraTransformable.remove(previouslyUnlinkedRecord) shouldBe None
+      }
+
+      it("returns None when merging an unlinked record which has linked more recently") {
+        val bibId = createSierraBibNumber
+
+        val record = createSierraHoldingsRecordWith(
+          modifiedDate = newerDate,
+          bibIds = List(bibId),
+          unlinkedBibIds = List()
+        )
+
+        val outOfDateUnlinkedRecord = record.copy(
+          modifiedDate = olderDate,
+          bibIds = List(),
+          unlinkedBibIds = List(bibId)
+        )
+
+        val sierraTransformable = createSierraTransformableWith(
+          sierraId = bibId,
+          holdingsRecords = List(record)
+        )
+
+        sierraTransformable.remove(outOfDateUnlinkedRecord) shouldBe None
+      }
+
+      it("only unlinks holdings records with matching bib IDs") {
+        val bibId = createSierraBibNumber
+        val unrelatedBibId = createSierraBibNumber
+
+        val record = createSierraHoldingsRecordWith(
+          bibIds = List(bibId),
+          unlinkedBibIds = List()
+        )
+
+        val unrelatedItemRecord = createSierraHoldingsRecordWith(
+          bibIds = List(),
+          unlinkedBibIds = List(unrelatedBibId)
+        )
+
+        val sierraTransformable = createSierraTransformableWith(
+          sierraId = bibId,
+          holdingsRecords = List(record)
+        )
+
+        val caught = intercept[RuntimeException] {
+          sierraTransformable.remove(unrelatedItemRecord)
+        }
+
+        caught.getMessage shouldEqual s"Non-matching bib id $bibId in holdings unlink bibs List($unrelatedBibId)"
+      }
+    }
+  }
 }

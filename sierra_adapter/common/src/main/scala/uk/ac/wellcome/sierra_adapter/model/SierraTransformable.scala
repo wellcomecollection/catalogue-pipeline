@@ -3,7 +3,8 @@ package uk.ac.wellcome.sierra_adapter.model
 case class SierraTransformable(
   sierraId: SierraBibNumber,
   maybeBibRecord: Option[SierraBibRecord] = None,
-  itemRecords: Map[SierraItemNumber, SierraItemRecord] = Map()
+  itemRecords: Map[SierraItemNumber, SierraItemRecord] = Map(),
+  holdingsRecords: Map[SierraHoldingsNumber, SierraHoldingsRecord] = Map()
 )
 
 object SierraTransformable {

@@ -132,14 +132,18 @@ trait SierraGenerators extends RandomGenerators {
   def createSierraTransformableWith(
     sierraId: SierraBibNumber = createSierraBibNumber,
     maybeBibRecord: Option[SierraBibRecord] = Some(createSierraBibRecord),
-    itemRecords: List[SierraItemRecord] = List()
+    itemRecords: List[SierraItemRecord] = List(),
+    holdingsRecords: List[SierraHoldingsRecord] = List()
   ): SierraTransformable =
     SierraTransformable(
       sierraId = sierraId,
       maybeBibRecord = maybeBibRecord,
-      itemRecords = itemRecords.map { record: SierraItemRecord =>
-        record.id -> record
-      }.toMap
+      itemRecords = itemRecords
+        .map { record => record.id -> record }
+        .toMap,
+      holdingsRecords = holdingsRecords
+        .map { record => record.id -> record }
+        .toMap
     )
 
   def createSierraTransformable: SierraTransformable =
