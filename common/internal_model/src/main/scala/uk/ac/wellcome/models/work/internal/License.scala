@@ -21,9 +21,6 @@ object License extends Enum[License] {
   implicit val licenseDecoder: Decoder[License] =
     Decoder.forProduct1("id")(License.withName)
 
-  def createLicense(id: String): License =
-    License.withName(id)
-
   case object CCBY extends License {
     val id = "cc-by"
     val label = "Attribution 4.0 International (CC BY 4.0)"

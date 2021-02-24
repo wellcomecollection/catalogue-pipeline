@@ -47,7 +47,7 @@ object WorkAggregations extends ElasticAggregations {
   }
 
   // Elasticsearch encodes the date key as milliseconds since the epoch
-  implicit val decodePeriod: Decoder[Period[Minted]] =
+  implicit val decodePeriodFromEpochMilli: Decoder[Period[Minted]] =
     Decoder.decodeLong.emap { epochMilli =>
       Try { Instant.ofEpochMilli(epochMilli) }
         .map { instant =>
@@ -59,11 +59,8 @@ object WorkAggregations extends ElasticAggregations {
         .getOrElse { Left("Error decoding") }
     }
 
-  implicit val decodeLicense: Decoder[License] =
-    Decoder.decodeString.emap { str =>
-      Try(License.createLicense(str)).toEither.left
-        .map(err => err.getMessage)
-    }
+  implicit val decodeFormatFromId: Decoder[Format] =
+    Decoder.decodeString.emap(Format.withNameEither(_).getMessage)
 
   implicit val decodeFormat: Decoder[Format] =
     Decoder.decodeString.emap { str =>
@@ -76,7 +73,7 @@ object WorkAggregations extends ElasticAggregations {
   // Both the Calm and Sierra transformers use the MARC language code list
   // to populate the "languages" field, so we can use the ID (code) to
   // unambiguously identify a language.
-  implicit val decodeLanguage: Decoder[Language] =
+  implicit val decodeLanguageFromCode: Decoder[Language] =
     Decoder.decodeString.emap { code =>
       MarcLanguageCodeList.lookupByCode(code) match {
         case Some(lang) => Right(lang)
