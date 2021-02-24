@@ -139,6 +139,26 @@ trait SierraRecordMergerFeatureTestCases[Record <: AbstractSierraRecord[_]]
   }
 }
 
+class SierraBibRecordMergerFeatureTest
+  extends SierraRecordMergerFeatureTestCases[SierraBibRecord]
+    with RecordMergerFixtures {
+  override def withWorker[R](queue: Queue, sourceVHS: SourceVHS[SierraTransformable])(testWith: TestWith[(Worker[SierraBibRecord, String], MemoryMessageSender), R]): R =
+    withRunningWorker[SierraBibRecord, R](queue, sourceVHS) {
+      testWith
+    }
+
+  override val recordCanBeLinkedToMultipleBibs = false
+
+  override def createRecordWith(bibIds: List[SierraBibNumber]): SierraBibRecord =
+    createSierraBibRecordWith(id = bibIds.head)
+
+  override implicit val encoder: Encoder[SierraBibRecord] = deriveEncoder
+
+  override implicit val transformableOps: TransformableOps[SierraBibRecord] =
+    TransformableOps.bibTransformableOps
+}
+
+
 class SierraItemRecordMergerFeatureTest
     extends SierraRecordMergerFeatureTestCases[SierraItemRecord]
     with RecordMergerFixtures {

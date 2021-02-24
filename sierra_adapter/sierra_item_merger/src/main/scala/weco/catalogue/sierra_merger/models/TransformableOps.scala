@@ -3,6 +3,7 @@ package weco.catalogue.sierra_merger.models
 import uk.ac.wellcome.sierra_adapter.model.{
   AbstractSierraRecord,
   SierraBibNumber,
+  SierraBibRecord,
   SierraItemRecord,
   SierraTransformable
 }
@@ -28,6 +29,38 @@ object TransformableOps {
       ops: TransformableOps[Record]
     ): Option[SierraTransformable] =
       ops.remove(t, r)
+  }
+
+  implicit val bibTransformableOps = new TransformableOps[SierraBibRecord] {
+    override def create(id: SierraBibNumber, bibRecord: SierraBibRecord): SierraTransformable = {
+      assert(id == bibRecord.id)
+      SierraTransformable(bibRecord)
+    }
+
+    override def add(
+      transformable: SierraTransformable,
+      bibRecord: SierraBibRecord): Option[SierraTransformable] = {
+      if (bibRecord.id != transformable.sierraId) {
+        throw new RuntimeException(
+          s"Non-matching bib ids ${bibRecord.id} != ${transformable.sierraId}")
+      }
+
+      val isNewerData = transformable.maybeBibRecord match {
+        case Some(bibData) =>
+          bibRecord.modifiedDate.isAfter(bibData.modifiedDate) ||
+            bibRecord.modifiedDate == bibData.modifiedDate
+        case None => true
+      }
+
+      if (isNewerData) {
+        Some(transformable.copy(maybeBibRecord = Some(bibRecord)))
+      } else {
+        None
+      }
+    }
+
+    override def remove(transformable: SierraTransformable, bibRecord: SierraBibRecord): Option[SierraTransformable] =
+      throw new RuntimeException(s"We should never be removing a bib record from a SierraTransformable (${transformable.sierraId})")
   }
 
   implicit val itemTransformableOps = new TransformableOps[SierraItemRecord] {

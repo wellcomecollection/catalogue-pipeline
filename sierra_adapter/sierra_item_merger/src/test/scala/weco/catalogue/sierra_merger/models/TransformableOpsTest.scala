@@ -2,13 +2,95 @@ package weco.catalogue.sierra_merger.models
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.sierra_adapter.model.SierraGenerators
+import uk.ac.wellcome.sierra_adapter.model.{
+  SierraGenerators,
+  SierraTransformable
+}
 
 class TransformableOpsTest
     extends AnyFunSpec
     with Matchers
     with SierraGenerators {
   import weco.catalogue.sierra_merger.models.TransformableOps._
+
+  describe("bibTransformableOps") {
+    describe("add") {
+      it("merges data from a bibRecord when empty") {
+        val bibRecord = createSierraBibRecord
+        val transformable = createSierraTransformableWith(
+          sierraId = bibRecord.id,
+          maybeBibRecord = None
+        )
+
+        val newTransformable = transformable.add(bibRecord)
+        newTransformable.get.maybeBibRecord.get shouldEqual bibRecord
+      }
+
+      it("only merges bib records with matching ids") {
+        val bibRecord = createSierraBibRecord
+        val transformable = createSierraTransformable
+
+        val caught = intercept[RuntimeException] {
+          transformable.add(bibRecord)
+        }
+        caught.getMessage shouldEqual s"Non-matching bib ids ${bibRecord.id} != ${transformable.sierraId}"
+      }
+
+      it("returns the transformable if you merge the same record more than once") {
+        val bibRecord = createSierraBibRecord
+
+        val transformable = SierraTransformable(bibRecord)
+
+        transformable.add(bibRecord) shouldBe Some(transformable)
+      }
+
+      it("returns None when merging a stale update") {
+        val oldBibRecord = createSierraBibRecordWith(
+          modifiedDate = olderDate
+        )
+
+        val newBibRecord = createSierraBibRecordWith(
+          id = oldBibRecord.id,
+          modifiedDate = newerDate
+        )
+
+        val transformable = SierraTransformable(
+          bibRecord = newBibRecord
+        )
+
+        transformable.add(oldBibRecord) shouldBe None
+      }
+
+      it("updates bibData when merging bib records with newer data") {
+        val newBibRecord = createSierraBibRecordWith(
+          modifiedDate = newerDate
+        )
+
+        val oldBibRecord = createSierraBibRecordWith(
+          id = newBibRecord.id,
+          modifiedDate = olderDate
+        )
+
+        val transformable = SierraTransformable(
+          bibRecord = oldBibRecord
+        )
+
+        transformable.add(newBibRecord).get.maybeBibRecord shouldBe Some(newBibRecord)
+      }
+    }
+
+    describe("remove") {
+      it("throws an error if you try to remove a SierraBibRecord from a SierraTransformable") {
+        val bibRecord = createSierraBibRecord
+        val transformable = createSierraTransformable
+
+        val caught = intercept[RuntimeException] {
+          transformable.remove(bibRecord)
+        }
+        caught.getMessage shouldEqual s"We should never be removing a bib record from a SierraTransformable (${transformable.sierraId})"
+      }
+    }
+  }
 
   describe("itemTransformableOps") {
     describe("add") {
