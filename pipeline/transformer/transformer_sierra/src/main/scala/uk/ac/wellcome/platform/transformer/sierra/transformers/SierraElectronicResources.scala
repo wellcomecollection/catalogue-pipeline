@@ -37,12 +37,25 @@ object SierraElectronicResources extends SierraQueryOps with Logging {
       // If the concatenated string is seven words or less, and contains "access",
       // "view" or "connect", we put it in the location "linkText" field.
       // Otherwise, we put it in the item's "title" field.
-      val label = getLabel(vf)
+      val (title, linkText) = getLabel(vf) match {
+        case Some(label) =>
+          if (label.split(" ").length <= 7 &&
+              label.containsAnyOf("access", "view", "connect"))
+            (None, Some(label))
+          else
+            (Some(label), None)
+
+        case None => (None, None)
+      }
 
       Item(
-        title = label,
+        title = title,
         locations = List(
-          DigitalLocation(url = url, locationType = OnlineResource)
+          DigitalLocation(
+            url = url,
+            linkText = linkText,
+            locationType = OnlineResource
+          )
         )
       )
     }
@@ -88,4 +101,9 @@ object SierraElectronicResources extends SierraQueryOps with Logging {
 
   private def isUrl(s: String): Boolean =
     Try { new URL(s) }.isSuccess
+
+  implicit class StringOps(s: String) {
+    def containsAnyOf(substrings: String*): Boolean =
+      substrings.exists { s.toLowerCase.contains(_) }
+  }
 }

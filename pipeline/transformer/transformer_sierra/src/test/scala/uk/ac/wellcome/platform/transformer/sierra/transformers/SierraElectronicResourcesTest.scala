@@ -102,6 +102,114 @@ class SierraElectronicResourcesTest
         )
       )
     }
+
+    it("puts the label in the linkText if it's ≤7 words and contains 'view', 'access' or 'connect'") {
+      val varFields = List(
+        createVarFieldWith(
+          marcTag = "856",
+          subfields = List(
+            MarcSubfield(tag = "u", content = "https://example.org/viewer"),
+            MarcSubfield(tag = "3", content = "View online")
+          )
+        ),
+        createVarFieldWith(
+          marcTag = "856",
+          subfields = List(
+            MarcSubfield(tag = "u", content = "https://example.org/resource"),
+            MarcSubfield(tag = "z", content = "Access resource")
+          )
+        ),
+        createVarFieldWith(
+          marcTag = "856",
+          subfields = List(
+            MarcSubfield(tag = "u", content = "https://example.org/journal"),
+            MarcSubfield(tag = "z", content = "Connect to journal")
+          )
+        )
+      )
+
+      getElectronicResources(varFields) shouldBe List(
+        Item(
+          title = None,
+          locations = List(
+            DigitalLocation(
+              url = "https://example.org/viewer",
+              linkText = Some("View online"),
+              locationType = OnlineResource
+            )
+          )
+        ),
+        Item(
+          title = None,
+          locations = List(
+            DigitalLocation(
+              url = "https://example.org/resource",
+              linkText = Some("Access resource"),
+              locationType = OnlineResource
+            )
+          )
+        ),
+        Item(
+          title = None,
+          locations = List(
+            DigitalLocation(
+              url = "https://example.org/journal",
+              linkText = Some("Connect to journal"),
+              locationType = OnlineResource
+            )
+          )
+        )
+      )
+    }
+
+    it("puts the label in the item title if it's ≤7 words but doesn't contain 'view', 'access' or 'connect'") {
+      val varFields = List(
+        createVarFieldWith(
+          marcTag = "856",
+          subfields = List(
+            MarcSubfield(tag = "u", content = "https://example.org/oxford"),
+            MarcSubfield(tag = "3", content = "Oxford Libraries Online")
+          )
+        )
+      )
+
+      getElectronicResources(varFields) shouldBe List(
+        Item(
+          title = Some("Oxford Libraries Online"),
+          locations = List(
+            DigitalLocation(
+              url = "https://example.org/oxford",
+              locationType = OnlineResource
+            )
+          )
+        )
+      )
+    }
+
+    it("trims whitespace from the underlying subfields") {
+      val varFields = List(
+        createVarFieldWith(
+          marcTag = "856",
+          subfields = List(
+            MarcSubfield(tag = "u", content = "https://example.org/resource"),
+            MarcSubfield(tag = "3", content = "View resource ")
+          )
+        )
+      )
+
+      getElectronicResources(varFields) shouldBe List(
+        Item(
+          title = None,
+          locations = List(
+            DigitalLocation(
+              url = "https://example.org/journal",
+              linkText = Some("View resource"),
+              locationType = OnlineResource
+            )
+          )
+        )
+      )
+    }
   }
 
   describe("skips adding an item") {
