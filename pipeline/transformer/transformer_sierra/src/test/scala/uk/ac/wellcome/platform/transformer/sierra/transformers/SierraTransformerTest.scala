@@ -965,13 +965,12 @@ class SierraTransformerTest
                             modifiedDate: Instant,
                             bibIds: List[SierraBibNumber]) =
     s"""
-                                                                                                               |{
-                                                                                                               |  "id": "$id",
-                                                                                                               |  "updatedDate": "${modifiedDate.toString}",
-                                                                                                               |  "bibIds": ${toJson(
-         bibIds).get}
-                                                                                                               |}
-                                                                                                               |""".stripMargin
+      |{
+      |  "id": "$id",
+      |  "updatedDate": "${modifiedDate.toString}",
+      |  "bibIds": ${toJson(bibIds).get}
+      |}
+      |""".stripMargin
 
   private def transformDataToWork(
     id: SierraBibNumber,
