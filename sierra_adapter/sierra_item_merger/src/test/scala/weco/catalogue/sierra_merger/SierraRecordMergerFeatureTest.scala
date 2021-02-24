@@ -31,8 +31,7 @@ trait SierraRecordMergerFeatureTestCases[Record <: AbstractSierraRecord[_]]
   def withWorker[R](queue: Queue,
                     sourceVHS: SourceVHS[SierraTransformable] =
                       createSourceVHS[SierraTransformable])(
-    testWith: TestWith[(Worker[Record, String], MemoryMessageSender),
-                       R]): R
+    testWith: TestWith[(Worker[Record, String], MemoryMessageSender), R]): R
 
   def createRecordWith(bibIds: List[SierraBibNumber]): Record
 
@@ -141,14 +140,18 @@ trait SierraRecordMergerFeatureTestCases[Record <: AbstractSierraRecord[_]]
 }
 
 class SierraItemRecordMergerFeatureTest
-  extends SierraRecordMergerFeatureTestCases[SierraItemRecord]
+    extends SierraRecordMergerFeatureTestCases[SierraItemRecord]
     with RecordMergerFixtures {
-  override def withWorker[R](queue: Queue, sourceVHS: SourceVHS[SierraTransformable])(testWith: TestWith[(Worker[SierraItemRecord, String], MemoryMessageSender), R]): R =
+  override def withWorker[R](queue: Queue,
+                             sourceVHS: SourceVHS[SierraTransformable])(
+    testWith: TestWith[(Worker[SierraItemRecord, String], MemoryMessageSender),
+                       R]): R =
     withRunningWorker[SierraItemRecord, R](queue, sourceVHS) {
       testWith
     }
 
-  override def createRecordWith(bibIds: List[SierraBibNumber]): SierraItemRecord =
+  override def createRecordWith(
+    bibIds: List[SierraBibNumber]): SierraItemRecord =
     createSierraItemRecordWith(bibIds = bibIds)
 
   override implicit val encoder: Encoder[SierraItemRecord] = deriveEncoder
