@@ -202,8 +202,83 @@ class SierraElectronicResourcesTest
           title = None,
           locations = List(
             DigitalLocation(
-              url = "https://example.org/journal",
+              url = "https://example.org/resource",
               linkText = Some("View resource"),
+              locationType = OnlineResource
+            )
+          )
+        )
+      )
+    }
+
+    it("strips trailing punctuation") {
+      val varFields = List(
+        createVarFieldWith(
+          marcTag = "856",
+          subfields = List(
+            MarcSubfield(tag = "u", content = "https://example.org/resource"),
+            MarcSubfield(tag = "3", content = "View resource.")
+          )
+        )
+      )
+
+      getElectronicResources(varFields) shouldBe List(
+        Item(
+          title = None,
+          locations = List(
+            DigitalLocation(
+              url = "https://example.org/resource",
+              linkText = Some("View resource"),
+              locationType = OnlineResource
+            )
+          )
+        )
+      )
+    }
+
+    it("title cases the word 'view' at the start of the label") {
+      val varFields = List(
+        createVarFieldWith(
+          marcTag = "856",
+          subfields = List(
+            MarcSubfield(tag = "u", content = "https://example.org/resource"),
+            MarcSubfield(tag = "3", content = "view resource")
+          )
+        )
+      )
+
+      getElectronicResources(varFields) shouldBe List(
+        Item(
+          title = None,
+          locations = List(
+            DigitalLocation(
+              url = "https://example.org/resource",
+              linkText = Some("View resource"),
+              locationType = OnlineResource
+            )
+          )
+        )
+      )
+    }
+
+    it("doesn't title case 'view' if it's not at the start of the label") {
+      val varFields = List(
+        createVarFieldWith(
+          marcTag = "856",
+          subfields = List(
+            MarcSubfield(tag = "u", content = "https://example.org/resource"),
+            MarcSubfield(tag = "3", content = "You can view this resource online")
+          )
+        )
+      )
+
+      getElectronicResources(varFields) shouldBe List(
+        Item(
+          title = None,
+          locations = List(
+            DigitalLocation(
+              url = "https://example.org/resource",
+              linkText = Some("You can view this resource online"),
               locationType = OnlineResource
             )
           )

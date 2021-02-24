@@ -41,7 +41,24 @@ object SierraElectronicResources extends SierraQueryOps with Logging {
         case Some(label) =>
           if (label.split(" ").length <= 7 &&
               label.containsAnyOf("access", "view", "connect"))
-            (None, Some(label))
+            (
+              None,
+              Some(label
+                // e.g. "View resource." ~> "View resource"
+                .stripSuffix(".")
+                .stripSuffix(":")
+                // e.g. "view resource" ~> "View resource"
+                .replaceFirst("^view ", "View ")
+                // These are hard-coded fixes for a couple of known weird records.
+                // We could also fix these in the catalogue, but fixing them here
+                // is cheap and easy.
+                .replace("VIEW FULL TEXT", "View full text")
+                .replace("via  MyiLibrary", "via MyiLibrary")
+                .replace("youtube", "YouTube")
+                .replace("View resource {PDF", "View resource [PDF")
+                .replace("View resource 613.7 KB]", "View resource [613.7 KB]")
+              )
+            )
           else
             (Some(label), None)
 
@@ -89,7 +106,7 @@ object SierraElectronicResources extends SierraQueryOps with Logging {
   private def getLabel(vf: VarField): Option[String] = {
     val labelCandidate =
       vf.subfieldsWithTags("z", "y", "3")
-        .map { _.content }
+        .map { _.content.trim }
         .mkString(" ")
 
     if (labelCandidate.isEmpty) {
