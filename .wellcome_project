@@ -34,7 +34,7 @@ sierra_adapter:
     - id: sierra_item_merger
       services:
         - id: items-merger
-    - id: sierra_items_to_dynamo
+    - id: sierra_linker
       services:
         - id: items-to-dynamo
     - id: sierra_reader
