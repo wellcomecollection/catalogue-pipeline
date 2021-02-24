@@ -4,7 +4,10 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.sierra_adapter.model.SierraGenerators
 
-class TransformableOpsTest extends AnyFunSpec with Matchers with SierraGenerators {
+class TransformableOpsTest
+    extends AnyFunSpec
+    with Matchers
+    with SierraGenerators {
   import weco.catalogue.sierra_merger.models.TransformableOps._
 
   describe("itemTransformableOps") {
@@ -15,7 +18,8 @@ class TransformableOpsTest extends AnyFunSpec with Matchers with SierraGenerator
           bibIds = List(bibId)
         )
 
-        val sierraTransformable = createSierraTransformableWith(sierraId = bibId)
+        val sierraTransformable =
+          createSierraTransformableWith(sierraId = bibId)
         val result = sierraTransformable.add(record)
 
         result.get.itemRecords shouldBe Map(record.id -> record)
@@ -50,7 +54,8 @@ class TransformableOpsTest extends AnyFunSpec with Matchers with SierraGenerator
           bibIds = List(bibId)
         )
 
-        val sierraTransformable = createSierraTransformableWith(sierraId = bibId)
+        val sierraTransformable =
+          createSierraTransformableWith(sierraId = bibId)
 
         val transformable1 = sierraTransformable.add(record)
         val transformable2 = transformable1.get.add(record)
@@ -87,7 +92,8 @@ class TransformableOpsTest extends AnyFunSpec with Matchers with SierraGenerator
           bibIds = List(bibId)
         )
 
-        val sierraTransformable = createSierraTransformableWith(sierraId = bibId)
+        val sierraTransformable =
+          createSierraTransformableWith(sierraId = bibId)
         val result1 = sierraTransformable.add(record1)
         val result2 = result1.get.add(record2)
 
@@ -104,7 +110,8 @@ class TransformableOpsTest extends AnyFunSpec with Matchers with SierraGenerator
           unlinkedBibIds = List()
         )
 
-        val sierraTransformable = createSierraTransformableWith(sierraId = bibId)
+        val sierraTransformable =
+          createSierraTransformableWith(sierraId = bibId)
 
         val caught = intercept[RuntimeException] {
           sierraTransformable.add(record)
@@ -139,7 +146,8 @@ class TransformableOpsTest extends AnyFunSpec with Matchers with SierraGenerator
           itemRecords = Map.empty
         )
 
-        sierraTransformable.remove(unlinkedItemRecord)
+        sierraTransformable
+          .remove(unlinkedItemRecord)
           .get shouldBe expectedSierraTransformable
       }
 
@@ -164,8 +172,7 @@ class TransformableOpsTest extends AnyFunSpec with Matchers with SierraGenerator
         sierraTransformable.remove(previouslyUnlinkedRecord) shouldBe None
       }
 
-      it(
-        "returns None when merging an unlinked record which has linked more recently") {
+      it("returns None when merging an unlinked record which has linked more recently") {
         val bibId = createSierraBibNumber
 
         val record = createSierraItemRecordWith(

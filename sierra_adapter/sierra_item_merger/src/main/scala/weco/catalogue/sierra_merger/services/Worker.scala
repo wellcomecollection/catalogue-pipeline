@@ -41,7 +41,8 @@ class Worker[Record <: AbstractSierraRecord[_], Destination](
   }
 
   private def sendUpdates(
-    updatedKeys: Seq[Identified[Version[String, Int], S3ObjectLocation]]): Future[Unit] =
+    updatedKeys: Seq[Identified[Version[String, Int], S3ObjectLocation]])
+    : Future[Unit] =
     Future
       .sequence {
         updatedKeys

@@ -1,6 +1,11 @@
 package weco.catalogue.sierra_merger.models
 
-import uk.ac.wellcome.sierra_adapter.model.{AbstractSierraRecord, SierraBibNumber, SierraItemRecord, SierraTransformable}
+import uk.ac.wellcome.sierra_adapter.model.{
+  AbstractSierraRecord,
+  SierraBibNumber,
+  SierraItemRecord,
+  SierraTransformable
+}
 
 trait TransformableOps[Record <: AbstractSierraRecord[_]] {
   def create(id: SierraBibNumber, r: Record): SierraTransformable
@@ -26,14 +31,16 @@ object TransformableOps {
   }
 
   implicit val itemTransformableOps = new TransformableOps[SierraItemRecord] {
-    override def create(sierraId: SierraBibNumber, itemRecord: SierraItemRecord): SierraTransformable =
+    override def create(sierraId: SierraBibNumber,
+                        itemRecord: SierraItemRecord): SierraTransformable =
       SierraTransformable(
         sierraId = sierraId,
         itemRecords = Map(itemRecord.id -> itemRecord)
       )
 
-    override def add(sierraTransformable: SierraTransformable,
-                     itemRecord: SierraItemRecord): Option[SierraTransformable] = {
+    override def add(
+      sierraTransformable: SierraTransformable,
+      itemRecord: SierraItemRecord): Option[SierraTransformable] = {
       if (!itemRecord.bibIds.contains(sierraTransformable.sierraId)) {
         throw new RuntimeException(
           s"Non-matching bib id ${sierraTransformable.sierraId} in item bib ${itemRecord.bibIds}")
@@ -47,12 +54,13 @@ object TransformableOps {
       //    just received?  If the existing data is older, we need to merge the
       //    new record.
       //
-      val isNewerData = sierraTransformable.itemRecords.get(itemRecord.id) match {
-        case Some(existing) =>
-          itemRecord.modifiedDate.isAfter(existing.modifiedDate) ||
-            itemRecord.modifiedDate == existing.modifiedDate
-        case None => true
-      }
+      val isNewerData =
+        sierraTransformable.itemRecords.get(itemRecord.id) match {
+          case Some(existing) =>
+            itemRecord.modifiedDate.isAfter(existing.modifiedDate) ||
+              itemRecord.modifiedDate == existing.modifiedDate
+          case None => true
+        }
 
       if (isNewerData) {
         val itemData = sierraTransformable.itemRecords + (itemRecord.id -> itemRecord)
@@ -62,8 +70,9 @@ object TransformableOps {
       }
     }
 
-    override def remove(sierraTransformable: SierraTransformable,
-                        itemRecord: SierraItemRecord): Option[SierraTransformable] = {
+    override def remove(
+      sierraTransformable: SierraTransformable,
+      itemRecord: SierraItemRecord): Option[SierraTransformable] = {
       if (!itemRecord.unlinkedBibIds.contains(sierraTransformable.sierraId)) {
         throw new RuntimeException(
           s"Non-matching bib id ${sierraTransformable.sierraId} in item unlink bibs ${itemRecord.unlinkedBibIds}")

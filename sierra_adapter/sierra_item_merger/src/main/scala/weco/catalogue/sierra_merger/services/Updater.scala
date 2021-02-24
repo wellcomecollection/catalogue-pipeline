@@ -41,8 +41,7 @@ class Updater[Record <: AbstractSierraRecord[_]](
     }.sequence
   }
 
-  private def linkBib(bibId: SierraBibNumber,
-                      record: Record): Either[
+  private def linkBib(bibId: SierraBibNumber, record: Record): Either[
     StorageError,
     Identified[Version[String, Int], S3ObjectLocation]] = {
     val newTransformable = transformableOps.create(bibId, record)
@@ -60,8 +59,7 @@ class Updater[Record <: AbstractSierraRecord[_]](
       .map { case Identified(id, (location, _)) => Identified(id, location) }
   }
 
-  private def unlinkBib(unlinkedBibId: SierraBibNumber,
-                        record: Record)
+  private def unlinkBib(unlinkedBibId: SierraBibNumber, record: Record)
     : Either[StorageError, Identified[Version[String, Int], S3ObjectLocation]] =
     sourceVHS
       .update(unlinkedBibId.withoutCheckDigit) {

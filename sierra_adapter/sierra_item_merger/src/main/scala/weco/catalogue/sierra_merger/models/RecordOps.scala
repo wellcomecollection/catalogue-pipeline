@@ -1,7 +1,11 @@
 package weco.catalogue.sierra_merger.models
 
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.sierra_adapter.model.{AbstractSierraRecord, SierraBibNumber, SierraItemRecord}
+import uk.ac.wellcome.sierra_adapter.model.{
+  AbstractSierraRecord,
+  SierraBibNumber,
+  SierraItemRecord
+}
 
 trait RecordOps[Record <: AbstractSierraRecord[_]] extends Logging {
   def getBibIds(r: Record): List[SierraBibNumber]
@@ -10,7 +14,8 @@ trait RecordOps[Record <: AbstractSierraRecord[_]] extends Logging {
 }
 
 object RecordOps {
-  implicit class SierraRecordOps[Record <: AbstractSierraRecord[_]](r: Record)(implicit ops: RecordOps[Record]) {
+  implicit class SierraRecordOps[Record <: AbstractSierraRecord[_]](r: Record)(
+    implicit ops: RecordOps[Record]) {
     def linkedBibIds: List[SierraBibNumber] =
       ops.getBibIds(r)
 
@@ -19,10 +24,12 @@ object RecordOps {
   }
 
   implicit val itemRecordOps = new RecordOps[SierraItemRecord] {
-    override def getBibIds(itemRecord: SierraItemRecord): List[SierraBibNumber] =
+    override def getBibIds(
+      itemRecord: SierraItemRecord): List[SierraBibNumber] =
       itemRecord.bibIds
 
-    override def getUnlinkedBibIds(itemRecord: SierraItemRecord): List[SierraBibNumber] =
+    override def getUnlinkedBibIds(
+      itemRecord: SierraItemRecord): List[SierraBibNumber] =
       itemRecord.unlinkedBibIds
   }
 }
