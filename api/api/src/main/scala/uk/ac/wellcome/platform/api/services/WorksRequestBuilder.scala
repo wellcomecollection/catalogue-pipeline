@@ -8,7 +8,12 @@ import com.sksamuel.elastic4s.requests.searches.queries._
 import com.sksamuel.elastic4s.requests.searches.sort._
 import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.platform.api.models._
-import uk.ac.wellcome.models.work.internal.WorkType
+import uk.ac.wellcome.models.work.internal.{
+  Availability,
+  Format,
+  License,
+  WorkType
+}
 import uk.ac.wellcome.platform.api.rest.PaginationQuery
 
 object WorksRequestBuilder
@@ -41,7 +46,7 @@ object WorksRequestBuilder
   private def toAggregation(aggReq: WorkAggregationRequest) = aggReq match {
     case WorkAggregationRequest.Format =>
       TermsAggregation("format")
-        .size(100)
+        .size(Format.values.size)
         .field("data.format.id")
         .minDocCount(0)
 
@@ -79,14 +84,20 @@ object WorksRequestBuilder
 
     case WorkAggregationRequest.License =>
       TermsAggregation("license")
-        .size(100)
+        .size(License.values.size)
         .field("data.items.locations.license.id")
         .minDocCount(0)
 
     case WorkAggregationRequest.ItemLocationType =>
       TermsAggregation("locationType")
-        .size(100)
+        .size(2)
         .field("data.items.locations.type")
+        .minDocCount(0)
+
+    case WorkAggregationRequest.Availabilities =>
+      TermsAggregation("availabilities")
+        .size(Availability.values.size)
+        .field("state.derivedData.availabilities.id")
         .minDocCount(0)
   }
 

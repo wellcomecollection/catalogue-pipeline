@@ -18,4 +18,6 @@ object WorkAggregationRequest {
   case object License extends WorkAggregationRequest
 
   case object ItemLocationType extends WorkAggregationRequest
+
+  case object Availabilities extends WorkAggregationRequest
 }

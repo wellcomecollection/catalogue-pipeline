@@ -19,6 +19,7 @@ case class WorkAggregations(
   contributors: Option[Aggregation[Contributor[Minted]]] = None,
   license: Option[Aggregation[License]] = None,
   locationType: Option[Aggregation[LocationTypeQuery]] = None,
+  availabilities: Option[Aggregation[Availability]] = None,
 )
 
 object WorkAggregations extends ElasticAggregations {
@@ -39,7 +40,9 @@ object WorkAggregations extends ElasticAggregations {
             .decodeAgg[Contributor[Minted]]("contributors"),
           license = e4sAggregations.decodeAgg[License]("license"),
           locationType =
-            e4sAggregations.decodeAgg[LocationTypeQuery]("locationType")
+            e4sAggregations.decodeAgg[LocationTypeQuery]("locationType"),
+          availabilities =
+            e4sAggregations.decodeAgg[Availability]("availabilities")
         ))
     } else {
       None
@@ -62,13 +65,8 @@ object WorkAggregations extends ElasticAggregations {
   implicit val decodeFormatFromId: Decoder[Format] =
     Decoder.decodeString.emap(Format.withNameEither(_).getMessage)
 
-  implicit val decodeFormat: Decoder[Format] =
-    Decoder.decodeString.emap { str =>
-      Format.fromCode(str) match {
-        case Some(format) => Right(format)
-        case None         => Left(s"couldn't find format for code '$str'")
-      }
-    }
+  implicit val decodeAvailabilityFromId: Decoder[Availability] =
+    Decoder.decodeString.emap(Availability.withNameEither(_).getMessage)
 
   // Both the Calm and Sierra transformers use the MARC language code list
   // to populate the "languages" field, so we can use the ID (code) to

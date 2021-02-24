@@ -12,6 +12,7 @@ import uk.ac.wellcome.display.models.{
   WorkAggregationRequest
 }
 import uk.ac.wellcome.platform.api.models.{
+  AvailabilitiesFilter,
   ContributorsFilter,
   FormatFilter,
   GenreFilter,
@@ -114,6 +115,8 @@ class WorkFiltersAndAggregationsBuilder(
       case _: LicenseFilter      => Some(WorkAggregationRequest.License)
       case _: ItemLocationTypeFilter =>
         Some(WorkAggregationRequest.ItemLocationType)
+      case _: AvailabilitiesFilter =>
+        Some(WorkAggregationRequest.Availabilities)
       case _ => None
     }
 }
