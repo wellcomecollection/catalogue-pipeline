@@ -19,6 +19,7 @@ case class WorkAggregations(
   contributors: Option[Aggregation[Contributor[Minted]]] = None,
   license: Option[Aggregation[License]] = None,
   locationType: Option[Aggregation[LocationTypeQuery]] = None,
+  availabilities: Option[Aggregation[Availability]] = None,
 )
 
 object WorkAggregations extends ElasticAggregations {
@@ -39,7 +40,9 @@ object WorkAggregations extends ElasticAggregations {
             .decodeAgg[Contributor[Minted]]("contributors"),
           license = e4sAggregations.decodeAgg[License]("license"),
           locationType =
-            e4sAggregations.decodeAgg[LocationTypeQuery]("locationType")
+            e4sAggregations.decodeAgg[LocationTypeQuery]("locationType"),
+          availabilities =
+            e4sAggregations.decodeAgg[Availability]("availabilities")
         ))
     } else {
       None
@@ -47,7 +50,7 @@ object WorkAggregations extends ElasticAggregations {
   }
 
   // Elasticsearch encodes the date key as milliseconds since the epoch
-  implicit val decodePeriod: Decoder[Period[Minted]] =
+  implicit val decodePeriodFromEpochMilli: Decoder[Period[Minted]] =
     Decoder.decodeLong.emap { epochMilli =>
       Try { Instant.ofEpochMilli(epochMilli) }
         .map { instant =>
@@ -59,24 +62,16 @@ object WorkAggregations extends ElasticAggregations {
         .getOrElse { Left("Error decoding") }
     }
 
-  implicit val decodeLicense: Decoder[License] =
-    Decoder.decodeString.emap { str =>
-      Try(License.createLicense(str)).toEither.left
-        .map(err => err.getMessage)
-    }
+  implicit val decodeFormatFromId: Decoder[Format] =
+    Decoder.decodeString.emap(Format.withNameEither(_).getMessage)
 
-  implicit val decodeFormat: Decoder[Format] =
-    Decoder.decodeString.emap { str =>
-      Format.fromCode(str) match {
-        case Some(format) => Right(format)
-        case None         => Left(s"couldn't find format for code '$str'")
-      }
-    }
+  implicit val decodeAvailabilityFromId: Decoder[Availability] =
+    Decoder.decodeString.emap(Availability.withNameEither(_).getMessage)
 
   // Both the Calm and Sierra transformers use the MARC language code list
   // to populate the "languages" field, so we can use the ID (code) to
   // unambiguously identify a language.
-  implicit val decodeLanguage: Decoder[Language] =
+  implicit val decodeLanguageFromCode: Decoder[Language] =
     Decoder.decodeString.emap { code =>
       MarcLanguageCodeList.lookupByCode(code) match {
         case Some(lang) => Right(lang)

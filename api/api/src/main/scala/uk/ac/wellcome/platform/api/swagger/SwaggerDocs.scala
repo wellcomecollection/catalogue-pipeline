@@ -411,7 +411,8 @@ trait MultipleWorksSwagger {
             "license",
             "languages",
             "locationType",
-            "items.locations.type")),
+            "items.locations.type",
+            "availabilities")),
         required = false
       ),
       new Parameter(
@@ -448,6 +449,12 @@ trait MultipleWorksSwagger {
         name = "partOf",
         in = ParameterIn.QUERY,
         description = "Filter the work by partOf relation.",
+        required = false
+      ),
+      new Parameter(
+        name = "availabilities",
+        in = ParameterIn.QUERY,
+        description = "Filter the work by availabilities.",
         required = false
       ),
       new Parameter(

@@ -566,4 +566,63 @@ class WorksAggregationsTest
         }
     }
   }
+
+  it("supports aggregating on availabilities") {
+    val items = List(
+      List(createIdentifiedPhysicalItem),
+      List(createIdentifiedPhysicalItem),
+      List(createDigitalItemWith(accessStatus = AccessStatus.Open)),
+      List(createDigitalItemWith(accessStatus = AccessStatus.Open)),
+      List(createDigitalItemWith(accessStatus = AccessStatus.OpenWithAdvisory)),
+      List(
+        createIdentifiedPhysicalItem,
+        createDigitalItemWith(accessStatus = AccessStatus.Open))
+    )
+    val works = items.map(indexedWork().items(_))
+
+    withWorksApi {
+      case (worksIndex, routes) =>
+        insertIntoElasticsearch(worksIndex, works: _*)
+        assertJsonResponse(
+          routes = routes,
+          path = s"/$apiPrefix/works?aggregations=availabilities"
+        ) {
+          Status.OK -> s"""
+            {
+              ${resultList(apiPrefix, totalResults = works.size)},
+              "aggregations": {
+                "availabilities": {
+                  "buckets": [
+                    {
+                      "count": 4,
+                      "data": {
+                        "label": "Online",
+                        "id": "online",
+                        "type" : "Availability"
+                      },
+                      "type": "AggregationBucket"
+                    },
+                    {
+                      "count": 3,
+                      "data": {
+                        "label": "In the library",
+                        "id": "in-library",
+                        "type" : "Availability"
+                      },
+                      "type": "AggregationBucket"
+                    }
+                  ],
+                  "type": "Aggregation"
+                },
+                "type": "Aggregations"
+              },
+              "results": [${works
+                            .sortBy { _.state.canonicalId }
+                            .map(workResponse)
+                            .mkString(",")}]
+            }
+          """.stripMargin
+        }
+    }
+  }
 }

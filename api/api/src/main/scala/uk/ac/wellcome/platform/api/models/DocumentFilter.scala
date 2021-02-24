@@ -45,3 +45,5 @@ case class AccessStatusFilter(includes: List[AccessStatus],
     extends WorkFilter
 
 case class PartOfFilter(id: String) extends WorkFilter
+
+case class AvailabilitiesFilter(availabilityIds: Seq[String]) extends WorkFilter
