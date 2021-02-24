@@ -2,7 +2,6 @@ package weco.catalogue.sierra_record_merger.services
 
 import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
-import uk.ac.wellcome.platform.sierra_item_merger.fixtures.SierraItemMergerFixtures
 import uk.ac.wellcome.sierra_adapter.model.Implicits._
 import uk.ac.wellcome.sierra_adapter.model.{
   SierraGenerators,
@@ -19,6 +18,7 @@ import uk.ac.wellcome.storage.store.{
   VersionedHybridStore
 }
 import uk.ac.wellcome.storage.{StoreWriteError, UpdateWriteError, Version}
+import weco.catalogue.sierra_record_merger.fixtures.RecordMergerFixtures
 import weco.catalogue.source_model.fixtures.SourceVHSFixture
 import weco.catalogue.source_model.store.SourceVHS
 
@@ -26,7 +26,7 @@ class UpdaterTest
     extends AnyFunSpec
     with EitherValues
     with SierraGenerators
-    with SierraItemMergerFixtures
+    with RecordMergerFixtures
     with SourceVHSFixture {
 
   it("creates a record if it receives an item with a bibId that doesn't exist") {
