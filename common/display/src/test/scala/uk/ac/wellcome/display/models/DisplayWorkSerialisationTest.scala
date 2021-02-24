@@ -38,7 +38,9 @@ class DisplayWorkSerialisationTest
       | "lettering": "${work.data.lettering.get}",
       | "alternativeTitles": [],
       | "createdDate": ${period(work.data.createdDate.get)},
-      | "availableOnline": false
+      | "availableOnline": false,
+      | "availabilities": [${availabilities(
+                            work.state.derivedData.availabilities)}]
       |}
     """.stripMargin
 
@@ -56,7 +58,9 @@ class DisplayWorkSerialisationTest
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
       | "items": [ ${items(work.data.items)} ],
-      | "availableOnline": true
+      | "availableOnline": true,
+      | "availabilities": [${availabilities(
+                            work.state.derivedData.availabilities)}]
       |}
     """.stripMargin
 
@@ -76,7 +80,9 @@ class DisplayWorkSerialisationTest
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
       | "items": [ ],
-      | "availableOnline": false
+      | "availableOnline": false,
+      | "availabilities": [${availabilities(
+                            work.state.derivedData.availabilities)}]
       |}
     """.stripMargin
 
@@ -96,7 +102,8 @@ class DisplayWorkSerialisationTest
     val item = createIdentifiedItemWith(locations = List(location))
     val workWithCopyright = indexedWork().items(List(item))
 
-    val expectedJson = s"""
+    val expectedJson =
+      s"""
       |{
       | "type": "Work",
       | "id": "${workWithCopyright.state.canonicalId}",
@@ -118,7 +125,9 @@ class DisplayWorkSerialisationTest
       |     ]
       |   }
       | ],
-      | "availableOnline": true
+      | "availableOnline": true,
+      | "availabilities": [${availabilities(
+           workWithCopyright.state.derivedData.availabilities)}]
       |}
     """.stripMargin
 
@@ -144,7 +153,9 @@ class DisplayWorkSerialisationTest
       | "title": "${workWithSubjects.data.title.get}",
       | "alternativeTitles": [],
       | "subjects": [${subjects(workWithSubjects.data.subjects)}],
-      | "availableOnline": false
+      | "availableOnline": false,
+      | "availabilities": [${availabilities(
+                            workWithSubjects.state.derivedData.availabilities)}]
       |}
     """.stripMargin
 
@@ -163,14 +174,17 @@ class DisplayWorkSerialisationTest
       createProductionEventList(count = 3)
     )
 
-    val expectedJson = s"""
+    val expectedJson =
+      s"""
       |{
       | "type": "Work",
       | "id": "${workWithProduction.state.canonicalId}",
       | "title": "${workWithProduction.data.title.get}",
       | "alternativeTitles": [],
       | "production": [${production(workWithProduction.data.production)}],
-      | "availableOnline": false
+      | "availableOnline": false,
+      | "availabilities": [${availabilities(
+           workWithProduction.state.derivedData.availabilities)}]
       |}
     """.stripMargin
 
@@ -207,7 +221,9 @@ class DisplayWorkSerialisationTest
       | "lettering": "${work.data.lettering.get}",
       | "createdDate": ${period(work.data.createdDate.get)},
       | "contributors": [${contributor(work.data.contributors.head)}],
-      | "availableOnline": false
+      | "availableOnline": false,
+      | "availabilities": [${availabilities(
+                            work.state.derivedData.availabilities)}]
       |}
     """.stripMargin
 
@@ -235,7 +251,9 @@ class DisplayWorkSerialisationTest
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
       | "genres": [ ${genres(work.data.genres)} ],
-      | "availableOnline": false
+      | "availableOnline": false,
+      | "availabilities": [${availabilities(
+                            work.state.derivedData.availabilities)}]
       |}
     """.stripMargin
 
@@ -277,7 +295,9 @@ class DisplayWorkSerialisationTest
       |     "type": "Note"
       |   }
       | ],
-      | "availableOnline": false
+      | "availableOnline": false,
+      | "availabilities": [${availabilities(
+                            work.state.derivedData.availabilities)}]
       |}
     """.stripMargin
 
@@ -301,7 +321,9 @@ class DisplayWorkSerialisationTest
       |   ${identifier(work.sourceIdentifier)},
       |   ${identifier(otherIdentifier)}
       | ],
-      | "availableOnline": false
+      | "availableOnline": false,
+      | "availabilities": [${availabilities(
+                            work.state.derivedData.availabilities)}]
       |}
     """.stripMargin
 
@@ -321,7 +343,9 @@ class DisplayWorkSerialisationTest
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
       | "identifiers": [ ${identifier(work.sourceIdentifier)} ],
-      | "availableOnline": false
+      | "availableOnline": false,
+      | "availabilities": [${availabilities(
+                            work.state.derivedData.availabilities)}]
       |}
     """.stripMargin
 
@@ -343,7 +367,9 @@ class DisplayWorkSerialisationTest
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
       | "images": [${workImageIncludes(work.data.imageData)}],
-      | "availableOnline": false
+      | "availableOnline": false,
+      | "availabilities": [${availabilities(
+                            work.state.derivedData.availabilities)}]
       |}
     """.stripMargin
 
@@ -369,7 +395,9 @@ class DisplayWorkSerialisationTest
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
       | "thumbnail": ${location(work.data.thumbnail.get)},
-      | "availableOnline": false
+      | "availableOnline": false,
+      | "availabilities": [${availabilities(
+                            work.state.derivedData.availabilities)}]
       |}
     """.stripMargin
 

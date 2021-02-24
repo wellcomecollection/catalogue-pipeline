@@ -32,7 +32,9 @@ class DisplayLocationsSerialisationTest
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
       | "items": [ ${items(work.data.items)} ],
-      | "availableOnline": false
+      | "availableOnline": false,
+      | "availabilities": [${availabilities(
+                            work.state.derivedData.availabilities)}]
       |}
     """.stripMargin
 
@@ -56,7 +58,9 @@ class DisplayLocationsSerialisationTest
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
       | "items": [ ${items(work.data.items)} ],
-      | "availableOnline": true
+      | "availableOnline": true,
+      | "availabilities": [${availabilities(
+                            work.state.derivedData.availabilities)}]
       |}
     """.stripMargin
 
@@ -81,7 +85,9 @@ class DisplayLocationsSerialisationTest
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
       | "items": [ ${items(work.data.items)} ],
-      | "availableOnline": true
+      | "availableOnline": true,
+      | "availabilities": [${availabilities(
+                            work.state.derivedData.availabilities)}]
       |}
     """.stripMargin
 
@@ -112,7 +118,9 @@ class DisplayLocationsSerialisationTest
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
       | "items": [ ${items(work.data.items)} ],
-      | "availableOnline": true
+      | "availableOnline": true,
+      | "availabilities": [${availabilities(
+                            work.state.derivedData.availabilities)}]
       |}
     """.stripMargin
 
