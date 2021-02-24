@@ -6,8 +6,10 @@ module "merger_queue" {
   aws_region      = var.aws_region
   alarm_topic_arn = var.dlq_alarm_arn
 
-  # This has to be longer than the `flush_interval_seconds` in the merger
-  visibility_timeout_seconds = 10 * 60
+  # This has to be longer than the `flush_interval_seconds` in the merger.
+  # It also has to be long enough for the Work to actually get processed,
+  # and some of them are quite big.
+  visibility_timeout_seconds = 20 * 60
 }
 
 module "merger" {
