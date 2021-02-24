@@ -3,6 +3,7 @@ package uk.ac.wellcome.models.work.generators
 import uk.ac.wellcome.fixtures.RandomGenerators
 import uk.ac.wellcome.models.work.internal.{
   AccessCondition,
+  AccessStatus,
   DigitalLocation,
   DigitalLocationType,
   License,
@@ -63,4 +64,12 @@ trait LocationGenerators extends RandomGenerators {
     createDigitalLocationWith(
       locationType = LocationType.IIIFPresentationAPI
     )
+
+  def createAccessConditionWith(
+    status: Option[AccessStatus] = Some(AccessStatus.Open)
+  ): AccessCondition = AccessCondition(
+    status = status,
+    terms = None,
+    to = None
+  )
 }

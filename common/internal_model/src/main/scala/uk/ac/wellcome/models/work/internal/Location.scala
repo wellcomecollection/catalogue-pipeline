@@ -5,6 +5,9 @@ sealed trait Location {
   val accessConditions: List[AccessCondition]
   val license: Option[License]
 
+  def isAvailable: Boolean =
+    accessConditions.exists(_.isAvailable)
+
   def hasRestrictions: Boolean =
     accessConditions.exists(_.hasRestrictions)
 }

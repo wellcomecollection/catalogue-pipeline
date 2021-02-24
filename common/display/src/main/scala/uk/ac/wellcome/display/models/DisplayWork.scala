@@ -80,6 +80,10 @@ case class DisplayWork(
     `type` = "Boolean"
   ) availableOnline: Boolean = false,
   @Schema(
+    description = "Ways in which the work is available to access",
+    `type` = "List[uk.ac.wellcome.display.modules.DisplayAvailability]"
+  ) availabilities: List[DisplayAvailability] = Nil,
+  @Schema(
     description = "Relates a work to its production events."
   ) production: Option[List[DisplayProductionEvent]] = None,
   @Schema(
@@ -161,6 +165,9 @@ object DisplayWork {
           })
         else None,
       availableOnline = work.state.derivedData.availableOnline,
+      availabilities = work.state.derivedData.availabilities.map {
+        DisplayAvailability(_)
+      },
       production =
         if (includes.production) Some(work.data.production.map {
           DisplayProductionEvent(_, includesIdentifiers = includes.identifiers)
