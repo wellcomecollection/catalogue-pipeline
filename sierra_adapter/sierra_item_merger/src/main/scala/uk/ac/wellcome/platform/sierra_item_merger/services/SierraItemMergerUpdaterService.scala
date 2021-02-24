@@ -1,9 +1,6 @@
 package uk.ac.wellcome.platform.sierra_item_merger.services
 
-import uk.ac.wellcome.platform.sierra_item_merger.links.{
-  ItemMerger,
-  ItemUnmerger
-}
+import uk.ac.wellcome.platform.sierra_item_merger.links.ItemUnmerger
 import uk.ac.wellcome.sierra_adapter.model.{
   SierraBibNumber,
   SierraItemRecord,
@@ -22,6 +19,8 @@ import weco.catalogue.source_model.store.SourceVHS
 class SierraItemMergerUpdaterService(
   sourceVHS: SourceVHS[SierraTransformable]
 ) {
+
+  import weco.catalogue.sierra_merger.models.TransformableOps._
 
   def update(itemRecord: SierraItemRecord)
     : Either[StorageError,
@@ -50,14 +49,13 @@ class SierraItemMergerUpdaterService(
 
     sourceVHS
       .upsert(bibId.withoutCheckDigit)(newTransformable) {
-        existingTransformable =>
-          ItemMerger.mergeItemRecord(existingTransformable, itemRecord) match {
-            case Some(updatedRecord) => Right(updatedRecord)
-            case None =>
-              Left(
-                UpdateNotApplied(
-                  new Throwable(s"Bib $bibId is already up to date")))
-          }
+        _.add(itemRecord) match {
+          case Some(updatedRecord) => Right(updatedRecord)
+          case None =>
+            Left(
+              UpdateNotApplied(
+                new Throwable(s"Bib $bibId is already up to date")))
+        }
       }
       .map { case Identified(id, (location, _)) => Identified(id, location) }
   }
