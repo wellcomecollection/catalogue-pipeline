@@ -29,6 +29,7 @@ import uk.ac.wellcome.models.work.internal.InvisibilityReason.{
   SourceFieldMissing,
   UnableToTransform
 }
+import uk.ac.wellcome.models.work.internal.LocationType.OnlineResource
 
 class SierraTransformerTest
     extends AnyFunSpec
@@ -900,6 +901,46 @@ class SierraTransformerTest
     )
   }
 
+  it("creates an item from field 856") {
+    val id = createSierraBibNumber
+    val data =
+      s"""
+         |{
+         |  "id": "$id",
+         |  "varFields": [
+         |    ${createTitleVarfield()},
+         |    {
+         |      "marcTag": "856",
+         |      "subfields": [
+         |        {"tag": "u", "content": "https://example.org/journal"},
+         |        {"tag": "z", "content": "View this journal"}
+         |      ]
+         |    }
+         |  ]
+         |}
+       """.stripMargin
+
+    val sierraTransformable = createSierraTransformableWith(
+      maybeBibRecord = Some(createSierraBibRecordWith(id = id, data = data))
+    )
+
+    val work = transformToWork(sierraTransformable)
+
+    val items = work.data.items
+
+    items should contain(
+      Item(
+        title = None,
+        locations = List(
+          DigitalLocation(
+            url = "https://example.org/journal",
+            linkText = Some("View this journal"),
+            locationType = OnlineResource
+          )
+        )
+      ))
+  }
+
   describe("throws a TransformerException when passed invalid data") {
     it("an item record") {
       val bibRecord = createSierraBibRecord
@@ -965,13 +1006,12 @@ class SierraTransformerTest
                             modifiedDate: Instant,
                             bibIds: List[SierraBibNumber]) =
     s"""
-                                                                                                               |{
-                                                                                                               |  "id": "$id",
-                                                                                                               |  "updatedDate": "${modifiedDate.toString}",
-                                                                                                               |  "bibIds": ${toJson(
-         bibIds).get}
-                                                                                                               |}
-                                                                                                               |""".stripMargin
+      |{
+      |  "id": "$id",
+      |  "updatedDate": "${modifiedDate.toString}",
+      |  "bibIds": ${toJson(bibIds).get}
+      |}
+      |""".stripMargin
 
   private def transformDataToWork(
     id: SierraBibNumber,
