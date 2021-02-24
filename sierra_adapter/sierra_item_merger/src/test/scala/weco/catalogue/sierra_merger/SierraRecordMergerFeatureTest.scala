@@ -1,9 +1,11 @@
 package weco.catalogue.sierra_merger
 
 import io.circe.Encoder
+import io.circe.generic.semiauto.deriveEncoder
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.fixtures.TestWith
+import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
@@ -11,12 +13,13 @@ import uk.ac.wellcome.sierra_adapter.model._
 import uk.ac.wellcome.sierra_adapter.model.Implicits._
 import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
 import uk.ac.wellcome.storage.Version
+import weco.catalogue.sierra_merger.fixtures.RecordMergerFixtures
 import weco.catalogue.sierra_merger.models.TransformableOps
 import weco.catalogue.sierra_merger.services.Worker
 import weco.catalogue.source_model.fixtures.SourceVHSFixture
 import weco.catalogue.source_model.store.SourceVHS
 
-trait SierraRecordMergerFeatureTest[Record <: AbstractSierraRecord[_]]
+trait SierraRecordMergerFeatureTestCases[Record <: AbstractSierraRecord[_]]
     extends AnyFunSpec
     with SQS
     with SourceVHSFixture
@@ -28,7 +31,7 @@ trait SierraRecordMergerFeatureTest[Record <: AbstractSierraRecord[_]]
   def withWorker[R](queue: Queue,
                     sourceVHS: SourceVHS[SierraTransformable] =
                       createSourceVHS[SierraTransformable])(
-    testWith: TestWith[(Worker[SierraItemRecord, String], MemoryMessageSender),
+    testWith: TestWith[(Worker[Record, String], MemoryMessageSender),
                        R]): R
 
   def createRecordWith(bibIds: List[SierraBibNumber]): Record
@@ -103,32 +106,53 @@ trait SierraRecordMergerFeatureTest[Record <: AbstractSierraRecord[_]]
     }
   }
 
+  val recordCanBeLinkedToMultipleBibs: Boolean = true
+
   it("sends a notification for every transformable which changes") {
-    withLocalSqsQueue() { queue =>
-      val bibIds = createSierraBibNumbers(3)
-      val record = createRecordWith(bibIds = bibIds)
+    if (recordCanBeLinkedToMultipleBibs) {
+      withLocalSqsQueue() { queue =>
+        val bibIds = createSierraBibNumbers(3)
+        val record = createRecordWith(bibIds = bibIds)
 
-      val sourceVHS = createSourceVHS[SierraTransformable]
+        val sourceVHS = createSourceVHS[SierraTransformable]
 
-      withWorker(queue, sourceVHS) {
-        case (_, messageSender) =>
-          sendNotificationToSQS(queue = queue, record)
+        withWorker(queue, sourceVHS) {
+          case (_, messageSender) =>
+            sendNotificationToSQS(queue = queue, record)
 
-          val expectedTransformables = bibIds.map { bibId =>
-            transformableOps.create(bibId, record)
-          }
-
-          eventually {
-            expectedTransformables.map { tranformable =>
-              assertStoredAndSent(
-                Version(tranformable.sierraId.withoutCheckDigit, 0),
-                tranformable,
-                sourceVHS,
-                messageSender
-              )
+            val expectedTransformables = bibIds.map { bibId =>
+              transformableOps.create(bibId, record)
             }
-          }
+
+            eventually {
+              expectedTransformables.map { tranformable =>
+                assertStoredAndSent(
+                  Version(tranformable.sierraId.withoutCheckDigit, 0),
+                  tranformable,
+                  sourceVHS,
+                  messageSender
+                )
+              }
+            }
+        }
       }
     }
   }
+}
+
+class SierraItemRecordMergerFeatureTest
+  extends SierraRecordMergerFeatureTestCases[SierraItemRecord]
+    with RecordMergerFixtures {
+  override def withWorker[R](queue: Queue, sourceVHS: SourceVHS[SierraTransformable])(testWith: TestWith[(Worker[SierraItemRecord, String], MemoryMessageSender), R]): R =
+    withRunningWorker[SierraItemRecord, R](queue, sourceVHS) {
+      testWith
+    }
+
+  override def createRecordWith(bibIds: List[SierraBibNumber]): SierraItemRecord =
+    createSierraItemRecordWith(bibIds = bibIds)
+
+  override implicit val encoder: Encoder[SierraItemRecord] = deriveEncoder
+
+  override implicit val transformableOps: TransformableOps[SierraItemRecord] =
+    TransformableOps.itemTransformableOps
 }
