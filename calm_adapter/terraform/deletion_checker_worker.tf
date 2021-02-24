@@ -19,7 +19,14 @@ module "deletion_checker_worker" {
     queue_url             = module.calm_deletion_checker_queue.url
     topic_arn             = module.calm_deletions_topic.arn
     vhs_dynamo_table_name = module.vhs.table_name
-    batch_size            = 1000
+    // Choosing the batch size is a tradeoff between number of requests
+    // and the size of those requests; smaller batches mean more requests
+    // but with a smaller maximum request size.
+    //
+    // Given that the Calm API errors before resource exhaustion occurs
+    // it seems that batch size might be an issue, so this has been tuned
+    // down from 1000.
+    batch_size = 512
   }
   secret_env_vars = {
     calm_api_username = "calm_adapter/calm_api/username"
@@ -27,7 +34,7 @@ module "deletion_checker_worker" {
   }
 
   min_capacity = 0
-  max_capacity = local.deletion_checking_enabled ? 2 : 0
+  max_capacity = local.deletion_checking_enabled ? 1 : 0
 
   cpu    = 512
   memory = 1024
