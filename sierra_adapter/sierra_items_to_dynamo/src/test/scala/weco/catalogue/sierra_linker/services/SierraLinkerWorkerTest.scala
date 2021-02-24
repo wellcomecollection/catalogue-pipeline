@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.sierra_items_to_dynamo.services
+package weco.catalogue.sierra_linker.services
 
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
@@ -7,9 +7,6 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
-import uk.ac.wellcome.platform.sierra_items_to_dynamo.fixtures.WorkerServiceFixture
-import uk.ac.wellcome.platform.sierra_items_to_dynamo.merger.SierraItemRecordMerger
-import uk.ac.wellcome.platform.sierra_items_to_dynamo.models.SierraItemLink
 import uk.ac.wellcome.sierra_adapter.model.{
   SierraGenerators,
   SierraItemNumber,
@@ -18,15 +15,17 @@ import uk.ac.wellcome.sierra_adapter.model.{
 import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
 import uk.ac.wellcome.storage.Version
 import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
+import weco.catalogue.sierra_linker.fixtures.WorkerFixture
+import weco.catalogue.sierra_linker.models.{Link, LinkOps}
 
-class SierraItemsToDynamoWorkerServiceTest
+class SierraLinkerWorkerTest
     extends AnyFunSpec
     with Matchers
     with Eventually
     with IntegrationPatience
     with ScalaFutures
     with SierraGenerators
-    with WorkerServiceFixture
+    with WorkerFixture
     with SierraAdapterHelpers {
 
   it("reads a Sierra record from SQS and stores it") {
@@ -47,20 +46,20 @@ class SierraItemsToDynamoWorkerServiceTest
       bibIds = bibIds2
     )
 
-    val expectedLink = SierraItemRecordMerger
-      .mergeItems(existingLink = SierraItemLink(record1), newRecord = record2)
+    val expectedLink = LinkOps.itemLinksOps
+      .updateLink(existingLink = Link(record1), newRecord = record2)
       .get
 
-    val store = MemoryVersionedStore[SierraItemNumber, SierraItemLink](
+    val store = MemoryVersionedStore[SierraItemNumber, Link](
       initialEntries = Map(
-        Version(record1.id, 1) -> SierraItemLink(record1)
+        Version(record1.id, 1) -> Link(record1)
       )
     )
 
     val messageSender = new MemoryMessageSender
 
     withLocalSqsQueue() { queue =>
-      withWorkerService(queue, store, messageSender = messageSender) { _ =>
+      withItemWorker(queue, store, messageSender = messageSender) { _ =>
         sendNotificationToSQS(queue = queue, message = record2)
 
         eventually {
@@ -77,22 +76,26 @@ class SierraItemsToDynamoWorkerServiceTest
 
     val messageSender = new MemoryMessageSender
 
+    val store =
+      MemoryVersionedStore[SierraItemNumber, Link](initialEntries = Map.empty)
+
     withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>
-        withWorkerService(queue, messageSender = messageSender) { _ =>
-          (1 to 5).foreach { _ =>
-            sendNotificationToSQS(queue = queue, message = record)
-          }
-
-          eventually {
-            assertQueueEmpty(queue)
-            assertQueueEmpty(dlq)
-
-            messageSender.getMessages[SierraItemRecord] shouldBe (1 to 5).map {
-              _ =>
-                record
+        withItemWorker(queue, store = store, messageSender = messageSender) {
+          _ =>
+            (1 to 5).foreach { _ =>
+              sendNotificationToSQS(queue = queue, message = record)
             }
-          }
+
+            eventually {
+              assertQueueEmpty(queue)
+              assertQueueEmpty(dlq)
+
+              messageSender
+                .getMessages[SierraItemRecord] shouldBe (1 to 5).map { _ =>
+                record
+              }
+            }
         }
     }
   }
@@ -115,9 +118,9 @@ class SierraItemsToDynamoWorkerServiceTest
       bibIds = bibIds2
     )
 
-    val store = MemoryVersionedStore[SierraItemNumber, SierraItemLink](
+    val store = MemoryVersionedStore[SierraItemNumber, Link](
       initialEntries = Map(
-        Version(record2.id, 1) -> SierraItemLink(record2)
+        Version(record2.id, 1) -> Link(record2)
       )
     )
 
@@ -125,7 +128,7 @@ class SierraItemsToDynamoWorkerServiceTest
 
     withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>
-        withWorkerService(queue, store, messageSender = messageSender) { _ =>
+        withItemWorker(queue, store, messageSender = messageSender) { _ =>
           sendNotificationToSQS(queue = queue, message = record1)
 
           eventually {
@@ -140,9 +143,13 @@ class SierraItemsToDynamoWorkerServiceTest
 
   it("records a failure if it receives an invalid message") {
     val metrics = new MemoryMetrics()
+
+    val store =
+      MemoryVersionedStore[SierraItemNumber, Link](initialEntries = Map.empty)
+
     withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>
-        withWorkerService(queue, metrics = metrics) { _ =>
+        withItemWorker(queue, store = store, metrics = metrics) { _ =>
           val body =
             """
                     |{

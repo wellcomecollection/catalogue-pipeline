@@ -1,18 +1,27 @@
-package uk.ac.wellcome.platform.sierra_items_to_dynamo.merger
+package weco.catalogue.sierra_linker.models
 
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.platform.sierra_items_to_dynamo.models.SierraItemLink
-import uk.ac.wellcome.sierra_adapter.model.SierraItemRecord
+import uk.ac.wellcome.sierra_adapter.model.{
+  AbstractSierraRecord,
+  SierraBibNumber,
+  SierraHoldingsRecord,
+  SierraItemRecord
+}
 
-object SierraItemRecordMerger extends Logging {
-  def mergeItems(existingLink: SierraItemLink,
-                 newRecord: SierraItemRecord): Option[SierraItemLink] =
+trait LinkOps[Record <: AbstractSierraRecord[_]] extends Logging {
+  def getBibIds(r: Record): List[SierraBibNumber]
+
+  def createLink(r: Record): Link
+
+  def copyUnlinkedBibIds(link: Link, targetRecord: Record): Record
+
+  def updateLink(existingLink: Link, newRecord: Record): Option[Link] =
     if (existingLink.modifiedDate.isBefore(newRecord.modifiedDate) ||
         existingLink.modifiedDate == newRecord.modifiedDate) {
       Some(
-        SierraItemLink(
+        Link(
           modifiedDate = newRecord.modifiedDate,
-          bibIds = newRecord.bibIds,
+          bibIds = getBibIds(newRecord),
           // Let's suppose we have
           //
           //    oldRecord = (linked = {1, 2, 3}, unlinked = {4, 5})
@@ -32,7 +41,7 @@ object SierraItemRecordMerger extends Logging {
           //
           unlinkedBibIds = subList(
             addList(existingLink.unlinkedBibIds, existingLink.bibIds),
-            newRecord.bibIds
+            getBibIds(newRecord)
           ),
         )
       )
@@ -53,4 +62,34 @@ object SierraItemRecordMerger extends Logging {
 
   private def subList[T](x: List[T], y: List[T]): List[T] =
     (x.toSet -- y.toSet).toList
+}
+
+object LinkOps {
+  implicit val itemLinksOps = new LinkOps[SierraItemRecord] {
+    override def getBibIds(
+      itemRecord: SierraItemRecord): List[SierraBibNumber] =
+      itemRecord.bibIds
+
+    override def createLink(itemRecord: SierraItemRecord): Link =
+      Link(itemRecord)
+
+    override def copyUnlinkedBibIds(
+      link: Link,
+      itemRecord: SierraItemRecord): SierraItemRecord =
+      itemRecord.copy(unlinkedBibIds = link.unlinkedBibIds)
+  }
+
+  implicit val holdingsLinkOps = new LinkOps[SierraHoldingsRecord] {
+    override def getBibIds(
+      holdingsRecord: SierraHoldingsRecord): List[SierraBibNumber] =
+      holdingsRecord.bibIds
+
+    override def createLink(holdingsRecord: SierraHoldingsRecord): Link =
+      Link(holdingsRecord)
+
+    override def copyUnlinkedBibIds(
+      link: Link,
+      holdingsRecord: SierraHoldingsRecord): SierraHoldingsRecord =
+      holdingsRecord.copy(unlinkedBibIds = link.unlinkedBibIds)
+  }
 }
