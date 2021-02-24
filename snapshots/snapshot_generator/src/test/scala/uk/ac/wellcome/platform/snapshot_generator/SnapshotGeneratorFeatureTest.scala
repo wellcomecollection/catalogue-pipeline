@@ -80,6 +80,7 @@ class SnapshotGeneratorFeatureTest
                 "languages": [],
                 "alternativeTitles": [],
                 "availableOnline": false,
+                "availabilities": [],
                 "notes": [],
                 "images": [],
                 "parts": [],
