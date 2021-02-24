@@ -1,7 +1,7 @@
 package weco.catalogue.sierra_linker.dynamo
 
 import org.scanamo.DynamoFormat
-import uk.ac.wellcome.sierra_adapter.model.{SierraBibNumber, SierraItemNumber}
+import uk.ac.wellcome.sierra_adapter.model.{SierraBibNumber, SierraHoldingsNumber, SierraItemNumber}
 
 object Implicits {
   implicit val formatBibNumber: DynamoFormat[SierraBibNumber] =
@@ -15,6 +15,13 @@ object Implicits {
     DynamoFormat
       .coercedXmap[SierraItemNumber, String, IllegalArgumentException](
         SierraItemNumber,
+        _.withoutCheckDigit
+      )
+
+  implicit val formatHoldingsNumber: DynamoFormat[SierraHoldingsNumber] =
+    DynamoFormat
+      .coercedXmap[SierraHoldingsNumber, String, IllegalArgumentException](
+        SierraHoldingsNumber,
         _.withoutCheckDigit
       )
 }
