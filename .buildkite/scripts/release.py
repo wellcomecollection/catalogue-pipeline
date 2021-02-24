@@ -9,7 +9,6 @@ import sys
 from commands import git
 from git_utils import (
     get_changed_paths,
-    get_all_tags,
     remote_default_branch,
     local_current_head,
     get_sha1_for_tag,
@@ -35,11 +34,9 @@ def changelog():
 
 
 def new_version(commit_hash):
-    version = latest_version()
-    version_info = [i for i in version.lstrip('v').split('.')]
+    build_number = os.environ("BUILDKITE_BUILD_NUMBER")
 
-    new_version = [int(version_info[0]), commit_hash]
-    new_version[0] += 1
+    new_version = [build_number, commit_hash]
     new_version = tuple(new_version)
     return 'v' + '.'.join(map(str, new_version))
 
@@ -123,27 +120,6 @@ def has_release():
     Returns True if there is a release file, False if not.
     """
     return os.path.exists(RELEASE_FILE)
-
-
-def latest_version():
-    """
-    Returns the latest version, as specified by the Git tags.
-    """
-    versions = []
-
-    for t in get_all_tags():
-        assert t == t.strip()
-        parts = t.split('.')
-        assert len(parts) == 3, t
-        parts[0] = parts[0].lstrip('v')
-        v = tuple(parts)
-
-        versions.append((v, t))
-
-    _, latest = max(versions)
-
-    assert latest in get_all_tags()
-    return latest
 
 
 def read_release_file():
