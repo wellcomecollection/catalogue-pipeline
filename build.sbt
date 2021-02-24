@@ -214,19 +214,9 @@ lazy val sierra_reader = setupProject(
   externalDependencies = CatalogueDependencies.sierraReaderDependencies
 )
 
-lazy val sierra_bib_merger = setupProject(
-  project,
-  "sierra_adapter/sierra_bib_merger",
-  localDependencies = Seq(sierra_adapter_common))
-
 lazy val sierra_item_merger = setupProject(
   project,
   "sierra_adapter/sierra_item_merger",
-  localDependencies = Seq(sierra_adapter_common))
-
-lazy val sierra_holdings_merger = setupProject(
-  project,
-  "sierra_adapter/sierra_holdings_merger",
   localDependencies = Seq(sierra_adapter_common))
 
 lazy val sierra_linker = setupProject(
