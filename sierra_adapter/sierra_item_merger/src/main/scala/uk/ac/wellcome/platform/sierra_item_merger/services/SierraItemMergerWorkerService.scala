@@ -10,13 +10,14 @@ import uk.ac.wellcome.sierra_adapter.model.SierraItemRecord
 import uk.ac.wellcome.storage.{Identified, Version}
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.typesafe.Runnable
+import weco.catalogue.sierra_record_merger.services.Updater
 import weco.catalogue.source_model.SierraSourcePayload
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class SierraItemMergerWorkerService[Destination](
   sqsStream: SQSStream[NotificationMessage],
-  sierraItemMergerUpdaterService: SierraItemMergerUpdaterService[SierraItemRecord],
+  sierraItemMergerUpdaterService: Updater[SierraItemRecord],
   messageSender: MessageSender[Destination]
 )(implicit ec: ExecutionContext)
     extends Runnable

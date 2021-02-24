@@ -1,11 +1,11 @@
-package weco.catalogue.sierra_merger.models
+package weco.catalogue.sierra_record_merger.models
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.sierra_adapter.model.SierraGenerators
 
 class TransformableOpsTest extends AnyFunSpec with Matchers with SierraGenerators {
-  import TransformableOps._
+  import weco.catalogue.sierra_merger.models.TransformableOps._
 
   describe("itemTransformableOps") {
     describe("add") {

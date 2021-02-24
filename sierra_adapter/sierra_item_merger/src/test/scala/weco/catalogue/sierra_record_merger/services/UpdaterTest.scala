@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.sierra_item_merger.services
+package weco.catalogue.sierra_record_merger.services
 
 import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
@@ -22,7 +22,7 @@ import uk.ac.wellcome.storage.{StoreWriteError, UpdateWriteError, Version}
 import weco.catalogue.source_model.fixtures.SourceVHSFixture
 import weco.catalogue.source_model.store.SourceVHS
 
-class SierraItemMergerUpdaterServiceTest
+class UpdaterTest
     extends AnyFunSpec
     with EitherValues
     with SierraGenerators
@@ -31,7 +31,7 @@ class SierraItemMergerUpdaterServiceTest
 
   it("creates a record if it receives an item with a bibId that doesn't exist") {
     val sourceVHS = createSourceVHS[SierraTransformable]
-    val sierraUpdaterService = new SierraItemMergerUpdaterService(sourceVHS)
+    val sierraUpdaterService = new Updater(sourceVHS)
 
     val bibId = createSierraBibNumber
     val newItemRecord = createSierraItemRecordWith(
@@ -76,7 +76,7 @@ class SierraItemMergerUpdaterServiceTest
         Version(bibId.withoutCheckDigit, 0) -> oldTransformable
       )
     )
-    val sierraUpdaterService = new SierraItemMergerUpdaterService(sourceVHS)
+    val sierraUpdaterService = new Updater(sourceVHS)
 
     val newItemRecord = itemRecord.copy(
       data = """{"data": "newer"}""",
@@ -124,7 +124,7 @@ class SierraItemMergerUpdaterServiceTest
         Version(bibId2.withoutCheckDigit, 0) -> sierraTransformable2
       )
     )
-    val sierraUpdaterService = new SierraItemMergerUpdaterService(sourceVHS)
+    val sierraUpdaterService = new Updater(sourceVHS)
 
     val unlinkItemRecord = itemRecord.copy(
       bibIds = List(bibId2),
@@ -192,7 +192,7 @@ class SierraItemMergerUpdaterServiceTest
         Version(bibId2.withoutCheckDigit, 0) -> sierraTransformable2
       )
     )
-    val sierraUpdaterService = new SierraItemMergerUpdaterService(sourceVHS)
+    val sierraUpdaterService = new Updater(sourceVHS)
 
     val unlinkItemRecord = itemRecord.copy(
       bibIds = List(bibId2),
@@ -253,7 +253,7 @@ class SierraItemMergerUpdaterServiceTest
         Version(bibId2.withoutCheckDigit, 0) -> sierraTransformable2
       )
     )
-    val sierraUpdaterService = new SierraItemMergerUpdaterService(sourceVHS)
+    val sierraUpdaterService = new Updater(sourceVHS)
 
     val unlinkItemRecord = itemRecord.copy(
       bibIds = List(bibId2),
@@ -313,7 +313,7 @@ class SierraItemMergerUpdaterServiceTest
         Version(bibId.withoutCheckDigit, 0) -> transformable
       )
     )
-    val sierraUpdaterService = new SierraItemMergerUpdaterService(sourceVHS)
+    val sierraUpdaterService = new Updater(sourceVHS)
 
     val oldItemRecord = itemRecord.copy(
       modifiedDate = olderDate
@@ -339,7 +339,7 @@ class SierraItemMergerUpdaterServiceTest
     )
 
     val sourceVHS = createSourceVHS[SierraTransformable]
-    val sierraUpdaterService = new SierraItemMergerUpdaterService(sourceVHS)
+    val sierraUpdaterService = new Updater(sourceVHS)
 
     (1 to 5).foreach { _ =>
       val result = sierraUpdaterService.update(itemRecord)
@@ -363,7 +363,7 @@ class SierraItemMergerUpdaterServiceTest
         Version(bibId.withoutCheckDigit, 0) -> transformable
       )
     )
-    val sierraUpdaterService = new SierraItemMergerUpdaterService(sourceVHS)
+    val sierraUpdaterService = new Updater(sourceVHS)
 
     val itemRecord = createSierraItemRecordWith(
       bibIds = List(bibId)
@@ -422,7 +422,7 @@ class SierraItemMergerUpdaterServiceTest
       }
     )
 
-    val brokenService = new SierraItemMergerUpdaterService(sourceVHS)
+    val brokenService = new Updater(sourceVHS)
 
     val itemRecord = createSierraItemRecordWith(
       bibIds = List(createSierraBibNumber)
@@ -442,7 +442,7 @@ class SierraItemMergerUpdaterServiceTest
       }
     )
 
-    val brokenService = new SierraItemMergerUpdaterService(sourceVHS)
+    val brokenService = new Updater(sourceVHS)
 
     val itemRecord = createSierraItemRecordWith(
       bibIds = List(createSierraBibNumber)

@@ -1,13 +1,22 @@
-package uk.ac.wellcome.platform.sierra_item_merger.services
+package weco.catalogue.sierra_record_merger.services
 
 import cats.implicits._
-import uk.ac.wellcome.sierra_adapter.model.{AbstractSierraRecord, SierraBibNumber, SierraTransformable}
+import uk.ac.wellcome.sierra_adapter.model.{
+  AbstractSierraRecord,
+  SierraBibNumber,
+  SierraTransformable
+}
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
-import uk.ac.wellcome.storage.{Identified, StorageError, UpdateNotApplied, Version}
+import uk.ac.wellcome.storage.{
+  Identified,
+  StorageError,
+  UpdateNotApplied,
+  Version
+}
 import weco.catalogue.sierra_merger.models.{RecordOps, TransformableOps}
 import weco.catalogue.source_model.store.SourceVHS
 
-class SierraItemMergerUpdaterService[Record <: AbstractSierraRecord[_]](
+class Updater[Record <: AbstractSierraRecord[_]](
   sourceVHS: SourceVHS[SierraTransformable]
 )(
   implicit

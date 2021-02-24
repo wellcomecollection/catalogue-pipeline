@@ -6,10 +6,14 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.platform.sierra_item_merger.services.{SierraItemMergerUpdaterService, SierraItemMergerWorkerService}
-import uk.ac.wellcome.sierra_adapter.model.{SierraItemRecord, SierraTransformable}
+import uk.ac.wellcome.platform.sierra_item_merger.services.SierraItemMergerWorkerService
+import uk.ac.wellcome.sierra_adapter.model.{
+  SierraItemRecord,
+  SierraTransformable
+}
 import uk.ac.wellcome.sierra_adapter.model.Implicits._
 import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
+import weco.catalogue.sierra_record_merger.services.Updater
 import weco.catalogue.source_model.fixtures.SourceVHSFixture
 import weco.catalogue.source_model.store.SourceVHS
 
@@ -21,8 +25,8 @@ trait SierraItemMergerFixtures
     with SierraAdapterHelpers
     with SourceVHSFixture {
   def withSierraUpdaterService[R](sourceVHS: SourceVHS[SierraTransformable])(
-    testWith: TestWith[SierraItemMergerUpdaterService[SierraItemRecord], R]): R = {
-    val sierraUpdaterService = new SierraItemMergerUpdaterService(sourceVHS)
+    testWith: TestWith[Updater[SierraItemRecord], R]): R = {
+    val sierraUpdaterService = new Updater(sourceVHS)
     testWith(sierraUpdaterService)
   }
 
@@ -38,7 +42,7 @@ trait SierraItemMergerFixtures
         val workerService = new SierraItemMergerWorkerService(
           sqsStream = sqsStream,
           sierraItemMergerUpdaterService =
-            new SierraItemMergerUpdaterService(sourceVHS),
+            new Updater(sourceVHS),
           messageSender = messageSender
         )
 
