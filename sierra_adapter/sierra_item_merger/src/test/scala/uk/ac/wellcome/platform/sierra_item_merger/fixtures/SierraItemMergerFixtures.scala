@@ -23,12 +23,6 @@ trait SierraItemMergerFixtures
     with SQS
     with SierraAdapterHelpers
     with SourceVHSFixture {
-  def withSierraUpdaterService[R](sourceVHS: SourceVHS[SierraTransformable])(
-    testWith: TestWith[Updater[SierraItemRecord], R]): R = {
-    val sierraUpdaterService = new Updater(sourceVHS)
-    testWith(sierraUpdaterService)
-  }
-
   def withSierraWorkerService[R](queue: Queue,
                                  sourceVHS: SourceVHS[SierraTransformable] =
                                    createSourceVHS[SierraTransformable])(
