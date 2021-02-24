@@ -71,6 +71,7 @@ case class MultipleWorksParams(
   `items.locations.accessConditions.status`: Option[AccessStatusFilter],
   `type`: Option[WorkTypeFilter],
   partOf: Option[PartOfFilter],
+  availabilities: Option[AvailabilitiesFilter],
   _queryType: Option[SearchQueryType],
   _index: Option[String],
 ) extends QueryParams
@@ -103,7 +104,8 @@ case class MultipleWorksParams(
       `items.locations.accessConditions.status`,
       license,
       `type`,
-      partOf
+      partOf,
+      availabilities
     ).flatten
 
   private def dateFilter: Option[DateRangeFilter] =
@@ -173,11 +175,12 @@ object MultipleWorksParams extends QueryParamsUtils {
         // Scala has a max tuple size of 22 so this is nested to get around this limit
         parameter(
           (
+            "availabilities".as[AvailabilitiesFilter].?,
             "_queryType".as[SearchQueryType].?,
             "_index".as[String].?,
           )
         ).tflatMap {
-          case (queryType, index) =>
+          case (availabilities, queryType, index) =>
             val params = MultipleWorksParams(
               page,
               pageSize,
@@ -200,6 +203,7 @@ object MultipleWorksParams extends QueryParamsUtils {
               accessStatus,
               workType,
               partOf,
+              availabilities,
               queryType,
               index
             )
@@ -224,25 +228,28 @@ object MultipleWorksParams extends QueryParamsUtils {
     ) map ItemLocationTypeFilter
 
   implicit val itemLocationTypeIdFilter: Decoder[ItemLocationTypeIdFilter] =
-    decodeCommaSeparated.emap(strs => Right(ItemLocationTypeIdFilter(strs)))
+    stringListFilter(ItemLocationTypeIdFilter)
 
   implicit val languagesFilter: Decoder[LanguagesFilter] =
     stringListFilter(LanguagesFilter)
 
   implicit val genreFilter: Decoder[GenreFilter] =
-    decodeCommaSeparated.emap(strs => Right(GenreFilter(strs)))
+    stringListFilter(GenreFilter)
 
   implicit val subjectFilter: Decoder[SubjectFilter] =
-    decodeCommaSeparated.emap(strs => Right(SubjectFilter(strs)))
+    stringListFilter(SubjectFilter)
 
   implicit val contributorsFilter: Decoder[ContributorsFilter] =
-    decodeCommaSeparated.emap(strs => Right(ContributorsFilter(strs)))
+    stringListFilter(ContributorsFilter)
 
   implicit val identifiersFilter: Decoder[IdentifiersFilter] =
     stringListFilter(IdentifiersFilter)
 
   implicit val partOf: Decoder[PartOfFilter] =
     Decoder.decodeString.map(PartOfFilter)
+
+  implicit val availabilitiesFilter: Decoder[AvailabilitiesFilter] =
+    stringListFilter(AvailabilitiesFilter)
 
   implicit val accessStatusFilter: Decoder[AccessStatusFilter] =
     decodeIncludesAndExcludes(

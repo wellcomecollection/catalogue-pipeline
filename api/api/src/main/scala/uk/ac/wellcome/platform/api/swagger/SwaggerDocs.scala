@@ -451,6 +451,12 @@ trait MultipleWorksSwagger {
         required = false
       ),
       new Parameter(
+        name = "availabilities",
+        in = ParameterIn.QUERY,
+        description = "Filter the work by availabilities.",
+        required = false
+      ),
+      new Parameter(
         name = "items.locations.accessConditions.status",
         in = ParameterIn.QUERY,
         description = "Filter the work by access status.",

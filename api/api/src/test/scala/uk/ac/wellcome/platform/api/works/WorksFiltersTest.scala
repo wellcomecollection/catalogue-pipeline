@@ -884,6 +884,56 @@ class WorksFiltersTest
     }
   }
 
+  describe("availabilities filter") {
+    val onlineWork = indexedWork().items(
+      List(createDigitalItemWith(accessStatus = AccessStatus.Open)))
+    val inLibraryWork = indexedWork().items(List(createIdentifiedPhysicalItem))
+    val onlineAndInLibraryWork = indexedWork().items(
+      List(
+        createDigitalItemWith(accessStatus = AccessStatus.OpenWithAdvisory),
+        createIdentifiedPhysicalItem))
+
+    it("filters by availability ID") {
+      withWorksApi {
+        case (worksIndex, routes) =>
+          insertIntoElasticsearch(
+            worksIndex,
+            onlineWork,
+            inLibraryWork,
+            onlineAndInLibraryWork)
+          assertJsonResponse(
+            routes = routes,
+            unordered = true,
+            path = s"/$apiPrefix/works?availabilities=online") {
+            Status.OK -> worksListResponse(
+              apiPrefix = apiPrefix,
+              works = Seq(onlineWork, onlineAndInLibraryWork)
+            )
+          }
+      }
+    }
+
+    it("filters by multiple comma-separated availability IDs") {
+      withWorksApi {
+        case (worksIndex, routes) =>
+          insertIntoElasticsearch(
+            worksIndex,
+            onlineWork,
+            inLibraryWork,
+            onlineAndInLibraryWork)
+          assertJsonResponse(
+            routes = routes,
+            unordered = true,
+            path = s"/$apiPrefix/works?availabilities=in-library,online") {
+            Status.OK -> worksListResponse(
+              apiPrefix = apiPrefix,
+              works = Seq(onlineWork, inLibraryWork, onlineAndInLibraryWork)
+            )
+          }
+      }
+    }
+  }
+
   describe("relation filters") {
 
     def work(path: String): Work.Visible[Indexed] =

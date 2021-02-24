@@ -180,5 +180,10 @@ object WorksRequestBuilder
           values = itemLocationTypeIds)
       case PartOfFilter(id) =>
         termQuery(field = "state.relations.ancestors.id", value = id)
+      case AvailabilitiesFilter(availabilityIds) =>
+        termsQuery(
+          field = "state.derivedData.availabilities.id",
+          values = availabilityIds
+        )
     }
 }
