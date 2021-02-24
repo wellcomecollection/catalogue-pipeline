@@ -1,4 +1,4 @@
-package weco.catalogue.sierra_record_merger.services
+package weco.catalogue.sierra_merger.services
 
 import cats.implicits._
 import uk.ac.wellcome.sierra_adapter.model.{

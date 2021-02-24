@@ -1,4 +1,4 @@
-package weco.catalogue.sierra_record_merger.fixtures
+package weco.catalogue.sierra_merger.fixtures
 
 import io.circe.Decoder
 import uk.ac.wellcome.akka.fixtures.Akka
@@ -15,7 +15,7 @@ import uk.ac.wellcome.sierra_adapter.model.Implicits._
 import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
 import uk.ac.wellcome.storage.streaming.Codec._
 import weco.catalogue.sierra_merger.models.{RecordOps, TransformableOps}
-import weco.catalogue.sierra_record_merger.services.{Updater, Worker}
+import weco.catalogue.sierra_merger.services.{Updater, Worker}
 import weco.catalogue.source_model.fixtures.SourceVHSFixture
 import weco.catalogue.source_model.store.SourceVHS
 

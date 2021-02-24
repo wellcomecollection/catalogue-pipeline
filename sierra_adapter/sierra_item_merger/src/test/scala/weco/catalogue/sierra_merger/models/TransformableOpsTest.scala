@@ -1,4 +1,4 @@
-package weco.catalogue.sierra_record_merger.models
+package weco.catalogue.sierra_merger.models
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers

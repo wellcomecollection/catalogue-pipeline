@@ -1,4 +1,4 @@
-package weco.catalogue.sierra_record_merger.services
+package weco.catalogue.sierra_merger.services
 
 import akka.Done
 import grizzled.slf4j.Logging

@@ -1,4 +1,4 @@
-package weco.catalogue.sierra_record_merger
+package weco.catalogue.sierra_merger
 
 import io.circe.Encoder
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
@@ -12,7 +12,7 @@ import uk.ac.wellcome.sierra_adapter.model.Implicits._
 import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
 import uk.ac.wellcome.storage.Version
 import weco.catalogue.sierra_merger.models.TransformableOps
-import weco.catalogue.sierra_record_merger.services.Worker
+import weco.catalogue.sierra_merger.services.Worker
 import weco.catalogue.source_model.fixtures.SourceVHSFixture
 import weco.catalogue.source_model.store.SourceVHS
 

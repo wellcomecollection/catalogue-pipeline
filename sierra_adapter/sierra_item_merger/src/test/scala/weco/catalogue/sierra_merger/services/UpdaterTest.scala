@@ -1,4 +1,4 @@
-package weco.catalogue.sierra_record_merger.services
+package weco.catalogue.sierra_merger.services
 
 import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
@@ -18,7 +18,7 @@ import uk.ac.wellcome.storage.store.{
   VersionedHybridStore
 }
 import uk.ac.wellcome.storage.{StoreWriteError, UpdateWriteError, Version}
-import weco.catalogue.sierra_record_merger.fixtures.RecordMergerFixtures
+import weco.catalogue.sierra_merger.fixtures.RecordMergerFixtures
 import weco.catalogue.source_model.fixtures.SourceVHSFixture
 import weco.catalogue.source_model.store.SourceVHS
 

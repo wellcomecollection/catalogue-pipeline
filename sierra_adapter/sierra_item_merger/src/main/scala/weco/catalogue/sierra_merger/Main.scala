@@ -8,7 +8,7 @@ import uk.ac.wellcome.sierra_adapter.model.SierraTransformable
 import uk.ac.wellcome.sierra_adapter.model.Implicits._
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
-import weco.catalogue.sierra_record_merger.services.{Updater, Worker}
+import weco.catalogue.sierra_merger.services.{Updater, Worker}
 import weco.catalogue.source_model.config.SourceVHSBuilder
 
 import scala.concurrent.ExecutionContext
