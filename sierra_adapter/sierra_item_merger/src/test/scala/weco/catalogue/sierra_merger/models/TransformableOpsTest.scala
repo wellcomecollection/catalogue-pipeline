@@ -37,7 +37,7 @@ class TransformableOpsTest
       }
 
       it(
-        "returns the transformable if you merge the same record more than once") {
+        "returns the same transformable if you merge the same record more than once") {
         val bibRecord = createSierraBibRecord
 
         val transformable = SierraTransformable(bibRecord)
