@@ -5,11 +5,14 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.internal.{DigitalLocation, Item}
 import uk.ac.wellcome.models.work.internal.LocationType.OnlineResource
 import uk.ac.wellcome.platform.transformer.sierra.generators.MarcGenerators
-import uk.ac.wellcome.platform.transformer.sierra.source.{MarcSubfield, VarField}
+import uk.ac.wellcome.platform.transformer.sierra.source.{
+  MarcSubfield,
+  VarField
+}
 import uk.ac.wellcome.sierra_adapter.model.SierraGenerators
 
 class SierraElectronicResourcesTest
-  extends AnyFunSpec
+    extends AnyFunSpec
     with Matchers
     with MarcGenerators
     with SierraGenerators {
@@ -47,7 +50,9 @@ class SierraElectronicResourcesTest
       createVarFieldWith(
         marcTag = "856",
         subfields = List(
-          MarcSubfield(tag = "u", content = "https://example.org/another-journal")
+          MarcSubfield(
+            tag = "u",
+            content = "https://example.org/another-journal")
         )
       )
     )
@@ -92,7 +97,8 @@ class SierraElectronicResourcesTest
 
       getElectronicResources(varFields) shouldBe List(
         Item(
-          title = Some("Related archival materials: available to library members. Cambridge Books Online."),
+          title = Some(
+            "Related archival materials: available to library members. Cambridge Books Online."),
           locations = List(
             DigitalLocation(
               url = "https://example.org/journal",
@@ -103,7 +109,8 @@ class SierraElectronicResourcesTest
       )
     }
 
-    it("puts the label in the linkText if it's ≤7 words and contains 'view', 'access' or 'connect'") {
+    it(
+      "puts the label in the linkText if it's ≤7 words and contains 'view', 'access' or 'connect'") {
       val varFields = List(
         createVarFieldWith(
           marcTag = "856",
@@ -162,7 +169,8 @@ class SierraElectronicResourcesTest
       )
     }
 
-    it("puts the label in the item title if it's ≤7 words but doesn't contain 'view', 'access' or 'connect'") {
+    it(
+      "puts the label in the item title if it's ≤7 words but doesn't contain 'view', 'access' or 'connect'") {
       val varFields = List(
         createVarFieldWith(
           marcTag = "856",
@@ -267,7 +275,9 @@ class SierraElectronicResourcesTest
           marcTag = "856",
           subfields = List(
             MarcSubfield(tag = "u", content = "https://example.org/resource"),
-            MarcSubfield(tag = "3", content = "You can view this resource online")
+            MarcSubfield(
+              tag = "3",
+              content = "You can view this resource online")
           )
         )
       )
@@ -318,7 +328,9 @@ class SierraElectronicResourcesTest
           marcTag = "856",
           subfields = List(
             MarcSubfield(tag = "u", content = "https://example.org/journal"),
-            MarcSubfield(tag = "u", content = "https://example.org/another-journal")
+            MarcSubfield(
+              tag = "u",
+              content = "https://example.org/another-journal")
           )
         )
       )

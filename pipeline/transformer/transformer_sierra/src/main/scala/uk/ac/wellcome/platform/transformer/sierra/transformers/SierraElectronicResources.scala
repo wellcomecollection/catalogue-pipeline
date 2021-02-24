@@ -3,7 +3,11 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.models.work.internal.LocationType.OnlineResource
 import uk.ac.wellcome.models.work.internal.{DigitalLocation, IdState, Item}
-import uk.ac.wellcome.platform.transformer.sierra.source.{MarcSubfield, SierraQueryOps, VarField}
+import uk.ac.wellcome.platform.transformer.sierra.source.{
+  MarcSubfield,
+  SierraQueryOps,
+  VarField
+}
 import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 
 import java.net.URL
@@ -21,16 +25,19 @@ import scala.util.Try
 // TODO: Update this link to the published version of the RFC
 //
 object SierraElectronicResources extends SierraQueryOps with Logging {
-  def apply(bibId: SierraBibNumber, varFields: List[VarField]): List[Item[IdState.Unminted]] =
+  def apply(bibId: SierraBibNumber,
+            varFields: List[VarField]): List[Item[IdState.Unminted]] =
     varFields
       .filter { _.marcTag.contains("856") }
-      .flatMap { vf => createItem(bibId, vf) }
+      .flatMap { vf =>
+        createItem(bibId, vf)
+      }
 
-  private def createItem(bibId: SierraBibNumber, vf: VarField): Option[Item[IdState.Unminted]] = {
+  private def createItem(bibId: SierraBibNumber,
+                         vf: VarField): Option[Item[IdState.Unminted]] = {
     assert(vf.marcTag.contains("856"))
 
     getUrl(bibId, vf).map { url =>
-
       // We don't want the link text to be too long (at most seven words), so
       // we apply the following heuristic to the label:
       //
@@ -43,21 +50,23 @@ object SierraElectronicResources extends SierraQueryOps with Logging {
               label.containsAnyOf("access", "view", "connect"))
             (
               None,
-              Some(label
+              Some(
+                label
                 // e.g. "View resource." ~> "View resource"
-                .stripSuffix(".")
-                .stripSuffix(":")
-                // e.g. "view resource" ~> "View resource"
-                .replaceFirst("^view ", "View ")
-                // These are hard-coded fixes for a couple of known weird records.
-                // We could also fix these in the catalogue, but fixing them here
-                // is cheap and easy.
-                .replace("VIEW FULL TEXT", "View full text")
-                .replace("via  MyiLibrary", "via MyiLibrary")
-                .replace("youtube", "YouTube")
-                .replace("View resource {PDF", "View resource [PDF")
-                .replace("View resource 613.7 KB]", "View resource [613.7 KB]")
-              )
+                  .stripSuffix(".")
+                  .stripSuffix(":")
+                  // e.g. "view resource" ~> "View resource"
+                  .replaceFirst("^view ", "View ")
+                  // These are hard-coded fixes for a couple of known weird records.
+                  // We could also fix these in the catalogue, but fixing them here
+                  // is cheap and easy.
+                  .replace("VIEW FULL TEXT", "View full text")
+                  .replace("via  MyiLibrary", "via MyiLibrary")
+                  .replace("youtube", "YouTube")
+                  .replace("View resource {PDF", "View resource [PDF")
+                  .replace(
+                    "View resource 613.7 KB]",
+                    "View resource [613.7 KB]"))
             )
           else
             (Some(label), None)

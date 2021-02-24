@@ -928,16 +928,17 @@ class SierraTransformerTest
 
     val items = work.data.items
 
-    items should contain(Item(
-      title = None,
-      locations = List(
-        DigitalLocation(
-          url = "https://example.org/journal",
-          linkText = Some("View this journal"),
-          locationType = OnlineResource
+    items should contain(
+      Item(
+        title = None,
+        locations = List(
+          DigitalLocation(
+            url = "https://example.org/journal",
+            linkText = Some("View this journal"),
+            locationType = OnlineResource
+          )
         )
-      )
-    ))
+      ))
   }
 
   describe("throws a TransformerException when passed invalid data") {
