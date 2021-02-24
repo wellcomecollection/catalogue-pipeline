@@ -49,8 +49,8 @@ steps:
     label: "transformer (Calm)"
   - command: .buildkite/scripts/run_job.py sierra_reader
     label: "Sierra reader"
-  - command: .buildkite/scripts/run_job.py sierra_item_merger
-    label: "Sierra item merger"
+  - command: .buildkite/scripts/run_job.py sierra_merger
+    label: "Sierra merger"
   - command: .buildkite/scripts/run_job.py sierra_linker
     label: "Sierra linker"
   - command: .buildkite/scripts/run_job.py mets_adapter

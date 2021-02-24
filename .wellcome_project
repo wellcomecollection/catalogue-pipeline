@@ -28,11 +28,9 @@ sierra_adapter:
     - id: prod
       name: Production
   image_repositories:
-    - id: sierra_bib_merger
+    - id: sierra_merger
       services:
         - id: bibs-merger
-    - id: sierra_item_merger
-      services:
         - id: items-merger
     - id: sierra_linker
       services:
