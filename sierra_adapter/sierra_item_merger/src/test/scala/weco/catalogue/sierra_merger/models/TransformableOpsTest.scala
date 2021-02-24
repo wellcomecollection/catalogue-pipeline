@@ -345,7 +345,7 @@ class TransformableOpsTest
           holdingsRecords = Map(olderRecord.id -> newerRecord))
       }
 
-      it("returns the record if you apply the same update more than once") {
+      it("returns the same record if you apply the same update more than once") {
         val bibId = createSierraBibNumber
         val record = createSierraHoldingsRecordWith(
           bibIds = List(bibId)
