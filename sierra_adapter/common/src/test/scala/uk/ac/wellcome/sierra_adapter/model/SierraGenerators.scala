@@ -138,12 +138,12 @@ trait SierraGenerators extends RandomGenerators {
     SierraTransformable(
       sierraId = sierraId,
       maybeBibRecord = maybeBibRecord,
-      itemRecords = itemRecords
-        .map { record => record.id -> record }
-        .toMap,
-      holdingsRecords = holdingsRecords
-        .map { record => record.id -> record }
-        .toMap
+      itemRecords = itemRecords.map { record =>
+        record.id -> record
+      }.toMap,
+      holdingsRecords = holdingsRecords.map { record =>
+        record.id -> record
+      }.toMap
     )
 
   def createSierraTransformable: SierraTransformable =

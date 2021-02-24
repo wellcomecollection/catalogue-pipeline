@@ -140,16 +140,20 @@ trait SierraRecordMergerFeatureTestCases[Record <: AbstractSierraRecord[_]]
 }
 
 class SierraBibRecordMergerFeatureTest
-  extends SierraRecordMergerFeatureTestCases[SierraBibRecord]
+    extends SierraRecordMergerFeatureTestCases[SierraBibRecord]
     with RecordMergerFixtures {
-  override def withWorker[R](queue: Queue, sourceVHS: SourceVHS[SierraTransformable])(testWith: TestWith[(Worker[SierraBibRecord, String], MemoryMessageSender), R]): R =
+  override def withWorker[R](queue: Queue,
+                             sourceVHS: SourceVHS[SierraTransformable])(
+    testWith: TestWith[(Worker[SierraBibRecord, String], MemoryMessageSender),
+                       R]): R =
     withRunningWorker[SierraBibRecord, R](queue, sourceVHS) {
       testWith
     }
 
   override val recordCanBeLinkedToMultipleBibs = false
 
-  override def createRecordWith(bibIds: List[SierraBibNumber]): SierraBibRecord =
+  override def createRecordWith(
+    bibIds: List[SierraBibNumber]): SierraBibRecord =
     createSierraBibRecordWith(id = bibIds.head)
 
   override implicit val encoder: Encoder[SierraBibRecord] = deriveEncoder
@@ -180,18 +184,24 @@ class SierraItemRecordMergerFeatureTest
 }
 
 class SierraHoldingsRecordMergerFeatureTest
-  extends SierraRecordMergerFeatureTestCases[SierraHoldingsRecord]
+    extends SierraRecordMergerFeatureTestCases[SierraHoldingsRecord]
     with RecordMergerFixtures {
-  override def withWorker[R](queue: Queue, sourceVHS: SourceVHS[SierraTransformable])(testWith: TestWith[(Worker[SierraHoldingsRecord, String], MemoryMessageSender), R]): R =
+  override def withWorker[R](queue: Queue,
+                             sourceVHS: SourceVHS[SierraTransformable])(
+    testWith: TestWith[(Worker[SierraHoldingsRecord, String],
+                        MemoryMessageSender),
+                       R]): R =
     withRunningWorker[SierraHoldingsRecord, R](queue, sourceVHS) {
       testWith
     }
 
-  override def createRecordWith(bibIds: List[SierraBibNumber]): SierraHoldingsRecord =
+  override def createRecordWith(
+    bibIds: List[SierraBibNumber]): SierraHoldingsRecord =
     createSierraHoldingsRecordWith(bibIds = bibIds)
 
   override implicit val encoder: Encoder[SierraHoldingsRecord] = deriveEncoder
 
-  override implicit val transformableOps: TransformableOps[SierraHoldingsRecord] =
+  override implicit val transformableOps
+    : TransformableOps[SierraHoldingsRecord] =
     TransformableOps.holdingsTransformableOps
 }

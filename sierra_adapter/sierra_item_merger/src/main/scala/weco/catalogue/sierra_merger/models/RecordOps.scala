@@ -26,9 +26,11 @@ object RecordOps {
   }
 
   implicit val bibRecordOps = new RecordOps[SierraBibRecord] {
-    override def getBibIds(r: SierraBibRecord): List[SierraBibNumber] = List(r.id)
+    override def getBibIds(r: SierraBibRecord): List[SierraBibNumber] =
+      List(r.id)
 
-    override def getUnlinkedBibIds(r: SierraBibRecord): List[SierraBibNumber] = List()
+    override def getUnlinkedBibIds(r: SierraBibRecord): List[SierraBibNumber] =
+      List()
   }
 
   implicit val itemRecordOps = new RecordOps[SierraItemRecord] {
@@ -43,7 +45,8 @@ object RecordOps {
     override def getBibIds(r: SierraHoldingsRecord): List[SierraBibNumber] =
       r.bibIds
 
-    override def getUnlinkedBibIds(r: SierraHoldingsRecord): List[SierraBibNumber] =
+    override def getUnlinkedBibIds(
+      r: SierraHoldingsRecord): List[SierraBibNumber] =
       r.unlinkedBibIds
   }
 }

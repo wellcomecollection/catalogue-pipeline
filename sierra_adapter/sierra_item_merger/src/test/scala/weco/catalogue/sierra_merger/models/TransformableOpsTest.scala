@@ -36,7 +36,8 @@ class TransformableOpsTest
         caught.getMessage shouldEqual s"Non-matching bib ids ${bibRecord.id} != ${transformable.sierraId}"
       }
 
-      it("returns the transformable if you merge the same record more than once") {
+      it(
+        "returns the transformable if you merge the same record more than once") {
         val bibRecord = createSierraBibRecord
 
         val transformable = SierraTransformable(bibRecord)
@@ -75,7 +76,8 @@ class TransformableOpsTest
           bibRecord = oldBibRecord
         )
 
-        transformable.add(newBibRecord).get.maybeBibRecord shouldBe Some(newBibRecord)
+        transformable.add(newBibRecord).get.maybeBibRecord shouldBe Some(
+          newBibRecord)
       }
     }
 
