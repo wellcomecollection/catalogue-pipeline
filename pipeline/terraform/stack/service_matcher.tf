@@ -1,5 +1,7 @@
 locals {
-  lock_timeout = 240
+  # This was previously 4 minutes, but we saw a handful of messages
+  # land on the DLQ, so we increased it.
+  lock_timeout = 10 * 60
 }
 
 module "matcher_input_queue" {
