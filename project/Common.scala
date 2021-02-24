@@ -22,6 +22,11 @@ object Common {
     ),
     updateOptions := updateOptions.value.withCachedResolution(true),
     parallelExecution in Test := false,
+    publishMavenStyle := true,
+    publishTo := Some(
+      "S3 releases" at "s3://releases.mvn-repo.wellcomecollection.org/"
+    ),
+    publishArtifact in Test := true,
     // Don't build scaladocs
     // https://www.scala-sbt.org/sbt-native-packager/formats/universal.html#skip-packagedoc-task-on-stage
     mappings in (Compile, packageDoc) := Nil

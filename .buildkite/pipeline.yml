@@ -71,6 +71,34 @@ steps:
   - command: .buildkite/scripts/run_job.py snapshot_generator
     label: "snapshot generator"
   - wait
+  - label: cut release
+      if: build.branch == "alice-publish-internal-model"
+      plugins:
+        - docker#v3.5.0:
+            image: "wellcome/sbt_wrapper"
+            mount-ssh-agent: true
+            volumes: ["/var/run/docker.sock:/var/run/docker.sock"]
+            network: "host"
+            always-pull: true
+            propagate-environment: true
+            entrypoint: "/usr/bin/python3"
+      command: "/workdir/.buildkite/scripts/release.py"
+  - wait
+  - label: publish internal model
+    if: build.branch == "alice-publish-internal-model"
+    env:
+      PROJECT: internal_model
+    plugins:
+      - docker#v3.5.0:
+          image: "wellcome/sbt_wrapper"
+          mount-ssh-agent: true
+          volumes: ["/var/run/docker.sock:/var/run/docker.sock"]
+          network: "host"
+          always-pull: true
+          propagate-environment: true
+          entrypoint: "/usr/bin/python3"
+    command: "/workdir/.buildkite/scripts/publish.py"
+  - wait
   - command: .buildkite/scripts/complete_build.py
     label: "complete build"
   - wait
