@@ -1,9 +1,13 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.models.work.internal.{IdState, Item}
-import uk.ac.wellcome.platform.transformer.sierra.source.{SierraQueryOps, VarField}
+import uk.ac.wellcome.models.work.internal.LocationType.OnlineResource
+import uk.ac.wellcome.models.work.internal.{DigitalLocation, IdState, Item}
+import uk.ac.wellcome.platform.transformer.sierra.source.{MarcSubfield, SierraQueryOps, VarField}
 import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
+
+import java.net.URL
+import scala.util.Try
 
 // Create items with a DigitalLocation based on the contents of field 856.
 //
@@ -20,11 +24,41 @@ object SierraElectronicResources extends SierraQueryOps with Logging {
   def apply(bibId: SierraBibNumber, varFields: List[VarField]): List[Item[IdState.Unminted]] =
     varFields
       .filter { _.marcTag.contains("856") }
-      .flatMap(createItem)
+      .flatMap { vf => createItem(bibId, vf) }
 
-  private def createItem(vf: VarField): Option[Item[IdState.Unminted]] = {
+  private def createItem(bibId: SierraBibNumber, vf: VarField): Option[Item[IdState.Unminted]] = {
     assert(vf.marcTag.contains("856"))
 
-    None
+    getUrl(bibId, vf)
+      .map { url =>
+        Item(
+          title = None,
+          locations = List(
+            DigitalLocation(url = url, locationType = OnlineResource)
+          )
+        )
+      }
   }
+
+  // We take the URL from subfield ǂu.  If subfield ǂu is missing, repeated,
+  // or contains something other than a URL, we discard it.
+  private def getUrl(bibId: SierraBibNumber, vf: VarField): Option[String] =
+    vf.subfieldsWithTag("u") match {
+      case Seq(MarcSubfield(_, content)) if isUrl(content) => Some(content)
+
+      case Seq(MarcSubfield(_, content)) =>
+        warn(s"Bib $bibId has a value in 856 ǂu which isn't a URL: $content")
+        None
+
+      case Nil =>
+        warn(s"Bib $bibId has a field 856 without any URLs")
+        None
+
+      case other =>
+        warn(s"Bib $bibId has a field 856 with repeated subfield ǂu")
+        None
+    }
+
+  private def isUrl(s: String): Boolean =
+    Try { new URL(s) }.isSuccess
 }
