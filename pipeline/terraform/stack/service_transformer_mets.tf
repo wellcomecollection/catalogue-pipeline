@@ -4,6 +4,14 @@ module "mets_transformer_queue" {
   topic_arns      = var.mets_adapter_topic_arns
   aws_region      = var.aws_region
   alarm_topic_arn = var.dlq_alarm_arn
+
+  # The default visibility timeout is 30 seconds, and occasionally we see
+  # works get sent to the DLQ that still got through the transformer --
+  # presumably because they took a bit too long to process.
+  #
+  # Bumping the timeout is an attempt to avoid the messages being
+  # sent to a DLQ.
+  visibility_timeout_seconds = 90
 }
 
 module "mets_transformer" {
