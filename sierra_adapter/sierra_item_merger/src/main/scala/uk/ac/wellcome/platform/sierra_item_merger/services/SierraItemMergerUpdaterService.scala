@@ -1,34 +1,30 @@
 package uk.ac.wellcome.platform.sierra_item_merger.services
 
-import uk.ac.wellcome.sierra_adapter.model.{
-  SierraBibNumber,
-  SierraItemRecord,
-  SierraTransformable
-}
-import uk.ac.wellcome.storage.{
-  Identified,
-  StorageError,
-  UpdateNotApplied,
-  Version
-}
 import cats.implicits._
+import uk.ac.wellcome.sierra_adapter.model.{AbstractSierraRecord, SierraBibNumber, SierraTransformable}
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
+import uk.ac.wellcome.storage.{Identified, StorageError, UpdateNotApplied, Version}
+import weco.catalogue.sierra_merger.models.{RecordOps, TransformableOps}
 import weco.catalogue.source_model.store.SourceVHS
 
-class SierraItemMergerUpdaterService(
+class SierraItemMergerUpdaterService[Record <: AbstractSierraRecord[_]](
   sourceVHS: SourceVHS[SierraTransformable]
+)(
+  implicit
+  transformableOps: TransformableOps[Record],
+  recordOps: RecordOps[Record]
 ) {
+  import RecordOps._
+  import TransformableOps._
 
-  import weco.catalogue.sierra_merger.models.TransformableOps._
-
-  def update(itemRecord: SierraItemRecord)
+  def update(record: Record)
     : Either[StorageError,
              List[Identified[Version[String, Int], S3ObjectLocation]]] = {
     val linkUpdates =
-      itemRecord.bibIds.map { linkBib(_, itemRecord) }
+      record.linkedBibIds.map { linkBib(_, record) }
 
     val unlinkUpdates =
-      itemRecord.unlinkedBibIds.map { unlinkBib(_, itemRecord) }
+      record.unlinkedBibIds.map { unlinkBib(_, record) }
 
     (linkUpdates ++ unlinkUpdates).filter {
       case Left(_: UpdateNotApplied) => false
@@ -37,18 +33,14 @@ class SierraItemMergerUpdaterService(
   }
 
   private def linkBib(bibId: SierraBibNumber,
-                      itemRecord: SierraItemRecord): Either[
+                      record: Record): Either[
     StorageError,
     Identified[Version[String, Int], S3ObjectLocation]] = {
-    val newTransformable =
-      SierraTransformable(
-        sierraId = bibId,
-        itemRecords = Map(itemRecord.id -> itemRecord)
-      )
+    val newTransformable = transformableOps.create(bibId, record)
 
     sourceVHS
       .upsert(bibId.withoutCheckDigit)(newTransformable) {
-        _.add(itemRecord) match {
+        _.add(record) match {
           case Some(updatedRecord) => Right(updatedRecord)
           case None =>
             Left(
@@ -60,11 +52,11 @@ class SierraItemMergerUpdaterService(
   }
 
   private def unlinkBib(unlinkedBibId: SierraBibNumber,
-                        itemRecord: SierraItemRecord)
+                        record: Record)
     : Either[StorageError, Identified[Version[String, Int], S3ObjectLocation]] =
     sourceVHS
       .update(unlinkedBibId.withoutCheckDigit) {
-        _.remove(itemRecord) match {
+        _.remove(record) match {
           case Some(updatedRecord) => Right(updatedRecord)
           case None =>
             Left(

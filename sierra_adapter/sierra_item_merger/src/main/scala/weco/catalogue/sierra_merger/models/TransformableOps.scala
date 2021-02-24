@@ -1,30 +1,37 @@
 package weco.catalogue.sierra_merger.models
 
-import uk.ac.wellcome.sierra_adapter.model.{
-  AbstractSierraRecord,
-  SierraItemRecord,
-  SierraTransformable
-}
+import uk.ac.wellcome.sierra_adapter.model.{AbstractSierraRecord, SierraBibNumber, SierraItemRecord, SierraTransformable}
 
 trait TransformableOps[Record <: AbstractSierraRecord[_]] {
+  def create(id: SierraBibNumber, r: Record): SierraTransformable
+
   def add(t: SierraTransformable, r: Record): Option[SierraTransformable]
 
   def remove(t: SierraTransformable, r: Record): Option[SierraTransformable]
 }
 
 object TransformableOps {
-  implicit class SierraTransformableOps[Record <: AbstractSierraRecord[_]](t: SierraTransformable)(
-    implicit
-    ops: TransformableOps[Record]
-  ) {
-    def add(r: Record): Option[SierraTransformable] =
+  implicit class SierraTransformableOps(t: SierraTransformable) {
+    def add[Record <: AbstractSierraRecord[_]](r: Record)(
+      implicit
+      ops: TransformableOps[Record]
+    ): Option[SierraTransformable] =
       ops.add(t, r)
 
-    def remove(r: Record): Option[SierraTransformable] =
+    def remove[Record <: AbstractSierraRecord[_]](r: Record)(
+      implicit
+      ops: TransformableOps[Record]
+    ): Option[SierraTransformable] =
       ops.remove(t, r)
   }
 
   implicit val itemTransformableOps = new TransformableOps[SierraItemRecord] {
+    override def create(sierraId: SierraBibNumber, itemRecord: SierraItemRecord): SierraTransformable =
+      SierraTransformable(
+        sierraId = sierraId,
+        itemRecords = Map(itemRecord.id -> itemRecord)
+      )
+
     override def add(sierraTransformable: SierraTransformable,
                      itemRecord: SierraItemRecord): Option[SierraTransformable] = {
       if (!itemRecord.bibIds.contains(sierraTransformable.sierraId)) {

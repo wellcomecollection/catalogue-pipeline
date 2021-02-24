@@ -16,7 +16,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class SierraItemMergerWorkerService[Destination](
   sqsStream: SQSStream[NotificationMessage],
-  sierraItemMergerUpdaterService: SierraItemMergerUpdaterService,
+  sierraItemMergerUpdaterService: SierraItemMergerUpdaterService[SierraItemRecord],
   messageSender: MessageSender[Destination]
 )(implicit ec: ExecutionContext)
     extends Runnable

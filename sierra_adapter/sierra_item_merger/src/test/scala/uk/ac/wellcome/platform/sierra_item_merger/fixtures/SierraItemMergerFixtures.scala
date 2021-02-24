@@ -6,11 +6,8 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.platform.sierra_item_merger.services.{
-  SierraItemMergerUpdaterService,
-  SierraItemMergerWorkerService
-}
-import uk.ac.wellcome.sierra_adapter.model.SierraTransformable
+import uk.ac.wellcome.platform.sierra_item_merger.services.{SierraItemMergerUpdaterService, SierraItemMergerWorkerService}
+import uk.ac.wellcome.sierra_adapter.model.{SierraItemRecord, SierraTransformable}
 import uk.ac.wellcome.sierra_adapter.model.Implicits._
 import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
 import weco.catalogue.source_model.fixtures.SourceVHSFixture
@@ -24,7 +21,7 @@ trait SierraItemMergerFixtures
     with SierraAdapterHelpers
     with SourceVHSFixture {
   def withSierraUpdaterService[R](sourceVHS: SourceVHS[SierraTransformable])(
-    testWith: TestWith[SierraItemMergerUpdaterService, R]): R = {
+    testWith: TestWith[SierraItemMergerUpdaterService[SierraItemRecord], R]): R = {
     val sierraUpdaterService = new SierraItemMergerUpdaterService(sourceVHS)
     testWith(sierraUpdaterService)
   }
