@@ -27,7 +27,10 @@ class MiroItemsTest
             url = "https://iiif.wellcomecollection.org/image/B0011308/info.json",
             locationType = LocationType.IIIFImageAPI,
             license = Some(License.CC0),
-            credit = Some("Ezra Feilden")
+            credit = Some("Ezra Feilden"),
+            accessConditions = List(
+              AccessCondition(status = Some(AccessStatus.Open))
+            )
           ))
         ))
     }

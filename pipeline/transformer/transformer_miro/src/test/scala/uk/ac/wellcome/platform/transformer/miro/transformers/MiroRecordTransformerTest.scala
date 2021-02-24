@@ -309,7 +309,10 @@ class MiroRecordTransformerTest
       url = "https://iiif.wellcomecollection.org/image/B0011308/info.json",
       license = Some(License.CCBY),
       credit = Some("Ezra Feilden"),
-      locationType = LocationType.IIIFImageAPI
+      locationType = LocationType.IIIFImageAPI,
+      accessConditions = List(
+        AccessCondition(status = Some(AccessStatus.Open))
+      )
     )
     work.data.items.head.locations shouldBe List(expectedDigitalLocation)
   }
@@ -323,7 +326,10 @@ class MiroRecordTransformerTest
       url = "https://iiif.wellcomecollection.org/image/B0011308/info.json",
       locationType = LocationType.IIIFImageAPI,
       license = Some(License.CCBY),
-      credit = None
+      credit = None,
+      accessConditions = List(
+        AccessCondition(status = Some(AccessStatus.Open))
+      )
     )
     work.data.items shouldBe List(
       Item(id = IdState.Unidentifiable, locations = List(expectedLocation))
