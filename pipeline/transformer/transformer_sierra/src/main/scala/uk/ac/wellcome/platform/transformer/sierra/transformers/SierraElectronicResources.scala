@@ -29,15 +29,23 @@ object SierraElectronicResources extends SierraQueryOps with Logging {
   private def createItem(bibId: SierraBibNumber, vf: VarField): Option[Item[IdState.Unminted]] = {
     assert(vf.marcTag.contains("856"))
 
-    getUrl(bibId, vf)
-      .map { url =>
-        Item(
-          title = None,
-          locations = List(
-            DigitalLocation(url = url, locationType = OnlineResource)
-          )
+    getUrl(bibId, vf).map { url =>
+
+      // We don't want the link text to be too long (at most seven words), so
+      // we apply the following heuristic to the label:
+      //
+      // If the concatenated string is seven words or less, and contains "access",
+      // "view" or "connect", we put it in the location "linkText" field.
+      // Otherwise, we put it in the item's "title" field.
+      val label = getLabel(vf)
+
+      Item(
+        title = label,
+        locations = List(
+          DigitalLocation(url = url, locationType = OnlineResource)
         )
-      }
+      )
+    }
   }
 
   // We take the URL from subfield ǂu.  If subfield ǂu is missing, repeated,
@@ -58,6 +66,25 @@ object SierraElectronicResources extends SierraQueryOps with Logging {
         warn(s"Bib $bibId has a field 856 with repeated subfield ǂu")
         None
     }
+
+  // We get the label by concatenating the contents of three subfields:
+  //
+  //  - ǂz (public note)
+  //  - ǂy (link text)
+  //  - ǂ3 (materials specified)
+  //
+  private def getLabel(vf: VarField): Option[String] = {
+    val labelCandidate =
+      vf.subfieldsWithTags("z", "y", "3")
+        .map { _.content }
+        .mkString(" ")
+
+    if (labelCandidate.isEmpty) {
+      None
+    } else {
+      Some(labelCandidate)
+    }
+  }
 
   private def isUrl(s: String): Boolean =
     Try { new URL(s) }.isSuccess

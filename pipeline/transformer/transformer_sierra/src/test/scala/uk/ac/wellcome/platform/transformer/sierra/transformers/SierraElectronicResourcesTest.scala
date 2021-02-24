@@ -74,6 +74,36 @@ class SierraElectronicResourcesTest
     )
   }
 
+  describe("sets the label") {
+    it("uses the concatenated contents of 856 ǂz, ǂy and ǂ3") {
+      // None of our records use all three subfields (they all use one or two),
+      // but we do it here to make testing simple.
+      val varFields = List(
+        createVarFieldWith(
+          marcTag = "856",
+          subfields = List(
+            MarcSubfield(tag = "u", content = "https://example.org/journal"),
+            MarcSubfield(tag = "3", content = "Related archival materials:"),
+            MarcSubfield(tag = "z", content = "available to library members."),
+            MarcSubfield(tag = "z", content = "Cambridge Books Online."),
+          )
+        )
+      )
+
+      getElectronicResources(varFields) shouldBe List(
+        Item(
+          title = Some("Related archival materials: available to library members. Cambridge Books Online."),
+          locations = List(
+            DigitalLocation(
+              url = "https://example.org/journal",
+              locationType = OnlineResource
+            )
+          )
+        )
+      )
+    }
+  }
+
   describe("skips adding an item") {
     it("if there are no instances of field 856") {
       getElectronicResources(varFields = List()) shouldBe empty
