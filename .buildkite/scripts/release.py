@@ -61,18 +61,28 @@ def update_changelog_and_version():
 
     heading_for_new_version = "## " + " - ".join((new_version_string, date))
 
-    new_changelog_parts = [
-        beginning.strip(),
-        "",
-        heading_for_new_version,
-        "",
-        release_contents,
-        "",
-        rest,
-    ]
+    try:
+        new_changelog_parts = [
+            beginning.strip(),
+            "",
+            heading_for_new_version,
+            "",
+            release_contents,
+            "",
+            rest,
+        ]
+    except NameError:
+        new_changelog_parts = lines + [
+            "",
+            heading_for_new_version,
+            "",
+            release_contents,
+        ]
 
     with open(CHANGELOG_FILE, "w") as o:
         o.write("\n".join(new_changelog_parts))
+
+
 
     # Update the version specified in build.sbt.  We're looking to replace
     # a line of the form:
