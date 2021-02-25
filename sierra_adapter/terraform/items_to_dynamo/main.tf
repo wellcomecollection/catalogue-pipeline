@@ -1,4 +1,4 @@
-module "sierra_to_dynamo_service" {
+module "service" {
   source = "../../../infrastructure/modules/worker"
 
   name = local.service_name
