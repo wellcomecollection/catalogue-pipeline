@@ -14,19 +14,19 @@ import uk.ac.wellcome.storage.s3.{S3Config, S3ObjectLocation, S3ObjectLocationPr
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import weco.catalogue.sierra_adapter.models.UntypedSierraRecordNumber
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
 class WindowManager(
   s3Config: S3Config,
   readerConfig: ReaderConfig
-)(implicit ec: ExecutionContext, s3Client: AmazonS3)
+)(implicit s3Client: AmazonS3)
     extends Logging {
 
   private val listing = S3ObjectLocationListing()
   private val store = S3TypedStore[String]
 
-  def getCurrentStatus(window: String): Future[WindowStatus] = {
+  def getCurrentStatus(window: String): Future[WindowStatus] = Future.fromTry {
     val prefix = S3ObjectLocationPrefix(
       bucket = s3Config.bucketName,
       keyPrefix = buildWindowShard(window)
@@ -35,7 +35,7 @@ class WindowManager(
     info(s"Searching for records from previous invocation of the reader in $prefix")
 
     for {
-      lastExistingKey: Option[S3ObjectLocation] <- Future {
+      lastExistingKey: Option[S3ObjectLocation] <- Try {
         listing.list(prefix) match {
           case Right(result) => result.lastOption
           case Left(err) => throw err.e
@@ -50,31 +50,29 @@ class WindowManager(
 
           case None =>
             debug(s"No existing records found in S3; starting from scratch")
-            Future.successful(WindowStatus(id = None, offset = 0))
+            Success(WindowStatus(id = None, offset = 0))
         }
     } yield status
   }
 
-  private def getStatusFromLastKey(location: S3ObjectLocation): Future[WindowStatus] = {
+  private def getStatusFromLastKey(location: S3ObjectLocation): Try[WindowStatus] = {
     // Our SequentialS3Sink creates filenames that end 0000.json, 0001.json, ..., with an optional prefix.
     // Find the number on the end of the last file.
     val embeddedIndexMatch = "(\\d{4})\\.json$".r.unanchored
 
     for {
       offset <- location.key match {
-        case embeddedIndexMatch(index) => Future.successful(index.toInt)
+        case embeddedIndexMatch(index) => Success(index.toInt)
         case _ =>
-          Future.failed(SierraReaderException(s"Unable to determine offset in $location"))
+          Failure(SierraReaderException(s"Unable to determine offset in $location"))
       }
 
       latestBody <- store.get(location) match {
-        case Right(Identified(_, body)) => Future.successful(body)
-        case Left(err) => Future.failed(err.e)
+        case Right(Identified(_, body)) => Success(body)
+        case Left(err) => Failure(err.e)
       }
 
-      latestId <- Future.fromTry {
-        getLatestId(location, latestBody)
-      }
+      latestId <- getLatestId(location, latestBody)
 
       _ = info(s"Found latest ID in S3: $latestId")
 

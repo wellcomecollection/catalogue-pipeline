@@ -17,8 +17,6 @@ import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 import weco.catalogue.sierra_adapter.generators.SierraGenerators
 import weco.catalogue.sierra_adapter.models.SierraBibNumber
 
-import scala.concurrent.ExecutionContext.Implicits.global
-
 class WindowManagerTest
     extends AnyFunSpec
     with Matchers
