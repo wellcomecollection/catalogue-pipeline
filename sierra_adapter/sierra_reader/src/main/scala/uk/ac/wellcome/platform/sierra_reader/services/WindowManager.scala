@@ -15,7 +15,7 @@ import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import weco.catalogue.sierra_adapter.models.UntypedSierraRecordNumber
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Success, Try}
 
 class WindowManager(
   s3Config: S3Config,
@@ -72,10 +72,8 @@ class WindowManager(
         case Left(err) => Future.failed(err.e)
       }
 
-      latestId <- Future {
-        getLatestId(latestBody).getOrElse(
-          throw SierraReaderException(s"JSON <<$latestBody>> did not contain an id")
-        )
+      latestId <- Future.fromTry {
+        getLatestId(location, latestBody)
       }
 
       _ = info(s"Found latest ID in S3: $latestId")
@@ -109,18 +107,26 @@ class WindowManager(
   // or SierraItemRecord; we want to get the last ID of the current contents
   // so we know what to ask the Sierra API for next.
   //
-  private def getLatestId(s3contents: String): Option[String] = {
+  private def getLatestId(location: S3ObjectLocation, s3contents: String): Try[String] = {
     case class Identified(id: UntypedSierraRecordNumber)
 
     fromJson[List[Identified]](s3contents) match {
       case Success(ids) =>
-        ids
-          .map { _.id.withoutCheckDigit }
-          .sorted
-          .lastOption
+        val lastId = ids.map { _.id.withoutCheckDigit }.sorted.lastOption
+
+        lastId match {
+          case Some(id) => Success(id)
+          case None => Failure(
+            SierraReaderException(s"JSON at $location did not contain an id")
+          )
+        }
+
       case Failure(_) =>
-        throw SierraReaderException(
-          s"S3 contents <<$s3contents> could not be parsed as JSON")
+        Failure(
+          SierraReaderException(
+            s"S3 object at $location could not be parsed as JSON"
+          )
+        )
     }
   }
 }
