@@ -8,7 +8,6 @@ import uk.ac.wellcome.sierra_adapter.model.{
   SierraItemNumber,
   SierraItemRecord
 }
-import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
 import uk.ac.wellcome.storage.maxima.memory.MemoryMaxima
 import uk.ac.wellcome.storage.store.memory.{MemoryStore, MemoryVersionedStore}
 import uk.ac.wellcome.storage.{
@@ -23,8 +22,7 @@ class LinkStoreTest
     extends AnyFunSpec
     with Matchers
     with EitherValues
-    with SierraGenerators
-    with SierraAdapterHelpers {
+    with SierraGenerators {
 
   it("inserts an ItemRecord into the VHS") {
     implicit val store =

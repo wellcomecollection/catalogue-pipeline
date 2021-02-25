@@ -12,7 +12,6 @@ import uk.ac.wellcome.sierra_adapter.model.{
   SierraItemNumber,
   SierraItemRecord
 }
-import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
 import uk.ac.wellcome.storage.Version
 import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
 import weco.catalogue.sierra_linker.fixtures.WorkerFixture
@@ -25,8 +24,7 @@ class SierraLinkerWorkerTest
     with IntegrationPatience
     with ScalaFutures
     with SierraGenerators
-    with WorkerFixture
-    with SierraAdapterHelpers {
+    with WorkerFixture {
 
   it("reads a Sierra record from SQS and stores it") {
     val bibIds = createSierraBibNumbers(count = 5)

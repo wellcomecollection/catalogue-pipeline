@@ -1,12 +1,13 @@
 package weco.catalogue.sierra_merger.services
 
-import org.scalatest.EitherValues
+import org.scalatest.{Assertion, EitherValues}
 import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.sierra_adapter.model.Implicits._
 import uk.ac.wellcome.sierra_adapter.model.{
   SierraGenerators,
   SierraItemRecord,
-  SierraTransformable
+  SierraTransformable,
+  TypedSierraRecordNumber
 }
 import uk.ac.wellcome.storage.maxima.Maxima
 import uk.ac.wellcome.storage.maxima.memory.MemoryMaxima
@@ -30,6 +31,13 @@ class UpdaterTest
     with RecordMergerFixtures
     with SourceVHSFixture {
 
+  def assertStored(
+    id: TypedSierraRecordNumber,
+    transformable: SierraTransformable,
+    sourceVHS: SourceVHS[SierraTransformable]
+  ): Assertion =
+    sourceVHS.underlying.getLatest(id.withoutCheckDigit).right.get.identifiedT shouldBe transformable
+
   it("creates a record if it receives an item with a bibId that doesn't exist") {
     val sourceVHS = createSourceVHS[SierraTransformable]
     val updater = new Updater[SierraItemRecord](sourceVHS)
@@ -52,10 +60,7 @@ class UpdaterTest
         itemRecords = List(newItemRecord)
       )
 
-    assertStored(
-      bibId.withoutCheckDigit,
-      expectedSierraTransformable,
-      sourceVHS)
+    assertStored(bibId, expectedSierraTransformable, sourceVHS)
   }
 
   it("updates an item if it receives an update with a newer date") {
@@ -94,7 +99,7 @@ class UpdaterTest
       Version(bibId.withoutCheckDigit, 1)))
 
     assertStored(
-      expectedTransformable.sierraId.withoutCheckDigit,
+      expectedTransformable.sierraId,
       expectedTransformable,
       sourceVHS
     )
@@ -155,16 +160,8 @@ class UpdaterTest
       Version(bibId1.withoutCheckDigit, 1),
       Version(bibId2.withoutCheckDigit, 1)))
 
-    assertStored(
-      bibId1.withoutCheckDigit,
-      expectedTransformable1,
-      sourceVHS
-    )
-    assertStored(
-      bibId2.withoutCheckDigit,
-      expectedTransformable2,
-      sourceVHS
-    )
+    assertStored(bibId1, expectedTransformable1, sourceVHS)
+    assertStored(bibId2, expectedTransformable2, sourceVHS)
   }
 
   it("unlinks and updates a bib from a single call") {
@@ -220,16 +217,9 @@ class UpdaterTest
     result.right.get.map { _.id } should contain theSameElementsAs (List(
       Version(bibId1.withoutCheckDigit, 1),
       Version(bibId2.withoutCheckDigit, 1)))
-    assertStored(
-      bibId1.withoutCheckDigit,
-      expectedTransformable1,
-      sourceVHS
-    )
-    assertStored(
-      bibId2.withoutCheckDigit,
-      expectedTransformable2,
-      sourceVHS
-    )
+
+    assertStored(bibId1, expectedTransformable1, sourceVHS)
+    assertStored(bibId2, expectedTransformable2, sourceVHS)
   }
 
   it("does not unlink an item if it receives an outdated unlink update") {
@@ -283,16 +273,8 @@ class UpdaterTest
     result.right.get.map { _.id } should contain theSameElementsAs List(
       Version(bibId2.withoutCheckDigit, 1))
 
-    assertStored(
-      bibId1.withoutCheckDigit,
-      expectedTransformable1,
-      sourceVHS
-    )
-    assertStored(
-      bibId2.withoutCheckDigit,
-      expectedTransformable2,
-      sourceVHS
-    )
+    assertStored(bibId1, expectedTransformable1, sourceVHS)
+    assertStored(bibId2, expectedTransformable2, sourceVHS)
   }
 
   it("does not update an item if it receives an update with an older date") {
@@ -324,11 +306,7 @@ class UpdaterTest
     result shouldBe a[Right[_, _]]
     result.right.get shouldBe empty
 
-    assertStored(
-      bibId.withoutCheckDigit,
-      transformable,
-      sourceVHS
-    )
+    assertStored(bibId, transformable, sourceVHS)
   }
 
   it("re-sends an item if it receives the same update twice") {
@@ -380,11 +358,8 @@ class UpdaterTest
     result shouldBe a[Right[_, _]]
     result.right.get.map { _.id } should contain theSameElementsAs (List(
       Version(bibId.withoutCheckDigit, 1)))
-    assertStored(
-      bibId.withoutCheckDigit,
-      expectedTransformable,
-      sourceVHS
-    )
+
+    assertStored(bibId, expectedTransformable, sourceVHS)
   }
 
   class BrokenStore

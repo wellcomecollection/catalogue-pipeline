@@ -7,7 +7,6 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.sierra_adapter.model.Implicits._
 import uk.ac.wellcome.sierra_adapter.model._
-import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
 import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
 import weco.catalogue.sierra_linker.fixtures.WorkerFixture
 import weco.catalogue.sierra_linker.models.Link
@@ -18,7 +17,6 @@ class SierraLinkerFeatureTest
     with Eventually
     with EitherValues
     with IntegrationPatience
-    with SierraAdapterHelpers
     with SierraGenerators
     with WorkerFixture {
 
