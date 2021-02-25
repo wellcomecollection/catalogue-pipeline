@@ -140,7 +140,8 @@ class WindowManagerTest
 
   it("throws an error if it can't list the contents of the bucket") {
     withWindowManager(createBucket) { windowManager =>
-      val future = windowManager.getCurrentStatus(s"[$startDateTime,$endDateTime]")
+      val future =
+        windowManager.getCurrentStatus(s"[$startDateTime,$endDateTime]")
 
       whenReady(future.failed) {
         _ shouldBe a[AmazonS3Exception]
