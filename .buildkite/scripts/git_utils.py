@@ -23,7 +23,7 @@ def get_all_tags():
     """
     git('fetch', '--tags')
     result = git('tag')
-    all_tags = result.split('\n')
+    all_tags = filter(lambda tag: tag.startswith("v") ,result.split('\n'))
 
     assert len(set(all_tags)) == len(all_tags)
 
