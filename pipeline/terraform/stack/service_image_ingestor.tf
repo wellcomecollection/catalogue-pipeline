@@ -4,6 +4,8 @@ module "ingestor_images_queue" {
   topic_arns      = [module.image_inferrer_topic.arn]
   aws_region      = var.aws_region
   alarm_topic_arn = var.dlq_alarm_arn
+
+  visibility_timeout_seconds = 60
 }
 
 # Service
@@ -68,7 +70,7 @@ module "ingestor_images" {
 
   subnets = var.subnets
 
-  max_capacity      = min(5, var.max_capacity)
+  max_capacity      = min(5, local.max_capacity)
   queue_read_policy = module.ingestor_images_queue.read_policy
 
   deployment_service_env  = var.release_label

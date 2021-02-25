@@ -49,7 +49,7 @@ module "ingestor_works" {
 
   subnets = var.subnets
 
-  max_capacity      = min(6, var.max_capacity)
+  max_capacity      = min(6, local.max_capacity)
   queue_read_policy = module.ingestor_works_queue.read_policy
 
   cpu    = 2048

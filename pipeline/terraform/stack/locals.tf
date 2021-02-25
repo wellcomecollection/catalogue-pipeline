@@ -16,7 +16,11 @@ locals {
   # specified at /infrastructure/critical/rds_id_minter.tf
   base_rds_instances             = 1
   id_minter_rds_max_connections  = (local.base_rds_instances + local.extra_rds_instances) * 45
-  id_minter_task_max_connections = min(9, var.max_capacity)
+  id_minter_task_max_connections = min(9, local.max_capacity)
+
+  # We don't want to overload our databases if we're not reindexing
+  # and don't have extra database capacity provisioned
+  max_capacity = var.is_reindexing ? var.max_capacity : min(3, var.max_capacity)
 
   services = [
     "ingestor_works",

@@ -4,6 +4,8 @@ module "router_queue" {
   topic_arns      = [module.merger_works_topic.arn]
   aws_region      = var.aws_region
   alarm_topic_arn = var.dlq_alarm_arn
+
+  visibility_timeout_seconds = 60
 }
 
 module "router" {
@@ -40,7 +42,7 @@ module "router" {
   shared_logging_secrets = var.shared_logging_secrets
 
   subnets           = var.subnets
-  max_capacity      = min(10, var.max_capacity)
+  max_capacity      = min(10, local.max_capacity)
   queue_read_policy = module.router_queue.read_policy
 
   cpu    = 1024
