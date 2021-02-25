@@ -80,7 +80,7 @@ class ReindexWorkerServiceTest
   //
   // These examples are based on the table structure as of 14 December 2020.
   describe("completing a reindex") {
-    it("for CALM records") {
+    it("for extant CALM records") {
       withLocalDynamoDbTable { table =>
         val calmRecordId = UUID.randomUUID().toString
         val location = createS3ObjectLocation
@@ -107,6 +107,45 @@ class ReindexWorkerServiceTest
           id = calmRecordId,
           location = location,
           version = version
+        )
+
+        runTest(
+          table = table,
+          source = ReindexSource.Calm,
+          expectedMessage = expectedMessage
+        )
+      }
+    }
+
+    it("for deleted CALM records") {
+      withLocalDynamoDbTable { table =>
+        val calmRecordId = UUID.randomUUID().toString
+        val location = createS3ObjectLocation
+        val version = randomInt(from = 1, to = 10)
+
+        dynamoClient.putItem(
+          PutItemRequest
+            .builder()
+            .tableName(table.name)
+            .item(
+              toAttributeValue(
+                "id" -> calmRecordId,
+                "payload" -> Map(
+                  "bucket" -> location.bucket,
+                  "key" -> location.key
+                ),
+                "version" -> version,
+                "isDeleted" -> true
+              )
+            )
+            .build()
+        )
+
+        val expectedMessage = CalmSourcePayload(
+          id = calmRecordId,
+          location = location,
+          version = version,
+          isDeleted = true
         )
 
         runTest(
