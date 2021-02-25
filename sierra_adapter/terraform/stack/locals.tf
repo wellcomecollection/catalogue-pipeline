@@ -5,7 +5,7 @@ data "aws_ssm_parameter" "critical_slack_webhook" {
 locals {
   namespace_hyphen = replace(var.namespace, "_", "-")
 
-  sierra_api_url = "https://libsys.wellcomelibrary.org/iii/sierra-api/v3"
+  sierra_api_url = "https://libsys.wellcomelibrary.org/iii/sierra-api/v5"
 
   sierra_items_fields = join(",", [
     "updatedDate",
