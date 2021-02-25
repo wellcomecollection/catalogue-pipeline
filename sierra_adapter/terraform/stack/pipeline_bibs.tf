@@ -38,13 +38,12 @@ module "bibs_merger" {
 
   resource_type = "bibs"
 
-  container_image = local.sierra_merger_image
+  container_image   = local.sierra_merger_image
+  updates_topic_arn = module.bibs_reader.topic_arn
 
   vhs_table_name        = module.vhs_sierra.table_name
   vhs_bucket_name       = module.vhs_sierra.bucket_name
   vhs_read_write_policy = module.vhs_sierra.full_access_policy
-
-  updates_topic_arn = module.bibs_reader.topic_arn
 
   cluster_name = aws_ecs_cluster.cluster.name
   cluster_arn  = aws_ecs_cluster.cluster.arn

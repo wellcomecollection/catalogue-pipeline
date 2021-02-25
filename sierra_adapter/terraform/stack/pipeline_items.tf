@@ -63,15 +63,14 @@ module "item_linker" {
 module "items_merger" {
   source = "./../sierra_merger"
 
-  resource_type = "items"
+  resource_type     = "items"
+  updates_topic_arn = module.item_linker.topic_arn
 
   container_image = local.sierra_merger_image
 
   vhs_table_name        = module.vhs_sierra.table_name
   vhs_bucket_name       = module.vhs_sierra.bucket_name
   vhs_read_write_policy = module.vhs_sierra.full_access_policy
-
-  updates_topic_arn = module.bibs_reader.topic_arn
 
   cluster_name = aws_ecs_cluster.cluster.name
   cluster_arn  = aws_ecs_cluster.cluster.arn
