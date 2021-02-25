@@ -6,7 +6,7 @@
     "method" : "POST",
     "headers" : {
       "Authorization" : {
-        "equalTo" : "Basic a2V5OnNlY3JldA=="
+        "equalTo" : "Basic a2V5Ondyb25nLXNlY3JldA=="
       }
     }
   },

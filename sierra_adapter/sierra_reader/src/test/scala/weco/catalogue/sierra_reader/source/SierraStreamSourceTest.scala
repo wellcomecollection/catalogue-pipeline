@@ -62,7 +62,7 @@ class SierraStreamSourceTest
     stubFor(get(urlMatching("/bibs")).inScenario("refresh token")
       .whenScenarioStateIs("token refreshed"))
 
-    val eventualJson = SierraSource(sierraWireMockUrl, oauthKey, oauthSecret)(
+    val eventualJson = SierraSource(sierraWireMockUrl, oauthKey, "wrong-secret")(
       "bibs", Map.empty).take(1).runWith(Sink.head[Json])
 
     whenReady(eventualJson) { json =>
