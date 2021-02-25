@@ -15,11 +15,9 @@ module "sierra-adapter-20200604" {
   bibs_windows_topic_arns  = [module.bibs_window_generator.topic_arn, module.bibs_reharvest_topic.arn]
   items_windows_topic_arns = [module.items_window_generator.topic_arn, module.items_reharvest_topic.arn]
 
-  sierra_reader_image          = aws_ecr_repository.sierra_reader.repository_url
-  sierra_bib_merger_image      = aws_ecr_repository.sierra_merger.repository_url
-  sierra_item_merger_image     = aws_ecr_repository.sierra_merger.repository_url
-
+  sierra_reader_image = aws_ecr_repository.sierra_reader.repository_url
   sierra_linker_image = aws_ecr_repository.sierra_linker.repository_url
+  sierra_merger_image = aws_ecr_repository.sierra_merger.repository_url
 
   deployment_env         = "prod"
   shared_logging_secrets = data.terraform_remote_state.shared_infra.outputs.shared_secrets_logging

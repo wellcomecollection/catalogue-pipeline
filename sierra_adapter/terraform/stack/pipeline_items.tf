@@ -61,21 +61,23 @@ module "item_linker" {
 }
 
 module "items_merger" {
-  source = "./../item_merger"
+  source = "./../sierra_merger"
 
-  container_image = local.sierra_item_merger_image
+  resource_type = "items"
 
-  updates_topic_arn = module.item_linker.topic_arn
+  container_image = local.sierra_merger_image
+
+  vhs_table_name        = module.vhs_sierra.table_name
+  vhs_bucket_name       = module.vhs_sierra.bucket_name
+  vhs_read_write_policy = module.vhs_sierra.full_access_policy
+
+  updates_topic_arn = module.bibs_reader.topic_arn
 
   cluster_name = aws_ecs_cluster.cluster.name
   cluster_arn  = aws_ecs_cluster.cluster.arn
   vpc_id       = var.vpc_id
 
   dlq_alarm_arn = var.dlq_alarm_arn
-
-  sierra_transformable_vhs_full_access_policy = module.vhs_sierra.full_access_policy
-  sierra_transformable_vhs_dynamo_table_name  = module.vhs_sierra.table_name
-  sierra_transformable_vhs_bucket_name        = module.vhs_sierra.bucket_name
 
   namespace_id = aws_service_discovery_private_dns_namespace.namespace.id
   namespace    = local.namespace_hyphen

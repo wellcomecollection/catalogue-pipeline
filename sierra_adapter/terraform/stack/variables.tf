@@ -18,14 +18,10 @@ variable "sierra_reader_image" {
   type = string
 }
 
-variable "sierra_bib_merger_image" {
-  type = string
-}
-
-variable "sierra_item_merger_image" {
-  type = string
-}
-
 variable "sierra_linker_image" {
+  type = string
+}
+
+variable "sierra_merger_image" {
   type = string
 }

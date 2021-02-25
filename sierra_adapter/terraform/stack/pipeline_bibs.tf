@@ -34,11 +34,15 @@ module "bibs_reader" {
 }
 
 module "bibs_merger" {
-  source = "./../bib_merger"
+  source = "./../sierra_merger"
 
-  container_image = local.sierra_bib_merger_image
+  resource_type = "bibs"
 
-  merged_dynamo_table_name = module.vhs_sierra.table_name
+  container_image = local.sierra_merger_image
+
+  vhs_table_name        = module.vhs_sierra.table_name
+  vhs_bucket_name       = module.vhs_sierra.bucket_name
+  vhs_read_write_policy = module.vhs_sierra.full_access_policy
 
   updates_topic_arn = module.bibs_reader.topic_arn
 
@@ -47,10 +51,6 @@ module "bibs_merger" {
   vpc_id       = var.vpc_id
 
   dlq_alarm_arn = var.dlq_alarm_arn
-
-  vhs_full_access_policy = module.vhs_sierra.full_access_policy
-
-  bucket_name = module.vhs_sierra.bucket_name
 
   namespace_id = aws_service_discovery_private_dns_namespace.namespace.id
   namespace    = local.namespace_hyphen
