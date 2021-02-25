@@ -29,7 +29,7 @@ def changelog():
 
 
 def new_version(commit_hash):
-    build_number = os.environ("BUILDKITE_BUILD_NUMBER")
+    build_number = os.environ["BUILDKITE_BUILD_NUMBER"]
 
     new_version = [build_number, commit_hash]
     new_version = tuple(new_version)
