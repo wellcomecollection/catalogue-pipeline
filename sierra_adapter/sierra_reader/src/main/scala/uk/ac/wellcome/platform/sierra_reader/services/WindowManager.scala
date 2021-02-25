@@ -22,29 +22,35 @@ class WindowManager(
 )(implicit ec: ExecutionContext, s3Client: AmazonS3)
     extends Logging {
 
-  def getCurrentStatus(window: String): Future[WindowStatus] = Future {
+  def getCurrentStatus(window: String): Future[WindowStatus] = {
     info(
       s"Searching for records from previous invocation of the reader in prefix ${buildWindowShard(window)}")
 
-    val lastExistingKey = s3Client
-      .listObjects(s3Config.bucketName, buildWindowShard(window))
-      .getObjectSummaries
-      .asScala
-      .map { _.getKey() }
-      .sorted
-      .lastOption
+    for {
+      lastExistingKey <- Future {
+        s3Client
+          .listObjects(s3Config.bucketName, buildWindowShard(window))
+          .getObjectSummaries
+          .asScala
+          .map { _.getKey() }
+          .sorted
+          .lastOption
+      }
 
-    lastExistingKey match {
-      case Some(key) =>
-        debug(s"Found JSON file from previous run in S3: $key")
-        getStatusFromLastKey(
-          S3ObjectLocation(s3Config.bucketName, key)
-        )
+      status <- Future {
+        lastExistingKey match {
+          case Some(key) =>
+            debug(s"Found JSON file from previous run in S3: $key")
+            getStatusFromLastKey(
+              S3ObjectLocation(s3Config.bucketName, key)
+            )
 
-      case None =>
-        debug(s"No existing records found in S3; starting from scratch")
-        WindowStatus(id = None, offset = 0)
-    }
+          case None =>
+            debug(s"No existing records found in S3; starting from scratch")
+            WindowStatus(id = None, offset = 0)
+        }
+      }
+    } yield status
   }
 
   private def getStatusFromLastKey(location: S3ObjectLocation): WindowStatus = {
