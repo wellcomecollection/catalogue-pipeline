@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.sierra_reader.services
 
+import com.amazonaws.services.s3.model.AmazonS3Exception
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -135,6 +136,16 @@ class WindowManagerTest
         whenReady(result.failed) {
           _ shouldBe a[SierraReaderException]
         }
+      }
+    }
+  }
+
+  it("throws an error if it can't list the contents of the bucket") {
+    withWindowManager(createBucket) { windowManager =>
+      val future = windowManager.getCurrentStatus(s"[$startDateTime,$endDateTime]")
+
+      whenReady(future.failed) {
+        _ shouldBe a[AmazonS3Exception]
       }
     }
   }
