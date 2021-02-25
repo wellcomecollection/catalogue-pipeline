@@ -1,6 +1,6 @@
 package weco.catalogue.sierra_linker.models
 
-import uk.ac.wellcome.sierra_adapter.model.{
+import weco.catalogue.sierra_adapter.models.{
   SierraBibNumber,
   SierraHoldingsRecord,
   SierraItemRecord

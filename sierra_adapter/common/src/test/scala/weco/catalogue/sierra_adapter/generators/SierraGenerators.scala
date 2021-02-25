@@ -2,7 +2,7 @@ package weco.catalogue.sierra_adapter.generators
 
 import uk.ac.wellcome.fixtures.RandomGenerators
 import uk.ac.wellcome.json.JsonUtil.toJson
-import uk.ac.wellcome.sierra_adapter.model._
+import weco.catalogue.sierra_adapter.models._
 
 import java.time.Instant
 import scala.util.Random

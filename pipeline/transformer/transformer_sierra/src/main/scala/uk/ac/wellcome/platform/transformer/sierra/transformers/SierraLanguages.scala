@@ -7,7 +7,7 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraBibData,
   SierraQueryOps
 }
-import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
+import weco.catalogue.sierra_adapter.models.SierraBibNumber
 
 object SierraLanguages
     extends SierraIdentifiedDataTransformer

@@ -2,12 +2,6 @@ package weco.catalogue.sierra_merger.services
 
 import org.scalatest.{Assertion, EitherValues}
 import org.scalatest.funspec.AnyFunSpec
-import uk.ac.wellcome.sierra_adapter.model.Implicits._
-import uk.ac.wellcome.sierra_adapter.model.{
-  SierraItemRecord,
-  SierraTransformable,
-  TypedSierraRecordNumber
-}
 import uk.ac.wellcome.storage.maxima.Maxima
 import uk.ac.wellcome.storage.maxima.memory.MemoryMaxima
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
@@ -20,6 +14,12 @@ import uk.ac.wellcome.storage.store.{
 }
 import uk.ac.wellcome.storage.{StoreWriteError, UpdateWriteError, Version}
 import weco.catalogue.sierra_adapter.generators.SierraGenerators
+import weco.catalogue.sierra_adapter.models.Implicits._
+import weco.catalogue.sierra_adapter.models.{
+  SierraItemRecord,
+  SierraTransformable,
+  TypedSierraRecordNumber
+}
 import weco.catalogue.sierra_merger.fixtures.RecordMergerFixtures
 import weco.catalogue.source_model.fixtures.SourceVHSFixture
 import weco.catalogue.source_model.store.SourceVHS

@@ -2,8 +2,8 @@ package weco.catalogue.sierra_merger.models
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.sierra_adapter.model.SierraTransformable
 import weco.catalogue.sierra_adapter.generators.SierraGenerators
+import weco.catalogue.sierra_adapter.models.SierraTransformable
 
 class TransformableOpsTest
     extends AnyFunSpec

@@ -6,11 +6,11 @@ import uk.ac.wellcome.models.work.internal.{result, Work}
 import uk.ac.wellcome.models.work.internal.WorkState.Source
 import uk.ac.wellcome.pipeline_storage.{PipelineStorageStream, Retriever}
 import uk.ac.wellcome.platform.transformer.sierra.SierraTransformer
-import uk.ac.wellcome.sierra_adapter.model.SierraTransformable
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.{Identified, ReadError, Version}
 import uk.ac.wellcome.storage.store.Readable
 import uk.ac.wellcome.typesafe.Runnable
+import weco.catalogue.sierra_adapter.models.SierraTransformable
 import weco.catalogue.source_model.SierraSourcePayload
 import weco.catalogue.transformer.{Transformer, TransformerWorker}
 

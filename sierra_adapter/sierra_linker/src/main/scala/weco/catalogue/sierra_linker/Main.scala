@@ -8,7 +8,13 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
-import uk.ac.wellcome.sierra_adapter.model.{
+import uk.ac.wellcome.storage.store.dynamo.DynamoSingleVersionStore
+import uk.ac.wellcome.storage.typesafe.DynamoBuilder
+import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
+import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
+import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
+import weco.catalogue.sierra_adapter.models.SierraRecordTypes._
+import weco.catalogue.sierra_adapter.models.{
   AbstractSierraRecord,
   SierraHoldingsNumber,
   SierraHoldingsRecord,
@@ -17,12 +23,6 @@ import uk.ac.wellcome.sierra_adapter.model.{
   SierraRecordTypes,
   TypedSierraRecordNumber
 }
-import uk.ac.wellcome.sierra_adapter.model.SierraRecordTypes._
-import uk.ac.wellcome.storage.store.dynamo.DynamoSingleVersionStore
-import uk.ac.wellcome.storage.typesafe.DynamoBuilder
-import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
-import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
-import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 import weco.catalogue.sierra_linker.dynamo.Implicits._
 import weco.catalogue.sierra_linker.models.{Link, LinkOps}
 import weco.catalogue.sierra_linker.services.{LinkStore, SierraLinkerWorker}

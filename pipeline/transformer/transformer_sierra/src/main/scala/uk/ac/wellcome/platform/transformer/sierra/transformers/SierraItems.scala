@@ -7,7 +7,7 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraItemData,
   SierraQueryOps
 }
-import uk.ac.wellcome.sierra_adapter.model.{SierraBibNumber, SierraItemNumber}
+import weco.catalogue.sierra_adapter.models.{SierraBibNumber, SierraItemNumber}
 
 case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
     extends SierraIdentifiedDataTransformer

@@ -13,13 +13,13 @@ import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.utils.JsonAssertions
-import uk.ac.wellcome.sierra_adapter.model.{
+import weco.catalogue.sierra_adapter.generators.SierraGenerators
+import weco.catalogue.sierra_adapter.models.{
   AbstractSierraRecord,
   SierraBibNumber,
   SierraBibRecord,
   SierraItemRecord
 }
-import weco.catalogue.sierra_adapter.generators.SierraGenerators
 
 class SierraRecordWrapperFlowTest
     extends AnyFunSpec

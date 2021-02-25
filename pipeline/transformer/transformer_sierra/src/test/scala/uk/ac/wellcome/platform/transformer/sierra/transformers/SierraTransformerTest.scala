@@ -11,13 +11,6 @@ import uk.ac.wellcome.platform.transformer.sierra.generators.MarcGenerators
 import uk.ac.wellcome.platform.transformer.sierra.source.MarcSubfield
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.work.internal.Format.{Books, Pictures}
-import uk.ac.wellcome.sierra_adapter.model.{
-  SierraBibNumber,
-  SierraBibRecord,
-  SierraItemNumber,
-  SierraItemRecord,
-  SierraTransformable
-}
 import WorkState.Source
 import org.scalatest.Assertion
 import uk.ac.wellcome.models.work.internal.DeletedReason.{
@@ -30,6 +23,13 @@ import uk.ac.wellcome.models.work.internal.InvisibilityReason.{
 }
 import uk.ac.wellcome.models.work.internal.LocationType.OnlineResource
 import weco.catalogue.sierra_adapter.generators.SierraGenerators
+import weco.catalogue.sierra_adapter.models.{
+  SierraBibNumber,
+  SierraBibRecord,
+  SierraItemNumber,
+  SierraItemRecord,
+  SierraTransformable
+}
 
 class SierraTransformerTest
     extends AnyFunSpec

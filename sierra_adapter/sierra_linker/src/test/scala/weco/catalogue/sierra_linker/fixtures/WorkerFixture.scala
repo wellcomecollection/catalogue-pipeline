@@ -10,7 +10,8 @@ import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.monitoring.Metrics
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
-import uk.ac.wellcome.sierra_adapter.model.{
+import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
+import weco.catalogue.sierra_adapter.models.{
   AbstractSierraRecord,
   SierraHoldingsNumber,
   SierraHoldingsRecord,
@@ -18,7 +19,6 @@ import uk.ac.wellcome.sierra_adapter.model.{
   SierraItemRecord,
   TypedSierraRecordNumber
 }
-import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
 import weco.catalogue.sierra_linker.models.{Link, LinkOps}
 import weco.catalogue.sierra_linker.services.{LinkStore, SierraLinkerWorker}
 

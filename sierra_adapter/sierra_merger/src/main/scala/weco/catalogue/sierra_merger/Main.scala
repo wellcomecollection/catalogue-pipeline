@@ -5,20 +5,20 @@ import com.typesafe.config.Config
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
-import uk.ac.wellcome.sierra_adapter.model.Implicits._
-import uk.ac.wellcome.sierra_adapter.model.SierraRecordTypes._
-import uk.ac.wellcome.sierra_adapter.model.{
+import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
+import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
+import weco.catalogue.sierra_merger.services.{Updater, Worker}
+import weco.catalogue.source_model.config.SourceVHSBuilder
+import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
+import weco.catalogue.sierra_adapter.models.Implicits._
+import weco.catalogue.sierra_adapter.models.SierraRecordTypes._
+import weco.catalogue.sierra_adapter.models.{
   SierraBibRecord,
   SierraHoldingsRecord,
   SierraItemRecord,
   SierraRecordTypes,
   SierraTransformable
 }
-import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
-import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
-import weco.catalogue.sierra_merger.services.{Updater, Worker}
-import weco.catalogue.source_model.config.SourceVHSBuilder
-import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 
 import scala.concurrent.ExecutionContext
 

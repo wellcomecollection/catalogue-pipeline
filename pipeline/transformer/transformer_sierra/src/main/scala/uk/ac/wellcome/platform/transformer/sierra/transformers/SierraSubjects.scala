@@ -9,7 +9,7 @@ import uk.ac.wellcome.platform.transformer.sierra.transformers.subjects.{
   SierraOrganisationSubjects,
   SierraPersonSubjects
 }
-import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
+import weco.catalogue.sierra_adapter.models.SierraBibNumber
 
 object SierraSubjects extends SierraIdentifiedDataTransformer {
 

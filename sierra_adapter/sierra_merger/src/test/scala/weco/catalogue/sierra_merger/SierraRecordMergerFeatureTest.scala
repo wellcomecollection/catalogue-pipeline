@@ -10,10 +10,10 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.sierra_adapter.model._
-import uk.ac.wellcome.sierra_adapter.model.Implicits._
 import uk.ac.wellcome.storage.{Identified, Version}
 import weco.catalogue.sierra_adapter.generators.SierraGenerators
+import weco.catalogue.sierra_adapter.models._
+import weco.catalogue.sierra_adapter.models.Implicits._
 import weco.catalogue.sierra_merger.fixtures.RecordMergerFixtures
 import weco.catalogue.sierra_merger.models.TransformableOps
 import weco.catalogue.sierra_merger.services.Worker

@@ -8,15 +8,15 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.work.internal.{IdentifierType, Work, WorkState}
 import uk.ac.wellcome.pipeline_storage.{PipelineStorageStream, Retriever}
-import uk.ac.wellcome.sierra_adapter.model.{
-  SierraBibNumber,
-  SierraTransformable
-}
-import uk.ac.wellcome.sierra_adapter.model.Implicits._
 import uk.ac.wellcome.storage.generators.S3ObjectLocationGenerators
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.memory.MemoryTypedStore
 import weco.catalogue.sierra_adapter.generators.SierraGenerators
+import weco.catalogue.sierra_adapter.models.{
+  SierraBibNumber,
+  SierraTransformable
+}
+import weco.catalogue.sierra_adapter.models.Implicits._
 import weco.catalogue.source_model.SierraSourcePayload
 import weco.catalogue.transformer.{
   TransformerWorker,

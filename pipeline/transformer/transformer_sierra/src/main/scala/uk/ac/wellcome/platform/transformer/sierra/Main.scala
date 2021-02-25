@@ -16,17 +16,17 @@ import uk.ac.wellcome.pipeline_storage.typesafe.{
   PipelineStorageStreamBuilder
 }
 import uk.ac.wellcome.platform.transformer.sierra.services.SierraTransformerWorker
-import uk.ac.wellcome.sierra_adapter.model.SierraTransformable
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.storage.typesafe.S3Builder
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
+import weco.catalogue.sierra_adapter.models.SierraTransformable
 
 import scala.concurrent.ExecutionContext
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
-    import uk.ac.wellcome.sierra_adapter.model.Implicits._
+    import weco.catalogue.sierra_adapter.models.Implicits._
 
     implicit val actorSystem: ActorSystem =
       AkkaBuilder.buildActorSystem()

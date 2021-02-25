@@ -21,16 +21,16 @@ import uk.ac.wellcome.platform.sierra_reader.models.{
 }
 import uk.ac.wellcome.platform.sierra_reader.sink.SequentialS3Sink
 import uk.ac.wellcome.sierra.{SierraSource, ThrottleRate}
-import uk.ac.wellcome.sierra_adapter.model.{
+import uk.ac.wellcome.storage.Identified
+import uk.ac.wellcome.storage.s3.{S3Config, S3ObjectLocation}
+import uk.ac.wellcome.storage.store.s3.S3TypedStore
+import uk.ac.wellcome.typesafe.Runnable
+import weco.catalogue.sierra_adapter.models.{
   AbstractSierraRecord,
   SierraBibRecord,
   SierraHoldingsRecord,
   SierraItemRecord
 }
-import uk.ac.wellcome.storage.Identified
-import uk.ac.wellcome.storage.s3.{S3Config, S3ObjectLocation}
-import uk.ac.wellcome.storage.store.s3.S3TypedStore
-import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
