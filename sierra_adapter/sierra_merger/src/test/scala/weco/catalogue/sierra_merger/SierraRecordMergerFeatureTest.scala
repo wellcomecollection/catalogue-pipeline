@@ -44,7 +44,7 @@ trait SierraRecordMergerFeatureTestCases[Record <: AbstractSierraRecord[_]]
     transformable: SierraTransformable,
     sourceVHS: SourceVHS[SierraTransformable],
     messageSender: MemoryMessageSender
- ): Assertion = {
+  ): Assertion = {
     sourceVHS.underlying.get(id).value shouldBe Identified(id, transformable)
 
     messageSender.getMessages[Version[String, Int]] should contain(id)

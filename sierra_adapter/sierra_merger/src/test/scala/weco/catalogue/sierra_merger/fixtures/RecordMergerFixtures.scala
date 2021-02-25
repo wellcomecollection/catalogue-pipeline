@@ -20,10 +20,7 @@ import weco.catalogue.source_model.store.SourceVHS
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-trait RecordMergerFixtures
-    extends Akka
-    with SQS
-    with SourceVHSFixture {
+trait RecordMergerFixtures extends Akka with SQS with SourceVHSFixture {
 
   def withRunningWorker[Record <: AbstractSierraRecord[_], R](
     queue: Queue,

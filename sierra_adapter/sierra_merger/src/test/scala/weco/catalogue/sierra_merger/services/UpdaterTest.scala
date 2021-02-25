@@ -36,7 +36,11 @@ class UpdaterTest
     transformable: SierraTransformable,
     sourceVHS: SourceVHS[SierraTransformable]
   ): Assertion =
-    sourceVHS.underlying.getLatest(id.withoutCheckDigit).right.get.identifiedT shouldBe transformable
+    sourceVHS.underlying
+      .getLatest(id.withoutCheckDigit)
+      .right
+      .get
+      .identifiedT shouldBe transformable
 
   it("creates a record if it receives an item with a bibId that doesn't exist") {
     val sourceVHS = createSourceVHS[SierraTransformable]
