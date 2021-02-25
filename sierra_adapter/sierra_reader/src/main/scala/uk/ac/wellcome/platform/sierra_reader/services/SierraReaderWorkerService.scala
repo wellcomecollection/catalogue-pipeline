@@ -37,16 +37,16 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class SierraReaderWorkerService(
   sqsStream: SQSStream[NotificationMessage],
-  s3client: AmazonS3,
   s3Config: S3Config,
   readerConfig: ReaderConfig,
   sierraAPIConfig: SierraAPIConfig
-)(implicit actorSystem: ActorSystem, ec: ExecutionContext)
+)(implicit
+  actorSystem: ActorSystem,
+  ec: ExecutionContext,
+  s3Client: AmazonS3)
     extends Logging
     with Runnable {
-  implicit val s = s3client
   val windowManager = new WindowManager(
-    s3client = s3client,
     s3Config = s3Config,
     readerConfig = readerConfig
   )
