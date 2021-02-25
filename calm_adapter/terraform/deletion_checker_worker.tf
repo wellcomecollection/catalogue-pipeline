@@ -34,6 +34,9 @@ module "deletion_checker_worker" {
   }
 
   min_capacity = 0
+
+  // Here be dragons: don't scale this up or else you might
+  // knock over the Calm server.
   max_capacity = local.deletion_checking_enabled ? 1 : 0
 
   cpu    = 512
