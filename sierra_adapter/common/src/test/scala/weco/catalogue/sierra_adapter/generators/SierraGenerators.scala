@@ -1,10 +1,10 @@
-package uk.ac.wellcome.sierra_adapter.model
-
-import java.time.Instant
+package weco.catalogue.sierra_adapter.generators
 
 import uk.ac.wellcome.fixtures.RandomGenerators
-import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.json.JsonUtil.toJson
+import uk.ac.wellcome.sierra_adapter.model._
 
+import java.time.Instant
 import scala.util.Random
 
 trait SierraGenerators extends RandomGenerators {

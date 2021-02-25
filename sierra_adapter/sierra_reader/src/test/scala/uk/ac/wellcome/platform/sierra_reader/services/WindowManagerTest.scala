@@ -11,9 +11,10 @@ import uk.ac.wellcome.platform.sierra_reader.models.{
   WindowStatus
 }
 import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.sierra_adapter.model.{SierraBibNumber, SierraGenerators}
+import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
 import uk.ac.wellcome.storage.fixtures.S3Fixtures
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
+import weco.catalogue.sierra_adapter.generators.SierraGenerators
 
 import scala.concurrent.ExecutionContext.Implicits.global
 

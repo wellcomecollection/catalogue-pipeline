@@ -6,7 +6,7 @@ import uk.ac.wellcome.platform.transformer.sierra.source.sierra.{
   SierraSourceLanguage,
   SierraSourceLocation
 }
-import uk.ac.wellcome.sierra_adapter.model.SierraGenerators
+import weco.catalogue.sierra_adapter.generators.SierraGenerators
 
 trait SierraDataGenerators extends IdentifiersGenerators with SierraGenerators {
   def createSierraBibDataWith(

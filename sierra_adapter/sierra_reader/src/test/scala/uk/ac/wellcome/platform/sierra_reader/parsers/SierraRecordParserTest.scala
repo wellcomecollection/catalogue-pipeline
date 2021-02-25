@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.sierra_reader.parsers
 
 import java.time.Instant
-
 import io.circe.parser.parse
 import org.scalatest.compatible.Assertion
 import org.scalatest.funspec.AnyFunSpec
@@ -12,9 +11,9 @@ import uk.ac.wellcome.sierra_adapter.model.{
   AbstractSierraRecord,
   SierraBibNumber,
   SierraBibRecord,
-  SierraGenerators,
   SierraItemRecord
 }
+import weco.catalogue.sierra_adapter.generators.SierraGenerators
 
 class SierraRecordParserTest
     extends AnyFunSpec

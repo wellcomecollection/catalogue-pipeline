@@ -14,7 +14,6 @@ import uk.ac.wellcome.models.work.internal.Format.{Books, Pictures}
 import uk.ac.wellcome.sierra_adapter.model.{
   SierraBibNumber,
   SierraBibRecord,
-  SierraGenerators,
   SierraItemNumber,
   SierraItemRecord,
   SierraTransformable
@@ -30,6 +29,7 @@ import uk.ac.wellcome.models.work.internal.InvisibilityReason.{
   UnableToTransform
 }
 import uk.ac.wellcome.models.work.internal.LocationType.OnlineResource
+import weco.catalogue.sierra_adapter.generators.SierraGenerators
 
 class SierraTransformerTest
     extends AnyFunSpec

@@ -3,11 +3,7 @@ package weco.catalogue.sierra_linker.services
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{Assertion, EitherValues}
-import uk.ac.wellcome.sierra_adapter.model.{
-  SierraGenerators,
-  SierraItemNumber,
-  SierraItemRecord
-}
+import uk.ac.wellcome.sierra_adapter.model.{SierraItemNumber, SierraItemRecord}
 import uk.ac.wellcome.storage.maxima.memory.MemoryMaxima
 import uk.ac.wellcome.storage.store.memory.{MemoryStore, MemoryVersionedStore}
 import uk.ac.wellcome.storage.{
@@ -16,6 +12,7 @@ import uk.ac.wellcome.storage.{
   UpdateWriteError,
   Version
 }
+import weco.catalogue.sierra_adapter.generators.SierraGenerators
 import weco.catalogue.sierra_linker.models.Link
 
 class LinkStoreTest

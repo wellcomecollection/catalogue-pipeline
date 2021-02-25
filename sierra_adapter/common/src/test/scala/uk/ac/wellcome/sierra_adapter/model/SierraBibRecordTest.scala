@@ -3,6 +3,7 @@ package uk.ac.wellcome.sierra_adapter.model
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil._
+import weco.catalogue.sierra_adapter.generators.SierraGenerators
 
 class SierraBibRecordTest
     extends AnyFunSpec

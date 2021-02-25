@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.sierra_reader.flow
 
 import java.time.Instant
-
 import akka.NotUsed
 import akka.stream.scaladsl.{Flow, Sink, Source}
 import io.circe.Json
@@ -18,9 +17,9 @@ import uk.ac.wellcome.sierra_adapter.model.{
   AbstractSierraRecord,
   SierraBibNumber,
   SierraBibRecord,
-  SierraGenerators,
   SierraItemRecord
 }
+import weco.catalogue.sierra_adapter.generators.SierraGenerators
 
 class SierraRecordWrapperFlowTest
     extends AnyFunSpec
