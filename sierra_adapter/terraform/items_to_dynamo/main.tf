@@ -12,7 +12,7 @@ module "sierra_to_dynamo_service" {
     demultiplexer_queue_url = module.demultiplexer_queue.url
     metrics_namespace       = local.service_name
 
-    dynamo_table_name = aws_dynamodb_table.items.name
+    dynamo_table_name = aws_dynamodb_table.links.name
 
     topic_arn = module.sierra_to_dynamo_updates_topic.arn
   }

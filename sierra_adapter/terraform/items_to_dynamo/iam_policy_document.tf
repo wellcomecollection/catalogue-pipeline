@@ -21,8 +21,8 @@ data "aws_iam_policy_document" "allow_dynamodb_access" {
     ]
 
     resources = [
-      aws_dynamodb_table.items.arn,
-      "${aws_dynamodb_table.items.arn}/*",
+      aws_dynamodb_table.links.arn,
+      "${aws_dynamodb_table.links.arn}/*",
     ]
   }
 }

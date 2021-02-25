@@ -1,4 +1,4 @@
-resource "aws_dynamodb_table" "items" {
+resource "aws_dynamodb_table" "links" {
   name     = "sourcedata-sierra-${var.resource_type}-${replace(var.namespace, "sierra-adapter-", "")}"
   hash_key = "id"
 
