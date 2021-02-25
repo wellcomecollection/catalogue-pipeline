@@ -1,3 +1,3 @@
 locals {
-  service_name = "${var.namespace}-items-to-dynamo"
+  service_name = "${var.namespace}-${var.resource_type}-to-dynamo"
 }

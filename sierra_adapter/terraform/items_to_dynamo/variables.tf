@@ -1,3 +1,7 @@
+variable "resource_type" {
+  type = string
+}
+
 variable "container_image" {}
 
 variable "demultiplexer_topic_arn" {}

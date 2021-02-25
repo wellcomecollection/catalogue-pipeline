@@ -36,6 +36,8 @@ module "items_reader" {
 module "items_to_dynamo" {
   source = "./../items_to_dynamo"
 
+  resource_type = "items"
+
   demultiplexer_topic_arn = module.items_reader.topic_arn
 
   container_image = local.sierra_items_to_dynamo_image
