@@ -43,7 +43,7 @@ module "relation_embedder" {
   secret_env_vars = local.pipeline_storage_es_service_secrets["relation_embedder"]
 
   # NOTE: limit to avoid >500 concurrent scroll contexts
-  max_capacity = min(10, var.max_capacity)
+  max_capacity = min(10, local.max_capacity)
 
   subnets           = var.subnets
   queue_read_policy = module.relation_embedder_queue.read_policy

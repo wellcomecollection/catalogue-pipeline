@@ -42,7 +42,7 @@ module "mets_transformer" {
   secret_env_vars = local.pipeline_storage_es_service_secrets["transformer"]
 
   subnets           = var.subnets
-  max_capacity      = var.max_capacity
+  max_capacity      = local.max_capacity
   queue_read_policy = module.mets_transformer_queue.read_policy
 
   # The METS transformer is quite CPU intensive, and if it doesn't have enough CPU,

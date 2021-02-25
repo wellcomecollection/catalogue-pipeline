@@ -39,7 +39,7 @@ module "miro_transformer" {
   use_fargate_spot = true
 
   subnets           = var.subnets
-  max_capacity      = var.max_capacity
+  max_capacity      = local.max_capacity
   queue_read_policy = module.miro_transformer_queue.read_policy
 
   depends_on = [

@@ -42,7 +42,7 @@ module "router" {
   shared_logging_secrets = var.shared_logging_secrets
 
   subnets           = var.subnets
-  max_capacity      = min(10, var.max_capacity)
+  max_capacity      = min(10, local.max_capacity)
   queue_read_policy = module.router_queue.read_policy
 
   cpu    = 1024

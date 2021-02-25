@@ -136,7 +136,7 @@ module "image_inferrer" {
   subnets = var.subnets
 
   # Any higher than this currently causes latency spikes from Loris
-  max_capacity = min(6, var.max_capacity)
+  max_capacity = min(6, local.max_capacity)
 
   queue_read_policy = module.image_inferrer_queue.read_policy
 

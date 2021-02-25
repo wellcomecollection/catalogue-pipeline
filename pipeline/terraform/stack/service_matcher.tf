@@ -62,7 +62,7 @@ module "matcher" {
   secret_env_vars = local.pipeline_storage_es_service_secrets["matcher"]
 
   subnets           = var.subnets
-  max_capacity      = var.max_capacity
+  max_capacity      = local.max_capacity
   queue_read_policy = module.matcher_input_queue.read_policy
 
   depends_on = [
