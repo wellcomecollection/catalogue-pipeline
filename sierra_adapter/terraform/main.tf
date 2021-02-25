@@ -13,7 +13,7 @@ module "sierra-adapter-20200604" {
   private_subnets = local.private_subnets
   vpc_id          = local.vpc_id
 
-  bibs_windows_topic_arns     = [
+  bibs_windows_topic_arns = [
     module.bibs_window_generator.topic_arn,
     module.bibs_reharvest_topic.arn,
   ]

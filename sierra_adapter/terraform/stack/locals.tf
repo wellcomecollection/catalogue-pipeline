@@ -22,7 +22,7 @@ locals {
     "varFields"
   ])
 
-  sierra_bibs_fields  = join(",", [
+  sierra_bibs_fields = join(",", [
     "updatedDate",
     "createdDate",
     "deletedDate",
@@ -46,7 +46,7 @@ locals {
   ])
 
   # See https://techdocs.iii.com/sierraapi/Content/zReference/objects/holdingsObjectDescription.htm
-  sierra_holdings_fields  = join(",", [
+  sierra_holdings_fields = join(",", [
     "bibIds",
     "itemIds",
     "inheritLocation",
