@@ -9,12 +9,12 @@ module "service" {
   image = var.container_image
 
   env_vars = {
-    demultiplexer_queue_url = module.demultiplexer_queue.url
+    demultiplexer_queue_url = module.input_queue.url
     metrics_namespace       = local.service_name
 
     dynamo_table_name = aws_dynamodb_table.links.name
 
-    topic_arn = module.sierra_to_dynamo_updates_topic.arn
+    topic_arn = module.output_topic.arn
   }
 
   min_capacity = 0

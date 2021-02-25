@@ -33,14 +33,14 @@ module "items_reader" {
   shared_logging_secrets  = var.shared_logging_secrets
 }
 
-module "items_to_dynamo" {
-  source = "./../items_to_dynamo"
+module "item_linker" {
+  source = "./../sierra_linker"
 
   resource_type = "items"
 
   demultiplexer_topic_arn = module.items_reader.topic_arn
 
-  container_image = local.sierra_items_to_dynamo_image
+  container_image = local.sierra_linker_image
 
   cluster_name = aws_ecs_cluster.cluster.name
   cluster_arn  = aws_ecs_cluster.cluster.arn
@@ -56,7 +56,7 @@ module "items_to_dynamo" {
   interservice_security_group_id   = var.interservice_security_group_id
 
   deployment_service_env  = var.deployment_env
-  deployment_service_name = "items-to-dynamo"
+  deployment_service_name = "item-linker"
   shared_logging_secrets  = var.shared_logging_secrets
 }
 
@@ -65,7 +65,7 @@ module "items_merger" {
 
   container_image = local.sierra_item_merger_image
 
-  updates_topic_arn = module.items_to_dynamo.topic_arn
+  updates_topic_arn = module.item_linker.topic_arn
 
   cluster_name = aws_ecs_cluster.cluster.name
   cluster_arn  = aws_ecs_cluster.cluster.arn

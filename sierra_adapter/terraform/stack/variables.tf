@@ -26,6 +26,6 @@ variable "sierra_item_merger_image" {
   type = string
 }
 
-variable "sierra_items_to_dynamo_image" {
+variable "sierra_linker_image" {
   type = string
 }

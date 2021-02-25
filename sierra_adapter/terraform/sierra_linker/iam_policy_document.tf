@@ -1,4 +1,4 @@
-data "aws_iam_policy_document" "allow_cloudwatch_push_metrics" {
+data "aws_iam_policy_document" "push_cloudwatch_metrics" {
   statement {
     actions = [
       "cloudwatch:PutMetricData",
@@ -10,7 +10,7 @@ data "aws_iam_policy_document" "allow_cloudwatch_push_metrics" {
   }
 }
 
-data "aws_iam_policy_document" "allow_dynamodb_access" {
+data "aws_iam_policy_document" "read_write_dynamo" {
   statement {
     actions = [
       "dynamodb:BatchGetItem",
