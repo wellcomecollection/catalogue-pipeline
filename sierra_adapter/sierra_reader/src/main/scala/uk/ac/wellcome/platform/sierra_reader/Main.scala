@@ -1,6 +1,7 @@
 package uk.ac.wellcome.platform.sierra_reader
 
 import akka.actor.ActorSystem
+import com.amazonaws.services.s3.AmazonS3
 import com.typesafe.config.Config
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.SQSBuilder
@@ -23,9 +24,10 @@ object Main extends WellcomeTypesafeApp {
 
     val sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config)
 
+    implicit val s3Client: AmazonS3 = S3Builder.buildS3Client(config)
+
     new SierraReaderWorkerService(
       sqsStream = sqsStream,
-      s3client = S3Builder.buildS3Client(config),
       s3Config = S3Builder.buildS3Config(config),
       readerConfig = ReaderConfigBuilder.buildReaderConfig(config),
       sierraAPIConfig = SierraAPIConfigBuilder.buildSierraConfig(config)

@@ -29,7 +29,6 @@ class WindowManagerTest
   private def withWindowManager[R](bucket: Bucket)(
     testWith: TestWith[WindowManager, R]) = {
     val windowManager = new WindowManager(
-      s3client = s3Client,
       s3Config = createS3ConfigWith(bucket),
       readerConfig = ReaderConfig(
         resourceType = SierraResourceTypes.bibs,

@@ -17,17 +17,16 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 class WindowManager(
-  s3client: AmazonS3,
   s3Config: S3Config,
   readerConfig: ReaderConfig
-)(implicit ec: ExecutionContext)
+)(implicit ec: ExecutionContext, s3Client: AmazonS3)
     extends Logging {
 
   def getCurrentStatus(window: String): Future[WindowStatus] = Future {
     info(
       s"Searching for records from previous invocation of the reader in prefix ${buildWindowShard(window)}")
 
-    val lastExistingKey = s3client
+    val lastExistingKey = s3Client
       .listObjects(s3Config.bucketName, buildWindowShard(window))
       .getObjectSummaries
       .asScala
@@ -51,7 +50,7 @@ class WindowManager(
         val lastBody =
           scala.io.Source
             .fromInputStream(
-              s3client.getObject(s3Config.bucketName, key).getObjectContent
+              s3Client.getObject(s3Config.bucketName, key).getObjectContent
             )
             .mkString
 
