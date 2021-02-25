@@ -2,17 +2,16 @@ package uk.ac.wellcome.platform.sierra_reader.services
 
 import java.time.format.DateTimeFormatter
 import java.time.{Instant, ZoneOffset}
-
 import com.amazonaws.services.s3.AmazonS3
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.platform.sierra_reader.config.models.ReaderConfig
 import uk.ac.wellcome.platform.sierra_reader.exceptions.SierraReaderException
 import uk.ac.wellcome.platform.sierra_reader.models.WindowStatus
-import uk.ac.wellcome.storage.s3.{S3Config, S3ObjectLocation}
+import uk.ac.wellcome.storage.listing.s3.S3ObjectLocationListing
+import uk.ac.wellcome.storage.s3.{S3Config, S3ObjectLocation, S3ObjectLocationPrefix}
 import weco.catalogue.sierra_adapter.models.UntypedSierraRecordNumber
 
-import scala.collection.JavaConverters._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
@@ -22,28 +21,29 @@ class WindowManager(
 )(implicit ec: ExecutionContext, s3Client: AmazonS3)
     extends Logging {
 
+  private val listing = S3ObjectLocationListing()
+
   def getCurrentStatus(window: String): Future[WindowStatus] = {
-    info(
-      s"Searching for records from previous invocation of the reader in prefix ${buildWindowShard(window)}")
+    val prefix = S3ObjectLocationPrefix(
+      bucket = s3Config.bucketName,
+      keyPrefix = buildWindowShard(window)
+    )
+
+    info(s"Searching for records from previous invocation of the reader in $prefix")
 
     for {
-      lastExistingKey <- Future {
-        s3Client
-          .listObjects(s3Config.bucketName, buildWindowShard(window))
-          .getObjectSummaries
-          .asScala
-          .map { _.getKey() }
-          .sorted
-          .lastOption
+      lastExistingKey: Option[S3ObjectLocation] <- Future {
+        listing.list(prefix) match {
+          case Right(result) => result.lastOption
+          case Left(err) => throw err.e
+        }
       }
 
       status <- Future {
         lastExistingKey match {
-          case Some(key) =>
-            debug(s"Found JSON file from previous run in S3: $key")
-            getStatusFromLastKey(
-              S3ObjectLocation(s3Config.bucketName, key)
-            )
+          case Some(location) =>
+            debug(s"Found JSON file from previous run in S3: $location")
+            getStatusFromLastKey(location)
 
           case None =>
             debug(s"No existing records found in S3; starting from scratch")
