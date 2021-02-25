@@ -16,6 +16,8 @@ module "service" {
     topic_arn         = module.output_topic.arn
 
     metrics_namespace = local.service_name
+
+    resource_type = var.resource_type
   }
 
   min_capacity = 0

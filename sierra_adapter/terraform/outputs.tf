@@ -6,6 +6,10 @@ output "merged_bibs_topic_arn" {
   value = module.sierra-adapter-20200604.merged_bibs_topic_arn
 }
 
+output "merged_holdings_topic_arn" {
+  value = module.sierra-adapter-20200604.merged_holdings_topic_arn
+}
+
 output "vhs_table_name" {
   value = module.sierra-adapter-20200604.vhs_table_name
 }

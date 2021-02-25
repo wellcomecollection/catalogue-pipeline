@@ -15,6 +15,8 @@ module "service" {
     dynamo_table_name = aws_dynamodb_table.links.name
 
     topic_arn = module.output_topic.arn
+
+    resource_type = var.resource_type
   }
 
   min_capacity = 0
