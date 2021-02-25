@@ -21,3 +21,7 @@ output "vhs_bucket_name" {
 output "vhs_read_policy" {
   value = module.sierra-adapter-20200604.vhs_read_policy
 }
+
+output "vhs_assumable_read_role" {
+  value = module.sierra-adapter-20200604.vhs_assumable_read_role
+}
