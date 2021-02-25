@@ -10,8 +10,6 @@ import uk.ac.wellcome.json.JsonUtil._
 import weco.catalogue.source_model.store.SourceVHS
 
 trait SierraAdapterHelpers extends Matchers {
-  type SierraVHS = VersionedStore[String, Int, SierraTransformable]
-
   def assertStored[T](id: String, t: T, sourceVHS: SourceVHS[T]): Assertion =
     sourceVHS.underlying.getLatest(id).right.get.identifiedT shouldBe t
 
