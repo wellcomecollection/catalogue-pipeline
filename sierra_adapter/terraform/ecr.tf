@@ -18,14 +18,6 @@ resource "aws_ecr_repository" "sierra_merger" {
   }
 }
 
-resource "aws_ecr_repository" "sierra_items_to_dynamo" {
-  name = "${local.repository_prefix}/sierra_items_to_dynamo"
-
-  lifecycle {
-    prevent_destroy = true
-  }
-}
-
 resource "aws_ecr_repository" "sierra_linker" {
   name = "${local.repository_prefix}/sierra_linker"
 

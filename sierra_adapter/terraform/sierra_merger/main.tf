@@ -1,4 +1,4 @@
-module "sierra_merger_service" {
+module "service" {
   source = "../../../infrastructure/modules/worker"
 
   name = local.service_name
@@ -9,11 +9,15 @@ module "sierra_merger_service" {
   image = var.container_image
 
   env_vars = {
-    windows_queue_url = module.updates_queue.url
+    sierra_vhs_dynamo_table_name = var.vhs_table_name
+    sierra_vhs_bucket_name       = var.vhs_bucket_name
+
+    windows_queue_url = module.input_queue.url
+    topic_arn         = module.output_topic.arn
+
     metrics_namespace = local.service_name
-    dynamo_table_name = var.merged_dynamo_table_name
-    bucket_name       = var.bucket_name
-    topic_arn         = module.sierra_bib_merger_results.arn
+
+    resource_type = var.resource_type
   }
 
   min_capacity = 0
