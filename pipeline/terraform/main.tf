@@ -81,6 +81,7 @@ module "catalogue_pipeline_2021-02-24" {
     /*local.sierra_reindexer_topic_arn,*/
     local.sierra_merged_bibs_topic_arn,
     local.sierra_merged_items_topic_arn,
+    local.sierra_merged_holdings_topic_arn,
   ]
 
   miro_adapter_topic_arns = [
