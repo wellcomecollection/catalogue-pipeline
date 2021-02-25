@@ -144,7 +144,7 @@ class WindowManagerTest
         windowManager.getCurrentStatus(s"[$startDateTime,$endDateTime]")
 
       whenReady(future.failed) {
-        _ shouldBe a[AmazonS3Exception]
+        _ shouldBe an[AmazonS3Exception]
       }
     }
   }
