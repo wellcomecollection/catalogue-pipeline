@@ -21,11 +21,12 @@ sealed trait ReindexPayload {
 case class CalmReindexPayload(
   id: String,
   payload: S3ObjectLocation,
-  version: Int
+  version: Int,
+  isDeleted: Boolean = false
 ) extends ReindexPayload {
 
   override def toSourcePayload: SourcePayload =
-    CalmSourcePayload(id, payload, version)
+    CalmSourcePayload(id, payload, version, isDeleted)
 }
 
 case class MiroInventoryReindexPayload(
