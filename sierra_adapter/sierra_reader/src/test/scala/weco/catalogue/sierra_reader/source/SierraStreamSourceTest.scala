@@ -1,14 +1,14 @@
-package uk.ac.wellcome.platform.sierra_reader.services
+package weco.catalogue.sierra_reader.source
 
-import java.net.SocketTimeoutException
-import java.time.temporal.ChronoUnit
-import java.time.Instant
-
-import scala.concurrent.duration._
 import akka.actor.ActorSystem
 import akka.stream.Materializer
 import akka.stream.scaladsl.Sink
-import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, get, stubFor, urlMatching}
+import com.github.tomakehurst.wiremock.client.WireMock.{
+  aResponse,
+  get,
+  stubFor,
+  urlMatching
+}
 import com.github.tomakehurst.wiremock.stubbing.Scenario
 import io.circe.Json
 import io.circe.optics.JsonPath.root
@@ -16,6 +16,11 @@ import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.time.{Millis, Seconds, Span}
+
+import java.net.SocketTimeoutException
+import java.time.Instant
+import java.time.temporal.ChronoUnit
+import scala.concurrent.duration._
 
 class SierraStreamSourceTest
     extends AnyFunSpec

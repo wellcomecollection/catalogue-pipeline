@@ -30,6 +30,7 @@ import weco.catalogue.sierra_adapter.models.{
   SierraHoldingsRecord,
   SierraItemRecord
 }
+import weco.catalogue.sierra_reader.source.{SierraSource, ThrottleRate}
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}

@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.sierra_reader.services
+package weco.catalogue.sierra_reader.source
 
 import akka.NotUsed
 import akka.stream.ThrottleMode

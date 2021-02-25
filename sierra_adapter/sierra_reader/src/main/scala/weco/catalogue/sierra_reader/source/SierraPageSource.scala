@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.sierra_reader.services
+package weco.catalogue.sierra_reader.source
 
 import akka.stream.stage.{GraphStage, GraphStageLogic, OutHandler}
 import akka.stream.{Attributes, Outlet, SourceShape}
@@ -6,7 +6,6 @@ import io.circe.Json
 import io.circe.optics.JsonPath.root
 import io.circe.parser.parse
 import org.slf4j.{Logger, LoggerFactory}
-
 import scalaj.http.{Http, HttpOptions, HttpResponse}
 
 class SierraPageSource(

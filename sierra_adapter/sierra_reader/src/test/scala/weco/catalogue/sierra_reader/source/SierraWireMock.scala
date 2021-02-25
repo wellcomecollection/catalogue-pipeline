@@ -1,21 +1,29 @@
-package uk.ac.wellcome.platform.sierra_reader.services
+package weco.catalogue.sierra_reader.source
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.{
+  proxyAllTo,
+  recordSpec,
+  stubFor
+}
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import org.scalatest._
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, Suite}
 
-trait SierraWireMock extends BeforeAndAfterAll with BeforeAndAfterEach{ this: Suite =>
+trait SierraWireMock extends BeforeAndAfterAll with BeforeAndAfterEach {
+  this: Suite =>
 
   lazy val oauthKey = sys.env.getOrElse("SIERRA_KEY", "key")
   lazy val oauthSecret = sys.env.getOrElse("SIERRA_SECRET", "secret")
 
   private val port = 8089
   private val host = "localhost"
-  private val wireMockServer = new WireMockServer(WireMockConfiguration.wireMockConfig()
-    .usingFilesUnderDirectory("sierra_adapter/sierra_reader/src/test/resources/wiremock")
-    .port(port))
+  private val wireMockServer = new WireMockServer(
+    WireMockConfiguration
+      .wireMockConfig()
+      .usingFilesUnderDirectory(
+        "sierra_adapter/sierra_reader/src/test/resources/wiremock")
+      .port(port))
 
   private val sierraUrl = "https://libsys.wellcomelibrary.org/iii/sierra-api/v3"
 
