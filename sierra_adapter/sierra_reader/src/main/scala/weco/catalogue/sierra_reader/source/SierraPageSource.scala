@@ -9,13 +9,13 @@ import org.slf4j.{Logger, LoggerFactory}
 import scalaj.http.{Http, HttpOptions, HttpResponse}
 
 class SierraPageSource(
-    apiUrl: String,
-    oauthKey: String,
-    oauthSecret: String,
-    timeoutMs: Int
+  apiUrl: String,
+  oauthKey: String,
+  oauthSecret: String,
+  timeoutMs: Int
 )(
-    resourceType: String,
-    params: Map[String, String] = Map()
+  resourceType: String,
+  params: Map[String, String] = Map()
 ) extends GraphStage[SourceShape[List[Json]]] {
 
   val out: Outlet[List[Json]] = Outlet("SierraSource")
@@ -61,14 +61,15 @@ class SierraPageSource(
           case 404 => complete(out)
           case 401 => ifUnauthorized
           case code =>
-            fail(out,
-                 new RuntimeException(
-                   s"Unexpected HTTP status code from Sierra: $code"))
+            fail(
+              out,
+              new RuntimeException(
+                s"Unexpected HTTP status code from Sierra: $code"))
         }
       }
 
       private def refreshJsonListAndPush(
-          response: HttpResponse[String]): Unit = {
+        response: HttpResponse[String]): Unit = {
         val responseJson = parse(response.body).right
           .getOrElse(throw new RuntimeException("response was not json"))
 

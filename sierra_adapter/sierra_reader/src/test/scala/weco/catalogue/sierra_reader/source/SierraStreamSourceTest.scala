@@ -33,7 +33,8 @@ class SierraStreamSourceTest
 
   it("should read from sierra") {
     val eventualJson = SierraSource(sierraWireMockUrl, oauthKey, oauthSecret)(
-      "items", Map.empty).take(1).runWith(Sink.head[Json])
+      "items",
+      Map.empty).take(1).runWith(Sink.head[Json])
     whenReady(eventualJson) { json =>
       root.id.string.getOption(json) shouldBe Some("1000001")
     }
@@ -52,39 +53,58 @@ class SierraStreamSourceTest
   }
 
   it("should refresh the access token if receives a unauthorized response") {
-    stubFor(get(urlMatching("/bibs")).inScenario("refresh token")
-      .whenScenarioStateIs(Scenario.STARTED).willReturn(aResponse().withStatus(401))
-      .atPriority(1).willSetStateTo("token expired"))
+    stubFor(
+      get(urlMatching("/bibs"))
+        .inScenario("refresh token")
+        .whenScenarioStateIs(Scenario.STARTED)
+        .willReturn(aResponse().withStatus(401))
+        .atPriority(1)
+        .willSetStateTo("token expired"))
 
-    stubFor(get(urlMatching("/token")).inScenario("refresh token")
-      .whenScenarioStateIs("token expired").willSetStateTo("token refreshed"))
+    stubFor(
+      get(urlMatching("/token"))
+        .inScenario("refresh token")
+        .whenScenarioStateIs("token expired")
+        .willSetStateTo("token refreshed"))
 
-    stubFor(get(urlMatching("/bibs")).inScenario("refresh token")
-      .whenScenarioStateIs("token refreshed"))
+    stubFor(
+      get(urlMatching("/bibs"))
+        .inScenario("refresh token")
+        .whenScenarioStateIs("token refreshed"))
 
-    val eventualJson = SierraSource(sierraWireMockUrl, oauthKey, "wrong-secret")(
-      "bibs", Map.empty).take(1).runWith(Sink.head[Json])
+    val eventualJson =
+      SierraSource(sierraWireMockUrl, oauthKey, "wrong-secret")(
+        "bibs",
+        Map.empty).take(1).runWith(Sink.head[Json])
 
     whenReady(eventualJson) { json =>
       root.id.string.getOption(json) shouldBe Some("1000001")
     }
   }
 
-  it("should return a sensible error message if it fails to authorize with the sierra api") {
+  it(
+    "should return a sensible error message if it fails to authorize with the sierra api") {
     stubFor(get(urlMatching("/bibs")).willReturn(aResponse().withStatus(401)))
 
-    val eventualJson = SierraSource(sierraWireMockUrl, oauthKey, oauthSecret)("bibs", Map.empty).take(1).runWith(Sink.head[Json])
+    val eventualJson = SierraSource(sierraWireMockUrl, oauthKey, oauthSecret)(
+      "bibs",
+      Map.empty).take(1).runWith(Sink.head[Json])
 
     whenReady(eventualJson.failed) { ex =>
-      ex shouldBe a [RuntimeException]
-      ex.getMessage should include ("Unauthorized")
+      ex shouldBe a[RuntimeException]
+      ex.getMessage should include("Unauthorized")
     }
   }
 
   it("should obey the throttle rate for sierra api requests") {
 
-    val sierraSource = SierraSource(sierraWireMockUrl, oauthKey, oauthSecret, ThrottleRate(4, 1.second))(
-      "items", Map("updatedDate" -> "[2013-12-10T17:16:35Z,2013-12-13T21:34:35Z]"))
+    val sierraSource = SierraSource(
+      sierraWireMockUrl,
+      oauthKey,
+      oauthSecret,
+      ThrottleRate(4, 1.second))(
+      "items",
+      Map("updatedDate" -> "[2013-12-10T17:16:35Z,2013-12-13T21:34:35Z]"))
 
     val eventualJsonList = sierraSource.runWith(Sink.seq[Json])
     val startTime = Instant.now()
@@ -118,7 +138,7 @@ class SierraStreamSourceTest
     val future = source.take(1).runWith(Sink.head[Json])
 
     whenReady(future.failed) { ex =>
-      ex shouldBe a [SocketTimeoutException]
+      ex shouldBe a[SocketTimeoutException]
     }
   }
 }
