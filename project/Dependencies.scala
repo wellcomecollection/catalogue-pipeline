@@ -11,8 +11,6 @@ object WellcomeDependencies {
     val messaging = defaultVersion
     val monitoring = defaultVersion
     val storage = defaultVersion
-
-    val sierraStreamsSource = "2.0.0"
   }
 
   val jsonLibrary: Seq[ModuleID] = library(
@@ -55,10 +53,6 @@ object WellcomeDependencies {
     version = versions.messaging
   ) ++ monitoringLibrary
 
-  val sierraStreamsSourceLibrary: Seq[ModuleID] = Seq(
-    "uk.ac.wellcome" %% "sierra-streams-source" % versions.sierraStreamsSource
-  )
-
   private def library(name: String, version: String): Seq[ModuleID] = Seq(
     "uk.ac.wellcome" %% name % version,
     "uk.ac.wellcome" %% name % version % "test" classifier "tests"
@@ -87,6 +81,7 @@ object ExternalDependencies {
     val enumeratum = "1.6.1"
     val enumeratumScalacheck = "1.6.1"
     val jsoup = "1.13.1"
+    val scalaJHttp = "2.3.0"
   }
   val enumeratumDependencies = Seq(
     "com.beachape" %% "enumeratum" % versions.enumeratum,
@@ -184,6 +179,10 @@ object ExternalDependencies {
 
   val jsoupDependencies = Seq(
     "org.jsoup" % "jsoup" % versions.jsoup
+  )
+
+  val scalaJDependencies = Seq(
+    "org.scalaj" %% "scalaj-http" % versions.scalaJHttp
   )
 }
 
@@ -311,9 +310,10 @@ object CatalogueDependencies {
       ExternalDependencies.javaxDependencies
 
   val sierraReaderDependencies: Seq[ModuleID] =
-    WellcomeDependencies.sierraStreamsSourceLibrary ++
-      ExternalDependencies.circeOpticsDependencies ++
-      WellcomeDependencies.messagingTypesafeLibrary
+    ExternalDependencies.circeOpticsDependencies ++
+      WellcomeDependencies.messagingTypesafeLibrary ++
+      ExternalDependencies.wireMockDependencies ++
+      ExternalDependencies.scalaJDependencies
 
   // Inference manager
   val inferenceManagerDependencies: Seq[ModuleID] =

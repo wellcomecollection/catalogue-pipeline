@@ -20,7 +20,6 @@ import uk.ac.wellcome.platform.sierra_reader.models.{
   WindowStatus
 }
 import uk.ac.wellcome.platform.sierra_reader.sink.SequentialS3Sink
-import uk.ac.wellcome.sierra.{SierraSource, ThrottleRate}
 import uk.ac.wellcome.storage.Identified
 import uk.ac.wellcome.storage.s3.{S3Config, S3ObjectLocation}
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
