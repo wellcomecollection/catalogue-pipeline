@@ -4,6 +4,8 @@ module "router_queue" {
   topic_arns      = [module.merger_works_topic.arn]
   aws_region      = var.aws_region
   alarm_topic_arn = var.dlq_alarm_arn
+
+  visibility_timeout_seconds = 60
 }
 
 module "router" {
