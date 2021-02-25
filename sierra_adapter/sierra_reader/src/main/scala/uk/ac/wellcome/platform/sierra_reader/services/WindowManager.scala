@@ -9,7 +9,7 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.platform.sierra_reader.config.models.ReaderConfig
 import uk.ac.wellcome.platform.sierra_reader.exceptions.SierraReaderException
 import uk.ac.wellcome.platform.sierra_reader.models.WindowStatus
-import uk.ac.wellcome.storage.s3.S3Config
+import uk.ac.wellcome.storage.s3.{S3Config, S3ObjectLocation}
 import weco.catalogue.sierra_adapter.models.UntypedSierraRecordNumber
 
 import scala.collection.JavaConverters._
@@ -35,42 +35,46 @@ class WindowManager(
       .lastOption
 
     lastExistingKey match {
-      case Some(key) => {
+      case Some(key) =>
         debug(s"Found JSON file from previous run in S3: $key")
+        getStatusFromLastKey(
+          S3ObjectLocation(s3Config.bucketName, key)
+        )
 
-        // Our SequentialS3Sink creates filenames that end 0000.json, 0001.json, ..., with an optional prefix.
-        // Find the number on the end of the last file.
-        val embeddedIndexMatch = "(\\d{4})\\.json$".r.unanchored
-        val offset = key match {
-          case embeddedIndexMatch(index) => index.toInt
-          case _ =>
-            throw SierraReaderException(s"Unable to determine offset in $key")
-        }
-
-        val lastBody =
-          scala.io.Source
-            .fromInputStream(
-              s3Client.getObject(s3Config.bucketName, key).getObjectContent
-            )
-            .mkString
-
-        val maybeLastId = getLastId(lastBody)
-
-        info(s"Found latest ID in S3: $maybeLastId")
-
-        maybeLastId match {
-          case Some(id) =>
-            val newId = (id.toInt + 1).toString
-            WindowStatus(id = newId, offset = offset + 1)
-          case None =>
-            throw SierraReaderException(
-              s"JSON <<$lastBody>> did not contain an id")
-        }
-      }
-      case None => {
+      case None =>
         debug(s"No existing records found in S3; starting from scratch")
         WindowStatus(id = None, offset = 0)
-      }
+    }
+  }
+
+  private def getStatusFromLastKey(location: S3ObjectLocation): WindowStatus = {
+    // Our SequentialS3Sink creates filenames that end 0000.json, 0001.json, ..., with an optional prefix.
+    // Find the number on the end of the last file.
+    val embeddedIndexMatch = "(\\d{4})\\.json$".r.unanchored
+    val offset = location.key match {
+      case embeddedIndexMatch(index) => index.toInt
+      case _ =>
+        throw SierraReaderException(s"Unable to determine offset in $location")
+    }
+
+    val lastBody =
+      scala.io.Source
+        .fromInputStream(
+          s3Client.getObject(location.bucket, location.key).getObjectContent
+        )
+        .mkString
+
+    val maybeLastId = getLastId(lastBody)
+
+    info(s"Found latest ID in S3: $maybeLastId")
+
+    maybeLastId match {
+      case Some(id) =>
+        val newId = (id.toInt + 1).toString
+        WindowStatus(id = newId, offset = offset + 1)
+      case None =>
+        throw SierraReaderException(
+          s"JSON <<$lastBody>> did not contain an id")
     }
   }
 

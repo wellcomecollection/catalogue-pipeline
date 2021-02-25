@@ -64,7 +64,7 @@ class WindowManagerTest
           windowManager.buildWindowShard(s"[$startDateTime,$endDateTime]")
 
         // We pre-populate S3 with files as if they'd come from a prior run of the reader.
-        s3Client.putObject(bucket.name, s"$prefix/0000.json", "[]")
+        s3Client.putObject(bucket.name, s"${prefix}0000.json", "[]")
 
         val record = createSierraBibRecordWith(
           id = SierraBibNumber("1794165")
@@ -72,7 +72,7 @@ class WindowManagerTest
 
         s3Client.putObject(
           bucket.name,
-          s"$prefix/0001.json",
+          s"${prefix}0001.json",
           toJson(List(record)).get
         )
 
@@ -91,7 +91,7 @@ class WindowManagerTest
       withWindowManager(bucket) { windowManager =>
         val prefix =
           windowManager.buildWindowShard(s"[$startDateTime,$endDateTime]")
-        s3Client.putObject(bucket.name, s"$prefix/0000.json", "not valid")
+        s3Client.putObject(bucket.name, s"${prefix}0000.json", "not valid")
 
         val result =
           windowManager.getCurrentStatus(s"[$startDateTime,$endDateTime]")
@@ -109,7 +109,7 @@ class WindowManagerTest
         val prefix =
           windowManager.buildWindowShard(s"[$startDateTime,$endDateTime]")
 
-        s3Client.putObject(bucket.name, s"$prefix/0000.json", "[]")
+        s3Client.putObject(bucket.name, s"${prefix}0000.json", "[]")
 
         val result =
           windowManager.getCurrentStatus(s"[$startDateTime,$endDateTime]")
@@ -127,7 +127,7 @@ class WindowManagerTest
         val prefix =
           windowManager.buildWindowShard(s"[$startDateTime,$endDateTime]")
 
-        s3Client.putObject(bucket.name, s"$prefix/000x.json", "[]")
+        s3Client.putObject(bucket.name, s"${prefix}000x.json", "[]")
 
         val result =
           windowManager.getCurrentStatus(s"[$startDateTime,$endDateTime]")
