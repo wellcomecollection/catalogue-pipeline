@@ -8,8 +8,10 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.platform.sierra_reader.config.models.ReaderConfig
 import uk.ac.wellcome.platform.sierra_reader.exceptions.SierraReaderException
 import uk.ac.wellcome.platform.sierra_reader.models.WindowStatus
+import uk.ac.wellcome.storage.Identified
 import uk.ac.wellcome.storage.listing.s3.S3ObjectLocationListing
 import uk.ac.wellcome.storage.s3.{S3Config, S3ObjectLocation, S3ObjectLocationPrefix}
+import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import weco.catalogue.sierra_adapter.models.UntypedSierraRecordNumber
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -22,6 +24,7 @@ class WindowManager(
     extends Logging {
 
   private val listing = S3ObjectLocationListing()
+  private val store = S3TypedStore[String]
 
   def getCurrentStatus(window: String): Future[WindowStatus] = {
     val prefix = S3ObjectLocationPrefix(
@@ -39,7 +42,7 @@ class WindowManager(
         }
       }
 
-      status <- Future {
+      status <-
         lastExistingKey match {
           case Some(location) =>
             debug(s"Found JSON file from previous run in S3: $location")
@@ -47,41 +50,39 @@ class WindowManager(
 
           case None =>
             debug(s"No existing records found in S3; starting from scratch")
-            WindowStatus(id = None, offset = 0)
+            Future.successful(WindowStatus(id = None, offset = 0))
         }
-      }
     } yield status
   }
 
-  private def getStatusFromLastKey(location: S3ObjectLocation): WindowStatus = {
+  private def getStatusFromLastKey(location: S3ObjectLocation): Future[WindowStatus] = {
     // Our SequentialS3Sink creates filenames that end 0000.json, 0001.json, ..., with an optional prefix.
     // Find the number on the end of the last file.
     val embeddedIndexMatch = "(\\d{4})\\.json$".r.unanchored
-    val offset = location.key match {
-      case embeddedIndexMatch(index) => index.toInt
-      case _ =>
-        throw SierraReaderException(s"Unable to determine offset in $location")
-    }
 
-    val lastBody =
-      scala.io.Source
-        .fromInputStream(
-          s3Client.getObject(location.bucket, location.key).getObjectContent
+    for {
+      offset <- location.key match {
+        case embeddedIndexMatch(index) => Future.successful(index.toInt)
+        case _ =>
+          Future.failed(SierraReaderException(s"Unable to determine offset in $location"))
+      }
+
+      latestBody <- store.get(location) match {
+        case Right(Identified(_, body)) => Future.successful(body)
+        case Left(err) => Future.failed(err.e)
+      }
+
+      latestId <- Future {
+        getLatestId(latestBody).getOrElse(
+          throw SierraReaderException(s"JSON <<$latestBody>> did not contain an id")
         )
-        .mkString
+      }
 
-    val maybeLastId = getLastId(lastBody)
+      _ = info(s"Found latest ID in S3: $latestId")
 
-    info(s"Found latest ID in S3: $maybeLastId")
-
-    maybeLastId match {
-      case Some(id) =>
-        val newId = (id.toInt + 1).toString
-        WindowStatus(id = newId, offset = offset + 1)
-      case None =>
-        throw SierraReaderException(
-          s"JSON <<$lastBody>> did not contain an id")
-    }
+      newId = (latestId.toInt + 1).toString
+      windowStatus = WindowStatus(id = newId, offset = offset + 1)
+    } yield windowStatus
   }
 
   def buildWindowShard(window: String) =
@@ -108,7 +109,7 @@ class WindowManager(
   // or SierraItemRecord; we want to get the last ID of the current contents
   // so we know what to ask the Sierra API for next.
   //
-  private def getLastId(s3contents: String): Option[String] = {
+  private def getLatestId(s3contents: String): Option[String] = {
     case class Identified(id: UntypedSierraRecordNumber)
 
     fromJson[List[Identified]](s3contents) match {
