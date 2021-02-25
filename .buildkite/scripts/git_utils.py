@@ -17,6 +17,19 @@ def get_changed_paths(*args, globs=None):
     return {line.strip() for line in diff_output.splitlines()}
 
 
+def get_all_tags():
+    """
+    Returns a list of all tags in the repo.
+    """
+    git('fetch', '--tags')
+    result = git('tag')
+    all_tags = result.split('\n')
+
+    assert len(set(all_tags)) == len(all_tags)
+
+    return set(all_tags)
+
+
 def remote_default_branch():
     """Inspect refs to discover default branch @ remote origin."""
     return git("symbolic-ref", "refs/remotes/origin/HEAD").split("/")[-1]
@@ -36,3 +49,14 @@ def get_sha1_for_tag(tag):
     """Use show-ref to discover the hash for a given tag (fetch first so we have all remote tags)."""
     git("fetch")
     return git("show-ref", "--hash", tag)
+
+
+def has_source_changes(commit_range):
+    """
+    Returns True if there are source changes since the previous release,
+    False if not.
+    """
+    changed_files = [
+        f for f in get_changed_paths(commit_range) if f.strip().endswith(('.sbt', '.scala'))
+    ]
+    return len(changed_files) != 0
