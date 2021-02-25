@@ -1,4 +1,4 @@
-package uk.ac.wellcome.sierra_adapter.model
+package weco.catalogue.sierra_adapter.models
 
 import java.time.Instant
 
@@ -6,15 +6,15 @@ import uk.ac.wellcome.json.JsonUtil._
 
 import scala.util.{Failure, Success}
 
-case class SierraHoldingsRecord(
-  id: SierraHoldingsNumber,
+case class SierraItemRecord(
+  id: SierraItemNumber,
   data: String,
   modifiedDate: Instant,
   bibIds: List[SierraBibNumber],
   unlinkedBibIds: List[SierraBibNumber] = List()
-) extends AbstractSierraRecord[SierraHoldingsNumber]
+) extends AbstractSierraRecord[SierraItemNumber]
 
-case object SierraHoldingsRecord {
+case object SierraItemRecord {
 
   private case class SierraAPIData(bibIds: List[String])
 
@@ -23,7 +23,7 @@ case object SierraHoldingsRecord {
     */
   def apply(id: String,
             data: String,
-            modifiedDate: Instant): SierraHoldingsRecord = {
+            modifiedDate: Instant): SierraItemRecord = {
     val bibIds = fromJson[SierraAPIData](data) match {
       case Success(apiData) => apiData.bibIds
       case Failure(e) =>
@@ -31,8 +31,8 @@ case object SierraHoldingsRecord {
           s"Error parsing bibIds from JSON <<$data>> ($e)")
     }
 
-    SierraHoldingsRecord(
-      id = SierraHoldingsNumber(id),
+    SierraItemRecord(
+      id = SierraItemNumber(id),
       data = data,
       modifiedDate = modifiedDate,
       bibIds = bibIds.map { SierraBibNumber }

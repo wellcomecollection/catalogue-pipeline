@@ -6,8 +6,8 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.sierra.SierraTransformer
 import uk.ac.wellcome.platform.transformer.sierra.exceptions.SierraTransformerException
-import uk.ac.wellcome.sierra_adapter.model.SierraTransformable
 import WorkState.Source
+import weco.catalogue.sierra_adapter.models.SierraTransformable
 
 trait SierraTransformableTestBase extends Matchers {
 

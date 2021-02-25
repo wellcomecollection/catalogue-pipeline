@@ -7,14 +7,10 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
-import uk.ac.wellcome.sierra_adapter.model.{
-  SierraGenerators,
-  SierraItemNumber,
-  SierraItemRecord
-}
-import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
 import uk.ac.wellcome.storage.Version
 import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
+import weco.catalogue.sierra_adapter.generators.SierraGenerators
+import weco.catalogue.sierra_adapter.models.{SierraItemNumber, SierraItemRecord}
 import weco.catalogue.sierra_linker.fixtures.WorkerFixture
 import weco.catalogue.sierra_linker.models.{Link, LinkOps}
 
@@ -25,8 +21,7 @@ class SierraLinkerWorkerTest
     with IntegrationPatience
     with ScalaFutures
     with SierraGenerators
-    with WorkerFixture
-    with SierraAdapterHelpers {
+    with WorkerFixture {
 
   it("reads a Sierra record from SQS and stores it") {
     val bibIds = createSierraBibNumbers(count = 5)

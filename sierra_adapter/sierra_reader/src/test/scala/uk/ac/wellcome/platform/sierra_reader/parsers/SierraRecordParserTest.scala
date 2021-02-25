@@ -1,18 +1,17 @@
 package uk.ac.wellcome.platform.sierra_reader.parsers
 
 import java.time.Instant
-
 import io.circe.parser.parse
 import org.scalatest.compatible.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil.toJson
 import uk.ac.wellcome.json.utils.JsonAssertions
-import uk.ac.wellcome.sierra_adapter.model.{
+import weco.catalogue.sierra_adapter.generators.SierraGenerators
+import weco.catalogue.sierra_adapter.models.{
   AbstractSierraRecord,
   SierraBibNumber,
   SierraBibRecord,
-  SierraGenerators,
   SierraItemRecord
 }
 

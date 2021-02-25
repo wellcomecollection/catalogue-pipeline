@@ -1,7 +1,8 @@
-package uk.ac.wellcome.sierra_adapter.model
+package weco.catalogue.sierra_adapter.models
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import weco.catalogue.sierra_adapter.generators.SierraGenerators
 
 class SierraTransformableTest
     extends AnyFunSpec

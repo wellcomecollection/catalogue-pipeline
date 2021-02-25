@@ -6,11 +6,11 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
-import uk.ac.wellcome.sierra_adapter.model.{
+import uk.ac.wellcome.typesafe.Runnable
+import weco.catalogue.sierra_adapter.models.{
   AbstractSierraRecord,
   TypedSierraRecordNumber
 }
-import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.Future
 import scala.util.Success

@@ -1,7 +1,7 @@
 package weco.catalogue.sierra_merger.models
 
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.sierra_adapter.model.{
+import weco.catalogue.sierra_adapter.models.{
   AbstractSierraRecord,
   SierraBibNumber,
   SierraBibRecord,

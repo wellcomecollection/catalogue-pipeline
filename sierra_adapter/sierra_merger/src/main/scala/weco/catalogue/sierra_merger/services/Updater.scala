@@ -1,17 +1,17 @@
 package weco.catalogue.sierra_merger.services
 
 import cats.implicits._
-import uk.ac.wellcome.sierra_adapter.model.{
-  AbstractSierraRecord,
-  SierraBibNumber,
-  SierraTransformable
-}
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.{
   Identified,
   StorageError,
   UpdateNotApplied,
   Version
+}
+import weco.catalogue.sierra_adapter.models.{
+  AbstractSierraRecord,
+  SierraBibNumber,
+  SierraTransformable
 }
 import weco.catalogue.sierra_merger.models.{RecordOps, TransformableOps}
 import weco.catalogue.source_model.store.SourceVHS

@@ -7,10 +7,10 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
-import uk.ac.wellcome.sierra_adapter.model.AbstractSierraRecord
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.{Identified, Version}
 import uk.ac.wellcome.typesafe.Runnable
+import weco.catalogue.sierra_adapter.models.AbstractSierraRecord
 import weco.catalogue.source_model.SierraSourcePayload
 
 import scala.concurrent.{ExecutionContext, Future}

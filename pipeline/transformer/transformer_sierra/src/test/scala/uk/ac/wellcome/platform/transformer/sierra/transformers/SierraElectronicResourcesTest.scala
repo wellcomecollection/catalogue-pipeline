@@ -9,7 +9,7 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   MarcSubfield,
   VarField
 }
-import uk.ac.wellcome.sierra_adapter.model.SierraGenerators
+import weco.catalogue.sierra_adapter.generators.SierraGenerators
 
 class SierraElectronicResourcesTest
     extends AnyFunSpec

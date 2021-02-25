@@ -9,8 +9,8 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.platform.sierra_reader.config.models.ReaderConfig
 import uk.ac.wellcome.platform.sierra_reader.exceptions.SierraReaderException
 import uk.ac.wellcome.platform.sierra_reader.models.WindowStatus
-import uk.ac.wellcome.sierra_adapter.model.UntypedSierraRecordNumber
 import uk.ac.wellcome.storage.s3.S3Config
+import weco.catalogue.sierra_adapter.models.UntypedSierraRecordNumber
 
 import scala.collection.JavaConverters._
 import scala.concurrent.{ExecutionContext, Future}

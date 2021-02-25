@@ -2,6 +2,7 @@ package weco.catalogue.sierra_merger
 
 import io.circe.Encoder
 import io.circe.generic.semiauto.deriveEncoder
+import org.scalatest.{Assertion, EitherValues}
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.fixtures.TestWith
@@ -9,10 +10,10 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.sierra_adapter.model._
-import uk.ac.wellcome.sierra_adapter.model.Implicits._
-import uk.ac.wellcome.sierra_adapter.utils.SierraAdapterHelpers
-import uk.ac.wellcome.storage.Version
+import uk.ac.wellcome.storage.{Identified, Version}
+import weco.catalogue.sierra_adapter.generators.SierraGenerators
+import weco.catalogue.sierra_adapter.models._
+import weco.catalogue.sierra_adapter.models.Implicits._
 import weco.catalogue.sierra_merger.fixtures.RecordMergerFixtures
 import weco.catalogue.sierra_merger.models.TransformableOps
 import weco.catalogue.sierra_merger.services.Worker
@@ -21,12 +22,12 @@ import weco.catalogue.source_model.store.SourceVHS
 
 trait SierraRecordMergerFeatureTestCases[Record <: AbstractSierraRecord[_]]
     extends AnyFunSpec
+    with EitherValues
     with SQS
     with SourceVHSFixture
     with SierraGenerators
     with Eventually
-    with IntegrationPatience
-    with SierraAdapterHelpers {
+    with IntegrationPatience {
 
   def withWorker[R](queue: Queue,
                     sourceVHS: SourceVHS[SierraTransformable] =
@@ -37,6 +38,17 @@ trait SierraRecordMergerFeatureTestCases[Record <: AbstractSierraRecord[_]]
 
   implicit val encoder: Encoder[Record]
   implicit val transformableOps: TransformableOps[Record]
+
+  def assertStoredAndSent(
+    id: Version[String, Int],
+    transformable: SierraTransformable,
+    sourceVHS: SourceVHS[SierraTransformable],
+    messageSender: MemoryMessageSender
+  ): Assertion = {
+    sourceVHS.underlying.get(id).value shouldBe Identified(id, transformable)
+
+    messageSender.getMessages[Version[String, Int]] should contain(id)
+  }
 
   it("stores a record from SQS") {
     withLocalSqsQueue() { queue =>

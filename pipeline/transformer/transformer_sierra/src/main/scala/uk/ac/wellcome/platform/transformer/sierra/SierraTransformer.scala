@@ -16,12 +16,6 @@ import uk.ac.wellcome.platform.transformer.sierra.transformers._
 import uk.ac.wellcome.platform.transformer.sierra.source.SierraMaterialType._
 import uk.ac.wellcome.platform.transformer.sierra.source.SierraBibData._
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.sierra_adapter.model.{
-  SierraBibNumber,
-  SierraBibRecord,
-  SierraItemNumber,
-  SierraTransformable
-}
 
 import scala.util.{Failure, Success, Try}
 import WorkState.Source
@@ -32,6 +26,12 @@ import uk.ac.wellcome.models.work.internal.DeletedReason.{
 import uk.ac.wellcome.models.work.internal.InvisibilityReason.{
   SourceFieldMissing,
   UnableToTransform
+}
+import weco.catalogue.sierra_adapter.models.{
+  SierraBibNumber,
+  SierraBibRecord,
+  SierraItemNumber,
+  SierraTransformable
 }
 
 class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)

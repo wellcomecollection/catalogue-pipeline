@@ -11,7 +11,7 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
 }
 import uk.ac.wellcome.platform.transformer.sierra.source.sierra.SierraSourceLocation
 import uk.ac.wellcome.platform.transformer.sierra.generators.SierraDataGenerators
-import uk.ac.wellcome.sierra_adapter.model.SierraItemNumber
+import weco.catalogue.sierra_adapter.models.SierraItemNumber
 
 class SierraItemsTest
     extends AnyFunSpec
