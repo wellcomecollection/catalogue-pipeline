@@ -13,7 +13,7 @@ def is_default_branch():
     current_branch_name = current_branch()
     default_branch_name = remote_default_branch()
 
-    return current_branch_name == default_branch_name
+    return current_branch_name == "alice-publish-internal-model"
 
 
 def repo():
