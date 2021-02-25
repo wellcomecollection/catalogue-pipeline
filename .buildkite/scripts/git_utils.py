@@ -17,19 +17,6 @@ def get_changed_paths(*args, globs=None):
     return {line.strip() for line in diff_output.splitlines()}
 
 
-def get_all_tags():
-    """
-    Returns a list of all tags in the repo.
-    """
-    git('fetch', '--tags')
-    result = git('tag')
-    all_tags = filter(lambda tag: tag.startswith("v") ,result.split('\n'))
-
-    assert len(set(all_tags)) == len(all_tags)
-
-    return set(all_tags)
-
-
 def remote_default_branch():
     """Inspect refs to discover default branch @ remote origin."""
     return git("symbolic-ref", "refs/remotes/origin/HEAD").split("/")[-1]

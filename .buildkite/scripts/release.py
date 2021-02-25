@@ -8,10 +8,6 @@ import sys
 
 from commands import git
 from git_utils import (
-    get_all_tags,
-    local_current_head,
-    get_sha1_for_tag,
-    remote_default_head,
     has_source_changes,
 )
 from provider import current_branch, is_default_branch, repo
@@ -119,27 +115,6 @@ def has_release():
     return os.path.exists(RELEASE_FILE)
 
 
-def latest_version():
-    """
-    Returns the latest version, as specified by the Git tags.
-    """
-    versions = []
-
-    for t in get_all_tags():
-        assert t == t.strip()
-        parts = t.split('.')
-        assert len(parts) == 3, t
-        parts[0] = parts[0].lstrip('v')
-        v = tuple(parts)
-
-        versions.append((v, t))
-
-    _, latest = max(versions)
-
-    assert latest in get_all_tags()
-    return latest
-
-
 def read_release_file():
     """
     Parses the release file, returning a tuple (release_type, release_contents)
@@ -166,18 +141,9 @@ def check_release_file(commit_range):
 
 
 def release():
-    local_head = local_current_head()
-
-    if is_default_branch():
-        latest_sha = get_sha1_for_tag(latest_version())
-        commit_range = f"{latest_sha}..{local_head}"
-    else:
-        remote_head = remote_default_head()
-        commit_range = f"{remote_head}..{local_head}"
 
     print(f"Working in branch: {current_branch()}")
     print(f"On default branch: {is_default_branch()}")
-    print(f"Commit range: {commit_range}")
 
     if not is_default_branch():
         print("Trying to release while not on master?")
