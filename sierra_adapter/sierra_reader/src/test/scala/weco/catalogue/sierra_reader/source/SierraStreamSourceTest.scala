@@ -48,8 +48,8 @@ class SierraStreamSourceTest
 
       val eventualJsonList = sierraSource.runWith(Sink.seq[Json])
 
-      whenReady(eventualJsonList) { jsonList =>
-        jsonList should have size 157
+      whenReady(eventualJsonList) {
+        _ should have size 157
       }
     }
   }
@@ -111,13 +111,12 @@ class SierraStreamSourceTest
       Map("updatedDate" -> "[2013-12-10T17:16:35Z,2013-12-13T21:34:35Z]"))
 
     withMaterializer { implicit materializer =>
-      val eventualJsonList =
-        sierraSource.runWith(Sink.seq[Json])
+      val future = sierraSource.runWith(Sink.seq[Json])
 
       val startTime = Instant.now()
       val expectedDurationInMillis = 1000L
 
-      whenReady(eventualJsonList) { jsonList =>
+      whenReady(future) { _ =>
         val gap: Long = ChronoUnit.MILLIS.between(startTime, Instant.now())
 
         gap shouldBe >(expectedDurationInMillis)
@@ -146,8 +145,8 @@ class SierraStreamSourceTest
     withMaterializer { implicit materializer =>
       val future = source.take(1).runWith(Sink.head[Json])
 
-      whenReady(future.failed) { ex =>
-        ex shouldBe a[SocketTimeoutException]
+      whenReady(future.failed) {
+        _ shouldBe a[SocketTimeoutException]
       }
     }
   }
