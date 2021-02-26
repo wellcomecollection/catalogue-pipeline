@@ -45,7 +45,7 @@ object Implicits {
         (c.value.as[StringOrInt], c.value.as[RecordNumberDict]) match {
           case (Right(value), _) => Right(value.underlying)
           case (_, Right(value)) => Right(value.recordNumber.underlying)
-          case (Left(err), _) => Left(err)
+          case (Left(err), _)    => Left(err)
         }
 
       idString.flatMap { id =>

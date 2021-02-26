@@ -78,5 +78,5 @@ if __name__ == "__main__":
     ):
         client.publish(
             TopicArn=f"arn:aws:sns:eu-west-1:760097843905:sierra_{resource}_reharvest_windows",
-            Message=json.dumps(window)
+            Message=json.dumps(window),
         )
