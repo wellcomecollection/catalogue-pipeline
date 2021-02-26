@@ -1,19 +1,13 @@
 package weco.catalogue.sierra_reader.source
 
 import akka.stream.scaladsl.Sink
-import com.github.tomakehurst.wiremock.client.WireMock.{
-  aResponse,
-  get,
-  stubFor,
-  urlMatching
-}
+import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, get, stubFor, urlMatching}
 import com.github.tomakehurst.wiremock.stubbing.Scenario
 import io.circe.Json
 import io.circe.optics.JsonPath.root
-import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures}
+import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import org.scalatest.time.{Millis, Seconds, Span}
 import uk.ac.wellcome.akka.fixtures.Akka
 
 import java.net.SocketTimeoutException
@@ -26,7 +20,7 @@ class SierraStreamSourceTest
     with SierraWireMock
     with Matchers
     with ScalaFutures
-    with ExtendedPatience
+    with IntegrationPatience
     with Akka {
 
   it("reads from Sierra") {
@@ -162,11 +156,4 @@ class SierraStreamSourceTest
       }
     }
   }
-}
-
-trait ExtendedPatience extends PatienceConfiguration {
-  override implicit val patienceConfig: PatienceConfig = PatienceConfig(
-    timeout = scaled(Span(40, Seconds)),
-    interval = scaled(Span(150, Millis))
-  )
 }
