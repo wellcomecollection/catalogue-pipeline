@@ -2,12 +2,13 @@ package weco.catalogue.sierra_reader.source
 
 import akka.stream.stage.{GraphStage, GraphStageLogic, OutHandler}
 import akka.stream.{Attributes, Outlet, SourceShape}
+import io.circe.Json
 import io.circe.optics.JsonPath.root
 import io.circe.parser.parse
-import io.circe.{Decoder, Encoder, HCursor, Json}
 import org.slf4j.{Logger, LoggerFactory}
 import scalaj.http.{Http, HttpOptions, HttpResponse}
 import uk.ac.wellcome.platform.sierra_reader.config.models.SierraAPIConfig
+import weco.catalogue.sierra_adapter.json.JsonOps._
 
 import scala.concurrent.duration.Duration
 
@@ -119,24 +120,14 @@ class SierraPageSource(
   // This isn't completely trivial -- bibs and items return the ID as a string, whereas
   // holdings return it as an int.
   //
-  private class ResponseId(val underlying: Int)
-
-  implicit private val decoder: Decoder[ResponseId] =
-    (c: HCursor) => c.as[String] match {
-      case Right(value) => Right(new ResponseId(value.toInt))
-      case Left(_) => c.as[Int].map { v => new ResponseId(v) }
-    }
-
-  implicit private val encoder: Encoder[ResponseId] =
-    (id: ResponseId) => Json.fromInt(id.underlying)
-
   private def getLastId(entries: List[Json]): Int = {
-    root.id.as[ResponseId]
+    root.id.as[StringOrInt]
       .getOption(entries.last)
       .getOrElse(
         throw new RuntimeException("Couldn't find ID in last item of list response")
       )
       .underlying
+      .toInt
   }
 
   private def makeRequest(apiUrl: String,

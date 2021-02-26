@@ -2,9 +2,9 @@ package uk.ac.wellcome.platform.sierra_reader.parsers
 
 import java.time.format.DateTimeFormatter
 import java.time.{Instant, LocalDate, LocalTime, ZoneOffset}
-
 import io.circe.Json
 import io.circe.optics.JsonPath.root
+import weco.catalogue.sierra_adapter.json.JsonOps._
 import weco.catalogue.sierra_adapter.models.AbstractSierraRecord
 
 object SierraRecordParser {
@@ -50,5 +50,8 @@ object SierraRecordParser {
   }
 
   private def getId(json: Json): String =
-    root.id.string.getOption(json).get
+    root.id.as[StringOrInt]
+      .getOption(json)
+      .map { _.underlying }
+      .get
 }

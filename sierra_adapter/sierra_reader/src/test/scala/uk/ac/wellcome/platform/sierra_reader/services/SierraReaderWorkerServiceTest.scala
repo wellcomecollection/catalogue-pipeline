@@ -6,6 +6,7 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS
+import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.platform.sierra_reader.exceptions.SierraReaderException
 import uk.ac.wellcome.platform.sierra_reader.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.storage.fixtures.S3Fixtures
@@ -24,8 +25,7 @@ class SierraReaderWorkerServiceTest
     with ScalaFutures
     with WorkerServiceFixture {
 
-  it(
-    "reads a window message from SQS, retrieves the bibs from Sierra and writes them to S3") {
+  it("fetches bibs from Sierra") {
     val body =
       """
         |{
@@ -39,7 +39,7 @@ class SierraReaderWorkerServiceTest
         withWorkerService(
           bucket,
           queue,
-          readerConfig = bibsReaderConfig.copy(batchSize = 10)) { service =>
+          readerConfig = bibsReaderConfig.copy(batchSize = 10)) { _ =>
           sendNotificationToSQS(queue = queue, body = body)
 
           val pageNames = List("0000.json", "0001.json", "0002.json").map {
@@ -61,8 +61,7 @@ class SierraReaderWorkerServiceTest
     }
   }
 
-  it(
-    "reads a window message from SQS, retrieves the items from Sierra and writes them to S3") {
+  it("fetches items from Sierra") {
     val body =
       """
         |{
@@ -74,7 +73,7 @@ class SierraReaderWorkerServiceTest
     withLocalS3Bucket { bucket =>
       withLocalSqsQueue() { queue =>
         withWorkerService(bucket, queue, readerConfig = itemsReaderConfig) {
-          service =>
+          _ =>
             sendNotificationToSQS(queue = queue, body = body)
 
             val pageNames = List(
@@ -118,8 +117,7 @@ class SierraReaderWorkerServiceTest
 
             val pageNames = List(
               "0000.json",
-              "0001.json",
-              "0002.json")
+              "0001.json")
               .map { label =>
                 s"records_holdings/2003-03-03T03-00-00Z__2003-04-04T04-00-00Z/$label"
               } ++ List(
