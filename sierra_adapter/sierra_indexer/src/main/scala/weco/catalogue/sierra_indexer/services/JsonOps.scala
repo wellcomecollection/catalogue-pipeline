@@ -9,5 +9,10 @@ object JsonOps {
 
     def fixedFields: Map[String, Json] =
       j.hcursor.downField("fixedFields").as[Map[String, Json]].getOrElse(Map())
+
+    def remainder: Json =
+      j.mapObject {
+        _.remove("varFields").remove("fixedFields")
+      }
   }
 }

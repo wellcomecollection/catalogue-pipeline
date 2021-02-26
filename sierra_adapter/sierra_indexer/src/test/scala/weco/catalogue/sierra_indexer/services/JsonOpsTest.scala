@@ -50,6 +50,8 @@ class JsonOpsTest extends AnyFunSpec with Matchers with EitherValues {
           |}
           |""".stripMargin
 
+      println(jsonString)
+
       val json = parse(jsonString).value
 
       json.varFields shouldBe varFieldsStrings.map { parse(_).value }
@@ -108,9 +110,6 @@ class JsonOpsTest extends AnyFunSpec with Matchers with EitherValues {
            |}
            |""".stripMargin
 
-      println(jsonString)
-      println("---")
-
       val json = parse(jsonString).value
 
       json.fixedFields shouldBe fixedFields.map { case (code, json) => code -> parse(json).value }
@@ -129,6 +128,73 @@ class JsonOpsTest extends AnyFunSpec with Matchers with EitherValues {
       val json = parse(jsonString).value
 
       json.fixedFields shouldBe empty
+    }
+  }
+
+  describe("remainder") {
+    it("removes the varFields and fixedFields from a Sierra API response") {
+      val jsonString =
+        s"""
+           |{
+           |  "id": "1464045",
+           |  "updatedDate": "2013-12-12T13:56:07Z",
+           |  "deleted": false,
+           |  "bibIds": [
+           |    "1536695"
+           |  ],
+           |  "varFields": [
+           |    {
+           |      "fieldTag": "b",
+           |      "content": "22501328220"
+           |    },
+           |    {
+           |      "fieldTag": "g",
+           |      "content": "P"
+           |    }
+           |  ],
+           |  "fixedFields": {
+           |    "81" : {
+           |      "label" : "RECORD #",
+           |      "value" : "1851557"
+           |    },
+           |    "110" : {
+           |      "label" : "LYCIRC",
+           |      "value" : 0
+           |    }
+           |  }
+           |}
+           |
+           |""".stripMargin
+
+      val json = parse(jsonString).value
+
+      json.remainder shouldBe parse(
+        """
+          |{
+          |  "id": "1464045",
+          |  "updatedDate": "2013-12-12T13:56:07Z",
+          |  "deleted": false,
+          |  "bibIds": [
+          |    "1536695"
+          |  ]
+          |}
+          |""".stripMargin
+      ).value
+    }
+
+    it("returns the remainder unmodified if there are no varFields or fixedFields") {
+      val jsonString =
+        s"""
+           |{
+           |  "id" : "1464045",
+           |  "updatedDate" : "2013-12-12T13:56:07Z",
+           |  "deleted" : true
+           |}
+           |""".stripMargin
+
+      val json = parse(jsonString).value
+
+      json.remainder shouldBe json
     }
   }
 }
