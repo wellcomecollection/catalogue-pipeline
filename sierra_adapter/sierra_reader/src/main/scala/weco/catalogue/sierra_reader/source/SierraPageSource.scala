@@ -9,9 +9,11 @@ import org.slf4j.{Logger, LoggerFactory}
 import scalaj.http.{Http, HttpOptions, HttpResponse}
 import uk.ac.wellcome.platform.sierra_reader.config.models.SierraAPIConfig
 
+import scala.concurrent.duration.Duration
+
 class SierraPageSource(
   config: SierraAPIConfig,
-  timeoutMs: Int
+  timeout: Duration
 )(
   resourceType: String,
   params: Map[String, String] = Map()
@@ -113,8 +115,8 @@ class SierraPageSource(
     logger.debug(s"Making request to $url with parameters $params & token $token")
 
     Http(url)
-      .option(HttpOptions.readTimeout(timeoutMs))
-      .option(HttpOptions.connTimeout(timeoutMs))
+      .option(HttpOptions.readTimeout(timeout.toMillis.toInt))
+      .option(HttpOptions.connTimeout(timeout.toMillis.toInt))
       .params(params)
       .header("Authorization", s"Bearer $token")
       .header("Accept", "application/json")

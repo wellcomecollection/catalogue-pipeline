@@ -18,14 +18,14 @@ object SierraSource {
   def apply(
     config: SierraAPIConfig,
     throttleRate: ThrottleRate = ThrottleRate(elements = 0, per = 0 seconds),
-    timeoutMs: Int = 10000
+    timeout: Duration = 10 seconds
   )(resourceType: String,
     params: Map[String, String]): Source[Json, NotUsed] = {
 
     val source = Source.fromGraph(
       new SierraPageSource(
         config = config,
-        timeoutMs = timeoutMs)(resourceType = resourceType, params = params)
+        timeout = timeout)(resourceType = resourceType, params = params)
     )
 
     throttleRate.elements match {

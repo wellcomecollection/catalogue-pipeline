@@ -98,12 +98,12 @@ class SierraStreamSourceTest
       val future = sierraSource.runWith(Sink.seq[Json])
 
       val startTime = Instant.now()
-      val expectedDurationInMillis = 1000L
+      val expectedDuration = 200 milliseconds
 
       whenReady(future) { _ =>
         val gap: Long = ChronoUnit.MILLIS.between(startTime, Instant.now())
 
-        gap shouldBe >(expectedDurationInMillis)
+        gap shouldBe >(expectedDuration.toMillis)
       }
     }
   }
@@ -113,7 +113,7 @@ class SierraStreamSourceTest
     // a fixed delay of 1000 milliseconds.
     val source = SierraSource(
       config = sierraAPIConfig,
-      timeoutMs = 200
+      timeout = 200 millisecond
     )(
       resourceType = "bibs",
       params = Map("timeout" -> "true")
