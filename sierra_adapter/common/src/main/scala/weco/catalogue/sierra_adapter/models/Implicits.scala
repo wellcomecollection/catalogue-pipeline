@@ -40,6 +40,9 @@ object Implicits {
         }
     }
 
+  implicit val holdingsNumberEncoder: Encoder[SierraHoldingsNumber] =
+    (number: SierraHoldingsNumber) => Json.fromString(number.withoutCheckDigit)
+
   implicit val _dec01: Decoder[SierraTransformable] = deriveConfiguredDecoder
   implicit val _dec02: Decoder[SierraItemRecord] = deriveConfiguredDecoder
   implicit val _dec03: Decoder[SierraHoldingsRecord] = deriveConfiguredDecoder
