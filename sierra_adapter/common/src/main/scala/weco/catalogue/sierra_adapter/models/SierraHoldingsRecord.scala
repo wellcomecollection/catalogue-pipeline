@@ -2,7 +2,6 @@ package weco.catalogue.sierra_adapter.models
 
 import java.time.Instant
 import uk.ac.wellcome.json.JsonUtil._
-import Implicits._
 
 import scala.util.{Failure, Success}
 
@@ -16,7 +15,7 @@ case class SierraHoldingsRecord(
 
 case object SierraHoldingsRecord {
 
-  private case class SierraAPIData(bibIds: List[SierraBibNumber])
+  private case class SierraAPIData(bibIds: List[Int])
 
   /** This apply method is for parsing JSON bodies that come from the
     * Sierra API.
@@ -25,7 +24,7 @@ case object SierraHoldingsRecord {
             data: String,
             modifiedDate: Instant): SierraHoldingsRecord = {
     val bibIds = fromJson[SierraAPIData](data) match {
-      case Success(apiData) => apiData.bibIds
+      case Success(apiData) => apiData.bibIds.map { v => SierraBibNumber(v.toString )}
       case Failure(e) =>
         throw new IllegalArgumentException(
           s"Error parsing bibIds from JSON <<$data>> ($e)")

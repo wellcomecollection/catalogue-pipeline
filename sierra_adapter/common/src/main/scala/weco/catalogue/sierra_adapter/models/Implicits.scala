@@ -30,21 +30,15 @@ object Implicits {
 
   // The API responses from Sierra can return a RecordNumber as a
   // string or an int.  We need to handle both cases.
-  private def createDecoder[T <: TypedSierraRecordNumber](create: String => T): Decoder[T] =
+  implicit val holdingsNumberDecoder: Decoder[SierraHoldingsNumber] =
     (c: HCursor) =>
       c.value.as[StringOrInt].flatMap {
         id =>
-          Try { create(id.underlying) } match {
+          Try { SierraHoldingsNumber(id.underlying) } match {
             case Success(number) => Right(number)
             case Failure(err) => Left(DecodingFailure(err.toString, ops = List.empty))
           }
       }
-
-  implicit val bibNumberDecoder: Decoder[SierraBibNumber] =
-    createDecoder(SierraBibNumber.apply)
-
-  implicit val holdingsNumberDecoder: Decoder[SierraHoldingsNumber] =
-    createDecoder(SierraHoldingsNumber.apply)
 
   implicit val _dec01: Decoder[SierraTransformable] = deriveConfiguredDecoder
   implicit val _dec02: Decoder[SierraItemRecord] = deriveConfiguredDecoder
