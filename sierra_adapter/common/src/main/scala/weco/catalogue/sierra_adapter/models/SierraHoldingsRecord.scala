@@ -1,8 +1,8 @@
 package weco.catalogue.sierra_adapter.models
 
 import java.time.Instant
-
 import uk.ac.wellcome.json.JsonUtil._
+import Implicits._
 
 import scala.util.{Failure, Success}
 
@@ -16,7 +16,7 @@ case class SierraHoldingsRecord(
 
 case object SierraHoldingsRecord {
 
-  private case class SierraAPIData(bibIds: List[String])
+  private case class SierraAPIData(bibIds: List[SierraBibNumber])
 
   /** This apply method is for parsing JSON bodies that come from the
     * Sierra API.
@@ -35,7 +35,7 @@ case object SierraHoldingsRecord {
       id = SierraHoldingsNumber(id),
       data = data,
       modifiedDate = modifiedDate,
-      bibIds = bibIds.map { SierraBibNumber }
+      bibIds = bibIds
     )
   }
 }
