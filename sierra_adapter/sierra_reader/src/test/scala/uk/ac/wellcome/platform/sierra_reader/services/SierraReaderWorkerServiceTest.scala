@@ -11,7 +11,12 @@ import uk.ac.wellcome.platform.sierra_reader.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.storage.fixtures.S3Fixtures
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
-import weco.catalogue.sierra_adapter.models.{SierraBibRecord, SierraItemRecord}
+import weco.catalogue.sierra_adapter.models.Implicits._
+import weco.catalogue.sierra_adapter.models.{
+  SierraBibRecord,
+  SierraHoldingsRecord,
+  SierraItemRecord
+}
 
 class SierraReaderWorkerServiceTest
     extends AnyFunSpec
@@ -124,8 +129,8 @@ class SierraReaderWorkerServiceTest
               // There are 51 item records in the Sierra wiremock so we expect 3 files
               listKeysInBucket(bucket = bucket) shouldBe pageNames
 
-              getItemRecordsFromS3(bucket, pageNames(0)) should have size 50
-              getItemRecordsFromS3(bucket, pageNames(1)) should have size 1
+              getHoldingsRecordsFromS3(bucket, pageNames(0)) should have size 50
+              getHoldingsRecordsFromS3(bucket, pageNames(1)) should have size 1
             }
         }
       }
@@ -193,6 +198,11 @@ class SierraReaderWorkerServiceTest
   private def getItemRecordsFromS3(bucket: Bucket,
                                    key: String): List[SierraItemRecord] =
     getObjectFromS3[List[SierraItemRecord]](
+      S3ObjectLocation(bucket = bucket.name, key = key))
+
+  private def getHoldingsRecordsFromS3(bucket: Bucket,
+                                       key: String): List[SierraHoldingsRecord] =
+    getObjectFromS3[List[SierraHoldingsRecord]](
       S3ObjectLocation(bucket = bucket.name, key = key))
 
   it("returns a SierraReaderException if it receives an invalid message") {
