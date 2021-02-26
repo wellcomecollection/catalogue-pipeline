@@ -12,6 +12,8 @@ import weco.catalogue.sierra_adapter.models.{
   AbstractSierraRecord,
   SierraBibNumber,
   SierraBibRecord,
+  SierraHoldingsNumber,
+  SierraHoldingsRecord,
   SierraItemRecord
 }
 
@@ -75,6 +77,36 @@ class SierraRecordParserTest
 
     assertSierraRecordsAreEqual(
       SierraRecordParser(SierraItemRecord.apply)(json),
+      expectedRecord
+    )
+  }
+
+  it("parses a holdings record") {
+    val jsonString =
+      """{
+          |    "id": 1064036,
+          |    "bibIds": [
+          |        1571482
+          |    ],
+          |    "itemIds": [
+          |        1234567
+          |    ],
+          |    "updatedDate": "2003-04-02T13:29:42Z",
+          |    "deleted": false,
+          |    "suppressed": false
+          |}""".stripMargin
+
+    val expectedRecord = createSierraHoldingsRecordWith(
+      id = SierraHoldingsNumber("1064036"),
+      modifiedDate = Instant.parse("2003-04-02T13:29:42Z"),
+      bibIds = List(SierraBibNumber("1571482")),
+      data = (_, _, _) => jsonString
+    )
+
+    val json = parse(jsonString).right.get
+
+    assertSierraRecordsAreEqual(
+      SierraRecordParser(SierraHoldingsRecord.apply)(json),
       expectedRecord
     )
   }

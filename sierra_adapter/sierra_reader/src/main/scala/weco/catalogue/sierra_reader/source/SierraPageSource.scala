@@ -8,6 +8,7 @@ import io.circe.parser.parse
 import org.slf4j.{Logger, LoggerFactory}
 import scalaj.http.{Http, HttpOptions, HttpResponse}
 import uk.ac.wellcome.platform.sierra_reader.config.models.SierraAPIConfig
+import weco.catalogue.sierra_adapter.json.JsonOps._
 
 import scala.concurrent.duration.Duration
 
@@ -79,14 +80,7 @@ class SierraPageSource(
 
         jsonList = root.entries.each.json.getAll(responseJson)
 
-        lastId = Some(root.id.string
-          .getOption(jsonList.last)
-          .getOrElse(
-            throw new RuntimeException(
-              s"Couldn't find ID in last item of list response; got ${response.body}"
-            )
-          )
-          .toInt)
+        lastId = Some(getLastId(jsonList))
 
         push(out, jsonList)
       }
@@ -96,6 +90,7 @@ class SierraPageSource(
 
         val tokenResponse =
           Http(url).postForm.auth(config.oauthKey, config.oauthSec).asString
+
         val json = parse(tokenResponse.body).right
           .getOrElse(
             throw new RuntimeException(
@@ -110,6 +105,32 @@ class SierraPageSource(
       }
 
     }
+
+  // The Sierra API returns entries as a list of the form:
+  //
+  //    [
+  //      {"id": "1001", …},
+  //      {"id": "1002", …},
+  //      …
+  //    ]
+  //
+  // This function returns the last ID in the list, which can be passed to the Sierra
+  // API on a subsequent response "everything after this ID please".
+  //
+  // This isn't completely trivial -- bibs and items return the ID as a string, whereas
+  // holdings return it as an int.
+  //
+  private def getLastId(entries: List[Json]): Int = {
+    root.id
+      .as[StringOrInt]
+      .getOption(entries.last)
+      .getOrElse(
+        throw new RuntimeException(
+          "Couldn't find ID in last item of list response")
+      )
+      .underlying
+      .toInt
+  }
 
   private def makeRequest(apiUrl: String,
                           resourceType: String,
