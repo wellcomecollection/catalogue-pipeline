@@ -2,9 +2,9 @@ package weco.catalogue.sierra_reader.source
 
 import akka.stream.stage.{GraphStage, GraphStageLogic, OutHandler}
 import akka.stream.{Attributes, Outlet, SourceShape}
-import io.circe.Json
 import io.circe.optics.JsonPath.root
 import io.circe.parser.parse
+import io.circe.{Decoder, Encoder, HCursor, Json}
 import org.slf4j.{Logger, LoggerFactory}
 import scalaj.http.{Http, HttpOptions, HttpResponse}
 import uk.ac.wellcome.platform.sierra_reader.config.models.SierraAPIConfig
@@ -79,14 +79,7 @@ class SierraPageSource(
 
         jsonList = root.entries.each.json.getAll(responseJson)
 
-        lastId = Some(root.id.string
-          .getOption(jsonList.last)
-          .getOrElse(
-            throw new RuntimeException(
-              s"Couldn't find ID in last item of list response; got ${response.body}"
-            )
-          )
-          .toInt)
+        lastId = Some(getLastId(jsonList))
 
         push(out, jsonList)
       }
@@ -96,6 +89,7 @@ class SierraPageSource(
 
         val tokenResponse =
           Http(url).postForm.auth(config.oauthKey, config.oauthSec).asString
+
         val json = parse(tokenResponse.body).right
           .getOrElse(
             throw new RuntimeException(
@@ -110,6 +104,40 @@ class SierraPageSource(
       }
 
     }
+
+  // The Sierra API returns entries as a list of the form:
+  //
+  //    [
+  //      {"id": "1001", …},
+  //      {"id": "1002", …},
+  //      …
+  //    ]
+  //
+  // This function returns the last ID in the list, which can be passed to the Sierra
+  // API on a subsequent response "everything after this ID please".
+  //
+  // This isn't completely trivial -- bibs and items return the ID as a string, whereas
+  // holdings return it as an int.
+  //
+  private class ResponseId(val underlying: Int)
+
+  implicit private val decoder: Decoder[ResponseId] =
+    (c: HCursor) => c.as[String] match {
+      case Right(value) => Right(new ResponseId(value.toInt))
+      case Left(_) => c.as[Int].map { v => new ResponseId(v) }
+    }
+
+  implicit private val encoder: Encoder[ResponseId] =
+    (id: ResponseId) => Json.fromInt(id.underlying)
+
+  private def getLastId(entries: List[Json]): Int = {
+    root.id.as[ResponseId]
+      .getOption(entries.last)
+      .getOrElse(
+        throw new RuntimeException("Couldn't find ID in last item of list response")
+      )
+      .underlying
+  }
 
   private def makeRequest(apiUrl: String,
                           resourceType: String,
