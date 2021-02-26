@@ -29,7 +29,7 @@ class SierraStreamSourceTest
     with ExtendedPatience
     with Akka {
 
-  it("should read from sierra") {
+  it("reads from Sierra") {
     withMaterializer { implicit materializer =>
       val eventualJson = SierraSource(sierraWireMockUrl, oauthKey, oauthSecret)(
         "items",
@@ -40,7 +40,7 @@ class SierraStreamSourceTest
     }
   }
 
-  it("should paginate through results") {
+  it("paginates through results") {
     withMaterializer { implicit materializer =>
       val sierraSource = SierraSource(sierraWireMockUrl, oauthKey, oauthSecret)(
         "items",
@@ -54,7 +54,7 @@ class SierraStreamSourceTest
     }
   }
 
-  it("should refresh the access token if receives a unauthorized response") {
+  it("refreshes the access token if receives a unauthorized response") {
     stubFor(
       get(urlMatching("/bibs"))
         .inScenario("refresh token")
@@ -86,8 +86,7 @@ class SierraStreamSourceTest
     }
   }
 
-  it(
-    "should return a sensible error message if it fails to authorize with the sierra api") {
+  it("returns a sensible error message if it fails to authorize with the Sierra API") {
     stubFor(get(urlMatching("/bibs")).willReturn(aResponse().withStatus(401)))
 
     withMaterializer { implicit materializer =>
@@ -102,8 +101,7 @@ class SierraStreamSourceTest
     }
   }
 
-  it("should obey the throttle rate for sierra api requests") {
-
+  it("obeys the throttle rate for sierra api requests") {
     val sierraSource = SierraSource(
       sierraWireMockUrl,
       oauthKey,
