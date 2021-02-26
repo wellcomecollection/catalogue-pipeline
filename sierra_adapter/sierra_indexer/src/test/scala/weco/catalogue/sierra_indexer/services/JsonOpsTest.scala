@@ -70,4 +70,65 @@ class JsonOpsTest extends AnyFunSpec with Matchers with EitherValues {
       json.varFields shouldBe empty
     }
   }
+
+  describe("varFields") {
+    it("gets the fixedFields from a Sierra API response") {
+      val fixedFields = Map(
+        "86" ->
+          """
+            |{
+            |  "label" : "AGENCY",
+            |  "value" : "1"
+            |}
+            |""".stripMargin,
+        "265" ->
+          """
+            |{
+            |  "label" : "Inherit Location",
+            |  "value" : false
+            |}
+            |""".stripMargin)
+
+      val fixedFieldsJson =
+        fixedFields
+          .map { case (code, json) =>
+            s"""
+              |"$code": $json
+              |""".stripMargin
+          }
+
+      val jsonString =
+        s"""
+           |{
+           |  "id" : "1464045",
+           |  "updatedDate" : "2013-12-12T13:56:07Z",
+           |  "deleted" : false,
+           |  "bibIds" : ["1536695"],
+           |  "fixedFields" : {${fixedFieldsJson.mkString(", ")}}
+           |}
+           |""".stripMargin
+
+      println(jsonString)
+      println("---")
+
+      val json = parse(jsonString).value
+
+      json.fixedFields shouldBe fixedFields.map { case (code, json) => code -> parse(json).value }
+    }
+
+    it("returns an empty list if there are no fixedFields") {
+      val jsonString =
+        s"""
+           |{
+           |  "id" : "1464045",
+           |  "updatedDate" : "2013-12-12T13:56:07Z",
+           |  "deleted" : true
+           |}
+           |""".stripMargin
+
+      val json = parse(jsonString).value
+
+      json.fixedFields shouldBe empty
+    }
+  }
 }
