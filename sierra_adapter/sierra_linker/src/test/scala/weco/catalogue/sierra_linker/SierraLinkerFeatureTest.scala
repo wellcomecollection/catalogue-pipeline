@@ -21,7 +21,7 @@ class SierraLinkerFeatureTest
     with SierraGenerators
     with WorkerFixture {
 
-  it("reads items from SQS, stores the link, and sends the record onward") {
+  it("links item records") {
     val messageSender = new MemoryMessageSender
 
     val record = createSierraItemRecordWith(
@@ -47,7 +47,7 @@ class SierraLinkerFeatureTest
     }
   }
 
-  it("reads holdings from SQS, stores the link, and sends the record onward") {
+  it("links holdings records") {
     val messageSender = new MemoryMessageSender
 
     val record = createSierraHoldingsRecordWith(

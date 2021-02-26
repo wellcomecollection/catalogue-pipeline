@@ -5,7 +5,6 @@ import com.typesafe.config.Config
 import org.scanamo.DynamoFormat
 import org.scanamo.generic.auto._
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.storage.store.dynamo.DynamoSingleVersionStore
@@ -14,6 +13,7 @@ import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 import weco.catalogue.sierra_adapter.models.SierraRecordTypes._
+import weco.catalogue.sierra_adapter.models.Implicits._
 import weco.catalogue.sierra_adapter.models.{
   AbstractSierraRecord,
   SierraHoldingsNumber,
