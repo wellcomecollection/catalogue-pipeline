@@ -116,10 +116,9 @@ trait SierraGenerators extends RandomGenerators {
     )
   }
 
-  private def defaultItemData(
-    id: SierraItemNumber,
-    modifiedDate: Instant,
-    bibIds: List[SierraBibNumber]): String =
+  private def defaultItemData(id: SierraItemNumber,
+                              modifiedDate: Instant,
+                              bibIds: List[SierraBibNumber]): String =
     s"""
        |{
        |  "id": "$id",
@@ -128,10 +127,9 @@ trait SierraGenerators extends RandomGenerators {
        |}
        |""".stripMargin
 
-  private def defaultHoldingsData(
-    id: SierraHoldingsNumber,
-    modifiedDate: Instant,
-    bibIds: List[SierraBibNumber]): String =
+  private def defaultHoldingsData(id: SierraHoldingsNumber,
+                                  modifiedDate: Instant,
+                                  bibIds: List[SierraBibNumber]): String =
     s"""
        |{
        |  "id": $id,

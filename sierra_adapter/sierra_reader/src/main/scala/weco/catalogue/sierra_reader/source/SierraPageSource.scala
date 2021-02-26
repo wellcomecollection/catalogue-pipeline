@@ -121,10 +121,12 @@ class SierraPageSource(
   // holdings return it as an int.
   //
   private def getLastId(entries: List[Json]): Int = {
-    root.id.as[StringOrInt]
+    root.id
+      .as[StringOrInt]
       .getOption(entries.last)
       .getOrElse(
-        throw new RuntimeException("Couldn't find ID in last item of list response")
+        throw new RuntimeException(
+          "Couldn't find ID in last item of list response")
       )
       .underlying
       .toInt

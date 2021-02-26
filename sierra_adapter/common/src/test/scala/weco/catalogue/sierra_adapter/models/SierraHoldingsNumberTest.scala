@@ -11,11 +11,13 @@ class SierraHoldingsNumberTest extends AnyFunSpec with Matchers {
   case class Identity(id: SierraHoldingsNumber)
 
   it("decodes a String as a HoldingsNumber") {
-    fromJson[Identity]("""{"id": "1234567"}""") shouldBe Success(Identity(SierraHoldingsNumber("1234567")))
+    fromJson[Identity]("""{"id": "1234567"}""") shouldBe Success(
+      Identity(SierraHoldingsNumber("1234567")))
   }
 
   it("decodes an Int as a HoldingsNumber") {
-    fromJson[Identity]("""{"id": 1234567}""") shouldBe Success(Identity(SierraHoldingsNumber("1234567")))
+    fromJson[Identity]("""{"id": 1234567}""") shouldBe Success(
+      Identity(SierraHoldingsNumber("1234567")))
   }
 
   it("fails if the Int is the wrong format") {

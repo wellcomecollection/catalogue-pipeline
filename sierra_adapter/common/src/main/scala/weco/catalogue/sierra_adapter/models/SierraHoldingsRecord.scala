@@ -24,7 +24,10 @@ case object SierraHoldingsRecord {
             data: String,
             modifiedDate: Instant): SierraHoldingsRecord = {
     val bibIds = fromJson[SierraAPIData](data) match {
-      case Success(apiData) => apiData.bibIds.map { v => SierraBibNumber(v.toString )}
+      case Success(apiData) =>
+        apiData.bibIds.map { v =>
+          SierraBibNumber(v.toString)
+        }
       case Failure(e) =>
         throw new IllegalArgumentException(
           s"Error parsing bibIds from JSON <<$data>> ($e)")

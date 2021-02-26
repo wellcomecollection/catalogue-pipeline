@@ -114,9 +114,7 @@ class SierraReaderWorkerServiceTest
           _ =>
             sendNotificationToSQS(queue = queue, body = body)
 
-            val pageNames = List(
-              "0000.json",
-              "0001.json")
+            val pageNames = List("0000.json", "0001.json")
               .map { label =>
                 s"records_holdings/2003-03-03T03-00-00Z__2003-04-04T04-00-00Z/$label"
               } ++ List(

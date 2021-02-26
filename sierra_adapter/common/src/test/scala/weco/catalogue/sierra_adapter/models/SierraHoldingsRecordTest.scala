@@ -26,7 +26,7 @@ class SierraHoldingsRecordTest extends AnyFunSpec with Matchers {
       data = jsonString,
       modifiedDate = Instant.now
     )
-    
+
     record.bibIds shouldBe List(SierraBibNumber("1571482"))
   }
 }

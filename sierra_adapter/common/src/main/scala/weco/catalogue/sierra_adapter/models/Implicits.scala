@@ -32,13 +32,13 @@ object Implicits {
   // string or an int.  We need to handle both cases.
   implicit val holdingsNumberDecoder: Decoder[SierraHoldingsNumber] =
     (c: HCursor) =>
-      c.value.as[StringOrInt].flatMap {
-        id =>
-          Try { SierraHoldingsNumber(id.underlying) } match {
-            case Success(number) => Right(number)
-            case Failure(err) => Left(DecodingFailure(err.toString, ops = List.empty))
-          }
-      }
+      c.value.as[StringOrInt].flatMap { id =>
+        Try { SierraHoldingsNumber(id.underlying) } match {
+          case Success(number) => Right(number)
+          case Failure(err) =>
+            Left(DecodingFailure(err.toString, ops = List.empty))
+        }
+    }
 
   implicit val _dec01: Decoder[SierraTransformable] = deriveConfiguredDecoder
   implicit val _dec02: Decoder[SierraItemRecord] = deriveConfiguredDecoder

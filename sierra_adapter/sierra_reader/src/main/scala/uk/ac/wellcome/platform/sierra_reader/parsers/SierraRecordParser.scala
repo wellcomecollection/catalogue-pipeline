@@ -50,7 +50,8 @@ object SierraRecordParser {
   }
 
   private def getId(json: Json): String =
-    root.id.as[StringOrInt]
+    root.id
+      .as[StringOrInt]
       .getOption(json)
       .map { _.underlying }
       .get

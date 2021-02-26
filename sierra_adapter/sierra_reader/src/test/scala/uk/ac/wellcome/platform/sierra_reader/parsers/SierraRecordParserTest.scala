@@ -83,7 +83,7 @@ class SierraRecordParserTest
 
   it("parses a holdings record") {
     val jsonString =
-        """{
+      """{
           |    "id": 1064036,
           |    "bibIds": [
           |        1571482

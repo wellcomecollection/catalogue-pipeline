@@ -8,9 +8,13 @@ object JsonOps {
   class StringOrInt(val underlying: String)
 
   implicit val decoder: Decoder[StringOrInt] =
-    (c: HCursor) => c.as[String] match {
-      case Right(value) => Right(new StringOrInt(value))
-      case Left(_) => c.as[Int].map { v => new StringOrInt(v.toString) }
+    (c: HCursor) =>
+      c.as[String] match {
+        case Right(value) => Right(new StringOrInt(value))
+        case Left(_) =>
+          c.as[Int].map { v =>
+            new StringOrInt(v.toString)
+          }
     }
 
   implicit val encoder: Encoder[StringOrInt] =

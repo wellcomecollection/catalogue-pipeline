@@ -11,8 +11,7 @@ class JsonOpsTest extends AnyFunSpec with Matchers with TryValues {
   import JsonOps._
 
   it("parses a String") {
-    fromJson[StringOrInt](
-      """
+    fromJson[StringOrInt]("""
         |"1234"
         |""".stripMargin).success.value.underlying shouldBe "1234"
   }
