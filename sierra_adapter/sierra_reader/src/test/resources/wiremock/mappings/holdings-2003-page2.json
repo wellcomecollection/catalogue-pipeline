@@ -2,7 +2,7 @@
   "id" : "22eaddc9-eb87-4166-9828-79d88aca0f7b",
   "name" : "holdings",
   "request" : {
-    "url" : "/holdings?updatedDate=%5B2003-03-03T03%3A00%3A00Z%2C2003-04-04T04%3A00%3A00Z%5D&id=%5B1376920,%5D&fields=updatedDate",
+    "url" : "/holdings?updatedDate=%5B2003-03-03T03%3A00%3A00Z%2C2003-04-04T04%3A00%3A00Z%5D&fields=updatedDate&id=%5B1064036%2C%5D",
     "method" : "GET",
     "headers" : {
       "Authorization" : {
