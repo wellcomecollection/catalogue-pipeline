@@ -85,30 +85,32 @@ class SierraStreamSourceTest
     }
   }
 
-  it("returns a sensible error message if it fails to authorize with the Sierra API") {
-    stubFor(get(urlMatching("/bibs")).willReturn(aResponse().withStatus(401)))
-
-    val sierraSource =
-      SierraSource(sierraWireMockUrl, oauthKey, oauthSecret)(
-        resourceType = "bibs",
-        params = Map.empty).take(1)
+  it("fails if it can't authenticate with the Sierra API") {
+    val sierraSource = SierraSource(
+      apiUrl = "http://localhost:8080",
+      oauthKey = oauthKey,
+      oauthSecret = oauthSecret
+    )(
+      resourceType = "bibs",
+      params = Map("unauthorized" -> "true")
+    )
 
     withMaterializer { implicit materializer =>
-      val eventualJson = sierraSource.runWith(Sink.head[Json])
+      val future = sierraSource.take(1).runWith(Sink.head[Json])
 
-      whenReady(eventualJson.failed) { ex =>
+      whenReady(future.failed) { ex =>
         ex shouldBe a[RuntimeException]
-        ex.getMessage should include("Unauthorized")
+        ex.getMessage shouldBe "Unable to refresh token!"
       }
     }
   }
 
-  it("obeys the throttle rate for sierra api requests") {
+  it("obeys the throttle rate for Sierra API requests") {
     val sierraSource = SierraSource(
-      apiUrl = sierraWireMockUrl,
+      apiUrl = "http://localhost:8080",
       oauthKey = oauthKey,
       oauthSecret = oauthSecret,
-      throttleRate = ThrottleRate(4, 1.second)
+      throttleRate = ThrottleRate(elements = 4, per = 1.second)
     )(
       resourceType = "items",
       params = Map("updatedDate" -> "[2013-12-10T17:16:35Z,2013-12-13T21:34:35Z]"))

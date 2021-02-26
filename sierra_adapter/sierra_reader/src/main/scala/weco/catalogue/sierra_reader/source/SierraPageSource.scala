@@ -46,7 +46,7 @@ class SierraPageSource(
           ifUnauthorized = {
             token = refreshToken(apiUrl, oauthKey, oauthSecret)
             makeRequestWith(newParams, ifUnauthorized = {
-              fail(out, new RuntimeException("Unauthorized!"))
+              fail(out, new RuntimeException("Unable to refresh token!"))
             })
           }
         )

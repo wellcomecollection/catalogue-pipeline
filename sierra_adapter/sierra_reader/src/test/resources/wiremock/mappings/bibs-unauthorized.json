@@ -1,0 +1,19 @@
+{
+  "id" : "f3006fe3-0952-4a12-a097-6610724f143b",
+  "name" : "bibs",
+  "request" : {
+    "url" : "/bibs?unauthorized=true",
+    "method" : "GET",
+    "headers" : {
+      "Authorization" : {
+        "equalTo" : "Bearer fake-token"
+      }
+    }
+  },
+  "response" : {
+    "status" : 401,
+    "body" : "{\"ok\":false}"
+  },
+  "uuid" : "f3006fe3-0952-4a12-a097-6610724f143b",
+  "persistent" : true
+}
