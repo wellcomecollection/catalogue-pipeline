@@ -68,7 +68,7 @@ if __name__ == "__main__":
     minutes = int(args["--window_length"] or 30)
     resource = args["--resource"]
 
-    assert resource in ("bibs", "items")
+    assert resource in ("bibs", "items", "holdings")
 
     client = boto3.client("sns")
 
@@ -78,6 +78,5 @@ if __name__ == "__main__":
     ):
         client.publish(
             TopicArn=f"arn:aws:sns:eu-west-1:760097843905:sierra_{resource}_reharvest_windows",
-            Message=json.dumps(window),
-            Subject=f"Window sent by {__file__}",
+            Message=json.dumps(window)
         )
