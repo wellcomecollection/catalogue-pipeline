@@ -1,0 +1,19 @@
+{
+  "id" : "9a296039-894f-4d35-9d82-45960c347556",
+  "name" : "bibs",
+  "request" : {
+    "url" : "/bibs?token_refresh=true",
+    "method" : "GET",
+    "headers" : {
+      "Authorization" : {
+        "equalTo" : "Bearer refreshed-token"
+      }
+    }
+  },
+  "response" : {
+    "status" : 200,
+    "body" : "{\"total\":1,\"entries\":[{\"id\":\"1000001\"}]}"
+  },
+  "uuid" : "9a296039-894f-4d35-9d82-45960c347556",
+  "persistent" : true
+}

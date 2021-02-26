@@ -7,12 +7,13 @@ import io.circe.optics.JsonPath.root
 import io.circe.parser.parse
 import org.slf4j.{Logger, LoggerFactory}
 import scalaj.http.{Http, HttpOptions, HttpResponse}
+import uk.ac.wellcome.platform.sierra_reader.config.models.SierraAPIConfig
+
+import scala.concurrent.duration.Duration
 
 class SierraPageSource(
-  apiUrl: String,
-  oauthKey: String,
-  oauthSecret: String,
-  timeoutMs: Int
+  config: SierraAPIConfig,
+  timeout: Duration
 )(
   resourceType: String,
   params: Map[String, String] = Map()
@@ -26,7 +27,7 @@ class SierraPageSource(
   override def createLogic(inheritedAttributes: Attributes): GraphStageLogic =
     new GraphStageLogic(shape) {
 
-      var token: String = refreshToken(apiUrl, oauthKey, oauthSecret)
+      var token: String = refreshToken(config)
       var lastId: Option[Int] = None
       var jsonList: List[Json] = Nil
 
@@ -44,9 +45,9 @@ class SierraPageSource(
         makeRequestWith(
           newParams,
           ifUnauthorized = {
-            token = refreshToken(apiUrl, oauthKey, oauthSecret)
+            token = refreshToken(config)
             makeRequestWith(newParams, ifUnauthorized = {
-              fail(out, new RuntimeException("Unauthorized!"))
+              fail(out, new RuntimeException("Unable to refresh token!"))
             })
           }
         )
@@ -54,7 +55,8 @@ class SierraPageSource(
 
       private def makeRequestWith[T](newParams: Map[String, String],
                                      ifUnauthorized: => Unit): Unit = {
-        val newResponse = makeRequest(apiUrl, resourceType, token, newParams)
+        val newResponse =
+          makeRequest(config.apiURL, resourceType, token, newParams)
 
         newResponse.code match {
           case 200 => refreshJsonListAndPush(newResponse)
@@ -71,30 +73,39 @@ class SierraPageSource(
       private def refreshJsonListAndPush(
         response: HttpResponse[String]): Unit = {
         val responseJson = parse(response.body).right
-          .getOrElse(throw new RuntimeException("response was not json"))
+          .getOrElse(
+            throw new RuntimeException(
+              s"List response was not JSON; got ${response.body}"))
 
         jsonList = root.entries.each.json.getAll(responseJson)
 
-        lastId = Some(
-          root.id.string
-            .getOption(jsonList.last)
-            .getOrElse(throw new RuntimeException("id not found in item"))
-            .toInt)
+        lastId = Some(root.id.string
+          .getOption(jsonList.last)
+          .getOrElse(
+            throw new RuntimeException(
+              s"Couldn't find ID in last item of list response; got ${response.body}"
+            )
+          )
+          .toInt)
 
         push(out, jsonList)
       }
 
-      private def refreshToken(apiUrl: String,
-                               oauthKey: String,
-                               oauthSecret: String) = {
+      private def refreshToken(config: SierraAPIConfig): String = {
+        val url = s"${config.apiURL}/token"
+
         val tokenResponse =
-          Http(s"$apiUrl/token").postForm.auth(oauthKey, oauthSecret).asString
+          Http(url).postForm.auth(config.oauthKey, config.oauthSec).asString
         val json = parse(tokenResponse.body).right
-          .getOrElse(throw new RuntimeException("response was not json"))
+          .getOrElse(
+            throw new RuntimeException(
+              s"Token response was not JSON; got ${tokenResponse.body}"))
         root.access_token.string
           .getOption(json)
           .getOrElse(
-            throw new Exception("Failed to refresh token!")
+            throw new Exception(
+              s"Couldn't find access_token in token response; got ${tokenResponse.body}"
+            )
           )
       }
 
@@ -103,13 +114,14 @@ class SierraPageSource(
   private def makeRequest(apiUrl: String,
                           resourceType: String,
                           token: String,
-                          params: Map[String, String]) = {
+                          params: Map[String, String]): HttpResponse[String] = {
+    val url = s"$apiUrl/$resourceType"
+    logger.debug(
+      s"Making request to $url with parameters $params & token $token")
 
-    logger.debug(s"Making request with parameters $params & token $token")
-
-    Http(url = s"$apiUrl/$resourceType")
-      .option(HttpOptions.readTimeout(timeoutMs))
-      .option(HttpOptions.connTimeout(timeoutMs))
+    Http(url)
+      .option(HttpOptions.readTimeout(timeout.toMillis.toInt))
+      .option(HttpOptions.connTimeout(timeout.toMillis.toInt))
       .params(params)
       .header("Authorization", s"Bearer $token")
       .header("Accept", "application/json")

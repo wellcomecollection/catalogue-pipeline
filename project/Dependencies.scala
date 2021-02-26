@@ -312,7 +312,6 @@ object CatalogueDependencies {
   val sierraReaderDependencies: Seq[ModuleID] =
     ExternalDependencies.circeOpticsDependencies ++
       WellcomeDependencies.messagingTypesafeLibrary ++
-      ExternalDependencies.wireMockDependencies ++
       ExternalDependencies.scalaJDependencies
 
   // Inference manager

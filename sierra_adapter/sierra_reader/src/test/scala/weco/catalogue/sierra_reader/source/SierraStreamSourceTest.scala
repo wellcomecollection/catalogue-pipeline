@@ -1,21 +1,13 @@
 package weco.catalogue.sierra_reader.source
 
-import akka.actor.ActorSystem
-import akka.stream.Materializer
 import akka.stream.scaladsl.Sink
-import com.github.tomakehurst.wiremock.client.WireMock.{
-  aResponse,
-  get,
-  stubFor,
-  urlMatching
-}
-import com.github.tomakehurst.wiremock.stubbing.Scenario
 import io.circe.Json
 import io.circe.optics.JsonPath.root
-import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures}
+import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import org.scalatest.time.{Millis, Seconds, Span}
+import uk.ac.wellcome.akka.fixtures.Akka
+import uk.ac.wellcome.platform.sierra_reader.fixtures.WireMockFixture
 
 import java.net.SocketTimeoutException
 import java.time.Instant
@@ -24,128 +16,116 @@ import scala.concurrent.duration._
 
 class SierraStreamSourceTest
     extends AnyFunSpec
-    with SierraWireMock
     with Matchers
     with ScalaFutures
-    with ExtendedPatience {
-  implicit val system = ActorSystem()
-  implicit val materializer = Materializer(system)
+    with IntegrationPatience
+    with Akka
+    with WireMockFixture {
 
-  it("should read from sierra") {
-    val eventualJson = SierraSource(sierraWireMockUrl, oauthKey, oauthSecret)(
-      "items",
-      Map.empty).take(1).runWith(Sink.head[Json])
-    whenReady(eventualJson) { json =>
-      root.id.string.getOption(json) shouldBe Some("1000001")
+  it("reads from Sierra") {
+    val sierraSource =
+      SierraSource(sierraAPIConfig)(resourceType = "items", params = Map.empty)
+
+    withMaterializer { implicit materializer =>
+      val eventualJson = sierraSource.take(1).runWith(Sink.head[Json])
+
+      whenReady(eventualJson) {
+        root.id.string.getOption(_) shouldBe Some("1000001")
+      }
     }
   }
 
-  it("should paginate through results") {
-    val sierraSource = SierraSource(sierraWireMockUrl, oauthKey, oauthSecret)(
-      "items",
-      Map("updatedDate" -> "[2013-12-10T17:16:35Z,2013-12-13T21:34:35Z]"))
+  it("paginates through results") {
+    val sierraSource = SierraSource(sierraAPIConfig)(
+      resourceType = "items",
+      params =
+        Map("updatedDate" -> "[2013-12-10T17:16:35Z,2013-12-13T21:34:35Z]"))
 
-    val eventualJsonList = sierraSource.runWith(Sink.seq[Json])
+    withMaterializer { implicit materializer =>
+      val eventualJsonList = sierraSource.runWith(Sink.seq[Json])
 
-    whenReady(eventualJsonList) { jsonList =>
-      jsonList should have size 157
+      whenReady(eventualJsonList) {
+        _ should have size 157
+      }
     }
   }
 
-  it("should refresh the access token if receives a unauthorized response") {
-    stubFor(
-      get(urlMatching("/bibs"))
-        .inScenario("refresh token")
-        .whenScenarioStateIs(Scenario.STARTED)
-        .willReturn(aResponse().withStatus(401))
-        .atPriority(1)
-        .willSetStateTo("token expired"))
+  it("refreshes the access token if receives a unauthorized response") {
+    // This test uses the three Wiremock fixture token_refresh*.json.
+    val config = sierraAPIConfig.copy(
+      oauthKey = "refresh_token_key",
+      oauthSec = "refresh_token_secret"
+    )
 
-    stubFor(
-      get(urlMatching("/token"))
-        .inScenario("refresh token")
-        .whenScenarioStateIs("token expired")
-        .willSetStateTo("token refreshed"))
+    val sierraSource = SierraSource(config)(
+      resourceType = "bibs",
+      params = Map("token_refresh" -> "true"))
 
-    stubFor(
-      get(urlMatching("/bibs"))
-        .inScenario("refresh token")
-        .whenScenarioStateIs("token refreshed"))
+    withMaterializer { implicit materializer =>
+      val eventualJson = sierraSource.take(1).runWith(Sink.head[Json])
 
-    val eventualJson =
-      SierraSource(sierraWireMockUrl, oauthKey, "wrong-secret")(
-        "bibs",
-        Map.empty).take(1).runWith(Sink.head[Json])
-
-    whenReady(eventualJson) { json =>
-      root.id.string.getOption(json) shouldBe Some("1000001")
+      whenReady(eventualJson) { json =>
+        root.id.string.getOption(json) shouldBe Some("1000001")
+      }
     }
   }
 
-  it(
-    "should return a sensible error message if it fails to authorize with the sierra api") {
-    stubFor(get(urlMatching("/bibs")).willReturn(aResponse().withStatus(401)))
+  it("fails if it can't authenticate with the Sierra API") {
+    // This test uses the Wiremock fixture bibs-unauthorized.json.
+    val sierraSource = SierraSource(sierraAPIConfig)(
+      resourceType = "bibs",
+      params = Map("unauthorized" -> "true"))
 
-    val eventualJson = SierraSource(sierraWireMockUrl, oauthKey, oauthSecret)(
-      "bibs",
-      Map.empty).take(1).runWith(Sink.head[Json])
+    withMaterializer { implicit materializer =>
+      val future = sierraSource.take(1).runWith(Sink.head[Json])
 
-    whenReady(eventualJson.failed) { ex =>
-      ex shouldBe a[RuntimeException]
-      ex.getMessage should include("Unauthorized")
+      whenReady(future.failed) { ex =>
+        ex shouldBe a[RuntimeException]
+        ex.getMessage shouldBe "Unable to refresh token!"
+      }
     }
   }
 
-  it("should obey the throttle rate for sierra api requests") {
-
+  it("obeys the throttle rate for Sierra API requests") {
     val sierraSource = SierraSource(
-      sierraWireMockUrl,
-      oauthKey,
-      oauthSecret,
-      ThrottleRate(4, 1.second))(
-      "items",
-      Map("updatedDate" -> "[2013-12-10T17:16:35Z,2013-12-13T21:34:35Z]"))
+      config = sierraAPIConfig,
+      throttleRate = ThrottleRate(elements = 4, per = 1.second)
+    )(
+      resourceType = "items",
+      params =
+        Map("updatedDate" -> "[2013-12-10T17:16:35Z,2013-12-13T21:34:35Z]"))
 
-    val eventualJsonList = sierraSource.runWith(Sink.seq[Json])
-    val startTime = Instant.now()
-    val expectedDurationInMillis = 1000L
+    withMaterializer { implicit materializer =>
+      val future = sierraSource.runWith(Sink.seq[Json])
 
-    whenReady(eventualJsonList) { jsonList =>
-      val gap: Long = ChronoUnit.MILLIS.between(startTime, Instant.now())
+      val startTime = Instant.now()
+      val expectedDuration = 200 milliseconds
 
-      gap shouldBe >(expectedDurationInMillis)
+      whenReady(future) { _ =>
+        val gap: Long = ChronoUnit.MILLIS.between(startTime, Instant.now())
+
+        gap shouldBe >(expectedDuration.toMillis)
+      }
     }
   }
 
   it("respects the specified timeout parameter") {
-    // The default timeout is 10000 ms, so with default settings we'd
-    // expect to get a 200 OK for this response.
-    stubFor(
-      get(urlMatching("/bibs")).willReturn(
-        aResponse()
-          .withStatus(200)
-          .withFixedDelay(5000)
-      )
+    // This test uses the Wiremock fixture bibs-timeout.json, which has
+    // a fixed delay of 1000 milliseconds.
+    val source = SierraSource(
+      config = sierraAPIConfig,
+      timeout = 200 millisecond
+    )(
+      resourceType = "bibs",
+      params = Map("timeout" -> "true")
     )
 
-    val source = SierraSource(
-      apiUrl = sierraWireMockUrl,
-      oauthKey = oauthKey,
-      oauthSecret = oauthSecret,
-      timeoutMs = 200
-    )("bibs", Map.empty)
+    withMaterializer { implicit materializer =>
+      val future = source.take(1).runWith(Sink.head[Json])
 
-    val future = source.take(1).runWith(Sink.head[Json])
-
-    whenReady(future.failed) { ex =>
-      ex shouldBe a[SocketTimeoutException]
+      whenReady(future.failed) {
+        _ shouldBe a[SocketTimeoutException]
+      }
     }
   }
-}
-
-trait ExtendedPatience extends PatienceConfiguration {
-  override implicit val patienceConfig: PatienceConfig = PatienceConfig(
-    timeout = scaled(Span(40, Seconds)),
-    interval = scaled(Span(150, Millis))
-  )
 }

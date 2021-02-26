@@ -4,6 +4,7 @@ import akka.NotUsed
 import akka.stream.ThrottleMode
 import akka.stream.scaladsl.Source
 import io.circe.Json
+import uk.ac.wellcome.platform.sierra_reader.config.models.SierraAPIConfig
 
 import scala.concurrent.duration._
 
@@ -15,20 +16,16 @@ case object ThrottleRate {
 
 object SierraSource {
   def apply(
-    apiUrl: String,
-    oauthKey: String,
-    oauthSecret: String,
+    config: SierraAPIConfig,
     throttleRate: ThrottleRate = ThrottleRate(elements = 0, per = 0 seconds),
-    timeoutMs: Int = 10000
+    timeout: Duration = 10 seconds
   )(resourceType: String,
     params: Map[String, String]): Source[Json, NotUsed] = {
 
     val source = Source.fromGraph(
-      new SierraPageSource(
-        apiUrl = apiUrl,
-        oauthKey = oauthKey,
-        oauthSecret = oauthSecret,
-        timeoutMs = timeoutMs)(resourceType = resourceType, params = params)
+      new SierraPageSource(config = config, timeout = timeout)(
+        resourceType = resourceType,
+        params = params)
     )
 
     throttleRate.elements match {
