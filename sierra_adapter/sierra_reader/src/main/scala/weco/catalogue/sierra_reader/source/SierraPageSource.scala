@@ -71,14 +71,18 @@ class SierraPageSource(
       private def refreshJsonListAndPush(
         response: HttpResponse[String]): Unit = {
         val responseJson = parse(response.body).right
-          .getOrElse(throw new RuntimeException("response was not json"))
+          .getOrElse(throw new RuntimeException(s"List response was not JSON; got ${response.body}"))
 
         jsonList = root.entries.each.json.getAll(responseJson)
 
         lastId = Some(
           root.id.string
             .getOption(jsonList.last)
-            .getOrElse(throw new RuntimeException("id not found in item"))
+            .getOrElse(
+              throw new RuntimeException(
+                s"Couldn't find ID in last item of list response; got ${response.body}"
+              )
+            )
             .toInt)
 
         push(out, jsonList)
@@ -90,11 +94,13 @@ class SierraPageSource(
         val tokenResponse =
           Http(s"$apiUrl/token").postForm.auth(oauthKey, oauthSecret).asString
         val json = parse(tokenResponse.body).right
-          .getOrElse(throw new RuntimeException("response was not json"))
+          .getOrElse(throw new RuntimeException(s"Token response was not JSON; got ${tokenResponse.body}"))
         root.access_token.string
           .getOption(json)
           .getOrElse(
-            throw new Exception("Failed to refresh token!")
+            throw new Exception(
+              s"Couldn't find access_token in token response; got ${tokenResponse.body}"
+            )
           )
       }
 
@@ -103,11 +109,11 @@ class SierraPageSource(
   private def makeRequest(apiUrl: String,
                           resourceType: String,
                           token: String,
-                          params: Map[String, String]) = {
+                          params: Map[String, String]): HttpResponse[String] = {
+    val url = s"$apiUrl/$resourceType"
+    logger.debug(s"Making request to $url with parameters $params & token $token")
 
-    logger.debug(s"Making request with parameters $params & token $token")
-
-    Http(url = s"$apiUrl/$resourceType")
+    Http(url)
       .option(HttpOptions.readTimeout(timeoutMs))
       .option(HttpOptions.connTimeout(timeoutMs))
       .params(params)
