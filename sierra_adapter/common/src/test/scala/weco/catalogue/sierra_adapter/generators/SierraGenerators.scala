@@ -81,7 +81,7 @@ trait SierraGenerators extends RandomGenerators {
   def createSierraItemRecordWith(
     id: SierraItemNumber = createSierraItemNumber,
     data: (SierraItemNumber, Instant, List[SierraBibNumber]) => String =
-      defaultData,
+      defaultItemData,
     modifiedDate: Instant = Instant.now,
     bibIds: List[SierraBibNumber] = List(),
     unlinkedBibIds: List[SierraBibNumber] = List()
@@ -100,7 +100,7 @@ trait SierraGenerators extends RandomGenerators {
   def createSierraHoldingsRecordWith(
     id: SierraHoldingsNumber = createSierraHoldingsNumber,
     data: (SierraHoldingsNumber, Instant, List[SierraBibNumber]) => String =
-      defaultData,
+      defaultHoldingsData,
     modifiedDate: Instant = Instant.now,
     bibIds: List[SierraBibNumber] = List(),
     unlinkedBibIds: List[SierraBibNumber] = List()
@@ -116,14 +116,27 @@ trait SierraGenerators extends RandomGenerators {
     )
   }
 
-  private def defaultData(id: TypedSierraRecordNumber,
-                          modifiedDate: Instant,
-                          bibIds: List[SierraBibNumber]): String =
+  private def defaultItemData(
+    id: SierraItemNumber,
+    modifiedDate: Instant,
+    bibIds: List[SierraBibNumber]): String =
     s"""
        |{
        |  "id": "$id",
        |  "updatedDate": "${modifiedDate.toString}",
        |  "bibIds": ${toJson(bibIds.map(_.recordNumber)).get}
+       |}
+       |""".stripMargin
+
+  private def defaultHoldingsData(
+    id: SierraHoldingsNumber,
+    modifiedDate: Instant,
+    bibIds: List[SierraBibNumber]): String =
+    s"""
+       |{
+       |  "id": $id,
+       |  "updatedDate": "${modifiedDate.toString}",
+       |  "bibIds": ${toJson(bibIds.map(_.recordNumber.toInt)).get}
        |}
        |""".stripMargin
 
