@@ -30,22 +30,25 @@ class SierraStreamSourceTest
     with Akka {
 
   it("reads from Sierra") {
+    val sierraSource = SierraSource(sierraWireMockUrl, oauthKey, oauthSecret)(
+      resourceType = "items",
+      params = Map.empty)
+
     withMaterializer { implicit materializer =>
-      val eventualJson = SierraSource(sierraWireMockUrl, oauthKey, oauthSecret)(
-        "items",
-        Map.empty).take(1).runWith(Sink.head[Json])
-      whenReady(eventualJson) { json =>
-        root.id.string.getOption(json) shouldBe Some("1000001")
+      val eventualJson = sierraSource.take(1).runWith(Sink.head[Json])
+
+      whenReady(eventualJson) {
+        root.id.string.getOption(_) shouldBe Some("1000001")
       }
     }
   }
 
   it("paginates through results") {
-    withMaterializer { implicit materializer =>
-      val sierraSource = SierraSource(sierraWireMockUrl, oauthKey, oauthSecret)(
-        "items",
-        Map("updatedDate" -> "[2013-12-10T17:16:35Z,2013-12-13T21:34:35Z]"))
+    val sierraSource = SierraSource(sierraWireMockUrl, oauthKey, oauthSecret)(
+      resourceType = "items",
+      params = Map("updatedDate" -> "[2013-12-10T17:16:35Z,2013-12-13T21:34:35Z]"))
 
+    withMaterializer { implicit materializer =>
       val eventualJsonList = sierraSource.runWith(Sink.seq[Json])
 
       whenReady(eventualJsonList) {
@@ -74,11 +77,13 @@ class SierraStreamSourceTest
         .inScenario("refresh token")
         .whenScenarioStateIs("token refreshed"))
 
+    val sierraSource =
+      SierraSource(sierraWireMockUrl, oauthKey, "wrong-secret")(
+        resourceType = "bibs",
+        params = Map.empty)
+
     withMaterializer { implicit materializer =>
-      val eventualJson =
-        SierraSource(sierraWireMockUrl, oauthKey, "wrong-secret")(
-          "bibs",
-          Map.empty).take(1).runWith(Sink.head[Json])
+      val eventualJson = sierraSource.take(1).runWith(Sink.head[Json])
 
       whenReady(eventualJson) { json =>
         root.id.string.getOption(json) shouldBe Some("1000001")
@@ -89,10 +94,13 @@ class SierraStreamSourceTest
   it("returns a sensible error message if it fails to authorize with the Sierra API") {
     stubFor(get(urlMatching("/bibs")).willReturn(aResponse().withStatus(401)))
 
+    val sierraSource =
+      SierraSource(sierraWireMockUrl, oauthKey, oauthSecret)(
+        resourceType = "bibs",
+        params = Map.empty).take(1)
+
     withMaterializer { implicit materializer =>
-      val eventualJson = SierraSource(sierraWireMockUrl, oauthKey, oauthSecret)(
-        "bibs",
-        Map.empty).take(1).runWith(Sink.head[Json])
+      val eventualJson = sierraSource.runWith(Sink.head[Json])
 
       whenReady(eventualJson.failed) { ex =>
         ex shouldBe a[RuntimeException]
@@ -103,12 +111,13 @@ class SierraStreamSourceTest
 
   it("obeys the throttle rate for sierra api requests") {
     val sierraSource = SierraSource(
-      sierraWireMockUrl,
-      oauthKey,
-      oauthSecret,
-      ThrottleRate(4, 1.second))(
-      "items",
-      Map("updatedDate" -> "[2013-12-10T17:16:35Z,2013-12-13T21:34:35Z]"))
+      apiUrl = sierraWireMockUrl,
+      oauthKey = oauthKey,
+      oauthSecret = oauthSecret,
+      throttleRate = ThrottleRate(4, 1.second)
+    )(
+      resourceType = "items",
+      params = Map("updatedDate" -> "[2013-12-10T17:16:35Z,2013-12-13T21:34:35Z]"))
 
     withMaterializer { implicit materializer =>
       val future = sierraSource.runWith(Sink.seq[Json])
@@ -140,7 +149,10 @@ class SierraStreamSourceTest
       oauthKey = oauthKey,
       oauthSecret = oauthSecret,
       timeoutMs = 200
-    )("bibs", Map.empty)
+    )(
+      resourceType = "bibs",
+      params = Map.empty
+    )
 
     withMaterializer { implicit materializer =>
       val future = source.take(1).runWith(Sink.head[Json])
