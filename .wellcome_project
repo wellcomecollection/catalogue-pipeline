@@ -32,13 +32,16 @@ sierra_adapter:
       services:
         - id: bibs-merger
         - id: items-merger
+        - id: holdings-merger
     - id: sierra_linker
       services:
-        - id: items-to-dynamo
+        - id: items-linker
+        - id: holdings-linker
     - id: sierra_reader
       services:
         - id: items-reader
         - id: bibs-reader
+        - id: holdings-reader
   name: Sierra Adapter
   role_arn: arn:aws:iam::760097843905:role/platform-ci
 
