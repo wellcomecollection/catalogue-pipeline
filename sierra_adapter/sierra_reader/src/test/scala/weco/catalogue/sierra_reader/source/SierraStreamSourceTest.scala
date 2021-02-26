@@ -35,6 +35,22 @@ class SierraStreamSourceTest
     }
   }
 
+  it("fetches holdings from Sierra") {
+    val sierraSource = SierraSource(sierraAPIConfig)(
+      resourceType = "holdings",
+      params = Map(
+        "updatedDate" -> "[2003-03-03T03:00:00Z,2003-04-04T04:00:00Z]",
+        "fields" -> "updatedDate"))
+
+    withMaterializer { implicit materializer =>
+      val eventualJson = sierraSource.take(1).runWith(Sink.head[Json])
+
+      whenReady(eventualJson) {
+        root.id.int.getOption(_) shouldBe Some(1047360)
+      }
+    }
+  }
+
   it("paginates through results") {
     val sierraSource = SierraSource(sierraAPIConfig)(
       resourceType = "items",
