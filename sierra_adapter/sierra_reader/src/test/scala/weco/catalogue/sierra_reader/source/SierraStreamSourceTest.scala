@@ -128,24 +128,16 @@ class SierraStreamSourceTest
   }
 
   it("respects the specified timeout parameter") {
-    // The default timeout is 10000 ms, so with default settings we'd
-    // expect to get a 200 OK for this response.
-    stubFor(
-      get(urlMatching("/bibs")).willReturn(
-        aResponse()
-          .withStatus(200)
-          .withFixedDelay(5000)
-      )
-    )
-
+    // This test accompanies the Wiremock fixture bibs-timeout.json, which has
+    // a fixed delay of 1000 milliseconds.
     val source = SierraSource(
-      apiUrl = sierraWireMockUrl,
+      apiUrl = "http://localhost:8080",
       oauthKey = oauthKey,
       oauthSecret = oauthSecret,
       timeoutMs = 200
     )(
       resourceType = "bibs",
-      params = Map.empty
+      params = Map("timeout" -> "true")
     )
 
     withMaterializer { implicit materializer =>
