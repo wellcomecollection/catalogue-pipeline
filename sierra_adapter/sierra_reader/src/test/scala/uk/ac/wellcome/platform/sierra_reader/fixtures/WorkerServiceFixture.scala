@@ -50,4 +50,9 @@ trait WorkerServiceFixture
     resourceType = SierraResourceTypes.items,
     fields = "updatedDate,deleted,deletedDate,bibIds,fixedFields,varFields"
   )
+
+  val holdingsReaderConfig: ReaderConfig = ReaderConfig(
+    resourceType = SierraResourceTypes.holdings,
+    fields = "updatedDate"
+  )
 }

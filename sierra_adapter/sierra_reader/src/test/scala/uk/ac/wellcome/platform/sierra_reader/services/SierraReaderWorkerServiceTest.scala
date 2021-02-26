@@ -101,6 +101,42 @@ class SierraReaderWorkerServiceTest
     }
   }
 
+  it("fetches holdings from Sierra") {
+    val body =
+      """
+        |{
+        | "start": "2003-03-03T03:00:00Z",
+        | "end":   "2003-04-04T04:00:00Z"
+        |}
+      """.stripMargin
+
+    withLocalS3Bucket { bucket =>
+      withLocalSqsQueue() { queue =>
+        withWorkerService(bucket, queue, readerConfig = holdingsReaderConfig) {
+          _ =>
+            sendNotificationToSQS(queue = queue, body = body)
+
+            val pageNames = List(
+              "0000.json",
+              "0001.json",
+              "0002.json")
+              .map { label =>
+                s"records_holdings/2003-03-03T03-00-00Z__2003-04-04T04-00-00Z/$label"
+              } ++ List(
+              "windows_holdings_complete/2003-03-03T03-00-00Z__2003-04-04T04-00-00Z")
+
+            eventually {
+              // There are 51 item records in the Sierra wiremock so we expect 3 files
+              listKeysInBucket(bucket = bucket) shouldBe pageNames
+
+              getItemRecordsFromS3(bucket, pageNames(0)) should have size 50
+              getItemRecordsFromS3(bucket, pageNames(1)) should have size 1
+            }
+        }
+      }
+    }
+  }
+
   it("resumes a window if it finds an in-progress set of records") {
     val body =
       """

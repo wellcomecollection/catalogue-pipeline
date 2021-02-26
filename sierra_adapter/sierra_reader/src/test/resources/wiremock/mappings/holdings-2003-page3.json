@@ -1,0 +1,19 @@
+{
+  "id" : "5ebcf6e4-65cd-4ed2-9cab-b7a3ad80d6a9",
+  "name" : "holdings",
+  "request" : {
+    "url" : "/holdings?updatedDate=%5B2005-05-05T05%3A00%3A00Z%2C2005-10-10T10%3A00%3A00Z%5D&id=%5B1381001,%5D&fields=updatedDate",
+    "method" : "GET",
+    "headers" : {
+      "Authorization" : {
+        "equalTo" : "Bearer fake-token"
+      }
+    }
+  },
+  "response" : {
+    "status" : 200,
+    "bodyFileName" : "holdings-2003-page3.json"
+  },
+  "uuid" : "5ebcf6e4-65cd-4ed2-9cab-b7a3ad80d6a9",
+  "persistent" : true
+}
