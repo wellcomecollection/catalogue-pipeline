@@ -1,7 +1,5 @@
 package weco.catalogue.sierra_reader.source
 
-import akka.actor.ActorSystem
-import akka.stream.Materializer
 import akka.stream.scaladsl.Sink
 import com.github.tomakehurst.wiremock.client.WireMock.{
   aResponse,
@@ -16,6 +14,7 @@ import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.time.{Millis, Seconds, Span}
+import uk.ac.wellcome.akka.fixtures.Akka
 
 import java.net.SocketTimeoutException
 import java.time.Instant
@@ -27,28 +26,31 @@ class SierraStreamSourceTest
     with SierraWireMock
     with Matchers
     with ScalaFutures
-    with ExtendedPatience {
-  implicit val system = ActorSystem()
-  implicit val materializer = Materializer(system)
+    with ExtendedPatience
+    with Akka {
 
   it("should read from sierra") {
-    val eventualJson = SierraSource(sierraWireMockUrl, oauthKey, oauthSecret)(
-      "items",
-      Map.empty).take(1).runWith(Sink.head[Json])
-    whenReady(eventualJson) { json =>
-      root.id.string.getOption(json) shouldBe Some("1000001")
+    withMaterializer { implicit materializer =>
+      val eventualJson = SierraSource(sierraWireMockUrl, oauthKey, oauthSecret)(
+        "items",
+        Map.empty).take(1).runWith(Sink.head[Json])
+      whenReady(eventualJson) { json =>
+        root.id.string.getOption(json) shouldBe Some("1000001")
+      }
     }
   }
 
   it("should paginate through results") {
-    val sierraSource = SierraSource(sierraWireMockUrl, oauthKey, oauthSecret)(
-      "items",
-      Map("updatedDate" -> "[2013-12-10T17:16:35Z,2013-12-13T21:34:35Z]"))
+    withMaterializer { implicit materializer =>
+      val sierraSource = SierraSource(sierraWireMockUrl, oauthKey, oauthSecret)(
+        "items",
+        Map("updatedDate" -> "[2013-12-10T17:16:35Z,2013-12-13T21:34:35Z]"))
 
-    val eventualJsonList = sierraSource.runWith(Sink.seq[Json])
+      val eventualJsonList = sierraSource.runWith(Sink.seq[Json])
 
-    whenReady(eventualJsonList) { jsonList =>
-      jsonList should have size 157
+      whenReady(eventualJsonList) { jsonList =>
+        jsonList should have size 157
+      }
     }
   }
 
@@ -72,13 +74,15 @@ class SierraStreamSourceTest
         .inScenario("refresh token")
         .whenScenarioStateIs("token refreshed"))
 
-    val eventualJson =
-      SierraSource(sierraWireMockUrl, oauthKey, "wrong-secret")(
-        "bibs",
-        Map.empty).take(1).runWith(Sink.head[Json])
+    withMaterializer { implicit materializer =>
+      val eventualJson =
+        SierraSource(sierraWireMockUrl, oauthKey, "wrong-secret")(
+          "bibs",
+          Map.empty).take(1).runWith(Sink.head[Json])
 
-    whenReady(eventualJson) { json =>
-      root.id.string.getOption(json) shouldBe Some("1000001")
+      whenReady(eventualJson) { json =>
+        root.id.string.getOption(json) shouldBe Some("1000001")
+      }
     }
   }
 
@@ -86,13 +90,15 @@ class SierraStreamSourceTest
     "should return a sensible error message if it fails to authorize with the sierra api") {
     stubFor(get(urlMatching("/bibs")).willReturn(aResponse().withStatus(401)))
 
-    val eventualJson = SierraSource(sierraWireMockUrl, oauthKey, oauthSecret)(
-      "bibs",
-      Map.empty).take(1).runWith(Sink.head[Json])
+    withMaterializer { implicit materializer =>
+      val eventualJson = SierraSource(sierraWireMockUrl, oauthKey, oauthSecret)(
+        "bibs",
+        Map.empty).take(1).runWith(Sink.head[Json])
 
-    whenReady(eventualJson.failed) { ex =>
-      ex shouldBe a[RuntimeException]
-      ex.getMessage should include("Unauthorized")
+      whenReady(eventualJson.failed) { ex =>
+        ex shouldBe a[RuntimeException]
+        ex.getMessage should include("Unauthorized")
+      }
     }
   }
 
@@ -106,14 +112,18 @@ class SierraStreamSourceTest
       "items",
       Map("updatedDate" -> "[2013-12-10T17:16:35Z,2013-12-13T21:34:35Z]"))
 
-    val eventualJsonList = sierraSource.runWith(Sink.seq[Json])
-    val startTime = Instant.now()
-    val expectedDurationInMillis = 1000L
+    withMaterializer { implicit materializer =>
+      val eventualJsonList =
+        sierraSource.runWith(Sink.seq[Json])
 
-    whenReady(eventualJsonList) { jsonList =>
-      val gap: Long = ChronoUnit.MILLIS.between(startTime, Instant.now())
+      val startTime = Instant.now()
+      val expectedDurationInMillis = 1000L
 
-      gap shouldBe >(expectedDurationInMillis)
+      whenReady(eventualJsonList) { jsonList =>
+        val gap: Long = ChronoUnit.MILLIS.between(startTime, Instant.now())
+
+        gap shouldBe >(expectedDurationInMillis)
+      }
     }
   }
 
@@ -135,10 +145,12 @@ class SierraStreamSourceTest
       timeoutMs = 200
     )("bibs", Map.empty)
 
-    val future = source.take(1).runWith(Sink.head[Json])
+    withMaterializer { implicit materializer =>
+      val future = source.take(1).runWith(Sink.head[Json])
 
-    whenReady(future.failed) { ex =>
-      ex shouldBe a[SocketTimeoutException]
+      whenReady(future.failed) { ex =>
+        ex shouldBe a[SocketTimeoutException]
+      }
     }
   }
 }
