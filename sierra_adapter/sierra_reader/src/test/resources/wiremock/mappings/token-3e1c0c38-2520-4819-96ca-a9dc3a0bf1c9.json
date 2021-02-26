@@ -1,0 +1,29 @@
+{
+  "id" : "3e1c0c38-2520-4819-96ca-a9dc3a0bf1c9",
+  "name" : "token",
+  "request" : {
+    "url" : "/token",
+    "method" : "POST",
+    "headers" : {
+      "Authorization" : {
+        "equalTo" : "Basic a2V5Ondyb25nLXNlY3JldA=="
+      }
+    }
+  },
+  "response" : {
+    "status" : 401,
+    "body" : "{\"code\":113,\"specificCode\":0,\"httpStatus\":401,\"name\":\"Unauthorized\",\"description\":\"Invalid or missing authorization header\"}",
+    "headers" : {
+      "Date" : "Thu, 25 Feb 2021 21:45:08 GMT",
+      "Server" : "Apache",
+      "Content-Type" : "application/json",
+      "Vary" : "Accept-Encoding,User-Agent",
+      "Set-Cookie" : [ "jcontainerId=.jcontainer-api2; path=/iii/patronio", "jcontainerId=.jcontainer-api2; path=/iii/rss", "jcontainerId=.jcontainer-api2; path=/iii/webrpt", "jcontainerId=.jcontainer-api2; path=/iii/upgrademgr", "jcontainerId=.jcontainer-api2; path=/sierra/admin", "jcontainerId=.jcontainer-api2; path=/iii/ws/extlink", "jcontainerId=.jcontainer-api2; path=/sierra/ws/summit", "jcontainerId=.jcontainer-api2; path=/iii/sierra-api" ],
+      "Keep-Alive" : "timeout=5, max=100",
+      "Connection" : "Keep-Alive"
+    }
+  },
+  "uuid" : "3e1c0c38-2520-4819-96ca-a9dc3a0bf1c9",
+  "persistent" : true,
+  "insertionIndex" : 38
+}
