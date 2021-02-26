@@ -200,8 +200,9 @@ class SierraReaderWorkerServiceTest
     getObjectFromS3[List[SierraItemRecord]](
       S3ObjectLocation(bucket = bucket.name, key = key))
 
-  private def getHoldingsRecordsFromS3(bucket: Bucket,
-                                       key: String): List[SierraHoldingsRecord] =
+  private def getHoldingsRecordsFromS3(
+    bucket: Bucket,
+    key: String): List[SierraHoldingsRecord] =
     getObjectFromS3[List[SierraHoldingsRecord]](
       S3ObjectLocation(bucket = bucket.name, key = key))
 

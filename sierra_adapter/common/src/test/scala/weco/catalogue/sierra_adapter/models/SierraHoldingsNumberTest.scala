@@ -8,7 +8,10 @@ import weco.catalogue.sierra_adapter.models.Implicits._
 
 import scala.util.{Failure, Success}
 
-class SierraHoldingsNumberTest extends AnyFunSpec with Matchers with SierraGenerators {
+class SierraHoldingsNumberTest
+    extends AnyFunSpec
+    with Matchers
+    with SierraGenerators {
   case class Identity(id: SierraHoldingsNumber)
 
   it("decodes a String as a HoldingsNumber") {
