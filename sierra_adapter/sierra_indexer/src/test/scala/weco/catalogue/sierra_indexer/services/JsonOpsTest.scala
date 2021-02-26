@@ -112,6 +112,8 @@ class JsonOpsTest extends AnyFunSpec with Matchers with EitherValues {
 
       val json = parse(jsonString).value
 
+      println(jsonString)
+
       json.fixedFields shouldBe fixedFields.map { case (code, json) => code -> parse(json).value }
     }
 

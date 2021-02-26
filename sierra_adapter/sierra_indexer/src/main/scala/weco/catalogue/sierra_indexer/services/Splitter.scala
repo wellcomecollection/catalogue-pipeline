@@ -5,6 +5,7 @@ import com.sksamuel.elastic4s.{Index, Indexes}
 import com.sksamuel.elastic4s.requests.delete.DeleteByQueryRequest
 import com.sksamuel.elastic4s.requests.indexes.IndexRequest
 import io.circe.parser._
+import io.circe.syntax._
 import io.circe.{Json, ParsingFailure}
 import uk.ac.wellcome.json.JsonUtil._
 import weco.catalogue.sierra_adapter.models.{SierraRecordTypes, SierraTransformable}
@@ -40,9 +41,9 @@ class Splitter(indexPrefix: String) {
                 index = varFieldIndex,
                 id = Some(s"${parent.id}-$position"),
                 source = Some(
-                  toJson(
-                    Map("parent" -> parent, "position" -> position, "varField" -> varField)
-                  ).get
+                  Map("parent" -> parent, "position" -> position, "varField" -> varField)
+                    .asJson
+                    .noSpaces
                 )
               )
           }
@@ -67,9 +68,9 @@ class Splitter(indexPrefix: String) {
                 index = fixedFieldsIndex,
                 id = Some(s"${parent.id}-$code"),
                 source = Some(
-                  toJson(
-                    Map("parent" -> parent, "code" -> code, "fixedField" -> fixedField)
-                  ).get
+                  Map("parent" -> parent, "code" -> code, "fixedField" -> fixedField)
+                    .asJson
+                    .noSpaces
                 )
               )
           }

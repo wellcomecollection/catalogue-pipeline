@@ -16,16 +16,17 @@ import weco.catalogue.source_model.SierraSourcePayload
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
-class Worker[MsgDestination](
+class Worker(
   sqsStream: SQSStream[NotificationMessage],
   sierraReadable: Readable[S3ObjectLocation, SierraTransformable],
+  indexPrefix: String = "sierra"
 )(
   implicit
   ec: ExecutionContext,
   elasticClient: ElasticClient
 ) extends Runnable {
 
-  private val splitter = new Splitter(indexPrefix = "sierra")
+  private val splitter = new Splitter(indexPrefix = indexPrefix)
 
   override def run(): Future[Any] =
     sqsStream.foreach("Sierra indexer", processMessage)
