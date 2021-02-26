@@ -7,11 +7,10 @@ import io.circe.optics.JsonPath.root
 import io.circe.parser.parse
 import org.slf4j.{Logger, LoggerFactory}
 import scalaj.http.{Http, HttpOptions, HttpResponse}
+import uk.ac.wellcome.platform.sierra_reader.config.models.SierraAPIConfig
 
 class SierraPageSource(
-  apiUrl: String,
-  oauthKey: String,
-  oauthSecret: String,
+  config: SierraAPIConfig,
   timeoutMs: Int
 )(
   resourceType: String,
@@ -26,7 +25,7 @@ class SierraPageSource(
   override def createLogic(inheritedAttributes: Attributes): GraphStageLogic =
     new GraphStageLogic(shape) {
 
-      var token: String = refreshToken(apiUrl, oauthKey, oauthSecret)
+      var token: String = refreshToken(config)
       var lastId: Option[Int] = None
       var jsonList: List[Json] = Nil
 
@@ -44,7 +43,7 @@ class SierraPageSource(
         makeRequestWith(
           newParams,
           ifUnauthorized = {
-            token = refreshToken(apiUrl, oauthKey, oauthSecret)
+            token = refreshToken(config)
             makeRequestWith(newParams, ifUnauthorized = {
               fail(out, new RuntimeException("Unable to refresh token!"))
             })
@@ -54,7 +53,7 @@ class SierraPageSource(
 
       private def makeRequestWith[T](newParams: Map[String, String],
                                      ifUnauthorized: => Unit): Unit = {
-        val newResponse = makeRequest(apiUrl, resourceType, token, newParams)
+        val newResponse = makeRequest(config.apiURL, resourceType, token, newParams)
 
         newResponse.code match {
           case 200 => refreshJsonListAndPush(newResponse)
@@ -88,11 +87,11 @@ class SierraPageSource(
         push(out, jsonList)
       }
 
-      private def refreshToken(apiUrl: String,
-                               oauthKey: String,
-                               oauthSecret: String) = {
+      private def refreshToken(config: SierraAPIConfig): String = {
+        val url = s"${config.apiURL}/token"
+
         val tokenResponse =
-          Http(s"$apiUrl/token").postForm.auth(oauthKey, oauthSecret).asString
+          Http(url).postForm.auth(config.oauthKey, config.oauthSec).asString
         val json = parse(tokenResponse.body).right
           .getOrElse(throw new RuntimeException(s"Token response was not JSON; got ${tokenResponse.body}"))
         root.access_token.string

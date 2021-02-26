@@ -23,7 +23,7 @@ class SierraStreamSourceTest
     with WireMockFixture {
 
   it("reads from Sierra") {
-    val sierraSource = SierraSource("http://localhost:8080", oauthKey, oauthSecret)(
+    val sierraSource = SierraSource(sierraAPIConfig)(
       resourceType = "items",
       params = Map.empty)
 
@@ -37,7 +37,7 @@ class SierraStreamSourceTest
   }
 
   it("paginates through results") {
-    val sierraSource = SierraSource("http://localhost:8080", oauthKey, oauthSecret)(
+    val sierraSource = SierraSource(sierraAPIConfig)(
       resourceType = "items",
       params = Map("updatedDate" -> "[2013-12-10T17:16:35Z,2013-12-13T21:34:35Z]"))
 
@@ -52,14 +52,14 @@ class SierraStreamSourceTest
 
   it("refreshes the access token if receives a unauthorized response") {
     // This test uses the three Wiremock fixture token_refresh*.json.
-    val sierraSource =
-      SierraSource(
-        apiUrl = "http://localhost:8080",
-        oauthKey = "refresh_token_key",
-        oauthSecret = "refresh_token_secret"
-      )(
-        resourceType = "bibs",
-        params = Map("token_refresh" -> "true"))
+    val config = sierraAPIConfig.copy(
+      oauthKey = "refresh_token_key",
+      oauthSec = "refresh_token_secret"
+    )
+
+    val sierraSource = SierraSource(config)(
+      resourceType = "bibs",
+      params = Map("token_refresh" -> "true"))
 
     withMaterializer { implicit materializer =>
       val eventualJson = sierraSource.take(1).runWith(Sink.head[Json])
@@ -72,14 +72,9 @@ class SierraStreamSourceTest
 
   it("fails if it can't authenticate with the Sierra API") {
     // This test uses the Wiremock fixture bibs-unauthorized.json.
-    val sierraSource = SierraSource(
-      apiUrl = "http://localhost:8080",
-      oauthKey = oauthKey,
-      oauthSecret = oauthSecret
-    )(
+    val sierraSource = SierraSource(sierraAPIConfig)(
       resourceType = "bibs",
-      params = Map("unauthorized" -> "true")
-    )
+      params = Map("unauthorized" -> "true"))
 
     withMaterializer { implicit materializer =>
       val future = sierraSource.take(1).runWith(Sink.head[Json])
@@ -93,9 +88,7 @@ class SierraStreamSourceTest
 
   it("obeys the throttle rate for Sierra API requests") {
     val sierraSource = SierraSource(
-      apiUrl = "http://localhost:8080",
-      oauthKey = oauthKey,
-      oauthSecret = oauthSecret,
+      config = sierraAPIConfig,
       throttleRate = ThrottleRate(elements = 4, per = 1.second)
     )(
       resourceType = "items",
@@ -119,9 +112,7 @@ class SierraStreamSourceTest
     // This test uses the Wiremock fixture bibs-timeout.json, which has
     // a fixed delay of 1000 milliseconds.
     val source = SierraSource(
-      apiUrl = "http://localhost:8080",
-      oauthKey = oauthKey,
-      oauthSecret = oauthSecret,
+      config = sierraAPIConfig,
       timeoutMs = 200
     )(
       resourceType = "bibs",
