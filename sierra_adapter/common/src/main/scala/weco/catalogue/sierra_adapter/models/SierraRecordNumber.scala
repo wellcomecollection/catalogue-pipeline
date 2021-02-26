@@ -80,9 +80,6 @@ sealed trait TypedSierraRecordNumber extends SierraRecordNumber {
   override def hashCode: Int = this.withCheckDigit.hashCode
 }
 
-class UntypedSierraRecordNumber(val recordNumber: String)
-    extends SierraRecordNumber
-
 // Note: these are deliberately classes rather than case classes so that
 // we can have fine-grained control over how their encoding/decoding works.
 //
@@ -95,6 +92,13 @@ class UntypedSierraRecordNumber(val recordNumber: String)
 // We have a decoder that will handle all three, but if these were case classes
 // we might get the automatically derived Circe encoder.  Making these regular
 // classes will force us to supply our special decoder.
+
+class UntypedSierraRecordNumber(val recordNumber: String)
+    extends SierraRecordNumber
+
+object UntypedSierraRecordNumber {
+  def apply(number: String) = new UntypedSierraRecordNumber(number)
+}
 
 class SierraBibNumber(val recordNumber: String)
     extends TypedSierraRecordNumber {

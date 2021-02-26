@@ -15,6 +15,7 @@ import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.storage.fixtures.S3Fixtures
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 import weco.catalogue.sierra_adapter.generators.SierraGenerators
+import weco.catalogue.sierra_adapter.models.Implicits._
 import weco.catalogue.sierra_adapter.models.SierraBibNumber
 
 class WindowManagerTest

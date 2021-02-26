@@ -70,7 +70,7 @@ class SierraRecordParserTest
     val expectedRecord = createSierraItemRecordWith(
       id = id,
       modifiedDate = Instant.parse(updatedDate),
-      bibIds = bibIds.map(SierraBibNumber).toList
+      bibIds = bibIds.map(SierraBibNumber(_)).toList
     )
 
     val json = parse(jsonString).right.get

@@ -23,6 +23,7 @@ import uk.ac.wellcome.models.work.internal.InvisibilityReason.{
 }
 import uk.ac.wellcome.models.work.internal.LocationType.OnlineResource
 import weco.catalogue.sierra_adapter.generators.SierraGenerators
+import weco.catalogue.sierra_adapter.models.Implicits._
 import weco.catalogue.sierra_adapter.models.{
   SierraBibNumber,
   SierraBibRecord,
