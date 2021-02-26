@@ -61,22 +61,64 @@ sealed trait TypedSierraRecordNumber extends SierraRecordNumber {
       .sum % 11
     if (remainder == 10) "x" else remainder.toString
   }
+
+  // Normally we use case classes for immutable data, which provide these
+  // methods for us.
+  //
+  // We deliberately don't use case classes here so we skip automatic
+  // case class derivation for JSON encoding (see below), so we have to
+  // define our own comparison methods.
+  def canEqual(a: Any): Boolean = a.isInstanceOf[TypedSierraRecordNumber]
+
+  override def equals(that: Any): Boolean =
+    that match {
+      case that: TypedSierraRecordNumber =>
+        that.canEqual(this) && this.withCheckDigit == that.withCheckDigit
+      case _ => false
+    }
+
+  override def hashCode: Int = this.withCheckDigit.hashCode
 }
 
-case class UntypedSierraRecordNumber(recordNumber: String)
+class UntypedSierraRecordNumber(val recordNumber: String)
     extends SierraRecordNumber
 
-case class SierraBibNumber(recordNumber: String)
+// Note: these are deliberately classes rather than case classes so that
+// we can have fine-grained control over how their encoding/decoding works.
+//
+// We have a mixture of at least three different JSON encodings in the pipeline:
+//
+//  - as a String
+//  - as an Int
+//  - as a JSON object {"recordNumber": "1234567"}
+//
+// We have a decoder that will handle all three, but if these were case classes
+// we might get the automatically derived Circe encoder.  Making these regular
+// classes will force us to supply our special decoder.
+
+class SierraBibNumber(val recordNumber: String)
     extends TypedSierraRecordNumber {
   val recordType: SierraRecordTypes.Value = SierraRecordTypes.bibs
 }
 
-case class SierraItemNumber(recordNumber: String)
+object SierraBibNumber {
+  def apply(number: String) = new SierraBibNumber(number)
+}
+
+class SierraItemNumber(val recordNumber: String)
     extends TypedSierraRecordNumber {
   val recordType: SierraRecordTypes.Value = SierraRecordTypes.items
 }
 
-case class SierraHoldingsNumber(recordNumber: String)
+object SierraItemNumber {
+  def apply(number: String) = new SierraItemNumber(number)
+}
+
+class SierraHoldingsNumber(val recordNumber: String)
     extends TypedSierraRecordNumber {
   val recordType: SierraRecordTypes.Value = SierraRecordTypes.holdings
+}
+
+object SierraHoldingsNumber {
+  def apply(number: String) = new SierraHoldingsNumber(number)
 }

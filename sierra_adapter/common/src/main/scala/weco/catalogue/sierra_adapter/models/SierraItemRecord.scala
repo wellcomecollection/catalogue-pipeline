@@ -35,7 +35,7 @@ case object SierraItemRecord {
       id = SierraItemNumber(id),
       data = data,
       modifiedDate = modifiedDate,
-      bibIds = bibIds.map { SierraBibNumber }
+      bibIds = bibIds.map { new SierraBibNumber(_) }
     )
   }
 }
