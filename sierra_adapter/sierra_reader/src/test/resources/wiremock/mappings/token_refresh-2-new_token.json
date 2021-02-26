@@ -1,0 +1,18 @@
+{
+  "id" : "dc6c7b4f-d24d-45e6-89c1-f5e7bf9c577c",
+  "name" : "token",
+  "request" : {
+    "url" : "/token",
+    "method" : "POST",
+    "headers" : {
+      "Authorization" : {
+        "equalTo" : "Basic cmVmcmVzaF90b2tlbl9rZXk6cmVmcmVzaF90b2tlbl9zZWNyZXQ="
+      }
+    }
+  },
+  "response" : {
+    "status" : 200,
+    "body" : "{\"access_token\":\"refreshed-token\",\"token_type\":\"bearer\",\"expires_in\":3600}"
+  },
+  "uuid" : "dc6c7b4f-d24d-45e6-89c1-f5e7bf9c577c"
+}

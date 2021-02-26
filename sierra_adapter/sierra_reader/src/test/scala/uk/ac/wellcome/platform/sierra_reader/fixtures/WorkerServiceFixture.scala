@@ -16,7 +16,9 @@ import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-trait WorkerServiceFixture extends Akka with SQS with S3Fixtures {
+
+
+trait WorkerServiceFixture extends Akka with SQS with S3Fixtures with WireMockFixture {
   def withWorkerService[R](bucket: Bucket,
                            queue: Queue,
                            readerConfig: ReaderConfig = bibsReaderConfig,
@@ -48,8 +50,8 @@ trait WorkerServiceFixture extends Akka with SQS with S3Fixtures {
   )
 
   val sierraAPIConfig: SierraAPIConfig = SierraAPIConfig(
-    apiURL = "http://localhost:8080",
-    oauthKey = "key",
-    oauthSec = "secret"
+    apiURL = apiUrl,
+    oauthKey = oauthKey,
+    oauthSec = oauthSecret
   )
 }

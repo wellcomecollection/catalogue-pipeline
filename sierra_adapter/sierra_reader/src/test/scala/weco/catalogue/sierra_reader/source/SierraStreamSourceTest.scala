@@ -1,14 +1,13 @@
 package weco.catalogue.sierra_reader.source
 
 import akka.stream.scaladsl.Sink
-import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, get, stubFor, urlMatching}
-import com.github.tomakehurst.wiremock.stubbing.Scenario
 import io.circe.Json
 import io.circe.optics.JsonPath.root
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
+import uk.ac.wellcome.platform.sierra_reader.fixtures.WireMockFixture
 
 import java.net.SocketTimeoutException
 import java.time.Instant
@@ -17,14 +16,14 @@ import scala.concurrent.duration._
 
 class SierraStreamSourceTest
     extends AnyFunSpec
-    with SierraWireMock
     with Matchers
     with ScalaFutures
     with IntegrationPatience
-    with Akka {
+    with Akka
+    with WireMockFixture {
 
   it("reads from Sierra") {
-    val sierraSource = SierraSource(sierraWireMockUrl, oauthKey, oauthSecret)(
+    val sierraSource = SierraSource("http://localhost:8080", oauthKey, oauthSecret)(
       resourceType = "items",
       params = Map.empty)
 
@@ -38,7 +37,7 @@ class SierraStreamSourceTest
   }
 
   it("paginates through results") {
-    val sierraSource = SierraSource(sierraWireMockUrl, oauthKey, oauthSecret)(
+    val sierraSource = SierraSource("http://localhost:8080", oauthKey, oauthSecret)(
       resourceType = "items",
       params = Map("updatedDate" -> "[2013-12-10T17:16:35Z,2013-12-13T21:34:35Z]"))
 
@@ -52,29 +51,15 @@ class SierraStreamSourceTest
   }
 
   it("refreshes the access token if receives a unauthorized response") {
-    stubFor(
-      get(urlMatching("/bibs"))
-        .inScenario("refresh token")
-        .whenScenarioStateIs(Scenario.STARTED)
-        .willReturn(aResponse().withStatus(401))
-        .atPriority(1)
-        .willSetStateTo("token expired"))
-
-    stubFor(
-      get(urlMatching("/token"))
-        .inScenario("refresh token")
-        .whenScenarioStateIs("token expired")
-        .willSetStateTo("token refreshed"))
-
-    stubFor(
-      get(urlMatching("/bibs"))
-        .inScenario("refresh token")
-        .whenScenarioStateIs("token refreshed"))
-
+    // This test uses the three Wiremock fixture token_refresh*.json.
     val sierraSource =
-      SierraSource(sierraWireMockUrl, oauthKey, "wrong-secret")(
+      SierraSource(
+        apiUrl = "http://localhost:8080",
+        oauthKey = "refresh_token_key",
+        oauthSecret = "refresh_token_secret"
+      )(
         resourceType = "bibs",
-        params = Map.empty)
+        params = Map("token_refresh" -> "true"))
 
     withMaterializer { implicit materializer =>
       val eventualJson = sierraSource.take(1).runWith(Sink.head[Json])
@@ -86,6 +71,7 @@ class SierraStreamSourceTest
   }
 
   it("fails if it can't authenticate with the Sierra API") {
+    // This test uses the Wiremock fixture bibs-unauthorized.json.
     val sierraSource = SierraSource(
       apiUrl = "http://localhost:8080",
       oauthKey = oauthKey,
@@ -130,7 +116,7 @@ class SierraStreamSourceTest
   }
 
   it("respects the specified timeout parameter") {
-    // This test accompanies the Wiremock fixture bibs-timeout.json, which has
+    // This test uses the Wiremock fixture bibs-timeout.json, which has
     // a fixed delay of 1000 milliseconds.
     val source = SierraSource(
       apiUrl = "http://localhost:8080",
