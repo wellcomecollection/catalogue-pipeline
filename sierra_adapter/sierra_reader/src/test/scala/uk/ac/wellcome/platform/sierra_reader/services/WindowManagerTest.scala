@@ -79,8 +79,9 @@ class WindowManagerTest
         val result =
           windowManager.getCurrentStatus(s"[$startDateTime,$endDateTime]")
 
-        whenReady(result) {
-          _ shouldBe WindowStatus(id = "1794166", offset = 2)
+        whenReady(result) { status =>
+          status.id.get.withoutCheckDigit shouldBe "1794166"
+          status.offset shouldBe 2
         }
       }
     }

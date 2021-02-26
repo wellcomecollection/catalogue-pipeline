@@ -57,6 +57,9 @@ object Implicits {
       }
     }
 
+  implicit val untypedSierraNumberDecoder: Decoder[UntypedSierraRecordNumber] =
+    createDecoder(new UntypedSierraRecordNumber(_))
+
   implicit val holdingsNumberDecoder: Decoder[SierraHoldingsNumber] =
     createDecoder(new SierraHoldingsNumber(_))
 
