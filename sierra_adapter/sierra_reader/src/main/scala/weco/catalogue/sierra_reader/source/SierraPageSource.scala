@@ -55,7 +55,8 @@ class SierraPageSource(
 
       private def makeRequestWith[T](newParams: Map[String, String],
                                      ifUnauthorized: => Unit): Unit = {
-        val newResponse = makeRequest(config.apiURL, resourceType, token, newParams)
+        val newResponse =
+          makeRequest(config.apiURL, resourceType, token, newParams)
 
         newResponse.code match {
           case 200 => refreshJsonListAndPush(newResponse)
@@ -72,19 +73,20 @@ class SierraPageSource(
       private def refreshJsonListAndPush(
         response: HttpResponse[String]): Unit = {
         val responseJson = parse(response.body).right
-          .getOrElse(throw new RuntimeException(s"List response was not JSON; got ${response.body}"))
+          .getOrElse(
+            throw new RuntimeException(
+              s"List response was not JSON; got ${response.body}"))
 
         jsonList = root.entries.each.json.getAll(responseJson)
 
-        lastId = Some(
-          root.id.string
-            .getOption(jsonList.last)
-            .getOrElse(
-              throw new RuntimeException(
-                s"Couldn't find ID in last item of list response; got ${response.body}"
-              )
+        lastId = Some(root.id.string
+          .getOption(jsonList.last)
+          .getOrElse(
+            throw new RuntimeException(
+              s"Couldn't find ID in last item of list response; got ${response.body}"
             )
-            .toInt)
+          )
+          .toInt)
 
         push(out, jsonList)
       }
@@ -95,7 +97,9 @@ class SierraPageSource(
         val tokenResponse =
           Http(url).postForm.auth(config.oauthKey, config.oauthSec).asString
         val json = parse(tokenResponse.body).right
-          .getOrElse(throw new RuntimeException(s"Token response was not JSON; got ${tokenResponse.body}"))
+          .getOrElse(
+            throw new RuntimeException(
+              s"Token response was not JSON; got ${tokenResponse.body}"))
         root.access_token.string
           .getOption(json)
           .getOrElse(
@@ -112,7 +116,8 @@ class SierraPageSource(
                           token: String,
                           params: Map[String, String]): HttpResponse[String] = {
     val url = s"$apiUrl/$resourceType"
-    logger.debug(s"Making request to $url with parameters $params & token $token")
+    logger.debug(
+      s"Making request to $url with parameters $params & token $token")
 
     Http(url)
       .option(HttpOptions.readTimeout(timeout.toMillis.toInt))

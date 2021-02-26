@@ -23,9 +23,8 @@ class SierraStreamSourceTest
     with WireMockFixture {
 
   it("reads from Sierra") {
-    val sierraSource = SierraSource(sierraAPIConfig)(
-      resourceType = "items",
-      params = Map.empty)
+    val sierraSource =
+      SierraSource(sierraAPIConfig)(resourceType = "items", params = Map.empty)
 
     withMaterializer { implicit materializer =>
       val eventualJson = sierraSource.take(1).runWith(Sink.head[Json])
@@ -39,7 +38,8 @@ class SierraStreamSourceTest
   it("paginates through results") {
     val sierraSource = SierraSource(sierraAPIConfig)(
       resourceType = "items",
-      params = Map("updatedDate" -> "[2013-12-10T17:16:35Z,2013-12-13T21:34:35Z]"))
+      params =
+        Map("updatedDate" -> "[2013-12-10T17:16:35Z,2013-12-13T21:34:35Z]"))
 
     withMaterializer { implicit materializer =>
       val eventualJsonList = sierraSource.runWith(Sink.seq[Json])
@@ -92,7 +92,8 @@ class SierraStreamSourceTest
       throttleRate = ThrottleRate(elements = 4, per = 1.second)
     )(
       resourceType = "items",
-      params = Map("updatedDate" -> "[2013-12-10T17:16:35Z,2013-12-13T21:34:35Z]"))
+      params =
+        Map("updatedDate" -> "[2013-12-10T17:16:35Z,2013-12-13T21:34:35Z]"))
 
     withMaterializer { implicit materializer =>
       val future = sierraSource.runWith(Sink.seq[Json])

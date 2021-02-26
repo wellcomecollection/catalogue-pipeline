@@ -23,9 +23,9 @@ object SierraSource {
     params: Map[String, String]): Source[Json, NotUsed] = {
 
     val source = Source.fromGraph(
-      new SierraPageSource(
-        config = config,
-        timeout = timeout)(resourceType = resourceType, params = params)
+      new SierraPageSource(config = config, timeout = timeout)(
+        resourceType = resourceType,
+        params = params)
     )
 
     throttleRate.elements match {

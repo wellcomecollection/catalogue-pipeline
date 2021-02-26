@@ -16,7 +16,11 @@ import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-trait WorkerServiceFixture extends Akka with SQS with S3Fixtures with WireMockFixture {
+trait WorkerServiceFixture
+    extends Akka
+    with SQS
+    with S3Fixtures
+    with WireMockFixture {
   def withWorkerService[R](bucket: Bucket,
                            queue: Queue,
                            readerConfig: ReaderConfig = bibsReaderConfig,
