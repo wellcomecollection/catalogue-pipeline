@@ -1,14 +1,24 @@
 package weco.catalogue.sierra_indexer.services
 
-import com.sksamuel.elastic4s.ElasticApi.{must, rangeQuery, termQuery, termsQuery}
+import com.sksamuel.elastic4s.ElasticApi.{
+  must,
+  rangeQuery,
+  termQuery,
+  termsQuery
+}
 import com.sksamuel.elastic4s.{Index, Indexes}
 import com.sksamuel.elastic4s.requests.delete.DeleteByQueryRequest
 import com.sksamuel.elastic4s.requests.indexes.IndexRequest
+import io.circe.generic.extras.semiauto.deriveConfiguredEncoder
 import io.circe.parser._
 import io.circe.syntax._
-import io.circe.{Json, ParsingFailure}
+import io.circe.{Encoder, Json, ParsingFailure}
 import uk.ac.wellcome.json.JsonUtil._
-import weco.catalogue.sierra_adapter.models.{SierraRecordTypes, SierraTransformable}
+import weco.catalogue.sierra_adapter.models.{
+  SierraRecordTypes,
+  SierraTransformable,
+  TypedSierraRecordNumber
+}
 import weco.catalogue.sierra_indexer.models.Parent
 
 // This object splits a SierraTransformable into indexable pieces
@@ -16,8 +26,19 @@ import weco.catalogue.sierra_indexer.models.Parent
 class Splitter(indexPrefix: String) {
   import JsonOps._
 
-  private val varFieldIndex = Index(s"${indexPrefix}_varFields")
-  private val fixedFieldsIndex = Index(s"${indexPrefix}_fixedFields")
+  private val varFieldIndex = Index(s"${indexPrefix}_varfields")
+  private val fixedFieldsIndex = Index(s"${indexPrefix}_fixedfields")
+
+  implicit val encoder: Encoder[SierraRecordTypes.Value] =
+    (value: SierraRecordTypes.Value) => Json.fromString(value.toString)
+
+  implicit val encoderNumber: Encoder[TypedSierraRecordNumber] =
+    (number: TypedSierraRecordNumber) => Json.fromString(number.withoutCheckDigit)
+
+  implicit val encoderParent: Encoder[Parent] = deriveConfiguredEncoder
+
+  private case class IndexedVarField(parent: Parent, position: Int, varField: Json)
+  private case class IndexedFixedField(parent: Parent, code: String, fixedField: Json)
 
   def split(t: SierraTransformable): Either[Seq[(Parent, ParsingFailure)], (Seq[IndexRequest], Seq[DeleteByQueryRequest])] = {
     for {
@@ -41,7 +62,7 @@ class Splitter(indexPrefix: String) {
                 index = varFieldIndex,
                 id = Some(s"${parent.id}-$position"),
                 source = Some(
-                  Map("parent" -> parent, "position" -> position, "varField" -> varField)
+                  IndexedVarField(parent, position, varField)
                     .asJson
                     .noSpaces
                 )
@@ -68,7 +89,7 @@ class Splitter(indexPrefix: String) {
                 index = fixedFieldsIndex,
                 id = Some(s"${parent.id}-$code"),
                 source = Some(
-                  Map("parent" -> parent, "code" -> code, "fixedField" -> fixedField)
+                  IndexedFixedField(parent, code, fixedField)
                     .asJson
                     .noSpaces
                 )
