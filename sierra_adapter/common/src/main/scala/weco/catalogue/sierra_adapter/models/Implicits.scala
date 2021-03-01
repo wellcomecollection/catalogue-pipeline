@@ -72,8 +72,10 @@ object Implicits {
   implicit val bibNumberDecoder: Decoder[SierraBibNumber] =
     createDecoder(new SierraBibNumber(_))
 
-  implicit val typedSierraRecordNumberEncoder: Encoder[TypedSierraRecordNumber] =
-    (number: TypedSierraRecordNumber) => Json.fromString(number.withoutCheckDigit)
+  implicit val typedSierraRecordNumberEncoder
+    : Encoder[TypedSierraRecordNumber] =
+    (number: TypedSierraRecordNumber) =>
+      Json.fromString(number.withoutCheckDigit)
 
   implicit val holdingsNumberEncoder: Encoder[SierraHoldingsNumber] =
     (number: SierraHoldingsNumber) => Json.fromString(number.withoutCheckDigit)

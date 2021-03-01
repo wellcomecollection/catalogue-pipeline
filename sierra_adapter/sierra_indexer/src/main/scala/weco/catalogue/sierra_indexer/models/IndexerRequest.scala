@@ -1,6 +1,11 @@
 package weco.catalogue.sierra_indexer.models
 
-import com.sksamuel.elastic4s.ElasticApi.{must, rangeQuery, termQuery, termsQuery}
+import com.sksamuel.elastic4s.ElasticApi.{
+  must,
+  rangeQuery,
+  termQuery,
+  termsQuery
+}
 import com.sksamuel.elastic4s.requests.delete.DeleteByQueryRequest
 import com.sksamuel.elastic4s.{Index, Indexes}
 import com.sksamuel.elastic4s.requests.indexes.IndexRequest
@@ -11,7 +16,8 @@ import weco.catalogue.sierra_adapter.models.Implicits._
 import weco.catalogue.sierra_indexer.services.SierraJsonOps._
 
 object IndexerRequest {
-  def mainRecords(indexPrefix: String, apiData: Seq[(Parent, Json)]): Seq[IndexRequest] =
+  def mainRecords(indexPrefix: String,
+                  apiData: Seq[(Parent, Json)]): Seq[IndexRequest] =
     List(
       apiData.map {
         case (parent, json) =>
@@ -23,8 +29,10 @@ object IndexerRequest {
       }
     ).flatten
 
-  private def varFieldIndex(indexPrefix: String) = Index(s"${indexPrefix}_varfields")
-  private def fixedFieldIndex(indexPrefix: String) = Index(s"${indexPrefix}_fixedfields")
+  private def varFieldIndex(indexPrefix: String) =
+    Index(s"${indexPrefix}_varfields")
+  private def fixedFieldIndex(indexPrefix: String) =
+    Index(s"${indexPrefix}_fixedfields")
 
   private case class IndexedVarField(
     parent: Parent,
@@ -32,7 +40,8 @@ object IndexerRequest {
     varField: Json
   )
 
-  def varFields(indexPrefix: String, apiData: Seq[(Parent, Json)]): Seq[IndexRequest] =
+  def varFields(indexPrefix: String,
+                apiData: Seq[(Parent, Json)]): Seq[IndexRequest] =
     apiData.flatMap {
       case (parent, json) =>
         json.varFields.zipWithIndex
@@ -48,16 +57,16 @@ object IndexerRequest {
           }
     }
 
-  def varFieldDeletions(indexPrefix: String, apiData: Seq[(Parent, Json)]): Seq[DeleteByQueryRequest] =
+  def varFieldDeletions(
+    indexPrefix: String,
+    apiData: Seq[(Parent, Json)]): Seq[DeleteByQueryRequest] =
     apiData.map {
       case (parent, json) =>
         DeleteByQueryRequest(
           indexes = Indexes(varFieldIndex(indexPrefix).name),
           query = must(
             termQuery("parent.id.keyword", parent.id),
-            termQuery(
-              "parent.recordType.keyword",
-              parent.recordType.toString),
+            termQuery("parent.recordType.keyword", parent.recordType.toString),
             rangeQuery("position").gte(json.varFields.length)
           )
         )
@@ -69,7 +78,8 @@ object IndexerRequest {
     fixedField: Json
   )
 
-  def fixedFields(indexPrefix: String, apiData: Seq[(Parent, Json)]): Seq[IndexRequest] =
+  def fixedFields(indexPrefix: String,
+                  apiData: Seq[(Parent, Json)]): Seq[IndexRequest] =
     apiData.flatMap {
       case (parent, json) =>
         json.fixedFields
@@ -85,18 +95,17 @@ object IndexerRequest {
           }
     }
 
-  def fixedFieldDeletions(indexPrefix: String, apiData: Seq[(Parent, Json)]): Seq[DeleteByQueryRequest] =
+  def fixedFieldDeletions(
+    indexPrefix: String,
+    apiData: Seq[(Parent, Json)]): Seq[DeleteByQueryRequest] =
     apiData.map {
       case (parent, json) =>
         DeleteByQueryRequest(
           indexes = Indexes(fixedFieldIndex(indexPrefix).name),
           query = must(
             termQuery("parent.id", parent.id),
-            termQuery(
-              "parent.recordType.keyword",
-              parent.recordType.toString),
-          )
-            .not(
+            termQuery("parent.recordType.keyword", parent.recordType.toString),
+          ).not(
               termsQuery("code", json.fixedFields.keys)
             )
         )

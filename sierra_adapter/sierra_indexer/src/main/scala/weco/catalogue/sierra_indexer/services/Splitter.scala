@@ -4,7 +4,10 @@ import com.sksamuel.elastic4s.requests.delete.DeleteByQueryRequest
 import com.sksamuel.elastic4s.requests.indexes.IndexRequest
 import io.circe.parser._
 import io.circe.{Json, ParsingFailure}
-import weco.catalogue.sierra_adapter.models.{SierraRecordTypes, SierraTransformable}
+import weco.catalogue.sierra_adapter.models.{
+  SierraRecordTypes,
+  SierraTransformable
+}
 import weco.catalogue.sierra_indexer.models.{IndexerRequest, Parent}
 
 // This object splits a SierraTransformable into indexable pieces
@@ -21,7 +24,9 @@ class Splitter(indexPrefix: String) {
       fixedFields = IndexerRequest.fixedFields(indexPrefix, apiData)
 
       varFieldDeletions = IndexerRequest.varFieldDeletions(indexPrefix, apiData)
-      fixedFieldDeletions = IndexerRequest.fixedFieldDeletions(indexPrefix, apiData)
+      fixedFieldDeletions = IndexerRequest.fixedFieldDeletions(
+        indexPrefix,
+        apiData)
     } yield
       (
         mainRecords ++ varFields ++ fixedFields,
