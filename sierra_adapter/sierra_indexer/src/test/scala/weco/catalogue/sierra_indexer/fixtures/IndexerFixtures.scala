@@ -47,9 +47,11 @@ trait IndexerFixtures
 
     withLocalElasticsearchIndex(NoStrictMapping, index = Index(s"${indexPrefix}_bibs")) { _ =>
       withLocalElasticsearchIndex(NoStrictMapping, index = Index(s"${indexPrefix}_items")) { _ =>
-        withLocalElasticsearchIndex(NoStrictMapping, index = Index(s"${indexPrefix}_varfields")) { _ =>
-          withLocalElasticsearchIndex(NoStrictMapping, index = Index(s"${indexPrefix}_fixedfields")) { _ =>
-            testWith(indexPrefix)
+        withLocalElasticsearchIndex(NoStrictMapping, index = Index(s"${indexPrefix}_holdings")) { _ =>
+          withLocalElasticsearchIndex(NoStrictMapping, index = Index(s"${indexPrefix}_varfields")) { _ =>
+            withLocalElasticsearchIndex(NoStrictMapping, index = Index(s"${indexPrefix}_fixedfields")) { _ =>
+              testWith(indexPrefix)
+            }
           }
         }
       }
