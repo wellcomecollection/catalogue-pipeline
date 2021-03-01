@@ -2,9 +2,10 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.models.work.internal.{LocationType, PhysicalLocationType}
+import weco.catalogue.sierra_adapter.models.TypedSierraRecordNumber
 
 object SierraPhysicalLocationType extends Logging {
-  def fromName(name: String): Option[PhysicalLocationType] =
+  def fromName(id: TypedSierraRecordNumber, name: String): Option[PhysicalLocationType] =
     name.toLowerCase match {
       case lowerCaseName
           if lowerCaseName.hasSubstring(
@@ -46,7 +47,7 @@ object SierraPhysicalLocationType extends Logging {
         None
 
       case _ =>
-        warn(s"Unable to map Sierra location name to LocationType: $name")
+        warn(s"$id: Unable to map Sierra location name to LocationType: $name")
         None
     }
 

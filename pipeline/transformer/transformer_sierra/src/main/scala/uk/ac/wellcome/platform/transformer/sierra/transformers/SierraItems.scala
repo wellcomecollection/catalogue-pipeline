@@ -48,14 +48,14 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
     // We assume that "in above" refers to another item on the same bib, so if the
     // non-above locations are unambiguous, we use them instead.
     val otherLocations =
-      sierraItemDataMap.values
-        .filterNot { _.deleted }
-        .collect { case SierraItemData(_, Some(location), _, _, _) => location }
-        .filterNot { loc =>
+      sierraItemDataMap
+        .filterNot { case (_, itemData) => itemData.deleted }
+        .collect { case (id, SierraItemData(_, Some(location), _, _, _)) => id -> location }
+        .filterNot { case (_, loc) =>
           loc.name.toLowerCase.contains("above") || loc.name == "-" || loc.name == ""
         }
-        .map { loc =>
-          SierraPhysicalLocationType.fromName(loc.name) match {
+        .map { case (id, loc) =>
+          SierraPhysicalLocationType.fromName(id, loc.name) match {
             case Some(LocationType.ClosedStores) =>
               (Some(LocationType.ClosedStores), LocationType.ClosedStores.label)
             case other => (other, loc.name)
@@ -97,7 +97,7 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
     Item(
       title = getItemTitle(itemId, itemData),
       locations =
-        getPhysicalLocation(bibId, itemData, bibData, fallbackLocation).toList,
+        getPhysicalLocation(bibId, itemId, itemData, bibData, fallbackLocation).toList,
       id = IdState.Identifiable(
         sourceIdentifier = SourceIdentifier(
           identifierType = IdentifierType("sierra-system-number"),

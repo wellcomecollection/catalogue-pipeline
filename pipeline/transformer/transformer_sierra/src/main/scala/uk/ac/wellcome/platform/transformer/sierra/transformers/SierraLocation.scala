@@ -8,12 +8,13 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraQueryOps,
   VarField
 }
-import weco.catalogue.sierra_adapter.models.SierraBibNumber
+import weco.catalogue.sierra_adapter.models.{SierraBibNumber, SierraItemNumber}
 
 trait SierraLocation extends SierraQueryOps with Logging {
 
   def getPhysicalLocation(
     bibNumber: SierraBibNumber,
+    itemNumber: SierraItemNumber,
     itemData: SierraItemData,
     bibData: SierraBibData,
     fallbackLocation: Option[(PhysicalLocationType, String)] = None)
@@ -23,7 +24,7 @@ trait SierraLocation extends SierraQueryOps with Logging {
 
       (locationType, label) <- {
         val parsedLocationType =
-          SierraPhysicalLocationType.fromName(sourceLocation.name)
+          SierraPhysicalLocationType.fromName(itemNumber, sourceLocation.name)
 
         (parsedLocationType, fallbackLocation) match {
           case (Some(locationType), _) =>
