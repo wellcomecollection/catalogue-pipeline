@@ -42,13 +42,15 @@ trait IndexerFixtures
       }
     }
 
-  def withBibIndexes[R](testWith: TestWith[String, R]): R = {
+  def withIndexes[R](testWith: TestWith[String, R]): R = {
     val indexPrefix = s"sierra_${randomAlphanumeric()}".toLowerCase()
 
     withLocalElasticsearchIndex(NoStrictMapping, index = Index(s"${indexPrefix}_bibs")) { _ =>
-      withLocalElasticsearchIndex(NoStrictMapping, index = Index(s"${indexPrefix}_varfields")) { _ =>
-        withLocalElasticsearchIndex(NoStrictMapping, index = Index(s"${indexPrefix}_fixedfields")) { _ =>
-          testWith(indexPrefix)
+      withLocalElasticsearchIndex(NoStrictMapping, index = Index(s"${indexPrefix}_items")) { _ =>
+        withLocalElasticsearchIndex(NoStrictMapping, index = Index(s"${indexPrefix}_varfields")) { _ =>
+          withLocalElasticsearchIndex(NoStrictMapping, index = Index(s"${indexPrefix}_fixedfields")) { _ =>
+            testWith(indexPrefix)
+          }
         }
       }
     }
