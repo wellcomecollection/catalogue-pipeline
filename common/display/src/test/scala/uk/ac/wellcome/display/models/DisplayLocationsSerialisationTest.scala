@@ -33,8 +33,7 @@ class DisplayLocationsSerialisationTest
       | "alternativeTitles": [],
       | "items": [ ${items(work.data.items)} ],
       | "availableOnline": false,
-      | "availabilities": [${availabilities(
-                            work.state.derivedData.availabilities)}]
+      | "availabilities": [${availabilities(work.state.availabilities)}]
       |}
     """.stripMargin
 
@@ -59,8 +58,7 @@ class DisplayLocationsSerialisationTest
       | "alternativeTitles": [],
       | "items": [ ${items(work.data.items)} ],
       | "availableOnline": true,
-      | "availabilities": [${availabilities(
-                            work.state.derivedData.availabilities)}]
+      | "availabilities": [${availabilities(work.state.availabilities)}]
       |}
     """.stripMargin
 
@@ -86,8 +84,7 @@ class DisplayLocationsSerialisationTest
       | "alternativeTitles": [],
       | "items": [ ${items(work.data.items)} ],
       | "availableOnline": true,
-      | "availabilities": [${availabilities(
-                            work.state.derivedData.availabilities)}]
+      | "availabilities": [${availabilities(work.state.availabilities)}]
       |}
     """.stripMargin
 
@@ -119,8 +116,7 @@ class DisplayLocationsSerialisationTest
       | "alternativeTitles": [],
       | "items": [ ${items(work.data.items)} ],
       | "availableOnline": true,
-      | "availabilities": [${availabilities(
-                            work.state.derivedData.availabilities)}]
+      | "availabilities": [${availabilities(work.state.availabilities)}]
       |}
     """.stripMargin
 

@@ -30,28 +30,38 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     canonicalId: String = createCanonicalId,
     modifiedTime: Instant = instantInLast30Days
-  ): Work.Visible[Merged] =
+  ): Work.Visible[Merged] = {
+    val data = initData[DataState.Identified]
     Work.Visible[Merged](
-      state = Merged(sourceIdentifier, canonicalId, modifiedTime),
-      data = initData,
+      state = Merged(
+        sourceIdentifier,
+        canonicalId,
+        modifiedTime,
+        availabilities = Availabilities.forWorkData(data)),
+      data = data,
       version = createVersion
     )
+  }
 
   def denormalisedWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     canonicalId: String = createCanonicalId,
     modifiedTime: Instant = instantInLast30Days,
     relations: Relations = Relations.none
-  ): Work.Visible[Denormalised] =
+  ): Work.Visible[Denormalised] = {
+    val data = initData[DataState.Identified]
     Work.Visible[Denormalised](
       state = Denormalised(
         sourceIdentifier = sourceIdentifier,
         canonicalId = canonicalId,
         modifiedTime = modifiedTime,
-        relations = relations),
-      data = initData,
+        availabilities = Availabilities.forWorkData(data),
+        relations = relations
+      ),
+      data = data,
       version = createVersion
     )
+  }
 
   def identifiedWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
@@ -80,6 +90,7 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
         sourceIdentifier = sourceIdentifier,
         canonicalId = canonicalId,
         modifiedTime = modifiedTime,
+        availabilities = Availabilities.forWorkData(data),
         derivedData = DerivedWorkData(data),
         relations = relations
       ),
@@ -257,10 +268,16 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
 
     implicit val updateIndexedState: UpdateState[Indexed] =
       (state: Indexed, data: WorkData[DataState.Identified]) =>
-        state.copy(derivedData = DerivedWorkData(data))
+        state.copy(
+          derivedData = DerivedWorkData(data),
+          availabilities = Availabilities.forWorkData(data))
     implicit val updateIdentifiedState: UpdateState[Identified] = identity
-    implicit val updateDenormalisedState: UpdateState[Denormalised] = identity
-    implicit val updateMergedState: UpdateState[Merged] = identity
+    implicit val updateDenormalisedState: UpdateState[Denormalised] =
+      (state: Denormalised, data: WorkData[DataState.Identified]) =>
+        state.copy(availabilities = Availabilities.forWorkData(data))
+    implicit val updateMergedState: UpdateState[Merged] =
+      (state: Merged, data: WorkData[DataState.Identified]) =>
+        state.copy(availabilities = Availabilities.forWorkData(data))
     implicit val updateSourceState: UpdateState[Source] = identity
   }
 

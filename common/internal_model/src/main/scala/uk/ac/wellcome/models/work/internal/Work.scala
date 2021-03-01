@@ -165,6 +165,7 @@ object WorkState {
     sourceIdentifier: SourceIdentifier,
     canonicalId: String,
     modifiedTime: Instant,
+    availabilities: List[Availability] = Nil,
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified
@@ -178,6 +179,7 @@ object WorkState {
     sourceIdentifier: SourceIdentifier,
     canonicalId: String,
     modifiedTime: Instant,
+    availabilities: List[Availability],
     relations: Relations = Relations.none
   ) extends WorkState {
 
@@ -191,6 +193,7 @@ object WorkState {
     sourceIdentifier: SourceIdentifier,
     canonicalId: String,
     modifiedTime: Instant,
+    availabilities: List[Availability],
     derivedData: DerivedWorkData,
     relations: Relations = Relations.none
   ) extends WorkState {
@@ -230,7 +233,8 @@ object WorkFsm {
       Merged(
         sourceIdentifier = state.sourceIdentifier,
         canonicalId = state.id,
-        modifiedTime = modifiedTime
+        modifiedTime = modifiedTime,
+        availabilities = Availabilities.forWorkData(data),
       )
 
     def data(data: WorkData[DataState.Identified]) = data
@@ -247,6 +251,7 @@ object WorkFsm {
           sourceIdentifier = state.sourceIdentifier,
           canonicalId = state.canonicalId,
           modifiedTime = state.modifiedTime,
+          availabilities = state.availabilities,
           relations = relations
         )
 
@@ -263,6 +268,7 @@ object WorkFsm {
         sourceIdentifier = state.sourceIdentifier,
         canonicalId = state.canonicalId,
         modifiedTime = state.modifiedTime,
+        availabilities = state.availabilities,
         derivedData = DerivedWorkData(data),
         relations = state.relations
       )
