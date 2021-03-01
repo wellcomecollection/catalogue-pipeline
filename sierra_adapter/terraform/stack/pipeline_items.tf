@@ -56,7 +56,7 @@ module "item_linker" {
   interservice_security_group_id   = var.interservice_security_group_id
 
   deployment_service_env  = var.deployment_env
-  deployment_service_name = "item-linker"
+  deployment_service_name = "items-linker"
   shared_logging_secrets  = var.shared_logging_secrets
 }
 

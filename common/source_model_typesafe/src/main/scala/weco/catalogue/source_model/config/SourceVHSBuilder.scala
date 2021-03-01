@@ -9,7 +9,12 @@ import uk.ac.wellcome.storage.store.{
   HybridStoreWithMaxima,
   VersionedHybridStore
 }
-import uk.ac.wellcome.storage.store.dynamo.{DynamoHashStore, DynamoHybridStore}
+import uk.ac.wellcome.storage.store.dynamo.{
+  ConsistencyMode,
+  DynamoHashStore,
+  DynamoHybridStore,
+  StronglyConsistent
+}
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.storage.streaming.Codec
 import uk.ac.wellcome.storage.typesafe.{DynamoBuilder, S3Builder}
@@ -27,6 +32,12 @@ object SourceVHSBuilder {
 
     val dynamoConfig =
       DynamoBuilder.buildDynamoConfig(config, namespace = namespace)
+
+    // We need strong consistency here, because immediately after we write
+    // a record, we want to be able to read the associated DynamoDB record
+    // to create a SourcePayload to send to the transformers.
+    implicit val consistencyMode: ConsistencyMode =
+      StronglyConsistent
 
     implicit val indexedStore: DynamoHashStore[String, Int, S3ObjectLocation] =
       new DynamoHashStore[String, Int, S3ObjectLocation](dynamoConfig)
