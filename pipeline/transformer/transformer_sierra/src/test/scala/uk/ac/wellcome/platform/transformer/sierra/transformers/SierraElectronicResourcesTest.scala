@@ -2,7 +2,12 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.internal.{DigitalLocation, Item}
+import uk.ac.wellcome.models.work.internal.AccessStatus.LicensedResources
+import uk.ac.wellcome.models.work.internal.{
+  AccessCondition,
+  DigitalLocation,
+  Item
+}
 import uk.ac.wellcome.models.work.internal.LocationType.OnlineResource
 import uk.ac.wellcome.platform.transformer.sierra.generators.MarcGenerators
 import uk.ac.wellcome.platform.transformer.sierra.source.{
@@ -32,7 +37,10 @@ class SierraElectronicResourcesTest
         locations = List(
           DigitalLocation(
             url = "https://example.org/journal",
-            locationType = OnlineResource
+            locationType = OnlineResource,
+            accessConditions = List(
+              AccessCondition(status = Some(LicensedResources))
+            )
           )
         )
       )
@@ -63,7 +71,10 @@ class SierraElectronicResourcesTest
         locations = List(
           DigitalLocation(
             url = "https://example.org/journal",
-            locationType = OnlineResource
+            locationType = OnlineResource,
+            accessConditions = List(
+              AccessCondition(status = Some(LicensedResources))
+            )
           )
         )
       ),
@@ -72,7 +83,10 @@ class SierraElectronicResourcesTest
         locations = List(
           DigitalLocation(
             url = "https://example.org/another-journal",
-            locationType = OnlineResource
+            locationType = OnlineResource,
+            accessConditions = List(
+              AccessCondition(status = Some(LicensedResources))
+            )
           )
         )
       )
@@ -102,7 +116,10 @@ class SierraElectronicResourcesTest
           locations = List(
             DigitalLocation(
               url = "https://example.org/journal",
-              locationType = OnlineResource
+              locationType = OnlineResource,
+              accessConditions = List(
+                AccessCondition(status = Some(LicensedResources))
+              )
             )
           )
         )
@@ -142,7 +159,10 @@ class SierraElectronicResourcesTest
             DigitalLocation(
               url = "https://example.org/viewer",
               linkText = Some("View online"),
-              locationType = OnlineResource
+              locationType = OnlineResource,
+              accessConditions = List(
+                AccessCondition(status = Some(LicensedResources))
+              )
             )
           )
         ),
@@ -152,7 +172,10 @@ class SierraElectronicResourcesTest
             DigitalLocation(
               url = "https://example.org/resource",
               linkText = Some("Access resource"),
-              locationType = OnlineResource
+              locationType = OnlineResource,
+              accessConditions = List(
+                AccessCondition(status = Some(LicensedResources))
+              )
             )
           )
         ),
@@ -162,7 +185,10 @@ class SierraElectronicResourcesTest
             DigitalLocation(
               url = "https://example.org/journal",
               linkText = Some("Connect to journal"),
-              locationType = OnlineResource
+              locationType = OnlineResource,
+              accessConditions = List(
+                AccessCondition(status = Some(LicensedResources))
+              )
             )
           )
         )
@@ -187,7 +213,10 @@ class SierraElectronicResourcesTest
           locations = List(
             DigitalLocation(
               url = "https://example.org/oxford",
-              locationType = OnlineResource
+              locationType = OnlineResource,
+              accessConditions = List(
+                AccessCondition(status = Some(LicensedResources))
+              )
             )
           )
         )
@@ -212,7 +241,10 @@ class SierraElectronicResourcesTest
             DigitalLocation(
               url = "https://example.org/resource",
               linkText = Some("View resource"),
-              locationType = OnlineResource
+              locationType = OnlineResource,
+              accessConditions = List(
+                AccessCondition(status = Some(LicensedResources))
+              )
             )
           )
         )
@@ -237,7 +269,10 @@ class SierraElectronicResourcesTest
             DigitalLocation(
               url = "https://example.org/resource",
               linkText = Some("View resource"),
-              locationType = OnlineResource
+              locationType = OnlineResource,
+              accessConditions = List(
+                AccessCondition(status = Some(LicensedResources))
+              )
             )
           )
         )
@@ -262,7 +297,10 @@ class SierraElectronicResourcesTest
             DigitalLocation(
               url = "https://example.org/resource",
               linkText = Some("View resource"),
-              locationType = OnlineResource
+              locationType = OnlineResource,
+              accessConditions = List(
+                AccessCondition(status = Some(LicensedResources))
+              )
             )
           )
         )
@@ -289,7 +327,10 @@ class SierraElectronicResourcesTest
             DigitalLocation(
               url = "https://example.org/resource",
               linkText = Some("You can view this resource online"),
-              locationType = OnlineResource
+              locationType = OnlineResource,
+              accessConditions = List(
+                AccessCondition(status = Some(LicensedResources))
+              )
             )
           )
         )
