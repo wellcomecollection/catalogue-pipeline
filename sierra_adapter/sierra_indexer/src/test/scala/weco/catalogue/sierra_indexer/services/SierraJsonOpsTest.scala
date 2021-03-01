@@ -5,8 +5,8 @@ import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class JsonOpsTest extends AnyFunSpec with Matchers with EitherValues {
-  import JsonOps._
+class SierraJsonOpsTest extends AnyFunSpec with Matchers with EitherValues {
+  import SierraJsonOps._
 
   describe("varFields") {
     it("gets the varFields from a Sierra API response") {

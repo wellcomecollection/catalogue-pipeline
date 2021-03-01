@@ -24,7 +24,7 @@ import weco.catalogue.sierra_indexer.models.Parent
 // This object splits a SierraTransformable into indexable pieces
 // that can be sent to Elasticsearch.
 class Splitter(indexPrefix: String) {
-  import JsonOps._
+  import SierraJsonOps._
 
   private val varFieldIndex = Index(s"${indexPrefix}_varfields")
   private val fixedFieldsIndex = Index(s"${indexPrefix}_fixedfields")
