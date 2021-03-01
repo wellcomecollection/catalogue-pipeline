@@ -64,6 +64,14 @@ class OtherIdentifiersRuleTest
         )
       )
 
+  val sierraWithDigcode: Work.Visible[WorkState.Identified] =
+    sierraDigitalIdentifiedWork().otherIdentifiers(
+      List(
+        createSierraSystemSourceIdentifier,
+        createDigcodeIdentifier("dighole")
+      )
+    )
+
   it("merges METS, Miro, and Sierra source IDs into Calm target") {
     inside(
       OtherIdentifiersRule
@@ -138,6 +146,18 @@ class OtherIdentifiersRuleTest
         mergedSources should contain theSameElementsAs List(
           miroWork,
           mergeCandidate)
+    }
+  }
+
+  it("merges only digcode identifiers from sources' otherIdentifiers") {
+    inside(OtherIdentifiersRule.merge(calmWork, Seq(sierraWithDigcode))) {
+      case FieldMergeResult(otherIdentifiers, _) =>
+        otherIdentifiers should contain only (
+          sierraWithDigcode.sourceIdentifier,
+          sierraWithDigcode.data.otherIdentifiers
+            .find(_.identifierType.id == "wellcome-digcode")
+            .get
+        )
     }
   }
 

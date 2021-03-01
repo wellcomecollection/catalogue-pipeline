@@ -23,6 +23,8 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
 
   type FieldData = List[SourceIdentifier]
 
+  private val otherIdentifiersTypeAllowList = Set("wellcome-digcode")
+
   override def merge(
     target: Work.Visible[Identified],
     sources: Seq[Work[Identified]]): FieldMergeResult[FieldData] = {
@@ -48,6 +50,12 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
     )
   }
 
+  private def getAllowedIdentifiersFromSource(
+    source: Work[Identified]): List[SourceIdentifier] =
+    (source.sourceIdentifier +: source.data.otherIdentifiers.filter { id =>
+      otherIdentifiersTypeAllowList.contains(id.identifierType.id)
+    }).distinct
+
   private val mergeSingleMiroIntoSingleOrZeroItemSierraTarget =
     new PartialRule {
       val isDefinedForTarget: WorkPredicate =
@@ -59,7 +67,8 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
 
       def rule(target: Work.Visible[Identified],
                sources: NonEmptyList[Work[Identified]]): FieldData =
-        target.data.otherIdentifiers ++ sources.toList.map(_.sourceIdentifier)
+        target.data.otherIdentifiers ++ sources.toList.flatMap(
+          getAllowedIdentifiersFromSource)
     }
 
   private val mergeIntoCalmTarget = new PartialRule {
@@ -69,7 +78,8 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
 
     def rule(target: Work.Visible[Identified],
              sources: NonEmptyList[Work[Identified]]): FieldData =
-      target.data.otherIdentifiers ++ sources.toList.map(_.sourceIdentifier)
+      target.data.otherIdentifiers ++ sources.toList.flatMap(
+        getAllowedIdentifiersFromSource)
   }
 
   private val mergeDigitalIntoPhysicalSierraTarget = new PartialRule {
