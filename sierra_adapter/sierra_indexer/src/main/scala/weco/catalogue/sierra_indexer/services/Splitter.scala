@@ -75,7 +75,8 @@ class Splitter(indexPrefix: String) {
           indexes = Indexes(varFieldIndex.name),
           query =
             must(
-              termQuery("parent.id", parent.id),
+              termQuery("parent.id.keyword", parent.id),
+              termQuery("parent.recordType.keyword", parent.recordType.toString),
               rangeQuery("position").gte(json.varFields.length)
             )
         )
