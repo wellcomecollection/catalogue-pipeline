@@ -106,8 +106,8 @@ object IndexerRequest {
             termQuery("parent.id", parent.id),
             termQuery("parent.recordType.keyword", parent.recordType.toString),
           ).not(
-              termsQuery("code", json.fixedFields.keys)
-            )
+            termsQuery("code", json.fixedFields.keys)
+          )
         )
     }
 }
