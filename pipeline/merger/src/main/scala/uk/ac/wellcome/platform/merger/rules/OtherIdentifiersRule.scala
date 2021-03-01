@@ -23,6 +23,12 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
 
   type FieldData = List[SourceIdentifier]
 
+  // This is a set of the identifierType ids that we allow to be merged
+  // from a source work's otherIdentifiers into a target work.
+  //
+  // - wellcome-digcode is present to persist digcode identifiers from
+  //   Encore records onto Calm target works if they are merged, because
+  //   digcode identifiers are used as a tagging/classification system.
   private val otherIdentifiersTypeAllowList = Set("wellcome-digcode")
 
   override def merge(
