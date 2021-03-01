@@ -138,6 +138,42 @@ class SierraIndexerFeatureTest
                 |}
                 |""".stripMargin
           )
+
+          assertElasticsearchEventuallyHas(
+            index = Index(s"${indexPrefix}_fixedfields"),
+            id = s"${bibId.withoutCheckDigit}-86",
+            json = s"""
+                      |{
+                      |  "parent": {
+                      |    "recordType": "bibs",
+                      |    "id": "${bibId.withoutCheckDigit}"
+                      |  },
+                      |  "code": "86",
+                      |  "fixedField": {
+                      |    "label" : "AGENCY",
+                      |    "value" : "1"
+                      |  }
+                      |}
+                      |""".stripMargin
+          )
+
+          assertElasticsearchEventuallyHas(
+            index = Index(s"${indexPrefix}_fixedfields"),
+            id = s"${bibId.withoutCheckDigit}-265",
+            json = s"""
+                      |{
+                      |  "parent": {
+                      |    "recordType": "bibs",
+                      |    "id": "${bibId.withoutCheckDigit}"
+                      |  },
+                      |  "code": "265",
+                      |  "fixedField": {
+                      |    "label" : "Inherit Location",
+                      |    "value" : false
+                      |  }
+                      |}
+                      |""".stripMargin
+          )
         }
       }
     }
@@ -292,6 +328,42 @@ class SierraIndexerFeatureTest
                       |}
                       |""".stripMargin
           )
+
+          assertElasticsearchEventuallyHas(
+            index = Index(s"${indexPrefix}_fixedfields"),
+            id = s"${itemId1.withoutCheckDigit}-86",
+            json = s"""
+                      |{
+                      |  "parent": {
+                      |    "recordType": "items",
+                      |    "id": "${itemId1.withoutCheckDigit}"
+                      |  },
+                      |  "code": "86",
+                      |  "fixedField": {
+                      |    "label" : "AGENCY",
+                      |    "value" : "1"
+                      |  }
+                      |}
+                      |""".stripMargin
+          )
+
+          assertElasticsearchEventuallyHas(
+            index = Index(s"${indexPrefix}_fixedfields"),
+            id = s"${itemId2.withoutCheckDigit}-265",
+            json = s"""
+                      |{
+                      |  "parent": {
+                      |    "recordType": "items",
+                      |    "id": "${itemId2.withoutCheckDigit}"
+                      |  },
+                      |  "code": "265",
+                      |  "fixedField": {
+                      |    "label" : "Inherit Location",
+                      |    "value" : false
+                      |  }
+                      |}
+                      |""".stripMargin
+          )
         }
       }
     }
@@ -442,6 +514,42 @@ class SierraIndexerFeatureTest
                       |        "content" : "/RHO"
                       |      }
                       |    ]
+                      |  }
+                      |}
+                      |""".stripMargin
+          )
+
+          assertElasticsearchEventuallyHas(
+            index = Index(s"${indexPrefix}_fixedfields"),
+            id = s"${holdingsId1.withoutCheckDigit}-86",
+            json = s"""
+                      |{
+                      |  "parent": {
+                      |    "recordType": "holdings",
+                      |    "id": "${holdingsId1.withoutCheckDigit}"
+                      |  },
+                      |  "code": "86",
+                      |  "fixedField": {
+                      |    "label" : "AGENCY",
+                      |    "value" : "1"
+                      |  }
+                      |}
+                      |""".stripMargin
+          )
+
+          assertElasticsearchEventuallyHas(
+            index = Index(s"${indexPrefix}_fixedfields"),
+            id = s"${holdingsId2.withoutCheckDigit}-265",
+            json = s"""
+                      |{
+                      |  "parent": {
+                      |    "recordType": "holdings",
+                      |    "id": "${holdingsId2.withoutCheckDigit}"
+                      |  },
+                      |  "code": "265",
+                      |  "fixedField": {
+                      |    "label" : "Inherit Location",
+                      |    "value" : false
                       |  }
                       |}
                       |""".stripMargin

@@ -68,6 +68,8 @@ trait IndexerFixtures
 
       getResponse.exists shouldBe true
 
+      println(s"@@AWLC getResponse = $getResponse")
+
       assertJsonStringsAreEqualIgnoringNulls(getResponse.sourceAsString, json)
     }
 }
