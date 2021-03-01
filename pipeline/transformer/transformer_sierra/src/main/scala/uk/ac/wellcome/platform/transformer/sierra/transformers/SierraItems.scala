@@ -50,16 +50,23 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
     val otherLocations =
       sierraItemDataMap
         .filterNot { case (_, itemData) => itemData.deleted }
-        .collect { case (id, SierraItemData(_, Some(location), _, _, _)) => id -> location }
-        .filterNot { case (_, loc) =>
-          loc.name.toLowerCase.contains("above") || loc.name == "-" || loc.name == ""
+        .collect {
+          case (id, SierraItemData(_, Some(location), _, _, _)) =>
+            id -> location
         }
-        .map { case (id, loc) =>
-          SierraPhysicalLocationType.fromName(id, loc.name) match {
-            case Some(LocationType.ClosedStores) =>
-              (Some(LocationType.ClosedStores), LocationType.ClosedStores.label)
-            case other => (other, loc.name)
-          }
+        .filterNot {
+          case (_, loc) =>
+            loc.name.toLowerCase.contains("above") || loc.name == "-" || loc.name == ""
+        }
+        .map {
+          case (id, loc) =>
+            SierraPhysicalLocationType.fromName(id, loc.name) match {
+              case Some(LocationType.ClosedStores) =>
+                (
+                  Some(LocationType.ClosedStores),
+                  LocationType.ClosedStores.label)
+              case other => (other, loc.name)
+            }
         }
         .toSeq
         .distinct
@@ -96,8 +103,12 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
     debug(s"Attempting to transform $itemId")
     Item(
       title = getItemTitle(itemId, itemData),
-      locations =
-        getPhysicalLocation(bibId, itemId, itemData, bibData, fallbackLocation).toList,
+      locations = getPhysicalLocation(
+        bibId,
+        itemId,
+        itemData,
+        bibData,
+        fallbackLocation).toList,
       id = IdState.Identifiable(
         sourceIdentifier = SourceIdentifier(
           identifierType = IdentifierType("sierra-system-number"),
