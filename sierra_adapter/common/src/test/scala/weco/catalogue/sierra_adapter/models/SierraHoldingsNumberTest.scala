@@ -24,6 +24,11 @@ class SierraHoldingsNumberTest
       Identity(SierraHoldingsNumber("1234567")))
   }
 
+  it("decodes an old-style JSON record as a HoldingsNumber") {
+    fromJson[Identity]("""{"id": {"recordNumber": "1234567"}}""") shouldBe Success(
+      Identity(SierraHoldingsNumber("1234567")))
+  }
+
   it("fails if the Int is the wrong format") {
     fromJson[Identity]("""{"id": 123456789}""") shouldBe a[Failure[_]]
   }

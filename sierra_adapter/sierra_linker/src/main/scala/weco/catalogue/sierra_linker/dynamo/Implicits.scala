@@ -11,21 +11,21 @@ object Implicits {
   implicit val formatBibNumber: DynamoFormat[SierraBibNumber] =
     DynamoFormat
       .coercedXmap[SierraBibNumber, String, IllegalArgumentException](
-        SierraBibNumber,
+        SierraBibNumber(_),
         _.withoutCheckDigit
       )
 
   implicit val formatItemNumber: DynamoFormat[SierraItemNumber] =
     DynamoFormat
       .coercedXmap[SierraItemNumber, String, IllegalArgumentException](
-        SierraItemNumber,
+        SierraItemNumber(_),
         _.withoutCheckDigit
       )
 
   implicit val formatHoldingsNumber: DynamoFormat[SierraHoldingsNumber] =
     DynamoFormat
       .coercedXmap[SierraHoldingsNumber, String, IllegalArgumentException](
-        SierraHoldingsNumber,
+        SierraHoldingsNumber(_),
         _.withoutCheckDigit
       )
 }

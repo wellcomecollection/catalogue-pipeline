@@ -5,6 +5,8 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil._
 import weco.catalogue.sierra_adapter.generators.SierraGenerators
 
+import Implicits._
+
 class SierraBibRecordTest
     extends AnyFunSpec
     with Matchers
