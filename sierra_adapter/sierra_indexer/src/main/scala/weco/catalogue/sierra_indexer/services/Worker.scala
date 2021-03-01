@@ -52,12 +52,9 @@ class Worker(
       .fromTry(ops)
       .flatMap {
         case (indexRequests, deleteByQueryRequests) =>
-          val futures = List(
-            elasticClient.execute(
-              bulk(indexRequests)
-            )
-          ) ++ deleteByQueryRequests.map { elasticClient.execute(_) }
-
+          val futures = elasticClient.execute(bulk(indexRequests))
+           +: deleteByQueryRequests.map { elasticClient.execute(_) }
+           
           Future.sequence(futures)
       }
       .map { _ =>
