@@ -43,7 +43,7 @@ trait IndexerFixtures
       }
     }
 
-  def withIndexes[R](testWith: TestWith[String, R]): R = {
+  def withIndices[R](testWith: TestWith[String, R]): R = {
     val indexPrefix = s"sierra_${randomAlphanumeric()}".toLowerCase()
 
     withLocalElasticsearchIndex(

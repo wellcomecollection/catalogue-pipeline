@@ -78,7 +78,7 @@ class SierraIndexerFeatureTest
       initialEntries = Map(location -> transformable)
     )
 
-    withIndexes { indexPrefix =>
+    withIndices { indexPrefix =>
       withLocalSqsQueue() { queue =>
         withWorker(queue, store, indexPrefix) { _ =>
           sendNotificationToSQS(
@@ -255,7 +255,7 @@ class SierraIndexerFeatureTest
       initialEntries = Map(location -> transformable)
     )
 
-    withIndexes { indexPrefix =>
+    withIndices { indexPrefix =>
       withLocalSqsQueue() { queue =>
         withWorker(queue, store, indexPrefix) { _ =>
           sendNotificationToSQS(
@@ -445,7 +445,7 @@ class SierraIndexerFeatureTest
       initialEntries = Map(location -> transformable)
     )
 
-    withIndexes { indexPrefix =>
+    withIndices { indexPrefix =>
       withLocalSqsQueue() { queue =>
         withWorker(queue, store, indexPrefix) { _ =>
           sendNotificationToSQS(
