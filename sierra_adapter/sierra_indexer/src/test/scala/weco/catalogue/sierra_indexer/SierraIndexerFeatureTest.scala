@@ -10,14 +10,18 @@ import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.memory.MemoryTypedStore
 import weco.catalogue.sierra_adapter.generators.SierraGenerators
 import weco.catalogue.sierra_adapter.models.Implicits._
-import weco.catalogue.sierra_adapter.models.{SierraHoldingsRecord, SierraItemRecord, SierraTransformable}
+import weco.catalogue.sierra_adapter.models.{
+  SierraHoldingsRecord,
+  SierraItemRecord,
+  SierraTransformable
+}
 import weco.catalogue.sierra_indexer.fixtures.IndexerFixtures
 import weco.catalogue.source_model.SierraSourcePayload
 
 import java.time.Instant
 
 class SierraIndexerFeatureTest
-  extends AnyFunSpec
+    extends AnyFunSpec
     with Matchers
     with EitherValues
     with SierraGenerators
@@ -32,8 +36,7 @@ class SierraIndexerFeatureTest
       maybeBibRecord = Some(
         createSierraBibRecordWith(
           id = bibId,
-          data =
-            s"""
+          data = s"""
                |{
                |  "id" : "$bibId",
                |  "updatedDate" : "2013-12-12T13:56:07Z",
@@ -80,7 +83,10 @@ class SierraIndexerFeatureTest
         withWorker(queue, store, indexPrefix) { _ =>
           sendNotificationToSQS(
             queue,
-            SierraSourcePayload(id = bibId.withoutCheckDigit, location = location, version = 1)
+            SierraSourcePayload(
+              id = bibId.withoutCheckDigit,
+              location = location,
+              version = 1)
           )
 
           assertElasticsearchEventuallyHas(

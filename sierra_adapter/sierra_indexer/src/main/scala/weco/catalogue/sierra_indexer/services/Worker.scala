@@ -38,26 +38,30 @@ class Worker(
 
         transformable <- sierraReadable.get(payload.location) match {
           case Right(Identified(_, transformable)) => Success(transformable)
-          case Left(err) => Failure(err.e)
+          case Left(err)                           => Failure(err.e)
         }
 
         ops <- splitter.split(transformable) match {
           case Right(ops) => Success(ops)
-          case Left(err) => Failure(new Throwable(s"Couldn't get the Elastic requests: $err"))
+          case Left(err) =>
+            Failure(new Throwable(s"Couldn't get the Elastic requests: $err"))
         }
       } yield ops
 
-    Future.fromTry(ops)
-      .flatMap { case (indexRequests, deleteByQueryRequests) =>
-        val futures = List(
-          elasticClient.execute(
-            bulk(indexRequests)
-          )
-        ) ++ deleteByQueryRequests.map { elasticClient.execute(_) }
+    Future
+      .fromTry(ops)
+      .flatMap {
+        case (indexRequests, deleteByQueryRequests) =>
+          val futures = List(
+            elasticClient.execute(
+              bulk(indexRequests)
+            )
+          ) ++ deleteByQueryRequests.map { elasticClient.execute(_) }
 
-        Future.sequence(futures)
+          Future.sequence(futures)
       }
-      .map { _ => () }
+      .map { _ =>
+        ()
+      }
   }
 }
-

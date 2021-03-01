@@ -20,13 +20,14 @@ import weco.catalogue.sierra_indexer.services.Worker
 import scala.concurrent.ExecutionContext.Implicits.global
 
 trait IndexerFixtures
-  extends ElasticsearchFixtures
+    extends ElasticsearchFixtures
     with Eventually
     with IntegrationPatience
     with Akka
     with SQS { this: Suite =>
   def withWorker[R](
-    queue: Queue, typedStore: MemoryTypedStore[S3ObjectLocation, SierraTransformable],
+    queue: Queue,
+    typedStore: MemoryTypedStore[S3ObjectLocation, SierraTransformable],
     indexPrefix: String)(
     testWith: TestWith[Worker, R]
   ): R =
@@ -45,11 +46,21 @@ trait IndexerFixtures
   def withIndexes[R](testWith: TestWith[String, R]): R = {
     val indexPrefix = s"sierra_${randomAlphanumeric()}".toLowerCase()
 
-    withLocalElasticsearchIndex(NoStrictMapping, index = Index(s"${indexPrefix}_bibs")) { _ =>
-      withLocalElasticsearchIndex(NoStrictMapping, index = Index(s"${indexPrefix}_items")) { _ =>
-        withLocalElasticsearchIndex(NoStrictMapping, index = Index(s"${indexPrefix}_holdings")) { _ =>
-          withLocalElasticsearchIndex(NoStrictMapping, index = Index(s"${indexPrefix}_varfields")) { _ =>
-            withLocalElasticsearchIndex(NoStrictMapping, index = Index(s"${indexPrefix}_fixedfields")) { _ =>
+    withLocalElasticsearchIndex(
+      NoStrictMapping,
+      index = Index(s"${indexPrefix}_bibs")) { _ =>
+      withLocalElasticsearchIndex(
+        NoStrictMapping,
+        index = Index(s"${indexPrefix}_items")) { _ =>
+        withLocalElasticsearchIndex(
+          NoStrictMapping,
+          index = Index(s"${indexPrefix}_holdings")) { _ =>
+          withLocalElasticsearchIndex(
+            NoStrictMapping,
+            index = Index(s"${indexPrefix}_varfields")) { _ =>
+            withLocalElasticsearchIndex(
+              NoStrictMapping,
+              index = Index(s"${indexPrefix}_fixedfields")) { _ =>
               testWith(indexPrefix)
             }
           }
@@ -58,7 +69,9 @@ trait IndexerFixtures
     }
   }
 
-  def assertElasticsearchEventuallyHas(index: Index, id: String, json: String): Assertion =
+  def assertElasticsearchEventuallyHas(index: Index,
+                                       id: String,
+                                       json: String): Assertion =
     eventually {
       val response: Response[GetResponse] = elasticClient.execute {
         get(index, id)

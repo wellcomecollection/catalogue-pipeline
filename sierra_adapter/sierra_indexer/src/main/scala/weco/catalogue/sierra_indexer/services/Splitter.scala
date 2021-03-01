@@ -33,88 +33,98 @@ class Splitter(indexPrefix: String) {
     (value: SierraRecordTypes.Value) => Json.fromString(value.toString)
 
   implicit val encoderNumber: Encoder[TypedSierraRecordNumber] =
-    (number: TypedSierraRecordNumber) => Json.fromString(number.withoutCheckDigit)
+    (number: TypedSierraRecordNumber) =>
+      Json.fromString(number.withoutCheckDigit)
 
   implicit val encoderParent: Encoder[Parent] = deriveConfiguredEncoder
 
-  private case class IndexedVarField(parent: Parent, position: Int, varField: Json)
-  private case class IndexedFixedField(parent: Parent, code: String, fixedField: Json)
+  private case class IndexedVarField(parent: Parent,
+                                     position: Int,
+                                     varField: Json)
+  private case class IndexedFixedField(parent: Parent,
+                                       code: String,
+                                       fixedField: Json)
 
-  def split(t: SierraTransformable): Either[Seq[(Parent, ParsingFailure)], (Seq[IndexRequest], Seq[DeleteByQueryRequest])] = {
+  def split(t: SierraTransformable)
+    : Either[Seq[(Parent, ParsingFailure)],
+             (Seq[IndexRequest], Seq[DeleteByQueryRequest])] = {
     for {
       apiData <- getSierraApiData(t)
 
       mainRecords = List(
-        apiData.map { case (parent, json) =>
-          IndexRequest(
-            index = Index(s"${indexPrefix}_${parent.recordType}"),
-            id = Some(parent.id.withoutCheckDigit),
-            source = Some(json.remainder.noSpaces)
-          )
+        apiData.map {
+          case (parent, json) =>
+            IndexRequest(
+              index = Index(s"${indexPrefix}_${parent.recordType}"),
+              id = Some(parent.id.withoutCheckDigit),
+              source = Some(json.remainder.noSpaces)
+            )
         }
       ).flatten
 
-      varFields = apiData.flatMap { case (parent, json) =>
-        json.varFields.zipWithIndex
-          .map {
-            case (varField, position) =>
-              IndexRequest(
-                index = varFieldIndex,
-                id = Some(s"${parent.id}-$position"),
-                source = Some(
-                  IndexedVarField(parent, position, varField)
-                    .asJson
-                    .noSpaces
+      varFields = apiData.flatMap {
+        case (parent, json) =>
+          json.varFields.zipWithIndex
+            .map {
+              case (varField, position) =>
+                IndexRequest(
+                  index = varFieldIndex,
+                  id = Some(s"${parent.id}-$position"),
+                  source = Some(
+                    IndexedVarField(parent, position, varField).asJson.noSpaces
+                  )
                 )
-              )
-          }
+            }
       }
 
-      varFieldDeletions = apiData.map { case (parent, json) =>
-        DeleteByQueryRequest(
-          indexes = Indexes(varFieldIndex.name),
-          query =
-            must(
+      varFieldDeletions = apiData.map {
+        case (parent, json) =>
+          DeleteByQueryRequest(
+            indexes = Indexes(varFieldIndex.name),
+            query = must(
               termQuery("parent.id.keyword", parent.id),
-              termQuery("parent.recordType.keyword", parent.recordType.toString),
+              termQuery(
+                "parent.recordType.keyword",
+                parent.recordType.toString),
               rangeQuery("position").gte(json.varFields.length)
             )
-        )
+          )
       }
 
-      fixedFields = apiData.flatMap { case (parent, json) =>
-        json.fixedFields
-          .map {
-            case (code, fixedField) =>
-              IndexRequest(
-                index = fixedFieldsIndex,
-                id = Some(s"${parent.id}-$code"),
-                source = Some(
-                  IndexedFixedField(parent, code, fixedField)
-                    .asJson
-                    .noSpaces
+      fixedFields = apiData.flatMap {
+        case (parent, json) =>
+          json.fixedFields
+            .map {
+              case (code, fixedField) =>
+                IndexRequest(
+                  index = fixedFieldsIndex,
+                  id = Some(s"${parent.id}-$code"),
+                  source = Some(
+                    IndexedFixedField(parent, code, fixedField).asJson.noSpaces
+                  )
                 )
-              )
-          }
+            }
       }
 
-      fixedFieldDeletions = apiData.map { case (parent, json) =>
-        DeleteByQueryRequest(
-          indexes = Indexes(varFieldIndex.name),
-          query =
-            must(termQuery("parent.id", parent.id))
+      fixedFieldDeletions = apiData.map {
+        case (parent, json) =>
+          DeleteByQueryRequest(
+            indexes = Indexes(varFieldIndex.name),
+            query = must(termQuery("parent.id", parent.id))
               .not(
                 termsQuery("code", json.fixedFields.keys)
               )
-        )
+          )
       }
-    } yield (
-      mainRecords ++ varFields ++ fixedFields,
-      varFieldDeletions ++ fixedFieldDeletions
-    )
+    } yield
+      (
+        mainRecords ++ varFields ++ fixedFields,
+        varFieldDeletions ++ fixedFieldDeletions
+      )
   }
 
-  private def getSierraApiData(t: SierraTransformable): Either[Seq[(Parent, ParsingFailure)], Seq[(Parent, Json)]] = {
+  private def getSierraApiData(t: SierraTransformable)
+    : Either[Seq[(Parent, ParsingFailure)], Seq[(Parent, Json)]] = {
     val bibData = t.maybeBibRecord match {
       case Some(bibRecord) =>
         Seq(
@@ -123,23 +133,22 @@ class Splitter(indexPrefix: String) {
       case None => Seq()
     }
 
-    val itemData: Seq[(Parent, Either[ParsingFailure, Json])] = t.itemRecords
-      .values
-      .map { itemRecord =>
+    val itemData: Seq[(Parent, Either[ParsingFailure, Json])] =
+      t.itemRecords.values.map { itemRecord =>
         Parent(SierraRecordTypes.items, itemRecord.id) -> parse(itemRecord.data)
-      }
-      .toSeq
+      }.toSeq
 
-    val holdingsData: Seq[(Parent, Either[ParsingFailure, Json])] = t.holdingsRecords
-      .values
-      .map { holdingsRecord =>
-        Parent(SierraRecordTypes.holdings, holdingsRecord.id) -> parse(holdingsRecord.data)
-      }
-      .toSeq
+    val holdingsData: Seq[(Parent, Either[ParsingFailure, Json])] =
+      t.holdingsRecords.values.map { holdingsRecord =>
+        Parent(SierraRecordTypes.holdings, holdingsRecord.id) -> parse(
+          holdingsRecord.data)
+      }.toSeq
 
     val data = bibData ++ itemData ++ holdingsData
 
-    val successes = data.collect { case (parent, Right(json)) => (parent, json) }
+    val successes = data.collect {
+      case (parent, Right(json)) => (parent, json)
+    }
     val failures = data.collect { case (parent, Left(err)) => (parent, err) }
 
     Either.cond(failures.isEmpty, successes, failures)

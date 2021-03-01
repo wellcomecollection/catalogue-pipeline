@@ -89,12 +89,14 @@ class JsonOpsTest extends AnyFunSpec with Matchers with EitherValues {
             |  "label" : "Inherit Location",
             |  "value" : false
             |}
-            |""".stripMargin)
+            |""".stripMargin
+      )
 
       val fixedFieldsJson =
         fixedFields
-          .map { case (code, json) =>
-            s"""
+          .map {
+            case (code, json) =>
+              s"""
               |"$code": $json
               |""".stripMargin
           }
@@ -114,7 +116,9 @@ class JsonOpsTest extends AnyFunSpec with Matchers with EitherValues {
 
       println(jsonString)
 
-      json.fixedFields shouldBe fixedFields.map { case (code, json) => code -> parse(json).value }
+      json.fixedFields shouldBe fixedFields.map {
+        case (code, json) => code -> parse(json).value
+      }
     }
 
     it("returns an empty list if there are no fixedFields") {
@@ -184,7 +188,8 @@ class JsonOpsTest extends AnyFunSpec with Matchers with EitherValues {
       ).value
     }
 
-    it("returns the remainder unmodified if there are no varFields or fixedFields") {
+    it(
+      "returns the remainder unmodified if there are no varFields or fixedFields") {
       val jsonString =
         s"""
            |{

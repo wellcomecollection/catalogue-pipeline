@@ -20,7 +20,8 @@ object Main extends WellcomeTypesafeApp {
     implicit val actorSystem: ActorSystem = AkkaBuilder.buildActorSystem()
     implicit val ec: ExecutionContext = AkkaBuilder.buildExecutionContext()
 
-    implicit val elasticClient: ElasticClient = ElasticBuilder.buildElasticClient(config)
+    implicit val elasticClient: ElasticClient =
+      ElasticBuilder.buildElasticClient(config)
 
     implicit val s3Client: AmazonS3 = S3Builder.buildS3Client(config)
 
