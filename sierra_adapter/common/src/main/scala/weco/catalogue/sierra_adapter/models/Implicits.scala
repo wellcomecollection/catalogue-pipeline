@@ -9,6 +9,9 @@ import scala.util.{Failure, Success, Try}
 object Implicits {
   import weco.catalogue.sierra_adapter.json.JsonOps._
 
+  implicit val recordTypeEncoder: Encoder[SierraRecordTypes.Value] =
+    (value: SierraRecordTypes.Value) => Json.fromString(value.toString)
+
   // Because the [[SierraTransformable.itemRecords]] field is keyed by
   // [[SierraItemNumber]] in our case class, but JSON only supports string
   // keys, we need to turn the ID into a string when storing as JSON.
@@ -68,6 +71,9 @@ object Implicits {
 
   implicit val bibNumberDecoder: Decoder[SierraBibNumber] =
     createDecoder(new SierraBibNumber(_))
+
+  implicit val typedSierraRecordNumberEncoder: Encoder[TypedSierraRecordNumber] =
+    (number: TypedSierraRecordNumber) => Json.fromString(number.withoutCheckDigit)
 
   implicit val holdingsNumberEncoder: Encoder[SierraHoldingsNumber] =
     (number: SierraHoldingsNumber) => Json.fromString(number.withoutCheckDigit)
