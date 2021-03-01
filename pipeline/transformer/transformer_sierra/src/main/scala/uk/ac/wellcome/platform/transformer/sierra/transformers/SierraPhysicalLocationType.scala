@@ -47,7 +47,7 @@ object SierraPhysicalLocationType extends Logging {
         None
 
       case _ =>
-        warn(s"$id: Unable to map Sierra location name to LocationType: $name")
+        warn(s"${id.withCheckDigit}: Unable to map Sierra location name to LocationType: $name")
         None
     }
 
