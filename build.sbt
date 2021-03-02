@@ -228,9 +228,10 @@ lazy val sierra_linker = Common.setupProject(
   projectVersion,
   localDependencies = Seq(sierra_adapter_common))
 
-lazy val sierra_indexer = setupProject(
+lazy val sierra_indexer = Common.setupProject(
   project,
   folder = "sierra_adapter/sierra_indexer",
+  projectVersion,
   localDependencies = Seq(sierra_adapter_common, pipeline_storage_typesafe))
 
 // METS adapter
