@@ -7,9 +7,7 @@ import re
 import sys
 
 from commands import git
-from git_utils import (
-    has_source_changes,
-)
+from git_utils import has_source_changes
 from provider import current_branch, is_default_branch, repo
 
 
@@ -81,8 +79,6 @@ def update_changelog_and_version():
 
     with open(CHANGELOG_FILE, "w") as o:
         o.write("\n".join(new_changelog_parts))
-
-
 
     # Update the version specified in build.sbt.  We're looking to replace
     # a line of the form:
