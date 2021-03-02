@@ -292,7 +292,7 @@ lazy val snapshot_generator = Common.setupProject(
 
 s3CredentialsProvider := { _ =>
   val builder = new STSAssumeRoleSessionCredentialsProvider.Builder(
-    "arn:aws:iam::760097843905:role/platform-read_only",
+    "arn:aws:iam::760097843905:role/platform-ci",
     UUID.randomUUID().toString
   )
   builder.build()
