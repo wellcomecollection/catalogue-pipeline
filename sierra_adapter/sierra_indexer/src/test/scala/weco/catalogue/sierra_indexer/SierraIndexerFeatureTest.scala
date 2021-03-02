@@ -32,8 +32,12 @@ class SierraIndexerFeatureTest
 
     val bibId = createSierraBibNumber
 
-    val itemIds = (1 to 5).map { _ => createSierraItemNumber}
-    val holdingsIds = (1 to 4).map { _ => createSierraHoldingsNumber }
+    val itemIds = (1 to 5).map { _ =>
+      createSierraItemNumber
+    }
+    val holdingsIds = (1 to 4).map { _ =>
+      createSierraHoldingsNumber
+    }
 
     val transformable = createSierraTransformableWith(
       maybeBibRecord = Some(
@@ -76,8 +80,12 @@ class SierraIndexerFeatureTest
                |""".stripMargin
         )
       ),
-      itemRecords = itemIds.map { id => createSierraItemRecordWith(id = id) }.toList,
-      holdingsRecords = holdingsIds.map { id => createSierraHoldingsRecordWith(id = id) }.toList,
+      itemRecords = itemIds.map { id =>
+        createSierraItemRecordWith(id = id)
+      }.toList,
+      holdingsRecords = holdingsIds.map { id =>
+        createSierraHoldingsRecordWith(id = id)
+      }.toList,
     )
 
     println(transformable)
@@ -98,16 +106,24 @@ class SierraIndexerFeatureTest
           )
 
           val itemIdsList =
-            itemIds.map { id =>
-              s"""
+            itemIds
+              .map { id =>
+                s"""
                  |"${id.withoutCheckDigit}"
-                 |""".stripMargin }.sorted.mkString(",")
+                 |""".stripMargin
+              }
+              .sorted
+              .mkString(",")
 
           val holdingsIdsList =
-            holdingsIds.map { id =>
-              s"""
+            holdingsIds
+              .map { id =>
+                s"""
                  |"${id.withoutCheckDigit}"
-                 |""".stripMargin }.sorted.mkString(",")
+                 |""".stripMargin
+              }
+              .sorted
+              .mkString(",")
 
           assertElasticsearchEventuallyHas(
             index = Index(s"${indexPrefix}_bibs"),
