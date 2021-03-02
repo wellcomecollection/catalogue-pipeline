@@ -44,7 +44,7 @@ sierra_adapter:
         - id: holdings-reader
     - id: sierra_indexer
       services:
-        - sierra-indexer
+        - id: sierra-indexer
   name: Sierra Adapter
   role_arn: arn:aws:iam::760097843905:role/platform-ci
 
