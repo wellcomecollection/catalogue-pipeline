@@ -32,6 +32,9 @@ class SierraIndexerFeatureTest
 
     val bibId = createSierraBibNumber
 
+    val itemIds = (1 to 5).map { _ => createSierraItemNumber}
+    val holdingsIds = (1 to 4).map { _ => createSierraHoldingsNumber }
+
     val transformable = createSierraTransformableWith(
       maybeBibRecord = Some(
         createSierraBibRecordWith(
@@ -72,8 +75,13 @@ class SierraIndexerFeatureTest
                |}
                |""".stripMargin
         )
-      )
+      ),
+      itemRecords = itemIds.map { id => createSierraItemRecordWith(id = id) }.toList,
+      holdingsRecords = holdingsIds.map { id => createSierraHoldingsRecordWith(id = id) }.toList,
     )
+
+    println(transformable)
+
     val store = MemoryTypedStore[S3ObjectLocation, SierraTransformable](
       initialEntries = Map(location -> transformable)
     )
@@ -89,6 +97,18 @@ class SierraIndexerFeatureTest
               version = 1)
           )
 
+          val itemIdsList =
+            itemIds.map { id =>
+              s"""
+                 |"${id.withoutCheckDigit}"
+                 |""".stripMargin }.sorted.mkString(",")
+
+          val holdingsIdsList =
+            holdingsIds.map { id =>
+              s"""
+                 |"${id.withoutCheckDigit}"
+                 |""".stripMargin }.sorted.mkString(",")
+
           assertElasticsearchEventuallyHas(
             index = Index(s"${indexPrefix}_bibs"),
             id = bibId.withoutCheckDigit,
@@ -96,7 +116,9 @@ class SierraIndexerFeatureTest
                 |{
                 |  "id" : "$bibId",
                 |  "updatedDate" : "2013-12-12T13:56:07Z",
-                |  "deleted" : false
+                |  "deleted" : false,
+                |  "itemIds": [$itemIdsList],
+                |  "holdingsIds": [$holdingsIdsList]
                 |}
                 |""".stripMargin
           )
