@@ -53,6 +53,9 @@ steps:
     label: "Sierra merger"
   - command: .buildkite/scripts/run_job.py sierra_linker
     label: "Sierra linker"
+  - command: .buildkite/scripts/run_job.py sierra_indexer
+    label: "Sierra indexer"
+
   - command: .buildkite/scripts/run_job.py mets_adapter
     label: "METS adapter"
   - command: .buildkite/scripts/run_job.py calm_adapter
