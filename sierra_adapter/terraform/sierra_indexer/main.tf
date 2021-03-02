@@ -26,6 +26,9 @@ module "service" {
     es_host     = "reporting/es_host"
   }
 
+  cpu    = 1024
+  memory = 2048
+
   min_capacity = 0
 
   # We don't allow this app to scale up too far -- it might take a while
