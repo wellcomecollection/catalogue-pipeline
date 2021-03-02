@@ -103,7 +103,7 @@ class SierraIndexerFeatureTest
 
           assertElasticsearchEventuallyHas(
             index = Index(s"${indexPrefix}_varfields"),
-            id = s"${bibId.withoutCheckDigit}-0",
+            id = s"bibs-${bibId.withoutCheckDigit}-0",
             json = s"""
                 |{
                 |  "parent": {
@@ -121,7 +121,7 @@ class SierraIndexerFeatureTest
 
           assertElasticsearchEventuallyHas(
             index = Index(s"${indexPrefix}_varfields"),
-            id = s"${bibId.withoutCheckDigit}-1",
+            id = s"bibs-${bibId.withoutCheckDigit}-1",
             json = s"""
                 |{
                 |  "parent": {
@@ -147,7 +147,7 @@ class SierraIndexerFeatureTest
 
           assertElasticsearchEventuallyHas(
             index = Index(s"${indexPrefix}_fixedfields"),
-            id = s"${bibId.withoutCheckDigit}-86",
+            id = s"bibs-${bibId.withoutCheckDigit}-86",
             json = s"""
                       |{
                       |  "parent": {
@@ -165,7 +165,7 @@ class SierraIndexerFeatureTest
 
           assertElasticsearchEventuallyHas(
             index = Index(s"${indexPrefix}_fixedfields"),
-            id = s"${bibId.withoutCheckDigit}-265",
+            id = s"bibs-${bibId.withoutCheckDigit}-265",
             json = s"""
                       |{
                       |  "parent": {
@@ -293,7 +293,7 @@ class SierraIndexerFeatureTest
 
           assertElasticsearchEventuallyHas(
             index = Index(s"${indexPrefix}_varfields"),
-            id = s"${itemId1.withoutCheckDigit}-0",
+            id = s"items-${itemId1.withoutCheckDigit}-0",
             json = s"""
                       |{
                       |  "parent": {
@@ -311,7 +311,7 @@ class SierraIndexerFeatureTest
 
           assertElasticsearchEventuallyHas(
             index = Index(s"${indexPrefix}_varfields"),
-            id = s"${itemId2.withoutCheckDigit}-0",
+            id = s"items-${itemId2.withoutCheckDigit}-0",
             json = s"""
                       |{
                       |  "parent": {
@@ -337,7 +337,7 @@ class SierraIndexerFeatureTest
 
           assertElasticsearchEventuallyHas(
             index = Index(s"${indexPrefix}_fixedfields"),
-            id = s"${itemId1.withoutCheckDigit}-86",
+            id = s"items-${itemId1.withoutCheckDigit}-86",
             json = s"""
                       |{
                       |  "parent": {
@@ -355,7 +355,7 @@ class SierraIndexerFeatureTest
 
           assertElasticsearchEventuallyHas(
             index = Index(s"${indexPrefix}_fixedfields"),
-            id = s"${itemId2.withoutCheckDigit}-265",
+            id = s"items-${itemId2.withoutCheckDigit}-265",
             json = s"""
                       |{
                       |  "parent": {
@@ -483,7 +483,7 @@ class SierraIndexerFeatureTest
 
           assertElasticsearchEventuallyHas(
             index = Index(s"${indexPrefix}_varfields"),
-            id = s"${holdingsId1.withoutCheckDigit}-0",
+            id = s"holdings-${holdingsId1.withoutCheckDigit}-0",
             json = s"""
                       |{
                       |  "parent": {
@@ -501,7 +501,7 @@ class SierraIndexerFeatureTest
 
           assertElasticsearchEventuallyHas(
             index = Index(s"${indexPrefix}_varfields"),
-            id = s"${holdingsId2.withoutCheckDigit}-0",
+            id = s"holdings-${holdingsId2.withoutCheckDigit}-0",
             json = s"""
                       |{
                       |  "parent": {
@@ -527,7 +527,7 @@ class SierraIndexerFeatureTest
 
           assertElasticsearchEventuallyHas(
             index = Index(s"${indexPrefix}_fixedfields"),
-            id = s"${holdingsId1.withoutCheckDigit}-86",
+            id = s"holdings-${holdingsId1.withoutCheckDigit}-86",
             json = s"""
                       |{
                       |  "parent": {
@@ -545,7 +545,7 @@ class SierraIndexerFeatureTest
 
           assertElasticsearchEventuallyHas(
             index = Index(s"${indexPrefix}_fixedfields"),
-            id = s"${holdingsId2.withoutCheckDigit}-265",
+            id = s"holdings-${holdingsId2.withoutCheckDigit}-265",
             json = s"""
                       |{
                       |  "parent": {
