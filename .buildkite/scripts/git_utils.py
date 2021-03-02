@@ -19,8 +19,7 @@ def get_changed_paths(*args, globs=None):
 
 def remote_default_branch():
     """Inspect refs to discover default branch @ remote origin."""
-    return "alice-publish-internal-model"
-    # return git("symbolic-ref", "refs/remotes/origin/HEAD").split("/")[-1]
+    return git("symbolic-ref", "refs/remotes/origin/HEAD").split("/")[-1]
 
 
 def remote_default_head():

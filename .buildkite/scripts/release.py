@@ -171,7 +171,7 @@ def release():
         git("remote", "add", "ssh-origin", repo(), exit_on_error=False)
 
         git("push", "ssh-origin", "HEAD:alice-publish-internal-model")
-        # git("push", "ssh-origin", "--tag")
+        git("push", "ssh-origin", "--tag")
     else:
         print("No release detected, exit gracefully.")
         sys.exit(0)
