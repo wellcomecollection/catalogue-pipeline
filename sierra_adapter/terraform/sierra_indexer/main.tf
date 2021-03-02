@@ -34,7 +34,7 @@ module "service" {
   # We don't allow this app to scale up too far -- it might take a while
   # to get through a reindex, but we don't want to overwhelm the
   # reporting cluster.
-  max_capacity = 1
+  max_capacity = 3
 
   namespace_id = var.namespace_id
 
