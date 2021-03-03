@@ -216,30 +216,20 @@ lazy val sierra_reader = setupProject(
   externalDependencies = CatalogueDependencies.sierraReaderDependencies
 )
 
-lazy val sierra_bib_merger = setupProject(
+lazy val sierra_merger = setupProject(
   project,
-  "sierra_adapter/sierra_bib_merger",
+  "sierra_adapter/sierra_merger",
   localDependencies = Seq(sierra_adapter_common))
 
-lazy val sierra_item_merger = setupProject(
+lazy val sierra_linker = setupProject(
   project,
-  "sierra_adapter/sierra_item_merger",
+  folder = "sierra_adapter/sierra_linker",
   localDependencies = Seq(sierra_adapter_common))
 
-lazy val sierra_holdings_merger = setupProject(
+lazy val sierra_indexer = setupProject(
   project,
-  "sierra_adapter/sierra_holdings_merger",
-  localDependencies = Seq(sierra_adapter_common))
-
-lazy val sierra_items_to_dynamo = setupProject(
-  project,
-  folder = "sierra_adapter/sierra_items_to_dynamo",
-  localDependencies = Seq(sierra_adapter_common))
-
-lazy val sierra_holdings_linker = setupProject(
-  project,
-  folder = "sierra_adapter/sierra_holdings_linker",
-  localDependencies = Seq(sierra_adapter_common))
+  folder = "sierra_adapter/sierra_indexer",
+  localDependencies = Seq(sierra_adapter_common, pipeline_storage_typesafe))
 
 // METS adapter
 
