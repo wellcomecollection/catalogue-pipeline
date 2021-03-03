@@ -9,15 +9,15 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.work.internal.WorkState.Merged
 import uk.ac.wellcome.models.work.internal._
+import uk.ac.wellcome.relation_embedder.fixtures.RelationGenerators
 
 class RelationsServiceTest
     extends AnyFunSpec
     with Matchers
     with ElasticsearchFixtures
-    with WorkGenerators
+    with RelationGenerators
     with Akka {
 
   def service(index: Index,
@@ -29,11 +29,6 @@ class RelationsServiceTest
       completeTreeScroll = completeTreeScroll,
       affectedWorksScroll = affectedWorksScroll
     )
-
-  def work(path: String) =
-    mergedWork(createSourceIdentifierWith(value = path))
-      .collectionPath(CollectionPath(path = path))
-      .title(path)
 
   def storeWorks(index: Index, works: List[Work[Merged]] = works): Assertion =
     insertIntoElasticsearch(index, works: _*)
@@ -247,16 +242,4 @@ class RelationsServiceTest
                           batch: Batch)(implicit as: ActorSystem) =
       service.getRelationTree(batch).runWith(Sink.seq[RelationWork])
   }
-
-  def toRelationWork(work: Work[Merged]): RelationWork =
-    RelationWork(
-      data = RelationWorkData(
-        title = work.data.title,
-        collectionPath = work.data.collectionPath,
-        workType = work.data.workType,
-      ),
-      state = RelationWorkState(
-        canonicalId = work.state.canonicalId
-      )
-    )
 }

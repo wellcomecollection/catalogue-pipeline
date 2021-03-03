@@ -53,7 +53,12 @@ class RelationEmbedderWorkerService[MsgDestination](
             val denormalisedWorks = relationsService
               .getAffectedWorks(batch)
               .map { work =>
-                work.transition[Denormalised](relationsCache(work))
+                val relations = relationsCache(work)
+                val relationAvailabilities =
+                  relationsCache.getAvailabilities(work)
+                work.transition[Denormalised](
+                  (relations, relationAvailabilities)
+                )
               }
 
             denormalisedWorks

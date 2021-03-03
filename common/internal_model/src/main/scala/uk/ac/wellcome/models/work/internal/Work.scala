@@ -184,7 +184,7 @@ object WorkState {
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified
-    type TransitionArgs = Relations
+    type TransitionArgs = (Relations, Set[Availability])
 
     def id = canonicalId
   }
@@ -246,14 +246,17 @@ object WorkFsm {
     new Transition[Merged, Denormalised] {
       def state(state: Merged,
                 data: WorkData[DataState.Identified],
-                relations: Relations): Denormalised =
-        Denormalised(
-          sourceIdentifier = state.sourceIdentifier,
-          canonicalId = state.canonicalId,
-          modifiedTime = state.modifiedTime,
-          availabilities = state.availabilities,
-          relations = relations
-        )
+                context: (Relations, Set[Availability])): Denormalised =
+        context match {
+          case (relations, relationAvailabilities) =>
+            Denormalised(
+              sourceIdentifier = state.sourceIdentifier,
+              canonicalId = state.canonicalId,
+              modifiedTime = state.modifiedTime,
+              availabilities = state.availabilities ++ relationAvailabilities,
+              relations = relations
+            )
+        }
 
       def data(data: WorkData[DataState.Identified]) = data
 
