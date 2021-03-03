@@ -123,7 +123,7 @@ def has_release():
 
 def read_release_file():
     """
-    Parses the release file, returning a tuple (release_type, release_contents)
+    Parses the release file, returning the release_contents
     """
     with open(RELEASE_FILE) as i:
         release_contents = i.read()
