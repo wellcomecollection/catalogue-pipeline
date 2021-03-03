@@ -4,13 +4,17 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
 import uk.ac.wellcome.models.work.internal.LocationType
+import weco.catalogue.sierra_adapter.generators.SierraGenerators
 
 class SierraPhysicalLocationTypeTest
     extends AnyFunSpec
     with Matchers
-    with TableDrivenPropertyChecks {
+    with TableDrivenPropertyChecks
+    with SierraGenerators {
   // These test cases are based on location names from every item in the
   // Sierra catalogue, as retrieved at the start of February 2021.
+
+  val id = createSierraBibNumber
 
   it("maps names to ClosedStores") {
     val testCases = Table(
@@ -31,7 +35,7 @@ class SierraPhysicalLocationTypeTest
     )
 
     forAll(testCases) {
-      SierraPhysicalLocationType.fromName(_) shouldBe Some(
+      SierraPhysicalLocationType.fromName(id, _) shouldBe Some(
         LocationType.ClosedStores)
     }
   }
@@ -53,13 +57,13 @@ class SierraPhysicalLocationTypeTest
     )
 
     forAll(testCases) {
-      SierraPhysicalLocationType.fromName(_) shouldBe Some(
+      SierraPhysicalLocationType.fromName(id, _) shouldBe Some(
         LocationType.OpenShelves)
     }
   }
 
   it("maps to the OnExhibition type") {
-    SierraPhysicalLocationType.fromName("On Exhibition") shouldBe Some(
+    SierraPhysicalLocationType.fromName(id, "On Exhibition") shouldBe Some(
       LocationType.OnExhibition)
   }
 
@@ -73,7 +77,7 @@ class SierraPhysicalLocationTypeTest
     )
 
     forAll(testCases) {
-      SierraPhysicalLocationType.fromName(_) shouldBe None
+      SierraPhysicalLocationType.fromName(id, _) shouldBe None
     }
   }
 }
