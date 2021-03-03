@@ -67,6 +67,7 @@ def should_run_sbt_project(repo, project_name, changed_paths):
 
     return False
 
+
 def should_check_release(project_name):
     return project_name == "internal_model"
 
