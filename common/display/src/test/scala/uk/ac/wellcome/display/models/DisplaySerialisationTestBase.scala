@@ -221,7 +221,7 @@ trait DisplaySerialisationTestBase {
   def production(production: List[ProductionEvent[IdState.Minted]]) =
     production.map(productionEvent).mkString(",")
 
-  def availabilities(availabilities: List[Availability]) =
+  def availabilities(availabilities: Set[Availability]) =
     availabilities.map(availability).mkString(",")
 
   def languages(ls: List[Language]): String =

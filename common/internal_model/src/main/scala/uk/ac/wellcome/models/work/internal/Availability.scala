@@ -31,8 +31,8 @@ object Availability extends Enum[Availability] {
 }
 
 object Availabilities {
-  def forWorkData(data: WorkData[_]): List[Availability] =
-    List(
+  def forWorkData(data: WorkData[_]): Set[Availability] =
+    Set(
       when(containsLocation(_.isInstanceOf[PhysicalLocation])(data.items))(
         Availability.InLibrary
       ),

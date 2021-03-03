@@ -165,7 +165,7 @@ object WorkState {
     sourceIdentifier: SourceIdentifier,
     canonicalId: String,
     modifiedTime: Instant,
-    availabilities: List[Availability] = Nil,
+    availabilities: Set[Availability] = Set.empty,
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified
@@ -179,7 +179,7 @@ object WorkState {
     sourceIdentifier: SourceIdentifier,
     canonicalId: String,
     modifiedTime: Instant,
-    availabilities: List[Availability],
+    availabilities: Set[Availability],
     relations: Relations = Relations.none
   ) extends WorkState {
 
@@ -193,7 +193,7 @@ object WorkState {
     sourceIdentifier: SourceIdentifier,
     canonicalId: String,
     modifiedTime: Instant,
-    availabilities: List[Availability],
+    availabilities: Set[Availability],
     derivedData: DerivedWorkData,
     relations: Relations = Relations.none
   ) extends WorkState {
