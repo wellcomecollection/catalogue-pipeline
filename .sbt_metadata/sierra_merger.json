@@ -1,7 +1,0 @@
-{
-  "id" : "sierra_merger",
-  "folder" : "sierra_adapter/sierra_merger",
-  "dependencyIds" : [
-    "sierra_adapter_common"
-  ]
-}
