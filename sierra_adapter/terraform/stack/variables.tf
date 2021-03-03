@@ -26,3 +26,11 @@ variable "sierra_linker_image" {
 variable "sierra_merger_image" {
   type = string
 }
+
+variable "sierra_indexer_image" {
+  type = string
+}
+
+variable "reporting_reindex_topic_arn" {
+  type = string
+}

@@ -36,10 +36,25 @@ class Splitter(indexPrefix: String) {
 
   private def getSierraApiData(t: SierraTransformable)
     : Either[Seq[(Parent, ParsingFailure)], Seq[(Parent, Json)]] = {
+    val itemIds = t.itemRecords.keys.map { _.withoutCheckDigit }.toList.sorted
+    val holdingsIds =
+      t.holdingsRecords.keys.map { _.withoutCheckDigit }.toList.sorted
+
     val bibData = t.maybeBibRecord match {
       case Some(bibRecord) =>
         Seq(
-          Parent(SierraRecordTypes.bibs, bibRecord.id) -> parse(bibRecord.data)
+          Parent(SierraRecordTypes.bibs, bibRecord.id) ->
+            parse(bibRecord.data)
+              .map { json =>
+                json
+                  .mapObject(_.add("itemIds", Json.fromValues(itemIds.map {
+                    Json.fromString
+                  })))
+                  .mapObject(
+                    _.add("holdingsIds", Json.fromValues(holdingsIds.map {
+                      Json.fromString
+                    })))
+              }
         )
       case None => Seq()
     }

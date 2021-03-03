@@ -32,6 +32,13 @@ class SierraIndexerFeatureTest
 
     val bibId = createSierraBibNumber
 
+    val itemIds = (1 to 5).map { _ =>
+      createSierraItemNumber
+    }
+    val holdingsIds = (1 to 4).map { _ =>
+      createSierraHoldingsNumber
+    }
+
     val transformable = createSierraTransformableWith(
       maybeBibRecord = Some(
         createSierraBibRecordWith(
@@ -72,8 +79,17 @@ class SierraIndexerFeatureTest
                |}
                |""".stripMargin
         )
-      )
+      ),
+      itemRecords = itemIds.map { id =>
+        createSierraItemRecordWith(id = id)
+      }.toList,
+      holdingsRecords = holdingsIds.map { id =>
+        createSierraHoldingsRecordWith(id = id)
+      }.toList,
     )
+
+    println(transformable)
+
     val store = MemoryTypedStore[S3ObjectLocation, SierraTransformable](
       initialEntries = Map(location -> transformable)
     )
@@ -89,6 +105,26 @@ class SierraIndexerFeatureTest
               version = 1)
           )
 
+          val itemIdsList =
+            itemIds
+              .map { id =>
+                s"""
+                 |"${id.withoutCheckDigit}"
+                 |""".stripMargin
+              }
+              .sorted
+              .mkString(",")
+
+          val holdingsIdsList =
+            holdingsIds
+              .map { id =>
+                s"""
+                 |"${id.withoutCheckDigit}"
+                 |""".stripMargin
+              }
+              .sorted
+              .mkString(",")
+
           assertElasticsearchEventuallyHas(
             index = Index(s"${indexPrefix}_bibs"),
             id = bibId.withoutCheckDigit,
@@ -96,14 +132,16 @@ class SierraIndexerFeatureTest
                 |{
                 |  "id" : "$bibId",
                 |  "updatedDate" : "2013-12-12T13:56:07Z",
-                |  "deleted" : false
+                |  "deleted" : false,
+                |  "itemIds": [$itemIdsList],
+                |  "holdingsIds": [$holdingsIdsList]
                 |}
                 |""".stripMargin
           )
 
           assertElasticsearchEventuallyHas(
             index = Index(s"${indexPrefix}_varfields"),
-            id = s"${bibId.withoutCheckDigit}-0",
+            id = s"bibs-${bibId.withoutCheckDigit}-0",
             json = s"""
                 |{
                 |  "parent": {
@@ -121,7 +159,7 @@ class SierraIndexerFeatureTest
 
           assertElasticsearchEventuallyHas(
             index = Index(s"${indexPrefix}_varfields"),
-            id = s"${bibId.withoutCheckDigit}-1",
+            id = s"bibs-${bibId.withoutCheckDigit}-1",
             json = s"""
                 |{
                 |  "parent": {
@@ -147,7 +185,7 @@ class SierraIndexerFeatureTest
 
           assertElasticsearchEventuallyHas(
             index = Index(s"${indexPrefix}_fixedfields"),
-            id = s"${bibId.withoutCheckDigit}-86",
+            id = s"bibs-${bibId.withoutCheckDigit}-86",
             json = s"""
                       |{
                       |  "parent": {
@@ -165,7 +203,7 @@ class SierraIndexerFeatureTest
 
           assertElasticsearchEventuallyHas(
             index = Index(s"${indexPrefix}_fixedfields"),
-            id = s"${bibId.withoutCheckDigit}-265",
+            id = s"bibs-${bibId.withoutCheckDigit}-265",
             json = s"""
                       |{
                       |  "parent": {
@@ -293,7 +331,7 @@ class SierraIndexerFeatureTest
 
           assertElasticsearchEventuallyHas(
             index = Index(s"${indexPrefix}_varfields"),
-            id = s"${itemId1.withoutCheckDigit}-0",
+            id = s"items-${itemId1.withoutCheckDigit}-0",
             json = s"""
                       |{
                       |  "parent": {
@@ -311,7 +349,7 @@ class SierraIndexerFeatureTest
 
           assertElasticsearchEventuallyHas(
             index = Index(s"${indexPrefix}_varfields"),
-            id = s"${itemId2.withoutCheckDigit}-0",
+            id = s"items-${itemId2.withoutCheckDigit}-0",
             json = s"""
                       |{
                       |  "parent": {
@@ -337,7 +375,7 @@ class SierraIndexerFeatureTest
 
           assertElasticsearchEventuallyHas(
             index = Index(s"${indexPrefix}_fixedfields"),
-            id = s"${itemId1.withoutCheckDigit}-86",
+            id = s"items-${itemId1.withoutCheckDigit}-86",
             json = s"""
                       |{
                       |  "parent": {
@@ -355,7 +393,7 @@ class SierraIndexerFeatureTest
 
           assertElasticsearchEventuallyHas(
             index = Index(s"${indexPrefix}_fixedfields"),
-            id = s"${itemId2.withoutCheckDigit}-265",
+            id = s"items-${itemId2.withoutCheckDigit}-265",
             json = s"""
                       |{
                       |  "parent": {
@@ -483,7 +521,7 @@ class SierraIndexerFeatureTest
 
           assertElasticsearchEventuallyHas(
             index = Index(s"${indexPrefix}_varfields"),
-            id = s"${holdingsId1.withoutCheckDigit}-0",
+            id = s"holdings-${holdingsId1.withoutCheckDigit}-0",
             json = s"""
                       |{
                       |  "parent": {
@@ -501,7 +539,7 @@ class SierraIndexerFeatureTest
 
           assertElasticsearchEventuallyHas(
             index = Index(s"${indexPrefix}_varfields"),
-            id = s"${holdingsId2.withoutCheckDigit}-0",
+            id = s"holdings-${holdingsId2.withoutCheckDigit}-0",
             json = s"""
                       |{
                       |  "parent": {
@@ -527,7 +565,7 @@ class SierraIndexerFeatureTest
 
           assertElasticsearchEventuallyHas(
             index = Index(s"${indexPrefix}_fixedfields"),
-            id = s"${holdingsId1.withoutCheckDigit}-86",
+            id = s"holdings-${holdingsId1.withoutCheckDigit}-86",
             json = s"""
                       |{
                       |  "parent": {
@@ -545,7 +583,7 @@ class SierraIndexerFeatureTest
 
           assertElasticsearchEventuallyHas(
             index = Index(s"${indexPrefix}_fixedfields"),
-            id = s"${holdingsId2.withoutCheckDigit}-265",
+            id = s"holdings-${holdingsId2.withoutCheckDigit}-265",
             json = s"""
                       |{
                       |  "parent": {

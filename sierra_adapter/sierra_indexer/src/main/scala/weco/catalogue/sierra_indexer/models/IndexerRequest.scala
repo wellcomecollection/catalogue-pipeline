@@ -49,7 +49,7 @@ object IndexerRequest {
             case (varField, position) =>
               IndexRequest(
                 index = varFieldIndex(indexPrefix),
-                id = Some(s"${parent.id}-$position"),
+                id = Some(s"${parent.recordType}-${parent.id}-$position"),
                 source = Some(
                   IndexedVarField(parent, position, varField).asJson.noSpaces
                 )
@@ -87,7 +87,7 @@ object IndexerRequest {
             case (code, fixedField) =>
               IndexRequest(
                 index = fixedFieldIndex(indexPrefix),
-                id = Some(s"${parent.id}-$code"),
+                id = Some(s"${parent.recordType}-${parent.id}-$code"),
                 source = Some(
                   IndexedFixedField(parent, code, fixedField).asJson.noSpaces
                 )
