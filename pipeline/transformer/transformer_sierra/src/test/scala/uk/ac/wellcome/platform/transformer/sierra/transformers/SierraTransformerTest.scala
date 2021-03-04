@@ -13,6 +13,7 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.work.internal.Format.{Books, Pictures}
 import WorkState.Source
 import org.scalatest.Assertion
+import uk.ac.wellcome.models.work.internal.AccessStatus.LicensedResources
 import uk.ac.wellcome.models.work.internal.DeletedReason.{
   DeletedFromSource,
   SuppressedFromSource
@@ -936,7 +937,10 @@ class SierraTransformerTest
           DigitalLocation(
             url = "https://example.org/journal",
             linkText = Some("View this journal"),
-            locationType = OnlineResource
+            locationType = OnlineResource,
+            accessConditions = List(
+              AccessCondition(status = Some(LicensedResources))
+            )
           )
         )
       ))

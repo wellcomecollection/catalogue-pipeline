@@ -1,8 +1,14 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import grizzled.slf4j.Logging
+import uk.ac.wellcome.models.work.internal.AccessStatus.LicensedResources
 import uk.ac.wellcome.models.work.internal.LocationType.OnlineResource
-import uk.ac.wellcome.models.work.internal.{DigitalLocation, IdState, Item}
+import uk.ac.wellcome.models.work.internal.{
+  AccessCondition,
+  DigitalLocation,
+  IdState,
+  Item
+}
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   MarcSubfield,
   SierraQueryOps,
@@ -80,7 +86,17 @@ object SierraElectronicResources extends SierraQueryOps with Logging {
           DigitalLocation(
             url = url,
             linkText = linkText,
-            locationType = OnlineResource
+            locationType = OnlineResource,
+            // We want these works to show up in a filter for "available online",
+            // so we need to add an access status.
+            //
+            // Neither "Open" nor "Open with advisory" are appropriate.
+            //
+            // See https://github.com/wellcomecollection/platform/issues/5062 for
+            // more discussion and conversations about this.
+            accessConditions = List(
+              AccessCondition(status = Some(LicensedResources))
+            )
           )
         )
       )

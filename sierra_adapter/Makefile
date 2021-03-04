@@ -5,7 +5,7 @@ STACK_ROOT  = sierra_adapter
 
 PROJECT_ID = sierra_adapter
 
-SBT_APPS = sierra_merger sierra_linker sierra_reader
+SBT_APPS = sierra_merger sierra_linker sierra_reader sierra_indexer
 SBT_NO_DOCKER_APPS =
 
 SBT_DOCKER_LIBRARIES    =

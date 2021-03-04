@@ -25,3 +25,11 @@ resource "aws_ecr_repository" "sierra_linker" {
     prevent_destroy = true
   }
 }
+
+resource "aws_ecr_repository" "sierra_indexer" {
+  name = "${local.repository_prefix}/sierra_indexer"
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
