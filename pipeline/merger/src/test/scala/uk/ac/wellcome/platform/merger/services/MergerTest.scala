@@ -135,8 +135,7 @@ class MergerTest
     val mergerOutput = FirstWorkMerger.merge(targetWork +: sourceWorks)
 
     val mergedWork: Work.Visible[Merged] = mergerOutput.mergedWorksWithTime(now)
-      .collect { case w: Work.Visible[Merged] => w }
-      .filter { w => w.sourceIdentifier == targetWork.sourceIdentifier }
+      .collect { case w: Work.Visible[Merged] if w.sourceIdentifier == targetWork.sourceIdentifier => w }
       .head
 
     mergedWork.redirectSources should contain allElementsOf existingRedirectSources
