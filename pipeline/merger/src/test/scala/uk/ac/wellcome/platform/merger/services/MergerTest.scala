@@ -20,8 +20,6 @@ class MergerTest
     with MetsWorkGenerators
     with MiroWorkGenerators
     with SierraWorkGenerators {
-  import Merger.WorkMergingOps
-
   val inputWorks: Seq[Work[Identified]] =
     (0 to 5).map { _ =>
       sierraDigitalIdentifiedWork()
@@ -88,17 +86,26 @@ class MergerTest
   val mergedWorks = FirstWorkMerger.merge(inputWorks)
 
   it("returns a single target work as specified") {
-    mergedWorks.mergedWorksWithTime(now) should contain(
-      inputWorks.head
-        .asInstanceOf[Work.Visible[Identified]]
-        .transition[Merged](now)
-        .mapData { data =>
-          data.copy[DataState.Identified](
-            items = mergedTargetItems,
-            otherIdentifiers = mergedOtherIdentifiers
-          )
-        }
-    )
+    val mergedWork: Work.Visible[Identified] = mergedWorks.mergedWorksWithTime(now)
+      .filter { w => w.sourceIdentifier == inputWorks.head.sourceIdentifier }
+      .head
+      .asInstanceOf[Work.Visible[Identified]]
+
+    mergedWork.data shouldBe
+      inputWorks.head.data.copy[DataState.Identified](
+        items = mergedTargetItems,
+        otherIdentifiers = mergedOtherIdentifiers
+      )
+  }
+
+  it("sets the redirectSources on the merged work") {
+    val mergedWork: Work.Visible[Identified] = mergedWorks.mergedWorksWithTime(now)
+      .filter { w => w.sourceIdentifier == inputWorks.head.sourceIdentifier }
+      .head
+      .asInstanceOf[Work.Visible[Identified]]
+
+    mergedWork.redirectSources should contain theSameElementsAs
+      inputWorks.tail.tail.map { w => IdState.Identified(w.id, w.sourceIdentifier) }
   }
 
   it(

@@ -135,6 +135,7 @@ class PlatformMergerTest
 
     val expectedMergedWork = sierraPhysicalWork
       .transition[Merged](now)
+      .asInstanceOf[Work.Visible[Merged]]
       .mapData { data =>
         data.copy(
           otherIdentifiers = sierraPhysicalWork.data.otherIdentifiers ++ miroWork.identifiers,
@@ -186,6 +187,7 @@ class PlatformMergerTest
 
     val expectedMergedWork = zeroItemSierraWork
       .transition[Merged](now)
+      .asInstanceOf[Work.Visible[Merged]]
       .mapData { data =>
         data.copy(
           otherIdentifiers = data.otherIdentifiers ++ miroWork.identifiers,
@@ -238,6 +240,7 @@ class PlatformMergerTest
 
     val expectedMergedWork = sierraDigitalWork
       .transition[Merged](now)
+      .asInstanceOf[Work.Visible[Merged]]
       .mapData { data =>
         data.copy(
           otherIdentifiers = sierraDigitalWork.data.otherIdentifiers ++ miroWork.identifiers,
@@ -288,6 +291,7 @@ class PlatformMergerTest
 
     val expectedMergedWork = multipleItemsSierraWork
       .transition[Merged](now)
+      .asInstanceOf[Work.Visible[Merged]]
       .mapData { data =>
         data.copy(
           imageData = miroWork.data.imageData,
@@ -316,6 +320,7 @@ class PlatformMergerTest
 
     val expectedMergedWork = sierraPhysicalWork
       .transition[Merged](now)
+      .asInstanceOf[Work.Visible[Merged]]
       .mapData { data =>
         data.copy(
           items = List(
@@ -382,6 +387,7 @@ class PlatformMergerTest
 
     val expectedMergedWork = sierraPictureWork
       .transition[Merged](now)
+      .asInstanceOf[Work.Visible[Merged]]
       .mapData { data =>
         data.copy(
           items = List(
@@ -436,6 +442,7 @@ class PlatformMergerTest
 
     val expectedMergedWork = sierraPhysicalWork
       .transition[Merged](now)
+      .asInstanceOf[Work.Visible[Merged]]
       .mapData { data =>
         data.copy(
           otherIdentifiers = sierraPhysicalWork.data.otherIdentifiers
@@ -518,6 +525,7 @@ class PlatformMergerTest
 
     val expectedMergedWork = multipleItemsSierraWork
       .transition[Merged](now)
+      .asInstanceOf[Work.Visible[Merged]]
       .mapData { data =>
         data.copy(
           thumbnail = metsWork.data.thumbnail,
@@ -556,6 +564,7 @@ class PlatformMergerTest
 
     val expectedMergedWork = multipleItemsSierraWork
       .transition[Merged](now)
+      .asInstanceOf[Work.Visible[Merged]]
       .mapData { data =>
         data.copy(
           otherIdentifiers = multipleItemsSierraWork.data.otherIdentifiers ++ sierraDigitisedWork.identifiers,

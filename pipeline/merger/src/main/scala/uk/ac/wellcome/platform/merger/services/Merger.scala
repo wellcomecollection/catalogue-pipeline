@@ -96,8 +96,23 @@ trait Merger extends MergerLogging {
           val redirects = redirectedSources.map(redirectSourceToTarget(target))
           logResult(result, redirects.toList, remaining.toList)
 
+          val redirectedIdentifiers =
+            redirectedSources.map {
+              s =>
+                IdState.Identified(s.id, s.sourceIdentifier)
+            }.toSeq
+
+          val targetWork: Work.Visible[Identified] =
+            Work.Visible[Identified](
+              version = result.mergedTarget.version,
+              data = result.mergedTarget.data,
+              state = result.mergedTarget.state,
+              redirectSources = //result.mergedTarget.redirectSources ++ redirectedIdentifiers
+                redirectedIdentifiers
+            )
+
           MergerOutcome(
-            resultWorks = redirects.toList ++ remaining ++ deleted :+ result.mergedTarget,
+            resultWorks = redirects.toList ++ remaining ++ deleted :+ targetWork,
             imagesWithSources = result.imageDataWithSources
           )
       }
@@ -139,20 +154,11 @@ trait Merger extends MergerLogging {
 
 object Merger {
   // Parameter can't be `State` as that shadows the Cats type
-  implicit class WorkMergingOps[StateT <: WorkState](work: Work[StateT]) {
+  implicit class WorkMergingOps[StateT <: WorkState](work: Work.Visible[StateT]) {
     def mapData(
       f: WorkData[StateT#WorkDataState] => WorkData[StateT#WorkDataState]
-    ): Work[StateT] =
-      work match {
-        case Work.Visible(version, data, state, redirectSources) =>
-          Work.Visible(version, f(data), state, redirectSources)
-        case Work.Invisible(version, data, state, reasons) =>
-          Work.Invisible(version, f(data), state, reasons)
-        case Work.Redirected(version, redirectTarget, state) =>
-          Work.Redirected(version, redirectTarget, state)
-        case Work.Deleted(version, data, state, reason) =>
-          Work.Deleted(version, f(data), state, reason)
-      }
+    ): Work.Visible[StateT] =
+      work.copy(data = f(work.data))
   }
 }
 
