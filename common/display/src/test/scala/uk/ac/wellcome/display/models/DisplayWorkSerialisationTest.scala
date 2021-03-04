@@ -39,8 +39,7 @@ class DisplayWorkSerialisationTest
       | "alternativeTitles": [],
       | "createdDate": ${period(work.data.createdDate.get)},
       | "availableOnline": false,
-      | "availabilities": [${availabilities(
-                            work.state.derivedData.availabilities)}]
+      | "availabilities": [${availabilities(work.state.availabilities)}]
       |}
     """.stripMargin
 
@@ -59,8 +58,7 @@ class DisplayWorkSerialisationTest
       | "alternativeTitles": [],
       | "items": [ ${items(work.data.items)} ],
       | "availableOnline": true,
-      | "availabilities": [${availabilities(
-                            work.state.derivedData.availabilities)}]
+      | "availabilities": [${availabilities(work.state.availabilities)}]
       |}
     """.stripMargin
 
@@ -81,8 +79,7 @@ class DisplayWorkSerialisationTest
       | "alternativeTitles": [],
       | "items": [ ],
       | "availableOnline": false,
-      | "availabilities": [${availabilities(
-                            work.state.derivedData.availabilities)}]
+      | "availabilities": [${availabilities(work.state.availabilities)}]
       |}
     """.stripMargin
 
@@ -127,7 +124,7 @@ class DisplayWorkSerialisationTest
       | ],
       | "availableOnline": true,
       | "availabilities": [${availabilities(
-           workWithCopyright.state.derivedData.availabilities)}]
+           workWithCopyright.state.availabilities)}]
       |}
     """.stripMargin
 
@@ -155,7 +152,7 @@ class DisplayWorkSerialisationTest
       | "subjects": [${subjects(workWithSubjects.data.subjects)}],
       | "availableOnline": false,
       | "availabilities": [${availabilities(
-                            workWithSubjects.state.derivedData.availabilities)}]
+                            workWithSubjects.state.availabilities)}]
       |}
     """.stripMargin
 
@@ -184,7 +181,7 @@ class DisplayWorkSerialisationTest
       | "production": [${production(workWithProduction.data.production)}],
       | "availableOnline": false,
       | "availabilities": [${availabilities(
-           workWithProduction.state.derivedData.availabilities)}]
+           workWithProduction.state.availabilities)}]
       |}
     """.stripMargin
 
@@ -222,8 +219,7 @@ class DisplayWorkSerialisationTest
       | "createdDate": ${period(work.data.createdDate.get)},
       | "contributors": [${contributor(work.data.contributors.head)}],
       | "availableOnline": false,
-      | "availabilities": [${availabilities(
-                            work.state.derivedData.availabilities)}]
+      | "availabilities": [${availabilities(work.state.availabilities)}]
       |}
     """.stripMargin
 
@@ -252,8 +248,7 @@ class DisplayWorkSerialisationTest
       | "alternativeTitles": [],
       | "genres": [ ${genres(work.data.genres)} ],
       | "availableOnline": false,
-      | "availabilities": [${availabilities(
-                            work.state.derivedData.availabilities)}]
+      | "availabilities": [${availabilities(work.state.availabilities)}]
       |}
     """.stripMargin
 
@@ -296,8 +291,7 @@ class DisplayWorkSerialisationTest
       |   }
       | ],
       | "availableOnline": false,
-      | "availabilities": [${availabilities(
-                            work.state.derivedData.availabilities)}]
+      | "availabilities": [${availabilities(work.state.availabilities)}]
       |}
     """.stripMargin
 
@@ -322,8 +316,7 @@ class DisplayWorkSerialisationTest
       |   ${identifier(otherIdentifier)}
       | ],
       | "availableOnline": false,
-      | "availabilities": [${availabilities(
-                            work.state.derivedData.availabilities)}]
+      | "availabilities": [${availabilities(work.state.availabilities)}]
       |}
     """.stripMargin
 
@@ -344,8 +337,7 @@ class DisplayWorkSerialisationTest
       | "alternativeTitles": [],
       | "identifiers": [ ${identifier(work.sourceIdentifier)} ],
       | "availableOnline": false,
-      | "availabilities": [${availabilities(
-                            work.state.derivedData.availabilities)}]
+      | "availabilities": [${availabilities(work.state.availabilities)}]
       |}
     """.stripMargin
 
@@ -368,8 +360,7 @@ class DisplayWorkSerialisationTest
       | "alternativeTitles": [],
       | "images": [${workImageIncludes(work.data.imageData)}],
       | "availableOnline": false,
-      | "availabilities": [${availabilities(
-                            work.state.derivedData.availabilities)}]
+      | "availabilities": [${availabilities(work.state.availabilities)}]
       |}
     """.stripMargin
 
@@ -396,8 +387,7 @@ class DisplayWorkSerialisationTest
       | "alternativeTitles": [],
       | "thumbnail": ${location(work.data.thumbnail.get)},
       | "availableOnline": false,
-      | "availabilities": [${availabilities(
-                            work.state.derivedData.availabilities)}]
+      | "availabilities": [${availabilities(work.state.availabilities)}]
       |}
     """.stripMargin
 

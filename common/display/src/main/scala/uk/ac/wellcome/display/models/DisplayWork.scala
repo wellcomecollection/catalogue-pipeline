@@ -165,7 +165,7 @@ object DisplayWork {
           })
         else None,
       availableOnline = work.state.derivedData.availableOnline,
-      availabilities = work.state.derivedData.availabilities.map {
+      availabilities = work.state.availabilities.toList.map {
         DisplayAvailability(_)
       },
       production =

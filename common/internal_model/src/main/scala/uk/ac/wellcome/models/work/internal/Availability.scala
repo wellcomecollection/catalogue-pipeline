@@ -29,3 +29,30 @@ object Availability extends Enum[Availability] {
     val label = "In the library"
   }
 }
+
+object Availabilities {
+  def forWorkData(data: WorkData[_]): Set[Availability] =
+    Set(
+      when(containsLocation(_.isInstanceOf[PhysicalLocation])(data.items))(
+        Availability.InLibrary
+      ),
+      when(isAvailableOnline(data.items))(
+        Availability.Online
+      )
+    ).flatten
+
+  private def isAvailableOnline: List[Item[_]] => Boolean =
+    containsLocation {
+      case location: DigitalLocation if location.isAvailable => true
+      case _                                                 => false
+    }
+
+  private def containsLocation(predicate: Location => Boolean)(
+    items: List[Item[_]]): Boolean =
+    items.exists { item =>
+      item.locations.exists(predicate)
+    }
+
+  private def when[T](condition: => Boolean)(property: T): Option[T] =
+    if (condition) Some(property) else { None }
+}

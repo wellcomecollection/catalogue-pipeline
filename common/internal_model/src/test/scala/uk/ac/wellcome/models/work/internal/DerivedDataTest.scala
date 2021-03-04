@@ -37,38 +37,6 @@ class DerivedDataTest
       }
     }
 
-    describe("availabilities") {
-      it("adds Availability.Online if there is a digital location with an Open or OpenWithAdvisory access status") {
-        val openWork = denormalisedWork().items(
-          List(createDigitalItemWith(accessStatus = AccessStatus.Open)))
-        val openWithAdvisoryWork = denormalisedWork().items(List(
-          createDigitalItemWith(accessStatus = AccessStatus.OpenWithAdvisory)))
-        val derivedOpenWorkData = DerivedWorkData(openWork.data)
-        val derivedOpenWithAdvisoryWorkData =
-          DerivedWorkData(openWithAdvisoryWork.data)
-
-        derivedOpenWorkData.availabilities should contain only Availability.Online
-        derivedOpenWithAdvisoryWorkData.availabilities should contain only Availability.Online
-      }
-
-      it("adds Availability.InLibrary if there is a physical location") {
-        val work = denormalisedWork().items(List(createIdentifiedPhysicalItem))
-        val derivedWorkData = DerivedWorkData(work.data)
-
-        derivedWorkData.availabilities should contain only Availability.InLibrary
-      }
-
-      it("adds Availability.Online and Availability.InLibrary if the conditions for both are satisfied") {
-        val work = denormalisedWork().items(
-          List(
-            createIdentifiedPhysicalItem,
-            createDigitalItemWith(accessStatus = AccessStatus.Open)))
-        val derivedWorkData = DerivedWorkData(work.data)
-
-        derivedWorkData.availabilities should contain allOf (Availability.InLibrary, Availability.Online)
-      }
-    }
-
     describe("contributorAgents") {
       it("derives contributorAgents from a heterogenous list of contributors") {
         val agents = List(

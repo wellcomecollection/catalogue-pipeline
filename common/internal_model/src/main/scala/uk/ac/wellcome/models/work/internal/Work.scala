@@ -165,6 +165,7 @@ object WorkState {
     sourceIdentifier: SourceIdentifier,
     canonicalId: String,
     modifiedTime: Instant,
+    availabilities: Set[Availability] = Set.empty,
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified
@@ -178,11 +179,12 @@ object WorkState {
     sourceIdentifier: SourceIdentifier,
     canonicalId: String,
     modifiedTime: Instant,
+    availabilities: Set[Availability],
     relations: Relations = Relations.none
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified
-    type TransitionArgs = Relations
+    type TransitionArgs = (Relations, Set[Availability])
 
     def id = canonicalId
   }
@@ -191,6 +193,7 @@ object WorkState {
     sourceIdentifier: SourceIdentifier,
     canonicalId: String,
     modifiedTime: Instant,
+    availabilities: Set[Availability],
     derivedData: DerivedWorkData,
     relations: Relations = Relations.none
   ) extends WorkState {
@@ -230,7 +233,8 @@ object WorkFsm {
       Merged(
         sourceIdentifier = state.sourceIdentifier,
         canonicalId = state.id,
-        modifiedTime = modifiedTime
+        modifiedTime = modifiedTime,
+        availabilities = Availabilities.forWorkData(data),
       )
 
     def data(data: WorkData[DataState.Identified]) = data
@@ -242,13 +246,17 @@ object WorkFsm {
     new Transition[Merged, Denormalised] {
       def state(state: Merged,
                 data: WorkData[DataState.Identified],
-                relations: Relations): Denormalised =
-        Denormalised(
-          sourceIdentifier = state.sourceIdentifier,
-          canonicalId = state.canonicalId,
-          modifiedTime = state.modifiedTime,
-          relations = relations
-        )
+                context: (Relations, Set[Availability])): Denormalised =
+        context match {
+          case (relations, relationAvailabilities) =>
+            Denormalised(
+              sourceIdentifier = state.sourceIdentifier,
+              canonicalId = state.canonicalId,
+              modifiedTime = state.modifiedTime,
+              availabilities = state.availabilities ++ relationAvailabilities,
+              relations = relations
+            )
+        }
 
       def data(data: WorkData[DataState.Identified]) = data
 
@@ -263,6 +271,7 @@ object WorkFsm {
         sourceIdentifier = state.sourceIdentifier,
         canonicalId = state.canonicalId,
         modifiedTime = state.modifiedTime,
+        availabilities = state.availabilities,
         derivedData = DerivedWorkData(data),
         relations = state.relations
       )

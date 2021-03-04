@@ -66,7 +66,8 @@ class RouterWorkerServiceTest
           worksMessageSender.messages.map(_.body) should contain(work.id)
           pathsMessageSender.messages shouldBe empty
           indexer.index should contain(
-            work.id -> work.transition[Denormalised](Relations.none))
+            work.id -> work.transition[Denormalised](
+              (Relations.none, Set.empty)))
         }
     }
   }

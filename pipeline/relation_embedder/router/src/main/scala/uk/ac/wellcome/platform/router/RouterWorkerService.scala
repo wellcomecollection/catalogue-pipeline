@@ -39,7 +39,8 @@ class RouterWorkerService[MsgDestination](
     work: Work[Merged]): Future[List[Work[Denormalised]]] = {
     work.data.collectionPath
       .fold[Future[List[Work[Denormalised]]]](ifEmpty = {
-        Future.successful(List(work.transition[Denormalised](Relations.none)))
+        Future.successful(
+          List(work.transition[Denormalised]((Relations.none, Set.empty))))
       }) { path =>
         Future.fromTry(pathsMsgSender.send(path.path)).map(_ => Nil)
       }

@@ -141,6 +141,7 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
       canonicalId,
       sourceIdentifier,
       dateField("modifiedTime"),
+      objectField("availabilities").fields(keywordField("id")),
       objectField("relations")
         .fields(
           objectField("ancestors").fields(lowercaseKeyword("id"))
@@ -149,7 +150,6 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
       objectField("derivedData")
         .fields(
           booleanField("availableOnline"),
-          objectField("availabilities").fields(keywordField("id")),
           keywordField("contributorAgents")
         )
         .dynamic("false")

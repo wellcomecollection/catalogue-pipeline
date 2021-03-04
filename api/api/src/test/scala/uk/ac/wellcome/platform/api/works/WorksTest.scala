@@ -43,8 +43,7 @@ class WorksTest
              "title": "${work.data.title.get}",
              "alternativeTitles": [],
              "availableOnline": false,
-             "availabilities": [${availabilities(
-            work.state.derivedData.availabilities)}]
+             "availabilities": [${availabilities(work.state.availabilities)}]
             }
           """
         }
@@ -69,8 +68,7 @@ class WorksTest
              "title": "${work.data.title.get}",
              "alternativeTitles": [],
              "availableOnline": false,
-             "availabilities": [${availabilities(
-            work.state.derivedData.availabilities)}],
+             "availabilities": [${availabilities(work.state.availabilities)}],
              "edition": "Special edition",
              "duration": 3600
             }
@@ -186,8 +184,7 @@ class WorksTest
                "title": "${work.data.title.get}",
                "alternativeTitles": [],
                "availableOnline": false,
-               "availabilities": [${availabilities(
-              work.state.derivedData.availabilities)}]
+               "availabilities": [${availabilities(work.state.availabilities)}]
               }
             """
           }
@@ -202,8 +199,7 @@ class WorksTest
                "title": "${altWork.data.title.get}",
                "alternativeTitles": [],
                "availableOnline": false,
-               "availabilities": [${availabilities(
-              work.state.derivedData.availabilities)}]
+               "availabilities": [${availabilities(work.state.availabilities)}]
               }
             """
           }
@@ -259,8 +255,7 @@ class WorksTest
                  "title": "${work.data.title.get}",
                  "alternativeTitles": [],
                  "availableOnline": true,
-                 "availabilities": [${availabilities(
-            work.state.derivedData.availabilities)}],
+                 "availabilities": [${availabilities(work.state.availabilities)}],
                  "thumbnail": ${location(work.data.thumbnail.get)}
                 }
               ]

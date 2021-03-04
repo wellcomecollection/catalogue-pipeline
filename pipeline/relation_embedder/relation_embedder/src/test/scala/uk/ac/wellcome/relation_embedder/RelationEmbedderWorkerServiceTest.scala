@@ -18,11 +18,11 @@ import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.work.internal.WorkState.{Denormalised, Merged}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.pipeline_storage.MemoryIndexer
 import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.relation_embedder.fixtures.RelationGenerators
 
 class RelationEmbedderWorkerServiceTest
     extends AnyFunSpec
@@ -31,14 +31,7 @@ class RelationEmbedderWorkerServiceTest
     with Akka
     with Eventually
     with ElasticsearchFixtures
-    with WorkGenerators {
-
-  def work(path: String) =
-    mergedWork(
-      sourceIdentifier = createSourceIdentifierWith(value = path),
-      canonicalId = path
-    ).collectionPath(CollectionPath(path = path))
-      .title(path)
+    with RelationGenerators {
 
   def storeWorks(index: Index, works: List[Work[Merged]] = works): Assertion =
     insertIntoElasticsearch(index, works: _*)
@@ -51,17 +44,19 @@ class RelationEmbedderWorkerServiceTest
     * 1  2
     * |  |---
     * |  |  |
-    * b  c  d
+    * b  c  d†
     *    |
     *    |
     *    e
+    *
+    * d† is available online
     */
   val workA = work("a")
   val work1 = work("a/1")
   val workB = work("a/1/b")
   val work2 = work("a/2")
   val workC = work("a/2/c")
-  val workD = work("a/2/d")
+  val workD = work("a/2/d", isAvailableOnline = true)
   val workE = work("a/2/d/e")
 
   val relA = Relation(workA, depth = 0, numChildren = 2, numDescendents = 6)
@@ -98,6 +93,10 @@ class RelationEmbedderWorkerServiceTest
     index: mutable.Map[String, Work[Denormalised]]): Map[String, Relations] =
     index.map { case (key, work) => key -> work.state.relations }.toMap
 
+  def availabilities(index: mutable.Map[String, Work[Denormalised]])
+    : Map[String, Set[Availability]] =
+    index.map { case (key, work) => key -> work.state.availabilities }.toMap
+
   it("denormalises a batch containing a list of selectors") {
     withWorkerService() {
       case (QueuePair(queue, dlq), index, msgSender) =>
@@ -122,6 +121,12 @@ class RelationEmbedderWorkerServiceTest
           workD.id -> relationsD,
           workE.id -> relationsE,
         )
+        availabilities(index) shouldBe Map(
+          work2.id -> Set(Availability.Online),
+          workC.id -> Set.empty,
+          workD.id -> Set(Availability.Online),
+          workE.id -> Set.empty
+        )
     }
   }
 
@@ -144,6 +149,15 @@ class RelationEmbedderWorkerServiceTest
           workC.id -> relationsC,
           workD.id -> relationsD,
           workE.id -> relationsE,
+        )
+        availabilities(index) shouldBe Map(
+          workA.id -> Set(Availability.Online),
+          work1.id -> Set.empty,
+          workB.id -> Set.empty,
+          work2.id -> Set(Availability.Online),
+          workC.id -> Set.empty,
+          workD.id -> Set(Availability.Online),
+          workE.id -> Set.empty,
         )
     }
   }
@@ -171,6 +185,16 @@ class RelationEmbedderWorkerServiceTest
           workD.id -> relationsD,
           workE.id -> relationsE,
           invisibleWork.id -> Relations.none
+        )
+        availabilities(index) shouldBe Map(
+          workA.id -> Set(Availability.Online),
+          work1.id -> Set.empty,
+          workB.id -> Set.empty,
+          work2.id -> Set(Availability.Online),
+          workC.id -> Set.empty,
+          workD.id -> Set(Availability.Online),
+          workE.id -> Set.empty,
+          invisibleWork.id -> Set.empty
         )
     }
   }

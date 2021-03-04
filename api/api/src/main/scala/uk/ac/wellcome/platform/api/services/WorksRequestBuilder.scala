@@ -97,7 +97,7 @@ object WorksRequestBuilder
     case WorkAggregationRequest.Availabilities =>
       TermsAggregation("availabilities")
         .size(Availability.values.size)
-        .field("state.derivedData.availabilities.id")
+        .field("state.availabilities.id")
         .minDocCount(0)
   }
 
@@ -193,7 +193,7 @@ object WorksRequestBuilder
         termQuery(field = "state.relations.ancestors.id", value = id)
       case AvailabilitiesFilter(availabilityIds) =>
         termsQuery(
-          field = "state.derivedData.availabilities.id",
+          field = "state.availabilities.id",
           values = availabilityIds
         )
     }
