@@ -467,9 +467,9 @@ class PlatformMergerTest
       ),
       state = sierraPhysicalWork.transition[Merged](now).state,
       redirectSources = Seq(
+        IdState.Identified(metsWork.id, metsWork.sourceIdentifier),
         IdState.Identified(miroWork.id, miroWork.sourceIdentifier),
         IdState.Identified(sierraDigitisedWork.id, sierraDigitisedWork.sourceIdentifier),
-        IdState.Identified(metsWork.id, metsWork.sourceIdentifier)
       )
     )
 
