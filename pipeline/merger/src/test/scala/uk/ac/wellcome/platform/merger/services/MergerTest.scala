@@ -33,7 +33,8 @@ class MergerTest
   val mergedOtherIdentifiers =
     (0 to 3).map(_ => createSierraSystemSourceIdentifier).toList
 
-  object TestItemsRule extends FieldMergeRule {
+  // Copies the items from the second work
+  object CopyItemsRule extends FieldMergeRule {
     type FieldData = List[Item[IdState.Minted]]
 
     override def merge(
@@ -45,7 +46,8 @@ class MergerTest
       )
   }
 
-  object TestOtherIdentifiersRule extends FieldMergeRule {
+  // Copies the identifiers from works 3–(last)
+  object CopyOtherIdentifiers extends FieldMergeRule {
     type FieldData = List[SourceIdentifier]
 
     override def merge(
@@ -56,7 +58,8 @@ class MergerTest
         sources = sources.tail.tail)
   }
 
-  object TestMerger extends Merger {
+  // Merges everything into the first Work in a given input.
+  object FirstWorkMerger extends Merger {
     import Merger.WorkMergingOps
 
     override protected def findTarget(
@@ -67,8 +70,8 @@ class MergerTest
       target: Work.Visible[Identified],
       sources: Seq[Work[Identified]]): State[MergeState, MergeResult] =
       for {
-        items <- TestItemsRule(target, sources).redirectSources
-        otherIdentifiers <- TestOtherIdentifiersRule(target, sources).redirectSources
+        items <- CopyItemsRule(target, sources).redirectSources
+        otherIdentifiers <- CopyOtherIdentifiers(target, sources).redirectSources
       } yield
         MergeResult(
           mergedTarget = target
@@ -82,7 +85,7 @@ class MergerTest
         )
   }
 
-  val mergedWorks = TestMerger.merge(inputWorks)
+  val mergedWorks = FirstWorkMerger.merge(inputWorks)
 
   it("returns a single target work as specified") {
     mergedWorks.mergedWorksWithTime(now) should contain(
