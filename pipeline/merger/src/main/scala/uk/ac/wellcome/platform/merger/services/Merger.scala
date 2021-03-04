@@ -97,9 +97,8 @@ trait Merger extends MergerLogging {
           logResult(result, redirects.toList, remaining.toList)
 
           val redirectedIdentifiers =
-            redirectedSources.map {
-              s =>
-                IdState.Identified(s.id, s.sourceIdentifier)
+            redirectedSources.map { s =>
+              IdState.Identified(s.id, s.sourceIdentifier)
             }.toSeq
 
           val targetWork: Work.Visible[Identified] =
@@ -153,7 +152,8 @@ trait Merger extends MergerLogging {
 
 object Merger {
   // Parameter can't be `State` as that shadows the Cats type
-  implicit class WorkMergingOps[StateT <: WorkState](work: Work.Visible[StateT]) {
+  implicit class WorkMergingOps[StateT <: WorkState](
+    work: Work.Visible[StateT]) {
     def mapData(
       f: WorkData[StateT#WorkDataState] => WorkData[StateT#WorkDataState]
     ): Work.Visible[StateT] =

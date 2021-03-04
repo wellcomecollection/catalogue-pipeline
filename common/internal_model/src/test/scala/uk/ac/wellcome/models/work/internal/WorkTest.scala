@@ -72,6 +72,8 @@ class WorkTest extends AnyFunSpec with Matchers with WorkGenerators {
 
     val w = identifiedWork().withRedirectSources(redirectSources)
 
-    w.transition[Merged](Instant.now).asInstanceOf[Work.Visible[Merged]].redirectSources shouldBe redirectSources
+    w.transition[Merged](Instant.now)
+      .asInstanceOf[Work.Visible[Merged]]
+      .redirectSources shouldBe redirectSources
   }
 }

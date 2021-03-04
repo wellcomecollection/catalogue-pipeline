@@ -469,7 +469,9 @@ class PlatformMergerTest
       redirectSources = Seq(
         IdState.Identified(metsWork.id, metsWork.sourceIdentifier),
         IdState.Identified(miroWork.id, miroWork.sourceIdentifier),
-        IdState.Identified(sierraDigitisedWork.id, sierraDigitisedWork.sourceIdentifier),
+        IdState.Identified(
+          sierraDigitisedWork.id,
+          sierraDigitisedWork.sourceIdentifier),
       )
     )
 
@@ -589,7 +591,9 @@ class PlatformMergerTest
       state = multipleItemsSierraWork.transition[Merged](now).state,
       redirectSources = Seq(
         IdState.Identified(metsWork.id, metsWork.sourceIdentifier),
-        IdState.Identified(sierraDigitisedWork.id, sierraDigitisedWork.sourceIdentifier)
+        IdState.Identified(
+          sierraDigitisedWork.id,
+          sierraDigitisedWork.sourceIdentifier)
       )
     )
 

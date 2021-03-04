@@ -86,8 +86,11 @@ class MergerTest
   val mergedWorks = FirstWorkMerger.merge(inputWorks)
 
   it("returns a single target work as specified") {
-    val mergedWork: Work.Visible[Identified] = mergedWorks.mergedWorksWithTime(now)
-      .filter { w => w.sourceIdentifier == inputWorks.head.sourceIdentifier }
+    val mergedWork: Work.Visible[Identified] = mergedWorks
+      .mergedWorksWithTime(now)
+      .filter { w =>
+        w.sourceIdentifier == inputWorks.head.sourceIdentifier
+      }
       .head
       .asInstanceOf[Work.Visible[Identified]]
 
@@ -99,13 +102,18 @@ class MergerTest
   }
 
   it("sets the redirectSources on the merged work") {
-    val mergedWork: Work.Visible[Identified] = mergedWorks.mergedWorksWithTime(now)
-      .filter { w => w.sourceIdentifier == inputWorks.head.sourceIdentifier }
+    val mergedWork: Work.Visible[Identified] = mergedWorks
+      .mergedWorksWithTime(now)
+      .filter { w =>
+        w.sourceIdentifier == inputWorks.head.sourceIdentifier
+      }
       .head
       .asInstanceOf[Work.Visible[Identified]]
 
     mergedWork.redirectSources should contain theSameElementsAs
-      inputWorks.tail.tail.map { w => IdState.Identified(w.id, w.sourceIdentifier) }
+      inputWorks.tail.tail.map { w =>
+        IdState.Identified(w.id, w.sourceIdentifier)
+      }
   }
 
   it(
@@ -130,16 +138,25 @@ class MergerTest
     val targetWork = identifiedWork()
       .withRedirectSources(existingRedirectSources)
 
-    val sourceWorks = (1 to 5).map { _ => identifiedWork() }
+    val sourceWorks = (1 to 5).map { _ =>
+      identifiedWork()
+    }
 
     val mergerOutput = FirstWorkMerger.merge(targetWork +: sourceWorks)
 
-    val mergedWork: Work.Visible[Merged] = mergerOutput.mergedWorksWithTime(now)
-      .collect { case w: Work.Visible[Merged] if w.sourceIdentifier == targetWork.sourceIdentifier => w }
+    val mergedWork: Work.Visible[Merged] = mergerOutput
+      .mergedWorksWithTime(now)
+      .collect {
+        case w: Work.Visible[Merged]
+            if w.sourceIdentifier == targetWork.sourceIdentifier =>
+          w
+      }
       .head
 
     mergedWork.redirectSources should contain allElementsOf existingRedirectSources
     mergedWork.redirectSources should contain allElementsOf
-      sourceWorks.tail.map { w => IdState.Identified(w.id, w.sourceIdentifier)}
+      sourceWorks.tail.map { w =>
+        IdState.Identified(w.id, w.sourceIdentifier)
+      }
   }
 }

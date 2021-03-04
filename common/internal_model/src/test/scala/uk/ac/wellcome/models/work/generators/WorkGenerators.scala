@@ -124,7 +124,8 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
         deletedReason = deletedReason
       )
 
-    def redirected(redirectTarget: State#WorkDataState#Id): Work.Redirected[State] =
+    def redirected(
+      redirectTarget: State#WorkDataState#Id): Work.Redirected[State] =
       Work.Redirected[State](
         state = work.state,
         version = work.version,
@@ -135,7 +136,8 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
       Work
         .Visible[State](version = version, data = work.data, state = work.state)
 
-    def withRedirectSources(redirectSources: Seq[State#WorkDataState#Id]): Work.Visible[State] =
+    def withRedirectSources(
+      redirectSources: Seq[State#WorkDataState#Id]): Work.Visible[State] =
       Work.Visible[State](
         version = work.version,
         data = work.data,
