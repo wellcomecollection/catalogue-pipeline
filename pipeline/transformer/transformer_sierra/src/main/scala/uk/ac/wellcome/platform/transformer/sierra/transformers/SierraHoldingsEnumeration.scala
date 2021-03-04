@@ -93,7 +93,6 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
             case None => None
           }
         }
-        .filterNot { case (_, value) => value.isEmpty }
         .filterNot { case (_, value) =>
           if (value.count(_ == '-') >= 2) {
             warn(s"$id: ambiguous range in 85X/86X pair: $value")
@@ -115,6 +114,7 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
 
   private def concatenateParts(parts: Seq[(String, String)]): String =
     parts
+      .filterNot { case (_, value) => value.isEmpty }
       .map {
         case (label, value) if label.startsWith("(") =>
           s"($value)"
