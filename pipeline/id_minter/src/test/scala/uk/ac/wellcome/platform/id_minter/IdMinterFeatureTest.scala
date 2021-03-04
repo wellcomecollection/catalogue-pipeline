@@ -96,7 +96,7 @@ class IdMinterFeatureTest
       withIdentifiersTable { identifiersTableConfig =>
         val work = sourceWork()
           .redirected(
-            redirect =
+            redirectTarget =
               IdState.Identifiable(sourceIdentifier = createSourceIdentifier))
         val inputIndex = createIndex(List(work))
         val outputIndex = mutable.Map.empty[String, Work[Identified]]
@@ -121,7 +121,7 @@ class IdMinterFeatureTest
           identifiedWork.state.canonicalId shouldBe sentId
           identifiedWork
             .asInstanceOf[Work.Redirected[Identified]]
-            .redirect
+            .redirectTarget
             .canonicalId shouldNot be(empty)
         }
       }

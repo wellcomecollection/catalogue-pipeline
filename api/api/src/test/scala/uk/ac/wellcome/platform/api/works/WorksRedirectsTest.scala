@@ -11,7 +11,7 @@ class WorksRedirectsTest extends ApiWorksTestBase {
       sourceIdentifier = createSourceIdentifier
     )
   )
-  val redirectId = redirectedWork.redirect.canonicalId
+  val redirectId = redirectedWork.redirectTarget.canonicalId
 
   it("returns a TemporaryRedirect if looking up a redirected work") {
     withWorksApi {

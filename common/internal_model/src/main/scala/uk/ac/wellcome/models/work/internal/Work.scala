@@ -32,8 +32,8 @@ sealed trait Work[State <: WorkState] {
         Work.Invisible(version, outData, outState, invisibilityReasons)
       case Work.Deleted(version, _, _, deletedReason) =>
         Work.Deleted(version, outData, outState, deletedReason)
-      case Work.Redirected(version, redirect, _) =>
-        Work.Redirected(version, transition.redirect(redirect), outState)
+      case Work.Redirected(version, redirectTarget, _) =>
+        Work.Redirected(version, transition.redirect(redirectTarget), outState)
     }
   }
 }
@@ -48,7 +48,7 @@ object Work {
 
   case class Redirected[State <: WorkState](
     version: Int,
-    redirect: State#WorkDataState#Id,
+    redirectTarget: State#WorkDataState#Id,
     state: State,
   ) extends Work[State] {
     val data = WorkData[State#WorkDataState]()

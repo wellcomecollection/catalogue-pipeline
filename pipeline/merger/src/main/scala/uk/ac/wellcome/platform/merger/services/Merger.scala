@@ -111,7 +111,7 @@ trait Merger extends MergerLogging {
         source.sourceIdentifier,
         source.state.canonicalId,
         source.state.modifiedTime),
-      redirect =
+      redirectTarget =
         IdState.Identified(target.state.canonicalId, target.sourceIdentifier)
     )
 
@@ -148,8 +148,8 @@ object Merger {
           Work.Visible(version, f(data), state)
         case Work.Invisible(version, data, state, reasons) =>
           Work.Invisible(version, f(data), state, reasons)
-        case Work.Redirected(version, redirect, state) =>
-          Work.Redirected(version, redirect, state)
+        case Work.Redirected(version, redirectTarget, state) =>
+          Work.Redirected(version, redirectTarget, state)
         case Work.Deleted(version, data, state, reason) =>
           Work.Deleted(version, f(data), state, reason)
       }

@@ -156,7 +156,7 @@ class PlatformMergerTest
           modifiedTime = now
         ),
         version = miroWork.version,
-        redirect = IdState.Identified(
+        redirectTarget = IdState.Identified(
           canonicalId = sierraPhysicalWork.state.canonicalId,
           sourceIdentifier = sierraPhysicalWork.sourceIdentifier)
       )
@@ -202,7 +202,7 @@ class PlatformMergerTest
           sourceIdentifier = miroWork.sourceIdentifier,
           modifiedTime = now),
         version = miroWork.version,
-        redirect = IdState.Identified(
+        redirectTarget = IdState.Identified(
           canonicalId = zeroItemSierraWork.state.canonicalId,
           sourceIdentifier = zeroItemSierraWork.sourceIdentifier)
       )
@@ -258,7 +258,7 @@ class PlatformMergerTest
           sourceIdentifier = miroWork.sourceIdentifier,
           modifiedTime = now),
         version = miroWork.version,
-        redirect = IdState.Identified(
+        redirectTarget = IdState.Identified(
           canonicalId = sierraDigitalWork.state.canonicalId,
           sourceIdentifier = sierraDigitalWork.sourceIdentifier)
       )
@@ -300,7 +300,7 @@ class PlatformMergerTest
         sourceIdentifier = miroWork.sourceIdentifier,
         modifiedTime = now),
       version = miroWork.version,
-      redirect = IdState.Identified(
+      redirectTarget = IdState.Identified(
         canonicalId = multipleItemsSierraWork.state.canonicalId,
         sourceIdentifier = multipleItemsSierraWork.sourceIdentifier)
     )
@@ -334,7 +334,7 @@ class PlatformMergerTest
           sourceIdentifier = metsWork.sourceIdentifier,
           modifiedTime = now),
         version = metsWork.version,
-        redirect = IdState.Identified(
+        redirectTarget = IdState.Identified(
           canonicalId = sierraPhysicalWork.state.canonicalId,
           sourceIdentifier = sierraPhysicalWork.sourceIdentifier)
       )
@@ -401,7 +401,7 @@ class PlatformMergerTest
           sourceIdentifier = metsWork.sourceIdentifier,
           modifiedTime = now),
         version = metsWork.version,
-        redirect = IdState.Identified(
+        redirectTarget = IdState.Identified(
           canonicalId = sierraPictureWork.state.canonicalId,
           sourceIdentifier = sierraPictureWork.sourceIdentifier)
       )
@@ -458,7 +458,7 @@ class PlatformMergerTest
           sourceIdentifier = sierraDigitisedWork.sourceIdentifier,
           modifiedTime = now),
         version = sierraDigitisedWork.version,
-        redirect = IdState.Identified(
+        redirectTarget = IdState.Identified(
           canonicalId = sierraPhysicalWork.state.canonicalId,
           sourceIdentifier = sierraPhysicalWork.sourceIdentifier)
       )
@@ -470,7 +470,7 @@ class PlatformMergerTest
           sourceIdentifier = miroWork.sourceIdentifier,
           modifiedTime = now),
         version = miroWork.version,
-        redirect = IdState.Identified(
+        redirectTarget = IdState.Identified(
           canonicalId = sierraPhysicalWork.state.canonicalId,
           sourceIdentifier = sierraPhysicalWork.sourceIdentifier)
       )
@@ -482,7 +482,7 @@ class PlatformMergerTest
           sourceIdentifier = metsWork.sourceIdentifier,
           modifiedTime = now),
         version = metsWork.version,
-        redirect = IdState.Identified(
+        redirectTarget = IdState.Identified(
           canonicalId = sierraPhysicalWork.state.canonicalId,
           sourceIdentifier = sierraPhysicalWork.sourceIdentifier)
       )
@@ -532,7 +532,7 @@ class PlatformMergerTest
           sourceIdentifier = metsWork.sourceIdentifier,
           modifiedTime = now),
         version = metsWork.version,
-        redirect = IdState.Identified(
+        redirectTarget = IdState.Identified(
           canonicalId = multipleItemsSierraWork.state.canonicalId,
           sourceIdentifier = multipleItemsSierraWork.sourceIdentifier)
       )
@@ -571,7 +571,7 @@ class PlatformMergerTest
           sourceIdentifier = sierraDigitisedWork.sourceIdentifier,
           modifiedTime = now),
         version = sierraDigitisedWork.version,
-        redirect = IdState.Identified(
+        redirectTarget = IdState.Identified(
           canonicalId = multipleItemsSierraWork.state.canonicalId,
           sourceIdentifier = multipleItemsSierraWork.sourceIdentifier)
       )
@@ -583,7 +583,7 @@ class PlatformMergerTest
           sourceIdentifier = metsWork.sourceIdentifier,
           modifiedTime = now),
         version = metsWork.version,
-        redirect = IdState.Identified(
+        redirectTarget = IdState.Identified(
           canonicalId = multipleItemsSierraWork.state.canonicalId,
           sourceIdentifier = multipleItemsSierraWork.sourceIdentifier)
       )
