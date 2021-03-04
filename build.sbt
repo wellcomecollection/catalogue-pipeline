@@ -34,6 +34,7 @@ def setupProject(
 lazy val internal_model = setupProject(
   project,
   "common/internal_model",
+  localDependencies = Seq(elasticsearch),
   externalDependencies = CatalogueDependencies.internalModelDependencies)
   .settings(Publish.settings: _*)
   .settings(version:= projectVersion)
@@ -47,7 +48,6 @@ lazy val display = setupProject(
 lazy val elasticsearch = setupProject(
   project,
   "common/elasticsearch",
-  localDependencies = Seq(internal_model),
   externalDependencies = CatalogueDependencies.elasticsearchDependencies)
 
 lazy val elasticsearch_typesafe = setupProject(
@@ -94,7 +94,7 @@ lazy val api = setupProject(
   project,
   "api/api",
   localDependencies =
-    Seq(internal_model, display, elasticsearch, elasticsearch_typesafe),
+    Seq(display, elasticsearch, elasticsearch_typesafe),
   externalDependencies = CatalogueDependencies.apiDependencies
 )
 
