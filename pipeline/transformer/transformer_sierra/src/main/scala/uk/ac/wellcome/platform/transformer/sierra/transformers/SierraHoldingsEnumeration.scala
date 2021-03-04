@@ -142,7 +142,7 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
         } else {
           List(
             datePartsMap.get("day"),
-            datePartsMap.get("month"),
+            datePartsMap.get("month").flatMap { monthNames.get },
             datePartsMap.get("year"),
           )
         }
@@ -190,6 +190,21 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
     "22" -> "Summer",
     "23" -> "Autumn",
     "24" -> "Winter"
+  )
+
+  private val monthNames = Map(
+    "01" -> "Jan.",
+    "02" -> "Feb.",
+    "03" -> "Mar.",
+    "04" -> "Apr.",
+    "05" -> "May",
+    "06" -> "June",
+    "07" -> "July",
+    "08" -> "Aug.",
+    "09" -> "Sep.",
+    "10" -> "Oct.",
+    "11" -> "Nov.",
+    "12" -> "Dec."
   )
 
   /** Given an 85X varField from Sierra, try to create a Label.
