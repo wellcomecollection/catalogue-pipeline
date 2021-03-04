@@ -1,6 +1,7 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import uk.ac.wellcome.platform.transformer.sierra.source.VarField
+import weco.catalogue.sierra_adapter.models.TypedSierraRecordNumber
 
 // The 85X/86X pairs are used to store structured captions -- the 85X contains
 // the labels, the 856X contains the values.
@@ -18,6 +19,6 @@ object SierraHoldingsEnumeration {
   val labelTag = "853"
   val valueTag = "863"
 
-  def apply(varFields: List[VarField]): List[String] =
+  def apply(id: TypedSierraRecordNumber, varFields: List[VarField]): List[String] =
     List()
 }
