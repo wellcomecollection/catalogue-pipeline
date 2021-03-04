@@ -99,16 +99,56 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
       val startParts = parts.map { case (label, value) => (label, value.split("-", 2).head) }
       val endParts = parts.map { case (label, value) => (label, value.split("-", 2).last) }
 
-      s"${concatenateParts(startParts)} - ${concatenateParts(endParts)}"
+      s"${concatenateParts(id, startParts)} - ${concatenateParts(id, endParts)}"
     } else {
-      concatenateParts(parts)
+      concatenateParts(id, parts)
     }
   }
 
-  private def concatenateParts(parts: Seq[(String, String)]): String = {
-    val result =
-      parts
-        .filterNot { case (_, value) => value.isEmpty }
+  private def concatenateParts(id: TypedSierraRecordNumber, parts: Seq[(String, String)]): String = {
+    val nonEmptyParts = parts.filterNot { case (_, value) => value.isEmpty }
+
+    // We split the label/values into date-based and textual.  The dates in
+    // the MARC are numeric and need to be rendered in a nicer format;
+    // the text values can be presented as is.
+    val dateParts =
+      nonEmptyParts
+        .filter { case (label, _) =>
+          label.toLowerCase.hasSubstring("season", "year", "month", "day")
+        }
+
+    val textualParts = nonEmptyParts.filterNot { dateParts.contains }
+
+    val datePartsMap =
+      dateParts
+        .map { case (label, value) => label.toLowerCase.stripParens -> value }
+        .toMap
+
+    // Construct the date string.  We wrap this all in a Try block, and if something
+    // goes wrong, just drop a warning log.  My hope is that this will be sufficiently
+    // infrequent that we don't need much sophisticated logic.
+    val dateString = Try {
+      val dateDisplayStrings =
+        if (datePartsMap.contains("season")) {
+          List(datePartsMap.get("season"), datePartsMap.get("year"))
+        } else {
+          List(
+            datePartsMap.get("day"),
+            datePartsMap.get("month"),
+            datePartsMap.get("year"),
+          )
+        }
+
+      dateDisplayStrings.flatten.mkString(" ")
+    } match {
+      case Success(s) => Some(s)
+      case Failure(_) =>
+        warn(s"${id.withCheckDigit}: unable to build a date from $valueTag")
+        None
+    }
+
+    val textualString =
+      textualParts
         .map {
           case (label, value) if label.startsWith("(") =>
             s"($value)"
@@ -128,12 +168,10 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
         }
         .trim
 
-    // If we have a single part and it's wrapped in parens (e.g. "(2014)"),
-    // we bin the parents.
-    if (parts.size == 1) {
-      result.stripPrefix("(").stripSuffix(")")
-    } else {
-      result
+    (textualString, dateString) match {
+      case (ts, Some(ds)) if ts.nonEmpty && ds.nonEmpty => s"$ts ($ds)"
+      case (_, Some(ds)) if ds.nonEmpty => ds
+      case (ts, _) => ts
     }
   }
 
@@ -177,4 +215,12 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
 
   private case class Label(link: Int, varField: VarField)
   private case class Value(link: Int, sequence: Int, varField: VarField)
+
+  implicit private class StringOps(s: String) {
+    def hasSubstring(substrings: String*): Boolean =
+      substrings.exists { s.contains }
+
+    def stripParens: String =
+      s.stripPrefix("(").stripSuffix(")")
+  }
 }
