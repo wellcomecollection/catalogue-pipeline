@@ -130,7 +130,10 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
     val dateString = Try {
       val dateDisplayStrings =
         if (datePartsMap.contains("season")) {
-          List(datePartsMap.get("season"), datePartsMap.get("year"))
+          List(
+            datePartsMap.get("season").flatMap { seasonNames.get },
+            datePartsMap.get("year")
+          )
         } else {
           List(
             datePartsMap.get("day"),
@@ -174,6 +177,15 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
       case (ts, _) => ts
     }
   }
+
+  // Seasons are represented as two-digit numeric codes.
+  // See https://help.oclc.org/Metadata_Services/Local_Holdings_Maintenance/OCLC_MARC_local_holdings_format_and_standards/8xx_fields/853_Captions_and_Pattern-Basic_Bibliographic_Unit
+  private val seasonNames = Map(
+    "21" -> "Spring",
+    "22" -> "Summer",
+    "23" -> "Autumn",
+    "24" -> "Winter"
+  )
 
   /** Given an 85X varField from Sierra, try to create a Label.
     *

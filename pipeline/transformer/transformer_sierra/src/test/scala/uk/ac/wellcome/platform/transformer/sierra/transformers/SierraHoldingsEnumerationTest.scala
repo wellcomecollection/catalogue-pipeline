@@ -227,6 +227,58 @@ class SierraHoldingsEnumerationTest extends AnyFunSpec with Matchers with MarcGe
     getEnumerations(varFields) shouldBe List("2010 - 2020")
   }
 
+  it("maps numeric Season values to names") {
+    // This test case is based on b15268688
+    val varFields = List(
+      createVarFieldWith(
+        marcTag = "863",
+        subfields = List(
+          MarcSubfield(tag = "8", content = "1.1"),
+          MarcSubfield(tag = "a", content = "41-57"),
+          MarcSubfield(tag = "b", content = "4-2"),
+          MarcSubfield(tag = "i", content = "1992-2008"),
+          MarcSubfield(tag = "j", content = "23-21"),
+        )
+      ),
+      createVarFieldWith(
+        marcTag = "863",
+        subfields = List(
+          MarcSubfield(tag = "8", content = "1.2"),
+          MarcSubfield(tag = "a", content = "57-59"),
+          MarcSubfield(tag = "b", content = "4-1"),
+          MarcSubfield(tag = "i", content = "2008-2009"),
+          MarcSubfield(tag = "j", content = "23-24"),
+        )
+      ),
+      createVarFieldWith(
+        marcTag = "863",
+        subfields = List(
+          MarcSubfield(tag = "8", content = "1.4"),
+          MarcSubfield(tag = "a", content = "60-61"),
+          MarcSubfield(tag = "b", content = "3-2"),
+          MarcSubfield(tag = "i", content = "2011-2012"),
+          MarcSubfield(tag = "j", content = "22-21"),
+        )
+      ),
+      createVarFieldWith(
+        marcTag = "853",
+        subfields = List(
+          MarcSubfield(tag = "8", content = "1"),
+          MarcSubfield(tag = "a", content = "v."),
+          MarcSubfield(tag = "b", content = "no."),
+          MarcSubfield(tag = "i", content = "(year)"),
+          MarcSubfield(tag = "j", content = "(season)"),
+        )
+      )
+    )
+
+    getEnumerations(varFields) shouldBe List(
+      "v.41:no.4 (Autumn 1992) - v.57:no.2 (Spring 2008)",
+      "v.57:no.4 (Autumn 2008) - v.59:no.1 (Winter 2009)",
+      "v.60:no.3 (Summer 2011) - v.61:no.2 (Spring 2012)"
+    )
+  }
+
   describe("handles malformed MARC data") {
     it("skips a field 863 if it has a missing sequence number") {
       val varFields = List(
