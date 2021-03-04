@@ -188,11 +188,8 @@ class ApiSwaggerTest
 
     val aggregationParams = getFields[WorkAggregations]
 
-    // We temporarily have one more Swagger parameter than aggregation parameter,
-    // because both `locationType` and `items.locations.type` parameters map
-    // to the same underlying field on `Aggregations`.
     assert(
-      swaggerParams.length == aggregationParams.length + 1,
+      swaggerParams.length == aggregationParams.length,
       s"swaggerParams     = ${swaggerParams.sorted}\naggregationParams = ${aggregationParams.sorted}"
     )
   }

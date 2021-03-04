@@ -11,32 +11,6 @@ class DerivedDataTest
     with ImageGenerators {
 
   describe("DerivedWorkData") {
-
-    describe("availableOnline") {
-      it(
-        "sets availableOnline = true if there is a digital location on an item") {
-        val work = denormalisedWork().items(
-          List(createDigitalItem, createIdentifiedPhysicalItem))
-        val derivedWorkData = DerivedWorkData(work.data)
-
-        derivedWorkData.availableOnline shouldBe true
-      }
-
-      it("sets availableOnline = false if there is no digital location on any items") {
-        val work = denormalisedWork().items(List(createIdentifiedPhysicalItem))
-        val derivedWorkData = DerivedWorkData(work.data)
-
-        derivedWorkData.availableOnline shouldBe false
-      }
-
-      it("handles empty items list") {
-        val work = denormalisedWork().items(Nil)
-        val derivedWorkData = DerivedWorkData(work.data)
-
-        derivedWorkData.availableOnline shouldBe false
-      }
-    }
-
     describe("contributorAgents") {
       it("derives contributorAgents from a heterogenous list of contributors") {
         val agents = List(

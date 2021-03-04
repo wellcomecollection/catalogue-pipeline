@@ -82,8 +82,6 @@ class SwaggerScalaModelConverter extends AbstractModelConverter(Json.mapper()) {
     else if (cls == classOf[DisplayLanguage]) "Language"
     else if (cls == classOf[DisplayContributor]) "Contributor"
     else if (cls == classOf[DisplayLicense]) "License"
-    else if (cls == classOf[DisplayLocationTypeAggregation])
-      "LocationTypeAggregation"
     else if (cls == classOf[DisplayAvailability]) "Availability"
     else throw new IllegalArgumentException(s"Unknown class $cls")
   }

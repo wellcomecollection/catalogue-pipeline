@@ -2,7 +2,6 @@ package uk.ac.wellcome.platform.api.models
 
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
 import io.circe.Decoder
-import uk.ac.wellcome.display.models.LocationTypeQuery
 import uk.ac.wellcome.models.marc.MarcLanguageCodeList
 import uk.ac.wellcome.models.work.internal.IdState.Minted
 import uk.ac.wellcome.models.work.internal._
@@ -18,7 +17,6 @@ case class WorkAggregations(
   subjects: Option[Aggregation[Subject[Minted]]] = None,
   contributors: Option[Aggregation[Contributor[Minted]]] = None,
   license: Option[Aggregation[License]] = None,
-  locationType: Option[Aggregation[LocationTypeQuery]] = None,
   availabilities: Option[Aggregation[Availability]] = None,
 )
 
@@ -39,8 +37,6 @@ object WorkAggregations extends ElasticAggregations {
           contributors = e4sAggregations
             .decodeAgg[Contributor[Minted]]("contributors"),
           license = e4sAggregations.decodeAgg[License]("license"),
-          locationType =
-            e4sAggregations.decodeAgg[LocationTypeQuery]("locationType"),
           availabilities =
             e4sAggregations.decodeAgg[Availability]("availabilities")
         ))
@@ -102,11 +98,5 @@ object WorkAggregations extends ElasticAggregations {
         case ontologyType   => Left(s"Illegal agent type: $ontologyType")
       }
       agent.map(agent => Contributor(agent = agent, roles = Nil))
-    }
-
-  implicit val decodeLocationTypeFromLabel: Decoder[LocationTypeQuery] =
-    Decoder.decodeString.map {
-      case "DigitalLocation"  => LocationTypeQuery.DigitalLocation
-      case "PhysicalLocation" => LocationTypeQuery.PhysicalLocation
     }
 }
