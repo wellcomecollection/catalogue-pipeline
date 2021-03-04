@@ -201,7 +201,7 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
     "06" -> "June",
     "07" -> "July",
     "08" -> "Aug.",
-    "09" -> "Sep.",
+    "09" -> "Sept.",
     "10" -> "Oct.",
     "11" -> "Nov.",
     "12" -> "Dec."
