@@ -75,7 +75,8 @@ class WorksController(elasticsearchService: ElasticsearchService,
 
   def workRedirect(work: Work.Redirected[Indexed]): Route =
     extractUri { uri =>
-      val newPath = (work.redirect.canonicalId :: uri.path.reverse.tail).reverse
+      val newPath =
+        (work.redirectTarget.canonicalId :: uri.path.reverse.tail).reverse
 
       // We use a relative URL here so that redirects keep you on the same host.
       //

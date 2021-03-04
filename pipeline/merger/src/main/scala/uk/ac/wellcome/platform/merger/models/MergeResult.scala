@@ -7,5 +7,5 @@ import uk.ac.wellcome.models.work.internal._
  * MergeResult holds the resultant target after all fields have been merged,
  * and the images that were created in the process
  */
-case class MergeResult(mergedTarget: Work[Identified],
+case class MergeResult(mergedTarget: Work.Visible[Identified],
                        imageDataWithSources: Seq[ImageDataWithSource])

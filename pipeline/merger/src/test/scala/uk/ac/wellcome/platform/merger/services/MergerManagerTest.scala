@@ -37,7 +37,7 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorkGenerators {
         val redirect = baseWork.asInstanceOf[Work.Redirected[Merged]]
         val redirectTarget =
           resultWorks.head.asInstanceOf[Work.Visible[Merged]]
-        redirect.redirect.sourceIdentifier shouldBe redirectTarget.sourceIdentifier
+        redirect.redirectTarget.sourceIdentifier shouldBe redirectTarget.sourceIdentifier
     }
   }
 
@@ -65,7 +65,7 @@ class MergerManagerTest extends AnyFunSpec with Matchers with WorkGenerators {
             work.state.canonicalId,
             work.state.modifiedTime),
           version = work.version,
-          redirect = IdState.Identified(
+          redirectTarget = IdState.Identified(
             works.head.state.canonicalId,
             works.head.sourceIdentifier)
         )

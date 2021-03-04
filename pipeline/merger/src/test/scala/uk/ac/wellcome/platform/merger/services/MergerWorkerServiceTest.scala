@@ -227,7 +227,7 @@ class MergerWorkerServiceTest
 
           redirectedWorks should have size 1
           redirectedWorks.head.sourceIdentifier shouldBe digitisedWork.sourceIdentifier
-          redirectedWorks.head.redirect shouldBe IdState.Identified(
+          redirectedWorks.head.redirectTarget shouldBe IdState.Identified(
             sourceIdentifier = physicalWork.sourceIdentifier,
             canonicalId = physicalWork.state.canonicalId)
 
@@ -282,7 +282,7 @@ class MergerWorkerServiceTest
           redirectedWorks should have size 2
           redirectedWorks.map(_.sourceIdentifier) should contain only
             (digitisedWork.sourceIdentifier, miroWork.sourceIdentifier)
-          redirectedWorks.map(_.redirect) should contain only
+          redirectedWorks.map(_.redirectTarget) should contain only
             IdState.Identified(
               sourceIdentifier = physicalWork.sourceIdentifier,
               canonicalId = physicalWork.state.canonicalId)
