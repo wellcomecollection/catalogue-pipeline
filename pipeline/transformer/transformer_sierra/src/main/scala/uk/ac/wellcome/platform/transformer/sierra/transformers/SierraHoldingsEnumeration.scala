@@ -105,27 +105,37 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
     }
   }
 
-  private def concatenateParts(parts: Seq[(String, String)]): String =
-    parts
-      .filterNot { case (_, value) => value.isEmpty }
-      .map {
-        case (label, value) if label.startsWith("(") =>
-          s"($value)"
+  private def concatenateParts(parts: Seq[(String, String)]): String = {
+    val result =
+      parts
+        .filterNot { case (_, value) => value.isEmpty }
+        .map {
+          case (label, value) if label.startsWith("(") =>
+            s"($value)"
 
-        case (label, value) =>
-          s"$label$value"
-      }
-      .foldRight("") { case (nextPart, accum) =>
-        // I haven't worked out the exact rules around this yet.
-        // In some cases, the old Wellcome Library site would join parts with
-        // a space.  In others (e.g. "v.130:no.3"), it uses a colon.
-        if (accum.startsWith("no.") && nextPart.startsWith("v.")) {
-          nextPart + ":" + accum
-        } else {
-          nextPart + " " + accum
+          case (label, value) =>
+            s"$label$value"
         }
-      }
-      .trim
+        .foldRight("") { case (nextPart, accum) =>
+          // I haven't worked out the exact rules around this yet.
+          // In some cases, the old Wellcome Library site would join parts with
+          // a space.  In others (e.g. "v.130:no.3"), it uses a colon.
+          if (accum.startsWith("no.") && nextPart.startsWith("v.")) {
+            nextPart + ":" + accum
+          } else {
+            nextPart + " " + accum
+          }
+        }
+        .trim
+
+    // If we have a single part and it's wrapped in parens (e.g. "(2014)"),
+    // we bin the parents.
+    if (parts.size == 1) {
+      result.stripPrefix("(").stripSuffix(")")
+    } else {
+      result
+    }
+  }
 
   /** Given an 85X varField from Sierra, try to create a Label.
     *
