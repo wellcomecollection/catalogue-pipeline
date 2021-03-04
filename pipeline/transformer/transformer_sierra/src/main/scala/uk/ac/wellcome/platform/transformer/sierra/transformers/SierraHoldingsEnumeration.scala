@@ -57,28 +57,79 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
             None
         }
       }
-      .map { case (label, value) => createString(label, value) }
+      .map { case (label, value) => createString(id, label, value) }
   }
 
-  private def createString(label: Label, value: Value): String =
-    value
-      .varField.subfields
-      .filterNot { _.tag == "8" }
-      .flatMap { sf =>
-        label.varField.subfieldsWithTag(sf.tag).headOption match {
-          // This isn't explicitly stated anywhere, but it seems like the presence
-          // of parens around the label means you skip the label text, and wrap
-          // the value in parens.
-          case Some(MarcSubfield(_, subfieldLabel)) if subfieldLabel.startsWith("(") =>
-            Some(s"(${sf.content})")
+  private def createString(id: TypedSierraRecordNumber, label: Label, value: Value): String = {
+    // We match the subfields on the label/value.
+    //
+    // For example, if we had the subfields:
+    //
+    //    853 00 |810|avol.|i(year)
+    //    863 40 |810.1|a1|i1995
+    //
+    // Then the label in subfield ǂa is "vol." and the value is "1".
+    //
+    // If the label is in parens, then we omit the label and wrap the
+    // value in parens, e.g. "(1995)".
+    //
+    // If any of the subfields contain a "-", then this is a range.
+    // For example, if we had the subfields:
+    //
+    //    853 00 |810|avol.|i(year)
+    //    863 40 |810.1|a1-10|i1995-2005
+    //
+    // Then we would create the string "vol.1 (1995) - vol.10 (2005)".
+    //
+    val parts: Seq[(String, String)] =
+      value
+        .varField.subfields
+        .filterNot { _.tag == "8" }
+        .flatMap { sf =>
+          label.varField.subfieldsWithTag(sf.tag).headOption match {
+            case Some(MarcSubfield(_, subfieldLabel)) => Some((subfieldLabel, sf.content))
+            case None => None
+          }
+        }
+        .filterNot { case (_, value) =>
+          if (value.count(_ == '-') >= 2) {
+            warn(s"$id: ambiguous range in 85X/86X pair: $value")
+            true
+          } else {
+            false
+          }
+        }
 
-          case Some(MarcSubfield(_, subfieldLabel)) =>
-            Some(s"$subfieldLabel${sf.content}")
+    if (parts.exists { case (_, value) => value.contains("-") }) {
+      val startParts = parts.map { case (label, value) => (label, value.split('-').head) }
+      val endParts = parts.map { case (label, value) => (label, value.split('-').last) }
 
-          case None => None
+      s"${concatenateParts(startParts)} - ${concatenateParts(endParts)}"
+    } else {
+      concatenateParts(parts)
+    }
+  }
+
+  private def concatenateParts(parts: Seq[(String, String)]): String =
+    parts
+      .map {
+        case (label, value) if label.startsWith("(") =>
+          s"($value)"
+
+        case (label, value) =>
+          s"$label$value"
+      }
+      .foldRight("") { case (nextPart, accum) =>
+        // I haven't worked out the exact rules around this yet.
+        // In some cases, the old Wellcome Library site would join parts with
+        // a space.  In others (e.g. "v.130:no.3"), it uses a colon.
+        if (accum.startsWith("no.") && nextPart.startsWith("v.")) {
+          nextPart + ":" + accum
+        } else {
+          nextPart + " " + accum
         }
       }
-      .mkString(" ")
+      .trim
 
   private def createLabel(id: TypedSierraRecordNumber, vf: VarField): Option[Label] =
     vf.subfieldsWithTag("8").headOption match {

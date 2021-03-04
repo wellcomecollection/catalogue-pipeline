@@ -45,6 +45,32 @@ class SierraHoldingsEnumerationTest extends AnyFunSpec with Matchers with MarcGe
     }
   }
 
+  it("handles an 853/863 pair that features a range with start/end") {
+    // This is based on b13488557 / h10310770
+    val varFields = List(
+      createVarFieldWith(
+        marcTag = "863",
+        subfields = List(
+          MarcSubfield(tag = "8", content = "1.1"),
+          MarcSubfield(tag = "a", content = "1-35"),
+          MarcSubfield(tag = "b", content = "1-2"),
+          MarcSubfield(tag = "i", content = "1984-2018"),
+        )
+      ),
+      createVarFieldWith(
+        marcTag = "853",
+        subfields = List(
+          MarcSubfield(tag = "8", content = "1"),
+          MarcSubfield(tag = "a", content = "v."),
+          MarcSubfield(tag = "b", content = "no."),
+          MarcSubfield(tag = "i", content = "(year)"),
+        )
+      )
+    )
+
+    getEnumerations(varFields) shouldBe List("v.1:no.1 (1984) - v.35:no.2 (2018)")
+  }
+
   describe("handles malformed MARC data") {
     it("skips a field 863 if it has a missing sequence number") {
       val varFields = List(
