@@ -369,6 +369,36 @@ class SierraHoldingsEnumerationTest extends AnyFunSpec with Matchers with MarcGe
     )
   }
 
+  it("handles a mix of month/season in the same record") {
+    // This test case is based on b13544019
+    val varFields = List(
+      createVarFieldWith(
+        marcTag = "863",
+        subfields = List(
+          MarcSubfield(tag = "8", content = "1.1"),
+          MarcSubfield(tag = "a", content = "26-47"),
+          MarcSubfield(tag = "b", content = "-2"),
+          MarcSubfield(tag = "i", content = "1996-2017"),
+          MarcSubfield(tag = "j", content = "24-05"),
+        )
+      ),
+      createVarFieldWith(
+        marcTag = "853",
+        subfields = List(
+          MarcSubfield(tag = "8", content = "1"),
+          MarcSubfield(tag = "a", content = "v."),
+          MarcSubfield(tag = "b", content = "no."),
+          MarcSubfield(tag = "i", content = "(year)"),
+          MarcSubfield(tag = "j", content = "(month)"),
+        )
+      )
+    )
+
+    getEnumerations(varFields) shouldBe List(
+      "v.26 (Winter 1996) - v.47:no.2 (May 2017)"
+    )
+  }
+
   describe("handles malformed MARC data") {
     it("skips a field 863 if it has a missing sequence number") {
       val varFields = List(
