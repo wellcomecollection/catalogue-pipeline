@@ -166,7 +166,8 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
       objectField("deletedReason")
         .fields(keywordField("type"))
         .dynamic("false"),
-      objectField("redirect").dynamic("false"),
+      objectField("redirectTarget").dynamic("false"),
+      objectField("redirectSources").dynamic(false),
       version
     )
 }
