@@ -131,12 +131,12 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
       val dateDisplayStrings =
         if (datePartsMap.contains("season")) {
           List(
-            datePartsMap.get("season").flatMap { seasonNames.get },
+            datePartsMap.get("season").flatMap { toNamedSeason },
             datePartsMap.get("year")
           )
-        } else if (seasonNames.contains(datePartsMap.getOrElse("month", ""))) {
+        } else if (toNamedSeason(datePartsMap.getOrElse("month", "")).isDefined) {
           List(
-            datePartsMap.get("month").flatMap { seasonNames.get },
+            datePartsMap.get("month").flatMap { toNamedSeason },
             datePartsMap.get("year")
           )
         } else {
@@ -180,6 +180,15 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
       case (ts, Some(ds)) if ts.nonEmpty && ds.nonEmpty => s"$ts ($ds)"
       case (_, Some(ds)) if ds.nonEmpty => ds
       case (ts, _) => ts
+    }
+  }
+
+  private def toNamedSeason(s: String): Option[String] = {
+    val parts = s.split("/")
+    if (parts.forall(seasonNames.contains)) {
+      Some(parts.map { seasonNames(_) }.mkString("/"))
+    } else {
+      None
     }
   }
 
