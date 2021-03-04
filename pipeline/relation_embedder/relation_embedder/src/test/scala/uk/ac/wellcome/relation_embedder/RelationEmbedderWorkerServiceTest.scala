@@ -44,12 +44,12 @@ class RelationEmbedderWorkerServiceTest
     * 1  2
     * |  |---
     * |  |  |
-    * b  c  d*
+    * b  c  d†
     *    |
     *    |
     *    e
     *
-    * *d is available online
+    * d† is available online
     */
   val workA = work("a")
   val work1 = work("a/1")

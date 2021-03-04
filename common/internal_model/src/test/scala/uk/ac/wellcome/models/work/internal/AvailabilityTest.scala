@@ -11,19 +11,20 @@ class AvailabilityTest
     with ItemsGenerators {
   describe("Availabilities.forWorkData") {
     it(
-      "adds Availability.Online if there is a digital location with an Open or OpenWithAdvisory access status") {
+      "adds Availability.Online if there is a digital location with an Open, OpenWithAdvisory or LicensedResources access status") {
       val openWork = denormalisedWork().items(
         List(createDigitalItemWith(accessStatus = AccessStatus.Open)))
       val openWithAdvisoryWork = denormalisedWork().items(
         List(
           createDigitalItemWith(accessStatus = AccessStatus.OpenWithAdvisory)))
-      val openWorkAvailabilities =
-        Availabilities.forWorkData(openWork.data)
-      val openWithAdvisoryWorkAvailabilities =
-        Availabilities.forWorkData(openWithAdvisoryWork.data)
+      val licensedResourcesWork = denormalisedWork().items(
+        List(
+          createDigitalItemWith(accessStatus = AccessStatus.LicensedResources)))
+      val availabilities =
+        List(openWork, openWithAdvisoryWork, licensedResourcesWork)
+          .map(work => Availabilities.forWorkData(work.data))
 
-      openWorkAvailabilities should contain only Availability.Online
-      openWithAdvisoryWorkAvailabilities should contain only Availability.Online
+      every(availabilities) should contain only Availability.Online
     }
 
     it("adds Availability.InLibrary if there is a physical location") {
@@ -42,6 +43,14 @@ class AvailabilityTest
       val workAvailabilities = Availabilities.forWorkData(work.data)
 
       workAvailabilities should contain allOf (Availability.InLibrary, Availability.Online)
+    }
+
+    it("does not add either availability if no conditions are satisfied") {
+      val work = denormalisedWork().items(
+        List(createDigitalItemWith(accessStatus = AccessStatus.Closed)))
+      val workAvailabilities = Availabilities.forWorkData(work.data)
+
+      workAvailabilities.size shouldBe 0
     }
   }
 }
