@@ -17,7 +17,6 @@ import uk.ac.wellcome.platform.api.models.{
   FormatFilter,
   GenreFilter,
   ImageFilter,
-  ItemLocationTypeFilter,
   LanguagesFilter,
   LicenseFilter,
   SubjectFilter,
@@ -113,8 +112,6 @@ class WorkFiltersAndAggregationsBuilder(
       case _: SubjectFilter      => Some(WorkAggregationRequest.Subject)
       case _: ContributorsFilter => Some(WorkAggregationRequest.Contributor)
       case _: LicenseFilter      => Some(WorkAggregationRequest.License)
-      case _: ItemLocationTypeFilter =>
-        Some(WorkAggregationRequest.ItemLocationType)
       case _: AvailabilitiesFilter =>
         Some(WorkAggregationRequest.Availabilities)
       case _ => None

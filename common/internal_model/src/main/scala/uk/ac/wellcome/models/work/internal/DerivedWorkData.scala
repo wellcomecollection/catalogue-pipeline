@@ -24,10 +24,4 @@ object DerivedWorkData {
         val label = agent.label
         s"$ontologyType:$label"
     }
-
-  private def containsLocation(predicate: Location => Boolean)(
-    items: List[Item[_]]): Boolean =
-    items.exists { item =>
-      item.locations.exists(predicate)
-    }
 }

@@ -37,9 +37,6 @@ case class DisplayWorkAggregations(
     description = "License aggregation on a set of results."
   ) license: Option[DisplayAggregation[DisplayLicense]],
   @Schema(
-    description = "Location type aggregation on a set of results."
-  ) locationType: Option[DisplayAggregation[DisplayLocationTypeAggregation]],
-  @Schema(
     description = "Availabilities aggregation on a set of results."
   ) availabilities: Option[DisplayAggregation[DisplayAvailability]],
   @JsonKey("type") @Schema(name = "type") ontologyType: String = "Aggregations")
@@ -69,9 +66,6 @@ object DisplayWorkAggregations {
             DisplayContributor(contributor, includesIdentifiers = false)
         ),
       license = displayAggregation(aggs.license, DisplayLicense.apply),
-      locationType = displayAggregation(
-        aggs.locationType,
-        DisplayLocationTypeAggregation.apply),
       availabilities =
         displayAggregation(aggs.availabilities, DisplayAvailability.apply)
     )

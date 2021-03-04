@@ -88,12 +88,6 @@ object WorksRequestBuilder
         .field("data.items.locations.license.id")
         .minDocCount(0)
 
-    case WorkAggregationRequest.ItemLocationType =>
-      TermsAggregation("locationType")
-        .size(2)
-        .field("data.items.locations.type")
-        .minDocCount(0)
-
     case WorkAggregationRequest.Availabilities =>
       TermsAggregation("availabilities")
         .size(Availability.values.size)
@@ -181,10 +175,6 @@ object WorksRequestBuilder
           includes = includes.map(_.name),
           excludes = excludes.map(_.name),
         )
-      case ItemLocationTypeFilter(locationTypes) =>
-        termsQuery(
-          field = "data.items.locations.type",
-          values = locationTypes.map(_.name))
       case ItemLocationTypeIdFilter(itemLocationTypeIds) =>
         termsQuery(
           field = "data.items.locations.locationType.id",

@@ -3,14 +3,9 @@ package uk.ac.wellcome.platform.api.models
 import uk.ac.wellcome.models.work.internal.{AccessStatus, WorkType}
 import java.time.LocalDate
 
-import uk.ac.wellcome.display.models.LocationTypeQuery
-
 sealed trait WorkFilter
 
 sealed trait ImageFilter
-
-case class ItemLocationTypeFilter(locationTypes: Seq[LocationTypeQuery])
-    extends WorkFilter
 
 case class ItemLocationTypeIdFilter(locationTypeIds: Seq[String])
     extends WorkFilter

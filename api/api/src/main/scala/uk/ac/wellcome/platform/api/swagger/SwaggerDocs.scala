@@ -372,16 +372,6 @@ trait MultipleWorksSwagger {
         required = false
       ),
       new Parameter(
-        name = "items.locations.type",
-        in = ParameterIn.QUERY,
-        description =
-          "Filter by the Location type of items on the retrieved works",
-        required = false,
-        schema = new Schema(
-          allowableValues = Array("DigitalLocation", "PhysicalLocation")
-        )
-      ),
-      new Parameter(
         name = "workType",
         in = ParameterIn.QUERY,
         description = "Filter by the format of the searched works",
@@ -410,8 +400,6 @@ trait MultipleWorksSwagger {
             "contributors",
             "license",
             "languages",
-            "locationType",
-            "items.locations.type",
             "availabilities")),
         required = false
       ),

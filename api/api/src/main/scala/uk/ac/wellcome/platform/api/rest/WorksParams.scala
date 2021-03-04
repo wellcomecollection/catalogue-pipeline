@@ -66,7 +66,6 @@ case class MultipleWorksParams(
   sortOrder: Option[SortingOrder],
   query: Option[String],
   identifiers: Option[IdentifiersFilter],
-  `items.locations.type`: Option[ItemLocationTypeFilter],
   `items.locations.locationType`: Option[ItemLocationTypeIdFilter],
   `items.locations.accessConditions.status`: Option[AccessStatusFilter],
   `type`: Option[WorkTypeFilter],
@@ -99,7 +98,6 @@ case class MultipleWorksParams(
       `subjects.label`,
       `contributors.agent.label`,
       identifiers,
-      `items.locations.type`,
       `items.locations.locationType`,
       `items.locations.accessConditions.status`,
       license,
@@ -143,7 +141,6 @@ object MultipleWorksParams extends QueryParamsUtils {
         "sortOrder".as[SortingOrder].?,
         "query".as[String].?,
         "identifiers".as[IdentifiersFilter].?,
-        "items.locations.type".as[ItemLocationTypeFilter].?,
         "items.locations.locationType".as[ItemLocationTypeIdFilter].?,
         "items.locations.accessConditions.status".as[AccessStatusFilter].?,
         "type".as[WorkTypeFilter].?,
@@ -167,7 +164,6 @@ object MultipleWorksParams extends QueryParamsUtils {
           sortOrder,
           query,
           identifiers,
-          itemLocationType,
           itemLocationTypeId,
           accessStatus,
           workType,
@@ -198,7 +194,6 @@ object MultipleWorksParams extends QueryParamsUtils {
               sortOrder,
               query,
               identifiers,
-              itemLocationType,
               itemLocationTypeId,
               accessStatus,
               workType,
@@ -220,12 +215,6 @@ object MultipleWorksParams extends QueryParamsUtils {
       "Series" -> WorkType.Series,
       "Section" -> WorkType.Section
     ).emap(values => Right(WorkTypeFilter(values)))
-
-  implicit val itemLocationTypeFilter: Decoder[ItemLocationTypeFilter] =
-    decodeOneOfCommaSeparated(
-      "DigitalLocation" -> LocationTypeQuery.DigitalLocation,
-      "PhysicalLocation" -> LocationTypeQuery.PhysicalLocation,
-    ) map ItemLocationTypeFilter
 
   implicit val itemLocationTypeIdFilter: Decoder[ItemLocationTypeIdFilter] =
     stringListFilter(ItemLocationTypeIdFilter)
@@ -273,8 +262,6 @@ object MultipleWorksParams extends QueryParamsUtils {
       "languages" -> WorkAggregationRequest.Languages,
       "contributors" -> WorkAggregationRequest.Contributor,
       "license" -> WorkAggregationRequest.License,
-      "locationType" -> WorkAggregationRequest.ItemLocationType,
-      "items.locations.type" -> WorkAggregationRequest.ItemLocationType,
       "availabilities" -> WorkAggregationRequest.Availabilities
     )
 
