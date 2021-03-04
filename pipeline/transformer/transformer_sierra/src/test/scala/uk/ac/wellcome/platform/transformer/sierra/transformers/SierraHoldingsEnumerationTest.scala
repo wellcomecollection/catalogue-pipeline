@@ -71,6 +71,37 @@ class SierraHoldingsEnumerationTest extends AnyFunSpec with Matchers with MarcGe
     getEnumerations(varFields) shouldBe List("v.1:no.1 (1984) - v.35:no.2 (2018)")
   }
 
+  it("handles a duplicated 853/863 field") {
+    val varFields = List(
+      createVarFieldWith(
+        marcTag = "853",
+        subfields = List(
+          MarcSubfield(tag = "8", content = "10"),
+          MarcSubfield(tag = "a", content = "vol."),
+          MarcSubfield(tag = "i", content = "(year)")
+        )
+      ),
+      createVarFieldWith(
+        marcTag = "853",
+        subfields = List(
+          MarcSubfield(tag = "8", content = "10"),
+          MarcSubfield(tag = "a", content = "vol."),
+          MarcSubfield(tag = "i", content = "(year)")
+        )
+      ),
+      createVarFieldWith(
+        marcTag = "863",
+        subfields = List(
+          MarcSubfield(tag = "8", content = "10.1"),
+          MarcSubfield(tag = "a", content = "1"),
+          MarcSubfield(tag = "i", content = "2001")
+        )
+      )
+    )
+
+    getEnumerations(varFields) shouldBe List("vol.1 (2001)")
+  }
+
   describe("handles malformed MARC data") {
     it("skips a field 863 if it has a missing sequence number") {
       val varFields = List(

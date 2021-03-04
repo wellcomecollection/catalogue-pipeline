@@ -42,11 +42,19 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
         .filter { _.marcTag.contains(valueTag) }
         .flatMap { createValue(id, _) }
 
-    // Now we turn this into a Map
     val labelsLookup = labels
       .map { case label @ Label(link, _) => link -> label }
       .toMap
-    assert(labelsLookup.size == labels.size)
+
+    // We have seen records where two instances of field 853 have the
+    // same sequence number, but only when the whole field is duplicated.
+    // That's not an issue -- they'd generate the same caption regardless.
+    //
+    // It's worth investigating if we have *different* data in the fields,
+    // because then we might have an unstable caption.
+    if (labelsLookup.size != labels.distinct.size) {
+      warn(s"${id.withoutCheckDigit}: multiple instances of $labelTag with the same sequence number")
+    }
 
     values
       .flatMap { value =>
