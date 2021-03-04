@@ -94,18 +94,10 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
           }
         }
         .filterNot { case (_, value) => value.trim == "-" }
-        .filterNot { case (_, value) =>
-          if (value.count(_ == '-') >= 2) {
-            warn(s"$id: ambiguous range in 85X/86X pair: $value")
-            true
-          } else {
-            false
-          }
-        }
 
     if (parts.exists { case (_, value) => value.contains("-") }) {
-      val startParts = parts.map { case (label, value) => (label, value.split('-').head) }
-      val endParts = parts.map { case (label, value) => (label, value.split('-').last) }
+      val startParts = parts.map { case (label, value) => (label, value.split("-", 2).head) }
+      val endParts = parts.map { case (label, value) => (label, value.split("-", 2).last) }
 
       s"${concatenateParts(startParts)} - ${concatenateParts(endParts)}"
     } else {
