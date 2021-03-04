@@ -399,6 +399,31 @@ class SierraHoldingsEnumerationTest extends AnyFunSpec with Matchers with MarcGe
     )
   }
 
+  it("includes the contents of the public note in subfield ǂz") {
+    // This test case is based on b14975993
+    val varFields = List(
+      createVarFieldWith(
+        marcTag = "863",
+        subfields = List(
+          MarcSubfield(tag = "8", content = "1.1"),
+          MarcSubfield(tag = "a", content = "1-2"),
+          MarcSubfield(tag = "b", content = "1-2"),
+          MarcSubfield(tag = "z", content = "Current issue on display")
+        )
+      ),
+      createVarFieldWith(
+        marcTag = "853",
+        subfields = List(
+          MarcSubfield(tag = "8", content = "1"),
+          MarcSubfield(tag = "a", content = "v."),
+          MarcSubfield(tag = "b", content = "no."),
+        )
+      )
+    )
+
+    getEnumerations(varFields) shouldBe List("v.1:no.1 - v.2:no.2 Current issue on display")
+  }
+
   describe("handles malformed MARC data") {
     it("skips a field 863 if it has a missing sequence number") {
       val varFields = List(

@@ -75,7 +75,16 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
             None
         }
       }
-      .map { case (label, value) => createString(id, label, value) }
+      .map { case (label, value) =>
+        // We concatenate the contents of the public note in subfield ǂz.
+        // This is completely separate from the logic for combining the
+        // labels/values from the 85X/86X pair.
+        val publicNote =
+          value.varField.subfieldsWithTag("z").map { _.content }.mkString(" ")
+
+        createString(id, label, value) + " " + publicNote
+      }
+      .map { _.trim }
   }
 
   private def createString(id: TypedSierraRecordNumber, label: Label, value: Value): String = {
