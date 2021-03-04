@@ -93,6 +93,7 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
             case None => None
           }
         }
+        .filterNot { case (_, value) => value.isEmpty }
         .filterNot { case (_, value) =>
           if (value.count(_ == '-') >= 2) {
             warn(s"$id: ambiguous range in 85X/86X pair: $value")

@@ -102,6 +102,32 @@ class SierraHoldingsEnumerationTest extends AnyFunSpec with Matchers with MarcGe
     getEnumerations(varFields) shouldBe List("vol.1 (2001)")
   }
 
+  it("skips empty values in field 863") {
+    // This is based on b13108608
+    val varFields = List(
+      createVarFieldWith(
+        marcTag = "863",
+        subfields = List(
+          MarcSubfield(tag = "8", content = "1.1"),
+          MarcSubfield(tag = "a", content = ""),
+          MarcSubfield(tag = "b", content = "1-101"),
+          MarcSubfield(tag = "i", content = "1982-2010")
+        )
+      ),
+      createVarFieldWith(
+        marcTag = "853",
+        subfields = List(
+          MarcSubfield(tag = "8", content = "1"),
+          MarcSubfield(tag = "a", content = "v."),
+          MarcSubfield(tag = "b", content = "no."),
+          MarcSubfield(tag = "i", content = "(year)")
+        )
+      )
+    )
+
+    getEnumerations(varFields) shouldBe List("no.1 (1982) - no.101 (2010)")
+  }
+
   describe("handles malformed MARC data") {
     it("skips a field 863 if it has a missing sequence number") {
       val varFields = List(
