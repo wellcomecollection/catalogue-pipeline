@@ -208,6 +208,31 @@ class SierraHoldingsEnumerationTest extends AnyFunSpec with Matchers with MarcGe
 
       getEnumerations(varFields) shouldBe List("vol.1 (1995)")
     }
+
+    it("skips a range field which is ambiguous") {
+      val varFields = List(
+        createVarFieldWith(
+          marcTag = "863",
+          subfields = List(
+            MarcSubfield(tag = "8", content = "1.1"),
+            MarcSubfield(tag = "a", content = "1-2"),
+            MarcSubfield(tag = "b", content = "1-2"),
+            MarcSubfield(tag = "i", content = "1984-1994-2004"),
+          )
+        ),
+        createVarFieldWith(
+          marcTag = "853",
+          subfields = List(
+            MarcSubfield(tag = "8", content = "1"),
+            MarcSubfield(tag = "a", content = "v."),
+            MarcSubfield(tag = "b", content = "no."),
+            MarcSubfield(tag = "i", content = "(year)"),
+          )
+        )
+      )
+
+      getEnumerations(varFields) shouldBe List("v.1:no.1 - v.2:no.2")
+    }
   }
 
   def getEnumerations(varFields: List[VarField]): List[String] =
