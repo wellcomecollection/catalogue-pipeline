@@ -56,6 +56,16 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
       warn(s"${id.withoutCheckDigit}: multiple instances of $labelTag with the same sequence number")
     }
 
+    // We match the subfields on the label/value.
+    //
+    // For example, if we had the subfields:
+    //
+    //    853 00 |810|avol.|i(year)
+    //    863 40 |810.1|a1|i1995
+    //
+    // Then the label in subfield ǂa is "vol." and the value is "1".
+    //
+    // If we can't find a label for a given value, we omit it.
     values
       .flatMap { value =>
         labelsLookup.get(value.link) match {
@@ -69,30 +79,14 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
   }
 
   private def createString(id: TypedSierraRecordNumber, label: Label, value: Value): String = {
-    // We match the subfields on the label/value.
-    //
-    // For example, if we had the subfields:
-    //
-    //    853 00 |810|avol.|i(year)
-    //    863 40 |810.1|a1|i1995
-    //
-    // Then the label in subfield ǂa is "vol." and the value is "1".
-    //
-    // If the label is in parens, then we omit the label and wrap the
-    // value in parens, e.g. "(1995)".
-    //
-    // If any of the subfields contain a "-", then this is a range.
-    // For example, if we had the subfields:
-    //
-    //    853 00 |810|avol.|i(year)
-    //    863 40 |810.1|a1-10|i1995-2005
-    //
-    // Then we would create the string "vol.1 (1995) - vol.10 (2005)".
-    //
     val parts: Seq[(String, String)] =
       value
         .varField.subfields
-        .filterNot { _.tag == "8" }
+        .filterNot {
+          // This is the link field (see above), so we don't need to include it when
+          // creating the display string.
+          _.tag == "8"
+        }
         .flatMap { sf =>
           label.varField.subfieldsWithTag(sf.tag).headOption match {
             case Some(MarcSubfield(_, subfieldLabel)) => Some((subfieldLabel, sf.content))
@@ -139,6 +133,10 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
       }
       .trim
 
+  /** Given an 85X varField from Sierra, try to create a Label.
+    *
+    * A Label contains the original varField and the link number.
+    */
   private def createLabel(id: TypedSierraRecordNumber, vf: VarField): Option[Label] =
     vf.subfieldsWithTag("8").headOption match {
       case Some(MarcSubfield(_, content)) =>
@@ -154,6 +152,10 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
         None
     }
 
+  /** Given an 86X varField from Sierra, try to create a Value.
+   *
+   * A Value contains the original varField, the link number and the sequence number.
+   */
   private def createValue(id: TypedSierraRecordNumber, vf: VarField): Option[Value] =
     vf.subfieldsWithTag("8").headOption match {
       case Some(MarcSubfield(_, content)) =>
