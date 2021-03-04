@@ -121,4 +121,26 @@ class MergerTest
       inputWorks.tail.head.transition[Merged](now)
     )
   }
+
+  it("preserves the existing redirectSources on a target work") {
+    val existingRedirectSources = (1 to 3).map { _ =>
+      IdState.Identified(createCanonicalId, createSourceIdentifier)
+    }
+
+    val targetWork = identifiedWork()
+      .withRedirectSources(existingRedirectSources)
+
+    val sourceWorks = (1 to 5).map { _ => identifiedWork() }
+
+    val mergerOutput = FirstWorkMerger.merge(targetWork +: sourceWorks)
+
+    val mergedWork: Work.Visible[Merged] = mergerOutput.mergedWorksWithTime(now)
+      .collect { case w: Work.Visible[Merged] => w }
+      .filter { w => w.sourceIdentifier == targetWork.sourceIdentifier }
+      .head
+
+    mergedWork.redirectSources should contain allElementsOf existingRedirectSources
+    mergedWork.redirectSources should contain allElementsOf
+      sourceWorks.tail.map { w => IdState.Identified(w.id, w.sourceIdentifier)}
+  }
 }

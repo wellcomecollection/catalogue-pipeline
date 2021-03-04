@@ -107,7 +107,7 @@ trait Merger extends MergerLogging {
               version = result.mergedTarget.version,
               data = result.mergedTarget.data,
               state = result.mergedTarget.state,
-              redirectSources = redirectedIdentifiers //result.mergedTarget.redirectSources ++ redirectedIdentifiers
+              redirectSources = result.mergedTarget.redirectSources ++ redirectedIdentifiers
             )
 
           MergerOutcome(
