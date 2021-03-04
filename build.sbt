@@ -2,6 +2,8 @@ import java.io.File
 import java.util.UUID
 import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider
 
+val projectVersion = "0.0.0"
+
 def setupProject(
   project: Project,
   folder: String,
@@ -32,7 +34,7 @@ def setupProject(
 lazy val internal_model = setupProject(
   project,
   "common/internal_model",
-  externalDependencies = CatalogueDependencies.internalModelDependencies)
+  externalDependencies = CatalogueDependencies.internalModelDependencies).settings( version:= projectVersion)
 
 lazy val display = setupProject(
   project,
@@ -282,7 +284,7 @@ lazy val snapshot_generator = setupProject(
 
 s3CredentialsProvider := { _ =>
   val builder = new STSAssumeRoleSessionCredentialsProvider.Builder(
-    "arn:aws:iam::760097843905:role/platform-read_only",
+    "arn:aws:iam::760097843905:role/platform-ci",
     UUID.randomUUID().toString
   )
   builder.build()

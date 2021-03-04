@@ -14,6 +14,7 @@ from git_utils import (
 )
 from provider import current_branch, is_default_branch
 from sbt_dependency_tree import Repository
+from release import check_release_file
 
 
 def should_run_sbt_project(repo, project_name, changed_paths):
@@ -67,6 +68,10 @@ def should_run_sbt_project(repo, project_name, changed_paths):
     return False
 
 
+def should_check_release(project_name):
+    return project_name == "internal_model"
+
+
 if __name__ == "__main__":
     # Get git metadata
 
@@ -114,8 +119,10 @@ if __name__ == "__main__":
             )
             sys.exit(0)
 
-    # Perform make tasks
+    if should_check_release(args.project_name):
+        check_release_file(commit_range)
 
+    # Perform make tasks
     make(f"{args.project_name}-test")
 
     if is_default_branch():

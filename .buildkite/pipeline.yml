@@ -55,7 +55,6 @@ steps:
     label: "Sierra linker"
   - command: .buildkite/scripts/run_job.py sierra_indexer
     label: "Sierra indexer"
-
   - command: .buildkite/scripts/run_job.py mets_adapter
     label: "METS adapter"
   - command: .buildkite/scripts/run_job.py calm_adapter
@@ -70,6 +69,34 @@ steps:
     label: "palette inferrer"
   - command: .buildkite/scripts/run_job.py snapshot_generator
     label: "snapshot generator"
+  - wait
+  - label: cut release
+    if: build.branch == "master"
+    plugins:
+      - docker#v3.5.0:
+          image: "wellcome/sbt_wrapper"
+          mount-ssh-agent: true
+          volumes: ["/var/run/docker.sock:/var/run/docker.sock"]
+          network: "host"
+          always-pull: true
+          propagate-environment: true
+          entrypoint: "/usr/bin/python3"
+    command: "/workdir/.buildkite/scripts/release.py"
+  - wait
+  - label: publish internal model
+    if: build.branch == "master"
+    env:
+      PROJECT: internal_model
+    plugins:
+      - docker#v3.5.0:
+          image: "wellcome/sbt_wrapper"
+          mount-ssh-agent: true
+          volumes: ["/var/run/docker.sock:/var/run/docker.sock"]
+          network: "host"
+          always-pull: true
+          propagate-environment: true
+          entrypoint: "/usr/bin/python3"
+    command: "/workdir/.buildkite/scripts/publish.py"
   - wait
   - command: .buildkite/scripts/complete_build.py
     label: "complete build"

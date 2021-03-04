@@ -36,3 +36,16 @@ def get_sha1_for_tag(tag):
     """Use show-ref to discover the hash for a given tag (fetch first so we have all remote tags)."""
     git("fetch")
     return git("show-ref", "--hash", tag)
+
+
+def has_source_changes(commit_range):
+    """
+    Returns True if there are source changes since the previous release,
+    False if not.
+    """
+    changed_files = [
+        f
+        for f in get_changed_paths(commit_range)
+        if f.strip().endswith((".sbt", ".scala"))
+    ]
+    return len(changed_files) != 0
