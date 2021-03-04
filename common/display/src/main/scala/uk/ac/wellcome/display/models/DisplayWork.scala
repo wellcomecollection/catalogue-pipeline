@@ -76,10 +76,6 @@ case class DisplayWork(
     description = "List of items related to this work."
   ) items: Option[List[DisplayItem]] = None,
   @Schema(
-    description = "Whether the work contains an item with a digital location",
-    `type` = "Boolean"
-  ) availableOnline: Boolean = false,
-  @Schema(
     description = "Ways in which the work is available to access",
     `type` = "List[uk.ac.wellcome.display.modules.DisplayAvailability]"
   ) availabilities: List[DisplayAvailability] = Nil,
@@ -164,7 +160,6 @@ object DisplayWork {
             DisplayItem(_, includesIdentifiers = includes.identifiers)
           })
         else None,
-      availableOnline = work.state.derivedData.availableOnline,
       availabilities = work.state.availabilities.toList.map {
         DisplayAvailability(_)
       },

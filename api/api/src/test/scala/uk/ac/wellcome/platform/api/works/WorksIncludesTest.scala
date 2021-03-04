@@ -40,7 +40,6 @@ class WorksIncludesTest
                    "id": "${work0.state.canonicalId}",
                    "title": "${work0.data.title.get}",
                    "alternativeTitles": [],
-                   "availableOnline": false,
                    "availabilities": [${availabilities(
               work0.state.availabilities)}],
                    "identifiers": [
@@ -53,7 +52,6 @@ class WorksIncludesTest
                    "id": "${work1.state.canonicalId}",
                    "title": "${work1.data.title.get}",
                    "alternativeTitles": [],
-                   "availableOnline": false,
                    "availabilities": [${availabilities(
               work1.state.availabilities)}],
                    "identifiers": [
@@ -85,7 +83,6 @@ class WorksIncludesTest
                 "id": "${work.state.canonicalId}",
                 "title": "${work.data.title.get}",
                 "alternativeTitles": [],
-                "availableOnline": false,
                 "availabilities": [${availabilities(work.state.availabilities)}],
                 "identifiers": [
                   ${identifier(work.sourceIdentifier)},
@@ -119,7 +116,6 @@ class WorksIncludesTest
               "id": "${work.state.canonicalId}",
               "title": "${work.data.title.get}",
               "alternativeTitles": [],
-              "availableOnline": true,
               "availabilities": [${availabilities(work.state.availabilities)}],
               "items": [ ${items(work.data.items)} ]
             }
@@ -150,7 +146,6 @@ class WorksIncludesTest
                    "id": "${work0.state.canonicalId}",
                    "title": "${work0.data.title.get}",
                    "alternativeTitles": [],
-                   "availableOnline": false,
                    "availabilities": [${availabilities(
               work0.state.availabilities)}],
                    "subjects": [ ${subjects(subjects0)}]
@@ -160,7 +155,6 @@ class WorksIncludesTest
                    "id": "${work1.state.canonicalId}",
                    "title": "${work1.data.title.get}",
                    "alternativeTitles": [],
-                   "availableOnline": false,
                    "availabilities": [${availabilities(
               work1.state.availabilities)}],
                    "subjects": [ ${subjects(subjects1)}]
@@ -189,7 +183,6 @@ class WorksIncludesTest
                 "id": "${work.state.canonicalId}",
                 "title": "${work.data.title.get}",
                 "alternativeTitles": [],
-                "availableOnline": false,
                 "availabilities": [${availabilities(work.state.availabilities)}],
                 "subjects": [ ${subjects(work.data.subjects)}]
               }
@@ -221,7 +214,6 @@ class WorksIncludesTest
                    "id": "${work1.state.canonicalId}",
                    "title": "${work1.data.title.get}",
                    "alternativeTitles": [],
-                   "availableOnline": false,
                    "availabilities": [${availabilities(
               work1.state.availabilities)}],
                    "genres": [ ${genres(genres1)}]
@@ -231,7 +223,6 @@ class WorksIncludesTest
                    "id": "${work2.state.canonicalId}",
                    "title": "${work2.data.title.get}",
                    "alternativeTitles": [],
-                   "availableOnline": false,
                    "availabilities": [${availabilities(
               work2.state.availabilities)}],
                    "genres": [ ${genres(genres2)}]
@@ -261,7 +252,6 @@ class WorksIncludesTest
                 "id": "${work.state.canonicalId}",
                 "title": "${work.data.title.get}",
                 "alternativeTitles": [],
-                "availableOnline": false,
                 "availabilities": [${availabilities(work.state.availabilities)}],
                 "genres": [ ${genres(work.data.genres)}]
               }
@@ -297,7 +287,6 @@ class WorksIncludesTest
                    "id": "${work1.state.canonicalId}",
                    "title": "${work1.data.title.get}",
                    "alternativeTitles": [],
-                   "availableOnline": false,
                    "availabilities": [${availabilities(
               work1.state.availabilities)}],
                    "contributors": [ ${contributors(contributors1)}]
@@ -307,7 +296,6 @@ class WorksIncludesTest
                    "id": "${work2.state.canonicalId}",
                    "title": "${work2.data.title.get}",
                    "alternativeTitles": [],
-                   "availableOnline": false,
                    "availabilities": [${availabilities(
               work2.state.availabilities)}],
                    "contributors": [ ${contributors(contributors2)}]
@@ -338,7 +326,6 @@ class WorksIncludesTest
                 "id": "${work.state.canonicalId}",
                 "title": "${work.data.title.get}",
                 "alternativeTitles": [],
-                "availableOnline": false,
                 "availabilities": [${availabilities(work.state.availabilities)}],
                 "contributors": [ ${contributors(work.data.contributors)}]
               }
@@ -372,7 +359,6 @@ class WorksIncludesTest
                    "id": "${work1.state.canonicalId}",
                    "title": "${work1.data.title.get}",
                    "alternativeTitles": [],
-                   "availableOnline": false,
                    "availabilities": [${availabilities(
               work1.state.availabilities)}],
                    "production": [ ${production(productionEvents1)}]
@@ -382,7 +368,6 @@ class WorksIncludesTest
                    "id": "${work2.state.canonicalId}",
                    "title": "${work2.data.title.get}",
                    "alternativeTitles": [],
-                   "availableOnline": false,
                    "availabilities": [${availabilities(
               work2.state.availabilities)}],
                    "production": [ ${production(productionEvents2)}]
@@ -411,7 +396,6 @@ class WorksIncludesTest
                 "id": "${work.state.canonicalId}",
                 "title": "${work.data.title.get}",
                 "alternativeTitles": [],
-                "availableOnline": false,
                 "availabilities": [${availabilities(work.state.availabilities)}],
                 "production": [ ${production(work.data.production)}]
               }
@@ -445,7 +429,6 @@ class WorksIncludesTest
                    "id": "${work1.state.canonicalId}",
                    "title": "${work1.data.title.get}",
                    "alternativeTitles": [],
-                   "availableOnline": false,
                    "availabilities": [${availabilities(
               work1.state.availabilities)}],
                    "languages": [ ${languages(work1.data.languages)}]
@@ -455,7 +438,6 @@ class WorksIncludesTest
                    "id": "${work2.state.canonicalId}",
                    "title": "${work2.data.title.get}",
                    "alternativeTitles": [],
-                   "availableOnline": false,
                    "availabilities": [${availabilities(
               work2.state.availabilities)}],
                    "languages": [ ${languages(work2.data.languages)}]
@@ -487,7 +469,6 @@ class WorksIncludesTest
                 "id": "${work.state.canonicalId}",
                 "title": "${work.data.title.get}",
                 "alternativeTitles": [],
-                "availableOnline": false,
                 "availabilities": [${availabilities(work.state.availabilities)}],
                 "languages": [ ${languages(work.data.languages)}]
               }
@@ -517,7 +498,6 @@ class WorksIncludesTest
                      "id": "${work1.state.canonicalId}",
                      "title": "${work1.data.title.get}",
                      "alternativeTitles": [],
-                     "availableOnline": false,
                      "availabilities": [${availabilities(
               work1.state.availabilities)}],
                      "notes": [
@@ -546,7 +526,6 @@ class WorksIncludesTest
                      "id": "${work2.state.canonicalId}",
                      "title": "${work2.data.title.get}",
                      "alternativeTitles": [],
-                     "availableOnline": false,
                      "availabilities": [${availabilities(
               work2.state.availabilities)}],
                      "notes": [
@@ -583,7 +562,6 @@ class WorksIncludesTest
                 "id": "${work.state.canonicalId}",
                 "title": "${work.data.title.get}",
                 "alternativeTitles": [],
-                "availableOnline": false,
                 "availabilities": [${availabilities(work.state.availabilities)}],
                 "notes": [
                    {
@@ -633,7 +611,6 @@ class WorksIncludesTest
                     "id": "${works.head.state.canonicalId}",
                     "title": "${works.head.data.title.get}",
                     "alternativeTitles": [],
-                    "availableOnline": false,
                     "availabilities": [${availabilities(
               works.head.state.availabilities)}],
                     "images": [${workImageIncludes(works.head.data.imageData)}]
@@ -643,7 +620,6 @@ class WorksIncludesTest
                     "id": "${works(1).state.canonicalId}",
                     "title": "${works(1).data.title.get}",
                     "alternativeTitles": [],
-                    "availableOnline": false,
                     "availabilities": [${availabilities(
               works(1).state.availabilities)}],
                     "images": [${workImageIncludes(works(1).data.imageData)}]
@@ -674,7 +650,6 @@ class WorksIncludesTest
                 "id": "${work.state.canonicalId}",
                 "title": "${work.data.title.get}",
                 "alternativeTitles": [],
-                "availableOnline": false,
                 "availabilities": [${availabilities(work.state.availabilities)}],
                 "images": [${workImageIncludes(images)}]
               }
@@ -730,7 +705,6 @@ class WorksIncludesTest
               "id": "${workC.state.canonicalId}",
               "title": "0/a/c",
               "alternativeTitles": [],
-              "availableOnline": false,
               "availabilities": [${availabilities(workC.state.availabilities)}],
               "parts": [{
                 "id": "${workE.state.canonicalId}",
@@ -758,7 +732,6 @@ class WorksIncludesTest
               "id": "${workC.state.canonicalId}",
               "title": "0/a/c",
               "alternativeTitles": [],
-              "availableOnline": false,
               "availabilities": [${availabilities(workC.state.availabilities)}],
               "partOf": [
                 {
@@ -796,7 +769,6 @@ class WorksIncludesTest
               "id": "${workC.state.canonicalId}",
               "title": "0/a/c",
               "alternativeTitles": [],
-              "availableOnline": false,
               "availabilities": [${availabilities(workC.state.availabilities)}],
               "precededBy": [{
                 "id": "${workB.state.canonicalId}",
@@ -824,7 +796,6 @@ class WorksIncludesTest
               "id": "${workC.state.canonicalId}",
               "title": "0/a/c",
               "alternativeTitles": [],
-              "availableOnline": false,
               "availabilities": [${availabilities(workC.state.availabilities)}],
               "succeededBy": [{
                 "id": "${workD.state.canonicalId}",

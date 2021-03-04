@@ -32,7 +32,6 @@ class DisplayLocationsSerialisationTest
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
       | "items": [ ${items(work.data.items)} ],
-      | "availableOnline": false,
       | "availabilities": [${availabilities(work.state.availabilities)}]
       |}
     """.stripMargin
@@ -57,7 +56,6 @@ class DisplayLocationsSerialisationTest
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
       | "items": [ ${items(work.data.items)} ],
-      | "availableOnline": true,
       | "availabilities": [${availabilities(work.state.availabilities)}]
       |}
     """.stripMargin
@@ -83,7 +81,6 @@ class DisplayLocationsSerialisationTest
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
       | "items": [ ${items(work.data.items)} ],
-      | "availableOnline": true,
       | "availabilities": [${availabilities(work.state.availabilities)}]
       |}
     """.stripMargin
@@ -115,7 +112,6 @@ class DisplayLocationsSerialisationTest
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
       | "items": [ ${items(work.data.items)} ],
-      | "availableOnline": true,
       | "availabilities": [${availabilities(work.state.availabilities)}]
       |}
     """.stripMargin
