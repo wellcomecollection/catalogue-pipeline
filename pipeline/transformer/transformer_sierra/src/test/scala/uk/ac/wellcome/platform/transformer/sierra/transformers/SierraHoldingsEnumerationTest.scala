@@ -45,6 +45,145 @@ class SierraHoldingsEnumerationTest extends AnyFunSpec with Matchers with MarcGe
     }
   }
 
+  describe("handles malformed MARC data") {
+    it("skips a field 863 if it has a missing sequence number") {
+      val varFields = List(
+        createVarFieldWith(
+          marcTag = "853",
+          subfields = List(
+            MarcSubfield(tag = "8", content = "10"),
+            MarcSubfield(tag = "a", content = "vol."),
+            MarcSubfield(tag = "i", content = "(year)")
+          )
+        ),
+        createVarFieldWith(
+          marcTag = "863",
+          subfields = List(
+            MarcSubfield(tag = "8", content = "10.1"),
+            MarcSubfield(tag = "a", content = "1"),
+            MarcSubfield(tag = "i", content = "1995")
+          )
+        ),
+        createVarFieldWith(
+          marcTag = "863",
+          subfields = List(
+            MarcSubfield(tag = "8", content = "2.1"),
+            MarcSubfield(tag = "a", content = "1"),
+            MarcSubfield(tag = "i", content = "1995")
+          )
+        )
+      )
+
+      getEnumerations(varFields) shouldBe List("vol.1 (1995)")
+    }
+
+    it("skips a subfield in field 863 if it doesn't have a corresponding label") {
+      val varFields = List(
+        createVarFieldWith(
+          marcTag = "853",
+          subfields = List(
+            MarcSubfield(tag = "8", content = "10"),
+            MarcSubfield(tag = "a", content = "vol."),
+          )
+        ),
+        createVarFieldWith(
+          marcTag = "863",
+          subfields = List(
+            MarcSubfield(tag = "8", content = "10.1"),
+            MarcSubfield(tag = "a", content = "1"),
+            MarcSubfield(tag = "i", content = "1995")
+          )
+        )
+      )
+
+      getEnumerations(varFields) shouldBe List("vol.1")
+    }
+
+    it("skips a field 863 if it can't parse the link/sequence as two integers") {
+      val varFields = List(
+        createVarFieldWith(
+          marcTag = "853",
+          subfields = List(
+            MarcSubfield(tag = "8", content = "10"),
+            MarcSubfield(tag = "a", content = "vol."),
+            MarcSubfield(tag = "i", content = "(year)")
+          )
+        ),
+        createVarFieldWith(
+          marcTag = "863",
+          subfields = List(
+            MarcSubfield(tag = "8", content = "10.1"),
+            MarcSubfield(tag = "a", content = "1"),
+            MarcSubfield(tag = "i", content = "2001")
+          )
+        ),
+        createVarFieldWith(
+          marcTag = "863",
+          subfields = List(
+            MarcSubfield(tag = "8", content = "b.b"),
+            MarcSubfield(tag = "a", content = "2"),
+            MarcSubfield(tag = "i", content = "2002")
+          )
+        ),
+        createVarFieldWith(
+          marcTag = "863",
+          subfields = List(
+            MarcSubfield(tag = "8", content = "3.3.3"),
+            MarcSubfield(tag = "a", content = "3"),
+            MarcSubfield(tag = "i", content = "2003")
+          )
+        ),
+        createVarFieldWith(
+          marcTag = "863",
+          subfields = List(
+            MarcSubfield(tag = "a", content = "4"),
+            MarcSubfield(tag = "i", content = "2004")
+          )
+        ),
+      )
+
+      getEnumerations(varFields) shouldBe List("vol.1 (2001)")
+    }
+
+    it("skips a field 853 if it can't find a sequence number") {
+      val varFields = List(
+        createVarFieldWith(
+          marcTag = "853",
+          subfields = List(
+            MarcSubfield(tag = "8", content = "10"),
+            MarcSubfield(tag = "a", content = "vol."),
+            MarcSubfield(tag = "i", content = "(year)")
+          )
+        ),
+        createVarFieldWith(
+          marcTag = "853",
+          subfields = List(
+            MarcSubfield(tag = "8", content = "a"),
+            MarcSubfield(tag = "a", content = "vol."),
+            MarcSubfield(tag = "i", content = "(year)")
+          )
+        ),
+        createVarFieldWith(
+          marcTag = "853",
+          subfields = List(
+            MarcSubfield(tag = "a", content = "vol."),
+            MarcSubfield(tag = "i", content = "(year)")
+          )
+        ),
+        createVarFieldWith(
+          marcTag = "863",
+          subfields = List(
+            MarcSubfield(tag = "8", content = "10.1"),
+            MarcSubfield(tag = "a", content = "1"),
+            MarcSubfield(tag = "i", content = "1995")
+          )
+        ),
+      )
+
+      getEnumerations(varFields) shouldBe List("vol.1 (1995)")
+    }
+  }
+
   def getEnumerations(varFields: List[VarField]): List[String] =
     SierraHoldingsEnumeration(createSierraHoldingsNumber, varFields)
 }
