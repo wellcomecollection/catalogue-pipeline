@@ -34,7 +34,9 @@ def setupProject(
 lazy val internal_model = setupProject(
   project,
   "common/internal_model",
-  externalDependencies = CatalogueDependencies.internalModelDependencies).settings( version:= projectVersion)
+  externalDependencies = CatalogueDependencies.internalModelDependencies)
+  .settings(Publish.settings: _*)
+  .settings(version:= projectVersion)
 
 lazy val display = setupProject(
   project,
