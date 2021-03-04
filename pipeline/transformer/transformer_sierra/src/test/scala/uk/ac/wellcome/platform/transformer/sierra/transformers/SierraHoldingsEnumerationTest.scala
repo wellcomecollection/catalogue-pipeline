@@ -71,7 +71,7 @@ class SierraHoldingsEnumerationTest extends AnyFunSpec with Matchers with MarcGe
     getEnumerations(varFields) shouldBe List("v.1:no.1 (1984) - v.35:no.2 (2018)")
   }
 
-  it("handles a duplicated 853/863 field") {
+  it("handles a duplicated field") {
     val varFields = List(
       createVarFieldWith(
         marcTag = "853",
