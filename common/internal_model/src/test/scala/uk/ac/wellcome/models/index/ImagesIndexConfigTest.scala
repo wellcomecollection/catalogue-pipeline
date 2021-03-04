@@ -1,4 +1,4 @@
-package uk.ac.wellcome.elasticsearch
+package uk.ac.wellcome.models.index
 
 import com.sksamuel.elastic4s.ElasticError
 import org.scalatest.concurrent.ScalaFutures

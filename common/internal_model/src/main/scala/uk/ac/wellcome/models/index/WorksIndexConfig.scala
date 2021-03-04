@@ -1,8 +1,9 @@
-package uk.ac.wellcome.elasticsearch
+package uk.ac.wellcome.models.index
 
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
 import com.sksamuel.elastic4s.requests.mappings.{FieldDefinition, ObjectField}
+import uk.ac.wellcome.elasticsearch.{IndexConfig, IndexConfigFields, WorksAnalysis}
 
 sealed trait WorksIndexConfig extends IndexConfig with IndexConfigFields {
 
@@ -63,7 +64,7 @@ object DenormalisedWorkIndexConfig extends WorksIndexConfig {
 
 object IndexedWorkIndexConfig extends WorksIndexConfig {
 
-  import WorksAnalysis._
+  import uk.ac.wellcome.elasticsearch.WorksAnalysis._
 
   // Here we set dynamic strict to be sure the object vaguely looks like a work
   // and contains the core fields, adding DynamicMapping.False in places where

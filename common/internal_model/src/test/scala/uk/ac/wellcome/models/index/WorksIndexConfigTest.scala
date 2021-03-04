@@ -1,7 +1,6 @@
-package uk.ac.wellcome.elasticsearch
+package uk.ac.wellcome.models.index
 
 import java.time.Instant
-
 import org.scalacheck.ScalacheckShapeless._
 import com.sksamuel.elastic4s.ElasticError
 import org.scalacheck.Gen.chooseNum
@@ -12,7 +11,6 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import io.circe.Encoder
 import io.circe.generic.semiauto.deriveEncoder
-
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.Implicits._
@@ -31,6 +29,10 @@ class WorksIndexConfigTest
     with WorkGenerators
     with ImageGenerators {
 
+  case class BadTestObject(
+                            id: String,
+                            weight: Int
+                          )
   // On failure, scalacheck tries to shrink to the smallest input that causes a failure.
   // With IdentifiedWork, that means that it never actually completes.
   implicit val noShrink = Shrink.shrinkAny[Work[Identified]]
