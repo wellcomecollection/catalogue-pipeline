@@ -144,8 +144,8 @@ object Merger {
       f: WorkData[StateT#WorkDataState] => WorkData[StateT#WorkDataState]
     ): Work[StateT] =
       work match {
-        case Work.Visible(version, data, state) =>
-          Work.Visible(version, f(data), state)
+        case Work.Visible(version, data, state, redirectSources) =>
+          Work.Visible(version, f(data), state, redirectSources)
         case Work.Invisible(version, data, state, reasons) =>
           Work.Invisible(version, f(data), state, reasons)
         case Work.Redirected(version, redirectTarget, state) =>
