@@ -7,7 +7,7 @@ import com.typesafe.config.Config
 import software.amazon.awssdk.services.sqs.model.Message
 
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.elasticsearch.AugmentedImageIndexConfig
+import uk.ac.wellcome.models.index.AugmentedImageIndexConfig
 import uk.ac.wellcome.platform.inference_manager.adapters.{
   FeatureVectorInferrerAdapter,
   InferrerAdapter,
