@@ -5,30 +5,21 @@ import com.sksamuel.elastic4s.{ElasticError, Index}
 import com.sksamuel.elastic4s.requests.searches.{SearchHit, SearchResponse}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
-import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.json.JsonUtil.fromJson
-import uk.ac.wellcome.models.work.generators.{
-  ContributorGenerators,
-  GenreGenerators,
-  ImageGenerators,
-  SubjectGenerators,
-  WorkGenerators
-}
+import uk.ac.wellcome.models.work.generators.{ContributorGenerators, GenreGenerators, ImageGenerators, SubjectGenerators, WorkGenerators}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
 import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.platform.api.services.{
-  ElasticsearchService,
-  WorksRequestBuilder
-}
+import uk.ac.wellcome.platform.api.services.{ElasticsearchService, WorksRequestBuilder}
 import WorkState.Indexed
 import org.scalatest.Assertion
+import uk.ac.wellcome.models.index.IndexFixtures
 
 class WorksQueryTest
     extends AnyFunSpec
     with Matchers
-    with ElasticsearchFixtures
+    with IndexFixtures
     with SearchOptionsGenerators
     with SubjectGenerators
     with GenreGenerators

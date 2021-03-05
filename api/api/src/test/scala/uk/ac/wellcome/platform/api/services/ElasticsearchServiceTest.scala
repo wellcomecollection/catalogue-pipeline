@@ -6,24 +6,20 @@ import com.sksamuel.elastic4s.{ElasticError, Index}
 import com.sksamuel.elastic4s.requests.searches.{SearchHit, SearchResponse}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators._
-import uk.ac.wellcome.models.work.internal.Format.{
-  Books,
-  CDRoms,
-  ManuscriptsAsian
-}
+import uk.ac.wellcome.models.work.internal.Format.{Books, CDRoms, ManuscriptsAsian}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
 import uk.ac.wellcome.platform.api.models._
 import WorkState.Indexed
+import uk.ac.wellcome.models.index.IndexFixtures
 
 class ElasticsearchServiceTest
     extends AnyFunSpec
     with Matchers
-    with ElasticsearchFixtures
+    with IndexFixtures
     with SearchOptionsGenerators
     with ItemsGenerators
     with WorkGenerators {

@@ -4,16 +4,15 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import com.sksamuel.elastic4s.Index
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-
 import uk.ac.wellcome.elasticsearch.ElasticClientBuilder
-import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.models.work.generators.ImageGenerators
 import uk.ac.wellcome.models.Implicits._
+import uk.ac.wellcome.models.index.IndexFixtures
 
 class QueryConfigTest
     extends AnyFunSpec
     with Matchers
-    with ElasticsearchFixtures
+    with IndexFixtures
     with ImageGenerators {
   describe("fetchFromIndex") {
 
