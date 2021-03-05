@@ -2,14 +2,10 @@ package uk.ac.wellcome.pipeline_storage
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import scala.concurrent.ExecutionContext.Implicits.global
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import uk.ac.wellcome.models.work.generators.{ImageGenerators, WorkGenerators}
-import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
-import uk.ac.wellcome.elasticsearch.{
-  InitialImageIndexConfig,
-  MergedWorkIndexConfig
-}
+import uk.ac.wellcome.models.index.{IndexFixtures, InitialImageIndexConfig, MergedWorkIndexConfig}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.elasticsearch.model.CanonicalId
@@ -19,7 +15,7 @@ import ImageState.Initial
 class EitherIndexerTest
     extends AnyFunSpec
     with Matchers
-    with ElasticsearchFixtures
+    with IndexFixtures
     with WorkGenerators
     with ImageGenerators {
 

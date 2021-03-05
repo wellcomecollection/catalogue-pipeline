@@ -1,6 +1,5 @@
 package uk.ac.wellcome.models.index
 
-import java.time.Instant
 import org.scalacheck.ScalacheckShapeless._
 import com.sksamuel.elastic4s.ElasticError
 import org.scalacheck.Gen.chooseNum
@@ -11,16 +10,17 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import io.circe.Encoder
 import io.circe.generic.semiauto.deriveEncoder
-import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.{ImageGenerators, WorkGenerators}
+import uk.ac.wellcome.models.work.internal.WorkState.Identified
 import uk.ac.wellcome.models.work.internal._
-import WorkState.Identified
+
+import java.time.Instant
 
 class WorksIndexConfigTest
     extends AnyFunSpec
-    with ElasticsearchFixtures
+    with IndexFixtures
     with ScalaFutures
     with Eventually
     with Matchers

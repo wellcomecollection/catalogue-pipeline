@@ -5,8 +5,7 @@ import org.scalatest.Assertion
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.elasticsearch.IdentifiedWorkIndexConfig
-import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
+import uk.ac.wellcome.models.index.{IdentifiedWorkIndexConfig, IndexFixtures}
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.work.generators.{InstantGenerators, WorkGenerators}
 import uk.ac.wellcome.models.work.internal.WorkState.Identified
@@ -14,15 +13,15 @@ import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.pipeline_storage.Indexable.workIndexable
 import uk.ac.wellcome.pipeline_storage.fixtures.ElasticIndexerFixtures
-import scala.concurrent.duration._
 
+import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class WorkIndexableTest
     extends AnyFunSpec
     with ScalaFutures
     with Matchers
-    with ElasticsearchFixtures
+    with IndexFixtures
     with ElasticIndexerFixtures
     with WorkGenerators
     with InstantGenerators {
