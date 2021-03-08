@@ -35,6 +35,7 @@ object SingleWorkParams extends QueryParamsUtils {
     decodeOneOfCommaSeparated(
       "identifiers" -> WorkInclude.Identifiers,
       "items" -> WorkInclude.Items,
+      "holdings" -> WorkInclude.Holdings,
       "subjects" -> WorkInclude.Subjects,
       "genres" -> WorkInclude.Genres,
       "contributors" -> WorkInclude.Contributors,

@@ -810,4 +810,82 @@ class WorksIncludesTest
       }
     }
   }
+
+  describe("holdings includes") {
+    def createHoldings(count: Int): List[Holdings] =
+      (1 to count).map { _ =>
+        Holdings(
+          description = chooseFrom(None, Some(randomAlphanumeric())),
+          note = chooseFrom(None, Some(randomAlphanumeric())),
+          enumeration =
+            collectionOf(min = 0, max = 10) { randomAlphanumeric() }.toList,
+          locations =
+            collectionOf(min = 0, max = 5) { createPhysicalLocation }.toList
+        )
+      }.toList
+
+    it("on the list endpoint") {
+      withWorksApi {
+        case (worksIndex, routes) =>
+          val works = List(
+            indexedWork().holdings(createHoldings(3)),
+            indexedWork().holdings(createHoldings(4))
+          ).sortBy { _.state.canonicalId }
+
+          insertIntoElasticsearch(worksIndex, works: _*)
+
+          assertJsonResponse(routes, s"/$apiPrefix/works?include=holdings") {
+            Status.OK -> s"""
+              {
+                ${resultList(apiPrefix, totalResults = works.size)},
+                "results": [
+                  {
+                    "type": "Work",
+                    "id": "${works.head.state.canonicalId}",
+                    "title": "${works.head.data.title.get}",
+                    "alternativeTitles": [],
+                    "availabilities": [${availabilities(
+              works.head.state.availabilities)}],
+                    "holdings": [${listOfHoldings(works.head.data.holdings)}]
+                  },
+                  {
+                    "type": "Work",
+                    "id": "${works(1).state.canonicalId}",
+                    "title": "${works(1).data.title.get}",
+                    "alternativeTitles": [],
+                    "availabilities": [${availabilities(
+              works(1).state.availabilities)}],
+                    "holdings": [${listOfHoldings(works(1).data.holdings)}]
+                  }
+                ]
+              }
+            """
+          }
+      }
+    }
+
+    it("on a single work endpoint") {
+      withWorksApi {
+        case (worksIndex, routes) =>
+          val work = indexedWork().holdings(createHoldings(3))
+
+          insertIntoElasticsearch(worksIndex, work)
+
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works/${work.state.canonicalId}?include=holdings") {
+            Status.OK -> s"""
+              {
+                ${singleWorkResult(apiPrefix)},
+                "id": "${work.state.canonicalId}",
+                "title": "${work.data.title.get}",
+                "alternativeTitles": [],
+                "availabilities": [${availabilities(work.state.availabilities)}],
+                "holdings": [${listOfHoldings(work.data.holdings)}]
+              }
+            """
+          }
+      }
+    }
+  }
 }

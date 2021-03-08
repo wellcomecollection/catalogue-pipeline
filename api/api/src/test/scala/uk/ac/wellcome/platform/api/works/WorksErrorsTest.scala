@@ -5,7 +5,7 @@ import org.scalatest.Assertion
 class WorksErrorsTest extends ApiWorksTestBase {
 
   val includesString =
-    "['identifiers', 'items', 'subjects', 'genres', 'contributors', 'production', 'languages', 'notes', 'images', 'parts', 'partOf', 'precededBy', 'succeededBy']"
+    "['identifiers', 'items', 'holdings', 'subjects', 'genres', 'contributors', 'production', 'languages', 'notes', 'images', 'parts', 'partOf', 'precededBy', 'succeededBy']"
 
   describe("returns a 400 Bad Request for errors in the ?include parameter") {
     it("a single invalid include") {

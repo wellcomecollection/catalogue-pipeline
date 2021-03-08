@@ -1,0 +1,1 @@
+Add the `Holdings` type to the Work model.

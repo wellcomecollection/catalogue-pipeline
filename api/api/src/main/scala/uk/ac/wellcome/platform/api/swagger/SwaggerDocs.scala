@@ -146,6 +146,7 @@ trait SingleWorkSwagger {
           allowableValues = Array(
             "identifiers",
             "items",
+            "holdings",
             "subjects",
             "genres",
             "contributors",
@@ -156,7 +157,8 @@ trait SingleWorkSwagger {
             "succeededBy",
             "precededBy",
             "partOf",
-            "parts")),
+            "parts"
+          )),
         required = false,
       )
     )
@@ -351,6 +353,7 @@ trait MultipleWorksSwagger {
           allowableValues = Array(
             "identifiers",
             "items",
+            "holdings",
             "subjects",
             "genres",
             "contributors",
@@ -361,7 +364,8 @@ trait MultipleWorksSwagger {
             "succeededBy",
             "precededBy",
             "partOf",
-            "parts")),
+            "parts"
+          )),
         required = false,
       ),
       new Parameter(

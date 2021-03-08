@@ -69,8 +69,8 @@ trait DisplaySerialisationTestBase {
        {
         "type": "PhysicalLocation",
         "locationType": ${locationType(loc.locationType)},
-        "label": "${loc.label}",
-        ${optionalObject("license", license, loc.license)}
+        "label": "${loc.label}"
+        ${optionalObject("license", license, loc.license)},
         ${optionalString("shelfmark", loc.shelfmark)}
         "accessConditions": ${accessConditions(loc.accessConditions)}
        }
@@ -302,4 +302,24 @@ trait DisplaySerialisationTestBase {
          "type": "LocationType"
        }
      """ stripMargin
+
+  def singleHoldings(h: Holdings): String =
+    s"""
+       |{
+       |  ${optionalString("description", h.description)}
+       |  ${optionalString("note", h.note)}
+       |  "enumeration": [
+       |    ${h.enumeration
+         .map { en =>
+           '"' + en + '"'
+         }
+         .mkString(",")}
+       |  ],
+       |  "locations": [${locations(h.locations)}],
+       |  "type": "Holdings"
+       |}
+       |""".stripMargin
+
+  def listOfHoldings(hs: List[Holdings]): String =
+    hs.map { singleHoldings }.mkString(",")
 }
