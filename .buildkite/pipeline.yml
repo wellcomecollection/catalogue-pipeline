@@ -100,8 +100,8 @@ steps:
           entrypoint: "/usr/bin/python3"
     command: "/workdir/.buildkite/scripts/publish.py"
   - wait
-  - command: .buildkite/scripts/complete_build.py
-    label: "complete build"
+  - command: .buildkite/scripts/tag_commit_as_latest.py
+    label: "tag commit as latest"
   - wait
   - label: release to stage
     if: build.branch == "master"
