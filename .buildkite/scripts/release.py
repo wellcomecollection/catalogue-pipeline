@@ -7,7 +7,7 @@ import re
 import sys
 
 from commands import git
-from git_utils import has_source_changes
+from git_utils import has_source_changes, update_latest_tag
 from provider import current_branch, is_default_branch, repo
 
 
@@ -112,7 +112,6 @@ def update_for_pending_release():
         "Bump version to %s and update changelog\n\n[skip ci]" % (new_version_string),
     )
     git("tag", new_version_string)
-    git("tag", "latest", "--force")
 
 
 def has_release():
@@ -168,6 +167,7 @@ def release():
         print("Attempting a release.")
         git("push", "ssh-origin", "HEAD:master")
         git("push", "ssh-origin", "--tags")
+        update_latest_tag()
     else:
         print("No release detected, exit gracefully.")
         sys.exit(0)

@@ -49,3 +49,9 @@ def has_source_changes(commit_range):
         if f.strip().endswith((".sbt", ".scala"))
     ]
     return len(changed_files) != 0
+
+
+def update_latest_tag():
+    git("tag", "latest", "--force")
+    git("push", "origin", ":latest")  # Delete the old tag
+    git("push", "origin", "latest")  # Push the new tag
