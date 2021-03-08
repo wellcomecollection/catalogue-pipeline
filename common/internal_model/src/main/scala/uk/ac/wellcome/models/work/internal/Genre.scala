@@ -6,7 +6,9 @@ case class Genre[+State](
 )
 
 object Genre {
-  def normalised[State](label: String, concepts: List[AbstractConcept[State]]): Genre[State] = {
+  def normalised[State](
+    label: String,
+    concepts: List[AbstractConcept[State]]): Genre[State] = {
     val normalisedLabel =
       label
         .stripSuffix(".")
