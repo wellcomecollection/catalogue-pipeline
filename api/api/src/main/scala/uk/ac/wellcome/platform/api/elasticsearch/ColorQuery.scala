@@ -33,6 +33,7 @@ class ColorQuery(binSizes: Seq[Seq[Int]], binMinima: Seq[Float]) {
         maxQueryTerms = Some(1000),
         minShouldMatch = Some("1")
       )
+      .boost(1000)
 
   // This replicates the logic in palette_encoder.py:get_bin_index
   private def getColorsSignature(colors: Seq[ColorQuery.Hsv],
