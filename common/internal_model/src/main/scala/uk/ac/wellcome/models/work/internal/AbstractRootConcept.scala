@@ -19,7 +19,7 @@ object Concept {
     label: String): Concept[State] =
     Concept(IdState.Unidentifiable, label)
 
-  def normalised[State](id: State, label: String): Concept[State] =
+  def normalised[State](id: State = IdState.Unidentifiable, label: String): Concept[State] =
     Concept(id, trimTrailing(label, '.'))
 }
 
