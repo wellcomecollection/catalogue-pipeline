@@ -18,6 +18,12 @@ import scala.util.{Failure, Success, Try}
 //
 // The behaviour of this class is partly based on the published descriptions,
 // partly on the observed behaviour on the old wellcomelibrary.org website.
+//
+// Currently this class only handles 853/863 pairs (which describe the holdings
+// themselves); there are also 854/864 (indexes) and 855/865 (supplements).
+// We don't present 854/864 or 855/865 in the Catalogue API, but this class is
+// written in a generic way that would allow supporting them if we wanted to later.
+//
 object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
   val labelTag = "853"
   val valueTag = "863"
@@ -104,6 +110,7 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
         }
         .filterNot { case (_, value) => value.trim == "-" }
 
+    // TODO: Explain why this is the case
     if (parts.exists { case (_, value) => value.contains("-") }) {
       val startParts = parts.map { case (label, value) => (label, value.split("-", 2).head) }
       val endParts = parts.map { case (label, value) => (label, value.split("-", 2).last) }
@@ -134,8 +141,9 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
         .toMap
 
     // Construct the date string.  We wrap this all in a Try block, and if something
-    // goes wrong, just drop a warning log.  My hope is that this will be sufficiently
-    // infrequent that we don't need much sophisticated logic.
+    // goes wrong, just drop a warning log.  My hope is that errors be sufficiently
+    // infrequent that we don't need to write separate paths for every different
+    // way this could go wrong.
     val dateString = Try {
       val dateDisplayStrings =
         if (datePartsMap.contains("season")) {
@@ -192,6 +200,13 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
     }
   }
 
+  // Take a numeric month value and turn it into a human-readable string.
+  //
+  // Examples:
+  //
+  //    03    -> Mar.
+  //    21/22 -> Spring/Summer
+  //
   private def toNamedSeason(s: String): Option[String] = {
     val parts = s.split("/")
     if (parts.forall(seasonNames.contains)) {
