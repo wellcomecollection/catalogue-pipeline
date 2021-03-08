@@ -179,32 +179,32 @@ class SierraGenresTest
         createVarFieldWith(
           marcTag = "655",
           subfields = List(
-            MarcSubfield(tag = "a", content = "Electronic journals.")
+            MarcSubfield(tag = "a", content = "Electronic journals")
           )
         ),
         createVarFieldWith(
           marcTag = "655",
           subfields = List(
-            MarcSubfield(tag = "a", content = "Electronic journals.")
+            MarcSubfield(tag = "a", content = "Electronic journals")
           )
         ),
         createVarFieldWith(
           marcTag = "655",
           subfields = List(
-            MarcSubfield(tag = "a", content = "Periodical.")
+            MarcSubfield(tag = "a", content = "Periodical")
           )
         ),
         createVarFieldWith(
           marcTag = "655",
           subfields = List(
-            MarcSubfield(tag = "a", content = "Periodicals."),
+            MarcSubfield(tag = "a", content = "Periodicals"),
             MarcSubfield(tag = "2", content = "rbgenr")
           )
         ),
         createVarFieldWith(
           marcTag = "655",
           subfields = List(
-            MarcSubfield(tag = "a", content = "Periodicals."),
+            MarcSubfield(tag = "a", content = "Periodicals"),
             MarcSubfield(tag = "2", content = "lcgft")
           )
         ),
@@ -212,7 +212,7 @@ class SierraGenresTest
     )
 
     val expectedGenres =
-      List("Electronic journals.", "Periodical.", "Periodicals.")
+      List("Electronic journals", "Periodical", "Periodicals")
         .map { label =>
           Genre(
             label = label,
@@ -258,6 +258,29 @@ class SierraGenresTest
           concepts = List(
             Concept(label = "A2 Content"),
             Concept(label = "V2 Content")
+          ))
+      )
+    SierraGenres(bibData) shouldBe expectedSubjects
+  }
+
+  it("strips punctuation from Sierra genres") {
+    val bibData = createSierraBibDataWith(
+      varFields = List(
+        createVarFieldWith(
+          marcTag = "655",
+          subfields = List(
+            MarcSubfield(tag = "a", content = "Printed books.")
+          )
+        )
+      )
+    )
+
+    val expectedSubjects =
+      List(
+        Genre(
+          label = "Printed books",
+          concepts = List(
+            Concept(label = "Printed books")
           ))
       )
     SierraGenres(bibData) shouldBe expectedSubjects

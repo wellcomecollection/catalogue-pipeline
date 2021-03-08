@@ -10,9 +10,9 @@ trait MiroGenres {
     // <image_phys_format> and <image_lc_genre>.
     (miroRecord.physFormat.toList ++ miroRecord.lcGenre.toList).map { label =>
       val normalisedLabel = sentenceCase(label)
-      Genre(
+      Genre.normalised(
         label = normalisedLabel,
-        concepts = List(Concept(normalisedLabel))
+        concepts = List(Concept.normalised(label = normalisedLabel))
       )
     }.distinct
 }

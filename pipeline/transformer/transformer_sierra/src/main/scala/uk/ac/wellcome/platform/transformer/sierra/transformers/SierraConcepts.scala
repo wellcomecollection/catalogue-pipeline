@@ -89,9 +89,9 @@ trait SierraConcepts extends SierraQueryOps {
     : List[AbstractConcept[IdState.Unminted]] =
     subdivisionSubfields.map { subfield =>
       subfield.tag match {
-        case "v" | "x" => Concept(label = subfield.content)
+        case "v" | "x" => Concept.normalised(label = subfield.content)
         case "y"       => Period(label = subfield.content)
-        case "z"       => Place(label = subfield.content)
+        case "z"       => Place.normalised(label = subfield.content)
       }
     }
 }
