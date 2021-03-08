@@ -501,6 +501,33 @@ class SierraHoldingsEnumerationTest extends AnyFunSpec with Matchers with MarcGe
     getEnumerations(varFields) shouldBe List("v.1:no.1 - v.2:no.2 Current issue on display")
   }
 
+  it("uses a colon as a separator between 'v' and 'no.'") {
+    // This example is based on b1310812
+    val varFields = List(
+      createVarFieldWith(
+        marcTag = "863",
+        subfields = List(
+          MarcSubfield(tag = "8", content = "1.1"),
+          MarcSubfield(tag = "a", content = "42"),
+          MarcSubfield(tag = "b", content = "1-2")
+        )
+      ),
+      createVarFieldWith(
+        marcTag = "853",
+        subfields = List(
+          MarcSubfield(tag = "8", content = "1"),
+          MarcSubfield(tag = "a", content = "v"),
+          MarcSubfield(tag = "b", content = "no."),
+        )
+      )
+    )
+
+    // TODO: We might consider normalising this to 'v.' to be consistent with
+    // our other holdings, but not right now -- this is meant to mimic the
+    // behaviour of the old Wellcome Library site.
+    getEnumerations(varFields) shouldBe List("v42:no.1 - v42:no.2")
+  }
+
   describe("handles malformed MARC data") {
     it("skips a field 863 if it has a missing sequence number") {
       val varFields = List(

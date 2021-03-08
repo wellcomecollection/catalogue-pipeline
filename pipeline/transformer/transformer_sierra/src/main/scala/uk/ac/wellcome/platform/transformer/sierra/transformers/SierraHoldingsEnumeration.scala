@@ -194,7 +194,7 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
           // I haven't worked out the exact rules around this yet.
           // In some cases, the old Wellcome Library site would join parts with
           // a space.  In others (e.g. "v.130:no.3"), it uses a colon.
-          if (accum.startsWith("no.") && nextPart.startsWith("v.")) {
+          if (accum.startsWith("no.") && nextPart.startsWith("v")) {
             nextPart + ":" + accum
           } else {
             nextPart + " " + accum
