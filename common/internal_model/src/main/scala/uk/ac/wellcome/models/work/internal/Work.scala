@@ -95,6 +95,7 @@ case class WorkData[State <: DataState](
   notes: List[Note] = Nil,
   duration: Option[Int] = None,
   items: List[Item[State#MaybeId]] = Nil,
+  holdings: List[Holdings] = Nil,
   collectionPath: Option[CollectionPath] = None,
   imageData: List[ImageData[State#Id]] = Nil,
   workType: WorkType = WorkType.Standard,
