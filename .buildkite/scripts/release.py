@@ -112,6 +112,7 @@ def update_for_pending_release():
         "Bump version to %s and update changelog\n\n[skip ci]" % (new_version_string),
     )
     git("tag", new_version_string)
+    git("tag", "latest-sbt-release")
 
 
 def has_release():

@@ -120,6 +120,8 @@ if __name__ == "__main__":
             sys.exit(0)
 
     if should_check_release(args.project_name):
+        latest_sha = get_sha1_for_tag("latest-sbt-release")
+        commit_range = f"{latest_sha}..{local_head}"
         check_release_file(commit_range)
 
     # Perform make tasks
