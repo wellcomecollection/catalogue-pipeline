@@ -76,6 +76,7 @@ class SnapshotGeneratorFeatureTest
                 "genres": [],
                 "subjects": [],
                 "items": [],
+                "holdings": [],
                 "production": [],
                 "languages": [],
                 "alternativeTitles": [],
