@@ -168,7 +168,7 @@ def release():
         git("remote", "add", "ssh-origin", repo(), exit_on_error=False)
 
         git("push", "ssh-origin", "HEAD:master")
-        git("push", "ssh-origin", "--tag")
+        git("push", "ssh-origin", "latest-sbt-release", "--force")
     else:
         print("No release detected, exit gracefully.")
         sys.exit(0)
