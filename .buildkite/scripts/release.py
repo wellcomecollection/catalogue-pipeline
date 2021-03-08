@@ -159,16 +159,15 @@ def release():
     if has_release():
         print("Updating changelog and version")
 
-        update_for_pending_release()
-
-        print("Attempting a release.")
-
         git("config", "user.name", "Buildkite on behalf of Wellcome Collection")
         git("config", "user.email", "wellcomedigitalplatform@wellcome.ac.uk")
         git("remote", "add", "ssh-origin", repo(), exit_on_error=False)
 
+        update_for_pending_release()
+
+        print("Attempting a release.")
         git("push", "ssh-origin", "HEAD:master")
-        git("push", "ssh-origin", "--tag")
+        git("push", "ssh-origin", "--tags")
     else:
         print("No release detected, exit gracefully.")
         sys.exit(0)
