@@ -116,7 +116,7 @@ case class MultipleWorksParams(
 
 object MultipleWorksParams extends QueryParamsUtils {
   import SingleWorkParams.includesDecoder
-  import CommonDecoders.licenseFilter
+  import CommonDecoders._
 
   // This is a custom akka-http directive which extracts MultipleWorksParams
   // data from the query string, returning an invalid response when any given
@@ -229,9 +229,6 @@ object MultipleWorksParams extends QueryParamsUtils {
   implicit val subjectFilter: Decoder[SubjectFilter] =
     stringListFilter(SubjectFilter)
 
-  implicit val contributorsFilter: Decoder[ContributorsFilter] =
-    stringListFilter(ContributorsFilter)
-
   implicit val identifiersFilter: Decoder[IdentifiersFilter] =
     stringListFilter(IdentifiersFilter)
 
@@ -282,7 +279,4 @@ object MultipleWorksParams extends QueryParamsUtils {
       SearchQueryType.default,
       "MultiMatcher" -> SearchQueryType.MultiMatcher,
     )
-
-  private def stringListFilter[T](applyFilter: Seq[String] => T): Decoder[T] =
-    decodeCommaSeparated.emap(strs => Right(applyFilter(strs)))
 }

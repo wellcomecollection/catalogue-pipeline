@@ -218,7 +218,7 @@ trait MultipleImagesSwagger {
       new Parameter(
         name = "locations.license",
         in = ParameterIn.QUERY,
-        description = "Filter the image by license.",
+        description = "Filter the images by license.",
         schema = new Schema(
           allowableValues = Array(
             "cc-by",
@@ -227,6 +227,12 @@ trait MultipleImagesSwagger {
             "cc-0",
             "pdm",
             "copyright-not-cleared")),
+        required = false
+      ),
+      new Parameter(
+        name = "source.contributors.agent.label",
+        in = ParameterIn.QUERY,
+        description = "Filter the images by the source works' contributors",
         required = false
       ),
       new Parameter(

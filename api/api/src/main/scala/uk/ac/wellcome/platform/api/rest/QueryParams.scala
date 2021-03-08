@@ -1,18 +1,25 @@
 package uk.ac.wellcome.platform.api.rest
 
 import java.time.LocalDate
+
 import akka.http.scaladsl.server.{Directive, Directives, ValidationRejection}
 import akka.http.scaladsl.unmarshalling.Unmarshaller
 import com.github.tototoshi.csv.CSVParser
 import io.circe.{Decoder, Json}
-import uk.ac.wellcome.platform.api.models.LicenseFilter
-import uk.ac.wellcome.platform.api.rest.MultipleWorksParams.decodeCommaSeparated
+import uk.ac.wellcome.platform.api.models.{ContributorsFilter, LicenseFilter}
+import uk.ac.wellcome.platform.api.rest.MultipleWorksParams.{
+  decodeCommaSeparated,
+  stringListFilter
+}
 
 trait QueryParams
 
 object CommonDecoders {
   implicit val licenseFilter: Decoder[LicenseFilter] =
     decodeCommaSeparated.emap(strs => Right(LicenseFilter(strs)))
+
+  implicit val contributorsFilter: Decoder[ContributorsFilter] =
+    stringListFilter(ContributorsFilter)
 }
 
 trait QueryParamsUtils extends Directives {
@@ -88,6 +95,9 @@ trait QueryParamsUtils extends Directives {
         }
       }
   }
+
+  def stringListFilter[T](applyFilter: Seq[String] => T): Decoder[T] =
+    decodeCommaSeparated.emap(strs => Right(applyFilter(strs)))
 
   def invalidValuesMsg(values: List[String],
                        validValues: List[String]): String = {

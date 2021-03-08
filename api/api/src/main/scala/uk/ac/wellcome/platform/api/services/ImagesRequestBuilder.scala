@@ -4,7 +4,7 @@ import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s._
 import com.sksamuel.elastic4s.requests.searches._
 import com.sksamuel.elastic4s.requests.searches.aggs.TermsAggregation
-import com.sksamuel.elastic4s.requests.searches.queries.Query
+import com.sksamuel.elastic4s.requests.searches.queries.{BoolQuery, Query}
 import com.sksamuel.elastic4s.requests.searches.sort._
 import uk.ac.wellcome.display.models.ImageAggregationRequest
 import uk.ac.wellcome.platform.api.elasticsearch.{
@@ -14,6 +14,7 @@ import uk.ac.wellcome.platform.api.elasticsearch.{
 }
 import uk.ac.wellcome.platform.api.models.{
   ColorMustQuery,
+  ContributorsFilter,
   ImageFilter,
   ImageMustQuery,
   ImageSearchOptions,
@@ -79,7 +80,18 @@ class ImagesRequestBuilder(queryConfig: QueryConfig)
     filter match {
       case LicenseFilter(licenseIds) =>
         termsQuery(field = "locations.license.id", values = licenseIds)
+      case ContributorsFilter(contributorQueries) =>
+        sourcesTermsQuery(
+          "data.contributors.agent.label.keyword",
+          contributorQueries)
     }
+
+  def sourcesTermsQuery[T](sourceField: String,
+                           values: Iterable[T]): BoolQuery =
+    should(
+      termsQuery(s"source.canonicalWork.$sourceField", values),
+      termsQuery(s"source.redirectedWork.$sourceField", values)
+    )
 
   def buildImageFilterQuery(filters: Seq[ImageFilter]): Seq[Query] =
     filters.map { buildImageFilterQuery }
