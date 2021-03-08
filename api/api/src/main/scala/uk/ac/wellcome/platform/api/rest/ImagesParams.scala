@@ -33,6 +33,7 @@ case class MultipleImagesParams(
   pageSize: Option[Int],
   query: Option[String],
   license: Option[LicenseFilter],
+  `source.contributors.agent.label`: Option[ContributorsFilter],
   color: Option[ColorMustQuery],
   include: Option[MultipleImagesIncludes],
   aggregations: Option[List[ImageAggregationRequest]],
@@ -51,14 +52,14 @@ case class MultipleImagesParams(
     )
 
   private def filters: List[ImageFilter] =
-    List(license).flatten
+    List(license, `source.contributors.agent.label`).flatten
 
   private def mustQueries: List[ImageMustQuery] =
     List(color).flatten
 }
 
 object MultipleImagesParams extends QueryParamsUtils {
-  import CommonDecoders.licenseFilter
+  import CommonDecoders._
 
   def parse =
     parameter(
@@ -67,6 +68,7 @@ object MultipleImagesParams extends QueryParamsUtils {
         "pageSize".as[Int].?,
         "query".as[String].?,
         "locations.license".as[LicenseFilter].?,
+        "source.contributors.agent.label".as[ContributorsFilter].?,
         "color".as[ColorMustQuery].?,
         "include".as[MultipleImagesIncludes].?,
         "aggregations".as[List[ImageAggregationRequest]].?,
