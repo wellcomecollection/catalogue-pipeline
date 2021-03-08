@@ -501,6 +501,53 @@ class SierraHoldingsEnumerationTest extends AnyFunSpec with Matchers with MarcGe
     getEnumerations(varFields) shouldBe List("v.1:no.1 - v.2:no.2 Current issue on display")
   }
 
+  it("sorts based on the link/sequence number") {
+    val varFields = List(
+      createVarFieldWith(
+        marcTag = "863",
+        subfields = List(
+          MarcSubfield(tag = "8", content = "1.2"),
+          MarcSubfield(tag = "a", content = "1"),
+          MarcSubfield(tag = "b", content = "2")
+        )
+      ),
+      createVarFieldWith(
+        marcTag = "863",
+        subfields = List(
+          MarcSubfield(tag = "8", content = "2.1"),
+          MarcSubfield(tag = "a", content = "2"),
+          MarcSubfield(tag = "b", content = "1"),
+        )
+      ),
+      createVarFieldWith(
+        marcTag = "863",
+        subfields = List(
+          MarcSubfield(tag = "8", content = "1.1"),
+          MarcSubfield(tag = "a", content = "1"),
+          MarcSubfield(tag = "b", content = "1")
+        )
+      ),
+      createVarFieldWith(
+        marcTag = "853",
+        subfields = List(
+          MarcSubfield(tag = "8", content = "1"),
+          MarcSubfield(tag = "a", content = "v."),
+          MarcSubfield(tag = "b", content = "no."),
+        )
+      ),
+      createVarFieldWith(
+        marcTag = "853",
+        subfields = List(
+          MarcSubfield(tag = "8", content = "2"),
+          MarcSubfield(tag = "a", content = "v."),
+          MarcSubfield(tag = "b", content = "no."),
+        )
+      )
+    )
+
+    getEnumerations(varFields) shouldBe List("v.1:no.1", "v.1:no.2", "v.2:no.1")
+  }
+
   it("uses a colon as a separator between 'v' and 'no.'") {
     // This example is based on b1310812
     val varFields = List(

@@ -81,6 +81,7 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
             None
         }
       }
+      .sortBy { case (_, value) => (value.link, value.sequence)}
       .map { case (label, value) =>
         // We concatenate the contents of the public note in subfield ǂz.
         // This is completely separate from the logic for combining the
