@@ -138,6 +138,15 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
     val datePartsMap =
       dateParts
         .map { case (label, value) => label.toLowerCase.stripParens -> value }
+        .map {
+          // If we have a range of months, we just take the first month of the range.
+          // We might revisit this decision later; this was chosen to mimic the output
+          // of the old Wellcome Library site.
+          case (label, value) if label == "month" && value.contains("-") =>
+            (label, value.split("-").head)
+
+          case (label, value) => (label, value)
+        }
         .toMap
 
     // Construct the date string.  We wrap this all in a Try block, and if something

@@ -452,6 +452,30 @@ class SierraHoldingsEnumerationTest extends AnyFunSpec with Matchers with MarcGe
     getEnumerations(varFields) shouldBe List("2001 - 2002")
   }
 
+  it("uses the first month of a range") {
+    // This example is based on b3225790
+    val varFields = List(
+      createVarFieldWith(
+        marcTag = "853",
+        subfields = List(
+          MarcSubfield(tag = "8", content = "1"),
+          MarcSubfield(tag = "i", content = "(year)"),
+          MarcSubfield(tag = "j", content = "(month)")
+        )
+      ),
+      createVarFieldWith(
+        marcTag = "863",
+        subfields = List(
+          MarcSubfield(tag = "8", content = "1.1"),
+          MarcSubfield(tag = "i", content = "1968-1969"),
+          MarcSubfield(tag = "j", content = "09-11-12")
+        )
+      )
+    )
+
+    getEnumerations(varFields) shouldBe List("Sept. 1968 - Nov. 1969")
+  }
+
   it("includes the contents of the public note in subfield ǂz") {
     // This test case is based on b14975993
     val varFields = List(
