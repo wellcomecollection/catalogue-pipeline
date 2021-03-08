@@ -157,7 +157,8 @@ trait SingleWorkSwagger {
             "succeededBy",
             "precededBy",
             "partOf",
-            "parts")),
+            "parts"
+          )),
         required = false,
       )
     )
@@ -363,7 +364,8 @@ trait MultipleWorksSwagger {
             "succeededBy",
             "precededBy",
             "partOf",
-            "parts")),
+            "parts"
+          )),
         required = false,
       ),
       new Parameter(

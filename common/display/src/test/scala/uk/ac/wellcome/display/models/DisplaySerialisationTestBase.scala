@@ -309,7 +309,11 @@ trait DisplaySerialisationTestBase {
        |  ${optionalString("description", h.description)}
        |  ${optionalString("note", h.note)}
        |  "enumeration": [
-       |    ${h.enumeration.map { en => '"' + en + '"'}.mkString(",")}
+       |    ${h.enumeration
+         .map { en =>
+           '"' + en + '"'
+         }
+         .mkString(",")}
        |  ],
        |  "locations": [${locations(h.locations)}],
        |  "type": "Holdings"

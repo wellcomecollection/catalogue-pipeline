@@ -16,7 +16,8 @@ case class DisplayHoldings(
     description = "Additional information about the holdings."
   ) note: Option[String],
   @Schema(
-    description = "A list of individual issues or parts that make up the holdings."
+    description =
+      "A list of individual issues or parts that make up the holdings."
   ) enumeration: List[String],
   @Schema(
     description = "List of locations where the holdings are stored."

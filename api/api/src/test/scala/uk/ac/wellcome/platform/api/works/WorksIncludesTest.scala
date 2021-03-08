@@ -813,16 +813,16 @@ class WorksIncludesTest
 
   describe("holdings includes") {
     def createHoldings(count: Int): List[Holdings] =
-      (1 to count)
-        .map { _ =>
-          Holdings(
-            description = chooseFrom(None, Some(randomAlphanumeric())),
-            note = chooseFrom(None, Some(randomAlphanumeric())),
-            enumeration = collectionOf(min = 0, max = 10) { randomAlphanumeric() }.toList,
-            locations = collectionOf(min = 0, max = 5) { createPhysicalLocation }.toList
-          )
-        }
-        .toList
+      (1 to count).map { _ =>
+        Holdings(
+          description = chooseFrom(None, Some(randomAlphanumeric())),
+          note = chooseFrom(None, Some(randomAlphanumeric())),
+          enumeration =
+            collectionOf(min = 0, max = 10) { randomAlphanumeric() }.toList,
+          locations =
+            collectionOf(min = 0, max = 5) { createPhysicalLocation }.toList
+        )
+      }.toList
 
     it("on the list endpoint") {
       withWorksApi {
