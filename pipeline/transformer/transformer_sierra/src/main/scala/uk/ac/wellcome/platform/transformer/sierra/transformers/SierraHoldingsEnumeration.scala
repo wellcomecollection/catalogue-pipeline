@@ -154,22 +154,24 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
     // infrequent that we don't need to write separate paths for every different
     // way this could go wrong.
     val dateString = Try {
+      val year = datePartsMap.get("year").map { _.stripSuffix(".") }
+
       val dateDisplayStrings =
         if (datePartsMap.contains("season")) {
           List(
             datePartsMap.get("season").flatMap { toNamedMonth(id, _) },
-            datePartsMap.get("year")
+            year
           )
         } else if (toNamedMonth(id, datePartsMap.getOrElse("month", "")).isDefined) {
           List(
             datePartsMap.get("month").flatMap { toNamedMonth(id, _) },
-            datePartsMap.get("year")
+            year
           )
         } else {
           List(
             datePartsMap.get("day"),
             datePartsMap.get("month").flatMap { monthNames.get },
-            datePartsMap.get("year"),
+            year
           )
         }
 
