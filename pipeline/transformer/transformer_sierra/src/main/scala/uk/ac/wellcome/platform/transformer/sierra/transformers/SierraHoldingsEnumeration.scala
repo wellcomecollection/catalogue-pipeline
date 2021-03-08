@@ -121,7 +121,26 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
         }
         .filterNot { case (_, value) => value.trim == "-" }
 
-    // TODO: Explain why this is the case
+    // We fork here to make sure we handle ranges, e.g.
+    //
+    //    853 v.|bno.
+    //    863 8-69|b-1
+    //    863 69|b2-3
+    //
+    // We want to expand these to "v.8 - v.69:no.1" and "v.69:no.2 - v.69:no.3".
+    //
+    // A couple of rules I've inferred from how the old Wellcome Library site works:
+    //
+    //  * if some parts of the value are a range but others aren't (e.g. "69" and "2-3" above),
+    //    then you use the single value in the unranged part as both start/end.
+    //    Hence: `.head` and `.last`.
+    //
+    //  * It is totally possible to have a three-part range, e.g. "01-02-03".
+    //    The Library site handles this by dropping all but the first two parts, i.e. treating
+    //    this as synonymous with "01-02".
+    //
+    // The tests have more examples for all the cases this range logic is meant to handle.
+    //
     if (parts.exists { case (_, value) => value.contains("-") }) {
       val startParts = parts.map {
         case (label, value) => (label, value.split("-", 2).head)
