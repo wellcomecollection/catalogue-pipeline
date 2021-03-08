@@ -150,7 +150,7 @@ class SnapshotServiceTest
           result.snapshotResult.documentCount shouldBe works.length
           result.snapshotResult.displayModel shouldBe expectedDisplayWorkClassName
 
-          result.snapshotResult.startedAt shouldBe >(
+          result.snapshotResult.startedAt shouldBe >=(
             result.snapshotJob.requestedAt)
           result.snapshotResult.finishedAt shouldBe >=(
             result.snapshotResult.startedAt)
