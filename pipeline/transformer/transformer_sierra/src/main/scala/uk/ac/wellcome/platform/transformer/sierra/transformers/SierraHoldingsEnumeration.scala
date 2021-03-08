@@ -1,7 +1,11 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.platform.transformer.sierra.source.{MarcSubfield, SierraQueryOps, VarField}
+import uk.ac.wellcome.platform.transformer.sierra.source.{
+  MarcSubfield,
+  SierraQueryOps,
+  VarField
+}
 import weco.catalogue.sierra_adapter.models.TypedSierraRecordNumber
 
 import scala.util.{Failure, Success, Try}
@@ -28,7 +32,8 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
   val labelTag = "853"
   val valueTag = "863"
 
-  def apply(id: TypedSierraRecordNumber, varFields: List[VarField]): List[String] = {
+  def apply(id: TypedSierraRecordNumber,
+            varFields: List[VarField]): List[String] = {
 
     // The 85X and 86X pairs are associated based on the contents of subfield 8.
     //
@@ -48,9 +53,9 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
         .filter { _.marcTag.contains(valueTag) }
         .flatMap { createValue(id, _) }
 
-    val labelsLookup = labels
-      .map { case label @ Label(link, _) => link -> label }
-      .toMap
+    val labelsLookup = labels.map {
+      case label @ Label(link, _) => link -> label
+    }.toMap
 
     // We have seen records where two instances of field 853 have the
     // same sequence number, but only when the whole field is duplicated.
@@ -59,7 +64,8 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
     // It's worth investigating if we have *different* data in the fields,
     // because then we might have an unstable caption.
     if (labelsLookup.size != labels.distinct.size) {
-      warn(s"${id.withoutCheckDigit}: multiple instances of $labelTag with the same sequence number")
+      warn(
+        s"${id.withoutCheckDigit}: multiple instances of $labelTag with the same sequence number")
     }
 
     // We match the subfields on the label/value.
@@ -77,27 +83,30 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
         labelsLookup.get(value.link) match {
           case Some(label) => Some((label, value))
           case None =>
-            warn(s"${id.withoutCheckDigit}: an instance of $valueTag refers to a missing sequence number in $labelTag: ${value.varField}")
+            warn(
+              s"${id.withoutCheckDigit}: an instance of $valueTag refers to a missing sequence number in $labelTag: ${value.varField}")
             None
         }
       }
-      .sortBy { case (_, value) => (value.link, value.sequence)}
-      .map { case (label, value) =>
-        // We concatenate the contents of the public note in subfield ǂz.
-        // This is completely separate from the logic for combining the
-        // labels/values from the 85X/86X pair.
-        val publicNote =
-          value.varField.subfieldsWithTag("z").map { _.content }.mkString(" ")
+      .sortBy { case (_, value) => (value.link, value.sequence) }
+      .map {
+        case (label, value) =>
+          // We concatenate the contents of the public note in subfield ǂz.
+          // This is completely separate from the logic for combining the
+          // labels/values from the 85X/86X pair.
+          val publicNote =
+            value.varField.subfieldsWithTag("z").map { _.content }.mkString(" ")
 
-        createString(id, label, value) + " " + publicNote
+          createString(id, label, value) + " " + publicNote
       }
       .map { _.trim }
   }
 
-  private def createString(id: TypedSierraRecordNumber, label: Label, value: Value): String = {
+  private def createString(id: TypedSierraRecordNumber,
+                           label: Label,
+                           value: Value): String = {
     val parts: Seq[(String, String)] =
-      value
-        .varField.subfields
+      value.varField.subfields
         .filterNot {
           // This is the link field (see above), so we don't need to include it when
           // creating the display string.
@@ -105,7 +114,8 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
         }
         .flatMap { sf =>
           label.varField.subfieldsWithTag(sf.tag).headOption match {
-            case Some(MarcSubfield(_, subfieldLabel)) => Some((subfieldLabel, sf.content))
+            case Some(MarcSubfield(_, subfieldLabel)) =>
+              Some((subfieldLabel, sf.content))
             case None => None
           }
         }
@@ -113,8 +123,12 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
 
     // TODO: Explain why this is the case
     if (parts.exists { case (_, value) => value.contains("-") }) {
-      val startParts = parts.map { case (label, value) => (label, value.split("-", 2).head) }
-      val endParts = parts.map { case (label, value) => (label, value.split("-", 2).last) }
+      val startParts = parts.map {
+        case (label, value) => (label, value.split("-", 2).head)
+      }
+      val endParts = parts.map {
+        case (label, value) => (label, value.split("-", 2).last)
+      }
 
       s"${concatenateParts(id, startParts)} - ${concatenateParts(id, endParts)}"
     } else {
@@ -122,7 +136,8 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
     }
   }
 
-  private def concatenateParts(id: TypedSierraRecordNumber, parts: Seq[(String, String)]): String = {
+  private def concatenateParts(id: TypedSierraRecordNumber,
+                               parts: Seq[(String, String)]): String = {
     val nonEmptyParts = parts.filterNot { case (_, value) => value.isEmpty }
 
     // We split the label/values into date-based and textual.  The dates in
@@ -130,8 +145,9 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
     // the text values can be presented as is.
     val dateParts =
       nonEmptyParts
-        .filter { case (label, _) =>
-          label.toLowerCase.hasSubstring("season", "year", "month", "day")
+        .filter {
+          case (label, _) =>
+            label.toLowerCase.hasSubstring("season", "year", "month", "day")
         }
 
     val textualParts = nonEmptyParts.filterNot { dateParts.contains }
@@ -193,22 +209,23 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
           case (label, value) =>
             s"$label$value"
         }
-        .foldRight("") { case (nextPart, accum) =>
-          // I haven't worked out the exact rules around this yet.
-          // In some cases, the old Wellcome Library site would join parts with
-          // a space.  In others (e.g. "v.130:no.3"), it uses a colon.
-          if (accum.startsWith("no.") && nextPart.startsWith("v")) {
-            nextPart + ":" + accum
-          } else {
-            nextPart + " " + accum
-          }
+        .foldRight("") {
+          case (nextPart, accum) =>
+            // I haven't worked out the exact rules around this yet.
+            // In some cases, the old Wellcome Library site would join parts with
+            // a space.  In others (e.g. "v.130:no.3"), it uses a colon.
+            if (accum.startsWith("no.") && nextPart.startsWith("v")) {
+              nextPart + ":" + accum
+            } else {
+              nextPart + " " + accum
+            }
         }
         .trim
 
     (textualString, dateString) match {
       case (ts, Some(ds)) if ts.nonEmpty && ds.nonEmpty => s"$ts ($ds)"
-      case (_, Some(ds)) if ds.nonEmpty => ds
-      case (ts, _) => ts
+      case (_, Some(ds)) if ds.nonEmpty                 => ds
+      case (ts, _)                                      => ts
     }
   }
 
@@ -219,7 +236,8 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
   //    03    -> Mar.
   //    21/22 -> Spring/Summer
   //
-  private def toNamedMonth(id: TypedSierraRecordNumber, s: String): Option[String] = {
+  private def toNamedMonth(id: TypedSierraRecordNumber,
+                           s: String): Option[String] = {
     val parts = s.split("/")
     if (parts.forall(monthNames.contains)) {
       Some(parts.map { monthNames(_) }.mkString("/"))
@@ -242,7 +260,6 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
     "10" -> "Oct.",
     "11" -> "Nov.",
     "12" -> "Dec.",
-
     // Seasons are represented as two-digit numeric codes.
     // See https://help.oclc.org/Metadata_Services/Local_Holdings_Maintenance/OCLC_MARC_local_holdings_format_and_standards/8xx_fields/853_Captions_and_Pattern-Basic_Bibliographic_Unit
     "21" -> "Spring",
@@ -255,37 +272,43 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
     *
     * A Label contains the original varField and the link number.
     */
-  private def createLabel(id: TypedSierraRecordNumber, vf: VarField): Option[Label] =
+  private def createLabel(id: TypedSierraRecordNumber,
+                          vf: VarField): Option[Label] =
     vf.subfieldsWithTag("8").headOption match {
       case Some(MarcSubfield(_, content)) =>
         Try { content.toInt } match {
           case Success(link) => Some(Label(link, vf))
           case Failure(_) =>
-            warn(s"${id.withoutCheckDigit}: an instance of $labelTag subfield ǂ8 has a non-numeric value: $content")
+            warn(
+              s"${id.withoutCheckDigit}: an instance of $labelTag subfield ǂ8 has a non-numeric value: $content")
             None
         }
 
       case None =>
-        warn(s"${id.withoutCheckDigit}: an instance of $labelTag is missing subfield ǂ8")
+        warn(
+          s"${id.withoutCheckDigit}: an instance of $labelTag is missing subfield ǂ8")
         None
     }
 
   /** Given an 86X varField from Sierra, try to create a Value.
-   *
-   * A Value contains the original varField, the link number and the sequence number.
-   */
-  private def createValue(id: TypedSierraRecordNumber, vf: VarField): Option[Value] =
+    *
+    * A Value contains the original varField, the link number and the sequence number.
+    */
+  private def createValue(id: TypedSierraRecordNumber,
+                          vf: VarField): Option[Value] =
     vf.subfieldsWithTag("8").headOption match {
       case Some(MarcSubfield(_, content)) =>
         Try { content.split('.').map(_.toInt).toSeq } match {
           case Success(Seq(link, sequence)) => Some(Value(link, sequence, vf))
           case _ =>
-            warn(s"${id.withoutCheckDigit}: an instance of $labelTag subfield ǂ8 could not be parsed as a link/sequence: $content")
+            warn(
+              s"${id.withoutCheckDigit}: an instance of $labelTag subfield ǂ8 could not be parsed as a link/sequence: $content")
             None
         }
 
       case None =>
-        warn(s"${id.withoutCheckDigit}: an instance of $labelTag is missing subfield ǂ8")
+        warn(
+          s"${id.withoutCheckDigit}: an instance of $labelTag is missing subfield ǂ8")
         None
     }
 

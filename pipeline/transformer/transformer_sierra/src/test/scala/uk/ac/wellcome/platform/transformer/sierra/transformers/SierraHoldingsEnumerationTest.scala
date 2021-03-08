@@ -3,10 +3,17 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.platform.transformer.sierra.generators.MarcGenerators
-import uk.ac.wellcome.platform.transformer.sierra.source.{MarcSubfield, VarField}
+import uk.ac.wellcome.platform.transformer.sierra.source.{
+  MarcSubfield,
+  VarField
+}
 import weco.catalogue.sierra_adapter.generators.SierraGenerators
 
-class SierraHoldingsEnumerationTest extends AnyFunSpec with Matchers with MarcGenerators with SierraGenerators {
+class SierraHoldingsEnumerationTest
+    extends AnyFunSpec
+    with Matchers
+    with MarcGenerators
+    with SierraGenerators {
   it("returns an empty list if there are no varFields with 853/863") {
     val varFields = List(
       createVarFieldWith(marcTag = "866"),
@@ -68,7 +75,8 @@ class SierraHoldingsEnumerationTest extends AnyFunSpec with Matchers with MarcGe
       )
     )
 
-    getEnumerations(varFields) shouldBe List("v.1:no.1 (1984) - v.35:no.2 (2018)")
+    getEnumerations(varFields) shouldBe List(
+      "v.1:no.1 (1984) - v.35:no.2 (2018)")
   }
 
   it("handles a duplicated field") {
@@ -203,7 +211,8 @@ class SierraHoldingsEnumerationTest extends AnyFunSpec with Matchers with MarcGe
       )
     )
 
-    getEnumerations(varFields) shouldBe List("v.12:no.1 (2009) - v.21:no.1-2 (2018)")
+    getEnumerations(varFields) shouldBe List(
+      "v.12:no.1 (2009) - v.21:no.1-2 (2018)")
   }
 
   it("removes parentheses from a single date") {
@@ -498,7 +507,8 @@ class SierraHoldingsEnumerationTest extends AnyFunSpec with Matchers with MarcGe
       )
     )
 
-    getEnumerations(varFields) shouldBe List("v.1:no.1 - v.2:no.2 Current issue on display")
+    getEnumerations(varFields) shouldBe List(
+      "v.1:no.1 - v.2:no.2 Current issue on display")
   }
 
   it("sorts based on the link/sequence number") {
@@ -764,7 +774,8 @@ class SierraHoldingsEnumerationTest extends AnyFunSpec with Matchers with MarcGe
       )
 
       val possibilities = List(
-        List("vol.1 (2001)"), List("v.1 (2001)")
+        List("vol.1 (2001)"),
+        List("v.1 (2001)")
       )
 
       possibilities should contain(getEnumerations(varFields))
