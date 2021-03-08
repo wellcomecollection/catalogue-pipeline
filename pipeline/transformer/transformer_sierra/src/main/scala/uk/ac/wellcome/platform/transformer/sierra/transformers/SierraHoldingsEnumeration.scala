@@ -148,12 +148,12 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
       val dateDisplayStrings =
         if (datePartsMap.contains("season")) {
           List(
-            datePartsMap.get("season").flatMap { toNamedSeason },
+            datePartsMap.get("season").flatMap { toNamedMonth(id, _) },
             datePartsMap.get("year")
           )
-        } else if (toNamedSeason(datePartsMap.getOrElse("month", "")).isDefined) {
+        } else if (toNamedMonth(id, datePartsMap.getOrElse("month", "")).isDefined) {
           List(
-            datePartsMap.get("month").flatMap { toNamedSeason },
+            datePartsMap.get("month").flatMap { toNamedMonth(id, _) },
             datePartsMap.get("year")
           )
         } else {
@@ -207,23 +207,15 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
   //    03    -> Mar.
   //    21/22 -> Spring/Summer
   //
-  private def toNamedSeason(s: String): Option[String] = {
+  private def toNamedMonth(id: TypedSierraRecordNumber, s: String): Option[String] = {
     val parts = s.split("/")
-    if (parts.forall(seasonNames.contains)) {
-      Some(parts.map { seasonNames(_) }.mkString("/"))
+    if (parts.forall(monthNames.contains)) {
+      Some(parts.map { monthNames(_) }.mkString("/"))
     } else {
+      warn(s"$id: Unable to completely parse ($s) as a named month.season")
       None
     }
   }
-
-  // Seasons are represented as two-digit numeric codes.
-  // See https://help.oclc.org/Metadata_Services/Local_Holdings_Maintenance/OCLC_MARC_local_holdings_format_and_standards/8xx_fields/853_Captions_and_Pattern-Basic_Bibliographic_Unit
-  private val seasonNames = Map(
-    "21" -> "Spring",
-    "22" -> "Summer",
-    "23" -> "Autumn",
-    "24" -> "Winter"
-  )
 
   private val monthNames = Map(
     "01" -> "Jan.",
@@ -237,7 +229,14 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
     "09" -> "Sept.",
     "10" -> "Oct.",
     "11" -> "Nov.",
-    "12" -> "Dec."
+    "12" -> "Dec.",
+
+    // Seasons are represented as two-digit numeric codes.
+    // See https://help.oclc.org/Metadata_Services/Local_Holdings_Maintenance/OCLC_MARC_local_holdings_format_and_standards/8xx_fields/853_Captions_and_Pattern-Basic_Bibliographic_Unit
+    "21" -> "Spring",
+    "22" -> "Summer",
+    "23" -> "Autumn",
+    "24" -> "Winter"
   )
 
   /** Given an 85X varField from Sierra, try to create a Label.

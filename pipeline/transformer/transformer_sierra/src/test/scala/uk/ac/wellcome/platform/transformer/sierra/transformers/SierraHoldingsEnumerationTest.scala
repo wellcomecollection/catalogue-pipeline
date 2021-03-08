@@ -399,6 +399,36 @@ class SierraHoldingsEnumerationTest extends AnyFunSpec with Matchers with MarcGe
     )
   }
 
+  it("handles a range and a slash in the month field") {
+    // This example is based on b1652927
+    val varFields = List(
+      createVarFieldWith(
+        marcTag = "853",
+        subfields = List(
+          MarcSubfield(tag = "8", content = "1"),
+          MarcSubfield(tag = "i", content = "(year)"),
+          MarcSubfield(tag = "j", content = "(month)")
+        )
+      ),
+      createVarFieldWith(
+        marcTag = "863",
+        subfields = List(
+          MarcSubfield(tag = "8", content = "1.1"),
+          MarcSubfield(tag = "i", content = "2005-2014/2015"),
+          MarcSubfield(tag = "j", content = "07-12/01")
+        )
+      )
+    )
+
+    // TODO: This test case is based on the current behaviour of Encore, but
+    // arguably this is wrong.  The correct output should be
+    //
+    //    July 2005 - Dec. 2014/Jan. 2015
+    //
+    // but we omit fixing this for now.
+    getEnumerations(varFields) shouldBe List("July 2005 - Dec./Jan. 2014/2015")
+  }
+
   it("includes the contents of the public note in subfield ǂz") {
     // This test case is based on b14975993
     val varFields = List(
