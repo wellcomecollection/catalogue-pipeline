@@ -146,6 +146,7 @@ trait SingleWorkSwagger {
           allowableValues = Array(
             "identifiers",
             "items",
+            "holdings",
             "subjects",
             "genres",
             "contributors",
@@ -351,6 +352,7 @@ trait MultipleWorksSwagger {
           allowableValues = Array(
             "identifiers",
             "items",
+            "holdings",
             "subjects",
             "genres",
             "contributors",

@@ -76,6 +76,10 @@ case class DisplayWork(
     description = "List of items related to this work."
   ) items: Option[List[DisplayItem]] = None,
   @Schema(
+    `type` = "List[uk.ac.wellcome.Display.models.DisplayHoldings]",
+    description = "List of holdings related to this work."
+  ) holdings: Option[List[DisplayHoldings]] = None,
+  @Schema(
     description = "Ways in which the work is available to access",
     `type` = "List[uk.ac.wellcome.display.modules.DisplayAvailability]"
   ) availabilities: List[DisplayAvailability] = Nil,
@@ -159,6 +163,10 @@ object DisplayWork {
           Some(work.data.items.map {
             DisplayItem(_, includesIdentifiers = includes.identifiers)
           })
+        else None,
+      holdings =
+        if (includes.holdings)
+          Some(work.data.holdings.map { DisplayHoldings(_) })
         else None,
       availabilities = work.state.availabilities.toList.map {
         DisplayAvailability(_)

@@ -231,6 +231,9 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
     def duration(newDuration: Int): Work.Visible[State] =
       work.map(_.copy(duration = Some(newDuration)))
 
+    def holdings(newHoldings: List[Holdings]): Work.Visible[State] =
+      work.map(_.copy(holdings = newHoldings))
+
     def map(f: WorkData[State#WorkDataState] => WorkData[State#WorkDataState])
       : Work.Visible[State] = {
       val nextData = f(work.data)
