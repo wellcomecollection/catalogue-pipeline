@@ -429,6 +429,29 @@ class SierraHoldingsEnumerationTest extends AnyFunSpec with Matchers with MarcGe
     getEnumerations(varFields) shouldBe List("July 2005 - Dec./Jan. 2014/2015")
   }
 
+  it("skips adding a value if it can't parse it as a date") {
+    val varFields = List(
+      createVarFieldWith(
+        marcTag = "853",
+        subfields = List(
+          MarcSubfield(tag = "8", content = "1"),
+          MarcSubfield(tag = "i", content = "(year)"),
+          MarcSubfield(tag = "j", content = "(month)")
+        )
+      ),
+      createVarFieldWith(
+        marcTag = "863",
+        subfields = List(
+          MarcSubfield(tag = "8", content = "1.1"),
+          MarcSubfield(tag = "i", content = "2001-2002"),
+          MarcSubfield(tag = "j", content = "XX-YY")
+        )
+      )
+    )
+
+    getEnumerations(varFields) shouldBe List("2001 - 2002")
+  }
+
   it("includes the contents of the public note in subfield ǂz") {
     // This test case is based on b14975993
     val varFields = List(
@@ -590,6 +613,41 @@ class SierraHoldingsEnumerationTest extends AnyFunSpec with Matchers with MarcGe
       )
 
       getEnumerations(varFields) shouldBe List("vol.1 (1995)")
+    }
+
+    it("handles a duplicate 853") {
+      val varFields = List(
+        createVarFieldWith(
+          marcTag = "853",
+          subfields = List(
+            MarcSubfield(tag = "8", content = "10"),
+            MarcSubfield(tag = "a", content = "vol."),
+            MarcSubfield(tag = "i", content = "(year)")
+          )
+        ),
+        createVarFieldWith(
+          marcTag = "853",
+          subfields = List(
+            MarcSubfield(tag = "8", content = "10"),
+            MarcSubfield(tag = "a", content = "v."),
+            MarcSubfield(tag = "i", content = "(year)")
+          )
+        ),
+        createVarFieldWith(
+          marcTag = "863",
+          subfields = List(
+            MarcSubfield(tag = "8", content = "10.1"),
+            MarcSubfield(tag = "a", content = "1"),
+            MarcSubfield(tag = "i", content = "2001")
+          )
+        )
+      )
+
+      val possibilities = List(
+        List("vol.1 (2001)"), List("v.1 (2001)")
+      )
+
+      possibilities should contain(getEnumerations(varFields))
     }
   }
 
