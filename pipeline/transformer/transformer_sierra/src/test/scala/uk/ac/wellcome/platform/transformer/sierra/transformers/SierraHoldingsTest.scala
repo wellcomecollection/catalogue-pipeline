@@ -3,22 +3,10 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.internal.IdState.Unidentifiable
-import uk.ac.wellcome.models.work.internal.LocationType.OnlineResource
-import uk.ac.wellcome.models.work.internal.{
-  AccessCondition,
-  AccessStatus,
-  DigitalLocation,
-  Holdings,
-  IdState,
-  Item
-}
+import uk.ac.wellcome.models.work.internal.LocationType.{ClosedStores, OnlineResource, OpenShelves}
+import uk.ac.wellcome.models.work.internal.{AccessCondition, AccessStatus, DigitalLocation, Holdings, IdState, Item}
 import uk.ac.wellcome.platform.transformer.sierra.generators.MarcGenerators
-import uk.ac.wellcome.platform.transformer.sierra.source.{
-  FixedField,
-  MarcSubfield,
-  SierraHoldingsData,
-  VarField
-}
+import uk.ac.wellcome.platform.transformer.sierra.source.{FixedField, MarcSubfield, SierraHoldingsData, VarField}
 import weco.catalogue.sierra_adapter.generators.SierraGenerators
 import weco.catalogue.sierra_adapter.models.SierraHoldingsNumber
 
@@ -365,6 +353,160 @@ class SierraHoldingsTest extends AnyFunSpec with Matchers with MarcGenerators wi
       holdings should have size 1
       holdings.head.description shouldBe Some("Missing Vol. 2")
       holdings.head.note shouldBe Some("Lost in a mysterious fishing accident")
+    }
+
+    it("creates an enumeration based on the contents of 85X/86X") {
+      val varFields = List(
+        createVarFieldWith(
+          marcTag = "863",
+          subfields = List(
+            MarcSubfield(tag = "8", content = "1.1"),
+            MarcSubfield(tag = "a", content = "57-59"),
+            MarcSubfield(tag = "b", content = "4-1")
+          )
+        ),
+        createVarFieldWith(
+          marcTag = "863",
+          subfields = List(
+            MarcSubfield(tag = "8", content = "1.2"),
+            MarcSubfield(tag = "a", content = "60-61"),
+            MarcSubfield(tag = "b", content = "3-2")
+          )
+        ),
+        createVarFieldWith(
+          marcTag = "853",
+          subfields = List(
+            MarcSubfield(tag = "8", content = "1"),
+            MarcSubfield(tag = "a", content = "v."),
+            MarcSubfield(tag = "b", content = "no.")
+          )
+        )
+      )
+
+      val holdingsData = SierraHoldingsData(
+        fixedFields = Map("40" -> FixedField(label = "LOCATION", value = "stax ")),
+        varFields = varFields
+      )
+      val dataMap = Map(createSierraHoldingsNumber -> holdingsData)
+
+      getItems(dataMap) shouldBe empty
+
+      val holdings = getHoldings(dataMap)
+      holdings should have size 1
+      holdings.head.enumeration shouldBe List(
+        "v.57:no.4 - v.59:no.1",
+        "v.60:no.3 - v.61:no.2"
+      )
+    }
+
+    it("uses the location type from fixed field 40 (closed stores)") {
+      val varFields = List(
+        createVarFieldWith(
+          marcTag = "866",
+          subfields = List(
+            MarcSubfield(tag = "a", content = "A secret holdings")
+          )
+        )
+      )
+
+      val holdingsData = SierraHoldingsData(
+        fixedFields = Map("40" -> FixedField(label = "LOCATION", value = "stax ")),
+        varFields = varFields
+      )
+      val dataMap = Map(createSierraHoldingsNumber -> holdingsData)
+
+      getItems(dataMap) shouldBe empty
+
+      val holdings = getHoldings(dataMap)
+      holdings should have size 1
+
+      val locations = holdings.head.locations
+      locations should have size 1
+      locations.head.locationType shouldBe ClosedStores
+      locations.head.label shouldBe "Closed stores"
+    }
+
+    it("uses the location type from fixed field 40 (open shelves)") {
+      val varFields = List(
+        createVarFieldWith(
+          marcTag = "866",
+          subfields = List(
+            MarcSubfield(tag = "a", content = "Journals on the shelves")
+          )
+        )
+      )
+
+      val holdingsData = SierraHoldingsData(
+        fixedFields = Map("40" -> FixedField(label = "LOCATION", value = "wgser")),
+        varFields = varFields
+      )
+      val dataMap = Map(createSierraHoldingsNumber -> holdingsData)
+
+      getItems(dataMap) shouldBe empty
+
+      val holdings = getHoldings(dataMap)
+      holdings should have size 1
+
+      val locations = holdings.head.locations
+      locations should have size 1
+      locations.head.locationType shouldBe OpenShelves
+      locations.head.label shouldBe "Journals"
+    }
+
+    it("uses 949 subfield ǂa as the shelfmark") {
+      val varFields = List(
+        createVarFieldWith(
+          marcTag = "866",
+          subfields = List(
+            MarcSubfield(tag = "a", content = "Journals on the shelves")
+          )
+        ),
+        createVarFieldWith(
+          marcTag = "949",
+          subfields = List(
+            MarcSubfield(tag = "a", content = "/MED     ")
+          )
+        )
+      )
+
+      val holdingsData = SierraHoldingsData(
+        fixedFields = Map("40" -> FixedField(label = "LOCATION", value = "wgser")),
+        varFields = varFields
+      )
+      val dataMap = Map(createSierraHoldingsNumber -> holdingsData)
+
+      getItems(dataMap) shouldBe empty
+
+      val holdings = getHoldings(dataMap)
+      holdings should have size 1
+
+      val locations = holdings.head.locations
+      locations should have size 1
+      locations.head.shelfmark shouldBe Some("/MED")
+    }
+
+    it("skips adding a location if the location code in fixed field 40 is unrecognised") {
+      val varFields = List(
+        createVarFieldWith(
+          marcTag = "866",
+          subfields = List(
+            MarcSubfield(tag = "a", content = "Journals on the shelves")
+          )
+        )
+      )
+
+      val holdingsData = SierraHoldingsData(
+        fixedFields = Map("40" -> FixedField(label = "LOCATION", value = "zzzzz")),
+        varFields = varFields
+      )
+      val dataMap = Map(createSierraHoldingsNumber -> holdingsData)
+
+      getItems(dataMap) shouldBe empty
+
+      val holdings = getHoldings(dataMap)
+      holdings should have size 1
+
+      holdings.head.locations shouldBe empty
     }
   }
 

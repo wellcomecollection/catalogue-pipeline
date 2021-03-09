@@ -1,0 +1,1 @@
+Don't default any values in `Holdings`; that type only takes PhysicalLocations for now.

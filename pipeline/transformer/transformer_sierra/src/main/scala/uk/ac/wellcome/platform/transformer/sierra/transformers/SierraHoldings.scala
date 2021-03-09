@@ -1,15 +1,13 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
-import uk.ac.wellcome.models.work.internal.{Holdings, IdState, Item}
-import uk.ac.wellcome.platform.transformer.sierra.source.{
-  FixedField,
-  SierraHoldingsData,
-  SierraQueryOps
-}
-import weco.catalogue.sierra_adapter.models.{
-  SierraBibNumber,
-  SierraHoldingsNumber
-}
+import com.github.tototoshi.csv.CSVReader
+import uk.ac.wellcome.models.work.internal.LocationType.ClosedStores
+import uk.ac.wellcome.models.work.internal.{Holdings, IdState, Item, PhysicalLocation}
+import uk.ac.wellcome.platform.transformer.sierra.source.{FixedField, SierraHoldingsData, SierraQueryOps}
+import weco.catalogue.sierra_adapter.models.{SierraBibNumber, SierraHoldingsNumber, TypedSierraRecordNumber}
+
+import java.io.InputStream
+import scala.io.Source
 
 object SierraHoldings extends SierraQueryOps {
   type Output = (List[Item[IdState.Unminted]], List[Holdings])
@@ -37,7 +35,7 @@ object SierraHoldings extends SierraQueryOps {
       physicalHoldingsData
         .toList
         .flatMap { case (_, data) =>
-          createPhysicalHoldings(data)
+          createPhysicalHoldings(id, data)
         }
 
     val digitalItems: List[Item[IdState.Unminted]] =
@@ -51,7 +49,7 @@ object SierraHoldings extends SierraQueryOps {
     (digitalItems, physicalHoldings)
   }
 
-  private def createPhysicalHoldings(data: SierraHoldingsData): Option[Holdings] = {
+  private def createPhysicalHoldings(id: TypedSierraRecordNumber, data: SierraHoldingsData): Option[Holdings] = {
 
     // We take the description from field 866 subfield ǂa
     val description = data.varFields
@@ -67,20 +65,77 @@ object SierraHoldings extends SierraQueryOps {
       .map { _.content }
       .mkString(" ")
 
+    val enumeration = SierraHoldingsEnumeration(id, data.varFields)
+
+    val locations = List(createLocation(id, data)).flatten
+
     // We should only create the Holdings object if we have some interesting data
     // to include; otherwise we don't.
-    val isNonEmpty = description.nonEmpty || note.nonEmpty
+    val isNonEmpty = description.nonEmpty || note.nonEmpty || enumeration.nonEmpty
 
     if (isNonEmpty) {
       Some(
         Holdings(
           description = if (description.nonEmpty) Some(description) else None,
           note = if (note.nonEmpty) Some(note) else None,
-          enumeration = List()
+          enumeration = enumeration,
+          locations = locations
         )
       )
     } else {
       None
     }
   }
+
+  private val stream: InputStream =
+    getClass.getResourceAsStream("/location-types.csv")
+  private val source = Source.fromInputStream(stream)
+  private val csvReader = CSVReader.open(source)
+  private val csvRows = csvReader.all()
+
+  // location-types.csv is a list of 2-tuples, e.g.:
+  //
+  //    acqi,Info Service acquisitions
+  //    acql,Wellcome Library
+  //
+  private val locationTypeMap: Map[String, String] = csvRows
+    .map { row =>
+      assert(row.size == 2)
+      row.head -> row.last
+    }
+    .toMap
+
+  private def createLocation(id: TypedSierraRecordNumber, data: SierraHoldingsData): Option[PhysicalLocation] =
+    for {
+      // We use the location code from fixed field 40.  If this is missing, we don't
+      // create a location.
+      //
+      // Note: these values are padded to five spaces (e.g. "stax "), so we need
+      // to remove whitespace first.
+      code <- data.fixedFields.get("40").map { _.value.trim }
+      name <- locationTypeMap.get(code)
+
+      locationType <- SierraPhysicalLocationType.fromName(id, name)
+      label = locationType match {
+        case ClosedStores => ClosedStores.label
+        case _ => name
+      }
+
+      // We take a shelfmark from field 949 ǂa, if present.
+      //
+      // Note: these values often contain extra whitespace (e.g. "/MED     "), so
+      // we need to trim that off.
+      shelfmark = data.varFields
+        .filter { _.marcTag.contains("949") }
+        .subfieldsWithTag("a")
+        .map { _.content.trim }
+        .distinct
+        .headOption
+
+      location = PhysicalLocation(
+        locationType = locationType,
+        label = label,
+        shelfmark = shelfmark
+      )
+    } yield location
 }
