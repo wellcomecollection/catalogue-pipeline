@@ -3,14 +3,34 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.internal.IdState.Unidentifiable
-import uk.ac.wellcome.models.work.internal.LocationType.{ClosedStores, OnlineResource, OpenShelves}
-import uk.ac.wellcome.models.work.internal.{AccessCondition, AccessStatus, DigitalLocation, Holdings, IdState, Item}
+import uk.ac.wellcome.models.work.internal.LocationType.{
+  ClosedStores,
+  OnlineResource,
+  OpenShelves
+}
+import uk.ac.wellcome.models.work.internal.{
+  AccessCondition,
+  AccessStatus,
+  DigitalLocation,
+  Holdings,
+  IdState,
+  Item
+}
 import uk.ac.wellcome.platform.transformer.sierra.generators.MarcGenerators
-import uk.ac.wellcome.platform.transformer.sierra.source.{FixedField, MarcSubfield, SierraHoldingsData, VarField}
+import uk.ac.wellcome.platform.transformer.sierra.source.{
+  FixedField,
+  MarcSubfield,
+  SierraHoldingsData,
+  VarField
+}
 import weco.catalogue.sierra_adapter.generators.SierraGenerators
 import weco.catalogue.sierra_adapter.models.SierraHoldingsNumber
 
-class SierraHoldingsTest extends AnyFunSpec with Matchers with MarcGenerators with SierraGenerators {
+class SierraHoldingsTest
+    extends AnyFunSpec
+    with Matchers
+    with MarcGenerators
+    with SierraGenerators {
   it("an empty map becomes an empty list of items and holdings") {
     getItems(holdingsDataMap = Map.empty) shouldBe empty
     getHoldings(holdingsDataMap = Map.empty) shouldBe empty
@@ -31,7 +51,8 @@ class SierraHoldingsTest extends AnyFunSpec with Matchers with MarcGenerators wi
       )
 
       val holdingsData = SierraHoldingsData(
-        fixedFields = Map("40" -> FixedField(label = "LOCATION", value = "elro ")),
+        fixedFields =
+          Map("40" -> FixedField(label = "LOCATION", value = "elro ")),
         varFields = varFields
       )
       val dataMap = Map(createSierraHoldingsNumber -> holdingsData)
@@ -45,14 +66,17 @@ class SierraHoldingsTest extends AnyFunSpec with Matchers with MarcGenerators wi
         createVarFieldWith(
           marcTag = "856",
           subfields = List(
-            MarcSubfield(tag = "u", content = "https://resolver.example.com/journal"),
+            MarcSubfield(
+              tag = "u",
+              content = "https://resolver.example.com/journal"),
             MarcSubfield(tag = "z", content = "Connect to Example Journals")
           )
         )
       )
 
       val holdingsData = SierraHoldingsData(
-        fixedFields = Map("40" -> FixedField(label = "LOCATION", value = "elro ")),
+        fixedFields =
+          Map("40" -> FixedField(label = "LOCATION", value = "elro ")),
         varFields = varFields
       )
       val dataMap = Map(createSierraHoldingsNumber -> holdingsData)
@@ -77,25 +101,31 @@ class SierraHoldingsTest extends AnyFunSpec with Matchers with MarcGenerators wi
       getHoldings(dataMap) shouldBe empty
     }
 
-    it("creates multiple items based on multiple instance of 856 on the same holdings") {
+    it(
+      "creates multiple items based on multiple instance of 856 on the same holdings") {
       val varFields = List(
         createVarFieldWith(
           marcTag = "856",
           subfields = List(
-            MarcSubfield(tag = "u", content = "https://resolver.example.com/journal"),
+            MarcSubfield(
+              tag = "u",
+              content = "https://resolver.example.com/journal"),
             MarcSubfield(tag = "z", content = "Connect to Example Journals")
           )
         ),
         createVarFieldWith(
           marcTag = "856",
           subfields = List(
-            MarcSubfield(tag = "u", content = "https://example.org/subscriptions")
+            MarcSubfield(
+              tag = "u",
+              content = "https://example.org/subscriptions")
           )
         )
       )
 
       val holdingsData = SierraHoldingsData(
-        fixedFields = Map("40" -> FixedField(label = "LOCATION", value = "elro ")),
+        fixedFields =
+          Map("40" -> FixedField(label = "LOCATION", value = "elro ")),
         varFields = varFields
       )
       val dataMap = Map(createSierraHoldingsNumber -> holdingsData)
@@ -139,7 +169,9 @@ class SierraHoldingsTest extends AnyFunSpec with Matchers with MarcGenerators wi
         createVarFieldWith(
           marcTag = "856",
           subfields = List(
-            MarcSubfield(tag = "u", content = "https://resolver.example.com/journal"),
+            MarcSubfield(
+              tag = "u",
+              content = "https://resolver.example.com/journal"),
             MarcSubfield(tag = "z", content = "Connect to Example Journals")
           )
         )
@@ -149,17 +181,21 @@ class SierraHoldingsTest extends AnyFunSpec with Matchers with MarcGenerators wi
         createVarFieldWith(
           marcTag = "856",
           subfields = List(
-            MarcSubfield(tag = "u", content = "https://example.org/subscriptions")
+            MarcSubfield(
+              tag = "u",
+              content = "https://example.org/subscriptions")
           )
         )
       )
 
       val dataMap = Map("1000001" -> varFields1, "2000002" -> varFields2)
-        .map { case (id, varFields) =>
-          SierraHoldingsNumber(id) -> SierraHoldingsData(
-            fixedFields = Map("40" -> FixedField(label = "LOCATION", value = "elro ")),
-            varFields = varFields
-          )
+        .map {
+          case (id, varFields) =>
+            SierraHoldingsNumber(id) -> SierraHoldingsData(
+              fixedFields =
+                Map("40" -> FixedField(label = "LOCATION", value = "elro ")),
+              varFields = varFields
+            )
         }
 
       getItems(dataMap) shouldBe List(
@@ -201,14 +237,17 @@ class SierraHoldingsTest extends AnyFunSpec with Matchers with MarcGenerators wi
         createVarFieldWith(
           marcTag = "856",
           subfields = List(
-            MarcSubfield(tag = "u", content = "https://resolver.example.com/journal"),
+            MarcSubfield(
+              tag = "u",
+              content = "https://resolver.example.com/journal"),
             MarcSubfield(tag = "z", content = "Connect to Example Journals")
           )
         )
       )
 
       val holdingsData = SierraHoldingsData(
-        fixedFields = Map("40" -> FixedField(label = "LOCATION", value = "stax ")),
+        fixedFields =
+          Map("40" -> FixedField(label = "LOCATION", value = "stax ")),
         varFields = varFields
       )
       val dataMap = Map(createSierraHoldingsNumber -> holdingsData)
@@ -222,14 +261,17 @@ class SierraHoldingsTest extends AnyFunSpec with Matchers with MarcGenerators wi
         createVarFieldWith(
           marcTag = "856",
           subfields = List(
-            MarcSubfield(tag = "u", content = "https://deleted.example.org/journal")
+            MarcSubfield(
+              tag = "u",
+              content = "https://deleted.example.org/journal")
           )
         )
       )
 
       val deletedHoldingsData = SierraHoldingsData(
         deleted = true,
-        fixedFields = Map("40" -> FixedField(label = "LOCATION", value = "elro ")),
+        fixedFields =
+          Map("40" -> FixedField(label = "LOCATION", value = "elro ")),
         varFields = varFields
       )
 
@@ -248,18 +290,22 @@ class SierraHoldingsTest extends AnyFunSpec with Matchers with MarcGenerators wi
         createVarFieldWith(
           marcTag = "856",
           subfields = List(
-            MarcSubfield(tag = "u", content = "https://suppressed.example.org/journal")
+            MarcSubfield(
+              tag = "u",
+              content = "https://suppressed.example.org/journal")
           )
         )
       )
 
       val suppressedHoldingsData = SierraHoldingsData(
         suppressed = true,
-        fixedFields = Map("40" -> FixedField(label = "LOCATION", value = "elro ")),
+        fixedFields =
+          Map("40" -> FixedField(label = "LOCATION", value = "elro ")),
         varFields = varFields
       )
 
-      val unsuppressedHoldingsData = suppressedHoldingsData.copy(suppressed = false)
+      val unsuppressedHoldingsData =
+        suppressedHoldingsData.copy(suppressed = false)
 
       // We transform with suppressed = true and suppressed = false, so we know
       // the holdings isn't being skipped because it's an incomplete record.
@@ -283,7 +329,8 @@ class SierraHoldingsTest extends AnyFunSpec with Matchers with MarcGenerators wi
 
       val holdingsData = SierraHoldingsData(
         suppressed = true,
-        fixedFields = Map("40" -> FixedField(label = "LOCATION", value = "stax ")),
+        fixedFields =
+          Map("40" -> FixedField(label = "LOCATION", value = "stax ")),
         varFields = varFields
       )
       val dataMap = Map(createSierraHoldingsNumber -> holdingsData)
@@ -303,7 +350,8 @@ class SierraHoldingsTest extends AnyFunSpec with Matchers with MarcGenerators wi
       )
 
       val holdingsData = SierraHoldingsData(
-        fixedFields = Map("40" -> FixedField(label = "LOCATION", value = "stax ")),
+        fixedFields =
+          Map("40" -> FixedField(label = "LOCATION", value = "stax ")),
         varFields = varFields
       )
       val dataMap = Map(createSierraHoldingsNumber -> holdingsData)
@@ -327,7 +375,8 @@ class SierraHoldingsTest extends AnyFunSpec with Matchers with MarcGenerators wi
       )
 
       val holdingsData = SierraHoldingsData(
-        fixedFields = Map("40" -> FixedField(label = "LOCATION", value = "stax ")),
+        fixedFields =
+          Map("40" -> FixedField(label = "LOCATION", value = "stax ")),
         varFields = varFields
       )
       val dataMap = Map(createSierraHoldingsNumber -> holdingsData)
@@ -346,13 +395,16 @@ class SierraHoldingsTest extends AnyFunSpec with Matchers with MarcGenerators wi
           marcTag = "866",
           subfields = List(
             MarcSubfield(tag = "a", content = "Missing Vol. 2"),
-            MarcSubfield(tag = "z", content = "Lost in a mysterious fishing accident")
+            MarcSubfield(
+              tag = "z",
+              content = "Lost in a mysterious fishing accident")
           )
         )
       )
 
       val holdingsData = SierraHoldingsData(
-        fixedFields = Map("40" -> FixedField(label = "LOCATION", value = "stax ")),
+        fixedFields =
+          Map("40" -> FixedField(label = "LOCATION", value = "stax ")),
         varFields = varFields
       )
       val dataMap = Map(createSierraHoldingsNumber -> holdingsData)
@@ -394,7 +446,8 @@ class SierraHoldingsTest extends AnyFunSpec with Matchers with MarcGenerators wi
       )
 
       val holdingsData = SierraHoldingsData(
-        fixedFields = Map("40" -> FixedField(label = "LOCATION", value = "stax ")),
+        fixedFields =
+          Map("40" -> FixedField(label = "LOCATION", value = "stax ")),
         varFields = varFields
       )
       val dataMap = Map(createSierraHoldingsNumber -> holdingsData)
@@ -420,7 +473,8 @@ class SierraHoldingsTest extends AnyFunSpec with Matchers with MarcGenerators wi
       )
 
       val holdingsData = SierraHoldingsData(
-        fixedFields = Map("40" -> FixedField(label = "LOCATION", value = "stax ")),
+        fixedFields =
+          Map("40" -> FixedField(label = "LOCATION", value = "stax ")),
         varFields = varFields
       )
       val dataMap = Map(createSierraHoldingsNumber -> holdingsData)
@@ -447,7 +501,8 @@ class SierraHoldingsTest extends AnyFunSpec with Matchers with MarcGenerators wi
       )
 
       val holdingsData = SierraHoldingsData(
-        fixedFields = Map("40" -> FixedField(label = "LOCATION", value = "wgser")),
+        fixedFields =
+          Map("40" -> FixedField(label = "LOCATION", value = "wgser")),
         varFields = varFields
       )
       val dataMap = Map(createSierraHoldingsNumber -> holdingsData)
@@ -480,7 +535,8 @@ class SierraHoldingsTest extends AnyFunSpec with Matchers with MarcGenerators wi
       )
 
       val holdingsData = SierraHoldingsData(
-        fixedFields = Map("40" -> FixedField(label = "LOCATION", value = "wgser")),
+        fixedFields =
+          Map("40" -> FixedField(label = "LOCATION", value = "wgser")),
         varFields = varFields
       )
       val dataMap = Map(createSierraHoldingsNumber -> holdingsData)
@@ -495,7 +551,8 @@ class SierraHoldingsTest extends AnyFunSpec with Matchers with MarcGenerators wi
       locations.head.shelfmark shouldBe Some("/MED")
     }
 
-    it("skips adding a location if the location code in fixed field 40 is unrecognised") {
+    it(
+      "skips adding a location if the location code in fixed field 40 is unrecognised") {
       val varFields = List(
         createVarFieldWith(
           marcTag = "866",
@@ -506,7 +563,8 @@ class SierraHoldingsTest extends AnyFunSpec with Matchers with MarcGenerators wi
       )
 
       val holdingsData = SierraHoldingsData(
-        fixedFields = Map("40" -> FixedField(label = "LOCATION", value = "zzzzz")),
+        fixedFields =
+          Map("40" -> FixedField(label = "LOCATION", value = "zzzzz")),
         varFields = varFields
       )
       val dataMap = Map(createSierraHoldingsNumber -> holdingsData)
@@ -520,25 +578,24 @@ class SierraHoldingsTest extends AnyFunSpec with Matchers with MarcGenerators wi
     }
 
     it("creates multiple holdings based on multiple data blocks") {
-      val dataMap = (1 to 3)
-        .map { volno =>
-          val varFields = List(
-            createVarFieldWith(
-              marcTag = "866",
-              subfields = List(
-                MarcSubfield(tag = "a", content = s"Vol. $volno only")
-              )
+      val dataMap = (1 to 3).map { volno =>
+        val varFields = List(
+          createVarFieldWith(
+            marcTag = "866",
+            subfields = List(
+              MarcSubfield(tag = "a", content = s"Vol. $volno only")
             )
           )
+        )
 
-          val holdingsData = SierraHoldingsData(
-            fixedFields = Map("40" -> FixedField(label = "LOCATION", value = "stax ")),
-            varFields = varFields
-          )
+        val holdingsData = SierraHoldingsData(
+          fixedFields =
+            Map("40" -> FixedField(label = "LOCATION", value = "stax ")),
+          varFields = varFields
+        )
 
-          SierraHoldingsNumber(s"${volno}00000$volno") -> holdingsData
-        }
-        .toMap
+        SierraHoldingsNumber(s"${volno}00000$volno") -> holdingsData
+      }.toMap
 
       getItems(dataMap) shouldBe empty
 
@@ -563,7 +620,8 @@ class SierraHoldingsTest extends AnyFunSpec with Matchers with MarcGenerators wi
 
       val deletedHoldingsData = SierraHoldingsData(
         deleted = true,
-        fixedFields = Map("40" -> FixedField(label = "LOCATION", value = "stax ")),
+        fixedFields =
+          Map("40" -> FixedField(label = "LOCATION", value = "stax ")),
         varFields = varFields
       )
 
@@ -589,11 +647,13 @@ class SierraHoldingsTest extends AnyFunSpec with Matchers with MarcGenerators wi
 
       val suppressedHoldingsData = SierraHoldingsData(
         suppressed = true,
-        fixedFields = Map("40" -> FixedField(label = "LOCATION", value = "stax ")),
+        fixedFields =
+          Map("40" -> FixedField(label = "LOCATION", value = "stax ")),
         varFields = varFields
       )
 
-      val unsuppressedHoldingsData = suppressedHoldingsData.copy(suppressed = false)
+      val unsuppressedHoldingsData =
+        suppressedHoldingsData.copy(suppressed = false)
 
       // We transform with suppressed = true and suppressed = false, so we know
       // the holdings isn't being skipped because it's an incomplete record.
@@ -604,12 +664,16 @@ class SierraHoldingsTest extends AnyFunSpec with Matchers with MarcGenerators wi
     }
   }
 
-  private def getItems(holdingsDataMap: Map[SierraHoldingsNumber, SierraHoldingsData]): List[Item[IdState.Unminted]] = {
+  private def getItems(
+    holdingsDataMap: Map[SierraHoldingsNumber, SierraHoldingsData])
+    : List[Item[IdState.Unminted]] = {
     val (items, _) = SierraHoldings(createSierraBibNumber, holdingsDataMap)
     items
   }
 
-  private def getHoldings(holdingsDataMap: Map[SierraHoldingsNumber, SierraHoldingsData]): List[Holdings] = {
+  private def getHoldings(
+    holdingsDataMap: Map[SierraHoldingsNumber, SierraHoldingsData])
+    : List[Holdings] = {
     val (_, holdings) = SierraHoldings(createSierraBibNumber, holdingsDataMap)
     holdings
   }

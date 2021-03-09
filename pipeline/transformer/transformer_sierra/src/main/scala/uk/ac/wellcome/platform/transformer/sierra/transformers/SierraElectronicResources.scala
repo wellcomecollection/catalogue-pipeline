@@ -105,12 +105,14 @@ object SierraElectronicResources extends SierraQueryOps with Logging {
 
   // We take the URL from subfield ǂu.  If subfield ǂu is missing, repeated,
   // or contains something other than a URL, we discard it.
-  private def getUrl(id: TypedSierraRecordNumber, vf: VarField): Option[String] =
+  private def getUrl(id: TypedSierraRecordNumber,
+                     vf: VarField): Option[String] =
     vf.subfieldsWithTag("u") match {
       case Seq(MarcSubfield(_, content)) if isUrl(content) => Some(content)
 
       case Seq(MarcSubfield(_, content)) =>
-        warn(s"Record ${id.withCheckDigit} has a value in 856 ǂu which isn't a URL: $content")
+        warn(
+          s"Record ${id.withCheckDigit} has a value in 856 ǂu which isn't a URL: $content")
         None
 
       case Nil =>
@@ -118,7 +120,8 @@ object SierraElectronicResources extends SierraQueryOps with Logging {
         None
 
       case other =>
-        warn(s"Record ${id.withCheckDigit} has a field 856 with repeated subfield ǂu")
+        warn(
+          s"Record ${id.withCheckDigit} has a field 856 with repeated subfield ǂu")
         None
     }
 

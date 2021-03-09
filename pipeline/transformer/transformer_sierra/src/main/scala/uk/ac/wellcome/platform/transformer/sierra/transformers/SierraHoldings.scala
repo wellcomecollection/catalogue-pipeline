@@ -2,9 +2,22 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import com.github.tototoshi.csv.CSVReader
 import uk.ac.wellcome.models.work.internal.LocationType.ClosedStores
-import uk.ac.wellcome.models.work.internal.{Holdings, IdState, Item, PhysicalLocation}
-import uk.ac.wellcome.platform.transformer.sierra.source.{FixedField, SierraHoldingsData, SierraQueryOps}
-import weco.catalogue.sierra_adapter.models.{SierraBibNumber, SierraHoldingsNumber, TypedSierraRecordNumber}
+import uk.ac.wellcome.models.work.internal.{
+  Holdings,
+  IdState,
+  Item,
+  PhysicalLocation
+}
+import uk.ac.wellcome.platform.transformer.sierra.source.{
+  FixedField,
+  SierraHoldingsData,
+  SierraQueryOps
+}
+import weco.catalogue.sierra_adapter.models.{
+  SierraBibNumber,
+  SierraHoldingsNumber,
+  TypedSierraRecordNumber
+}
 
 import java.io.InputStream
 import scala.io.Source
@@ -12,7 +25,9 @@ import scala.io.Source
 object SierraHoldings extends SierraQueryOps {
   type Output = (List[Item[IdState.Unminted]], List[Holdings])
 
-  def apply(id: SierraBibNumber, holdingsDataMap: Map[SierraHoldingsNumber, SierraHoldingsData]): Output = {
+  def apply(
+    id: SierraBibNumber,
+    holdingsDataMap: Map[SierraHoldingsNumber, SierraHoldingsData]): Output = {
 
     // We start by looking at fixed field 40, which contains a Sierra location code.
     // The value 'elro' tells us this is an online resource; if so, we create a series
@@ -27,29 +42,31 @@ object SierraHoldings extends SierraQueryOps {
           case (_, holdingsData) =>
             holdingsData.fixedFields.get("40") match {
               case Some(FixedField(_, value)) if value.trim == "elro" => true
-              case _ => false
+              case _                                                  => false
             }
         }
 
     val physicalHoldings =
-      physicalHoldingsData
-        .toList
-        .flatMap { case (_, data) =>
-          createPhysicalHoldings(id, data)
+      physicalHoldingsData.toList
+        .flatMap {
+          case (_, data) =>
+            createPhysicalHoldings(id, data)
         }
 
     val digitalItems: List[Item[IdState.Unminted]] =
-      electronicHoldingsData
-        .toList
+      electronicHoldingsData.toList
         .sortBy { case (id, _) => id.withCheckDigit }
-        .flatMap { case (id, data) =>
-          SierraElectronicResources(id, data.varFields)
+        .flatMap {
+          case (id, data) =>
+            SierraElectronicResources(id, data.varFields)
         }
 
     (digitalItems, physicalHoldings)
   }
 
-  private def createPhysicalHoldings(id: TypedSierraRecordNumber, data: SierraHoldingsData): Option[Holdings] = {
+  private def createPhysicalHoldings(
+    id: TypedSierraRecordNumber,
+    data: SierraHoldingsData): Option[Holdings] = {
 
     // We take the description from field 866 subfield ǂa
     val description = data.varFields
@@ -98,14 +115,14 @@ object SierraHoldings extends SierraQueryOps {
   //    acqi,Info Service acquisitions
   //    acql,Wellcome Library
   //
-  private val locationTypeMap: Map[String, String] = csvRows
-    .map { row =>
-      assert(row.size == 2)
-      row.head -> row.last
-    }
-    .toMap
+  private val locationTypeMap: Map[String, String] = csvRows.map { row =>
+    assert(row.size == 2)
+    row.head -> row.last
+  }.toMap
 
-  private def createLocation(id: TypedSierraRecordNumber, data: SierraHoldingsData): Option[PhysicalLocation] =
+  private def createLocation(
+    id: TypedSierraRecordNumber,
+    data: SierraHoldingsData): Option[PhysicalLocation] =
     for {
       // We use the location code from fixed field 40.  If this is missing, we don't
       // create a location.
@@ -118,7 +135,7 @@ object SierraHoldings extends SierraQueryOps {
       locationType <- SierraPhysicalLocationType.fromName(id, name)
       label = locationType match {
         case ClosedStores => ClosedStores.label
-        case _ => name
+        case _            => name
       }
 
       // We take a shelfmark from field 949 ǂa, if present.
