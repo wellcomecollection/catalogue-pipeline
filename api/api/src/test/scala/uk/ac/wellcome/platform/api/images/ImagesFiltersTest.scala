@@ -27,16 +27,21 @@ class ImagesFiltersTest extends ApiImagesTestBase {
     val machiavelli =
       Contributor(agent = Person("Machiavelli, Niccolo"), roles = Nil)
     val hypatia = Contributor(agent = Person("Hypatia"), roles = Nil)
+    val said = Contributor(agent = Person("Edward Said"), roles = Nil)
 
     val canonicalMachiavelliImage = createImageData.toIndexedImageWith(
       parentWork = identifiedWork().contributors(List(machiavelli))
     )
+    val canonicalSaidImage = createImageData.toIndexedImageWith(
+      parentWork = identifiedWork().contributors(List(said))
+    )
     val redirectedHypatiaImage = createImageData.toIndexedImageWith(
-      parentWork = identifiedWork().contributors(List(hypatia))
+      redirectedWork = Some(identifiedWork().contributors(List(hypatia)))
     )
 
     val images = List(
       canonicalMachiavelliImage,
+      canonicalSaidImage,
       redirectedHypatiaImage
     )
 
@@ -52,28 +57,28 @@ class ImagesFiltersTest extends ApiImagesTestBase {
       }
     }
 
-    it("filters by contributors from the redirected source work") {
+    it("does not filter by contributors from the redirected source work") {
       withImagesApi {
         case (imagesIndex, routes) =>
           insertImagesIntoElasticsearch(imagesIndex, images: _*)
           assertJsonResponse(
             routes,
             s"/$apiPrefix/images?source.contributors.agent.label=Hypatia") {
-            Status.OK -> imagesListResponse(List(redirectedHypatiaImage))
+            Status.OK -> imagesListResponse(Nil)
           }
       }
     }
 
-    it("filters by multiple contributors from both source works") {
+    it("filters by multiple contributors") {
       withImagesApi {
         case (imagesIndex, routes) =>
           insertImagesIntoElasticsearch(imagesIndex, images: _*)
           assertJsonResponse(
             routes,
-            s"""/$apiPrefix/images?source.contributors.agent.label="Machiavelli,%20Niccolo",Hypatia""",
+            s"""/$apiPrefix/images?source.contributors.agent.label="Machiavelli,%20Niccolo",Edward%20Said""",
             unordered = true) {
             Status.OK -> imagesListResponse(
-              List(canonicalMachiavelliImage, redirectedHypatiaImage))
+              List(canonicalMachiavelliImage, canonicalSaidImage))
           }
       }
     }

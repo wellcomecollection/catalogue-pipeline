@@ -55,7 +55,7 @@ class ImagesAggregationsTest extends ApiImagesTestBase {
     }
   }
 
-  it("aggregates by source contributor agent labels") {
+  it("aggregates by the canonical source's contributor agent labels") {
     val carrots = Contributor(agent = Agent("carrots"), roles = Nil)
     val parrots = Contributor(agent = Organisation("parrots"), roles = Nil)
     val parrotsMeeting = Contributor(agent = Meeting("parrots"), roles = Nil)
@@ -66,7 +66,7 @@ class ImagesAggregationsTest extends ApiImagesTestBase {
         parentWork = identifiedWork().contributors(List(carrots))
       ),
       createImageData.toIndexedImageWith(
-        parentWork = identifiedWork().contributors(List(carrots)),
+        parentWork = identifiedWork().contributors(List(carrots, parrots)),
         redirectedWork =
           Some(identifiedWork().contributors(List(parrots, parrotsMeeting)))
       ),
@@ -100,16 +100,11 @@ class ImagesAggregationsTest extends ApiImagesTestBase {
                     },
                     {
                       "data": ${contributor(parrotsMeeting)},
-                      "count": 2,
-                      "type": "AggregationBucket"
-                    },
-                    {
-                      "data": ${contributor(parrots)},
                       "count": 1,
                       "type": "AggregationBucket"
                     },
                     {
-                      "data": ${contributor(rats)},
+                      "data": ${contributor(parrots)},
                       "count": 1,
                       "type": "AggregationBucket"
                     }

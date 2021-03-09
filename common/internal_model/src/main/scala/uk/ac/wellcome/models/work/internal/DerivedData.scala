@@ -46,10 +46,7 @@ object DerivedImageData extends DerivedDataCommon {
   private def sourceContributorAgents(source: ImageSource): List[String] =
     source match {
       case SourceWorks(canonicalWork, redirectedWork) =>
-        contributorAgentLabels(
-          canonicalWork.data.contributors ++
-            redirectedWork.map(_.data.contributors).getOrElse(Nil)
-        ).distinct
+        contributorAgentLabels(canonicalWork.data.contributors)
       case _ => Nil
     }
 }

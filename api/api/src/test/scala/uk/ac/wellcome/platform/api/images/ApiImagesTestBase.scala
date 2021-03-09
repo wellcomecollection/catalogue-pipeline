@@ -47,7 +47,10 @@ trait ApiImagesTestBase
   def imagesListResponse(images: Seq[Image[ImageState.Indexed]]): String =
     s"""
        |{
-       |  ${resultList(apiPrefix, totalResults = images.size)},
+       |  ${resultList(
+         apiPrefix,
+         totalResults = images.size,
+         totalPages = if (images.nonEmpty) { 1 } else { 0 })},
        |  "results": [
        |    ${images.map(imageResponse).mkString(",")}
        |  ]

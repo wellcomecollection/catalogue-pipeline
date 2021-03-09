@@ -55,7 +55,8 @@ class DerivedDataTest
       }
     }
 
-    it("constructs a list of contributor agent labels from both source works") {
+    it(
+      "constructs a list of contributor agent labels from the canonical source work") {
       val image = createImageData.toAugmentedImageWith(
         parentWork = identifiedWork().contributors(
           List(Contributor(Organisation("Planet Express"), roles = Nil))
@@ -68,10 +69,9 @@ class DerivedDataTest
       )
       val derivedImageData = DerivedImageData(image)
 
-      derivedImageData.sourceContributorAgents should contain allOf (
-        "Organisation:Planet Express",
-        "Person:Zaphod Beeblebrox"
-      )
+      derivedImageData.sourceContributorAgents should contain(
+        "Organisation:Planet Express")
+      derivedImageData.sourceContributorAgents should not contain "Person:Zaphod Beeblebrox"
     }
   }
 }
