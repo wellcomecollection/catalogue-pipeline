@@ -227,15 +227,20 @@ class SierraHoldingsTest extends AnyFunSpec with Matchers with MarcGenerators wi
         )
       )
 
-      val holdingsData = SierraHoldingsData(
+      val deletedHoldingsData = SierraHoldingsData(
         deleted = true,
         fixedFields = Map("40" -> FixedField(label = "LOCATION", value = "elro ")),
         varFields = varFields
       )
-      val dataMap = Map(createSierraHoldingsNumber -> holdingsData)
 
-      getItems(dataMap) shouldBe empty
-      getHoldings(dataMap) shouldBe empty
+      val undeletedHoldingsData = deletedHoldingsData.copy(deleted = false)
+
+      // We transform with deleted = true and deleted = false, so we know
+      // the holdings isn't being skipped because it's an incomplete record.
+      getItems(Map(createSierraHoldingsNumber -> deletedHoldingsData)) shouldBe empty
+      getItems(Map(createSierraHoldingsNumber -> undeletedHoldingsData)) should not be empty
+
+      getHoldings(Map(createSierraHoldingsNumber -> deletedHoldingsData)) shouldBe empty
     }
 
     it("ignores electronic holdings that are suppressed") {
@@ -248,15 +253,20 @@ class SierraHoldingsTest extends AnyFunSpec with Matchers with MarcGenerators wi
         )
       )
 
-      val holdingsData = SierraHoldingsData(
+      val suppressedHoldingsData = SierraHoldingsData(
         suppressed = true,
         fixedFields = Map("40" -> FixedField(label = "LOCATION", value = "elro ")),
         varFields = varFields
       )
-      val dataMap = Map(createSierraHoldingsNumber -> holdingsData)
 
-      getItems(dataMap) shouldBe empty
-      getHoldings(dataMap) shouldBe empty
+      val unsuppressedHoldingsData = suppressedHoldingsData.copy(suppressed = false)
+
+      // We transform with suppressed = true and suppressed = false, so we know
+      // the holdings isn't being skipped because it's an incomplete record.
+      getItems(Map(createSierraHoldingsNumber -> suppressedHoldingsData)) shouldBe empty
+      getItems(Map(createSierraHoldingsNumber -> unsuppressedHoldingsData)) should not be empty
+
+      getHoldings(Map(createSierraHoldingsNumber -> suppressedHoldingsData)) shouldBe empty
     }
   }
 
@@ -507,6 +517,90 @@ class SierraHoldingsTest extends AnyFunSpec with Matchers with MarcGenerators wi
       holdings should have size 1
 
       holdings.head.locations shouldBe empty
+    }
+
+    it("creates multiple holdings based on multiple data blocks") {
+      val dataMap = (1 to 3)
+        .map { volno =>
+          val varFields = List(
+            createVarFieldWith(
+              marcTag = "866",
+              subfields = List(
+                MarcSubfield(tag = "a", content = s"Vol. $volno only")
+              )
+            )
+          )
+
+          val holdingsData = SierraHoldingsData(
+            fixedFields = Map("40" -> FixedField(label = "LOCATION", value = "stax ")),
+            varFields = varFields
+          )
+
+          SierraHoldingsNumber(s"${volno}00000$volno") -> holdingsData
+        }
+        .toMap
+
+      getItems(dataMap) shouldBe empty
+
+      val holdings = getHoldings(dataMap)
+      holdings should have size 3
+      holdings.map { _.description } shouldBe Seq(
+        Some("Vol. 1 only"),
+        Some("Vol. 2 only"),
+        Some("Vol. 3 only"),
+      )
+    }
+
+    it("skips holdings that are deleted") {
+      val varFields = List(
+        createVarFieldWith(
+          marcTag = "866",
+          subfields = List(
+            MarcSubfield(tag = "a", content = "A deleted holdings")
+          )
+        )
+      )
+
+      val deletedHoldingsData = SierraHoldingsData(
+        deleted = true,
+        fixedFields = Map("40" -> FixedField(label = "LOCATION", value = "stax ")),
+        varFields = varFields
+      )
+
+      val undeletedHoldingsData = deletedHoldingsData.copy(deleted = false)
+
+      // We transform with deleted = true and deleted = false, so we know
+      // the holdings isn't being skipped because it's an incomplete record.
+      getHoldings(Map(createSierraHoldingsNumber -> deletedHoldingsData)) shouldBe empty
+      getHoldings(Map(createSierraHoldingsNumber -> undeletedHoldingsData)) should not be empty
+
+      getItems(Map(createSierraHoldingsNumber -> deletedHoldingsData)) shouldBe empty
+    }
+
+    it("skips holdings that are suppressed") {
+      val varFields = List(
+        createVarFieldWith(
+          marcTag = "866",
+          subfields = List(
+            MarcSubfield(tag = "a", content = "A suppressed holdings")
+          )
+        )
+      )
+
+      val suppressedHoldingsData = SierraHoldingsData(
+        suppressed = true,
+        fixedFields = Map("40" -> FixedField(label = "LOCATION", value = "stax ")),
+        varFields = varFields
+      )
+
+      val unsuppressedHoldingsData = suppressedHoldingsData.copy(suppressed = false)
+
+      // We transform with suppressed = true and suppressed = false, so we know
+      // the holdings isn't being skipped because it's an incomplete record.
+      getHoldings(Map(createSierraHoldingsNumber -> suppressedHoldingsData)) shouldBe empty
+      getHoldings(Map(createSierraHoldingsNumber -> unsuppressedHoldingsData)) should not be empty
+
+      getItems(Map(createSierraHoldingsNumber -> suppressedHoldingsData)) shouldBe empty
     }
   }
 
