@@ -1,0 +1,401 @@
+acqi,Info Service acquisitions
+acql,Wellcome Library
+admi,administration
+arch,Archives Collection
+bwith,bound in above
+cwith,Contained in above
+dbiaa,Biomedical Ethics
+dcoaa,C&E
+dept,Wellcome Trust departments
+dhuaa,Human Resources
+digi,Digitised Collections
+digit,Digitised Collections
+dimgs,IMS
+dinad,IT:Admin
+dingo,IT:Governance
+dinop,IT:Operations
+dinsd,IT:Systems Development
+dints,IT:Training & Support
+dlnk,Digitised content
+dpleg,Legal Dept.
+dpoaa,Policy Unit
+dpuih,Grants Management
+elrm,E-Learning Room
+elro,Online
+enhl,Enquiry Hall
+epbo,Rare Books Collection
+exre,ON EXHIBITION RESERVE
+exres,On Exhibition
+foto,Medical Photo Library
+gblip,215 Information Point
+gibb,Wellcome Trust departments
+hamp,Offsite
+hgser,Offsite
+hgslr,Offsite (LSHTM journals)
+hicon,OBSOLETE Offsite Iconographic
+hmfac,REQUEST Moving image and sound collections
+homc,History of Medicine Collection
+home,Wellcome Library
+icno,Iconographic Collection
+illd,ILL Department
+info,Open shelves
+iscdr,Medicine & Society Collection CDROM
+isope,Medicine & Society Collection
+ispre,Closed stores Press Cuttings
+isref,OBSOLETE journals
+issta,Closed stores Medicine & Society
+isvid,Information Service Video
+ledw,Enquiry Desk
+medc,Medical Collection
+mfgmc,Closed stores Graves Med.AV col
+mfinc,Closed stores Inst.Neurol.Coll.
+mfohc,Closed stores Moving image and sound collections
+mfulc,Closed stores Univ.Lon. AV Coll
+mfvac,Closed stores Moving image and sound collections
+mfvl,Closed stores
+mfwcm,Well.Centre for Med.Sci.
+nist,Not In Stock
+ofacq,OBSOLETE Closed stores Staff Office Acq
+ofarw,Closed stores Archives Workroom
+ofch1,OBSOLETE Closed stores Staff Office 313
+ofcur,OBSOLETE Closed stores Staff Office CW
+ofdj1,OBSOLETE Closed stores Staff Office 320
+ofdp1,Closed stores Head of Library's Office
+ofep1,Closed stores Rare Books Staff Area
+ofep2,OBSOLETE Closed stores Staff Office 342
+ofep3,OBSOLETE Closed stores Staff Office 343
+ofexh,Closed stores Exhibitions Office
+ofgcc,Closed stores Collections Management Office
+ofinf,Closed stores Professional Collection
+ofjs1,"Closed stores Head, Research & Special Collections"
+oflh1,OBSOLETE Closed stores Staff Office 322
+oflis,OBSOLETE Closed stores Staff Office 258
+ofmfa,Closed stores MISC Office
+ofmpl,Closed stores MPL Office
+ofmsj,Closed stores 1st floor staff office
+ofna1,OBSOLETE Closed stores Staff Office 242
+ofns1,Closed stores Asian Collection Staff Area
+ofor3,Closed stores Outreach Officer
+ofpld,OBSOLETE Closed stores Staff Office 348
+ofra1,Closed stores Staff Office 325
+ofres,OBSOLETE Closed stores Readers Services Office
+ofrk1,Closed stores Digital Services
+ofsg1,OBSOLETE Closed stores Staff Office 223
+ofvds,Closed stores Human Resources Office
+ofvn1,OBSOLETE Closed stores Staff Office VN
+ofws1,Closed stores Iconographic Office
+ofzs1,OBSOLETE Closed stores Staff Office 311
+orio,Asian Collections
+poyn,Rare Materials Room
+resv,EXHIBITION RESERVE
+rm001,Room 3.42
+rmdda,Room 3.41
+sc#ac,Unrequestable Arch. & MSS
+sc#ra,Unrequestable A&MSS RAMC
+sc#wa,Unrequestable A&MSS WA
+sc#wf,Unrequestable A&MSS WF
+scmac,Closed stores Arch. & MSS
+scmra,Closed stores A&MSS RAMC
+scmwa,Closed stores A&MSS Well.Arch.
+scmwc,Archives & Mss Well.Coll.
+scmwf,Closed stores A&MSS Well.Found.
+scons,Conservation
+sehuf,Closed stores EPB Hunt.G.O/S
+sehun,Closed stores EPB Hunt.
+sehup,Closed stores EPB Hunt. pam
+sehux,Closed stores EPB Hunt. O/S
+semfc,RESTRICTED
+semfm,Closed stores EPB m/film
+semsa,Closed stores EPB MSL A
+semsb,Closed stores EPB MSL B
+semsc,Closed stores EPB MSL C
+semsd,Closed stores EPB MSL D
+semsf,Closed stores EPB MSL G. O/S
+semsl,Closed stores EPB MSL
+semss,Closed stores EPB MSL journals
+semst,Closed stores EPB MSL tracts
+sepaf,Closed stores EPB Amer.G.O/S
+sepah,Closed stores EPB Austro-Hung.
+sepal,Closed stores EBP Almanac
+sepam,Closed stores EPB American
+sepax,Closed stores EPB Amer. O/S
+sepba,Closed stores EPB / A
+sepbb,Closed stores EPB / B
+sepbc,Closed stores EPB / C
+sepbd,Closed stores EPB / D
+sepbf,Closed stores EPB G. O/S
+sepbi,Closed stores EPB Biog p.Vol
+sepbk,Closed stores EPB
+sepbl,Closed stores EPB Books for the Blind
+sepbn,Closed stores EPB Bindings
+sepbp,Closed stores EPB / P
+sepbr,Closed stores EPB Planchests
+sepcp,Closed stores EPB Cattle Plague
+sepcr,Closed stores EPB Crawford
+sepct,Closed stores EPB Cancer tracts
+sepen,Closed stores EPB Encycl
+sepep,Closed stores EPB Ephemera
+seper,Closed stores EPB Erotica
+sepin,Closed stores EPB Incunabula
+seraf,Closed stores EPB RAMC G. O/S
+seram,Closed stores EPB RAMC
+seras,Closed stores EPB RAMC journals
+serax,Closed stores EPB RAMC O/S
+sese2,Closed stores EPB dup journals
+seser,Closed stores EPB journals
+sesex,Closed stores EPB journals O/S
+sespc,Closed stores EPB Pamphlets O/S
+sesua,Closed stores EPB Suppl. A
+sesub,Closed stores EPB Suppl. B
+sesuc,Closed stores EPB Suppl. C
+sesud,Closed stores EPB Suppl. D
+sesup,Closed stores EPB Suppl. P
+sesus,Early Printed Books /Supp
+setra,Closed stores EPB Tracts
+sg#a2,Closed stores pams. (RMR)
+sg#am,Closed stores Med. pam (RMR)
+sg#ax,Closed stores Med. pam O/S (RMR)
+sg#bi,Closed stores Biog. pam (RMR)
+sg#c2,Closed stores pams. O/S (RMR)
+sg#e1,Closed stores mons. O/S (RMR)
+sg#e2,Closed stores mons. (RMR)
+sg#ed,Closed stores Med. (RMR)
+sg#ef,Closed stores Med. G. O/S (RMR)
+sg#ex,Closed stores Med. O/S (RMR)
+sg#f2,Closed stores Med G. O/S 2
+sg#hi,Closed stores Hist. pam (RMR)
+sg#i2,Closed stores Hist. 2 (RMR)
+sg#if,Closed stores Hist. G. O/S (RMR)
+sg#vo,Closed stores Pam. vol. (RMR)
+sg#x2,Closed stores Hist. O/S 2
+sgamc,Closed stores Americana
+sgame,Closed stores Amer. Ethnog.
+sgami,Closed stores Amerind
+sgamp,Temp. store Hist.
+sgams,Closed stores Amer. journals
+sganr,Closed stores ann. rep.
+sganx,Closed stores ann. rep. O/S
+sgbsc,Closed stores booksellers cat.
+sgcam,Closed stores Camden Soc.
+sgcra,Closed stores Thai mss
+sgdi2,OBSOLETE Closed stores diss. 2
+sgdir,OBSOLETE Closed stores directories
+sgdis,Closed stores diss.
+sgdix,Closed stores diss. O/S
+sgenc,Closed stores Hist. Encylop.
+sgeph,Closed stores ephemera
+sgero,Closed stores Erotica
+sgeth,Unavailable
+sggue,Closed stores Guerra Coll.
+sghac,Closed stores Hackett
+sghak,Closed stores Hakluyt Soc.
+sghf2,Closed stores Hist. G. O/S 2
+sghi2,Closed stores Hist. 2
+sghif,Closed stores Hist. G. O/S
+sghio,OBSOLETE Closed stores Hist. 2 (foa)
+sghip,OBSOLETE Closed stores Hist. 2 (RMR)
+sghx2,Closed stores Hist. O/S 2
+sgleo,Temp store Hist folios
+sglew,Closed stores Lewis
+sgmc2,Closed stores Conferences 2
+sgme1,Closed stores Med. 1
+sgme2,OBSOLETE Closed stores Med. 2
+sgmed,Closed stores Med.
+sgmef,Closed stores Med. G. O/S
+sgmex,Closed stores Med. O/S
+sgmf2,Closed stores Med. G. O/S 2
+sgmfc,By appointment
+sgmfm,Closed stores Med. microfilm
+sgmg2,Closed stores Garr. Mort 2
+sgmoh,Closed stores MOH reports (RMR)
+sgmon,Closed stores mons.
+sgmox,Closed stores mons. O/S
+sgmp1,OBSOLETE Closed stores Med. (RMR)
+sgmp2,OBSOLETE Closed stores Med. O/S (RMR)
+sgmp3,OBSOLETE Closed stores Med. G. O/S (RMR)
+sgmp4,OBSOLETE Closed stores Med. G O/S 2 (RMR)
+sgmx1,OBSOLETE Closed stores Med. O/S 1
+sgmx2,OBSOLETE Closed stores Med. O/S 2
+sgocc,Closed stores Occult
+sgpa1,OBSOLETE Closed stores Med. pam. (RR)
+sgpa2,Closed stores Med. pam 2
+sgpam,Closed stores Med. pam.
+sgpan,Closed stores pams.
+sgpax,Closed stores Med. pam O/S
+sgpbi,Closed stores Biog. pam
+sgpbx,Closed stores Biog. pam O/S
+sgphi,Closed stores Hist. pam
+sgphx,Closed stores Hist. pam O/S
+sgptb,Closed stores bound patents
+sgptu,Closed stores unbound patents
+sgpvo,Closed stores Pam. vol.
+sgpvx,Closed stores Pam vol. O/S
+sgpx2,OBSOLETE Closed stores Med. pam O/S 2
+sgpxn,Closed stores pams. O/S
+sgram,Closed stores RAMC
+sgras,Closed stores RAMC journals
+sgrax,Closed stores RAMC O/S
+sgrcs,Closed stores RCSE journals
+sgse2,Closed stores journals 2
+sgsee,Closed stores Hist. journals
+sgsen,Closed stores journals
+sgser,Closed stores journals
+sgsex,Closed stores journals O/S
+sgshe,Closed stores Shepherd
+sgsx2,OBSOLETE Closed stores journals O/S 2
+sgsxn,Closed stores journals O/S
+sgwel,Closed stores Wellcome Coll.
+sicon,Closed stores Iconographic
+smfac,"Closed stores Film, Video & Sound"
+sobab,Closed stores P.B. Arabic
+sobah,Closed stores P.B. Amharic
+sobak,Closed stores P.B. Akkadian
+sobam,Closed stores P.B. Aramaic
+sobar,Closed stores P.B. Armenian
+sobas,Closed stores P.B. Assyrian
+sobbe,Closed stores P.B. Bengali
+sobbh,Closed stores P.B. Bhili
+sobbu,Closed stores P.B. Burmese
+sobch,Closed stores P.B. Chinese
+sobco,Closed stores P.B. Coptic
+sobet,Closed stores P.B. Ethiopic
+sobge,Closed stores P.B. Georgian
+sobgu,Closed stores P.B. Gujurati
+sobhe,Closed stores P.B. Hebrew
+sobhg,Closed stores P.B. Hieroglyphic
+sobhi,Closed stores P.B. Hindi
+sobhr,Closed stores P.B. Hieratic
+sobin,Closed stores P.B. Indonesian
+sobja,Closed stores P.B. Japanese
+sobkl,Closed stores P.B. Kalmuck
+sobkn,Closed stores P.B. Kanarese
+sobko,Closed stores P.B. Korean
+sobla,Closed stores P.B. Ladakhi
+sobmd,Closed stores P.B. Malagasi
+sobmi,Closed stores P.B. Misc. Langs.
+sobml,Closed stores P.B. Malay
+sobmm,Closed stores P.B. Malayam
+sobmo,Closed stores P.B. Mongolian
+sobmr,Closed stores P.B. Marath
+sobne,Closed stores P.B. Nepali
+sobor,Closed stores P.B. Oriya
+sobpe,Closed stores P.B. Persian
+sobph,Closed stores P.B. Pahlavi
+sobpl,Closed stores P.B. Pali
+sobpr,Closed stores P.B. Prakrit
+sobps,Closed stores P.B. Pashto
+sobsa,Closed stores P.B. Sanskrit
+sobsi,Closed stores P.B. Singhalese
+sobsy,Closed stores P.B. Syriac
+sobta,Closed stores P.B. Tamil
+sobtb,Closed stores P.B. Tibetan
+sobte,P.B. Telugu
+sobtg,Closed stores P.B. Tigrinya
+sobth,Closed stores P.B. Thai
+sobtu,Closed stores P.B. Turkish
+sobui,Closed stores P.B. Uighur
+sobur,Closed stores P.B. Urdu
+sobuz,Closed stores P.B. Uzbek
+sobyi,Closed stores P.B. Yiddish
+sohob,Closed stores Orient. Hobson
+solie,Closed stores Orient. Lietard
+solsa,Closed stores Sanskrit litho
+somab,Closed stores Arabic mss
+sombu,Closed stores Burmese mss
+somch,Closed stores Chinese coll.
+somet,Closed stores Ethiopian mss
+somfm,Closed stores Oriental m/film
+somge,Closed stores Georgian mss
+somhe,Closed stores Hebrew mss
+somhi,Closed stores Hindi mss
+somja,Closed stores Japanese mss
+somml,Closed stores Malayan mss
+sompa,Closed stores Pali mss
+sompe,Closed stores Persian mss
+sompr,Closed stores Prakrit mss
+somsa,Closed stores Sanskrit mss alpha
+somsb,Closed stores Sanskrit mss beta
+somsc,Closed stores Sanskrit mss gamma
+somsd,Closed stores Sanskrit mss delta
+somse,Closed stores Sanskrit mss epsi
+somsi,Closed stores Sinhalese mss
+somsr,Closed stores Turkish Ottoman mss
+somsy,Closed stores Syriac mss
+somtb,Closed stores Tibetan mss
+sopam,Closed stores Oriental pam.
+sopme,Closed stores Orient. Mehta
+soref,Closed stores Orient. ref.
+sorex,Closed stores Orient. ref. O/S
+soser,Closed stores Oriental journals
+sotop,Closed stores Orient. Topog.
+sreg,SELF REGISTERED
+sslob,Closed stores Student Coll
+sslor,Closed stores Student Reprint
+stax,Closed stores
+swm#1,Unrequestable WMS 1
+swm#2,Unrequestable WMS 2
+swm#3,Unrequestable WMS 3
+swm#4,Unrequestable WMS 4
+swm#5,Unrequestable WMS 5
+swm#6,Unrequestable WMS 6
+swm#7,Unrequestable WMS 7
+swm#m,Unrequestable WMS Amer.
+swm#o,Unrequestable WMS MSL
+swmal,Closed stores WMS Als
+swmam,Closed stores WMS Amer.
+swmlo,Closed stores WMS MSL
+swms1,Closed stores WMS 1
+swms2,Closed stores WMS 2
+swms3,Closed stores WMS 3
+swms4,Closed stores WMS 4
+swms5,Closed stores WMS 5
+swms6,Closed stores WMS 6
+swms7,Closed stores WMS 7
+swmti,Closed stores WMS Ticehurst
+szmon,Closed stores prof. monographs
+szser,Closed stores prof. journals
+temp,temp. location
+temp1,At Digitisation
+temp2,Temporarily in use
+temp3,At Digitisation
+temp4,At Digitisation
+temp5,At Digitisation
+temp6,At Digitisation
+virm,Viewing Room
+wgcom,Closed stores computer media
+wghib,Biographies
+wghig,Gallery
+wghip,Rare Materials Room
+wghir,Reading Room
+wghxb,OBSOLETE Folios
+wghxg,Folios
+wghxp,OBSOLETE Folios
+wghxr,OBSOLETE Folios
+wgmem,Medical Collection
+wgmxm,OBSOLETE Medical Collection oversize
+wgpvm,History of Medicine
+wgsee,Journals
+wgsem,Journals
+wgser,Journals
+whml,Open shelves
+wmso,Western Mss Collection
+wqrfc,Quick Ref. Collection
+wqrfd,OBSOLETE Poynter Room [Desk]
+wqrfe,Enquiry Line
+wqrfp,Rare Materials Room Reference
+wqrfr,OBSOLETE Enquiry Hall
+wsdis,Closed stores Student diss
+wslob,Student Collection
+wslom,Student Coll (Med Lit)
+wslor,Student Coll.  reprints
+wslox,Student Coll. (oversize)
+wsref,Student Coll. (ref only)
+wsrer,Student Coll. reprints (ref only)
+wsrex,Student Coll. (Ref. O/S)
+zcql,Acquisitions Z39.50
+zzzzz,-
+searb,Closed stores Artists' Books
+sg#er,Closed stores journals (RMR)
+sgmip,sgmip
+sgzin,Closed stores zines
+sc#ns,Conservation (RMR)

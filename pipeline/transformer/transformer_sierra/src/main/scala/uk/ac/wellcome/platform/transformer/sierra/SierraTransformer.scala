@@ -10,6 +10,7 @@ import uk.ac.wellcome.platform.transformer.sierra.exceptions.{
 }
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraBibData,
+  SierraHoldingsData,
   SierraItemData
 }
 import uk.ac.wellcome.platform.transformer.sierra.transformers._
@@ -30,6 +31,7 @@ import uk.ac.wellcome.models.work.internal.InvisibilityReason.{
 import weco.catalogue.sierra_adapter.models.{
   SierraBibNumber,
   SierraBibRecord,
+  SierraHoldingsNumber,
   SierraItemNumber,
   SierraTransformable
 }
@@ -112,7 +114,9 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
       }
   }
 
-  def workDataFromBibData(bibId: SierraBibNumber, bibData: SierraBibData) =
+  def workDataFromBibData(bibId: SierraBibNumber, bibData: SierraBibData) = {
+    val (holdingsItems, holdings) = SierraHoldings(bibId, holdingsDataMap)
+
     WorkData[DataState.Unidentified](
       otherIdentifiers = SierraIdentifiers(bibId, bibData),
       mergeCandidates = SierraMergeCandidates(bibData),
@@ -131,8 +135,11 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
       notes = SierraNotes(bibData),
       duration = SierraDuration(bibData),
       items = SierraItems(itemDataMap)(bibId, bibData) ++
-        SierraElectronicResources(bibId, varFields = bibData.varFields)
+        SierraElectronicResources(bibId, varFields = bibData.varFields) ++
+        holdingsItems,
+      holdings = holdings
     )
+  }
 
   lazy val bibId = sierraTransformable.sierraId
 
@@ -152,6 +159,19 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
             case Failure(_) =>
               throw SierraTransformerException(
                 s"Unable to parse item data for $id as JSON: <<$jsonString>>")
+          }
+      }
+
+  lazy val holdingsDataMap: Map[SierraHoldingsNumber, SierraHoldingsData] =
+    sierraTransformable.holdingsRecords
+      .map { case (id, hRecord) => (id, hRecord.data) }
+      .map {
+        case (id, jsonString) =>
+          fromJson[SierraHoldingsData](jsonString) match {
+            case Success(data) => id -> data
+            case Failure(_) =>
+              throw SierraTransformerException(
+                s"Unable to parse holdings data for $id as JSON: <<$jsonString>>")
           }
       }
 }

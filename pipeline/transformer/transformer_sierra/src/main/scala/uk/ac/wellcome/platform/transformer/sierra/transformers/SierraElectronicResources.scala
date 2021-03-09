@@ -14,7 +14,7 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraQueryOps,
   VarField
 }
-import weco.catalogue.sierra_adapter.models.SierraBibNumber
+import weco.catalogue.sierra_adapter.models.TypedSierraRecordNumber
 
 import java.net.URL
 import scala.util.Try
@@ -31,19 +31,19 @@ import scala.util.Try
 // TODO: Update this link to the published version of the RFC
 //
 object SierraElectronicResources extends SierraQueryOps with Logging {
-  def apply(bibId: SierraBibNumber,
+  def apply(id: TypedSierraRecordNumber,
             varFields: List[VarField]): List[Item[IdState.Unminted]] =
     varFields
       .filter { _.marcTag.contains("856") }
       .flatMap { vf =>
-        createItem(bibId, vf)
+        createItem(id, vf)
       }
 
-  private def createItem(bibId: SierraBibNumber,
+  private def createItem(id: TypedSierraRecordNumber,
                          vf: VarField): Option[Item[IdState.Unminted]] = {
     assert(vf.marcTag.contains("856"))
 
-    getUrl(bibId, vf).map { url =>
+    getUrl(id, vf).map { url =>
       // We don't want the link text to be too long (at most seven words), so
       // we apply the following heuristic to the label:
       //
@@ -105,20 +105,23 @@ object SierraElectronicResources extends SierraQueryOps with Logging {
 
   // We take the URL from subfield ǂu.  If subfield ǂu is missing, repeated,
   // or contains something other than a URL, we discard it.
-  private def getUrl(bibId: SierraBibNumber, vf: VarField): Option[String] =
+  private def getUrl(id: TypedSierraRecordNumber,
+                     vf: VarField): Option[String] =
     vf.subfieldsWithTag("u") match {
       case Seq(MarcSubfield(_, content)) if isUrl(content) => Some(content)
 
       case Seq(MarcSubfield(_, content)) =>
-        warn(s"Bib $bibId has a value in 856 ǂu which isn't a URL: $content")
+        warn(
+          s"Record ${id.withCheckDigit} has a value in 856 ǂu which isn't a URL: $content")
         None
 
       case Nil =>
-        warn(s"Bib $bibId has a field 856 without any URLs")
+        warn(s"Record ${id.withCheckDigit} has a field 856 without any URLs")
         None
 
       case other =>
-        warn(s"Bib $bibId has a field 856 with repeated subfield ǂu")
+        warn(
+          s"Record ${id.withCheckDigit} has a field 856 with repeated subfield ǂu")
         None
     }
 

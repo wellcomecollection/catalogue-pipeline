@@ -38,7 +38,4 @@ trait SierraDataGenerators extends IdentifiersGenerators with SierraGenerators {
     )
 
   def createSierraItemData: SierraItemData = createSierraItemDataWith()
-
-  def createSierraMaterialTypeWith(code: String): SierraMaterialType =
-    SierraMaterialType(code = code)
 }
