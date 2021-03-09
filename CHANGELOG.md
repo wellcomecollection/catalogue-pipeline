@@ -18,3 +18,7 @@ Add the `Holdings` type to the Work model.
 ## v3341.8d2e8f98349b02ffdd82f595b5ba015d18f2d5e1 - 2021-03-08
 
 A release to keep BuildKite happy.
+
+## v3355.c84544eab2788391584da0e5939f7ff7f58e1367 - 2021-03-09
+
+Don't default any values in `Holdings`; that type only takes PhysicalLocations for now.
