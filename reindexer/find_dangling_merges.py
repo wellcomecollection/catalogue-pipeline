@@ -46,20 +46,16 @@ if __name__ == "__main__":
 
     works = {}
 
-    # for w in tqdm.tqdm(get_works(reindex_date)):
-    #     canonical_id = w['state']['canonicalId']
-    #
-    #     works[canonical_id] = {
-    #         'redirectSources': [
-    #             rs['canonicalId'] for rs in w.get('redirectSources', [])
-    #         ],
-    #         'redirectTarget': w.get('redirectTarget', {}).get('canonicalId'),
-    #         'type': w['type']
-    #     }
+    for w in tqdm.tqdm(get_works(reindex_date)):
+        canonical_id = w['state']['canonicalId']
 
-    import json
-
-    works = json.load(open("works_2021-03-05-redux.json"))
+        works[canonical_id] = {
+            'redirectSources': [
+                rs['canonicalId'] for rs in w.get('redirectSources', [])
+            ],
+            'redirectTarget': w.get('redirectTarget', {}).get('canonicalId'),
+            'type': w['type']
+        }
 
     errors = collections.defaultdict(list)
     affected_work_ids = set()
