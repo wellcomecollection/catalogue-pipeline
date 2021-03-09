@@ -84,7 +84,7 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
           case Some(label) => Some((label, value))
           case None =>
             warn(
-              s"${id.withoutCheckDigit}: an instance of $valueTag refers to a missing sequence number in $labelTag: ${value.varField}")
+              s"${id.withCheckDigit}: an instance of $valueTag refers to a missing sequence number in $labelTag: ${value.varField}")
             None
         }
       }
@@ -299,13 +299,13 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
           case Success(link) => Some(Label(link, vf))
           case Failure(_) =>
             warn(
-              s"${id.withoutCheckDigit}: an instance of $labelTag subfield ǂ8 has a non-numeric value: $content")
+              s"${id.withCheckDigit}: an instance of $labelTag subfield ǂ8 has a non-numeric value: $content")
             None
         }
 
       case None =>
         warn(
-          s"${id.withoutCheckDigit}: an instance of $labelTag is missing subfield ǂ8")
+          s"${id.withCheckDigit}: an instance of $labelTag is missing subfield ǂ8")
         None
     }
 
@@ -321,13 +321,13 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
           case Success(Seq(link, sequence)) => Some(Value(link, sequence, vf))
           case _ =>
             warn(
-              s"${id.withoutCheckDigit}: an instance of $labelTag subfield ǂ8 could not be parsed as a link/sequence: $content")
+              s"${id.withCheckDigit}: an instance of $labelTag subfield ǂ8 could not be parsed as a link/sequence: $content")
             None
         }
 
       case None =>
         warn(
-          s"${id.withoutCheckDigit}: an instance of $labelTag is missing subfield ǂ8")
+          s"${id.withCheckDigit}: an instance of $labelTag is missing subfield ǂ8")
         None
     }
 
