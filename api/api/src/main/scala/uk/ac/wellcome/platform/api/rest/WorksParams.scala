@@ -132,7 +132,7 @@ object MultipleWorksParams extends QueryParamsUtils {
       "genres.label".as[GenreFilter].?,
       "subjects.label".as[SubjectFilter].?,
       "contributors.agent.label".as[ContributorsFilter].?,
-        "license".as[LicenseFilter].?,
+      "license".as[LicenseFilter].?,
       "include".as[WorksIncludes].?,
       "aggregations".as[List[WorkAggregationRequest]].?,
       "sort".as[List[SortRequest]].?,
@@ -141,8 +141,8 @@ object MultipleWorksParams extends QueryParamsUtils {
       "identifiers".as[IdentifiersFilter].?,
       "items.locations.locationType".as[ItemLocationTypeIdFilter].?,
       "items.locations.accessConditions.status".as[AccessStatusFilter].?,
-      "type".as[WorkTypeFilter].?,"partOf".as[PartOfFilter].?,
-      )
+      "type".as[WorkTypeFilter].?,
+      "partOf".as[PartOfFilter].?
     ).tflatMap {
       case (
           page,
@@ -167,10 +167,9 @@ object MultipleWorksParams extends QueryParamsUtils {
           partOf) =>
         // Scala has a max tuple size of 22 so this is nested to get around this limit
         parameter(
-          (
-            "availabilities".as[AvailabilitiesFilter].?,
-      "_queryType".as[SearchQueryType].?,
-      "_index".as[String].?,
+          "availabilities".as[AvailabilitiesFilter].?,
+          "_queryType".as[SearchQueryType].?,
+          "_index".as[String].?
         ).tflatMap {
           case (availabilities, queryType, index) =>
             val params = MultipleWorksParams(
