@@ -1,7 +1,3 @@
-sqs:
-  image: "760097843905.dkr.ecr.eu-west-1.amazonaws.com/s12v/elasticmq"
-  ports:
-    - "9324:9324"
 elasticsearch:
   image: "docker.elastic.co/elasticsearch/elasticsearch:7.9.0"
   ports:
@@ -11,4 +7,5 @@ elasticsearch:
     - "http.host=0.0.0.0"
     - "transport.host=0.0.0.0"
     - "cluster.name=wellcome"
+    - "ES_JAVA_OPTS=-Xms750m -Xmx750m"
     - "discovery.type=single-node"
