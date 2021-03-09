@@ -272,6 +272,102 @@ class SierraHoldingsTest extends AnyFunSpec with Matchers with MarcGenerators wi
     }
   }
 
+  describe("creates physical holdings") {
+    it("does not create holdings if there is no useful data") {
+      val varFields = List(
+        createVarFieldWith(
+          marcTag = "989",
+          subfields = List(
+            MarcSubfield(tag = "a", content = "This is old location data")
+          )
+        )
+      )
+
+      val holdingsData = SierraHoldingsData(
+        suppressed = true,
+        fixedFields = Map("40" -> FixedField(label = "LOCATION", value = "stax ")),
+        varFields = varFields
+      )
+      val dataMap = Map(createSierraHoldingsNumber -> holdingsData)
+
+      getItems(dataMap) shouldBe empty
+      getHoldings(dataMap) shouldBe empty
+    }
+
+    it("uses the description from 866 subfield ǂa") {
+      val varFields = List(
+        createVarFieldWith(
+          marcTag = "866",
+          subfields = List(
+            MarcSubfield(tag = "a", content = "Vol. 3 only")
+          )
+        )
+      )
+
+      val holdingsData = SierraHoldingsData(
+        fixedFields = Map("40" -> FixedField(label = "LOCATION", value = "stax ")),
+        varFields = varFields
+      )
+      val dataMap = Map(createSierraHoldingsNumber -> holdingsData)
+
+      getItems(dataMap) shouldBe empty
+
+      val holdings = getHoldings(dataMap)
+      holdings should have size 1
+      holdings.head.description shouldBe Some("Vol. 3 only")
+      holdings.head.note shouldBe None
+    }
+
+    it("uses the note from 866 subfield ǂz") {
+      val varFields = List(
+        createVarFieldWith(
+          marcTag = "866",
+          subfields = List(
+            MarcSubfield(tag = "z", content = "Another note about the document")
+          )
+        )
+      )
+
+      val holdingsData = SierraHoldingsData(
+        fixedFields = Map("40" -> FixedField(label = "LOCATION", value = "stax ")),
+        varFields = varFields
+      )
+      val dataMap = Map(createSierraHoldingsNumber -> holdingsData)
+
+      getItems(dataMap) shouldBe empty
+
+      val holdings = getHoldings(dataMap)
+      holdings should have size 1
+      holdings.head.description shouldBe None
+      holdings.head.note shouldBe Some("Another note about the document")
+    }
+
+    it("sets both the note and the description") {
+      val varFields = List(
+        createVarFieldWith(
+          marcTag = "866",
+          subfields = List(
+            MarcSubfield(tag = "a", content = "Missing Vol. 2"),
+            MarcSubfield(tag = "z", content = "Lost in a mysterious fishing accident")
+          )
+        )
+      )
+
+      val holdingsData = SierraHoldingsData(
+        fixedFields = Map("40" -> FixedField(label = "LOCATION", value = "stax ")),
+        varFields = varFields
+      )
+      val dataMap = Map(createSierraHoldingsNumber -> holdingsData)
+
+      getItems(dataMap) shouldBe empty
+
+      val holdings = getHoldings(dataMap)
+      holdings should have size 1
+      holdings.head.description shouldBe Some("Missing Vol. 2")
+      holdings.head.note shouldBe Some("Lost in a mysterious fishing accident")
+    }
+  }
+
   private def getItems(holdingsDataMap: Map[SierraHoldingsNumber, SierraHoldingsData]): List[Item[IdState.Unminted]] = {
     val (items, _) = SierraHoldings(createSierraBibNumber, holdingsDataMap)
     items
