@@ -51,6 +51,7 @@ object IndexedImageIndexConfig extends IndexConfig with IndexConfigFields {
             objectField("concepts").fields(label)
           ),
           objectField("genres").fields(
+            label,
             objectField("concepts").fields(label)
           ),
           objectField("production").fields(
