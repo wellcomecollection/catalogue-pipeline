@@ -399,7 +399,7 @@ class SierraElectronicResourcesTest
 
   def getElectronicResources(varFields: List[VarField]): List[Item[_]] =
     SierraElectronicResources(
-      bibId = createSierraBibNumber,
+      id = createSierraBibNumber,
       varFields = varFields
     )
 }
