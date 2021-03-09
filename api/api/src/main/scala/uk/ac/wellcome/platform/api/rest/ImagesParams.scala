@@ -35,6 +35,7 @@ case class MultipleImagesParams(
   query: Option[String],
   license: Option[LicenseFilter],
   `source.contributors.agent.label`: Option[ContributorsFilter],
+  `source.genres.label`: Option[GenreFilter],
   color: Option[ColorMustQuery],
   include: Option[MultipleImagesIncludes],
   aggregations: Option[List[ImageAggregationRequest]],
@@ -53,7 +54,11 @@ case class MultipleImagesParams(
     )
 
   private def filters: List[ImageFilter] =
-    List(license, `source.contributors.agent.label`).flatten
+    List(
+      license,
+      `source.contributors.agent.label`,
+      `source.genres.label`
+    ).flatten
 
   private def mustQueries: List[ImageMustQuery] =
     List(color).flatten
@@ -70,6 +75,7 @@ object MultipleImagesParams extends QueryParamsUtils {
         "query".as[String].?,
         "locations.license".as[LicenseFilter].?,
         "source.contributors.agent.label".as[ContributorsFilter].?,
+        "source.genres.label".as[GenreFilter].?,
         "color".as[ColorMustQuery].?,
         "include".as[MultipleImagesIncludes].?,
         "aggregations".as[List[ImageAggregationRequest]].?,
