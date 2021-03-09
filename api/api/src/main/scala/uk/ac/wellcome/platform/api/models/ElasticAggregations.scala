@@ -5,7 +5,15 @@ import com.sksamuel.elastic4s.requests.searches.aggs.responses.{
 }
 import grizzled.slf4j.Logging
 import io.circe.Decoder
-import uk.ac.wellcome.models.work.internal.License
+import uk.ac.wellcome.models.work.internal.IdState.Minted
+import uk.ac.wellcome.models.work.internal.{
+  Agent,
+  Contributor,
+  License,
+  Meeting,
+  Organisation,
+  Person
+}
 
 import scala.util.Failure
 
@@ -13,6 +21,21 @@ trait ElasticAggregations extends Logging {
 
   implicit val decodeLicenseFromId: Decoder[License] =
     Decoder.decodeString.emap(License.withNameEither(_).getMessage)
+
+  implicit val decodeContributorFromLabel: Decoder[Contributor[Minted]] =
+    Decoder.decodeString.emap { str =>
+      val splitIdx = str.indexOf(':')
+      val ontologyType = str.slice(0, splitIdx)
+      val label = str.slice(splitIdx + 1, Int.MaxValue)
+      val agent = ontologyType match {
+        case "Agent"        => Right(Agent(label = label))
+        case "Person"       => Right(Person(label = label))
+        case "Organisation" => Right(Organisation(label = label))
+        case "Meeting"      => Right(Meeting(label = label))
+        case ontologyType   => Left(s"Illegal agent type: $ontologyType")
+      }
+      agent.map(agent => Contributor(agent = agent, roles = Nil))
+    }
 
   implicit class ThrowableEitherOps[T](either: Either[Throwable, T]) {
     def getMessage: Either[String, T] =

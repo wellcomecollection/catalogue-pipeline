@@ -7,6 +7,7 @@ import com.sksamuel.elastic4s.requests.searches.aggs.TermsAggregation
 import com.sksamuel.elastic4s.requests.searches.queries.{BoolQuery, Query}
 import com.sksamuel.elastic4s.requests.searches.sort._
 import uk.ac.wellcome.display.models.ImageAggregationRequest
+import uk.ac.wellcome.models.work.internal.License
 import uk.ac.wellcome.platform.api.elasticsearch.{
   ColorQuery,
   ImageSimilarity,
@@ -64,8 +65,13 @@ class ImagesRequestBuilder(queryConfig: QueryConfig)
   private def toAggregation(aggReq: ImageAggregationRequest) = aggReq match {
     case ImageAggregationRequest.License =>
       TermsAggregation("license")
-        .size(100)
+        .size(License.values.size)
         .field("locations.license.id")
+        .minDocCount(0)
+    case ImageAggregationRequest.SourceContributors =>
+      TermsAggregation("sourceContributors")
+        .size(20)
+        .field("state.derivedData.sourceContributorAgents")
         .minDocCount(0)
   }
 

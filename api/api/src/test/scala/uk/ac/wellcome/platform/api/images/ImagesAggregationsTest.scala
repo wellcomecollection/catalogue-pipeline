@@ -54,4 +54,77 @@ class ImagesAggregationsTest extends ApiImagesTestBase {
         }
     }
   }
+
+  it("aggregates by source contributor agent labels") {
+    val carrots = Contributor(agent = Agent("carrots"), roles = Nil)
+    val parrots = Contributor(agent = Organisation("parrots"), roles = Nil)
+    val parrotsMeeting = Contributor(agent = Meeting("parrots"), roles = Nil)
+    val rats = Contributor(agent = Person("rats"), roles = Nil)
+
+    val images = List(
+      createImageData.toIndexedImageWith(
+        parentWork = identifiedWork().contributors(List(carrots))
+      ),
+      createImageData.toIndexedImageWith(
+        parentWork = identifiedWork().contributors(List(carrots)),
+        redirectedWork =
+          Some(identifiedWork().contributors(List(parrots, parrotsMeeting)))
+      ),
+      createImageData.toIndexedImageWith(
+        parentWork =
+          identifiedWork().contributors(List(carrots, parrotsMeeting)),
+        redirectedWork = Some(identifiedWork().contributors(List(rats)))
+      )
+    )
+
+    withImagesApi {
+      case (imagesIndex, routes) =>
+        insertImagesIntoElasticsearch(imagesIndex, images: _*)
+
+        assertJsonResponse(
+          routes,
+          s"/$apiPrefix/images?aggregations=source.contributors.agent.label"
+        ) {
+          Status.OK -> s"""
+            {
+              ${resultList(apiPrefix, totalResults = images.size)},
+              "aggregations": {
+                "type" : "Aggregations",
+                "source.contributors.agent.label": {
+                  "type" : "Aggregation",
+                  "buckets": [
+                    {
+                      "data": ${contributor(carrots)},
+                      "count": 3,
+                      "type": "AggregationBucket"
+                    },
+                    {
+                      "data": ${contributor(parrotsMeeting)},
+                      "count": 2,
+                      "type": "AggregationBucket"
+                    },
+                    {
+                      "data": ${contributor(parrots)},
+                      "count": 1,
+                      "type": "AggregationBucket"
+                    },
+                    {
+                      "data": ${contributor(rats)},
+                      "count": 1,
+                      "type": "AggregationBucket"
+                    }
+                  ]
+                }
+              },
+              "results": [
+                ${images
+            .sortBy { _.state.canonicalId }
+            .map(imageResponse)
+            .mkString(",")}
+              ]
+            }
+          """
+        }
+    }
+  }
 }

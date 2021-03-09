@@ -90,6 +90,7 @@ object MultipleImagesParams extends QueryParamsUtils {
 
   implicit val aggregationsDecoder: Decoder[List[ImageAggregationRequest]] =
     decodeOneOfCommaSeparated(
-      "locations.license" -> ImageAggregationRequest.License
+      "locations.license" -> ImageAggregationRequest.License,
+      "source.contributors.agent.label" -> ImageAggregationRequest.SourceContributors
     )
 }

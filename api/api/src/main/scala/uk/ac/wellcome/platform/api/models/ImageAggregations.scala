@@ -1,10 +1,12 @@
 package uk.ac.wellcome.platform.api.models
 
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
+import uk.ac.wellcome.models.work.internal.IdState.Minted
 import uk.ac.wellcome.models.work.internal._
 
 case class ImageAggregations(
   license: Option[Aggregation[License]] = None,
+  sourceContributors: Option[Aggregation[Contributor[Minted]]] = None
 )
 
 object ImageAggregations extends ElasticAggregations {
@@ -13,7 +15,9 @@ object ImageAggregations extends ElasticAggregations {
     if (e4sAggregations.data.nonEmpty) {
       Some(
         ImageAggregations(
-          license = e4sAggregations.decodeAgg[License]("license")
+          license = e4sAggregations.decodeAgg[License]("license"),
+          sourceContributors =
+            e4sAggregations.decodeAgg[Contributor[Minted]]("sourceContributors")
         ))
     } else {
       None
