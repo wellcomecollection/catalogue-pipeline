@@ -15,10 +15,10 @@ resource "aws_lb_target_group" "tcp" {
   deregistration_delay = 10
 
   health_check {
-    protocol = "TCP"
-    path = var.healthcheck_path
-    interval = 10
-    healthy_threshold = 3
+    protocol            = "TCP"
+    path                = var.healthcheck_path
+    interval            = 10
+    healthy_threshold   = 3
     unhealthy_threshold = 3
   }
 }
