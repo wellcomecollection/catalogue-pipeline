@@ -1,10 +1,16 @@
 package uk.ac.wellcome.platform.api.images
 
-import uk.ac.wellcome.models.work.generators.ContributorGenerators
+import uk.ac.wellcome.models.work.generators.{
+  ContributorGenerators,
+  GenreGenerators
+}
 import uk.ac.wellcome.models.work.internal.Language
 import uk.ac.wellcome.models.Implicits._
 
-class ImagesIncludesTest extends ApiImagesTestBase with ContributorGenerators {
+class ImagesIncludesTest
+    extends ApiImagesTestBase
+    with ContributorGenerators
+    with GenreGenerators {
   describe("images includes") {
     val source = identifiedWork()
       .title("Apple agitator")
@@ -18,6 +24,12 @@ class ImagesIncludesTest extends ApiImagesTestBase with ContributorGenerators {
           createPersonContributorWith("Adrian Aardvark"),
           createPersonContributorWith("Beatrice Buffalo")
         ))
+      .genres(
+        List(
+          createGenreWith("Crumbly cabbages"),
+          createGenreWith("Deadly durians")
+        )
+      )
     val image = createImageData.toIndexedImageWith(parentWork = source)
 
     it(
@@ -132,6 +144,66 @@ class ImagesIncludesTest extends ApiImagesTestBase with ContributorGenerators {
               |    "id": "${source.id}",
               |    "title": "Apple agitator",
               |    "languages": [${languages(source.data.languages)}],
+              |    "type": "Work"
+              |  }
+              |}
+            """.stripMargin
+          }
+      }
+    }
+
+    it(
+      "includes the source genres on results from the list endpoint if we pass ?include=source.genres") {
+      withImagesApi {
+        case (imagesIndex, routes) =>
+          insertImagesIntoElasticsearch(imagesIndex, image)
+
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/images?include=source.genres") {
+            Status.OK -> s"""
+              |{
+              |  ${resultList(apiPrefix, totalResults = 1)},
+              |  "results": [
+              |    {
+              |      "type": "Image",
+              |      "id": "${image.id}",
+              |      "thumbnail": ${location(image.state.derivedData.thumbnail)},
+              |      "locations": [${locations(image.locations)}],
+              |      "source": {
+              |        "id": "${source.id}",
+              |        "title": "Apple agitator",
+              |        "genres": [${genres(source.data.genres)}],
+              |        "type": "Work"
+              |      }
+              |    }
+              |  ]
+              |}
+            """.stripMargin
+          }
+      }
+    }
+
+    it(
+      "includes the source genres on a result from the single image endpoint if we pass ?include=source.genres") {
+      withImagesApi {
+        case (imagesIndex, routes) =>
+          insertImagesIntoElasticsearch(imagesIndex, image)
+
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/images/${image.id}?include=source.genres") {
+            Status.OK -> s"""
+              |{
+              |  $singleImageResult,
+              |  "type": "Image",
+              |  "id": "${image.id}",
+              |  "thumbnail": ${location(image.state.derivedData.thumbnail)},
+              |  "locations": [${locations(image.locations)}],
+              |  "source": {
+              |    "id": "${source.id}",
+              |    "title": "Apple agitator",
+              |    "genres": [${genres(source.data.genres)}],
               |    "type": "Work"
               |  }
               |}

@@ -21,6 +21,9 @@ case class DisplayImageSource(
   @Schema(
     description = "The languages of the image source"
   ) languages: Option[List[DisplayLanguage]],
+  @Schema(
+    description = "The genres that describe the content of the image source"
+  ) genres: Option[List[DisplayGenre]],
   @JsonKey("type") @Schema(
     name = "type",
     description = "What kind of source this is"
@@ -49,6 +52,12 @@ object DisplayImageSource {
       languages =
         if (includes.`source.languages`)
           Some(source.canonicalWork.data.languages.map(DisplayLanguage(_)))
+        else None,
+      genres =
+        if (includes.`source.genres`)
+          Some(
+            source.canonicalWork.data.genres
+              .map(DisplayGenre(_, includesIdentifiers = false)))
         else None,
       ontologyType = "Work"
     )

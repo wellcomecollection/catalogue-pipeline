@@ -78,7 +78,8 @@ trait SingleImageSwagger {
             "withSimilarFeatures",
             "withSimilarColors",
             "source.contributors",
-            "source.languages")
+            "source.languages",
+            "source.genres")
         ),
         required = false
       )
