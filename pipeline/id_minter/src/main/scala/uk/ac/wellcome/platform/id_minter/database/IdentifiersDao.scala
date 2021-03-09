@@ -1,14 +1,13 @@
 package uk.ac.wellcome.platform.id_minter.database
 
-import java.sql.{BatchUpdateException, Statement}
-
 import grizzled.slf4j.Logging
 import scalikejdbc._
 import uk.ac.wellcome.models.work.internal.SourceIdentifier
 import uk.ac.wellcome.platform.id_minter.models.{Identifier, IdentifiersTable}
 
+import java.sql.{BatchUpdateException, Statement}
 import scala.concurrent.blocking
-import scala.util.Try
+import scala.util.{Failure, Try}
 
 object IdentifiersDao {
   case class LookupResult(
@@ -74,7 +73,7 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
                       case None =>
                         // this should be impossible in practice
                         throw new RuntimeException(
-                          s"The row $row returned by the query could not be matched to a sourceIdentifier")
+                          s"The row returned by the query ($row) could not be matched to a sourceIdentifier in $sourceIdentifiers")
                     }
 
                   })
@@ -113,7 +112,7 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
         }.batch(values: _*).apply()
         InsertResult(ids)
       }
-    } recover {
+    } recoverWith {
       case e: BatchUpdateException =>
         val insertError = getInsertErrorFromException(e, ids)
         val failedIds = insertError.failed.map(_.SourceId)
@@ -121,10 +120,10 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
         error(
           s"Batch update failed for [$failedIds], succeeded for [$succeededIds]",
           e)
-        throw insertError
+        Failure(insertError)
       case e =>
         error(s"Failed inserting IDs: [${ids.map(_.SourceId)}]")
-        throw e
+        Failure(e)
     }
 
   private def getInsertErrorFromException(
@@ -170,7 +169,34 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
   // If we use a single endpoint, we see the ID minter get slow, especially
   // for works with a large number of IDs.
   private def readOnlySession: ReadOnlyNamedAutoSession = {
-    val name = poolNames.next()
+
+    // The old version of this code was
+    //
+    //    val name = poolNames.next()
+    //
+    // We would sometimes see a NoSuchElementException thrown, even though
+    // this should be an infinite iterator.
+    //
+    // Our guess is that the iterator isn't thread-safe, so we wrap it in
+    // synchronized() to make it so.  See https://stackoverflow.com/q/30639945/1558022
+    //
+    // In case this still doesn't fix the error, we catch it, log a warning
+    // and then choose the primary.  It means we can rule this out as a
+    // source of problems, and reduce noise in the ID minter logs.
+    //
+    // If we don't see the warning, we can come back and remove the try block.
+    //
+    // For more discussion, see
+    // https://github.com/wellcomecollection/platform/issues/4957
+    // https://github.com/wellcomecollection/platform/issues/4851
+    val name = try {
+      synchronized(poolNames.next())
+    } catch {
+      case exc: NoSuchElementException =>
+        warn(s"Unexpected NoSuchElementException when picking session: $exc")
+        'primary
+    }
+
     ReadOnlyNamedAutoSession(name)
   }
 

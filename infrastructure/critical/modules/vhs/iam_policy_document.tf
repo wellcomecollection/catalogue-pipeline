@@ -22,7 +22,7 @@ data "aws_iam_policy_document" "read_policy" {
     ]
 
     resources = [
-      "${local.bucket_arn}/",
+      local.bucket_arn,
       "${local.bucket_arn}/*",
     ]
   }
@@ -62,7 +62,7 @@ data "aws_iam_policy_document" "dynamodb_update_policy" {
     ]
 
     resources = [
-      "${local.table_arn}",
+      local.table_arn,
     ]
   }
 }

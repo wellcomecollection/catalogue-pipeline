@@ -1,15 +1,19 @@
 package uk.ac.wellcome.platform.transformer.calm
 
 import java.time.LocalDate
+
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks._
-import uk.ac.wellcome.models.work.internal.DeletedReason.SuppressedFromSource
-import uk.ac.wellcome.models.work.internal.WorkState.Source
+import uk.ac.wellcome.models.work.internal.DeletedReason.{
+  DeletedFromSource,
+  SuppressedFromSource
+}
 import uk.ac.wellcome.models.work.internal._
-import WorkState.Source
 import uk.ac.wellcome.models.work.internal.IdState.Identifiable
-import uk.ac.wellcome.platform.transformer.calm.generators.CalmRecordGenerators
+import uk.ac.wellcome.platform.transformer.calm.models.CalmSourceData
+import weco.catalogue.source_model.generators.CalmRecordGenerators
+import WorkState.Source
 
 class CalmTransformerTest
     extends AnyFunSpec
@@ -34,7 +38,7 @@ class CalmTransformerTest
           SourceIdentifier(
             value = record.id,
             identifierType = CalmIdentifierTypes.recordId,
-            ontologyType = "SourceIdentifier"
+            ontologyType = "Work"
           ),
           record.retrievedAt
         ),
@@ -51,18 +55,18 @@ class CalmTransformerTest
             SourceIdentifier(
               value = "a/b/c",
               identifierType = CalmIdentifierTypes.refNo,
-              ontologyType = "SourceIdentifier"),
+              ontologyType = "Work"),
             SourceIdentifier(
               value = "a.b.c",
               identifierType = CalmIdentifierTypes.altRefNo,
-              ontologyType = "SourceIdentifier"),
+              ontologyType = "Work"),
           ),
           items = List(
             Item(
               title = None,
               locations = List(
-                PhysicalLocationDeprecated(
-                  locationType = LocationType("scmac"),
+                PhysicalLocation(
+                  locationType = LocationType.ClosedStores,
                   label = "Closed stores Arch. & MSS",
                   accessConditions = Nil
                 )
@@ -96,15 +100,15 @@ class CalmTransformerTest
         SourceIdentifier(
           value = "a/b/c",
           identifierType = CalmIdentifierTypes.refNo,
-          ontologyType = "SourceIdentifier"),
+          ontologyType = "Work"),
         SourceIdentifier(
           value = "a.b.c",
           identifierType = CalmIdentifierTypes.altRefNo,
-          ontologyType = "SourceIdentifier"),
+          ontologyType = "Work"),
         SourceIdentifier(
           value = "b456",
           identifierType = IdentifierType("sierra-system-number"),
-          ontologyType = "SourceIdentifier"),
+          ontologyType = "Work"),
       )
   }
 
@@ -344,6 +348,24 @@ class CalmTransformerTest
       WorkType.Series
   }
 
+  it("Returns a deleted work when isDeleted = true") {
+    val record = createCalmRecordWith(
+      "Title" -> "abc",
+      "Level" -> "Subseries",
+      "RefNo" -> "a/b/c",
+      "AltRefNo" -> "a.b.c",
+      "CatalogueStatus" -> "Catalogued"
+    )
+
+    val result = CalmTransformer(
+      CalmSourceData(record, isDeleted = true),
+      version).right.get
+    result shouldBe a[Work.Deleted[_]]
+    result
+      .asInstanceOf[Work.Deleted[_]]
+      .deletedReason shouldBe DeletedFromSource("Calm")
+  }
+
   it("transforms to deleted work when CatalogueStatus is suppressible") {
     val recordA = createCalmRecordWith(
       "Title" -> "abc",
@@ -515,16 +537,42 @@ class CalmTransformerTest
     )
     CalmTransformer(record, version) shouldBe Right(
       Work.Deleted[Source](
+        data = WorkData[DataState.Unidentified](
+          title = Some("Should suppress"),
+          format = Some(Format.ArchivesAndManuscripts),
+          collectionPath = Some(
+            CollectionPath(path = "AMSG/X/Y")
+          ),
+          otherIdentifiers = List(
+            SourceIdentifier(
+              value = "AMSG/X/Y",
+              identifierType = CalmIdentifierTypes.refNo,
+              ontologyType = "Work"),
+          ),
+          items = List(
+            Item(
+              title = None,
+              locations = List(
+                PhysicalLocation(
+                  locationType = LocationType.ClosedStores,
+                  label = "Closed stores Arch. & MSS",
+                  accessConditions = Nil
+                )
+              )
+            )
+          ),
+          workType = WorkType.Section
+        ),
         state = Source(
           SourceIdentifier(
             value = record.id,
             identifierType = CalmIdentifierTypes.recordId,
-            ontologyType = "SourceIdentifier"
+            ontologyType = "Work"
           ),
           record.retrievedAt
         ),
         version = version,
-        deletedReason = Some(SuppressedFromSource("Calm"))
+        deletedReason = SuppressedFromSource("Calm")
       )
     )
   }

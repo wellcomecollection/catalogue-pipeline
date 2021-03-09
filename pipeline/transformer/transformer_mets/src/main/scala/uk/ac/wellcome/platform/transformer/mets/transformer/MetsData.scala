@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils.equalsIgnoreCase
 import uk.ac.wellcome.models.work.internal._
 import WorkState.Source
 import uk.ac.wellcome.models.work.internal.DeletedReason.DeletedFromSource
+import uk.ac.wellcome.models.work.internal.InvisibilityReason.MetsWorksAreNotVisible
 
 case class MetsData(
   recordIdentifier: String,
@@ -26,8 +27,11 @@ case class MetsData(
         Right(
           Work.Deleted[Source](
             version = version,
+            data = WorkData[DataState.Unidentified](),
             state = Source(sourceIdentifier, modifiedTime),
-            deletedReason = Some(DeletedFromSource("Mets"))))
+            deletedReason = DeletedFromSource("Mets")
+          )
+        )
       case false =>
         for {
           license <- parseLicense
@@ -45,7 +49,8 @@ case class MetsData(
               thumbnail =
                 thumbnail(sourceIdentifier.value, license, accessStatus),
               imageData = imageData(version, license, accessStatus)
-            )
+            ),
+            invisibilityReasons = List(MetsWorksAreNotVisible)
           )
     }
   }
@@ -57,16 +62,20 @@ case class MetsData(
     identifier = SourceIdentifier(
       identifierType = IdentifierType("sierra-system-number"),
       ontologyType = "Work",
-      value = recordIdentifier
+      // We lowercase the b number in the METS file so it matches the
+      // case used by Sierra.
+      // e.g. b20442233 has the identifier "B20442233" in the METS file,
+      //
+      value = recordIdentifier.toLowerCase
     ),
     reason = "METS work"
   )
 
   private def digitalLocation(license: Option[License],
                               accessStatus: Option[AccessStatus]) =
-    DigitalLocationDeprecated(
+    DigitalLocation(
       url = s"https://wellcomelibrary.org/iiif/$recordIdentifier/manifest",
-      locationType = LocationType("iiif-presentation"),
+      locationType = LocationType.IIIFPresentationAPI,
       license = license,
       accessConditions = accessConditions(accessStatus)
     )
@@ -114,9 +123,14 @@ case class MetsData(
 
   private def sourceIdentifier =
     SourceIdentifier(
-      IdentifierType("mets"),
+      identifierType = IdentifierType("mets"),
       ontologyType = "Work",
-      value = recordIdentifier)
+      // We lowercase the b number in the METS file so it matches the
+      // case used by Sierra.
+      // e.g. b20442233 has the identifier "B20442233" in the METS file,
+      //
+      value = recordIdentifier.toLowerCase
+    )
 
   private def titlePageFileReference: Option[FileReference] =
     titlePageId
@@ -129,16 +143,16 @@ case class MetsData(
   private def thumbnail(
     bnumber: String,
     license: Option[License],
-    accessStatus: Option[AccessStatus]): Option[DigitalLocationDeprecated] =
+    accessStatus: Option[AccessStatus]): Option[DigitalLocation] =
     for {
       fileReference <- titlePageFileReference
         .orElse(fileReferences.find(ImageUtils.isThumbnail))
       url <- ImageUtils.buildThumbnailUrl(bnumber, fileReference)
       if !accessStatus.exists(_.hasRestrictions)
     } yield
-      DigitalLocationDeprecated(
+      DigitalLocation(
         url = url,
-        locationType = LocationType("thumbnail-image"),
+        locationType = LocationType.ThumbnailImage,
         license = license
       )
 
@@ -152,7 +166,7 @@ case class MetsData(
       fileReferences
         .filter(ImageUtils.isImage)
         .flatMap { fileReference =>
-          ImageUtils.buildImageUrl(recordIdentifier, fileReference).map { url =>
+          ImageUtils.buildImageUrl(fileReference).map { url =>
             ImageData[IdState.Identifiable](
               id = IdState.Identifiable(
                 sourceIdentifier = ImageUtils
@@ -160,9 +174,9 @@ case class MetsData(
               ),
               version = version,
               locations = List(
-                DigitalLocationDeprecated(
+                DigitalLocation(
                   url = url,
-                  locationType = LocationType("iiif-image"),
+                  locationType = LocationType.IIIFImageAPI,
                   license = license,
                   accessConditions = accessConditions(accessStatus)
                 ),

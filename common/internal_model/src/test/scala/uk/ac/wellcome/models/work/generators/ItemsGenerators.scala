@@ -1,14 +1,14 @@
 package uk.ac.wellcome.models.work.generators
 
-import uk.ac.wellcome.models.work.internal.{DigitalLocationDeprecated, _}
+import uk.ac.wellcome.models.work.internal._
 
-trait ItemsGenerators extends IdentifiersGenerators {
+trait ItemsGenerators extends IdentifiersGenerators with LocationGenerators {
 
   def createIdentifiedItemWith[I >: IdState.Identified](
     canonicalId: String = createCanonicalId,
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     otherIdentifiers: List[SourceIdentifier] = Nil,
-    locations: List[LocationDeprecated] = List(defaultLocation),
+    locations: List[Location] = List(createDigitalLocation),
     title: Option[String] = None,
   ): Item[I] =
     Item(
@@ -28,87 +28,44 @@ trait ItemsGenerators extends IdentifiersGenerators {
       createIdentifiedItem
     }.toList
 
-  def createIdentifiableItemWith[I >: IdState.Identifiable](
-    sourceIdentifier: SourceIdentifier = createSourceIdentifier,
-    locations: List[LocationDeprecated] = List(defaultLocation)
-  ): Item[I] =
-    Item(
-      id = IdState.Identifiable(sourceIdentifier),
-      locations = locations
-    )
-
-  def createUnidentifiableItemWith[I >: IdState.Unidentifiable.type](
-    locations: List[LocationDeprecated] = List(defaultLocation)): Item[I] =
+  def createUnidentifiableItemWith(
+    locations: List[Location] = List(createDigitalLocation))
+    : Item[IdState.Unidentifiable.type] =
     Item(id = IdState.Unidentifiable, locations = locations)
 
-  def createPhysicalLocation = createPhysicalLocationWith()
+  def createUnidentifiableItem: Item[IdState.Unidentifiable.type] =
+    createUnidentifiableItemWith()
 
-  def createPhysicalLocationWith(locationType: LocationType =
-                                   createStoresLocationType,
-                                 accessConditions: List[AccessCondition] = Nil,
-                                 label: String = "locationLabel") =
-    PhysicalLocationDeprecated(
-      locationType = locationType,
-      label = label,
-      accessConditions = accessConditions
-    )
-
-  def createDigitalLocation = createDigitalLocationWith()
-
-  def createImageLocation = createDigitalLocationWith(
-    locationType = createImageLocationType
-  )
-
-  def createManifestLocation = createDigitalLocationWith(
-    locationType = createPresentationLocationType
-  )
-
-  def createDigitalLocationWith(
-    locationType: LocationType = createPresentationLocationType,
-    url: String = defaultLocationUrl,
-    license: Option[License] = Some(License.CCBY),
-    accessConditions: List[AccessCondition] = Nil) = DigitalLocationDeprecated(
-    locationType = locationType,
-    url = url,
-    license = license,
-    accessConditions = accessConditions
-  )
-
-  def createImageLocationType = LocationType("iiif-image")
-
-  def createPresentationLocationType = LocationType("iiif-presentation")
-
-  def createStoresLocationType = LocationType("sgmed")
-
-  def createIdentifiablePhysicalItem =
-    createIdentifiableItemWith(locations = List(createPhysicalLocation))
-
-  def createIdentifiedPhysicalItem =
+  def createIdentifiedPhysicalItem: Item[IdState.Identified] =
     createIdentifiedItemWith(locations = List(createPhysicalLocation))
 
-  def createDigitalItem =
+  def createDigitalItem: Item[IdState.Unidentifiable.type] =
     createUnidentifiableItemWith(locations = List(createDigitalLocation))
 
-  def createDigitalItemWith(locations: List[LocationDeprecated]) =
+  def createDigitalItemWith(
+    accessStatus: AccessStatus): Item[IdState.Unidentifiable.type] =
+    createDigitalItemWith(
+      locations = List(
+        createDigitalLocationWith(accessConditions =
+          List(createAccessConditionWith(status = Some(accessStatus))))))
+
+  def createDigitalItemWith(
+    locations: List[Location]): Item[IdState.Unidentifiable.type] =
     createUnidentifiableItemWith(locations = locations)
 
-  def createDigitalItemWith(license: Option[License]) =
+  def createDigitalItemWith(
+    license: Option[License]): Item[IdState.Unidentifiable.type] =
     createUnidentifiableItemWith(
       locations = List(createDigitalLocationWith(license = license))
     )
 
-  def createCalmItem =
+  def createCalmItem: Item[IdState.Unidentifiable.type] =
     createUnidentifiableItemWith(
       locations = List(
         createPhysicalLocationWith(
-          locationType = LocationType("scmac"),
-          label = "Closed stores Arch. & MSS",
+          locationType = LocationType.ClosedStores,
+          label = LocationType.ClosedStores.label
         )
       )
     )
-
-  private def defaultLocation = createDigitalLocationWith()
-
-  private def defaultLocationUrl =
-    s"https://iiif.wellcomecollection.org/image/${randomAlphanumeric(3)}.jpg/info.json"
 }

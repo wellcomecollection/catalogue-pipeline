@@ -38,4 +38,5 @@ object SierraAlternativeTitles
           }
           .contentString(" ")
       }
+      .distinct
 }

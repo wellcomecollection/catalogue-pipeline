@@ -5,31 +5,12 @@ import com.sksamuel.elastic4s.requests.searches.sort.FieldSort
 import com.sksamuel.elastic4s.Index
 import com.sksamuel.elastic4s.requests.searches.queries.Query
 import com.sksamuel.elastic4s.ElasticDsl._
-import uk.ac.wellcome.platform.api.models.{
-  DocumentFilter,
-  MustQuery,
-  SearchOptions
-}
+import uk.ac.wellcome.platform.api.models.SearchOptions
 
-import scala.reflect.ClassTag
-
-trait ElasticsearchRequestBuilder {
-
+trait ElasticsearchRequestBuilder[S <: SearchOptions[_, _, _]] {
   val idSort: FieldSort
 
-  def request(searchOptions: SearchOptions, index: Index): SearchRequest
-
-  implicit class SearchOptionsRefinements(val searchOptions: SearchOptions) {
-    def safeFilters[T <: DocumentFilter: ClassTag]: List[T] =
-      searchOptions.filters.collect {
-        case filter: T => filter
-      }
-
-    def safeMustQueries[T <: MustQuery: ClassTag]: List[T] =
-      searchOptions.mustQueries.collect {
-        case query: T => query
-      }
-  }
+  def request(searchOptions: S, index: Index): SearchRequest
 }
 
 object ElasticsearchRequestBuilder {

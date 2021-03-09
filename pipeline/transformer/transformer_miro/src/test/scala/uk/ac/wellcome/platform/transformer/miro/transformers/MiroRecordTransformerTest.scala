@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.transformer.miro.transformers
 
 import java.time.Instant
-
 import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.prop.TableDrivenPropertyChecks._
@@ -12,6 +11,8 @@ import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
 import uk.ac.wellcome.platform.transformer.miro.models.MiroMetadata
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 import WorkState.Source
+import uk.ac.wellcome.models.work.internal.DeletedReason.SuppressedFromSource
+import uk.ac.wellcome.models.work.internal.InvisibilityReason.UnableToTransform
 
 class MiroRecordTransformerTest
     extends AnyFunSpec
@@ -224,36 +225,72 @@ class MiroRecordTransformerTest
     )
   }
 
-  describe("returns an InvisibleWork") {
+  describe("returns a DeletedWork") {
     it("if usage restrictions mean we suppress the image") {
-      assertTransformReturnsInvisibleWork(
+      assertTransformReturnsDeletedWork(
         createMiroRecordWith(
           useRestrictions = Some("Do not use")
+        ),
+        deletedReason = SuppressedFromSource(
+          "Miro: image_use_restrictions = 'Do not use'"
+        )
+      )
+    }
+
+    it("if the image has been withdrawn") {
+      assertTransformReturnsDeletedWork(
+        createMiroRecordWith(
+          useRestrictions = Some("Image withdrawn, see notes")
+        ),
+        deletedReason = SuppressedFromSource(
+          "Miro: image_use_restrictions = 'Image withdrawn, see notes'"
         )
       )
     }
 
     it("if the contributor code is GUS") {
-      assertTransformReturnsInvisibleWork(
+      assertTransformReturnsDeletedWork(
         createMiroRecordWith(
           sourceCode = Some("GUS"),
           imageNumber = "B0009891"
+        ),
+        deletedReason = SuppressedFromSource(
+          "Miro: we do not expose image_source_code = GUS"
         )
       )
     }
 
     it("if the image doesn't have copyright clearance") {
-      assertTransformReturnsInvisibleWork(
+      assertTransformReturnsDeletedWork(
         createMiroRecordWith(
           copyrightCleared = Some("N")
+        ),
+        deletedReason = SuppressedFromSource(
+          "Miro: image_copyright_cleared = N"
         )
       )
     }
 
     it("if the image isn't cleared for the catalogue API") {
-      assertTransformReturnsInvisibleWork(
+      assertTransformReturnsDeletedWork(
         createMiroRecord,
-        miroMetadata = MiroMetadata(isClearedForCatalogueAPI = false)
+        miroMetadata = MiroMetadata(isClearedForCatalogueAPI = false),
+        deletedReason = SuppressedFromSource(
+          "Miro: isClearedForCatalogueAPI = false"
+        )
+      )
+    }
+  }
+
+  describe("returns an InvisibleWork") {
+    it("if the image doesn't specify usage restrictions") {
+      assertTransformReturnsInvisibleWork(
+        createMiroRecordWith(
+          useRestrictions = None
+        ),
+        invisibilityReasons = List(
+          UnableToTransform("Miro: Nothing in the image_use_restrictions field")
+        )
       )
     }
   }
@@ -268,11 +305,14 @@ class MiroRecordTransformerTest
       )
     )
 
-    val expectedDigitalLocation = DigitalLocationDeprecated(
-      url = "https://iiif.wellcomecollection.org/image/B0011308.jpg/info.json",
+    val expectedDigitalLocation = DigitalLocation(
+      url = "https://iiif.wellcomecollection.org/image/B0011308/info.json",
       license = Some(License.CCBY),
       credit = Some("Ezra Feilden"),
-      locationType = LocationType("iiif-image")
+      locationType = LocationType.IIIFImageAPI,
+      accessConditions = List(
+        AccessCondition(status = Some(AccessStatus.Open))
+      )
     )
     work.data.items.head.locations shouldBe List(expectedDigitalLocation)
   }
@@ -282,11 +322,14 @@ class MiroRecordTransformerTest
       createMiroRecordWith(imageNumber = "B0011308")
     )
 
-    val expectedLocation = DigitalLocationDeprecated(
-      "https://iiif.wellcomecollection.org/image/B0011308.jpg/info.json",
-      LocationType("iiif-image"),
-      Some(License.CCBY),
-      None
+    val expectedLocation = DigitalLocation(
+      url = "https://iiif.wellcomecollection.org/image/B0011308/info.json",
+      locationType = LocationType.IIIFImageAPI,
+      license = Some(License.CCBY),
+      credit = None,
+      accessConditions = List(
+        AccessCondition(status = Some(AccessStatus.Open))
+      )
     )
     work.data.items shouldBe List(
       Item(id = IdState.Unidentifiable, locations = List(expectedLocation))
@@ -306,10 +349,10 @@ class MiroRecordTransformerTest
     )
 
     work.data.thumbnail shouldBe Some(
-      DigitalLocationDeprecated(
+      DigitalLocation(
         url =
-          s"https://iiif.wellcomecollection.org/image/$miroId.jpg/full/300,/0/default.jpg",
-        locationType = LocationType("thumbnail-image"),
+          s"https://iiif.wellcomecollection.org/image/$miroId/full/300,/0/default.jpg",
+        locationType = LocationType.ThumbnailImage,
         license = Some(License.CCBY)
       )
     )
@@ -317,7 +360,8 @@ class MiroRecordTransformerTest
 
   private def assertTransformReturnsInvisibleWork(
     miroRecord: MiroRecord,
-    miroMetadata: MiroMetadata = MiroMetadata(isClearedForCatalogueAPI = true)
+    miroMetadata: MiroMetadata = MiroMetadata(isClearedForCatalogueAPI = true),
+    invisibilityReasons: List[InvisibilityReason]
   ): Assertion = {
     val triedMaybeWork = transformer.transform(
       miroRecord = miroRecord,
@@ -332,10 +376,37 @@ class MiroRecordTransformerTest
         createMiroSourceIdentifierWith(
           value = miroRecord.imageNumber
         ),
-        Instant.EPOCH
+        modifiedTime = Instant.EPOCH
       ),
       version = 1,
-      data = WorkData()
+      data = WorkData(),
+      invisibilityReasons = invisibilityReasons
+    )
+  }
+
+  private def assertTransformReturnsDeletedWork(
+    miroRecord: MiroRecord,
+    miroMetadata: MiroMetadata = MiroMetadata(isClearedForCatalogueAPI = true),
+    deletedReason: DeletedReason
+  ): Assertion = {
+    val triedMaybeWork = transformer.transform(
+      miroRecord = miroRecord,
+      miroMetadata = miroMetadata,
+      version = 1
+    )
+
+    triedMaybeWork.isSuccess shouldBe true
+
+    triedMaybeWork.get shouldBe Work.Deleted[Source](
+      state = Source(
+        createMiroSourceIdentifierWith(
+          value = miroRecord.imageNumber
+        ),
+        modifiedTime = Instant.EPOCH
+      ),
+      version = 1,
+      data = WorkData(),
+      deletedReason = deletedReason
     )
   }
 

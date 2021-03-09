@@ -5,7 +5,7 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraBibData,
   SierraQueryOps
 }
-import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
+import weco.catalogue.sierra_adapter.models.SierraBibNumber
 
 // Populate wwork:identifiers.
 //
@@ -51,7 +51,7 @@ object SierraIdentifiers
         SourceIdentifier(
           identifierType = IdentifierType("isbn"),
           ontologyType = "Work",
-          value = value
+          value = value.trim
         )
       }
 
@@ -66,7 +66,7 @@ object SierraIdentifiers
         SourceIdentifier(
           identifierType = IdentifierType("issn"),
           ontologyType = "Work",
-          value = value
+          value = value.trim
         )
       }
 

@@ -33,17 +33,47 @@ class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
         Relations.none
       }
 
+  // The availabilities of an archive's Relations are the union of
+  // all of its descendants' availabilities, as well as its own
+  def getAvailabilities(work: Work[Merged]): Set[Availability] =
+    work.data.collectionPath
+      .map {
+        case CollectionPath(path, _) =>
+          @tailrec
+          def availabilities(stack: List[String],
+                             accum: Set[Availability]): Set[Availability] =
+            stack match {
+              case Nil => accum
+              case head :: tail =>
+                val children = childMapping.getOrElse(head, Nil)
+
+                val childAvailabilities =
+                  (head :: children)
+                    .map(works)
+                    .map(_.state.availabilities)
+                    .foldLeft(Set.empty[Availability])(_ union _)
+
+                availabilities(
+                  childMapping.getOrElse(head, Nil) ++ tail,
+                  accum union childAvailabilities
+                )
+            }
+          availabilities(
+            childMapping.getOrElse(path, Nil),
+            works.get(path).map(_.state.availabilities).getOrElse(Set.empty)
+          )
+      }
+      .getOrElse(Set.empty)
+
   def size = relations.size
 
   def numParents = parentMapping.size
 
   private def getChildren(path: String): List[Relation] =
     childMapping
-      .get(path)
-      // Relations might not exist in the cache if e.g. the work is not Visible
-      .getOrElse(Nil)
+    // Relations might not exist in the cache if e.g. the work is not Visible
+      .getOrElse(path, default = Nil)
       .map(relations)
-      .toList
 
   private def getSiblings(path: String): (List[Relation], List[Relation]) = {
     val siblings = parentMapping
@@ -97,7 +127,7 @@ class ArchiveRelationsCache(works: Map[String, RelationWork]) extends Logging {
       .map {
         case (path, _) =>
           val parent = tokenize(path).dropRight(1)
-          path -> works.keys.find(tokenize(_) == parent)
+          path -> Some(parent.mkString("/")).filter(works.contains)
       }
       .collect { case (path, Some(parentPath)) => path -> parentPath }
 
@@ -121,7 +151,9 @@ object ArchiveRelationsCache {
   def apply(works: Seq[RelationWork]): ArchiveRelationsCache =
     new ArchiveRelationsCache(
       works
-        .map { case work => work.data.collectionPath -> work }
+        .map { work =>
+          work.data.collectionPath -> work
+        }
         .collect {
           case (Some(CollectionPath(path, _)), work) =>
             path -> work

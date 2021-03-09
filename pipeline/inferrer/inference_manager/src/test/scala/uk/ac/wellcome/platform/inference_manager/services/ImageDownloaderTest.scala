@@ -1,8 +1,7 @@
 package uk.ac.wellcome.platform.inference_manager.services
 
 import java.nio.file.{Path, Paths}
-
-import akka.http.scaladsl.model.HttpResponse
+import akka.http.scaladsl.model.{HttpResponse, Uri}
 import akka.stream.Materializer
 import akka.stream.scaladsl.{Sink, Source}
 import akka.util.ByteString
@@ -12,6 +11,7 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.work.generators.ImageGenerators
+import uk.ac.wellcome.models.work.internal.LocationType
 import uk.ac.wellcome.platform.inference_manager.fixtures.{
   MemoryFileWriter,
   RequestPoolFixtures,
@@ -38,7 +38,7 @@ class ImageDownloaderTest
             val image = createImageDataWith(
               locations = List(
                 createDigitalLocationWith(
-                  locationType = createImageLocationType,
+                  locationType = LocationType.IIIFImageAPI,
                   url = "http://images.com/this-image.jpg"
                 ))
             ).toInitialImage
@@ -100,11 +100,11 @@ class ImageDownloaderTest
             val image = createImageDataWith(
               locations = List(
                 createDigitalLocationWith(
-                  locationType = createPresentationLocationType,
+                  locationType = LocationType.IIIFPresentationAPI,
                   url = "http://example.com/image/manifest"
                 ),
                 createDigitalLocationWith(
-                  locationType = createImageLocationType,
+                  locationType = LocationType.IIIFImageAPI,
                   url = "http://images.com/this-image.jpg"
                 )
               )
@@ -152,19 +152,20 @@ class ImageDownloaderTest
                                        _ => Some(Responses.image),
                                      existingFilePaths: Set[Path] = Set.empty)(
     testWith: TestWith[(ImageDownloader[Unit],
-                        RequestPoolMock[MergedIdentifiedImage, Unit],
+                        RequestPoolMock[(Uri, MergedIdentifiedImage), Unit],
                         MemoryFileWriter),
                        R])(implicit materializer: Materializer): R =
-    withRequestPool[MergedIdentifiedImage, Unit, R](response) { requestPool =>
-      val fileWriter = new MemoryFileWriter
-      existingFilePaths.foreach { existingFile =>
-        fileWriter.files
-          .put(existingFile, ByteString(Responses.randomImageBytes()))
-      }
-      val downloader =
-        new ImageDownloader(
-          requestPool = requestPool.pool,
-          fileWriter = fileWriter)
-      testWith((downloader, requestPool, fileWriter))
+    withRequestPool[(Uri, MergedIdentifiedImage), Unit, R](response) {
+      requestPool =>
+        val fileWriter = new MemoryFileWriter
+        existingFilePaths.foreach { existingFile =>
+          fileWriter.files
+            .put(existingFile, ByteString(Responses.randomImageBytes()))
+        }
+        val downloader =
+          new ImageDownloader(
+            requestPool = requestPool.pool,
+            fileWriter = fileWriter)
+        testWith((downloader, requestPool, fileWriter))
     }
 }

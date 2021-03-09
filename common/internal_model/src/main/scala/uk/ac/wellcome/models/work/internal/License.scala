@@ -2,49 +2,24 @@ package uk.ac.wellcome.models.work.internal
 
 import enumeratum.EnumEntry
 import enumeratum.Enum
-import io.circe.{Decoder, Encoder, Json}
+import io.circe.{Decoder, Encoder}
 
 sealed trait License extends EnumEntry {
   val id: String
   val label: String
   val url: String
+
+  override lazy val entryName: String = id
 }
 
 object License extends Enum[License] {
   val values = findValues
 
-  implicit val licenseEncoder: Encoder[License] = Encoder.instance[License] {
-    license =>
-      Json.obj(
-        ("id", Json.fromString(license.id))
-      )
-  }
+  implicit val licenseEncoder: Encoder[License] =
+    Encoder.forProduct1("id")(_.id)
 
-  implicit val licenseDecoder: Decoder[License] = Decoder.instance[License] {
-    cursor =>
-      for {
-        id <- cursor.downField("id").as[String]
-      } yield {
-        createLicense(id)
-      }
-  }
-
-  private val licenseIdIndex = {
-    val idPairs = values.map { license =>
-      license.id -> license
-    }
-
-    // Check we don't have any duplicate IDs
-    assert(idPairs.toMap.size == idPairs.size)
-
-    idPairs.toMap
-  }
-
-  def createLicense(id: String): License =
-    licenseIdIndex.get(id) match {
-      case Some(license) => license
-      case _             => throw new Exception(s"$id is not a valid license id")
-    }
+  implicit val licenseDecoder: Decoder[License] =
+    Decoder.forProduct1("id")(License.withName)
 
   case object CCBY extends License {
     val id = "cc-by"

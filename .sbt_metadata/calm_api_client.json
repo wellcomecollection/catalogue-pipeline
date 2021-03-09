@@ -1,0 +1,8 @@
+{
+  "id" : "calm_api_client",
+  "folder" : "calm_adapter/calm_api_client",
+  "dependencyIds" : [
+    "source_model",
+    "flows"
+  ]
+}

@@ -4,7 +4,7 @@ import org.scalatest.GivenWhenThen
 import org.scalatest.featurespec.AnyFeatureSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.generators.SourceWorkGenerators
-import uk.ac.wellcome.models.work.internal.Format
+import uk.ac.wellcome.models.work.internal.{Format, IdState, MergeCandidate}
 import uk.ac.wellcome.platform.merger.fixtures.FeatureTestSugar
 import uk.ac.wellcome.platform.merger.services.PlatformMerger
 
@@ -143,6 +143,34 @@ class MergerFeatureTest
       And("the physical work contains the digitised work's identifiers")
       val physicalIdentifiers = outcome.getMerged(physicalSierra).identifiers
       physicalIdentifiers should contain allElementsOf digitalSierra.identifiers
+    }
+
+    Scenario("Audiovisual Sierra works are not merged") {
+      Given("a physical Sierra AV work and its digitised counterpart")
+      val digitisedVideo =
+        sierraDigitalIdentifiedWork().format(Format.EVideos)
+
+      val physicalVideo =
+        sierraPhysicalIdentifiedWork()
+          .format(Format.Videos)
+          .mergeCandidates(
+            List(
+              MergeCandidate(
+                id = IdState.Identified(
+                  sourceIdentifier = digitisedVideo.sourceIdentifier,
+                  canonicalId = digitisedVideo.state.canonicalId),
+                reason = Some("Physical/digitised Sierra work")
+              )
+            )
+          )
+
+      When("the works are merged")
+      val outcome = merger.merge(Seq(physicalVideo, digitisedVideo))
+
+      Then("both original works are preserved")
+      outcome.resultWorks should contain theSameElementsAs Seq(
+        physicalVideo,
+        digitisedVideo)
     }
 
     Scenario("A Calm work and a Sierra work are matched") {

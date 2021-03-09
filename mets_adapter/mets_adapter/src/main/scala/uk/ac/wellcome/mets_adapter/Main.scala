@@ -4,9 +4,8 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import akka.actor.ActorSystem
 import com.typesafe.config.Config
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
-import org.scanamo.auto._
-import org.scanamo.time.JavaTimeFormats._
+import org.scanamo.generic.auto._
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
@@ -21,6 +20,8 @@ import uk.ac.wellcome.mets_adapter.services.{
 import uk.ac.wellcome.storage.store.dynamo.DynamoSingleVersionStore
 import uk.ac.wellcome.storage.typesafe.DynamoBuilder
 
+import scala.language.higherKinds
+
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
     implicit val ec: ExecutionContext =
@@ -28,7 +29,7 @@ object Main extends WellcomeTypesafeApp {
     implicit val actorSystem: ActorSystem =
       AkkaBuilder.buildActorSystem()
 
-    implicit val dynamoClilent: AmazonDynamoDB =
+    implicit val dynamoClilent: DynamoDbClient =
       DynamoBuilder.buildDynamoClient(config)
 
     new MetsAdapterWorkerService(
@@ -40,7 +41,7 @@ object Main extends WellcomeTypesafeApp {
   }
 
   private def buildMetsStore(config: Config)(
-    implicit dynamoClient: AmazonDynamoDB): MetsStore =
+    implicit dynamoClient: DynamoDbClient): MetsStore =
     new MetsStore(
       new DynamoSingleVersionStore(
         DynamoBuilder.buildDynamoConfig(config, namespace = "mets")

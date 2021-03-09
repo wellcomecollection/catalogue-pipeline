@@ -28,6 +28,8 @@ module "service" {
   min_capacity           = 0
   max_capacity           = 7
   shared_logging_secrets = var.shared_logging_secrets
+
+  use_fargate_spot = true
 }
 
 module "ingestor_works_scaling_alarm" {

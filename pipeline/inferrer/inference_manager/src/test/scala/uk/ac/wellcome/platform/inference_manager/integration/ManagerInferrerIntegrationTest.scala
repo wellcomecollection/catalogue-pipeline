@@ -1,8 +1,10 @@
 package uk.ac.wellcome.platform.inference_manager.integration
 
+import scala.concurrent.duration._
+import scala.io.Source
+import scala.collection.mutable
 import java.io.File
 import java.nio.file.Paths
-
 import akka.http.scaladsl.Http
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
@@ -13,9 +15,13 @@ import software.amazon.awssdk.services.sqs.model.Message
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.ImageGenerators
-import uk.ac.wellcome.models.work.internal.{Image, ImageState, InferredData}
+import uk.ac.wellcome.models.work.internal.{
+  Image,
+  ImageState,
+  InferredData,
+  LocationType
+}
 import uk.ac.wellcome.platform.inference_manager.adapters.{
   FeatureVectorInferrerAdapter,
   InferrerAdapter,
@@ -27,9 +33,8 @@ import uk.ac.wellcome.platform.inference_manager.services.{
   DefaultFileWriter,
   MergedIdentifiedImage
 }
-
-import scala.concurrent.duration._
-import scala.io.Source
+import ImageState.{Augmented, Initial}
+import akka.http.scaladsl.model.Uri
 
 class ManagerInferrerIntegrationTest
     extends AnyFunSpec
@@ -43,21 +48,22 @@ class ManagerInferrerIntegrationTest
     with InferenceManagerWorkerServiceFixture {
 
   it("augments images with feature and palette vectors") {
-    withWorkerServiceFixtures {
-      case (QueuePair(queue, dlq), messageSender, rootDir) =>
+    val image = createImageDataWith(
+      locations = List(
+        createDigitalLocationWith(
+          locationType = LocationType.IIIFImageAPI,
+          url = s"http://localhost:$localImageServerPort/test-image.jpg"
+        ))).toInitialImage
+
+    withWorkerServiceFixtures(image) {
+      case (QueuePair(queue, dlq), messageSender, augmentedImages, rootDir) =>
         // This is (more than) enough time for the inferrer to have
         // done its prestart work and be ready to use
         eventually(Timeout(scaled(90 seconds))) {
           inferrersAreHealthy shouldBe true
         }
 
-        val image = createImageDataWith(
-          locations = List(
-            createDigitalLocationWith(
-              locationType = createImageLocationType,
-              url = s"http://localhost:$localImageServerPort/test-image.jpg"
-            ))).toInitialImage
-        sendMessage(queue, image)
+        sendNotificationToSQS(queue = queue, body = image.id)
         eventually {
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
@@ -65,22 +71,26 @@ class ManagerInferrerIntegrationTest
           rootDir.listFiles().length should be(0)
 
           val augmentedImage =
-            messageSender.getMessages[Image[ImageState.Augmented]].head
+            augmentedImages(messageSender.messages.head.body)
 
           inside(augmentedImage.state) {
-            case ImageState.Augmented(_, id, Some(inferredData)) =>
+            case Augmented(_, id, Some(inferredData)) =>
               id should be(image.id)
               inside(inferredData) {
                 case InferredData(
                     features1,
                     features2,
                     lshEncodedFeatures,
-                    palette) =>
+                    palette,
+                    binSizes,
+                    binMinima) =>
                   features1 should have length 2048
                   features2 should have length 2048
                   forAll(features1 ++ features2) { _.isNaN shouldBe false }
                   every(lshEncodedFeatures) should fullyMatch regex """(\d+)-(\d+)"""
                   every(palette) should fullyMatch regex """\d+/\d+"""
+                  every(binSizes) should not be empty
+                  binMinima should not be empty
               }
           }
         }
@@ -103,8 +113,12 @@ class ManagerInferrerIntegrationTest
       } finally source.close()
     }
 
-  def withWorkerServiceFixtures[R](
-    testWith: TestWith[(QueuePair, MemoryMessageSender, File), R]): R =
+  def withWorkerServiceFixtures[R](image: Image[Initial])(
+    testWith: TestWith[(QueuePair,
+                        MemoryMessageSender,
+                        mutable.Map[String, Image[Augmented]],
+                        File),
+                       R]): R =
     // We would like a timeout longer than 1s here because the inferrer
     // may need to warm up.
     withLocalSqsQueuePair(visibilityTimeout = 5) { queuePair =>
@@ -112,9 +126,12 @@ class ManagerInferrerIntegrationTest
       val root = Paths.get("integration-tmp").toFile
       root.mkdir()
       withActorSystem { implicit actorSystem =>
+        val augmentedImages = mutable.Map.empty[String, Image[Augmented]]
         withWorkerService(
           queuePair.queue,
           messageSender,
+          augmentedImages = augmentedImages,
+          initialImages = List(image),
           adapters = Set(
             new FeatureVectorInferrerAdapter(
               "localhost",
@@ -128,11 +145,11 @@ class ManagerInferrerIntegrationTest
           inferrerRequestPool =
             Http().superPool[((DownloadedImage, InferrerAdapter), Message)](),
           imageRequestPool =
-            Http().superPool[(MergedIdentifiedImage, Message)](),
+            Http().superPool[((Uri, MergedIdentifiedImage), Message)](),
           fileRoot = root.getPath
         ) { _ =>
           try {
-            testWith((queuePair, messageSender, root))
+            testWith((queuePair, messageSender, augmentedImages, root))
           } finally {
             root.delete()
           }

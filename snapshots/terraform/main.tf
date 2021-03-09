@@ -20,16 +20,25 @@ module "stack" {
   # generation fails.
   #
   # In general, the size of a work grows over time, so if we start hitting exceptions
-  # like 'ContentTooLongException', we should consider turning down this number.
-  # It used to be set to 1000, but that became too big in November 2020.
+  # of the following form:
+  #
+  #     Caused by: org.apache.http.ContentTooLongException:
+  #     entity content is too long [112524060] for the configured buffer limit [104857600]
+  #
+  # we should consider it down.  Previous values:
+  #
+  #     1000 ~ too big in November 2020
+  #      500 ~ too big in January 2021
   #
   # See https://github.com/wellcomecollection/platform/issues/4901
-  es_bulk_size = 500
+  es_bulk_size = 150
 
   shared_logging_secrets = local.shared_logging_secrets
 
   dlq_alarm_arn          = local.dlq_alarm_arn
   lambda_error_alarm_arn = local.lambda_error_alarm_arn
+
+  elastic_cloud_vpce_sg_id = local.elastic_cloud_vpce_sg_id
 
   vpc_id  = local.vpc_id
   subnets = local.subnets

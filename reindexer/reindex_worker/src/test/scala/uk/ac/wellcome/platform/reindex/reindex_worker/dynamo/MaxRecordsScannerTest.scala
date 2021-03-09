@@ -3,10 +3,11 @@ package uk.ac.wellcome.platform.reindex.reindex_worker.dynamo
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import org.scanamo.auto._
+import org.scanamo.generic.auto._
 import uk.ac.wellcome.platform.reindex.reindex_worker.fixtures.ReindexDynamoFixtures
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.language.higherKinds
 
 class MaxRecordsScannerTest
     extends AnyFunSpec

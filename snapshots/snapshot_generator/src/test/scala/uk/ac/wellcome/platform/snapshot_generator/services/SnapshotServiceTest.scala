@@ -10,7 +10,6 @@ import com.sksamuel.elastic4s.http.JavaClientExceptionWrapper
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.display.json.DisplayJsonUtil.toJson
@@ -99,7 +98,7 @@ class SnapshotServiceTest
           result.snapshotResult.documentCount shouldBe visibleWorks.length
           result.snapshotResult.displayModel shouldBe expectedDisplayWorkClassName
 
-          result.snapshotResult.startedAt shouldBe >(
+          result.snapshotResult.startedAt shouldBe >=(
             result.snapshotJob.requestedAt)
           result.snapshotResult.finishedAt shouldBe >(
             result.snapshotResult.startedAt)
@@ -151,9 +150,9 @@ class SnapshotServiceTest
           result.snapshotResult.documentCount shouldBe works.length
           result.snapshotResult.displayModel shouldBe expectedDisplayWorkClassName
 
-          result.snapshotResult.startedAt shouldBe >(
+          result.snapshotResult.startedAt shouldBe >=(
             result.snapshotJob.requestedAt)
-          result.snapshotResult.finishedAt shouldBe >(
+          result.snapshotResult.finishedAt shouldBe >=(
             result.snapshotResult.startedAt)
 
           result.snapshotResult.s3Etag shouldBe s3Etag

@@ -98,19 +98,25 @@ class SierraNotesTest
     SierraNotes(bibData(notes)) shouldBe notes.map(_._2)
   }
 
-  it("suppresses subfield ǂ5 in binding information") {
-    val bibData = createSierraBibDataWith(
-      varFields = List(
-        createVarFieldWith(
-          marcTag = "563",
-          subfields = List(
-            MarcSubfield(tag = "a", content = "Main bit."),
-            MarcSubfield(tag = "5", content = "UkLW"),
-          )
+  it("suppresses subfield ǂ5 universally") {
+    val varFields = SierraNotes.notesFields.keys.map(key => {
+      createVarFieldWith(
+        marcTag = key,
+        subfields = List(
+          MarcSubfield(tag = "a", content = "Main bit."),
+          MarcSubfield(tag = "5", content = "UkLW"),
         )
       )
+    })
+    val bibData = createSierraBibDataWith(
+      varFields = varFields.toList
     )
-    SierraNotes(bibData) shouldBe List(BindingInformation("Main bit."))
+
+    val notes = SierraNotes.notesFields.values
+      .map(notesField => notesField.createNote("Main bit."))
+      .toList
+
+    SierraNotes(bibData) should contain theSameElementsAs notes
   }
 
   def bibData(contents: List[(String, Note)]): SierraBibData =

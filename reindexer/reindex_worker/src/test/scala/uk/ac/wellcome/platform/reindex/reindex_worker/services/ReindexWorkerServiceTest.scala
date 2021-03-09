@@ -1,11 +1,14 @@
 package uk.ac.wellcome.platform.reindex.reindex_worker.services
 
-import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import io.circe.Decoder
 import org.scalatest.Assertion
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import software.amazon.awssdk.services.dynamodb.model.{
+  AttributeValue,
+  PutItemRequest
+}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryIndividualMessageSender
@@ -25,10 +28,12 @@ import weco.catalogue.source_model.{
   SourcePayload
 }
 import weco.catalogue.source_model.generators.MetsSourceDataGenerators
+import weco.catalogue.source_model.mets.DeletedMetsFile
 
 import java.time.Instant
 import scala.collection.JavaConverters._
 import java.util.UUID
+import java.util
 
 class ReindexWorkerServiceTest
     extends AnyFunSpec
@@ -37,6 +42,31 @@ class ReindexWorkerServiceTest
     with WorkerServiceFixture
     with MetsSourceDataGenerators
     with S3ObjectLocationGenerators {
+
+  def toSingleAttributeValue(v: Any): AttributeValue =
+    v match {
+      case s: String     => AttributeValue.builder().s(s).build()
+      case n: Int        => AttributeValue.builder().n(n.toString).build()
+      case n: Long       => AttributeValue.builder().n(n.toString).build()
+      case bool: Boolean => AttributeValue.builder().bool(bool).build()
+      case m: Map[_, _] =>
+        val convertedMap = toAttributeValue(
+          m.asInstanceOf[Map[String, Any]].toSeq: _*)
+        AttributeValue.builder().m(convertedMap).build()
+      case l: List[_] =>
+        val convertedList = l.map { toSingleAttributeValue }
+        AttributeValue.builder().l(convertedList: _*).build()
+    }
+
+  def toAttributeValue(
+    m: Tuple2[String, Any]*): util.Map[String, AttributeValue] =
+    m.map {
+        case (key, value) => key -> toSingleAttributeValue(value)
+        case other =>
+          throw new IllegalArgumentException(s"Unexpected type in $m ($other)")
+      }
+      .toMap
+      .asJava
 
   // These tests are designed to check we can parse the data in DynamoDB
   // correctly.
@@ -50,24 +80,27 @@ class ReindexWorkerServiceTest
   //
   // These examples are based on the table structure as of 14 December 2020.
   describe("completing a reindex") {
-    it("for CALM records") {
+    it("for extant CALM records") {
       withLocalDynamoDbTable { table =>
         val calmRecordId = UUID.randomUUID().toString
         val location = createS3ObjectLocation
         val version = randomInt(from = 1, to = 10)
 
         dynamoClient.putItem(
-          table.name,
-          Map(
-            "id" -> new AttributeValue(calmRecordId),
-            "payload" -> new AttributeValue().withM(
-              Map(
-                "bucket" -> new AttributeValue(location.bucket),
-                "key" -> new AttributeValue(location.key)
-              ).asJava
-            ),
-            "version" -> new AttributeValue().withN(version.toString)
-          ).asJava
+          PutItemRequest
+            .builder()
+            .tableName(table.name)
+            .item(
+              toAttributeValue(
+                "id" -> calmRecordId,
+                "payload" -> Map(
+                  "bucket" -> location.bucket,
+                  "key" -> location.key
+                ),
+                "version" -> version
+              )
+            )
+            .build()
         )
 
         val expectedMessage = CalmSourcePayload(
@@ -84,7 +117,46 @@ class ReindexWorkerServiceTest
       }
     }
 
-    it("for METS records") {
+    it("for deleted CALM records") {
+      withLocalDynamoDbTable { table =>
+        val calmRecordId = UUID.randomUUID().toString
+        val location = createS3ObjectLocation
+        val version = randomInt(from = 1, to = 10)
+
+        dynamoClient.putItem(
+          PutItemRequest
+            .builder()
+            .tableName(table.name)
+            .item(
+              toAttributeValue(
+                "id" -> calmRecordId,
+                "payload" -> Map(
+                  "bucket" -> location.bucket,
+                  "key" -> location.key
+                ),
+                "version" -> version,
+                "isDeleted" -> true
+              )
+            )
+            .build()
+        )
+
+        val expectedMessage = CalmSourcePayload(
+          id = calmRecordId,
+          location = location,
+          version = version,
+          isDeleted = true
+        )
+
+        runTest(
+          table = table,
+          source = ReindexSource.Calm,
+          expectedMessage = expectedMessage
+        )
+      }
+    }
+
+    it("for extant METS records") {
       withLocalDynamoDbTable { table =>
         val bibId = randomAlphanumeric()
         val sourceData = createMetsSourceDataWith(
@@ -95,24 +167,71 @@ class ReindexWorkerServiceTest
         val version = randomInt(from = 1, to = 10)
 
         dynamoClient.putItem(
-          table.name,
-          Map(
-            "id" -> new AttributeValue(bibId),
-            "payload" -> new AttributeValue().withM(
-              Map(
-                "bucket" -> new AttributeValue(sourceData.bucket),
-                "createdDate" -> new AttributeValue().withN("1569103811343"),
-                "deleted" -> new AttributeValue().withBOOL(sourceData.deleted),
-                "file" -> new AttributeValue(sourceData.file),
-                "manifestations" -> new AttributeValue().withL(
-                  sourceData.manifestations.map { new AttributeValue(_) }.asJava),
-                "path" -> new AttributeValue(sourceData.path),
-                "version" -> new AttributeValue().withN(
-                  sourceData.version.toString)
-              ).asJava
-            ),
-            "version" -> new AttributeValue().withN(version.toString)
-          ).asJava
+          PutItemRequest
+            .builder()
+            .tableName(table.name)
+            .item(
+              toAttributeValue(
+                "id" -> bibId,
+                "payload" -> Map(
+                  "MetsFileWithImages" -> Map(
+                    "root" -> Map(
+                      "bucket" -> sourceData.root.bucket,
+                      "keyPrefix" -> sourceData.root.keyPrefix
+                    ),
+                    "createdDate" -> 1569103811343L,
+                    "filename" -> sourceData.filename,
+                    "manifestations" -> sourceData.manifestations,
+                    "version" -> sourceData.version
+                  )
+                ),
+                "version" -> version
+              )
+            )
+            .build()
+        )
+
+        val expectedMessage = MetsSourcePayload(
+          id = bibId,
+          sourceData = sourceData,
+          version = version
+        )
+
+        runTest(
+          table = table,
+          source = ReindexSource.Mets,
+          expectedMessage = expectedMessage
+        )
+      }
+    }
+
+    it("for deleted METS records") {
+      withLocalDynamoDbTable { table =>
+        val bibId = randomAlphanumeric()
+        val version = randomInt(from = 1, to = 10)
+
+        val sourceData = DeletedMetsFile(
+          createdDate = Instant.parse("2019-09-21T22:10:11.343Z"),
+          version = version
+        )
+
+        dynamoClient.putItem(
+          PutItemRequest
+            .builder()
+            .tableName(table.name)
+            .item(
+              toAttributeValue(
+                "id" -> bibId,
+                "payload" -> Map(
+                  "DeletedMetsFile" -> Map(
+                    "createdDate" -> 1569103811343L,
+                    "version" -> sourceData.version
+                  )
+                ),
+                "version" -> version
+              )
+            )
+            .build()
         )
 
         val expectedMessage = MetsSourcePayload(
@@ -137,19 +256,21 @@ class ReindexWorkerServiceTest
         val version = randomInt(from = 1, to = 10)
 
         dynamoClient.putItem(
-          table.name,
-          Map(
-            "id" -> new AttributeValue(miroID),
-            "location" -> new AttributeValue().withM(
-              Map(
-                "bucket" -> new AttributeValue(location.bucket),
-                "key" -> new AttributeValue(location.key)
-              ).asJava
-            ),
-            "isClearedForCatalogueAPI" -> new AttributeValue()
-              .withBOOL(isClearedForCatalogueAPI),
-            "version" -> new AttributeValue().withN(version.toString)
-          ).asJava
+          PutItemRequest
+            .builder()
+            .tableName(table.name)
+            .item(
+              toAttributeValue(
+                "id" -> miroID,
+                "location" -> Map(
+                  "bucket" -> location.bucket,
+                  "key" -> location.key
+                ),
+                "isClearedForCatalogueAPI" -> isClearedForCatalogueAPI,
+                "version" -> version
+              )
+            )
+            .build()
         )
 
         val expectedMessage = MiroSourcePayload(
@@ -174,17 +295,20 @@ class ReindexWorkerServiceTest
         val version = randomInt(from = 1, to = 10)
 
         dynamoClient.putItem(
-          table.name,
-          Map(
-            "id" -> new AttributeValue(miroID),
-            "location" -> new AttributeValue().withM(
-              Map(
-                "bucket" -> new AttributeValue(location.bucket),
-                "key" -> new AttributeValue(location.key)
-              ).asJava
-            ),
-            "version" -> new AttributeValue().withN(version.toString)
-          ).asJava
+          PutItemRequest
+            .builder()
+            .tableName(table.name)
+            .item(
+              toAttributeValue(
+                "id" -> miroID,
+                "location" -> Map(
+                  "bucket" -> location.bucket,
+                  "key" -> location.key
+                ),
+                "version" -> version
+              )
+            )
+            .build()
         )
 
         val expectedMessage = MiroInventorySourcePayload(
@@ -208,17 +332,20 @@ class ReindexWorkerServiceTest
         val version = randomInt(from = 1, to = 10)
 
         dynamoClient.putItem(
-          table.name,
-          Map(
-            "id" -> new AttributeValue(bibId),
-            "payload" -> new AttributeValue().withM(
-              Map(
-                "bucket" -> new AttributeValue(location.bucket),
-                "key" -> new AttributeValue(location.key)
-              ).asJava
-            ),
-            "version" -> new AttributeValue().withN(version.toString)
-          ).asJava
+          PutItemRequest
+            .builder()
+            .tableName(table.name)
+            .item(
+              toAttributeValue(
+                "id" -> bibId,
+                "payload" -> Map(
+                  "bucket" -> location.bucket,
+                  "key" -> location.key
+                ),
+                "version" -> version
+              )
+            )
+            .build()
         )
 
         val expectedMessage = SierraSourcePayload(

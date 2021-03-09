@@ -12,6 +12,7 @@ case class RelationsRequestBuilder(index: Index,
   // return core fields
   private val relationsFieldWhitelist = List(
     "state.canonicalId",
+    "state.availabilities",
     "data.title",
     "data.collectionPath.path",
     "data.collectionPath.label",
@@ -26,6 +27,9 @@ case class RelationsRequestBuilder(index: Index,
       .scroll(keepAlive = scrollKeepAlive)
       .size(scrollSize)
 
+  // While the affected works do exist in the `completeTree`, we need
+  // to make another request for them to get the _full_ work documents
+  // which can then be denormalised.
   def affectedWorks(batch: Batch, scrollSize: Int): SearchRequest =
     search(index)
       .query(should(batch.selectors.map(_.query)))

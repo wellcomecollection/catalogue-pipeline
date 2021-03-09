@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- encoding: utf-8
 
 import json
 import math
@@ -7,15 +6,13 @@ import sys
 
 import boto3
 import click
-import hcl
-import requests
 import tqdm
 
 
 SOURCES = {
     "miro": "vhs-sourcedata-miro",
     "sierra": "vhs-sierra-sierra-adapter-20200604",
-    "mets": "mets-adapter-store",
+    "mets": "mets-adapter-store-delta",
     "calm": "vhs-calm-adapter",
 }
 
@@ -69,31 +66,6 @@ def read_from_s3(bucket, key):
     return obj["Body"].read()
 
 
-def post_to_slack(slack_message):
-    """
-    Posts a message about the reindex in Slack, so we can track them.
-    """
-    # Get the non-critical Slack token.
-    tfvars_body = read_from_s3(
-        bucket="wellcomecollection-platform-infra", key="terraform.tfvars"
-    )
-    tfvars = hcl.loads(tfvars_body)
-    webhook_url = tfvars["non_critical_slack_webhook"]
-
-    slack_data = {
-        "username": "reindex-tracker",
-        "icon_emoji": ":dynamodb:",
-        "color": "#2E72B8",
-        "title": "reindexer",
-        "fields": [{"value": slack_message}],
-    }
-
-    resp = requests.post(
-        webhook_url, json=slack_data, headers={"Content-Type": "application/json"}
-    )
-    resp.raise_for_status()
-
-
 def get_reindexer_topic_arn():
     statefile_body = read_from_s3(
         bucket="wellcomecollection-platform-infra",
@@ -132,6 +104,41 @@ def publish_messages(job_config_id, topic_arn, parameters):
         assert resp["ResponseMetadata"]["HTTPStatusCode"] == 200, resp
 
 
+def get_reindexer_job_config(session):
+    """
+    Get the reindexer job config passed to the reindexer task.
+    """
+    ecs_client = session.client("ecs")
+
+    resp = ecs_client.describe_task_definition(taskDefinition="reindexer")
+
+    # The container definition contains two containers: the reindexer app, and the
+    # logstash router.
+    container_definition = next(
+        cd
+        for cd in resp["taskDefinition"]["containerDefinitions"]
+        if cd["name"] == "reindexer"
+    )
+
+    job_config_str = next(
+        ev["value"]
+        for ev in container_definition["environment"]
+        if ev["name"] == "reindexer_job_config_json"
+    )
+
+    return json.loads(job_config_str)
+
+
+def has_subscriptions(session, *, topic_arn):
+    """
+    Returns True if a topic ARN has any subscriptions (e.g. an SQS queue), False otherwise.
+    """
+    sns_client = session.client("sns")
+    resp = sns_client.list_subscriptions_by_topic(TopicArn=topic_arn)
+
+    return len(resp["Subscriptions"]) > 0
+
+
 @click.command()
 @click.option(
     "--src",
@@ -159,11 +166,12 @@ def start_reindex(ctx, src, dst, mode):
     if src == "all" and mode == "complete":
         for source in SOURCES.keys():
             ctx.invoke(start_reindex, src=source, dst=dst, mode=mode)
+            print("")
         sys.exit(0)
     elif src == "all" and mode != "complete":
         sys.exit("All-source reindexes only support --mode=complete")
 
-    print(f"Starting a reindex {src!r} ~> {dst!r}")
+    print(f"Starting a reindex {src} ~> {dst}")
 
     if mode == "complete":
         total_segments = how_many_segments(table_name=SOURCES[src])
@@ -181,23 +189,37 @@ def start_reindex(ctx, src, dst, mode):
             return sys.exit("You need to specify at least 1 record ID")
         parameters = specific_reindex_parameters(specified_records)
 
-    # TODO: This was broken by the move to AssumeRole, because the GetUser call
-    # doesn't work in an IAM role.  When we agree a replacement, we should apply
-    # it globally, including here.
+    job_config_id = f"{src}--{dst}"
+    reindexer_job_config = get_reindexer_job_config(session)
 
-    # username = boto3.client("iam").get_user()["User"]["UserName"]
-    # slack_message = (
-    #     f"*{username}* started a {mode} reindex *{src!r}* ~> *{dst!r}*\n"
-    #     f"Reason: *{reason}*"
-    # )
+    # It's incredibly frustrating to run a reindex using this script, see nothing come
+    # through the pipeline, and realise that nothing is listening to the reindexer output.
+    # (Ask me how I know.)
+    #
+    # This probably isn't what the user is trying to do, so if we detect there's nothing
+    # subscribed to the reindexer output, double-check that's correct.  It will save us
+    # time, frustration, and money.
+    try:
+        job_config = reindexer_job_config[job_config_id]
+    except KeyError:
+        raise RuntimeError(f"Unrecognised job config ID: {job_config_id}")
+    else:
+        destination_topic_arn = job_config["destinationConfig"]["topicArn"]
 
-    # post_to_slack(slack_message)
+        if not has_subscriptions(session, topic_arn=destination_topic_arn):
+            topic_name = destination_topic_arn.split(":")[-1]
+            warning_message = (
+                f"Warning: This reindex will send records to {topic_name}, "
+                "but nothing is subscribed to that topic.\nContinue?"
+            )
+            click.confirm(click.style(warning_message, "yellow"), abort=True)
 
-    topic_arn = get_reindexer_topic_arn()
-    print
+    reindexer_topic_arn = get_reindexer_topic_arn()
 
     publish_messages(
-        job_config_id=f"{src}--{dst}", topic_arn=topic_arn, parameters=parameters
+        job_config_id=job_config_id,
+        topic_arn=reindexer_topic_arn,
+        parameters=parameters,
     )
 
 

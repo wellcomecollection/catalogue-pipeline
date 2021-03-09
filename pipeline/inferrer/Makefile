@@ -14,7 +14,7 @@ SBT_NO_DOCKER_LIBRARIES =
 PYTHON_APPS = feature_inferrer feature_training palette_inferrer
 LAMBDAS     =
 
-TEST_OVERRIDE := feature_inferrer feature_training palette_inferrer
+TEST_OVERRIDE := feature_inferrer palette_inferrer
 
 inference_manager-test: feature_inferrer-build palette_inferrer-build
 
@@ -24,20 +24,12 @@ inference_manager-integration-only: feature_inferrer-build palette_inferrer-buil
 		wellcome/sbt_wrapper \
 		"project inference_manager" ";dockerComposeUp;testOnly **.integration.*;dockerComposeStop"
 
-feature_inferrer-test: feature_inferrer-build
-	$(ROOT)/docker_run.py --dind -- \
-		feature_inferrer \
-		python -m unittest discover -s .
+feature_inferrer-test:
+	$(call test_python,pipeline/inferrer/feature_inferrer)
 	$(MAKE) inference_manager-integration-only
 
-feature_training-test: feature_training-build
-	$(ROOT)/docker_run.py --dind -- feature_training \
-    		python -m compileall /src
-
-palette_inferrer-test: palette_inferrer-build
-	$(ROOT)/docker_run.py --dind -- \
-    		palette_inferrer \
-    		python -m unittest discover -s .
+palette_inferrer-test:
+	$(call test_python,pipeline/inferrer/palette_inferrer)
 	$(MAKE) inference_manager-integration-only
 
 $(val $(call stack_setup))

@@ -68,6 +68,15 @@ class MiroGenresTest
     )
   }
 
+  it("removes trailing punctuation from genre labels") {
+    transformRecordAndCheckGenres(
+      miroRecord = createMiroRecordWith(
+        physFormat = Some("Printed books.")
+      ),
+      expectedGenreLabels = List("Printed books")
+    )
+  }
+
   private def transformRecordAndCheckGenres(
     miroRecord: MiroRecord,
     expectedGenreLabels: List[String]

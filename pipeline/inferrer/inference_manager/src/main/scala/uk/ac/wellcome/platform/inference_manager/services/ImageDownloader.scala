@@ -17,7 +17,7 @@ import akka.stream.{IOResult, Materializer}
 import akka.stream.scaladsl.{FileIO, Flow, Keep, Sink}
 import akka.util.ByteString
 import software.amazon.awssdk.services.sqs.model.Message
-import uk.ac.wellcome.models.work.internal.DigitalLocationDeprecated
+import uk.ac.wellcome.models.work.internal.{DigitalLocation, LocationType}
 import uk.ac.wellcome.platform.inference_manager.models.DownloadedImage
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -29,7 +29,7 @@ trait FileWriter {
 }
 
 class ImageDownloader[Ctx](
-  requestPool: RequestPoolFlow[MergedIdentifiedImage, Ctx],
+  requestPool: RequestPoolFlow[(Uri, MergedIdentifiedImage), Ctx],
   fileWriter: FileWriter,
   root: String = "/")(implicit materializer: Materializer) {
 
@@ -57,10 +57,10 @@ class ImageDownloader[Ctx](
     Paths.get(root, image.id, "default.jpg").toAbsolutePath
 
   private def createImageFileRequest(
-    image: MergedIdentifiedImage): (HttpRequest, MergedIdentifiedImage) =
+    image: MergedIdentifiedImage): (HttpRequest, (Uri, MergedIdentifiedImage)) =
     getImageUri(image.locations) match {
       case Some(uri) =>
-        (HttpRequest(method = HttpMethods.GET, uri = uri), image)
+        (HttpRequest(method = HttpMethods.GET, uri = uri), (uri, image))
       case None =>
         throw new RuntimeException(
           s"Could not extract an image URL from locations on image ${image.state.sourceIdentifier}"
@@ -68,28 +68,30 @@ class ImageDownloader[Ctx](
     }
 
   private def saveImageFile: PartialFunction[
-    (Try[HttpResponse], MergedIdentifiedImage),
+    (Try[HttpResponse], (Uri, MergedIdentifiedImage)),
     Future[(MergedIdentifiedImage, Path)]
   ] = {
-    case (Success(response @ HttpResponse(StatusCodes.OK, _, _, _)), image) =>
+    case (
+        Success(response @ HttpResponse(StatusCodes.OK, _, _, _)),
+        (_, image)) =>
       val path = getLocalImagePath(image)
       response.entity.dataBytes
         .runWith(fileWriter.write(path))
         .map { _ =>
           (image, path)
         }
-    case (Success(failedResponse), image) =>
+    case (Success(failedResponse), (uri, image)) =>
       failedResponse.discardEntityBytes()
       Future.failed(
-        throw new RuntimeException(s"Image request for ${getImageUri(
-          image.locations)} failed with status ${failedResponse.status}"))
+        throw new RuntimeException(
+          s"Image request for $uri failed with status ${failedResponse.status}"
+        ))
     case (Failure(exception), _) => Future.failed(exception)
   }
 
-  private def getImageUri(
-    locations: List[DigitalLocationDeprecated]): Option[Uri] =
+  private def getImageUri(locations: List[DigitalLocation]): Option[Uri] =
     locations
-      .find(_.locationType.id == "iiif-image")
+      .find(_.locationType == LocationType.IIIFImageAPI)
       .map { location =>
         Uri(location.url) match {
           case uri @ Uri(_, _, path, _, _)
@@ -100,14 +102,10 @@ class ImageDownloader[Ctx](
                   .toString()
                   .replace(
                     "info.json",
-                    if (uri.authority.host.address() contains "dlcs") {
-                      // DLCS provides a thumbnails service which only serves certain sizes of image.
-                      // Requests for these don't touch the image server and so, as we're performing
-                      // lots of requests, we use 400x400 thumbnails and resize them ourselves later on.
-                      "full/!400,400/0/default.jpg"
-                    } else {
-                      "full/224,224/0/default.jpg"
-                    }
+                    // DLCS provides a thumbnails service which only serves certain sizes of image.
+                    // Requests for these don't touch the image server and so, as we're performing
+                    // lots of requests, we use 400x400 thumbnails and resize them ourselves later on.
+                    "full/!400,400/0/default.jpg"
                   )
               )
             )
@@ -141,6 +139,6 @@ object ImageDownloader {
     new ImageDownloader(
       root = root,
       fileWriter = new DefaultFileWriter(root),
-      requestPool = Http().superPool[(MergedIdentifiedImage, Message)]()
+      requestPool = Http().superPool[((Uri, MergedIdentifiedImage), Message)]()
     )
 }

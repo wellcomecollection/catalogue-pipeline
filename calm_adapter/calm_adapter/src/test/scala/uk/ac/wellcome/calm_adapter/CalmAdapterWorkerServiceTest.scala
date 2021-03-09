@@ -1,6 +1,7 @@
 package uk.ac.wellcome.calm_adapter
 
 import java.time.{Instant, LocalDate}
+
 import akka.NotUsed
 import akka.stream.scaladsl._
 import io.circe.Encoder
@@ -18,10 +19,12 @@ import uk.ac.wellcome.messaging.memory.{
   MemoryMessageSender
 }
 import uk.ac.wellcome.messaging.sns.NotificationMessage
+import uk.ac.wellcome.platform.calm_api_client.CalmQuery
 import uk.ac.wellcome.storage.{Identified, Version}
 import uk.ac.wellcome.storage.maxima.memory.MemoryMaxima
 import uk.ac.wellcome.storage.store.memory.MemoryStore
 import weco.catalogue.source_model.CalmSourcePayload
+import weco.catalogue.source_model.calm.CalmRecord
 import weco.catalogue.source_model.fixtures.SourceVHSFixture
 import weco.catalogue.source_model.store.SourceVHS
 
@@ -45,8 +48,10 @@ class CalmAdapterWorkerServiceTest
   val instantB = Instant.ofEpochSecond(instantA.getEpochSecond + 1)
   val instantC = Instant.ofEpochSecond(instantA.getEpochSecond + 2)
   val recordA = CalmRecord("A", Map("RecordID" -> List("A")), instantA)
-  val recordB = CalmRecord("B", Map("RecordID" -> List("B")), instantB)
-  val recordC = CalmRecord("C", Map("RecordID" -> List("C")), instantC)
+  val recordB =
+    CalmRecord("B", Map("RecordID" -> List("B")), instantB)
+  val recordC =
+    CalmRecord("C", Map("RecordID" -> List("C")), instantC)
   val queryDate = LocalDate.of(2000, 1, 1)
 
   it("processes an incoming window, storing records and publishing keys") {

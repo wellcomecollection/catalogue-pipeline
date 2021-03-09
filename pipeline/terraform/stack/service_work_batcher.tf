@@ -2,7 +2,7 @@ module "batcher_queue" {
   source                     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
   queue_name                 = "${local.namespace_hyphen}_batcher"
   topic_arns                 = [module.router_path_output_topic.arn]
-  visibility_timeout_seconds = 1900
+  visibility_timeout_seconds = 3000
   aws_region                 = var.aws_region
   alarm_topic_arn            = var.dlq_alarm_arn
 }
@@ -26,7 +26,7 @@ module "batcher" {
     queue_url        = module.batcher_queue.url
     output_topic_arn = module.batcher_output_topic.arn
 
-    flush_interval_minutes = 30     // NOTE: this needs to be less than visibility timeout
+    flush_interval_minutes = 45     // NOTE: this needs to be less than visibility timeout
     max_processed_paths    = 100000 // NOTE: SQS in flight limit is 120k
     max_batch_size         = 40
   }
@@ -35,13 +35,16 @@ module "batcher" {
 
   shared_logging_secrets = var.shared_logging_secrets
 
-  subnets             = var.subnets
-  max_capacity        = 1
-  messages_bucket_arn = aws_s3_bucket.messages.arn
-  queue_read_policy   = module.batcher_queue.read_policy
+  subnets           = var.subnets
+  max_capacity      = min(1, local.max_capacity)
+  queue_read_policy = module.batcher_queue.read_policy
 
   cpu    = 1024
   memory = 2048
+
+  depends_on = [
+    null_resource.elasticsearch_users,
+  ]
 
   deployment_service_env  = var.release_label
   deployment_service_name = "work-batcher"
@@ -52,8 +55,6 @@ module "batcher_output_topic" {
 
   name       = "${local.namespace_hyphen}_batcher_output"
   role_names = [module.batcher.task_role_name]
-
-  messages_bucket_arn = aws_s3_bucket.messages.arn
 }
 
 module "batcher_scaling_alarm" {

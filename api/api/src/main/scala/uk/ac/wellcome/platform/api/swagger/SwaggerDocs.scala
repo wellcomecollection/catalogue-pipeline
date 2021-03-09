@@ -146,6 +146,7 @@ trait SingleWorkSwagger {
           allowableValues = Array(
             "identifiers",
             "items",
+            "holdings",
             "subjects",
             "genres",
             "contributors",
@@ -156,7 +157,8 @@ trait SingleWorkSwagger {
             "succeededBy",
             "precededBy",
             "partOf",
-            "parts")),
+            "parts"
+          )),
         required = false,
       )
     )
@@ -216,7 +218,7 @@ trait MultipleImagesSwagger {
       new Parameter(
         name = "locations.license",
         in = ParameterIn.QUERY,
-        description = "Filter the image by license.",
+        description = "Filter the images by license.",
         schema = new Schema(
           allowableValues = Array(
             "cc-by",
@@ -225,6 +227,12 @@ trait MultipleImagesSwagger {
             "cc-0",
             "pdm",
             "copyright-not-cleared")),
+        required = false
+      ),
+      new Parameter(
+        name = "source.contributors.agent.label",
+        in = ParameterIn.QUERY,
+        description = "Filter the images by the source works' contributors",
         required = false
       ),
       new Parameter(
@@ -240,6 +248,16 @@ trait MultipleImagesSwagger {
         schema = new Schema(
           allowableValues = Array("source.contributors", "source.languages")
         )
+      ),
+      new Parameter(
+        name = "aggregations",
+        in = ParameterIn.QUERY,
+        description =
+          "What aggregated data in correlation to the results should we return.",
+        schema = new Schema(
+          allowableValues = Array("locations.license")
+        ),
+        required = false
       ),
       new Parameter(
         name = "page",
@@ -341,6 +359,7 @@ trait MultipleWorksSwagger {
           allowableValues = Array(
             "identifiers",
             "items",
+            "holdings",
             "subjects",
             "genres",
             "contributors",
@@ -351,7 +370,8 @@ trait MultipleWorksSwagger {
             "succeededBy",
             "precededBy",
             "partOf",
-            "parts")),
+            "parts"
+          )),
         required = false,
       ),
       new Parameter(
@@ -360,16 +380,6 @@ trait MultipleWorksSwagger {
         description =
           "Filter by the LocationType of items on the retrieved works",
         required = false
-      ),
-      new Parameter(
-        name = "items.locations.type",
-        in = ParameterIn.QUERY,
-        description =
-          "Filter by the Location type of items on the retrieved works",
-        required = false,
-        schema = new Schema(
-          allowableValues = Array("DigitalLocation", "PhysicalLocation")
-        )
       ),
       new Parameter(
         name = "workType",
@@ -397,9 +407,10 @@ trait MultipleWorksSwagger {
             "genres",
             "production.dates",
             "subjects",
+            "contributors",
             "license",
             "languages",
-            "locationType")),
+            "availabilities")),
         required = false
       ),
       new Parameter(
@@ -421,9 +432,27 @@ trait MultipleWorksSwagger {
         required = false
       ),
       new Parameter(
+        name = "contributors.agent.label",
+        in = ParameterIn.QUERY,
+        description = "Filter the work by contributor.",
+        required = false
+      ),
+      new Parameter(
         name = "identifiers",
         in = ParameterIn.QUERY,
         description = "Filter the work by identifiers.",
+        required = false
+      ),
+      new Parameter(
+        name = "partOf",
+        in = ParameterIn.QUERY,
+        description = "Filter the work by partOf relation.",
+        required = false
+      ),
+      new Parameter(
+        name = "availabilities",
+        in = ParameterIn.QUERY,
+        description = "Filter the work by availabilities.",
         required = false
       ),
       new Parameter(
@@ -594,11 +623,26 @@ trait MultipleWorksSwagger {
     description = "A paginated list of works."
   )
   class DisplayWorksResultList
-      extends DisplayResultList[DisplayWork, DisplayAggregations](
+      extends DisplayResultList[DisplayWork, DisplayWorkAggregations](
         context = "",
         pageSize = 0,
         totalPages = 0,
         totalResults = 0,
         results = Nil)
-  val _ = new DisplayWorksResultList
+
+  val w = new DisplayWorksResultList
+
+  @Schema(
+    name = "ImageResultList",
+    description = "A paginated list of works."
+  )
+  class DisplayImagesResultList
+      extends DisplayResultList[DisplayImage, DisplayImageAggregations](
+        context = "",
+        pageSize = 0,
+        totalPages = 0,
+        totalResults = 0,
+        results = Nil)
+
+  val i = new DisplayImagesResultList
 }

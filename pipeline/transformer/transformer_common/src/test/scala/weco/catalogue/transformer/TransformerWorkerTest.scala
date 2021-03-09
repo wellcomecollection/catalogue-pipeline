@@ -53,7 +53,10 @@ class TransformerWorkerTest
     val messageVersion = storeVersion - 1
 
     val location = createS3ObjectLocation
-    val data = ValidExampleData(createSourceIdentifier)
+    val data = ValidExampleData(
+      id = createSourceIdentifier,
+      title = randomAlphanumeric()
+    )
 
     val sourceStore = MemoryVersionedStore[S3ObjectLocation, ExampleData](
       initialEntries = Map(

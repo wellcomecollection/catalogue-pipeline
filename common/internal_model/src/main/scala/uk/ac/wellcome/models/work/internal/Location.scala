@@ -1,30 +1,30 @@
 package uk.ac.wellcome.models.work.internal
 
 sealed trait Location {
+  val locationType: LocationType
   val accessConditions: List[AccessCondition]
-}
-object Location {
-  case class OpenShelves(accessConditions: List[AccessCondition],
-                         shelfmark: String,
-                         shelfLocation: String)
-      extends Location
+  val license: Option[License]
 
-  case class ClosedStores(accessConditions: List[AccessCondition])
-      extends Location
+  def isAvailable: Boolean =
+    accessConditions.exists(_.isAvailable)
 
-  case class DigitalResource(accessConditions: List[AccessCondition],
-                             url: String,
-                             license: Option[License] = None,
-                             credit: Option[String] = None,
-                             format: Option[DigitalResourceFormat] = None)
-      extends Location
+  def hasRestrictions: Boolean =
+    accessConditions.exists(_.hasRestrictions)
 }
 
-sealed trait DigitalResourceFormat
-object DigitalResourceFormat {
+case class DigitalLocation(
+  url: String,
+  locationType: DigitalLocationType,
+  license: Option[License] = None,
+  credit: Option[String] = None,
+  linkText: Option[String] = None,
+  accessConditions: List[AccessCondition] = Nil
+) extends Location
 
-  case object IIIFPresentation extends DigitalResourceFormat
-
-  case object IIIFImage extends DigitalResourceFormat
-
-}
+case class PhysicalLocation(
+  locationType: PhysicalLocationType,
+  label: String,
+  license: Option[License] = None,
+  shelfmark: Option[String] = None,
+  accessConditions: List[AccessCondition] = Nil
+) extends Location

@@ -49,7 +49,9 @@ trait ApiFixture
     val router = new Router(
       elasticClient,
       elasticConfig,
-      QueryConfig(paletteBinSizes = Seq(4, 6, 8)),
+      QueryConfig(
+        paletteBinSizes = Seq(Seq(4, 6, 9), Seq(2, 4, 6), Seq(1, 3, 5)),
+        paletteBinMinima = Seq(0f, 10f / 256, 10f / 256)),
       swaggerDocs = swaggerDocs,
       apiConfig = apiConfig
     )

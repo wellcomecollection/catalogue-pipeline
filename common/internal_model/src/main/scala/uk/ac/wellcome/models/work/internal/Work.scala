@@ -26,14 +26,16 @@ sealed trait Work[State <: WorkState] {
     val outState = transition.state(state, data, args)
     val outData = transition.data(data)
     this match {
-      case Work.Visible(version, _, _) =>
-        Work.Visible(version, outData, outState)
+      case Work.Visible(version, _, _, redirectSources) =>
+        Work.Visible(version, outData, outState, redirectSources.map {
+          transition.redirect
+        })
       case Work.Invisible(version, _, _, invisibilityReasons) =>
         Work.Invisible(version, outData, outState, invisibilityReasons)
-      case Work.Deleted(version, _, deletedReasons) =>
-        Work.Deleted(version, outState, deletedReasons)
-      case Work.Redirected(version, redirect, _) =>
-        Work.Redirected(version, transition.redirect(redirect), outState)
+      case Work.Deleted(version, _, _, deletedReason) =>
+        Work.Deleted(version, outData, outState, deletedReason)
+      case Work.Redirected(version, redirectTarget, _) =>
+        Work.Redirected(version, transition.redirect(redirectTarget), outState)
     }
   }
 }
@@ -44,11 +46,12 @@ object Work {
     version: Int,
     data: WorkData[State#WorkDataState],
     state: State,
+    redirectSources: Seq[State#WorkDataState#Id] = Nil
   ) extends Work[State]
 
   case class Redirected[State <: WorkState](
     version: Int,
-    redirect: State#WorkDataState#Id,
+    redirectTarget: State#WorkDataState#Id,
     state: State,
   ) extends Work[State] {
     val data = WorkData[State#WorkDataState]()
@@ -63,11 +66,10 @@ object Work {
 
   case class Deleted[State <: WorkState](
     version: Int,
+    data: WorkData[State#WorkDataState],
     state: State,
-    deletedReason: Option[DeletedReason] = None,
-  ) extends Work[State] {
-    val data = WorkData[State#WorkDataState]()
-  }
+    deletedReason: DeletedReason,
+  ) extends Work[State]
 }
 
 /** WorkData contains data common to all types of works that can exist at any
@@ -86,13 +88,14 @@ case class WorkData[State <: DataState](
   subjects: List[Subject[State#MaybeId]] = Nil,
   genres: List[Genre[State#MaybeId]] = Nil,
   contributors: List[Contributor[State#MaybeId]] = Nil,
-  thumbnail: Option[LocationDeprecated] = None,
+  thumbnail: Option[Location] = None,
   production: List[ProductionEvent[State#MaybeId]] = Nil,
   languages: List[Language] = Nil,
   edition: Option[String] = None,
   notes: List[Note] = Nil,
   duration: Option[Int] = None,
   items: List[Item[State#MaybeId]] = Nil,
+  holdings: List[Holdings] = Nil,
   collectionPath: Option[CollectionPath] = None,
   imageData: List[ImageData[State#Id]] = Nil,
   workType: WorkType = WorkType.Standard,
@@ -149,19 +152,6 @@ object WorkState {
     val relations = Relations.none
   }
 
-  case class Merged(
-    sourceIdentifier: SourceIdentifier,
-    canonicalId: String,
-    modifiedTime: Instant,
-  ) extends WorkState {
-
-    type WorkDataState = DataState.Identified
-    type TransitionArgs = Option[Instant]
-
-    def id = canonicalId
-    val relations = Relations.none
-  }
-
   case class Identified(
     sourceIdentifier: SourceIdentifier,
     canonicalId: String,
@@ -175,15 +165,30 @@ object WorkState {
     val relations = Relations.none
   }
 
+  case class Merged(
+    sourceIdentifier: SourceIdentifier,
+    canonicalId: String,
+    modifiedTime: Instant,
+    availabilities: Set[Availability] = Set.empty,
+  ) extends WorkState {
+
+    type WorkDataState = DataState.Identified
+    type TransitionArgs = Instant
+
+    def id: String = canonicalId
+    val relations: Relations = Relations.none
+  }
+
   case class Denormalised(
     sourceIdentifier: SourceIdentifier,
     canonicalId: String,
     modifiedTime: Instant,
+    availabilities: Set[Availability],
     relations: Relations = Relations.none
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified
-    type TransitionArgs = Relations
+    type TransitionArgs = (Relations, Set[Availability])
 
     def id = canonicalId
   }
@@ -192,6 +197,7 @@ object WorkState {
     sourceIdentifier: SourceIdentifier,
     canonicalId: String,
     modifiedTime: Instant,
+    availabilities: Set[Availability],
     derivedData: DerivedWorkData,
     relations: Relations = Relations.none
   ) extends WorkState {
@@ -227,11 +233,12 @@ object WorkFsm {
   implicit val identifiedToMerged = new Transition[Identified, Merged] {
     def state(state: Identified,
               data: WorkData[DataState.Identified],
-              args: Option[Instant]): Merged =
+              modifiedTime: Instant): Merged =
       Merged(
-        state.sourceIdentifier,
-        state.id,
-        args.getOrElse(state.modifiedTime),
+        sourceIdentifier = state.sourceIdentifier,
+        canonicalId = state.id,
+        modifiedTime = modifiedTime,
+        availabilities = Availabilities.forWorkData(data),
       )
 
     def data(data: WorkData[DataState.Identified]) = data
@@ -243,13 +250,17 @@ object WorkFsm {
     new Transition[Merged, Denormalised] {
       def state(state: Merged,
                 data: WorkData[DataState.Identified],
-                relations: Relations): Denormalised =
-        Denormalised(
-          sourceIdentifier = state.sourceIdentifier,
-          canonicalId = state.canonicalId,
-          modifiedTime = state.modifiedTime,
-          relations = relations
-        )
+                context: (Relations, Set[Availability])): Denormalised =
+        context match {
+          case (relations, relationAvailabilities) =>
+            Denormalised(
+              sourceIdentifier = state.sourceIdentifier,
+              canonicalId = state.canonicalId,
+              modifiedTime = state.modifiedTime,
+              availabilities = state.availabilities ++ relationAvailabilities,
+              relations = relations
+            )
+        }
 
       def data(data: WorkData[DataState.Identified]) = data
 
@@ -264,6 +275,7 @@ object WorkFsm {
         sourceIdentifier = state.sourceIdentifier,
         canonicalId = state.canonicalId,
         modifiedTime = state.modifiedTime,
+        availabilities = state.availabilities,
         derivedData = DerivedWorkData(data),
         relations = state.relations
       )

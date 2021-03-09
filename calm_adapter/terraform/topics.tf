@@ -4,6 +4,11 @@ module "calm_adapter_topic" {
   cross_account_subscription_ids = ["269807742353"]
 }
 
+module "calm_deletions_topic" {
+  source = "github.com/wellcomecollection/terraform-aws-sns-topic.git?ref=v1.0.0"
+  name   = "calm-deletions"
+}
+
 data "aws_iam_policy_document" "publish_to_adapter_topic" {
   statement {
     actions = [
@@ -16,28 +21,28 @@ data "aws_iam_policy_document" "publish_to_adapter_topic" {
   }
 }
 
-resource "aws_iam_role_policy" "adapter_policy" {
-  role   = module.worker.task_role_name
-  policy = data.aws_iam_policy_document.publish_to_adapter_topic.json
-}
-
-resource "aws_sns_topic" "calm_windows_topic" {
-  name = "calm-windows"
-}
-
-data "aws_iam_policy_document" "publish_to_windows_topic" {
+data "aws_iam_policy_document" "publish_to_deletions_topic" {
   statement {
     actions = [
       "sns:Publish",
     ]
 
     resources = [
-      aws_sns_topic.calm_windows_topic.arn
+      module.calm_deletions_topic.arn
     ]
   }
 }
 
-resource "aws_iam_role_policy" "windows_policy" {
-  role   = aws_iam_role.window_generator_role.name
-  policy = data.aws_iam_policy_document.publish_to_windows_topic.json
+resource "aws_iam_role_policy" "adapter_policy" {
+  role   = module.adapter_worker.task_role_name
+  policy = data.aws_iam_policy_document.publish_to_adapter_topic.json
+}
+
+resource "aws_iam_role_policy" "deletion_checker_policy" {
+  role   = module.deletion_checker_worker.task_role_name
+  policy = data.aws_iam_policy_document.publish_to_deletions_topic.json
+}
+
+resource "aws_sns_topic" "calm_windows_topic" {
+  name = "calm-windows"
 }

@@ -6,10 +6,10 @@ import akka.NotUsed
 import akka.stream.scaladsl.Flow
 import io.circe.Json
 import uk.ac.wellcome.platform.sierra_reader.parsers.SierraRecordParser
-import uk.ac.wellcome.sierra_adapter.model.AbstractSierraRecord
+import weco.catalogue.sierra_adapter.models.AbstractSierraRecord
 
 object SierraRecordWrapperFlow {
-  def apply[T <: AbstractSierraRecord](
+  def apply[T <: AbstractSierraRecord[_]](
     createRecord: (String, String, Instant) => T): Flow[Json, T, NotUsed] =
     Flow.fromFunction(SierraRecordParser(createRecord))
 }

@@ -1,5 +1,7 @@
 locals {
-  lock_timeout = 240
+  # This was previously 4 minutes, but we saw a handful of messages
+  # land on the DLQ, so we increased it.
+  lock_timeout = 10 * 60
 }
 
 module "matcher_input_queue" {
@@ -17,7 +19,7 @@ module "matcher_input_queue" {
   # The matcher is able to override locks that have expired
   # Wait slightly longer to make sure locks are expired
   visibility_timeout_seconds = local.lock_timeout + 30
-  max_receive_count          = 20
+  max_receive_count          = 5
 }
 
 # Service
@@ -29,10 +31,16 @@ module "matcher" {
   security_group_ids = [
     aws_security_group.service_egress.id,
     aws_security_group.interservice.id,
+    var.pipeline_storage_security_group_id,
   ]
 
   cluster_name = aws_ecs_cluster.cluster.name
   cluster_arn  = aws_ecs_cluster.cluster.arn
+
+  cpu    = 1024
+  memory = 2048
+
+  use_fargate_spot = true
 
   env_vars = {
     queue_url         = module.matcher_input_queue.url
@@ -46,21 +54,20 @@ module "matcher" {
 
     dynamo_lock_timeout = local.lock_timeout
 
-    es_index = local.es_works_identified_index
+    es_index                    = local.es_works_identified_index
+    read_batch_size             = 100
+    read_flush_interval_seconds = 30
   }
 
-  secret_env_vars = {
-    es_host     = "catalogue/pipeline_storage/es_host"
-    es_port     = "catalogue/pipeline_storage/es_port"
-    es_protocol = "catalogue/pipeline_storage/es_protocol"
-    es_username = "catalogue/pipeline_storage/matcher/es_username"
-    es_password = "catalogue/pipeline_storage/matcher/es_password"
-  }
+  secret_env_vars = local.pipeline_storage_es_service_secrets["matcher"]
 
-  subnets             = var.subnets
-  max_capacity        = 10
-  messages_bucket_arn = aws_s3_bucket.messages.arn
-  queue_read_policy   = module.matcher_input_queue.read_policy
+  subnets           = var.subnets
+  max_capacity      = local.max_capacity
+  queue_read_policy = module.matcher_input_queue.read_policy
+
+  depends_on = [
+    null_resource.elasticsearch_users,
+  ]
 
   deployment_service_env  = var.release_label
   deployment_service_name = "matcher"
@@ -82,9 +89,8 @@ resource "aws_iam_role_policy" "matcher_lock_readwrite" {
 module "matcher_topic" {
   source = "../modules/topic"
 
-  name                = "${local.namespace_hyphen}_matcher"
-  role_names          = [module.matcher.task_role_name]
-  messages_bucket_arn = aws_s3_bucket.messages.arn
+  name       = "${local.namespace_hyphen}_matcher"
+  role_names = [module.matcher.task_role_name]
 }
 
 module "matcher_scaling_alarm" {

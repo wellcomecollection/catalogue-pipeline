@@ -4,7 +4,9 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
 import uk.ac.wellcome.models.work.internal.{
-  DigitalLocationDeprecated,
+  AccessCondition,
+  AccessStatus,
+  DigitalLocation,
   IdState,
   IdentifierType,
   ImageData,
@@ -40,12 +42,14 @@ class MiroImageDataTest
         ),
         version = 1,
         locations = List(
-          DigitalLocationDeprecated(
-            url =
-              "https://iiif.wellcomecollection.org/image/B0011308.jpg/info.json",
-            locationType = LocationType("iiif-image"),
+          DigitalLocation(
+            url = "https://iiif.wellcomecollection.org/image/B0011308/info.json",
+            locationType = LocationType.IIIFImageAPI,
             license = Some(License.CC0),
-            credit = Some("Ezra Feilden")
+            credit = Some("Ezra Feilden"),
+            accessConditions = List(
+              AccessCondition(status = Some(AccessStatus.Open))
+            )
           ))
       )
     }

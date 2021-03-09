@@ -33,16 +33,14 @@ module "items_reader" {
   shared_logging_secrets  = var.shared_logging_secrets
 }
 
-module "items_to_dynamo" {
-  source = "./../items_to_dynamo"
+module "item_linker" {
+  source = "./../sierra_linker"
+
+  resource_type = "items"
 
   demultiplexer_topic_arn = module.items_reader.topic_arn
 
-  container_image = local.sierra_items_to_dynamo_image
-
-  vhs_sierra_items_full_access_policy = module.vhs_sierra_items.full_access_policy
-  vhs_sierra_items_table_name         = module.vhs_sierra_items.table_name
-  vhs_sierra_items_bucket_name        = module.vhs_sierra_items.bucket_name
+  container_image = local.sierra_linker_image
 
   cluster_name = aws_ecs_cluster.cluster.name
   cluster_arn  = aws_ecs_cluster.cluster.arn
@@ -58,30 +56,27 @@ module "items_to_dynamo" {
   interservice_security_group_id   = var.interservice_security_group_id
 
   deployment_service_env  = var.deployment_env
-  deployment_service_name = "items-to-dynamo"
+  deployment_service_name = "items-linker"
   shared_logging_secrets  = var.shared_logging_secrets
 }
 
 module "items_merger" {
-  source = "./../item_merger"
+  source = "./../sierra_merger"
 
-  container_image = local.sierra_item_merger_image
+  resource_type     = "items"
+  updates_topic_arn = module.item_linker.topic_arn
 
-  updates_topic_arn = module.items_to_dynamo.topic_arn
+  container_image = local.sierra_merger_image
+
+  vhs_table_name        = module.vhs_sierra.table_name
+  vhs_bucket_name       = module.vhs_sierra.bucket_name
+  vhs_read_write_policy = module.vhs_sierra.full_access_policy
 
   cluster_name = aws_ecs_cluster.cluster.name
   cluster_arn  = aws_ecs_cluster.cluster.arn
   vpc_id       = var.vpc_id
 
   dlq_alarm_arn = var.dlq_alarm_arn
-
-  sierra_transformable_vhs_full_access_policy = module.vhs_sierra.full_access_policy
-  sierra_transformable_vhs_dynamo_table_name  = module.vhs_sierra.table_name
-  sierra_transformable_vhs_bucket_name        = module.vhs_sierra.bucket_name
-
-  sierra_items_vhs_bucket_name       = module.vhs_sierra_items.bucket_name
-  sierra_items_vhs_dynamo_table_name = module.vhs_sierra_items.table_name
-  sierra_items_vhs_read_policy       = module.vhs_sierra_items.read_policy
 
   namespace_id = aws_service_discovery_private_dns_namespace.namespace.id
   namespace    = local.namespace_hyphen

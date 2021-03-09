@@ -17,12 +17,7 @@ import uk.ac.wellcome.models.work.internal.Format.{
 }
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
-import uk.ac.wellcome.platform.api.models.{
-  FormatFilter,
-  ItemLocationTypeIdFilter,
-  SearchOptions,
-  SearchQuery
-}
+import uk.ac.wellcome.platform.api.models._
 import WorkState.Indexed
 
 class ElasticsearchServiceTest
@@ -31,14 +26,11 @@ class ElasticsearchServiceTest
     with ElasticsearchFixtures
     with SearchOptionsGenerators
     with ItemsGenerators
-    with SubjectGenerators
-    with GenreGenerators
-    with WorkGenerators
-    with ContributorGenerators {
+    with WorkGenerators {
 
   val searchService = new ElasticsearchService(elasticClient)
 
-  val defaultSearchOptions: SearchOptions =
+  val defaultSearchOptions =
     createWorksSearchOptions
 
   describe("findResultById") {
@@ -264,8 +256,8 @@ class ElasticsearchServiceTest
           .title("Tumbling tangerines")
           .items(
             List(
-              createItemWithLocationType(LocationType("iiif-image")),
-              createItemWithLocationType(LocationType("acqi"))
+              createItemWithLocationType(LocationType.IIIFImageAPI),
+              createItemWithLocationType(LocationType.ClosedStores)
             )
           )
 
@@ -273,7 +265,7 @@ class ElasticsearchServiceTest
           .title("Tumbling tangerines")
           .items(
             List(
-              createItemWithLocationType(LocationType("acqi"))
+              createItemWithLocationType(LocationType.ClosedStores)
             )
           )
 
@@ -297,8 +289,8 @@ class ElasticsearchServiceTest
             .title("Tumbling tangerines")
             .items(
               List(
-                createItemWithLocationType(LocationType("iiif-image")),
-                createItemWithLocationType(LocationType("acqi"))
+                createItemWithLocationType(LocationType.IIIFImageAPI),
+                createItemWithLocationType(LocationType.ClosedStores)
               )
             )
 
@@ -307,7 +299,7 @@ class ElasticsearchServiceTest
             .title("Tumbling tangerines")
             .items(
               List(
-                createItemWithLocationType(LocationType("acqi"))
+                createItemWithLocationType(LocationType.ClosedStores)
               )
             )
 
@@ -316,7 +308,7 @@ class ElasticsearchServiceTest
             .title("Tumbling tangerines")
             .items(
               List(
-                createItemWithLocationType(LocationType("digit"))
+                createItemWithLocationType(LocationType.OpenShelves)
               )
             )
 
@@ -328,7 +320,7 @@ class ElasticsearchServiceTest
             searchQuery = Some(SearchQuery("tangerines")),
             filters = List(
               ItemLocationTypeIdFilter(
-                locationTypeIds = List("iiif-image", "digit")))
+                locationTypeIds = List("iiif-image", "open-shelves")))
           ),
           expectedWorks = List(work, work2)
         )
@@ -349,16 +341,23 @@ class ElasticsearchServiceTest
     }
   }
 
-  private def createItemWithLocationType(
+  def createItemWithLocationType(
     locationType: LocationType): Item[IdState.Minted] =
     createIdentifiedItemWith(
       locations = List(
-        // This test really shouldn't be affected by physical/digital locations;
-        // we just pick randomly here to ensure we get a good mixture.
-        chooseFrom(
-          createPhysicalLocationWith(locationType = locationType),
-          createDigitalLocationWith(locationType = locationType)
-        )
+        locationType match {
+          case LocationType.ClosedStores =>
+            createPhysicalLocationWith(
+              locationType = LocationType.ClosedStores,
+              label = LocationType.ClosedStores.label
+            )
+
+          case physicalLocationType: PhysicalLocationType =>
+            createPhysicalLocationWith(locationType = physicalLocationType)
+
+          case digitalLocationType: DigitalLocationType =>
+            createDigitalLocationWith(locationType = digitalLocationType)
+        }
       )
     )
 
@@ -368,10 +367,10 @@ class ElasticsearchServiceTest
 
     insertIntoElasticsearch(index, works: _*)
 
-    works.sortBy(_.state.canonicalId).toList
+    works.sortBy(_.state.canonicalId)
   }
 
-  private def searchResults(index: Index, searchOptions: SearchOptions) = {
+  private def searchResults(index: Index, searchOptions: WorkSearchOptions) = {
     val searchResponseFuture =
       searchService.executeSearch(searchOptions, WorksRequestBuilder, index)
     whenReady(searchResponseFuture) { response =>
@@ -381,7 +380,7 @@ class ElasticsearchServiceTest
 
   private def assertResultsAreCorrect(
     index: Index,
-    searchOptions: SearchOptions = createWorksSearchOptions,
+    searchOptions: WorkSearchOptions = createWorksSearchOptions,
     expectedWorks: List[Work.Visible[Indexed]],
     scored: Option[Boolean] = None) = {
     searchResults(index, searchOptions) should contain theSameElementsAs expectedWorks

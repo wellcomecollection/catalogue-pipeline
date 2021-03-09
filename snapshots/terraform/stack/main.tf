@@ -18,6 +18,8 @@ module "snapshot_generator" {
 
   dlq_alarm_arn = var.dlq_alarm_arn
 
+  elastic_cloud_vpce_sg_id = var.elastic_cloud_vpce_sg_id
+
   vpc_id  = var.vpc_id
   subnets = var.subnets
 }

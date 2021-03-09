@@ -3,6 +3,7 @@ package uk.ac.wellcome.platform.merger.models
 import java.time.Instant
 import uk.ac.wellcome.models.work.internal._
 import WorkState.{Identified, Merged}
+import ImageState.Initial
 import WorkFsm._
 
 /*
@@ -14,19 +15,23 @@ import WorkFsm._
 case class MergerOutcome(resultWorks: Seq[Work[Identified]],
                          imagesWithSources: Seq[ImageDataWithSource]) {
 
-  def mergedWorksWithTime(modifiedTime: Instant): Seq[Work[Merged]] =
-    resultWorks.map(_.transition[Merged](Some(modifiedTime)))
+  def mergedWorksAndImagesWithTime(
+    modifiedTime: Instant): Seq[Either[Work[Merged], Image[Initial]]] =
+    mergedWorksWithTime(modifiedTime).map(Left(_)) ++ mergedImagesWithTime(
+      modifiedTime).map(Right(_))
 
-  def mergedImagesWithTime(
-    modifiedTime: Instant): Seq[Image[ImageState.Initial]] =
+  def mergedWorksWithTime(modifiedTime: Instant): Seq[Work[Merged]] =
+    resultWorks.map(_.transition[Merged](modifiedTime))
+
+  def mergedImagesWithTime(modifiedTime: Instant): Seq[Image[Initial]] =
     imagesWithSources.map {
       case ImageDataWithSource(imageData, source) =>
-        Image[ImageState.Initial](
+        Image[Initial](
           version = imageData.version,
           locations = imageData.locations,
           source = source,
           modifiedTime = modifiedTime,
-          state = ImageState.Initial(
+          state = Initial(
             sourceIdentifier = imageData.id.sourceIdentifier,
             canonicalId = imageData.id.canonicalId
           )

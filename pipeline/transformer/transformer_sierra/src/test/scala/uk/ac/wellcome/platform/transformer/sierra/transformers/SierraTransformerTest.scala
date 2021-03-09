@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import java.time.Instant
-
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.generators.WorkGenerators
@@ -12,15 +11,27 @@ import uk.ac.wellcome.platform.transformer.sierra.generators.MarcGenerators
 import uk.ac.wellcome.platform.transformer.sierra.source.MarcSubfield
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.work.internal.Format.{Books, Pictures}
-import uk.ac.wellcome.sierra_adapter.model.{
+import WorkState.Source
+import org.scalatest.Assertion
+import uk.ac.wellcome.models.work.internal.AccessStatus.LicensedResources
+import uk.ac.wellcome.models.work.internal.DeletedReason.{
+  DeletedFromSource,
+  SuppressedFromSource
+}
+import uk.ac.wellcome.models.work.internal.InvisibilityReason.{
+  SourceFieldMissing,
+  UnableToTransform
+}
+import uk.ac.wellcome.models.work.internal.LocationType.OnlineResource
+import weco.catalogue.sierra_adapter.generators.SierraGenerators
+import weco.catalogue.sierra_adapter.models.Implicits._
+import weco.catalogue.sierra_adapter.models.{
   SierraBibNumber,
   SierraBibRecord,
-  SierraGenerators,
   SierraItemNumber,
   SierraItemRecord,
   SierraTransformable
 }
-import WorkState.Source
 
 class SierraTransformerTest
     extends AnyFunSpec
@@ -30,7 +41,7 @@ class SierraTransformerTest
     with SierraTransformableTestBase
     with WorkGenerators {
 
-  it("performs a transformation on a work with physical items") {
+  it("transforms a work with physical items") {
     val itemRecords = List(
       createSierraItemRecord,
       createSierraItemRecord
@@ -60,7 +71,7 @@ class SierraTransformerTest
 
     actualIdentifiers should contain theSameElementsAs expectedIdentifiers
   }
-  it("performs a transformation on a work with empty code in the lang field") {
+  it("transforms a work with empty code in the lang field") {
     val number = createSierraBibNumber
     val data =
       s"""
@@ -110,8 +121,7 @@ class SierraTransformerTest
   it("extracts information from items") {
     val bibId = createSierraBibNumber
     val itemId = createSierraItemNumber
-    val locationType = LocationType("sgmed")
-    val locationLabel = "A museum of mermaids"
+
     def itemData(itemId: SierraItemNumber,
                  modifiedDate: Instant,
                  bibIds: List[SierraBibNumber]) =
@@ -119,8 +129,8 @@ class SierraTransformerTest
          |{
          |  "id": "$itemId",
          |  "location": {
-         |    "code": "${locationType.id}",
-         |    "name": "$locationLabel"
+         |    "code": "sgmed",
+         |    "name": "Closed stores Med."
          |  }
          |}
          |""".stripMargin
@@ -160,14 +170,19 @@ class SierraTransformerTest
       id = IdState.Identifiable(
         sourceIdentifier = expectedSourceIdentifier,
         otherIdentifiers = expectedOtherIdentifiers),
-      locations = List(PhysicalLocationDeprecated(locationType, locationLabel))
+      locations = List(
+        PhysicalLocation(
+          locationType = LocationType.ClosedStores,
+          label = LocationType.ClosedStores.label
+        )
+      )
     )
   }
 
   it("extracts title from items") {
     val bibId = createSierraBibNumber
     val itemId = createSierraItemNumber
-    val locationType = LocationType("sgmed")
+    val locationType = LocationType.ClosedStores
     val locationLabel = "A museum of mermaids"
     def itemData(itemId: SierraItemNumber,
                  modifiedDate: Instant,
@@ -211,20 +226,21 @@ class SierraTransformerTest
   it("returns an InvisibleWork if there isn't any bib data") {
     assertTransformReturnsInvisibleWork(
       maybeBibRecord = None,
-      Instant.EPOCH
+      modifiedDate = Instant.EPOCH,
+      invisibilityReasons = List(SourceFieldMissing("bibData"))
     )
   }
 
-  it(
-    "does not perform a transformation without bibData, even if some itemData is present") {
+  it("does not transform without bibData, even if some itemData is present") {
     assertTransformReturnsInvisibleWork(
       maybeBibRecord = None,
-      Instant.EPOCH,
-      itemRecords = List(createSierraItemRecord)
+      modifiedDate = Instant.EPOCH,
+      itemRecords = List(createSierraItemRecord),
+      invisibilityReasons = List(SourceFieldMissing("bibData"))
     )
   }
 
-  it("performs a transformation on a work using all varfields") {
+  it("transforms a work using all varfields") {
     val id = createSierraBibNumber
     val title = "Hi Diddle Dee Dee"
     val lettering = "An actor's life for me"
@@ -333,7 +349,7 @@ class SierraTransformerTest
       .languages(expectedLanguages)
   }
 
-  it("makes deleted works invisible") {
+  it("deletes works with 'deleted': true") {
     val id = createSierraBibNumber
     val title = "Hi Diddle Dee Dee"
     val data =
@@ -347,10 +363,13 @@ class SierraTransformerTest
         """.stripMargin
 
     val work = transformDataToWork(id = id, data = data)
-    work shouldBe a[Work.Invisible[_]]
+
+    work shouldBe a[Work.Deleted[_]]
+    val deletedWork = work.asInstanceOf[Work.Deleted[_]]
+    deletedWork.deletedReason shouldBe DeletedFromSource("Sierra")
   }
 
-  it("makes suppressed works invisible") {
+  it("deletes works with 'suppressed': true") {
     val id = createSierraBibNumber
     val title = "Hi Diddle Dee Dee"
     val data =
@@ -364,7 +383,10 @@ class SierraTransformerTest
         """.stripMargin
 
     val work = transformDataToWork(id = id, data = data)
-    work shouldBe a[Work.Invisible[_]]
+
+    work shouldBe a[Work.Deleted[_]]
+    val deletedWork = work.asInstanceOf[Work.Deleted[_]]
+    deletedWork.deletedReason shouldBe SuppressedFromSource("Sierra")
   }
 
   it("transforms bib records that don't have a title") {
@@ -375,8 +397,7 @@ class SierraTransformerTest
       s"""
          |{
          |  "id": "$id",
-         |  "deletedDate": "2017-02-20",
-         |  "deleted": true,
+         |  "deleted": false,
          |  "orders": [],
          |  "locations": [],
          |  "fixedFields": {},
@@ -853,7 +874,9 @@ class SierraTransformerTest
 
     assertTransformReturnsInvisibleWork(
       maybeBibRecord = Some(bibRecord),
-      bibRecord.modifiedDate
+      modifiedDate = bibRecord.modifiedDate,
+      invisibilityReasons =
+        List(UnableToTransform("Could not find field 245 to create title"))
     )
   }
 
@@ -878,6 +901,49 @@ class SierraTransformerTest
     work.asInstanceOf[Work.Visible[Source]].data.format shouldBe Some(
       Pictures
     )
+  }
+
+  it("creates an item from field 856") {
+    val id = createSierraBibNumber
+    val data =
+      s"""
+         |{
+         |  "id": "$id",
+         |  "varFields": [
+         |    ${createTitleVarfield()},
+         |    {
+         |      "marcTag": "856",
+         |      "subfields": [
+         |        {"tag": "u", "content": "https://example.org/journal"},
+         |        {"tag": "z", "content": "View this journal"}
+         |      ]
+         |    }
+         |  ]
+         |}
+       """.stripMargin
+
+    val sierraTransformable = createSierraTransformableWith(
+      maybeBibRecord = Some(createSierraBibRecordWith(id = id, data = data))
+    )
+
+    val work = transformToWork(sierraTransformable)
+
+    val items = work.data.items
+
+    items should contain(
+      Item(
+        title = None,
+        locations = List(
+          DigitalLocation(
+            url = "https://example.org/journal",
+            linkText = Some("View this journal"),
+            locationType = OnlineResource,
+            accessConditions = List(
+              AccessCondition(status = Some(LicensedResources))
+            )
+          )
+        )
+      ))
   }
 
   describe("throws a TransformerException when passed invalid data") {
@@ -945,13 +1011,12 @@ class SierraTransformerTest
                             modifiedDate: Instant,
                             bibIds: List[SierraBibNumber]) =
     s"""
-                                                                                                               |{
-                                                                                                               |  "id": "$id",
-                                                                                                               |  "updatedDate": "${modifiedDate.toString}",
-                                                                                                               |  "bibIds": ${toJson(
-         bibIds).get}
-                                                                                                               |}
-                                                                                                               |""".stripMargin
+      |{
+      |  "id": "$id",
+      |  "updatedDate": "${modifiedDate.toString}",
+      |  "bibIds": ${toJson(bibIds).get}
+      |}
+      |""".stripMargin
 
   private def transformDataToWork(
     id: SierraBibNumber,
@@ -973,7 +1038,8 @@ class SierraTransformerTest
   private def assertTransformReturnsInvisibleWork(
     maybeBibRecord: Option[SierraBibRecord],
     modifiedDate: Instant,
-    itemRecords: List[SierraItemRecord] = List()) = {
+    itemRecords: List[SierraItemRecord] = List(),
+    invisibilityReasons: List[InvisibilityReason]): Assertion = {
     val id = createSierraBibNumber
 
     val sierraTransformable = createSierraTransformableWith(
@@ -994,7 +1060,8 @@ class SierraTransformerTest
         modifiedDate
       ),
       version = 1,
-      data = WorkData()
+      data = WorkData(),
+      invisibilityReasons = invisibilityReasons
     )
   }
 

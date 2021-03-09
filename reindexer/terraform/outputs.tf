@@ -22,3 +22,11 @@ output "calm_reindexer_topic_name" {
 output "calm_reindexer_topic_arn" {
   value = local.calm_reindexer_topic_arn
 }
+
+output "calm_deletion_checker_topic_name" {
+  value = local.calm_deletion_checker_topic_name
+}
+
+output "calm_deletion_checker_topic_arn" {
+  value = local.calm_deletion_checker_topic_arn
+}

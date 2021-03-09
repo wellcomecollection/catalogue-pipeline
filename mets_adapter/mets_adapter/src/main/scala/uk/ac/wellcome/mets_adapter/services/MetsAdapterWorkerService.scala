@@ -12,10 +12,10 @@ import uk.ac.wellcome.typesafe.Runnable
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.mets_adapter.models._
 import uk.ac.wellcome.storage.{Identified, Version}
-import uk.ac.wellcome.bigmessaging.FlowOps
 import uk.ac.wellcome.messaging.MessageSender
 import weco.catalogue.source_model.MetsSourcePayload
 import weco.catalogue.source_model.mets.MetsSourceData
+import weco.flows.FlowOps
 
 import scala.concurrent.Future
 

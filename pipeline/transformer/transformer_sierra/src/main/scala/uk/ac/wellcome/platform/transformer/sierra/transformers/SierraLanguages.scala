@@ -7,9 +7,10 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraBibData,
   SierraQueryOps
 }
+import weco.catalogue.sierra_adapter.models.SierraBibNumber
 
 object SierraLanguages
-    extends SierraDataTransformer
+    extends SierraIdentifiedDataTransformer
     with SierraQueryOps
     with Logging {
   type Output = List[Language]
@@ -34,7 +35,7 @@ object SierraLanguages
   //    This is a repeatable field, as is the subfield.
   //    See https://www.loc.gov/marc/bibliographic/bd041.html
   //
-  override def apply(bibData: SierraBibData): List[Language] = {
+  override def apply(bibId: SierraBibNumber, bibData: SierraBibData): List[Language] = {
     val primaryLanguage =
       bibData.lang
         .map { lang =>
@@ -47,13 +48,23 @@ object SierraLanguages
       bibData
         .subfieldsWithTag("041" -> "a")
         .contents
+        .map {
+          // Some of our records include whitespace in this field, but it's irrelevant
+          // and can be safely discarded.  e.g. "ger " means the same as "ger"
+          _.trim
+        }
+        .map {
+          // Most of our records use a lowercase code, but if not we can safely lowercase
+          // the code.  e.g. "Lat" means the same as "lat"
+          _.toLowerCase()
+        }
         .map { code =>
           (code, MarcLanguageCodeList.lookupByCode(code))
         }
         .map {
           case (_, Some(lang)) => Some(lang)
           case (code, None) =>
-            warn(s"Unrecognised code in MARC 041 ǂa: $code")
+            warn(s"$bibId: Unrecognised code in MARC 041 ǂa: $code")
             None
         }
 

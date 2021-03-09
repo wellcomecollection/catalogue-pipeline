@@ -9,23 +9,28 @@ variable "egress_security_group_id" {}
 variable "interservice_security_group_id" {}
 variable "bibs_windows_topic_arns" {}
 variable "items_windows_topic_arns" {}
+variable "holdings_windows_topic_arns" {}
 variable "deployment_env" {}
 variable "shared_logging_secrets" {
-  type = map
+  type = map(any)
 }
 
 variable "sierra_reader_image" {
   type = string
 }
 
-variable "sierra_bib_merger_image" {
+variable "sierra_linker_image" {
   type = string
 }
 
-variable "sierra_item_merger_image" {
+variable "sierra_merger_image" {
   type = string
 }
 
-variable "sierra_items_to_dynamo_image" {
+variable "sierra_indexer_image" {
+  type = string
+}
+
+variable "reporting_reindex_topic_arn" {
   type = string
 }

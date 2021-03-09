@@ -1,49 +1,77 @@
 package uk.ac.wellcome.models.work.internal
 
-import java.io.InputStream
+import enumeratum.{Enum, EnumEntry}
+import io.circe.{Decoder, Encoder}
 
-import com.github.tototoshi.csv.CSVReader
+sealed trait LocationType extends EnumEntry {
+  val id: String
+  val label: String
 
-import scala.io.Source
+  override lazy val entryName: String = id
+}
 
-case class LocationType(
-  id: String,
-  label: String
-)
+sealed trait PhysicalLocationType extends LocationType
+sealed trait DigitalLocationType extends LocationType
 
-case object LocationType {
-  private val stream: InputStream =
-    getClass.getResourceAsStream("/location-types.csv")
-  private val source = Source.fromInputStream(stream)
-  private val csvReader = CSVReader.open(source)
-  private val csvRows = csvReader.all()
+object LocationType extends Enum[LocationType] {
+  val values = findValues
 
-  // location-types.csv is a list of 3-tuples, e.g.:
-  //
-  //
-  //    ThumbnailImage,thumbnail-image,Thumbnail Image
-  //    2,acqi,Info Service acquisitions
-  //    3,acql,Wellcome Library
-  //
-  private val locationTypeMap: Map[String, LocationType] = csvRows
-    .map { row =>
-      Map(
-        row(1) -> LocationType(
-          id = row(1),
-          label = row(2)
-        )
-      )
-    }
-    .fold(Map()) { (x, y) =>
-      x ++ y
+  implicit val locationTypeEncoder: Encoder[LocationType] =
+    Encoder.forProduct1("id")(_.id)
+
+  implicit val physicalLocationTypeEncoder: Encoder[PhysicalLocationType] =
+    locType => locationTypeEncoder.apply(locType)
+
+  implicit val digitalLocationTypeEncoder: Encoder[DigitalLocationType] =
+    locType => locationTypeEncoder.apply(locType)
+
+  implicit val locationTypeDecoder: Decoder[LocationType] =
+    Decoder.forProduct1("id")(LocationType.withName)
+
+  implicit val physicalLocationTypeDecoder: Decoder[PhysicalLocationType] =
+    cursor =>
+      locationTypeDecoder.apply(cursor).map {
+        _.asInstanceOf[PhysicalLocationType]
     }
 
-  def apply(id: String): LocationType = {
-    locationTypeMap.get(id) match {
-      case Some(locType) => locType
-      case None =>
-        throw new IllegalArgumentException(s"Unrecognised location type: [$id]")
+  implicit val digitalLocationTypeDecoder: Decoder[DigitalLocationType] =
+    cursor =>
+      locationTypeDecoder.apply(cursor).map {
+        _.asInstanceOf[DigitalLocationType]
     }
+
+  case object ClosedStores extends PhysicalLocationType {
+    val id = "closed-stores"
+    val label = "Closed stores"
   }
 
+  case object OpenShelves extends PhysicalLocationType {
+    val id = "open-shelves"
+    val label = "Open shelves"
+  }
+
+  case object OnExhibition extends PhysicalLocationType {
+    val id = "on-exhibition"
+    val label = "On exhibition"
+  }
+
+  case object IIIFPresentationAPI extends DigitalLocationType {
+    val id = "iiif-presentation"
+    val label = "IIIF Presentation API"
+  }
+
+  case object IIIFImageAPI extends DigitalLocationType {
+    val id = "iiif-image"
+    val label = "IIIF Image API"
+  }
+
+  case object ThumbnailImage extends DigitalLocationType {
+    val id = "thumbnail-image"
+    val label = "Thumbnail image"
+  }
+
+  case object OnlineResource extends DigitalLocationType {
+    val id = "online-resource"
+    val label = "Online resource"
+  }
 }

@@ -23,11 +23,14 @@ class MiroItemsTest
         )) shouldBe List(
         Item(
           id = IdState.Unidentifiable,
-          locations = List(DigitalLocationDeprecated(
-            "https://iiif.wellcomecollection.org/image/B0011308.jpg/info.json",
-            LocationType("iiif-image"),
-            Some(License.CC0),
-            credit = Some("Ezra Feilden")
+          locations = List(DigitalLocation(
+            url = "https://iiif.wellcomecollection.org/image/B0011308/info.json",
+            locationType = LocationType.IIIFImageAPI,
+            license = Some(License.CC0),
+            credit = Some("Ezra Feilden"),
+            accessConditions = List(
+              AccessCondition(status = Some(AccessStatus.Open))
+            )
           ))
         ))
     }

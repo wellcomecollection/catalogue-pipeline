@@ -1,5 +1,13 @@
 # RDS
 
+output "rds_cluster_id" {
+  value = module.identifiers_delta_rds_cluster.rds_cluster_id
+}
+
+output "rds_subnet_group_name" {
+  value = aws_db_subnet_group.default.name
+}
+
 output "rds_access_security_group_id" {
   value = aws_security_group.rds_ingress_security_group.id
 }
@@ -29,4 +37,22 @@ output "vhs_miro_inventory_table_name" {
 
 output "vhs_miro_inventory_assumable_read_role" {
   value = module.vhs_miro_migration.assumable_read_role
+}
+
+# Catalogue Pipeline Elastic Cloud
+
+output "catalogue_pipeline_storage_elastic_cloud_sg_id" {
+  value = module.platform_privatelink.security_group_id
+}
+
+output "catalogue_elastic_cloud_sg_id" {
+  value = module.catalogue_privatelink.security_group_id
+}
+
+output "traffic_filter_platform_vpce_id" {
+  value = module.platform_privatelink.traffic_filter_vpce_id
+}
+
+output "traffic_filter_public_internet_id" {
+  value = ec_deployment_traffic_filter.public_internet.id
 }

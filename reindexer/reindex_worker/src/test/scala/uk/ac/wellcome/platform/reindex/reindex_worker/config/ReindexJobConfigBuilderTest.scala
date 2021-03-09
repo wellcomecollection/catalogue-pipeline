@@ -11,7 +11,7 @@ import uk.ac.wellcome.storage.dynamo.DynamoConfig
 
 class ReindexJobConfigBuilderTest extends AnyFunSpec with Matchers {
   it("reads the config") {
-    // This is the config for the reindex worker at 2020-12-13
+    // This is the config for the reindex worker at 2020-12-16
     val config =
       """
         |{
@@ -63,7 +63,7 @@ class ReindexJobConfigBuilderTest extends AnyFunSpec with Matchers {
         |  "mets--catalogue": {
         |    "source": "mets",
         |    "dynamoConfig": {
-        |      "tableName": "mets-adapter-store"
+        |      "tableName": "mets-adapter-store-delta"
         |    },
         |    "destinationConfig": {
         |      "topicArn": "arn:aws:sns:eu-west-1:760097843905:mets_reindexer_topic"
@@ -84,7 +84,7 @@ class ReindexJobConfigBuilderTest extends AnyFunSpec with Matchers {
     val configMap = ReindexJobConfigBuilder.buildReindexJobConfigMap(config)
 
     configMap("mets--catalogue") shouldBe ReindexJobConfig(
-      dynamoConfig = DynamoConfig(tableName = "mets-adapter-store"),
+      dynamoConfig = DynamoConfig(tableName = "mets-adapter-store-delta"),
       destinationConfig = SNSConfig(
         topicArn = "arn:aws:sns:eu-west-1:760097843905:mets_reindexer_topic"),
       source = ReindexSource.Mets

@@ -1,6 +1,7 @@
 package uk.ac.wellcome.platform.api.images
 
-import uk.ac.wellcome.models.work.internal.License
+import uk.ac.wellcome.models.work.internal.{Contributor, License, Person}
+import uk.ac.wellcome.models.Implicits._
 
 class ImagesFiltersTest extends ApiImagesTestBase {
   describe("filtering images by license") {
@@ -22,108 +23,116 @@ class ImagesFiltersTest extends ApiImagesTestBase {
     }
   }
 
+  describe("filtering images by source contributors") {
+    val machiavelli =
+      Contributor(agent = Person("Machiavelli, Niccolo"), roles = Nil)
+    val hypatia = Contributor(agent = Person("Hypatia"), roles = Nil)
+
+    val canonicalMachiavelliImage = createImageData.toIndexedImageWith(
+      parentWork = identifiedWork().contributors(List(machiavelli))
+    )
+    val redirectedHypatiaImage = createImageData.toIndexedImageWith(
+      parentWork = identifiedWork().contributors(List(hypatia))
+    )
+
+    val images = List(
+      canonicalMachiavelliImage,
+      redirectedHypatiaImage
+    )
+
+    it("filters by contributors from the canonical source work") {
+      withImagesApi {
+        case (imagesIndex, routes) =>
+          insertImagesIntoElasticsearch(imagesIndex, images: _*)
+          assertJsonResponse(
+            routes,
+            s"""/$apiPrefix/images?source.contributors.agent.label="Machiavelli,%20Niccolo"""") {
+            Status.OK -> imagesListResponse(List(canonicalMachiavelliImage))
+          }
+      }
+    }
+
+    it("filters by contributors from the redirected source work") {
+      withImagesApi {
+        case (imagesIndex, routes) =>
+          insertImagesIntoElasticsearch(imagesIndex, images: _*)
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/images?source.contributors.agent.label=Hypatia") {
+            Status.OK -> imagesListResponse(List(redirectedHypatiaImage))
+          }
+      }
+    }
+
+    it("filters by multiple contributors from both source works") {
+      withImagesApi {
+        case (imagesIndex, routes) =>
+          insertImagesIntoElasticsearch(imagesIndex, images: _*)
+          assertJsonResponse(
+            routes,
+            s"""/$apiPrefix/images?source.contributors.agent.label="Machiavelli,%20Niccolo",Hypatia""",
+            unordered = true) {
+            Status.OK -> imagesListResponse(
+              List(canonicalMachiavelliImage, redirectedHypatiaImage))
+          }
+      }
+    }
+  }
+
   describe("filtering images by color") {
     val redImage = createImageData.toIndexedImageWith(
       inferredData = createInferredData.map(
         _.copy(
           palette = List(
-            "3/4",
-            "3/4",
-            "6/4",
-            "6/4",
-            "30/4",
-            "18/4",
-            "1/4",
-            "5/6",
-            "5/6",
-            "34/6",
-            "34/6",
-            "130/6",
-            "70/6",
-            "2/6",
-            "7/8",
-            "7/8",
-            "69/8",
-            "69/8",
-            "301/8",
-            "181/8",
-            "2/8"
+            "7/0",
+            "7/0",
+            "7/0",
+            "71/1",
+            "71/1",
+            "71/1",
+            "268/2",
+            "268/2",
+            "268/2",
           ))))
     val blueImage = createImageData.toIndexedImageWith(
-      inferredData = createInferredData.map(_.copy(palette = List(
-        "48/4",
-        "48/4",
-        "5/4",
-        "5/4",
-        "26/4",
-        "32/4",
-        "16/4",
-        "180/6",
-        "180/6",
-        "50/6",
-        "50/6",
-        "93/6",
-        "144/6",
-        "36/6",
-        "448/8",
-        "448/8",
-        "83/8",
-        "83/8",
-        "164/8",
-        "320/8",
-        "128/8"
-      ))))
+      inferredData = createInferredData.map(
+        _.copy(
+          palette = List(
+            "9/0",
+            "9/0",
+            "9/0",
+            "5/0",
+            "74/1",
+            "74/1",
+            "74/1",
+            "35/1",
+            "50/1",
+            "29/1",
+            "38/1",
+            "273/2",
+            "273/2",
+            "273/2",
+            "187/2",
+            "165/2",
+            "115/2",
+            "129/2",
+          ))))
     val slightlyLessRedImage = createImageData.toIndexedImageWith(
       inferredData = createInferredData.map(
         _.copy(
           palette = List(
-            "0/0",
-            "0/0",
-            "6/4",
-            "6/4",
-            "30/4",
-            "18/4",
-            "1/4",
-            "5/6",
-            "5/6",
-            "34/6",
-            "34/6",
-            "130/6",
-            "70/6",
-            "2/6",
-            "7/8",
-            "7/8",
-            "69/8",
-            "69/8",
-            "301/8",
-            "181/8",
-            "2/8"
+            "7/0",
+            "71/1",
+            "71/1",
+            "71/1",
           ))))
     val evenLessRedImage = createImageData.toIndexedImageWith(
       inferredData = createInferredData.map(
         _.copy(
           palette = List(
-            "0/0",
-            "0/0",
-            "6/4",
-            "6/4",
-            "30/4",
-            "18/4",
-            "1/4",
-            "0/0",
-            "0/0",
-            "34/6",
-            "34/6",
-            "130/6",
-            "70/6",
-            "2/6",
-            "7/8",
-            "7/8",
-            "69/8",
-            "69/8",
-            "301/8",
-            "181/8",
-            "2/8"
+            "7/0",
+            "7/0",
+            "7/0",
           ))))
 
     it("filters by color") {

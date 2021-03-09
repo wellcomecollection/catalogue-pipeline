@@ -5,10 +5,9 @@ import scala.concurrent.Future
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
-import org.scanamo.error.DynamoReadError
 import uk.ac.wellcome.models.matcher.WorkNode
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
-import uk.ac.wellcome.platform.matcher.models.{WorkGraph, WorkUpdate}
+import uk.ac.wellcome.platform.matcher.models.{WorkGraph, WorkLinks}
 
 class WorkGraphStoreTest
     extends AnyFunSpec
@@ -22,7 +21,7 @@ class WorkGraphStoreTest
         withWorkGraphStore(graphTable) { workGraphStore =>
           whenReady(
             workGraphStore.findAffectedWorks(
-              WorkUpdate("Not-there", 0, Set.empty))) { workGraph =>
+              WorkLinks("Not-there", 0, Set.empty))) { workGraph =>
             workGraph shouldBe WorkGraph(Set.empty)
           }
         }
@@ -38,7 +37,7 @@ class WorkGraphStoreTest
           put(dynamoClient, graphTable.name)(work)
 
           whenReady(
-            workGraphStore.findAffectedWorks(WorkUpdate("A", 0, Set.empty))) {
+            workGraphStore.findAffectedWorks(WorkLinks("A", 0, Set.empty))) {
             workGraph =>
               workGraph shouldBe WorkGraph(Set(work))
           }
@@ -57,7 +56,7 @@ class WorkGraphStoreTest
           put(dynamoClient, graphTable.name)(workB)
 
           whenReady(
-            workGraphStore.findAffectedWorks(WorkUpdate("A", 0, Set("B")))) {
+            workGraphStore.findAffectedWorks(WorkLinks("A", 0, Set("B")))) {
             workGraph =>
               workGraph.nodes shouldBe Set(workA, workB)
           }
@@ -81,7 +80,7 @@ class WorkGraphStoreTest
           put(dynamoClient, graphTable.name)(workB)
 
           whenReady(
-            workGraphStore.findAffectedWorks(WorkUpdate("A", 0, Set.empty))) {
+            workGraphStore.findAffectedWorks(WorkLinks("A", 0, Set.empty))) {
             workGraph =>
               workGraph.nodes shouldBe Set(workA, workB)
           }
@@ -116,7 +115,7 @@ class WorkGraphStoreTest
           put(dynamoClient, graphTable.name)(workC)
 
           whenReady(
-            workGraphStore.findAffectedWorks(WorkUpdate("A", 0, Set.empty))) {
+            workGraphStore.findAffectedWorks(WorkLinks("A", 0, Set.empty))) {
             workGraph =>
               workGraph.nodes shouldBe Set(workA, workB, workC)
           }
@@ -144,7 +143,7 @@ class WorkGraphStoreTest
           put(dynamoClient, graphTable.name)(workC)
 
           whenReady(
-            workGraphStore.findAffectedWorks(WorkUpdate("B", 0, Set("C")))) {
+            workGraphStore.findAffectedWorks(WorkLinks("B", 0, Set("C")))) {
             workGraph =>
               workGraph.nodes shouldBe Set(workA, workB, workC)
           }
@@ -180,8 +179,7 @@ class WorkGraphStoreTest
       dynamoClient,
       dynamoConfig = createDynamoConfigWith(nonExistentTable)
     ) {
-      override def put(
-        work: WorkNode): Future[Option[Either[DynamoReadError, WorkNode]]] =
+      override def put(nodes: Set[WorkNode]): Future[Unit] =
         Future.failed(expectedException)
     }
 

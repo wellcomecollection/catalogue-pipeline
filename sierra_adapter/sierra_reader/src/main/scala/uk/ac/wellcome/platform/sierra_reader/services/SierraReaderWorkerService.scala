@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.sierra_reader.services
 
 import java.time.Instant
-
 import akka.Done
 import akka.actor.ActorSystem
 import com.amazonaws.services.s3.AmazonS3
@@ -21,32 +20,34 @@ import uk.ac.wellcome.platform.sierra_reader.models.{
   WindowStatus
 }
 import uk.ac.wellcome.platform.sierra_reader.sink.SequentialS3Sink
-import uk.ac.wellcome.sierra.{SierraSource, ThrottleRate}
-import uk.ac.wellcome.sierra_adapter.model.{
-  AbstractSierraRecord,
-  SierraBibRecord,
-  SierraItemRecord
-}
 import uk.ac.wellcome.storage.Identified
 import uk.ac.wellcome.storage.s3.{S3Config, S3ObjectLocation}
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.typesafe.Runnable
+import weco.catalogue.sierra_adapter.models.Implicits._
+import weco.catalogue.sierra_adapter.models.{
+  AbstractSierraRecord,
+  SierraBibRecord,
+  SierraHoldingsRecord,
+  SierraItemRecord
+}
+import weco.catalogue.sierra_reader.source.{SierraSource, ThrottleRate}
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 
 class SierraReaderWorkerService(
   sqsStream: SQSStream[NotificationMessage],
-  s3client: AmazonS3,
   s3Config: S3Config,
   readerConfig: ReaderConfig,
   sierraAPIConfig: SierraAPIConfig
-)(implicit actorSystem: ActorSystem, ec: ExecutionContext)
+)(implicit
+  actorSystem: ActorSystem,
+  ec: ExecutionContext,
+  s3Client: AmazonS3)
     extends Logging
     with Runnable {
-  implicit val s = s3client
   val windowManager = new WindowManager(
-    s3client = s3client,
     s3Config = s3Config,
     readerConfig = readerConfig
   )
@@ -86,11 +87,9 @@ class SierraReaderWorkerService(
     )
 
     val sierraSource = SierraSource(
-      apiUrl = sierraAPIConfig.apiURL,
-      oauthKey = sierraAPIConfig.oauthKey,
-      oauthSecret = sierraAPIConfig.oauthSec,
+      config = sierraAPIConfig,
       throttleRate = ThrottleRate(3, per = 1.second),
-      timeoutMs = 60000
+      timeout = 60 seconds
     )(resourceType = readerConfig.resourceType.toString, params)
 
     val outcome = sierraSource
@@ -116,17 +115,21 @@ class SierraReaderWorkerService(
     }
   }
 
-  private def createRecord: (String, String, Instant) => AbstractSierraRecord =
+  private def createRecord
+    : (String, String, Instant) => AbstractSierraRecord[_] =
     readerConfig.resourceType match {
-      case SierraResourceTypes.bibs  => SierraBibRecord.apply
-      case SierraResourceTypes.items => SierraItemRecord.apply
+      case SierraResourceTypes.bibs     => SierraBibRecord.apply
+      case SierraResourceTypes.items    => SierraItemRecord.apply
+      case SierraResourceTypes.holdings => SierraHoldingsRecord.apply
     }
 
-  private def toJson(records: Seq[AbstractSierraRecord]): Json =
+  private def toJson(records: Seq[AbstractSierraRecord[_]]): Json =
     readerConfig.resourceType match {
       case SierraResourceTypes.bibs =>
         records.asInstanceOf[Seq[SierraBibRecord]].asJson
       case SierraResourceTypes.items =>
         records.asInstanceOf[Seq[SierraItemRecord]].asJson
+      case SierraResourceTypes.holdings =>
+        records.asInstanceOf[Seq[SierraHoldingsRecord]].asJson
     }
 }

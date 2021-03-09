@@ -3,8 +3,10 @@ package uk.ac.wellcome.platform.api.services
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s._
 import com.sksamuel.elastic4s.requests.searches._
-import com.sksamuel.elastic4s.requests.searches.queries.Query
+import com.sksamuel.elastic4s.requests.searches.aggs.TermsAggregation
+import com.sksamuel.elastic4s.requests.searches.queries.{BoolQuery, Query}
 import com.sksamuel.elastic4s.requests.searches.sort._
+import uk.ac.wellcome.display.models.ImageAggregationRequest
 import uk.ac.wellcome.platform.api.elasticsearch.{
   ColorQuery,
   ImageSimilarity,
@@ -12,25 +14,28 @@ import uk.ac.wellcome.platform.api.elasticsearch.{
 }
 import uk.ac.wellcome.platform.api.models.{
   ColorMustQuery,
+  ContributorsFilter,
   ImageFilter,
   ImageMustQuery,
+  ImageSearchOptions,
   LicenseFilter,
-  QueryConfig,
-  SearchOptions
+  QueryConfig
 }
 import uk.ac.wellcome.platform.api.rest.PaginationQuery
 
 class ImagesRequestBuilder(queryConfig: QueryConfig)
-    extends ElasticsearchRequestBuilder {
+    extends ElasticsearchRequestBuilder[ImageSearchOptions] {
 
   val idSort: FieldSort = fieldSort("state.canonicalId").order(SortOrder.ASC)
 
   lazy val colorQuery = new ColorQuery(
-    binSizes = queryConfig.paletteBinSizes
+    binSizes = queryConfig.paletteBinSizes,
+    binMinima = queryConfig.paletteBinMinima
   )
 
-  def request(searchOptions: SearchOptions, index: Index): SearchRequest =
+  def request(searchOptions: ImageSearchOptions, index: Index): SearchRequest =
     search(index)
+      .aggs { filteredAggregationBuilder(searchOptions).filteredAggregations }
       .query(
         searchOptions.searchQuery
           .map { q =>
@@ -38,28 +43,58 @@ class ImagesRequestBuilder(queryConfig: QueryConfig)
           }
           .getOrElse(boolQuery)
           .must(
-            buildImageMustQuery(searchOptions.safeMustQueries[ImageMustQuery])
+            buildImageMustQuery(searchOptions.mustQueries)
           )
           .filter(
-            buildImageFilterQuery(searchOptions.safeFilters[ImageFilter])
+            buildImageFilterQuery(searchOptions.filters)
           )
       )
       .sortBy { sortBy(searchOptions) }
       .limit(searchOptions.pageSize)
       .from(PaginationQuery.safeGetFrom(searchOptions))
 
-  def sortBy(searchOptions: SearchOptions): Seq[Sort] =
+  private def filteredAggregationBuilder(searchOptions: ImageSearchOptions) =
+    new ImageFiltersAndAggregationsBuilder(
+      aggregationRequests = searchOptions.aggregations,
+      filters = searchOptions.filters,
+      requestToAggregation = toAggregation,
+      filterToQuery = buildImageFilterQuery
+    )
+
+  private def toAggregation(aggReq: ImageAggregationRequest) = aggReq match {
+    case ImageAggregationRequest.License =>
+      TermsAggregation("license")
+        .size(100)
+        .field("locations.license.id")
+        .minDocCount(0)
+  }
+
+  def sortBy(searchOptions: ImageSearchOptions): Seq[Sort] =
     if (searchOptions.searchQuery.isDefined || searchOptions.mustQueries.nonEmpty) {
       List(scoreSort(SortOrder.DESC), idSort)
     } else {
       List(idSort)
     }
 
-  def buildImageFilterQuery(filters: Seq[ImageFilter]): Seq[Query] =
-    filters.map {
+  def buildImageFilterQuery(filter: ImageFilter): Query =
+    filter match {
       case LicenseFilter(licenseIds) =>
         termsQuery(field = "locations.license.id", values = licenseIds)
+      case ContributorsFilter(contributorQueries) =>
+        sourcesTermsQuery(
+          "data.contributors.agent.label.keyword",
+          contributorQueries)
     }
+
+  def sourcesTermsQuery[T](sourceField: String,
+                           values: Iterable[T]): BoolQuery =
+    should(
+      termsQuery(s"source.canonicalWork.$sourceField", values),
+      termsQuery(s"source.redirectedWork.$sourceField", values)
+    )
+
+  def buildImageFilterQuery(filters: Seq[ImageFilter]): Seq[Query] =
+    filters.map { buildImageFilterQuery }
 
   def buildImageMustQuery(queries: List[ImageMustQuery]): Seq[Query] =
     queries.map {

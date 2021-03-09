@@ -1,9 +1,11 @@
 module "router_queue" {
   source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
   queue_name      = "${local.namespace_hyphen}_router"
-  topic_arns      = [module.id_minter_topic.arn]
+  topic_arns      = [module.merger_works_topic.arn]
   aws_region      = var.aws_region
   alarm_topic_arn = var.dlq_alarm_arn
+
+  visibility_timeout_seconds = 60
 }
 
 module "router" {
@@ -14,6 +16,7 @@ module "router" {
   security_group_ids = [
     aws_security_group.service_egress.id,
     aws_security_group.interservice.id,
+    var.pipeline_storage_security_group_id,
   ]
 
   cluster_name = aws_ecs_cluster.cluster.name
@@ -34,23 +37,22 @@ module "router" {
     flush_interval_seconds = 30
   }
 
-  secret_env_vars = {
-    es_host     = "catalogue/pipeline_storage/es_host"
-    es_port     = "catalogue/pipeline_storage/es_port"
-    es_protocol = "catalogue/pipeline_storage/es_protocol"
-    es_username = "catalogue/pipeline_storage/router/es_username"
-    es_password = "catalogue/pipeline_storage/router/es_password"
-  }
+  secret_env_vars = local.pipeline_storage_es_service_secrets["router"]
 
   shared_logging_secrets = var.shared_logging_secrets
 
-  subnets             = var.subnets
-  max_capacity        = 10
-  messages_bucket_arn = aws_s3_bucket.messages.arn
-  queue_read_policy   = module.router_queue.read_policy
+  subnets           = var.subnets
+  max_capacity      = min(10, local.max_capacity)
+  queue_read_policy = module.router_queue.read_policy
 
   cpu    = 1024
   memory = 2048
+
+  use_fargate_spot = true
+
+  depends_on = [
+    null_resource.elasticsearch_users,
+  ]
 
   deployment_service_env  = var.release_label
   deployment_service_name = "work-router"
@@ -61,8 +63,6 @@ module "router_path_output_topic" {
 
   name       = "${local.namespace_hyphen}_router_path_output"
   role_names = [module.router.task_role_name]
-
-  messages_bucket_arn = aws_s3_bucket.messages.arn
 }
 
 module "router_work_output_topic" {
@@ -70,8 +70,6 @@ module "router_work_output_topic" {
 
   name       = "${local.namespace_hyphen}_router_work_output"
   role_names = [module.router.task_role_name]
-
-  messages_bucket_arn = aws_s3_bucket.messages.arn
 }
 
 module "router_scaling_alarm" {

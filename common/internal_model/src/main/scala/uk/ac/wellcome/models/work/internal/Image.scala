@@ -5,25 +5,21 @@ import java.time.Instant
 case class ImageData[+State](
   id: State,
   version: Int,
-  locations: List[DigitalLocationDeprecated]
+  locations: List[DigitalLocation]
 ) extends HasId[State]
 
 case class Image[State <: ImageState](
   version: Int,
   state: State,
-  locations: List[DigitalLocationDeprecated],
-  source: ImageSource[State#SourceDataState],
+  locations: List[DigitalLocation],
+  source: ImageSource,
   modifiedTime: Instant
 ) {
   def id: String = state.id
   def sourceIdentifier: SourceIdentifier = state.sourceIdentifier
 
   def transition[OutState <: ImageState](args: OutState#TransitionArgs = ())(
-    implicit transition: ImageFsm.Transition[State, OutState],
-    // The transition helper method does not allow transitions across source
-    // DataState boundaries
-    sourceEqualityWitness: ImageSource[State#SourceDataState] =:= ImageSource[
-      OutState#SourceDataState]
+    implicit transition: ImageFsm.Transition[State, OutState]
   ): Image[OutState] =
     Image[OutState](
       state = transition.state(this, args),
@@ -35,7 +31,6 @@ case class Image[State <: ImageState](
 }
 
 sealed trait ImageState {
-  type SourceDataState <: DataState
   type TransitionArgs
 
   val sourceIdentifier: SourceIdentifier
@@ -50,10 +45,6 @@ sealed trait ImageState {
   *      | (merger)
   *      ▼
   *    Initial
-  *      |
-  *      | (image id minter)
-  *      ▼
-  *  Identified
   *      |
   *      | (inferrer)
   *      ▼
@@ -70,7 +61,6 @@ object ImageState {
     sourceIdentifier: SourceIdentifier,
     canonicalId: String
   ) extends ImageState {
-    type SourceDataState = DataState.Identified
     type TransitionArgs = Unit
 
     override def id = canonicalId
@@ -81,7 +71,6 @@ object ImageState {
     canonicalId: String,
     inferredData: Option[InferredData] = None
   ) extends ImageState {
-    type SourceDataState = DataState.Identified
     type TransitionArgs = Option[InferredData]
 
     override def id = canonicalId
@@ -93,7 +82,6 @@ object ImageState {
     inferredData: Option[InferredData] = None,
     derivedData: DerivedImageData
   ) extends ImageState {
-    type SourceDataState = DataState.Identified
     type TransitionArgs = Unit
 
     override def id = canonicalId
@@ -135,9 +123,11 @@ case class InferredData(
   features1: List[Float],
   features2: List[Float],
   lshEncodedFeatures: List[String],
-  palette: List[String]
+  palette: List[String],
+  binSizes: List[List[Int]],
+  binMinima: List[Float],
 )
 
 object InferredData {
-  def empty: InferredData = InferredData(Nil, Nil, Nil, Nil)
+  def empty: InferredData = InferredData(Nil, Nil, Nil, Nil, Nil, Nil)
 }

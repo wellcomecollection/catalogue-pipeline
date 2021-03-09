@@ -70,15 +70,19 @@ case class DisplayWork(
     `type` = "uk.ac.wellcome.Display.models.DisplayLocation",
     description =
       "Relates any thing to the location of a representative thumbnail image"
-  ) thumbnail: Option[DisplayLocationDeprecated] = None,
+  ) thumbnail: Option[DisplayLocation] = None,
   @Schema(
     `type` = "List[uk.ac.wellcome.Display.models.DisplayItem]",
     description = "List of items related to this work."
   ) items: Option[List[DisplayItem]] = None,
   @Schema(
-    description = "Whether the work contains an item with a digital location",
-    `type` = "Boolean"
-  ) availableOnline: Boolean = false,
+    `type` = "List[uk.ac.wellcome.Display.models.DisplayHoldings]",
+    description = "List of holdings related to this work."
+  ) holdings: Option[List[DisplayHoldings]] = None,
+  @Schema(
+    description = "Ways in which the work is available to access",
+    `type` = "List[uk.ac.wellcome.display.modules.DisplayAvailability]"
+  ) availabilities: List[DisplayAvailability] = Nil,
   @Schema(
     description = "Relates a work to its production events."
   ) production: Option[List[DisplayProductionEvent]] = None,
@@ -153,14 +157,20 @@ object DisplayWork {
           Some(work.identifiers.map { DisplayIdentifier(_) })
         else None,
       workType = work.data.format.map { DisplayFormat(_) },
-      thumbnail = work.data.thumbnail.map { DisplayLocationDeprecated(_) },
+      thumbnail = work.data.thumbnail.map { DisplayLocation(_) },
       items =
         if (includes.items)
           Some(work.data.items.map {
             DisplayItem(_, includesIdentifiers = includes.identifiers)
           })
         else None,
-      availableOnline = work.state.derivedData.availableOnline,
+      holdings =
+        if (includes.holdings)
+          Some(work.data.holdings.map { DisplayHoldings(_) })
+        else None,
+      availabilities = work.state.availabilities.toList.map {
+        DisplayAvailability(_)
+      },
       production =
         if (includes.production) Some(work.data.production.map {
           DisplayProductionEvent(_, includesIdentifiers = includes.identifiers)

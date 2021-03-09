@@ -5,9 +5,13 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil.{fromJson, toJson}
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.exceptions.JsonDecodingError
-import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
+import uk.ac.wellcome.models.work.generators.WorkGenerators
+import uk.ac.wellcome.models.work.internal.IdState.Identified
+import uk.ac.wellcome.models.work.internal.WorkState.Merged
 
-class WorkTest extends AnyFunSpec with Matchers with IdentifiersGenerators {
+import java.time.Instant
+
+class WorkTest extends AnyFunSpec with Matchers with WorkGenerators {
 
   // This is based on a real failure.  We deployed a version of the API
   // with a newer model than was in Elasticsearch -- in particular, it had
@@ -59,5 +63,17 @@ class WorkTest extends AnyFunSpec with Matchers with IdentifiersGenerators {
     }
     caught.getMessage should startWith(
       "Attempt to decode value on failed cursor")
+  }
+
+  it("preserves redirect sources when transitioning Work.Visible") {
+    val redirectSources = (1 to 3).map { _ =>
+      Identified(createCanonicalId, createSourceIdentifier)
+    }
+
+    val w = identifiedWork().withRedirectSources(redirectSources)
+
+    w.transition[Merged](Instant.now)
+      .asInstanceOf[Work.Visible[Merged]]
+      .redirectSources shouldBe redirectSources
   }
 }

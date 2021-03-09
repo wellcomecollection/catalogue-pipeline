@@ -14,17 +14,17 @@ import com.sksamuel.elastic4s.requests.get.GetResponse
 import com.sksamuel.elastic4s.requests.indexes.IndexResponse
 import com.sksamuel.elastic4s.requests.indexes.admin.IndexExistsResponse
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
-import com.sksamuel.elastic4s.{ElasticClient, Index, Response}
+import com.sksamuel.elastic4s.{Index, Response}
 import grizzled.slf4j.Logging
 import io.circe.{Decoder, Encoder, Json}
 import io.circe.parser.parse
+
 import uk.ac.wellcome.elasticsearch._
 import uk.ac.wellcome.elasticsearch.model.CanonicalId
 import uk.ac.wellcome.fixtures._
 import uk.ac.wellcome.json.JsonUtil.{fromJson, toJson}
 import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.models.Implicits._
 import WorkState.Identified
 
 trait ElasticsearchFixtures
@@ -39,12 +39,22 @@ trait ElasticsearchFixtures
   private val esHost = "localhost"
   private val esPort = 9200
 
-  val elasticClient: ElasticClient = ElasticClientBuilder.create(
+  lazy val elasticClient = ElasticClientBuilder.create(
     hostname = esHost,
     port = esPort,
     protocol = "http",
     username = "elastic",
-    password = "changeme"
+    password = "changeme",
+    compressionEnabled = false,
+  )
+
+  lazy val elasticClientWithCompression = ElasticClientBuilder.create(
+    hostname = esHost,
+    port = esPort,
+    protocol = "http",
+    username = "elastic",
+    password = "changeme",
+    compressionEnabled = true,
   )
 
   // Elasticsearch takes a while to start up so check that it actually started
@@ -91,8 +101,19 @@ trait ElasticsearchFixtures
         testWith(index)
     }
 
+  def withLocalInitialImagesIndex[R](testWith: TestWith[Index, R]): R =
+    withLocalElasticsearchIndex[R](config = InitialImageIndexConfig) { index =>
+      testWith(index)
+    }
+
+  def withLocalAugmentedImageIndex[R](testWith: TestWith[Index, R]): R =
+    withLocalElasticsearchIndex[R](config = AugmentedImageIndexConfig) {
+      index =>
+        testWith(index)
+    }
+
   def withLocalImagesIndex[R](testWith: TestWith[Index, R]): R =
-    withLocalElasticsearchIndex[R](config = ImagesIndexConfig) { index =>
+    withLocalElasticsearchIndex[R](config = IndexedImageIndexConfig) { index =>
       testWith(index)
     }
 
@@ -143,7 +164,7 @@ trait ElasticsearchFixtures
     index: Index,
     works: Work[State]*)(implicit enc: Encoder[Work[State]]): Seq[Assertion] = {
     implicit val id: CanonicalId[Work[State]] =
-      (work: Work[State]) => work.state.id
+      (work: Work[State]) => work.id
     assertElasticsearchEventuallyHas(index, works: _*)
   }
 
@@ -152,7 +173,7 @@ trait ElasticsearchFixtures
     images: Image[State]*)(
     implicit enc: Encoder[Image[State]]): Seq[Assertion] = {
     implicit val id: CanonicalId[Image[State]] =
-      (image: Image[State]) => image.state.id
+      (image: Image[State]) => image.id
     assertElasticsearchEventuallyHas(index, images: _*)
   }
 
@@ -241,7 +262,22 @@ trait ElasticsearchFixtures
         }
         r
       }
+  }
 
+  def indexObjectCompressed[T](index: Index, t: T)(
+    implicit encoder: Encoder[T]): Future[Response[IndexResponse]] = {
+    val doc = toJson(t).get
+    debug(s"ingesting: $doc")
+    elasticClientWithCompression
+      .execute {
+        indexInto(index.name).doc(doc)
+      }
+      .map { r =>
+        if (r.isError) {
+          error(s"Error from Elasticsearch: $r")
+        }
+        r
+      }
   }
 
   def insertIntoElasticsearch[State <: WorkState](
@@ -260,14 +296,16 @@ trait ElasticsearchFixtures
       ).refreshImmediately
     )
 
-    whenReady(result) { _ =>
+    // With a large number of works this can take a long time
+    // 30 seconds should be enough
+    whenReady(result, Timeout(Span(30, Seconds))) { _ =>
       getSizeOf(index) shouldBe works.size
     }
   }
 
-  def insertImagesIntoElasticsearch(
-    index: Index,
-    images: Image[ImageState.Indexed]*): Assertion = {
+  def insertImagesIntoElasticsearch[State <: ImageState](index: Index,
+                                                         images: Image[State]*)(
+    implicit encoder: Encoder[Image[State]]): Assertion = {
     val result = elasticClient.execute(
       bulk(
         images.map { image =>
@@ -303,7 +341,7 @@ trait ElasticsearchFixtures
   def assertJsonStringsAreEqualIgnoringNulls(a: String,
                                              b: String): Assertion = {
     val jsonA = parseOrElse(a)
-    val jsonB = parseOrElse(a)
+    val jsonB = parseOrElse(b)
     jsonA shouldBe jsonB
   }
 

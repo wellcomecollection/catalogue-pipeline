@@ -10,7 +10,7 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraBibData,
   VarField
 }
-import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
+import weco.catalogue.sierra_adapter.models.SierraBibNumber
 
 class SierraOrganisationSubjectsTest
     extends AnyFunSpec

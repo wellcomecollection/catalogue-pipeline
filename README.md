@@ -1,6 +1,9 @@
 # Catalogue
 
-[![Build status](https://badge.buildkite.com/0ca819db1215b66ecb17019d8ee5331d8e537094d051141219.svg?branch=master)](https://buildkite.com/wellcomecollection/catalogue)
+| CI Pipeline       | Status                                                                                                                                                                    |
+|-------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Build             | [![Build status](https://badge.buildkite.com/0ca819db1215b66ecb17019d8ee5331d8e537094d051141219.svg?branch=master)](https://buildkite.com/wellcomecollection/catalogue)   |
+| Integration tests | [![Build status](https://badge.buildkite.com/31a06ac64ab4f09ca5bc5930e21a57889c3f02561260f18ae6.svg?branch=main)](https://buildkite.com/wellcomecollection/integration) |
 
 ## Purpose
 
@@ -66,6 +69,16 @@ These are:
   Go to `Settings > Build, Execution, Deployment > Compiler` and change
   `Build process heap size (Mbytes)` to something large, eg 2048.
 
+* **Pulling docker containers from ECR**
+  
+  You'll need to log into ECR before local docker can pull from there:
+  ```bash
+  # bash etc
+  eval $(AWS_PROFILE=platform-developer aws ecr get-login --no-include-email)
+  
+  # fish
+  eval (env AWS_PROFILE=platform-dev aws ecr get-login --no-include-email)
+  ```
 
 ## Deploying
 

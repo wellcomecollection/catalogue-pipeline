@@ -19,7 +19,7 @@ import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.pipeline_storage.typesafe.{
   ElasticIndexerBuilder,
-  ElasticRetrieverBuilder,
+  ElasticSourceRetrieverBuilder,
   PipelineStorageStreamBuilder
 }
 import uk.ac.wellcome.models.work.internal._
@@ -64,7 +64,7 @@ object Main extends WellcomeTypesafeApp {
         messageSender)(config)
     new IdMinterWorkerService(
       identifierGenerator = identifierGenerator,
-      jsonRetriever = ElasticRetrieverBuilder[Json](
+      jsonRetriever = ElasticSourceRetrieverBuilder[Json](
         config,
         esClient,
         namespace = "source-works"),

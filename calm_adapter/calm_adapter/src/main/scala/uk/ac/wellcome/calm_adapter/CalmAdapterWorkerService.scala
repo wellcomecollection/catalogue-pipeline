@@ -5,15 +5,17 @@ import akka.stream.Materializer
 import akka.stream.scaladsl._
 import grizzled.slf4j.Logging
 import software.amazon.awssdk.services.sqs.model.{Message => SQSMessage}
-import uk.ac.wellcome.bigmessaging.FlowOps
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
+import uk.ac.wellcome.platform.calm_api_client.CalmQuery
 import uk.ac.wellcome.storage.Version
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.typesafe.Runnable
 import weco.catalogue.source_model.CalmSourcePayload
+import weco.catalogue.source_model.calm.CalmRecord
+import weco.flows.FlowOps
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}

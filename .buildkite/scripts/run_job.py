@@ -14,6 +14,7 @@ from git_utils import (
 )
 from provider import current_branch, is_default_branch
 from sbt_dependency_tree import Repository
+from release import check_release_file
 
 
 def should_run_sbt_project(repo, project_name, changed_paths):
@@ -38,6 +39,12 @@ def should_run_sbt_project(repo, project_name, changed_paths):
         if path.endswith((".py", ".tf", ".md")):
             continue
 
+        if path.startswith("api/diff_tool"):
+            continue
+
+        if os.path.basename(path) in {".terraform.lock.hcl", ".wellcome_project"}:
+            continue
+
         if path.endswith("Makefile"):
             if os.path.dirname(project.folder) == os.path.dirname(path):
                 print("*** %s is defined by %s" % (project.name, path))
@@ -59,6 +66,10 @@ def should_run_sbt_project(repo, project_name, changed_paths):
         print("*** Not significant: %s" % path)
 
     return False
+
+
+def should_check_release(project_name):
+    return project_name == "internal_model"
 
 
 if __name__ == "__main__":
@@ -108,8 +119,12 @@ if __name__ == "__main__":
             )
             sys.exit(0)
 
-    # Perform make tasks
+    if should_check_release(args.project_name):
+        latest_sha = get_sha1_for_tag("latest-sbt-release")
+        commit_range = f"{latest_sha}..{local_head}"
+        check_release_file(commit_range)
 
+    # Perform make tasks
     make(f"{args.project_name}-test")
 
     if is_default_branch():

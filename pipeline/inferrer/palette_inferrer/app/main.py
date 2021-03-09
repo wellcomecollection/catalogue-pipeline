@@ -11,15 +11,21 @@ logger = get_logger(__name__)
 # Initialise encoder
 logger.info("Initialising PaletteEncoder model")
 palette_encoder = PaletteEncoder(
-    palette_weights=[2, 2, 1, 1, 1], bin_sizes=[2, 4, 6, 8]
+    palette_size=5,
+    hue_bins=[4, 6, 9],
+    sat_bins=[2, 4, 6],
+    val_bins=[1, 3, 5],
+    sat_min=(10 / 256),
+    val_min=(10 / 256),
 )
+palette_hash_params = palette_encoder.get_hash_params()
 
 # initialise API
 logger.info("Starting API")
 app = FastAPI(title="Palette extractor", description="extracts palettes")
 logger.info("API started, awaiting requests")
 
-batch_inferrer_queue = BatchExecutionQueue(palette_encoder, batch_size=4, timeout=0.5)
+batch_inferrer_queue = BatchExecutionQueue(palette_encoder, batch_size=8, timeout=1)
 
 
 @app.get("/palette/")
@@ -34,7 +40,7 @@ async def main(query_url: str):
     palette = await batch_inferrer_queue.execute(image)
     logger.info(f"extracted palette from url: {query_url}")
 
-    return {"palette": palette}
+    return {"palette": palette, "hash_params": palette_hash_params}
 
 
 @app.get("/healthcheck")

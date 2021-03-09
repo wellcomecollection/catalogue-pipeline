@@ -1,15 +1,9 @@
 package uk.ac.wellcome.platform.reindex.reindex_worker.dynamo
 
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
-import com.amazonaws.services.dynamodbv2.document.{
-  BatchGetItemOutcome,
-  DynamoDB,
-  Item,
-  TableKeysAndAttributes
-}
-import org.scanamo.DynamoFormat
+import org.scanamo.syntax._
+import org.scanamo.{DynamoFormat, Scanamo, Table}
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 
-import scala.collection.JavaConverters._
 import scala.concurrent.{ExecutionContext, Future}
 
 /** Fetches multiple IDs from DynamoDB.
@@ -21,30 +15,28 @@ import scala.concurrent.{ExecutionContext, Future}
   * to 100 items or 16 MB of data, whichever comes first.
   */
 class MultiItemGetter(implicit
-                      val dynamoClient: AmazonDynamoDB,
-                      val ec: ExecutionContext)
-    extends ItemParser {
-
-  private val documentApiClient = new DynamoDB(dynamoClient)
+                      val dynamoClient: DynamoDbClient,
+                      val ec: ExecutionContext) {
 
   def get[T](ids: Seq[String], partitionKey: String = "id")(tableName: String)(
     implicit format: DynamoFormat[T]
   ): Future[Seq[T]] = {
-    val batchGetRequest: TableKeysAndAttributes =
-      new TableKeysAndAttributes(tableName)
-        .addHashOnlyPrimaryKeys(partitionKey, ids: _*)
+    val table = Table[T](tableName)
 
-    for {
-      batchGetResult: BatchGetItemOutcome <- Future {
-        documentApiClient.batchGetItem(batchGetRequest)
+    val ops = table.getAll(partitionKey in ids.toSet)
+
+    Future {
+      val result = Scanamo(dynamoClient).exec(ops)
+
+      val successes = result.collect { case Right(t) => t }
+      val failures = result.collect { case Left(err) => err.toString }
+
+      if (failures.isEmpty) {
+        successes.toSeq
+      } else {
+        throw new Throwable(
+          s"Errors parsing Scanamo result: ${failures.mkString(", ")}")
       }
-
-      items = batchGetResult.getTableItems.asScala.get(tableName) match {
-        case Some(it) => it.asScala
-        case None     => Seq[Item]()
-      }
-
-      result <- parseItems[T](items)
-    } yield result
+    }
   }
 }

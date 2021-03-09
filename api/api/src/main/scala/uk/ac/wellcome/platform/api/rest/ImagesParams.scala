@@ -31,30 +31,33 @@ case class MultipleImagesParams(
   pageSize: Option[Int],
   query: Option[String],
   license: Option[LicenseFilter],
+  `source.contributors.agent.label`: Option[ContributorsFilter],
   color: Option[ColorMustQuery],
   include: Option[MultipleImagesIncludes],
+  aggregations: Option[List[ImageAggregationRequest]],
   _index: Option[String]
 ) extends QueryParams
     with Paginated {
 
-  def searchOptions(apiConfig: ApiConfig): SearchOptions =
-    SearchOptions(
+  def searchOptions(apiConfig: ApiConfig): ImageSearchOptions =
+    ImageSearchOptions(
       searchQuery = query.map(SearchQuery(_)),
       filters = filters,
       mustQueries = mustQueries,
+      aggregations = aggregations.getOrElse(Nil),
       pageSize = pageSize.getOrElse(apiConfig.defaultPageSize),
       pageNumber = page.getOrElse(1)
     )
 
   private def filters: List[ImageFilter] =
-    List(license).flatten
+    List(license, `source.contributors.agent.label`).flatten
 
   private def mustQueries: List[ImageMustQuery] =
     List(color).flatten
 }
 
 object MultipleImagesParams extends QueryParamsUtils {
-  import CommonDecoders.licenseFilter
+  import CommonDecoders._
 
   def parse =
     parameter(
@@ -62,8 +65,10 @@ object MultipleImagesParams extends QueryParamsUtils {
       "pageSize".as[Int].?,
       "query".as[String].?,
       "locations.license".as[LicenseFilter].?,
+      "source.contributors.agent.label".as[ContributorsFilter].?,
       "color".as[ColorMustQuery].?,
       "include".as[MultipleImagesIncludes].?,
+      "aggregations".as[List[ImageAggregationRequest]].?,
       "_index".as[String].?
     ).tflatMap { args =>
       val params = (MultipleImagesParams.apply _).tupled(args)
@@ -78,4 +83,9 @@ object MultipleImagesParams extends QueryParamsUtils {
       "source.contributors" -> ImageInclude.SourceContributors,
       "source.languages" -> ImageInclude.SourceLanguages,
     ).emap(values => Right(MultipleImagesIncludes(values: _*)))
+
+  implicit val aggregationsDecoder: Decoder[List[ImageAggregationRequest]] =
+    decodeOneOfCommaSeparated(
+      "locations.license" -> ImageAggregationRequest.License
+    )
 }

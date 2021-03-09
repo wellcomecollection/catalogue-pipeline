@@ -3,8 +3,8 @@ INFRA_BUCKET = wellcomecollection-platform-infra
 
 ECR_REGISTRY = 760097843905.dkr.ecr.eu-west-1.amazonaws.com
 
-LAMBDA_UPLOAD_BUCKET = wellcomecollection-catalogue-infra-delta
-LAMBDA_PUBLISH_ROLE_ARN = arn:aws:iam::756629837203:role/catalogue-developer
+LAMBDA_UPLOAD_BUCKET ?= wellcomecollection-catalogue-infra-delta
+LAMBDA_PUBLISH_ROLE_ARN ?= arn:aws:iam::756629837203:role/catalogue-developer
 
 ifneq ($(CI),true)
 DEV_ROLE_ARN := arn:aws:iam::760097843905:role/platform-developer
@@ -27,20 +27,17 @@ endef
 
 
 # Test a Python project.
-#
+# Tox workdir override is to prevent the volume mount from being hammered
 # Args:
 #   $1 - Path to the Python project's directory, relative to the root
 #        of the repo.
 #
 define test_python
-	$(ROOT)/docker_run.py --aws --dind -- \
-		$(ECR_REGISTRY)/wellcome/build_test_python $(1)
-
-	$(ROOT)/docker_run.py --aws --dind -- \
-		--net=host \
-		--volume $(ROOT)/shared_conftest.py:/conftest.py \
-		--workdir $(ROOT)/$(1) --tty \
-		wellcome/test_python_$(shell basename $(1)):latest
+	$(ROOT)/docker_run.py --dind --root -- \
+	    --workdir $(ROOT)/$(1) \
+	    --tty \
+		wellcome/tox:latest \
+		    --workdir /tmp/.tox
 endef
 
 
@@ -262,7 +259,7 @@ define __python_ssm_target
 $(1)-build:
 	$(call build_image,$(1),$(2))
 
-ifneq ($(filter $$(1),$$(TEST_OVERRIDE)),)
+ifeq ($(filter $(1),$(TEST_OVERRIDE)),)
 $(1)-test:
 	$(call test_python,$(STACK_ROOT)/$(1))
 endif

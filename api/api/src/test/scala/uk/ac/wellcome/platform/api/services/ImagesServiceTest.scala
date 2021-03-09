@@ -1,14 +1,15 @@
 package uk.ac.wellcome.platform.api.services
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import com.sksamuel.elastic4s.{ElasticError, Index}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.{EitherValues, OptionValues}
+
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.models.work.generators.ImageGenerators
 import uk.ac.wellcome.platform.api.models.{QueryConfig, SimilarityMetric}
-
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.ac.wellcome.models.Implicits._
 
 class ImagesServiceTest
     extends AnyFunSpec
@@ -22,7 +23,10 @@ class ImagesServiceTest
 
   val imagesService = new ImagesService(
     elasticsearchService,
-    QueryConfig(paletteBinSizes = Seq(4, 6, 8))
+    QueryConfig(
+      paletteBinSizes = Seq(Seq(4, 6, 9), Seq(2, 4, 6), Seq(1, 3, 5)),
+      paletteBinMinima = Seq(0f, 10f / 256, 10f / 256)
+    )
   )
 
   describe("findImageById") {

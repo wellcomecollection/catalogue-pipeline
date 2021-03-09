@@ -7,7 +7,7 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   VarField
 }
 import uk.ac.wellcome.models.work.internal.{IdState, Subject}
-import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
+import weco.catalogue.sierra_adapter.models.SierraBibNumber
 
 trait SierraSubjectsTransformer
     extends SierraIdentifiedDataTransformer

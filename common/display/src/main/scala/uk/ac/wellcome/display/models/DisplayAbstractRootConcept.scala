@@ -40,7 +40,7 @@ case object DisplayAbstractConcept extends GetIdentifiers {
           label = label,
           identifiers = getIdentifiers(id, includesIdentifiers)
         )
-      case Period(id, label, range) =>
+      case Period(id, label, _) =>
         DisplayPeriod(
           id = id.maybeCanonicalId,
           label = label,
@@ -184,7 +184,6 @@ case class DisplayAgent(
 case class DisplayPerson(
   @Schema(
     `type` = "String",
-    readOnly = true,
     description = "The canonical identifier given to a thing.") id: Option[
     String],
   @Schema(
@@ -212,7 +211,6 @@ case class DisplayPerson(
 case class DisplayOrganisation(
   @Schema(
     `type` = "String",
-    readOnly = true,
     description = "The canonical identifier given to a thing.") id: Option[
     String],
   @Schema(
@@ -229,7 +227,6 @@ case class DisplayOrganisation(
 case class DisplayMeeting(
   @Schema(
     `type` = "String",
-    readOnly = true,
     description = "The canonical identifier given to a thing.") id: Option[
     String],
   @Schema(

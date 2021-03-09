@@ -4,6 +4,9 @@ import scala.collection.mutable
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
+
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
@@ -19,9 +22,6 @@ import WorkState.{Identified, Merged}
 import WorkFsm._
 import uk.ac.wellcome.models.work.generators.MiroWorkGenerators
 import uk.ac.wellcome.pipeline_storage.MemoryRetriever
-
-import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext.Implicits.global
 
 class MergerWorkerServiceTest
     extends AnyFunSpec
@@ -65,9 +65,9 @@ class MergerWorkerServiceTest
           )
 
           index shouldBe Map(
-            work1.id -> work1.transition[Merged](Some(latestUpdate)),
-            work2.id -> work2.transition[Merged](Some(latestUpdate)),
-            work3.id -> work3.transition[Merged](Some(latestUpdate))
+            work1.id -> Left(work1.transition[Merged](latestUpdate)),
+            work2.id -> Left(work2.transition[Merged](latestUpdate)),
+            work3.id -> Left(work3.transition[Merged](latestUpdate))
           )
 
           metrics.incrementedCounts.length should be >= 1
@@ -96,7 +96,8 @@ class MergerWorkerServiceTest
 
           getWorksSent(senders) should contain only work.id
 
-          index shouldBe Map(work.id -> work.transition[Merged](None))
+          index shouldBe Map(
+            work.id -> Left(work.transition[Merged](work.state.modifiedTime)))
 
           metrics.incrementedCounts.length shouldBe 1
           metrics.incrementedCounts.last should endWith("_success")
@@ -150,7 +151,8 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
           getWorksSent(senders) should contain only work.id
-          index shouldBe Map(work.id -> work.transition[Merged](None))
+          index shouldBe Map(
+            work.id -> Left(work.transition[Merged](work.state.modifiedTime)))
         }
     }
   }
@@ -180,7 +182,8 @@ class MergerWorkerServiceTest
           assertQueueEmpty(dlq)
 
           getWorksSent(senders) should contain only work.id
-          index shouldBe Map(work.id -> work.transition[Merged](None))
+          index shouldBe Map(
+            work.id -> Left(work.transition[Merged](work.state.modifiedTime)))
 
           metrics.incrementedCounts.length shouldBe 1
           metrics.incrementedCounts.last should endWith("_success")
@@ -216,15 +219,15 @@ class MergerWorkerServiceTest
           index should have size 2
 
           val redirectedWorks = index.collect {
-            case (_, work: Work.Redirected[Merged]) => work
+            case (_, Left(work: Work.Redirected[Merged])) => work
           }
           val mergedWorks = index.collect {
-            case (_, work: Work.Visible[Merged]) => work
+            case (_, Left(work: Work.Visible[Merged])) => work
           }
 
           redirectedWorks should have size 1
           redirectedWorks.head.sourceIdentifier shouldBe digitisedWork.sourceIdentifier
-          redirectedWorks.head.redirect shouldBe IdState.Identified(
+          redirectedWorks.head.redirectTarget shouldBe IdState.Identified(
             sourceIdentifier = physicalWork.sourceIdentifier,
             canonicalId = physicalWork.state.canonicalId)
 
@@ -261,22 +264,25 @@ class MergerWorkerServiceTest
           assertQueueEmpty(dlq)
 
           getWorksSent(senders).distinct should have size 3
-          index should have size 3
+          index should have size 4
 
           val imagesSent = getImagesSent(senders).distinct
           imagesSent should have size 1
 
           val redirectedWorks = index.collect {
-            case (_, work: Work.Redirected[Merged]) => work
+            case (_, Left(work: Work.Redirected[Merged])) => work
           }
           val mergedWorks = index.collect {
-            case (_, work: Work.Visible[Merged]) => work
+            case (_, Left(work: Work.Visible[Merged])) => work
+          }
+          val images = index.collect {
+            case (_, Right(image)) => image
           }
 
           redirectedWorks should have size 2
           redirectedWorks.map(_.sourceIdentifier) should contain only
             (digitisedWork.sourceIdentifier, miroWork.sourceIdentifier)
-          redirectedWorks.map(_.redirect) should contain only
+          redirectedWorks.map(_.redirectTarget) should contain only
             IdState.Identified(
               sourceIdentifier = physicalWork.sourceIdentifier,
               canonicalId = physicalWork.state.canonicalId)
@@ -284,7 +290,9 @@ class MergerWorkerServiceTest
           mergedWorks should have size 1
           mergedWorks.head.sourceIdentifier shouldBe physicalWork.sourceIdentifier
 
-          imagesSent.head.id shouldBe miroWork.data.imageData.head.id.canonicalId
+          imagesSent.head shouldBe miroWork.data.imageData.head.id.canonicalId
+          images should have size 1
+          images.head.id shouldBe miroWork.data.imageData.head.id.canonicalId
         }
     }
   }
@@ -320,10 +328,10 @@ class MergerWorkerServiceTest
           getWorksSent(senders) should have size 4
 
           val redirectedWorks = index.collect {
-            case (_, work: Work.Redirected[Merged]) => work
+            case (_, Left(work: Work.Redirected[Merged])) => work
           }
           val mergedWorks = index.collect {
-            case (_, work: Work.Visible[Merged]) => work
+            case (_, Left(work: Work.Visible[Merged])) => work
           }
 
           redirectedWorks should have size 2
@@ -332,9 +340,57 @@ class MergerWorkerServiceTest
     }
   }
 
+  it("passes through a deleted work unmodified") {
+    val deletedWork = identifiedWork().deleted()
+    val visibleWork = sierraPhysicalIdentifiedWork()
+      .mergeCandidates(
+        List(
+          MergeCandidate(
+            id = IdState.Identified(
+              deletedWork.state.canonicalId,
+              deletedWork.sourceIdentifier),
+            reason = Some("Physical/digitised Sierra work")
+          )
+        )
+      )
+
+    withMergerWorkerServiceFixtures {
+      case (retriever, QueuePair(queue, dlq), senders, _, index) =>
+        retriever.index ++= Map(
+          visibleWork.id -> visibleWork,
+          deletedWork.id -> deletedWork
+        )
+
+        val matcherResult = MatcherResult(
+          Set(
+            MatchedIdentifiers(
+              worksToWorkIdentifiers(List(visibleWork, deletedWork)))
+          ))
+
+        sendNotificationToSQS(queue = queue, message = matcherResult)
+
+        eventually {
+          assertQueueEmpty(queue)
+          assertQueueEmpty(dlq)
+
+          getWorksSent(senders) should have size 2
+
+          val visibleWorks = index.collect {
+            case (_, Left(work: Work.Visible[Merged])) => work
+          }
+          val deletedWorks = index.collect {
+            case (_, Left(work: Work.Deleted[Merged])) => work
+          }
+
+          visibleWorks.map { _.id } shouldBe Seq(visibleWork.id)
+          deletedWorks.map { _.id } shouldBe Seq(deletedWork.id)
+        }
+    }
+  }
+
   it("fails if the message sent is not a matcher result") {
     withMergerWorkerServiceFixtures {
-      case (_, QueuePair(queue, dlq), _, metrics, index) =>
+      case (_, QueuePair(queue, dlq), _, metrics, _) =>
         sendInvalidJSONto(queue)
 
         eventually {
@@ -380,7 +436,7 @@ class MergerWorkerServiceTest
                         QueuePair,
                         Senders,
                         MemoryMetrics,
-                        mutable.Map[String, Work[Merged]]),
+                        mutable.Map[String, WorkOrImage]),
                        R]): R =
     withLocalSqsQueuePair() {
       case queuePair @ QueuePair(queue, _) =>
@@ -390,7 +446,7 @@ class MergerWorkerServiceTest
         val retriever = new MemoryRetriever[Work[Identified]]()
 
         val metrics = new MemoryMetrics()
-        val index = mutable.Map[String, Work[Merged]]()
+        val index = mutable.Map.empty[String, WorkOrImage]
 
         withWorkerService(
           retriever,
@@ -413,6 +469,6 @@ class MergerWorkerServiceTest
   def getWorksSent(senders: Senders): Seq[String] =
     getWorksSent(senders.works)
 
-  def getImagesSent(senders: Senders): Seq[Image[ImageState.Initial]] =
+  def getImagesSent(senders: Senders): Seq[String] =
     getImagesSent(senders.images)
 }

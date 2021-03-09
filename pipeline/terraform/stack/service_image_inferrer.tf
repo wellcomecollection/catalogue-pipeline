@@ -8,8 +8,12 @@ locals {
   shared_storage_name      = "shared_storage"
   shared_storage_path      = "/data"
 
-  total_cpu    = 7680
-  total_memory = 7000
+  total_cpu       = 8192
+  total_memory    = 7512
+  manager_memory  = 2048
+  manager_cpu     = 1024
+  inferrer_cpu    = floor(0.5 * (local.total_cpu - local.manager_cpu))
+  inferrer_memory = floor(0.5 * (local.total_memory - local.manager_memory))
 }
 
 module "image_inferrer_queue" {
@@ -27,7 +31,8 @@ module "image_inferrer" {
   service_name = "${local.namespace_hyphen}_image_inferrer"
   security_group_ids = [
     aws_security_group.service_egress.id,
-    aws_security_group.interservice.id
+    aws_security_group.interservice.id,
+    var.pipeline_storage_security_group_id,
   ]
 
   cluster_name = aws_ecs_cluster.cluster.name
@@ -52,8 +57,8 @@ module "image_inferrer" {
 
   manager_container_name  = "inference_manager"
   manager_container_image = local.inference_manager_image
-  manager_cpu             = 512
-  manager_memory          = 512
+  manager_cpu             = local.manager_cpu
+  manager_memory          = local.manager_memory
   manager_mount_points = [{
     containerPath = local.shared_storage_path,
     sourceVolume  = local.shared_storage_name
@@ -62,8 +67,8 @@ module "image_inferrer" {
   apps = {
     feature_inferrer = {
       image  = local.feature_inferrer_image
-      cpu    = floor(0.5 * local.total_cpu)
-      memory = floor(0.5 * local.total_memory)
+      cpu    = local.inferrer_cpu
+      memory = local.inferrer_memory
       env_vars = {
         PORT              = local.feature_inferrer_port
         MODEL_OBJECT_KEY  = data.aws_ssm_parameter.inferrer_lsh_model_key.value
@@ -84,8 +89,8 @@ module "image_inferrer" {
     }
     palette_inferrer = {
       image  = local.palette_inferrer_image
-      cpu    = floor(0.5 * local.total_cpu)
-      memory = floor(0.5 * local.total_memory)
+      cpu    = local.inferrer_cpu
+      memory = local.inferrer_memory
       env_vars = {
         PORT = local.palette_inferrer_port
       }
@@ -111,21 +116,37 @@ module "image_inferrer" {
     palette_inferrer_port = local.palette_inferrer_port
     metrics_namespace     = "${local.namespace_hyphen}_image_inferrer"
     topic_arn             = module.image_inferrer_topic.arn
-    messages_bucket_name  = aws_s3_bucket.messages.id
     queue_url             = module.image_inferrer_queue.url
     images_root           = local.shared_storage_path
+
+    es_initial_images_index   = local.es_images_initial_index
+    es_augmented_images_index = local.es_images_augmented_index
+
+    flush_interval_seconds = 30
+
+    # This was previously set at 6, I've tried turning it down to stem
+    # the number of out-of-memory errors we get from the image inferrer.
+    #
+    # See https://github.com/wellcomecollection/platform/issues/5020
+    batch_size = 1
   }
+
+  manager_secret_env_vars = local.pipeline_storage_es_service_secrets["inferrer"]
 
   subnets = var.subnets
 
   # Any higher than this currently causes latency spikes from Loris
-  max_capacity = 6
+  max_capacity = min(6, local.max_capacity)
 
-  messages_bucket_arn = aws_s3_bucket.messages.arn
-  queue_read_policy   = module.image_inferrer_queue.read_policy
+  queue_read_policy = module.image_inferrer_queue.read_policy
+
+  depends_on = [
+    null_resource.elasticsearch_users,
+  ]
 
   deployment_service_env  = var.release_label
   deployment_service_name = "image-inferrer"
+  shared_logging_secrets  = var.shared_logging_secrets
 }
 
 resource "aws_iam_role_policy" "read_inferrer_data" {
@@ -152,8 +173,6 @@ module "image_inferrer_topic" {
 
   name       = "${local.namespace_hyphen}_image_inferrer"
   role_names = [module.image_inferrer.task_role_name]
-
-  messages_bucket_arn = aws_s3_bucket.messages.arn
 }
 
 module "image_inferrer_scaling_alarm" {

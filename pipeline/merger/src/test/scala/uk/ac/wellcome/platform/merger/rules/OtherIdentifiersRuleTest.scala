@@ -28,9 +28,6 @@ class OtherIdentifiersRuleTest
       metsIdentifiedWork().invisible()
     }.toList
 
-  val metsDeletedWork: Work.Deleted[WorkState.Identified] =
-    metsIdentifiedWork().deleted()
-
   val physicalSierraWork: Work.Visible[WorkState.Identified] =
     sierraPhysicalIdentifiedWork().format(Format.Pictures)
 
@@ -67,12 +64,20 @@ class OtherIdentifiersRuleTest
         )
       )
 
+  val sierraWithDigcode: Work.Visible[WorkState.Identified] =
+    sierraDigitalIdentifiedWork().otherIdentifiers(
+      List(
+        createSierraSystemSourceIdentifier,
+        createDigcodeIdentifier("dighole")
+      )
+    )
+
   it("merges METS, Miro, and Sierra source IDs into Calm target") {
     inside(
       OtherIdentifiersRule
         .merge(
           calmWork,
-          physicalSierraWork :: nothingWork :: miroWork :: metsDeletedWork :: metsWorks)) {
+          physicalSierraWork :: nothingWork :: miroWork :: metsWorks)) {
       case FieldMergeResult(otherIdentifiers, mergedSources) =>
         otherIdentifiers should contain theSameElementsAs
           List(physicalSierraWork.sourceIdentifier, miroWork.sourceIdentifier) ++
@@ -144,6 +149,18 @@ class OtherIdentifiersRuleTest
     }
   }
 
+  it("merges only digcode identifiers from sources' otherIdentifiers") {
+    inside(OtherIdentifiersRule.merge(calmWork, Seq(sierraWithDigcode))) {
+      case FieldMergeResult(otherIdentifiers, _) =>
+        otherIdentifiers should contain only (
+          sierraWithDigcode.sourceIdentifier,
+          sierraWithDigcode.data.otherIdentifiers
+            .find(_.identifierType.id == "wellcome-digcode")
+            .get
+        )
+    }
+  }
+
   it("only merges miro source identifiers") {
     val miroWorkWithOtherSources =
       miroIdentifiedWork(sourceIdentifier = miroWork.sourceIdentifier)
@@ -173,7 +190,7 @@ class OtherIdentifiersRuleTest
     inside(OtherIdentifiersRule.merge(physicalSierraWork, metsWorks)) {
       case FieldMergeResult(otherIdentifiers, mergedSources) =>
         forAll(otherIdentifiers) { id =>
-          id.identifierType.id should not be ("mets")
+          id.identifierType.id should not be "mets"
         }
 
         mergedSources shouldBe empty

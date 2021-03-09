@@ -8,18 +8,18 @@ module "snapshot_generator" {
     queue_url        = module.snapshot_generator_input_queue.url
     topic_arn        = module.snapshot_generator_output_topic.arn
     metric_namespace = "snapshot_generator-${var.deployment_service_env}"
+    es_bulk_size     = var.es_bulk_size
   }
 
   cpu    = 4096
   memory = 8192
 
   secret_env_vars = {
-    es_host      = "catalogue/api/es_host"
-    es_port      = "catalogue/api/es_port"
-    es_protocol  = "catalogue/api/es_protocol"
-    es_username  = "catalogue/api/es_username"
-    es_password  = "catalogue/api/es_password"
-    es_bulk_size = var.es_bulk_size
+    es_host     = "elasticsearch/catalogue/private_host"
+    es_port     = "catalogue/api/es_port"
+    es_protocol = "catalogue/api/es_protocol"
+    es_username = "catalogue/api/es_username"
+    es_password = "catalogue/api/es_password"
   }
 
   subnets = var.subnets
@@ -28,7 +28,8 @@ module "snapshot_generator" {
   cluster_arn  = var.cluster_arn
 
   security_group_ids = [
-    aws_security_group.egress.id
+    var.elastic_cloud_vpce_sg_id,
+    aws_security_group.egress.id,
   ]
 
   min_capacity = 0

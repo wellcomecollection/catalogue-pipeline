@@ -42,7 +42,7 @@ class WorksTest
              "id": "${work.state.canonicalId}",
              "title": "${work.data.title.get}",
              "alternativeTitles": [],
-             "availableOnline": false
+             "availabilities": [${availabilities(work.state.availabilities)}]
             }
           """
         }
@@ -66,7 +66,7 @@ class WorksTest
              "id": "${work.state.canonicalId}",
              "title": "${work.data.title.get}",
              "alternativeTitles": [],
-             "availableOnline": false,
+             "availabilities": [${availabilities(work.state.availabilities)}],
              "edition": "Special edition",
              "duration": 3600
             }
@@ -181,7 +181,7 @@ class WorksTest
                "id": "${work.state.canonicalId}",
                "title": "${work.data.title.get}",
                "alternativeTitles": [],
-               "availableOnline": false
+               "availabilities": [${availabilities(work.state.availabilities)}]
               }
             """
           }
@@ -195,7 +195,7 @@ class WorksTest
                "id": "${altWork.state.canonicalId}",
                "title": "${altWork.data.title.get}",
                "alternativeTitles": [],
-               "availableOnline": false
+               "availabilities": [${availabilities(work.state.availabilities)}]
               }
             """
           }
@@ -229,8 +229,8 @@ class WorksTest
   it("shows the thumbnail field if available") {
     withWorksApi {
       case (worksIndex, routes) =>
-        val thumbnailLocation = DigitalLocationDeprecated(
-          locationType = LocationType("thumbnail-image"),
+        val thumbnailLocation = DigitalLocation(
+          locationType = LocationType.ThumbnailImage,
           url = "https://iiif.example.org/1234/default.jpg",
           license = Some(License.CCBY)
         )
@@ -250,7 +250,7 @@ class WorksTest
                  "id": "${work.state.canonicalId}",
                  "title": "${work.data.title.get}",
                  "alternativeTitles": [],
-                 "availableOnline": true,
+                 "availabilities": [${availabilities(work.state.availabilities)}],
                  "thumbnail": ${location(work.data.thumbnail.get)}
                 }
               ]

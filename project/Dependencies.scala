@@ -2,7 +2,7 @@ import sbt._
 
 object WellcomeDependencies {
 
-  val defaultVersion = "25.0.3"
+  val defaultVersion = "26.3.2"
 
   lazy val versions = new {
     val typesafe = defaultVersion
@@ -11,8 +11,6 @@ object WellcomeDependencies {
     val messaging = defaultVersion
     val monitoring = defaultVersion
     val storage = defaultVersion
-
-    val sierraStreamsSource = "2.0.0"
   }
 
   val jsonLibrary: Seq[ModuleID] = library(
@@ -55,10 +53,6 @@ object WellcomeDependencies {
     version = versions.messaging
   ) ++ monitoringLibrary
 
-  val sierraStreamsSourceLibrary: Seq[ModuleID] = Seq(
-    "uk.ac.wellcome" %% "sierra-streams-source" % versions.sierraStreamsSource
-  )
-
   private def library(name: String, version: String): Seq[ModuleID] = Seq(
     "uk.ac.wellcome" %% name % version,
     "uk.ac.wellcome" %% name % version % "test" classifier "tests"
@@ -71,11 +65,9 @@ object ExternalDependencies {
     val akkaHttp = "10.2.2"
     val akkaHttpCirce = "1.32.0"
     val akkaStreamAlpakka = "1.1.2"
-    val apacheCommons = "3.7"
-    val apacheLogging = "2.8.2"
-    val aws = "1.11.504"
+    val apacheCommons = "1.9"
     val circe = "0.13.0"
-    val elastic4s = "7.9.2"
+    val elastic4s = "7.10.1"
     val fastparse = "2.3.0"
     val swagger = "2.0.10"
     val mockito = "1.9.5"
@@ -86,9 +78,10 @@ object ExternalDependencies {
     val scalacsv = "1.3.5"
     val scalaGraph = "1.12.5"
     val apm = "1.12.0"
-    val enumeratum = "1.5.13"
-    val enumeratumScalacheck = "1.5.16"
+    val enumeratum = "1.6.1"
+    val enumeratumScalacheck = "1.6.1"
     val jsoup = "1.13.1"
+    val scalaJHttp = "2.3.0"
   }
   val enumeratumDependencies = Seq(
     "com.beachape" %% "enumeratum" % versions.enumeratum,
@@ -115,7 +108,7 @@ object ExternalDependencies {
   )
 
   val apacheCommonsDependencies = Seq(
-    "org.apache.commons" % "commons-lang3" % versions.apacheCommons
+    "org.apache.commons" % "commons-text" % versions.apacheCommons
   )
 
   val circeOpticsDependencies = Seq(
@@ -123,8 +116,6 @@ object ExternalDependencies {
   )
 
   val elasticsearchDependencies = Seq(
-    "org.apache.logging.log4j" % "log4j-core" % versions.apacheLogging,
-    "org.apache.logging.log4j" % "log4j-api" % versions.apacheLogging,
     "com.sksamuel.elastic4s" %% "elastic4s-core" % versions.elastic4s,
     "com.sksamuel.elastic4s" %% "elastic4s-client-esjava" % versions.elastic4s,
     "com.sksamuel.elastic4s" %% "elastic4s-http-streams" % versions.elastic4s,
@@ -141,7 +132,6 @@ object ExternalDependencies {
   )
 
   val mySqlDependencies = Seq(
-    "com.amazonaws" % "aws-java-sdk-rds" % versions.aws,
     "org.flywaydb" % "flyway-core" % "4.2.0",
     "org.scalikejdbc" %% "scalikejdbc" % "3.4.0",
     "mysql" % "mysql-connector-java" % "6.0.6"
@@ -190,6 +180,10 @@ object ExternalDependencies {
   val jsoupDependencies = Seq(
     "org.jsoup" % "jsoup" % versions.jsoup
   )
+
+  val scalaJDependencies = Seq(
+    "org.scalaj" %% "scalaj-http" % versions.scalaJHttp
+  )
 }
 
 object CatalogueDependencies {
@@ -209,19 +203,11 @@ object CatalogueDependencies {
   val elasticsearchDependencies: Seq[ModuleID] =
     ExternalDependencies.elasticsearchDependencies ++
       ExternalDependencies.scalacheckDependencies ++
-      WellcomeDependencies.fixturesLibrary
+      WellcomeDependencies.fixturesLibrary ++
+      WellcomeDependencies.typesafeLibrary
 
-  val bigMessagingDependencies: Seq[ModuleID] =
-    ExternalDependencies.scalatestDependencies ++
-      WellcomeDependencies.typesafeLibrary ++
-      WellcomeDependencies.monitoringLibrary ++
-      WellcomeDependencies.messagingLibrary ++
-      WellcomeDependencies.storageLibrary ++
-      WellcomeDependencies.fixturesLibrary
-
-  val bigMessagingTypesafeDependencies: Seq[ModuleID] =
-    WellcomeDependencies.storageTypesafeLibrary ++
-      WellcomeDependencies.messagingTypesafeLibrary
+  val flowDependencies: Seq[ModuleID] =
+    WellcomeDependencies.typesafeLibrary
 
   val sourceModelDependencies: Seq[sbt.ModuleID] =
     WellcomeDependencies.storageLibrary ++
@@ -303,12 +289,16 @@ object CatalogueDependencies {
       ExternalDependencies.akkaHttpDependencies ++
       ExternalDependencies.mockitoDependencies ++
       ExternalDependencies.wireMockDependencies ++
-      ExternalDependencies.scribeJavaDependencies
+      ExternalDependencies.scribeJavaDependencies ++
+      WellcomeDependencies.messagingTypesafeLibrary ++
+      WellcomeDependencies.storageTypesafeLibrary
 
   // CALM adapter
 
-  val calmAdapterDependencies: Seq[ModuleID] =
-    ExternalDependencies.akkaHttpDependencies
+  val calmApiClientDependencies: Seq[ModuleID] =
+    ExternalDependencies.akkaHttpDependencies ++
+      ExternalDependencies.scalaXmlDependencies ++
+      ExternalDependencies.scalatestDependencies
 
   // Sierra adapter stack
 
@@ -320,9 +310,9 @@ object CatalogueDependencies {
       ExternalDependencies.javaxDependencies
 
   val sierraReaderDependencies: Seq[ModuleID] =
-    WellcomeDependencies.sierraStreamsSourceLibrary ++
-      ExternalDependencies.circeOpticsDependencies ++
-      WellcomeDependencies.messagingTypesafeLibrary
+    ExternalDependencies.circeOpticsDependencies ++
+      WellcomeDependencies.messagingTypesafeLibrary ++
+      ExternalDependencies.scalaJDependencies
 
   // Inference manager
   val inferenceManagerDependencies: Seq[ModuleID] =

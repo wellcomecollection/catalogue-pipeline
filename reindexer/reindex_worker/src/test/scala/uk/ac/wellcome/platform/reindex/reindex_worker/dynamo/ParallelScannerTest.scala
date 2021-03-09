@@ -1,15 +1,16 @@
 package uk.ac.wellcome.platform.reindex.reindex_worker.dynamo
 
-import com.amazonaws.services.dynamodbv2.model.AmazonDynamoDBException
 import org.scalatest.Assertion
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import org.scanamo.auto._
+import org.scanamo.generic.auto._
+import software.amazon.awssdk.services.dynamodb.model.DynamoDbException
 import uk.ac.wellcome.platform.reindex.reindex_worker.fixtures.ReindexDynamoFixtures
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.language.higherKinds
 
 class ParallelScannerTest
     extends AnyFunSpec
@@ -50,9 +51,8 @@ class ParallelScannerTest
       )(table.name)
 
       whenReady(future.failed) { err =>
-        err shouldBe a[AmazonDynamoDBException]
-        val message = err.asInstanceOf[AmazonDynamoDBException].getMessage
-        message should include(
+        err shouldBe a[DynamoDbException]
+        err.getMessage should include(
           "Value '10' at 'segment' failed to satisfy constraint: Member must have value less than or equal to 4")
       }
     }

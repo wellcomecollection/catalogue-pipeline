@@ -24,6 +24,7 @@ case class RelationWork(
 
 case class RelationWorkState(
   canonicalId: String,
+  availabilities: Set[Availability],
 )
 
 case class RelationWorkData(

@@ -18,6 +18,7 @@ object SearchTemplate {
 // This is to return the search templates in the format of
 // { "templates": [...] }
 case class SearchTemplateResponse(templates: List[SearchTemplate])
+
 object SearchTemplateResponse {
   implicit val encoder: Encoder[SearchTemplateResponse] =
     deriveConfiguredEncoder

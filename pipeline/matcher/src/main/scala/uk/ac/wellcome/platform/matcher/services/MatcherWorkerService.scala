@@ -7,18 +7,21 @@ import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.internal.Work
-import uk.ac.wellcome.models.work.internal.WorkState.Identified
-import uk.ac.wellcome.pipeline_storage.Retriever
+import uk.ac.wellcome.pipeline_storage.PipelineStorageStream._
+import uk.ac.wellcome.pipeline_storage.{PipelineStorageConfig, Retriever}
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.matcher.WorkMatcher
-import uk.ac.wellcome.platform.matcher.models.VersionExpectedConflictException
+import uk.ac.wellcome.platform.matcher.models.{
+  VersionExpectedConflictException,
+  WorkLinks
+}
 import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class MatcherWorkerService[MsgDestination](
-  workRetriever: Retriever[Work[Identified]],
+  config: PipelineStorageConfig,
+  workLinksRetriever: Retriever[WorkLinks],
   msgStream: SQSStream[NotificationMessage],
   msgSender: MessageSender[MsgDestination],
   workMatcher: WorkMatcher)(implicit ec: ExecutionContext)
@@ -26,12 +29,20 @@ class MatcherWorkerService[MsgDestination](
     with Runnable {
 
   def run(): Future[Done] =
-    msgStream.foreach(this.getClass.getSimpleName, processMessage)
+    msgStream.runStream(
+      this.getClass.getSimpleName,
+      source =>
+        source
+          .via(batchRetrieveFlow(config, workLinksRetriever))
+          .mapAsync(config.parallelism) {
+            case (message, item) =>
+              processMessage(item).map(_ => message)
+        }
+    )
 
-  def processMessage(message: NotificationMessage): Future[Unit] = {
+  def processMessage(workLinks: WorkLinks): Future[Unit] = {
     (for {
-      work <- workRetriever.apply(id = message.body)
-      identifiersList <- workMatcher.matchWork(work)
+      identifiersList <- workMatcher.matchWork(workLinks)
       _ <- Future.fromTry(msgSender.sendT(identifiersList))
     } yield ()).recover {
       case MatcherException(e: VersionExpectedConflictException) =>

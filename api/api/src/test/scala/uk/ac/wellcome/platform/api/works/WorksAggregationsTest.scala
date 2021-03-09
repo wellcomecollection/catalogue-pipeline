@@ -287,8 +287,8 @@ class WorksAggregationsTest
                     },
                     {
                       "data" : ${subject(
-                            paleoNeuroBiology,
-                            showConcepts = false)},
+            paleoNeuroBiology,
+            showConcepts = false)},
                       "count" : 2,
                       "type" : "AggregationBucket"
                     }
@@ -296,11 +296,103 @@ class WorksAggregationsTest
                 }
               },
               "results": [${works
-                            .sortBy { _.state.canonicalId }
-                            .map(workResponse)
-                            .mkString(",")}]
+            .sortBy { _.state.canonicalId }
+            .map(workResponse)
+            .mkString(",")}]
             }
-          """.stripMargin
+          """
+        }
+    }
+  }
+
+  it("supports aggregating on contributors") {
+    val agent47 = Contributor(agent = Agent("47"), roles = Nil)
+    val jamesBond = Contributor(agent = Agent("007"), roles = Nil)
+    val mi5 = Contributor(agent = Organisation("MI5"), roles = Nil)
+    val gchq = Contributor(agent = Organisation("GCHQ"), roles = Nil)
+
+    val works =
+      List(List(agent47), List(agent47), List(jamesBond, mi5), List(mi5, gchq)).zipWithIndex
+        .map {
+          case (contributors, idx) =>
+            indexedWork(canonicalId = idx.toString).contributors(contributors)
+        }
+
+    withWorksApi {
+      case (worksIndex, routes) =>
+        insertIntoElasticsearch(worksIndex, works: _*)
+        assertJsonResponse(
+          routes,
+          s"/$apiPrefix/works?aggregations=contributors") {
+          Status.OK -> s"""
+            {
+              ${resultList(apiPrefix, totalResults = works.size)},
+              "aggregations": {
+                "type" : "Aggregations",
+                "contributors": {
+                  "type" : "Aggregation",
+                  "buckets": [
+                    {
+                      "count" : 2,
+                      "data" : ${contributor(agent47)},
+                      "type" : "AggregationBucket"
+                    },
+                    {
+                      "count" : 2,
+                      "data" : ${contributor(mi5)},
+                      "type" : "AggregationBucket"
+                    },
+                    {
+                      "count" : 1,
+                      "data" : ${contributor(jamesBond)},
+                      "type" : "AggregationBucket"
+                    },
+                    {
+                      "count" : 1,
+                      "data" : ${contributor(gchq)},
+                      "type" : "AggregationBucket"
+                    }
+                  ]
+                }
+              },
+              "results": [${works.map(workResponse).mkString(",")}]
+            }
+          """
+        }
+    }
+  }
+
+  it("does not bring down the API when unknown contributor type") {
+
+    val work = indexedWork()
+
+    val workWithContributor = work.copy(
+      state = work.state.copy(
+        derivedData = work.state.derivedData.copy(
+          contributorAgents = List("Producer:Keith")
+        )
+      )
+    )
+
+    withWorksApi {
+      case (worksIndex, routes) =>
+        insertIntoElasticsearch(worksIndex, workWithContributor)
+        assertJsonResponse(
+          routes,
+          s"/$apiPrefix/works?aggregations=contributors") {
+          Status.OK -> s"""
+            {
+              ${resultList(apiPrefix, totalResults = 1)},
+              "aggregations": {
+                "type" : "Aggregations",
+                "contributors": {
+                  "type" : "Aggregation",
+                  "buckets": []
+                }
+              },
+              "results": [${workResponse(workWithContributor)}]
+            }
+          """
         }
     }
   }
@@ -352,61 +444,63 @@ class WorksAggregationsTest
                 }
               },
               "results": [${works
-                            .sortBy { _.state.canonicalId }
-                            .map(workResponse)
-                            .mkString(",")}]
+            .sortBy { _.state.canonicalId }
+            .map(workResponse)
+            .mkString(",")}]
             }
-          """.stripMargin
+          """
         }
     }
   }
 
-  it("supports aggregating on locationType") {
-    val locations = List(
-      createPhysicalLocation,
-      createPhysicalLocation,
-      createDigitalLocation,
-      createDigitalLocation,
-      createDigitalLocation
+  it("supports aggregating on availabilities") {
+    val items = List(
+      List(createIdentifiedPhysicalItem),
+      List(createIdentifiedPhysicalItem),
+      List(createDigitalItemWith(accessStatus = AccessStatus.Open)),
+      List(createDigitalItemWith(accessStatus = AccessStatus.Open)),
+      List(createDigitalItemWith(accessStatus = AccessStatus.OpenWithAdvisory)),
+      List(
+        createIdentifiedPhysicalItem,
+        createDigitalItemWith(accessStatus = AccessStatus.Open))
     )
-
-    val works = locations.map { loc =>
-      indexedWork()
-        .items(List(createIdentifiedItemWith(locations = List(loc))))
-    }
+    val works = items.map(indexedWork().items(_))
 
     withWorksApi {
       case (worksIndex, routes) =>
         insertIntoElasticsearch(worksIndex, works: _*)
         assertJsonResponse(
-          routes,
-          s"/$apiPrefix/works?aggregations=locationType") {
+          routes = routes,
+          path = s"/$apiPrefix/works?aggregations=availabilities"
+        ) {
           Status.OK -> s"""
             {
               ${resultList(apiPrefix, totalResults = works.size)},
-              "aggregations" : {
-                "locationType" : {
-                  "buckets" : [
+              "aggregations": {
+                "availabilities": {
+                  "buckets": [
                     {
-                      "count" : 3,
-                      "data" : {
-                        "label" : "Online",
-                        "type" : "DigitalLocation"
+                      "count": 4,
+                      "data": {
+                        "label": "Online",
+                        "id": "online",
+                        "type" : "Availability"
                       },
-                      "type" : "AggregationBucket"
+                      "type": "AggregationBucket"
                     },
                     {
-                      "count" : 2,
-                      "data" : {
-                        "label" : "In the library",
-                        "type" : "PhysicalLocation"
+                      "count": 3,
+                      "data": {
+                        "label": "In the library",
+                        "id": "in-library",
+                        "type" : "Availability"
                       },
-                      "type" : "AggregationBucket"
+                      "type": "AggregationBucket"
                     }
                   ],
-                  "type" : "Aggregation"
+                  "type": "Aggregation"
                 },
-                "type" : "Aggregations"
+                "type": "Aggregations"
               },
               "results": [${works
                             .sortBy { _.state.canonicalId }

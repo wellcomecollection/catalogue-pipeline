@@ -9,7 +9,7 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   VarField
 }
 import uk.ac.wellcome.models.parse.Marc008Parser
-import uk.ac.wellcome.sierra_adapter.model.SierraBibNumber
+import weco.catalogue.sierra_adapter.models.SierraBibNumber
 
 object SierraProduction
     extends SierraIdentifiedDataTransformer

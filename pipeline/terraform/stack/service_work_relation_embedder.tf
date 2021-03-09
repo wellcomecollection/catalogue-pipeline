@@ -1,10 +1,13 @@
 module "relation_embedder_queue" {
-  source                     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
-  queue_name                 = "${local.namespace_hyphen}_relation_embedder"
-  topic_arns                 = [module.batcher_output_topic.arn]
-  visibility_timeout_seconds = 600
-  aws_region                 = var.aws_region
-  alarm_topic_arn            = var.dlq_alarm_arn
+  source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
+  queue_name      = "${local.namespace_hyphen}_relation_embedder"
+  topic_arns      = [module.batcher_output_topic.arn]
+  aws_region      = var.aws_region
+  alarm_topic_arn = var.dlq_alarm_arn
+
+  # We know that 10 minutes is too short; some big archives can't be
+  # processed in that time, and they end up on a DLQ.
+  visibility_timeout_seconds = 30 * 60
 }
 
 module "relation_embedder" {
@@ -15,6 +18,7 @@ module "relation_embedder" {
   security_group_ids = [
     aws_security_group.service_egress.id,
     aws_security_group.interservice.id,
+    var.pipeline_storage_security_group_id,
   ]
 
   cluster_name = aws_ecs_cluster.cluster.name
@@ -32,25 +36,26 @@ module "relation_embedder" {
     queue_parallelism            = 3  // NOTE: limit to avoid memory errors
     affected_works_scroll_size   = 50 // NOTE: limit to avoid memory errors
     complete_tree_scroll_size    = 800
-    index_batch_size             = 25 // NOTE: too large results in 413 from ES
+    index_batch_size             = 100 // NOTE: too large results in 413 from ES
     index_flush_interval_seconds = 60
   }
 
-  secret_env_vars = {
-    es_host     = "catalogue/pipeline_storage/es_host"
-    es_port     = "catalogue/pipeline_storage/es_port"
-    es_protocol = "catalogue/pipeline_storage/es_protocol"
-    es_username = "catalogue/pipeline_storage/relation_embedder/es_username"
-    es_password = "catalogue/pipeline_storage/relation_embedder/es_password"
-  }
+  secret_env_vars = local.pipeline_storage_es_service_secrets["relation_embedder"]
 
-  subnets             = var.subnets
-  max_capacity        = 10 // NOTE: limit to avoid >500 concurrent scroll contexts
-  messages_bucket_arn = aws_s3_bucket.messages.arn
-  queue_read_policy   = module.relation_embedder_queue.read_policy
+  # NOTE: limit to avoid >500 concurrent scroll contexts
+  max_capacity = min(10, local.max_capacity)
 
-  cpu    = 1024
-  memory = 2048
+  subnets           = var.subnets
+  queue_read_policy = module.relation_embedder_queue.read_policy
+
+  cpu    = 2048
+  memory = 4096
+
+  use_fargate_spot = true
+
+  depends_on = [
+    null_resource.elasticsearch_users,
+  ]
 
   deployment_service_env  = var.release_label
   deployment_service_name = "work-relation-embedder"
@@ -64,8 +69,6 @@ module "relation_embedder_output_topic" {
 
   name       = "${local.namespace_hyphen}_relation_embedder_output"
   role_names = [module.relation_embedder.task_role_name]
-
-  messages_bucket_arn = aws_s3_bucket.messages.arn
 }
 
 module "relation_embedder_scaling_alarm" {

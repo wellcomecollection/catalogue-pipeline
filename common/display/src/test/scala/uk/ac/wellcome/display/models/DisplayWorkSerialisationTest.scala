@@ -38,7 +38,7 @@ class DisplayWorkSerialisationTest
       | "lettering": "${work.data.lettering.get}",
       | "alternativeTitles": [],
       | "createdDate": ${period(work.data.createdDate.get)},
-      | "availableOnline": false
+      | "availabilities": [${availabilities(work.state.availabilities)}]
       |}
     """.stripMargin
 
@@ -47,7 +47,7 @@ class DisplayWorkSerialisationTest
 
   it("renders an item if the items include is present") {
     val work = indexedWork()
-      .items(createIdentifiedItems(count = 1) :+ createUnidentifiableItemWith())
+      .items(createIdentifiedItems(count = 1) :+ createUnidentifiableItem)
 
     val expectedJson = s"""
       |{
@@ -56,7 +56,7 @@ class DisplayWorkSerialisationTest
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
       | "items": [ ${items(work.data.items)} ],
-      | "availableOnline": true
+      | "availabilities": [${availabilities(work.state.availabilities)}]
       |}
     """.stripMargin
 
@@ -76,7 +76,7 @@ class DisplayWorkSerialisationTest
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
       | "items": [ ],
-      | "availableOnline": false
+      | "availabilities": [${availabilities(work.state.availabilities)}]
       |}
     """.stripMargin
 
@@ -87,8 +87,8 @@ class DisplayWorkSerialisationTest
   }
 
   it("includes credit information in DisplayWork serialisation") {
-    val location = DigitalLocationDeprecated(
-      locationType = LocationType("thumbnail-image"),
+    val location = DigitalLocation(
+      locationType = LocationType.OnlineResource,
       url = "",
       credit = Some("Wellcome Collection"),
       license = Some(License.CCBY)
@@ -96,7 +96,8 @@ class DisplayWorkSerialisationTest
     val item = createIdentifiedItemWith(locations = List(location))
     val workWithCopyright = indexedWork().items(List(item))
 
-    val expectedJson = s"""
+    val expectedJson =
+      s"""
       |{
       | "type": "Work",
       | "id": "${workWithCopyright.state.canonicalId}",
@@ -118,7 +119,8 @@ class DisplayWorkSerialisationTest
       |     ]
       |   }
       | ],
-      | "availableOnline": true
+      | "availabilities": [${availabilities(
+           workWithCopyright.state.availabilities)}]
       |}
     """.stripMargin
 
@@ -144,7 +146,8 @@ class DisplayWorkSerialisationTest
       | "title": "${workWithSubjects.data.title.get}",
       | "alternativeTitles": [],
       | "subjects": [${subjects(workWithSubjects.data.subjects)}],
-      | "availableOnline": false
+      | "availabilities": [${availabilities(
+                            workWithSubjects.state.availabilities)}]
       |}
     """.stripMargin
 
@@ -163,14 +166,16 @@ class DisplayWorkSerialisationTest
       createProductionEventList(count = 3)
     )
 
-    val expectedJson = s"""
+    val expectedJson =
+      s"""
       |{
       | "type": "Work",
       | "id": "${workWithProduction.state.canonicalId}",
       | "title": "${workWithProduction.data.title.get}",
       | "alternativeTitles": [],
       | "production": [${production(workWithProduction.data.production)}],
-      | "availableOnline": false
+      | "availabilities": [${availabilities(
+           workWithProduction.state.availabilities)}]
       |}
     """.stripMargin
 
@@ -207,7 +212,7 @@ class DisplayWorkSerialisationTest
       | "lettering": "${work.data.lettering.get}",
       | "createdDate": ${period(work.data.createdDate.get)},
       | "contributors": [${contributor(work.data.contributors.head)}],
-      | "availableOnline": false
+      | "availabilities": [${availabilities(work.state.availabilities)}]
       |}
     """.stripMargin
 
@@ -235,7 +240,7 @@ class DisplayWorkSerialisationTest
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
       | "genres": [ ${genres(work.data.genres)} ],
-      | "availableOnline": false
+      | "availabilities": [${availabilities(work.state.availabilities)}]
       |}
     """.stripMargin
 
@@ -277,7 +282,7 @@ class DisplayWorkSerialisationTest
       |     "type": "Note"
       |   }
       | ],
-      | "availableOnline": false
+      | "availabilities": [${availabilities(work.state.availabilities)}]
       |}
     """.stripMargin
 
@@ -301,7 +306,7 @@ class DisplayWorkSerialisationTest
       |   ${identifier(work.sourceIdentifier)},
       |   ${identifier(otherIdentifier)}
       | ],
-      | "availableOnline": false
+      | "availabilities": [${availabilities(work.state.availabilities)}]
       |}
     """.stripMargin
 
@@ -321,7 +326,7 @@ class DisplayWorkSerialisationTest
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
       | "identifiers": [ ${identifier(work.sourceIdentifier)} ],
-      | "availableOnline": false
+      | "availabilities": [${availabilities(work.state.availabilities)}]
       |}
     """.stripMargin
 
@@ -343,7 +348,7 @@ class DisplayWorkSerialisationTest
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
       | "images": [${workImageIncludes(work.data.imageData)}],
-      | "availableOnline": false
+      | "availabilities": [${availabilities(work.state.availabilities)}]
       |}
     """.stripMargin
 
@@ -355,8 +360,8 @@ class DisplayWorkSerialisationTest
 
   it("shows the thumbnail field if available") {
     val work = indexedWork().thumbnail(
-      DigitalLocationDeprecated(
-        locationType = LocationType("thumbnail-image"),
+      DigitalLocation(
+        locationType = LocationType.ThumbnailImage,
         url = "https://iiif.example.org/1234/default.jpg",
         license = Some(License.CCBY)
       )
@@ -369,7 +374,7 @@ class DisplayWorkSerialisationTest
       | "title": "${work.data.title.get}",
       | "alternativeTitles": [],
       | "thumbnail": ${location(work.data.thumbnail.get)},
-      | "availableOnline": false
+      | "availabilities": [${availabilities(work.state.availabilities)}]
       |}
     """.stripMargin
 

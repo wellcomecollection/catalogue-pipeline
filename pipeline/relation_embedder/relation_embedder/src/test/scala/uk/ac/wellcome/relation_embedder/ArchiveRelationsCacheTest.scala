@@ -2,25 +2,20 @@ package uk.ac.wellcome.relation_embedder
 
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
-
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.models.work.generators.WorkGenerators
-import WorkState.Merged
+import org.scalatest.Inspectors
+import uk.ac.wellcome.relation_embedder.fixtures.RelationGenerators
 
 class ArchiveRelationsCacheTest
     extends AnyFunSpec
     with Matchers
-    with WorkGenerators {
-
-  def work(path: String) =
-    mergedWork(createSourceIdentifierWith(value = path))
-      .collectionPath(CollectionPath(path = path))
-      .title(path)
+    with Inspectors
+    with RelationGenerators {
 
   val workA = work("a")
   val work1 = work("a/1")
   val workB = work("a/1/b")
-  val workC = work("a/1/c")
+  val workC = work("a/1/c", isAvailableOnline = true)
   val work2 = work("a/2")
   val workD = work("a/2/d")
   val workE = work("a/2/e")
@@ -118,15 +113,15 @@ class ArchiveRelationsCacheTest
     )
   }
 
-  def toRelationWork(work: Work[Merged]): RelationWork =
-    RelationWork(
-      data = RelationWorkData(
-        title = work.data.title,
-        collectionPath = work.data.collectionPath,
-        workType = work.data.workType,
-      ),
-      state = RelationWorkState(
-        canonicalId = work.state.canonicalId
-      )
-    )
+  it("finds a work's availabilities") {
+    val relationsCache = ArchiveRelationsCache(works)
+
+    relationsCache.getAvailabilities(workA) should contain only Availability.Online
+    relationsCache.getAvailabilities(work1) should contain only Availability.Online
+    relationsCache.getAvailabilities(workC) should contain only Availability.Online
+
+    forEvery(List(workB, work2, workD, workE, workF, work3, work4)) { work =>
+      relationsCache.getAvailabilities(work).size shouldBe 0
+    }
+  }
 }

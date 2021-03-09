@@ -6,7 +6,7 @@ import uk.ac.wellcome.models.work.generators.SourceWorkGenerators
 import uk.ac.wellcome.models.work.internal.{
   AccessCondition,
   AccessStatus,
-  DigitalLocationDeprecated,
+  DigitalLocation,
   License,
   LocationType
 }
@@ -27,17 +27,17 @@ class ThumbnailRuleTest
   val calmWorkWithAdvisory = calmIdentifiedWork().items(
     List(
       createUnidentifiableItemWith(locations = List(createPhysicalLocationWith(
-        locationType = LocationType("scmac"),
-        label = "Closed stores Arch. & MSS",
+        locationType = LocationType.ClosedStores,
+        label = LocationType.ClosedStores.label,
         accessConditions =
           List(AccessCondition(status = Some(AccessStatus.OpenWithAdvisory)))
       )))))
 
   val metsWork = metsIdentifiedWork()
     .thumbnail(
-      DigitalLocationDeprecated(
+      DigitalLocation(
         url = "mets.com/thumbnail.jpg",
-        locationType = LocationType("thumbnail-image"),
+        locationType = LocationType.ThumbnailImage,
         license = Some(License.CCBY)
       )
     )

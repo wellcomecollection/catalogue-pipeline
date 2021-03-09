@@ -5,6 +5,7 @@ sealed trait WorkInclude
 object WorkInclude {
   case object Identifiers extends WorkInclude
   case object Items extends WorkInclude
+  case object Holdings extends WorkInclude
   case object Subjects extends WorkInclude
   case object Genres extends WorkInclude
   case object Contributors extends WorkInclude
@@ -21,6 +22,7 @@ object WorkInclude {
 case class WorksIncludes(
   identifiers: Boolean,
   items: Boolean,
+  holdings: Boolean,
   subjects: Boolean,
   genres: Boolean,
   contributors: Boolean,
@@ -41,6 +43,7 @@ case object WorksIncludes {
     WorksIncludes(
       identifiers = includes.contains(WorkInclude.Identifiers),
       items = includes.contains(WorkInclude.Items),
+      holdings = includes.contains(WorkInclude.Holdings),
       subjects = includes.contains(WorkInclude.Subjects),
       genres = includes.contains(WorkInclude.Genres),
       contributors = includes.contains(WorkInclude.Contributors),
@@ -60,6 +63,7 @@ case object WorksIncludes {
     WorksIncludes(
       identifiers = true,
       items = true,
+      holdings = true,
       subjects = true,
       genres = true,
       contributors = true,

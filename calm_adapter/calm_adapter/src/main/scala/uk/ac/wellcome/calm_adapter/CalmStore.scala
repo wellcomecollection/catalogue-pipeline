@@ -8,6 +8,7 @@ import uk.ac.wellcome.storage.{
   StorageError,
   Version
 }
+import weco.catalogue.source_model.calm.CalmRecord
 import weco.catalogue.source_model.store.SourceVHS
 
 class CalmStore(store: SourceVHS[CalmRecord]) extends Logging {

@@ -7,7 +7,10 @@ import uk.ac.wellcome.platform.transformer.sierra.generators.{
   MarcGenerators,
   SierraDataGenerators
 }
-import uk.ac.wellcome.platform.transformer.sierra.source.MarcSubfield
+import uk.ac.wellcome.platform.transformer.sierra.source.{
+  MarcSubfield,
+  SierraBibData
+}
 import uk.ac.wellcome.platform.transformer.sierra.source.sierra.SierraSourceLanguage
 
 class SierraLanguagesTest
@@ -18,7 +21,7 @@ class SierraLanguagesTest
   it("ignores records without any languages") {
     val bibData = createSierraBibDataWith(lang = None, varFields = List.empty)
 
-    SierraLanguages(bibData) shouldBe empty
+    getLanguages(bibData) shouldBe empty
   }
 
   it("parses a single language from the 'lang' field") {
@@ -30,8 +33,7 @@ class SierraLanguagesTest
       varFields = List.empty
     )
 
-    SierraLanguages(bibData) shouldBe List(
-      Language(label = "French", id = "fre"))
+    getLanguages(bibData) shouldBe List(Language(label = "French", id = "fre"))
   }
 
   it("combines the language from the 'lang' field and 041") {
@@ -51,7 +53,7 @@ class SierraLanguagesTest
       )
     )
 
-    SierraLanguages(bibData) shouldBe List(
+    getLanguages(bibData) shouldBe List(
       Language(label = "French", id = "fre"),
       Language(label = "German", id = "ger"),
       Language(label = "English", id = "eng")
@@ -75,7 +77,7 @@ class SierraLanguagesTest
       )
     )
 
-    SierraLanguages(bibData) shouldBe List(
+    getLanguages(bibData) shouldBe List(
       Language(label = "French", id = "fre"),
       Language(label = "German", id = "ger"),
       Language(label = "English", id = "eng")
@@ -97,8 +99,7 @@ class SierraLanguagesTest
       )
     )
 
-    SierraLanguages(bibData) shouldBe List(
-      Language(label = "Chinese", id = "chi"))
+    getLanguages(bibData) shouldBe List(Language(label = "Chinese", id = "chi"))
   }
 
   it("deduplicates, putting whatever's in 'lang' first") {
@@ -119,7 +120,7 @@ class SierraLanguagesTest
       )
     )
 
-    SierraLanguages(bibData) shouldBe List(
+    getLanguages(bibData) shouldBe List(
       Language(label = "German", id = "ger"),
       Language(label = "French", id = "fre"),
       Language(label = "English", id = "eng")
@@ -145,10 +146,49 @@ class SierraLanguagesTest
       )
     )
 
-    SierraLanguages(bibData) shouldBe List(
+    getLanguages(bibData) shouldBe List(
       Language(label = "Chinese", id = "chi"),
       Language(label = "English", id = "eng"),
       Language(label = "French", id = "fre")
     )
   }
+
+  it("strips whitespace from values in the 041 field") {
+    val bibData = createSierraBibDataWith(
+      varFields = List(
+        createVarFieldWith(
+          marcTag = "041",
+          subfields = List(
+            MarcSubfield(tag = "a", content = "eng "),
+          )
+        )
+      )
+    )
+
+    getLanguages(bibData) shouldBe List(
+      Language(label = "English", id = "eng"),
+    )
+  }
+
+  it("lowercases values in the 041 field") {
+    val bibData = createSierraBibDataWith(
+      varFields = List(
+        createVarFieldWith(
+          marcTag = "041",
+          subfields = List(
+            MarcSubfield(tag = "a", content = "ENG"),
+            MarcSubfield(tag = "a", content = "Lat"),
+          )
+        )
+      )
+    )
+
+    getLanguages(bibData) shouldBe List(
+      Language(label = "English", id = "eng"),
+      Language(label = "Latin", id = "lat"),
+    )
+  }
+
+  private def getLanguages(bibData: SierraBibData): List[Language] =
+    SierraLanguages(bibId = createSierraBibNumber, bibData = bibData)
 }

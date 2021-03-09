@@ -1,7 +1,6 @@
 package uk.ac.wellcome.elasticsearch
 
 import com.sksamuel.elastic4s.ElasticDsl.{
-  dateField,
   intField,
   keywordField,
   objectField,
@@ -14,18 +13,6 @@ import uk.ac.wellcome.elasticsearch.WorksAnalysis._
 trait IndexConfig {
   def mapping: MappingDefinition
   def analysis: Analysis
-
-  // Because we have a relatively small number of records (compared
-  // to what Elasticsearch usually expects), we can get weird results
-  // if our records are split across multiple shards.
-  //
-  // e.g. searching for the same query multiple times gets varying results
-  //
-  // This forces all our records to be indexed into a single shard,
-  // which should avoid this problem.
-  //
-  // If/when we index more records, we should revisit this.
-  //
   def shards: Int = 1
 }
 
@@ -54,6 +41,24 @@ trait IndexConfigFields {
       textField("english").analyzer("english")
     )
 
+  val languagesTextFields =
+    languages.map(lang => textField(lang).analyzer(s"${lang}_analyzer"))
+
+  def multilingualField(name: String) =
+    textField(name)
+      .fields(
+        List(
+          textField("english").analyzer(englishAnalyzer.name),
+          textField("shingles").analyzer(shingleAsciifoldingAnalyzer.name)) ++
+          languagesTextFields,
+      )
+
+  def multilingualKeywordField(name: String) = textField(name).fields(
+    lowercaseKeyword("keyword"),
+    // we don't care about the name, we just want to compose the fields parameter
+    multilingualField("").fields: _*
+  )
+
   def lowercaseKeyword(name: String) =
     keywordField(name).normalizer(lowercaseNormalizer.name)
 
@@ -61,73 +66,15 @@ trait IndexConfigFields {
     textWithKeyword(name)
       .analyzer(asciifoldingAnalyzer.name)
 
-  def sourceIdentifierFields = Seq(
-    keywordField("ontologyType"),
-    objectField("identifierType").fields(
-      label,
-      keywordField("id")
-    ),
-    sourceIdentifierValue
-  )
-
-  def sourceIdentifier =
-    objectField("sourceIdentifier")
-      .fields(sourceIdentifierFields)
-
-  def id(fieldName: String = "id") =
-    objectField(fieldName).fields(
-      keywordField("type"),
-      canonicalId,
-      objectField("sourceIdentifier").fields(sourceIdentifierFields),
-      objectField("otherIdentifiers").fields(sourceIdentifierFields),
-    )
-
-  def identifiable(fieldName: String = "id") =
-    objectField(fieldName).fields(
-      keywordField("type"),
-      keywordField("identifiedType"),
-      objectField("sourceIdentifier").fields(sourceIdentifierFields),
-      objectField("otherIdentifiers").fields(sourceIdentifierFields),
-    )
-
-  def location(fieldName: String = "locations") =
-    objectField(fieldName).fields(
-      keywordField("type"),
-      objectField("locationType").fields(
-        label,
-        keywordField("id")
-      ),
-      label,
-      textField("url"),
-      textField("credit"),
-      license,
-      accessConditions
-    )
-
-  val accessConditions =
-    objectField("accessConditions")
-      .fields(
-        englishTextKeywordField("terms"),
-        textField("to"),
-        objectField("status").fields(keywordField("type"))
-      )
-
-  val license = objectField("license").fields(
-    keywordField("id")
-  )
-
   val label = asciifoldingTextFieldWithKeyword("label")
 
-  val sourceIdentifierValue = lowercaseKeyword("value")
-
   val canonicalId = lowercaseKeyword("canonicalId")
-  val version = intField("version")
-  val modifiedTime = dateField("modifiedTime")
 
-  val identifiedSourceImageState = objectField("state").fields(
-    sourceIdentifier,
-    canonicalId
-  )
+  val version = intField("version")
+
+  val sourceIdentifier = objectField("sourceIdentifier")
+    .fields(lowercaseKeyword("value"))
+    .dynamic("false")
 }
 
 object NoStrictMapping extends IndexConfig {

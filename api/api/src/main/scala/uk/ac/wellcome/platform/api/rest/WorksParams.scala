@@ -1,8 +1,9 @@
 package uk.ac.wellcome.platform.api.rest
 
 import java.time.LocalDate
-
+import akka.http.scaladsl.server.Directive
 import io.circe.Decoder
+
 import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.models.work.internal.{AccessStatus, WorkType}
@@ -32,6 +33,7 @@ object SingleWorkParams extends QueryParamsUtils {
     decodeOneOfCommaSeparated(
       "identifiers" -> WorkInclude.Identifiers,
       "items" -> WorkInclude.Items,
+      "holdings" -> WorkInclude.Holdings,
       "subjects" -> WorkInclude.Subjects,
       "genres" -> WorkInclude.Genres,
       "contributors" -> WorkInclude.Contributors,
@@ -55,24 +57,26 @@ case class MultipleWorksParams(
   languages: Option[LanguagesFilter],
   `genres.label`: Option[GenreFilter],
   `subjects.label`: Option[SubjectFilter],
+  `contributors.agent.label`: Option[ContributorsFilter],
   license: Option[LicenseFilter],
   include: Option[WorksIncludes],
-  aggregations: Option[List[AggregationRequest]],
+  aggregations: Option[List[WorkAggregationRequest]],
   sort: Option[List[SortRequest]],
   sortOrder: Option[SortingOrder],
   query: Option[String],
   identifiers: Option[IdentifiersFilter],
-  `items.locations.type`: Option[ItemLocationTypeFilter],
   `items.locations.locationType`: Option[ItemLocationTypeIdFilter],
   `items.locations.accessConditions.status`: Option[AccessStatusFilter],
   `type`: Option[WorkTypeFilter],
+  partOf: Option[PartOfFilter],
+  availabilities: Option[AvailabilitiesFilter],
   _queryType: Option[SearchQueryType],
   _index: Option[String],
 ) extends QueryParams
     with Paginated {
 
-  def searchOptions(apiConfig: ApiConfig): SearchOptions =
-    SearchOptions(
+  def searchOptions(apiConfig: ApiConfig): WorkSearchOptions =
+    WorkSearchOptions(
       searchQuery = query map { query =>
         SearchQuery(query, _queryType)
       },
@@ -91,12 +95,14 @@ case class MultipleWorksParams(
       languages,
       `genres.label`,
       `subjects.label`,
+      `contributors.agent.label`,
       identifiers,
-      `items.locations.type`,
       `items.locations.locationType`,
       `items.locations.accessConditions.status`,
       license,
-      `type`
+      `type`,
+      partOf,
+      availabilities
     ).flatten
 
   private def dateFilter: Option[DateRangeFilter] =
@@ -108,14 +114,14 @@ case class MultipleWorksParams(
 
 object MultipleWorksParams extends QueryParamsUtils {
   import SingleWorkParams.includesDecoder
-  import CommonDecoders.licenseFilter
+  import CommonDecoders._
 
   // This is a custom akka-http directive which extracts MultipleWorksParams
   // data from the query string, returning an invalid response when any given
   // parameter is not correctly parsed. More info on custom directives is
   // available here:
   // https://doc.akka.io/docs/akka-http/current/routing-dsl/directives/custom-directives.html
-  def parse =
+  def parse: Directive[Tuple1[MultipleWorksParams]] =
     parameter(
       "page".as[Int].?,
       "pageSize".as[Int].?,
@@ -125,22 +131,75 @@ object MultipleWorksParams extends QueryParamsUtils {
       "languages".as[LanguagesFilter].?,
       "genres.label".as[GenreFilter].?,
       "subjects.label".as[SubjectFilter].?,
-      "license".as[LicenseFilter].?,
+      "contributors.agent.label".as[ContributorsFilter].?,
+        "license".as[LicenseFilter].?,
       "include".as[WorksIncludes].?,
-      "aggregations".as[List[AggregationRequest]].?,
+      "aggregations".as[List[WorkAggregationRequest]].?,
       "sort".as[List[SortRequest]].?,
       "sortOrder".as[SortingOrder].?,
       "query".as[String].?,
       "identifiers".as[IdentifiersFilter].?,
-      "items.locations.type".as[ItemLocationTypeFilter].?,
       "items.locations.locationType".as[ItemLocationTypeIdFilter].?,
       "items.locations.accessConditions.status".as[AccessStatusFilter].?,
-      "type".as[WorkTypeFilter].?,
+      "type".as[WorkTypeFilter].?,"partOf".as[PartOfFilter].?,
+      )
+    ).tflatMap {
+      case (
+          page,
+          pageSize,
+          format,
+          dateFrom,
+          dateTo,
+          languages,
+          genre,
+          subjects,
+          contributors,
+          license,
+          includes,
+          aggregations,
+          sort,
+          sortOrder,
+          query,
+          identifiers,
+          itemLocationTypeId,
+          accessStatus,
+          workType,
+          partOf) =>
+        // Scala has a max tuple size of 22 so this is nested to get around this limit
+        parameter(
+          (
+            "availabilities".as[AvailabilitiesFilter].?,
       "_queryType".as[SearchQueryType].?,
       "_index".as[String].?,
-    ).tflatMap { args =>
-      val params = (MultipleWorksParams.apply _).tupled(args)
-      validated(params.paginationErrors, params)
+        ).tflatMap {
+          case (availabilities, queryType, index) =>
+            val params = MultipleWorksParams(
+              page,
+              pageSize,
+              format,
+              dateFrom,
+              dateTo,
+              languages,
+              genre,
+              subjects,
+              contributors,
+              license,
+              includes,
+              aggregations,
+              sort,
+              sortOrder,
+              query,
+              identifiers,
+              itemLocationTypeId,
+              accessStatus,
+              workType,
+              partOf,
+              availabilities,
+              queryType,
+              index
+            )
+            validated(params.paginationErrors, params)
+        }
     }
 
   implicit val formatFilter: Decoder[FormatFilter] =
@@ -153,26 +212,26 @@ object MultipleWorksParams extends QueryParamsUtils {
       "Section" -> WorkType.Section
     ).emap(values => Right(WorkTypeFilter(values)))
 
-  implicit val itemLocationTypeFilter: Decoder[ItemLocationTypeFilter] =
-    decodeOneOfCommaSeparated(
-      "DigitalLocation" -> LocationTypeQuery.DigitalLocation,
-      "PhysicalLocation" -> LocationTypeQuery.PhysicalLocation,
-    ) map ItemLocationTypeFilter
-
   implicit val itemLocationTypeIdFilter: Decoder[ItemLocationTypeIdFilter] =
-    decodeCommaSeparated.emap(strs => Right(ItemLocationTypeIdFilter(strs)))
+    stringListFilter(ItemLocationTypeIdFilter)
 
   implicit val languagesFilter: Decoder[LanguagesFilter] =
     stringListFilter(LanguagesFilter)
 
   implicit val genreFilter: Decoder[GenreFilter] =
-    Decoder.decodeString.emap(str => Right(GenreFilter(str)))
+    stringListFilter(GenreFilter)
 
   implicit val subjectFilter: Decoder[SubjectFilter] =
-    Decoder.decodeString.emap(str => Right(SubjectFilter(str)))
+    stringListFilter(SubjectFilter)
 
   implicit val identifiersFilter: Decoder[IdentifiersFilter] =
     stringListFilter(IdentifiersFilter)
+
+  implicit val partOf: Decoder[PartOfFilter] =
+    Decoder.decodeString.map(PartOfFilter)
+
+  implicit val availabilitiesFilter: Decoder[AvailabilitiesFilter] =
+    stringListFilter(AvailabilitiesFilter)
 
   implicit val accessStatusFilter: Decoder[AccessStatusFilter] =
     decodeIncludesAndExcludes(
@@ -187,15 +246,16 @@ object MultipleWorksParams extends QueryParamsUtils {
       case (includes, excludes) => Right(AccessStatusFilter(includes, excludes))
     }
 
-  implicit val aggregationsDecoder: Decoder[List[AggregationRequest]] =
+  implicit val aggregationsDecoder: Decoder[List[WorkAggregationRequest]] =
     decodeOneOfCommaSeparated(
-      "workType" -> AggregationRequest.Format,
-      "genres" -> AggregationRequest.Genre,
-      "production.dates" -> AggregationRequest.ProductionDate,
-      "subjects" -> AggregationRequest.Subject,
-      "languages" -> AggregationRequest.Languages,
-      "license" -> AggregationRequest.License,
-      "locationType" -> AggregationRequest.ItemLocationType,
+      "workType" -> WorkAggregationRequest.Format,
+      "genres" -> WorkAggregationRequest.Genre,
+      "production.dates" -> WorkAggregationRequest.ProductionDate,
+      "subjects" -> WorkAggregationRequest.Subject,
+      "languages" -> WorkAggregationRequest.Languages,
+      "contributors" -> WorkAggregationRequest.Contributor,
+      "license" -> WorkAggregationRequest.License,
+      "availabilities" -> WorkAggregationRequest.Availabilities
     )
 
   implicit val sortDecoder: Decoder[List[SortRequest]] =
@@ -214,7 +274,4 @@ object MultipleWorksParams extends QueryParamsUtils {
       SearchQueryType.default,
       "MultiMatcher" -> SearchQueryType.MultiMatcher,
     )
-
-  private def stringListFilter[T](applyFilter: Seq[String] => T): Decoder[T] =
-    decodeCommaSeparated.emap(strs => Right(applyFilter(strs)))
 }

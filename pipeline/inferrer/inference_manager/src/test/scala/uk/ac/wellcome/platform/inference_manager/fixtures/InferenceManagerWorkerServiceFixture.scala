@@ -1,18 +1,17 @@
 package uk.ac.wellcome.platform.inference_manager.fixtures
 
 import scala.concurrent.ExecutionContext.Implicits.global
-
-import io.circe.Decoder
+import scala.collection.mutable
 import software.amazon.awssdk.services.sqs.model.Message
 
-import uk.ac.wellcome.akka.fixtures.Akka
-import uk.ac.wellcome.bigmessaging.fixtures.BigMessagingFixture
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
+import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.inference_manager.adapters.InferrerAdapter
 import uk.ac.wellcome.platform.inference_manager.models.DownloadedImage
+import uk.ac.wellcome.pipeline_storage.{MemoryIndexer, MemoryRetriever}
 import uk.ac.wellcome.platform.inference_manager.services.{
   FileWriter,
   ImageDownloader,
@@ -20,26 +19,37 @@ import uk.ac.wellcome.platform.inference_manager.services.{
   MergedIdentifiedImage,
   RequestPoolFlow
 }
+import uk.ac.wellcome.pipeline_storage.fixtures.PipelineStorageStreamFixtures
+import ImageState.{Augmented, Initial}
+import akka.http.scaladsl.model.Uri
 
 trait InferenceManagerWorkerServiceFixture
-    extends BigMessagingFixture
-    with Akka {
+    extends PipelineStorageStreamFixtures {
+
   def withWorkerService[R](
     queue: Queue,
-    messageSender: MemoryMessageSender,
+    msgSender: MemoryMessageSender,
     adapters: Set[InferrerAdapter],
     fileWriter: FileWriter,
     inferrerRequestPool: RequestPoolFlow[(DownloadedImage, InferrerAdapter),
                                          Message],
-    imageRequestPool: RequestPoolFlow[MergedIdentifiedImage, Message],
-    fileRoot: String = "/")(
-    testWith: TestWith[InferenceManagerWorkerService[String], R])(
-    implicit decoder: Decoder[MergedIdentifiedImage]): R =
+    imageRequestPool: RequestPoolFlow[(Uri, MergedIdentifiedImage), Message],
+    fileRoot: String = "/",
+    initialImages: List[Image[Initial]] = Nil,
+    augmentedImages: mutable.Map[String, Image[Augmented]])(
+    testWith: TestWith[InferenceManagerWorkerService[String], R]): R =
     withActorSystem { implicit actorSystem =>
-      withBigMessageStream[Image[ImageState.Initial], R](queue) { msgStream =>
+      withSQSStream[NotificationMessage, R](queue) { msgStream =>
         val workerService = new InferenceManagerWorkerService(
           msgStream = msgStream,
-          messageSender = messageSender,
+          msgSender = msgSender,
+          imageRetriever = new MemoryRetriever[Image[Initial]](
+            index = mutable.Map(
+              initialImages.map(image => image.id -> image): _*
+            )
+          ),
+          imageIndexer = new MemoryIndexer(augmentedImages),
+          pipelineStorageConfig = pipelineStorageConfig,
           inferrerAdapters = adapters,
           imageDownloader = new ImageDownloader(
             root = fileRoot,

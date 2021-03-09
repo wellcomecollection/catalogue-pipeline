@@ -11,7 +11,8 @@ sealed trait SourcePayload {
 case class CalmSourcePayload(
   id: String,
   location: S3ObjectLocation,
-  version: Int
+  version: Int,
+  isDeleted: Boolean = false
 ) extends SourcePayload
 
 case class MiroInventorySourcePayload(

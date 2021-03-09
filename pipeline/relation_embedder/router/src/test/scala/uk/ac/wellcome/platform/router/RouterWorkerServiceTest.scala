@@ -66,7 +66,8 @@ class RouterWorkerServiceTest
           worksMessageSender.messages.map(_.body) should contain(work.id)
           pathsMessageSender.messages shouldBe empty
           indexer.index should contain(
-            work.id -> work.transition[Denormalised](Relations.none))
+            work.id -> work.transition[Denormalised](
+              (Relations.none, Set.empty)))
         }
     }
   }
@@ -100,7 +101,7 @@ class RouterWorkerServiceTest
     val work = mergedWork()
     val failingIndexer = new Indexer[Work[Denormalised]] {
       override def init(): Future[Unit] = Future.successful(())
-      override def index(documents: Seq[Work[Denormalised]])
+      override def apply(documents: Seq[Work[Denormalised]])
         : Future[Either[Seq[Work[Denormalised]], Seq[Work[Denormalised]]]] =
         Future.successful(Left(documents))
     }

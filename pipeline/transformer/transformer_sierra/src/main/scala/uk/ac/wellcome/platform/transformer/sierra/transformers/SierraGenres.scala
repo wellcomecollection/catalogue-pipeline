@@ -1,11 +1,6 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
-import uk.ac.wellcome.models.work.internal.{
-  AbstractConcept,
-  Concept,
-  Genre,
-  IdState
-}
+import uk.ac.wellcome.models.work.internal.{Concept, Genre, IdState}
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   MarcSubfield,
   SierraBibData,
@@ -63,16 +58,17 @@ object SierraGenres
         val concepts = getPrimaryConcept(primarySubfields, varField = varField) ++ getSubdivisions(
           subdivisionSubfields)
 
-        Genre(label = label, concepts = concepts)
+        Genre.normalised(label = label, concepts = concepts)
       }
+      .distinct
 
   // Extract the primary concept, which comes from subfield $a.  This is the
   // only concept which might be identified.
   private def getPrimaryConcept(
     primarySubfields: List[MarcSubfield],
-    varField: VarField): List[AbstractConcept[IdState.Unminted]] =
+    varField: VarField): List[Concept[IdState.Unminted]] =
     primarySubfields.map { subfield =>
-      val concept = Concept(label = subfield.content)
+      val concept = Concept.normalised(label = subfield.content)
       concept.copy(id = identifyConcept(concept, varField))
     }
 }

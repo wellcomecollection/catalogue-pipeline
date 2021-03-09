@@ -1,13 +1,20 @@
 package uk.ac.wellcome.platform.id_minter.services
 
 import akka.Done
+import akka.stream.scaladsl.Flow
 import grizzled.slf4j.Logging
 import io.circe.{Decoder, Json}
+import software.amazon.awssdk.services.sqs.model.Message
+import uk.ac.wellcome.json.JsonUtil
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal.WorkState.Identified
 import uk.ac.wellcome.models.work.internal._
+import uk.ac.wellcome.pipeline_storage.PipelineStorageStream.{
+  batchRetrieveFlow,
+  processFlow
+}
 import uk.ac.wellcome.pipeline_storage.{PipelineStorageStream, Retriever}
 import uk.ac.wellcome.platform.id_minter.config.models.{
   IdentifiersTableConfig,
@@ -45,15 +52,19 @@ class IdMinterWorkerService[Destination](
       tableName = identifiersTableConfig.tableName
     )
 
-    pipelineStream.foreach(this.getClass.getSimpleName, processMessage)
+    pipelineStream.run(
+      this.getClass.getSimpleName,
+      Flow[(Message, NotificationMessage)]
+        .via(batchRetrieveFlow(pipelineStream.config, jsonRetriever))
+        .via(processFlow(pipelineStream.config, item => processMessage(item)))
+    )
   }
 
-  def processMessage(
-    message: NotificationMessage): Future[Option[Work[Identified]]] =
-    jsonRetriever(message.body)
-      .flatMap(json => Future.fromTry(embedIds(json)))
-      .flatMap(updatedJson =>
-        Future.fromTry(decodeJson(updatedJson)).map(Some(_)))
+  def processMessage(json: Json): Future[List[Work[Identified]]] =
+    for {
+      updatedJson <- Future.fromTry(embedIds(json))
+      work <- Future.fromTry(decodeJson(updatedJson))
+    } yield List(work)
 
   def embedIds(json: Json): Try[Json] =
     for {
@@ -65,5 +76,5 @@ class IdMinterWorkerService[Destination](
 
   def decodeJson(json: Json)(
     implicit decoder: Decoder[Work[Identified]]): Try[Work[Identified]] =
-    decoder.decodeJson(json).toTry
+    JsonUtil.fromJson[Work[Identified]](json.noSpaces)(decoder)
 }

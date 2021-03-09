@@ -11,30 +11,27 @@ class DerivedDataTest
     with ImageGenerators {
 
   describe("DerivedWorkData") {
+    describe("contributorAgents") {
+      it("derives contributorAgents from a heterogenous list of contributors") {
+        val agents = List(
+          Agent("0048146"),
+          Organisation("PKK"),
+          Person("Salt Bae"),
+          Meeting("Brunch, 18th Jan 2021")
+        )
+        val work =
+          denormalisedWork().contributors(
+            agents.map(Contributor(_, roles = Nil)))
+        val derivedWorkData = DerivedWorkData(work.data)
 
-    it("sets availableOnline = true if there is a digital location on an item") {
-      val work = mergedWork().items(
-        List(createDigitalItem, createIdentifiedPhysicalItem))
-      val derivedWorkData = DerivedWorkData(work.data)
-
-      derivedWorkData.availableOnline shouldBe true
+        derivedWorkData.contributorAgents shouldBe List(
+          "Agent:0048146",
+          "Organisation:PKK",
+          "Person:Salt Bae",
+          "Meeting:Brunch, 18th Jan 2021"
+        )
+      }
     }
-
-    it(
-      "sets availableOnline = false if there is no digital location on any items") {
-      val work = mergedWork().items(List(createIdentifiedPhysicalItem))
-      val derivedWorkData = DerivedWorkData(work.data)
-
-      derivedWorkData.availableOnline shouldBe false
-    }
-
-    it("handles empty items list") {
-      val work = mergedWork().items(Nil)
-      val derivedWorkData = DerivedWorkData(work.data)
-
-      derivedWorkData.availableOnline shouldBe false
-    }
-
   }
 
   describe("DerivedImageData") {

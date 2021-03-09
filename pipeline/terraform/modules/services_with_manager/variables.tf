@@ -77,8 +77,6 @@ variable "manager_mount_points" {
   default = []
 }
 
-variable "messages_bucket_arn" {}
-
 variable "queue_read_policy" {}
 
 variable "apps" {
@@ -125,4 +123,8 @@ variable "deployment_service_env" {
 
 variable "deployment_service_name" {
   type = string
+}
+
+variable "shared_logging_secrets" {
+  type = map(any)
 }

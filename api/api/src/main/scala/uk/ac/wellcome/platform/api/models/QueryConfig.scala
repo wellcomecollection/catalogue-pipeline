@@ -4,7 +4,7 @@ import com.sksamuel.elastic4s.ElasticApi.{existsQuery, search}
 import com.sksamuel.elastic4s.ElasticDsl.SearchHandler
 import com.sksamuel.elastic4s.circe._
 import com.sksamuel.elastic4s.{ElasticClient, Index}
-import uk.ac.wellcome.models.work.internal.{Image, ImageState}
+import uk.ac.wellcome.models.work.internal.{Image, ImageState, InferredData}
 import uk.ac.wellcome.models.Implicits._
 
 import scala.concurrent.duration._
@@ -12,26 +12,31 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
 case class QueryConfig(
-  paletteBinSizes: Seq[Int]
+  paletteBinSizes: Seq[Seq[Int]],
+  paletteBinMinima: Seq[Float]
 )
 
 object QueryConfig {
   def fetchFromIndex(elasticClient: ElasticClient, imagesIndex: Index)(
-    implicit ec: ExecutionContext): QueryConfig =
+    implicit ec: ExecutionContext): QueryConfig = {
+    val (binSizes, binMinima) = Try(
+      Await.result(
+        getPaletteParamsFromIndex(elasticClient, imagesIndex),
+        5 seconds
+      )
+    ).getOrElse((defaultPaletteBinSizes, defaultPaletteBinMinima))
     QueryConfig(
-      paletteBinSizes = Try(
-        Await.result(
-          getPaletteBinSizesFromIndex(elasticClient, imagesIndex),
-          5 seconds
-        )
-      ).getOrElse(defaultPaletteBinSizes)
+      paletteBinSizes = binSizes,
+      paletteBinMinima = binMinima
     )
+  }
 
-  val defaultPaletteBinSizes = Seq(4, 6, 8)
+  val defaultPaletteBinSizes = Seq(Seq(4, 6, 9), Seq(2, 4, 6), Seq(1, 3, 5))
+  val defaultPaletteBinMinima = Seq(0f, 10f / 256, 10f / 256)
 
-  private def getPaletteBinSizesFromIndex(
-    elasticClient: ElasticClient,
-    index: Index)(implicit ec: ExecutionContext): Future[Seq[Int]] =
+  private def getPaletteParamsFromIndex(elasticClient: ElasticClient,
+                                        index: Index)(
+    implicit ec: ExecutionContext): Future[(Seq[Seq[Int]], Seq[Float])] =
     elasticClient
       .execute(
         search(index).query(
@@ -43,20 +48,22 @@ object QueryConfig {
           result.toEither
             .map { response =>
               response.hits.hits.headOption
-                .flatMap(_.to[Image[ImageState.Indexed]].state.inferredData
-                  .map(_.palette))
-                .map { palette =>
-                  palette
-                    .flatMap(_.split("/").lastOption)
-                    .distinct
-                    .map(_.toInt)
+                .flatMap {
+                  _.to[Image[ImageState.Indexed]].state.inferredData.flatMap {
+                    case InferredData(_, _, _, _, binSizes, binMinima)
+                        if binSizes.size == 3 &&
+                          binSizes.forall(_.size == 3) &&
+                          binMinima.size == 3 =>
+                      Some((binSizes, binMinima))
+                    case _ => None
+                  }
                 }
             }
             .left
             .map(_.asException)
             .toTry
             .flatMap {
-              case Some(bins) => Success(bins)
+              case Some(params) => Success(params)
               case None =>
                 Failure(
                   new RuntimeException(

@@ -57,7 +57,7 @@ class WorksIndexConfigTest
   it("puts a valid work") {
     forAll { sampleWork: Work[Identified] =>
       withLocalWorksIndex { index =>
-        whenReady(indexObject(index, sampleWork)) { resp =>
+        whenReady(indexObject(index, sampleWork)) { _ =>
           assertObjectIndexed(index, sampleWork)
         }
       }
@@ -149,6 +149,16 @@ class WorksIndexConfigTest
       whenReady(indexObject(index, badTestObject)) { response =>
         response.isError shouldBe true
         response.error shouldBe a[ElasticError]
+      }
+    }
+  }
+
+  it("puts a valid work using compression") {
+    forAll { sampleWork: Work[Identified] =>
+      withLocalWorksIndex { index =>
+        whenReady(indexObjectCompressed(index, sampleWork)) { _ =>
+          assertObjectIndexed(index, sampleWork)
+        }
       }
     }
   }

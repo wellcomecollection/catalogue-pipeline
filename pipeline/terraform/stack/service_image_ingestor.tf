@@ -4,6 +4,8 @@ module "ingestor_images_queue" {
   topic_arns      = [module.image_inferrer_topic.arn]
   aws_region      = var.aws_region
   alarm_topic_arn = var.dlq_alarm_arn
+
+  visibility_timeout_seconds = 60
 }
 
 # Service
@@ -16,6 +18,7 @@ module "ingestor_images" {
   security_group_ids = [
     aws_security_group.service_egress.id,
     aws_security_group.interservice.id,
+    var.pipeline_storage_security_group_id,
   ]
 
   cluster_name = aws_ecs_cluster.cluster.name
@@ -24,31 +27,67 @@ module "ingestor_images" {
   memory = 4096
 
   env_vars = {
-    metrics_namespace   = "${local.namespace_hyphen}_ingestor_images"
-    es_index            = local.es_images_index
-    ingest_queue_id     = module.ingestor_images_queue.url
-    es_ingest_batchSize = 100
+    metrics_namespace = "${local.namespace_hyphen}_ingestor_images"
+    ingest_queue_id   = module.ingestor_images_queue.url
+    topic_arn         = module.image_ingestor_topic.arn
+
+    es_images_index    = local.es_images_index
+    es_augmented_index = local.es_images_augmented_index
+
+    ingest_flush_interval_seconds = 30
+
+    # We initially had this set to 100, and we saw errors like:
+    #
+    #     com.sksamuel.elastic4s.http.JavaClientExceptionWrapper:
+    #     org.apache.http.ContentTooLongException: entity content is too long
+    #     [130397743] for the configured buffer limit [104857600]
+    #
+    # My guess is that turning down the batch size will sort out these
+    # errors, because I think this error is caused by getting a response
+    # that's >100MB.
+    #
+    # I cranked it down to 50, still saw the error sometimes.
+    #
+    # See https://github.com/wellcomecollection/platform/issues/5038
+    ingest_batch_size = 10
   }
 
   secret_env_vars = {
-    es_host     = "catalogue/ingestor/es_host"
-    es_port     = "catalogue/ingestor/es_port"
-    es_username = "catalogue/ingestor/es_username"
-    es_password = "catalogue/ingestor/es_password"
-    es_protocol = "catalogue/ingestor/es_protocol"
+    es_host_catalogue     = "elasticsearch/catalogue/private_host"
+    es_port_catalogue     = "catalogue/ingestor/es_port"
+    es_username_catalogue = "catalogue/ingestor/es_username"
+    es_password_catalogue = "catalogue/ingestor/es_password"
+    es_protocol_catalogue = "catalogue/ingestor/es_protocol"
+
+    es_host_pipeline_storage     = local.pipeline_storage_private_host
+    es_port_pipeline_storage     = local.pipeline_storage_port
+    es_protocol_pipeline_storage = local.pipeline_storage_protocol
+    es_username_pipeline_storage = "elasticsearch/pipeline_storage_${var.pipeline_date}/image_ingestor/es_username"
+    es_password_pipeline_storage = "elasticsearch/pipeline_storage_${var.pipeline_date}/image_ingestor/es_password"
   }
 
+  use_fargate_spot = true
 
   subnets = var.subnets
 
-  max_capacity        = 10
-  messages_bucket_arn = aws_s3_bucket.messages.arn
-  queue_read_policy   = module.ingestor_images_queue.read_policy
+  max_capacity      = min(5, local.max_capacity)
+  queue_read_policy = module.ingestor_images_queue.read_policy
 
   deployment_service_env  = var.release_label
   deployment_service_name = "image-ingestor"
 
+  depends_on = [
+    null_resource.elasticsearch_users,
+  ]
+
   shared_logging_secrets = var.shared_logging_secrets
+}
+
+module "image_ingestor_topic" {
+  source = "../modules/topic"
+
+  name       = "${local.namespace_hyphen}_image_ingestor_output"
+  role_names = [module.ingestor_images.task_role_name]
 }
 
 module "ingestor_images_scaling_alarm" {

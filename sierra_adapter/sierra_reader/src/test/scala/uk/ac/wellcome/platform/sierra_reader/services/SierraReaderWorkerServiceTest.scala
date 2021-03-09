@@ -4,14 +4,18 @@ import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
-import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.platform.sierra_reader.exceptions.SierraReaderException
 import uk.ac.wellcome.platform.sierra_reader.fixtures.WorkerServiceFixture
-import uk.ac.wellcome.sierra_adapter.model.{SierraBibRecord, SierraItemRecord}
 import uk.ac.wellcome.storage.fixtures.S3Fixtures
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
+import weco.catalogue.sierra_adapter.models.Implicits._
+import weco.catalogue.sierra_adapter.models.{
+  SierraBibRecord,
+  SierraHoldingsRecord,
+  SierraItemRecord
+}
 
 class SierraReaderWorkerServiceTest
     extends AnyFunSpec
@@ -24,8 +28,7 @@ class SierraReaderWorkerServiceTest
     with ScalaFutures
     with WorkerServiceFixture {
 
-  it(
-    "reads a window message from SQS, retrieves the bibs from Sierra and writes them to S3") {
+  it("fetches bibs from Sierra") {
     val body =
       """
         |{
@@ -39,7 +42,7 @@ class SierraReaderWorkerServiceTest
         withWorkerService(
           bucket,
           queue,
-          readerConfig = bibsReaderConfig.copy(batchSize = 10)) { service =>
+          readerConfig = bibsReaderConfig.copy(batchSize = 10)) { _ =>
           sendNotificationToSQS(queue = queue, body = body)
 
           val pageNames = List("0000.json", "0001.json", "0002.json").map {
@@ -61,8 +64,7 @@ class SierraReaderWorkerServiceTest
     }
   }
 
-  it(
-    "reads a window message from SQS, retrieves the items from Sierra and writes them to S3") {
+  it("fetches items from Sierra") {
     val body =
       """
         |{
@@ -74,7 +76,7 @@ class SierraReaderWorkerServiceTest
     withLocalS3Bucket { bucket =>
       withLocalSqsQueue() { queue =>
         withWorkerService(bucket, queue, readerConfig = itemsReaderConfig) {
-          service =>
+          _ =>
             sendNotificationToSQS(queue = queue, body = body)
 
             val pageNames = List(
@@ -95,6 +97,39 @@ class SierraReaderWorkerServiceTest
               getItemRecordsFromS3(bucket, pageNames(1)) should have size 50
               getItemRecordsFromS3(bucket, pageNames(2)) should have size 50
               getItemRecordsFromS3(bucket, pageNames(3)) should have size 7
+            }
+        }
+      }
+    }
+  }
+
+  it("fetches holdings from Sierra") {
+    val body =
+      """
+        |{
+        | "start": "2003-03-03T03:00:00Z",
+        | "end":   "2003-04-04T04:00:00Z"
+        |}
+      """.stripMargin
+
+    withLocalS3Bucket { bucket =>
+      withLocalSqsQueue() { queue =>
+        withWorkerService(bucket, queue, readerConfig = holdingsReaderConfig) {
+          _ =>
+            sendNotificationToSQS(queue = queue, body = body)
+
+            val pageNames = List("0000.json", "0001.json")
+              .map { label =>
+                s"records_holdings/2003-03-03T03-00-00Z__2003-04-04T04-00-00Z/$label"
+              } ++ List(
+              "windows_holdings_complete/2003-03-03T03-00-00Z__2003-04-04T04-00-00Z")
+
+            eventually {
+              // There are 51 item records in the Sierra wiremock so we expect 3 files
+              listKeysInBucket(bucket = bucket) shouldBe pageNames
+
+              getHoldingsRecordsFromS3(bucket, pageNames(0)) should have size 50
+              getHoldingsRecordsFromS3(bucket, pageNames(1)) should have size 1
             }
         }
       }
@@ -162,6 +197,12 @@ class SierraReaderWorkerServiceTest
   private def getItemRecordsFromS3(bucket: Bucket,
                                    key: String): List[SierraItemRecord] =
     getObjectFromS3[List[SierraItemRecord]](
+      S3ObjectLocation(bucket = bucket.name, key = key))
+
+  private def getHoldingsRecordsFromS3(
+    bucket: Bucket,
+    key: String): List[SierraHoldingsRecord] =
+    getObjectFromS3[List[SierraHoldingsRecord]](
       S3ObjectLocation(bucket = bucket.name, key = key))
 
   it("returns a SierraReaderException if it receives an invalid message") {

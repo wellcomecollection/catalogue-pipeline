@@ -15,14 +15,13 @@ class DisplayItemTest extends AnyFunSpec with Matchers with ItemsGenerators {
     )
 
     displayItem.id shouldBe Some(item.id.canonicalId)
-    displayItem.locations shouldBe List(
-      DisplayLocationDeprecated(item.locations.head))
+    displayItem.locations shouldBe List(DisplayLocation(item.locations.head))
     displayItem.identifiers shouldBe Some(
       List(DisplayIdentifier(item.id.sourceIdentifier)))
     displayItem.ontologyType shouldBe "Item"
   }
   it("parses an unidentified Item as a displayItem") {
-    val item = createUnidentifiableItemWith()
+    val item = createUnidentifiableItem
 
     val displayItem = DisplayItem(
       item = item,
@@ -32,7 +31,7 @@ class DisplayItemTest extends AnyFunSpec with Matchers with ItemsGenerators {
     displayItem shouldBe DisplayItem(
       id = None,
       identifiers = None,
-      locations = List(DisplayLocationDeprecated(item.locations.head)))
+      locations = List(DisplayLocation(item.locations.head)))
   }
 
   it("parses an unidentified Item without any locations") {

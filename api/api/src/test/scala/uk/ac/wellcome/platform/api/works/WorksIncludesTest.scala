@@ -40,7 +40,8 @@ class WorksIncludesTest
                    "id": "${work0.state.canonicalId}",
                    "title": "${work0.data.title.get}",
                    "alternativeTitles": [],
-                   "availableOnline": false,
+                   "availabilities": [${availabilities(
+              work0.state.availabilities)}],
                    "identifiers": [
                      ${identifier(work0.sourceIdentifier)},
                      ${identifier(otherIdentifier0)}
@@ -51,7 +52,8 @@ class WorksIncludesTest
                    "id": "${work1.state.canonicalId}",
                    "title": "${work1.data.title.get}",
                    "alternativeTitles": [],
-                   "availableOnline": false,
+                   "availabilities": [${availabilities(
+              work1.state.availabilities)}],
                    "identifiers": [
                      ${identifier(work1.sourceIdentifier)},
                      ${identifier(otherIdentifier1)}
@@ -81,7 +83,7 @@ class WorksIncludesTest
                 "id": "${work.state.canonicalId}",
                 "title": "${work.data.title.get}",
                 "alternativeTitles": [],
-                "availableOnline": false,
+                "availabilities": [${availabilities(work.state.availabilities)}],
                 "identifiers": [
                   ${identifier(work.sourceIdentifier)},
                   ${identifier(otherIdentifier)}
@@ -100,7 +102,7 @@ class WorksIncludesTest
           .items(
             List(
               createIdentifiedItemWith(title = Some("item title")),
-              createUnidentifiableItemWith()
+              createUnidentifiableItem
             ))
 
         insertIntoElasticsearch(worksIndex, work)
@@ -114,7 +116,7 @@ class WorksIncludesTest
               "id": "${work.state.canonicalId}",
               "title": "${work.data.title.get}",
               "alternativeTitles": [],
-              "availableOnline": true,
+              "availabilities": [${availabilities(work.state.availabilities)}],
               "items": [ ${items(work.data.items)} ]
             }
           """
@@ -144,7 +146,8 @@ class WorksIncludesTest
                    "id": "${work0.state.canonicalId}",
                    "title": "${work0.data.title.get}",
                    "alternativeTitles": [],
-                   "availableOnline": false,
+                   "availabilities": [${availabilities(
+              work0.state.availabilities)}],
                    "subjects": [ ${subjects(subjects0)}]
                  },
                  {
@@ -152,7 +155,8 @@ class WorksIncludesTest
                    "id": "${work1.state.canonicalId}",
                    "title": "${work1.data.title.get}",
                    "alternativeTitles": [],
-                   "availableOnline": false,
+                   "availabilities": [${availabilities(
+              work1.state.availabilities)}],
                    "subjects": [ ${subjects(subjects1)}]
                  }
                 ]
@@ -179,7 +183,7 @@ class WorksIncludesTest
                 "id": "${work.state.canonicalId}",
                 "title": "${work.data.title.get}",
                 "alternativeTitles": [],
-                "availableOnline": false,
+                "availabilities": [${availabilities(work.state.availabilities)}],
                 "subjects": [ ${subjects(work.data.subjects)}]
               }
             """
@@ -210,7 +214,8 @@ class WorksIncludesTest
                    "id": "${work1.state.canonicalId}",
                    "title": "${work1.data.title.get}",
                    "alternativeTitles": [],
-                   "availableOnline": false,
+                   "availabilities": [${availabilities(
+              work1.state.availabilities)}],
                    "genres": [ ${genres(genres1)}]
                  },
                  {
@@ -218,7 +223,8 @@ class WorksIncludesTest
                    "id": "${work2.state.canonicalId}",
                    "title": "${work2.data.title.get}",
                    "alternativeTitles": [],
-                   "availableOnline": false,
+                   "availabilities": [${availabilities(
+              work2.state.availabilities)}],
                    "genres": [ ${genres(genres2)}]
                  }
                 ]
@@ -246,7 +252,7 @@ class WorksIncludesTest
                 "id": "${work.state.canonicalId}",
                 "title": "${work.data.title.get}",
                 "alternativeTitles": [],
-                "availableOnline": false,
+                "availabilities": [${availabilities(work.state.availabilities)}],
                 "genres": [ ${genres(work.data.genres)}]
               }
             """
@@ -281,7 +287,8 @@ class WorksIncludesTest
                    "id": "${work1.state.canonicalId}",
                    "title": "${work1.data.title.get}",
                    "alternativeTitles": [],
-                   "availableOnline": false,
+                   "availabilities": [${availabilities(
+              work1.state.availabilities)}],
                    "contributors": [ ${contributors(contributors1)}]
                  },
                  {
@@ -289,7 +296,8 @@ class WorksIncludesTest
                    "id": "${work2.state.canonicalId}",
                    "title": "${work2.data.title.get}",
                    "alternativeTitles": [],
-                   "availableOnline": false,
+                   "availabilities": [${availabilities(
+              work2.state.availabilities)}],
                    "contributors": [ ${contributors(contributors2)}]
                  }
                 ]
@@ -318,7 +326,7 @@ class WorksIncludesTest
                 "id": "${work.state.canonicalId}",
                 "title": "${work.data.title.get}",
                 "alternativeTitles": [],
-                "availableOnline": false,
+                "availabilities": [${availabilities(work.state.availabilities)}],
                 "contributors": [ ${contributors(work.data.contributors)}]
               }
             """
@@ -351,7 +359,8 @@ class WorksIncludesTest
                    "id": "${work1.state.canonicalId}",
                    "title": "${work1.data.title.get}",
                    "alternativeTitles": [],
-                   "availableOnline": false,
+                   "availabilities": [${availabilities(
+              work1.state.availabilities)}],
                    "production": [ ${production(productionEvents1)}]
                  },
                  {
@@ -359,7 +368,8 @@ class WorksIncludesTest
                    "id": "${work2.state.canonicalId}",
                    "title": "${work2.data.title.get}",
                    "alternativeTitles": [],
-                   "availableOnline": false,
+                   "availabilities": [${availabilities(
+              work2.state.availabilities)}],
                    "production": [ ${production(productionEvents2)}]
                  }
                 ]
@@ -386,7 +396,7 @@ class WorksIncludesTest
                 "id": "${work.state.canonicalId}",
                 "title": "${work.data.title.get}",
                 "alternativeTitles": [],
-                "availableOnline": false,
+                "availabilities": [${availabilities(work.state.availabilities)}],
                 "production": [ ${production(work.data.production)}]
               }
             """
@@ -419,7 +429,8 @@ class WorksIncludesTest
                    "id": "${work1.state.canonicalId}",
                    "title": "${work1.data.title.get}",
                    "alternativeTitles": [],
-                   "availableOnline": false,
+                   "availabilities": [${availabilities(
+              work1.state.availabilities)}],
                    "languages": [ ${languages(work1.data.languages)}]
                  },
                  {
@@ -427,7 +438,8 @@ class WorksIncludesTest
                    "id": "${work2.state.canonicalId}",
                    "title": "${work2.data.title.get}",
                    "alternativeTitles": [],
-                   "availableOnline": false,
+                   "availabilities": [${availabilities(
+              work2.state.availabilities)}],
                    "languages": [ ${languages(work2.data.languages)}]
                  }
                 ]
@@ -457,7 +469,7 @@ class WorksIncludesTest
                 "id": "${work.state.canonicalId}",
                 "title": "${work.data.title.get}",
                 "alternativeTitles": [],
-                "availableOnline": false,
+                "availabilities": [${availabilities(work.state.availabilities)}],
                 "languages": [ ${languages(work.data.languages)}]
               }
             """
@@ -486,7 +498,8 @@ class WorksIncludesTest
                      "id": "${work1.state.canonicalId}",
                      "title": "${work1.data.title.get}",
                      "alternativeTitles": [],
-                     "availableOnline": false,
+                     "availabilities": [${availabilities(
+              work1.state.availabilities)}],
                      "notes": [
                        {
                          "noteType": {
@@ -513,7 +526,8 @@ class WorksIncludesTest
                      "id": "${work2.state.canonicalId}",
                      "title": "${work2.data.title.get}",
                      "alternativeTitles": [],
-                     "availableOnline": false,
+                     "availabilities": [${availabilities(
+              work2.state.availabilities)}],
                      "notes": [
                        {
                          "noteType": {
@@ -548,7 +562,7 @@ class WorksIncludesTest
                 "id": "${work.state.canonicalId}",
                 "title": "${work.data.title.get}",
                 "alternativeTitles": [],
-                "availableOnline": false,
+                "availabilities": [${availabilities(work.state.availabilities)}],
                 "notes": [
                    {
                      "noteType": {
@@ -597,7 +611,8 @@ class WorksIncludesTest
                     "id": "${works.head.state.canonicalId}",
                     "title": "${works.head.data.title.get}",
                     "alternativeTitles": [],
-                    "availableOnline": false,
+                    "availabilities": [${availabilities(
+              works.head.state.availabilities)}],
                     "images": [${workImageIncludes(works.head.data.imageData)}]
                   },
                   {
@@ -605,7 +620,8 @@ class WorksIncludesTest
                     "id": "${works(1).state.canonicalId}",
                     "title": "${works(1).data.title.get}",
                     "alternativeTitles": [],
-                    "availableOnline": false,
+                    "availabilities": [${availabilities(
+              works(1).state.availabilities)}],
                     "images": [${workImageIncludes(works(1).data.imageData)}]
                   }
                 ]
@@ -634,7 +650,7 @@ class WorksIncludesTest
                 "id": "${work.state.canonicalId}",
                 "title": "${work.data.title.get}",
                 "alternativeTitles": [],
-                "availableOnline": false,
+                "availabilities": [${availabilities(work.state.availabilities)}],
                 "images": [${workImageIncludes(images)}]
               }
             """
@@ -689,7 +705,7 @@ class WorksIncludesTest
               "id": "${workC.state.canonicalId}",
               "title": "0/a/c",
               "alternativeTitles": [],
-              "availableOnline": false,
+              "availabilities": [${availabilities(workC.state.availabilities)}],
               "parts": [{
                 "id": "${workE.state.canonicalId}",
                 "title": "0/a/c/e",
@@ -716,7 +732,7 @@ class WorksIncludesTest
               "id": "${workC.state.canonicalId}",
               "title": "0/a/c",
               "alternativeTitles": [],
-              "availableOnline": false,
+              "availabilities": [${availabilities(workC.state.availabilities)}],
               "partOf": [
                 {
                   "id": "${workA.state.canonicalId}",
@@ -753,7 +769,7 @@ class WorksIncludesTest
               "id": "${workC.state.canonicalId}",
               "title": "0/a/c",
               "alternativeTitles": [],
-              "availableOnline": false,
+              "availabilities": [${availabilities(workC.state.availabilities)}],
               "precededBy": [{
                 "id": "${workB.state.canonicalId}",
                 "title": "0/a/b",
@@ -780,7 +796,7 @@ class WorksIncludesTest
               "id": "${workC.state.canonicalId}",
               "title": "0/a/c",
               "alternativeTitles": [],
-              "availableOnline": false,
+              "availabilities": [${availabilities(workC.state.availabilities)}],
               "succeededBy": [{
                 "id": "${workD.state.canonicalId}",
                 "title": "0/a/d",
@@ -790,6 +806,84 @@ class WorksIncludesTest
               }]
             }
           """
+          }
+      }
+    }
+  }
+
+  describe("holdings includes") {
+    def createHoldings(count: Int): List[Holdings] =
+      (1 to count).map { _ =>
+        Holdings(
+          description = chooseFrom(None, Some(randomAlphanumeric())),
+          note = chooseFrom(None, Some(randomAlphanumeric())),
+          enumeration =
+            collectionOf(min = 0, max = 10) { randomAlphanumeric() }.toList,
+          locations =
+            collectionOf(min = 0, max = 5) { createPhysicalLocation }.toList
+        )
+      }.toList
+
+    it("on the list endpoint") {
+      withWorksApi {
+        case (worksIndex, routes) =>
+          val works = List(
+            indexedWork().holdings(createHoldings(3)),
+            indexedWork().holdings(createHoldings(4))
+          ).sortBy { _.state.canonicalId }
+
+          insertIntoElasticsearch(worksIndex, works: _*)
+
+          assertJsonResponse(routes, s"/$apiPrefix/works?include=holdings") {
+            Status.OK -> s"""
+              {
+                ${resultList(apiPrefix, totalResults = works.size)},
+                "results": [
+                  {
+                    "type": "Work",
+                    "id": "${works.head.state.canonicalId}",
+                    "title": "${works.head.data.title.get}",
+                    "alternativeTitles": [],
+                    "availabilities": [${availabilities(
+              works.head.state.availabilities)}],
+                    "holdings": [${listOfHoldings(works.head.data.holdings)}]
+                  },
+                  {
+                    "type": "Work",
+                    "id": "${works(1).state.canonicalId}",
+                    "title": "${works(1).data.title.get}",
+                    "alternativeTitles": [],
+                    "availabilities": [${availabilities(
+              works(1).state.availabilities)}],
+                    "holdings": [${listOfHoldings(works(1).data.holdings)}]
+                  }
+                ]
+              }
+            """
+          }
+      }
+    }
+
+    it("on a single work endpoint") {
+      withWorksApi {
+        case (worksIndex, routes) =>
+          val work = indexedWork().holdings(createHoldings(3))
+
+          insertIntoElasticsearch(worksIndex, work)
+
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works/${work.state.canonicalId}?include=holdings") {
+            Status.OK -> s"""
+              {
+                ${singleWorkResult(apiPrefix)},
+                "id": "${work.state.canonicalId}",
+                "title": "${work.data.title.get}",
+                "alternativeTitles": [],
+                "availabilities": [${availabilities(work.state.availabilities)}],
+                "holdings": [${listOfHoldings(work.data.holdings)}]
+              }
+            """
           }
       }
     }

@@ -2,11 +2,12 @@ package weco.catalogue.transformer.example
 
 import io.circe.Encoder
 import io.circe.generic.extras.semiauto.deriveConfiguredEncoder
+import org.scalatest.EitherValues
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
-import uk.ac.wellcome.models.work.internal.{Work, WorkState}
+import uk.ac.wellcome.models.work.internal.{IdentifierType, Work, WorkState}
 import uk.ac.wellcome.pipeline_storage.{PipelineStorageStream, Retriever}
 import uk.ac.wellcome.storage.Version
 import uk.ac.wellcome.storage.generators.S3ObjectLocationGenerators
@@ -27,7 +28,8 @@ class ExampleTransformerTest
       ExampleData
     ]
     with S3ObjectLocationGenerators
-    with IdentifiersGenerators {
+    with IdentifiersGenerators
+    with EitherValues {
 
   implicit lazy val encoder: Encoder[CalmSourcePayload] =
     deriveConfiguredEncoder[CalmSourcePayload]
@@ -40,20 +42,34 @@ class ExampleTransformerTest
         initialEntries = Map.empty)
     )
 
-  override def createPayload(
+  override def createPayloadWith(id: String, version: Int)(
     implicit store: MemoryVersionedStore[S3ObjectLocation, ExampleData])
     : CalmSourcePayload = {
-    val data = ValidExampleData(id = createSourceIdentifier)
-    val version = randomInt(from = 1, to = 10)
+    val data = ValidExampleData(
+      id = createSourceIdentifierWith(
+        identifierType = IdentifierType("calm-record-id"),
+        value = id
+      ),
+      title = randomAlphanumeric()
+    )
 
     val location = createS3ObjectLocation
 
     store.put(Version(location, version))(data) shouldBe a[Right[_, _]]
 
-    CalmSourcePayload(
-      id = data.id.toString,
-      version = version,
-      location = location)
+    CalmSourcePayload(id = id, version = version, location = location)
+  }
+
+  override def setPayloadVersion(p: CalmSourcePayload, version: Int)(
+    implicit store: MemoryVersionedStore[S3ObjectLocation, ExampleData])
+    : CalmSourcePayload = {
+    val storedData: ExampleData =
+      store.get(Version(p.location, p.version)).value.identifiedT
+
+    val location = createS3ObjectLocation
+    store.put(Version(location, version))(storedData) shouldBe a[Right[_, _]]
+
+    p.copy(location = location, version = version)
   }
 
   override def createBadPayload(
@@ -75,7 +91,7 @@ class ExampleTransformerTest
   override def assertMatches(p: CalmSourcePayload, w: Work[WorkState.Source])(
     implicit context: MemoryVersionedStore[S3ObjectLocation, ExampleData])
     : Unit = {
-    w.sourceIdentifier.toString shouldBe p.id
+    w.sourceIdentifier.value shouldBe p.id
     w.version shouldBe p.version
   }
 

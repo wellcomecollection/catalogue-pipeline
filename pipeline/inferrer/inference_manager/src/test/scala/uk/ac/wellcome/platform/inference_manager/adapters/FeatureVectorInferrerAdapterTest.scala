@@ -50,7 +50,13 @@ class FeatureVectorInferrerAdapterTest
       )
       val inferredData = adapter.augment(InferredData.empty, response)
       inside(inferredData) {
-        case InferredData(features1, features2, actualLshEncodedFeatures, _) =>
+        case InferredData(
+            features1,
+            features2,
+            actualLshEncodedFeatures,
+            _,
+            _,
+            _) =>
           features1 should be(features.slice(0, 2048))
           features2 should be(features.slice(2048, 4096))
           actualLshEncodedFeatures should be(lshEncodedFeatures)

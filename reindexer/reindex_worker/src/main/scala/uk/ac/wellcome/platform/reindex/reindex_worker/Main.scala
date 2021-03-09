@@ -1,8 +1,8 @@
 package uk.ac.wellcome.platform.reindex.reindex_worker
 
 import akka.actor.ActorSystem
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.typesafe.config.Config
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.platform.reindex.reindex_worker.config.ReindexJobConfigBuilder
@@ -24,7 +24,7 @@ object Main extends WellcomeTypesafeApp {
     implicit val executionContext: ExecutionContext =
       AkkaBuilder.buildExecutionContext()
 
-    implicit val dynamoDBClient: AmazonDynamoDB =
+    implicit val dynamoDBClient: DynamoDbClient =
       DynamoBuilder.buildDynamoClient(config)
 
     val recordReader = new RecordReader

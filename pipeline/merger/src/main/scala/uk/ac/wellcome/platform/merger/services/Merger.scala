@@ -34,23 +34,30 @@ trait Merger extends MergerLogging {
     target: Work.Visible[Identified],
     sources: Seq[Work[Identified]]): State[MergeState, MergeResult]
 
-  protected def getTargetAndSources(works: Seq[Work[Identified]])
-    : Option[(Work.Visible[Identified], Seq[Work[Identified]])] =
+  private case class CategorisedWorks(
+    target: Work.Visible[Identified],
+    sources: Seq[Work[Identified]] = Nil,
+    deleted: Seq[Work.Deleted[Identified]] = Nil
+  ) {
+    require(!sources.contains(target))
+    require(deleted.intersect(sources).isEmpty)
+  }
+
+  private def categoriseWorks(
+    works: Seq[Work[Identified]]): Option[CategorisedWorks] =
     works match {
       case List(unmatchedWork: Work.Visible[Identified]) =>
-        Some((unmatchedWork, Nil))
+        Some(CategorisedWorks(target = unmatchedWork))
       case matchedWorks =>
         findTarget(matchedWorks).map { target =>
-          (
-            target,
-            matchedWorks
-              .filterNot {
-                case _: Work.Deleted[Identified] => true
-                case _                           => false
-              }
-              .filterNot(
-                _.sourceIdentifier == target.sourceIdentifier
-              )
+          CategorisedWorks(
+            target = target,
+            sources = matchedWorks
+              .filterNot { _.isInstanceOf[Work.Deleted[Identified]] }
+              .filterNot { _.sourceIdentifier == target.sourceIdentifier },
+            deleted = matchedWorks.collect {
+              case w: Work.Deleted[Identified] => w
+            },
           )
         }
     }
@@ -72,9 +79,11 @@ trait Merger extends MergerLogging {
   }
 
   def merge(works: Seq[Work[Identified]]): MergerOutcome =
-    getTargetAndSources(works)
+    categoriseWorks(works)
       .map {
-        case (target, sources) =>
+        case CategorisedWorks(target, sources, deleted) =>
+          assert((sources ++ deleted :+ target).toSet == works.toSet)
+
           logIntentions(target, sources)
           val (mergeResultSources, result) = createMergeResult(target, sources)
             .run(Map.empty)
@@ -87,8 +96,21 @@ trait Merger extends MergerLogging {
           val redirects = redirectedSources.map(redirectSourceToTarget(target))
           logResult(result, redirects.toList, remaining.toList)
 
+          val redirectedIdentifiers =
+            redirectedSources.map { s =>
+              IdState.Identified(s.id, s.sourceIdentifier)
+            }.toSeq
+
+          val targetWork: Work.Visible[Identified] =
+            Work.Visible[Identified](
+              version = result.mergedTarget.version,
+              data = result.mergedTarget.data,
+              state = result.mergedTarget.state,
+              redirectSources = result.mergedTarget.redirectSources ++ redirectedIdentifiers
+            )
+
           MergerOutcome(
-            resultWorks = redirects.toList ++ remaining :+ result.mergedTarget,
+            resultWorks = redirects.toList ++ remaining ++ deleted :+ targetWork,
             imagesWithSources = result.imageDataWithSources
           )
       }
@@ -102,7 +124,7 @@ trait Merger extends MergerLogging {
         source.sourceIdentifier,
         source.state.canonicalId,
         source.state.modifiedTime),
-      redirect =
+      redirectTarget =
         IdState.Identified(target.state.canonicalId, target.sourceIdentifier)
     )
 
@@ -130,20 +152,12 @@ trait Merger extends MergerLogging {
 
 object Merger {
   // Parameter can't be `State` as that shadows the Cats type
-  implicit class WorkMergingOps[StateT <: WorkState](work: Work[StateT]) {
+  implicit class WorkMergingOps[StateT <: WorkState](
+    work: Work.Visible[StateT]) {
     def mapData(
       f: WorkData[StateT#WorkDataState] => WorkData[StateT#WorkDataState]
-    ): Work[StateT] =
-      work match {
-        case Work.Visible(version, data, state) =>
-          Work.Visible(version, f(data), state)
-        case Work.Invisible(version, data, state, reasons) =>
-          Work.Invisible(version, f(data), state, reasons)
-        case Work.Redirected(version, redirect, state) =>
-          Work.Redirected(version, redirect, state)
-        case Work.Deleted(version, state, reason) =>
-          Work.Deleted(version, state, reason)
-      }
+    ): Work.Visible[StateT] =
+      work.copy(data = f(work.data))
   }
 }
 

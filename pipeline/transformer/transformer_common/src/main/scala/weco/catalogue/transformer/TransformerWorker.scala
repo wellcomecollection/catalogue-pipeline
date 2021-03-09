@@ -60,16 +60,21 @@ trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest]
       for {
         payload <- decodePayload(message)
         key = Version(payload.id, payload.version)
-        recordResult <- getRecord(payload)
-        (record, version) = recordResult
-        newWork <- work(record, version, key)
+
+        _ = debug(s"Decoded payload $payload and key $key")
+
+        getResult <- getSourceData(payload)
+        (sourceData, version) = getResult
+        _ = debug(s"Retrieved sourceData version $version for key $key")
+
+        newWork <- work(sourceData, version, key)
       } yield (newWork, key)
     }.flatMap { compareToStored }
 
   private def work(sourceData: SourceData,
                    version: Int,
                    key: StoreKey): Result[Work[Source]] =
-    transformer(sourceData, version) match {
+    transformer(id = key.id, sourceData, version) match {
       case Right(result) => Right(result)
       case Left(err) =>
         Left(catalogue.transformer.TransformerError(err, sourceData, key))
@@ -81,7 +86,7 @@ trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest]
       case Failure(err)      => Left(DecodePayloadError(err, message))
     }
 
-  private def getRecord(p: Payload): Result[(SourceData, Int)] =
+  private def getSourceData(p: Payload): Result[(SourceData, Int)] =
     lookupSourceData(p)
       .map {
         case Identified(Version(storedId, storedVersion), sourceData) =>
@@ -97,15 +102,13 @@ trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest]
         StoreReadError(err, p)
       }
 
-  import WorkComparison._
-
   private def compareToStored(workResult: Result[(Work[Source], StoreKey)])
     : Future[Result[Option[(Work[Source], StoreKey)]]] =
     workResult match {
 
       // Once we've transformed the Work, we query forward -- is this a work we've
-      // seen before?  If it's a Work the pipeline already knows about, we can skip
-      // a bunch of unnecessary processing by not sending it on.
+      // seen before?  If it's the same as a Work the pipeline already knows about,
+      // we can skip a bunch of unnecessary processing by not sending it on.
       //
       // The pipeline is meant to be idempotent, so sending the work forward would
       // be a no-op.
@@ -114,26 +117,65 @@ trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest]
       // nightly Sierra reharvest, when ~250k Sierra source records get synced with
       // Calm.  The records get a new modifiedDate from Sierra, but none of the data
       // we care about for the pipeline is changed.
-      case Right((newWork, key)) =>
+      case Right((transformedWork, key)) =>
         retriever
-          .apply(workIndexable.id(newWork))
+          .apply(workIndexable.id(transformedWork))
           .map { storedWork =>
-            if (newWork.shouldReplace(storedWork)) {
-              info(
-                s"$name: from $key transformed work; already in pipeline so not re-sending")
-              Right(Some((newWork, key)))
+            if (shouldSend(transformedWork, storedWork)) {
+              Right(Some((transformedWork, key)))
             } else {
+              info(
+                s"$name: from $key transformed work with id ${transformedWork.id}; already in pipeline so not re-sending")
               Right(None)
             }
           }
           .recover {
             case err: Throwable =>
               debug(s"Unable to retrieve work $key: $err")
-              Right(Some((newWork, key)))
+              Right(Some((transformedWork, key)))
           }
 
       case Left(err) => Future.successful(Left(err))
     }
+
+  protected def shouldSend(transformedWork: Work[Source],
+                           storedWork: Work[Source]): Boolean = {
+    if (transformedWork.version < storedWork.version) {
+      debug(
+        s"${transformedWork.id}: transformed Work is older than the stored Work")
+      false
+    }
+
+    // We cannot guarantee that storing a work results in a message being sent to SNS.
+    // If this is the same version of the Work as was previously stored, resend it to
+    // ensure it gets through the pipeline.
+    else if (storedWork.version == transformedWork.version) {
+      debug(
+        s"${transformedWork.id}: transformed Work and stored Work have the same version")
+      true
+    }
+
+    // Different data is always worth sending along the pipeline.
+    else if (storedWork.data != transformedWork.data) {
+      assert(storedWork.version < transformedWork.version)
+      debug(
+        s"${transformedWork.id}: transformed Work has different data to the stored Work")
+      true
+    }
+
+    // If we get here, it means the new work and the stored work should have
+    // the same data, but the stored work has a strictly lower version.
+    //
+    // Nothing in the pipeline will change if we send this work, and we
+    // can assume the previous version of the work was sent successfully.
+    else {
+      debug(
+        s"${transformedWork.id}: transformed Work has newer version/same data as the stored Work")
+      assert(storedWork.data == transformedWork.data)
+      assert(storedWork.version < transformedWork.version)
+      false
+    }
+  }
 
   def run(): Future[Done] =
     pipelineStream.foreach(
@@ -154,12 +196,13 @@ trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest]
             throw err
 
           case Right(None) =>
-            debug(s"$name: no transformed work returned for $notification")
-            None
+            debug(
+              s"$name: no transformed Work returned for $notification (this means the Work is already in the pipeline)")
+            Nil
 
           case Right(Some((work, key))) =>
             info(s"$name: from $key transformed work with id ${work.id}")
-            Some(work)
+            List(work)
       }
     )
 }

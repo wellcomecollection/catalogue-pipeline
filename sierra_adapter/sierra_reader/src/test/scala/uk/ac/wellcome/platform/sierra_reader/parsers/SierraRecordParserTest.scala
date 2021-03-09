@@ -1,18 +1,19 @@
 package uk.ac.wellcome.platform.sierra_reader.parsers
 
 import java.time.Instant
-
 import io.circe.parser.parse
 import org.scalatest.compatible.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil.toJson
 import uk.ac.wellcome.json.utils.JsonAssertions
-import uk.ac.wellcome.sierra_adapter.model.{
+import weco.catalogue.sierra_adapter.generators.SierraGenerators
+import weco.catalogue.sierra_adapter.models.{
   AbstractSierraRecord,
   SierraBibNumber,
   SierraBibRecord,
-  SierraGenerators,
+  SierraHoldingsNumber,
+  SierraHoldingsRecord,
   SierraItemRecord
 }
 
@@ -69,13 +70,43 @@ class SierraRecordParserTest
     val expectedRecord = createSierraItemRecordWith(
       id = id,
       modifiedDate = Instant.parse(updatedDate),
-      bibIds = bibIds.map(SierraBibNumber).toList
+      bibIds = bibIds.map(SierraBibNumber(_)).toList
     )
 
     val json = parse(jsonString).right.get
 
     assertSierraRecordsAreEqual(
       SierraRecordParser(SierraItemRecord.apply)(json),
+      expectedRecord
+    )
+  }
+
+  it("parses a holdings record") {
+    val jsonString =
+      """{
+          |    "id": 1064036,
+          |    "bibIds": [
+          |        1571482
+          |    ],
+          |    "itemIds": [
+          |        1234567
+          |    ],
+          |    "updatedDate": "2003-04-02T13:29:42Z",
+          |    "deleted": false,
+          |    "suppressed": false
+          |}""".stripMargin
+
+    val expectedRecord = createSierraHoldingsRecordWith(
+      id = SierraHoldingsNumber("1064036"),
+      modifiedDate = Instant.parse("2003-04-02T13:29:42Z"),
+      bibIds = List(SierraBibNumber("1571482")),
+      data = (_, _, _) => jsonString
+    )
+
+    val json = parse(jsonString).right.get
+
+    assertSierraRecordsAreEqual(
+      SierraRecordParser(SierraHoldingsRecord.apply)(json),
       expectedRecord
     )
   }
@@ -137,8 +168,8 @@ class SierraRecordParserTest
   }
 
   private def assertSierraRecordsAreEqual(
-    x: AbstractSierraRecord,
-    y: AbstractSierraRecord): Assertion = {
+    x: AbstractSierraRecord[_],
+    y: AbstractSierraRecord[_]): Assertion = {
     x.id shouldBe x.id
     assertJsonStringsAreEqual(x.data, y.data)
     x.modifiedDate shouldBe y.modifiedDate

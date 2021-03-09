@@ -8,8 +8,6 @@ steps:
     label: "display"
   - command: .buildkite/scripts/run_job.py elasticsearch
     label: "elasticsearch"
-  - command: .buildkite/scripts/run_job.py big_messaging
-    label: "big messaging"
   - command: .buildkite/scripts/run_job.py source_model
     label: "source model"
   - command: .buildkite/scripts/run_job.py pipeline_storage
@@ -18,6 +16,10 @@ steps:
     label: "ingestor common"
   - command: .buildkite/scripts/run_job.py transformer_common
     label: "transformer common"
+  - command: .buildkite/scripts/run_job.py calm_api_client
+    label: "Calm API client"
+  - command: .buildkite/scripts/run_job.py sierra_adapter_common
+    label: "Sierra adapter"
   - wait
   - command: .buildkite/scripts/run_job.py api
     label: "API"
@@ -49,16 +51,18 @@ steps:
     label: "transformer (Calm)"
   - command: .buildkite/scripts/run_job.py sierra_reader
     label: "Sierra reader"
-  - command: .buildkite/scripts/run_job.py sierra_bib_merger
-    label: "Sierra bib merger"
-  - command: .buildkite/scripts/run_job.py sierra_item_merger
-    label: "Sierra item merger"
-  - command: .buildkite/scripts/run_job.py sierra_items_to_dynamo
-    label: "Sierra items to Dynamo"
+  - command: .buildkite/scripts/run_job.py sierra_merger
+    label: "Sierra merger"
+  - command: .buildkite/scripts/run_job.py sierra_linker
+    label: "Sierra linker"
+  - command: .buildkite/scripts/run_job.py sierra_indexer
+    label: "Sierra indexer"
   - command: .buildkite/scripts/run_job.py mets_adapter
     label: "METS adapter"
   - command: .buildkite/scripts/run_job.py calm_adapter
     label: "Calm adapter"
+  - command: .buildkite/scripts/run_job.py calm_deletion_checker
+    label: "Calm deletion checker"
   - command: .buildkite/scripts/run_job.py inference_manager
     label: "inference manager"
   - command: .buildkite/scripts/run_job.py feature_inferrer --changes-in pipeline/inferrer/feature_inferrer
@@ -68,14 +72,42 @@ steps:
   - command: .buildkite/scripts/run_job.py snapshot_generator
     label: "snapshot generator"
   - wait
-  - command: .buildkite/scripts/complete_build.py
-    label: "complete build"
+  - label: cut release
+    if: build.branch == "master"
+    plugins:
+      - docker#v3.5.0:
+          image: "wellcome/sbt_wrapper"
+          mount-ssh-agent: true
+          volumes: ["/var/run/docker.sock:/var/run/docker.sock"]
+          network: "host"
+          always-pull: true
+          propagate-environment: true
+          entrypoint: "/usr/bin/python3"
+    command: "/workdir/.buildkite/scripts/release.py"
+  - wait
+  - label: publish internal model
+    if: build.branch == "master"
+    env:
+      PROJECT: internal_model
+    plugins:
+      - docker#v3.5.0:
+          image: "wellcome/sbt_wrapper"
+          mount-ssh-agent: true
+          volumes: ["/var/run/docker.sock:/var/run/docker.sock"]
+          network: "host"
+          always-pull: true
+          propagate-environment: true
+          entrypoint: "/usr/bin/python3"
+    command: "/workdir/.buildkite/scripts/publish.py"
+  - wait
+  - command: .buildkite/scripts/tag_commit_as_latest.py
+    label: "tag commit as latest"
   - wait
   - label: release to stage
     if: build.branch == "master"
     plugins:
       - docker#v3.5.0:
-          image: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/wellcome/weco-deploy:5.6.10
+          image: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/wellcome/weco-deploy:5.6
           workdir: /repo
           mount-ssh-agent: true
           command: [
@@ -83,7 +115,7 @@ steps:
               "--confirm",
               "release-deploy",
               "--from-label", "latest",
-              "--environment-id", "staging",
+              "--environment-id", "stage",
               "--description", $BUILDKITE_BUILD_URL,
               "--confirmation-wait-for", 3600]
   - wait

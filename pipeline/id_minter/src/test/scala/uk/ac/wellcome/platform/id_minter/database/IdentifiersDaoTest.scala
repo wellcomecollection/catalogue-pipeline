@@ -6,7 +6,6 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import scalikejdbc._
 import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
 import uk.ac.wellcome.platform.id_minter.fixtures
 import uk.ac.wellcome.platform.id_minter.fixtures.SqlIdentifiersGenerators
 import uk.ac.wellcome.platform.id_minter.models.{Identifier, IdentifiersTable}
@@ -17,7 +16,6 @@ class IdentifiersDaoTest
     extends AnyFunSpec
     with fixtures.IdentifiersDatabase
     with Matchers
-    with IdentifiersGenerators
     with SqlIdentifiersGenerators {
 
   implicit val session: DBSession = NamedAutoSession('primary)
@@ -139,7 +137,7 @@ class IdentifiersDaoTest
           triedLookup shouldBe a[Success[_]]
 
           triedLookup.get.existingIdentifiers shouldBe identifiersMap
-          triedLookup.get.unmintedIdentifiers should contain theSameElementsAs (unmintedSourceIdentifiers)
+          triedLookup.get.unmintedIdentifiers should contain theSameElementsAs unmintedSourceIdentifiers
       }
     }
 
@@ -153,7 +151,7 @@ class IdentifiersDaoTest
             sourceIdentifiers
           )
           triedLookup.get.existingIdentifiers shouldBe empty
-          triedLookup.get.unmintedIdentifiers should contain theSameElementsAs (sourceIdentifiers)
+          triedLookup.get.unmintedIdentifiers should contain theSameElementsAs sourceIdentifiers
       }
     }
   }
@@ -198,7 +196,7 @@ class IdentifiersDaoTest
           result shouldBe a[Success[_]]
           val (insertResult, lookupResult) = result.get
           lookupResult.existingIdentifiers shouldBe ids
-          insertResult.succeeded should contain theSameElementsAs (lookupResult.existingIdentifiers.values)
+          insertResult.succeeded should contain theSameElementsAs lookupResult.existingIdentifiers.values
       }
     }
 
@@ -219,20 +217,20 @@ class IdentifiersDaoTest
             _ <- identifiersDao.saveIdentifiers(
               List(duplicatedIdentifier1, duplicatedIdentifier2))
             insertResult <- identifiersDao.saveIdentifiers(identifiers)
-          } yield (insertResult)
+          } yield insertResult
 
           result shouldBe a[Failure[_]]
           val error = result.failed.get.asInstanceOf[IdentifiersDao.InsertError]
           error.e shouldBe a[BatchUpdateException]
-          error.failed should contain theSameElementsAs (identifiers
+          error.failed should contain theSameElementsAs identifiers
             .filter(i =>
-              i.CanonicalId == duplicatedIdentifier1.CanonicalId || i.CanonicalId == duplicatedIdentifier2.CanonicalId))
-          error.succeeded should contain theSameElementsAs (identifiers
+              i.CanonicalId == duplicatedIdentifier1.CanonicalId || i.CanonicalId == duplicatedIdentifier2.CanonicalId)
+          error.succeeded should contain theSameElementsAs identifiers
             .filterNot(i =>
-              i.CanonicalId == duplicatedIdentifier1.CanonicalId || i.CanonicalId == duplicatedIdentifier2.CanonicalId))
+              i.CanonicalId == duplicatedIdentifier1.CanonicalId || i.CanonicalId == duplicatedIdentifier2.CanonicalId)
 
           val lookupResult = identifiersDao.lookupIds(ids.keys.toList).get
-          lookupResult.existingIdentifiers.values should contain theSameElementsAs (error.succeeded)
+          lookupResult.existingIdentifiers.values should contain theSameElementsAs error.succeeded
       }
     }
 
@@ -247,7 +245,7 @@ class IdentifiersDaoTest
             _ <- identifiersDao.saveIdentifiers(List(identifier))
             insertResult <- identifiersDao.saveIdentifiers(
               List(duplicateIdentifier))
-          } yield (insertResult)
+          } yield insertResult
 
           result shouldBe a[Failure[_]]
           val error = result.failed.get.asInstanceOf[IdentifiersDao.InsertError]
@@ -278,7 +276,7 @@ class IdentifiersDaoTest
           val result = for {
             insertResult <- identifiersDao.saveIdentifiers(
               List(identifier1, identifier2))
-          } yield (insertResult)
+          } yield insertResult
 
           result shouldBe a[Success[_]]
       }
@@ -303,7 +301,7 @@ class IdentifiersDaoTest
           val result = for {
             insertResult <- identifiersDao.saveIdentifiers(
               List(identifier1, identifier2))
-          } yield (insertResult)
+          } yield insertResult
 
           result shouldBe a[Success[_]]
       }

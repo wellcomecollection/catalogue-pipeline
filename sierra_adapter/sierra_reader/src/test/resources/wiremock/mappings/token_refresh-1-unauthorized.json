@@ -1,0 +1,19 @@
+{
+  "id" : "75ec617b-9363-4b78-bf8a-37364168f667",
+  "name" : "bibs",
+  "request" : {
+    "url" : "/bibs?token_refresh=true",
+    "method" : "GET",
+    "headers" : {
+      "Authorization" : {
+        "equalTo" : "Bearer fake-token"
+      }
+    }
+  },
+  "response" : {
+    "status" : 401,
+    "body" : "{\"code\":113,\"specificCode\":0,\"httpStatus\":401,\"name\":\"Unauthorized\",\"description\":\"Invalid or missing authorization header\"}"
+  },
+  "uuid" : "75ec617b-9363-4b78-bf8a-37364168f667",
+  "persistent" : true
+}

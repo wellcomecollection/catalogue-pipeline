@@ -6,7 +6,7 @@ import uk.ac.wellcome.platform.transformer.sierra.source.sierra.{
   SierraSourceLanguage,
   SierraSourceLocation
 }
-import uk.ac.wellcome.sierra_adapter.model.SierraGenerators
+import weco.catalogue.sierra_adapter.generators.SierraGenerators
 
 trait SierraDataGenerators extends IdentifiersGenerators with SierraGenerators {
   def createSierraBibDataWith(
@@ -26,11 +26,15 @@ trait SierraDataGenerators extends IdentifiersGenerators with SierraGenerators {
 
   def createSierraItemDataWith(
     deleted: Boolean = false,
-    location: Option[SierraSourceLocation] = None
+    location: Option[SierraSourceLocation] = None,
+    callNumber: Option[String] = None,
+    varFields: List[VarField] = Nil
   ): SierraItemData =
     SierraItemData(
       deleted = deleted,
-      location = location
+      location = location,
+      callNumber = callNumber,
+      varFields = varFields
     )
 
   def createSierraItemData: SierraItemData = createSierraItemDataWith()

@@ -53,7 +53,12 @@ class RelationEmbedderWorkerService[MsgDestination](
             val denormalisedWorks = relationsService
               .getAffectedWorks(batch)
               .map { work =>
-                work.transition[Denormalised](relationsCache(work))
+                val relations = relationsCache(work)
+                val relationAvailabilities =
+                  relationsCache.getAvailabilities(work)
+                work.transition[Denormalised](
+                  (relations, relationAvailabilities)
+                )
               }
 
             denormalisedWorks
@@ -62,7 +67,7 @@ class RelationEmbedderWorkerService[MsgDestination](
                 indexFlushInterval
               )(workIndexable.weight)
               .mapAsync(1) { works =>
-                workIndexer.index(works).flatMap {
+                workIndexer(works).flatMap {
                   case Left(failedWorks) =>
                     Future.failed(
                       new Exception(s"Failed indexing works: $failedWorks")

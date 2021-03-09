@@ -44,30 +44,34 @@ trait DisplaySerialisationTestBase {
      }
     """
 
-  def locations(locations: List[LocationDeprecated]) =
+  def locations(locations: List[Location]) =
     locations.map(location).mkString(",")
 
-  def location(loc: LocationDeprecated) =
+  def location(loc: Location) =
     loc match {
-      case l: DigitalLocationDeprecated  => digitalLocation(l)
-      case l: PhysicalLocationDeprecated => physicalLocation(l)
+      case l: DigitalLocation  => digitalLocation(l)
+      case l: PhysicalLocation => physicalLocation(l)
     }
 
-  def digitalLocation(digitalLocation: DigitalLocationDeprecated) =
+  def digitalLocation(digitalLocation: DigitalLocation) =
     s"""{
       "type": "DigitalLocation",
       "locationType": ${locationType(digitalLocation.locationType)},
       "url": "${digitalLocation.url}"
       ${optionalObject("license", license, digitalLocation.license)},
+      ${optionalString("credit", digitalLocation.credit)}
+      ${optionalString("linkText", digitalLocation.linkText)}
       "accessConditions": ${accessConditions(digitalLocation.accessConditions)}
     }"""
 
-  def physicalLocation(loc: PhysicalLocationDeprecated) =
+  def physicalLocation(loc: PhysicalLocation) =
     s"""
        {
         "type": "PhysicalLocation",
         "locationType": ${locationType(loc.locationType)},
-        "label": "${loc.label}",
+        "label": "${loc.label}"
+        ${optionalObject("license", license, loc.license)},
+        ${optionalString("shelfmark", loc.shelfmark)}
         "accessConditions": ${accessConditions(loc.accessConditions)}
        }
      """
@@ -209,13 +213,16 @@ trait DisplaySerialisationTestBase {
         "roles": ${toJson(contributor.roles).get},
         "type": "Contributor"
       }
-    """.stripMargin
+    """
 
   def contributors(contributors: List[Contributor[IdState.Minted]]) =
     contributors.map(contributor).mkString(",")
 
   def production(production: List[ProductionEvent[IdState.Minted]]) =
     production.map(productionEvent).mkString(",")
+
+  def availabilities(availabilities: Set[Availability]) =
+    availabilities.map(availability).mkString(",")
 
   def languages(ls: List[Language]): String =
     ls.map(language).mkString(",")
@@ -226,10 +233,19 @@ trait DisplaySerialisationTestBase {
          "id": "${image.id.canonicalId}",
          "type": "Image"
        }
-    """.stripMargin
+    """
 
   def workImageIncludes(images: List[ImageData[IdState.Identified]]) =
     images.map(workImageInclude).mkString(",")
+
+  def availability(availability: Availability): String =
+    s"""
+      {
+        "id": "${availability.id}",
+        "label": "${availability.label}",
+        "type": "Availability"
+      }
+     """.stripMargin
 
   def productionEvent(event: ProductionEvent[IdState.Minted]): String =
     s"""
@@ -240,7 +256,7 @@ trait DisplaySerialisationTestBase {
         "places": [${event.places.map(place).mkString(",")}],
         "type": "ProductionEvent"
       }
-    """.stripMargin
+    """
 
   def format(fmt: Format): String =
     s"""
@@ -249,16 +265,16 @@ trait DisplaySerialisationTestBase {
         "label": "${fmt.label}",
         "type": "Format"
       }
-    """.stripMargin
+    """
 
   def language(lang: Language): String =
     s"""
-       |{
-       |  "id": "${lang.id}",
-       |  "label": "${lang.label}",
-       |  "type": "Language"
-       |}
-     """.stripMargin
+       {
+         "id": "${lang.id}",
+         "label": "${lang.label}",
+         "type": "Language"
+       }
+     """
 
   def license(license: License) =
     s"""{
@@ -281,10 +297,29 @@ trait DisplaySerialisationTestBase {
 
   def locationType(locType: LocationType): String =
     s"""{
-       |  "id": "${locType.id}",
-       |  "label": "${locType.label}",
-       |  "type": "LocationType"
-       |}
-     """.stripMargin
+         "id": "${DisplayLocationType(locType).id}",
+         "label": "${DisplayLocationType(locType).label}",
+         "type": "LocationType"
+       }
+     """ stripMargin
 
+  def singleHoldings(h: Holdings): String =
+    s"""
+       |{
+       |  ${optionalString("description", h.description)}
+       |  ${optionalString("note", h.note)}
+       |  "enumeration": [
+       |    ${h.enumeration
+         .map { en =>
+           '"' + en + '"'
+         }
+         .mkString(",")}
+       |  ],
+       |  "locations": [${locations(h.locations)}],
+       |  "type": "Holdings"
+       |}
+       |""".stripMargin
+
+  def listOfHoldings(hs: List[Holdings]): String =
+    hs.map { singleHoldings }.mkString(",")
 }

@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.sierra_reader.flow
 
 import java.time.Instant
-
 import akka.NotUsed
 import akka.stream.scaladsl.{Flow, Sink, Source}
 import io.circe.Json
@@ -14,11 +13,11 @@ import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.utils.JsonAssertions
-import uk.ac.wellcome.sierra_adapter.model.{
+import weco.catalogue.sierra_adapter.generators.SierraGenerators
+import weco.catalogue.sierra_adapter.models.{
   AbstractSierraRecord,
   SierraBibNumber,
   SierraBibRecord,
-  SierraGenerators,
   SierraItemRecord
 }
 
@@ -31,7 +30,7 @@ class SierraRecordWrapperFlowTest
     with JsonAssertions
     with SierraGenerators {
 
-  private def withRecordWrapperFlow[T <: AbstractSierraRecord](
+  private def withRecordWrapperFlow[T <: AbstractSierraRecord[_]](
     createRecord: (String, String, Instant) => T)(
     testWith: TestWith[Flow[Json, T, NotUsed], Assertion]) = {
     val wrapperFlow = SierraRecordWrapperFlow(
@@ -97,7 +96,7 @@ class SierraRecordWrapperFlowTest
         val expectedRecord = createSierraItemRecordWith(
           id = id,
           modifiedDate = Instant.parse(updatedDate),
-          bibIds = bibIds.map(SierraBibNumber).toList
+          bibIds = bibIds.map(SierraBibNumber(_)).toList
         )
 
         val json = parse(jsonString).right.get
@@ -138,8 +137,8 @@ class SierraRecordWrapperFlowTest
   }
 
   private def assertSierraRecordsAreEqual(
-    x: AbstractSierraRecord,
-    y: AbstractSierraRecord): Assertion = {
+    x: AbstractSierraRecord[_],
+    y: AbstractSierraRecord[_]): Assertion = {
     x.id shouldBe x.id
     assertJsonStringsAreEqual(x.data, y.data)
     x.modifiedDate shouldBe y.modifiedDate

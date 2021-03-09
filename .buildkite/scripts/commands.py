@@ -37,3 +37,8 @@ def git(*args, exit_on_error=True):
     cmd = ["git"] + list(args)
 
     return _subprocess_run(cmd, exit_on_error=exit_on_error)
+
+
+def sbt(*args):
+    """Run a Make command, and check it completes successfully."""
+    _subprocess_run(["sbt"] + list(args))

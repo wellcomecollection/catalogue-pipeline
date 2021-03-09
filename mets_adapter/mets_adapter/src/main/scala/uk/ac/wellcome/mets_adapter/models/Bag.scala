@@ -1,9 +1,15 @@
 package uk.ac.wellcome.mets_adapter.models
 
-import java.time.Instant
-import weco.catalogue.source_model.mets.MetsSourceData
+import uk.ac.wellcome.storage.s3.S3ObjectLocationPrefix
 
-/** The response receiveved from the storage-service bag API.
+import java.time.Instant
+import weco.catalogue.source_model.mets.{
+  DeletedMetsFile,
+  MetsFileWithImages,
+  MetsSourceData
+}
+
+/** The response received from the storage-service bag API.
   */
 case class Bag(info: BagInfo,
                manifest: BagManifest,
@@ -11,27 +17,47 @@ case class Bag(info: BagInfo,
                version: String,
                createdDate: Instant) {
 
-  def metsSourceData: Either[Exception, MetsSourceData] =
-    metsFile
-      .flatMap { metsFile =>
-        parsedVersion.map { version =>
-          MetsSourceData(
-            bucket = location.bucket,
-            path = location.path,
-            version = version,
-            file = metsFile,
+  def metsSourceData: Either[Throwable, MetsSourceData] =
+    parsedVersion.flatMap { version =>
+      // If the bag doesn't contain any files, then it's empty and the
+      // METS file has been deleted.
+      // See https://github.com/wellcomecollection/platform/issues/4872
+      if (manifest.files.isEmpty) {
+        Right(
+          DeletedMetsFile(
             createdDate = createdDate,
-            // If the only file in the bag is the METS file, that means
-            // the bag has been deleted. Check https://github.com/wellcomecollection/platform/issues/4893
-            deleted = containsOnlyMetsFile(metsFile),
-            manifestations = manifestations
+            version = version
           )
+        )
+      } else {
+
+        metsFile.map { filename =>
+          // If the only file in the bag is the METS file, that means
+          // the bag has been deleted.
+          // See https://github.com/wellcomecollection/platform/issues/4893
+          if (containsOnlyMetsFile(filename)) {
+            DeletedMetsFile(
+              createdDate = createdDate,
+              version = version
+            )
+          } else {
+            MetsFileWithImages(
+              root = S3ObjectLocationPrefix(
+                bucket = location.bucket,
+                keyPrefix = location.path
+              ),
+              filename = filename,
+              manifestations = manifestations,
+              createdDate = createdDate,
+              version = version
+            )
+          }
         }
       }
+    }
 
-  private def containsOnlyMetsFile(metsFile: String) = {
+  private def containsOnlyMetsFile(metsFile: String): Boolean =
     manifest.files.forall(f => f.path == metsFile)
-  }
 
   // Storage-service only stores a list of files, so we need to search for a
   // XML file in data directory named with some b-number.

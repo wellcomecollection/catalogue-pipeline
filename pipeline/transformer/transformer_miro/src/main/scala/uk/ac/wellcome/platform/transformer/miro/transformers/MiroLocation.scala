@@ -1,7 +1,9 @@
 package uk.ac.wellcome.platform.transformer.miro.transformers
 
 import uk.ac.wellcome.models.work.internal.{
-  DigitalLocationDeprecated,
+  AccessCondition,
+  AccessStatus,
+  DigitalLocation,
   LocationType
 }
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
@@ -9,8 +11,8 @@ import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 trait MiroLocation extends MiroLicenses with MiroContributorCodes {
 
   private val imageUriTemplates = Map(
-    "thumbnail" -> "%s/image/%s.jpg/full/300,/0/default.jpg",
-    "info" -> "%s/image/%s.jpg/info.json"
+    "thumbnail" -> "%s/image/%s/full/300,/0/default.jpg",
+    "info" -> "%s/image/%s/info.json"
   )
 
   def buildImageApiURL(miroId: String, templateName: String): String = {
@@ -23,9 +25,9 @@ trait MiroLocation extends MiroLicenses with MiroContributorCodes {
     imageUriTemplate.format(iiifImageApiBaseUri, miroId)
   }
 
-  def getLocation(miroRecord: MiroRecord): DigitalLocationDeprecated =
-    DigitalLocationDeprecated(
-      locationType = LocationType("iiif-image"),
+  def getLocation(miroRecord: MiroRecord): DigitalLocation =
+    DigitalLocation(
+      locationType = LocationType.IIIFImageAPI,
       url = buildImageApiURL(
         miroId = miroRecord.imageNumber,
         templateName = "info"
@@ -35,6 +37,11 @@ trait MiroLocation extends MiroLicenses with MiroContributorCodes {
         chooseLicense(
           miroId = miroRecord.imageNumber,
           maybeUseRestrictions = miroRecord.useRestrictions
+        )
+      ),
+      accessConditions = List(
+        AccessCondition(
+          status = Some(AccessStatus.Open)
         )
       )
     )

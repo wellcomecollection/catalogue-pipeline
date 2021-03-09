@@ -3,15 +3,9 @@ package uk.ac.wellcome.platform.api.models
 import uk.ac.wellcome.models.work.internal.{AccessStatus, WorkType}
 import java.time.LocalDate
 
-import uk.ac.wellcome.display.models.LocationTypeQuery
+sealed trait WorkFilter
 
-sealed trait DocumentFilter
-
-sealed trait WorkFilter extends DocumentFilter
-sealed trait ImageFilter extends DocumentFilter
-
-case class ItemLocationTypeFilter(locationTypes: Seq[LocationTypeQuery])
-    extends WorkFilter
+sealed trait ImageFilter
 
 case class ItemLocationTypeIdFilter(locationTypeIds: Seq[String])
     extends WorkFilter
@@ -28,9 +22,13 @@ case object VisibleWorkFilter extends WorkFilter
 
 case class LanguagesFilter(languageIds: Seq[String]) extends WorkFilter
 
-case class GenreFilter(genreQuery: String) extends WorkFilter
+case class GenreFilter(genreQuery: Seq[String]) extends WorkFilter
 
-case class SubjectFilter(subjectQuery: String) extends WorkFilter
+case class SubjectFilter(subjectQuery: Seq[String]) extends WorkFilter
+
+case class ContributorsFilter(contributorQueries: Seq[String])
+    extends WorkFilter
+    with ImageFilter
 
 case class LicenseFilter(licenseIds: Seq[String])
     extends WorkFilter
@@ -38,10 +36,10 @@ case class LicenseFilter(licenseIds: Seq[String])
 
 case class IdentifiersFilter(values: Seq[String]) extends WorkFilter
 
-case class CollectionPathFilter(path: String) extends WorkFilter
-
-case class CollectionDepthFilter(depth: Int) extends WorkFilter
-
 case class AccessStatusFilter(includes: List[AccessStatus],
                               excludes: List[AccessStatus])
     extends WorkFilter
+
+case class PartOfFilter(id: String) extends WorkFilter
+
+case class AvailabilitiesFilter(availabilityIds: Seq[String]) extends WorkFilter

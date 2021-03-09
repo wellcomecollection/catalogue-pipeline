@@ -15,9 +15,11 @@ class MergerManager(mergerRules: Merger) {
   def applyMerge(maybeWorks: Seq[Option[Work[Identified]]]): MergerOutcome = {
     val works = maybeWorks.flatten
 
-    if (works.size == maybeWorks.size)
-      mergerRules.merge(works)
-    else
+    if (works.size == maybeWorks.size) {
+      val result = mergerRules.merge(works)
+      assert(result.resultWorks.size == works.size)
+      result
+    } else
       MergerOutcome.passThrough(works)
   }
 }

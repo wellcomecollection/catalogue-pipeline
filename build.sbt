@@ -2,6 +2,8 @@ import java.io.File
 import java.util.UUID
 import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider
 
+val projectVersion = "3341.8d2e8f98349b02ffdd82f595b5ba015d18f2d5e1"
+
 def setupProject(
   project: Project,
   folder: String,
@@ -33,6 +35,8 @@ lazy val internal_model = setupProject(
   project,
   "common/internal_model",
   externalDependencies = CatalogueDependencies.internalModelDependencies)
+  .settings(Publish.settings: _*)
+  .settings(version:= projectVersion)
 
 lazy val display = setupProject(
   project,
@@ -53,17 +57,10 @@ lazy val elasticsearch_typesafe = setupProject(
   externalDependencies = CatalogueDependencies.elasticsearchTypesafeDependencies
 )
 
-lazy val big_messaging = setupProject(
+lazy val flows = setupProject(
   project,
-  "common/big_messaging",
-  externalDependencies = CatalogueDependencies.bigMessagingDependencies)
-
-lazy val big_messaging_typesafe = setupProject(
-  project,
-  "common/big_messaging_typesafe",
-  localDependencies = Seq(big_messaging),
-  externalDependencies = CatalogueDependencies.bigMessagingTypesafeDependencies
-)
+  "common/flows",
+  externalDependencies = CatalogueDependencies.flowDependencies)
 
 lazy val source_model = setupProject(
   project,
@@ -89,7 +86,8 @@ lazy val pipeline_storage_typesafe = setupProject(
   project,
   "common/pipeline_storage_typesafe",
   localDependencies = Seq(pipeline_storage),
-  externalDependencies = CatalogueDependencies.pipelineStorageTypesafeDependencies
+  externalDependencies =
+    CatalogueDependencies.pipelineStorageTypesafeDependencies
 )
 
 lazy val api = setupProject(
@@ -110,22 +108,19 @@ lazy val id_minter = setupProject(
 lazy val ingestor_common = setupProject(
   project,
   "pipeline/ingestor/ingestor_common",
-  localDependencies =
-    Seq(elasticsearch_typesafe, big_messaging_typesafe, pipeline_storage_typesafe)
+  localDependencies = Seq(elasticsearch_typesafe, pipeline_storage_typesafe)
 )
 
 lazy val ingestor_works = setupProject(
   project,
   "pipeline/ingestor/ingestor_works",
-  localDependencies =
-    Seq(elasticsearch_typesafe, big_messaging_typesafe, ingestor_common)
+  localDependencies = Seq(ingestor_common)
 )
 
 lazy val ingestor_images = setupProject(
   project,
   "pipeline/ingestor/ingestor_images",
-  localDependencies =
-    Seq(elasticsearch_typesafe, big_messaging_typesafe, ingestor_common)
+  localDependencies = Seq(ingestor_common)
 )
 
 lazy val matcher = setupProject(
@@ -138,22 +133,23 @@ lazy val matcher = setupProject(
 lazy val merger = setupProject(
   project,
   "pipeline/merger",
-  localDependencies =
-    Seq(internal_model, big_messaging_typesafe, pipeline_storage_typesafe),
+  localDependencies = Seq(internal_model, pipeline_storage_typesafe),
   externalDependencies = CatalogueDependencies.mergerDependencies
 )
 
 lazy val relation_embedder = setupProject(
   project,
   "pipeline/relation_embedder/relation_embedder",
-  localDependencies = Seq(internal_model, elasticsearch, pipeline_storage_typesafe),
+  localDependencies =
+    Seq(internal_model, elasticsearch, pipeline_storage_typesafe),
   externalDependencies = CatalogueDependencies.relationEmbedderDependencies
 )
 
 lazy val router = setupProject(
   project,
   "pipeline/relation_embedder/router",
-  localDependencies = Seq(internal_model, elasticsearch, pipeline_storage_typesafe),
+  localDependencies =
+    Seq(internal_model, elasticsearch, pipeline_storage_typesafe),
   externalDependencies = CatalogueDependencies.routerDependencies
 )
 
@@ -173,7 +169,8 @@ lazy val reindex_worker = setupProject(
 lazy val transformer_common = setupProject(
   project,
   "pipeline/transformer/transformer_common",
-  localDependencies = Seq(internal_model, source_model_typesafe, pipeline_storage_typesafe),
+  localDependencies =
+    Seq(internal_model, source_model_typesafe, pipeline_storage_typesafe),
   externalDependencies = CatalogueDependencies.transformerCommonDependencies
 )
 
@@ -221,44 +218,58 @@ lazy val sierra_reader = setupProject(
   externalDependencies = CatalogueDependencies.sierraReaderDependencies
 )
 
-lazy val sierra_bib_merger = setupProject(
+lazy val sierra_merger = setupProject(
   project,
-  "sierra_adapter/sierra_bib_merger",
+  "sierra_adapter/sierra_merger",
   localDependencies = Seq(sierra_adapter_common))
 
-lazy val sierra_item_merger = setupProject(
+lazy val sierra_linker = setupProject(
   project,
-  "sierra_adapter/sierra_item_merger",
+  folder = "sierra_adapter/sierra_linker",
   localDependencies = Seq(sierra_adapter_common))
 
-lazy val sierra_items_to_dynamo = setupProject(
+lazy val sierra_indexer = setupProject(
   project,
-  folder = "sierra_adapter/sierra_items_to_dynamo",
-  localDependencies = Seq(sierra_adapter_common))
+  folder = "sierra_adapter/sierra_indexer",
+  localDependencies = Seq(sierra_adapter_common, pipeline_storage_typesafe))
 
 // METS adapter
 
 lazy val mets_adapter = setupProject(
   project,
   folder = "mets_adapter/mets_adapter",
-  localDependencies = Seq(internal_model, source_model, big_messaging_typesafe),
+  localDependencies = Seq(internal_model, source_model, flows),
   externalDependencies = CatalogueDependencies.metsAdapterDependencies
 )
 
 // CALM adapter
 
+lazy val calm_api_client = setupProject(
+  project,
+  folder = "calm_adapter/calm_api_client",
+  localDependencies = Seq(source_model, flows),
+  externalDependencies = CatalogueDependencies.calmApiClientDependencies
+)
+
 lazy val calm_adapter = setupProject(
   project,
   folder = "calm_adapter/calm_adapter",
-  localDependencies = Seq(internal_model, source_model_typesafe, big_messaging_typesafe),
-  externalDependencies = CatalogueDependencies.calmAdapterDependencies
+  localDependencies =
+    Seq(calm_api_client, internal_model, source_model_typesafe)
+)
+
+lazy val calm_deletion_checker = setupProject(
+  project,
+  folder = "calm_adapter/calm_deletion_checker",
+  localDependencies = Seq(calm_api_client, source_model_typesafe),
+  externalDependencies = ExternalDependencies.scalacheckDependencies
 )
 
 // Inference manager
 lazy val inference_manager = setupProject(
   project,
   folder = "pipeline/inferrer/inference_manager",
-  localDependencies = Seq(internal_model, big_messaging_typesafe),
+  localDependencies = Seq(internal_model, pipeline_storage_typesafe),
   externalDependencies = CatalogueDependencies.inferenceManagerDependencies
 )
 
@@ -275,7 +286,7 @@ lazy val snapshot_generator = setupProject(
 
 s3CredentialsProvider := { _ =>
   val builder = new STSAssumeRoleSessionCredentialsProvider.Builder(
-    "arn:aws:iam::760097843905:role/platform-read_only",
+    "arn:aws:iam::760097843905:role/platform-ci",
     UUID.randomUUID().toString
   )
   builder.build()

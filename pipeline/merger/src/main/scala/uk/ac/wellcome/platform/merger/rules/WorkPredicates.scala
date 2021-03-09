@@ -2,6 +2,7 @@ package uk.ac.wellcome.platform.merger.rules
 
 import uk.ac.wellcome.models.work.internal._
 import WorkState.Identified
+import uk.ac.wellcome.models.work.internal.Format.Audiovisual
 
 object WorkPredicates {
   type WorkPredicate = Work[Identified] => Boolean
@@ -76,24 +77,24 @@ object WorkPredicates {
   private def physicalLocationExists(work: Work[Identified]): Boolean =
     work.data.items.exists { item =>
       item.locations.exists {
-        case _: PhysicalLocationDeprecated => true
-        case _                             => false
+        case _: PhysicalLocation => true
+        case _                   => false
       }
     }
 
   private def allDigitalLocations(work: Work[Identified]): Boolean =
     work.data.items.forall { item =>
       item.locations.forall {
-        case _: DigitalLocationDeprecated => true
-        case _                            => false
+        case _: DigitalLocation => true
+        case _                  => false
       }
     }
 
   private def allPhysicalLocations(work: Work[Identified]): Boolean =
     work.data.items.forall { item =>
       item.locations.forall {
-        case _: PhysicalLocationDeprecated => true
-        case _                             => false
+        case _: PhysicalLocation => true
+        case _                   => false
       }
     }
 
@@ -112,6 +113,12 @@ object WorkPredicates {
 
   private def format(format: Format)(work: Work[Identified]): Boolean =
     work.data.format.contains(format)
+
+  def isAudiovisual(work: Work[Identified]): Boolean =
+    work.data.format match {
+      case Some(f) if f.isInstanceOf[Audiovisual] => true
+      case _                                      => false
+    }
 
   private def satisfiesAll(predicates: (Work[Identified] => Boolean)*)(
     work: Work[Identified]): Boolean = predicates.forall(_(work))

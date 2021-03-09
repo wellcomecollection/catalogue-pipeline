@@ -4,6 +4,14 @@ module "mets_transformer_queue" {
   topic_arns      = var.mets_adapter_topic_arns
   aws_region      = var.aws_region
   alarm_topic_arn = var.dlq_alarm_arn
+
+  # The default visibility timeout is 30 seconds, and occasionally we see
+  # works get sent to the DLQ that still got through the transformer --
+  # presumably because they took a bit too long to process.
+  #
+  # Bumping the timeout is an attempt to avoid the messages being
+  # sent to a DLQ.
+  visibility_timeout_seconds = 90
 }
 
 module "mets_transformer" {
@@ -13,6 +21,7 @@ module "mets_transformer" {
   security_group_ids = [
     aws_security_group.service_egress.id,
     aws_security_group.interservice.id,
+    var.pipeline_storage_security_group_id,
   ]
 
   cluster_name = aws_ecs_cluster.cluster.name
@@ -22,8 +31,6 @@ module "mets_transformer" {
     transformer_queue_id = module.mets_transformer_queue.url
     metrics_namespace    = "${local.namespace_hyphen}_mets_transformer"
 
-    mets_adapter_dynamo_table_name = var.mets_adapter_table_name
-
     sns_topic_arn = module.mets_transformer_output_topic.arn
 
     es_index = local.es_works_source_index
@@ -32,21 +39,22 @@ module "mets_transformer" {
     flush_interval_seconds = 30
   }
 
-  secret_env_vars = {
-    es_host     = "catalogue/pipeline_storage/es_host"
-    es_port     = "catalogue/pipeline_storage/es_port"
-    es_protocol = "catalogue/pipeline_storage/es_protocol"
-    es_username = "catalogue/pipeline_storage/transformer/es_username"
-    es_password = "catalogue/pipeline_storage/transformer/es_password"
-  }
+  secret_env_vars = local.pipeline_storage_es_service_secrets["transformer"]
 
-  subnets             = var.subnets
-  max_capacity        = 10
-  messages_bucket_arn = aws_s3_bucket.messages.arn
-  queue_read_policy   = module.mets_transformer_queue.read_policy
+  subnets           = var.subnets
+  max_capacity      = local.max_capacity
+  queue_read_policy = module.mets_transformer_queue.read_policy
 
-  cpu    = 1024
-  memory = 2048
+  # The METS transformer is quite CPU intensive, and if it doesn't have enough CPU,
+  # the Akka scheduler gets resource-starved and the whole app stops doing anything.
+  cpu    = 2048
+  memory = 4096
+
+  use_fargate_spot = true
+
+  depends_on = [
+    null_resource.elasticsearch_users,
+  ]
 
   deployment_service_env  = var.release_label
   deployment_service_name = "mets-transformer"
@@ -70,11 +78,6 @@ module "mets_transformer_scaling_alarm" {
 
   queue_high_actions = [module.mets_transformer.scale_up_arn]
   queue_low_actions  = [module.mets_transformer.scale_down_arn]
-}
-
-resource "aws_iam_role_policy" "read_mets_adapter_table" {
-  role   = module.mets_transformer.task_role_name
-  policy = var.mets_adapter_read_policy
 }
 
 data "aws_iam_policy_document" "read_storage_bucket" {

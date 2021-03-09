@@ -29,7 +29,7 @@ trait FeatureTestSugar {
     def apply(left: Work[Identified]): MatchResult = MatchResult(
       left.isInstanceOf[Work.Redirected[Identified]] && left
         .asInstanceOf[Work.Redirected[Identified]]
-        .redirect
+        .redirectTarget
         .sourceIdentifier == expectedRedirectTo.sourceIdentifier,
       s"${left.sourceIdentifier} was not redirected to ${expectedRedirectTo.sourceIdentifier}",
       s"${left.sourceIdentifier} was redirected to ${expectedRedirectTo.sourceIdentifier}"
