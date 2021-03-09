@@ -64,11 +64,6 @@ trait ElasticsearchFixtures
     response.result.numberOfNodes shouldBe 1
   }
 
-
-
-
-
-
   def withLocalElasticsearchIndex[R](
     config: IndexConfig,
     index: Index = createIndex): Fixture[Index, R] = fixture[Index, R](
@@ -161,8 +156,6 @@ trait ElasticsearchFixtures
       hits should have size 0
     }
 
-
-
   def assertElasticsearchNeverHas[T](index: Index, documents: T*)(
     implicit id: CanonicalId[T]): Unit = {
     // Let enough time pass to account for elasticsearch
@@ -209,10 +202,6 @@ trait ElasticsearchFixtures
         r
       }
   }
-
-
-
-
 
   def createIndex: Index =
     Index(name = createIndexName)

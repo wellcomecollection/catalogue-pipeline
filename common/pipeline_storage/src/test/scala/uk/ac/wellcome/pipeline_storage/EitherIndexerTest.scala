@@ -5,7 +5,11 @@ import org.scalatest.matchers.should.Matchers
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import uk.ac.wellcome.models.work.generators.{ImageGenerators, WorkGenerators}
-import uk.ac.wellcome.models.index.{IndexFixtures, InitialImageIndexConfig, MergedWorkIndexConfig}
+import uk.ac.wellcome.models.index.{
+  IndexFixtures,
+  InitialImageIndexConfig,
+  MergedWorkIndexConfig
+}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.elasticsearch.model.CanonicalId

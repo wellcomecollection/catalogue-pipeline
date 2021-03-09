@@ -3,7 +3,11 @@ package uk.ac.wellcome.models.index
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
 import com.sksamuel.elastic4s.requests.mappings.{FieldDefinition, ObjectField}
-import uk.ac.wellcome.elasticsearch.{IndexConfig, IndexConfigFields, WorksAnalysis}
+import uk.ac.wellcome.elasticsearch.{
+  IndexConfig,
+  IndexConfigFields,
+  WorksAnalysis
+}
 
 sealed trait WorksIndexConfig extends IndexConfig with IndexConfigFields {
 

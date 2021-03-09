@@ -8,7 +8,11 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.index.{IndexFixtures, IndexedImageIndexConfig}
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.generators.{ImageGenerators, InstantGenerators, WorkGenerators}
+import uk.ac.wellcome.models.work.generators.{
+  ImageGenerators,
+  InstantGenerators,
+  WorkGenerators
+}
 import uk.ac.wellcome.models.work.internal.{Image, ImageState}
 import uk.ac.wellcome.pipeline_storage.Indexable.imageIndexable
 import uk.ac.wellcome.pipeline_storage.fixtures.ElasticIndexerFixtures

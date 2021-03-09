@@ -30,9 +30,9 @@ class WorksIndexConfigTest
     with ImageGenerators {
 
   case class BadTestObject(
-                            id: String,
-                            weight: Int
-                          )
+    id: String,
+    weight: Int
+  )
   // On failure, scalacheck tries to shrink to the smallest input that causes a failure.
   // With IdentifiedWork, that means that it never actually completes.
   implicit val noShrink = Shrink.shrinkAny[Work[Identified]]

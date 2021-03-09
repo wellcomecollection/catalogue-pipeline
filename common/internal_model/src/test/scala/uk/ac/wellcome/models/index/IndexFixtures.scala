@@ -15,7 +15,7 @@ import uk.ac.wellcome.json.JsonUtil.toJson
 import uk.ac.wellcome.models.work.internal.WorkState.Identified
 import uk.ac.wellcome.models.work.internal.{Image, ImageState, Work, WorkState}
 
-trait IndexFixtures extends ElasticsearchFixtures{ this: Suite =>
+trait IndexFixtures extends ElasticsearchFixtures { this: Suite =>
   def withLocalIndices[R](testWith: TestWith[ElasticConfig, R]): R =
     withLocalWorksIndex { worksIndex =>
       withLocalImagesIndex { imagesIndex =>
@@ -27,7 +27,6 @@ trait IndexFixtures extends ElasticsearchFixtures{ this: Suite =>
     withLocalElasticsearchIndex[R](config = IndexedWorkIndexConfig) { index =>
       testWith(index)
     }
-
 
   def withLocalMergedWorksIndex[R](testWith: TestWith[Index, R]): R =
     withLocalElasticsearchIndex[R](config = MergedWorkIndexConfig) { index =>
@@ -56,17 +55,17 @@ trait IndexFixtures extends ElasticsearchFixtures{ this: Suite =>
     }
 
   def assertElasticsearchEventuallyHasWork[State <: WorkState](
-                                                                index: Index,
-                                                                works: Work[State]*)(implicit enc: Encoder[Work[State]]): Seq[Assertion] = {
+    index: Index,
+    works: Work[State]*)(implicit enc: Encoder[Work[State]]): Seq[Assertion] = {
     implicit val id: CanonicalId[Work[State]] =
       (work: Work[State]) => work.id
     assertElasticsearchEventuallyHas(index, works: _*)
   }
 
   def assertElasticsearchEventuallyHasImage[State <: ImageState](
-                                                                  index: Index,
-                                                                  images: Image[State]*)(
-                                                                  implicit enc: Encoder[Image[State]]): Seq[Assertion] = {
+    index: Index,
+    images: Image[State]*)(
+    implicit enc: Encoder[Image[State]]): Seq[Assertion] = {
     implicit val id: CanonicalId[Image[State]] =
       (image: Image[State]) => image.id
     assertElasticsearchEventuallyHas(index, images: _*)
@@ -80,8 +79,8 @@ trait IndexFixtures extends ElasticsearchFixtures{ this: Suite =>
   }
 
   def insertIntoElasticsearch[State <: WorkState](
-                                                   index: Index,
-                                                   works: Work[State]*)(implicit encoder: Encoder[Work[State]]): Assertion = {
+    index: Index,
+    works: Work[State]*)(implicit encoder: Encoder[Work[State]]): Assertion = {
     val result = elasticClient.execute(
       bulk(
         works.map { work =>
@@ -104,7 +103,7 @@ trait IndexFixtures extends ElasticsearchFixtures{ this: Suite =>
 
   def insertImagesIntoElasticsearch[State <: ImageState](index: Index,
                                                          images: Image[State]*)(
-                                                          implicit encoder: Encoder[Image[State]]): Assertion = {
+    implicit encoder: Encoder[Image[State]]): Assertion = {
     val result = elasticClient.execute(
       bulk(
         images.map { image =>

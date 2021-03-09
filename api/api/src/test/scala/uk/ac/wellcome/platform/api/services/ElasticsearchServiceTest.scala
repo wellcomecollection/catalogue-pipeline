@@ -9,7 +9,11 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators._
-import uk.ac.wellcome.models.work.internal.Format.{Books, CDRoms, ManuscriptsAsian}
+import uk.ac.wellcome.models.work.internal.Format.{
+  Books,
+  CDRoms,
+  ManuscriptsAsian
+}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
 import uk.ac.wellcome.platform.api.models._

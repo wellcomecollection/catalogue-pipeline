@@ -11,7 +11,12 @@ import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.index.IndexFixtures
-import uk.ac.wellcome.models.work.generators.{GenreGenerators, ProductionEventGenerators, SubjectGenerators, WorkGenerators}
+import uk.ac.wellcome.models.work.generators.{
+  GenreGenerators,
+  ProductionEventGenerators,
+  SubjectGenerators,
+  WorkGenerators
+}
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
 
 class AggregationsTest
