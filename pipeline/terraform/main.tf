@@ -1,7 +1,7 @@
-module "catalogue_pipeline_2021-03-05" {
+module "catalogue_pipeline_2021-03-09" {
   source = "./stack"
 
-  pipeline_date = "2021-03-05"
+  pipeline_date = "2021-03-09"
   release_label = "stage"
 
   # Transformer config
@@ -9,7 +9,7 @@ module "catalogue_pipeline_2021-03-05" {
   # If this pipeline is meant to be reindexed, remember to uncomment the
   # reindexer topic names.
 
-  is_reindexing = false
+  is_reindexing = true
 
   sierra_adapter_topic_arns = [
     local.sierra_reindexer_topic_arn,
@@ -65,10 +65,11 @@ module "catalogue_pipeline_2021-03-05" {
   storage_bucket_name = local.storage_bucket
 }
 
-module "catalogue_pipeline_2021-02-24" {
+
+module "catalogue_pipeline_2021-03-05" {
   source = "./stack"
 
-  pipeline_date = "2021-02-24"
+  pipeline_date = "2021-03-05"
   release_label = "prod"
 
   # Transformer config
