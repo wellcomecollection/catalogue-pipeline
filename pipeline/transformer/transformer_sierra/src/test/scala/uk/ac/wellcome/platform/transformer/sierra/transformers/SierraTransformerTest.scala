@@ -22,12 +22,16 @@ import uk.ac.wellcome.models.work.internal.InvisibilityReason.{
   SourceFieldMissing,
   UnableToTransform
 }
-import uk.ac.wellcome.models.work.internal.LocationType.OnlineResource
+import uk.ac.wellcome.models.work.internal.LocationType.{
+  ClosedStores,
+  OnlineResource
+}
 import weco.catalogue.sierra_adapter.generators.SierraGenerators
 import weco.catalogue.sierra_adapter.models.Implicits._
 import weco.catalogue.sierra_adapter.models.{
   SierraBibNumber,
   SierraBibRecord,
+  SierraHoldingsRecord,
   SierraItemNumber,
   SierraItemRecord,
   SierraTransformable
@@ -944,6 +948,108 @@ class SierraTransformerTest
           )
         )
       ))
+  }
+
+  describe("includes the holdings") {
+    it("adds a digital item if fixed field 40 = 'elro'") {
+      val holdingsId = createSierraHoldingsNumber
+      val holdingsData =
+        s"""
+           |{
+           |  "id": "$holdingsId",
+           |  "fixedFields": {
+           |    "40": {"label": "LOCATION", "value": "elro "}
+           |  },
+           |  "varFields": [
+           |    {
+           |      "marcTag": "856",
+           |      "subfields": [
+           |        {"tag": "u", "content": "https://example.org/holdings"},
+           |        {"tag": "z", "content": "View this journal"}
+           |      ]
+           |    }
+           |  ]
+           |}
+       """.stripMargin
+
+      val transformable = createSierraTransformableWith(
+        holdingsRecords = List(
+          SierraHoldingsRecord(
+            id = holdingsId,
+            data = holdingsData,
+            modifiedDate = Instant.now(),
+            bibIds = List(),
+            unlinkedBibIds = List()
+          )
+        )
+      )
+
+      val work = transformToWork(transformable)
+
+      work.data.items should contain(
+        Item(
+          title = None,
+          locations = List(
+            DigitalLocation(
+              url = "https://example.org/holdings",
+              linkText = Some("View this journal"),
+              locationType = OnlineResource,
+              accessConditions = List(
+                AccessCondition(status = Some(LicensedResources))
+              )
+            )
+          )
+        ))
+    }
+
+    it("includes the holdings") {
+      val holdingsId = createSierraHoldingsNumber
+      val holdingsData =
+        s"""
+           |{
+           |  "id": "$holdingsId",
+           |  "fixedFields": {
+           |    "40": {"label": "LOCATION", "value": "stax "}
+           |  },
+           |  "varFields": [
+           |    {
+           |      "marcTag": "866",
+           |      "subfields": [
+           |        {"tag": "a", "content": "A Jubilant Journal"}
+           |      ]
+           |    }
+           |  ]
+           |}
+       """.stripMargin
+
+      val transformable = createSierraTransformableWith(
+        holdingsRecords = List(
+          SierraHoldingsRecord(
+            id = holdingsId,
+            data = holdingsData,
+            modifiedDate = Instant.now(),
+            bibIds = List(),
+            unlinkedBibIds = List()
+          )
+        )
+      )
+
+      val work = transformToWork(transformable)
+
+      work.data.holdings shouldBe List(
+        Holdings(
+          description = Some("A Jubilant Journal"),
+          note = None,
+          enumeration = List(),
+          locations = List(
+            PhysicalLocation(
+              locationType = ClosedStores,
+              label = ClosedStores.label
+            )
+          )
+        )
+      )
+    }
   }
 
   describe("throws a TransformerException when passed invalid data") {
