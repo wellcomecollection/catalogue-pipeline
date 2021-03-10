@@ -16,6 +16,7 @@ should keep reindexes consistent, and perhaps give us some clues about
 where this problem is coming from.
 """
 
+import datetime
 import json
 
 from elasticsearch import Elasticsearch
@@ -43,7 +44,7 @@ if __name__ == "__main__":
     prod_works = set(get_works(es_client, index_name=prod_index_name))
 
     print("Fetching works from the stage index...")
-    stage_index_name = get_index_name("api.wellcomecollection.org")
+    stage_index_name = get_index_name("api-stage.wellcomecollection.org")
     stage_works = set(get_works(es_client, index_name=stage_index_name))
 
     mismatched_work_ids = set(
@@ -61,7 +62,7 @@ if __name__ == "__main__":
     sns = session.client("sns")
 
     prod_index_date = prod_index_name.replace("works-", "")
-    stage_index_date = stage_index_name.replace("works-")
+    stage_index_date = stage_index_name.replace("works-", "")
 
     for work_id in tqdm.tqdm(mismatched_work_ids):
         sns.publish(
