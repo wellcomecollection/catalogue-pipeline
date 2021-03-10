@@ -6,9 +6,9 @@ resource "ec_deployment" "catalogue" {
   deployment_template_id = "aws-io-optimized"
 
   traffic_filter = [
-    ec_deployment_traffic_filter.public_internet.id,
-    module.platform_privatelink.traffic_filter_vpce_id,
-    module.catalogue_privatelink.traffic_filter_vpce_id,
+    data.terraform_remote_state.infra_critical.outputs["ec_public_internet_traffic_filter_id"],
+    data.terraform_remote_state.infra_critical.outputs["ec_platform_privatelink_traffic_filter_id"],
+    data.terraform_remote_state.infra_critical.outputs["ec_catalogue_privatelink_traffic_filter_id"],
   ]
 
   elasticsearch {

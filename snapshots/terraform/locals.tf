@@ -19,5 +19,5 @@ locals {
   vpc_id  = data.terraform_remote_state.catalogue_account.outputs.catalogue_vpc_id
   subnets = data.terraform_remote_state.catalogue_account.outputs.catalogue_vpc_private_subnets
 
-  elastic_cloud_vpce_sg_id = data.terraform_remote_state.infra_critical.outputs["catalogue_elastic_cloud_sg_id"]
+  elastic_cloud_vpce_sg_id = data.terraform_remote_state.shared.outputs["ec_catalogue_privatelink_sg_id"]
 }

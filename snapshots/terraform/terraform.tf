@@ -56,15 +56,3 @@ data "terraform_remote_state" "api_shared" {
     region = "eu-west-1"
   }
 }
-
-data "terraform_remote_state" "infra_critical" {
-  backend = "s3"
-
-  config = {
-    role_arn = "arn:aws:iam::760097843905:role/platform-read_only"
-
-    bucket = "wellcomecollection-platform-infra"
-    key    = "terraform/catalogue/infrastructure/critical.tfstate"
-    region = "eu-west-1"
-  }
-}
