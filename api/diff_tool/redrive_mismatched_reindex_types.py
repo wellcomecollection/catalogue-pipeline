@@ -67,9 +67,9 @@ if __name__ == "__main__":
     for work_id in tqdm.tqdm(mismatched_work_ids):
         sns.publish(
             TopicArn=f"arn:aws:sns:eu-west-1:760097843905:catalogue-{prod_index_date}_id_minter_output",
-            Body=work_id,
+            Message=work_id,
         )
         sns.publish(
             TopicArn=f"arn:aws:sns:eu-west-1:760097843905:catalogue-{stage_index_date}_id_minter_output",
-            Body=work_id,
+            Message=work_id,
         )
