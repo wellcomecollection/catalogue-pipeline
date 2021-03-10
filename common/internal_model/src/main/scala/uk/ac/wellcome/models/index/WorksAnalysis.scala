@@ -1,13 +1,6 @@
-package uk.ac.wellcome.elasticsearch
-import com.sksamuel.elastic4s.analysis.{
-  Analysis,
-  CustomAnalyzer,
-  CustomNormalizer,
-  PathHierarchyTokenizer,
-  ShingleTokenFilter,
-  StemmerTokenFilter
-}
-import uk.ac.wellcome.elasticsearch.elastic4s.AsciiFoldingTokenFilter
+package uk.ac.wellcome.models.index
+
+import com.sksamuel.elastic4s.analysis.{Analysis, CustomAnalyzer, CustomNormalizer, PathHierarchyTokenizer, ShingleTokenFilter, StemmerTokenFilter}
 
 object WorksAnalysis {
   // Analysis

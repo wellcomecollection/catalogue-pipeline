@@ -1,4 +1,4 @@
-package uk.ac.wellcome.elasticsearch.elastic4s
+package uk.ac.wellcome.models.index
 
 import com.sksamuel.elastic4s.analysis.TokenFilter
 import com.sksamuel.elastic4s.json.{XContentBuilder, XContentFactory}
