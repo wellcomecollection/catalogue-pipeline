@@ -511,6 +511,23 @@ class CalmTransformerTest
     CalmTransformer(record, version).right.get shouldBe a[Work.Invisible[_]]
   }
 
+  it("returns a Work.Invisible[Source] for 'Group of Pieces'-level works") {
+    val record = createCalmRecordWith(
+      "Title" -> "abc",
+      "Level" -> "Group of Pieces",
+      "AltRefNo" -> "a.b.c",
+      "CatalogueStatus" -> "Catalogued"
+    )
+    val result = CalmTransformer(record, version).right.get
+    result shouldBe a[Work.Invisible[_]]
+    result
+      .asInstanceOf[Work.Invisible[_]]
+      .invisibilityReasons should contain only
+      InvisibilityReason.UnableToTransform(
+        "Calm:Unsupported level - group of pieces"
+      )
+  }
+
   it("does not add language code if language not recognised") {
     val record = createCalmRecordWith(
       "Title" -> "abc",

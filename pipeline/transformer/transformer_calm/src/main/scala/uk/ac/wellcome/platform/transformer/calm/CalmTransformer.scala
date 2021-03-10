@@ -112,6 +112,8 @@ object CalmTransformer
       case TitleMissing => SourceFieldMissing("Calm:Title")
       case RefNoMissing => SourceFieldMissing("Calm:RefNo")
       case LevelMissing => SourceFieldMissing("Calm:Level")
+      case UnsupportedLevel(level) =>
+        UnableToTransform(s"Calm:Unsupported level - $level")
       case UnrecognisedLevel(level) =>
         InvalidValueInSourceField(s"Calm:Level - $level")
     }
@@ -236,6 +238,9 @@ object CalmTransformer
         case "subsubsubseries"  => Right(WorkType.Series)
         case "item"             => Right(WorkType.Standard)
         case "piece"            => Right(WorkType.Standard)
+        // We choose not to support Group of Pieces records as these are being
+        // removed from the source data
+        case level @ "group of pieces" => Left(UnsupportedLevel(level))
         case level =>
           warn(s"${record.id} has an unrecognised level: $level")
           Left(UnrecognisedLevel(level))
