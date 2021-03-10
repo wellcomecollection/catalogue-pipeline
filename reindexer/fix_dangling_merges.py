@@ -66,14 +66,14 @@ if __name__ == "__main__":
     works = {}
 
     for w in tqdm.tqdm(get_works(reindex_date)):
-        canonical_id = w['state']['canonicalId']
+        canonical_id = w["state"]["canonicalId"]
 
         works[canonical_id] = {
-            'redirectSources': [
-                rs['canonicalId'] for rs in w.get('redirectSources', [])
+            "redirectSources": [
+                rs["canonicalId"] for rs in w.get("redirectSources", [])
             ],
-            'redirectTarget': w.get('redirectTarget', {}).get('canonicalId'),
-            'type': w['type']
+            "redirectTarget": w.get("redirectTarget", {}).get("canonicalId"),
+            "type": w["type"],
         }
 
     errors = collections.defaultdict(list)
@@ -106,7 +106,9 @@ if __name__ == "__main__":
                     affected_work_ids.add(w["redirectTarget"])
 
     if errors:
-        with open(f"errors-{reindex_date}-{datetime.datetime.now()}.json", "w") as outfile:
+        with open(
+            f"errors-{reindex_date}-{datetime.datetime.now()}.json", "w"
+        ) as outfile:
             outfile.write(
                 json.dumps(
                     {"errors": errors, "affected_work_ids": sorted(affected_work_ids)},
@@ -129,7 +131,7 @@ if __name__ == "__main__":
             for work_id in tqdm.tqdm(affected_work_ids):
                 sns.publish(
                     TopicArn=f"catalogue-{reindex_date}_id_minter_output",
-                    Message=work_id
+                    Message=work_id,
                 )
 
     else:
