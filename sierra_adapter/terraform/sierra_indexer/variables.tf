@@ -33,3 +33,7 @@ variable "deployment_service_name" {}
 variable "shared_logging_secrets" {
   type = map(any)
 }
+
+variable "elastic_cloud_vpce_sg_id" {
+  type = string
+}

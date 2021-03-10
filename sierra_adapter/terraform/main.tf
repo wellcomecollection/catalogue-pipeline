@@ -4,11 +4,12 @@ module "sierra-adapter-20200604" {
   namespace     = "sierra-adapter-20200604"
   release_label = "latest"
 
-  dlq_alarm_arn                  = local.dlq_alarm_arn
+  dlq_alarm_arn          = local.dlq_alarm_arn
+  infra_bucket           = var.infra_bucket
+  lambda_error_alarm_arn = local.lambda_error_alarm_arn
+
   egress_security_group_id       = aws_security_group.egress_security_group.id
-  infra_bucket                   = var.infra_bucket
   interservice_security_group_id = aws_security_group.interservice_security_group.id
-  lambda_error_alarm_arn         = local.lambda_error_alarm_arn
 
   private_subnets = local.private_subnets
   vpc_id          = local.vpc_id
@@ -37,4 +38,6 @@ module "sierra-adapter-20200604" {
 
   deployment_env         = "prod"
   shared_logging_secrets = data.terraform_remote_state.shared_infra.outputs.shared_secrets_logging
+
+  elastic_cloud_vpce_sg_id = data.terraform_remote_state.shared_infra.outputs["ec_platform_privatelink_sg_id"]
 }

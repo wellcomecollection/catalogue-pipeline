@@ -36,6 +36,9 @@ module "sierra_reader_service" {
   security_group_ids = [
     var.interservice_security_group_id,
     var.service_egress_security_group_id,
+    var.elastic_cloud_vpce_sg_id,
   ]
   shared_logging_secrets = var.shared_logging_secrets
+
+  use_privatelink_logging_endpoint = true
 }

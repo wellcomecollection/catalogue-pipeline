@@ -34,3 +34,7 @@ variable "sierra_indexer_image" {
 variable "reporting_reindex_topic_arn" {
   type = string
 }
+
+variable "elastic_cloud_vpce_sg_id" {
+  type = string
+}
