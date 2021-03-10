@@ -23,6 +23,10 @@ variable "security_group_ids" {
   type    = list(string)
 }
 
+variable "elastic_cloud_vpce_sg_id" {
+  type = string
+}
+
 variable "queue_read_policy" {}
 
 variable "max_capacity" {

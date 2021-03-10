@@ -21,6 +21,10 @@ variable "security_group_ids" {
   default = []
 }
 
+variable "elastic_cloud_vpce_sg_id" {
+  type = string
+}
+
 variable "host_cpu" {
   type    = number
   default = 512

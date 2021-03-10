@@ -18,7 +18,8 @@ module "worker" {
 
   desired_task_count = var.desired_task_count
 
-  security_group_ids = var.security_group_ids
+  security_group_ids       = var.security_group_ids
+  elastic_cloud_vpce_sg_id = var.elastic_cloud_vpce_sg_id
 
   cpu    = var.cpu
   memory = var.memory
@@ -31,6 +32,4 @@ module "worker" {
   shared_logging_secrets  = var.shared_logging_secrets
 
   use_fargate_spot = var.use_fargate_spot
-
-  use_privatelink_logging_endpoint = true
 }

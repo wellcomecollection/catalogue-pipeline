@@ -58,6 +58,10 @@ variable "security_group_ids" {
   default = []
 }
 
+variable "elastic_cloud_vpce_sg_id" {
+  type = string
+}
+
 variable "apps" {
   type = map(object({
     image           = string,
@@ -148,9 +152,4 @@ variable "deployment_service_env" {
   type        = string
   description = "Used by weco-deploy to determine which services to deploy in conjunction with deployment_service_name"
   default     = "prod"
-}
-
-variable "use_privatelink_logging_endpoint" {
-  type    = bool
-  default = false
 }

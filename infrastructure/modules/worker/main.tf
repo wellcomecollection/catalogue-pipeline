@@ -13,10 +13,16 @@ module "service" {
   service_discovery_namespace_id = var.namespace_id
   launch_type                    = var.launch_type
   desired_task_count             = var.desired_task_count
-  security_group_ids             = var.security_group_ids
   use_fargate_spot               = var.use_fargate_spot
   capacity_provider_strategies   = var.capacity_provider_strategies
   ordered_placement_strategies   = var.ordered_placement_strategies
+
+  # We need to append the Elastic Cloud VPC endpoint security group so
+  # that our services can talk to the logging cluster.
+  security_group_ids = concat(
+    var.security_group_ids,
+    [var.elastic_cloud_vpce_sg_id]
+  )
 
   propagate_tags = "SERVICE"
 
@@ -74,7 +80,7 @@ module "log_router_container" {
   source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/firelens?ref=425be018ddc150166d669d28d866c7a8ed0bb5ca"
   namespace = var.name
 
-  use_privatelink_endpoint = var.use_privatelink_logging_endpoint
+  use_privatelink_endpoint = true
 }
 
 module "log_router_permissions" {

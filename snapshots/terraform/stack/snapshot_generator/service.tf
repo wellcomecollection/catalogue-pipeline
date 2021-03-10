@@ -28,9 +28,10 @@ module "snapshot_generator" {
   cluster_arn  = var.cluster_arn
 
   security_group_ids = [
-    var.elastic_cloud_vpce_sg_id,
+    # TODO: Do we need this egress security group?
     aws_security_group.egress.id,
   ]
+  elastic_cloud_vpce_sg_id = var.elastic_cloud_vpce_sg_id
 
   min_capacity = 0
   max_capacity = 1
@@ -38,8 +39,6 @@ module "snapshot_generator" {
   deployment_service_env  = var.deployment_service_env
   deployment_service_name = "snapshot-generator"
   shared_logging_secrets  = var.shared_logging_secrets
-
-  use_privatelink_logging_endpoint = true
 }
 
 module "snapshot_generator_scaling_alarm" {
