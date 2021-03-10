@@ -49,6 +49,12 @@ module "deletion_checker_worker" {
 
   deployment_service_env  = local.release_label
   deployment_service_name = "calm-deletion-checker"
+
+  security_group_ids = [
+    data.terraform_remote_state.shared_infra.outputs.ec_platform_privatelink_sg_id,
+  ]
+
+  use_privatelink_logging_endpoint = true
 }
 
 resource "aws_iam_role_policy" "read_from_deletion_checker_queue" {
