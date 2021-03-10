@@ -12,4 +12,8 @@ resource "aws_security_group" "egress" {
       "0.0.0.0/0",
     ]
   }
+
+  tags = {
+    Name = "snapshot_generator_service_egress"
+  }
 }
