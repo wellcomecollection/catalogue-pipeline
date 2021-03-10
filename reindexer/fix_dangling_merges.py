@@ -1,6 +1,25 @@
 #!/usr/bin/env python
+"""
+A "dangling merge" is when the redirect information in the API index
+isn't consistent.  There are two variants:
+
+1)  Work A redirects to Work B, but the copy of Work B in the index doesn't
+    have the merged data from Work A
+
+2)  Work B has the merged data from Work A, but Work A doesn't redirect to B
+
+This script will scan the API index, find any dangling merges, and offer
+to redrive these messages through the pipeline.
+
+Ideally we wouldn't need this, and hopefully at some point the pipeline
+will become reliable enough that we can delete it.  In the meantime, this
+should keep reindexes consistent, and perhaps give us some clues about
+where this problem is coming from.
+
+"""
 
 import collections
+import datetime
 import json
 import sys
 
@@ -87,7 +106,7 @@ if __name__ == "__main__":
                     affected_work_ids.add(w["redirectTarget"])
 
     if errors:
-        with open("errors.json", "w") as outfile:
+        with open(f"errors-{reindex_date}-{datetime.datetime.now()}.json", "w") as outfile:
             outfile.write(
                 json.dumps(
                     {"errors": errors, "affected_work_ids": sorted(affected_work_ids)},
@@ -103,5 +122,15 @@ if __name__ == "__main__":
                 "red",
             )
         )
+
+        if click.confirm("Resend these works to the merger?"):
+            sns = session.client("sns")
+
+            for work_id in tqdm.tqdm(affected_work_ids):
+                sns.publish(
+                    TopicArn=f"catalogue-{reindex_date}_id_minter_output",
+                    Message=work_id
+                )
+
     else:
         print(click.style("No errors detected!", "green"))
