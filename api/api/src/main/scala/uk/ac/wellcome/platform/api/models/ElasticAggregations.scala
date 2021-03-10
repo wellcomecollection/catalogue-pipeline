@@ -7,8 +7,8 @@ import grizzled.slf4j.Logging
 import io.circe.Decoder
 import uk.ac.wellcome.models.work.internal.IdState.Minted
 import uk.ac.wellcome.models.work.internal.{
+  AbstractAgent,
   Agent,
-  Contributor,
   License,
   Meeting,
   Organisation,
@@ -22,19 +22,18 @@ trait ElasticAggregations extends Logging {
   implicit val decodeLicenseFromId: Decoder[License] =
     Decoder.decodeString.emap(License.withNameEither(_).getMessage)
 
-  implicit val decodeContributorFromLabel: Decoder[Contributor[Minted]] =
+  implicit val decodeAgentFromLabel: Decoder[AbstractAgent[Minted]] =
     Decoder.decodeString.emap { str =>
       val splitIdx = str.indexOf(':')
       val ontologyType = str.slice(0, splitIdx)
       val label = str.slice(splitIdx + 1, Int.MaxValue)
-      val agent = ontologyType match {
+      ontologyType match {
         case "Agent"        => Right(Agent(label = label))
         case "Person"       => Right(Person(label = label))
         case "Organisation" => Right(Organisation(label = label))
         case "Meeting"      => Right(Meeting(label = label))
         case ontologyType   => Left(s"Illegal agent type: $ontologyType")
       }
-      agent.map(agent => Contributor(agent = agent, roles = Nil))
     }
 
   implicit class ThrowableEitherOps[T](either: Either[Throwable, T]) {

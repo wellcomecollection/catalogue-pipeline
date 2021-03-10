@@ -85,4 +85,7 @@ object WorkAggregations extends ElasticAggregations {
       Subject(label = str, concepts = Nil)
     }
 
+  implicit val decodeContributorFromLabel: Decoder[Contributor[Minted]] =
+    decodeAgentFromLabel.map(agent => Contributor(agent = agent, roles = Nil))
+
 }

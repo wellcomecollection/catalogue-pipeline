@@ -68,8 +68,8 @@ class ImagesRequestBuilder(queryConfig: QueryConfig)
         .size(License.values.size)
         .field("locations.license.id")
         .minDocCount(0)
-    case ImageAggregationRequest.SourceContributors =>
-      TermsAggregation("sourceContributors")
+    case ImageAggregationRequest.SourceContributorAgents =>
+      TermsAggregation("sourceContributorAgents")
         .size(20)
         .field("state.derivedData.sourceContributorAgents")
         .minDocCount(0)
