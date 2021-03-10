@@ -348,7 +348,7 @@ class CalmTransformerTest
       WorkType.Series
   }
 
-  it("Returns a deleted work when isDeleted = true") {
+  it("Returns an empty deleted work when isDeleted = true") {
     val record = createCalmRecordWith(
       "Title" -> "abc",
       "Level" -> "Subseries",
@@ -361,9 +361,10 @@ class CalmTransformerTest
       CalmSourceData(record, isDeleted = true),
       version).right.get
     result shouldBe a[Work.Deleted[_]]
-    result
-      .asInstanceOf[Work.Deleted[_]]
-      .deletedReason shouldBe DeletedFromSource("Calm")
+    val deletedWork = result.asInstanceOf[Work.Deleted[_]]
+
+    deletedWork.deletedReason shouldBe DeletedFromSource("Calm")
+    deletedWork.data shouldBe WorkData()
   }
 
   it("transforms to deleted work when CatalogueStatus is suppressible") {
@@ -510,6 +511,23 @@ class CalmTransformerTest
     CalmTransformer(record, version).right.get shouldBe a[Work.Invisible[_]]
   }
 
+  it("returns a Work.Invisible[Source] for 'Group of Pieces'-level works") {
+    val record = createCalmRecordWith(
+      "Title" -> "abc",
+      "Level" -> "Group of Pieces",
+      "AltRefNo" -> "a.b.c",
+      "CatalogueStatus" -> "Catalogued"
+    )
+    val result = CalmTransformer(record, version).right.get
+    result shouldBe a[Work.Invisible[_]]
+    result
+      .asInstanceOf[Work.Invisible[_]]
+      .invisibilityReasons should contain only
+      InvisibilityReason.UnableToTransform(
+        "Calm:Suppressed level - group of pieces"
+      )
+  }
+
   it("does not add language code if language not recognised") {
     val record = createCalmRecordWith(
       "Title" -> "abc",
@@ -537,32 +555,7 @@ class CalmTransformerTest
     )
     CalmTransformer(record, version) shouldBe Right(
       Work.Deleted[Source](
-        data = WorkData[DataState.Unidentified](
-          title = Some("Should suppress"),
-          format = Some(Format.ArchivesAndManuscripts),
-          collectionPath = Some(
-            CollectionPath(path = "AMSG/X/Y")
-          ),
-          otherIdentifiers = List(
-            SourceIdentifier(
-              value = "AMSG/X/Y",
-              identifierType = CalmIdentifierTypes.refNo,
-              ontologyType = "Work"),
-          ),
-          items = List(
-            Item(
-              title = None,
-              locations = List(
-                PhysicalLocation(
-                  locationType = LocationType.ClosedStores,
-                  label = "Closed stores Arch. & MSS",
-                  accessConditions = Nil
-                )
-              )
-            )
-          ),
-          workType = WorkType.Section
-        ),
+        data = WorkData(),
         state = Source(
           SourceIdentifier(
             value = record.id,

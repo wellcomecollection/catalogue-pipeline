@@ -7,9 +7,9 @@ import com.sksamuel.elastic4s.Index
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
-import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.Implicits._
+import uk.ac.wellcome.models.index.IndexFixtures
 import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.snapshot_generator.models.SnapshotGeneratorConfig
@@ -18,7 +18,7 @@ class ElasticsearchSourceTest
     extends AnyFunSpec
     with Matchers
     with Akka
-    with ElasticsearchFixtures
+    with IndexFixtures
     with WorkGenerators {
 
   it("outputs the entire content of the index") {

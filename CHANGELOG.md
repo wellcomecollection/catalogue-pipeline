@@ -22,3 +22,7 @@ A release to keep BuildKite happy.
 ## v3355.c84544eab2788391584da0e5939f7ff7f58e1367 - 2021-03-09
 
 Don't default any values in `Holdings`; that type only takes PhysicalLocations for now.
+
+## v3369.12677925a9186ca631f8eac62b1807447363c1a1 - 2021-03-09
+
+Make `internal_model` depend on `elasticsearch_typesafe`

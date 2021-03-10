@@ -6,8 +6,8 @@ STACK_ROOT  = common
 SBT_APPS =
 SBT_NO_DOCKER_APPS =
 
-SBT_DOCKER_LIBRARIES    = elasticsearch pipeline_storage
-SBT_NO_DOCKER_LIBRARIES = display elasticsearch_typesafe internal_model source_model source_model_typesafe
+SBT_DOCKER_LIBRARIES    = elasticsearch internal_model pipeline_storage
+SBT_NO_DOCKER_LIBRARIES = display elasticsearch_typesafe source_model source_model_typesafe
 
 PYTHON_APPS =
 LAMBDAS     =

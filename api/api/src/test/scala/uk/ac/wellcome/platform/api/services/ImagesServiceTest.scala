@@ -5,16 +5,15 @@ import com.sksamuel.elastic4s.{ElasticError, Index}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.{EitherValues, OptionValues}
-
-import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.models.work.generators.ImageGenerators
 import uk.ac.wellcome.platform.api.models.{QueryConfig, SimilarityMetric}
 import uk.ac.wellcome.models.Implicits._
+import uk.ac.wellcome.models.index.IndexFixtures
 
 class ImagesServiceTest
     extends AnyFunSpec
     with ScalaFutures
-    with ElasticsearchFixtures
+    with IndexFixtures
     with ImageGenerators
     with EitherValues
     with OptionValues {

@@ -12,7 +12,7 @@ import uk.ac.wellcome.platform.transformer.mets.services.MetsTransformerWorker
 import uk.ac.wellcome.storage.typesafe.S3Builder
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
-import uk.ac.wellcome.elasticsearch.SourceWorkIndexConfig
+import uk.ac.wellcome.models.index.SourceWorkIndexConfig
 import uk.ac.wellcome.models.work.internal.Work
 import uk.ac.wellcome.models.work.internal.WorkState.Source
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
