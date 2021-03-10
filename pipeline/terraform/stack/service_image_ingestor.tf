@@ -1,3 +1,7 @@
+locals {
+  image_ingestor_flush_interval_seconds = 30
+}
+
 module "ingestor_images_queue" {
   source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
   queue_name      = "${local.namespace_hyphen}_ingestor_images"
@@ -5,7 +9,7 @@ module "ingestor_images_queue" {
   aws_region      = var.aws_region
   alarm_topic_arn = var.dlq_alarm_arn
 
-  visibility_timeout_seconds = 60
+  visibility_timeout_seconds = local.image_ingestor_flush_interval_seconds + 30
 }
 
 # Service
@@ -34,7 +38,7 @@ module "ingestor_images" {
     es_images_index    = local.es_images_index
     es_augmented_index = local.es_images_augmented_index
 
-    ingest_flush_interval_seconds = 30
+    ingest_flush_interval_seconds = local.image_ingestor_flush_interval_seconds
 
     # We initially had this set to 100, and we saw errors like:
     #

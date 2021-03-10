@@ -1,7 +1,5 @@
 locals {
-  # This was previously 4 minutes, but we saw a handful of messages
-  # land on the DLQ, so we increased it.
-  lock_timeout = 10 * 60
+  lock_timeout = 1 * 60
 }
 
 module "matcher_input_queue" {
@@ -19,7 +17,22 @@ module "matcher_input_queue" {
   # The matcher is able to override locks that have expired
   # Wait slightly longer to make sure locks are expired
   visibility_timeout_seconds = local.lock_timeout + 30
-  max_receive_count          = 5
+
+  # Epistemic status of this comment: somewhat speculative.
+  #
+  # We want a lot of redrives here so we can handle cases where a bunch
+  # of works are being merged together in quick succession.
+  #
+  # Consider: ten works A, B, C, …, J are all going to be merged together,
+  # and they arrive at the matcher in that order.
+  #
+  # The matcher starts processing work A, and acquires a lock on it.
+  # The nine other works try to get a lock on A, fail, get redriven.
+  #
+  # When the visibility timeout expires, the matcher starts processing B
+  # and acquires a lock on A.  The eight other works try to get a lock on A,
+  # fail, get redriven.
+  max_receive_count = 10
 }
 
 # Service
