@@ -4,3 +4,4 @@ elasticsearch
 httpx
 humanize
 jinja2
+tqdm
