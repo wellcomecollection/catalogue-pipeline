@@ -6,7 +6,7 @@ import io.circe.generic.extras.JsonKey
 import io.swagger.v3.oas.annotations.media.Schema
 import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.display.json.DisplayJsonUtil._
-import uk.ac.wellcome.models.work.internal.Contributor
+import uk.ac.wellcome.models.work.internal.{Contributor, Genre}
 import uk.ac.wellcome.models.work.internal.IdState.Minted
 
 @Schema(
@@ -21,6 +21,9 @@ case class DisplayImageAggregations(
     description = "Contributor aggregation on a set of results."
   ) `source.contributors.agent.label`: Option[
     DisplayAggregation[DisplayContributor]] = None,
+  @Schema(
+    description = "Genre aggregation on a set of results."
+  ) `source.genres.label`: Option[DisplayAggregation[DisplayGenre]],
   @JsonKey("type") @Schema(name = "type") ontologyType: String = "Aggregations"
 )
 
@@ -36,7 +39,10 @@ object DisplayImageAggregations {
         displayAggregation[Contributor[Minted], DisplayContributor](
           aggs.sourceContributors,
           DisplayContributor(_, includesIdentifiers = false)
-        )
+        ),
+      `source.genres.label` = displayAggregation[Genre[Minted], DisplayGenre](
+        aggs.sourceGenres,
+        DisplayGenre(_, includesIdentifiers = false))
     )
 
   private def displayAggregation[T, D](
