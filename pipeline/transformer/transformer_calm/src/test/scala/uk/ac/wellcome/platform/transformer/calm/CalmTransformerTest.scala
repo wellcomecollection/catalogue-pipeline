@@ -524,7 +524,7 @@ class CalmTransformerTest
       .asInstanceOf[Work.Invisible[_]]
       .invisibilityReasons should contain only
       InvisibilityReason.UnableToTransform(
-        "Calm:Unsupported level - group of pieces"
+        "Calm:Suppressed level - group of pieces"
       )
   }
 

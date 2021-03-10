@@ -112,8 +112,8 @@ object CalmTransformer
       case TitleMissing => SourceFieldMissing("Calm:Title")
       case RefNoMissing => SourceFieldMissing("Calm:RefNo")
       case LevelMissing => SourceFieldMissing("Calm:Level")
-      case UnsupportedLevel(level) =>
-        UnableToTransform(s"Calm:Unsupported level - $level")
+      case SuppressedLevel(level) =>
+        UnableToTransform(s"Calm:Suppressed level - $level")
       case UnrecognisedLevel(level) =>
         InvalidValueInSourceField(s"Calm:Level - $level")
     }
@@ -239,8 +239,10 @@ object CalmTransformer
         case "item"             => Right(WorkType.Standard)
         case "piece"            => Right(WorkType.Standard)
         // We choose not to support Group of Pieces records as these are being
-        // removed from the source data
-        case level @ "group of pieces" => Left(UnsupportedLevel(level))
+        // removed from the source data.
+        // See conversation here for more context:
+        // https://wellcome.slack.com/archives/C8X9YKM5X/p1615367956007300
+        case level @ "group of pieces" => Left(SuppressedLevel(level))
         case level =>
           warn(s"${record.id} has an unrecognised level: $level")
           Left(UnrecognisedLevel(level))
