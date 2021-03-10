@@ -9,9 +9,9 @@ import tempfile
 import urllib.parse
 
 import click
+import httpx
 import humanize
 from jinja2 import Environment, FileSystemLoader, select_autoescape
-import requests
 
 import api_stats
 
@@ -74,7 +74,7 @@ class ApiDiffer:
 
     def call_api(self, api_base):
         url = f"https://{api_base}{self.path}"
-        response = requests.get(url, params=self.params)
+        response = httpx.get(url, params=self.params)
         return (response.status_code, response.json())
 
 
