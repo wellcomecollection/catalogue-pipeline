@@ -70,8 +70,11 @@ module "app_permissions" {
 }
 
 module "log_router_container" {
-  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/firelens?ref=v3.3.1"
+  # TODO: Use a released version of this module
+  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/firelens?ref=425be018ddc150166d669d28d866c7a8ed0bb5ca"
   namespace = var.name
+
+  use_privatelink_endpoint = var.use_privatelink_logging_endpoint
 }
 
 module "log_router_permissions" {

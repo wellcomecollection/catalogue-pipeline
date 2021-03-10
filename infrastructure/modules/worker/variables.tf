@@ -102,3 +102,8 @@ variable "deployment_service_env" {
   description = "Used by weco-deploy to determine which services to deploy in conjunction with deployment_service_name"
   default     = "prod"
 }
+
+variable "use_privatelink_logging_endpoint" {
+  type    = bool
+  default = false
+}

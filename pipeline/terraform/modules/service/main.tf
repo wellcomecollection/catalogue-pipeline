@@ -31,4 +31,6 @@ module "worker" {
   shared_logging_secrets  = var.shared_logging_secrets
 
   use_fargate_spot = var.use_fargate_spot
+
+  use_privatelink_logging_endpoint = true
 }

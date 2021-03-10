@@ -37,4 +37,6 @@ module "worker" {
   deployment_service_name = var.deployment_service_name
 
   shared_logging_secrets = var.shared_logging_secrets
+
+  use_privatelink_logging_endpoint = true
 }
