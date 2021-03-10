@@ -237,6 +237,12 @@ trait MultipleImagesSwagger {
         required = false
       ),
       new Parameter(
+        name = "source.genres.label",
+        in = ParameterIn.QUERY,
+        description = "Filter the images by the source works' genres",
+        required = false
+      ),
+      new Parameter(
         name = "colors",
         in = ParameterIn.QUERY,
         description = "Filter the images by colors.",
