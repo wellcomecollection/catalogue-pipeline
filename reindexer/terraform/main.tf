@@ -10,6 +10,7 @@ module "reindex_worker" {
   cluster_arn  = aws_ecs_cluster.cluster.arn
 
   service_egress_security_group_id = aws_security_group.service_egress_security_group.id
+  elastic_cloud_vpce_sg_id         = data.terraform_remote_state.shared_infra.outputs["ec_platform_privatelink_sg_id"]
 
   account_id = data.aws_caller_identity.current.account_id
 

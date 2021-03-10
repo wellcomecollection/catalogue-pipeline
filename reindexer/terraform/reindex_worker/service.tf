@@ -8,7 +8,10 @@ module "service" {
 
   image = var.reindex_worker_container_image
 
-  security_group_ids = [var.service_egress_security_group_id]
+  security_group_ids = [
+    var.service_egress_security_group_id,
+    var.elastic_cloud_vpce_sg_id,
+  ]
 
   cpu    = 1024
   memory = 2048
@@ -30,6 +33,8 @@ module "service" {
   shared_logging_secrets = var.shared_logging_secrets
 
   use_fargate_spot = true
+
+  use_privatelink_logging_endpoint = true
 }
 
 module "ingestor_works_scaling_alarm" {

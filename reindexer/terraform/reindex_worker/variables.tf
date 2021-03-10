@@ -8,6 +8,10 @@ variable "reindex_worker_container_image" {}
 
 variable "service_egress_security_group_id" {}
 
+variable "elastic_cloud_vpce_sg_id" {
+  type = string
+}
+
 variable "cluster_name" {}
 variable "cluster_arn" {}
 
