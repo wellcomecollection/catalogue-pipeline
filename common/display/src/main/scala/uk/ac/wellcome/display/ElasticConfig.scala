@@ -1,7 +1,9 @@
-package uk.ac.wellcome.elasticsearch
+package uk.ac.wellcome.display
 
 import com.sksamuel.elastic4s.Index
 
+// This is here as display is the only module shared
+// between api and snapshot_generator.
 case class ElasticConfig(
   worksIndex: Index,
   imagesIndex: Index

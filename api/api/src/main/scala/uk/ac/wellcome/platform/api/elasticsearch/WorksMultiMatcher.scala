@@ -11,7 +11,7 @@ import com.sksamuel.elastic4s.requests.searches.queries.matches.{
   FieldWithOptionalBoost,
   MultiMatchQuery
 }
-import uk.ac.wellcome.elasticsearch.WorksAnalysis.whitespaceAnalyzer
+import uk.ac.wellcome.models.index.WorksAnalysis.whitespaceAnalyzer
 
 case object WorksMultiMatcher {
   def apply(q: String): BoolQuery = {

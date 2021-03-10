@@ -7,7 +7,6 @@ import io.circe.Encoder
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.time.{Seconds, Span}
 import org.scalatest.{Assertion, Suite}
-import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.elasticsearch.model.CanonicalId
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.fixtures.TestWith
@@ -16,12 +15,6 @@ import uk.ac.wellcome.models.work.internal.WorkState.Identified
 import uk.ac.wellcome.models.work.internal.{Image, ImageState, Work, WorkState}
 
 trait IndexFixtures extends ElasticsearchFixtures { this: Suite =>
-  def withLocalIndices[R](testWith: TestWith[ElasticConfig, R]): R =
-    withLocalWorksIndex { worksIndex =>
-      withLocalImagesIndex { imagesIndex =>
-        testWith(ElasticConfig(worksIndex, imagesIndex))
-      }
-    }
 
   def withLocalWorksIndex[R](testWith: TestWith[Index, R]): R =
     withLocalElasticsearchIndex[R](config = IndexedWorkIndexConfig) { index =>

@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.snapshot_generator
 
 import akka.actor.ActorSystem
 import com.typesafe.config.Config
-import uk.ac.wellcome.elasticsearch.ElasticConfig
+import uk.ac.wellcome.display.ElasticConfig
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
