@@ -69,6 +69,9 @@ object WorkPredicates {
   val sierraDigaids: WorkPredicate =
     satisfiesAll(sierraWork, hasDigcode("digaids"))
 
+  val sierraElectronicBib: WorkPredicate =
+    satisfiesAll(zeroItemSierra, format(Format.Videos))
+
   def not(pred: WorkPredicate): WorkPredicate = !pred(_)
 
   def sierraWorkWithId(id: SourceIdentifier)(work: Work[Identified]): Boolean =

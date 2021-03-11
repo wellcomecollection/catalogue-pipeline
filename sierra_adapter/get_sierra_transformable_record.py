@@ -96,7 +96,7 @@ def main(bnumber, skip_decoding):
             for item_record in transformable["itemRecords"].values():
                 item_record["data"] = json.loads(item_record["data"])
 
-            for holdings_record in transformable["holdingsRecords"].values():
+            for holdings_record in transformable.get("holdingsRecords", {}).values():
                 holdings_record["data"] = json.loads(holdings_record["data"])
 
         _, tmp_path = tempfile.mkstemp(suffix=".json", prefix=f"b{bnumber}_")

@@ -685,4 +685,98 @@ class PlatformMergerTest
       visibleWork,
       deletedWork)
   }
+
+  it("merges digitised videos from METS into e-bibs") {
+    // This test case is based on a real example of four related works that
+    // were being merged incorrectly.  In particular, the METS work (and associated
+    // IIIF manifest) was being merged into the physical video formats, not the
+    // more detailed e-bib that it should have been attached to.
+    //
+    // See https://wellcome.slack.com/archives/C3TQSF63C/p1615474389063800
+    val workWithPhysicalVideoFormats =
+      sierraIdentifiedWork()
+        .title("A work with physical video formats, e.g. DVD or digibeta")
+        .format(Format.Film)
+        .items(List(createIdentifiedPhysicalItem))
+
+    val workForEbib =
+      sierraIdentifiedWork()
+        .title("A work for an e-bib")
+        .format(Format.Videos)
+        .mergeCandidates(
+          List(
+            MergeCandidate(
+              id = IdState.Identified(
+                canonicalId = workWithPhysicalVideoFormats.id,
+                sourceIdentifier = workWithPhysicalVideoFormats.sourceIdentifier
+              ),
+              reason = Some("Physical/digitised Sierra work")
+            )
+          )
+        )
+
+    val workForMets =
+      identifiedWork(sourceIdentifier = createMetsSourceIdentifier)
+        .title("A METS work")
+        .mergeCandidates(
+          List(
+            MergeCandidate(
+              id = IdState.Identified(
+                canonicalId = workForEbib.id,
+                sourceIdentifier = workForEbib.sourceIdentifier
+              ),
+              reason = Some("METS work")
+            )
+          )
+        )
+        .items(List(createDigitalItem))
+        .invisible()
+
+    val workForFilmReel =
+      sierraIdentifiedWork()
+        .title("Work for film reel")
+        .mergeCandidates(
+          List(
+            MergeCandidate(
+              id = IdState.Identified(
+                canonicalId = workForEbib.id,
+                sourceIdentifier = workForEbib.sourceIdentifier
+              ),
+              reason = Some("Physical/digitised Sierra work")
+            )
+          )
+        )
+        .format(Format.Videos)
+
+    val sierraWorks =
+      List(workWithPhysicalVideoFormats, workForEbib, workForFilmReel)
+    val works = sierraWorks :+ workForMets
+
+    val result = merger.merge(works).mergedWorksWithTime(now)
+
+    val visibleWorks = result
+      .collect { case w: Work.Visible[_] => w }
+      .map { w =>
+        w.id -> w
+      }
+      .toMap
+    val redirectedWorks = result.collect {
+      case w: Work.Redirected[Merged] => w
+    }
+    val invisibleWorks = result.collect { case w: Work.Invisible[Merged] => w }
+
+    // First check that the METS work got redirected into one of the Sierra works
+    visibleWorks.keys should contain theSameElementsAs sierraWorks.map { _.id }
+    redirectedWorks.map { _.id } shouldBe List(workForMets.id)
+    invisibleWorks shouldBe empty
+
+    // Now check that the METS work redirects into the e-bib specifically
+    val redirectedWork = redirectedWorks.head
+    redirectedWork.redirectTarget.canonicalId shouldBe workForEbib.id
+
+    visibleWorks(workWithPhysicalVideoFormats.id).data.items shouldBe workWithPhysicalVideoFormats.data.items
+    visibleWorks(workForFilmReel.id).data.items shouldBe workForFilmReel.data.items
+
+    visibleWorks(workForEbib.id).data.items shouldBe workForMets.data.items
+  }
 }
