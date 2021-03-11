@@ -1,6 +1,13 @@
 package uk.ac.wellcome.models.index
 
-import com.sksamuel.elastic4s.analysis.{Analysis, CustomAnalyzer, CustomNormalizer, PathHierarchyTokenizer, ShingleTokenFilter, StemmerTokenFilter}
+import com.sksamuel.elastic4s.analysis.{
+  Analysis,
+  CustomAnalyzer,
+  CustomNormalizer,
+  PathHierarchyTokenizer,
+  ShingleTokenFilter,
+  StemmerTokenFilter
+}
 
 object WorksAnalysis {
   // Analysis

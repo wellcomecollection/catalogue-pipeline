@@ -15,8 +15,10 @@ from git_utils import (
 from provider import current_branch, is_default_branch
 from sbt_dependency_tree import Repository
 
+
 def publish(project_name):
     sbt(f"project {project_name}", "publish")
+
 
 # This script takes environment variables as the "command" step
 # when used with the buildkite docker plugin incorrectly parses

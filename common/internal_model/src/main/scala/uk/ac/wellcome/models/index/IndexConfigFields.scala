@@ -63,4 +63,3 @@ trait IndexConfigFields {
     .fields(lowercaseKeyword("value"))
     .dynamic("false")
 }
-

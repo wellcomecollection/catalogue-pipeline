@@ -10,8 +10,15 @@ import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil.toJson
 import uk.ac.wellcome.models.index.{IndexConfigFields, WorksAnalysis}
-import uk.ac.wellcome.pipeline_storage.fixtures.{SampleDocument, SampleDocumentData}
-import uk.ac.wellcome.pipeline_storage.{ElasticIndexer, Indexer, IndexerTestCases}
+import uk.ac.wellcome.pipeline_storage.fixtures.{
+  SampleDocument,
+  SampleDocumentData
+}
+import uk.ac.wellcome.pipeline_storage.{
+  ElasticIndexer,
+  Indexer,
+  IndexerTestCases
+}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
