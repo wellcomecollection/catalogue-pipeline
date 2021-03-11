@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.matcher.storage.elastic
 
 import com.sksamuel.elastic4s.Index
-import uk.ac.wellcome.elasticsearch.IdentifiedWorkIndexConfig
+import uk.ac.wellcome.models.index.IdentifiedWorkIndexConfig
 import uk.ac.wellcome.elasticsearch.model.CanonicalId
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.fixtures.TestWith

@@ -6,11 +6,11 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.concurrent.ScalaFutures
 import com.sksamuel.elastic4s.Index
 import org.scalatest.funspec.AnyFunSpec
-import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.Implicits._
+import uk.ac.wellcome.models.index.IndexFixtures
 import uk.ac.wellcome.models.work.generators.{
   GenreGenerators,
   ProductionEventGenerators,
@@ -23,7 +23,7 @@ class AggregationsTest
     extends AnyFunSpec
     with Matchers
     with ScalaFutures
-    with ElasticsearchFixtures
+    with IndexFixtures
     with SubjectGenerators
     with GenreGenerators
     with ProductionEventGenerators

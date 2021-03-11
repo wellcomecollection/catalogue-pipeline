@@ -12,7 +12,7 @@ import uk.ac.wellcome.pipeline_storage.typesafe.{
   PipelineStorageStreamBuilder
 }
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
-import uk.ac.wellcome.elasticsearch.IndexedImageIndexConfig
+import uk.ac.wellcome.models.index.IndexedImageIndexConfig
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal._

@@ -3,7 +3,7 @@ package uk.ac.wellcome.relation_embedder
 import akka.actor.ActorSystem
 import com.sksamuel.elastic4s.Index
 import com.typesafe.config.Config
-import uk.ac.wellcome.elasticsearch.DenormalisedWorkIndexConfig
+import uk.ac.wellcome.models.index.DenormalisedWorkIndexConfig
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}

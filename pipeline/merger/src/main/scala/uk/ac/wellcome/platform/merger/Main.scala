@@ -4,7 +4,7 @@ import scala.concurrent.ExecutionContext
 import akka.actor.ActorSystem
 import com.typesafe.config.Config
 
-import uk.ac.wellcome.elasticsearch.{
+import uk.ac.wellcome.models.index.{
   InitialImageIndexConfig,
   MergedWorkIndexConfig
 }

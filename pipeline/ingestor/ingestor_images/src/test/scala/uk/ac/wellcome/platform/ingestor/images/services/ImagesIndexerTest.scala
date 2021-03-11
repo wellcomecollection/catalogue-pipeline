@@ -3,8 +3,7 @@ package uk.ac.wellcome.platform.ingestor.images.services
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.elasticsearch.IndexedImageIndexConfig
-import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
+import uk.ac.wellcome.models.index.{IndexFixtures, IndexedImageIndexConfig}
 import uk.ac.wellcome.models.work.generators.ImageGenerators
 import uk.ac.wellcome.models.work.internal.{Image, ImageState}
 import uk.ac.wellcome.pipeline_storage.ElasticIndexer
@@ -18,7 +17,7 @@ import scala.concurrent.duration._
 class ImagesIndexerTest
     extends AnyFunSpec
     with Matchers
-    with ElasticsearchFixtures
+    with IndexFixtures
     with ScalaFutures
     with ElasticIndexerFixtures
     with ImageGenerators {

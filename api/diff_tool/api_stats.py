@@ -41,6 +41,16 @@ def get_api_es_url(session):
     return f"{protocol}://{username}:{password}@{host}:{port}"
 
 
+def get_index_name(api_url):
+    """
+    Returns the name of the index used by this API.
+    """
+    search_templates_resp = httpx.get(
+        f"https://{api_url}/catalogue/v2/search-templates.json"
+    )
+    return search_templates_resp.json()["templates"][0]["index"]
+
+
 def get_api_stats(session, *, api_url):
     """
     Returns some index stats about the API, including the index name and a breakdown
@@ -48,10 +58,7 @@ def get_api_stats(session, *, api_url):
     """
     es_url = get_api_es_url(session)
 
-    search_templates_resp = httpx.get(
-        f"https://{api_url}/catalogue/v2/search-templates.json"
-    )
-    index_name = search_templates_resp.json()["templates"][0]["index"]
+    index_name = get_index_name(api_url)
 
     search_resp = httpx.request(
         "GET",

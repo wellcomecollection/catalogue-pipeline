@@ -1,9 +1,8 @@
-package uk.ac.wellcome.elasticsearch
+package uk.ac.wellcome.models.index
 
 import com.sksamuel.elastic4s.ElasticError
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
-import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.ImageGenerators
@@ -14,7 +13,7 @@ import scala.util.Random
 class ImagesIndexConfigTest
     extends AnyFunSpec
     with ImageGenerators
-    with ElasticsearchFixtures
+    with IndexFixtures
     with ScalaFutures {
 
   it("can ingest an image with large image features vectors") {

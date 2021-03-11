@@ -204,6 +204,7 @@ object CatalogueDependencies {
     ExternalDependencies.elasticsearchDependencies ++
       ExternalDependencies.scalacheckDependencies ++
       WellcomeDependencies.fixturesLibrary ++
+      WellcomeDependencies.jsonLibrary ++
       WellcomeDependencies.typesafeLibrary
 
   val flowDependencies: Seq[ModuleID] =
