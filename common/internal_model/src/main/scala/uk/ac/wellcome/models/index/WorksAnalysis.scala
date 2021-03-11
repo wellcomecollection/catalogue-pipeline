@@ -1,4 +1,5 @@
-package uk.ac.wellcome.elasticsearch
+package uk.ac.wellcome.models.index
+
 import com.sksamuel.elastic4s.analysis.{
   Analysis,
   CustomAnalyzer,
@@ -7,7 +8,6 @@ import com.sksamuel.elastic4s.analysis.{
   ShingleTokenFilter,
   StemmerTokenFilter
 }
-import uk.ac.wellcome.elasticsearch.elastic4s.AsciiFoldingTokenFilter
 
 object WorksAnalysis {
   // Analysis

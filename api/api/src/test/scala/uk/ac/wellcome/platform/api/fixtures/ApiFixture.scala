@@ -8,7 +8,7 @@ import com.sksamuel.elastic4s.Index
 import io.circe.parser.parse
 import io.circe.Json
 import org.scalatest.funspec.AnyFunSpec
-import uk.ac.wellcome.elasticsearch.ElasticConfig
+import uk.ac.wellcome.display.ElasticConfig
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.platform.api.Router
 import uk.ac.wellcome.models.index.IndexFixtures

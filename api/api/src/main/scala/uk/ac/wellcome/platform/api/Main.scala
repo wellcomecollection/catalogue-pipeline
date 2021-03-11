@@ -4,7 +4,7 @@ import akka.Done
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import com.typesafe.config.Config
-import uk.ac.wellcome.elasticsearch.ElasticConfig
+import uk.ac.wellcome.display.ElasticConfig
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.platform.api.models.{ApiConfig, QueryConfig}
 import uk.ac.wellcome.platform.api.swagger.SwaggerDocs
