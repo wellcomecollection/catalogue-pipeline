@@ -42,10 +42,10 @@ module "deletion_checker_worker" {
   cpu    = 512
   memory = 1024
 
-  cluster_name            = aws_ecs_cluster.cluster.name
-  cluster_arn             = aws_ecs_cluster.cluster.arn
-  subnets                 = local.private_subnets
-  shared_logging_secrets  = local.shared_logging_secrets
+  cluster_name             = aws_ecs_cluster.cluster.name
+  cluster_arn              = aws_ecs_cluster.cluster.arn
+  subnets                  = local.private_subnets
+  shared_logging_secrets   = local.shared_logging_secrets
   elastic_cloud_vpce_sg_id = local.elastic_cloud_vpce_sg_id
 
   deployment_service_env  = local.release_label
