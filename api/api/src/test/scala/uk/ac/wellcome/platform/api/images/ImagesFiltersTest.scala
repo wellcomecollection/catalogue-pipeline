@@ -2,8 +2,9 @@ package uk.ac.wellcome.platform.api.images
 
 import uk.ac.wellcome.models.work.internal.{Contributor, License, Person}
 import uk.ac.wellcome.models.Implicits._
+import uk.ac.wellcome.models.work.generators.GenreGenerators
 
-class ImagesFiltersTest extends ApiImagesTestBase {
+class ImagesFiltersTest extends ApiImagesTestBase with GenreGenerators {
   describe("filtering images by license") {
     val ccByImage = createLicensedImage(License.CCBY)
     val ccByNcImage = createLicensedImage(License.CCBYNC)
@@ -79,6 +80,74 @@ class ImagesFiltersTest extends ApiImagesTestBase {
             unordered = true) {
             Status.OK -> imagesListResponse(
               List(canonicalMachiavelliImage, canonicalSaidImage))
+          }
+      }
+    }
+  }
+
+  describe("filtering images by source genres") {
+    val carrotCounselling = createGenreWith("Carrot counselling")
+    val dodoDivination = createGenreWith("Dodo divination")
+    val emuEntrepreneurship = createGenreWith("Emu entrepreneurship")
+    val falconFinances = createGenreWith("Falcon finances")
+
+    val carrotCounsellingImage = createImageData.toIndexedImageWith(
+      parentWork = identifiedWork().genres(List(carrotCounselling))
+    )
+    val redirectedDodoDivinationImage = createImageData.toIndexedImageWith(
+      redirectedWork = Some(identifiedWork().genres(List(dodoDivination)))
+    )
+    val emuEntrepreneurShipAndFalconFinancesImage =
+      createImageData.toIndexedImageWith(
+        parentWork =
+          identifiedWork().genres(List(emuEntrepreneurship, falconFinances))
+      )
+
+    val images = List(
+      carrotCounsellingImage,
+      redirectedDodoDivinationImage,
+      emuEntrepreneurShipAndFalconFinancesImage
+    )
+
+    it("filters by genres from the canonical source work") {
+      withImagesApi {
+        case (imagesIndex, routes) =>
+          insertImagesIntoElasticsearch(imagesIndex, images: _*)
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/images?source.genres.label=Carrot%20counselling"
+          ) {
+            Status.OK -> imagesListResponse(List(carrotCounsellingImage))
+          }
+      }
+    }
+
+    it("does not filter by genres from the redirected source work") {
+      withImagesApi {
+        case (imagesIndex, routes) =>
+          insertImagesIntoElasticsearch(imagesIndex, images: _*)
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/images?source.genres.label=Dodo%20divination"
+          ) {
+            Status.OK -> imagesListResponse(Nil)
+          }
+      }
+    }
+
+    it("filters by multiple genres") {
+      withImagesApi {
+        case (imagesIndex, routes) =>
+          insertImagesIntoElasticsearch(imagesIndex, images: _*)
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/images?source.genres.label=Carrot%20counselling,Emu%20entrepreneurship",
+            unordered = true
+          ) {
+            Status.OK -> imagesListResponse(
+              List(
+                carrotCounsellingImage,
+                emuEntrepreneurShipAndFalconFinancesImage))
           }
       }
     }

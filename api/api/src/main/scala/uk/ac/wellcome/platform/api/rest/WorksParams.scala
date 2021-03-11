@@ -223,9 +223,6 @@ object MultipleWorksParams extends QueryParamsUtils {
   implicit val languagesFilter: Decoder[LanguagesFilter] =
     stringListFilter(LanguagesFilter)
 
-  implicit val genreFilter: Decoder[GenreFilter] =
-    stringListFilter(GenreFilter)
-
   implicit val subjectFilter: Decoder[SubjectFilter] =
     stringListFilter(SubjectFilter)
 

@@ -6,7 +6,11 @@ import akka.http.scaladsl.server.{Directive, Directives, ValidationRejection}
 import akka.http.scaladsl.unmarshalling.Unmarshaller
 import com.github.tototoshi.csv.CSVParser
 import io.circe.{Decoder, Json}
-import uk.ac.wellcome.platform.api.models.{ContributorsFilter, LicenseFilter}
+import uk.ac.wellcome.platform.api.models.{
+  ContributorsFilter,
+  GenreFilter,
+  LicenseFilter
+}
 import uk.ac.wellcome.platform.api.rest.MultipleWorksParams.{
   decodeCommaSeparated,
   stringListFilter
@@ -20,6 +24,9 @@ object CommonDecoders {
 
   implicit val contributorsFilter: Decoder[ContributorsFilter] =
     stringListFilter(ContributorsFilter)
+
+  implicit val genreFilter: Decoder[GenreFilter] =
+    stringListFilter(GenreFilter)
 }
 
 trait QueryParamsUtils extends Directives {

@@ -16,6 +16,7 @@ import uk.ac.wellcome.platform.api.elasticsearch.{
 import uk.ac.wellcome.platform.api.models.{
   ColorMustQuery,
   ContributorsFilter,
+  GenreFilter,
   ImageFilter,
   ImageMustQuery,
   ImageSearchOptions,
@@ -91,6 +92,10 @@ class ImagesRequestBuilder(queryConfig: QueryConfig)
           "source.canonicalWork.data.contributors.agent.label.keyword",
           contributorQueries
         )
+      case GenreFilter(genreQueries) =>
+        termsQuery(
+          "source.canonicalWork.data.genres.label.keyword",
+          genreQueries)
     }
 
   def buildImageFilterQuery(filters: Seq[ImageFilter]): Seq[Query] =
