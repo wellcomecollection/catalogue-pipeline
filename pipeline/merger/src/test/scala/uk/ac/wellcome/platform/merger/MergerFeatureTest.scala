@@ -4,7 +4,7 @@ import org.scalatest.GivenWhenThen
 import org.scalatest.featurespec.AnyFeatureSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.generators.SourceWorkGenerators
-import uk.ac.wellcome.models.work.internal.{Format, IdState, Item, MergeCandidate}
+import uk.ac.wellcome.models.work.internal.{Format, IdState, MergeCandidate}
 import uk.ac.wellcome.platform.merger.fixtures.FeatureTestSugar
 import uk.ac.wellcome.platform.merger.services.PlatformMerger
 
@@ -201,13 +201,7 @@ class MergerFeatureTest
         sierraIdentifiedWork()
           .title("A work with physical video formats, e.g. DVD or digibeta")
           .format(Format.Film)
-          .items(
-            List(
-              createIdentifiedItemWith(
-                locations = List(createPhysicalLocation)
-              )
-            )
-          )
+          .items(List(createIdentifiedPhysicalItem))
 
       val workForEbib =
         sierraIdentifiedWork()
@@ -239,14 +233,7 @@ class MergerFeatureTest
               )
             )
           )
-          .items(
-            List(
-              Item(
-                locations = List(createDigitalLocation),
-                title = None
-              )
-            )
-          )
+          .items(List(createDigitalItem))
           .invisible()
 
       When("the works are merged")

@@ -697,13 +697,7 @@ class PlatformMergerTest
       sierraIdentifiedWork()
         .title("A work with physical video formats, e.g. DVD or digibeta")
         .format(Format.Film)
-        .items(
-          List(
-            createIdentifiedItemWith(
-              locations = List(createPhysicalLocation)
-            )
-          )
-        )
+        .items(List(createIdentifiedPhysicalItem))
 
     val workForEbib =
       sierraIdentifiedWork()
@@ -735,14 +729,7 @@ class PlatformMergerTest
             )
           )
         )
-        .items(
-          List(
-            Item(
-              locations = List(createDigitalLocation),
-              title = None
-            )
-          )
-        )
+        .items(List(createDigitalItem))
         .invisible()
 
     val workForFilmReel =
