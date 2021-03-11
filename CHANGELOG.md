@@ -31,3 +31,7 @@ Make `internal_model` depend on `elasticsearch_typesafe`
 ## v3400.2ad7429aff6f680744b83aa63a9de643b6c17455 - 2021-03-11
 
 Bump the index name to 2021-03-09.
+
+## v3410.ab93ed31bbe1e9522de8762cf4973d22fa4ba3d9 - 2021-03-11
+
+Derive typed source contributor agent labels for images

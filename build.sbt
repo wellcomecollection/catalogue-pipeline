@@ -2,7 +2,7 @@ import java.io.File
 import java.util.UUID
 import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider
 
-val projectVersion = "3400.2ad7429aff6f680744b83aa63a9de643b6c17455"
+val projectVersion = "3410.ab93ed31bbe1e9522de8762cf4973d22fa4ba3d9"
 
 def setupProject(
   project: Project,
