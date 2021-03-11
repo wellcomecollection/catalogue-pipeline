@@ -23,7 +23,7 @@ def publish(project_name):
 # when used with the buildkite docker plugin incorrectly parses
 # spaces as newlines preventing passing args to this script!
 if __name__ == "__main__":
-    project = os.environ.get("SBT_PROJECT")
+    project = os.environ.get("PROJECT")
     commit_range = None
     local_head = local_current_head()
 
