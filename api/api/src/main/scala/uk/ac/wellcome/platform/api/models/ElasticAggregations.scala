@@ -9,6 +9,7 @@ import uk.ac.wellcome.models.work.internal.IdState.Minted
 import uk.ac.wellcome.models.work.internal.{
   AbstractAgent,
   Agent,
+  Genre,
   License,
   Meeting,
   Organisation,
