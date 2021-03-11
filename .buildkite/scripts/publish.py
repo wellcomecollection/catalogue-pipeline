@@ -1,6 +1,5 @@
 # -*- encoding: utf-8
 
-import argparse
 import os
 import sys
 
@@ -44,8 +43,8 @@ if __name__ == "__main__":
     # Determine whether we should build this project
 
     sbt_repo = Repository(".sbt_metadata")
-    if not should_run_sbt_project(sbt_repo, args.project_name, changed_paths):
-        print(f"Nothing in this patch affects {args.project_name}, so stopping.")
+    if not should_run_sbt_project(sbt_repo, project, changed_paths):
+        print(f"Nothing in this patch affects {project}, so stopping.")
         sys.exit(0)
 
     publish(project)
