@@ -7,7 +7,7 @@ import uk.ac.wellcome.platform.merger.models.ImageDataWithSource
 
 trait MergerLogging extends Logging {
   def describeWork(work: Work[_]): String =
-    s"(id=${work.sourceIdentifier.value})"
+    s"(id=${work.sourceIdentifier})"
 
   def describeWorks(works: Seq[Work[_]]): String =
     s"[${works.map(describeWork).mkString(",")}]"
