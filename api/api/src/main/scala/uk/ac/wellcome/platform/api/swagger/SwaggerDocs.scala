@@ -78,7 +78,8 @@ trait SingleImageSwagger {
             "withSimilarFeatures",
             "withSimilarColors",
             "source.contributors",
-            "source.languages")
+            "source.languages",
+            "source.genres")
         ),
         required = false
       )
@@ -246,7 +247,11 @@ trait MultipleImagesSwagger {
         in = ParameterIn.QUERY,
         description = "A comma-separated list of extra fields to include",
         schema = new Schema(
-          allowableValues = Array("source.contributors", "source.languages")
+          allowableValues = Array(
+            "source.contributors",
+            "source.languages",
+            "source.genres"
+          )
         )
       ),
       new Parameter(

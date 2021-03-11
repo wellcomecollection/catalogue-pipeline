@@ -25,6 +25,7 @@ object SingleImageParams extends QueryParamsUtils {
       "withSimilarColors" -> ImageInclude.WithSimilarColors,
       "source.contributors" -> ImageInclude.SourceContributors,
       "source.languages" -> ImageInclude.SourceLanguages,
+      "source.genres" -> ImageInclude.SourceGenres,
     ).emap(values => Right(SingleImageIncludes(values: _*)))
 }
 
@@ -86,6 +87,7 @@ object MultipleImagesParams extends QueryParamsUtils {
     decodeOneOfCommaSeparated(
       "source.contributors" -> ImageInclude.SourceContributors,
       "source.languages" -> ImageInclude.SourceLanguages,
+      "source.genres" -> ImageInclude.SourceGenres,
     ).emap(values => Right(MultipleImagesIncludes(values: _*)))
 
   implicit val aggregationsDecoder: Decoder[List[ImageAggregationRequest]] =
