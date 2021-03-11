@@ -255,7 +255,10 @@ trait MultipleImagesSwagger {
         description =
           "What aggregated data in correlation to the results should we return.",
         schema = new Schema(
-          allowableValues = Array("locations.license")
+          allowableValues = Array(
+            "locations.license",
+            "source.contributors.agent.label"
+          )
         ),
         required = false
       ),

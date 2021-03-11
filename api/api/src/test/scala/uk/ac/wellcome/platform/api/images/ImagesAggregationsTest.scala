@@ -54,4 +54,77 @@ class ImagesAggregationsTest extends ApiImagesTestBase {
         }
     }
   }
+
+  it("aggregates by the canonical source's contributor agent labels") {
+    val carrots = Agent("carrots")
+    val parrots = Organisation("parrots")
+    val parrotsMeeting = Meeting("parrots")
+    val rats = Person("rats")
+
+    val images = List(
+      createImageData.toIndexedImageWith(
+        parentWork = identifiedWork().contributors(
+          List(carrots).map(Contributor(_, roles = Nil)))
+      ),
+      createImageData.toIndexedImageWith(
+        parentWork = identifiedWork().contributors(
+          List(carrots, parrots).map(Contributor(_, roles = Nil))),
+        redirectedWork = Some(
+          identifiedWork().contributors(
+            List(parrots, parrotsMeeting).map(Contributor(_, roles = Nil))))
+      ),
+      createImageData.toIndexedImageWith(
+        parentWork = identifiedWork().contributors(
+          List(carrots, parrotsMeeting).map(Contributor(_, roles = Nil))),
+        redirectedWork = Some(
+          identifiedWork().contributors(
+            List(rats).map(Contributor(_, roles = Nil))))
+      )
+    )
+
+    withImagesApi {
+      case (imagesIndex, routes) =>
+        insertImagesIntoElasticsearch(imagesIndex, images: _*)
+
+        assertJsonResponse(
+          routes,
+          s"/$apiPrefix/images?aggregations=source.contributors.agent.label"
+        ) {
+          Status.OK -> s"""
+            {
+              ${resultList(apiPrefix, totalResults = images.size)},
+              "aggregations": {
+                "type" : "Aggregations",
+                "source.contributors.agent.label": {
+                  "type" : "Aggregation",
+                  "buckets": [
+                    {
+                      "data": ${abstractAgent(carrots)},
+                      "count": 3,
+                      "type": "AggregationBucket"
+                    },
+                    {
+                      "data": ${abstractAgent(parrotsMeeting)},
+                      "count": 1,
+                      "type": "AggregationBucket"
+                    },
+                    {
+                      "data": ${abstractAgent(parrots)},
+                      "count": 1,
+                      "type": "AggregationBucket"
+                    }
+                  ]
+                }
+              },
+              "results": [
+                ${images
+            .sortBy { _.state.canonicalId }
+            .map(imageResponse)
+            .mkString(",")}
+              ]
+            }
+          """
+        }
+    }
+  }
 }

@@ -60,7 +60,9 @@ object Place {
     Place(trimTrailing(label, ':'))
 }
 
-sealed trait AbstractAgent[+State] extends AbstractRootConcept[State]
+sealed trait AbstractAgent[+State] extends AbstractRootConcept[State] {
+  def typedLabel: String = s"${this.getClass.getSimpleName}:$label"
+}
 
 case class Agent[+State](
   id: State,

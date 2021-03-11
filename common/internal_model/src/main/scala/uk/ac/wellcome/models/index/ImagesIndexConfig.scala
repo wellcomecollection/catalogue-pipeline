@@ -87,7 +87,11 @@ object IndexedImageIndexConfig extends IndexConfig with IndexConfigFields {
       canonicalId,
       sourceIdentifier,
       inferredData,
-      objectField("derivedData").dynamic("false")
+      objectField("derivedData")
+        .fields(
+          keywordField("sourceContributorAgents")
+        )
+        .dynamic("false")
     )
 
   val fields = Seq(

@@ -4,9 +4,10 @@ import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s._
 import com.sksamuel.elastic4s.requests.searches._
 import com.sksamuel.elastic4s.requests.searches.aggs.TermsAggregation
-import com.sksamuel.elastic4s.requests.searches.queries.{BoolQuery, Query}
+import com.sksamuel.elastic4s.requests.searches.queries.Query
 import com.sksamuel.elastic4s.requests.searches.sort._
 import uk.ac.wellcome.display.models.ImageAggregationRequest
+import uk.ac.wellcome.models.work.internal.License
 import uk.ac.wellcome.platform.api.elasticsearch.{
   ColorQuery,
   ImageSimilarity,
@@ -64,8 +65,13 @@ class ImagesRequestBuilder(queryConfig: QueryConfig)
   private def toAggregation(aggReq: ImageAggregationRequest) = aggReq match {
     case ImageAggregationRequest.License =>
       TermsAggregation("license")
-        .size(100)
+        .size(License.values.size)
         .field("locations.license.id")
+        .minDocCount(0)
+    case ImageAggregationRequest.SourceContributorAgents =>
+      TermsAggregation("sourceContributorAgents")
+        .size(20)
+        .field("state.derivedData.sourceContributorAgents")
         .minDocCount(0)
   }
 
@@ -81,17 +87,11 @@ class ImagesRequestBuilder(queryConfig: QueryConfig)
       case LicenseFilter(licenseIds) =>
         termsQuery(field = "locations.license.id", values = licenseIds)
       case ContributorsFilter(contributorQueries) =>
-        sourcesTermsQuery(
-          "data.contributors.agent.label.keyword",
-          contributorQueries)
+        termsQuery(
+          "source.canonicalWork.data.contributors.agent.label.keyword",
+          contributorQueries
+        )
     }
-
-  def sourcesTermsQuery[T](sourceField: String,
-                           values: Iterable[T]): BoolQuery =
-    should(
-      termsQuery(s"source.canonicalWork.$sourceField", values),
-      termsQuery(s"source.redirectedWork.$sourceField", values)
-    )
 
   def buildImageFilterQuery(filters: Seq[ImageFilter]): Seq[Query] =
     filters.map { buildImageFilterQuery }
