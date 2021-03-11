@@ -1,10 +1,12 @@
 module "id_minter_queue" {
   source     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
   queue_name = "${local.namespace_hyphen}_id_minter"
-  topic_arns = [module.calm_transformer_output_topic.arn,
+  topic_arns = [
+    module.calm_transformer_output_topic.arn,
     module.mets_transformer_output_topic.arn,
     module.miro_transformer_output_topic.arn,
-  module.sierra_transformer_output_topic.arn, ]
+    module.sierra_transformer_output_topic.arn,
+  ]
   aws_region                 = var.aws_region
   alarm_topic_arn            = var.dlq_alarm_arn
   visibility_timeout_seconds = 120
@@ -16,11 +18,13 @@ module "id_minter" {
   container_image = local.id_minter_image
 
   security_group_ids = [
+    # TODO: Do we need egress/interservice groups?
     aws_security_group.service_egress.id,
     aws_security_group.interservice.id,
     var.rds_ids_access_security_group_id,
-    var.pipeline_storage_security_group_id,
   ]
+
+  elastic_cloud_vpce_sg_id = var.ec_privatelink_security_group_id
 
   cluster_name = aws_ecs_cluster.cluster.name
   cluster_arn  = aws_ecs_cluster.cluster.id

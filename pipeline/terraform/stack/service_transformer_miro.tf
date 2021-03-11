@@ -11,10 +11,12 @@ module "miro_transformer" {
   service_name    = "${local.namespace_hyphen}_miro_transformer"
   container_image = local.transformer_miro_image
   security_group_ids = [
+    # TODO: Do we need any of these?
     aws_security_group.service_egress.id,
     aws_security_group.interservice.id,
-    var.pipeline_storage_security_group_id,
   ]
+
+  elastic_cloud_vpce_sg_id = var.ec_privatelink_security_group_id
 
   cluster_name = aws_ecs_cluster.cluster.name
   cluster_arn  = aws_ecs_cluster.cluster.arn

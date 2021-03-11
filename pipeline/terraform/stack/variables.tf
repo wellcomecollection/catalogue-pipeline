@@ -34,7 +34,7 @@ variable "is_reindexing" {
 }
 
 variable "rds_ids_access_security_group_id" {}
-variable "pipeline_storage_security_group_id" {
+variable "ec_privatelink_security_group_id" {
   type = string
 }
 
