@@ -7,7 +7,7 @@ import uk.ac.wellcome.models.work.internal.WorkState.Identified
 
 trait FeatureTestSugar {
   implicit class OutcomeOps(val mergerOutcome: MergerOutcome) {
-    def getMerged(originalWork: Work.Visible[Identified]): Work[Identified] =
+    def getMerged(originalWork: Work[Identified]): Work[Identified] =
       mergerOutcome.resultWorks
         .find(_.sourceIdentifier == originalWork.sourceIdentifier)
         .get
