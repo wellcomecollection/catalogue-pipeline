@@ -748,16 +748,21 @@ class PlatformMergerTest
         )
         .format(Format.Videos)
 
-    val sierraWorks = List(workWithPhysicalVideoFormats, workForEbib, workForFilmReel)
+    val sierraWorks =
+      List(workWithPhysicalVideoFormats, workForEbib, workForFilmReel)
     val works = sierraWorks :+ workForMets
 
     val result = merger.merge(works).mergedWorksWithTime(now)
 
     val visibleWorks = result
       .collect { case w: Work.Visible[_] => w }
-      .map { w => w.id -> w }
+      .map { w =>
+        w.id -> w
+      }
       .toMap
-    val redirectedWorks = result.collect { case w: Work.Redirected[Merged] => w }
+    val redirectedWorks = result.collect {
+      case w: Work.Redirected[Merged] => w
+    }
     val invisibleWorks = result.collect { case w: Work.Invisible[Merged] => w }
 
     // First check that the METS work got redirected into one of the Sierra works

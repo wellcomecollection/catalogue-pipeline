@@ -212,7 +212,8 @@ class MergerFeatureTest
               MergeCandidate(
                 id = IdState.Identified(
                   canonicalId = workWithPhysicalVideoFormats.id,
-                  sourceIdentifier = workWithPhysicalVideoFormats.sourceIdentifier
+                  sourceIdentifier =
+                    workWithPhysicalVideoFormats.sourceIdentifier
                 ),
                 reason = Some("Physical/digitised Sierra work")
               )
