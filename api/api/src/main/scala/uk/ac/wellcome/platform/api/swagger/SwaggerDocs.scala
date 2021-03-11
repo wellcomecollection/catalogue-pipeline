@@ -268,7 +268,8 @@ trait MultipleImagesSwagger {
         schema = new Schema(
           allowableValues = Array(
             "locations.license",
-            "source.contributors.agent.label"
+            "source.contributors.agent.label",
+            "source.genres.label"
           )
         ),
         required = false

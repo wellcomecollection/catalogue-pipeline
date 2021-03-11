@@ -75,11 +75,6 @@ object WorkAggregations extends ElasticAggregations {
       }
     }
 
-  implicit val decodeGenreFromLabel: Decoder[Genre[Minted]] =
-    Decoder.decodeString.map { str =>
-      Genre(label = str)
-    }
-
   implicit val decodeSubjectFromLabel: Decoder[Subject[Minted]] =
     Decoder.decodeString.map { str =>
       Subject(label = str, concepts = Nil)

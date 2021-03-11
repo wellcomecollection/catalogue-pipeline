@@ -9,6 +9,7 @@ import uk.ac.wellcome.models.work.internal.IdState.Minted
 import uk.ac.wellcome.models.work.internal.{
   AbstractAgent,
   Agent,
+  Genre,
   License,
   Meeting,
   Organisation,
@@ -34,6 +35,11 @@ trait ElasticAggregations extends Logging {
         case "Meeting"      => Right(Meeting(label = label))
         case ontologyType   => Left(s"Illegal agent type: $ontologyType")
       }
+    }
+
+  implicit val decodeGenreFromLabel: Decoder[Genre[Minted]] =
+    Decoder.decodeString.map { str =>
+      Genre(label = str)
     }
 
   implicit class ThrowableEitherOps[T](either: Either[Throwable, T]) {

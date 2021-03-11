@@ -74,6 +74,11 @@ class ImagesRequestBuilder(queryConfig: QueryConfig)
         .size(20)
         .field("state.derivedData.sourceContributorAgents")
         .minDocCount(0)
+    case ImageAggregationRequest.SourceGenres =>
+      TermsAggregation("sourceGenres")
+        .size(20)
+        .field("source.canonicalWork.data.genres.label.keyword")
+        .minDocCount(0)
   }
 
   def sortBy(searchOptions: ImageSearchOptions): Seq[Sort] =
