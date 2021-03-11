@@ -26,4 +26,6 @@ module "worker" {
   namespace_id           = aws_service_discovery_private_dns_namespace.namespace.id
   subnets                = local.private_subnets
   shared_logging_secrets = data.terraform_remote_state.shared_infra.outputs.shared_secrets_logging
+
+  elastic_cloud_vpce_sg_id = data.terraform_remote_state.shared_infra.outputs.ec_platform_privatelink_sg_id
 }

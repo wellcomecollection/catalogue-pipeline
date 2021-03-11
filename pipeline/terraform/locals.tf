@@ -42,8 +42,10 @@ locals {
   rds_cluster_id               = local.infra_critical.rds_cluster_id
   rds_subnet_group_name        = local.infra_critical.rds_subnet_group_name
 
-  pipeline_storage_security_group_id = local.infra_critical["catalogue_pipeline_storage_elastic_cloud_sg_id"]
+  shared_infra = data.terraform_remote_state.shared_infra.outputs
 
-  traffic_filter_platform_vpce_id   = local.infra_critical["traffic_filter_platform_vpce_id"]
-  traffic_filter_public_internet_id = local.infra_critical["traffic_filter_public_internet_id"]
+  ec_platform_privatelink_security_group_id = local.shared_infra["ec_platform_privatelink_sg_id"]
+
+  traffic_filter_platform_vpce_id   = local.shared_infra["ec_platform_privatelink_traffic_filter_id"]
+  traffic_filter_public_internet_id = local.shared_infra["ec_public_internet_traffic_filter_id"]
 }

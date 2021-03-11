@@ -27,6 +27,7 @@ module "holdings_reader" {
 
   service_egress_security_group_id = var.egress_security_group_id
   interservice_security_group_id   = var.interservice_security_group_id
+  elastic_cloud_vpce_sg_id         = var.elastic_cloud_vpce_sg_id
 
   deployment_service_env  = var.deployment_env
   deployment_service_name = "holdings-reader"
@@ -54,6 +55,7 @@ module "holdings_linker" {
 
   service_egress_security_group_id = var.egress_security_group_id
   interservice_security_group_id   = var.interservice_security_group_id
+  elastic_cloud_vpce_sg_id         = var.elastic_cloud_vpce_sg_id
 
   deployment_service_env  = var.deployment_env
   deployment_service_name = "holdings-linker"
@@ -84,6 +86,7 @@ module "holdings_merger" {
 
   service_egress_security_group_id = var.egress_security_group_id
   interservice_security_group_id   = var.interservice_security_group_id
+  elastic_cloud_vpce_sg_id         = var.elastic_cloud_vpce_sg_id
 
   deployment_service_env  = var.deployment_env
   deployment_service_name = "holdings-merger"

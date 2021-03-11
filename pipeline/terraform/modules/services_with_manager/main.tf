@@ -15,7 +15,8 @@ module "worker" {
 
   desired_task_count = var.desired_task_count
 
-  security_group_ids = var.security_group_ids
+  security_group_ids       = var.security_group_ids
+  elastic_cloud_vpce_sg_id = var.elastic_cloud_vpce_sg_id
 
   apps = var.apps
 

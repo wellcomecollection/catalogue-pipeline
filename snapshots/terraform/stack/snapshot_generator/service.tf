@@ -28,9 +28,10 @@ module "snapshot_generator" {
   cluster_arn  = var.cluster_arn
 
   security_group_ids = [
-    var.elastic_cloud_vpce_sg_id,
+    # TODO: Do we need this egress security group?
     aws_security_group.egress.id,
   ]
+  elastic_cloud_vpce_sg_id = var.elastic_cloud_vpce_sg_id
 
   min_capacity = 0
   max_capacity = 1

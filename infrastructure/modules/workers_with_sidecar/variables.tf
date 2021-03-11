@@ -58,6 +58,10 @@ variable "security_group_ids" {
   default = []
 }
 
+variable "elastic_cloud_vpce_sg_id" {
+  type = string
+}
+
 variable "apps" {
   type = map(object({
     image           = string,

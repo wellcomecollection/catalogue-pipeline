@@ -91,6 +91,10 @@ variable "security_group_ids" {
   default = []
 }
 
+variable "elastic_cloud_vpce_sg_id" {
+  type = string
+}
+
 variable "deployment_service_name" {
   type        = string
   description = "Used by weco-deploy to determine which services to deploy, if unset the value used will be var.name"

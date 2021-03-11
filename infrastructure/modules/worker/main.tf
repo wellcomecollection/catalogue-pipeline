@@ -4,7 +4,7 @@ locals {
 }
 
 module "service" {
-  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/service?ref=v3.3.1"
+  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/service?ref=v3.4.0"
 
   task_definition_arn            = module.task_definition.arn
   service_name                   = var.name
@@ -13,10 +13,16 @@ module "service" {
   service_discovery_namespace_id = var.namespace_id
   launch_type                    = var.launch_type
   desired_task_count             = var.desired_task_count
-  security_group_ids             = var.security_group_ids
   use_fargate_spot               = var.use_fargate_spot
   capacity_provider_strategies   = var.capacity_provider_strategies
   ordered_placement_strategies   = var.ordered_placement_strategies
+
+  # We need to append the Elastic Cloud VPC endpoint security group so
+  # that our services can talk to the logging cluster.
+  security_group_ids = concat(
+    var.security_group_ids,
+    [var.elastic_cloud_vpce_sg_id]
+  )
 
   propagate_tags = "SERVICE"
 
@@ -25,7 +31,7 @@ module "service" {
 }
 
 module "autoscaling" {
-  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/autoscaling?ref=v3.3.1"
+  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/autoscaling?ref=v3.4.0"
 
   name = var.name
 
@@ -37,7 +43,7 @@ module "autoscaling" {
 }
 
 module "task_definition" {
-  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/task_definition?ref=v3.3.1"
+  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/task_definition?ref=v3.4.0"
 
   cpu    = var.cpu
   memory = var.memory
@@ -52,7 +58,7 @@ module "task_definition" {
 }
 
 module "app_container" {
-  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/container_definition?ref=v3.3.1"
+  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/container_definition?ref=v3.4.0"
 
   name  = var.name
   image = var.image
@@ -64,18 +70,20 @@ module "app_container" {
 }
 
 module "app_permissions" {
-  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/secrets?ref=v3.3.1"
+  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/secrets?ref=v3.4.0"
   secrets   = var.secret_env_vars
   role_name = module.task_definition.task_execution_role_name
 }
 
 module "log_router_container" {
-  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/firelens?ref=v3.3.1"
+  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/firelens?ref=v3.4.0"
   namespace = var.name
+
+  use_privatelink_endpoint = true
 }
 
 module "log_router_permissions" {
-  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/secrets?ref=v3.3.1"
+  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/secrets?ref=v3.4.0"
   secrets   = var.shared_logging_secrets
   role_name = module.task_definition.task_execution_role_name
 }

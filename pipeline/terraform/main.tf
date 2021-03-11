@@ -46,8 +46,8 @@ module "catalogue_pipeline_2021-03-09" {
   rds_subnet_group_name = local.rds_subnet_group_name
 
   # Security groups
-  rds_ids_access_security_group_id   = local.rds_access_security_group_id
-  pipeline_storage_security_group_id = local.pipeline_storage_security_group_id
+  rds_ids_access_security_group_id = local.rds_access_security_group_id
+  ec_privatelink_security_group_id = local.ec_platform_privatelink_security_group_id
 
   traffic_filter_platform_vpce_id   = local.traffic_filter_platform_vpce_id
   traffic_filter_public_internet_id = local.traffic_filter_public_internet_id
@@ -114,8 +114,8 @@ module "catalogue_pipeline_2021-03-05" {
   rds_subnet_group_name = local.rds_subnet_group_name
 
   # Security groups
-  rds_ids_access_security_group_id   = local.rds_access_security_group_id
-  pipeline_storage_security_group_id = local.pipeline_storage_security_group_id
+  rds_ids_access_security_group_id = local.rds_access_security_group_id
+  ec_privatelink_security_group_id = local.ec_platform_privatelink_security_group_id
 
   traffic_filter_platform_vpce_id   = local.traffic_filter_platform_vpce_id
   traffic_filter_public_internet_id = local.traffic_filter_public_internet_id

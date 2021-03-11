@@ -8,7 +8,12 @@ module "service" {
 
   image = var.reindex_worker_container_image
 
-  security_group_ids = [var.service_egress_security_group_id]
+  security_group_ids = [
+    # TODO: Does the reindexer still need an egress security group?
+    var.service_egress_security_group_id,
+  ]
+
+  elastic_cloud_vpce_sg_id = var.elastic_cloud_vpce_sg_id
 
   cpu    = 1024
   memory = 2048
