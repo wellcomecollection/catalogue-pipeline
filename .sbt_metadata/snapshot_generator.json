@@ -3,7 +3,6 @@
   "folder" : "snapshots/snapshot_generator",
   "dependencyIds" : [
     "internal_model",
-    "display",
-    "elasticsearch_typesafe"
+    "display"
   ]
 }
