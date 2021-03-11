@@ -5,24 +5,13 @@ import com.sksamuel.elastic4s.{Index, Response}
 import com.sksamuel.elastic4s.requests.get.GetResponse
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
 import org.scalatest.{Assertion, EitherValues}
-import uk.ac.wellcome.elasticsearch.{
-  IndexConfig,
-  IndexConfigFields,
-  NoStrictMapping,
-  WorksAnalysis
-}
+import uk.ac.wellcome.elasticsearch.{IndexConfig, NoStrictMapping}
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil.toJson
-import uk.ac.wellcome.pipeline_storage.fixtures.{
-  SampleDocument,
-  SampleDocumentData
-}
-import uk.ac.wellcome.pipeline_storage.{
-  ElasticIndexer,
-  Indexer,
-  IndexerTestCases
-}
+import uk.ac.wellcome.models.index.{IndexConfigFields, WorksAnalysis}
+import uk.ac.wellcome.pipeline_storage.fixtures.{SampleDocument, SampleDocumentData}
+import uk.ac.wellcome.pipeline_storage.{ElasticIndexer, Indexer, IndexerTestCases}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
