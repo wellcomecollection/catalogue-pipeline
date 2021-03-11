@@ -3,7 +3,7 @@ package uk.ac.wellcome.platform.ingestor.works
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
-import uk.ac.wellcome.elasticsearch.IndexedWorkIndexConfig
+import uk.ac.wellcome.models.index.IndexedWorkIndexConfig
 import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.work.internal._

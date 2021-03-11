@@ -6,7 +6,7 @@ import uk.ac.wellcome.models.work.internal._
 
 case class ImageAggregations(
   license: Option[Aggregation[License]] = None,
-  sourceContributors: Option[Aggregation[Contributor[Minted]]] = None,
+  sourceContributorAgents: Option[Aggregation[AbstractAgent[Minted]]] = None,
   sourceGenres: Option[Aggregation[Genre[Minted]]] = None
 )
 
@@ -17,8 +17,8 @@ object ImageAggregations extends ElasticAggregations {
       Some(
         ImageAggregations(
           license = e4sAggregations.decodeAgg[License]("license"),
-          sourceContributors = e4sAggregations.decodeAgg[Contributor[Minted]](
-            "sourceContributors"),
+          sourceContributorAgents = e4sAggregations
+            .decodeAgg[AbstractAgent[Minted]]("sourceContributorAgents"),
           sourceGenres =
             e4sAggregations.decodeAgg[Genre[Minted]]("sourceGenres")
         ))

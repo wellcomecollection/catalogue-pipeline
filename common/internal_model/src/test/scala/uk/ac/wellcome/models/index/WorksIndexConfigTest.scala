@@ -1,6 +1,4 @@
-package uk.ac.wellcome.elasticsearch
-
-import java.time.Instant
+package uk.ac.wellcome.models.index
 
 import org.scalacheck.ScalacheckShapeless._
 import com.sksamuel.elastic4s.ElasticError
@@ -12,17 +10,17 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import io.circe.Encoder
 import io.circe.generic.semiauto.deriveEncoder
-
-import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.{ImageGenerators, WorkGenerators}
+import uk.ac.wellcome.models.work.internal.WorkState.Identified
 import uk.ac.wellcome.models.work.internal._
-import WorkState.Identified
+
+import java.time.Instant
 
 class WorksIndexConfigTest
     extends AnyFunSpec
-    with ElasticsearchFixtures
+    with IndexFixtures
     with ScalaFutures
     with Eventually
     with Matchers
@@ -31,6 +29,10 @@ class WorksIndexConfigTest
     with WorkGenerators
     with ImageGenerators {
 
+  case class BadTestObject(
+    id: String,
+    weight: Int
+  )
   // On failure, scalacheck tries to shrink to the smallest input that causes a failure.
   // With IdentifiedWork, that means that it never actually completes.
   implicit val noShrink = Shrink.shrinkAny[Work[Identified]]

@@ -57,24 +57,29 @@ class ImagesAggregationsTest extends ApiImagesTestBase with GenreGenerators {
   }
 
   it("aggregates by the canonical source's contributor agent labels") {
-    val carrots = Contributor(agent = Agent("carrots"), roles = Nil)
-    val parrots = Contributor(agent = Organisation("parrots"), roles = Nil)
-    val parrotsMeeting = Contributor(agent = Meeting("parrots"), roles = Nil)
-    val rats = Contributor(agent = Person("rats"), roles = Nil)
+    val carrots = Agent("carrots")
+    val parrots = Organisation("parrots")
+    val parrotsMeeting = Meeting("parrots")
+    val rats = Person("rats")
 
     val images = List(
       createImageData.toIndexedImageWith(
-        parentWork = identifiedWork().contributors(List(carrots))
+        parentWork = identifiedWork().contributors(
+          List(carrots).map(Contributor(_, roles = Nil)))
       ),
       createImageData.toIndexedImageWith(
-        parentWork = identifiedWork().contributors(List(carrots, parrots)),
-        redirectedWork =
-          Some(identifiedWork().contributors(List(parrots, parrotsMeeting)))
+        parentWork = identifiedWork().contributors(
+          List(carrots, parrots).map(Contributor(_, roles = Nil))),
+        redirectedWork = Some(
+          identifiedWork().contributors(
+            List(parrots, parrotsMeeting).map(Contributor(_, roles = Nil))))
       ),
       createImageData.toIndexedImageWith(
-        parentWork =
-          identifiedWork().contributors(List(carrots, parrotsMeeting)),
-        redirectedWork = Some(identifiedWork().contributors(List(rats)))
+        parentWork = identifiedWork().contributors(
+          List(carrots, parrotsMeeting).map(Contributor(_, roles = Nil))),
+        redirectedWork = Some(
+          identifiedWork().contributors(
+            List(rats).map(Contributor(_, roles = Nil))))
       )
     )
 
@@ -95,17 +100,17 @@ class ImagesAggregationsTest extends ApiImagesTestBase with GenreGenerators {
                   "type" : "Aggregation",
                   "buckets": [
                     {
-                      "data": ${contributor(carrots)},
+                      "data": ${abstractAgent(carrots)},
                       "count": 3,
                       "type": "AggregationBucket"
                     },
                     {
-                      "data": ${contributor(parrotsMeeting)},
+                      "data": ${abstractAgent(parrotsMeeting)},
                       "count": 1,
                       "type": "AggregationBucket"
                     },
                     {
-                      "data": ${contributor(parrots)},
+                      "data": ${abstractAgent(parrots)},
                       "count": 1,
                       "type": "AggregationBucket"
                     }

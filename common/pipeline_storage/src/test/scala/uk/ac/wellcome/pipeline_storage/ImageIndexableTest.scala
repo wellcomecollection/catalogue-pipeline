@@ -5,8 +5,7 @@ import org.scalatest.Assertion
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.elasticsearch.IndexedImageIndexConfig
-import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
+import uk.ac.wellcome.models.index.{IndexFixtures, IndexedImageIndexConfig}
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.{
@@ -25,7 +24,7 @@ class ImageIndexableTest
     extends AnyFunSpec
     with ScalaFutures
     with Matchers
-    with ElasticsearchFixtures
+    with IndexFixtures
     with ElasticIndexerFixtures
     with ImageGenerators
     with WorkGenerators

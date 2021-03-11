@@ -24,7 +24,7 @@ import uk.ac.wellcome.pipeline_storage.typesafe.{
 }
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.elasticsearch.IdentifiedWorkIndexConfig
+import uk.ac.wellcome.models.index.IdentifiedWorkIndexConfig
 import WorkState.Identified
 
 object Main extends WellcomeTypesafeApp {

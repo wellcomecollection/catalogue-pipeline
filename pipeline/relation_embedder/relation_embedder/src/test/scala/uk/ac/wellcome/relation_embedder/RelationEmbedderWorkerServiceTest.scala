@@ -11,7 +11,6 @@ import org.scalatest.matchers.should.Matchers
 import akka.NotUsed
 import akka.stream.scaladsl.Source
 import uk.ac.wellcome.akka.fixtures.Akka
-import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
@@ -22,6 +21,7 @@ import uk.ac.wellcome.models.work.internal.WorkState.{Denormalised, Merged}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.pipeline_storage.MemoryIndexer
 import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.models.index.IndexFixtures
 import uk.ac.wellcome.relation_embedder.fixtures.RelationGenerators
 
 class RelationEmbedderWorkerServiceTest
@@ -30,7 +30,7 @@ class RelationEmbedderWorkerServiceTest
     with SQS
     with Akka
     with Eventually
-    with ElasticsearchFixtures
+    with IndexFixtures
     with RelationGenerators {
 
   def storeWorks(index: Index, works: List[Work[Merged]] = works): Assertion =

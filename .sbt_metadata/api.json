@@ -2,9 +2,6 @@
   "id" : "api",
   "folder" : "api/api",
   "dependencyIds" : [
-    "internal_model",
-    "display",
-    "elasticsearch",
-    "elasticsearch_typesafe"
+    "display"
   ]
 }

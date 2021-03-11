@@ -2,6 +2,6 @@
   "id" : "pipeline_storage",
   "folder" : "common/pipeline_storage",
   "dependencyIds" : [
-    "elasticsearch_typesafe"
+    "internal_model"
   ]
 }

@@ -11,14 +11,11 @@ import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.elasticsearch.ElasticConfig
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.platform.api.Router
-import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
+import uk.ac.wellcome.models.index.IndexFixtures
 import uk.ac.wellcome.platform.api.models.{ApiConfig, QueryConfig}
 import uk.ac.wellcome.platform.api.swagger.SwaggerDocs
 
-trait ApiFixture
-    extends AnyFunSpec
-    with ScalatestRouteTest
-    with ElasticsearchFixtures {
+trait ApiFixture extends AnyFunSpec with ScalatestRouteTest with IndexFixtures {
 
   val Status = akka.http.scaladsl.model.StatusCodes
 
