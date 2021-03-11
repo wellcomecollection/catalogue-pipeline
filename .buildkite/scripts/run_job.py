@@ -74,7 +74,7 @@ if __name__ == "__main__":
     local_head = local_current_head()
 
     if is_default_branch():
-        latest_sha = get_sha1_for_tag("latest-sbt-release")
+        latest_sha = get_sha1_for_tag("latest")
         commit_range = f"{latest_sha}..{local_head}"
     else:
         remote_head = remote_default_head()

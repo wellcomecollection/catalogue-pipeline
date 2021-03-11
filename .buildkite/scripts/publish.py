@@ -29,7 +29,7 @@ if __name__ == "__main__":
     local_head = local_current_head()
 
     if is_default_branch():
-        latest_sha = get_sha1_for_tag("latest-sbt-release")
+        latest_sha = get_sha1_for_tag("latest")
         commit_range = f"{latest_sha}..{local_head}"
     else:
         remote_head = remote_default_head()
@@ -39,34 +39,13 @@ if __name__ == "__main__":
     print(f"On default branch: {is_default_branch()}")
     print(f"Commit range: {commit_range}")
 
-    # Parse script args
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("project_name", default=project)
-    parser.add_argument("--changes-in", nargs="*")
-    args = parser.parse_args()
-
-    # Get changed_paths
-
-    if args.changes_in:
-        change_globs = args.changes_in + [".buildkite/pipeline.yml"]
-    else:
-        change_globs = None
-
-    changed_paths = get_changed_paths(commit_range, globs=change_globs)
+    changed_paths = get_changed_paths(commit_range, globs=None)
 
     # Determine whether we should build this project
 
     sbt_repo = Repository(".sbt_metadata")
-    try:
-        if not should_run_sbt_project(sbt_repo, args.project_name, changed_paths):
-            print(f"Nothing in this patch affects {args.project_name}, so stopping.")
-            sys.exit(0)
-    except (FileNotFoundError, KeyError):
-        if args.changes_in and not changed_paths:
-            print(
-                f"Nothing in this patch affects the files {args.changes_in}, so stopping."
-            )
-            sys.exit(0)
+    if not should_run_sbt_project(sbt_repo, args.project_name, changed_paths):
+        print(f"Nothing in this patch affects {args.project_name}, so stopping.")
+        sys.exit(0)
 
     publish(project)
