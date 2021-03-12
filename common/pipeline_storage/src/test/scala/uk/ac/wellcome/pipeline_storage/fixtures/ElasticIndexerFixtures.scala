@@ -12,7 +12,7 @@ import uk.ac.wellcome.elasticsearch.{IndexConfig, NoStrictMapping}
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.pipeline_storage.{ElasticIndexer, Indexable}
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.elasticsearch.model.CanonicalId
+import uk.ac.wellcome.elasticsearch.model.IndexId
 
 case class SampleDocument(version: Int,
                           canonicalId: String,
@@ -30,7 +30,7 @@ object SampleDocument {
     def id(document: SampleDocument): String = document.canonicalId
   }
 
-  implicit val canonicalId: CanonicalId[SampleDocument] =
+  implicit val canonicalId: IndexId[SampleDocument] =
     (doc: SampleDocument) => doc.canonicalId
 
   implicit val encoder: Encoder[SampleDocument] = deriveEncoder
@@ -51,7 +51,7 @@ trait ElasticIndexerFixtures extends ElasticsearchFixtures with Akka {
     testWith(new ElasticIndexer[T](esClient, idx, config))
 
   implicit def canonicalId[T](
-    implicit indexable: Indexable[T]): CanonicalId[T] =
+    implicit indexable: Indexable[T]): IndexId[T] =
     (doc: T) => indexable.id(doc)
 
   def ingestInOrder[T](indexer: ElasticIndexer[T])(documents: T*)(
