@@ -69,7 +69,7 @@ class ElasticIndexerTest
 
     eventually {
       val response: Response[GetResponse] = elasticClient.execute {
-        get(index, canonicalId.canonicalId(doc))
+        get(index, canonicalId.indexId(doc))
       }.await
 
       val getResponse = response.result
@@ -223,7 +223,7 @@ class ElasticIndexerTest
 
           whenReady(future) { resp =>
             resp shouldBe a[Right[_, _]]
-            resp.value should contain theSameElementsAs documents
+            resp.right.value should contain theSameElementsAs documents
           }
 
           // Because Elasticsearch isn't strongly consistent, it may take a

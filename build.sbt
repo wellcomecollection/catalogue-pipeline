@@ -2,7 +2,7 @@ import java.io.File
 import java.util.UUID
 import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider
 
-val projectVersion = "3410.ab93ed31bbe1e9522de8762cf4973d22fa4ba3d9"
+val projectVersion = "0.0.0"
 
 def setupProject(
   project: Project,
@@ -34,7 +34,6 @@ def setupProject(
 lazy val internal_model = setupProject(
   project,
   "common/internal_model",
-  localDependencies = Seq(elasticsearch_typesafe),
   externalDependencies = CatalogueDependencies.internalModelDependencies)
   .settings(Publish.settings: _*)
   .settings(version:= projectVersion)
@@ -45,17 +44,6 @@ lazy val display = setupProject(
   localDependencies = Seq(internal_model),
   externalDependencies = CatalogueDependencies.displayModelDependencies)
 
-lazy val elasticsearch = setupProject(
-  project,
-  "common/elasticsearch",
-  externalDependencies = CatalogueDependencies.elasticsearchDependencies)
-
-lazy val elasticsearch_typesafe = setupProject(
-  project,
-  "common/elasticsearch_typesafe",
-  localDependencies = Seq(elasticsearch),
-  externalDependencies = CatalogueDependencies.elasticsearchTypesafeDependencies
-)
 
 lazy val flows = setupProject(
   project,
@@ -108,7 +96,8 @@ lazy val id_minter = setupProject(
 lazy val ingestor_common = setupProject(
   project,
   "pipeline/ingestor/ingestor_common",
-  localDependencies = Seq(elasticsearch_typesafe, pipeline_storage_typesafe)
+  localDependencies = Seq(pipeline_storage_typesafe),
+  externalDependencies = WellcomeDependencies.elasticsearchTypesafeLibrary
 )
 
 lazy val ingestor_works = setupProject(
@@ -141,7 +130,7 @@ lazy val relation_embedder = setupProject(
   project,
   "pipeline/relation_embedder/relation_embedder",
   localDependencies =
-    Seq(internal_model, elasticsearch, pipeline_storage_typesafe),
+    Seq(internal_model, pipeline_storage_typesafe),
   externalDependencies = CatalogueDependencies.relationEmbedderDependencies
 )
 
@@ -149,7 +138,7 @@ lazy val router = setupProject(
   project,
   "pipeline/relation_embedder/router",
   localDependencies =
-    Seq(internal_model, elasticsearch, pipeline_storage_typesafe),
+    Seq(internal_model, pipeline_storage_typesafe),
   externalDependencies = CatalogueDependencies.routerDependencies
 )
 
@@ -278,7 +267,7 @@ lazy val inference_manager = setupProject(
 lazy val snapshot_generator = setupProject(
   project,
   "snapshots/snapshot_generator",
-  localDependencies = Seq(internal_model, display, elasticsearch_typesafe),
+  localDependencies = Seq(display),
   externalDependencies = CatalogueDependencies.snapshotGeneratorDependencies
 )
 

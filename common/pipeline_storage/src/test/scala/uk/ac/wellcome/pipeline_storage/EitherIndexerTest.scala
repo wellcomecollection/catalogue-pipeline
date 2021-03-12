@@ -12,7 +12,7 @@ import uk.ac.wellcome.models.index.{
 }
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.elasticsearch.model.CanonicalId
+import uk.ac.wellcome.elasticsearch.model.IndexId
 import WorkState.Merged
 import ImageState.Initial
 
@@ -23,9 +23,9 @@ class EitherIndexerTest
     with WorkGenerators
     with ImageGenerators {
 
-  implicit val workId: CanonicalId[Work[Merged]] =
+  implicit val workId: IndexId[Work[Merged]] =
     (work: Work[Merged]) => work.id
-  implicit val imageId: CanonicalId[Image[Initial]] = (image: Image[Initial]) =>
+  implicit val imageId: IndexId[Image[Initial]] = (image: Image[Initial]) =>
     image.id
 
   val works: Seq[Work[Merged]] = (1 to 3).map(_ => mergedWork()).toList

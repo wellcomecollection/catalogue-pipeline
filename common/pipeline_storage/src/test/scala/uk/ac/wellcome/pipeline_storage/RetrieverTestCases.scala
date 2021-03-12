@@ -3,7 +3,7 @@ package uk.ac.wellcome.pipeline_storage
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.elasticsearch.model.CanonicalId
+import uk.ac.wellcome.elasticsearch.model.IndexId
 import uk.ac.wellcome.fixtures.TestWith
 
 trait RetrieverTestCases[Context, T]
@@ -17,13 +17,13 @@ trait RetrieverTestCases[Context, T]
 
   def createT: T
 
-  implicit val id: CanonicalId[T]
+  implicit val id: IndexId[T]
 
   it("retrieves a document") {
     val t = createT
 
     withContext(documents = Seq(t)) { implicit context =>
-      val future = withRetriever { _.apply(id.canonicalId(t)) }
+      val future = withRetriever { _.apply(id.indexId(t)) }
 
       whenReady(future) {
         _ shouldBe t
@@ -32,7 +32,7 @@ trait RetrieverTestCases[Context, T]
   }
 
   it("throws an error if asked to retrieve a missing document") {
-    val missingId = id.canonicalId(createT)
+    val missingId = id.indexId(createT)
     val someOtherDocument = createT
 
     withContext(documents = Seq(someOtherDocument)) { implicit context =>
@@ -51,10 +51,10 @@ trait RetrieverTestCases[Context, T]
     val t3 = createT
 
     val documents = Seq(t1, t2, t3)
-    val ids = documents.map { id.canonicalId }
+    val ids = documents.map { id.indexId }
     val expectedResult = RetrieverMultiResult(
       found = documents.map { t =>
-        id.canonicalId(t) -> t
+        id.indexId(t) -> t
       }.toMap,
       notFound = Map.empty
     )
@@ -74,20 +74,19 @@ trait RetrieverTestCases[Context, T]
     val t3 = createT
 
     val documents = Seq(t1, t2, t3)
-    val ids = documents.map { id.canonicalId }
+    val ids = documents.map { id.indexId }
 
     withContext(documents = Seq(t1, t2)) { implicit context =>
       val future = withRetriever { _.apply(ids) }
 
       whenReady(future) { result =>
         result.found shouldBe Map(
-          id.canonicalId(t1) -> t1,
-          id.canonicalId(t2) -> t2
+          id.indexId(t1) -> t1,
+          id.indexId(t2) -> t2
         )
 
-        result.notFound.keySet shouldBe Set(id.canonicalId(t3))
-        result.notFound(id.canonicalId(t3)) shouldBe a[
-          RetrieverNotFoundException]
+        result.notFound.keySet shouldBe Set(id.indexId(t3))
+        result.notFound(id.indexId(t3)) shouldBe a[RetrieverNotFoundException]
       }
     }
   }

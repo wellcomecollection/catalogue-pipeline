@@ -77,6 +77,21 @@ class SierraMergeCandidatesTest
       SierraMergeCandidates(sierraData) shouldBe Nil
     }
 
+    it("checks for the (UkLW) prefix case-insensitively") {
+      val casingVariations = List("UkLW", "uklw", "UkLw", "UKLW")
+      val sierraData = casingVariations.map { uklw =>
+        createSierraBibDataWith(
+          varFields = create776subfieldsWith(
+            ids = List(s"($uklw)$mergeCandidateBibNumber")
+          )
+        )
+      }
+      val mergeCandidates = sierraData.map(SierraMergeCandidates.apply)
+
+      every(mergeCandidates) shouldBe
+        physicalAndDigitalSierraMergeCandidate(mergeCandidateBibNumber)
+    }
+
     it("ignores values in 776$$w that aren't prefixed with (UkLW)") {
       val sierraData = createSierraBibDataWith(
         varFields = create776subfieldsWith(

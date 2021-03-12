@@ -2,7 +2,7 @@ package uk.ac.wellcome.pipeline_storage.memory
 
 import java.util.UUID
 
-import uk.ac.wellcome.elasticsearch.model.CanonicalId
+import uk.ac.wellcome.elasticsearch.model.IndexId
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.pipeline_storage.{
   MemoryRetriever,
@@ -18,7 +18,7 @@ class MemoryRetrieverTest extends RetrieverTestCases[Map[String, UUID], UUID] {
     testWith: TestWith[Map[String, UUID], R]): R =
     testWith(
       documents.map { doc =>
-        id.canonicalId(doc) -> doc
+        id.indexId(doc) -> doc
       }.toMap
     )
 
@@ -31,6 +31,6 @@ class MemoryRetrieverTest extends RetrieverTestCases[Map[String, UUID], UUID] {
   override def createT: UUID =
     UUID.randomUUID()
 
-  override implicit val id: CanonicalId[UUID] =
+  override implicit val id: IndexId[UUID] =
     (uuid: UUID) => uuid.toString
 }
