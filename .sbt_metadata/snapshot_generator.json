@@ -2,7 +2,6 @@
   "id" : "snapshot_generator",
   "folder" : "snapshots/snapshot_generator",
   "dependencyIds" : [
-    "internal_model",
     "display"
   ]
 }

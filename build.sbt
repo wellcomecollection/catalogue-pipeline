@@ -41,7 +41,6 @@ lazy val internal_model = setupProject(
 lazy val display = setupProject(
   project,
   "common/display",
-  localDependencies = Seq(internal_model),
   externalDependencies = CatalogueDependencies.displayModelDependencies)
 
 
@@ -267,7 +266,7 @@ lazy val inference_manager = setupProject(
 lazy val snapshot_generator = setupProject(
   project,
   "snapshots/snapshot_generator",
-  localDependencies = Seq(internal_model, display),
+  localDependencies = Seq(display),
   externalDependencies = CatalogueDependencies.snapshotGeneratorDependencies
 )
 

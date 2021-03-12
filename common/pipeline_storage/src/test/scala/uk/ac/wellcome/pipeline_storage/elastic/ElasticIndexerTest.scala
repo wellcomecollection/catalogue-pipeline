@@ -223,7 +223,7 @@ class ElasticIndexerTest
 
           whenReady(future) { resp: Either[Seq[SampleDocument], Seq[SampleDocument]] =>
             resp shouldBe a[Right[_, _]]
-            resp.right.get should contain theSameElementsAs documents
+            resp.value should contain theSameElementsAs documents
           }
 
           // Because Elasticsearch isn't strongly consistent, it may take a

@@ -58,7 +58,7 @@ class WorkMatcherTest
             val savedLinkedWork =
               get[WorkNode](dynamoClient, graphTable.name)(
                 "id" === links.workId)
-                .map(_.right.get)
+                .map(_.value)
 
             savedLinkedWork shouldBe Some(
               WorkNode(links.workId, links.version, Nil, ciHash(links.workId)))
@@ -90,7 +90,7 @@ class WorkMatcherTest
                     WorkIdentifier(identifierB.canonicalId, None)))))
 
             val savedWorkNodes = scan[WorkNode](dynamoClient, graphTable.name)
-              .map(_.right.get)
+              .map(_.value)
 
             savedWorkNodes should contain theSameElementsAs List(
               WorkNode(
@@ -162,7 +162,7 @@ class WorkMatcherTest
                       WorkIdentifier(identifierC.canonicalId, 1)))))
 
             val savedNodes = scan[WorkNode](dynamoClient, graphTable.name)
-              .map(_.right.get)
+              .map(_.value)
 
             savedNodes should contain theSameElementsAs List(
               WorkNode(

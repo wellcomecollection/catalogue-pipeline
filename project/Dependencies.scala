@@ -332,5 +332,6 @@ object CatalogueDependencies {
   val snapshotGeneratorDependencies: Seq[ModuleID] =
     WellcomeDependencies.messagingTypesafeLibrary ++
       WellcomeDependencies.storageLibrary ++
+      WellcomeDependencies.typesafeLibrary ++
       ExternalDependencies.alpakkaS3Dependencies
 }
