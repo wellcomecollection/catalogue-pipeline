@@ -29,7 +29,10 @@ object SierraMergeCandidates extends SierraDataTransformer with SierraQueryOps {
   // This regex matches any string starting with (UkLW), followed by
   // any number of spaces, and then captures everything after the
   // space, which is the bib number we're interested in.
-  private val uklwPrefixRegex: Regex = """\(UkLW\)[\s]*(.+)""".r.anchored
+  //
+  // The UkLW match is case insensitive because there are sufficient
+  // inconsistencies in the source data that it's easier to handle that here.
+  private val uklwPrefixRegex: Regex = """\((?i:UkLW)\)[\s]*(.+)""".r.anchored
 
   /** We can merge a bib and the digitised version of that bib.  The number
     * of the other bib comes from MARC tag 776 subfield $w.
