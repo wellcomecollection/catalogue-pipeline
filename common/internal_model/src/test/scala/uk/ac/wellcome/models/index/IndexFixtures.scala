@@ -7,7 +7,7 @@ import io.circe.Encoder
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.time.{Seconds, Span}
 import org.scalatest.{Assertion, Suite}
-import uk.ac.wellcome.elasticsearch.model.CanonicalId
+import uk.ac.wellcome.elasticsearch.model.IndexId
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil.toJson
@@ -50,7 +50,7 @@ trait IndexFixtures extends ElasticsearchFixtures { this: Suite =>
   def assertElasticsearchEventuallyHasWork[State <: WorkState](
     index: Index,
     works: Work[State]*)(implicit enc: Encoder[Work[State]]): Seq[Assertion] = {
-    implicit val id: CanonicalId[Work[State]] =
+    implicit val id: IndexId[Work[State]] =
       (work: Work[State]) => work.id
     assertElasticsearchEventuallyHas(index, works: _*)
   }
@@ -59,14 +59,14 @@ trait IndexFixtures extends ElasticsearchFixtures { this: Suite =>
     index: Index,
     images: Image[State]*)(
     implicit enc: Encoder[Image[State]]): Seq[Assertion] = {
-    implicit val id: CanonicalId[Image[State]] =
+    implicit val id: IndexId[Image[State]] =
       (image: Image[State]) => image.id
     assertElasticsearchEventuallyHas(index, images: _*)
   }
 
   def assertElasticsearchNeverHasWork(index: Index,
                                       works: Work[Identified]*): Unit = {
-    implicit val id: CanonicalId[Work[Identified]] =
+    implicit val id: IndexId[Work[Identified]] =
       (work: Work[Identified]) => work.state.canonicalId
     assertElasticsearchNeverHas(index, works: _*)
   }

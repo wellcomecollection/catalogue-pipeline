@@ -2,7 +2,7 @@ import sbt._
 
 object WellcomeDependencies {
 
-  val defaultVersion = "26.3.2"
+  val defaultVersion = "26.4.0"
 
   lazy val versions = new {
     val typesafe = defaultVersion
@@ -11,6 +11,7 @@ object WellcomeDependencies {
     val messaging = defaultVersion
     val monitoring = defaultVersion
     val storage = defaultVersion
+    val elasticsearch = defaultVersion
   }
 
   val jsonLibrary: Seq[ModuleID] = library(
@@ -26,6 +27,16 @@ object WellcomeDependencies {
   val messagingLibrary: Seq[ModuleID] = library(
     name = "messaging",
     version = versions.messaging
+  )
+
+  val elasticsearchLibrary: Seq[ModuleID] = library(
+    name = "elasticsearch",
+    version = versions.elasticsearch
+  )
+
+  val elasticsearchTypesafeLibrary: Seq[ModuleID] = library(
+    name = "elasticsearch_typesafe",
+    version = versions.elasticsearch
   )
 
   val monitoringLibrary: Seq[ModuleID] = library(
@@ -67,7 +78,6 @@ object ExternalDependencies {
     val akkaStreamAlpakka = "1.1.2"
     val apacheCommons = "1.9"
     val circe = "0.13.0"
-    val elastic4s = "7.10.1"
     val fastparse = "2.3.0"
     val swagger = "2.0.10"
     val mockito = "1.9.5"
@@ -113,14 +123,6 @@ object ExternalDependencies {
 
   val circeOpticsDependencies = Seq(
     "io.circe" %% "circe-optics" % versions.circe
-  )
-
-  val elasticsearchDependencies = Seq(
-    "com.sksamuel.elastic4s" %% "elastic4s-core" % versions.elastic4s,
-    "com.sksamuel.elastic4s" %% "elastic4s-client-esjava" % versions.elastic4s,
-    "com.sksamuel.elastic4s" %% "elastic4s-http-streams" % versions.elastic4s,
-    "com.sksamuel.elastic4s" %% "elastic4s-json-circe" % versions.elastic4s,
-    "com.sksamuel.elastic4s" %% "elastic4s-testkit" % versions.elastic4s % "test"
   )
 
   val mockitoDependencies: Seq[ModuleID] = Seq(
@@ -190,6 +192,8 @@ object CatalogueDependencies {
   val internalModelDependencies =
     ExternalDependencies.scalacsvDependencies ++
       WellcomeDependencies.fixturesLibrary ++
+      WellcomeDependencies.elasticsearchLibrary ++
+      WellcomeDependencies.elasticsearchTypesafeLibrary ++
       WellcomeDependencies.jsonLibrary ++
       ExternalDependencies.parseDependencies ++
       ExternalDependencies.scalacheckDependencies ++
@@ -197,15 +201,12 @@ object CatalogueDependencies {
       ExternalDependencies.scalaXmlDependencies
 
   val displayModelDependencies =
+      WellcomeDependencies.elasticsearchLibrary ++
+      WellcomeDependencies.elasticsearchTypesafeLibrary ++
+      WellcomeDependencies.jsonLibrary ++
     ExternalDependencies.swaggerDependencies ++
       ExternalDependencies.scalacheckDependencies
 
-  val elasticsearchDependencies: Seq[ModuleID] =
-    ExternalDependencies.elasticsearchDependencies ++
-      ExternalDependencies.scalacheckDependencies ++
-      WellcomeDependencies.fixturesLibrary ++
-      WellcomeDependencies.jsonLibrary ++
-      WellcomeDependencies.typesafeLibrary
 
   val flowDependencies: Seq[ModuleID] =
     WellcomeDependencies.typesafeLibrary
@@ -220,7 +221,8 @@ object CatalogueDependencies {
       WellcomeDependencies.messagingTypesafeLibrary
 
   val pipelineStorageDependencies: Seq[ModuleID] =
-    WellcomeDependencies.messagingLibrary
+    WellcomeDependencies.messagingLibrary ++
+      WellcomeDependencies.typesafeLibrary
 
   val pipelineStorageTypesafeDependencies: Seq[ModuleID] =
     WellcomeDependencies.messagingTypesafeLibrary
@@ -235,6 +237,7 @@ object CatalogueDependencies {
     ExternalDependencies.akkaHttpDependencies ++
       ExternalDependencies.apmDependencies ++
       ExternalDependencies.circeOpticsDependencies ++
+      WellcomeDependencies.elasticsearchTypesafeLibrary ++
       WellcomeDependencies.typesafeLibrary
 
   val idminterDependencies: Seq[ModuleID] =
@@ -325,5 +328,6 @@ object CatalogueDependencies {
   val snapshotGeneratorDependencies: Seq[ModuleID] =
     WellcomeDependencies.messagingTypesafeLibrary ++
       WellcomeDependencies.storageLibrary ++
+      WellcomeDependencies.typesafeLibrary ++
       ExternalDependencies.alpakkaS3Dependencies
 }

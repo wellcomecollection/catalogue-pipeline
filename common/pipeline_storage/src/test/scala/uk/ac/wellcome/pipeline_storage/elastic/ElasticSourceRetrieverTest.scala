@@ -2,7 +2,7 @@ package uk.ac.wellcome.pipeline_storage.elastic
 
 import com.sksamuel.elastic4s.Index
 import uk.ac.wellcome.elasticsearch.NoStrictMapping
-import uk.ac.wellcome.elasticsearch.model.CanonicalId
+import uk.ac.wellcome.elasticsearch.model.IndexId
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
@@ -48,7 +48,7 @@ class ElasticSourceRetrieverTest
       title = randomAlphanumeric()
     )
 
-  override implicit val id: CanonicalId[SampleDocument] =
+  override implicit val id: IndexId[SampleDocument] =
     (doc: SampleDocument) => doc.canonicalId
 
   it("retrieves a document with a slash in the ID") {

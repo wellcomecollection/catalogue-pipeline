@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.matcher.storage.elastic
 
 import com.sksamuel.elastic4s.Index
 import uk.ac.wellcome.models.index.IdentifiedWorkIndexConfig
-import uk.ac.wellcome.elasticsearch.model.CanonicalId
+import uk.ac.wellcome.elasticsearch.model.IndexId
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
@@ -44,7 +44,7 @@ class ElasticWorkLinksRetrieverTest
         }
 
         whenReady(indexer(works)) { _ =>
-          implicit val id: CanonicalId[Work[WorkState.Identified]] =
+          implicit val id: IndexId[Work[WorkState.Identified]] =
             (w: Work[WorkState.Identified]) => w.id
 
           assertElasticsearchEventuallyHas(index, works: _*)
@@ -62,6 +62,6 @@ class ElasticWorkLinksRetrieverTest
 
   override def createT: WorkLinks = createWorkLinks
 
-  override implicit val id: CanonicalId[WorkLinks] =
+  override implicit val id: IndexId[WorkLinks] =
     (links: WorkLinks) => links.workId
 }

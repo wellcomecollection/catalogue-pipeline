@@ -1,6 +1,0 @@
-{
-  "id" : "elasticsearch",
-  "folder" : "common/elasticsearch",
-  "dependencyIds" : [
-  ]
-}
