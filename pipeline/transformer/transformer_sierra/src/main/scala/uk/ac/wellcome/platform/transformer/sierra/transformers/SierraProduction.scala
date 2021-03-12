@@ -26,7 +26,7 @@ object SierraProduction
   // towards, using RDA rules. If neither of these  fields are available, we
   // fallback to 008.
   //
-  // If 260/264 are available but don't contain any date information, we fill in
+  // If 260/264 are available but can't be parsed into dates, we fill in
   // the first ProductionEvent with date information from 008 (which is what the
   // 008 field should refer to according to the cataloguing rules).
   //
@@ -34,25 +34,34 @@ object SierraProduction
   // but it would be a cataloguing error -- we should reject it, and flag it
   // to the librarians.
   //
-  def apply(bibId: SierraBibNumber, bibData: SierraBibData) = {
+  def apply(
+    bibId: SierraBibNumber,
+    bibData: SierraBibData
+  ): List[ProductionEvent[IdState.Unminted]] = {
+    val marc260fields = bibData.varfieldsWithTag("260")
+    val marc264fields = bibData.varfieldsWithTag("264")
 
-    val maybeMarc260fields = bibData.varfieldsWithTag("260")
-    val maybeMarc264fields = bibData.varfieldsWithTag("264")
-
-    val productions = (maybeMarc260fields, maybeMarc264fields) match {
-      case (Nil, Nil)           => List()
-      case (marc260fields, Nil) => getProductionFrom260Fields(marc260fields)
-      case (Nil, marc264fields) =>
+    val productionEvents = (marc260fields, marc264fields) match {
+      case (Nil, Nil) => Nil
+      case (_, Nil) =>
+        getProductionFrom260Fields(marc260fields)
+      case (Nil, _) =>
         getProductionFrom264Fields(bibId, marc264fields)
-      case (marc260fields, marc264fields) =>
+      case _ =>
         getProductionFromBothFields(bibId, marc260fields, marc264fields)
     }
+    val marc008productionEvents = getProductionFrom008(bibData)
 
-    (productions, getProductionFrom008(bibData)) match {
-      case (head :: tail, production :: _) =>
-        val dates = if (head.dates.nonEmpty) head.dates else production.dates
-        head.copy(dates = dates) :: tail
-      case (maybe260or264, maybe008) => maybe260or264 ++ maybe008
+    (productionEvents, marc008productionEvents) match {
+      // Use the dates from the first 008 production event if we couldn't parse those in 260/4
+      case (
+          firstEvent :: otherEvents,
+          ProductionEvent(_, _, _, marc008dates, _) :: _
+          )
+          if firstEvent.dates.forall(_.range.isEmpty) && marc008dates.nonEmpty =>
+        firstEvent.copy(dates = marc008dates) :: otherEvents
+      case (Nil, _) => marc008productionEvents
+      case _        => productionEvents
     }
   }
 

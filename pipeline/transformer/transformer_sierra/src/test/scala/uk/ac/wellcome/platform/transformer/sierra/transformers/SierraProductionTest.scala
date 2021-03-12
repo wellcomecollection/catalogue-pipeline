@@ -637,6 +637,38 @@ class SierraProductionTest
           dates = List(Period("1757")),
           function = None))
     }
+
+    // Example is from b28533306, with the 264 field modified so it's never parseable
+    // and so this test is predictable.
+    it("uses date information from 008 if 260/264 cannot be parsed") {
+      val varFields = List(
+        createVarFieldWith(
+          marcTag = "008",
+          content = Some("160323s1972    enk               ku    d")
+        ),
+        createVarFieldWith(
+          marcTag = "264",
+          indicator2 = "0",
+          subfields = List(
+            MarcSubfield(tag = "a", content = "[Netherne, Surrey],"),
+            MarcSubfield(
+              tag = "c",
+              content = "B̷A̴D̸ ̴U̶N̸P̵A̸R̸S̷E̷A̶B̵L̶E̸ ̵N̴O̴N̶S̵E̷N̷S̴E̴")
+          )
+        )
+      )
+
+      val result = transformToProduction(varFields)
+      result should have length 1
+      result.head shouldBe ProductionEvent(
+        label =
+          "[Netherne, Surrey], B̷A̴D̸ ̴U̶N̸P̵A̸R̸S̷E̷A̶B̵L̶E̸ ̵N̴O̴N̶S̵E̷N̷S̴E̴",
+        places = List(Place("[Netherne, Surrey],")),
+        agents = Nil,
+        dates = List(Period("1972")),
+        function = Some(Concept("Production"))
+      )
+    }
   }
 
   // Test helpers
