@@ -86,8 +86,7 @@ trait RetrieverTestCases[Context, T]
         )
 
         result.notFound.keySet shouldBe Set(id.indexId(t3))
-        result.notFound(id.indexId(t3)) shouldBe a[
-          RetrieverNotFoundException]
+        result.notFound(id.indexId(t3)) shouldBe a[RetrieverNotFoundException]
       }
     }
   }

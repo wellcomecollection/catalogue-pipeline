@@ -50,8 +50,7 @@ trait ElasticIndexerFixtures extends ElasticsearchFixtures with Akka {
                                               indexable: Indexable[T]): R =
     testWith(new ElasticIndexer[T](esClient, idx, config))
 
-  implicit def canonicalId[T](
-    implicit indexable: Indexable[T]): IndexId[T] =
+  implicit def canonicalId[T](implicit indexable: Indexable[T]): IndexId[T] =
     (doc: T) => indexable.id(doc)
 
   def ingestInOrder[T](indexer: ElasticIndexer[T])(documents: T*)(

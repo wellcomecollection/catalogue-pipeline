@@ -46,7 +46,8 @@ class DynamoBatchWriterTest
           scanamo
             .exec(ScanamoTable[Shape](table.name).get("sides" === s.sides))
             .get
-            .right.value shouldBe s
+            .right
+            .value shouldBe s
         }
       }
     }
@@ -65,7 +66,8 @@ class DynamoBatchWriterTest
           scanamo
             .exec(ScanamoTable[Shape](table.name).get("sides" === s.sides))
             .get
-            .right.value shouldBe s
+            .right
+            .value shouldBe s
         }
       }
     }
