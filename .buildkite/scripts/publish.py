@@ -3,7 +3,7 @@
 import os
 import sys
 
-from commands import git,sbt
+from commands import git, sbt
 from run_job import should_run_sbt_project
 from git_utils import (
     local_current_head,
@@ -17,6 +17,7 @@ from sbt_dependency_tree import Repository
 ROOT = git("rev-parse", "--show-toplevel")
 
 BUILD_SBT = os.path.join(ROOT, "build.sbt")
+
 
 def update_build_sbt():
     new_version_string = new_version()
