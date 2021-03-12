@@ -28,20 +28,24 @@ object PeriodParser extends Parser[InstantRange] with DateParserUtils {
     "\"",
     "©",
     // roman numerals are almost always accompanied by a decimal
-    // date, so strip them out and hope it's there rather than
-    // trying to parse them.
-    romanNumeralRegexString
+    // date, so strip them out if they're at the start of a date
+    // and followed by a word boundary.
+    s"""^"?$romanNumeralRegexString\\b"""
   ).reduceLeft(_ + "|" + _).r
 
-  // This matches at least 2 roman numeral characters and
-  // decimal/comma separators within word boundaries
-  private val romanNumeralRegexString = "\\b[mdclxvi\\.\\,]{2,}\\b"
+  // This is from:
+  // https://www.oreilly.com/library/view/regular-expressions-cookbook/9780596802837/ch06s09.html
+  // It is additionally restricted to numerals 3 characters or longer,
+  // to avoid interfering with things like (eg) 'c.1920'", and includes
+  // period and comma separators to handle numerals like "M.DCC.XXXVII."
+  private val romanNumeralRegexString = {
+    val sep = "[\\.\\,]?\\s?"
+    s"(?=[MDCLXVI\\.\\,\\s]{3,})M*$sep(C[MD]|D?C*)$sep(X[CL]|L?X*)$sep(I[XV]|V?I*)".toLowerCase
+  }
 
   private def preprocess(input: String): String =
     ignoreRegex
-    // Replace with whitespace rather than removing
-    // entirely to avoid concatenating tokens
-      .replaceAllIn(input.toLowerCase, " ")
+      .replaceAllIn(input.toLowerCase, "")
       .trim
 
   // Try to parse as many `timePeriod`s as we can and then add them to find
