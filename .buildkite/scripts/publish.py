@@ -23,6 +23,7 @@ def update_build_sbt():
     new_version_string = new_version()
 
     print("New version: %s" % new_version_string)
+    print(BUILD_SBT)
     lines = list(open(BUILD_SBT))
     for idx, l in enumerate(lines):
         if l.startswith("val projectVersion = "):
