@@ -5,6 +5,7 @@ import java.time.LocalDate
 import org.scalatest.Inspectors
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import uk.ac.wellcome.models.parse.PeriodParser
 import uk.ac.wellcome.models.work.internal.InstantRange
 
 class ParserTest extends AnyFunSpec with Matchers with Inspectors {

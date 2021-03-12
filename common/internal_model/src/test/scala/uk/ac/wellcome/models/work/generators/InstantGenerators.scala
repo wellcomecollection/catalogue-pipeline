@@ -11,12 +11,15 @@ trait InstantGenerators {
 
   val now: Instant = Instant.now
 
-  def createInstantRangeWith(from: String,
-                             to: String,
-                             inferred: Boolean = false,
-                             label: String = "") =
-    InstantRange(LocalDateTime.parse(from), LocalDateTime.parse(to), label)
-      .withInferred(inferred)
+  def createInstantRangeWith(
+    from: String,
+    to: String,
+    label: String = ""
+  ): InstantRange = InstantRange(
+    LocalDateTime.parse(from),
+    LocalDateTime.parse(to),
+    label
+  )
 
   def randomInstantBefore(max: Instant, maxBefore: FiniteDuration) =
     max - ((Random.nextLong() % maxBefore.toSeconds) seconds)

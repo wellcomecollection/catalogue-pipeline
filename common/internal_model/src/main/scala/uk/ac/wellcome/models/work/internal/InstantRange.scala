@@ -8,22 +8,15 @@ import uk.ac.wellcome.models.work.internal.InstantRange.instantOrdering
 // We're not extending this yet, as we don't actually want it to be part of
 // the Display model as yet before we've started testing, but in future it
 // might extend AbstractConcept
-case class InstantRange(from: Instant,
-                        to: Instant,
-                        label: String = "",
-                        inferred: Boolean = false) {
-
-  def withInferred(inferred: Boolean): InstantRange =
-    InstantRange(from, to, label, inferred)
+case class InstantRange(from: Instant, to: Instant, label: String = "") {
 
   def withLabel(label: String): InstantRange =
-    InstantRange(from, to, label, inferred)
+    InstantRange(from, to, label)
 
   def +(x: InstantRange): InstantRange = InstantRange(
     from = instantOrdering.min(x.from, from),
     to = instantOrdering.max(x.to, to),
     label = s"$label, ${x.label}",
-    inferred = inferred || x.inferred
   )
 }
 

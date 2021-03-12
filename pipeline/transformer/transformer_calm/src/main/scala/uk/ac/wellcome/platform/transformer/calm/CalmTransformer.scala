@@ -14,7 +14,6 @@ import uk.ac.wellcome.models.work.internal.DeletedReason.{
   SuppressedFromSource
 }
 import uk.ac.wellcome.models.work.internal.IdState.Identifiable
-import uk.ac.wellcome.platform.transformer.calm.periods.PeriodParser
 import uk.ac.wellcome.platform.transformer.calm.transformers.{
   CalmItems,
   CalmLanguages,
@@ -23,6 +22,7 @@ import uk.ac.wellcome.platform.transformer.calm.transformers.{
 import weco.catalogue.source_model.calm.CalmRecord
 import weco.catalogue.transformer.Transformer
 import WorkState.Source
+import uk.ac.wellcome.models.parse.PeriodParser
 
 object CalmTransformer
     extends Transformer[CalmSourceData]

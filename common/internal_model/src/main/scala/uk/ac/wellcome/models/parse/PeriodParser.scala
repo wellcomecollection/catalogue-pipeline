@@ -1,13 +1,11 @@
-package uk.ac.wellcome.platform.transformer.calm.periods
+package uk.ac.wellcome.models.parse
 
 import fastparse._
 import NoWhitespace._
-import uk.ac.wellcome.models.parse._
 import uk.ac.wellcome.models.work.internal.InstantRange
 
 object PeriodParser extends Parser[InstantRange] with DateParserUtils {
   import DateParserImplicits._
-  import FreeformDateParser.{calendarDate, day, month, monthAndYear}
   import QualifyFuzzyDate._
 
   override def apply(input: String): Option[InstantRange] =
@@ -165,6 +163,34 @@ object PeriodParser extends Parser[InstantRange] with DateParserUtils {
 
   def yearDivision[_: P]: P[FuzzyDateRange[MonthAndYear, MonthAndYear]] =
     seasonYear | lawTermYear
+
+  def calendarDate[_: P]: P[CalendarDate] =
+    numericDate | dayMonthYear | monthDayYear | yearMonthDay
+
+  def numericDate[_: P]: P[CalendarDate] =
+    (dayDigits ~ "/" ~ monthDigits ~ "/" ~ yearDigits)
+      .map { case (d, m, y) => CalendarDate(d, m, y) }
+
+  def dayMonthYear[_: P]: P[CalendarDate] =
+    (writtenDay ~ ws ~ (writtenMonth | monthDigits) ~ ",".? ~ ws ~ yearDigits)
+      .map { case (d, m, y) => CalendarDate(d, m, y) }
+
+  def monthDayYear[_: P]: P[CalendarDate] =
+    (writtenMonth ~ ws ~ writtenDay ~ ",".? ~ ws ~ yearDigits)
+      .map { case (m, d, y) => CalendarDate(d, m, y) }
+
+  def yearMonthDay[_: P]: P[CalendarDate] =
+    (yearDigits ~ ws ~ (writtenMonth | monthDigits) ~ ws ~ writtenDay).map {
+      case (y, m, d) => CalendarDate(d, m, y)
+    }
+
+  def monthAndYear[_: P]: P[MonthAndYear] =
+    (monthFollowedByYear | yearFollowedByMonth)
+      .map { case (m, y) => MonthAndYear(m, y) }
+
+  def month[_: P]: P[Month] = writtenMonth map Month
+
+  def day[_: P]: P[Day] = writtenDay map Day
 
   def seasonYear[_: P]: P[FuzzyDateRange[MonthAndYear, MonthAndYear]] =
     P((Lex.season map {

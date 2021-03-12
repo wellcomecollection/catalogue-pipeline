@@ -1,8 +1,7 @@
-package uk.ac.wellcome.platform.transformer.calm.periods
+package uk.ac.wellcome.models.parse
 
 import fastparse._
 import NoWhitespace._
-import uk.ac.wellcome.models.parse._
 
 sealed trait Qualifier
 object Qualifier {
