@@ -23,14 +23,13 @@ def update_build_sbt():
     new_version_string = new_version()
 
     print("New version: %s" % new_version_string)
-    print(BUILD_SBT)
     lines = list(open(BUILD_SBT))
     for idx, l in enumerate(lines):
         if l.startswith("val projectVersion = "):
             lines[idx] = 'val projectVersion = "%s"\n' % new_version_string.strip("v")
             break
-        else:  # no break
-            raise RuntimeError("Never updated version in build.sbt?")
+    else:  # no break
+        raise RuntimeError("Never updated version in build.sbt?")
 
     with open(BUILD_SBT, "w") as f:
         f.write("".join(lines))
