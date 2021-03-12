@@ -241,6 +241,7 @@ object CatalogueDependencies {
     ExternalDependencies.akkaHttpDependencies ++
       ExternalDependencies.apmDependencies ++
       ExternalDependencies.circeOpticsDependencies ++
+      WellcomeDependencies.elasticsearchTypesafeLibrary ++
       WellcomeDependencies.typesafeLibrary
 
   val idminterDependencies: Seq[ModuleID] =

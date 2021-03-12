@@ -58,7 +58,7 @@ class WorkMatcherTest
             val savedLinkedWork =
               get[WorkNode](dynamoClient, graphTable.name)(
                 "id" === links.workId)
-                .map(_.value)
+                .map(_.right.get)
 
             savedLinkedWork shouldBe Some(
               WorkNode(links.workId, links.version, Nil, ciHash(links.workId)))
