@@ -221,9 +221,9 @@ class ElasticIndexerTest
         withIndexer { indexer =>
           val future = indexer(documents)
 
-          whenReady(future) { resp: Either[Seq[SampleDocument], Seq[SampleDocument]] =>
+          whenReady(future) { resp =>
             resp shouldBe a[Right[_, _]]
-            resp.value should contain theSameElementsAs documents
+            resp.right.value should contain theSameElementsAs documents
           }
 
           // Because Elasticsearch isn't strongly consistent, it may take a
