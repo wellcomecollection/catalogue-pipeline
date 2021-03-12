@@ -13,7 +13,7 @@ object PeriodParser extends Parser[InstantRange] with DateParserUtils {
 
   // These strings don't change parsing outcomes so we remove them rather
   // than trying to handle them in the parser
-  private final val ignoreSubstrings = Seq(
+  private final lazy val ignoreRegex = Seq(
     "\\[gaps\\]",
     "floruit",
     "fl\\.",
@@ -24,14 +24,24 @@ object PeriodParser extends Parser[InstantRange] with DateParserUtils {
     "\\[",
     "\\]",
     "\\?",
-    "\\."
-  )
+    "\\.",
+    "\"",
+    "©",
+    // roman numerals are almost always accompanied by a decimal
+    // date, so strip them out and hope it's there rather than
+    // trying to parse them.
+    romanNumeralRegexString
+  ).reduceLeft(_ + "|" + _).r
+
+  // This matches at least 2 roman numeral characters and
+  // decimal/comma separators within word boundaries
+  private val romanNumeralRegexString = "\\b[mdclxvi\\.\\,]{2,}\\b"
 
   private def preprocess(input: String): String =
-    ignoreSubstrings
-      .reduceLeft(_ + "|" + _)
-      .r
-      .replaceAllIn(input.toLowerCase, "")
+    ignoreRegex
+    // Replace with whitespace rather than removing
+    // entirely to avoid concatenating tokens
+      .replaceAllIn(input.toLowerCase, " ")
       .trim
 
   // Try to parse as many `timePeriod`s as we can and then add them to find

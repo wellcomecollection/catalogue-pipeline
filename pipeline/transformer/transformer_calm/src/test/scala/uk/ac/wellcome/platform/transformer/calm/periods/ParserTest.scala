@@ -349,6 +349,14 @@ class ParserTest extends AnyFunSpec with Matchers with Inspectors {
           "fl. 1999-2001 [gaps]"))
     }
 
+    it("strips Roman numerals") {
+      PeriodParser("MDCCLXXXVII. [1787]") shouldBe Some(
+        InstantRange(
+          LocalDate of (1787, 1, 1),
+          LocalDate of (1787, 12, 31),
+          "MDCCLXXXVII. [1787]"))
+    }
+
     it("handles dates from the BC era") {
       PeriodParser("1111 BC") shouldBe Some(
         InstantRange(
