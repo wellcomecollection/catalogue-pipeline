@@ -815,7 +815,6 @@ class WorksIncludesTest
     def createHoldings(count: Int): List[Holdings] =
       (1 to count).map { _ =>
         Holdings(
-          description = chooseFrom(None, Some(randomAlphanumeric())),
           note = chooseFrom(None, Some(randomAlphanumeric())),
           enumeration =
             collectionOf(min = 0, max = 10) { randomAlphanumeric() }.toList,

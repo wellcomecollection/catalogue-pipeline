@@ -10,9 +10,6 @@ import uk.ac.wellcome.models.work.internal.Holdings
 )
 case class DisplayHoldings(
   @Schema(
-    description = "A textual description of the holdings."
-  ) description: Option[String],
-  @Schema(
     description = "Additional information about the holdings."
   ) note: Option[String],
   @Schema(
@@ -28,7 +25,6 @@ case class DisplayHoldings(
 case object DisplayHoldings {
   def apply(h: Holdings): DisplayHoldings =
     DisplayHoldings(
-      description = h.description,
       note = h.note,
       enumeration = h.enumeration,
       locations = h.locations.map { DisplayLocation(_) }

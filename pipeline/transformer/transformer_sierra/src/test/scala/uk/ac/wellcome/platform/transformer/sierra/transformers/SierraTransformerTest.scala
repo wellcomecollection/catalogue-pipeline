@@ -1038,9 +1038,8 @@ class SierraTransformerTest
 
       work.data.holdings shouldBe List(
         Holdings(
-          description = Some("A Jubilant Journal"),
           note = None,
-          enumeration = List(),
+          enumeration = List("A Jubilant Journal"),
           locations = List(
             PhysicalLocation(
               locationType = ClosedStores,

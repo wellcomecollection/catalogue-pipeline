@@ -61,7 +61,12 @@ object SierraHoldings extends SierraQueryOps {
             SierraElectronicResources(id, data.varFields)
         }
 
-    (digitalItems, physicalHoldings)
+    // Note: holdings records are sparsely populated, and a lot of the information is
+    // in fields we don't expose to the public.
+    //
+    // Since we also don't identify the Holdings objects we create, we may end up
+    // with duplicates in the transformer output.  This isn't useful, so remove them.
+    (digitalItems, physicalHoldings.distinct)
   }
 
   private def createPhysicalHoldings(
@@ -82,18 +87,25 @@ object SierraHoldings extends SierraQueryOps {
       .map { _.content }
       .mkString(" ")
 
-    val enumeration = SierraHoldingsEnumeration(id, data.varFields)
+    // We prepend the description from 866 ǂa to the list of enumerations because
+    // often this field contains the first line of the enumeration, and it simplifies
+    // the display logic.  They were also presented together on wellcomelibrary.org.
+    val enumeration =
+      if (description.nonEmpty) {
+        List(description) ++ SierraHoldingsEnumeration(id, data.varFields)
+      } else {
+        SierraHoldingsEnumeration(id, data.varFields)
+      }
 
     val locations = List(createLocation(id, data)).flatten
 
     // We should only create the Holdings object if we have some interesting data
     // to include; otherwise we don't.
-    val isNonEmpty = description.nonEmpty || note.nonEmpty || enumeration.nonEmpty
+    val isNonEmpty = note.nonEmpty || enumeration.nonEmpty
 
     if (isNonEmpty) {
       Some(
         Holdings(
-          description = if (description.nonEmpty) Some(description) else None,
           note = if (note.nonEmpty) Some(note) else None,
           enumeration = enumeration,
           locations = locations
