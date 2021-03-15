@@ -2,8 +2,6 @@ import java.io.File
 import java.util.UUID
 import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider
 
-val projectVersion = "0.0.0"
-
 def setupProject(
   project: Project,
   folder: String,
@@ -36,7 +34,13 @@ lazy val internal_model = setupProject(
   "common/internal_model",
   externalDependencies = CatalogueDependencies.internalModelDependencies)
   .settings(Publish.settings: _*)
-  .settings(version:= projectVersion)
+  .enablePlugins(GitVersioning)
+  .settings(
+    git.baseVersion:= sys.env.getOrElse("BUILDKITE_BUILD_NUMBER","0"),
+    git.formattedShaVersion := git.gitHeadCommit.value map { sha => s"${git.baseVersion.value}.$sha" })
+  .enablePlugins(BuildInfoPlugin).settings(
+  buildInfoKeys := Seq[BuildInfoKey](name, version))
+
 
 lazy val display = setupProject(
   project,
@@ -103,13 +107,23 @@ lazy val ingestor_works = setupProject(
   project,
   "pipeline/ingestor/ingestor_works",
   localDependencies = Seq(ingestor_common)
-)
+)  .enablePlugins(GitVersioning)
+  .settings(
+    git.baseVersion:= sys.env.getOrElse("BUILDKITE_BUILD_NUMBER","0"),
+    git.formattedShaVersion := git.gitHeadCommit.value map { sha => s"${git.baseVersion.value}.$sha" })
+  .enablePlugins(BuildInfoPlugin).settings(
+  buildInfoKeys := Seq[BuildInfoKey](name, version))
 
 lazy val ingestor_images = setupProject(
   project,
   "pipeline/ingestor/ingestor_images",
   localDependencies = Seq(ingestor_common)
-)
+)  .enablePlugins(GitVersioning)
+  .settings(
+    git.baseVersion:= sys.env.getOrElse("BUILDKITE_BUILD_NUMBER","0"),
+    git.formattedShaVersion := git.gitHeadCommit.value map { sha => s"${git.baseVersion.value}.$sha" })
+  .enablePlugins(BuildInfoPlugin).settings(
+  buildInfoKeys := Seq[BuildInfoKey](name, version))
 
 lazy val matcher = setupProject(
   project,
