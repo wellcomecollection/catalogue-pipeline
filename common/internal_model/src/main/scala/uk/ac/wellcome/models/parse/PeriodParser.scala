@@ -1,13 +1,11 @@
-package uk.ac.wellcome.platform.transformer.calm.periods
+package uk.ac.wellcome.models.parse
 
 import fastparse._
 import NoWhitespace._
-import uk.ac.wellcome.models.parse._
 import uk.ac.wellcome.models.work.internal.InstantRange
 
 object PeriodParser extends Parser[InstantRange] with DateParserUtils {
   import DateParserImplicits._
-  import FreeformDateParser.{calendarDate, day, month, monthAndYear}
   import QualifyFuzzyDate._
 
   override def apply(input: String): Option[InstantRange] =
@@ -15,7 +13,7 @@ object PeriodParser extends Parser[InstantRange] with DateParserUtils {
 
   // These strings don't change parsing outcomes so we remove them rather
   // than trying to handle them in the parser
-  private final val ignoreSubstrings = Seq(
+  private final lazy val ignoreRegex = Seq(
     "\\[gaps\\]",
     "floruit",
     "fl\\.",
@@ -26,13 +24,27 @@ object PeriodParser extends Parser[InstantRange] with DateParserUtils {
     "\\[",
     "\\]",
     "\\?",
-    "\\."
-  )
+    "\\.",
+    "\"",
+    "©",
+    // roman numerals are almost always accompanied by a decimal
+    // date, so strip them out if they're at the start of a date
+    // and followed by a word boundary.
+    s"""^"?$romanNumeralRegexString\\b"""
+  ).reduceLeft(_ + "|" + _).r
+
+  // This is from:
+  // https://www.oreilly.com/library/view/regular-expressions-cookbook/9780596802837/ch06s09.html
+  // It is additionally restricted to numerals 3 characters or longer,
+  // to avoid interfering with things like (eg) 'c.1920'", and includes
+  // period and comma separators to handle numerals like "M.DCC.XXXVII."
+  private val romanNumeralRegexString = {
+    val sep = "[\\.\\,]?\\s?"
+    s"(?=[MDCLXVI\\.\\,\\s]{3,})M*$sep(C[MD]|D?C*)$sep(X[CL]|L?X*)$sep(I[XV]|V?I*)".toLowerCase
+  }
 
   private def preprocess(input: String): String =
-    ignoreSubstrings
-      .reduceLeft(_ + "|" + _)
-      .r
+    ignoreRegex
       .replaceAllIn(input.toLowerCase, "")
       .trim
 
@@ -165,6 +177,34 @@ object PeriodParser extends Parser[InstantRange] with DateParserUtils {
 
   def yearDivision[_: P]: P[FuzzyDateRange[MonthAndYear, MonthAndYear]] =
     seasonYear | lawTermYear
+
+  def calendarDate[_: P]: P[CalendarDate] =
+    numericDate | dayMonthYear | monthDayYear | yearMonthDay
+
+  def numericDate[_: P]: P[CalendarDate] =
+    (dayDigits ~ "/" ~ monthDigits ~ "/" ~ yearDigits)
+      .map { case (d, m, y) => CalendarDate(d, m, y) }
+
+  def dayMonthYear[_: P]: P[CalendarDate] =
+    (writtenDay ~ ws ~ (writtenMonth | monthDigits) ~ ",".? ~ ws ~ yearDigits)
+      .map { case (d, m, y) => CalendarDate(d, m, y) }
+
+  def monthDayYear[_: P]: P[CalendarDate] =
+    (writtenMonth ~ ws ~ writtenDay ~ ",".? ~ ws ~ yearDigits)
+      .map { case (m, d, y) => CalendarDate(d, m, y) }
+
+  def yearMonthDay[_: P]: P[CalendarDate] =
+    (yearDigits ~ ws ~ (writtenMonth | monthDigits) ~ ws ~ writtenDay).map {
+      case (y, m, d) => CalendarDate(d, m, y)
+    }
+
+  def monthAndYear[_: P]: P[MonthAndYear] =
+    (monthFollowedByYear | yearFollowedByMonth)
+      .map { case (m, y) => MonthAndYear(m, y) }
+
+  def month[_: P]: P[Month] = writtenMonth map Month
+
+  def day[_: P]: P[Day] = writtenDay map Day
 
   def seasonYear[_: P]: P[FuzzyDateRange[MonthAndYear, MonthAndYear]] =
     P((Lex.season map {

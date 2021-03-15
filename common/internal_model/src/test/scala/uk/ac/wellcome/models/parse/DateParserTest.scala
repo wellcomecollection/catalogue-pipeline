@@ -22,8 +22,7 @@ class DateParserTest extends AnyFunSpec with Matchers {
       InstantRange(
         LocalDate of (1240, 1, 1),
         LocalDate of (1240, 12, 31),
-        "[1240]")
-        withInferred true)
+        "[1240]"))
   }
 
   it("parses written dates with day first") {
@@ -56,7 +55,6 @@ class DateParserTest extends AnyFunSpec with Matchers {
         LocalDate of (1980, 7, 31),
         LocalDate of (1980, 7, 31),
         "[July 31st 1980]")
-        withInferred true
     )
   }
 
@@ -73,8 +71,7 @@ class DateParserTest extends AnyFunSpec with Matchers {
       InstantRange(
         LocalDate of (1913, 2, 10),
         LocalDate of (1913, 2, 10),
-        "10/02/1913]")
-        withInferred true)
+        "10/02/1913]"))
   }
 
   it("parses written month and year") {

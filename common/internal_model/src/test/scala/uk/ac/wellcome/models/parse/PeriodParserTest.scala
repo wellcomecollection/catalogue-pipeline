@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.transformer.calm.periods
+package uk.ac.wellcome.models.parse
 
 import java.time.LocalDate
 
@@ -7,7 +7,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.internal.InstantRange
 
-class ParserTest extends AnyFunSpec with Matchers with Inspectors {
+class PeriodParserTest extends AnyFunSpec with Matchers with Inspectors {
 
   // From: http://www.dswebhosting.info/documents/Manuals/ALM/V10/MANUAL/main_menu/basics/period_field_format.htm
   // Can't use a Table() because the list is too long (> 22 elements)
@@ -346,6 +346,14 @@ class ParserTest extends AnyFunSpec with Matchers with Inspectors {
           LocalDate of (1999, 1, 1),
           LocalDate of (2001, 12, 31),
           "fl. 1999-2001 [gaps]"))
+    }
+
+    it("strips Roman numerals") {
+      PeriodParser("MDCCLXXXVII. [1787]") shouldBe Some(
+        InstantRange(
+          LocalDate of (1787, 1, 1),
+          LocalDate of (1787, 12, 31),
+          "MDCCLXXXVII. [1787]"))
     }
 
     it("handles dates from the BC era") {
