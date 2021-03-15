@@ -608,6 +608,32 @@ class SierraHoldingsTest
       )
     }
 
+    it("de-duplicates holdings after transformation") {
+      val dataMap = (1 to 3).map { _ =>
+        val varFields = List(
+          createVarFieldWith(
+            marcTag = "866",
+            subfields = List(
+              MarcSubfield(tag = "a", content = "Complete set")
+            )
+          )
+        )
+
+        val holdingsData = SierraHoldingsData(
+          fixedFields =
+            Map("40" -> FixedField(label = "LOCATION", value = "stax ")),
+          varFields = varFields
+        )
+
+        createSierraHoldingsNumber -> holdingsData
+      }.toMap
+
+      getItems(dataMap) shouldBe empty
+
+      val holdings = getHoldings(dataMap)
+      holdings should have size 1
+    }
+
     it("skips holdings that are deleted") {
       val varFields = List(
         createVarFieldWith(

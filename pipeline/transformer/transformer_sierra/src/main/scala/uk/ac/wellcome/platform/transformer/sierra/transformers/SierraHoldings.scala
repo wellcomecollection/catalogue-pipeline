@@ -61,7 +61,12 @@ object SierraHoldings extends SierraQueryOps {
             SierraElectronicResources(id, data.varFields)
         }
 
-    (digitalItems, physicalHoldings)
+    // Note: holdings records are sparsely populated, and a lot of the information is
+    // in fields we don't expose to the public.
+    //
+    // Since we also don't identify the Holdings objects we create, we may end up
+    // with duplicates in the transformer output.  This isn't useful, so remove them.
+    (digitalItems, physicalHoldings.distinct)
   }
 
   private def createPhysicalHoldings(
