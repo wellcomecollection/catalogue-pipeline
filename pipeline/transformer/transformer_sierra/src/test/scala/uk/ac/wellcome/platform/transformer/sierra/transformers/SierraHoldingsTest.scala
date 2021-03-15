@@ -551,8 +551,7 @@ class SierraHoldingsTest
       locations.head.shelfmark shouldBe Some("/MED")
     }
 
-    it(
-      "skips adding a location if the location code in fixed field 40 is unrecognised") {
+    it("skips adding a location if the location code is unrecognised") {
       val varFields = List(
         createVarFieldWith(
           marcTag = "866",
