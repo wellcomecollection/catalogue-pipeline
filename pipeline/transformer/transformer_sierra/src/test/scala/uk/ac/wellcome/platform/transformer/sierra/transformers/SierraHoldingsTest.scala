@@ -360,7 +360,7 @@ class SierraHoldingsTest
 
       val holdings = getHoldings(dataMap)
       holdings should have size 1
-      holdings.head.description shouldBe Some("Vol. 3 only")
+      holdings.head.enumeration shouldBe List("Vol. 3 only")
       holdings.head.note shouldBe None
     }
 
@@ -385,11 +385,11 @@ class SierraHoldingsTest
 
       val holdings = getHoldings(dataMap)
       holdings should have size 1
-      holdings.head.description shouldBe None
+      holdings.head.enumeration shouldBe empty
       holdings.head.note shouldBe Some("Another note about the document")
     }
 
-    it("sets both the note and the description") {
+    it("uses both the note and the description") {
       val varFields = List(
         createVarFieldWith(
           marcTag = "866",
@@ -413,7 +413,7 @@ class SierraHoldingsTest
 
       val holdings = getHoldings(dataMap)
       holdings should have size 1
-      holdings.head.description shouldBe Some("Missing Vol. 2")
+      holdings.head.enumeration shouldBe List("Missing Vol. 2")
       holdings.head.note shouldBe Some("Lost in a mysterious fishing accident")
     }
 
@@ -600,10 +600,10 @@ class SierraHoldingsTest
 
       val holdings = getHoldings(dataMap)
       holdings should have size 3
-      holdings.map { _.description } shouldBe Seq(
-        Some("Vol. 1 only"),
-        Some("Vol. 2 only"),
-        Some("Vol. 3 only"),
+      holdings.map { _.enumeration } shouldBe Seq(
+        List("Vol. 1 only"),
+        List("Vol. 2 only"),
+        List("Vol. 3 only"),
       )
     }
 

@@ -306,7 +306,6 @@ trait DisplaySerialisationTestBase {
   def singleHoldings(h: Holdings): String =
     s"""
        |{
-       |  ${optionalString("description", h.description)}
        |  ${optionalString("note", h.note)}
        |  "enumeration": [
        |    ${h.enumeration
