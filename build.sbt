@@ -108,23 +108,13 @@ lazy val ingestor_works = setupProject(
   project,
   "pipeline/ingestor/ingestor_works",
   localDependencies = Seq(ingestor_common)
-)  .enablePlugins(GitVersioning)
-  .settings(
-    git.baseVersion:= sys.env.getOrElse("BUILDKITE_BUILD_NUMBER","0"),
-    git.formattedShaVersion := git.gitHeadCommit.value map { sha => s"${git.baseVersion.value}.$sha" })
-  .enablePlugins(BuildInfoPlugin).settings(
-  buildInfoKeys := Seq[BuildInfoKey](name, version))
+)
 
 lazy val ingestor_images = setupProject(
   project,
   "pipeline/ingestor/ingestor_images",
   localDependencies = Seq(ingestor_common)
-)  .enablePlugins(GitVersioning)
-  .settings(
-    git.baseVersion:= sys.env.getOrElse("BUILDKITE_BUILD_NUMBER","0"),
-    git.formattedShaVersion := git.gitHeadCommit.value map { sha => s"${git.baseVersion.value}.$sha" })
-  .enablePlugins(BuildInfoPlugin).settings(
-  buildInfoKeys := Seq[BuildInfoKey](name, version))
+)
 
 lazy val matcher = setupProject(
   project,
