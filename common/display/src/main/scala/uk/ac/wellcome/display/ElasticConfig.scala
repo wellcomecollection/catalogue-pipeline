@@ -1,5 +1,6 @@
 package uk.ac.wellcome.display
 
+import buildinfo.BuildInfo
 import com.sksamuel.elastic4s.Index
 
 // This is here as display is the only module shared
@@ -10,13 +11,10 @@ case class ElasticConfig(
 )
 
 object ElasticConfig {
-  // We use this to share config across API applications
-  // i.e. The API and the snapshot generator.
-  val indexDate = "2021-03-09"
 
   def apply(): ElasticConfig =
     ElasticConfig(
-      worksIndex = Index(s"works-$indexDate"),
-      imagesIndex = Index(s"images-$indexDate")
+      worksIndex = Index(s"works-${BuildInfo.version}"),
+      imagesIndex = Index(s"images-${BuildInfo.version}")
     )
 }
