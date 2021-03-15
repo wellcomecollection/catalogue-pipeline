@@ -2,7 +2,7 @@ module "catalogue_pipeline_2021-03-09" {
   source = "./stack"
 
   pipeline_date = "2021-03-09"
-  release_label = "stage"
+  release_label = "prod"
 
   # Transformer config
   #
@@ -66,11 +66,11 @@ module "catalogue_pipeline_2021-03-09" {
 }
 
 
-module "catalogue_pipeline_2021-03-05" {
+module "catalogue_pipeline_2021-03-15" {
   source = "./stack"
 
-  pipeline_date = "2021-03-05"
-  release_label = "prod"
+  pipeline_date = "2021-03-15"
+  release_label = "stage"
 
   # Transformer config
   #
