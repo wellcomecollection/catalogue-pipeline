@@ -3,7 +3,7 @@
 import os
 import sys
 
-from commands import git, sbt
+from commands import sbt
 from run_job import should_run_sbt_project
 from git_utils import (
     local_current_head,
