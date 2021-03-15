@@ -210,6 +210,7 @@ object CatalogueDependencies {
     WellcomeDependencies.internalModel ++
       WellcomeDependencies.elasticsearchLibrary ++
       WellcomeDependencies.elasticsearchTypesafeLibrary ++
+      WellcomeDependencies.fixturesLibrary ++
       WellcomeDependencies.jsonLibrary ++
     ExternalDependencies.swaggerDependencies ++
       ExternalDependencies.scalacheckDependencies
