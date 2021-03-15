@@ -27,17 +27,18 @@ object ElasticIndexerBuilder {
     )
 
   def buildWithIndexSuffix[T: Indexable](config: Config,
-                           client: ElasticClient,
-                           indexConfig: IndexConfig,
-                           indexSuffix : String,
-                             namespace: String = "")(
-                            implicit
-                            ec: ExecutionContext,
-                            encoder: Encoder[T]
-                          ): ElasticIndexer[T] =
+                                         client: ElasticClient,
+                                         indexConfig: IndexConfig,
+                                         indexSuffix: String,
+                                         namespace: String = "")(
+    implicit
+    ec: ExecutionContext,
+    encoder: Encoder[T]
+  ): ElasticIndexer[T] =
     new ElasticIndexer[T](
       client = client,
-      index = Index(s"${config.requireString(s"es.$namespace.index")}-$indexSuffix"),
+      index =
+        Index(s"${config.requireString(s"es.$namespace.index")}-$indexSuffix"),
       config = indexConfig
     )
 }
