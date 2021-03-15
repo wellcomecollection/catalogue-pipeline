@@ -45,6 +45,7 @@ lazy val internal_model = setupProject(
 lazy val display = setupProject(
   project,
   "common/display",
+  localDependencies = Seq(internal_model),
   externalDependencies = CatalogueDependencies.displayModelDependencies)
 
 

@@ -2,5 +2,6 @@
   "id" : "display",
   "folder" : "common/display",
   "dependencyIds" : [
+    "internal_model"
   ]
 }
