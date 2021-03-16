@@ -16,7 +16,9 @@ sealed trait WorksIndexConfig extends IndexConfig with IndexConfigFields {
 
   def mapping = {
     val version = BuildInfo.version.split("\\.").toList
-    properties(fields).dynamic(dynamicMapping).meta(Map(s"model.versions.${version.head}" -> version.tail.head))
+    properties(fields)
+      .dynamic(dynamicMapping)
+      .meta(Map(s"model.versions.${version.head}" -> version.tail.head))
   }
 }
 
