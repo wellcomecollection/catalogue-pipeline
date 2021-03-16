@@ -17,7 +17,6 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal._
 import ImageState.{Augmented, Indexed}
-import buildinfo.BuildInfo
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
