@@ -6,7 +6,7 @@ import akka.http.scaladsl.Http
 import com.typesafe.config.Config
 import uk.ac.wellcome.display.ElasticConfig
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
-import uk.ac.wellcome.platform.api.models.{ApiConfig, QueryConfig}
+import uk.ac.wellcome.platform.api.models.{ApiConfig, CheckModel, QueryConfig}
 import uk.ac.wellcome.platform.api.swagger.SwaggerDocs
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
@@ -25,6 +25,9 @@ object Main extends WellcomeTypesafeApp {
     val elasticClient = ElasticBuilder.buildElasticClient(config)
 
     val elasticConfig = ElasticConfig()
+
+    CheckModel.checkModel(elasticConfig.worksIndex.name)(elasticClient)
+    CheckModel.checkModel(elasticConfig.imagesIndex.name)(elasticClient)
 
     val apiConfig =
       ApiConfig(
