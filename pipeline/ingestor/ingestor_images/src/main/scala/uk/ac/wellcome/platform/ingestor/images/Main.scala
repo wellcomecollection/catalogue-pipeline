@@ -33,12 +33,13 @@ object Main extends WellcomeTypesafeApp {
       ElasticBuilder.buildElasticClient(config, namespace = "pipeline_storage"),
       namespace = "augmented-images")
 
-    val imageIndexer = ElasticIndexerBuilder[Image[Indexed]](
-      config,
-      ElasticBuilder.buildElasticClient(config, namespace = "catalogue"),
-      namespace = "indexed-images",
-      indexConfig = IndexedImageIndexConfig
-    )
+    val imageIndexer =
+      ElasticIndexerBuilder[Image[Indexed]](
+        config,
+        ElasticBuilder.buildElasticClient(config, namespace = "catalogue"),
+        namespace = "indexed-images",
+        indexConfig = IndexedImageIndexConfig
+      )
     val msgSender = SNSBuilder
       .buildSNSMessageSender(config, subject = "Sent from the ingestor-images")
 

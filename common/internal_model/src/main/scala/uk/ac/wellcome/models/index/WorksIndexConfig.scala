@@ -1,5 +1,6 @@
 package uk.ac.wellcome.models.index
 
+import buildinfo.BuildInfo
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
 import com.sksamuel.elastic4s.requests.mappings.{FieldDefinition, ObjectField}
@@ -13,7 +14,12 @@ sealed trait WorksIndexConfig extends IndexConfig with IndexConfigFields {
 
   def fields: Seq[FieldDefinition with Product with Serializable]
 
-  def mapping = properties(fields).dynamic(dynamicMapping)
+  def mapping = {
+    val version = BuildInfo.version.split("\\.").toList
+    properties(fields)
+      .dynamic(dynamicMapping)
+      .meta(Map(s"model.versions.${version.head}" -> version.tail.head))
+  }
 }
 
 object SourceWorkIndexConfig extends WorksIndexConfig {

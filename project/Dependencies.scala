@@ -2,7 +2,7 @@ import sbt._
 
 object WellcomeDependencies {
 
-  val defaultVersion = "26.4.0"
+  val defaultVersion = "26.4.1"
 
   lazy val versions = new {
     val typesafe = defaultVersion
@@ -203,6 +203,7 @@ object CatalogueDependencies {
   val displayModelDependencies =
       WellcomeDependencies.elasticsearchLibrary ++
       WellcomeDependencies.elasticsearchTypesafeLibrary ++
+      WellcomeDependencies.fixturesLibrary ++
       WellcomeDependencies.jsonLibrary ++
     ExternalDependencies.swaggerDependencies ++
       ExternalDependencies.scalacheckDependencies
