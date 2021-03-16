@@ -35,10 +35,9 @@ object Main extends WellcomeTypesafeApp {
       namespace = "augmented-images")
 
     val imageIndexer =
-      ElasticIndexerBuilder.buildWithIndexSuffix[Image[Indexed]](
+      ElasticIndexerBuilder[Image[Indexed]](
         config,
         ElasticBuilder.buildElasticClient(config, namespace = "catalogue"),
-        indexSuffix = BuildInfo.version,
         namespace = "indexed-images",
         indexConfig = IndexedImageIndexConfig
       )

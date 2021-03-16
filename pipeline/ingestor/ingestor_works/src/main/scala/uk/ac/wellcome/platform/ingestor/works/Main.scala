@@ -36,10 +36,9 @@ object Main extends WellcomeTypesafeApp {
         .buildElasticClient(config, namespace = "pipeline_storage"),
       namespace = "denormalised-works")
 
-    val workIndexer = ElasticIndexerBuilder.buildWithIndexSuffix[Work[Indexed]](
+    val workIndexer = ElasticIndexerBuilder[Work[Indexed]](
       config,
       ElasticBuilder.buildElasticClient(config, namespace = "catalogue"),
-      indexSuffix = BuildInfo.version,
       namespace = "indexed-works",
       indexConfig = IndexedWorkIndexConfig
     )

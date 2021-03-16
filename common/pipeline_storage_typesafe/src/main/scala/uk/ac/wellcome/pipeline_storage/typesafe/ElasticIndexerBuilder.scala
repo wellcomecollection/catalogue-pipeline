@@ -25,20 +25,4 @@ object ElasticIndexerBuilder {
       index = Index(config.requireString(s"es.$namespace.index")),
       config = indexConfig
     )
-
-  def buildWithIndexSuffix[T: Indexable](config: Config,
-                                         client: ElasticClient,
-                                         indexConfig: IndexConfig,
-                                         indexSuffix: String,
-                                         namespace: String = "")(
-    implicit
-    ec: ExecutionContext,
-    encoder: Encoder[T]
-  ): ElasticIndexer[T] =
-    new ElasticIndexer[T](
-      client = client,
-      index =
-        Index(s"${config.requireString(s"es.$namespace.index")}-$indexSuffix"),
-      config = indexConfig
-    )
 }
