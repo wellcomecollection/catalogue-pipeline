@@ -17,6 +17,7 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal._
 import ImageState.{Augmented, Indexed}
+import buildinfo.BuildInfo
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
@@ -33,12 +34,14 @@ object Main extends WellcomeTypesafeApp {
       ElasticBuilder.buildElasticClient(config, namespace = "pipeline_storage"),
       namespace = "augmented-images")
 
-    val imageIndexer = ElasticIndexerBuilder[Image[Indexed]](
-      config,
-      ElasticBuilder.buildElasticClient(config, namespace = "catalogue"),
-      namespace = "indexed-images",
-      indexConfig = IndexedImageIndexConfig
-    )
+    val imageIndexer =
+      ElasticIndexerBuilder.buildWithIndexSuffix[Image[Indexed]](
+        config,
+        ElasticBuilder.buildElasticClient(config, namespace = "catalogue"),
+        indexSuffix = BuildInfo.version,
+        namespace = "indexed-images",
+        indexConfig = IndexedImageIndexConfig
+      )
     val msgSender = SNSBuilder
       .buildSNSMessageSender(config, subject = "Sent from the ingestor-images")
 

@@ -203,6 +203,7 @@ object CatalogueDependencies {
   val displayModelDependencies =
       WellcomeDependencies.elasticsearchLibrary ++
       WellcomeDependencies.elasticsearchTypesafeLibrary ++
+      WellcomeDependencies.fixturesLibrary ++
       WellcomeDependencies.jsonLibrary ++
     ExternalDependencies.swaggerDependencies ++
       ExternalDependencies.scalacheckDependencies

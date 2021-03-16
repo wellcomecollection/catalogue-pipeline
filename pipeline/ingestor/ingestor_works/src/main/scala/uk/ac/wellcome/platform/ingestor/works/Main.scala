@@ -18,6 +18,7 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal._
 import WorkState.{Denormalised, Indexed}
+import buildinfo.BuildInfo
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
@@ -35,9 +36,10 @@ object Main extends WellcomeTypesafeApp {
         .buildElasticClient(config, namespace = "pipeline_storage"),
       namespace = "denormalised-works")
 
-    val workIndexer = ElasticIndexerBuilder[Work[Indexed]](
+    val workIndexer = ElasticIndexerBuilder.buildWithIndexSuffix[Work[Indexed]](
       config,
       ElasticBuilder.buildElasticClient(config, namespace = "catalogue"),
+      indexSuffix = BuildInfo.version,
       namespace = "indexed-works",
       indexConfig = IndexedWorkIndexConfig
     )
