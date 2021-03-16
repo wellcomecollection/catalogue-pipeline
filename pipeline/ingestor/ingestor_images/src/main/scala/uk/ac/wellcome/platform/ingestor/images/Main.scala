@@ -17,7 +17,6 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal._
 import ImageState.{Augmented, Indexed}
-import buildinfo.BuildInfo
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
@@ -35,10 +34,9 @@ object Main extends WellcomeTypesafeApp {
       namespace = "augmented-images")
 
     val imageIndexer =
-      ElasticIndexerBuilder.buildWithIndexSuffix[Image[Indexed]](
+      ElasticIndexerBuilder[Image[Indexed]](
         config,
         ElasticBuilder.buildElasticClient(config, namespace = "catalogue"),
-        indexSuffix = BuildInfo.version,
         namespace = "indexed-images",
         indexConfig = IndexedImageIndexConfig
       )
