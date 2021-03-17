@@ -38,7 +38,7 @@ class textNormalisationTest extends AnyFunSpec with Matchers {
         ("a title ... with .... ", "a title ... with ...")
       )
       forAll(examples) { (i: String, o: String) =>
-        trimTrailing(i, '.') shouldBe o
+        i.trimTrailing('.') shouldBe o
       }
     }
 
@@ -49,7 +49,7 @@ class textNormalisationTest extends AnyFunSpec with Matchers {
         ("text^", '^')
       )
       forAll(examples) { (i: String, c: Char) =>
-        trimTrailing(i, c) shouldBe "text"
+        i.trimTrailing(c) shouldBe "text"
       }
     }
   }
