@@ -45,15 +45,18 @@ object SierraMergeCandidates extends SierraDataTransformer with SierraQueryOps {
     *
     */
   private def get776mergeCandidates(
-    bibData: SierraBibData): List[MergeCandidate[Identifiable]] =
-    bibData
-      .subfieldsWithTag("776" -> "w")
-      .contents
-      .flatMap {
-        case uklwPrefixRegex(bibNumber) => Some(bibNumber)
-        case _                          => None
-      }
-      .distinct match {
+    bibData: SierraBibData): List[MergeCandidate[Identifiable]] = {
+
+    val identifiers =
+      bibData
+        .subfieldsWithTag("776" -> "w")
+        .contents
+        .flatMap {
+          case uklwPrefixRegex(bibNumber) => Some(bibNumber)
+          case _                          => None
+        }
+
+    identifiers.distinct match {
       case List(bibNumber) =>
         List(
           MergeCandidate(
@@ -67,6 +70,7 @@ object SierraMergeCandidates extends SierraDataTransformer with SierraQueryOps {
         )
       case _ => Nil
     }
+  }
 
   /*
    * We always try to merge all linked Miro and Sierra works
