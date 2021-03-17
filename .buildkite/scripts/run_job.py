@@ -27,6 +27,15 @@ def should_run_sbt_project(repo, project_name, changed_paths):
     if "build.sbt" in interesting_paths:
         print("*** Relevant: build.sbt")
         return True
+    if "docker_run.py" in interesting_paths:
+        print("*** Relevant: docker_run.py")
+        return True
+    if "Makefile" in interesting_paths:
+        print("*** Relevant: Makefile")
+        return True
+    if any(p.startswith("makefiles/") for p in interesting_paths):
+        print("*** Relevant: makefiles/")
+        return True
     if any(p.startswith("project/") for p in interesting_paths):
         print("*** Relevant: project/")
         return True
