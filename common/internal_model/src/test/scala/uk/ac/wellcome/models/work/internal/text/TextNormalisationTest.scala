@@ -5,7 +5,7 @@ import org.scalatest.prop.TableDrivenPropertyChecks._
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.text.TextNormalisation._
 
-class textNormalisationTest extends AnyFunSpec with Matchers {
+class TextNormalisationTest extends AnyFunSpec with Matchers {
   describe("trimTrailing") {
     it("removes trailing character") {
       val examples = Table(
@@ -38,7 +38,7 @@ class textNormalisationTest extends AnyFunSpec with Matchers {
         ("a title ... with .... ", "a title ... with ...")
       )
       forAll(examples) { (i: String, o: String) =>
-        trimTrailing(i, '.') shouldBe o
+        i.trimTrailing('.') shouldBe o
       }
     }
 
@@ -49,7 +49,32 @@ class textNormalisationTest extends AnyFunSpec with Matchers {
         ("text^", '^')
       )
       forAll(examples) { (i: String, c: Char) =>
-        trimTrailing(i, c) shouldBe "text"
+        i.trimTrailing(c) shouldBe "text"
+      }
+    }
+  }
+
+  describe("trimTrailingPeriod") {
+    it("removes a single trailing period") {
+      val examples = Table(
+        ("text", "text"),
+        ("text.", "text"),
+        (" text. ", " text"),
+        ("text. ", "text"),
+        ("text . ", "text"),
+      )
+      forAll(examples) { (i: String, o: String) =>
+        i.trimTrailingPeriod shouldBe o
+      }
+    }
+
+    it("doesn't remove an ellipsis") {
+      val examples = Table(
+        ("text...", "text..."),
+        ("text... ", "text...")
+      )
+      forAll(examples) { (i: String, o: String) =>
+        i.trimTrailingPeriod shouldBe o
       }
     }
   }
@@ -66,7 +91,7 @@ class textNormalisationTest extends AnyFunSpec with Matchers {
         ("Text teXT", "Text teXT")
       )
       forAll(examples) { (i: String, o: String) =>
-        sentenceCase(i) shouldBe o
+        i.sentenceCase shouldBe o
       }
     }
   }

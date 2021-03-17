@@ -21,7 +21,7 @@ object Concept {
 
   def normalised[State](id: State = IdState.Unidentifiable,
                         label: String): Concept[State] =
-    Concept(id, trimTrailing(label, '.'))
+    Concept(id, label.trimTrailingPeriod)
 }
 
 case class Period[+State](
@@ -38,7 +38,7 @@ object Period {
 
   def apply[State >: IdState.Unidentifiable.type](
     label: String): Period[State] = {
-    val normalisedLabel = trimTrailing(label, '.')
+    val normalisedLabel = label.trimTrailingPeriod
     Period(
       IdState.Unidentifiable,
       normalisedLabel,
@@ -57,7 +57,7 @@ object Place {
 
   def normalised[State >: IdState.Unidentifiable.type](
     label: String): Place[State] =
-    Place(trimTrailing(label, ':'))
+    Place(label.trimTrailing(':'))
 }
 
 sealed trait AbstractAgent[+State] extends AbstractRootConcept[State] {
@@ -74,9 +74,8 @@ object Agent {
     Agent(IdState.Unidentifiable, label)
 
   def normalised[State >: IdState.Unidentifiable.type](
-    label: String): Agent[State] = {
-    Agent(trimTrailing(label, ','))
-  }
+    label: String): Agent[State] =
+    Agent(label.trimTrailing(','))
 }
 
 case class Organisation[+State](
@@ -91,7 +90,7 @@ object Organisation {
 
   def normalised[State >: IdState.Unidentifiable.type](
     label: String): Organisation[State] =
-    Organisation(trimTrailing(label, ','))
+    Organisation(label.trimTrailing(','))
 }
 
 case class Person[+State](
@@ -113,7 +112,7 @@ object Person {
   ): Person[State] =
     Person(
       id = IdState.Unidentifiable,
-      label = trimTrailing(label, ','),
+      label = label.trimTrailing(','),
       prefix = prefix,
       numeration = numeration)
 }
@@ -130,5 +129,5 @@ object Meeting {
 
   def normalised[State >: IdState.Unidentifiable.type](
     label: String): Meeting[State] =
-    Meeting(trimTrailing(label, ','))
+    Meeting(label.trimTrailing(','))
 }

@@ -1,6 +1,7 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import uk.ac.wellcome.models.work.internal._
+import uk.ac.wellcome.models.work.text.TextNormalisation._
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   MarcSubfield,
   SierraQueryOps,
@@ -15,7 +16,7 @@ trait SierraConcepts extends SierraQueryOps {
   protected def getLabel(primarySubfields: List[MarcSubfield],
                          subdivisionSubfields: List[MarcSubfield]): String = {
     val orderedSubfields = primarySubfields ++ subdivisionSubfields
-    orderedSubfields.map { _.content }.mkString(" - ")
+    orderedSubfields.map { _.content }.mkString(" - ").trimTrailingPeriod
   }
 
   /** Return a list of the distinct contents of every subfield 0 on
