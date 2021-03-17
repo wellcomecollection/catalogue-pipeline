@@ -128,6 +128,20 @@ class SierraMergeCandidatesTest
       SierraMergeCandidates(bibData) shouldBe
         physicalAndDigitalSierraMergeCandidate(mergeCandidateBibNumber)
     }
+
+    it("ignores non-UkLW prefixed values") {
+      val bibData = createSierraBibDataWith(
+        varFields = create776subfieldsWith(
+          ids = List(
+            s"(OCLC)123456789",
+            s"(UkLW)$mergeCandidateBibNumber",
+          )
+        )
+      )
+
+      SierraMergeCandidates(bibData) shouldBe
+        physicalAndDigitalSierraMergeCandidate(mergeCandidateBibNumber)
+    }
   }
 
   describe("Miro/Sierra work") {

@@ -40,18 +40,21 @@ object SierraMergeCandidates extends SierraDataTransformer with SierraQueryOps {
     * If the identifier starts with (UkLW), we strip the prefix and use the
     * bib number as a merge candidate.
     *
+    * We ignore any values in 776 subfield ǂw that don't start with (UkLW),
+    * e.g. identifiers that start (OCLC).
+    *
     */
   private def get776mergeCandidates(
     bibData: SierraBibData): List[MergeCandidate[Identifiable]] =
     bibData
       .subfieldsWithTag("776" -> "w")
       .contents
-      .map {
+      .flatMap {
         case uklwPrefixRegex(bibNumber) => Some(bibNumber)
         case _                          => None
       }
       .distinct match {
-      case List(Some(bibNumber)) =>
+      case List(bibNumber) =>
         List(
           MergeCandidate(
             identifier = SourceIdentifier(
