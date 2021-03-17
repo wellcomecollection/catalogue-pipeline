@@ -350,4 +350,19 @@ class SierraConceptSubjectsTest
 
     SierraConceptSubjects(bibId, bibData) shouldBe Nil
   }
+
+  it("removes a trailing period from a subject label") {
+    val bibData = createSierraBibDataWith(
+      varFields = List(
+        createVarFieldWith(
+          marcTag = "650",
+          subfields = List(
+            MarcSubfield(tag = "a", content = "Diet, Food, and Nutrition.")
+          )
+        )
+      )
+    )
+
+    SierraConceptSubjects(bibId, bibData) shouldBe List(Subject("Diet, Food, and Nutrition", concepts = List(Concept("Diet, Food, and Nutrition"))))
+  }
 }

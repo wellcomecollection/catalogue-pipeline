@@ -1,6 +1,7 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers.subjects
 
 import uk.ac.wellcome.models.work.internal._
+import uk.ac.wellcome.models.work.text.TextNormalisation._
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   MarcSubfield,
   VarField
@@ -81,10 +82,12 @@ object SierraConceptSubjects
     primarySubfields: List[MarcSubfield],
     varField: VarField): List[AbstractConcept[IdState.Unminted]] =
     primarySubfields.map { subfield =>
+      val label = subfield.content.trimTrailingPeriod
+
       varField.marcTag.get match {
-        case "650" => Concept(label = subfield.content)
-        case "648" => Period(label = subfield.content)
-        case "651" => Place(label = subfield.content)
+        case "650" => Concept(label = label)
+        case "648" => Period(label = label)
+        case "651" => Place(label = label)
       }
     }
 }

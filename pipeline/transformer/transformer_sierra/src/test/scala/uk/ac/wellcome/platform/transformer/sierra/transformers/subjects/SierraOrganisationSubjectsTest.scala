@@ -36,7 +36,7 @@ class SierraOrganisationSubjectsTest
       val subjects = getOrganisationSubjects(bibData)
       subjects should have size 1
 
-      subjects.head.label shouldBe "United States. Supreme Court, Washington, DC. September 29, 2005, pictured."
+      subjects.head.label shouldBe "United States. Supreme Court, Washington, DC. September 29, 2005, pictured"
     }
 
     it("uses repeated subfields for the label if necessary") {
@@ -54,7 +54,7 @@ class SierraOrganisationSubjectsTest
       val subjects = getOrganisationSubjects(bibData)
       subjects should have size 1
 
-      subjects.head.label shouldBe "United States. Army. Cavalry, 7th. Company E, depicted."
+      subjects.head.label shouldBe "United States. Army. Cavalry, 7th. Company E, depicted"
     }
   }
 

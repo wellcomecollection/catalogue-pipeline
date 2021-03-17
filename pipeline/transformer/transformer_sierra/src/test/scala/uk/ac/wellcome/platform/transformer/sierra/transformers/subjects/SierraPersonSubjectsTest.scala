@@ -308,4 +308,21 @@ class SierraPersonSubjectsTest
       subject.label shouldBe "Aristophanes. Birds."
     }
   }
+
+  it("doesn't remove a trailing ellipsis from a subject label") {
+    val bibData = createSierraBibDataWith(
+      varFields = List(
+        createVarFieldWith(
+          marcTag = "600",
+          subfields = List(
+            MarcSubfield(tag = "a", content = "Agate, John,"),
+            MarcSubfield(tag = "d", content = "1676-1720."),
+            MarcSubfield(tag = "t", content = "Sermon preach'd at Exeter, on the 30th of January ...")
+          )
+        )
+      )
+    )
+
+    SierraPersonSubjects(bibId, bibData) shouldBe List(Subject("Agate, John, 1676-1720. Sermon preach'd at Exeter, on the 30th of January ...", concepts = List(Person("Agate, John, 1676-1720. Sermon preach'd at Exeter, on the 30th of January ..."))))
+  }
 }
