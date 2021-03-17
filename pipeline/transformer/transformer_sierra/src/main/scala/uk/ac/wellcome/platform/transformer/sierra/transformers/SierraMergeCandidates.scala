@@ -19,7 +19,10 @@ import weco.catalogue.sierra_adapter.models.SierraBibNumber
 import scala.util.Try
 import scala.util.matching.Regex
 
-object SierraMergeCandidates extends SierraIdentifiedDataTransformer with SierraQueryOps with Logging {
+object SierraMergeCandidates
+    extends SierraIdentifiedDataTransformer
+    with SierraQueryOps
+    with Logging {
 
   type Output = List[MergeCandidate[Identifiable]]
 

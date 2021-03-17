@@ -28,7 +28,8 @@ class SierraMergeCandidatesTest
   val mergeCandidateBibNumber = "b21414440"
   val miroID = "A0123456"
 
-  def getMergeCandidates(bibData: SierraBibData): List[MergeCandidate[Identifiable]] =
+  def getMergeCandidates(
+    bibData: SierraBibData): List[MergeCandidate[Identifiable]] =
     SierraMergeCandidates(createSierraBibNumber, bibData)
 
   describe("physical/digital Sierra work") {
@@ -274,7 +275,8 @@ class SierraMergeCandidatesTest
           create962subfieldsForWellcomeImageUrl(miroID)
       )
 
-      getMergeCandidates(bibData) should contain theSameElementsAs miroMergeCandidate(miroID)
+      getMergeCandidates(bibData) should contain theSameElementsAs miroMergeCandidate(
+        miroID)
     }
 
     it(
@@ -327,16 +329,14 @@ class SierraMergeCandidatesTest
       val calmIds = (1 to 5).map(_ => randomUUID.toString)
       val bibData = bibDataWith035(calmIds)
 
-      getMergeCandidates(bibData) shouldBe calmIds.map(
-        createCalmMergeCandidate)
+      getMergeCandidates(bibData) shouldBe calmIds.map(createCalmMergeCandidate)
     }
     it("dedupes Calm IDs and adds as mergeCandidates") {
       val calmIds = (1 to 5).map(_ => randomUUID.toString)
 
       val bibData = bibDataWith035(calmIds ++ calmIds)
 
-      getMergeCandidates(bibData) shouldBe calmIds.map(
-        createCalmMergeCandidate)
+      getMergeCandidates(bibData) shouldBe calmIds.map(createCalmMergeCandidate)
     }
     it(
       "creates calm merge candidates if it has a mix of calm and non calm identifiers") {
@@ -344,8 +344,7 @@ class SierraMergeCandidatesTest
       val otherIds = (1 to 5).map(_.toString)
       val bibData = bibDataWith035(otherIds ++ calmIds)
 
-      getMergeCandidates(bibData) shouldBe calmIds.map(
-        createCalmMergeCandidate)
+      getMergeCandidates(bibData) shouldBe calmIds.map(createCalmMergeCandidate)
     }
     it("doesn't create merge candidates if there are no calm ids") {
       val otherIds = (1 to 5).map(_.toString)
