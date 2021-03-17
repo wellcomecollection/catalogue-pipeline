@@ -32,4 +32,6 @@ module "worker" {
   ]
 
   elastic_cloud_vpce_sg_id = data.terraform_remote_state.shared_infra.outputs.ec_platform_privatelink_sg_id
+
+  use_fargate_spot = true
 }

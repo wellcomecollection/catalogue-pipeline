@@ -50,6 +50,8 @@ module "deletion_checker_worker" {
 
   deployment_service_env  = local.release_label
   deployment_service_name = "calm-deletion-checker"
+
+  use_fargate_spot = true
 }
 
 resource "aws_iam_role_policy" "read_from_deletion_checker_queue" {
