@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
+import grizzled.slf4j.Logging
 import uk.ac.wellcome.models.work.internal.IdState.Identifiable
 
 import java.util.UUID
@@ -13,16 +14,20 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraQueryOps
 }
 import uk.ac.wellcome.platform.transformer.sierra.transformers.parsers.MiroIdParsing
+import weco.catalogue.sierra_adapter.models.SierraBibNumber
 
 import scala.util.Try
 import scala.util.matching.Regex
 
-object SierraMergeCandidates extends SierraDataTransformer with SierraQueryOps {
+object SierraMergeCandidates
+    extends SierraIdentifiedDataTransformer
+    with SierraQueryOps
+    with Logging {
 
   type Output = List[MergeCandidate[Identifiable]]
 
-  def apply(bibData: SierraBibData) =
-    get776mergeCandidates(bibData) ++
+  def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
+    get776mergeCandidates(bibId, bibData) ++
       getSinglePageMiroMergeCandidates(bibData) ++ get035CalmMergeCandidates(
       bibData)
 
@@ -34,36 +39,54 @@ object SierraMergeCandidates extends SierraDataTransformer with SierraQueryOps {
   // inconsistencies in the source data that it's easier to handle that here.
   private val uklwPrefixRegex: Regex = """\((?i:UkLW)\)[\s]*(.+)""".r.anchored
 
+  private val bnumberRegex: Regex = """b[0-9]{7}[0-9x]""".r.anchored
+
   /** We can merge a bib and the digitised version of that bib.  The number
     * of the other bib comes from MARC tag 776 subfield $w.
     *
     * If the identifier starts with (UkLW), we strip the prefix and use the
     * bib number as a merge candidate.
     *
+    * We ignore any values in 776 subfield ǂw that don't start with (UkLW),
+    * e.g. identifiers that start (OCLC).
+    *
     */
   private def get776mergeCandidates(
-    bibData: SierraBibData): List[MergeCandidate[Identifiable]] =
-    bibData
-      .subfieldsWithTag("776" -> "w")
-      .contents
-      .map {
-        case uklwPrefixRegex(bibNumber) => Some(bibNumber)
-        case _                          => None
-      }
-      .distinct match {
-      case List(Some(bibNumber)) =>
+    bibId: SierraBibNumber,
+    bibData: SierraBibData): List[MergeCandidate[Identifiable]] = {
+
+    val identifiers =
+      bibData
+        .subfieldsWithTag("776" -> "w")
+        .contents
+        .flatMap {
+          case uklwPrefixRegex(bibNumber) => Some(bibNumber.trim)
+          case _                          => None
+        }
+        .filter { s =>
+          bnumberRegex.findFirstIn(s) match {
+            case Some(_) => true
+            case None =>
+              warn(s"$bibId: not a b number in field 776 subfield ǂw: $s")
+              false
+          }
+        }
+
+    identifiers.distinct match {
+      case List(bibNumber) =>
         List(
           MergeCandidate(
             identifier = SourceIdentifier(
               identifierType = IdentifierType("sierra-system-number"),
               ontologyType = "Work",
-              value = bibNumber.trim
+              value = bibNumber
             ),
             reason = "Physical/digitised Sierra work"
           )
         )
       case _ => Nil
     }
+  }
 
   /*
    * We always try to merge all linked Miro and Sierra works
