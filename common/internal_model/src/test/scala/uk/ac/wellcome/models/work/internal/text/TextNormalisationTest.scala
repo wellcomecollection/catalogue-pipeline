@@ -71,7 +71,7 @@ class TextNormalisationTest extends AnyFunSpec with Matchers {
     it("doesn't remove an ellipsis") {
       val examples = Table(
         ("text...", "text..."),
-        ("text... ", "text... ")
+        ("text... ", "text...")
       )
       forAll(examples) { (i: String, o: String) =>
         i.trimTrailingPeriod shouldBe o

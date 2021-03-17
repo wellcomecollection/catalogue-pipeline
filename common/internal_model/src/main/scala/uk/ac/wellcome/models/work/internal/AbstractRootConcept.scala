@@ -74,9 +74,8 @@ object Agent {
     Agent(IdState.Unidentifiable, label)
 
   def normalised[State >: IdState.Unidentifiable.type](
-    label: String): Agent[State] = {
+    label: String): Agent[State] =
     Agent(label.trimTrailing(','))
-  }
 }
 
 case class Organisation[+State](
