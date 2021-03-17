@@ -172,7 +172,7 @@ if __name__ == "__main__":
         cmd += ["-e", "ROOT=%s" % ROOT]
 
     if namespace.expose_ci_env_variable:
-        cmd += ["-e","BUILDKITE_BUILD_NUMBER"]
+        cmd += ["-e", "BUILDKITE_BUILD_NUMBER"]
 
     try:
         if additional_args[0] == "--":
