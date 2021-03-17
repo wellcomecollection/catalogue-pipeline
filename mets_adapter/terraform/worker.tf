@@ -27,5 +27,9 @@ module "worker" {
   subnets                = local.private_subnets
   shared_logging_secrets = data.terraform_remote_state.shared_infra.outputs.shared_secrets_logging
 
+  security_group_ids = [
+    aws_security_group.egress.id
+  ]
+
   elastic_cloud_vpce_sg_id = data.terraform_remote_state.shared_infra.outputs.ec_platform_privatelink_sg_id
 }
