@@ -39,6 +39,10 @@ module "adapter_worker" {
   shared_logging_secrets   = local.shared_logging_secrets
   elastic_cloud_vpce_sg_id = local.elastic_cloud_vpce_sg_id
 
+  security_group_ids = [
+    aws_security_group.egress.id,
+  ]
+
   deployment_service_env  = local.release_label
   deployment_service_name = "calm-adapter"
 }
