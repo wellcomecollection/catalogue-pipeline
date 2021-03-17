@@ -5,7 +5,7 @@ import org.scalatest.prop.TableDrivenPropertyChecks._
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.text.TextNormalisation._
 
-class textNormalisationTest extends AnyFunSpec with Matchers {
+class TextNormalisationTest extends AnyFunSpec with Matchers {
   describe("trimTrailing") {
     it("removes trailing character") {
       val examples = Table(
