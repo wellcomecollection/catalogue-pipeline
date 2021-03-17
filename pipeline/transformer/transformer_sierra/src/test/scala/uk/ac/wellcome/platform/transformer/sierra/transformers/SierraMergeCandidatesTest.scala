@@ -28,6 +28,9 @@ class SierraMergeCandidatesTest
   val mergeCandidateBibNumber = "b21414440"
   val miroID = "A0123456"
 
+  def getMergeCandidates(bibData: SierraBibData): List[MergeCandidate[Identifiable]] =
+    SierraMergeCandidates(createSierraBibNumber, bibData)
+
   describe("physical/digital Sierra work") {
     it("extracts the bib number in 776$$w as a mergeCandidate") {
       val sierraData = createSierraBibDataWith(
@@ -36,7 +39,7 @@ class SierraMergeCandidatesTest
         )
       )
 
-      SierraMergeCandidates(sierraData) shouldBe
+      getMergeCandidates(sierraData) shouldBe
         physicalAndDigitalSierraMergeCandidate(mergeCandidateBibNumber)
     }
 
@@ -47,7 +50,7 @@ class SierraMergeCandidatesTest
         )
       )
 
-      SierraMergeCandidates(sierraData) shouldBe
+      getMergeCandidates(sierraData) shouldBe
         physicalAndDigitalSierraMergeCandidate(mergeCandidateBibNumber)
     }
 
@@ -58,7 +61,7 @@ class SierraMergeCandidatesTest
         )
       )
 
-      SierraMergeCandidates(sierraData) shouldBe
+      getMergeCandidates(sierraData) shouldBe
         physicalAndDigitalSierraMergeCandidate(mergeCandidateBibNumber)
     }
 
@@ -74,7 +77,7 @@ class SierraMergeCandidatesTest
         )
       )
 
-      SierraMergeCandidates(sierraData) shouldBe Nil
+      getMergeCandidates(sierraData) shouldBe Nil
     }
 
     it("checks for the (UkLW) prefix case-insensitively") {
@@ -86,7 +89,7 @@ class SierraMergeCandidatesTest
           )
         )
       }
-      val mergeCandidates = sierraData.map(SierraMergeCandidates.apply)
+      val mergeCandidates = sierraData.map(getMergeCandidates)
 
       every(mergeCandidates) shouldBe
         physicalAndDigitalSierraMergeCandidate(mergeCandidateBibNumber)
@@ -99,7 +102,7 @@ class SierraMergeCandidatesTest
         )
       )
 
-      SierraMergeCandidates(sierraData) shouldBe Nil
+      getMergeCandidates(sierraData) shouldBe Nil
     }
 
     it(
@@ -110,7 +113,7 @@ class SierraMergeCandidatesTest
         )
       )
 
-      SierraMergeCandidates(bibData) shouldBe Nil
+      getMergeCandidates(bibData) shouldBe Nil
     }
 
     it(
@@ -125,7 +128,7 @@ class SierraMergeCandidatesTest
         )
       )
 
-      SierraMergeCandidates(bibData) shouldBe
+      getMergeCandidates(bibData) shouldBe
         physicalAndDigitalSierraMergeCandidate(mergeCandidateBibNumber)
     }
 
@@ -139,7 +142,21 @@ class SierraMergeCandidatesTest
         )
       )
 
-      SierraMergeCandidates(bibData) shouldBe
+      getMergeCandidates(bibData) shouldBe
+        physicalAndDigitalSierraMergeCandidate(mergeCandidateBibNumber)
+    }
+
+    it("ignores values that aren't b numbers") {
+      val bibData = createSierraBibDataWith(
+        varFields = create776subfieldsWith(
+          ids = List(
+            s"(UkLW)bxxxxxxxx",
+            s"(UkLW)$mergeCandidateBibNumber",
+          )
+        )
+      )
+
+      getMergeCandidates(bibData) shouldBe
         physicalAndDigitalSierraMergeCandidate(mergeCandidateBibNumber)
     }
   }
@@ -150,8 +167,7 @@ class SierraMergeCandidatesTest
         urls = List(s"http://wellcomeimages.org/indexplus/image/$miroID.html")
       )
 
-      SierraMergeCandidates(bibData) shouldBe
-        miroMergeCandidate(miroID)
+      getMergeCandidates(bibData) shouldBe miroMergeCandidate(miroID)
     }
 
     it(
@@ -163,7 +179,7 @@ class SierraMergeCandidatesTest
         )
       )
 
-      SierraMergeCandidates(bibData) should contain theSameElementsAs (
+      getMergeCandidates(bibData) should contain theSameElementsAs (
         miroMergeCandidate(miroID) ++ miroMergeCandidate("B0000001")
       )
     }
@@ -176,8 +192,7 @@ class SierraMergeCandidatesTest
         )
       )
 
-      SierraMergeCandidates(bibData) shouldBe
-        miroMergeCandidate(miroID)
+      getMergeCandidates(bibData) shouldBe miroMergeCandidate(miroID)
     }
 
     it("does not create a merge candidate if the URL is unrecognised") {
@@ -186,7 +201,7 @@ class SierraMergeCandidatesTest
           "http://film.wellcome.ac.uk:15151/mediaplayer.html?fug_7340-1&pw=524ph=600.html")
       )
 
-      SierraMergeCandidates(bibData) shouldBe Nil
+      getMergeCandidates(bibData) shouldBe Nil
     }
 
     it("creates a merge candidate if the material type is 'Picture'") {
@@ -197,7 +212,7 @@ class SierraMergeCandidatesTest
         )
       )
 
-      SierraMergeCandidates(bibData) shouldBe miroMergeCandidate(miroID)
+      getMergeCandidates(bibData) shouldBe miroMergeCandidate(miroID)
     }
 
     // - - - - - - -  089 fields - - - - - - -
@@ -207,7 +222,7 @@ class SierraMergeCandidatesTest
         varFields = create089subfieldsWith(List("V 13889"))
       )
 
-      SierraMergeCandidates(bibData) shouldBe miroMergeCandidate(
+      getMergeCandidates(bibData) shouldBe miroMergeCandidate(
         miroID = "V0013889")
     }
 
@@ -217,7 +232,7 @@ class SierraMergeCandidatesTest
         varFields = create089subfieldsWith(List("V 13889"))
       )
 
-      SierraMergeCandidates(bibData) shouldBe miroMergeCandidate(
+      getMergeCandidates(bibData) shouldBe miroMergeCandidate(
         miroID = "V0013889")
     }
 
@@ -226,7 +241,7 @@ class SierraMergeCandidatesTest
         varFields = create089subfieldsWith(List("V 13889", "V 12"))
       )
 
-      SierraMergeCandidates(bibData) should contain theSameElementsAs (
+      getMergeCandidates(bibData) should contain theSameElementsAs (
         miroMergeCandidate("V0013889") ++ miroMergeCandidate("V0000012")
       )
     }
@@ -238,7 +253,7 @@ class SierraMergeCandidatesTest
             ++ create089subfieldsWith(List("V 13889"))
       )
 
-      SierraMergeCandidates(bibData) should contain theSameElementsAs
+      getMergeCandidates(bibData) should contain theSameElementsAs
         miroMergeCandidate(miroID) ++ miroMergeCandidate("V0013889")
     }
 
@@ -249,7 +264,7 @@ class SierraMergeCandidatesTest
           create962subfieldsForWellcomeImageUrl("V0036036EL")
       )
 
-      SierraMergeCandidates(bibData) should contain theSameElementsAs
+      getMergeCandidates(bibData) should contain theSameElementsAs
         miroMergeCandidate("V0036036EL")
     }
 
@@ -259,8 +274,7 @@ class SierraMergeCandidatesTest
           create962subfieldsForWellcomeImageUrl(miroID)
       )
 
-      val result = SierraMergeCandidates(bibData)
-      result should contain theSameElementsAs miroMergeCandidate(miroID)
+      getMergeCandidates(bibData) should contain theSameElementsAs miroMergeCandidate(miroID)
     }
 
     it(
@@ -270,7 +284,7 @@ class SierraMergeCandidatesTest
           create962subfieldsForWellcomeImageUrl("V0012345EBR")
       )
 
-      SierraMergeCandidates(bibData) should contain theSameElementsAs
+      getMergeCandidates(bibData) should contain theSameElementsAs
         miroMergeCandidate("V0036036") ++ miroMergeCandidate("V0012345EBR")
     }
   }
@@ -291,12 +305,12 @@ class SierraMergeCandidatesTest
         physicalAndDigitalSierraMergeCandidate(mergeCandidateBibNumber) ++
           miroMergeCandidate(miroID)
 
-      SierraMergeCandidates(sierraData) shouldBe expectedMergeCandidates
+      getMergeCandidates(sierraData) shouldBe expectedMergeCandidates
     }
 
     it("returns an empty list if there is no MARC tag 776 or 962") {
       val sierraData = createSierraBibDataWith(varFields = List())
-      SierraMergeCandidates(sierraData) shouldBe Nil
+      getMergeCandidates(sierraData) shouldBe Nil
     }
   }
 
@@ -306,14 +320,14 @@ class SierraMergeCandidatesTest
       val calmId = randomUUID.toString
       val bibData = bibDataWith035(List(calmId))
 
-      SierraMergeCandidates(bibData) shouldBe List(
+      getMergeCandidates(bibData) shouldBe List(
         createCalmMergeCandidate(calmId))
     }
     it("adds multiple Calm IDs as mergeCandidates") {
       val calmIds = (1 to 5).map(_ => randomUUID.toString)
       val bibData = bibDataWith035(calmIds)
 
-      SierraMergeCandidates(bibData) shouldBe calmIds.map(
+      getMergeCandidates(bibData) shouldBe calmIds.map(
         createCalmMergeCandidate)
     }
     it("dedupes Calm IDs and adds as mergeCandidates") {
@@ -321,7 +335,7 @@ class SierraMergeCandidatesTest
 
       val bibData = bibDataWith035(calmIds ++ calmIds)
 
-      SierraMergeCandidates(bibData) shouldBe calmIds.map(
+      getMergeCandidates(bibData) shouldBe calmIds.map(
         createCalmMergeCandidate)
     }
     it(
@@ -330,14 +344,14 @@ class SierraMergeCandidatesTest
       val otherIds = (1 to 5).map(_.toString)
       val bibData = bibDataWith035(otherIds ++ calmIds)
 
-      SierraMergeCandidates(bibData) shouldBe calmIds.map(
+      getMergeCandidates(bibData) shouldBe calmIds.map(
         createCalmMergeCandidate)
     }
     it("doesn't create merge candidates if there are no calm ids") {
       val otherIds = (1 to 5).map(_.toString)
       val bibData = bibDataWith035(otherIds)
 
-      SierraMergeCandidates(bibData) shouldBe Nil
+      getMergeCandidates(bibData) shouldBe Nil
     }
   }
 

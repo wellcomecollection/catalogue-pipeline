@@ -119,7 +119,7 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
 
     WorkData[DataState.Unidentified](
       otherIdentifiers = SierraIdentifiers(bibId, bibData),
-      mergeCandidates = SierraMergeCandidates(bibData),
+      mergeCandidates = SierraMergeCandidates(bibId, bibData),
       title = SierraTitle(bibData),
       alternativeTitles = SierraAlternativeTitles(bibData),
       format = SierraFormat(bibData),
