@@ -115,6 +115,13 @@ def parse_args():
         const=True,
         help="Whether to expose the name of the root folder of the repository in the host",
     )
+    parser.add_argument(
+        "--ci-env",
+        dest="expose_ci_env_variable",
+        action="store_const",
+        const=True,
+        help="Whether to expose the BUILDKITE_BUILD_NUMBER",
+    )
     return parser.parse_known_args()
 
 
@@ -163,6 +170,9 @@ if __name__ == "__main__":
 
     if namespace.expose_host_root_folder:
         cmd += ["-e", "ROOT=%s" % ROOT]
+
+    if namespace.expose_ci_env_variable:
+        cmd += ["-e","BUILDKITE_BUILD_NUMBER"]
 
     try:
         if additional_args[0] == "--":

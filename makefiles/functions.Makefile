@@ -106,7 +106,7 @@ endef
 #   $1 - Name of the project.
 #
 define sbt_build
-	$(ROOT)/docker_run.py --sbt --root -- \
+	$(ROOT)/docker_run.py --sbt --root --ci-env -- \
 		$(ECR_REGISTRY)/wellcome/sbt_wrapper \
 		"project $(1)" ";stage"
 endef
