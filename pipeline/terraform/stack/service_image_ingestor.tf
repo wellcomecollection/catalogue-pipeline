@@ -9,7 +9,7 @@ module "ingestor_images_queue" {
   aws_region      = var.aws_region
   alarm_topic_arn = var.dlq_alarm_arn
 
-  visibility_timeout_seconds = local.image_ingestor_flush_interval_seconds + 30
+  visibility_timeout_seconds = local.image_ingestor_flush_interval_seconds + 60
 }
 
 # Service

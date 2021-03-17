@@ -29,6 +29,7 @@ import humanize
 import tqdm
 
 from get_reindex_status import get_api_es_client, get_session_with_role
+from pipeline_inject_messages import inject_id_messages
 
 
 def get_works(reindex_date):
@@ -126,13 +127,12 @@ if __name__ == "__main__":
         )
 
         if click.confirm("Resend these works to the merger?"):
-            sns = session.client("sns")
-
-            for work_id in tqdm.tqdm(affected_work_ids):
-                sns.publish(
-                    TopicArn=f"catalogue-{reindex_date}_id_minter_output",
-                    Message=work_id,
-                )
+            inject_id_messages(
+                session,
+                destination_name="id_minter_output",
+                reindex_date=reindex_date,
+                ids=affected_work_ids,
+            )
 
     else:
         print(click.style("No errors detected!", "green"))
