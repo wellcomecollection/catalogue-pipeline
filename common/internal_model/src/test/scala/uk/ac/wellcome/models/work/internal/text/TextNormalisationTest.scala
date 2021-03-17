@@ -54,6 +54,31 @@ class TextNormalisationTest extends AnyFunSpec with Matchers {
     }
   }
 
+  describe("trimTrailingPeriod") {
+    it("removes a single trailing period") {
+      val examples = Table(
+        ("text", "text"),
+        ("text.", "text"),
+        (" text. ", " text"),
+        ("text. ", "text"),
+        ("text . ", "text"),
+      )
+      forAll(examples) { (i: String, o: String) =>
+        i.trimTrailingPeriod shouldBe o
+      }
+    }
+
+    it("doesn't remove an ellipsis") {
+      val examples = Table(
+        ("text...", "text..."),
+        ("text... ", "text... ")
+      )
+      forAll(examples) { (i: String, o: String) =>
+        i.trimTrailingPeriod shouldBe o
+      }
+    }
+  }
+
   describe("sentenceCase") {
     it("converts to sentence case") {
       val examples = Table(

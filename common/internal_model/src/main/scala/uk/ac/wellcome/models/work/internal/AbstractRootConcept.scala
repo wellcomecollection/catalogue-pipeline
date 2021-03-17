@@ -21,7 +21,7 @@ object Concept {
 
   def normalised[State](id: State = IdState.Unidentifiable,
                         label: String): Concept[State] =
-    Concept(id, label.trimTrailing('.'))
+    Concept(id, label.trimTrailingPeriod)
 }
 
 case class Period[+State](
@@ -38,7 +38,7 @@ object Period {
 
   def apply[State >: IdState.Unidentifiable.type](
     label: String): Period[State] = {
-    val normalisedLabel = label.trimTrailing('.')
+    val normalisedLabel = label.trimTrailingPeriod
     Period(
       IdState.Unidentifiable,
       normalisedLabel,

@@ -10,6 +10,12 @@ object TextNormalisation {
       s.replaceAll(regexp, "")
     }
 
+    /** Remove a single trailing period, but not ellipses */
+    def trimTrailingPeriod: String =
+      s
+        .replaceAll("""([^\.])\.\s*$""", "$1")
+        .replaceAll("""\s*$""", "")
+
     def sentenceCase: String =
       s.capitalize
   }
