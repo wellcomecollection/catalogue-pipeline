@@ -66,7 +66,7 @@ class textNormalisationTest extends AnyFunSpec with Matchers {
         ("Text teXT", "Text teXT")
       )
       forAll(examples) { (i: String, o: String) =>
-        sentenceCase(i) shouldBe o
+        i.sentenceCase shouldBe o
       }
     }
   }

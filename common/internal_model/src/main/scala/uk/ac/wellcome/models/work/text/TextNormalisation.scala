@@ -9,8 +9,8 @@ object TextNormalisation {
       val regexp = """\s*[""" + Regex.quote(c.toString) + """]\s*$"""
       s.replaceAll(regexp, "")
     }
-  }
 
-  def sentenceCase(s: String): String =
-    s.capitalize
+    def sentenceCase: String =
+      s.capitalize
+  }
 }
