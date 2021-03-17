@@ -39,9 +39,12 @@ def should_run_sbt_project(repo, project_name, changed_paths):
     if any(p.startswith("project/") for p in interesting_paths):
         print("*** Relevant: project/")
         return True
+    if any(p.startswith(".buildkite") for p in interesting_paths):
+        print("*** Relevant: project/")
+        return True
 
     for path in interesting_paths:
-        if path.startswith((".buildkite", "docs/")):
+        if path.startswith("docs/"):
             continue
 
         if path.endswith((".py", ".tf", ".md")):
