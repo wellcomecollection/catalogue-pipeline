@@ -363,6 +363,9 @@ class SierraConceptSubjectsTest
       )
     )
 
-    SierraConceptSubjects(bibId, bibData) shouldBe List(Subject("Diet, Food, and Nutrition", concepts = List(Concept("Diet, Food, and Nutrition"))))
+    SierraConceptSubjects(bibId, bibData) shouldBe List(
+      Subject(
+        "Diet, Food, and Nutrition",
+        concepts = List(Concept("Diet, Food, and Nutrition"))))
   }
 }
