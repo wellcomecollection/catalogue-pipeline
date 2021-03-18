@@ -2,13 +2,13 @@ package uk.ac.wellcome.platform.api.images
 
 import uk.ac.wellcome.display.models.DisplaySerialisationTestBase
 import uk.ac.wellcome.platform.api.ApiTestBase
-import weco.catalogue.internal_model.generators.ImageGenerators
+import uk.ac.wellcome.platform.api.generators.ApiImageGenerators
 import weco.catalogue.internal_model.image._
 
 trait ApiImagesTestBase
     extends ApiTestBase
     with DisplaySerialisationTestBase
-    with ImageGenerators {
+    with ApiImageGenerators {
 
   def singleImageResult: String =
     s"""
@@ -18,7 +18,7 @@ trait ApiImagesTestBase
 
   def imageSource(source: ImageSource): String =
     source match {
-      case SourceWorks(work, _) =>
+      case ParentWorks(work, _) =>
         s"""
              | {
              |   "id": "${source.id.canonicalId}",

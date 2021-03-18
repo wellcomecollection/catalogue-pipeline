@@ -818,8 +818,7 @@ class WorksIncludesTest
           note = chooseFrom(None, Some(randomAlphanumeric())),
           enumeration =
             collectionOf(min = 0, max = 10) { randomAlphanumeric() }.toList,
-          locations =
-            collectionOf(min = 0, max = 5) { createPhysicalLocation }.toList
+          location = chooseFrom(None, Some(createPhysicalLocation))
         )
       }.toList
 
