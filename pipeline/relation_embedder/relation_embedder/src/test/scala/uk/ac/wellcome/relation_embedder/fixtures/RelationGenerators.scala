@@ -2,7 +2,6 @@ package uk.ac.wellcome.relation_embedder.fixtures
 
 import uk.ac.wellcome.models.work.generators.{ItemsGenerators, WorkGenerators}
 import weco.catalogue.internal_model.work.WorkState.Merged
-import uk.ac.wellcome.models.work.internal.Work
 import uk.ac.wellcome.relation_embedder.{
   RelationWork,
   RelationWorkData,

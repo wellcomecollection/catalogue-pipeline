@@ -14,7 +14,6 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import weco.catalogue.internal_model.work.WorkFsm._
 import weco.catalogue.internal_model.work.WorkState.Denormalised
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.pipeline_storage.{Indexable, Indexer}
 import uk.ac.wellcome.typesafe.Runnable
 import Indexable.workIndexable

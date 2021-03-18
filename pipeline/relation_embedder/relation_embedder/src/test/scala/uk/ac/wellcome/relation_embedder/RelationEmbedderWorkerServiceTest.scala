@@ -18,7 +18,6 @@ import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.Implicits._
 import weco.catalogue.internal_model.work.WorkState.{Denormalised, Merged}
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.pipeline_storage.MemoryIndexer
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.index.IndexFixtures
