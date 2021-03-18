@@ -14,7 +14,6 @@ import uk.ac.wellcome.platform.id_minter.models.IdentifiersTable
 import uk.ac.wellcome.platform.id_minter.steps.IdentifierGenerator
 import uk.ac.wellcome.platform.id_minter.services.IdMinterWorkerService
 import uk.ac.wellcome.pipeline_storage.{MemoryIndexer, MemoryRetriever}
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.Implicits._
 import weco.catalogue.internal_model.work.WorkState.{Identified, Source}
 import uk.ac.wellcome.pipeline_storage.fixtures.PipelineStorageStreamFixtures

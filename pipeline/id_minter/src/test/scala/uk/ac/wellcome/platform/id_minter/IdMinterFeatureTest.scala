@@ -8,8 +8,8 @@ import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.models.work.generators.WorkGenerators
 import weco.catalogue.internal_model.work.WorkState.Identified
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.id_minter.fixtures.WorkerServiceFixture
+import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.Work
 
 import scala.collection.mutable

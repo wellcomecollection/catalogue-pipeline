@@ -22,7 +22,6 @@ import uk.ac.wellcome.pipeline_storage.typesafe.{
   ElasticSourceRetrieverBuilder,
   PipelineStorageStreamBuilder
 }
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.index.IdentifiedWorkIndexConfig
 import weco.catalogue.internal_model.work.Work

@@ -10,7 +10,6 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.Implicits._
 import weco.catalogue.internal_model.work.WorkState.Identified
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.pipeline_storage.PipelineStorageStream.{
   batchRetrieveFlow,
   processFlow
