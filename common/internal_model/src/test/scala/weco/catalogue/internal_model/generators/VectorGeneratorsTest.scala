@@ -1,14 +1,13 @@
-package uk.ac.wellcome.models.work.internal
+package weco.catalogue.internal_model.generators
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.generators.{VectorGenerators, VectorOps}
 
 class VectorGeneratorsTest
     extends AnyFunSpec
     with VectorGenerators
     with Matchers {
-  import VectorOps._
+  import weco.catalogue.internal_model.generators.VectorOps._
 
   val floatPrecision = 1e-5f
 

@@ -20,8 +20,9 @@ import uk.ac.wellcome.platform.inference_manager.services.{
   RequestPoolFlow
 }
 import uk.ac.wellcome.pipeline_storage.fixtures.PipelineStorageStreamFixtures
-import ImageState.{Augmented, Initial}
+import weco.catalogue.internal_model.image.ImageState.{Augmented, Initial}
 import akka.http.scaladsl.model.Uri
+import weco.catalogue.internal_model.image.Image
 
 trait InferenceManagerWorkerServiceFixture
     extends PipelineStorageStreamFixtures {

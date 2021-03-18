@@ -6,13 +6,13 @@ import akka.http.scaladsl.model.{HttpMethods, HttpRequest}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{Inside, OptionValues}
-import uk.ac.wellcome.models.work.generators.ImageGenerators
-import uk.ac.wellcome.models.work.internal.InferredData
 import uk.ac.wellcome.platform.inference_manager.fixtures.Encoding
 import uk.ac.wellcome.platform.inference_manager.models.{
   DownloadedImage,
   FeatureVectorInferrerResponse
 }
+import weco.catalogue.internal_model.generators.ImageGenerators
+import weco.catalogue.internal_model.image.InferredData
 
 class FeatureVectorInferrerAdapterTest
     extends AnyFunSpec

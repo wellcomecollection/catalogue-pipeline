@@ -4,6 +4,7 @@ import scala.concurrent.Future
 import grizzled.slf4j.Logging
 
 import uk.ac.wellcome.models.work.internal._
+import weco.catalogue.internal_model.image.{Image, ImageState}
 
 abstract class Indexer[T: Indexable] {
 

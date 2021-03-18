@@ -1,4 +1,4 @@
-package uk.ac.wellcome.models.work.generators
+package weco.catalogue.internal_model.generators
 
 import scala.util.Random
 

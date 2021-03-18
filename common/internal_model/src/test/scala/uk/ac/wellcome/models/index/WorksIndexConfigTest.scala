@@ -12,9 +12,10 @@ import io.circe.Encoder
 import io.circe.generic.semiauto.deriveEncoder
 import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.generators.{ImageGenerators, WorkGenerators}
+import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.work.internal.WorkState.Identified
 import uk.ac.wellcome.models.work.internal._
+import weco.catalogue.internal_model.generators.ImageGenerators
 
 import java.time.Instant
 

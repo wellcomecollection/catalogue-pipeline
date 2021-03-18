@@ -3,8 +3,9 @@ package uk.ac.wellcome.platform.merger.models
 import java.time.Instant
 import uk.ac.wellcome.models.work.internal._
 import WorkState.{Identified, Merged}
-import ImageState.Initial
+import weco.catalogue.internal_model.image.ImageState.Initial
 import WorkFsm._
+import weco.catalogue.internal_model.image.Image
 
 /*
  * MergerOutcome creates the final output of the merger:

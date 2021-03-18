@@ -9,12 +9,12 @@ import uk.ac.wellcome.models.work.internal.{
   DigitalLocation,
   IdState,
   IdentifierType,
-  ImageData,
   License,
   LocationType,
   SourceIdentifier
 }
 import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
+import weco.catalogue.internal_model.image.ImageData
 
 class MiroImageDataTest
     extends AnyFunSpec

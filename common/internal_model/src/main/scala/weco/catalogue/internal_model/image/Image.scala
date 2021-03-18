@@ -1,4 +1,10 @@
-package uk.ac.wellcome.models.work.internal
+package weco.catalogue.internal_model.image
+
+import uk.ac.wellcome.models.work.internal.{
+  DigitalLocation,
+  HasId,
+  SourceIdentifier
+}
 
 import java.time.Instant
 

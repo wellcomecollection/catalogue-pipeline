@@ -1,5 +1,7 @@
 package uk.ac.wellcome.models.work.internal
 
+import weco.catalogue.internal_model.image.ImageData
+
 import java.time.Instant
 
 /** Work is the core model in the pipeline / API.

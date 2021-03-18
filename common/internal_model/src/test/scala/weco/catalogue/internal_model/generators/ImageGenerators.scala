@@ -1,11 +1,13 @@
-package uk.ac.wellcome.models.work.generators
+package weco.catalogue.internal_model.generators
 
-import uk.ac.wellcome.models.work.internal.ImageState._
-import uk.ac.wellcome.models.work.internal.SourceWork._
+import uk.ac.wellcome.models.work.generators._
 import uk.ac.wellcome.models.work.internal._
+import weco.catalogue.internal_model.image
+import weco.catalogue.internal_model.image.SourceWork._
+import weco.catalogue.internal_model.image.ImageState.{Indexed, Initial}
+import weco.catalogue.internal_model.image._
 
 import java.time.Instant
-
 import scala.util.Random
 
 trait ImageGenerators
@@ -137,7 +139,7 @@ trait ImageGenerators
       imageData
         .toInitialImageWith(
           modifiedTime = modifiedTime,
-          sourceWorks = SourceWorks(
+          sourceWorks = image.SourceWorks(
             canonicalWork = parentWork.toSourceWork,
             redirectedWork = redirectedWork.map(_.toSourceWork))
         )

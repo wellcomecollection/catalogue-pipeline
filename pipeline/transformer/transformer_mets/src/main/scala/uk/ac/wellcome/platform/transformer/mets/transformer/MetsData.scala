@@ -9,6 +9,7 @@ import uk.ac.wellcome.models.work.internal._
 import WorkState.Source
 import uk.ac.wellcome.models.work.internal.DeletedReason.DeletedFromSource
 import uk.ac.wellcome.models.work.internal.InvisibilityReason.MetsWorksAreNotVisible
+import weco.catalogue.internal_model.image.ImageData
 
 case class MetsData(
   recordIdentifier: String,

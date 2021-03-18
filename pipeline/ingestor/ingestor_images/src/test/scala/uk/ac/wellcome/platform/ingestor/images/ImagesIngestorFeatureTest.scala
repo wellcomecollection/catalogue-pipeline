@@ -7,12 +7,13 @@ import org.scalatest.time.{Seconds, Span}
 import uk.ac.wellcome.models.index.{IndexFixtures, IndexedImageIndexConfig}
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.generators.ImageGenerators
-import uk.ac.wellcome.models.work.internal.{Image, ImageState}
+import uk.ac.wellcome.models.work.internal.ImageState
 import uk.ac.wellcome.pipeline_storage.ElasticIndexer
 import uk.ac.wellcome.pipeline_storage.Indexable.imageIndexable
-import ImageState.{Augmented, Indexed}
+import weco.catalogue.internal_model.image.ImageState.{Augmented, Indexed}
 import uk.ac.wellcome.pipeline_storage.elastic.ElasticSourceRetriever
+import weco.catalogue.internal_model.generators.ImageGenerators
+import weco.catalogue.internal_model.image.Image
 
 class ImagesIngestorFeatureTest
     extends AnyFunSpec

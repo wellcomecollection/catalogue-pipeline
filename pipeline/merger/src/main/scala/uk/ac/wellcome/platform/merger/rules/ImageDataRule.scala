@@ -4,6 +4,7 @@ import cats.data.NonEmptyList
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 import WorkState.Identified
+import weco.catalogue.internal_model.image.ImageData
 
 object ImageDataRule extends FieldMergeRule {
   import WorkPredicates._

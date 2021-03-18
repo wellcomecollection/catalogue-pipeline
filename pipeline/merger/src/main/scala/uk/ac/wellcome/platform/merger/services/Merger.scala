@@ -11,6 +11,8 @@ import uk.ac.wellcome.platform.merger.models.{
   MergerOutcome
 }
 import WorkState.Identified
+import weco.catalogue.internal_model.image
+import weco.catalogue.internal_model.image.{ImageData, SourceWorks}
 
 /*
  * The implementor of a Merger must provide:
@@ -162,7 +164,7 @@ object Merger {
 }
 
 object PlatformMerger extends Merger {
-  import SourceWork._
+  import weco.catalogue.internal_model.image.SourceWork._
   import Merger.WorkMergingOps
 
   override def findTarget(
@@ -214,7 +216,7 @@ object PlatformMerger extends Merger {
           imageDataWithSources = sourceImageData.map { imageData =>
             ImageDataWithSource(
               imageData = imageData,
-              source = SourceWorks(
+              source = image.SourceWorks(
                 canonicalWork = work.toSourceWork,
                 redirectedWork = sources
                   .find { _.data.imageData.contains(imageData) }

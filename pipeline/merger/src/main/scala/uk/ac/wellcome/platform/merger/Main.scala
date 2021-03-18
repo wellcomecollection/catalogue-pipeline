@@ -23,7 +23,8 @@ import uk.ac.wellcome.platform.merger.services._
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import WorkState.{Identified, Merged}
-import ImageState.Initial
+import weco.catalogue.internal_model.image.Image
+import weco.catalogue.internal_model.image.ImageState.Initial
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>

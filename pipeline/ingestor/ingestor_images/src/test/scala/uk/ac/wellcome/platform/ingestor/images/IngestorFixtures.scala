@@ -11,7 +11,8 @@ import uk.ac.wellcome.pipeline_storage.fixtures.{
   PipelineStorageStreamFixtures
 }
 import uk.ac.wellcome.pipeline_storage.{Indexer, Retriever}
-import ImageState.{Augmented, Indexed}
+import weco.catalogue.internal_model.image.Image
+import weco.catalogue.internal_model.image.ImageState.{Augmented, Indexed}
 
 trait IngestorFixtures
     extends ElasticIndexerFixtures

@@ -16,7 +16,8 @@ import uk.ac.wellcome.models.index.IndexedImageIndexConfig
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.internal._
-import ImageState.{Augmented, Indexed}
+import weco.catalogue.internal_model.image.Image
+import weco.catalogue.internal_model.image.ImageState.{Augmented, Indexed}
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>

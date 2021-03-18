@@ -1,9 +1,10 @@
 package uk.ac.wellcome.platform.merger.fixtures
 
-import uk.ac.wellcome.models.work.internal.{IdState, ImageData, Work}
+import uk.ac.wellcome.models.work.internal.{IdState, Work}
 import uk.ac.wellcome.platform.merger.models.MergerOutcome
 import org.scalatest.matchers.{MatchResult, Matcher}
 import uk.ac.wellcome.models.work.internal.WorkState.Identified
+import weco.catalogue.internal_model.image.ImageData
 
 trait FeatureTestSugar {
   implicit class OutcomeOps(val mergerOutcome: MergerOutcome) {

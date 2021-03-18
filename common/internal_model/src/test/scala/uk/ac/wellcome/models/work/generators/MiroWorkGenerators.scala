@@ -1,6 +1,7 @@
 package uk.ac.wellcome.models.work.generators
 
 import uk.ac.wellcome.models.work.internal._
+import weco.catalogue.internal_model.generators.ImageGenerators
 
 import scala.util.Random
 

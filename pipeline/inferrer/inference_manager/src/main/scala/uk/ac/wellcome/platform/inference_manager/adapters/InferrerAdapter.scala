@@ -6,8 +6,8 @@ import akka.stream.Materializer
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import grizzled.slf4j.Logging
 import io.circe.Decoder
-import uk.ac.wellcome.models.work.internal.InferredData
 import uk.ac.wellcome.platform.inference_manager.models.DownloadedImage
+import weco.catalogue.internal_model.image.InferredData
 
 import scala.concurrent.Future
 

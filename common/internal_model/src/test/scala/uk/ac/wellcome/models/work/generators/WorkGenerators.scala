@@ -4,6 +4,7 @@ import java.time.Instant
 import uk.ac.wellcome.models.work.internal._
 import WorkState._
 import uk.ac.wellcome.models.work.internal.DeletedReason.DeletedFromSource
+import weco.catalogue.internal_model.image.ImageData
 
 import scala.util.Random
 

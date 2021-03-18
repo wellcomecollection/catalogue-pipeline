@@ -12,7 +12,8 @@ import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil.toJson
 import uk.ac.wellcome.models.work.internal.WorkState.Identified
-import uk.ac.wellcome.models.work.internal.{Image, ImageState, Work, WorkState}
+import uk.ac.wellcome.models.work.internal.{Work, WorkState}
+import weco.catalogue.internal_model.image.{Image, ImageState}
 
 trait IndexFixtures extends ElasticsearchFixtures { this: Suite =>
 

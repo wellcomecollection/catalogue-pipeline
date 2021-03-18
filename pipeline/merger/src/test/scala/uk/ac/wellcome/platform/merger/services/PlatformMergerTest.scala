@@ -6,8 +6,9 @@ import org.scalatest.prop.TableDrivenPropertyChecks._
 import uk.ac.wellcome.models.work.internal._
 import WorkState.{Identified, Merged}
 import WorkFsm._
-import SourceWork._
+import weco.catalogue.internal_model.image.SourceWork._
 import uk.ac.wellcome.models.work.generators.SourceWorkGenerators
+import weco.catalogue.internal_model.image.SourceWorks
 
 class PlatformMergerTest
     extends AnyFunSpec

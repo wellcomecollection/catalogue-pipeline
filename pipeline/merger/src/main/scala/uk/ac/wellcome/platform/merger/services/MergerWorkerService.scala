@@ -22,7 +22,8 @@ import uk.ac.wellcome.pipeline_storage.{
 }
 import uk.ac.wellcome.typesafe.Runnable
 import WorkState.{Identified, Merged}
-import ImageState.Initial
+import weco.catalogue.internal_model.image.Image
+import weco.catalogue.internal_model.image.ImageState.Initial
 
 class MergerWorkerService[WorkDestination, ImageDestination](
   msgStream: SQSStream[NotificationMessage],

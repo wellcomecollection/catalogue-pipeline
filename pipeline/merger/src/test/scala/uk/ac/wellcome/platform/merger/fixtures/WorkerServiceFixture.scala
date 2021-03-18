@@ -15,7 +15,8 @@ import uk.ac.wellcome.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import uk.ac.wellcome.pipeline_storage.{MemoryIndexer, MemoryRetriever}
 import uk.ac.wellcome.platform.merger.services._
 import WorkState.{Identified, Merged}
-import ImageState.Initial
+import weco.catalogue.internal_model.image.Image
+import weco.catalogue.internal_model.image.ImageState.Initial
 
 trait WorkerServiceFixture extends PipelineStorageStreamFixtures {
 
