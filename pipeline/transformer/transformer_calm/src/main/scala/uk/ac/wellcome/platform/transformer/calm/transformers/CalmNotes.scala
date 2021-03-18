@@ -18,13 +18,12 @@ object CalmNotes extends CalmRecordOps {
     ("Arrangement", ArrangementNote(_))
   )
 
-  def apply(record: CalmRecord,
-            languageNote: Option[LanguageNote]): List[Note] =
+  def apply(record: CalmRecord): List[Note] =
     notesMapping.flatMap {
       case (key, createNote) =>
         record
           .getList(key)
           .map(NormaliseText(_))
           .map(createNote)
-    } ++ List(languageNote).flatten
+    }
 }
