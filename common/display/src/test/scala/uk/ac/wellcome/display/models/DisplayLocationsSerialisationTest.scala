@@ -5,8 +5,8 @@ import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.display.json.DisplayJsonUtil._
 import uk.ac.wellcome.display.test.util.JsonMapperTestUtil
 import uk.ac.wellcome.models.work.generators._
-import uk.ac.wellcome.models.work.internal._
-import WorkState.Indexed
+import weco.catalogue.internal_model.locations._
+import weco.catalogue.internal_model.work.{Work, WorkState}
 
 class DisplayLocationsSerialisationTest
     extends AnyFunSpec
@@ -120,7 +120,7 @@ class DisplayLocationsSerialisationTest
   }
 
   private def assertWorkMapsToJson(
-    work: Work.Visible[Indexed],
+    work: Work.Visible[WorkState.Indexed],
     expectedJson: String
   ): Assertion =
     assertObjectMapsToJson(

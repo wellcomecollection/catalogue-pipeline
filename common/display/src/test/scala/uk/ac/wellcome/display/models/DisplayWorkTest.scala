@@ -1,7 +1,6 @@
 package uk.ac.wellcome.display.models
 
 import java.time.Instant
-
 import org.scalacheck.Arbitrary
 import org.scalacheck.Gen.chooseNum
 import org.scalacheck.ScalacheckShapeless._
@@ -9,13 +8,13 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import uk.ac.wellcome.models.work.generators.{
-  ImageGenerators,
   ProductionEventGenerators,
   WorkGenerators
 }
-import uk.ac.wellcome.models.work.internal.Format.Videos
-import uk.ac.wellcome.models.work.internal._
-import WorkState.Indexed
+import weco.catalogue.internal_model.generators.ImageGenerators
+import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.locations._
+import weco.catalogue.internal_model.work._
 
 class DisplayWorkTest
     extends AnyFunSpec
@@ -112,7 +111,7 @@ class DisplayWorkTest
   }
 
   it("gets the format from a Work") {
-    val format = Videos
+    val format = Format.Videos
 
     val expectedDisplayWork = DisplayFormat(
       id = format.id,
@@ -222,7 +221,7 @@ class DisplayWorkTest
   }
 
   it("does not extract includes set to false") {
-    forAll { work: Work.Visible[Indexed] =>
+    forAll { work: Work.Visible[WorkState.Indexed] =>
       val displayWork = DisplayWork(work, includes = WorksIncludes.none)
 
       displayWork.production shouldNot be(defined)

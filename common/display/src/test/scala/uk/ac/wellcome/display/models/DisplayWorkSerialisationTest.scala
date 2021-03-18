@@ -1,16 +1,16 @@
 package uk.ac.wellcome.display.models
 
 import org.scalatest.funspec.AnyFunSpec
+import uk.ac.wellcome.display.models.Implicits._
 import uk.ac.wellcome.display.test.util.JsonMapperTestUtil
 import uk.ac.wellcome.models.work.generators.{
-  ImageGenerators,
   ProductionEventGenerators,
   SubjectGenerators,
   WorkGenerators
 }
-import uk.ac.wellcome.models.work.internal.Format.{Books, EBooks}
-import uk.ac.wellcome.models.work.internal._
-import Implicits._
+import weco.catalogue.internal_model.generators.ImageGenerators
+import weco.catalogue.internal_model.locations._
+import weco.catalogue.internal_model.work._
 
 class DisplayWorkSerialisationTest
     extends AnyFunSpec
@@ -23,7 +23,7 @@ class DisplayWorkSerialisationTest
 
   it("serialises a DisplayWork") {
     val work = indexedWork()
-      .format(Books)
+      .format(Format.Books)
       .description(randomAlphanumeric(100))
       .lettering(randomAlphanumeric(100))
       .createdDate(Period("1901"))
@@ -191,7 +191,7 @@ class DisplayWorkSerialisationTest
   it(
     "includes the contributors in DisplayWork serialisation with the contribuotrs include") {
     val work = indexedWork()
-      .format(EBooks)
+      .format(Format.EBooks)
       .description(randomAlphanumeric(100))
       .lettering(randomAlphanumeric(100))
       .createdDate(Period("1901"))

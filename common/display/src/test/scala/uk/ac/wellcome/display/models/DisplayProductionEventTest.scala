@@ -3,7 +3,7 @@ package uk.ac.wellcome.display.models
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.generators.ProductionEventGenerators
-import uk.ac.wellcome.models.work.internal._
+import weco.catalogue.internal_model.work._
 
 class DisplayProductionEventTest
     extends AnyFunSpec

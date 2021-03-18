@@ -2,8 +2,7 @@ package uk.ac.wellcome.display.models
 
 import io.circe.generic.extras.JsonKey
 import io.swagger.v3.oas.annotations.media.Schema
-import uk.ac.wellcome.models.work.internal._
-import WorkState.Indexed
+import weco.catalogue.internal_model.work.{Work, WorkState, WorkType}
 
 @Schema(
   name = "Work",
@@ -127,7 +126,7 @@ case class DisplayWork(
 
 object DisplayWork {
 
-  def apply(work: Work.Visible[Indexed], includes: WorksIncludes): DisplayWork =
+  def apply(work: Work.Visible[WorkState.Indexed], includes: WorksIncludes): DisplayWork =
     DisplayWork(
       id = work.state.canonicalId,
       title = work.data.title,
@@ -223,7 +222,7 @@ object DisplayWork {
         else None,
     )
 
-  def apply(work: Work.Visible[Indexed]): DisplayWork =
+  def apply(work: Work.Visible[WorkState.Indexed]): DisplayWork =
     DisplayWork(work = work, includes = WorksIncludes.none)
 
   def displayWorkType(workType: WorkType): String = workType match {

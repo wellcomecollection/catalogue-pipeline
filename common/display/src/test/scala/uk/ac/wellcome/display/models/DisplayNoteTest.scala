@@ -3,7 +3,7 @@ package uk.ac.wellcome.display.models
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
-import uk.ac.wellcome.models.work.internal.{LanguageNote, LetteringNote}
+import weco.catalogue.internal_model.work.{LanguageNote, LetteringNote}
 
 class DisplayNoteTest
     extends AnyFunSpec

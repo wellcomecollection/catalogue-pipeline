@@ -2,13 +2,8 @@ package uk.ac.wellcome.display.models
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.generators.LocationGenerators
-import uk.ac.wellcome.models.work.internal.{
-  DigitalLocation,
-  License,
-  LocationType,
-  PhysicalLocation
-}
+import weco.catalogue.internal_model.generators.LocationGenerators
+import weco.catalogue.internal_model.locations._
 
 class DisplayLocationTest
     extends AnyFunSpec
