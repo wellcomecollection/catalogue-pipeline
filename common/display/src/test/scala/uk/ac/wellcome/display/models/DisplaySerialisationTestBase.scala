@@ -320,8 +320,8 @@ trait DisplaySerialisationTestBase {
            '"' + en + '"'
          }
          .mkString(",")}
-       |  ],
-       |  ${optionalObject("location", location, h.location)}
+       |  ]
+       |  ${optionalObject("location", location, h.location)},
        |  "type": "Holdings"
        |}
        |""".stripMargin
