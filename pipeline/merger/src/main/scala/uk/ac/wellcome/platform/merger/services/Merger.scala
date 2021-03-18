@@ -165,7 +165,7 @@ object Merger {
 }
 
 object PlatformMerger extends Merger {
-  import weco.catalogue.internal_model.image.SourceWork._
+  import weco.catalogue.internal_model.image.ParentWork._
   import Merger.WorkMergingOps
 
   override def findTarget(
@@ -189,8 +189,8 @@ object PlatformMerger extends Merger {
           imageDataWithSources = standaloneImages(target).map { image =>
             ImageDataWithSource(
               image,
-              SourceWorks(
-                canonicalWork = target.toSourceWork,
+              ParentWorks(
+                canonicalWork = target.toParentWork,
                 redirectedWork = None
               )
             )
@@ -217,11 +217,11 @@ object PlatformMerger extends Merger {
           imageDataWithSources = sourceImageData.map { imageData =>
             ImageDataWithSource(
               imageData = imageData,
-              source = image.SourceWorks(
-                canonicalWork = work.toSourceWork,
+              source = image.ParentWorks(
+                canonicalWork = work.toParentWork,
                 redirectedWork = sources
                   .find { _.data.imageData.contains(imageData) }
-                  .map(_.toSourceWork)
+                  .map(_.toParentWork)
               )
             )
           }

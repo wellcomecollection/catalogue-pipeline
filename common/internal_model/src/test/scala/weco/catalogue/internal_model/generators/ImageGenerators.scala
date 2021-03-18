@@ -3,7 +3,7 @@ package weco.catalogue.internal_model.generators
 import uk.ac.wellcome.models.work.generators._
 import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType}
 import weco.catalogue.internal_model.image
-import weco.catalogue.internal_model.image.SourceWork._
+import weco.catalogue.internal_model.image.ParentWork._
 import weco.catalogue.internal_model.image.ImageState.{Indexed, Initial}
 import weco.catalogue.internal_model.image._
 import weco.catalogue.internal_model.locations.{
@@ -113,15 +113,15 @@ trait ImageGenerators
     imageData: ImageData[IdState.Identified]) {
     def toInitialImageWith(
       modifiedTime: Instant = instantInLast30Days,
-      sourceWorks: SourceWorks = SourceWorks(
-        canonicalWork = mergedWork().toSourceWork,
+      parentWorks: ParentWorks = ParentWorks(
+        canonicalWork = mergedWork().toParentWork,
         redirectedWork = None
       )
     ): Image[ImageState.Initial] = Image[ImageState.Initial](
       version = imageData.version,
       locations = imageData.locations,
       modifiedTime = modifiedTime,
-      source = sourceWorks,
+      source = parentWorks,
       state = ImageState.Initial(
         sourceIdentifier = imageData.id.sourceIdentifier,
         canonicalId = imageData.id.canonicalId
@@ -138,9 +138,9 @@ trait ImageGenerators
       imageData
         .toInitialImageWith(
           modifiedTime = modifiedTime,
-          sourceWorks = image.SourceWorks(
-            canonicalWork = parentWork.toSourceWork,
-            redirectedWork = redirectedWork.map(_.toSourceWork))
+          parentWorks = image.ParentWorks(
+            canonicalWork = parentWork.toParentWork,
+            redirectedWork = redirectedWork.map(_.toParentWork))
         )
         .transition[ImageState.Augmented](inferredData)
 
