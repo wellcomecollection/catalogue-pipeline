@@ -2,7 +2,6 @@ package uk.ac.wellcome.platform.inference_manager
 
 import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
 import akka.stream.scaladsl.{Flow, FlowWithContext}
-import uk.ac.wellcome.models.work.internal._
 import weco.catalogue.internal_model.image.{Image, ImageState}
 
 import scala.util.Try

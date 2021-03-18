@@ -11,7 +11,6 @@ import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import weco.catalogue.internal_model.image.ImageState.{Augmented, Initial}
-import uk.ac.wellcome.models.work.internal.InferredData
 import uk.ac.wellcome.pipeline_storage.Indexable.imageIndexable
 import uk.ac.wellcome.pipeline_storage.PipelineStorageStream._
 import uk.ac.wellcome.pipeline_storage.{
