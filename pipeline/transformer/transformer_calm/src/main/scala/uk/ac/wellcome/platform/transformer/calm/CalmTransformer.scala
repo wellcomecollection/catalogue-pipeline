@@ -145,9 +145,7 @@ object CalmTransformer
       }
 
   def workData(record: CalmRecord): Result[WorkData[DataState.Unidentified]] = {
-    val (languages, languageNotes) = CalmLanguages(
-      languageField = record.get("Language")
-    )
+    val (languages, languageNotes) = CalmLanguages(record.getList("Language"))
 
     for {
       items <- CalmItems(record)

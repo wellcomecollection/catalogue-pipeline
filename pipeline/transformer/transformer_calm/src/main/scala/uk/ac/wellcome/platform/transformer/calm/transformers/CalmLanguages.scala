@@ -18,10 +18,17 @@ object CalmLanguages {
   // languages we can, and keep the original sentence in a note.
   // e.g. "Mainly in German, smaller parts in English."
   //
-  def apply(
-    languageField: Option[String]): (List[Language], List[LanguageNote]) =
+  def apply(languageFieldValues: List[String]): (List[Language], List[LanguageNote]) =
+    languageFieldValues
+      .foldLeft((List[Language](), List[LanguageNote]())) {
+        case ((languages, notes), value) =>
+          val (newLanguages, newNotes) = parseSingleValue(value)
+          ((languages ++ newLanguages).distinct, (notes ++ newNotes).distinct)
+      }
+
+  private def parseSingleValue(languageField: String): (List[Language], List[LanguageNote]) =
     languageField match {
-      case Some(value) if value.trim.nonEmpty =>
+      case value if value.trim.nonEmpty =>
         parseLanguages(value) match {
           case Some(languages) => (languages, List())
 

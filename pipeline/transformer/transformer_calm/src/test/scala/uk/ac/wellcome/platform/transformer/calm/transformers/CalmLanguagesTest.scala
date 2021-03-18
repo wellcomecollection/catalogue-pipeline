@@ -14,13 +14,13 @@ class CalmLanguagesTest
     val degenerateTestCases =
       Table(
         "languagesField",
-        None,
-        Some(""),
-        Some("\n\n"),
+        "",
+        "  ",
+        "\n\n",
       )
 
-    forAll(degenerateTestCases) { languagesField =>
-      CalmLanguages(languagesField) shouldBe ((List(), List()))
+    forAll(degenerateTestCases) { value =>
+      CalmLanguages(List(value)) shouldBe ((List(), List()))
     }
   }
 
@@ -169,7 +169,7 @@ class CalmLanguagesTest
   it("handles fallback cases") {
     forAll(fallbackTestCases) {
       case (languageField, expectedLanguages) =>
-        val (languages, languageNotes) = CalmLanguages(Some(languageField))
+        val (languages, languageNotes) = CalmLanguages(List(languageField))
         languages shouldBe expectedLanguages
         languageNotes shouldBe List(LanguageNote(languageField))
     }
@@ -179,7 +179,7 @@ class CalmLanguagesTest
     // Taken from f9f09f42-675d-4d27-8efa-1726d314f20b
     // We can remove this test and the fixup code once the record is corrected.
     val (languages, languageNotes) = CalmLanguages(
-      Some(
+      List(
         "The majority of this collection is in English, however Kitzinger recieved " +
           "letters from around the world and travelled widely for conferences so some " +
           "material is not."
@@ -194,10 +194,54 @@ class CalmLanguagesTest
       ))
   }
 
+  it("combines languages and notes from multiple values") {
+    val (languages, notes) = CalmLanguages(
+      List(
+        "English; German",
+        "French with a Polish translation",
+        "Dutch",
+        "Chinese inscription"
+      )
+    )
+
+    languages shouldBe List(
+      Language(label = "English", id = "eng"),
+      Language(label = "German", id = "ger"),
+      Language(label = "French", id = "fre"),
+      Language(label = "Polish", id = "pol"),
+      Language(label = "Dutch", id = "dut"),
+      Language(label = "Chinese", id = "chi")
+    )
+
+    notes shouldBe List(
+      LanguageNote("French with a Polish translation"),
+      LanguageNote("Chinese inscription")
+    )
+  }
+
+  it("deduplicates languages and notes") {
+    val (languages, notes) = CalmLanguages(
+      List(
+        "English; Chinese",
+        "Chinese inscription",
+        "Chinese inscription"
+      )
+    )
+
+    languages shouldBe List(
+      Language(label = "English", id = "eng"),
+      Language(label = "Chinese", id = "chi")
+    )
+
+    notes shouldBe List(
+      LanguageNote("Chinese inscription")
+    )
+  }
+
   def runTestCases(testCases: TableFor2[String, List[Language]]): Assertion =
     forAll(testCases) {
       case (languageField, expectedLanguages) =>
-        val (languages, languageNote) = CalmLanguages(Some(languageField))
+        val (languages, languageNote) = CalmLanguages(List(languageField))
         languages shouldBe expectedLanguages
         languageNote shouldBe List()
     }

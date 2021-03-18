@@ -238,6 +238,24 @@ class CalmTransformerTest
     )
   }
 
+  it("finds multiple languages") {
+    val record = createCalmRecordWith(
+      "Title" -> "abc",
+      "Level" -> "Collection",
+      "RefNo" -> "a/b/c",
+      "AltRefNo" -> "a.b.c",
+      "Language" -> "English",
+      "Language" -> "German",
+      "Language" -> "French",
+      "CatalogueStatus" -> "Catalogued"
+    )
+    CalmTransformer(record, version).right.get.data.languages shouldBe Seq(
+      Language(label = "English", id = "eng"),
+      Language(label = "German", id = "ger"),
+      Language(label = "French", id = "fre")
+    )
+  }
+
   it("only preserves i HTML tags when transforming title") {
     val record = createCalmRecordWith(
       "Title" -> "<p> The <i>title</i> of the <strong>work</strong>",
