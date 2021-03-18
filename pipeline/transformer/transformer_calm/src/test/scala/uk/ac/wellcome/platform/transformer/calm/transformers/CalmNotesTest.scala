@@ -20,7 +20,7 @@ class CalmNotesTest extends AnyFunSpec with Matchers with CalmRecordGenerators {
       ("Arrangement", "Arranged in an Adorable Alignment")
     )
 
-    val notes = CalmNotes(record, languageNote = None)
+    val notes = CalmNotes(record)
 
     // The ordering of the Notes field is arbitrary, because the underlying
     // Calm data is arbitrary.
@@ -38,23 +38,6 @@ class CalmNotesTest extends AnyFunSpec with Matchers with CalmRecordGenerators {
     )
   }
 
-  it("includes the language note, if supplied") {
-    val record = createCalmRecordWith(
-      ("Arrangement", "Aligned Across the Axis"),
-    )
-
-    val languageNote = LanguageNote("Listed in Lampung and Lavongai")
-
-    val notes = CalmNotes(record, languageNote = Some(languageNote))
-
-    // The ordering of the Notes field is arbitrary, because the underlying
-    // Calm data is arbitrary.
-    notes should contain theSameElementsAs List(
-      ArrangementNote("Aligned Across the Axis"),
-      languageNote
-    )
-  }
-
   it("returns an empty list if none of the fields contain notes") {
     val record = createCalmRecordWith(
       "Title" -> "abc",
@@ -62,7 +45,7 @@ class CalmNotesTest extends AnyFunSpec with Matchers with CalmRecordGenerators {
       "RefNo" -> "a/b/c"
     )
 
-    CalmNotes(record, languageNote = None) shouldBe empty
+    CalmNotes(record) shouldBe empty
   }
 
   // This is a field that we used to transform, but Collections Information
@@ -73,6 +56,6 @@ class CalmNotesTest extends AnyFunSpec with Matchers with CalmRecordGenerators {
       ("ReproductionConditions", "Reproduction is Rarely Regulated"),
     )
 
-    CalmNotes(record, languageNote = None) shouldBe empty
+    CalmNotes(record) shouldBe empty
   }
 }

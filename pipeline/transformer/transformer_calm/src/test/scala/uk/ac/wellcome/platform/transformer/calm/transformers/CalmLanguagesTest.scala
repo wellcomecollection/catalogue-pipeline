@@ -20,7 +20,7 @@ class CalmLanguagesTest
       )
 
     forAll(degenerateTestCases) { languagesField =>
-      CalmLanguages(languagesField) shouldBe ((List.empty, None))
+      CalmLanguages(languagesField) shouldBe ((List(), List()))
     }
   }
 
@@ -169,16 +169,16 @@ class CalmLanguagesTest
   it("handles fallback cases") {
     forAll(fallbackTestCases) {
       case (languageField, expectedLanguages) =>
-        val (languages, languageNote) = CalmLanguages(Some(languageField))
+        val (languages, languageNotes) = CalmLanguages(Some(languageField))
         languages shouldBe expectedLanguages
-        languageNote shouldBe Some(LanguageNote(languageField))
+        languageNotes shouldBe List(LanguageNote(languageField))
     }
   }
 
   it("fixes spelling errors") {
     // Taken from f9f09f42-675d-4d27-8efa-1726d314f20b
     // We can remove this test and the fixup code once the record is corrected.
-    val (languages, languageNote) = CalmLanguages(
+    val (languages, languageNotes) = CalmLanguages(
       Some(
         "The majority of this collection is in English, however Kitzinger recieved " +
           "letters from around the world and travelled widely for conferences so some " +
@@ -186,7 +186,7 @@ class CalmLanguagesTest
       ))
 
     languages shouldBe List(Language(label = "English", id = "eng"))
-    languageNote shouldBe Some(
+    languageNotes shouldBe List(
       LanguageNote(
         "The majority of this collection is in English, however Kitzinger received " +
           "letters from around the world and travelled widely for conferences so some " +
@@ -199,6 +199,6 @@ class CalmLanguagesTest
       case (languageField, expectedLanguages) =>
         val (languages, languageNote) = CalmLanguages(Some(languageField))
         languages shouldBe expectedLanguages
-        languageNote shouldBe None
+        languageNote shouldBe List()
     }
 }
