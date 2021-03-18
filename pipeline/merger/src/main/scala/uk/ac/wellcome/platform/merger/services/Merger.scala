@@ -12,7 +12,7 @@ import uk.ac.wellcome.platform.merger.models.{
 import weco.catalogue.internal_model.identifiers.{DataState, IdState}
 import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.catalogue.internal_model.image
-import weco.catalogue.internal_model.image.{ImageData, SourceWorks}
+import weco.catalogue.internal_model.image.{ImageData, ParentWorks}
 import weco.catalogue.internal_model.work.{Work, WorkData, WorkState}
 
 /*

@@ -65,17 +65,16 @@ trait ImageGenerators
       parentWork: Work[WorkState.Identified] = sierraIdentifiedWork(),
       redirectedWork: Option[Work[WorkState.Identified]] = Some(
         sierraIdentifiedWork())): Image[ImageState.Augmented] =
-      imageData
-        .toIdentified
+      imageData.toIdentified
         .toAugmentedImageWith(
           inferredData = inferredData,
           parentWork = parentWork,
           redirectedWork = redirectedWork)
 
     def toIndexedImageWith(
-      inferredData: Option[InferredData] = createInferredData): Image[ImageState.Indexed] =
-      imageData
-        .toIdentified
+      inferredData: Option[InferredData] = createInferredData)
+      : Image[ImageState.Indexed] =
+      imageData.toIdentified
         .toIndexedImageWith(inferredData = inferredData)
 
     def toIdentified: ImageData[IdState.Identified] =
@@ -115,14 +114,12 @@ trait ImageGenerators
 
     def toAugmentedImageWith(
       inferredData: Option[InferredData] = createInferredData,
-      modifiedTime: Instant = instantInLast30Days,
       parentWork: Work[WorkState.Identified] = sierraIdentifiedWork(),
       redirectedWork: Option[Work[WorkState.Identified]] = Some(
         sierraIdentifiedWork())
     ): Image[ImageState.Augmented] =
       imageData
         .toInitialImageWith(
-          modifiedTime = modifiedTime,
           parentWorks = image.ParentWorks(
             canonicalWork = parentWork.toParentWork,
             redirectedWork = redirectedWork.map(_.toParentWork))
@@ -130,18 +127,10 @@ trait ImageGenerators
         .transition[ImageState.Augmented](inferredData)
 
     def toIndexedImageWith(
-      inferredData: Option[InferredData] = createInferredData,
-      modifiedTime: Instant = instantInLast30Days,
-      parentWork: Work[WorkState.Identified] = sierraIdentifiedWork(),
-      redirectedWork: Option[Work[WorkState.Identified]] = Some(
-        sierraIdentifiedWork())): Image[ImageState.Indexed] =
+      inferredData: Option[InferredData] = createInferredData)
+      : Image[ImageState.Indexed] =
       imageData
-        .toAugmentedImageWith(
-          modifiedTime = modifiedTime,
-          parentWork = parentWork,
-          redirectedWork = redirectedWork,
-          inferredData = inferredData
-        )
+        .toAugmentedImageWith(inferredData = inferredData)
         .transition[ImageState.Indexed]()
 
     def toInitialImage = toInitialImageWith()
