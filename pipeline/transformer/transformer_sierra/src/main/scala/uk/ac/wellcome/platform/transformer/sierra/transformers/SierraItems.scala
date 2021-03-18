@@ -120,13 +120,13 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
         fallbackLocation).toList,
       id = IdState.Identifiable(
         sourceIdentifier = SourceIdentifier(
-          identifierType = IdentifierType("sierra-system-number"),
+          identifierType = IdentifierType.SierraSystemNumber,
           ontologyType = "Item",
           value = itemId.withCheckDigit
         ),
         otherIdentifiers = List(
           SourceIdentifier(
-            identifierType = IdentifierType("sierra-identifier"),
+            identifierType = IdentifierType.SierraIdentifier,
             ontologyType = "Item",
             value = itemId.withoutCheckDigit
           )

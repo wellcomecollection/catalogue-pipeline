@@ -30,7 +30,7 @@ class SierraConceptsTest extends AnyFunSpec with Matchers with MarcGenerators {
     )
 
     val sourceIdentifier = SourceIdentifier(
-      identifierType = IdentifierType("lc-subjects"),
+      identifierType = IdentifierType.LCSubjects,
       value = "lcsh/ppp",
       ontologyType = "Concept"
     )
@@ -65,7 +65,7 @@ class SierraConceptsTest extends AnyFunSpec with Matchers with MarcGenerators {
     )
 
     val sourceIdentifier = SourceIdentifier(
-      identifierType = IdentifierType("lc-subjects"),
+      identifierType = IdentifierType.LCSubjects,
       value = "lcsh/bbb",
       ontologyType = "Concept"
     )

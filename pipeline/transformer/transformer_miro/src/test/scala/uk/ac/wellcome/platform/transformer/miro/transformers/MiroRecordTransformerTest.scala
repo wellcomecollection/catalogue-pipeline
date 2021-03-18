@@ -435,7 +435,7 @@ class MiroRecordTransformerTest
     )
     val libraryRefList = expectedValues.map { value =>
       createSourceIdentifierWith(
-        identifierType = IdentifierType("miro-library-reference"),
+        identifierType = IdentifierType.MiroLibraryReference,
         value = value
       )
     }

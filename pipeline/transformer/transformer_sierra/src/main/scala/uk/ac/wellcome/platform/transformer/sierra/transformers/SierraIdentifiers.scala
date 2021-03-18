@@ -34,7 +34,7 @@ object SierraIdentifiers
   def apply(bibId: SierraBibNumber,
             bibData: SierraBibData): List[SourceIdentifier] = {
     val sierraIdentifier = SourceIdentifier(
-      identifierType = IdentifierType("sierra-identifier"),
+      identifierType = IdentifierType.SierraIdentifier,
       ontologyType = "Work",
       value = bibId.withoutCheckDigit
     )
@@ -52,7 +52,7 @@ object SierraIdentifiers
       .distinct
       .map { value =>
         SourceIdentifier(
-          identifierType = IdentifierType("isbn"),
+          identifierType = IdentifierType.ISBN,
           ontologyType = "Work",
           value = value.trim
         )
@@ -67,7 +67,7 @@ object SierraIdentifiers
       .distinct
       .map { value =>
         SourceIdentifier(
-          identifierType = IdentifierType("issn"),
+          identifierType = IdentifierType.ISSN,
           ontologyType = "Work",
           value = value.trim
         )
@@ -107,7 +107,7 @@ object SierraIdentifiers
     digcodeValues.distinct
       .map { value =>
         SourceIdentifier(
-          identifierType = IdentifierType("wellcome-digcode"),
+          identifierType = IdentifierType.WellcomeDigcode,
           ontologyType = "Work",
           value = value
         )

@@ -31,7 +31,7 @@ class MiroImageDataTest
       ) shouldBe ImageData[IdState.Identifiable](
         id = IdState.Identifiable(
           sourceIdentifier = SourceIdentifier(
-            identifierType = IdentifierType("miro-image-number"),
+            identifierType = IdentifierType.MiroImageNumber,
             ontologyType = "Image",
             value = "B0011308"
           )

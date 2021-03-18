@@ -15,6 +15,10 @@ sealed trait DigitalLocationType extends LocationType
 
 object LocationType extends Enum[LocationType] {
   val values = findValues
+  assert(
+    values.size == values.map { _.id }.toSet.size,
+    "IDs for LocationType are not unique!"
+  )
 
   implicit val locationTypeEncoder: Encoder[LocationType] =
     Encoder.forProduct1("id")(_.id)

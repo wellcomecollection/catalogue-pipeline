@@ -77,7 +77,7 @@ object SierraMergeCandidates
         List(
           MergeCandidate(
             identifier = SourceIdentifier(
-              identifierType = IdentifierType("sierra-system-number"),
+              identifierType = IdentifierType.SierraSystemNumber,
               ontologyType = "Work",
               value = bibNumber
             ),
@@ -120,7 +120,7 @@ object SierraMergeCandidates
       .map { recordId =>
         MergeCandidate(
           identifier = SourceIdentifier(
-            identifierType = IdentifierType("calm-record-id"),
+            identifierType = IdentifierType.CalmRecordIdentifier,
             ontologyType = "Work",
             value = recordId.toString
           ),
@@ -145,7 +145,7 @@ object SierraMergeCandidates
   private def miroMergeCandidate(miroId: String, reason: String) = {
     MergeCandidate(
       identifier = SourceIdentifier(
-        identifierType = IdentifierType("miro-image-number"),
+        identifierType = IdentifierType.MiroImageNumber,
         ontologyType = "Work",
         value = miroId
       ),

@@ -33,7 +33,7 @@ class SierraItemsTest
       value = itemId.withCheckDigit)
 
     val sourceIdentifier2 = SourceIdentifier(
-      identifierType = IdentifierType("sierra-identifier"),
+      identifierType = IdentifierType.SierraIdentifier,
       ontologyType = "Item",
       value = itemId.withoutCheckDigit
     )

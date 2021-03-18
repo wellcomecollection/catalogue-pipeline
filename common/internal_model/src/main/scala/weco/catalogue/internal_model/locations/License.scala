@@ -14,6 +14,10 @@ sealed trait License extends EnumEntry {
 
 object License extends Enum[License] {
   val values = findValues
+  assert(
+    values.size == values.map { _.id }.toSet.size,
+    "IDs for License are not unique!"
+  )
 
   implicit val licenseEncoder: Encoder[License] =
     Encoder.forProduct1("id")(_.id)

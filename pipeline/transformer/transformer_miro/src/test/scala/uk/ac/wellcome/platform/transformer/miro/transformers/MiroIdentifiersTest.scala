@@ -43,7 +43,7 @@ class MiroIdentifiersTest
 
     otherIdentifiers shouldBe List(
       SourceIdentifier(
-        identifierType = IdentifierType("miro-library-reference"),
+        identifierType = IdentifierType.MiroLibraryReference,
         ontologyType = "Work",
         value = "EPB 20057/B/1"
       )

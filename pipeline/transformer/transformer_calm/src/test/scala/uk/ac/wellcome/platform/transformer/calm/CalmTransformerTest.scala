@@ -34,7 +34,7 @@ class CalmTransformerTest
         state = Source(
           SourceIdentifier(
             value = record.id,
-            identifierType = CalmIdentifierTypes.recordId,
+            identifierType = IdentifierType.CalmRecordIdentifier,
             ontologyType = "Work"
           ),
           record.retrievedAt
@@ -51,11 +51,11 @@ class CalmTransformerTest
           otherIdentifiers = List(
             SourceIdentifier(
               value = "a/b/c",
-              identifierType = CalmIdentifierTypes.refNo,
+              identifierType = IdentifierType.CalmRefNo,
               ontologyType = "Work"),
             SourceIdentifier(
               value = "a.b.c",
-              identifierType = CalmIdentifierTypes.altRefNo,
+              identifierType = IdentifierType.CalmAltRefNo,
               ontologyType = "Work"),
           ),
           items = List(
@@ -96,15 +96,15 @@ class CalmTransformerTest
       List(
         SourceIdentifier(
           value = "a/b/c",
-          identifierType = CalmIdentifierTypes.refNo,
+          identifierType = IdentifierType.CalmRefNo,
           ontologyType = "Work"),
         SourceIdentifier(
           value = "a.b.c",
-          identifierType = CalmIdentifierTypes.altRefNo,
+          identifierType = IdentifierType.CalmAltRefNo,
           ontologyType = "Work"),
         SourceIdentifier(
           value = "b456",
-          identifierType = IdentifierType("sierra-system-number"),
+          identifierType = IdentifierType.SierraSystemNumber,
           ontologyType = "Work"),
       )
   }
@@ -124,7 +124,7 @@ class CalmTransformerTest
           IdState.Identifiable(
             SourceIdentifier(
               value = "b456",
-              identifierType = IdentifierType("sierra-system-number"),
+              identifierType = IdentifierType.SierraSystemNumber,
               ontologyType = "Work"
             )
           )
@@ -574,7 +574,7 @@ class CalmTransformerTest
         state = Source(
           SourceIdentifier(
             value = record.id,
-            identifierType = CalmIdentifierTypes.recordId,
+            identifierType = IdentifierType.CalmRecordIdentifier,
             ontologyType = "Work"
           ),
           record.retrievedAt

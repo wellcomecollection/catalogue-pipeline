@@ -25,7 +25,7 @@ class OtherIdentifiersRuleTest
     with Inspectors {
   val nothingWork: Work.Visible[WorkState.Identified] = identifiedWork(
     sourceIdentifier = SourceIdentifier(
-      identifierType = IdentifierType("fake", "fake"),
+      identifierType = IdentifierType.MESH,
       value = "fake",
       ontologyType = "Work"
     )
@@ -177,7 +177,7 @@ class OtherIdentifiersRuleTest
         .otherIdentifiers(
           List(
             SourceIdentifier(
-              identifierType = IdentifierType("miro-library-reference"),
+              identifierType = IdentifierType.MiroLibraryReference,
               ontologyType = "Work",
               value = randomAlphanumeric(32)
             )

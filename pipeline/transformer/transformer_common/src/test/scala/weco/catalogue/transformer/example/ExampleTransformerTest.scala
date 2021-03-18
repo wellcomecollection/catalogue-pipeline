@@ -48,7 +48,7 @@ class ExampleTransformerTest
     : CalmSourcePayload = {
     val data = ValidExampleData(
       id = createSourceIdentifierWith(
-        identifierType = IdentifierType("calm-record-id"),
+        identifierType = IdentifierType.CalmRecordIdentifier,
         value = id
       ),
       title = randomAlphanumeric()

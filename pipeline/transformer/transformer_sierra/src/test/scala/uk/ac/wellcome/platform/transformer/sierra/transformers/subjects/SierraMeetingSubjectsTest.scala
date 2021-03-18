@@ -85,7 +85,7 @@ class SierraMeetingSubjectsTest
       )
     )
     val sourceIdentifier = SourceIdentifier(
-      identifierType = IdentifierType("lc-names"),
+      identifierType = IdentifierType.LCNames,
       ontologyType = "Subject",
       value = "lcsh7212"
     )

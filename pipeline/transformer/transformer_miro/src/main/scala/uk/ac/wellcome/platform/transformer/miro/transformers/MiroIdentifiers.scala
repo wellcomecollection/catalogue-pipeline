@@ -51,7 +51,7 @@ trait MiroIdentifiers extends MiroTransformableUtils {
           case Some(s) =>
             s.map { id =>
               SourceIdentifier(
-                identifierType = IdentifierType("sierra-system-number"),
+                identifierType = IdentifierType.SierraSystemNumber,
                 ontologyType = "Work",
                 value = s"b$id")
             }
@@ -74,7 +74,7 @@ trait MiroIdentifiers extends MiroTransformableUtils {
         .collect {
           case (Some(label), Some(value)) =>
             SourceIdentifier(
-              identifierType = IdentifierType("miro-library-reference"),
+              identifierType = IdentifierType.MiroLibraryReference,
               ontologyType = "Work",
               value = s"$label $value"
             )

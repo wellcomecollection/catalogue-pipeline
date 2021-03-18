@@ -60,7 +60,7 @@ class MiroRecordTransformer
                           miroMetadata: MiroMetadata,
                           version: Int): Try[Work[Source]] = {
     val sourceIdentifier = SourceIdentifier(
-      identifierType = IdentifierType("miro-image-number"),
+      identifierType = IdentifierType.MiroImageNumber,
       ontologyType = "Work",
       value = originalMiroRecord.imageNumber
     )

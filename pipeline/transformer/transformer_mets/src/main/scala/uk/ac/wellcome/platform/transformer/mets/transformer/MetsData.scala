@@ -63,7 +63,7 @@ case class MetsData(
 
   private def mergeCandidate = MergeCandidate(
     identifier = SourceIdentifier(
-      identifierType = IdentifierType("sierra-system-number"),
+      identifierType = IdentifierType.SierraSystemNumber,
       ontologyType = "Work",
       // We lowercase the b number in the METS file so it matches the
       // case used by Sierra.
@@ -126,7 +126,7 @@ case class MetsData(
 
   private def sourceIdentifier =
     SourceIdentifier(
-      identifierType = IdentifierType("mets"),
+      identifierType = IdentifierType.METS,
       ontologyType = "Work",
       // We lowercase the b number in the METS file so it matches the
       // case used by Sierra.

@@ -216,7 +216,7 @@ class SierraPersonSubjectsTest
     )
 
     val sourceIdentifier = SourceIdentifier(
-      identifierType = IdentifierType("lc-names"),
+      identifierType = IdentifierType.LCNames,
       ontologyType = "Subject",
       value = lcshCode
     )

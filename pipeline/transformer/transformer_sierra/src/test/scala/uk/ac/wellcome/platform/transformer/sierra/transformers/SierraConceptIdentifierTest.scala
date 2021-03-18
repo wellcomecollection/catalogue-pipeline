@@ -18,7 +18,7 @@ class SierraConceptIdentifierTest
     val varField = create655VarFieldWith(indicator2 = "0")
 
     val expectedSourceIdentifier = SourceIdentifier(
-      identifierType = IdentifierType("lc-subjects"),
+      identifierType = IdentifierType.LCSubjects,
       value = "lcsh/123",
       ontologyType = ontologyType
     )
@@ -38,7 +38,7 @@ class SierraConceptIdentifierTest
     val varField = create655VarFieldWith(indicator2 = "2")
 
     val expectedSourceIdentifier = SourceIdentifier(
-      identifierType = IdentifierType("nlm-mesh"),
+      identifierType = IdentifierType.MESH,
       value = "mesh/456",
       ontologyType = ontologyType
     )
@@ -88,7 +88,7 @@ class SierraConceptIdentifierTest
     val varField = create655VarFieldWith(indicator2 = "2")
 
     val expectedSourceIdentifier = SourceIdentifier(
-      identifierType = IdentifierType("nlm-mesh"),
+      identifierType = IdentifierType.MESH,
       value = "mesh/456",
       ontologyType = "Item"
     )

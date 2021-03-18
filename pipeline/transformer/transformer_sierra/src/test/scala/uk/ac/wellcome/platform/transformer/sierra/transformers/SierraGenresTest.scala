@@ -319,12 +319,12 @@ class SierraGenresTest
 
     val expectedSourceIdentifiers = List(
       SourceIdentifier(
-        identifierType = IdentifierType("lc-subjects"),
+        identifierType = IdentifierType.LCSubjects,
         value = "lcsh/123",
         ontologyType = "Concept"
       ),
       SourceIdentifier(
-        identifierType = IdentifierType("nlm-mesh"),
+        identifierType = IdentifierType.MESH,
         value = "mesh/456",
         ontologyType = "Concept"
       )
