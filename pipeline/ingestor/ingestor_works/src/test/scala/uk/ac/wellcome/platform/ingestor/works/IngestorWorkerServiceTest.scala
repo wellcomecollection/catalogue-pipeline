@@ -8,10 +8,10 @@ import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.WorkGenerators
 import weco.catalogue.internal_model.work.WorkState.{Denormalised, Indexed}
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.pipeline_storage.Indexable.workIndexable
 import uk.ac.wellcome.pipeline_storage.elastic.ElasticSourceRetriever
 import uk.ac.wellcome.pipeline_storage.ElasticIndexer
+import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType}
 import weco.catalogue.internal_model.work.Work
 
 import scala.concurrent.ExecutionContext.Implicits.global

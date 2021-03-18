@@ -4,7 +4,6 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.index.{IndexFixtures, IndexedImageIndexConfig}
-import uk.ac.wellcome.models.work.internal.ImageState
 import uk.ac.wellcome.pipeline_storage.ElasticIndexer
 import uk.ac.wellcome.pipeline_storage.Indexable.imageIndexable
 import uk.ac.wellcome.models.Implicits._
