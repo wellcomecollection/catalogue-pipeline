@@ -13,10 +13,10 @@ sealed trait IdentifierType extends EnumEntry {
 object IdentifierType extends Enum[IdentifierType] {
   val values = findValues
 
-  implicit val locationTypeEncoder: Encoder[IdentifierType] =
+  implicit val identifierTypeEncoder: Encoder[IdentifierType] =
     Encoder.forProduct1("id")(_.id)
 
-  implicit val locationTypeDecoder: Decoder[IdentifierType] =
+  implicit val identifierTypeDecoder: Decoder[IdentifierType] =
     Decoder.forProduct1("id")(IdentifierType.withName)
 
   def apply(id: String): IdentifierType =
