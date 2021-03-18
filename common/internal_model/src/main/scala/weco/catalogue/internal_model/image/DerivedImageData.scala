@@ -1,6 +1,6 @@
 package weco.catalogue.internal_model.image
 
-import uk.ac.wellcome.models.work.internal.DerivedDataCommon
+import weco.catalogue.internal_model.DerivedDataCommon
 import weco.catalogue.internal_model.locations.{DigitalLocation, LocationType}
 
 case class DerivedImageData(

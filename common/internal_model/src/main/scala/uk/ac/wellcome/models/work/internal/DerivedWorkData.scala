@@ -1,14 +1,10 @@
 package uk.ac.wellcome.models.work.internal
 
+import weco.catalogue.internal_model.DerivedDataCommon
+
 case class DerivedWorkData(
   contributorAgents: List[String] = Nil,
 )
-
-trait DerivedDataCommon {
-  protected def contributorAgentLabels(
-    contributors: List[Contributor[_]]): List[String] =
-    contributors.map(_.agent.typedLabel)
-}
 
 object DerivedWorkData extends DerivedDataCommon {
   def apply(data: WorkData[_]): DerivedWorkData =
