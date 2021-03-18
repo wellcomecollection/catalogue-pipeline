@@ -1,6 +1,5 @@
 package uk.ac.wellcome.platform.matcher.models
 
-import uk.ac.wellcome.models.work.internal._
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.Identified
 

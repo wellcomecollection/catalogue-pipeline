@@ -7,7 +7,6 @@ import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.work.generators.WorkGenerators
-import uk.ac.wellcome.models.work.internal.WorkState
 import uk.ac.wellcome.pipeline_storage.fixtures.ElasticIndexerFixtures
 import uk.ac.wellcome.pipeline_storage.{Retriever, RetrieverTestCases}
 import uk.ac.wellcome.platform.matcher.generators.WorkLinksGenerators
