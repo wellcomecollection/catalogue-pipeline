@@ -60,46 +60,31 @@ trait ImageGenerators
   implicit class UnidentifiedImageDataOps(
     imageData: ImageData[IdState.Identifiable]) {
 
-    def toIdentifiedWith(
-      canonicalId: String = createCanonicalId): ImageData[IdState.Identified] =
-      imageData.copy(
-        id = IdState.Identified(
-          canonicalId = canonicalId,
-          sourceIdentifier = imageData.id.sourceIdentifier
-        )
-      )
-
     def toAugmentedImageWith(
-      canonicalId: String = createCanonicalId,
       inferredData: Option[InferredData] = createInferredData,
-      modifiedTime: Instant = instantInLast30Days,
       parentWork: Work[WorkState.Identified] = sierraIdentifiedWork(),
       redirectedWork: Option[Work[WorkState.Identified]] = Some(
         sierraIdentifiedWork())): Image[ImageState.Augmented] =
       imageData
-        .toIdentifiedWith(canonicalId)
+        .toIdentified
         .toAugmentedImageWith(
-          inferredData,
-          modifiedTime,
-          parentWork,
-          redirectedWork)
+          inferredData = inferredData,
+          parentWork = parentWork,
+          redirectedWork = redirectedWork)
 
     def toIndexedImageWith(
-      canonicalId: String = createCanonicalId,
-      inferredData: Option[InferredData] = createInferredData,
-      modifiedTime: Instant = instantInLast30Days,
-      parentWork: Work[WorkState.Identified] = sierraIdentifiedWork(),
-      redirectedWork: Option[Work[WorkState.Identified]] = Some(
-        sierraIdentifiedWork())): Image[ImageState.Indexed] =
+      inferredData: Option[InferredData] = createInferredData): Image[ImageState.Indexed] =
       imageData
-        .toIdentifiedWith(canonicalId)
-        .toIndexedImageWith(
-          inferredData,
-          modifiedTime,
-          parentWork,
-          redirectedWork)
+        .toIdentified
+        .toIndexedImageWith(inferredData = inferredData)
 
-    def toIdentified = toIdentifiedWith()
+    def toIdentified: ImageData[IdState.Identified] =
+      imageData.copy(
+        id = IdState.Identified(
+          canonicalId = createCanonicalId,
+          sourceIdentifier = imageData.id.sourceIdentifier
+        )
+      )
 
     def toInitialImage: Image[Initial] =
       imageData.toIdentified.toInitialImage
