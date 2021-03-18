@@ -68,15 +68,6 @@ trait ImageGenerators
           sourceIdentifier = imageData.id.sourceIdentifier
         )
       )
-    def toInitialImageWith(canonicalId: String = createCanonicalId,
-                           modifiedTime: Instant = instantInLast30Days,
-                           sourceWorks: SourceWorks = SourceWorks(
-                             canonicalWork = mergedWork().toSourceWork,
-                             redirectedWork = None
-                           )): Image[Initial] =
-      imageData
-        .toIdentifiedWith(canonicalId)
-        .toInitialImageWith(modifiedTime, sourceWorks)
 
     def toAugmentedImageWith(
       canonicalId: String = createCanonicalId,
@@ -109,7 +100,9 @@ trait ImageGenerators
           redirectedWork)
 
     def toIdentified = toIdentifiedWith()
-    def toInitialImage = toInitialImageWith()
+
+    def toInitialImage: Image[Initial] =
+      imageData.toIdentified.toInitialImage
 
     def toAugmentedImage = toAugmentedImageWith()
 
