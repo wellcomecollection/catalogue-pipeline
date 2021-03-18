@@ -43,7 +43,7 @@ object IdentifierType extends Enum[IdentifierType] {
   }
 
   case object LCGraphicMaterials extends IdentifierType {
-    val id = "sierra-identifier"
+    val id = "lc-gmgpc"
     val label = "Library of Congress Thesaurus for Graphic Materials"
   }
 
