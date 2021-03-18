@@ -20,7 +20,6 @@ import weco.catalogue.internal_model.identifiers.{
   DataState,
   IdState,
   IdentifierType,
-  IdentifierType,
   SourceIdentifier
 }
 import weco.catalogue.internal_model.locations.UnknownAccessStatus
