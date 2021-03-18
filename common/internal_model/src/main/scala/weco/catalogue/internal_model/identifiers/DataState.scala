@@ -1,6 +1,4 @@
-package uk.ac.wellcome.models.work.internal
-
-import weco.catalogue.internal_model.identifiers.IdState
+package weco.catalogue.internal_model.identifiers
 
 /** Container type for IdState types, that is used by WorkData / ImageData
   * with three associated types:

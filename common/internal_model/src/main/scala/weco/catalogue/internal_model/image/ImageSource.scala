@@ -1,7 +1,7 @@
 package weco.catalogue.internal_model.image
 
-import uk.ac.wellcome.models.work.internal._
-import weco.catalogue.internal_model.identifiers.IdState
+import uk.ac.wellcome.models.work.internal.{Work, WorkData, WorkState}
+import weco.catalogue.internal_model.identifiers.{DataState, IdState}
 
 sealed trait ImageSource {
   val id: IdState.Identified
