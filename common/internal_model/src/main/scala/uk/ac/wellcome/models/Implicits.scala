@@ -13,6 +13,7 @@ import weco.catalogue.internal_model.image.{
   ImageState,
   SourceWorks
 }
+import weco.catalogue.internal_model.locations._
 
 object Implicits {
 

@@ -14,9 +14,15 @@ import uk.ac.wellcome.platform.transformer.calm.models.CalmSourceData
 import weco.catalogue.source_model.generators.CalmRecordGenerators
 import WorkState.Source
 import weco.catalogue.internal_model.identifiers.{
-  IdentifierType,
   IdState,
+  IdentifierType,
   SourceIdentifier
+}
+import weco.catalogue.internal_model.locations.{
+  AccessCondition,
+  AccessStatus,
+  LocationType,
+  PhysicalLocation
 }
 
 class CalmTransformerTest

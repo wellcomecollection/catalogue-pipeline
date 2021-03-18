@@ -3,7 +3,6 @@ package uk.ac.wellcome.platform.transformer.mets.transformer
 import java.time.Instant
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
-import uk.ac.wellcome.models.work.internal.License
 import uk.ac.wellcome.models.work.internal.result.Result
 import uk.ac.wellcome.platform.transformer.mets.fixtures.{
   LocalResources,
@@ -11,6 +10,7 @@ import uk.ac.wellcome.platform.transformer.mets.fixtures.{
 }
 import uk.ac.wellcome.storage.s3.{S3ObjectLocation, S3ObjectLocationPrefix}
 import uk.ac.wellcome.storage.store.memory.MemoryStore
+import weco.catalogue.internal_model.locations.License
 import weco.catalogue.source_model.mets.{DeletedMetsFile, MetsFileWithImages}
 
 class MetsXmlTransformerTest

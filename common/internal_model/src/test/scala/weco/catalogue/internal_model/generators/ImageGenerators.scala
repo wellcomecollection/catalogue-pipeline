@@ -7,6 +7,11 @@ import weco.catalogue.internal_model.image
 import weco.catalogue.internal_model.image.SourceWork._
 import weco.catalogue.internal_model.image.ImageState.{Indexed, Initial}
 import weco.catalogue.internal_model.image._
+import weco.catalogue.internal_model.locations.{
+  DigitalLocation,
+  License,
+  LocationType
+}
 
 import java.time.Instant
 import scala.util.Random

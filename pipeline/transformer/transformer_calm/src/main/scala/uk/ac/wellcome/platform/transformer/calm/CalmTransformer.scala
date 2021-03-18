@@ -27,6 +27,7 @@ import weco.catalogue.internal_model.identifiers.{
   IdentifierType,
   SourceIdentifier
 }
+import weco.catalogue.internal_model.locations.UnknownAccessStatus
 
 object CalmTransformer
     extends Transformer[CalmSourceData]

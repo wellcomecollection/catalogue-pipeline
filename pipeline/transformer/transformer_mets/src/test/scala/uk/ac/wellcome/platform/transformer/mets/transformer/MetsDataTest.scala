@@ -13,6 +13,12 @@ import weco.catalogue.internal_model.identifiers.{
   IdentifierType,
   SourceIdentifier
 }
+import weco.catalogue.internal_model.locations.{
+  AccessCondition,
+  AccessStatus,
+  DigitalLocation,
+  LocationType
+}
 
 class MetsDataTest
     extends AnyFunSpec

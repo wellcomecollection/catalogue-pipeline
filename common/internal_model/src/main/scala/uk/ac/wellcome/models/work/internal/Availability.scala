@@ -2,6 +2,11 @@ package uk.ac.wellcome.models.work.internal
 
 import enumeratum.{Enum, EnumEntry}
 import io.circe.{Decoder, Encoder}
+import weco.catalogue.internal_model.locations.{
+  DigitalLocation,
+  Location,
+  PhysicalLocation
+}
 
 sealed trait Availability extends EnumEntry {
   val id: String

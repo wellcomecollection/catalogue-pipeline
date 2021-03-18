@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.transformer.mets.fixtures
 
 import uk.ac.wellcome.fixtures.RandomGenerators
-import uk.ac.wellcome.models.work.internal.License
+import weco.catalogue.internal_model.locations.License
 
 import scala.xml.NodeSeq
 

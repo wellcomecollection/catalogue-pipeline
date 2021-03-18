@@ -3,6 +3,7 @@ package uk.ac.wellcome.models.work.generators
 import uk.ac.wellcome.models.work.internal._
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.identifiers.{IdState, SourceIdentifier}
+import weco.catalogue.internal_model.locations.{DigitalLocation, LocationType}
 
 import scala.util.Random
 

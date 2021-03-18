@@ -1,6 +1,7 @@
 package uk.ac.wellcome.models.work.internal
 
 import weco.catalogue.internal_model.identifiers.{HasId, IdState}
+import weco.catalogue.internal_model.locations.Location
 
 case class Item[+State](
   id: State,

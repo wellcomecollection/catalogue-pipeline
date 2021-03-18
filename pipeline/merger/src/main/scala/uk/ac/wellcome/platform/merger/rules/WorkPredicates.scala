@@ -4,6 +4,10 @@ import uk.ac.wellcome.models.work.internal._
 import WorkState.Identified
 import uk.ac.wellcome.models.work.internal.Format.Audiovisual
 import weco.catalogue.internal_model.identifiers.SourceIdentifier
+import weco.catalogue.internal_model.locations.{
+  DigitalLocation,
+  PhysicalLocation
+}
 
 object WorkPredicates {
   type WorkPredicate = Work[Identified] => Boolean

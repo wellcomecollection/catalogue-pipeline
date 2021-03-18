@@ -3,6 +3,7 @@ package uk.ac.wellcome.models.work.internal
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.generators.{ItemsGenerators, WorkGenerators}
+import weco.catalogue.internal_model.locations.AccessStatus
 
 class AvailabilityTest
     extends AnyFunSpec

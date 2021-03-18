@@ -11,6 +11,13 @@ import uk.ac.wellcome.models.work.internal.DeletedReason.DeletedFromSource
 import uk.ac.wellcome.models.work.internal.InvisibilityReason.MetsWorksAreNotVisible
 import weco.catalogue.internal_model.identifiers.SourceIdentifier
 import weco.catalogue.internal_model.image.ImageData
+import weco.catalogue.internal_model.locations.{
+  AccessCondition,
+  AccessStatus,
+  DigitalLocation,
+  License,
+  LocationType
+}
 
 case class MetsData(
   recordIdentifier: String,

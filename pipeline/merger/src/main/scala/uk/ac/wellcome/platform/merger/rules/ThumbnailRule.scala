@@ -11,6 +11,7 @@ import uk.ac.wellcome.platform.merger.rules.WorkPredicates.{
   WorkPredicateOps
 }
 import WorkState.Identified
+import weco.catalogue.internal_model.locations.Location
 
 /*
  * Thumbnails are chosen preferentially off of METS works, falling back to

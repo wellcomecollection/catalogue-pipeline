@@ -12,6 +12,7 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
 import uk.ac.wellcome.platform.transformer.sierra.source.sierra.SierraSourceLocation
 import uk.ac.wellcome.platform.transformer.sierra.generators.SierraDataGenerators
 import weco.catalogue.internal_model.identifiers.SourceIdentifier
+import weco.catalogue.internal_model.locations.{LocationType, PhysicalLocation}
 import weco.catalogue.sierra_adapter.models.SierraItemNumber
 
 class SierraItemsTest

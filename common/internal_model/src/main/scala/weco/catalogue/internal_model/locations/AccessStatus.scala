@@ -1,4 +1,4 @@
-package uk.ac.wellcome.models.work.internal
+package weco.catalogue.internal_model.locations
 
 class UnknownAccessStatus(status: String) extends Exception(status)
 

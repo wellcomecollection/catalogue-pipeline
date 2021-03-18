@@ -1,4 +1,4 @@
-package uk.ac.wellcome.models.work.internal
+package weco.catalogue.internal_model.locations
 
 import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec

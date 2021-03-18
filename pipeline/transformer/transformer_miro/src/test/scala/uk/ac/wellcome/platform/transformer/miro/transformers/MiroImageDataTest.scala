@@ -2,13 +2,6 @@ package uk.ac.wellcome.platform.transformer.miro.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.internal.{
-  AccessCondition,
-  AccessStatus,
-  DigitalLocation,
-  License,
-  LocationType
-}
 import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
 import weco.catalogue.internal_model.generators.IdentifiersGenerators
 import weco.catalogue.internal_model.identifiers.{
@@ -17,6 +10,12 @@ import weco.catalogue.internal_model.identifiers.{
   SourceIdentifier
 }
 import weco.catalogue.internal_model.image.ImageData
+import weco.catalogue.internal_model.locations.{
+  AccessCondition,
+  AccessStatus,
+  DigitalLocation,
+  LocationType
+}
 
 class MiroImageDataTest
     extends AnyFunSpec

@@ -9,6 +9,7 @@ import WorkFsm._
 import weco.catalogue.internal_model.image.SourceWork._
 import uk.ac.wellcome.models.work.generators.SourceWorkGenerators
 import weco.catalogue.internal_model.image.SourceWorks
+import weco.catalogue.internal_model.locations.{DigitalLocation, LocationType}
 
 class PlatformMergerTest
     extends AnyFunSpec

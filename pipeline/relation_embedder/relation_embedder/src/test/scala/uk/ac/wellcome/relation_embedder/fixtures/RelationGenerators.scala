@@ -2,12 +2,13 @@ package uk.ac.wellcome.relation_embedder.fixtures
 
 import uk.ac.wellcome.models.work.generators.{ItemsGenerators, WorkGenerators}
 import uk.ac.wellcome.models.work.internal.WorkState.Merged
-import uk.ac.wellcome.models.work.internal.{AccessStatus, CollectionPath, Work}
+import uk.ac.wellcome.models.work.internal.{CollectionPath, Work}
 import uk.ac.wellcome.relation_embedder.{
   RelationWork,
   RelationWorkData,
   RelationWorkState
 }
+import weco.catalogue.internal_model.locations.AccessStatus
 
 trait RelationGenerators extends WorkGenerators with ItemsGenerators {
   def work(path: String,

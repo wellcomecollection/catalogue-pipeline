@@ -3,11 +3,10 @@ import org.scalatest.Inside
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.generators.SourceWorkGenerators
-import uk.ac.wellcome.models.work.internal.{
+import weco.catalogue.internal_model.locations.{
   AccessCondition,
   AccessStatus,
   DigitalLocation,
-  License,
   LocationType
 }
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult

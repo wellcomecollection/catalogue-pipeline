@@ -1,7 +1,7 @@
 package weco.catalogue.internal_model.image
 
-import uk.ac.wellcome.models.work.internal.DigitalLocation
 import weco.catalogue.internal_model.identifiers.{HasId, SourceIdentifier}
+import weco.catalogue.internal_model.locations.DigitalLocation
 
 import java.time.Instant
 

@@ -3,7 +3,7 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
-import uk.ac.wellcome.models.work.internal.LocationType
+import weco.catalogue.internal_model.locations.LocationType
 import weco.catalogue.sierra_adapter.generators.SierraGenerators
 
 class SierraPhysicalLocationTypeTest

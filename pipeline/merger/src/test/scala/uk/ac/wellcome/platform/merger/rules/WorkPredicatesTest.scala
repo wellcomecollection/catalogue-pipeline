@@ -9,6 +9,10 @@ import uk.ac.wellcome.models.work.generators.{
 }
 import uk.ac.wellcome.models.work.internal.WorkState.Identified
 import uk.ac.wellcome.models.work.internal._
+import weco.catalogue.internal_model.locations.{
+  DigitalLocation,
+  PhysicalLocation
+}
 
 class WorkPredicatesTest
     extends AnyFunSpec

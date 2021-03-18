@@ -7,6 +7,7 @@ import uk.ac.wellcome.models.work.internal.DeletedReason.DeletedFromSource
 import weco.catalogue.internal_model.generators.IdentifiersGenerators
 import weco.catalogue.internal_model.identifiers.SourceIdentifier
 import weco.catalogue.internal_model.image.ImageData
+import weco.catalogue.internal_model.locations.Location
 
 import scala.util.Random
 

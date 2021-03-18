@@ -2,18 +2,12 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.internal.LocationType.{
+import weco.catalogue.internal_model.locations.LocationType.{
   ClosedStores,
   OnlineResource,
   OpenShelves
 }
-import uk.ac.wellcome.models.work.internal.{
-  AccessCondition,
-  AccessStatus,
-  DigitalLocation,
-  Holdings,
-  Item
-}
+import uk.ac.wellcome.models.work.internal.{Holdings, Item}
 import uk.ac.wellcome.platform.transformer.sierra.generators.MarcGenerators
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   FixedField,
@@ -22,6 +16,11 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   VarField
 }
 import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.locations.{
+  AccessCondition,
+  AccessStatus,
+  DigitalLocation
+}
 import weco.catalogue.sierra_adapter.generators.SierraGenerators
 import weco.catalogue.sierra_adapter.models.SierraHoldingsNumber
 

@@ -13,7 +13,7 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.work.internal.Format.{Books, Pictures}
 import WorkState.Source
 import org.scalatest.Assertion
-import uk.ac.wellcome.models.work.internal.AccessStatus.LicensedResources
+import weco.catalogue.internal_model.locations.AccessStatus.LicensedResources
 import uk.ac.wellcome.models.work.internal.DeletedReason.{
   DeletedFromSource,
   SuppressedFromSource
@@ -22,7 +22,13 @@ import uk.ac.wellcome.models.work.internal.InvisibilityReason.{
   SourceFieldMissing,
   UnableToTransform
 }
-import uk.ac.wellcome.models.work.internal.LocationType.{
+import weco.catalogue.internal_model.locations.{
+  AccessCondition,
+  DigitalLocation,
+  LocationType,
+  PhysicalLocation
+}
+import weco.catalogue.internal_model.locations.LocationType.{
   ClosedStores,
   OnlineResource
 }

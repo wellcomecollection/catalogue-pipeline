@@ -8,6 +8,10 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraQueryOps
 }
 import weco.catalogue.internal_model.identifiers.SourceIdentifier
+import weco.catalogue.internal_model.locations.{
+  LocationType,
+  PhysicalLocationType
+}
 import weco.catalogue.sierra_adapter.models.{SierraBibNumber, SierraItemNumber}
 
 case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])

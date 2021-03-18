@@ -5,6 +5,7 @@ import uk.ac.wellcome.platform.transformer.miro.exceptions.{
   ShouldNotTransformException,
   ShouldSuppressException
 }
+import weco.catalogue.internal_model.locations.License
 
 trait MiroLicenses {
 

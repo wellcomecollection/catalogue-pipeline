@@ -5,6 +5,12 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
 import weco.catalogue.internal_model.generators.IdentifiersGenerators
+import weco.catalogue.internal_model.locations.{
+  AccessCondition,
+  AccessStatus,
+  DigitalLocation,
+  LocationType
+}
 
 class MiroItemsTest
     extends AnyFunSpec

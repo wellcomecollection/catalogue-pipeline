@@ -1,4 +1,4 @@
-package uk.ac.wellcome.models.work.internal
+package weco.catalogue.internal_model.locations
 
 sealed trait Location {
   val locationType: LocationType

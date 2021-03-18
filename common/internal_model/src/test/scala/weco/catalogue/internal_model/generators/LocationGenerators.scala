@@ -1,16 +1,7 @@
-package uk.ac.wellcome.models.work.generators
+package weco.catalogue.internal_model.generators
 
 import uk.ac.wellcome.fixtures.RandomGenerators
-import uk.ac.wellcome.models.work.internal.{
-  AccessCondition,
-  AccessStatus,
-  DigitalLocation,
-  DigitalLocationType,
-  License,
-  LocationType,
-  PhysicalLocation,
-  PhysicalLocationType
-}
+import weco.catalogue.internal_model.locations._
 
 trait LocationGenerators extends RandomGenerators {
   def createPhysicalLocationWith(

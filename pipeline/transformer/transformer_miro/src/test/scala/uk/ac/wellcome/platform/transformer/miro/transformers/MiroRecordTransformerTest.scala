@@ -13,6 +13,12 @@ import WorkState.Source
 import uk.ac.wellcome.models.work.internal.DeletedReason.SuppressedFromSource
 import uk.ac.wellcome.models.work.internal.InvisibilityReason.UnableToTransform
 import weco.catalogue.internal_model.generators.IdentifiersGenerators
+import weco.catalogue.internal_model.locations.{
+  AccessCondition,
+  AccessStatus,
+  DigitalLocation,
+  LocationType
+}
 
 class MiroRecordTransformerTest
     extends AnyFunSpec
