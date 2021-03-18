@@ -1,10 +1,10 @@
 package uk.ac.wellcome.platform.merger.rules
 
 import cats.data.{NonEmptyList, State}
-import uk.ac.wellcome.models.work.internal.WorkState.Identified
-import uk.ac.wellcome.models.work.internal._
+import weco.catalogue.internal_model.work.WorkState.Identified
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 import uk.ac.wellcome.platform.merger.rules.WorkPredicates.WorkPredicate
+import weco.catalogue.internal_model.work.Work
 
 import scala.Function.const
 

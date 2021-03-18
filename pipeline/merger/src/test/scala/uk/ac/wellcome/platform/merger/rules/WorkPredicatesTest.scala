@@ -7,8 +7,12 @@ import uk.ac.wellcome.models.work.generators.{
   MetsWorkGenerators,
   MiroWorkGenerators
 }
-import uk.ac.wellcome.models.work.internal.WorkState.Identified
-import uk.ac.wellcome.models.work.internal._
+import weco.catalogue.internal_model.work.WorkState.Identified
+import weco.catalogue.internal_model.locations.{
+  DigitalLocation,
+  PhysicalLocation
+}
+import weco.catalogue.internal_model.work.{Format, Work}
 
 class WorkPredicatesTest
     extends AnyFunSpec

@@ -16,12 +16,12 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
 import uk.ac.wellcome.pipeline_storage.fixtures.{
   ElasticIndexerFixtures,
   PipelineStorageStreamFixtures,
   SampleDocument
 }
+import weco.catalogue.internal_model.generators.IdentifiersGenerators
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

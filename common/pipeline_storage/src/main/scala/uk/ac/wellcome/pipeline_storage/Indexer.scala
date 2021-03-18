@@ -3,7 +3,8 @@ package uk.ac.wellcome.pipeline_storage
 import scala.concurrent.Future
 import grizzled.slf4j.Logging
 
-import uk.ac.wellcome.models.work.internal._
+import weco.catalogue.internal_model.image.{Image, ImageState}
+import weco.catalogue.internal_model.work.{Work, WorkState}
 
 abstract class Indexer[T: Indexable] {
 

@@ -2,7 +2,7 @@ package uk.ac.wellcome.models.work.generators
 
 import java.time.{Instant, LocalDateTime}
 
-import uk.ac.wellcome.models.work.internal._
+import weco.catalogue.internal_model.work.InstantRange
 
 import scala.concurrent.duration._
 import scala.util.Random

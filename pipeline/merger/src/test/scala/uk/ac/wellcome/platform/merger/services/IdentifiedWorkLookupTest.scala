@@ -5,9 +5,9 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.matcher.WorkIdentifier
 import uk.ac.wellcome.models.work.generators.WorkGenerators
-import uk.ac.wellcome.models.work.internal.WorkState.Identified
-import uk.ac.wellcome.models.work.internal._
+import weco.catalogue.internal_model.work.WorkState.Identified
 import uk.ac.wellcome.pipeline_storage.MemoryRetriever
+import weco.catalogue.internal_model.work.Work
 
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global

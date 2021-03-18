@@ -2,8 +2,8 @@ package uk.ac.wellcome.platform.merger.logging
 
 import grizzled.slf4j.Logging
 import cats.data.NonEmptyList
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.models.ImageDataWithSource
+import weco.catalogue.internal_model.work.Work
 
 trait MergerLogging extends Logging {
   def describeWork(work: Work[_]): String =

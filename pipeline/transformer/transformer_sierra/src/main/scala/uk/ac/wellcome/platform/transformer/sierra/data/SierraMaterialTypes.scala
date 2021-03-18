@@ -1,8 +1,8 @@
 package uk.ac.wellcome.platform.transformer.sierra.data
 
-import uk.ac.wellcome.models.work.internal.Format
-import uk.ac.wellcome.models.work.internal.Format.{Linked, Unlinked}
 import uk.ac.wellcome.platform.transformer.sierra.exceptions.SierraTransformerException
+import weco.catalogue.internal_model.work.Format
+import weco.catalogue.internal_model.work.Format.{Linked, Unlinked}
 
 object SierraMaterialTypes {
 

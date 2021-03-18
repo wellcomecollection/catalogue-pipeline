@@ -4,17 +4,19 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import uk.ac.wellcome.models.work.generators.{ImageGenerators, WorkGenerators}
+import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.index.{
   IndexFixtures,
   InitialImageIndexConfig,
   MergedWorkIndexConfig
 }
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.elasticsearch.model.IndexId
-import WorkState.Merged
-import ImageState.Initial
+import weco.catalogue.internal_model.work.WorkState.Merged
+import weco.catalogue.internal_model.generators.ImageGenerators
+import weco.catalogue.internal_model.image.Image
+import weco.catalogue.internal_model.image.ImageState.Initial
+import weco.catalogue.internal_model.work.Work
 
 class EitherIndexerTest
     extends AnyFunSpec

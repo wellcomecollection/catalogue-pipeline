@@ -6,7 +6,8 @@ import uk.ac.wellcome.models.work.generators.{
   CalmWorkGenerators,
   SierraWorkGenerators
 }
-import uk.ac.wellcome.models.work.internal.{Format, IdState, MergeCandidate}
+import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.work.{Format, MergeCandidate}
 
 class SourcesTest
     extends AnyFunSpec

@@ -12,9 +12,11 @@ import io.circe.Encoder
 import io.circe.generic.semiauto.deriveEncoder
 import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.generators.{ImageGenerators, WorkGenerators}
-import uk.ac.wellcome.models.work.internal.WorkState.Identified
-import uk.ac.wellcome.models.work.internal._
+import uk.ac.wellcome.models.work.generators.WorkGenerators
+import weco.catalogue.internal_model.generators.ImageGenerators
+import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.locations.{AccessCondition, AccessStatus}
+import weco.catalogue.internal_model.work._
 
 import java.time.Instant
 
@@ -35,7 +37,7 @@ class WorksIndexConfigTest
   )
   // On failure, scalacheck tries to shrink to the smallest input that causes a failure.
   // With IdentifiedWork, that means that it never actually completes.
-  implicit val noShrink = Shrink.shrinkAny[Work[Identified]]
+  implicit val noShrink = Shrink.shrinkAny[Work[WorkState.Identified]]
 
   // We use this for the scalacheck of the java.time.Instant type
   // We could just import the library, but I might wait until we need more
@@ -57,7 +59,7 @@ class WorksIndexConfigTest
   implicit val badObjectEncoder: Encoder[BadTestObject] = deriveEncoder
 
   it("puts a valid work") {
-    forAll { sampleWork: Work[Identified] =>
+    forAll { sampleWork: Work[WorkState.Identified] =>
       withLocalWorksIndex { index =>
         whenReady(indexObject(index, sampleWork)) { _ =>
           assertObjectIndexed(index, sampleWork)
@@ -156,7 +158,7 @@ class WorksIndexConfigTest
   }
 
   it("puts a valid work using compression") {
-    forAll { sampleWork: Work[Identified] =>
+    forAll { sampleWork: Work[WorkState.Identified] =>
       withLocalWorksIndex { index =>
         whenReady(indexObjectCompressed(index, sampleWork)) { _ =>
           assertObjectIndexed(index, sampleWork)

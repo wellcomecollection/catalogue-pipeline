@@ -2,8 +2,8 @@ package uk.ac.wellcome.platform.id_minter.database
 
 import grizzled.slf4j.Logging
 import scalikejdbc._
-import uk.ac.wellcome.models.work.internal.SourceIdentifier
 import uk.ac.wellcome.platform.id_minter.models.{Identifier, IdentifiersTable}
+import weco.catalogue.internal_model.identifiers.SourceIdentifier
 
 import java.sql.{BatchUpdateException, Statement}
 import scala.concurrent.blocking

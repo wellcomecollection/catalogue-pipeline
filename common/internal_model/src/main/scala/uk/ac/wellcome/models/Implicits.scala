@@ -4,7 +4,10 @@ import io.circe.generic.extras.semiauto._
 import io.circe._
 import uk.ac.wellcome.models.matcher.MatcherResult
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.models.work.internal._
+import weco.catalogue.internal_model.identifiers._
+import weco.catalogue.internal_model.image._
+import weco.catalogue.internal_model.locations._
+import weco.catalogue.internal_model.work._
 
 object Implicits {
 

@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.transformer.calm.transformers
 
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.calm.{CalmRecordOps, NormaliseText}
+import weco.catalogue.internal_model.work._
 import weco.catalogue.source_model.calm.CalmRecord
 
 object CalmNotes extends CalmRecordOps {

@@ -2,7 +2,7 @@ package uk.ac.wellcome.models.parse
 
 import fastparse._
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.models.work.internal.InstantRange
+import weco.catalogue.internal_model.work.InstantRange
 
 /**
   *  Trait for parsing some input into T with the FastParse library

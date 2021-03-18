@@ -1,7 +1,12 @@
 package uk.ac.wellcome.platform.transformer.miro.transformers
 
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
+import weco.catalogue.internal_model.identifiers.{
+  IdState,
+  IdentifierType,
+  SourceIdentifier
+}
+import weco.catalogue.internal_model.image.ImageData
 
 trait MiroImageData extends MiroLocation {
 

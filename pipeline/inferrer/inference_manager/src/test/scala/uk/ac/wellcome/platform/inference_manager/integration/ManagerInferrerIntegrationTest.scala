@@ -15,13 +15,6 @@ import software.amazon.awssdk.services.sqs.model.Message
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.models.work.generators.ImageGenerators
-import uk.ac.wellcome.models.work.internal.{
-  Image,
-  ImageState,
-  InferredData,
-  LocationType
-}
 import uk.ac.wellcome.platform.inference_manager.adapters.{
   FeatureVectorInferrerAdapter,
   InferrerAdapter,
@@ -33,8 +26,11 @@ import uk.ac.wellcome.platform.inference_manager.services.{
   DefaultFileWriter,
   MergedIdentifiedImage
 }
-import ImageState.{Augmented, Initial}
+import weco.catalogue.internal_model.image.ImageState.{Augmented, Initial}
 import akka.http.scaladsl.model.Uri
+import weco.catalogue.internal_model.generators.ImageGenerators
+import weco.catalogue.internal_model.image.{Image, InferredData}
+import weco.catalogue.internal_model.locations.LocationType
 
 class ManagerInferrerIntegrationTest
     extends AnyFunSpec

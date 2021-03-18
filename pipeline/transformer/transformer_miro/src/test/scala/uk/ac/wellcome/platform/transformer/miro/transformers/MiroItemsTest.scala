@@ -2,9 +2,11 @@ package uk.ac.wellcome.platform.transformer.miro.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
+import weco.catalogue.internal_model.generators.IdentifiersGenerators
+import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.locations._
+import weco.catalogue.internal_model.work.Item
 
 class MiroItemsTest
     extends AnyFunSpec

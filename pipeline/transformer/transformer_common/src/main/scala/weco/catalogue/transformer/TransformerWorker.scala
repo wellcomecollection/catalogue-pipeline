@@ -5,12 +5,12 @@ import grizzled.slf4j.Logging
 import io.circe.Decoder
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.models.work.internal.WorkState.Source
-import uk.ac.wellcome.models.work.internal._
+import weco.catalogue.internal_model.work.WorkState.Source
 import uk.ac.wellcome.pipeline_storage.{PipelineStorageStream, Retriever}
 import uk.ac.wellcome.pipeline_storage.Indexable._
 import uk.ac.wellcome.storage.{Identified, ReadError, Version}
 import weco.catalogue
+import weco.catalogue.internal_model.work.Work
 import weco.catalogue.source_model.SourcePayload
 
 import scala.concurrent.{ExecutionContext, Future}

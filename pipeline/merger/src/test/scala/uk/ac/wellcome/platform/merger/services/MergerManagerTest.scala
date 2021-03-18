@@ -4,10 +4,11 @@ import cats.data.State
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.generators.WorkGenerators
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.models.{MergeResult, MergerOutcome}
-import WorkState.{Identified, Merged}
-import WorkFsm._
+import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.work.Work
+import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
+import weco.catalogue.internal_model.work.WorkFsm._
 
 class MergerManagerTest extends AnyFunSpec with Matchers with WorkGenerators {
 

@@ -1,7 +1,10 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.models.work.internal.{LocationType, PhysicalLocationType}
+import weco.catalogue.internal_model.locations.{
+  LocationType,
+  PhysicalLocationType
+}
 import weco.catalogue.sierra_adapter.models.TypedSierraRecordNumber
 
 object SierraPhysicalLocationType extends Logging {

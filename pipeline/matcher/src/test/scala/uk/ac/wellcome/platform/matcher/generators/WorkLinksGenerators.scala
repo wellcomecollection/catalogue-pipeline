@@ -1,8 +1,8 @@
 package uk.ac.wellcome.platform.matcher.generators
 
-import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
-import uk.ac.wellcome.models.work.internal.IdState
 import uk.ac.wellcome.platform.matcher.models.WorkLinks
+import weco.catalogue.internal_model.generators.IdentifiersGenerators
+import weco.catalogue.internal_model.identifiers.IdState
 
 trait WorkLinksGenerators extends IdentifiersGenerators {
   def createIdentifier(id: String): IdState.Identified =

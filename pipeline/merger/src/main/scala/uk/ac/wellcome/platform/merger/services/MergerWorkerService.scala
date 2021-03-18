@@ -12,7 +12,6 @@ import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.matcher.MatcherResult
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.pipeline_storage.{
   Indexable,
@@ -21,8 +20,10 @@ import uk.ac.wellcome.pipeline_storage.{
   PipelineStorageStream
 }
 import uk.ac.wellcome.typesafe.Runnable
-import WorkState.{Identified, Merged}
-import ImageState.Initial
+import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
+import weco.catalogue.internal_model.image.Image
+import weco.catalogue.internal_model.image.ImageState.Initial
+import weco.catalogue.internal_model.work.Work
 
 class MergerWorkerService[WorkDestination, ImageDestination](
   msgStream: SQSStream[NotificationMessage],

@@ -1,11 +1,17 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.text.TextNormalisation._
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   MarcSubfield,
   SierraQueryOps,
   VarField
+}
+import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.work.{
+  AbstractConcept,
+  Concept,
+  Period,
+  Place
 }
 
 trait SierraConcepts extends SierraQueryOps {

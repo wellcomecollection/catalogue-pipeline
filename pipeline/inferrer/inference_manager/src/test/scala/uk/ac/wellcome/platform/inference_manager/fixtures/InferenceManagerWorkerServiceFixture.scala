@@ -8,7 +8,6 @@ import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.inference_manager.adapters.InferrerAdapter
 import uk.ac.wellcome.platform.inference_manager.models.DownloadedImage
 import uk.ac.wellcome.pipeline_storage.{MemoryIndexer, MemoryRetriever}
@@ -20,8 +19,9 @@ import uk.ac.wellcome.platform.inference_manager.services.{
   RequestPoolFlow
 }
 import uk.ac.wellcome.pipeline_storage.fixtures.PipelineStorageStreamFixtures
-import ImageState.{Augmented, Initial}
+import weco.catalogue.internal_model.image.ImageState.{Augmented, Initial}
 import akka.http.scaladsl.model.Uri
+import weco.catalogue.internal_model.image.Image
 
 trait InferenceManagerWorkerServiceFixture
     extends PipelineStorageStreamFixtures {

@@ -1,19 +1,12 @@
 package uk.ac.wellcome.platform.transformer.calm
 
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.models.work.internal.InvisibilityReason._
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.internal.result._
 import uk.ac.wellcome.platform.transformer.calm.models.{
   CalmSourceData,
   CalmTransformerException
 }
 import uk.ac.wellcome.platform.transformer.calm.models.CalmTransformerException._
-import uk.ac.wellcome.models.work.internal.DeletedReason.{
-  DeletedFromSource,
-  SuppressedFromSource
-}
-import uk.ac.wellcome.models.work.internal.IdState.Identifiable
 import uk.ac.wellcome.platform.transformer.calm.transformers.{
   CalmItems,
   CalmLanguages,
@@ -21,8 +14,21 @@ import uk.ac.wellcome.platform.transformer.calm.transformers.{
 }
 import weco.catalogue.source_model.calm.CalmRecord
 import weco.catalogue.transformer.Transformer
-import WorkState.Source
+import weco.catalogue.internal_model.work.WorkState.Source
 import uk.ac.wellcome.models.parse.PeriodParser
+import weco.catalogue.internal_model.identifiers.{
+  DataState,
+  IdState,
+  IdentifierType,
+  SourceIdentifier
+}
+import weco.catalogue.internal_model.locations.UnknownAccessStatus
+import weco.catalogue.internal_model.work.DeletedReason.{
+  DeletedFromSource,
+  SuppressedFromSource
+}
+import weco.catalogue.internal_model.work.InvisibilityReason._
+import weco.catalogue.internal_model.work._
 
 object CalmTransformer
     extends Transformer[CalmSourceData]
@@ -189,12 +195,13 @@ object CalmTransformer
           )
     }
 
-  def mergeCandidates(record: CalmRecord): List[MergeCandidate[Identifiable]] =
+  def mergeCandidates(
+    record: CalmRecord): List[MergeCandidate[IdState.Identifiable]] =
     record
       .get("BNumber")
       .map { id =>
         MergeCandidate(
-          Identifiable(
+          IdState.Identifiable(
             SourceIdentifier(
               identifierType = IdentifierType("sierra-system-number"),
               ontologyType = "Work",

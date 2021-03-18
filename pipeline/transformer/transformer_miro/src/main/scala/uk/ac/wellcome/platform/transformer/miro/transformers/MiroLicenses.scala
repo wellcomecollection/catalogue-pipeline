@@ -1,10 +1,10 @@
 package uk.ac.wellcome.platform.transformer.miro.transformers
 
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.miro.exceptions.{
   ShouldNotTransformException,
   ShouldSuppressException
 }
+import weco.catalogue.internal_model.locations.License
 
 trait MiroLicenses {
 

@@ -2,12 +2,6 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.internal.{
-  AccessCondition,
-  AccessStatus,
-  LocationType,
-  PhysicalLocation
-}
 import uk.ac.wellcome.platform.transformer.sierra.source.sierra.SierraSourceLocation
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   MarcSubfield,
@@ -15,6 +9,12 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   VarField
 }
 import uk.ac.wellcome.platform.transformer.sierra.generators.SierraDataGenerators
+import weco.catalogue.internal_model.locations.{
+  AccessCondition,
+  AccessStatus,
+  LocationType,
+  PhysicalLocation
+}
 
 class SierraLocationTest
     extends AnyFunSpec

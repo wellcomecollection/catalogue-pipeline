@@ -2,7 +2,7 @@ package uk.ac.wellcome.models.parse
 
 import fastparse._
 import NoWhitespace._
-import uk.ac.wellcome.models.work.internal.InstantRange
+import weco.catalogue.internal_model.work.InstantRange
 
 object PeriodParser extends Parser[InstantRange] with DateParserUtils {
   import DateParserImplicits._

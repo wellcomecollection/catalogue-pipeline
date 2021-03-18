@@ -4,38 +4,33 @@ import java.time.Instant
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.generators.WorkGenerators
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.sierra.SierraTransformer
 import uk.ac.wellcome.platform.transformer.sierra.exceptions.SierraTransformerException
 import uk.ac.wellcome.platform.transformer.sierra.generators.MarcGenerators
 import uk.ac.wellcome.platform.transformer.sierra.source.MarcSubfield
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.models.work.internal.Format.{Books, Pictures}
-import WorkState.Source
+import weco.catalogue.internal_model.work.WorkState.Source
 import org.scalatest.Assertion
-import uk.ac.wellcome.models.work.internal.AccessStatus.LicensedResources
-import uk.ac.wellcome.models.work.internal.DeletedReason.{
-  DeletedFromSource,
-  SuppressedFromSource
-}
-import uk.ac.wellcome.models.work.internal.InvisibilityReason.{
-  SourceFieldMissing,
-  UnableToTransform
-}
-import uk.ac.wellcome.models.work.internal.LocationType.{
+import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.locations.AccessStatus.LicensedResources
+import weco.catalogue.internal_model.locations._
+import weco.catalogue.internal_model.locations.LocationType.{
   ClosedStores,
   OnlineResource
 }
+import weco.catalogue.internal_model.work.DeletedReason.{
+  DeletedFromSource,
+  SuppressedFromSource
+}
+import weco.catalogue.internal_model.work.Format.{Books, Pictures}
+import weco.catalogue.internal_model.work.InvisibilityReason.{
+  SourceFieldMissing,
+  UnableToTransform
+}
+import weco.catalogue.internal_model.work._
 import weco.catalogue.sierra_adapter.generators.SierraGenerators
 import weco.catalogue.sierra_adapter.models.Implicits._
-import weco.catalogue.sierra_adapter.models.{
-  SierraBibNumber,
-  SierraBibRecord,
-  SierraHoldingsRecord,
-  SierraItemNumber,
-  SierraItemRecord,
-  SierraTransformable
-}
+import weco.catalogue.sierra_adapter.models._
 
 class SierraTransformerTest
     extends AnyFunSpec
@@ -112,14 +107,12 @@ class SierraTransformerTest
 
     val bibRecord = createSierraBibRecordWith(id = id, data = data)
 
-    val expectedFormat = Pictures
-
     val triedWork =
       SierraTransformer(createSierraTransformableWith(id, Some(bibRecord)), 1)
     triedWork.isSuccess shouldBe true
 
     triedWork.get.asInstanceOf[Work.Visible[_]].data.format shouldBe Some(
-      expectedFormat)
+      Pictures)
   }
 
   it("extracts information from items") {
@@ -448,8 +441,6 @@ class SierraTransformerTest
     val formatId = "a"
     val formatValue = "Books"
 
-    val expectedFormat = Books
-
     val data =
       s"""
          | {
@@ -463,7 +454,7 @@ class SierraTransformerTest
       """.stripMargin
 
     val work = transformDataToSourceWork(id = id, data = data)
-    work.data.format shouldBe Some(expectedFormat)
+    work.data.format shouldBe Some(Books)
   }
 
   it("includes the alternative title, if present") {

@@ -1,8 +1,8 @@
 package uk.ac.wellcome.platform.merger.services
 
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.models.MergerOutcome
-import WorkState.Identified
+import weco.catalogue.internal_model.work.Work
+import weco.catalogue.internal_model.work.WorkState.Identified
 
 class MergerManager(mergerRules: Merger) {
 

@@ -5,8 +5,8 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.generators.ImageGenerators
-import uk.ac.wellcome.models.work.internal.InferredData
+import weco.catalogue.internal_model.generators.ImageGenerators
+import weco.catalogue.internal_model.image.InferredData
 
 import scala.util.Random
 

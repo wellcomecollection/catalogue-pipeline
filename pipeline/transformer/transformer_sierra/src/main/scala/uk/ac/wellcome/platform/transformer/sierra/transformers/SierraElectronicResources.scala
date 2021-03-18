@@ -1,19 +1,19 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.models.work.internal.AccessStatus.LicensedResources
-import uk.ac.wellcome.models.work.internal.LocationType.OnlineResource
-import uk.ac.wellcome.models.work.internal.{
-  AccessCondition,
-  DigitalLocation,
-  IdState,
-  Item
-}
+import weco.catalogue.internal_model.locations.AccessStatus.LicensedResources
+import weco.catalogue.internal_model.locations.LocationType.OnlineResource
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   MarcSubfield,
   SierraQueryOps,
   VarField
 }
+import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.locations.{
+  AccessCondition,
+  DigitalLocation
+}
+import weco.catalogue.internal_model.work.Item
 import weco.catalogue.sierra_adapter.models.TypedSierraRecordNumber
 
 import java.net.URL

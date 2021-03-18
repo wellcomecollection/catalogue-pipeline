@@ -4,7 +4,7 @@ import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.{TableDrivenPropertyChecks, TableFor2}
-import uk.ac.wellcome.models.work.internal.{Language, LanguageNote}
+import weco.catalogue.internal_model.work.{Language, LanguageNote}
 
 class CalmLanguagesTest
     extends AnyFunSpec

@@ -2,9 +2,9 @@ package uk.ac.wellcome.relation_embedder
 
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
-import uk.ac.wellcome.models.work.internal._
 import org.scalatest.Inspectors
 import uk.ac.wellcome.relation_embedder.fixtures.RelationGenerators
+import weco.catalogue.internal_model.work.{Availability, Relation, Relations}
 
 class ArchiveRelationsCacheTest
     extends AnyFunSpec

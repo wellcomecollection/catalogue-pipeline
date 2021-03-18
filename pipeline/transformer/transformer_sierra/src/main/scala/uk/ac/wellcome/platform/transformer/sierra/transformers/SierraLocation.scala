@@ -1,13 +1,8 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.platform.transformer.sierra.source.{
-  SierraBibData,
-  SierraItemData,
-  SierraQueryOps,
-  VarField
-}
+import uk.ac.wellcome.platform.transformer.sierra.source._
+import weco.catalogue.internal_model.locations._
 import weco.catalogue.sierra_adapter.models.{SierraBibNumber, SierraItemNumber}
 
 trait SierraLocation extends SierraQueryOps with Logging {

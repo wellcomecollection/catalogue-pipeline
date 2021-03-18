@@ -1,7 +1,10 @@
 package uk.ac.wellcome.platform.transformer.miro.transformers
 
-import uk.ac.wellcome.models.work.internal.{IdentifierType, SourceIdentifier}
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
+import weco.catalogue.internal_model.identifiers.{
+  IdentifierType,
+  SourceIdentifier
+}
 
 trait MiroIdentifiers extends MiroTransformableUtils {
   def getOtherIdentifiers(miroRecord: MiroRecord): List[SourceIdentifier] = {

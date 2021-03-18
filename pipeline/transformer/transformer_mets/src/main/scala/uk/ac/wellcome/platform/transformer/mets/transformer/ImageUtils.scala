@@ -1,6 +1,9 @@
 package uk.ac.wellcome.platform.transformer.mets.transformer
 
-import uk.ac.wellcome.models.work.internal.{IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  IdentifierType,
+  SourceIdentifier
+}
 
 object ImageUtils {
   def isThumbnail(fileReference: FileReference): Boolean =

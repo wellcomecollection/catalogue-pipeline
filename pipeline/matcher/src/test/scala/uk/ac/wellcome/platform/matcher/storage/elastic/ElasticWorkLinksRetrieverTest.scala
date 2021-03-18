@@ -7,12 +7,12 @@ import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.work.generators.WorkGenerators
-import uk.ac.wellcome.models.work.internal.IdState.Identified
-import uk.ac.wellcome.models.work.internal.{MergeCandidate, Work, WorkState}
 import uk.ac.wellcome.pipeline_storage.fixtures.ElasticIndexerFixtures
 import uk.ac.wellcome.pipeline_storage.{Retriever, RetrieverTestCases}
 import uk.ac.wellcome.platform.matcher.generators.WorkLinksGenerators
 import uk.ac.wellcome.platform.matcher.models.WorkLinks
+import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.work.{MergeCandidate, Work, WorkState}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -33,7 +33,7 @@ class ElasticWorkLinksRetrieverTest
             .mergeCandidates(
               lk.referencedWorkIds.map { id =>
                 MergeCandidate(
-                  id = Identified(
+                  id = IdState.Identified(
                     canonicalId = id,
                     sourceIdentifier = createSourceIdentifier
                   ),

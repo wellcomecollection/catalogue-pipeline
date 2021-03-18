@@ -3,10 +3,10 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 import scala.util.Try
 import org.scalatest.matchers.should.Matchers
 
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.sierra.SierraTransformer
 import uk.ac.wellcome.platform.transformer.sierra.exceptions.SierraTransformerException
-import WorkState.Source
+import weco.catalogue.internal_model.work.Work
+import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.sierra_adapter.models.SierraTransformable
 
 trait SierraTransformableTestBase extends Matchers {

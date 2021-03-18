@@ -2,7 +2,6 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.internal.Language
 import uk.ac.wellcome.platform.transformer.sierra.generators.{
   MarcGenerators,
   SierraDataGenerators
@@ -12,6 +11,7 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraBibData
 }
 import uk.ac.wellcome.platform.transformer.sierra.source.sierra.SierraSourceLanguage
+import weco.catalogue.internal_model.work.Language
 
 class SierraLanguagesTest
     extends AnyFunSpec

@@ -8,11 +8,11 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.index.{IdentifiedWorkIndexConfig, IndexFixtures}
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.work.generators.{InstantGenerators, WorkGenerators}
-import uk.ac.wellcome.models.work.internal.WorkState.Identified
-import uk.ac.wellcome.models.work.internal._
+import weco.catalogue.internal_model.work.WorkState.Identified
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.pipeline_storage.Indexable.workIndexable
 import uk.ac.wellcome.pipeline_storage.fixtures.ElasticIndexerFixtures
+import weco.catalogue.internal_model.work.Work
 
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global

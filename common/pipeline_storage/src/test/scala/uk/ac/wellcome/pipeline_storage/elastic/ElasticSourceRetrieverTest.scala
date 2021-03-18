@@ -5,12 +5,12 @@ import uk.ac.wellcome.elasticsearch.NoStrictMapping
 import uk.ac.wellcome.elasticsearch.model.IndexId
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
 import uk.ac.wellcome.pipeline_storage.{Retriever, RetrieverTestCases}
 import uk.ac.wellcome.pipeline_storage.fixtures.{
   ElasticIndexerFixtures,
   SampleDocument
 }
+import weco.catalogue.internal_model.generators.IdentifiersGenerators
 
 import scala.concurrent.ExecutionContext.Implicits.global
 

@@ -10,8 +10,6 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.models.work.generators.ImageGenerators
-import uk.ac.wellcome.models.work.internal.LocationType
 import uk.ac.wellcome.platform.inference_manager.fixtures.{
   MemoryFileWriter,
   RequestPoolFixtures,
@@ -19,6 +17,8 @@ import uk.ac.wellcome.platform.inference_manager.fixtures.{
   Responses
 }
 import uk.ac.wellcome.platform.inference_manager.models.DownloadedImage
+import weco.catalogue.internal_model.generators.ImageGenerators
+import weco.catalogue.internal_model.locations.LocationType
 
 class ImageDownloaderTest
     extends AnyFunSpec

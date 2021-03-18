@@ -8,14 +8,15 @@ import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.monitoring.Metrics
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
 import uk.ac.wellcome.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import uk.ac.wellcome.pipeline_storage.{MemoryIndexer, MemoryRetriever}
 import uk.ac.wellcome.platform.merger.services._
-import WorkState.{Identified, Merged}
-import ImageState.Initial
+import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
+import weco.catalogue.internal_model.image.Image
+import weco.catalogue.internal_model.image.ImageState.Initial
+import weco.catalogue.internal_model.work.Work
 
 trait WorkerServiceFixture extends PipelineStorageStreamFixtures {
 

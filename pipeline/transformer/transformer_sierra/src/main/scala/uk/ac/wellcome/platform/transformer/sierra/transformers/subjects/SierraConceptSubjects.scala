@@ -1,12 +1,13 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers.subjects
 
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.text.TextNormalisation._
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   MarcSubfield,
   VarField
 }
 import uk.ac.wellcome.platform.transformer.sierra.transformers.SierraConcepts
+import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.work._
 import weco.catalogue.sierra_adapter.models.SierraBibNumber
 
 // Populate wwork:subject

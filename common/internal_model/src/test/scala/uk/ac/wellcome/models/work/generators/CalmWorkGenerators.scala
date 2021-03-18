@@ -1,6 +1,6 @@
 package uk.ac.wellcome.models.work.generators
 
-import uk.ac.wellcome.models.work.internal.{Work, WorkState}
+import weco.catalogue.internal_model.work.{Work, WorkState}
 
 trait CalmWorkGenerators extends WorkGenerators with ItemsGenerators {
 

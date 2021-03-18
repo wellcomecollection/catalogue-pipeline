@@ -1,6 +1,6 @@
 package uk.ac.wellcome.relation_embedder
 
-import uk.ac.wellcome.models.work.internal._
+import weco.catalogue.internal_model.work._
 
 /** Contains the minimal set of fields on a Work needed for generating a
   * Relation object.

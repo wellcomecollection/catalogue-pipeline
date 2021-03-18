@@ -6,11 +6,12 @@ import org.scalatest.EitherValues
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.models.work.internal.{IdentifierType, Work, WorkState}
 import uk.ac.wellcome.pipeline_storage.{PipelineStorageStream, Retriever}
 import uk.ac.wellcome.storage.generators.S3ObjectLocationGenerators
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.memory.MemoryTypedStore
+import weco.catalogue.internal_model.identifiers.IdentifierType
+import weco.catalogue.internal_model.work.{Work, WorkState}
 import weco.catalogue.sierra_adapter.generators.SierraGenerators
 import weco.catalogue.sierra_adapter.models.{
   SierraBibNumber,

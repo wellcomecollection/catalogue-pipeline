@@ -7,8 +7,7 @@ import uk.ac.wellcome.models.index.SourceWorkIndexConfig
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
-import uk.ac.wellcome.models.work.internal.Work
-import uk.ac.wellcome.models.work.internal.WorkState.Source
+import weco.catalogue.internal_model.work.WorkState.Source
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.pipeline_storage.typesafe.{
   ElasticIndexerBuilder,
@@ -23,6 +22,7 @@ import uk.ac.wellcome.typesafe.config.builders.{
   AWSClientConfigBuilder,
   AkkaBuilder
 }
+import weco.catalogue.internal_model.work.Work
 import weco.catalogue.source_model.calm.CalmRecord
 
 import scala.concurrent.ExecutionContext

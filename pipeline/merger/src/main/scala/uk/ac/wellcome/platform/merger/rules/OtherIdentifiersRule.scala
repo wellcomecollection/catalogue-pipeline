@@ -3,11 +3,12 @@ package uk.ac.wellcome.platform.merger.rules
 import cats.data.NonEmptyList
 import cats.implicits._
 
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.logging.MergerLogging
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 import uk.ac.wellcome.platform.merger.models.Sources.findFirstLinkedDigitisedSierraWorkFor
-import WorkState.Identified
+import weco.catalogue.internal_model.work.WorkState.Identified
+import weco.catalogue.internal_model.identifiers.SourceIdentifier
+import weco.catalogue.internal_model.work.Work
 
 /**
   * Identifiers are merged as follows:

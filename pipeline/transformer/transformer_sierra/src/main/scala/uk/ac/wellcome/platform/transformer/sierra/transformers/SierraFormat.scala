@@ -1,8 +1,8 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
-import uk.ac.wellcome.models.work.internal.Format
 import uk.ac.wellcome.platform.transformer.sierra.data.SierraMaterialTypes
 import uk.ac.wellcome.platform.transformer.sierra.source.SierraBibData
+import weco.catalogue.internal_model.work.Format
 
 object SierraFormat extends SierraDataTransformer {
 

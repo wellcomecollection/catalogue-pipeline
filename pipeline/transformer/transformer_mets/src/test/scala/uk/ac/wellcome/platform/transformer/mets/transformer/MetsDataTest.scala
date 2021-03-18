@@ -4,11 +4,13 @@ import java.time.Instant
 import org.scalatest.{EitherValues, Inside}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.internal._
-import WorkState.Source
-import uk.ac.wellcome.models.work.internal.DeletedReason.DeletedFromSource
-import uk.ac.wellcome.models.work.internal.InvisibilityReason.MetsWorksAreNotVisible
+import weco.catalogue.internal_model.work.WorkState.Source
 import uk.ac.wellcome.platform.transformer.mets.fixtures.MetsGenerators
+import weco.catalogue.internal_model.identifiers._
+import weco.catalogue.internal_model.locations._
+import weco.catalogue.internal_model.work.DeletedReason.DeletedFromSource
+import weco.catalogue.internal_model.work.InvisibilityReason.MetsWorksAreNotVisible
+import weco.catalogue.internal_model.work._
 
 class MetsDataTest
     extends AnyFunSpec

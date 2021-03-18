@@ -11,7 +11,6 @@ import uk.ac.wellcome.models.index.{
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.pipeline_storage.EitherIndexer
 import uk.ac.wellcome.pipeline_storage.typesafe.{
@@ -22,8 +21,10 @@ import uk.ac.wellcome.pipeline_storage.typesafe.{
 import uk.ac.wellcome.platform.merger.services._
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
-import WorkState.{Identified, Merged}
-import ImageState.Initial
+import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
+import weco.catalogue.internal_model.image.Image
+import weco.catalogue.internal_model.image.ImageState.Initial
+import weco.catalogue.internal_model.work.Work
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>

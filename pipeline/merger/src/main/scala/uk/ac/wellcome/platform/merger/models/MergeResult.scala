@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.merger.models
 
-import uk.ac.wellcome.models.work.internal.WorkState.Identified
-import uk.ac.wellcome.models.work.internal._
+import weco.catalogue.internal_model.work.WorkState.Identified
+import weco.catalogue.internal_model.work.Work
 
 /*
  * MergeResult holds the resultant target after all fields have been merged,

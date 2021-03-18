@@ -16,8 +16,8 @@ import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.models.index.IndexedWorkIndexConfig
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.internal._
-import WorkState.{Denormalised, Indexed}
+import weco.catalogue.internal_model.work.Work
+import weco.catalogue.internal_model.work.WorkState.{Denormalised, Indexed}
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>

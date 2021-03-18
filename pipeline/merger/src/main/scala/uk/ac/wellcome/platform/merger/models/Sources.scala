@@ -1,8 +1,8 @@
 package uk.ac.wellcome.platform.merger.models
 
-import uk.ac.wellcome.models.work.internal.WorkState.Identified
-import uk.ac.wellcome.models.work.internal._
+import weco.catalogue.internal_model.work.WorkState.Identified
 import uk.ac.wellcome.platform.merger.rules.WorkPredicates
+import weco.catalogue.internal_model.work.Work
 
 object Sources {
   import WorkPredicates._

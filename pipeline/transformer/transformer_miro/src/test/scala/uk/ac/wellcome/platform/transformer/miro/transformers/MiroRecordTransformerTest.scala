@@ -5,14 +5,16 @@ import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
 import uk.ac.wellcome.platform.transformer.miro.models.MiroMetadata
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
-import WorkState.Source
-import uk.ac.wellcome.models.work.internal.DeletedReason.SuppressedFromSource
-import uk.ac.wellcome.models.work.internal.InvisibilityReason.UnableToTransform
+import weco.catalogue.internal_model.work.WorkState.Source
+import weco.catalogue.internal_model.generators.IdentifiersGenerators
+import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType}
+import weco.catalogue.internal_model.locations._
+import weco.catalogue.internal_model.work.DeletedReason.SuppressedFromSource
+import weco.catalogue.internal_model.work.InvisibilityReason.UnableToTransform
+import weco.catalogue.internal_model.work._
 
 class MiroRecordTransformerTest
     extends AnyFunSpec

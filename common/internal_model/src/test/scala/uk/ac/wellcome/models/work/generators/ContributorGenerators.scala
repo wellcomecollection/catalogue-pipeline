@@ -1,6 +1,6 @@
 package uk.ac.wellcome.models.work.generators
 
-import uk.ac.wellcome.models.work.internal._
+import weco.catalogue.internal_model.work._
 
 trait ContributorGenerators {
   def createPersonContributorWith(label: String,

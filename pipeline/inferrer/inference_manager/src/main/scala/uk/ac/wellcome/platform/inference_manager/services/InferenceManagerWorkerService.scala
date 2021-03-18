@@ -10,8 +10,7 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
-import uk.ac.wellcome.models.work.internal.ImageState.{Augmented, Initial}
-import uk.ac.wellcome.models.work.internal.{Image, ImageState, InferredData}
+import weco.catalogue.internal_model.image.ImageState.{Augmented, Initial}
 import uk.ac.wellcome.pipeline_storage.Indexable.imageIndexable
 import uk.ac.wellcome.pipeline_storage.PipelineStorageStream._
 import uk.ac.wellcome.pipeline_storage.{
@@ -25,6 +24,7 @@ import uk.ac.wellcome.platform.inference_manager.adapters.{
 }
 import uk.ac.wellcome.platform.inference_manager.models.DownloadedImage
 import uk.ac.wellcome.typesafe.Runnable
+import weco.catalogue.internal_model.image.{Image, ImageState, InferredData}
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}

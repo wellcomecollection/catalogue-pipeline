@@ -1,6 +1,6 @@
 package uk.ac.wellcome.models.matcher
 
-import uk.ac.wellcome.models.work.internal.Work
+import weco.catalogue.internal_model.work.Work
 
 case class WorkIdentifier(identifier: String, version: Option[Int])
 

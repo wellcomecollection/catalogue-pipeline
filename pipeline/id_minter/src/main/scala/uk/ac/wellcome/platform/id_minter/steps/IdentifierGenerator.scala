@@ -1,10 +1,10 @@
 package uk.ac.wellcome.platform.id_minter.steps
 
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.models.work.internal.SourceIdentifier
 import uk.ac.wellcome.platform.id_minter.database.IdentifiersDao
 import uk.ac.wellcome.platform.id_minter.models.Identifier
 import uk.ac.wellcome.platform.id_minter.utils.Identifiable
+import weco.catalogue.internal_model.identifiers.SourceIdentifier
 
 import scala.util.{Success, Try}
 
