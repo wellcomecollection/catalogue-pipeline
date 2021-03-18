@@ -37,7 +37,7 @@ class ImagesServiceTest
         whenReady(
           imagesService
             .findImageById(id = image.id)(index)) {
-          _.right.value.value shouldBe image
+          _.value.value shouldBe image
         }
       }
     }
@@ -47,7 +47,7 @@ class ImagesServiceTest
         whenReady(
           imagesService
             .findImageById("bananas")(index)) {
-          _.right.value shouldBe None
+          _.value shouldBe None
         }
       }
     }
