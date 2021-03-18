@@ -9,10 +9,10 @@ import com.sksamuel.elastic4s.requests.searches.SearchHit
 import com.sksamuel.elastic4s.streams.ReactiveElastic._
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.json.JsonUtil.fromJson
-import uk.ac.wellcome.models.work.internal._
-import WorkState.Indexed
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.platform.snapshot_generator.models.SnapshotGeneratorConfig
+import weco.catalogue.internal_model.work.Work
+import weco.catalogue.internal_model.work.WorkState.Indexed
 
 import java.text.NumberFormat
 

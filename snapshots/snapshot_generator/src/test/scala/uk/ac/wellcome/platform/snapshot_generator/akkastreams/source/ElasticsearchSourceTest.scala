@@ -11,8 +11,8 @@ import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.index.IndexFixtures
 import uk.ac.wellcome.models.work.generators.WorkGenerators
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.snapshot_generator.models.SnapshotGeneratorConfig
+import weco.catalogue.internal_model.work.{Work, WorkState}
 
 class ElasticsearchSourceTest
     extends AnyFunSpec
