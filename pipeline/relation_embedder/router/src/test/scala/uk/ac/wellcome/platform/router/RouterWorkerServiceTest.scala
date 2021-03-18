@@ -7,7 +7,6 @@ import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.models.work.generators.WorkGenerators
 import weco.catalogue.internal_model.work.WorkState.{Denormalised, Merged}
-import uk.ac.wellcome.models.work.internal.Work
 import uk.ac.wellcome.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import uk.ac.wellcome.pipeline_storage.{
   Indexer,

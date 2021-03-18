@@ -7,7 +7,6 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import weco.catalogue.internal_model.work.WorkState.{Denormalised, Merged}
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.pipeline_storage.PipelineStorageStream._
 import uk.ac.wellcome.pipeline_storage.{
   Indexable,
