@@ -321,7 +321,7 @@ trait DisplaySerialisationTestBase {
          }
          .mkString(",")}
        |  ],
-       |  "locations": [${locations(h.locations)}],
+       |  ${optionalObject("location", location, h.location)}
        |  "type": "Holdings"
        |}
        |""".stripMargin

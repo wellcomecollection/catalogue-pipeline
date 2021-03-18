@@ -18,7 +18,7 @@ case class DisplayHoldings(
   ) enumeration: List[String],
   @Schema(
     description = "List of locations where the holdings are stored."
-  ) locations: List[DisplayLocation],
+  ) location: Option[DisplayLocation],
   @JsonKey("type") @Schema(name = "type") ontologyType: String = "Holdings"
 )
 
@@ -27,6 +27,6 @@ case object DisplayHoldings {
     DisplayHoldings(
       note = h.note,
       enumeration = h.enumeration,
-      locations = h.locations.map { DisplayLocation(_) }
+      location = h.location.map { DisplayLocation(_) }
     )
 }
