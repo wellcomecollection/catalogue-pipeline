@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.transformer.calm
 
-import uk.ac.wellcome.models.work.internal.IdentifierType
+import weco.catalogue.internal_model.identifiers.IdentifierType
 
 case object CalmIdentifierTypes {
   def recordId = IdentifierType("calm-record-id")

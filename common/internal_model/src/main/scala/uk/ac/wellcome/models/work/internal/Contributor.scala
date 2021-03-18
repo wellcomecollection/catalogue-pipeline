@@ -1,5 +1,7 @@
 package uk.ac.wellcome.models.work.internal
 
+import weco.catalogue.internal_model.identifiers.{HasId, IdState}
+
 case class Contributor[+State](
   id: State,
   agent: AbstractAgent[State],

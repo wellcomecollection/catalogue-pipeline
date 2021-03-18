@@ -2,7 +2,6 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.internal.IdState.Unidentifiable
 import uk.ac.wellcome.models.work.internal.LocationType.{
   ClosedStores,
   OnlineResource,
@@ -13,7 +12,6 @@ import uk.ac.wellcome.models.work.internal.{
   AccessStatus,
   DigitalLocation,
   Holdings,
-  IdState,
   Item
 }
 import uk.ac.wellcome.platform.transformer.sierra.generators.MarcGenerators
@@ -23,6 +21,7 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraHoldingsData,
   VarField
 }
+import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.sierra_adapter.generators.SierraGenerators
 import weco.catalogue.sierra_adapter.models.SierraHoldingsNumber
 
@@ -83,7 +82,7 @@ class SierraHoldingsTest
 
       getItems(dataMap) shouldBe List(
         Item(
-          id = Unidentifiable,
+          id = IdState.Unidentifiable,
           locations = List(
             DigitalLocation(
               url = "https://resolver.example.com/journal",
@@ -132,7 +131,7 @@ class SierraHoldingsTest
 
       getItems(dataMap) shouldBe List(
         Item(
-          id = Unidentifiable,
+          id = IdState.Unidentifiable,
           locations = List(
             DigitalLocation(
               url = "https://resolver.example.com/journal",
@@ -147,7 +146,7 @@ class SierraHoldingsTest
           )
         ),
         Item(
-          id = Unidentifiable,
+          id = IdState.Unidentifiable,
           locations = List(
             DigitalLocation(
               url = "https://example.org/subscriptions",
@@ -200,7 +199,7 @@ class SierraHoldingsTest
 
       getItems(dataMap) shouldBe List(
         Item(
-          id = Unidentifiable,
+          id = IdState.Unidentifiable,
           locations = List(
             DigitalLocation(
               url = "https://resolver.example.com/journal",
@@ -215,7 +214,7 @@ class SierraHoldingsTest
           )
         ),
         Item(
-          id = Unidentifiable,
+          id = IdState.Unidentifiable,
           locations = List(
             DigitalLocation(
               url = "https://example.org/subscriptions",

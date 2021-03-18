@@ -2,6 +2,7 @@ package uk.ac.wellcome.models.work.internal
 
 import uk.ac.wellcome.models.work.text.TextNormalisation._
 import uk.ac.wellcome.models.parse.parsers.DateParser
+import weco.catalogue.internal_model.identifiers.{HasId, IdState}
 
 sealed trait AbstractRootConcept[+State] extends HasId[State] {
   val label: String

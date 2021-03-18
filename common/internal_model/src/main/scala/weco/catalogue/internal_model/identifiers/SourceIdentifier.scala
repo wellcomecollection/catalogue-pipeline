@@ -1,4 +1,4 @@
-package uk.ac.wellcome.models.work.internal
+package weco.catalogue.internal_model.identifiers
 
 /** An identifier received from one of the original sources */
 case class SourceIdentifier(

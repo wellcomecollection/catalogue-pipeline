@@ -6,6 +6,10 @@ import org.scalatest.{Inside, Inspectors}
 import uk.ac.wellcome.models.work.generators.SourceWorkGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
+import weco.catalogue.internal_model.identifiers.{
+  IdentifierType,
+  SourceIdentifier
+}
 
 class OtherIdentifiersRuleTest
     extends AnyFunSpec

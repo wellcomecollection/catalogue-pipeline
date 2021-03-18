@@ -10,10 +10,14 @@ import uk.ac.wellcome.models.work.internal.DeletedReason.{
   SuppressedFromSource
 }
 import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.models.work.internal.IdState.Identifiable
 import uk.ac.wellcome.platform.transformer.calm.models.CalmSourceData
 import weco.catalogue.source_model.generators.CalmRecordGenerators
 import WorkState.Source
+import weco.catalogue.internal_model.identifiers.{
+  IdentifierType,
+  IdState,
+  SourceIdentifier
+}
 
 class CalmTransformerTest
     extends AnyFunSpec
@@ -124,7 +128,7 @@ class CalmTransformerTest
     CalmTransformer(record, version).right.get.data.mergeCandidates shouldBe
       List(
         MergeCandidate(
-          Identifiable(
+          IdState.Identifiable(
             SourceIdentifier(
               value = "b456",
               identifierType = IdentifierType("sierra-system-number"),

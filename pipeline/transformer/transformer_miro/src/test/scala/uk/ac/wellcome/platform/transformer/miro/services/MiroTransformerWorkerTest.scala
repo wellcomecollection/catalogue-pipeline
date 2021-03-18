@@ -6,7 +6,7 @@ import org.scalatest.EitherValues
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.models.work.internal.{IdentifierType, Work, WorkState}
+import uk.ac.wellcome.models.work.internal.{Work, WorkState}
 import uk.ac.wellcome.pipeline_storage.{PipelineStorageStream, Retriever}
 import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
 import uk.ac.wellcome.platform.transformer.miro.models.MiroMetadata
@@ -14,6 +14,7 @@ import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 import uk.ac.wellcome.storage.generators.S3ObjectLocationGenerators
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.memory.MemoryTypedStore
+import weco.catalogue.internal_model.identifiers.IdentifierType
 import weco.catalogue.source_model.MiroSourcePayload
 import weco.catalogue.transformer.{
   TransformerWorker,

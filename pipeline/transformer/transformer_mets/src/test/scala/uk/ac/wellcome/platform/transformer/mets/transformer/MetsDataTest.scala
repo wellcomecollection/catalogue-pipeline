@@ -9,6 +9,10 @@ import WorkState.Source
 import uk.ac.wellcome.models.work.internal.DeletedReason.DeletedFromSource
 import uk.ac.wellcome.models.work.internal.InvisibilityReason.MetsWorksAreNotVisible
 import uk.ac.wellcome.platform.transformer.mets.fixtures.MetsGenerators
+import weco.catalogue.internal_model.identifiers.{
+  IdentifierType,
+  SourceIdentifier
+}
 
 class MetsDataTest
     extends AnyFunSpec

@@ -1,10 +1,10 @@
 package weco.catalogue.internal_model.image
 
-import uk.ac.wellcome.models.work.internal.IdState.Identified
 import uk.ac.wellcome.models.work.internal._
+import weco.catalogue.internal_model.identifiers.IdState
 
 sealed trait ImageSource {
-  val id: Identified
+  val id: IdState.Identified
   val version: Int
 }
 
@@ -18,7 +18,7 @@ case class SourceWorks(
 }
 
 case class SourceWork(
-  id: Identified,
+  id: IdState.Identified,
   data: WorkData[DataState.Identified],
   version: Int,
 )

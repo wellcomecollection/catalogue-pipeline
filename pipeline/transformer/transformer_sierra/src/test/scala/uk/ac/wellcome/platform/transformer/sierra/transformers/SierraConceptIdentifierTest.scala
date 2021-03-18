@@ -5,6 +5,7 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.sierra.generators.MarcGenerators
 import uk.ac.wellcome.platform.transformer.sierra.source.VarField
+import weco.catalogue.internal_model.identifiers.SourceIdentifier
 
 class SierraConceptIdentifierTest
     extends AnyFunSpec

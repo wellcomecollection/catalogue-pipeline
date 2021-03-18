@@ -5,6 +5,7 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   MarcSubfield,
   SierraQueryOps
 }
+import weco.catalogue.internal_model.identifiers.SourceIdentifier
 
 trait SierraAgents extends SierraQueryOps {
   // This is used to construct a Person from MARc tags 100, 700 and 600.

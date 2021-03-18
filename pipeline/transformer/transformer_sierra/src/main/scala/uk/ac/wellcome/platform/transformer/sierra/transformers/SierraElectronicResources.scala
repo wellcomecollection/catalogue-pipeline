@@ -6,7 +6,6 @@ import uk.ac.wellcome.models.work.internal.LocationType.OnlineResource
 import uk.ac.wellcome.models.work.internal.{
   AccessCondition,
   DigitalLocation,
-  IdState,
   Item
 }
 import uk.ac.wellcome.platform.transformer.sierra.source.{
@@ -14,6 +13,7 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraQueryOps,
   VarField
 }
+import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.sierra_adapter.models.TypedSierraRecordNumber
 
 import java.net.URL

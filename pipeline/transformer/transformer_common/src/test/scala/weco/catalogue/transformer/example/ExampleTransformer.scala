@@ -4,11 +4,12 @@ import io.circe.Decoder
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.work.internal.WorkState.Source
-import uk.ac.wellcome.models.work.internal.{SourceIdentifier, Work, WorkData}
+import uk.ac.wellcome.models.work.internal.{Work, WorkData}
 import uk.ac.wellcome.pipeline_storage.{PipelineStorageStream, Retriever}
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.storage.{Identified, ReadError, Version}
+import weco.catalogue.internal_model.identifiers.SourceIdentifier
 import weco.catalogue.source_model.CalmSourcePayload
 import weco.catalogue.transformer.{Transformer, TransformerWorker}
 

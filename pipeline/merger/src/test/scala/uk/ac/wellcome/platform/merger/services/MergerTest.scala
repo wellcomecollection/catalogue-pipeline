@@ -13,6 +13,7 @@ import uk.ac.wellcome.models.work.generators.{
   MiroWorkGenerators,
   SierraWorkGenerators
 }
+import weco.catalogue.internal_model.identifiers.SourceIdentifier
 
 class MergerTest
     extends AnyFunSpec

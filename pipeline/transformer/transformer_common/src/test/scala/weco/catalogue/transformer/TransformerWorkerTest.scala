@@ -7,7 +7,6 @@ import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.{Queue, QueuePair}
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
 import uk.ac.wellcome.models.work.internal.Work
 import uk.ac.wellcome.models.work.internal.WorkState.Source
 import uk.ac.wellcome.pipeline_storage.{MemoryIndexer, MemoryRetriever}
@@ -16,6 +15,7 @@ import uk.ac.wellcome.storage.Version
 import uk.ac.wellcome.storage.generators.S3ObjectLocationGenerators
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
+import weco.catalogue.internal_model.generators.IdentifiersGenerators
 import weco.catalogue.source_model.CalmSourcePayload
 import weco.catalogue.transformer.example.{
   ExampleData,

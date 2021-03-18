@@ -1,4 +1,4 @@
-package uk.ac.wellcome.models.work.internal
+package weco.catalogue.internal_model.identifiers
 
 /** Represents an ID that is attached to individual pieces of work data.
   *  The ID can be in 3 possible states:
@@ -52,9 +52,4 @@ object IdState {
     def maybeCanonicalId = None
     def allSourceIdentifiers = Nil
   }
-}
-
-/** A trait assigned to all objects that contain some ID value. */
-trait HasId[+T] {
-  val id: T
 }

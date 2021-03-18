@@ -1,7 +1,10 @@
-package uk.ac.wellcome.models.work.generators
+package weco.catalogue.internal_model.generators
 
 import uk.ac.wellcome.fixtures.RandomGenerators
-import uk.ac.wellcome.models.work.internal.{IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  IdentifierType,
+  SourceIdentifier
+}
 
 import scala.util.Random
 

@@ -5,10 +5,10 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.internal.{
   AccessCondition,
-  IdState,
   Item,
   UnknownAccessStatus
 }
+import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.source_model.generators.CalmRecordGenerators
 
 class CalmItemsTest

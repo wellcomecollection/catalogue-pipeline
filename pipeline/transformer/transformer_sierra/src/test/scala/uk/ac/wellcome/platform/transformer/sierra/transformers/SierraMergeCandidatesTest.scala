@@ -2,12 +2,7 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.internal.IdState.Identifiable
-import uk.ac.wellcome.models.work.internal.{
-  IdentifierType,
-  MergeCandidate,
-  SourceIdentifier
-}
+import uk.ac.wellcome.models.work.internal.MergeCandidate
 import uk.ac.wellcome.platform.transformer.sierra.generators.{
   MarcGenerators,
   SierraDataGenerators
@@ -17,6 +12,11 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraBibData,
   SierraMaterialType,
   VarField
+}
+import weco.catalogue.internal_model.identifiers.{
+  IdState,
+  IdentifierType,
+  SourceIdentifier
 }
 
 class SierraMergeCandidatesTest
@@ -29,7 +29,7 @@ class SierraMergeCandidatesTest
   val miroID = "A0123456"
 
   def getMergeCandidates(
-    bibData: SierraBibData): List[MergeCandidate[Identifiable]] =
+    bibData: SierraBibData): List[MergeCandidate[IdState.Identifiable]] =
     SierraMergeCandidates(createSierraBibNumber, bibData)
 
   describe("physical/digital Sierra work") {
@@ -424,7 +424,7 @@ class SierraMergeCandidatesTest
     }
 
   private def physicalAndDigitalSierraMergeCandidate(
-    bibNumber: String): List[MergeCandidate[Identifiable]] =
+    bibNumber: String): List[MergeCandidate[IdState.Identifiable]] =
     List(
       MergeCandidate(
         identifier = SourceIdentifier(
@@ -438,7 +438,7 @@ class SierraMergeCandidatesTest
 
   private def miroMergeCandidate(
     miroID: String,
-    reason: String = "Miro/Sierra work"): List[MergeCandidate[Identifiable]] =
+    reason: String = "Miro/Sierra work"): List[MergeCandidate[IdState.Identifiable]] =
     List(
       MergeCandidate(
         identifier = SourceIdentifier(

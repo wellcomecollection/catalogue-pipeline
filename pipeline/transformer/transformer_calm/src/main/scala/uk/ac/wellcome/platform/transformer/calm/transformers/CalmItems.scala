@@ -3,13 +3,13 @@ package uk.ac.wellcome.platform.transformer.calm.transformers
 import uk.ac.wellcome.models.work.internal.{
   AccessCondition,
   AccessStatus,
-  IdState,
   Item,
   LocationType,
   PhysicalLocation
 }
 import uk.ac.wellcome.models.work.internal.result._
 import uk.ac.wellcome.platform.transformer.calm.CalmRecordOps
+import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.source_model.calm.CalmRecord
 
 object CalmItems extends CalmRecordOps {

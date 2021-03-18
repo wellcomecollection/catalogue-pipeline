@@ -11,6 +11,7 @@ import uk.ac.wellcome.platform.transformer.sierra.generators.{
   MarcGenerators,
   SierraDataGenerators
 }
+import weco.catalogue.internal_model.identifiers.SourceIdentifier
 
 class SierraContributorsTest
     extends AnyFunSpec

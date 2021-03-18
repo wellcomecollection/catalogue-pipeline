@@ -1,8 +1,9 @@
 package uk.ac.wellcome.platform.transformer.miro.transformers
 
-import uk.ac.wellcome.models.work.internal.{Agent, Contributor, IdState}
+import uk.ac.wellcome.models.work.internal.{Agent, Contributor}
 import uk.ac.wellcome.platform.transformer.miro.exceptions.MiroTransformerException
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
+import weco.catalogue.internal_model.identifiers.IdState
 
 trait MiroContributors extends MiroContributorCodes {
   /* Populate wwork:contributors.  We use the <image_creator> tag from the Miro XML. */

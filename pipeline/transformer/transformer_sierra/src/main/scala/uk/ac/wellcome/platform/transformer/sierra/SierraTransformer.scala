@@ -28,6 +28,7 @@ import uk.ac.wellcome.models.work.internal.InvisibilityReason.{
   SourceFieldMissing,
   UnableToTransform
 }
+import weco.catalogue.internal_model.identifiers.SourceIdentifier
 import weco.catalogue.sierra_adapter.models.{
   SierraBibNumber,
   SierraBibRecord,

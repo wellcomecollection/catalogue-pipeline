@@ -2,6 +2,7 @@ package weco.catalogue.internal_model.generators
 
 import uk.ac.wellcome.models.work.generators._
 import uk.ac.wellcome.models.work.internal._
+import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType}
 import weco.catalogue.internal_model.image
 import weco.catalogue.internal_model.image.SourceWork._
 import weco.catalogue.internal_model.image.ImageState.{Indexed, Initial}

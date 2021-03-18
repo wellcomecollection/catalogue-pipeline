@@ -1,6 +1,10 @@
 package uk.ac.wellcome.models.work.internal
 
-import uk.ac.wellcome.models.work.internal.IdState.Identifiable
+import weco.catalogue.internal_model.identifiers.{
+  HasId,
+  IdState,
+  SourceIdentifier
+}
 
 /** Indicates that it might be possible to merge this Work with another Work.
   *
@@ -19,9 +23,9 @@ case class MergeCandidate[+State](
 
 case object MergeCandidate {
   def apply(identifier: SourceIdentifier,
-            reason: String): MergeCandidate[Identifiable] =
+            reason: String): MergeCandidate[IdState.Identifiable] =
     MergeCandidate(
-      id = Identifiable(sourceIdentifier = identifier),
+      id = IdState.Identifiable(sourceIdentifier = identifier),
       reason = Some(reason)
     )
 }

@@ -16,6 +16,7 @@ import WorkState.Source
 import uk.ac.wellcome.models.work.internal.DeletedReason.SuppressedFromSource
 import uk.ac.wellcome.models.work.internal.InvisibilityReason.UnableToTransform
 import uk.ac.wellcome.models.work.internal.result.Result
+import weco.catalogue.internal_model.identifiers.SourceIdentifier
 import weco.catalogue.transformer.Transformer
 
 class MiroRecordTransformer

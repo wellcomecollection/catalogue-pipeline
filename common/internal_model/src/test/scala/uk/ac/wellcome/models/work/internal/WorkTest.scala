@@ -6,8 +6,8 @@ import uk.ac.wellcome.json.JsonUtil.{fromJson, toJson}
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.exceptions.JsonDecodingError
 import uk.ac.wellcome.models.work.generators.WorkGenerators
-import uk.ac.wellcome.models.work.internal.IdState.Identified
 import uk.ac.wellcome.models.work.internal.WorkState.Merged
+import weco.catalogue.internal_model.identifiers.IdState
 
 import java.time.Instant
 
@@ -67,7 +67,7 @@ class WorkTest extends AnyFunSpec with Matchers with WorkGenerators {
 
   it("preserves redirect sources when transitioning Work.Visible") {
     val redirectSources = (1 to 3).map { _ =>
-      Identified(createCanonicalId, createSourceIdentifier)
+      IdState.Identified(createCanonicalId, createSourceIdentifier)
     }
 
     val w = identifiedWork().withRedirectSources(redirectSources)

@@ -13,7 +13,6 @@ import uk.ac.wellcome.models.work.internal.DeletedReason.{
   DeletedFromSource,
   SuppressedFromSource
 }
-import uk.ac.wellcome.models.work.internal.IdState.Identifiable
 import uk.ac.wellcome.platform.transformer.calm.transformers.{
   CalmItems,
   CalmLanguages,
@@ -23,6 +22,11 @@ import weco.catalogue.source_model.calm.CalmRecord
 import weco.catalogue.transformer.Transformer
 import WorkState.Source
 import uk.ac.wellcome.models.parse.PeriodParser
+import weco.catalogue.internal_model.identifiers.{
+  IdState,
+  IdentifierType,
+  SourceIdentifier
+}
 
 object CalmTransformer
     extends Transformer[CalmSourceData]
@@ -189,12 +193,12 @@ object CalmTransformer
           )
     }
 
-  def mergeCandidates(record: CalmRecord): List[MergeCandidate[Identifiable]] =
+  def mergeCandidates(record: CalmRecord): List[MergeCandidate[IdState.Identifiable]] =
     record
       .get("BNumber")
       .map { id =>
         MergeCandidate(
-          Identifiable(
+          IdState.Identifiable(
             SourceIdentifier(
               identifierType = IdentifierType("sierra-system-number"),
               ontologyType = "Work",

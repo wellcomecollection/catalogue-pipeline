@@ -2,6 +2,7 @@ package uk.ac.wellcome.models.work.generators
 
 import uk.ac.wellcome.models.work.internal._
 import WorkState._
+import weco.catalogue.internal_model.identifiers.IdState
 
 trait SierraWorkGenerators extends WorkGenerators with ItemsGenerators {
 

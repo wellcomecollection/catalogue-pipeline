@@ -5,6 +5,7 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil.{fromJson, toJson}
 import uk.ac.wellcome.json.utils.JsonAssertions
+import weco.catalogue.internal_model.identifiers.IdState
 
 class ConceptTest extends AnyFunSpec with Matchers with JsonAssertions {
 

@@ -8,6 +8,7 @@ import uk.ac.wellcome.platform.merger.logging.MergerLogging
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 import uk.ac.wellcome.platform.merger.models.Sources.findFirstLinkedDigitisedSierraWorkFor
 import WorkState.Identified
+import weco.catalogue.internal_model.identifiers.SourceIdentifier
 
 /**
   * Identifiers are merged as follows:

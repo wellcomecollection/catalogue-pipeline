@@ -16,6 +16,7 @@ import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.work.internal.WorkState.Identified
 import uk.ac.wellcome.models.work.internal._
 import weco.catalogue.internal_model.generators.ImageGenerators
+import weco.catalogue.internal_model.identifiers.IdState
 
 import java.time.Instant
 

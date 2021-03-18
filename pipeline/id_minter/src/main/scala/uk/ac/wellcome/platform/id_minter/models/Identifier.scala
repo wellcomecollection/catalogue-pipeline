@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.id_minter.models
 
 import scalikejdbc._
-import uk.ac.wellcome.models.work.internal.SourceIdentifier
+import weco.catalogue.internal_model.identifiers.SourceIdentifier
 
 /** Represents a set of identifiers as stored in MySQL */
 case class Identifier(

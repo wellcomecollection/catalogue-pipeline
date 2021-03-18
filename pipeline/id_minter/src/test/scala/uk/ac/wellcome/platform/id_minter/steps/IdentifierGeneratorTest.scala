@@ -4,13 +4,13 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{Inspectors, OptionValues}
 import scalikejdbc._
-import uk.ac.wellcome.models.work.generators.IdentifiersGenerators
 import uk.ac.wellcome.platform.id_minter.database.{IdentifiersDao, TableProvisioner}
 import uk.ac.wellcome.platform.id_minter.fixtures
 import uk.ac.wellcome.platform.id_minter.models.{Identifier, IdentifiersTable}
 import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.models.work.internal.SourceIdentifier
 import uk.ac.wellcome.platform.id_minter.config.models.IdentifiersTableConfig
+import weco.catalogue.internal_model.generators.IdentifiersGenerators
+import weco.catalogue.internal_model.identifiers.SourceIdentifier
 
 import scala.util.{Failure, Success, Try}
 
