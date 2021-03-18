@@ -2,7 +2,7 @@ package uk.ac.wellcome.display.models
 
 import io.circe.generic.extras.JsonKey
 import io.swagger.v3.oas.annotations.media.Schema
-import weco.catalogue.internal_model.image.{ImageSource, SourceWorks}
+import weco.catalogue.internal_model.image.{ImageSource, ParentWorks}
 
 @Schema(
   name = "ImageSource",
@@ -35,28 +35,28 @@ object DisplayImageSource {
   def apply(imageSource: ImageSource,
             includes: ImageIncludes): DisplayImageSource =
     imageSource match {
-      case works: SourceWorks =>
+      case works: ParentWorks =>
         DisplayImageSource(works, includes)
     }
 
-  def apply(source: SourceWorks, includes: ImageIncludes): DisplayImageSource =
+  def apply(parent: ParentWorks, includes: ImageIncludes): DisplayImageSource =
     new DisplayImageSource(
-      id = source.id.canonicalId,
-      title = source.canonicalWork.data.title,
+      id = parent.id.canonicalId,
+      title = parent.canonicalWork.data.title,
       contributors =
         if (includes.`source.contributors`)
           Some(
-            source.canonicalWork.data.contributors
+            parent.canonicalWork.data.contributors
               .map(DisplayContributor(_, includesIdentifiers = false)))
         else None,
       languages =
         if (includes.`source.languages`)
-          Some(source.canonicalWork.data.languages.map(DisplayLanguage(_)))
+          Some(parent.canonicalWork.data.languages.map(DisplayLanguage(_)))
         else None,
       genres =
         if (includes.`source.genres`)
           Some(
-            source.canonicalWork.data.genres
+            parent.canonicalWork.data.genres
               .map(DisplayGenre(_, includesIdentifiers = false)))
         else None,
       ontologyType = "Work"
