@@ -54,7 +54,8 @@ object CalmLanguages {
   private object ExactLanguageMatch {
     def unapply(langField: String): Option[List[Language]] =
       MarcLanguageCodeList
-        .lookupByName(langField)
+        .lookupCodeForName(langField)
+        .map { code => Language(label = langField, id = code) }
         .map { List(_) }
   }
 
@@ -75,9 +76,12 @@ object CalmLanguages {
         .map { _.trim }
         .filter { _.nonEmpty }
 
-      val matchedLanguages = components.flatMap {
-        MarcLanguageCodeList.lookupByName
-      }.toList
+      val matchedLanguages = components
+        .flatMap { name =>
+          MarcLanguageCodeList.lookupCodeForName(name).map { (_, name) }
+        }
+        .map { case (code, name) => Language(label = name, id = code) }
+        .toList
 
       // If there were some unmatched components, this isn't right --
       // return nothing.
@@ -177,6 +181,9 @@ object CalmLanguages {
   private def guessLanguages(langField: String): List[Language] =
     languageNamePattern
       .findAllIn(langField)
-      .flatMap { MarcLanguageCodeList.lookupByName }
+      .flatMap { name =>
+        MarcLanguageCodeList.lookupCodeForName(name).map { (_, name) }
+      }
+      .map { case (code, name) => Language(label = name, id = code) }
       .toList
 }
