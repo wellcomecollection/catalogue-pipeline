@@ -18,7 +18,8 @@ import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.locations.{
   AccessCondition,
   AccessStatus,
-  DigitalLocation
+  DigitalLocation,
+  PhysicalLocation
 }
 import weco.catalogue.internal_model.work.{Holdings, Item}
 import weco.catalogue.sierra_adapter.generators.SierraGenerators
@@ -482,10 +483,12 @@ class SierraHoldingsTest
       val holdings = getHoldings(dataMap)
       holdings should have size 1
 
-      val locations = holdings.head.locations
-      locations should have size 1
-      locations.head.locationType shouldBe ClosedStores
-      locations.head.label shouldBe "Closed stores"
+      holdings.head.location shouldBe Some(
+        PhysicalLocation(
+          locationType = ClosedStores,
+          label = ClosedStores.label
+        )
+      )
     }
 
     it("uses the location type from fixed field 40 (open shelves)") {
@@ -510,10 +513,12 @@ class SierraHoldingsTest
       val holdings = getHoldings(dataMap)
       holdings should have size 1
 
-      val locations = holdings.head.locations
-      locations should have size 1
-      locations.head.locationType shouldBe OpenShelves
-      locations.head.label shouldBe "Journals"
+      holdings.head.location shouldBe Some(
+        PhysicalLocation(
+          locationType = OpenShelves,
+          label = "Journals"
+        )
+      )
     }
 
     it("uses 949 subfield ǂa as the shelfmark") {
@@ -544,9 +549,7 @@ class SierraHoldingsTest
       val holdings = getHoldings(dataMap)
       holdings should have size 1
 
-      val locations = holdings.head.locations
-      locations should have size 1
-      locations.head.shelfmark shouldBe Some("/MED")
+      holdings.head.location.get.shelfmark shouldBe Some("/MED")
     }
 
     it("skips adding a location if the location code is unrecognised") {
@@ -571,7 +574,7 @@ class SierraHoldingsTest
       val holdings = getHoldings(dataMap)
       holdings should have size 1
 
-      holdings.head.locations shouldBe empty
+      holdings.head.location shouldBe None
     }
 
     it("creates multiple holdings based on multiple data blocks") {
