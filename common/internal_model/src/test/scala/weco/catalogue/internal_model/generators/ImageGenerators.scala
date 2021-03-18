@@ -85,7 +85,8 @@ trait ImageGenerators
           inferredData = inferredData
         )
 
-    def toIdentifiedWith(canonicalId: String = createCanonicalId): ImageData[IdState.Identified] =
+    def toIdentifiedWith(
+      canonicalId: String = createCanonicalId): ImageData[IdState.Identified] =
       imageData.copy(
         id = IdState.Identified(
           canonicalId = createCanonicalId,
