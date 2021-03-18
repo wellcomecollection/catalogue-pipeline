@@ -10,13 +10,4 @@ package object result {
         .map(result => result.map(Some(_)))
         .getOrElse(Right(None))
   }
-
-  implicit class ListResultOps[T](list: List[Result[T]]) {
-    def toResult: Result[List[T]] = {
-      list.collect { case Left(err) => err } match {
-        case Nil  => Right(list.collect { case Right(value) => value })
-        case errs => Left(new Exception(s"Multiple errors: $errs"))
-      }
-    }
-  }
 }
