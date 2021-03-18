@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.merger.models
 
 import java.time.Instant
-import uk.ac.wellcome.models.work.internal._
 import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.catalogue.internal_model.image.ImageState.Initial
 import weco.catalogue.internal_model.work.WorkFsm._

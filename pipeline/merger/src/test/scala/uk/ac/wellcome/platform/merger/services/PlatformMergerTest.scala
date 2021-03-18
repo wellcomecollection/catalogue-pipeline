@@ -3,14 +3,19 @@ package uk.ac.wellcome.platform.merger.services
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks._
-import uk.ac.wellcome.models.work.internal._
+import uk.ac.wellcome.models.index.MergedWorkIndexConfig.sourceIdentifier
 import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.catalogue.internal_model.work.WorkFsm._
 import weco.catalogue.internal_model.image.SourceWork._
 import uk.ac.wellcome.models.work.generators.SourceWorkGenerators
+import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.image.SourceWorks
-import weco.catalogue.internal_model.locations.{DigitalLocation, LocationType}
-import weco.catalogue.internal_model.work.{MergeCandidate, Work}
+import weco.catalogue.internal_model.locations.{
+  DigitalLocation,
+  License,
+  LocationType
+}
+import weco.catalogue.internal_model.work.{Format, MergeCandidate, Work}
 
 class PlatformMergerTest
     extends AnyFunSpec

@@ -7,6 +7,7 @@ import weco.catalogue.internal_model.locations.{
   AccessCondition,
   AccessStatus,
   DigitalLocation,
+  License,
   LocationType
 }
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult

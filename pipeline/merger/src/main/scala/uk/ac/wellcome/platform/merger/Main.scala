@@ -11,7 +11,6 @@ import uk.ac.wellcome.models.index.{
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.pipeline_storage.EitherIndexer
 import uk.ac.wellcome.pipeline_storage.typesafe.{

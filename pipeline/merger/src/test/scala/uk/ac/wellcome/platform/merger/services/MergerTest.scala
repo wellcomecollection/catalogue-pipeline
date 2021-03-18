@@ -2,7 +2,6 @@ package uk.ac.wellcome.platform.merger.services
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.models.{FieldMergeResult, MergeResult}
 import uk.ac.wellcome.platform.merger.rules.FieldMergeRule
 import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
@@ -13,7 +12,11 @@ import uk.ac.wellcome.models.work.generators.{
   MiroWorkGenerators,
   SierraWorkGenerators
 }
-import weco.catalogue.internal_model.identifiers.SourceIdentifier
+import weco.catalogue.internal_model.identifiers.{
+  DataState,
+  IdState,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.work.{Item, Work}
 
 class MergerTest

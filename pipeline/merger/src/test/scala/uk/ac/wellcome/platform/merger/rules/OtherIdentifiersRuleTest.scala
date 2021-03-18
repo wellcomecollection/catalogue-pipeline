@@ -4,13 +4,18 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{Inside, Inspectors}
 import uk.ac.wellcome.models.work.generators.SourceWorkGenerators
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 import weco.catalogue.internal_model.identifiers.{
+  IdState,
   IdentifierType,
   SourceIdentifier
 }
-import weco.catalogue.internal_model.work.{MergeCandidate, Work, WorkState}
+import weco.catalogue.internal_model.work.{
+  Format,
+  MergeCandidate,
+  Work,
+  WorkState
+}
 
 class OtherIdentifiersRuleTest
     extends AnyFunSpec

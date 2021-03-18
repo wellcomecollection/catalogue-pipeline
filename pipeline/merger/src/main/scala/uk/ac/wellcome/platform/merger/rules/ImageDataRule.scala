@@ -1,8 +1,8 @@
 package uk.ac.wellcome.platform.merger.rules
 
 import cats.data.NonEmptyList
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
+import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.catalogue.internal_model.image.ImageData
 import weco.catalogue.internal_model.work.Work

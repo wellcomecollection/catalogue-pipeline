@@ -6,7 +6,6 @@ import uk.ac.wellcome.models.matcher.{
   WorkIdentifier
 }
 import weco.catalogue.internal_model.work.WorkState.Identified
-import uk.ac.wellcome.models.work.internal._
 import weco.catalogue.internal_model.work.Work
 
 trait MatcherResultFixture {

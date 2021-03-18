@@ -4,7 +4,6 @@ import org.scalatest.matchers.should.Matchers
 import cats.data.NonEmptyList
 import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.models.work.generators.WorkGenerators
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 import uk.ac.wellcome.platform.merger.rules.WorkPredicates.WorkPredicate
 import weco.catalogue.internal_model.work.Work

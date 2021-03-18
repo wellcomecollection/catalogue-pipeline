@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.merger.services
 
 import cats.data.State
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.rules._
 import uk.ac.wellcome.platform.merger.logging.MergerLogging
 import uk.ac.wellcome.platform.merger.models.{
@@ -10,6 +9,7 @@ import uk.ac.wellcome.platform.merger.models.{
   MergeResult,
   MergerOutcome
 }
+import weco.catalogue.internal_model.identifiers.{DataState, IdState}
 import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.catalogue.internal_model.image
 import weco.catalogue.internal_model.image.{ImageData, SourceWorks}

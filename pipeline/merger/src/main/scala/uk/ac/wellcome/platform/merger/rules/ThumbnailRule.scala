@@ -3,7 +3,6 @@ package uk.ac.wellcome.platform.merger.rules
 import scala.util.Try
 import cats.data.NonEmptyList
 
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.logging.MergerLogging
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 import uk.ac.wellcome.platform.merger.rules.WorkPredicates.{

@@ -1,9 +1,10 @@
 package uk.ac.wellcome.platform.merger.rules
 
-import uk.ac.wellcome.models.work.internal._
 import weco.catalogue.internal_model.work.WorkState.Identified
-import uk.ac.wellcome.models.work.internal.Format.Audiovisual
-import weco.catalogue.internal_model.identifiers.SourceIdentifier
+import weco.catalogue.internal_model.identifiers.{
+  IdentifierType,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.locations.{
   DigitalLocation,
   PhysicalLocation
@@ -125,8 +126,8 @@ object WorkPredicates {
 
   def isAudiovisual(work: Work[Identified]): Boolean =
     work.data.format match {
-      case Some(f) if f.isInstanceOf[Audiovisual] => true
-      case _                                      => false
+      case Some(f) if f.isInstanceOf[Format.Audiovisual] => true
+      case _                                             => false
     }
 
   private def satisfiesAll(predicates: (Work[Identified] => Boolean)*)(
