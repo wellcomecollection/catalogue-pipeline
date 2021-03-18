@@ -2,6 +2,7 @@
   "id" : "api",
   "folder" : "api/api",
   "dependencyIds" : [
-    "display"
+    "display",
+    "source_model"
   ]
 }

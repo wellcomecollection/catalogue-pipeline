@@ -126,7 +126,8 @@ case class DisplayWork(
 
 object DisplayWork {
 
-  def apply(work: Work.Visible[WorkState.Indexed], includes: WorksIncludes): DisplayWork =
+  def apply(work: Work.Visible[WorkState.Indexed],
+            includes: WorksIncludes): DisplayWork =
     DisplayWork(
       id = work.state.canonicalId,
       title = work.data.title,
