@@ -65,8 +65,6 @@ catalogue_pipeline:
       name: Production
     - id: stage
       name: Staging
-    - id: alice
-      name: Alice
   image_repositories:
     - id: id_minter
       services:
