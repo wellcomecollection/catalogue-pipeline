@@ -55,7 +55,9 @@ object CalmLanguages {
     def unapply(langField: String): Option[List[Language]] =
       MarcLanguageCodeList
         .lookupCodeForName(langField)
-        .map { code => Language(label = langField, id = code) }
+        .map { code =>
+          Language(label = langField, id = code)
+        }
         .map { List(_) }
   }
 

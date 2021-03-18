@@ -436,9 +436,9 @@ class SierraMergeCandidatesTest
       )
     )
 
-  private def miroMergeCandidate(
-    miroID: String,
-    reason: String = "Miro/Sierra work"): List[MergeCandidate[IdState.Identifiable]] =
+  private def miroMergeCandidate(miroID: String,
+                                 reason: String = "Miro/Sierra work")
+    : List[MergeCandidate[IdState.Identifiable]] =
     List(
       MergeCandidate(
         identifier = SourceIdentifier(

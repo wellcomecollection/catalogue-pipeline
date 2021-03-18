@@ -17,5 +17,3 @@ object DerivedWorkData extends DerivedDataCommon {
       contributorAgents = Nil
     )
 }
-
-

@@ -2,7 +2,11 @@ package uk.ac.wellcome.models.work.generators
 
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.identifiers.{IdState, SourceIdentifier}
-import weco.catalogue.internal_model.locations.{DigitalLocation, License, LocationType}
+import weco.catalogue.internal_model.locations.{
+  DigitalLocation,
+  License,
+  LocationType
+}
 import weco.catalogue.internal_model.work.{Item, Work, WorkState}
 
 import scala.util.Random

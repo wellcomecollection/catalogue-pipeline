@@ -111,7 +111,8 @@ class SierraTransformerTest
       SierraTransformer(createSierraTransformableWith(id, Some(bibRecord)), 1)
     triedWork.isSuccess shouldBe true
 
-    triedWork.get.asInstanceOf[Work.Visible[_]].data.format shouldBe Some(Pictures)
+    triedWork.get.asInstanceOf[Work.Visible[_]].data.format shouldBe Some(
+      Pictures)
   }
 
   it("extracts information from items") {

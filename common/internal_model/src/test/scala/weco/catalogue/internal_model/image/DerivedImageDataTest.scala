@@ -5,12 +5,15 @@ import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.work.{Contributor, Organisation, Person}
 
-class DerivedImageDataTest extends AnyFunSpec with Matchers with ImageGenerators {
+class DerivedImageDataTest
+    extends AnyFunSpec
+    with Matchers
+    with ImageGenerators {
   it(
     "sets the thumbnail to the first iiif-image location it finds in locations") {
     val imageLocation = createImageLocation
-    val image = createImageDataWith(locations =
-      List(createManifestLocation, imageLocation)).toAugmentedImage
+    val image = createImageDataWith(
+      locations = List(createManifestLocation, imageLocation)).toAugmentedImage
     val derivedImageData = DerivedImageData(image)
 
     derivedImageData.thumbnail shouldBe imageLocation

@@ -11,8 +11,8 @@ trait SierraWorkGenerators extends WorkGenerators with ItemsGenerators {
         List(createSierraSystemSourceIdentifier)
       )
 
-  def sierraIdentifiedWorkPair()
-    : (Work.Visible[WorkState.Identified], Work.Visible[WorkState.Identified]) = {
+  def sierraIdentifiedWorkPair(): (Work.Visible[WorkState.Identified],
+                                   Work.Visible[WorkState.Identified]) = {
     val digitisedWork = sierraDigitalIdentifiedWork()
     val physicalWork = sierraPhysicalIdentifiedWork()
       .mergeCandidates(

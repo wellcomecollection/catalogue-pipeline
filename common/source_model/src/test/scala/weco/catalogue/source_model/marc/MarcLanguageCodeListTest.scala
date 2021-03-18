@@ -21,7 +21,8 @@ class MarcLanguageCodeListTest extends AnyFunSpec with Matchers {
   }
 
   it("finds a language by variant name") {
-    MarcLanguageCodeList.lookupCodeForName(name = "Flemish") shouldBe Some("dut")
+    MarcLanguageCodeList.lookupCodeForName(name = "Flemish") shouldBe Some(
+      "dut")
   }
 
   it("finds a language with ambiguous names") {
@@ -29,9 +30,12 @@ class MarcLanguageCodeListTest extends AnyFunSpec with Matchers {
   }
 
   it("handles obsolete codes") {
-    MarcLanguageCodeList.lookupNameForCode(code = "tgl") shouldBe Some("Tagalog")
-    MarcLanguageCodeList.lookupNameForCode(code = "tag") shouldBe Some("Tagalog")
+    MarcLanguageCodeList.lookupNameForCode(code = "tgl") shouldBe Some(
+      "Tagalog")
+    MarcLanguageCodeList.lookupNameForCode(code = "tag") shouldBe Some(
+      "Tagalog")
 
-    MarcLanguageCodeList.lookupCodeForName(name = "Tagalog") shouldBe Some("tgl")
+    MarcLanguageCodeList.lookupCodeForName(name = "Tagalog") shouldBe Some(
+      "tgl")
   }
 }

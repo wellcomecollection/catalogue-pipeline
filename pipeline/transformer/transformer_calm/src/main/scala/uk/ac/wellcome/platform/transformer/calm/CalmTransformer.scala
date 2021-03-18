@@ -195,7 +195,8 @@ object CalmTransformer
           )
     }
 
-  def mergeCandidates(record: CalmRecord): List[MergeCandidate[IdState.Identifiable]] =
+  def mergeCandidates(
+    record: CalmRecord): List[MergeCandidate[IdState.Identifiable]] =
     record
       .get("BNumber")
       .map { id =>
