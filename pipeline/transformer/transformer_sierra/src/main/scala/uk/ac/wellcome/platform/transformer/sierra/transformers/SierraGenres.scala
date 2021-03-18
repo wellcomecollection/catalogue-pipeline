@@ -1,6 +1,5 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
-import uk.ac.wellcome.models.work.internal.{Concept, Genre}
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   MarcSubfield,
   SierraBibData,
@@ -8,6 +7,7 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   VarField
 }
 import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.work.{Concept, Genre}
 
 // Populate wwork:genres
 //

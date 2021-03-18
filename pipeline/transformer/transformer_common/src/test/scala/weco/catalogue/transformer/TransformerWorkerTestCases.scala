@@ -7,8 +7,7 @@ import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.{Queue, QueuePair}
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.models.work.internal.Work
-import uk.ac.wellcome.models.work.internal.WorkState.Source
+import weco.catalogue.internal_model.work.WorkState.Source
 import uk.ac.wellcome.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import uk.ac.wellcome.pipeline_storage.{
   MemoryIndexer,
@@ -17,6 +16,7 @@ import uk.ac.wellcome.pipeline_storage.{
   Retriever,
   RetrieverNotFoundException
 }
+import weco.catalogue.internal_model.work.Work
 import weco.catalogue.source_model.SourcePayload
 
 import scala.collection.mutable

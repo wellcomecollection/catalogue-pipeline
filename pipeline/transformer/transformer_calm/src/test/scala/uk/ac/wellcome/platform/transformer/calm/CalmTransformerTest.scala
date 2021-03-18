@@ -1,29 +1,16 @@
 package uk.ac.wellcome.platform.transformer.calm
 
 import java.time.LocalDate
-
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks._
-import uk.ac.wellcome.models.work.internal.DeletedReason.{
-  DeletedFromSource,
-  SuppressedFromSource
-}
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.calm.models.CalmSourceData
 import weco.catalogue.source_model.generators.CalmRecordGenerators
-import WorkState.Source
-import weco.catalogue.internal_model.identifiers.{
-  IdState,
-  IdentifierType,
-  SourceIdentifier
-}
-import weco.catalogue.internal_model.locations.{
-  AccessCondition,
-  AccessStatus,
-  LocationType,
-  PhysicalLocation
-}
+import weco.catalogue.internal_model.work.WorkState.Source
+import weco.catalogue.internal_model.identifiers._
+import weco.catalogue.internal_model.locations._
+import weco.catalogue.internal_model.work.DeletedReason._
+import weco.catalogue.internal_model.work._
 
 class CalmTransformerTest
     extends AnyFunSpec

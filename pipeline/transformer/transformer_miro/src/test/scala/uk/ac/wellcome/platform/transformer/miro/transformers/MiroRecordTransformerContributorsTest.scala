@@ -2,9 +2,9 @@ package uk.ac.wellcome.platform.transformer.miro.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.Assertion
-import uk.ac.wellcome.models.work.internal.{Agent, Contributor}
 import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
+import weco.catalogue.internal_model.work.{Agent, Contributor}
 
 class MiroRecordTransformerContributorsTest
     extends AnyFunSpec

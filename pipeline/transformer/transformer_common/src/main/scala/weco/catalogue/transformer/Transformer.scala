@@ -1,8 +1,8 @@
 package weco.catalogue.transformer
 
-import uk.ac.wellcome.models.work.internal.Work
-import uk.ac.wellcome.models.work.internal.WorkState.Source
+import weco.catalogue.internal_model.work.WorkState.Source
 import uk.ac.wellcome.models.work.internal.result.Result
+import weco.catalogue.internal_model.work.Work
 
 trait Transformer[SourceData] {
   def apply(sourceData: SourceData, version: Int): Result[Work[Source]] = ???

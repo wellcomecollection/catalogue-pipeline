@@ -7,7 +7,6 @@ import weco.catalogue.internal_model.locations.LocationType.{
   OnlineResource,
   OpenShelves
 }
-import uk.ac.wellcome.models.work.internal.{Holdings, Item}
 import uk.ac.wellcome.platform.transformer.sierra.generators.MarcGenerators
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   FixedField,
@@ -21,6 +20,7 @@ import weco.catalogue.internal_model.locations.{
   AccessStatus,
   DigitalLocation
 }
+import weco.catalogue.internal_model.work.{Holdings, Item}
 import weco.catalogue.sierra_adapter.generators.SierraGenerators
 import weco.catalogue.sierra_adapter.models.SierraHoldingsNumber
 

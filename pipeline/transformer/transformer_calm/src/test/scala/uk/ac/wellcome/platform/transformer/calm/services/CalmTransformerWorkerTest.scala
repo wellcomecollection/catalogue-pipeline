@@ -6,7 +6,6 @@ import org.scalatest.EitherValues
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.models.work.internal.{Work, WorkState}
 import uk.ac.wellcome.pipeline_storage.{
   MemoryIndexer,
   PipelineStorageStream,
@@ -20,13 +19,14 @@ import weco.catalogue.transformer.{
   TransformerWorker,
   TransformerWorkerTestCases
 }
-import java.util.UUID
 
+import java.util.UUID
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.models.work.internal.WorkState.Source
+import weco.catalogue.internal_model.work.WorkState.Source
 import uk.ac.wellcome.platform.transformer.calm.models.CalmSourceData
 import weco.catalogue.internal_model.identifiers.IdentifierType
+import weco.catalogue.internal_model.work.{Work, WorkState}
 import weco.catalogue.source_model.calm.CalmRecord
 import weco.catalogue.source_model.generators.CalmRecordGenerators
 

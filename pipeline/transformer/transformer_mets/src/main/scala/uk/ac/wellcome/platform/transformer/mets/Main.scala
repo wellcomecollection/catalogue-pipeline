@@ -13,8 +13,7 @@ import uk.ac.wellcome.storage.typesafe.S3Builder
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.models.index.SourceWorkIndexConfig
-import uk.ac.wellcome.models.work.internal.Work
-import uk.ac.wellcome.models.work.internal.WorkState.Source
+import weco.catalogue.internal_model.work.WorkState.Source
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.pipeline_storage.typesafe.{
   ElasticIndexerBuilder,
@@ -23,6 +22,7 @@ import uk.ac.wellcome.pipeline_storage.typesafe.{
 }
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.typesafe.config.builders.AWSClientConfigBuilder
+import weco.catalogue.internal_model.work.Work
 
 object Main extends WellcomeTypesafeApp with AWSClientConfigBuilder {
   runWithConfig { config: Config =>

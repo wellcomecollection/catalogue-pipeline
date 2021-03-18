@@ -5,19 +5,13 @@ import cats.syntax.traverse._
 import cats.instances.either._
 import cats.instances.option._
 import org.apache.commons.lang3.StringUtils.equalsIgnoreCase
-import uk.ac.wellcome.models.work.internal._
-import WorkState.Source
-import uk.ac.wellcome.models.work.internal.DeletedReason.DeletedFromSource
-import uk.ac.wellcome.models.work.internal.InvisibilityReason.MetsWorksAreNotVisible
-import weco.catalogue.internal_model.identifiers.SourceIdentifier
+import weco.catalogue.internal_model.work.WorkState.Source
+import weco.catalogue.internal_model.identifiers._
 import weco.catalogue.internal_model.image.ImageData
-import weco.catalogue.internal_model.locations.{
-  AccessCondition,
-  AccessStatus,
-  DigitalLocation,
-  License,
-  LocationType
-}
+import weco.catalogue.internal_model.locations._
+import weco.catalogue.internal_model.work.DeletedReason.DeletedFromSource
+import weco.catalogue.internal_model.work.InvisibilityReason.MetsWorksAreNotVisible
+import weco.catalogue.internal_model.work.{Item, MergeCandidate, Work, WorkData}
 
 case class MetsData(
   recordIdentifier: String,

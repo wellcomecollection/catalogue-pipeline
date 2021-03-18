@@ -3,12 +3,12 @@ package uk.ac.wellcome.platform.transformer.calm.transformers
 import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.internal.Item
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.locations.{
   AccessCondition,
   UnknownAccessStatus
 }
+import weco.catalogue.internal_model.work.Item
 import weco.catalogue.source_model.generators.CalmRecordGenerators
 
 class CalmItemsTest

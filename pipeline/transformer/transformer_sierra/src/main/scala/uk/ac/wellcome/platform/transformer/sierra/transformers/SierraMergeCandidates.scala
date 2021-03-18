@@ -3,7 +3,6 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 import grizzled.slf4j.Logging
 
 import java.util.UUID
-import uk.ac.wellcome.models.work.internal.MergeCandidate
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraBibData,
   SierraQueryOps
@@ -14,6 +13,7 @@ import weco.catalogue.internal_model.identifiers.{
   IdentifierType,
   SourceIdentifier
 }
+import weco.catalogue.internal_model.work.MergeCandidate
 import weco.catalogue.sierra_adapter.models.SierraBibNumber
 
 import scala.util.Try

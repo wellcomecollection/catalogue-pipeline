@@ -10,12 +10,7 @@ import weco.catalogue.internal_model.identifiers.{
   SourceIdentifier
 }
 import weco.catalogue.internal_model.image.ImageData
-import weco.catalogue.internal_model.locations.{
-  AccessCondition,
-  AccessStatus,
-  DigitalLocation,
-  LocationType
-}
+import weco.catalogue.internal_model.locations._
 
 class MiroImageDataTest
     extends AnyFunSpec

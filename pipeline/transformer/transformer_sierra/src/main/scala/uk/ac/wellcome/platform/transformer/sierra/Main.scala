@@ -8,8 +8,7 @@ import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
-import uk.ac.wellcome.models.work.internal.Work
-import uk.ac.wellcome.models.work.internal.WorkState.Source
+import weco.catalogue.internal_model.work.WorkState.Source
 import uk.ac.wellcome.pipeline_storage.typesafe.{
   ElasticIndexerBuilder,
   ElasticSourceRetrieverBuilder,
@@ -20,6 +19,7 @@ import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.storage.typesafe.S3Builder
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
+import weco.catalogue.internal_model.work.Work
 import weco.catalogue.sierra_adapter.models.SierraTransformable
 
 import scala.concurrent.ExecutionContext

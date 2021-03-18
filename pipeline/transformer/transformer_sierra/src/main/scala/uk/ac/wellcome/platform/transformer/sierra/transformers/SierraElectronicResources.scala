@@ -3,7 +3,6 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.locations.AccessStatus.LicensedResources
 import weco.catalogue.internal_model.locations.LocationType.OnlineResource
-import uk.ac.wellcome.models.work.internal.Item
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   MarcSubfield,
   SierraQueryOps,
@@ -14,6 +13,7 @@ import weco.catalogue.internal_model.locations.{
   AccessCondition,
   DigitalLocation
 }
+import weco.catalogue.internal_model.work.Item
 import weco.catalogue.sierra_adapter.models.TypedSierraRecordNumber
 
 import java.net.URL

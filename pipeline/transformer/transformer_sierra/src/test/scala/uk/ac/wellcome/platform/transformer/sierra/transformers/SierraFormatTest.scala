@@ -2,9 +2,9 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.internal.Format.Books
 import uk.ac.wellcome.platform.transformer.sierra.generators.SierraDataGenerators
 import uk.ac.wellcome.platform.transformer.sierra.source.SierraMaterialType
+import weco.catalogue.internal_model.work.Format.Books
 
 class SierraFormatTest
     extends AnyFunSpec

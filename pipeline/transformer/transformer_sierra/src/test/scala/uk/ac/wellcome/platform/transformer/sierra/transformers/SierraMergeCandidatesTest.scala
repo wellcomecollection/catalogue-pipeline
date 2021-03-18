@@ -2,7 +2,6 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.internal.MergeCandidate
 import uk.ac.wellcome.platform.transformer.sierra.generators.{
   MarcGenerators,
   SierraDataGenerators
@@ -18,6 +17,7 @@ import weco.catalogue.internal_model.identifiers.{
   IdentifierType,
   SourceIdentifier
 }
+import weco.catalogue.internal_model.work.MergeCandidate
 
 class SierraMergeCandidatesTest
     extends AnyFunSpec

@@ -4,7 +4,6 @@ import java.time.Instant
 import scala.util.{Success, Try}
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.miro.exceptions.{
   ShouldNotTransformException,
   ShouldSuppressException
@@ -12,11 +11,16 @@ import uk.ac.wellcome.platform.transformer.miro.exceptions.{
 import uk.ac.wellcome.platform.transformer.miro.models.MiroMetadata
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 import uk.ac.wellcome.platform.transformer.miro.transformers._
-import WorkState.Source
-import uk.ac.wellcome.models.work.internal.DeletedReason.SuppressedFromSource
-import uk.ac.wellcome.models.work.internal.InvisibilityReason.UnableToTransform
+import weco.catalogue.internal_model.work.WorkState.Source
 import uk.ac.wellcome.models.work.internal.result.Result
-import weco.catalogue.internal_model.identifiers.SourceIdentifier
+import weco.catalogue.internal_model.identifiers.{
+  DataState,
+  IdentifierType,
+  SourceIdentifier
+}
+import weco.catalogue.internal_model.work.DeletedReason.SuppressedFromSource
+import weco.catalogue.internal_model.work.InvisibilityReason.UnableToTransform
+import weco.catalogue.internal_model.work.{Work, WorkData}
 import weco.catalogue.transformer.Transformer
 
 class MiroRecordTransformer

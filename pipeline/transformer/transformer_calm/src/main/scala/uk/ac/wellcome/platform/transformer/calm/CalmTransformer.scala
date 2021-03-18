@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.transformer.calm
 
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.work.internal.result._
 import uk.ac.wellcome.platform.transformer.calm.models.{
   CalmSourceData,
@@ -28,11 +27,7 @@ import weco.catalogue.internal_model.work.DeletedReason.{
   DeletedFromSource,
   SuppressedFromSource
 }
-import weco.catalogue.internal_model.work.InvisibilityReason.{
-  InvalidValueInSourceField,
-  SourceFieldMissing,
-  UnableToTransform
-}
+import weco.catalogue.internal_model.work.InvisibilityReason._
 import weco.catalogue.internal_model.work._
 
 object CalmTransformer

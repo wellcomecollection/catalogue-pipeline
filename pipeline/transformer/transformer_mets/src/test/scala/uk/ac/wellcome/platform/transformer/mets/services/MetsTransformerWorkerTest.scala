@@ -5,7 +5,6 @@ import io.circe.generic.extras.semiauto.deriveConfiguredEncoder
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.models.work.internal.{Work, WorkState}
 import uk.ac.wellcome.pipeline_storage.{PipelineStorageStream, Retriever}
 import uk.ac.wellcome.platform.transformer.mets.fixtures.MetsGenerators
 import uk.ac.wellcome.storage.generators.S3ObjectLocationGenerators
@@ -13,6 +12,7 @@ import uk.ac.wellcome.storage.s3.{S3ObjectLocation, S3ObjectLocationPrefix}
 import uk.ac.wellcome.storage.store.memory.MemoryTypedStore
 import weco.catalogue.internal_model.identifiers.IdentifierType
 import weco.catalogue.internal_model.locations.License
+import weco.catalogue.internal_model.work.{Work, WorkState}
 import weco.catalogue.source_model.MetsSourcePayload
 import weco.catalogue.source_model.generators.MetsSourceDataGenerators
 import weco.catalogue.source_model.mets.{MetsFileWithImages, MetsSourceData}

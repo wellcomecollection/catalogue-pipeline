@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.models.work.internal.PhysicalLocationType
 import weco.catalogue.internal_model.locations.{
   LocationType,
   PhysicalLocationType

@@ -3,39 +3,18 @@ package uk.ac.wellcome.platform.transformer.sierra
 import java.time.Instant
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.exceptions.JsonDecodingError
-import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.platform.transformer.sierra.exceptions.{
-  ShouldNotTransformException,
-  SierraTransformerException
-}
-import uk.ac.wellcome.platform.transformer.sierra.source.{
-  SierraBibData,
-  SierraHoldingsData,
-  SierraItemData
-}
+import uk.ac.wellcome.platform.transformer.sierra.exceptions._
+import uk.ac.wellcome.platform.transformer.sierra.source._
 import uk.ac.wellcome.platform.transformer.sierra.transformers._
-import uk.ac.wellcome.platform.transformer.sierra.source.SierraMaterialType._
-import uk.ac.wellcome.platform.transformer.sierra.source.SierraBibData._
 import grizzled.slf4j.Logging
 
 import scala.util.{Failure, Success, Try}
-import WorkState.Source
-import uk.ac.wellcome.models.work.internal.DeletedReason.{
-  DeletedFromSource,
-  SuppressedFromSource
-}
-import uk.ac.wellcome.models.work.internal.InvisibilityReason.{
-  SourceFieldMissing,
-  UnableToTransform
-}
-import weco.catalogue.internal_model.identifiers.SourceIdentifier
-import weco.catalogue.sierra_adapter.models.{
-  SierraBibNumber,
-  SierraBibRecord,
-  SierraHoldingsNumber,
-  SierraItemNumber,
-  SierraTransformable
-}
+import weco.catalogue.internal_model.work.WorkState.Source
+import weco.catalogue.internal_model.identifiers._
+import weco.catalogue.internal_model.work.DeletedReason._
+import weco.catalogue.internal_model.work.InvisibilityReason._
+import weco.catalogue.internal_model.work.{Work, WorkData}
+import weco.catalogue.sierra_adapter.models._
 
 class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
     extends Logging {

@@ -1,11 +1,11 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraBibData,
   SierraQueryOps,
   VarField
 }
+import weco.catalogue.internal_model.work._
 
 case class NotesField(createNote: String => Note)
 

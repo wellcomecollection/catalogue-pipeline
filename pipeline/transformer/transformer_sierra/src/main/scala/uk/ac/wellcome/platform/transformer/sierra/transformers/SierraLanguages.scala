@@ -1,11 +1,11 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.models.work.internal.Language
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraBibData,
   SierraQueryOps
 }
+import weco.catalogue.internal_model.work.Language
 import weco.catalogue.sierra_adapter.models.SierraBibNumber
 import weco.catalogue.source_model.marc.MarcLanguageCodeList
 

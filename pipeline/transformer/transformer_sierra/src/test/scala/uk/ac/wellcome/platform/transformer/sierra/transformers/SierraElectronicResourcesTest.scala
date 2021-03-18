@@ -3,7 +3,6 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.locations.AccessStatus.LicensedResources
-import uk.ac.wellcome.models.work.internal.Item
 import weco.catalogue.internal_model.locations.LocationType.OnlineResource
 import uk.ac.wellcome.platform.transformer.sierra.generators.MarcGenerators
 import uk.ac.wellcome.platform.transformer.sierra.source.{
@@ -14,6 +13,7 @@ import weco.catalogue.internal_model.locations.{
   AccessCondition,
   DigitalLocation
 }
+import weco.catalogue.internal_model.work.Item
 import weco.catalogue.sierra_adapter.generators.SierraGenerators
 
 class SierraElectronicResourcesTest
