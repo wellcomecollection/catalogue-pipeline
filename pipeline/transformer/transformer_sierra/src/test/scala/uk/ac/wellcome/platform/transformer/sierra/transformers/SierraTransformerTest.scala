@@ -1031,7 +1031,7 @@ class SierraTransformerTest
         Holdings(
           note = None,
           enumeration = List("A Jubilant Journal"),
-          locations = List(
+          location = Some(
             PhysicalLocation(
               locationType = ClosedStores,
               label = ClosedStores.label

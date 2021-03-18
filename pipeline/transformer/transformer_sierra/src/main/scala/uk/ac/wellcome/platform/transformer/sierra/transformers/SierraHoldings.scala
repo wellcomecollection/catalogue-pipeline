@@ -94,7 +94,7 @@ object SierraHoldings extends SierraQueryOps {
         SierraHoldingsEnumeration(id, data.varFields)
       }
 
-    val locations = List(createLocation(id, data)).flatten
+    val location = createLocation(id, data)
 
     // We should only create the Holdings object if we have some interesting data
     // to include; otherwise we don't.
@@ -105,7 +105,7 @@ object SierraHoldings extends SierraQueryOps {
         Holdings(
           note = if (note.nonEmpty) Some(note) else None,
           enumeration = enumeration,
-          locations = locations
+          location = location
         )
       )
     } else {
