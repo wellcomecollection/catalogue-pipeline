@@ -2,14 +2,12 @@ package weco.catalogue.internal_model.identifiers
 
 import enumeratum.{Enum, EnumEntry}
 import io.circe.{Decoder, Encoder}
-import weco.catalogue.internal_model.locations.LocationType.findValues
-
-import java.io.InputStream
-import scala.io.Source
 
 sealed trait IdentifierType extends EnumEntry {
   val id: String
   val label: String
+
+  override lazy val entryName: String = id
 }
 
 object IdentifierType extends Enum[IdentifierType] {
