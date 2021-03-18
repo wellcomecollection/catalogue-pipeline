@@ -1,4 +1,4 @@
-package uk.ac.wellcome.models.work.internal
+package weco.catalogue.internal_model.work
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.prop.TableDrivenPropertyChecks._

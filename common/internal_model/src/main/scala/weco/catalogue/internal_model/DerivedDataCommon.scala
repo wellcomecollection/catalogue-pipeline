@@ -1,6 +1,6 @@
 package weco.catalogue.internal_model
 
-import uk.ac.wellcome.models.work.internal.Contributor
+import weco.catalogue.internal_model.work.Contributor
 
 trait DerivedDataCommon {
   protected def contributorAgentLabels(

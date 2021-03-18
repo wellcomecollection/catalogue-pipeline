@@ -1,8 +1,8 @@
 package uk.ac.wellcome.models.work.generators
 
 import uk.ac.wellcome.fixtures.RandomGenerators
-import uk.ac.wellcome.models.work.internal._
 import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.work._
 
 trait ProductionEventGenerators extends RandomGenerators {
   def createProductionEventWith(

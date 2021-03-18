@@ -1,4 +1,4 @@
-package uk.ac.wellcome.models.work.internal
+package weco.catalogue.internal_model.work
 
 import enumeratum.{Enum, EnumEntry}
 import io.circe.{Decoder, Encoder}

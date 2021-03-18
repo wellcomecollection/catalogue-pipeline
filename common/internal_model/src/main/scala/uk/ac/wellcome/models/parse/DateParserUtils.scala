@@ -1,8 +1,8 @@
 package uk.ac.wellcome.models.parse
 
-import uk.ac.wellcome.models.work.internal.InstantRange
 import fastparse._
 import NoWhitespace._
+import weco.catalogue.internal_model.work.InstantRange
 
 trait DateParserUtils extends ParserUtils {
 

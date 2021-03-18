@@ -2,8 +2,8 @@ package weco.catalogue.internal_model.image
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.internal.{Contributor, Organisation, Person}
 import weco.catalogue.internal_model.generators.ImageGenerators
+import weco.catalogue.internal_model.work.{Contributor, Organisation, Person}
 
 class DerivedImageDataTest extends AnyFunSpec with Matchers with ImageGenerators {
   it(

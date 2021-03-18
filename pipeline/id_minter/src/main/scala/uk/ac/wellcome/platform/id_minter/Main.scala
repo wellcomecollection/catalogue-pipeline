@@ -25,7 +25,8 @@ import uk.ac.wellcome.pipeline_storage.typesafe.{
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.index.IdentifiedWorkIndexConfig
-import WorkState.Identified
+import weco.catalogue.internal_model.work.Work
+import weco.catalogue.internal_model.work.WorkState.Identified
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>

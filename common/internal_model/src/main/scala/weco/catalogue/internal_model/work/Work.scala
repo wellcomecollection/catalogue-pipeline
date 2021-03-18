@@ -1,6 +1,10 @@
-package uk.ac.wellcome.models.work.internal
+package weco.catalogue.internal_model.work
 
-import weco.catalogue.internal_model.identifiers.{DataState, IdState, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  DataState,
+  IdState,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.image.ImageData
 import weco.catalogue.internal_model.locations.Location
 

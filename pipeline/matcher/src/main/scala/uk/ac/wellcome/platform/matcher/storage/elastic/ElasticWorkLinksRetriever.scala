@@ -5,10 +5,10 @@ import com.sksamuel.elastic4s.requests.get.{GetRequest, GetResponse}
 import com.sksamuel.elastic4s.circe._
 import com.sksamuel.elastic4s.{ElasticClient, Index}
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.models.work.internal.MergeCandidate
 import uk.ac.wellcome.pipeline_storage.elastic.ElasticRetriever
 import uk.ac.wellcome.platform.matcher.models.WorkLinks
 import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.work.MergeCandidate
 
 import scala.concurrent.ExecutionContext
 import scala.util.Try

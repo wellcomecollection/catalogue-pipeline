@@ -1,8 +1,8 @@
 package uk.ac.wellcome.relation_embedder
 
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.models.work.internal.WorkState.Merged
-import uk.ac.wellcome.models.work.internal._
+import weco.catalogue.internal_model.work.WorkState.Merged
+import weco.catalogue.internal_model.work._
 
 import scala.annotation.tailrec
 

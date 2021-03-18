@@ -10,6 +10,7 @@ import weco.catalogue.internal_model.identifiers.{
   IdentifierType,
   SourceIdentifier
 }
+import weco.catalogue.internal_model.work.{MergeCandidate, Work, WorkState}
 
 class OtherIdentifiersRuleTest
     extends AnyFunSpec

@@ -12,12 +12,13 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
-import uk.ac.wellcome.models.work.internal.WorkFsm._
-import uk.ac.wellcome.models.work.internal.WorkState.Denormalised
+import weco.catalogue.internal_model.work.WorkFsm._
+import weco.catalogue.internal_model.work.WorkState.Denormalised
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.pipeline_storage.{Indexable, Indexer}
 import uk.ac.wellcome.typesafe.Runnable
 import Indexable.workIndexable
+import weco.catalogue.internal_model.work.Work
 
 class RelationEmbedderWorkerService[MsgDestination](
   sqsStream: SQSStream[NotificationMessage],

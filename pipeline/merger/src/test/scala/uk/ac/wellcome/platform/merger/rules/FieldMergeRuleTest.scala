@@ -7,7 +7,8 @@ import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 import uk.ac.wellcome.platform.merger.rules.WorkPredicates.WorkPredicate
-import WorkState.Identified
+import weco.catalogue.internal_model.work.Work
+import weco.catalogue.internal_model.work.WorkState.Identified
 
 class FieldMergeRuleTest
     extends AnyFunSpec

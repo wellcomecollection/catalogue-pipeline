@@ -1,11 +1,10 @@
-package uk.ac.wellcome.models.work.internal
+package weco.catalogue.internal_model.work
 
 import enumeratum.scalacheck._
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.utils.JsonAssertions
-import uk.ac.wellcome.models.work.internal.Format.CDRoms
 
 class FormatTest
     extends AnyFunSpec
@@ -28,7 +27,7 @@ class FormatTest
   }
 
   it("finds a format by code") {
-    Format.fromCode("m") shouldBe Some(CDRoms)
+    Format.fromCode("m") shouldBe Some(Format.CDRoms)
   }
 
   def formatJson(id: String, label: String) =

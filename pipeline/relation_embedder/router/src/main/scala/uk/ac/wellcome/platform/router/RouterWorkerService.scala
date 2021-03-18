@@ -6,7 +6,7 @@ import software.amazon.awssdk.services.sqs.model.Message
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.models.work.internal.WorkState.{Denormalised, Merged}
+import weco.catalogue.internal_model.work.WorkState.{Denormalised, Merged}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.pipeline_storage.PipelineStorageStream._
 import uk.ac.wellcome.pipeline_storage.{
@@ -15,6 +15,7 @@ import uk.ac.wellcome.pipeline_storage.{
   Retriever
 }
 import uk.ac.wellcome.typesafe.Runnable
+import weco.catalogue.internal_model.work.{Relations, Work}
 
 import scala.concurrent.{ExecutionContext, Future}
 

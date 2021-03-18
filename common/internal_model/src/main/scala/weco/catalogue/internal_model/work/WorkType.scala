@@ -1,11 +1,11 @@
-package uk.ac.wellcome.models.work.internal
+package weco.catalogue.internal_model.work
 
-import io.circe.{Decoder, Encoder}
-import io.circe.syntax._
 import io.circe.generic.extras.semiauto.{
   deriveEnumerationDecoder,
   deriveEnumerationEncoder
 }
+import io.circe.syntax._
+import io.circe.{Decoder, Encoder}
 
 sealed trait WorkType
 

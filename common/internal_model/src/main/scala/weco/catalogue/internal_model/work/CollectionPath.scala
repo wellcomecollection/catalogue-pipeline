@@ -1,4 +1,4 @@
-package uk.ac.wellcome.models.work.internal
+package weco.catalogue.internal_model.work
 
 /**
   * A CollectionPath represents the position of an individual work in a

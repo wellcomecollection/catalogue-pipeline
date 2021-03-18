@@ -2,8 +2,8 @@ package uk.ac.wellcome.models.parse
 
 import fastparse._, NoWhitespace._
 
-import uk.ac.wellcome.models.work.internal.InstantRange
 import DateParserImplicits._
+import weco.catalogue.internal_model.work.InstantRange
 
 /**
   *  Parses Marc 008 date information into InstantRange

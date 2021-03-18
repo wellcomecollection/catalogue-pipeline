@@ -5,8 +5,9 @@ import uk.ac.wellcome.models.matcher.{
   MatcherResult,
   WorkIdentifier
 }
-import uk.ac.wellcome.models.work.internal.WorkState.Identified
+import weco.catalogue.internal_model.work.WorkState.Identified
 import uk.ac.wellcome.models.work.internal._
+import weco.catalogue.internal_model.work.Work
 
 trait MatcherResultFixture {
   def matcherResultWith(matchedEntries: Set[Set[Work[Identified]]]) =

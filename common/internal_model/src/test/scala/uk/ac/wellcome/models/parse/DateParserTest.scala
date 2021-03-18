@@ -4,8 +4,8 @@ import org.scalatest.matchers.should.Matchers
 import java.time.LocalDate
 
 import org.scalatest.funspec.AnyFunSpec
-import uk.ac.wellcome.models.work.internal.InstantRange
 import uk.ac.wellcome.models.parse.parsers.DateParser
+import weco.catalogue.internal_model.work.InstantRange
 
 class DateParserTest extends AnyFunSpec with Matchers {
 

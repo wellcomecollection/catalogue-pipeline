@@ -16,8 +16,9 @@ import uk.ac.wellcome.platform.id_minter.services.IdMinterWorkerService
 import uk.ac.wellcome.pipeline_storage.{MemoryIndexer, MemoryRetriever}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.Implicits._
-import WorkState.{Identified, Source}
+import weco.catalogue.internal_model.work.WorkState.{Identified, Source}
 import uk.ac.wellcome.pipeline_storage.fixtures.PipelineStorageStreamFixtures
+import weco.catalogue.internal_model.work.Work
 
 trait WorkerServiceFixture
     extends IdentifiersDatabase

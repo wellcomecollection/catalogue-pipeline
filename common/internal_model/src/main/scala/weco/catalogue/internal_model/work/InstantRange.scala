@@ -1,9 +1,9 @@
-package uk.ac.wellcome.models.work.internal
-
-import java.time.{Instant, LocalDate, LocalDateTime, ZoneOffset}
+package weco.catalogue.internal_model.work
 
 import uk.ac.wellcome.models.parse.Parser
-import uk.ac.wellcome.models.work.internal.InstantRange.instantOrdering
+import weco.catalogue.internal_model.work.InstantRange.instantOrdering
+
+import java.time.{Instant, LocalDate, LocalDateTime, ZoneOffset}
 
 // We're not extending this yet, as we don't actually want it to be part of
 // the Display model as yet before we've started testing, but in future it

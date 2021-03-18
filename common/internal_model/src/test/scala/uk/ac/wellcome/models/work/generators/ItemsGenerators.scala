@@ -1,6 +1,5 @@
 package uk.ac.wellcome.models.work.generators
 
-import uk.ac.wellcome.models.work.internal._
 import weco.catalogue.internal_model.generators.{
   IdentifiersGenerators,
   LocationGenerators
@@ -12,6 +11,7 @@ import weco.catalogue.internal_model.locations.{
   Location,
   LocationType
 }
+import weco.catalogue.internal_model.work.Item
 
 trait ItemsGenerators extends IdentifiersGenerators with LocationGenerators {
 

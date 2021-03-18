@@ -1,10 +1,10 @@
 package uk.ac.wellcome.platform.ingestor.works
 
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.pipeline_storage.{PipelineStorageStream, Retriever}
 import uk.ac.wellcome.platform.ingestor.common.IngestorWorkerService
-import WorkState.{Denormalised, Indexed}
+import weco.catalogue.internal_model.work.Work
+import weco.catalogue.internal_model.work.WorkState.{Denormalised, Indexed}
 
 import scala.concurrent.ExecutionContext
 

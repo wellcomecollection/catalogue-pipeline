@@ -10,9 +10,10 @@ import uk.ac.wellcome.platform.merger.models.{
   MergeResult,
   MergerOutcome
 }
-import WorkState.Identified
+import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.catalogue.internal_model.image
 import weco.catalogue.internal_model.image.{ImageData, SourceWorks}
+import weco.catalogue.internal_model.work.{Work, WorkData, WorkState}
 
 /*
  * The implementor of a Merger must provide:

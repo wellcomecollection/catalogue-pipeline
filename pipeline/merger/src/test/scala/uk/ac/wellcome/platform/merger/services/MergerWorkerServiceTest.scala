@@ -18,10 +18,11 @@ import uk.ac.wellcome.platform.merger.fixtures.{
   MatcherResultFixture,
   WorkerServiceFixture
 }
-import WorkState.{Identified, Merged}
-import WorkFsm._
+import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
+import weco.catalogue.internal_model.work.WorkFsm._
 import uk.ac.wellcome.models.work.generators.MiroWorkGenerators
 import uk.ac.wellcome.pipeline_storage.MemoryRetriever
+import weco.catalogue.internal_model.work.{MergeCandidate, Work}
 
 class MergerWorkerServiceTest
     extends AnyFunSpec

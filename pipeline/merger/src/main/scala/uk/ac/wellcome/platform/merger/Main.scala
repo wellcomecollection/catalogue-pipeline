@@ -22,9 +22,10 @@ import uk.ac.wellcome.pipeline_storage.typesafe.{
 import uk.ac.wellcome.platform.merger.services._
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
-import WorkState.{Identified, Merged}
+import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.catalogue.internal_model.image.Image
 import weco.catalogue.internal_model.image.ImageState.Initial
+import weco.catalogue.internal_model.work.Work
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>

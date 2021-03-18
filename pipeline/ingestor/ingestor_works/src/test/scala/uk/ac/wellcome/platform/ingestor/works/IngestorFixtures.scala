@@ -5,10 +5,11 @@ import org.scalatest.Suite
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.models.index.IndexFixtures
-import uk.ac.wellcome.models.work.internal.WorkState.{Denormalised, Indexed}
+import weco.catalogue.internal_model.work.WorkState.{Denormalised, Indexed}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import uk.ac.wellcome.pipeline_storage.{Indexer, Retriever}
+import weco.catalogue.internal_model.work.Work
 
 trait IngestorFixtures
     extends IndexFixtures

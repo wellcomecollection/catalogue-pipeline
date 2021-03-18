@@ -10,8 +10,9 @@ import com.sksamuel.elastic4s.{ElasticClient, Index}
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.internal.WorkState.Merged
+import weco.catalogue.internal_model.work.WorkState.Merged
 import uk.ac.wellcome.models.work.internal._
+import weco.catalogue.internal_model.work.Work
 
 trait RelationsService {
 

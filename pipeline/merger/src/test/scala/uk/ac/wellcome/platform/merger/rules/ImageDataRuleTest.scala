@@ -8,10 +8,11 @@ import uk.ac.wellcome.models.work.generators.{
   MiroWorkGenerators,
   SierraWorkGenerators
 }
-import uk.ac.wellcome.models.work.internal.WorkState.Identified
+import weco.catalogue.internal_model.work.WorkState.Identified
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.rules.ImageDataRule.FlatImageMergeRule
 import uk.ac.wellcome.platform.merger.rules.WorkPredicates.WorkPredicate
+import weco.catalogue.internal_model.work.Work
 
 class ImageDataRuleTest
     extends AnyFunSpec

@@ -5,8 +5,8 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.merger.models.{FieldMergeResult, MergeResult}
 import uk.ac.wellcome.platform.merger.rules.FieldMergeRule
-import WorkState.{Identified, Merged}
-import WorkFsm._
+import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
+import weco.catalogue.internal_model.work.WorkFsm._
 import cats.data.State
 import uk.ac.wellcome.models.work.generators.{
   MetsWorkGenerators,
@@ -14,6 +14,7 @@ import uk.ac.wellcome.models.work.generators.{
   SierraWorkGenerators
 }
 import weco.catalogue.internal_model.identifiers.SourceIdentifier
+import weco.catalogue.internal_model.work.{Item, Work}
 
 class MergerTest
     extends AnyFunSpec

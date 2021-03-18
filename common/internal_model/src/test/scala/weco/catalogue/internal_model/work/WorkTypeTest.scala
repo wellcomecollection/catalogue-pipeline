@@ -1,4 +1,4 @@
-package uk.ac.wellcome.models.work.internal
+package weco.catalogue.internal_model.work
 
 import uk.ac.wellcome.json.JsonUtil._
 import org.scalatest.funspec.AnyFunSpec

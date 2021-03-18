@@ -1,7 +1,8 @@
 package uk.ac.wellcome.models.parse
 
+import weco.catalogue.internal_model.work.InstantRange
+
 import java.time.DateTimeException
-import uk.ac.wellcome.models.work.internal.InstantRange
 import scala.util.control.Exception
 
 /**

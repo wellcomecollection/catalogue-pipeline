@@ -5,7 +5,8 @@ import uk.ac.wellcome.platform.merger.logging.MergerLogging
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 import uk.ac.wellcome.platform.merger.models.Sources.findFirstLinkedDigitisedSierraWorkFor
 import cats.data.NonEmptyList
-import WorkState.Identified
+import weco.catalogue.internal_model.work.{Item, Work}
+import weco.catalogue.internal_model.work.WorkState.Identified
 
 /**
   * Items are merged as follows

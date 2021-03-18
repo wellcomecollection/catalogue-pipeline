@@ -1,4 +1,4 @@
-package uk.ac.wellcome.models.work.internal
+package weco.catalogue.internal_model.work
 
 import weco.catalogue.internal_model.identifiers.{HasId, IdState}
 import weco.catalogue.internal_model.locations.Location

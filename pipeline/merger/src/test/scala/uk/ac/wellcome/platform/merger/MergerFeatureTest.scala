@@ -4,10 +4,11 @@ import org.scalatest.GivenWhenThen
 import org.scalatest.featurespec.AnyFeatureSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.generators.SourceWorkGenerators
-import uk.ac.wellcome.models.work.internal.{Format, MergeCandidate}
+import uk.ac.wellcome.models.work.internal.MergeCandidate
 import uk.ac.wellcome.platform.merger.fixtures.FeatureTestSugar
 import uk.ac.wellcome.platform.merger.services.PlatformMerger
 import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.work.MergeCandidate
 
 class MergerFeatureTest
     extends AnyFeatureSpec

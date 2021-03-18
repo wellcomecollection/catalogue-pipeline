@@ -1,3 +1,3 @@
-package uk.ac.wellcome.models.work.internal
+package weco.catalogue.internal_model.work
 
 case class Language(label: String, id: String)

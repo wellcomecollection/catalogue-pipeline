@@ -17,12 +17,13 @@ import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.internal.WorkState.{Denormalised, Merged}
+import weco.catalogue.internal_model.work.WorkState.{Denormalised, Merged}
 import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.pipeline_storage.MemoryIndexer
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.index.IndexFixtures
 import uk.ac.wellcome.relation_embedder.fixtures.RelationGenerators
+import weco.catalogue.internal_model.work._
 
 class RelationEmbedderWorkerServiceTest
     extends AnyFunSpec

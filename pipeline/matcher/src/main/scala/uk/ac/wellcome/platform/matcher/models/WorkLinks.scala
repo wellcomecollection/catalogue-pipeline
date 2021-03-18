@@ -1,7 +1,8 @@
 package uk.ac.wellcome.platform.matcher.models
 
 import uk.ac.wellcome.models.work.internal._
-import WorkState.Identified
+import weco.catalogue.internal_model.work.Work
+import weco.catalogue.internal_model.work.WorkState.Identified
 
 case class WorkLinks(workId: String,
                      version: Int,
