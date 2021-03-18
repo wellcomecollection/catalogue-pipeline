@@ -1,4 +1,4 @@
-package weco.catalogue.source_model.marc
+package weco.catalogue.internal_model.marc
 
 import grizzled.slf4j.Logging
 

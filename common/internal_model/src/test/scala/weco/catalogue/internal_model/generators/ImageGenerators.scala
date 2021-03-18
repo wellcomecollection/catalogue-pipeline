@@ -57,7 +57,7 @@ trait ImageGenerators
     identifierType = IdentifierType.METSImage
   )
 
-  implicit class UnidentifiedImageDataOps(
+  implicit class IdentifiableImageDataOps(
     imageData: ImageData[IdState.Identifiable]) {
 
     def toAugmentedImageWith(
@@ -72,18 +72,30 @@ trait ImageGenerators
           redirectedWork = redirectedWork)
 
     def toIndexedImageWith(
+      canonicalId: String = createCanonicalId,
+      parentWork: Work[WorkState.Identified] = identifiedWork(),
+      redirectedWork: Option[Work[WorkState.Identified]] = None,
       inferredData: Option[InferredData] = createInferredData)
       : Image[ImageState.Indexed] =
-      imageData.toIdentified
-        .toIndexedImageWith(inferredData = inferredData)
+      imageData
+        .toIdentifiedWith(canonicalId = canonicalId)
+        .toIndexedImageWith(
+          parentWork = parentWork,
+          redirectedWork = redirectedWork,
+          inferredData = inferredData
+        )
 
-    def toIdentified: ImageData[IdState.Identified] =
+    def toIdentifiedWith(
+      canonicalId: String = createCanonicalId): ImageData[IdState.Identified] =
       imageData.copy(
         id = IdState.Identified(
           canonicalId = createCanonicalId,
           sourceIdentifier = imageData.id.sourceIdentifier
         )
       )
+
+    def toIdentified: ImageData[IdState.Identified] =
+      imageData.toIdentifiedWith()
 
     def toInitialImage: Image[Initial] =
       imageData.toIdentified.toInitialImage
@@ -127,10 +139,16 @@ trait ImageGenerators
         .transition[ImageState.Augmented](inferredData)
 
     def toIndexedImageWith(
+      parentWork: Work[WorkState.Identified] = identifiedWork(),
+      redirectedWork: Option[Work[WorkState.Identified]] = None,
       inferredData: Option[InferredData] = createInferredData)
       : Image[ImageState.Indexed] =
       imageData
-        .toAugmentedImageWith(inferredData = inferredData)
+        .toAugmentedImageWith(
+          parentWork = parentWork,
+          redirectedWork = redirectedWork,
+          inferredData = inferredData
+        )
         .transition[ImageState.Indexed]()
 
     def toInitialImage = toInitialImageWith()
