@@ -130,7 +130,7 @@ object Implicits {
     deriveConfiguredDecoder
   implicit val _dec62: Decoder[Work[WorkState.Identified]] =
     deriveConfiguredDecoder
-  implicit val _dec63: Decoder[SourceWorks] =
+  implicit val _dec63: Decoder[ParentWorks] =
     deriveConfiguredDecoder
   implicit val _dec64: Decoder[ImageSource] =
     deriveConfiguredDecoder
@@ -258,7 +258,7 @@ object Implicits {
     deriveConfiguredEncoder
   implicit val _enc62: Encoder[Work[WorkState.Identified]] =
     deriveConfiguredEncoder
-  implicit val _enc63: Encoder[SourceWorks] =
+  implicit val _enc63: Encoder[ParentWorks] =
     deriveConfiguredEncoder
   implicit val _enc64: Encoder[ImageSource] =
     deriveConfiguredEncoder

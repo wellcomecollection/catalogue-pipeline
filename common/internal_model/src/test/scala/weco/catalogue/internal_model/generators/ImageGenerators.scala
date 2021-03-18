@@ -3,7 +3,7 @@ package weco.catalogue.internal_model.generators
 import uk.ac.wellcome.models.work.generators._
 import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType}
 import weco.catalogue.internal_model.image
-import weco.catalogue.internal_model.image.SourceWork._
+import weco.catalogue.internal_model.image.ParentWork._
 import weco.catalogue.internal_model.image.ImageState.{Indexed, Initial}
 import weco.catalogue.internal_model.image._
 import weco.catalogue.internal_model.locations.{
@@ -60,56 +60,33 @@ trait ImageGenerators
   implicit class UnidentifiedImageDataOps(
     imageData: ImageData[IdState.Identifiable]) {
 
-    def toIdentifiedWith(
-      canonicalId: String = createCanonicalId): ImageData[IdState.Identified] =
-      imageData.copy(
-        id = IdState.Identified(
-          canonicalId = canonicalId,
-          sourceIdentifier = imageData.id.sourceIdentifier
-        )
-      )
-    def toInitialImageWith(canonicalId: String = createCanonicalId,
-                           modifiedTime: Instant = instantInLast30Days,
-                           sourceWorks: SourceWorks = SourceWorks(
-                             canonicalWork = mergedWork().toSourceWork,
-                             redirectedWork = None
-                           )): Image[Initial] =
-      imageData
-        .toIdentifiedWith(canonicalId)
-        .toInitialImageWith(modifiedTime, sourceWorks)
-
     def toAugmentedImageWith(
-      canonicalId: String = createCanonicalId,
       inferredData: Option[InferredData] = createInferredData,
-      modifiedTime: Instant = instantInLast30Days,
       parentWork: Work[WorkState.Identified] = sierraIdentifiedWork(),
       redirectedWork: Option[Work[WorkState.Identified]] = Some(
         sierraIdentifiedWork())): Image[ImageState.Augmented] =
-      imageData
-        .toIdentifiedWith(canonicalId)
+      imageData.toIdentified
         .toAugmentedImageWith(
-          inferredData,
-          modifiedTime,
-          parentWork,
-          redirectedWork)
+          inferredData = inferredData,
+          parentWork = parentWork,
+          redirectedWork = redirectedWork)
 
     def toIndexedImageWith(
-      canonicalId: String = createCanonicalId,
-      inferredData: Option[InferredData] = createInferredData,
-      modifiedTime: Instant = instantInLast30Days,
-      parentWork: Work[WorkState.Identified] = sierraIdentifiedWork(),
-      redirectedWork: Option[Work[WorkState.Identified]] = Some(
-        sierraIdentifiedWork())): Image[ImageState.Indexed] =
-      imageData
-        .toIdentifiedWith(canonicalId)
-        .toIndexedImageWith(
-          inferredData,
-          modifiedTime,
-          parentWork,
-          redirectedWork)
+      inferredData: Option[InferredData] = createInferredData)
+      : Image[ImageState.Indexed] =
+      imageData.toIdentified
+        .toIndexedImageWith(inferredData = inferredData)
 
-    def toIdentified = toIdentifiedWith()
-    def toInitialImage = toInitialImageWith()
+    def toIdentified: ImageData[IdState.Identified] =
+      imageData.copy(
+        id = IdState.Identified(
+          canonicalId = createCanonicalId,
+          sourceIdentifier = imageData.id.sourceIdentifier
+        )
+      )
+
+    def toInitialImage: Image[Initial] =
+      imageData.toIdentified.toInitialImage
 
     def toAugmentedImage = toAugmentedImageWith()
 
@@ -120,15 +97,15 @@ trait ImageGenerators
     imageData: ImageData[IdState.Identified]) {
     def toInitialImageWith(
       modifiedTime: Instant = instantInLast30Days,
-      sourceWorks: SourceWorks = SourceWorks(
-        canonicalWork = mergedWork().toSourceWork,
+      parentWorks: ParentWorks = ParentWorks(
+        canonicalWork = mergedWork().toParentWork,
         redirectedWork = None
       )
     ): Image[ImageState.Initial] = Image[ImageState.Initial](
       version = imageData.version,
       locations = imageData.locations,
       modifiedTime = modifiedTime,
-      source = sourceWorks,
+      source = parentWorks,
       state = ImageState.Initial(
         sourceIdentifier = imageData.id.sourceIdentifier,
         canonicalId = imageData.id.canonicalId
@@ -137,33 +114,23 @@ trait ImageGenerators
 
     def toAugmentedImageWith(
       inferredData: Option[InferredData] = createInferredData,
-      modifiedTime: Instant = instantInLast30Days,
       parentWork: Work[WorkState.Identified] = sierraIdentifiedWork(),
       redirectedWork: Option[Work[WorkState.Identified]] = Some(
         sierraIdentifiedWork())
     ): Image[ImageState.Augmented] =
       imageData
         .toInitialImageWith(
-          modifiedTime = modifiedTime,
-          sourceWorks = image.SourceWorks(
-            canonicalWork = parentWork.toSourceWork,
-            redirectedWork = redirectedWork.map(_.toSourceWork))
+          parentWorks = image.ParentWorks(
+            canonicalWork = parentWork.toParentWork,
+            redirectedWork = redirectedWork.map(_.toParentWork))
         )
         .transition[ImageState.Augmented](inferredData)
 
     def toIndexedImageWith(
-      inferredData: Option[InferredData] = createInferredData,
-      modifiedTime: Instant = instantInLast30Days,
-      parentWork: Work[WorkState.Identified] = sierraIdentifiedWork(),
-      redirectedWork: Option[Work[WorkState.Identified]] = Some(
-        sierraIdentifiedWork())): Image[ImageState.Indexed] =
+      inferredData: Option[InferredData] = createInferredData)
+      : Image[ImageState.Indexed] =
       imageData
-        .toAugmentedImageWith(
-          modifiedTime = modifiedTime,
-          parentWork = parentWork,
-          redirectedWork = redirectedWork,
-          inferredData = inferredData
-        )
+        .toAugmentedImageWith(inferredData = inferredData)
         .transition[ImageState.Indexed]()
 
     def toInitialImage = toInitialImageWith()

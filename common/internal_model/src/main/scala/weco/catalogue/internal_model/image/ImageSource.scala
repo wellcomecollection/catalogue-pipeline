@@ -8,27 +8,26 @@ sealed trait ImageSource {
   val version: Int
 }
 
-case class SourceWorks(
-  canonicalWork: SourceWork,
-  redirectedWork: Option[SourceWork] = None
+case class ParentWorks(
+  canonicalWork: ParentWork,
+  redirectedWork: Option[ParentWork] = None
 ) extends ImageSource {
   override val id = canonicalWork.id
   override val version =
     canonicalWork.version + redirectedWork.map(_.version).getOrElse(0)
 }
 
-case class SourceWork(
+case class ParentWork(
   id: IdState.Identified,
   data: WorkData[DataState.Identified],
   version: Int,
 )
 
-object SourceWork {
+object ParentWork {
 
-  implicit class MergedWorkToSourceWork(work: Work[WorkState.Merged]) {
-
-    def toSourceWork: SourceWork =
-      SourceWork(
+  implicit class MergedToParentWork(work: Work[WorkState.Merged]) {
+    def toParentWork: ParentWork =
+      ParentWork(
         id = IdState
           .Identified(work.state.canonicalId, work.state.sourceIdentifier),
         data = work.data,
@@ -36,10 +35,9 @@ object SourceWork {
       )
   }
 
-  implicit class IdentifiedWorkToSourceWork(work: Work[WorkState.Identified]) {
-
-    def toSourceWork: SourceWork =
-      SourceWork(
+  implicit class IdentifiedToParentWork(work: Work[WorkState.Identified]) {
+    def toParentWork: ParentWork =
+      ParentWork(
         id = IdState.Identified(
           sourceIdentifier = work.state.sourceIdentifier,
           canonicalId = work.state.canonicalId
