@@ -63,7 +63,7 @@ def today():
 @click.argument("end", type=click.DateTime(["%Y-%m-%d"]))
 def date_range(start, end):
     queries = created_or_modified_date_range(start.date(), end.date())
-    WindowGenerator(queries, queries).run()
+    WindowGenerator(queries).run()
 
 
 @cli.command()
