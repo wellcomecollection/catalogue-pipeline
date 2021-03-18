@@ -8,12 +8,8 @@ import com.sksamuel.elastic4s.requests.searches.{
 }
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.internal.Format
-import uk.ac.wellcome.models.work.internal.Format.{
-  Books,
-  ManuscriptsAsian,
-  Music
-}
+import weco.catalogue.internal_model.work.Format
+import weco.catalogue.internal_model.work.Format._
 
 class AggregationResultsTest extends AnyFunSpec with Matchers {
   it("destructures a single aggregation result") {

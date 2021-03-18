@@ -1,19 +1,17 @@
 package uk.ac.wellcome.platform.api.works
 
 import com.sksamuel.elastic4s.Index
-import uk.ac.wellcome.models.work.internal.Format.{
-  Books,
-  CDRoms,
-  ManuscriptsAsian
-}
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.{
   ItemsGenerators,
   ProductionEventGenerators
 }
-import WorkState.Indexed
 import org.scalatest.prop.TableDrivenPropertyChecks
+import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.locations._
+import weco.catalogue.internal_model.work.Format._
+import weco.catalogue.internal_model.work._
+import weco.catalogue.internal_model.work.WorkState.Indexed
 
 import java.net.URLEncoder
 

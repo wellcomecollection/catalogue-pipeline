@@ -3,12 +3,12 @@ package uk.ac.wellcome.platform.api.works
 import com.sksamuel.elastic4s.Index
 
 import uk.ac.wellcome.models.work.generators.{
-  ImageGenerators,
   ProductionEventGenerators,
   SubjectGenerators
 }
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.Implicits._
+import weco.catalogue.internal_model.generators.ImageGenerators
+import weco.catalogue.internal_model.work._
 
 class WorksIncludesTest
     extends ApiWorksTestBase

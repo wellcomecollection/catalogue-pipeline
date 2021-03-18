@@ -1,8 +1,9 @@
 package uk.ac.wellcome.platform.api.models
 
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
-import uk.ac.wellcome.models.work.internal.IdState.Minted
-import uk.ac.wellcome.models.work.internal._
+import weco.catalogue.internal_model.identifiers.IdState.Minted
+import weco.catalogue.internal_model.locations.License
+import weco.catalogue.internal_model.work.{AbstractAgent, Genre}
 
 case class ImageAggregations(
   license: Option[Aggregation[License]] = None,

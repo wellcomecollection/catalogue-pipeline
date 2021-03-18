@@ -1,14 +1,9 @@
 package uk.ac.wellcome.platform.api.images
 
 import uk.ac.wellcome.display.models.DisplaySerialisationTestBase
-import uk.ac.wellcome.models.work.generators.ImageGenerators
-import uk.ac.wellcome.models.work.internal.{
-  Image,
-  ImageSource,
-  ImageState,
-  SourceWorks
-}
 import uk.ac.wellcome.platform.api.ApiTestBase
+import weco.catalogue.internal_model.generators.ImageGenerators
+import weco.catalogue.internal_model.image._
 
 trait ApiImagesTestBase
     extends ApiTestBase

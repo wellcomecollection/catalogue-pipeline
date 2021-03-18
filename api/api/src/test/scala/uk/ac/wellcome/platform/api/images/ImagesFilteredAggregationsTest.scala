@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.api.images
 
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.Implicits._
+import weco.catalogue.internal_model.locations.License
 
 class ImagesFilteredAggregationsTest extends ApiImagesTestBase {
   it("filters and aggregates by license") {

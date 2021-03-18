@@ -1,8 +1,9 @@
 package uk.ac.wellcome.platform.api.images
 
-import uk.ac.wellcome.models.work.internal.{Contributor, License, Person}
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.GenreGenerators
+import weco.catalogue.internal_model.locations.License
+import weco.catalogue.internal_model.work.{Contributor, Person}
 
 class ImagesFiltersTest extends ApiImagesTestBase with GenreGenerators {
   describe("filtering images by license") {

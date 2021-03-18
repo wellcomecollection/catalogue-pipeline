@@ -1,12 +1,14 @@
 package uk.ac.wellcome.platform.api.works
 
-import uk.ac.wellcome.models.work.internal.Format.{Books, Journals, Pictures}
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.{
   ItemsGenerators,
   ProductionEventGenerators
 }
+import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.locations.{AccessStatus, License}
+import weco.catalogue.internal_model.work._
+import weco.catalogue.internal_model.work.Format._
 
 class WorksAggregationsTest
     extends ApiWorksTestBase

@@ -8,11 +8,11 @@ import com.sksamuel.elastic4s.Index
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
 import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.display.models.Implicits._
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.api.models.ApiConfig
 import uk.ac.wellcome.platform.api.services.{ElasticsearchService, WorksService}
 import uk.ac.wellcome.platform.api.Tracing
-import WorkState.Indexed
+import weco.catalogue.internal_model.work.Work
+import weco.catalogue.internal_model.work.WorkState.Indexed
 
 class WorksController(elasticsearchService: ElasticsearchService,
                       implicit val apiConfig: ApiConfig,

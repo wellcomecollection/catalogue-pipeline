@@ -1,6 +1,7 @@
 package uk.ac.wellcome.platform.api.models
 
-import uk.ac.wellcome.models.work.internal.{AccessStatus, WorkType}
+import weco.catalogue.internal_model.locations.AccessStatus
+import weco.catalogue.internal_model.work.WorkType
 import java.time.LocalDate
 
 sealed trait WorkFilter

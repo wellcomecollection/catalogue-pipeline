@@ -1,11 +1,12 @@
 package uk.ac.wellcome.platform.api.works
 
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.{
   ItemsGenerators,
   ProductionEventGenerators
 }
+import weco.catalogue.internal_model.locations._
+import weco.catalogue.internal_model.work.{Work, WorkState}
 
 class WorksTest
     extends ApiWorksTestBase

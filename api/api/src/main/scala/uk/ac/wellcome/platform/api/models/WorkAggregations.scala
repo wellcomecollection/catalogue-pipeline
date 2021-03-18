@@ -2,9 +2,10 @@ package uk.ac.wellcome.platform.api.models
 
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
 import io.circe.Decoder
-import uk.ac.wellcome.models.marc.MarcLanguageCodeList
-import uk.ac.wellcome.models.work.internal.IdState.Minted
-import uk.ac.wellcome.models.work.internal._
+import weco.catalogue.internal_model.identifiers.IdState.Minted
+import weco.catalogue.internal_model.locations.License
+import weco.catalogue.internal_model.work._
+import weco.catalogue.source_model.marc.MarcLanguageCodeList
 
 import java.time.{Instant, LocalDateTime, ZoneOffset}
 import scala.util.Try
@@ -69,8 +70,8 @@ object WorkAggregations extends ElasticAggregations {
   // unambiguously identify a language.
   implicit val decodeLanguageFromCode: Decoder[Language] =
     Decoder.decodeString.emap { code =>
-      MarcLanguageCodeList.lookupByCode(code) match {
-        case Some(lang) => Right(lang)
+      MarcLanguageCodeList.lookupNameForCode(code) match {
+        case Some(name) => Right(Language(label = name, id = code))
         case None       => Left(s"couldn't find language for code $code")
       }
     }

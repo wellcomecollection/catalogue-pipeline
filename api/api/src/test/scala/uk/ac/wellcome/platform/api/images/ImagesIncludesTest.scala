@@ -4,8 +4,8 @@ import uk.ac.wellcome.models.work.generators.{
   ContributorGenerators,
   GenreGenerators
 }
-import uk.ac.wellcome.models.work.internal.Language
 import uk.ac.wellcome.models.Implicits._
+import weco.catalogue.internal_model.work.Language
 
 class ImagesIncludesTest
     extends ApiImagesTestBase

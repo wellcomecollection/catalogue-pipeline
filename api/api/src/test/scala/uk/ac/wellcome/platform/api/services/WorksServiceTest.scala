@@ -13,19 +13,13 @@ import uk.ac.wellcome.models.work.generators.{
   ProductionEventGenerators,
   WorkGenerators
 }
-import uk.ac.wellcome.models.work.internal._
-import uk.ac.wellcome.models.work.internal.Format.{
-  ArchivesAndManuscripts,
-  Audio,
-  Books,
-  CDRoms,
-  ManuscriptsAsian
-}
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
 import uk.ac.wellcome.platform.api.models._
-import WorkState.Indexed
 import uk.ac.wellcome.models.index.IndexFixtures
+import weco.catalogue.internal_model.work.Work
+import weco.catalogue.internal_model.work.Format._
+import weco.catalogue.internal_model.work.WorkState.Indexed
 
 class WorksServiceTest
     extends AnyFunSpec
