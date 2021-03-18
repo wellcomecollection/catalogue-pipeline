@@ -55,7 +55,7 @@ class CalmTransformerTest
               ontologyType = "Work"),
             SourceIdentifier(
               value = "a.b.c",
-              identifierType = IdentifierType.CalmRefNo,
+              identifierType = IdentifierType.CalmAltRefNo,
               ontologyType = "Work"),
           ),
           items = List(
