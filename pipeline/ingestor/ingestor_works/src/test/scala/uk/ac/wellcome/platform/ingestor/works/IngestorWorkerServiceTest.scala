@@ -93,9 +93,7 @@ class IngestorWorkerServiceTest
       sourceIdentifier = createSierraSystemSourceIdentifier
     )
     val otherWork = denormalisedWork(
-      sourceIdentifier = createSourceIdentifierWith(
-        identifierType = CalmAltRefNo
-      )
+      sourceIdentifier = createCalmSourceIdentifier
     )
 
     val works = List(miroWork, sierraWork, otherWork)
