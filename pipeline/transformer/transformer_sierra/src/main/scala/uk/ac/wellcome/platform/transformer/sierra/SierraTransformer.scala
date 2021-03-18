@@ -5,6 +5,8 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.exceptions.JsonDecodingError
 import uk.ac.wellcome.platform.transformer.sierra.exceptions._
 import uk.ac.wellcome.platform.transformer.sierra.source._
+import uk.ac.wellcome.platform.transformer.sierra.source.SierraMaterialType._
+import uk.ac.wellcome.platform.transformer.sierra.source.SierraBibData._
 import uk.ac.wellcome.platform.transformer.sierra.transformers._
 import grizzled.slf4j.Logging
 
