@@ -120,7 +120,8 @@ object WorkPredicates {
       .find(_.identifierType == IdentifierType.WellcomeDigcode)
       .exists(_.value == digcode)
 
-  private def identifierTypeId(id: IdentifierType)(work: Work[Identified]): Boolean =
+  private def identifierTypeId(id: IdentifierType)(
+    work: Work[Identified]): Boolean =
     work.sourceIdentifier.identifierType == id
 
   private def format(format: Format)(work: Work[Identified]): Boolean =
