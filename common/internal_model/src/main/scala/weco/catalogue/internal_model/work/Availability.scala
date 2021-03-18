@@ -17,6 +17,10 @@ sealed trait Availability extends EnumEntry {
 
 object Availability extends Enum[Availability] {
   val values = findValues
+  assert(
+    values.size == values.map { _.id }.toSet.size,
+    "IDs for Availability are not unique!"
+  )
 
   implicit val availabilityEncoder: Encoder[Availability] =
     Encoder.forProduct1("id")(_.id)

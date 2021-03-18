@@ -12,6 +12,10 @@ sealed trait Format extends EnumEntry {
 
 object Format extends Enum[Format] {
   val values = findValues
+  assert(
+    values.size == values.map { _.id }.toSet.size,
+    "IDs for Format are not unique!"
+  )
 
   implicit val formatEncoder: Encoder[Format] =
     Encoder.forProduct2("id", "label")(format => (format.id, format.label))

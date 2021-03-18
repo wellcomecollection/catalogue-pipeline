@@ -12,6 +12,10 @@ sealed trait IdentifierType extends EnumEntry {
 
 object IdentifierType extends Enum[IdentifierType] {
   val values = findValues
+  assert(
+    values.size == values.map { _.id }.toSet.size,
+    "IDs for IdentifierType are not unique!"
+  )
 
   implicit val identifierTypeEncoder: Encoder[IdentifierType] =
     Encoder.forProduct1("id")(_.id)
