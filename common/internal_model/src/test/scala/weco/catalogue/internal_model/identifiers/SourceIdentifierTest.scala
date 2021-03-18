@@ -6,7 +6,7 @@ import org.scalatest.matchers.should.Matchers
 class SourceIdentifierTest extends AnyFunSpec with Matchers {
   it("has the correct toString value") {
     val sourceIdentifier = SourceIdentifier(
-      identifierType = IdentifierType("miro-image-number"),
+      identifierType = IdentifierType.MiroImageNumber,
       value = "A0001234",
       ontologyType = "Work"
     )
@@ -17,7 +17,7 @@ class SourceIdentifierTest extends AnyFunSpec with Matchers {
   it("fails creating a sourceIdentifier with extra spaces in the value") {
     intercept[IllegalArgumentException] {
       SourceIdentifier(
-        identifierType = IdentifierType("sierra-system-number"),
+        identifierType = IdentifierType.SierraSystemNumber,
         value = "b1234567  ",
         ontologyType = "Work")
     }

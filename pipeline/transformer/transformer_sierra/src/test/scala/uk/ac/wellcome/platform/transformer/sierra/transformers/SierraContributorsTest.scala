@@ -223,7 +223,7 @@ class SierraContributorsTest
       )
 
       val sourceIdentifier = SourceIdentifier(
-        identifierType = IdentifierType("lc-names"),
+        identifierType = IdentifierType.LCNames,
         ontologyType = "Person",
         value = lcshCode
       )
@@ -264,7 +264,7 @@ class SierraContributorsTest
       )
 
       val sourceIdentifier = SourceIdentifier(
-        identifierType = IdentifierType("lc-names"),
+        identifierType = IdentifierType.LCNames,
         ontologyType = "Person",
         value = lcshCodeCanonical
       )
@@ -463,7 +463,7 @@ class SierraContributorsTest
       )
 
       val sourceIdentifier = SourceIdentifier(
-        identifierType = IdentifierType("lc-names"),
+        identifierType = IdentifierType.LCNames,
         ontologyType = "Organisation",
         value = lcshCode
       )
@@ -501,7 +501,7 @@ class SierraContributorsTest
       )
 
       val sourceIdentifier = SourceIdentifier(
-        identifierType = IdentifierType("lc-names"),
+        identifierType = IdentifierType.LCNames,
         ontologyType = "Organisation",
         value = lcshCodeCanonical
       )
@@ -645,7 +645,7 @@ class SierraContributorsTest
         )
       )
       val sourceIdentifier = SourceIdentifier(
-        identifierType = IdentifierType("lc-names"),
+        identifierType = IdentifierType.LCNames,
         ontologyType = "Meeting",
         value = "456"
       )

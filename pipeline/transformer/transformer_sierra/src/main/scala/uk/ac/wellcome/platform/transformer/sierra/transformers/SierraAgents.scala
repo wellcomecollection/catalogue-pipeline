@@ -91,7 +91,7 @@ trait SierraAgents extends SierraQueryOps {
       case Seq(code) =>
         IdState.Identifiable(
           SourceIdentifier(
-            identifierType = IdentifierType("lc-names"),
+            identifierType = IdentifierType.LCNames,
             value = code,
             ontologyType = ontologyType
           )

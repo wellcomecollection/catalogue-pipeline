@@ -88,8 +88,7 @@ class SierraTransformerWorkerTest
   override def assertMatches(p: SierraSourcePayload, w: Work[WorkState.Source])(
     implicit context: MemoryTypedStore[S3ObjectLocation, SierraTransformable])
     : Unit = {
-    w.sourceIdentifier.identifierType shouldBe IdentifierType(
-      "sierra-system-number")
+    w.sourceIdentifier.identifierType shouldBe IdentifierType.SierraSystemNumber
     w.sourceIdentifier.value shouldBe SierraBibNumber(p.id).withCheckDigit
   }
 

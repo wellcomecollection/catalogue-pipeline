@@ -21,7 +21,7 @@ object ImageUtils {
 
   def getImageSourceId(bnumber: String, fileId: String): SourceIdentifier =
     SourceIdentifier(
-      identifierType = IdentifierType("mets-image"),
+      identifierType = IdentifierType.METSImage,
       ontologyType = "Image",
       value = s"$bnumber/$fileId"
     )

@@ -25,7 +25,7 @@ class SierraIdentifiersTest
     val bibId = createSierraBibNumber
     val expectedIdentifiers = List(
       SourceIdentifier(
-        identifierType = IdentifierType("sierra-identifier"),
+        identifierType = IdentifierType.SierraIdentifier,
         ontologyType = "Work",
         value = bibId.withoutCheckDigit
       )
@@ -47,7 +47,7 @@ class SierraIdentifiersTest
       val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
       otherIdentifiers should contain(
         SourceIdentifier(
-          identifierType = IdentifierType("isbn"),
+          identifierType = IdentifierType.ISBN,
           ontologyType = "Work",
           value = isbn10
         ))
@@ -63,13 +63,13 @@ class SierraIdentifiersTest
       val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
       otherIdentifiers should contain(
         SourceIdentifier(
-          identifierType = IdentifierType("isbn"),
+          identifierType = IdentifierType.ISBN,
           ontologyType = "Work",
           value = isbn10
         ))
       otherIdentifiers should contain(
         SourceIdentifier(
-          identifierType = IdentifierType("isbn"),
+          identifierType = IdentifierType.ISBN,
           ontologyType = "Work",
           value = isbn13
         ))
@@ -95,7 +95,7 @@ class SierraIdentifiersTest
       val isbn = "978-1479144075"
 
       val expectedIdentifier = SourceIdentifier(
-        identifierType = IdentifierType("isbn"),
+        identifierType = IdentifierType.ISBN,
         ontologyType = "Work",
         value = isbn
       )
@@ -122,7 +122,7 @@ class SierraIdentifiersTest
       val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
       otherIdentifiers should contain(
         SourceIdentifier(
-          identifierType = IdentifierType("issn"),
+          identifierType = IdentifierType.ISSN,
           ontologyType = "Work",
           value = issn
         ))
@@ -140,13 +140,13 @@ class SierraIdentifiersTest
       val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
       otherIdentifiers should contain(
         SourceIdentifier(
-          identifierType = IdentifierType("issn"),
+          identifierType = IdentifierType.ISSN,
           ontologyType = "Work",
           value = issn1
         ))
       otherIdentifiers should contain(
         SourceIdentifier(
-          identifierType = IdentifierType("issn"),
+          identifierType = IdentifierType.ISSN,
           ontologyType = "Work",
           value = issn2
         ))
@@ -173,7 +173,7 @@ class SierraIdentifiersTest
       val issn = "0945-7704"
 
       val expectedIdentifier = SourceIdentifier(
-        identifierType = IdentifierType("issn"),
+        identifierType = IdentifierType.ISSN,
         ontologyType = "Work",
         value = issn
       )

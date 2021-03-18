@@ -86,8 +86,7 @@ class MiroTransformerWorkerTest
 
   override def assertMatches(p: MiroSourcePayload, w: Work[WorkState.Source])(
     implicit source: MemoryTypedStore[S3ObjectLocation, MiroRecord]): Unit = {
-    w.sourceIdentifier.identifierType shouldBe IdentifierType(
-      "miro-image-number")
+    w.sourceIdentifier.identifierType shouldBe IdentifierType.MiroImageNumber
     p.id shouldBe w.sourceIdentifier.value
   }
 

@@ -281,12 +281,12 @@ class SierraConceptSubjectsTest
 
     val expectedSourceIdentifiers = List(
       SourceIdentifier(
-        identifierType = IdentifierType("lc-subjects"),
+        identifierType = IdentifierType.LCSubjects,
         value = "lcsh/123",
         ontologyType = "Subject"
       ),
       SourceIdentifier(
-        identifierType = IdentifierType("nlm-mesh"),
+        identifierType = IdentifierType.MESH,
         value = "mesh/456",
         ontologyType = "Subject"
       )
@@ -326,7 +326,7 @@ class SierraConceptSubjectsTest
     )
 
     val sourceIdentifier = SourceIdentifier(
-      identifierType = IdentifierType("nlm-mesh"),
+      identifierType = IdentifierType.MESH,
       value = "mesh/456",
       ontologyType = "Subject"
     )

@@ -119,7 +119,7 @@ class CalmTransformerWorkerTest
 
   override def assertMatches(p: CalmSourcePayload, w: Work[WorkState.Source])(
     implicit store: MemoryTypedStore[S3ObjectLocation, CalmRecord]): Unit = {
-    w.sourceIdentifier.identifierType shouldBe IdentifierType("calm-record-id")
+    w.sourceIdentifier.identifierType shouldBe IdentifierType.CalmRecordIdentifier
     w.sourceIdentifier.value shouldBe p.id
   }
 

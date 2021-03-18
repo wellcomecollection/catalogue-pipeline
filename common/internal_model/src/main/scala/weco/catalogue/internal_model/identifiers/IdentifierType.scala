@@ -1,47 +1,106 @@
 package weco.catalogue.internal_model.identifiers
 
-import java.io.InputStream
+import enumeratum.{Enum, EnumEntry}
+import io.circe.{Decoder, Encoder}
+import weco.catalogue.internal_model.locations.LocationType.findValues
 
+import java.io.InputStream
 import scala.io.Source
 
-case class IdentifierType(
-  id: String,
-  label: String
-)
+sealed trait IdentifierType extends EnumEntry {
+  val id: String
+  val label: String
+}
 
-case object IdentifierType {
-  private val stream: InputStream =
-    getClass.getResourceAsStream("/identifier-schemes.csv")
-  private val source = Source.fromInputStream(stream)
-  private val csvRows = source.mkString
-    .split("\n")
+object IdentifierType extends Enum[IdentifierType] {
+  val values = findValues
 
-  // identifier-schemes.csv is a list of 2-tuples, e.g.:
-  //
-  //
-  //    miro-image-number,Miro image number
-  //    wellcome-library-videodisk-number,Wellcome library videodisk number
-  //    sierra-system-number,Sierra system number
-  //
-  private val identifierTypeMap: Map[String, IdentifierType] = csvRows
-    .map { row =>
-      val columns = row.split(",").map(_.trim)
-      assert(columns.length == 2)
-      Map(
-        columns(0) -> IdentifierType(
-          id = columns(0),
-          label = columns(1)
-        ))
-    }
-    .fold(Map()) { (x, y) =>
-      x ++ y
-    }
+  implicit val locationTypeEncoder: Encoder[IdentifierType] =
+    Encoder.forProduct1("id")(_.id)
 
-  def apply(platformId: String): IdentifierType =
-    identifierTypeMap.get(platformId) match {
-      case Some(id) => id
-      case None =>
-        throw new IllegalArgumentException(
-          s"Unrecognised identifier type: [$platformId]")
-    }
+  implicit val locationTypeDecoder: Decoder[IdentifierType] =
+    Decoder.forProduct1("id")(IdentifierType.withName)
+
+  def apply(id: String): IdentifierType =
+    IdentifierType.withName(id)
+
+  case object MiroImageNumber extends IdentifierType {
+    val id = "miro-image-number"
+    val label = "Miro image number"
+  }
+
+  case object MiroLibraryReference extends IdentifierType {
+    val id = "miro-library-reference"
+    val label = "Miro library reference"
+  }
+
+  case object SierraSystemNumber extends IdentifierType {
+    val id = "sierra-system-number"
+    val label = "Sierra system number"
+  }
+
+  case object SierraIdentifier extends IdentifierType {
+    val id = "sierra-identifier"
+    val label = "Sierra identifier"
+  }
+
+  case object LCGraphicMaterials extends IdentifierType {
+    val id = "sierra-identifier"
+    val label = "Library of Congress Thesaurus for Graphic Materials"
+  }
+
+  case object LCSubjects extends IdentifierType {
+    val id = "lc-subjects"
+    val label = "Library of Congress Subject Headings (LCSH)"
+  }
+
+  case object LCNames extends IdentifierType {
+    val id = "lc-names"
+    val label = "Library of Congress Name authority records"
+  }
+
+  case object MESH extends IdentifierType {
+    val id = "nlm-mesh"
+    val label = "Medical Subject Headings (MESH) identifier"
+  }
+
+  case object CalmRefNo extends IdentifierType {
+    val id = "calm-ref-no"
+    val label = "calm-ref-no"
+  }
+
+  case object CalmAltRefNo extends IdentifierType {
+    val id = "calm-altref-no"
+    val label = "Calm AltRefNo"
+  }
+
+  case object CalmRecordIdentifier extends IdentifierType {
+    val id = "calm-record-id"
+    val label = "Calm RecordIdentifier"
+  }
+
+  case object ISBN extends IdentifierType {
+    val id = "isbn"
+    val label = "International Standard Book Number"
+  }
+
+  case object ISSN extends IdentifierType {
+    val id = "issn"
+    val label = "ISSN"
+  }
+
+  case object METS extends IdentifierType {
+    val id = "mets"
+    val label = "METS"
+  }
+
+  case object METSImage extends IdentifierType {
+    val id = "mets-image"
+    val label = "METS image"
+  }
+
+  case object WellcomeDigcode extends IdentifierType {
+    val id = "wellcome-digcode"
+    val label = "Wellcome digcode"
+  }
 }

@@ -126,7 +126,7 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
   lazy val bibId = sierraTransformable.sierraId
 
   lazy val sourceIdentifier = SourceIdentifier(
-    identifierType = IdentifierType("sierra-system-number"),
+    identifierType = IdentifierType.SierraSystemNumber,
     ontologyType = "Work",
     value = bibId.withCheckDigit
   )

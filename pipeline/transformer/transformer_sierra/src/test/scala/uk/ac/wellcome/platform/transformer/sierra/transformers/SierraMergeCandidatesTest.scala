@@ -364,7 +364,7 @@ class SierraMergeCandidatesTest
 
   private def createCalmMergeCandidate(calmId: String) = MergeCandidate(
     identifier = SourceIdentifier(
-      identifierType = IdentifierType("calm-record-id"),
+      identifierType = IdentifierType.CalmRecordIdentifier,
       ontologyType = "Work",
       value = calmId
     ),
@@ -428,7 +428,7 @@ class SierraMergeCandidatesTest
     List(
       MergeCandidate(
         identifier = SourceIdentifier(
-          identifierType = IdentifierType("sierra-system-number"),
+          identifierType = IdentifierType.SierraSystemNumber,
           ontologyType = "Work",
           value = bibNumber
         ),
@@ -442,7 +442,7 @@ class SierraMergeCandidatesTest
     List(
       MergeCandidate(
         identifier = SourceIdentifier(
-          identifierType = IdentifierType("miro-image-number"),
+          identifierType = IdentifierType.MiroImageNumber,
           ontologyType = "Work",
           value = miroID
         ),

@@ -21,9 +21,7 @@ class SourceIdentifierEmbedderTest
         |{
         |  "sourceIdentifier": {
         |    "identifierType": {
-        |      "id": "${sourceIdentifier.identifierType.id}",
-        |      "label": "${sourceIdentifier.identifierType.label}",
-        |      "ontologyType": "IdentifierType"
+        |      "id": "${sourceIdentifier.identifierType.id}"
         |    },
         |    "value": "${sourceIdentifier.value}",
         |    "ontologyType": "${sourceIdentifier.ontologyType}"
@@ -43,9 +41,7 @@ class SourceIdentifierEmbedderTest
         |{
         |  "sourceIdentifier": {
         |    "identifierType": {
-        |      "id": "${sourceIdentifiers(0).identifierType.id}",
-        |      "label": "${sourceIdentifiers(0).identifierType.label}",
-        |      "ontologyType": "IdentifierType"
+        |      "id": "${sourceIdentifiers(0).identifierType.id}"
         |    },
         |    "value": "${sourceIdentifiers(0).value}",
         |    "ontologyType": "${sourceIdentifiers(0).ontologyType}"
@@ -54,9 +50,7 @@ class SourceIdentifierEmbedderTest
         |     {
         |       "sourceIdentifier": {
         |         "identifierType": {
-        |           "id": "${sourceIdentifiers(1).identifierType.id}",
-        |           "label": "${sourceIdentifiers(1).identifierType.label}",
-        |           "ontologyType": "IdentifierType"
+        |           "id": "${sourceIdentifiers(1).identifierType.id}"
         |         },
         |         "value": "${sourceIdentifiers(1).value}",
         |         "ontologyType": "${sourceIdentifiers(1).ontologyType}"
@@ -65,9 +59,7 @@ class SourceIdentifierEmbedderTest
         |     {
         |       "sourceIdentifier": {
         |         "identifierType": {
-        |           "id": "${sourceIdentifiers(2).identifierType.id}",
-        |           "label": "${sourceIdentifiers(2).identifierType.label}",
-        |           "ontologyType": "IdentifierType"
+        |           "id": "${sourceIdentifiers(2).identifierType.id}"
         |         },
         |         "value": "${sourceIdentifiers(2).value}",
         |         "ontologyType": "${sourceIdentifiers(2).ontologyType}"
@@ -76,9 +68,7 @@ class SourceIdentifierEmbedderTest
         |         {
         |           "sourceIdentifier": {
         |             "identifierType": {
-        |               "id": "${sourceIdentifiers(3).identifierType.id}",
-        |               "label": "${sourceIdentifiers(3).identifierType.label}",
-        |               "ontologyType": "IdentifierType"
+        |               "id": "${sourceIdentifiers(3).identifierType.id}"
         |             },
         |             "value": "${sourceIdentifiers(3).value}",
         |             "ontologyType": "${sourceIdentifiers(3).ontologyType}"
@@ -117,9 +107,7 @@ class SourceIdentifierEmbedderTest
         |{
         |  "sourceIdentifier": {
         |    "identifierType": {
-        |      "id": "${sourceIdentifier.identifierType.id}",
-        |      "label": "${sourceIdentifier.identifierType.label}",
-        |      "ontologyType": "IdentifierType"
+        |      "id": "${sourceIdentifier.identifierType.id}"
         |    },
         |    "value": "${sourceIdentifier.value}",
         |    "ontologyType": "${sourceIdentifier.ontologyType}"
@@ -142,9 +130,7 @@ class SourceIdentifierEmbedderTest
            |{
            |  "sourceIdentifier": {
            |    "identifierType": {
-           |      "id": "${sourceIdentifier.identifierType.id}",
-           |      "label": "${sourceIdentifier.identifierType.label}",
-           |      "ontologyType": "IdentifierType"
+           |      "id": "${sourceIdentifier.identifierType.id}"
            |    },
            |    "value": "${sourceIdentifier.value}",
            |    "ontologyType": "${sourceIdentifier.ontologyType}"
@@ -161,9 +147,7 @@ class SourceIdentifierEmbedderTest
         |{
         |  "sourceIdentifier": {
         |    "identifierType": {
-        |      "id": "${sourceIdentifiers(0).identifierType.id}",
-        |      "label": "${sourceIdentifiers(0).identifierType.label}",
-        |      "ontologyType": "IdentifierType"
+        |      "id": "${sourceIdentifiers(0).identifierType.id}"
         |    },
         |    "value": "${sourceIdentifiers(0).value}",
         |    "ontologyType": "${sourceIdentifiers(0).ontologyType}"
@@ -172,9 +156,7 @@ class SourceIdentifierEmbedderTest
         |     {
         |       "sourceIdentifier": {
         |         "identifierType": {
-        |           "id": "${sourceIdentifiers(1).identifierType.id}",
-        |           "label": "${sourceIdentifiers(1).identifierType.label}",
-        |           "ontologyType": "IdentifierType"
+        |           "id": "${sourceIdentifiers(1).identifierType.id}"
         |         },
         |         "value": "${sourceIdentifiers(1).value}",
         |         "ontologyType": "${sourceIdentifiers(1).ontologyType}"
@@ -183,9 +165,7 @@ class SourceIdentifierEmbedderTest
         |     {
         |       "sourceIdentifier": {
         |         "identifierType": {
-        |           "id": "${sourceIdentifiers(2).identifierType.id}",
-        |           "label": "${sourceIdentifiers(2).identifierType.label}",
-        |           "ontologyType": "IdentifierType"
+        |           "id": "${sourceIdentifiers(2).identifierType.id}"
         |         },
         |         "value": "${sourceIdentifiers(2).value}",
         |         "ontologyType": "${sourceIdentifiers(2).ontologyType}"
@@ -194,9 +174,7 @@ class SourceIdentifierEmbedderTest
         |         {
         |           "sourceIdentifier": {
         |             "identifierType": {
-        |               "id": "${sourceIdentifiers(3).identifierType.id}",
-        |               "label": "${sourceIdentifiers(3).identifierType.label}",
-        |               "ontologyType": "IdentifierType"
+        |               "id": "${sourceIdentifiers(3).identifierType.id}"
         |             },
         |             "value": "${sourceIdentifiers(3).value}",
         |             "ontologyType": "${sourceIdentifiers(3).ontologyType}"
@@ -226,9 +204,7 @@ class SourceIdentifierEmbedderTest
           |{
           |  "sourceIdentifier": {
           |    "identifierType": {
-          |      "id": "${sourceIdentifiers(0).identifierType.id}",
-          |      "label": "${sourceIdentifiers(0).identifierType.label}",
-          |      "ontologyType": "IdentifierType"
+          |      "id": "${sourceIdentifiers(0).identifierType.id}"
           |    },
           |    "value": "${sourceIdentifiers(0).value}",
           |    "ontologyType": "${sourceIdentifiers(0).ontologyType}"
@@ -238,9 +214,7 @@ class SourceIdentifierEmbedderTest
           |     {
           |       "sourceIdentifier": {
           |         "identifierType": {
-          |           "id": "${sourceIdentifiers(1).identifierType.id}",
-          |           "label": "${sourceIdentifiers(1).identifierType.label}",
-          |           "ontologyType": "IdentifierType"
+          |           "id": "${sourceIdentifiers(1).identifierType.id}"
           |         },
           |         "value": "${sourceIdentifiers(1).value}",
           |         "ontologyType": "${sourceIdentifiers(1).ontologyType}"
@@ -250,9 +224,7 @@ class SourceIdentifierEmbedderTest
           |     {
           |       "sourceIdentifier": {
           |         "identifierType": {
-          |           "id": "${sourceIdentifiers(2).identifierType.id}",
-          |           "label": "${sourceIdentifiers(2).identifierType.label}",
-          |           "ontologyType": "IdentifierType"
+          |           "id": "${sourceIdentifiers(2).identifierType.id}"
           |         },
           |         "value": "${sourceIdentifiers(2).value}",
           |         "ontologyType": "${sourceIdentifiers(2).ontologyType}"
@@ -262,9 +234,7 @@ class SourceIdentifierEmbedderTest
           |         {
           |           "sourceIdentifier": {
           |             "identifierType": {
-          |               "id": "${sourceIdentifiers(3).identifierType.id}",
-          |               "label": "${sourceIdentifiers(3).identifierType.label}",
-          |               "ontologyType": "IdentifierType"
+          |               "id": "${sourceIdentifiers(3).identifierType.id}"
           |             },
           |             "value": "${sourceIdentifiers(3).value}",
           |             "ontologyType": "${sourceIdentifiers(3).ontologyType}"
@@ -286,9 +256,7 @@ class SourceIdentifierEmbedderTest
         |{
         |  "sourceIdentifier": {
         |    "identifierType": {
-        |      "id": "${sourceIdentifier1.identifierType.id}",
-        |      "label": "${sourceIdentifier1.identifierType.label}",
-        |      "ontologyType": "IdentifierType"
+        |      "id": "${sourceIdentifier1.identifierType.id}"
         |    },
         |    "value": "${sourceIdentifier1.value}",
         |    "ontologyType": "${sourceIdentifier1.ontologyType}"
@@ -298,9 +266,7 @@ class SourceIdentifierEmbedderTest
         |    {
         |      "sourceIdentifier": {
         |        "identifierType": {
-        |          "id": "${sourceIdentifier2.identifierType.id}",
-        |          "label": "${sourceIdentifier2.identifierType.label}",
-        |          "ontologyType": "IdentifierType"
+        |          "id": "${sourceIdentifier2.identifierType.id}"
         |        },
         |        "value": "${sourceIdentifier2.value}",
         |        "ontologyType": "${sourceIdentifier2.ontologyType}"
@@ -328,9 +294,7 @@ class SourceIdentifierEmbedderTest
            |{
            |  "sourceIdentifier": {
            |    "identifierType": {
-           |      "id": "${sourceIdentifier1.identifierType.id}",
-           |      "label": "${sourceIdentifier1.identifierType.label}",
-           |      "ontologyType": "IdentifierType"
+           |      "id": "${sourceIdentifier1.identifierType.id}"
            |    },
            |    "value": "${sourceIdentifier1.value}",
            |    "ontologyType": "${sourceIdentifier1.ontologyType}"
@@ -341,9 +305,7 @@ class SourceIdentifierEmbedderTest
            |    {
            |      "sourceIdentifier": {
            |        "identifierType": {
-           |          "id": "${sourceIdentifier2.identifierType.id}",
-           |          "label": "${sourceIdentifier2.identifierType.label}",
-           |          "ontologyType": "IdentifierType"
+           |          "id": "${sourceIdentifier2.identifierType.id}"
            |        },
            |        "value": "${sourceIdentifier2.value}",
            |        "ontologyType": "${sourceIdentifier2.ontologyType}"
@@ -364,9 +326,7 @@ class SourceIdentifierEmbedderTest
         |{
         |  "sourceIdentifier": {
         |    "identifierType": {
-        |      "id": "${sourceIdentifier.identifierType.id}",
-        |      "label": "${sourceIdentifier.identifierType.label}",
-        |      "ontologyType": "IdentifierType"
+        |      "id": "${sourceIdentifier.identifierType.id}"
         |    },
         |    "value": "${sourceIdentifier.value}",
         |    "ontologyType": "${sourceIdentifier.ontologyType}"

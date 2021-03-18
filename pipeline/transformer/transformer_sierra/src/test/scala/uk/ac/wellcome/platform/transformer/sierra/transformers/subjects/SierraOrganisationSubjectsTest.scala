@@ -109,7 +109,7 @@ class SierraOrganisationSubjectsTest
 
       subject.id shouldBe IdState.Identifiable(
         SourceIdentifier(
-          identifierType = IdentifierType("lc-names"),
+          identifierType = IdentifierType.LCNames,
           ontologyType = "Subject",
           value = lcNamesCode
         )
@@ -133,7 +133,7 @@ class SierraOrganisationSubjectsTest
 
       subject.id shouldBe IdState.Identifiable(
         SourceIdentifier(
-          identifierType = IdentifierType("lc-names"),
+          identifierType = IdentifierType.LCNames,
           ontologyType = "Subject",
           value = "n1234"
         )

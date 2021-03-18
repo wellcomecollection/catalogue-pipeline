@@ -11,7 +11,7 @@ import weco.catalogue.internal_model.work.WorkState.{Denormalised, Indexed}
 import uk.ac.wellcome.pipeline_storage.Indexable.workIndexable
 import uk.ac.wellcome.pipeline_storage.elastic.ElasticSourceRetriever
 import uk.ac.wellcome.pipeline_storage.ElasticIndexer
-import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType}
+import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.Work
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -79,9 +79,7 @@ class IngestorWorkerServiceTest
 
   it("inserts a non Sierra- or Miro- denormalised work") {
     val work = denormalisedWork(
-      sourceIdentifier = createSourceIdentifierWith(
-        identifierType = IdentifierType("calm-altref-no")
-      )
+      sourceIdentifier = createCalmSourceIdentifier
     )
 
     assertWorksIndexedCorrectly(work)
@@ -96,7 +94,7 @@ class IngestorWorkerServiceTest
     )
     val otherWork = denormalisedWork(
       sourceIdentifier = createSourceIdentifierWith(
-        identifierType = IdentifierType("calm-altref-no")
+        identifierType = CalmAltRefNo
       )
     )
 

@@ -15,11 +15,13 @@ object WorkPredicates {
   type WorkPredicate = Work[Identified] => Boolean
 
   private val sierraIdentified: WorkPredicate = identifierTypeId(
-    "sierra-system-number")
-  private val metsIdentified: WorkPredicate = identifierTypeId("mets")
-  private val calmIdentified: WorkPredicate = identifierTypeId("calm-record-id")
+    IdentifierType.SierraSystemNumber)
+  private val metsIdentified: WorkPredicate = identifierTypeId(
+    IdentifierType.METS)
+  private val calmIdentified: WorkPredicate = identifierTypeId(
+    IdentifierType.CalmRecordIdentifier)
   private val miroIdentified: WorkPredicate = identifierTypeId(
-    "miro-image-number")
+    IdentifierType.MiroImageNumber)
 
   val sierraWork: WorkPredicate = sierraIdentified
   val zeroItem: WorkPredicate = work => work.data.items.isEmpty
@@ -115,11 +117,11 @@ object WorkPredicates {
 
   private def hasDigcode(digcode: String)(work: Work[Identified]): Boolean =
     work.data.otherIdentifiers
-      .find(_.identifierType.id == "wellcome-digcode")
+      .find(_.identifierType == IdentifierType.WellcomeDigcode)
       .exists(_.value == digcode)
 
-  private def identifierTypeId(id: String)(work: Work[Identified]): Boolean =
-    work.sourceIdentifier.identifierType == IdentifierType(id)
+  private def identifierTypeId(id: IdentifierType)(work: Work[Identified]): Boolean =
+    work.sourceIdentifier.identifierType == id
 
   private def format(format: Format)(work: Work[Identified]): Boolean =
     work.data.format.contains(format)

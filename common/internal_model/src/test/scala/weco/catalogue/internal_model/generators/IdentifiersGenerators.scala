@@ -15,9 +15,9 @@ trait IdentifiersGenerators extends RandomGenerators {
 
   def createSourceIdentifierWith(
     identifierType: IdentifierType = chooseFrom(
-      IdentifierType("miro-image-number"),
-      IdentifierType("sierra-system-number"),
-      IdentifierType("calm-record-id")
+      IdentifierType.MiroImageNumber,
+      IdentifierType.SierraSystemNumber,
+      IdentifierType.CalmRecordIdentifier
     ),
     value: String = randomAlphanumeric(length = 10),
     ontologyType: String = "Work"): SourceIdentifier =
@@ -32,13 +32,13 @@ trait IdentifiersGenerators extends RandomGenerators {
     ontologyType: String = "Work"
   ): SourceIdentifier =
     SourceIdentifier(
-      identifierType = IdentifierType("sierra-system-number"),
+      identifierType = IdentifierType.SierraSystemNumber,
       value = value,
       ontologyType = ontologyType
     )
 
   def createMetsSourceIdentifier: SourceIdentifier =
-    createSourceIdentifierWith(identifierType = IdentifierType("mets"))
+    createSourceIdentifierWith(identifierType = IdentifierType.METS)
 
   def createSierraSystemSourceIdentifier: SourceIdentifier =
     createSierraSystemSourceIdentifierWith()
@@ -48,7 +48,7 @@ trait IdentifiersGenerators extends RandomGenerators {
     ontologyType: String = "Work"
   ): SourceIdentifier =
     SourceIdentifier(
-      identifierType = IdentifierType("sierra-identifier"),
+      identifierType = IdentifierType.SierraIdentifier,
       value = value,
       ontologyType = ontologyType
     )
@@ -58,7 +58,7 @@ trait IdentifiersGenerators extends RandomGenerators {
 
   def createIsbnSourceIdentifier: SourceIdentifier =
     createSourceIdentifierWith(
-      identifierType = IdentifierType("isbn")
+      identifierType = IdentifierType.ISBN
     )
 
   private val miroIdPrefixes: Seq[Char] = Seq(
@@ -77,7 +77,7 @@ trait IdentifiersGenerators extends RandomGenerators {
     ontologyType: String = "Work"
   ): SourceIdentifier =
     SourceIdentifier(
-      identifierType = IdentifierType("miro-image-number"),
+      identifierType = IdentifierType.MiroImageNumber,
       ontologyType = ontologyType,
       value = value
     )
@@ -91,14 +91,14 @@ trait IdentifiersGenerators extends RandomGenerators {
   def createCalmSourceIdentifier: SourceIdentifier =
     SourceIdentifier(
       value = createCalmRecordID,
-      identifierType = IdentifierType("calm-record-id"),
+      identifierType = IdentifierType.CalmRecordIdentifier,
       ontologyType = "Work"
     )
 
   def createDigcodeIdentifier(digcode: String): SourceIdentifier =
     SourceIdentifier(
       value = digcode,
-      identifierType = IdentifierType("wellcome-digcode"),
+      identifierType = IdentifierType.WellcomeDigcode,
       ontologyType = "Work"
     )
 }

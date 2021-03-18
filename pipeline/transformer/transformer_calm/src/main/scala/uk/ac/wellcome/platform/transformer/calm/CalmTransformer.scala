@@ -20,6 +20,7 @@ import weco.catalogue.internal_model.identifiers.{
   DataState,
   IdState,
   IdentifierType,
+  IdentifierType,
   SourceIdentifier
 }
 import weco.catalogue.internal_model.locations.UnknownAccessStatus
@@ -36,9 +37,9 @@ object CalmTransformer
     with Logging {
 
   val identifierMapping = Map(
-    "RefNo" -> CalmIdentifierTypes.refNo,
-    "AltRefNo" -> CalmIdentifierTypes.altRefNo,
-    "BNumber" -> IdentifierType("sierra-system-number")
+    "RefNo" -> IdentifierType.CalmRefNo,
+    "AltRefNo" -> IdentifierType.CalmAltRefNo,
+    "BNumber" -> IdentifierType.SierraSystemNumber
   )
 
   // As much as it might not look like it, these values mean it should
@@ -174,7 +175,7 @@ object CalmTransformer
   def sourceIdentifier(record: CalmRecord): SourceIdentifier =
     SourceIdentifier(
       value = record.id,
-      identifierType = CalmIdentifierTypes.recordId,
+      identifierType = IdentifierType.CalmRecordIdentifier,
       ontologyType = "Work"
     )
 
@@ -201,7 +202,7 @@ object CalmTransformer
         MergeCandidate(
           IdState.Identifiable(
             SourceIdentifier(
-              identifierType = IdentifierType("sierra-system-number"),
+              identifierType = IdentifierType.SierraSystemNumber,
               ontologyType = "Work",
               value = id
             )

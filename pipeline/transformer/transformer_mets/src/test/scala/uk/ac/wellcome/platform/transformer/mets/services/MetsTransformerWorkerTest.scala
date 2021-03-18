@@ -94,7 +94,7 @@ class MetsTransformerWorkerTest
 
   override def assertMatches(p: MetsSourcePayload, w: Work[WorkState.Source])(
     implicit context: MemoryTypedStore[S3ObjectLocation, String]): Unit = {
-    w.sourceIdentifier.identifierType shouldBe IdentifierType("mets")
+    w.sourceIdentifier.identifierType shouldBe IdentifierType.METS
     p.id shouldBe w.sourceIdentifier.value
   }
 

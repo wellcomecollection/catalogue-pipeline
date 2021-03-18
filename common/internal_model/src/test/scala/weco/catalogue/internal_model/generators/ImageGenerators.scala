@@ -27,7 +27,7 @@ trait ImageGenerators
     locations: List[DigitalLocation] = List(createImageLocation),
     version: Int = 1,
     identifierValue: String = randomAlphanumeric(10),
-    identifierType: IdentifierType = IdentifierType("miro-image-number")
+    identifierType: IdentifierType = IdentifierType.MiroImageNumber
   ): ImageData[IdState.Identifiable] =
     ImageData[IdState.Identifiable](
       id = IdState.Identifiable(
@@ -54,7 +54,7 @@ trait ImageGenerators
 
   def createMetsImageData = createImageDataWith(
     locations = List(createImageLocation, createManifestLocation),
-    identifierType = IdentifierType("mets-image")
+    identifierType = IdentifierType.METSImage
   )
 
   implicit class UnidentifiedImageDataOps(

@@ -27,7 +27,7 @@ class MetsDataTest
         accessConditionDz = Some("CC-BY-NC"))
     val version = 1
     val expectedSourceIdentifier = SourceIdentifier(
-      IdentifierType("mets", "METS"),
+      identifierType = IdentifierType.METS,
       ontologyType = "Work",
       value = bibNumber)
 
@@ -50,7 +50,7 @@ class MetsDataTest
           mergeCandidates = List(
             MergeCandidate(
               identifier = SourceIdentifier(
-                identifierType = IdentifierType("sierra-system-number"),
+                identifierType = IdentifierType.SierraSystemNumber,
                 ontologyType = "Work",
                 value = bibNumber
               ),
@@ -68,7 +68,7 @@ class MetsDataTest
       MetsData(recordIdentifier = bibNumber, deleted = true)
     val version = 1
     val expectedSourceIdentifier = SourceIdentifier(
-      IdentifierType("mets", "METS"),
+      identifierType = IdentifierType.METS,
       ontologyType = "Work",
       value = bibNumber)
 
@@ -90,7 +90,7 @@ class MetsDataTest
       MetsData(recordIdentifier = bibNumber, accessConditionDz = None)
     val version = 1
     val expectedSourceIdentifier = SourceIdentifier(
-      IdentifierType("mets", "METS"),
+      identifierType = IdentifierType.METS,
       ontologyType = "Work",
       value = bibNumber)
 
@@ -115,7 +115,7 @@ class MetsDataTest
           mergeCandidates = List(
             MergeCandidate(
               identifier = SourceIdentifier(
-                identifierType = IdentifierType("sierra-system-number"),
+                identifierType = IdentifierType.SierraSystemNumber,
                 ontologyType = "Work",
                 value = bibNumber
               ),
@@ -478,7 +478,7 @@ class MetsDataTest
     val work = data.toWork(version = 1, modifiedTime = Instant.now()).value
 
     work.sourceIdentifier shouldBe SourceIdentifier(
-      identifierType = IdentifierType("mets"),
+      identifierType = IdentifierType.METS,
       ontologyType = "Work",
       value = "b1234"
     )
@@ -488,7 +488,7 @@ class MetsDataTest
 
     mergeCandidates.head.id.sourceIdentifier shouldBe
       SourceIdentifier(
-        identifierType = IdentifierType("sierra-system-number"),
+        identifierType = IdentifierType.SierraSystemNumber,
         ontologyType = "Work",
         value = "b1234"
       )
