@@ -1,4 +1,4 @@
-package uk.ac.wellcome.models.marc
+package weco.catalogue.source_model.marc
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers

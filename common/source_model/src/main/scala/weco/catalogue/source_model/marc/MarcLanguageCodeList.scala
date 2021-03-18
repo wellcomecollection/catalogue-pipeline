@@ -1,4 +1,4 @@
-package uk.ac.wellcome.models.marc
+package weco.catalogue.source_model.marc
 
 import grizzled.slf4j.Logging
 
