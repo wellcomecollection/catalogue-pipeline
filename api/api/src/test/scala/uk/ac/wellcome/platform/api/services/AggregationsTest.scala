@@ -8,7 +8,6 @@ import com.sksamuel.elastic4s.Index
 import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.platform.api.models._
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.index.IndexFixtures
 import uk.ac.wellcome.models.work.generators.{
@@ -18,6 +17,8 @@ import uk.ac.wellcome.models.work.generators.{
   WorkGenerators
 }
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
+import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.work.{Format, Period, Subject}
 
 class AggregationsTest
     extends AnyFunSpec

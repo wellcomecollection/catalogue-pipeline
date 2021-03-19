@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.api.works
 
-import uk.ac.wellcome.models.work.internal.IdState
 import uk.ac.wellcome.models.Implicits._
+import weco.catalogue.internal_model.identifiers.IdState
 
 class WorksRedirectsTest extends ApiWorksTestBase {
 

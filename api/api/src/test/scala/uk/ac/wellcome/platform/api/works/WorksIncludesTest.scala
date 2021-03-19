@@ -3,12 +3,13 @@ package uk.ac.wellcome.platform.api.works
 import com.sksamuel.elastic4s.Index
 
 import uk.ac.wellcome.models.work.generators.{
-  ImageGenerators,
   ProductionEventGenerators,
   SubjectGenerators
 }
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.Implicits._
+import weco.catalogue.internal_model.generators.ImageGenerators
+import weco.catalogue.internal_model.languages.Language
+import weco.catalogue.internal_model.work._
 
 class WorksIncludesTest
     extends ApiWorksTestBase
@@ -818,8 +819,7 @@ class WorksIncludesTest
           note = chooseFrom(None, Some(randomAlphanumeric())),
           enumeration =
             collectionOf(min = 0, max = 10) { randomAlphanumeric() }.toList,
-          locations =
-            collectionOf(min = 0, max = 5) { createPhysicalLocation }.toList
+          location = chooseFrom(None, Some(createPhysicalLocation))
         )
       }.toList
 

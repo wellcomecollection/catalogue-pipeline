@@ -8,10 +8,10 @@ import com.sksamuel.elastic4s.ElasticError
 import com.sksamuel.elastic4s.requests.get.GetResponse
 import com.sksamuel.elastic4s.requests.searches.SearchResponse
 import com.sksamuel.elastic4s.circe._
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.models.Implicits._
-import WorkState.Indexed
+import weco.catalogue.internal_model.work.Work
+import weco.catalogue.internal_model.work.WorkState.Indexed
 
 class WorksService(searchService: ElasticsearchService)(
   implicit ec: ExecutionContext) {

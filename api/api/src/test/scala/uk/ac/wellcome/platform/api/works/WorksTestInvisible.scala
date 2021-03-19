@@ -1,8 +1,8 @@
 package uk.ac.wellcome.platform.api.works
 
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.Implicits._
-import WorkState.Indexed
+import weco.catalogue.internal_model.work.Work
+import weco.catalogue.internal_model.work.WorkState.Indexed
 
 class WorksTestInvisible extends ApiWorksTestBase {
   val invisibleWork: Work.Invisible[Indexed] =

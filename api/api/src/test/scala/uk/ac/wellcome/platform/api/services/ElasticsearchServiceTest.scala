@@ -9,16 +9,14 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators._
-import uk.ac.wellcome.models.work.internal.Format.{
-  Books,
-  CDRoms,
-  ManuscriptsAsian
-}
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
 import uk.ac.wellcome.platform.api.models._
-import WorkState.Indexed
 import uk.ac.wellcome.models.index.IndexFixtures
+import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.locations._
+import weco.catalogue.internal_model.work.Format._
+import weco.catalogue.internal_model.work.{Item, Work}
+import weco.catalogue.internal_model.work.WorkState.Indexed
 
 class ElasticsearchServiceTest
     extends AnyFunSpec

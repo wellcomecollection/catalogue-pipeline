@@ -9,11 +9,8 @@ import uk.ac.wellcome.json.JsonUtil.fromJson
 import uk.ac.wellcome.models.work.generators.{
   ContributorGenerators,
   GenreGenerators,
-  ImageGenerators,
-  SubjectGenerators,
-  WorkGenerators
+  SubjectGenerators
 }
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
 import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.models.Implicits._
@@ -21,9 +18,11 @@ import uk.ac.wellcome.platform.api.services.{
   ElasticsearchService,
   WorksRequestBuilder
 }
-import WorkState.Indexed
 import org.scalatest.Assertion
 import uk.ac.wellcome.models.index.IndexFixtures
+import weco.catalogue.internal_model.generators.ImageGenerators
+import weco.catalogue.internal_model.work.{CollectionPath, Work}
+import weco.catalogue.internal_model.work.WorkState.Indexed
 
 class WorksQueryTest
     extends AnyFunSpec
@@ -32,7 +31,6 @@ class WorksQueryTest
     with SearchOptionsGenerators
     with SubjectGenerators
     with GenreGenerators
-    with WorkGenerators
     with ImageGenerators
     with ContributorGenerators {
 

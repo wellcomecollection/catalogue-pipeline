@@ -3,7 +3,7 @@ package uk.ac.wellcome.display.models
 import org.scalatest.OptionValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.generators.ImageGenerators
+import weco.catalogue.internal_model.generators.ImageGenerators
 
 class DisplayImageTest
     extends AnyFunSpec

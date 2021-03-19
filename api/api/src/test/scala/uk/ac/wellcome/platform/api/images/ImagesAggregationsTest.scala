@@ -1,8 +1,9 @@
 package uk.ac.wellcome.platform.api.images
 
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.GenreGenerators
+import weco.catalogue.internal_model.locations.License
+import weco.catalogue.internal_model.work._
 
 class ImagesAggregationsTest extends ApiImagesTestBase with GenreGenerators {
   it("aggregates by license") {

@@ -84,8 +84,7 @@ lazy val pipeline_storage_typesafe = setupProject(
 lazy val api = setupProject(
   project,
   "api/api",
-  localDependencies =
-    Seq(display),
+  localDependencies = Seq(display),
   externalDependencies = CatalogueDependencies.apiDependencies
 )
 

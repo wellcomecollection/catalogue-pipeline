@@ -6,7 +6,8 @@ import io.circe.Decoder
 
 import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.platform.api.models._
-import uk.ac.wellcome.models.work.internal.{AccessStatus, WorkType}
+import weco.catalogue.internal_model.locations.AccessStatus
+import weco.catalogue.internal_model.work.WorkType
 
 case class SingleWorkParams(
   include: Option[WorksIncludes],

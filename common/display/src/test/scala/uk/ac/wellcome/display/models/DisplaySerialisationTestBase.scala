@@ -2,7 +2,15 @@ package uk.ac.wellcome.display.models
 
 import org.scalatest.Suite
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.models.work.internal._
+import weco.catalogue.internal_model.identifiers.{
+  HasId,
+  IdState,
+  SourceIdentifier
+}
+import weco.catalogue.internal_model.image.ImageData
+import weco.catalogue.internal_model.languages.Language
+import weco.catalogue.internal_model.locations._
+import weco.catalogue.internal_model.work._
 
 trait DisplaySerialisationTestBase {
   this: Suite =>
@@ -313,8 +321,8 @@ trait DisplaySerialisationTestBase {
            '"' + en + '"'
          }
          .mkString(",")}
-       |  ],
-       |  "locations": [${locations(h.locations)}],
+       |  ]
+       |  ${optionalObject("location", location, h.location)},
        |  "type": "Holdings"
        |}
        |""".stripMargin

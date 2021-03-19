@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.api.models
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.internal.Period
+import weco.catalogue.internal_model.work.Period
 
 class DateAggregationMergerTest extends AnyFunSpec with Matchers {
 

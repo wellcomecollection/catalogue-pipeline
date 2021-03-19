@@ -1,8 +1,8 @@
 package uk.ac.wellcome.platform.api.works
 
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.internal.WorkState.Indexed
-import uk.ac.wellcome.models.work.internal._
+import weco.catalogue.internal_model.work.Work
+import weco.catalogue.internal_model.work.WorkState.Indexed
 
 class WorksTestDeleted extends ApiWorksTestBase {
   val deletedWork: Work.Deleted[Indexed] = indexedWork().deleted()

@@ -5,16 +5,9 @@ import com.sksamuel.elastic4s.requests.searches.aggs.responses.{
 }
 import grizzled.slf4j.Logging
 import io.circe.Decoder
-import uk.ac.wellcome.models.work.internal.IdState.Minted
-import uk.ac.wellcome.models.work.internal.{
-  AbstractAgent,
-  Agent,
-  Genre,
-  License,
-  Meeting,
-  Organisation,
-  Person
-}
+import weco.catalogue.internal_model.identifiers.IdState.Minted
+import weco.catalogue.internal_model.locations.License
+import weco.catalogue.internal_model.work._
 
 import scala.util.Failure
 

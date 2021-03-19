@@ -4,9 +4,10 @@ import uk.ac.wellcome.display.models.DisplaySerialisationTestBase
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.work.generators._
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.api.ApiTestBase
-import WorkState.Indexed
+import weco.catalogue.internal_model.locations.DigitalLocation
+import weco.catalogue.internal_model.work.{Work, WorkType}
+import weco.catalogue.internal_model.work.WorkState.Indexed
 
 trait ApiWorksTestBase
     extends ApiTestBase

@@ -7,9 +7,9 @@ import io.circe.{Encoder, Json}
 import io.swagger.v3.oas.annotations.media.Schema
 import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.display.json.DisplayJsonUtil._
-import uk.ac.wellcome.models.work.internal._
 import uk.ac.wellcome.platform.api.models._
-import WorkState.Indexed
+import weco.catalogue.internal_model.image.{Image, ImageState}
+import weco.catalogue.internal_model.work.{Work, WorkState}
 
 case class ResultResponse[T: Encoder](
   @JsonKey("@context") context: String,
@@ -54,11 +54,12 @@ object DisplayResultList {
   implicit def encoder[R: Encoder, A: Encoder]
     : Encoder[DisplayResultList[R, A]] = deriveConfiguredEncoder
 
-  def apply(resultList: ResultList[Work.Visible[Indexed], WorkAggregations],
-            searchOptions: SearchOptions[_, _, _],
-            includes: WorksIncludes,
-            requestUri: Uri,
-            contextUri: String)
+  def apply(
+    resultList: ResultList[Work.Visible[WorkState.Indexed], WorkAggregations],
+    searchOptions: SearchOptions[_, _, _],
+    includes: WorksIncludes,
+    requestUri: Uri,
+    contextUri: String)
     : DisplayResultList[DisplayWork, DisplayWorkAggregations] =
     PaginationResponse(resultList, searchOptions, requestUri) match {
       case PaginationResponse(totalPages, prevPage, nextPage) =>

@@ -8,13 +8,9 @@ import com.sksamuel.elastic4s.requests.searches.queries._
 import com.sksamuel.elastic4s.requests.searches.sort._
 import uk.ac.wellcome.display.models._
 import uk.ac.wellcome.platform.api.models._
-import uk.ac.wellcome.models.work.internal.{
-  Availability,
-  Format,
-  License,
-  WorkType
-}
 import uk.ac.wellcome.platform.api.rest.PaginationQuery
+import weco.catalogue.internal_model.locations.License
+import weco.catalogue.internal_model.work._
 
 object WorksRequestBuilder
     extends ElasticsearchRequestBuilder[WorkSearchOptions] {

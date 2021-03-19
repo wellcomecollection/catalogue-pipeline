@@ -7,23 +7,14 @@ import com.sksamuel.elastic4s.requests.searches.aggs.TermsAggregation
 import com.sksamuel.elastic4s.requests.searches.queries.Query
 import com.sksamuel.elastic4s.requests.searches.sort._
 import uk.ac.wellcome.display.models.ImageAggregationRequest
-import uk.ac.wellcome.models.work.internal.License
 import uk.ac.wellcome.platform.api.elasticsearch.{
   ColorQuery,
   ImageSimilarity,
   ImagesMultiMatcher
 }
-import uk.ac.wellcome.platform.api.models.{
-  ColorMustQuery,
-  ContributorsFilter,
-  GenreFilter,
-  ImageFilter,
-  ImageMustQuery,
-  ImageSearchOptions,
-  LicenseFilter,
-  QueryConfig
-}
+import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.platform.api.rest.PaginationQuery
+import weco.catalogue.internal_model.locations.License
 
 class ImagesRequestBuilder(queryConfig: QueryConfig)
     extends ElasticsearchRequestBuilder[ImageSearchOptions] {
