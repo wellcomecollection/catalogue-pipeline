@@ -38,15 +38,17 @@ def get_nodes_properties(es, *, index_date, work_ids):
         _source=[
             "state.sourceIdentifier.identifierType.id",
             "state.sourceIdentifier.value",
-            "type"
+            "type",
         ],
     )
     return [
         {
             "id": doc["_id"],
-            "source_id_type": doc["_source"]["state"]["sourceIdentifier"]["identifierType"]["id"],
+            "source_id_type": doc["_source"]["state"]["sourceIdentifier"][
+                "identifierType"
+            ]["id"],
             "source_id": doc["_source"]["state"]["sourceIdentifier"]["value"],
-            "type": doc["_source"]["type"]
+            "type": doc["_source"]["type"],
         }
         for doc in response["docs"]
     ]

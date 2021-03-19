@@ -11,7 +11,7 @@ source_type_labels = {
     "sierra-system-number": "Sierra",
     "miro-image-number": "Miro",
     "mets": "METS",
-    "calm-record-id": "CALM"
+    "calm-record-id": "CALM",
 }
 
 
