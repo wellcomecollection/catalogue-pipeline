@@ -38,6 +38,16 @@ variable "max_capacity" {
   default = 1
 }
 
+variable "scale_up_adjustment" {
+  type    = number
+  default = 1
+}
+
+variable "scale_down_adjustment" {
+  type    = number
+  default = -1
+}
+
 variable "cpu" {
   type    = number
   default = 512

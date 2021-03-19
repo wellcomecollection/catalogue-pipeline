@@ -44,6 +44,9 @@ module "autoscaling" {
 
   min_capacity = var.min_capacity
   max_capacity = var.max_capacity
+
+  scale_down_adjustment = var.scale_down_adjustment
+  scale_up_adjustment   = var.scale_up_adjustment
 }
 
 module "task_definition" {

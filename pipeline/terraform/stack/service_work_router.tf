@@ -14,9 +14,8 @@ module "router" {
   container_image = local.router_image
 
   security_group_ids = [
-    # TODO: Do we need these?
+    # TODO: Do we need the egress security group?
     aws_security_group.service_egress.id,
-    aws_security_group.interservice.id,
   ]
 
   elastic_cloud_vpce_sg_id = var.ec_privatelink_security_group_id
@@ -43,8 +42,13 @@ module "router" {
 
   shared_logging_secrets = var.shared_logging_secrets
 
-  subnets           = var.subnets
-  max_capacity      = min(10, local.max_capacity)
+  subnets = var.subnets
+
+  max_capacity = min(10, local.max_capacity)
+
+  scale_down_adjustment = local.scale_down_adjustment
+  scale_up_adjustment   = local.scale_up_adjustment
+
   queue_read_policy = module.router_queue.read_policy
 
   cpu    = 1024

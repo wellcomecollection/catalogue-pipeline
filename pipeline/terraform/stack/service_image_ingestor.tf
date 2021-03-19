@@ -20,9 +20,8 @@ module "ingestor_images" {
   service_name    = "${local.namespace_hyphen}_ingestor_images"
   container_image = local.ingestor_images_image
   security_group_ids = [
-    # TODO: Do we need any of these?
+    # TODO: Do we need the egress security group?
     aws_security_group.service_egress.id,
-    aws_security_group.interservice.id,
   ]
 
   elastic_cloud_vpce_sg_id = var.ec_privatelink_security_group_id
@@ -76,7 +75,11 @@ module "ingestor_images" {
 
   subnets = var.subnets
 
-  max_capacity      = min(5, local.max_capacity)
+  max_capacity = min(5, local.max_capacity)
+
+  scale_down_adjustment = local.scale_down_adjustment
+  scale_up_adjustment   = local.scale_up_adjustment
+
   queue_read_policy = module.ingestor_images_queue.read_policy
 
   deployment_service_env  = var.release_label

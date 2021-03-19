@@ -30,9 +30,7 @@ module "image_inferrer" {
 
   service_name = "${local.namespace_hyphen}_image_inferrer"
   security_group_ids = [
-    # TODO: Do we need interservice?
     aws_security_group.service_egress.id,
-    aws_security_group.interservice.id,
   ]
 
   elastic_cloud_vpce_sg_id = var.ec_privatelink_security_group_id
@@ -126,11 +124,7 @@ module "image_inferrer" {
 
     flush_interval_seconds = 30
 
-    # This was previously set at 6, I've tried turning it down to stem
-    # the number of out-of-memory errors we get from the image inferrer.
-    #
-    # See https://github.com/wellcomecollection/platform/issues/5020
-    batch_size = 1
+    batch_size = 25
   }
 
   manager_secret_env_vars = local.pipeline_storage_es_service_secrets["inferrer"]
@@ -139,6 +133,9 @@ module "image_inferrer" {
 
   # Any higher than this currently causes latency spikes from Loris
   max_capacity = min(6, local.max_capacity)
+
+  scale_down_adjustment = local.scale_down_adjustment
+  scale_up_adjustment   = local.scale_up_adjustment
 
   queue_read_policy = module.image_inferrer_queue.read_policy
 

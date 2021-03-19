@@ -18,9 +18,8 @@ module "id_minter" {
   container_image = local.id_minter_image
 
   security_group_ids = [
-    # TODO: Do we need egress/interservice groups?
+    # TODO: Do we need the egress security group?
     aws_security_group.service_egress.id,
-    aws_security_group.interservice.id,
     var.rds_ids_access_security_group_id,
   ]
 
@@ -57,6 +56,9 @@ module "id_minter" {
     ),
     var.max_capacity
   )
+
+  scale_down_adjustment = local.scale_down_adjustment
+  scale_up_adjustment   = local.scale_up_adjustment
 
   subnets           = var.subnets
   queue_read_policy = module.id_minter_queue.read_policy

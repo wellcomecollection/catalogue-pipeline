@@ -29,15 +29,6 @@ variable "elastic_cloud_vpce_sg_id" {
 
 variable "queue_read_policy" {}
 
-variable "max_capacity" {
-  type = number
-}
-
-variable "desired_task_count" {
-  type    = number
-  default = 1
-}
-
 variable "cpu" {
   type    = number
   default = 512
@@ -48,9 +39,28 @@ variable "memory" {
   default = 1024
 }
 
+variable "desired_task_count" {
+  type    = number
+  default = 1
+}
+
 variable "min_capacity" {
   type    = number
   default = 0
+}
+
+variable "max_capacity" {
+  type = number
+}
+
+variable "scale_up_adjustment" {
+  type    = number
+  default = 1
+}
+
+variable "scale_down_adjustment" {
+  type    = number
+  default = -1
 }
 
 variable "launch_type" {

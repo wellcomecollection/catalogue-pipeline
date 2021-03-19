@@ -27,6 +27,9 @@ module "worker" {
   min_capacity = var.min_capacity
   max_capacity = var.max_capacity
 
+  scale_down_adjustment = var.scale_down_adjustment
+  scale_up_adjustment   = var.scale_up_adjustment
+
   deployment_service_env  = var.deployment_service_env
   deployment_service_name = var.deployment_service_name
   shared_logging_secrets  = var.shared_logging_secrets
