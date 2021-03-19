@@ -10,6 +10,7 @@ import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import uk.ac.wellcome.models.work.generators.ProductionEventGenerators
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.locations._
 import weco.catalogue.internal_model.work._
 

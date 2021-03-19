@@ -8,6 +8,7 @@ import uk.ac.wellcome.models.work.generators.{
 }
 import uk.ac.wellcome.models.Implicits._
 import weco.catalogue.internal_model.generators.ImageGenerators
+import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.work._
 
 class WorksIncludesTest

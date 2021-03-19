@@ -2,13 +2,13 @@ package uk.ac.wellcome.platform.api.images
 
 import uk.ac.wellcome.display.models.DisplaySerialisationTestBase
 import uk.ac.wellcome.platform.api.ApiTestBase
-import uk.ac.wellcome.platform.api.generators.ApiImageGenerators
+import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.image._
 
 trait ApiImagesTestBase
     extends ApiTestBase
     with DisplaySerialisationTestBase
-    with ApiImageGenerators {
+    with ImageGenerators {
 
   def singleImageResult: String =
     s"""

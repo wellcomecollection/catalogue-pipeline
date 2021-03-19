@@ -8,6 +8,7 @@ import uk.ac.wellcome.models.work.generators.{
 }
 import org.scalatest.prop.TableDrivenPropertyChecks
 import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.locations._
 import weco.catalogue.internal_model.work.Format._
 import weco.catalogue.internal_model.work._

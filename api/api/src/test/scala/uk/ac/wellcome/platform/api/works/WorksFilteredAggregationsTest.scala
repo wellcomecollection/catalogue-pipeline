@@ -1,7 +1,8 @@
 package uk.ac.wellcome.platform.api.works
 
 import uk.ac.wellcome.models.Implicits._
-import weco.catalogue.internal_model.work.{Language, Work, WorkState}
+import weco.catalogue.internal_model.languages.Language
+import weco.catalogue.internal_model.work.{Work, WorkState}
 import weco.catalogue.internal_model.work.Format._
 
 class WorksFilteredAggregationsTest extends ApiWorksTestBase {

@@ -5,7 +5,7 @@ import uk.ac.wellcome.models.work.generators.{
   GenreGenerators
 }
 import uk.ac.wellcome.models.Implicits._
-import weco.catalogue.internal_model.work.Language
+import weco.catalogue.internal_model.languages.Language
 
 class ImagesIncludesTest
     extends ApiImagesTestBase

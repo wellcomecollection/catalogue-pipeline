@@ -6,6 +6,7 @@ import uk.ac.wellcome.models.work.generators.{
   ProductionEventGenerators
 }
 import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.locations.{AccessStatus, License}
 import weco.catalogue.internal_model.work._
 import weco.catalogue.internal_model.work.Format._
