@@ -50,7 +50,7 @@ variable "scale_up_adjustment" {
 }
 
 variable "scale_down_adjustment" {
-  type   = number
+  type    = number
   default = -1
 }
 
