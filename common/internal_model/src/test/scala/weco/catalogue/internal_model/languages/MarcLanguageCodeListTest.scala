@@ -1,4 +1,4 @@
-package weco.catalogue.internal_model.marc
+package weco.catalogue.internal_model.languages
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
