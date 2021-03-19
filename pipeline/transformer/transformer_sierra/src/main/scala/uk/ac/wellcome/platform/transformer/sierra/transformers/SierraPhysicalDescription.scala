@@ -7,12 +7,18 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
 
 // Populate wwork:physicalDescription.
 //
-// We use MARC field 300 and subfields $a, $b and $c.
+// We use MARC field 300 and subfields:
 //
+//    - ǂa = extent
+//    - ǂb = other physical details
+//    - ǂc = dimensions
+//    - ǂe = accompanying material
+//
+// The underlying MARC values should have all the punctuation we need.
 //
 // Notes:
 //
-//  - MARC field 300 and subfield $b are both labelled "R" (repeatable).
+//  - MARC field 300 and subfield ǂb are both labelled "R" (repeatable).
 //    According to Branwen, this field does appear multiple times on some
 //    of our records -- not usually on books, but on some of the moving image
 //    & sound records.
@@ -37,6 +43,7 @@ object SierraPhysicalDescription
         "300" -> "a",
         "300" -> "b",
         "300" -> "c",
+        "300" -> "e",
       )
       .contentString(" ")
 }

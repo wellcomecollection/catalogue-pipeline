@@ -26,7 +26,7 @@ class SierraPhysicalDescriptionTest
     SierraPhysicalDescription(bibData(field)) shouldBe None
   }
 
-  it("extracts physical description from MARC field 300 subfield $b") {
+  it("transforms field 300 subfield $b") {
     val description = "Queuing quokkas quarrel about Quirinus Quirrell"
     val field = varField(
       "300",
@@ -36,8 +36,7 @@ class SierraPhysicalDescriptionTest
     SierraPhysicalDescription(bibData(field)) shouldBe Some(description)
   }
 
-  it(
-    "extracts a physical description where there are multiple MARC field 300 $b") {
+  it("transforms multiple instances of field 300 $b") {
     val descriptionA = "The queer quolls quits and quarrels"
     val descriptionB = "A quintessential quadraped is quick"
     val expectedDescription = s"$descriptionA $descriptionB"
@@ -52,8 +51,7 @@ class SierraPhysicalDescriptionTest
     SierraPhysicalDescription(data) shouldBe Some(expectedDescription)
   }
 
-  it(
-    f"extracts a physical description from MARC 300 subfields $$a, $$b and $$c") {
+  it("uses field 300 ǂa, ǂb and ǂc") {
     val descriptionA = "The queer quolls quits and quarrels"
     val descriptionB = "A quintessential quadraped is quick"
     val descriptionC = "The edifying extent of early emus"
@@ -64,6 +62,20 @@ class SierraPhysicalDescriptionTest
       varField("300", MarcSubfield("c", descriptionC)),
     )
     SierraPhysicalDescription(data) shouldBe Some(expectedDescription)
+  }
+
+  it("uses field 300 ǂa, ǂb, ǂc and ǂe") {
+    val extent = "1 photograph :"
+    val otherPhysicalDetails = "photonegative, glass ;"
+    val dimensions = "glass 10.6 x 8 cm +"
+    val accompanyingMaterial = "envelope"
+    val data = bibData(
+      varField("300", MarcSubfield("a", extent)),
+      varField("300", MarcSubfield("b", otherPhysicalDetails)),
+      varField("300", MarcSubfield("c", dimensions)),
+      varField("300", MarcSubfield("e", accompanyingMaterial)),
+    )
+    SierraPhysicalDescription(data) shouldBe Some("1 photograph : photonegative, glass ; glass 10.6 x 8 cm + envelope")
   }
 
   def bibData(varFields: VarField*): SierraBibData =
