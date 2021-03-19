@@ -124,11 +124,7 @@ module "image_inferrer" {
 
     flush_interval_seconds = 30
 
-    # This was previously set at 6, I've tried turning it down to stem
-    # the number of out-of-memory errors we get from the image inferrer.
-    #
-    # See https://github.com/wellcomecollection/platform/issues/5020
-    batch_size = 1
+    batch_size = 25
   }
 
   manager_secret_env_vars = local.pipeline_storage_es_service_secrets["inferrer"]
