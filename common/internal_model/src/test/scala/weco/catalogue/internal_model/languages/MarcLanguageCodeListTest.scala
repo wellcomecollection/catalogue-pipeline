@@ -5,37 +5,40 @@ import org.scalatest.matchers.should.Matchers
 
 class MarcLanguageCodeListTest extends AnyFunSpec with Matchers {
   it("returns None for a non-existent code") {
-    MarcLanguageCodeList.lookupNameForCode(code = "doesnotexist") shouldBe None
+    MarcLanguageCodeList.fromCode(code = "doesnotexist") shouldBe None
   }
 
   it("finds a language by code") {
-    MarcLanguageCodeList.lookupNameForCode(code = "abk") shouldBe Some("Abkhaz")
+    MarcLanguageCodeList.fromCode(code = "abk") shouldBe Some(
+      Language(label = "Abkhaz", id = "abk"))
   }
 
   it("returns None for a name which isn't in the list") {
-    MarcLanguageCodeList.lookupCodeForName(name = "Klingon") shouldBe None
+    MarcLanguageCodeList.fromName(name = "Klingon") shouldBe None
   }
 
   it("finds a language by name") {
-    MarcLanguageCodeList.lookupCodeForName(name = "German") shouldBe Some("ger")
+    MarcLanguageCodeList.fromName(name = "German") shouldBe Some(
+      Language(label = "German", id = "ger"))
   }
 
   it("finds a language by variant name") {
-    MarcLanguageCodeList.lookupCodeForName(name = "Flemish") shouldBe Some(
-      "dut")
+    MarcLanguageCodeList.fromName(name = "Flemish") shouldBe Some(
+      Language(label = "Flemish", id = "dut"))
   }
 
   it("finds a language with ambiguous names") {
-    MarcLanguageCodeList.lookupCodeForName(name = "Inuit") shouldBe Some("iku")
+    MarcLanguageCodeList.fromName(name = "Inuit") shouldBe Some(
+      Language(label = "Inuit", id = "iku"))
   }
 
   it("handles obsolete codes") {
-    MarcLanguageCodeList.lookupNameForCode(code = "tgl") shouldBe Some(
-      "Tagalog")
-    MarcLanguageCodeList.lookupNameForCode(code = "tag") shouldBe Some(
-      "Tagalog")
+    MarcLanguageCodeList.fromCode(code = "tgl") shouldBe Some(
+      Language(label = "Tagalog", id = "tgl"))
+    MarcLanguageCodeList.fromCode(code = "tag") shouldBe Some(
+      Language(label = "Tagalog", id = "tag"))
 
-    MarcLanguageCodeList.lookupCodeForName(name = "Tagalog") shouldBe Some(
-      "tgl")
+    MarcLanguageCodeList.fromName(name = "Tagalog") shouldBe Some(
+      Language(label = "Tagalog", id = "tgl"))
   }
 }
