@@ -68,7 +68,7 @@ object IdentifierType extends Enum[IdentifierType] {
 
   case object CalmRefNo extends IdentifierType {
     val id = "calm-ref-no"
-    val label = "calm-ref-no"
+    val label = "Calm RefNo"
   }
 
   case object CalmAltRefNo extends IdentifierType {
