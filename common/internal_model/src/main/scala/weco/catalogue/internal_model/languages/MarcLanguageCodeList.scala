@@ -1,4 +1,4 @@
-package weco.catalogue.internal_model.marc
+package weco.catalogue.internal_model.languages
 
 import grizzled.slf4j.Logging
 
@@ -84,23 +84,27 @@ object MarcLanguageCodeList extends Logging {
       }
   }
 
-  // Returns the name of the language with the given code, if any
-  def lookupNameForCode(code: String): Option[String] = {
+  // Returns the Language with the given code, if any
+  def fromCode(code: String): Option[Language] = {
     if (code.length != 3) {
       warn(
         s"MARC language codes are 3 letters long; got $code (length ${code.length})")
     }
 
-    codeLookup.get(code)
+    codeLookup
+      .get(code)
+      .map { name =>
+        Language(label = name, id = code)
+      }
   }
 
-  // Returns the language code for the given name, if any
-  def lookupCodeForName(name: String): Option[String] =
+  // Returns the Language for the given name, if any
+  def fromName(name: String): Option[Language] =
     nameLookup.get(name) match {
-      case Some(Seq(code)) => Some(code)
+      case Some(Seq(code)) => Some(Language(label = name, id = code))
       case Some(codes) =>
         warn(s"Multiple language codes for name $name: $codes")
-        Some(codes.head)
+        Some(Language(label = name, id = codes.head))
       case _ => None
     }
 }

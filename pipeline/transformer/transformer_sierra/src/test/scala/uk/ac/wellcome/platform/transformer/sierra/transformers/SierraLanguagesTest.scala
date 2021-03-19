@@ -11,7 +11,7 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraBibData
 }
 import uk.ac.wellcome.platform.transformer.sierra.source.sierra.SierraSourceLanguage
-import weco.catalogue.internal_model.work.Language
+import weco.catalogue.internal_model.languages.Language
 
 class SierraLanguagesTest
     extends AnyFunSpec

@@ -5,9 +5,8 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraBibData,
   SierraQueryOps
 }
-import weco.catalogue.internal_model.work.Language
 import weco.catalogue.sierra_adapter.models.SierraBibNumber
-import weco.catalogue.internal_model.marc.MarcLanguageCodeList
+import weco.catalogue.internal_model.languages.{Language, MarcLanguageCodeList}
 
 object SierraLanguages
     extends SierraIdentifiedDataTransformer
@@ -39,10 +38,8 @@ object SierraLanguages
     val primaryLanguage =
       bibData.lang
         .map { lang =>
-          MarcLanguageCodeList.lookupNameForCode(lang.code) match {
-            case Some(name) => Language(label = name, id = lang.code)
-            case None => Language(label = lang.name, id = lang.code)
-          }
+          MarcLanguageCodeList.fromCode(lang.code)
+            .getOrElse(Language(label = lang.name, id = lang.code))
         }
 
     val additionalLanguages =
@@ -60,10 +57,10 @@ object SierraLanguages
           _.toLowerCase()
         }
         .map { code =>
-          (code, MarcLanguageCodeList.lookupNameForCode(code))
+          (code, MarcLanguageCodeList.fromCode(code))
         }
         .map {
-          case (code, Some(name)) => Some(Language(label = name, id = code))
+          case (_, Some(lang)) => Some(lang)
           case (code, None) =>
             warn(s"$bibId: Unrecognised code in MARC 041 ǂa: $code")
             None
