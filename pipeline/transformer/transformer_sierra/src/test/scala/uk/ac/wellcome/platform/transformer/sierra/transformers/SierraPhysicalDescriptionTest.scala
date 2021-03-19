@@ -75,7 +75,8 @@ class SierraPhysicalDescriptionTest
       varField("300", MarcSubfield("c", dimensions)),
       varField("300", MarcSubfield("e", accompanyingMaterial)),
     )
-    SierraPhysicalDescription(data) shouldBe Some("1 photograph : photonegative, glass ; glass 10.6 x 8 cm + envelope")
+    SierraPhysicalDescription(data) shouldBe Some(
+      "1 photograph : photonegative, glass ; glass 10.6 x 8 cm + envelope")
   }
 
   def bibData(varFields: VarField*): SierraBibData =
