@@ -1,9 +1,9 @@
-package weco.catalogue.sierra_adapter.models
+package weco.catalogue.source_model.sierra
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil._
-import weco.catalogue.sierra_adapter.generators.SierraGenerators
+import weco.catalogue.source_model.generators.SierraGenerators
 
 import Implicits._
 

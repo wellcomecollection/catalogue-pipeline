@@ -10,8 +10,8 @@ import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.{Identified, Version}
 import uk.ac.wellcome.typesafe.Runnable
-import weco.catalogue.sierra_adapter.models.AbstractSierraRecord
 import weco.catalogue.source_model.SierraSourcePayload
+import weco.catalogue.source_model.sierra.AbstractSierraRecord
 
 import scala.concurrent.{ExecutionContext, Future}
 

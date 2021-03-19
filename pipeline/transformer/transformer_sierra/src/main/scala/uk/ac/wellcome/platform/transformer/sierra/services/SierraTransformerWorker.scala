@@ -11,8 +11,8 @@ import uk.ac.wellcome.storage.{Identified, ReadError, Version}
 import uk.ac.wellcome.storage.store.Readable
 import uk.ac.wellcome.typesafe.Runnable
 import weco.catalogue.internal_model.work.Work
-import weco.catalogue.sierra_adapter.models.SierraTransformable
 import weco.catalogue.source_model.SierraSourcePayload
+import weco.catalogue.source_model.sierra.SierraTransformable
 import weco.catalogue.transformer.{Transformer, TransformerWorker}
 
 import scala.concurrent.ExecutionContext

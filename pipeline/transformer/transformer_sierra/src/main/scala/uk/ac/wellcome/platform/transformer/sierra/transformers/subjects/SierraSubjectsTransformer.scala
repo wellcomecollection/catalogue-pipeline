@@ -9,7 +9,7 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
 import uk.ac.wellcome.models.work.text.TextNormalisation._
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.Subject
-import weco.catalogue.sierra_adapter.models.SierraBibNumber
+import weco.catalogue.source_model.sierra.SierraBibNumber
 
 trait SierraSubjectsTransformer
     extends SierraIdentifiedDataTransformer

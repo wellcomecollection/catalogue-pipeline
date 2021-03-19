@@ -6,7 +6,7 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraQueryOps,
   VarField
 }
-import weco.catalogue.sierra_adapter.models.TypedSierraRecordNumber
+import weco.catalogue.source_model.sierra.TypedSierraRecordNumber
 
 import scala.util.{Failure, Success, Try}
 

@@ -7,7 +7,7 @@ import uk.ac.wellcome.platform.transformer.sierra.SierraTransformer
 import uk.ac.wellcome.platform.transformer.sierra.exceptions.SierraTransformerException
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.Source
-import weco.catalogue.sierra_adapter.models.SierraTransformable
+import weco.catalogue.source_model.sierra.SierraTransformable
 
 trait SierraTransformableTestBase extends Matchers {
 

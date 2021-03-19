@@ -16,7 +16,7 @@ import weco.catalogue.internal_model.locations.{
   PhysicalLocationType
 }
 import weco.catalogue.internal_model.work.Item
-import weco.catalogue.sierra_adapter.models.{SierraBibNumber, SierraItemNumber}
+import weco.catalogue.source_model.sierra.{SierraBibNumber, SierraItemNumber}
 
 case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
     extends SierraIdentifiedDataTransformer

@@ -3,7 +3,7 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers.subjects
 import uk.ac.wellcome.platform.transformer.sierra.source.VarField
 import uk.ac.wellcome.platform.transformer.sierra.transformers.SierraAgents
 import weco.catalogue.internal_model.work.{Concept, Subject}
-import weco.catalogue.sierra_adapter.models.SierraBibNumber
+import weco.catalogue.source_model.sierra.SierraBibNumber
 
 // Populate wwork:subject
 //

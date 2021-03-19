@@ -20,13 +20,13 @@ import uk.ac.wellcome.storage.typesafe.S3Builder
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import weco.catalogue.internal_model.work.Work
-import weco.catalogue.sierra_adapter.models.SierraTransformable
+import weco.catalogue.source_model.sierra.SierraTransformable
 
 import scala.concurrent.ExecutionContext
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
-    import weco.catalogue.sierra_adapter.models.Implicits._
+    import weco.catalogue.source_model.sierra.Implicits._
 
     implicit val actorSystem: ActorSystem =
       AkkaBuilder.buildActorSystem()

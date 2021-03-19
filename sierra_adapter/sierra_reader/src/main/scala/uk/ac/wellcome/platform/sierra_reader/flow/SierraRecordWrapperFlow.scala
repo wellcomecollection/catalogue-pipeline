@@ -6,7 +6,7 @@ import akka.NotUsed
 import akka.stream.scaladsl.Flow
 import io.circe.Json
 import uk.ac.wellcome.platform.sierra_reader.parsers.SierraRecordParser
-import weco.catalogue.sierra_adapter.models.AbstractSierraRecord
+import weco.catalogue.source_model.sierra.AbstractSierraRecord
 
 object SierraRecordWrapperFlow {
   def apply[T <: AbstractSierraRecord[_]](

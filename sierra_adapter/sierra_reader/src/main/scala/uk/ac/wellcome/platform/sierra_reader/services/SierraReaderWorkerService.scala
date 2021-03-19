@@ -24,14 +24,14 @@ import uk.ac.wellcome.storage.Identified
 import uk.ac.wellcome.storage.s3.{S3Config, S3ObjectLocation}
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.typesafe.Runnable
-import weco.catalogue.sierra_adapter.models.Implicits._
-import weco.catalogue.sierra_adapter.models.{
+import weco.catalogue.sierra_reader.source.{SierraSource, ThrottleRate}
+import weco.catalogue.source_model.sierra.Implicits._
+import weco.catalogue.source_model.sierra.{
   AbstractSierraRecord,
   SierraBibRecord,
   SierraHoldingsRecord,
   SierraItemRecord
 }
-import weco.catalogue.sierra_reader.source.{SierraSource, ThrottleRate}
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}

@@ -12,7 +12,7 @@ import com.sksamuel.elastic4s.requests.indexes.IndexRequest
 import io.circe.Json
 import io.circe.syntax._
 import uk.ac.wellcome.json.JsonUtil._
-import weco.catalogue.sierra_adapter.models.Implicits._
+import weco.catalogue.source_model.sierra.Implicits._
 import weco.catalogue.sierra_indexer.services.SierraJsonOps._
 
 object IndexerRequest {

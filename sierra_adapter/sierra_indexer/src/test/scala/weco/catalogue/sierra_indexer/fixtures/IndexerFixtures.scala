@@ -14,8 +14,8 @@ import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.memory.MemoryTypedStore
-import weco.catalogue.sierra_adapter.models.SierraTransformable
 import weco.catalogue.sierra_indexer.services.Worker
+import weco.catalogue.source_model.sierra.SierraTransformable
 
 import scala.concurrent.ExecutionContext.Implicits.global
 

@@ -5,7 +5,7 @@ import uk.ac.wellcome.platform.transformer.sierra.source._
 import uk.ac.wellcome.models.parse.Marc008Parser
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work._
-import weco.catalogue.sierra_adapter.models.SierraBibNumber
+import weco.catalogue.source_model.sierra.SierraBibNumber
 
 object SierraProduction
     extends SierraIdentifiedDataTransformer

@@ -22,8 +22,8 @@ import weco.catalogue.internal_model.locations.{
   PhysicalLocation
 }
 import weco.catalogue.internal_model.work.{Holdings, Item}
-import weco.catalogue.sierra_adapter.generators.SierraGenerators
-import weco.catalogue.sierra_adapter.models.SierraHoldingsNumber
+import weco.catalogue.source_model.generators.SierraGenerators
+import weco.catalogue.source_model.sierra.SierraHoldingsNumber
 
 class SierraHoldingsTest
     extends AnyFunSpec

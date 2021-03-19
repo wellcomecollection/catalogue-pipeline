@@ -1,6 +1,6 @@
 package weco.catalogue.sierra_merger.models
 
-import weco.catalogue.sierra_adapter.models.{
+import weco.catalogue.source_model.sierra.{
   AbstractSierraRecord,
   SierraBibNumber,
   SierraBibRecord,

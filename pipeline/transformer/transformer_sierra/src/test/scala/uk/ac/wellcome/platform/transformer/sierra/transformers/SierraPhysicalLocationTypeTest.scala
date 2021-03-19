@@ -4,7 +4,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
 import weco.catalogue.internal_model.locations.LocationType
-import weco.catalogue.sierra_adapter.generators.SierraGenerators
+import weco.catalogue.source_model.generators.SierraGenerators
 
 class SierraPhysicalLocationTypeTest
     extends AnyFunSpec

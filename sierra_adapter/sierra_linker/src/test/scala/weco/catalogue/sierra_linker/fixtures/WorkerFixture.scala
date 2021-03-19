@@ -10,8 +10,10 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.monitoring.Metrics
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
 import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
-import weco.catalogue.sierra_adapter.models.Implicits._
-import weco.catalogue.sierra_adapter.models.{
+import weco.catalogue.sierra_linker.models.{Link, LinkOps}
+import weco.catalogue.sierra_linker.services.{LinkStore, SierraLinkerWorker}
+import weco.catalogue.source_model.sierra.Implicits._
+import weco.catalogue.source_model.sierra.{
   AbstractSierraRecord,
   SierraHoldingsNumber,
   SierraHoldingsRecord,
@@ -19,8 +21,6 @@ import weco.catalogue.sierra_adapter.models.{
   SierraItemRecord,
   TypedSierraRecordNumber
 }
-import weco.catalogue.sierra_linker.models.{Link, LinkOps}
-import weco.catalogue.sierra_linker.services.{LinkStore, SierraLinkerWorker}
 
 import scala.concurrent.Future
 

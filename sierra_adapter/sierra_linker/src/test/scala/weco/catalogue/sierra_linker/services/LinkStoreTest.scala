@@ -11,9 +11,9 @@ import uk.ac.wellcome.storage.{
   UpdateWriteError,
   Version
 }
-import weco.catalogue.sierra_adapter.generators.SierraGenerators
-import weco.catalogue.sierra_adapter.models.{SierraItemNumber, SierraItemRecord}
 import weco.catalogue.sierra_linker.models.Link
+import weco.catalogue.source_model.generators.SierraGenerators
+import weco.catalogue.source_model.sierra.{SierraItemNumber, SierraItemRecord}
 
 class LinkStoreTest
     extends AnyFunSpec

@@ -1,7 +1,0 @@
-{
-  "id" : "sierra_adapter_common",
-  "folder" : "sierra_adapter/common",
-  "dependencyIds" : [
-    "source_model_typesafe"
-  ]
-}

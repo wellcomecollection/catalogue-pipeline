@@ -16,8 +16,6 @@ steps:
     label: "transformer common"
   - command: .buildkite/scripts/run_job.py calm_api_client
     label: "Calm API client"
-  - command: .buildkite/scripts/run_job.py sierra_adapter_common
-    label: "Sierra adapter"
   - wait
   - command: .buildkite/scripts/run_job.py api
     label: "API"

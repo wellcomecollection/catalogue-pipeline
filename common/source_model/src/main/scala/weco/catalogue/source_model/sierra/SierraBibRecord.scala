@@ -1,4 +1,4 @@
-package weco.catalogue.sierra_adapter.models
+package weco.catalogue.source_model.sierra
 
 import java.time.Instant
 

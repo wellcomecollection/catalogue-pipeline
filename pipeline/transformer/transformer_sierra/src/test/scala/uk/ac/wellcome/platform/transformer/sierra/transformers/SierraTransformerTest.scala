@@ -29,9 +29,9 @@ import weco.catalogue.internal_model.work.InvisibilityReason.{
   UnableToTransform
 }
 import weco.catalogue.internal_model.work._
-import weco.catalogue.sierra_adapter.generators.SierraGenerators
-import weco.catalogue.sierra_adapter.models.Implicits._
-import weco.catalogue.sierra_adapter.models._
+import weco.catalogue.source_model.generators.SierraGenerators
+import weco.catalogue.source_model.sierra.Implicits._
+import weco.catalogue.source_model.sierra._
 
 class SierraTransformerTest
     extends AnyFunSpec

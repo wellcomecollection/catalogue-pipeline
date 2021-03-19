@@ -17,7 +17,7 @@ import weco.catalogue.internal_model.identifiers.{
 }
 import weco.catalogue.internal_model.locations.{LocationType, PhysicalLocation}
 import weco.catalogue.internal_model.work.Item
-import weco.catalogue.sierra_adapter.models.SierraItemNumber
+import weco.catalogue.source_model.sierra.SierraItemNumber
 
 class SierraItemsTest
     extends AnyFunSpec

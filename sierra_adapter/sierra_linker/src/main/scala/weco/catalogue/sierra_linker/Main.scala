@@ -12,9 +12,12 @@ import uk.ac.wellcome.storage.typesafe.DynamoBuilder
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
-import weco.catalogue.sierra_adapter.models.SierraRecordTypes._
-import weco.catalogue.sierra_adapter.models.Implicits._
-import weco.catalogue.sierra_adapter.models.{
+import weco.catalogue.sierra_linker.dynamo.Implicits._
+import weco.catalogue.sierra_linker.models.{Link, LinkOps}
+import weco.catalogue.sierra_linker.services.{LinkStore, SierraLinkerWorker}
+import weco.catalogue.source_model.sierra.SierraRecordTypes._
+import weco.catalogue.source_model.sierra.Implicits._
+import weco.catalogue.source_model.sierra.{
   AbstractSierraRecord,
   SierraHoldingsNumber,
   SierraHoldingsRecord,
@@ -23,9 +26,6 @@ import weco.catalogue.sierra_adapter.models.{
   SierraRecordTypes,
   TypedSierraRecordNumber
 }
-import weco.catalogue.sierra_linker.dynamo.Implicits._
-import weco.catalogue.sierra_linker.models.{Link, LinkOps}
-import weco.catalogue.sierra_linker.services.{LinkStore, SierraLinkerWorker}
 
 import scala.concurrent.ExecutionContext
 import scala.language.higherKinds

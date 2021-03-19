@@ -10,7 +10,7 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.locations.PhysicalLocation
 import weco.catalogue.internal_model.work.{Holdings, Item}
-import weco.catalogue.sierra_adapter.models.{
+import weco.catalogue.source_model.sierra.{
   SierraBibNumber,
   SierraHoldingsNumber,
   TypedSierraRecordNumber

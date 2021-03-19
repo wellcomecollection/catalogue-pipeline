@@ -8,15 +8,15 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.storage.generators.S3ObjectLocationGenerators
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.memory.MemoryTypedStore
-import weco.catalogue.sierra_adapter.generators.SierraGenerators
-import weco.catalogue.sierra_adapter.models.Implicits._
-import weco.catalogue.sierra_adapter.models.{
+import weco.catalogue.sierra_indexer.fixtures.IndexerFixtures
+import weco.catalogue.source_model.SierraSourcePayload
+import weco.catalogue.source_model.generators.SierraGenerators
+import weco.catalogue.source_model.sierra.Implicits._
+import weco.catalogue.source_model.sierra.{
   SierraHoldingsRecord,
   SierraItemRecord,
   SierraTransformable
 }
-import weco.catalogue.sierra_indexer.fixtures.IndexerFixtures
-import weco.catalogue.source_model.SierraSourcePayload
 
 import java.time.Instant
 

@@ -283,7 +283,8 @@ object CatalogueDependencies {
       ExternalDependencies.scalatestDependencies
 
   val sierraTransformerDependencies: Seq[ModuleID] =
-    ExternalDependencies.apacheCommonsDependencies
+    ExternalDependencies.apacheCommonsDependencies ++
+      WellcomeDependencies.jsonLibrary
 
   val metsTransformerDependencies: Seq[ModuleID] =
     ExternalDependencies.apacheCommonsDependencies
@@ -313,17 +314,18 @@ object CatalogueDependencies {
 
   // Sierra adapter stack
 
-  val sierraAdapterCommonDependencies: Seq[ModuleID] =
-    WellcomeDependencies.storageTypesafeLibrary ++
-      WellcomeDependencies.messagingTypesafeLibrary ++
-      WellcomeDependencies.jsonLibrary ++
-      WellcomeDependencies.typesafeLibrary ++
-      ExternalDependencies.javaxDependencies
+  val sierraLinkerDependencies: Seq[ModuleID] =
+    WellcomeDependencies.typesafeLibrary
+
+  val sierraMergerDependencies: Seq[ModuleID] =
+    WellcomeDependencies.typesafeLibrary
 
   val sierraReaderDependencies: Seq[ModuleID] =
     ExternalDependencies.circeOpticsDependencies ++
       WellcomeDependencies.messagingTypesafeLibrary ++
-      ExternalDependencies.scalaJDependencies
+      ExternalDependencies.scalaJDependencies ++
+      WellcomeDependencies.jsonLibrary ++
+      WellcomeDependencies.typesafeLibrary
 
   // Inference manager
   val inferenceManagerDependencies: Seq[ModuleID] =
