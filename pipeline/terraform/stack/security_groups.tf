@@ -12,4 +12,8 @@ resource "aws_security_group" "service_egress" {
       "0.0.0.0/0",
     ]
   }
+
+  tags = {
+    Name = "${local.namespace_hyphen}_egress"
+  }
 }
