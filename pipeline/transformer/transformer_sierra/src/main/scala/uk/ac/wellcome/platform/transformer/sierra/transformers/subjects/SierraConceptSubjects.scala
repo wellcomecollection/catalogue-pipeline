@@ -8,7 +8,7 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
 import uk.ac.wellcome.platform.transformer.sierra.transformers.SierraConcepts
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work._
-import weco.catalogue.sierra_adapter.models.SierraBibNumber
+import weco.catalogue.source_model.sierra.SierraBibNumber
 
 // Populate wwork:subject
 //

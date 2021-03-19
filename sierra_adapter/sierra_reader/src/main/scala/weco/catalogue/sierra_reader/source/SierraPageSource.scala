@@ -8,7 +8,7 @@ import io.circe.parser.parse
 import org.slf4j.{Logger, LoggerFactory}
 import scalaj.http.{Http, HttpOptions, HttpResponse}
 import uk.ac.wellcome.platform.sierra_reader.config.models.SierraAPIConfig
-import weco.catalogue.sierra_adapter.json.JsonOps._
+import weco.catalogue.source_model.json.JsonOps._
 
 import scala.concurrent.duration.Duration
 

@@ -7,7 +7,7 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   MarcSubfield,
   VarField
 }
-import weco.catalogue.sierra_adapter.generators.SierraGenerators
+import weco.catalogue.source_model.generators.SierraGenerators
 
 class SierraHoldingsEnumerationTest
     extends AnyFunSpec

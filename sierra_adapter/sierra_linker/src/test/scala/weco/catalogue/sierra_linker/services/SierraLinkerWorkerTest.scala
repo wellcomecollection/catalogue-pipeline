@@ -8,11 +8,11 @@ import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
 import uk.ac.wellcome.storage.Version
 import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
-import weco.catalogue.sierra_adapter.generators.SierraGenerators
-import weco.catalogue.sierra_adapter.models.Implicits._
-import weco.catalogue.sierra_adapter.models.{SierraItemNumber, SierraItemRecord}
 import weco.catalogue.sierra_linker.fixtures.WorkerFixture
 import weco.catalogue.sierra_linker.models.{Link, LinkOps}
+import weco.catalogue.source_model.generators.SierraGenerators
+import weco.catalogue.source_model.sierra.Implicits._
+import weco.catalogue.source_model.sierra.{SierraItemNumber, SierraItemRecord}
 
 class SierraLinkerWorkerTest
     extends AnyFunSpec

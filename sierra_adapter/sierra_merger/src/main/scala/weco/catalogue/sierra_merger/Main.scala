@@ -9,9 +9,9 @@ import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import weco.catalogue.sierra_merger.services.{Updater, Worker}
 import weco.catalogue.source_model.config.SourceVHSBuilder
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
-import weco.catalogue.sierra_adapter.models.Implicits._
-import weco.catalogue.sierra_adapter.models.SierraRecordTypes._
-import weco.catalogue.sierra_adapter.models.{
+import weco.catalogue.source_model.sierra.Implicits._
+import weco.catalogue.source_model.sierra.SierraRecordTypes._
+import weco.catalogue.source_model.sierra.{
   SierraBibRecord,
   SierraHoldingsRecord,
   SierraItemRecord,

@@ -9,7 +9,7 @@ SBT_APPS = sierra_merger sierra_linker sierra_reader sierra_indexer
 SBT_NO_DOCKER_APPS =
 
 SBT_DOCKER_LIBRARIES    =
-SBT_NO_DOCKER_LIBRARIES = sierra_adapter_common
+SBT_NO_DOCKER_LIBRARIES =
 
 PYTHON_APPS =
 LAMBDAS     = s3_demultiplexer \

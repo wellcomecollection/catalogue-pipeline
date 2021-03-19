@@ -4,11 +4,11 @@ import com.sksamuel.elastic4s.requests.delete.DeleteByQueryRequest
 import com.sksamuel.elastic4s.requests.indexes.IndexRequest
 import io.circe.parser._
 import io.circe.{Json, ParsingFailure}
-import weco.catalogue.sierra_adapter.models.{
+import weco.catalogue.sierra_indexer.models.{IndexerRequest, Parent}
+import weco.catalogue.source_model.sierra.{
   SierraRecordTypes,
   SierraTransformable
 }
-import weco.catalogue.sierra_indexer.models.{IndexerRequest, Parent}
 
 // This object splits a SierraTransformable into indexable pieces
 // that can be sent to Elasticsearch.

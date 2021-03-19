@@ -13,15 +13,15 @@ import uk.ac.wellcome.storage.store.{
   VersionedHybridStore
 }
 import uk.ac.wellcome.storage.{StoreWriteError, UpdateWriteError, Version}
-import weco.catalogue.sierra_adapter.generators.SierraGenerators
-import weco.catalogue.sierra_adapter.models.Implicits._
-import weco.catalogue.sierra_adapter.models.{
+import weco.catalogue.source_model.sierra.Implicits._
+import weco.catalogue.sierra_merger.fixtures.RecordMergerFixtures
+import weco.catalogue.source_model.fixtures.SourceVHSFixture
+import weco.catalogue.source_model.generators.SierraGenerators
+import weco.catalogue.source_model.sierra.{
   SierraItemRecord,
   SierraTransformable,
   TypedSierraRecordNumber
 }
-import weco.catalogue.sierra_merger.fixtures.RecordMergerFixtures
-import weco.catalogue.source_model.fixtures.SourceVHSFixture
 import weco.catalogue.source_model.store.SourceVHS
 
 class UpdaterTest

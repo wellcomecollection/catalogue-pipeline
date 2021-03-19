@@ -14,9 +14,9 @@ import uk.ac.wellcome.platform.sierra_reader.models.{
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.storage.fixtures.S3Fixtures
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
-import weco.catalogue.sierra_adapter.generators.SierraGenerators
-import weco.catalogue.sierra_adapter.models.Implicits._
-import weco.catalogue.sierra_adapter.models.SierraBibNumber
+import weco.catalogue.source_model.generators.SierraGenerators
+import weco.catalogue.source_model.sierra.Implicits._
+import weco.catalogue.source_model.sierra.SierraBibNumber
 
 class WindowManagerTest
     extends AnyFunSpec

@@ -9,7 +9,7 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraQueryOps,
   VarField
 }
-import weco.catalogue.sierra_adapter.models.SierraBibNumber
+import weco.catalogue.source_model.sierra.SierraBibNumber
 
 import scala.util.Try
 

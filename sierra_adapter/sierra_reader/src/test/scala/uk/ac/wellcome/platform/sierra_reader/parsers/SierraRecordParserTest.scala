@@ -7,8 +7,8 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil.toJson
 import uk.ac.wellcome.json.utils.JsonAssertions
-import weco.catalogue.sierra_adapter.generators.SierraGenerators
-import weco.catalogue.sierra_adapter.models.{
+import weco.catalogue.source_model.generators.SierraGenerators
+import weco.catalogue.source_model.sierra.{
   AbstractSierraRecord,
   SierraBibNumber,
   SierraBibRecord,

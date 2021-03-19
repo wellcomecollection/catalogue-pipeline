@@ -16,7 +16,7 @@ import weco.catalogue.internal_model.identifiers._
 import weco.catalogue.internal_model.work.DeletedReason._
 import weco.catalogue.internal_model.work.InvisibilityReason._
 import weco.catalogue.internal_model.work.{Work, WorkData}
-import weco.catalogue.sierra_adapter.models._
+import weco.catalogue.source_model.sierra._
 
 class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
     extends Logging {

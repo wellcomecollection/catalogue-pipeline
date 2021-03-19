@@ -1,6 +1,6 @@
 package weco.catalogue.sierra_linker.models
 
-import weco.catalogue.sierra_adapter.models.{
+import weco.catalogue.source_model.sierra.{
   SierraBibNumber,
   SierraHoldingsRecord,
   SierraItemRecord

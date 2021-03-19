@@ -1,4 +1,4 @@
-package weco.catalogue.sierra_adapter.json
+package weco.catalogue.source_model.json
 
 import io.circe.{Decoder, Encoder, HCursor, Json}
 

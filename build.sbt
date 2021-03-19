@@ -176,7 +176,7 @@ lazy val transformer_miro = setupProject(
 lazy val transformer_sierra = setupProject(
   project,
   folder = "pipeline/transformer/transformer_sierra",
-  localDependencies = Seq(transformer_common, sierra_adapter_common),
+  localDependencies = Seq(transformer_common),
   externalDependencies = CatalogueDependencies.sierraTransformerDependencies
 )
 
@@ -196,34 +196,31 @@ lazy val transformer_calm = setupProject(
 
 // Sierra adapter
 
-lazy val sierra_adapter_common = setupProject(
-  project,
-  "sierra_adapter/common",
-  localDependencies = Seq(source_model_typesafe),
-  externalDependencies = CatalogueDependencies.sierraAdapterCommonDependencies
-)
-
 lazy val sierra_reader = setupProject(
   project,
   "sierra_adapter/sierra_reader",
-  localDependencies = Seq(sierra_adapter_common),
+  localDependencies = Seq(source_model_typesafe),
   externalDependencies = CatalogueDependencies.sierraReaderDependencies
 )
 
 lazy val sierra_merger = setupProject(
   project,
   "sierra_adapter/sierra_merger",
-  localDependencies = Seq(sierra_adapter_common))
+  localDependencies = Seq(source_model_typesafe),
+  externalDependencies = CatalogueDependencies.sierraMergerDependencies
+)
 
 lazy val sierra_linker = setupProject(
   project,
   folder = "sierra_adapter/sierra_linker",
-  localDependencies = Seq(sierra_adapter_common))
+  localDependencies = Seq(source_model_typesafe),
+  externalDependencies = CatalogueDependencies.sierraLinkerDependencies
+)
 
 lazy val sierra_indexer = setupProject(
   project,
   folder = "sierra_adapter/sierra_indexer",
-  localDependencies = Seq(sierra_adapter_common, pipeline_storage_typesafe))
+  localDependencies = Seq(source_model_typesafe, pipeline_storage_typesafe))
 
 // METS adapter
 

@@ -8,12 +8,12 @@ import uk.ac.wellcome.storage.{
   UpdateNotApplied,
   Version
 }
-import weco.catalogue.sierra_adapter.models.{
+import weco.catalogue.sierra_merger.models.{RecordOps, TransformableOps}
+import weco.catalogue.source_model.sierra.{
   AbstractSierraRecord,
   SierraBibNumber,
   SierraTransformable
 }
-import weco.catalogue.sierra_merger.models.{RecordOps, TransformableOps}
 import weco.catalogue.source_model.store.SourceVHS
 
 class Updater[Record <: AbstractSierraRecord[_]](

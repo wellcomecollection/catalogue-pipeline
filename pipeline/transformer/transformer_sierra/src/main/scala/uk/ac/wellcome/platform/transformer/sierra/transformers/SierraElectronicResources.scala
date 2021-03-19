@@ -14,7 +14,7 @@ import weco.catalogue.internal_model.locations.{
   DigitalLocation
 }
 import weco.catalogue.internal_model.work.Item
-import weco.catalogue.sierra_adapter.models.TypedSierraRecordNumber
+import weco.catalogue.source_model.sierra.TypedSierraRecordNumber
 
 import java.net.URL
 import scala.util.Try

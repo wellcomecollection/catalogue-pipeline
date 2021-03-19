@@ -2,8 +2,8 @@ package weco.catalogue.sierra_linker.models
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.sierra_adapter.generators.SierraGenerators
-import weco.catalogue.sierra_adapter.models.SierraItemRecord
+import weco.catalogue.source_model.generators.SierraGenerators
+import weco.catalogue.source_model.sierra.SierraItemRecord
 
 class LinkOpsTest extends AnyFunSpec with Matchers with SierraGenerators {
 

@@ -8,14 +8,14 @@ import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.storage.streaming.Codec._
-import weco.catalogue.sierra_adapter.models.Implicits._
-import weco.catalogue.sierra_adapter.models.{
-  AbstractSierraRecord,
-  SierraTransformable
-}
 import weco.catalogue.sierra_merger.models.{RecordOps, TransformableOps}
 import weco.catalogue.sierra_merger.services.{Updater, Worker}
 import weco.catalogue.source_model.fixtures.SourceVHSFixture
+import weco.catalogue.source_model.sierra.Implicits._
+import weco.catalogue.source_model.sierra.{
+  AbstractSierraRecord,
+  SierraTransformable
+}
 import weco.catalogue.source_model.store.SourceVHS
 
 import scala.concurrent.ExecutionContext.Implicits.global

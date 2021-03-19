@@ -4,8 +4,8 @@ import java.time.format.DateTimeFormatter
 import java.time.{Instant, LocalDate, LocalTime, ZoneOffset}
 import io.circe.Json
 import io.circe.optics.JsonPath.root
-import weco.catalogue.sierra_adapter.json.JsonOps._
-import weco.catalogue.sierra_adapter.models.AbstractSierraRecord
+import weco.catalogue.source_model.json.JsonOps._
+import weco.catalogue.source_model.sierra.AbstractSierraRecord
 
 object SierraRecordParser {
   def apply[T <: AbstractSierraRecord[_]](

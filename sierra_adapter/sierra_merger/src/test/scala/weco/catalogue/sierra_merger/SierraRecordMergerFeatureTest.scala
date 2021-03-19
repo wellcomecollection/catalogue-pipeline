@@ -11,13 +11,13 @@ import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.storage.{Identified, Version}
-import weco.catalogue.sierra_adapter.generators.SierraGenerators
-import weco.catalogue.sierra_adapter.models._
-import weco.catalogue.sierra_adapter.models.Implicits._
 import weco.catalogue.sierra_merger.fixtures.RecordMergerFixtures
 import weco.catalogue.sierra_merger.models.TransformableOps
 import weco.catalogue.sierra_merger.services.Worker
 import weco.catalogue.source_model.fixtures.SourceVHSFixture
+import weco.catalogue.source_model.generators.SierraGenerators
+import weco.catalogue.source_model.sierra._
+import weco.catalogue.source_model.sierra.Implicits._
 import weco.catalogue.source_model.store.SourceVHS
 
 trait SierraRecordMergerFeatureTestCases[Record <: AbstractSierraRecord[_]]

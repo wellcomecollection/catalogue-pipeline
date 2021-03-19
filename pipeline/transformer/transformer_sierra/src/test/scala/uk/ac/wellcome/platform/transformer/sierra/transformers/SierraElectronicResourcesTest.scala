@@ -14,7 +14,7 @@ import weco.catalogue.internal_model.locations.{
   DigitalLocation
 }
 import weco.catalogue.internal_model.work.Item
-import weco.catalogue.sierra_adapter.generators.SierraGenerators
+import weco.catalogue.source_model.generators.SierraGenerators
 
 class SierraElectronicResourcesTest
     extends AnyFunSpec

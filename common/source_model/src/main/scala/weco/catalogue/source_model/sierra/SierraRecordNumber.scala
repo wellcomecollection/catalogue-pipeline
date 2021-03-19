@@ -1,4 +1,4 @@
-package weco.catalogue.sierra_adapter.models
+package weco.catalogue.source_model.sierra
 
 object SierraRecordTypes extends Enumeration {
   val bibs, items, holdings = Value

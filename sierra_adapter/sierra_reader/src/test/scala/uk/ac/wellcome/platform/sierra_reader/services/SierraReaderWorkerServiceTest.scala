@@ -10,8 +10,8 @@ import uk.ac.wellcome.platform.sierra_reader.fixtures.WorkerServiceFixture
 import uk.ac.wellcome.storage.fixtures.S3Fixtures
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
-import weco.catalogue.sierra_adapter.models.Implicits._
-import weco.catalogue.sierra_adapter.models.{
+import weco.catalogue.source_model.sierra.Implicits._
+import weco.catalogue.source_model.sierra.{
   SierraBibRecord,
   SierraHoldingsRecord,
   SierraItemRecord

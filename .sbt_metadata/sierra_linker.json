@@ -2,6 +2,6 @@
   "id" : "sierra_linker",
   "folder" : "sierra_adapter/sierra_linker",
   "dependencyIds" : [
-    "sierra_adapter_common"
+    "source_model_typesafe"
   ]
 }

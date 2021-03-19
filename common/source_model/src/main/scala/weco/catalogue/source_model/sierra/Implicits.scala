@@ -1,4 +1,4 @@
-package weco.catalogue.sierra_adapter.models
+package weco.catalogue.source_model.sierra
 
 import io.circe.generic.extras.semiauto._
 import io.circe._
@@ -7,7 +7,7 @@ import uk.ac.wellcome.json.JsonUtil._
 import scala.util.{Failure, Success, Try}
 
 object Implicits {
-  import weco.catalogue.sierra_adapter.json.JsonOps._
+  import weco.catalogue.source_model.json.JsonOps._
 
   implicit val recordTypeEncoder: Encoder[SierraRecordTypes.Value] =
     (value: SierraRecordTypes.Value) => Json.fromString(value.toString)

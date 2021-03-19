@@ -1,8 +1,8 @@
-package weco.catalogue.sierra_adapter.generators
+package weco.catalogue.source_model.generators
 
 import uk.ac.wellcome.fixtures.RandomGenerators
 import uk.ac.wellcome.json.JsonUtil.toJson
-import weco.catalogue.sierra_adapter.models._
+import weco.catalogue.source_model.sierra._
 
 import java.time.Instant
 import scala.util.Random

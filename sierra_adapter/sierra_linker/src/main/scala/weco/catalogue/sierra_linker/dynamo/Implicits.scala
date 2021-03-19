@@ -1,7 +1,7 @@
 package weco.catalogue.sierra_linker.dynamo
 
 import org.scanamo.DynamoFormat
-import weco.catalogue.sierra_adapter.models.{
+import weco.catalogue.source_model.sierra.{
   SierraBibNumber,
   SierraHoldingsNumber,
   SierraItemNumber

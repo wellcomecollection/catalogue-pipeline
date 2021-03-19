@@ -5,8 +5,8 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraBibData,
   SierraQueryOps
 }
-import weco.catalogue.sierra_adapter.models.SierraBibNumber
 import weco.catalogue.internal_model.languages.{Language, MarcLanguageCodeList}
+import weco.catalogue.source_model.sierra.SierraBibNumber
 
 object SierraLanguages
     extends SierraIdentifiedDataTransformer

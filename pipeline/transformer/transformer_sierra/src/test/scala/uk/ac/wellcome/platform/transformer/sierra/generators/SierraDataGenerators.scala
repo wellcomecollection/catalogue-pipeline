@@ -6,7 +6,7 @@ import uk.ac.wellcome.platform.transformer.sierra.source.sierra.{
   SierraSourceLocation
 }
 import weco.catalogue.internal_model.generators.IdentifiersGenerators
-import weco.catalogue.sierra_adapter.generators.SierraGenerators
+import weco.catalogue.source_model.generators.SierraGenerators
 
 trait SierraDataGenerators extends IdentifiersGenerators with SierraGenerators {
   def createSierraBibDataWith(

@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import uk.ac.wellcome.platform.transformer.sierra.source.SierraBibData
-import weco.catalogue.sierra_adapter.models.SierraBibNumber
+import weco.catalogue.source_model.sierra.SierraBibNumber
 
 trait SierraDataTransformer {
   type Output

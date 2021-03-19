@@ -16,8 +16,8 @@ import uk.ac.wellcome.storage.s3.{
   S3ObjectLocationPrefix
 }
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
-import weco.catalogue.sierra_adapter.models.Implicits._
-import weco.catalogue.sierra_adapter.models.UntypedSierraRecordNumber
+import weco.catalogue.source_model.sierra.Implicits._
+import weco.catalogue.source_model.sierra.UntypedSierraRecordNumber
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}

@@ -5,7 +5,7 @@ import weco.catalogue.internal_model.locations.{
   LocationType,
   PhysicalLocationType
 }
-import weco.catalogue.sierra_adapter.models.TypedSierraRecordNumber
+import weco.catalogue.source_model.sierra.TypedSierraRecordNumber
 
 object SierraPhysicalLocationType extends Logging {
   def fromName(id: TypedSierraRecordNumber,
