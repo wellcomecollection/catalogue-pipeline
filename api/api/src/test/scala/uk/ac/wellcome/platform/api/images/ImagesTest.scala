@@ -74,12 +74,12 @@ class ImagesTest extends ApiImagesTestBase with SierraWorkGenerators {
         val baguetteImage = createImageData.toIndexedImageWith(
           canonicalId = "a",
           parentWork = identifiedWork()
-            .title("Baguette is a French bread style")
+            .title("Baguette is a French style of bread; it's a long, thin bread; other countries also make this bread")
         )
         val focacciaImage = createImageData.toIndexedImageWith(
           canonicalId = "b",
           parentWork = identifiedWork()
-            .title("A Ligurian style of bread, Focaccia")
+            .title("A Ligurian style of bread, Focaccia is a flat Italian bread")
         )
         val mantouImage = createImageData.toIndexedImageWith(
           canonicalId = "c",
