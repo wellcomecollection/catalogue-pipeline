@@ -46,6 +46,9 @@ module "relation_embedder" {
   # NOTE: limit to avoid >500 concurrent scroll contexts
   max_capacity = min(10, local.max_capacity)
 
+  scale_down_adjustment = local.scale_down_adjustment
+  scale_up_adjustment   = local.scale_up_adjustment
+
   subnets           = var.subnets
   queue_read_policy = module.relation_embedder_queue.read_policy
 

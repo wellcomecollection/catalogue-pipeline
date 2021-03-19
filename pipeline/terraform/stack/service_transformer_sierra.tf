@@ -36,8 +36,12 @@ module "sierra_transformer" {
 
   use_fargate_spot = true
 
-  subnets      = var.subnets
+  subnets = var.subnets
+
   max_capacity = local.max_capacity
+
+  scale_down_adjustment = local.scale_down_adjustment
+  scale_up_adjustment   = local.scale_up_adjustment
 
   queue_read_policy = module.sierra_transformer_queue.read_policy
 

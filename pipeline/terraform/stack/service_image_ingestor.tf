@@ -75,7 +75,11 @@ module "ingestor_images" {
 
   subnets = var.subnets
 
-  max_capacity      = min(5, local.max_capacity)
+  max_capacity = min(5, local.max_capacity)
+
+  scale_down_adjustment = local.scale_down_adjustment
+  scale_up_adjustment   = local.scale_up_adjustment
+
   queue_read_policy = module.ingestor_images_queue.read_policy
 
   deployment_service_env  = var.release_label

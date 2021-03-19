@@ -11,11 +11,6 @@ variable "cluster_arn" {
 variable "service_name" {
 }
 
-variable "desired_task_count" {
-  type    = number
-  default = 1
-}
-
 variable "security_group_ids" {
   type    = list(string)
   default = []
@@ -35,6 +30,11 @@ variable "host_memory" {
   default = 1024
 }
 
+variable "desired_task_count" {
+  type    = number
+  default = 1
+}
+
 variable "max_capacity" {
   type = number
 }
@@ -42,6 +42,16 @@ variable "max_capacity" {
 variable "min_capacity" {
   type    = number
   default = 0
+}
+
+variable "scale_up_adjustment" {
+  type    = number
+  default = 1
+}
+
+variable "scale_down_adjustment" {
+  type   = number
+  default = -1
 }
 
 variable "launch_type" {

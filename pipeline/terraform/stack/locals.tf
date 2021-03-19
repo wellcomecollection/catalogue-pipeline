@@ -22,6 +22,20 @@ locals {
   # and don't have extra database capacity provisioned
   max_capacity = var.is_reindexing ? var.max_capacity : min(3, var.max_capacity)
 
+  # If we're reindexing, our services will scale up to max capacity,
+  # work through everything on the reindex queues, and then suddenly
+  # finish processing everything -- at which point they all become idle.
+  #
+  # If we only stop one task per minute, that's a lot of tasks doing
+  # nothing.  By increasing the scale_down_adjustment during reindexes,
+  # we'll stop tasks faster and make reindexing cheaper.
+  #
+  # Note: if the scale down adjustment is greater than the number of tasks,
+  # ECS will just stop every task.  e.g. if scale_down_adjustment = -5 and
+  # there are 3 tasks running, ECS will scale the tasks down to zero.
+  scale_down_adjustment = var.is_reindexing ? -5 : -1
+  scale_up_adjustment   = 1
+
   services = [
     "ingestor_works",
     "ingestor_images",

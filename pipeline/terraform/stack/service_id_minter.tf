@@ -57,6 +57,9 @@ module "id_minter" {
     var.max_capacity
   )
 
+  scale_down_adjustment = local.scale_down_adjustment
+  scale_up_adjustment   = local.scale_up_adjustment
+
   subnets           = var.subnets
   queue_read_policy = module.id_minter_queue.read_policy
 

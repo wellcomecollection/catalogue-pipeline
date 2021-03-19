@@ -37,8 +37,13 @@ module "batcher" {
 
   shared_logging_secrets = var.shared_logging_secrets
 
-  subnets           = var.subnets
-  max_capacity      = min(1, local.max_capacity)
+  subnets = var.subnets
+
+  max_capacity = min(1, local.max_capacity)
+
+  scale_down_adjustment = local.scale_down_adjustment
+  scale_up_adjustment   = local.scale_up_adjustment
+
   queue_read_policy = module.batcher_queue.read_policy
 
   cpu    = 1024
