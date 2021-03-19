@@ -13,9 +13,8 @@ module "batcher" {
   container_image = local.batcher_image
 
   security_group_ids = [
-    # TODO: Do we need these?
+    # TODO: Do we need the egress security group?
     aws_security_group.service_egress.id,
-    aws_security_group.interservice.id,
   ]
 
   elastic_cloud_vpce_sg_id = var.ec_privatelink_security_group_id

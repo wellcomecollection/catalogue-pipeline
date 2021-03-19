@@ -13,16 +13,3 @@ resource "aws_security_group" "service_egress" {
     ]
   }
 }
-
-resource "aws_security_group" "interservice" {
-  name        = "${local.namespace_hyphen}_interservice"
-  description = "Allow traffic between services"
-  vpc_id      = var.vpc_id
-
-  ingress {
-    from_port = 0
-    to_port   = 0
-    protocol  = "-1"
-    self      = true
-  }
-}
