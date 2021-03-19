@@ -9,8 +9,7 @@ import uk.ac.wellcome.json.JsonUtil.fromJson
 import uk.ac.wellcome.models.work.generators.{
   ContributorGenerators,
   GenreGenerators,
-  SubjectGenerators,
-  WorkGenerators
+  SubjectGenerators
 }
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
 import uk.ac.wellcome.platform.api.models._
@@ -32,7 +31,6 @@ class WorksQueryTest
     with SearchOptionsGenerators
     with SubjectGenerators
     with GenreGenerators
-    with WorkGenerators
     with ImageGenerators
     with ContributorGenerators {
 

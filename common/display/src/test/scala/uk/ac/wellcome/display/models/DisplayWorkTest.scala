@@ -7,10 +7,7 @@ import org.scalacheck.ScalacheckShapeless._
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
-import uk.ac.wellcome.models.work.generators.{
-  ProductionEventGenerators,
-  WorkGenerators
-}
+import uk.ac.wellcome.models.work.generators.ProductionEventGenerators
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.locations._
@@ -20,7 +17,6 @@ class DisplayWorkTest
     extends AnyFunSpec
     with Matchers
     with ProductionEventGenerators
-    with WorkGenerators
     with ImageGenerators
     with ScalaCheckPropertyChecks {
 

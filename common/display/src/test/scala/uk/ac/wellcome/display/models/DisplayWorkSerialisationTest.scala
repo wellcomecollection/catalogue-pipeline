@@ -5,8 +5,7 @@ import uk.ac.wellcome.display.models.Implicits._
 import uk.ac.wellcome.display.test.util.JsonMapperTestUtil
 import uk.ac.wellcome.models.work.generators.{
   ProductionEventGenerators,
-  SubjectGenerators,
-  WorkGenerators
+  SubjectGenerators
 }
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.locations._
@@ -18,7 +17,6 @@ class DisplayWorkSerialisationTest
     with JsonMapperTestUtil
     with ProductionEventGenerators
     with SubjectGenerators
-    with WorkGenerators
     with ImageGenerators {
 
   it("serialises a DisplayWork") {
