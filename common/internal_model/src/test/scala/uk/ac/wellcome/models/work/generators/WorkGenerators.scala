@@ -4,6 +4,7 @@ import java.time.Instant
 import weco.catalogue.internal_model.generators.IdentifiersGenerators
 import weco.catalogue.internal_model.identifiers.{DataState, SourceIdentifier}
 import weco.catalogue.internal_model.image.ImageData
+import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.locations.Location
 import weco.catalogue.internal_model.work.DeletedReason.DeletedFromSource
 import weco.catalogue.internal_model.work.WorkState._

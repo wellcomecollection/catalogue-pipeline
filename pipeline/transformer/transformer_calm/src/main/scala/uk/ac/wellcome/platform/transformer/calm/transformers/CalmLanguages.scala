@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.transformer.calm.transformers
 
-import weco.catalogue.internal_model.work.{Language, LanguageNote}
-import weco.catalogue.internal_model.languages.MarcLanguageCodeList
+import weco.catalogue.internal_model.work.LanguageNote
+import weco.catalogue.internal_model.languages.{Language, MarcLanguageCodeList}
 
 import scala.util.matching.Regex
 

@@ -12,6 +12,7 @@ import uk.ac.wellcome.json.JsonUtil._
 import weco.catalogue.internal_model.work.WorkState.Source
 import org.scalatest.Assertion
 import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.locations.AccessStatus.LicensedResources
 import weco.catalogue.internal_model.locations._
 import weco.catalogue.internal_model.locations.LocationType.{

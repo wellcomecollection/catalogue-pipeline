@@ -6,6 +6,7 @@ import weco.catalogue.internal_model.identifiers.{
   SourceIdentifier
 }
 import weco.catalogue.internal_model.image.ImageData
+import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.locations.Location
 
 import java.time.Instant
