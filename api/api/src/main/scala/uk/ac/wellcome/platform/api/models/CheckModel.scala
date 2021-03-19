@@ -12,13 +12,16 @@ object CheckModel {
     val version = BuildInfo.version.split("\\.").toList
     val mapping =
       Await.result(elasticClient.execute(getMapping(indexName)), 5 seconds)
+
+    val metadata = mapping.result.head.meta
+
     require(
-      mapping.result.head.meta.contains(s"model.versions.${version.head}"),
-      s"The index $indexName doesn't support internal model version ${BuildInfo.version}"
+      metadata.contains(s"model.versions.${version.head}"),
+      s"The index $indexName doesn't support internal model version ${BuildInfo.version} (supports $metadata)"
     )
     require(
-      mapping.result.head.meta(s"model.versions.${version.head}") == version(1),
-      s"The index $indexName doesn't support internal model version ${BuildInfo.version}"
+      metadata(s"model.versions.${version.head}") == version(1),
+      s"The index $indexName has a different hash for internal model version ${BuildInfo.version} ($metadata)"
     )
   }
 }
