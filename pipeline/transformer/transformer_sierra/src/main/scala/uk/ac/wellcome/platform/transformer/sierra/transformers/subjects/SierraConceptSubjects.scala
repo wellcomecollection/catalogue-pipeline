@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers.subjects
 
-import uk.ac.wellcome.models.work.text.TextNormalisation._
+import weco.catalogue.internal_model.text.TextNormalisation._
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   MarcSubfield,
   VarField
