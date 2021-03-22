@@ -45,11 +45,9 @@ def main(index_date, work_id):
     valid_node_links = [
         [dest for dest in ids if dest not in deleted_node_ids] for ids in node_links
     ]
-    for node, links in zip(nodes, valid_node_links):
-        if node["type"] == "Deleted":
-            deleted_node_ids.add(node["id"])
-            continue
-
+    for node, links in filter(
+        lambda x: x[0]["type"] != "Deleted", zip(nodes, valid_node_links)
+    ):
         source = source_type_labels.get(node["source_id_type"], node["source_id_type"])
         graph.node(node["id"], label=fr"{source}\n{node['source_id']}")
         graph.edges([(node["id"], dest) for dest in links])
