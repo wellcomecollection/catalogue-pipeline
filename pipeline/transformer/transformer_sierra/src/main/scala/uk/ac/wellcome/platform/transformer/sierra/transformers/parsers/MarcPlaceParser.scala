@@ -1,7 +1,8 @@
-package uk.ac.wellcome.models.parse
+package uk.ac.wellcome.platform.transformer.sierra.transformers.parsers
 
 import fastparse._, NoWhitespace._
 
+import uk.ac.wellcome.models.parse.Parser
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.Place
 
