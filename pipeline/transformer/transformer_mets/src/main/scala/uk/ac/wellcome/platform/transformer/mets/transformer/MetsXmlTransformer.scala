@@ -2,7 +2,6 @@ package uk.ac.wellcome.platform.transformer.mets.transformer
 
 import uk.ac.wellcome.storage.store.Readable
 import uk.ac.wellcome.storage.Identified
-import uk.ac.wellcome.models.work.internal.result.Result
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import weco.catalogue.internal_model.work.{Work, WorkState}
 import weco.catalogue.source_model.mets.{
@@ -11,6 +10,7 @@ import weco.catalogue.source_model.mets.{
   MetsSourceData
 }
 import weco.catalogue.transformer.Transformer
+import weco.catalogue.transformer.result.Result
 
 class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
     extends Transformer[MetsSourceData] {
