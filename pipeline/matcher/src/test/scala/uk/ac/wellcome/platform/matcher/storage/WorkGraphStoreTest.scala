@@ -25,7 +25,10 @@ class WorkGraphStoreTest
         withWorkGraphStore(graphTable) { workGraphStore =>
           whenReady(
             workGraphStore.findAffectedWorks(
-              WorkLinks("Not-there", version = 0, referencedWorkIds = Set.empty))) { workGraph =>
+              WorkLinks(
+                "Not-there",
+                version = 0,
+                referencedWorkIds = Set.empty))) { workGraph =>
             workGraph shouldBe WorkGraph(Set.empty)
           }
         }
@@ -37,7 +40,11 @@ class WorkGraphStoreTest
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
           val work =
-            WorkNode(id = idA, version = 0, linkedIds = Nil, componentId = ciHash(idA))
+            WorkNode(
+              id = idA,
+              version = 0,
+              linkedIds = Nil,
+              componentId = ciHash(idA))
           put(dynamoClient, graphTable.name)(work)
 
           whenReady(
@@ -53,9 +60,17 @@ class WorkGraphStoreTest
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
           val workA =
-            WorkNode(id = idA, version = 0, linkedIds = Nil, componentId = ciHash(idA))
+            WorkNode(
+              id = idA,
+              version = 0,
+              linkedIds = Nil,
+              componentId = ciHash(idA))
           val workB =
-            WorkNode(id = idB, version = 0, linkedIds = Nil, componentId = ciHash(idB))
+            WorkNode(
+              id = idB,
+              version = 0,
+              linkedIds = Nil,
+              componentId = ciHash(idB))
           put(dynamoClient, graphTable.name)(workA)
           put(dynamoClient, graphTable.name)(workB)
 
@@ -78,13 +93,18 @@ class WorkGraphStoreTest
               linkedIds = List(idB),
               componentId = ciHash(idA, idB))
           val workB =
-            WorkNode(id = idB, version = 0, linkedIds = Nil, componentId = ciHash(idA, idB))
+            WorkNode(
+              id = idB,
+              version = 0,
+              linkedIds = Nil,
+              componentId = ciHash(idA, idB))
 
           put(dynamoClient, graphTable.name)(workA)
           put(dynamoClient, graphTable.name)(workB)
 
           whenReady(
-            workGraphStore.findAffectedWorks(WorkLinks(idA, version = 0, referencedWorkIds = Set.empty))) {
+            workGraphStore.findAffectedWorks(
+              WorkLinks(idA, version = 0, referencedWorkIds = Set.empty))) {
             workGraph =>
               workGraph.nodes shouldBe Set(workA, workB)
           }
@@ -138,9 +158,17 @@ class WorkGraphStoreTest
               linkedIds = List(idB),
               componentId = ciHash(idA, idB))
           val workB =
-            WorkNode(id = idB, version = 0, linkedIds = Nil, componentId = ciHash(idA, idB))
+            WorkNode(
+              id = idB,
+              version = 0,
+              linkedIds = Nil,
+              componentId = ciHash(idA, idB))
           val workC =
-            WorkNode(id = idC, version = 0, linkedIds = Nil, componentId = ciHash(idC))
+            WorkNode(
+              id = idC,
+              version = 0,
+              linkedIds = Nil,
+              componentId = ciHash(idC))
 
           put(dynamoClient, graphTable.name)(workA)
           put(dynamoClient, graphTable.name)(workB)
@@ -148,10 +176,8 @@ class WorkGraphStoreTest
 
           val links = WorkLinks(idB, version = 0, referencedWorkIds = Set(idC))
 
-          whenReady(
-            workGraphStore.findAffectedWorks(links)) {
-            workGraph =>
-              workGraph.nodes shouldBe Set(workA, workB, workC)
+          whenReady(workGraphStore.findAffectedWorks(links)) { workGraph =>
+            workGraph.nodes shouldBe Set(workA, workB, workC)
           }
         }
       }
@@ -162,8 +188,16 @@ class WorkGraphStoreTest
     it("puts a simple graph") {
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
-          val workNodeA = WorkNode(idA, version = 0, linkedIds = List(idB), componentId = ciHash(idA, idB))
-          val workNodeB = WorkNode(idB, version = 0, linkedIds = Nil, componentId = ciHash(idA, idB))
+          val workNodeA = WorkNode(
+            idA,
+            version = 0,
+            linkedIds = List(idB),
+            componentId = ciHash(idA, idB))
+          val workNodeB = WorkNode(
+            idB,
+            version = 0,
+            linkedIds = Nil,
+            componentId = ciHash(idA, idB))
 
           whenReady(workGraphStore.put(WorkGraph(Set(workNodeA, workNodeB)))) {
             _ =>
@@ -191,7 +225,11 @@ class WorkGraphStoreTest
 
     val workGraphStore = new WorkGraphStore(brokenWorkNodeDao)
 
-    val workNode = WorkNode(idA, version = 0, linkedIds = Nil, componentId = ciHash(idA, idB))
+    val workNode = WorkNode(
+      idA,
+      version = 0,
+      linkedIds = Nil,
+      componentId = ciHash(idA, idB))
 
     whenReady(
       workGraphStore
