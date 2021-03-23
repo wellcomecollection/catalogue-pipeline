@@ -43,7 +43,7 @@ class WorksIndexConfigTest
   // We could just import the library, but I might wait until we need more
   // Taken from here:
   // https://github.com/rallyhealth/scalacheck-ops/blob/master/core/src/main/scala/org/scalacheck/ops/time/ImplicitJavaTimeGenerators.scala
-  implicit val arbInstant: Arbitrary[Instant] = {
+  implicit val arbInstant: Arbitrary[Instant] =
     Arbitrary {
       for {
         millis <- chooseNum(
@@ -54,7 +54,6 @@ class WorksIndexConfigTest
         Instant.ofEpochMilli(millis).plusNanos(nanos)
       }
     }
-  }
 
   implicit val badObjectEncoder: Encoder[BadTestObject] = deriveEncoder
 
