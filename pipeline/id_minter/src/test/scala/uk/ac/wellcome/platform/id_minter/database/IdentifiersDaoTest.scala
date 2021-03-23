@@ -172,7 +172,7 @@ class IdentifiersDaoTest
               .where
               .eq(identifiersTable.i.SourceSystem, identifier.SourceSystem)
               .and
-              .eq(identifiersTable.i.CanonicalId, identifier.CanonicalId)
+              .eq(identifiersTable.i.CanonicalId, identifier.CanonicalId.underlying)
           }.map(Identifier(identifiersTable.i)).single.apply()
 
           maybeIdentifier shouldBe defined

@@ -1,5 +1,7 @@
 package uk.ac.wellcome.platform.id_minter.utils
 
+import weco.catalogue.internal_model.identifiers.CanonicalID
+
 import scala.util.Random
 
 object Identifiable {
@@ -15,16 +17,18 @@ object Identifiable {
   private val firstCharacterSet =
     allowedCharacterSet.filterNot(numberRange.contains)
 
-  def generate: String =
-    (1 to identifierLength).map {
-      // One of the serialization formats of RDF is XML, so for
-      // compatibility, our identifiers have to comply with XML rules.
-      // XML identifiers cannot start with numbers, so we apply the same
-      // rule to the identifiers we generate.
-      //
-      // See: http://stackoverflow.com/a/1077111/1558022
-      case 1 => firstCharacterSet(Random.nextInt(firstCharacterSet.length))
-      case _ =>
-        allowedCharacterSet(Random.nextInt(allowedCharacterSet.length))
-    }.mkString
+  def generate: CanonicalID =
+    CanonicalID(
+      (1 to identifierLength).map {
+        // One of the serialization formats of RDF is XML, so for
+        // compatibility, our identifiers have to comply with XML rules.
+        // XML identifiers cannot start with numbers, so we apply the same
+        // rule to the identifiers we generate.
+        //
+        // See: http://stackoverflow.com/a/1077111/1558022
+        case 1 => firstCharacterSet(Random.nextInt(firstCharacterSet.length))
+        case _ =>
+          allowedCharacterSet(Random.nextInt(allowedCharacterSet.length))
+      }.mkString
+    )
 }

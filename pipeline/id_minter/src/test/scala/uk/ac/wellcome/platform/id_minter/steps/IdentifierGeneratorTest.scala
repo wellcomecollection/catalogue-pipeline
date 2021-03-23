@@ -177,7 +177,7 @@ class IdentifierGeneratorTest
         )
 
         val id = triedId.get.values.head.CanonicalId
-        id should not be empty
+        id.underlying should not be empty
 
         val i = identifiersTable.i
         val maybeIdentifier = withSQL {

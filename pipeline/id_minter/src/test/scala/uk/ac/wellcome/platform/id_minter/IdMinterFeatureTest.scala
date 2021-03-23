@@ -123,7 +123,8 @@ class IdMinterFeatureTest
           identifiedWork
             .asInstanceOf[Work.Redirected[Identified]]
             .redirectTarget
-            .canonicalId shouldNot be(empty)
+            .canonicalId
+            .underlying shouldNot be(empty)
         }
       }
     }
