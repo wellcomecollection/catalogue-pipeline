@@ -8,7 +8,8 @@ trait WorkLinksGenerators extends IdentifiersGenerators {
   def createIdentifier(canonicalId: CanonicalID): IdState.Identified =
     IdState.Identified(
       canonicalId = canonicalId,
-      sourceIdentifier = createSourceIdentifierWith(value = canonicalId.toString)
+      sourceIdentifier =
+        createSourceIdentifierWith(value = canonicalId.toString)
     )
 
   def createIdentifier(canonicalId: String): IdState.Identified =

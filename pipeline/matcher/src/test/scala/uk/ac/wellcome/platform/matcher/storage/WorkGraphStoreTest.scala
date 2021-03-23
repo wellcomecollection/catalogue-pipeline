@@ -42,7 +42,6 @@ class WorkGraphStoreTest
       "returns a WorkNode if it has no links and it's the only node in the setId") {
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
-
           val work =
             WorkNode(
               id = idA,

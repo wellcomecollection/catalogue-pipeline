@@ -54,4 +54,3 @@ object CanonicalID {
   implicit val ordering: Ordering[CanonicalID] =
     (x: CanonicalID, y: CanonicalID) => x.underlying.compare(y.underlying)
 }
-

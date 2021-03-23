@@ -199,7 +199,9 @@ class WorkNodeDaoTest
     it("returns an error if Scanamo fails during a getByComponentIds") {
       withWorkGraphTable { table =>
         withWorkNodeDao(table) { workNodeDao =>
-          case class BadRecord(id: CanonicalID, componentId: String, version: String)
+          case class BadRecord(id: CanonicalID,
+                               componentId: String,
+                               version: String)
           val badRecord: BadRecord =
             BadRecord(
               id = idA,
