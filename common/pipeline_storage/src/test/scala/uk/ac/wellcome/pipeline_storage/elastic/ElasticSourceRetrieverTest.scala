@@ -3,7 +3,6 @@ package uk.ac.wellcome.pipeline_storage.elastic
 import com.sksamuel.elastic4s.Index
 import uk.ac.wellcome.elasticsearch.NoStrictMapping
 import uk.ac.wellcome.elasticsearch.model.IndexId
-import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.pipeline_storage.{Retriever, RetrieverTestCases}
 import uk.ac.wellcome.pipeline_storage.fixtures.{
@@ -16,7 +15,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class ElasticSourceRetrieverTest
     extends RetrieverTestCases[Index, SampleDocument]
-    with ElasticsearchFixtures
     with ElasticIndexerFixtures
     with IdentifiersGenerators {
 

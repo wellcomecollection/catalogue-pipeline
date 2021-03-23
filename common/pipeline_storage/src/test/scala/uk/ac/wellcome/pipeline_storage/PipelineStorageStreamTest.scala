@@ -9,7 +9,6 @@ import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.time.{Seconds, Span}
 import software.amazon.awssdk.services.sqs.model.Message
-import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.elasticsearch.{ElasticClientBuilder, NoStrictMapping}
 import uk.ac.wellcome.json.JsonUtil
 import uk.ac.wellcome.json.JsonUtil._
@@ -32,7 +31,6 @@ class PipelineStorageStreamTest
     extends AnyFunSpec
     with ElasticIndexerFixtures
     with IdentifiersGenerators
-    with ElasticsearchFixtures
     with PipelineStorageStreamFixtures {
 
   def indexer(index: Index, elasticClient: ElasticClient = elasticClient) =
