@@ -14,7 +14,11 @@ import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.WorkGenerators
 import weco.catalogue.internal_model.generators.ImageGenerators
-import weco.catalogue.internal_model.identifiers.{IdState, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  CanonicalId,
+  IdState,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.locations.{AccessCondition, AccessStatus}
 import weco.catalogue.internal_model.work._
 
@@ -62,6 +66,11 @@ class WorksIndexConfigTest
   implicit val arbitrarySourceIdentifier: Arbitrary[SourceIdentifier] =
     Arbitrary {
       createSourceIdentifier
+    }
+
+  implicit val arbitraryCanonicalId: Arbitrary[CanonicalId] =
+    Arbitrary {
+      createCanonicalId
     }
 
   implicit val badObjectEncoder: Encoder[BadTestObject] = deriveEncoder
