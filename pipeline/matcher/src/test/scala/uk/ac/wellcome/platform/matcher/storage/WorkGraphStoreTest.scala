@@ -21,7 +21,7 @@ class WorkGraphStoreTest
         withWorkGraphStore(graphTable) { workGraphStore =>
           whenReady(
             workGraphStore.findAffectedWorks(
-              WorkLinks("Not-there", 0, Set.empty))) { workGraph =>
+              WorkLinks("Not-there", version = 0, referencedWorkIds = Set.empty))) { workGraph =>
             workGraph shouldBe WorkGraph(Set.empty)
           }
         }
@@ -80,7 +80,7 @@ class WorkGraphStoreTest
           put(dynamoClient, graphTable.name)(workB)
 
           whenReady(
-            workGraphStore.findAffectedWorks(WorkLinks("A", 0, Set.empty))) {
+            workGraphStore.findAffectedWorks(WorkLinks("A", version = 0, referencedWorkIds = Set.empty))) {
             workGraph =>
               workGraph.nodes shouldBe Set(workA, workB)
           }
@@ -142,8 +142,10 @@ class WorkGraphStoreTest
           put(dynamoClient, graphTable.name)(workB)
           put(dynamoClient, graphTable.name)(workC)
 
+          val links = WorkLinks(idB, version = 0, referencedWorkIds = Set(idC))
+
           whenReady(
-            workGraphStore.findAffectedWorks(WorkLinks("B", 0, Set("C")))) {
+            workGraphStore.findAffectedWorks(links)) {
             workGraph =>
               workGraph.nodes shouldBe Set(workA, workB, workC)
           }
@@ -156,8 +158,8 @@ class WorkGraphStoreTest
     it("puts a simple graph") {
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
-          val workNodeA = WorkNode("A", version = 0, List("B"), "A+B")
-          val workNodeB = WorkNode("B", version = 0, Nil, "A+B")
+          val workNodeA = WorkNode("A", version = 0, linkedIds = List("B"), componentId = "A+B")
+          val workNodeB = WorkNode("B", version = 0, linkedIds = Nil, componentId = "A+B")
 
           whenReady(workGraphStore.put(WorkGraph(Set(workNodeA, workNodeB)))) {
             _ =>
@@ -185,9 +187,11 @@ class WorkGraphStoreTest
 
     val workGraphStore = new WorkGraphStore(brokenWorkNodeDao)
 
+    val workNode = WorkNode("A", version = 0, linkedIds = Nil, componentId = "A+B")
+
     whenReady(
       workGraphStore
-        .put(WorkGraph(Set(WorkNode("A", version = 0, Nil, "A+B"))))
+        .put(WorkGraph(Set(workNode)))
         .failed) { failedException =>
       failedException shouldBe expectedException
     }
