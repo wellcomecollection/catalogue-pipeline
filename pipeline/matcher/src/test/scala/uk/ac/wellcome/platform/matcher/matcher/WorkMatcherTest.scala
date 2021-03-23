@@ -97,17 +97,14 @@ class WorkMatcherTest
                 identifierA.canonicalId,
                 links.version,
                 List(identifierB.canonicalId),
-                ciHash(
-                  List(identifierA.canonicalId, identifierB.canonicalId).sorted
-                    .mkString("+"))
+                ciHash(identifierA.canonicalId, identifierB.canonicalId)
               ),
               WorkNode(
                 identifierB.canonicalId,
                 None,
                 Nil,
-                ciHash(
-                  List(identifierA.canonicalId, identifierB.canonicalId).sorted
-                    .mkString("+")))
+                ciHash(identifierA.canonicalId, identifierB.canonicalId)
+              )
             )
           }
         }
@@ -124,18 +121,14 @@ class WorkMatcherTest
             identifierA.canonicalId,
             1,
             List(identifierB.canonicalId),
-            ciHash(
-              ciHash(
-                List(identifierA.canonicalId, identifierB.canonicalId).sorted
-                  .mkString("+"))))
+            ciHash(identifierA.canonicalId, identifierB.canonicalId)
+          )
           val existingWorkB = WorkNode(
             identifierB.canonicalId,
             1,
             Nil,
-            ciHash(
-              ciHash(
-                List(identifierA.canonicalId, identifierB.canonicalId).sorted
-                  .mkString("+"))))
+            ciHash(identifierA.canonicalId, identifierB.canonicalId)
+          )
           val existingWorkC = WorkNode(
             identifierC.canonicalId,
             1,
@@ -170,30 +163,27 @@ class WorkMatcherTest
                 1,
                 List(identifierB.canonicalId),
                 ciHash(
-                  List(
-                    identifierA.canonicalId,
-                    identifierB.canonicalId,
-                    identifierC.canonicalId).sorted.mkString("+"))
+                  identifierA.canonicalId,
+                  identifierB.canonicalId,
+                  identifierC.canonicalId)
               ),
               WorkNode(
                 identifierB.canonicalId,
                 2,
                 List(identifierC.canonicalId),
                 ciHash(
-                  List(
-                    identifierA.canonicalId,
-                    identifierB.canonicalId,
-                    identifierC.canonicalId).sorted.mkString("+"))
+                  identifierA.canonicalId,
+                  identifierB.canonicalId,
+                  identifierC.canonicalId)
               ),
               WorkNode(
                 identifierC.canonicalId,
                 1,
                 Nil,
                 ciHash(
-                  List(
-                    identifierA.canonicalId,
-                    identifierB.canonicalId,
-                    identifierC.canonicalId).sorted.mkString("+")))
+                  identifierA.canonicalId,
+                  identifierB.canonicalId,
+                  identifierC.canonicalId))
             )
           }
         }
