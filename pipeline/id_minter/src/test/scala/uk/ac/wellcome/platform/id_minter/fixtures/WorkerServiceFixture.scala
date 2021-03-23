@@ -58,7 +58,7 @@ trait WorkerServiceFixture
     mergedIndex: Map[String, Json],
     identifiedIndex: mutable.Map[String, Work[Identified]])(
     testWith: TestWith[IdMinterWorkerService[String], R]): R = {
-    Class.forName("com.mysql.jdbc.Driver")
+    Class.forName("com.mysql.cj.jdbc.Driver")
     ConnectionPool.singleton(
       s"jdbc:mysql://$host:$port",
       username,
