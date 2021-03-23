@@ -103,10 +103,11 @@ class ElasticIndexerTest
 
       val analysis = WorksAnalysis()
 
+      val id = lowercaseKeyword("id")
       val title = textField("title")
       val data = objectField("data")
 
-      val mapping = properties(Seq(title, canonicalId, version, data))
+      val mapping = properties(Seq(title, id, version, data))
         .dynamic(DynamicMapping.Strict)
     }
 
@@ -131,15 +132,15 @@ class ElasticIndexerTest
   }
 
   it("does not store optional fields when those fields are unmapped") {
-
-    val documents = List(
-      createDocumentWith("A", 1).copy(
-        data = SampleDocumentData(genre = Some("Crime"))
-      ),
-      createDocumentWith("B", 2).copy(
-        data = SampleDocumentData(date = Some("10/10/2010"))
-      ),
+    val documentA = createDocumentWith("A", 1).copy(
+      data = SampleDocumentData(genre = Some("Crime"))
     )
+
+    val documentB = createDocumentWith("B", 2).copy(
+      data = SampleDocumentData(date = Some("10/10/2010"))
+    )
+
+    val documents = List(documentA, documentB)
 
     object UnmappedDataMappingIndexConfig
         extends IndexConfig
@@ -149,10 +150,11 @@ class ElasticIndexerTest
 
       val analysis = WorksAnalysis()
 
+      val id = lowercaseKeyword("id")
       val title = textField("title")
       val data = objectField("data").dynamic("false")
 
-      val mapping = properties(Seq(title, canonicalId, version, data))
+      val mapping = properties(Seq(title, id, version, data))
         .dynamic(DynamicMapping.Strict)
     }
 
@@ -162,6 +164,7 @@ class ElasticIndexerTest
           val future = indexer(documents)
 
           whenReady(future) { result =>
+            println(result)
             result.right.get should contain only (documents: _*)
             val hits = eventually {
               val response = elasticClient.execute {
@@ -175,15 +178,15 @@ class ElasticIndexerTest
             }
             hits.map(_.sourceAsMap).toList shouldBe List(
               Map(
-                "canonicalId" -> "A",
-                "version" -> 1,
-                "title" -> "A:1",
+                "id" -> documentA.id,
+                "version" -> documentA.version,
+                "title" -> documentA.title,
                 "data" -> Map("genre" -> "Crime")
               ),
               Map(
-                "canonicalId" -> "B",
-                "version" -> 2,
-                "title" -> "B:2",
+                "id" -> documentB.id,
+                "version" -> documentB.version,
+                "title" -> documentB.title,
                 "data" -> Map("date" -> "10/10/2010")
               )
             )
