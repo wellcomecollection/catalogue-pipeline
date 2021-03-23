@@ -1,5 +1,6 @@
 package uk.ac.wellcome.relation_embedder
 
+import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.catalogue.internal_model.work._
 
 /** Contains the minimal set of fields on a Work needed for generating a
@@ -23,7 +24,7 @@ case class RelationWork(
 }
 
 case class RelationWorkState(
-  canonicalId: String,
+  canonicalId: CanonicalId,
   availabilities: Set[Availability],
 )
 

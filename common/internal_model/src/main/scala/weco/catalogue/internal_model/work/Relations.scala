@@ -1,5 +1,8 @@
 package weco.catalogue.internal_model.work
 
+import weco.catalogue.internal_model.identifiers.CanonicalId
+import weco.catalogue.internal_model.work.WorkState.{Indexed, Merged}
+
 /** Holds relations for a particular work.
   *
   * @param ancestors Ancestors from root downwards
@@ -40,7 +43,7 @@ object Relations {
   * @param depth The depth of the relation in the tree
   */
 case class Relation(
-  id: String,
+  id: CanonicalId,
   title: Option[String],
   collectionPath: Option[CollectionPath],
   workType: WorkType,
@@ -50,18 +53,32 @@ case class Relation(
 )
 
 object Relation {
-
-  def apply[State <: WorkState](work: Work[State],
-                                depth: Int,
-                                numChildren: Int,
-                                numDescendents: Int): Relation =
+  private def apply(
+    id: CanonicalId,
+    data: WorkData[_],
+    depth: Int,
+    numChildren: Int,
+    numDescendents: Int
+  ): Relation =
     Relation(
-      id = work.id,
-      title = work.data.title,
-      collectionPath = work.data.collectionPath,
-      workType = work.data.workType,
+      id = id,
+      title = data.title,
+      collectionPath = data.collectionPath,
+      workType = data.workType,
       depth = depth,
       numChildren = numChildren,
       numDescendents = numDescendents,
     )
+
+  def apply[State <: WorkState](work: Work[State], depth: Int, numChildren: Int, numDescendents: Int): Relation =
+    work.state match {
+      case state: Indexed =>
+        apply(state.canonicalId, work.data, depth, numChildren, numDescendents)
+
+      case state: Merged =>
+        apply(state.canonicalId, work.data, depth, numChildren, numDescendents)
+
+      case _ =>
+        throw new IllegalArgumentException(s"Cannot create Relation from $work")
+    }
 }
