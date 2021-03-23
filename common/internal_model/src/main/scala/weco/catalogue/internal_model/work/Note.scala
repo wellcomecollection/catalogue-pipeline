@@ -22,6 +22,8 @@ case class CiteAsNote(content: String) extends Note
 
 case class LocationOfOriginalNote(content: String) extends Note
 
+case class LocationOfDuplicatesNote(content: String) extends Note
+
 case class BindingInformation(content: String) extends Note
 
 case class BiographicalNote(content: String) extends Note
