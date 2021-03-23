@@ -1,6 +1,5 @@
 package uk.ac.wellcome.platform.transformer.calm.transformers
 
-import uk.ac.wellcome.models.work.internal.result._
 import uk.ac.wellcome.platform.transformer.calm.CalmRecordOps
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.locations.{
@@ -11,6 +10,7 @@ import weco.catalogue.internal_model.locations.{
 }
 import weco.catalogue.internal_model.work.Item
 import weco.catalogue.source_model.calm.CalmRecord
+import weco.catalogue.transformer.result._
 
 object CalmItems extends CalmRecordOps {
   def apply(record: CalmRecord): Result[List[Item[IdState.Unminted]]] =

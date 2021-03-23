@@ -1,9 +1,9 @@
-package uk.ac.wellcome.models.work.internal.text
+package weco.catalogue.internal_model.text
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.text.TextNormalisation._
+import TextNormalisation._
 
 class TextNormalisationTest extends AnyFunSpec with Matchers {
   describe("trimTrailing") {

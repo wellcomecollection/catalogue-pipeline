@@ -1,4 +1,4 @@
-package uk.ac.wellcome.models.work.internal
+package weco.catalogue.transformer
 
 package object result {
 

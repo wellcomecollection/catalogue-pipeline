@@ -6,17 +6,6 @@ import WorksAnalysis._
 /** Mixin for common fields used within an IndexConfig in our internal models.
   */
 trait IndexConfigFields {
-  // `textWithKeyword` and `keywordWithText` are slightly different in the semantics and their use case.
-  // If the intended field type is keyword, but you would like to search it textually, use `keywordWithText` and
-  // visa versa.
-
-  // This encodes how someone would expect the field to work, but allow querying it in other ways.
-  def textWithKeyword(name: String) =
-    textField(name).fields(keywordField("keyword"))
-
-  def keywordWithText(name: String) =
-    keywordField(name).fields(textField("text"))
-
   def englishTextKeywordField(name: String) =
     textField(name).fields(
       keywordField("keyword"),
@@ -50,7 +39,8 @@ trait IndexConfigFields {
     keywordField(name).normalizer(lowercaseNormalizer.name)
 
   def asciifoldingTextFieldWithKeyword(name: String) =
-    textWithKeyword(name)
+    textField(name)
+      .fields(keywordField("keyword"))
       .analyzer(asciifoldingAnalyzer.name)
 
   val label = asciifoldingTextFieldWithKeyword("label")

@@ -1,7 +1,7 @@
 package weco.catalogue.internal_model.work
 
 import uk.ac.wellcome.models.parse.parsers.DateParser
-import uk.ac.wellcome.models.work.text.TextNormalisation._
+import weco.catalogue.internal_model.text.TextNormalisation._
 import weco.catalogue.internal_model.identifiers.{HasId, IdState}
 
 sealed trait AbstractRootConcept[+State] extends HasId[State] {

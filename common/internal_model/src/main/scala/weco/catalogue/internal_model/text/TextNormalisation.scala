@@ -1,4 +1,4 @@
-package uk.ac.wellcome.models.work.text
+package weco.catalogue.internal_model.text
 
 import scala.util.matching.Regex
 

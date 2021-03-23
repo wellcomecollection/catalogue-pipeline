@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import uk.ac.wellcome.platform.transformer.sierra.exceptions.CataloguingException
 import uk.ac.wellcome.platform.transformer.sierra.source._
-import uk.ac.wellcome.models.parse.Marc008Parser
+import uk.ac.wellcome.platform.transformer.sierra.transformers.parsers.Marc008Parser
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work._
 import weco.catalogue.source_model.sierra.SierraBibNumber

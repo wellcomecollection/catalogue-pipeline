@@ -2,7 +2,6 @@ package uk.ac.wellcome.platform.transformer.sierra.services
 
 import io.circe.Decoder
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.models.work.internal.result
 import weco.catalogue.internal_model.work.WorkState.Source
 import uk.ac.wellcome.pipeline_storage.{PipelineStorageStream, Retriever}
 import uk.ac.wellcome.platform.transformer.sierra.SierraTransformer
@@ -14,6 +13,7 @@ import weco.catalogue.internal_model.work.Work
 import weco.catalogue.source_model.SierraSourcePayload
 import weco.catalogue.source_model.sierra.SierraTransformable
 import weco.catalogue.transformer.{Transformer, TransformerWorker}
+import weco.catalogue.transformer.result
 
 import scala.concurrent.ExecutionContext
 

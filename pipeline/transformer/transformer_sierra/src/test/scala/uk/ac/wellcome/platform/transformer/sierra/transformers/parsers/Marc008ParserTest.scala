@@ -1,4 +1,4 @@
-package uk.ac.wellcome.models.parse
+package uk.ac.wellcome.platform.transformer.sierra.transformers.parsers
 
 import org.scalatest.matchers.should.Matchers
 import java.time.LocalDate

@@ -12,7 +12,6 @@ import uk.ac.wellcome.platform.transformer.miro.models.MiroMetadata
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 import uk.ac.wellcome.platform.transformer.miro.transformers._
 import weco.catalogue.internal_model.work.WorkState.Source
-import uk.ac.wellcome.models.work.internal.result.Result
 import weco.catalogue.internal_model.identifiers.{
   DataState,
   IdentifierType,
@@ -22,6 +21,7 @@ import weco.catalogue.internal_model.work.DeletedReason.SuppressedFromSource
 import weco.catalogue.internal_model.work.InvisibilityReason.UnableToTransform
 import weco.catalogue.internal_model.work.{Work, WorkData}
 import weco.catalogue.transformer.Transformer
+import weco.catalogue.transformer.result.Result
 
 class MiroRecordTransformer
     extends MiroContributors

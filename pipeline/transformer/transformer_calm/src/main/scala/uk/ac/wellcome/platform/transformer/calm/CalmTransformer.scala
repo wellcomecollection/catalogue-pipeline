@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.transformer.calm
 
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.models.work.internal.result._
 import uk.ac.wellcome.platform.transformer.calm.models.{
   CalmSourceData,
   CalmTransformerException
@@ -14,6 +13,7 @@ import uk.ac.wellcome.platform.transformer.calm.transformers.{
 }
 import weco.catalogue.source_model.calm.CalmRecord
 import weco.catalogue.transformer.Transformer
+import weco.catalogue.transformer.result._
 import weco.catalogue.internal_model.work.WorkState.Source
 import uk.ac.wellcome.models.parse.PeriodParser
 import weco.catalogue.internal_model.identifiers.{
