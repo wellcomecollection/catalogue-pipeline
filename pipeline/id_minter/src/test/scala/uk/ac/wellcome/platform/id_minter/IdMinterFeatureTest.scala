@@ -9,7 +9,7 @@ import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.models.work.generators.WorkGenerators
 import weco.catalogue.internal_model.work.WorkState.Identified
 import uk.ac.wellcome.platform.id_minter.fixtures.WorkerServiceFixture
-import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.identifiers.{CanonicalId, IdState}
 import weco.catalogue.internal_model.work.Work
 
 import scala.collection.mutable
@@ -52,7 +52,7 @@ class IdMinterFeatureTest
 
           val identifiedWork = outputIndex(sentIds.head)
           identifiedWork.sourceIdentifier shouldBe work.sourceIdentifier
-          identifiedWork.state.canonicalId shouldBe sentIds.head
+          identifiedWork.state.canonicalId shouldBe CanonicalId(sentIds.head)
         }
       }
     }
@@ -84,7 +84,7 @@ class IdMinterFeatureTest
 
           val identifiedWork = outputIndex(sentId)
           identifiedWork.sourceIdentifier shouldBe work.sourceIdentifier
-          identifiedWork.state.canonicalId shouldBe sentId
+          identifiedWork.state.canonicalId shouldBe CanonicalId(sentId)
         }
       }
     }
@@ -119,7 +119,7 @@ class IdMinterFeatureTest
 
           val identifiedWork = outputIndex(sentId)
           identifiedWork.sourceIdentifier shouldBe work.sourceIdentifier
-          identifiedWork.state.canonicalId shouldBe sentId
+          identifiedWork.state.canonicalId shouldBe CanonicalId(sentId)
           identifiedWork
             .asInstanceOf[Work.Redirected[Identified]]
             .redirectTarget
