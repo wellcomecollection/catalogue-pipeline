@@ -14,7 +14,7 @@ import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.WorkGenerators
 import weco.catalogue.internal_model.generators.ImageGenerators
-import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.identifiers.{IdState, SourceIdentifier}
 import weco.catalogue.internal_model.locations.{AccessCondition, AccessStatus}
 import weco.catalogue.internal_model.work._
 
@@ -53,6 +53,15 @@ class WorksIndexConfigTest
       } yield {
         Instant.ofEpochMilli(millis).plusNanos(nanos)
       }
+    }
+
+  // We have a rule that says SourceIdentifier isn't allowed to contain whitespace,
+  // but sometimes scalacheck will happen to generate such a string, which breaks
+  // tests in CI.  This generator is meant to create SourceIdentifiers that
+  // don't contain whitespace.
+  implicit val arbitrarySourceIdentifier: Arbitrary[SourceIdentifier] =
+    Arbitrary {
+      createSourceIdentifier
     }
 
   implicit val badObjectEncoder: Encoder[BadTestObject] = deriveEncoder
