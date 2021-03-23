@@ -10,14 +10,28 @@ import uk.ac.wellcome.json.utils.JsonAssertions
 import scala.util.Success
 
 class CanonicalIDTest extends AnyFunSpec with Matchers with JsonAssertions {
+  it("checks it's really a canonical ID") {
+    intercept[IllegalArgumentException] {
+      CanonicalID("1")
+    }
+
+    intercept[IllegalArgumentException] {
+      CanonicalID("AStringThatsMoreThanEightCharacters")
+    }
+
+    intercept[IllegalArgumentException] {
+      CanonicalID("a string with space")
+    }
+  }
+
   describe("JSON encoding") {
     it("encodes as a string") {
-      val id = CanonicalID("1234567")
+      val id = CanonicalID("12345678")
 
       assertJsonStringsAreEqual(
         toJson(id).get,
         """
-          |"1234567"
+          |"12345678"
           |""".stripMargin
       )
     }
@@ -25,21 +39,21 @@ class CanonicalIDTest extends AnyFunSpec with Matchers with JsonAssertions {
     it("decodes from a string") {
       val jsonString =
         """
-          |"1234567"
+          |"12345678"
           |""".stripMargin
-      fromJson[CanonicalID](jsonString) shouldBe Success(CanonicalID("1234567"))
+      fromJson[CanonicalID](jsonString) shouldBe Success(CanonicalID("12345678"))
     }
   }
 
   describe("DynamoFormat") {
     it("encodes as a string") {
-      val id = CanonicalID("1234567")
-      DynamoFormat[CanonicalID].write(id) shouldBe DynamoValue.fromString("1234567")
+      val id = CanonicalID("12345678")
+      DynamoFormat[CanonicalID].write(id) shouldBe DynamoValue.fromString("12345678")
     }
 
     it("decodes from a string") {
-      val av = AttributeValue.builder().s("1234567").build()
-      DynamoFormat[CanonicalID].read(av) shouldBe Right(CanonicalID("1234567"))
+      val av = AttributeValue.builder().s("12345678").build()
+      DynamoFormat[CanonicalID].read(av) shouldBe Right(CanonicalID("12345678"))
     }
   }
 }

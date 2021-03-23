@@ -11,7 +11,7 @@ import scala.util.Random
 
 trait IdentifiersGenerators extends RandomGenerators {
   def createCanonicalId: CanonicalID =
-    CanonicalID(randomAlphanumeric(length = 10).toLowerCase())
+    CanonicalID(randomAlphanumeric(length = 8).toLowerCase())
 
   def createSourceIdentifier: SourceIdentifier = createSourceIdentifierWith()
 

@@ -5,6 +5,17 @@ import org.scanamo.DynamoFormat
 
 class CanonicalID(val underlying: String) {
   override def toString: String = underlying
+
+  require(
+    !underlying.contains(" "),
+    s"Canonical ID cannot contain whitespace; got $underlying"
+  )
+
+  require(
+    underlying.length == 8,
+    s"Canonical ID should have length 8; got $underlying.  Is this actually a canonical ID?"
+  )
+
   // Normally we use case classes for immutable data, which provide these
   // methods for us.
   //
