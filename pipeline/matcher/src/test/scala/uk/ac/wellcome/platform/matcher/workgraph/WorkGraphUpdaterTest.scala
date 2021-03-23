@@ -34,7 +34,7 @@ class WorkGraphUpdaterTest
     it("updating nothing with A gives A:A") {
       WorkGraphUpdater
         .update(
-          links = WorkLinks("A", 1, Set.empty),
+          links = WorkLinks("A", version = 1, referencedWorkIds = Set.empty),
           existingGraph = WorkGraph(Set.empty)
         )
         .nodes shouldBe Set(
@@ -44,7 +44,7 @@ class WorkGraphUpdaterTest
     it("updating nothing with A->B gives A+B:A->B") {
       WorkGraphUpdater
         .update(
-          links = WorkLinks("A", 1, Set("B")),
+          links = WorkLinks("A", version = 1, referencedWorkIds = Set("B")),
           existingGraph = WorkGraph(Set.empty)
         )
         .nodes shouldBe Set(
@@ -132,7 +132,7 @@ class WorkGraphUpdaterTest
     it("updating A->B, B, C with B->C gives A+B+C:(A->B, B->C, C)") {
       WorkGraphUpdater
         .update(
-          links = WorkLinks("B", 2, Set("C")),
+          links = WorkLinks("B", version = 2, referencedWorkIds = Set("C")),
           existingGraph = WorkGraph(Set(
             WorkNode(
               "A",
