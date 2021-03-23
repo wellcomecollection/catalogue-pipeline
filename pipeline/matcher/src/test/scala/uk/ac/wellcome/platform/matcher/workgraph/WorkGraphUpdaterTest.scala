@@ -24,7 +24,11 @@ class WorkGraphUpdaterTest
           existingGraph = WorkGraph(Set.empty)
         )
         .nodes shouldBe Set(
-        WorkNode(idA, version = 1, linkedIds = List(), componentId = ciHash(idA)))
+        WorkNode(
+          idA,
+          version = 1,
+          linkedIds = List(),
+          componentId = ciHash(idA)))
     }
 
     it("updating nothing with A->B gives A+B:A->B") {
@@ -73,8 +77,16 @@ class WorkGraphUpdaterTest
           links = WorkLinks(idA, version = 2, referencedWorkIds = Set(idB)),
           existingGraph = WorkGraph(
             Set(
-              WorkNode(idA, version = 1, linkedIds = Nil, componentId = ciHash(idA)),
-              WorkNode(idB, version = 1, linkedIds = Nil, componentId = ciHash(idB))
+              WorkNode(
+                idA,
+                version = 1,
+                linkedIds = Nil,
+                componentId = ciHash(idA)),
+              WorkNode(
+                idB,
+                version = 1,
+                linkedIds = Nil,
+                componentId = ciHash(idB))
             )
           )
         )
@@ -103,7 +115,11 @@ class WorkGraphUpdaterTest
                 version = 1,
                 linkedIds = List(idB),
                 componentId = ciHash(idA, idB)),
-              WorkNode(idB, version = 1, linkedIds = Nil, componentId = ciHash(idA, idB))))
+              WorkNode(
+                idB,
+                version = 1,
+                linkedIds = Nil,
+                componentId = ciHash(idA, idB))))
         )
         .nodes shouldBe Set(
         WorkNode(
@@ -111,7 +127,11 @@ class WorkGraphUpdaterTest
           version = 2,
           linkedIds = List(idB),
           componentId = ciHash(idA, idB)),
-        WorkNode(idB, version = 1, linkedIds = List(), componentId = ciHash(idA, idB))
+        WorkNode(
+          idB,
+          version = 1,
+          linkedIds = List(),
+          componentId = ciHash(idA, idB))
       )
     }
 
@@ -125,8 +145,16 @@ class WorkGraphUpdaterTest
               version = 2,
               linkedIds = List(idB),
               componentId = "A+B"),
-            WorkNode(idB, version = 1, linkedIds = Nil, componentId = ciHash(idA, idB)),
-            WorkNode(idC, version = 1, linkedIds = Nil, componentId = ciHash(idC))
+            WorkNode(
+              idB,
+              version = 1,
+              linkedIds = Nil,
+              componentId = ciHash(idA, idB)),
+            WorkNode(
+              idC,
+              version = 1,
+              linkedIds = Nil,
+              componentId = ciHash(idC))
           ))
         )
         .nodes shouldBe Set(
@@ -140,7 +168,11 @@ class WorkGraphUpdaterTest
           version = 2,
           linkedIds = List(idC),
           componentId = ciHash(idA, idB, idC)),
-        WorkNode(idC, version = 1, linkedIds = List(), componentId = ciHash(idA, idB, idC))
+        WorkNode(
+          idC,
+          version = 1,
+          linkedIds = List(),
+          componentId = ciHash(idA, idB, idC))
       )
     }
 
@@ -198,9 +230,21 @@ class WorkGraphUpdaterTest
               version = 2,
               linkedIds = List(idB),
               componentId = "A+B"),
-            WorkNode(idB, version = 1, linkedIds = Nil, componentId = ciHash(idA, idB)),
-            WorkNode(idC, version = 1, linkedIds = Nil, componentId = ciHash(idC)),
-            WorkNode(idD, version = 1, linkedIds = Nil, componentId = ciHash(idD))
+            WorkNode(
+              idB,
+              version = 1,
+              linkedIds = Nil,
+              componentId = ciHash(idA, idB)),
+            WorkNode(
+              idC,
+              version = 1,
+              linkedIds = Nil,
+              componentId = ciHash(idC)),
+            WorkNode(
+              idD,
+              version = 1,
+              linkedIds = Nil,
+              componentId = ciHash(idD))
           ))
         )
         .nodes shouldBe
@@ -273,8 +317,13 @@ class WorkGraphUpdaterTest
       WorkGraphUpdater
         .update(
           links = WorkLinks(idA, updateVersion, referencedWorkIds = Set(idB)),
-          existingGraph = WorkGraph(Set(
-            WorkNode(idA, existingVersion, linkedIds = Nil, componentId = ciHash(idA))))
+          existingGraph = WorkGraph(
+            Set(
+              WorkNode(
+                idA,
+                existingVersion,
+                linkedIds = Nil,
+                componentId = ciHash(idA))))
         )
         .nodes should contain theSameElementsAs
         List(
@@ -391,8 +440,16 @@ class WorkGraphUpdaterTest
                 componentId = "A+B")))
         )
         .nodes shouldBe Set(
-        WorkNode(idA, version = 2, linkedIds = List(), componentId = ciHash(idA)),
-        WorkNode(idB, version = 1, linkedIds = List(), componentId = ciHash(idB))
+        WorkNode(
+          idA,
+          version = 2,
+          linkedIds = List(),
+          componentId = ciHash(idA)),
+        WorkNode(
+          idB,
+          version = 1,
+          linkedIds = List(),
+          componentId = ciHash(idB))
       )
     }
 
@@ -411,7 +468,11 @@ class WorkGraphUpdaterTest
         )
         .nodes shouldBe Set(
         WorkNode(idA, version = 2, linkedIds = Nil, componentId = ciHash(idA)),
-        WorkNode(idB, version = None, linkedIds = Nil, componentId = ciHash(idB))
+        WorkNode(
+          idB,
+          version = None,
+          linkedIds = Nil,
+          componentId = ciHash(idB))
       )
     }
 
@@ -439,7 +500,11 @@ class WorkGraphUpdaterTest
           version = 2,
           linkedIds = List(idB),
           componentId = ciHash(idA, idB)),
-        WorkNode(idB, version = 3, linkedIds = Nil, componentId = ciHash(idA, idB)),
+        WorkNode(
+          idB,
+          version = 3,
+          linkedIds = Nil,
+          componentId = ciHash(idA, idB)),
         WorkNode(idC, version = 1, linkedIds = Nil, componentId = ciHash(idC))
       )
     }
@@ -473,7 +538,11 @@ class WorkGraphUpdaterTest
           version = 3,
           linkedIds = List(idC),
           componentId = ciHash(idA, idB, idC)),
-        WorkNode(idC, version = 1, linkedIds = Nil, componentId = ciHash(idA, idB, idC))
+        WorkNode(
+          idC,
+          version = 1,
+          linkedIds = Nil,
+          componentId = ciHash(idA, idB, idC))
       )
     }
   }

@@ -56,7 +56,11 @@ class WorkNodeDaoTest
               linkedIds = List(idB),
               componentId = ciHash(idA, idB))
           val existingWorkB: WorkNode =
-            WorkNode(idB, version = 0, linkedIds = Nil, componentId = ciHash(idA, idB))
+            WorkNode(
+              idB,
+              version = 0,
+              linkedIds = Nil,
+              componentId = ciHash(idA, idB))
 
           put(dynamoClient, table.name)(existingWorkA)
           put(dynamoClient, table.name)(existingWorkB)
@@ -131,7 +135,11 @@ class WorkNodeDaoTest
             linkedIds = List(idB),
             componentId = ciHash(idA, idB))
           val existingWorkNodeB: WorkNode =
-            WorkNode(idB, version = 0, linkedIds = Nil, componentId = ciHash(idA, idB))
+            WorkNode(
+              idB,
+              version = 0,
+              linkedIds = Nil,
+              componentId = ciHash(idA, idB))
 
           put(dynamoClient, table.name)(existingWorkNodeA)
           put(dynamoClient, table.name)(existingWorkNodeB)
@@ -190,7 +198,10 @@ class WorkNodeDaoTest
         withWorkNodeDao(table) { workNodeDao =>
           case class BadRecord(id: String, componentId: String, version: String)
           val badRecord: BadRecord =
-            BadRecord(id = idA, componentId = ciHash(idA, idB), version = "five")
+            BadRecord(
+              id = idA,
+              componentId = ciHash(idA, idB),
+              version = "five")
           put(dynamoClient, table.name)(badRecord)
 
           whenReady(workNodeDao.getByComponentIds(Set(ciHash(idA, idB))).failed) {
@@ -245,7 +256,11 @@ class WorkNodeDaoTest
         )
 
         val workNode =
-          WorkNode(idA, version = 1, linkedIds = List(idB), componentId = ciHash(idA, idB))
+          WorkNode(
+            idA,
+            version = 1,
+            linkedIds = List(idB),
+            componentId = ciHash(idA, idB))
 
         whenReady(workNodeDao.put(Set(workNode)).failed) {
           _ shouldBe expectedException
