@@ -14,7 +14,7 @@ import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.WorkGenerators
 import weco.catalogue.internal_model.generators.ImageGenerators
-import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.identifiers.{IdState, SourceIdentifier}
 import weco.catalogue.internal_model.locations.{AccessCondition, AccessStatus}
 import weco.catalogue.internal_model.work._
 
@@ -43,7 +43,7 @@ class WorksIndexConfigTest
   // We could just import the library, but I might wait until we need more
   // Taken from here:
   // https://github.com/rallyhealth/scalacheck-ops/blob/master/core/src/main/scala/org/scalacheck/ops/time/ImplicitJavaTimeGenerators.scala
-  implicit val arbInstant: Arbitrary[Instant] = {
+  implicit val arbInstant: Arbitrary[Instant] =
     Arbitrary {
       for {
         millis <- chooseNum(
@@ -54,7 +54,15 @@ class WorksIndexConfigTest
         Instant.ofEpochMilli(millis).plusNanos(nanos)
       }
     }
-  }
+
+  // We have a rule that says SourceIdentifier isn't allowed to contain whitespace,
+  // but sometimes scalacheck will happen to generate such a string, which breaks
+  // tests in CI.  This generator is meant to create SourceIdentifiers that
+  // don't contain whitespace.
+  implicit val arbitrarySourceIdentifier: Arbitrary[SourceIdentifier] =
+    Arbitrary {
+      createSourceIdentifier
+    }
 
   implicit val badObjectEncoder: Encoder[BadTestObject] = deriveEncoder
 
