@@ -7,7 +7,7 @@ import com.sksamuel.elastic4s.{ElasticClient, Index}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.pipeline_storage.elastic.ElasticRetriever
 import uk.ac.wellcome.platform.matcher.models.WorkLinks
-import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.identifiers.{CanonicalID, IdState}
 import weco.catalogue.internal_model.work.MergeCandidate
 
 import scala.concurrent.ExecutionContext
@@ -48,7 +48,7 @@ class ElasticWorkLinksRetriever(val client: ElasticClient, val index: Index)(
       )
     }
 
-  private case class StateStub(canonicalId: String)
+  private case class StateStub(canonicalId: CanonicalID)
   private case class DataStub(
     mergeCandidates: List[MergeCandidate[IdState.Identified]])
 

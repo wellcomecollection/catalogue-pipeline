@@ -46,9 +46,12 @@ object CanonicalID {
 
   implicit def evidence: DynamoFormat[CanonicalID] =
     DynamoFormat
-      .iso[CanonicalID, String](
+      .coercedXmap[CanonicalID, String, IllegalArgumentException](
         CanonicalID(_),
         _.underlying
       )
+
+  implicit val ordering: Ordering[CanonicalID] =
+    (x: CanonicalID, y: CanonicalID) => x.underlying.compare(y.underlying)
 }
 

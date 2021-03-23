@@ -9,6 +9,7 @@ import uk.ac.wellcome.models.matcher.WorkNode
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.storage.dynamo.DynamoBatchWriter
 import uk.ac.wellcome.storage.dynamo.DynamoConfig
+import weco.catalogue.internal_model.identifiers.CanonicalID
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -33,7 +34,7 @@ class WorkNodeDao(dynamoClient: DynamoDbClient, dynamoConfig: DynamoConfig)(
           throw MatcherException(exception)
       }
 
-  def get(ids: Set[String]): Future[Set[WorkNode]] =
+  def get(ids: Set[CanonicalID]): Future[Set[WorkNode]] =
     Future {
       scanamo
         .exec { nodes.getAll("id" in ids) }

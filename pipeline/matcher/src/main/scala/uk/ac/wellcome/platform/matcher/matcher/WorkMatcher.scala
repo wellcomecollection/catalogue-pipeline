@@ -35,7 +35,7 @@ class WorkMatcher(workGraphStore: WorkGraphStore,
     doMatch(links).map(MatcherResult)
 
   private def doMatch(links: WorkLinks): Future[Out] =
-    withLocks(links, links.ids) {
+    withLocks(links, links.ids.map(_.toString)) {
       for {
         beforeGraph <- workGraphStore.findAffectedWorks(links)
         afterGraph = WorkGraphUpdater.update(links, beforeGraph)

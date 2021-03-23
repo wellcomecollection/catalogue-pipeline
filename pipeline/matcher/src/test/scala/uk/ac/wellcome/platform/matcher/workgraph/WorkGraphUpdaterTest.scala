@@ -5,16 +5,17 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.matcher.WorkNode
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
 import uk.ac.wellcome.platform.matcher.models._
+import weco.catalogue.internal_model.identifiers.CanonicalID
 
 class WorkGraphUpdaterTest
     extends AnyFunSpec
     with Matchers
     with MatcherFixtures {
 
-  val idA = "A"
-  val idB = "B"
-  val idC = "C"
-  val idD = "D"
+  val idA = CanonicalID("AAAAAAAA")
+  val idB = CanonicalID("BBBBBBBB")
+  val idC = CanonicalID("CCCCCCCC")
+  val idD = CanonicalID("DDDDDDDD")
 
   describe("Adding links without existing works") {
     it("updating nothing with A gives A:A") {

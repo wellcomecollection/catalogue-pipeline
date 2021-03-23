@@ -31,6 +31,7 @@ import uk.ac.wellcome.storage.locking.memory.{
   MemoryLockDao,
   MemoryLockingService
 }
+import weco.catalogue.internal_model.identifiers.CanonicalID
 
 import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -128,12 +129,12 @@ trait MatcherFixtures
     retriever: MemoryRetriever[WorkLinks],
     queue: SQS.Queue
   ): Any = {
-    retriever.index ++= Map(links.workId -> links)
-    sendNotificationToSQS(queue, body = links.workId)
+    retriever.index ++= Map(links.workId.toString -> links)
+    sendNotificationToSQS(queue, body = links.workId.toString)
   }
 
-  def ciHash(ids: String*): String =
-    DigestUtils.sha256Hex(ids.sorted.mkString("+"))
+  def ciHash(ids: CanonicalID*): String =
+    DigestUtils.sha256Hex(ids.sorted.map(_.underlying).mkString("+"))
 
   def get[T](dynamoClient: DynamoDbClient, tableName: String)(
     key: UniqueKey[_])(

@@ -73,7 +73,7 @@ class MatcherFeatureTest
               id = linksV1.workId,
               version = Some(existingWorkVersion),
               linkedIds = Nil,
-              componentId = linksV1.workId
+              componentId = ciHash(linksV1.workId)
             )
             put(dynamoClient, graphTable.name)(nodeV2)
 
