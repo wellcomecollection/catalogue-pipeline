@@ -10,14 +10,15 @@ import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil.toJson
 import uk.ac.wellcome.models.index.{IndexConfigFields, WorksAnalysis}
-import uk.ac.wellcome.pipeline_storage.fixtures.{
-  SampleDocument,
-  SampleDocumentData
-}
 import uk.ac.wellcome.pipeline_storage.{
   ElasticIndexer,
   Indexer,
   IndexerTestCases
+}
+import weco.catalogue.pipeline_storage.generators.{
+  SampleDocument,
+  SampleDocumentData,
+  SampleDocumentGenerators
 }
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -25,7 +26,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class ElasticIndexerTest
     extends IndexerTestCases[Index, SampleDocument]
     with ElasticsearchFixtures
-    with EitherValues {
+    with EitherValues
+    with SampleDocumentGenerators {
 
   import SampleDocument._
 
@@ -57,7 +59,7 @@ class ElasticIndexerTest
   }
 
   override def createDocumentWith(id: String, version: Int): SampleDocument =
-    SampleDocument(canonicalId = id, version = version, title = s"$id:$version")
+    createSampleDocumentWith(canonicalId = id, version = version)
 
   override def assertIsIndexed(doc: SampleDocument)(
     implicit index: Index): Assertion =

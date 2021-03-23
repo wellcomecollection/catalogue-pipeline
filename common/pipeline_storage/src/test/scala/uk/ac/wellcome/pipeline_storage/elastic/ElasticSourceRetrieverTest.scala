@@ -5,18 +5,18 @@ import uk.ac.wellcome.elasticsearch.NoStrictMapping
 import uk.ac.wellcome.elasticsearch.model.IndexId
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.pipeline_storage.{Retriever, RetrieverTestCases}
-import uk.ac.wellcome.pipeline_storage.fixtures.{
-  ElasticIndexerFixtures,
-  SampleDocument
+import uk.ac.wellcome.pipeline_storage.fixtures.ElasticIndexerFixtures
+import weco.catalogue.pipeline_storage.generators.{
+  SampleDocument,
+  SampleDocumentGenerators
 }
-import weco.catalogue.internal_model.generators.IdentifiersGenerators
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class ElasticSourceRetrieverTest
     extends RetrieverTestCases[Index, SampleDocument]
     with ElasticIndexerFixtures
-    with IdentifiersGenerators {
+    with SampleDocumentGenerators {
 
   import SampleDocument._
 
@@ -40,20 +40,14 @@ class ElasticSourceRetrieverTest
     )
 
   override def createT: SampleDocument =
-    SampleDocument(
-      version = 1,
-      canonicalId = createCanonicalId,
-      title = randomAlphanumeric()
-    )
+    createSampleDocument
 
   override implicit val id: IndexId[SampleDocument] =
     (doc: SampleDocument) => doc.canonicalId
 
   it("retrieves a document with a slash in the ID") {
-    val documentWithSlash = SampleDocument(
-      version = 1,
-      canonicalId = "sierra-system-number/b1234",
-      title = randomAlphanumeric()
+    val documentWithSlash = createSampleDocumentWith(
+      canonicalId = "sierra-system-number/b1234"
     )
 
     withContext(documents = Seq(documentWithSlash)) { implicit context =>

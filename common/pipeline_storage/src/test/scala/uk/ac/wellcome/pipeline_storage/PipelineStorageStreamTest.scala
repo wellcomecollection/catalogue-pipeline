@@ -17,10 +17,12 @@ import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.pipeline_storage.fixtures.{
   ElasticIndexerFixtures,
-  PipelineStorageStreamFixtures,
-  SampleDocument
+  PipelineStorageStreamFixtures
 }
-import weco.catalogue.internal_model.generators.IdentifiersGenerators
+import weco.catalogue.pipeline_storage.generators.{
+  SampleDocument,
+  SampleDocumentGenerators
+}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -30,8 +32,8 @@ import scala.util.{Failure, Random, Try}
 class PipelineStorageStreamTest
     extends AnyFunSpec
     with ElasticIndexerFixtures
-    with IdentifiersGenerators
-    with PipelineStorageStreamFixtures {
+    with PipelineStorageStreamFixtures
+    with SampleDocumentGenerators {
 
   def indexer(index: Index, elasticClient: ElasticClient = elasticClient) =
     new ElasticIndexer[SampleDocument](elasticClient, index, NoStrictMapping)
@@ -54,7 +56,7 @@ class PipelineStorageStreamTest
 
   it("ingests a single document and sends it on") {
     val index = createIndex
-    val document = SampleDocument(1, createCanonicalId, randomAlphanumeric())
+    val document = createSampleDocument
 
     val sender = new MemoryMessageSender
 
@@ -87,10 +89,10 @@ class PipelineStorageStreamTest
   it("supports multiple documents for a single input") {
     val index = createIndex
     val documentsFirstMessage = (1 to 2)
-      .map(_ => SampleDocument(1, createCanonicalId, randomAlphanumeric()))
+      .map(_ => createSampleDocument)
       .toList
     val documentsSecondMessage = (1 to 3)
-      .map(_ => SampleDocument(1, createCanonicalId, randomAlphanumeric()))
+      .map(_ => createSampleDocument)
       .toList
     val documents = documentsFirstMessage ++ documentsSecondMessage
 
@@ -128,10 +130,10 @@ class PipelineStorageStreamTest
 
   it("does not delete a message if some of the process results fail ingesting") {
     val documentsFailingMessage = (1 to 2)
-      .map(_ => SampleDocument(1, createCanonicalId, randomAlphanumeric()))
+      .map(_ => createSampleDocument)
       .toList
     val documentsSuccessfulMessage = (1 to 3)
-      .map(_ => SampleDocument(1, createCanonicalId, randomAlphanumeric()))
+      .map(_ => createSampleDocument)
       .toList
 
     val failingDocument = documentsFailingMessage.head
@@ -178,10 +180,10 @@ class PipelineStorageStreamTest
   it("does not delete a message if some of the process results fail sending") {
     val index = createIndex
     val documentsFailingMessage = (1 to 2)
-      .map(_ => SampleDocument(1, createCanonicalId, randomAlphanumeric()))
+      .map(_ => createSampleDocument)
       .toList
     val documentsSuccessfulMessage = (1 to 3)
-      .map(_ => SampleDocument(1, createCanonicalId, randomAlphanumeric()))
+      .map(_ => createSampleDocument)
       .toList
 
     val sentDocuments = documentsFailingMessage.tail ++ documentsSuccessfulMessage
@@ -234,7 +236,7 @@ class PipelineStorageStreamTest
   it(
     "processes a message and does not ingest if result of process is an empty List") {
     val index = createIndex
-    val document = SampleDocument(1, createCanonicalId, randomAlphanumeric())
+    val document = createSampleDocument
 
     val sender = new MemoryMessageSender
 
@@ -262,7 +264,7 @@ class PipelineStorageStreamTest
 
   it(
     "does not delete the message if the processFunction throws an exception not wrapped in a future") {
-    val document = SampleDocument(1, createCanonicalId, randomAlphanumeric())
+    val document = createSampleDocument
 
     val sender = new MemoryMessageSender
 
@@ -291,8 +293,7 @@ class PipelineStorageStreamTest
 
   it("ingests lots of documents") {
     val index = createIndex
-    val documents = (1 to 250).map(_ =>
-      SampleDocument(1, createCanonicalId, randomAlphanumeric()))
+    val documents = (1 to 250).map(_ => createSampleDocument)
 
     val pipelineStorageConfig = PipelineStorageConfig(
       batchSize = 150,
@@ -381,19 +382,10 @@ class PipelineStorageStreamTest
   }
 
   it("does not delete from the queue documents that failed indexing") {
-    val successfulDocuments = (1 to 5).map { _ =>
-      SampleDocument(
-        version = 1,
-        canonicalId = createCanonicalId,
-        title = randomAlphanumeric())
-    }
+    val successfulDocuments = (1 to 5).map { _ => createSampleDocument }
     val failingDocuments = (1 to 5).map { _ =>
-      val canonicalId = createCanonicalId
-      val doc = SampleDocument(
-        version = 1,
-        canonicalId = canonicalId,
-        title = randomAlphanumeric())
-      (canonicalId, doc)
+      val doc = createSampleDocument
+      (doc.canonicalId, doc)
     }.toMap
     val documents = successfulDocuments ++ failingDocuments.values
     val indexer = new Indexer[SampleDocument] {
@@ -435,11 +427,7 @@ class PipelineStorageStreamTest
   }
 
   it("leaves a document on the queue if it can't send an onward message") {
-    val document = SampleDocument(
-      version = 1,
-      canonicalId = createCanonicalId,
-      title = randomAlphanumeric()
-    )
+    val document = createSampleDocument
 
     val brokenSender = new MemoryMessageSender() {
       override def send(body: String): Try[Unit] =
@@ -479,7 +467,7 @@ class PipelineStorageStreamTest
                 i =>
                   Bundle(
                     message,
-                    SampleDocument(1, message.messageId() + i, "title"),
+                    createSampleDocumentWith(canonicalId = message.messageId() + i),
                     numberOfItems = 2)))
           .toMap
 
@@ -510,7 +498,7 @@ class PipelineStorageStreamTest
                 i =>
                   Bundle(
                     message,
-                    SampleDocument(1, message.messageId() + i, "title"),
+                    createSampleDocumentWith(canonicalId = message.messageId() + i),
                     numberOfItems = 2)))
           .toMap
         val failingMessages = (3 to 5).map(i =>
@@ -519,7 +507,7 @@ class PipelineStorageStreamTest
           message =>
             Bundle(
               message,
-              SampleDocument(1, message.messageId(), "title"),
+              createSampleDocumentWith(canonicalId = message.messageId()),
               numberOfItems = 2))
 
         val result = Source(
@@ -544,7 +532,7 @@ class PipelineStorageStreamTest
         val messages = (1 to 5).map(i =>
           Message.builder().messageId(i.toString).body(i.toString).build())
         val bundles = messages.map(message =>
-          Bundle(message, SampleDocument(1, message.messageId(), "title"), numberOfItems = 1))
+          Bundle(message, createSampleDocumentWith(canonicalId = message.messageId()), numberOfItems = 1))
         // set maxSubstreams lower than the number of messages
         val maxSubStreams = 3
         val (queue, result) = Source
@@ -578,14 +566,14 @@ class PipelineStorageStreamTest
           message =>
             Bundle(
               message,
-              SampleDocument(1, message.messageId(), "title"),
+              createSampleDocumentWith(canonicalId = message.messageId()),
               numberOfItems = 1))
         //  number of items doesn't match on the Bundles
         val failingBundles = failingMessages.map(
           message =>
             Bundle(
               message,
-              SampleDocument(1, message.messageId(), "title"),
+              createSampleDocumentWith(canonicalId = message.messageId()),
               numberOfItems = 2))
 
         val maxSubStreams = 3
@@ -617,7 +605,7 @@ class PipelineStorageStreamTest
   describe("batchRetrieveFlow") {
     it("retrieves multiple documents") {
       val documents = (1 to 5).map(i =>
-        (i.toString, SampleDocument(1, i.toString, 1.toString)))
+        (i.toString, createSampleDocumentWith(canonicalId = i.toString)))
       val retriever = new MemoryRetriever[SampleDocument](
         collection.mutable.Map(documents: _*))
 
@@ -643,11 +631,11 @@ class PipelineStorageStreamTest
 
     it("filters out documents that it fails to retrieve") {
       val successfulDocuments = (1 to 3).map(i =>
-        (i.toString, SampleDocument(1, i.toString, 1.toString)))
+        (i.toString, createSampleDocumentWith(canonicalId = i.toString)))
       val retriever = new MemoryRetriever[SampleDocument](
         collection.mutable.Map(successfulDocuments: _*))
       val failingDocuments = (4 to 5).map(i =>
-        (i.toString, SampleDocument(1, i.toString, 1.toString)))
+        (i.toString, createSampleDocumentWith(canonicalId = i.toString)))
       val documents = successfulDocuments ++ failingDocuments
 
       withActorSystem { implicit ac =>

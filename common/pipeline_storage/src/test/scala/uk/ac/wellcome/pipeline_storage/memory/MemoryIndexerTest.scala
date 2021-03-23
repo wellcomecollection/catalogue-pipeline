@@ -1,12 +1,15 @@
 package uk.ac.wellcome.pipeline_storage.memory
 
 import org.scalatest.Assertion
-import uk.ac.wellcome.fixtures.{RandomGenerators, TestWith}
-import uk.ac.wellcome.pipeline_storage.fixtures.SampleDocument
+import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.pipeline_storage.{
   Indexer,
   IndexerTestCases,
   MemoryIndexer
+}
+import weco.catalogue.pipeline_storage.generators.{
+  SampleDocument,
+  SampleDocumentGenerators
 }
 
 import scala.collection.mutable
@@ -15,7 +18,7 @@ class MemoryIndexerTest
     extends IndexerTestCases[
       mutable.Map[String, SampleDocument],
       SampleDocument]
-    with RandomGenerators {
+    with SampleDocumentGenerators {
   import SampleDocument._
 
   override def withContext[R](documents: Seq[SampleDocument])(
@@ -35,10 +38,7 @@ class MemoryIndexerTest
     )
 
   override def createDocumentWith(id: String, version: Int): SampleDocument =
-    SampleDocument(
-      canonicalId = id,
-      version = version,
-      title = randomAlphanumeric())
+    createSampleDocumentWith(canonicalId = id, version = version)
 
   override def assertIsIndexed(doc: SampleDocument)(
     implicit index: mutable.Map[String, SampleDocument]): Assertion =
