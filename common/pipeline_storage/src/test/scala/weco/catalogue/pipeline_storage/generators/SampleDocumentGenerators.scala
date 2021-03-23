@@ -9,7 +9,7 @@ import uk.ac.wellcome.pipeline_storage.Indexable
 
 case class SampleDocument(
   version: Int,
-  canonicalId: String,
+  id: String,
   title: String,
   data: SampleDocumentData = SampleDocumentData()
 )
@@ -22,11 +22,11 @@ case class SampleDocumentData(
 object SampleDocument {
   implicit val indexable = new Indexable[SampleDocument] {
     def version(document: SampleDocument): Long = document.version
-    def id(document: SampleDocument): String = document.canonicalId
+    def id(document: SampleDocument): String = document.id
   }
 
   implicit val canonicalId: IndexId[SampleDocument] =
-    (doc: SampleDocument) => doc.canonicalId
+    (doc: SampleDocument) => doc.id
 
   implicit val encoder: Encoder[SampleDocument] = deriveEncoder
 
@@ -34,16 +34,16 @@ object SampleDocument {
 }
 
 trait SampleDocumentGenerators extends RandomGenerators {
-  def createSampleDocument: SampleDocument =
-    createSampleDocumentWith()
+  def createDocument: SampleDocument =
+    createDocumentWith()
 
-  def createSampleDocumentWith(
-    version: Int = randomInt(from = 1, to = 10),
-    canonicalId: String = randomAlphanumeric()
+  def createDocumentWith(
+    id: String = randomAlphanumeric(),
+    version: Int = randomInt(from = 1, to = 10)
   ): SampleDocument =
     SampleDocument(
       version = version,
-      canonicalId = canonicalId,
+      id = id,
       title = randomAlphanumeric()
     )
 }

@@ -26,7 +26,7 @@ class MemoryIndexerTest
     testWith(
       mutable.Map(
         documents.map { doc =>
-          (doc.canonicalId, doc)
+          (doc.id, doc)
         }: _*
       )
     )
@@ -37,14 +37,14 @@ class MemoryIndexerTest
       new MemoryIndexer[SampleDocument](index)
     )
 
-  override def createDocumentWith(id: String, version: Int): SampleDocument =
-    createSampleDocumentWith(canonicalId = id, version = version)
+  override def createDocument: SampleDocument =
+    createDocumentWith()
 
   override def assertIsIndexed(doc: SampleDocument)(
     implicit index: mutable.Map[String, SampleDocument]): Assertion =
-    index(doc.canonicalId) shouldBe doc
+    index(doc.id) shouldBe doc
 
   override def assertIsNotIndexed(doc: SampleDocument)(
     implicit index: mutable.Map[String, SampleDocument]): Assertion =
-    index.get(doc.canonicalId) should not be Some(doc)
+    index.get(doc.id) should not be Some(doc)
 }

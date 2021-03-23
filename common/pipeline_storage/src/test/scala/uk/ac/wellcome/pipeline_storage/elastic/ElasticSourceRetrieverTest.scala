@@ -40,18 +40,18 @@ class ElasticSourceRetrieverTest
     )
 
   override def createT: SampleDocument =
-    createSampleDocument
+    createDocument
 
   override implicit val id: IndexId[SampleDocument] =
-    (doc: SampleDocument) => doc.canonicalId
+    (doc: SampleDocument) => doc.id
 
   it("retrieves a document with a slash in the ID") {
-    val documentWithSlash = createSampleDocumentWith(
-      canonicalId = "sierra-system-number/b1234"
+    val documentWithSlash = createDocumentWith(
+      id = "sierra-system-number/b1234"
     )
 
     withContext(documents = Seq(documentWithSlash)) { implicit context =>
-      val future = withRetriever { _.apply(documentWithSlash.canonicalId) }
+      val future = withRetriever { _.apply(documentWithSlash.id) }
 
       whenReady(future) {
         _ shouldBe documentWithSlash
