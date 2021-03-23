@@ -3,7 +3,6 @@ package uk.ac.wellcome.platform.matcher.storage.elastic
 import com.sksamuel.elastic4s.Index
 import uk.ac.wellcome.models.index.IdentifiedWorkIndexConfig
 import uk.ac.wellcome.elasticsearch.model.IndexId
-import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.models.work.generators.WorkGenerators
@@ -18,7 +17,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class ElasticWorkLinksRetrieverTest
     extends RetrieverTestCases[Index, WorkLinks]
-    with ElasticsearchFixtures
     with ElasticIndexerFixtures
     with WorkGenerators
     with WorkLinksGenerators {

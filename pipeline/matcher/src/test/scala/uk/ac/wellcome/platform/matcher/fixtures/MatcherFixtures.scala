@@ -132,8 +132,8 @@ trait MatcherFixtures
     sendNotificationToSQS(queue, body = links.workId)
   }
 
-  def ciHash(str: String): String =
-    DigestUtils.sha256Hex(str)
+  def ciHash(ids: String*): String =
+    DigestUtils.sha256Hex(ids.sorted.mkString("+"))
 
   def get[T](dynamoClient: DynamoDbClient, tableName: String)(
     key: UniqueKey[_])(

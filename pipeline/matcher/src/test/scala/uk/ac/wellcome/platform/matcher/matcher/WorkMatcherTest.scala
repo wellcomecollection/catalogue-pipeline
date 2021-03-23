@@ -47,8 +47,7 @@ class WorkMatcherTest
     withWorkGraphTable { graphTable =>
       withWorkGraphStore(graphTable) { workGraphStore =>
         withWorkMatcher(workGraphStore) { workMatcher =>
-          val id = createIdentifier("A")
-          val links = createWorkLinksWith(id = id)
+          val links = createWorkLinksWith(id = identifierA)
 
           whenReady(workMatcher.matchWork(links)) { matcherResult =>
             matcherResult shouldBe
@@ -61,7 +60,13 @@ class WorkMatcherTest
                 .map(_.right.value)
 
             savedLinkedWork shouldBe Some(
-              WorkNode(links.workId, links.version, Nil, ciHash(links.workId)))
+              WorkNode(
+                id = links.workId,
+                version = links.version,
+                linkedIds = Nil,
+                componentId = ciHash(links.workId)
+              )
+            )
           }
         }
       }
@@ -73,9 +78,6 @@ class WorkMatcherTest
     withWorkGraphTable { graphTable =>
       withWorkGraphStore(graphTable) { workGraphStore =>
         withWorkMatcher(workGraphStore) { workMatcher =>
-          val identifierA = createIdentifier("A")
-          val identifierB = createIdentifier("B")
-
           val links = createWorkLinksWith(
             id = identifierA,
             referencedIds = Set(identifierB)
@@ -94,20 +96,19 @@ class WorkMatcherTest
 
             savedWorkNodes should contain theSameElementsAs List(
               WorkNode(
-                identifierA.canonicalId,
-                links.version,
-                List(identifierB.canonicalId),
-                ciHash(
-                  List(identifierA.canonicalId, identifierB.canonicalId).sorted
-                    .mkString("+"))
+                id = identifierA.canonicalId,
+                version = links.version,
+                linkedIds = List(identifierB.canonicalId),
+                componentId =
+                  ciHash(identifierA.canonicalId, identifierB.canonicalId)
               ),
               WorkNode(
-                identifierB.canonicalId,
-                None,
-                Nil,
-                ciHash(
-                  List(identifierA.canonicalId, identifierB.canonicalId).sorted
-                    .mkString("+")))
+                id = identifierB.canonicalId,
+                version = None,
+                linkedIds = Nil,
+                componentId =
+                  ciHash(identifierA.canonicalId, identifierB.canonicalId)
+              )
             )
           }
         }
@@ -121,26 +122,25 @@ class WorkMatcherTest
       withWorkGraphStore(graphTable) { workGraphStore =>
         withWorkMatcher(workGraphStore) { workMatcher =>
           val existingWorkA = WorkNode(
-            identifierA.canonicalId,
-            1,
-            List(identifierB.canonicalId),
-            ciHash(
-              ciHash(
-                List(identifierA.canonicalId, identifierB.canonicalId).sorted
-                  .mkString("+"))))
+            id = identifierA.canonicalId,
+            version = 1,
+            linkedIds = List(identifierB.canonicalId),
+            componentId =
+              ciHash(identifierA.canonicalId, identifierB.canonicalId)
+          )
           val existingWorkB = WorkNode(
-            identifierB.canonicalId,
-            1,
-            Nil,
-            ciHash(
-              ciHash(
-                List(identifierA.canonicalId, identifierB.canonicalId).sorted
-                  .mkString("+"))))
+            id = identifierB.canonicalId,
+            version = 1,
+            linkedIds = Nil,
+            componentId =
+              ciHash(identifierA.canonicalId, identifierB.canonicalId)
+          )
           val existingWorkC = WorkNode(
-            identifierC.canonicalId,
-            1,
-            Nil,
-            ciHash(identifierC.canonicalId))
+            id = identifierC.canonicalId,
+            version = 1,
+            linkedIds = Nil,
+            componentId = ciHash(identifierC.canonicalId)
+          )
           put(dynamoClient, graphTable.name)(existingWorkA)
           put(dynamoClient, graphTable.name)(existingWorkB)
           put(dynamoClient, graphTable.name)(existingWorkC)
@@ -166,34 +166,31 @@ class WorkMatcherTest
 
             savedNodes should contain theSameElementsAs List(
               WorkNode(
-                identifierA.canonicalId,
-                1,
-                List(identifierB.canonicalId),
-                ciHash(
-                  List(
-                    identifierA.canonicalId,
-                    identifierB.canonicalId,
-                    identifierC.canonicalId).sorted.mkString("+"))
+                id = identifierA.canonicalId,
+                version = 1,
+                linkedIds = List(identifierB.canonicalId),
+                componentId = ciHash(
+                  identifierA.canonicalId,
+                  identifierB.canonicalId,
+                  identifierC.canonicalId)
               ),
               WorkNode(
-                identifierB.canonicalId,
-                2,
-                List(identifierC.canonicalId),
-                ciHash(
-                  List(
-                    identifierA.canonicalId,
-                    identifierB.canonicalId,
-                    identifierC.canonicalId).sorted.mkString("+"))
+                id = identifierB.canonicalId,
+                version = 2,
+                linkedIds = List(identifierC.canonicalId),
+                componentId = ciHash(
+                  identifierA.canonicalId,
+                  identifierB.canonicalId,
+                  identifierC.canonicalId)
               ),
               WorkNode(
-                identifierC.canonicalId,
-                1,
-                Nil,
-                ciHash(
-                  List(
-                    identifierA.canonicalId,
-                    identifierB.canonicalId,
-                    identifierC.canonicalId).sorted.mkString("+")))
+                id = identifierC.canonicalId,
+                version = 1,
+                linkedIds = Nil,
+                componentId = ciHash(
+                  identifierA.canonicalId,
+                  identifierB.canonicalId,
+                  identifierC.canonicalId))
             )
           }
         }
@@ -235,12 +232,11 @@ class WorkMatcherTest
         val idC = identifierC.canonicalId
 
         val future = workGraphStore.put(
-          WorkGraph(
-            Set(
-              WorkNode(idA, 0, List(idB), componentId),
-              WorkNode(idB, 0, List(idC), componentId),
-              WorkNode(idC, 0, Nil, componentId),
-            )))
+          WorkGraph(Set(
+            WorkNode(idA, version = 0, linkedIds = List(idB), componentId),
+            WorkNode(idB, version = 0, linkedIds = List(idC), componentId),
+            WorkNode(idC, version = 0, linkedIds = Nil, componentId),
+          )))
 
         whenReady(future) { _ =>
           val links = createWorkLinksWith(

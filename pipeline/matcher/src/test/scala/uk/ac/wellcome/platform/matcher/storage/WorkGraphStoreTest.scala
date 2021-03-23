@@ -15,13 +15,20 @@ class WorkGraphStoreTest
     with ScalaFutures
     with MatcherFixtures {
 
+  val idA = "A"
+  val idB = "B"
+  val idC = "C"
+
   describe("Get graph of linked works") {
     it("returns nothing if there are no matching graphs") {
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
           whenReady(
             workGraphStore.findAffectedWorks(
-              WorkLinks("Not-there", 0, Set.empty))) { workGraph =>
+              WorkLinks(
+                "Not-there",
+                version = 0,
+                referencedWorkIds = Set.empty))) { workGraph =>
             workGraph shouldBe WorkGraph(Set.empty)
           }
         }
@@ -33,11 +40,15 @@ class WorkGraphStoreTest
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
           val work =
-            WorkNode(id = "A", version = 0, linkedIds = Nil, componentId = "A")
+            WorkNode(
+              id = idA,
+              version = 0,
+              linkedIds = Nil,
+              componentId = ciHash(idA))
           put(dynamoClient, graphTable.name)(work)
 
           whenReady(
-            workGraphStore.findAffectedWorks(WorkLinks("A", 0, Set.empty))) {
+            workGraphStore.findAffectedWorks(WorkLinks(idA, 0, Set.empty))) {
             workGraph =>
               workGraph shouldBe WorkGraph(Set(work))
           }
@@ -49,14 +60,22 @@ class WorkGraphStoreTest
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
           val workA =
-            WorkNode(id = "A", version = 0, linkedIds = Nil, componentId = "A")
+            WorkNode(
+              id = idA,
+              version = 0,
+              linkedIds = Nil,
+              componentId = ciHash(idA))
           val workB =
-            WorkNode(id = "B", version = 0, linkedIds = Nil, componentId = "B")
+            WorkNode(
+              id = idB,
+              version = 0,
+              linkedIds = Nil,
+              componentId = ciHash(idB))
           put(dynamoClient, graphTable.name)(workA)
           put(dynamoClient, graphTable.name)(workB)
 
           whenReady(
-            workGraphStore.findAffectedWorks(WorkLinks("A", 0, Set("B")))) {
+            workGraphStore.findAffectedWorks(WorkLinks(idA, 0, Set(idB)))) {
             workGraph =>
               workGraph.nodes shouldBe Set(workA, workB)
           }
@@ -69,18 +88,23 @@ class WorkGraphStoreTest
         withWorkGraphStore(graphTable) { workGraphStore =>
           val workA =
             WorkNode(
-              id = "A",
+              id = idA,
               version = 0,
-              linkedIds = List("B"),
-              componentId = "AB")
+              linkedIds = List(idB),
+              componentId = ciHash(idA, idB))
           val workB =
-            WorkNode(id = "B", version = 0, linkedIds = Nil, componentId = "AB")
+            WorkNode(
+              id = idB,
+              version = 0,
+              linkedIds = Nil,
+              componentId = ciHash(idA, idB))
 
           put(dynamoClient, graphTable.name)(workA)
           put(dynamoClient, graphTable.name)(workB)
 
           whenReady(
-            workGraphStore.findAffectedWorks(WorkLinks("A", 0, Set.empty))) {
+            workGraphStore.findAffectedWorks(
+              WorkLinks(idA, version = 0, referencedWorkIds = Set.empty))) {
             workGraph =>
               workGraph.nodes shouldBe Set(workA, workB)
           }
@@ -94,28 +118,28 @@ class WorkGraphStoreTest
         withWorkGraphStore(graphTable) { workGraphStore =>
           val workA =
             WorkNode(
-              id = "A",
+              id = idA,
               version = 0,
-              linkedIds = List("B"),
-              componentId = "ABC")
+              linkedIds = List(idB),
+              componentId = ciHash(idA, idB, idC))
           val workB =
             WorkNode(
-              id = "B",
+              id = idB,
               version = 0,
-              linkedIds = List("C"),
-              componentId = "ABC")
+              linkedIds = List(idC),
+              componentId = ciHash(idA, idB, idC))
           val workC = WorkNode(
-            id = "C",
+            id = idC,
             version = 0,
             linkedIds = Nil,
-            componentId = "ABC")
+            componentId = ciHash(idA, idB, idC))
 
           put(dynamoClient, graphTable.name)(workA)
           put(dynamoClient, graphTable.name)(workB)
           put(dynamoClient, graphTable.name)(workC)
 
           whenReady(
-            workGraphStore.findAffectedWorks(WorkLinks("A", 0, Set.empty))) {
+            workGraphStore.findAffectedWorks(WorkLinks(idA, 0, Set.empty))) {
             workGraph =>
               workGraph.nodes shouldBe Set(workA, workB, workC)
           }
@@ -129,23 +153,31 @@ class WorkGraphStoreTest
         withWorkGraphStore(graphTable) { workGraphStore =>
           val workA =
             WorkNode(
-              id = "A",
+              id = idA,
               version = 0,
-              linkedIds = List("B"),
-              componentId = "AB")
+              linkedIds = List(idB),
+              componentId = ciHash(idA, idB))
           val workB =
-            WorkNode(id = "B", version = 0, linkedIds = Nil, componentId = "AB")
+            WorkNode(
+              id = idB,
+              version = 0,
+              linkedIds = Nil,
+              componentId = ciHash(idA, idB))
           val workC =
-            WorkNode(id = "C", version = 0, linkedIds = Nil, componentId = "C")
+            WorkNode(
+              id = idC,
+              version = 0,
+              linkedIds = Nil,
+              componentId = ciHash(idC))
 
           put(dynamoClient, graphTable.name)(workA)
           put(dynamoClient, graphTable.name)(workB)
           put(dynamoClient, graphTable.name)(workC)
 
-          whenReady(
-            workGraphStore.findAffectedWorks(WorkLinks("B", 0, Set("C")))) {
-            workGraph =>
-              workGraph.nodes shouldBe Set(workA, workB, workC)
+          val links = WorkLinks(idB, version = 0, referencedWorkIds = Set(idC))
+
+          whenReady(workGraphStore.findAffectedWorks(links)) { workGraph =>
+            workGraph.nodes shouldBe Set(workA, workB, workC)
           }
         }
       }
@@ -156,8 +188,16 @@ class WorkGraphStoreTest
     it("puts a simple graph") {
       withWorkGraphTable { graphTable =>
         withWorkGraphStore(graphTable) { workGraphStore =>
-          val workNodeA = WorkNode("A", version = 0, List("B"), "A+B")
-          val workNodeB = WorkNode("B", version = 0, Nil, "A+B")
+          val workNodeA = WorkNode(
+            idA,
+            version = 0,
+            linkedIds = List(idB),
+            componentId = ciHash(idA, idB))
+          val workNodeB = WorkNode(
+            idB,
+            version = 0,
+            linkedIds = Nil,
+            componentId = ciHash(idA, idB))
 
           whenReady(workGraphStore.put(WorkGraph(Set(workNodeA, workNodeB)))) {
             _ =>
@@ -185,9 +225,15 @@ class WorkGraphStoreTest
 
     val workGraphStore = new WorkGraphStore(brokenWorkNodeDao)
 
+    val workNode = WorkNode(
+      idA,
+      version = 0,
+      linkedIds = Nil,
+      componentId = ciHash(idA, idB))
+
     whenReady(
       workGraphStore
-        .put(WorkGraph(Set(WorkNode("A", version = 0, Nil, "A+B"))))
+        .put(WorkGraph(Set(workNode)))
         .failed) { failedException =>
       failedException shouldBe expectedException
     }

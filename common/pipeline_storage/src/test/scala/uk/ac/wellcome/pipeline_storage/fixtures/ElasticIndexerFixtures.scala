@@ -1,42 +1,16 @@
 package uk.ac.wellcome.pipeline_storage.fixtures
 
-import scala.concurrent.{ExecutionContext, Future}
 import com.sksamuel.elastic4s.{ElasticClient, Index}
+import io.circe.Encoder
 import org.scalatest.Suite
-import io.circe.{Decoder, Encoder}
-import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
-
 import uk.ac.wellcome.akka.fixtures.Akka
+import uk.ac.wellcome.elasticsearch.model.IndexId
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.elasticsearch.{IndexConfig, NoStrictMapping}
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.pipeline_storage.{ElasticIndexer, Indexable}
-import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.elasticsearch.model.IndexId
 
-case class SampleDocument(version: Int,
-                          canonicalId: String,
-                          title: String,
-                          data: SampleDocumentData = SampleDocumentData())
-
-case class SampleDocumentData(
-  genre: Option[String] = None,
-  date: Option[String] = None,
-)
-
-object SampleDocument {
-  implicit val indexable = new Indexable[SampleDocument] {
-    def version(document: SampleDocument): Long = document.version
-    def id(document: SampleDocument): String = document.canonicalId
-  }
-
-  implicit val canonicalId: IndexId[SampleDocument] =
-    (doc: SampleDocument) => doc.canonicalId
-
-  implicit val encoder: Encoder[SampleDocument] = deriveEncoder
-
-  implicit val decoder: Decoder[SampleDocument] = deriveDecoder
-}
+import scala.concurrent.{ExecutionContext, Future}
 
 trait ElasticIndexerFixtures extends ElasticsearchFixtures with Akka {
   this: Suite =>

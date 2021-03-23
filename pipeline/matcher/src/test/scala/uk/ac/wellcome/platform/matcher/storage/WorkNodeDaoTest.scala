@@ -32,6 +32,9 @@ class WorkNodeDaoTest
     with ScalaFutures
     with MatcherFixtures {
 
+  val idA = "A"
+  val idB = "B"
+
   describe("Get from dynamo") {
     it("returns nothing if ids are not in dynamo") {
       withWorkGraphTable { table =>
@@ -47,13 +50,22 @@ class WorkNodeDaoTest
       withWorkGraphTable { table =>
         withWorkNodeDao(table) { workNodeDao =>
           val existingWorkA: WorkNode =
-            WorkNode("A", 1, List("B"), "A+B")
-          val existingWorkB: WorkNode = WorkNode("B", 0, Nil, "A+B")
+            WorkNode(
+              idA,
+              version = 1,
+              linkedIds = List(idB),
+              componentId = ciHash(idA, idB))
+          val existingWorkB: WorkNode =
+            WorkNode(
+              idB,
+              version = 0,
+              linkedIds = Nil,
+              componentId = ciHash(idA, idB))
 
           put(dynamoClient, table.name)(existingWorkA)
           put(dynamoClient, table.name)(existingWorkB)
 
-          whenReady(workNodeDao.get(Set("A", "B"))) { work =>
+          whenReady(workNodeDao.get(Set(idA, idB))) { work =>
             work shouldBe Set(existingWorkA, existingWorkB)
           }
         }
@@ -73,7 +85,7 @@ class WorkNodeDaoTest
           DynamoConfig(table.name, table.index)
         )
 
-        whenReady(matcherGraphDao.get(Set("A")).failed) { failedException =>
+        whenReady(matcherGraphDao.get(Set(idA)).failed) { failedException =>
           failedException shouldBe expectedException
         }
       }
@@ -94,7 +106,7 @@ class WorkNodeDaoTest
           DynamoConfig(table.name, table.index)
         )
 
-        whenReady(workNodeDao.get(Set("A")).failed) { failedException =>
+        whenReady(workNodeDao.get(Set(idA)).failed) { failedException =>
           failedException shouldBe a[MatcherException]
         }
       }
@@ -117,13 +129,22 @@ class WorkNodeDaoTest
       "returns WorkNodes which are stored in DynamoDB for a given component id") {
       withWorkGraphTable { table =>
         withWorkNodeDao(table) { matcherGraphDao =>
-          val existingWorkNodeA: WorkNode = WorkNode("A", 1, List("B"), "A+B")
-          val existingWorkNodeB: WorkNode = WorkNode("B", 0, Nil, "A+B")
+          val existingWorkNodeA: WorkNode = WorkNode(
+            idA,
+            version = 1,
+            linkedIds = List(idB),
+            componentId = ciHash(idA, idB))
+          val existingWorkNodeB: WorkNode =
+            WorkNode(
+              idB,
+              version = 0,
+              linkedIds = Nil,
+              componentId = ciHash(idA, idB))
 
           put(dynamoClient, table.name)(existingWorkNodeA)
           put(dynamoClient, table.name)(existingWorkNodeB)
 
-          whenReady(matcherGraphDao.getByComponentIds(Set("A+B"))) {
+          whenReady(matcherGraphDao.getByComponentIds(Set(ciHash(idA, idB)))) {
             linkedWorks =>
               linkedWorks shouldBe Set(existingWorkNodeA, existingWorkNodeB)
           }
@@ -143,7 +164,7 @@ class WorkNodeDaoTest
           DynamoConfig(table.name, table.index)
         )
 
-        whenReady(workNodeDao.getByComponentIds(Set("A+B")).failed) {
+        whenReady(workNodeDao.getByComponentIds(Set(ciHash(idA, idB))).failed) {
           failedException =>
             failedException shouldBe expectedException
         }
@@ -165,7 +186,7 @@ class WorkNodeDaoTest
           DynamoConfig(table.name, table.index)
         )
 
-        whenReady(workNodeDao.getByComponentIds(Set("A+B")).failed) {
+        whenReady(workNodeDao.getByComponentIds(Set(ciHash(idA, idB))).failed) {
           failedException =>
             failedException shouldBe a[MatcherException]
         }
@@ -177,10 +198,13 @@ class WorkNodeDaoTest
         withWorkNodeDao(table) { workNodeDao =>
           case class BadRecord(id: String, componentId: String, version: String)
           val badRecord: BadRecord =
-            BadRecord(id = "A", componentId = "A+B", version = "five")
+            BadRecord(
+              id = idA,
+              componentId = ciHash(idA, idB),
+              version = "five")
           put(dynamoClient, table.name)(badRecord)
 
-          whenReady(workNodeDao.getByComponentIds(Set("A+B")).failed) {
+          whenReady(workNodeDao.getByComponentIds(Set(ciHash(idA, idB))).failed) {
             _ shouldBe a[RuntimeException]
           }
         }
@@ -192,10 +216,14 @@ class WorkNodeDaoTest
     it("puts a WorkNode") {
       withWorkGraphTable { table =>
         withWorkNodeDao(table) { workNodeDao =>
-          val work = WorkNode("A", 1, List("B"), "A+B")
+          val work = WorkNode(
+            idA,
+            version = 1,
+            linkedIds = List(idA),
+            componentId = ciHash(idA, idB))
           whenReady(workNodeDao.put(Set(work))) { _ =>
             val savedLinkedWork =
-              get[WorkNode](dynamoClient, table.name)("id" === "A")
+              get[WorkNode](dynamoClient, table.name)("id" === idA)
             savedLinkedWork shouldBe Some(Right(work))
           }
         }
@@ -206,10 +234,10 @@ class WorkNodeDaoTest
       withWorkGraphTable { table =>
         withWorkNodeDao(table) { workNodeDao =>
           case class BadRecord(id: String, version: String)
-          val badRecord: BadRecord = BadRecord(id = "A", version = "six")
+          val badRecord: BadRecord = BadRecord(id = idA, version = "six")
           put(dynamoClient, table.name)(badRecord)
 
-          whenReady(workNodeDao.get(Set("A")).failed) {
+          whenReady(workNodeDao.get(Set(idA)).failed) {
             _ shouldBe a[RuntimeException]
           }
         }
@@ -227,8 +255,14 @@ class WorkNodeDaoTest
           DynamoConfig(table.name, table.index)
         )
 
-        whenReady(
-          workNodeDao.put(Set(WorkNode("A", 1, List("B"), "A+B"))).failed) {
+        val workNode =
+          WorkNode(
+            idA,
+            version = 1,
+            linkedIds = List(idB),
+            componentId = ciHash(idA, idB))
+
+        whenReady(workNodeDao.put(Set(workNode)).failed) {
           _ shouldBe expectedException
         }
       }
@@ -249,8 +283,13 @@ class WorkNodeDaoTest
           DynamoConfig(table.name, table.index)
         )
 
-        whenReady(
-          workNodeDao.put(Set(WorkNode("A", 1, List("B"), "A+B"))).failed) {
+        val workNode = WorkNode(
+          id = idA,
+          version = 1,
+          linkedIds = List(idB),
+          componentId = ciHash(idA, idB))
+
+        whenReady(workNodeDao.put(Set(workNode)).failed) {
           _ shouldBe a[MatcherException]
         }
       }

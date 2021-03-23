@@ -36,9 +36,10 @@ case class Image[State <: ImageState](
 sealed trait ImageState {
   type TransitionArgs
 
+  val canonicalId: String
   val sourceIdentifier: SourceIdentifier
 
-  def id: String = sourceIdentifier.toString
+  def id: String = canonicalId
 }
 
 /** ImageState represents the state of the image in the pipeline.
@@ -65,8 +66,6 @@ object ImageState {
     canonicalId: String
   ) extends ImageState {
     type TransitionArgs = Unit
-
-    override def id = canonicalId
   }
 
   case class Augmented(
@@ -75,8 +74,6 @@ object ImageState {
     inferredData: Option[InferredData] = None
   ) extends ImageState {
     type TransitionArgs = Option[InferredData]
-
-    override def id = canonicalId
   }
 
   case class Indexed(
@@ -86,8 +83,6 @@ object ImageState {
     derivedData: DerivedImageData
   ) extends ImageState {
     type TransitionArgs = Unit
-
-    override def id = canonicalId
   }
 
 }

@@ -8,7 +8,6 @@ case class WorkNode(
 )
 
 object WorkNode {
-
   def apply(id: String,
             version: Int,
             linkedIds: List[String],
