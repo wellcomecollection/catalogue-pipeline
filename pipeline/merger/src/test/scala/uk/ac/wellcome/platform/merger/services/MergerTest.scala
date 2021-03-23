@@ -117,7 +117,7 @@ class MergerTest
 
     mergedWork.redirectSources should contain theSameElementsAs
       inputWorks.tail.tail.map { w =>
-        IdState.Identified(w.id, w.sourceIdentifier)
+        IdState.Identified(w.state.canonicalId, w.sourceIdentifier)
       }
   }
 
@@ -161,7 +161,7 @@ class MergerTest
     mergedWork.redirectSources should contain allElementsOf existingRedirectSources
     mergedWork.redirectSources should contain allElementsOf
       sourceWorks.tail.map { w =>
-        IdState.Identified(w.id, w.sourceIdentifier)
+        IdState.Identified(w.state.canonicalId, w.sourceIdentifier)
       }
   }
 }

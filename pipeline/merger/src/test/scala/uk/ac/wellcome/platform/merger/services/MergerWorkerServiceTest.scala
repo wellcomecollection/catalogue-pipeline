@@ -21,7 +21,7 @@ import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.catalogue.internal_model.work.WorkFsm._
 import uk.ac.wellcome.models.work.generators.MiroWorkGenerators
 import uk.ac.wellcome.pipeline_storage.MemoryRetriever
-import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.identifiers.{CanonicalId, IdState}
 import weco.catalogue.internal_model.work.{MergeCandidate, Work}
 
 class MergerWorkerServiceTest
@@ -291,9 +291,9 @@ class MergerWorkerServiceTest
           mergedWorks should have size 1
           mergedWorks.head.sourceIdentifier shouldBe physicalWork.sourceIdentifier
 
-          imagesSent.head shouldBe miroWork.data.imageData.head.id.canonicalId
+          CanonicalId(imagesSent.head) shouldBe miroWork.data.imageData.head.id.canonicalId
           images should have size 1
-          images.head.id shouldBe miroWork.data.imageData.head.id.canonicalId
+          CanonicalId(images.head.id) shouldBe miroWork.data.imageData.head.id.canonicalId
         }
     }
   }

@@ -101,7 +101,7 @@ trait Merger extends MergerLogging {
 
           val redirectedIdentifiers =
             redirectedSources.map { s =>
-              IdState.Identified(s.id, s.sourceIdentifier)
+              IdState.Identified(s.state.canonicalId, s.sourceIdentifier)
             }.toSeq
 
           val targetWork: Work.Visible[Identified] =
