@@ -47,8 +47,13 @@ class WorkNodeDaoTest
       withWorkGraphTable { table =>
         withWorkNodeDao(table) { workNodeDao =>
           val existingWorkA: WorkNode =
-            WorkNode("A", version = 1, linkedIds = List("B"), componentId = "A+B")
-          val existingWorkB: WorkNode = WorkNode("B", version = 0, linkedIds = Nil, componentId = "A+B")
+            WorkNode(
+              "A",
+              version = 1,
+              linkedIds = List("B"),
+              componentId = "A+B")
+          val existingWorkB: WorkNode =
+            WorkNode("B", version = 0, linkedIds = Nil, componentId = "A+B")
 
           put(dynamoClient, table.name)(existingWorkA)
           put(dynamoClient, table.name)(existingWorkB)
@@ -117,8 +122,13 @@ class WorkNodeDaoTest
       "returns WorkNodes which are stored in DynamoDB for a given component id") {
       withWorkGraphTable { table =>
         withWorkNodeDao(table) { matcherGraphDao =>
-          val existingWorkNodeA: WorkNode = WorkNode("A", version = 1, linkedIds = List("B"), componentId = "A+B")
-          val existingWorkNodeB: WorkNode = WorkNode("B", version = 0, linkedIds = Nil, componentId = "A+B")
+          val existingWorkNodeA: WorkNode = WorkNode(
+            "A",
+            version = 1,
+            linkedIds = List("B"),
+            componentId = "A+B")
+          val existingWorkNodeB: WorkNode =
+            WorkNode("B", version = 0, linkedIds = Nil, componentId = "A+B")
 
           put(dynamoClient, table.name)(existingWorkNodeA)
           put(dynamoClient, table.name)(existingWorkNodeB)
@@ -192,7 +202,11 @@ class WorkNodeDaoTest
     it("puts a WorkNode") {
       withWorkGraphTable { table =>
         withWorkNodeDao(table) { workNodeDao =>
-          val work = WorkNode("A", version = 1, linkedIds = List("B"), componentId = "A+B")
+          val work = WorkNode(
+            "A",
+            version = 1,
+            linkedIds = List("B"),
+            componentId = "A+B")
           whenReady(workNodeDao.put(Set(work))) { _ =>
             val savedLinkedWork =
               get[WorkNode](dynamoClient, table.name)("id" === "A")
@@ -227,10 +241,10 @@ class WorkNodeDaoTest
           DynamoConfig(table.name, table.index)
         )
 
-        val workNode = WorkNode("A", version = 1, linkedIds = List("B"), componentId = "A+B")
+        val workNode =
+          WorkNode("A", version = 1, linkedIds = List("B"), componentId = "A+B")
 
-        whenReady(
-          workNodeDao.put(Set(workNode)).failed) {
+        whenReady(workNodeDao.put(Set(workNode)).failed) {
           _ shouldBe expectedException
         }
       }
@@ -251,10 +265,13 @@ class WorkNodeDaoTest
           DynamoConfig(table.name, table.index)
         )
 
-        val workNode = WorkNode(id = "A", version = 1, linkedIds = List("B"), componentId = "A+B")
+        val workNode = WorkNode(
+          id = "A",
+          version = 1,
+          linkedIds = List("B"),
+          componentId = "A+B")
 
-        whenReady(
-          workNodeDao.put(Set(workNode)).failed) {
+        whenReady(workNodeDao.put(Set(workNode)).failed) {
           _ shouldBe a[MatcherException]
         }
       }

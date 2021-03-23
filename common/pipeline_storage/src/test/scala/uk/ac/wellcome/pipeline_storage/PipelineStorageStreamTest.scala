@@ -224,8 +224,7 @@ class PipelineStorageStreamTest
           eventually {
             brokenSender.messages
               .map(_.body)
-              .distinct should contain theSameElementsAs sentDocuments.map(
-              _.id)
+              .distinct should contain theSameElementsAs sentDocuments.map(_.id)
             assertQueueEmpty(queue)
             assertQueueHasSize(dlq, 1)
           }
@@ -382,7 +381,9 @@ class PipelineStorageStreamTest
   }
 
   it("does not delete from the queue documents that failed indexing") {
-    val successfulDocuments = (1 to 5).map { _ => createDocument }
+    val successfulDocuments = (1 to 5).map { _ =>
+      createDocument
+    }
     val failingDocuments = (1 to 5).map { _ =>
       val doc = createDocument
       (doc.id, doc)
@@ -393,8 +394,8 @@ class PipelineStorageStreamTest
 
       override def apply(documents: Seq[SampleDocument])
         : Future[Either[Seq[SampleDocument], Seq[SampleDocument]]] = {
-        Future.successful(Left(documents.filter(d =>
-          failingDocuments.keySet.contains(d.id))))
+        Future.successful(
+          Left(documents.filter(d => failingDocuments.keySet.contains(d.id))))
       }
     }
 
@@ -531,8 +532,12 @@ class PipelineStorageStreamTest
       withActorSystem { implicit ac =>
         val messages = (1 to 5).map(i =>
           Message.builder().messageId(i.toString).body(i.toString).build())
-        val bundles = messages.map(message =>
-          Bundle(message, createDocumentWith(id = message.messageId()), numberOfItems = 1))
+        val bundles = messages.map(
+          message =>
+            Bundle(
+              message,
+              createDocumentWith(id = message.messageId()),
+              numberOfItems = 1))
         // set maxSubstreams lower than the number of messages
         val maxSubStreams = 3
         val (queue, result) = Source
@@ -604,8 +609,8 @@ class PipelineStorageStreamTest
 
   describe("batchRetrieveFlow") {
     it("retrieves multiple documents") {
-      val documents = (1 to 5).map(i =>
-        (i.toString, createDocumentWith(id = i.toString)))
+      val documents =
+        (1 to 5).map(i => (i.toString, createDocumentWith(id = i.toString)))
       val retriever = new MemoryRetriever[SampleDocument](
         collection.mutable.Map(documents: _*))
 
@@ -630,12 +635,12 @@ class PipelineStorageStreamTest
     }
 
     it("filters out documents that it fails to retrieve") {
-      val successfulDocuments = (1 to 3).map(i =>
-        (i.toString, createDocumentWith(id = i.toString)))
+      val successfulDocuments =
+        (1 to 3).map(i => (i.toString, createDocumentWith(id = i.toString)))
       val retriever = new MemoryRetriever[SampleDocument](
         collection.mutable.Map(successfulDocuments: _*))
-      val failingDocuments = (4 to 5).map(i =>
-        (i.toString, createDocumentWith(id = i.toString)))
+      val failingDocuments =
+        (4 to 5).map(i => (i.toString, createDocumentWith(id = i.toString)))
       val documents = successfulDocuments ++ failingDocuments
 
       withActorSystem { implicit ac =>

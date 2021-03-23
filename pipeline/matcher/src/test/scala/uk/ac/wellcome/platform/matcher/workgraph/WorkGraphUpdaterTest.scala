@@ -37,7 +37,8 @@ class WorkGraphUpdaterTest
           links = WorkLinks("A", 1, Set.empty),
           existingGraph = WorkGraph(Set.empty)
         )
-        .nodes shouldBe Set(WorkNode("A", version = 1, linkedIds = List(), componentId = hashed_A))
+        .nodes shouldBe Set(
+        WorkNode("A", version = 1, linkedIds = List(), componentId = hashed_A))
     }
 
     it("updating nothing with A->B gives A+B:A->B") {
@@ -47,8 +48,16 @@ class WorkGraphUpdaterTest
           existingGraph = WorkGraph(Set.empty)
         )
         .nodes shouldBe Set(
-        WorkNode("A", version = 1, linkedIds = List("B"), componentId = hashed_AB),
-        WorkNode("B", version = None, linkedIds = List(), componentId = hashed_AB))
+        WorkNode(
+          "A",
+          version = 1,
+          linkedIds = List("B"),
+          componentId = hashed_AB),
+        WorkNode(
+          "B",
+          version = None,
+          linkedIds = List(),
+          componentId = hashed_AB))
     }
 
     it("updating nothing with B->A gives A+B:B->A") {
@@ -58,8 +67,16 @@ class WorkGraphUpdaterTest
           existingGraph = WorkGraph(Set.empty)
         )
         .nodes shouldBe Set(
-        WorkNode("B", version = 1, linkedIds = List("A"), componentId = hashed_AB),
-        WorkNode("A", version = None, linkedIds = List(), componentId = hashed_AB))
+        WorkNode(
+          "B",
+          version = 1,
+          linkedIds = List("A"),
+          componentId = hashed_AB),
+        WorkNode(
+          "A",
+          version = None,
+          linkedIds = List(),
+          componentId = hashed_AB))
     }
   }
 
@@ -77,8 +94,16 @@ class WorkGraphUpdaterTest
         )
         .nodes should contain theSameElementsAs
         List(
-          WorkNode("A", version = 2, linkedIds = List("B"), componentId = hashed_AB),
-          WorkNode("B", version = 1, linkedIds = List(), componentId = hashed_AB))
+          WorkNode(
+            "A",
+            version = 2,
+            linkedIds = List("B"),
+            componentId = hashed_AB),
+          WorkNode(
+            "B",
+            version = 1,
+            linkedIds = List(),
+            componentId = hashed_AB))
     }
 
     it("updating A->B with A->B gives A+B:(A->B, B)") {
@@ -87,11 +112,19 @@ class WorkGraphUpdaterTest
           links = WorkLinks("A", version = 2, referencedWorkIds = Set("B")),
           existingGraph = WorkGraph(
             Set(
-              WorkNode("A", version = 1, linkedIds = List("B"), componentId = "A+B"),
+              WorkNode(
+                "A",
+                version = 1,
+                linkedIds = List("B"),
+                componentId = "A+B"),
               WorkNode("B", version = 1, linkedIds = Nil, componentId = "A+B")))
         )
         .nodes shouldBe Set(
-        WorkNode("A", version = 2, linkedIds = List("B"), componentId = hashed_AB),
+        WorkNode(
+          "A",
+          version = 2,
+          linkedIds = List("B"),
+          componentId = hashed_AB),
         WorkNode("B", version = 1, linkedIds = List(), componentId = hashed_AB)
       )
     }
@@ -100,15 +133,27 @@ class WorkGraphUpdaterTest
       WorkGraphUpdater
         .update(
           links = WorkLinks("B", 2, Set("C")),
-          existingGraph = WorkGraph(
-            Set(
-              WorkNode("A", version = 2, linkedIds = List("B"), componentId = "A+B"),
-              WorkNode("B", version = 1, linkedIds = Nil, componentId = "A+B"),
-              WorkNode("C", version = 1, linkedIds = Nil, componentId = "C")))
+          existingGraph = WorkGraph(Set(
+            WorkNode(
+              "A",
+              version = 2,
+              linkedIds = List("B"),
+              componentId = "A+B"),
+            WorkNode("B", version = 1, linkedIds = Nil, componentId = "A+B"),
+            WorkNode("C", version = 1, linkedIds = Nil, componentId = "C")
+          ))
         )
         .nodes shouldBe Set(
-        WorkNode("A", version = 2, linkedIds = List("B"), componentId = hashed_ABC),
-        WorkNode("B", version = 2, linkedIds = List("C"), componentId = hashed_ABC),
+        WorkNode(
+          "A",
+          version = 2,
+          linkedIds = List("B"),
+          componentId = hashed_ABC),
+        WorkNode(
+          "B",
+          version = 2,
+          linkedIds = List("C"),
+          componentId = hashed_ABC),
         WorkNode("C", version = 1, linkedIds = List(), componentId = hashed_ABC)
       )
     }
@@ -117,40 +162,83 @@ class WorkGraphUpdaterTest
       WorkGraphUpdater
         .update(
           links = WorkLinks("B", version = 2, referencedWorkIds = Set("C")),
-          existingGraph = WorkGraph(
-            Set(
-              WorkNode("A", version = 1, linkedIds = List("B"), componentId = "A+B"),
-              WorkNode("C", version = 1, linkedIds = List("D"), componentId = "C+D"),
-              WorkNode("B", version = 1, linkedIds = Nil, componentId = "A+B"),
-              WorkNode("D", version = 1, linkedIds = Nil, componentId = "C+D")
-            ))
+          existingGraph = WorkGraph(Set(
+            WorkNode(
+              "A",
+              version = 1,
+              linkedIds = List("B"),
+              componentId = "A+B"),
+            WorkNode(
+              "C",
+              version = 1,
+              linkedIds = List("D"),
+              componentId = "C+D"),
+            WorkNode("B", version = 1, linkedIds = Nil, componentId = "A+B"),
+            WorkNode("D", version = 1, linkedIds = Nil, componentId = "C+D")
+          ))
         )
         .nodes shouldBe
         Set(
-          WorkNode("A", version = 1, linkedIds = List("B"), componentId = hashed_ABCD),
-          WorkNode("B", version = 2, linkedIds = List("C"), componentId = hashed_ABCD),
-          WorkNode("C", version = 1, linkedIds = List("D"), componentId = hashed_ABCD),
-          WorkNode("D", version = 1, linkedIds = List(), componentId = hashed_ABCD))
+          WorkNode(
+            "A",
+            version = 1,
+            linkedIds = List("B"),
+            componentId = hashed_ABCD),
+          WorkNode(
+            "B",
+            version = 2,
+            linkedIds = List("C"),
+            componentId = hashed_ABCD),
+          WorkNode(
+            "C",
+            version = 1,
+            linkedIds = List("D"),
+            componentId = hashed_ABCD),
+          WorkNode(
+            "D",
+            version = 1,
+            linkedIds = List(),
+            componentId = hashed_ABCD)
+        )
     }
 
     it("updating A->B with B->[C,D] gives A+B+C+D:(A->B, B->C&D, C, D") {
       WorkGraphUpdater
         .update(
           links = WorkLinks("B", version = 2, referencedWorkIds = Set("C", "D")),
-          existingGraph = WorkGraph(
-            Set(
-              WorkNode("A", version = 2, linkedIds = List("B"), componentId = "A+B"),
-              WorkNode("B", version = 1, linkedIds = Nil, componentId = "A+B"),
-              WorkNode("C", version = 1, linkedIds = Nil, componentId = "C"),
-              WorkNode("D", version = 1, linkedIds = Nil, componentId = "D")
-            ))
+          existingGraph = WorkGraph(Set(
+            WorkNode(
+              "A",
+              version = 2,
+              linkedIds = List("B"),
+              componentId = "A+B"),
+            WorkNode("B", version = 1, linkedIds = Nil, componentId = "A+B"),
+            WorkNode("C", version = 1, linkedIds = Nil, componentId = "C"),
+            WorkNode("D", version = 1, linkedIds = Nil, componentId = "D")
+          ))
         )
         .nodes shouldBe
         Set(
-          WorkNode("A", version = 2, linkedIds = List("B"), componentId = hashed_ABCD),
-          WorkNode("B", version = 2, linkedIds = List("C", "D"), componentId = hashed_ABCD),
-          WorkNode("C", version = 1, linkedIds = List(), componentId = hashed_ABCD),
-          WorkNode("D", version = 1, linkedIds = List(), componentId = hashed_ABCD)
+          WorkNode(
+            "A",
+            version = 2,
+            linkedIds = List("B"),
+            componentId = hashed_ABCD),
+          WorkNode(
+            "B",
+            version = 2,
+            linkedIds = List("C", "D"),
+            componentId = hashed_ABCD),
+          WorkNode(
+            "C",
+            version = 1,
+            linkedIds = List(),
+            componentId = hashed_ABCD),
+          WorkNode(
+            "D",
+            version = 1,
+            linkedIds = List(),
+            componentId = hashed_ABCD)
         )
     }
 
@@ -158,16 +246,36 @@ class WorkGraphUpdaterTest
       WorkGraphUpdater
         .update(
           links = WorkLinks("C", version = 2, referencedWorkIds = Set("A")),
-          existingGraph = WorkGraph(
-            Set(
-              WorkNode("A", version = 2, linkedIds = List("B"), componentId = "A+B+C"),
-              WorkNode("B", version = 2, linkedIds = List("C"), componentId = "A+B+C"),
-              WorkNode("C", version = 1, linkedIds = Nil, componentId = "A+B+C")))
+          existingGraph = WorkGraph(Set(
+            WorkNode(
+              "A",
+              version = 2,
+              linkedIds = List("B"),
+              componentId = "A+B+C"),
+            WorkNode(
+              "B",
+              version = 2,
+              linkedIds = List("C"),
+              componentId = "A+B+C"),
+            WorkNode("C", version = 1, linkedIds = Nil, componentId = "A+B+C")
+          ))
         )
         .nodes shouldBe Set(
-        WorkNode("A", version = 2, linkedIds = List("B"), componentId = hashed_ABC),
-        WorkNode("B", version = 2, linkedIds = List("C"), componentId = hashed_ABC),
-        WorkNode("C", version = 2, linkedIds = List("A"), componentId = hashed_ABC)
+        WorkNode(
+          "A",
+          version = 2,
+          linkedIds = List("B"),
+          componentId = hashed_ABC),
+        WorkNode(
+          "B",
+          version = 2,
+          linkedIds = List("C"),
+          componentId = hashed_ABC),
+        WorkNode(
+          "C",
+          version = 2,
+          linkedIds = List("A"),
+          componentId = hashed_ABC)
       )
     }
   }
@@ -179,13 +287,21 @@ class WorkGraphUpdaterTest
       WorkGraphUpdater
         .update(
           links = WorkLinks("A", updateVersion, referencedWorkIds = Set("B")),
-          existingGraph =
-            WorkGraph(Set(WorkNode("A", existingVersion, linkedIds = Nil, componentId = "A")))
+          existingGraph = WorkGraph(Set(
+            WorkNode("A", existingVersion, linkedIds = Nil, componentId = "A")))
         )
         .nodes should contain theSameElementsAs
         List(
-          WorkNode("A", updateVersion, linkedIds = List("B"), componentId = hashed_AB),
-          WorkNode("B", version = None, linkedIds = List(), componentId = hashed_AB))
+          WorkNode(
+            "A",
+            updateVersion,
+            linkedIds = List("B"),
+            componentId = hashed_AB),
+          WorkNode(
+            "B",
+            version = None,
+            linkedIds = List(),
+            componentId = hashed_AB))
     }
 
     it("doesn't process an update for a lower version") {
@@ -196,8 +312,13 @@ class WorkGraphUpdaterTest
         WorkGraphUpdater
           .update(
             links = WorkLinks("A", updateVersion, referencedWorkIds = Set("B")),
-            existingGraph =
-              WorkGraph(Set(WorkNode("A", existingVersion, linkedIds = Nil, componentId = "A")))
+            existingGraph = WorkGraph(
+              Set(
+                WorkNode(
+                  "A",
+                  existingVersion,
+                  linkedIds = Nil,
+                  componentId = "A")))
           )
       }
       thrown.message shouldBe "update failed, work:A v1 is not newer than existing work v3"
@@ -213,13 +334,29 @@ class WorkGraphUpdaterTest
           links = WorkLinks("A", updateVersion, referencedWorkIds = Set("B")),
           existingGraph = WorkGraph(
             Set(
-              WorkNode("A", existingVersion, linkedIds = List("B"), componentId = hashed_AB),
-              WorkNode("B", version = 0, linkedIds = List(), componentId = hashed_AB)))
+              WorkNode(
+                "A",
+                existingVersion,
+                linkedIds = List("B"),
+                componentId = hashed_AB),
+              WorkNode(
+                "B",
+                version = 0,
+                linkedIds = List(),
+                componentId = hashed_AB)))
         )
         .nodes should contain theSameElementsAs
         List(
-          WorkNode("A", updateVersion, linkedIds = List("B"), componentId = hashed_AB),
-          WorkNode("B", version = 0, linkedIds = List(), componentId = hashed_AB))
+          WorkNode(
+            "A",
+            updateVersion,
+            linkedIds = List("B"),
+            componentId = hashed_AB),
+          WorkNode(
+            "B",
+            version = 0,
+            linkedIds = List(),
+            componentId = hashed_AB))
     }
 
     it(
@@ -233,8 +370,16 @@ class WorkGraphUpdaterTest
             links = WorkLinks("A", updateVersion, referencedWorkIds = Set("A")),
             existingGraph = WorkGraph(
               Set(
-                WorkNode("A", existingVersion, linkedIds = List("B"), componentId = hashed_AB),
-                WorkNode("B", version = 0, linkedIds = List(), componentId = hashed_AB)))
+                WorkNode(
+                  "A",
+                  existingVersion,
+                  linkedIds = List("B"),
+                  componentId = hashed_AB),
+                WorkNode(
+                  "B",
+                  version = 0,
+                  linkedIds = List(),
+                  componentId = hashed_AB)))
           )
       }
       thrown.getMessage shouldBe "update failed, work:A v2 already exists with different content! update-ids:Set(A) != existing-ids:Set(B)"
@@ -248,8 +393,16 @@ class WorkGraphUpdaterTest
           links = WorkLinks("A", version = 2, referencedWorkIds = Set.empty),
           existingGraph = WorkGraph(
             Set(
-              WorkNode("A", version = 1, linkedIds = List("B"), componentId = "A+B"),
-              WorkNode("B", version = 1, linkedIds = List(), componentId = "A+B")))
+              WorkNode(
+                "A",
+                version = 1,
+                linkedIds = List("B"),
+                componentId = "A+B"),
+              WorkNode(
+                "B",
+                version = 1,
+                linkedIds = List(),
+                componentId = "A+B")))
         )
         .nodes shouldBe Set(
         WorkNode("A", version = 2, linkedIds = List(), componentId = hashed_A),
@@ -263,7 +416,11 @@ class WorkGraphUpdaterTest
           links = WorkLinks("A", version = 2, referencedWorkIds = Set.empty),
           existingGraph = WorkGraph(
             Set(
-              WorkNode("A", version = 1, linkedIds = List("B"), componentId = "A+B")
+              WorkNode(
+                "A",
+                version = 1,
+                linkedIds = List("B"),
+                componentId = "A+B")
             ))
         )
         .nodes shouldBe Set(
@@ -276,14 +433,26 @@ class WorkGraphUpdaterTest
       WorkGraphUpdater
         .update(
           links = WorkLinks("B", version = 3, referencedWorkIds = Set.empty),
-          existingGraph = WorkGraph(
-            Set(
-              WorkNode("A", version = 2, linkedIds = List("B"), componentId = "A+B+C"),
-              WorkNode("B", version = 2, linkedIds = List("C"), componentId = "A+B+C"),
-              WorkNode("C", version = 1, linkedIds = Nil, componentId = "A+B+C")))
+          existingGraph = WorkGraph(Set(
+            WorkNode(
+              "A",
+              version = 2,
+              linkedIds = List("B"),
+              componentId = "A+B+C"),
+            WorkNode(
+              "B",
+              version = 2,
+              linkedIds = List("C"),
+              componentId = "A+B+C"),
+            WorkNode("C", version = 1, linkedIds = Nil, componentId = "A+B+C")
+          ))
         )
         .nodes shouldBe Set(
-        WorkNode("A", version = 2, linkedIds = List("B"), componentId = hashed_AB),
+        WorkNode(
+          "A",
+          version = 2,
+          linkedIds = List("B"),
+          componentId = hashed_AB),
         WorkNode("B", version = 3, linkedIds = Nil, componentId = hashed_AB),
         WorkNode("C", version = 1, linkedIds = Nil, componentId = hashed_C)
       )
@@ -293,15 +462,31 @@ class WorkGraphUpdaterTest
       WorkGraphUpdater
         .update(
           links = WorkLinks("B", version = 3, referencedWorkIds = Set("C")),
-          existingGraph = WorkGraph(
-            Set(
-              WorkNode("A", version = 2, linkedIds = List("B"), componentId = "A+B+C"),
-              WorkNode("B", version = 2, linkedIds = List("A", "C"), componentId = "A+B+C"),
-              WorkNode("C", version = 1, linkedIds = Nil, componentId = "A+B+C")))
+          existingGraph = WorkGraph(Set(
+            WorkNode(
+              "A",
+              version = 2,
+              linkedIds = List("B"),
+              componentId = "A+B+C"),
+            WorkNode(
+              "B",
+              version = 2,
+              linkedIds = List("A", "C"),
+              componentId = "A+B+C"),
+            WorkNode("C", version = 1, linkedIds = Nil, componentId = "A+B+C")
+          ))
         )
         .nodes shouldBe Set(
-        WorkNode("A", version = 2, linkedIds = List("B"), componentId = hashed_ABC),
-        WorkNode("B", version = 3, linkedIds = List("C"), componentId = hashed_ABC),
+        WorkNode(
+          "A",
+          version = 2,
+          linkedIds = List("B"),
+          componentId = hashed_ABC),
+        WorkNode(
+          "B",
+          version = 3,
+          linkedIds = List("C"),
+          componentId = hashed_ABC),
         WorkNode("C", version = 1, linkedIds = Nil, componentId = hashed_ABC)
       )
     }

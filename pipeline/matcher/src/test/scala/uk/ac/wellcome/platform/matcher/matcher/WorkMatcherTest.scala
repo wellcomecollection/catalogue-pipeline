@@ -103,13 +103,15 @@ class WorkMatcherTest
                 id = identifierA.canonicalId,
                 version = links.version,
                 linkedIds = List(identifierB.canonicalId),
-                componentId = ciHash(identifierA.canonicalId, identifierB.canonicalId)
+                componentId =
+                  ciHash(identifierA.canonicalId, identifierB.canonicalId)
               ),
               WorkNode(
                 id = identifierB.canonicalId,
                 version = None,
                 linkedIds = Nil,
-                componentId = ciHash(identifierA.canonicalId, identifierB.canonicalId)
+                componentId =
+                  ciHash(identifierA.canonicalId, identifierB.canonicalId)
               )
             )
           }
@@ -127,13 +129,15 @@ class WorkMatcherTest
             id = identifierA.canonicalId,
             version = 1,
             linkedIds = List(identifierB.canonicalId),
-            componentId = ciHash(identifierA.canonicalId, identifierB.canonicalId)
+            componentId =
+              ciHash(identifierA.canonicalId, identifierB.canonicalId)
           )
           val existingWorkB = WorkNode(
             id = identifierB.canonicalId,
             version = 1,
             linkedIds = Nil,
-            componentId = ciHash(identifierA.canonicalId, identifierB.canonicalId)
+            componentId =
+              ciHash(identifierA.canonicalId, identifierB.canonicalId)
           )
           val existingWorkC = WorkNode(
             id = identifierC.canonicalId,
@@ -232,12 +236,11 @@ class WorkMatcherTest
         val idC = identifierC.canonicalId
 
         val future = workGraphStore.put(
-          WorkGraph(
-            Set(
-              WorkNode(idA, version = 0, linkedIds = List(idB), componentId),
-              WorkNode(idB, version = 0, linkedIds = List(idC), componentId),
-              WorkNode(idC, version = 0, linkedIds = Nil, componentId),
-            )))
+          WorkGraph(Set(
+            WorkNode(idA, version = 0, linkedIds = List(idB), componentId),
+            WorkNode(idB, version = 0, linkedIds = List(idC), componentId),
+            WorkNode(idC, version = 0, linkedIds = Nil, componentId),
+          )))
 
         whenReady(future) { _ =>
           val links = createWorkLinksWith(
