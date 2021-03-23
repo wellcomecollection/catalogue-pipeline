@@ -53,10 +53,12 @@ object SierraNotes extends SierraDataTransformer with SierraQueryOps {
         case Some((vf, Some(createNote))) => createNote(vf)
       }
 
-  private def createNoteFromContents(createNote: String => Note): VarField => Note =
+  private def createNoteFromContents(
+    createNote: String => Note): VarField => Note =
     (varField: VarField) => {
       val contents =
-        varField.subfieldsWithoutTags(suppressedSubfields.toSeq: _*)
+        varField
+          .subfieldsWithoutTags(suppressedSubfields.toSeq: _*)
           .contents
           .mkString(" ")
 

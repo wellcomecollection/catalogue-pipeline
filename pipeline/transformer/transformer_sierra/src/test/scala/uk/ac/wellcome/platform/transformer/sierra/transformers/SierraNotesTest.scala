@@ -104,12 +104,14 @@ class SierraNotesTest
         createVarFieldWith(
           marcTag = "535",
           indicator1 = Some("1"),
-          subfields = List(MarcSubfield(tag = "a", content = "The originals are in Oman"))
+          subfields =
+            List(MarcSubfield(tag = "a", content = "The originals are in Oman"))
         ),
         createVarFieldWith(
           marcTag = "535",
           indicator1 = Some("2"),
-          subfields = List(MarcSubfield(tag = "a", content = "The duplicates are in Denmark"))
+          subfields = List(
+            MarcSubfield(tag = "a", content = "The duplicates are in Denmark"))
         )
       )
     )
@@ -135,14 +137,16 @@ class SierraNotesTest
     )
 
     val notes = SierraNotes.notesFields.values
-      .map(createNote => createNote(
-        createVarFieldWith(
-          marcTag = "000",
-          subfields = List(
-            MarcSubfield(tag = "a", content = "Main bit.")
-          )
-        )
-      ))
+      .map(
+        createNote =>
+          createNote(
+            createVarFieldWith(
+              marcTag = "000",
+              subfields = List(
+                MarcSubfield(tag = "a", content = "Main bit.")
+              )
+            )
+        ))
       .toList
 
     SierraNotes(bibData) should contain theSameElementsAs notes
