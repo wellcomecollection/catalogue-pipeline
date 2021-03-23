@@ -98,6 +98,28 @@ class SierraNotesTest
     SierraNotes(bibData(notes)) shouldBe notes.map(_._2)
   }
 
+  it("distinguishes based on the first indicator of 535") {
+    val bibData = createSierraBibDataWith(
+      varFields = List(
+        createVarFieldWith(
+          marcTag = "535",
+          indicator1 = Some("1"),
+          subfields = List(MarcSubfield(tag = "a", content = "The originals are in Oman"))
+        ),
+        createVarFieldWith(
+          marcTag = "535",
+          indicator1 = Some("2"),
+          subfields = List(MarcSubfield(tag = "a", content = "The duplicates are in Denmark"))
+        )
+      )
+    )
+
+    SierraNotes(bibData) shouldBe List(
+      LocationOfOriginalNote("The originals are in Oman"),
+      LocationOfDuplicatesNote("The duplicates are in Denmark")
+    )
+  }
+
   it("suppresses subfield ǂ5 universally") {
     val varFields = SierraNotes.notesFields.keys.map(key => {
       createVarFieldWith(
@@ -113,7 +135,14 @@ class SierraNotesTest
     )
 
     val notes = SierraNotes.notesFields.values
-      .map(notesField => notesField.createNote("Main bit."))
+      .map(createNote => createNote(
+        createVarFieldWith(
+          marcTag = "000",
+          subfields = List(
+            MarcSubfield(tag = "a", content = "Main bit.")
+          )
+        )
+      ))
       .toList
 
     SierraNotes(bibData) should contain theSameElementsAs notes

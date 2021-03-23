@@ -7,44 +7,42 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
 }
 import weco.catalogue.internal_model.work._
 
-case class NotesField(createNote: String => Note)
-
 object SierraNotes extends SierraDataTransformer with SierraQueryOps {
 
   type Output = List[Note]
   val suppressedSubfields = Set("5")
 
   val notesFields = Map(
-    "500" -> NotesField(GeneralNote),
-    "501" -> NotesField(GeneralNote),
-    "502" -> NotesField(DissertationNote),
-    "504" -> NotesField(BibliographicalInformation),
-    "505" -> NotesField(ContentsNote),
-    "508" -> NotesField(CreditsNote),
-    "510" -> NotesField(PublicationsNote),
-    "511" -> NotesField(CreditsNote),
-    "514" -> NotesField(LetteringNote),
-    "518" -> NotesField(TimeAndPlaceNote),
-    "524" -> NotesField(CiteAsNote),
-    "533" -> NotesField(ReproductionNote),
-    "534" -> NotesField(ReproductionNote),
-    "535" -> NotesField(LocationOfOriginalNote),
-    "536" -> NotesField(FundingInformation),
-    "540" -> NotesField(TermsOfUse),
-    "542" -> NotesField(CopyrightNote),
-    "545" -> NotesField(BiographicalNote),
-    "546" -> NotesField(LanguageNote),
-    "547" -> NotesField(GeneralNote),
-    "562" -> NotesField(GeneralNote),
-    "563" -> NotesField(BindingInformation),
-    "581" -> NotesField(PublicationsNote),
-    "585" -> NotesField(ExhibitionsNote),
-    "586" -> NotesField(AwardsNote),
-    "591" -> NotesField(GeneralNote),
-    "593" -> NotesField(CopyrightNote),
+    "500" -> createNoteFromContents(GeneralNote),
+    "501" -> createNoteFromContents(GeneralNote),
+    "502" -> createNoteFromContents(DissertationNote),
+    "504" -> createNoteFromContents(BibliographicalInformation),
+    "505" -> createNoteFromContents(ContentsNote),
+    "508" -> createNoteFromContents(CreditsNote),
+    "510" -> createNoteFromContents(PublicationsNote),
+    "511" -> createNoteFromContents(CreditsNote),
+    "514" -> createNoteFromContents(LetteringNote),
+    "518" -> createNoteFromContents(TimeAndPlaceNote),
+    "524" -> createNoteFromContents(CiteAsNote),
+    "533" -> createNoteFromContents(ReproductionNote),
+    "534" -> createNoteFromContents(ReproductionNote),
+    "535" -> createLocationOfNote _,
+    "536" -> createNoteFromContents(FundingInformation),
+    "540" -> createNoteFromContents(TermsOfUse),
+    "542" -> createNoteFromContents(CopyrightNote),
+    "545" -> createNoteFromContents(BiographicalNote),
+    "546" -> createNoteFromContents(LanguageNote),
+    "547" -> createNoteFromContents(GeneralNote),
+    "562" -> createNoteFromContents(GeneralNote),
+    "563" -> createNoteFromContents(BindingInformation),
+    "581" -> createNoteFromContents(PublicationsNote),
+    "585" -> createNoteFromContents(ExhibitionsNote),
+    "586" -> createNoteFromContents(AwardsNote),
+    "591" -> createNoteFromContents(GeneralNote),
+    "593" -> createNoteFromContents(CopyrightNote),
   )
 
-  def apply(bibData: SierraBibData) =
+  def apply(bibData: SierraBibData): List[Note] =
     bibData.varFields
       .map {
         case vf @ VarField(_, Some(marcTag), _, _, _, _) =>
@@ -52,15 +50,27 @@ object SierraNotes extends SierraDataTransformer with SierraQueryOps {
         case _ => None
       }
       .collect {
-        case Some((vf, Some(notesField))) => (vf, notesField)
+        case Some((vf, Some(createNote))) => createNote(vf)
       }
-      .map {
-        case (vf, NotesField(createNote)) =>
-          val contents =
-            vf.subfieldsWithoutTags(suppressedSubfields.toSeq: _*)
-              .contents
-              .mkString(" ")
 
-          createNote(contents)
-      }
+  private def createNoteFromContents(createNote: String => Note): VarField => Note =
+    (varField: VarField) => {
+      val contents =
+        varField.subfieldsWithoutTags(suppressedSubfields.toSeq: _*)
+          .contents
+          .mkString(" ")
+
+      createNote(contents)
+    }
+
+  // In MARC 535, indicator 1 takes the following values:
+  //
+  //    1 = holder of originals
+  //    2 = holder of duplicates
+  //
+  private def createLocationOfNote(vf: VarField): Note =
+    vf.indicator1 match {
+      case Some("2") => createNoteFromContents(LocationOfDuplicatesNote)(vf)
+      case _         => createNoteFromContents(LocationOfOriginalNote)(vf)
+    }
 }
