@@ -47,8 +47,7 @@ class WorkMatcherTest
     withWorkGraphTable { graphTable =>
       withWorkGraphStore(graphTable) { workGraphStore =>
         withWorkMatcher(workGraphStore) { workMatcher =>
-          val id = createIdentifier("A")
-          val links = createWorkLinksWith(id = id)
+          val links = createWorkLinksWith(id = identifierA)
 
           whenReady(workMatcher.matchWork(links)) { matcherResult =>
             matcherResult shouldBe
@@ -79,9 +78,6 @@ class WorkMatcherTest
     withWorkGraphTable { graphTable =>
       withWorkGraphStore(graphTable) { workGraphStore =>
         withWorkMatcher(workGraphStore) { workMatcher =>
-          val identifierA = createIdentifier("A")
-          val identifierB = createIdentifier("B")
-
           val links = createWorkLinksWith(
             id = identifierA,
             referencedIds = Set(identifierB)
