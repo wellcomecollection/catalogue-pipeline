@@ -154,7 +154,8 @@ class PlatformMergerTest
       ),
       state = sierraPhysicalWork.transition[Merged](now).state,
       redirectSources = Seq(
-        IdState.Identified(miroWork.state.canonicalId, miroWork.sourceIdentifier)
+        IdState
+          .Identified(miroWork.state.canonicalId, miroWork.sourceIdentifier)
       )
     )
 
@@ -204,7 +205,8 @@ class PlatformMergerTest
       ),
       state = zeroItemSierraWork.transition[Merged](now).state,
       redirectSources = Seq(
-        IdState.Identified(miroWork.state.canonicalId, miroWork.sourceIdentifier)
+        IdState
+          .Identified(miroWork.state.canonicalId, miroWork.sourceIdentifier)
       )
     )
 
@@ -263,7 +265,8 @@ class PlatformMergerTest
       ),
       state = sierraDigitalWork.transition[Merged](now).state,
       redirectSources = Seq(
-        IdState.Identified(miroWork.state.canonicalId, miroWork.sourceIdentifier)
+        IdState
+          .Identified(miroWork.state.canonicalId, miroWork.sourceIdentifier)
       )
     )
 
@@ -309,7 +312,8 @@ class PlatformMergerTest
       ),
       state = multipleItemsSierraWork.transition[Merged](now).state,
       redirectSources = Seq(
-        IdState.Identified(miroWork.state.canonicalId, miroWork.sourceIdentifier)
+        IdState
+          .Identified(miroWork.state.canonicalId, miroWork.sourceIdentifier)
       )
     )
 
@@ -345,7 +349,8 @@ class PlatformMergerTest
       ),
       state = sierraPhysicalWork.transition[Merged](now).state,
       redirectSources = Seq(
-        IdState.Identified(metsWork.state.canonicalId, metsWork.sourceIdentifier)
+        IdState
+          .Identified(metsWork.state.canonicalId, metsWork.sourceIdentifier)
       )
     )
 
@@ -415,7 +420,8 @@ class PlatformMergerTest
       ),
       state = sierraPictureWork.transition[Merged](now).state,
       redirectSources = Seq(
-        IdState.Identified(metsWork.state.canonicalId, metsWork.sourceIdentifier)
+        IdState
+          .Identified(metsWork.state.canonicalId, metsWork.sourceIdentifier)
       )
     )
 
@@ -475,8 +481,10 @@ class PlatformMergerTest
       ),
       state = sierraPhysicalWork.transition[Merged](now).state,
       redirectSources = Seq(
-        IdState.Identified(metsWork.state.canonicalId, metsWork.sourceIdentifier),
-        IdState.Identified(miroWork.state.canonicalId, miroWork.sourceIdentifier),
+        IdState
+          .Identified(metsWork.state.canonicalId, metsWork.sourceIdentifier),
+        IdState
+          .Identified(miroWork.state.canonicalId, miroWork.sourceIdentifier),
         IdState.Identified(
           sierraDigitisedWork.state.canonicalId,
           sierraDigitisedWork.sourceIdentifier),
@@ -556,7 +564,8 @@ class PlatformMergerTest
       ),
       state = multipleItemsSierraWork.transition[Merged](now).state,
       redirectSources = Seq(
-        IdState.Identified(metsWork.state.canonicalId, metsWork.sourceIdentifier)
+        IdState
+          .Identified(metsWork.state.canonicalId, metsWork.sourceIdentifier)
       )
     )
 
@@ -598,7 +607,8 @@ class PlatformMergerTest
       ),
       state = multipleItemsSierraWork.transition[Merged](now).state,
       redirectSources = Seq(
-        IdState.Identified(metsWork.state.canonicalId, metsWork.sourceIdentifier),
+        IdState
+          .Identified(metsWork.state.canonicalId, metsWork.sourceIdentifier),
         IdState.Identified(
           sierraDigitisedWork.state.canonicalId,
           sierraDigitisedWork.sourceIdentifier)

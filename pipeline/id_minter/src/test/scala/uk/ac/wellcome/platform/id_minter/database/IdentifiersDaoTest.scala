@@ -32,7 +32,8 @@ class IdentifiersDaoTest
           val triedLookup = identifiersDao.lookupIds(List(sourceIdentifier))
 
           triedLookup shouldBe a[Success[_]]
-          triedLookup.get.existingIdentifiers shouldBe Map(sourceIdentifier -> identifier)
+          triedLookup.get.existingIdentifiers shouldBe Map(
+            sourceIdentifier -> identifier)
           triedLookup.get.unmintedIdentifiers shouldBe empty
       }
     }
@@ -93,7 +94,7 @@ class IdentifiersDaoTest
       withIdentifiersDao(existingEntries = identifiersMap.values.toSeq) {
         case (identifiersDao, _) =>
           val triedLookup = identifiersDao.lookupIds(
-              identifiersMap.keys.toList ++ unmintedSourceIdentifiers
+            identifiersMap.keys.toList ++ unmintedSourceIdentifiers
           )
 
           triedLookup shouldBe a[Success[_]]
@@ -134,7 +135,9 @@ class IdentifiersDaoTest
               .where
               .eq(identifiersTable.i.SourceSystem, identifier.SourceSystem)
               .and
-              .eq(identifiersTable.i.CanonicalId, identifier.CanonicalId.underlying)
+              .eq(
+                identifiersTable.i.CanonicalId,
+                identifier.CanonicalId.underlying)
           }.map(Identifier(identifiersTable.i)).single.apply()
 
           maybeIdentifier shouldBe defined

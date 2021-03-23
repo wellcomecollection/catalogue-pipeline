@@ -70,7 +70,10 @@ object Relation {
       numDescendents = numDescendents,
     )
 
-  def apply[State <: WorkState](work: Work[State], depth: Int, numChildren: Int, numDescendents: Int): Relation =
+  def apply[State <: WorkState](work: Work[State],
+                                depth: Int,
+                                numChildren: Int,
+                                numDescendents: Int): Relation =
     work.state match {
       case state: Indexed =>
         apply(state.canonicalId, work.data, depth, numChildren, numDescendents)

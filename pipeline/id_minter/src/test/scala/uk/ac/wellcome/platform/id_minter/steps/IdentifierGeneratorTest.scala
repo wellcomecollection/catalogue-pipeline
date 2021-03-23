@@ -26,22 +26,25 @@ class IdentifierGeneratorTest
                                    None,
                                  existingDaoEntries: Seq[Identifier] = Nil)(
     testWith: TestWith[(IdentifierGenerator, IdentifiersTable), R]): R =
-    withIdentifiersDao(existingDaoEntries) { case (identifiersDao, table) =>
-      val identifierGenerator = maybeIdentifiersDao match {
-        case Some(dao) => new IdentifierGenerator(dao)
-        case None      => new IdentifierGenerator(identifiersDao)
-      }
+    withIdentifiersDao(existingDaoEntries) {
+      case (identifiersDao, table) =>
+        val identifierGenerator = maybeIdentifiersDao match {
+          case Some(dao) => new IdentifierGenerator(dao)
+          case None      => new IdentifierGenerator(identifiersDao)
+        }
 
-      testWith((identifierGenerator, table))
+        testWith((identifierGenerator, table))
     }
 
   it("queries the database and returns matching canonical IDs") {
     val sourceIdentifiers = (1 to 5).map(_ => createSourceIdentifier).toList
     val canonicalIds = (1 to 5).map(_ => createCanonicalId).toList
     val existingEntries = (sourceIdentifiers zip canonicalIds).map {
-      case (sourceId, canonicalId) => Identifier(
-        canonicalId, sourceId
-      )
+      case (sourceId, canonicalId) =>
+        Identifier(
+          canonicalId,
+          sourceId
+        )
     }
     withIdentifierGenerator(existingDaoEntries = existingEntries) {
       case (identifierGenerator, _) =>
@@ -98,8 +101,7 @@ class IdentifierGeneratorTest
     val identifiersDao = new IdentifiersDao(
       identifiers = new IdentifiersTable(config)
     ) {
-      override def lookupIds(
-        sourceIdentifiers: Seq[SourceIdentifier])(
+      override def lookupIds(sourceIdentifiers: Seq[SourceIdentifier])(
         implicit session: DBSession
       ): Try[IdentifiersDao.LookupResult] =
         Success(
@@ -109,8 +111,7 @@ class IdentifierGeneratorTest
           )
         )
 
-      override def saveIdentifiers(
-        ids: List[Identifier])(
+      override def saveIdentifiers(ids: List[Identifier])(
         implicit session: DBSession
       ): Try[IdentifiersDao.InsertResult] =
         Failure(
