@@ -2,6 +2,7 @@ package uk.ac.wellcome.platform.transformer.mets.services
 
 import io.circe.Encoder
 import io.circe.generic.extras.semiauto.deriveConfiguredEncoder
+import org.scalatest.concurrent.IntegrationPatience
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.sns.NotificationMessage
@@ -31,7 +32,8 @@ class MetsTransformerWorkerTest
       MetsSourceData]
     with MetsGenerators
     with MetsSourceDataGenerators
-    with S3ObjectLocationGenerators {
+    with S3ObjectLocationGenerators
+    with IntegrationPatience {
   override def withContext[R](
     testWith: TestWith[MemoryTypedStore[S3ObjectLocation, String], R]): R =
     testWith(
