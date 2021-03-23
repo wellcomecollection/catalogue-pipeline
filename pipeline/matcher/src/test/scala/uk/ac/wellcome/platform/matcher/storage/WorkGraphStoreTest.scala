@@ -9,7 +9,7 @@ import uk.ac.wellcome.models.matcher.WorkNode
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
 import uk.ac.wellcome.platform.matcher.models.{WorkGraph, WorkLinks}
 import weco.catalogue.internal_model.generators.IdentifiersGenerators
-import weco.catalogue.internal_model.identifiers.CanonicalID
+import weco.catalogue.internal_model.identifiers.CanonicalId
 
 class WorkGraphStoreTest
     extends AnyFunSpec
@@ -18,9 +18,9 @@ class WorkGraphStoreTest
     with MatcherFixtures
     with IdentifiersGenerators {
 
-  val idA = CanonicalID("AAAAAAAA")
-  val idB = CanonicalID("BBBBBBBB")
-  val idC = CanonicalID("CCCCCCCC")
+  val idA = CanonicalId("AAAAAAAA")
+  val idB = CanonicalId("BBBBBBBB")
+  val idC = CanonicalId("CCCCCCCC")
 
   describe("Get graph of linked works") {
     it("returns nothing if there are no matching graphs") {

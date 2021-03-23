@@ -1,18 +1,18 @@
 package uk.ac.wellcome.models.matcher
 
-import weco.catalogue.internal_model.identifiers.CanonicalID
+import weco.catalogue.internal_model.identifiers.CanonicalId
 
 case class WorkNode(
-  id: CanonicalID,
+  id: CanonicalId,
   version: Option[Int],
-  linkedIds: List[CanonicalID],
+  linkedIds: List[CanonicalId],
   componentId: String
 )
 
 object WorkNode {
-  def apply(id: CanonicalID,
+  def apply(id: CanonicalId,
             version: Int,
-            linkedIds: List[CanonicalID],
+            linkedIds: List[CanonicalId],
             componentId: String): WorkNode =
     WorkNode(id, Some(version), linkedIds, componentId)
 }

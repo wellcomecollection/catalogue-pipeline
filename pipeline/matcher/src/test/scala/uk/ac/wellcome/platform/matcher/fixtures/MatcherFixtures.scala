@@ -31,7 +31,7 @@ import uk.ac.wellcome.storage.locking.memory.{
   MemoryLockDao,
   MemoryLockingService
 }
-import weco.catalogue.internal_model.identifiers.CanonicalID
+import weco.catalogue.internal_model.identifiers.CanonicalId
 
 import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -133,7 +133,7 @@ trait MatcherFixtures
     sendNotificationToSQS(queue, body = links.workId.toString)
   }
 
-  def ciHash(ids: CanonicalID*): String =
+  def ciHash(ids: CanonicalId*): String =
     DigestUtils.sha256Hex(ids.sorted.map(_.underlying).mkString("+"))
 
   def get[T](dynamoClient: DynamoDbClient, tableName: String)(

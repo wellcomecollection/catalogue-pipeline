@@ -23,7 +23,7 @@ import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
 import uk.ac.wellcome.storage.dynamo.DynamoConfig
 import weco.catalogue.internal_model.generators.IdentifiersGenerators
-import weco.catalogue.internal_model.identifiers.CanonicalID
+import weco.catalogue.internal_model.identifiers.CanonicalId
 
 import scala.language.higherKinds
 
@@ -35,8 +35,8 @@ class WorkNodeDaoTest
     with MatcherFixtures
     with IdentifiersGenerators {
 
-  val idA = CanonicalID("AAAAAAAA")
-  val idB = CanonicalID("BBBBBBBB")
+  val idA = CanonicalId("AAAAAAAA")
+  val idB = CanonicalId("BBBBBBBB")
 
   describe("Get from dynamo") {
     it("returns nothing if ids are not in dynamo") {
@@ -199,7 +199,7 @@ class WorkNodeDaoTest
     it("returns an error if Scanamo fails during a getByComponentIds") {
       withWorkGraphTable { table =>
         withWorkNodeDao(table) { workNodeDao =>
-          case class BadRecord(id: CanonicalID,
+          case class BadRecord(id: CanonicalId,
                                componentId: String,
                                version: String)
           val badRecord: BadRecord =
@@ -238,7 +238,7 @@ class WorkNodeDaoTest
     it("returns an error if Scanamo fails to put a record") {
       withWorkGraphTable { table =>
         withWorkNodeDao(table) { workNodeDao =>
-          case class BadRecord(id: CanonicalID, version: String)
+          case class BadRecord(id: CanonicalId, version: String)
           val badRecord: BadRecord = BadRecord(id = idA, version = "six")
           put(dynamoClient, table.name)(badRecord)
 

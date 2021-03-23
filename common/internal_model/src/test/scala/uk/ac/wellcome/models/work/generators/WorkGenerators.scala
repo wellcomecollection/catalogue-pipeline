@@ -3,7 +3,7 @@ package uk.ac.wellcome.models.work.generators
 import java.time.Instant
 import weco.catalogue.internal_model.generators.IdentifiersGenerators
 import weco.catalogue.internal_model.identifiers.{
-  CanonicalID,
+  CanonicalId,
   DataState,
   SourceIdentifier
 }
@@ -37,7 +37,7 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
 
   def mergedWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
-    canonicalId: CanonicalID = createCanonicalId,
+    canonicalId: CanonicalId = createCanonicalId,
     modifiedTime: Instant = instantInLast30Days
   ): Work.Visible[Merged] = {
     val data = initData[DataState.Identified]
@@ -54,7 +54,7 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
 
   def denormalisedWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
-    canonicalId: CanonicalID = createCanonicalId,
+    canonicalId: CanonicalId = createCanonicalId,
     modifiedTime: Instant = instantInLast30Days,
     relations: Relations = Relations.none
   ): Work.Visible[Denormalised] = {
@@ -74,7 +74,7 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
 
   def identifiedWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
-    canonicalId: CanonicalID = createCanonicalId,
+    canonicalId: CanonicalId = createCanonicalId,
     modifiedTime: Instant = instantInLast30Days,
   ): Work.Visible[Identified] =
     Work.Visible[Identified](
@@ -89,7 +89,7 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
 
   def indexedWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
-    canonicalId: CanonicalID = createCanonicalId,
+    canonicalId: CanonicalId = createCanonicalId,
     modifiedTime: Instant = instantInLast30Days,
     relations: Relations = Relations.none
   ): Work.Visible[Indexed] = {

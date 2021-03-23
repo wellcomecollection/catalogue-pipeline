@@ -2,10 +2,10 @@ package uk.ac.wellcome.platform.matcher.generators
 
 import uk.ac.wellcome.platform.matcher.models.WorkLinks
 import weco.catalogue.internal_model.generators.IdentifiersGenerators
-import weco.catalogue.internal_model.identifiers.{CanonicalID, IdState}
+import weco.catalogue.internal_model.identifiers.{CanonicalId, IdState}
 
 trait WorkLinksGenerators extends IdentifiersGenerators {
-  def createIdentifier(canonicalId: CanonicalID): IdState.Identified =
+  def createIdentifier(canonicalId: CanonicalId): IdState.Identified =
     IdState.Identified(
       canonicalId = canonicalId,
       sourceIdentifier =
@@ -13,7 +13,7 @@ trait WorkLinksGenerators extends IdentifiersGenerators {
     )
 
   def createIdentifier(canonicalId: String): IdState.Identified =
-    createIdentifier(canonicalId = CanonicalID(canonicalId))
+    createIdentifier(canonicalId = CanonicalId(canonicalId))
 
   def createWorkLinksWith(
     id: IdState.Identified = createIdentifier(canonicalId = createCanonicalId),

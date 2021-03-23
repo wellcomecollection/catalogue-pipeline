@@ -1,13 +1,13 @@
 package uk.ac.wellcome.platform.matcher.models
 
-import weco.catalogue.internal_model.identifiers.CanonicalID
+import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.Identified
 
-case class WorkLinks(workId: CanonicalID,
+case class WorkLinks(workId: CanonicalId,
                      version: Int,
-                     referencedWorkIds: Set[CanonicalID]) {
-  lazy val ids: Set[CanonicalID] = referencedWorkIds + workId
+                     referencedWorkIds: Set[CanonicalId]) {
+  lazy val ids: Set[CanonicalId] = referencedWorkIds + workId
 }
 
 case object WorkLinks {

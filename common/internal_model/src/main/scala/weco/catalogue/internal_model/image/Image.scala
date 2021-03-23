@@ -1,7 +1,7 @@
 package weco.catalogue.internal_model.image
 
 import weco.catalogue.internal_model.identifiers.{
-  CanonicalID,
+  CanonicalId,
   HasId,
   SourceIdentifier
 }
@@ -40,7 +40,7 @@ case class Image[State <: ImageState](
 sealed trait ImageState {
   type TransitionArgs
 
-  val canonicalId: CanonicalID
+  val canonicalId: CanonicalId
   val sourceIdentifier: SourceIdentifier
 
   def id: String = canonicalId.toString
@@ -67,14 +67,14 @@ object ImageState {
 
   case class Initial(
     sourceIdentifier: SourceIdentifier,
-    canonicalId: CanonicalID
+    canonicalId: CanonicalId
   ) extends ImageState {
     type TransitionArgs = Unit
   }
 
   case class Augmented(
     sourceIdentifier: SourceIdentifier,
-    canonicalId: CanonicalID,
+    canonicalId: CanonicalId,
     inferredData: Option[InferredData] = None
   ) extends ImageState {
     type TransitionArgs = Option[InferredData]
@@ -82,7 +82,7 @@ object ImageState {
 
   case class Indexed(
     sourceIdentifier: SourceIdentifier,
-    canonicalId: CanonicalID,
+    canonicalId: CanonicalId,
     inferredData: Option[InferredData] = None,
     derivedData: DerivedImageData
   ) extends ImageState {

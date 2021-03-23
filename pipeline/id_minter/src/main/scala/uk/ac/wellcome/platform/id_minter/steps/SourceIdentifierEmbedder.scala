@@ -7,7 +7,7 @@ import io.circe.optics.JsonOptics._
 import monocle.function.Plated
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.platform.id_minter.models.Identifier
-import weco.catalogue.internal_model.identifiers.{CanonicalID, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{CanonicalId, SourceIdentifier}
 
 import scala.annotation.tailrec
 import scala.util.{Failure, Success, Try}
@@ -70,7 +70,7 @@ object SourceIdentifierEmbedder extends Logging {
       .getOrElse(node)
 
   private def getCanonicalId(identifiers: Map[SourceIdentifier, Identifier])(
-    sourceIdentifier: SourceIdentifier): CanonicalID =
+    sourceIdentifier: SourceIdentifier): CanonicalId =
     identifiers
       .getOrElse(
         sourceIdentifier,

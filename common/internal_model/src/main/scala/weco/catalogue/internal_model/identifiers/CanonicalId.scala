@@ -3,7 +3,7 @@ package weco.catalogue.internal_model.identifiers
 import io.circe.{Decoder, Encoder, HCursor, Json}
 import org.scanamo.DynamoFormat
 
-class CanonicalID(val underlying: String) {
+class CanonicalId(val underlying: String) {
   override def toString: String = underlying
 
   require(
@@ -22,11 +22,11 @@ class CanonicalID(val underlying: String) {
   // We deliberately don't use case classes here so we skip automatic
   // case class derivation for JSON encoding/DynamoDB in Scanamo,
   // and force callers to intentionally import the implicits below.
-  def canEqual(a: Any): Boolean = a.isInstanceOf[CanonicalID]
+  def canEqual(a: Any): Boolean = a.isInstanceOf[CanonicalId]
 
   override def equals(that: Any): Boolean =
     that match {
-      case that: CanonicalID =>
+      case that: CanonicalId =>
         that.canEqual(this) && this.underlying == that.underlying
       case _ => false
     }
@@ -34,23 +34,23 @@ class CanonicalID(val underlying: String) {
   override def hashCode: Int = underlying.hashCode
 }
 
-object CanonicalID {
-  def apply(underlying: String): CanonicalID =
-    new CanonicalID(underlying)
+object CanonicalId {
+  def apply(underlying: String): CanonicalId =
+    new CanonicalId(underlying)
 
-  implicit val encoder: Encoder[CanonicalID] =
-    (value: CanonicalID) => Json.fromString(value.toString)
+  implicit val encoder: Encoder[CanonicalId] =
+    (value: CanonicalId) => Json.fromString(value.toString)
 
-  implicit val decoder: Decoder[CanonicalID] = (cursor: HCursor) =>
-    cursor.value.as[String].map(CanonicalID(_))
+  implicit val decoder: Decoder[CanonicalId] = (cursor: HCursor) =>
+    cursor.value.as[String].map(CanonicalId(_))
 
-  implicit def evidence: DynamoFormat[CanonicalID] =
+  implicit def evidence: DynamoFormat[CanonicalId] =
     DynamoFormat
-      .coercedXmap[CanonicalID, String, IllegalArgumentException](
-        CanonicalID(_),
+      .coercedXmap[CanonicalId, String, IllegalArgumentException](
+        CanonicalId(_),
         _.underlying
       )
 
-  implicit val ordering: Ordering[CanonicalID] =
-    (x: CanonicalID, y: CanonicalID) => x.underlying.compare(y.underlying)
+  implicit val ordering: Ordering[CanonicalId] =
+    (x: CanonicalId, y: CanonicalId) => x.underlying.compare(y.underlying)
 }

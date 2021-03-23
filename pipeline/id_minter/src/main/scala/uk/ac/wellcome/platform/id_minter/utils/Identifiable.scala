@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.id_minter.utils
 
-import weco.catalogue.internal_model.identifiers.CanonicalID
+import weco.catalogue.internal_model.identifiers.CanonicalId
 
 import scala.util.Random
 
@@ -17,8 +17,8 @@ object Identifiable {
   private val firstCharacterSet =
     allowedCharacterSet.filterNot(numberRange.contains)
 
-  def generate: CanonicalID =
-    CanonicalID(
+  def generate: CanonicalId =
+    CanonicalId(
       (1 to identifierLength).map {
         // One of the serialization formats of RDF is XML, so for
         // compatibility, our identifiers have to comply with XML rules.

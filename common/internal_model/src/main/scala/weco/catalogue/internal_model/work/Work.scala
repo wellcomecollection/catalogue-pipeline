@@ -1,7 +1,7 @@
 package weco.catalogue.internal_model.work
 
 import weco.catalogue.internal_model.identifiers.{
-  CanonicalID,
+  CanonicalId,
   DataState,
   IdState,
   SourceIdentifier
@@ -164,7 +164,7 @@ object WorkState {
 
   case class Identified(
     sourceIdentifier: SourceIdentifier,
-    canonicalId: CanonicalID,
+    canonicalId: CanonicalId,
     modifiedTime: Instant,
   ) extends WorkState {
 
@@ -177,7 +177,7 @@ object WorkState {
 
   case class Merged(
     sourceIdentifier: SourceIdentifier,
-    canonicalId: CanonicalID,
+    canonicalId: CanonicalId,
     modifiedTime: Instant,
     availabilities: Set[Availability] = Set.empty,
   ) extends WorkState {
@@ -191,7 +191,7 @@ object WorkState {
 
   case class Denormalised(
     sourceIdentifier: SourceIdentifier,
-    canonicalId: CanonicalID,
+    canonicalId: CanonicalId,
     modifiedTime: Instant,
     availabilities: Set[Availability],
     relations: Relations = Relations.none
@@ -205,7 +205,7 @@ object WorkState {
 
   case class Indexed(
     sourceIdentifier: SourceIdentifier,
-    canonicalId: CanonicalID,
+    canonicalId: CanonicalId,
     modifiedTime: Instant,
     availabilities: Set[Availability],
     derivedData: DerivedWorkData,
