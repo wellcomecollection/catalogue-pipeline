@@ -68,7 +68,7 @@ trait IndexFixtures extends ElasticsearchFixtures { this: Suite =>
   def assertElasticsearchNeverHasWork(index: Index,
                                       works: Work[Identified]*): Unit = {
     implicit val id: IndexId[Work[Identified]] =
-      (work: Work[Identified]) => work.state.canonicalId
+      (work: Work[Identified]) => work.state.canonicalId.toString
     assertElasticsearchNeverHas(index, works: _*)
   }
 

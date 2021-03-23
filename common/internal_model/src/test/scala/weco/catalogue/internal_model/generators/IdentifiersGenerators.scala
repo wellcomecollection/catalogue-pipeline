@@ -2,6 +2,7 @@ package weco.catalogue.internal_model.generators
 
 import uk.ac.wellcome.fixtures.RandomGenerators
 import weco.catalogue.internal_model.identifiers.{
+  CanonicalID,
   IdentifierType,
   SourceIdentifier
 }
@@ -9,7 +10,8 @@ import weco.catalogue.internal_model.identifiers.{
 import scala.util.Random
 
 trait IdentifiersGenerators extends RandomGenerators {
-  def createCanonicalId: String = randomAlphanumeric(length = 10).toLowerCase()
+  def createCanonicalId: CanonicalID =
+    CanonicalID(randomAlphanumeric(length = 10).toLowerCase())
 
   def createSourceIdentifier: SourceIdentifier = createSourceIdentifierWith()
 

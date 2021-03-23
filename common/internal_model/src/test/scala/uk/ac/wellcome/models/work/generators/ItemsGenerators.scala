@@ -4,7 +4,11 @@ import weco.catalogue.internal_model.generators.{
   IdentifiersGenerators,
   LocationGenerators
 }
-import weco.catalogue.internal_model.identifiers.{IdState, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  CanonicalID,
+  IdState,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.locations.{
   AccessStatus,
   License,
@@ -16,7 +20,7 @@ import weco.catalogue.internal_model.work.Item
 trait ItemsGenerators extends IdentifiersGenerators with LocationGenerators {
 
   def createIdentifiedItemWith[I >: IdState.Identified](
-    canonicalId: String = createCanonicalId,
+    canonicalId: CanonicalID = createCanonicalId,
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     otherIdentifiers: List[SourceIdentifier] = Nil,
     locations: List[Location] = List(createDigitalLocation),

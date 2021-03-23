@@ -1,7 +1,11 @@
 package weco.catalogue.internal_model.generators
 
 import uk.ac.wellcome.models.work.generators._
-import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType}
+import weco.catalogue.internal_model.identifiers.{
+  CanonicalID,
+  IdState,
+  IdentifierType
+}
 import weco.catalogue.internal_model.image
 import weco.catalogue.internal_model.image.ParentWork._
 import weco.catalogue.internal_model.image.ImageState.{Indexed, Initial}
@@ -72,7 +76,7 @@ trait ImageGenerators
           redirectedWork = redirectedWork)
 
     def toIndexedImageWith(
-      canonicalId: String = createCanonicalId,
+      canonicalId: CanonicalID = createCanonicalId,
       parentWork: Work[WorkState.Identified] = identifiedWork(),
       redirectedWork: Option[Work[WorkState.Identified]] = None,
       inferredData: Option[InferredData] = createInferredData)
@@ -86,7 +90,7 @@ trait ImageGenerators
         )
 
     def toIdentifiedWith(
-      canonicalId: String = createCanonicalId): ImageData[IdState.Identified] =
+      canonicalId: CanonicalID = createCanonicalId): ImageData[IdState.Identified] =
       imageData.copy(
         id = IdState.Identified(
           canonicalId = createCanonicalId,
