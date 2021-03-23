@@ -203,7 +203,8 @@ object CatalogueDependencies {
       ExternalDependencies.parseDependencies ++
       ExternalDependencies.scalacheckDependencies ++
       ExternalDependencies.enumeratumDependencies ++
-      ExternalDependencies.scalaXmlDependencies
+      ExternalDependencies.scalaXmlDependencies ++
+      WellcomeDependencies.storageLibrary
 
   val displayModelDependencies =
     WellcomeDependencies.internalModel ++
