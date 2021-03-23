@@ -357,7 +357,7 @@ class WorkGraphUpdaterTest
                   componentId = ciHash(idA))))
           )
       }
-      thrown.message shouldBe "update failed, work:A v1 is not newer than existing work v3"
+      thrown.message shouldBe s"update failed, work:$idA v1 is not newer than existing work v3"
     }
 
     it(
@@ -418,7 +418,7 @@ class WorkGraphUpdaterTest
                   componentId = ciHash(idA, idB))))
           )
       }
-      thrown.getMessage shouldBe "update failed, work:A v2 already exists with different content! update-ids:Set(A) != existing-ids:Set(B)"
+      thrown.getMessage shouldBe s"update failed, work:$idA v2 already exists with different content! update-ids:Set($idA) != existing-ids:Set($idB)"
     }
   }
 

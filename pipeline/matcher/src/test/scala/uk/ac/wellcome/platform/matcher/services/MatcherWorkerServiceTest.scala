@@ -28,9 +28,9 @@ class MatcherWorkerServiceTest
     with MatcherFixtures
     with WorkLinksGenerators {
 
-  private val identifierA = createIdentifier("A")
-  private val identifierB = createIdentifier("B")
-  private val identifierC = createIdentifier("C")
+  private val identifierA = createIdentifier("AAAAAAAA")
+  private val identifierB = createIdentifier("BBBBBBBB")
+  private val identifierC = createIdentifier("CCCCCCCC")
 
   it("matches a Work which doesn't reference any other Works") {
     val workLinks = createWorkLinksWith(id = identifierA)
