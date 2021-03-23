@@ -105,7 +105,7 @@ object PipelineStorageStream extends Logging {
     Flow[(Message, NotificationMessage)]
       .map {
         case (message, notificationMessage) =>
-          Bundle(message, notificationMessage.body, 1)
+          Bundle(message, notificationMessage.body, numberOfItems = 1)
       }
       .groupedWithin(config.batchSize, config.flushInterval)
       .mapAsyncUnordered(parallelism = config.parallelism) { bundles =>

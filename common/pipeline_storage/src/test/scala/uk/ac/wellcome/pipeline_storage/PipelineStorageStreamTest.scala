@@ -480,7 +480,7 @@ class PipelineStorageStreamTest
                   Bundle(
                     message,
                     SampleDocument(1, message.messageId() + i, "title"),
-                    2)))
+                    numberOfItems = 2)))
           .toMap
 
         val result = Source(Random.shuffle(bundlesMap.values.flatten.toList))
@@ -511,7 +511,7 @@ class PipelineStorageStreamTest
                   Bundle(
                     message,
                     SampleDocument(1, message.messageId() + i, "title"),
-                    2)))
+                    numberOfItems = 2)))
           .toMap
         val failingMessages = (3 to 5).map(i =>
           Message.builder().messageId(i.toString).body(i.toString).build())
@@ -544,7 +544,7 @@ class PipelineStorageStreamTest
         val messages = (1 to 5).map(i =>
           Message.builder().messageId(i.toString).body(i.toString).build())
         val bundles = messages.map(message =>
-          Bundle(message, SampleDocument(1, message.messageId(), "title"), 1))
+          Bundle(message, SampleDocument(1, message.messageId(), "title"), numberOfItems = 1))
         // set maxSubstreams lower than the number of messages
         val maxSubStreams = 3
         val (queue, result) = Source
