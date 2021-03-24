@@ -11,7 +11,7 @@ package weco.catalogue.internal_model.identifiers
   *    thus can never have a canonicalId attached
   *  */
 sealed trait IdState {
-  def maybeCanonicalId: Option[String]
+  def maybeCanonicalId: Option[CanonicalId]
   def allSourceIdentifiers: List[SourceIdentifier]
 }
 
@@ -26,7 +26,7 @@ object IdState {
   /** Represents an ID that has been successfully minted, and thus has a
     *  canonicalId assigned. */
   case class Identified(
-    canonicalId: String,
+    canonicalId: CanonicalId,
     sourceIdentifier: SourceIdentifier,
     otherIdentifiers: List[SourceIdentifier] = Nil,
   ) extends Minted {

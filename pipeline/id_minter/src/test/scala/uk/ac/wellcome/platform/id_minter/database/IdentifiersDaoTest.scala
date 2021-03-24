@@ -5,10 +5,9 @@ import java.sql.BatchUpdateException
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import scalikejdbc._
-import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.platform.id_minter.fixtures
 import uk.ac.wellcome.platform.id_minter.fixtures.SqlIdentifiersGenerators
-import uk.ac.wellcome.platform.id_minter.models.{Identifier, IdentifiersTable}
+import uk.ac.wellcome.platform.id_minter.models.Identifier
 
 import scala.util.{Failure, Success}
 
@@ -19,43 +18,6 @@ class IdentifiersDaoTest
     with SqlIdentifiersGenerators {
 
   implicit val session: DBSession = NamedAutoSession('primary)
-
-  def withIdentifiersDao[R](existingEntries: Seq[Identifier] = Nil)(
-    testWith: TestWith[(IdentifiersDao, IdentifiersTable), R]): R =
-    withIdentifiersTable { identifiersTableConfig =>
-      val identifiersTable = new IdentifiersTable(identifiersTableConfig)
-
-      new TableProvisioner(rdsClientConfig)
-        .provision(
-          database = identifiersTableConfig.database,
-          tableName = identifiersTableConfig.tableName
-        )
-
-      val identifiersDao = new IdentifiersDao(identifiersTable)
-
-      eventuallyTableExists(identifiersTableConfig)
-
-      if (existingEntries.nonEmpty) {
-        NamedDB('primary) localTx { implicit session =>
-          withSQL {
-            insert
-              .into(identifiersTable)
-              .namedValues(
-                identifiersTable.column.CanonicalId -> sqls.?,
-                identifiersTable.column.OntologyType -> sqls.?,
-                identifiersTable.column.SourceSystem -> sqls.?,
-                identifiersTable.column.SourceId -> sqls.?
-              )
-          }.batch {
-            existingEntries.map { id =>
-              Seq(id.CanonicalId, id.OntologyType, id.SourceSystem, id.SourceId)
-            }: _*
-          }.apply()
-        }
-      }
-
-      testWith((identifiersDao, identifiersTable))
-    }
 
   describe("lookupIds") {
 
@@ -70,7 +32,8 @@ class IdentifiersDaoTest
           val triedLookup = identifiersDao.lookupIds(List(sourceIdentifier))
 
           triedLookup shouldBe a[Success[_]]
-          triedLookup.get.existingIdentifiers shouldBe Map(sourceIdentifier -> identifier)
+          triedLookup.get.existingIdentifiers shouldBe Map(
+            sourceIdentifier -> identifier)
           triedLookup.get.unmintedIdentifiers shouldBe empty
       }
     }
@@ -131,7 +94,7 @@ class IdentifiersDaoTest
       withIdentifiersDao(existingEntries = identifiersMap.values.toSeq) {
         case (identifiersDao, _) =>
           val triedLookup = identifiersDao.lookupIds(
-              identifiersMap.keys.toList ++ unmintedSourceIdentifiers
+            identifiersMap.keys.toList ++ unmintedSourceIdentifiers
           )
 
           triedLookup shouldBe a[Success[_]]
@@ -172,7 +135,9 @@ class IdentifiersDaoTest
               .where
               .eq(identifiersTable.i.SourceSystem, identifier.SourceSystem)
               .and
-              .eq(identifiersTable.i.CanonicalId, identifier.CanonicalId)
+              .eq(
+                identifiersTable.i.CanonicalId,
+                identifier.CanonicalId.underlying)
           }.map(Identifier(identifiersTable.i)).single.apply()
 
           maybeIdentifier shouldBe defined

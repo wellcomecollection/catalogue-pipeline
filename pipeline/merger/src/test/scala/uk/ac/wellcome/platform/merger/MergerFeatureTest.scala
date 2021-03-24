@@ -212,7 +212,7 @@ class MergerFeatureTest
             List(
               MergeCandidate(
                 id = IdState.Identified(
-                  canonicalId = workWithPhysicalVideoFormats.id,
+                  canonicalId = workWithPhysicalVideoFormats.state.canonicalId,
                   sourceIdentifier =
                     workWithPhysicalVideoFormats.sourceIdentifier
                 ),
@@ -228,7 +228,7 @@ class MergerFeatureTest
             List(
               MergeCandidate(
                 id = IdState.Identified(
-                  canonicalId = workForEbib.id,
+                  canonicalId = workForEbib.state.canonicalId,
                   sourceIdentifier = workForEbib.sourceIdentifier
                 ),
                 reason = Some("METS work")

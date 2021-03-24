@@ -1,6 +1,10 @@
 package weco.catalogue.internal_model.image
 
-import weco.catalogue.internal_model.identifiers.{HasId, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  CanonicalId,
+  HasId,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.locations.DigitalLocation
 
 import java.time.Instant
@@ -36,10 +40,10 @@ case class Image[State <: ImageState](
 sealed trait ImageState {
   type TransitionArgs
 
-  val canonicalId: String
+  val canonicalId: CanonicalId
   val sourceIdentifier: SourceIdentifier
 
-  def id: String = canonicalId
+  def id: String = canonicalId.toString
 }
 
 /** ImageState represents the state of the image in the pipeline.
@@ -63,14 +67,14 @@ object ImageState {
 
   case class Initial(
     sourceIdentifier: SourceIdentifier,
-    canonicalId: String
+    canonicalId: CanonicalId
   ) extends ImageState {
     type TransitionArgs = Unit
   }
 
   case class Augmented(
     sourceIdentifier: SourceIdentifier,
-    canonicalId: String,
+    canonicalId: CanonicalId,
     inferredData: Option[InferredData] = None
   ) extends ImageState {
     type TransitionArgs = Option[InferredData]
@@ -78,13 +82,12 @@ object ImageState {
 
   case class Indexed(
     sourceIdentifier: SourceIdentifier,
-    canonicalId: String,
+    canonicalId: CanonicalId,
     inferredData: Option[InferredData] = None,
     derivedData: DerivedImageData
   ) extends ImageState {
     type TransitionArgs = Unit
   }
-
 }
 
 // ImageFsm contains all of the possible transitions between image states

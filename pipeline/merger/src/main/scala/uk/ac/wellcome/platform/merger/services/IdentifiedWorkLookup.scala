@@ -18,7 +18,7 @@ class IdentifiedWorkLookup(retriever: Retriever[Work[Identified]])(
 
     val workIds = workIdentifiers
       .collect {
-        case WorkIdentifier(identifier, Some(_)) => identifier
+        case WorkIdentifier(identifier, Some(_)) => identifier.toString
       }
 
     // If none of the work identifiers had a version, we'll discard anything
@@ -37,7 +37,7 @@ class IdentifiedWorkLookup(retriever: Retriever[Work[Identified]])(
               .map {
                 case WorkIdentifier(_, None) => None
                 case WorkIdentifier(id, Some(version)) =>
-                  val work = works(id)
+                  val work = works(id.toString)
                   // We only want to get the exact versions of the works specified
                   // by the matcher.
                   //

@@ -5,16 +5,17 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.matcher.WorkNode
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
 import uk.ac.wellcome.platform.matcher.models._
+import weco.catalogue.internal_model.identifiers.CanonicalId
 
 class WorkGraphUpdaterTest
     extends AnyFunSpec
     with Matchers
     with MatcherFixtures {
 
-  val idA = "A"
-  val idB = "B"
-  val idC = "C"
-  val idD = "D"
+  val idA = CanonicalId("AAAAAAAA")
+  val idB = CanonicalId("BBBBBBBB")
+  val idC = CanonicalId("CCCCCCCC")
+  val idD = CanonicalId("DDDDDDDD")
 
   describe("Adding links without existing works") {
     it("updating nothing with A gives A:A") {
@@ -356,7 +357,7 @@ class WorkGraphUpdaterTest
                   componentId = ciHash(idA))))
           )
       }
-      thrown.message shouldBe "update failed, work:A v1 is not newer than existing work v3"
+      thrown.message shouldBe s"update failed, work:$idA v1 is not newer than existing work v3"
     }
 
     it(
@@ -417,7 +418,7 @@ class WorkGraphUpdaterTest
                   componentId = ciHash(idA, idB))))
           )
       }
-      thrown.getMessage shouldBe "update failed, work:A v2 already exists with different content! update-ids:Set(A) != existing-ids:Set(B)"
+      thrown.getMessage shouldBe s"update failed, work:$idA v2 already exists with different content! update-ids:Set($idA) != existing-ids:Set($idB)"
     }
   }
 

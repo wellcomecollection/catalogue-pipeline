@@ -32,8 +32,8 @@ class WorkMatcherConcurrencyTest
     withWorkGraphTable { graphTable =>
       withWorkGraphStore(graphTable) { workGraphStore =>
         val workMatcher = new WorkMatcher(workGraphStore, lockingService)
-        val identifierA = createIdentifier(id = "A")
-        val identifierB = createIdentifier(id = "B")
+        val identifierA = createIdentifier(canonicalId = "AAAAAAAA")
+        val identifierB = createIdentifier(canonicalId = "BBBBBBBB")
 
         val linksA = createWorkLinksWith(
           id = identifierA,

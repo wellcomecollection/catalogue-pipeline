@@ -154,7 +154,8 @@ class PlatformMergerTest
       ),
       state = sierraPhysicalWork.transition[Merged](now).state,
       redirectSources = Seq(
-        IdState.Identified(miroWork.id, miroWork.sourceIdentifier)
+        IdState
+          .Identified(miroWork.state.canonicalId, miroWork.sourceIdentifier)
       )
     )
 
@@ -204,7 +205,8 @@ class PlatformMergerTest
       ),
       state = zeroItemSierraWork.transition[Merged](now).state,
       redirectSources = Seq(
-        IdState.Identified(miroWork.id, miroWork.sourceIdentifier)
+        IdState
+          .Identified(miroWork.state.canonicalId, miroWork.sourceIdentifier)
       )
     )
 
@@ -263,7 +265,8 @@ class PlatformMergerTest
       ),
       state = sierraDigitalWork.transition[Merged](now).state,
       redirectSources = Seq(
-        IdState.Identified(miroWork.id, miroWork.sourceIdentifier)
+        IdState
+          .Identified(miroWork.state.canonicalId, miroWork.sourceIdentifier)
       )
     )
 
@@ -309,7 +312,8 @@ class PlatformMergerTest
       ),
       state = multipleItemsSierraWork.transition[Merged](now).state,
       redirectSources = Seq(
-        IdState.Identified(miroWork.id, miroWork.sourceIdentifier)
+        IdState
+          .Identified(miroWork.state.canonicalId, miroWork.sourceIdentifier)
       )
     )
 
@@ -345,7 +349,8 @@ class PlatformMergerTest
       ),
       state = sierraPhysicalWork.transition[Merged](now).state,
       redirectSources = Seq(
-        IdState.Identified(metsWork.id, metsWork.sourceIdentifier)
+        IdState
+          .Identified(metsWork.state.canonicalId, metsWork.sourceIdentifier)
       )
     )
 
@@ -415,7 +420,8 @@ class PlatformMergerTest
       ),
       state = sierraPictureWork.transition[Merged](now).state,
       redirectSources = Seq(
-        IdState.Identified(metsWork.id, metsWork.sourceIdentifier)
+        IdState
+          .Identified(metsWork.state.canonicalId, metsWork.sourceIdentifier)
       )
     )
 
@@ -475,10 +481,12 @@ class PlatformMergerTest
       ),
       state = sierraPhysicalWork.transition[Merged](now).state,
       redirectSources = Seq(
-        IdState.Identified(metsWork.id, metsWork.sourceIdentifier),
-        IdState.Identified(miroWork.id, miroWork.sourceIdentifier),
+        IdState
+          .Identified(metsWork.state.canonicalId, metsWork.sourceIdentifier),
+        IdState
+          .Identified(miroWork.state.canonicalId, miroWork.sourceIdentifier),
         IdState.Identified(
-          sierraDigitisedWork.id,
+          sierraDigitisedWork.state.canonicalId,
           sierraDigitisedWork.sourceIdentifier),
       )
     )
@@ -556,7 +564,8 @@ class PlatformMergerTest
       ),
       state = multipleItemsSierraWork.transition[Merged](now).state,
       redirectSources = Seq(
-        IdState.Identified(metsWork.id, metsWork.sourceIdentifier)
+        IdState
+          .Identified(metsWork.state.canonicalId, metsWork.sourceIdentifier)
       )
     )
 
@@ -598,9 +607,10 @@ class PlatformMergerTest
       ),
       state = multipleItemsSierraWork.transition[Merged](now).state,
       redirectSources = Seq(
-        IdState.Identified(metsWork.id, metsWork.sourceIdentifier),
+        IdState
+          .Identified(metsWork.state.canonicalId, metsWork.sourceIdentifier),
         IdState.Identified(
-          sierraDigitisedWork.id,
+          sierraDigitisedWork.state.canonicalId,
           sierraDigitisedWork.sourceIdentifier)
       )
     )
@@ -715,7 +725,7 @@ class PlatformMergerTest
           List(
             MergeCandidate(
               id = IdState.Identified(
-                canonicalId = workWithPhysicalVideoFormats.id,
+                canonicalId = workWithPhysicalVideoFormats.state.canonicalId,
                 sourceIdentifier = workWithPhysicalVideoFormats.sourceIdentifier
               ),
               reason = Some("Physical/digitised Sierra work")
@@ -730,7 +740,7 @@ class PlatformMergerTest
           List(
             MergeCandidate(
               id = IdState.Identified(
-                canonicalId = workForEbib.id,
+                canonicalId = workForEbib.state.canonicalId,
                 sourceIdentifier = workForEbib.sourceIdentifier
               ),
               reason = Some("METS work")
@@ -747,7 +757,7 @@ class PlatformMergerTest
           List(
             MergeCandidate(
               id = IdState.Identified(
-                canonicalId = workForEbib.id,
+                canonicalId = workForEbib.state.canonicalId,
                 sourceIdentifier = workForEbib.sourceIdentifier
               ),
               reason = Some("Physical/digitised Sierra work")
@@ -780,7 +790,7 @@ class PlatformMergerTest
 
     // Now check that the METS work redirects into the e-bib specifically
     val redirectedWork = redirectedWorks.head
-    redirectedWork.redirectTarget.canonicalId shouldBe workForEbib.id
+    redirectedWork.redirectTarget.canonicalId shouldBe workForEbib.state.canonicalId
 
     visibleWorks(workWithPhysicalVideoFormats.id).data.items shouldBe workWithPhysicalVideoFormats.data.items
     visibleWorks(workForFilmReel.id).data.items shouldBe workForFilmReel.data.items

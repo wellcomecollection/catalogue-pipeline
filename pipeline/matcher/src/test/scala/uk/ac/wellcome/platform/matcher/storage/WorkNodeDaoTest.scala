@@ -22,6 +22,8 @@ import uk.ac.wellcome.models.matcher.WorkNode
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
 import uk.ac.wellcome.storage.dynamo.DynamoConfig
+import weco.catalogue.internal_model.generators.IdentifiersGenerators
+import weco.catalogue.internal_model.identifiers.CanonicalId
 
 import scala.language.higherKinds
 
@@ -30,16 +32,17 @@ class WorkNodeDaoTest
     with Matchers
     with MockitoSugar
     with ScalaFutures
-    with MatcherFixtures {
+    with MatcherFixtures
+    with IdentifiersGenerators {
 
-  val idA = "A"
-  val idB = "B"
+  val idA = CanonicalId("AAAAAAAA")
+  val idB = CanonicalId("BBBBBBBB")
 
   describe("Get from dynamo") {
     it("returns nothing if ids are not in dynamo") {
       withWorkGraphTable { table =>
         withWorkNodeDao(table) { workNodeDao =>
-          whenReady(workNodeDao.get(Set("Not-there"))) { workNodeSet =>
+          whenReady(workNodeDao.get(Set(createCanonicalId))) { workNodeSet =>
             workNodeSet shouldBe Set.empty
           }
         }
@@ -196,7 +199,9 @@ class WorkNodeDaoTest
     it("returns an error if Scanamo fails during a getByComponentIds") {
       withWorkGraphTable { table =>
         withWorkNodeDao(table) { workNodeDao =>
-          case class BadRecord(id: String, componentId: String, version: String)
+          case class BadRecord(id: CanonicalId,
+                               componentId: String,
+                               version: String)
           val badRecord: BadRecord =
             BadRecord(
               id = idA,
@@ -233,7 +238,7 @@ class WorkNodeDaoTest
     it("returns an error if Scanamo fails to put a record") {
       withWorkGraphTable { table =>
         withWorkNodeDao(table) { workNodeDao =>
-          case class BadRecord(id: String, version: String)
+          case class BadRecord(id: CanonicalId, version: String)
           val badRecord: BadRecord = BadRecord(id = idA, version = "six")
           put(dynamoClient, table.name)(badRecord)
 

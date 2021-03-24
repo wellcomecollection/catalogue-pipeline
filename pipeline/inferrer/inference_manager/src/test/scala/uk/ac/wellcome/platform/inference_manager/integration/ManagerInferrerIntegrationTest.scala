@@ -71,7 +71,7 @@ class ManagerInferrerIntegrationTest
 
           inside(augmentedImage.state) {
             case Augmented(_, id, Some(inferredData)) =>
-              id should be(image.id)
+              id should be(image.state.canonicalId)
               inside(inferredData) {
                 case InferredData(
                     features1,

@@ -164,7 +164,6 @@ class ElasticIndexerTest
           val future = indexer(documents)
 
           whenReady(future) { result =>
-            println(result)
             result.right.get should contain only (documents: _*)
             val hits = eventually {
               val response = elasticClient.execute {

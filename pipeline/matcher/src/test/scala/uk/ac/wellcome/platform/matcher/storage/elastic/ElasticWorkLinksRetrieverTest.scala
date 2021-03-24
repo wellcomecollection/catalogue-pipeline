@@ -61,5 +61,5 @@ class ElasticWorkLinksRetrieverTest
   override def createT: WorkLinks = createWorkLinks
 
   override implicit val id: IndexId[WorkLinks] =
-    (links: WorkLinks) => links.workId
+    (links: WorkLinks) => links.workId.underlying
 }

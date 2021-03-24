@@ -38,9 +38,9 @@ class WorkMatcherTest
     with EitherValues
     with WorkLinksGenerators {
 
-  private val identifierA = createIdentifier("A")
-  private val identifierB = createIdentifier("B")
-  private val identifierC = createIdentifier("C")
+  private val identifierA = createIdentifier("AAAAAAAA")
+  private val identifierB = createIdentifier("BBBBBBBB")
+  private val identifierC = createIdentifier("CCCCCCCC")
 
   it(
     "matches a work with no linked identifiers to itself only A and saves the updated graph A") {

@@ -1,6 +1,7 @@
 package weco.catalogue.internal_model.work
 
 import weco.catalogue.internal_model.identifiers.{
+  CanonicalId,
   DataState,
   IdState,
   SourceIdentifier
@@ -163,20 +164,20 @@ object WorkState {
 
   case class Identified(
     sourceIdentifier: SourceIdentifier,
-    canonicalId: String,
+    canonicalId: CanonicalId,
     modifiedTime: Instant,
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified
     type TransitionArgs = Unit
 
-    def id = canonicalId
+    def id = canonicalId.toString
     val relations = Relations.none
   }
 
   case class Merged(
     sourceIdentifier: SourceIdentifier,
-    canonicalId: String,
+    canonicalId: CanonicalId,
     modifiedTime: Instant,
     availabilities: Set[Availability] = Set.empty,
   ) extends WorkState {
@@ -184,13 +185,13 @@ object WorkState {
     type WorkDataState = DataState.Identified
     type TransitionArgs = Instant
 
-    def id: String = canonicalId
+    def id: String = canonicalId.toString
     val relations: Relations = Relations.none
   }
 
   case class Denormalised(
     sourceIdentifier: SourceIdentifier,
-    canonicalId: String,
+    canonicalId: CanonicalId,
     modifiedTime: Instant,
     availabilities: Set[Availability],
     relations: Relations = Relations.none
@@ -199,12 +200,12 @@ object WorkState {
     type WorkDataState = DataState.Identified
     type TransitionArgs = (Relations, Set[Availability])
 
-    def id = canonicalId
+    def id = canonicalId.toString
   }
 
   case class Indexed(
     sourceIdentifier: SourceIdentifier,
-    canonicalId: String,
+    canonicalId: CanonicalId,
     modifiedTime: Instant,
     availabilities: Set[Availability],
     derivedData: DerivedWorkData,
@@ -214,7 +215,7 @@ object WorkState {
     type WorkDataState = DataState.Identified
     type TransitionArgs = Unit
 
-    def id = canonicalId
+    def id = canonicalId.toString
   }
 }
 
@@ -245,7 +246,7 @@ object WorkFsm {
               modifiedTime: Instant): Merged =
       Merged(
         sourceIdentifier = state.sourceIdentifier,
-        canonicalId = state.id,
+        canonicalId = state.canonicalId,
         modifiedTime = modifiedTime,
         availabilities = Availabilities.forWorkData(data),
       )

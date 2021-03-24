@@ -11,6 +11,7 @@ import uk.ac.wellcome.platform.matcher.models.{
   WorkGraph,
   WorkLinks
 }
+import weco.catalogue.internal_model.identifiers.CanonicalId
 
 object WorkGraphUpdater extends Logging {
   def update(links: WorkLinks, existingGraph: WorkGraph): WorkGraph = {
@@ -60,7 +61,7 @@ object WorkGraphUpdater extends Logging {
     //
     // Every work in the existing graph will be in this list.
     //
-    val workVersions: Map[String, Int] =
+    val workVersions: Map[CanonicalId, Int] =
       linkedWorks.collect {
         case WorkNode(id, Some(version), _, _) => (id, version)
       }.toMap + (workLinks.workId -> workLinks.version)
@@ -106,7 +107,7 @@ object WorkGraphUpdater extends Logging {
     //
     // In this example, linkedWorkIds(B) = {C, D}
     //
-    def linkedWorkIds(n: g.NodeT): List[String] =
+    def linkedWorkIds(n: g.NodeT): List[CanonicalId] =
       n.diSuccessors.map(_.value).toList.sorted
 
     // Go through the components of the graph, and turn each of them into
@@ -145,6 +146,6 @@ object WorkGraphUpdater extends Logging {
     * TODO: Does this need to be a SHA-256 value?
     * Could we just concatenate all the IDs?
     */
-  private def componentIdentifier(nodeIds: List[String]): String =
-    DigestUtils.sha256Hex(nodeIds.sorted.mkString("+"))
+  private def componentIdentifier(nodeIds: List[CanonicalId]): String =
+    DigestUtils.sha256Hex(nodeIds.sorted.map(_.underlying).mkString("+"))
 }

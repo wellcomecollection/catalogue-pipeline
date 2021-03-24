@@ -4,7 +4,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{Inspectors, OptionValues}
 import scalikejdbc._
-import uk.ac.wellcome.platform.id_minter.database.{IdentifiersDao, TableProvisioner}
+import uk.ac.wellcome.platform.id_minter.database.IdentifiersDao
 import uk.ac.wellcome.platform.id_minter.fixtures
 import uk.ac.wellcome.platform.id_minter.models.{Identifier, IdentifiersTable}
 import uk.ac.wellcome.fixtures.TestWith
@@ -25,52 +25,26 @@ class IdentifierGeneratorTest
   def withIdentifierGenerator[R](maybeIdentifiersDao: Option[IdentifiersDao] =
                                    None,
                                  existingDaoEntries: Seq[Identifier] = Nil)(
-    testWith: TestWith[(IdentifierGenerator, IdentifiersTable), R]) =
-    withIdentifiersTable[R] { identifiersTableConfig =>
-      val identifiersTable = new IdentifiersTable(identifiersTableConfig)
-
-      new TableProvisioner(rdsClientConfig)
-        .provision(
-          database = identifiersTableConfig.database,
-          tableName = identifiersTableConfig.tableName
-        )
-
-      val identifiersDao = maybeIdentifiersDao.getOrElse(
-        new IdentifiersDao(identifiersTable)
-      )
-
-      val identifierGenerator = new IdentifierGenerator(identifiersDao)
-      eventuallyTableExists(identifiersTableConfig)
-
-      if (existingDaoEntries.nonEmpty) {
-        NamedDB('primary) localTx { implicit session =>
-          withSQL {
-            insert
-              .into(identifiersTable)
-              .namedValues(
-                identifiersTable.column.CanonicalId -> sqls.?,
-                identifiersTable.column.OntologyType -> sqls.?,
-                identifiersTable.column.SourceSystem -> sqls.?,
-                identifiersTable.column.SourceId -> sqls.?
-              )
-          }.batch {
-            existingDaoEntries.map { id =>
-              Seq(id.CanonicalId, id.OntologyType, id.SourceSystem, id.SourceId)
-            }: _*
-          }.apply()
+    testWith: TestWith[(IdentifierGenerator, IdentifiersTable), R]): R =
+    withIdentifiersDao(existingDaoEntries) {
+      case (identifiersDao, table) =>
+        val identifierGenerator = maybeIdentifiersDao match {
+          case Some(dao) => new IdentifierGenerator(dao)
+          case None      => new IdentifierGenerator(identifiersDao)
         }
-      }
 
-      testWith((identifierGenerator, identifiersTable))
+        testWith((identifierGenerator, table))
     }
 
   it("queries the database and returns matching canonical IDs") {
     val sourceIdentifiers = (1 to 5).map(_ => createSourceIdentifier).toList
     val canonicalIds = (1 to 5).map(_ => createCanonicalId).toList
     val existingEntries = (sourceIdentifiers zip canonicalIds).map {
-      case (sourceId, canonicalId) => Identifier(
-        canonicalId, sourceId
-      )
+      case (sourceId, canonicalId) =>
+        Identifier(
+          canonicalId,
+          sourceId
+        )
     }
     withIdentifierGenerator(existingDaoEntries = existingEntries) {
       case (identifierGenerator, _) =>
@@ -127,8 +101,7 @@ class IdentifierGeneratorTest
     val identifiersDao = new IdentifiersDao(
       identifiers = new IdentifiersTable(config)
     ) {
-      override def lookupIds(
-        sourceIdentifiers: Seq[SourceIdentifier])(
+      override def lookupIds(sourceIdentifiers: Seq[SourceIdentifier])(
         implicit session: DBSession
       ): Try[IdentifiersDao.LookupResult] =
         Success(
@@ -138,8 +111,7 @@ class IdentifierGeneratorTest
           )
         )
 
-      override def saveIdentifiers(
-        ids: List[Identifier])(
+      override def saveIdentifiers(ids: List[Identifier])(
         implicit session: DBSession
       ): Try[IdentifiersDao.InsertResult] =
         Failure(
@@ -177,7 +149,7 @@ class IdentifierGeneratorTest
         )
 
         val id = triedId.get.values.head.CanonicalId
-        id should not be empty
+        id.underlying should not be empty
 
         val i = identifiersTable.i
         val maybeIdentifier = withSQL {

@@ -1,19 +1,21 @@
 package uk.ac.wellcome.models.matcher
 
+import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.catalogue.internal_model.work.Work
+import weco.catalogue.internal_model.work.WorkState.Identified
 
-case class WorkIdentifier(identifier: String, version: Option[Int])
+case class WorkIdentifier(identifier: CanonicalId, version: Option[Int])
 
 object WorkIdentifier {
   def apply(work: WorkNode): WorkIdentifier =
     WorkIdentifier(work.id, work.version)
 
-  def apply(work: Work[_]): WorkIdentifier =
+  def apply(work: Work[Identified]): WorkIdentifier =
     WorkIdentifier(
-      identifier = work.id,
+      identifier = work.state.canonicalId,
       version = Some(work.version)
     )
 
-  def apply(identifier: String, version: Int): WorkIdentifier =
+  def apply(identifier: CanonicalId, version: Int): WorkIdentifier =
     WorkIdentifier(identifier, Some(version))
 }

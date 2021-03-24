@@ -9,8 +9,13 @@ import uk.ac.wellcome.platform.id_minter.config.models.{
   IdentifiersTableConfig,
   RDSClientConfig
 }
-import uk.ac.wellcome.platform.id_minter.database.FieldDescription
+import uk.ac.wellcome.platform.id_minter.database.{
+  FieldDescription,
+  IdentifiersDao,
+  TableProvisioner
+}
 import uk.ac.wellcome.platform.id_minter.generators.TableNameGenerators
+import uk.ac.wellcome.platform.id_minter.models.{Identifier, IdentifiersTable}
 
 trait IdentifiersDatabase
     extends Eventually
@@ -116,4 +121,45 @@ trait IdentifiersDatabase
     }
 
   }
+
+  def insertIdentifiers(table: IdentifiersTable, identifiers: Seq[Identifier]): Unit = {
+    if (identifiers.nonEmpty) {
+      NamedDB('primary) localTx { implicit session =>
+        withSQL {
+          insert
+            .into(table)
+            .namedValues(
+              table.column.CanonicalId -> sqls.?,
+              table.column.OntologyType -> sqls.?,
+              table.column.SourceSystem -> sqls.?,
+              table.column.SourceId -> sqls.?
+            )
+        }.batch {
+          identifiers.map { id =>
+            Seq(id.CanonicalId.toString, id.OntologyType, id.SourceSystem, id.SourceId)
+          }: _*
+        }.apply()
+      }
+    }
+  }
+
+  def withIdentifiersDao[R](existingEntries: Seq[Identifier] = Nil)(
+    testWith: TestWith[(IdentifiersDao, IdentifiersTable), R]): R =
+    withIdentifiersTable { identifiersTableConfig =>
+      val identifiersTable = new IdentifiersTable(identifiersTableConfig)
+
+      new TableProvisioner(rdsClientConfig)
+        .provision(
+          database = identifiersTableConfig.database,
+          tableName = identifiersTableConfig.tableName
+        )
+
+      val identifiersDao = new IdentifiersDao(identifiersTable)
+
+      eventuallyTableExists(identifiersTableConfig)
+
+      insertIdentifiers(identifiersTable, existingEntries)
+
+      testWith((identifiersDao, identifiersTable))
+    }
 }

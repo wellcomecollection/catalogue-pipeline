@@ -97,7 +97,7 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
   ): Try[InsertResult] =
     Try {
       val values = ids.map(i =>
-        Seq(i.CanonicalId, i.OntologyType, i.SourceSystem, i.SourceId))
+        Seq(i.CanonicalId.toString, i.OntologyType, i.SourceSystem, i.SourceId))
       blocking {
         debug(s"Putting new identifier $ids")
         withSQL {

@@ -8,16 +8,19 @@ import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.models.matcher.WorkNode
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
 import uk.ac.wellcome.platform.matcher.models.{WorkGraph, WorkLinks}
+import weco.catalogue.internal_model.generators.IdentifiersGenerators
+import weco.catalogue.internal_model.identifiers.CanonicalId
 
 class WorkGraphStoreTest
     extends AnyFunSpec
     with Matchers
     with ScalaFutures
-    with MatcherFixtures {
+    with MatcherFixtures
+    with IdentifiersGenerators {
 
-  val idA = "A"
-  val idB = "B"
-  val idC = "C"
+  val idA = CanonicalId("AAAAAAAA")
+  val idB = CanonicalId("BBBBBBBB")
+  val idC = CanonicalId("CCCCCCCC")
 
   describe("Get graph of linked works") {
     it("returns nothing if there are no matching graphs") {
@@ -26,7 +29,7 @@ class WorkGraphStoreTest
           whenReady(
             workGraphStore.findAffectedWorks(
               WorkLinks(
-                "Not-there",
+                createCanonicalId,
                 version = 0,
                 referencedWorkIds = Set.empty))) { workGraph =>
             workGraph shouldBe WorkGraph(Set.empty)
