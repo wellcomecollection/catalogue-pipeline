@@ -9,7 +9,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import uk.ac.wellcome.models.work.generators.ProductionEventGenerators
 import weco.catalogue.internal_model.generators.ImageGenerators
-import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.identifiers.{CanonicalId, IdState}
 import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.locations._
 import weco.catalogue.internal_model.work._
@@ -56,7 +56,7 @@ class DisplayWorkTest
       includes = WorksIncludes(WorkInclude.Items)
     )
     val displayItem = displayWork.items.get.head
-    displayItem.id shouldBe Some(items.head.id.canonicalId)
+    displayItem.id shouldBe Some(items.head.id.canonicalId.underlying)
   }
 
   it("parses unidentified items on a work") {
@@ -187,7 +187,7 @@ class DisplayWorkTest
     displayWork.contributors.get shouldBe List(
       DisplayContributor(
         agent = DisplayPerson(
-          id = Some(canonicalId),
+          id = Some(canonicalId.underlying),
           label = "Vlad the Vanquished",
           identifiers = Some(
             List(DisplayIdentifier(sourceIdentifier))
@@ -216,6 +216,11 @@ class DisplayWorkTest
     displayWork.production.get shouldBe List(
       DisplayProductionEvent(productionEvent, includesIdentifiers = false))
   }
+
+  implicit val arbitraryCanonicalId: Arbitrary[CanonicalId] =
+    Arbitrary {
+      createCanonicalId
+    }
 
   it("does not extract includes set to false") {
     forAll { work: Work.Visible[WorkState.Indexed] =>
@@ -454,9 +459,11 @@ class DisplayWorkTest
           work,
           includes = WorksIncludes(WorkInclude.Images)
         )
-        displayWork.images.get
-          .map(_.id) should contain theSameElementsAs
-          work.data.imageData.map(_.id.canonicalId)
+
+        val displayIds = displayWork.images.get.map(_.id)
+        val expectedIds = work.data.imageData.map(_.id.canonicalId.underlying)
+
+        displayIds should contain theSameElementsAs expectedIds
       }
     }
   }
@@ -490,7 +497,7 @@ class DisplayWorkTest
         DisplayWork(work, WorksIncludes(WorkInclude.PartOf))
       displayWork.partOf.isEmpty shouldBe false
       val partOf = displayWork.partOf.get
-      partOf.map(_.id) shouldBe List(workB.state.canonicalId)
+      partOf.map(_.id) shouldBe List(workB.state.canonicalId.underlying)
       partOf(0).partOf shouldBe Some(
         List(
           DisplayRelation(relationA).copy(

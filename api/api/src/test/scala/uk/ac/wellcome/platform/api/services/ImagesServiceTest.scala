@@ -36,7 +36,7 @@ class ImagesServiceTest
 
         whenReady(
           imagesService
-            .findImageById(id = image.id)(index)) {
+            .findImageById(id = image.state.canonicalId)(index)) {
           _.right.value.value shouldBe image
         }
       }
@@ -46,7 +46,7 @@ class ImagesServiceTest
       withLocalImagesIndex { index =>
         whenReady(
           imagesService
-            .findImageById("bananas")(index)) {
+            .findImageById(createCanonicalId)(index)) {
           _.right.value shouldBe None
         }
       }
@@ -55,7 +55,7 @@ class ImagesServiceTest
     it("returns a Left[ElasticError] if Elasticsearch returns an error") {
       whenReady(
         imagesService
-          .findImageById("potatoes")(Index("parsnips"))) {
+          .findImageById(createCanonicalId)(Index("parsnips"))) {
         _.left.value shouldBe a[ElasticError]
       }
     }

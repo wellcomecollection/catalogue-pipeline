@@ -14,16 +14,17 @@ import com.sksamuel.elastic4s.{ElasticClient, ElasticError, Index}
 import grizzled.slf4j.Logging
 import uk.ac.wellcome.platform.api.Tracing
 import uk.ac.wellcome.platform.api.models._
+import weco.catalogue.internal_model.identifiers.CanonicalId
 
 class ElasticsearchService(elasticClient: ElasticClient)(
   implicit ec: ExecutionContext
 ) extends Logging
     with Tracing {
 
-  def executeGet(canonicalId: String)(
+  def executeGet(canonicalId: CanonicalId)(
     index: Index): Future[Either[ElasticError, GetResponse]] =
     withActiveTrace(elasticClient.execute {
-      get(index, canonicalId)
+      get(index, canonicalId.underlying)
     }).map { _.toEither }
 
   /** Given a set of query options, build a SearchDefinition for Elasticsearch

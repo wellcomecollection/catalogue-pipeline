@@ -129,7 +129,7 @@ object DisplayWork {
   def apply(work: Work.Visible[WorkState.Indexed],
             includes: WorksIncludes): DisplayWork =
     DisplayWork(
-      id = work.state.canonicalId,
+      id = work.state.canonicalId.underlying,
       title = work.data.title,
       alternativeTitles = work.data.alternativeTitles,
       referenceNumber = work.data.collectionPath.flatMap(_.label),

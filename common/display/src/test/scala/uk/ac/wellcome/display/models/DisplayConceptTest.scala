@@ -49,13 +49,15 @@ class DisplayConceptTest
       ontologyType = "Concept"
     )
 
+    val canonicalId = createCanonicalId
+
     assertDisplayConceptIsCorrect(
       concept = Concept(
         label = "darkness",
-        id = IdState.Identified("dj4kndg5", sourceIdentifier)
+        id = IdState.Identified(canonicalId, sourceIdentifier)
       ),
       expectedDisplayConcept = DisplayConcept(
-        id = Some("dj4kndg5"),
+        id = Some(canonicalId.underlying),
         identifiers = Some(List(DisplayIdentifier(sourceIdentifier))),
         label = "darkness"
       )
@@ -67,14 +69,16 @@ class DisplayConceptTest
       ontologyType = "Period"
     )
 
+    val canonicalId = createCanonicalId
+
     assertDisplayConceptIsCorrect(
       concept = Period(
         label = "never",
         range = None,
-        id = IdState.Identified("nrzbm3ah", sourceIdentifier)
+        id = IdState.Identified(canonicalId, sourceIdentifier)
       ),
       expectedDisplayConcept = DisplayPeriod(
-        id = Some("nrzbm3ah"),
+        id = Some(canonicalId.underlying),
         identifiers = Some(List(DisplayIdentifier(sourceIdentifier))),
         label = "never"
       )
@@ -86,13 +90,15 @@ class DisplayConceptTest
       ontologyType = "Place"
     )
 
+    val canonicalId = createCanonicalId
+
     assertDisplayConceptIsCorrect(
       concept = Place(
         label = "anywhere",
-        id = IdState.Identified("axtswq4z", sourceIdentifier)
+        id = IdState.Identified(canonicalId, sourceIdentifier)
       ),
       expectedDisplayConcept = DisplayPlace(
-        id = Some("axtswq4z"),
+        id = Some(canonicalId.underlying),
         identifiers = Some(List(DisplayIdentifier(sourceIdentifier))),
         label = "anywhere"
       )

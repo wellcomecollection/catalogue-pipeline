@@ -16,6 +16,7 @@ import uk.ac.wellcome.platform.api.services.{
   ImagesService
 }
 import cats.implicits._
+import weco.catalogue.internal_model.identifiers.CanonicalId
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -29,7 +30,7 @@ class ImagesController(elasticsearchService: ElasticsearchService,
   import DisplayResultList.encoder
   import ResultResponse.encoder
 
-  def singleImage(id: String, params: SingleImageParams): Route =
+  def singleImage(id: CanonicalId, params: SingleImageParams): Route =
     getWithFuture {
       transactFuture("GET /images/{imageId}") {
         val index =

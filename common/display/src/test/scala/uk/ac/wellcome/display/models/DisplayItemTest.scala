@@ -14,7 +14,7 @@ class DisplayItemTest extends AnyFunSpec with Matchers with ItemsGenerators {
       includesIdentifiers = true
     )
 
-    displayItem.id shouldBe Some(item.id.canonicalId)
+    displayItem.id shouldBe Some(item.id.canonicalId.underlying)
     displayItem.locations shouldBe List(DisplayLocation(item.locations.head))
     displayItem.identifiers shouldBe Some(
       List(DisplayIdentifier(item.id.sourceIdentifier)))
