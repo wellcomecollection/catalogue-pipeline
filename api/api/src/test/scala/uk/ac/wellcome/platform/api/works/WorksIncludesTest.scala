@@ -17,37 +17,28 @@ class WorksIncludesTest
     with SubjectGenerators
     with ImageGenerators {
 
+  val canonicalId1 = "1"
+  val canonicalId2 = "2"
+
   describe("identifiers includes") {
     it(
       "includes a list of identifiers on a list endpoint if we pass ?include=identifiers") {
       withWorksApi {
         case (worksIndex, routes) =>
-          val otherIdentifier0 = createSourceIdentifier
           val otherIdentifier1 = createSourceIdentifier
-          val work0 = indexedWork(canonicalId = "0")
-            .otherIdentifiers(List(otherIdentifier0))
-          val work1 = indexedWork(canonicalId = "1")
+          val otherIdentifier2 = createSourceIdentifier
+          val work1 = indexedWork(canonicalId = canonicalId1)
             .otherIdentifiers(List(otherIdentifier1))
+          val work2 = indexedWork(canonicalId = canonicalId2)
+            .otherIdentifiers(List(otherIdentifier2))
 
-          insertIntoElasticsearch(worksIndex, work0, work1)
+          insertIntoElasticsearch(worksIndex, work1, work2)
 
           assertJsonResponse(routes, s"/$apiPrefix/works?include=identifiers") {
             Status.OK -> s"""
               {
                 ${resultList(apiPrefix, totalResults = 2)},
                 "results": [
-                 {
-                   "type": "Work",
-                   "id": "${work0.state.canonicalId}",
-                   "title": "${work0.data.title.get}",
-                   "alternativeTitles": [],
-                   "availabilities": [${availabilities(
-              work0.state.availabilities)}],
-                   "identifiers": [
-                     ${identifier(work0.sourceIdentifier)},
-                     ${identifier(otherIdentifier0)}
-                   ]
-                 },
                  {
                    "type": "Work",
                    "id": "${work1.state.canonicalId}",
@@ -58,6 +49,18 @@ class WorksIncludesTest
                    "identifiers": [
                      ${identifier(work1.sourceIdentifier)},
                      ${identifier(otherIdentifier1)}
+                   ]
+                 },
+                 {
+                   "type": "Work",
+                   "id": "${work2.state.canonicalId}",
+                   "title": "${work2.data.title.get}",
+                   "alternativeTitles": [],
+                   "availabilities": [${availabilities(
+              work2.state.availabilities)}],
+                   "identifiers": [
+                     ${identifier(work2.sourceIdentifier)},
+                     ${identifier(otherIdentifier2)}
                    ]
                  }
                 ]
@@ -130,12 +133,12 @@ class WorksIncludesTest
       "includes a list of subjects on a list endpoint if we pass ?include=subjects") {
       withWorksApi {
         case (worksIndex, routes) =>
-          val subjects0 = List(createSubject)
           val subjects1 = List(createSubject)
-          val work0 = indexedWork(canonicalId = "0").subjects(subjects0)
-          val work1 = indexedWork(canonicalId = "1").subjects(subjects1)
+          val subjects2 = List(createSubject)
+          val work1 = indexedWork(canonicalId = canonicalId1).subjects(subjects1)
+          val work2 = indexedWork(canonicalId = canonicalId2).subjects(subjects2)
 
-          insertIntoElasticsearch(worksIndex, work0, work1)
+          insertIntoElasticsearch(worksIndex, work1, work2)
 
           assertJsonResponse(routes, s"/$apiPrefix/works?include=subjects") {
             Status.OK -> s"""
@@ -144,21 +147,21 @@ class WorksIncludesTest
                 "results": [
                  {
                    "type": "Work",
-                   "id": "${work0.state.canonicalId}",
-                   "title": "${work0.data.title.get}",
-                   "alternativeTitles": [],
-                   "availabilities": [${availabilities(
-              work0.state.availabilities)}],
-                   "subjects": [ ${subjects(subjects0)}]
-                 },
-                 {
-                   "type": "Work",
                    "id": "${work1.state.canonicalId}",
                    "title": "${work1.data.title.get}",
                    "alternativeTitles": [],
                    "availabilities": [${availabilities(
               work1.state.availabilities)}],
                    "subjects": [ ${subjects(subjects1)}]
+                 },
+                 {
+                   "type": "Work",
+                   "id": "${work2.state.canonicalId}",
+                   "title": "${work2.data.title.get}",
+                   "alternativeTitles": [],
+                   "availabilities": [${availabilities(
+              work2.state.availabilities)}],
+                   "subjects": [ ${subjects(subjects2)}]
                  }
                 ]
               }
@@ -200,8 +203,8 @@ class WorksIncludesTest
         case (worksIndex, routes) =>
           val genres1 = List(Genre("ornithology", List(Concept("ornithology"))))
           val genres2 = List(Genre("flying cars", List(Concept("flying cars"))))
-          val work1 = indexedWork(canonicalId = "1").genres(genres1)
-          val work2 = indexedWork(canonicalId = "2").genres(genres2)
+          val work1 = indexedWork(canonicalId = canonicalId1).genres(genres1)
+          val work2 = indexedWork(canonicalId = canonicalId2).genres(genres2)
 
           insertIntoElasticsearch(worksIndex, work1, work2)
 
@@ -272,9 +275,9 @@ class WorksIncludesTest
           val contributors2 =
             List(Contributor(Person("Fred Astair"), roles = Nil))
           val work1 =
-            indexedWork(canonicalId = "1").contributors(contributors1)
+            indexedWork(canonicalId = canonicalId1).contributors(contributors1)
           val work2 =
-            indexedWork(canonicalId = "2").contributors(contributors2)
+            indexedWork(canonicalId = canonicalId2).contributors(contributors2)
 
           insertIntoElasticsearch(worksIndex, work1, work2)
 
@@ -344,9 +347,9 @@ class WorksIncludesTest
           val productionEvents1 = createProductionEventList()
           val productionEvents2 = createProductionEventList()
           val work1 =
-            indexedWork(canonicalId = "1").production(productionEvents1)
+            indexedWork(canonicalId = canonicalId1).production(productionEvents1)
           val work2 =
-            indexedWork(canonicalId = "2").production(productionEvents2)
+            indexedWork(canonicalId = canonicalId2).production(productionEvents2)
 
           insertIntoElasticsearch(worksIndex, work1, work2)
 
@@ -415,8 +418,8 @@ class WorksIncludesTest
           val swedish = Language(label = "Swedish", id = "swe")
 
           val work1 =
-            indexedWork(canonicalId = "1").languages(List(english, turkish))
-          val work2 = indexedWork(canonicalId = "2").languages(List(swedish))
+            indexedWork(canonicalId = canonicalId1).languages(List(english, turkish))
+          val work2 = indexedWork(canonicalId = canonicalId2).languages(List(swedish))
 
           insertIntoElasticsearch(worksIndex, work1, work2)
 
@@ -483,9 +486,9 @@ class WorksIncludesTest
     it("includes notes on the list endpoint if we pass ?include=notes") {
       withWorksApi {
         case (worksIndex, routes) =>
-          val work1 = indexedWork(canonicalId = "1")
+          val work1 = indexedWork(canonicalId = canonicalId1)
             .notes(List(GeneralNote("GN1"), FundingInformation("FI1")))
-          val work2 = indexedWork(canonicalId = "2")
+          val work2 = indexedWork(canonicalId = canonicalId2)
             .notes(List(GeneralNote("GN2.1"), GeneralNote("GN2.2")))
 
           insertIntoElasticsearch(worksIndex, work1, work2)
