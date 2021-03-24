@@ -191,9 +191,12 @@ class ElasticsearchServiceTest
 
     it("sorts by score then canonicalId when scored = true") {
       withLocalWorksIndex { index =>
-        val work1 = indexedWork(canonicalId = CanonicalId("0000000Z")).title("match")
-        val work2 = indexedWork(canonicalId = CanonicalId("0000000Y")).title("match stick")
-        val work3 = indexedWork(canonicalId = CanonicalId("0000000X")).title("match")
+        val work1 =
+          indexedWork(canonicalId = CanonicalId("0000000Z")).title("match")
+        val work2 = indexedWork(canonicalId = CanonicalId("0000000Y"))
+          .title("match stick")
+        val work3 =
+          indexedWork(canonicalId = CanonicalId("0000000X")).title("match")
 
         insertIntoElasticsearch(index, work1, work2, work3)
 

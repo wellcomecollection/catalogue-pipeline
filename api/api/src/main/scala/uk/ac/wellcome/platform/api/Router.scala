@@ -42,7 +42,9 @@ class Router(elasticClient: ElasticClient,
               path("works" / Segment) { id: String =>
                 Try { CanonicalId(id) } match {
                   case Success(workId) =>
-                    SingleWorkParams.parse { worksController.singleWork(workId, _) }
+                    SingleWorkParams.parse {
+                      worksController.singleWork(workId, _)
+                    }
 
                   case _ => notFound(s"Work not found for identifier $id")
                 }

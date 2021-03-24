@@ -355,7 +355,10 @@ class WorksAggregationsTest
                   ]
                 }
               },
-              "results": [${works.sortBy(_.state.canonicalId).map(workResponse).mkString(",")}]
+              "results": [${works
+            .sortBy(_.state.canonicalId)
+            .map(workResponse)
+            .mkString(",")}]
             }
           """
         }
