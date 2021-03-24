@@ -24,7 +24,7 @@ object DisplaySubject extends GetIdentifiers {
     subject match {
       case Subject(id, label, concepts) =>
         DisplaySubject(
-          id = id.maybeCanonicalId,
+          id = id.maybeCanonicalId.map { _.underlying },
           identifiers = getIdentifiers(id, includesIdentifiers),
           label = label,
           concepts =

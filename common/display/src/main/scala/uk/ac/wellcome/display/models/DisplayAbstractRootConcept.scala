@@ -37,19 +37,19 @@ case object DisplayAbstractConcept extends GetIdentifiers {
     abstractConcept match {
       case Concept(id, label) =>
         DisplayConcept(
-          id = id.maybeCanonicalId,
+          id = id.maybeCanonicalId.map { _.underlying },
           label = label,
           identifiers = getIdentifiers(id, includesIdentifiers)
         )
       case Period(id, label, _) =>
         DisplayPeriod(
-          id = id.maybeCanonicalId,
+          id = id.maybeCanonicalId.map { _.underlying },
           label = label,
           identifiers = getIdentifiers(id, includesIdentifiers)
         )
       case Place(id, label) =>
         DisplayPlace(
-          id = id.maybeCanonicalId,
+          id = id.maybeCanonicalId.map { _.underlying },
           label = label,
           identifiers = getIdentifiers(id, includesIdentifiers)
         )
@@ -140,13 +140,13 @@ case object DisplayAbstractAgent extends GetIdentifiers {
     agent match {
       case Agent(id, label) =>
         DisplayAgent(
-          id = id.maybeCanonicalId,
+          id = id.maybeCanonicalId.map { _.underlying },
           label = label,
           identifiers = getIdentifiers(id, includesIdentifiers),
         )
       case Person(id, label, prefix, numeration) =>
         DisplayPerson(
-          id = id.maybeCanonicalId,
+          id = id.maybeCanonicalId.map { _.underlying },
           label = label,
           numeration = numeration,
           prefix = prefix,
@@ -154,13 +154,13 @@ case object DisplayAbstractAgent extends GetIdentifiers {
         )
       case Organisation(id, label) =>
         DisplayOrganisation(
-          id = id.maybeCanonicalId,
+          id = id.maybeCanonicalId.map { _.underlying },
           label = label,
           identifiers = getIdentifiers(id, includesIdentifiers),
         )
       case Meeting(id, label) =>
         DisplayMeeting(
-          id = id.maybeCanonicalId,
+          id = id.maybeCanonicalId.map { _.underlying },
           label = label,
           identifiers = getIdentifiers(id, includesIdentifiers),
         )

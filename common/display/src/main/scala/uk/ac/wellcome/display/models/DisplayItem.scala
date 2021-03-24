@@ -35,7 +35,7 @@ object DisplayItem extends GetIdentifiers {
     item match {
       case Item(id, title, locations) =>
         DisplayItem(
-          id = id.maybeCanonicalId,
+          id = id.maybeCanonicalId.map { _.underlying },
           identifiers = getIdentifiers(id, includesIdentifiers),
           title = title,
           locations = locations.map(DisplayLocation(_))

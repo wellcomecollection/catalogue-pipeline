@@ -65,7 +65,7 @@ class DisplayAbstractConceptSerialisationTest
     val concept = Concept(
       label = "conceptLabel",
       id = IdState.Identified(
-        canonicalId = "uq4bt5us",
+        canonicalId = createCanonicalId,
         sourceIdentifier = createSourceIdentifierWith(
           ontologyType = "Concept"
         )

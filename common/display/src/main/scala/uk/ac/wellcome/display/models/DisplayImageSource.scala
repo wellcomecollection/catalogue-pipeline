@@ -41,7 +41,7 @@ object DisplayImageSource {
 
   def apply(parent: ParentWorks, includes: ImageIncludes): DisplayImageSource =
     new DisplayImageSource(
-      id = parent.id.canonicalId,
+      id = parent.id.canonicalId.underlying,
       title = parent.canonicalWork.data.title,
       contributors =
         if (includes.`source.contributors`)

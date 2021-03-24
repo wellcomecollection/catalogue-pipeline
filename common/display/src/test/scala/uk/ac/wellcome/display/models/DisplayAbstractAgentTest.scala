@@ -3,7 +3,11 @@ package uk.ac.wellcome.display.models
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.generators.IdentifiersGenerators
-import weco.catalogue.internal_model.identifiers.{IdState, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  CanonicalId,
+  IdState,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.work.{Agent, Meeting, Organisation, Person}
 
 class DisplayAbstractAgentTest
@@ -16,7 +20,7 @@ class DisplayAbstractAgentTest
   val otherIdentifiers: List[SourceIdentifier] = (1 to 3).map { _ =>
     createSourceIdentifier
   }.toList
-  val canonicalId: String = createCanonicalId
+  val canonicalId: CanonicalId = createCanonicalId
 
   val identified =
     IdState.Identified(canonicalId, sourceIdentifier, otherIdentifiers)
@@ -45,7 +49,7 @@ class DisplayAbstractAgentTest
     it(
       "converts an Identified Agent to a DisplayAgent (includesIdentifiers = true)") {
       val expectedAgent = DisplayAgent(
-        id = Some(canonicalId),
+        id = Some(canonicalId.underlying),
         identifiers = Some((List(sourceIdentifier) ++ otherIdentifiers).map {
           DisplayIdentifier(_)
         }),
@@ -58,7 +62,7 @@ class DisplayAbstractAgentTest
     it(
       "converts an Identified Agent to a DisplayAgent (includesIdentifiers = false)") {
       val expectedAgent = DisplayAgent(
-        id = Some(canonicalId),
+        id = Some(canonicalId.underlying),
         identifiers = None,
         label = label
       )
@@ -106,7 +110,7 @@ class DisplayAbstractAgentTest
     it(
       "converts an Identified Person to a DisplayPerson (includesIdentifiers = true)") {
       val expectedPerson = DisplayPerson(
-        id = Some(canonicalId),
+        id = Some(canonicalId.underlying),
         identifiers = Some((List(sourceIdentifier) ++ otherIdentifiers).map {
           DisplayIdentifier(_)
         }),
@@ -121,7 +125,7 @@ class DisplayAbstractAgentTest
     it(
       "converts an Identified Person to a DisplayPerson (includesIdentifiers = false)") {
       val expectedPerson = DisplayPerson(
-        id = Some(canonicalId),
+        id = Some(canonicalId.underlying),
         identifiers = None,
         label = label,
         prefix = Some(prefix),
@@ -160,7 +164,7 @@ class DisplayAbstractAgentTest
     it(
       "converts an Identified Organisation to a DisplayOrganisation (includesIdentifiers = true)") {
       val expectedOrganisation = DisplayOrganisation(
-        id = Some(canonicalId),
+        id = Some(canonicalId.underlying),
         identifiers = Some((List(sourceIdentifier) ++ otherIdentifiers).map {
           DisplayIdentifier(_)
         }),
@@ -173,7 +177,7 @@ class DisplayAbstractAgentTest
     it(
       "converts an Identified Organisation to a DisplayOrganisation (includesIdentifiers = false)") {
       val expectedOrganisation = DisplayOrganisation(
-        id = Some(canonicalId),
+        id = Some(canonicalId.underlying),
         identifiers = None,
         label = label
       )
@@ -204,7 +208,7 @@ class DisplayAbstractAgentTest
       "converts an Identified Meeting to a DisplayMeeting (includesIdentifiers = true)") {
       DisplayAbstractAgent(identifiedMeeting, includesIdentifiers = true) shouldBe
         DisplayMeeting(
-          id = Some(canonicalId),
+          id = Some(canonicalId.underlying),
           identifiers = Some((List(sourceIdentifier) ++ otherIdentifiers).map {
             DisplayIdentifier(_)
           }),
@@ -216,7 +220,7 @@ class DisplayAbstractAgentTest
       "converts an Identified Meeting to a DisplayMeeting (includesIdentifiers = false)") {
       DisplayAbstractAgent(identifiedMeeting, includesIdentifiers = false) shouldBe
         DisplayMeeting(
-          id = Some(canonicalId),
+          id = Some(canonicalId.underlying),
           identifiers = None,
           label = label
         )

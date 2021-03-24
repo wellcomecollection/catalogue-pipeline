@@ -37,7 +37,7 @@ object DisplayRelation {
 
   def apply(relation: Relation): DisplayRelation =
     DisplayRelation(
-      id = relation.id,
+      id = relation.id.underlying,
       title = relation.title,
       referenceNumber = relation.collectionPath.flatMap(_.label),
       ontologyType = DisplayWork.displayWorkType(relation.workType),

@@ -16,12 +16,14 @@ class DisplaySubjectSerialisationTest
     with SubjectGenerators {
 
   it("serialises a DisplaySubject constructed from a Subject") {
+    val canonicalId2 = createCanonicalId
+
     val concept0 = Concept(label = "conceptLabel")
     val concept1 = Period(label = "periodLabel")
     val concept2 = Place(
       label = "placeLabel",
       id = IdState.Identified(
-        canonicalId = "ABC",
+        canonicalId = canonicalId2,
         sourceIdentifier = createSourceIdentifierWith(
           ontologyType = "Place"
         )
@@ -47,7 +49,7 @@ class DisplaySubjectSerialisationTest
               "type" : "Period"
             },
             {
-              "id": "ABC",
+              "id": "$canonicalId2",
               "identifiers": [${identifier(concept2.id.sourceIdentifier)}],
               "label" : "placeLabel",
               "type" : "Place"
