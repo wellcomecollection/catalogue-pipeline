@@ -261,25 +261,23 @@ class WorksTest
     }
   }
 
-  def createDatedWork(canonicalId: String,
-                      dateLabel: String): Work.Visible[WorkState.Indexed] =
-    indexedWork(canonicalId = canonicalId)
-      .production(List(createProductionEventWith(dateLabel = Some(dateLabel))))
+  def createDatedWork(dateLabel: String): Work.Visible[WorkState.Indexed] =
+    indexedWork().production(List(createProductionEventWith(dateLabel = Some(dateLabel))))
 
   it("supports sorting by production date") {
     withWorksApi {
       case (worksIndex, routes) =>
-        val work1 = createDatedWork(canonicalId = "1", dateLabel = "1900")
-        val work2 = createDatedWork(canonicalId = "2", dateLabel = "1976")
-        val work3 = createDatedWork(canonicalId = "3", dateLabel = "1904")
-        val work4 = createDatedWork(canonicalId = "4", dateLabel = "2020")
-        val work5 = createDatedWork(canonicalId = "5", dateLabel = "1098")
-        insertIntoElasticsearch(worksIndex, work1, work2, work3, work4, work5)
+        val work1900 = createDatedWork(dateLabel = "1900")
+        val work1976 = createDatedWork(dateLabel = "1976")
+        val work1904 = createDatedWork(dateLabel = "1904")
+        val work2020 = createDatedWork(dateLabel = "2020")
+        val work1098 = createDatedWork(dateLabel = "1098")
+        insertIntoElasticsearch(worksIndex, work1900, work1976, work1904, work2020, work1098)
 
         assertJsonResponse(routes, s"/$apiPrefix/works?sort=production.dates") {
           Status.OK -> worksListResponse(
             apiPrefix = apiPrefix,
-            works = Seq(work5, work1, work3, work2, work4)
+            works = Seq(work1098, work1900, work1904, work1976, work2020)
           )
         }
     }
@@ -288,17 +286,17 @@ class WorksTest
   it("supports sorting of dates in descending order") {
     withWorksApi {
       case (worksIndex, routes) =>
-        val work1 = createDatedWork(canonicalId = "1", dateLabel = "1900")
-        val work2 = createDatedWork(canonicalId = "2", dateLabel = "1976")
-        val work3 = createDatedWork(canonicalId = "3", dateLabel = "1904")
-        insertIntoElasticsearch(worksIndex, work1, work2, work3)
+        val work1900 = createDatedWork(dateLabel = "1900")
+        val work1976 = createDatedWork(dateLabel = "1976")
+        val work1904 = createDatedWork(dateLabel = "1904")
+        insertIntoElasticsearch(worksIndex, work1900, work1976, work1904)
 
         assertJsonResponse(
           routes,
           s"/$apiPrefix/works?sort=production.dates&sortOrder=desc") {
           Status.OK -> worksListResponse(
             apiPrefix = apiPrefix,
-            works = Seq(work2, work3, work1)
+            works = Seq(work1976, work1904, work1900)
           )
         }
     }
