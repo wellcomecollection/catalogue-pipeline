@@ -17,7 +17,8 @@ class CalmNotesTest extends AnyFunSpec with Matchers with CalmRecordGenerators {
       ("PubInNote", "Published in the Public Pamphlet"),
       ("UserWrapped4", "Wrapped in the Worldly Words"),
       ("Copyright", "Copyright the Creative Consortium"),
-      ("Arrangement", "Arranged in an Adorable Alignment")
+      ("Arrangement", "Arranged in an Adorable Alignment"),
+      ("Copies", "A copy is contained in the Circular Church"),
     )
 
     val notes = CalmNotes(record)
@@ -34,7 +35,8 @@ class CalmNotesTest extends AnyFunSpec with Matchers with CalmRecordGenerators {
       PublicationsNote("Published in the Public Pamphlet"),
       FindingAids("Wrapped in the Worldly Words"),
       CopyrightNote("Copyright the Creative Consortium"),
-      ArrangementNote("Arranged in an Adorable Alignment")
+      ArrangementNote("Arranged in an Adorable Alignment"),
+      LocationOfDuplicatesNote("A copy is contained in the Circular Church"),
     )
   }
 
