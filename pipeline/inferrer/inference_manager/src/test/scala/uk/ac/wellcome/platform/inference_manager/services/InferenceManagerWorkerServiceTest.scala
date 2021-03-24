@@ -44,7 +44,7 @@ class InferenceManagerWorkerServiceTest
     "reads image messages, augments them with the inferrers, and sends them to SNS") {
     val images = (1 to 5)
       .map(_ => createImageData.toInitialImage)
-      .map(image => image.id -> image)
+      .map(image => image.state.canonicalId -> image)
       .toMap
     withResponsesAndFixtures(
       images.values.toList,
