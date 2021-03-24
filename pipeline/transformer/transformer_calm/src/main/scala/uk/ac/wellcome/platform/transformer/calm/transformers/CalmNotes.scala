@@ -15,7 +15,8 @@ object CalmNotes extends CalmRecordOps {
     ("PubInNote", PublicationsNote(_)),
     ("UserWrapped4", FindingAids(_)),
     ("Copyright", CopyrightNote(_)),
-    ("Arrangement", ArrangementNote(_))
+    ("Arrangement", ArrangementNote(_)),
+    ("Copies", LocationOfDuplicatesNote(_)),
   )
 
   def apply(record: CalmRecord): List[Note] =
