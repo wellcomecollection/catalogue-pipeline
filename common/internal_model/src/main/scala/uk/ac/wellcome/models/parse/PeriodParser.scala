@@ -51,18 +51,29 @@ object PeriodParser extends Parser[InstantRange] with DateParserUtils {
   // Try to parse as many `timePeriod`s as we can and then add them to find
   // the interval that covers all of them
   def parser[_: P]: P[InstantRange] =
-    (Start ~ timePeriod.rep(sep = multiPeriodSeparator, min = 1) ~ End) map {
+    ((Start ~ timePeriod.rep(sep = multiPeriodSeparator, min = 1) ~ End) map {
       periods =>
         periods.reduceLeft(_ + _)
-    }
+    }) |
+      (Start ~ halfBoundedDate ~ End)
 
   def multiPeriodSeparator[_: P]: P[Unit] =
     ws.? ~ StringIn(";", ",", "and") ~ ws.?
 
-  def timePeriod[_: P] =
+  def timePeriod[_: P]: P[InstantRange] =
     dateRange |
       singleDate |
       (noopQualifier ~ ws.? ~ singleDate) // Try not to fail for un-spec'd qualifiers
+
+  def halfBoundedDate[_: P]: P[InstantRange] =
+    (leftBoundedDate map InstantRange.after) |
+      (rightBoundedDate map InstantRange.before)
+
+  def rightBoundedDate[_: P]: P[InstantRange] =
+    ("-" ~ ws.? ~ singleDate) | ("before" ~ ws.? ~ singleDate)
+
+  def leftBoundedDate[_: P]: P[InstantRange] =
+    (singleDate ~ ws.? ~ "-") | ("after" ~ ws.? ~ singleDate)
 
   def singleDate[_: P]: P[InstantRange] =
     calendarDate.toInstantRange |

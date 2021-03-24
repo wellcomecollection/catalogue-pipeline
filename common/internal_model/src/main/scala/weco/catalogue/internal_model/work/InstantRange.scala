@@ -39,6 +39,30 @@ object InstantRange {
       label
     )
 
+  val positiveInfinity = LocalDate
+    .of(9999, 12, 31)
+    .atStartOfDay()
+    .plusDays(1)
+    .minusNanos(1)
+    .toInstant(ZoneOffset.UTC)
+
+  val negativeInfinity = LocalDate
+    .of(-9999, 1, 1)
+    .atStartOfDay()
+    .toInstant(ZoneOffset.UTC)
+
+  def after(start: InstantRange): InstantRange = InstantRange(
+    from = start.from,
+    to = positiveInfinity,
+    label = start.label
+  )
+
+  def before(end: InstantRange): InstantRange = InstantRange(
+    from = negativeInfinity,
+    to = end.to,
+    label = end.label
+  )
+
   def parse(label: String)(
     implicit parser: Parser[InstantRange]): Option[InstantRange] =
     parser(label)

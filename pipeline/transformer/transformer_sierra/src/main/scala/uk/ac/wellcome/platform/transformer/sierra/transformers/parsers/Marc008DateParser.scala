@@ -46,22 +46,18 @@ object Marc008DateParser extends Parser[InstantRange] with DateParserUtils {
   def continuingResourceCeasedPublication[_: P] =
     ("d" ~ year ~ year) map { case (from, to) => FuzzyDateRange(from, to) }
 
-  // TODO : InstantRange should have optional start / end rather than 9999
   def continuingResourceCurrentlyPublished[_: P] =
     ("c" ~ year ~ "9999") map (FuzzyDateRange(_, Year(9999)))
 
-  // TODO : InstantRange should have optional start / end rather than 9999
   def continuingResourceStatusUnknown[_: P] =
     ("u" ~ year ~ "uuuu") map (FuzzyDateRange(_, Year(9999)))
 
-  // TODO : should these dates be marked as inferred?
   def questionableDate[_: P] =
     ("q" ~ year ~ year) map { case (from, to) => FuzzyDateRange(from, to) }
 
   def differingReleaseAndProduction[_: P] =
     ("p" ~ year ~ year) map { case (release, production) => release }
 
-  // TODO : should century / century and decade be marked inferred
   def partialYear[_: P] =
     year.toInstantRange |
       century.toInstantRange |
