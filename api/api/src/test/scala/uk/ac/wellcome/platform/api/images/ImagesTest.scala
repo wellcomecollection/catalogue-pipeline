@@ -68,26 +68,28 @@ class ImagesTest extends ApiImagesTestBase with SierraWorkGenerators {
     }
   }
 
+  val baguetteImage = createImageData.toIndexedImageWith(
+    canonicalId = "a",
+    parentWork = identifiedWork()
+      .title(
+        "Baguette is a French style of bread; it's a long, thin bread; other countries also make this bread")
+  )
+  val focacciaImage = createImageData.toIndexedImageWith(
+    canonicalId = "b",
+    parentWork = identifiedWork()
+      .title(
+        "A Ligurian style of bread, Focaccia is a flat Italian bread")
+  )
+
   it("returns matching results when using work data") {
     withImagesApi {
       case (imagesIndex, routes) =>
-        val baguetteImage = createImageData.toIndexedImageWith(
-          canonicalId = "a",
-          parentWork = identifiedWork()
-            .title(
-              "Baguette is a French style of bread; it's a long, thin bread; other countries also make this bread")
-        )
-        val focacciaImage = createImageData.toIndexedImageWith(
-          canonicalId = "b",
-          parentWork = identifiedWork()
-            .title(
-              "A Ligurian style of bread, Focaccia is a flat Italian bread")
-        )
         val mantouImage = createImageData.toIndexedImageWith(
           canonicalId = "c",
           parentWork = identifiedWork()
             .title("Mantou is a steamed bread associated with Northern China")
         )
+
         insertImagesIntoElasticsearch(
           imagesIndex,
           baguetteImage,
@@ -108,16 +110,6 @@ class ImagesTest extends ApiImagesTestBase with SierraWorkGenerators {
   it("returns matching results when using workdata from the redirected work") {
     withImagesApi {
       case (imagesIndex, routes) =>
-        val baguetteImage = createImageData.toIndexedImageWith(
-          canonicalId = "a",
-          parentWork = identifiedWork()
-            .title("Baguette is a French bread style")
-        )
-        val focacciaImage = createImageData.toIndexedImageWith(
-          canonicalId = "b",
-          parentWork = identifiedWork()
-            .title("A Ligurian style of bread, Focaccia")
-        )
         val schiacciataImage = createImageData.toIndexedImageWith(
           canonicalId = "c",
           parentWork = identifiedWork()
