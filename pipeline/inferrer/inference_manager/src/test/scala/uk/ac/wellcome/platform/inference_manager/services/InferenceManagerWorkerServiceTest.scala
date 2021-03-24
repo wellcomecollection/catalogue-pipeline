@@ -49,17 +49,23 @@ class InferenceManagerWorkerServiceTest
     withResponsesAndFixtures(
       images.values.toList,
       inferrer = req =>
-        images.keys
-          .find(req.contains(_))
-          .flatMap { id =>
-            if (req.contains("feature_inferrer")) {
-              // Using the ID to seed the random generators means we can make
-              // sure that collected responses are correctly matched to the
-              // images upon which the inference was performed
-              Some(Responses.featureInferrerDeterministic(id.hashCode))
-            } else if (req.contains("palette_inferrer")) {
-              Some(Responses.paletteInferrerDeterministic(id.hashCode))
-            } else None
+        images.keys.map(_.toString).find(req.contains(_)) match {
+          case Some(id) if req.contains("feature_inferrer") =>
+            // Using the ID to seed the random generators means we can make
+            // sure that collected responses are correctly matched to the
+            // images upon which the inference was performed
+            Some(Responses.featureInferrerDeterministic(id.hashCode))
+
+          case Some(id) if req.contains("palette_inferrer") =>
+            Some(Responses.paletteInferrerDeterministic(id.hashCode))
+
+          case Some(id) =>
+            warn(s"Unrecognised request for $id: $req")
+            None
+
+          case None =>
+            warn(s"Unable to find matching image for request $req")
+            None
         },
       images = _ => Some(Responses.image)
     ) {
