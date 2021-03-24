@@ -19,6 +19,9 @@ import uk.ac.wellcome.platform.api.swagger.SwaggerDocs
 import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.platform.api.rest._
 import uk.ac.wellcome.platform.api.services.ElasticsearchService
+import weco.catalogue.internal_model.identifiers.CanonicalId
+
+import scala.util.{Success, Try}
 
 class Router(elasticClient: ElasticClient,
              elasticConfig: ElasticConfig,
@@ -36,15 +39,25 @@ class Router(elasticClient: ElasticClient,
               path("works") {
                 MultipleWorksParams.parse { worksController.multipleWorks }
               },
-              path("works" / Segment) { workId: String =>
-                SingleWorkParams.parse { worksController.singleWork(workId, _) }
+              path("works" / Segment) { id: String =>
+                Try { CanonicalId(id) } match {
+                  case Success(workId) =>
+                    SingleWorkParams.parse { worksController.singleWork(workId, _) }
+
+                  case _ => notFound(s"Work not found for identifier $id")
+                }
               },
               path("images") {
                 MultipleImagesParams.parse { imagesController.multipleImages }
               },
-              path("images" / Segment) { imageId: String =>
-                SingleImageParams.parse {
-                  imagesController.singleImage(imageId, _)
+              path("images" / Segment) { id: String =>
+                Try { CanonicalId(id) } match {
+                  case Success(imageId) =>
+                    SingleImageParams.parse {
+                      imagesController.singleImage(imageId, _)
+                    }
+
+                  case _ => notFound(s"Image not found for identifier $id")
                 }
               },
               path("context.json") {

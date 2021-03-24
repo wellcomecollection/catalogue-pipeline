@@ -249,14 +249,14 @@ class WorksErrorsTest extends ApiWorksTestBase {
 
       it("looking up a work") {
         assertIsNotFound(
-          s"/works/1234?_index=$indexName",
+          s"/works/$createCanonicalId?_index=$indexName",
           description = s"There is no index $indexName"
         )
       }
 
       it("searching") {
         assertIsNotFound(
-          s"/works/1234?_index=$indexName&query=foobar",
+          s"/works/$createCanonicalId?_index=$indexName&query=foobar",
           description = s"There is no index $indexName"
         )
       }

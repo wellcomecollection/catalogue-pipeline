@@ -296,7 +296,7 @@ class WorksServiceTest
     it("returns a future of None if it cannot get a record by id") {
       withLocalWorksIndex { index =>
         val recordsFuture =
-          worksService.findWorkById(canonicalId = "1234")(index)
+          worksService.findWorkById(canonicalId = createCanonicalId)(index)
 
         whenReady(recordsFuture) { result =>
           result.isRight shouldBe true
@@ -307,7 +307,7 @@ class WorksServiceTest
 
     it("returns a Left[ElasticError] if there's an Elasticsearch error") {
       val future = worksService.findWorkById(
-        canonicalId = "1234"
+        canonicalId = createCanonicalId
       )(
         index = Index("doesnotexist")
       )

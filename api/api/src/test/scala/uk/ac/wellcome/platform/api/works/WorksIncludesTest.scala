@@ -1,13 +1,13 @@
 package uk.ac.wellcome.platform.api.works
 
 import com.sksamuel.elastic4s.Index
-
 import uk.ac.wellcome.models.work.generators.{
   ProductionEventGenerators,
   SubjectGenerators
 }
 import uk.ac.wellcome.models.Implicits._
 import weco.catalogue.internal_model.generators.ImageGenerators
+import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.work._
 
@@ -17,8 +17,8 @@ class WorksIncludesTest
     with SubjectGenerators
     with ImageGenerators {
 
-  val canonicalId1 = "1"
-  val canonicalId2 = "2"
+  val canonicalId1 = CanonicalId("00000000")
+  val canonicalId2 = CanonicalId("11111111")
 
   describe("identifiers includes") {
     it(

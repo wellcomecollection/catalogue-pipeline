@@ -10,13 +10,14 @@ import com.sksamuel.elastic4s.requests.searches.SearchResponse
 import com.sksamuel.elastic4s.circe._
 import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.models.Implicits._
+import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.Indexed
 
 class WorksService(searchService: ElasticsearchService)(
   implicit ec: ExecutionContext) {
 
-  def findWorkById(canonicalId: String)(
+  def findWorkById(canonicalId: CanonicalId)(
     index: Index): Future[Either[ElasticError, Option[Work[Indexed]]]] =
     searchService
       .executeGet(canonicalId)(index)

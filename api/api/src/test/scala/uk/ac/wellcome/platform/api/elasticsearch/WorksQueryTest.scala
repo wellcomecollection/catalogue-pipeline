@@ -21,6 +21,7 @@ import uk.ac.wellcome.platform.api.services.{
 import org.scalatest.Assertion
 import uk.ac.wellcome.models.index.IndexFixtures
 import weco.catalogue.internal_model.generators.ImageGenerators
+import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.catalogue.internal_model.work.{CollectionPath, Work}
 import weco.catalogue.internal_model.work.WorkState.Indexed
 
@@ -40,9 +41,9 @@ class WorksQueryTest
 
     it("searches the canonicalId") {
       withLocalWorksIndex { index =>
-        val work = indexedWork(canonicalId = "abc123")
+        val work = indexedWork(canonicalId = CanonicalId("12345678"))
 
-        val query = "abc123"
+        val query = "12345678"
 
         insertIntoElasticsearch(index, work)
 
@@ -90,7 +91,7 @@ class WorksQueryTest
 
         assertResultsMatchForAllowedQueryTypes(
           index,
-          query = item1.id.canonicalId,
+          query = item1.id.canonicalId.underlying,
           matches = List(work1)
         )
       }
@@ -146,7 +147,7 @@ class WorksQueryTest
 
         assertResultsMatchForAllowedQueryTypes(
           index,
-          query = image1.id.canonicalId,
+          query = image1.id.canonicalId.underlying,
           matches = List(work1)
         )
       }
@@ -178,7 +179,7 @@ class WorksQueryTest
 
         assertResultsMatchForAllowedQueryTypes(
           index,
-          query = work.state.canonicalId,
+          query = work.state.canonicalId.underlying,
           matches = List(work)
         )
       }
@@ -186,7 +187,7 @@ class WorksQueryTest
 
     it("doesn't match on partial IDs") {
       withLocalWorksIndex { index =>
-        val work = indexedWork(canonicalId = "1234567")
+        val work = indexedWork(canonicalId = CanonicalId("12345678"))
 
         insertIntoElasticsearch(index, work)
 
@@ -200,14 +201,14 @@ class WorksQueryTest
 
     it("matches IDs case insensitively") {
       withLocalWorksIndex { index =>
-        val work1 = indexedWork(canonicalId = "AbCDeF1234")
-        val work2 = indexedWork(canonicalId = "bloopybloop")
+        val work1 = indexedWork(canonicalId = CanonicalId("AbCDeF12"))
+        val work2 = indexedWork(canonicalId = CanonicalId("bloopybo"))
 
         insertIntoElasticsearch(index, work1, work2)
 
         assertResultsMatchForAllowedQueryTypes(
           index,
-          query = work1.state.canonicalId.toLowerCase(),
+          query = work1.state.canonicalId.underlying.toLowerCase(),
           matches = List(work1)
         )
       }
@@ -235,7 +236,11 @@ class WorksQueryTest
         val work2 = indexedWork()
 
         // We've put spaces in this as some Miro IDs are sentences
-        val work3 = indexedWork(canonicalId = "Oxford English Dictionary")
+        val work3 = indexedWork(
+          sourceIdentifier = createMiroSourceIdentifierWith(
+            value = "Oxford English Dictionary"
+          )
+        )
 
         insertIntoElasticsearch(index, work1, work2, work3)
 

@@ -9,6 +9,7 @@ import io.circe.Decoder
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.platform.api.Tracing
 import uk.ac.wellcome.platform.api.models._
+import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.catalogue.internal_model.image.{Image, ImageState}
 
 class ImagesService(searchService: ElasticsearchService,
@@ -18,7 +19,7 @@ class ImagesService(searchService: ElasticsearchService,
   private val nVisuallySimilarImages = 5
   private val imagesRequestBuilder = new ImagesRequestBuilder(queryConfig)
 
-  def findImageById(id: String)(index: Index)
+  def findImageById(id: CanonicalId)(index: Index)
     : Future[Either[ElasticError, Option[Image[ImageState.Indexed]]]] =
     searchService
       .executeGet(id)(index)

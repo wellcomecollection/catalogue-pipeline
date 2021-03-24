@@ -315,11 +315,8 @@ class WorksAggregationsTest
     val gchq = Contributor(agent = Organisation("GCHQ"), roles = Nil)
 
     val works =
-      List(List(agent47), List(agent47), List(jamesBond, mi5), List(mi5, gchq)).zipWithIndex
-        .map {
-          case (contributors, idx) =>
-            indexedWork(canonicalId = idx.toString).contributors(contributors)
-        }
+      List(List(agent47), List(agent47), List(jamesBond, mi5), List(mi5, gchq))
+        .map { indexedWork().contributors(_) }
 
     withWorksApi {
       case (worksIndex, routes) =>
@@ -358,7 +355,7 @@ class WorksAggregationsTest
                   ]
                 }
               },
-              "results": [${works.map(workResponse).mkString(",")}]
+              "results": [${works.sortBy(_.state.canonicalId).map(workResponse).mkString(",")}]
             }
           """
         }

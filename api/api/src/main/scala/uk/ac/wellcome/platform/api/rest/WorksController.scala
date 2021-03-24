@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.api.rest
 
 import scala.concurrent.ExecutionContext
-
 import akka.http.scaladsl.model.StatusCodes.Found
 import akka.http.scaladsl.server.Route
 import com.sksamuel.elastic4s.Index
@@ -11,6 +10,7 @@ import uk.ac.wellcome.display.models.Implicits._
 import uk.ac.wellcome.platform.api.models.ApiConfig
 import uk.ac.wellcome.platform.api.services.{ElasticsearchService, WorksService}
 import uk.ac.wellcome.platform.api.Tracing
+import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.Indexed
 
@@ -49,7 +49,7 @@ class WorksController(elasticsearchService: ElasticsearchService,
       }
     }
 
-  def singleWork(id: String, params: SingleWorkParams): Route =
+  def singleWork(id: CanonicalId, params: SingleWorkParams): Route =
     getWithFuture {
       transactFuture("GET /works/{workId}") {
         val index =
@@ -76,7 +76,7 @@ class WorksController(elasticsearchService: ElasticsearchService,
   def workRedirect(work: Work.Redirected[Indexed]): Route =
     extractUri { uri =>
       val newPath =
-        (work.redirectTarget.canonicalId :: uri.path.reverse.tail).reverse
+        (work.redirectTarget.canonicalId.underlying :: uri.path.reverse.tail).reverse
 
       // We use a relative URL here so that redirects keep you on the same host.
       //

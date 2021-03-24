@@ -12,7 +12,7 @@ import uk.ac.wellcome.models.work.generators._
 import uk.ac.wellcome.platform.api.generators.SearchOptionsGenerators
 import uk.ac.wellcome.platform.api.models._
 import uk.ac.wellcome.models.index.IndexFixtures
-import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.identifiers.{CanonicalId, IdState}
 import weco.catalogue.internal_model.locations._
 import weco.catalogue.internal_model.work.Format._
 import weco.catalogue.internal_model.work.{Item, Work}
@@ -51,7 +51,7 @@ class ElasticsearchServiceTest
 
     it("returns a Left[ElasticError] if Elasticsearch returns an error") {
       val future = searchService
-        .executeGet("1234")(Index("doesnotexist"))
+        .executeGet(createCanonicalId)(Index("doesnotexist"))
 
       whenReady(future) { response =>
         response.isLeft shouldBe true
@@ -175,9 +175,9 @@ class ElasticsearchServiceTest
 
     it("sorts by canonicalId when scored = false") {
       withLocalWorksIndex { index =>
-        val work1 = indexedWork(canonicalId = "000Z")
-        val work2 = indexedWork(canonicalId = "000Y")
-        val work3 = indexedWork(canonicalId = "000X")
+        val work1 = indexedWork(canonicalId = CanonicalId("0000000Z"))
+        val work2 = indexedWork(canonicalId = CanonicalId("0000000Y"))
+        val work3 = indexedWork(canonicalId = CanonicalId("0000000X"))
 
         insertIntoElasticsearch(index, work1, work2, work3)
 
@@ -191,9 +191,9 @@ class ElasticsearchServiceTest
 
     it("sorts by score then canonicalId when scored = true") {
       withLocalWorksIndex { index =>
-        val work1 = indexedWork(canonicalId = "000Z").title("match")
-        val work2 = indexedWork(canonicalId = "000Y").title("match stick")
-        val work3 = indexedWork(canonicalId = "000X").title("match")
+        val work1 = indexedWork(canonicalId = CanonicalId("0000000Z")).title("match")
+        val work2 = indexedWork(canonicalId = CanonicalId("0000000Y")).title("match stick")
+        val work3 = indexedWork(canonicalId = CanonicalId("0000000X")).title("match")
 
         insertIntoElasticsearch(index, work1, work2, work3)
 
