@@ -77,8 +77,7 @@ class ImagesTest extends ApiImagesTestBase with SierraWorkGenerators {
   val focacciaImage = createImageData.toIndexedImageWith(
     canonicalId = "b",
     parentWork = identifiedWork()
-      .title(
-        "A Ligurian style of bread, Focaccia is a flat Italian bread")
+      .title("A Ligurian style of bread, Focaccia is a flat Italian bread")
   )
 
   it("returns matching results when using work data") {
