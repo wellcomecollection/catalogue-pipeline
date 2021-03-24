@@ -262,7 +262,8 @@ class WorksTest
   }
 
   def createDatedWork(dateLabel: String): Work.Visible[WorkState.Indexed] =
-    indexedWork().production(List(createProductionEventWith(dateLabel = Some(dateLabel))))
+    indexedWork().production(
+      List(createProductionEventWith(dateLabel = Some(dateLabel))))
 
   it("supports sorting by production date") {
     withWorksApi {
@@ -272,7 +273,13 @@ class WorksTest
         val work1904 = createDatedWork(dateLabel = "1904")
         val work2020 = createDatedWork(dateLabel = "2020")
         val work1098 = createDatedWork(dateLabel = "1098")
-        insertIntoElasticsearch(worksIndex, work1900, work1976, work1904, work2020, work1098)
+        insertIntoElasticsearch(
+          worksIndex,
+          work1900,
+          work1976,
+          work1904,
+          work2020,
+          work1098)
 
         assertJsonResponse(routes, s"/$apiPrefix/works?sort=production.dates") {
           Status.OK -> worksListResponse(

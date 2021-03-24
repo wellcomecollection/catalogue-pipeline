@@ -135,8 +135,10 @@ class WorksIncludesTest
         case (worksIndex, routes) =>
           val subjects1 = List(createSubject)
           val subjects2 = List(createSubject)
-          val work1 = indexedWork(canonicalId = canonicalId1).subjects(subjects1)
-          val work2 = indexedWork(canonicalId = canonicalId2).subjects(subjects2)
+          val work1 =
+            indexedWork(canonicalId = canonicalId1).subjects(subjects1)
+          val work2 =
+            indexedWork(canonicalId = canonicalId2).subjects(subjects2)
 
           insertIntoElasticsearch(worksIndex, work1, work2)
 
@@ -347,9 +349,11 @@ class WorksIncludesTest
           val productionEvents1 = createProductionEventList()
           val productionEvents2 = createProductionEventList()
           val work1 =
-            indexedWork(canonicalId = canonicalId1).production(productionEvents1)
+            indexedWork(canonicalId = canonicalId1)
+              .production(productionEvents1)
           val work2 =
-            indexedWork(canonicalId = canonicalId2).production(productionEvents2)
+            indexedWork(canonicalId = canonicalId2)
+              .production(productionEvents2)
 
           insertIntoElasticsearch(worksIndex, work1, work2)
 
@@ -418,8 +422,10 @@ class WorksIncludesTest
           val swedish = Language(label = "Swedish", id = "swe")
 
           val work1 =
-            indexedWork(canonicalId = canonicalId1).languages(List(english, turkish))
-          val work2 = indexedWork(canonicalId = canonicalId2).languages(List(swedish))
+            indexedWork(canonicalId = canonicalId1)
+              .languages(List(english, turkish))
+          val work2 =
+            indexedWork(canonicalId = canonicalId2).languages(List(swedish))
 
           insertIntoElasticsearch(worksIndex, work1, work2)
 
