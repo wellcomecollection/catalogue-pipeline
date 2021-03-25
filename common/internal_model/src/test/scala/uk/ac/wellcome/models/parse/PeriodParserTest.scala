@@ -396,6 +396,32 @@ class PeriodParserTest extends AnyFunSpec with Matchers with Inspectors {
           "2000s-2020s"))
     }
 
+    it("handles left-bounded intervals") {
+      PeriodParser("1897-") shouldBe Some(
+        InstantRange(
+          LocalDate of (1897, 1, 1),
+          LocalDate of (9999, 12, 31),
+          "1897-"))
+      PeriodParser("after 1897") shouldBe Some(
+        InstantRange(
+          LocalDate of (1897, 1, 1),
+          LocalDate of (9999, 12, 31),
+          "after 1897"))
+    }
+
+    it("handles right-bounded intervals") {
+      PeriodParser("-1897") shouldBe Some(
+        InstantRange(
+          LocalDate of (-9999, 1, 1),
+          LocalDate of (1897, 12, 31),
+          "-1897"))
+      PeriodParser("before 1897") shouldBe Some(
+        InstantRange(
+          LocalDate of (-9999, 1, 1),
+          LocalDate of (1897, 12, 31),
+          "before 1897"))
+    }
+
     it("parses and combines multiple periods") {
       PeriodParser("1952, 1953, 1955, 1957-1960") shouldBe Some(
         InstantRange(

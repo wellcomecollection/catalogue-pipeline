@@ -647,7 +647,8 @@ class SierraProductionTest
 
     // Example is from b28533306, with the 264 field modified so it's never parseable
     // and so this test is predictable.
-    it("uses date information from 008 if 260/264 cannot be parsed") {
+    it(
+      "uses date information from 008 but labels from 260/4 if the latter cannot be parsed") {
       val varFields = List(
         createVarFieldWith(
           marcTag = "008",
@@ -672,7 +673,9 @@ class SierraProductionTest
           "[Netherne, Surrey], B̷A̴D̸ ̴U̶N̸P̵A̸R̸S̷E̷A̶B̵L̶E̸ ̵N̴O̴N̶S̵E̷N̷S̴E̴",
         places = List(Place("[Netherne, Surrey],")),
         agents = Nil,
-        dates = List(Period("1972")),
+        dates = List(
+          Period("1972").copy(
+            label = "B̷A̴D̸ ̴U̶N̸P̵A̸R̸S̷E̷A̶B̵L̶E̸ ̵N̴O̴N̶S̵E̷N̷S̴E̴")),
         function = Some(Concept("Production"))
       )
     }
