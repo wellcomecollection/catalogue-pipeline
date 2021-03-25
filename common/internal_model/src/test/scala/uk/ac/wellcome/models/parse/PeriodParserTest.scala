@@ -402,6 +402,11 @@ class PeriodParserTest extends AnyFunSpec with Matchers with Inspectors {
           LocalDate of (1897, 1, 1),
           LocalDate of (9999, 12, 31),
           "1897-"))
+      PeriodParser("after 1897") shouldBe Some(
+        InstantRange(
+          LocalDate of (1897, 1, 1),
+          LocalDate of (9999, 12, 31),
+          "after 1897"))
     }
 
     it("handles right-bounded intervals") {
@@ -410,6 +415,11 @@ class PeriodParserTest extends AnyFunSpec with Matchers with Inspectors {
           LocalDate of (-9999, 1, 1),
           LocalDate of (1897, 12, 31),
           "-1897"))
+      PeriodParser("before 1897") shouldBe Some(
+        InstantRange(
+          LocalDate of (-9999, 1, 1),
+          LocalDate of (1897, 12, 31),
+          "before 1897"))
     }
 
     it("parses and combines multiple periods") {
