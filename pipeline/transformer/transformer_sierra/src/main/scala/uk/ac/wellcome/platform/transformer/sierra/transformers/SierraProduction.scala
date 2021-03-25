@@ -24,7 +24,8 @@ object SierraProduction
   //
   // If 260/264 are available but can't be parsed into dates, we fill in
   // the first ProductionEvent with date information from 008 (which is what the
-  // 008 field should refer to according to the cataloguing rules).
+  // 008 field should refer to according to the cataloguing rules), but use the
+  // 260/264 field contents for the date labels.
   //
   // It is theoretically possible for a bib record to have both 260 and 264,
   // but it would be a cataloguing error -- we should reject it, and flag it
@@ -55,7 +56,13 @@ object SierraProduction
           ProductionEvent(_, _, _, marc008dates, _) :: _
           )
           if firstEvent.dates.forall(_.range.isEmpty) && marc008dates.nonEmpty =>
-        firstEvent.copy(dates = marc008dates) :: otherEvents
+        // There is only ever 1 date in an 008 production event
+        val productionLabelledDate = marc008dates.head.copy(
+          label = firstEvent.dates.headOption
+            .map(_.label)
+            .getOrElse(marc008dates.head.label)
+        )
+        firstEvent.copy(dates = List(productionLabelledDate)) :: otherEvents
       case (Nil, _) => marc008productionEvents
       case _        => productionEvents
     }
