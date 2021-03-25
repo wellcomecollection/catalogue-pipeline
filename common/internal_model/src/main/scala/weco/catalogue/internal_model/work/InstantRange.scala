@@ -39,14 +39,16 @@ object InstantRange {
       label
     )
 
-  val positiveInfinity = LocalDate
+  // We use the year 9999 here because it's the same convention
+  // used by Sierra and in MARC 008 codes
+  private val positiveInfinity = LocalDate
     .of(9999, 12, 31)
     .atStartOfDay()
     .plusDays(1)
     .minusNanos(1)
     .toInstant(ZoneOffset.UTC)
 
-  val negativeInfinity = LocalDate
+  private val negativeInfinity = LocalDate
     .of(-9999, 1, 1)
     .atStartOfDay()
     .toInstant(ZoneOffset.UTC)
