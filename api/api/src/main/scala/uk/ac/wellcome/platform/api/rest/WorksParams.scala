@@ -61,7 +61,7 @@ case class MultipleWorksParams(
   `genres.label`: Option[GenreFilter],
   `subjects.label`: Option[SubjectFilter],
   `contributors.agent.label`: Option[ContributorsFilter],
-  license: Option[LicenseFilter],
+  `items.locations.license`: Option[LicenseFilter],
   include: Option[WorksIncludes],
   aggregations: Option[List[WorkAggregationRequest]],
   sort: Option[List[SortRequest]],
@@ -102,7 +102,7 @@ case class MultipleWorksParams(
       identifiers,
       `items.locations.locationType`,
       `items.locations.accessConditions.status`,
-      license,
+      `items.locations.license`,
       `type`,
       partOf,
       availabilities
@@ -137,6 +137,7 @@ object MultipleWorksParams extends QueryParamsUtils {
         "subjects.label".as[SubjectFilter].?,
         "contributors.agent.label".as[ContributorsFilter].?,
         "license".as[LicenseFilter].?,
+        "items.locations.license".as[LicenseFilter].?,
         "include".as[WorksIncludes].?,
         "aggregations".as[List[WorkAggregationRequest]].?,
         "sort".as[List[SortRequest]].?,
@@ -145,8 +146,7 @@ object MultipleWorksParams extends QueryParamsUtils {
         "identifiers".as[IdentifiersFilter].?,
         "items.locations.locationType".as[ItemLocationTypeIdFilter].?,
         "items.locations.accessConditions.status".as[AccessStatusFilter].?,
-        "type".as[WorkTypeFilter].?,
-        "partOf".as[PartOfFilter].?,
+        "type".as[WorkTypeFilter].?
       )
     ).tflatMap {
       case (
@@ -160,6 +160,7 @@ object MultipleWorksParams extends QueryParamsUtils {
           subjects,
           contributors,
           license,
+          itemsLocationsLicense,
           includes,
           aggregations,
           sort,
@@ -168,17 +169,17 @@ object MultipleWorksParams extends QueryParamsUtils {
           identifiers,
           itemLocationTypeId,
           accessStatus,
-          workType,
-          partOf) =>
+          workType) =>
         // Scala has a max tuple size of 22 so this is nested to get around this limit
         parameter(
           (
+            "partOf".as[PartOfFilter].?,
             "availabilities".as[AvailabilitiesFilter].?,
             "_queryType".as[SearchQueryType].?,
             "_index".as[String].?,
           )
         ).tflatMap {
-          case (availabilities, queryType, index) =>
+          case (partOf, availabilities, queryType, index) =>
             val params = MultipleWorksParams(
               page,
               pageSize,
@@ -189,7 +190,8 @@ object MultipleWorksParams extends QueryParamsUtils {
               genre,
               subjects,
               contributors,
-              license,
+              // TODO: remove the plain "license" filter
+              itemsLocationsLicense.orElse(license),
               includes,
               aggregations,
               sort,

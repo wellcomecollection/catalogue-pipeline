@@ -627,6 +627,60 @@ class WorksFiltersTest
     }
   }
 
+  describe("filtering works by items.locations.license") {
+    def createLicensedWork(
+      licenses: Seq[License]): Work.Visible[WorkState.Indexed] = {
+      val items =
+        licenses.map { license =>
+          createDigitalItemWith(license = Some(license))
+        }.toList
+
+      indexedWork().items(items)
+    }
+
+    val ccByWork = createLicensedWork(licenses = List(License.CCBY))
+    val ccByNcWork = createLicensedWork(licenses = List(License.CCBYNC))
+    val bothLicenseWork =
+      createLicensedWork(licenses = List(License.CCBY, License.CCBYNC))
+    val noLicenseWork = createLicensedWork(licenses = List.empty)
+
+    val works = List(ccByWork, ccByNcWork, bothLicenseWork, noLicenseWork)
+
+    it("filters by license") {
+      withWorksApi {
+        case (worksIndex, routes) =>
+          insertIntoElasticsearch(worksIndex, works: _*)
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works?items.locations.license=cc-by") {
+            Status.OK -> worksListResponse(
+              apiPrefix = apiPrefix,
+              works = Seq(ccByWork, bothLicenseWork).sortBy {
+                _.state.canonicalId
+              }
+            )
+          }
+      }
+    }
+
+    it("filters by multiple licenses") {
+      withWorksApi {
+        case (worksIndex, routes) =>
+          insertIntoElasticsearch(worksIndex, works: _*)
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works?items.locations.license=cc-by,cc-by-nc") {
+            Status.OK -> worksListResponse(
+              apiPrefix = apiPrefix,
+              works = Seq(ccByWork, ccByNcWork, bothLicenseWork).sortBy {
+                _.state.canonicalId
+              }
+            )
+          }
+      }
+    }
+  }
+
   describe("Identifiers filter") {
     val unknownWork = indexedWork()
 
