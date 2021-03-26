@@ -53,6 +53,8 @@ sealed trait TypedSierraRecordNumber extends SierraRecordNumber {
     * after the division is the check digit.  If the remainder is 10,
     * the letter x is used as the check digit.
     *
+    * See https://documentation.iii.com/sierrahelp/Default.htm#sril/sril_records_numbers.html
+    *
     */
   private def getCheckDigit: String = {
     val remainder = recordNumber.reverse
