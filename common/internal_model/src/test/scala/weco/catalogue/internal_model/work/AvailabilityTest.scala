@@ -28,7 +28,8 @@ class AvailabilityTest
       every(availabilities) should contain only Availability.Online
     }
 
-    it("adds Availability.InLibrary if there is an item with a physical location") {
+    it(
+      "adds Availability.InLibrary if there is an item with a physical location") {
       val work = denormalisedWork().items(List(createIdentifiedPhysicalItem))
       val workAvailabilities = Availabilities.forWorkData(work.data)
 

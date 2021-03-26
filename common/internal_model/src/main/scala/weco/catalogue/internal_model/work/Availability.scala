@@ -42,7 +42,7 @@ object Availability extends Enum[Availability] {
 object Availabilities {
   def forWorkData(data: WorkData[_]): Set[Availability] = {
     val locations =
-      data.items.flatMap { _.locations} ++
+      data.items.flatMap { _.locations } ++
         data.holdings.flatMap { _.location }
 
     Set(
@@ -62,7 +62,7 @@ object Availabilities {
     def isAvailableOnline: Boolean =
       loc match {
         case digitalLoc: DigitalLocation if digitalLoc.isAvailable => true
-        case _ => false
+        case _                                                     => false
       }
   }
 
