@@ -65,7 +65,7 @@ class CalmTransformerTest
               locations = List(
                 PhysicalLocation(
                   locationType = LocationType.ClosedStores,
-                  label = "Closed stores Arch. & MSS",
+                  label = "Closed stores",
                   accessConditions = Nil
                 )
               )

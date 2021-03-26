@@ -29,7 +29,7 @@ object CalmItems extends CalmRecordOps {
                                status: Option[AccessStatus]): PhysicalLocation =
     PhysicalLocation(
       locationType = LocationType.ClosedStores,
-      label = "Closed stores Arch. & MSS",
+      label = LocationType.ClosedStores.label,
       accessConditions = accessCondition(record, status).filterEmpty.toList
     )
 
