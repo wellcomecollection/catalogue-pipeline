@@ -40,28 +40,32 @@ object Availability extends Enum[Availability] {
 }
 
 object Availabilities {
-  def forWorkData(data: WorkData[_]): Set[Availability] =
+  def forWorkData(data: WorkData[_]): Set[Availability] = {
+    val locations =
+      data.items.flatMap { _.locations} ++
+        data.holdings.flatMap { _.location }
+
     Set(
-      when(containsLocation(_.isInstanceOf[PhysicalLocation])(data.items))(
+      when(locations.exists(_.isPhysicalLocation)) {
         Availability.InLibrary
-      ),
-      when(isAvailableOnline(data.items))(
+      },
+      when(locations.exists(_.isAvailableOnline)) {
         Availability.Online
-      )
+      },
     ).flatten
+  }
 
-  private def isAvailableOnline: List[Item[_]] => Boolean =
-    containsLocation {
-      case location: DigitalLocation if location.isAvailable => true
-      case _                                                 => false
-    }
+  private implicit class LocationOps(loc: Location) {
+    def isPhysicalLocation: Boolean =
+      loc.isInstanceOf[PhysicalLocation]
 
-  private def containsLocation(predicate: Location => Boolean)(
-    items: List[Item[_]]): Boolean =
-    items.exists { item =>
-      item.locations.exists(predicate)
-    }
+    def isAvailableOnline: Boolean =
+      loc match {
+        case digitalLoc: DigitalLocation if digitalLoc.isAvailable => true
+        case _ => false
+      }
+  }
 
-  private def when[T](condition: => Boolean)(property: T): Option[T] =
-    if (condition) Some(property) else { None }
+  private def when[T](condition: Boolean)(result: T): Option[T] =
+    if (condition) Some(result) else { None }
 }

@@ -28,11 +28,45 @@ class AvailabilityTest
       every(availabilities) should contain only Availability.Online
     }
 
-    it("adds Availability.InLibrary if there is a physical location") {
+    it("adds Availability.InLibrary if there is an item with a physical location") {
       val work = denormalisedWork().items(List(createIdentifiedPhysicalItem))
       val workAvailabilities = Availabilities.forWorkData(work.data)
 
       workAvailabilities should contain only Availability.InLibrary
+    }
+
+    describe("if there is a holdings") {
+      it("with no physical location, then no availabilities") {
+        val work = denormalisedWork()
+          .holdings(
+            List(
+              Holdings(
+                note = Some("A holdings in a mystery place"),
+                enumeration = Nil,
+                location = None
+              )
+            )
+          )
+        val workAvailabilities = Availabilities.forWorkData(work.data)
+
+        workAvailabilities shouldBe empty
+      }
+
+      it("with a physical location, then it adds Availability.InLibrary") {
+        val work = denormalisedWork()
+          .holdings(
+            List(
+              Holdings(
+                note = Some("A holdings in the closed stores"),
+                enumeration = Nil,
+                location = Some(createPhysicalLocation)
+              )
+            )
+          )
+        val workAvailabilities = Availabilities.forWorkData(work.data)
+
+        workAvailabilities shouldBe Set(Availability.InLibrary)
+      }
     }
 
     it(
