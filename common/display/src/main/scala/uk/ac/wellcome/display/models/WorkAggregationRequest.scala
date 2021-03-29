@@ -13,6 +13,8 @@ object WorkAggregationRequest {
 
   case object Subject extends WorkAggregationRequest
 
+  case object SubjectDeprecated extends WorkAggregationRequest
+
   case object Contributor extends WorkAggregationRequest
 
   case object Languages extends WorkAggregationRequest

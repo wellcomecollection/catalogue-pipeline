@@ -258,7 +258,9 @@ object MultipleWorksParams extends QueryParamsUtils {
       // TODO remove genres in favour of genres.label
       "genres.label" -> WorkAggregationRequest.Genre,
       "production.dates" -> WorkAggregationRequest.ProductionDate,
-      "subjects" -> WorkAggregationRequest.Subject,
+      // TODO remove subjects in favour of subjects.label
+      "subjects" -> WorkAggregationRequest.SubjectDeprecated,
+      "subjects.label" -> WorkAggregationRequest.Subject,
       "languages" -> WorkAggregationRequest.Languages,
       "contributors" -> WorkAggregationRequest.Contributor,
       // TODO remove license in favour of items.locations.license

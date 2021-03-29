@@ -381,6 +381,60 @@ class WorksAggregationsTest
     }
   }
 
+  it("supports aggregating on subjects.label, ordered by frequency") {
+    val paleoNeuroBiology = createSubjectWith(label = "paleoNeuroBiology")
+    val realAnalysis = createSubjectWith(label = "realAnalysis")
+
+    val subjectLists = List(
+      List(paleoNeuroBiology),
+      List(realAnalysis),
+      List(realAnalysis),
+      List(paleoNeuroBiology, realAnalysis),
+      List.empty
+    )
+
+    val works = subjectLists
+      .map { indexedWork().subjects(_) }
+
+    withWorksApi {
+      case (worksIndex, routes) =>
+        insertIntoElasticsearch(worksIndex, works: _*)
+        assertJsonResponse(
+          routes,
+          s"/$apiPrefix/works?aggregations=subjects.label") {
+          Status.OK -> s"""
+            {
+              ${resultList(apiPrefix, totalResults = works.size)},
+              "aggregations": {
+                "type" : "Aggregations",
+                "subjects.label": {
+                  "type" : "Aggregation",
+                  "buckets": [
+                    {
+                      "data" : ${subject(realAnalysis, showConcepts = false)},
+                      "count" : 3,
+                      "type" : "AggregationBucket"
+                    },
+                    {
+                      "data" : ${subject(
+            paleoNeuroBiology,
+            showConcepts = false)},
+                      "count" : 2,
+                      "type" : "AggregationBucket"
+                    }
+                  ]
+                }
+              },
+              "results": [${works
+            .sortBy { _.state.canonicalId }
+            .map(workResponse)
+            .mkString(",")}]
+            }
+          """
+        }
+    }
+  }
+
   it("supports aggregating on contributors") {
     val agent47 = Contributor(agent = Agent("47"), roles = Nil)
     val jamesBond = Contributor(agent = Agent("007"), roles = Nil)

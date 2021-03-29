@@ -61,7 +61,8 @@ object WorksRequestBuilder
         .field("data.genres.concepts.label.keyword")
         .minDocCount(0)
 
-    case WorkAggregationRequest.Subject =>
+    case WorkAggregationRequest.Subject |
+        WorkAggregationRequest.SubjectDeprecated =>
       TermsAggregation("subjects")
         .size(20)
         .field("data.subjects.label.keyword")

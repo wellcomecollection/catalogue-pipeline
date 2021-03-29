@@ -110,7 +110,10 @@ class WorkFiltersAndAggregationsBuilder(
         List(
           WorkAggregationRequest.Genre,
           WorkAggregationRequest.GenreDeprecated)
-      case _: SubjectFilter      => List(WorkAggregationRequest.Subject)
+      case _: SubjectFilter =>
+        List(
+          WorkAggregationRequest.Subject,
+          WorkAggregationRequest.SubjectDeprecated)
       case _: ContributorsFilter => List(WorkAggregationRequest.Contributor)
       case _: LicenseFilter =>
         List(
