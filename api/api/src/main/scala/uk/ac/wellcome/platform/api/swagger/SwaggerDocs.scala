@@ -420,13 +420,17 @@ trait MultipleWorksSwagger {
           allowableValues = Array(
             "workType",
             "genres",
+            "genres.label",
             "production.dates",
             "subjects",
+            "subjects.label",
             "contributors",
+            "contributors.agent.label",
             "license",
             "items.locations.license",
             "languages",
-            "availabilities")),
+            "availabilities"
+          )),
         required = false
       ),
       new Parameter(

@@ -189,7 +189,9 @@ class ApiSwaggerTest
 
     val swaggerParams = getEnumValues(aggregationsParam)
 
-    val aggregationParams = getFields[WorkAggregations]
+    // TODO remove aliases
+    val aliasedAggregations = List("subjects", "genres", "contributors")
+    val aggregationParams = getFields[WorkAggregations] ++ aliasedAggregations
 
     assert(
       swaggerParams.length == aggregationParams.length,
