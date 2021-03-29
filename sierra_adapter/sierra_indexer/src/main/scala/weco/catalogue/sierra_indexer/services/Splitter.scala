@@ -5,10 +5,7 @@ import com.sksamuel.elastic4s.requests.indexes.IndexRequest
 import io.circe.parser._
 import io.circe.{Json, ParsingFailure}
 import weco.catalogue.sierra_indexer.models.{IndexerRequest, Parent}
-import weco.catalogue.source_model.sierra.{
-  SierraRecordTypes,
-  SierraTransformable
-}
+import weco.catalogue.source_model.sierra.SierraTransformable
 
 // This object splits a SierraTransformable into indexable pieces
 // that can be sent to Elasticsearch.
@@ -43,7 +40,7 @@ class Splitter(indexPrefix: String) {
     val bibData = t.maybeBibRecord match {
       case Some(bibRecord) =>
         Seq(
-          Parent(SierraRecordTypes.bibs, bibRecord.id) ->
+          Parent(bibRecord.id) ->
             parse(bibRecord.data)
               .map { json =>
                 json
@@ -61,13 +58,12 @@ class Splitter(indexPrefix: String) {
 
     val itemData: Seq[(Parent, Either[ParsingFailure, Json])] =
       t.itemRecords.values.map { itemRecord =>
-        Parent(SierraRecordTypes.items, itemRecord.id) -> parse(itemRecord.data)
+        Parent(itemRecord.id) -> parse(itemRecord.data)
       }.toSeq
 
     val holdingsData: Seq[(Parent, Either[ParsingFailure, Json])] =
       t.holdingsRecords.values.map { holdingsRecord =>
-        Parent(SierraRecordTypes.holdings, holdingsRecord.id) -> parse(
-          holdingsRecord.data)
+        Parent(holdingsRecord.id) -> parse(holdingsRecord.data)
       }.toSeq
 
     val data = bibData ++ itemData ++ holdingsData

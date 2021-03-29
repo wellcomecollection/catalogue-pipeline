@@ -1,6 +1,7 @@
 package weco.catalogue.sierra_indexer.services
 
 import io.circe.Json
+import weco.catalogue.source_model.sierra.TypedSierraRecordNumber
 
 object SierraJsonOps {
   implicit class JsonOps(j: Json) {
@@ -13,6 +14,11 @@ object SierraJsonOps {
     def remainder: Json =
       j.mapObject {
         _.remove("varFields").remove("fixedFields")
+      }
+
+    def withId(id: TypedSierraRecordNumber): Json =
+      j.mapObject {
+        _.add("idWithCheckDigit", Json.fromString(id.withCheckDigit))
       }
   }
 }
