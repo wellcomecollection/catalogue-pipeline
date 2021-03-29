@@ -68,7 +68,8 @@ object WorksRequestBuilder
         .field("data.subjects.label.keyword")
         .minDocCount(0)
 
-    case WorkAggregationRequest.Contributor =>
+    case WorkAggregationRequest.Contributor |
+        WorkAggregationRequest.ContributorDeprecated =>
       TermsAggregation("contributors")
         .size(20)
         .field("state.derivedData.contributorAgents")

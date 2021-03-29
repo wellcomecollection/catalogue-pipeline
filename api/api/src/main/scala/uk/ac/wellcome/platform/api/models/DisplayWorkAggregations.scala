@@ -37,6 +37,9 @@ case class DisplayWorkAggregations(
     description = "Contributor aggregation on a set of results."
   ) contributors: Option[DisplayAggregation[DisplayContributor]],
   @Schema(
+    description = "Contributor aggregation on a set of results."
+  ) `contributors.agent.label`: Option[DisplayAggregation[DisplayContributor]],
+  @Schema(
     description = "Language aggregation on a set of results."
   ) languages: Option[DisplayAggregation[DisplayLanguage]],
   @Schema(
@@ -89,12 +92,22 @@ object DisplayWorkAggregations {
             aggs.subjects,
             subject => DisplaySubject(subject, includesIdentifiers = false)
           )),
-      contributors =
+      contributors = whenRequestPresent(
+        aggregationRequests,
+        WorkAggregationRequest.ContributorDeprecated)(
         displayAggregation[Contributor[Minted], DisplayContributor](
           aggs.contributors,
           contributor =>
             DisplayContributor(contributor, includesIdentifiers = false)
-        ),
+        )),
+      `contributors.agent.label` = whenRequestPresent(
+        aggregationRequests,
+        WorkAggregationRequest.Contributor)(
+        displayAggregation[Contributor[Minted], DisplayContributor](
+          aggs.contributors,
+          contributor =>
+            DisplayContributor(contributor, includesIdentifiers = false)
+        )),
       license = whenRequestPresent(
         aggregationRequests,
         WorkAggregationRequest.LicenseDeprecated)(

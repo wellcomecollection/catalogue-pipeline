@@ -17,6 +17,8 @@ object WorkAggregationRequest {
 
   case object Contributor extends WorkAggregationRequest
 
+  case object ContributorDeprecated extends WorkAggregationRequest
+
   case object Languages extends WorkAggregationRequest
 
   case object License extends WorkAggregationRequest
