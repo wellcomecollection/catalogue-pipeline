@@ -24,7 +24,7 @@ object IndexerRequest {
           IndexRequest(
             index = Index(s"${indexPrefix}_${parent.recordType}"),
             id = Some(parent.id.withoutCheckDigit),
-            source = Some(json.remainder.noSpaces)
+            source = Some(json.withId(parent.id).remainder.noSpaces)
           )
       }
     ).flatten

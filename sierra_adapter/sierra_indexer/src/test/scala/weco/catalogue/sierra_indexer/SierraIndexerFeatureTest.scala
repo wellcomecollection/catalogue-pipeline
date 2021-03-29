@@ -88,8 +88,6 @@ class SierraIndexerFeatureTest
       }.toList,
     )
 
-    println(transformable)
-
     val store = MemoryTypedStore[S3ObjectLocation, SierraTransformable](
       initialEntries = Map(location -> transformable)
     )
@@ -131,6 +129,7 @@ class SierraIndexerFeatureTest
             json = s"""
                 |{
                 |  "id" : "$bibId",
+                |  "idWithCheckDigit": "${bibId.withCheckDigit}",
                 |  "updatedDate" : "2013-12-12T13:56:07Z",
                 |  "deleted" : false,
                 |  "itemIds": [$itemIdsList],
@@ -146,7 +145,8 @@ class SierraIndexerFeatureTest
                 |{
                 |  "parent": {
                 |    "recordType": "bibs",
-                |    "id": "${bibId.withoutCheckDigit}"
+                |    "id": "${bibId.withoutCheckDigit}",
+                |    "idWithCheckDigit": "${bibId.withCheckDigit}"
                 |  },
                 |  "position": 0,
                 |  "varField": {
@@ -164,7 +164,8 @@ class SierraIndexerFeatureTest
                 |{
                 |  "parent": {
                 |    "recordType": "bibs",
-                |    "id": "${bibId.withoutCheckDigit}"
+                |    "id": "${bibId.withoutCheckDigit}",
+                |    "idWithCheckDigit": "${bibId.withCheckDigit}"
                 |  },
                 |  "position": 1,
                 |  "varField": {
@@ -190,7 +191,8 @@ class SierraIndexerFeatureTest
                       |{
                       |  "parent": {
                       |    "recordType": "bibs",
-                      |    "id": "${bibId.withoutCheckDigit}"
+                      |    "id": "${bibId.withoutCheckDigit}",
+                      |    "idWithCheckDigit": "${bibId.withCheckDigit}"
                       |  },
                       |  "code": "86",
                       |  "fixedField": {
@@ -208,7 +210,8 @@ class SierraIndexerFeatureTest
                       |{
                       |  "parent": {
                       |    "recordType": "bibs",
-                      |    "id": "${bibId.withoutCheckDigit}"
+                      |    "id": "${bibId.withoutCheckDigit}",
+                      |    "idWithCheckDigit": "${bibId.withCheckDigit}"
                       |  },
                       |  "code": "265",
                       |  "fixedField": {
@@ -260,6 +263,7 @@ class SierraIndexerFeatureTest
           data = s"""
                     |{
                     |  "id" : "$itemId2",
+                    |  "idWithCheckDigit": "${itemId2.withCheckDigit}",
                     |  "updatedDate" : "2002-02-02T02:02:02Z",
                     |  "deleted" : true,
                     |  "varFields" : [
@@ -311,6 +315,7 @@ class SierraIndexerFeatureTest
             json = s"""
                       |{
                       |  "id" : "$itemId1",
+                      |  "idWithCheckDigit": "${itemId1.withCheckDigit}",
                       |  "updatedDate" : "2001-01-01T01:01:01Z",
                       |  "deleted" : false
                       |}
@@ -323,6 +328,7 @@ class SierraIndexerFeatureTest
             json = s"""
                   |{
                   |  "id" : "$itemId2",
+                  |  "idWithCheckDigit": "${itemId2.withCheckDigit}",
                   |  "updatedDate" : "2002-02-02T02:02:02Z",
                   |  "deleted" : true
                   |}
@@ -336,7 +342,8 @@ class SierraIndexerFeatureTest
                       |{
                       |  "parent": {
                       |    "recordType": "items",
-                      |    "id": "${itemId1.withoutCheckDigit}"
+                      |    "id": "${itemId1.withoutCheckDigit}",
+                      |    "idWithCheckDigit": "${itemId1.withCheckDigit}"
                       |  },
                       |  "position": 0,
                       |  "varField": {
@@ -354,7 +361,8 @@ class SierraIndexerFeatureTest
                       |{
                       |  "parent": {
                       |    "recordType": "items",
-                      |    "id": "${itemId2.withoutCheckDigit}"
+                      |    "id": "${itemId2.withoutCheckDigit}",
+                      |    "idWithCheckDigit": "${itemId2.withCheckDigit}"
                       |  },
                       |  "position": 0,
                       |  "varField": {
@@ -380,7 +388,8 @@ class SierraIndexerFeatureTest
                       |{
                       |  "parent": {
                       |    "recordType": "items",
-                      |    "id": "${itemId1.withoutCheckDigit}"
+                      |    "id": "${itemId1.withoutCheckDigit}",
+                      |    "idWithCheckDigit": "${itemId1.withCheckDigit}"
                       |  },
                       |  "code": "86",
                       |  "fixedField": {
@@ -398,7 +407,8 @@ class SierraIndexerFeatureTest
                       |{
                       |  "parent": {
                       |    "recordType": "items",
-                      |    "id": "${itemId2.withoutCheckDigit}"
+                      |    "id": "${itemId2.withoutCheckDigit}",
+                      |    "idWithCheckDigit": "${itemId2.withCheckDigit}"
                       |  },
                       |  "code": "265",
                       |  "fixedField": {
@@ -501,6 +511,7 @@ class SierraIndexerFeatureTest
             json = s"""
                       |{
                       |  "id" : "$holdingsId1",
+                      |  "idWithCheckDigit": "${holdingsId1.withCheckDigit}",
                       |  "updatedDate" : "2001-01-01T01:01:01Z",
                       |  "deleted" : false
                       |}
@@ -513,6 +524,7 @@ class SierraIndexerFeatureTest
             json = s"""
                       |{
                       |  "id" : "$holdingsId2",
+                      |  "idWithCheckDigit": "${holdingsId2.withCheckDigit}",
                       |  "updatedDate" : "2002-02-02T02:02:02Z",
                       |  "deleted" : true
                       |}
@@ -526,7 +538,8 @@ class SierraIndexerFeatureTest
                       |{
                       |  "parent": {
                       |    "recordType": "holdings",
-                      |    "id": "${holdingsId1.withoutCheckDigit}"
+                      |    "id": "${holdingsId1.withoutCheckDigit}",
+                      |    "idWithCheckDigit": "${holdingsId1.withCheckDigit}"
                       |  },
                       |  "position": 0,
                       |  "varField": {
@@ -544,7 +557,8 @@ class SierraIndexerFeatureTest
                       |{
                       |  "parent": {
                       |    "recordType": "holdings",
-                      |    "id": "${holdingsId2.withoutCheckDigit}"
+                      |    "id": "${holdingsId2.withoutCheckDigit}",
+                      |    "idWithCheckDigit": "${holdingsId2.withCheckDigit}"
                       |  },
                       |  "position": 0,
                       |  "varField": {
@@ -570,7 +584,8 @@ class SierraIndexerFeatureTest
                       |{
                       |  "parent": {
                       |    "recordType": "holdings",
-                      |    "id": "${holdingsId1.withoutCheckDigit}"
+                      |    "id": "${holdingsId1.withoutCheckDigit}",
+                      |    "idWithCheckDigit": "${holdingsId1.withCheckDigit}"
                       |  },
                       |  "code": "86",
                       |  "fixedField": {
@@ -588,7 +603,8 @@ class SierraIndexerFeatureTest
                       |{
                       |  "parent": {
                       |    "recordType": "holdings",
-                      |    "id": "${holdingsId2.withoutCheckDigit}"
+                      |    "id": "${holdingsId2.withoutCheckDigit}",
+                      |    "idWithCheckDigit": "${holdingsId2.withCheckDigit}"
                       |  },
                       |  "code": "265",
                       |  "fixedField": {

@@ -22,12 +22,16 @@ trait SierraRecordNumber {
 sealed trait TypedSierraRecordNumber extends SierraRecordNumber {
   val recordType: SierraRecordTypes.Value
 
-  /** Returns the ID with the check digit and prefix. */
+  /** Returns the ID with the check digit and prefix.
+    *
+    * The letter prefixes are taken from
+    * https://documentation.iii.com/sierrahelp/Default.htm#sril/sril_records_numbers.html
+    */
   def withCheckDigit: String = {
     val prefix = recordType match {
       case SierraRecordTypes.bibs     => "b"
       case SierraRecordTypes.items    => "i"
-      case SierraRecordTypes.holdings => "h"
+      case SierraRecordTypes.holdings => "c" // for "checkin"
       case _ =>
         throw new RuntimeException(
           s"Received unrecognised record type: $recordType"
