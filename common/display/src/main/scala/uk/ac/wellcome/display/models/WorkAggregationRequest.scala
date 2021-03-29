@@ -17,5 +17,7 @@ object WorkAggregationRequest {
 
   case object License extends WorkAggregationRequest
 
+  case object LicenseDeprecated extends WorkAggregationRequest
+
   case object Availabilities extends WorkAggregationRequest
 }

@@ -18,6 +18,7 @@ case class WorkAggregations(
   subjects: Option[Aggregation[Subject[Minted]]] = None,
   contributors: Option[Aggregation[Contributor[Minted]]] = None,
   license: Option[Aggregation[License]] = None,
+  itemsLocationsLicense: Option[Aggregation[License]] = None,
   availabilities: Option[Aggregation[Availability]] = None,
 )
 
@@ -38,6 +39,7 @@ object WorkAggregations extends ElasticAggregations {
           contributors = e4sAggregations
             .decodeAgg[Contributor[Minted]]("contributors"),
           license = e4sAggregations.decodeAgg[License]("license"),
+          itemsLocationsLicense = e4sAggregations.decodeAgg[License]("license"),
           availabilities =
             e4sAggregations.decodeAgg[Availability]("availabilities")
         ))

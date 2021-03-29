@@ -259,7 +259,9 @@ object MultipleWorksParams extends QueryParamsUtils {
       "subjects" -> WorkAggregationRequest.Subject,
       "languages" -> WorkAggregationRequest.Languages,
       "contributors" -> WorkAggregationRequest.Contributor,
-      "license" -> WorkAggregationRequest.License,
+      // TODO remove license in favour of items.locations.license
+      "license" -> WorkAggregationRequest.LicenseDeprecated,
+      "items.locations.license" -> WorkAggregationRequest.License,
       "availabilities" -> WorkAggregationRequest.Availabilities
     )
 

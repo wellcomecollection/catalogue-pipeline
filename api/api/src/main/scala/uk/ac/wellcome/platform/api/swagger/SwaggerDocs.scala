@@ -424,6 +424,7 @@ trait MultipleWorksSwagger {
             "subjects",
             "contributors",
             "license",
+            "items.locations.license",
             "languages",
             "availabilities")),
         required = false

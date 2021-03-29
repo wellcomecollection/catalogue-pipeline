@@ -78,7 +78,8 @@ object WorksRequestBuilder
         .field("data.languages.id")
         .minDocCount(0)
 
-    case WorkAggregationRequest.License =>
+    case WorkAggregationRequest.License |
+        WorkAggregationRequest.LicenseDeprecated =>
       TermsAggregation("license")
         .size(License.values.size)
         .field("data.items.locations.license.id")

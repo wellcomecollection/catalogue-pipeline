@@ -47,7 +47,7 @@ trait FiltersAndAggregationsBuilder[Filter, AggregationRequest] {
   val requestToAggregation: AggregationRequest => Aggregation
   val filterToQuery: Filter => Query
 
-  def pairedAggregationRequest(filter: Filter): Option[AggregationRequest]
+  def pairedAggregationRequests(filter: Filter): List[AggregationRequest]
 
   lazy val unpairedFilters: List[Filter] =
     filterSets.getOrElse(FilterCategory.Unpaired, List())
@@ -72,9 +72,9 @@ trait FiltersAndAggregationsBuilder[Filter, AggregationRequest] {
 
   private lazy val filterSets: Map[FilterCategory, List[Filter]] =
     filters.groupBy {
-      pairedAggregationRequest(_) match {
-        case Some(aggregationRequest)
-            if aggregationRequests contains aggregationRequest =>
+      pairedAggregationRequests(_) match {
+        case pairedRequests
+            if aggregationRequests.intersect(pairedRequests).nonEmpty =>
           FilterCategory.Paired
         case _ => FilterCategory.Unpaired
       }
@@ -83,10 +83,8 @@ trait FiltersAndAggregationsBuilder[Filter, AggregationRequest] {
   private def pairedFilter(
     aggregationRequest: AggregationRequest): Option[Filter] =
     pairedFilters.find {
-      pairedAggregationRequest(_) match {
-        case Some(agg) => agg == aggregationRequest
-        case None      => false
-      }
+      pairedAggregationRequests(_)
+        .contains(aggregationRequest)
     }
 
   private sealed trait FilterCategory
@@ -103,18 +101,21 @@ class WorkFiltersAndAggregationsBuilder(
   val filterToQuery: WorkFilter => Query
 ) extends FiltersAndAggregationsBuilder[WorkFilter, WorkAggregationRequest] {
 
-  override def pairedAggregationRequest(
-    filter: WorkFilter): Option[WorkAggregationRequest] =
+  override def pairedAggregationRequests(
+    filter: WorkFilter): List[WorkAggregationRequest] =
     filter match {
-      case _: FormatFilter       => Some(WorkAggregationRequest.Format)
-      case _: LanguagesFilter    => Some(WorkAggregationRequest.Languages)
-      case _: GenreFilter        => Some(WorkAggregationRequest.Genre)
-      case _: SubjectFilter      => Some(WorkAggregationRequest.Subject)
-      case _: ContributorsFilter => Some(WorkAggregationRequest.Contributor)
-      case _: LicenseFilter      => Some(WorkAggregationRequest.License)
+      case _: FormatFilter       => List(WorkAggregationRequest.Format)
+      case _: LanguagesFilter    => List(WorkAggregationRequest.Languages)
+      case _: GenreFilter        => List(WorkAggregationRequest.Genre)
+      case _: SubjectFilter      => List(WorkAggregationRequest.Subject)
+      case _: ContributorsFilter => List(WorkAggregationRequest.Contributor)
+      case _: LicenseFilter =>
+        List(
+          WorkAggregationRequest.License,
+          WorkAggregationRequest.LicenseDeprecated)
       case _: AvailabilitiesFilter =>
-        Some(WorkAggregationRequest.Availabilities)
-      case _ => None
+        List(WorkAggregationRequest.Availabilities)
+      case _ => Nil
     }
 }
 
@@ -125,10 +126,10 @@ class ImageFiltersAndAggregationsBuilder(
   val filterToQuery: ImageFilter => Query
 ) extends FiltersAndAggregationsBuilder[ImageFilter, ImageAggregationRequest] {
 
-  override def pairedAggregationRequest(
-    filter: ImageFilter): Option[ImageAggregationRequest] =
+  override def pairedAggregationRequests(
+    filter: ImageFilter): List[ImageAggregationRequest] =
     filter match {
-      case _: LicenseFilter => Some(ImageAggregationRequest.License)
-      case _                => None
+      case _: LicenseFilter => List(ImageAggregationRequest.License)
+      case _                => Nil
     }
 }

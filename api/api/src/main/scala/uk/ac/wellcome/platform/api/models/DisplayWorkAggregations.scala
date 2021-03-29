@@ -37,6 +37,9 @@ case class DisplayWorkAggregations(
     description = "License aggregation on a set of results."
   ) license: Option[DisplayAggregation[DisplayLicense]],
   @Schema(
+    description = "License aggregation on a set of results."
+  ) `items.locations.license`: Option[DisplayAggregation[DisplayLicense]],
+  @Schema(
     description = "Availabilities aggregation on a set of results."
   ) availabilities: Option[DisplayAggregation[DisplayAvailability]],
   @JsonKey("type") @Schema(name = "type") ontologyType: String = "Aggregations")
@@ -46,7 +49,9 @@ object DisplayWorkAggregations {
   implicit def encoder: Encoder[DisplayWorkAggregations] =
     deriveConfiguredEncoder
 
-  def apply(aggs: WorkAggregations): DisplayWorkAggregations =
+  def apply(
+    aggs: WorkAggregations,
+    aggregationRequests: Seq[WorkAggregationRequest]): DisplayWorkAggregations =
     DisplayWorkAggregations(
       workType = displayAggregation(aggs.format, DisplayFormat.apply),
       productionDates =
@@ -65,7 +70,22 @@ object DisplayWorkAggregations {
           contributor =>
             DisplayContributor(contributor, includesIdentifiers = false)
         ),
-      license = displayAggregation(aggs.license, DisplayLicense.apply),
+      license = aggregationRequests
+        .find {
+          case WorkAggregationRequest.LicenseDeprecated => true
+          case _                                        => false
+        }
+        .flatMap { _ =>
+          displayAggregation(aggs.license, DisplayLicense.apply)
+        },
+      `items.locations.license` = aggregationRequests
+        .find {
+          case WorkAggregationRequest.License => true
+          case _                              => false
+        }
+        .flatMap { _ =>
+          displayAggregation(aggs.license, DisplayLicense.apply)
+        },
       availabilities =
         displayAggregation(aggs.availabilities, DisplayAvailability.apply)
     )

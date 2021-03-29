@@ -456,6 +456,64 @@ class WorksAggregationsTest
     }
   }
 
+  it("supports aggregating on items.locations.license") {
+    def createLicensedWork(
+      licenses: Seq[License]): Work.Visible[WorkState.Indexed] = {
+      val items =
+        licenses.map { license =>
+          createDigitalItemWith(license = Some(license))
+        }.toList
+
+      indexedWork().items(items)
+    }
+
+    val licenseLists = List(
+      List(License.CCBY),
+      List(License.CCBY),
+      List(License.CCBYNC),
+      List(License.CCBY, License.CCBYNC),
+      List.empty
+    )
+
+    val works = licenseLists.map { createLicensedWork(_) }
+
+    withWorksApi {
+      case (worksIndex, routes) =>
+        insertIntoElasticsearch(worksIndex, works: _*)
+        assertJsonResponse(
+          routes,
+          s"/$apiPrefix/works?aggregations=items.locations.license") {
+          Status.OK -> s"""
+            {
+              ${resultList(apiPrefix, totalResults = works.size)},
+              "aggregations": {
+                "type" : "Aggregations",
+                "items.locations.license": {
+                  "type" : "Aggregation",
+                  "buckets": [
+                    {
+                      "count" : 3,
+                      "data" : ${license(License.CCBY)},
+                      "type" : "AggregationBucket"
+                    },
+                    {
+                      "count" : 2,
+                      "data" : ${license(License.CCBYNC)},
+                      "type" : "AggregationBucket"
+                    }
+                  ]
+                }
+              },
+              "results": [${works
+            .sortBy { _.state.canonicalId }
+            .map(workResponse)
+            .mkString(",")}]
+            }
+          """
+        }
+    }
+  }
+
   it("supports aggregating on availabilities") {
     val items = List(
       List(createIdentifiedPhysicalItem),
