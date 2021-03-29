@@ -154,6 +154,79 @@ class WorksAggregationsTest
     }
   }
 
+  it("supports fetching the genre.label aggregation") {
+    withWorksApi {
+      case (worksIndex, routes) =>
+        val concept0 = Concept("conceptLabel")
+        val concept1 = Place("placeLabel")
+        val concept2 = Period(
+          id = IdState.Identified(
+            canonicalId = createCanonicalId,
+            sourceIdentifier = createSourceIdentifierWith(
+              ontologyType = "Period"
+            )
+          ),
+          label = "periodLabel",
+          range = None
+        )
+
+        val genre = Genre(
+          label = "Electronic books.",
+          concepts = List(concept0, concept1, concept2)
+        )
+
+        val work = indexedWork().genres(List(genre))
+
+        insertIntoElasticsearch(worksIndex, work)
+
+        assertJsonResponse(
+          routes,
+          s"/$apiPrefix/works?aggregations=genres.label") {
+          Status.OK -> s"""
+            {
+              ${resultList(apiPrefix, totalResults = 1)},
+              "aggregations": {
+                "type" : "Aggregations",
+                "genres.label": {
+                  "type" : "Aggregation",
+                  "buckets": [
+                    {
+                      "data" : {
+                        "label" : "conceptLabel",
+                        "concepts": [],
+                        "type" : "Genre"
+                      },
+                      "count" : 1,
+                      "type" : "AggregationBucket"
+                    },
+                           {
+                      "data" : {
+                        "label" : "periodLabel",
+                        "concepts": [],
+                        "type" : "Genre"
+                      },
+                      "count" : 1,
+                      "type" : "AggregationBucket"
+                    },
+                           {
+                      "data" : {
+                        "label" : "placeLabel",
+                        "concepts": [],
+                        "type" : "Genre"
+                      },
+                      "count" : 1,
+                      "type" : "AggregationBucket"
+                    }
+                  ]
+                }
+              },
+              "results": [${workResponse(work)}]
+            }
+          """
+        }
+    }
+  }
+
   it("supports aggregating on dates by from year") {
     withWorksApi {
       case (worksIndex, routes) =>

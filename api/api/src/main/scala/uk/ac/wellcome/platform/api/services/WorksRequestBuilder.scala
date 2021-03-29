@@ -54,7 +54,8 @@ object WorksRequestBuilder
 
     // We don't split genres into concepts, as the data isn't great,
     // and for rendering isn't useful at the moment.
-    case WorkAggregationRequest.Genre =>
+    case WorkAggregationRequest.Genre |
+        WorkAggregationRequest.GenreDeprecated =>
       TermsAggregation("genres")
         .size(20)
         .field("data.genres.concepts.label.keyword")

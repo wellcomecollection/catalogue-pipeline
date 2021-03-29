@@ -42,7 +42,7 @@ class WorksErrorsTest extends ApiWorksTestBase {
   }
 
   val aggregationsString =
-    "['workType', 'genres', 'production.dates', 'subjects', 'languages', 'contributors', 'license', 'items.locations.license', 'availabilities']"
+    "['workType', 'genres', 'genres.label', 'production.dates', 'subjects', 'languages', 'contributors', 'license', 'items.locations.license', 'availabilities']"
 
   describe(
     "returns a 400 Bad Request for errors in the ?aggregations parameter") {

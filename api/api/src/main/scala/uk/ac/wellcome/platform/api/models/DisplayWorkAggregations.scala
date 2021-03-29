@@ -25,6 +25,9 @@ case class DisplayWorkAggregations(
     description = "Genre aggregation on a set of results."
   ) genres: Option[DisplayAggregation[DisplayGenre]],
   @Schema(
+    description = "Genre aggregation on a set of results."
+  ) `genres.label`: Option[DisplayAggregation[DisplayGenre]],
+  @Schema(
     description = "Subject aggregation on a set of results."
   ) subjects: Option[DisplayAggregation[DisplaySubject]],
   @Schema(
@@ -56,9 +59,19 @@ object DisplayWorkAggregations {
       workType = displayAggregation(aggs.format, DisplayFormat.apply),
       productionDates =
         displayAggregation(aggs.productionDates, DisplayPeriod.apply),
-      genres = displayAggregation[Genre[Minted], DisplayGenre](
-        aggs.genres,
-        DisplayGenre(_, includesIdentifiers = false)),
+      genres = whenRequestPresent(
+        aggregationRequests,
+        WorkAggregationRequest.GenreDeprecated)(
+        displayAggregation[Genre[Minted], DisplayGenre](
+          aggs.genres,
+          DisplayGenre(_, includesIdentifiers = false))
+      ),
+      `genres.label` =
+        whenRequestPresent(aggregationRequests, WorkAggregationRequest.Genre)(
+          displayAggregation[Genre[Minted], DisplayGenre](
+            aggs.genres,
+            DisplayGenre(_, includesIdentifiers = false))
+        ),
       languages = displayAggregation(aggs.languages, DisplayLanguage.apply),
       subjects = displayAggregation[Subject[Minted], DisplaySubject](
         aggs.subjects,
@@ -70,25 +83,28 @@ object DisplayWorkAggregations {
           contributor =>
             DisplayContributor(contributor, includesIdentifiers = false)
         ),
-      license = aggregationRequests
-        .find {
-          case WorkAggregationRequest.LicenseDeprecated => true
-          case _                                        => false
-        }
-        .flatMap { _ =>
+      license = whenRequestPresent(
+        aggregationRequests,
+        WorkAggregationRequest.LicenseDeprecated)(
+        displayAggregation(aggs.license, DisplayLicense.apply)
+      ),
+      `items.locations.license` =
+        whenRequestPresent(aggregationRequests, WorkAggregationRequest.License)(
           displayAggregation(aggs.license, DisplayLicense.apply)
-        },
-      `items.locations.license` = aggregationRequests
-        .find {
-          case WorkAggregationRequest.License => true
-          case _                              => false
-        }
-        .flatMap { _ =>
-          displayAggregation(aggs.license, DisplayLicense.apply)
-        },
+        ),
       availabilities =
         displayAggregation(aggs.availabilities, DisplayAvailability.apply)
     )
+
+  def whenRequestPresent[T](
+    requests: Seq[WorkAggregationRequest],
+    conditionalRequest: WorkAggregationRequest
+  )(property: Option[T]): Option[T] =
+    if (requests.contains(conditionalRequest)) {
+      property
+    } else {
+      None
+    }
 
   private def displayAggregation[T, D](
     maybeAgg: Option[Aggregation[T]],

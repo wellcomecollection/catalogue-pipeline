@@ -9,6 +9,8 @@ object WorkAggregationRequest {
 
   case object Genre extends WorkAggregationRequest
 
+  case object GenreDeprecated extends WorkAggregationRequest
+
   case object Subject extends WorkAggregationRequest
 
   case object Contributor extends WorkAggregationRequest
