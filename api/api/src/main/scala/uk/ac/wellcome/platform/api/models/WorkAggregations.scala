@@ -35,6 +35,7 @@ object WorkAggregations extends ElasticAggregations {
           languages = e4sAggregations.decodeAgg[Language]("languages"),
           subjectsLabel = e4sAggregations
             .decodeAgg[Subject[Minted]]("subjects"),
+          // TODO decode only agents here once `contributors` is removed
           contributorsAgentsLabel = e4sAggregations
             .decodeAgg[Contributor[Minted]]("contributors"),
           itemsLocationsLicense = e4sAggregations.decodeAgg[License]("license"),

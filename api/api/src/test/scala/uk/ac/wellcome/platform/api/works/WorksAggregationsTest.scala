@@ -492,6 +492,65 @@ class WorksAggregationsTest
     }
   }
 
+  it("supports aggregating on contributor agent labels") {
+    val agent47 = Agent("47")
+    val jamesBond = Agent("007")
+    val mi5 = Organisation("MI5")
+    val gchq = Organisation("GCHQ")
+
+    val works =
+      List(List(agent47), List(agent47), List(jamesBond, mi5), List(mi5, gchq))
+        .map { agents =>
+          indexedWork().contributors(agents.map(Contributor(_, roles = Nil)))
+        }
+
+    withWorksApi {
+      case (worksIndex, routes) =>
+        insertIntoElasticsearch(worksIndex, works: _*)
+        assertJsonResponse(
+          routes,
+          s"/$apiPrefix/works?aggregations=contributors.agent.label") {
+          Status.OK -> s"""
+            {
+              ${resultList(apiPrefix, totalResults = works.size)},
+              "aggregations": {
+                "type" : "Aggregations",
+                "contributors.agent.label": {
+                  "type" : "Aggregation",
+                  "buckets": [
+                    {
+                      "count" : 2,
+                      "data" : ${abstractAgent(agent47)},
+                      "type" : "AggregationBucket"
+                    },
+                    {
+                      "count" : 2,
+                      "data" : ${abstractAgent(mi5)},
+                      "type" : "AggregationBucket"
+                    },
+                    {
+                      "count" : 1,
+                      "data" : ${abstractAgent(jamesBond)},
+                      "type" : "AggregationBucket"
+                    },
+                    {
+                      "count" : 1,
+                      "data" : ${abstractAgent(gchq)},
+                      "type" : "AggregationBucket"
+                    }
+                  ]
+                }
+              },
+              "results": [${works
+            .sortBy(_.state.canonicalId)
+            .map(workResponse)
+            .mkString(",")}]
+            }
+          """
+        }
+    }
+  }
+
   it("does not bring down the API when unknown contributor type") {
 
     val work = indexedWork()
