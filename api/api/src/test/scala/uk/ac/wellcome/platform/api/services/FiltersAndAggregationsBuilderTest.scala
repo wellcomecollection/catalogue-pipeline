@@ -3,7 +3,8 @@ package uk.ac.wellcome.platform.api.services
 import com.sksamuel.elastic4s.requests.searches.aggs.{
   AbstractAggregation,
   Aggregation,
-  FilterAggregation
+  FilterAggregation,
+  GlobalAggregation
 }
 import com.sksamuel.elastic4s.requests.searches.queries.{BoolQuery, Query}
 import org.scalatest.funspec.AnyFunSpec
@@ -72,8 +73,15 @@ class FiltersAndAggregationsBuilderTest extends AnyFunSpec with Matchers {
       )
 
       builder.filteredAggregations should have length 2
-      builder.filteredAggregations.head shouldBe a[MockAggregation]
-      val agg = builder.filteredAggregations.head.asInstanceOf[MockAggregation]
+      builder.filteredAggregations.head shouldBe a[GlobalAggregation]
+
+      val topAgg = builder.filteredAggregations.head
+        .asInstanceOf[GlobalAggregation]
+        .subaggs
+        .head
+      topAgg shouldBe a[MockAggregation]
+
+      val agg = topAgg.asInstanceOf[MockAggregation]
       agg.subaggs.head shouldBe a[FilterAggregation]
       agg.request shouldBe WorkAggregationRequest.Format
     }
@@ -108,7 +116,12 @@ class FiltersAndAggregationsBuilderTest extends AnyFunSpec with Matchers {
       val formatAgg =
         builder.filteredAggregations.head.asInstanceOf[MockAggregation]
       val languageAgg =
-        builder.filteredAggregations(1).asInstanceOf[MockAggregation]
+        builder
+          .filteredAggregations(1)
+          .asInstanceOf[GlobalAggregation]
+          .subaggs
+          .head
+          .asInstanceOf[MockAggregation]
       formatAgg.subaggs.size shouldBe 0
       languageAgg.subaggs.head
         .asInstanceOf[FilterAggregation]
@@ -133,6 +146,9 @@ class FiltersAndAggregationsBuilderTest extends AnyFunSpec with Matchers {
 
       val agg =
         builder.filteredAggregations.head
+          .asInstanceOf[GlobalAggregation]
+          .subaggs
+          .head
           .asInstanceOf[MockAggregation]
           .subaggs
           .head

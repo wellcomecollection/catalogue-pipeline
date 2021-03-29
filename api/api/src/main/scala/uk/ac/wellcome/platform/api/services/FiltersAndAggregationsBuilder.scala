@@ -4,7 +4,8 @@ import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.searches.aggs.{
   AbstractAggregation,
   Aggregation,
-  FilterAggregation
+  FilterAggregation,
+  GlobalAggregation
 }
 import com.sksamuel.elastic4s.requests.searches.queries.Query
 import uk.ac.wellcome.display.models.{
@@ -59,10 +60,19 @@ trait FiltersAndAggregationsBuilder[Filter, AggregationRequest] {
       val agg = requestToAggregation(aggReq)
       val subFilters = pairedFilters.filterNot(pairedFilter(aggReq).contains(_))
       if (subFilters.nonEmpty) {
-        agg.addSubagg(
-          FilterAggregation(
-            "filtered",
-            boolQuery.filter { subFilters.map(filterToQuery) }
+        GlobalAggregation(
+          name = agg.name,
+          subaggs = Seq(
+            // We would like to rename the aggregation here to something predictable
+            // (eg "global_agg") but because it is an opaque AbstractAggregation we
+            // make do with naming it the same as its parent GlobalAggregation, so that
+            // the latter can be picked off when parsing in WorkAggregations
+            agg.addSubagg(
+              FilterAggregation(
+                "filtered",
+                boolQuery.filter { subFilters.map(filterToQuery) }
+              )
+            )
           )
         )
       } else {

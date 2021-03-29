@@ -44,13 +44,11 @@ object WorksRequestBuilder
       TermsAggregation("format")
         .size(Format.values.size)
         .field("data.format.id")
-        .minDocCount(0)
 
     case WorkAggregationRequest.ProductionDate =>
       DateHistogramAggregation("productionDates")
         .calendarInterval(DateHistogramInterval.Year)
         .field("data.production.dates.range.from")
-        .minDocCount(1)
 
     // We don't split genres into concepts, as the data isn't great,
     // and for rendering isn't useful at the moment.
@@ -59,40 +57,34 @@ object WorksRequestBuilder
       TermsAggregation("genres")
         .size(20)
         .field("data.genres.concepts.label.keyword")
-        .minDocCount(0)
 
     case WorkAggregationRequest.Subject |
         WorkAggregationRequest.SubjectDeprecated =>
       TermsAggregation("subjects")
         .size(20)
         .field("data.subjects.label.keyword")
-        .minDocCount(0)
 
     case WorkAggregationRequest.Contributor |
         WorkAggregationRequest.ContributorDeprecated =>
       TermsAggregation("contributors")
         .size(20)
         .field("state.derivedData.contributorAgents")
-        .minDocCount(0)
 
     case WorkAggregationRequest.Languages =>
       TermsAggregation("languages")
         .size(200)
         .field("data.languages.id")
-        .minDocCount(0)
 
     case WorkAggregationRequest.License |
         WorkAggregationRequest.LicenseDeprecated =>
       TermsAggregation("license")
         .size(License.values.size)
         .field("data.items.locations.license.id")
-        .minDocCount(0)
 
     case WorkAggregationRequest.Availabilities =>
       TermsAggregation("availabilities")
         .size(Availability.values.size)
         .field("state.availabilities.id")
-        .minDocCount(0)
   }
 
   private def sortBy(implicit searchOptions: WorkSearchOptions) =
