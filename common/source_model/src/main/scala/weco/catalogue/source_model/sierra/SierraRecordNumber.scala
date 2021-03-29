@@ -31,7 +31,7 @@ sealed trait TypedSierraRecordNumber extends SierraRecordNumber {
     val prefix = recordType match {
       case SierraRecordTypes.bibs     => "b"
       case SierraRecordTypes.items    => "i"
-      case SierraRecordTypes.holdings => "c"  // for "checkin"
+      case SierraRecordTypes.holdings => "c" // for "checkin"
       case _ =>
         throw new RuntimeException(
           s"Received unrecognised record type: $recordType"
