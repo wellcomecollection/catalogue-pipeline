@@ -88,8 +88,6 @@ class SierraIndexerFeatureTest
       }.toList,
     )
 
-    println(transformable)
-
     val store = MemoryTypedStore[S3ObjectLocation, SierraTransformable](
       initialEntries = Map(location -> transformable)
     )
