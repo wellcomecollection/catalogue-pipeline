@@ -12,12 +12,11 @@ import scala.util.Try
 
 case class WorkAggregations(
   format: Option[Aggregation[Format]] = None,
-  genres: Option[Aggregation[Genre[Minted]]] = None,
+  genresLabel: Option[Aggregation[Genre[Minted]]] = None,
   productionDates: Option[Aggregation[Period[Minted]]] = None,
   languages: Option[Aggregation[Language]] = None,
-  subjects: Option[Aggregation[Subject[Minted]]] = None,
-  contributors: Option[Aggregation[Contributor[Minted]]] = None,
-  license: Option[Aggregation[License]] = None,
+  subjectsLabel: Option[Aggregation[Subject[Minted]]] = None,
+  contributorsAgentsLabel: Option[Aggregation[Contributor[Minted]]] = None,
   itemsLocationsLicense: Option[Aggregation[License]] = None,
   availabilities: Option[Aggregation[Availability]] = None,
 )
@@ -30,15 +29,14 @@ object WorkAggregations extends ElasticAggregations {
       Some(
         WorkAggregations(
           format = e4sAggregations.decodeAgg[Format]("format"),
-          genres = e4sAggregations.decodeAgg[Genre[Minted]]("genres"),
+          genresLabel = e4sAggregations.decodeAgg[Genre[Minted]]("genres"),
           productionDates = e4sAggregations
             .decodeAgg[Period[Minted]]("productionDates"),
           languages = e4sAggregations.decodeAgg[Language]("languages"),
-          subjects = e4sAggregations
+          subjectsLabel = e4sAggregations
             .decodeAgg[Subject[Minted]]("subjects"),
-          contributors = e4sAggregations
+          contributorsAgentsLabel = e4sAggregations
             .decodeAgg[Contributor[Minted]]("contributors"),
-          license = e4sAggregations.decodeAgg[License]("license"),
           itemsLocationsLicense = e4sAggregations.decodeAgg[License]("license"),
           availabilities =
             e4sAggregations.decodeAgg[Availability]("availabilities")

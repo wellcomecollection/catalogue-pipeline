@@ -69,13 +69,13 @@ object DisplayWorkAggregations {
         aggregationRequests,
         WorkAggregationRequest.GenreDeprecated)(
         displayAggregation[Genre[Minted], DisplayGenre](
-          aggs.genres,
+          aggs.genresLabel,
           DisplayGenre(_, includesIdentifiers = false))
       ),
       `genres.label` =
         whenRequestPresent(aggregationRequests, WorkAggregationRequest.Genre)(
           displayAggregation[Genre[Minted], DisplayGenre](
-            aggs.genres,
+            aggs.genresLabel,
             DisplayGenre(_, includesIdentifiers = false))
         ),
       languages = displayAggregation(aggs.languages, DisplayLanguage.apply),
@@ -83,20 +83,20 @@ object DisplayWorkAggregations {
         aggregationRequests,
         WorkAggregationRequest.SubjectDeprecated)(
         displayAggregation[Subject[Minted], DisplaySubject](
-          aggs.subjects,
+          aggs.subjectsLabel,
           subject => DisplaySubject(subject, includesIdentifiers = false)
         )),
       `subjects.label` =
         whenRequestPresent(aggregationRequests, WorkAggregationRequest.Subject)(
           displayAggregation[Subject[Minted], DisplaySubject](
-            aggs.subjects,
+            aggs.subjectsLabel,
             subject => DisplaySubject(subject, includesIdentifiers = false)
           )),
       contributors = whenRequestPresent(
         aggregationRequests,
         WorkAggregationRequest.ContributorDeprecated)(
         displayAggregation[Contributor[Minted], DisplayContributor](
-          aggs.contributors,
+          aggs.contributorsAgentsLabel,
           contributor =>
             DisplayContributor(contributor, includesIdentifiers = false)
         )),
@@ -104,18 +104,18 @@ object DisplayWorkAggregations {
         aggregationRequests,
         WorkAggregationRequest.Contributor)(
         displayAggregation[Contributor[Minted], DisplayContributor](
-          aggs.contributors,
+          aggs.contributorsAgentsLabel,
           contributor =>
             DisplayContributor(contributor, includesIdentifiers = false)
         )),
       license = whenRequestPresent(
         aggregationRequests,
         WorkAggregationRequest.LicenseDeprecated)(
-        displayAggregation(aggs.license, DisplayLicense.apply)
+        displayAggregation(aggs.itemsLocationsLicense, DisplayLicense.apply)
       ),
       `items.locations.license` =
         whenRequestPresent(aggregationRequests, WorkAggregationRequest.License)(
-          displayAggregation(aggs.license, DisplayLicense.apply)
+          displayAggregation(aggs.itemsLocationsLicense, DisplayLicense.apply)
         ),
       availabilities =
         displayAggregation(aggs.availabilities, DisplayAvailability.apply)
