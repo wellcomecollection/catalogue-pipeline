@@ -43,24 +43,24 @@ trait IndexerFixtures
       }
     }
 
+  private def withIndex[R](prefix: String, suffix: String)(
+    testWith: TestWith[Index, R]
+  ): R = {
+    val index = Index(s"${prefix}_$suffix")
+
+    withLocalElasticsearchIndex(NoStrictMapping, index = index) {
+      testWith(_)
+    }
+  }
+
   def withIndices[R](testWith: TestWith[String, R]): R = {
     val indexPrefix = s"sierra_${randomAlphanumeric()}".toLowerCase()
 
-    withLocalElasticsearchIndex(
-      NoStrictMapping,
-      index = Index(s"${indexPrefix}_bibs")) { _ =>
-      withLocalElasticsearchIndex(
-        NoStrictMapping,
-        index = Index(s"${indexPrefix}_items")) { _ =>
-        withLocalElasticsearchIndex(
-          NoStrictMapping,
-          index = Index(s"${indexPrefix}_holdings")) { _ =>
-          withLocalElasticsearchIndex(
-            NoStrictMapping,
-            index = Index(s"${indexPrefix}_varfields")) { _ =>
-            withLocalElasticsearchIndex(
-              NoStrictMapping,
-              index = Index(s"${indexPrefix}_fixedfields")) { _ =>
+    withIndex(indexPrefix, "bibs") { _ =>
+      withIndex(indexPrefix, "items") { _ =>
+        withIndex(indexPrefix, "holdings") { _ =>
+          withIndex(indexPrefix, "varfields") { _ =>
+            withIndex(indexPrefix, "fixedfields") { _ =>
               testWith(indexPrefix)
             }
           }
