@@ -689,6 +689,68 @@ class SierraContributorsTest
     )
   }
 
+  it("includes subfield ǂn") {
+    // This example is based on b23042059
+    val varFields = List(
+      createVarFieldWith(
+        marcTag = "700",
+        subfields = List(
+          MarcSubfield(tag = "a", content = "Brewer, George."),
+          MarcSubfield(tag = "t", content = "Essays after the manner of Goldsmith,"),
+          MarcSubfield(tag = "n", content = "No. 1-22.")
+        )
+      )
+    )
+
+    val bibData = createSierraBibDataWith(varFields = varFields)
+
+    SierraContributors(bibData) shouldBe List(
+      Contributor(
+        agent =
+          Agent(
+            label = "Brewer, George. Essays after the manner of Goldsmith, No. 1-22."
+          ),
+        roles = List.empty
+      )
+    )
+  }
+
+  it("includes subfield ǂp") {
+    // This example is based on b14582855
+    val varFields = List(
+      createVarFieldWith(
+        marcTag = "700",
+        subfields = List(
+          MarcSubfield(tag = "a", content = "Hippocrates."),
+          MarcSubfield(tag = "t", content = "Epistolae."),
+          MarcSubfield(tag = "p", content = "Ad Ptolemaeum regem de hominis fabrica."),
+          MarcSubfield(tag = "l", content = "Latin."),
+          MarcSubfield(tag = "f", content = "1561."),
+          MarcSubfield(tag = "0", content = "n  79005643"),
+        )
+      )
+    )
+
+    val bibData = createSierraBibDataWith(varFields = varFields)
+
+    SierraContributors(bibData) shouldBe List(
+      Contributor(
+        agent =
+          Agent(
+            id = IdState.Identifiable(
+              sourceIdentifier = SourceIdentifier(
+                identifierType = IdentifierType.LCNames,
+                value = "n79005643",
+                ontologyType = "Agent"
+              )
+            ),
+            label = "Hippocrates. Epistolae. Ad Ptolemaeum regem de hominis fabrica."
+          ),
+        roles = List.empty
+      )
+    )
+  }
+
   private def transformAndCheckContributors(
     varFields: List[VarField],
     expectedContributors: List[Contributor[IdState.Unminted]]
