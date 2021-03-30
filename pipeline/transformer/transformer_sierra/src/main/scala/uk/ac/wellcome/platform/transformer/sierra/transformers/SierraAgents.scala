@@ -46,19 +46,18 @@ trait SierraAgents extends SierraQueryOps {
   // For all entries:
   //  - Subfield $a is "label"
   //  - Subfield $0 is used to populate "identifiers". The identifier scheme is lc-names.
+  //  - Subfield $n is "Number of part/section/meeting", which we don't want to include
+  //    in the label.
   //
   def getOrganisation(
     subfields: List[MarcSubfield]): Option[Organisation[IdState.Unminted]] =
-    getLabel(subfields).map { label =>
-      Organisation.normalised(label = label)
-    }
+    getLabel(subfields.filterNot(_.tag == "n"))
+      .map { Organisation.normalised }
 
   def getMeeting(
     subfields: List[MarcSubfield]): Option[Meeting[IdState.Unminted]] =
-    getLabel(subfields.withTags("a", "c", "d", "j", "t", "0"))
-      .map { label =>
-        Meeting.normalised(label = label)
-      }
+    getLabel(subfields.withTags("a", "c", "d", "t"))
+      .map { Meeting.normalised }
 
   /* Given an agent and the associated MARC subfields, look for instances of subfield $0,
    * which are used for identifiers.
@@ -102,7 +101,7 @@ trait SierraAgents extends SierraQueryOps {
 
   def getLabel(subfields: List[MarcSubfield]): Option[String] =
     subfields.filter { s =>
-      List("a", "b", "c", "d", "t").contains(s.tag)
+      List("a", "b", "c", "d", "t", "p", "n").contains(s.tag)
     } map (_.content) match {
       case Nil          => None
       case nonEmptyList => Some(nonEmptyList mkString " ")
