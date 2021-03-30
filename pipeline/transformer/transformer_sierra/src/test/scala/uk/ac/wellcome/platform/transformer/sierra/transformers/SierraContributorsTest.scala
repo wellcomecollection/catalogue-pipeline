@@ -696,7 +696,9 @@ class SierraContributorsTest
         marcTag = "700",
         subfields = List(
           MarcSubfield(tag = "a", content = "Brewer, George."),
-          MarcSubfield(tag = "t", content = "Essays after the manner of Goldsmith,"),
+          MarcSubfield(
+            tag = "t",
+            content = "Essays after the manner of Goldsmith,"),
           MarcSubfield(tag = "n", content = "No. 1-22.")
         )
       )
@@ -706,10 +708,10 @@ class SierraContributorsTest
 
     SierraContributors(bibData) shouldBe List(
       Contributor(
-        agent =
-          Agent(
-            label = "Brewer, George. Essays after the manner of Goldsmith, No. 1-22."
-          ),
+        agent = Agent(
+          label =
+            "Brewer, George. Essays after the manner of Goldsmith, No. 1-22."
+        ),
         roles = List.empty
       )
     )
@@ -723,7 +725,9 @@ class SierraContributorsTest
         subfields = List(
           MarcSubfield(tag = "a", content = "Hippocrates."),
           MarcSubfield(tag = "t", content = "Epistolae."),
-          MarcSubfield(tag = "p", content = "Ad Ptolemaeum regem de hominis fabrica."),
+          MarcSubfield(
+            tag = "p",
+            content = "Ad Ptolemaeum regem de hominis fabrica."),
           MarcSubfield(tag = "l", content = "Latin."),
           MarcSubfield(tag = "f", content = "1561."),
           MarcSubfield(tag = "0", content = "n  79005643"),
@@ -735,17 +739,17 @@ class SierraContributorsTest
 
     SierraContributors(bibData) shouldBe List(
       Contributor(
-        agent =
-          Agent(
-            id = IdState.Identifiable(
-              sourceIdentifier = SourceIdentifier(
-                identifierType = IdentifierType.LCNames,
-                value = "n79005643",
-                ontologyType = "Agent"
-              )
-            ),
-            label = "Hippocrates. Epistolae. Ad Ptolemaeum regem de hominis fabrica."
+        agent = Agent(
+          id = IdState.Identifiable(
+            sourceIdentifier = SourceIdentifier(
+              identifierType = IdentifierType.LCNames,
+              value = "n79005643",
+              ontologyType = "Agent"
+            )
           ),
+          label =
+            "Hippocrates. Epistolae. Ad Ptolemaeum regem de hominis fabrica."
+        ),
         roles = List.empty
       )
     )
