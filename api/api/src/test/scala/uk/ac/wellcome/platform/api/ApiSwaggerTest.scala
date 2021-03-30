@@ -88,7 +88,10 @@ class ApiSwaggerTest
     it("multiple works endpoint") {
       val swaggerParams = getParameterNames(multipleWorksEndpoint)
 
-      val queryParams = getFields[MultipleWorksParams]
+      // TODO remove aliases
+      // "license" is added here as it is a deprecated filter
+      // which aliases `items.locations.license`
+      val queryParams = getFields[MultipleWorksParams] :+ "license"
 
       assert(
         swaggerParams.length == queryParams.length,
@@ -186,7 +189,10 @@ class ApiSwaggerTest
 
     val swaggerParams = getEnumValues(aggregationsParam)
 
-    val aggregationParams = getFields[WorkAggregations]
+    // TODO remove aliases
+    val aliasedAggregations =
+      List("subjects", "genres", "contributors", "license")
+    val aggregationParams = getFields[WorkAggregations] ++ aliasedAggregations
 
     assert(
       swaggerParams.length == aggregationParams.length,

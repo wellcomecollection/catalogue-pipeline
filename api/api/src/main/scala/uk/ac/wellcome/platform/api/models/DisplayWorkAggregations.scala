@@ -25,17 +25,30 @@ case class DisplayWorkAggregations(
     description = "Genre aggregation on a set of results."
   ) genres: Option[DisplayAggregation[DisplayGenre]],
   @Schema(
+    description = "Genre aggregation on a set of results."
+  ) `genres.label`: Option[DisplayAggregation[DisplayGenre]],
+  @Schema(
     description = "Subject aggregation on a set of results."
   ) subjects: Option[DisplayAggregation[DisplaySubject]],
   @Schema(
+    description = "Subject aggregation on a set of results."
+  ) `subjects.label`: Option[DisplayAggregation[DisplaySubject]],
+  @Schema(
     description = "Contributor aggregation on a set of results."
   ) contributors: Option[DisplayAggregation[DisplayContributor]],
+  @Schema(
+    description = "Contributor aggregation on a set of results."
+  ) `contributors.agent.label`: Option[
+    DisplayAggregation[DisplayAbstractAgent]],
   @Schema(
     description = "Language aggregation on a set of results."
   ) languages: Option[DisplayAggregation[DisplayLanguage]],
   @Schema(
     description = "License aggregation on a set of results."
   ) license: Option[DisplayAggregation[DisplayLicense]],
+  @Schema(
+    description = "License aggregation on a set of results."
+  ) `items.locations.license`: Option[DisplayAggregation[DisplayLicense]],
   @Schema(
     description = "Availabilities aggregation on a set of results."
   ) availabilities: Option[DisplayAggregation[DisplayAvailability]],
@@ -46,29 +59,78 @@ object DisplayWorkAggregations {
   implicit def encoder: Encoder[DisplayWorkAggregations] =
     deriveConfiguredEncoder
 
-  def apply(aggs: WorkAggregations): DisplayWorkAggregations =
+  def apply(
+    aggs: WorkAggregations,
+    aggregationRequests: Seq[WorkAggregationRequest]): DisplayWorkAggregations =
     DisplayWorkAggregations(
       workType = displayAggregation(aggs.format, DisplayFormat.apply),
       productionDates =
         displayAggregation(aggs.productionDates, DisplayPeriod.apply),
-      genres = displayAggregation[Genre[Minted], DisplayGenre](
-        aggs.genres,
-        DisplayGenre(_, includesIdentifiers = false)),
-      languages = displayAggregation(aggs.languages, DisplayLanguage.apply),
-      subjects = displayAggregation[Subject[Minted], DisplaySubject](
-        aggs.subjects,
-        subject => DisplaySubject(subject, includesIdentifiers = false)
+      genres = whenRequestPresent(
+        aggregationRequests,
+        WorkAggregationRequest.GenreDeprecated)(
+        displayAggregation[Genre[Minted], DisplayGenre](
+          aggs.genresLabel,
+          DisplayGenre(_, includesIdentifiers = false))
       ),
-      contributors =
+      `genres.label` =
+        whenRequestPresent(aggregationRequests, WorkAggregationRequest.Genre)(
+          displayAggregation[Genre[Minted], DisplayGenre](
+            aggs.genresLabel,
+            DisplayGenre(_, includesIdentifiers = false))
+        ),
+      languages = displayAggregation(aggs.languages, DisplayLanguage.apply),
+      subjects = whenRequestPresent(
+        aggregationRequests,
+        WorkAggregationRequest.SubjectDeprecated)(
+        displayAggregation[Subject[Minted], DisplaySubject](
+          aggs.subjectsLabel,
+          subject => DisplaySubject(subject, includesIdentifiers = false)
+        )),
+      `subjects.label` =
+        whenRequestPresent(aggregationRequests, WorkAggregationRequest.Subject)(
+          displayAggregation[Subject[Minted], DisplaySubject](
+            aggs.subjectsLabel,
+            subject => DisplaySubject(subject, includesIdentifiers = false)
+          )),
+      contributors = whenRequestPresent(
+        aggregationRequests,
+        WorkAggregationRequest.ContributorDeprecated)(
         displayAggregation[Contributor[Minted], DisplayContributor](
-          aggs.contributors,
+          aggs.contributorsAgentsLabel,
           contributor =>
             DisplayContributor(contributor, includesIdentifiers = false)
+        )),
+      `contributors.agent.label` = whenRequestPresent(
+        aggregationRequests,
+        WorkAggregationRequest.Contributor)(
+        displayAggregation[Contributor[Minted], DisplayAbstractAgent](
+          aggs.contributorsAgentsLabel,
+          contributor =>
+            DisplayAbstractAgent(contributor.agent, includesIdentifiers = false)
+        )),
+      license = whenRequestPresent(
+        aggregationRequests,
+        WorkAggregationRequest.LicenseDeprecated)(
+        displayAggregation(aggs.itemsLocationsLicense, DisplayLicense.apply)
+      ),
+      `items.locations.license` =
+        whenRequestPresent(aggregationRequests, WorkAggregationRequest.License)(
+          displayAggregation(aggs.itemsLocationsLicense, DisplayLicense.apply)
         ),
-      license = displayAggregation(aggs.license, DisplayLicense.apply),
       availabilities =
         displayAggregation(aggs.availabilities, DisplayAvailability.apply)
     )
+
+  def whenRequestPresent[T](
+    requests: Seq[WorkAggregationRequest],
+    conditionalRequest: WorkAggregationRequest
+  )(property: Option[T]): Option[T] =
+    if (requests.contains(conditionalRequest)) {
+      property
+    } else {
+      None
+    }
 
   private def displayAggregation[T, D](
     maybeAgg: Option[Aggregation[T]],

@@ -56,7 +56,7 @@ object DisplayResultList {
 
   def apply(
     resultList: ResultList[Work.Visible[WorkState.Indexed], WorkAggregations],
-    searchOptions: SearchOptions[_, _, _],
+    searchOptions: SearchOptions[_, WorkAggregationRequest, _],
     includes: WorksIncludes,
     requestUri: Uri,
     contextUri: String)
@@ -71,8 +71,9 @@ object DisplayResultList {
           results = resultList.results.map(DisplayWork(_, includes)),
           prevPage = prevPage,
           nextPage = nextPage,
-          aggregations =
-            resultList.aggregations.map(DisplayWorkAggregations.apply)
+          aggregations = resultList.aggregations.map(
+            DisplayWorkAggregations.apply(_, searchOptions.aggregations)
+          )
         )
     }
 

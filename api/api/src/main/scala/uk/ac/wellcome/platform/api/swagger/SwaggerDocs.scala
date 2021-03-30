@@ -420,12 +420,17 @@ trait MultipleWorksSwagger {
           allowableValues = Array(
             "workType",
             "genres",
+            "genres.label",
             "production.dates",
             "subjects",
+            "subjects.label",
             "contributors",
+            "contributors.agent.label",
             "license",
+            "items.locations.license",
             "languages",
-            "availabilities")),
+            "availabilities"
+          )),
         required = false
       ),
       new Parameter(
@@ -487,6 +492,20 @@ trait MultipleWorksSwagger {
       ),
       new Parameter(
         name = "license",
+        in = ParameterIn.QUERY,
+        description = "Filter the work by license.",
+        schema = new Schema(
+          allowableValues = Array(
+            "cc-by",
+            "cc-by-nc",
+            "cc-by-nc-nd",
+            "cc-0",
+            "pdm",
+            "copyright-not-cleared")),
+        required = false
+      ),
+      new Parameter(
+        name = "items.locations.license",
         in = ParameterIn.QUERY,
         description = "Filter the work by license.",
         schema = new Schema(
