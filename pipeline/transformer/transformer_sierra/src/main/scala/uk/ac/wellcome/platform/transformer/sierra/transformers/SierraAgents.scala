@@ -49,16 +49,13 @@ trait SierraAgents extends SierraQueryOps {
   //
   def getOrganisation(
     subfields: List[MarcSubfield]): Option[Organisation[IdState.Unminted]] =
-    getLabel(subfields).map { label =>
-      Organisation.normalised(label = label)
-    }
+    getLabel(subfields)
+      .map { Organisation.normalised }
 
   def getMeeting(
     subfields: List[MarcSubfield]): Option[Meeting[IdState.Unminted]] =
     getLabel(subfields.withTags("a", "c", "d", "t"))
-      .map { label =>
-        Meeting.normalised(label = label)
-      }
+      .map { Meeting.normalised }
 
   /* Given an agent and the associated MARC subfields, look for instances of subfield $0,
    * which are used for identifiers.

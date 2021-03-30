@@ -81,7 +81,7 @@ object SierraContributors
     subfields
       .withTag(subfieldTag)
       .contents
-      .map(ContributionRole(_))
+      .map(ContributionRole)
 
   private def withId(agent: AbstractAgent[IdState.Unminted],
                      id: IdState.Unminted) =
