@@ -4,7 +4,8 @@ import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.searches.aggs.{
   AbstractAggregation,
   Aggregation,
-  FilterAggregation
+  FilterAggregation,
+  GlobalAggregation
 }
 import com.sksamuel.elastic4s.requests.searches.queries.Query
 import uk.ac.wellcome.display.models.{
@@ -35,11 +36,8 @@ import scala.collection.immutable._
   * constituents of the ES query, this class exposes:
   *
   * - `filteredAggregations`: a list of all the ES query aggregations, where those that need to be filtered
-  *   now have a sub-aggregation of the filter aggregation type, named "filtered".
-  * - `unpairedFilters`: a list of all of the given filters which are not paired to any of
-  *   the given aggregations. These can be used as the ES query filters.
-  * - `pairedFilters`: a list of all of the given filters which are paired to one
-  *   of the given aggregations. These can be used as the ES post-query filters.
+  *   now have a sub-aggregation of the filter aggregation type, named "filtered", and are in the global
+  *   aggregation context so post-filtering of query results is not required.
   */
 trait FiltersAndAggregationsBuilder[Filter, AggregationRequest] {
   val aggregationRequests: List[AggregationRequest]
@@ -49,49 +47,42 @@ trait FiltersAndAggregationsBuilder[Filter, AggregationRequest] {
 
   def pairedAggregationRequests(filter: Filter): List[AggregationRequest]
 
-  lazy val unpairedFilters: List[Filter] =
-    filterSets.getOrElse(FilterCategory.Unpaired, List())
-  lazy val pairedFilters: List[Filter] =
-    filterSets.getOrElse(FilterCategory.Paired, List())
-
   lazy val filteredAggregations: List[AbstractAggregation] =
     aggregationRequests.map { aggReq =>
       val agg = requestToAggregation(aggReq)
-      val subFilters = pairedFilters.filterNot(pairedFilter(aggReq).contains(_))
-      if (subFilters.nonEmpty) {
-        agg.addSubagg(
-          FilterAggregation(
-            "filtered",
-            boolQuery.filter { subFilters.map(filterToQuery) }
+      pairedFilter(aggReq) match {
+        case Some(_) if filters.size == 1 =>
+          GlobalAggregation(
+            // We would like to rename the aggregation here to something predictable
+            // (eg "global_agg") but because it is an opaque AbstractAggregation we
+            // make do with naming it the same as its parent GlobalAggregation, so that
+            // the latter can be picked off when parsing in WorkAggregations
+            name = agg.name,
+            subaggs = Seq(agg)
           )
-        )
-      } else {
-        agg
-      }
-    }
-
-  private lazy val filterSets: Map[FilterCategory, List[Filter]] =
-    filters.groupBy {
-      pairedAggregationRequests(_) match {
-        case pairedRequests
-            if aggregationRequests.intersect(pairedRequests).nonEmpty =>
-          FilterCategory.Paired
-        case _ => FilterCategory.Unpaired
+        case Some(paired) if filters.size > 1 =>
+          val subFilters = filters.filterNot(_ == paired)
+          GlobalAggregation(
+            name = agg.name,
+            subaggs = Seq(
+              agg.addSubagg(
+                FilterAggregation(
+                  "filtered",
+                  boolQuery.filter { subFilters.map(filterToQuery) }
+                )
+              )
+            )
+          )
+        case _ => agg
       }
     }
 
   private def pairedFilter(
     aggregationRequest: AggregationRequest): Option[Filter] =
-    pairedFilters.find {
-      pairedAggregationRequests(_)
+    filters.find { filter =>
+      pairedAggregationRequests(filter)
         .contains(aggregationRequest)
     }
-
-  private sealed trait FilterCategory
-  private object FilterCategory {
-    case object Unpaired extends FilterCategory
-    case object Paired extends FilterCategory
-  }
 }
 
 class WorkFiltersAndAggregationsBuilder(

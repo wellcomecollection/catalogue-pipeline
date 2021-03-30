@@ -12,17 +12,33 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
   val quechua = Language(label = "Quechua", id = "que")
   val chechen = Language(label = "Chechen", id = "che")
 
+  /*
+   * | workType     | count |
+   * |--------------|-------|
+   * | a / Books    | 4     |
+   * | d / Journals | 3     |
+   * | i / Audio    | 2     |
+   * | k / Pictures | 1     |
+   *
+   * | language      | count |
+   * |---------------|-------|
+   * | bak / Bashkir | 4     |
+   * | que / Quechua | 3     |
+   * | mar / Marathi  | 2     |
+   * | che / Chechen | 1     |
+   *
+   */
   val works: List[Work.Visible[WorkState.Indexed]] = List(
-    (Books, bashkir),
-    (Journals, marathi),
-    (Pictures, quechua),
-    (Audio, bashkir),
-    (Books, bashkir),
-    (Books, bashkir),
-    (Journals, quechua),
-    (Books, marathi),
-    (Journals, quechua),
-    (Audio, chechen)
+    (Books, bashkir), // a
+    (Journals, marathi), // d
+    (Pictures, quechua), // k
+    (Audio, bashkir), // i
+    (Books, bashkir), // a
+    (Books, bashkir), // a
+    (Journals, quechua), // d
+    (Books, marathi), // a
+    (Journals, quechua), // d
+    (Audio, chechen) // i
   ).map {
     case (format, language) =>
       indexedWork()
@@ -30,20 +46,22 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
         .languages(List(language))
   }
 
-  it(
-    "filters an aggregation with a filter that is not paired to the aggregation") {
-    withWorksApi {
-      case (worksIndex, routes) =>
-        insertIntoElasticsearch(worksIndex, works: _*)
-        assertJsonResponse(
-          routes,
-          s"/$apiPrefix/works?workType=a&aggregations=languages") {
-          Status.OK -> s"""
+  describe(
+    "filters aggregation buckets with any filters that are not paired to the aggregation") {
+    it("when those filters do not have a paired aggregation present") {
+      withWorksApi {
+        case (worksIndex, routes) =>
+          insertIntoElasticsearch(worksIndex, works: _*)
+          assertJsonResponse(
+            routes,
+            // We expect to see the language buckets for only the works with workType=a
+            s"/$apiPrefix/works?workType=a&aggregations=languages") {
+            Status.OK -> s"""
             {
               ${resultList(
-                            apiPrefix,
-                            totalResults =
-                              works.count(_.data.format.get == Books))},
+                              apiPrefix,
+                              totalResults =
+                                works.count(_.data.format.get == Books))},
               "aggregations": {
                 "type" : "Aggregations",
                 "languages": {
@@ -57,46 +75,38 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
                     {
                       "count" : 1,
                       "data" : ${language(marathi)},
-                      "type" : "AggregationBucket"
-                    },
-                    {
-                      "count" : 0,
-                      "data" : ${language(chechen)},
-                      "type" : "AggregationBucket"
-                    },
-                    {
-                      "count" : 0,
-                      "data" : ${language(quechua)},
                       "type" : "AggregationBucket"
                     }
                   ]
                 }
               },
               "results": [${works
-                            .filter(_.data.format.get == Books)
-                            .sortBy { _.state.canonicalId }
-                            .map(workResponse)
-                            .mkString(",")}]
+                              .filter(_.data.format.get == Books)
+                              .sortBy { _.state.canonicalId }
+                              .map(workResponse)
+                              .mkString(",")}]
             }
           """.stripMargin
-        }
+          }
+      }
     }
-  }
 
-  it(
-    "filters an aggregation with a filter that is paired to another aggregation") {
-    withWorksApi {
-      case (worksIndex, routes) =>
-        insertIntoElasticsearch(worksIndex, works: _*)
-        assertJsonResponse(
-          routes,
-          s"/$apiPrefix/works?workType=a&aggregations=languages,workType") {
-          Status.OK -> s"""
+    it("when those filters do have a paired aggregation present") {
+      withWorksApi {
+        case (worksIndex, routes) =>
+          insertIntoElasticsearch(worksIndex, works: _*)
+          assertJsonResponse(
+            routes,
+            // We expect to see the language buckets for only the works with workType=a
+            // We expect to see the workType buckets for all of the works
+            s"/$apiPrefix/works?workType=a&aggregations=languages,workType"
+          ) {
+            Status.OK -> s"""
             {
               ${resultList(
-                            apiPrefix,
-                            totalResults =
-                              works.count(_.data.format.get == Books))},
+                              apiPrefix,
+                              totalResults =
+                                works.count(_.data.format.get == Books))},
               "aggregations": {
                 "type" : "Aggregations",
                 "languages": {
@@ -108,18 +118,8 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
                       "type" : "AggregationBucket"
                     },
                     {
-                      "count" : 0,
-                      "data" : ${language(quechua)},
-                      "type" : "AggregationBucket"
-                    },
-                    {
                       "count" : 1,
                       "data" : ${language(marathi)},
-                      "type" : "AggregationBucket"
-                    },
-                    {
-                      "count" : 0,
-                      "data" : ${language(chechen)},
                       "type" : "AggregationBucket"
                     }
                   ]
@@ -151,13 +151,63 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
                 }
               },
               "results": [${works
-                            .filter(_.data.format.get == Books)
-                            .sortBy { _.state.canonicalId }
-                            .map(workResponse)
-                            .mkString(",")}]
+                              .filter(_.data.format.get == Books)
+                              .sortBy { _.state.canonicalId }
+                              .map(workResponse)
+                              .mkString(",")}]
             }
           """.stripMargin
-        }
+          }
+      }
+    }
+
+    it("but still returns empty buckets if their paired filter is present") {
+      withWorksApi {
+        case (worksIndex, routes) =>
+          insertIntoElasticsearch(worksIndex, works: _*)
+          assertJsonResponse(
+            routes,
+            // We expect to see the workType buckets for worktype i/Audio, because that
+            // has the language che/Chechen, and for a/Books, because a filter for it is
+            // present
+            s"/$apiPrefix/works?workType=a&languages=che&aggregations=workType"
+          ) {
+            Status.OK -> s"""
+            {
+              ${resultList(apiPrefix, totalResults = 0, totalPages = 0)},
+              "aggregations": {
+                "type" : "Aggregations",
+                "workType" : {
+                  "type": "Aggregation",
+                  "buckets" : [
+                    {
+                      "count" : 0,
+                      "data" : ${format(Books)},
+                      "type" : "AggregationBucket"
+                    },
+                    {
+                      "count" : 0,
+                      "data" : ${format(Journals)},
+                      "type" : "AggregationBucket"
+                    },
+                    {
+                      "count" : 1,
+                      "data" : ${format(Audio)},
+                      "type" : "AggregationBucket"
+                    },
+                    {
+                      "count" : 0,
+                      "data" : ${format(Pictures)},
+                      "type" : "AggregationBucket"
+                    }
+                  ]
+                }
+              },
+              "results": []
+            }
+          """.stripMargin
+          }
+      }
     }
   }
 

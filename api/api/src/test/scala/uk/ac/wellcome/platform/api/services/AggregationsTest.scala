@@ -93,28 +93,6 @@ class AggregationsTest
     }
   }
 
-  it("returns empty buckets if they exist") {
-    val formats = Format.values
-    val works = formats.flatMap { format =>
-      (0 to 4).map(_ => indexedWork().format(format))
-    }
-    withLocalWorksIndex { index =>
-      insertIntoElasticsearch(index, works: _*)
-      val searchOptions = createWorksSearchOptionsWith(
-        searchQuery = Some(SearchQuery("anything will give zero results")),
-        aggregations = List(WorkAggregationRequest.Format)
-      )
-      whenReady(aggregationQuery(index, searchOptions)) { aggs =>
-        aggs.format should not be empty
-        val buckets = aggs.format.get.buckets
-        buckets.length shouldBe formats.length
-        buckets.map(_.data.label) should contain theSameElementsAs formats
-          .map(_.label)
-        buckets.map(_.count) should contain only 0
-      }
-    }
-  }
-
   describe("aggregations with filters") {
     val formats = Format.values
     val subjects = (0 to 5).map(_ => createSubject)

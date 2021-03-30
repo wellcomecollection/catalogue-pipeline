@@ -87,4 +87,40 @@ class AggregationResultsTest extends AnyFunSpec with Matchers {
     singleAgg.get.format shouldBe Some(
       Aggregation[Format](List(AggregationBucket(data = Books, count = 1234))))
   }
+
+  it("uses the buckets from the global aggregation when present") {
+    val searchResponse = SearchResponse(
+      took = 1234,
+      isTimedOut = false,
+      isTerminatedEarly = false,
+      suggest = Map(),
+      _shards = Shards(total = 1, failed = 0, successful = 1),
+      scrollId = None,
+      hits = SearchHits(
+        total = Total(0, "potatoes"),
+        maxScore = 0.0,
+        hits = Array()),
+      _aggregationsAsMap = Map(
+        "format" -> Map(
+          "doc_count" -> 12345,
+          "format" -> Map(
+            "doc_count_error_upper_bound" -> 0,
+            "sum_other_doc_count" -> 0,
+            "buckets" -> List(
+              Map(
+                "key" -> "a",
+                "doc_count" -> 393145,
+                "filtered" -> Map(
+                  "doc_count" -> 1234
+                )
+              )
+            )
+          )
+        )
+      )
+    )
+    val singleAgg = WorkAggregations(searchResponse)
+    singleAgg.get.format shouldBe Some(
+      Aggregation[Format](List(AggregationBucket(data = Books, count = 1234))))
+  }
 }
