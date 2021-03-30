@@ -49,6 +49,7 @@ object WorksRequestBuilder
       DateHistogramAggregation("productionDates")
         .calendarInterval(DateHistogramInterval.Year)
         .field("data.production.dates.range.from")
+        .minDocCount(1)
 
     // We don't split genres into concepts, as the data isn't great,
     // and for rendering isn't useful at the moment.
