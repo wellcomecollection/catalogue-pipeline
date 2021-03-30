@@ -41,14 +41,13 @@ class ImagesFilteredAggregationsTest extends ApiImagesTestBase {
                       "type" : "AggregationBucket"
                     },
                     {
+                      "data" : ${license(License.OGL)},
+                      "count" : ${oglImages.size},
+                      "type" : "AggregationBucket"
+                    },
+                    {
                       "data" : ${license(License.PDM)},
                       "count" : ${pdmImages.size},
-                      "type" : "AggregationBucket"
-                    }
-                    ,
-                    {
-                      "data" : ${license(License.OGL)},
-                      "count" : 0,
                       "type" : "AggregationBucket"
                     }
                   ]

@@ -14,52 +14,6 @@ import uk.ac.wellcome.platform.api.models._
 
 class FiltersAndAggregationsBuilderTest extends AnyFunSpec with Matchers {
 
-  describe("filter discrimination") {
-    it("separates paired and unpaired filters") {
-      val formatFilter = FormatFilter(Seq("bananas"))
-      val languagesFilter = LanguagesFilter(Seq("eng"))
-      val builder = new WorkFiltersAndAggregationsBuilder(
-        aggregationRequests =
-          List(WorkAggregationRequest.Format, WorkAggregationRequest.License),
-        filters = List(formatFilter, languagesFilter, VisibleWorkFilter),
-        requestToAggregation = requestToAggregation,
-        filterToQuery = filterToQuery
-      )
-
-      builder.pairedFilters should contain only formatFilter
-      builder.unpairedFilters should contain only (languagesFilter, VisibleWorkFilter)
-    }
-
-    it("handles the case where all filters are unpaired") {
-      val formatFilter = FormatFilter(Seq("bananas"))
-      val languagesFilter = LanguagesFilter(Seq("eng"))
-      val builder = new WorkFiltersAndAggregationsBuilder(
-        aggregationRequests = List(WorkAggregationRequest.License),
-        filters = List(formatFilter, languagesFilter, VisibleWorkFilter),
-        requestToAggregation = requestToAggregation,
-        filterToQuery = filterToQuery
-      )
-
-      builder.pairedFilters should have length 0
-      builder.unpairedFilters should contain only (languagesFilter, formatFilter, VisibleWorkFilter)
-    }
-
-    it("handles the case where all filters are paired") {
-      val formatFilter = FormatFilter(Seq("bananas"))
-      val languagesFilter = LanguagesFilter(Seq("en"))
-      val builder = new WorkFiltersAndAggregationsBuilder(
-        aggregationRequests =
-          List(WorkAggregationRequest.Format, WorkAggregationRequest.Languages),
-        filters = List(formatFilter, languagesFilter),
-        requestToAggregation = requestToAggregation,
-        filterToQuery = filterToQuery
-      )
-
-      builder.pairedFilters should contain only (formatFilter, languagesFilter)
-      builder.unpairedFilters should have length 0
-    }
-  }
-
   describe("aggregation-level filtering") {
     it("applies to aggregations with a paired filter") {
       val formatFilter = FormatFilter(Seq("bananas"))
@@ -113,21 +67,19 @@ class FiltersAndAggregationsBuilderTest extends AnyFunSpec with Matchers {
       )
 
       builder.filteredAggregations should have length 2
-      val formatAgg =
-        builder.filteredAggregations.head.asInstanceOf[MockAggregation]
-      val languageAgg =
-        builder
-          .filteredAggregations(1)
-          .asInstanceOf[GlobalAggregation]
-          .subaggs
-          .head
-          .asInstanceOf[MockAggregation]
-      formatAgg.subaggs.size shouldBe 0
-      languageAgg.subaggs.head
-        .asInstanceOf[FilterAggregation]
-        .query
-        .asInstanceOf[BoolQuery]
-        .filters should contain only MockQuery(formatFilter)
+      builder.filteredAggregations.head shouldBe a[GlobalAggregation]
+      builder.filteredAggregations.head
+        .asInstanceOf[GlobalAggregation]
+        .subaggs
+        .head
+        .asInstanceOf[MockAggregation]
+        .subaggs should have length 0
+
+      builder.filteredAggregations(1) shouldBe a[MockAggregation]
+      builder
+        .filteredAggregations(1)
+        .asInstanceOf[MockAggregation]
+        .subaggs should have length 0
     }
 
     it("applies all other aggregation-dependent filters to the paired filter") {

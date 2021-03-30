@@ -24,7 +24,6 @@ object WorksRequestBuilder
     search(index)
       .aggs { filteredAggregationBuilder.filteredAggregations }
       .query { filteredQuery }
-      .postFilter { postFilterQuery }
       .sortBy { sortBy }
       .limit { searchOptions.pageSize }
       .from { PaginationQuery.safeGetFrom(searchOptions) }
@@ -108,12 +107,6 @@ object WorksRequestBuilder
       case SortingOrder.Descending => SortOrder.DESC
     }
 
-  private def postFilterQuery(
-    implicit searchOptions: WorkSearchOptions): BoolQuery =
-    boolQuery.filter {
-      filteredAggregationBuilder.pairedFilters.map(buildWorkFilterQuery)
-    }
-
   private def filteredQuery(
     implicit searchOptions: WorkSearchOptions): BoolQuery =
     searchOptions.searchQuery
@@ -123,7 +116,7 @@ object WorksRequestBuilder
       }
       .getOrElse { boolQuery }
       .filter {
-        (VisibleWorkFilter :: filteredAggregationBuilder.unpairedFilters)
+        (VisibleWorkFilter :: searchOptions.filters)
           .map(buildWorkFilterQuery)
       }
 
