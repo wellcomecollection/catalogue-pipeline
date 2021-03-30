@@ -55,7 +55,7 @@ trait SierraAgents extends SierraQueryOps {
 
   def getMeeting(
     subfields: List[MarcSubfield]): Option[Meeting[IdState.Unminted]] =
-    getLabel(subfields.withTags("a", "c", "d", "j", "t", "0"))
+    getLabel(subfields.withTags("a", "c", "d", "t"))
       .map { label =>
         Meeting.normalised(label = label)
       }
