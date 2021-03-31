@@ -44,6 +44,7 @@ trait FiltersAndAggregationsBuilder[Filter, AggregationRequest] {
   val filters: List[Filter]
   val requestToAggregation: AggregationRequest => Aggregation
   val filterToQuery: Filter => Query
+  val searchQuery: Query
 
   def pairedAggregationRequests(filter: Filter): List[AggregationRequest]
 
@@ -51,24 +52,21 @@ trait FiltersAndAggregationsBuilder[Filter, AggregationRequest] {
     aggregationRequests.map { aggReq =>
       val agg = requestToAggregation(aggReq)
       pairedFilter(aggReq) match {
-        case Some(_) if filters.size == 1 =>
+        case Some(paired) =>
+          val subFilters = filters.filterNot(_ == paired)
           GlobalAggregation(
             // We would like to rename the aggregation here to something predictable
             // (eg "global_agg") but because it is an opaque AbstractAggregation we
             // make do with naming it the same as its parent GlobalAggregation, so that
             // the latter can be picked off when parsing in WorkAggregations
             name = agg.name,
-            subaggs = Seq(agg)
-          )
-        case Some(paired) if filters.size > 1 =>
-          val subFilters = filters.filterNot(_ == paired)
-          GlobalAggregation(
-            name = agg.name,
             subaggs = Seq(
               agg.addSubagg(
                 FilterAggregation(
                   "filtered",
-                  boolQuery.filter { subFilters.map(filterToQuery) }
+                  boolQuery.filter {
+                    searchQuery :: subFilters.map(filterToQuery)
+                  }
                 )
               )
             )
@@ -89,7 +87,8 @@ class WorkFiltersAndAggregationsBuilder(
   val aggregationRequests: List[WorkAggregationRequest],
   val filters: List[WorkFilter],
   val requestToAggregation: WorkAggregationRequest => Aggregation,
-  val filterToQuery: WorkFilter => Query
+  val filterToQuery: WorkFilter => Query,
+  val searchQuery: Query
 ) extends FiltersAndAggregationsBuilder[WorkFilter, WorkAggregationRequest] {
 
   override def pairedAggregationRequests(
@@ -123,7 +122,8 @@ class ImageFiltersAndAggregationsBuilder(
   val aggregationRequests: List[ImageAggregationRequest],
   val filters: List[ImageFilter],
   val requestToAggregation: ImageAggregationRequest => Aggregation,
-  val filterToQuery: ImageFilter => Query
+  val filterToQuery: ImageFilter => Query,
+  val searchQuery: Query
 ) extends FiltersAndAggregationsBuilder[ImageFilter, ImageAggregationRequest] {
 
   override def pairedAggregationRequests(
