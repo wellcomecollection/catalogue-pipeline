@@ -55,7 +55,7 @@ class ElasticsearchService(elasticClient: ElasticClient)(
         .map(_.toEither)
         .map { responseOrError =>
           responseOrError.map { res =>
-            transaction.addLabel("elasticTook", res.took)
+            transaction.setLabel("elasticTook", res.took)
             res
           }
         }
@@ -83,7 +83,7 @@ class ElasticsearchService(elasticClient: ElasticClient)(
                 case None =>
                   val responses = results.collect { case Right(resp) => resp }.toList
                   val took = responses.map(_.took).sum
-                  transaction.addLabel("elasticTook", took)
+                  transaction.setLabel("elasticTook", took)
                   Right(responses)
               }
           }
@@ -93,16 +93,16 @@ class ElasticsearchService(elasticClient: ElasticClient)(
   implicit class EnhancedTransaction(transaction: Transaction) {
     def addQueryOptionLabels(
       searchOptions: SearchOptions[_, _, _]): Transaction = {
-      transaction.addLabel("pageSize", searchOptions.pageSize)
-      transaction.addLabel("pageNumber", searchOptions.pageNumber)
-      transaction.addLabel("sortOrder", searchOptions.sortOrder.toString)
-      transaction.addLabel(
+      transaction.setLabel("pageSize", searchOptions.pageSize)
+      transaction.setLabel("pageNumber", searchOptions.pageNumber)
+      transaction.setLabel("sortOrder", searchOptions.sortOrder.toString)
+      transaction.setLabel(
         "sortBy",
         searchOptions.sortBy.map { _.toString }.mkString(","))
-      transaction.addLabel(
+      transaction.setLabel(
         "filters",
         searchOptions.filters.map { _.toString }.mkString(","))
-      transaction.addLabel(
+      transaction.setLabel(
         "aggregations",
         searchOptions.aggregations.map { _.toString }.mkString(","))
     }
