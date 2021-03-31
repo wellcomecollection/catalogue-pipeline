@@ -23,7 +23,8 @@ class FiltersAndAggregationsBuilderTest extends AnyFunSpec with Matchers {
           List(WorkAggregationRequest.Format, WorkAggregationRequest.Languages),
         filters = List(formatFilter, languagesFilter),
         requestToAggregation = requestToAggregation,
-        filterToQuery = filterToQuery
+        filterToQuery = filterToQuery,
+        searchQuery = MockSearchQuery
       )
 
       builder.filteredAggregations should have length 2
@@ -46,7 +47,8 @@ class FiltersAndAggregationsBuilderTest extends AnyFunSpec with Matchers {
         aggregationRequests = List(WorkAggregationRequest.Format),
         filters = List(languagesFilter),
         requestToAggregation = requestToAggregation,
-        filterToQuery = filterToQuery
+        filterToQuery = filterToQuery,
+        searchQuery = MockSearchQuery
       )
 
       builder.filteredAggregations should have length 1
@@ -63,7 +65,8 @@ class FiltersAndAggregationsBuilderTest extends AnyFunSpec with Matchers {
           List(WorkAggregationRequest.Format, WorkAggregationRequest.Languages),
         filters = List(formatFilter),
         requestToAggregation = requestToAggregation,
-        filterToQuery = filterToQuery
+        filterToQuery = filterToQuery,
+        searchQuery = MockSearchQuery
       )
 
       builder.filteredAggregations should have length 2
@@ -73,7 +76,7 @@ class FiltersAndAggregationsBuilderTest extends AnyFunSpec with Matchers {
         .subaggs
         .head
         .asInstanceOf[MockAggregation]
-        .subaggs should have length 0
+        .subaggs should have length 1
 
       builder.filteredAggregations(1) shouldBe a[MockAggregation]
       builder
@@ -93,7 +96,8 @@ class FiltersAndAggregationsBuilderTest extends AnyFunSpec with Matchers {
           WorkAggregationRequest.Genre),
         filters = List(formatFilter, languagesFilter, genreFilter),
         requestToAggregation = requestToAggregation,
-        filterToQuery = filterToQuery
+        filterToQuery = filterToQuery,
+        searchQuery = MockSearchQuery
       )
 
       val agg =
@@ -108,8 +112,9 @@ class FiltersAndAggregationsBuilderTest extends AnyFunSpec with Matchers {
       agg.query shouldBe a[BoolQuery]
       val query = agg.query.asInstanceOf[BoolQuery]
       query.filters should not contain MockQuery(formatFilter)
-      query.filters should contain only (MockQuery(languagesFilter), MockQuery(
-        genreFilter))
+      query.filters should contain only (
+        MockSearchQuery, MockQuery(languagesFilter), MockQuery(genreFilter)
+      )
     }
   }
 
@@ -120,6 +125,7 @@ class FiltersAndAggregationsBuilderTest extends AnyFunSpec with Matchers {
   private def filterToQuery(filter: WorkFilter): Query = MockQuery(filter)
 
   private case class MockQuery(filter: WorkFilter) extends Query
+  private case object MockSearchQuery extends Query
 
   private case class MockAggregation(name: String,
                                      request: WorkAggregationRequest,

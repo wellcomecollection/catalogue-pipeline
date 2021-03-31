@@ -29,19 +29,20 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
    *
    */
   val works: List[Work.Visible[WorkState.Indexed]] = List(
-    (Books, bashkir), // a
-    (Journals, marathi), // d
-    (Pictures, quechua), // k
-    (Audio, bashkir), // i
-    (Books, bashkir), // a
-    (Books, bashkir), // a
-    (Journals, quechua), // d
-    (Books, marathi), // a
-    (Journals, quechua), // d
-    (Audio, chechen) // i
+    (Books, bashkir, "rats"), // a
+    (Journals, marathi, "capybara"), // d
+    (Pictures, quechua, "tapirs"), // k
+    (Audio, bashkir, "rats"), // i
+    (Books, bashkir, "capybara"), // a
+    (Books, bashkir, "tapirs"), // a
+    (Journals, quechua, "rats"), // d
+    (Books, marathi, "capybara"), // a
+    (Journals, quechua, "tapirs"), // d
+    (Audio, chechen, "rats") // i
   ).map {
-    case (format, language) =>
+    case (format, language, title) =>
       indexedWork()
+        .title(title)
         .format(format)
         .languages(List(language))
   }
@@ -208,6 +209,60 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
           """.stripMargin
           }
       }
+    }
+  }
+
+  it("applies the search query to aggregations paired with an applied filter") {
+    withWorksApi {
+      case (worksIndex, routes) =>
+        insertIntoElasticsearch(worksIndex, works: _*)
+        assertJsonResponse(
+          routes,
+          s"/$apiPrefix/works?query=rats&workType=a&aggregations=workType") {
+          Status.OK -> s"""
+            {
+              ${resultList(
+                            apiPrefix,
+                            totalResults = works
+                              .filter(_.data.format.get == Books)
+                              .count(_.data.title.contains("rats")))},
+              "aggregations": {
+                "type" : "Aggregations",
+                "workType": {
+                  "type" : "Aggregation",
+                  "buckets": [
+                    {
+                      "count" : 1,
+                      "data" : ${format(Books)},
+                      "type" : "AggregationBucket"
+                    },
+                    {
+                      "count" : 1,
+                      "data" : ${format(Journals)},
+                      "type" : "AggregationBucket"
+                    },
+                    {
+                      "count" : 2,
+                      "data" : ${format(Audio)},
+                      "type" : "AggregationBucket"
+                    },
+                    {
+                      "count" : 0,
+                      "data" : ${format(Pictures)},
+                      "type" : "AggregationBucket"
+                    }
+                  ]
+                }
+              },
+              "results": [${works
+                            .filter(_.data.format.get == Books)
+                            .filter(_.data.title.contains("rats"))
+                            .sortBy { _.state.canonicalId }
+                            .map(workResponse)
+                            .mkString(",")}]
+            }
+          """.stripMargin
+        }
     }
   }
 

@@ -4,7 +4,7 @@ import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s._
 import com.sksamuel.elastic4s.requests.searches._
 import com.sksamuel.elastic4s.requests.searches.aggs.TermsAggregation
-import com.sksamuel.elastic4s.requests.searches.queries.Query
+import com.sksamuel.elastic4s.requests.searches.queries.{BoolQuery, Query}
 import com.sksamuel.elastic4s.requests.searches.sort._
 import uk.ac.wellcome.display.models.ImageAggregationRequest
 import uk.ac.wellcome.platform.api.elasticsearch.{
@@ -30,14 +30,7 @@ class ImagesRequestBuilder(queryConfig: QueryConfig)
     search(index)
       .aggs { filteredAggregationBuilder(searchOptions).filteredAggregations }
       .query(
-        searchOptions.searchQuery
-          .map { q =>
-            ImagesMultiMatcher(q.query)
-          }
-          .getOrElse(boolQuery)
-          .must(
-            buildImageMustQuery(searchOptions.mustQueries)
-          )
+        searchQuery(searchOptions)
           .filter(
             buildImageFilterQuery(searchOptions.filters)
           )
@@ -51,8 +44,19 @@ class ImagesRequestBuilder(queryConfig: QueryConfig)
       aggregationRequests = searchOptions.aggregations,
       filters = searchOptions.filters,
       requestToAggregation = toAggregation,
-      filterToQuery = buildImageFilterQuery
+      filterToQuery = buildImageFilterQuery,
+      searchQuery = searchQuery(searchOptions)
     )
+
+  private def searchQuery(searchOptions: ImageSearchOptions): BoolQuery =
+    searchOptions.searchQuery
+      .map { q =>
+        ImagesMultiMatcher(q.query)
+      }
+      .getOrElse(boolQuery)
+      .must(
+        buildImageMustQuery(searchOptions.mustQueries)
+      )
 
   private def toAggregation(aggReq: ImageAggregationRequest) = aggReq match {
     case ImageAggregationRequest.License =>
