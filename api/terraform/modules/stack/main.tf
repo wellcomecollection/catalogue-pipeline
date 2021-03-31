@@ -38,6 +38,7 @@ module "service" {
   environment = {
     api_host         = "api.wellcomecollection.org"
     apm_service_name = var.namespace
+    apm_environment  = var.environment
   }
 
   secrets = {

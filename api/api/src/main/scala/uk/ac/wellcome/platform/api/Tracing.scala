@@ -37,6 +37,9 @@ object Tracing {
         "service_name" -> config
           .getStringOption("apm.service.name")
           .getOrElse("catalogue-api"),
+        "environment" -> config
+          .getStringOption("apm.environment")
+          .getOrElse(""),
         "server_urls" -> config
           .getStringOption("apm.server.url")
           .getOrElse("http://localhost:9200"),
