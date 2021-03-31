@@ -83,77 +83,6 @@ class WorksAggregationsTest
     }
   }
 
-  it("supports fetching the genre aggregation") {
-    withWorksApi {
-      case (worksIndex, routes) =>
-        val concept0 = Concept("conceptLabel")
-        val concept1 = Place("placeLabel")
-        val concept2 = Period(
-          id = IdState.Identified(
-            canonicalId = createCanonicalId,
-            sourceIdentifier = createSourceIdentifierWith(
-              ontologyType = "Period"
-            )
-          ),
-          label = "periodLabel",
-          range = None
-        )
-
-        val genre = Genre(
-          label = "Electronic books.",
-          concepts = List(concept0, concept1, concept2)
-        )
-
-        val work = indexedWork().genres(List(genre))
-
-        insertIntoElasticsearch(worksIndex, work)
-
-        assertJsonResponse(routes, s"/$apiPrefix/works?aggregations=genres") {
-          Status.OK -> s"""
-            {
-              ${resultList(apiPrefix, totalResults = 1)},
-              "aggregations": {
-                "type" : "Aggregations",
-                "genres": {
-                  "type" : "Aggregation",
-                  "buckets": [
-                    {
-                      "data" : {
-                        "label" : "conceptLabel",
-                        "concepts": [],
-                        "type" : "Genre"
-                      },
-                      "count" : 1,
-                      "type" : "AggregationBucket"
-                    },
-                           {
-                      "data" : {
-                        "label" : "periodLabel",
-                        "concepts": [],
-                        "type" : "Genre"
-                      },
-                      "count" : 1,
-                      "type" : "AggregationBucket"
-                    },
-                           {
-                      "data" : {
-                        "label" : "placeLabel",
-                        "concepts": [],
-                        "type" : "Genre"
-                      },
-                      "count" : 1,
-                      "type" : "AggregationBucket"
-                    }
-                  ]
-                }
-              },
-              "results": [${workResponse(work)}]
-            }
-          """
-        }
-    }
-  }
-
   it("supports fetching the genre.label aggregation") {
     withWorksApi {
       case (worksIndex, routes) =>
@@ -329,58 +258,6 @@ class WorksAggregationsTest
     }
   }
 
-  it("supports aggregating on subject, ordered by frequency") {
-    val paleoNeuroBiology = createSubjectWith(label = "paleoNeuroBiology")
-    val realAnalysis = createSubjectWith(label = "realAnalysis")
-
-    val subjectLists = List(
-      List(paleoNeuroBiology),
-      List(realAnalysis),
-      List(realAnalysis),
-      List(paleoNeuroBiology, realAnalysis),
-      List.empty
-    )
-
-    val works = subjectLists
-      .map { indexedWork().subjects(_) }
-
-    withWorksApi {
-      case (worksIndex, routes) =>
-        insertIntoElasticsearch(worksIndex, works: _*)
-        assertJsonResponse(routes, s"/$apiPrefix/works?aggregations=subjects") {
-          Status.OK -> s"""
-            {
-              ${resultList(apiPrefix, totalResults = works.size)},
-              "aggregations": {
-                "type" : "Aggregations",
-                "subjects": {
-                  "type" : "Aggregation",
-                  "buckets": [
-                    {
-                      "data" : ${subject(realAnalysis, showConcepts = false)},
-                      "count" : 3,
-                      "type" : "AggregationBucket"
-                    },
-                    {
-                      "data" : ${subject(
-            paleoNeuroBiology,
-            showConcepts = false)},
-                      "count" : 2,
-                      "type" : "AggregationBucket"
-                    }
-                  ]
-                }
-              },
-              "results": [${works
-            .sortBy { _.state.canonicalId }
-            .map(workResponse)
-            .mkString(",")}]
-            }
-          """
-        }
-    }
-  }
-
   it("supports aggregating on subjects.label, ordered by frequency") {
     val paleoNeuroBiology = createSubjectWith(label = "paleoNeuroBiology")
     val realAnalysis = createSubjectWith(label = "realAnalysis")
@@ -427,63 +304,6 @@ class WorksAggregationsTest
               },
               "results": [${works
             .sortBy { _.state.canonicalId }
-            .map(workResponse)
-            .mkString(",")}]
-            }
-          """
-        }
-    }
-  }
-
-  it("supports aggregating on contributors") {
-    val agent47 = Contributor(agent = Agent("47"), roles = Nil)
-    val jamesBond = Contributor(agent = Agent("007"), roles = Nil)
-    val mi5 = Contributor(agent = Organisation("MI5"), roles = Nil)
-    val gchq = Contributor(agent = Organisation("GCHQ"), roles = Nil)
-
-    val works =
-      List(List(agent47), List(agent47), List(jamesBond, mi5), List(mi5, gchq))
-        .map { indexedWork().contributors(_) }
-
-    withWorksApi {
-      case (worksIndex, routes) =>
-        insertIntoElasticsearch(worksIndex, works: _*)
-        assertJsonResponse(
-          routes,
-          s"/$apiPrefix/works?aggregations=contributors") {
-          Status.OK -> s"""
-            {
-              ${resultList(apiPrefix, totalResults = works.size)},
-              "aggregations": {
-                "type" : "Aggregations",
-                "contributors": {
-                  "type" : "Aggregation",
-                  "buckets": [
-                    {
-                      "count" : 2,
-                      "data" : ${contributor(agent47)},
-                      "type" : "AggregationBucket"
-                    },
-                    {
-                      "count" : 2,
-                      "data" : ${contributor(mi5)},
-                      "type" : "AggregationBucket"
-                    },
-                    {
-                      "count" : 1,
-                      "data" : ${contributor(jamesBond)},
-                      "type" : "AggregationBucket"
-                    },
-                    {
-                      "count" : 1,
-                      "data" : ${contributor(gchq)},
-                      "type" : "AggregationBucket"
-                    }
-                  ]
-                }
-              },
-              "results": [${works
-            .sortBy(_.state.canonicalId)
             .map(workResponse)
             .mkString(",")}]
             }
@@ -568,74 +388,18 @@ class WorksAggregationsTest
         insertIntoElasticsearch(worksIndex, workWithContributor)
         assertJsonResponse(
           routes,
-          s"/$apiPrefix/works?aggregations=contributors") {
+          s"/$apiPrefix/works?aggregations=contributors.agent.label") {
           Status.OK -> s"""
             {
               ${resultList(apiPrefix, totalResults = 1)},
               "aggregations": {
                 "type" : "Aggregations",
-                "contributors": {
+                "contributors.agent.label": {
                   "type" : "Aggregation",
                   "buckets": []
                 }
               },
               "results": [${workResponse(workWithContributor)}]
-            }
-          """
-        }
-    }
-  }
-
-  it("supports aggregating on license") {
-    def createLicensedWork(
-      licenses: Seq[License]): Work.Visible[WorkState.Indexed] = {
-      val items =
-        licenses.map { license =>
-          createDigitalItemWith(license = Some(license))
-        }.toList
-
-      indexedWork().items(items)
-    }
-
-    val licenseLists = List(
-      List(License.CCBY),
-      List(License.CCBY),
-      List(License.CCBYNC),
-      List(License.CCBY, License.CCBYNC),
-      List.empty
-    )
-
-    val works = licenseLists.map { createLicensedWork(_) }
-
-    withWorksApi {
-      case (worksIndex, routes) =>
-        insertIntoElasticsearch(worksIndex, works: _*)
-        assertJsonResponse(routes, s"/$apiPrefix/works?aggregations=license") {
-          Status.OK -> s"""
-            {
-              ${resultList(apiPrefix, totalResults = works.size)},
-              "aggregations": {
-                "type" : "Aggregations",
-                "license": {
-                  "type" : "Aggregation",
-                  "buckets": [
-                    {
-                      "count" : 3,
-                      "data" : ${license(License.CCBY)},
-                      "type" : "AggregationBucket"
-                    },
-                    {
-                      "count" : 2,
-                      "data" : ${license(License.CCBYNC)},
-                      "type" : "AggregationBucket"
-                    }
-                  ]
-                }
-              },
-              "results": [${works
-            .sortBy { _.state.canonicalId }
-            .map(workResponse)
-            .mkString(",")}]
             }
           """
         }

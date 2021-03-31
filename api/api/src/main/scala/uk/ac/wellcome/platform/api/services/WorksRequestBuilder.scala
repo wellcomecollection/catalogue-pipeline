@@ -53,20 +53,17 @@ object WorksRequestBuilder
 
     // We don't split genres into concepts, as the data isn't great,
     // and for rendering isn't useful at the moment.
-    case WorkAggregationRequest.Genre |
-        WorkAggregationRequest.GenreDeprecated =>
+    case WorkAggregationRequest.Genre =>
       TermsAggregation("genres")
         .size(20)
         .field("data.genres.concepts.label.keyword")
 
-    case WorkAggregationRequest.Subject |
-        WorkAggregationRequest.SubjectDeprecated =>
+    case WorkAggregationRequest.Subject =>
       TermsAggregation("subjects")
         .size(20)
         .field("data.subjects.label.keyword")
 
-    case WorkAggregationRequest.Contributor |
-        WorkAggregationRequest.ContributorDeprecated =>
+    case WorkAggregationRequest.Contributor =>
       TermsAggregation("contributors")
         .size(20)
         .field("state.derivedData.contributorAgents")
@@ -76,8 +73,7 @@ object WorksRequestBuilder
         .size(200)
         .field("data.languages.id")
 
-    case WorkAggregationRequest.License |
-        WorkAggregationRequest.LicenseDeprecated =>
+    case WorkAggregationRequest.License =>
       TermsAggregation("license")
         .size(License.values.size)
         .field("data.items.locations.license.id")
