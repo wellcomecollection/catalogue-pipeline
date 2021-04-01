@@ -182,6 +182,11 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
                   "type": "Aggregation",
                   "buckets" : [
                     {
+                      "count" : 1,
+                      "data" : ${format(Audio)},
+                      "type" : "AggregationBucket"
+                    },
+                    {
                       "count" : 0,
                       "data" : ${format(Books)},
                       "type" : "AggregationBucket"
@@ -189,11 +194,6 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
                     {
                       "count" : 0,
                       "data" : ${format(Journals)},
-                      "type" : "AggregationBucket"
-                    },
-                    {
-                      "count" : 1,
-                      "data" : ${format(Audio)},
                       "type" : "AggregationBucket"
                     },
                     {
@@ -232,6 +232,11 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
                   "type" : "Aggregation",
                   "buckets": [
                     {
+                      "count" : 2,
+                      "data" : ${format(Audio)},
+                      "type" : "AggregationBucket"
+                    },
+                    {
                       "count" : 1,
                       "data" : ${format(Books)},
                       "type" : "AggregationBucket"
@@ -239,11 +244,6 @@ class WorksFilteredAggregationsTest extends ApiWorksTestBase {
                     {
                       "count" : 1,
                       "data" : ${format(Journals)},
-                      "type" : "AggregationBucket"
-                    },
-                    {
-                      "count" : 2,
-                      "data" : ${format(Audio)},
                       "type" : "AggregationBucket"
                     },
                     {
