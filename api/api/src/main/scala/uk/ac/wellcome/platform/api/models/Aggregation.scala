@@ -84,10 +84,9 @@ object AggregationMapping {
             .toTry
       }
       .map { buckets =>
-        buckets
-          .map { b =>
-            (b.key.as[T], b.docCount)
-          }
+        buckets.map { b =>
+          (b.key.as[T], b.docCount)
+        }
       }
       .map { tally =>
         tally.collect {
@@ -95,7 +94,14 @@ object AggregationMapping {
         }
       }
       .map { buckets =>
-        Aggregation(buckets.toList)
+        Aggregation(
+          buckets
+          // Sort manually here because filtered aggregations are bucketed before filtering
+          // therefore they are not always ordered by their final counts.
+          // Sorting in Scala is stable.
+            .sortBy(_.count)(Ordering[Int].reverse)
+            .toList
+        )
       }
 }
 
