@@ -3,7 +3,6 @@ package uk.ac.wellcome.platform.merger.services
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks._
-import uk.ac.wellcome.models.index.MergedWorkIndexConfig.sourceIdentifier
 import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.catalogue.internal_model.work.WorkFsm._
 import weco.catalogue.internal_model.image.ParentWork._
@@ -11,11 +10,13 @@ import uk.ac.wellcome.models.work.generators.SourceWorkGenerators
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.image.ParentWorks
 import weco.catalogue.internal_model.locations.{
+  AccessCondition,
+  AccessStatus,
   DigitalLocation,
   License,
   LocationType
 }
-import weco.catalogue.internal_model.work.{Format, MergeCandidate, Work}
+import weco.catalogue.internal_model.work.{Format, Item, MergeCandidate, Work}
 
 class PlatformMergerTest
     extends AnyFunSpec
@@ -796,5 +797,80 @@ class PlatformMergerTest
     visibleWorks(workForFilmReel.id).data.items shouldBe workForFilmReel.data.items
 
     visibleWorks(workForEbib.id).data.items shouldBe workForMets.data.items
+  }
+
+  it("ignores online resources for physical/digital bib merging rules") {
+    // This test case is based on a real example of three related works that
+    // were being merged incorrectly.  In particular, the METS work (and associated
+    // IIIF manifest) was being merged into the physical video formats, not the
+    // more detailed e-bib that it should have been attached to.
+    //
+    // See https://wellcome.slack.com/archives/C8X9YKM5X/p1617705467131600
+    val eVideoWork =
+      sierraIdentifiedWork()
+        .format(Format.Videos)
+        .items(
+          List(
+            Item(
+              id = IdState.Unidentifiable,
+              title = Some("Scope: UK Disability Charity"),
+              locations = List(
+                DigitalLocation(
+                  url = "http://www.scope.org.uk",
+                  locationType = LocationType.OnlineResource,
+                  accessConditions = List(
+                    AccessCondition(
+                      status = Some(AccessStatus.LicensedResources))
+                  )
+                )
+              )
+            )
+          )
+        )
+
+    val physicalVideoWork =
+      sierraIdentifiedWork()
+        .mergeCandidates(
+          List(
+            MergeCandidate(
+              id = IdState.Identified(
+                canonicalId = eVideoWork.state.canonicalId,
+                sourceIdentifier = eVideoWork.sourceIdentifier
+              ),
+              reason = Some("Physical/digitised Sierra work")
+            )
+          )
+        )
+        .format(Format.Videos)
+        .items(List(createIdentifiedPhysicalItem))
+
+    val metsWork =
+      metsIdentifiedWork()
+        .mergeCandidates(
+          List(
+            MergeCandidate(
+              id = IdState.Identified(
+                canonicalId = eVideoWork.state.canonicalId,
+                sourceIdentifier = eVideoWork.sourceIdentifier
+              ),
+              reason = Some("METS work")
+            )
+          )
+        )
+
+    val result = merger
+      .merge(works = Seq(eVideoWork, physicalVideoWork, metsWork))
+      .mergedWorksWithTime(now)
+
+    val redirectedWorks = result.collect {
+      case w: Work.Redirected[Merged] => w
+    }
+    val invisibleWorks = result.collect { case w: Work.Invisible[Merged] => w }
+
+    invisibleWorks shouldBe empty
+    redirectedWorks.map { w =>
+      w.state.canonicalId -> w.redirectTarget.canonicalId
+    }.toMap shouldBe Map(
+      metsWork.state.canonicalId -> eVideoWork.state.canonicalId)
   }
 }

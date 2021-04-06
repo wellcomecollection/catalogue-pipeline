@@ -2,6 +2,7 @@ package uk.ac.wellcome.platform.merger.rules
 
 import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.catalogue.internal_model.identifiers.{
+  IdState,
   IdentifierType,
   SourceIdentifier
 }
@@ -9,7 +10,7 @@ import weco.catalogue.internal_model.locations.{
   DigitalLocation,
   PhysicalLocation
 }
-import weco.catalogue.internal_model.work.{Format, Work}
+import weco.catalogue.internal_model.work.{Format, Item, Work}
 
 object WorkPredicates {
   type WorkPredicate = Work[Identified] => Boolean
@@ -27,6 +28,12 @@ object WorkPredicates {
   val zeroItem: WorkPredicate = work => work.data.items.isEmpty
   val singleItem: WorkPredicate = work => work.data.items.size == 1
   val multiItem: WorkPredicate = work => work.data.items.size > 1
+
+  val zeroIdentifiedItems: WorkPredicate =
+    work =>
+      work.data.items.collect {
+        case it @ Item(IdState.Identified(_, _, _), _, _) => it
+      }.isEmpty
 
   /**
     * This is the shape in which we expect the works from the transformers.
@@ -78,8 +85,14 @@ object WorkPredicates {
   val sierraDigaids: WorkPredicate =
     satisfiesAll(sierraWork, hasDigcode("digaids"))
 
-  val sierraElectronicBib: WorkPredicate =
-    satisfiesAll(zeroItemSierra, format(Format.Videos))
+  val sierraElectronicVideo: WorkPredicate =
+    satisfiesAll(
+      sierraWork,
+      format(Format.Videos),
+      // We may get unidentified items on Sierra bibs, drawn from
+      // resources in field 856 -- we don't care about those here.
+      zeroIdentifiedItems
+    )
 
   def not(pred: WorkPredicate): WorkPredicate = !pred(_)
 
