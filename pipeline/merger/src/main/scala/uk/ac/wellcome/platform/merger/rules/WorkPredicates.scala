@@ -30,11 +30,10 @@ object WorkPredicates {
   val multiItem: WorkPredicate = work => work.data.items.size > 1
 
   val zeroIdentifiedItems: WorkPredicate =
-    work => work.data.items
-      .collect {
+    work =>
+      work.data.items.collect {
         case it @ Item(IdState.Identified(_, _, _), _, _) => it
-      }
-      .isEmpty
+      }.isEmpty
 
   /**
     * This is the shape in which we expect the works from the transformers.

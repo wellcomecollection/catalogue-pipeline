@@ -819,7 +819,8 @@ class PlatformMergerTest
                   url = "http://www.scope.org.uk",
                   locationType = LocationType.OnlineResource,
                   accessConditions = List(
-                    AccessCondition(status = Some(AccessStatus.LicensedResources))
+                    AccessCondition(
+                      status = Some(AccessStatus.LicensedResources))
                   )
                 )
               )
@@ -867,8 +868,9 @@ class PlatformMergerTest
     val invisibleWorks = result.collect { case w: Work.Invisible[Merged] => w }
 
     invisibleWorks shouldBe empty
-    redirectedWorks
-      .map { w => w.state.canonicalId -> w.redirectTarget.canonicalId }
-      .toMap shouldBe Map(metsWork.state.canonicalId -> eVideoWork.state.canonicalId)
+    redirectedWorks.map { w =>
+      w.state.canonicalId -> w.redirectTarget.canonicalId
+    }.toMap shouldBe Map(
+      metsWork.state.canonicalId -> eVideoWork.state.canonicalId)
   }
 }
