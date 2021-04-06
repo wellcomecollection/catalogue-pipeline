@@ -3,7 +3,6 @@ package uk.ac.wellcome.platform.merger.services
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks._
-import uk.ac.wellcome.models.index.MergedWorkIndexConfig.sourceIdentifier
 import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.catalogue.internal_model.work.WorkFsm._
 import weco.catalogue.internal_model.image.ParentWork._
