@@ -136,7 +136,6 @@ object MultipleWorksParams extends QueryParamsUtils {
         "genres.label".as[GenreFilter].?,
         "subjects.label".as[SubjectFilter].?,
         "contributors.agent.label".as[ContributorsFilter].?,
-        "license".as[LicenseFilter].?,
         "items.locations.license".as[LicenseFilter].?,
         "include".as[WorksIncludes].?,
         "aggregations".as[List[WorkAggregationRequest]].?,
@@ -146,7 +145,8 @@ object MultipleWorksParams extends QueryParamsUtils {
         "identifiers".as[IdentifiersFilter].?,
         "items.locations.locationType".as[ItemLocationTypeIdFilter].?,
         "items.locations.accessConditions.status".as[AccessStatusFilter].?,
-        "type".as[WorkTypeFilter].?
+        "type".as[WorkTypeFilter].?,
+        "partOf".as[PartOfFilter].?
       )
     ).tflatMap {
       case (
@@ -159,7 +159,6 @@ object MultipleWorksParams extends QueryParamsUtils {
           genre,
           subjects,
           contributors,
-          license,
           itemsLocationsLicense,
           includes,
           aggregations,
@@ -169,17 +168,17 @@ object MultipleWorksParams extends QueryParamsUtils {
           identifiers,
           itemLocationTypeId,
           accessStatus,
-          workType) =>
+          workType,
+          partOf) =>
         // Scala has a max tuple size of 22 so this is nested to get around this limit
         parameter(
           (
-            "partOf".as[PartOfFilter].?,
             "availabilities".as[AvailabilitiesFilter].?,
             "_queryType".as[SearchQueryType].?,
             "_index".as[String].?,
           )
         ).tflatMap {
-          case (partOf, availabilities, queryType, index) =>
+          case (availabilities, queryType, index) =>
             val params = MultipleWorksParams(
               page,
               pageSize,
@@ -190,8 +189,7 @@ object MultipleWorksParams extends QueryParamsUtils {
               genre,
               subjects,
               contributors,
-              // TODO: remove the plain "license" filter
-              itemsLocationsLicense.orElse(license),
+              itemsLocationsLicense,
               includes,
               aggregations,
               sort,
@@ -254,19 +252,11 @@ object MultipleWorksParams extends QueryParamsUtils {
   implicit val aggregationsDecoder: Decoder[List[WorkAggregationRequest]] =
     decodeOneOfCommaSeparated(
       "workType" -> WorkAggregationRequest.Format,
-      "genres" -> WorkAggregationRequest.GenreDeprecated,
-      // TODO remove genres in favour of genres.label
       "genres.label" -> WorkAggregationRequest.Genre,
       "production.dates" -> WorkAggregationRequest.ProductionDate,
-      // TODO remove subjects in favour of subjects.label
-      "subjects" -> WorkAggregationRequest.SubjectDeprecated,
       "subjects.label" -> WorkAggregationRequest.Subject,
       "languages" -> WorkAggregationRequest.Languages,
-      // TODO remove contributors in favour of contributors.agent.label
-      "contributors" -> WorkAggregationRequest.ContributorDeprecated,
       "contributors.agent.label" -> WorkAggregationRequest.Contributor,
-      // TODO remove license in favour of items.locations.license
-      "license" -> WorkAggregationRequest.LicenseDeprecated,
       "items.locations.license" -> WorkAggregationRequest.License,
       "availabilities" -> WorkAggregationRequest.Availabilities
     )

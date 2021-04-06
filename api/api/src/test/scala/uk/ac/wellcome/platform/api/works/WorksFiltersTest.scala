@@ -598,7 +598,9 @@ class WorksFiltersTest
       withWorksApi {
         case (worksIndex, routes) =>
           insertIntoElasticsearch(worksIndex, works: _*)
-          assertJsonResponse(routes, s"/$apiPrefix/works?license=cc-by") {
+          assertJsonResponse(
+            routes,
+            s"/$apiPrefix/works?items.locations.license=cc-by") {
             Status.OK -> worksListResponse(
               apiPrefix = apiPrefix,
               works = Seq(ccByWork, bothLicenseWork).sortBy {
@@ -615,7 +617,7 @@ class WorksFiltersTest
           insertIntoElasticsearch(worksIndex, works: _*)
           assertJsonResponse(
             routes,
-            s"/$apiPrefix/works?license=cc-by,cc-by-nc") {
+            s"/$apiPrefix/works?items.locations.license=cc-by,cc-by-nc") {
             Status.OK -> worksListResponse(
               apiPrefix = apiPrefix,
               works = Seq(ccByWork, ccByNcWork, bothLicenseWork).sortBy {

@@ -94,24 +94,12 @@ class WorkFiltersAndAggregationsBuilder(
   override def pairedAggregationRequests(
     filter: WorkFilter): List[WorkAggregationRequest] =
     filter match {
-      case _: FormatFilter    => List(WorkAggregationRequest.Format)
-      case _: LanguagesFilter => List(WorkAggregationRequest.Languages)
-      case _: GenreFilter =>
-        List(
-          WorkAggregationRequest.Genre,
-          WorkAggregationRequest.GenreDeprecated)
-      case _: SubjectFilter =>
-        List(
-          WorkAggregationRequest.Subject,
-          WorkAggregationRequest.SubjectDeprecated)
-      case _: ContributorsFilter =>
-        List(
-          WorkAggregationRequest.Contributor,
-          WorkAggregationRequest.ContributorDeprecated)
-      case _: LicenseFilter =>
-        List(
-          WorkAggregationRequest.License,
-          WorkAggregationRequest.LicenseDeprecated)
+      case _: FormatFilter       => List(WorkAggregationRequest.Format)
+      case _: LanguagesFilter    => List(WorkAggregationRequest.Languages)
+      case _: GenreFilter        => List(WorkAggregationRequest.Genre)
+      case _: SubjectFilter      => List(WorkAggregationRequest.Subject)
+      case _: ContributorsFilter => List(WorkAggregationRequest.Contributor)
+      case _: LicenseFilter      => List(WorkAggregationRequest.License)
       case _: AvailabilitiesFilter =>
         List(WorkAggregationRequest.Availabilities)
       case _ => Nil
