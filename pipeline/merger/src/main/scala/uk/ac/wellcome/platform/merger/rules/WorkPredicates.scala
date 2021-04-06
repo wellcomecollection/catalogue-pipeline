@@ -78,7 +78,7 @@ object WorkPredicates {
   val sierraDigaids: WorkPredicate =
     satisfiesAll(sierraWork, hasDigcode("digaids"))
 
-  val sierraElectronicBib: WorkPredicate =
+  val sierraElectronicVideo: WorkPredicate =
     satisfiesAll(zeroItemSierra, format(Format.Videos))
 
   def not(pred: WorkPredicate): WorkPredicate = !pred(_)

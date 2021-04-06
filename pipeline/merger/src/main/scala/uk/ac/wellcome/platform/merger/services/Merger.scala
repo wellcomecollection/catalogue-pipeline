@@ -172,7 +172,7 @@ object PlatformMerger extends Merger {
     works: Seq[Work[Identified]]): Option[Work.Visible[Identified]] =
     works
       .find(WorkPredicates.singlePhysicalItemCalmWork)
-      .orElse(works.find(WorkPredicates.sierraElectronicBib))
+      .orElse(works.find(WorkPredicates.sierraElectronicVideo))
       .orElse(works.find(WorkPredicates.physicalSierra))
       .orElse(works.find(WorkPredicates.sierraWork)) match {
       case Some(target: Work.Visible[Identified]) => Some(target)
