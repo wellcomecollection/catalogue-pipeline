@@ -20,6 +20,8 @@ case object WorksMultiMatcher {
     "data.title.shingles",
     "data.alternativeTitles")
 
+
+
   def fieldsWithBoost(boost: Int,
                       fields: Seq[String]): Seq[FieldWithOptionalBoost] =
     fields.map(FieldWithOptionalBoost(_, Some(boost.toDouble)))
@@ -78,6 +80,13 @@ case object WorksMultiMatcher {
               `type` = Some(BEST_FIELDS),
               operator = Some(AND),
               fuzziness = Some("AUTO")
+            ),
+            MultiMatchQuery(
+              q,
+              queryName = Some("non-english titles"),
+              fields = WorksAnalysis.languages.map(FieldWithOptionalBoost(language => s"data.title.${language}", None)),
+              `type` = Some(BEST_FIELDS),
+              operator = Some(AND)
             )
           )),
         MultiMatchQuery(
