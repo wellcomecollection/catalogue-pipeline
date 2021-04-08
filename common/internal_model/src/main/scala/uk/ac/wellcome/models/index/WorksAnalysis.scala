@@ -37,7 +37,7 @@ object WorksAnalysis {
     )
 
   val languages =
-    List("french", "italian", "german", "hindi", "arabic", "bengali").sort
+    List("french", "italian", "german", "hindi", "arabic", "bengali").sorted
 
   val languageFiltersAndAnalyzers = languages.map(lang => {
     val name = s"${lang}_token_filter"
