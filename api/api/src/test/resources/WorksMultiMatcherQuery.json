@@ -80,12 +80,12 @@
               "multi_match": {
                 "_name": "non-english titles",
                 "fields": [
-                  "data.title.arabic",
-                  "data.title.bengali",
                   "data.title.french",
+                  "data.title.italian",
                   "data.title.german",
                   "data.title.hindi",
-                  "data.title.italian"
+                  "data.title.arabic",
+                  "data.title.bengali"
                 ],
                 "operator": "And",
                 "query": "{{query}}",
