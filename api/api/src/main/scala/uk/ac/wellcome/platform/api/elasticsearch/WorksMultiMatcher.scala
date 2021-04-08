@@ -11,7 +11,7 @@ import com.sksamuel.elastic4s.requests.searches.queries.matches.{
   FieldWithOptionalBoost,
   MultiMatchQuery
 }
-import uk.ac.wellcome.models.index.WorksAnalysis.whitespaceAnalyzer
+import uk.ac.wellcome.models.index.WorksAnalysis.{languages, whitespaceAnalyzer}
 
 case object WorksMultiMatcher {
   val titleFields = Seq(
@@ -78,6 +78,14 @@ case object WorksMultiMatcher {
               `type` = Some(BEST_FIELDS),
               operator = Some(AND),
               fuzziness = Some("AUTO")
+            ),
+            MultiMatchQuery(
+              q,
+              queryName = Some("non-english titles"),
+              fields = languages.map(language =>
+                FieldWithOptionalBoost(s"data.title.${language}", None)),
+              `type` = Some(BEST_FIELDS),
+              operator = Some(AND)
             )
           )),
         MultiMatchQuery(

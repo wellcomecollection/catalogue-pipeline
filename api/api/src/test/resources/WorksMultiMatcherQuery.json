@@ -28,7 +28,7 @@
             {
               "bool": {
                 "_name": "title prefix",
-                "boost": 1000.0,
+                "boost": 1000,
                 "must": [
                   {
                     "prefix": {
@@ -71,6 +71,22 @@
                   "data.alternativeTitles^80.0"
                 ],
                 "fuzziness": "AUTO",
+                "operator": "And",
+                "query": "{{query}}",
+                "type": "best_fields"
+              }
+            },
+            {
+              "multi_match": {
+                "_name": "non-english titles",
+                "fields": [
+                  "data.title.french",
+                  "data.title.italian",
+                  "data.title.german",
+                  "data.title.hindi",
+                  "data.title.arabic",
+                  "data.title.bengali"
+                ],
                 "operator": "And",
                 "query": "{{query}}",
                 "type": "best_fields"
