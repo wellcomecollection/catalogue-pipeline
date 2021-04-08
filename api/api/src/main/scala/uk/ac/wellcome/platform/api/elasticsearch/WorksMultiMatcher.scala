@@ -82,9 +82,8 @@ case object WorksMultiMatcher {
             MultiMatchQuery(
               q,
               queryName = Some("non-english titles"),
-              fields = WorksAnalysis.languages.map(FieldWithOptionalBoost(
-                language => s"data.title.${language}",
-                None)),
+              fields = WorksAnalysis.languages.map(language =>
+                FieldWithOptionalBoost(s"data.title.${language}", None)),
               `type` = Some(BEST_FIELDS),
               operator = Some(AND)
             )
