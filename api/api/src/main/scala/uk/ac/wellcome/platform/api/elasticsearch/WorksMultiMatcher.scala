@@ -11,7 +11,7 @@ import com.sksamuel.elastic4s.requests.searches.queries.matches.{
   FieldWithOptionalBoost,
   MultiMatchQuery
 }
-import uk.ac.wellcome.models.index.WorksAnalysis.{whitespaceAnalyzer, languages}
+import uk.ac.wellcome.models.index.WorksAnalysis.{languages, whitespaceAnalyzer}
 
 case object WorksMultiMatcher {
   val titleFields = Seq(
