@@ -326,14 +326,10 @@ class ApiSwaggerTest
   it("lists the properties on the Aggregations model") {
     checkSwaggerJson { json =>
       val schemas =
-        getKey(json, "components")
-          .flatMap { getKey(_, "schemas") }
-          .get
+        getKey(json, "components").flatMap { getKey(_, "schemas") }.get
 
       val aggregationsProperties =
-        getKey(schemas, "Aggregations")
-          .flatMap { getKey(_, "properties") }
-          .get
+        getKey(schemas, "Aggregations").flatMap { getKey(_, "properties") }.get
 
       getKeys(aggregationsProperties) should contain("type")
       val displayFields = getKeys(aggregationsProperties)
@@ -341,7 +337,7 @@ class ApiSwaggerTest
 
       getFields[DisplayWorkAggregations] should contain("ontologyType")
       val internalFields = getFields[DisplayWorkAggregations]
-        .filterNot { _ == "ontologyType"}
+        .filterNot { _ == "ontologyType" }
 
       displayFields should contain theSameElementsAs internalFields
     }
