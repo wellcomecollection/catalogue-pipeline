@@ -18,16 +18,20 @@ case class DisplayWorkAggregations(
     description = "Format aggregation on a set of results."
   ) workType: Option[DisplayAggregation[DisplayFormat]],
   @Schema(
+    name = "production.dates",
     description = "Date aggregation on a set of results."
-  ) @JsonKey("production.dates") productionDates: Option[
+  ) @JsonKey("production.dates") `production.dates`: Option[
     DisplayAggregation[DisplayPeriod]],
   @Schema(
+    name = "genres.label",
     description = "Genre aggregation on a set of results."
   ) `genres.label`: Option[DisplayAggregation[DisplayGenre]],
   @Schema(
+    name = "subjects.label",
     description = "Subject aggregation on a set of results."
   ) `subjects.label`: Option[DisplayAggregation[DisplaySubject]],
   @Schema(
+    name = "contributors.agent.label",
     description = "Contributor aggregation on a set of results."
   ) `contributors.agent.label`: Option[
     DisplayAggregation[DisplayAbstractAgent]],
@@ -35,6 +39,7 @@ case class DisplayWorkAggregations(
     description = "Language aggregation on a set of results."
   ) languages: Option[DisplayAggregation[DisplayLanguage]],
   @Schema(
+    name = "items.locations.license",
     description = "License aggregation on a set of results."
   ) `items.locations.license`: Option[DisplayAggregation[DisplayLicense]],
   @Schema(
@@ -52,7 +57,7 @@ object DisplayWorkAggregations {
     aggregationRequests: Seq[WorkAggregationRequest]): DisplayWorkAggregations =
     DisplayWorkAggregations(
       workType = displayAggregation(aggs.format, DisplayFormat.apply),
-      productionDates =
+      `production.dates` =
         displayAggregation(aggs.productionDates, DisplayPeriod.apply),
       `genres.label` =
         whenRequestPresent(aggregationRequests, WorkAggregationRequest.Genre)(

@@ -6,7 +6,11 @@ import io.circe.Json
 import org.scalatest.prop.TableDrivenPropertyChecks
 import uk.ac.wellcome.display.models.{SingleImageIncludes, WorksIncludes}
 import uk.ac.wellcome.platform.api.fixtures.ReflectionHelpers
-import uk.ac.wellcome.platform.api.models.{SearchQueryType, WorkAggregations}
+import uk.ac.wellcome.platform.api.models.{
+  DisplayWorkAggregations,
+  SearchQueryType,
+  WorkAggregations
+}
 import uk.ac.wellcome.platform.api.rest._
 import uk.ac.wellcome.platform.api.works.ApiWorksTestBase
 
@@ -316,6 +320,30 @@ class ApiSwaggerTest
         getKey(schema, key = "type").flatMap { _.asString } shouldBe Some(
           "integer")
       }
+    }
+  }
+
+  it("lists the properties on the Aggregations model") {
+    checkSwaggerJson { json =>
+      val schemas =
+        getKey(json, "components")
+          .flatMap { getKey(_, "schemas") }
+          .get
+
+      val aggregationsProperties =
+        getKey(schemas, "Aggregations")
+          .flatMap { getKey(_, "properties") }
+          .get
+
+      getKeys(aggregationsProperties) should contain("type")
+      val displayFields = getKeys(aggregationsProperties)
+        .filterNot { _ == "type" }
+
+      getFields[DisplayWorkAggregations] should contain("ontologyType")
+      val internalFields = getFields[DisplayWorkAggregations]
+        .filterNot { _ == "ontologyType"}
+
+      displayFields should contain theSameElementsAs internalFields
     }
   }
 
