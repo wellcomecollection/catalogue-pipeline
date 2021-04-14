@@ -9,6 +9,7 @@ import uk.ac.wellcome.platform.merger.rules.WorkPredicates.{
   WorkPredicate,
   WorkPredicateOps
 }
+import weco.catalogue.internal_model.identifiers.IdentifierType
 import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.catalogue.internal_model.locations.Location
 import weco.catalogue.internal_model.work.Work
@@ -80,9 +81,9 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
       object MiroIdOrdering extends Ordering[Work[Identified]] {
         def compare(x: Work[Identified], y: Work[Identified]): Int =
           (
-            x.sourceIdentifier.identifierType.id,
-            y.sourceIdentifier.identifierType.id) match {
-            case ("miro-image-number", "miro-image-number") =>
+            x.sourceIdentifier.identifierType,
+            y.sourceIdentifier.identifierType) match {
+            case (IdentifierType.MiroImageNumber, IdentifierType.MiroImageNumber) =>
               x.sourceIdentifier.value compare y.sourceIdentifier.value
             case _ => 0
           }
