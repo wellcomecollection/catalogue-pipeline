@@ -80,10 +80,10 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
 
       object MiroIdOrdering extends Ordering[Work[Identified]] {
         def compare(x: Work[Identified], y: Work[Identified]): Int =
-          (
-            x.sourceIdentifier.identifierType,
-            y.sourceIdentifier.identifierType) match {
-            case (IdentifierType.MiroImageNumber, IdentifierType.MiroImageNumber) =>
+          (x.sourceIdentifier.identifierType, y.sourceIdentifier.identifierType) match {
+            case (
+                IdentifierType.MiroImageNumber,
+                IdentifierType.MiroImageNumber) =>
               x.sourceIdentifier.value compare y.sourceIdentifier.value
             case _ => 0
           }
