@@ -1,8 +1,12 @@
+locals {
+  wait_minutes = var.is_reindexing ? 45 : 5
+}
+
 module "batcher_queue" {
   source                     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
   queue_name                 = "${local.namespace_hyphen}_batcher"
   topic_arns                 = [module.router_path_output_topic.arn]
-  visibility_timeout_seconds = 3000
+  visibility_timeout_seconds = (local.wait_minutes + 5) * 60
   aws_region                 = var.aws_region
   alarm_topic_arn            = var.dlq_alarm_arn
 }
@@ -28,9 +32,13 @@ module "batcher" {
     queue_url        = module.batcher_queue.url
     output_topic_arn = module.batcher_output_topic.arn
 
-    flush_interval_minutes = 45     // NOTE: this needs to be less than visibility timeout
-    max_processed_paths    = 100000 // NOTE: SQS in flight limit is 120k
-    max_batch_size         = 40
+    # NOTE: this needs to be less than visibility timeout
+    flush_interval_minutes = local.wait_minutes
+
+    # NOTE: SQS in flight limit is 120k
+    max_processed_paths = var.is_reindexing ? 100000 : 5000
+
+    max_batch_size      = 40
   }
 
   secret_env_vars = {}
