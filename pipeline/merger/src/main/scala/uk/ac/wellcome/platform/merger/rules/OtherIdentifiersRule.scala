@@ -6,6 +6,7 @@ import cats.implicits._
 import uk.ac.wellcome.platform.merger.logging.MergerLogging
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 import uk.ac.wellcome.platform.merger.models.Sources.findFirstLinkedDigitisedSierraWorkFor
+import weco.catalogue.internal_model.identifiers.IdentifierType
 import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.catalogue.internal_model.identifiers.SourceIdentifier
 import weco.catalogue.internal_model.work.Work
@@ -30,7 +31,8 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
   // - wellcome-digcode is present to persist digcode identifiers from
   //   Encore records onto Calm target works if they are merged, because
   //   digcode identifiers are used as a tagging/classification system.
-  private val otherIdentifiersTypeAllowList = Set("wellcome-digcode")
+  private val otherIdentifiersTypeAllowList = Set(
+    IdentifierType.WellcomeDigcode)
 
   override def merge(
     target: Work.Visible[Identified],
@@ -60,7 +62,7 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
   private def getAllowedIdentifiersFromSource(
     source: Work[Identified]): List[SourceIdentifier] =
     (source.sourceIdentifier +: source.data.otherIdentifiers.filter { id =>
-      otherIdentifiersTypeAllowList.contains(id.identifierType.id)
+      otherIdentifiersTypeAllowList.exists(_ == id.identifierType)
     }).distinct
 
   private val mergeSingleMiroIntoSingleOrZeroItemSierraTarget =
