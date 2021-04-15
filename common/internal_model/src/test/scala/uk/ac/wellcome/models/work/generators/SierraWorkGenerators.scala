@@ -8,7 +8,7 @@ trait SierraWorkGenerators extends WorkGenerators with ItemsGenerators {
   def sierraIdentifiedWork(): Work.Visible[WorkState.Identified] =
     identifiedWork(sourceIdentifier = createSierraSystemSourceIdentifier)
       .otherIdentifiers(
-        List(createSierraSystemSourceIdentifier)
+        List(createSierraSystemSourceIdentifier, createSierraIdentifierSourceIdentifier)
       )
 
   def sierraIdentifiedWorkPair(): (Work.Visible[WorkState.Identified],

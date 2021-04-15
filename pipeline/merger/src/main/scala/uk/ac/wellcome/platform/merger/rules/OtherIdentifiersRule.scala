@@ -32,7 +32,7 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
   //   Encore records onto Calm target works if they are merged, because
   //   digcode identifiers are used as a tagging/classification system.
   private val otherIdentifiersTypeAllowList = Set(
-    IdentifierType.WellcomeDigcode)
+    IdentifierType.WellcomeDigcode, IdentifierType.SierraIdentifier)
 
   override def merge(
     target: Work.Visible[Identified],
