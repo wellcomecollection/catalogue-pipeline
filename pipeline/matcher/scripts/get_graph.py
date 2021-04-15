@@ -15,13 +15,30 @@ source_type_labels = {
 }
 
 
+def get_aws_session(*, role_arn):
+    sts_client = boto3.client("sts")
+    assumed_role_object = sts_client.assume_role(
+        RoleArn=role_arn, RoleSessionName="AssumeRoleSession1"
+    )
+    credentials = assumed_role_object["Credentials"]
+    return boto3.Session(
+        aws_access_key_id=credentials["AccessKeyId"],
+        aws_secret_access_key=credentials["SecretAccessKey"],
+        aws_session_token=credentials["SessionToken"],
+    )
+
+
 @click.command()
 @click.argument("index_date")
 @click.argument("work_id")
 def main(index_date, work_id):
-    session = boto3.Session(profile_name="platform-read_only")
+    session = get_aws_session(
+        role_arn="arn:aws:iam::760097843905:role/platform-read_only"
+    )
     # Necessary for reading secrets
-    dev_session = boto3.Session(profile_name="platform-developer")
+    dev_session = get_aws_session(
+        role_arn="arn:aws:iam::760097843905:role/platform-developer"
+    )
     es = get_pipeline_storage_es_client(dev_session, index_date=index_date)
     graph = Digraph(f"Matcher graph for {work_id}", format="pdf")
 
