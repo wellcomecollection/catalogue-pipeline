@@ -46,7 +46,7 @@ data "aws_route53_zone" "weco_zone" {
 resource "aws_acm_certificate_validation" "id_cert" {
   provider = aws.us_east_1
 
-  certificate_arn         = aws_acm_certificate.id.arn
+  certificate_arn = aws_acm_certificate.id.arn
   validation_record_fqdns = [
     # This is temporarily hard-coded to match what's currently deployed,
     # but if we decide to keep this we should come back and deploy
@@ -153,7 +153,7 @@ resource "aws_cognito_user_pool_client" "web_auth_test" {
   allowed_oauth_flows_user_pool_client = true
   allowed_oauth_flows                  = ["code"]
   allowed_oauth_scopes                 = concat(["openid", "email"], aws_cognito_resource_server.stacks_api.scope_identifiers)
-  explicit_auth_flows                  = [
+  explicit_auth_flows = [
     "ALLOW_CUSTOM_AUTH",
     "ALLOW_REFRESH_TOKEN_AUTH",
     "ALLOW_USER_PASSWORD_AUTH",
