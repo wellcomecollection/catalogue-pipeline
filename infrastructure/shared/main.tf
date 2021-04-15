@@ -1,3 +1,0 @@
-module "identity" {
-  source = "./identity"
-}
