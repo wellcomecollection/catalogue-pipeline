@@ -33,24 +33,32 @@ data "aws_route53_zone" "weco_zone" {
   private_zone = false
 }
 
-resource "aws_route53_record" "cert_validation" {
+/*resource "aws_route53_record" "cert_validation" {
   provider = aws.dns
 
   name    = aws_acm_certificate.id.domain_validation_options[0].resource_record_name
   type    = aws_acm_certificate.id.domain_validation_options[0].resource_record_type
   zone_id = data.aws_route53_zone.weco_zone.id
-  records = [aws_acm_certificate.id.domain_validation_options[0].resource_record_value]
+  records = [
+    aws_acm_certificate.id.domain_validation_options[0].resource_record_value
+  ]
   ttl     = 60
-}
+}*/
 
 resource "aws_acm_certificate_validation" "id_cert" {
   provider = aws.us_east_1
 
   certificate_arn         = aws_acm_certificate.id.arn
-  validation_record_fqdns = [aws_route53_record.cert_validation.fqdn]
+  validation_record_fqdns = [
+    # This is temporarily hard-coded to match what's currently deployed,
+    # but if we decide to keep this we should come back and deploy
+    # it properly.
+    "_4471fcd7032a27a3594fb572e9c5bcff.id.wellcomecollection.org",
+    #aws_route53_record.cert_validation.fqdn,
+  ]
 }
 
-resource "aws_route53_record" "cognito_cloudfront_distribution" {
+/*resource "aws_route53_record" "cognito_cloudfront_distribution" {
   provider = aws.dns
 
   name    = "id.wellcomecollection.org"
@@ -62,7 +70,7 @@ resource "aws_route53_record" "cognito_cloudfront_distribution" {
     zone_id                = "Z2FDTNDATAQYW2"
     evaluate_target_health = true
   }
-}
+}*/
 
 # Cognito
 resource "aws_cognito_user_pool" "pool" {
@@ -147,13 +155,17 @@ resource "aws_cognito_user_pool_client" "web_auth_test" {
   allowed_oauth_flows_user_pool_client = true
   allowed_oauth_flows                  = ["code"]
   allowed_oauth_scopes                 = concat(["openid", "email"], aws_cognito_resource_server.stacks_api.scope_identifiers)
-  explicit_auth_flows                  = ["USER_PASSWORD_AUTH"]
+  explicit_auth_flows                  = [
+    "ALLOW_CUSTOM_AUTH",
+    "ALLOW_REFRESH_TOKEN_AUTH",
+    "ALLOW_USER_PASSWORD_AUTH",
+    "ALLOW_USER_SRP_AUTH",
+  ]
 
   user_pool_id    = aws_cognito_user_pool.pool.id
   generate_secret = false
 
   callback_urls                = ["http://localhost:3000/works/auth-code"]
-  default_redirect_uri         = "http://localhost:3000/works/auth-code"
-  logout_urls                  = ["http://localhost:3000/logout"]
+  logout_urls                  = ["http://localhost:3000/works/logout"]
   supported_identity_providers = ["COGNITO"]
 }
