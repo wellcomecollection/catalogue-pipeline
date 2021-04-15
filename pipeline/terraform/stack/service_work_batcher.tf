@@ -38,7 +38,7 @@ module "batcher" {
     # NOTE: SQS in flight limit is 120k
     max_processed_paths = var.is_reindexing ? 100000 : 5000
 
-    max_batch_size      = 40
+    max_batch_size = 40
   }
 
   secret_env_vars = {}
