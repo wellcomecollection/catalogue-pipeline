@@ -91,7 +91,10 @@ class OtherIdentifiersRuleTest
       case FieldMergeResult(otherIdentifiers, mergedSources) =>
         otherIdentifiers should contain theSameElementsAs
           List(physicalSierraWork.sourceIdentifier, miroWork.sourceIdentifier) ++
-            metsWorks.map(_.sourceIdentifier) ++ calmWork.data.otherIdentifiers
+            metsWorks.map(_.sourceIdentifier) ++ calmWork.data.otherIdentifiers :+
+            physicalSierraWork.data.otherIdentifiers
+              .find(_.identifierType.id == IdentifierType.SierraIdentifier.id)
+              .get
 
         mergedSources should contain theSameElementsAs (physicalSierraWork :: miroWork :: metsWorks)
     }
