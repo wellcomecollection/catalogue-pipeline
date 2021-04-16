@@ -196,8 +196,11 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
         // e.g. "Spring 2000"
         if (datePartsMap.contains("season")) {
           List(
-            datePartsMap.get("season")
-              .flatMap { s => toNamedMonth(id, Some(s)) }
+            datePartsMap
+              .get("season")
+              .flatMap { s =>
+                toNamedMonth(id, Some(s))
+              }
               .map(_.value),
             year
           )

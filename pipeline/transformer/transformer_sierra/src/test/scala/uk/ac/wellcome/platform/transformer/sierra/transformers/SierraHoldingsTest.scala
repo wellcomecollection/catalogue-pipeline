@@ -75,7 +75,9 @@ class SierraHoldingsTest
             MarcSubfield(tag = "i", content = "1991-2017"),
             MarcSubfield(tag = "j", content = "02-04"),
             MarcSubfield(tag = "k", content = "01-17"),
-            MarcSubfield(tag = "x", content = "Chronology adjusted by embargo period"),
+            MarcSubfield(
+              tag = "x",
+              content = "Chronology adjusted by embargo period"),
           )
         ),
         createVarFieldWith(
@@ -547,7 +549,9 @@ class SierraHoldingsTest
       val holdings = getHoldings(dataMap)
       holdings should have size 1
 
-      holdings.head.location.get.asInstanceOf[PhysicalLocation].shelfmark shouldBe Some("/MED")
+      holdings.head.location.get
+        .asInstanceOf[PhysicalLocation]
+        .shelfmark shouldBe Some("/MED")
     }
 
     it("skips adding a location if the location code is unrecognised") {

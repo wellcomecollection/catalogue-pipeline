@@ -62,14 +62,15 @@ object SierraHoldings extends SierraQueryOps {
               (varFields, it)
             }
         }
-        .flatMap { case (varFields, Item(_, title, locations)) =>
-          locations.map { loc =>
-            Holdings(
-              note = title,
-              enumeration = SierraHoldingsEnumeration(id, varFields),
-              location = Some(loc)
-            )
-          }
+        .flatMap {
+          case (varFields, Item(_, title, locations)) =>
+            locations.map { loc =>
+              Holdings(
+                note = title,
+                enumeration = SierraHoldingsEnumeration(id, varFields),
+                location = Some(loc)
+              )
+            }
         }
 
     // Note: holdings records are sparsely populated, and a lot of the information is
