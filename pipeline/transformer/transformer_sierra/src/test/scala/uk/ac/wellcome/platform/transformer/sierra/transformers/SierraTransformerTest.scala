@@ -943,57 +943,6 @@ class SierraTransformerTest
   }
 
   describe("includes the holdings") {
-    it("adds a digital item if fixed field 40 = 'elro'") {
-      val holdingsId = createSierraHoldingsNumber
-      val holdingsData =
-        s"""
-           |{
-           |  "id": "$holdingsId",
-           |  "fixedFields": {
-           |    "40": {"label": "LOCATION", "value": "elro "}
-           |  },
-           |  "varFields": [
-           |    {
-           |      "marcTag": "856",
-           |      "subfields": [
-           |        {"tag": "u", "content": "https://example.org/holdings"},
-           |        {"tag": "z", "content": "View this journal"}
-           |      ]
-           |    }
-           |  ]
-           |}
-       """.stripMargin
-
-      val transformable = createSierraTransformableWith(
-        holdingsRecords = List(
-          SierraHoldingsRecord(
-            id = holdingsId,
-            data = holdingsData,
-            modifiedDate = Instant.now(),
-            bibIds = List(),
-            unlinkedBibIds = List()
-          )
-        )
-      )
-
-      val work = transformToWork(transformable)
-
-      work.data.items should contain(
-        Item(
-          title = None,
-          locations = List(
-            DigitalLocation(
-              url = "https://example.org/holdings",
-              linkText = Some("View this journal"),
-              locationType = OnlineResource,
-              accessConditions = List(
-                AccessCondition(status = Some(LicensedResources))
-              )
-            )
-          )
-        ))
-    }
-
     it("includes the holdings") {
       val holdingsId = createSierraHoldingsNumber
       val holdingsData =

@@ -193,24 +193,42 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
       val year = datePartsMap.get("year").map { _.stripSuffix(".") }
 
       val dateDisplayStrings =
+        // e.g. "Spring 2000"
         if (datePartsMap.contains("season")) {
           List(
-            datePartsMap.get("season").flatMap { toNamedMonth(id, _) },
-            year
-          )
-        } else if (datePartsMap.contains("month") && toNamedMonth(
-                     id,
-                     datePartsMap("month")).isDefined) {
-          List(
-            datePartsMap.get("month").flatMap { toNamedMonth(id, _) },
+            datePartsMap
+              .get("season")
+              .flatMap { s =>
+                toNamedMonth(id, Some(s))
+              }
+              .map(_.value),
             year
           )
         } else {
-          List(
-            datePartsMap.get("day"),
-            datePartsMap.get("month").flatMap { monthNames.get },
-            year
-          )
+          toNamedMonth(id, datePartsMap.get("month")) match {
+            // e.g. "1 Jul 2000"
+            case Some(NamedMonthResult(value, isAllMonths)) if isAllMonths =>
+              List(
+                datePartsMap.get("day").map { _.stripPrefix("0") },
+                Some(value),
+                year
+              )
+
+            // e.g. "Summer 2000"
+            case Some(NamedMonthResult(value, _)) =>
+              List(
+                Some(value),
+                year
+              )
+
+            // e.g. "13 Sept. 2004"
+            case _ =>
+              List(
+                datePartsMap.get("day").map { _.stripPrefix("0") },
+                datePartsMap.get("month").flatMap { monthNames.get },
+                year
+              )
+          }
         }
 
       dateDisplayStrings.flatten.mkString(" ")
@@ -257,16 +275,33 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
   //    03    -> Mar.
   //    21/22 -> Spring/Summer
   //
+  private case class NamedMonthResult(value: String, isAllMonths: Boolean)
+
   private def toNamedMonth(id: TypedSierraRecordNumber,
-                           s: String): Option[String] = {
-    val parts = s.split("/")
-    if (parts.forall(monthNames.contains)) {
-      Some(parts.map { monthNames(_) }.mkString("/"))
-    } else {
-      warn(s"$id: Unable to completely parse ($s) as a named month.season")
-      None
+                           maybeS: Option[String]): Option[NamedMonthResult] =
+    maybeS.flatMap { s =>
+      val parts = s.split("/").toList
+      if (parts.forall(monthNames.contains)) {
+        Some(
+          NamedMonthResult(
+            value = parts.map { monthNames(_) }.mkString("/"),
+            isAllMonths = !parts.exists(seasonNames.contains)
+          )
+        )
+      } else {
+        warn(s"$id: Unable to completely parse ($s) as a named month.season")
+        None
+      }
     }
-  }
+
+  private val seasonNames = Map(
+    // Seasons are represented as two-digit numeric codes.
+    // See https://help.oclc.org/Metadata_Services/Local_Holdings_Maintenance/OCLC_MARC_local_holdings_format_and_standards/8xx_fields/853_Captions_and_Pattern-Basic_Bibliographic_Unit
+    "21" -> "Spring",
+    "22" -> "Summer",
+    "23" -> "Autumn",
+    "24" -> "Winter"
+  )
 
   private val monthNames = Map(
     "01" -> "Jan.",
@@ -280,14 +315,8 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
     "09" -> "Sept.",
     "10" -> "Oct.",
     "11" -> "Nov.",
-    "12" -> "Dec.",
-    // Seasons are represented as two-digit numeric codes.
-    // See https://help.oclc.org/Metadata_Services/Local_Holdings_Maintenance/OCLC_MARC_local_holdings_format_and_standards/8xx_fields/853_Captions_and_Pattern-Basic_Bibliographic_Unit
-    "21" -> "Spring",
-    "22" -> "Summer",
-    "23" -> "Autumn",
-    "24" -> "Winter"
-  )
+    "12" -> "Dec."
+  ) ++ seasonNames
 
   /** Given an 85X varField from Sierra, try to create a Label.
     *

@@ -96,9 +96,7 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
       }
   }
 
-  def workDataFromBibData(bibId: SierraBibNumber, bibData: SierraBibData) = {
-    val (holdingsItems, holdings) = SierraHoldings(bibId, holdingsDataMap)
-
+  def workDataFromBibData(bibId: SierraBibNumber, bibData: SierraBibData) =
     WorkData[DataState.Unidentified](
       otherIdentifiers = SierraIdentifiers(bibId, bibData),
       mergeCandidates = SierraMergeCandidates(bibId, bibData),
@@ -117,11 +115,9 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
       notes = SierraNotes(bibData),
       duration = SierraDuration(bibData),
       items = SierraItems(itemDataMap)(bibId, bibData) ++
-        SierraElectronicResources(bibId, varFields = bibData.varFields) ++
-        holdingsItems,
-      holdings = holdings
+        SierraElectronicResources(bibId, varFields = bibData.varFields),
+      holdings = SierraHoldings(bibId, holdingsDataMap)
     )
-  }
 
   lazy val bibId = sierraTransformable.sierraId
 

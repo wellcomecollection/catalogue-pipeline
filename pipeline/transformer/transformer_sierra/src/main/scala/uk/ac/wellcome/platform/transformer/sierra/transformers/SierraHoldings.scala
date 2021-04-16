@@ -7,7 +7,6 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraHoldingsData,
   SierraQueryOps
 }
-import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.locations.PhysicalLocation
 import weco.catalogue.internal_model.work.{Holdings, Item}
 import weco.catalogue.source_model.sierra.{
@@ -20,7 +19,7 @@ import java.io.InputStream
 import scala.io.Source
 
 object SierraHoldings extends SierraQueryOps {
-  type Output = (List[Item[IdState.Unminted]], List[Holdings])
+  type Output = List[Holdings]
 
   def apply(
     id: SierraBibNumber,
@@ -50,12 +49,28 @@ object SierraHoldings extends SierraQueryOps {
             createPhysicalHoldings(id, data)
         }
 
-    val digitalItems: List[Item[IdState.Unminted]] =
+    val digitalHoldings =
       electronicHoldingsData.toList
         .sortBy { case (id, _) => id.withCheckDigit }
-        .flatMap {
+        .map {
           case (id, data) =>
-            SierraElectronicResources(id, data.varFields)
+            (data.varFields, SierraElectronicResources(id, data.varFields))
+        }
+        .flatMap {
+          case (varFields, items) =>
+            items.map { it =>
+              (varFields, it)
+            }
+        }
+        .flatMap {
+          case (varFields, Item(_, title, locations)) =>
+            locations.map { loc =>
+              Holdings(
+                note = title,
+                enumeration = SierraHoldingsEnumeration(id, varFields),
+                location = Some(loc)
+              )
+            }
         }
 
     // Note: holdings records are sparsely populated, and a lot of the information is
@@ -63,7 +78,7 @@ object SierraHoldings extends SierraQueryOps {
     //
     // Since we also don't identify the Holdings objects we create, we may end up
     // with duplicates in the transformer output.  This isn't useful, so remove them.
-    (digitalItems, physicalHoldings.distinct)
+    (digitalHoldings ++ physicalHoldings).distinct
   }
 
   private def createPhysicalHoldings(
@@ -94,7 +109,7 @@ object SierraHoldings extends SierraQueryOps {
         SierraHoldingsEnumeration(id, data.varFields)
       }
 
-    val location = createLocation(id, data)
+    val location = createPhysicalLocation(id, data)
 
     // We should only create the Holdings object if we have some interesting data
     // to include; otherwise we don't.
@@ -129,7 +144,7 @@ object SierraHoldings extends SierraQueryOps {
     row.head -> row.last
   }.toMap
 
-  private def createLocation(
+  private def createPhysicalLocation(
     id: TypedSierraRecordNumber,
     data: SierraHoldingsData): Option[PhysicalLocation] =
     for {
