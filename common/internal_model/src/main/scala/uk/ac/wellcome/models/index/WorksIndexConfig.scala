@@ -56,7 +56,7 @@ object IdentifiedWorkIndexConfig extends WorksIndexConfig {
   val fields =
     Seq(
       objectField("data").fields(
-        objectField("otherIdentifiers").fields(lowercaseKeyword("value")),
+        objectField("otherIdentifiers").fields(lowercaseKeyword("value"))
       ),
       objectField("state")
         .fields(sourceIdentifier)
@@ -90,7 +90,7 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
       englishTextKeywordField("physicalDescription"),
       multilingualField("lettering"),
       objectField("contributors").fields(
-        objectField("agent").fields(label),
+        objectField("agent").fields(label)
       ),
       objectField("subjects").fields(
         label,
@@ -107,7 +107,7 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
           objectField("license").fields(keywordField("id")),
           objectField("accessConditions").fields(
             objectField("status").fields(keywordField("type"))
-          ),
+          )
         ),
         objectField("id").fields(
           canonicalId,
@@ -151,7 +151,15 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
       objectField("availabilities").fields(keywordField("id")),
       objectField("relations")
         .fields(
-          objectField("ancestors").fields(lowercaseKeyword("id"))
+          objectField("ancestors").fields(
+            lowercaseKeyword("id"),
+            objectField("collectionPath").fields(
+              label,
+              textField("path")
+                .analyzer(pathAnalyzer.name)
+                .fields(keywordField("keyword"))
+            )
+          )
         )
         .dynamic("false"),
       objectField("derivedData")
