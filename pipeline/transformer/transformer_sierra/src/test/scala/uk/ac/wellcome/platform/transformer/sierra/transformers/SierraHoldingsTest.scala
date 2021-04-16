@@ -35,8 +35,8 @@ class SierraHoldingsTest
     getHoldings(holdingsDataMap = Map.empty) shouldBe empty
   }
 
-  describe("creates digital items if fixed field 40 = 'elro'") {
-    it("does not create items if there are no instances of field 856") {
+  describe("creates digital holdings if fixed field 40 = 'elro'") {
+    it("creates nothing if there are no instances of field 856") {
       // This example is based on b1017055 / h1068096
       val varFields = List(
         VarField(
@@ -60,7 +60,7 @@ class SierraHoldingsTest
       getHoldings(dataMap) shouldBe empty
     }
 
-    it("creates a single digital item based on field 856") {
+    it("creates a single holdings based on field 856") {
       val varFields = List(
         createVarFieldWith(
           marcTag = "856",
@@ -69,6 +69,25 @@ class SierraHoldingsTest
               tag = "u",
               content = "https://resolver.example.com/journal"),
             MarcSubfield(tag = "z", content = "Connect to Example Journals")
+          )
+        ),
+        createVarFieldWith(
+          marcTag = "863",
+          subfields = List(
+            MarcSubfield(tag = "8", content = "1.1"),
+            MarcSubfield(tag = "i", content = "1991-2017"),
+            MarcSubfield(tag = "j", content = "02-04"),
+            MarcSubfield(tag = "k", content = "01-17"),
+            MarcSubfield(tag = "x", content = "Chronology adjusted by embargo period"),
+          )
+        ),
+        createVarFieldWith(
+          marcTag = "853",
+          subfields = List(
+            MarcSubfield(tag = "8", content = "1"),
+            MarcSubfield(tag = "i", content = "(year)"),
+            MarcSubfield(tag = "j", content = "(month)"),
+            MarcSubfield(tag = "k", content = "(day)"),
           )
         )
       )
@@ -80,10 +99,12 @@ class SierraHoldingsTest
       )
       val dataMap = Map(createSierraHoldingsNumber -> holdingsData)
 
-      getItems(dataMap) shouldBe List(
-        Item(
-          id = IdState.Unidentifiable,
-          locations = List(
+      getItems(dataMap) shouldBe empty
+      getHoldings(dataMap) shouldBe List(
+        Holdings(
+          note = None,
+          enumeration = List("1 Feb. 1991 - 17 Apr. 2017"),
+          location = Some(
             DigitalLocation(
               url = "https://resolver.example.com/journal",
               locationType = OnlineResource,
@@ -97,11 +118,10 @@ class SierraHoldingsTest
           )
         )
       )
-      getHoldings(dataMap) shouldBe empty
     }
 
     it(
-      "creates multiple items based on multiple instance of 856 on the same holdings") {
+      "creates multiple holdings based on multiple instance of 856 on the same holdings") {
       val varFields = List(
         createVarFieldWith(
           marcTag = "856",
@@ -129,10 +149,10 @@ class SierraHoldingsTest
       )
       val dataMap = Map(createSierraHoldingsNumber -> holdingsData)
 
-      getItems(dataMap) shouldBe List(
-        Item(
-          id = IdState.Unidentifiable,
-          locations = List(
+      getHoldings(dataMap) shouldBe List(
+        Holdings(
+          note = None,
+          location = Some(
             DigitalLocation(
               url = "https://resolver.example.com/journal",
               locationType = OnlineResource,
@@ -143,11 +163,12 @@ class SierraHoldingsTest
                 )
               )
             )
-          )
+          ),
+          enumeration = List()
         ),
-        Item(
-          id = IdState.Unidentifiable,
-          locations = List(
+        Holdings(
+          note = None,
+          location = Some(
             DigitalLocation(
               url = "https://example.org/subscriptions",
               locationType = OnlineResource,
@@ -157,13 +178,14 @@ class SierraHoldingsTest
                 )
               )
             )
-          )
+          ),
+          enumeration = List()
         )
       )
-      getHoldings(dataMap) shouldBe empty
+      getItems(dataMap) shouldBe empty
     }
 
-    it("creates multiple items based on multiple holdings records") {
+    it("creates multiple holdings based on multiple holdings records") {
       val varFields1 = List(
         createVarFieldWith(
           marcTag = "856",
@@ -197,10 +219,10 @@ class SierraHoldingsTest
             )
         }
 
-      getItems(dataMap) shouldBe List(
-        Item(
-          id = IdState.Unidentifiable,
-          locations = List(
+      getHoldings(dataMap) shouldBe List(
+        Holdings(
+          note = None,
+          location = Some(
             DigitalLocation(
               url = "https://resolver.example.com/journal",
               locationType = OnlineResource,
@@ -211,11 +233,12 @@ class SierraHoldingsTest
                 )
               )
             )
-          )
+          ),
+          enumeration = List()
         ),
-        Item(
-          id = IdState.Unidentifiable,
-          locations = List(
+        Holdings(
+          note = None,
+          location = Some(
             DigitalLocation(
               url = "https://example.org/subscriptions",
               locationType = OnlineResource,
@@ -225,10 +248,11 @@ class SierraHoldingsTest
                 )
               )
             )
-          )
+          ),
+          enumeration = List()
         )
       )
-      getHoldings(dataMap) shouldBe empty
+      getItems(dataMap) shouldBe empty
     }
 
     it("skips field 856 if fixed field 40 is not 'elro'") {
@@ -278,10 +302,10 @@ class SierraHoldingsTest
 
       // We transform with deleted = true and deleted = false, so we know
       // the holdings isn't being skipped because it's an incomplete record.
-      getItems(Map(createSierraHoldingsNumber -> deletedHoldingsData)) shouldBe empty
-      getItems(Map(createSierraHoldingsNumber -> undeletedHoldingsData)) should not be empty
-
       getHoldings(Map(createSierraHoldingsNumber -> deletedHoldingsData)) shouldBe empty
+      getHoldings(Map(createSierraHoldingsNumber -> undeletedHoldingsData)) should not be empty
+
+      getItems(Map(createSierraHoldingsNumber -> deletedHoldingsData)) shouldBe empty
     }
 
     it("ignores electronic holdings that are suppressed") {
@@ -308,10 +332,10 @@ class SierraHoldingsTest
 
       // We transform with suppressed = true and suppressed = false, so we know
       // the holdings isn't being skipped because it's an incomplete record.
-      getItems(Map(createSierraHoldingsNumber -> suppressedHoldingsData)) shouldBe empty
-      getItems(Map(createSierraHoldingsNumber -> unsuppressedHoldingsData)) should not be empty
-
       getHoldings(Map(createSierraHoldingsNumber -> suppressedHoldingsData)) shouldBe empty
+      getHoldings(Map(createSierraHoldingsNumber -> unsuppressedHoldingsData)) should not be empty
+
+      getItems(Map(createSierraHoldingsNumber -> suppressedHoldingsData)) shouldBe empty
     }
   }
 
@@ -549,7 +573,7 @@ class SierraHoldingsTest
       val holdings = getHoldings(dataMap)
       holdings should have size 1
 
-      holdings.head.location.get.shelfmark shouldBe Some("/MED")
+      holdings.head.location.get.asInstanceOf[PhysicalLocation].shelfmark shouldBe Some("/MED")
     }
 
     it("skips adding a location if the location code is unrecognised") {
