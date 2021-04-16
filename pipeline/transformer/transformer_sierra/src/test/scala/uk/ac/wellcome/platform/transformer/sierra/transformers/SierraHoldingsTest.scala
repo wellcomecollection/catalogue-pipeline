@@ -14,14 +14,13 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraHoldingsData,
   VarField
 }
-import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.locations.{
   AccessCondition,
   AccessStatus,
   DigitalLocation,
   PhysicalLocation
 }
-import weco.catalogue.internal_model.work.{Holdings, Item}
+import weco.catalogue.internal_model.work.Holdings
 import weco.catalogue.source_model.generators.SierraGenerators
 import weco.catalogue.source_model.sierra.SierraHoldingsNumber
 
@@ -31,7 +30,6 @@ class SierraHoldingsTest
     with MarcGenerators
     with SierraGenerators {
   it("an empty map becomes an empty list of items and holdings") {
-    getItems(holdingsDataMap = Map.empty) shouldBe empty
     getHoldings(holdingsDataMap = Map.empty) shouldBe empty
   }
 
@@ -56,7 +54,6 @@ class SierraHoldingsTest
       )
       val dataMap = Map(createSierraHoldingsNumber -> holdingsData)
 
-      getItems(dataMap) shouldBe empty
       getHoldings(dataMap) shouldBe empty
     }
 
@@ -99,7 +96,6 @@ class SierraHoldingsTest
       )
       val dataMap = Map(createSierraHoldingsNumber -> holdingsData)
 
-      getItems(dataMap) shouldBe empty
       getHoldings(dataMap) shouldBe List(
         Holdings(
           note = None,
@@ -182,7 +178,6 @@ class SierraHoldingsTest
           enumeration = List()
         )
       )
-      getItems(dataMap) shouldBe empty
     }
 
     it("creates multiple holdings based on multiple holdings records") {
@@ -252,7 +247,6 @@ class SierraHoldingsTest
           enumeration = List()
         )
       )
-      getItems(dataMap) shouldBe empty
     }
 
     it("skips field 856 if fixed field 40 is not 'elro'") {
@@ -275,7 +269,6 @@ class SierraHoldingsTest
       )
       val dataMap = Map(createSierraHoldingsNumber -> holdingsData)
 
-      getItems(dataMap) shouldBe empty
       getHoldings(dataMap) shouldBe empty
     }
 
@@ -304,8 +297,6 @@ class SierraHoldingsTest
       // the holdings isn't being skipped because it's an incomplete record.
       getHoldings(Map(createSierraHoldingsNumber -> deletedHoldingsData)) shouldBe empty
       getHoldings(Map(createSierraHoldingsNumber -> undeletedHoldingsData)) should not be empty
-
-      getItems(Map(createSierraHoldingsNumber -> deletedHoldingsData)) shouldBe empty
     }
 
     it("ignores electronic holdings that are suppressed") {
@@ -334,8 +325,6 @@ class SierraHoldingsTest
       // the holdings isn't being skipped because it's an incomplete record.
       getHoldings(Map(createSierraHoldingsNumber -> suppressedHoldingsData)) shouldBe empty
       getHoldings(Map(createSierraHoldingsNumber -> unsuppressedHoldingsData)) should not be empty
-
-      getItems(Map(createSierraHoldingsNumber -> suppressedHoldingsData)) shouldBe empty
     }
   }
 
@@ -358,7 +347,6 @@ class SierraHoldingsTest
       )
       val dataMap = Map(createSierraHoldingsNumber -> holdingsData)
 
-      getItems(dataMap) shouldBe empty
       getHoldings(dataMap) shouldBe empty
     }
 
@@ -378,8 +366,6 @@ class SierraHoldingsTest
         varFields = varFields
       )
       val dataMap = Map(createSierraHoldingsNumber -> holdingsData)
-
-      getItems(dataMap) shouldBe empty
 
       val holdings = getHoldings(dataMap)
       holdings should have size 1
@@ -403,8 +389,6 @@ class SierraHoldingsTest
         varFields = varFields
       )
       val dataMap = Map(createSierraHoldingsNumber -> holdingsData)
-
-      getItems(dataMap) shouldBe empty
 
       val holdings = getHoldings(dataMap)
       holdings should have size 1
@@ -431,8 +415,6 @@ class SierraHoldingsTest
         varFields = varFields
       )
       val dataMap = Map(createSierraHoldingsNumber -> holdingsData)
-
-      getItems(dataMap) shouldBe empty
 
       val holdings = getHoldings(dataMap)
       holdings should have size 1
@@ -475,8 +457,6 @@ class SierraHoldingsTest
       )
       val dataMap = Map(createSierraHoldingsNumber -> holdingsData)
 
-      getItems(dataMap) shouldBe empty
-
       val holdings = getHoldings(dataMap)
       holdings should have size 1
       holdings.head.enumeration shouldBe List(
@@ -501,8 +481,6 @@ class SierraHoldingsTest
         varFields = varFields
       )
       val dataMap = Map(createSierraHoldingsNumber -> holdingsData)
-
-      getItems(dataMap) shouldBe empty
 
       val holdings = getHoldings(dataMap)
       holdings should have size 1
@@ -531,8 +509,6 @@ class SierraHoldingsTest
         varFields = varFields
       )
       val dataMap = Map(createSierraHoldingsNumber -> holdingsData)
-
-      getItems(dataMap) shouldBe empty
 
       val holdings = getHoldings(dataMap)
       holdings should have size 1
@@ -568,8 +544,6 @@ class SierraHoldingsTest
       )
       val dataMap = Map(createSierraHoldingsNumber -> holdingsData)
 
-      getItems(dataMap) shouldBe empty
-
       val holdings = getHoldings(dataMap)
       holdings should have size 1
 
@@ -592,8 +566,6 @@ class SierraHoldingsTest
         varFields = varFields
       )
       val dataMap = Map(createSierraHoldingsNumber -> holdingsData)
-
-      getItems(dataMap) shouldBe empty
 
       val holdings = getHoldings(dataMap)
       holdings should have size 1
@@ -620,8 +592,6 @@ class SierraHoldingsTest
 
         SierraHoldingsNumber(s"${volno}00000$volno") -> holdingsData
       }.toMap
-
-      getItems(dataMap) shouldBe empty
 
       val holdings = getHoldings(dataMap)
       holdings should have size 3
@@ -652,8 +622,6 @@ class SierraHoldingsTest
         createSierraHoldingsNumber -> holdingsData
       }.toMap
 
-      getItems(dataMap) shouldBe empty
-
       val holdings = getHoldings(dataMap)
       holdings should have size 1
     }
@@ -681,8 +649,6 @@ class SierraHoldingsTest
       // the holdings isn't being skipped because it's an incomplete record.
       getHoldings(Map(createSierraHoldingsNumber -> deletedHoldingsData)) shouldBe empty
       getHoldings(Map(createSierraHoldingsNumber -> undeletedHoldingsData)) should not be empty
-
-      getItems(Map(createSierraHoldingsNumber -> deletedHoldingsData)) shouldBe empty
     }
 
     it("skips holdings that are suppressed") {
@@ -709,22 +675,11 @@ class SierraHoldingsTest
       // the holdings isn't being skipped because it's an incomplete record.
       getHoldings(Map(createSierraHoldingsNumber -> suppressedHoldingsData)) shouldBe empty
       getHoldings(Map(createSierraHoldingsNumber -> unsuppressedHoldingsData)) should not be empty
-
-      getItems(Map(createSierraHoldingsNumber -> suppressedHoldingsData)) shouldBe empty
     }
-  }
-
-  private def getItems(
-    holdingsDataMap: Map[SierraHoldingsNumber, SierraHoldingsData])
-    : List[Item[IdState.Unminted]] = {
-    val (items, _) = SierraHoldings(createSierraBibNumber, holdingsDataMap)
-    items
   }
 
   private def getHoldings(
     holdingsDataMap: Map[SierraHoldingsNumber, SierraHoldingsData])
-    : List[Holdings] = {
-    val (_, holdings) = SierraHoldings(createSierraBibNumber, holdingsDataMap)
-    holdings
-  }
+    : List[Holdings] =
+    SierraHoldings(createSierraBibNumber, holdingsDataMap)
 }

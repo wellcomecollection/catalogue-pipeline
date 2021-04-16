@@ -7,7 +7,6 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraHoldingsData,
   SierraQueryOps
 }
-import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.locations.PhysicalLocation
 import weco.catalogue.internal_model.work.{Holdings, Item}
 import weco.catalogue.source_model.sierra.{
@@ -20,7 +19,7 @@ import java.io.InputStream
 import scala.io.Source
 
 object SierraHoldings extends SierraQueryOps {
-  type Output = (List[Item[IdState.Unminted]], List[Holdings])
+  type Output = List[Holdings]
 
   def apply(
     id: SierraBibNumber,
@@ -45,12 +44,9 @@ object SierraHoldings extends SierraQueryOps {
 
     val physicalHoldings =
       physicalHoldingsData.toList
-        .map {
+        .flatMap {
           case (_, data) =>
-            id -> createPhysicalHoldings(id, data)
-        }
-        .collect {
-          case (id, Some(holdings)) => id -> holdings
+            createPhysicalHoldings(id, data)
         }
 
     val digitalHoldings =
@@ -58,17 +54,17 @@ object SierraHoldings extends SierraQueryOps {
         .sortBy { case (id, _) => id.withCheckDigit }
         .map {
           case (id, data) =>
-            (id, data.varFields, SierraElectronicResources(id, data.varFields))
+            (data.varFields, SierraElectronicResources(id, data.varFields))
         }
         .flatMap {
-          case (id, varFields, items) =>
+          case (varFields, items) =>
             items.map { it =>
-              (id, varFields, it)
+              (varFields, it)
             }
         }
-        .flatMap { case (id, varFields, Item(_, title, locations)) =>
+        .flatMap { case (varFields, Item(_, title, locations)) =>
           locations.map { loc =>
-            id -> Holdings(
+            Holdings(
               note = title,
               enumeration = SierraHoldingsEnumeration(id, varFields),
               location = Some(loc)
@@ -81,12 +77,7 @@ object SierraHoldings extends SierraQueryOps {
     //
     // Since we also don't identify the Holdings objects we create, we may end up
     // with duplicates in the transformer output.  This isn't useful, so remove them.
-    val holdings =
-      (digitalHoldings ++ physicalHoldings)
-        .sortBy { case (id, _) => id.withoutCheckDigit }
-        .collect { case (_, holdings) => holdings }
-        .distinct
-    (List.empty, holdings)
+    (digitalHoldings ++ physicalHoldings).distinct
   }
 
   private def createPhysicalHoldings(
