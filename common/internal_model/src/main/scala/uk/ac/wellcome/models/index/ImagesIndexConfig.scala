@@ -42,10 +42,11 @@ object IndexedImageIndexConfig extends IndexConfig with IndexConfigFields {
         objectField("id").fields(canonicalId, sourceIdentifier),
         objectField("data").fields(
           objectField("otherIdentifiers").fields(lowercaseKeyword("value")),
-          englishTextKeywordField("title"),
-          englishTextKeywordField("alternativeTitles"),
-          englishTextField("description"),
+          multilingualKeywordField("title"),
+          multilingualKeywordField("alternativeTitles"),
+          multilingualField("description"),
           englishTextKeywordField("physicalDescription"),
+          multilingualField("lettering"),
           objectField("contributors").fields(
             objectField("agent").fields(label),
           ),
@@ -67,7 +68,7 @@ object IndexedImageIndexConfig extends IndexConfig with IndexConfigFields {
             keywordField("id")
           ),
           textField("edition"),
-          objectField("notes").fields(englishTextField("content")),
+          objectField("notes").fields(multilingualField("content")),
           objectField("collectionPath").fields(label, textField("path")),
         ),
         keywordField("type"),
