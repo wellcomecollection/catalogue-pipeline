@@ -607,6 +607,81 @@ class SierraHoldingsEnumerationTest
     getEnumerations(varFields) shouldBe List("1985 - 2002")
   }
 
+  it("includes the day if the range is a month") {
+    val varFields = List(
+      createVarFieldWith(
+        marcTag = "863",
+        subfields = List(
+          MarcSubfield(tag = "8", content = "1.1"),
+          MarcSubfield(tag = "i", content = "1991-2017"),
+          MarcSubfield(tag = "j", content = "02-04"),
+          MarcSubfield(tag = "k", content = "13-17"),
+        )
+      ),
+      createVarFieldWith(
+        marcTag = "853",
+        subfields = List(
+          MarcSubfield(tag = "8", content = "1"),
+          MarcSubfield(tag = "i", content = "(year)"),
+          MarcSubfield(tag = "j", content = "(month)"),
+          MarcSubfield(tag = "k", content = "(day)"),
+        )
+      )
+    )
+
+    getEnumerations(varFields) shouldBe List("13 Feb. 1991 - 17 Apr. 2017")
+  }
+
+  it("skips the day if the month value contains a season") {
+    val varFields = List(
+      createVarFieldWith(
+        marcTag = "863",
+        subfields = List(
+          MarcSubfield(tag = "8", content = "1.1"),
+          MarcSubfield(tag = "i", content = "2001"),
+          MarcSubfield(tag = "j", content = "23"),
+          MarcSubfield(tag = "k", content = "1"),
+        )
+      ),
+      createVarFieldWith(
+        marcTag = "853",
+        subfields = List(
+          MarcSubfield(tag = "8", content = "1"),
+          MarcSubfield(tag = "i", content = "(year)"),
+          MarcSubfield(tag = "j", content = "(month)"),
+          MarcSubfield(tag = "k", content = "(day)"),
+        )
+      )
+    )
+
+    getEnumerations(varFields) shouldBe List("Autumn 2001")
+  }
+
+  it("strips a leading zero from the day") {
+    val varFields = List(
+      createVarFieldWith(
+        marcTag = "863",
+        subfields = List(
+          MarcSubfield(tag = "8", content = "1.1"),
+          MarcSubfield(tag = "i", content = "2001"),
+          MarcSubfield(tag = "j", content = "01"),
+          MarcSubfield(tag = "k", content = "01"),
+        )
+      ),
+      createVarFieldWith(
+        marcTag = "853",
+        subfields = List(
+          MarcSubfield(tag = "8", content = "1"),
+          MarcSubfield(tag = "i", content = "(year)"),
+          MarcSubfield(tag = "j", content = "(month)"),
+          MarcSubfield(tag = "k", content = "(day)"),
+        )
+      )
+    )
+
+    getEnumerations(varFields) shouldBe List("1 Jan. 2001")
+  }
+
   describe("handles malformed MARC data") {
     it("skips a field 863 if it has a missing sequence number") {
       val varFields = List(
