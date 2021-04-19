@@ -35,7 +35,8 @@ class ImageDataRuleTest
     }
 
     it(
-      "creates n images from a METS work containing n images, and a single Sierra picture work") {
+      "creates n images from a METS work containing n images, and a single Sierra picture work"
+    ) {
       val n = 5
       val metsWork = createInvisibleMetsIdentifiedWorkWith(numImages = n)
       val sierraPictureWork = sierraIdentifiedWork().format(Format.Pictures)
@@ -47,7 +48,8 @@ class ImageDataRuleTest
     }
 
     it(
-      "creates n images from a METS work containing n images, and a single Sierra ephemera work") {
+      "creates n images from a METS work containing n images, and a single Sierra ephemera work"
+    ) {
       val n = 5
       val metsWork = createInvisibleMetsIdentifiedWorkWith(numImages = n)
       val sierraEphemeraWork = sierraIdentifiedWork().format(Format.Ephemera)
@@ -59,7 +61,8 @@ class ImageDataRuleTest
     }
 
     it(
-      "creates n + m images from m Miro works, a METS work containing n images, and a single Sierra picture work") {
+      "creates n + m images from m Miro works, a METS work containing n images, and a single Sierra picture work"
+    ) {
       val n = 3
       val m = 4
       val miroWorks = (1 to m).map(_ => miroIdentifiedWork()).toList
@@ -71,11 +74,12 @@ class ImageDataRuleTest
       result should have length n + m
       result.map(_.locations) should contain theSameElementsAs
         metsWork.data.imageData.map(_.locations) ++
-          miroWorks.map(_.data.imageData.head.locations)
+        miroWorks.map(_.data.imageData.head.locations)
     }
 
     it(
-      "creates n + m images from m Miro works, a METS work containing n images, and a single Sierra ephemera work") {
+      "creates n + m images from m Miro works, a METS work containing n images, and a single Sierra ephemera work"
+    ) {
       val n = 3
       val m = 4
       val miroWorks = (1 to m).map(_ => miroIdentifiedWork()).toList
@@ -87,11 +91,12 @@ class ImageDataRuleTest
       result should have length n + m
       result.map(_.locations) should contain theSameElementsAs
         metsWork.data.imageData.map(_.locations) ++
-          miroWorks.map(_.data.imageData.head.locations)
+        miroWorks.map(_.data.imageData.head.locations)
     }
 
     it(
-      "ignores METS images, but uses n Miro images, for a non-picture/ephemera Sierra work") {
+      "ignores METS images, but uses n Miro images, for a non-picture/ephemera Sierra work"
+    ) {
       val n = 3
       val metsWork = createInvisibleMetsIdentifiedWorkWith(numImages = 3)
       val miroWorks = (1 to n).map(_ => miroIdentifiedWork()).toList
@@ -104,7 +109,8 @@ class ImageDataRuleTest
     }
 
     it(
-      "does not use Miro images when a METS image is present for a digaids Sierra work") {
+      "does not use Miro images when a METS image is present for a digaids Sierra work"
+    ) {
       val metsWork = createInvisibleMetsIdentifiedWorkWith(numImages = 1)
       val miroWork = miroIdentifiedWork()
       val sierraDigaidsWork = sierraIdentifiedWork()
@@ -114,21 +120,9 @@ class ImageDataRuleTest
         ImageDataRule.merge(sierraDigaidsWork, List(miroWork, metsWork)).data
 
       result should have length 1
-      result.map(_.locations) should contain theSameElementsAs metsWork.data.imageData
-        .map(_.locations)
-    }
-
-    it(
-      "will use Miro images for digaids Sierra works when no METS image is present") {
-      val miroWork = miroIdentifiedWork()
-      val sierraDigaidsWork = sierraIdentifiedWork()
-        .format(Format.Pictures)
-        .otherIdentifiers(List(createDigcodeIdentifier("digaids")))
-      val result =
-        ImageDataRule.merge(sierraDigaidsWork, List(miroWork)).data
-
-      result should have length 1
-      result.map(_.locations) should contain theSameElementsAs miroWork.data.imageData
+      result.map(
+        _.locations
+      ) should contain theSameElementsAs metsWork.data.imageData
         .map(_.locations)
     }
   }
@@ -147,7 +141,8 @@ class ImageDataRuleTest
   }
 
   def createInvisibleMetsIdentifiedWorkWith(
-    numImages: Int): Work.Invisible[Identified] = {
+    numImages: Int
+  ): Work.Invisible[Identified] = {
     val images =
       (1 to numImages).map { _ =>
         createMetsImageData.toIdentified
