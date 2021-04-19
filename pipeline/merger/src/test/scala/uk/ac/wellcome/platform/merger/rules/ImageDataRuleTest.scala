@@ -74,7 +74,7 @@ class ImageDataRuleTest
       result should have length n + m
       result.map(_.locations) should contain theSameElementsAs
         metsWork.data.imageData.map(_.locations) ++
-        miroWorks.map(_.data.imageData.head.locations)
+          miroWorks.map(_.data.imageData.head.locations)
     }
 
     it(
@@ -91,7 +91,7 @@ class ImageDataRuleTest
       result should have length n + m
       result.map(_.locations) should contain theSameElementsAs
         metsWork.data.imageData.map(_.locations) ++
-        miroWorks.map(_.data.imageData.head.locations)
+          miroWorks.map(_.data.imageData.head.locations)
     }
 
     it(

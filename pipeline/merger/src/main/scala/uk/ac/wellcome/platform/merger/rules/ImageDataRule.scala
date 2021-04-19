@@ -24,8 +24,7 @@ object ImageDataRule extends FieldMergeRule {
         getMetsPictureAndEphemeraImages,
         getMiroPictureAndEphemeraImages,
         getPairedMiroImages
-      )
-        .flatMap(_.mergedSources(target, sources))
+      ).flatMap(_.mergedSources(target, sources))
     )
 
   private lazy val getMetsPictureAndEphemeraImages = new FlatImageMergeRule {
