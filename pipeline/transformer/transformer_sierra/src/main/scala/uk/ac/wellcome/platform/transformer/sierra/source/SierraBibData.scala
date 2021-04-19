@@ -51,6 +51,6 @@ object SierraBibData {
     : Decoder[Option[SierraSourceLanguage]] =
     dec.map {
       case Some(SierraSourceLanguage(code, _)) if code.trim.isEmpty => None
-      case other => other
+      case other                                                    => other
     }
 }
