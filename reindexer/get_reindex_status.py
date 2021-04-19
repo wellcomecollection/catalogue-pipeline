@@ -9,6 +9,7 @@ from elasticsearch import Elasticsearch
 from elasticsearch.exceptions import NotFoundError
 import humanize
 import tabulate
+from tenacity import retry, stop_after_attempt, wait_exponential
 
 
 def get_session_with_role(role_arn):
@@ -94,6 +95,10 @@ def get_api_es_client(session):
     return Elasticsearch(f"{protocol}://{username}:{password}@{host}:{port}")
 
 
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=1, max=10)
+)
 def count_documents_in_index(es_client, *, index_name):
     """
     Returns the number of documents in an Elasticsearch index.
