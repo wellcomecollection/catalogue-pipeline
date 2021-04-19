@@ -4,10 +4,10 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil._
 import SierraBibData._
-import uk.ac.wellcome.json.exceptions.JsonDecodingError
+import org.scalatest.TryValues
 import uk.ac.wellcome.platform.transformer.sierra.source.sierra.SierraSourceLanguage
 
-class SierraBibDataTest extends AnyFunSpec with Matchers {
+class SierraBibDataTest extends AnyFunSpec with Matchers with TryValues {
   it("decodes a bibData with language") {
     val bibDataJson =
       s"""
@@ -33,15 +33,28 @@ class SierraBibDataTest extends AnyFunSpec with Matchers {
 
     fromJson[SierraBibData](bibDataJson).get shouldBe SierraBibData()
   }
-  it("fails to decode a bibData without name and non-empty code") {
+
+  it("decodes a bib with no language name") {
+    // This is a minimal example based on b16675617, as retrieved 19 April 2021
+    // It was failing in the Sierra transformer.
     val bibDataJson =
-      s"""
-         |{
+      s"""{
+         |  "deleted": false,
+         |  "suppressed": false,
          |  "lang": {
-         |    "code": "blah"
-         |  }
+         |    "code": "tgl"
+         |  },
+         |  "locations": [],
+         |  "fixedFields": {
+         |    "24": {
+         |      "label": "LANG",
+         |      "value": "tgl"
+         |    }
+         |  },
+         |  "varFields": []
          |}""".stripMargin
 
-    intercept[JsonDecodingError] { fromJson[SierraBibData](bibDataJson).get }
+    val bibData = fromJson[SierraBibData](bibDataJson).success.value
+    bibData.lang shouldBe Some(SierraSourceLanguage(code = "tgl", name = None))
   }
 }

@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.transformer.sierra.source
 
-import io.circe.{Decoder, DecodingFailure, HCursor}
+import io.circe.Decoder
 import uk.ac.wellcome.platform.transformer.sierra.source.sierra.{
   SierraSourceCountry,
   SierraSourceLanguage,
@@ -49,12 +49,8 @@ object SierraBibData {
   // so we use a custom decoder to achieve that
   implicit def d(implicit dec: Decoder[Option[SierraSourceLanguage]])
     : Decoder[Option[SierraSourceLanguage]] =
-    dec.handleErrorWith { err: DecodingFailure =>
-      Decoder.instance { hcursor: HCursor =>
-        hcursor.downField("code").as[String].flatMap {
-          case c if c.trim.isEmpty => Right(None)
-          case _                   => Left(err)
-        }
-      }
+    dec.map {
+      case Some(SierraSourceLanguage(code, _)) if code.trim.isEmpty => None
+      case other => other
     }
 }
