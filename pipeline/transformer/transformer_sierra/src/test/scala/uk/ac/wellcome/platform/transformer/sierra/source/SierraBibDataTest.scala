@@ -8,7 +8,7 @@ import uk.ac.wellcome.json.exceptions.JsonDecodingError
 import uk.ac.wellcome.platform.transformer.sierra.source.sierra.SierraSourceLanguage
 
 class SierraBibDataTest extends AnyFunSpec with Matchers {
-  it("should decode a bibData with language") {
+  it("decodes a bibData with language") {
     val bibDataJson =
       s"""
          |{
@@ -22,7 +22,7 @@ class SierraBibDataTest extends AnyFunSpec with Matchers {
       lang = Some(SierraSourceLanguage("eng", "English")))
   }
 
-  it("should decode a bibData with language with empty code as None") {
+  it("decodes a language with empty code as None") {
     val bibDataJson =
       s"""
          |{
@@ -33,7 +33,7 @@ class SierraBibDataTest extends AnyFunSpec with Matchers {
 
     fromJson[SierraBibData](bibDataJson).get shouldBe SierraBibData()
   }
-  it("should fail decoding a bibData without name and non-empty code") {
+  it("fails to decode a bibData without name and non-empty code") {
     val bibDataJson =
       s"""
          |{
