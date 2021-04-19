@@ -1,6 +1,7 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import grizzled.slf4j.Logging
+import uk.ac.wellcome.platform.transformer.sierra.source.sierra.SierraSourceLanguage
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraBibData,
   SierraQueryOps
@@ -35,12 +36,7 @@ object SierraLanguages
   //    See https://www.loc.gov/marc/bibliographic/bd041.html
   //
   override def apply(bibId: SierraBibNumber, bibData: SierraBibData): List[Language] = {
-    val primaryLanguage =
-      bibData.lang
-        .map { lang =>
-          MarcLanguageCodeList.fromCode(lang.code)
-            .getOrElse(Language(label = lang.name, id = lang.code))
-        }
+    val primaryLanguage = bibData.lang.flatMap { createLanguage(bibId, _) }
 
     val additionalLanguages =
       bibData
@@ -71,4 +67,13 @@ object SierraLanguages
       .filterNot { lang => suppressedLanguageCodes.contains(lang.id) }
       .distinct
   }
+
+  private def createLanguage(bibId: SierraBibNumber, lang: SierraSourceLanguage): Option[Language] =
+    (lang, MarcLanguageCodeList.fromCode(lang.code)) match {
+      case (_, Some(deducedLang)) => Some(deducedLang)
+      case (SierraSourceLanguage(code, Some(name)), _) => Some(Language(label = name, id = code))
+      case _ =>
+        warn(s"$bibId: Unrecognised primary language: $lang")
+        None
+    }
 }

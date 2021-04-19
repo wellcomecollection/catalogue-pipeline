@@ -189,6 +189,14 @@ class SierraLanguagesTest
     )
   }
 
+  it("skips a language with no name and an unidentifiable code") {
+    val bibData = createSierraBibDataWith(
+      lang = Some(SierraSourceLanguage(code = "idk", name = None))
+    )
+
+    getLanguages(bibData) shouldBe empty
+  }
+
   private def getLanguages(bibData: SierraBibData): List[Language] =
     SierraLanguages(bibId = createSierraBibNumber, bibData = bibData)
 }
