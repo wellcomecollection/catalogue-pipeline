@@ -14,44 +14,44 @@ object ImageDataRule extends FieldMergeRule {
 
   override def merge(
     target: Work.Visible[Identified],
-    sources: Seq[Work[Identified]] = Nil): FieldMergeResult[FieldData] =
+    sources: Seq[Work[Identified]] = Nil
+  ): FieldMergeResult[FieldData] =
     FieldMergeResult(
-      data = getOnlyMetsDigaidsImages(target, sources).getOrElse(
-        getPictureAndEphemeraImages(target, sources).getOrElse(Nil) ++
-          getPairedMiroImages(target, sources).getOrElse(Nil)
-      ),
-      sources = getOnlyMetsDigaidsImages.mergedSources(target, sources) match {
-        case Nil =>
-          List(getPictureAndEphemeraImages, getPairedMiroImages)
-            .flatMap(_.mergedSources(target, sources))
-        case digaidsMets => digaidsMets
-      }
+      data = getMetsPictureAndEphemeraImages(target, sources).getOrElse(Nil) ++
+        getMiroPictureAndEphemeraImages(target, sources).getOrElse(Nil) ++
+        getPairedMiroImages(target, sources).getOrElse(Nil),
+      sources = List(
+        getMetsPictureAndEphemeraImages,
+        getMiroPictureAndEphemeraImages,
+        getPairedMiroImages
+      )
+        .flatMap(_.mergedSources(target, sources))
     )
 
-  // In future this may be changed to `digmiro` for all works
-  // where we know that the Miro and METS images are identical
-  private lazy val getOnlyMetsDigaidsImages = new FlatImageMergeRule {
-    val isDefinedForTarget: WorkPredicate =
-      sierraDigaids and sierraPictureOrEphemera
+  private lazy val getMetsPictureAndEphemeraImages = new FlatImageMergeRule {
+    val isDefinedForTarget: WorkPredicate = sierraPictureOrEphemera
     val isDefinedForSource: WorkPredicate = singleDigitalItemMetsWork
   }
 
-  private lazy val getPictureAndEphemeraImages = new FlatImageMergeRule {
-    val isDefinedForTarget: WorkPredicate = sierraPictureOrEphemera
-    val isDefinedForSource
-      : WorkPredicate = singleDigitalItemMetsWork or singleDigitalItemMiroWork
+  // In future we may change `digaids` to `digmiro` for all works
+  // where we know that the Miro and METS images are identical
+  private lazy val getMiroPictureAndEphemeraImages = new FlatImageMergeRule {
+    val isDefinedForTarget: WorkPredicate =
+      sierraPictureOrEphemera and not(sierraDigaids)
+    val isDefinedForSource: WorkPredicate = singleDigitalItemMiroWork
   }
 
   private lazy val getPairedMiroImages = new FlatImageMergeRule {
-    val isDefinedForTarget: WorkPredicate = sierraWork and not(
-      sierraPictureOrEphemera)
+    val isDefinedForTarget: WorkPredicate =
+      sierraWork and not(sierraPictureOrEphemera) and not(sierraDigaids)
     val isDefinedForSource: WorkPredicate = singleDigitalItemMiroWork
   }
 
   trait FlatImageMergeRule extends PartialRule {
-    final override def rule(target: Work.Visible[Identified],
-                            sources: NonEmptyList[Work[Identified]])
-      : List[ImageData[IdState.Identified]] =
+    final override def rule(
+      target: Work.Visible[Identified],
+      sources: NonEmptyList[Work[Identified]]
+    ): List[ImageData[IdState.Identified]] =
       (target :: sources).toList.flatMap(_.data.imageData)
   }
 
