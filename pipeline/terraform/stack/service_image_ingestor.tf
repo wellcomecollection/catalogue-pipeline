@@ -20,7 +20,6 @@ module "ingestor_images" {
   service_name    = "${local.namespace_hyphen}_ingestor_images"
   container_image = local.ingestor_images_image
   security_group_ids = [
-    # TODO: Do we need the egress security group?
     aws_security_group.service_egress.id,
   ]
 

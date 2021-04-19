@@ -18,7 +18,6 @@ module "id_minter" {
   container_image = local.id_minter_image
 
   security_group_ids = [
-    # TODO: Do we need the egress security group?
     aws_security_group.service_egress.id,
     var.rds_ids_access_security_group_id,
   ]

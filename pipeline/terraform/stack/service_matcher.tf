@@ -42,7 +42,6 @@ module "matcher" {
   service_name    = "${local.namespace_hyphen}_matcher"
   container_image = local.matcher_image
   security_group_ids = [
-    # TODO: Do we need the egress security group?
     aws_security_group.service_egress.id,
   ]
 
