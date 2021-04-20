@@ -29,9 +29,13 @@ class Splitter(indexPrefix: String)(
       // This is an attempt to reduce the pressure on the Elasticsearch cluster.
       //
       // We look at the main record for this bib/item/holdings, and compare it to what's
-      // already stored.  We assume the modified/deletedDate will change when the record
-      // changes (including fixedFields and varFields) – this is one of the fields in
-      // the JSON of a Sierra record, so if the date changes, so will the JSON.
+      // already stored.  Note that these records include the modifiedDate/deletedDate, e.g
+      //
+      //    {"id": "1234567", "modifiedDate": "2001-01-01T01:01:01Z", …}
+      //
+      // and we assume that this value will change when the record is modified.
+      // Because the modified/deletedDate is part of the JSON, it is sufficient to compare
+      // the JSON strings without extracting the dates directly.
       //
       // If you wanted to go one step further, you could diff individual
       // varFields/fixedFields, but that adds more complexity.
