@@ -6,7 +6,7 @@ resource "ec_deployment" "pipeline_storage" {
   name = "catalogue-pipeline-storage-${var.pipeline_date}"
 
   region                 = "eu-west-1"
-  version                = "7.10.2"
+  version                = "7.12.0"
   deployment_template_id = "aws-io-optimized-v2"
 
   traffic_filter = [

@@ -17,7 +17,6 @@ module "batcher" {
   container_image = local.batcher_image
 
   security_group_ids = [
-    # TODO: Do we need the egress security group?
     aws_security_group.service_egress.id,
   ]
 

@@ -64,6 +64,8 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
     implicit context: Context
   ): R
 
+  val visibilityTimeout: Int = 1
+
   describe("behaves as a TransformerWorker") {
     it("transforms a work, indexes it, and removes it from the queue") {
       withContext { implicit context =>
@@ -72,7 +74,7 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
         val workIndexer = new MemoryIndexer[Work[Source]]()
         val workKeySender = new MemoryMessageSender()
 
-        withLocalSqsQueuePair() {
+        withLocalSqsQueuePair(visibilityTimeout = visibilityTimeout) {
           case QueuePair(queue, dlq) =>
             withWorkerImpl(queue, workIndexer, workKeySender) { _ =>
               sendNotificationToSQS(queue, payload)

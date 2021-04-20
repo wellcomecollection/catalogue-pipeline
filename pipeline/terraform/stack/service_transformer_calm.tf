@@ -11,7 +11,6 @@ module "calm_transformer" {
   service_name    = "${local.namespace_hyphen}_calm_transformer"
   container_image = local.transformer_calm_image
   security_group_ids = [
-    # TODO: Do we need the egress security group?
     aws_security_group.service_egress.id,
   ]
 
