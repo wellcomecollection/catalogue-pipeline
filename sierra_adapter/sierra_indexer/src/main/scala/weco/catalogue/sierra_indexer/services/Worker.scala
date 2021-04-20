@@ -14,7 +14,6 @@ import weco.catalogue.source_model.SierraSourcePayload
 import weco.catalogue.source_model.sierra.SierraTransformable
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
 
 class Worker(
   sqsStream: SQSStream[NotificationMessage],
@@ -34,22 +33,19 @@ class Worker(
   def processMessage(notificationMessage: NotificationMessage): Future[Unit] = {
     val ops =
       for {
-        payload <- fromJson[SierraSourcePayload](notificationMessage.body)
+        payload <- Future.fromTry(
+          fromJson[SierraSourcePayload](notificationMessage.body)
+        )
 
         transformable <- sierraReadable.get(payload.location) match {
-          case Right(Identified(_, transformable)) => Success(transformable)
-          case Left(err)                           => Failure(err.e)
+          case Right(Identified(_, transformable)) => Future.successful(transformable)
+          case Left(err)                           => Future.failed(err.e)
         }
 
-        ops <- splitter.split(transformable) match {
-          case Right(ops) => Success(ops)
-          case Left(err) =>
-            Failure(new Throwable(s"Couldn't get the Elastic requests: $err"))
-        }
+        ops <- splitter.split(transformable)
       } yield ops
 
-    Future
-      .fromTry(ops)
+    ops
       .flatMap {
         case (indexRequests, deleteByQueryRequests) =>
           val futures = deleteByQueryRequests.map { elasticClient.execute(_) } :+ elasticClient

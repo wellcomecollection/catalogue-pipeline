@@ -5,6 +5,7 @@ import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.storage.generators.S3ObjectLocationGenerators
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.memory.MemoryTypedStore
@@ -217,6 +218,226 @@ class SierraIndexerFeatureTest
                       |  "fixedField": {
                       |    "label" : "Inherit Location",
                       |    "value" : false
+                      |  }
+                      |}
+                      |""".stripMargin
+          )
+        }
+      }
+    }
+  }
+
+  it("replaces a bib record that has changed") {
+    val location1 = createS3ObjectLocation
+    val location2 = createS3ObjectLocation
+
+    val bibId = createSierraBibNumber
+
+    val transformable1 = createSierraTransformableWith(
+      maybeBibRecord = Some(
+        createSierraBibRecordWith(
+          id = bibId,
+          data = s"""
+                    |{
+                    |  "id" : "$bibId",
+                    |  "updatedDate" : "2001-01-01T01:01:01Z",
+                    |  "deleted" : false,
+                    |  "varFields" : [
+                    |    {
+                    |      "fieldTag" : "b",
+                    |      "content" : "11111111"
+                    |    }
+                    |  ],
+                    |  "fixedFields": {
+                    |    "86": {
+                    |      "label" : "AGENCY",
+                    |       "value" : "1"
+                    |    }
+                    |  }
+                    |}
+                    |""".stripMargin
+        )
+      ),
+      itemRecords = List(),
+      holdingsRecords = List(),
+    )
+
+    val transformable2 = createSierraTransformableWith(
+      maybeBibRecord = Some(
+        createSierraBibRecordWith(
+          id = bibId,
+          data = s"""
+                    |{
+                    |  "id" : "$bibId",
+                    |  "updatedDate" : "2002-02-02T02:02:02Z",
+                    |  "deleted" : false,
+                    |  "varFields" : [
+                    |    {
+                    |      "fieldTag" : "b",
+                    |      "content" : "22222222"
+                    |    }
+                    |  ],
+                    |  "fixedFields": {
+                    |    "86": {
+                    |      "label" : "AGENCY",
+                    |       "value" : "2"
+                    |    }
+                    |  }
+                    |}
+                    |""".stripMargin
+        )
+      ),
+      itemRecords = List(),
+      holdingsRecords = List(),
+    )
+
+    val store = MemoryTypedStore[S3ObjectLocation, SierraTransformable](
+      initialEntries = Map(
+        location1 -> transformable1,
+        location2 -> transformable2
+      )
+    )
+
+    withIndices { indexPrefix =>
+      withLocalSqsQueuePair(visibilityTimeout = 5) { case QueuePair(queue, dlq) =>
+        withWorker(queue, store, indexPrefix) { _ =>
+          sendNotificationToSQS(
+            queue,
+            SierraSourcePayload(
+              id = bibId.withoutCheckDigit,
+              location = location1,
+              version = 1)
+          )
+
+          assertElasticsearchEventuallyHas(
+            index = Index(s"${indexPrefix}_bibs"),
+            id = bibId.withoutCheckDigit,
+            json = s"""
+                      |{
+                      |  "id" : "$bibId",
+                      |  "idWithCheckDigit": "${bibId.withCheckDigit}",
+                      |  "updatedDate" : "2001-01-01T01:01:01Z",
+                      |  "deleted" : false,
+                      |  "itemIds": [],
+                      |  "holdingsIds": []
+                      |}
+                      |""".stripMargin
+          )
+
+          assertElasticsearchEventuallyHas(
+            index = Index(s"${indexPrefix}_varfields"),
+            id = s"bibs-${bibId.withoutCheckDigit}-0",
+            json = s"""
+                      |{
+                      |  "parent": {
+                      |    "recordType": "bibs",
+                      |    "id": "${bibId.withoutCheckDigit}",
+                      |    "idWithCheckDigit": "${bibId.withCheckDigit}"
+                      |  },
+                      |  "position": 0,
+                      |  "varField": {
+                      |    "fieldTag" : "b",
+                      |    "content" : "11111111"
+                      |  }
+                      |}
+                      |""".stripMargin
+          )
+
+          assertElasticsearchEventuallyHas(
+            index = Index(s"${indexPrefix}_fixedfields"),
+            id = s"bibs-${bibId.withoutCheckDigit}-86",
+            json = s"""
+                      |{
+                      |  "parent": {
+                      |    "recordType": "bibs",
+                      |    "id": "${bibId.withoutCheckDigit}",
+                      |    "idWithCheckDigit": "${bibId.withCheckDigit}"
+                      |  },
+                      |  "code": "86",
+                      |  "fixedField": {
+                      |    "label" : "AGENCY",
+                      |    "value" : "1"
+                      |  }
+                      |}
+                      |""".stripMargin
+          )
+
+          eventually {
+            assertQueueEmpty(queue)
+            assertQueueEmpty(dlq)
+          }
+
+          // Now re-send the same notification, and check the queue clears
+          sendNotificationToSQS(
+            queue,
+            SierraSourcePayload(
+              id = bibId.withoutCheckDigit,
+              location = location1,
+              version = 1)
+          )
+
+          eventually {
+            assertQueueEmpty(queue)
+            assertQueueEmpty(dlq)
+          }
+
+          // Now send the new notification, and check the record gets updated
+          sendNotificationToSQS(
+            queue,
+            SierraSourcePayload(
+              id = bibId.withoutCheckDigit,
+              location = location2,
+              version = 2)
+          )
+
+          assertElasticsearchEventuallyHas(
+            index = Index(s"${indexPrefix}_bibs"),
+            id = bibId.withoutCheckDigit,
+            json = s"""
+                      |{
+                      |  "id" : "$bibId",
+                      |  "idWithCheckDigit": "${bibId.withCheckDigit}",
+                      |  "updatedDate" : "2002-02-02T02:02:02Z",
+                      |  "deleted" : false,
+                      |  "itemIds": [],
+                      |  "holdingsIds": []
+                      |}
+                      |""".stripMargin
+          )
+
+          assertElasticsearchEventuallyHas(
+            index = Index(s"${indexPrefix}_varfields"),
+            id = s"bibs-${bibId.withoutCheckDigit}-0",
+            json = s"""
+                      |{
+                      |  "parent": {
+                      |    "recordType": "bibs",
+                      |    "id": "${bibId.withoutCheckDigit}",
+                      |    "idWithCheckDigit": "${bibId.withCheckDigit}"
+                      |  },
+                      |  "position": 0,
+                      |  "varField": {
+                      |    "fieldTag" : "b",
+                      |    "content" : "22222222"
+                      |  }
+                      |}
+                      |""".stripMargin
+          )
+
+          assertElasticsearchEventuallyHas(
+            index = Index(s"${indexPrefix}_fixedfields"),
+            id = s"bibs-${bibId.withoutCheckDigit}-86",
+            json = s"""
+                      |{
+                      |  "parent": {
+                      |    "recordType": "bibs",
+                      |    "id": "${bibId.withoutCheckDigit}",
+                      |    "idWithCheckDigit": "${bibId.withCheckDigit}"
+                      |  },
+                      |  "code": "86",
+                      |  "fixedField": {
+                      |    "label" : "AGENCY",
+                      |    "value" : "2"
                       |  }
                       |}
                       |""".stripMargin
