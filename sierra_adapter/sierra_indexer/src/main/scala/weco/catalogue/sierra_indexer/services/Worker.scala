@@ -38,8 +38,9 @@ class Worker(
         )
 
         transformable <- sierraReadable.get(payload.location) match {
-          case Right(Identified(_, transformable)) => Future.successful(transformable)
-          case Left(err)                           => Future.failed(err.e)
+          case Right(Identified(_, transformable)) =>
+            Future.successful(transformable)
+          case Left(err) => Future.failed(err.e)
         }
 
         ops <- splitter.split(transformable)

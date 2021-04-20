@@ -299,20 +299,21 @@ class SierraIndexerFeatureTest
     )
 
     withIndices { indexPrefix =>
-      withLocalSqsQueuePair(visibilityTimeout = 5) { case QueuePair(queue, dlq) =>
-        withWorker(queue, store, indexPrefix) { _ =>
-          sendNotificationToSQS(
-            queue,
-            SierraSourcePayload(
-              id = bibId.withoutCheckDigit,
-              location = location1,
-              version = 1)
-          )
+      withLocalSqsQueuePair(visibilityTimeout = 5) {
+        case QueuePair(queue, dlq) =>
+          withWorker(queue, store, indexPrefix) { _ =>
+            sendNotificationToSQS(
+              queue,
+              SierraSourcePayload(
+                id = bibId.withoutCheckDigit,
+                location = location1,
+                version = 1)
+            )
 
-          assertElasticsearchEventuallyHas(
-            index = Index(s"${indexPrefix}_bibs"),
-            id = bibId.withoutCheckDigit,
-            json = s"""
+            assertElasticsearchEventuallyHas(
+              index = Index(s"${indexPrefix}_bibs"),
+              id = bibId.withoutCheckDigit,
+              json = s"""
                       |{
                       |  "id" : "$bibId",
                       |  "idWithCheckDigit": "${bibId.withCheckDigit}",
@@ -322,12 +323,12 @@ class SierraIndexerFeatureTest
                       |  "holdingsIds": []
                       |}
                       |""".stripMargin
-          )
+            )
 
-          assertElasticsearchEventuallyHas(
-            index = Index(s"${indexPrefix}_varfields"),
-            id = s"bibs-${bibId.withoutCheckDigit}-0",
-            json = s"""
+            assertElasticsearchEventuallyHas(
+              index = Index(s"${indexPrefix}_varfields"),
+              id = s"bibs-${bibId.withoutCheckDigit}-0",
+              json = s"""
                       |{
                       |  "parent": {
                       |    "recordType": "bibs",
@@ -341,12 +342,12 @@ class SierraIndexerFeatureTest
                       |  }
                       |}
                       |""".stripMargin
-          )
+            )
 
-          assertElasticsearchEventuallyHas(
-            index = Index(s"${indexPrefix}_fixedfields"),
-            id = s"bibs-${bibId.withoutCheckDigit}-86",
-            json = s"""
+            assertElasticsearchEventuallyHas(
+              index = Index(s"${indexPrefix}_fixedfields"),
+              id = s"bibs-${bibId.withoutCheckDigit}-86",
+              json = s"""
                       |{
                       |  "parent": {
                       |    "recordType": "bibs",
@@ -360,40 +361,40 @@ class SierraIndexerFeatureTest
                       |  }
                       |}
                       |""".stripMargin
-          )
+            )
 
-          eventually {
-            assertQueueEmpty(queue)
-            assertQueueEmpty(dlq)
-          }
+            eventually {
+              assertQueueEmpty(queue)
+              assertQueueEmpty(dlq)
+            }
 
-          // Now re-send the same notification, and check the queue clears
-          sendNotificationToSQS(
-            queue,
-            SierraSourcePayload(
+            // Now re-send the same notification, and check the queue clears
+            sendNotificationToSQS(
+              queue,
+              SierraSourcePayload(
+                id = bibId.withoutCheckDigit,
+                location = location1,
+                version = 1)
+            )
+
+            eventually {
+              assertQueueEmpty(queue)
+              assertQueueEmpty(dlq)
+            }
+
+            // Now send the new notification, and check the record gets updated
+            sendNotificationToSQS(
+              queue,
+              SierraSourcePayload(
+                id = bibId.withoutCheckDigit,
+                location = location2,
+                version = 2)
+            )
+
+            assertElasticsearchEventuallyHas(
+              index = Index(s"${indexPrefix}_bibs"),
               id = bibId.withoutCheckDigit,
-              location = location1,
-              version = 1)
-          )
-
-          eventually {
-            assertQueueEmpty(queue)
-            assertQueueEmpty(dlq)
-          }
-
-          // Now send the new notification, and check the record gets updated
-          sendNotificationToSQS(
-            queue,
-            SierraSourcePayload(
-              id = bibId.withoutCheckDigit,
-              location = location2,
-              version = 2)
-          )
-
-          assertElasticsearchEventuallyHas(
-            index = Index(s"${indexPrefix}_bibs"),
-            id = bibId.withoutCheckDigit,
-            json = s"""
+              json = s"""
                       |{
                       |  "id" : "$bibId",
                       |  "idWithCheckDigit": "${bibId.withCheckDigit}",
@@ -403,12 +404,12 @@ class SierraIndexerFeatureTest
                       |  "holdingsIds": []
                       |}
                       |""".stripMargin
-          )
+            )
 
-          assertElasticsearchEventuallyHas(
-            index = Index(s"${indexPrefix}_varfields"),
-            id = s"bibs-${bibId.withoutCheckDigit}-0",
-            json = s"""
+            assertElasticsearchEventuallyHas(
+              index = Index(s"${indexPrefix}_varfields"),
+              id = s"bibs-${bibId.withoutCheckDigit}-0",
+              json = s"""
                       |{
                       |  "parent": {
                       |    "recordType": "bibs",
@@ -422,12 +423,12 @@ class SierraIndexerFeatureTest
                       |  }
                       |}
                       |""".stripMargin
-          )
+            )
 
-          assertElasticsearchEventuallyHas(
-            index = Index(s"${indexPrefix}_fixedfields"),
-            id = s"bibs-${bibId.withoutCheckDigit}-86",
-            json = s"""
+            assertElasticsearchEventuallyHas(
+              index = Index(s"${indexPrefix}_fixedfields"),
+              id = s"bibs-${bibId.withoutCheckDigit}-86",
+              json = s"""
                       |{
                       |  "parent": {
                       |    "recordType": "bibs",
@@ -441,8 +442,8 @@ class SierraIndexerFeatureTest
                       |  }
                       |}
                       |""".stripMargin
-          )
-        }
+            )
+          }
       }
     }
   }

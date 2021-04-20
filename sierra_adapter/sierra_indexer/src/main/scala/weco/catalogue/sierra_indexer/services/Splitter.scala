@@ -22,7 +22,8 @@ class Splitter(indexPrefix: String)(
 ) extends Logging {
   import weco.catalogue.sierra_indexer.services.SierraJsonOps._
 
-  def split(t: SierraTransformable): Future[(Seq[IndexRequest], Seq[DeleteByQueryRequest])] = {
+  def split(t: SierraTransformable)
+    : Future[(Seq[IndexRequest], Seq[DeleteByQueryRequest])] = {
     for {
       apiData <- getSierraApiData(t)
 
@@ -43,24 +44,29 @@ class Splitter(indexPrefix: String)(
       // I'm hoping this is a quick fix that makes the indexer performance "good enough"
       // without us having to pour money into the reporting cluster.
       stored <- getStored(apiData)
-      modifiedApiData =
-        stored
-          .filter {
-            case ((parent, json), getResponse) if jsonStringsMatch(json.withId(parent.id).remainder, getResponse.sourceAsString) =>
-              debug(s"Not indexing ${parent.id.withCheckDigit}; it is already indexed")
-              false
+      modifiedApiData = stored
+        .filter {
+          case ((parent, json), getResponse)
+              if jsonStringsMatch(
+                json.withId(parent.id).remainder,
+                getResponse.sourceAsString) =>
+            debug(
+              s"Not indexing ${parent.id.withCheckDigit}; it is already indexed")
+            false
 
-            case ((parent, _), _) =>
-              debug(s"Indexing ${parent.id.withCheckDigit}")
-              true
-          }
-          .map { case ((parent, json), _) => (parent, json) }
+          case ((parent, _), _) =>
+            debug(s"Indexing ${parent.id.withCheckDigit}")
+            true
+        }
+        .map { case ((parent, json), _) => (parent, json) }
 
       mainRecords = IndexerRequest.mainRecords(indexPrefix, modifiedApiData)
       varFields = IndexerRequest.varFields(indexPrefix, modifiedApiData)
       fixedFields = IndexerRequest.fixedFields(indexPrefix, modifiedApiData)
 
-      varFieldDeletions = IndexerRequest.varFieldDeletions(indexPrefix, modifiedApiData)
+      varFieldDeletions = IndexerRequest.varFieldDeletions(
+        indexPrefix,
+        modifiedApiData)
       fixedFieldDeletions = IndexerRequest.fixedFieldDeletions(
         indexPrefix,
         modifiedApiData)
@@ -74,12 +80,16 @@ class Splitter(indexPrefix: String)(
   private def jsonStringsMatch(j1: Json, j2: String): Boolean =
     parse(j2) match {
       case Right(value) => value == j1
-      case _ => false
+      case _            => false
     }
 
-  private def getStored(apiData: Seq[(Parent, Json)]): Future[Seq[((Parent, Json), GetResponse)]] = {
-    val gets = apiData.map { case (parent, _) =>
-      get(Index(s"${indexPrefix}_${parent.recordType}"), id = parent.id.withoutCheckDigit)
+  private def getStored(apiData: Seq[(Parent, Json)])
+    : Future[Seq[((Parent, Json), GetResponse)]] = {
+    val gets = apiData.map {
+      case (parent, _) =>
+        get(
+          Index(s"${indexPrefix}_${parent.recordType}"),
+          id = parent.id.withoutCheckDigit)
     }
 
     client.execute(multiget(gets)).map { resp =>
@@ -87,7 +97,8 @@ class Splitter(indexPrefix: String)(
     }
   }
 
-  private def getSierraApiData(t: SierraTransformable): Future[Seq[(Parent, Json)]] = {
+  private def getSierraApiData(
+    t: SierraTransformable): Future[Seq[(Parent, Json)]] = {
     val itemIds = t.itemRecords.keys.map { _.withoutCheckDigit }.toList.sorted
     val holdingsIds =
       t.holdingsRecords.keys.map { _.withoutCheckDigit }.toList.sorted
