@@ -40,8 +40,9 @@ class MatcherWorkerServiceTest
     val workLinks = createWorkLinksWith(id = identifierA)
     val expectedWorks =
       Set(
-        MatchedIdentifiers(identifiers =
-          Set(WorkIdentifier(workLinks.workId, version = workLinks.version)))
+        MatchedIdentifiers(
+          identifiers =
+            Set(WorkIdentifier(workLinks.workId, version = workLinks.version)))
       )
 
     implicit val retriever: MemoryRetriever[WorkLinks] =
@@ -50,9 +51,7 @@ class MatcherWorkerServiceTest
 
     withLocalSqsQueue() { implicit queue =>
       withWorkerService(retriever, queue, messageSender) { _ =>
-        processAndAssertMatchedWorkIs(
-          workLinks,
-          expectedWorks = expectedWorks)
+        processAndAssertMatchedWorkIs(workLinks, expectedWorks = expectedWorks)
       }
     }
   }
@@ -307,7 +306,8 @@ class MatcherWorkerServiceTest
 
             messageSender
               .getMessages[MatcherResult]
-              .last.works shouldBe expectedWorkAv2
+              .last
+              .works shouldBe expectedWorkAv2
           }
         }
     }

@@ -91,9 +91,10 @@ class WorkMatcherTest
             assertRecent(matcherResult.createdTime)
             matcherResult.works shouldBe
               Set(
-                MatchedIdentifiers(Set(
-                  WorkIdentifier(identifierA.canonicalId, links.version),
-                  WorkIdentifier(identifierB.canonicalId, None))))
+                MatchedIdentifiers(
+                  Set(
+                    WorkIdentifier(identifierA.canonicalId, links.version),
+                    WorkIdentifier(identifierB.canonicalId, None))))
 
             val savedWorkNodes = scan[WorkNode](dynamoClient, graphTable.name)
               .map(_.right.value)
