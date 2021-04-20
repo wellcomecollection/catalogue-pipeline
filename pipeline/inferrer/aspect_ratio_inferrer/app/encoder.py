@@ -4,8 +4,8 @@ from joblib import Parallel, delayed
 class Encoder:
     def __init__(self):
         """
-        Instantiate an encoder which determines the aspect ratio of a given 
-        image, where the aspect ratio (R) = width / height. By definition, R 
+        Instantiate an encoder which determines the aspect ratio of a given
+        image, where the aspect ratio (R) = width / height. By definition, R
         should always be positive.
 
         0 < R < 1 : portrait
