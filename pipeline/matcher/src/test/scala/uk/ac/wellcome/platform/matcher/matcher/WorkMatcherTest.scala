@@ -10,12 +10,14 @@ import org.scalatestplus.mockito.MockitoSugar
 import org.scanamo.syntax._
 import uk.ac.wellcome.models.matcher.{
   MatchedIdentifiers,
-  MatcherResult,
   WorkIdentifier,
   WorkNode
 }
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
-import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
+import uk.ac.wellcome.platform.matcher.fixtures.{
+  MatcherFixtures,
+  TimeTestFixture
+}
 import uk.ac.wellcome.platform.matcher.generators.WorkLinksGenerators
 import uk.ac.wellcome.platform.matcher.models.{WorkGraph, WorkLinks}
 import uk.ac.wellcome.platform.matcher.storage.WorkGraphStore
@@ -36,7 +38,8 @@ class WorkMatcherTest
     with ScalaFutures
     with MockitoSugar
     with EitherValues
-    with WorkLinksGenerators {
+    with WorkLinksGenerators
+    with TimeTestFixture {
 
   private val identifierA = createIdentifier("AAAAAAAA")
   private val identifierB = createIdentifier("BBBBBBBB")
@@ -50,9 +53,10 @@ class WorkMatcherTest
           val links = createWorkLinksWith(id = identifierA)
 
           whenReady(workMatcher.matchWork(links)) { matcherResult =>
-            matcherResult shouldBe
-              MatcherResult(Set(MatchedIdentifiers(
-                Set(WorkIdentifier(links.workId, links.version)))))
+            assertRecent(matcherResult.createdTime)
+            matcherResult.works shouldBe
+              Set(MatchedIdentifiers(
+                Set(WorkIdentifier(links.workId, links.version))))
 
             val savedLinkedWork =
               get[WorkNode](dynamoClient, graphTable.name)(
@@ -83,13 +87,13 @@ class WorkMatcherTest
             referencedIds = Set(identifierB)
           )
 
-          whenReady(workMatcher.matchWork(links)) { identifiersList =>
-            identifiersList shouldBe
-              MatcherResult(
-                Set(
-                  MatchedIdentifiers(Set(
-                    WorkIdentifier(identifierA.canonicalId, links.version),
-                    WorkIdentifier(identifierB.canonicalId, None)))))
+          whenReady(workMatcher.matchWork(links)) { matcherResult =>
+            assertRecent(matcherResult.createdTime)
+            matcherResult.works shouldBe
+              Set(
+                MatchedIdentifiers(Set(
+                  WorkIdentifier(identifierA.canonicalId, links.version),
+                  WorkIdentifier(identifierB.canonicalId, None))))
 
             val savedWorkNodes = scan[WorkNode](dynamoClient, graphTable.name)
               .map(_.right.value)
@@ -151,15 +155,15 @@ class WorkMatcherTest
             referencedIds = Set(identifierC)
           )
 
-          whenReady(workMatcher.matchWork(links)) { identifiersList =>
-            identifiersList shouldBe
-              MatcherResult(
-                Set(
-                  MatchedIdentifiers(
-                    Set(
-                      WorkIdentifier(identifierA.canonicalId, 1),
-                      WorkIdentifier(identifierB.canonicalId, 2),
-                      WorkIdentifier(identifierC.canonicalId, 1)))))
+          whenReady(workMatcher.matchWork(links)) { matcherResult =>
+            assertRecent(matcherResult.createdTime)
+            matcherResult.works shouldBe
+              Set(
+                MatchedIdentifiers(
+                  Set(
+                    WorkIdentifier(identifierA.canonicalId, 1),
+                    WorkIdentifier(identifierB.canonicalId, 2),
+                    WorkIdentifier(identifierC.canonicalId, 1))))
 
             val savedNodes = scan[WorkNode](dynamoClient, graphTable.name)
               .map(_.right.value)

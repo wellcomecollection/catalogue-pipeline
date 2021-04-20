@@ -13,7 +13,10 @@ import uk.ac.wellcome.models.matcher.{
   WorkNode
 }
 import uk.ac.wellcome.pipeline_storage.MemoryRetriever
-import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
+import uk.ac.wellcome.platform.matcher.fixtures.{
+  MatcherFixtures,
+  TimeTestFixture
+}
 import uk.ac.wellcome.platform.matcher.generators.WorkLinksGenerators
 import uk.ac.wellcome.platform.matcher.models.WorkLinks
 
@@ -25,31 +28,34 @@ class MatcherFeatureTest
     with Eventually
     with IntegrationPatience
     with MatcherFixtures
-    with WorkLinksGenerators {
+    with WorkLinksGenerators
+    with TimeTestFixture {
 
   it("processes a message with a single WorkLinks with no linked works") {
     implicit val retriever: MemoryRetriever[WorkLinks] =
       new MemoryRetriever[WorkLinks]()
     val messageSender = new MemoryMessageSender()
 
-    withLocalSqsQueue() { queue =>
+    withLocalSqsQueue(visibilityTimeout = 5) { queue =>
       withWorkerService(retriever, queue, messageSender) { _ =>
         val links = createWorkLinksWith(referencedIds = Set.empty)
 
-        val expectedResult = MatcherResult(
+        val expectedWorks =
           Set(
             MatchedIdentifiers(
               identifiers =
                 Set(WorkIdentifier(links.workId, version = links.version))
             )
           )
-        )
 
         sendWork(links, retriever, queue)
 
         eventually {
-          messageSender.getMessages[MatcherResult].distinct shouldBe Seq(
-            expectedResult)
+          messageSender.messages should have size 1
+
+          val result = messageSender.getMessages[MatcherResult].head
+          result.works shouldBe expectedWorks
+          assertRecent(result.createdTime)
         }
       }
     }
