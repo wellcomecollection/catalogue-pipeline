@@ -41,15 +41,15 @@ class Splitter(indexPrefix: String)(
       modifiedApiData =
         stored
           .filter {
-            case (parent, json, Some(getResponse)) if jsonStringsMatch(json.withId(parent.id).remainder, getResponse.sourceAsString) =>
+            case ((parent, json), getResponse) if jsonStringsMatch(json.withId(parent.id).remainder, getResponse.sourceAsString) =>
               debug(s"Not indexing ${parent.id.withCheckDigit}; it is already indexed")
               false
 
-            case (parent, _, _) =>
+            case ((parent, _), _) =>
               debug(s"Indexing ${parent.id.withCheckDigit}")
               true
           }
-          .map { case (parent, json, _) => (parent, json) }
+          .map { case ((parent, json), _) => (parent, json) }
 
       mainRecords = IndexerRequest.mainRecords(indexPrefix, modifiedApiData)
       varFields = IndexerRequest.varFields(indexPrefix, modifiedApiData)
@@ -72,18 +72,15 @@ class Splitter(indexPrefix: String)(
       case _ => false
     }
 
-  private def getStored(apiData: Seq[(Parent, Json)]): Future[Seq[(Parent, Json, Option[GetResponse])]] =
-    Future.sequence(
-      apiData.map { case (parent, json) =>
-        val resp = client.execute(
-          get(Index(s"${indexPrefix}_${parent.recordType}"), id = parent.id.withoutCheckDigit)
-        )
+  private def getStored(apiData: Seq[(Parent, Json)]): Future[Seq[((Parent, Json), GetResponse)]] = {
+    val gets = apiData.map { case (parent, json) =>
+      get(Index(s"${indexPrefix}_${parent.recordType}"), id = parent.id.withoutCheckDigit)
+    }
 
-        resp.map { r =>
-          (parent, json, if (r.isSuccess) Some(r.result) else None)
-        }
-      }
-    )
+    client.execute(multiget(gets)).map { resp =>
+      apiData.zip(resp.result.items)
+    }
+  }
 
   private def getSierraApiData(t: SierraTransformable): Future[Seq[(Parent, Json)]] = {
     val itemIds = t.itemRecords.keys.map { _.withoutCheckDigit }.toList.sorted
