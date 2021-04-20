@@ -73,7 +73,7 @@ class Splitter(indexPrefix: String)(
     }
 
   private def getStored(apiData: Seq[(Parent, Json)]): Future[Seq[((Parent, Json), GetResponse)]] = {
-    val gets = apiData.map { case (parent, json) =>
+    val gets = apiData.map { case (parent, _) =>
       get(Index(s"${indexPrefix}_${parent.recordType}"), id = parent.id.withoutCheckDigit)
     }
 
@@ -81,7 +81,7 @@ class Splitter(indexPrefix: String)(
       apiData.zip(resp.result.items)
     }
   }
-
+  
   private def getSierraApiData(t: SierraTransformable): Future[Seq[(Parent, Json)]] = {
     val itemIds = t.itemRecords.keys.map { _.withoutCheckDigit }.toList.sorted
     val holdingsIds =
