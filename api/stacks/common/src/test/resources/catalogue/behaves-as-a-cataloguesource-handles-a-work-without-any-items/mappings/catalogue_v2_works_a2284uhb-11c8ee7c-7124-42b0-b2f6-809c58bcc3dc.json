@@ -1,0 +1,34 @@
+{
+  "id" : "11c8ee7c-7124-42b0-b2f6-809c58bcc3dc",
+  "name" : "catalogue_v2_works_a2284uhb",
+  "request" : {
+    "url" : "/catalogue/v2/works/a2284uhb?include=items,identifiers",
+    "method" : "GET"
+  },
+  "response" : {
+    "status" : 200,
+    "body" : "{\"id\":\"a2284uhb\",\"title\":\"Index locorum in commentario Caesaris Belli gallici descriptorum (Rev: Bonus Accursius)\",\"alternativeTitles\":[],\"physicalDescription\":\"Online resource (v., ill.).\",\"workType\":{\"id\":\"a\",\"label\":\"Books\",\"type\":\"WorkType\"},\"identifiers\":[{\"identifierType\":{\"id\":\"sierra-system-number\",\"label\":\"Sierra system number\",\"type\":\"IdentifierType\"},\"value\":\"b30948988\",\"type\":\"Identifier\"},{\"identifierType\":{\"id\":\"sierra-identifier\",\"label\":\"Sierra identifier\",\"type\":\"IdentifierType\"},\"value\":\"3094898\",\"type\":\"Identifier\"}],\"items\":[],\"language\":{\"id\":\"lat\",\"label\":\"Latin\",\"type\":\"Language\"},\"type\":\"Work\",\"@context\":\"https://api.wellcomecollection.org/catalogue/v2/context.json\"}",
+    "headers" : {
+      "Content-Type" : "application/json",
+      "Connection" : "keep-alive",
+      "Date" : "Thu, 27 Feb 2020 13:41:39 GMT",
+      "x-amzn-RequestId" : "bf99b22d-052a-44b8-8d85-29891187441d",
+      "Access-Control-Allow-Origin" : "*",
+      "Access-Control-Allow-Headers" : "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type",
+      "x-amzn-Remapped-Content-Length" : "699",
+      "x-amzn-Remapped-Connection" : "keep-alive",
+      "x-amz-apigw-id" : "IjwLFFrcDoEFZzg=",
+      "x-amzn-Remapped-Server" : "nginx",
+      "Access-Control-Allow-Methods" : "GET, POST, OPTIONS",
+      "x-amzn-Remapped-Date" : "Thu, 27 Feb 2020 13:41:39 GMT",
+      "Access-Control-Allow-Credentials" : "true",
+      "X-Cache" : "Miss from cloudfront",
+      "Via" : "1.1 25206e54d0febe09f3f2edcd0a3fb6cc.cloudfront.net (CloudFront)",
+      "X-Amz-Cf-Pop" : "LHR62-C1",
+      "X-Amz-Cf-Id" : "0BHIrdSRYTmCQA1DTBTlT675sLgIBpKL-cCwiXZ373G9VUph-JWs8Q=="
+    }
+  },
+  "uuid" : "11c8ee7c-7124-42b0-b2f6-809c58bcc3dc",
+  "persistent" : true,
+  "insertionIndex" : 1
+}

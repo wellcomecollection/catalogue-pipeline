@@ -1,0 +1,26 @@
+{
+  "id" : "9057b491-f8c3-3271-a808-c93ab4f8594f",
+  "request" : {
+    "url" : "/iii/sierra-api/v5/patrons/1234567/holds?limit=100&offset=0",
+    "method" : "GET",
+    "headers" : {
+      "Authorization" : {
+        "equalTo" : "Bearer dummy_access_token"
+      }
+    }
+  },
+  "response" : {
+    "status" : 200,
+    "bodyFileName" : "body-iii-sierra-api-v5-patrons-1100189-holds-c8bRb.json",
+    "headers" : {
+      "Date" : "Tue, 19 Nov 2019 11:54:44 GMT",
+      "Server" : "Apache",
+      "Content-Type" : "application/json;charset=UTF-8",
+      "Vary" : "Accept-Encoding,User-Agent",
+      "Set-Cookie" : [ "jcontainerId=.jcontainer-api2; path=/iii/patronio", "jcontainerId=.jcontainer-api2; path=/iii/rss", "jcontainerId=.jcontainer-api2; path=/sierra/admin", "jcontainerId=.jcontainer-api2; path=/sierra/dashboard", "jcontainerId=.jcontainer-api2; path=/sierra/shindig", "jcontainerId=.jcontainer-api2; path=/iii/ws/extlink", "jcontainerId=.jcontainer-api2; path=/sierra/ws/summit", "jcontainerId=.jcontainer-api2; path=/iii/sierra-api" ],
+      "Keep-Alive" : "timeout=5, max=99",
+      "Connection" : "Keep-Alive"
+    }
+  },
+  "uuid" : "9057b491-f8c3-3271-a808-c93ab4f8594f"
+}

@@ -1,0 +1,7 @@
+{
+  "code": 132,
+  "specificCode": 2,
+  "httpStatus": 500,
+  "name": "XCirc error",
+  "description": "XCirc error : This record is not available"
+}

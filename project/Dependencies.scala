@@ -247,6 +247,15 @@ object CatalogueDependencies {
       WellcomeDependencies.elasticsearchTypesafeLibrary ++
       WellcomeDependencies.typesafeLibrary
 
+  val stacksDependencies: Seq[ModuleID] =
+    ExternalDependencies.akkaHttpDependencies ++
+      ExternalDependencies.scalatestDependencies ++
+      ExternalDependencies.wireMockDependencies ++
+      WellcomeDependencies.jsonLibrary ++
+      WellcomeDependencies.monitoringLibrary ++
+      WellcomeDependencies.typesafeLibrary ++
+      WellcomeDependencies.monitoringLibrary
+
   val idminterDependencies: Seq[ModuleID] =
     ExternalDependencies.mySqlDependencies ++
       ExternalDependencies.circeOpticsDependencies

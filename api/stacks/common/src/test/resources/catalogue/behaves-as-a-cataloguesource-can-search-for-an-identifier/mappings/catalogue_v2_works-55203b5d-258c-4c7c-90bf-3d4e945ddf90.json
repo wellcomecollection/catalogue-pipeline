@@ -1,0 +1,34 @@
+{
+  "id" : "55203b5d-258c-4c7c-90bf-3d4e945ddf90",
+  "name" : "catalogue_v2_works",
+  "request" : {
+    "url" : "/catalogue/v2/works?include=items,identifiers&query=1093837",
+    "method" : "GET"
+  },
+  "response" : {
+    "status" : 200,
+    "body" : "{\"@context\":\"https://api.wellcomecollection.org/catalogue/v2/context.json\",\"type\":\"ResultList\",\"pageSize\":10,\"totalPages\":1,\"totalResults\":2,\"results\":[{\"id\":\"aczz5tm3\",\"title\":\"Lacaille : astronomer, traveler with a new translation of his journal\",\"alternativeTitles\":[],\"physicalDescription\":\"320 pages : illustrations, facsimiles, maps, portraits ; 23 cm.\",\"workType\":{\"id\":\"a\",\"label\":\"Books\",\"type\":\"WorkType\"},\"identifiers\":[{\"identifierType\":{\"id\":\"sierra-system-number\",\"label\":\"Sierra system number\",\"type\":\"IdentifierType\"},\"value\":\"b10938370\",\"type\":\"Identifier\"},{\"identifierType\":{\"id\":\"sierra-identifier\",\"label\":\"Sierra identifier\",\"type\":\"IdentifierType\"},\"value\":\"1093837\",\"type\":\"Identifier\"}],\"items\":[{\"id\":\"qkdy3h58\",\"identifiers\":[{\"identifierType\":{\"id\":\"sierra-system-number\",\"label\":\"Sierra system number\",\"type\":\"IdentifierType\"},\"value\":\"i11088953\",\"type\":\"Identifier\"},{\"identifierType\":{\"id\":\"sierra-identifier\",\"label\":\"Sierra identifier\",\"type\":\"IdentifierType\"},\"value\":\"1108895\",\"type\":\"Identifier\"}],\"locations\":[{\"locationType\":{\"id\":\"sghi2\",\"label\":\"Closed stores Hist. 2\",\"type\":\"LocationType\"},\"label\":\"Closed stores Hist. 2\",\"accessConditions\":[],\"type\":\"PhysicalLocation\"}],\"type\":\"Item\"}],\"language\":{\"id\":\"eng\",\"label\":\"English\",\"type\":\"Language\"},\"type\":\"Work\"},{\"id\":\"ayzrznsz\",\"title\":\"Letters relating to the plague, and other contagious distempers\",\"alternativeTitles\":[],\"physicalDescription\":\"xx, 1 unnumbered leaf, 411 pages 9 pages, [10?] leaves, folded plates ; (8vo)\",\"workType\":{\"id\":\"a\",\"label\":\"Books\",\"type\":\"WorkType\"},\"identifiers\":[{\"identifierType\":{\"id\":\"sierra-system-number\",\"label\":\"Sierra system number\",\"type\":\"IdentifierType\"},\"value\":\"b10809569\",\"type\":\"Identifier\"},{\"identifierType\":{\"id\":\"sierra-identifier\",\"label\":\"Sierra identifier\",\"type\":\"IdentifierType\"},\"value\":\"1080956\",\"type\":\"Identifier\"},{\"identifierType\":{\"id\":\"sierra-system-number\",\"label\":\"Sierra system number\",\"type\":\"IdentifierType\"},\"value\":\"b30511720\",\"type\":\"Identifier\"},{\"identifierType\":{\"id\":\"sierra-identifier\",\"label\":\"Sierra identifier\",\"type\":\"IdentifierType\"},\"value\":\"3051172\",\"type\":\"Identifier\"}],\"thumbnail\":{\"locationType\":{\"id\":\"thumbnail-image\",\"label\":\"Thumbnail Image\",\"type\":\"LocationType\"},\"url\":\"https://dlcs.io/thumbs/wellcome/5/b30511720_0001.jp2/full/!200,200/0/default.jpg\",\"license\":{\"id\":\"pdm\",\"label\":\"Public Domain Mark\",\"url\":\"https://creativecommons.org/share-your-work/public-domain/pdm/\",\"type\":\"License\"},\"accessConditions\":[],\"type\":\"DigitalLocation\"},\"items\":[{\"id\":\"q2knsrhh\",\"identifiers\":[{\"identifierType\":{\"id\":\"sierra-system-number\",\"label\":\"Sierra system number\",\"type\":\"IdentifierType\"},\"value\":\"i10938370\",\"type\":\"Identifier\"},{\"identifierType\":{\"id\":\"sierra-identifier\",\"label\":\"Sierra identifier\",\"type\":\"IdentifierType\"},\"value\":\"1093837\",\"type\":\"Identifier\"}],\"locations\":[{\"locationType\":{\"id\":\"sepbb\",\"label\":\"Closed stores EPB / B\",\"type\":\"LocationType\"},\"label\":\"Closed stores EPB / B\",\"accessConditions\":[],\"type\":\"PhysicalLocation\"},{\"locationType\":{\"id\":\"iiif-presentation\",\"label\":\"IIIF Presentation API\",\"type\":\"LocationType\"},\"url\":\"https://wellcomelibrary.org/iiif/b30511720/manifest\",\"license\":{\"id\":\"pdm\",\"label\":\"Public Domain Mark\",\"url\":\"https://creativecommons.org/share-your-work/public-domain/pdm/\",\"type\":\"License\"},\"accessConditions\":[{\"status\":{\"id\":\"open\",\"label\":\"Open\",\"type\":\"AccessStatus\"},\"type\":\"AccessCondition\"}],\"type\":\"DigitalLocation\"}],\"type\":\"Item\"}],\"language\":{\"id\":\"eng\",\"label\":\"English\",\"type\":\"Language\"},\"type\":\"Work\"}]}",
+    "headers" : {
+      "Content-Type" : "application/json",
+      "Connection" : "keep-alive",
+      "Date" : "Thu, 27 Feb 2020 13:49:44 GMT",
+      "x-amzn-RequestId" : "63dc7e28-1656-4e38-8be5-0d18e9304005",
+      "Access-Control-Allow-Origin" : "*",
+      "Access-Control-Allow-Headers" : "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type",
+      "x-amzn-Remapped-Content-Length" : "3556",
+      "x-amzn-Remapped-Connection" : "keep-alive",
+      "x-amz-apigw-id" : "IjxWxFCXjoEFVnQ=",
+      "x-amzn-Remapped-Server" : "nginx",
+      "Access-Control-Allow-Methods" : "GET, POST, OPTIONS",
+      "x-amzn-Remapped-Date" : "Thu, 27 Feb 2020 13:49:44 GMT",
+      "Access-Control-Allow-Credentials" : "true",
+      "X-Cache" : "Miss from cloudfront",
+      "Via" : "1.1 4bc362c59a07f21706e00e1fe67ba2ff.cloudfront.net (CloudFront)",
+      "X-Amz-Cf-Pop" : "LHR62-C1",
+      "X-Amz-Cf-Id" : "c7woPipruh3Qgn4Sm22T7zo2ZxAWSLydiJwlvNrff5X47DDQARYL8w=="
+    }
+  },
+  "uuid" : "55203b5d-258c-4c7c-90bf-3d4e945ddf90",
+  "persistent" : true,
+  "insertionIndex" : 1
+}
