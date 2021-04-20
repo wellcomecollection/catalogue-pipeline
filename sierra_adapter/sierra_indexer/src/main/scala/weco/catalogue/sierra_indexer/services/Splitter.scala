@@ -30,7 +30,8 @@ class Splitter(indexPrefix: String)(
       //
       // We look at the main record for this bib/item/holdings, and compare it to what's
       // already stored.  We assume the modified/deletedDate will change when the record
-      // changes (including fixedFields and varFields).
+      // changes (including fixedFields and varFields) – this is one of the fields in
+      // the JSON of a Sierra record, so if the date changes, so will the JSON.
       //
       // If you wanted to go one step further, you could diff individual
       // varFields/fixedFields, but that adds more complexity.
@@ -81,7 +82,7 @@ class Splitter(indexPrefix: String)(
       apiData.zip(resp.result.items)
     }
   }
-  
+
   private def getSierraApiData(t: SierraTransformable): Future[Seq[(Parent, Json)]] = {
     val itemIds = t.itemRecords.keys.map { _.withoutCheckDigit }.toList.sorted
     val holdingsIds =
