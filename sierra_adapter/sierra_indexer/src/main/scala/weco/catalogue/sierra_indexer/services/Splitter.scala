@@ -102,6 +102,8 @@ class Splitter(indexPrefix: String)(
     val itemIds = t.itemRecords.keys.map { _.withoutCheckDigit }.toList.sorted
     val holdingsIds =
       t.holdingsRecords.keys.map { _.withoutCheckDigit }.toList.sorted
+    val orderIds =
+      t.orderRecords.keys.map { _.withoutCheckDigit }.toList.sorted
 
     val bibData = t.maybeBibRecord match {
       case Some(bibRecord) =>
@@ -115,6 +117,10 @@ class Splitter(indexPrefix: String)(
                   })))
                   .mapObject(
                     _.add("holdingsIds", Json.fromValues(holdingsIds.map {
+                      Json.fromString
+                    })))
+                  .mapObject(
+                    _.add("orderIds", Json.fromValues(orderIds.map {
                       Json.fromString
                     })))
               }
@@ -132,7 +138,12 @@ class Splitter(indexPrefix: String)(
         Parent(holdingsRecord.id) -> parse(holdingsRecord.data)
       }.toSeq
 
-    val data = bibData ++ itemData ++ holdingsData
+    val orderData: Seq[(Parent, Either[ParsingFailure, Json])] =
+      t.orderRecords.values.map { orderRecord =>
+        Parent(orderRecord.id) -> parse(orderRecord.data)
+      }.toSeq
+
+    val data = bibData ++ itemData ++ holdingsData ++ orderData
 
     val successes = data.collect {
       case (parent, Right(json)) => (parent, json)
