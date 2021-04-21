@@ -42,7 +42,7 @@ class MergerWorkerServiceTest
         val work3 = identifiedWork(modifiedTime = latestUpdate - (2 days))
 
         val matcherResult =
-          matcherResultWith(Set(Set(work3), Set(work1, work2)))
+          createMatcherResultWith(Set(Set(work3), Set(work1, work2)))
 
         retriever.index ++= Map(
           work1.id -> work1,
@@ -82,7 +82,7 @@ class MergerWorkerServiceTest
       case (retriever, QueuePair(queue, dlq), senders, metrics, index) =>
         val work = identifiedWork().invisible()
 
-        val matcherResult = matcherResultWith(Set(Set(work)))
+        val matcherResult = createMatcherResultWith(Set(Set(work)))
 
         retriever.index ++= Map(work.id -> work)
 
@@ -111,7 +111,7 @@ class MergerWorkerServiceTest
       case (_, QueuePair(queue, dlq), senders, metrics, _) =>
         val work = identifiedWork()
 
-        val matcherResult = matcherResultWith(Set(Set(work)))
+        val matcherResult = createMatcherResultWith(Set(Set(work)))
 
         sendNotificationToSQS(
           queue = queue,
@@ -139,7 +139,7 @@ class MergerWorkerServiceTest
           identifiedWork(canonicalId = olderWork.state.canonicalId)
             .withVersion(olderWork.version + 1)
 
-        val matcherResult = matcherResultWith(Set(Set(work, olderWork)))
+        val matcherResult = createMatcherResultWith(Set(Set(work, olderWork)))
 
         retriever.index ++= Map(work.id -> work, newerWork.id -> newerWork)
 
@@ -169,7 +169,7 @@ class MergerWorkerServiceTest
           identifiedWork(canonicalId = versionZeroWork.state.canonicalId)
             .withVersion(1)
 
-        val matcherResult = matcherResultWith(Set(Set(work, versionZeroWork)))
+        val matcherResult = createMatcherResultWith(Set(Set(work, versionZeroWork)))
 
         retriever.index ++= Map(work.id -> work)
 
@@ -409,7 +409,7 @@ class MergerWorkerServiceTest
         val work0 = identifiedWork().withVersion(0)
         val work1 = identifiedWork(canonicalId = work0.state.canonicalId)
           .withVersion(1)
-        val matcherResult = matcherResultWith(Set(Set(work0)))
+        val matcherResult = createMatcherResultWith(Set(Set(work0)))
         retriever.index ++= Map(work1.id -> work1)
 
         sendNotificationToSQS(

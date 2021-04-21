@@ -9,7 +9,7 @@ import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.catalogue.internal_model.work.Work
 
 trait MatcherResultFixture {
-  def matcherResultWith(matchedEntries: Set[Set[Work[Identified]]]) =
+  def createMatcherResultWith(matchedEntries: Set[Set[Work[Identified]]]) =
     MatcherResult(
       matchedEntries.map { works =>
         MatchedIdentifiers(worksToWorkIdentifiers(works))
