@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.sierra_reader.models
+package weco.catalogue.sierra_reader.models
 
 import weco.catalogue.source_model.sierra.UntypedSierraRecordNumber
 
