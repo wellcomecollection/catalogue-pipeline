@@ -5,7 +5,6 @@ import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
@@ -36,10 +35,9 @@ class MergerWorkerServiceTest
   it("reads matcher result messages, retrieves the works and sends on the IDs") {
     withMergerWorkerServiceFixtures {
       case (retriever, QueuePair(queue, dlq), senders, metrics, index) =>
-        val latestUpdate = randomInstantBefore(now, 30 days)
-        val work1 = identifiedWork(modifiedTime = latestUpdate)
-        val work2 = identifiedWork(modifiedTime = latestUpdate - (1 day))
-        val work3 = identifiedWork(modifiedTime = latestUpdate - (2 days))
+        val work1 = identifiedWork()
+        val work2 = identifiedWork()
+        val work3 = identifiedWork()
 
         val matcherResult =
           createMatcherResultWith(Set(Set(work3), Set(work1, work2)))
@@ -66,9 +64,9 @@ class MergerWorkerServiceTest
           )
 
           index shouldBe Map(
-            work1.id -> Left(work1.transition[Merged](latestUpdate)),
-            work2.id -> Left(work2.transition[Merged](latestUpdate)),
-            work3.id -> Left(work3.transition[Merged](latestUpdate))
+            work1.id -> Left(work1.transition[Merged](matcherResult.createdTime)),
+            work2.id -> Left(work2.transition[Merged](matcherResult.createdTime)),
+            work3.id -> Left(work3.transition[Merged](matcherResult.createdTime))
           )
 
           metrics.incrementedCounts.length should be >= 1
@@ -98,7 +96,7 @@ class MergerWorkerServiceTest
           getWorksSent(senders) should contain only work.id
 
           index shouldBe Map(
-            work.id -> Left(work.transition[Merged](work.state.modifiedTime)))
+            work.id -> Left(work.transition[Merged](matcherResult.createdTime)))
 
           metrics.incrementedCounts.length shouldBe 1
           metrics.incrementedCounts.last should endWith("_success")
@@ -153,7 +151,7 @@ class MergerWorkerServiceTest
           assertQueueEmpty(dlq)
           getWorksSent(senders) should contain only work.id
           index shouldBe Map(
-            work.id -> Left(work.transition[Merged](work.state.modifiedTime)))
+            work.id -> Left(work.transition[Merged](matcherResult.createdTime)))
         }
     }
   }
@@ -184,7 +182,7 @@ class MergerWorkerServiceTest
 
           getWorksSent(senders) should contain only work.id
           index shouldBe Map(
-            work.id -> Left(work.transition[Merged](work.state.modifiedTime)))
+            work.id -> Left(work.transition[Merged](matcherResult.createdTime)))
 
           metrics.incrementedCounts.length shouldBe 1
           metrics.incrementedCounts.last should endWith("_success")
