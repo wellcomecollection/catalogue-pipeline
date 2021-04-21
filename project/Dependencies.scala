@@ -49,6 +49,11 @@ object WellcomeDependencies {
     version = versions.monitoring
   )
 
+  val monitoringTypesafeLibrary: Seq[ModuleID] = monitoringLibrary ++ library(
+    name = "monitoring_typesafe",
+    version = versions.monitoring
+  )
+
   val storageLibrary: Seq[ModuleID] = library(
     name = "storage",
     version = versions.storage
@@ -252,7 +257,7 @@ object CatalogueDependencies {
       ExternalDependencies.scalatestDependencies ++
       ExternalDependencies.wireMockDependencies ++
       WellcomeDependencies.jsonLibrary ++
-      WellcomeDependencies.monitoringLibrary ++
+      WellcomeDependencies.monitoringTypesafeLibrary ++
       WellcomeDependencies.typesafeLibrary ++
       WellcomeDependencies.monitoringLibrary
 

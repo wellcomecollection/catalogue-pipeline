@@ -4,6 +4,7 @@ include makefiles/functions.Makefile
 include makefiles/formatting.Makefile
 
 include api/Makefile
+include api/stacks/Makefile
 include common/Makefile
 include pipeline/Makefile
 include reindexer/Makefile
