@@ -135,7 +135,7 @@ object SierraHoldingsNumber {
 }
 
 class SierraOrderNumber(val recordNumber: String)
-  extends TypedSierraRecordNumber {
+    extends TypedSierraRecordNumber {
   val recordType: SierraRecordTypes.Value = SierraRecordTypes.orders
 }
 

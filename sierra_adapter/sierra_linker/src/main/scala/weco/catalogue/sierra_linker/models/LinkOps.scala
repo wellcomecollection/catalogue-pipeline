@@ -95,7 +95,8 @@ object LinkOps {
   }
 
   implicit val orderLinkOps = new LinkOps[SierraOrderRecord] {
-    override def getBibIds(orderRecord: SierraOrderRecord): List[SierraBibNumber] =
+    override def getBibIds(
+      orderRecord: SierraOrderRecord): List[SierraBibNumber] =
       orderRecord.bibIds
 
     override def createLink(orderRecord: SierraOrderRecord): Link =

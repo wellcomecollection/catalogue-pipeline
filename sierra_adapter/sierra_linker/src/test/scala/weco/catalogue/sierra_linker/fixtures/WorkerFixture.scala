@@ -96,13 +96,12 @@ trait WorkerFixture extends SQS with Akka {
   def withOrderWorker[R](
     queue: Queue,
     store: MemoryVersionedStore[SierraOrderNumber, Link] =
-      MemoryVersionedStore[SierraOrderNumber, Link](
-        initialEntries = Map.empty),
+      MemoryVersionedStore[SierraOrderNumber, Link](initialEntries = Map.empty),
     metrics: Metrics[Future] = new MemoryMetrics(),
     messageSender: MemoryMessageSender = new MemoryMessageSender
   )(testWith: TestWith[
-    SierraLinkerWorker[SierraOrderNumber, SierraOrderRecord, String],
-    R]): R =
+      SierraLinkerWorker[SierraOrderNumber, SierraOrderRecord, String],
+      R]): R =
     withWorker[SierraOrderNumber, SierraOrderRecord, R](
       queue,
       store,

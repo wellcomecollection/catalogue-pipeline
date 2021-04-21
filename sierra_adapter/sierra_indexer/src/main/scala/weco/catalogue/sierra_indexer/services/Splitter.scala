@@ -119,10 +119,9 @@ class Splitter(indexPrefix: String)(
                     _.add("holdingsIds", Json.fromValues(holdingsIds.map {
                       Json.fromString
                     })))
-                  .mapObject(
-                    _.add("orderIds", Json.fromValues(orderIds.map {
-                      Json.fromString
-                    })))
+                  .mapObject(_.add("orderIds", Json.fromValues(orderIds.map {
+                    Json.fromString
+                  })))
               }
         )
       case None => Seq()

@@ -154,7 +154,9 @@ trait SierraGenerators extends RandomGenerators {
                                modifiedDate: Instant,
                                bibIds: List[SierraBibNumber]): String = {
     val urls =
-      bibIds.map { id => s"https://libsys.wellcomelibrary.org/iii/sierra-api/v6/bibs/$id" }
+      bibIds.map { id =>
+        s"https://libsys.wellcomelibrary.org/iii/sierra-api/v6/bibs/$id"
+      }
 
     s"""
        |{

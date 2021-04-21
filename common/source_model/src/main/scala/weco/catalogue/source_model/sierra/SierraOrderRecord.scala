@@ -17,8 +17,8 @@ case object SierraOrderRecord {
   private case class SierraAPIData(bibs: List[String])
 
   /** This apply method is for parsing JSON bodies that come from the
-   * Sierra API.
-   */
+    * Sierra API.
+    */
   def apply(id: String,
             data: String,
             modifiedDate: Instant): SierraOrderRecord = {
@@ -29,7 +29,8 @@ case object SierraOrderRecord {
       // For now, just split on slashes and take the final part.
       case Success(apiData) =>
         apiData.bibs.map { url =>
-          assert(url.startsWith("https://libsys.wellcomelibrary.org/iii/sierra-api"))
+          assert(
+            url.startsWith("https://libsys.wellcomelibrary.org/iii/sierra-api"))
           SierraBibNumber(url.split("/").last)
         }
       case Failure(e) =>

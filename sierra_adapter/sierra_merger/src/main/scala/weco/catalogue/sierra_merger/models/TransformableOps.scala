@@ -73,13 +73,17 @@ object TransformableOps {
         s"We should never be removing a bib record from a SierraTransformable (${transformable.sierraId})")
   }
 
-  trait SubrecordTransformableOps[Id <: TypedSierraRecordNumber, Record <: AbstractSierraRecord[Id]] extends TransformableOps[Record] {
+  trait SubrecordTransformableOps[
+    Id <: TypedSierraRecordNumber, Record <: AbstractSierraRecord[Id]]
+      extends TransformableOps[Record] {
     implicit val recordOps: RecordOps[Record]
 
     def getRecords(t: SierraTransformable): Map[Id, Record]
-    def setRecords(t: SierraTransformable, records: Map[Id, Record]): SierraTransformable
+    def setRecords(t: SierraTransformable,
+                   records: Map[Id, Record]): SierraTransformable
 
-    override def create(sierraId: SierraBibNumber, record: Record): SierraTransformable = {
+    override def create(sierraId: SierraBibNumber,
+                        record: Record): SierraTransformable = {
       val t = SierraTransformable(sierraId = sierraId)
       val newRecords = Map(record.id -> record)
 
@@ -118,7 +122,8 @@ object TransformableOps {
       }
     }
 
-    override def remove(t: SierraTransformable, record: Record): Option[SierraTransformable] = {
+    override def remove(t: SierraTransformable,
+                        record: Record): Option[SierraTransformable] = {
       if (!recordOps.getUnlinkedBibIds(record).contains(t.sierraId)) {
         throw new RuntimeException(
           s"Non-matching bib id ${t.sierraId} in ${recordOps.getUnlinkedBibIds(record)}")
@@ -145,33 +150,51 @@ object TransformableOps {
     }
   }
 
-  implicit val itemTransformableOps = new SubrecordTransformableOps[SierraItemNumber, SierraItemRecord] {
-    override implicit val recordOps: RecordOps[SierraItemRecord] = RecordOps.itemRecordOps
+  implicit val itemTransformableOps =
+    new SubrecordTransformableOps[SierraItemNumber, SierraItemRecord] {
+      override implicit val recordOps: RecordOps[SierraItemRecord] =
+        RecordOps.itemRecordOps
 
-    override def getRecords(t: SierraTransformable): Map[SierraItemNumber, SierraItemRecord] =
-      t.itemRecords
+      override def getRecords(
+        t: SierraTransformable): Map[SierraItemNumber, SierraItemRecord] =
+        t.itemRecords
 
-    override def setRecords(t: SierraTransformable, itemRecords: Map[SierraItemNumber, SierraItemRecord]): SierraTransformable =
-      t.copy(itemRecords = itemRecords)
-  }
+      override def setRecords(
+        t: SierraTransformable,
+        itemRecords: Map[SierraItemNumber, SierraItemRecord])
+        : SierraTransformable =
+        t.copy(itemRecords = itemRecords)
+    }
 
-  implicit val holdingsTransformableOps = new SubrecordTransformableOps[SierraHoldingsNumber, SierraHoldingsRecord] {
-    override implicit val recordOps: RecordOps[SierraHoldingsRecord] = RecordOps.holdingsRecordOps
+  implicit val holdingsTransformableOps =
+    new SubrecordTransformableOps[SierraHoldingsNumber, SierraHoldingsRecord] {
+      override implicit val recordOps: RecordOps[SierraHoldingsRecord] =
+        RecordOps.holdingsRecordOps
 
-    override def getRecords(t: SierraTransformable): Map[SierraHoldingsNumber, SierraHoldingsRecord] =
-      t.holdingsRecords
+      override def getRecords(t: SierraTransformable)
+        : Map[SierraHoldingsNumber, SierraHoldingsRecord] =
+        t.holdingsRecords
 
-    override def setRecords(t: SierraTransformable, holdingsRecords: Map[SierraHoldingsNumber, SierraHoldingsRecord]): SierraTransformable =
-      t.copy(holdingsRecords = holdingsRecords)
-  }
+      override def setRecords(
+        t: SierraTransformable,
+        holdingsRecords: Map[SierraHoldingsNumber, SierraHoldingsRecord])
+        : SierraTransformable =
+        t.copy(holdingsRecords = holdingsRecords)
+    }
 
-  implicit val orderTransformableOps = new SubrecordTransformableOps[SierraOrderNumber, SierraOrderRecord] {
-    override implicit val recordOps: RecordOps[SierraOrderRecord] = RecordOps.orderRecordOps
+  implicit val orderTransformableOps =
+    new SubrecordTransformableOps[SierraOrderNumber, SierraOrderRecord] {
+      override implicit val recordOps: RecordOps[SierraOrderRecord] =
+        RecordOps.orderRecordOps
 
-    override def getRecords(t: SierraTransformable): Map[SierraOrderNumber, SierraOrderRecord] =
-      t.orderRecords
+      override def getRecords(
+        t: SierraTransformable): Map[SierraOrderNumber, SierraOrderRecord] =
+        t.orderRecords
 
-    override def setRecords(t: SierraTransformable, orderRecords: Map[SierraOrderNumber, SierraOrderRecord]): SierraTransformable =
-      t.copy(orderRecords = orderRecords)
-  }
+      override def setRecords(
+        t: SierraTransformable,
+        orderRecords: Map[SierraOrderNumber, SierraOrderRecord])
+        : SierraTransformable =
+        t.copy(orderRecords = orderRecords)
+    }
 }

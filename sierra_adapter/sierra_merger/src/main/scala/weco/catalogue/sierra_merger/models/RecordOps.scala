@@ -55,7 +55,8 @@ object RecordOps {
     override def getBibIds(r: SierraOrderRecord): List[SierraBibNumber] =
       r.bibIds
 
-    override def getUnlinkedBibIds(r: SierraOrderRecord): List[SierraBibNumber] =
+    override def getUnlinkedBibIds(
+      r: SierraOrderRecord): List[SierraBibNumber] =
       r.unlinkedBibIds
   }
 }
