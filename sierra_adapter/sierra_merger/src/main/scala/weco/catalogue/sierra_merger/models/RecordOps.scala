@@ -6,7 +6,8 @@ import weco.catalogue.source_model.sierra.{
   SierraBibNumber,
   SierraBibRecord,
   SierraHoldingsRecord,
-  SierraItemRecord
+  SierraItemRecord,
+  SierraOrderRecord
 }
 
 trait RecordOps[Record <: AbstractSierraRecord[_]] extends Logging {
@@ -47,6 +48,14 @@ object RecordOps {
 
     override def getUnlinkedBibIds(
       r: SierraHoldingsRecord): List[SierraBibNumber] =
+      r.unlinkedBibIds
+  }
+
+  implicit val orderRecordOps = new RecordOps[SierraOrderRecord] {
+    override def getBibIds(r: SierraOrderRecord): List[SierraBibNumber] =
+      r.bibIds
+
+    override def getUnlinkedBibIds(r: SierraOrderRecord): List[SierraBibNumber] =
       r.unlinkedBibIds
   }
 }
