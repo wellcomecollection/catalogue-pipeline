@@ -83,10 +83,10 @@ class SierraIndexerFeatureTest
       ),
       itemRecords = itemIds.map { id =>
         createSierraItemRecordWith(id = id)
-      }.toList,
+      },
       holdingsRecords = holdingsIds.map { id =>
         createSierraHoldingsRecordWith(id = id)
-      }.toList,
+      }
     )
 
     val store = MemoryTypedStore[S3ObjectLocation, SierraTransformable](

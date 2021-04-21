@@ -133,8 +133,8 @@ trait SierraGenerators extends RandomGenerators {
   def createSierraTransformableWith(
     sierraId: SierraBibNumber = createSierraBibNumber,
     maybeBibRecord: Option[SierraBibRecord] = Some(createSierraBibRecord),
-    itemRecords: List[SierraItemRecord] = List(),
-    holdingsRecords: List[SierraHoldingsRecord] = List()
+    itemRecords: Seq[SierraItemRecord] = List(),
+    holdingsRecords: Seq[SierraHoldingsRecord] = List()
   ): SierraTransformable =
     SierraTransformable(
       sierraId = sierraId,
