@@ -121,7 +121,7 @@ class MergerFeatureTest
 
         val storedTimes_t5 = getModifiedTimes(index)
         existingTimes_t5.foreach { case (id, time) =>
-          storedTimes_t5(id) shouldBe >=(time)
+          storedTimes_t5(id) shouldBe >(time)
         }
 
         index(idD.underlying).left.value.data.title shouldBe Some("I was updated at t = 4")
@@ -157,7 +157,7 @@ class MergerFeatureTest
 
         val storedTimes_t6 = getModifiedTimes(index)
         existingTimes_t6.foreach { case (id, time) =>
-          storedTimes_t6(id) shouldBe >=(time)
+          storedTimes_t6(id) shouldBe >(time)
         }
 
         index(idA.underlying).left.value.data.title shouldBe Some("I was updated at t = 1")
@@ -183,8 +183,8 @@ class MergerFeatureTest
         storedTimes_t7(idA) shouldBe existingTimes_t7(idA)
         storedTimes_t7(idD) shouldBe existingTimes_t7(idD)
 
-        storedTimes_t7(idB) shouldBe >=(existingTimes_t7(idB))
-        storedTimes_t7(idC) shouldBe >=(existingTimes_t7(idC))
+        storedTimes_t7(idB) shouldBe >(existingTimes_t7(idB))
+        storedTimes_t7(idC) shouldBe >(existingTimes_t7(idC))
 
         index(idB.underlying).left.value.data.title shouldBe Some("I was updated at t = 2")
       }
