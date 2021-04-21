@@ -10,7 +10,6 @@ import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, MatcherResult}
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
 import uk.ac.wellcome.platform.merger.fixtures.{
   MatcherResultFixture,
@@ -202,11 +201,7 @@ class MergerWorkerServiceTest
           physicalWork.id -> physicalWork,
           digitisedWork.id -> digitisedWork)
 
-        val matcherResult = MatcherResult(
-          Set(
-            MatchedIdentifiers(worksToWorkIdentifiers(works))
-          )
-        )
+        val matcherResult = createMatcherResultWith(Set(works.toSet))
 
         sendNotificationToSQS(queue = queue, message = matcherResult)
 
@@ -250,11 +245,7 @@ class MergerWorkerServiceTest
           digitisedWork.id -> digitisedWork,
           miroWork.id -> miroWork)
 
-        val matcherResult = MatcherResult(
-          Set(
-            MatchedIdentifiers(worksToWorkIdentifiers(works))
-          )
-        )
+        val matcherResult = createMatcherResultWith(Set(works.toSet))
 
         sendNotificationToSQS(queue = queue, message = matcherResult)
 
@@ -312,11 +303,12 @@ class MergerWorkerServiceTest
           digitisedWork2.id -> digitisedWork2
         )
 
-        val matcherResult = MatcherResult(
+        val matcherResult = createMatcherResultWith(
           Set(
-            MatchedIdentifiers(worksToWorkIdentifiers(workPair1)),
-            MatchedIdentifiers(worksToWorkIdentifiers(workPair2))
-          ))
+            workPair1.toSet,
+            workPair2.toSet
+          )
+        )
 
         sendNotificationToSQS(queue = queue, message = matcherResult)
 
@@ -360,11 +352,9 @@ class MergerWorkerServiceTest
           deletedWork.id -> deletedWork
         )
 
-        val matcherResult = MatcherResult(
-          Set(
-            MatchedIdentifiers(
-              worksToWorkIdentifiers(List(visibleWork, deletedWork)))
-          ))
+        val matcherResult = createMatcherResultWith(
+          Set(Set(visibleWork, deletedWork))
+        )
 
         sendNotificationToSQS(queue = queue, message = matcherResult)
 
