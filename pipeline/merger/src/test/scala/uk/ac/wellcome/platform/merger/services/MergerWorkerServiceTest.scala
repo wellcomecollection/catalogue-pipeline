@@ -5,13 +5,11 @@ import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, MatcherResult}
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
 import uk.ac.wellcome.platform.merger.fixtures.{
   MatcherResultFixture,
@@ -36,13 +34,12 @@ class MergerWorkerServiceTest
   it("reads matcher result messages, retrieves the works and sends on the IDs") {
     withMergerWorkerServiceFixtures {
       case (retriever, QueuePair(queue, dlq), senders, metrics, index) =>
-        val latestUpdate = randomInstantBefore(now, 30 days)
-        val work1 = identifiedWork(modifiedTime = latestUpdate)
-        val work2 = identifiedWork(modifiedTime = latestUpdate - (1 day))
-        val work3 = identifiedWork(modifiedTime = latestUpdate - (2 days))
+        val work1 = identifiedWork()
+        val work2 = identifiedWork()
+        val work3 = identifiedWork()
 
         val matcherResult =
-          matcherResultWith(Set(Set(work3), Set(work1, work2)))
+          createMatcherResultWith(Set(Set(work3), Set(work1, work2)))
 
         retriever.index ++= Map(
           work1.id -> work1,
@@ -66,9 +63,12 @@ class MergerWorkerServiceTest
           )
 
           index shouldBe Map(
-            work1.id -> Left(work1.transition[Merged](latestUpdate)),
-            work2.id -> Left(work2.transition[Merged](latestUpdate)),
-            work3.id -> Left(work3.transition[Merged](latestUpdate))
+            work1.id -> Left(
+              work1.transition[Merged](matcherResult.createdTime)),
+            work2.id -> Left(
+              work2.transition[Merged](matcherResult.createdTime)),
+            work3.id -> Left(
+              work3.transition[Merged](matcherResult.createdTime))
           )
 
           metrics.incrementedCounts.length should be >= 1
@@ -82,7 +82,7 @@ class MergerWorkerServiceTest
       case (retriever, QueuePair(queue, dlq), senders, metrics, index) =>
         val work = identifiedWork().invisible()
 
-        val matcherResult = matcherResultWith(Set(Set(work)))
+        val matcherResult = createMatcherResultWith(Set(Set(work)))
 
         retriever.index ++= Map(work.id -> work)
 
@@ -98,7 +98,7 @@ class MergerWorkerServiceTest
           getWorksSent(senders) should contain only work.id
 
           index shouldBe Map(
-            work.id -> Left(work.transition[Merged](work.state.modifiedTime)))
+            work.id -> Left(work.transition[Merged](matcherResult.createdTime)))
 
           metrics.incrementedCounts.length shouldBe 1
           metrics.incrementedCounts.last should endWith("_success")
@@ -111,7 +111,7 @@ class MergerWorkerServiceTest
       case (_, QueuePair(queue, dlq), senders, metrics, _) =>
         val work = identifiedWork()
 
-        val matcherResult = matcherResultWith(Set(Set(work)))
+        val matcherResult = createMatcherResultWith(Set(Set(work)))
 
         sendNotificationToSQS(
           queue = queue,
@@ -139,7 +139,7 @@ class MergerWorkerServiceTest
           identifiedWork(canonicalId = olderWork.state.canonicalId)
             .withVersion(olderWork.version + 1)
 
-        val matcherResult = matcherResultWith(Set(Set(work, olderWork)))
+        val matcherResult = createMatcherResultWith(Set(Set(work, olderWork)))
 
         retriever.index ++= Map(work.id -> work, newerWork.id -> newerWork)
 
@@ -153,7 +153,7 @@ class MergerWorkerServiceTest
           assertQueueEmpty(dlq)
           getWorksSent(senders) should contain only work.id
           index shouldBe Map(
-            work.id -> Left(work.transition[Merged](work.state.modifiedTime)))
+            work.id -> Left(work.transition[Merged](matcherResult.createdTime)))
         }
     }
   }
@@ -169,7 +169,8 @@ class MergerWorkerServiceTest
           identifiedWork(canonicalId = versionZeroWork.state.canonicalId)
             .withVersion(1)
 
-        val matcherResult = matcherResultWith(Set(Set(work, versionZeroWork)))
+        val matcherResult =
+          createMatcherResultWith(Set(Set(work, versionZeroWork)))
 
         retriever.index ++= Map(work.id -> work)
 
@@ -184,7 +185,7 @@ class MergerWorkerServiceTest
 
           getWorksSent(senders) should contain only work.id
           index shouldBe Map(
-            work.id -> Left(work.transition[Merged](work.state.modifiedTime)))
+            work.id -> Left(work.transition[Merged](matcherResult.createdTime)))
 
           metrics.incrementedCounts.length shouldBe 1
           metrics.incrementedCounts.last should endWith("_success")
@@ -204,11 +205,7 @@ class MergerWorkerServiceTest
           physicalWork.id -> physicalWork,
           digitisedWork.id -> digitisedWork)
 
-        val matcherResult = MatcherResult(
-          Set(
-            MatchedIdentifiers(worksToWorkIdentifiers(works))
-          )
-        )
+        val matcherResult = createMatcherResultWith(Set(works.toSet))
 
         sendNotificationToSQS(queue = queue, message = matcherResult)
 
@@ -252,11 +249,7 @@ class MergerWorkerServiceTest
           digitisedWork.id -> digitisedWork,
           miroWork.id -> miroWork)
 
-        val matcherResult = MatcherResult(
-          Set(
-            MatchedIdentifiers(worksToWorkIdentifiers(works))
-          )
-        )
+        val matcherResult = createMatcherResultWith(Set(works.toSet))
 
         sendNotificationToSQS(queue = queue, message = matcherResult)
 
@@ -314,11 +307,12 @@ class MergerWorkerServiceTest
           digitisedWork2.id -> digitisedWork2
         )
 
-        val matcherResult = MatcherResult(
+        val matcherResult = createMatcherResultWith(
           Set(
-            MatchedIdentifiers(worksToWorkIdentifiers(workPair1)),
-            MatchedIdentifiers(worksToWorkIdentifiers(workPair2))
-          ))
+            workPair1.toSet,
+            workPair2.toSet
+          )
+        )
 
         sendNotificationToSQS(queue = queue, message = matcherResult)
 
@@ -362,11 +356,9 @@ class MergerWorkerServiceTest
           deletedWork.id -> deletedWork
         )
 
-        val matcherResult = MatcherResult(
-          Set(
-            MatchedIdentifiers(
-              worksToWorkIdentifiers(List(visibleWork, deletedWork)))
-          ))
+        val matcherResult = createMatcherResultWith(
+          Set(Set(visibleWork, deletedWork))
+        )
 
         sendNotificationToSQS(queue = queue, message = matcherResult)
 
@@ -409,7 +401,7 @@ class MergerWorkerServiceTest
         val work0 = identifiedWork().withVersion(0)
         val work1 = identifiedWork(canonicalId = work0.state.canonicalId)
           .withVersion(1)
-        val matcherResult = matcherResultWith(Set(Set(work0)))
+        val matcherResult = createMatcherResultWith(Set(Set(work0)))
         retriever.index ++= Map(work1.id -> work1)
 
         sendNotificationToSQS(

@@ -62,18 +62,31 @@ class MergerWorkerService[WorkDestination, ImageDestination](
 
   private def processMessage(
     message: NotificationMessage): Future[List[WorkOrImage]] =
-    Future
-      .fromTry(fromJson[MatcherResult](message.body))
-      .flatMap { matcherResult =>
-        getWorkSets(matcherResult)
-          .map(workSets => workSets.filter(_.flatten.nonEmpty))
-      }
-      .map {
+    for {
+      matcherResult <- Future.fromTry(
+        fromJson[MatcherResult](message.body)
+      )
+
+      workSets <- getWorkSets(matcherResult)
+        .map(workSets => workSets.filter(_.flatten.nonEmpty))
+
+      result = workSets match {
         case Nil => Nil
         case workSets =>
-          val lastUpdated = getLastUpdated(workSets)
-          workSets.flatMap(workSet => applyMerge(workSet, lastUpdated))
+          workSets.flatMap(
+            ws =>
+              // We use the matcher result time as the "modified" time on
+              // the merged works, because it reflects the last time the
+              // matcher inspected the connections between these works.
+              //
+              // We *cannot* rely on the modified times of the individual
+              // works -- this may cause us to drop updates if works
+              // get unlinked.
+              //
+              // See https://github.com/wellcomecollection/docs/tree/8d83d75aba89ead23559584db2533e95ceb09200/rfcs/038-matcher-versioning
+              applyMerge(ws, matcherResult.createdTime))
       }
+    } yield result
 
   private def getWorkSets(matcherResult: MatcherResult): Future[List[WorkSet]] =
     Future.sequence {
@@ -83,19 +96,14 @@ class MergerWorkerService[WorkDestination, ImageDestination](
     }
 
   private def applyMerge(workSet: WorkSet,
-                         lastUpdated: Instant): Seq[WorkOrImage] =
+                         matcherResultTime: Instant): Seq[WorkOrImage] =
     mergerManager
       .applyMerge(maybeWorks = workSet)
-      .mergedWorksAndImagesWithTime(lastUpdated)
+      .mergedWorksAndImagesWithTime(matcherResultTime)
 
   private def sendWorkOrImage(workOrImage: WorkOrImage): Try[Unit] =
     workOrImage match {
       case Left(work)   => workMsgSender.send(workIndexable.id(work))
       case Right(image) => imageMsgSender.send(imageIndexable.id(image))
     }
-
-  private def getLastUpdated(workSets: List[WorkSet]): Instant =
-    workSets
-      .flatMap(_.flatten.map(work => work.state.modifiedTime))
-      .max
 }
