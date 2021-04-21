@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.merger.fixtures
 
+import uk.ac.wellcome.fixtures.RandomGenerators
 import uk.ac.wellcome.models.matcher.{
   MatchedIdentifiers,
   MatcherResult,
@@ -8,12 +9,13 @@ import uk.ac.wellcome.models.matcher.{
 import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.catalogue.internal_model.work.Work
 
-trait MatcherResultFixture {
-  def matcherResultWith(matchedEntries: Set[Set[Work[Identified]]]) =
+trait MatcherResultFixture extends RandomGenerators {
+  def createMatcherResultWith(matchedEntries: Set[Set[Work[Identified]]]) =
     MatcherResult(
-      matchedEntries.map { works =>
+      works = matchedEntries.map { works =>
         MatchedIdentifiers(worksToWorkIdentifiers(works))
-      }
+      },
+      createdTime = randomInstant
     )
 
   def worksToWorkIdentifiers(

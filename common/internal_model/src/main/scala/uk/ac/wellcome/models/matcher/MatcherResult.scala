@@ -22,14 +22,3 @@ case class MatcherResult(
   works: Set[MatchedIdentifiers],
   createdTime: Instant
 )
-
-case object MatcherResult {
-  // Note: I could achieve this by putting a default in the case class, but
-  // doing it this way means I can "Find Usages" on this method to find callers
-  // that *don't* explicitly set the correct time.
-  //
-  // This method will only last as long as https://github.com/wellcomecollection/platform/issues/5132,
-  // after which it can be deleted -- all uses should be setting the time explicitly.
-  def apply(works: Set[MatchedIdentifiers]): MatcherResult =
-    MatcherResult(works = works, createdTime = Instant.now())
-}
