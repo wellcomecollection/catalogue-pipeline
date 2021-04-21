@@ -28,7 +28,7 @@ class MergerFeatureTest
     with Eventually
     with EitherValues
     with IntegrationPatience {
-  it("switches how a pair of works care matched") {
+  it("switches how a pair of works are matched") {
     // This test case is based on a real example of four Works that were
     // being matched correctly.  In particular, we had some Sanskrit manuscripts
     // where the METS work and e-bib were paired incorrectly.
@@ -181,7 +181,7 @@ class MergerFeatureTest
 
         val storedTimes_t7 = getModifiedTimes(index)
         storedTimes_t7(idA) shouldBe existingTimes_t7(idA)
-        storedTimes_t7(idC) shouldBe existingTimes_t7(idC)
+        storedTimes_t7(idD) shouldBe existingTimes_t7(idD)
 
         storedTimes_t7(idB) shouldBe >=(existingTimes_t7(idB))
         storedTimes_t7(idC) shouldBe >=(existingTimes_t7(idC))
