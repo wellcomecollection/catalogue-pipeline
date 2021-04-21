@@ -62,18 +62,22 @@ class MergerWorkerService[WorkDestination, ImageDestination](
 
   private def processMessage(
     message: NotificationMessage): Future[List[WorkOrImage]] =
-    Future
-      .fromTry(fromJson[MatcherResult](message.body))
-      .flatMap { matcherResult =>
+    for {
+      matcherResult <- Future.fromTry(
+        fromJson[MatcherResult](message.body)
+      )
+
+      workSets <-
         getWorkSets(matcherResult)
           .map(workSets => workSets.filter(_.flatten.nonEmpty))
-      }
-      .map {
+
+      result = workSets match {
         case Nil => Nil
         case workSets =>
           val lastUpdated = getLastUpdated(workSets)
           workSets.flatMap(workSet => applyMerge(workSet, lastUpdated))
       }
+    } yield result
 
   private def getWorkSets(matcherResult: MatcherResult): Future[List[WorkSet]] =
     Future.sequence {
