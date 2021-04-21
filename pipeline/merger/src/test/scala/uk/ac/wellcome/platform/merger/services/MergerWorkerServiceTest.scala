@@ -63,9 +63,12 @@ class MergerWorkerServiceTest
           )
 
           index shouldBe Map(
-            work1.id -> Left(work1.transition[Merged](matcherResult.createdTime)),
-            work2.id -> Left(work2.transition[Merged](matcherResult.createdTime)),
-            work3.id -> Left(work3.transition[Merged](matcherResult.createdTime))
+            work1.id -> Left(
+              work1.transition[Merged](matcherResult.createdTime)),
+            work2.id -> Left(
+              work2.transition[Merged](matcherResult.createdTime)),
+            work3.id -> Left(
+              work3.transition[Merged](matcherResult.createdTime))
           )
 
           metrics.incrementedCounts.length should be >= 1
@@ -166,7 +169,8 @@ class MergerWorkerServiceTest
           identifiedWork(canonicalId = versionZeroWork.state.canonicalId)
             .withVersion(1)
 
-        val matcherResult = createMatcherResultWith(Set(Set(work, versionZeroWork)))
+        val matcherResult =
+          createMatcherResultWith(Set(Set(work, versionZeroWork)))
 
         retriever.index ++= Map(work.id -> work)
 

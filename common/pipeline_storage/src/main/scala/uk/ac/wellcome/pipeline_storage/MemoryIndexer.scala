@@ -7,7 +7,8 @@ import scala.concurrent.Future
 
 class MemoryIndexer[T: Indexable](
   val index: mutable.Map[String, T] = mutable.Map[String, T]())
-    extends Indexer[T] with Logging {
+    extends Indexer[T]
+    with Logging {
 
   def init(): Future[Unit] =
     Future.successful(())
