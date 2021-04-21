@@ -19,6 +19,8 @@ import weco.catalogue.source_model.sierra.{
   SierraHoldingsRecord,
   SierraItemNumber,
   SierraItemRecord,
+  SierraOrderNumber,
+  SierraOrderRecord,
   TypedSierraRecordNumber
 }
 
@@ -84,6 +86,24 @@ trait WorkerFixture extends SQS with Akka {
       SierraLinkerWorker[SierraHoldingsNumber, SierraHoldingsRecord, String],
       R]): R =
     withWorker[SierraHoldingsNumber, SierraHoldingsRecord, R](
+      queue,
+      store,
+      metrics,
+      messageSender) { worker =>
+      testWith(worker)
+    }
+
+  def withOrderWorker[R](
+    queue: Queue,
+    store: MemoryVersionedStore[SierraOrderNumber, Link] =
+      MemoryVersionedStore[SierraOrderNumber, Link](
+        initialEntries = Map.empty),
+    metrics: Metrics[Future] = new MemoryMetrics(),
+    messageSender: MemoryMessageSender = new MemoryMessageSender
+  )(testWith: TestWith[
+    SierraLinkerWorker[SierraOrderNumber, SierraOrderRecord, String],
+    R]): R =
+    withWorker[SierraOrderNumber, SierraOrderRecord, R](
       queue,
       store,
       metrics,
