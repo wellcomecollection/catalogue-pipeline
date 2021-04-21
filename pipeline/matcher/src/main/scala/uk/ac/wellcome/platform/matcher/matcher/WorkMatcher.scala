@@ -20,6 +20,7 @@ import uk.ac.wellcome.storage.locking.{
   LockingService
 }
 
+import java.time.Instant
 import java.util.UUID
 
 class WorkMatcher(workGraphStore: WorkGraphStore,
@@ -32,7 +33,10 @@ class WorkMatcher(workGraphStore: WorkGraphStore,
   type Out = Set[MatchedIdentifiers]
 
   def matchWork(links: WorkLinks): Future[MatcherResult] =
-    doMatch(links).map(MatcherResult)
+    doMatch(links)
+      .map { works =>
+        MatcherResult(works = works, createdTime = Instant.now())
+      }
 
   private def doMatch(links: WorkLinks): Future[Out] =
     withLocks(links, links.ids.map(_.toString)) {
