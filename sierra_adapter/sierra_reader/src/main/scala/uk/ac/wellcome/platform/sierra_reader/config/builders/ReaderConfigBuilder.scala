@@ -11,6 +11,7 @@ object ReaderConfigBuilder {
       case s: String if s == bibs.toString     => bibs
       case s: String if s == items.toString    => items
       case s: String if s == holdings.toString => holdings
+      case s: String if s == orders.toString   => orders
       case s: String =>
         throw new IllegalArgumentException(
           s"$s is not a valid Sierra resource type")
