@@ -19,6 +19,10 @@ steps:
   - wait
   - command: .buildkite/scripts/run_job.py api
     label: "API"
+  - command: .buildkite/scripts/run_job.py items_api
+    label: "Stacks: Items API"
+  - command: .buildkite/scripts/run_job.py requests_api
+    label: "Stacks: Requests API"
   - command: .buildkite/scripts/run_job.py reindex_worker
     label: "reindex worker"
   - command: .buildkite/scripts/run_job.py ingestor_works
