@@ -146,22 +146,21 @@ class RequestsApiFeatureTest
     }
 
     it("responds with a 409 Conflict when a hold is rejected") {
-      withMaterializer { implicit mat =>
-        withApp { wireMockServer =>
-          val path = "/requests"
+      withApp { wireMockServer =>
+        val path = "/requests"
 
-          val headers = List(
-            HttpHeader
-              .parse(
-                name = "Weco-Sierra-Patron-Id",
-                value = "1234567"
-              )
-              .asInstanceOf[ParsingResult.Ok]
-              .header
-          )
+        val headers = List(
+          HttpHeader
+            .parse(
+              name = "Weco-Sierra-Patron-Id",
+              value = "1234567"
+            )
+            .asInstanceOf[ParsingResult.Ok]
+            .header
+        )
 
-          val entity = createJsonHttpEntityWith(
-            """
+        val entity = createJsonHttpEntityWith(
+          """
               |{
               |  "item": {
               |    "id": "ys3ern6y",
@@ -170,29 +169,28 @@ class RequestsApiFeatureTest
               |  "type": "Request"
               |}
               |""".stripMargin
-          )
+        )
 
-          whenPostRequestReady(path, entity, headers) { response =>
-            response.status shouldBe StatusCodes.Conflict
+        whenPostRequestReady(path, entity, headers) { response =>
+          response.status shouldBe StatusCodes.Conflict
 
-            wireMockServer.verify(
-              1,
-              postRequestedFor(
-                urlEqualTo(
-                  "/iii/sierra-api/v5/patrons/1234567/holds/requests"
-                )
-              ).withRequestBody(
-                equalToJson("""
+          wireMockServer.verify(
+            1,
+            postRequestedFor(
+              urlEqualTo(
+                "/iii/sierra-api/v5/patrons/1234567/holds/requests"
+              )
+            ).withRequestBody(
+              equalToJson("""
                     |{
                     |  "recordType" : "i",
                     |  "recordNumber" : 1601018,
                     |  "pickupLocation" : "unspecified"
                     |}
                     |""".stripMargin)
-              )
             )
+          )
 
-          }
         }
       }
     }
