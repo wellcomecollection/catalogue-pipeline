@@ -3,7 +3,7 @@ terraform {
     role_arn = "arn:aws:iam::756629837203:role/catalogue-developer"
 
     bucket         = "wellcomecollection-catalogue-infra-delta"
-    key            = "terraform/catalogue/api/catalogue_api_stage.tfstate"
+    key            = "terraform/catalogue/items_api.tfstate"
     dynamodb_table = "terraform-locktable"
     region         = "eu-west-1"
   }
@@ -43,8 +43,4 @@ data "terraform_remote_state" "accounts_catalogue" {
     key    = "terraform/platform-infrastructure/accounts/catalogue.tfstate"
     region = "eu-west-1"
   }
-}
-
-locals {
-  catalogue_vpcs = data.terraform_remote_state.accounts_catalogue.outputs
 }

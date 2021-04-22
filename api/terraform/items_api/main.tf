@@ -14,7 +14,7 @@ module "items_api_stage" {
   load_balancer_listener_port = 6001
 
   container_image = local.api_container_image["stage"]
-  
+
   desired_task_count = 1
 
   security_group_ids = [
@@ -24,7 +24,7 @@ module "items_api_stage" {
     local.elastic_cloud_vpce_sg_id
   ]
 
-  env_vars = {
+  environment = {
     app_base_url       = "https://api.wellcomecollection.org/stacks/v1/items"
     context_url        = "https://api.wellcomecollection.org/stacks/v1/context.json"
     catalogue_base_url = "https://api.wellcomecollection.org/catalogue/v2"
@@ -35,7 +35,7 @@ module "items_api_stage" {
     metrics_namespace = "items_api"
   }
 
-  secret_env_vars = {
+  secrets = {
     sierra_api_key    = "stacks/prod/sierra_api_key"
     sierra_api_secret = "stacks/prod/sierra_api_secret"
   }
