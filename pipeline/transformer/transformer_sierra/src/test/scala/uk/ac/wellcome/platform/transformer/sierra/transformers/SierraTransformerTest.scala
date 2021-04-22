@@ -1026,7 +1026,7 @@ class SierraTransformerTest
         locations = List(
           PhysicalLocation(
             locationType = LocationType.OnOrder,
-            label = "1 copy ordered for Wellcome Collection on 1 January 2001"
+            label = "Ordered for Wellcome Collection on 1 January 2001"
           )
         )
       )
