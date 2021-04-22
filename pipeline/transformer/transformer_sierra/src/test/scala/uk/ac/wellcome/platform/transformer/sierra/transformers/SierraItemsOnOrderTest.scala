@@ -12,7 +12,10 @@ import weco.catalogue.internal_model.identifiers.IdState.Unidentifiable
 import weco.catalogue.internal_model.locations.{LocationType, PhysicalLocation}
 import weco.catalogue.internal_model.work.Item
 
-class SierraItemsOnOrderTest extends AnyFunSpec with Matchers with SierraDataGenerators {
+class SierraItemsOnOrderTest
+    extends AnyFunSpec
+    with Matchers
+    with SierraDataGenerators {
   it("returns nothing if there are no orders or items") {
     getOrders(hasItems = false, orderData = List()) shouldBe empty
   }
@@ -53,7 +56,8 @@ class SierraItemsOnOrderTest extends AnyFunSpec with Matchers with SierraDataGen
           locations = List(
             PhysicalLocation(
               locationType = LocationType.OnOrder,
-              label = "2 copies ordered for Wellcome Collection on 2 February 2002"
+              label =
+                "2 copies ordered for Wellcome Collection on 2 February 2002"
             )
           )
         )
@@ -178,7 +182,9 @@ class SierraItemsOnOrderTest extends AnyFunSpec with Matchers with SierraDataGen
 
       getOrders(hasItems = false, orderData = orderData) should not be empty
 
-      val suppressedOrderData = orderData.map { od => od.copy(suppressed = true) }
+      val suppressedOrderData = orderData.map { od =>
+        od.copy(suppressed = true)
+      }
       getOrders(hasItems = false, orderData = suppressedOrderData) shouldBe empty
     }
 
@@ -202,7 +208,9 @@ class SierraItemsOnOrderTest extends AnyFunSpec with Matchers with SierraDataGen
 
       getOrders(hasItems = false, orderData = orderData) should not be empty
 
-      val deletedOrderData = orderData.map { od => od.copy(deleted = true) }
+      val deletedOrderData = orderData.map { od =>
+        od.copy(deleted = true)
+      }
       getOrders(hasItems = false, orderData = deletedOrderData) shouldBe empty
     }
 
@@ -335,7 +343,11 @@ class SierraItemsOnOrderTest extends AnyFunSpec with Matchers with SierraDataGen
 
       getOrders(hasItems = false, orderData = orderData) shouldBe empty
 
-      val orderWithRdate = orderData.map { od => od.copy(fixedFields = od.fixedFields ++ Map("17" -> FixedField(label = "RDATE", value = "2008-08-08"))) }
+      val orderWithRdate = orderData.map { od =>
+        od.copy(
+          fixedFields = od.fixedFields ++ Map(
+            "17" -> FixedField(label = "RDATE", value = "2008-08-08")))
+      }
       getOrders(hasItems = false, orderData = orderWithRdate) should not be empty
     }
 
@@ -352,7 +364,9 @@ class SierraItemsOnOrderTest extends AnyFunSpec with Matchers with SierraDataGen
 
       getOrders(hasItems = false, orderData = orderData) should not be empty
 
-      val suppressedOrderData = orderData.map { od => od.copy(suppressed = true) }
+      val suppressedOrderData = orderData.map { od =>
+        od.copy(suppressed = true)
+      }
       getOrders(hasItems = false, orderData = suppressedOrderData) shouldBe empty
     }
 
@@ -369,7 +383,9 @@ class SierraItemsOnOrderTest extends AnyFunSpec with Matchers with SierraDataGen
 
       getOrders(hasItems = false, orderData = orderData) should not be empty
 
-      val deletedOrderData = orderData.map { od => od.copy(deleted = true) }
+      val deletedOrderData = orderData.map { od =>
+        od.copy(deleted = true)
+      }
       getOrders(hasItems = false, orderData = deletedOrderData) shouldBe empty
     }
 
@@ -412,11 +428,14 @@ class SierraItemsOnOrderTest extends AnyFunSpec with Matchers with SierraDataGen
     }
   }
 
-  def getOrders(hasItems: Boolean, orderData: List[SierraOrderData]): List[Item[IdState.Unidentifiable.type]] = {
+  def getOrders(hasItems: Boolean, orderData: List[SierraOrderData])
+    : List[Item[IdState.Unidentifiable.type]] = {
     val id = createSierraBibNumber
 
     val orderIds = (1 to orderData.size)
-      .map { _ => createSierraOrderNumber }
+      .map { _ =>
+        createSierraOrderNumber
+      }
       .sortBy { _.withoutCheckDigit }
 
     val orderDataMap = orderIds.zip(orderData).toMap
