@@ -23,6 +23,8 @@ import weco.catalogue.source_model.sierra.{
   SierraHoldingsRecord,
   SierraItemNumber,
   SierraItemRecord,
+  SierraOrderNumber,
+  SierraOrderRecord,
   SierraRecordTypes,
   TypedSierraRecordNumber
 }
@@ -67,6 +69,14 @@ object Main extends WellcomeTypesafeApp {
           sqsStream = sqsStream,
           linkStore =
             createLinkStore[SierraHoldingsNumber, SierraHoldingsRecord](config),
+          messageSender = messageSender
+        )
+
+      case SierraRecordTypes.orders =>
+        new SierraLinkerWorker(
+          sqsStream = sqsStream,
+          linkStore =
+            createLinkStore[SierraOrderNumber, SierraOrderRecord](config),
           messageSender = messageSender
         )
 
