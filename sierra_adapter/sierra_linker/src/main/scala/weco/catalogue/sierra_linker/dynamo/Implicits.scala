@@ -4,7 +4,8 @@ import org.scanamo.DynamoFormat
 import weco.catalogue.source_model.sierra.{
   SierraBibNumber,
   SierraHoldingsNumber,
-  SierraItemNumber
+  SierraItemNumber,
+  SierraOrderNumber
 }
 
 object Implicits {
@@ -26,6 +27,13 @@ object Implicits {
     DynamoFormat
       .coercedXmap[SierraHoldingsNumber, String, IllegalArgumentException](
         SierraHoldingsNumber(_),
+        _.withoutCheckDigit
+      )
+
+  implicit val formatOrderNumber: DynamoFormat[SierraOrderNumber] =
+    DynamoFormat
+      .coercedXmap[SierraOrderNumber, String, IllegalArgumentException](
+        SierraOrderNumber(_),
         _.withoutCheckDigit
       )
 }
