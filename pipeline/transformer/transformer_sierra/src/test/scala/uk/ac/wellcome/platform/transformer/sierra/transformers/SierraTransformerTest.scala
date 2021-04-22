@@ -12,6 +12,7 @@ import uk.ac.wellcome.json.JsonUtil._
 import weco.catalogue.internal_model.work.WorkState.Source
 import org.scalatest.Assertion
 import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.identifiers.IdState.Unidentifiable
 import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.locations.AccessStatus.LicensedResources
 import weco.catalogue.internal_model.locations._
@@ -30,7 +31,6 @@ import weco.catalogue.internal_model.work.InvisibilityReason.{
 }
 import weco.catalogue.internal_model.work._
 import weco.catalogue.source_model.generators.SierraGenerators
-import weco.catalogue.source_model.sierra.Implicits._
 import weco.catalogue.source_model.sierra._
 
 class SierraTransformerTest
@@ -990,6 +990,47 @@ class SierraTransformerTest
         )
       )
     }
+  }
+
+  it("includes items based on the order records") {
+    val orderId = createSierraOrderNumber
+    val orderData =
+      s"""
+         |{
+         |  "id": "$orderId",
+         |  "fixedFields": {
+         |    "5": {"label": "COPIES", "value": "1"},
+         |    "13": {"label": "ODATE", "value": "2001-01-01"},
+         |    "20": {"label": "STATUS", "value": "o"}
+         |  }
+         |}
+       """.stripMargin
+
+    val transformable = createSierraTransformableWith(
+      orderRecords = List(
+        SierraOrderRecord(
+          id = orderId,
+          data = orderData,
+          modifiedDate = Instant.now(),
+          bibIds = List()
+        )
+      )
+    )
+
+    val work = transformToWork(transformable)
+
+    work.data.items shouldBe List(
+      Item(
+        id = Unidentifiable,
+        title = None,
+        locations = List(
+          PhysicalLocation(
+            locationType = LocationType.OnOrder,
+            label = "1 copy ordered for Wellcome Collection on 1 January 2001"
+          )
+        )
+      )
+    )
   }
 
   describe("throws a TransformerException when passed invalid data") {
