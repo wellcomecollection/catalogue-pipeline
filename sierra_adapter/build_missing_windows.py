@@ -65,7 +65,7 @@ if __name__ == "__main__":
 
     client = session.client("sns")
 
-    for resource_type in ("bibs", "items", "holdings"):
+    for resource_type in ("bibs", "items", "holdings", "orders"):
         report = build_report(
             s3_client=session.client("s3"), bucket=BUCKET, resource_type=resource_type
         )

@@ -68,7 +68,7 @@ if __name__ == "__main__":
     minutes = int(args["--window_length"] or 30)
     resource = args["--resource"]
 
-    assert resource in ("bibs", "items", "holdings")
+    assert resource in ("bibs", "items", "holdings", "orders")
 
     client = boto3.client("sns")
 
