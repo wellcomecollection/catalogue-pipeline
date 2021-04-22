@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
+import grizzled.slf4j.Logging
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraItemData,
   SierraOrderData
@@ -40,7 +41,7 @@ import scala.util.Try
   * https://documentation.iii.com/sierrahelp/Default.htm#sril/sril_records_fixed_field_types_order.html%3FTocPath%3DSierra%2520Reference%7CHow%2520Innovative%2520Systems%2520Store%2520Information%7CFixed-length%2520Fields%7C_____11
   *
   */
-object SierraItemsOnOrder {
+object SierraItemsOnOrder extends Logging {
   def apply(
     id: TypedSierraRecordNumber,
     itemDataMap: Map[SierraItemNumber, SierraItemData],
@@ -57,9 +58,12 @@ object SierraItemsOnOrder {
     }
 
   private def createItem(id: TypedSierraRecordNumber, order: SierraOrderData): Option[Item[IdState.Unidentifiable.type]] =
-    (getStatus(order), getOrderDate(order), getCopies(order)) match {
+    (getStatus(order), getOrderDate(order), getReceivedDate(order), getCopies(order)) match {
+
       // status 'o' = "On order"
-      case (status, orderedDate, copies) if status.contains("o") =>
+      //
+      // We create an item with a message something like "1 copy ordered for Wellcome Collection on 1 Jan 2001"
+      case (Some(status), orderedDate, _, copies) if status == "o" =>
         Some(
           Item(
             title = None,
@@ -71,18 +75,45 @@ object SierraItemsOnOrder {
             )
           )
         )
+
+      // status 'a' = "Fully paid"
+      case (Some(status), _, Some(_), copies) if status == "a" =>
+        Some(
+          Item(
+            title = None,
+            locations = List(
+              PhysicalLocation(
+                locationType = LocationType.OnOrder,
+                label = createAwaitingCataloguingMessage(copies)
+              )
+            )
+          )
+        )
+
+      case (Some(status), _, None, _) if status == "a" =>
+        warn(s"${id.withCheckDigit}: order has STATUS 'a' (fully paid) but no RDATE.  Where is this item?")
+        None
+
+      case (status, _, _, _) =>
+        warn(s"${id.withCheckDigit}: order has unrecognised STATUS $status.  How do we handle it?")
+        None
     }
 
   // Fixed field 20 = STATUS
   private def getStatus(order: SierraOrderData): Option[String] =
     order.fixedFields.get("20").map { _.value }
 
-  private val rdateFormat = new SimpleDateFormat("yyyy-MM-dd")
+  private val marcDateFormat = new SimpleDateFormat("yyyy-MM-dd")
 
   // Fixed field 13 = ODATE.  This is usually a date in the form YYYY-MM-DD.
   private def getOrderDate(order: SierraOrderData): Option[Date] =
     order.fixedFields.get("13").map { _.value }
-      .flatMap { d => Try(rdateFormat.parse(d)).toOption }
+      .flatMap { d => Try(marcDateFormat.parse(d)).toOption }
+
+  // Fixed field 17 = RDATE.  This is usually a date in the form YYYY-MM-DD.
+  private def getReceivedDate(order: SierraOrderData): Option[Date] =
+    order.fixedFields.get("17").map { _.value }
+      .flatMap { d => Try(marcDateFormat.parse(d)).toOption }
 
   // Fixed field 5 = COPIES
   private def getCopies(order: SierraOrderData): Option[Int] =
@@ -104,5 +135,17 @@ object SierraItemsOnOrder {
 
       case (None, None) =>
         "Ordered for Wellcome Collection"
+    }
+
+  private def createAwaitingCataloguingMessage(maybeCopies: Option[Int]): String =
+    maybeCopies match {
+      case Some(copies) if copies == 1 =>
+        "1 copy awaiting cataloguing for Wellcome Collection"
+
+      case Some(copies) =>
+        s"$copies copies awaiting cataloguing for Wellcome Collection"
+
+      case _ =>
+        s"Awaiting cataloguing for Wellcome Collection"
     }
 }

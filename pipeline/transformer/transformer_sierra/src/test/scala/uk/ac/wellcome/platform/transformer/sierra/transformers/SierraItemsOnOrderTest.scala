@@ -162,7 +162,6 @@ class SierraItemsOnOrderTest extends AnyFunSpec with Matchers with SierraDataGen
     it("unless the order is suppressed") {
       val orderData = List(
         createSierraOrderDataWith(
-          suppressed = true,
           fixedFields = Map(
             "5" -> FixedField(label = "COPIES", value = "1"),
             "13" -> FixedField(label = "ODATE", value = "2001-01-01"),
@@ -178,24 +177,15 @@ class SierraItemsOnOrderTest extends AnyFunSpec with Matchers with SierraDataGen
         )
       )
 
-      getOrders(itemData = List(), orderData = orderData) shouldBe List(
-        Item(
-          id = Unidentifiable,
-          title = None,
-          locations = List(
-            PhysicalLocation(
-              locationType = LocationType.OnOrder,
-              label = "2 copies ordered for Wellcome Collection on 2 February 2002"
-            )
-          )
-        )
-      )
+      getOrders(itemData = List(), orderData = orderData) should not be empty
+
+      val suppressedOrderData = orderData.map { od => od.copy(suppressed = true) }
+      getOrders(itemData = List(), orderData = suppressedOrderData) shouldBe empty
     }
 
     it("unless the order is deleted") {
       val orderData = List(
         createSierraOrderDataWith(
-          deleted = true,
           fixedFields = Map(
             "5" -> FixedField(label = "COPIES", value = "1"),
             "13" -> FixedField(label = "ODATE", value = "2001-01-01"),
@@ -211,18 +201,10 @@ class SierraItemsOnOrderTest extends AnyFunSpec with Matchers with SierraDataGen
         )
       )
 
-      getOrders(itemData = List(), orderData = orderData) shouldBe List(
-        Item(
-          id = Unidentifiable,
-          title = None,
-          locations = List(
-            PhysicalLocation(
-              locationType = LocationType.OnOrder,
-              label = "2 copies ordered for Wellcome Collection on 2 February 2002"
-            )
-          )
-        )
-      )
+      getOrders(itemData = List(), orderData = orderData) should not be empty
+
+      val deletedOrderData = orderData.map { od => od.copy(deleted = true) }
+      getOrders(itemData = List(), orderData = deletedOrderData) shouldBe empty
     }
 
     it("unless there are any items") {
@@ -251,30 +233,183 @@ class SierraItemsOnOrderTest extends AnyFunSpec with Matchers with SierraDataGen
   }
 
   describe("returns 'awaiting cataloguing' items") {
-    it("if there are orders with status 'a' and an RDATE") {
-      true shouldBe false
+    it("if there are orders with status 'a'") {
+      val orderData = List(
+        createSierraOrderDataWith(
+          fixedFields = Map(
+            "5" -> FixedField(label = "COPIES", value = "1"),
+            "17" -> FixedField(label = "RDATE", value = "2001-01-01"),
+            "20" -> FixedField(label = "STATUS", value = "a")
+          )
+        ),
+        createSierraOrderDataWith(
+          fixedFields = Map(
+            "5" -> FixedField(label = "COPIES", value = "2"),
+            "17" -> FixedField(label = "RDATE", value = "2002-02-02"),
+            "20" -> FixedField(label = "STATUS", value = "a")
+          )
+        )
+      )
+
+      getOrders(itemData = List(), orderData = orderData) shouldBe List(
+        Item(
+          id = Unidentifiable,
+          title = None,
+          locations = List(
+            PhysicalLocation(
+              locationType = LocationType.OnOrder,
+              label = "1 copy awaiting cataloguing for Wellcome Collection"
+            )
+          )
+        ),
+        Item(
+          id = Unidentifiable,
+          title = None,
+          locations = List(
+            PhysicalLocation(
+              locationType = LocationType.OnOrder,
+              label = "2 copies awaiting cataloguing for Wellcome Collection"
+            )
+          )
+        )
+      )
+    }
+
+    it("if the number of copies is omitted") {
+      val orderData = List(
+        createSierraOrderDataWith(
+          fixedFields = Map(
+            "17" -> FixedField(label = "RDATE", value = "2001-01-01"),
+            "20" -> FixedField(label = "STATUS", value = "a")
+          )
+        )
+      )
+
+      getOrders(itemData = List(), orderData = orderData) shouldBe List(
+        Item(
+          id = Unidentifiable,
+          title = None,
+          locations = List(
+            PhysicalLocation(
+              locationType = LocationType.OnOrder,
+              label = "Awaiting cataloguing for Wellcome Collection"
+            )
+          )
+        )
+      )
+    }
+
+    it("if the number of copies is not an integer") {
+      val orderData = List(
+        createSierraOrderDataWith(
+          fixedFields = Map(
+            "5" -> FixedField(label = "COPIES", value = "NaN"),
+            "17" -> FixedField(label = "RDATE", value = "2001-01-01"),
+            "20" -> FixedField(label = "STATUS", value = "a")
+          )
+        )
+      )
+
+      getOrders(itemData = List(), orderData = orderData) shouldBe List(
+        Item(
+          id = Unidentifiable,
+          title = None,
+          locations = List(
+            PhysicalLocation(
+              locationType = LocationType.OnOrder,
+              label = "Awaiting cataloguing for Wellcome Collection"
+            )
+          )
+        )
+      )
+    }
+
+    it("unless the order has no RDATE") {
+      val orderData = List(
+        createSierraOrderDataWith(
+          fixedFields = Map(
+            "5" -> FixedField(label = "COPIES", value = "1"),
+            "20" -> FixedField(label = "STATUS", value = "a")
+          )
+        )
+      )
+
+      getOrders(itemData = List(), orderData = orderData) shouldBe empty
+
+      val orderWithRdate = orderData.map { od => od.copy(fixedFields = od.fixedFields ++ Map("17" -> FixedField(label = "RDATE", value = "2008-08-08"))) }
+      getOrders(itemData = List(), orderData = orderWithRdate) should not be empty
     }
 
     it("unless the order is suppressed") {
-      true shouldBe false
+      val orderData = List(
+        createSierraOrderDataWith(
+          fixedFields = Map(
+            "5" -> FixedField(label = "COPIES", value = "1"),
+            "17" -> FixedField(label = "RDATE", value = "2001-01-01"),
+            "20" -> FixedField(label = "STATUS", value = "a")
+          )
+        )
+      )
+
+      getOrders(itemData = List(), orderData = orderData) should not be empty
+
+      val suppressedOrderData = orderData.map { od => od.copy(suppressed = true) }
+      getOrders(itemData = List(), orderData = suppressedOrderData) shouldBe empty
     }
 
     it("unless the order is deleted") {
-      true shouldBe false
+      val orderData = List(
+        createSierraOrderDataWith(
+          fixedFields = Map(
+            "5" -> FixedField(label = "COPIES", value = "1"),
+            "17" -> FixedField(label = "RDATE", value = "2001-01-01"),
+            "20" -> FixedField(label = "STATUS", value = "a")
+          )
+        )
+      )
+
+      getOrders(itemData = List(), orderData = orderData) should not be empty
+
+      val deletedOrderData = orderData.map { od => od.copy(deleted = true) }
+      getOrders(itemData = List(), orderData = deletedOrderData) shouldBe empty
     }
 
     it("unless there are any items") {
-      true shouldBe false
+      val orderData = List(
+        createSierraOrderDataWith(
+          fixedFields = Map(
+            "5" -> FixedField(label = "COPIES", value = "1"),
+            "17" -> FixedField(label = "RDATE", value = "2001-01-01"),
+            "20" -> FixedField(label = "STATUS", value = "a")
+          )
+        )
+      )
+
+      // Note: we test both with and without order data here, so we'll
+      // spot if the lack of output is unrelated to the items.
+      getOrders(itemData = List(), orderData = orderData) should not be empty
+      getOrders(itemData = List(createSierraItemData), orderData = orderData) shouldBe empty
     }
   }
 
   describe("skips unrecognised order records") {
-    it("no RDATE, unrecognised status") {
-      true shouldBe false
-    }
+    it("if they have an unrecognised status") {
+      val orderData = List(
+        createSierraOrderDataWith(
+          fixedFields = Map(
+            "20" -> FixedField(label = "STATUS", value = "x")
+          )
+        ),
+        createSierraOrderDataWith(
+          fixedFields = Map(
+            "5" -> FixedField(label = "COPIES", value = "2"),
+            "13" -> FixedField(label = "ODATE", value = "2002-02-02"),
+            "20" -> FixedField(label = "STATUS", value = "z")
+          )
+        )
+      )
 
-    it("RDATE, unrecognised status") {
-      true shouldBe false
+      getOrders(itemData = List(), orderData = orderData) shouldBe empty
     }
   }
 
