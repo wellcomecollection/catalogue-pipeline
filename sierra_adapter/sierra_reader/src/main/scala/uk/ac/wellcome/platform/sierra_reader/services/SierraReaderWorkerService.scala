@@ -27,7 +27,8 @@ import weco.catalogue.source_model.sierra.{
   AbstractSierraRecord,
   SierraBibRecord,
   SierraHoldingsRecord,
-  SierraItemRecord
+  SierraItemRecord,
+  SierraOrderRecord
 }
 
 import scala.concurrent.duration._
@@ -118,6 +119,7 @@ class SierraReaderWorkerService(
       case SierraResourceTypes.bibs     => SierraBibRecord.apply
       case SierraResourceTypes.items    => SierraItemRecord.apply
       case SierraResourceTypes.holdings => SierraHoldingsRecord.apply
+      case SierraResourceTypes.orders   => SierraOrderRecord.apply
     }
 
   private def toJson(records: Seq[AbstractSierraRecord[_]]): Json =
@@ -128,5 +130,7 @@ class SierraReaderWorkerService(
         records.asInstanceOf[Seq[SierraItemRecord]].asJson
       case SierraResourceTypes.holdings =>
         records.asInstanceOf[Seq[SierraHoldingsRecord]].asJson
+      case SierraResourceTypes.orders =>
+        records.asInstanceOf[Seq[SierraOrderRecord]].asJson
     }
 }
