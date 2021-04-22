@@ -29,6 +29,11 @@ module "sierra-adapter-20200604" {
     module.holdings_reharvest_topic.arn,
   ]
 
+  orders_windows_topic_arns = [
+    module.orders_window_generator.topic_arn,
+    module.orders_reharvest_topic.arn,
+  ]
+
   reporting_reindex_topic_arn = local.reporting_reindex_topic_arn
 
   sierra_reader_image  = aws_ecr_repository.sierra_reader.repository_url
