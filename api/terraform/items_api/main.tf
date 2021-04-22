@@ -14,7 +14,7 @@ module "items_api_stage" {
   load_balancer_listener_port = 6001
 
   container_image = local.api_container_image["stage"]
-  
+
   desired_task_count = 1
 
   security_group_ids = [
