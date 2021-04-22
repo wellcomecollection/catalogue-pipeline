@@ -18,7 +18,6 @@ import scala.util.Try
   * are "on order" or "awaiting cataloguing" -- which don't have their own
   * item record yet.
   *
-  *
   * To understand how this works, it's useful to understand the ordering
   * process:
   *
@@ -60,20 +59,19 @@ object SierraItemsOnOrder extends Logging {
     (
       getStatus(order),
       getOrderDate(order),
-      getReceivedDate(order),
-      getCopies(order)) match {
+      getReceivedDate(order)) match {
 
       // status 'o' = "On order"
       //
       // We create an item with a message something like "1 copy ordered for Wellcome Collection on 1 Jan 2001"
-      case (Some(status), orderedDate, _, copies) if status == "o" =>
+      case (Some(status), orderedDate, _) if status == "o" =>
         Some(
           Item(
             title = None,
             locations = List(
               PhysicalLocation(
                 locationType = LocationType.OnOrder,
-                label = createOnOrderMessage(orderedDate, copies)
+                label = createOnOrderMessage(orderedDate)
               )
             )
           )
@@ -84,7 +82,7 @@ object SierraItemsOnOrder extends Logging {
       // We create an item with a message like "Awaiting cataloguing for Wellcome Collection"
       // We don't expose the received date publicly (in case an item has been in the queue
       // for a long time) -- but we do expect it to be there for these records.
-      case (Some(status), _, receivedDate, copies)
+      case (Some(status), _, receivedDate)
           if status == "a" && receivedDate.isDefined =>
         Some(
           Item(
@@ -92,7 +90,7 @@ object SierraItemsOnOrder extends Logging {
             locations = List(
               PhysicalLocation(
                 locationType = LocationType.OnOrder,
-                label = createAwaitingCataloguingMessage(copies)
+                label = "Awaiting cataloguing for Wellcome Collection"
               )
             )
           )
@@ -101,13 +99,13 @@ object SierraItemsOnOrder extends Logging {
       // We're deliberately quite conservative here -- if we're not sure what an order
       // means, we ignore it.  I don't know how many orders this will affect, and how many
       // will be ignored because they're suppressed/there are other items.
-      case (Some(status), _, receivedDate, _)
+      case (Some(status), _, receivedDate)
           if status == "a" && receivedDate.isEmpty =>
         warn(
           s"${id.withCheckDigit}: order has STATUS 'a' (fully paid) but no RDATE.  Where is this item?")
         None
 
-      case (status, _, _, _) =>
+      case (status, _, _) =>
         warn(
           s"${id.withCheckDigit}: order has unrecognised STATUS $status.  How do we handle it?")
         None
@@ -137,44 +135,14 @@ object SierraItemsOnOrder extends Logging {
         Try(marcDateFormat.parse(d)).toOption
       }
 
-  // Fixed field 5 = COPIES
-  private def getCopies(order: SierraOrderData): Option[Int] =
-    order.fixedFields
-      .get("5")
-      .map { _.value }
-      .flatMap { c =>
-        Try(c.toInt).toOption
-      }
-
   private val displayFormat = new SimpleDateFormat("d MMMM yyyy")
 
-  private def createOnOrderMessage(maybeOrderedDate: Option[Date],
-                                   maybeCopies: Option[Int]): String =
-    (maybeOrderedDate, maybeCopies) match {
-      case (Some(orderedDate), Some(copies)) =>
-        s"$copies ${if (copies == 1) "copy" else "copies"} ordered for Wellcome Collection on ${displayFormat
-          .format(orderedDate)}"
-
-      case (None, Some(copies)) =>
-        s"$copies ${if (copies == 1) "copy" else "copies"} ordered for Wellcome Collection"
-
-      case (Some(orderedDate), None) =>
+  private def createOnOrderMessage(maybeOrderedDate: Option[Date]): String =
+    maybeOrderedDate match {
+      case Some(orderedDate) =>
         s"Ordered for Wellcome Collection on ${displayFormat.format(orderedDate)}"
 
-      case (None, None) =>
+      case None =>
         "Ordered for Wellcome Collection"
-    }
-
-  private def createAwaitingCataloguingMessage(
-    maybeCopies: Option[Int]): String =
-    maybeCopies match {
-      case Some(copies) if copies == 1 =>
-        "1 copy awaiting cataloguing for Wellcome Collection"
-
-      case Some(copies) =>
-        s"$copies copies awaiting cataloguing for Wellcome Collection"
-
-      case _ =>
-        s"Awaiting cataloguing for Wellcome Collection"
     }
 }

@@ -46,7 +46,7 @@ class SierraItemsOnOrderTest
           locations = List(
             PhysicalLocation(
               locationType = LocationType.OnOrder,
-              label = "1 copy ordered for Wellcome Collection on 1 January 2001"
+              label = "Ordered for Wellcome Collection on 1 January 2001"
             )
           )
         ),
@@ -56,8 +56,7 @@ class SierraItemsOnOrderTest
           locations = List(
             PhysicalLocation(
               locationType = LocationType.OnOrder,
-              label =
-                "2 copies ordered for Wellcome Collection on 2 February 2002"
+              label = "Ordered for Wellcome Collection on 2 February 2002"
             )
           )
         )
@@ -130,7 +129,7 @@ class SierraItemsOnOrderTest
           locations = List(
             PhysicalLocation(
               locationType = LocationType.OnOrder,
-              label = "10 copies ordered for Wellcome Collection"
+              label = "Ordered for Wellcome Collection"
             )
           )
         )
@@ -155,7 +154,7 @@ class SierraItemsOnOrderTest
           locations = List(
             PhysicalLocation(
               locationType = LocationType.OnOrder,
-              label = "3 copies ordered for Wellcome Collection"
+              label = "Ordered for Wellcome Collection"
             )
           )
         )
@@ -265,7 +264,7 @@ class SierraItemsOnOrderTest
           locations = List(
             PhysicalLocation(
               locationType = LocationType.OnOrder,
-              label = "1 copy awaiting cataloguing for Wellcome Collection"
+              label = "Awaiting cataloguing for Wellcome Collection"
             )
           )
         ),
@@ -275,7 +274,7 @@ class SierraItemsOnOrderTest
           locations = List(
             PhysicalLocation(
               locationType = LocationType.OnOrder,
-              label = "2 copies awaiting cataloguing for Wellcome Collection"
+              label = "Awaiting cataloguing for Wellcome Collection"
             )
           )
         )
