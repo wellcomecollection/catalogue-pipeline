@@ -22,7 +22,8 @@ variable "container_port" {
 }
 
 variable "service_discovery_namespace_id" {
-  type = string
+  type    = string
+  default = null
 }
 
 variable "use_fargate_spot" {
