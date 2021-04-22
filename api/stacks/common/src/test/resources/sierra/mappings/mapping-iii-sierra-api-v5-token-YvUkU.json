@@ -1,0 +1,26 @@
+{
+  "id" : "49eea99a-bb25-3dec-a95b-4bcda5517729",
+  "request" : {
+    "url" : "/iii/sierra-api/v5/token",
+    "method" : "POST",
+    "headers" : {
+      "Authorization" : {
+        "equalTo" : "Basic dXNlcm5hbWU6cGFzc3dvcmQ="
+      }
+    }
+  },
+  "response" : {
+    "status" : 200,
+    "bodyFileName" : "body-iii-sierra-api-v5-token-YvUkU.json",
+    "headers" : {
+      "Date" : "Fri, 15 Nov 2019 11:47:36 GMT",
+      "Server" : "Apache",
+      "Content-Type" : "application/json;charset=UTF-8",
+      "Vary" : "Accept-Encoding,User-Agent",
+      "Set-Cookie" : [ "jcontainerId=.jcontainer-api2; path=/iii/patronio", "jcontainerId=.jcontainer-api2; path=/iii/rss", "jcontainerId=.jcontainer-api2; path=/sierra/admin", "jcontainerId=.jcontainer-api2; path=/sierra/dashboard", "jcontainerId=.jcontainer-api2; path=/sierra/shindig", "jcontainerId=.jcontainer-api2; path=/iii/ws/extlink", "jcontainerId=.jcontainer-api2; path=/sierra/ws/summit", "jcontainerId=.jcontainer-api2; path=/iii/sierra-api" ],
+      "Keep-Alive" : "timeout=5, max=100",
+      "Connection" : "Keep-Alive"
+    }
+  },
+  "uuid" : "49eea99a-bb25-3dec-a95b-4bcda5517729"
+}

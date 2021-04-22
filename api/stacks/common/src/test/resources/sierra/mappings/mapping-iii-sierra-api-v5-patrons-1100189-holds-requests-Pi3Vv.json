@@ -1,0 +1,31 @@
+{
+  "id" : "487e0101-f036-30d7-a955-00f305b77355",
+  "request" : {
+    "url" : "/iii/sierra-api/v5/patrons/1234567/holds/requests",
+    "method" : "POST",
+    "headers" : {
+      "Authorization" : {
+        "equalTo" : "Bearer dummy_access_token"
+      }
+    },
+    "bodyPatterns" : [ {
+      "equalToJson" : "{\"recordType\": \"i\", \"recordNumber\": 1601018, \"pickupLocation\": \"unspecified\" }",
+      "ignoreArrayOrder" : true,
+      "ignoreExtraElements" : false
+    } ]
+  },
+  "response" : {
+    "status" : 500,
+    "bodyFileName" : "body-iii-sierra-api-v5-patrons-1100189-holds-requests-500.json",
+    "headers" : {
+      "Date" : "Wed, 20 Nov 2019 13:14:44 GMT",
+      "Server" : "Apache",
+      "Content-Type" : "application/json;charset=UTF-8",
+      "Set-Cookie" : [ "jcontainerId=.jcontainer-api1; path=/iii/patronio", "jcontainerId=.jcontainer-api1; path=/iii/rss", "jcontainerId=.jcontainer-api1; path=/sierra/admin", "jcontainerId=.jcontainer-api1; path=/sierra/dashboard", "jcontainerId=.jcontainer-api1; path=/sierra/shindig", "jcontainerId=.jcontainer-api1; path=/iii/ws/extlink", "jcontainerId=.jcontainer-api1; path=/sierra/ws/summit", "jcontainerId=.jcontainer-api1; path=/iii/sierra-api" ],
+      "Vary" : "User-Agent",
+      "Keep-Alive" : "timeout=5, max=99",
+      "Connection" : "Keep-Alive"
+    }
+  },
+  "uuid" : "487e0101-f036-30d7-a955-00f305b77355"
+}

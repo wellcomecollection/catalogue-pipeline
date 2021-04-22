@@ -88,6 +88,27 @@ lazy val api = setupProject(
   externalDependencies = CatalogueDependencies.apiDependencies
 )
 
+lazy val stacks_common = setupProject(
+  project,
+  "api/stacks/common",
+  localDependencies = Seq(display),
+  externalDependencies = CatalogueDependencies.stacksDependencies
+)
+
+lazy val items_api = setupProject(
+  project,
+  "api/stacks/items_api",
+  localDependencies = Seq(stacks_common),
+  externalDependencies = CatalogueDependencies.stacksDependencies
+)
+
+lazy val requests_api = setupProject(
+  project,
+  "api/stacks/requests_api",
+  localDependencies = Seq(stacks_common),
+  externalDependencies = CatalogueDependencies.stacksDependencies
+)
+
 lazy val id_minter = setupProject(
   project,
   "pipeline/id_minter",

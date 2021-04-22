@@ -49,6 +49,11 @@ object WellcomeDependencies {
     version = versions.monitoring
   )
 
+  val monitoringTypesafeLibrary: Seq[ModuleID] = monitoringLibrary ++ library(
+    name = "monitoring_typesafe",
+    version = versions.monitoring
+  )
+
   val storageLibrary: Seq[ModuleID] = library(
     name = "storage",
     version = versions.storage
@@ -246,6 +251,15 @@ object CatalogueDependencies {
       ExternalDependencies.circeOpticsDependencies ++
       WellcomeDependencies.elasticsearchTypesafeLibrary ++
       WellcomeDependencies.typesafeLibrary
+
+  val stacksDependencies: Seq[ModuleID] =
+    ExternalDependencies.akkaHttpDependencies ++
+      ExternalDependencies.scalatestDependencies ++
+      ExternalDependencies.wireMockDependencies ++
+      WellcomeDependencies.jsonLibrary ++
+      WellcomeDependencies.monitoringTypesafeLibrary ++
+      WellcomeDependencies.typesafeLibrary ++
+      WellcomeDependencies.monitoringLibrary
 
   val idminterDependencies: Seq[ModuleID] =
     ExternalDependencies.mySqlDependencies ++

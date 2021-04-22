@@ -1,0 +1,34 @@
+{
+  "id" : "e90f7b4a-1e68-4a23-a93f-9d0bcce52ac3",
+  "name" : "catalogue_v2_works",
+  "request" : {
+    "url" : "/catalogue/v2/works?include=items,identifiers&query=ys3ern6x",
+    "method" : "GET"
+  },
+  "response" : {
+    "status" : 200,
+    "body" : "{\"@context\":\"https://api.wellcomecollection.org/catalogue/v2/context.json\",\"type\":\"ResultList\",\"pageSize\":10,\"totalPages\":1,\"totalResults\":1,\"results\":[{\"id\":\"cnkv77md\",\"title\":\"The sun rising with a yellow condom instead of the sun; representing protection against AIDS. Colour lithograph after M. Kolvenbach and G. Meyer, 199-.\",\"alternativeTitles\":[],\"physicalDescription\":\"1 print : lithograph, printed in colour ; sheet 59.5 x 42 cm\",\"workType\":{\"id\":\"k\",\"label\":\"Pictures\",\"type\":\"WorkType\"},\"lettering\":\"Guten Tag. Mach's mit. Bundeszentrale für gesundheitliche Aufklärung, 51101 Köln. Konzept + Gestaltung: Marcel Kolvenbach + Guido Meyer\",\"identifiers\":[{\"identifierType\":{\"id\":\"sierra-system-number\",\"label\":\"Sierra system number\",\"type\":\"IdentifierType\"},\"value\":\"b16656180\",\"type\":\"Identifier\"},{\"identifierType\":{\"id\":\"sierra-identifier\",\"label\":\"Sierra identifier\",\"type\":\"IdentifierType\"},\"value\":\"1665618\",\"type\":\"Identifier\"},{\"identifierType\":{\"id\":\"miro-image-number\",\"label\":\"Miro image number\",\"type\":\"IdentifierType\"},\"value\":\"L0053261\",\"type\":\"Identifier\"}],\"thumbnail\":{\"locationType\":{\"id\":\"thumbnail-image\",\"label\":\"Thumbnail Image\",\"type\":\"LocationType\"},\"url\":\"https://dlcs.io/thumbs/wellcome/5/b16656180_l0053261.jp2/full/!200,200/0/default.jpg\",\"license\":{\"id\":\"cc-by-nc\",\"label\":\"Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)\",\"url\":\"https://creativecommons.org/licenses/by-nc/4.0/\",\"type\":\"License\"},\"accessConditions\":[],\"type\":\"DigitalLocation\"},\"items\":[{\"id\":\"ys3ern6x\",\"identifiers\":[{\"identifierType\":{\"id\":\"sierra-system-number\",\"label\":\"Sierra system number\",\"type\":\"IdentifierType\"},\"value\":\"i16010176\",\"type\":\"Identifier\"},{\"identifierType\":{\"id\":\"sierra-identifier\",\"label\":\"Sierra identifier\",\"type\":\"IdentifierType\"},\"value\":\"1601017\",\"type\":\"Identifier\"}],\"locations\":[{\"locationType\":{\"id\":\"sicon\",\"label\":\"Closed stores Iconographic\",\"type\":\"LocationType\"},\"label\":\"Closed stores Iconographic\",\"accessConditions\":[],\"type\":\"PhysicalLocation\"},{\"locationType\":{\"id\":\"iiif-presentation\",\"label\":\"IIIF Presentation API\",\"type\":\"LocationType\"},\"url\":\"https://wellcomelibrary.org/iiif/b16656180/manifest\",\"license\":{\"id\":\"cc-by-nc\",\"label\":\"Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)\",\"url\":\"https://creativecommons.org/licenses/by-nc/4.0/\",\"type\":\"License\"},\"accessConditions\":[{\"status\":{\"id\":\"open\",\"label\":\"Open\",\"type\":\"AccessStatus\"},\"type\":\"AccessCondition\"}],\"type\":\"DigitalLocation\"}],\"type\":\"Item\"}],\"language\":{\"id\":\"ger\",\"label\":\"German\",\"type\":\"Language\"},\"type\":\"Work\"}]}",
+    "headers" : {
+      "Content-Type" : "application/json",
+      "Connection" : "keep-alive",
+      "Date" : "Fri, 28 Feb 2020 13:43:47 GMT",
+      "x-amzn-RequestId" : "a4cc6a4f-95ec-4167-8f20-9f25a2c5ef84",
+      "Access-Control-Allow-Origin" : "*",
+      "Access-Control-Allow-Headers" : "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type",
+      "x-amzn-Remapped-Content-Length" : "2560",
+      "x-amzn-Remapped-Connection" : "keep-alive",
+      "x-amz-apigw-id" : "InDbIHbnjoEFcVw=",
+      "x-amzn-Remapped-Server" : "nginx",
+      "Access-Control-Allow-Methods" : "GET, POST, OPTIONS",
+      "x-amzn-Remapped-Date" : "Fri, 28 Feb 2020 13:43:47 GMT",
+      "Access-Control-Allow-Credentials" : "true",
+      "X-Cache" : "Miss from cloudfront",
+      "Via" : "1.1 81a5a0f348d8c55baa9c088dd6b5ecbd.cloudfront.net (CloudFront)",
+      "X-Amz-Cf-Pop" : "LHR62-C2",
+      "X-Amz-Cf-Id" : "mIIONM0vCMXju4JDKJwlUT5yY0c4NsTrag7Cc_tzXd-3emq9BjXm0w=="
+    }
+  },
+  "uuid" : "e90f7b4a-1e68-4a23-a93f-9d0bcce52ac3",
+  "persistent" : true,
+  "insertionIndex" : 1
+}

@@ -1,0 +1,34 @@
+{
+  "id" : "8030d2e9-0989-4af5-9001-964ae1a0af48",
+  "name" : "catalogue_v2_works_a227dajt",
+  "request" : {
+    "url" : "/catalogue/v2/works/a227dajt?include=items,identifiers",
+    "method" : "GET"
+  },
+  "response" : {
+    "status" : 200,
+    "body" : "{\"id\":\"a227dajt\",\"title\":\"L'homoeopathie à l'Académie de médecine de Belgique en 1877 : réponse au défi de M. le professeur Crocq\",\"alternativeTitles\":[],\"physicalDescription\":\"93 pages ; 25 cm\",\"workType\":{\"id\":\"a\",\"label\":\"Books\",\"type\":\"WorkType\"},\"identifiers\":[{\"identifierType\":{\"id\":\"sierra-system-number\",\"label\":\"Sierra system number\",\"type\":\"IdentifierType\"},\"value\":\"b21053613\",\"type\":\"Identifier\"},{\"identifierType\":{\"id\":\"sierra-identifier\",\"label\":\"Sierra identifier\",\"type\":\"IdentifierType\"},\"value\":\"2105361\",\"type\":\"Identifier\"}],\"thumbnail\":{\"locationType\":{\"id\":\"thumbnail-image\",\"label\":\"Thumbnail Image\",\"type\":\"LocationType\"},\"url\":\"https://dlcs.io/thumbs/wellcome/5/b21053613_0001.jp2/full/!200,200/0/default.jpg\",\"license\":{\"id\":\"pdm\",\"label\":\"Public Domain Mark\",\"url\":\"https://creativecommons.org/share-your-work/public-domain/pdm/\",\"type\":\"License\"},\"accessConditions\":[],\"type\":\"DigitalLocation\"},\"items\":[{\"locations\":[{\"locationType\":{\"id\":\"iiif-presentation\",\"label\":\"IIIF Presentation API\",\"type\":\"LocationType\"},\"url\":\"https://wellcomelibrary.org/iiif/b21053613/manifest\",\"license\":{\"id\":\"pdm\",\"label\":\"Public Domain Mark\",\"url\":\"https://creativecommons.org/share-your-work/public-domain/pdm/\",\"type\":\"License\"},\"accessConditions\":[{\"status\":{\"id\":\"open\",\"label\":\"Open\",\"type\":\"AccessStatus\"},\"type\":\"AccessCondition\"}],\"type\":\"DigitalLocation\"}],\"type\":\"Item\"}],\"language\":{\"id\":\"fre\",\"label\":\"French\",\"type\":\"Language\"},\"type\":\"Work\",\"@context\":\"https://api.wellcomecollection.org/catalogue/v2/context.json\"}",
+    "headers" : {
+      "Content-Type" : "application/json",
+      "Connection" : "keep-alive",
+      "Date" : "Thu, 27 Feb 2020 13:42:45 GMT",
+      "x-amzn-RequestId" : "193d476c-da5e-42aa-ac83-03c7f7e6359c",
+      "Access-Control-Allow-Origin" : "*",
+      "Access-Control-Allow-Headers" : "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type",
+      "x-amzn-Remapped-Content-Length" : "1548",
+      "x-amzn-Remapped-Connection" : "keep-alive",
+      "x-amz-apigw-id" : "IjwVUGL6joEFazg=",
+      "x-amzn-Remapped-Server" : "nginx",
+      "Access-Control-Allow-Methods" : "GET, POST, OPTIONS",
+      "x-amzn-Remapped-Date" : "Thu, 27 Feb 2020 13:42:45 GMT",
+      "Access-Control-Allow-Credentials" : "true",
+      "X-Cache" : "Miss from cloudfront",
+      "Via" : "1.1 bad4c5c93bbbcff151219f57e6a9b2b5.cloudfront.net (CloudFront)",
+      "X-Amz-Cf-Pop" : "LHR50-C1",
+      "X-Amz-Cf-Id" : "fBf-DTggPDaLid4HLvyaLXC2ml4O-XY0NM0vvutAFnC6CphIgLNojQ=="
+    }
+  },
+  "uuid" : "8030d2e9-0989-4af5-9001-964ae1a0af48",
+  "persistent" : true,
+  "insertionIndex" : 1
+}
