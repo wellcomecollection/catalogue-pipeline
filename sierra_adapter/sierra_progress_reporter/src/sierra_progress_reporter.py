@@ -151,9 +151,7 @@ def main(event=None, _ctxt=None):
             errors.append(resource_type)
 
     if errors:
-        error_lines.insert(
-            0, "There are gaps in the %s data." % "/".join(errors)
-        )
+        error_lines.insert(0, "There are gaps in the %s data." % "/".join(errors))
 
         error_lines.append(
             "You can fix this by running `$ python sierra_adapter/build_missing_windows.py` in the root of the catalogue repo."
