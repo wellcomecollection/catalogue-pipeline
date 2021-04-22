@@ -3,11 +3,10 @@ locals {
 
   suffix         = var.instance != "" ? "-${var.instance}" : ""
   namespaced_env = "${var.namespace}-${var.environment}${local.suffix}"
-
 }
 
 module "service" {
-  source = "./service"
+  source = "../../service"
 
   service_name                   = local.namespaced_env
   service_discovery_namespace_id = var.service_discovery_namespace_id

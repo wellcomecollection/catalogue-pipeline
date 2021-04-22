@@ -1,5 +1,5 @@
 module "catalogue_api_staging_20201008" {
-  source = "../modules/stack"
+  source = "../modules/stack/catalogue_api"
 
   environment        = local.environment
   instance           = "20201008"

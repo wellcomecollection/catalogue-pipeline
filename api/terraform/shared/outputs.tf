@@ -2,6 +2,10 @@ output "cluster_arn" {
   value = aws_ecs_cluster.catalogue_api.arn
 }
 
+output "stacks_cluster_arn" {
+  value = aws_ecs_cluster.stacks_api.arn
+}
+
 output "nlb_arn" {
   value = aws_lb.catalogue_api.arn
 }

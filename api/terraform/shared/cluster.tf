@@ -1,3 +1,7 @@
 resource "aws_ecs_cluster" "catalogue_api" {
-  name = replace(local.namespace, "_", "-")
+  name = "catalogue-api"
+}
+
+resource "aws_ecs_cluster" "stacks_api" {
+  name = "stacks-api"
 }
