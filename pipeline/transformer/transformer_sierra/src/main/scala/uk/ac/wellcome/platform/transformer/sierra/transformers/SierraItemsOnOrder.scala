@@ -63,7 +63,7 @@ object SierraItemsOnOrder extends Logging {
 
       // status 'o' = "On order"
       //
-      // We create an item with a message something like "1 copy ordered for Wellcome Collection on 1 Jan 2001"
+      // We create an item with a message something like "Ordered for Wellcome Collection on 1 Jan 2001"
       case (Some(status), orderedDate, _) if status == "o" =>
         Some(
           Item(
