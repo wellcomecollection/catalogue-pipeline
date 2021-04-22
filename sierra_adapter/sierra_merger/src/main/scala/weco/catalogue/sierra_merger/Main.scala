@@ -15,6 +15,7 @@ import weco.catalogue.source_model.sierra.{
   SierraBibRecord,
   SierraHoldingsRecord,
   SierraItemRecord,
+  SierraOrderRecord,
   SierraRecordTypes,
   SierraTransformable
 }
@@ -66,6 +67,13 @@ object Main extends WellcomeTypesafeApp {
         new Worker(
           sqsStream = sqsStream,
           updater = new Updater[SierraHoldingsRecord](sourceVHS),
+          messageSender = messageSender
+        )
+
+      case SierraRecordTypes.orders =>
+        new Worker(
+          sqsStream = sqsStream,
+          updater = new Updater[SierraOrderRecord](sourceVHS),
           messageSender = messageSender
         )
     }
