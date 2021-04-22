@@ -18,9 +18,8 @@ import weco.catalogue.internal_model.locations.{
 import weco.catalogue.internal_model.work.Item
 import weco.catalogue.source_model.sierra.{SierraBibNumber, SierraItemNumber}
 
-case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
-    extends SierraIdentifiedDataTransformer
-    with Logging
+object SierraItems
+    extends Logging
     with SierraLocation
     with SierraQueryOps {
 
@@ -33,7 +32,7 @@ case class SierraItems(itemDataMap: Map[SierraItemNumber, SierraItemData])
     * sierra-identifier.  We want to revisit this at some point.
     * See https://github.com/wellcomecollection/platform/issues/4993
     */
-  def apply(bibId: SierraBibNumber, bibData: SierraBibData) =
+  def apply(bibId: SierraBibNumber, bibData: SierraBibData, itemDataMap: Map[SierraItemNumber, SierraItemData]) =
     getPhysicalItems(bibId, itemDataMap, bibData)
       .sortBy { item =>
         item.id match {
