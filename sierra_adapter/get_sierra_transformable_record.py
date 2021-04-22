@@ -99,6 +99,9 @@ def main(bnumber, skip_decoding):
             for holdings_record in transformable.get("holdingsRecords", {}).values():
                 holdings_record["data"] = json.loads(holdings_record["data"])
 
+            for order_record in transformable.get("orderRecords", {}).values():
+                order_record["data"] = json.loads(order_record["data"])
+
         _, tmp_path = tempfile.mkstemp(suffix=".json", prefix=f"b{bnumber}_")
         with open(tmp_path, "w") as outfile:
             outfile.write(json.dumps(transformable, indent=2))
