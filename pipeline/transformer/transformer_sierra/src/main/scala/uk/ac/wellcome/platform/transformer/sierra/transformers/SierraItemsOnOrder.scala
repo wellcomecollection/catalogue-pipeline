@@ -56,10 +56,7 @@ object SierraItemsOnOrder extends Logging {
   private def createItem(
     id: TypedSierraRecordNumber,
     order: SierraOrderData): Option[Item[IdState.Unidentifiable.type]] =
-    (
-      getStatus(order),
-      getOrderDate(order),
-      getReceivedDate(order)) match {
+    (getStatus(order), getOrderDate(order), getReceivedDate(order)) match {
 
       // status 'o' = "On order"
       //
