@@ -72,12 +72,10 @@ These are:
 * **Pulling docker containers from ECR**
   
   You'll need to log into ECR before local docker can pull from there:
-  ```bash
-  # bash etc
-  eval $(AWS_PROFILE=platform-developer aws ecr get-login --no-include-email)
   
-  # fish
-  eval (env AWS_PROFILE=platform-dev aws ecr get-login --no-include-email)
+  ```bash
+  aws ecr get-login-password --region eu-west-1 --profile platform-dev | \
+  docker login --username AWS --password-stdin 760097843905.dkr.ecr.eu-west-1.amazonaws.com
   ```
 
 ## Deploying
@@ -101,7 +99,6 @@ API & data are stored within \[`./scripts`\].
 ---
 
 Part of the [Wellcome Digital Platform][platform repo].
-
 
 [catalogue docs]: https://docs.wellcomecollection.org/catalogue/
 [api developer docs]: https://developers.wellcomecollection.org/catalogue/
