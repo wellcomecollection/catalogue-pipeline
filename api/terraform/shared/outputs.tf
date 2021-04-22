@@ -45,3 +45,11 @@ output "ecr_api_repository_url" {
 output "ecr_snapshot_generator_repository_url" {
   value = aws_ecr_repository.snapshot_generator.repository_url
 }
+
+output "ecr_items_api_repository_url" {
+  value = aws_ecr_repository.items_api.repository_url
+}
+
+output "ecr_requests_api_repository_url" {
+  value = aws_ecr_repository.requests_api.repository_url
+}

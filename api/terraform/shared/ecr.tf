@@ -1,3 +1,19 @@
+resource "aws_ecr_repository" "items_api" {
+  name = "uk.ac.wellcome/items_api"
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+resource "aws_ecr_repository" "requests_api" {
+  name = "uk.ac.wellcome/requests_api"
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
 resource "aws_ecr_repository" "api" {
   name = "uk.ac.wellcome/api"
 

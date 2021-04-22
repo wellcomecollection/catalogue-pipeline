@@ -131,3 +131,12 @@ catalogue_api:
   account_id: '756629837203'
   role_arn: arn:aws:iam::756629837203:role/catalogue-ci
   aws_region_name: eu-west-1
+
+stacks:
+  image_repositories:
+    - id: items_api
+    - id: requests_api
+  name: Stacks API
+  account_id: '756629837203'
+  role_arn: arn:aws:iam::756629837203:role/catalogue-ci
+  aws_region_name: eu-west-1
