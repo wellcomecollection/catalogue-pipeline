@@ -22,7 +22,8 @@ import uk.ac.wellcome.fixtures.TestWith
   *
   */
 trait CatalogueWireMockFixture extends AnyFunSpec with Logging {
-  val baseRecordingRoot: String = "./api/stacks/common/src/test/resources/catalogue"
+  val baseRecordingRoot: String =
+    "./api/stacks/common/src/test/resources/catalogue"
   var recordingRoot: Path = Paths.get(baseRecordingRoot)
 
   // Each test has a separate set of recordings, in a separate directory,
