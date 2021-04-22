@@ -115,7 +115,7 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
       notes = SierraNotes(bibData),
       duration = SierraDuration(bibData),
       items =
-        SierraItemsOnOrder(bibId, itemDataMap, orderDataMap) ++
+        SierraItemsOnOrder(bibId, hasItems = hasItems, orderDataMap) ++
           SierraItems(itemDataMap)(bibId, bibData) ++
           SierraElectronicResources(bibId, varFields = bibData.varFields),
       holdings = SierraHoldings(bibId, holdingsDataMap)
@@ -128,6 +128,9 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
     ontologyType = "Work",
     value = bibId.withCheckDigit
   )
+
+  lazy val hasItems: Boolean =
+    sierraTransformable.itemRecords.nonEmpty
 
   lazy val itemDataMap: Map[SierraItemNumber, SierraItemData] =
     sierraTransformable.itemRecords

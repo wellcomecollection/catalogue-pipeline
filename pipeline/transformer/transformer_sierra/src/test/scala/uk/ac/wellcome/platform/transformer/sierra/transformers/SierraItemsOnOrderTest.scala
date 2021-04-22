@@ -5,7 +5,6 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.platform.transformer.sierra.generators.SierraDataGenerators
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   FixedField,
-  SierraItemData,
   SierraOrderData
 }
 import weco.catalogue.internal_model.identifiers.IdState
@@ -15,7 +14,7 @@ import weco.catalogue.internal_model.work.Item
 
 class SierraItemsOnOrderTest extends AnyFunSpec with Matchers with SierraDataGenerators {
   it("returns nothing if there are no orders or items") {
-    getOrders(itemData = List(), orderData = List()) shouldBe empty
+    getOrders(hasItems = false, orderData = List()) shouldBe empty
   }
 
   describe("creates 'on order' items") {
@@ -37,7 +36,7 @@ class SierraItemsOnOrderTest extends AnyFunSpec with Matchers with SierraDataGen
         )
       )
 
-      getOrders(itemData = List(), orderData = orderData) shouldBe List(
+      getOrders(hasItems = false, orderData = orderData) shouldBe List(
         Item(
           id = Unidentifiable,
           title = None,
@@ -71,7 +70,7 @@ class SierraItemsOnOrderTest extends AnyFunSpec with Matchers with SierraDataGen
         )
       )
 
-      getOrders(itemData = List(), orderData = orderData) shouldBe List(
+      getOrders(hasItems = false, orderData = orderData) shouldBe List(
         Item(
           id = Unidentifiable,
           title = None,
@@ -96,7 +95,7 @@ class SierraItemsOnOrderTest extends AnyFunSpec with Matchers with SierraDataGen
         )
       )
 
-      getOrders(itemData = List(), orderData = orderData) shouldBe List(
+      getOrders(hasItems = false, orderData = orderData) shouldBe List(
         Item(
           id = Unidentifiable,
           title = None,
@@ -120,7 +119,7 @@ class SierraItemsOnOrderTest extends AnyFunSpec with Matchers with SierraDataGen
         )
       )
 
-      getOrders(itemData = List(), orderData = orderData) shouldBe List(
+      getOrders(hasItems = false, orderData = orderData) shouldBe List(
         Item(
           id = Unidentifiable,
           title = None,
@@ -145,7 +144,7 @@ class SierraItemsOnOrderTest extends AnyFunSpec with Matchers with SierraDataGen
         )
       )
 
-      getOrders(itemData = List(), orderData = orderData) shouldBe List(
+      getOrders(hasItems = false, orderData = orderData) shouldBe List(
         Item(
           id = Unidentifiable,
           title = None,
@@ -177,10 +176,10 @@ class SierraItemsOnOrderTest extends AnyFunSpec with Matchers with SierraDataGen
         )
       )
 
-      getOrders(itemData = List(), orderData = orderData) should not be empty
+      getOrders(hasItems = false, orderData = orderData) should not be empty
 
       val suppressedOrderData = orderData.map { od => od.copy(suppressed = true) }
-      getOrders(itemData = List(), orderData = suppressedOrderData) shouldBe empty
+      getOrders(hasItems = false, orderData = suppressedOrderData) shouldBe empty
     }
 
     it("unless the order is deleted") {
@@ -201,10 +200,10 @@ class SierraItemsOnOrderTest extends AnyFunSpec with Matchers with SierraDataGen
         )
       )
 
-      getOrders(itemData = List(), orderData = orderData) should not be empty
+      getOrders(hasItems = false, orderData = orderData) should not be empty
 
       val deletedOrderData = orderData.map { od => od.copy(deleted = true) }
-      getOrders(itemData = List(), orderData = deletedOrderData) shouldBe empty
+      getOrders(hasItems = false, orderData = deletedOrderData) shouldBe empty
     }
 
     it("unless there are any items") {
@@ -227,8 +226,8 @@ class SierraItemsOnOrderTest extends AnyFunSpec with Matchers with SierraDataGen
 
       // Note: we test both with and without order data here, so we'll
       // spot if the lack of output is unrelated to the items.
-      getOrders(itemData = List(), orderData = orderData) should not be empty
-      getOrders(itemData = List(createSierraItemData), orderData = orderData) shouldBe empty
+      getOrders(hasItems = false, orderData = orderData) should not be empty
+      getOrders(hasItems = true, orderData = orderData) shouldBe empty
     }
   }
 
@@ -251,7 +250,7 @@ class SierraItemsOnOrderTest extends AnyFunSpec with Matchers with SierraDataGen
         )
       )
 
-      getOrders(itemData = List(), orderData = orderData) shouldBe List(
+      getOrders(hasItems = false, orderData = orderData) shouldBe List(
         Item(
           id = Unidentifiable,
           title = None,
@@ -285,7 +284,7 @@ class SierraItemsOnOrderTest extends AnyFunSpec with Matchers with SierraDataGen
         )
       )
 
-      getOrders(itemData = List(), orderData = orderData) shouldBe List(
+      getOrders(hasItems = false, orderData = orderData) shouldBe List(
         Item(
           id = Unidentifiable,
           title = None,
@@ -310,7 +309,7 @@ class SierraItemsOnOrderTest extends AnyFunSpec with Matchers with SierraDataGen
         )
       )
 
-      getOrders(itemData = List(), orderData = orderData) shouldBe List(
+      getOrders(hasItems = false, orderData = orderData) shouldBe List(
         Item(
           id = Unidentifiable,
           title = None,
@@ -334,10 +333,10 @@ class SierraItemsOnOrderTest extends AnyFunSpec with Matchers with SierraDataGen
         )
       )
 
-      getOrders(itemData = List(), orderData = orderData) shouldBe empty
+      getOrders(hasItems = false, orderData = orderData) shouldBe empty
 
       val orderWithRdate = orderData.map { od => od.copy(fixedFields = od.fixedFields ++ Map("17" -> FixedField(label = "RDATE", value = "2008-08-08"))) }
-      getOrders(itemData = List(), orderData = orderWithRdate) should not be empty
+      getOrders(hasItems = false, orderData = orderWithRdate) should not be empty
     }
 
     it("unless the order is suppressed") {
@@ -351,10 +350,10 @@ class SierraItemsOnOrderTest extends AnyFunSpec with Matchers with SierraDataGen
         )
       )
 
-      getOrders(itemData = List(), orderData = orderData) should not be empty
+      getOrders(hasItems = false, orderData = orderData) should not be empty
 
       val suppressedOrderData = orderData.map { od => od.copy(suppressed = true) }
-      getOrders(itemData = List(), orderData = suppressedOrderData) shouldBe empty
+      getOrders(hasItems = false, orderData = suppressedOrderData) shouldBe empty
     }
 
     it("unless the order is deleted") {
@@ -368,10 +367,10 @@ class SierraItemsOnOrderTest extends AnyFunSpec with Matchers with SierraDataGen
         )
       )
 
-      getOrders(itemData = List(), orderData = orderData) should not be empty
+      getOrders(hasItems = false, orderData = orderData) should not be empty
 
       val deletedOrderData = orderData.map { od => od.copy(deleted = true) }
-      getOrders(itemData = List(), orderData = deletedOrderData) shouldBe empty
+      getOrders(hasItems = false, orderData = deletedOrderData) shouldBe empty
     }
 
     it("unless there are any items") {
@@ -385,10 +384,10 @@ class SierraItemsOnOrderTest extends AnyFunSpec with Matchers with SierraDataGen
         )
       )
 
-      // Note: we test both with and without order data here, so we'll
+      // Note: we test both with and without items here, so we'll
       // spot if the lack of output is unrelated to the items.
-      getOrders(itemData = List(), orderData = orderData) should not be empty
-      getOrders(itemData = List(createSierraItemData), orderData = orderData) shouldBe empty
+      getOrders(hasItems = false, orderData = orderData) should not be empty
+      getOrders(hasItems = true, orderData = orderData) shouldBe empty
     }
   }
 
@@ -409,24 +408,19 @@ class SierraItemsOnOrderTest extends AnyFunSpec with Matchers with SierraDataGen
         )
       )
 
-      getOrders(itemData = List(), orderData = orderData) shouldBe empty
+      getOrders(hasItems = false, orderData = orderData) shouldBe empty
     }
   }
 
-  def getOrders(itemData: List[SierraItemData], orderData: List[SierraOrderData]): List[Item[IdState.Unidentifiable.type]] = {
+  def getOrders(hasItems: Boolean, orderData: List[SierraOrderData]): List[Item[IdState.Unidentifiable.type]] = {
     val id = createSierraBibNumber
-
-    val itemIds = (1 to itemData.size)
-      .map { _ => createSierraItemNumber }
-      .sortBy { _.withoutCheckDigit }
 
     val orderIds = (1 to orderData.size)
       .map { _ => createSierraOrderNumber }
       .sortBy { _.withoutCheckDigit }
 
-    val itemDataMap = itemIds.zip(itemData).toMap
     val orderDataMap = orderIds.zip(orderData).toMap
 
-    SierraItemsOnOrder(id, itemDataMap, orderDataMap)
+    SierraItemsOnOrder(id, hasItems, orderDataMap)
   }
 }
