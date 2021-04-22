@@ -114,8 +114,10 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
       edition = SierraEdition(bibData),
       notes = SierraNotes(bibData),
       duration = SierraDuration(bibData),
-      items = SierraItems(itemDataMap)(bibId, bibData) ++
-        SierraElectronicResources(bibId, varFields = bibData.varFields),
+      items =
+        SierraItemsOnOrder(bibId, hasItems = hasItems, orderDataMap) ++
+          SierraItems(bibId, bibData, itemDataMap) ++
+          SierraElectronicResources(bibId, varFields = bibData.varFields),
       holdings = SierraHoldings(bibId, holdingsDataMap)
     )
 
@@ -126,6 +128,9 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
     ontologyType = "Work",
     value = bibId.withCheckDigit
   )
+
+  lazy val hasItems: Boolean =
+    sierraTransformable.itemRecords.nonEmpty
 
   lazy val itemDataMap: Map[SierraItemNumber, SierraItemData] =
     sierraTransformable.itemRecords
@@ -150,6 +155,19 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
             case Failure(_) =>
               throw SierraTransformerException(
                 s"Unable to parse holdings data for $id as JSON: <<$jsonString>>")
+          }
+      }
+
+  lazy val orderDataMap: Map[SierraOrderNumber, SierraOrderData] =
+    sierraTransformable.orderRecords
+      .map { case (id, oRecord) => (id, oRecord.data) }
+      .map {
+        case (id, jsonString) =>
+          fromJson[SierraOrderData](jsonString) match {
+            case Success(data) => id -> data
+            case Failure(_) =>
+              throw SierraTransformerException(
+                s"Unable to parse order data for $id as JSON: <<$jsonString>>")
           }
       }
 }

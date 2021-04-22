@@ -38,4 +38,17 @@ trait SierraDataGenerators extends IdentifiersGenerators with SierraGenerators {
     )
 
   def createSierraItemData: SierraItemData = createSierraItemDataWith()
+
+  def createSierraOrderDataWith(
+    suppressed: Boolean = false,
+    deleted: Boolean = false,
+    fixedFields: Map[String, FixedField] = Map()
+  ): SierraOrderData =
+    SierraOrderData(
+      deleted = deleted,
+      suppressed = suppressed,
+      fixedFields = fixedFields
+    )
+
+  def createSierraOrderData: SierraOrderData = createSierraOrderDataWith()
 }
