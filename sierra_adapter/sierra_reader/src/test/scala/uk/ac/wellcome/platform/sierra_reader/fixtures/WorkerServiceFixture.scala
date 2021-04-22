@@ -9,10 +9,10 @@ import uk.ac.wellcome.platform.sierra_reader.config.models.{
   ReaderConfig,
   SierraAPIConfig
 }
-import uk.ac.wellcome.platform.sierra_reader.models.SierraResourceTypes
 import uk.ac.wellcome.platform.sierra_reader.services.SierraReaderWorkerService
 import uk.ac.wellcome.storage.fixtures.S3Fixtures
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
+import weco.catalogue.sierra_reader.models.SierraResourceTypes
 
 import scala.concurrent.ExecutionContext.Implicits.global
 

@@ -16,6 +16,7 @@ import weco.catalogue.source_model.sierra.Implicits._
 import weco.catalogue.source_model.sierra.{
   SierraHoldingsRecord,
   SierraItemRecord,
+  SierraOrderRecord,
   SierraTransformable
 }
 
@@ -38,6 +39,9 @@ class SierraIndexerFeatureTest
     }
     val holdingsIds = (1 to 4).map { _ =>
       createSierraHoldingsNumber
+    }
+    val orderIds = (1 to 4).map { _ =>
+      createSierraOrderNumber
     }
 
     val transformable = createSierraTransformableWith(
@@ -83,10 +87,13 @@ class SierraIndexerFeatureTest
       ),
       itemRecords = itemIds.map { id =>
         createSierraItemRecordWith(id = id)
-      }.toList,
+      },
       holdingsRecords = holdingsIds.map { id =>
         createSierraHoldingsRecordWith(id = id)
-      }.toList,
+      },
+      orderRecords = orderIds.map { id =>
+        createSierraOrderRecordWith(id = id)
+      }
     )
 
     val store = MemoryTypedStore[S3ObjectLocation, SierraTransformable](
@@ -124,6 +131,16 @@ class SierraIndexerFeatureTest
               .sorted
               .mkString(",")
 
+          val orderIdsList =
+            orderIds
+              .map { id =>
+                s"""
+                   |"${id.withoutCheckDigit}"
+                   |""".stripMargin
+              }
+              .sorted
+              .mkString(",")
+
           assertElasticsearchEventuallyHas(
             index = Index(s"${indexPrefix}_bibs"),
             id = bibId.withoutCheckDigit,
@@ -134,7 +151,8 @@ class SierraIndexerFeatureTest
                 |  "updatedDate" : "2013-12-12T13:56:07Z",
                 |  "deleted" : false,
                 |  "itemIds": [$itemIdsList],
-                |  "holdingsIds": [$holdingsIdsList]
+                |  "holdingsIds": [$holdingsIdsList],
+                |  "orderIds": [$orderIdsList]
                 |}
                 |""".stripMargin
           )
@@ -320,7 +338,8 @@ class SierraIndexerFeatureTest
                       |  "updatedDate" : "2001-01-01T01:01:01Z",
                       |  "deleted" : false,
                       |  "itemIds": [],
-                      |  "holdingsIds": []
+                      |  "holdingsIds": [],
+                      |  "orderIds": []
                       |}
                       |""".stripMargin
             )
@@ -401,7 +420,8 @@ class SierraIndexerFeatureTest
                       |  "updatedDate" : "2002-02-02T02:02:02Z",
                       |  "deleted" : false,
                       |  "itemIds": [],
-                      |  "holdingsIds": []
+                      |  "holdingsIds": [],
+                      |  "orderIds": []
                       |}
                       |""".stripMargin
             )
@@ -827,6 +847,202 @@ class SierraIndexerFeatureTest
                       |    "recordType": "holdings",
                       |    "id": "${holdingsId2.withoutCheckDigit}",
                       |    "idWithCheckDigit": "${holdingsId2.withCheckDigit}"
+                      |  },
+                      |  "code": "265",
+                      |  "fixedField": {
+                      |    "label" : "Inherit Location",
+                      |    "value" : false
+                      |  }
+                      |}
+                      |""".stripMargin
+          )
+        }
+      }
+    }
+  }
+
+  it("indexes order records and their varFields/fixedFields") {
+    val location = createS3ObjectLocation
+
+    val orderId1 = createSierraOrderNumber
+    val orderId2 = createSierraOrderNumber
+
+    val transformable = createSierraTransformableWith(
+      orderRecords = List(
+        SierraOrderRecord(
+          id = orderId1,
+          data = s"""
+                    |{
+                    |  "id" : "$orderId1",
+                    |  "updatedDate" : "2001-01-01T01:01:01Z",
+                    |  "deleted" : false,
+                    |  "varFields" : [
+                    |    {
+                    |      "fieldTag" : "b",
+                    |      "content" : "22501328220"
+                    |    }
+                    |  ],
+                    |  "fixedFields": {
+                    |    "86": {
+                    |      "label" : "AGENCY",
+                    |       "value" : "1"
+                    |    }
+                    |  }
+                    |}
+                    |""".stripMargin,
+          modifiedDate = Instant.now(),
+          bibIds = List()
+        ),
+        SierraOrderRecord(
+          id = orderId2,
+          data = s"""
+                    |{
+                    |  "id" : "$orderId2",
+                    |  "updatedDate" : "2002-02-02T02:02:02Z",
+                    |  "deleted" : true,
+                    |  "varFields" : [
+                    |    {
+                    |      "fieldTag" : "c",
+                    |      "marcTag" : "949",
+                    |      "ind1" : " ",
+                    |      "ind2" : " ",
+                    |      "subfields" : [
+                    |        {
+                    |          "tag" : "a",
+                    |          "content" : "/RHO"
+                    |        }
+                    |      ]
+                    |    }
+                    |  ],
+                    |  "fixedFields": {
+                    |    "265": {
+                    |      "label" : "Inherit Location",
+                    |      "value" : false
+                    |    }
+                    |  }
+                    |}
+                    |""".stripMargin,
+          modifiedDate = Instant.now(),
+          bibIds = List()
+        )
+      )
+    )
+    val store = MemoryTypedStore[S3ObjectLocation, SierraTransformable](
+      initialEntries = Map(location -> transformable)
+    )
+
+    withIndices { indexPrefix =>
+      withLocalSqsQueue() { queue =>
+        withWorker(queue, store, indexPrefix) { _ =>
+          sendNotificationToSQS(
+            queue,
+            SierraSourcePayload(
+              id = transformable.sierraId.withoutCheckDigit,
+              location = location,
+              version = 1
+            )
+          )
+
+          assertElasticsearchEventuallyHas(
+            index = Index(s"${indexPrefix}_orders"),
+            id = orderId1.withoutCheckDigit,
+            json = s"""
+                      |{
+                      |  "id" : "$orderId1",
+                      |  "idWithCheckDigit": "${orderId1.withCheckDigit}",
+                      |  "updatedDate" : "2001-01-01T01:01:01Z",
+                      |  "deleted" : false
+                      |}
+                      |""".stripMargin
+          )
+
+          assertElasticsearchEventuallyHas(
+            index = Index(s"${indexPrefix}_orders"),
+            id = orderId2.withoutCheckDigit,
+            json = s"""
+                      |{
+                      |  "id" : "$orderId2",
+                      |  "idWithCheckDigit": "${orderId2.withCheckDigit}",
+                      |  "updatedDate" : "2002-02-02T02:02:02Z",
+                      |  "deleted" : true
+                      |}
+                      |""".stripMargin
+          )
+
+          assertElasticsearchEventuallyHas(
+            index = Index(s"${indexPrefix}_varfields"),
+            id = s"orders-${orderId1.withoutCheckDigit}-0",
+            json = s"""
+                      |{
+                      |  "parent": {
+                      |    "recordType": "orders",
+                      |    "id": "${orderId1.withoutCheckDigit}",
+                      |    "idWithCheckDigit": "${orderId1.withCheckDigit}"
+                      |  },
+                      |  "position": 0,
+                      |  "varField": {
+                      |    "fieldTag" : "b",
+                      |    "content" : "22501328220"
+                      |  }
+                      |}
+                      |""".stripMargin
+          )
+
+          assertElasticsearchEventuallyHas(
+            index = Index(s"${indexPrefix}_varfields"),
+            id = s"orders-${orderId2.withoutCheckDigit}-0",
+            json = s"""
+                      |{
+                      |  "parent": {
+                      |    "recordType": "orders",
+                      |    "id": "${orderId2.withoutCheckDigit}",
+                      |    "idWithCheckDigit": "${orderId2.withCheckDigit}"
+                      |  },
+                      |  "position": 0,
+                      |  "varField": {
+                      |    "fieldTag" : "c",
+                      |    "marcTag" : "949",
+                      |    "ind1" : " ",
+                      |    "ind2" : " ",
+                      |    "subfields" : [
+                      |      {
+                      |        "tag" : "a",
+                      |        "content" : "/RHO"
+                      |      }
+                      |    ]
+                      |  }
+                      |}
+                      |""".stripMargin
+          )
+
+          assertElasticsearchEventuallyHas(
+            index = Index(s"${indexPrefix}_fixedfields"),
+            id = s"orders-${orderId1.withoutCheckDigit}-86",
+            json = s"""
+                      |{
+                      |  "parent": {
+                      |    "recordType": "orders",
+                      |    "id": "${orderId1.withoutCheckDigit}",
+                      |    "idWithCheckDigit": "${orderId1.withCheckDigit}"
+                      |  },
+                      |  "code": "86",
+                      |  "fixedField": {
+                      |    "label" : "AGENCY",
+                      |    "value" : "1"
+                      |  }
+                      |}
+                      |""".stripMargin
+          )
+
+          assertElasticsearchEventuallyHas(
+            index = Index(s"${indexPrefix}_fixedfields"),
+            id = s"orders-${orderId2.withoutCheckDigit}-265",
+            json = s"""
+                      |{
+                      |  "parent": {
+                      |    "recordType": "orders",
+                      |    "id": "${orderId2.withoutCheckDigit}",
+                      |    "idWithCheckDigit": "${orderId2.withCheckDigit}"
                       |  },
                       |  "code": "265",
                       |  "fixedField": {

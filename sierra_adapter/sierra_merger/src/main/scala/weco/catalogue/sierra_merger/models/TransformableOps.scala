@@ -4,9 +4,14 @@ import weco.catalogue.source_model.sierra.{
   AbstractSierraRecord,
   SierraBibNumber,
   SierraBibRecord,
+  SierraHoldingsNumber,
   SierraHoldingsRecord,
+  SierraItemNumber,
   SierraItemRecord,
-  SierraTransformable
+  SierraOrderNumber,
+  SierraOrderRecord,
+  SierraTransformable,
+  TypedSierraRecordNumber
 }
 
 trait TransformableOps[Record <: AbstractSierraRecord[_]] {
@@ -68,20 +73,28 @@ object TransformableOps {
         s"We should never be removing a bib record from a SierraTransformable (${transformable.sierraId})")
   }
 
-  implicit val itemTransformableOps = new TransformableOps[SierraItemRecord] {
-    override def create(sierraId: SierraBibNumber,
-                        itemRecord: SierraItemRecord): SierraTransformable =
-      SierraTransformable(
-        sierraId = sierraId,
-        itemRecords = Map(itemRecord.id -> itemRecord)
-      )
+  trait SubrecordTransformableOps[
+    Id <: TypedSierraRecordNumber, Record <: AbstractSierraRecord[Id]]
+      extends TransformableOps[Record] {
+    implicit val recordOps: RecordOps[Record]
 
-    override def add(
-      sierraTransformable: SierraTransformable,
-      itemRecord: SierraItemRecord): Option[SierraTransformable] = {
-      if (!itemRecord.bibIds.contains(sierraTransformable.sierraId)) {
+    def getRecords(t: SierraTransformable): Map[Id, Record]
+    def setRecords(t: SierraTransformable,
+                   records: Map[Id, Record]): SierraTransformable
+
+    override def create(sierraId: SierraBibNumber,
+                        record: Record): SierraTransformable = {
+      val t = SierraTransformable(sierraId = sierraId)
+      val newRecords = Map(record.id -> record)
+
+      setRecords(t, newRecords)
+    }
+
+    override def add(t: SierraTransformable,
+                     record: Record): Option[SierraTransformable] = {
+      if (!recordOps.getBibIds(record).contains(t.sierraId)) {
         throw new RuntimeException(
-          s"Non-matching bib id ${sierraTransformable.sierraId} in item bib ${itemRecord.bibIds}")
+          s"Non-matching bib id ${t.sierraId} in ${recordOps.getBibIds(record)}")
       }
 
       // We can decide whether to insert the new data in two steps:
@@ -92,123 +105,96 @@ object TransformableOps {
       //    just received?  If the existing data is older, we need to merge the
       //    new record.
       //
-      val isNewerData =
-        sierraTransformable.itemRecords.get(itemRecord.id) match {
+      val isNewerData = {
+        getRecords(t).get(record.id) match {
           case Some(existing) =>
-            itemRecord.modifiedDate.isAfter(existing.modifiedDate) ||
-              itemRecord.modifiedDate == existing.modifiedDate
+            record.modifiedDate.isAfter(existing.modifiedDate) ||
+              record.modifiedDate == existing.modifiedDate
           case None => true
         }
+      }
 
       if (isNewerData) {
-        val itemData = sierraTransformable.itemRecords + (itemRecord.id -> itemRecord)
-        Some(sierraTransformable.copy(itemRecords = itemData))
+        val newRecords = getRecords(t) ++ Map(record.id -> record)
+        Some(setRecords(t, newRecords))
       } else {
         None
       }
     }
 
-    override def remove(
-      sierraTransformable: SierraTransformable,
-      itemRecord: SierraItemRecord): Option[SierraTransformable] = {
-      if (!itemRecord.unlinkedBibIds.contains(sierraTransformable.sierraId)) {
+    override def remove(t: SierraTransformable,
+                        record: Record): Option[SierraTransformable] = {
+      if (!recordOps.getUnlinkedBibIds(record).contains(t.sierraId)) {
         throw new RuntimeException(
-          s"Non-matching bib id ${sierraTransformable.sierraId} in item unlink bibs ${itemRecord.unlinkedBibIds}")
+          s"Non-matching bib id ${t.sierraId} in ${recordOps.getUnlinkedBibIds(record)}")
       }
 
-      val itemRecords =
-        sierraTransformable.itemRecords
+      val newRecords =
+        getRecords(t)
           .filterNot {
-            case (id, currentItemRecord) =>
-              val matchesCurrentItemRecord = id == itemRecord.id
+            case (id, currentRecord) =>
+              val matchesCurrentRecord = id == record.id
 
-              val modifiedAfter = itemRecord.modifiedDate.isAfter(
-                currentItemRecord.modifiedDate
+              val modifiedAfter = record.modifiedDate.isAfter(
+                currentRecord.modifiedDate
               )
 
-              matchesCurrentItemRecord && modifiedAfter
+              matchesCurrentRecord && modifiedAfter
           }
 
-      if (sierraTransformable.itemRecords != itemRecords) {
-        Some(sierraTransformable.copy(itemRecords = itemRecords))
+      if (getRecords(t) != newRecords) {
+        Some(setRecords(t, newRecords))
       } else {
         None
       }
     }
   }
 
+  implicit val itemTransformableOps =
+    new SubrecordTransformableOps[SierraItemNumber, SierraItemRecord] {
+      override implicit val recordOps: RecordOps[SierraItemRecord] =
+        RecordOps.itemRecordOps
+
+      override def getRecords(
+        t: SierraTransformable): Map[SierraItemNumber, SierraItemRecord] =
+        t.itemRecords
+
+      override def setRecords(
+        t: SierraTransformable,
+        itemRecords: Map[SierraItemNumber, SierraItemRecord])
+        : SierraTransformable =
+        t.copy(itemRecords = itemRecords)
+    }
+
   implicit val holdingsTransformableOps =
-    new TransformableOps[SierraHoldingsRecord] {
-      override def create(
-        sierraId: SierraBibNumber,
-        holdingsRecord: SierraHoldingsRecord): SierraTransformable =
-        SierraTransformable(
-          sierraId = sierraId,
-          holdingsRecords = Map(holdingsRecord.id -> holdingsRecord)
-        )
+    new SubrecordTransformableOps[SierraHoldingsNumber, SierraHoldingsRecord] {
+      override implicit val recordOps: RecordOps[SierraHoldingsRecord] =
+        RecordOps.holdingsRecordOps
 
-      override def add(
-        sierraTransformable: SierraTransformable,
-        holdingsRecord: SierraHoldingsRecord): Option[SierraTransformable] = {
-        if (!holdingsRecord.bibIds.contains(sierraTransformable.sierraId)) {
-          throw new RuntimeException(
-            s"Non-matching bib id ${sierraTransformable.sierraId} in holdings bib ${holdingsRecord.bibIds}")
-        }
+      override def getRecords(t: SierraTransformable)
+        : Map[SierraHoldingsNumber, SierraHoldingsRecord] =
+        t.holdingsRecords
 
-        // We can decide whether to insert the new data in two steps:
-        //
-        //  - Do we already have any data for this item?  If not, we definitely
-        //    need to merge this record.
-        //  - If we have existing data, is it newer or older than the update we've
-        //    just received?  If the existing data is older, we need to merge the
-        //    new record.
-        //
-        val isNewerData =
-          sierraTransformable.holdingsRecords.get(holdingsRecord.id) match {
-            case Some(existing) =>
-              holdingsRecord.modifiedDate.isAfter(existing.modifiedDate) ||
-                holdingsRecord.modifiedDate == existing.modifiedDate
-            case None => true
-          }
+      override def setRecords(
+        t: SierraTransformable,
+        holdingsRecords: Map[SierraHoldingsNumber, SierraHoldingsRecord])
+        : SierraTransformable =
+        t.copy(holdingsRecords = holdingsRecords)
+    }
 
-        if (isNewerData) {
-          Some(
-            sierraTransformable.copy(
-              holdingsRecords = sierraTransformable.holdingsRecords + (holdingsRecord.id -> holdingsRecord)
-            )
-          )
-        } else {
-          None
-        }
-      }
+  implicit val orderTransformableOps =
+    new SubrecordTransformableOps[SierraOrderNumber, SierraOrderRecord] {
+      override implicit val recordOps: RecordOps[SierraOrderRecord] =
+        RecordOps.orderRecordOps
 
-      override def remove(
-        sierraTransformable: SierraTransformable,
-        holdingsRecord: SierraHoldingsRecord): Option[SierraTransformable] = {
-        if (!holdingsRecord.unlinkedBibIds.contains(
-              sierraTransformable.sierraId)) {
-          throw new RuntimeException(
-            s"Non-matching bib id ${sierraTransformable.sierraId} in holdings unlink bibs ${holdingsRecord.unlinkedBibIds}")
-        }
+      override def getRecords(
+        t: SierraTransformable): Map[SierraOrderNumber, SierraOrderRecord] =
+        t.orderRecords
 
-        val newHoldingsRecords =
-          sierraTransformable.holdingsRecords
-            .filterNot {
-              case (id, currentHoldingsRecord) =>
-                val matchesCurrentItemRecord = id == holdingsRecord.id
-
-                val modifiedAfter = holdingsRecord.modifiedDate.isAfter(
-                  currentHoldingsRecord.modifiedDate
-                )
-
-                matchesCurrentItemRecord && modifiedAfter
-            }
-
-        if (sierraTransformable.holdingsRecords != newHoldingsRecords) {
-          Some(sierraTransformable.copy(holdingsRecords = newHoldingsRecords))
-        } else {
-          None
-        }
-      }
+      override def setRecords(
+        t: SierraTransformable,
+        orderRecords: Map[SierraOrderNumber, SierraOrderRecord])
+        : SierraTransformable =
+        t.copy(orderRecords = orderRecords)
     }
 }

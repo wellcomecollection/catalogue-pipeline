@@ -25,11 +25,17 @@ object Implicits {
   implicit val holdingsNumberKeyEncoder: KeyEncoder[SierraHoldingsNumber] =
     (key: SierraHoldingsNumber) => key.withoutCheckDigit
 
+  implicit val orderNumberKeyEncoder: KeyEncoder[SierraOrderNumber] =
+    (key: SierraOrderNumber) => key.withoutCheckDigit
+
   implicit val itemNumberKeyDecoder: KeyDecoder[SierraItemNumber] =
     (key: String) => Some(new SierraItemNumber(key))
 
   implicit val holdingsNumberKeyDecoder: KeyDecoder[SierraHoldingsNumber] =
     (key: String) => Some(new SierraHoldingsNumber(key))
+
+  implicit val orderNumberKeyDecoder: KeyDecoder[SierraOrderNumber] =
+    (key: String) => Some(new SierraOrderNumber(key))
 
   // We have Sierra record numbers stored in three formats:
   //
@@ -72,6 +78,9 @@ object Implicits {
   implicit val bibNumberDecoder: Decoder[SierraBibNumber] =
     createDecoder(new SierraBibNumber(_))
 
+  implicit val orderNumberDecoder: Decoder[SierraOrderNumber] =
+    createDecoder(new SierraOrderNumber(_))
+
   implicit val typedSierraRecordNumberEncoder
     : Encoder[TypedSierraRecordNumber] =
     (number: TypedSierraRecordNumber) =>
@@ -86,13 +95,18 @@ object Implicits {
   implicit val bibNumberEncoder: Encoder[SierraBibNumber] =
     (number: SierraBibNumber) => Json.fromString(number.withoutCheckDigit)
 
+  implicit val orderNumberEncoder: Encoder[SierraOrderNumber] =
+    (number: SierraOrderNumber) => Json.fromString(number.withoutCheckDigit)
+
   implicit val _dec01: Decoder[SierraItemRecord] = deriveConfiguredDecoder
   implicit val _dec02: Decoder[SierraHoldingsRecord] = deriveConfiguredDecoder
   implicit val _dec03: Decoder[SierraBibRecord] = deriveConfiguredDecoder
-  implicit val _dec04: Decoder[SierraTransformable] = deriveConfiguredDecoder
+  implicit val _dec04: Decoder[SierraOrderRecord] = deriveConfiguredDecoder
+  implicit val _dec05: Decoder[SierraTransformable] = deriveConfiguredDecoder
 
   implicit val _enc01: Encoder[SierraItemRecord] = deriveConfiguredEncoder
   implicit val _enc02: Encoder[SierraHoldingsRecord] = deriveConfiguredEncoder
   implicit val _enc03: Encoder[SierraBibRecord] = deriveConfiguredEncoder
-  implicit val _enc04: Encoder[SierraTransformable] = deriveConfiguredEncoder
+  implicit val _enc04: Encoder[SierraOrderRecord] = deriveConfiguredEncoder
+  implicit val _enc05: Encoder[SierraTransformable] = deriveConfiguredEncoder
 }

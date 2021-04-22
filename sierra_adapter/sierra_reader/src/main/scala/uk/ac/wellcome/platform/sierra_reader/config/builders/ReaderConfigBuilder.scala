@@ -2,8 +2,8 @@ package uk.ac.wellcome.platform.sierra_reader.config.builders
 
 import com.typesafe.config.Config
 import uk.ac.wellcome.platform.sierra_reader.config.models.ReaderConfig
-import uk.ac.wellcome.platform.sierra_reader.models.SierraResourceTypes._
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
+import weco.catalogue.sierra_reader.models.SierraResourceTypes._
 
 object ReaderConfigBuilder {
   def buildReaderConfig(config: Config): ReaderConfig = {
@@ -11,6 +11,7 @@ object ReaderConfigBuilder {
       case s: String if s == bibs.toString     => bibs
       case s: String if s == items.toString    => items
       case s: String if s == holdings.toString => holdings
+      case s: String if s == orders.toString   => orders
       case s: String =>
         throw new IllegalArgumentException(
           s"$s is not a valid Sierra resource type")

@@ -3,7 +3,8 @@ package weco.catalogue.sierra_linker.models
 import weco.catalogue.source_model.sierra.{
   SierraBibNumber,
   SierraHoldingsRecord,
-  SierraItemRecord
+  SierraItemRecord,
+  SierraOrderRecord
 }
 
 import java.time.Instant
@@ -27,5 +28,12 @@ case object Link {
       bibIds = holdingsRecord.bibIds,
       unlinkedBibIds = holdingsRecord.unlinkedBibIds,
       modifiedDate = holdingsRecord.modifiedDate
+    )
+
+  def apply(orderRecord: SierraOrderRecord): Link =
+    Link(
+      bibIds = orderRecord.bibIds,
+      unlinkedBibIds = orderRecord.unlinkedBibIds,
+      modifiedDate = orderRecord.modifiedDate
     )
 }

@@ -4,7 +4,8 @@ case class SierraTransformable(
   sierraId: SierraBibNumber,
   maybeBibRecord: Option[SierraBibRecord] = None,
   itemRecords: Map[SierraItemNumber, SierraItemRecord] = Map(),
-  holdingsRecords: Map[SierraHoldingsNumber, SierraHoldingsRecord] = Map()
+  holdingsRecords: Map[SierraHoldingsNumber, SierraHoldingsRecord] = Map(),
+  orderRecords: Map[SierraOrderNumber, SierraOrderRecord] = Map()
 )
 
 object SierraTransformable {
@@ -12,5 +13,4 @@ object SierraTransformable {
     SierraTransformable(
       sierraId = bibRecord.id,
       maybeBibRecord = Some(bibRecord))
-
 }

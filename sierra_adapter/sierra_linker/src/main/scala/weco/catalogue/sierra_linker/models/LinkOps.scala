@@ -5,7 +5,8 @@ import weco.catalogue.source_model.sierra.{
   AbstractSierraRecord,
   SierraBibNumber,
   SierraHoldingsRecord,
-  SierraItemRecord
+  SierraItemRecord,
+  SierraOrderRecord
 }
 
 trait LinkOps[Record <: AbstractSierraRecord[_]] extends Logging {
@@ -91,5 +92,19 @@ object LinkOps {
       link: Link,
       holdingsRecord: SierraHoldingsRecord): SierraHoldingsRecord =
       holdingsRecord.copy(unlinkedBibIds = link.unlinkedBibIds)
+  }
+
+  implicit val orderLinkOps = new LinkOps[SierraOrderRecord] {
+    override def getBibIds(
+      orderRecord: SierraOrderRecord): List[SierraBibNumber] =
+      orderRecord.bibIds
+
+    override def createLink(orderRecord: SierraOrderRecord): Link =
+      Link(orderRecord)
+
+    override def copyUnlinkedBibIds(
+      link: Link,
+      orderRecord: SierraOrderRecord): SierraOrderRecord =
+      orderRecord.copy(unlinkedBibIds = link.unlinkedBibIds)
   }
 }

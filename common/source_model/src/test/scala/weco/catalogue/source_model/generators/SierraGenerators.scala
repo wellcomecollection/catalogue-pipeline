@@ -33,6 +33,9 @@ trait SierraGenerators extends RandomGenerators {
   def createSierraHoldingsNumber: SierraHoldingsNumber =
     SierraHoldingsNumber(createSierraRecordNumberString)
 
+  def createSierraOrderNumber: SierraOrderNumber =
+    SierraOrderNumber(createSierraRecordNumberString)
+
   protected def createTitleVarfield(
     title: String = s"title-${randomAlphanumeric()}"): String =
     s"""
@@ -106,6 +109,25 @@ trait SierraGenerators extends RandomGenerators {
     )
   }
 
+  def createSierraOrderRecordWith(
+    id: SierraOrderNumber = createSierraOrderNumber,
+    data: (SierraOrderNumber, Instant, List[SierraBibNumber]) => String =
+      defaultOrderData,
+    modifiedDate: Instant = Instant.now,
+    bibIds: List[SierraBibNumber] = List(),
+    unlinkedBibIds: List[SierraBibNumber] = List()
+  ): SierraOrderRecord = {
+    val recordData = data(id, modifiedDate, bibIds)
+
+    SierraOrderRecord(
+      id = id,
+      data = recordData,
+      modifiedDate = modifiedDate,
+      bibIds = bibIds,
+      unlinkedBibIds = unlinkedBibIds
+    )
+  }
+
   private def defaultItemData(id: SierraItemNumber,
                               modifiedDate: Instant,
                               bibIds: List[SierraBibNumber]): String =
@@ -128,13 +150,31 @@ trait SierraGenerators extends RandomGenerators {
        |}
        |""".stripMargin
 
+  private def defaultOrderData(id: SierraOrderNumber,
+                               modifiedDate: Instant,
+                               bibIds: List[SierraBibNumber]): String = {
+    val urls =
+      bibIds.map { id =>
+        s"https://libsys.wellcomelibrary.org/iii/sierra-api/v6/bibs/$id"
+      }
+
+    s"""
+       |{
+       |  "id": $id,
+       |  "updatedDate": "${modifiedDate.toString}",
+       |  "bibs": ${toJson(urls).get}
+       |}
+       |""".stripMargin
+  }
+
   def createSierraItemRecord: SierraItemRecord = createSierraItemRecordWith()
 
   def createSierraTransformableWith(
     sierraId: SierraBibNumber = createSierraBibNumber,
     maybeBibRecord: Option[SierraBibRecord] = Some(createSierraBibRecord),
-    itemRecords: List[SierraItemRecord] = List(),
-    holdingsRecords: List[SierraHoldingsRecord] = List()
+    itemRecords: Seq[SierraItemRecord] = List(),
+    holdingsRecords: Seq[SierraHoldingsRecord] = List(),
+    orderRecords: Seq[SierraOrderRecord] = List()
   ): SierraTransformable =
     SierraTransformable(
       sierraId = sierraId,
@@ -143,6 +183,9 @@ trait SierraGenerators extends RandomGenerators {
         record.id -> record
       }.toMap,
       holdingsRecords = holdingsRecords.map { record =>
+        record.id -> record
+      }.toMap,
+      orderRecords = orderRecords.map { record =>
         record.id -> record
       }.toMap
     )

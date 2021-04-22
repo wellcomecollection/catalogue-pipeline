@@ -23,7 +23,7 @@ class SierraTransformableTest
   it("allows looking up items by ID") {
     val itemRecords = (0 to 3).map { _ =>
       createSierraItemRecord
-    }.toList
+    }
     val transformable = createSierraTransformableWith(
       itemRecords = itemRecords
     )

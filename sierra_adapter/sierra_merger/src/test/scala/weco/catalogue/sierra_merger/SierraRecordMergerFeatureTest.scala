@@ -217,3 +217,24 @@ class SierraHoldingsRecordMergerFeatureTest
     : TransformableOps[SierraHoldingsRecord] =
     TransformableOps.holdingsTransformableOps
 }
+
+class SierraOrderRecordMergerFeatureTest
+    extends SierraRecordMergerFeatureTestCases[SierraOrderRecord]
+    with RecordMergerFixtures {
+  override def withWorker[R](queue: Queue,
+                             sourceVHS: SourceVHS[SierraTransformable])(
+    testWith: TestWith[(Worker[SierraOrderRecord, String], MemoryMessageSender),
+                       R]): R =
+    withRunningWorker[SierraOrderRecord, R](queue, sourceVHS) {
+      testWith
+    }
+
+  override def createRecordWith(
+    bibIds: List[SierraBibNumber]): SierraOrderRecord =
+    createSierraOrderRecordWith(bibIds = bibIds)
+
+  override implicit val encoder: Encoder[SierraOrderRecord] = deriveEncoder
+
+  override implicit val transformableOps: TransformableOps[SierraOrderRecord] =
+    TransformableOps.orderTransformableOps
+}

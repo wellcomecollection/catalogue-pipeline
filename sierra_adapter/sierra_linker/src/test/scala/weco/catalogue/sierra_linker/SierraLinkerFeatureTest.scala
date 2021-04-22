@@ -73,4 +73,31 @@ class SierraLinkerFeatureTest
       }
     }
   }
+
+  it("links order records") {
+    val messageSender = new MemoryMessageSender
+
+    val record = createSierraOrderRecordWith(
+      bibIds = List(createSierraBibNumber)
+    )
+
+    val expectedLink = Link(record)
+
+    val store = MemoryVersionedStore[SierraOrderNumber, Link](
+      initialEntries = Map.empty
+    )
+
+    withLocalSqsQueue() { queue =>
+      withOrderWorker(queue, store = store, messageSender = messageSender) {
+        _ =>
+          sendNotificationToSQS(queue, record)
+
+          eventually {
+            messageSender.getMessages[SierraOrderRecord] shouldBe Seq(record)
+
+            store.getLatest(record.id).value.identifiedT shouldBe expectedLink
+          }
+      }
+    }
+  }
 }
