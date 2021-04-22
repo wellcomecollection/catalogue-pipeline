@@ -1053,17 +1053,6 @@ class SierraTransformerTest
     }
   }
 
-  def defaultItemRecordData(id: SierraItemNumber,
-                            modifiedDate: Instant,
-                            bibIds: List[SierraBibNumber]) =
-    s"""
-      |{
-      |  "id": "$id",
-      |  "updatedDate": "${modifiedDate.toString}",
-      |  "bibIds": ${toJson(bibIds).get}
-      |}
-      |""".stripMargin
-
   private def transformDataToWork(
     id: SierraBibNumber,
     data: String,
