@@ -33,15 +33,18 @@ sierra_adapter:
         - id: bibs-merger
         - id: items-merger
         - id: holdings-merger
+        - id: orders-merger
     - id: sierra_linker
       services:
         - id: items-linker
         - id: holdings-linker
+        - id: orders-linker
     - id: sierra_reader
       services:
         - id: items-reader
         - id: bibs-reader
         - id: holdings-reader
+        - id: orders-reader
     - id: sierra_indexer
       services:
         - id: sierra-indexer
