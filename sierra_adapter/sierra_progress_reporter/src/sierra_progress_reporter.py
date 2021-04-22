@@ -137,7 +137,7 @@ def main(event=None, _ctxt=None):
     errors = []
     error_lines = []
 
-    for resource_type in ("bibs", "items"):
+    for resource_type in ("bibs", "items", "holdings", "orders"):
         try:
             process_report(
                 s3_client=s3_client, bucket=bucket, resource_type=resource_type
@@ -151,14 +151,7 @@ def main(event=None, _ctxt=None):
             errors.append(resource_type)
 
     if errors:
-        if errors == ["bibs"]:
-            message = "There are gaps in the bib data."
-        elif errors == ["items"]:
-            message = "There are gaps in the item data."
-        else:
-            message = "There are gaps in the bib and the item data."
-
-        error_lines.insert(0, message)
+        error_lines.insert(0, "There are gaps in the %s data." % "/".join(errors))
 
         error_lines.append(
             "You can fix this by running `$ python sierra_adapter/build_missing_windows.py` in the root of the catalogue repo."

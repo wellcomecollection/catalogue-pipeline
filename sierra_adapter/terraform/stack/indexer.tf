@@ -9,6 +9,7 @@ module "sierra_indexer" {
     module.bibs_merger.topic_arn,
     module.items_merger.topic_arn,
     module.holdings_merger.topic_arn,
+    module.orders_merger.topic_arn,
     var.reporting_reindex_topic_arn,
   ]
 

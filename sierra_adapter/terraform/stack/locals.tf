@@ -73,5 +73,23 @@ locals {
     "varFields",
   ])
 
+  # See https://techdocs.iii.com/sierraapi/Content/zReference/objects/orderObject.htm
+  sierra_orders_fields = join(",", [
+    "bibs",
+    "updatedDate",
+    "createdDate",
+    "deletedDate",
+    "deleted",
+    "suppressed",
+    "accountingUnit",
+    "estimatedPrice",
+    "vendorRecordCode",
+    "orderDate",
+    "chargedFunds",
+    "vendorTitles",
+    "fixedFields",
+    "varFields",
+  ])
+
   critical_slack_webhook = data.aws_ssm_parameter.critical_slack_webhook.value
 }

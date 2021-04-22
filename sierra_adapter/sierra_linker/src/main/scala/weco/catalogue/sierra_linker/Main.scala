@@ -23,6 +23,8 @@ import weco.catalogue.source_model.sierra.{
   SierraHoldingsRecord,
   SierraItemNumber,
   SierraItemRecord,
+  SierraOrderNumber,
+  SierraOrderRecord,
   SierraRecordTypes,
   TypedSierraRecordNumber
 }
@@ -45,6 +47,7 @@ object Main extends WellcomeTypesafeApp {
       case s: String if s == bibs.toString     => bibs
       case s: String if s == items.toString    => items
       case s: String if s == holdings.toString => holdings
+      case s: String if s == orders.toString   => orders
       case s: String =>
         throw new IllegalArgumentException(
           s"$s is not a valid Sierra resource type")
@@ -66,6 +69,14 @@ object Main extends WellcomeTypesafeApp {
           sqsStream = sqsStream,
           linkStore =
             createLinkStore[SierraHoldingsNumber, SierraHoldingsRecord](config),
+          messageSender = messageSender
+        )
+
+      case SierraRecordTypes.orders =>
+        new SierraLinkerWorker(
+          sqsStream = sqsStream,
+          linkStore =
+            createLinkStore[SierraOrderNumber, SierraOrderRecord](config),
           messageSender = messageSender
         )
 

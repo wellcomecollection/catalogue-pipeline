@@ -10,6 +10,11 @@ variable "interservice_security_group_id" {}
 variable "bibs_windows_topic_arns" {}
 variable "items_windows_topic_arns" {}
 variable "holdings_windows_topic_arns" {}
+
+variable "orders_windows_topic_arns" {
+  type = list(string)
+}
+
 variable "deployment_env" {}
 variable "shared_logging_secrets" {
   type = map(any)
