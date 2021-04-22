@@ -81,7 +81,7 @@ object SierraItemsOnOrder extends Logging {
       // We create an item with a message like "Awaiting cataloguing for Wellcome Collection"
       // We don't expose the received date publicly (in case an item has been in the queue
       // for a long time) -- but we do expect it to be there for these records.
-      case (Some(status), _, Some(_), copies) if status == "a" =>
+      case (Some(status), _, receivedDate @ Some(_), copies) if status == "a" =>
         Some(
           Item(
             title = None,
@@ -97,7 +97,7 @@ object SierraItemsOnOrder extends Logging {
       // We're deliberately quite conservative here -- if we're not sure what an order
       // means, we ignore it.  I don't know how many orders this will affect, and how many
       // will be ignored because they're suppressed/there are other items.
-      case (Some(status), _, None, _) if status == "a" =>
+      case (Some(status), _, receivedDate @ None, _) if status == "a" =>
         warn(s"${id.withCheckDigit}: order has STATUS 'a' (fully paid) but no RDATE.  Where is this item?")
         None
 
