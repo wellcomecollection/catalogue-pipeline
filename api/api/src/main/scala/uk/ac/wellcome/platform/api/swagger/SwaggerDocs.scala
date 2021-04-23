@@ -227,7 +227,12 @@ trait MultipleImagesSwagger {
             "cc-by-nc-nd",
             "cc-0",
             "pdm",
-            "copyright-not-cleared")),
+            "cc-by-nd",
+            "cc-by-sa",
+            "cc-by-nc-sa",
+            "ogl",
+            "opl",
+            "inc")),
         required = false
       ),
       new Parameter(
@@ -497,7 +502,12 @@ trait MultipleWorksSwagger {
             "cc-by-nc-nd",
             "cc-0",
             "pdm",
-            "copyright-not-cleared")),
+            "cc-by-nd",
+            "cc-by-sa",
+            "cc-by-nc-sa",
+            "ogl",
+            "opl",
+            "inc")),
         required = false
       ),
       new Parameter(
