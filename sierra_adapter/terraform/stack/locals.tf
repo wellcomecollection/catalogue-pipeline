@@ -7,17 +7,23 @@ locals {
 
   sierra_api_url = "https://libsys.wellcomelibrary.org/iii/sierra-api/v5"
 
+  # See https://sandbox.iii.com/iii/sierra-api/swagger/index.html
+
   sierra_items_fields = join(",", [
     "updatedDate",
     "createdDate",
     "deletedDate",
     "deleted",
+    "suppressed",
     "bibIds",
     "location",
     "status",
     "barcode",
     "callNumber",
     "itemType",
+    "transitInfo",
+    "copyNo",
+    "holdCount",
     "fixedFields",
     "varFields"
   ])
@@ -45,7 +51,6 @@ locals {
     "varFields"
   ])
 
-  # See https://techdocs.iii.com/sierraapi/Content/zReference/objects/holdingsObjectDescription.htm
   sierra_holdings_fields = join(",", [
     "bibIds",
     "itemIds",
