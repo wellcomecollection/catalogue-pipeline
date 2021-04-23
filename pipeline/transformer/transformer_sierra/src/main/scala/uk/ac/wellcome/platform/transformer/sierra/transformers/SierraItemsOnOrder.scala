@@ -49,6 +49,7 @@ object SierraItemsOnOrder extends Logging {
         }
         .sortBy { case (id, _) => id.withoutCheckDigit }
         .flatMap { case (_, orderData) => createItem(id, orderData) }
+        .distinct
     } else {
       List()
     }

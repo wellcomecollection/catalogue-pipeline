@@ -63,6 +63,40 @@ class SierraItemsOnOrderTest
       )
     }
 
+    it("deduplicates the items it creates") {
+      // Because we don't expose the number of copies in the API, duplicate
+      // items are less useful.
+      val orderData = List(
+        createSierraOrderDataWith(
+          fixedFields = Map(
+            "5" -> FixedField(label = "COPIES", value = "1"),
+            "13" -> FixedField(label = "ODATE", value = "2001-01-01"),
+            "20" -> FixedField(label = "STATUS", value = "o")
+          )
+        ),
+        createSierraOrderDataWith(
+          fixedFields = Map(
+            "5" -> FixedField(label = "COPIES", value = "1"),
+            "13" -> FixedField(label = "ODATE", value = "2001-01-01"),
+            "20" -> FixedField(label = "STATUS", value = "o")
+          )
+        )
+      )
+
+      getOrders(hasItems = false, orderData = orderData) shouldBe List(
+        Item(
+          id = Unidentifiable,
+          title = None,
+          locations = List(
+            PhysicalLocation(
+              locationType = LocationType.OnOrder,
+              label = "Ordered for Wellcome Collection on 1 January 2001"
+            )
+          )
+        )
+      )
+    }
+
     it("if the number of copies is missing") {
       val orderData = List(
         createSierraOrderDataWith(
@@ -258,16 +292,6 @@ class SierraItemsOnOrderTest
       )
 
       getOrders(hasItems = false, orderData = orderData) shouldBe List(
-        Item(
-          id = Unidentifiable,
-          title = None,
-          locations = List(
-            PhysicalLocation(
-              locationType = LocationType.OnOrder,
-              label = "Awaiting cataloguing for Wellcome Collection"
-            )
-          )
-        ),
         Item(
           id = Unidentifiable,
           title = None,
