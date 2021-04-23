@@ -63,6 +63,73 @@ class SierraItemsOnOrderTest
       )
     }
 
+    it("if there are orders with status 'a' and no RDATE") {
+      val orderData = List(
+        createSierraOrderDataWith(
+          fixedFields = Map(
+            "5" -> FixedField(label = "COPIES", value = "1"),
+            "13" -> FixedField(label = "ODATE", value = "2001-01-01"),
+            "20" -> FixedField(label = "STATUS", value = "a")
+          )
+        ),
+        createSierraOrderDataWith(
+          fixedFields = Map(
+            "5" -> FixedField(label = "COPIES", value = "2"),
+            "13" -> FixedField(label = "ODATE", value = "2002-02-02"),
+            "20" -> FixedField(label = "STATUS", value = "a")
+          )
+        )
+      )
+
+      getOrders(hasItems = false, orderData = orderData) shouldBe List(
+        Item(
+          id = Unidentifiable,
+          title = None,
+          locations = List(
+            PhysicalLocation(
+              locationType = LocationType.OnOrder,
+              label = "Ordered for Wellcome Collection on 1 January 2001"
+            )
+          )
+        ),
+        Item(
+          id = Unidentifiable,
+          title = None,
+          locations = List(
+            PhysicalLocation(
+              locationType = LocationType.OnOrder,
+              label = "Ordered for Wellcome Collection on 2 February 2002"
+            )
+          )
+        )
+      )
+    }
+
+    it("if there are orders with status 'c' and no RDATE") {
+      val orderData = List(
+        createSierraOrderDataWith(
+          fixedFields = Map(
+            "5" -> FixedField(label = "COPIES", value = "1"),
+            "13" -> FixedField(label = "ODATE", value = "2001-01-01"),
+            "20" -> FixedField(label = "STATUS", value = "c")
+          )
+        )
+      )
+
+      getOrders(hasItems = false, orderData = orderData) shouldBe List(
+        Item(
+          id = Unidentifiable,
+          title = None,
+          locations = List(
+            PhysicalLocation(
+              locationType = LocationType.OnOrder,
+              label = "Ordered for Wellcome Collection on 1 January 2001"
+            )
+          )
+        )
+      )
+    }
+
     it("deduplicates the items it creates") {
       // Because we don't expose the number of copies in the API, duplicate
       // items are less useful.
@@ -273,7 +340,7 @@ class SierraItemsOnOrderTest
   }
 
   describe("returns 'awaiting cataloguing' items") {
-    it("if there are orders with status 'a'") {
+    it("if there are orders with status 'a' and an RDATE") {
       val orderData = List(
         createSierraOrderDataWith(
           fixedFields = Map(
@@ -352,26 +419,6 @@ class SierraItemsOnOrderTest
           )
         )
       )
-    }
-
-    it("unless the order has no RDATE") {
-      val orderData = List(
-        createSierraOrderDataWith(
-          fixedFields = Map(
-            "5" -> FixedField(label = "COPIES", value = "1"),
-            "20" -> FixedField(label = "STATUS", value = "a")
-          )
-        )
-      )
-
-      getOrders(hasItems = false, orderData = orderData) shouldBe empty
-
-      val orderWithRdate = orderData.map { od =>
-        od.copy(
-          fixedFields = od.fixedFields ++ Map(
-            "17" -> FixedField(label = "RDATE", value = "2008-08-08")))
-      }
-      getOrders(hasItems = false, orderData = orderWithRdate) should not be empty
     }
 
     it("unless the order is suppressed") {

@@ -60,9 +60,12 @@ object SierraItemsOnOrder extends Logging {
     (getStatus(order), getOrderDate(order), getReceivedDate(order)) match {
 
       // status 'o' = "On order"
+      // status 'c' = "Serial on order"
       //
       // We create an item with a message something like "Ordered for Wellcome Collection on 1 Jan 2001"
-      case (Some(status), orderedDate, _) if status == "o" =>
+      case (Some(status), orderedDate, receivedDate)
+          if (status == "o" || status == "c" || status == "a") &&
+            receivedDate.isEmpty=>
         Some(
           Item(
             title = None,
