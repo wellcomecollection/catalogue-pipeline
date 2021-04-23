@@ -135,16 +135,22 @@ class SierraItemsTest
     }
   }
 
-  it("removes items with deleted=true") {
-    val item1 = createSierraItemDataWith(deleted = true)
-    val item2 = createSierraItemDataWith(deleted = false)
+  it("skips deleted items") {
+    val itemDataMap = (1 to 3)
+      .map { _ => createSierraItemNumber -> createSierraItemData }
+      .toMap
 
-    val itemDataMap = Map(
-      createSierraItemNumber -> item1,
-      createSierraItemNumber -> item2
-    )
+    // First we transform the items without deleting them, to
+    // check they're not being skipped for a reason unrelated
+    // to deleted=true
+    getTransformedItems(itemDataMap = itemDataMap) should have size itemDataMap.size
 
-    getTransformedItems(itemDataMap = itemDataMap) should have size 1
+    // Then we mark them as deleted, and check they're all ignored.
+    val deletedItemDataMap =
+      itemDataMap
+        .map { case (id, itemData) => id -> itemData.copy(deleted = true) }
+
+    getTransformedItems(itemDataMap = deletedItemDataMap) shouldBe empty
   }
 
   it("ignores all digital locations - 'dlnk', 'digi'") {
