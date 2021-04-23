@@ -3,9 +3,6 @@ ACCOUNT_ID = 760097843905
 include makefiles/functions.Makefile
 include makefiles/formatting.Makefile
 
-include api/Makefile
-include api/stacks/Makefile
-include api/snapshots/Makefile
 include common/Makefile
 include pipeline/Makefile
 include reindexer/Makefile
@@ -13,8 +10,7 @@ include sierra_adapter/Makefile
 include mets_adapter/Makefile
 include calm_adapter/Makefile
 
-lambda-test: snapshot_scheduler-test \
-			 s3_demultiplexer-test \
+lambda-test: s3_demultiplexer-test \
 			 sierra_progress_reporter-test \
 			 sierra_window_generator-test
 

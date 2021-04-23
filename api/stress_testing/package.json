@@ -1,8 +1,0 @@
-{
-  "scripts": {
-    "start": "artillery run normal_usage.yml"
-  },
-  "dependencies": {
-    "artillery": "^1.6.0-29"
-  }
-}

@@ -1,7 +1,0 @@
-boto3
-click
-elasticsearch
-httpx
-humanize
-jinja2
-tqdm
