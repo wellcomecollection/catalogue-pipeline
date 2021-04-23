@@ -1,6 +1,6 @@
 {
   "id" : "display",
-  "folder" : "common/display",
+  "folder" : "api/common/display",
   "dependencyIds" : [
   ]
 }
