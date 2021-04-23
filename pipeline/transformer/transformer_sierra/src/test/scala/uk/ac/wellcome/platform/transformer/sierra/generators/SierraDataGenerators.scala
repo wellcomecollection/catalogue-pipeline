@@ -25,13 +25,11 @@ trait SierraDataGenerators extends IdentifiersGenerators with SierraGenerators {
   def createSierraBibData: SierraBibData = createSierraBibDataWith()
 
   def createSierraItemDataWith(
-    deleted: Boolean = false,
     location: Option[SierraSourceLocation] = None,
     callNumber: Option[String] = None,
     varFields: List[VarField] = Nil
   ): SierraItemData =
     SierraItemData(
-      deleted = deleted,
       location = location,
       callNumber = callNumber,
       varFields = varFields
@@ -40,13 +38,9 @@ trait SierraDataGenerators extends IdentifiersGenerators with SierraGenerators {
   def createSierraItemData: SierraItemData = createSierraItemDataWith()
 
   def createSierraOrderDataWith(
-    suppressed: Boolean = false,
-    deleted: Boolean = false,
     fixedFields: Map[String, FixedField] = Map()
   ): SierraOrderData =
     SierraOrderData(
-      deleted = deleted,
-      suppressed = suppressed,
       fixedFields = fixedFields
     )
 
