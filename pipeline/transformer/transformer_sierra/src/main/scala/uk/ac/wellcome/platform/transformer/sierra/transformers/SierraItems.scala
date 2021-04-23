@@ -34,7 +34,9 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
             itemDataMap: Map[SierraItemNumber, SierraItemData]) = {
     val visibleItems =
       itemDataMap
-        .filterNot { case (_, itemData) => itemData.deleted || itemData.suppressed }
+        .filterNot {
+          case (_, itemData) => itemData.deleted || itemData.suppressed
+        }
 
     getPhysicalItems(bibId, visibleItems, bibData)
       .sortBy { item =>

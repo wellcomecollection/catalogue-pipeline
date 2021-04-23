@@ -136,9 +136,9 @@ class SierraItemsTest
   }
 
   it("skips deleted items") {
-    val itemDataMap = (1 to 3)
-      .map { _ => createSierraItemNumber -> createSierraItemData }
-      .toMap
+    val itemDataMap = (1 to 3).map { _ =>
+      createSierraItemNumber -> createSierraItemData
+    }.toMap
 
     // First we transform the items without deleting them, to
     // check they're not being skipped for a reason unrelated
@@ -154,9 +154,9 @@ class SierraItemsTest
   }
 
   it("skips suppressed items") {
-    val itemDataMap = (1 to 3)
-      .map { _ => createSierraItemNumber -> createSierraItemData }
-      .toMap
+    val itemDataMap = (1 to 3).map { _ =>
+      createSierraItemNumber -> createSierraItemData
+    }.toMap
 
     // First we transform the items without suppressing them, to
     // check they're not being skipped for a reason unrelated
