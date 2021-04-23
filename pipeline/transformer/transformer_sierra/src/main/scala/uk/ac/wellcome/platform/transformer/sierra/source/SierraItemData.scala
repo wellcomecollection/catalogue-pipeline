@@ -4,6 +4,7 @@ import uk.ac.wellcome.platform.transformer.sierra.source.sierra.SierraSourceLoca
 
 case class SierraItemData(
   deleted: Boolean = false,
+  suppressed: Boolean = false,
   location: Option[SierraSourceLocation] = None,
   callNumber: Option[String] = None,
   fixedFields: Map[String, FixedField] = Map(),
