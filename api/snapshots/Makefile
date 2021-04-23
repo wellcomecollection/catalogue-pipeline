@@ -1,7 +1,7 @@
 ROOT = $(shell git rev-parse --show-toplevel)
 include $(ROOT)/makefiles/functions.Makefile
 
-STACK_ROOT  = snapshots
+STACK_ROOT  = api/snapshots
 
 PROJECT_ID = catalogue_api
 

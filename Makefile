@@ -5,11 +5,11 @@ include makefiles/formatting.Makefile
 
 include api/Makefile
 include api/stacks/Makefile
+include api/snapshots/Makefile
 include common/Makefile
 include pipeline/Makefile
 include reindexer/Makefile
 include sierra_adapter/Makefile
-include snapshots/Makefile
 include mets_adapter/Makefile
 include calm_adapter/Makefile
 

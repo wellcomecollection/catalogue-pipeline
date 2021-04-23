@@ -41,13 +41,6 @@ lazy val internal_model = setupProject(
   .enablePlugins(BuildInfoPlugin).settings(
   buildInfoKeys := Seq[BuildInfoKey](name, version))
 
-
-lazy val display = setupProject(
-  project,
-  "common/display",
-  externalDependencies = CatalogueDependencies.displayModelDependencies)
-
-
 lazy val flows = setupProject(
   project,
   "common/flows",
@@ -79,34 +72,6 @@ lazy val pipeline_storage_typesafe = setupProject(
   localDependencies = Seq(pipeline_storage),
   externalDependencies =
     CatalogueDependencies.pipelineStorageTypesafeDependencies
-)
-
-lazy val api = setupProject(
-  project,
-  "api/api",
-  localDependencies = Seq(display),
-  externalDependencies = CatalogueDependencies.apiDependencies
-)
-
-lazy val stacks_common = setupProject(
-  project,
-  "api/stacks/common",
-  localDependencies = Seq(display),
-  externalDependencies = CatalogueDependencies.stacksDependencies
-)
-
-lazy val items_api = setupProject(
-  project,
-  "api/stacks/items_api",
-  localDependencies = Seq(stacks_common),
-  externalDependencies = CatalogueDependencies.stacksDependencies
-)
-
-lazy val requests_api = setupProject(
-  project,
-  "api/stacks/requests_api",
-  localDependencies = Seq(stacks_common),
-  externalDependencies = CatalogueDependencies.stacksDependencies
 )
 
 lazy val id_minter = setupProject(
@@ -282,11 +247,44 @@ lazy val inference_manager = setupProject(
   externalDependencies = CatalogueDependencies.inferenceManagerDependencies
 )
 
-// Snapshots
+// API Projects
+
+lazy val display = setupProject(
+  project,
+  "api/common/display",
+  externalDependencies = CatalogueDependencies.displayModelDependencies)
+
+lazy val api = setupProject(
+  project,
+  "api/api",
+  localDependencies = Seq(display),
+  externalDependencies = CatalogueDependencies.apiDependencies
+)
+
+lazy val stacks_common = setupProject(
+  project,
+  "api/stacks/common",
+  localDependencies = Seq(display),
+  externalDependencies = CatalogueDependencies.stacksDependencies
+)
+
+lazy val items_api = setupProject(
+  project,
+  "api/stacks/items_api",
+  localDependencies = Seq(stacks_common),
+  externalDependencies = CatalogueDependencies.stacksDependencies
+)
+
+lazy val requests_api = setupProject(
+  project,
+  "api/stacks/requests_api",
+  localDependencies = Seq(stacks_common),
+  externalDependencies = CatalogueDependencies.stacksDependencies
+)
 
 lazy val snapshot_generator = setupProject(
   project,
-  "snapshots/snapshot_generator",
+  "api/snapshots/snapshot_generator",
   localDependencies = Seq(display),
   externalDependencies = CatalogueDependencies.snapshotGeneratorDependencies
 )
