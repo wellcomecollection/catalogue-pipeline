@@ -65,7 +65,7 @@ object SierraItemsOnOrder extends Logging {
       // We create an item with a message something like "Ordered for Wellcome Collection on 1 Jan 2001"
       case (Some(status), orderedDate, receivedDate)
           if (status == "o" || status == "c" || status == "a") &&
-            receivedDate.isEmpty=>
+            receivedDate.isEmpty =>
         Some(
           Item(
             title = None,

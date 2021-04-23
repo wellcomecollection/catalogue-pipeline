@@ -40,11 +40,12 @@ class AvailabilityTest
       val work = denormalisedWork()
         .items(
           List(
-            createIdentifiedItemWith(locations = List(
-              createPhysicalLocationWith(
-                locationType = LocationType.OnOrder
-              )
-            ))
+            createIdentifiedItemWith(
+              locations = List(
+                createPhysicalLocationWith(
+                  locationType = LocationType.OnOrder
+                )
+              ))
           )
         )
       val workAvailabilities = Availabilities.forWorkData(work.data)
@@ -56,14 +57,15 @@ class AvailabilityTest
       val work = denormalisedWork()
         .items(
           List(
-            createIdentifiedItemWith(locations = List(
-              createPhysicalLocationWith(
-                locationType = LocationType.OnOrder
-              ),
-              createPhysicalLocationWith(
-                locationType = LocationType.OpenShelves
-              )
-            ))
+            createIdentifiedItemWith(
+              locations = List(
+                createPhysicalLocationWith(
+                  locationType = LocationType.OnOrder
+                ),
+                createPhysicalLocationWith(
+                  locationType = LocationType.OpenShelves
+                )
+              ))
           )
         )
       val workAvailabilities = Availabilities.forWorkData(work.data)
