@@ -31,14 +31,19 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
     */
   def apply(bibId: SierraBibNumber,
             bibData: SierraBibData,
-            itemDataMap: Map[SierraItemNumber, SierraItemData]) =
-    getPhysicalItems(bibId, itemDataMap, bibData)
+            itemDataMap: Map[SierraItemNumber, SierraItemData]) = {
+    val visibleItems =
+      itemDataMap
+        .filterNot { case (_, itemData) => itemData.deleted || itemData.suppressed }
+
+    getPhysicalItems(bibId, visibleItems, bibData)
       .sortBy { item =>
         item.id match {
           case IdState.Unidentifiable          => None
           case IdState.Identifiable(_, ids, _) => ids.headOption.map(_.value)
         }
       }
+  }
 
   private def getPhysicalItems(
     bibId: SierraBibNumber,
@@ -56,9 +61,8 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
     // non-above locations are unambiguous, we use them instead.
     val otherLocations =
       sierraItemDataMap
-        .filterNot { case (_, itemData) => itemData.deleted }
         .collect {
-          case (id, SierraItemData(_, Some(location), _, _, _)) =>
+          case (id, SierraItemData(_, _, Some(location), _, _, _)) =>
             id -> location
         }
         .filterNot {

@@ -153,6 +153,24 @@ class SierraItemsTest
     getTransformedItems(itemDataMap = deletedItemDataMap) shouldBe empty
   }
 
+  it("skips suppressed items") {
+    val itemDataMap = (1 to 3)
+      .map { _ => createSierraItemNumber -> createSierraItemData }
+      .toMap
+
+    // First we transform the items without suppressing them, to
+    // check they're not being skipped for a reason unrelated
+    // to suppressing=true
+    getTransformedItems(itemDataMap = itemDataMap) should have size itemDataMap.size
+
+    // Then we mark them as deleted, and check they're all ignored.
+    val suppressedItemDataMap =
+      itemDataMap
+        .map { case (id, itemData) => id -> itemData.copy(suppressed = true) }
+
+    getTransformedItems(itemDataMap = suppressedItemDataMap) shouldBe empty
+  }
+
   it("ignores all digital locations - 'dlnk', 'digi'") {
     val bibData = createSierraBibDataWith(
       locations = Some(
