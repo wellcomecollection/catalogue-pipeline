@@ -15,6 +15,7 @@ steps:
   - command: .buildkite/scripts/run_job.py calm_api_client
     label: "Calm API client"
   - wait
+  - command: .buildkite/scripts/run_job.py reindex_worker
     label: "reindex worker"
   - command: .buildkite/scripts/run_job.py ingestor_works
     label: "ingestor (works)"
