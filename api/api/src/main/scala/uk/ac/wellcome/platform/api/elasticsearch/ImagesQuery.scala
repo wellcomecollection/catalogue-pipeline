@@ -165,7 +165,7 @@ case object ImagesMultiMatcher {
                         s"data.title.${language}",
                         s"data.notes.${language}",
                         s"data.lettering.${language}"
-                      )
+                    )
                   )
               )
             )
