@@ -6,7 +6,11 @@ import io.circe.Json
 import org.scalatest.prop.TableDrivenPropertyChecks
 import uk.ac.wellcome.display.models.{SingleImageIncludes, WorksIncludes}
 import uk.ac.wellcome.platform.api.fixtures.ReflectionHelpers
-import uk.ac.wellcome.platform.api.models.{DisplayWorkAggregations, SearchQueryType, WorkAggregations}
+import uk.ac.wellcome.platform.api.models.{
+  DisplayWorkAggregations,
+  SearchQueryType,
+  WorkAggregations
+}
 import uk.ac.wellcome.platform.api.rest._
 import uk.ac.wellcome.platform.api.works.ApiWorksTestBase
 import weco.catalogue.internal_model.locations.License
@@ -174,7 +178,9 @@ class ApiSwaggerTest
   describe("includes all the options in enumerable filters") {
     describe("images endpoint") {
       it("locations.license") {
-        val actualValues = getParameterEnumValues(multipleImagesEndpoint, name = "locations.license")
+        val actualValues = getParameterEnumValues(
+          multipleImagesEndpoint,
+          name = "locations.license")
         val expectedValues = License.values.map { _.id }
 
         actualValues should contain theSameElementsAs expectedValues
@@ -191,7 +197,9 @@ class ApiSwaggerTest
       }
 
       it("items.locations.license") {
-        val actualValues = getParameterEnumValues(multipleWorksEndpoint, name = "items.locations.license")
+        val actualValues = getParameterEnumValues(
+          multipleWorksEndpoint,
+          name = "items.locations.license")
         val expectedValues = License.values.map { _.id }
 
         actualValues should contain theSameElementsAs expectedValues
@@ -201,7 +209,9 @@ class ApiSwaggerTest
     def getParameterEnumValues(endpoint: String, name: String): Seq[String] = {
       val lookup =
         getParameters(endpoint)
-          .map { json => getKey(json, "name") -> json }
+          .map { json =>
+            getKey(json, "name") -> json
+          }
           .collect { case (Some(key), json) => key -> json }
           .map { case (key, json) => key.asString.get -> json }
           .toMap
