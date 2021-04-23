@@ -5,6 +5,7 @@ import io.circe.{Decoder, Encoder}
 import weco.catalogue.internal_model.locations.{
   DigitalLocation,
   Location,
+  LocationType,
   PhysicalLocation
 }
 
@@ -46,7 +47,7 @@ object Availabilities {
         data.holdings.flatMap { _.location }
 
     Set(
-      when(locations.exists(_.isPhysicalLocation)) {
+      when(locations.exists(_.isAvailableInLibrary)) {
         Availability.InLibrary
       },
       when(locations.exists(_.isAvailableOnline)) {
@@ -56,8 +57,19 @@ object Availabilities {
   }
 
   private implicit class LocationOps(loc: Location) {
-    def isPhysicalLocation: Boolean =
-      loc.isInstanceOf[PhysicalLocation]
+    def isAvailableInLibrary: Boolean =
+      loc match {
+        case physicalLoc: PhysicalLocation =>
+          // The availability filter is meant to show people things they
+          // can actually see, so we don't include items that have been ordered
+          // but aren't available to view yet.
+          physicalLoc.locationType match {
+            case LocationType.OnOrder => false
+            case _                    => true
+          }
+
+        case _ => false
+      }
 
     def isAvailableOnline: Boolean =
       loc match {

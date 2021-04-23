@@ -3,7 +3,7 @@ package weco.catalogue.internal_model.work
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.generators.{ItemsGenerators, WorkGenerators}
-import weco.catalogue.internal_model.locations.AccessStatus
+import weco.catalogue.internal_model.locations.{AccessStatus, LocationType}
 
 class AvailabilityTest
     extends AnyFunSpec
@@ -31,6 +31,41 @@ class AvailabilityTest
     it(
       "adds Availability.InLibrary if there is an item with a physical location") {
       val work = denormalisedWork().items(List(createIdentifiedPhysicalItem))
+      val workAvailabilities = Availabilities.forWorkData(work.data)
+
+      workAvailabilities should contain only Availability.InLibrary
+    }
+
+    it("does not add Availability.InLibrary if the only location is OnOrder") {
+      val work = denormalisedWork()
+        .items(
+          List(
+            createIdentifiedItemWith(locations = List(
+              createPhysicalLocationWith(
+                locationType = LocationType.OnOrder
+              )
+            ))
+          )
+        )
+      val workAvailabilities = Availabilities.forWorkData(work.data)
+
+      workAvailabilities shouldBe empty
+    }
+
+    it("adds Availability.InLibrary if there are locations other than OnOrder") {
+      val work = denormalisedWork()
+        .items(
+          List(
+            createIdentifiedItemWith(locations = List(
+              createPhysicalLocationWith(
+                locationType = LocationType.OnOrder
+              ),
+              createPhysicalLocationWith(
+                locationType = LocationType.OpenShelves
+              )
+            ))
+          )
+        )
       val workAvailabilities = Availabilities.forWorkData(work.data)
 
       workAvailabilities should contain only Availability.InLibrary
