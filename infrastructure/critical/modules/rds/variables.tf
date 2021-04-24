@@ -6,10 +6,6 @@ variable "username" {}
 
 variable "password" {}
 
-variable "vpc_security_group_ids" {
-  type = list(string)
-}
-
 variable "db_security_group_id" {
   type = string
 }

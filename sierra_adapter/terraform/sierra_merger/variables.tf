@@ -17,7 +17,6 @@ variable "vhs_bucket_name" {
 variable "updates_topic_arn" {}
 variable "cluster_name" {}
 variable "cluster_arn" {}
-variable "vpc_id" {}
 
 variable "container_image" {}
 

@@ -10,7 +10,6 @@ variable "container_image" {}
 
 variable "cluster_name" {}
 variable "cluster_arn" {}
-variable "vpc_id" {}
 
 variable "dlq_alarm_arn" {}
 variable "lambda_error_alarm_arn" {}
