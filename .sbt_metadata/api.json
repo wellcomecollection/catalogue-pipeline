@@ -1,7 +1,0 @@
-{
-  "id" : "api",
-  "folder" : "api/api",
-  "dependencyIds" : [
-    "display"
-  ]
-}

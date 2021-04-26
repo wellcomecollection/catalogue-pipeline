@@ -1,7 +1,0 @@
-{
-  "id" : "stacks_common",
-  "folder" : "api/stacks/common",
-  "dependencyIds" : [
-    "display"
-  ]
-}

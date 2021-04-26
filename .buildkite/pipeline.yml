@@ -62,6 +62,9 @@ steps:
   - command: .buildkite/scripts/run_job.py palette_inferrer --changes-in pipeline/inferrer/palette_inferrer
     label: "palette inferrer"
   - wait
+  - command: .buildkite/scripts/tag_commit_as_latest.py
+    label: "tag commit as latest"
+  - wait
   - label: publish internal model
     if: build.branch == "master"
     env:
