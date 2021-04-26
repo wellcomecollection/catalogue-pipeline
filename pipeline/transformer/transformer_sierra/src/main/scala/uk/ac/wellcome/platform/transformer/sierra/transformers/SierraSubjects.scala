@@ -24,7 +24,8 @@ object SierraSubjects extends SierraIdentifiedDataTransformer {
     SierraBrandNameSubjects
   )
 
-  def apply(bibId: SierraBibNumber, bibData: SierraBibData): List[Subject[IdState.Unminted]] =
+  def apply(bibId: SierraBibNumber,
+            bibData: SierraBibData): List[Subject[IdState.Unminted]] =
     subjectsTransformers
       .flatMap(transform => transform(bibId, bibData))
       .distinct

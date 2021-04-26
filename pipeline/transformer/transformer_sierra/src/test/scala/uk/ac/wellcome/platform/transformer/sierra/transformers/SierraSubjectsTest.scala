@@ -9,7 +9,10 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
 }
 import weco.catalogue.internal_model.work.{Concept, Subject}
 
-class SierraSubjectsTest extends AnyFunSpec with Matchers with SierraDataGenerators {
+class SierraSubjectsTest
+    extends AnyFunSpec
+    with Matchers
+    with SierraDataGenerators {
   it("deduplicates subjects") {
     // This is based on b2506728x.  The different second indicators
     // tell us these are MESH/LCSH concepts, but because we don't expose
