@@ -19,7 +19,7 @@ The catalogue consists of multiple sources including:
 As and when these sources are made available digitally, we will consume
 them via [our pipeline](./pipeline), unify them into a
 [single model](./common/internal_model) and make them discoverable via
-our [API](./api).
+our [API](https://github.com/wellcomecollection/catalogue-api).
 
 **Interested in how we make these services?**
 
@@ -44,12 +44,15 @@ works?**
 ## Architecture
 
 The catalogue consists of three main parts with supporting services.
+
 These are:
 
-* [Sierra adapter](sierra_adapter.md): Allowing us to store data from
-  Sierra that is retrievable performantly and at scale.
-* [Pipeline](pipeline.md): Taking adapter data and putting it into our query index, Elasticsearch
-* [API](api/): Serving the data from Elastic search to clients via HTTP 
+* Adapters: Syncing data from multiple external sources, enabling retrieving data performantly and at scale:
+  - [Sierra adapter](sierra_adapter/README.md): [Sierra](https://www.iii.com/products/sierra-ils/) contains data on things in the library
+  - [Calm adapter](calm_adapter/README.md): [Calm](https://www.axiell.com/uk/solutions/product/calm/) contains data on things in the archive
+  - [METS adapter](mets_adapter/README.md): [METS](http://www.loc.gov/standards/mets/) data on digital assets from our workflow & archival storage systems. 
+* [Pipeline](pipeline.md): Taking adapter data and putting it into our query index. We use [Elasticsearch](https://www.elastic.co/elasticsearch/) as our underlying search engine.
+* [API](https://github.com/wellcomecollection/catalogue-api/blob/main/README.md): The public APIs to query our catalogue data. The API services are stored in a different GitHub repository: https://github.com/wellcomecollection/catalogue-api
 
 
 ## Dependencies
@@ -78,17 +81,10 @@ These are:
   docker login --username AWS --password-stdin 760097843905.dkr.ecr.eu-west-1.amazonaws.com
   ```
 
+
 ## Deploying
 
 We deploy ECS catalogue services using the [weco-deploy](https://github.com/wellcomecollection/weco-deploy) tool.
-
-The [current latest default branch](https://buildkite.com/wellcomecollection/catalogue) build deploys to staging automatically.
-
-### Deploying to production
-
-After automated deployment to the staging environment, we run [integration tests](https://buildkite.com/wellcomecollection/integration) against the staging API and front-end.
-
-**When deploying a release from staging to production you should check these tests pass.**
 
 
 ## Things you might want to do
