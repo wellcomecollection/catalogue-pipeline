@@ -8,7 +8,6 @@ variable "demultiplexer_topic_arn" {}
 
 variable "cluster_name" {}
 variable "cluster_arn" {}
-variable "vpc_id" {}
 
 variable "dlq_alarm_arn" {}
 

@@ -15,7 +15,6 @@ module "sierra_indexer" {
 
   cluster_name = aws_ecs_cluster.cluster.name
   cluster_arn  = aws_ecs_cluster.cluster.arn
-  vpc_id       = var.vpc_id
 
   dlq_alarm_arn          = var.dlq_alarm_arn
   lambda_error_alarm_arn = var.lambda_error_alarm_arn
