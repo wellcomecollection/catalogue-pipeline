@@ -89,7 +89,6 @@ object ExternalDependencies {
     val apacheCommons = "1.9"
     val circe = "0.13.0"
     val fastparse = "2.3.0"
-    val swagger = "2.0.10"
     val mockito = "1.9.5"
     val scalatest = "3.2.3"
     val scalatestplus = "3.1.2.0"
@@ -97,12 +96,12 @@ object ExternalDependencies {
     val scalacheckShapeless = "1.1.6"
     val scalacsv = "1.3.5"
     val scalaGraph = "1.12.5"
-    val apm = "1.22.0"
     val enumeratum = "1.6.1"
     val enumeratumScalacheck = "1.6.1"
     val jsoup = "1.13.1"
     val scalaJHttp = "2.3.0"
   }
+
   val enumeratumDependencies = Seq(
     "com.beachape" %% "enumeratum" % versions.enumeratum,
     "com.beachape" %% "enumeratum-scalacheck" % versions.enumeratumScalacheck % "test"
@@ -110,11 +109,6 @@ object ExternalDependencies {
 
   val scribeJavaDependencies = Seq(
     "com.github.dakatsuka" %% "akka-http-oauth2-client" % "0.2.0")
-
-  val apmDependencies = Seq(
-    "co.elastic.apm" % "apm-agent-attach" % versions.apm,
-    "co.elastic.apm" % "apm-agent-api" % versions.apm
-  )
 
   val akkaHttpDependencies = Seq(
     "com.typesafe.akka" %% "akka-testkit" % versions.akka % "test",
@@ -166,23 +160,8 @@ object ExternalDependencies {
     "org.scalatest" %% "scalatest" % versions.scalatest % "test"
   )
 
-  val swaggerDependencies = Seq(
-    "io.swagger.core.v3" % "swagger-core" % versions.swagger,
-    "io.swagger.core.v3" % "swagger-annotations" % versions.swagger,
-    "io.swagger.core.v3" % "swagger-models" % versions.swagger,
-    "io.swagger.core.v3" % "swagger-integration" % versions.swagger,
-    "io.swagger.core.v3" % "swagger-jaxrs2" % versions.swagger,
-    "javax.ws.rs" % "javax.ws.rs-api" % "2.0.1",
-    "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.8.8"
-  )
-
   val parseDependencies = Seq(
     "com.lihaoyi" %% "fastparse" % versions.fastparse
-  )
-
-  val javaxDependencies = Seq(
-    "javax.xml.bind" % "jaxb-api" % "2.3.0",
-    "com.sun.xml.bind" % "jaxb-ri" % "2.3.0"
   )
 
   val scalaXmlDependencies = Seq(
@@ -199,7 +178,7 @@ object ExternalDependencies {
 }
 
 object CatalogueDependencies {
-  val internalModelDependencies =
+  val internalModelDependencies: Seq[ModuleID] =
     ExternalDependencies.scalacsvDependencies ++
       WellcomeDependencies.fixturesLibrary ++
       WellcomeDependencies.elasticsearchLibrary ++
@@ -210,15 +189,6 @@ object CatalogueDependencies {
       ExternalDependencies.enumeratumDependencies ++
       ExternalDependencies.scalaXmlDependencies ++
       WellcomeDependencies.storageLibrary
-
-  val displayModelDependencies =
-    WellcomeDependencies.internalModel ++
-      WellcomeDependencies.elasticsearchLibrary ++
-      WellcomeDependencies.elasticsearchTypesafeLibrary ++
-      WellcomeDependencies.fixturesLibrary ++
-      WellcomeDependencies.jsonLibrary ++
-      ExternalDependencies.swaggerDependencies ++
-      ExternalDependencies.scalacheckDependencies
 
   val flowDependencies: Seq[ModuleID] =
     WellcomeDependencies.typesafeLibrary
@@ -244,22 +214,6 @@ object CatalogueDependencies {
 
   val transformerCommonDependencies: Seq[ModuleID] =
     WellcomeDependencies.storageLibrary
-
-  val apiDependencies: Seq[ModuleID] =
-    ExternalDependencies.akkaHttpDependencies ++
-      ExternalDependencies.apmDependencies ++
-      ExternalDependencies.circeOpticsDependencies ++
-      WellcomeDependencies.elasticsearchTypesafeLibrary ++
-      WellcomeDependencies.typesafeLibrary
-
-  val stacksDependencies: Seq[ModuleID] =
-    ExternalDependencies.akkaHttpDependencies ++
-      ExternalDependencies.scalatestDependencies ++
-      ExternalDependencies.wireMockDependencies ++
-      WellcomeDependencies.jsonLibrary ++
-      WellcomeDependencies.monitoringTypesafeLibrary ++
-      WellcomeDependencies.typesafeLibrary ++
-      WellcomeDependencies.monitoringLibrary
 
   val idminterDependencies: Seq[ModuleID] =
     ExternalDependencies.mySqlDependencies ++
@@ -345,12 +299,4 @@ object CatalogueDependencies {
   val inferenceManagerDependencies: Seq[ModuleID] =
     ExternalDependencies.akkaHttpDependencies ++
       ExternalDependencies.wireMockDependencies
-
-  // Snapshots stack
-
-  val snapshotGeneratorDependencies: Seq[ModuleID] =
-    WellcomeDependencies.messagingTypesafeLibrary ++
-      WellcomeDependencies.storageLibrary ++
-      WellcomeDependencies.typesafeLibrary ++
-      ExternalDependencies.alpakkaS3Dependencies
 }

@@ -1,7 +1,0 @@
-{
-  "id" : "snapshot_generator",
-  "folder" : "api/snapshots/snapshot_generator",
-  "dependencyIds" : [
-    "display"
-  ]
-}

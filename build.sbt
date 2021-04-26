@@ -247,48 +247,6 @@ lazy val inference_manager = setupProject(
   externalDependencies = CatalogueDependencies.inferenceManagerDependencies
 )
 
-// API Projects
-
-lazy val display = setupProject(
-  project,
-  "api/common/display",
-  externalDependencies = CatalogueDependencies.displayModelDependencies)
-
-lazy val api = setupProject(
-  project,
-  "api/api",
-  localDependencies = Seq(display),
-  externalDependencies = CatalogueDependencies.apiDependencies
-)
-
-lazy val stacks_common = setupProject(
-  project,
-  "api/stacks/common",
-  localDependencies = Seq(display),
-  externalDependencies = CatalogueDependencies.stacksDependencies
-)
-
-lazy val items_api = setupProject(
-  project,
-  "api/stacks/items_api",
-  localDependencies = Seq(stacks_common),
-  externalDependencies = CatalogueDependencies.stacksDependencies
-)
-
-lazy val requests_api = setupProject(
-  project,
-  "api/stacks/requests_api",
-  localDependencies = Seq(stacks_common),
-  externalDependencies = CatalogueDependencies.stacksDependencies
-)
-
-lazy val snapshot_generator = setupProject(
-  project,
-  "api/snapshots/snapshot_generator",
-  localDependencies = Seq(display),
-  externalDependencies = CatalogueDependencies.snapshotGeneratorDependencies
-)
-
 // AWS Credentials to read from S3
 
 s3CredentialsProvider := { _ =>
