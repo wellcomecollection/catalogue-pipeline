@@ -197,7 +197,7 @@ class SierraLocationTest
         PhysicalLocation(
           locationType = locationType,
           label = label,
-          accessConditions = List(AccessCondition(Some(AccessStatus.Open)))
+          accessConditions = List(AccessCondition(status = AccessStatus.Open))
         )
       )
     }

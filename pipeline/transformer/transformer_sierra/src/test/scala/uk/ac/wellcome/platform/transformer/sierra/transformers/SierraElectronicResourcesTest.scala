@@ -39,7 +39,7 @@ class SierraElectronicResourcesTest
             url = "https://example.org/journal",
             locationType = OnlineResource,
             accessConditions = List(
-              AccessCondition(status = Some(LicensedResources))
+              AccessCondition(status = LicensedResources)
             )
           )
         )
@@ -73,7 +73,7 @@ class SierraElectronicResourcesTest
             url = "https://example.org/journal",
             locationType = OnlineResource,
             accessConditions = List(
-              AccessCondition(status = Some(LicensedResources))
+              AccessCondition(status = LicensedResources)
             )
           )
         )
@@ -85,7 +85,7 @@ class SierraElectronicResourcesTest
             url = "https://example.org/another-journal",
             locationType = OnlineResource,
             accessConditions = List(
-              AccessCondition(status = Some(LicensedResources))
+              AccessCondition(status = LicensedResources)
             )
           )
         )
@@ -118,7 +118,7 @@ class SierraElectronicResourcesTest
               url = "https://example.org/journal",
               locationType = OnlineResource,
               accessConditions = List(
-                AccessCondition(status = Some(LicensedResources))
+                AccessCondition(status = LicensedResources)
               )
             )
           )
@@ -161,7 +161,7 @@ class SierraElectronicResourcesTest
               linkText = Some("View online"),
               locationType = OnlineResource,
               accessConditions = List(
-                AccessCondition(status = Some(LicensedResources))
+                AccessCondition(status = LicensedResources)
               )
             )
           )
@@ -174,7 +174,7 @@ class SierraElectronicResourcesTest
               linkText = Some("Access resource"),
               locationType = OnlineResource,
               accessConditions = List(
-                AccessCondition(status = Some(LicensedResources))
+                AccessCondition(status = LicensedResources)
               )
             )
           )
@@ -187,7 +187,7 @@ class SierraElectronicResourcesTest
               linkText = Some("Connect to journal"),
               locationType = OnlineResource,
               accessConditions = List(
-                AccessCondition(status = Some(LicensedResources))
+                AccessCondition(status = LicensedResources)
               )
             )
           )
@@ -215,7 +215,7 @@ class SierraElectronicResourcesTest
               url = "https://example.org/oxford",
               locationType = OnlineResource,
               accessConditions = List(
-                AccessCondition(status = Some(LicensedResources))
+                AccessCondition(status = LicensedResources)
               )
             )
           )
@@ -243,7 +243,7 @@ class SierraElectronicResourcesTest
               linkText = Some("View resource"),
               locationType = OnlineResource,
               accessConditions = List(
-                AccessCondition(status = Some(LicensedResources))
+                AccessCondition(status = LicensedResources)
               )
             )
           )
@@ -271,7 +271,7 @@ class SierraElectronicResourcesTest
               linkText = Some("View resource"),
               locationType = OnlineResource,
               accessConditions = List(
-                AccessCondition(status = Some(LicensedResources))
+                AccessCondition(status = LicensedResources)
               )
             )
           )
@@ -299,7 +299,7 @@ class SierraElectronicResourcesTest
               linkText = Some("View resource"),
               locationType = OnlineResource,
               accessConditions = List(
-                AccessCondition(status = Some(LicensedResources))
+                AccessCondition(status = LicensedResources)
               )
             )
           )
@@ -329,7 +329,7 @@ class SierraElectronicResourcesTest
               linkText = Some("You can view this resource online"),
               locationType = OnlineResource,
               accessConditions = List(
-                AccessCondition(status = Some(LicensedResources))
+                AccessCondition(status = LicensedResources)
               )
             )
           )

@@ -95,7 +95,7 @@ object SierraElectronicResources extends SierraQueryOps with Logging {
             // See https://github.com/wellcomecollection/platform/issues/5062 for
             // more discussion and conversations about this.
             accessConditions = List(
-              AccessCondition(status = Some(LicensedResources))
+              AccessCondition(status = LicensedResources)
             )
           )
         )

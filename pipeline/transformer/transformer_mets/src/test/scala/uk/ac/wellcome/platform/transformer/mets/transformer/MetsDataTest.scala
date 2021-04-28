@@ -372,9 +372,7 @@ class MetsDataTest
     inside(result.right.get.data.items.head.locations.head) {
       case DigitalLocation(_, _, _, _, _, accessConditions) =>
         accessConditions shouldBe List(
-          AccessCondition(
-            status = Some(AccessStatus.OpenWithAdvisory)
-          )
+          AccessCondition(status = AccessStatus.OpenWithAdvisory)
         )
 
     }
@@ -455,9 +453,7 @@ class MetsDataTest
       case DigitalLocation(_, _, _, _, _, accessConditions) =>
         accessConditions shouldBe
           List(
-            AccessCondition(
-              status = Some(AccessStatus.Restricted)
-            )
+            AccessCondition(status = AccessStatus.Restricted)
           )
     }
   }

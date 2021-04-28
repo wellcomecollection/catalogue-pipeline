@@ -40,9 +40,7 @@ trait MiroLocation extends MiroLicenses with MiroContributorCodes {
         )
       ),
       accessConditions = List(
-        AccessCondition(
-          status = Some(AccessStatus.Open)
-        )
+        AccessCondition(status = AccessStatus.Open)
       )
     )
 
