@@ -9,6 +9,7 @@ include reindexer/Makefile
 include sierra_adapter/Makefile
 include mets_adapter/Makefile
 include calm_adapter/Makefile
+include tei_adapter/Makefile
 
 lambda-test: s3_demultiplexer-test \
 			 sierra_progress_reporter-test \
