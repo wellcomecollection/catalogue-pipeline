@@ -95,7 +95,8 @@ object AccessStatus {
       case lowerCaseStatus
           if lowerCaseStatus.startsWith(
             "missing",
-            "deaccessioned"
+            "deaccessioned",
+            "not available",
           ) =>
         Right(AccessStatus.Unavailable)
 
@@ -113,7 +114,10 @@ object AccessStatus {
             "permission required",
             "permission is required",
             "donor permission",
-            "permission must be obtained"
+            "permission must be obtained",
+            "apply for permission",
+            "only with permission",
+            "with prior permission",
           ) =>
         Right(AccessStatus.PermissionRequired)
 
