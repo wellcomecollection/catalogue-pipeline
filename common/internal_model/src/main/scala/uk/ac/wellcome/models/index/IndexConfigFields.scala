@@ -25,11 +25,12 @@ trait IndexConfigFields {
       .fields(
         List(
           textField("english").analyzer(englishAnalyzer.name),
-          textField("shingles").analyzer(shingleAsciifoldingAnalyzer.name)) ++
-          languagesTextFields,
+          textField("shingles").analyzer(shingleAsciifoldingAnalyzer.name)
+        ) ++
+          languagesTextFields
       )
 
-  def multilingualKeywordField(name: String) = textField(name).fields(
+  def multilingualFieldWithKeyword(name: String) = textField(name).fields(
     lowercaseKeyword("keyword"),
     // we don't care about the name, we just want to compose the fields parameter
     multilingualField("").fields: _*
@@ -40,7 +41,15 @@ trait IndexConfigFields {
 
   def asciifoldingTextFieldWithKeyword(name: String) =
     textField(name)
-      .fields(keywordField("keyword"))
+      .fields(
+        /**
+          * Having a keyword and lowercaseKeyword allows you to
+          * aggregate accurately on the field i.e. `ID123` does not become `id123`
+          * but also allows you to do keyword searches e.g. `id123` matches `ID123`
+          */
+        keywordField("keyword"),
+        lowercaseKeyword("lowercaseKeyword")
+      )
       .analyzer(asciifoldingAnalyzer.name)
 
   val label = asciifoldingTextFieldWithKeyword("label")

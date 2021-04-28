@@ -39,7 +39,7 @@ object MergedWorkIndexConfig extends WorksIndexConfig {
           textField("path")
             .copyTo("data.collectionPath.depth")
             .analyzer(pathAnalyzer.name)
-            .fields(keywordField("keyword")),
+            .fields(lowercaseKeyword("keyword")),
           tokenCountField("depth").analyzer("standard")
         )
       )
@@ -84,8 +84,8 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
     objectField("data").fields(
       objectField("otherIdentifiers").fields(lowercaseKeyword("value")),
       objectField("format").fields(keywordField("id")),
-      multilingualKeywordField("title"),
-      multilingualKeywordField("alternativeTitles"),
+      multilingualFieldWithKeyword("title"),
+      multilingualFieldWithKeyword("alternativeTitles"),
       englishTextField("description"),
       englishTextKeywordField("physicalDescription"),
       multilingualField("lettering"),
@@ -129,19 +129,25 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
       textField("edition"),
       objectField("notes").fields(englishTextField("content")),
       intField("duration"),
-      objectField("collectionPath").fields(
-        label,
-        textField("path")
-          .copyTo("data.collectionPath.depth")
-          .analyzer(pathAnalyzer.name)
-          .fields(keywordField("keyword")),
-        tokenCountField("depth").analyzer("standard")
-      ),
+      collectionPath(copyDepthTo = Some("data.collectionPath.depth")),
       objectField("imageData").fields(
         objectField("id").fields(canonicalId, sourceIdentifier)
       ),
       keywordField("workType")
     )
+
+  def collectionPath(copyDepthTo: Option[String]) = {
+    val path = textField("path")
+      .analyzer(pathAnalyzer.name)
+      .fields(keywordField("keyword"))
+      .copyTo(copyDepthTo.toList)
+
+    objectField("collectionPath").fields(
+      label,
+      path,
+      tokenCountField("depth").analyzer("standard")
+    )
+  }
 
   val state = objectField("state")
     .fields(
@@ -153,12 +159,11 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
         .fields(
           objectField("ancestors").fields(
             lowercaseKeyword("id"),
-            objectField("collectionPath").fields(
-              label,
-              textField("path")
-                .analyzer(pathAnalyzer.name)
-                .fields(keywordField("keyword"))
-            )
+            intField("depth"),
+            intField("numChildren"),
+            intField("numDescendents"),
+            multilingualFieldWithKeyword("title"),
+            collectionPath(copyDepthTo = None)
           )
         )
         .dynamic("false"),
