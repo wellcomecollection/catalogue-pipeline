@@ -62,8 +62,8 @@ trait ItemsGenerators extends IdentifiersGenerators with LocationGenerators {
     accessStatus: AccessStatus): Item[IdState.Unidentifiable.type] =
     createDigitalItemWith(
       locations = List(
-        createDigitalLocationWith(accessConditions =
-          List(AccessCondition(status = accessStatus)))))
+        createDigitalLocationWith(
+          accessConditions = List(AccessCondition(status = accessStatus)))))
 
   def createDigitalItemWith(
     locations: List[Location]): Item[IdState.Unidentifiable.type] =
