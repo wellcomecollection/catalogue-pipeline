@@ -17,8 +17,8 @@ import com.sksamuel.elastic4s.requests.searches._
 
 case class TestDoc(label: String)
 object TestDoc {
-  implicit val fooDecoder: Decoder[TestDoc] = deriveDecoder
-  implicit val fooEncoder: Encoder[TestDoc] = deriveEncoder
+  implicit val testDocDecoder: Decoder[TestDoc] = deriveDecoder
+  implicit val testDocEncoder: Encoder[TestDoc] = deriveEncoder
 }
 
 object TestIndexConfig extends IndexConfig with IndexConfigFields {
