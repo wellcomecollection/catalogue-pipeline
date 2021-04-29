@@ -108,9 +108,7 @@ class SierraHoldingsTest
               locationType = OnlineResource,
               linkText = Some("Connect to Example Journals"),
               accessConditions = List(
-                AccessCondition(
-                  status = Some(AccessStatus.LicensedResources)
-                )
+                AccessCondition(status = AccessStatus.LicensedResources)
               )
             )
           )
@@ -156,9 +154,7 @@ class SierraHoldingsTest
               locationType = OnlineResource,
               linkText = Some("Connect to Example Journals"),
               accessConditions = List(
-                AccessCondition(
-                  status = Some(AccessStatus.LicensedResources)
-                )
+                AccessCondition(status = AccessStatus.LicensedResources)
               )
             )
           ),
@@ -171,9 +167,7 @@ class SierraHoldingsTest
               url = "https://example.org/subscriptions",
               locationType = OnlineResource,
               accessConditions = List(
-                AccessCondition(
-                  status = Some(AccessStatus.LicensedResources)
-                )
+                AccessCondition(status = AccessStatus.LicensedResources)
               )
             )
           ),
@@ -225,9 +219,7 @@ class SierraHoldingsTest
               locationType = OnlineResource,
               linkText = Some("Connect to Example Journals"),
               accessConditions = List(
-                AccessCondition(
-                  status = Some(AccessStatus.LicensedResources)
-                )
+                AccessCondition(status = AccessStatus.LicensedResources)
               )
             )
           ),
@@ -240,9 +232,7 @@ class SierraHoldingsTest
               url = "https://example.org/subscriptions",
               locationType = OnlineResource,
               accessConditions = List(
-                AccessCondition(
-                  status = Some(AccessStatus.LicensedResources)
-                )
+                AccessCondition(status = AccessStatus.LicensedResources)
               )
             )
           ),

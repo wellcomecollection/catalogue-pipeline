@@ -55,12 +55,4 @@ trait LocationGenerators extends RandomGenerators {
     createDigitalLocationWith(
       locationType = LocationType.IIIFPresentationAPI
     )
-
-  def createAccessConditionWith(
-    status: Option[AccessStatus] = Some(AccessStatus.Open)
-  ): AccessCondition = AccessCondition(
-    status = status,
-    terms = None,
-    to = None
-  )
 }

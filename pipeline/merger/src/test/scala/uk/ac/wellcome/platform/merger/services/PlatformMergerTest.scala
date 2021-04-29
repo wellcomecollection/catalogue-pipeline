@@ -819,8 +819,7 @@ class PlatformMergerTest
                   url = "http://www.scope.org.uk",
                   locationType = LocationType.OnlineResource,
                   accessConditions = List(
-                    AccessCondition(
-                      status = Some(AccessStatus.LicensedResources))
+                    AccessCondition(status = AccessStatus.LicensedResources)
                   )
                 )
               )

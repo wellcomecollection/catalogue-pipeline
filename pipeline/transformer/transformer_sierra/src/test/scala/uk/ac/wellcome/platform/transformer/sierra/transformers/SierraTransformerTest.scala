@@ -935,7 +935,7 @@ class SierraTransformerTest
             linkText = Some("View this journal"),
             locationType = OnlineResource,
             accessConditions = List(
-              AccessCondition(status = Some(LicensedResources))
+              AccessCondition(status = LicensedResources)
             )
           )
         )

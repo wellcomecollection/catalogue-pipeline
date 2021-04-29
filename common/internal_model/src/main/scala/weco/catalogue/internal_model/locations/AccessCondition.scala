@@ -15,3 +15,8 @@ case class AccessCondition(
 
   def hasRestrictions: Boolean = status.exists(_.hasRestrictions)
 }
+
+case object AccessCondition {
+  def apply(status: AccessStatus): AccessCondition =
+    AccessCondition(status = Some(status))
+}

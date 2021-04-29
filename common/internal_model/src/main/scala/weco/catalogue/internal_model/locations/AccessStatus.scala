@@ -1,8 +1,10 @@
 package weco.catalogue.internal_model.locations
 
+import enumeratum.{Enum, EnumEntry}
+
 class UnknownAccessStatus(status: String) extends Exception(status)
 
-sealed trait AccessStatus { this: AccessStatus =>
+sealed trait AccessStatus extends EnumEntry { this: AccessStatus =>
 
   def name: String = this.getClass.getSimpleName.stripSuffix("$")
 
@@ -23,7 +25,12 @@ sealed trait AccessStatus { this: AccessStatus =>
   }
 }
 
-object AccessStatus {
+object AccessStatus extends Enum[License] {
+  val values = findValues
+  assert(
+    values.size == values.map { _.id }.toSet.size,
+    "IDs for AccessStatus are not unique!"
+  )
 
   // These types should reflect our collections access framework, as described in
   // Wellcome Collection's Access Policy.
@@ -95,7 +102,8 @@ object AccessStatus {
       case lowerCaseStatus
           if lowerCaseStatus.startsWith(
             "missing",
-            "deaccessioned"
+            "deaccessioned",
+            "not available",
           ) =>
         Right(AccessStatus.Unavailable)
 
@@ -113,7 +121,10 @@ object AccessStatus {
             "permission required",
             "permission is required",
             "donor permission",
-            "permission must be obtained"
+            "permission must be obtained",
+            "apply for permission",
+            "only with permission",
+            "with prior permission",
           ) =>
         Right(AccessStatus.PermissionRequired)
 
