@@ -1,8 +1,10 @@
 package weco.catalogue.internal_model.locations
 
+import enumeratum.{Enum, EnumEntry}
+
 class UnknownAccessStatus(status: String) extends Exception(status)
 
-sealed trait AccessStatus { this: AccessStatus =>
+sealed trait AccessStatus extends EnumEntry { this: AccessStatus =>
 
   def name: String = this.getClass.getSimpleName.stripSuffix("$")
 
@@ -23,7 +25,12 @@ sealed trait AccessStatus { this: AccessStatus =>
   }
 }
 
-object AccessStatus {
+object AccessStatus extends Enum[License] {
+  val values = findValues
+  assert(
+    values.size == values.map { _.id }.toSet.size,
+    "IDs for AccessStatus are not unique!"
+  )
 
   // These types should reflect our collections access framework, as described in
   // Wellcome Collection's Access Policy.
