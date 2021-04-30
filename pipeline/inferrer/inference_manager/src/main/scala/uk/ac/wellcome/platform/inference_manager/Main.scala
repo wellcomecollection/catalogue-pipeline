@@ -9,10 +9,10 @@ import software.amazon.awssdk.services.sqs.model.Message
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.index.AugmentedImageIndexConfig
 import uk.ac.wellcome.platform.inference_manager.adapters.{
+  AspectRatioInferrerAdapter,
   FeatureVectorInferrerAdapter,
   InferrerAdapter,
-  PaletteInferrerAdapter,
-  AspectRatioInferrerAdapter
+  PaletteInferrerAdapter
 }
 import uk.ac.wellcome.platform.inference_manager.models.DownloadedImage
 import uk.ac.wellcome.platform.inference_manager.services.{
