@@ -12,11 +12,6 @@ SBT_DOCKER_LIBRARIES =
 SBT_NO_DOCKER_LIBRARIES =
 
 PYTHON_APPS =
-LAMBDAS = tei_window_generator
-
-# These override the defaults (catalogue account) set in functions.Makefile
-# See https://github.com/wellcomecollection/catalogue/pull/912 for some context
-LAMBDA_UPLOAD_BUCKET = wellcomecollection-platform-infra
-LAMBDA_PUBLISH_ROLE_ARN := arn:aws:iam::760097843905:role/platform-developer
+LAMBDAS =
 
 $(val $(call stack_setup))

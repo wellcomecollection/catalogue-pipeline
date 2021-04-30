@@ -5,7 +5,7 @@ module "tei_window_generator_lambda" {
   description = "Sends windows to the Tei adapter"
 
   s3_bucket         = local.infra_bucket
-  s3_key            = "lambdas/tei_adapter/tei_window_generator.zip"
+  s3_key            = "lambdas/common/window_generator.zip"
   schedule_interval = local.window_generator_interval
 
   env_vars = {
