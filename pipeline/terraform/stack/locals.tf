@@ -46,6 +46,7 @@ locals {
     "feature_inferrer",
     "feature_training",
     "palette_inferrer",
+    "aspect_ratio_inferrer",
     "router",
     "batcher",
     "relation_embedder",

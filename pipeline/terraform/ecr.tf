@@ -59,6 +59,10 @@ resource "aws_ecr_repository" "ecr_repository_palette_inferrer" {
   name = "uk.ac.wellcome/palette_inferrer"
 }
 
+resource "aws_ecr_repository" "ecr_repository_aspect_ratio_inferrer" {
+  name = "uk.ac.wellcome/aspect_ratio_inferrer"
+}
+
 resource "aws_ecr_repository" "ecr_repository_ingestor_images" {
   name = "uk.ac.wellcome/ingestor_images"
 }

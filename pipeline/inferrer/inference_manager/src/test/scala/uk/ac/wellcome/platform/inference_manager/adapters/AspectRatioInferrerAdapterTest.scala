@@ -6,21 +6,21 @@ import akka.http.scaladsl.model.{HttpMethods, HttpRequest}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{Inside, OptionValues}
-import uk.ac.wellcome.platform.inference_manager.fixtures.Encoding
 import uk.ac.wellcome.platform.inference_manager.models.{
-  DownloadedImage,
-  FeatureVectorInferrerResponse
+  AspectRatioInferrerResponse,
+  DownloadedImage
 }
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.image.InferredData
+import scala.util.Random
 
-class FeatureVectorInferrerAdapterTest
+class AspectRatioInferrerAdapterTest
     extends AnyFunSpec
     with Matchers
     with ImageGenerators
     with Inside
     with OptionValues {
-  val adapter = new FeatureVectorInferrerAdapter("feature_inferrer", 80)
+  val adapter = new AspectRatioInferrerAdapter("aspect_ratio_inferrer", 80)
 
   describe("createRequest") {
     it("creates a request with the query_url parameter as a local path") {
@@ -34,7 +34,7 @@ class FeatureVectorInferrerAdapterTest
         case HttpRequest(method, uri, _, _, _) =>
           method should be(HttpMethods.GET)
           uri.toString() should be(
-            s"http://feature_inferrer:80/feature-vector/?query_url=file://${downloadedImage.path}"
+            s"http://aspect_ratio_inferrer:80/aspect-ratio/?query_url=file://${downloadedImage.path}"
           )
       }
     }
@@ -42,27 +42,13 @@ class FeatureVectorInferrerAdapterTest
 
   describe("augment") {
     it("augments InferredData with the data from the inferrer response") {
-      val features = (0 until 4096).map(_ / 4096f).toList
-      val featuresB64 = Encoding.toLittleEndianBase64(features)
-      val lshEncodedFeatures = ('a' to 'z').map(_.toString * 3).toList
-      val response = FeatureVectorInferrerResponse(
-        features_b64 = featuresB64,
-        lsh_encoded_features = lshEncodedFeatures
-      )
-      val inferredData = adapter.augment(InferredData.empty, response)
+      val aspectRatio = Some(Random.nextFloat())
+      val aspectRatioResponse = AspectRatioInferrerResponse(aspectRatio)
+      val inferredData =
+        adapter.augment(InferredData.empty, aspectRatioResponse)
       inside(inferredData) {
-        case InferredData(
-            features1,
-            features2,
-            actualLshEncodedFeatures,
-            _,
-            _,
-            _,
-            _
-            ) =>
-          features1 should be(features.slice(0, 2048))
-          features2 should be(features.slice(2048, 4096))
-          actualLshEncodedFeatures should be(lshEncodedFeatures)
+        case InferredData(_, _, _, _, _, _, actualAspectRatio) =>
+          actualAspectRatio should be(aspectRatio)
       }
     }
   }

@@ -13,7 +13,8 @@ import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.platform.inference_manager.adapters.{
   FeatureVectorInferrerAdapter,
   InferrerAdapter,
-  PaletteInferrerAdapter
+  PaletteInferrerAdapter,
+  AspectRatioInferrerAdapter
 }
 import uk.ac.wellcome.platform.inference_manager.fixtures.{
   InferenceManagerWorkerServiceFixture,
@@ -59,6 +60,9 @@ class InferenceManagerWorkerServiceTest
           case Some(id) if req.contains("palette_inferrer") =>
             Some(Responses.paletteInferrerDeterministic(id.hashCode))
 
+          case Some(id) if req.contains("aspect_ratio_inferrer") =>
+            Some(Responses.aspectRatioInferrerDeterministic(id.hashCode))
+
           case Some(id) =>
             warn(s"Unrecognised request for $id: $req")
             None
@@ -89,7 +93,8 @@ class InferenceManagerWorkerServiceTest
                       lshEncodedFeatures,
                       palette,
                       binSizes,
-                      binMinima) =>
+                      binMinima,
+                      aspectRatio) =>
                     val featureVector =
                       Responses.randomFeatureVector(seed)
                     features1 should be(featureVector.slice(0, 2048))
@@ -99,6 +104,7 @@ class InferenceManagerWorkerServiceTest
                     palette should be(Responses.randomPaletteVector(seed))
                     binSizes should be(Responses.randomBinSizes(seed))
                     binMinima should be(Responses.randomBinMinima(seed))
+                    aspectRatio should be(Responses.randomAspectRatio(seed))
                 }
             }
           }
@@ -115,6 +121,8 @@ class InferenceManagerWorkerServiceTest
           Some(Responses.featureInferrer)
         } else if (req.contains("palette_inferrer")) {
           Some(Responses.paletteInferrer)
+        } else if (req.contains("aspect_ratio_inferrer")) {
+          Some(Responses.aspectRatioInferrer)
         } else None,
       images = _ => Some(Responses.image)
     ) {
@@ -136,13 +144,15 @@ class InferenceManagerWorkerServiceTest
                       lshEncodedFeatures,
                       palette,
                       binSizes,
-                      binMinima) =>
+                      binMinima,
+                      aspectRatio) =>
                     features1 should have length 2048
                     features2 should have length 2048
                     every(lshEncodedFeatures) should fullyMatch regex """(\d+)-(\d+)"""
                     every(palette) should fullyMatch regex """\d+"""
                     every(binSizes) should not be empty
                     binMinima should not be empty
+                    aspectRatio should not be empty
                 }
             }
           }
@@ -253,6 +263,7 @@ class InferenceManagerWorkerServiceTest
         adapters = Set(
           new FeatureVectorInferrerAdapter("feature_inferrer", 80),
           new PaletteInferrerAdapter("palette_inferrer", 80),
+          new AspectRatioInferrerAdapter("aspect_ratio_inferrer", 80),
         ),
         fileWriter = fileWriter,
         inferrerRequestPool = inferrerRequestPool,

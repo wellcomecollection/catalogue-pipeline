@@ -11,7 +11,8 @@ import uk.ac.wellcome.models.index.AugmentedImageIndexConfig
 import uk.ac.wellcome.platform.inference_manager.adapters.{
   FeatureVectorInferrerAdapter,
   InferrerAdapter,
-  PaletteInferrerAdapter
+  PaletteInferrerAdapter,
+  AspectRatioInferrerAdapter
 }
 import uk.ac.wellcome.platform.inference_manager.models.DownloadedImage
 import uk.ac.wellcome.platform.inference_manager.services.{
@@ -52,6 +53,10 @@ object Main extends WellcomeTypesafeApp {
       config.getString("inferrer.palette.host"),
       config.getInt("inferrer.palette.port")
     )
+    val aspectRatioInferrerAdapter = new AspectRatioInferrerAdapter(
+      config.getString("inferrer.aspectRatio.host"),
+      config.getInt("inferrer.aspectRatio.port")
+    )
 
     val inferrerClientFlow =
       Http().superPool[((DownloadedImage, InferrerAdapter), Message)]()
@@ -85,7 +90,8 @@ object Main extends WellcomeTypesafeApp {
       imageDownloader = imageDownloader,
       inferrerAdapters = Set(
         featureInferrerAdapter,
-        paletteInferrerAdapter
+        paletteInferrerAdapter,
+        aspectRatioInferrerAdapter
       ),
       requestPool = inferrerClientFlow
     )

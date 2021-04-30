@@ -24,6 +24,15 @@ palette_inferrer:
   links:
     - "image_server:image_server"
 
+aspect_ratio_inferrer:
+  image: aspect_ratio_inferrer
+  ports:
+    - "3143:80"
+  volumes:
+    - $ROOT:$ROOT
+  links:
+    - "image_server:image_server"
+
 image_server:
   image: nginx
   ports:

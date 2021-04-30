@@ -33,7 +33,8 @@ object IndexedImageIndexConfig extends IndexConfig with IndexConfigFields {
     keywordField("lshEncodedFeatures"),
     keywordField("palette"),
     intField("binSizes").index(false),
-    floatField("binMinima").index(false)
+    floatField("binMinima").index(false),
+    floatField("aspectRatio")
   )
 
   def sourceWork(fieldName: String): ObjectField =
@@ -48,7 +49,7 @@ object IndexedImageIndexConfig extends IndexConfig with IndexConfigFields {
           englishTextKeywordField("physicalDescription"),
           multilingualField("lettering"),
           objectField("contributors").fields(
-            objectField("agent").fields(label),
+            objectField("agent").fields(label)
           ),
           objectField("subjects").fields(
             objectField("concepts").fields(label)
@@ -69,9 +70,9 @@ object IndexedImageIndexConfig extends IndexConfig with IndexConfigFields {
           ),
           textField("edition"),
           objectField("notes").fields(multilingualField("content")),
-          objectField("collectionPath").fields(label, textField("path")),
+          objectField("collectionPath").fields(label, textField("path"))
         ),
-        keywordField("type"),
+        keywordField("type")
       )
       .dynamic("false")
 
@@ -100,7 +101,7 @@ object IndexedImageIndexConfig extends IndexConfig with IndexConfigFields {
     state,
     objectField("locations")
       .fields(
-        objectField("license").fields(keywordField("id")),
+        objectField("license").fields(keywordField("id"))
       )
       .dynamic("false")
   )

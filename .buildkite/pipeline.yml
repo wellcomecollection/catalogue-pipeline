@@ -61,6 +61,8 @@ steps:
     label: "feature inferrer"
   - command: .buildkite/scripts/run_job.py palette_inferrer --changes-in pipeline/inferrer/palette_inferrer
     label: "palette inferrer"
+  - command: .buildkite/scripts/run_job.py aspect_ratio_inferrer --changes-in pipeline/inferrer/aspect_ratio_inferrer
+    label: "aspect ratio inferrer"
   - wait
   - command: .buildkite/scripts/tag_commit_as_latest.py
     label: "tag commit as latest"

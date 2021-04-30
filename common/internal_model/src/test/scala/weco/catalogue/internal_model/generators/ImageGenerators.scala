@@ -167,6 +167,8 @@ trait ImageGenerators
 
   lazy private val inferredDataBinMinima = List.fill(3)(Random.nextFloat)
 
+  lazy private val inferredDataAspectRatio = Some(Random.nextFloat())
+
   def createInferredData = {
     val features = randomVector(4096)
     val (features1, features2) = features.splitAt(features.size / 2)
@@ -179,7 +181,8 @@ trait ImageGenerators
         lshEncodedFeatures = lshEncodedFeatures.toList,
         palette = palette.toList,
         binSizes = inferredDataBinSizes,
-        binMinima = inferredDataBinMinima
+        binMinima = inferredDataBinMinima,
+        aspectRatio = inferredDataAspectRatio
       )
     )
   }
@@ -221,7 +224,8 @@ trait ImageGenerators
               lshEncodedFeatures = l.toList,
               palette = p.toList,
               binSizes = inferredDataBinSizes,
-              binMinima = inferredDataBinMinima
+              binMinima = inferredDataBinMinima,
+              aspectRatio = inferredDataAspectRatio
             )
           )
         )

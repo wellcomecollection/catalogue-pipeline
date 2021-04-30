@@ -99,8 +99,10 @@ object ImageFsm {
   }
 
   implicit val initialToAugmented = new Transition[Initial, Augmented] {
-    def state(self: Image[Initial],
-              inferredData: Option[InferredData]): Augmented =
+    def state(
+      self: Image[Initial],
+      inferredData: Option[InferredData]
+    ): Augmented =
       Augmented(
         sourceIdentifier = self.state.sourceIdentifier,
         canonicalId = self.state.canonicalId,
@@ -118,6 +120,7 @@ object ImageFsm {
       )
   }
 }
+
 case class InferredData(
   // We split the feature vector so that it can fit into
   // ES's dense vector type (max length 2048)
@@ -127,8 +130,9 @@ case class InferredData(
   palette: List[String],
   binSizes: List[List[Int]],
   binMinima: List[Float],
+  aspectRatio: Option[Float]
 )
 
 object InferredData {
-  def empty: InferredData = InferredData(Nil, Nil, Nil, Nil, Nil, Nil)
+  def empty: InferredData = InferredData(Nil, Nil, Nil, Nil, Nil, Nil, None)
 }
