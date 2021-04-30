@@ -1,32 +1,10 @@
 module "tei_window_generator_lambda" {
-  source = "./modules/scheduled_lambda"
+  source = "./modules/window_generator"
 
-  name        = "tei_window_generator"
-  description = "Sends windows to the Tei adapter"
+  window_length_minutes    = 50
+  trigger_interval_minutes = 30
 
-  s3_bucket         = local.infra_bucket
-  s3_key            = "lambdas/common/window_generator.zip"
-  schedule_interval = local.window_generator_interval
-
-  env_vars = {
-    TOPIC_ARN = aws_sns_topic.tei_windows_topic.arn
-    WINDOW_LENGTH_MINUTES = 45
-  }
+  lambda_error_alarm_arn = local.lambda_error_alarm_arn
+  infra_bucket           = local.infra_bucket
 }
 
-data "aws_iam_policy_document" "publish_to_windows_topic" {
-  statement {
-    actions = [
-      "sns:Publish",
-    ]
-
-    resources = [
-      aws_sns_topic.tei_windows_topic.arn
-    ]
-  }
-}
-
-resource "aws_iam_role_policy" "windows_policy" {
-  role   = module.tei_window_generator_lambda.role_name
-  policy = data.aws_iam_policy_document.publish_to_windows_topic.json
-}

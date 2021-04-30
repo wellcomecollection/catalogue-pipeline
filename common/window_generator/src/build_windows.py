@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 """
-Build 'update windows' for the Sierra adapter pipeline.
+Build 'update windows' for the Sierra or TEI adapter pipeline.
 
 Usage:
     build_windows.py --start=<START> --end=<END> [--window_length=<WINDOW_LENGTH>] --resource=<RESOURCE>
@@ -77,6 +77,7 @@ if __name__ == "__main__":
         total=math.ceil((end - start).total_seconds() / 60 / (minutes - 1)),
     ):
         client.publish(
+            # TODO: parametrise topic
             TopicArn=f"arn:aws:sns:eu-west-1:760097843905:sierra_{resource}_reharvest_windows",
             Message=json.dumps(window),
         )
