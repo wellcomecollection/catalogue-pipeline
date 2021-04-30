@@ -3,7 +3,7 @@
 Publish a new Calm window to SNS.
 """
 
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 import os
 import boto3
 import pytz
