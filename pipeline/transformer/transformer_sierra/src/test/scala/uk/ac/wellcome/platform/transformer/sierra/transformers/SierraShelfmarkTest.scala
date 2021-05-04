@@ -32,6 +32,21 @@ class SierraShelfmarkTest extends AnyFunSpec with Matchers with MarcGenerators w
     SierraShelfmark(itemData) shouldBe Some("S7956")
   }
 
+  it("strips whitespace from shelfmarks") {
+    val varFields = List(
+      createVarFieldWith(
+        marcTag = "949",
+        subfields = List(
+          MarcSubfield(tag = "a", content = "/LEATHER            ")
+        )
+      )
+    )
+
+    val itemData = createSierraItemDataWith(varFields = varFields)
+
+    SierraShelfmark(itemData) shouldBe Some("/LEATHER")
+  }
+
   it("ignores any other 949 subfields") {
     val varFields = List(
       createVarFieldWith(

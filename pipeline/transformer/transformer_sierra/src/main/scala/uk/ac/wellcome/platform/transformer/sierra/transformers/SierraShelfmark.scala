@@ -17,5 +17,5 @@ object SierraShelfmark extends SierraQueryOps {
       .filter { vf => vf.marcTag.contains("949") }
       .subfieldsWithTags("a")
       .headOption
-      .map { _.content }
+      .map { _.content.trim }
 }
