@@ -35,8 +35,7 @@ object Responses {
   def aspectRatioInferrer: HttpResponse =
     aspectRatioInferrerDeterministic(Random.nextInt())
 
-  def randomAspectRatio(seed: Int): Float =
-    new Random(seed).nextFloat()
+  def randomAspectRatio(seed: Int): Float = new Random(seed).nextFloat()
 
   def paletteInferrerDeterministic(seed: Int): HttpResponse = json(
     s"""{

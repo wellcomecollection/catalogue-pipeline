@@ -42,7 +42,8 @@ class InferenceManagerWorkerServiceTest
     with RequestPoolFixtures {
 
   it(
-    "reads image messages, augments them with the inferrers, and sends them to SNS") {
+    "reads image messages, augments them with the inferrers, and sends them to SNS"
+  ) {
     val images = (1 to 5)
       .map(_ => createImageData.toInitialImage)
       .map(image => image.state.canonicalId -> image)
@@ -70,12 +71,13 @@ class InferenceManagerWorkerServiceTest
           case None =>
             warn(s"Unable to find matching image for request $req")
             None
-      },
+        },
       images = _ => Some(Responses.image)
     ) {
       case (QueuePair(queue, dlq), messageSender, augmentedImages, _, _) =>
-        images.values.foreach(image =>
-          sendNotificationToSQS(queue = queue, body = image.id))
+        images.values.foreach(
+          image => sendNotificationToSQS(queue = queue, body = image.id)
+        )
         eventually {
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
@@ -94,17 +96,21 @@ class InferenceManagerWorkerServiceTest
                       palette,
                       binSizes,
                       binMinima,
-                      aspectRatio) =>
+                      aspectRatio
+                      ) =>
                     val featureVector =
                       Responses.randomFeatureVector(seed)
                     features1 should be(featureVector.slice(0, 2048))
                     features2 should be(featureVector.slice(2048, 4096))
                     lshEncodedFeatures should be(
-                      Responses.randomLshVector(seed))
+                      Responses.randomLshVector(seed)
+                    )
                     palette should be(Responses.randomPaletteVector(seed))
                     binSizes should be(Responses.randomBinSizes(seed))
                     binMinima should be(Responses.randomBinMinima(seed))
-                    aspectRatio should be(Responses.randomAspectRatio(seed))
+                    aspectRatio should be(
+                      Some(Responses.randomAspectRatio(seed))
+                    )
                 }
             }
           }
@@ -127,8 +133,9 @@ class InferenceManagerWorkerServiceTest
       images = _ => Some(Responses.image)
     ) {
       case (QueuePair(queue, dlq), messageSender, augmentedImages, _, _) =>
-        (1 to 3).foreach(_ =>
-          sendNotificationToSQS(queue = queue, body = image.id))
+        (1 to 3).foreach(
+          _ => sendNotificationToSQS(queue = queue, body = image.id)
+        )
         eventually {
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
@@ -145,7 +152,8 @@ class InferenceManagerWorkerServiceTest
                       palette,
                       binSizes,
                       binMinima,
-                      aspectRatio) =>
+                      aspectRatio
+                      ) =>
                     features1 should have length 2048
                     features2 should have length 2048
                     every(lshEncodedFeatures) should fullyMatch regex """(\d+)-(\d+)"""
@@ -208,16 +216,22 @@ class InferenceManagerWorkerServiceTest
     }
   }
 
-  def withResponsesAndFixtures[R](initialImages: List[Image[Initial]],
-                                  inferrer: String => Option[HttpResponse],
-                                  images: String => Option[HttpResponse])(
+  def withResponsesAndFixtures[R](
+    initialImages: List[Image[Initial]],
+    inferrer: String => Option[HttpResponse],
+    images: String => Option[HttpResponse]
+  )(
     testWith: TestWith[
-      (QueuePair,
-       MemoryMessageSender,
-       mutable.Map[String, Image[Augmented]],
-       RequestPoolMock[(DownloadedImage, InferrerAdapter), Message],
-       RequestPoolMock[(Uri, MergedIdentifiedImage), Message]),
-      R]): R =
+      (
+        QueuePair,
+        MemoryMessageSender,
+        mutable.Map[String, Image[Augmented]],
+        RequestPoolMock[(DownloadedImage, InferrerAdapter), Message],
+        RequestPoolMock[(Uri, MergedIdentifiedImage), Message]
+      ),
+      R
+    ]
+  ): R =
     withResponses(inferrer, images) {
       case (inferrerMock, imagesMock) =>
         val augmentedImages = mutable.Map.empty[String, Image[Augmented]]
@@ -225,19 +239,27 @@ class InferenceManagerWorkerServiceTest
           initialImages,
           inferrerMock.pool,
           imagesMock.pool,
-          augmentedImages) {
+          augmentedImages
+        ) {
           case (queuePair, sender) =>
             testWith(
-              (queuePair, sender, augmentedImages, inferrerMock, imagesMock))
+              (queuePair, sender, augmentedImages, inferrerMock, imagesMock)
+            )
         }
     }
 
-  def withResponses[R](inferrer: String => Option[HttpResponse],
-                       images: String => Option[HttpResponse])(
+  def withResponses[R](
+    inferrer: String => Option[HttpResponse],
+    images: String => Option[HttpResponse]
+  )(
     testWith: TestWith[
-      (RequestPoolMock[(DownloadedImage, InferrerAdapter), Message],
-       RequestPoolMock[(Uri, MergedIdentifiedImage), Message]),
-      R]): R =
+      (
+        RequestPoolMock[(DownloadedImage, InferrerAdapter), Message],
+        RequestPoolMock[(Uri, MergedIdentifiedImage), Message]
+      ),
+      R
+    ]
+  ): R =
     withRequestPool[(DownloadedImage, InferrerAdapter), Message, R](inferrer) {
       inferrerPoolMock =>
         withRequestPool[(Uri, MergedIdentifiedImage), Message, R](images) {
@@ -248,11 +270,13 @@ class InferenceManagerWorkerServiceTest
 
   def withWorkerServiceFixtures[R](
     initialImages: List[Image[Initial]],
-    inferrerRequestPool: RequestPoolFlow[(DownloadedImage, InferrerAdapter),
-                                         Message],
+    inferrerRequestPool: RequestPoolFlow[
+      (DownloadedImage, InferrerAdapter),
+      Message
+    ],
     imageRequestPool: RequestPoolFlow[(Uri, MergedIdentifiedImage), Message],
-    augmentedImages: mutable.Map[String, Image[Augmented]])(
-    testWith: TestWith[(QueuePair, MemoryMessageSender), R]): R =
+    augmentedImages: mutable.Map[String, Image[Augmented]]
+  )(testWith: TestWith[(QueuePair, MemoryMessageSender), R]): R =
     withLocalSqsQueuePair() { queuePair =>
       val msgSender = new MemoryMessageSender()
       val fileWriter = new MemoryFileWriter()
@@ -263,7 +287,7 @@ class InferenceManagerWorkerServiceTest
         adapters = Set(
           new FeatureVectorInferrerAdapter("feature_inferrer", 80),
           new PaletteInferrerAdapter("palette_inferrer", 80),
-          new AspectRatioInferrerAdapter("aspect_ratio_inferrer", 80),
+          new AspectRatioInferrerAdapter("aspect_ratio_inferrer", 80)
         ),
         fileWriter = fileWriter,
         inferrerRequestPool = inferrerRequestPool,
