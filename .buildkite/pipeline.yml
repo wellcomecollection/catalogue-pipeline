@@ -1,3 +1,25 @@
 steps:
   - command: .buildkite/scripts/run_job.py merger
     label: "merger"
+  - command: .buildkite/scripts/run_job.py merger
+    label: "merger"
+  - command: .buildkite/scripts/run_job.py merger
+    label: "merger"
+  - command: .buildkite/scripts/run_job.py merger
+    label: "merger"
+  - command: .buildkite/scripts/run_job.py merger
+    label: "merger"
+  - command: .buildkite/scripts/run_job.py merger
+    label: "merger"
+  - command: .buildkite/scripts/run_job.py merger
+    label: "merger"
+  - command: .buildkite/scripts/run_job.py merger
+    label: "merger"
+  - command: .buildkite/scripts/run_job.py merger
+    label: "merger"
+  - command: .buildkite/scripts/run_job.py merger
+    label: "merger"
+  - command: .buildkite/scripts/run_job.py merger
+    label: "merger"
+  - command: .buildkite/scripts/run_job.py merger
+    label: "merger"
