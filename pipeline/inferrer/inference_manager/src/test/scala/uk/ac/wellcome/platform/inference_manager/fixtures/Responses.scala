@@ -28,8 +28,8 @@ object Responses {
 
   def aspectRatioInferrerDeterministic(seed: Int): HttpResponse = json(
     s"""{
-      "aspect_ratio": "${randomAspectRatio(seed).toString()}",
-    """
+      "aspect_ratio": "${randomAspectRatio(seed).toString()}"
+    }"""
   )
 
   def aspectRatioInferrer: HttpResponse =
