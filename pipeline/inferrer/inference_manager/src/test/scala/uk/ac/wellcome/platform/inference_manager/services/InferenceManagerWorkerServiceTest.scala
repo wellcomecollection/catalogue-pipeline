@@ -11,10 +11,10 @@ import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.platform.inference_manager.adapters.{
+  AspectRatioInferrerAdapter,
   FeatureVectorInferrerAdapter,
   InferrerAdapter,
-  PaletteInferrerAdapter,
-  AspectRatioInferrerAdapter
+  PaletteInferrerAdapter
 }
 import uk.ac.wellcome.platform.inference_manager.fixtures.{
   InferenceManagerWorkerServiceFixture,
