@@ -6,7 +6,6 @@ case class SierraItemData(
   deleted: Boolean = false,
   suppressed: Boolean = false,
   location: Option[SierraSourceLocation] = None,
-  callNumber: Option[String] = None,
   fixedFields: Map[String, FixedField] = Map(),
   varFields: List[VarField] = List()
 )

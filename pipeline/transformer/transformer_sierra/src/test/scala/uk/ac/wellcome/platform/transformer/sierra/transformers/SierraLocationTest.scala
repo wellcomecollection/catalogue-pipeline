@@ -8,7 +8,10 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraItemData,
   VarField
 }
-import uk.ac.wellcome.platform.transformer.sierra.generators.SierraDataGenerators
+import uk.ac.wellcome.platform.transformer.sierra.generators.{
+  MarcGenerators,
+  SierraDataGenerators
+}
 import weco.catalogue.internal_model.locations.{
   AccessCondition,
   AccessStatus,
@@ -19,6 +22,7 @@ import weco.catalogue.internal_model.locations.{
 class SierraLocationTest
     extends AnyFunSpec
     with Matchers
+    with MarcGenerators
     with SierraDataGenerators {
 
   private val transformer = new SierraLocation {}
@@ -113,10 +117,17 @@ class SierraLocationTest
       )
     }
 
-    it("uses the callNumber as the shelfmark") {
+    it("uses 949 subfield ǂa as the shelfmark") {
       val itemData: SierraItemData = createSierraItemDataWith(
         location = Some(SierraSourceLocation("info", "Open shelves")),
-        callNumber = Some("AX1234:Box 1")
+        varFields = List(
+          createVarFieldWith(
+            marcTag = "949",
+            subfields = List(
+              MarcSubfield(tag = "a", content = "AX1234:Box 1")
+            )
+          )
+        )
       )
 
       val location =
