@@ -8,7 +8,11 @@ import uk.ac.wellcome.platform.transformer.sierra.generators.{
 }
 import uk.ac.wellcome.platform.transformer.sierra.source.MarcSubfield
 
-class SierraShelfmarkTest extends AnyFunSpec with Matchers with MarcGenerators with SierraDataGenerators {
+class SierraShelfmarkTest
+    extends AnyFunSpec
+    with Matchers
+    with MarcGenerators
+    with SierraDataGenerators {
   it("returns no shelfmark if there is no 949") {
     val varFields = List()
 
