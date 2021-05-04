@@ -8,6 +8,7 @@ import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.time.{Seconds, Span}
 import org.scalatest.{Assertion, Suite}
 import uk.ac.wellcome.elasticsearch.model.IndexId
+import uk.ac.wellcome.elasticsearch.IndexConfig
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil.toJson
@@ -48,9 +49,15 @@ trait IndexFixtures extends ElasticsearchFixtures { this: Suite =>
       testWith(index)
     }
 
+  def withLocalIndex[R](config: IndexConfig)(testWith: TestWith[Index, R]): R =
+    withLocalElasticsearchIndex[R](config) { index =>
+      testWith(index)
+    }
+
   def assertElasticsearchEventuallyHasWork[State <: WorkState](
     index: Index,
-    works: Work[State]*)(implicit enc: Encoder[Work[State]]): Seq[Assertion] = {
+    works: Work[State]*
+  )(implicit enc: Encoder[Work[State]]): Seq[Assertion] = {
     implicit val id: IndexId[Work[State]] =
       (work: Work[State]) => work.id
     assertElasticsearchEventuallyHas(index, works: _*)
@@ -58,15 +65,17 @@ trait IndexFixtures extends ElasticsearchFixtures { this: Suite =>
 
   def assertElasticsearchEventuallyHasImage[State <: ImageState](
     index: Index,
-    images: Image[State]*)(
-    implicit enc: Encoder[Image[State]]): Seq[Assertion] = {
+    images: Image[State]*
+  )(implicit enc: Encoder[Image[State]]): Seq[Assertion] = {
     implicit val id: IndexId[Image[State]] =
       (image: Image[State]) => image.id
     assertElasticsearchEventuallyHas(index, images: _*)
   }
 
-  def assertElasticsearchNeverHasWork(index: Index,
-                                      works: Work[Identified]*): Unit = {
+  def assertElasticsearchNeverHasWork(
+    index: Index,
+    works: Work[Identified]*
+  ): Unit = {
     implicit val id: IndexId[Work[Identified]] =
       (work: Work[Identified]) => work.state.canonicalId.toString
     assertElasticsearchNeverHas(index, works: _*)
@@ -74,7 +83,8 @@ trait IndexFixtures extends ElasticsearchFixtures { this: Suite =>
 
   def insertIntoElasticsearch[State <: WorkState](
     index: Index,
-    works: Work[State]*)(implicit encoder: Encoder[Work[State]]): Assertion = {
+    works: Work[State]*
+  )(implicit encoder: Encoder[Work[State]]): Assertion = {
     val result = elasticClient.execute(
       bulk(
         works.map { work =>
@@ -95,9 +105,10 @@ trait IndexFixtures extends ElasticsearchFixtures { this: Suite =>
     }
   }
 
-  def insertImagesIntoElasticsearch[State <: ImageState](index: Index,
-                                                         images: Image[State]*)(
-    implicit encoder: Encoder[Image[State]]): Assertion = {
+  def insertImagesIntoElasticsearch[State <: ImageState](
+    index: Index,
+    images: Image[State]*
+  )(implicit encoder: Encoder[Image[State]]): Assertion = {
     val result = elasticClient.execute(
       bulk(
         images.map { image =>
@@ -116,7 +127,7 @@ trait IndexFixtures extends ElasticsearchFixtures { this: Suite =>
       getSizeOf(index) shouldBe images.size
     }
   }
-  private def getSizeOf(index: Index): Long =
+  def getSizeOf(index: Index): Long =
     elasticClient
       .execute { count(index.name) }
       .await

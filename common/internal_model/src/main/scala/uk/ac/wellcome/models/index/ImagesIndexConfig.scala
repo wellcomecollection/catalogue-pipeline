@@ -42,8 +42,8 @@ object IndexedImageIndexConfig extends IndexConfig with IndexConfigFields {
         objectField("id").fields(canonicalId, sourceIdentifier),
         objectField("data").fields(
           objectField("otherIdentifiers").fields(lowercaseKeyword("value")),
-          multilingualKeywordField("title"),
-          multilingualKeywordField("alternativeTitles"),
+          multilingualFieldWithKeyword("title"),
+          multilingualFieldWithKeyword("alternativeTitles"),
           multilingualField("description"),
           englishTextKeywordField("physicalDescription"),
           multilingualField("lettering"),
