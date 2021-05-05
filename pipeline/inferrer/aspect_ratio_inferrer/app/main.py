@@ -7,8 +7,7 @@ logger = get_logger(__name__)
 
 # initialise API
 logger.info("Starting API")
-app = FastAPI(title="Aspect ratio extractor",
-              description="extracts aspect ratios")
+app = FastAPI(title="Aspect ratio extractor", description="extracts aspect ratios")
 logger.info("API started, awaiting requests")
 
 
