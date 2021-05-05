@@ -1,6 +1,7 @@
 locals {
-  feature_inferrer_port = 3141
-  palette_inferrer_port = 3142
+  feature_inferrer_port      = 3141
+  palette_inferrer_port      = 3142
+  aspect_ratio_inferrer_port = 3143
   //  High inferrer throughput comes at the cost of the latency distribution
   // having heavy tails - this stops some unfortunate messages from being
   // put on the DLQ when they are consumed but not processed.
@@ -107,17 +108,39 @@ module "image_inferrer" {
         timeout     = 5
       }
     }
+    aspect_ratio_inferrer = {
+      image  = local.aspect_ratio_inferrer_image
+      cpu    = local.inferrer_cpu
+      memory = local.inferrer_memory
+      env_vars = {
+        PORT = local.aspect_ratio_inferrer_port
+      }
+      secret_env_vars = {}
+      mount_points = [{
+        containerPath = local.shared_storage_path,
+        sourceVolume  = local.shared_storage_name
+      }]
+      healthcheck = {
+        command     = ["CMD-SHELL", "curl -f http://localhost:${local.aspect_ratio_inferrer_port}/healthcheck"],
+        interval    = 30,
+        retries     = 3,
+        startPeriod = 30,
+        timeout     = 5
+      }
+    }
   }
 
   manager_env_vars = {
-    feature_inferrer_host = "localhost"
-    feature_inferrer_port = local.feature_inferrer_port
-    palette_inferrer_host = "localhost"
-    palette_inferrer_port = local.palette_inferrer_port
-    metrics_namespace     = "${local.namespace_hyphen}_image_inferrer"
-    topic_arn             = module.image_inferrer_topic.arn
-    queue_url             = module.image_inferrer_queue.url
-    images_root           = local.shared_storage_path
+    feature_inferrer_host      = "localhost"
+    feature_inferrer_port      = local.feature_inferrer_port
+    palette_inferrer_host      = "localhost"
+    palette_inferrer_port      = local.palette_inferrer_port
+    aspect_ratio_inferrer_host = "localhost"
+    aspect_ratio_inferrer_port = local.palette_inferrer_port
+    metrics_namespace          = "${local.namespace_hyphen}_image_inferrer"
+    topic_arn                  = module.image_inferrer_topic.arn
+    queue_url                  = module.image_inferrer_queue.url
+    images_root                = local.shared_storage_path
 
     es_initial_images_index   = local.es_images_initial_index
     es_augmented_images_index = local.es_images_augmented_index

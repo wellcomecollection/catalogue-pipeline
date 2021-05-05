@@ -16,6 +16,7 @@ import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.platform.inference_manager.adapters.{
+  AspectRatioInferrerAdapter,
   FeatureVectorInferrerAdapter,
   InferrerAdapter,
   PaletteInferrerAdapter
@@ -43,13 +44,15 @@ class ManagerInferrerIntegrationTest
     with IntegrationPatience
     with InferenceManagerWorkerServiceFixture {
 
-  it("augments images with feature and palette vectors") {
+  it("augments images with features, palettes, and aspect ratios") {
     val image = createImageDataWith(
       locations = List(
         createDigitalLocationWith(
           locationType = LocationType.IIIFImageAPI,
           url = s"http://localhost:$localImageServerPort/test-image.jpg"
-        ))).toInitialImage
+        )
+      )
+    ).toInitialImage
 
     withWorkerServiceFixtures(image) {
       case (QueuePair(queue, dlq), messageSender, augmentedImages, rootDir) =>
@@ -79,7 +82,9 @@ class ManagerInferrerIntegrationTest
                     lshEncodedFeatures,
                     palette,
                     binSizes,
-                    binMinima) =>
+                    binMinima,
+                    aspectRatio
+                    ) =>
                   features1 should have length 2048
                   features2 should have length 2048
                   forAll(features1 ++ features2) { _.isNaN shouldBe false }
@@ -87,6 +92,7 @@ class ManagerInferrerIntegrationTest
                   every(palette) should fullyMatch regex """\d+/\d+"""
                   every(binSizes) should not be empty
                   binMinima should not be empty
+                  aspectRatio should not be empty
               }
           }
         }
@@ -95,7 +101,8 @@ class ManagerInferrerIntegrationTest
 
   val localInferrerPorts: Map[String, Int] = Map(
     "feature" -> 3141,
-    "palette" -> 3142
+    "palette" -> 3142,
+    "aspect_ratio" -> 3143
   )
   val localImageServerPort = 2718
 
@@ -110,11 +117,16 @@ class ManagerInferrerIntegrationTest
     }
 
   def withWorkerServiceFixtures[R](image: Image[Initial])(
-    testWith: TestWith[(QueuePair,
-                        MemoryMessageSender,
-                        mutable.Map[String, Image[Augmented]],
-                        File),
-                       R]): R =
+    testWith: TestWith[
+      (
+        QueuePair,
+        MemoryMessageSender,
+        mutable.Map[String, Image[Augmented]],
+        File
+      ),
+      R
+    ]
+  ): R =
     // We would like a timeout longer than 1s here because the inferrer
     // may need to warm up.
     withLocalSqsQueuePair(visibilityTimeout = 5) { queuePair =>
@@ -131,11 +143,16 @@ class ManagerInferrerIntegrationTest
           adapters = Set(
             new FeatureVectorInferrerAdapter(
               "localhost",
-              localInferrerPorts("feature")),
+              localInferrerPorts("feature")
+            ),
             new PaletteInferrerAdapter(
               "localhost",
               localInferrerPorts("palette")
             ),
+            new AspectRatioInferrerAdapter(
+              "localhost",
+              localInferrerPorts("aspect_ratio")
+            )
           ),
           fileWriter = new DefaultFileWriter(root.getPath),
           inferrerRequestPool =

@@ -17,7 +17,7 @@ encoder = Encoder()
 batch_inferrer_queue = BatchExecutionQueue(encoder, batch_size=8, timeout=1)
 
 
-@app.get("/aspect_ratio/")
+@app.get("/aspect-ratio/")
 async def main(query_url: str):
     try:
         image = await get_image_from_url(query_url)

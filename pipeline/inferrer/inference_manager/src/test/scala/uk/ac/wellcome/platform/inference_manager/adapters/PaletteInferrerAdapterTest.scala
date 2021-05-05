@@ -34,7 +34,8 @@ class PaletteInferrerAdapterTest
         case HttpRequest(method, uri, _, _, _) =>
           method should be(HttpMethods.GET)
           uri.toString() should be(
-            s"http://palette_inferrer:80/palette/?query_url=file://${downloadedImage.path}")
+            s"http://palette_inferrer:80/palette/?query_url=file://${downloadedImage.path}"
+          )
       }
     }
   }
@@ -59,7 +60,9 @@ class PaletteInferrerAdapterTest
             _,
             paletteResponse,
             binSizesResponse,
-            binMinimaResponse) =>
+            binMinimaResponse,
+            _
+            ) =>
           paletteResponse should be(palette)
           binSizesResponse should be(binSizes)
           binMinimaResponse should be(binMinima)

@@ -15,7 +15,8 @@ object Responses {
   def featureInferrerDeterministic(seed: Int): HttpResponse = json(
     s"""{
       "features_b64": "${Encoding.toLittleEndianBase64(
-         randomFeatureVector(seed))}",
+         randomFeatureVector(seed)
+       )}",
       "lsh_encoded_features": [${randomLshVector(seed)
          .map(str => s""""$str"""")
          .mkString(", ")}]
@@ -24,6 +25,17 @@ object Responses {
 
   def featureInferrer: HttpResponse =
     featureInferrerDeterministic(Random.nextInt())
+
+  def aspectRatioInferrerDeterministic(seed: Int): HttpResponse = json(
+    s"""{
+      "aspect_ratio": "${randomAspectRatio(seed).toString()}"
+    }"""
+  )
+
+  def aspectRatioInferrer: HttpResponse =
+    aspectRatioInferrerDeterministic(Random.nextInt())
+
+  def randomAspectRatio(seed: Int): Float = new Random(seed).nextFloat()
 
   def paletteInferrerDeterministic(seed: Int): HttpResponse = json(
     s"""{
