@@ -112,7 +112,7 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
         objectField("id").fields(
           canonicalId,
           sourceIdentifier,
-          objectField("otherIdentifiers").fields(lowercaseKeyword("value"))
+          objectField("otherIdentifiers").fields(sourceIdentifierFields)
         )
       ),
       objectField("production").fields(

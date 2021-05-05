@@ -2,6 +2,7 @@ package uk.ac.wellcome.models.index
 
 import com.sksamuel.elastic4s.ElasticDsl._
 import WorksAnalysis._
+import com.sksamuel.elastic4s.requests.mappings.KeywordField
 
 /** Mixin for common fields used within an IndexConfig in our internal models.
   */
@@ -58,7 +59,14 @@ trait IndexConfigFields {
 
   val version = intField("version")
 
+  val sourceIdentifierFields: Seq[KeywordField] =
+    Seq(
+      keywordField("identifierType.id"),
+      keywordField("ontologyType"),
+      lowercaseKeyword("value")
+    )
+
   val sourceIdentifier = objectField("sourceIdentifier")
-    .fields(lowercaseKeyword("value"))
+    .fields(sourceIdentifierFields)
     .dynamic("false")
 }
