@@ -78,7 +78,7 @@ steps:
           propagate-environment: true
           entrypoint: "/usr/bin/python3"
     command: "/workdir/.buildkite/scripts/publish.py"
+  - wait
   - command: .buildkite/scripts/tag_commit_as_latest.py
     label: "tag commit as latest"
-  - wait
 
