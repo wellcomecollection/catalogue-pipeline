@@ -64,9 +64,6 @@ steps:
   - command: .buildkite/scripts/run_job.py aspect_ratio_inferrer --changes-in pipeline/inferrer/aspect_ratio_inferrer
     label: "aspect ratio inferrer"
   - wait
-  - command: .buildkite/scripts/tag_commit_as_latest.py
-    label: "tag commit as latest"
-  - wait
   - label: publish internal model
     if: build.branch == "master"
     env:
@@ -81,4 +78,7 @@ steps:
           propagate-environment: true
           entrypoint: "/usr/bin/python3"
     command: "/workdir/.buildkite/scripts/publish.py"
+  - command: .buildkite/scripts/tag_commit_as_latest.py
+    label: "tag commit as latest"
+  - wait
 
