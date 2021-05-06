@@ -68,8 +68,6 @@ catalogue_pipeline:
       name: Production
     - id: stage
       name: Staging
-    - id: aspect-ratio
-      name: AspectRatio
   image_repositories:
     - id: id_minter
       services:
