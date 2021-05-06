@@ -9,12 +9,14 @@ locals {
   shared_storage_name      = "shared_storage"
   shared_storage_path      = "/data"
 
-  total_cpu       = 8192
-  total_memory    = 7512
-  manager_memory  = 2048
-  manager_cpu     = 1024
-  inferrer_cpu    = floor(0.5 * (local.total_cpu - local.manager_cpu))
-  inferrer_memory = floor(0.5 * (local.total_memory - local.manager_memory))
+  total_cpu           = 8192
+  total_memory        = 15463
+  manager_memory      = 2048
+  manager_cpu         = 1024
+  aspect_ratio_cpu    = 2048
+  aspect_ratio_memory = 2048
+  inferrer_cpu        = floor(0.5 * (local.total_cpu - local.manager_cpu - local.aspect_ratio_cpu))
+  inferrer_memory     = floor(0.5 * (local.total_memory - local.manager_memory - local.aspect_ratio_memory))
 }
 
 module "image_inferrer_queue" {
@@ -110,8 +112,8 @@ module "image_inferrer" {
     }
     aspect_ratio_inferrer = {
       image  = local.aspect_ratio_inferrer_image
-      cpu    = local.inferrer_cpu
-      memory = local.inferrer_memory
+      cpu    = local.aspect_ratio_cpu
+      memory = local.aspect_ratio_memory
       env_vars = {
         PORT = local.aspect_ratio_inferrer_port
       }
@@ -136,7 +138,7 @@ module "image_inferrer" {
     palette_inferrer_host      = "localhost"
     palette_inferrer_port      = local.palette_inferrer_port
     aspect_ratio_inferrer_host = "localhost"
-    aspect_ratio_inferrer_port = local.palette_inferrer_port
+    aspect_ratio_inferrer_port = local.aspect_ratio_inferrer_port
     metrics_namespace          = "${local.namespace_hyphen}_image_inferrer"
     topic_arn                  = module.image_inferrer_topic.arn
     queue_url                  = module.image_inferrer_queue.url

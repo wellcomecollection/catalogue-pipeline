@@ -65,10 +65,10 @@ module "catalogue_pipeline_2021-04-19" {
   storage_bucket_name = local.storage_bucket
 }
 
-module "catalogue_pipeline_2021-05-04" {
+module "catalogue_pipeline_2021-05-05" {
   source = "./stack"
 
-  pipeline_date = "2021-05-04"
+  pipeline_date = "2021-05-05"
   release_label = "stage"
 
   # Transformer config
@@ -76,27 +76,27 @@ module "catalogue_pipeline_2021-05-04" {
   # If this pipeline is meant to be reindexed, remember to uncomment the
   # reindexer topic names.
 
-  is_reindexing = true
+  is_reindexing = false
 
   sierra_adapter_topic_arns = [
-    local.sierra_reindexer_topic_arn,
+    //    local.sierra_reindexer_topic_arn,
     local.sierra_merged_bibs_topic_arn,
     local.sierra_merged_items_topic_arn,
     local.sierra_merged_holdings_topic_arn,
   ]
 
   miro_adapter_topic_arns = [
-    local.miro_reindexer_topic_arn,
+    //    local.miro_reindexer_topic_arn,
     local.miro_updates_topic_arn,
   ]
 
   mets_adapter_topic_arns = [
-    local.mets_reindexer_topic_arn,
+    //    local.mets_reindexer_topic_arn,
     local.mets_adapter_topic_arn,
   ]
 
   calm_adapter_topic_arns = [
-    local.calm_reindexer_topic_arn,
+    //    local.calm_reindexer_topic_arn,
     local.calm_adapter_topic_arn,
     local.calm_deletions_topic_arn,
   ]
