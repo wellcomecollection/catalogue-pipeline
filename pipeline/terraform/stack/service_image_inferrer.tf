@@ -10,11 +10,13 @@ locals {
   shared_storage_path      = "/data"
 
   total_cpu       = 8192
-  total_memory    = 7512
+  total_memory    = 15463
   manager_memory  = 2048
   manager_cpu     = 1024
-  inferrer_cpu    = floor(0.5 * (local.total_cpu - local.manager_cpu))
-  inferrer_memory = floor(0.5 * (local.total_memory - local.manager_memory))
+  aspect_ratio_cpu = 2048
+  aspect_ratio_memory = 2048
+  inferrer_cpu    = floor(0.5 * (local.total_cpu - local.manager_cpu - local.aspect_ratio_cpu))
+  inferrer_memory = floor(0.5 * (local.total_memory - local.manager_memory - local.aspect_ratio_memory))
 }
 
 module "image_inferrer_queue" {
@@ -110,8 +112,8 @@ module "image_inferrer" {
     }
     aspect_ratio_inferrer = {
       image  = local.aspect_ratio_inferrer_image
-      cpu    = local.inferrer_cpu
-      memory = local.inferrer_memory
+      cpu    = local.aspect_ratio_cpu
+      memory = local.aspect_ratio_memory
       env_vars = {
         PORT = local.aspect_ratio_inferrer_port
       }
