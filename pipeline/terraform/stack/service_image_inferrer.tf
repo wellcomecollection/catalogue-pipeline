@@ -9,14 +9,14 @@ locals {
   shared_storage_name      = "shared_storage"
   shared_storage_path      = "/data"
 
-  total_cpu       = 8192
-  total_memory    = 15463
-  manager_memory  = 2048
-  manager_cpu     = 1024
-  aspect_ratio_cpu = 2048
+  total_cpu           = 8192
+  total_memory        = 15463
+  manager_memory      = 2048
+  manager_cpu         = 1024
+  aspect_ratio_cpu    = 2048
   aspect_ratio_memory = 2048
-  inferrer_cpu    = floor(0.5 * (local.total_cpu - local.manager_cpu - local.aspect_ratio_cpu))
-  inferrer_memory = floor(0.5 * (local.total_memory - local.manager_memory - local.aspect_ratio_memory))
+  inferrer_cpu        = floor(0.5 * (local.total_cpu - local.manager_cpu - local.aspect_ratio_cpu))
+  inferrer_memory     = floor(0.5 * (local.total_memory - local.manager_memory - local.aspect_ratio_memory))
 }
 
 module "image_inferrer_queue" {
