@@ -72,7 +72,10 @@ class SierraShelfmarkTest
 
     getShelfmark(bibData, itemData) shouldBe Some("PP/BOW/P.1.2.3/10:Box 123,1")
 
-    getShelfmark(bibData.copy(materialType = Some(SierraMaterialType(ArchivesAndManuscripts.id))), itemData) shouldBe None
+    getShelfmark(
+      bibData.copy(
+        materialType = Some(SierraMaterialType(ArchivesAndManuscripts.id))),
+      itemData) shouldBe None
   }
 
   it("ignores any other 949 subfields") {
