@@ -1,5 +1,5 @@
 module "window_generator_lambda" {
-  source = "../lambda"
+  source = "../../../../infrastructure/modules/lambda"
 
   name = "tei_window_generator"
 

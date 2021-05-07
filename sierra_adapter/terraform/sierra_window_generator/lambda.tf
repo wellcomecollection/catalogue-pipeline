@@ -1,5 +1,5 @@
 module "window_generator_lambda" {
-  source = "../modules/lambda"
+  source = "../../../infrastructure/modules/lambda"
 
   name = "sierra_${var.resource_type}_window_generator"
 
