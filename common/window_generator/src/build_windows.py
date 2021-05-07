@@ -42,7 +42,17 @@ import json
 import math
 
 import boto3
+import click
 import pytz
+import tqdm
+
+SOURCES = {
+    "tei": "arn:aws:sns:eu-west-1:760097843905:tei_reharvest_windows",
+    "sierra-items": "arn:aws:sns:eu-west-1:760097843905:sierra_items_reharvest_windows",
+    "sierra-bibs": "arn:aws:sns:eu-west-1:760097843905:sierra_bibs_reharvest_windows",
+    "sierra-holdings": "arn:aws:sns:eu-west-1:760097843905:sierra_holdings_reharvest_windows",
+    "sierra-orders": "arn:aws:sns:eu-west-1:760097843905:sierra_orders_reharvest_windows",
+}
 
 
 def generate_windows(start, end, minutes):
@@ -56,28 +66,56 @@ def generate_windows(start, end, minutes):
         current += dt.timedelta(minutes=minutes - 1)
 
 
-if __name__ == "__main__":
-    import docopt
-    import maya
-    import tqdm
+@click.command()
+@click.option(
+    "--start",
+    required=True,
+    type=click.DateTime(),
+    prompt="At what datetime should windows start?",
+)
+@click.option(
+    "--end",
+    required=True,
+    type=click.DateTime(),
+    prompt="At what datetime should windows end?",
+)
+@click.option(
+    "--window-length",
+    required=True,
+    type=int,
+    default=30,
+    prompt="How long should the windows be in minutes?",
+)
+@click.option(
+    "--resource",
+    required=True,
+    type=click.Choice(SOURCES.keys()),
+    prompt="Which resource?",
+)
+def main(start, end, window_length, resource):
+    sts = boto3.client("sts")
+    response = sts.assume_role(
+        RoleArn="arn:aws:iam::760097843905:role/platform-developer",
+        RoleSessionName="platform",
+    )
+    session = boto3.Session(
+        aws_access_key_id=response["Credentials"]["AccessKeyId"],
+        aws_secret_access_key=response["Credentials"]["SecretAccessKey"],
+        aws_session_token=response["Credentials"]["SessionToken"],
+        region_name="eu-west-1",
+    )
+    client = session.client("sns")
 
-    args = docopt.docopt(__doc__)
-
-    start = maya.parse(args["--start"]).datetime()
-    end = maya.parse(args["--end"]).datetime()
-    minutes = int(args["--window_length"] or 30)
-    resource = args["--resource"]
-
-    assert resource in ("bibs", "items", "holdings", "orders")
-
-    client = boto3.client("sns")
-
+    topic = SOURCES[resource]
     for window in tqdm.tqdm(
-        generate_windows(start, end, minutes),
-        total=math.ceil((end - start).total_seconds() / 60 / (minutes - 1)),
+            generate_windows(start, end, window_length),
+            total=math.ceil((end - start).total_seconds() / 60 / (window_length - 1)),
     ):
         client.publish(
-            # TODO: parametrise topic
-            TopicArn=f"arn:aws:sns:eu-west-1:760097843905:sierra_{resource}_reharvest_windows",
+            TopicArn=topic,
             Message=json.dumps(window),
         )
+
+
+if __name__ == "__main__":
+    main()
