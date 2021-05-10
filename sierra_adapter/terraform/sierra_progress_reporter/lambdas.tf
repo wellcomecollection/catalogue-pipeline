@@ -1,5 +1,5 @@
 module "lambda" {
-  source = "../modules/lambda"
+  source = "../../../infrastructure/modules/lambda"
 
   name = "${var.namespace}-sierra_progress_reporter"
 
