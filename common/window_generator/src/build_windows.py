@@ -108,13 +108,10 @@ def main(start, end, window_length, resource):
 
     topic = SOURCES[resource]
     for window in tqdm.tqdm(
-            generate_windows(start, end, window_length),
-            total=math.ceil((end - start).total_seconds() / 60 / (window_length - 1)),
+        generate_windows(start, end, window_length),
+        total=math.ceil((end - start).total_seconds() / 60 / (window_length - 1)),
     ):
-        client.publish(
-            TopicArn=topic,
-            Message=json.dumps(window),
-        )
+        client.publish(TopicArn=topic, Message=json.dumps(window))
 
 
 if __name__ == "__main__":
