@@ -212,7 +212,7 @@ lazy val sierra_indexer = setupProject(
 lazy val mets_adapter = setupProject(
   project,
   folder = "mets_adapter/mets_adapter",
-  localDependencies = Seq(internal_model, source_model, flows),
+  localDependencies = Seq(source_model, flows),
   externalDependencies = CatalogueDependencies.metsAdapterDependencies
 )
 
@@ -246,7 +246,13 @@ lazy val inference_manager = setupProject(
   localDependencies = Seq(internal_model, pipeline_storage_typesafe),
   externalDependencies = CatalogueDependencies.inferenceManagerDependencies
 )
+// TEI adapter
 
+lazy val tei_github = setupProject(
+  project,
+  folder = "tei_adapter/tei_github",
+  externalDependencies = CatalogueDependencies.teiGitHubDependencies
+)
 // AWS Credentials to read from S3
 
 s3CredentialsProvider := { _ =>
