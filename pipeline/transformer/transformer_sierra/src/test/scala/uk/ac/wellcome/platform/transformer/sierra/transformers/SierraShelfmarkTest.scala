@@ -6,7 +6,13 @@ import uk.ac.wellcome.platform.transformer.sierra.generators.{
   MarcGenerators,
   SierraDataGenerators
 }
-import uk.ac.wellcome.platform.transformer.sierra.source.MarcSubfield
+import uk.ac.wellcome.platform.transformer.sierra.source.{
+  MarcSubfield,
+  SierraBibData,
+  SierraItemData,
+  SierraMaterialType
+}
+import weco.catalogue.internal_model.work.Format.ArchivesAndManuscripts
 
 class SierraShelfmarkTest
     extends AnyFunSpec
@@ -18,7 +24,7 @@ class SierraShelfmarkTest
 
     val itemData = createSierraItemDataWith(varFields = varFields)
 
-    SierraShelfmark(itemData) shouldBe None
+    getShelfmark(itemData = itemData) shouldBe None
   }
 
   it("uses the contents of field 949 subfield ǂa") {
@@ -33,7 +39,7 @@ class SierraShelfmarkTest
 
     val itemData = createSierraItemDataWith(varFields = varFields)
 
-    SierraShelfmark(itemData) shouldBe Some("S7956")
+    getShelfmark(itemData = itemData) shouldBe Some("S7956")
   }
 
   it("strips whitespace from shelfmarks") {
@@ -48,7 +54,28 @@ class SierraShelfmarkTest
 
     val itemData = createSierraItemDataWith(varFields = varFields)
 
-    SierraShelfmark(itemData) shouldBe Some("/LEATHER")
+    getShelfmark(itemData = itemData) shouldBe Some("/LEATHER")
+  }
+
+  it("suppresses shelfmarks for Archives & Manuscripts") {
+    val varFields = List(
+      createVarFieldWith(
+        marcTag = "949",
+        subfields = List(
+          MarcSubfield(tag = "a", content = "PP/BOW/P.1.2.3/10:Box 123,1")
+        )
+      )
+    )
+
+    val bibData = createSierraBibData
+    val itemData = createSierraItemDataWith(varFields = varFields)
+
+    getShelfmark(bibData, itemData) shouldBe Some("PP/BOW/P.1.2.3/10:Box 123,1")
+
+    getShelfmark(
+      bibData.copy(
+        materialType = Some(SierraMaterialType(ArchivesAndManuscripts.id))),
+      itemData) shouldBe None
   }
 
   it("ignores any other 949 subfields") {
@@ -63,6 +90,12 @@ class SierraShelfmarkTest
 
     val itemData = createSierraItemDataWith(varFields = varFields)
 
-    SierraShelfmark(itemData) shouldBe None
+    getShelfmark(itemData = itemData) shouldBe None
   }
+
+  private def getShelfmark(
+    bibData: SierraBibData = createSierraBibData,
+    itemData: SierraItemData
+  ): Option[String] =
+    SierraShelfmark(bibData, itemData)
 }

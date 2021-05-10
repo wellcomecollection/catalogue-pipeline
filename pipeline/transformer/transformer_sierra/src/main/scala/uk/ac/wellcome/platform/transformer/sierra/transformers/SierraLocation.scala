@@ -41,7 +41,7 @@ trait SierraLocation extends SierraQueryOps with Logging {
         locationType = locationType,
         accessConditions = getAccessConditions(bibNumber, bibData),
         label = label,
-        shelfmark = SierraShelfmark(itemData)
+        shelfmark = SierraShelfmark(bibData, itemData)
       )
     } yield physicalLocation
 
