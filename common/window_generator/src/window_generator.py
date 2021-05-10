@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 """
-Publish a new Sierra update window to SNS.
+Publish a new update window to SNS.
 """
 
 import datetime as dt
@@ -14,7 +14,7 @@ from build_windows import generate_windows
 
 
 def build_window(minutes):
-    """Construct the Sierra update window."""
+    """Construct the update window."""
     seconds = minutes * 60
 
     end = dt.datetime.now()

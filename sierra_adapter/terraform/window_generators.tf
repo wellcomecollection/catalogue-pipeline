@@ -1,7 +1,7 @@
 module "bibs_window_generator" {
-  source = "./sierra_window_generator"
+  source = "../../infrastructure/modules/window_generator"
 
-  resource_type = "bibs"
+  source_name = "sierra_bibs"
 
   window_length_minutes    = 8
   trigger_interval_minutes = 7
@@ -11,9 +11,9 @@ module "bibs_window_generator" {
 }
 
 module "items_window_generator" {
-  source = "./sierra_window_generator"
+  source = "../../infrastructure/modules/window_generator"
 
-  resource_type = "items"
+  source_name = "sierra_items"
 
   window_length_minutes    = 16
   trigger_interval_minutes = 15
@@ -23,9 +23,9 @@ module "items_window_generator" {
 }
 
 module "holdings_window_generator" {
-  source = "./sierra_window_generator"
+  source = "../../infrastructure/modules/window_generator"
 
-  resource_type = "holdings"
+  source_name = "sierra_holdings"
 
   window_length_minutes    = 16
   trigger_interval_minutes = 15
@@ -35,9 +35,9 @@ module "holdings_window_generator" {
 }
 
 module "orders_window_generator" {
-  source = "./sierra_window_generator"
+  source = "../../infrastructure/modules/window_generator"
 
-  resource_type = "orders"
+  source_name = "sierra_orders"
 
   window_length_minutes    = 16
   trigger_interval_minutes = 15

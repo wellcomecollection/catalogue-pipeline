@@ -1,5 +1,5 @@
 module "s3_demultiplexer_lambda" {
-  source      = "../modules/lambda"
+  source      = "../../../infrastructure/modules/lambda"
   s3_bucket   = var.infra_bucket
   s3_key      = "lambdas/sierra_adapter/s3_demultiplexer.zip"
   module_name = "s3_demultiplexer"

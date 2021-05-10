@@ -1,13 +1,13 @@
 module "window_generator_lambda" {
-  source = "../modules/lambda"
+  source = "../lambda"
 
-  name = "sierra_${var.resource_type}_window_generator"
+  name = "${var.source_name}_window_generator"
 
   s3_bucket   = var.infra_bucket
-  s3_key      = "lambdas/sierra_adapter/sierra_window_generator.zip"
-  module_name = "sierra_window_generator"
+  s3_key      = "lambdas/common/window_generator.zip"
+  module_name = "window_generator"
 
-  description     = "Asks the Sierra ${var.resource_type} reader to fetch new records from the API"
+  description     = "Send an update window"
   alarm_topic_arn = var.lambda_error_alarm_arn
   timeout         = 10
 

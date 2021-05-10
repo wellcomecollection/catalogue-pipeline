@@ -4,7 +4,7 @@ import datetime as dt
 import os
 from unittest import mock
 
-from sierra_window_generator import build_window, main
+from window_generator import build_window, main
 
 pytest_plugins = "catalogue_aws_fixtures"
 
