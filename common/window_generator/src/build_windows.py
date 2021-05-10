@@ -15,7 +15,7 @@ Options:
     --resource=<RESOURCE>   Should the pipeline fetch bibs or items?
 
 
-This script generates windows to poll for updates from Sierra, and sends
+This script generates windows to poll for updates, and sends
 them to the SNS topic that triggers our pipeline.  You pass it an interval
 (start, end), and then it generates windows of length ``window_length`` that
 cover the interval.
