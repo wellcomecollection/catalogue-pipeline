@@ -7,7 +7,6 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, MatcherResult}
 import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.pipeline_storage.MemoryRetriever
 import uk.ac.wellcome.platform.merger.fixtures.{
@@ -113,9 +112,8 @@ class MergerFeatureTest
           // get updated.
           retriever.index(idD.underlying) = workD_t4
 
-          val matcherResult_t5 = MatcherResult(
-            works =
-              Set(matchedIdentifiers(workA_t0, workB_t0, workC_t0, workD_t4)),
+          val matcherResult_t5 = createMatcherResultWith(
+            matchedEntries = Set(Set(workA_t0, workB_t0, workC_t0, workD_t4)),
             createdTime = time(t = 5)
           )
 
@@ -152,10 +150,8 @@ class MergerFeatureTest
           retriever.index(idA.underlying) = workA_t1
           retriever.index(idC.underlying) = workC_t3
 
-          val matcherResult_t6 = MatcherResult(
-            works = Set(
-              matchedIdentifiers(workA_t1, workD_t4),
-              matchedIdentifiers(workB_t0, workC_t3)),
+          val matcherResult_t6 = createMatcherResultWith(
+            matchedEntries = Set(Set(workA_t1, workD_t4), Set(workB_t0, workC_t3)),
             createdTime = time(t = 6)
           )
 
@@ -181,8 +177,8 @@ class MergerFeatureTest
           // 5) Now suppose we finally process the update to B at time t=7.
           retriever.index(idB.underlying) = workB_t2
 
-          val matcherResult_t7 = MatcherResult(
-            works = Set(matchedIdentifiers(workB_t2, workC_t3)),
+          val matcherResult_t7 = createMatcherResultWith(
+            matchedEntries = Set(Set(workB_t2, workC_t3)),
             createdTime = time(t = 7)
           )
 
@@ -212,9 +208,6 @@ class MergerFeatureTest
 
   private def time(t: Int): Instant =
     Instant.ofEpochSecond(t)
-
-  private def matchedIdentifiers(works: Work[Identified]*): MatchedIdentifiers =
-    MatchedIdentifiers(worksToWorkIdentifiers(works))
 
   private def getModifiedTimes(
     index: mutable.Map[String, WorkOrImage]): Map[CanonicalId, Instant] =
