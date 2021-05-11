@@ -43,9 +43,10 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
     val data = initData[DataState.Identified]
     Work.Visible[Merged](
       state = Merged(
-        sourceIdentifier,
-        canonicalId,
-        modifiedTime,
+        sourceIdentifier = sourceIdentifier,
+        canonicalId = canonicalId,
+        modifiedTime = modifiedTime,
+        sourceModifiedTime = modifiedTime,
         availabilities = Availabilities.forWorkData(data)),
       data = data,
       version = createVersion
@@ -64,6 +65,7 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
         sourceIdentifier = sourceIdentifier,
         canonicalId = canonicalId,
         modifiedTime = modifiedTime,
+        sourceModifiedTime = modifiedTime,
         availabilities = Availabilities.forWorkData(data),
         relations = relations
       ),
@@ -99,6 +101,8 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
         sourceIdentifier = sourceIdentifier,
         canonicalId = canonicalId,
         modifiedTime = modifiedTime,
+        sourceModifiedTime = modifiedTime,
+        indexedTime = Instant.now(),
         availabilities = Availabilities.forWorkData(data),
         derivedData = DerivedWorkData(data),
         relations = relations
