@@ -213,6 +213,6 @@ class MergerFeatureTest
   private def getModifiedTimes(
     index: mutable.Map[String, WorkOrImage]): Map[CanonicalId, Instant] =
     index.values.collect {
-      case Left(work) => work.state.canonicalId -> work.state.modifiedTime
+      case Left(work) => work.state.canonicalId -> work.state.mergedTime
     }.toMap
 }

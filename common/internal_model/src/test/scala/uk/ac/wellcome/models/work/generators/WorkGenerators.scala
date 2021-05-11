@@ -45,7 +45,7 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
       state = Merged(
         sourceIdentifier = sourceIdentifier,
         canonicalId = canonicalId,
-        modifiedTime = modifiedTime,
+        mergedTime = modifiedTime,
         sourceModifiedTime = modifiedTime,
         availabilities = Availabilities.forWorkData(data)),
       data = data,
@@ -64,7 +64,7 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
       state = Denormalised(
         sourceIdentifier = sourceIdentifier,
         canonicalId = canonicalId,
-        modifiedTime = modifiedTime,
+        mergedTime = modifiedTime,
         sourceModifiedTime = modifiedTime,
         availabilities = Availabilities.forWorkData(data),
         relations = relations
@@ -100,7 +100,7 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
       state = Indexed(
         sourceIdentifier = sourceIdentifier,
         canonicalId = canonicalId,
-        modifiedTime = modifiedTime,
+        mergedTime = modifiedTime,
         sourceModifiedTime = modifiedTime,
         indexedTime = Instant.now(),
         availabilities = Availabilities.forWorkData(data),

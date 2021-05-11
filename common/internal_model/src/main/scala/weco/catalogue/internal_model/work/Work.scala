@@ -178,7 +178,7 @@ object WorkState {
   case class Merged(
     sourceIdentifier: SourceIdentifier,
     canonicalId: CanonicalId,
-    modifiedTime: Instant,
+    mergedTime: Instant,
     sourceModifiedTime: Instant,
     availabilities: Set[Availability] = Set.empty,
   ) extends WorkState {
@@ -188,12 +188,16 @@ object WorkState {
 
     def id: String = canonicalId.toString
     val relations: Relations = Relations.none
+
+    // This is used to order updates in pipeline-storage.
+    // See https://github.com/wellcomecollection/docs/tree/main/rfcs/038-matcher-versioning
+    override val modifiedTime: Instant = mergedTime
   }
 
   case class Denormalised(
     sourceIdentifier: SourceIdentifier,
     canonicalId: CanonicalId,
-    modifiedTime: Instant,
+    mergedTime: Instant,
     sourceModifiedTime: Instant,
     availabilities: Set[Availability],
     relations: Relations = Relations.none
@@ -203,11 +207,15 @@ object WorkState {
     type TransitionArgs = (Relations, Set[Availability])
 
     def id = canonicalId.toString
+
+    // This is used to order updates in pipeline-storage.
+    // See https://github.com/wellcomecollection/docs/tree/main/rfcs/038-matcher-versioning
+    override val modifiedTime: Instant = mergedTime
   }
 
   /** Why are there three *Time parameters?
     *
-    * @param modifiedTime
+    * @param mergedTime
     *   When did this Work get processed by the matcher/merger?
     *   This is used to order updates in pipeline-storage.
     *   See https://github.com/wellcomecollection/docs/tree/main/rfcs/038-matcher-versioning
@@ -221,7 +229,7 @@ object WorkState {
   case class Indexed(
     sourceIdentifier: SourceIdentifier,
     canonicalId: CanonicalId,
-    modifiedTime: Instant,
+    mergedTime: Instant,
     sourceModifiedTime: Instant,
     indexedTime: Instant,
     availabilities: Set[Availability],
@@ -233,6 +241,8 @@ object WorkState {
     type TransitionArgs = Unit
 
     def id = canonicalId.toString
+
+    override val modifiedTime: Instant = mergedTime
   }
 }
 
@@ -264,7 +274,7 @@ object WorkFsm {
       Merged(
         sourceIdentifier = state.sourceIdentifier,
         canonicalId = state.canonicalId,
-        modifiedTime = mergedTime,
+        mergedTime = mergedTime,
         sourceModifiedTime = state.modifiedTime,
         availabilities = Availabilities.forWorkData(data),
       )
@@ -284,7 +294,7 @@ object WorkFsm {
             Denormalised(
               sourceIdentifier = state.sourceIdentifier,
               canonicalId = state.canonicalId,
-              modifiedTime = state.modifiedTime,
+              mergedTime = state.mergedTime,
               sourceModifiedTime = state.sourceModifiedTime,
               availabilities = state.availabilities ++ relationAvailabilities,
               relations = relations
@@ -303,7 +313,7 @@ object WorkFsm {
       Indexed(
         sourceIdentifier = state.sourceIdentifier,
         canonicalId = state.canonicalId,
-        modifiedTime = state.modifiedTime,
+        mergedTime = state.mergedTime,
         sourceModifiedTime = state.sourceModifiedTime,
         indexedTime = Instant.now(),
         availabilities = state.availabilities,
