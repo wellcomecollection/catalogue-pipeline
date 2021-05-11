@@ -49,16 +49,24 @@ case object MiroRecord {
   private def unescapeHtml(s: String): String =
     StringEscapeUtils.unescapeHtml3(s)
 
-  /* Adêle Mongrédien's name has been mangled as Unicode nonsense in the
-   * Miro exports.  This presents as ugly nonsense in the API, and it affects
-   * a fair number of works, to replace it properly.
+  /* Fix a couple of names that got mangled in the Miro exports:
+   *
+   *    Adêle Mongrédien
+   *    Hermann von Schlagintweit-Sakünlünski
+   *
+   * This presents as ugly nonsense in the API.
+   *
+   * These checks are deliberately conservative to avoid introducing more
+   * problems than they fix.  The long-term fix is for these Miro records to
+   * get paired with Sierra records with the correct data.
    */
-  private def fixAdeleUnicode(s: String): String =
+  private def fixBadUnicode(s: String): String =
     s.replaceAll("Ad\\u00c3\\u00aale", "Adêle")
       .replaceAll("Mongr\\u00c3\\u00a9dien", "Mongrédien")
+      .replaceAll("Sak\\u00c3\\u00bcnl\\u00c3\\u00bcnski", "Sakünlünski")
 
   def create(jsonString: String): MiroRecord = {
-    val unescapedData = fixAdeleUnicode(unescapeHtml(jsonString))
+    val unescapedData = fixBadUnicode(unescapeHtml(jsonString))
 
     fromJson[MiroRecord](unescapedData) match {
       case Success(miroRecord) => miroRecord
