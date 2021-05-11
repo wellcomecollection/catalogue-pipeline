@@ -54,6 +54,8 @@ case object MiroRecord {
    *    Adêle Mongrédien
    *    Hermann von Schlagintweit-Sakünlünski
    *    Écorché horse
+   *    Félix Méheux
+   *    André Just
    *
    * This presents as ugly nonsense in the API.
    *
@@ -62,10 +64,11 @@ case object MiroRecord {
    * get paired with Sierra records with the correct data.
    */
   private def fixBadUnicode(s: String): String =
-    s.replaceAll("Ad\\u00c3\\u00aale", "Adêle")
-      .replaceAll("Mongr\\u00c3\\u00a9dien", "Mongrédien")
-      .replaceAll("Sak\\u00c3\\u00bcnl\\u00c3\\u00bcnski", "Sakünlünski")
-      .replaceAll("\\u00c3&#8240;corch\\u00c3\\u00a9", "Écorché")
+    s
+      .replaceAll("\\u00c3\\u00aa", "ê")
+      .replaceAll("\\u00c3\\u00a9", "é")
+      .replaceAll("\\u00c3\\u00bc", "ü")
+      .replaceAll("\\u00c3&#8240;", "É")
 
   def create(jsonString: String): MiroRecord = {
     val unescapedData = fixBadUnicode(unescapeHtml(jsonString))
