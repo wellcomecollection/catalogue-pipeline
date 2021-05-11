@@ -153,7 +153,9 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
     .fields(
       canonicalId,
       sourceIdentifier,
-      dateField("modifiedTime"),
+      dateField("sourceModifiedTime"),
+      dateField("mergedTime"),
+      dateField("indexedTime"),
       objectField("availabilities").fields(keywordField("id")),
       objectField("relations")
         .fields(

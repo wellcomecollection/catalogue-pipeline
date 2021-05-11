@@ -1,7 +1,9 @@
 package uk.ac.wellcome.models.index
 
+import com.sksamuel.elastic4s.ElasticDsl._
+import com.sksamuel.elastic4s.requests.indexes.IndexResponse
 import org.scalacheck.ScalacheckShapeless._
-import com.sksamuel.elastic4s.ElasticError
+import com.sksamuel.elastic4s.{ElasticError, Index, Response}
 import org.scalacheck.Gen.chooseNum
 import org.scalacheck.{Arbitrary, Shrink}
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
@@ -10,19 +12,18 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import io.circe.Encoder
 import io.circe.generic.semiauto.deriveEncoder
+import uk.ac.wellcome.json.JsonUtil.toJson
 import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.WorkGenerators
 import weco.catalogue.internal_model.generators.ImageGenerators
-import weco.catalogue.internal_model.identifiers.{
-  CanonicalId,
-  IdState,
-  SourceIdentifier
-}
+import weco.catalogue.internal_model.identifiers.{CanonicalId, IdState, SourceIdentifier}
 import weco.catalogue.internal_model.locations.{AccessCondition, AccessStatus}
 import weco.catalogue.internal_model.work._
+import scala.concurrent.ExecutionContext.Implicits.global
 
 import java.time.Instant
+import scala.concurrent.Future
 
 class WorksIndexConfigTest
     extends AnyFunSpec
@@ -41,7 +42,11 @@ class WorksIndexConfigTest
   )
   // On failure, scalacheck tries to shrink to the smallest input that causes a failure.
   // With IdentifiedWork, that means that it never actually completes.
-  implicit val noShrink = Shrink.shrinkAny[Work[WorkState.Identified]]
+  implicit val noShrinkSource = Shrink.shrinkAny[Work[WorkState.Source]]
+  implicit val noShrinkMerged = Shrink.shrinkAny[Work[WorkState.Merged]]
+  implicit val noShrinkDenormalised = Shrink.shrinkAny[Work[WorkState.Denormalised]]
+  implicit val noShrinkIdentified = Shrink.shrinkAny[Work[WorkState.Identified]]
+  implicit val noShrinkIndexed = Shrink.shrinkAny[Work[WorkState.Indexed]]
 
   // We use this for the scalacheck of the java.time.Instant type
   // We could just import the library, but I might wait until we need more
@@ -75,11 +80,71 @@ class WorksIndexConfigTest
 
   implicit val badObjectEncoder: Encoder[BadTestObject] = deriveEncoder
 
-  it("puts a valid work") {
-    forAll { sampleWork: Work[WorkState.Identified] =>
-      withLocalWorksIndex { index =>
-        whenReady(indexObject(index, sampleWork)) { _ =>
-          assertObjectIndexed(index, sampleWork)
+  describe("indexing different works with every type of WorkState") {
+    it("WorkState.Source") {
+      forAll { sourceWork: Work[WorkState.Source] =>
+        withLocalIndex(SourceWorkIndexConfig) { index =>
+          println(sourceWork)
+          whenReady(indexObject(index, sourceWork)) { _ =>
+            assertObjectIndexed(index, sourceWork)
+          }
+        }
+      }
+    }
+
+    it("WorkState.Identified") {
+      forAll { identifiedWork: Work[WorkState.Identified] =>
+        withLocalIndex(IdentifiedWorkIndexConfig) { index =>
+          whenReady(indexObject(index, identifiedWork)) { _ =>
+            assertObjectIndexed(index, identifiedWork)
+          }
+        }
+      }
+    }
+
+    it("WorkState.Merged") {
+      forAll { mergedWork: Work[WorkState.Merged] =>
+        withLocalIndex(MergedWorkIndexConfig) { index =>
+          whenReady(indexObject(index, mergedWork)) { _ =>
+            assertObjectIndexed(index, mergedWork)
+          }
+        }
+      }
+    }
+
+    it("WorkState.Denormalised") {
+      forAll { denormalisedWork: Work[WorkState.Denormalised] =>
+        withLocalIndex(DenormalisedWorkIndexConfig) { index =>
+          whenReady(indexObject(index, denormalisedWork)) { _ =>
+            assertObjectIndexed(index, denormalisedWork)
+          }
+        }
+      }
+    }
+
+    it("WorkState.Indexed") {
+      def indexObject2[T](index: Index, t: T)(
+        implicit encoder: Encoder[T]): Future[Response[IndexResponse]] = {
+        val doc = toJson(t).get
+        debug(s"ingesting: $doc")
+        elasticClient
+          .execute {
+            indexInto(index.name).doc(doc)
+          }
+          .map { r =>
+            println(r)
+//            if (r.isError) {
+//              error(s"Error from Elasticsearch: $r")
+//            }
+            r
+          }
+      }
+
+      forAll { indexedWork: Work[WorkState.Indexed] =>
+        withLocalIndex(IndexedWorkIndexConfig) { index =>
+          whenReady(indexObject2(index, indexedWork)) { _ =>
+            assertObjectIndexed(index, indexedWork)
+          }
         }
       }
     }
