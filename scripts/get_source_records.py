@@ -122,7 +122,9 @@ def _get_mets_record(session, *, b_number):
     s3 = session.client("s3")
 
     try:
-        item = dynamodb.get_item(TableName=METS_ADAPTER_TABLE, Key={"id": b_number})["Item"]
+        item = dynamodb.get_item(TableName=METS_ADAPTER_TABLE, Key={"id": b_number})[
+            "Item"
+        ]
     except KeyError:
         raise RuntimeError(f"No METS item with ID {id} in {METS_ADAPTER_TABLE}")
 
@@ -152,9 +154,7 @@ def get_source_record(session, *, source_identifier, apply_cleanups):
         # The sourceIdentifier has a b-number like b19489936, but the
         # Sierra VHS keys records without their prefix/check digit, ie 1948993
         b_number = source_identifier["value"][1:8]
-        record = _get_vhs_record(
-            session, table_name=SIERRA_ADAPTER_TABLE, id=b_number
-        )
+        record = _get_vhs_record(session, table_name=SIERRA_ADAPTER_TABLE, id=b_number)
 
         if apply_cleanups:
             transformable = json.loads(record)
@@ -214,8 +214,7 @@ if __name__ == "__main__":
             continue
 
         out_path = os.path.join(
-            temp_dir,
-            f"{id['identifierType']['id']}_{id['value']}.json"
+            temp_dir, f"{id['identifierType']['id']}_{id['value']}.json"
         )
 
         with open(out_path, "w") as outfile:
