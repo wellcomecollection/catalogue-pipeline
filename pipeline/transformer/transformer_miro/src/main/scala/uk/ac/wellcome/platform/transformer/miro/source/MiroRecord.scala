@@ -64,8 +64,7 @@ case object MiroRecord {
    * get paired with Sierra records with the correct data.
    */
   private def fixBadUnicode(s: String): String =
-    s
-      .replaceAll("\\u00c3\\u00aa", "ê")
+    s.replaceAll("\\u00c3\\u00aa", "ê")
       .replaceAll("\\u00c3\\u00a9", "é")
       .replaceAll("\\u00c3\\u00bc", "ü")
       .replaceAll("\\u00c3&#8240;", "É")
