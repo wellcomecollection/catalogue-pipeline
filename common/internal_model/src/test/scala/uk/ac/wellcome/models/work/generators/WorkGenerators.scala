@@ -27,10 +27,10 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
 
   def sourceWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
-    modifiedTime: Instant = instantInLast30Days
+    sourceModifiedTime: Instant = instantInLast30Days
   ): Work.Visible[Source] =
     Work.Visible[Source](
-      state = Source(sourceIdentifier, modifiedTime),
+      state = Source(sourceIdentifier, sourceModifiedTime),
       data = initData,
       version = createVersion
     )
@@ -77,13 +77,13 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
   def identifiedWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     canonicalId: CanonicalId = createCanonicalId,
-    modifiedTime: Instant = instantInLast30Days,
+    sourceModifiedTime: Instant = instantInLast30Days,
   ): Work.Visible[Identified] =
     Work.Visible[Identified](
       state = Identified(
         sourceIdentifier = sourceIdentifier,
         canonicalId = canonicalId,
-        modifiedTime = modifiedTime,
+        sourceModifiedTime = sourceModifiedTime,
       ),
       data = initData,
       version = createVersion
@@ -92,7 +92,7 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
   def indexedWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     canonicalId: CanonicalId = createCanonicalId,
-    modifiedTime: Instant = instantInLast30Days,
+    mergedTime: Instant = instantInLast30Days,
     relations: Relations = Relations.none
   ): Work.Visible[Indexed] = {
     val data = initData[DataState.Identified]
@@ -100,8 +100,8 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
       state = Indexed(
         sourceIdentifier = sourceIdentifier,
         canonicalId = canonicalId,
-        mergedTime = modifiedTime,
-        sourceModifiedTime = modifiedTime,
+        mergedTime = mergedTime,
+        sourceModifiedTime = mergedTime,
         indexedTime = Instant.now(),
         availabilities = Availabilities.forWorkData(data),
         derivedData = DerivedWorkData(data),

@@ -152,7 +152,7 @@ object WorkState {
 
   case class Source(
     sourceIdentifier: SourceIdentifier,
-    modifiedTime: Instant
+    sourceModifiedTime: Instant
   ) extends WorkState {
 
     type WorkDataState = DataState.Unidentified
@@ -160,12 +160,14 @@ object WorkState {
 
     def id = sourceIdentifier.toString
     val relations = Relations.none
+
+    override val modifiedTime: Instant = sourceModifiedTime
   }
 
   case class Identified(
     sourceIdentifier: SourceIdentifier,
     canonicalId: CanonicalId,
-    modifiedTime: Instant,
+    sourceModifiedTime: Instant,
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified
@@ -173,6 +175,8 @@ object WorkState {
 
     def id = canonicalId.toString
     val relations = Relations.none
+
+    override val modifiedTime: Instant = sourceModifiedTime
   }
 
   case class Merged(
@@ -275,7 +279,7 @@ object WorkFsm {
         sourceIdentifier = state.sourceIdentifier,
         canonicalId = state.canonicalId,
         mergedTime = mergedTime,
-        sourceModifiedTime = state.modifiedTime,
+        sourceModifiedTime = state.sourceModifiedTime,
         availabilities = Availabilities.forWorkData(data),
       )
 
