@@ -151,7 +151,8 @@ class MergerFeatureTest
           retriever.index(idC.underlying) = workC_t3
 
           val matcherResult_t6 = createMatcherResultWith(
-            matchedEntries = Set(Set(workA_t1, workD_t4), Set(workB_t0, workC_t3)),
+            matchedEntries =
+              Set(Set(workA_t1, workD_t4), Set(workB_t0, workC_t3)),
             createdTime = time(t = 6)
           )
 
