@@ -1,5 +1,6 @@
 package weco.catalogue.internal_model.work
 
+import io.circe.generic.extras.JsonKey
 import weco.catalogue.internal_model.identifiers.{
   CanonicalId,
   DataState,
@@ -152,7 +153,7 @@ object WorkState {
 
   case class Source(
     sourceIdentifier: SourceIdentifier,
-    sourceModifiedTime: Instant
+    @JsonKey("modifiedTime") sourceModifiedTime: Instant
   ) extends WorkState {
 
     type WorkDataState = DataState.Unidentified
@@ -167,7 +168,7 @@ object WorkState {
   case class Identified(
     sourceIdentifier: SourceIdentifier,
     canonicalId: CanonicalId,
-    sourceModifiedTime: Instant,
+    @JsonKey("modifiedTime") sourceModifiedTime: Instant,
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified
@@ -182,7 +183,7 @@ object WorkState {
   case class Merged(
     sourceIdentifier: SourceIdentifier,
     canonicalId: CanonicalId,
-    mergedTime: Instant,
+    @JsonKey("modifiedTime") mergedTime: Instant,
     sourceModifiedTime: Instant,
     availabilities: Set[Availability] = Set.empty,
   ) extends WorkState {
@@ -201,7 +202,7 @@ object WorkState {
   case class Denormalised(
     sourceIdentifier: SourceIdentifier,
     canonicalId: CanonicalId,
-    mergedTime: Instant,
+    @JsonKey("modifiedTime") mergedTime: Instant,
     sourceModifiedTime: Instant,
     availabilities: Set[Availability],
     relations: Relations = Relations.none
@@ -233,7 +234,7 @@ object WorkState {
   case class Indexed(
     sourceIdentifier: SourceIdentifier,
     canonicalId: CanonicalId,
-    mergedTime: Instant,
+    @JsonKey("modifiedTime") mergedTime: Instant,
     sourceModifiedTime: Instant,
     indexedTime: Instant,
     availabilities: Set[Availability],
