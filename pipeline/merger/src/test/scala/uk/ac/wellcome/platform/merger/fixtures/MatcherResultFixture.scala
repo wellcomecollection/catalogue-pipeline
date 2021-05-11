@@ -9,23 +9,16 @@ import uk.ac.wellcome.models.matcher.{
 import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.catalogue.internal_model.work.Work
 
+import java.time.Instant
+
 trait MatcherResultFixture extends RandomGenerators {
-  def createMatcherResultWith(matchedEntries: Set[Set[Work[Identified]]]) =
+  def createMatcherResultWith(
+    matchedEntries: Set[Set[Work[Identified]]],
+    createdTime: Instant = randomInstant): MatcherResult =
     MatcherResult(
       works = matchedEntries.map { works =>
-        MatchedIdentifiers(worksToWorkIdentifiers(works))
+        MatchedIdentifiers(works.map { WorkIdentifier(_) })
       },
-      createdTime = randomInstant
+      createdTime = createdTime
     )
-
-  def worksToWorkIdentifiers(
-    works: Seq[Work[Identified]]): Set[WorkIdentifier] =
-    worksToWorkIdentifiers(works.toSet)
-
-  def worksToWorkIdentifiers(
-    works: Set[Work[Identified]]): Set[WorkIdentifier] =
-    works
-      .map { work =>
-        WorkIdentifier(work)
-      }
 }
