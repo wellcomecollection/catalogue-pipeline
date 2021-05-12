@@ -152,7 +152,7 @@ object WorkState {
 
   case class Source(
     sourceIdentifier: SourceIdentifier,
-    modifiedTime: Instant
+    sourceModifiedTime: Instant
   ) extends WorkState {
 
     type WorkDataState = DataState.Unidentified
@@ -160,12 +160,14 @@ object WorkState {
 
     def id = sourceIdentifier.toString
     val relations = Relations.none
+
+    override val modifiedTime: Instant = sourceModifiedTime
   }
 
   case class Identified(
     sourceIdentifier: SourceIdentifier,
     canonicalId: CanonicalId,
-    modifiedTime: Instant,
+    sourceModifiedTime: Instant,
   ) extends WorkState {
 
     type WorkDataState = DataState.Identified
@@ -173,12 +175,15 @@ object WorkState {
 
     def id = canonicalId.toString
     val relations = Relations.none
+
+    override val modifiedTime: Instant = sourceModifiedTime
   }
 
   case class Merged(
     sourceIdentifier: SourceIdentifier,
     canonicalId: CanonicalId,
-    modifiedTime: Instant,
+    mergedTime: Instant,
+    sourceModifiedTime: Instant,
     availabilities: Set[Availability] = Set.empty,
   ) extends WorkState {
 
@@ -187,12 +192,17 @@ object WorkState {
 
     def id: String = canonicalId.toString
     val relations: Relations = Relations.none
+
+    // This is used to order updates in pipeline-storage.
+    // See https://github.com/wellcomecollection/docs/tree/main/rfcs/038-matcher-versioning
+    override val modifiedTime: Instant = mergedTime
   }
 
   case class Denormalised(
     sourceIdentifier: SourceIdentifier,
     canonicalId: CanonicalId,
-    modifiedTime: Instant,
+    mergedTime: Instant,
+    sourceModifiedTime: Instant,
     availabilities: Set[Availability],
     relations: Relations = Relations.none
   ) extends WorkState {
@@ -201,12 +211,31 @@ object WorkState {
     type TransitionArgs = (Relations, Set[Availability])
 
     def id = canonicalId.toString
+
+    // This is used to order updates in pipeline-storage.
+    // See https://github.com/wellcomecollection/docs/tree/main/rfcs/038-matcher-versioning
+    override val modifiedTime: Instant = mergedTime
   }
 
+  /** Why are there three *Time parameters?
+    *
+    * @param mergedTime
+    *   When did this Work get processed by the matcher/merger?
+    *   This is used to order updates in pipeline-storage.
+    *   See https://github.com/wellcomecollection/docs/tree/main/rfcs/038-matcher-versioning
+    * @param sourceModifiedTime
+    *   When was the underlying source record updated in the source system?
+    * @param indexedTime
+    *   When was this work indexed, and thus made available in the API?
+    *   Combined with sourceModifiedTime, this allows us to track the latency
+    *   of the pipeline.
+    */
   case class Indexed(
     sourceIdentifier: SourceIdentifier,
     canonicalId: CanonicalId,
-    modifiedTime: Instant,
+    mergedTime: Instant,
+    sourceModifiedTime: Instant,
+    indexedTime: Instant,
     availabilities: Set[Availability],
     derivedData: DerivedWorkData,
     relations: Relations = Relations.none
@@ -216,6 +245,8 @@ object WorkState {
     type TransitionArgs = Unit
 
     def id = canonicalId.toString
+
+    override val modifiedTime: Instant = mergedTime
   }
 }
 
@@ -243,11 +274,12 @@ object WorkFsm {
   implicit val identifiedToMerged = new Transition[Identified, Merged] {
     def state(state: Identified,
               data: WorkData[DataState.Identified],
-              modifiedTime: Instant): Merged =
+              mergedTime: Instant): Merged =
       Merged(
         sourceIdentifier = state.sourceIdentifier,
         canonicalId = state.canonicalId,
-        modifiedTime = modifiedTime,
+        mergedTime = mergedTime,
+        sourceModifiedTime = state.sourceModifiedTime,
         availabilities = Availabilities.forWorkData(data),
       )
 
@@ -266,7 +298,8 @@ object WorkFsm {
             Denormalised(
               sourceIdentifier = state.sourceIdentifier,
               canonicalId = state.canonicalId,
-              modifiedTime = state.modifiedTime,
+              mergedTime = state.mergedTime,
+              sourceModifiedTime = state.sourceModifiedTime,
               availabilities = state.availabilities ++ relationAvailabilities,
               relations = relations
             )
@@ -284,7 +317,9 @@ object WorkFsm {
       Indexed(
         sourceIdentifier = state.sourceIdentifier,
         canonicalId = state.canonicalId,
-        modifiedTime = state.modifiedTime,
+        mergedTime = state.mergedTime,
+        sourceModifiedTime = state.sourceModifiedTime,
+        indexedTime = Instant.now(),
         availabilities = state.availabilities,
         derivedData = DerivedWorkData(data),
         relations = state.relations

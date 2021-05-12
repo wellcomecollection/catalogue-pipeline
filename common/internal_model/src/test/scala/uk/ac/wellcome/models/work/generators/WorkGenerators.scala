@@ -27,10 +27,10 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
 
   def sourceWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
-    modifiedTime: Instant = instantInLast30Days
+    sourceModifiedTime: Instant = instantInLast30Days
   ): Work.Visible[Source] =
     Work.Visible[Source](
-      state = Source(sourceIdentifier, modifiedTime),
+      state = Source(sourceIdentifier, sourceModifiedTime),
       data = initData,
       version = createVersion
     )
@@ -43,10 +43,12 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
     val data = initData[DataState.Identified]
     Work.Visible[Merged](
       state = Merged(
-        sourceIdentifier,
-        canonicalId,
-        modifiedTime,
-        availabilities = Availabilities.forWorkData(data)),
+        sourceIdentifier = sourceIdentifier,
+        canonicalId = canonicalId,
+        mergedTime = modifiedTime,
+        sourceModifiedTime = modifiedTime,
+        availabilities = Availabilities.forWorkData(data)
+      ),
       data = data,
       version = createVersion
     )
@@ -63,7 +65,8 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
       state = Denormalised(
         sourceIdentifier = sourceIdentifier,
         canonicalId = canonicalId,
-        modifiedTime = modifiedTime,
+        mergedTime = modifiedTime,
+        sourceModifiedTime = modifiedTime,
         availabilities = Availabilities.forWorkData(data),
         relations = relations
       ),
@@ -75,13 +78,13 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
   def identifiedWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     canonicalId: CanonicalId = createCanonicalId,
-    modifiedTime: Instant = instantInLast30Days,
+    sourceModifiedTime: Instant = instantInLast30Days,
   ): Work.Visible[Identified] =
     Work.Visible[Identified](
       state = Identified(
         sourceIdentifier = sourceIdentifier,
         canonicalId = canonicalId,
-        modifiedTime = modifiedTime,
+        sourceModifiedTime = sourceModifiedTime,
       ),
       data = initData,
       version = createVersion
@@ -90,7 +93,7 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
   def indexedWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     canonicalId: CanonicalId = createCanonicalId,
-    modifiedTime: Instant = instantInLast30Days,
+    mergedTime: Instant = instantInLast30Days,
     relations: Relations = Relations.none
   ): Work.Visible[Indexed] = {
     val data = initData[DataState.Identified]
@@ -98,7 +101,9 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
       state = Indexed(
         sourceIdentifier = sourceIdentifier,
         canonicalId = canonicalId,
-        modifiedTime = modifiedTime,
+        mergedTime = mergedTime,
+        sourceModifiedTime = mergedTime,
+        indexedTime = Instant.now(),
         availabilities = Availabilities.forWorkData(data),
         derivedData = DerivedWorkData(data),
         relations = relations

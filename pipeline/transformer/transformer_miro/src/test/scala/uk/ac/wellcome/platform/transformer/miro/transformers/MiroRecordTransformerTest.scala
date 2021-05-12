@@ -378,7 +378,7 @@ class MiroRecordTransformerTest
         createMiroSourceIdentifierWith(
           value = miroRecord.imageNumber
         ),
-        modifiedTime = Instant.EPOCH
+        sourceModifiedTime = Instant.EPOCH
       ),
       version = 1,
       data = WorkData(),
@@ -404,7 +404,7 @@ class MiroRecordTransformerTest
         createMiroSourceIdentifierWith(
           value = miroRecord.imageNumber
         ),
-        modifiedTime = Instant.EPOCH
+        sourceModifiedTime = Instant.EPOCH
       ),
       version = 1,
       data = WorkData(),

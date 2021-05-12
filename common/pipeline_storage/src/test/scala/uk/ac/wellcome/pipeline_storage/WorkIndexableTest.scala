@@ -32,7 +32,7 @@ class WorkIndexableTest
 
       val newWork: Work.Visible[Identified] = originalWork.copy(
         state = originalWork.state.copy(
-          modifiedTime = originalWork.state.modifiedTime + (2 days)))
+          sourceModifiedTime = originalWork.state.sourceModifiedTime + (2 days)))
 
       withWorksIndexAndIndexer {
         case (index, indexer) =>
@@ -77,7 +77,7 @@ class WorkIndexableTest
 
       val olderWork: Work.Visible[Identified] = originalWork.copy(
         state = originalWork.state.copy(
-          modifiedTime = originalWork.state.modifiedTime - (2 days)))
+          sourceModifiedTime = originalWork.state.sourceModifiedTime - (2 days)))
 
       withWorksIndexAndIndexer {
         case (index, indexer) =>

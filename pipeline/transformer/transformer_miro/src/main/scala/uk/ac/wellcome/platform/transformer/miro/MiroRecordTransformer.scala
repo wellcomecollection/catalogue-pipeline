@@ -68,7 +68,7 @@ class MiroRecordTransformer
     val state = Source(
       sourceIdentifier = sourceIdentifier,
       // Miro records are static so we just send 0 as a last modification timestamp
-      modifiedTime = Instant.EPOCH
+      sourceModifiedTime = Instant.EPOCH
     )
 
     if (!miroMetadata.isClearedForCatalogueAPI) {

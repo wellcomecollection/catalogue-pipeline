@@ -56,10 +56,14 @@ class MergerFeatureTest
     //
     //      D <--> C
     //
-    val workA_t0 = identifiedWork(canonicalId = idA, modifiedTime = time(t = 0))
-    val workB_t0 = identifiedWork(canonicalId = idB, modifiedTime = time(t = 0))
-    val workC_t0 = identifiedWork(canonicalId = idC, modifiedTime = time(t = 0))
-    val workD_t0 = identifiedWork(canonicalId = idD, modifiedTime = time(t = 0))
+    val workA_t0 =
+      identifiedWork(canonicalId = idA, sourceModifiedTime = time(t = 0))
+    val workB_t0 =
+      identifiedWork(canonicalId = idB, sourceModifiedTime = time(t = 0))
+    val workC_t0 =
+      identifiedWork(canonicalId = idC, sourceModifiedTime = time(t = 0))
+    val workD_t0 =
+      identifiedWork(canonicalId = idD, sourceModifiedTime = time(t = 0))
 
     val index = mutable.Map[String, WorkOrImage](
       idA.underlying -> Left(workA_t0.transition[Merged](time(t = 0))),
@@ -87,16 +91,16 @@ class MergerFeatureTest
           // However, due to best-effort ordering, we don't process these updates
           // in the correct order.
           val workA_t1 =
-            identifiedWork(canonicalId = idA, modifiedTime = time(t = 1))
+            identifiedWork(canonicalId = idA, sourceModifiedTime = time(t = 1))
               .title("I was updated at t = 1")
           val workB_t2 =
-            identifiedWork(canonicalId = idB, modifiedTime = time(t = 2))
+            identifiedWork(canonicalId = idB, sourceModifiedTime = time(t = 2))
               .title("I was updated at t = 2")
           val workC_t3 =
-            identifiedWork(canonicalId = idC, modifiedTime = time(t = 3))
+            identifiedWork(canonicalId = idC, sourceModifiedTime = time(t = 3))
               .title("I was updated at t = 3")
           val workD_t4 =
-            identifiedWork(canonicalId = idD, modifiedTime = time(t = 4))
+            identifiedWork(canonicalId = idD, sourceModifiedTime = time(t = 4))
               .title("I was updated at t = 4")
 
           // 3) Suppose the update to D gets processed by the matcher at
@@ -213,6 +217,6 @@ class MergerFeatureTest
   private def getModifiedTimes(
     index: mutable.Map[String, WorkOrImage]): Map[CanonicalId, Instant] =
     index.values.collect {
-      case Left(work) => work.state.canonicalId -> work.state.modifiedTime
+      case Left(work) => work.state.canonicalId -> work.state.mergedTime
     }.toMap
 }
