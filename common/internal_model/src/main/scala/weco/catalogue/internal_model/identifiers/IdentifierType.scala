@@ -105,4 +105,9 @@ object IdentifierType extends Enum[IdentifierType] {
     val id = "wellcome-digcode"
     val label = "Wellcome digcode"
   }
+
+  case object IconographicNumber extends IdentifierType {
+    val id = "iconographic-number"
+    val label = "Iconographic number"
+  }
 }
