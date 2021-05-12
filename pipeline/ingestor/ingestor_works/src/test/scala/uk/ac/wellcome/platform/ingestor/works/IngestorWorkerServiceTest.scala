@@ -138,9 +138,9 @@ class IngestorWorkerServiceTest
                 sendNotificationToSQS(queue = queue, body = work.id)
               }
 
-              assertElasticsearchEventuallyHasWork[Indexed](
-                index = indexedIndex,
-                works.map(WorkTransformer.deriveData): _*)
+              works.foreach {
+                assertWorkIndexed(indexedIndex, _)
+              }
 
               assertQueueEmpty(queue)
               assertQueueEmpty(dlq)
