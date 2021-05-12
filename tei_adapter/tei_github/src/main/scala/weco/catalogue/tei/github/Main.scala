@@ -16,7 +16,8 @@ object Main extends WellcomeTypesafeApp {
     GitHubWorkerService(
       messageStream = SQSBuilder.buildSQSStream(config),
       messageSender = SNSBuilder
-        .buildSNSMessageSender(config, subject = "TEI github service")
+        .buildSNSMessageSender(config, subject = "TEI github service"),
+      ""
     )
   }
 }

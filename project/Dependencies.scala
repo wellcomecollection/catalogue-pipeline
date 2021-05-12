@@ -304,6 +304,7 @@ object CatalogueDependencies {
 
   val teiGitHubDependencies: Seq[ModuleID] = {
     WellcomeDependencies.messagingTypesafeLibrary ++
+    WellcomeDependencies.typesafeLibrary ++
       ExternalDependencies.scalatestDependencies
   }
 }

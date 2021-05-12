@@ -1,0 +1,98 @@
+{
+  "sha": "db7581026bb9149330225dc2b9411202b3cd6894",
+  "node_id": "MDY6Q29tbWl0MTY0NDYyMTYwOmRiNzU4MTAyNmJiOTE0OTMzMDIyNWRjMmI5NDExMjAyYjNjZDY4OTQ=",
+  "commit": {
+    "author": {
+      "name": "laras20",
+      "email": "66060097+laras20@users.noreply.github.com",
+      "date": "2021-05-06T12:33:44Z"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2021-05-06T12:33:44Z"
+    },
+    "message": "Updated altIdentifier",
+    "tree": {
+      "sha": "b5be5b4b6b04b6c96a283f56891ff51a463cf16c",
+      "url": "https://api.github.com/repos/wellcomecollection/wellcome-collection-tei/git/trees/b5be5b4b6b04b6c96a283f56891ff51a463cf16c"
+    },
+    "url": "https://api.github.com/repos/wellcomecollection/wellcome-collection-tei/git/commits/db7581026bb9149330225dc2b9411202b3cd6894",
+    "comment_count": 0,
+    "verification": {
+      "verified": true,
+      "reason": "valid",
+      "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsBcBAABCAAQBQJgk+IoCRBK7hj4Ov3rIwAAwJEIAEx0Nu3COJ5wvFLomnRITIZ+\nk0dt5GcnLCSsvBtS0zz2RSKZowOZQBhjiVq1ExAfl2bUS81Lp8XYlyD7J23A2KLi\nt1MBB0q/97h9+52t8EZpTvOw9LYxK65ZR1KUo1gWR8fw5YCKNS/pKtwNN5Zc8Im/\nftU932qXZ63fpPjgMjXnK7V0Dpjqq65pyJlbcqsRyVYG7eqDu9Mkf8Wvq5fBfxOL\n/9EqPInhFRn4F8+CqdVo9uNdbasVycQyfwrK3ekuI4VwVOQDfihWwcG1WeUv+ahy\nC6EBv8fm4DdVq7L6QbHC7fR0/BffECSrl8OMp5XRJ2rcF5S/LAWENN8AGMLkTzE=\n=4s8z\n-----END PGP SIGNATURE-----\n",
+      "payload": "tree b5be5b4b6b04b6c96a283f56891ff51a463cf16c\nparent 1e394d3186b6a8ed5f0fa8af33b99bdc59d7c544\nauthor laras20 <66060097+laras20@users.noreply.github.com> 1620304424 +0100\ncommitter GitHub <noreply@github.com> 1620304424 +0100\n\nUpdated altIdentifier"
+    }
+  },
+  "url": "https://api.github.com/repos/wellcomecollection/wellcome-collection-tei/commits/db7581026bb9149330225dc2b9411202b3cd6894",
+  "html_url": "https://github.com/wellcomecollection/wellcome-collection-tei/commit/db7581026bb9149330225dc2b9411202b3cd6894",
+  "comments_url": "https://api.github.com/repos/wellcomecollection/wellcome-collection-tei/commits/db7581026bb9149330225dc2b9411202b3cd6894/comments",
+  "author": {
+    "login": "laras20",
+    "id": 66060097,
+    "node_id": "MDQ6VXNlcjY2MDYwMDk3",
+    "avatar_url": "https://avatars.githubusercontent.com/u/66060097?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/laras20",
+    "html_url": "https://github.com/laras20",
+    "followers_url": "https://api.github.com/users/laras20/followers",
+    "following_url": "https://api.github.com/users/laras20/following{/other_user}",
+    "gists_url": "https://api.github.com/users/laras20/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/laras20/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/laras20/subscriptions",
+    "organizations_url": "https://api.github.com/users/laras20/orgs",
+    "repos_url": "https://api.github.com/users/laras20/repos",
+    "events_url": "https://api.github.com/users/laras20/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/laras20/received_events",
+    "type": "User",
+    "site_admin": false
+  },
+  "committer": {
+    "login": "web-flow",
+    "id": 19864447,
+    "node_id": "MDQ6VXNlcjE5ODY0NDQ3",
+    "avatar_url": "https://avatars.githubusercontent.com/u/19864447?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/web-flow",
+    "html_url": "https://github.com/web-flow",
+    "followers_url": "https://api.github.com/users/web-flow/followers",
+    "following_url": "https://api.github.com/users/web-flow/following{/other_user}",
+    "gists_url": "https://api.github.com/users/web-flow/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/web-flow/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/web-flow/subscriptions",
+    "organizations_url": "https://api.github.com/users/web-flow/orgs",
+    "repos_url": "https://api.github.com/users/web-flow/repos",
+    "events_url": "https://api.github.com/users/web-flow/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/web-flow/received_events",
+    "type": "User",
+    "site_admin": false
+  },
+  "parents": [
+    {
+      "sha": "1e394d3186b6a8ed5f0fa8af33b99bdc59d7c544",
+      "url": "https://api.github.com/repos/wellcomecollection/wellcome-collection-tei/commits/1e394d3186b6a8ed5f0fa8af33b99bdc59d7c544",
+      "html_url": "https://github.com/wellcomecollection/wellcome-collection-tei/commit/1e394d3186b6a8ed5f0fa8af33b99bdc59d7c544"
+    }
+  ],
+  "stats": {
+    "total": 6,
+    "additions": 6,
+    "deletions": 0
+  },
+  "files": [
+    {
+      "sha": "f794b7e5bc6041042b82c3f2874e5d4724d1cdde",
+      "filename": "Arabic/WMS_Arabic_62.xml",
+      "status": "modified",
+      "additions": 6,
+      "deletions": 0,
+      "changes": 6,
+      "blob_url": "https://github.com/wellcomecollection/wellcome-collection-tei/blob/db7581026bb9149330225dc2b9411202b3cd6894/Arabic/WMS_Arabic_62.xml",
+      "raw_url": "https://github.com/wellcomecollection/wellcome-collection-tei/raw/db7581026bb9149330225dc2b9411202b3cd6894/Arabic/WMS_Arabic_62.xml",
+      "contents_url": "https://api.github.com/repos/wellcomecollection/wellcome-collection-tei/contents/Arabic/WMS_Arabic_62.xml?ref=db7581026bb9149330225dc2b9411202b3cd6894",
+      "patch": "@@ -22,6 +22,12 @@\n                   <repository>Wellcome Collection</repository>\r\n                   <collection> Manuscripts in Arabic</collection>\r\n                   <idno>MS Arabic 62</idno>\r\n+                   <altIdentifier type=\"former\">\r\n+                    <idno>WMS. Or. 62 (Iskandar)</idno>\r\n+                  </altIdentifier>\r\n+                  <altIdentifier type=\"former\">\r\n+                    <idno>WMS. Or. 62</idno>\r\n+                  </altIdentifier>\r\n                </msIdentifier>\r\n \r\n                <msPart xml:id=\"WMS_Arabic_62-part1\">\r"
+    }
+  ]
+}
