@@ -56,10 +56,14 @@ class MergerFeatureTest
     //
     //      D <--> C
     //
-    val workA_t0 = identifiedWork(canonicalId = idA, sourceModifiedTime = time(t = 0))
-    val workB_t0 = identifiedWork(canonicalId = idB, sourceModifiedTime = time(t = 0))
-    val workC_t0 = identifiedWork(canonicalId = idC, sourceModifiedTime = time(t = 0))
-    val workD_t0 = identifiedWork(canonicalId = idD, sourceModifiedTime = time(t = 0))
+    val workA_t0 =
+      identifiedWork(canonicalId = idA, sourceModifiedTime = time(t = 0))
+    val workB_t0 =
+      identifiedWork(canonicalId = idB, sourceModifiedTime = time(t = 0))
+    val workC_t0 =
+      identifiedWork(canonicalId = idC, sourceModifiedTime = time(t = 0))
+    val workD_t0 =
+      identifiedWork(canonicalId = idD, sourceModifiedTime = time(t = 0))
 
     val index = mutable.Map[String, WorkOrImage](
       idA.underlying -> Left(workA_t0.transition[Merged](time(t = 0))),

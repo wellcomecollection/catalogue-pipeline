@@ -28,7 +28,8 @@ trait IngestorFixtures
       .between(instant, Instant.now)
       .getSeconds should be <= recentSeconds.toLong
 
-  def assertWorkIndexed(index: Index, work: Work[WorkState.Denormalised]): Assertion =
+  def assertWorkIndexed(index: Index,
+                        work: Work[WorkState.Denormalised]): Assertion =
     eventually {
       val response: Response[GetResponse] = elasticClient.execute {
         get(index, work.state.canonicalId.toString)
@@ -38,7 +39,8 @@ trait IngestorFixtures
 
       getResponse.exists shouldBe true
 
-      val storedWork = fromJson[Work[WorkState.Indexed]](getResponse.sourceAsString).get
+      val storedWork =
+        fromJson[Work[WorkState.Indexed]](getResponse.sourceAsString).get
       val expectedWork = WorkTransformer.deriveData(work)
 
       storedWork.data shouldBe expectedWork.data

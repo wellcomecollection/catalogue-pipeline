@@ -47,7 +47,8 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
         canonicalId = canonicalId,
         mergedTime = modifiedTime,
         sourceModifiedTime = modifiedTime,
-        availabilities = Availabilities.forWorkData(data)),
+        availabilities = Availabilities.forWorkData(data)
+      ),
       data = data,
       version = createVersion
     )

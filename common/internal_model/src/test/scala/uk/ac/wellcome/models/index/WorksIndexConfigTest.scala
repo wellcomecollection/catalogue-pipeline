@@ -17,7 +17,11 @@ import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.WorkGenerators
 import weco.catalogue.internal_model.generators.ImageGenerators
-import weco.catalogue.internal_model.identifiers.{CanonicalId, IdState, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  CanonicalId,
+  IdState,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.locations.{AccessCondition, AccessStatus}
 import weco.catalogue.internal_model.work._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -44,7 +48,8 @@ class WorksIndexConfigTest
   // With IdentifiedWork, that means that it never actually completes.
   implicit val noShrinkSource = Shrink.shrinkAny[Work[WorkState.Source]]
   implicit val noShrinkMerged = Shrink.shrinkAny[Work[WorkState.Merged]]
-  implicit val noShrinkDenormalised = Shrink.shrinkAny[Work[WorkState.Denormalised]]
+  implicit val noShrinkDenormalised =
+    Shrink.shrinkAny[Work[WorkState.Denormalised]]
   implicit val noShrinkIdentified = Shrink.shrinkAny[Work[WorkState.Identified]]
   implicit val noShrinkIndexed = Shrink.shrinkAny[Work[WorkState.Indexed]]
 

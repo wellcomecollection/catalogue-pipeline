@@ -504,7 +504,8 @@ class PlatformMergerTest
           canonicalId = sierraDigitisedWork.state.canonicalId,
           sourceIdentifier = sierraDigitisedWork.sourceIdentifier,
           sourceModifiedTime = sierraDigitisedWork.state.sourceModifiedTime,
-          mergedTime = now),
+          mergedTime = now
+        ),
         version = sierraDigitisedWork.version,
         redirectTarget = IdState.Identified(
           canonicalId = sierraPhysicalWork.state.canonicalId,
@@ -632,7 +633,8 @@ class PlatformMergerTest
           canonicalId = sierraDigitisedWork.state.canonicalId,
           sourceIdentifier = sierraDigitisedWork.sourceIdentifier,
           sourceModifiedTime = sierraDigitisedWork.state.sourceModifiedTime,
-          mergedTime = now),
+          mergedTime = now
+        ),
         version = sierraDigitisedWork.version,
         redirectTarget = IdState.Identified(
           canonicalId = multipleItemsSierraWork.state.canonicalId,
