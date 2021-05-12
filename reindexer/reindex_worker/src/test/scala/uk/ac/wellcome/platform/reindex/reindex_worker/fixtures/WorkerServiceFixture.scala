@@ -22,7 +22,11 @@ import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-trait WorkerServiceFixture extends Akka with SQS with ReindexDynamoFixtures with RandomGenerators {
+trait WorkerServiceFixture
+    extends Akka
+    with SQS
+    with ReindexDynamoFixtures
+    with RandomGenerators {
   val defaultJobConfigId = "testing"
 
   type Destination = String
