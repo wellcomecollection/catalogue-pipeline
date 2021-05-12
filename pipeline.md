@@ -37,9 +37,9 @@ Runs some [rules](https://github.com/wellcomecollection/catalogue/tree/864b998aa
 
 Each Unidentified Work or Image has an ID minted for it, using a source ID and avoiding dupes.
 
-### [Inferrer](https://github.com/wellcomecollection/catalogue/tree/master/pipeline/inferrer)
+### [Inferrer](pipeline/inferrer)
 
-Infers data from the image (currently, this data is a feature vector) and attaches that to the image. Composed of 2 coupled services as detailed in [this RFC](https://github.com/wellcomecollection/docs/tree/master/rfcs/021-data_science_in_the_pipeline).
+Infers data from the image (currently, this data is a feature vector) and attaches that to the image. Composed of 2 coupled services as detailed in [this RFC](https://github.com/wellcomecollection/docs/tree/main/rfcs/021-data_science_in_the_pipeline).
 
 ### [Ingestors](https://github.com/wellcomecollection/catalogue/tree/864b998aae9ed3fe40515edfef061c7c7371f721/pipeline/ingestor/README.md)
 

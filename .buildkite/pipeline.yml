@@ -65,7 +65,7 @@ steps:
     label: "aspect ratio inferrer"
   - wait
   - label: publish internal model
-    if: build.branch == "master"
+    if: build.branch == "main"
     env:
       PROJECT: internal_model
     plugins:
