@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.reindex.reindex_worker.fixtures
 
 import uk.ac.wellcome.akka.fixtures.Akka
-import uk.ac.wellcome.fixtures.TestWith
+import uk.ac.wellcome.fixtures.{RandomGenerators, TestWith}
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryIndividualMessageSender
@@ -21,15 +21,18 @@ import uk.ac.wellcome.platform.reindex.reindex_worker.services.{
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.Random
 
-trait WorkerServiceFixture extends Akka with SQS with ReindexDynamoFixtures {
+trait WorkerServiceFixture
+    extends Akka
+    with SQS
+    with ReindexDynamoFixtures
+    with RandomGenerators {
   val defaultJobConfigId = "testing"
 
   type Destination = String
 
   def createDestination: Destination =
-    Random.alphanumeric.take(8) mkString
+    randomAlphanumeric()
 
   def withWorkerService[R](
     messageSender: MemoryIndividualMessageSender,

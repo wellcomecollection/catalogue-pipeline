@@ -1,9 +1,7 @@
 package uk.ac.wellcome.models.index
 
-import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.requests.indexes.IndexResponse
 import org.scalacheck.ScalacheckShapeless._
-import com.sksamuel.elastic4s.{ElasticError, Index, Response}
+import com.sksamuel.elastic4s.ElasticError
 import org.scalacheck.Gen.chooseNum
 import org.scalacheck.{Arbitrary, Shrink}
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
@@ -12,7 +10,6 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import io.circe.Encoder
 import io.circe.generic.semiauto.deriveEncoder
-import uk.ac.wellcome.json.JsonUtil.toJson
 import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.WorkGenerators
@@ -24,10 +21,8 @@ import weco.catalogue.internal_model.identifiers.{
 }
 import weco.catalogue.internal_model.locations.{AccessCondition, AccessStatus}
 import weco.catalogue.internal_model.work._
-import scala.concurrent.ExecutionContext.Implicits.global
 
 import java.time.Instant
-import scala.concurrent.Future
 
 class WorksIndexConfigTest
     extends AnyFunSpec
@@ -128,26 +123,9 @@ class WorksIndexConfigTest
     }
 
     it("WorkState.Indexed") {
-      def indexObject2[T](index: Index, t: T)(
-        implicit encoder: Encoder[T]): Future[Response[IndexResponse]] = {
-        val doc = toJson(t).get
-        debug(s"ingesting: $doc")
-        elasticClient
-          .execute {
-            indexInto(index.name).doc(doc)
-          }
-          .map { r =>
-            println(r)
-//            if (r.isError) {
-//              error(s"Error from Elasticsearch: $r")
-//            }
-            r
-          }
-      }
-
       forAll { indexedWork: Work[WorkState.Indexed] =>
         withLocalIndex(IndexedWorkIndexConfig) { index =>
-          whenReady(indexObject2(index, indexedWork)) { _ =>
+          whenReady(indexObject(index, indexedWork)) { _ =>
             assertObjectIndexed(index, indexedWork)
           }
         }
