@@ -111,20 +111,7 @@ case class WorkData[State <: DataState](
   referenceNumber: Option[ReferenceNumber] = None,
   imageData: List[ImageData[State#Id]] = Nil,
   workType: WorkType = WorkType.Standard,
-) {
-
-  // We have separate fields for collectionPath and referenceNumber so we
-  // can set a referenceNumber which isn't part of a collection.
-  // (e.g. an Iconographic number on Sierra records.)
-  //
-  // If a collectionPath is set, we should always require a referenceNumber
-  // to be set, based on its value.
-  collectionPath match {
-    case Some(CollectionPath(_, Some(label))) =>
-      require(referenceNumber.contains(ReferenceNumber(label)))
-    case _ => ()
-  }
-}
+)
 
 /** WorkState represents the state of the work in the pipeline, and contains
   * different data depending on what state it is. This allows us to consider the
