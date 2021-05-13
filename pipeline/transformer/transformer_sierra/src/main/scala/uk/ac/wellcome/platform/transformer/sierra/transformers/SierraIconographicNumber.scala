@@ -12,17 +12,18 @@ object SierraIconographicNumber extends SierraDataTransformer with SierraQueryOp
   private val IconographicNumberMatch = "^([0-9]+i)$".r
 
   override def apply(bibData: SierraBibData): Option[String] =
-    if (bibData.isVisualCollections) {
-      bibData
-        .varfieldsWithTag("001")
-        .flatMap { _.content }
-        .collectFirst {
-          // There are a handful of cases where the value in this field doesn't
-          // look like an i-number, in which case we discard it.
-          case IconographicNumberMatch(number) => number
-        }
-    } else {
-      None
+    bibData match {
+      case _ if bibData.isVisualCollections =>
+        bibData
+          .varfieldsWithTag("001")
+          .flatMap { _.content }
+          .collectFirst {
+            // There are a handful of cases where the value in this field doesn't
+            // look like an i-number, in which case we discard it.
+            case IconographicNumberMatch(number) => number
+          }
+
+      case _ => None
     }
 
   private implicit class VisualCollectionOps(bibData: SierraBibData) {

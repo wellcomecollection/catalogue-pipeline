@@ -96,9 +96,21 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
       }
   }
 
-  def workDataFromBibData(bibId: SierraBibNumber, bibData: SierraBibData) =
+  def workDataFromBibData(bibId: SierraBibNumber, bibData: SierraBibData) = {
+    val iconographicNumber = SierraIconographicNumber(bibData)
+
+    val iconographicIdentifier =
+      List(iconographicNumber)
+        .collect { case Some(value) =>
+          SourceIdentifier(
+            identifierType = IdentifierType.IconographicNumber,
+            ontologyType = "Work",
+            value = value
+          )
+        }
+
     WorkData[DataState.Unidentified](
-      otherIdentifiers = SierraIdentifiers(bibId, bibData),
+      otherIdentifiers = SierraIdentifiers(bibId, bibData) ++ iconographicIdentifier,
       mergeCandidates = SierraMergeCandidates(bibId, bibData),
       title = SierraTitle(bibData),
       alternativeTitles = SierraAlternativeTitles(bibData),
@@ -118,8 +130,10 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
         SierraItemsOnOrder(bibId, hasItems = hasItems, orderDataMap) ++
           SierraItems(bibId, bibData, itemDataMap) ++
           SierraElectronicResources(bibId, varFields = bibData.varFields),
-      holdings = SierraHoldings(bibId, holdingsDataMap)
+      holdings = SierraHoldings(bibId, holdingsDataMap),
+      referenceNumber = iconographicNumber.map { ReferenceNumber(_) }
     )
+  }
 
   lazy val bibId = sierraTransformable.sierraId
 
