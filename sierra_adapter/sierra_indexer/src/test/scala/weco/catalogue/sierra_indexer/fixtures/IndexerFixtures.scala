@@ -1,7 +1,7 @@
 package weco.catalogue.sierra_indexer.fixtures
 
 import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.{ElasticClient, Index, Response}
+import com.sksamuel.elastic4s.{Index, Response}
 import com.sksamuel.elastic4s.requests.get.GetResponse
 import org.scalatest.{Assertion, Suite}
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
@@ -33,8 +33,6 @@ trait IndexerFixtures
   ): R =
     withActorSystem { implicit actorSystem =>
       withSQSStream[NotificationMessage, R](queue) { sqsStream =>
-        implicit val client: ElasticClient = elasticClient
-
         val worker = new Worker(sqsStream, typedStore, indexPrefix)
 
         worker.run()
