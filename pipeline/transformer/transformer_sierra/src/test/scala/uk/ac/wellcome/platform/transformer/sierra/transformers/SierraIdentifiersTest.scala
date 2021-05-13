@@ -8,6 +8,7 @@ import uk.ac.wellcome.platform.transformer.sierra.generators.{
 }
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   MarcSubfield,
+  SierraMaterialType,
   VarField
 }
 import weco.catalogue.internal_model.identifiers.{
@@ -281,6 +282,24 @@ class SierraIdentifiersTest
       }
       digcodeIdentifiers should have size 1
     }
+  }
+
+  it("finds the iconographic number from field 001 on visual collections") {
+    val bibData = createSierraBibDataWith(
+      materialType = Some(SierraMaterialType("r")),
+      varFields = List(
+        VarField(marcTag = Some("001"), content = Some("12345i"))
+      )
+    )
+
+    val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
+    otherIdentifiers should contain(
+      SourceIdentifier(
+        identifierType = IdentifierType.IconographicNumber,
+        value = "12345i",
+        ontologyType = "Work"
+      )
+    )
   }
 
   private def createVarFieldWith(marcTag: String, subfieldA: String): VarField =
