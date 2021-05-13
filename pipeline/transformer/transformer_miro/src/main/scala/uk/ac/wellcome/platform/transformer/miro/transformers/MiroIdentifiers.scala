@@ -75,7 +75,9 @@ trait MiroIdentifiers extends MiroTransformableUtils {
           // Note that the "Iconographic Collection" identifiers have a lot of
           // other stuff which isn't an i-number, so we should be careful what
           // we put here.
-          case (Some(label), Some(value)) if label == "Iconographic Collection" && value.matches("^[0-9]+i$") =>
+          case (Some(label), Some(value))
+              if label == "Iconographic Collection" && value.matches(
+                "^[0-9]+i$") =>
             SourceIdentifier(
               identifierType = IdentifierType.IconographicNumber,
               ontologyType = "Work",
