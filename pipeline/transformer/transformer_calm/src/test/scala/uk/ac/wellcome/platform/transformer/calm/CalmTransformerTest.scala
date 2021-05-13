@@ -49,6 +49,7 @@ class CalmTransformerTest
               label = Some("a.b.c")
             )
           ),
+          referenceNumber = Some(ReferenceNumber("a.b.c")),
           otherIdentifiers = List(
             SourceIdentifier(
               value = "a/b/c",
