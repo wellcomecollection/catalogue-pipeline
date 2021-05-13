@@ -50,5 +50,30 @@ class MiroIdentifiersTest
     )
   }
 
+  it(
+    "uses a distinct type for iconographic numbers, but only if they look like i-numbers") {
+    val miroRecord = createMiroRecordWith(
+      libraryRefDepartment =
+        List(Some("Iconographic Collection"), Some("Iconographic Collection")),
+      libraryRefId = List(Some("590947i"), Some("974.1"))
+    )
+
+    val otherIdentifiers =
+      transformer.getOtherIdentifiers(miroRecord = miroRecord)
+
+    otherIdentifiers shouldBe List(
+      SourceIdentifier(
+        identifierType = IdentifierType.IconographicNumber,
+        ontologyType = "Work",
+        value = "590947i"
+      ),
+      SourceIdentifier(
+        identifierType = IdentifierType.MiroLibraryReference,
+        ontologyType = "Work",
+        value = "Iconographic Collection 974.1"
+      )
+    )
+  }
+
   val transformer = new MiroIdentifiers {}
 }

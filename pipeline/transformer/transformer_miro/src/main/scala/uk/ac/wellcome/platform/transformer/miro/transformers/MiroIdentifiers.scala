@@ -64,14 +64,29 @@ trait MiroIdentifiers extends MiroTransformableUtils {
       case None => List()
     }
 
-    // Add any other legacy identifiers to this record.  Right now we
-    // put them all in the same identifier scheme, because we're not doing
-    // any transformation or cleaning.
     val libraryRefsList: List[SourceIdentifier] =
       zipMiroFields(
         keys = miroRecord.libraryRefDepartment,
         values = miroRecord.libraryRefId).distinct
         .collect {
+          // We have an identifier type for iconographic numbers (e.g. 577895i),
+          // so use that when possible.
+          //
+          // Note that the "Iconographic Collection" identifiers have a lot of
+          // other stuff which isn't an i-number, so we should be careful what
+          // we put here.
+          case (Some(label), Some(value))
+              if label == "Iconographic Collection" && value.matches(
+                "^[0-9]+i$") =>
+            SourceIdentifier(
+              identifierType = IdentifierType.IconographicNumber,
+              ontologyType = "Work",
+              value = value
+            )
+
+          // Put any other identifiers in one catch-all scheme until we come
+          // up with a better way to handle them.  We want them visible and
+          // searchable, but they're not worth spending more time on right now.
           case (Some(label), Some(value)) =>
             SourceIdentifier(
               identifierType = IdentifierType.MiroLibraryReference,
