@@ -299,4 +299,11 @@ object CatalogueDependencies {
   val inferenceManagerDependencies: Seq[ModuleID] =
     ExternalDependencies.akkaHttpDependencies ++
       ExternalDependencies.wireMockDependencies
+
+  // TEI adapter
+
+  val teiGitHubDependencies: Seq[ModuleID] = {
+    WellcomeDependencies.messagingTypesafeLibrary ++
+      ExternalDependencies.scalatestDependencies
+  }
 }
