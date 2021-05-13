@@ -114,14 +114,13 @@ object SierraIdentifiers
       }
   }
 
-  private def getIconographicNumbers(bibData: SierraBibData): List[SourceIdentifier] =
-    SierraIconographicNumber(bibData)
-      .map { iconographicNumber =>
-        SourceIdentifier(
-          identifierType = IdentifierType.IconographicNumber,
-          ontologyType = "Work",
-          value = iconographicNumber
-        )
-      }
-      .toList
+  private def getIconographicNumbers(
+    bibData: SierraBibData): List[SourceIdentifier] =
+    SierraIconographicNumber(bibData).map { iconographicNumber =>
+      SourceIdentifier(
+        identifierType = IdentifierType.IconographicNumber,
+        ontologyType = "Work",
+        value = iconographicNumber
+      )
+    }.toList
 }

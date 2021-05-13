@@ -1076,7 +1076,11 @@ class SierraTransformerTest
          |""".stripMargin
 
     val transformable = createSierraTransformableWith(
-      maybeBibRecord = Some(SierraBibRecord(id = bibId, data = bibData, modifiedDate = Instant.now())),
+      maybeBibRecord = Some(
+        SierraBibRecord(
+          id = bibId,
+          data = bibData,
+          modifiedDate = Instant.now())),
       itemRecords = List(
         SierraItemRecord(
           id = itemId,

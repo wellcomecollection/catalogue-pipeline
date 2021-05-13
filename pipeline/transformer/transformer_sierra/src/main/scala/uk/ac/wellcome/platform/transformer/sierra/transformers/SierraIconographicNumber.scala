@@ -6,7 +6,9 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraQueryOps
 }
 
-object SierraIconographicNumber extends SierraDataTransformer with SierraQueryOps {
+object SierraIconographicNumber
+    extends SierraDataTransformer
+    with SierraQueryOps {
   override type Output = Option[String]
 
   private val IconographicNumberMatch = "^([0-9]+i)$".r
@@ -29,9 +31,9 @@ object SierraIconographicNumber extends SierraDataTransformer with SierraQueryOp
   private implicit class VisualCollectionOps(bibData: SierraBibData) {
     def isVisualCollections: Boolean =
       bibData.materialType match {
-        case Some(SierraMaterialType("k")) => true  // Pictures
-        case Some(SierraMaterialType("r")) => true  // 3D-Objects
-        case _ => false
+        case Some(SierraMaterialType("k")) => true // Pictures
+        case Some(SierraMaterialType("r")) => true // 3D-Objects
+        case _                             => false
       }
   }
 }

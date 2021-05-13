@@ -8,7 +8,10 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   VarField
 }
 
-class SierraIconographicNumberTest extends AnyFunSpec with Matchers with SierraDataGenerators {
+class SierraIconographicNumberTest
+    extends AnyFunSpec
+    with Matchers
+    with SierraDataGenerators {
   it("uses the i-number from 001 if materialType = Pictures") {
     val bibData = createSierraBibDataWith(
       materialType = Some(SierraMaterialType("k")),
