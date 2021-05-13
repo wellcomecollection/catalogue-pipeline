@@ -15,8 +15,8 @@ module "tei_github" {
   image = local.tei_github_image
 
   env_vars = {
-    sqs_url          = module.tei_windows_queue.url
-    sns_topic        = module.tei_adapter_topic.arn
+    sqs_url   = module.tei_windows_queue.url
+    sns_topic = module.tei_adapter_topic.arn
   }
   secret_env_vars = {
   }
