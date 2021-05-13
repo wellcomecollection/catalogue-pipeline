@@ -14,7 +14,8 @@ import weco.json.{TypedString, TypedStringOps}
   * See https://wellcome.slack.com/archives/C294K7D5M/p1620733997159000 for more
   *
   */
-class ReferenceNumber(val underlying: String) extends TypedString[ReferenceNumber]
+class ReferenceNumber(val underlying: String)
+    extends TypedString[ReferenceNumber]
 
 object ReferenceNumber extends TypedStringOps[ReferenceNumber] {
   def apply(underlying: String): ReferenceNumber =
