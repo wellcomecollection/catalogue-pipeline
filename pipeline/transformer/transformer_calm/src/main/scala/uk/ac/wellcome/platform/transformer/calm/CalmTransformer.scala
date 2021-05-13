@@ -20,6 +20,7 @@ import weco.catalogue.internal_model.identifiers.{
   DataState,
   IdState,
   IdentifierType,
+  ReferenceNumber,
   SourceIdentifier
 }
 import weco.catalogue.internal_model.locations.UnknownAccessStatus
@@ -158,6 +159,7 @@ object CalmTransformer
         otherIdentifiers = otherIdentifiers(record),
         format = Some(Format.ArchivesAndManuscripts),
         collectionPath = Some(collectionPath),
+        referenceNumber = collectionPath.label.map(ReferenceNumber(_)),
         subjects = subjects(record),
         languages = languages,
         mergeCandidates = mergeCandidates(record),

@@ -4,6 +4,7 @@ import weco.catalogue.internal_model.identifiers.{
   CanonicalId,
   DataState,
   IdState,
+  ReferenceNumber,
   SourceIdentifier
 }
 import weco.catalogue.internal_model.image.ImageData
@@ -107,6 +108,7 @@ case class WorkData[State <: DataState](
   items: List[Item[State#MaybeId]] = Nil,
   holdings: List[Holdings] = Nil,
   collectionPath: Option[CollectionPath] = None,
+  referenceNumber: Option[ReferenceNumber] = None,
   imageData: List[ImageData[State#Id]] = Nil,
   workType: WorkType = WorkType.Standard,
 )

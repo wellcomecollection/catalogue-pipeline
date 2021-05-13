@@ -6,18 +6,36 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   SierraMaterialType,
   SierraQueryOps
 }
-import weco.catalogue.internal_model.work.Format.ArchivesAndManuscripts
 
 object SierraShelfmark extends SierraQueryOps {
   def apply(bibData: SierraBibData, itemData: SierraItemData): Option[String] =
-    bibData.materialType match {
+    bibData match {
       // The shelfmarks for Archives & Manuscripts are a duplicate of the
       // reference number and the box number, the latter of which we don't
       // want to expose publicly.
       //
       // e.g. PP/ABC/D.2/3:Box 5
       //
-      case Some(SierraMaterialType(ArchivesAndManuscripts.id)) =>
+      case _ if bibData.isArchivesAndManuscripts =>
+        None
+
+      // In the Iconographic Collection, 949 ǂa may contain i-numbers.  These are
+      // required for LE&E staff to find the item in our stores, but they aren't
+      // useful to show to users, so we hide them.
+      //
+      // e.g. 12345i
+      //
+      // Note that the iconographic number in 001 on the bib may not match 949 ǂa
+      // on the item -- that's fine and expected.
+      //
+      // If several pictures have been mounted on the same frame, they get a single
+      // item (because you request them all together).  Each picture would get its
+      // own i-number and its own bib, and the item record would record all the item
+      // numbers on the frame.
+      //
+      // e.g. 12345i, 12346i, 12347i
+      //
+      case _ if bibData.hasIconographicNumber =>
         None
 
       case _ =>
@@ -35,4 +53,12 @@ object SierraShelfmark extends SierraQueryOps {
           .headOption
           .map { _.content.trim }
     }
+
+  private implicit class BibShelfmarkOps(bibData: SierraBibData) {
+    def isArchivesAndManuscripts: Boolean =
+      bibData.materialType.contains(SierraMaterialType("h"))
+
+    def hasIconographicNumber: Boolean =
+      SierraIconographicNumber(bibData).isDefined
+  }
 }

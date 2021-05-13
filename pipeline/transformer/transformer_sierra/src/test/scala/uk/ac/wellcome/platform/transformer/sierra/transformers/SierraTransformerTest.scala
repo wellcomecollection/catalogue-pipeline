@@ -11,7 +11,12 @@ import uk.ac.wellcome.platform.transformer.sierra.source.MarcSubfield
 import uk.ac.wellcome.json.JsonUtil._
 import weco.catalogue.internal_model.work.WorkState.Source
 import org.scalatest.Assertion
-import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.identifiers.{
+  IdState,
+  IdentifierType,
+  ReferenceNumber,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.identifiers.IdState.Unidentifiable
 import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.locations.AccessStatus.LicensedResources
@@ -367,7 +372,7 @@ class SierraTransformerTest
     deletedWork.deletedReason shouldBe DeletedFromSource("Sierra")
   }
 
-  it("deletes works with 'suppressed': true") {
+  it("suppresses works with 'suppressed': true") {
     val id = createSierraBibNumber
     val title = "Hi Diddle Dee Dee"
     val data =
@@ -1031,6 +1036,82 @@ class SierraTransformerTest
         )
       )
     )
+  }
+
+  it("suppresses the shelfmark from 949 ǂa if there's an iconographic number") {
+    val bibId = createSierraBibNumber
+    val bibData =
+      s"""
+         |{
+         |  "id": "$bibId",
+         |  "materialType": {"code": "k", "label": "Pictures"},
+         |  "varFields": [
+         |    ${createTitleVarfield()},
+         |    {
+         |      "marcTag": "001",
+         |      "content": "12345i"
+         |    }
+         |  ]
+         |}
+       """.stripMargin
+
+    val itemId = createSierraItemNumber
+    val itemData =
+      s"""
+         |{
+         |  "id": "$itemId",
+         |  "location": {
+         |    "code": "sgicon",
+         |    "name": "Closed stores Iconographic"
+         |  },
+         |  "varFields": [
+         |    {
+         |      "marcTag": "949",
+         |      "subfields": [
+         |        {"tag": "a", "content": "12345i"}
+         |      ]
+         |    }
+         |  ]
+         |}
+         |""".stripMargin
+
+    val transformable = createSierraTransformableWith(
+      maybeBibRecord = Some(
+        SierraBibRecord(
+          id = bibId,
+          data = bibData,
+          modifiedDate = Instant.now())),
+      itemRecords = List(
+        SierraItemRecord(
+          id = itemId,
+          data = itemData,
+          modifiedDate = Instant.now(),
+          bibIds = List()
+        )
+      )
+    )
+
+    val work = transformToWork(transformable)
+    println(work)
+
+    work.data.referenceNumber shouldBe Some(ReferenceNumber("12345i"))
+    work.data.collectionPath shouldBe None
+
+    work.data.otherIdentifiers should contain(
+      SourceIdentifier(
+        identifierType = IdentifierType.IconographicNumber,
+        value = "12345i",
+        ontologyType = "Work"
+      )
+    )
+
+    work.data.items should have size 1
+
+    val item = work.data.items.head
+    item.locations should have size 1
+
+    val location = item.locations.head.asInstanceOf[PhysicalLocation]
+    location.shelfmark shouldBe None
   }
 
   describe("throws a TransformerException when passed invalid data") {

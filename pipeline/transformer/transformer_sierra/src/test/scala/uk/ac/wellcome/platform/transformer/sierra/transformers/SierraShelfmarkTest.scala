@@ -10,7 +10,8 @@ import uk.ac.wellcome.platform.transformer.sierra.source.{
   MarcSubfield,
   SierraBibData,
   SierraItemData,
-  SierraMaterialType
+  SierraMaterialType,
+  VarField
 }
 import weco.catalogue.internal_model.work.Format.ArchivesAndManuscripts
 
@@ -91,6 +92,33 @@ class SierraShelfmarkTest
     val itemData = createSierraItemDataWith(varFields = varFields)
 
     getShelfmark(itemData = itemData) shouldBe None
+  }
+
+  it("suppresses the shelfmark if the bib has an iconographic number") {
+    def getShelfmarkWith001(s: String): Option[String] = {
+      val bibData = createSierraBibDataWith(
+        materialType = Some(SierraMaterialType("k")),
+        varFields = List(
+          VarField(marcTag = Some("001"), content = Some(s))
+        )
+      )
+
+      val varFields = List(
+        createVarFieldWith(
+          marcTag = "949",
+          subfields = List(
+            MarcSubfield(tag = "a", content = "S7956")
+          )
+        )
+      )
+
+      val itemData = createSierraItemDataWith(varFields = varFields)
+
+      getShelfmark(bibData = bibData, itemData = itemData)
+    }
+
+    getShelfmarkWith001(s = "3") shouldBe Some("S7956")
+    getShelfmarkWith001(s = "12345i") shouldBe None
   }
 
   private def getShelfmark(

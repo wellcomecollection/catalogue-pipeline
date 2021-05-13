@@ -40,7 +40,7 @@ object SierraIdentifiers
     )
 
     List(sierraIdentifier) ++ getIsbnIdentifiers(bibData) ++ getIssnIdentifiers(
-      bibData) ++ getDigcodes(bibData)
+      bibData) ++ getDigcodes(bibData) ++ getIconographicNumbers(bibData)
   }
 
   // Find ISBN (International Serial Book Number) identifiers from MARC 020 ǂa.
@@ -113,4 +113,14 @@ object SierraIdentifiers
         )
       }
   }
+
+  private def getIconographicNumbers(
+    bibData: SierraBibData): List[SourceIdentifier] =
+    SierraIconographicNumber(bibData).map { iconographicNumber =>
+      SourceIdentifier(
+        identifierType = IdentifierType.IconographicNumber,
+        ontologyType = "Work",
+        value = iconographicNumber
+      )
+    }.toList
 }

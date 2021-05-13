@@ -118,7 +118,8 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
         SierraItemsOnOrder(bibId, hasItems = hasItems, orderDataMap) ++
           SierraItems(bibId, bibData, itemDataMap) ++
           SierraElectronicResources(bibId, varFields = bibData.varFields),
-      holdings = SierraHoldings(bibId, holdingsDataMap)
+      holdings = SierraHoldings(bibId, holdingsDataMap),
+      referenceNumber = SierraReferenceNumber(bibData)
     )
 
   lazy val bibId = sierraTransformable.sierraId
