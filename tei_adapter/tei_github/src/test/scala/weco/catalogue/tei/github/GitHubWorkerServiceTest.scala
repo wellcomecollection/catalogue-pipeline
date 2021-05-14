@@ -19,9 +19,10 @@ class GitHubWorkerServiceTest extends AnyFunSpec with SQS with Akka with Eventua
     withLocalSqsQueuePair(){case QueuePair(queue, dlq) =>
       sendNotificationToSQS(queue,createNotificationMessageWith(message) )
       withActorSystem{ implicit actorSystem =>
+      implicit val ec = actorSystem.dispatcher
       withSQSStream(queue){ stream: SQSStream[NotificationMessage] =>
           val messageSender = new MemoryMessageSender()
-        val service = new GitHubWorkerService(messageStream = stream,messageSender, "http://localhost:8080")
+        val service = new GitHubWorkerService(stream, new GitHubRetriever("http://localhost:8080"),messageSender, 10)
         service.run()
         eventually {
           messageSender.getMessages[String]() should contain theSameElementsAs List(

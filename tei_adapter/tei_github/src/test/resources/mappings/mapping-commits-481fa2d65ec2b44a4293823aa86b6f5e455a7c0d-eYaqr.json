@@ -1,15 +1,15 @@
 {
-  "id" : "4d2184e1-4ef9-3eef-942a-40eb3b040912",
+  "id" : "eaaff78d-8160-34a6-8195-67eafd99230d",
   "request" : {
     "url" : "/commits/481fa2d65ec2b44a4293823aa86b6f5e455a7c0d",
     "method" : "GET"
   },
   "response" : {
     "status" : 200,
-    "bodyFileName" : "body-commits-481fa2d65ec2b44a4293823aa86b6f5e455a7c0d-4W6YV.json",
+    "bodyFileName" : "body-commits-481fa2d65ec2b44a4293823aa86b6f5e455a7c0d-eYaqr.json",
     "headers" : {
       "Server" : "GitHub.com",
-      "Date" : "Wed, 12 May 2021 15:15:03 GMT",
+      "Date" : "Thu, 13 May 2021 15:05:06 GMT",
       "Content-Type" : "application/json; charset=utf-8",
       "Cache-Control" : "public, max-age=60, s-maxage=60",
       "Vary" : "Accept, Accept-Encoding, Accept, X-Requested-With",
@@ -23,13 +23,13 @@
       "Referrer-Policy" : "origin-when-cross-origin, strict-origin-when-cross-origin",
       "Content-Security-Policy" : "default-src 'none'",
       "X-RateLimit-Limit" : "60",
-      "X-RateLimit-Remaining" : "50",
-      "X-RateLimit-Reset" : "1620833901",
+      "X-RateLimit-Remaining" : "55",
+      "X-RateLimit-Reset" : "1620919509",
       "X-RateLimit-Resource" : "core",
-      "X-RateLimit-Used" : "10",
+      "X-RateLimit-Used" : "5",
       "Accept-Ranges" : "bytes",
-      "X-GitHub-Request-Id" : "D624:EC98:2F65433:3054254:609BF0F7"
+      "X-GitHub-Request-Id" : "F357:E693:61DC8F:8523AA:609D4021"
     }
   },
-  "uuid" : "4d2184e1-4ef9-3eef-942a-40eb3b040912"
+  "uuid" : "eaaff78d-8160-34a6-8195-67eafd99230d"
 }

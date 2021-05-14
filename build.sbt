@@ -251,6 +251,7 @@ lazy val inference_manager = setupProject(
 lazy val tei_github = setupProject(
   project,
   folder = "tei_adapter/tei_github",
+  localDependencies = Seq(flows),
   externalDependencies = CatalogueDependencies.teiGitHubDependencies
 )
 // AWS Credentials to read from S3

@@ -13,11 +13,12 @@ object Main extends WellcomeTypesafeApp {
     implicit val actorSystem: ActorSystem =
       AkkaBuilder.buildActorSystem()
 
-    GitHubWorkerService(
+    val retriever = new GitHubRetriever("")
+    new GitHubWorkerService(
       messageStream = SQSBuilder.buildSQSStream(config),
       messageSender = SNSBuilder
         .buildSNSMessageSender(config, subject = "TEI github service"),
-      ""
+      gitHubRetriever = retriever, concurrentWindows = ???
     )
   }
 }
