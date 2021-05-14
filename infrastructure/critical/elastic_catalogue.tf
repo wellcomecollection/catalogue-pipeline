@@ -34,12 +34,8 @@ resource "ec_deployment" "catalogue" {
 locals {
   catalogue_elastic_id     = ec_deployment.catalogue.elasticsearch[0].resource_id
   catalogue_elastic_region = ec_deployment.catalogue.elasticsearch[0].region
-}
 
-module "catalogue_secrets_platform" {
-  source = "../modules/secrets"
-
-  key_value_map = {
+  catalogue_secrets = {
     "elasticsearch/catalogue/public_host" = "${local.catalogue_elastic_id}.${local.catalogue_elastic_region}.aws.found.io"
 
     # See https://www.elastic.co/guide/en/cloud/current/ec-traffic-filtering-vpc.html
@@ -47,17 +43,25 @@ module "catalogue_secrets_platform" {
   }
 }
 
+module "catalogue_secrets_platform" {
+  source        = "../modules/secrets"
+  key_value_map = local.catalogue_secrets
+}
+
 module "catalogue_secrets" {
-  source = "../modules/secrets"
+  source        = "../modules/secrets"
+  key_value_map = local.catalogue_secrets
 
   providers = {
     aws = aws.catalogue
   }
+}
 
-  key_value_map = {
-    "elasticsearch/catalogue/public_host" = "${local.catalogue_elastic_id}.${local.catalogue_elastic_region}.aws.found.io"
+module "catalogue_secrets_identity" {
+  source        = "../modules/secrets"
+  key_value_map = local.catalogue_secrets
 
-    # See https://www.elastic.co/guide/en/cloud/current/ec-traffic-filtering-vpc.html
-    "elasticsearch/catalogue/private_host" = "${local.catalogue_elastic_id}.vpce.${local.catalogue_elastic_region}.aws.elastic-cloud.com"
+  providers = {
+    aws = aws.identity
   }
 }
