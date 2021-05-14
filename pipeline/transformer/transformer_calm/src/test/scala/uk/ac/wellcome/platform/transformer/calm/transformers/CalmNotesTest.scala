@@ -9,7 +9,7 @@ class CalmNotesTest extends AnyFunSpec with Matchers with CalmRecordGenerators {
   it("extracts all the notes fields") {
     val record = createCalmRecordWith(
       ("AdminHistory", "Administered by the Active Administrator"),
-      ("CustodHistory", "Collected by the Careful Custodian"),
+      ("CustodialHistory", "Collected by the Careful Custodian"),
       ("Acquisition", "Acquired by the Academic Archivists"),
       ("Appraisal", "Appraised by the Affable Appraiser"),
       ("Accruals", "Accrued by the Alliterative Acquirer"),
