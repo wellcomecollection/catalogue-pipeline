@@ -7,7 +7,7 @@ import weco.catalogue.source_model.calm.CalmRecord
 object CalmNotes extends CalmRecordOps {
   private val notesMapping = List(
     ("AdminHistory", BiographicalNote(_)),
-    ("CustodHistory", OwnershipNote(_)),
+    ("CustodialHistory", OwnershipNote(_)),
     ("Acquisition", AcquisitionNote(_)),
     ("Appraisal", AppraisalNote(_)),
     ("Accruals", AccrualsNote(_)),
