@@ -14,10 +14,7 @@ import uk.ac.wellcome.models.matcher.{
   WorkNode
 }
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
-import uk.ac.wellcome.platform.matcher.fixtures.{
-  MatcherFixtures,
-  TimeTestFixture
-}
+import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
 import uk.ac.wellcome.platform.matcher.generators.WorkLinksGenerators
 import uk.ac.wellcome.platform.matcher.models.{WorkGraph, WorkLinks}
 import uk.ac.wellcome.platform.matcher.storage.WorkGraphStore
@@ -26,6 +23,7 @@ import uk.ac.wellcome.storage.locking.memory.{
   MemoryLockDao,
   MemoryLockingService
 }
+import weco.fixtures.TimeAssertions
 
 import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -39,7 +37,7 @@ class WorkMatcherTest
     with MockitoSugar
     with EitherValues
     with WorkLinksGenerators
-    with TimeTestFixture {
+    with TimeAssertions {
 
   private val identifierA = createIdentifier("AAAAAAAA")
   private val identifierB = createIdentifier("BBBBBBBB")

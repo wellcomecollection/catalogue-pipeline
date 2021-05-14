@@ -13,12 +13,10 @@ import uk.ac.wellcome.models.matcher.{
   WorkNode
 }
 import uk.ac.wellcome.pipeline_storage.MemoryRetriever
-import uk.ac.wellcome.platform.matcher.fixtures.{
-  MatcherFixtures,
-  TimeTestFixture
-}
+import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
 import uk.ac.wellcome.platform.matcher.generators.WorkLinksGenerators
 import uk.ac.wellcome.platform.matcher.models.WorkLinks
+import weco.fixtures.TimeAssertions
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -29,7 +27,7 @@ class MatcherFeatureTest
     with IntegrationPatience
     with MatcherFixtures
     with WorkLinksGenerators
-    with TimeTestFixture {
+    with TimeAssertions {
 
   it("processes a message with a single WorkLinks with no linked works") {
     implicit val retriever: MemoryRetriever[WorkLinks] =

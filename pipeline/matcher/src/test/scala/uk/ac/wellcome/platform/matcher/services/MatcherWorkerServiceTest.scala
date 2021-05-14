@@ -12,14 +12,12 @@ import uk.ac.wellcome.models.matcher.{
   MatcherResult,
   WorkIdentifier
 }
-import uk.ac.wellcome.platform.matcher.fixtures.{
-  MatcherFixtures,
-  TimeTestFixture
-}
+import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.pipeline_storage.MemoryRetriever
 import uk.ac.wellcome.platform.matcher.generators.WorkLinksGenerators
 import uk.ac.wellcome.platform.matcher.models.WorkLinks
+import weco.fixtures.TimeAssertions
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -30,7 +28,7 @@ class MatcherWorkerServiceTest
     with IntegrationPatience
     with MatcherFixtures
     with WorkLinksGenerators
-    with TimeTestFixture {
+    with TimeAssertions {
 
   private val identifierA = createIdentifier("AAAAAAAA")
   private val identifierB = createIdentifier("BBBBBBBB")
