@@ -79,6 +79,8 @@ catalogue_pipeline:
       name: Production
     - id: stage
       name: Staging
+    - id: "2021-05-17"
+      name: "2021-05-17"
   image_repositories:
     - id: id_minter
       services:
