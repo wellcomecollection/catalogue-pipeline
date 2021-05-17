@@ -18,7 +18,8 @@ object Main extends WellcomeTypesafeApp {
       messageStream = SQSBuilder.buildSQSStream(config),
       messageSender = SNSBuilder
         .buildSNSMessageSender(config, subject = "TEI github service"),
-      gitHubRetriever = retriever, concurrentWindows = ???
+      gitHubRetriever = retriever,
+      concurrentWindows = ???
     )
   }
 }

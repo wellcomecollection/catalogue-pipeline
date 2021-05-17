@@ -12,22 +12,30 @@ import weco.flows.FlowOps
 import java.time.ZonedDateTime
 import scala.concurrent.{ExecutionContext, Future}
 
-class GitHubWorkerService[Destination](messageStream: SQSStream[NotificationMessage], gitHubRetriever: GitHubRetriever, messageSender: MessageSender[Destination], concurrentWindows: Int)(implicit val ec: ExecutionContext) extends Runnable
-  with FlowOps{
+class GitHubWorkerService[Destination](
+  messageStream: SQSStream[NotificationMessage],
+  gitHubRetriever: GitHubRetriever,
+  messageSender: MessageSender[Destination],
+  concurrentWindows: Int)(implicit val ec: ExecutionContext)
+    extends Runnable
+    with FlowOps {
 
   val className = this.getClass.getSimpleName
 
   override def run(): Future[Any] = {
-    messageStream.runStream(className,source =>
-      source.via(unwrapMessage)
-        .via(processWindow)
-        .map { case (Context(msg), _) => msg })
+    messageStream.runStream(
+      className,
+      source =>
+        source
+          .via(unwrapMessage)
+          .via(processWindow)
+          .map { case (Context(msg), _) => msg })
   }
 
   def processWindow =
     Flow[(Context, Window)]
       .mapAsync(concurrentWindows) {
-        case (ctx, window) => Future((ctx,Right(())))
+        case (ctx, window) => Future((ctx, Right(())))
 
       }
       .via(catchErrors)
