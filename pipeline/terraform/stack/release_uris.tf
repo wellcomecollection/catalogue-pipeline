@@ -1,5 +1,9 @@
+locals {
+  lsh_model_key = var.release_label == "prod" ? "prod" : "stage"
+}
+
 data "aws_ssm_parameter" "inferrer_lsh_model_key" {
-  name = "/catalogue_pipeline/config/models/${var.release_label}/lsh_model"
+  name = "/catalogue_pipeline/config/models/${local.lsh_model_key}/lsh_model"
 }
 
 data "aws_ssm_parameter" "latest_lsh_model_key" {
