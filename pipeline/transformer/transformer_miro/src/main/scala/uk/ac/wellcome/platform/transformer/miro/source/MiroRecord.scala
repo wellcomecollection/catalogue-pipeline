@@ -70,8 +70,7 @@ case object MiroRecord {
    * with the correct data.
    */
   private def fixBadUnicode(s: String): String =
-    s
-      .replaceAll(" \\u00cc\\u0081", " ́")
+    s.replaceAll(" \\u00cc\\u0081", " ́")
       .replaceAll("i\\u00cc\\u00a8", "į")
       .replaceAll("\\u00c3&#8224;", "Æ")
       .replaceAll("\\u00c3&#8240;", "É")
