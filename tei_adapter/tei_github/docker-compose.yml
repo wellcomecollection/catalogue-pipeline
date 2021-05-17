@@ -2,9 +2,3 @@ sqs:
   image: "760097843905.dkr.ecr.eu-west-1.amazonaws.com/s12v/elasticmq"
   ports:
     - "9324:9324"
-wiremock:
-  image: "760097843905.dkr.ecr.eu-west-1.amazonaws.com/rodolpheche/wiremock"
-  ports:
-    - "8080:8080"
-  volumes:
-    - "${ROOT}/tei_adapter/tei_github/src/test/resources/wiremock:/home/wiremock"

@@ -13,7 +13,7 @@ object Main extends WellcomeTypesafeApp {
     implicit val actorSystem: ActorSystem =
       AkkaBuilder.buildActorSystem()
 
-    val retriever = new GitHubRetriever("")
+    val retriever = new GitHubRetriever("", ???)
     new GitHubWorkerService(
       messageStream = SQSBuilder.buildSQSStream(config),
       messageSender = SNSBuilder

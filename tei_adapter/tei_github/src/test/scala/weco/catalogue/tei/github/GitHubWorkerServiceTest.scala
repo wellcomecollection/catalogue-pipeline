@@ -1,6 +1,6 @@
 package weco.catalogue.tei.github
 
-import org.scalatest.concurrent.Eventually
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
@@ -9,12 +9,13 @@ import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
+import weco.catalogue.tei.github.fixtures.Wiremock
 
-class GitHubWorkerServiceTest extends AnyFunSpec with SQS with Akka with Eventually{
+class GitHubWorkerServiceTest extends AnyFunSpec with SQS with Akka with Eventually with Wiremock with IntegrationPatience{
   it("receives a window message calls the github api and sends a message with all files changed in that window"){
    val message = """ {
-      "start": "2021-05-05T10:00:00",
-      "end": "2021-05-07T18:01:00",
+      "start": "2021-05-05T10:00:00Z",
+      "end": "2021-05-07T18:00:00Z",
     }"""
     withLocalSqsQueuePair(){case QueuePair(queue, dlq) =>
       sendNotificationToSQS(queue,createNotificationMessageWith(message) )
@@ -22,7 +23,8 @@ class GitHubWorkerServiceTest extends AnyFunSpec with SQS with Akka with Eventua
       implicit val ec = actorSystem.dispatcher
       withSQSStream(queue){ stream: SQSStream[NotificationMessage] =>
           val messageSender = new MemoryMessageSender()
-        val service = new GitHubWorkerService(stream, new GitHubRetriever("http://localhost:8080"),messageSender, 10)
+        withWiremock("localhost") { port =>
+        val service = new GitHubWorkerService(stream, new GitHubRetriever(s"http://localhost:$port", "master"),messageSender, 10)
         service.run()
         eventually {
           messageSender.getMessages[String]() should contain theSameElementsAs List(
@@ -31,7 +33,7 @@ class GitHubWorkerServiceTest extends AnyFunSpec with SQS with Akka with Eventua
             "https://github.com/wellcomecollection/wellcome-collection-tei/raw/db7581026bb9149330225dc2b9411202b3cd6894/Arabic/WMS_Arabic_62.xml"
           )
         }
-      }
+      }}
       }
     }
   }
