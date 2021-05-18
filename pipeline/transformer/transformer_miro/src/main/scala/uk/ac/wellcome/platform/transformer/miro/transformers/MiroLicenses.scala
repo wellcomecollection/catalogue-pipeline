@@ -17,24 +17,25 @@ trait MiroLicenses {
                     maybeUseRestrictions: Option[String]): License =
     licenseOverrides.get(miroId) match {
       case Some(license) => license
-      case None => chooseLicenseFromUseRestrictions(maybeUseRestrictions)
+      case None          => chooseLicenseFromUseRestrictions(maybeUseRestrictions)
     }
 
   /** If the image has a non-empty image_use_restrictions field, choose which
-   *  license (if any) we're going to assign to the thumbnail for this work.
-   *
-   *  The mappings in this function are based on a document provided by
-   *  Christy Henshaw (MIRO drop-downs.docx).  There are still some gaps in
-   *  that, we'll have to come back and update this code later.
-   *
-   *  For now, this mapping only covers use restrictions seen in the
-   *  V collection.  We'll need to extend this for other licenses later.
-   *
-   *  TODO: Expand this mapping to cover all of MIRO.
-   *  TODO: Update these mappings based on the final version of Christy's
-   *        document.
-   */
-  private def chooseLicenseFromUseRestrictions(maybeUseRestrictions: Option[String]): License =
+    *  license (if any) we're going to assign to the thumbnail for this work.
+    *
+    *  The mappings in this function are based on a document provided by
+    *  Christy Henshaw (MIRO drop-downs.docx).  There are still some gaps in
+    *  that, we'll have to come back and update this code later.
+    *
+    *  For now, this mapping only covers use restrictions seen in the
+    *  V collection.  We'll need to extend this for other licenses later.
+    *
+    *  TODO: Expand this mapping to cover all of MIRO.
+    *  TODO: Update these mappings based on the final version of Christy's
+    *        document.
+    */
+  private def chooseLicenseFromUseRestrictions(
+    maybeUseRestrictions: Option[String]): License =
     maybeUseRestrictions match {
 
       case None =>

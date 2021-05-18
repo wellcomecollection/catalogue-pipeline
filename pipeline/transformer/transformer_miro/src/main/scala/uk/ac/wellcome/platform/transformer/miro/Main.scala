@@ -65,7 +65,8 @@ object Main extends WellcomeTypesafeApp {
     )
   }
 
-  private def getLicenseOverrides(config: Config)(implicit s3Client: AmazonS3): Map[String, License] = {
+  private def getLicenseOverrides(config: Config)(
+    implicit s3Client: AmazonS3): Map[String, License] = {
     val location = S3ObjectLocation(
       bucket = config.requireString("miro.licenseOverride.bucket"),
       key = config.requireString("miro.licenseOverride.key")
@@ -74,7 +75,8 @@ object Main extends WellcomeTypesafeApp {
     val typedStore = S3TypedStore[Map[String, License]]
     typedStore.get(location) match {
       case Right(Identified(_, value)) => value
-      case Left(err) => throw new RuntimeException(s"Unable to load license override: $err")
+      case Left(err) =>
+        throw new RuntimeException(s"Unable to load license override: $err")
     }
   }
 }
