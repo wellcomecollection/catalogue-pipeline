@@ -128,6 +128,9 @@ trait SierraGenerators extends RandomGenerators {
     )
   }
 
+  def createSierraOrderRecord: SierraOrderRecord =
+    createSierraOrderRecordWith()
+
   private def defaultItemData(id: SierraItemNumber,
                               modifiedDate: Instant,
                               bibIds: List[SierraBibNumber]): String =
