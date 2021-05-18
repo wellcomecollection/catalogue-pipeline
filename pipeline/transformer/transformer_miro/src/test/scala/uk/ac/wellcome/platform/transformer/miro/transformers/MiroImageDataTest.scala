@@ -17,7 +17,9 @@ class MiroImageDataTest
     with Matchers
     with IdentifiersGenerators
     with MiroRecordGenerators {
-  val transformer = new MiroImageData {}
+  val transformer = new MiroImageData {
+    override val licenseOverrides: Map[String, License] = Map()
+  }
 
   describe("getImageData") {
     it("extracts the Miro image data") {

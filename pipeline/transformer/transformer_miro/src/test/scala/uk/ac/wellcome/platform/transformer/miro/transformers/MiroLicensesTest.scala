@@ -35,10 +35,29 @@ class MiroLicensesTest extends AnyFunSpec with Matchers {
     }
   }
 
+  it("uses the license override for a Miro ID") {
+    val miroId = "A0000001"
+    val useRestrictions = "CC-0"
+
+    val transformer1 = new MiroLicenses {
+      override val licenseOverrides: Map[String, License] = Map.empty
+    }
+
+    transformer1.chooseLicense(miroId, Some(useRestrictions)) shouldBe License.CC0
+
+    val transformer2 = new MiroLicenses {
+      override val licenseOverrides: Map[String, License] = Map(miroId -> License.InCopyright)
+    }
+
+    transformer2.chooseLicense(miroId, Some(useRestrictions)) shouldBe License.InCopyright
+  }
+
   private def chooseLicense(maybeUseRestrictions: Option[String]): License =
     transformer.chooseLicense(
       miroId = "A1234567",
       maybeUseRestrictions = maybeUseRestrictions)
 
-  val transformer = new MiroLicenses {}
+  val transformer = new MiroLicenses {
+    override val licenseOverrides: Map[String, License] = Map.empty
+  }
 }

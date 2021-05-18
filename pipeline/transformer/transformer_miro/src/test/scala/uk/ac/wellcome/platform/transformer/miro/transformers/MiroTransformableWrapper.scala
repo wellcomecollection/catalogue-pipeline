@@ -12,7 +12,7 @@ import weco.catalogue.internal_model.work.WorkState.Source
 import scala.util.Try
 
 trait MiroTransformableWrapper extends Matchers { this: Suite =>
-  val transformer = new MiroRecordTransformer
+  val transformer = new MiroRecordTransformer(licenseOverrides = Map())
 
   def transformWork(miroRecord: MiroRecord): Work.Visible[Source] = {
     val triedWork: Try[Work[Source]] =

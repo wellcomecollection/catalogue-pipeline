@@ -9,7 +9,9 @@ class MiroLocationTest
     extends AnyFunSpec
     with Matchers
     with MiroRecordGenerators {
-  val transformer = new MiroLocation {}
+  val transformer = new MiroLocation {
+    override val licenseOverrides: Map[String, License] = Map()
+  }
   it(
     "extracts the digital location and finds the credit line for an image-specific contributor code") {
     transformer.getLocation(

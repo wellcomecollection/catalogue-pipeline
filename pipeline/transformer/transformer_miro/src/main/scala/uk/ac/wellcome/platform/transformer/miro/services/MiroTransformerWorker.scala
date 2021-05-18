@@ -11,6 +11,7 @@ import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.Readable
 import uk.ac.wellcome.storage.{Identified, ReadError, Version}
 import uk.ac.wellcome.typesafe.Runnable
+import weco.catalogue.internal_model.locations.License
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.source_model.MiroSourcePayload
 import weco.catalogue.transformer.{Transformer, TransformerWorker}
@@ -22,7 +23,8 @@ class MiroTransformerWorker[MsgDestination](
                                             Work[Source],
                                             MsgDestination],
   miroReadable: Readable[S3ObjectLocation, MiroRecord],
-  val retriever: Retriever[Work[Source]]
+  val retriever: Retriever[Work[Source]],
+  licenseOverrides: Map[String, License]
 )(
   implicit
   val decoder: Decoder[MiroSourcePayload],
@@ -34,7 +36,7 @@ class MiroTransformerWorker[MsgDestination](
       MsgDestination] {
 
   override val transformer: Transformer[(MiroRecord, MiroMetadata)] =
-    new MiroRecordTransformer
+    new MiroRecordTransformer(licenseOverrides = licenseOverrides)
 
   override def lookupSourceData(p: MiroSourcePayload)
     : Either[ReadError,

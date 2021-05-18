@@ -17,13 +17,14 @@ import weco.catalogue.internal_model.identifiers.{
   IdentifierType,
   SourceIdentifier
 }
+import weco.catalogue.internal_model.locations.License
 import weco.catalogue.internal_model.work.DeletedReason.SuppressedFromSource
 import weco.catalogue.internal_model.work.InvisibilityReason.UnableToTransform
 import weco.catalogue.internal_model.work.{Work, WorkData}
 import weco.catalogue.transformer.Transformer
 import weco.catalogue.transformer.result.Result
 
-class MiroRecordTransformer
+class MiroRecordTransformer(val licenseOverrides: Map[String, License])
     extends MiroContributors
     with MiroCreatedDate
     with MiroItems

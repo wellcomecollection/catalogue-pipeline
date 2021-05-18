@@ -103,7 +103,8 @@ class MiroTransformerWorkerTest
       new MiroTransformerWorker(
         pipelineStream = pipelineStream,
         miroReadable = miroReadable,
-        retriever = retriever
+        retriever = retriever,
+        licenseOverrides = Map()
       )
     )
 }

@@ -13,7 +13,9 @@ class MiroItemsTest
     with Matchers
     with IdentifiersGenerators
     with MiroRecordGenerators {
-  val transformer = new MiroItems {}
+  val transformer = new MiroItems {
+    override val licenseOverrides: Map[String, License] = Map()
+  }
 
   describe("getItems") {
     it("extracts an unidentifiable item") {
