@@ -115,7 +115,7 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
       notes = SierraNotes(bibData),
       duration = SierraDuration(bibData),
       items =
-        SierraItemsOnOrder(bibId, hasItems = hasItems, orderDataMap) ++
+        SierraItemsOnOrder(bibId, bibData = bibData, hasItems = hasItems, orderDataMap) ++
           SierraItems(bibId, bibData, itemDataMap) ++
           SierraElectronicResources(bibId, varFields = bibData.varFields),
       holdings = SierraHoldings(bibId, holdingsDataMap),

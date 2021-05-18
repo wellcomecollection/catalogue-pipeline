@@ -1038,6 +1038,33 @@ class SierraTransformerTest
     )
   }
 
+  // This test is based on a real failure, when we were adding an item for
+  // b32496485.  This Work didn't have any items in Sierra, but it did get
+  // a digitised item from the METS.
+  it("does not create an item from the order record if there are no items but there is a CAT DATE on the bib") {
+    val id = createSierraBibNumber
+
+    val transformable = createSierraTransformableWith(
+      maybeBibRecord = Some(
+        createSierraBibRecordWith(
+          data =
+            s"""
+               |{
+               |  "id": "$id",
+               |  "fixedFields": {
+               |    "28": {"label": "CAT DATE", "value": "2021-05-17"}
+               |  }
+               |}
+               |""".stripMargin
+        )
+      ),
+      orderRecords = List(createSierraOrderRecord)
+    )
+
+    val work = transformToWork(transformable)
+    work.data.items shouldBe empty
+  }
+
   it("suppresses the shelfmark from 949 ǂa if there's an iconographic number") {
     val bibId = createSierraBibNumber
     val bibData =
