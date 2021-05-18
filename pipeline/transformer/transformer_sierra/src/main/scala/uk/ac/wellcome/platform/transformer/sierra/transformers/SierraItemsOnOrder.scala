@@ -35,6 +35,10 @@ import scala.util.Try
   *   3)  At some point after that, an item record is created.  This supercedes
   *       the order record.
   *
+  * Note that born-digital objects do not necessarily get item records: that can be
+  * supplied separately, e.g. from the METS.  In this case, we should look at the CAT DATE
+  * (cataloguing date) fixed field to see we shouldn't add any order items.
+  *
   * The Sierra documentation for fixed fields on order records is useful reading:
   * https://documentation.iii.com/sierrahelp/Default.htm#sril/sril_records_fixed_field_types_order.html%3FTocPath%3DSierra%2520Reference%7CHow%2520Innovative%2520Systems%2520Store%2520Information%7CFixed-length%2520Fields%7C_____11
   *
