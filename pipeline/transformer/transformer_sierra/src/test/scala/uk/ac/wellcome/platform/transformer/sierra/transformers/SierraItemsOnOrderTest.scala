@@ -360,7 +360,8 @@ class SierraItemsOnOrderTest
       val bibData = createSierraBibData
       val bibDataWithCatDate =
         bibData.copy(
-          fixedFields = Map("28" -> FixedField(label = "CAT DATE", value = "2021-05-17"))
+          fixedFields =
+            Map("28" -> FixedField(label = "CAT DATE", value = "2021-05-17"))
         )
 
       // Note: we test both with and without CAT DATE here, so we'll
@@ -521,7 +522,8 @@ class SierraItemsOnOrderTest
       val bibData = createSierraBibData
       val bibDataWithCatDate =
         bibData.copy(
-          fixedFields = Map("28" -> FixedField(label = "CAT DATE", value = "2021-05-17"))
+          fixedFields =
+            Map("28" -> FixedField(label = "CAT DATE", value = "2021-05-17"))
         )
 
       // Note: we test both with and without CAT DATE here, so we'll
@@ -552,10 +554,9 @@ class SierraItemsOnOrderTest
     }
   }
 
-  def getOrders(
-    hasItems: Boolean = false,
-    bibData: SierraBibData = createSierraBibData,
-    orderData: List[SierraOrderData])
+  def getOrders(hasItems: Boolean = false,
+                bibData: SierraBibData = createSierraBibData,
+                orderData: List[SierraOrderData])
     : List[Item[IdState.Unidentifiable.type]] = {
     val id = createSierraBibNumber
 
