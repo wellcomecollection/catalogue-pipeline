@@ -22,8 +22,7 @@ trait MiroLicenses {
     *  TODO: Update these mappings based on the final version of Christy's
     *        document.
     */
-  def chooseLicense(miroId: String,
-                    maybeUseRestrictions: Option[String]): License =
+  def chooseLicense(maybeUseRestrictions: Option[String]): License =
     maybeUseRestrictions match {
 
       // These images need more data.
@@ -57,5 +56,4 @@ trait MiroLicenses {
               "image_use_restrictions = 'Image withdrawn, see notes'")
         }
     }
-
 }

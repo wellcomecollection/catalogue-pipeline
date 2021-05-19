@@ -35,7 +35,6 @@ trait MiroLocation extends MiroLicenses with MiroContributorCodes {
       credit = getCredit(miroRecord),
       license = Some(
         chooseLicense(
-          miroId = miroRecord.imageNumber,
           maybeUseRestrictions = miroRecord.useRestrictions
         )
       ),

@@ -36,9 +36,7 @@ class MiroLicensesTest extends AnyFunSpec with Matchers {
   }
 
   private def chooseLicense(maybeUseRestrictions: Option[String]): License =
-    transformer.chooseLicense(
-      miroId = "A1234567",
-      maybeUseRestrictions = maybeUseRestrictions)
+    transformer.chooseLicense(maybeUseRestrictions = maybeUseRestrictions)
 
   val transformer = new MiroLicenses {}
 }

@@ -12,7 +12,6 @@ trait MiroThumbnail extends MiroImageData with MiroLicenses {
         templateName = "thumbnail"),
       license = Some(
         chooseLicense(
-          miroId = miroRecord.imageNumber,
           maybeUseRestrictions = miroRecord.useRestrictions
         )
       )
