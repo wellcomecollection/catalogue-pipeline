@@ -57,6 +57,8 @@ class MiroTransformerWorkerTest
       id = id,
       version = version,
       location = location,
+      events = List(),
+      overrides = None,
       isClearedForCatalogueAPI = chooseFrom(true, false)
     )
   }
@@ -79,6 +81,8 @@ class MiroTransformerWorkerTest
       id = randomAlphanumeric(),
       version = 1,
       location = createS3ObjectLocation,
+      events = List(),
+      overrides = None,
       isClearedForCatalogueAPI = chooseFrom(true, false)
     )
 
