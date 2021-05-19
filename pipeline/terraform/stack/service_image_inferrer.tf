@@ -157,6 +157,9 @@ module "image_inferrer" {
   subnets = var.subnets
 
   # Any higher than this currently causes latency spikes from Loris
+  # TODO: Now these images are served by DLCS, not Loris, can we increase
+  # the max capacity?
+  min_capacity = var.min_capacity
   max_capacity = min(6, local.max_capacity)
 
   scale_down_adjustment = local.scale_down_adjustment

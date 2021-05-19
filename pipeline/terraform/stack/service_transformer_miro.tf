@@ -40,6 +40,7 @@ module "miro_transformer" {
 
   subnets = var.subnets
 
+  min_capacity = var.min_capacity
   max_capacity = local.max_capacity
 
   scale_down_adjustment = local.scale_down_adjustment

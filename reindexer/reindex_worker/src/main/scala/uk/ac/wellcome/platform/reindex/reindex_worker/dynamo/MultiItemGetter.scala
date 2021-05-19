@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.reindex.reindex_worker.dynamo
 
+import grizzled.slf4j.Logging
 import org.scanamo.syntax._
 import org.scanamo.{DynamoFormat, Scanamo, Table}
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
@@ -16,7 +17,8 @@ import scala.concurrent.{ExecutionContext, Future}
   */
 class MultiItemGetter(implicit
                       val dynamoClient: DynamoDbClient,
-                      val ec: ExecutionContext) {
+                      val ec: ExecutionContext)
+    extends Logging {
 
   def get[T](ids: Seq[String], partitionKey: String = "id")(tableName: String)(
     implicit format: DynamoFormat[T]
@@ -30,6 +32,17 @@ class MultiItemGetter(implicit
 
       val successes = result.collect { case Right(t) => t }
       val failures = result.collect { case Left(err) => err.toString }
+
+      // This usually means somebody has asked us to reindex the wrong IDs.
+      //
+      // e.g. trying to reindex the Sierra b-number with a check digit and
+      // prefix (b32496485) instead of the unprefixed ID in the store (3249648).
+      //
+      // It doesn't prevent the reindexer from potentially sending other IDs
+      // in the batch, but drop a warning to help them realise their mistake.
+      if (successes.size != ids.size) {
+        warn(s"Looked in table $tableName; could not find all the IDs in $ids")
+      }
 
       if (failures.isEmpty) {
         successes.toSeq

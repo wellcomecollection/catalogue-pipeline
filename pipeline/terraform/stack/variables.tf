@@ -2,6 +2,11 @@ variable "pipeline_date" {
   type = string
 }
 
+variable "min_capacity" {
+  type    = number
+  default = 0
+}
+
 variable "max_capacity" {
   type        = number
   default     = 15
