@@ -17,7 +17,8 @@ import scala.concurrent.{ExecutionContext, Future}
   */
 class MultiItemGetter(implicit
                       val dynamoClient: DynamoDbClient,
-                      val ec: ExecutionContext) extends Logging {
+                      val ec: ExecutionContext)
+    extends Logging {
 
   def get[T](ids: Seq[String], partitionKey: String = "id")(tableName: String)(
     implicit format: DynamoFormat[T]
