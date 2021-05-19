@@ -49,6 +49,7 @@ lazy val flows = setupProject(
 lazy val source_model = setupProject(
   project,
   folder = "common/source_model",
+  localDependencies = Seq(internal_model),
   externalDependencies = CatalogueDependencies.sourceModelDependencies
 )
 

@@ -3,6 +3,7 @@ package weco.catalogue.internal_model.locations
 import enumeratum.EnumEntry
 import enumeratum.Enum
 import io.circe.{Decoder, Encoder}
+import org.scanamo.DynamoFormat
 
 sealed trait License extends EnumEntry {
   val id: String
@@ -24,6 +25,12 @@ object License extends Enum[License] {
 
   implicit val licenseDecoder: Decoder[License] =
     Decoder.forProduct1("id")(License.withName)
+
+  implicit val format: DynamoFormat[License] =
+    DynamoFormat.coercedXmap[License, String, NoSuchElementException](
+      License.withName,
+      _.id
+    )
 
   case object CCBY extends License {
     val id = "cc-by"

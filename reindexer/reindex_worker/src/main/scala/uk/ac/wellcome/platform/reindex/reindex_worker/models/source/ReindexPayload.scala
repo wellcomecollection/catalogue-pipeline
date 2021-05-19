@@ -10,6 +10,7 @@ import weco.catalogue.source_model.{
   SourcePayload
 }
 import weco.catalogue.source_model.mets.MetsSourceData
+import weco.catalogue.source_model.miro.{MiroSourceOverrides, MiroUpdateEvent}
 
 sealed trait ReindexPayload {
   val id: String
@@ -43,11 +44,20 @@ case class MiroReindexPayload(
   id: String,
   isClearedForCatalogueAPI: Boolean,
   location: S3ObjectLocation,
+  events: List[MiroUpdateEvent] = Nil,
+  overrides: Option[MiroSourceOverrides] = None,
   version: Int
 ) extends ReindexPayload {
 
   override def toSourcePayload: SourcePayload =
-    MiroSourcePayload(id, isClearedForCatalogueAPI, location, version)
+    MiroSourcePayload(
+      id = id,
+      isClearedForCatalogueAPI = isClearedForCatalogueAPI,
+      location = location,
+      events = events,
+      overrides = overrides,
+      version = version
+    )
 }
 
 case class MetsReindexPayload(

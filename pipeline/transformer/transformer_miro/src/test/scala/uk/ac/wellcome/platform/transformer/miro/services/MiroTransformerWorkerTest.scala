@@ -16,6 +16,7 @@ import uk.ac.wellcome.storage.store.memory.MemoryTypedStore
 import weco.catalogue.internal_model.identifiers.IdentifierType
 import weco.catalogue.internal_model.work.{Work, WorkState}
 import weco.catalogue.source_model.MiroSourcePayload
+import weco.catalogue.source_model.miro.MiroSourceOverrides
 import weco.catalogue.transformer.{
   TransformerWorker,
   TransformerWorkerTestCases
@@ -27,7 +28,7 @@ class MiroTransformerWorkerTest
     extends TransformerWorkerTestCases[
       MemoryTypedStore[S3ObjectLocation, MiroRecord],
       MiroSourcePayload,
-      (MiroRecord, MiroMetadata)]
+      (MiroRecord, MiroSourceOverrides, MiroMetadata)]
     with MiroRecordGenerators
     with S3ObjectLocationGenerators
     with EitherValues {
@@ -56,6 +57,8 @@ class MiroTransformerWorkerTest
       id = id,
       version = version,
       location = location,
+      events = List(),
+      overrides = None,
       isClearedForCatalogueAPI = chooseFrom(true, false)
     )
   }
@@ -78,6 +81,8 @@ class MiroTransformerWorkerTest
       id = randomAlphanumeric(),
       version = 1,
       location = createS3ObjectLocation,
+      events = List(),
+      overrides = None,
       isClearedForCatalogueAPI = chooseFrom(true, false)
     )
 
@@ -95,9 +100,12 @@ class MiroTransformerWorkerTest
                                           Work[WorkState.Source],
                                           String],
     retriever: Retriever[Work[WorkState.Source]])(
-    testWith: TestWith[
-      TransformerWorker[MiroSourcePayload, (MiroRecord, MiroMetadata), String],
-      R])(
+    testWith: TestWith[TransformerWorker[MiroSourcePayload,
+                                         (MiroRecord,
+                                          MiroSourceOverrides,
+                                          MiroMetadata),
+                                         String],
+                       R])(
     implicit miroReadable: MemoryTypedStore[S3ObjectLocation, MiroRecord]): R =
     testWith(
       new MiroTransformerWorker(

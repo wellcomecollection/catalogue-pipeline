@@ -5,6 +5,7 @@ import uk.ac.wellcome.platform.transformer.miro.exceptions.{
   ShouldSuppressException
 }
 import weco.catalogue.internal_model.locations.License
+import weco.catalogue.source_model.miro.MiroSourceOverrides
 
 trait MiroLicenses {
 
@@ -22,8 +23,15 @@ trait MiroLicenses {
     *  TODO: Update these mappings based on the final version of Christy's
     *        document.
     */
-  def chooseLicense(miroId: String,
-                    maybeUseRestrictions: Option[String]): License =
+  def chooseLicense(maybeUseRestrictions: Option[String],
+                    overrides: MiroSourceOverrides): License =
+    overrides.license match {
+      case Some(license) => license
+      case None          => chooseLicenseFromUseRestrictions(maybeUseRestrictions)
+    }
+
+  private def chooseLicenseFromUseRestrictions(
+    maybeUseRestrictions: Option[String]): License =
     maybeUseRestrictions match {
 
       // These images need more data.
@@ -57,5 +65,4 @@ trait MiroLicenses {
               "image_use_restrictions = 'Image withdrawn, see notes'")
         }
     }
-
 }

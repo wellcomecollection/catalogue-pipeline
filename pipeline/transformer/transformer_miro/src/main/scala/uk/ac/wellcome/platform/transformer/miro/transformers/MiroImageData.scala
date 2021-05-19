@@ -7,10 +7,12 @@ import weco.catalogue.internal_model.identifiers.{
   SourceIdentifier
 }
 import weco.catalogue.internal_model.image.ImageData
+import weco.catalogue.source_model.miro.MiroSourceOverrides
 
 trait MiroImageData extends MiroLocation {
 
   def getImageData(miroRecord: MiroRecord,
+                   overrides: MiroSourceOverrides,
                    version: Int): ImageData[IdState.Identifiable] =
     ImageData[IdState.Identifiable](
       id = IdState.Identifiable(
@@ -21,6 +23,6 @@ trait MiroImageData extends MiroLocation {
         )
       ),
       version = version,
-      locations = List(getLocation(miroRecord))
+      locations = List(getLocation(miroRecord, overrides))
     )
 }

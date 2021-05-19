@@ -15,6 +15,7 @@ import weco.catalogue.internal_model.locations._
 import weco.catalogue.internal_model.work.DeletedReason.SuppressedFromSource
 import weco.catalogue.internal_model.work.InvisibilityReason.UnableToTransform
 import weco.catalogue.internal_model.work._
+import weco.catalogue.source_model.miro.MiroSourceOverrides
 
 class MiroRecordTransformerTest
     extends AnyFunSpec
@@ -360,6 +361,30 @@ class MiroRecordTransformerTest
     )
   }
 
+  describe("it uses the MiroSourceOverrides") {
+    it("to set the license") {
+      val miroRecord = createMiroRecordWith(useRestrictions = Some("CC-0"))
+
+      val work1 = transformWork(
+        miroRecord = miroRecord,
+        overrides = MiroSourceOverrides.empty
+      )
+
+      val license1 = work1.data.items.head.locations.head.license
+      license1 shouldBe Some(License.CC0)
+
+      val work2 = transformWork(
+        miroRecord = miroRecord,
+        overrides = MiroSourceOverrides(
+          license = Some(License.InCopyright)
+        )
+      )
+
+      val license2 = work2.data.items.head.locations.head.license
+      license2 shouldBe Some(License.InCopyright)
+    }
+  }
+
   private def assertTransformReturnsInvisibleWork(
     miroRecord: MiroRecord,
     miroMetadata: MiroMetadata = MiroMetadata(isClearedForCatalogueAPI = true),
@@ -367,6 +392,7 @@ class MiroRecordTransformerTest
   ): Assertion = {
     val triedMaybeWork = transformer.transform(
       miroRecord = miroRecord,
+      overrides = MiroSourceOverrides.empty,
       miroMetadata = miroMetadata,
       version = 1
     )
@@ -393,6 +419,7 @@ class MiroRecordTransformerTest
   ): Assertion = {
     val triedMaybeWork = transformer.transform(
       miroRecord = miroRecord,
+      overrides = MiroSourceOverrides.empty,
       miroMetadata = miroMetadata,
       version = 1
     )
