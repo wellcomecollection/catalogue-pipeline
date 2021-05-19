@@ -17,7 +17,7 @@ SOURCES = {
     "calm": "vhs-calm-adapter",
 }
 
-DESTINATIONS = ["catalogue", "reporting"]
+DESTINATIONS = ["catalogue", "catalogue_miro_updates", "reporting"]
 
 
 def how_many_segments(table_name):
