@@ -438,4 +438,17 @@ def main(catalogue_id, index, dry_run):
 
 
 if __name__ == "__main__":
+    # This script is outdated, in particular:
+    #
+    #  - it should use the new mechanism for updating Miro images in VHS
+    #    (see miro_updates.py in the parent directory)
+    #
+    #    That script will remove it from VHS and send it to the Miro
+    #    transformer to remove it from our indexes.
+    #
+    #  - it assumes the use of Loris, which we've stopped using
+    #
+    # The idea behind this script is sound -- but I don't want to fix
+    # it right now.
+    assert 0, "This script is outdated and needs to be rewritten"
     main()

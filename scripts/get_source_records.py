@@ -19,52 +19,15 @@ import os
 import sys
 import tempfile
 
-import boto3
-from elasticsearch import Elasticsearch
 import httpx
+
+from _common import get_api_es_client, get_session
 
 
 CALM_ADAPTER_TABLE = "vhs-calm-adapter"
 METS_ADAPTER_TABLE = "mets-adapter-store-delta"
 MIRO_ADAPTER_TABLE = "vhs-sourcedata-miro"
 SIERRA_ADAPTER_TABLE = "vhs-sierra-sierra-adapter-20200604"
-
-
-def get_session(*, role_arn):
-    """
-    Returns a boto3 Session authenticated with the current role ARN.
-    """
-    sts_client = boto3.client("sts")
-    assumed_role_object = sts_client.assume_role(
-        RoleArn=role_arn, RoleSessionName="AssumeRoleSession1"
-    )
-    credentials = assumed_role_object["Credentials"]
-    return boto3.Session(
-        aws_access_key_id=credentials["AccessKeyId"],
-        aws_secret_access_key=credentials["SecretAccessKey"],
-        aws_session_token=credentials["SessionToken"],
-    )
-
-
-def get_secret_string(session, *, secret_id):
-    """
-    Look up the value of a SecretString in Secrets Manager.
-    """
-    secrets = session.client("secretsmanager")
-    return secrets.get_secret_value(SecretId=secret_id)["SecretString"]
-
-
-def get_api_es_client(session):
-    """
-    Returns an Elasticsearch client for the catalogue cluster.
-    """
-    host = get_secret_string(session, secret_id="catalogue/api/es_host")
-    port = get_secret_string(session, secret_id="catalogue/api/es_port")
-    protocol = get_secret_string(session, secret_id="catalogue/api/es_protocol")
-    username = get_secret_string(session, secret_id="catalogue/api/es_username")
-    password = get_secret_string(session, secret_id="catalogue/api/es_password")
-
-    return Elasticsearch(f"{protocol}://{username}:{password}@{host}:{port}")
 
 
 def get_current_works_index():
@@ -149,7 +112,7 @@ def get_source_record(session, *, source_identifier, apply_cleanups):
         if apply_cleanups:
             return _prettify_json(record)
         else:
-            return record.encode("utf8")
+            return record
     elif identifier_type == "sierra-system-number":
         # The sourceIdentifier has a b-number like b19489936, but the
         # Sierra VHS keys records without their prefix/check digit, ie 1948993
@@ -175,7 +138,7 @@ def get_source_record(session, *, source_identifier, apply_cleanups):
 
             return json.dumps(transformable, indent=2, sort_keys=True)
         else:
-            return record.encode("utf8")
+            return record
     elif identifier_type == "miro-image-number":
         record = _get_vhs_record(
             session, table_name=MIRO_ADAPTER_TABLE, id=source_identifier["value"]
@@ -184,7 +147,7 @@ def get_source_record(session, *, source_identifier, apply_cleanups):
         if apply_cleanups:
             return _prettify_json(record)
         else:
-            return record.encode("utf8")
+            return record
     elif identifier_type == "mets":
         return _get_mets_record(session, b_number=source_identifier["value"])
     else:
@@ -217,7 +180,11 @@ if __name__ == "__main__":
             temp_dir, f"{id['identifierType']['id']}_{id['value']}.json"
         )
 
-        with open(out_path, "w") as outfile:
-            outfile.write(record)
+        if isinstance(record, bytes):
+            with open(out_path, "wb") as outfile:
+                outfile.write(record)
+        else:
+            with open(out_path, "w") as outfile:
+                outfile.write(record)
 
         print(out_path)
