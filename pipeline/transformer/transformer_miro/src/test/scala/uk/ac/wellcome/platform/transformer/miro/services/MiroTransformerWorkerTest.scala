@@ -16,6 +16,7 @@ import uk.ac.wellcome.storage.store.memory.MemoryTypedStore
 import weco.catalogue.internal_model.identifiers.IdentifierType
 import weco.catalogue.internal_model.work.{Work, WorkState}
 import weco.catalogue.source_model.MiroSourcePayload
+import weco.catalogue.source_model.miro.MiroSourceOverrides
 import weco.catalogue.transformer.{
   TransformerWorker,
   TransformerWorkerTestCases
@@ -27,7 +28,7 @@ class MiroTransformerWorkerTest
     extends TransformerWorkerTestCases[
       MemoryTypedStore[S3ObjectLocation, MiroRecord],
       MiroSourcePayload,
-      (MiroRecord, MiroMetadata)]
+      (MiroRecord, MiroSourceOverrides, MiroMetadata)]
     with MiroRecordGenerators
     with S3ObjectLocationGenerators
     with EitherValues {
@@ -96,7 +97,7 @@ class MiroTransformerWorkerTest
                                           String],
     retriever: Retriever[Work[WorkState.Source]])(
     testWith: TestWith[
-      TransformerWorker[MiroSourcePayload, (MiroRecord, MiroMetadata), String],
+      TransformerWorker[MiroSourcePayload, (MiroRecord, MiroSourceOverrides, MiroMetadata), String],
       R])(
     implicit miroReadable: MemoryTypedStore[S3ObjectLocation, MiroRecord]): R =
     testWith(

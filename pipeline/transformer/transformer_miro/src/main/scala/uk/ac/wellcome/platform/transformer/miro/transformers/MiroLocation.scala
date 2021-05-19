@@ -7,6 +7,7 @@ import weco.catalogue.internal_model.locations.{
   DigitalLocation,
   LocationType
 }
+import weco.catalogue.source_model.miro.MiroSourceOverrides
 
 trait MiroLocation extends MiroLicenses with MiroContributorCodes {
 
@@ -25,7 +26,7 @@ trait MiroLocation extends MiroLicenses with MiroContributorCodes {
     imageUriTemplate.format(iiifImageApiBaseUri, miroId)
   }
 
-  def getLocation(miroRecord: MiroRecord): DigitalLocation =
+  def getLocation(miroRecord: MiroRecord, overrides: MiroSourceOverrides): DigitalLocation =
     DigitalLocation(
       locationType = LocationType.IIIFImageAPI,
       url = buildImageApiURL(
@@ -35,7 +36,8 @@ trait MiroLocation extends MiroLicenses with MiroContributorCodes {
       credit = getCredit(miroRecord),
       license = Some(
         chooseLicense(
-          maybeUseRestrictions = miroRecord.useRestrictions
+          maybeUseRestrictions = miroRecord.useRestrictions,
+          overrides = overrides
         )
       ),
       accessConditions = List(

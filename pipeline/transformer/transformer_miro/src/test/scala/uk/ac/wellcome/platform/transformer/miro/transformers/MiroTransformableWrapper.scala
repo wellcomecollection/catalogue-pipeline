@@ -8,16 +8,18 @@ import uk.ac.wellcome.platform.transformer.miro.models.MiroMetadata
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.Source
+import weco.catalogue.source_model.miro.MiroSourceOverrides
 
 import scala.util.Try
 
 trait MiroTransformableWrapper extends Matchers { this: Suite =>
   val transformer = new MiroRecordTransformer
 
-  def transformWork(miroRecord: MiroRecord): Work.Visible[Source] = {
+  def transformWork(miroRecord: MiroRecord, overrides: MiroSourceOverrides = MiroSourceOverrides.empty): Work.Visible[Source] = {
     val triedWork: Try[Work[Source]] =
       transformer.transform(
         miroRecord = miroRecord,
+        overrides = overrides,
         miroMetadata = MiroMetadata(isClearedForCatalogueAPI = true),
         version = 1
       )
@@ -39,6 +41,7 @@ trait MiroTransformableWrapper extends Matchers { this: Suite =>
     transformer
       .transform(
         miroRecord = miroRecord,
+        overrides = MiroSourceOverrides.empty,
         miroMetadata = MiroMetadata(isClearedForCatalogueAPI = true),
         version = 1
       )

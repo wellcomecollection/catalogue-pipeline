@@ -7,6 +7,7 @@ import uk.ac.wellcome.platform.transformer.miro.exceptions.{
   ShouldSuppressException
 }
 import weco.catalogue.internal_model.locations.License
+import weco.catalogue.source_model.miro.MiroSourceOverrides
 
 class MiroLicensesTest extends AnyFunSpec with Matchers {
   it("finds a recognised license") {
@@ -35,8 +36,25 @@ class MiroLicensesTest extends AnyFunSpec with Matchers {
     }
   }
 
+  it("uses the license override, if set") {
+    val maybeUseRestrictions = Some("CC-0")
+
+    transformer.chooseLicense(
+      maybeUseRestrictions = maybeUseRestrictions,
+      overrides = MiroSourceOverrides.empty
+    ) shouldBe License.CC0
+
+    transformer.chooseLicense(
+      maybeUseRestrictions = maybeUseRestrictions,
+      overrides = MiroSourceOverrides(license = Some(License.InCopyright))
+    ) shouldBe License.InCopyright
+  }
+
   private def chooseLicense(maybeUseRestrictions: Option[String]): License =
-    transformer.chooseLicense(maybeUseRestrictions = maybeUseRestrictions)
+    transformer.chooseLicense(
+      maybeUseRestrictions = maybeUseRestrictions,
+      overrides = MiroSourceOverrides.empty
+    )
 
   val transformer = new MiroLicenses {}
 }

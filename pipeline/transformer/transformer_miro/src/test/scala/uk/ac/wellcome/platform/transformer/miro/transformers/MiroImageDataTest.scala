@@ -11,6 +11,7 @@ import weco.catalogue.internal_model.identifiers.{
 }
 import weco.catalogue.internal_model.image.ImageData
 import weco.catalogue.internal_model.locations._
+import weco.catalogue.source_model.miro.MiroSourceOverrides
 
 class MiroImageDataTest
     extends AnyFunSpec
@@ -21,14 +22,17 @@ class MiroImageDataTest
 
   describe("getImageData") {
     it("extracts the Miro image data") {
-      transformer.getImageData(
-        createMiroRecordWith(
+      val imageData = transformer.getImageData(
+        miroRecord = createMiroRecordWith(
           imageNumber = "B0011308",
           useRestrictions = Some("CC-0"),
           sourceCode = Some("FDN")
         ),
+        overrides = MiroSourceOverrides.empty,
         version = 1
-      ) shouldBe ImageData[IdState.Identifiable](
+      )
+
+      imageData shouldBe ImageData[IdState.Identifiable](
         id = IdState.Identifiable(
           sourceIdentifier = SourceIdentifier(
             identifierType = IdentifierType.MiroImageNumber,
@@ -48,6 +52,28 @@ class MiroImageDataTest
             )
           ))
       )
+    }
+
+    it("uses the source overrides") {
+      val miroRecord = createMiroRecordWith(useRestrictions = Some("CC-0"))
+
+      val imageData1 = transformer.getImageData(
+        miroRecord = miroRecord,
+        overrides = MiroSourceOverrides.empty,
+        version = 1
+      )
+
+      imageData1.locations.head.license shouldBe Some(License.CC0)
+
+      val imageData2 = transformer.getImageData(
+        miroRecord = miroRecord,
+        overrides = MiroSourceOverrides(
+          license = Some(License.InCopyright)
+        ),
+        version = 1
+      )
+
+      imageData2.locations.head.license shouldBe Some(License.InCopyright)
     }
   }
 }

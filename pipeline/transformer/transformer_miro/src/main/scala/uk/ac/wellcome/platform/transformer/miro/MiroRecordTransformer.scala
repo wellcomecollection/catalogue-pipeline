@@ -20,6 +20,7 @@ import weco.catalogue.internal_model.identifiers.{
 import weco.catalogue.internal_model.work.DeletedReason.SuppressedFromSource
 import weco.catalogue.internal_model.work.InvisibilityReason.UnableToTransform
 import weco.catalogue.internal_model.work.{Work, WorkData}
+import weco.catalogue.source_model.miro.MiroSourceOverrides
 import weco.catalogue.transformer.Transformer
 import weco.catalogue.transformer.result.Result
 
@@ -35,19 +36,20 @@ class MiroRecordTransformer
     with MiroTitleAndDescription
     with MiroFormat
     with Logging
-    with Transformer[(MiroRecord, MiroMetadata)] {
+    with Transformer[(MiroRecord, MiroSourceOverrides, MiroMetadata)] {
 
-  override def apply(sourceData: (MiroRecord, MiroMetadata),
+  override def apply(sourceData: (MiroRecord, MiroSourceOverrides, MiroMetadata),
                      version: Int): Result[Work[Source]] = {
-    val (miroRecord, miroMetadata) = sourceData
+    val (miroRecord, overrides, miroMetadata) = sourceData
 
-    transform(miroRecord, miroMetadata, version).toEither
+    transform(miroRecord, overrides, miroMetadata, version).toEither
   }
 
   def transform(miroRecord: MiroRecord,
+                overrides: MiroSourceOverrides,
                 miroMetadata: MiroMetadata,
                 version: Int): Try[Work[Source]] =
-    doTransform(miroRecord, miroMetadata, version) map { transformed =>
+    doTransform(miroRecord, overrides, miroMetadata, version) map { transformed =>
       debug(s"Transformed record to $transformed")
       transformed
     } recover {
@@ -57,6 +59,7 @@ class MiroRecordTransformer
     }
 
   private def doTransform(originalMiroRecord: MiroRecord,
+                          overrides: MiroSourceOverrides,
                           miroMetadata: MiroMetadata,
                           version: Int): Try[Work[Source]] = {
     val sourceIdentifier = SourceIdentifier(
@@ -115,9 +118,9 @@ class MiroRecordTransformer
           subjects = getSubjects(miroRecord),
           genres = getGenres(miroRecord),
           contributors = getContributors(miroRecord),
-          thumbnail = Some(getThumbnail(miroRecord)),
-          items = getItems(miroRecord),
-          imageData = List(getImageData(miroRecord, version = version))
+          thumbnail = Some(getThumbnail(miroRecord, overrides)),
+          items = getItems(miroRecord, overrides),
+          imageData = List(getImageData(miroRecord, overrides = overrides, version = version))
         )
 
         Work.Visible[Source](

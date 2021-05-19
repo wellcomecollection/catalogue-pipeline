@@ -13,6 +13,7 @@ import uk.ac.wellcome.storage.{Identified, ReadError, Version}
 import uk.ac.wellcome.typesafe.Runnable
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.source_model.MiroSourcePayload
+import weco.catalogue.source_model.miro.MiroSourceOverrides
 import weco.catalogue.transformer.{Transformer, TransformerWorker}
 
 import scala.concurrent.ExecutionContext
@@ -30,15 +31,15 @@ class MiroTransformerWorker[MsgDestination](
 ) extends Runnable
     with TransformerWorker[
       MiroSourcePayload,
-      (MiroRecord, MiroMetadata),
+      (MiroRecord, MiroSourceOverrides, MiroMetadata),
       MsgDestination] {
 
-  override val transformer: Transformer[(MiroRecord, MiroMetadata)] =
+  override val transformer: Transformer[(MiroRecord, MiroSourceOverrides, MiroMetadata)] =
     new MiroRecordTransformer
 
   override def lookupSourceData(p: MiroSourcePayload)
     : Either[ReadError,
-             Identified[Version[String, Int], (MiroRecord, MiroMetadata)]] =
+             Identified[Version[String, Int], (MiroRecord, MiroSourceOverrides, MiroMetadata)]] =
     miroReadable
       .get(p.location)
       .map {
@@ -47,6 +48,7 @@ class MiroTransformerWorker[MsgDestination](
             Version(p.id, p.version),
             (
               miroRecord,
+              p.overrides.getOrElse(MiroSourceOverrides.empty),
               MiroMetadata(
                 isClearedForCatalogueAPI = p.isClearedForCatalogueAPI)))
       }
