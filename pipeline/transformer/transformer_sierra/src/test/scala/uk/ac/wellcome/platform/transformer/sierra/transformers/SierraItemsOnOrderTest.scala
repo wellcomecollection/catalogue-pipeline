@@ -5,6 +5,7 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.platform.transformer.sierra.generators.SierraDataGenerators
 import uk.ac.wellcome.platform.transformer.sierra.source.{
   FixedField,
+  SierraBibData,
   SierraOrderData
 }
 import weco.catalogue.internal_model.identifiers.IdState
@@ -337,6 +338,37 @@ class SierraItemsOnOrderTest
       getOrders(hasItems = false, orderData = orderData) should not be empty
       getOrders(hasItems = true, orderData = orderData) shouldBe empty
     }
+
+    it("unless there is a CAT DATE") {
+      val orderData = List(
+        createSierraOrderDataWith(
+          fixedFields = Map(
+            "5" -> FixedField(label = "COPIES", value = "1"),
+            "13" -> FixedField(label = "ODATE", value = "2001-01-01"),
+            "20" -> FixedField(label = "STATUS", value = "o")
+          )
+        ),
+        createSierraOrderDataWith(
+          fixedFields = Map(
+            "5" -> FixedField(label = "COPIES", value = "2"),
+            "13" -> FixedField(label = "ODATE", value = "2002-02-02"),
+            "20" -> FixedField(label = "STATUS", value = "o")
+          )
+        )
+      )
+
+      val bibData = createSierraBibData
+      val bibDataWithCatDate =
+        bibData.copy(
+          fixedFields =
+            Map("28" -> FixedField(label = "CAT DATE", value = "2021-05-17"))
+        )
+
+      // Note: we test both with and without CAT DATE here, so we'll
+      // spot if the lack of output is unrelated to the items.
+      getOrders(bibData = bibData, orderData = orderData) should not be empty
+      getOrders(bibData = bibDataWithCatDate, orderData = orderData) shouldBe empty
+    }
   }
 
   describe("returns 'awaiting cataloguing' items") {
@@ -475,6 +507,30 @@ class SierraItemsOnOrderTest
       getOrders(hasItems = false, orderData = orderData) should not be empty
       getOrders(hasItems = true, orderData = orderData) shouldBe empty
     }
+
+    it("unless there is a CAT DATE") {
+      val orderData = List(
+        createSierraOrderDataWith(
+          fixedFields = Map(
+            "5" -> FixedField(label = "COPIES", value = "1"),
+            "17" -> FixedField(label = "RDATE", value = "2001-01-01"),
+            "20" -> FixedField(label = "STATUS", value = "a")
+          )
+        )
+      )
+
+      val bibData = createSierraBibData
+      val bibDataWithCatDate =
+        bibData.copy(
+          fixedFields =
+            Map("28" -> FixedField(label = "CAT DATE", value = "2021-05-17"))
+        )
+
+      // Note: we test both with and without CAT DATE here, so we'll
+      // spot if the lack of output is unrelated to the items.
+      getOrders(bibData = bibData, orderData = orderData) should not be empty
+      getOrders(bibData = bibDataWithCatDate, orderData = orderData) shouldBe empty
+    }
   }
 
   describe("skips unrecognised order records") {
@@ -498,7 +554,9 @@ class SierraItemsOnOrderTest
     }
   }
 
-  def getOrders(hasItems: Boolean, orderData: List[SierraOrderData])
+  def getOrders(hasItems: Boolean = false,
+                bibData: SierraBibData = createSierraBibData,
+                orderData: List[SierraOrderData])
     : List[Item[IdState.Unidentifiable.type]] = {
     val id = createSierraBibNumber
 
@@ -510,6 +568,6 @@ class SierraItemsOnOrderTest
 
     val orderDataMap = orderIds.zip(orderData).toMap
 
-    SierraItemsOnOrder(id, hasItems, orderDataMap)
+    SierraItemsOnOrder(id, bibData, hasItems, orderDataMap)
   }
 }
