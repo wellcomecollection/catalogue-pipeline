@@ -19,6 +19,7 @@ import uk.ac.wellcome.platform.reindex.reindex_worker.models.{
 }
 import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
 import uk.ac.wellcome.storage.generators.S3ObjectLocationGenerators
+import weco.catalogue.internal_model.locations.License
 import weco.catalogue.source_model.{
   CalmSourcePayload,
   MetsSourcePayload,
@@ -29,6 +30,7 @@ import weco.catalogue.source_model.{
 }
 import weco.catalogue.source_model.generators.MetsSourceDataGenerators
 import weco.catalogue.source_model.mets.DeletedMetsFile
+import weco.catalogue.source_model.miro.{MiroSourceOverrides, MiroUpdateEvent}
 
 import java.time.Instant
 import scala.collection.JavaConverters._
@@ -277,6 +279,68 @@ class ReindexWorkerServiceTest
           id = miroID,
           isClearedForCatalogueAPI = isClearedForCatalogueAPI,
           location = location,
+          version = version
+        )
+
+        runTest(
+          table = table,
+          source = ReindexSource.Miro,
+          expectedMessage = expectedMessage
+        )
+      }
+    }
+
+    it("for Miro records with a license override") {
+      withLocalDynamoDbTable { table =>
+        val miroID = randomAlphanumeric()
+        val isClearedForCatalogueAPI = chooseFrom(true, false)
+        val location = createS3ObjectLocation
+        val version = randomInt(from = 1, to = 10)
+
+        dynamoClient.putItem(
+          PutItemRequest
+            .builder()
+            .tableName(table.name)
+            .item(
+              toAttributeValue(
+                "id" -> miroID,
+                "location" -> Map(
+                  "bucket" -> location.bucket,
+                  "key" -> location.key
+                ),
+                "isClearedForCatalogueAPI" -> isClearedForCatalogueAPI,
+                "events" -> List(
+                  Map(
+                    "description" -> "Change license override from 'None' to 'cc-by-nc'",
+                    "message" -> "An email from Jane Smith (the contributor) explained we can use CC-BY-NC",
+                    "date" -> 1621417033533L,
+                    "user" -> "Henry Wellcome <wellcomeh@wellcomecloud.onmicrosoft.com>"
+                  )
+                ),
+                "overrides" -> Map(
+                  "license" -> "cc-by"
+                ),
+                "version" -> version
+              )
+            )
+            .build()
+        )
+
+        val expectedMessage = MiroSourcePayload(
+          id = miroID,
+          isClearedForCatalogueAPI = isClearedForCatalogueAPI,
+          location = location,
+          events = List(
+            MiroUpdateEvent(
+              description = "Change license override from 'None' to 'cc-by-nc'",
+              message = "An email from Jane Smith (the contributor) explained we can use CC-BY-NC",
+              date = Instant.parse("2021-05-19T09:37:13.533Z"),
+              user = "Henry Wellcome <wellcomeh@wellcomecloud.onmicrosoft.com>"
+            )
+          ),
+          overrides = Some(
+            MiroSourceOverrides(license = Some(License.CCBY))
+          ),
           version = version
         )
 
