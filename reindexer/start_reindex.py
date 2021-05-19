@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import itertools
 import json
 import math
 import sys
@@ -56,8 +57,21 @@ def partial_reindex_parameters(max_records):
     yield {"maxRecords": max_records, "type": "PartialReindexParameters"}
 
 
+def chunked_iterable(iterable, size):
+    # See https://alexwlchan.net/2018/12/iterating-in-fixed-size-chunks/
+    it = iter(iterable)
+    while True:
+        chunk = tuple(itertools.islice(it, size))
+        if not chunk:
+            break
+        yield chunk
+
+
 def specific_reindex_parameters(record_ids):
-    yield {"ids": record_ids, "type": "SpecificReindexParameters"}
+    # The reindexer can handle up to 100 IDs at a time, so send them in
+    # batches of that size.
+    for chunk in chunked_iterable(record_ids, size=100):
+        yield {"ids": chunk, "type": "SpecificReindexParameters"}
 
 
 def read_from_s3(bucket, key):
