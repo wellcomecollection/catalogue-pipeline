@@ -2,6 +2,7 @@ package weco.catalogue.source_model
 
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import weco.catalogue.source_model.mets.MetsSourceData
+import weco.catalogue.source_model.miro.{MiroSourceOverrides, MiroUpdateEvent}
 
 sealed trait SourcePayload {
   val id: String
@@ -25,6 +26,8 @@ case class MiroSourcePayload(
   id: String,
   isClearedForCatalogueAPI: Boolean,
   location: S3ObjectLocation,
+  events: List[MiroUpdateEvent] = Nil,
+  overrides: Option[MiroSourceOverrides] = None,
   version: Int
 ) extends SourcePayload
 
