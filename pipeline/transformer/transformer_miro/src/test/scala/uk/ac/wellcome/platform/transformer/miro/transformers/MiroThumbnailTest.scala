@@ -6,7 +6,10 @@ import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
 import weco.catalogue.internal_model.locations.License
 import weco.catalogue.source_model.miro.MiroSourceOverrides
 
-class MiroThumbnailTest extends AnyFunSpec with Matchers with MiroRecordGenerators {
+class MiroThumbnailTest
+    extends AnyFunSpec
+    with Matchers
+    with MiroRecordGenerators {
   val transformer = new MiroThumbnail {}
 
   it("uses the source overrides") {

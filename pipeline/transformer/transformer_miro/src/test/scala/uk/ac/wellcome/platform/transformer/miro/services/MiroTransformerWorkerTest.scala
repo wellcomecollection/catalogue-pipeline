@@ -96,9 +96,12 @@ class MiroTransformerWorkerTest
                                           Work[WorkState.Source],
                                           String],
     retriever: Retriever[Work[WorkState.Source]])(
-    testWith: TestWith[
-      TransformerWorker[MiroSourcePayload, (MiroRecord, MiroSourceOverrides, MiroMetadata), String],
-      R])(
+    testWith: TestWith[TransformerWorker[MiroSourcePayload,
+                                         (MiroRecord,
+                                          MiroSourceOverrides,
+                                          MiroMetadata),
+                                         String],
+                       R])(
     implicit miroReadable: MemoryTypedStore[S3ObjectLocation, MiroRecord]): R =
     testWith(
       new MiroTransformerWorker(

@@ -5,7 +5,8 @@ import weco.catalogue.internal_model.locations.{DigitalLocation, LocationType}
 import weco.catalogue.source_model.miro.MiroSourceOverrides
 
 trait MiroThumbnail extends MiroImageData with MiroLicenses {
-  def getThumbnail(miroRecord: MiroRecord, overrides: MiroSourceOverrides): DigitalLocation =
+  def getThumbnail(miroRecord: MiroRecord,
+                   overrides: MiroSourceOverrides): DigitalLocation =
     DigitalLocation(
       locationType = LocationType.ThumbnailImage,
       url = buildImageApiURL(

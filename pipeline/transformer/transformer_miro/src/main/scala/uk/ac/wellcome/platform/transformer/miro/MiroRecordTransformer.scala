@@ -38,8 +38,9 @@ class MiroRecordTransformer
     with Logging
     with Transformer[(MiroRecord, MiroSourceOverrides, MiroMetadata)] {
 
-  override def apply(sourceData: (MiroRecord, MiroSourceOverrides, MiroMetadata),
-                     version: Int): Result[Work[Source]] = {
+  override def apply(
+    sourceData: (MiroRecord, MiroSourceOverrides, MiroMetadata),
+    version: Int): Result[Work[Source]] = {
     val (miroRecord, overrides, miroMetadata) = sourceData
 
     transform(miroRecord, overrides, miroMetadata, version).toEither
@@ -49,9 +50,10 @@ class MiroRecordTransformer
                 overrides: MiroSourceOverrides,
                 miroMetadata: MiroMetadata,
                 version: Int): Try[Work[Source]] =
-    doTransform(miroRecord, overrides, miroMetadata, version) map { transformed =>
-      debug(s"Transformed record to $transformed")
-      transformed
+    doTransform(miroRecord, overrides, miroMetadata, version) map {
+      transformed =>
+        debug(s"Transformed record to $transformed")
+        transformed
     } recover {
       case e: Throwable =>
         error("Failed to perform transform to unified item", e)
@@ -120,7 +122,8 @@ class MiroRecordTransformer
           contributors = getContributors(miroRecord),
           thumbnail = Some(getThumbnail(miroRecord, overrides)),
           items = getItems(miroRecord, overrides),
-          imageData = List(getImageData(miroRecord, overrides = overrides, version = version))
+          imageData = List(
+            getImageData(miroRecord, overrides = overrides, version = version))
         )
 
         Work.Visible[Source](

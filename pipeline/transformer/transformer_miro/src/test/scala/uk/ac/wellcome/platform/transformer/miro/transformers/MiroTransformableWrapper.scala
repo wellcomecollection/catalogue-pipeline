@@ -15,7 +15,9 @@ import scala.util.Try
 trait MiroTransformableWrapper extends Matchers { this: Suite =>
   val transformer = new MiroRecordTransformer
 
-  def transformWork(miroRecord: MiroRecord, overrides: MiroSourceOverrides = MiroSourceOverrides.empty): Work.Visible[Source] = {
+  def transformWork(miroRecord: MiroRecord,
+                    overrides: MiroSourceOverrides = MiroSourceOverrides.empty)
+    : Work.Visible[Source] = {
     val triedWork: Try[Work[Source]] =
       transformer.transform(
         miroRecord = miroRecord,

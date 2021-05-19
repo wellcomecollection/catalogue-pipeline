@@ -333,7 +333,8 @@ class ReindexWorkerServiceTest
           events = List(
             MiroUpdateEvent(
               description = "Change license override from 'None' to 'cc-by-nc'",
-              message = "An email from Jane Smith (the contributor) explained we can use CC-BY-NC",
+              message =
+                "An email from Jane Smith (the contributor) explained we can use CC-BY-NC",
               date = Instant.parse("2021-05-19T09:37:13.533Z"),
               user = "Henry Wellcome <wellcomeh@wellcomecloud.onmicrosoft.com>"
             )

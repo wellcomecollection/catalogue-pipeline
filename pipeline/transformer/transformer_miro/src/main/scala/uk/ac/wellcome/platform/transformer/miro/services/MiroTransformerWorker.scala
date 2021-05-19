@@ -34,12 +34,14 @@ class MiroTransformerWorker[MsgDestination](
       (MiroRecord, MiroSourceOverrides, MiroMetadata),
       MsgDestination] {
 
-  override val transformer: Transformer[(MiroRecord, MiroSourceOverrides, MiroMetadata)] =
+  override val transformer
+    : Transformer[(MiroRecord, MiroSourceOverrides, MiroMetadata)] =
     new MiroRecordTransformer
 
   override def lookupSourceData(p: MiroSourcePayload)
     : Either[ReadError,
-             Identified[Version[String, Int], (MiroRecord, MiroSourceOverrides, MiroMetadata)]] =
+             Identified[Version[String, Int],
+                        (MiroRecord, MiroSourceOverrides, MiroMetadata)]] =
     miroReadable
       .get(p.location)
       .map {
@@ -50,6 +52,7 @@ class MiroTransformerWorker[MsgDestination](
               miroRecord,
               p.overrides.getOrElse(MiroSourceOverrides.empty),
               MiroMetadata(
-                isClearedForCatalogueAPI = p.isClearedForCatalogueAPI)))
+                isClearedForCatalogueAPI = p.isClearedForCatalogueAPI))
+          )
       }
 }

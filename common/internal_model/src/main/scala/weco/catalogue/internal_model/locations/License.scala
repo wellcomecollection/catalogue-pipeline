@@ -28,7 +28,8 @@ object License extends Enum[License] {
 
   implicit val format: DynamoFormat[License] =
     DynamoFormat.coercedXmap[License, String, NoSuchElementException](
-      License.withName, _.id
+      License.withName,
+      _.id
     )
 
   case object CCBY extends License {

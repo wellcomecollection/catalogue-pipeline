@@ -7,7 +7,8 @@ import weco.catalogue.source_model.miro.MiroSourceOverrides
 
 trait MiroItems extends MiroLocation {
 
-  def getItems(miroRecord: MiroRecord, overrides: MiroSourceOverrides): List[Item[IdState.Unminted]] =
+  def getItems(miroRecord: MiroRecord,
+               overrides: MiroSourceOverrides): List[Item[IdState.Unminted]] =
     List(
       Item(
         id = IdState.Unidentifiable,

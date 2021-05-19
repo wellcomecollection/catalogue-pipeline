@@ -27,10 +27,11 @@ trait MiroLicenses {
                     overrides: MiroSourceOverrides): License =
     overrides.license match {
       case Some(license) => license
-      case None => chooseLicenseFromUseRestrictions(maybeUseRestrictions)
+      case None          => chooseLicenseFromUseRestrictions(maybeUseRestrictions)
     }
 
-  private def chooseLicenseFromUseRestrictions(maybeUseRestrictions: Option[String]): License =
+  private def chooseLicenseFromUseRestrictions(
+    maybeUseRestrictions: Option[String]): License =
     maybeUseRestrictions match {
 
       // These images need more data.

@@ -18,7 +18,7 @@ class MiroItemsTest
 
   describe("getItems") {
     it("extracts an unidentifiable item") {
-      val items  = transformer.getItems(
+      val items = transformer.getItems(
         miroRecord = createMiroRecordWith(
           sourceCode = Some("FDN"),
           useRestrictions = Some("CC-0"),
