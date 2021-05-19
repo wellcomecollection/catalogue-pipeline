@@ -279,6 +279,8 @@ class ReindexWorkerServiceTest
           id = miroID,
           isClearedForCatalogueAPI = isClearedForCatalogueAPI,
           location = location,
+          events = List(),
+          overrides = None,
           version = version
         )
 
