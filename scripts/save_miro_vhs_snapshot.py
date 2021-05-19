@@ -38,15 +38,21 @@ def scan_table(session, *, TableName, **kwargs):
 
 
 if __name__ == "__main__":
-    read_only_session = get_session(role_arn="arn:aws:iam::760097843905:role/platform-read_only")
-    dev_session = get_session(role_arn="arn:aws:iam::760097843905:role/platform-developer")
+    read_only_session = get_session(
+        role_arn="arn:aws:iam::760097843905:role/platform-read_only"
+    )
+    dev_session = get_session(
+        role_arn="arn:aws:iam::760097843905:role/platform-developer"
+    )
 
     today = datetime.date.today()
 
     out_path = f"vhs-sourcedata-miro-{today}.json.gz"
 
     with gzip.open(out_path, "w") as outfile:
-        for item in tqdm.tqdm(scan_table(read_only_session, TableName="vhs-sourcedata-miro")):
+        for item in tqdm.tqdm(
+            scan_table(read_only_session, TableName="vhs-sourcedata-miro")
+        ):
             line = json.dumps(item, cls=DecimalEncoder) + "\n"
             outfile.write(line.encode("utf8"))
 

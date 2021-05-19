@@ -55,10 +55,7 @@ def _request_reindex_for(miro_id):
         "parameters": {"ids": [miro_id], "type": "SpecificReindexParameters"},
     }
 
-    sns_client.publish(
-        TopicArn=_get_reindexer_topic_arn(),
-        Message=json.dumps(message),
-    )
+    sns_client.publish(TopicArn=_get_reindexer_topic_arn(), Message=json.dumps(message))
 
 
 def _get_timestamp():
