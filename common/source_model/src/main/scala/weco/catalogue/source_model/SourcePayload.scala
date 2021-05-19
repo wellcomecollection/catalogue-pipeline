@@ -26,8 +26,8 @@ case class MiroSourcePayload(
   id: String,
   isClearedForCatalogueAPI: Boolean,
   location: S3ObjectLocation,
-  events: List[MiroUpdateEvent] = Nil,
-  overrides: Option[MiroSourceOverrides] = None,
+  events: List[MiroUpdateEvent],
+  overrides: Option[MiroSourceOverrides],
   version: Int
 ) extends SourcePayload
 
