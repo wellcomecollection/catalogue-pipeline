@@ -1,3 +1,8 @@
+"""
+This file contains some helper functions for updating the data in the
+Miro VHS, e.g. to suppress images or override the licence.
+"""
+
 import datetime
 import json
 
@@ -120,13 +125,103 @@ def suppress_image(*, miro_id, message: str):
     Hide a Miro image from wellcomecollection.org.
     """
     _set_image_availability(miro_id=miro_id, message=message, is_available=False)
-#
-# def set_license_override(image_id, license_code: str, message: str)
-#
-# def remove_license_override(image_id, message: str)
 
-if __name__ == "__main__":
-    suppress_image(
-        miro_id="AS0000081FH23",
-        message="Testing the Miro update Python on an image that's already unavailable",
+
+def _set_overrides(*, miro_id, message: str, override_key: str, override_value: str):
+    item = DYNAMO_CLIENT.get_item(TableName=TABLE_NAME, Key={"id": miro_id})["Item"]
+
+    new_event = {
+        "description": "Change overrides.%s from %r to %r"
+        % (override_key, item.get("overrides", {}).get(override_key), override_value),
+        "message": message,
+        "date": _get_timestamp(),
+        "user": _get_user(),
+    }
+
+    overrides = item.get("overrides", {})
+    overrides[override_key] = override_value
+
+    try:
+        events = item["events"] + [new_event]
+    except KeyError:
+        events = [new_event]
+
+    DYNAMO_CLIENT.update_item(
+        TableName=TABLE_NAME,
+        Key={"id": miro_id},
+        UpdateExpression="SET #version = :newVersion, #events = :events, #overrides = :overrides",
+        ConditionExpression="#version = :oldVersion",
+        ExpressionAttributeNames={
+            "#version": "version",
+            "#events": "events",
+            "#overrides": "overrides",
+        },
+        ExpressionAttributeValues={
+            ":oldVersion": item["version"],
+            ":newVersion": item["version"] + 1,
+            ":events": events,
+            ":overrides": overrides,
+        },
     )
+
+    _request_reindex_for(miro_id)
+
+
+def _remove_override(*, miro_id, message: str, override_key: str):
+    item = DYNAMO_CLIENT.get_item(TableName=TABLE_NAME, Key={"id": miro_id})["Item"]
+
+    new_event = {
+        "description": "Remove overrides.%s (previously %r)"
+        % (override_key, item.get("overrides", {}).get(override_key)),
+        "message": message,
+        "date": _get_timestamp(),
+        "user": _get_user(),
+    }
+
+    overrides = item.get("overrides", {})
+
+    try:
+        del overrides[override_key]
+    except KeyError:
+        pass
+
+    try:
+        events = item["events"] + [new_event]
+    except KeyError:
+        events = [new_event]
+
+    DYNAMO_CLIENT.update_item(
+        TableName=TABLE_NAME,
+        Key={"id": miro_id},
+        UpdateExpression="SET #version = :newVersion, #events = :events, #overrides = :overrides",
+        ConditionExpression="#version = :oldVersion",
+        ExpressionAttributeNames={
+            "#version": "version",
+            "#events": "events",
+            "#overrides": "overrides",
+        },
+        ExpressionAttributeValues={
+            ":oldVersion": item["version"],
+            ":newVersion": item["version"] + 1,
+            ":events": events,
+            ":overrides": overrides,
+        },
+    )
+
+    _request_reindex_for(miro_id)
+
+
+def set_license_override(*, miro_id: str, license_code: str, message: str):
+    """
+    Set the license of a Miro image on wellcomecollection.org.
+    """
+    _set_overrides(
+        miro_id=miro_id,
+        message=message,
+        override_key="license",
+        override_value=license_code,
+    )
+
+
+def remove_license_override(*, miro_id: str, message: str):
+    _remove_override(miro_id=miro_id, message=message, override_key="license")
