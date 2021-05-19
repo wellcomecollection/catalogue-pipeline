@@ -55,6 +55,7 @@ module "ingestor_works" {
 
   subnets = var.subnets
 
+  min_capacity = var.min_capacity
   max_capacity = min(6, local.max_capacity)
 
   scale_down_adjustment = local.scale_down_adjustment
