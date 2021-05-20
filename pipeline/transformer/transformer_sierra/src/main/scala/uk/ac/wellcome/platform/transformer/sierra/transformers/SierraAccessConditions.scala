@@ -11,10 +11,13 @@ object SierraAccessConditions extends SierraQueryOps {
       .varfieldsWithTag("506")
       .map { varfield =>
         val terms = getTerms(varfield)
+        val termsStatus = statusFromTerms(terms)
+
+        val status = getAccessStatus(bibId, varfield, termsStatus)
 
         AccessCondition(
-          status = getAccessStatus(bibId, varfield, terms),
-          terms = terms,
+          status = status,
+          terms = if (termsStatus.isDefined && termsStatus == status) None else terms,
           to = varfield.subfieldsWithTag("g").contents.headOption
         )
       }
@@ -31,6 +34,36 @@ object SierraAccessConditions extends SierraQueryOps {
       .map { _.content.trim }
       .filter { _.nonEmpty }
 
+  private def statusFromTerms(terms: Option[String]): Option[AccessStatus] = {
+    val normalisedTerms = terms
+      .map { _.stripSuffix(".").trim.toLowerCase() }
+
+    // Now we do some matching.  Note that we are very conservative here --
+    // we don't want to be tripped up by phrases like
+    //
+    //      This item was previously restricted, then reassessed in 2020 and opened.
+    //
+    // We are looking for specific matches that we can map to an access status.
+    normalisedTerms match {
+      case Some(value) if value == "unrestricted" || value == "open" || value == "unrestricted / open" || value == "unrestricted (open)" || value == "open access" =>
+        Some(AccessStatus.Open)
+
+      case Some(value) if value == "restricted" =>
+        Some(AccessStatus.Restricted)
+
+      case Some(value) if value == "closed" =>
+        Some(AccessStatus.Closed)
+
+      case Some(value) if value == "open with advisory" =>
+        Some(AccessStatus.OpenWithAdvisory)
+
+      case Some(value) if value == "permission is required to view these item" || value == "permission is required to view this item" =>
+        Some(AccessStatus.PermissionRequired)
+
+      case _ => None
+    }
+  }
+
   // Get an AccessStatus that draws from our list of types.
   //
   // Rules:
@@ -41,7 +74,7 @@ object SierraAccessConditions extends SierraQueryOps {
   // See https://www.loc.gov/marc/bibliographic/bd506.html
   private def getAccessStatus(bibId: SierraBibNumber,
                               varfield: VarField,
-                              terms: Option[String]): Option[AccessStatus] = {
+                              termsStatus: Option[AccessStatus]): Option[AccessStatus] = {
 
     // If the first indicator is 0, then there are no restrictions
     val indicator0 =
@@ -65,10 +98,6 @@ object SierraAccessConditions extends SierraQueryOps {
               None
           }
         }
-
-    // Look at the terms for the standardised terminology
-    val termsStatus =
-      terms.map { AccessStatus(_) }.collect { case Right(status) => status }
 
     // Finally, we look at all three fields together.  If the data is inconsistent
     // we should drop a warning and not set an access status, rather than set one that's

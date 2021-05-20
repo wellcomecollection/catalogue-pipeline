@@ -280,7 +280,7 @@ class SierraLocationTest
 
       location.accessConditions.head.status shouldBe Some(
         AccessStatus.Restricted)
-      location.accessConditions.head.terms shouldBe Some("Restricted")
+      location.accessConditions.head.terms shouldBe None
     }
 
     it("does not set an AccessStatus if the contents of ǂa and ǂf disagree") {
@@ -370,26 +370,6 @@ class SierraLocationTest
           accessConditions = List()
         )
       )
-    }
-
-    it("strips whitespace from the access conditions") {
-      val bibData = createSierraBibDataWith(
-        varFields = List(
-          VarField(
-            marcTag = Some("506"),
-            subfields = List(
-              MarcSubfield("a", "Permission is required to view this item. "),
-            )
-          )
-        )
-      )
-
-      val location =
-        transformer.getPhysicalLocation(bibId, itemId, itemData, bibData).get
-      location.accessConditions should have size 1
-
-      location.accessConditions.head.terms shouldBe Some(
-        "Permission is required to view this item.")
     }
   }
 }
