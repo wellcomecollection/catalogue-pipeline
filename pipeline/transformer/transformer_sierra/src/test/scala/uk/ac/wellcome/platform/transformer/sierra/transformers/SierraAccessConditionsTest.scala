@@ -106,6 +106,28 @@ class SierraAccessConditionsTest extends AnyFunSpec with Matchers with MarcGener
     )
   }
 
+  it("ignores a single period 506 subfield ǂf") {
+    val accessConditions = getAccessConditions(
+      bibVarFields = List(
+        VarField(
+          marcTag = Some("506"),
+          subfields = List(
+            MarcSubfield(tag = "a", content = "Access restricted to authorized subscribers"),
+            MarcSubfield(tag = "f", content = ".")
+          )
+        )
+      )
+    )
+
+    accessConditions shouldBe List(
+      AccessCondition(
+        status = None,
+        terms = Some("Access restricted to authorized subscribers"),
+        to = None
+      )
+    )
+  }
+
   it("strips whitespace from the access conditions") {
     val accessConditions = getAccessConditions(
       bibVarFields = List(

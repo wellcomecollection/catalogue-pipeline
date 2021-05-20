@@ -55,81 +55,40 @@ object AccessStatus extends Enum[License] {
 
   case object PermissionRequired extends AccessStatus
 
-  def apply(status: String): Either[Exception, AccessStatus] =
-    status.toLowerCase match {
-      case lowerCaseStatus
-          if lowerCaseStatus.startsWith(
-            "open with advisory",
-            "requires registration"
-          ) =>
+  def apply(status: String): Either[Exception, AccessStatus] = {
+    val normalisedStatus = status.trim.stripSuffix(".").trim.toLowerCase()
+
+    normalisedStatus match {
+      case value if value == "open with advisory" =>
         Right(AccessStatus.OpenWithAdvisory)
 
-      case lowerCaseStatus
-          if lowerCaseStatus.startsWith(
-            "unrestricted",
-            "open"
-          ) =>
+      // This has to come after the "OpenWithAdvisory" branch so we don't
+      // match on the partial open.
+      case value if value == "open" || value == "unrestricted" || value == "unrestricted / open" || value == "unrestricted (open)" || value == "open access" =>
         Right(AccessStatus.Open)
 
-      case lowerCaseStatus
-          if lowerCaseStatus.startsWith(
-            "restricted",
-            "cannot be produced",
-            "certain restrictions apply",
-            "clinical images",
-            "the file is restricted",
-            "this file is restricted"
-          ) =>
+      case value if value == "restricted" || value == "certain restrictions apply" || value.startsWith("restricted access") =>
         Right(AccessStatus.Restricted)
 
-      case lowerCaseStatus
-          if lowerCaseStatus.startsWith(
-            "by appointment"
-          ) =>
+      case value if value.startsWith("by appointment") =>
         Right(AccessStatus.ByAppointment)
 
-      case lowerCaseStatus
-          if lowerCaseStatus.startsWith(
-            "closed",
-            "the file is closed",
-            "this file is closed",
-            "the papers are closed",
-            "the files in this series are closed"
-          ) =>
+      case value if value == "closed" =>
         Right(AccessStatus.Closed)
 
-      case lowerCaseStatus
-          if lowerCaseStatus.startsWith(
-            "missing",
-            "deaccessioned",
-            "not available",
-          ) =>
+      case value if value == "cannot be produced" || value == "missing" || value == "deaccessioned" =>
         Right(AccessStatus.Unavailable)
 
-      case lowerCaseStatus
-          if lowerCaseStatus.startsWith(
-            "temporarily unavailable"
-          ) =>
+      case value if value == "temporarily unavailable" =>
         Right(AccessStatus.TemporarilyUnavailable)
 
-      case lowerCaseStatus if lowerCaseStatus.startsWith("in copyright") =>
-        Right(AccessStatus.LicensedResources)
-
-      case lowerCaseStatus
-          if lowerCaseStatus.startsWith(
-            "permission required",
-            "permission is required",
-            "donor permission",
-            "permission must be obtained",
-            "apply for permission",
-            "only with permission",
-            "with prior permission",
-          ) =>
+      case value if value == "donor permission" || value == "permission is required to view these item" || value == "permission is required to view this item" =>
         Right(AccessStatus.PermissionRequired)
 
       case _ =>
         Left(new UnknownAccessStatus(status))
     }
+  }
 
   implicit class StringOps(s: String) {
     def startsWith(prefixes: String*): Boolean =

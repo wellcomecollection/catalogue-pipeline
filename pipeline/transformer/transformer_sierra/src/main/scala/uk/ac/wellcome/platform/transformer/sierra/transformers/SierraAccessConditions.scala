@@ -34,35 +34,8 @@ object SierraAccessConditions extends SierraQueryOps {
       .map { _.content.trim }
       .filter { _.nonEmpty }
 
-  private def statusFromTerms(terms: Option[String]): Option[AccessStatus] = {
-    val normalisedTerms = terms
-      .map { _.stripSuffix(".").trim.toLowerCase() }
-
-    // Now we do some matching.  Note that we are very conservative here --
-    // we don't want to be tripped up by phrases like
-    //
-    //      This item was previously restricted, then reassessed in 2020 and opened.
-    //
-    // We are looking for specific matches that we can map to an access status.
-    normalisedTerms match {
-      case Some(value) if value == "unrestricted" || value == "open" || value == "unrestricted / open" || value == "unrestricted (open)" || value == "open access" =>
-        Some(AccessStatus.Open)
-
-      case Some(value) if value == "restricted" =>
-        Some(AccessStatus.Restricted)
-
-      case Some(value) if value == "closed" =>
-        Some(AccessStatus.Closed)
-
-      case Some(value) if value == "open with advisory" =>
-        Some(AccessStatus.OpenWithAdvisory)
-
-      case Some(value) if value == "permission is required to view these item" || value == "permission is required to view this item" =>
-        Some(AccessStatus.PermissionRequired)
-
-      case _ => None
-    }
-  }
+  private def statusFromTerms(terms: Option[String]): Option[AccessStatus] =
+    terms.flatMap { AccessStatus(_).toOption }
 
   // Get an AccessStatus that draws from our list of types.
   //
