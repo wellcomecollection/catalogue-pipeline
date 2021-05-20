@@ -45,9 +45,9 @@ if __name__ == "__main__":
         role_arn="arn:aws:iam::760097843905:role/platform-developer"
     )
 
-    today = datetime.date.today()
+    now = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
-    out_path = f"vhs-sourcedata-miro-{today}.json.gz"
+    out_path = f"vhs-sourcedata-miro-{now}.json.gz"
 
     with gzip.open(out_path, "w") as outfile:
         for item in tqdm.tqdm(
