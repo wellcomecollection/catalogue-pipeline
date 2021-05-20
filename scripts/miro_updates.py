@@ -233,12 +233,7 @@ def _remove_image_from_cloudfront(*, miro_id):
     cloudfront_client.create_invalidation(
         DistributionId="E1KKXGJWOADM2A",  # IIIF APIs prod
         InvalidationBatch={
-            "Paths": {
-                "Quantity": 1,
-                "Items": [
-                    f"/image/{miro_id}*",
-                ],
-            },
+            "Paths": {"Quantity": 1, "Items": [f"/image/{miro_id}*"]},
             "CallerReference": f"{__file__} invalidating {miro_id}",
         },
     )
