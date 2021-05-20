@@ -1,6 +1,10 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
-import uk.ac.wellcome.platform.transformer.sierra.source.{SierraBibData, SierraQueryOps, VarField}
+import uk.ac.wellcome.platform.transformer.sierra.source.{
+  SierraBibData,
+  SierraQueryOps,
+  VarField
+}
 import weco.catalogue.internal_model.locations.{AccessCondition, AccessStatus}
 import weco.catalogue.source_model.sierra.SierraBibNumber
 
@@ -17,7 +21,8 @@ object SierraAccessConditions extends SierraQueryOps {
 
         AccessCondition(
           status = status,
-          terms = if (termsStatus.isDefined && termsStatus == status) None else terms,
+          terms =
+            if (termsStatus.isDefined && termsStatus == status) None else terms,
           to = varfield.subfieldsWithTag("g").contents.headOption
         )
       }
@@ -45,9 +50,10 @@ object SierraAccessConditions extends SierraQueryOps {
   //  - look at the "terms governing access" from 506 ǂa
   //
   // See https://www.loc.gov/marc/bibliographic/bd506.html
-  private def getAccessStatus(bibId: SierraBibNumber,
-                              varfield: VarField,
-                              termsStatus: Option[AccessStatus]): Option[AccessStatus] = {
+  private def getAccessStatus(
+    bibId: SierraBibNumber,
+    varfield: VarField,
+    termsStatus: Option[AccessStatus]): Option[AccessStatus] = {
 
     // If the first indicator is 0, then there are no restrictions
     val indicator0 =

@@ -3,11 +3,22 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
-import uk.ac.wellcome.platform.transformer.sierra.generators.{MarcGenerators, SierraDataGenerators}
-import uk.ac.wellcome.platform.transformer.sierra.source.{MarcSubfield, VarField}
+import uk.ac.wellcome.platform.transformer.sierra.generators.{
+  MarcGenerators,
+  SierraDataGenerators
+}
+import uk.ac.wellcome.platform.transformer.sierra.source.{
+  MarcSubfield,
+  VarField
+}
 import weco.catalogue.internal_model.locations.{AccessCondition, AccessStatus}
 
-class SierraAccessConditionsTest extends AnyFunSpec with Matchers with MarcGenerators with SierraDataGenerators with TableDrivenPropertyChecks {
+class SierraAccessConditionsTest
+    extends AnyFunSpec
+    with Matchers
+    with MarcGenerators
+    with SierraDataGenerators
+    with TableDrivenPropertyChecks {
   it("drops an empty string in 506 subfield ǂa") {
     val accessConditions = getAccessConditions(
       bibVarFields = List(
@@ -36,40 +47,48 @@ class SierraAccessConditionsTest extends AnyFunSpec with Matchers with MarcGener
     ("Unrestricted / open", AccessStatus.Open),
     ("Unrestricted (open)", AccessStatus.Open),
     ("Closed.", AccessStatus.Closed),
-    ("Permission is required to view these item.", AccessStatus.PermissionRequired),
-    ("Permission is required to view this item.", AccessStatus.PermissionRequired),
+    (
+      "Permission is required to view these item.",
+      AccessStatus.PermissionRequired),
+    (
+      "Permission is required to view this item.",
+      AccessStatus.PermissionRequired),
   )
 
   it("matches particular strings in 506 subfield ǂa to an access status") {
-    forAll(testCases) { case (text, expectedStatus) =>
-      val accessConditions = getAccessConditions(
-        bibVarFields = List(
-          VarField(
-            marcTag = Some("506"),
-            subfields = List(
-              MarcSubfield(tag = "a", content = text)
+    forAll(testCases) {
+      case (text, expectedStatus) =>
+        val accessConditions = getAccessConditions(
+          bibVarFields = List(
+            VarField(
+              marcTag = Some("506"),
+              subfields = List(
+                MarcSubfield(tag = "a", content = text)
+              )
             )
           )
         )
-      )
 
-      accessConditions shouldBe List(
-        AccessCondition(
-          status = Some(expectedStatus),
-          terms = None,
-          to = None
+        accessConditions shouldBe List(
+          AccessCondition(
+            status = Some(expectedStatus),
+            terms = None,
+            to = None
+          )
         )
-      )
     }
   }
 
-  it("exposes the terms from 506 subfield ǂa if it can't map them to an AccessStatus") {
+  it(
+    "exposes the terms from 506 subfield ǂa if it can't map them to an AccessStatus") {
     val accessConditions = getAccessConditions(
       bibVarFields = List(
         VarField(
           marcTag = Some("506"),
           subfields = List(
-            MarcSubfield(tag = "a", content = "ACME Library membership required for access.")
+            MarcSubfield(
+              tag = "a",
+              content = "ACME Library membership required for access.")
           )
         )
       )
@@ -84,7 +103,8 @@ class SierraAccessConditionsTest extends AnyFunSpec with Matchers with MarcGener
     )
   }
 
-  it("exposes the terms from 506 subfield ǂa if there's no consistent access status") {
+  it(
+    "exposes the terms from 506 subfield ǂa if there's no consistent access status") {
     val accessConditions = getAccessConditions(
       bibVarFields = List(
         VarField(
@@ -112,7 +132,9 @@ class SierraAccessConditionsTest extends AnyFunSpec with Matchers with MarcGener
         VarField(
           marcTag = Some("506"),
           subfields = List(
-            MarcSubfield(tag = "a", content = "Access restricted to authorized subscribers"),
+            MarcSubfield(
+              tag = "a",
+              content = "Access restricted to authorized subscribers"),
             MarcSubfield(tag = "f", content = ".")
           )
         )
@@ -149,7 +171,8 @@ class SierraAccessConditionsTest extends AnyFunSpec with Matchers with MarcGener
     )
   }
 
-  private def getAccessConditions(bibVarFields: List[VarField]): List[AccessCondition] =
+  private def getAccessConditions(
+    bibVarFields: List[VarField]): List[AccessCondition] =
     SierraAccessConditions(
       bibId = createSierraBibNumber,
       bibData = createSierraBibDataWith(varFields = bibVarFields)
