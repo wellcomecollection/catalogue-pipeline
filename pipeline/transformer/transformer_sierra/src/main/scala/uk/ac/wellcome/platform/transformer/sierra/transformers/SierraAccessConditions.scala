@@ -10,11 +10,7 @@ object SierraAccessConditions extends SierraQueryOps {
     bibData
       .varfieldsWithTag("506")
       .map { varfield =>
-        // MARC 506 subfield ǂa contains "terms governing access".  This is a
-        // non-repeatable field.  See https://www.loc.gov/marc/bibliographic/bd506.html
-        val terms = varfield
-          .nonrepeatableSubfieldWithTag("a")
-          .map { _.content.trim }
+        val terms = getTerms(varfield)
 
         AccessCondition(
           status = getAccessStatus(bibId, varfield, terms),
@@ -26,6 +22,14 @@ object SierraAccessConditions extends SierraQueryOps {
         case AccessCondition(None, None, None) => false
         case _                                 => true
       }
+
+  // MARC 506 subfield ǂa contains "terms governing access".  This is a
+  // non-repeatable field.  See https://www.loc.gov/marc/bibliographic/bd506.html
+  private def getTerms(varfield: VarField): Option[String] =
+    varfield
+      .nonrepeatableSubfieldWithTag("a")
+      .map { _.content.trim }
+      .filter { _.nonEmpty }
 
   // Get an AccessStatus that draws from our list of types.
   //
