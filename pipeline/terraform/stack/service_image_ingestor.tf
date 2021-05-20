@@ -75,7 +75,9 @@ module "ingestor_images" {
   subnets = var.subnets
 
   min_capacity = var.min_capacity
-  max_capacity = min(5, local.max_capacity)
+  //  max_capacity = min(5, local.max_capacity)
+  // Ingestors turned off 20/5/2021 pending investigation into cluster overloading issues
+  max_capacity = 0
 
   scale_down_adjustment = local.scale_down_adjustment
   scale_up_adjustment   = local.scale_up_adjustment
