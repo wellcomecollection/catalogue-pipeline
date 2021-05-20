@@ -30,10 +30,10 @@ def get_api_es_client(session):
     """
     Returns an Elasticsearch client for the catalogue cluster.
     """
-    host = get_secret_string(session, secret_id="catalogue/api/es_host")
-    port = get_secret_string(session, secret_id="catalogue/api/es_port")
-    protocol = get_secret_string(session, secret_id="catalogue/api/es_protocol")
-    username = get_secret_string(session, secret_id="catalogue/api/es_username")
-    password = get_secret_string(session, secret_id="catalogue/api/es_password")
+    host = get_secret_string(session, secret_id="catalogue/ingestor/es_host")
+    port = get_secret_string(session, secret_id="catalogue/ingestor/es_port")
+    protocol = get_secret_string(session, secret_id="catalogue/ingestor/es_protocol")
+    username = get_secret_string(session, secret_id="catalogue/ingestor/es_username")
+    password = get_secret_string(session, secret_id="catalogue/ingestor/es_password")
 
     return Elasticsearch(f"{protocol}://{username}:{password}@{host}:{port}")
