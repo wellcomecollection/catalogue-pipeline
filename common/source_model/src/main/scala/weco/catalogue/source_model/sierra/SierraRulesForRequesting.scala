@@ -1,6 +1,4 @@
-package uk.ac.wellcome.platform.transformer.sierra.transformers
-
-import uk.ac.wellcome.platform.transformer.sierra.source.SierraItemData
+package weco.catalogue.source_model.sierra
 
 sealed trait RulesForRequestingResult
 
@@ -225,6 +223,59 @@ object SierraRulesForRequesting {
       //    q|i||79||=|sepep||
       //
       case i if i.locationCode.contains("sepep") =>
+        NotRequestable()
+
+      // This case covers the lines:
+      //
+      //    v|i||79||=|sc#ac||
+      //    v|i||79||=|sc#ra||
+      //    v|i||79||=|sc#wa||
+      //    v|i||79||=|sc#wf||
+      //    v|i||79||=|swm#m||
+      //    v|i||79||=|swm#o||
+      //    v|i||79||=|swm#1||
+      //    v|i||79||=|swm#2||
+      //    v|i||79||=|swm#3||
+      //    v|i||79||=|swm#4||
+      //    v|i||79||=|swm#5||
+      //    v|i||79||=|swm#6||
+      //    q|i||79||=|swm#7||Item not available due to provisions of Data Protection Act. Return to Archives catalogue to see when this file will be opened.
+      //
+      case i if i.locationCode.containsAnyOf("sc#ac", "sc#ra", "sc#wa", "sc#wf", "swm#m", "swm#o", "swm#1", "swm#2", "swm#3", "swm#4", "swm#5", "swm#6", "swm#7") =>
+        NotRequestable(message = "Item not available due to provisions of Data Protection Act. Return to Archives catalogue to see when this file will be opened.")
+
+      // There's a rule in the Rules for Requesting that goes:
+      //
+      //    q|b|^||i|=|0|This item is on order and cannot be requested yet.  Please ask at an Enquiry Desk.
+      //
+      // This rule means "if this bib has no items linked, it cannot be requested".
+      // We don't allow requesting on bibs, so I haven't implemented this rule.
+
+      // This case covers the lines:
+      //
+      //    v|i||79||=|temp1||
+      //    v|i||79||=|temp2||
+      //    v|i||79||=|temp3||
+      //    v|i||79||=|temp4||
+      //    v|i||79||=|temp5||
+      //    q|i||79||=|temp6||At digitisation and temporarily unavailable.
+      //
+      case i if i.locationCode.containsAnyOf("temp1", "temp2", "temp3", "temp4", "temp5", "temp6") =>
+        NotRequestable(message = "At digitisation and temporarily unavailable.")
+
+      // This case covers the lines:
+      //
+      //    v|i||79||=|rm001||
+      //    q|i||79||=|rmdda||
+      //
+      case i if i.locationCode.containsAnyOf("rm001", "rmdda") =>
+        NotRequestable()
+
+      // This case covers the line:
+      //
+      //    q|i||97||=|j||
+      //
+      case i if i.imessage.contains("j") =>
         NotRequestable()
 
       case _ => Requestable
