@@ -115,6 +115,81 @@ object SierraRulesForRequesting {
       case i if i.loanRule.getOrElse("0") != "0" || i.status.contains("!") =>
         NotRequestable(message = "Item is in use by another reader. Please ask at Enquiry Desk.")
 
+      // These cases cover the lines:
+      //
+      //    v|i||79||=|mfgmc||
+      //    v|i||79||=|mfinc||
+      //    v|i||79||=|mfwcm||
+      //    v|i||79||=|hmfac||
+      //    q|i||79||=|mfulc||Item cannot be requested online. Please contact Medical Film & Audio Library.   Email: mfac@wellcome.ac.uk. Telephone: +44 (0)20 76118596/97.
+      //
+      case i if i.locationCode.containsAnyOf("mfgmc", "mfinc", "mfwcm", "hmfac", "mfulc") =>
+        NotRequestable(message = "Item cannot be requested online. Please contact Medical Film & Audio Library.   Email: mfac@wellcome.ac.uk. Telephone: +44 (0)20 76118596/97.")
+
+      // These cases cover the lines:
+      //
+      //    v|i||79||=|dbiaa||
+      //    v|i||79||=|dcoaa||
+      //    v|i||79||=|dinad||
+      //    v|i||79||=|dinop||
+      //    v|i||79||=|dinsd||
+      //    v|i||79||=|dints||
+      //    v|i||79||=|dpoaa||
+      //    v|i||79||=|dimgs||
+      //    v|i||79||=|dhuaa||
+      //    v|i||79||=|dimgs||
+      //    v|i||79||=|dingo||
+      //    v|i||79||=|dpleg||
+      //    v|i||79||=|dpuih||
+      //    v|i||79||=|gblip||
+      //    q|i||79||=|ofvds||This item cannot be requested online. Please place a manual request.
+      //
+      case i if i.locationCode.containsAnyOf("dbiaa", "dcoaa", "dinad", "dinop", "dinsd", "dints", "dpoaa", "dimgs", "dhuaa", "dimgs", "dingo", "dpleg", "dpuih", "gblip", "ofvds") =>
+        NotRequestable(message = "This item cannot be requested online. Please place a manual request.")
+
+      // These cases cover the lines:
+      //
+      //    v|i||79||=|isvid||
+      //    q|i||79||=|iscdr||Item cannot be requested online. Please ask at Information Service desk, email: infoserv@wellcome.ac.uk or telephone +44 (0)20 7611 8722.
+      //
+      case i if i.locationCode.containsAnyOf("isvid", "iscdr") =>
+        NotRequestable(message = "Item cannot be requested online. Please ask at Information Service desk, email: infoserv@wellcome.ac.uk or telephone +44 (0)20 7611 8722.")
+
+      // These cases cover the lines:
+      //
+      //    v|i||79||=|isope||
+      //    v|i||79||=|isref||
+      //    v|i||79||=|gblip||
+      //    v|i||79||=|wghib||
+      //    v|i||79||=|wghig||
+      //    v|i||79||=|wghip||
+      //    v|i||79||=|wghir||
+      //    v|i||79||=|wghxb||
+      //    v|i||79||=|wghxg||
+      //    v|i||79||=|wghxp||
+      //    v|i||79||=|wghxr||
+      //    v|i||79||=|wgmem||
+      //    v|i||79||=|wgmxm||
+      //    v|i||79||=|wgpvm||
+      //    v|i||79||=|wgsee||
+      //    v|i||79||=|wgsem||
+      //    v|i||79||=|wgser||
+      //    v|i||79||=|wqrfc||
+      //    v|i||79||=|wqrfd||
+      //    v|i||79||=|wqrfe||
+      //    v|i||79||=|wqrfp||
+      //    v|i||79||=|wqrfr||
+      //    v|i||79||=|wslob||
+      //    v|i||79||=|wslom||
+      //    v|i||79||=|wslor||
+      //    v|i||79||=|wslox||
+      //    v|i||79||=|wsref||
+      //    v|i||79||=|hgslr||
+      //    q|i||79||=|wsrex||Item is on open shelves.  Check Location and Shelfmark for location details.
+      //
+      case i if i.locationCode.containsAnyOf("isope", "isref", "gblip", "wghib", "wghig", "wghip", "wghir", "wghxb", "wghxg", "wghxp", "wghxr", "wgmem", "wgmxm", "wgpvm", "wgsee", "wgsem", "wgser", "wqrfc", "wqrfd", "wqrfe", "wqrfp", "wqrfr", "wslob", "wslom", "wslor", "wslox", "wsref", "hgslr", "wsrex") =>
+        NotRequestable(message = "Item is on open shelves.  Check Location and Shelfmark for location details.")
+
       case _ => Requestable
     }
 
@@ -127,5 +202,13 @@ object SierraRulesForRequesting {
 
     def loanRule: Option[String] =
       itemData.fixedFields.get("87").map { _.value.trim }
+
+    def locationCode: Option[String] =
+      itemData.fixedFields.get("79").map { _.value.trim }
+  }
+
+  private implicit class OptionalStringOps(s: Option[String]) {
+    def containsAnyOf(substrings: String*): Boolean =
+      substrings.exists(s.contains(_))
   }
 }

@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
+import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
@@ -64,6 +65,52 @@ class SierraRulesForRequestingTest extends AnyFunSpec with Matchers with SierraD
     )
 
     SierraRulesForRequesting(item) shouldBe Requestable
+  }
+
+  describe("blocks an item based on fixed field 79 (location)") {
+    it("if it's part of the Medical Film & Audio Library") {
+      val testCases = Table("mfgmc", "mfinc", "mfwcm", "hmfac", "mfulc")
+
+      forAll(testCases) {
+        assertBlockedWith(_, expectedMessage = "Item cannot be requested online. Please contact Medical Film & Audio Library.   Email: mfac@wellcome.ac.uk. Telephone: +44 (0)20 76118596/97.")
+      }
+    }
+
+    it("if it needs a manual request") {
+      val testCases = Table("dbiaa", "dcoaa", "dinad", "dinop", "dinsd", "dints", "dpoaa", "dimgs", "dhuaa", "dimgs", "dingo", "dpleg", "dpuih", "gblip", "ofvds")
+
+      forAll(testCases) {
+        assertBlockedWith(_, expectedMessage = "This item cannot be requested online. Please place a manual request.")
+      }
+    }
+
+    it("if it's with Information Services") {
+      val testCases = Table("isvid", "iscdr")
+
+      forAll(testCases) {
+        assertBlockedWith(_, expectedMessage = "Item cannot be requested online. Please ask at Information Service desk, email: infoserv@wellcome.ac.uk or telephone +44 (0)20 7611 8722.")
+      }
+    }
+
+    it("if it's on the open shelves") {
+      val testCases = Table("isope", "isref",
+        // Note: this is one of the location codes matched by this rule, but it
+        // matches another rule higher up, so it's commented out.
+        // "gblip",
+        "wghib", "wghig", "wghip", "wghir", "wghxb", "wghxg", "wghxp", "wghxr", "wgmem", "wgmxm", "wgpvm", "wgsee", "wgsem", "wgser", "wqrfc", "wqrfd", "wqrfe", "wqrfp", "wqrfr", "wslob", "wslom", "wslor", "wslox", "wsref", "hgslr", "wsrex")
+
+      forAll(testCases) {
+        assertBlockedWith(_, expectedMessage = "Item is on open shelves.  Check Location and Shelfmark for location details.")
+      }
+    }
+
+    def assertBlockedWith(locationCode: String, expectedMessage: String): Assertion = {
+      val item = createSierraItemDataWith(
+        fixedFields = Map("79" -> FixedField(label = "LOCATION", value = locationCode))
+      )
+
+      SierraRulesForRequesting(item) shouldBe NotRequestable(expectedMessage)
+    }
   }
 
   it("allows an item that does not match any rules") {
