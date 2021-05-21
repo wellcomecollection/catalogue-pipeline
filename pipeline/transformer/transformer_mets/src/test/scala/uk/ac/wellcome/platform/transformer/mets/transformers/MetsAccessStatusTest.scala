@@ -5,7 +5,10 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
 import weco.catalogue.internal_model.locations.AccessStatus
 
-class MetsAccessStatusTest extends AnyFunSpec with Matchers with TableDrivenPropertyChecks {
+class MetsAccessStatusTest
+    extends AnyFunSpec
+    with Matchers
+    with TableDrivenPropertyChecks {
   val testCases = Table(
     ("accessConditionStatus", "expectedStatus"),
     ("Restricted files", AccessStatus.Restricted),
@@ -17,8 +20,10 @@ class MetsAccessStatusTest extends AnyFunSpec with Matchers with TableDrivenProp
   )
 
   it("creates an access status") {
-    forAll(testCases) { case (accessConditionStatus, expectedStatus) =>
-      MetsAccessStatus(Some(accessConditionStatus)) shouldBe Right(Some(expectedStatus))
+    forAll(testCases) {
+      case (accessConditionStatus, expectedStatus) =>
+        MetsAccessStatus(Some(accessConditionStatus)) shouldBe Right(
+          Some(expectedStatus))
     }
   }
 
