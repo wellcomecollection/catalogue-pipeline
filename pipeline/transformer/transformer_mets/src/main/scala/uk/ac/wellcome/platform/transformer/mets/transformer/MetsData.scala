@@ -5,6 +5,7 @@ import cats.syntax.traverse._
 import cats.instances.either._
 import cats.instances.option._
 import org.apache.commons.lang3.StringUtils.equalsIgnoreCase
+import uk.ac.wellcome.platform.transformer.mets.transformers.MetsAccessStatus
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.identifiers._
 import weco.catalogue.internal_model.image.ImageData
@@ -38,7 +39,7 @@ case class MetsData(
       case false =>
         for {
           license <- parseLicense
-          accessStatus <- parseAccessStatus
+          accessStatus <- MetsAccessStatus(accessConditionStatus)
           item = Item[IdState.Unminted](
             id = IdState.Unidentifiable,
             locations = List(digitalLocation(license, accessStatus)))
@@ -122,11 +123,6 @@ case class MetsData(
             Left(new Exception(s"Couldn't match $accessCondition to a license"))
         }
     }.sequence
-
-  private val parseAccessStatus: Either[Exception, Option[AccessStatus]] =
-    accessConditionStatus
-      .map(AccessStatus(_))
-      .sequence
 
   private def sourceIdentifier =
     SourceIdentifier(

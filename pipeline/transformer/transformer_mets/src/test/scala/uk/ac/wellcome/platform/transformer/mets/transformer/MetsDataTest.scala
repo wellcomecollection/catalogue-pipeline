@@ -281,7 +281,7 @@ class MetsDataTest
     val metsData = MetsData(
       recordIdentifier = createBibNumber,
       accessConditionDz = Some("CC-BY-NC"),
-      accessConditionStatus = Some("restricted"),
+      accessConditionStatus = Some("Restricted files"),
       fileReferencesMapping = List(
         "id" -> FileReference("l", "location.jp2", Some("image/jp2"))
       )
@@ -416,7 +416,7 @@ class MetsDataTest
   it("creates a work with a single accessCondition including usage terms") {
     val result = MetsData(
       recordIdentifier = "ID",
-      accessConditionStatus = Some("Clinical Images"),
+      accessConditionStatus = Some("Clinical images"),
       accessConditionUsage = Some("Please ask nicely")
     ).toWork(1, Instant.now())
     result shouldBe a[Right[_, _]]

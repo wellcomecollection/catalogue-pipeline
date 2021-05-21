@@ -12,9 +12,6 @@ class AccessStatusTest extends AnyFunSpec with Matchers {
   it("creates the Closed AccessStatus") {
     val closedValues = List(
       "Closed",
-      "The file is closed until 2059",
-      "This file is closed until 2060",
-      "The papers are closed until some future date"
     )
     closedValues.foreach { str =>
       AccessStatus.apply(str) shouldBe Right(AccessStatus.Closed)
@@ -25,11 +22,6 @@ class AccessStatusTest extends AnyFunSpec with Matchers {
     val restrictedValues = List(
       "Restricted",
       "Restricted access (Data Protection Act)",
-      "Cannot Be Produced - View Digitised Version",
-      "Certain restrictions apply.",
-      "Restricted: currently undergoing conservation.",
-      "The file is restricted for data protection reasons",
-      "This file is restricted for sensitivity reasons"
     )
     restrictedValues.foreach { str =>
       AccessStatus.apply(str) shouldBe Right(AccessStatus.Restricted)
@@ -39,7 +31,7 @@ class AccessStatusTest extends AnyFunSpec with Matchers {
   it("creates the Unavailable AccessStatus") {
     val unavailableValues = List(
       "Missing.",
-      "Deaccessioned on 01/01/2001"
+      "Deaccessioned"
     )
     unavailableValues.foreach { str =>
       AccessStatus.apply(str) shouldBe Right(AccessStatus.Unavailable)
@@ -48,10 +40,8 @@ class AccessStatusTest extends AnyFunSpec with Matchers {
 
   it("creates the PermissionRequired AccessStatus") {
     val permissionRequiredValues = List(
-      "Permission Required.",
       "Donor Permission.",
       "Permission is required to view this item.",
-      "Permission must be obtained from the Winnicott Trust before access can be granted"
     )
     permissionRequiredValues.foreach { str =>
       AccessStatus.apply(str) shouldBe Right(AccessStatus.PermissionRequired)
@@ -72,19 +62,9 @@ class AccessStatusTest extends AnyFunSpec with Matchers {
   it("creates the OpenWithAdvisory AccessStatus") {
     val openWithAdvisoryValues = List(
       "Open with advisory",
-      "Requires registration to view"
     )
     openWithAdvisoryValues.foreach { str =>
       AccessStatus.apply(str) shouldBe Right(AccessStatus.OpenWithAdvisory)
-    }
-  }
-
-  it("creates the LicensedResources AccessStatus") {
-    val licensedResourcesValues = List(
-      "In copyright to the Earl of Ownership"
-    )
-    licensedResourcesValues.foreach { str =>
-      AccessStatus.apply(str) shouldBe Right(AccessStatus.LicensedResources)
     }
   }
 
