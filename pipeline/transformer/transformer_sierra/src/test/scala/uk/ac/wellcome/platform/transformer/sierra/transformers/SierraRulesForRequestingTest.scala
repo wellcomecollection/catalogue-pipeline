@@ -42,6 +42,30 @@ class SierraRulesForRequestingTest extends AnyFunSpec with Matchers with SierraD
     }
   }
 
+  it("blocks an item if fixed field 87 (loan rule) is non-zero") {
+    val item = createSierraItemDataWith(
+      fixedFields = Map("87" -> FixedField(label = "LOANRULE", value = "1"))
+    )
+
+    SierraRulesForRequesting(item) shouldBe NotRequestable("Item is in use by another reader. Please ask at Enquiry Desk.")
+  }
+
+  it("blocks an item if fixed field 88 (status) is !") {
+    val item = createSierraItemDataWith(
+      fixedFields = Map("88" -> FixedField(label = "STATUS", value = "!"))
+    )
+
+    SierraRulesForRequesting(item) shouldBe NotRequestable("Item is in use by another reader. Please ask at Enquiry Desk.")
+  }
+
+  it("does not block an item if fixed field 87 (loan rule) is zero") {
+    val item = createSierraItemDataWith(
+      fixedFields = Map("87" -> FixedField(label = "LOANRULE", value = "0"))
+    )
+
+    SierraRulesForRequesting(item) shouldBe Requestable
+  }
+
   it("allows an item that does not match any rules") {
     val item = createSierraItemData
 

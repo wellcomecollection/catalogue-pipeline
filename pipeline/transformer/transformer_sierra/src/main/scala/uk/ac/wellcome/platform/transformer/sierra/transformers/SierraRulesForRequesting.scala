@@ -23,10 +23,12 @@ case object Requestable extends RulesForRequestingResult
   *
   * Relevant Sierra docs:
   *
-  *   - Rules for Requesting
+  *   - Rules for Requesting syntax
   *     https://documentation.iii.com/sierrahelp/Content/sgasaa/sgasaa_requestrl.html
   *   - Fixed fields on items
   *     https://documentation.iii.com/sierrahelp/Content/sril/sril_records_fixed_field_types_item.html
+  *   - Variable length fields on items
+  *     https://documentation.iii.com/sierrahelp/Content/sril/sril_records_varfld_types_item.html
   *
   */
 object SierraRulesForRequesting {
@@ -91,6 +93,28 @@ object SierraRulesForRequesting {
       case i if i.status.contains("y") =>
         NotRequestable()
 
+      // These cases cover the lines:
+      //
+      //    v|i||87||~|0||
+      //    v|i|8|||e|||
+      //    q|i||88||=|!||Item is in use by another reader. Please ask at Enquiry Desk.
+      //
+      // How they work:
+      //
+      //    v|i||87||~|0||      # If fixed field 87 (loan rule) is not-equal to zero OR
+      //    v|i|8|||e|||        # If variable field with tag 8 exists OR
+      //    q|i||88||=|!||      # If fixed field 88 (status) equals '!'
+      //
+      // Notes:
+      //    - Some items are missing fixed field 87 but are requestable using Encore.
+      //      The Sierra API docs suggest the default loan rule is '0', so I'm assuming
+      //      a missing FF87 doesn't block requesting.
+      //    - I haven't found an example of an item with tag 8, so I'm skipping that rule
+      //      for now.  TODO: Find an example of this.
+      //
+      case i if i.loanRule.getOrElse("0") != "0" || i.status.contains("!") =>
+        NotRequestable(message = "Item is in use by another reader. Please ask at Enquiry Desk.")
+
       case _ => Requestable
     }
 
@@ -100,5 +124,8 @@ object SierraRulesForRequesting {
 
     def status: Option[String] =
       itemData.fixedFields.get("88").map { _.value.trim }
+
+    def loanRule: Option[String] =
+      itemData.fixedFields.get("87").map { _.value.trim }
   }
 }
