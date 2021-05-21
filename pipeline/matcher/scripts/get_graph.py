@@ -2,6 +2,7 @@
 
 import boto3
 import click
+import json
 from graphviz import Digraph
 
 from dynamo import get_graph_table_row, get_graph_component
@@ -31,7 +32,8 @@ def get_aws_session(*, role_arn):
 @click.command()
 @click.argument("index_date")
 @click.argument("work_id")
-def main(index_date, work_id):
+@click.option("--emit-source-data", is_flag=True)
+def main(index_date, work_id, emit_source_data):
     session = get_aws_session(
         role_arn="arn:aws:iam::760097843905:role/platform-read_only"
     )
@@ -56,14 +58,14 @@ def main(index_date, work_id):
 
     node_ids = [node["id"] for node in graph_component]
     node_links = [node["linkedIds"] for node in graph_component]
-    nodes = get_nodes_properties(es, index_date=index_date, work_ids=node_ids)
+    nodes = get_nodes_properties(es, index_date=index_date, work_ids=node_ids, get_all_properties=emit_source_data)
 
     deleted_node_ids = {node["id"] for node in nodes if node["type"] == "Deleted"}
     valid_node_links = [
         [dest for dest in ids if dest not in deleted_node_ids] for ids in node_links
     ]
     for node, links in filter(
-        lambda x: x[0]["type"] != "Deleted", zip(nodes, valid_node_links)
+            lambda x: x[0]["type"] != "Deleted", zip(nodes, valid_node_links)
     ):
         source = source_type_labels.get(node["source_id_type"], node["source_id_type"])
         graph.node(node["id"], label=fr"{source}\n{node['source_id']}")
@@ -72,6 +74,13 @@ def main(index_date, work_id):
     print(graph.source)
     staggered = graph.unflatten(stagger=3)
     staggered.render(f"{work_id}_graph", view=True, cleanup=True)
+
+    if emit_source_data:
+        source_data = {node["id"]: node["complete_source"] for node in nodes}
+        source_data_filename = f"{work_id}_source_data.json"
+        with open(source_data_filename, "w") as source_data_file:
+            json.dump(source_data, source_data_file, indent=2)
+        print(f"Wrote source data to {source_data_filename}")
 
 
 if __name__ == "__main__":
