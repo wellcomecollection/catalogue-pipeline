@@ -18,11 +18,9 @@ object ImageDataRule extends FieldMergeRule {
   ): FieldMergeResult[FieldData] =
     FieldMergeResult(
       data = getMetsPictureAndEphemeraImages(target, sources).getOrElse(Nil) ++
-        getMiroPictureAndEphemeraImages(target, sources).getOrElse(Nil) ++
         getPairedMiroImages(target, sources).getOrElse(Nil),
       sources = List(
         getMetsPictureAndEphemeraImages,
-        getMiroPictureAndEphemeraImages,
         getPairedMiroImages
       ).flatMap(_.mergedSources(target, sources))
     )
@@ -34,15 +32,9 @@ object ImageDataRule extends FieldMergeRule {
 
   // In future we may change `digaids` to `digmiro` for all works
   // where we know that the Miro and METS images are identical
-  private lazy val getMiroPictureAndEphemeraImages = new FlatImageMergeRule {
-    val isDefinedForTarget: WorkPredicate =
-      sierraPictureOrEphemera and not(sierraDigaids)
-    val isDefinedForSource: WorkPredicate = singleDigitalItemMiroWork
-  }
-
   private lazy val getPairedMiroImages = new FlatImageMergeRule {
     val isDefinedForTarget: WorkPredicate =
-      sierraWork and not(sierraPictureOrEphemera) and not(sierraDigaids)
+      sierraWork and not(sierraDigaids)
     val isDefinedForSource: WorkPredicate = singleDigitalItemMiroWork
   }
 
