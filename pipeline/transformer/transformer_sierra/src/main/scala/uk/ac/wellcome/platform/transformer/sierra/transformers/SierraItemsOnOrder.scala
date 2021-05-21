@@ -1,14 +1,12 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.platform.transformer.sierra.source.{
-  SierraBibData,
-  SierraOrderData
-}
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.locations.{LocationType, PhysicalLocation}
 import weco.catalogue.internal_model.work.Item
 import weco.catalogue.source_model.sierra.{
+  SierraBibData,
+  SierraOrderData,
   SierraOrderNumber,
   TypedSierraRecordNumber
 }

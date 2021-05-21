@@ -2,14 +2,14 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.platform.transformer.sierra.generators.MarcGenerators
-import uk.ac.wellcome.platform.transformer.sierra.source.MarcSubfield
 import weco.catalogue.internal_model.identifiers.{
   IdState,
   IdentifierType,
   SourceIdentifier
 }
 import weco.catalogue.internal_model.work.Concept
+import weco.catalogue.source_model.generators.MarcGenerators
+import weco.catalogue.source_model.sierra.marc.MarcSubfield
 
 class SierraConceptsTest extends AnyFunSpec with Matchers with MarcGenerators {
 

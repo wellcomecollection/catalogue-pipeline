@@ -2,15 +2,13 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import com.github.tototoshi.csv.CSVReader
 import weco.catalogue.internal_model.locations.LocationType.ClosedStores
-import uk.ac.wellcome.platform.transformer.sierra.source.{
-  FixedField,
-  SierraHoldingsData,
-  SierraQueryOps
-}
+import uk.ac.wellcome.platform.transformer.sierra.source.SierraQueryOps
 import weco.catalogue.internal_model.locations.PhysicalLocation
 import weco.catalogue.internal_model.work.{Holdings, Item}
+import weco.catalogue.source_model.sierra.marc.FixedField
 import weco.catalogue.source_model.sierra.{
   SierraBibNumber,
+  SierraHoldingsData,
   SierraHoldingsNumber,
   TypedSierraRecordNumber
 }

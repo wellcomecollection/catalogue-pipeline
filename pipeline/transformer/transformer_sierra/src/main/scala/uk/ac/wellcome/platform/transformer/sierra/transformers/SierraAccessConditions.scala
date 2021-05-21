@@ -1,12 +1,9 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
-import uk.ac.wellcome.platform.transformer.sierra.source.{
-  SierraBibData,
-  SierraQueryOps,
-  VarField
-}
+import uk.ac.wellcome.platform.transformer.sierra.source.SierraQueryOps
 import weco.catalogue.internal_model.locations.{AccessCondition, AccessStatus}
-import weco.catalogue.source_model.sierra.SierraBibNumber
+import weco.catalogue.source_model.sierra.marc.VarField
+import weco.catalogue.source_model.sierra.{SierraBibData, SierraBibNumber}
 
 object SierraAccessConditions extends SierraQueryOps {
   def apply(bibId: SierraBibNumber,

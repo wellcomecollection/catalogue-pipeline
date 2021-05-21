@@ -4,9 +4,6 @@ import java.time.Instant
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.json.exceptions.JsonDecodingError
 import uk.ac.wellcome.platform.transformer.sierra.exceptions._
-import uk.ac.wellcome.platform.transformer.sierra.source._
-import uk.ac.wellcome.platform.transformer.sierra.source.SierraMaterialType._
-import uk.ac.wellcome.platform.transformer.sierra.source.SierraBibData._
 import uk.ac.wellcome.platform.transformer.sierra.transformers._
 import grizzled.slf4j.Logging
 
@@ -17,6 +14,8 @@ import weco.catalogue.internal_model.work.DeletedReason._
 import weco.catalogue.internal_model.work.InvisibilityReason._
 import weco.catalogue.internal_model.work.{Work, WorkData}
 import weco.catalogue.source_model.sierra._
+import weco.catalogue.source_model.sierra.SierraBibData._
+import weco.catalogue.source_model.sierra.source.SierraMaterialType._
 
 class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
     extends Logging {

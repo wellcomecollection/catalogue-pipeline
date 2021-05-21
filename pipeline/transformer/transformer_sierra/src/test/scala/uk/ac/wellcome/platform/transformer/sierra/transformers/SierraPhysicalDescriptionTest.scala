@@ -2,15 +2,12 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.platform.transformer.sierra.source.{
-  MarcSubfield,
-  SierraBibData,
-  VarField
-}
-import uk.ac.wellcome.platform.transformer.sierra.generators.{
+import weco.catalogue.source_model.generators.{
   MarcGenerators,
   SierraDataGenerators
 }
+import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
+import weco.catalogue.source_model.sierra.SierraBibData
 
 class SierraPhysicalDescriptionTest
     extends AnyFunSpec

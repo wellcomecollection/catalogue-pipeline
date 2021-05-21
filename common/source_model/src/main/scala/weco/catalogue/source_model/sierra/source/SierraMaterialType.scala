@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.transformer.sierra.source
+package weco.catalogue.source_model.sierra.source
 
 import io.circe.Decoder
 

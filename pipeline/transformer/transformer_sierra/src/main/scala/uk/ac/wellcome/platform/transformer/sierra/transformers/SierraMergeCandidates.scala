@@ -3,10 +3,7 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 import grizzled.slf4j.Logging
 
 import java.util.UUID
-import uk.ac.wellcome.platform.transformer.sierra.source.{
-  SierraBibData,
-  SierraQueryOps
-}
+import uk.ac.wellcome.platform.transformer.sierra.source.SierraQueryOps
 import uk.ac.wellcome.platform.transformer.sierra.transformers.parsers.MiroIdParsing
 import weco.catalogue.internal_model.identifiers.{
   IdState,
@@ -14,7 +11,7 @@ import weco.catalogue.internal_model.identifiers.{
   SourceIdentifier
 }
 import weco.catalogue.internal_model.work.MergeCandidate
-import weco.catalogue.source_model.sierra.SierraBibNumber
+import weco.catalogue.source_model.sierra.{SierraBibData, SierraBibNumber}
 
 import scala.util.Try
 import scala.util.matching.Regex

@@ -1,6 +1,5 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
-import uk.ac.wellcome.platform.transformer.sierra.source.SierraBibData
 import uk.ac.wellcome.platform.transformer.sierra.transformers.subjects.{
   SierraBrandNameSubjects,
   SierraConceptSubjects,
@@ -10,7 +9,7 @@ import uk.ac.wellcome.platform.transformer.sierra.transformers.subjects.{
 }
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.Subject
-import weco.catalogue.source_model.sierra.SierraBibNumber
+import weco.catalogue.source_model.sierra.{SierraBibData, SierraBibNumber}
 
 object SierraSubjects extends SierraIdentifiedDataTransformer {
 

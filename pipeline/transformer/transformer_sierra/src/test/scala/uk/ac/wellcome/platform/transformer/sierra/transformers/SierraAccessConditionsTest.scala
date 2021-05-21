@@ -3,15 +3,12 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
-import uk.ac.wellcome.platform.transformer.sierra.generators.{
+import weco.catalogue.internal_model.locations.{AccessCondition, AccessStatus}
+import weco.catalogue.source_model.generators.{
   MarcGenerators,
   SierraDataGenerators
 }
-import uk.ac.wellcome.platform.transformer.sierra.source.{
-  MarcSubfield,
-  VarField
-}
-import weco.catalogue.internal_model.locations.{AccessCondition, AccessStatus}
+import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
 
 class SierraAccessConditionsTest
     extends AnyFunSpec

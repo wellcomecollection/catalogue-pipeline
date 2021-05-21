@@ -1,11 +1,7 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.platform.transformer.sierra.source.{
-  SierraBibData,
-  SierraItemData,
-  SierraQueryOps
-}
+import uk.ac.wellcome.platform.transformer.sierra.source.SierraQueryOps
 import weco.catalogue.internal_model.identifiers.{
   IdState,
   IdentifierType,
@@ -16,7 +12,12 @@ import weco.catalogue.internal_model.locations.{
   PhysicalLocationType
 }
 import weco.catalogue.internal_model.work.Item
-import weco.catalogue.source_model.sierra.{SierraBibNumber, SierraItemNumber}
+import weco.catalogue.source_model.sierra.{
+  SierraBibData,
+  SierraBibNumber,
+  SierraItemData,
+  SierraItemNumber
+}
 
 object SierraItems extends Logging with SierraLocation with SierraQueryOps {
 

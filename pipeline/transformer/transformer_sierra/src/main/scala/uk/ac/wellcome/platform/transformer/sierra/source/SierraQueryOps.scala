@@ -1,6 +1,8 @@
 package uk.ac.wellcome.platform.transformer.sierra.source
 
 import grizzled.slf4j.Logging
+import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
+import weco.catalogue.source_model.sierra.SierraBibData
 
 trait SierraQueryOps extends Logging {
 
