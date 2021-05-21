@@ -32,8 +32,8 @@ def get_aws_session(*, role_arn):
 @click.command()
 @click.argument("index_date")
 @click.argument("work_id")
-@click.option("--emit-source-data", is_flag=True)
-def main(index_date, work_id, emit_source_data):
+@click.option("--emit-work-data", is_flag=True)
+def main(index_date, work_id, emit_work_data):
     session = get_aws_session(
         role_arn="arn:aws:iam::760097843905:role/platform-read_only"
     )
@@ -62,7 +62,7 @@ def main(index_date, work_id, emit_source_data):
         es,
         index_date=index_date,
         work_ids=node_ids,
-        fetch_complete_source=emit_source_data,
+        fetch_complete_work=emit_work_data,
     )
 
     deleted_node_ids = {node["id"] for node in nodes if node["type"] == "Deleted"}
@@ -80,12 +80,12 @@ def main(index_date, work_id, emit_source_data):
     staggered = graph.unflatten(stagger=3)
     staggered.render(f"{work_id}_graph", view=True, cleanup=True)
 
-    if emit_source_data:
-        source_data = {node["id"]: node["complete_source"] for node in nodes}
-        source_data_filename = f"{work_id}_source_data.json"
-        with open(source_data_filename, "w") as source_data_file:
-            json.dump(source_data, source_data_file, indent=2)
-        print(f"Wrote source data to {source_data_filename}")
+    if emit_work_data:
+        work_data = {node["id"]: node["complete_work"] for node in nodes}
+        work_data_filename = f"{work_id}_work_data.json"
+        with open(work_data_filename, "w") as work_data_file:
+            json.dump(work_data, work_data_file, indent=2)
+        print(f"Wrote work data to {work_data_filename}")
 
 
 if __name__ == "__main__":

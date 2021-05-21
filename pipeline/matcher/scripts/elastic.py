@@ -30,13 +30,13 @@ def get_pipeline_storage_es_client(session, *, index_date):
     return Elasticsearch(f"{protocol}://{username}:{password}@{host}:{port}")
 
 
-def get_nodes_properties(es, *, index_date, work_ids, fetch_complete_source=False):
+def get_nodes_properties(es, *, index_date, work_ids, fetch_complete_work=False):
     response = es.mget(
         index=f"{matcher_index}-{index_date}",
         body={"ids": work_ids},
         doc_type="_doc",
         _source=True
-        if fetch_complete_source
+        if fetch_complete_work
         else [
             "state.sourceIdentifier.identifierType.id",
             "state.sourceIdentifier.value",
@@ -51,7 +51,7 @@ def get_nodes_properties(es, *, index_date, work_ids, fetch_complete_source=Fals
             ]["id"],
             "source_id": doc["_source"]["state"]["sourceIdentifier"]["value"],
             "type": doc["_source"]["type"],
-            "complete_source": doc["_source"] if fetch_complete_source else None,
+            "complete_work": doc["_source"] if fetch_complete_work else None,
         }
         for doc in response["docs"]
     ]
