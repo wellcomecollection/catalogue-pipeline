@@ -36,12 +36,14 @@ class ItemsRuleTest
   val calmWork: Work.Visible[WorkState.Identified] = calmIdentifiedWork()
 
   it(
-    "leaves items unchanged and returns a digitised version of a Sierra work as a merged source") {
+    "leaves items unchanged and returns a digitised version of a Sierra work as a merged source"
+  ) {
     val (digitisedWork, physicalWork) = sierraIdentifiedWorkPair()
 
     inside(
       ItemsRule
-        .merge(physicalWork, List(digitisedWork))) {
+        .merge(physicalWork, List(digitisedWork))
+    ) {
       case FieldMergeResult(items, mergedSources) =>
         items should have size 1
         items shouldBe physicalWork.data.items
@@ -96,7 +98,8 @@ class ItemsRuleTest
   it("does not merge any Miro sources when there are several of them") {
     inside(
       ItemsRule
-        .merge(physicalPictureSierra, List(miroWork, miroIdentifiedWork()))) {
+        .merge(physicalPictureSierra, List(miroWork, miroIdentifiedWork()))
+    ) {
       case FieldMergeResult(items, mergedSources) =>
         items shouldEqual physicalPictureSierra.data.items
         mergedSources shouldBe empty
@@ -104,7 +107,8 @@ class ItemsRuleTest
   }
 
   it(
-    "does not merge a Miro source into a Sierra work with format != picture/digital image/3D object") {
+    "does not merge a Miro source into a Sierra work with format != picture/digital image/3D object"
+  ) {
     inside(ItemsRule.merge(physicalMapsSierra, List(miroWork))) {
       case FieldMergeResult(items, mergedSources) =>
         items shouldEqual physicalMapsSierra.data.items
@@ -113,7 +117,8 @@ class ItemsRuleTest
   }
 
   it(
-    "override Miro merging with METS merging into single-item physical Sierra works items") {
+    "override Miro merging with METS merging into single-item physical Sierra works items"
+  ) {
     inside(ItemsRule.merge(physicalPictureSierra, List(miroWork, metsWork))) {
       case FieldMergeResult(items, mergedSources) =>
         items should have size 1
@@ -140,6 +145,24 @@ class ItemsRuleTest
         items should contain theSameElementsAs
           multiItemPhysicalSierra.data.items ++ metsWork.data.items
         mergedSources should be(Seq(metsWork))
+    }
+  }
+
+  it(
+    "doesn't merge Miro works into multi-item Sierra digaids works alongside METS items, but does treat them as mergedSources"
+  ) {
+    inside(
+      ItemsRule.merge(
+        multiItemPhysicalSierra
+          .otherIdentifiers(List(createDigcodeIdentifier("digaids"))),
+        List(miroWork, metsWork)
+      )
+    ) {
+      case FieldMergeResult(items, mergedSources) =>
+        items should be(
+          multiItemPhysicalSierra.data.items ++ metsWork.data.items
+        )
+        mergedSources should contain theSameElementsAs Seq(miroWork, metsWork)
     }
   }
 
@@ -173,7 +196,8 @@ class ItemsRuleTest
 
         mergedSources should contain theSameElementsAs Seq(
           metsWork,
-          physicalPictureSierra)
+          physicalPictureSierra
+        )
     }
   }
 }

@@ -109,9 +109,10 @@ class MergerScenarioTest
 
     Scenario("An AIDS poster Sierra picture, a METS and a Miro are matched") {
       Given(
-        "a Sierra picture with digcode `digaids`, a METS work and a Miro work")
+        "a Sierra picture with digcode `digaids`, a METS work and a Miro work"
+      )
       val sierraDigaidsPicture = sierraIdentifiedWork()
-        .items(List(createIdentifiedPhysicalItem))
+        .items(List(createIdentifiedPhysicalItem, createIdentifiedPhysicalItem))
         .format(Format.Pictures)
         .otherIdentifiers(List(createDigcodeIdentifier("digaids")))
       val mets = metsIdentifiedWork()
@@ -159,7 +160,8 @@ class MergerScenarioTest
               MergeCandidate(
                 id = IdState.Identified(
                   sourceIdentifier = digitisedVideo.sourceIdentifier,
-                  canonicalId = digitisedVideo.state.canonicalId),
+                  canonicalId = digitisedVideo.state.canonicalId
+                ),
                 reason = Some("Physical/digitised Sierra work")
               )
             )
@@ -171,7 +173,8 @@ class MergerScenarioTest
       Then("both original works are preserved")
       outcome.resultWorks should contain theSameElementsAs Seq(
         physicalVideo,
-        digitisedVideo)
+        digitisedVideo
+      )
     }
 
     Scenario("A Calm work and a Sierra work are matched") {
