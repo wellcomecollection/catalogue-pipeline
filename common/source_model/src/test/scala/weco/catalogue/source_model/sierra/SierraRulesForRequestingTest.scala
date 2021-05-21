@@ -205,7 +205,7 @@ class SierraRulesForRequestingTest
       }
     }
 
-    it("if it's sepep, rm001 or rmdda") {
+    it("if it's one of the location codes blocked with no user-facing message") {
       val testCases = Table("locationCode", "sepep", "rm001", "rmdda")
 
       forAll(testCases) { locationCode =>
