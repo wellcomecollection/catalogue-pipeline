@@ -42,6 +42,7 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
       ).flatMap { rule =>
         rule.mergedSources(target, sources)
       } ++ findFirstLinkedDigitisedSierraWorkFor(target, sources)
+        ++ knownDuplicateSources(target, sources)
     ).distinct
 
     FieldMergeResult(
