@@ -190,6 +190,36 @@ object SierraRulesForRequesting {
       case i if i.locationCode.containsAnyOf("isope", "isref", "gblip", "wghib", "wghig", "wghip", "wghir", "wghxb", "wghxg", "wghxp", "wghxr", "wgmem", "wgmxm", "wgpvm", "wgsee", "wgsem", "wgser", "wqrfc", "wqrfd", "wqrfe", "wqrfp", "wqrfr", "wslob", "wslom", "wslor", "wslox", "wsref", "hgslr", "wsrex") =>
         NotRequestable(message = "Item is on open shelves.  Check Location and Shelfmark for location details.")
 
+      // These cases cover the lines:
+      //
+      //    q|i||61||=|22||Item is on Exhibition Reserve. Please ask at the Enquiry Desk
+      //    q|i||61||=|17||
+      //    q|i||61||=|18||
+      //    q|i||61||=|15||
+      //
+      //    v|i||61||=|4||
+      //    v|i||61||=|14||
+      //    v|i||79||=|ofvn1||
+      //    v|i||79||=|scmwc||
+      //    v|i||79||=|sgmoh||
+      //    v|i||79||=|somet||
+      //    v|i||79||=|somge||
+      //    v|i||79||=|somhe||
+      //    v|i||79||=|somhi||
+      //    v|i||79||=|somja||
+      //    v|i||79||=|sompa||
+      //    v|i||79||=|sompr||
+      //    q|i||79||=|somsy||Please complete a manual request slip.  This item cannot be requested online.
+      //
+      case i if i.itemType.contains("61") =>
+        NotRequestable(message = "Item is on Exhibition Reserve. Please ask at the Enquiry Desk")
+
+      case i if i.itemType.containsAnyOf("17", "18", "15") =>
+        NotRequestable()
+
+      case i if i.itemType.containsAnyOf("4", "14") || i.locationCode.containsAnyOf("ofvn1", "scmwc", "sgmoh", "somet", "somge", "somhe", "somhi", "somja", "sompa", "sompr", "somsy") =>
+        NotRequestable(message = "Please complete a manual request slip.  This item cannot be requested online.")
+
       case _ => Requestable
     }
 
@@ -205,6 +235,9 @@ object SierraRulesForRequesting {
 
     def locationCode: Option[String] =
       itemData.fixedFields.get("79").map { _.value.trim }
+
+    def itemType: Option[String] =
+      itemData.fixedFields.get("61").map { _.value.trim }
   }
 
   private implicit class OptionalStringOps(s: Option[String]) {
