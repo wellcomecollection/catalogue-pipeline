@@ -8,13 +8,18 @@ import weco.catalogue.source_model.generators.SierraDataGenerators
 import weco.catalogue.source_model.sierra
 import weco.catalogue.source_model.sierra.marc.FixedField
 
-class SierraRulesForRequestingTest extends AnyFunSpec with Matchers with SierraDataGenerators with TableDrivenPropertyChecks {
+class SierraRulesForRequestingTest
+    extends AnyFunSpec
+    with Matchers
+    with SierraDataGenerators
+    with TableDrivenPropertyChecks {
   it("blocks an item from the strong room") {
     val item = createSierraItemDataWith(
       fixedFields = Map("97" -> FixedField(label = "IMESSAGE", value = "x"))
     )
 
-    SierraRulesForRequesting(item) shouldBe NotRequestable("This item belongs in the Strongroom")
+    SierraRulesForRequesting(item) shouldBe NotRequestable(
+      "This item belongs in the Strongroom")
   }
 
   it("blocks an item with fixed field 97 (imessage) = j") {
@@ -42,12 +47,15 @@ class SierraRulesForRequestingTest extends AnyFunSpec with Matchers with SierraD
       ("y", None),
     )
 
-    forAll(testCases) { case (status, expectedMessage) =>
-      val item = createSierraItemDataWith(
-        fixedFields = Map("88" -> FixedField(label = "STATUS", value = status))
-      )
+    forAll(testCases) {
+      case (status, expectedMessage) =>
+        val item = createSierraItemDataWith(
+          fixedFields =
+            Map("88" -> FixedField(label = "STATUS", value = status))
+        )
 
-      sierra.SierraRulesForRequesting(item) shouldBe NotRequestable(expectedMessage)
+        sierra.SierraRulesForRequesting(item) shouldBe NotRequestable(
+          expectedMessage)
     }
   }
 
@@ -56,7 +64,8 @@ class SierraRulesForRequestingTest extends AnyFunSpec with Matchers with SierraD
       fixedFields = Map("87" -> FixedField(label = "LOANRULE", value = "1"))
     )
 
-    sierra.SierraRulesForRequesting(item) shouldBe NotRequestable("Item is in use by another reader. Please ask at Enquiry Desk.")
+    sierra.SierraRulesForRequesting(item) shouldBe NotRequestable(
+      "Item is in use by another reader. Please ask at Enquiry Desk.")
   }
 
   it("blocks an item if fixed field 88 (status) is !") {
@@ -64,7 +73,8 @@ class SierraRulesForRequestingTest extends AnyFunSpec with Matchers with SierraD
       fixedFields = Map("88" -> FixedField(label = "STATUS", value = "!"))
     )
 
-    sierra.SierraRulesForRequesting(item) shouldBe NotRequestable("Item is in use by another reader. Please ask at Enquiry Desk.")
+    sierra.SierraRulesForRequesting(item) shouldBe NotRequestable(
+      "Item is in use by another reader. Please ask at Enquiry Desk.")
   }
 
   it("does not block an item if fixed field 87 (loan rule) is zero") {
@@ -77,18 +87,42 @@ class SierraRulesForRequestingTest extends AnyFunSpec with Matchers with SierraD
 
   describe("blocks an item based on fixed field 79 (location)") {
     it("if it's part of the Medical Film & Audio Library") {
-      val testCases = Table("locationCode", "mfgmc", "mfinc", "mfwcm", "hmfac", "mfulc")
+      val testCases =
+        Table("locationCode", "mfgmc", "mfinc", "mfwcm", "hmfac", "mfulc")
 
       forAll(testCases) {
-        assertBlockedWith(_, expectedMessage = "Item cannot be requested online. Please contact Medical Film & Audio Library.   Email: mfac@wellcome.ac.uk. Telephone: +44 (0)20 76118596/97.")
+        assertBlockedWith(
+          _,
+          expectedMessage =
+            "Item cannot be requested online. Please contact Medical Film & Audio Library.   Email: mfac@wellcome.ac.uk. Telephone: +44 (0)20 76118596/97."
+        )
       }
     }
 
     it("if it needs a manual request") {
-      val testCases = Table("locationCode", "dbiaa", "dcoaa", "dinad", "dinop", "dinsd", "dints", "dpoaa", "dimgs", "dhuaa", "dimgs", "dingo", "dpleg", "dpuih", "gblip", "ofvds")
+      val testCases = Table(
+        "locationCode",
+        "dbiaa",
+        "dcoaa",
+        "dinad",
+        "dinop",
+        "dinsd",
+        "dints",
+        "dpoaa",
+        "dimgs",
+        "dhuaa",
+        "dimgs",
+        "dingo",
+        "dpleg",
+        "dpuih",
+        "gblip",
+        "ofvds")
 
       forAll(testCases) {
-        assertBlockedWith(_, expectedMessage = "This item cannot be requested online. Please place a manual request.")
+        assertBlockedWith(
+          _,
+          expectedMessage =
+            "This item cannot be requested online. Please place a manual request.")
       }
     }
 
@@ -96,27 +130,78 @@ class SierraRulesForRequestingTest extends AnyFunSpec with Matchers with SierraD
       val testCases = Table("locationCode", "isvid", "iscdr")
 
       forAll(testCases) {
-        assertBlockedWith(_, expectedMessage = "Item cannot be requested online. Please ask at Information Service desk, email: infoserv@wellcome.ac.uk or telephone +44 (0)20 7611 8722.")
+        assertBlockedWith(
+          _,
+          expectedMessage =
+            "Item cannot be requested online. Please ask at Information Service desk, email: infoserv@wellcome.ac.uk or telephone +44 (0)20 7611 8722."
+        )
       }
     }
 
     it("if it's on the open shelves") {
-      val testCases = Table("locationCode", "isope", "isref",
+      val testCases = Table(
+        "locationCode",
+        "isope",
+        "isref",
         // Note: this is one of the location codes matched by this rule, but it
         // matches another rule higher up, so it's commented out.
         // "gblip",
-        "wghib", "wghig", "wghip", "wghir", "wghxb", "wghxg", "wghxp", "wghxr", "wgmem", "wgmxm", "wgpvm", "wgsee", "wgsem", "wgser", "wqrfc", "wqrfd", "wqrfe", "wqrfp", "wqrfr", "wslob", "wslom", "wslor", "wslox", "wsref", "hgslr", "wsrex")
+        "wghib",
+        "wghig",
+        "wghip",
+        "wghir",
+        "wghxb",
+        "wghxg",
+        "wghxp",
+        "wghxr",
+        "wgmem",
+        "wgmxm",
+        "wgpvm",
+        "wgsee",
+        "wgsem",
+        "wgser",
+        "wqrfc",
+        "wqrfd",
+        "wqrfe",
+        "wqrfp",
+        "wqrfr",
+        "wslob",
+        "wslom",
+        "wslor",
+        "wslox",
+        "wsref",
+        "hgslr",
+        "wsrex"
+      )
 
       forAll(testCases) {
-        assertBlockedWith(_, expectedMessage = "Item is on open shelves.  Check Location and Shelfmark for location details.")
+        assertBlockedWith(
+          _,
+          expectedMessage =
+            "Item is on open shelves.  Check Location and Shelfmark for location details.")
       }
     }
 
     it("if it needs a manual request slip") {
-      val testCases = Table("locationCode", "ofvn1", "scmwc", "sgmoh", "somet", "somge", "somhe", "somhi", "somja", "sompa", "sompr", "somsy")
+      val testCases = Table(
+        "locationCode",
+        "ofvn1",
+        "scmwc",
+        "sgmoh",
+        "somet",
+        "somge",
+        "somhe",
+        "somhi",
+        "somja",
+        "sompa",
+        "sompr",
+        "somsy")
 
       forAll(testCases) {
-        assertBlockedWith(_, expectedMessage = "Please complete a manual request slip.  This item cannot be requested online.")
+        assertBlockedWith(
+          _,
+          expectedMessage =
+            "Please complete a manual request slip.  This item cannot be requested online.")
       }
     }
 
@@ -125,7 +210,8 @@ class SierraRulesForRequestingTest extends AnyFunSpec with Matchers with SierraD
 
       forAll(testCases) { locationCode =>
         val item = createSierraItemDataWith(
-          fixedFields = Map("79" -> FixedField(label = "LOCATION", value = locationCode))
+          fixedFields =
+            Map("79" -> FixedField(label = "LOCATION", value = locationCode))
         )
 
         sierra.SierraRulesForRequesting(item) shouldBe NotRequestable()
@@ -133,47 +219,87 @@ class SierraRulesForRequestingTest extends AnyFunSpec with Matchers with SierraD
     }
 
     it("if it's closed for Data Protection") {
-      val testCases = Table("locationCode", "sc#ac", "sc#ra", "sc#wa", "sc#wf", "swm#m", "swm#o", "swm#1", "swm#2", "swm#3", "swm#4", "swm#5", "swm#6", "swm#7")
+      val testCases = Table(
+        "locationCode",
+        "sc#ac",
+        "sc#ra",
+        "sc#wa",
+        "sc#wf",
+        "swm#m",
+        "swm#o",
+        "swm#1",
+        "swm#2",
+        "swm#3",
+        "swm#4",
+        "swm#5",
+        "swm#6",
+        "swm#7")
 
       forAll(testCases) {
-        assertBlockedWith(_, expectedMessage = "Item not available due to provisions of Data Protection Act. Return to Archives catalogue to see when this file will be opened.")
+        assertBlockedWith(
+          _,
+          expectedMessage =
+            "Item not available due to provisions of Data Protection Act. Return to Archives catalogue to see when this file will be opened.")
       }
     }
 
     it("if it's at digitisation") {
-      val testCases = Table("locationCode", "temp1", "temp2", "temp3", "temp4", "temp5", "temp6")
+      val testCases = Table(
+        "locationCode",
+        "temp1",
+        "temp2",
+        "temp3",
+        "temp4",
+        "temp5",
+        "temp6")
 
       forAll(testCases) {
-        assertBlockedWith(_, expectedMessage = "At digitisation and temporarily unavailable.")
+        assertBlockedWith(
+          _,
+          expectedMessage = "At digitisation and temporarily unavailable.")
       }
     }
 
-    def assertBlockedWith(locationCode: String, expectedMessage: String): Assertion = {
+    def assertBlockedWith(locationCode: String,
+                          expectedMessage: String): Assertion = {
       val item = createSierraItemDataWith(
-        fixedFields = Map("79" -> FixedField(label = "LOCATION", value = locationCode))
+        fixedFields =
+          Map("79" -> FixedField(label = "LOCATION", value = locationCode))
       )
 
-      sierra.SierraRulesForRequesting(item) shouldBe NotRequestable(expectedMessage)
+      sierra.SierraRulesForRequesting(item) shouldBe NotRequestable(
+        expectedMessage)
     }
   }
 
   it("blocks an item based on fixed field 61 (item type)") {
     val testCases = Table(
       ("itemType", "expectedMessage"),
-      ("22", Some("Item is on Exhibition Reserve. Please ask at the Enquiry Desk")),
+      (
+        "22",
+        Some("Item is on Exhibition Reserve. Please ask at the Enquiry Desk")),
       ("17", None),
       ("18", None),
       ("15", None),
-      ("4", Some("Please complete a manual request slip.  This item cannot be requested online.")),
-      ("14", Some("Please complete a manual request slip.  This item cannot be requested online.")),
+      (
+        "4",
+        Some(
+          "Please complete a manual request slip.  This item cannot be requested online.")),
+      (
+        "14",
+        Some(
+          "Please complete a manual request slip.  This item cannot be requested online.")),
     )
 
-    forAll(testCases) { case (itemType, expectedMessage) =>
-      val item = createSierraItemDataWith(
-        fixedFields = Map("61" -> FixedField(label = "I TYPE", value = itemType))
-      )
+    forAll(testCases) {
+      case (itemType, expectedMessage) =>
+        val item = createSierraItemDataWith(
+          fixedFields =
+            Map("61" -> FixedField(label = "I TYPE", value = itemType))
+        )
 
-      sierra.SierraRulesForRequesting(item) shouldBe NotRequestable(expectedMessage)
+        sierra.SierraRulesForRequesting(item) shouldBe NotRequestable(
+          expectedMessage)
     }
   }
 

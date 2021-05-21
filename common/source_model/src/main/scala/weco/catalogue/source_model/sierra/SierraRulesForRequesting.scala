@@ -2,7 +2,8 @@ package weco.catalogue.source_model.sierra
 
 sealed trait RulesForRequestingResult
 
-case class NotRequestable(message: Option[String] = None) extends RulesForRequestingResult
+case class NotRequestable(message: Option[String] = None)
+    extends RulesForRequestingResult
 
 case object NotRequestable {
   def apply(message: String): NotRequestable =
@@ -111,7 +112,9 @@ object SierraRulesForRequesting {
       //      for now.  TODO: Find an example of this.
       //
       case i if i.loanRule.getOrElse("0") != "0" || i.status.contains("!") =>
-        NotRequestable(message = "Item is in use by another reader. Please ask at Enquiry Desk.")
+        NotRequestable(
+          message =
+            "Item is in use by another reader. Please ask at Enquiry Desk.")
 
       // These cases cover the lines:
       //
@@ -121,8 +124,16 @@ object SierraRulesForRequesting {
       //    v|i||79||=|hmfac||
       //    q|i||79||=|mfulc||Item cannot be requested online. Please contact Medical Film & Audio Library.   Email: mfac@wellcome.ac.uk. Telephone: +44 (0)20 76118596/97.
       //
-      case i if i.locationCode.containsAnyOf("mfgmc", "mfinc", "mfwcm", "hmfac", "mfulc") =>
-        NotRequestable(message = "Item cannot be requested online. Please contact Medical Film & Audio Library.   Email: mfac@wellcome.ac.uk. Telephone: +44 (0)20 76118596/97.")
+      case i
+          if i.locationCode.containsAnyOf(
+            "mfgmc",
+            "mfinc",
+            "mfwcm",
+            "hmfac",
+            "mfulc") =>
+        NotRequestable(
+          message =
+            "Item cannot be requested online. Please contact Medical Film & Audio Library.   Email: mfac@wellcome.ac.uk. Telephone: +44 (0)20 76118596/97.")
 
       // These cases cover the lines:
       //
@@ -142,8 +153,25 @@ object SierraRulesForRequesting {
       //    v|i||79||=|gblip||
       //    q|i||79||=|ofvds||This item cannot be requested online. Please place a manual request.
       //
-      case i if i.locationCode.containsAnyOf("dbiaa", "dcoaa", "dinad", "dinop", "dinsd", "dints", "dpoaa", "dimgs", "dhuaa", "dimgs", "dingo", "dpleg", "dpuih", "gblip", "ofvds") =>
-        NotRequestable(message = "This item cannot be requested online. Please place a manual request.")
+      case i
+          if i.locationCode.containsAnyOf(
+            "dbiaa",
+            "dcoaa",
+            "dinad",
+            "dinop",
+            "dinsd",
+            "dints",
+            "dpoaa",
+            "dimgs",
+            "dhuaa",
+            "dimgs",
+            "dingo",
+            "dpleg",
+            "dpuih",
+            "gblip",
+            "ofvds") =>
+        NotRequestable(message =
+          "This item cannot be requested online. Please place a manual request.")
 
       // These cases cover the lines:
       //
@@ -151,7 +179,9 @@ object SierraRulesForRequesting {
       //    q|i||79||=|iscdr||Item cannot be requested online. Please ask at Information Service desk, email: infoserv@wellcome.ac.uk or telephone +44 (0)20 7611 8722.
       //
       case i if i.locationCode.containsAnyOf("isvid", "iscdr") =>
-        NotRequestable(message = "Item cannot be requested online. Please ask at Information Service desk, email: infoserv@wellcome.ac.uk or telephone +44 (0)20 7611 8722.")
+        NotRequestable(
+          message =
+            "Item cannot be requested online. Please ask at Information Service desk, email: infoserv@wellcome.ac.uk or telephone +44 (0)20 7611 8722.")
 
       // These cases cover the lines:
       //
@@ -185,8 +215,41 @@ object SierraRulesForRequesting {
       //    v|i||79||=|hgslr||
       //    q|i||79||=|wsrex||Item is on open shelves.  Check Location and Shelfmark for location details.
       //
-      case i if i.locationCode.containsAnyOf("isope", "isref", "gblip", "wghib", "wghig", "wghip", "wghir", "wghxb", "wghxg", "wghxp", "wghxr", "wgmem", "wgmxm", "wgpvm", "wgsee", "wgsem", "wgser", "wqrfc", "wqrfd", "wqrfe", "wqrfp", "wqrfr", "wslob", "wslom", "wslor", "wslox", "wsref", "hgslr", "wsrex") =>
-        NotRequestable(message = "Item is on open shelves.  Check Location and Shelfmark for location details.")
+      case i
+          if i.locationCode.containsAnyOf(
+            "isope",
+            "isref",
+            "gblip",
+            "wghib",
+            "wghig",
+            "wghip",
+            "wghir",
+            "wghxb",
+            "wghxg",
+            "wghxp",
+            "wghxr",
+            "wgmem",
+            "wgmxm",
+            "wgpvm",
+            "wgsee",
+            "wgsem",
+            "wgser",
+            "wqrfc",
+            "wqrfd",
+            "wqrfe",
+            "wqrfp",
+            "wqrfr",
+            "wslob",
+            "wslom",
+            "wslor",
+            "wslox",
+            "wsref",
+            "hgslr",
+            "wsrex"
+          ) =>
+        NotRequestable(
+          message =
+            "Item is on open shelves.  Check Location and Shelfmark for location details.")
 
       // These cases cover the lines:
       //
@@ -210,13 +273,30 @@ object SierraRulesForRequesting {
       //    q|i||79||=|somsy||Please complete a manual request slip.  This item cannot be requested online.
       //
       case i if i.itemType.contains("22") =>
-        NotRequestable(message = "Item is on Exhibition Reserve. Please ask at the Enquiry Desk")
+        NotRequestable(
+          message =
+            "Item is on Exhibition Reserve. Please ask at the Enquiry Desk")
 
       case i if i.itemType.containsAnyOf("17", "18", "15") =>
         NotRequestable()
 
-      case i if i.itemType.containsAnyOf("4", "14") || i.locationCode.containsAnyOf("ofvn1", "scmwc", "sgmoh", "somet", "somge", "somhe", "somhi", "somja", "sompa", "sompr", "somsy") =>
-        NotRequestable(message = "Please complete a manual request slip.  This item cannot be requested online.")
+      case i
+          if i.itemType.containsAnyOf("4", "14") || i.locationCode
+            .containsAnyOf(
+              "ofvn1",
+              "scmwc",
+              "sgmoh",
+              "somet",
+              "somge",
+              "somhe",
+              "somhi",
+              "somja",
+              "sompa",
+              "sompr",
+              "somsy") =>
+        NotRequestable(
+          message =
+            "Please complete a manual request slip.  This item cannot be requested online.")
 
       // This case covers the line:
       //
@@ -241,8 +321,24 @@ object SierraRulesForRequesting {
       //    v|i||79||=|swm#6||
       //    q|i||79||=|swm#7||Item not available due to provisions of Data Protection Act. Return to Archives catalogue to see when this file will be opened.
       //
-      case i if i.locationCode.containsAnyOf("sc#ac", "sc#ra", "sc#wa", "sc#wf", "swm#m", "swm#o", "swm#1", "swm#2", "swm#3", "swm#4", "swm#5", "swm#6", "swm#7") =>
-        NotRequestable(message = "Item not available due to provisions of Data Protection Act. Return to Archives catalogue to see when this file will be opened.")
+      case i
+          if i.locationCode.containsAnyOf(
+            "sc#ac",
+            "sc#ra",
+            "sc#wa",
+            "sc#wf",
+            "swm#m",
+            "swm#o",
+            "swm#1",
+            "swm#2",
+            "swm#3",
+            "swm#4",
+            "swm#5",
+            "swm#6",
+            "swm#7") =>
+        NotRequestable(
+          message =
+            "Item not available due to provisions of Data Protection Act. Return to Archives catalogue to see when this file will be opened.")
 
       // There's a rule in the Rules for Requesting that goes:
       //
@@ -260,7 +356,14 @@ object SierraRulesForRequesting {
       //    v|i||79||=|temp5||
       //    q|i||79||=|temp6||At digitisation and temporarily unavailable.
       //
-      case i if i.locationCode.containsAnyOf("temp1", "temp2", "temp3", "temp4", "temp5", "temp6") =>
+      case i
+          if i.locationCode.containsAnyOf(
+            "temp1",
+            "temp2",
+            "temp3",
+            "temp4",
+            "temp5",
+            "temp6") =>
         NotRequestable(message = "At digitisation and temporarily unavailable.")
 
       // This case covers the lines:
