@@ -211,7 +211,7 @@ object SierraRulesForRequesting {
       //    v|i||79||=|sompr||
       //    q|i||79||=|somsy||Please complete a manual request slip.  This item cannot be requested online.
       //
-      case i if i.itemType.contains("61") =>
+      case i if i.itemType.contains("22") =>
         NotRequestable(message = "Item is on Exhibition Reserve. Please ask at the Enquiry Desk")
 
       case i if i.itemType.containsAnyOf("17", "18", "15") =>
@@ -219,6 +219,13 @@ object SierraRulesForRequesting {
 
       case i if i.itemType.containsAnyOf("4", "14") || i.locationCode.containsAnyOf("ofvn1", "scmwc", "sgmoh", "somet", "somge", "somhe", "somhi", "somja", "sompa", "sompr", "somsy") =>
         NotRequestable(message = "Please complete a manual request slip.  This item cannot be requested online.")
+
+      // This case covers the line:
+      //
+      //    q|i||79||=|sepep||
+      //
+      case i if i.locationCode.contains("sepep") =>
+        NotRequestable()
 
       case _ => Requestable
     }

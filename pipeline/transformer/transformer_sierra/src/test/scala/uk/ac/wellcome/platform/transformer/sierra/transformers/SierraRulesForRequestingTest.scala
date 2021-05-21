@@ -112,6 +112,14 @@ class SierraRulesForRequestingTest extends AnyFunSpec with Matchers with SierraD
       }
     }
 
+    it("if it's sepep") {
+      val item = createSierraItemDataWith(
+        fixedFields = Map("79" -> FixedField(label = "LOCATION", value = "sepep"))
+      )
+
+      SierraRulesForRequesting(item) shouldBe NotRequestable()
+    }
+
     def assertBlockedWith(locationCode: String, expectedMessage: String): Assertion = {
       val item = createSierraItemDataWith(
         fixedFields = Map("79" -> FixedField(label = "LOCATION", value = locationCode))
@@ -124,7 +132,7 @@ class SierraRulesForRequestingTest extends AnyFunSpec with Matchers with SierraD
   it("blocks an item based on fixed field 61 (item type)") {
     val testCases = Table(
       ("itemType", "expectedMessage"),
-      ("22", Some("Item is on Exhibition Reserve. Please ask at the Enquiry Desk ")),
+      ("22", Some("Item is on Exhibition Reserve. Please ask at the Enquiry Desk")),
       ("17", None),
       ("18", None),
       ("15", None),
@@ -134,7 +142,7 @@ class SierraRulesForRequestingTest extends AnyFunSpec with Matchers with SierraD
 
     forAll(testCases) { case (itemType, expectedMessage) =>
       val item = createSierraItemDataWith(
-        fixedFields = Map("79" -> FixedField(label = "I TYPE", value = itemType))
+        fixedFields = Map("61" -> FixedField(label = "I TYPE", value = itemType))
       )
 
       SierraRulesForRequesting(item) shouldBe NotRequestable(expectedMessage)
