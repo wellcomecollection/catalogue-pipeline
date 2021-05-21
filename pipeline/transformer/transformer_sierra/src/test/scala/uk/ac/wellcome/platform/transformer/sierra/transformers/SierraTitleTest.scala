@@ -4,11 +4,11 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import uk.ac.wellcome.platform.transformer.sierra.exceptions.ShouldNotTransformException
-import uk.ac.wellcome.platform.transformer.sierra.generators.{
+import weco.catalogue.source_model.generators.{
   MarcGenerators,
   SierraDataGenerators
 }
-import uk.ac.wellcome.platform.transformer.sierra.source.MarcSubfield
+import weco.catalogue.source_model.sierra.marc.MarcSubfield
 
 class SierraTitleTest
     extends AnyFunSpec

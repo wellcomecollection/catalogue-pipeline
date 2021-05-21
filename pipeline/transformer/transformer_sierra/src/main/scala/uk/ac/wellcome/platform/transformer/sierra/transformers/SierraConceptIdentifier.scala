@@ -1,10 +1,10 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
-import uk.ac.wellcome.platform.transformer.sierra.source.VarField
 import weco.catalogue.internal_model.identifiers.{
   IdentifierType,
   SourceIdentifier
 }
+import weco.catalogue.source_model.sierra.marc.VarField
 
 // Implements logic for finding a source identifier for varFields with
 // MARC tag 648, 650, 651 and 655.  These are the fields we use for genre

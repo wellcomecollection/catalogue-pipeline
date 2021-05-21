@@ -1,12 +1,18 @@
-package uk.ac.wellcome.platform.transformer.sierra.generators
+package weco.catalogue.source_model.generators
 
-import uk.ac.wellcome.platform.transformer.sierra.source._
-import uk.ac.wellcome.platform.transformer.sierra.source.sierra.{
+import weco.catalogue.internal_model.generators.IdentifiersGenerators
+import weco.catalogue.source_model
+import weco.catalogue.source_model.sierra.marc.{FixedField, VarField}
+import weco.catalogue.source_model.sierra.source.{
+  SierraMaterialType,
   SierraSourceLanguage,
   SierraSourceLocation
 }
-import weco.catalogue.internal_model.generators.IdentifiersGenerators
-import weco.catalogue.source_model.generators.SierraGenerators
+import weco.catalogue.source_model.sierra.{
+  SierraBibData,
+  SierraItemData,
+  SierraOrderData
+}
 
 trait SierraDataGenerators extends IdentifiersGenerators with SierraGenerators {
   def createSierraBibDataWith(
@@ -15,7 +21,7 @@ trait SierraDataGenerators extends IdentifiersGenerators with SierraGenerators {
     locations: Option[List[SierraSourceLocation]] = None,
     varFields: List[VarField] = List()
   ): SierraBibData =
-    SierraBibData(
+    source_model.sierra.SierraBibData(
       lang = lang,
       materialType = materialType,
       locations = locations,
@@ -26,10 +32,12 @@ trait SierraDataGenerators extends IdentifiersGenerators with SierraGenerators {
 
   def createSierraItemDataWith(
     location: Option[SierraSourceLocation] = None,
+    fixedFields: Map[String, FixedField] = Map(),
     varFields: List[VarField] = Nil
   ): SierraItemData =
     SierraItemData(
       location = location,
+      fixedFields = fixedFields,
       varFields = varFields
     )
 

@@ -6,8 +6,6 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.platform.transformer.sierra.SierraTransformer
 import uk.ac.wellcome.platform.transformer.sierra.exceptions.SierraTransformerException
-import uk.ac.wellcome.platform.transformer.sierra.generators.MarcGenerators
-import uk.ac.wellcome.platform.transformer.sierra.source.MarcSubfield
 import uk.ac.wellcome.json.JsonUtil._
 import weco.catalogue.internal_model.work.WorkState.Source
 import org.scalatest.Assertion
@@ -35,8 +33,9 @@ import weco.catalogue.internal_model.work.InvisibilityReason.{
   UnableToTransform
 }
 import weco.catalogue.internal_model.work._
-import weco.catalogue.source_model.generators.SierraGenerators
+import weco.catalogue.source_model.generators.{MarcGenerators, SierraGenerators}
 import weco.catalogue.source_model.sierra._
+import weco.catalogue.source_model.sierra.marc.MarcSubfield
 
 class SierraTransformerTest
     extends AnyFunSpec

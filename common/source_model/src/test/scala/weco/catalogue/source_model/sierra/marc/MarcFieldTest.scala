@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.transformer.sierra.source
+package weco.catalogue.source_model.sierra.marc
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers

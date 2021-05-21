@@ -7,13 +7,6 @@ import weco.catalogue.internal_model.locations.LocationType.{
   OnlineResource,
   OpenShelves
 }
-import uk.ac.wellcome.platform.transformer.sierra.generators.MarcGenerators
-import uk.ac.wellcome.platform.transformer.sierra.source.{
-  FixedField,
-  MarcSubfield,
-  SierraHoldingsData,
-  VarField
-}
 import weco.catalogue.internal_model.locations.{
   AccessCondition,
   AccessStatus,
@@ -21,8 +14,16 @@ import weco.catalogue.internal_model.locations.{
   PhysicalLocation
 }
 import weco.catalogue.internal_model.work.Holdings
-import weco.catalogue.source_model.generators.SierraGenerators
-import weco.catalogue.source_model.sierra.SierraHoldingsNumber
+import weco.catalogue.source_model.generators.{MarcGenerators, SierraGenerators}
+import weco.catalogue.source_model.sierra.marc.{
+  FixedField,
+  MarcSubfield,
+  VarField
+}
+import weco.catalogue.source_model.sierra.{
+  SierraHoldingsData,
+  SierraHoldingsNumber
+}
 
 class SierraHoldingsTest
     extends AnyFunSpec

@@ -2,16 +2,13 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.platform.transformer.sierra.generators.SierraDataGenerators
-import uk.ac.wellcome.platform.transformer.sierra.source.{
-  FixedField,
-  SierraBibData,
-  SierraOrderData
-}
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.identifiers.IdState.Unidentifiable
 import weco.catalogue.internal_model.locations.{LocationType, PhysicalLocation}
 import weco.catalogue.internal_model.work.Item
+import weco.catalogue.source_model.generators.SierraDataGenerators
+import weco.catalogue.source_model.sierra.marc.FixedField
+import weco.catalogue.source_model.sierra.{SierraBibData, SierraOrderData}
 
 class SierraItemsOnOrderTest
     extends AnyFunSpec

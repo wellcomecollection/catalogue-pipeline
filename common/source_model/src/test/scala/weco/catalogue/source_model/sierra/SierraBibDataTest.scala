@@ -1,11 +1,12 @@
-package uk.ac.wellcome.platform.transformer.sierra.source
+package weco.catalogue.source_model.sierra
 
+import org.scalatest.TryValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil._
+import weco.catalogue.source_model.sierra.source.SierraSourceLanguage
+
 import SierraBibData._
-import org.scalatest.TryValues
-import uk.ac.wellcome.platform.transformer.sierra.source.sierra.SierraSourceLanguage
 
 class SierraBibDataTest extends AnyFunSpec with Matchers with TryValues {
   it("decodes a bibData with language") {

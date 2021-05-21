@@ -1,7 +1,9 @@
-package uk.ac.wellcome.platform.transformer.sierra.source
+package weco.catalogue.source_model.sierra
 
 import io.circe.Decoder
-import uk.ac.wellcome.platform.transformer.sierra.source.sierra.{
+import weco.catalogue.source_model.sierra.marc.{FixedField, VarField}
+import weco.catalogue.source_model.sierra.source.{
+  SierraMaterialType,
   SierraSourceCountry,
   SierraSourceLanguage,
   SierraSourceLocation

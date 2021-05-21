@@ -2,18 +2,14 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.platform.transformer.sierra.generators.{
+import weco.catalogue.internal_model.work.Format.ArchivesAndManuscripts
+import weco.catalogue.source_model.generators.{
   MarcGenerators,
   SierraDataGenerators
 }
-import uk.ac.wellcome.platform.transformer.sierra.source.{
-  MarcSubfield,
-  SierraBibData,
-  SierraItemData,
-  SierraMaterialType,
-  VarField
-}
-import weco.catalogue.internal_model.work.Format.ArchivesAndManuscripts
+import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
+import weco.catalogue.source_model.sierra.source.SierraMaterialType
+import weco.catalogue.source_model.sierra.{SierraBibData, SierraItemData}
 
 class SierraShelfmarkTest
     extends AnyFunSpec

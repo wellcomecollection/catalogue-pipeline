@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.transformer.sierra.source
+package weco.catalogue.source_model.sierra.marc
 
 import io.circe.generic.extras.JsonKey
 
@@ -26,11 +26,6 @@ import io.circe.generic.extras.JsonKey
 //      ]
 //    }
 //
-case class MarcSubfield(
-  tag: String,
-  content: String
-)
-
 case class VarField(
   content: Option[String] = None,
   marcTag: Option[String] = None,
@@ -38,20 +33,4 @@ case class VarField(
   @JsonKey("ind1") indicator1: Option[String] = None,
   @JsonKey("ind2") indicator2: Option[String] = None,
   subfields: List[MarcSubfield] = Nil
-)
-
-// Examples of fixedFields from the Sierra JSON:
-//
-//    "98": {
-//      "label": "PDATE",
-//      "value": "2017-12-22T12:55:57Z"
-//    },
-//    "77": {
-//      "label": "TOT RENEW",
-//      "value": 12
-//    }
-//
-case class FixedField(
-  label: String,
-  value: String
 )

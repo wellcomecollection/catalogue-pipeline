@@ -4,17 +4,13 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.locations.AccessStatus.LicensedResources
 import weco.catalogue.internal_model.locations.LocationType.OnlineResource
-import uk.ac.wellcome.platform.transformer.sierra.generators.MarcGenerators
-import uk.ac.wellcome.platform.transformer.sierra.source.{
-  MarcSubfield,
-  VarField
-}
 import weco.catalogue.internal_model.locations.{
   AccessCondition,
   DigitalLocation
 }
 import weco.catalogue.internal_model.work.Item
-import weco.catalogue.source_model.generators.SierraGenerators
+import weco.catalogue.source_model.generators.{MarcGenerators, SierraGenerators}
+import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
 
 class SierraElectronicResourcesTest
     extends AnyFunSpec

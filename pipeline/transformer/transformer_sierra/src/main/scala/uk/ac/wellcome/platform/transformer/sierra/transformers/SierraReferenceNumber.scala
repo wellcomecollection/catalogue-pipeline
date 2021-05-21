@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
-import uk.ac.wellcome.platform.transformer.sierra.source.SierraBibData
 import weco.catalogue.internal_model.identifiers.ReferenceNumber
+import weco.catalogue.source_model.sierra.SierraBibData
 
 object SierraReferenceNumber extends SierraDataTransformer {
   override type Output = Option[ReferenceNumber]

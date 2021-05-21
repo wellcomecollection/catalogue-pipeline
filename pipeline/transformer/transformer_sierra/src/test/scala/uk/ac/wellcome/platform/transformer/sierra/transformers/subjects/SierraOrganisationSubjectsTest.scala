@@ -3,18 +3,14 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers.subjects
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.platform.transformer.sierra.exceptions.CataloguingException
-import uk.ac.wellcome.platform.transformer.sierra.generators.SierraDataGenerators
-import uk.ac.wellcome.platform.transformer.sierra.source.{
-  MarcSubfield,
-  SierraBibData,
-  VarField
-}
 import weco.catalogue.internal_model.identifiers.{
   IdState,
   IdentifierType,
   SourceIdentifier
 }
-import weco.catalogue.source_model.sierra.SierraBibNumber
+import weco.catalogue.source_model.generators.SierraDataGenerators
+import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
+import weco.catalogue.source_model.sierra.{SierraBibData, SierraBibNumber}
 
 class SierraOrganisationSubjectsTest
     extends AnyFunSpec

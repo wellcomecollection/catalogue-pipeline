@@ -1,11 +1,8 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
-import uk.ac.wellcome.platform.transformer.sierra.source.{
-  SierraBibData,
-  SierraItemData,
-  SierraMaterialType,
-  SierraQueryOps
-}
+import uk.ac.wellcome.platform.transformer.sierra.source.SierraQueryOps
+import weco.catalogue.source_model.sierra.source.SierraMaterialType
+import weco.catalogue.source_model.sierra.{SierraBibData, SierraItemData}
 
 object SierraShelfmark extends SierraQueryOps {
   def apply(bibData: SierraBibData, itemData: SierraItemData): Option[String] =

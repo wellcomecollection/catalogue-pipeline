@@ -3,13 +3,9 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 import grizzled.slf4j.Logging
 
 import java.net.URL
-import uk.ac.wellcome.platform.transformer.sierra.source.{
-  MarcSubfield,
-  SierraBibData,
-  SierraQueryOps,
-  VarField
-}
-import weco.catalogue.source_model.sierra.SierraBibNumber
+import uk.ac.wellcome.platform.transformer.sierra.source.SierraQueryOps
+import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
+import weco.catalogue.source_model.sierra.{SierraBibData, SierraBibNumber}
 
 import scala.util.Try
 

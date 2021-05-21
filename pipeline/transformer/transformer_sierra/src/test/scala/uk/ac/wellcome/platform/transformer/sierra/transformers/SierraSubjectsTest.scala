@@ -2,12 +2,9 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.platform.transformer.sierra.generators.SierraDataGenerators
-import uk.ac.wellcome.platform.transformer.sierra.source.{
-  MarcSubfield,
-  VarField
-}
 import weco.catalogue.internal_model.work.{Concept, Subject}
+import weco.catalogue.source_model.generators.SierraDataGenerators
+import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
 
 class SierraSubjectsTest
     extends AnyFunSpec

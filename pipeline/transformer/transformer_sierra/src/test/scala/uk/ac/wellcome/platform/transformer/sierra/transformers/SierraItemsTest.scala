@@ -2,14 +2,6 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.platform.transformer.sierra.source.{
-  MarcSubfield,
-  SierraBibData,
-  SierraItemData,
-  VarField
-}
-import uk.ac.wellcome.platform.transformer.sierra.source.sierra.SierraSourceLocation
-import uk.ac.wellcome.platform.transformer.sierra.generators.SierraDataGenerators
 import weco.catalogue.internal_model.identifiers.{
   IdState,
   IdentifierType,
@@ -17,7 +9,14 @@ import weco.catalogue.internal_model.identifiers.{
 }
 import weco.catalogue.internal_model.locations.{LocationType, PhysicalLocation}
 import weco.catalogue.internal_model.work.Item
-import weco.catalogue.source_model.sierra.SierraItemNumber
+import weco.catalogue.source_model.generators.SierraDataGenerators
+import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
+import weco.catalogue.source_model.sierra.source.SierraSourceLocation
+import weco.catalogue.source_model.sierra.{
+  SierraBibData,
+  SierraItemData,
+  SierraItemNumber
+}
 
 class SierraItemsTest
     extends AnyFunSpec

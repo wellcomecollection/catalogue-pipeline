@@ -1,11 +1,8 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.platform.transformer.sierra.source.{
-  MarcSubfield,
-  SierraQueryOps,
-  VarField
-}
+import uk.ac.wellcome.platform.transformer.sierra.source.SierraQueryOps
+import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
 import weco.catalogue.source_model.sierra.TypedSierraRecordNumber
 
 import scala.util.{Failure, Success, Try}

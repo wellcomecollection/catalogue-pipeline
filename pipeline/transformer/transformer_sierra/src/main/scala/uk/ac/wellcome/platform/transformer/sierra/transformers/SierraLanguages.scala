@@ -1,13 +1,10 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.platform.transformer.sierra.source.sierra.SierraSourceLanguage
-import uk.ac.wellcome.platform.transformer.sierra.source.{
-  SierraBibData,
-  SierraQueryOps
-}
+import uk.ac.wellcome.platform.transformer.sierra.source.SierraQueryOps
 import weco.catalogue.internal_model.languages.{Language, MarcLanguageCodeList}
-import weco.catalogue.source_model.sierra.SierraBibNumber
+import weco.catalogue.source_model.sierra.source.SierraSourceLanguage
+import weco.catalogue.source_model.sierra.{SierraBibData, SierraBibNumber}
 
 object SierraLanguages
     extends SierraIdentifiedDataTransformer

@@ -1,4 +1,6 @@
-package uk.ac.wellcome.platform.transformer.sierra.source
+package weco.catalogue.source_model.sierra
+
+import weco.catalogue.source_model.sierra.marc.{FixedField, VarField}
 
 case class SierraHoldingsData(
   deleted: Boolean = false,
