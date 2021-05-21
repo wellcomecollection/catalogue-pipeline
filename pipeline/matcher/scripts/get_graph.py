@@ -58,7 +58,7 @@ def main(index_date, work_id, emit_source_data):
 
     node_ids = [node["id"] for node in graph_component]
     node_links = [node["linkedIds"] for node in graph_component]
-    nodes = get_nodes_properties(es, index_date=index_date, work_ids=node_ids, get_all_properties=emit_source_data)
+    nodes = get_nodes_properties(es, index_date=index_date, work_ids=node_ids, fetch_complete_source=emit_source_data)
 
     deleted_node_ids = {node["id"] for node in nodes if node["type"] == "Deleted"}
     valid_node_links = [
