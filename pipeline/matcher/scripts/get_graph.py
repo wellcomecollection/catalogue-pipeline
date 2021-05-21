@@ -58,14 +58,19 @@ def main(index_date, work_id, emit_source_data):
 
     node_ids = [node["id"] for node in graph_component]
     node_links = [node["linkedIds"] for node in graph_component]
-    nodes = get_nodes_properties(es, index_date=index_date, work_ids=node_ids, fetch_complete_source=emit_source_data)
+    nodes = get_nodes_properties(
+        es,
+        index_date=index_date,
+        work_ids=node_ids,
+        fetch_complete_source=emit_source_data,
+    )
 
     deleted_node_ids = {node["id"] for node in nodes if node["type"] == "Deleted"}
     valid_node_links = [
         [dest for dest in ids if dest not in deleted_node_ids] for ids in node_links
     ]
     for node, links in filter(
-            lambda x: x[0]["type"] != "Deleted", zip(nodes, valid_node_links)
+        lambda x: x[0]["type"] != "Deleted", zip(nodes, valid_node_links)
     ):
         source = source_type_labels.get(node["source_id_type"], node["source_id_type"])
         graph.node(node["id"], label=fr"{source}\n{node['source_id']}")

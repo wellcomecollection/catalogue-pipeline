@@ -35,7 +35,9 @@ def get_nodes_properties(es, *, index_date, work_ids, fetch_complete_source=Fals
         index=f"{matcher_index}-{index_date}",
         body={"ids": work_ids},
         doc_type="_doc",
-        _source=True if fetch_complete_source else [
+        _source=True
+        if fetch_complete_source
+        else [
             "state.sourceIdentifier.identifierType.id",
             "state.sourceIdentifier.value",
             "type",
@@ -49,7 +51,7 @@ def get_nodes_properties(es, *, index_date, work_ids, fetch_complete_source=Fals
             ]["id"],
             "source_id": doc["_source"]["state"]["sourceIdentifier"]["value"],
             "type": doc["_source"]["type"],
-            "complete_source": doc["_source"] if fetch_complete_source else None
+            "complete_source": doc["_source"] if fetch_complete_source else None,
         }
         for doc in response["docs"]
     ]
