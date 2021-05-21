@@ -24,12 +24,14 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
 
   override def merge(
     target: Work.Visible[Identified],
-    sources: Seq[Work[Identified]]): FieldMergeResult[FieldData] = {
+    sources: Seq[Work[Identified]]
+  ): FieldMergeResult[FieldData] = {
     val items =
       mergeIntoCalmTarget(target, sources)
         .orElse(mergeMetsIntoSierraTarget(target, sources))
         .orElse(
-          mergeSingleMiroIntoSingleOrZeroItemSierraTarget(target, sources))
+          mergeSingleMiroIntoSingleOrZeroItemSierraTarget(target, sources)
+        )
         .getOrElse(target.data.items)
 
     val mergedSources = (
@@ -40,6 +42,7 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
       ).flatMap { rule =>
         rule.mergedSources(target, sources)
       } ++ findFirstLinkedDigitisedSierraWorkFor(target, sources)
+        ++ knownDuplicateSources(target, sources)
     ).distinct
 
     FieldMergeResult(
@@ -58,8 +61,10 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     val isDefinedForTarget: WorkPredicate = sierraWork
     val isDefinedForSource: WorkPredicate = singleDigitalItemMetsWork
 
-    def rule(target: Work.Visible[Identified],
-             sources: NonEmptyList[Work[Identified]]): FieldData =
+    def rule(
+      target: Work.Visible[Identified],
+      sources: NonEmptyList[Work[Identified]]
+    ): FieldData =
       target.data.items match {
         case List(sierraItem) =>
           List(
@@ -94,8 +99,10 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
       override val isDefinedForSourceList: Seq[Work[Identified]] => Boolean =
         _.count(singleDigitalItemMiroWork) == 1
 
-      def rule(target: Work.Visible[Identified],
-               sources: NonEmptyList[Work[Identified]]): FieldData =
+      def rule(
+        target: Work.Visible[Identified],
+        sources: NonEmptyList[Work[Identified]]
+      ): FieldData =
         target.data.items match {
           case List(sierraItem) =>
             List(
@@ -107,6 +114,22 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
             )
           case _ => sources.toList.flatMap(_.data.items)
         }
+    }
+
+  // While we can't merge a Miro item into a Sierra work with multiple items (as described above),
+  // we know that in some cases the duplication is such that we can treat the Miro source as having
+  // been entirely subsumed into the target despite not having used any of its data.
+  //
+  // At the moment, the only case of this is when we have a digaids work: we know that
+  // the Miro item is identical to the METS item.
+  def knownDuplicateSources(
+    target: Work.Visible[Identified],
+    sources: Seq[Work[Identified]]
+  ): Seq[Work[Identified]] =
+    if (sierraDigaids(target) && sources.exists(singleDigitalItemMetsWork)) {
+      sources.filter(singleDigitalItemMiroWork)
+    } else {
+      Nil
     }
 
   /**
@@ -121,8 +144,10 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     val isDefinedForSource
       : WorkPredicate = singleDigitalItemMetsWork or sierraWork
 
-    def rule(target: Work.Visible[Identified],
-             sources: NonEmptyList[Work[Identified]]): FieldData = {
+    def rule(
+      target: Work.Visible[Identified],
+      sources: NonEmptyList[Work[Identified]]
+    ): FieldData = {
 
       // The calm Work predicate ensures this is safe
       val calmItem = target.data.items.head
@@ -139,7 +164,8 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
         calmItem.copy(
           locations = calmItem.locations ++ metsDigitalLocations,
           id = sierraItemId.getOrElse(IdState.Unidentifiable)
-        ))
+        )
+      )
     }
   }
 }
