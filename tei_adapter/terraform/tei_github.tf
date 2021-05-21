@@ -1,7 +1,7 @@
 module "tei_windows_queue" {
   source                     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
   queue_name                 = "tei-windows"
-  topic_arns                 = [module.tei_window_generator_lambda.topic_arn]
+  topic_arns                 = [module.tei_updater_lambda.topic_arn]
   aws_region                 = local.aws_region
   alarm_topic_arn            = local.dlq_alarm_arn
   visibility_timeout_seconds = 10800

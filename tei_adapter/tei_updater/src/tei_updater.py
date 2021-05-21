@@ -33,6 +33,7 @@ def get_new_tree(url,):
                     'sha': entry['sha'],
                     'url': entry['url']
                 }
+        return new_tree
     else:
         raise Exception("received status code! = 200")
 
@@ -41,7 +42,7 @@ def get_new_tree(url,):
 def main(event, _ctxt=None, s3_client=None, sns_client=None):
     topic_arn = os.environ["TOPIC_ARN"]
     bucket_name= os.environ["BUCKET_NAME"]
-    key = os.envirton["TREE_FILE_KEY"]
+    key = os.environ["TREE_FILE_KEY"]
     github_api_url = os.environ["GITHUB_API_URL"]
 
     s3_client = s3_client or boto3.client("s3")

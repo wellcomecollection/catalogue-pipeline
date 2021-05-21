@@ -12,7 +12,7 @@ SBT_DOCKER_LIBRARIES =
 SBT_NO_DOCKER_LIBRARIES =
 
 PYTHON_APPS =
-LAMBDAS =
+LAMBDAS = tei_updater
 
 # These override the defaults (catalogue account) set in functions.Makefile
 # See https://github.com/wellcomecollection/catalogue/pull/912 for some context
