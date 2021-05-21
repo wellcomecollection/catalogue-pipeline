@@ -1,6 +1,6 @@
 module "tei_adapter_topic" {
   source = "github.com/wellcomecollection/terraform-aws-sns-topic.git?ref=v1.0.0"
-  name   = "tei-files"
+  name   = "tei-adapter-input"
 }
 
 

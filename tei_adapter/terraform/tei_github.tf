@@ -16,7 +16,7 @@ module "tei_github" {
 
   env_vars = {
     sqs_url   = module.tei_windows_queue.url
-    sns_topic = module.tei_adapter_topic.arn
+    sns_topic = module.tei_adapter_output.arn
   }
   secret_env_vars = {
   }
