@@ -22,8 +22,9 @@ def get_stored_tree(s3, bucket, key):
         else:
             raise ex
 
-def get_new_tree(url,):
-    response =requests.get(url)
+def get_new_tree(url,session=None):
+    session = session or requests.Session()
+    response =session.get(url)
     response.raise_for_status()
     new_tree = {}
     response_tree= response.json()
@@ -56,7 +57,7 @@ def diff_trees(old_tree, new_tree):
     return messages
 
 @log_on_error
-def main(event, _ctxt=None, s3_client=None, sns_client=None):
+def main(event, _ctxt=None, s3_client=None, sns_client=None, session=None):
     topic_arn = os.environ["TOPIC_ARN"]
     bucket_name= os.environ["BUCKET_NAME"]
     key = os.environ["TREE_FILE_KEY"]
@@ -66,7 +67,7 @@ def main(event, _ctxt=None, s3_client=None, sns_client=None):
     sns_client = sns_client or boto3.client("sns")
 
     old_tree = get_stored_tree(s3_client, bucket_name, key)
-    new_tree = get_new_tree(github_api_url)
+    new_tree = get_new_tree(github_api_url, session)
 
     if old_tree:
         messages = diff_trees(old_tree, new_tree)
