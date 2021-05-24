@@ -45,6 +45,7 @@ def diff_trees(old_tree, new_tree):
     values_changed = diff.pop("values_changed", [])
     items_added = diff.pop("dictionary_item_added", [])
     items_removed = diff.pop("dictionary_item_removed", [])
+    assert len(diff.keys()) == 0
     messages = []
     # assert that the diff only contains the three keys above
     if values_changed:
