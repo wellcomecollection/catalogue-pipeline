@@ -37,7 +37,7 @@ def test_tree_does_not_exist(
     key = "tree.json"
     mock_s3_client = boto3.client("s3", region_name="us-east-1")
     mock_s3_client.create_bucket(Bucket=bucket)
-    
+
     with mock.patch.dict(
         os.environ,
         {
@@ -140,9 +140,9 @@ def test_elements_added_changed_deleted_are_returned():
     }
     diffs = diff_trees(old_tree, new_tree)
     expected_diffs = [
-        {"path": "fileb", "url": "http://filebb"}, # fileb is modified
-        {"path": "filed", "url": "http://filed"}, # filed is added
-        {"path": "filea", "deleted": True}, # filea is deleted
+        {"path": "fileb", "url": "http://filebb"},  # fileb is modified
+        {"path": "filed", "url": "http://filed"},  # filed is added
+        {"path": "filea", "deleted": True},  # filea is deleted
     ]
     assert diffs == expected_diffs
 
