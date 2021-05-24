@@ -41,7 +41,10 @@ trait SierraLocation {
 
       physicalLocation = PhysicalLocation(
         locationType = locationType,
-        accessConditions = SierraAccessConditions(bibNumber, bibData),
+        accessConditions =
+          SierraAccessStatus.forBib(bibNumber, bibData)
+            .map { status => AccessCondition(status) }
+            .toList,
         label = label,
         shelfmark = SierraShelfmark(bibData, itemData)
       )

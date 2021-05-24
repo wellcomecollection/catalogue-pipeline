@@ -23,6 +23,7 @@ class SierraNotesTest
       "502" -> DissertationNote("dissertation note"),
       "504" -> BibliographicalInformation("bib info a"),
       "505" -> ContentsNote("contents note"),
+      "506" -> TermsOfUse("typical terms of use"),
       "508" -> CreditsNote("credits note a"),
       "510" -> PublicationsNote("publications a"),
       "511" -> CreditsNote("credits note b"),

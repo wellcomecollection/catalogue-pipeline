@@ -86,15 +86,14 @@ class SierraLocationTest
       transformer.getPhysicalLocation(bibId, itemId, itemData, bibData) shouldBe None
     }
 
-    it("adds access condition to the location if present") {
+    it("adds access status to the location if present") {
       val bibData = createSierraBibDataWith(
         varFields = List(
           VarField(
             marcTag = Some("506"),
             subfields = List(
               MarcSubfield("a", "You're not allowed yet"),
-              MarcSubfield("f", "Restricted"),
-              MarcSubfield("g", "2099-12-31"),
+              MarcSubfield("f", "Restricted")
             )
           )
         )
@@ -104,11 +103,7 @@ class SierraLocationTest
           locationType = locationType,
           label = label,
           accessConditions = List(
-            AccessCondition(
-              status = Some(AccessStatus.Restricted),
-              terms = Some("You're not allowed yet"),
-              to = Some("2099-12-31")
-            ),
+            AccessCondition(status = AccessStatus.Restricted),
           )
         )
       )
@@ -210,7 +205,7 @@ class SierraLocationTest
       )
     }
 
-    it("adds access condition if f is not present but other subfields are") {
+    it("skips an access condition if it can't get an access status") {
       val bibData = createSierraBibDataWith(
         varFields = List(
           VarField(
@@ -222,19 +217,9 @@ class SierraLocationTest
           )
         )
       )
-      transformer.getPhysicalLocation(bibId, itemId, itemData, bibData) shouldBe Some(
-        PhysicalLocation(
-          locationType = locationType,
-          label = label,
-          accessConditions = List(
-            AccessCondition(
-              status = None,
-              terms = Some("You're not allowed yet"),
-              to = Some("2099-12-31")
-            ),
-          )
-        )
-      )
+
+      val location = transformer.getPhysicalLocation(bibId, itemId, itemData, bibData).get
+      location.accessConditions shouldBe empty
     }
 
     it("sets an access status based on the contents of subfield ǂf") {
@@ -280,7 +265,7 @@ class SierraLocationTest
       location.accessConditions.head.terms shouldBe None
     }
 
-    it("does not set an AccessStatus if the contents of ǂa and ǂf disagree") {
+    it("only sets an AccessStatus if the contents of ǂa and ǂf agree") {
       val bibData = createSierraBibDataWith(
         varFields = List(
           VarField(
@@ -295,57 +280,7 @@ class SierraLocationTest
 
       val location =
         transformer.getPhysicalLocation(bibId, itemId, itemData, bibData).get
-      location.accessConditions should have size 1
-
-      location.accessConditions.head.status shouldBe None
-      location.accessConditions.head.terms shouldBe Some("Restricted")
-    }
-
-    it(
-      "does not set an AccessStatus if the indicator 0 and the contents of subfield ǂf disagree") {
-      val bibData = createSierraBibDataWith(
-        varFields = List(
-          VarField(
-            marcTag = Some("506"),
-            indicator1 = Some("0"),
-            subfields = List(
-              MarcSubfield("a", "This item is inconsistent and weird"),
-              MarcSubfield("f", "Restricted"),
-            )
-          )
-        )
-      )
-
-      val location =
-        transformer.getPhysicalLocation(bibId, itemId, itemData, bibData).get
-      location.accessConditions should have size 1
-
-      location.accessConditions.head.status shouldBe None
-      location.accessConditions.head.terms shouldBe Some(
-        "This item is inconsistent and weird")
-    }
-
-    it(
-      "does not set an AccessStatus if the contents of subfield ǂf can't be parsed") {
-      val bibData = createSierraBibDataWith(
-        varFields = List(
-          VarField(
-            marcTag = Some("506"),
-            subfields = List(
-              MarcSubfield("a", "This item is inconsistent and weird"),
-              MarcSubfield("f", "fffffff my cat sat on the keyboard"),
-            )
-          )
-        )
-      )
-
-      val location =
-        transformer.getPhysicalLocation(bibId, itemId, itemData, bibData).get
-      location.accessConditions should have size 1
-
-      location.accessConditions.head.status shouldBe None
-      location.accessConditions.head.terms shouldBe Some(
-        "This item is inconsistent and weird")
+      location.accessConditions shouldBe empty
     }
 
     it(

@@ -1,29 +1,28 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import uk.ac.wellcome.platform.transformer.sierra.source.SierraQueryOps
-import weco.catalogue.internal_model.locations.{AccessCondition, AccessStatus}
+import weco.catalogue.internal_model.locations.AccessStatus
 import weco.catalogue.source_model.sierra.marc.VarField
 import weco.catalogue.source_model.sierra.{SierraBibData, SierraBibNumber}
 
-object SierraAccessConditions extends SierraQueryOps {
-  def apply(bibId: SierraBibNumber,
-            bibData: SierraBibData): List[AccessCondition] =
-    bibData
-      .varfieldsWithTag("506")
-      .map { varfield =>
-        val terms = getTerms(varfield)
-        val termsStatus = statusFromTerms(terms)
+object SierraAccessStatus extends SierraQueryOps {
+  def forBib(bibId: SierraBibNumber, bibData: SierraBibData): Option[AccessStatus] = {
+    val statuses =
+      bibData
+        .varfieldsWithTag("506")
+        .flatMap { varField =>
+          val terms = getTerms(varField)
+          val termsStatus = statusFromTerms(terms)
 
-        val status = getAccessStatus(bibId, varfield, termsStatus)
+          getAccessStatus(bibId, varField, termsStatus)
+        }
+        .distinct
 
-        AccessCondition(
-          status = status,
-          terms =
-            if (termsStatus.isDefined && termsStatus == status) None else terms,
-          to = varfield.subfieldsWithTag("g").contents.headOption
-        )
-      }
-      .filterNot { _.isEmpty }
+    statuses match {
+      case Seq(status) => Some(status)
+      case _ => None
+    }
+  }
 
   // MARC 506 subfield ǂa contains "terms governing access".  This is a
   // non-repeatable field.  See https://www.loc.gov/marc/bibliographic/bd506.html
