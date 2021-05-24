@@ -1,8 +1,10 @@
 package weco.catalogue.sierra_indexer.services
 
 import com.sksamuel.elastic4s.ElasticApi.bulk
-import com.sksamuel.elastic4s.ElasticClient
+import com.sksamuel.elastic4s.{ElasticClient, RequestSuccess}
 import com.sksamuel.elastic4s.ElasticDsl._
+import com.sksamuel.elastic4s.requests.bulk.BulkResponse
+import com.sksamuel.elastic4s.requests.delete.DeleteByQueryResponse
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
@@ -54,8 +56,19 @@ class Worker(
 
           Future.sequence(futures)
       }
-      .map { _ =>
-        ()
+      .map { resp =>
+        resp.foreach {
+          case RequestSuccess(_, _, _, d: DeleteByQueryResponse) =>
+            ()
+
+          case RequestSuccess(_, _, _, b: BulkResponse) =>
+            if (b.hasFailures) {
+              throw new RuntimeException(s"Errors in the bulk response: $b")
+            }
+
+          case _ =>
+            ()
+        }
       }
   }
 }

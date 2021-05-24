@@ -1,6 +1,7 @@
 package weco.catalogue.sierra_indexer
 
-import com.sksamuel.elastic4s.Index
+import com.sksamuel.elastic4s.ElasticDsl._
+import com.sksamuel.elastic4s.{Index, Indexes}
 import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -13,12 +14,7 @@ import weco.catalogue.sierra_indexer.fixtures.IndexerFixtures
 import weco.catalogue.source_model.SierraSourcePayload
 import weco.catalogue.source_model.generators.SierraGenerators
 import weco.catalogue.source_model.sierra.Implicits._
-import weco.catalogue.source_model.sierra.{
-  SierraHoldingsRecord,
-  SierraItemRecord,
-  SierraOrderRecord,
-  SierraTransformable
-}
+import weco.catalogue.source_model.sierra.{SierraHoldingsRecord, SierraItemRecord, SierraOrderRecord, SierraTransformable}
 
 import java.time.Instant
 
@@ -1052,6 +1048,78 @@ class SierraIndexerFeatureTest
                       |}
                       |""".stripMargin
           )
+        }
+      }
+    }
+  }
+
+  it("DLQs a message if one of the bulk requests fails") {
+    withIndices { indexPrefix =>
+      val location = createS3ObjectLocation
+
+      val bibId = createSierraBibNumber
+
+      val transformable = createSierraTransformableWith(
+        maybeBibRecord = Some(
+          createSierraBibRecordWith(
+            id = bibId,
+            data =
+              s"""
+                 |{
+                 |  "id" : "$bibId",
+                 |  "updatedDate" : "2013-12-12T13:56:07Z",
+                 |  "deleted" : false,
+                 |  "varFields" : [
+                 |    {
+                 |      "fieldTag" : "b",
+                 |      "content" : "22501328220"
+                 |    },
+                 |    {
+                 |      "fieldTag" : "c",
+                 |      "marcTag" : "949",
+                 |      "ind1" : " ",
+                 |      "ind2" : " ",
+                 |      "subfields" : [
+                 |        {
+                 |          "tag" : "a",
+                 |          "content" : "/RHO"
+                 |        }
+                 |      ]
+                 |    }
+                 |  ]
+                 |}
+                 |""".stripMargin
+          )
+        )
+      )
+
+      val store = MemoryTypedStore[S3ObjectLocation, SierraTransformable](
+        initialEntries = Map(location -> transformable)
+      )
+
+      // Make the varfields index read-only, so any attempt to index data into
+      // this index should fail.
+      elasticClient.execute(
+        updateSettings(
+          Indexes(s"${indexPrefix}_varfields"), settings = Map("blocks.read_only" -> "true")
+        )
+      ).await
+
+      withLocalSqsQueuePair() { case QueuePair(queue, dlq) =>
+        withWorker(queue, store, indexPrefix) { worker =>
+          sendNotificationToSQS(
+            queue,
+            SierraSourcePayload(
+              id = bibId.withoutCheckDigit,
+              location = location,
+              version = 1
+            )
+          )
+
+          eventually {
+            assertQueueEmpty(queue)
+            assertQueueHasSize(queue, size = 1)
+          }
         }
       }
     }
