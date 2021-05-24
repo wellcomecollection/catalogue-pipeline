@@ -11,7 +11,7 @@ import weco.catalogue.source_model.generators.{
 import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
 
 class SierraAccessStatusTest
-  extends AnyFunSpec
+    extends AnyFunSpec
     with Matchers
     with MarcGenerators
     with SierraDataGenerators
@@ -123,7 +123,8 @@ class SierraAccessStatusTest
     accessStatus shouldBe None
   }
 
-  private def getAccessStatus(bibVarFields: List[VarField]): Option[AccessStatus] =
+  private def getAccessStatus(
+    bibVarFields: List[VarField]): Option[AccessStatus] =
     SierraAccessStatus.forBib(
       bibId = createSierraBibNumber,
       bibData = createSierraBibDataWith(varFields = bibVarFields)

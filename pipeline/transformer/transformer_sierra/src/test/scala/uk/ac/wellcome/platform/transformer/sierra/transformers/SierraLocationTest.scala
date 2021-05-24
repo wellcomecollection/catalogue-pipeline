@@ -218,7 +218,8 @@ class SierraLocationTest
         )
       )
 
-      val location = transformer.getPhysicalLocation(bibId, itemId, itemData, bibData).get
+      val location =
+        transformer.getPhysicalLocation(bibId, itemId, itemData, bibData).get
       location.accessConditions shouldBe empty
     }
 

@@ -30,9 +30,8 @@ object CalmItems extends CalmRecordOps {
     PhysicalLocation(
       locationType = LocationType.ClosedStores,
       label = LocationType.ClosedStores.label,
-      accessConditions =
-        List(accessCondition(record, status))
-          .filterNot { _.isEmpty }
+      accessConditions = List(accessCondition(record, status))
+        .filterNot { _.isEmpty }
     )
 
   private def accessCondition(record: CalmRecord,

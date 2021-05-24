@@ -6,7 +6,8 @@ import weco.catalogue.source_model.sierra.marc.VarField
 import weco.catalogue.source_model.sierra.{SierraBibData, SierraBibNumber}
 
 object SierraAccessStatus extends SierraQueryOps {
-  def forBib(bibId: SierraBibNumber, bibData: SierraBibData): Option[AccessStatus] = {
+  def forBib(bibId: SierraBibNumber,
+             bibData: SierraBibData): Option[AccessStatus] = {
     val statuses =
       bibData
         .varfieldsWithTag("506")
@@ -20,7 +21,7 @@ object SierraAccessStatus extends SierraQueryOps {
 
     statuses match {
       case Seq(status) => Some(status)
-      case _ => None
+      case _           => None
     }
   }
 
