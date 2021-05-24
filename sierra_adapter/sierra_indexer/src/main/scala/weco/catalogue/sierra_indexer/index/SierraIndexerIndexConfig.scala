@@ -2,7 +2,11 @@ package weco.catalogue.sierra_indexer.index
 
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.analysis.Analysis
-import com.sksamuel.elastic4s.requests.mappings.{FieldDefinition, MappingDefinition, ObjectField}
+import com.sksamuel.elastic4s.requests.mappings.{
+  FieldDefinition,
+  MappingDefinition,
+  ObjectField
+}
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
 import uk.ac.wellcome.elasticsearch.IndexConfig
 import uk.ac.wellcome.models.index.IndexConfigFields

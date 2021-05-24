@@ -14,7 +14,12 @@ import weco.catalogue.sierra_indexer.fixtures.IndexerFixtures
 import weco.catalogue.source_model.SierraSourcePayload
 import weco.catalogue.source_model.generators.SierraGenerators
 import weco.catalogue.source_model.sierra.Implicits._
-import weco.catalogue.source_model.sierra.{SierraHoldingsRecord, SierraItemRecord, SierraOrderRecord, SierraTransformable}
+import weco.catalogue.source_model.sierra.{
+  SierraHoldingsRecord,
+  SierraItemRecord,
+  SierraOrderRecord,
+  SierraTransformable
+}
 
 import java.time.Instant
 
@@ -1063,8 +1068,7 @@ class SierraIndexerFeatureTest
         maybeBibRecord = Some(
           createSierraBibRecordWith(
             id = bibId,
-            data =
-              s"""
+            data = s"""
                  |{
                  |  "id" : "$bibId",
                  |  "updatedDate" : "2013-12-12T13:56:07Z",
@@ -1099,28 +1103,32 @@ class SierraIndexerFeatureTest
 
       // Make the varfields index read-only, so any attempt to index data into
       // this index should fail.
-      elasticClient.execute(
-        updateSettings(
-          Indexes(s"${indexPrefix}_varfields"), settings = Map("blocks.read_only" -> "true")
-        )
-      ).await
-
-      withLocalSqsQueuePair() { case QueuePair(queue, dlq) =>
-        withWorker(queue, store, indexPrefix) { _ =>
-          sendNotificationToSQS(
-            queue,
-            SierraSourcePayload(
-              id = bibId.withoutCheckDigit,
-              location = location,
-              version = 1
-            )
+      elasticClient
+        .execute(
+          updateSettings(
+            Indexes(s"${indexPrefix}_varfields"),
+            settings = Map("blocks.read_only" -> "true")
           )
+        )
+        .await
 
-          eventually {
-            assertQueueEmpty(queue)
-            assertQueueHasSize(dlq, size = 1)
+      withLocalSqsQueuePair() {
+        case QueuePair(queue, dlq) =>
+          withWorker(queue, store, indexPrefix) { _ =>
+            sendNotificationToSQS(
+              queue,
+              SierraSourcePayload(
+                id = bibId.withoutCheckDigit,
+                location = location,
+                version = 1
+              )
+            )
+
+            eventually {
+              assertQueueEmpty(queue)
+              assertQueueHasSize(dlq, size = 1)
+            }
           }
-        }
       }
     }
   }

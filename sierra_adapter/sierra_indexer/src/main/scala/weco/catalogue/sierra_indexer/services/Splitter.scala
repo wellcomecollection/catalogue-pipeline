@@ -24,12 +24,10 @@ class Splitter(indexPrefix: String)(
     val varFields = IndexerRequest.varFields(indexPrefix, apiData)
     val fixedFields = IndexerRequest.fixedFields(indexPrefix, apiData)
 
-    val varFieldDeletions = IndexerRequest.varFieldDeletions(
-      indexPrefix,
-      apiData)
-    val fixedFieldDeletions = IndexerRequest.fixedFieldDeletions(
-      indexPrefix,
-      apiData)
+    val varFieldDeletions =
+      IndexerRequest.varFieldDeletions(indexPrefix, apiData)
+    val fixedFieldDeletions =
+      IndexerRequest.fixedFieldDeletions(indexPrefix, apiData)
 
     (
       mainRecords ++ varFields ++ fixedFields,
@@ -37,8 +35,7 @@ class Splitter(indexPrefix: String)(
     )
   }
 
-  private def getSierraApiData(
-    t: SierraTransformable): Seq[(Parent, Json)] = {
+  private def getSierraApiData(t: SierraTransformable): Seq[(Parent, Json)] = {
     val itemIds = t.itemRecords.keys.map { _.withoutCheckDigit }.toList.sorted
     val holdingsIds =
       t.holdingsRecords.keys.map { _.withoutCheckDigit }.toList.sorted

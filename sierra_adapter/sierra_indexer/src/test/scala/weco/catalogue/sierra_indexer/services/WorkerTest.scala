@@ -14,7 +14,11 @@ import weco.catalogue.source_model.generators.SierraGenerators
 import weco.catalogue.source_model.sierra.Implicits._
 import weco.catalogue.source_model.sierra.SierraTransformable
 
-class WorkerTest extends AnyFunSpec with IndexerFixtures with S3ObjectLocationGenerators with SierraGenerators {
+class WorkerTest
+    extends AnyFunSpec
+    with IndexerFixtures
+    with S3ObjectLocationGenerators
+    with SierraGenerators {
   it("returns an error if one of the bulk requests fails") {
     withIndices { indexPrefix =>
       val location = createS3ObjectLocation
@@ -25,8 +29,7 @@ class WorkerTest extends AnyFunSpec with IndexerFixtures with S3ObjectLocationGe
         maybeBibRecord = Some(
           createSierraBibRecordWith(
             id = bibId,
-            data =
-              s"""
+            data = s"""
                  |{
                  |  "id" : "$bibId",
                  |  "updatedDate" : "2013-12-12T13:56:07Z",
@@ -61,29 +64,33 @@ class WorkerTest extends AnyFunSpec with IndexerFixtures with S3ObjectLocationGe
 
       // Make the varfields index read-only, so any attempt to index data into
       // this index should fail.
-      elasticClient.execute(
-        updateSettings(
-          Indexes(s"${indexPrefix}_varfields"), settings = Map("blocks.read_only" -> "true")
+      elasticClient
+        .execute(
+          updateSettings(
+            Indexes(s"${indexPrefix}_varfields"),
+            settings = Map("blocks.read_only" -> "true")
+          )
         )
-      ).await
+        .await
 
-      withLocalSqsQueuePair() { case QueuePair(queue, dlq) =>
-        withWorker(queue, store, indexPrefix) { worker =>
-          val future = worker.processMessage(
-            createNotificationMessageWith(
-              SierraSourcePayload(
-                id = bibId.withoutCheckDigit,
-                location = location,
-                version = 1
+      withLocalSqsQueuePair() {
+        case QueuePair(queue, dlq) =>
+          withWorker(queue, store, indexPrefix) { worker =>
+            val future = worker.processMessage(
+              createNotificationMessageWith(
+                SierraSourcePayload(
+                  id = bibId.withoutCheckDigit,
+                  location = location,
+                  version = 1
+                )
               )
             )
-          )
 
-          whenReady(future.failed) { err =>
-            err shouldBe a[RuntimeException]
-            err.getMessage should startWith("Errors in the bulk response")
+            whenReady(future.failed) { err =>
+              err shouldBe a[RuntimeException]
+              err.getMessage should startWith("Errors in the bulk response")
+            }
           }
-        }
       }
     }
   }
@@ -102,8 +109,7 @@ class WorkerTest extends AnyFunSpec with IndexerFixtures with S3ObjectLocationGe
         maybeBibRecord = Some(
           createSierraBibRecordWith(
             id = bibId,
-            data =
-              s"""
+            data = s"""
                  |{
                  |  "id" : "$bibId",
                  |  "updatedDate" : "2013-12-12T13:56:07Z",
@@ -128,26 +134,31 @@ class WorkerTest extends AnyFunSpec with IndexerFixtures with S3ObjectLocationGe
         initialEntries = Map(location -> transformable)
       )
 
-      withLocalSqsQueuePair() { case QueuePair(queue, dlq) =>
-        withWorker(queue, store, indexPrefix) { _ =>
-          sendNotificationToSQS(
-            queue,
-            SierraSourcePayload(
-              id = bibId.withoutCheckDigit,
-              location = location,
-              version = 1
+      withLocalSqsQueuePair() {
+        case QueuePair(queue, dlq) =>
+          withWorker(queue, store, indexPrefix) { _ =>
+            sendNotificationToSQS(
+              queue,
+              SierraSourcePayload(
+                id = bibId.withoutCheckDigit,
+                location = location,
+                version = 1
+              )
             )
-          )
 
-          eventually {
-            elasticClient.execute(
-              count(Indexes(s"${indexPrefix}_varfields"))
-            ).await.result.count shouldBe 2
+            eventually {
+              elasticClient
+                .execute(
+                  count(Indexes(s"${indexPrefix}_varfields"))
+                )
+                .await
+                .result
+                .count shouldBe 2
 
-            assertQueueEmpty(queue)
-            assertQueueEmpty(dlq)
+              assertQueueEmpty(queue)
+              assertQueueEmpty(dlq)
+            }
           }
-        }
       }
     }
   }
@@ -166,8 +177,7 @@ class WorkerTest extends AnyFunSpec with IndexerFixtures with S3ObjectLocationGe
         maybeBibRecord = Some(
           createSierraBibRecordWith(
             id = bibId,
-            data =
-              s"""
+            data = s"""
                  |{
                  |  "id" : "$bibId",
                  |  "updatedDate" : "2013-12-12T13:56:07Z",
@@ -192,26 +202,31 @@ class WorkerTest extends AnyFunSpec with IndexerFixtures with S3ObjectLocationGe
         initialEntries = Map(location -> transformable)
       )
 
-      withLocalSqsQueuePair() { case QueuePair(queue, dlq) =>
-        withWorker(queue, store, indexPrefix) { _ =>
-          sendNotificationToSQS(
-            queue,
-            SierraSourcePayload(
-              id = bibId.withoutCheckDigit,
-              location = location,
-              version = 1
+      withLocalSqsQueuePair() {
+        case QueuePair(queue, dlq) =>
+          withWorker(queue, store, indexPrefix) { _ =>
+            sendNotificationToSQS(
+              queue,
+              SierraSourcePayload(
+                id = bibId.withoutCheckDigit,
+                location = location,
+                version = 1
+              )
             )
-          )
 
-          eventually {
-            elasticClient.execute(
-              count(Indexes(s"${indexPrefix}_fixedfields"))
-            ).await.result.count shouldBe 2
+            eventually {
+              elasticClient
+                .execute(
+                  count(Indexes(s"${indexPrefix}_fixedfields"))
+                )
+                .await
+                .result
+                .count shouldBe 2
 
-            assertQueueEmpty(queue)
-            assertQueueEmpty(dlq)
+              assertQueueEmpty(queue)
+              assertQueueEmpty(dlq)
+            }
           }
-        }
       }
     }
   }
