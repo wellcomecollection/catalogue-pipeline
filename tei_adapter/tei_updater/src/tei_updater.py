@@ -46,9 +46,12 @@ def diff_trees(old_tree, new_tree):
     values_changed = diff.pop("values_changed", [])
     items_added = diff.pop("dictionary_item_added", [])
     items_removed = diff.pop("dictionary_item_removed", [])
-    assert len(diff.keys()) == 0
-    messages = []
+
     # assert that the diff only contains the three keys above
+    assert len(diff.keys()) == 0
+    
+    messages = []
+
     if values_changed:
         paths_changed = {
             get_path_from_diff(changed.up.path()) for changed in values_changed
