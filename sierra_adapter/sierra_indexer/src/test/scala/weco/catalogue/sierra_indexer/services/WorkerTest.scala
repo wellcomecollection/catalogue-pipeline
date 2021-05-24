@@ -88,12 +88,16 @@ class WorkerTest extends AnyFunSpec with IndexerFixtures with S3ObjectLocationGe
     }
   }
 
-  it("doesn't try to infer a type for varfields") {
+  it("uses a strict mapping for varfields") {
     withIndices { indexPrefix =>
       val location = createS3ObjectLocation
 
       val bibId = createSierraBibNumber
 
+      // This example is quite carefully constructed: in the first version
+      // of the Sierra indexer, we didn't have any mappings, and ES guessed
+      // that one of the fields was a date -- preventing any non-date data
+      // being indexed in future updates.
       val transformable = createSierraTransformableWith(
         maybeBibRecord = Some(
           createSierraBibRecordWith(
@@ -138,6 +142,70 @@ class WorkerTest extends AnyFunSpec with IndexerFixtures with S3ObjectLocationGe
           eventually {
             elasticClient.execute(
               count(Indexes(s"${indexPrefix}_varfields"))
+            ).await.result.count shouldBe 2
+
+            assertQueueEmpty(queue)
+            assertQueueEmpty(dlq)
+          }
+        }
+      }
+    }
+  }
+
+  it("uses a strict mapping for fixed fields") {
+    withIndices { indexPrefix =>
+      val location = createS3ObjectLocation
+
+      val bibId = createSierraBibNumber
+
+      // This example is quite carefully constructed: in the first version
+      // of the Sierra indexer, we didn't have any mappings, and ES guessed
+      // that one of the fields was a date -- preventing any non-date data
+      // being indexed in future updates.
+      val transformable = createSierraTransformableWith(
+        maybeBibRecord = Some(
+          createSierraBibRecordWith(
+            id = bibId,
+            data =
+              s"""
+                 |{
+                 |  "id" : "$bibId",
+                 |  "updatedDate" : "2013-12-12T13:56:07Z",
+                 |  "deleted" : false,
+                 |  "fixedFields" : {
+                 |    "1": {
+                 |      "label": "ONE",
+                 |      "value": "2021-05-24"
+                 |    },
+                 |    "2": {
+                 |      "label": "TWO",
+                 |      "value": "This is the second field"
+                 |    }
+                 |  }
+                 |}
+                 |""".stripMargin
+          )
+        )
+      )
+
+      val store = MemoryTypedStore[S3ObjectLocation, SierraTransformable](
+        initialEntries = Map(location -> transformable)
+      )
+
+      withLocalSqsQueuePair() { case QueuePair(queue, dlq) =>
+        withWorker(queue, store, indexPrefix) { _ =>
+          sendNotificationToSQS(
+            queue,
+            SierraSourcePayload(
+              id = bibId.withoutCheckDigit,
+              location = location,
+              version = 1
+            )
+          )
+
+          eventually {
+            elasticClient.execute(
+              count(Indexes(s"${indexPrefix}_fixedfields"))
             ).await.result.count shouldBe 2
 
             assertQueueEmpty(queue)
