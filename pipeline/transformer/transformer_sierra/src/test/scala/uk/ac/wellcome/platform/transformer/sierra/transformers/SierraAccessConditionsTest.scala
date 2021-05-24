@@ -168,6 +168,21 @@ class SierraAccessConditionsTest
     )
   }
 
+  it("removes an access condition with no interesting fields") {
+    val accessConditions = getAccessConditions(
+      bibVarFields = List(
+        VarField(
+          marcTag = Some("506"),
+          subfields = List(
+            MarcSubfield("5", "ACME Corp"),
+          )
+        )
+      )
+    )
+
+    accessConditions shouldBe empty
+  }
+
   private def getAccessConditions(
     bibVarFields: List[VarField]): List[AccessCondition] =
     SierraAccessConditions(

@@ -23,10 +23,7 @@ object SierraAccessConditions extends SierraQueryOps {
           to = varfield.subfieldsWithTag("g").contents.headOption
         )
       }
-      .filter {
-        case AccessCondition(None, None, None) => false
-        case _                                 => true
-      }
+      .filterNot { _.isEmpty }
 
   // MARC 506 subfield ǂa contains "terms governing access".  This is a
   // non-repeatable field.  See https://www.loc.gov/marc/bibliographic/bd506.html
