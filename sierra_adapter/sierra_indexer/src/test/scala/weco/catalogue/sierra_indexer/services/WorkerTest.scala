@@ -79,11 +79,6 @@ class WorkerTest extends AnyFunSpec with IndexerFixtures with S3ObjectLocationGe
             )
           )
 
-          eventually {
-            assertQueueEmpty(queue)
-            assertQueueHasSize(queue, size = 1)
-          }
-
           whenReady(future.failed) { err =>
             err shouldBe a[RuntimeException]
             err.getMessage should startWith("Errors in the bulk response")

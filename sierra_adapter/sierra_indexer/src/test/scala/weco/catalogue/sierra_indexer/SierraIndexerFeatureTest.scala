@@ -1106,7 +1106,7 @@ class SierraIndexerFeatureTest
       ).await
 
       withLocalSqsQueuePair() { case QueuePair(queue, dlq) =>
-        withWorker(queue, store, indexPrefix) { worker =>
+        withWorker(queue, store, indexPrefix) { _ =>
           sendNotificationToSQS(
             queue,
             SierraSourcePayload(
@@ -1118,7 +1118,7 @@ class SierraIndexerFeatureTest
 
           eventually {
             assertQueueEmpty(queue)
-            assertQueueHasSize(queue, size = 1)
+            assertQueueHasSize(dlq, size = 1)
           }
         }
       }
