@@ -3,33 +3,19 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
-import weco.catalogue.internal_model.locations.{AccessCondition, AccessStatus}
+import weco.catalogue.internal_model.locations.AccessStatus
 import weco.catalogue.source_model.generators.{
   MarcGenerators,
   SierraDataGenerators
 }
 import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
 
-class SierraAccessConditionsTest
+class SierraAccessStatusTest
     extends AnyFunSpec
     with Matchers
     with MarcGenerators
     with SierraDataGenerators
     with TableDrivenPropertyChecks {
-  it("drops an empty string in 506 subfield ǂa") {
-    val accessConditions = getAccessConditions(
-      bibVarFields = List(
-        VarField(
-          marcTag = Some("506"),
-          subfields = List(
-            MarcSubfield(tag = "a", content = "")
-          )
-        )
-      )
-    )
-
-    accessConditions shouldBe empty
-  }
 
   val testCases = Table(
     ("text", "expectedStatus"),
@@ -52,10 +38,10 @@ class SierraAccessConditionsTest
       AccessStatus.PermissionRequired),
   )
 
-  it("matches particular strings in 506 subfield ǂa to an access status") {
+  it("matches particular strings to an access status") {
     forAll(testCases) {
       case (text, expectedStatus) =>
-        val accessConditions = getAccessConditions(
+        val accessStatus = getAccessStatus(
           bibVarFields = List(
             VarField(
               marcTag = Some("506"),
@@ -66,19 +52,12 @@ class SierraAccessConditionsTest
           )
         )
 
-        accessConditions shouldBe List(
-          AccessCondition(
-            status = Some(expectedStatus),
-            terms = None,
-            to = None
-          )
-        )
+        accessStatus shouldBe Some(expectedStatus)
     }
   }
 
-  it(
-    "exposes the terms from 506 subfield ǂa if it can't map them to an AccessStatus") {
-    val accessConditions = getAccessConditions(
+  it("returns None if it can't map 506 subfield ǂa to a status") {
+    val accessStatus = getAccessStatus(
       bibVarFields = List(
         VarField(
           marcTag = Some("506"),
@@ -91,18 +70,11 @@ class SierraAccessConditionsTest
       )
     )
 
-    accessConditions shouldBe List(
-      AccessCondition(
-        status = None,
-        terms = Some("ACME Library membership required for access."),
-        to = None
-      )
-    )
+    accessStatus shouldBe None
   }
 
-  it(
-    "exposes the terms from 506 subfield ǂa if there's no consistent access status") {
-    val accessConditions = getAccessConditions(
+  it("returns None if there's no consistent access status") {
+    val accessStatus = getAccessStatus(
       bibVarFields = List(
         VarField(
           marcTag = Some("506"),
@@ -114,17 +86,27 @@ class SierraAccessConditionsTest
       )
     )
 
-    accessConditions shouldBe List(
-      AccessCondition(
-        status = None,
-        terms = Some("Restricted"),
-        to = None
-      )
-    )
+    accessStatus shouldBe None
   }
 
-  it("ignores a single period 506 subfield ǂf") {
-    val accessConditions = getAccessConditions(
+  it("returns None if the first indicator and subfield ǂf disagree") {
+    val accessStatus = getAccessStatus(
+      bibVarFields = List(
+        VarField(
+          marcTag = Some("506"),
+          indicator1 = Some("0"),
+          subfields = List(
+            MarcSubfield(tag = "f", content = "Restricted")
+          )
+        )
+      )
+    )
+
+    accessStatus shouldBe None
+  }
+
+  it("ignores a single period in 506 subfield ǂf") {
+    val accessStatus = getAccessStatus(
       bibVarFields = List(
         VarField(
           marcTag = Some("506"),
@@ -138,39 +120,12 @@ class SierraAccessConditionsTest
       )
     )
 
-    accessConditions shouldBe List(
-      AccessCondition(
-        status = None,
-        terms = Some("Access restricted to authorized subscribers"),
-        to = None
-      )
-    )
+    accessStatus shouldBe None
   }
 
-  it("strips whitespace from the access conditions") {
-    val accessConditions = getAccessConditions(
-      bibVarFields = List(
-        VarField(
-          marcTag = Some("506"),
-          subfields = List(
-            MarcSubfield("a", "Access restricted to authorized subscribers. "),
-          )
-        )
-      )
-    )
-
-    accessConditions shouldBe List(
-      AccessCondition(
-        status = None,
-        terms = Some("Access restricted to authorized subscribers."),
-        to = None
-      )
-    )
-  }
-
-  private def getAccessConditions(
-    bibVarFields: List[VarField]): List[AccessCondition] =
-    SierraAccessConditions(
+  private def getAccessStatus(
+    bibVarFields: List[VarField]): Option[AccessStatus] =
+    SierraAccessStatus.forBib(
       bibId = createSierraBibNumber,
       bibData = createSierraBibDataWith(varFields = bibVarFields)
     )
