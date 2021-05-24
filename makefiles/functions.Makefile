@@ -7,7 +7,7 @@ LAMBDA_UPLOAD_BUCKET ?= wellcomecollection-catalogue-infra-delta
 LAMBDA_PUBLISH_ROLE_ARN ?= arn:aws:iam::756629837203:role/catalogue-developer
 
 ifneq ($(CI),true)
-DEV_ROLE_ARN := arn:aws:iam::760097843905:role/platform-developer
+DEV_ROLE_ARN := $(LAMBDA_PUBLISH_ROLE_ARN)
 endif
 
 
@@ -18,10 +18,10 @@ endif
 #
 define publish_lambda
     $(ROOT)/docker_run.py --aws --root -- \
-        $(ECR_REGISTRY)/wellcome/publish_lambda:130 \
+        $(ECR_REGISTRY)/wellcome/publish_lambda:131 \
         "$(1)" --key="lambdas/$(1).zip" \
 		--bucket="$(LAMBDA_UPLOAD_BUCKET)" \
-		--role-arn="$(LAMBDA_PUBLISH_ROLE_ARN)" \
+		--role-arn="$(DEV_ROLE_ARN)" \
 		--sns-topic="arn:aws:sns:eu-west-1:760097843905:lambda_pushes"
 endef
 

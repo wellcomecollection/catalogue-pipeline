@@ -61,3 +61,6 @@ if __name__ == "__main__":
         sys.exit(0)
 
     make(f"{args.project_name}-test")
+    if is_default_branch():
+        make(f"{args.project_name}-publish")
+
