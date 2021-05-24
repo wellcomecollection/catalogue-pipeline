@@ -47,7 +47,6 @@ import pytz
 import tqdm
 
 SOURCES = {
-    "tei": "arn:aws:sns:eu-west-1:760097843905:tei_reharvest_windows",
     "sierra-items": "arn:aws:sns:eu-west-1:760097843905:sierra_items_reharvest_windows",
     "sierra-bibs": "arn:aws:sns:eu-west-1:760097843905:sierra_bibs_reharvest_windows",
     "sierra-holdings": "arn:aws:sns:eu-west-1:760097843905:sierra_holdings_reharvest_windows",
