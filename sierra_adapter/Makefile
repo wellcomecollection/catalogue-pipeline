@@ -12,8 +12,7 @@ SBT_DOCKER_LIBRARIES    =
 SBT_NO_DOCKER_LIBRARIES =
 
 PYTHON_APPS =
-LAMBDAS     = s3_demultiplexer \
-              sierra_progress_reporter
+LAMBDAS     = s3_demultiplexer sierra_progress_reporter
 
 $(val $(call stack_setup))
 
