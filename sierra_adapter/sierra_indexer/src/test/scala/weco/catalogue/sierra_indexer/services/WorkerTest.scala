@@ -87,4 +87,64 @@ class WorkerTest extends AnyFunSpec with IndexerFixtures with S3ObjectLocationGe
       }
     }
   }
+
+  it("doesn't try to infer a type for varfields") {
+    withIndices { indexPrefix =>
+      val location = createS3ObjectLocation
+
+      val bibId = createSierraBibNumber
+
+      val transformable = createSierraTransformableWith(
+        maybeBibRecord = Some(
+          createSierraBibRecordWith(
+            id = bibId,
+            data =
+              s"""
+                 |{
+                 |  "id" : "$bibId",
+                 |  "updatedDate" : "2013-12-12T13:56:07Z",
+                 |  "deleted" : false,
+                 |  "varFields" : [
+                 |    {
+                 |      "fieldTag" : "a",
+                 |      "content" : "2021-05-24"
+                 |    },
+                 |    {
+                 |      "fieldTag" : "b",
+                 |      "content": "This isn't a date"
+                 |    }
+                 |  ]
+                 |}
+                 |""".stripMargin
+          )
+        )
+      )
+
+      val store = MemoryTypedStore[S3ObjectLocation, SierraTransformable](
+        initialEntries = Map(location -> transformable)
+      )
+
+      withLocalSqsQueuePair() { case QueuePair(queue, dlq) =>
+        withWorker(queue, store, indexPrefix) { _ =>
+          sendNotificationToSQS(
+            queue,
+            SierraSourcePayload(
+              id = bibId.withoutCheckDigit,
+              location = location,
+              version = 1
+            )
+          )
+
+          eventually {
+            elasticClient.execute(
+              count(Indexes(s"${indexPrefix}_varfields"))
+            ).await.result.count shouldBe 2
+
+            assertQueueEmpty(queue)
+            assertQueueEmpty(dlq)
+          }
+        }
+      }
+    }
+  }
 }
