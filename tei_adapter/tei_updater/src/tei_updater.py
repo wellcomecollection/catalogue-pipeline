@@ -49,7 +49,7 @@ def diff_trees(old_tree, new_tree):
 
     # assert that the diff only contains the three keys above
     assert len(diff.keys()) == 0
-    
+
     messages = []
 
     if values_changed:
