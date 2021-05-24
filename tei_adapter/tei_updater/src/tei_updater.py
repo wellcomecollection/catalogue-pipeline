@@ -28,7 +28,7 @@ def get_new_tree(url,session=None):
     response.raise_for_status()
     new_tree = {}
     response_tree= response.json()
-    assert response_tree['truncated'] == False
+    assert response_tree['truncated'] is False
     for entry in response_tree['tree']:
         if entry['type'] == 'blob':
             new_tree[entry['path']] = {
