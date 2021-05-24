@@ -13,11 +13,16 @@ include tei_adapter/Makefile
 
 lambda-test: s3_demultiplexer-test \
 			 sierra_progress_reporter-test \
-			 sierra_window_generator-test
+			 window_generator-test \
+			 calm_deletion_check_initiator-test \
+			 tei_updater-test
 
 lambda-publish: snapshot_scheduler-publish \
                 snapshot_slack_alarms-publish \
 			    update_api_docs-publish \
 			    s3_demultiplexer-publish \
 			    sierra_progress_reporter-publish \
-			    sierra_window_generator-publish
+			    window_generator-publish \
+			 	calm_deletion_check_initiator-publish \
+			 	calm_window_generator-publish \
+			    tei_updater-publish
