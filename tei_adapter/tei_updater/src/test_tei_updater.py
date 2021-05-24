@@ -48,8 +48,13 @@ def test_tree_does_not_exist(
         },
     ):
         main({}, s3_client=mock_s3_client, sns_client=mock_sns_client, session=session)
+
+    # Check that a message per blob in the tree has been sent. The number of messages
+    # expected comes from the betamax recording of the github api response
     messages = get_test_topic_messages()
     assert len(list(messages)) == 653
+
+    # Check that a s3 file hase been written with the right number of entries
     content_object = mock_s3_client.get_object(Bucket=bucket, Key=key)
     body = content_object["Body"].read()
     saved_tree = json.loads(body)
@@ -77,8 +82,13 @@ def test_changes_to_old_tree_sent(
         },
     ):
         main({}, s3_client=mock_s3_client, sns_client=mock_sns_client, session=session)
+
+    # Check that we get the correct number of messages. There is one file modified
+    # and one created between the existing file in s3 and the api response.
     messages = get_test_topic_messages()
     assert len(list(messages)) == 2
+
+    # Check that the file in s3 has the right number of entries
     content_object = mock_s3_client.get_object(Bucket=bucket, Key=key)
     body = content_object["Body"].read()
     saved_tree = json.loads(body)
@@ -106,8 +116,12 @@ def test_truncated_tree_results_in_error(
 
         with pytest.raises(Exception):
             main({}, s3_client=mock_s3_client, sns_client=mock_sns_client)
+
+    # Check that no messages are sent
     messages = get_test_topic_messages()
     assert len(list(messages)) == 0
+
+    # Check that no files are written in s3
     with pytest.raises(ClientError) as e:
         mock_s3_client.get_object(Bucket=bucket, Key=key)
         assert e.response["Error"]["Code"] == "NoSuchKey"
@@ -126,9 +140,9 @@ def test_elements_added_changed_deleted_are_returned():
     }
     diffs = diff_trees(old_tree, new_tree)
     expected_diffs = [
-        {"path": "fileb", "url": "http://filebb"},
-        {"path": "filed", "url": "http://filed"},
-        {"path": "filea", "deleted": True},
+        {"path": "fileb", "url": "http://filebb"}, # fileb is modified
+        {"path": "filed", "url": "http://filed"}, # filed is added
+        {"path": "filea", "deleted": True}, # filea is deleted
     ]
     assert diffs == expected_diffs
 
