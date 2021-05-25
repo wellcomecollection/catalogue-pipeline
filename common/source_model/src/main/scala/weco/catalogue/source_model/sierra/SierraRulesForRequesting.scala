@@ -4,12 +4,22 @@ import weco.catalogue.source_model.sierra.source.SierraQueryOps
 
 sealed trait RulesForRequestingResult
 
-case class NotRequestable(message: Option[String] = None)
-    extends RulesForRequestingResult
+// We add our own distinct types for NotRequestable so our downstream code
+// can match on types rather than strings.
+sealed trait NotRequestable extends RulesForRequestingResult {
+  val message: Option[String]
+}
 
-case object NotRequestable {
-  def apply(message: String): NotRequestable =
-    NotRequestable(message = Some(message))
+case class OpenShelvesNotRequestable(displayMessage: String) extends NotRequestable {
+  val message: Option[String] = Some(displayMessage)
+}
+
+case class OtherNotRequestable(message: Option[String] = None)
+    extends NotRequestable
+
+case object OtherNotRequestable {
+  def apply(message: String): OtherNotRequestable =
+    OtherNotRequestable(message = Some(message))
 }
 
 case object Requestable extends RulesForRequestingResult
@@ -42,7 +52,7 @@ object SierraRulesForRequesting extends SierraQueryOps {
       //
       // This rule means "if fixed field 97 on the item has the value 'x'".
       case i if i.imessage.contains("x") =>
-        NotRequestable(message = "This item belongs in the Strongroom")
+        OtherNotRequestable(message = "This item belongs in the Strongroom")
 
       // These cases cover the lines:
       //
@@ -57,18 +67,18 @@ object SierraRulesForRequesting extends SierraQueryOps {
       // These rules mean "if fixed field 88 on the item has a given value,
       // show this message".
       case i if i.status.contains("m") =>
-        NotRequestable(message = "This item is missing.")
+        OtherNotRequestable(message = "This item is missing.")
       case i if i.status.contains("s") =>
-        NotRequestable(message = "This item is on search.")
+        OtherNotRequestable(message = "This item is on search.")
       case i if i.status.contains("x") =>
-        NotRequestable(message = "This item is withdrawn.")
+        OtherNotRequestable(message = "This item is withdrawn.")
       case i if i.status.contains("r") =>
-        NotRequestable(message = "This item is unavailable.")
-      case i if i.status.contains("z") => NotRequestable()
+        OtherNotRequestable(message = "This item is unavailable.")
+      case i if i.status.contains("z") => OtherNotRequestable()
       case i if i.status.contains("v") =>
-        NotRequestable(message = "This item is with conservation.")
+        OtherNotRequestable(message = "This item is with conservation.")
       case i if i.status.contains("h") =>
-        NotRequestable(message = "This item is closed.")
+        OtherNotRequestable(message = "This item is closed.")
 
       // These cases cover the lines:
       //
@@ -78,7 +88,7 @@ object SierraRulesForRequesting extends SierraQueryOps {
       // These are similar to the rules above; the difference is that the 'v' means
       // "if this line or the next line matches".  The 'q' means 'end of rule'.
       case i if i.status.contains("b") || i.status.contains("c") =>
-        NotRequestable(message = "Please request top item.")
+        OtherNotRequestable(message = "Please request top item.")
 
       // These cases cover the lines:
       //
@@ -88,11 +98,11 @@ object SierraRulesForRequesting extends SierraQueryOps {
       //
       // These are the same as the checks above.
       case i if i.status.contains("d") =>
-        NotRequestable(message = "On new books display.")
+        OtherNotRequestable(message = "On new books display.")
       case i if i.status.contains("e") =>
-        NotRequestable(message = "On exhibition. Please ask at Enquiry Desk.")
+        OtherNotRequestable(message = "On exhibition. Please ask at Enquiry Desk.")
       case i if i.status.contains("y") =>
-        NotRequestable()
+        OtherNotRequestable()
 
       // These cases cover the lines:
       //
@@ -114,7 +124,7 @@ object SierraRulesForRequesting extends SierraQueryOps {
       //      for now.  TODO: Find an example of this.
       //
       case i if i.loanRule.getOrElse("0") != "0" || i.status.contains("!") =>
-        NotRequestable(
+        OtherNotRequestable(
           message =
             "Item is in use by another reader. Please ask at Enquiry Desk.")
 
@@ -133,7 +143,7 @@ object SierraRulesForRequesting extends SierraQueryOps {
             "mfwcm",
             "hmfac",
             "mfulc") =>
-        NotRequestable(
+        OtherNotRequestable(
           message =
             "Item cannot be requested online. Please contact Medical Film & Audio Library.   Email: mfac@wellcome.ac.uk. Telephone: +44 (0)20 76118596/97.")
 
@@ -172,7 +182,7 @@ object SierraRulesForRequesting extends SierraQueryOps {
             "dpuih",
             "gblip",
             "ofvds") =>
-        NotRequestable(message =
+        OtherNotRequestable(message =
           "This item cannot be requested online. Please place a manual request.")
 
       // These cases cover the lines:
@@ -181,7 +191,7 @@ object SierraRulesForRequesting extends SierraQueryOps {
       //    q|i||79||=|iscdr||Item cannot be requested online. Please ask at Information Service desk, email: infoserv@wellcome.ac.uk or telephone +44 (0)20 7611 8722.
       //
       case i if i.locationCode.containsAnyOf("isvid", "iscdr") =>
-        NotRequestable(
+        OtherNotRequestable(
           message =
             "Item cannot be requested online. Please ask at Information Service desk, email: infoserv@wellcome.ac.uk or telephone +44 (0)20 7611 8722.")
 
@@ -249,9 +259,8 @@ object SierraRulesForRequesting extends SierraQueryOps {
             "hgslr",
             "wsrex"
           ) =>
-        NotRequestable(
-          message =
-            "Item is on open shelves.  Check Location and Shelfmark for location details.")
+        OpenShelvesNotRequestable(
+          "Item is on open shelves.  Check Location and Shelfmark for location details.")
 
       // These cases cover the lines:
       //
@@ -275,12 +284,12 @@ object SierraRulesForRequesting extends SierraQueryOps {
       //    q|i||79||=|somsy||Please complete a manual request slip.  This item cannot be requested online.
       //
       case i if i.itemType.contains("22") =>
-        NotRequestable(
+        OtherNotRequestable(
           message =
             "Item is on Exhibition Reserve. Please ask at the Enquiry Desk")
 
       case i if i.itemType.containsAnyOf("17", "18", "15") =>
-        NotRequestable()
+        OtherNotRequestable()
 
       case i
           if i.itemType.containsAnyOf("4", "14") || i.locationCode
@@ -296,7 +305,7 @@ object SierraRulesForRequesting extends SierraQueryOps {
               "sompa",
               "sompr",
               "somsy") =>
-        NotRequestable(
+        OtherNotRequestable(
           message =
             "Please complete a manual request slip.  This item cannot be requested online.")
 
@@ -305,7 +314,7 @@ object SierraRulesForRequesting extends SierraQueryOps {
       //    q|i||79||=|sepep||
       //
       case i if i.locationCode.contains("sepep") =>
-        NotRequestable()
+        OtherNotRequestable()
 
       // This case covers the lines:
       //
@@ -338,7 +347,7 @@ object SierraRulesForRequesting extends SierraQueryOps {
             "swm#5",
             "swm#6",
             "swm#7") =>
-        NotRequestable(
+        OtherNotRequestable(
           message =
             "Item not available due to provisions of Data Protection Act. Return to Archives catalogue to see when this file will be opened.")
 
@@ -366,7 +375,7 @@ object SierraRulesForRequesting extends SierraQueryOps {
             "temp4",
             "temp5",
             "temp6") =>
-        NotRequestable(message = "At digitisation and temporarily unavailable.")
+        OtherNotRequestable(message = "At digitisation and temporarily unavailable.")
 
       // This case covers the lines:
       //
@@ -374,14 +383,14 @@ object SierraRulesForRequesting extends SierraQueryOps {
       //    q|i||79||=|rmdda||
       //
       case i if i.locationCode.containsAnyOf("rm001", "rmdda") =>
-        NotRequestable()
+        OtherNotRequestable()
 
       // This case covers the line:
       //
       //    q|i||97||=|j||
       //
       case i if i.imessage.contains("j") =>
-        NotRequestable()
+        OtherNotRequestable()
 
       case _ => Requestable
     }

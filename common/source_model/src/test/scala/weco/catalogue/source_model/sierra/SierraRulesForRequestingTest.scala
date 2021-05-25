@@ -18,7 +18,7 @@ class SierraRulesForRequestingTest
       fixedFields = Map("97" -> FixedField(label = "IMESSAGE", value = "x"))
     )
 
-    SierraRulesForRequesting(item) shouldBe NotRequestable(
+    SierraRulesForRequesting(item) shouldBe OtherNotRequestable(
       "This item belongs in the Strongroom")
   }
 
@@ -27,7 +27,7 @@ class SierraRulesForRequestingTest
       fixedFields = Map("97" -> FixedField(label = "IMESSAGE", value = "j"))
     )
 
-    sierra.SierraRulesForRequesting(item) shouldBe NotRequestable()
+    sierra.SierraRulesForRequesting(item) shouldBe OtherNotRequestable()
   }
 
   it("blocks an item based on the status") {
@@ -54,7 +54,7 @@ class SierraRulesForRequestingTest
             Map("88" -> FixedField(label = "STATUS", value = status))
         )
 
-        sierra.SierraRulesForRequesting(item) shouldBe NotRequestable(
+        sierra.SierraRulesForRequesting(item) shouldBe OtherNotRequestable(
           expectedMessage)
     }
   }
@@ -64,7 +64,7 @@ class SierraRulesForRequestingTest
       fixedFields = Map("87" -> FixedField(label = "LOANRULE", value = "1"))
     )
 
-    sierra.SierraRulesForRequesting(item) shouldBe NotRequestable(
+    sierra.SierraRulesForRequesting(item) shouldBe OtherNotRequestable(
       "Item is in use by another reader. Please ask at Enquiry Desk.")
   }
 
@@ -73,7 +73,7 @@ class SierraRulesForRequestingTest
       fixedFields = Map("88" -> FixedField(label = "STATUS", value = "!"))
     )
 
-    sierra.SierraRulesForRequesting(item) shouldBe NotRequestable(
+    sierra.SierraRulesForRequesting(item) shouldBe OtherNotRequestable(
       "Item is in use by another reader. Please ask at Enquiry Desk.")
   }
 
@@ -175,10 +175,10 @@ class SierraRulesForRequestingTest
       )
 
       forAll(testCases) {
-        assertBlockedWith(
+        assertBlockedBy(
           _,
-          expectedMessage =
-            "Item is on open shelves.  Check Location and Shelfmark for location details.")
+          expectedResult =
+            OpenShelvesNotRequestable("Item is on open shelves.  Check Location and Shelfmark for location details."))
       }
     }
 
@@ -214,7 +214,7 @@ class SierraRulesForRequestingTest
             Map("79" -> FixedField(label = "LOCATION", value = locationCode))
         )
 
-        sierra.SierraRulesForRequesting(item) shouldBe NotRequestable()
+        sierra.SierraRulesForRequesting(item) shouldBe OtherNotRequestable()
       }
     }
 
@@ -260,16 +260,22 @@ class SierraRulesForRequestingTest
       }
     }
 
-    def assertBlockedWith(locationCode: String,
-                          expectedMessage: String): Assertion = {
+    def assertBlockedBy(locationCode: String,
+                        expectedResult: NotRequestable): Assertion = {
       val item = createSierraItemDataWith(
         fixedFields =
           Map("79" -> FixedField(label = "LOCATION", value = locationCode))
       )
 
-      sierra.SierraRulesForRequesting(item) shouldBe NotRequestable(
-        expectedMessage)
+      sierra.SierraRulesForRequesting(item) shouldBe expectedResult
     }
+
+    def assertBlockedWith(locationCode: String,
+                          expectedMessage: String): Assertion =
+      assertBlockedBy(
+        locationCode,
+        expectedResult = OtherNotRequestable(expectedMessage)
+      )
   }
 
   it("blocks an item based on fixed field 61 (item type)") {
@@ -298,7 +304,7 @@ class SierraRulesForRequestingTest
             Map("61" -> FixedField(label = "I TYPE", value = itemType))
         )
 
-        sierra.SierraRulesForRequesting(item) shouldBe NotRequestable(
+        sierra.SierraRulesForRequesting(item) shouldBe OtherNotRequestable(
           expectedMessage)
     }
   }
