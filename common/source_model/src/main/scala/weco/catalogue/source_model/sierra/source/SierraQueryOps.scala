@@ -113,6 +113,9 @@ trait SierraQueryOps extends Logging {
 
     def itemType: Option[String] =
       itemData.fixedFields.get("61").map { _.value.trim }
+
+    def opacmsg: Option[String] =
+      itemData.fixedFields.get("108").map { _.value.trim }
   }
 
   implicit class SubfieldsOps(subfields: List[MarcSubfield]) {
