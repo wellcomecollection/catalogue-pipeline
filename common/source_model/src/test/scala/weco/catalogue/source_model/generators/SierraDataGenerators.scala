@@ -32,11 +32,13 @@ trait SierraDataGenerators extends IdentifiersGenerators with SierraGenerators {
 
   def createSierraItemDataWith(
     location: Option[SierraSourceLocation] = None,
+    holdCount: Option[Int] = None,
     fixedFields: Map[String, FixedField] = Map(),
     varFields: List[VarField] = Nil
   ): SierraItemData =
     SierraItemData(
       location = location,
+      holdCount = holdCount,
       fixedFields = fixedFields,
       varFields = varFields
     )

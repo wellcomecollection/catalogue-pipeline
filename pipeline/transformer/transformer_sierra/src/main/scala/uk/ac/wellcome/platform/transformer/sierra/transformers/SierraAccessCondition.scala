@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
-import weco.catalogue.internal_model.locations.{AccessCondition, PhysicalLocationType}
+import weco.catalogue.internal_model.locations.{AccessCondition, LocationType, PhysicalLocationType}
 import weco.catalogue.source_model.sierra.marc.VarField
 import weco.catalogue.source_model.sierra.source.SierraQueryOps
 import weco.catalogue.source_model.sierra._
@@ -14,6 +14,15 @@ object ItemStatus {
 }
 
 object SierraAccessCondition extends SierraQueryOps {
+  object OpacMsg {
+    val OnlineRequest = "f"
+    val OpenShelves = "o"
+  }
+
+  case object Status {
+    val Available = "-"
+  }
+
   def apply(bibId: SierraBibNumber, bibData: SierraBibData, itemId: SierraItemNumber, itemData: SierraItemData): (List[AccessCondition], ItemStatus) = {
     val bibAccessStatus = SierraAccessStatus.forBib(bibId, bibData)
     val holdCount = itemData.holdCount
@@ -32,6 +41,14 @@ object SierraAccessCondition extends SierraQueryOps {
     println(maybeDisplayNote)
 
     (bibAccessStatus, holdCount, status, opacmsg, isRequestable, location) match {
+
+      // Items on the open shelves don't have any access conditions.
+      //
+      // We could add an access status of "Open" here, but it feels dubious to be
+      // synthesising access information that doesn't come from the source records.
+      case (None, Some(0), Some(Status.Available), Some(OpacMsg.OpenShelves), NotRequestable.OpenShelves(_), Some(LocationType.OpenShelves)) =>
+        (List(), ItemStatus.Available)
+
       case other =>
         println(other)
         throw new RuntimeException(s"Unhandled case! $other")

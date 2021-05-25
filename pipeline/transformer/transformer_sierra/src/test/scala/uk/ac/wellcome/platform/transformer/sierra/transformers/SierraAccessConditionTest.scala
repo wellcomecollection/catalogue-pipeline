@@ -6,6 +6,8 @@ import uk.ac.wellcome.json.JsonUtil._
 import weco.catalogue.source_model.generators.SierraDataGenerators
 import weco.catalogue.source_model.sierra.Implicits._
 import weco.catalogue.source_model.sierra._
+import weco.catalogue.source_model.sierra.marc.FixedField
+import weco.catalogue.source_model.sierra.source.SierraSourceLocation
 
 import java.io.{BufferedReader, File, FileInputStream, InputStreamReader}
 //import java.util.zip.GZIPInputStream
@@ -79,9 +81,28 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
       }
   }
 
-  describe("items on the open shelves") {
-    it("that are available do not have any access conditions") {
-      
+  describe("if an item is on the open shelves") {
+    describe("and does not have any holds") {
+      it("if it is available, then it has no access conditions") {
+        val bibId = createSierraBibNumber
+        val bibData = createSierraBibData
+
+        val itemId = createSierraItemNumber
+        val itemData = createSierraItemDataWith(
+          holdCount = Some(0),
+          fixedFields = Map(
+            "79" -> FixedField(label = "LOCATION", value = "wgmem", display = "Medical Collection"),
+            "88" -> FixedField(label = "STATUS", value = "-", display = "Available"),
+            "108" -> FixedField(label = "OPACMSG", value = "o", display = "Open shelves"),
+          ),
+          location = Some(SierraSourceLocation(code = "wgmem", name = "Medical Collection"))
+        )
+
+        val (ac, status) = SierraAccessCondition(bibId, bibData, itemId, itemData)
+
+        ac shouldBe empty
+        status shouldBe ItemStatus.Available
+      }
     }
   }
 }
