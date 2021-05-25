@@ -2,7 +2,7 @@ package weco.catalogue.source_model.sierra.source
 
 import grizzled.slf4j.Logging
 import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
-import weco.catalogue.source_model.sierra.SierraBibData
+import weco.catalogue.source_model.sierra.{SierraBibData, SierraItemData}
 
 trait SierraQueryOps extends Logging {
 
@@ -94,6 +94,25 @@ trait SierraQueryOps extends Logging {
     def contents: List[String] = varfields.flatMap(_.content)
 
     def subfieldContents: List[String] = varfields.subfields.contents
+  }
+
+  // See the Sierra documentation "Fixed fields on items"
+  // https://documentation.iii.com/sierrahelp/Content/sril/sril_records_fixed_field_types_item.html
+  implicit class ItemDataOps(itemData: SierraItemData) {
+    def imessage: Option[String] =
+      itemData.fixedFields.get("97").map { _.value.trim }
+
+    def status: Option[String] =
+      itemData.fixedFields.get("88").map { _.value.trim }
+
+    def loanRule: Option[String] =
+      itemData.fixedFields.get("87").map { _.value.trim }
+
+    def locationCode: Option[String] =
+      itemData.fixedFields.get("79").map { _.value.trim }
+
+    def itemType: Option[String] =
+      itemData.fixedFields.get("61").map { _.value.trim }
   }
 
   implicit class SubfieldsOps(subfields: List[MarcSubfield]) {

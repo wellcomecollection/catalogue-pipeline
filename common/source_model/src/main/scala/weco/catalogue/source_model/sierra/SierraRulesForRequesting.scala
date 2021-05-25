@@ -1,5 +1,7 @@
 package weco.catalogue.source_model.sierra
 
+import weco.catalogue.source_model.sierra.source.SierraQueryOps
+
 sealed trait RulesForRequestingResult
 
 case class NotRequestable(message: Option[String] = None)
@@ -30,7 +32,7 @@ case object Requestable extends RulesForRequestingResult
   *     https://documentation.iii.com/sierrahelp/Content/sril/sril_records_varfld_types_item.html
   *
   */
-object SierraRulesForRequesting {
+object SierraRulesForRequesting extends SierraQueryOps {
   def apply(itemData: SierraItemData): RulesForRequestingResult =
     itemData match {
 
@@ -383,23 +385,6 @@ object SierraRulesForRequesting {
 
       case _ => Requestable
     }
-
-  private implicit class ItemDataOps(itemData: SierraItemData) {
-    def imessage: Option[String] =
-      itemData.fixedFields.get("97").map { _.value.trim }
-
-    def status: Option[String] =
-      itemData.fixedFields.get("88").map { _.value.trim }
-
-    def loanRule: Option[String] =
-      itemData.fixedFields.get("87").map { _.value.trim }
-
-    def locationCode: Option[String] =
-      itemData.fixedFields.get("79").map { _.value.trim }
-
-    def itemType: Option[String] =
-      itemData.fixedFields.get("61").map { _.value.trim }
-  }
 
   private implicit class OptionalStringOps(s: Option[String]) {
     def containsAnyOf(substrings: String*): Boolean =
