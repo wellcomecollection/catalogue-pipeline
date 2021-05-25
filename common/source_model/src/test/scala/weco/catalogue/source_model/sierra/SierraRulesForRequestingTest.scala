@@ -43,7 +43,10 @@ class SierraRulesForRequestingTest
       ("b", NotRequestable.RequestTopItem("Please request top item.")),
       ("c", NotRequestable.RequestTopItem("Please request top item.")),
       ("d", OtherNotRequestable(Some("On new books display."))),
-      ("e", OtherNotRequestable(Some("On exhibition. Please ask at Enquiry Desk."))),
+      (
+        "e",
+        OtherNotRequestable(
+          Some("On exhibition. Please ask at Enquiry Desk."))),
       ("y", NotRequestable.PermissionRequired),
     )
 
@@ -120,8 +123,8 @@ class SierraRulesForRequestingTest
       forAll(testCases) {
         assertBlockedBy(
           _,
-          expectedResult =
-            NotRequestable.ManualRequest("This item cannot be requested online. Please place a manual request."))
+          expectedResult = NotRequestable.ManualRequest(
+            "This item cannot be requested online. Please place a manual request."))
       }
     }
 
@@ -176,8 +179,8 @@ class SierraRulesForRequestingTest
       forAll(testCases) {
         assertBlockedBy(
           _,
-          expectedResult =
-            NotRequestable.OpenShelves("Item is on open shelves.  Check Location and Shelfmark for location details."))
+          expectedResult = NotRequestable.OpenShelves(
+            "Item is on open shelves.  Check Location and Shelfmark for location details."))
       }
     }
 
@@ -199,8 +202,8 @@ class SierraRulesForRequestingTest
       forAll(testCases) {
         assertBlockedBy(
           _,
-          expectedResult =
-            NotRequestable.ManualRequest("Please complete a manual request slip.  This item cannot be requested online.")
+          expectedResult = NotRequestable.ManualRequest(
+            "Please complete a manual request slip.  This item cannot be requested online.")
         )
       }
     }
@@ -238,8 +241,8 @@ class SierraRulesForRequestingTest
       forAll(testCases) {
         assertBlockedBy(
           _,
-          expectedResult =
-            NotRequestable.ItemUnavailable("Item not available due to provisions of Data Protection Act. Return to Archives catalogue to see when this file will be opened.")
+          expectedResult = NotRequestable.ItemUnavailable(
+            "Item not available due to provisions of Data Protection Act. Return to Archives catalogue to see when this file will be opened.")
         )
       }
     }
@@ -284,7 +287,9 @@ class SierraRulesForRequestingTest
       ("itemType", "expectedMessage"),
       (
         "22",
-        OtherNotRequestable(Some("Item is on Exhibition Reserve. Please ask at the Enquiry Desk"))),
+        OtherNotRequestable(
+          Some(
+            "Item is on Exhibition Reserve. Please ask at the Enquiry Desk"))),
       ("17", OtherNotRequestable(None)),
       ("18", OtherNotRequestable(None)),
       ("15", OtherNotRequestable(None)),

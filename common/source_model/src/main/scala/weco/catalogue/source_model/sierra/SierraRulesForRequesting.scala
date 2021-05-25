@@ -134,8 +134,9 @@ object SierraRulesForRequesting extends SierraQueryOps {
       case i if i.status.contains("d") =>
         OtherNotRequestable(message = "On new books display.")
       case i if i.status.contains("e") =>
-        OtherNotRequestable(message = "On exhibition. Please ask at Enquiry Desk.")
-      case i if i.status.contains("y") =>  // status "y" = "Permission required"
+        OtherNotRequestable(
+          message = "On exhibition. Please ask at Enquiry Desk.")
+      case i if i.status.contains("y") => // status "y" = "Permission required"
         NotRequestable.PermissionRequired
 
       // These cases cover the lines:
@@ -406,7 +407,8 @@ object SierraRulesForRequesting extends SierraQueryOps {
             "temp4",
             "temp5",
             "temp6") =>
-        OtherNotRequestable(message = "At digitisation and temporarily unavailable.")
+        OtherNotRequestable(
+          message = "At digitisation and temporarily unavailable.")
 
       // This case covers the lines:
       //
