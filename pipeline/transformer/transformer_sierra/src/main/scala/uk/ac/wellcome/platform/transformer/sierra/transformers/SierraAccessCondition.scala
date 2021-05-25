@@ -9,8 +9,6 @@ import weco.catalogue.internal_model.locations.{
 import weco.catalogue.source_model.sierra.source.SierraQueryOps
 import weco.catalogue.source_model.sierra.{
   NotRequestable,
-  OpenShelvesNotRequestable,
-  PermissionRequiredNotRequestable,
   Requestable,
   SierraBibData,
   SierraBibNumber,
@@ -39,7 +37,7 @@ object SierraAccessCondition extends SierraQueryOps {
     (bibAccessStatus, holdCount, status, opacmsg, isRequestable, location) match {
       // - = "available"
       // o = "Open shelves"
-      case (None, Some(0), Some("-"), Some("o"), OpenShelvesNotRequestable(_), Some(LocationType.OpenShelves)) =>
+      case (None, Some(0), Some("-"), Some("o"), NotRequestable.OpenShelves(_), Some(LocationType.OpenShelves)) =>
         (List(), ItemStatus.Available)
 
       // - = "available"
@@ -56,7 +54,7 @@ object SierraAccessCondition extends SierraQueryOps {
 
       // "y" = "permission required"
       // "a" = "by appointment"
-      case (Some(AccessStatus.ByAppointment), Some(0), Some("y"), Some("a"), PermissionRequiredNotRequestable, Some(LocationType.ClosedStores)) =>
+      case (Some(AccessStatus.ByAppointment), Some(0), Some("y"), Some("a"), NotRequestable.PermissionRequired, Some(LocationType.ClosedStores)) =>
         (
           List(AccessCondition(status = AccessStatus.ByAppointment)),
           ItemStatus.Available

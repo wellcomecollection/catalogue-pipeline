@@ -10,16 +10,18 @@ sealed trait NotRequestable extends RulesForRequestingResult {
   val message: Option[String]
 }
 
-case class OpenShelvesNotRequestable(displayMessage: String) extends NotRequestable {
-  val message: Option[String] = Some(displayMessage)
-}
+object NotRequestable {
+  case class OpenShelves(displayMessage: String) extends NotRequestable {
+    val message: Option[String] = Some(displayMessage)
+  }
 
-case class ManualRequestNotRequestable(displayMessage: String) extends NotRequestable {
-  val message: Option[String] = Some(displayMessage)
-}
+  case class ManualRequest(displayMessage: String) extends NotRequestable {
+    val message: Option[String] = Some(displayMessage)
+  }
 
-case object PermissionRequiredNotRequestable extends NotRequestable {
-  val message: Option[String] = None
+  case object PermissionRequired extends NotRequestable {
+    val message: Option[String] = None
+  }
 }
 
 case class OtherNotRequestable(message: Option[String] = None)
@@ -110,7 +112,7 @@ object SierraRulesForRequesting extends SierraQueryOps {
       case i if i.status.contains("e") =>
         OtherNotRequestable(message = "On exhibition. Please ask at Enquiry Desk.")
       case i if i.status.contains("y") =>  // status "y" = "Permission required"
-        PermissionRequiredNotRequestable
+        NotRequestable.PermissionRequired
 
       // These cases cover the lines:
       //
@@ -190,7 +192,7 @@ object SierraRulesForRequesting extends SierraQueryOps {
             "dpuih",
             "gblip",
             "ofvds") =>
-        OtherNotRequestable(message =
+        NotRequestable.ManualRequest(
           "This item cannot be requested online. Please place a manual request.")
 
       // These cases cover the lines:
@@ -267,7 +269,7 @@ object SierraRulesForRequesting extends SierraQueryOps {
             "hgslr",
             "wsrex"
           ) =>
-        OpenShelvesNotRequestable(
+        NotRequestable.OpenShelves(
           "Item is on open shelves.  Check Location and Shelfmark for location details.")
 
       // These cases cover the lines:

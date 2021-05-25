@@ -44,7 +44,6 @@ class SierraRulesForRequestingTest
       ("c", Some("Please request top item.")),
       ("d", Some("On new books display.")),
       ("e", Some("On exhibition. Please ask at Enquiry Desk.")),
-      ("y", None),
     )
 
     forAll(testCases) {
@@ -65,7 +64,7 @@ class SierraRulesForRequestingTest
         Map("88" -> FixedField(label = "STATUS", value = "y"))
     )
 
-    sierra.SierraRulesForRequesting(item) shouldBe PermissionRequiredNotRequestable
+    sierra.SierraRulesForRequesting(item) shouldBe NotRequestable.PermissionRequired
   }
 
   it("blocks an item if fixed field 87 (loan rule) is non-zero") {
@@ -128,10 +127,10 @@ class SierraRulesForRequestingTest
         "ofvds")
 
       forAll(testCases) {
-        assertBlockedWith(
+        assertBlockedBy(
           _,
-          expectedMessage =
-            "This item cannot be requested online. Please place a manual request.")
+          expectedResult =
+            NotRequestable.ManualRequest("This item cannot be requested online. Please place a manual request."))
       }
     }
 
@@ -187,7 +186,7 @@ class SierraRulesForRequestingTest
         assertBlockedBy(
           _,
           expectedResult =
-            OpenShelvesNotRequestable("Item is on open shelves.  Check Location and Shelfmark for location details."))
+            NotRequestable.OpenShelves("Item is on open shelves.  Check Location and Shelfmark for location details."))
       }
     }
 
