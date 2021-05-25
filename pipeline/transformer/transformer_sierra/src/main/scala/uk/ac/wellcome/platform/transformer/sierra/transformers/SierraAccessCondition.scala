@@ -60,9 +60,14 @@ object SierraAccessCondition extends SierraQueryOps {
 
       // - = "available"
       // f = "Online request"
-      case (None, holdCount, Some("-"), Some("f"), Requestable, Some(LocationType.ClosedStores)) =>
+      case (None, Some(holdCount), Some("-"), Some("f"), Requestable, Some(LocationType.ClosedStores)) if holdCount > 0 =>
         (
           List(AccessCondition(status = Some(AccessStatus.TemporarilyUnavailable), terms = Some("Item is on hold for another reader."), note = maybeDisplayNote)),
+          ItemStatus.TemporarilyUnavailable
+        )
+      case (None, Some(holdCount), Some("!"), Some("f"), NotRequestable.ItemOnHold(message), Some(LocationType.ClosedStores)) if holdCount > 0 =>
+        (
+          List(AccessCondition(status = Some(AccessStatus.TemporarilyUnavailable), terms = Some(message), note = maybeDisplayNote)),
           ItemStatus.TemporarilyUnavailable
         )
 

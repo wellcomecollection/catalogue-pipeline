@@ -38,6 +38,10 @@ object NotRequestable {
   case class ItemUnavailable(displayMessage: String) extends NotRequestable {
     val message: Option[String] = Some(displayMessage)
   }
+
+  case class ItemOnHold(displayMessage: String) extends NotRequestable {
+    val message: Option[String] = Some(displayMessage)
+  }
 }
 
 case class OtherNotRequestable(message: Option[String] = None)
@@ -150,9 +154,8 @@ object SierraRulesForRequesting extends SierraQueryOps {
       //      for now.  TODO: Find an example of this.
       //
       case i if i.loanRule.getOrElse("0") != "0" || i.status.contains("!") =>
-        OtherNotRequestable(
-          message =
-            "Item is in use by another reader. Please ask at Enquiry Desk.")
+        NotRequestable.ItemOnHold(
+          "Item is in use by another reader. Please ask at Enquiry Desk.")
 
       // These cases cover the lines:
       //

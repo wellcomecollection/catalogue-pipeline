@@ -78,6 +78,7 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
           // opacmsg = "manual request", surely shouldn't be requestable
           "1426986",
           "1662472",
+          "1672561",
 
           // investigate further
           "1656560",
@@ -86,7 +87,9 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
           "2029687",
 
           // on exhibition
-          "1186077"
+          "1186077",
+
+          "2872246",
         ).contains(bibId.withoutCheckDigit)
       }
       .filterNot { case (_, _, _, itemData) =>
@@ -537,6 +540,28 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
 
     ac shouldBe List(
       AccessCondition(status = Some(AccessStatus.TemporarilyUnavailable), terms = Some("Item is on hold for another reader."))
+    )
+    status shouldBe ItemStatus.TemporarilyUnavailable
+  }
+
+  it("an item that's on hold") {
+    val bibId = createSierraBibNumber
+    val bibData = createSierraBibData
+
+    val itemId = createSierraItemNumber
+    val itemData = createSierraItemDataWith(
+      fixedFields = Map(
+        "79" -> FixedField(label = "LOCATION", value = "swms4", display = "Closed stores WMS 4"),
+        "88" -> FixedField(label = "STATUS", value = "!", display = "On holdshelf"),
+        "108" -> FixedField(label = "OPACMSG", value = "f", display = "Online request"),
+      ),
+      location = Some(SierraSourceLocation(code = "swms4", name = "Closed stores WMS 4"))
+    ).copy(holdCount = Some(1))
+
+    val (ac, status) = SierraAccessCondition(bibId, bibData, itemId, itemData)
+
+    ac shouldBe List(
+      AccessCondition(status = Some(AccessStatus.TemporarilyUnavailable), terms = Some("Item is in use by another reader. Please ask at Enquiry Desk."))
     )
     status shouldBe ItemStatus.TemporarilyUnavailable
   }
