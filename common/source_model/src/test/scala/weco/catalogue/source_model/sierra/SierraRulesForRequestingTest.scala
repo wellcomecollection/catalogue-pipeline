@@ -33,46 +33,29 @@ class SierraRulesForRequestingTest
   it("blocks an item based on the status") {
     val testCases = Table(
       ("status", "expectedMessage"),
-      ("s", Some("This item is on search.")),
-      ("x", Some("This item is withdrawn.")),
-      ("r", Some("This item is unavailable.")),
-      ("z", None),
-      ("v", Some("This item is with conservation.")),
-      ("h", Some("This item is closed.")),
-      ("b", Some("Please request top item.")),
-      ("c", Some("Please request top item.")),
-      ("d", Some("On new books display.")),
-      ("e", Some("On exhibition. Please ask at Enquiry Desk.")),
+      ("m", NotRequestable.ItemMissing("This item is missing.")),
+      ("s", OtherNotRequestable(Some("This item is on search."))),
+      ("x", NotRequestable.ItemWithdrawn("This item is withdrawn.")),
+      ("r", NotRequestable.ItemUnavailable("This item is unavailable.")),
+      ("z", OtherNotRequestable(None)),
+      ("v", OtherNotRequestable(Some("This item is with conservation."))),
+      ("h", NotRequestable.ItemClosed("This item is closed.")),
+      ("b", NotRequestable.RequestTopItem("Please request top item.")),
+      ("c", NotRequestable.RequestTopItem("Please request top item.")),
+      ("d", OtherNotRequestable(Some("On new books display."))),
+      ("e", OtherNotRequestable(Some("On exhibition. Please ask at Enquiry Desk."))),
+      ("y", NotRequestable.PermissionRequired),
     )
 
     forAll(testCases) {
-      case (status, expectedMessage) =>
+      case (status, expectedResult) =>
         val item = createSierraItemDataWith(
           fixedFields =
             Map("88" -> FixedField(label = "STATUS", value = status))
         )
 
-        sierra.SierraRulesForRequesting(item) shouldBe OtherNotRequestable(
-          expectedMessage)
+        sierra.SierraRulesForRequesting(item) shouldBe expectedResult
     }
-  }
-
-  it("blocks a missing item") {
-    val item = createSierraItemDataWith(
-      fixedFields =
-        Map("88" -> FixedField(label = "STATUS", value = "m"))
-    )
-
-    sierra.SierraRulesForRequesting(item) shouldBe NotRequestable.ItemMissing("This item is missing.")
-  }
-
-  it("blocks an item based on the permission required status") {
-    val item = createSierraItemDataWith(
-      fixedFields =
-        Map("88" -> FixedField(label = "STATUS", value = "y"))
-    )
-
-    sierra.SierraRulesForRequesting(item) shouldBe NotRequestable.PermissionRequired
   }
 
   it("blocks an item if fixed field 87 (loan rule) is non-zero") {
@@ -80,7 +63,7 @@ class SierraRulesForRequestingTest
       fixedFields = Map("87" -> FixedField(label = "LOANRULE", value = "1"))
     )
 
-    sierra.SierraRulesForRequesting(item) shouldBe OtherNotRequestable(
+    sierra.SierraRulesForRequesting(item) shouldBe NotRequestable.ItemOnHold(
       "Item is in use by another reader. Please ask at Enquiry Desk.")
   }
 
@@ -89,7 +72,7 @@ class SierraRulesForRequestingTest
       fixedFields = Map("88" -> FixedField(label = "STATUS", value = "!"))
     )
 
-    sierra.SierraRulesForRequesting(item) shouldBe OtherNotRequestable(
+    sierra.SierraRulesForRequesting(item) shouldBe NotRequestable.ItemOnHold(
       "Item is in use by another reader. Please ask at Enquiry Desk.")
   }
 
@@ -214,10 +197,11 @@ class SierraRulesForRequestingTest
         "somsy")
 
       forAll(testCases) {
-        assertBlockedWith(
+        assertBlockedBy(
           _,
-          expectedMessage =
-            "Please complete a manual request slip.  This item cannot be requested online.")
+          expectedResult =
+            NotRequestable.ManualRequest("Please complete a manual request slip.  This item cannot be requested online.")
+        )
       }
     }
 
@@ -252,10 +236,11 @@ class SierraRulesForRequestingTest
         "swm#7")
 
       forAll(testCases) {
-        assertBlockedWith(
+        assertBlockedBy(
           _,
-          expectedMessage =
-            "Item not available due to provisions of Data Protection Act. Return to Archives catalogue to see when this file will be opened.")
+          expectedResult =
+            NotRequestable.ItemUnavailable("Item not available due to provisions of Data Protection Act. Return to Archives catalogue to see when this file will be opened.")
+        )
       }
     }
 
@@ -299,29 +284,28 @@ class SierraRulesForRequestingTest
       ("itemType", "expectedMessage"),
       (
         "22",
-        Some("Item is on Exhibition Reserve. Please ask at the Enquiry Desk")),
-      ("17", None),
-      ("18", None),
-      ("15", None),
+        OtherNotRequestable(Some("Item is on Exhibition Reserve. Please ask at the Enquiry Desk"))),
+      ("17", OtherNotRequestable(None)),
+      ("18", OtherNotRequestable(None)),
+      ("15", OtherNotRequestable(None)),
       (
         "4",
-        Some(
+        NotRequestable.ManualRequest(
           "Please complete a manual request slip.  This item cannot be requested online.")),
       (
         "14",
-        Some(
+        NotRequestable.ManualRequest(
           "Please complete a manual request slip.  This item cannot be requested online.")),
     )
 
     forAll(testCases) {
-      case (itemType, expectedMessage) =>
+      case (itemType, expectedResult) =>
         val item = createSierraItemDataWith(
           fixedFields =
             Map("61" -> FixedField(label = "I TYPE", value = itemType))
         )
 
-        sierra.SierraRulesForRequesting(item) shouldBe OtherNotRequestable(
-          expectedMessage)
+        sierra.SierraRulesForRequesting(item) shouldBe expectedResult
     }
   }
 
