@@ -8,6 +8,7 @@ import weco.catalogue.internal_model.locations.{
 import weco.catalogue.source_model.sierra.source.SierraQueryOps
 import weco.catalogue.source_model.sierra.{
   OpenShelvesNotRequestable,
+  Requestable,
   SierraBibData,
   SierraBibNumber,
   SierraItemData,
@@ -33,7 +34,14 @@ object SierraAccessCondition extends SierraQueryOps {
     val location: Option[PhysicalLocationType] = itemData.location.map { _.name }.flatMap { SierraPhysicalLocationType.fromName(itemId, _) }
 
     (bibAccessStatus, holdCount, status, opacmsg, isRequestable, location) match {
+      // - = "available"
+      // o = "Open shelves"
       case (None, Some(0), Some("-"), Some("o"), OpenShelvesNotRequestable(_), Some(LocationType.OpenShelves)) =>
+        (List(), ItemStatus.Available)
+
+      // - = "available"
+      // f = "Online request"
+      case (None, Some(0), Some("-"), Some("f"), Requestable, Some(LocationType.ClosedStores)) =>
         (List(), ItemStatus.Available)
 
       case other =>

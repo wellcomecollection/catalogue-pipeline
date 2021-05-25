@@ -90,4 +90,24 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
     ac shouldBe empty
     status shouldBe ItemStatus.Available
   }
+
+  it("an item in the closed stores is available and has no access conditions") {
+    val bibId = createSierraBibNumber
+    val bibData = createSierraBibData
+
+    val itemId = createSierraItemNumber
+    val itemData = createSierraItemDataWith(
+      fixedFields = Map(
+        "79" -> FixedField(label = "LOCATION", value = "scmac", display = "Closed stores Arch. & MSS"),
+        "88" -> FixedField(label = "STATUS", value = "-", display = "Available"),
+        "108" -> FixedField(label = "OPACMSG", value = "f", display = "Online request"),
+      ),
+      location = Some(SierraSourceLocation(code = "scmac", name = "Closed stores Arch. & MSS"))
+    )
+
+    val (ac, status) = SierraAccessCondition(bibId, bibData, itemId, itemData)
+
+    ac shouldBe empty
+    status shouldBe ItemStatus.Available
+  }
 }
