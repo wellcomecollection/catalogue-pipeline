@@ -123,7 +123,7 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
     status shouldBe ItemStatus.Available
   }
 
-  it("an item that has 'as above' is not requestable") {
+  it("an item that has 'as above' is not requestable (status = 'b')") {
     val bibId = createSierraBibNumber
     val bibData = createSierraBibData
 
@@ -135,6 +135,26 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
         "108" -> FixedField(label = "OPACMSG", value = "-", display = "-"),
       ),
       location = Some(SierraSourceLocation(code = "bwith", name = "bound in above"))
+    )
+
+    val (ac, status) = SierraAccessCondition(bibId, bibData, itemId, itemData)
+
+    ac shouldBe empty
+    status shouldBe ItemStatus.Unavailable
+  }
+
+  it("an item that has 'as above' is not requestable (status = 'c')") {
+    val bibId = createSierraBibNumber
+    val bibData = createSierraBibData
+
+    val itemId = createSierraItemNumber
+    val itemData = createSierraItemDataWith(
+      fixedFields = Map(
+        "79" -> FixedField(label = "LOCATION", value = "bwith", display = "bound in above"),
+        "88" -> FixedField(label = "STATUS", value = "c", display = "As above"),
+        "108" -> FixedField(label = "OPACMSG", value = "-", display = "-"),
+      ),
+      location = Some(SierraSourceLocation(code = "cwith", name = "Contained in above"))
     )
 
     val (ac, status) = SierraAccessCondition(bibId, bibData, itemId, itemData)
@@ -293,5 +313,34 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
       AccessCondition(status = AccessStatus.PermissionRequired)
     )
     status shouldBe ItemStatus.Available
+  }
+
+  it("an item that is closed") {
+    val bibId = createSierraBibNumber
+    val bibData = createSierraBibDataWith(
+      varFields = List(
+        VarField(
+          marcTag = Some("506"),
+          subfields = List(MarcSubfield(tag = "f", content = "Closed."))
+        )
+      )
+    )
+
+    val itemId = createSierraItemNumber
+    val itemData = createSierraItemDataWith(
+      fixedFields = Map(
+        "79" -> FixedField(label = "LOCATION", value = "sc#ac", display = "Unrequestable Arch. & MSS"),
+        "88" -> FixedField(label = "STATUS", value = "h", display = "Closed"),
+        "108" -> FixedField(label = "OPACMSG", value = "u", display = "Unavailable"),
+      ),
+      location = Some(SierraSourceLocation(code = "sc#ac", name = "Unrequestable Arch. & MSS"))
+    )
+
+    val (ac, status) = SierraAccessCondition(bibId, bibData, itemId, itemData)
+
+    ac shouldBe List(
+      AccessCondition(status = AccessStatus.Closed)
+    )
+    status shouldBe ItemStatus.Unavailable
   }
 }

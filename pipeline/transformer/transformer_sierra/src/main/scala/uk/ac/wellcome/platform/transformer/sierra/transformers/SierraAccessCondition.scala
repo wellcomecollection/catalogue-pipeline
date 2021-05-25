@@ -48,8 +48,8 @@ object SierraAccessCondition extends SierraQueryOps {
           ItemStatus.Available
         )
 
-      // "b" = "as above"
-      case (_, _, Some("b"), _, _, _) =>
+      // "b" / "c" = "as above"
+      case (_, _, Some("b"), _, _, _) | (_, _, Some("c"), _, _, _) =>
         (List(), ItemStatus.Unavailable)
 
       // "y" = "permission required"
@@ -107,6 +107,16 @@ object SierraAccessCondition extends SierraQueryOps {
             AccessCondition(status = AccessStatus.PermissionRequired)
           ),
           ItemStatus.Available
+        )
+
+      // "h" = "closed"
+      // "u" = "unavailable"
+      case (Some(AccessStatus.Closed), _, Some("h"), Some("u"), NotRequestable.ItemClosed(_), Some(LocationType.ClosedStores)) =>
+        (
+          List(
+            AccessCondition(status = AccessStatus.Closed)
+          ),
+          ItemStatus.Unavailable
         )
 
       case other =>

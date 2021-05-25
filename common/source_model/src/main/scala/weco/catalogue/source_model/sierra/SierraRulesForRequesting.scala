@@ -26,6 +26,10 @@ object NotRequestable {
   case class ItemMissing(displayMessage: String) extends NotRequestable {
     val message: Option[String] = Some(displayMessage)
   }
+
+  case class ItemClosed(displayMessage: String) extends NotRequestable {
+    val message: Option[String] = Some(displayMessage)
+  }
 }
 
 case class OtherNotRequestable(message: Option[String] = None)
@@ -92,7 +96,7 @@ object SierraRulesForRequesting extends SierraQueryOps {
       case i if i.status.contains("v") =>
         OtherNotRequestable(message = "This item is with conservation.")
       case i if i.status.contains("h") =>
-        OtherNotRequestable(message = "This item is closed.")
+        NotRequestable.ItemClosed("This item is closed.")
 
       // These cases cover the lines:
       //
