@@ -110,4 +110,24 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
     ac shouldBe empty
     status shouldBe ItemStatus.Available
   }
+
+  it("an item that has 'as above' is not requestable") {
+    val bibId = createSierraBibNumber
+    val bibData = createSierraBibData
+
+    val itemId = createSierraItemNumber
+    val itemData = createSierraItemDataWith(
+      fixedFields = Map(
+        "79" -> FixedField(label = "LOCATION", value = "bwith", display = "bound in above"),
+        "88" -> FixedField(label = "STATUS", value = "b", display = "As above"),
+        "108" -> FixedField(label = "OPACMSG", value = "-", display = "-"),
+      ),
+      location = Some(SierraSourceLocation(code = "bwith", name = "bound in above"))
+    )
+
+    val (ac, status) = SierraAccessCondition(bibId, bibData, itemId, itemData)
+
+    ac shouldBe empty
+    status shouldBe ItemStatus.Unavailable
+  }
 }
