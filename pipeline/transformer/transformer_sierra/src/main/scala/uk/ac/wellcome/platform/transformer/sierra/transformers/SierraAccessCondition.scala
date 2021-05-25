@@ -54,7 +54,8 @@ object SierraAccessCondition extends SierraQueryOps {
 
       // "y" = "permission required"
       // "a" = "by appointment"
-      case (Some(AccessStatus.ByAppointment), Some(0), Some("y"), Some("a"), NotRequestable.PermissionRequired, Some(LocationType.ClosedStores)) =>
+      case (Some(AccessStatus.ByAppointment), _, Some("y"), Some("a"), NotRequestable.PermissionRequired, Some(LocationType.ClosedStores)) |
+           (None, _, Some("y"), Some("a"), NotRequestable.PermissionRequired, Some(LocationType.ClosedStores)) =>
         (
           List(AccessCondition(status = AccessStatus.ByAppointment)),
           ItemStatus.Available
@@ -62,7 +63,7 @@ object SierraAccessCondition extends SierraQueryOps {
 
       // "-" = "available"
       // "n" = "manual request"
-      case (None, Some(0), Some("-"), Some("n"), notRequestable: NotRequestable, Some(LocationType.ClosedStores)) =>
+      case (None, _, Some("-"), Some("n"), notRequestable: NotRequestable, Some(LocationType.ClosedStores)) =>
         (
           List(
             AccessCondition(

@@ -143,7 +143,7 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
     status shouldBe ItemStatus.Unavailable
   }
 
-  it("an item that is permission required") {
+  it("an item that is permission required (plus bib status)") {
     val bibId = createSierraBibNumber
     val bibData = createSierraBibDataWith(
       varFields = List(
@@ -162,6 +162,26 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
         "108" -> FixedField(label = "OPACMSG", value = "a", display = "By appointment"),
       ),
       location = Some(SierraSourceLocation(code = "scmac", name = "Closed stores Arch. & MSS"))
+    )
+
+    val (ac, status) = SierraAccessCondition(bibId, bibData, itemId, itemData)
+
+    ac shouldBe List(AccessCondition(status = AccessStatus.ByAppointment))
+    status shouldBe ItemStatus.Available
+  }
+
+  it("an item that is permission required (nothing on the bib)") {
+    val bibId = createSierraBibNumber
+    val bibData = createSierraBibData
+
+    val itemId = createSierraItemNumber
+    val itemData = createSierraItemDataWith(
+      fixedFields = Map(
+        "79" -> FixedField(label = "LOCATION", value = "hgser", display = "Offsite"),
+        "88" -> FixedField(label = "STATUS", value = "y", display = "Permission required"),
+        "108" -> FixedField(label = "OPACMSG", value = "a", display = "By appointment"),
+      ),
+      location = Some(SierraSourceLocation(code = "hgser", name = "Offsite"))
     )
 
     val (ac, status) = SierraAccessCondition(bibId, bibData, itemId, itemData)
