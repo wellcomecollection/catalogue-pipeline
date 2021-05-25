@@ -14,6 +14,14 @@ case class OpenShelvesNotRequestable(displayMessage: String) extends NotRequesta
   val message: Option[String] = Some(displayMessage)
 }
 
+case class ManualRequestNotRequestable(displayMessage: String) extends NotRequestable {
+  val message: Option[String] = Some(displayMessage)
+}
+
+case object PermissionRequiredNotRequestable extends NotRequestable {
+  val message: Option[String] = None
+}
+
 case class OtherNotRequestable(message: Option[String] = None)
     extends NotRequestable
 
@@ -101,8 +109,8 @@ object SierraRulesForRequesting extends SierraQueryOps {
         OtherNotRequestable(message = "On new books display.")
       case i if i.status.contains("e") =>
         OtherNotRequestable(message = "On exhibition. Please ask at Enquiry Desk.")
-      case i if i.status.contains("y") =>
-        OtherNotRequestable()
+      case i if i.status.contains("y") =>  // status "y" = "Permission required"
+        PermissionRequiredNotRequestable
 
       // These cases cover the lines:
       //

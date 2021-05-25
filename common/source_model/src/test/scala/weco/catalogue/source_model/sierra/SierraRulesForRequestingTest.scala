@@ -59,6 +59,15 @@ class SierraRulesForRequestingTest
     }
   }
 
+  it("blocks an item based on the permission required status") {
+    val item = createSierraItemDataWith(
+      fixedFields =
+        Map("88" -> FixedField(label = "STATUS", value = "y"))
+    )
+
+    sierra.SierraRulesForRequesting(item) shouldBe PermissionRequiredNotRequestable
+  }
+
   it("blocks an item if fixed field 87 (loan rule) is non-zero") {
     val item = createSierraItemDataWith(
       fixedFields = Map("87" -> FixedField(label = "LOANRULE", value = "1"))

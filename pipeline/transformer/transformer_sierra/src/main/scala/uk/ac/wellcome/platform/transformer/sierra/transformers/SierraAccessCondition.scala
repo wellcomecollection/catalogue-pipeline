@@ -2,12 +2,15 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import weco.catalogue.internal_model.locations.{
   AccessCondition,
+  AccessStatus,
   LocationType,
   PhysicalLocationType
 }
 import weco.catalogue.source_model.sierra.source.SierraQueryOps
 import weco.catalogue.source_model.sierra.{
+  NotRequestable,
   OpenShelvesNotRequestable,
+  PermissionRequiredNotRequestable,
   Requestable,
   SierraBibData,
   SierraBibNumber,
@@ -42,11 +45,36 @@ object SierraAccessCondition extends SierraQueryOps {
       // - = "available"
       // f = "Online request"
       case (None, Some(0), Some("-"), Some("f"), Requestable, Some(LocationType.ClosedStores)) =>
-        (List(), ItemStatus.Available)
+        (
+          List(AccessCondition(status = Some(AccessStatus.Open), note = Some("Online request"))),
+          ItemStatus.Available
+        )
 
       // "b" = "as above"
       case (_, _, Some("b"), _, _, _) =>
         (List(), ItemStatus.Unavailable)
+
+      // "y" = "permission required"
+      // "a" = "by appointment"
+      case (Some(AccessStatus.ByAppointment), Some(0), Some("y"), Some("a"), PermissionRequiredNotRequestable, Some(LocationType.ClosedStores)) =>
+        (
+          List(AccessCondition(status = AccessStatus.ByAppointment)),
+          ItemStatus.Available
+        )
+
+      // "-" = "available"
+      // "n" = "manual request"
+      case (None, Some(0), Some("-"), Some("n"), notRequestable: NotRequestable, Some(LocationType.ClosedStores)) =>
+        (
+          List(
+            AccessCondition(
+              status = Some(AccessStatus.Open),
+              note = Some("Manual request"),
+              terms = notRequestable.message
+            )
+          ),
+          ItemStatus.Unavailable
+        )
 
       case other =>
         println(other)
