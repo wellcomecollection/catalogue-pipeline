@@ -240,4 +240,29 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
     )
     status shouldBe ItemStatus.Unavailable
   }
+
+  it("an item that is at digitisation") {
+    val bibId = createSierraBibNumber
+    val bibData = createSierraBibData
+
+    val itemId = createSierraItemNumber
+    val itemData = createSierraItemDataWith(
+      fixedFields = Map(
+        "79" -> FixedField(label = "LOCATION", value = "sgser", display = "Closed stores journals"),
+        "88" -> FixedField(label = "STATUS", value = "r", display = "Unavailable"),
+        "108" -> FixedField(label = "OPACMSG", value = "b", display = "@ digitisation"),
+      ),
+      location = Some(SierraSourceLocation(code = "sgser", name = "Closed stores journals"))
+    )
+
+    val (ac, status) = SierraAccessCondition(bibId, bibData, itemId, itemData)
+
+    ac shouldBe List(
+      AccessCondition(
+        status = Some(AccessStatus.TemporarilyUnavailable),
+        terms = Some("At digitisation and temporarily unavailable.")
+      )
+    )
+    status shouldBe ItemStatus.TemporarilyUnavailable
+  }
 }

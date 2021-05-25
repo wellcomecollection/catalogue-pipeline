@@ -319,9 +319,8 @@ object SierraRulesForRequesting extends SierraQueryOps {
               "sompa",
               "sompr",
               "somsy") =>
-        OtherNotRequestable(
-          message =
-            "Please complete a manual request slip.  This item cannot be requested online.")
+        NotRequestable.ManualRequest(
+          "Please complete a manual request slip.  This item cannot be requested online.")
 
       // This case covers the line:
       //

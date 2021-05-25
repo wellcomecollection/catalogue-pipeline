@@ -86,6 +86,19 @@ object SierraAccessCondition extends SierraQueryOps {
           ItemStatus.Unavailable
         )
 
+      // "r" = "unavailable"
+      // b = "At digitisation"
+      case (_, _, Some("r"), Some("b"), _, _) =>
+        (
+          List(
+            AccessCondition(
+              status = Some(AccessStatus.TemporarilyUnavailable),
+              terms = Some("At digitisation and temporarily unavailable.")
+            )
+          ),
+          ItemStatus.TemporarilyUnavailable
+        )
+
       case other =>
         println(other)
         throw new RuntimeException(s"Unhandled case! $other")
