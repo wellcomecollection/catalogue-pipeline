@@ -34,6 +34,10 @@ object NotRequestable {
   case class ItemWithdrawn(displayMessage: String) extends NotRequestable {
     val message: Option[String] = Some(displayMessage)
   }
+
+  case class ItemUnavailable(displayMessage: String) extends NotRequestable {
+    val message: Option[String] = Some(displayMessage)
+  }
 }
 
 case class OtherNotRequestable(message: Option[String] = None)
@@ -368,9 +372,8 @@ object SierraRulesForRequesting extends SierraQueryOps {
             "swm#5",
             "swm#6",
             "swm#7") =>
-        OtherNotRequestable(
-          message =
-            "Item not available due to provisions of Data Protection Act. Return to Archives catalogue to see when this file will be opened.")
+        NotRequestable.ItemUnavailable(
+          "Item not available due to provisions of Data Protection Act. Return to Archives catalogue to see when this file will be opened.")
 
       // There's a rule in the Rules for Requesting that goes:
       //
