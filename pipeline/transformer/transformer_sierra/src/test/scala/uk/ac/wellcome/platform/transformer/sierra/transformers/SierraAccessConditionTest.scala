@@ -126,6 +126,38 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
     status shouldBe ItemStatus.Available
   }
 
+  it("an item in the closed stores is available and has no access conditions (with bib status)") {
+    val bibId = createSierraBibNumber
+    val bibData = createSierraBibDataWith(
+      varFields = List(
+        VarField(
+          marcTag = Some("506"),
+          subfields = List(MarcSubfield(tag = "f", content = "Open."))
+        )
+      )
+    )
+
+    val itemId = createSierraItemNumber
+    val itemData = createSierraItemDataWith(
+      fixedFields = Map(
+        "79" -> FixedField(label = "LOCATION", value = "scmac", display = "Closed stores Arch. & MSS"),
+        "88" -> FixedField(label = "STATUS", value = "-", display = "Available"),
+        "108" -> FixedField(label = "OPACMSG", value = "f", display = "Online request"),
+      ),
+      location = Some(SierraSourceLocation(code = "scmac", name = "Closed stores Arch. & MSS"))
+    )
+
+    val (ac, status) = SierraAccessCondition(bibId, bibData, itemId, itemData)
+
+    ac shouldBe List(
+      AccessCondition(
+        status = Some(AccessStatus.Open),
+        terms = Some("Online request")
+      )
+    )
+    status shouldBe ItemStatus.Available
+  }
+
   it("an item that has 'as above' is not requestable (status = 'b')") {
     val bibId = createSierraBibNumber
     val bibData = createSierraBibData
@@ -259,6 +291,31 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
       AccessCondition(
         status = Some(AccessStatus.Unavailable),
         terms = Some("This item is missing.")
+      )
+    )
+    status shouldBe ItemStatus.Unavailable
+  }
+
+  it("an item that is withdrawn") {
+    val bibId = createSierraBibNumber
+    val bibData = createSierraBibData
+
+    val itemId = createSierraItemNumber
+    val itemData = createSierraItemDataWith(
+      fixedFields = Map(
+        "79" -> FixedField(label = "LOCATION", value = "ofjs1", display = "Closed stores Head, Research & Special Collections"),
+        "88" -> FixedField(label = "STATUS", value = "x", display = "Withdrawn"),
+        "108" -> FixedField(label = "OPACMSG", value = "-", display = "-"),
+      ),
+      location = Some(SierraSourceLocation(code = "ofjs1", name = "Closed stores Head, Research & Special Collections"))
+    )
+
+    val (ac, status) = SierraAccessCondition(bibId, bibData, itemId, itemData)
+
+    ac shouldBe List(
+      AccessCondition(
+        status = Some(AccessStatus.Unavailable),
+        terms = Some("This item is withdrawn.")
       )
     )
     status shouldBe ItemStatus.Unavailable

@@ -30,6 +30,10 @@ object NotRequestable {
   case class ItemClosed(displayMessage: String) extends NotRequestable {
     val message: Option[String] = Some(displayMessage)
   }
+
+  case class ItemWithdrawn(displayMessage: String) extends NotRequestable {
+    val message: Option[String] = Some(displayMessage)
+  }
 }
 
 case class OtherNotRequestable(message: Option[String] = None)
@@ -89,7 +93,7 @@ object SierraRulesForRequesting extends SierraQueryOps {
       case i if i.status.contains("s") =>
         OtherNotRequestable(message = "This item is on search.")
       case i if i.status.contains("x") =>
-        OtherNotRequestable(message = "This item is withdrawn.")
+        NotRequestable.ItemWithdrawn("This item is withdrawn.")
       case i if i.status.contains("r") =>
         OtherNotRequestable(message = "This item is unavailable.")
       case i if i.status.contains("z") => OtherNotRequestable()
