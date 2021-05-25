@@ -3,6 +3,7 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil._
+import weco.catalogue.internal_model.locations.AccessCondition
 import weco.catalogue.source_model.generators.SierraDataGenerators
 import weco.catalogue.source_model.sierra.Implicits._
 import weco.catalogue.source_model.sierra._
@@ -73,9 +74,12 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
           case Failure(err) =>
             println(s"Got to $idx")
             println(bibId)
-            println(bibData)
+            println(bibData.varFields)
             println(itemId)
-            println(itemData)
+            println(itemData.location)
+            println(itemData.fixedFields)
+            println(itemData.varFields.filter(_.fieldTag.contains("n")))
+            println("")
             throw err
         }
       }
@@ -101,6 +105,33 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
         val (ac, status) = SierraAccessCondition(bibId, bibData, itemId, itemData)
 
         ac shouldBe empty
+        status shouldBe ItemStatus.Available
+      }
+    }
+  }
+
+  describe("if an item is in the closed stores") {
+    describe("and does not have any holds") {
+      it("if it is available, then it can be requested online") {
+        val bibId = createSierraBibNumber
+        val bibData = createSierraBibData
+
+        val itemId = createSierraItemNumber
+        val itemData = createSierraItemDataWith(
+          holdCount = Some(0),
+          fixedFields = Map(
+            "79" -> FixedField(label = "LOCATION", value = "scmac", display = "Closed stores Arch. & MSS"),
+            "88" -> FixedField(label = "STATUS", value = "-", display = "Available"),
+            "108" -> FixedField(label = "OPACMSG", value = "f", display = "Online request"),
+          ),
+          location = Some(SierraSourceLocation(code = "scmac", name = "Closed stores Arch. & MSS"))
+        )
+
+        val (ac, status) = SierraAccessCondition(bibId, bibData, itemId, itemData)
+
+        ac shouldBe List(
+          AccessCondition(terms = Some("Online request"))
+        )
         status shouldBe ItemStatus.Available
       }
     }

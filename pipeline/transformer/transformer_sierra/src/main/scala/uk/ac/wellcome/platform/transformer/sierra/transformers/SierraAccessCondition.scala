@@ -37,8 +37,7 @@ object SierraAccessCondition extends SierraQueryOps {
       case _ => throw new Throwable("???")
     }.mkString(" ")
 
-    val maybeDisplayNote = if (displayNote.isEmpty) None else Some(displayNote)
-    println(maybeDisplayNote)
+//    val maybeDisplayNote = if (displayNote.isEmpty) None else Some(displayNote)
 
     (bibAccessStatus, holdCount, status, opacmsg, isRequestable, location) match {
 
@@ -46,8 +45,22 @@ object SierraAccessCondition extends SierraQueryOps {
       //
       // We could add an access status of "Open" here, but it feels dubious to be
       // synthesising access information that doesn't come from the source records.
+      //
+      // TODO: Do any items on the open shelves have a display note we want to expose?
       case (None, Some(0), Some(Status.Available), Some(OpacMsg.OpenShelves), NotRequestable.OpenShelves(_), Some(LocationType.OpenShelves)) =>
+        if (displayNote.nonEmpty) {
+          println(s"Warn: $itemId is open shelves/available but has a display note $displayNote")
+        }
         (List(), ItemStatus.Available)
+
+      // Items on the closed stores that are requestable get the "Online request" condition.
+      //
+      // TODO: Do any of these items have a display note we want to expose?
+      case (None, Some(0), Some(Status.Available), Some(OpacMsg.OnlineRequest), Requestable, Some(LocationType.ClosedStores)) =>
+        if (displayNote.nonEmpty) {
+          println(s"Warn: $itemId is open shelves/available but has a display note $displayNote")
+        }
+        (List(AccessCondition(terms = Some("Online request"))), ItemStatus.Available)
 
       case other =>
         println(other)
