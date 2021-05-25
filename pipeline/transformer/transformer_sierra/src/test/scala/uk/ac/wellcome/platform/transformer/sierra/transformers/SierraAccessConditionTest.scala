@@ -15,6 +15,10 @@ import java.io.{BufferedReader, FileInputStream, InputStreamReader}
 import scala.util.{Failure, Success, Try}
 
 class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraDataGenerators with TableDrivenPropertyChecks {
+
+  val bibId: SierraBibNumber = createSierraBibNumber
+  val itemId: SierraItemNumber = createSierraItemNumber
+
   ignore("assigns access conditions for all Sierra items") {
     // Note: this test is not meant to hang around long-term.  It's a test harness
     // that runs through every SierraTransformable instance, tries to assign some
@@ -84,10 +88,8 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
   describe("if an item is on the open shelves") {
     describe("and does not have any holds") {
       it("if it is available, then it has no access conditions") {
-        val bibId = createSierraBibNumber
         val bibData = createSierraBibData
 
-        val itemId = createSierraItemNumber
         val itemData = createSierraItemDataWith(
           holdCount = Some(0),
           fixedFields = Map(
@@ -105,10 +107,8 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
       }
 
       it("if it is at digitisation, then it is temporarily unavailable") {
-        val bibId = createSierraBibNumber
         val bibData = createSierraBibData
 
-        val itemId = createSierraItemNumber
         val itemData = createSierraItemDataWith(
           holdCount = Some(0),
           fixedFields = Map(
@@ -134,10 +134,8 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
   describe("if an item is in the closed stores") {
     describe("and does not have any holds") {
       it("if it is available, then it can be requested online") {
-        val bibId = createSierraBibNumber
         val bibData = createSierraBibData
 
-        val itemId = createSierraItemNumber
         val itemData = createSierraItemDataWith(
           holdCount = Some(0),
           fixedFields = Map(
@@ -163,7 +161,6 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
       }
 
       it("if it is available and the bib is open, then it can be requested online") {
-        val bibId = createSierraBibNumber
         val bibData = createSierraBibDataWith(
           varFields = List(
             VarField(
@@ -175,7 +172,6 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
           )
         )
 
-        val itemId = createSierraItemNumber
         val itemData = createSierraItemDataWith(
           holdCount = Some(0),
           fixedFields = Map(
@@ -195,7 +191,6 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
       }
 
       it("if the bib is by appointment, then the item cannot be requested online") {
-        val bibId = createSierraBibNumber
         val bibData = createSierraBibDataWith(
           varFields = List(
             VarField(
@@ -207,7 +202,6 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
           )
         )
 
-        val itemId = createSierraItemNumber
         val itemData = createSierraItemDataWith(
           holdCount = Some(0),
           fixedFields = Map(
@@ -233,7 +227,6 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
       }
 
       it("if the bib is permission required but the item is by appointment, then the item is by appointment") {
-        val bibId = createSierraBibNumber
         val bibData = createSierraBibDataWith(
           varFields = List(
             VarField(
@@ -245,7 +238,6 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
           )
         )
 
-        val itemId = createSierraItemNumber
         val itemData = createSierraItemDataWith(
           holdCount = Some(0),
           fixedFields = Map(
@@ -265,10 +257,8 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
       }
 
       it("if the item is by appointment, then it cannot be requested online") {
-        val bibId = createSierraBibNumber
         val bibData = createSierraBibData
 
-        val itemId = createSierraItemNumber
         val itemData = createSierraItemDataWith(
           holdCount = Some(0),
           fixedFields = Map(
@@ -288,10 +278,8 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
       }
 
       it("and needs a manual request") {
-        val bibId = createSierraBibNumber
         val bibData = createSierraBibData
 
-        val itemId = createSierraItemNumber
         val itemData = createSierraItemDataWith(
           holdCount = Some(0),
           fixedFields = Map(
@@ -314,10 +302,8 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
       }
 
       it("you need to ask at the enquiry desk") {
-        val bibId = createSierraBibNumber
         val bibData = createSierraBibData
 
-        val itemId = createSierraItemNumber
         val itemData = createSierraItemDataWith(
           holdCount = Some(0),
           fixedFields = Map(
@@ -340,10 +326,8 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
       }
 
       it("and is missing") {
-        val bibId = createSierraBibNumber
         val bibData = createSierraBibData
 
-        val itemId = createSierraItemNumber
         val itemData = createSierraItemDataWith(
           holdCount = Some(0),
           fixedFields = Map(
@@ -366,10 +350,8 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
       }
 
       it("and is at digitisation") {
-        val bibId = createSierraBibNumber
         val bibData = createSierraBibData
 
-        val itemId = createSierraItemNumber
         val itemData = createSierraItemDataWith(
           holdCount = Some(0),
           fixedFields = Map(
@@ -392,7 +374,6 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
       }
 
       it("if it requires permission and so does the bib") {
-        val bibId = createSierraBibNumber
         val bibData = createSierraBibDataWith(
           varFields = List(
             VarField(
@@ -404,7 +385,6 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
           )
         )
 
-        val itemId = createSierraItemNumber
         val itemData = createSierraItemDataWith(
           holdCount = Some(0),
           fixedFields = Map(
@@ -424,7 +404,6 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
       }
 
       it("if the bib and item are both closed, then the item cannot be requested") {
-        val bibId = createSierraBibNumber
         val bibData = createSierraBibDataWith(
           varFields = List(
             VarField(
@@ -436,7 +415,6 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
           )
         )
 
-        val itemId = createSierraItemNumber
         val itemData = createSierraItemDataWith(
           holdCount = Some(0),
           fixedFields = Map(
@@ -456,7 +434,6 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
       }
 
       it("if the bib and item are both closed and the item has no location, then the item cannot be requested") {
-        val bibId = createSierraBibNumber
         val bibData = createSierraBibDataWith(
           varFields = List(
             VarField(
@@ -468,7 +445,6 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
           )
         )
 
-        val itemId = createSierraItemNumber
         val itemData = createSierraItemDataWith(
           holdCount = Some(0),
           fixedFields = Map(
@@ -488,10 +464,8 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
       }
 
       it("and the item type does not permit requesting") {
-        val bibId = createSierraBibNumber
         val bibData = createSierraBibData
 
-        val itemId = createSierraItemNumber
         val itemData = createSierraItemDataWith(
           holdCount = Some(0),
           fixedFields = Map(
@@ -512,7 +486,6 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
       }
 
       it("and the bib is restricted, but available for requesting") {
-        val bibId = createSierraBibNumber
         val bibData = createSierraBibDataWith(
           varFields = List(
             VarField(
@@ -524,7 +497,6 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
           )
         )
 
-        val itemId = createSierraItemNumber
         val itemData = createSierraItemDataWith(
           holdCount = Some(0),
           fixedFields = Map(
@@ -544,10 +516,8 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
       }
 
       it("if the item is for staff use only") {
-        val bibId = createSierraBibNumber
         val bibData = createSierraBibData
 
-        val itemId = createSierraItemNumber
         val itemData = createSierraItemDataWith(
           holdCount = Some(0),
           fixedFields = Map(
@@ -568,10 +538,8 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
       }
 
       it("if the item is on exhibition") {
-        val bibId = createSierraBibNumber
         val bibData = createSierraBibData
 
-        val itemId = createSierraItemNumber
         val itemData = createSierraItemDataWith(
           holdCount = Some(0),
           fixedFields = Map(
@@ -593,7 +561,6 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
       }
 
       it("if the bib and item are temporarily unavailable for internal assessment") {
-        val bibId = createSierraBibNumber
         val bibData = createSierraBibDataWith(
           varFields = List(
             VarField(
@@ -605,7 +572,6 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
           )
         )
 
-        val itemId = createSierraItemNumber
         val itemData = createSierraItemDataWith(
           holdCount = Some(0),
           fixedFields = Map(
@@ -631,10 +597,8 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
       }
 
       it("if the item is temporarily unavailable for internal assessment") {
-        val bibId = createSierraBibNumber
         val bibData = createSierraBibData
 
-        val itemId = createSierraItemNumber
         val itemData = createSierraItemDataWith(
           holdCount = Some(0),
           fixedFields = Map(
@@ -654,10 +618,8 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
       }
 
       it("if you're meant to request the top item") {
-        val bibId = createSierraBibNumber
         val bibData = createSierraBibData
 
-        val itemId = createSierraItemNumber
         val itemData = createSierraItemDataWith(
           holdCount = Some(0),
           fixedFields = Map(
@@ -679,10 +641,8 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
 
     describe("and has at least one hold") {
       it("if it's still in the stores, it can't be requested") {
-        val bibId = createSierraBibNumber
         val bibData = createSierraBibData
 
-        val itemId = createSierraItemNumber
         val itemData = createSierraItemDataWith(
           holdCount = Some(1),
           fixedFields = Map(
@@ -704,10 +664,8 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
       }
 
       it("if it's on the holdshelf, it can't be requested") {
-        val bibId = createSierraBibNumber
         val bibData = createSierraBibData
 
-        val itemId = createSierraItemNumber
         val itemData = createSierraItemDataWith(
           holdCount = Some(1),
           fixedFields = Map(
