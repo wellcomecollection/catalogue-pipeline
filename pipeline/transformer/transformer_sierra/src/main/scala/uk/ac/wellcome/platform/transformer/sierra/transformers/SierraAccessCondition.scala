@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
-import weco.catalogue.internal_model.locations.{AccessCondition, LocationType, PhysicalLocationType}
+import weco.catalogue.internal_model.locations.{AccessCondition, AccessStatus, LocationType, PhysicalLocationType}
 import weco.catalogue.source_model.sierra.marc.VarField
 import weco.catalogue.source_model.sierra.source.SierraQueryOps
 import weco.catalogue.source_model.sierra._
@@ -14,13 +14,15 @@ object ItemStatus {
 }
 
 object SierraAccessCondition extends SierraQueryOps {
+  case object Status {
+    val Available = "-"
+    val PermissionRequired = "y"
+  }
+
   object OpacMsg {
     val OnlineRequest = "f"
     val OpenShelves = "o"
-  }
-
-  case object Status {
-    val Available = "-"
+    val ByAppointment = "a"
   }
 
   def apply(bibId: SierraBibNumber, bibData: SierraBibData, itemId: SierraItemNumber, itemData: SierraItemData): (List[AccessCondition], ItemStatus) = {
@@ -61,6 +63,12 @@ object SierraAccessCondition extends SierraQueryOps {
           println(s"Warn: $itemId is open shelves/available but has a display note $displayNote")
         }
         (List(AccessCondition(terms = Some("Online request"))), ItemStatus.Available)
+
+      // The status "by appointment" takes precedence over "permission required".
+      //
+      // Example: b32214832 / i19389383
+      case (Some(AccessStatus.ByAppointment), Some(0), Some(Status.PermissionRequired), Some(OpacMsg.ByAppointment), NotRequestable.PermissionRequired, Some(LocationType.ClosedStores)) =>
+        (List(AccessCondition(status = AccessStatus.ByAppointment)), ItemStatus.Available)
 
       case other =>
         println(other)

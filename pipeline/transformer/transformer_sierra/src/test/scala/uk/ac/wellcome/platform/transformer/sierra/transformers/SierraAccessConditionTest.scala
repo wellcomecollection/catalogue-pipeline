@@ -3,11 +3,11 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil._
-import weco.catalogue.internal_model.locations.AccessCondition
+import weco.catalogue.internal_model.locations.{AccessCondition, AccessStatus}
 import weco.catalogue.source_model.generators.SierraDataGenerators
 import weco.catalogue.source_model.sierra.Implicits._
 import weco.catalogue.source_model.sierra._
-import weco.catalogue.source_model.sierra.marc.FixedField
+import weco.catalogue.source_model.sierra.marc.{FixedField, MarcSubfield, VarField}
 import weco.catalogue.source_model.sierra.source.SierraSourceLocation
 
 import java.io.{BufferedReader, File, FileInputStream, InputStreamReader}
@@ -134,6 +134,38 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
         )
         status shouldBe ItemStatus.Available
       }
+    }
+
+    it("if it needs an appointment, then it cannot be requested online") {
+      val bibId = createSierraBibNumber
+      val bibData = createSierraBibDataWith(
+        varFields = List(
+          VarField(
+            marcTag = Some("506"),
+            subfields = List(
+              MarcSubfield(tag = "f", content = "By Appointment.")
+            )
+          )
+        )
+      )
+
+      val itemId = createSierraItemNumber
+      val itemData = createSierraItemDataWith(
+        holdCount = Some(0),
+        fixedFields = Map(
+          "79" -> FixedField(label = "LOCATION", value = "scmac", display = "Closed stores Arch. & MSS"),
+          "88" -> FixedField(label = "STATUS", value = "y", display = "Permission required"),
+          "108" -> FixedField(label = "OPACMSG", value = "a", display = "By appointment"),
+        ),
+        location = Some(SierraSourceLocation(code = "scmac", name = "Closed stores Arch. & MSS"))
+      )
+
+      val (ac, status) = SierraAccessCondition(bibId, bibData, itemId, itemData)
+
+      ac shouldBe List(
+        AccessCondition(status = AccessStatus.ByAppointment)
+      )
+      status shouldBe ItemStatus.Available
     }
   }
 }
