@@ -23,6 +23,10 @@ object NotRequestable {
     val message: Option[String] = None
   }
 
+  case class RequestTopItem(displayMessage: String) extends NotRequestable {
+    val message: Option[String] = Some(displayMessage)
+  }
+
   case class ItemMissing(displayMessage: String) extends NotRequestable {
     val message: Option[String] = Some(displayMessage)
   }
@@ -118,7 +122,7 @@ object SierraRulesForRequesting extends SierraQueryOps {
       // These are similar to the rules above; the difference is that the 'v' means
       // "if this line or the next line matches".  The 'q' means 'end of rule'.
       case i if i.status.contains("b") || i.status.contains("c") =>
-        OtherNotRequestable(message = "Please request top item.")
+        NotRequestable.RequestTopItem("Please request top item.")
 
       // These cases cover the lines:
       //
