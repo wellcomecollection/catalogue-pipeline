@@ -265,4 +265,33 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
     )
     status shouldBe ItemStatus.TemporarilyUnavailable
   }
+
+  it("an item that requires permission") {
+    val bibId = createSierraBibNumber
+    val bibData = createSierraBibDataWith(
+      varFields = List(
+        VarField(
+          marcTag = Some("506"),
+          subfields = List(MarcSubfield(tag = "f", content = "Donor Permission."))
+        )
+      )
+    )
+
+    val itemId = createSierraItemNumber
+    val itemData = createSierraItemDataWith(
+      fixedFields = Map(
+        "79" -> FixedField(label = "LOCATION", value = "sc#ac", display = "Unrequestable Arch. & MSS"),
+        "88" -> FixedField(label = "STATUS", value = "y", display = "Permission required"),
+        "108" -> FixedField(label = "OPACMSG", value = "q", display = "Donor permission"),
+      ),
+      location = Some(SierraSourceLocation(code = "sc#ac", name = "Unrequestable Arch. & MSS"))
+    )
+
+    val (ac, status) = SierraAccessCondition(bibId, bibData, itemId, itemData)
+
+    ac shouldBe List(
+      AccessCondition(status = AccessStatus.PermissionRequired)
+    )
+    status shouldBe ItemStatus.Available
+  }
 }

@@ -87,7 +87,7 @@ object SierraAccessCondition extends SierraQueryOps {
         )
 
       // "r" = "unavailable"
-      // b = "At digitisation"
+      // "b" = "At digitisation"
       case (_, _, Some("r"), Some("b"), _, _) =>
         (
           List(
@@ -97,6 +97,16 @@ object SierraAccessCondition extends SierraQueryOps {
             )
           ),
           ItemStatus.TemporarilyUnavailable
+        )
+
+      // "y" = "permission required"
+      // "q" = "donor permission"
+      case (Some(AccessStatus.PermissionRequired), _, Some("y"), Some("q"), NotRequestable.PermissionRequired, Some(LocationType.ClosedStores)) =>
+        (
+          List(
+            AccessCondition(status = AccessStatus.PermissionRequired)
+          ),
+          ItemStatus.Available
         )
 
       case other =>
