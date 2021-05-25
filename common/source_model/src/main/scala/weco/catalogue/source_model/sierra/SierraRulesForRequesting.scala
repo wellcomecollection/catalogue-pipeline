@@ -103,7 +103,7 @@ object SierraRulesForRequesting extends SierraQueryOps {
       case i if i.status.contains("x") =>
         NotRequestable.ItemWithdrawn("This item is withdrawn.")
       case i if i.status.contains("r") =>
-        OtherNotRequestable(message = "This item is unavailable.")
+        NotRequestable.ItemUnavailable("This item is unavailable.")
       case i if i.status.contains("z") => OtherNotRequestable()
       case i if i.status.contains("v") =>
         OtherNotRequestable(message = "This item is with conservation.")

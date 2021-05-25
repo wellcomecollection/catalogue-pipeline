@@ -77,7 +77,7 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
             println(bibData.varFields)
             println(itemId)
             println(itemData.location)
-            println(itemData.fixedFields)
+            println(itemData.fixedFields.filterNot { case (code, _) => Set("264", "81", "87", "59", "64", "76").contains(code) })
             println(itemData.varFields.filter(_.fieldTag.contains("n")))
             println("")
             throw err
@@ -134,38 +134,122 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
         )
         status shouldBe ItemStatus.Available
       }
-    }
 
-    it("if it needs an appointment, then it cannot be requested online") {
-      val bibId = createSierraBibNumber
-      val bibData = createSierraBibDataWith(
-        varFields = List(
-          VarField(
-            marcTag = Some("506"),
-            subfields = List(
-              MarcSubfield(tag = "f", content = "By Appointment.")
+      it("if it needs an appointment, then it cannot be requested online") {
+        val bibId = createSierraBibNumber
+        val bibData = createSierraBibDataWith(
+          varFields = List(
+            VarField(
+              marcTag = Some("506"),
+              subfields = List(
+                MarcSubfield(tag = "f", content = "By Appointment.")
+              )
             )
           )
         )
-      )
 
-      val itemId = createSierraItemNumber
-      val itemData = createSierraItemDataWith(
-        holdCount = Some(0),
-        fixedFields = Map(
-          "79" -> FixedField(label = "LOCATION", value = "scmac", display = "Closed stores Arch. & MSS"),
-          "88" -> FixedField(label = "STATUS", value = "y", display = "Permission required"),
-          "108" -> FixedField(label = "OPACMSG", value = "a", display = "By appointment"),
-        ),
-        location = Some(SierraSourceLocation(code = "scmac", name = "Closed stores Arch. & MSS"))
-      )
+        val itemId = createSierraItemNumber
+        val itemData = createSierraItemDataWith(
+          holdCount = Some(0),
+          fixedFields = Map(
+            "79" -> FixedField(label = "LOCATION", value = "scmac", display = "Closed stores Arch. & MSS"),
+            "88" -> FixedField(label = "STATUS", value = "y", display = "Permission required"),
+            "108" -> FixedField(label = "OPACMSG", value = "a", display = "By appointment"),
+          ),
+          location = Some(SierraSourceLocation(code = "scmac", name = "Closed stores Arch. & MSS")),
+          varFields = List(
+            VarField(
+              fieldTag = Some("n"),
+              content = Some("Offsite")
+            )
+          )
+        )
 
-      val (ac, status) = SierraAccessCondition(bibId, bibData, itemId, itemData)
+        val (ac, status) = SierraAccessCondition(bibId, bibData, itemId, itemData)
 
-      ac shouldBe List(
-        AccessCondition(status = AccessStatus.ByAppointment)
-      )
-      status shouldBe ItemStatus.Available
+        ac shouldBe List(
+          AccessCondition(status = Some(AccessStatus.ByAppointment), note = Some("Offsite"))
+        )
+        status shouldBe ItemStatus.Available
+      }
+
+      it("and needs a manual request") {
+        val bibId = createSierraBibNumber
+        val bibData = createSierraBibData
+
+        val itemId = createSierraItemNumber
+        val itemData = createSierraItemDataWith(
+          holdCount = Some(0),
+          fixedFields = Map(
+            "61" -> FixedField(label = "I TYPE", value = "4", display = "serial"),
+            "79" -> FixedField(label = "LOCATION", value = "sgser", display = "Closed stores journals"),
+            "88" -> FixedField(label = "STATUS", value = "-", display = "Available"),
+            "108" -> FixedField(label = "OPACMSG", value = "n", display = "Manual request"),
+          ),
+          location = Some(SierraSourceLocation(code = "sgser", name = "Closed stores journals"))
+        )
+
+        val (ac, status) = SierraAccessCondition(bibId, bibData, itemId, itemData)
+
+        ac shouldBe List(
+          AccessCondition(
+            terms = Some("Please complete a manual request slip.  This item cannot be requested online.")
+          )
+        )
+        status shouldBe ItemStatus.Available
+      }
+
+      it("and is missing") {
+        val bibId = createSierraBibNumber
+        val bibData = createSierraBibData
+
+        val itemId = createSierraItemNumber
+        val itemData = createSierraItemDataWith(
+          holdCount = Some(0),
+          fixedFields = Map(
+            "79" -> FixedField(label = "LOCATION", value = "sghi2", display = "Closed stores Hist. 2"),
+            "88" -> FixedField(label = "STATUS", value = "m", display = "Missing"),
+            "108" -> FixedField(label = "OPACMSG", value = "f", display = "Online request"),
+          ),
+          location = Some(SierraSourceLocation(code = "sghi2", name = "Closed stores Hist. 2"))
+        )
+
+        val (ac, status) = SierraAccessCondition(bibId, bibData, itemId, itemData)
+
+        ac shouldBe List(
+          AccessCondition(
+            status = Some(AccessStatus.Unavailable),
+            terms = Some("This item is missing.")
+          )
+        )
+        status shouldBe ItemStatus.Unavailable
+      }
+
+      it("and is at digitisation") {
+        val bibId = createSierraBibNumber
+        val bibData = createSierraBibData
+
+        val itemId = createSierraItemNumber
+        val itemData = createSierraItemDataWith(
+          holdCount = Some(0),
+          fixedFields = Map(
+            "79" -> FixedField(label = "LOCATION", value = "sgser", display = "Closed stores journals"),
+            "88" -> FixedField(label = "STATUS", value = "r", display = "Unavailable"),
+            "108" -> FixedField(label = "OPACMSG", value = "b", display = "@ digitisation"),
+          ),
+          location = Some(SierraSourceLocation(code = "sgser", name = "Closed stores journals"))
+        )
+
+        val (ac, status) = SierraAccessCondition(bibId, bibData, itemId, itemData)
+
+        ac shouldBe List(
+          AccessCondition(
+            status = Some(AccessStatus.TemporarilyUnavailable),
+            terms = Some("At digitisation and temporarily unavailable.")
+          )
+        )
+        status shouldBe ItemStatus.TemporarilyUnavailable
+      }
     }
   }
 }
