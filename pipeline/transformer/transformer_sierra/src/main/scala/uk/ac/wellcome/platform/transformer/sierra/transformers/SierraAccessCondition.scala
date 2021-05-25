@@ -10,6 +10,7 @@ import weco.catalogue.source_model.sierra.marc.VarField
 import weco.catalogue.source_model.sierra.source.SierraQueryOps
 import weco.catalogue.source_model.sierra.{
   NotRequestable,
+  OtherNotRequestable,
   Requestable,
   SierraBibData,
   SierraBibNumber,
@@ -90,9 +91,8 @@ object SierraAccessCondition extends SierraQueryOps {
         (
           List(
             AccessCondition(
-              status = Some(AccessStatus.Open),
-              terms = notRequestable.message,
-              note = maybeDisplayNote
+              terms = Some("Manual request"),
+              note = Seq(maybeDisplayNote, notRequestable.message).flatten.headOption
             )
           ),
           ItemStatus.Unavailable
@@ -186,6 +186,39 @@ object SierraAccessCondition extends SierraQueryOps {
             AccessCondition(status = Some(AccessStatus.Unavailable), terms = Some("Staff use only"), note = maybeDisplayNote)
           ),
           ItemStatus.Unavailable
+        )
+
+      // "a" = "by appointment
+      case (_, _, _, Some("a"), OtherNotRequestable(None), Some(LocationType.ClosedStores)) =>
+        (
+          List(
+            AccessCondition(status = AccessStatus.ByAppointment)
+          ),
+          ItemStatus.Unavailable
+        )
+
+      // This is more conservative than Encore, which will allow you to request such items.
+      // I'm guessing that Encore is wrong here, and suppressing requests is the right approach.
+      case (Some(AccessStatus.TemporarilyUnavailable), _, Some("-"), Some("f"), Requestable, Some(LocationType.ClosedStores)) =>
+        (
+          List(
+            AccessCondition(status = AccessStatus.TemporarilyUnavailable)
+          ),
+          ItemStatus.TemporarilyUnavailable
+        )
+
+      case (None, _, Some("-"), Some("i"), NotRequestable.ManualRequest(message), Some(LocationType.ClosedStores)) =>
+        (
+          List(
+            AccessCondition(
+              terms = Some("Manual request"),
+              note = maybeDisplayNote match {
+                case Some(note) => Some(note)
+                case None => Some(message)
+              }
+            )
+          ),
+          ItemStatus.Available
         )
 
       case other =>

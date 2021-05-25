@@ -90,6 +90,9 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
           "1186077",
 
           "2872246",
+
+          // ambiguous opacmsg
+          "1850919",
         ).contains(bibId.withoutCheckDigit)
       }
       .filterNot { case (_, _, _, itemData) =>
@@ -301,8 +304,8 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
 
     ac shouldBe List(
       AccessCondition(
-        status = Some(AccessStatus.Open),
-        terms = Some("Please complete a manual request slip.  This item cannot be requested online.")
+        terms = Some("Manual request"),
+        note = Some("Please complete a manual request slip.  This item cannot be requested online.")
       )
     )
     status shouldBe ItemStatus.Unavailable
@@ -564,5 +567,83 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
       AccessCondition(status = Some(AccessStatus.TemporarilyUnavailable), terms = Some("Item is in use by another reader. Please ask at Enquiry Desk."))
     )
     status shouldBe ItemStatus.TemporarilyUnavailable
+  }
+
+  it("an item whose item type prevents it from being requested") {
+    val bibId = createSierraBibNumber
+    val bibData = createSierraBibData
+
+    val itemId = createSierraItemNumber
+    val itemData = createSierraItemDataWith(
+      fixedFields = Map(
+        "61" -> FixedField(label = "I TYPE", value = "18", display = "audio format non-requestable"),
+        "79" -> FixedField(label = "LOCATION", value = "mfohc", display = "Closed stores Moving image and sound collections"),
+        "88" -> FixedField(label = "STATUS", value = "-", display = "Available"),
+        "108" -> FixedField(label = "OPACMSG", value = "a", display = "By appointment"),
+      ),
+      location = Some(SierraSourceLocation(code = "mfohc", name = "Closed stores Moving image and sound collections"))
+    ).copy(holdCount = Some(1))
+
+    val (ac, status) = SierraAccessCondition(bibId, bibData, itemId, itemData)
+
+    ac shouldBe List(
+      AccessCondition(status = AccessStatus.ByAppointment)
+    )
+    status shouldBe ItemStatus.Unavailable
+  }
+
+  it("an item that is temporarily unavailable at the bib level") {
+    // e.g. b28173284
+    // This is more conservative than Encore, which will allow you to request such items.
+    // I'm guessing that Encore is wrong here, and suppressing requests is the right approach.
+    val bibId = createSierraBibNumber
+    val bibData = createSierraBibDataWith(
+      varFields = List(
+        VarField(
+          marcTag = Some("506"),
+          subfields = List(MarcSubfield(tag = "f", content = "Temporarily Unavailable."))
+        )
+      )
+    )
+
+    val itemId = createSierraItemNumber
+    val itemData = createSierraItemDataWith(
+      fixedFields = Map(
+        "79" -> FixedField(label = "LOCATION", value = "scmac", display = "Closed stores Arch. & MSS"),
+        "88" -> FixedField(label = "STATUS", value = "-", display = "Available"),
+        "108" -> FixedField(label = "OPACMSG", value = "f", display = "Online request"),
+      ),
+      location = Some(SierraSourceLocation(code = "scmac", name = "Closed stores Arch. & MSS"))
+    )
+
+    val (ac, status) = SierraAccessCondition(bibId, bibData, itemId, itemData)
+
+    ac shouldBe List(
+      AccessCondition(status = AccessStatus.TemporarilyUnavailable)
+    )
+    status shouldBe ItemStatus.TemporarilyUnavailable
+  }
+
+  it("a manual request") {
+    val bibId = createSierraBibNumber
+    val bibData = createSierraBibData
+
+    val itemId = createSierraItemNumber
+    val itemData = createSierraItemDataWith(
+      fixedFields = Map(
+        "61" -> FixedField(label = "I TYPE", value = "4", display = "serial"),
+        "79" -> FixedField(label = "LOCATION", value = "hgser", display = "Offsite"),
+        "88" -> FixedField(label = "STATUS", value = "-", display = "Available"),
+        "108" -> FixedField(label = "OPACMSG", value = "i", display = "Ask at desk"),
+      ),
+      location = Some(SierraSourceLocation(code = "hgser", name = "Offsite"))
+    )
+
+    val (ac, status) = SierraAccessCondition(bibId, bibData, itemId, itemData)
+
+    ac shouldBe List(
+      AccessCondition(terms = Some("Manual request"), note = Some("Please complete a manual request slip.  This item cannot be requested online."))
+    )
+    status shouldBe ItemStatus.Available
   }
 }
