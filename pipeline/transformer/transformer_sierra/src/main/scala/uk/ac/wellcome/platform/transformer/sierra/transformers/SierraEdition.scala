@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
-import uk.ac.wellcome.platform.transformer.sierra.source.SierraQueryOps
 import weco.catalogue.source_model.sierra.SierraBibData
+import weco.catalogue.source_model.sierra.source.SierraQueryOps
 
 // Populate work:edition
 //
