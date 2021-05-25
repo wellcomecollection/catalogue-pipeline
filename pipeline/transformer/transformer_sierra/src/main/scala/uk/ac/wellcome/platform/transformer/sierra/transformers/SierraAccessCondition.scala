@@ -19,6 +19,8 @@ object SierraAccessCondition extends SierraQueryOps {
     val PermissionRequired = "y"
     val Missing = "m"
     val Unavailable = "r"
+    val Closed = "h"
+    val Restricted = "6"
   }
 
   object OpacMsg {
@@ -27,6 +29,8 @@ object SierraAccessCondition extends SierraQueryOps {
     val OpenShelves = "o"
     val ByAppointment = "a"
     val AtDigitisation = "b"
+    val DonorPermission = "q"
+    val Unavailable = "u"
   }
 
   def apply(bibId: SierraBibNumber, bibData: SierraBibData, itemId: SierraItemNumber, itemData: SierraItemData): (List[AccessCondition], ItemStatus) = {
@@ -65,12 +69,23 @@ object SierraAccessCondition extends SierraQueryOps {
       //
       // TODO: Do any of these items have a display note we want to expose?
       //
-      // Example: b18799966 / i17571170
-      case (None, Some(0), Some(Status.Available), Some(OpacMsg.OnlineRequest), Requestable, Some(LocationType.ClosedStores)) =>
+      // Example: b18799966 / i17571170, b18974946 / i1771276
+      case (bibStatus, Some(0), Some(Status.Available), Some(OpacMsg.OnlineRequest), Requestable, Some(LocationType.ClosedStores))
+          if bibStatus.isEmpty || bibStatus.contains(AccessStatus.Open) =>
         if (displayNote.nonEmpty) {
           println(s"Warn: $bibId / $itemId is online request but has a display note $displayNote")
         }
-        (List(AccessCondition(terms = Some("Online request"))), ItemStatus.Available)
+        (List(AccessCondition(status = bibStatus, terms = Some("Online request"))), ItemStatus.Available)
+
+      // An item which is restricted can be requested online -- the user will have to fill in
+      // any paperwork when they actually visit the library.
+      //
+      // Example: b29459126 / i19023340
+      case (Some(AccessStatus.Restricted), Some(0), Some(Status.Restricted), Some(OpacMsg.OnlineRequest), Requestable, Some(LocationType.ClosedStores)) =>
+        if (displayNote.nonEmpty) {
+          println(s"Warn: $bibId / $itemId is restricted but has a display note $displayNote")
+        }
+        (List(AccessCondition(status = Some(AccessStatus.Restricted), terms = Some("Online request"))), ItemStatus.Available)
 
       // The status "by appointment" takes precedence over "permission required".
       //
@@ -105,6 +120,36 @@ object SierraAccessCondition extends SierraQueryOps {
           println(s"Warn: $bibId / $itemId is missing but has a display note $displayNote")
         }
         (List(AccessCondition(status = Some(AccessStatus.TemporarilyUnavailable), terms = Some("At digitisation and temporarily unavailable."))), ItemStatus.TemporarilyUnavailable)
+
+      // If an item requires permission to view, it's not requestable online.
+      //
+      // Example: b19346955 / i17948149
+      case (Some(AccessStatus.PermissionRequired), _, Some(Status.PermissionRequired), Some(OpacMsg.DonorPermission), NotRequestable.PermissionRequired, Some(LocationType.ClosedStores)) =>
+        if (displayNote.nonEmpty) {
+          println(s"Warn: $bibId / $itemId is perm to view but has a display note $displayNote")
+        }
+        (List(AccessCondition(status = AccessStatus.PermissionRequired)), ItemStatus.Available)
+
+      // If an item is closed, it's not requestable online.
+      //
+      // We don't show the text from rules for requesting -- it's not saying anything
+      // that you can't work out from the AccessStatus.
+      //
+      // Example: b20657365 / i18576503
+      case (Some(AccessStatus.Closed), _, Some(Status.Closed), Some(OpacMsg.Unavailable), NotRequestable.ItemClosed(_), Some(LocationType.ClosedStores)) =>
+        if (displayNote.nonEmpty) {
+          println(s"Warn: $bibId / $itemId is closed but has a display note $displayNote")
+        }
+        (List(AccessCondition(status = AccessStatus.Closed)), ItemStatus.Unavailable)
+
+      // An item that can't be requested online but is viewable by appointment.
+      //
+      // Example: b16561909 / i15842824
+      case (None, _, Some(Status.Available), Some(OpacMsg.ByAppointment), OtherNotRequestable(message), Some(LocationType.ClosedStores)) =>
+        if (displayNote.nonEmpty) {
+          println(s"Warn: $bibId / $itemId is not requestable but has a display note $displayNote")
+        }
+        (List(AccessCondition(status = Some(AccessStatus.ByAppointment), terms = message)), ItemStatus.Available)
 
       case other =>
         println(other)
