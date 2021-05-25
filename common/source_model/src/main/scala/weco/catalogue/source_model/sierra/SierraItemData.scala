@@ -7,7 +7,7 @@ case class SierraItemData(
   deleted: Boolean = false,
   suppressed: Boolean = false,
   location: Option[SierraSourceLocation] = None,
-  holdCount: Option[Int] = None,
+  holdCount: Option[Int] = Some(0),
   fixedFields: Map[String, FixedField] = Map(),
   varFields: List[VarField] = List()
 )

@@ -3,8 +3,17 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil._
+import weco.catalogue.source_model.generators.SierraDataGenerators
 import weco.catalogue.source_model.sierra.Implicits._
-import weco.catalogue.source_model.sierra.{SierraBibData, SierraBibNumber, SierraItemData, SierraItemNumber, SierraTransformable}
+import weco.catalogue.source_model.sierra.marc.FixedField
+import weco.catalogue.source_model.sierra.source.SierraSourceLocation
+import weco.catalogue.source_model.sierra.{
+  SierraBibData,
+  SierraBibNumber,
+  SierraItemData,
+  SierraItemNumber,
+  SierraTransformable
+}
 
 import java.io.{BufferedReader, File, FileInputStream, InputStreamReader}
 import java.util.zip.GZIPInputStream
@@ -26,7 +35,7 @@ object GzFileIterator {
 }
 
 
-class SierraAccessConditionTest extends AnyFunSpec with Matchers {
+class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraDataGenerators {
   it("works") {
     val gz = GzFileIterator(new File("/Users/alexwlchan/desktop/sierra/out.json.gz"))
 
@@ -60,5 +69,25 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers {
           throw err
       }
     }
+  }
+
+  it("an item on the open shelves is available and has no access conditions") {
+    val bibId = createSierraBibNumber
+    val bibData = createSierraBibData
+
+    val itemId = createSierraItemNumber
+    val itemData = createSierraItemDataWith(
+      fixedFields = Map(
+        "79" -> FixedField(label = "LOCATION", value = "wgmem", display = "Medical Collection"),
+        "88" -> FixedField(label = "STATUS", value = "-", display = "Available"),
+        "108" -> FixedField(label = "OPACMSG", value = "o", display = "Available"),
+      ),
+      location = Some(SierraSourceLocation(code = "wgmem", name = "Medical Collection"))
+    )
+
+    val (ac, status) = SierraAccessCondition(bibId, bibData, itemId, itemData)
+
+    ac shouldBe empty
+    status shouldBe ItemStatus.Available
   }
 }

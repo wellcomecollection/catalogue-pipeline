@@ -1,26 +1,44 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
-import weco.catalogue.internal_model.locations.AccessCondition
+import weco.catalogue.internal_model.locations.{
+  AccessCondition,
+  LocationType,
+  PhysicalLocationType
+}
 import weco.catalogue.source_model.sierra.source.SierraQueryOps
-import weco.catalogue.source_model.sierra.{SierraBibData, SierraBibNumber, SierraItemData, SierraItemNumber, SierraRulesForRequesting}
+import weco.catalogue.source_model.sierra.{
+  OpenShelvesNotRequestable,
+  SierraBibData,
+  SierraBibNumber,
+  SierraItemData,
+  SierraItemNumber,
+  SierraRulesForRequesting
+}
+
+sealed trait ItemStatus
+
+object ItemStatus {
+  case object Available extends ItemStatus
+  case object TemporarilyUnavailable extends ItemStatus
+  case object Unavailable extends ItemStatus
+}
 
 object SierraAccessCondition extends SierraQueryOps {
-  def apply(bibId: SierraBibNumber, bibData: SierraBibData, itemId: SierraItemNumber, itemData: SierraItemData): List[AccessCondition] = {
+  def apply(bibId: SierraBibNumber, bibData: SierraBibData, itemId: SierraItemNumber, itemData: SierraItemData): (List[AccessCondition], ItemStatus) = {
     val bibAccessStatus = SierraAccessStatus.forBib(bibId, bibData)
+    val holdCount = itemData.holdCount
+    val status = itemData.status
+    val opacmsg = itemData.opacmsg
+    val isRequestable = SierraRulesForRequesting(itemData)
+    val location: Option[PhysicalLocationType] = itemData.location.map { _.name }.flatMap { SierraPhysicalLocationType.fromName(itemId, _) }
 
-    println(bibAccessStatus)
-    println(itemData.holdCount)
-    println(itemData.status)
-    println(itemData.opacmsg)
+    (bibAccessStatus, holdCount, status, opacmsg, isRequestable, location) match {
+      case (None, Some(0), Some("-"), Some("o"), OpenShelvesNotRequestable(_), Some(LocationType.OpenShelves)) =>
+        (List(), ItemStatus.Available)
 
-    println(SierraRulesForRequesting(itemData))
-
-    println(
-      itemData.location.map { _.name }.map { SierraPhysicalLocationType.fromName(itemId, _) }
-    )
-
-    throw new RuntimeException(s"Unhandled case!")
-    assert(false)
-    List()
+      case other =>
+        println(other)
+        throw new RuntimeException(s"Unhandled case! $other")
+    }
   }
 }
