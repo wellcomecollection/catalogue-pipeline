@@ -43,7 +43,9 @@ object SierraAccessCondition extends SierraQueryOps {
     val opacmsg = itemData.opacmsg
     val isRequestable = SierraRulesForRequesting(itemData)
 
-    // Note: When we wire
+    // Note: When we wire up these into the items/locations code, we'll pass
+    // in these values rather than re-parse them, but this works well enough
+    // for the test harness.
     val bibAccessStatus = SierraAccessStatus.forBib(bibId, bibData)
     val location: Option[PhysicalLocationType] = itemData
       .location.map { _.name }
