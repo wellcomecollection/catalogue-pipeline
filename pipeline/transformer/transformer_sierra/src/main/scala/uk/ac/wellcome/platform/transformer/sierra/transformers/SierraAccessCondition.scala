@@ -119,6 +119,16 @@ object SierraAccessCondition extends SierraQueryOps {
           ItemStatus.Unavailable
         )
 
+      // "6" = "restricted"
+      // "f" = "Online request"
+      case (Some(AccessStatus.Restricted), Some(0), Some("6"), Some("f"), Requestable, Some(LocationType.ClosedStores)) =>
+        (
+          List(
+            AccessCondition(status = Some(AccessStatus.Restricted), terms = Some("Online request"))
+          ),
+          ItemStatus.Available
+        )
+
       case other =>
         println(other)
         throw new RuntimeException(s"Unhandled case! $other")

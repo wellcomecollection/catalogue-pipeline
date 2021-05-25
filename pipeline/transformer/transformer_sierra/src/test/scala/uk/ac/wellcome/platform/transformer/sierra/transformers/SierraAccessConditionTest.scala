@@ -62,6 +62,9 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
         }
 
     bibItemPairs
+      .filterNot { case (bibId, _, _, _) =>
+        Set("1656190").contains(bibId.withoutCheckDigit)
+      }
       .zipWithIndex.foreach { case ((bibId, bibData, itemId, itemData), idx) =>
       val ac = Try { SierraAccessCondition(bibId, bibData, itemId, itemData) }
 
@@ -342,5 +345,34 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
       AccessCondition(status = AccessStatus.Closed)
     )
     status shouldBe ItemStatus.Unavailable
+  }
+
+  it("an item that is restricted") {
+    val bibId = createSierraBibNumber
+    val bibData = createSierraBibDataWith(
+      varFields = List(
+        VarField(
+          marcTag = Some("506"),
+          subfields = List(MarcSubfield(tag = "f", content = "Restricted."))
+        )
+      )
+    )
+
+    val itemId = createSierraItemNumber
+    val itemData = createSierraItemDataWith(
+      fixedFields = Map(
+        "79" -> FixedField(label = "LOCATION", value = "scmac", display = "Closed stores Arch. & MSS"),
+        "88" -> FixedField(label = "STATUS", value = "6", display = "Restricted"),
+        "108" -> FixedField(label = "OPACMSG", value = "f", display = "Online request"),
+      ),
+      location = Some(SierraSourceLocation(code = "scmac", name = "Closed stores Arch. & MSS"))
+    )
+
+    val (ac, status) = SierraAccessCondition(bibId, bibData, itemId, itemData)
+
+    ac shouldBe List(
+      AccessCondition(status = Some(AccessStatus.Restricted), terms = Some("Online request"))
+    )
+    status shouldBe ItemStatus.Available
   }
 }
