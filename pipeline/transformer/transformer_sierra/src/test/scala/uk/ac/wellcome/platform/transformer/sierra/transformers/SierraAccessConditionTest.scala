@@ -83,6 +83,7 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
 
           // investigate further
           "1656560",
+          "1657618",
 
           // strongroom
           "2029687",
@@ -91,6 +92,7 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
           "1186077",
           "1582967",
           "1465752",
+          "1202636",
 
           "2872246",
 
@@ -826,6 +828,29 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
 
     ac shouldBe List(
       AccessCondition(terms = Some("Ask at desk"))
+    )
+    status shouldBe ItemStatus.Available
+  }
+
+  it("if the opacmsg is 'by appointment', even if nothing else is") {
+    // e.g. b1667926
+    val bibId = createSierraBibNumber
+    val bibData = createSierraBibData
+
+    val itemId = createSierraItemNumber
+    val itemData = createSierraItemDataWith(
+      fixedFields = Map(
+        "79" -> FixedField(label = "LOCATION", value = "mfvac", display = "Closed stores Moving image and sound collections"),
+        "88" -> FixedField(label = "STATUS", value = "w", display = "Dept material"),
+        "108" -> FixedField(label = "OPACMSG", value = "a", display = "By appointment"),
+      ),
+      location = Some(SierraSourceLocation(code = "mfvac", name = "Closed stores Moving image and sound collections"))
+    )
+
+    val (ac, status) = SierraAccessCondition(bibId, bibData, itemId, itemData)
+
+    ac shouldBe List(
+      AccessCondition(status = AccessStatus.ByAppointment)
     )
     status shouldBe ItemStatus.Available
   }

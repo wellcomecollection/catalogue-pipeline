@@ -300,6 +300,15 @@ object SierraAccessCondition extends SierraQueryOps {
           ItemStatus.Available
         )
 
+      // If an item has opacmsg 'by appointment', that overrules requestability
+      case (None, Some(0), Some("w"), Some("a"), Requestable, Some(LocationType.ClosedStores)) =>
+        (
+          List(
+            AccessCondition(status = AccessStatus.ByAppointment)
+          ),
+          ItemStatus.Available
+        )
+
       case other =>
         println(other)
         throw new RuntimeException(s"Unhandled case! $other")
