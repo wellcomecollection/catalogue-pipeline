@@ -58,7 +58,7 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
           bibData.suppressed | bibData.deleted | itemData.suppressed | itemData.deleted
       }
       .filterNot { case (bibId, _, _, _) =>
-        Set().contains(bibId.withoutCheckDigit)
+        Set("b32165274", "b16679027", "b14269867", "b28157904", "b20296873", "b16624725", "b28722462", "b1672561x", "b28173284", "b18509198").contains(bibId.withCheckDigit)
       }
       .filterNot { case (_, _, _, itemData) =>
         itemData.location.map { _.code }.contains("bwith") | itemData.location.map { _.code }.contains("cwith")
@@ -73,12 +73,12 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
         ac match {
           case Success(_) => ()
           case Failure(err) =>
-            println(s"Got to $idx")
-            println(bibId)
+            println(s"===\nGot to $idx")
+            println(bibId.withCheckDigit)
             println(bibData.varFields.filter(_.marcTag.contains("506")))
-            println(itemId)
+            println(itemId.withCheckDigit)
             println(itemData.location)
-            println(itemData.fixedFields.filterNot { case (code, _) => Set("161", "306", "70", "86", "64", "81", "87", "59", "64", "76", "98", "93", "84", "265", "62", "83", "77", "110", "60", "94", "127", "57", "58", "74", "85").contains(code) })
+            println(itemData.fixedFields.filterNot { case (code, _) => Set("68", "63", "71",  "72", "80", "67", "66", "69", "78", "109", "162", "264", "161", "306", "70", "86", "64", "81", "59", "64", "76", "98", "93", "84", "265", "62", "83", "77", "110", "60", "94", "127", "57", "58", "74", "85").contains(code) })
             println(itemData.varFields.filter(_.fieldTag.contains("n")))
             println("")
             throw err
@@ -168,7 +168,7 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
         status shouldBe ItemStatus.Available
       }
 
-      it("if it needs an appointment, then it cannot be requested online") {
+      it("if the bib is by appointment, then the item cannot be requested online") {
         val bibId = createSierraBibNumber
         val bibData = createSierraBibDataWith(
           varFields = List(
@@ -202,6 +202,29 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
 
         ac shouldBe List(
           AccessCondition(status = Some(AccessStatus.ByAppointment), note = Some("Offsite"))
+        )
+        status shouldBe ItemStatus.Available
+      }
+
+      it("if the item is by appointment, then it cannot be requested online") {
+        val bibId = createSierraBibNumber
+        val bibData = createSierraBibData
+
+        val itemId = createSierraItemNumber
+        val itemData = createSierraItemDataWith(
+          holdCount = Some(0),
+          fixedFields = Map(
+            "79" -> FixedField(label = "LOCATION", value = "sepbr", display = "Closed stores EPB Planchests"),
+            "88" -> FixedField(label = "STATUS", value = "y", display = "Permission required"),
+            "108" -> FixedField(label = "OPACMSG", value = "a", display = "By appointment"),
+          ),
+          location = Some(SierraSourceLocation(code = "sepbr", name = "Closed stores EPB Planchests"))
+        )
+
+        val (ac, status) = SierraAccessCondition(bibId, bibData, itemId, itemData)
+
+        ac shouldBe List(
+          AccessCondition(status = Some(AccessStatus.ByAppointment))
         )
         status shouldBe ItemStatus.Available
       }
@@ -284,7 +307,7 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
         status shouldBe ItemStatus.TemporarilyUnavailable
       }
 
-      it("and it requires permission") {
+      it("if it requires permission and so does the bib") {
         val bibId = createSierraBibNumber
         val bibData = createSierraBibDataWith(
           varFields = List(
@@ -316,7 +339,7 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
         status shouldBe ItemStatus.Available
       }
 
-      it("and it is closed") {
+      it("if the bib and item are both closed, then the item cannot be requested") {
         val bibId = createSierraBibNumber
         val bibData = createSierraBibDataWith(
           varFields = List(
@@ -338,6 +361,38 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
             "108" -> FixedField(label = "OPACMSG", value = "u", display = "Unavailable"),
           ),
           location = Some(SierraSourceLocation(code = "sc#ac", name = "Unrequestable Arch. & MSS"))
+        )
+
+        val (ac, status) = SierraAccessCondition(bibId, bibData, itemId, itemData)
+
+        ac shouldBe List(
+          AccessCondition(status = AccessStatus.Closed)
+        )
+        status shouldBe ItemStatus.Unavailable
+      }
+
+      it("if the bib and item are both closed and the item has no location, then the item cannot be requested") {
+        val bibId = createSierraBibNumber
+        val bibData = createSierraBibDataWith(
+          varFields = List(
+            VarField(
+              marcTag = Some("506"),
+              subfields = List(
+                MarcSubfield(tag = "f", content = "Closed.")
+              )
+            )
+          )
+        )
+
+        val itemId = createSierraItemNumber
+        val itemData = createSierraItemDataWith(
+          holdCount = Some(0),
+          fixedFields = Map(
+            "79" -> FixedField(label = "LOCATION", value = "", display = ""),
+            "88" -> FixedField(label = "STATUS", value = "h", display = "Closed"),
+            "108" -> FixedField(label = "OPACMSG", value = "u", display = "Unavailable"),
+          ),
+          location = None
         )
 
         val (ac, status) = SierraAccessCondition(bibId, bibData, itemId, itemData)
@@ -402,6 +457,107 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
           AccessCondition(status = Some(AccessStatus.Restricted), terms = Some("Online request"))
         )
         status shouldBe ItemStatus.Available
+      }
+
+      it("if the item is for staff use only") {
+        val bibId = createSierraBibNumber
+        val bibData = createSierraBibData
+
+        val itemId = createSierraItemNumber
+        val itemData = createSierraItemDataWith(
+          holdCount = Some(0),
+          fixedFields = Map(
+            "61" -> FixedField(label = "I TYPE", value = "17", display = "film"),
+            "79" -> FixedField(label = "LOCATION", value = "mfohc", display = "Closed stores Moving image and sound collections"),
+            "88" -> FixedField(label = "STATUS", value = "-", display = "Available"),
+            "108" -> FixedField(label = "OPACMSG", value = "s", display = "Staff use only"),
+          ),
+          location = Some(SierraSourceLocation(code = "mfohc", name = "Closed stores Moving image and sound collections"))
+        )
+
+        val (ac, status) = SierraAccessCondition(bibId, bibData, itemId, itemData)
+
+        ac shouldBe List(
+          AccessCondition(status = Some(AccessStatus.Unavailable), terms = Some("Staff use only"))
+        )
+        status shouldBe ItemStatus.Unavailable
+      }
+
+      it("if the item is on exhibition") {
+        val bibId = createSierraBibNumber
+        val bibData = createSierraBibData
+
+        val itemId = createSierraItemNumber
+        val itemData = createSierraItemDataWith(
+          holdCount = Some(0),
+          fixedFields = Map(
+            "61" -> FixedField(label = "I TYPE", value = "22", display = "exhibit"),
+            "79" -> FixedField(label = "LOCATION", value = "exres", display = "On Exhibition"),
+            "87" -> FixedField(label = "LOANRULE", value = "26"),
+            "88" -> FixedField(label = "STATUS", value = "-", display = "Available"),
+            "108" -> FixedField(label = "OPACMSG", value = "f", display = "Online request"),
+          ),
+          location = Some(SierraSourceLocation(code = "exres", name = "On Exhibition"))
+        )
+
+        val (ac, status) = SierraAccessCondition(bibId, bibData, itemId, itemData)
+
+        ac shouldBe List(
+          AccessCondition(status = Some(AccessStatus.TemporarilyUnavailable), terms = Some("Item is on Exhibition Reserve. Please ask at the Enquiry Desk"))
+        )
+        status shouldBe ItemStatus.TemporarilyUnavailable
+      }
+    }
+
+    describe("and has at least one hold") {
+      it("if it's still in the stores, it can't be requested") {
+        val bibId = createSierraBibNumber
+        val bibData = createSierraBibData
+
+        val itemId = createSierraItemNumber
+        val itemData = createSierraItemDataWith(
+          holdCount = Some(1),
+          fixedFields = Map(
+            "79" -> FixedField(label = "LOCATION", value = "sgeph", display = "Closed stores ephemera"),
+            "88" -> FixedField(label = "STATUS", value = "-", display = "Available"),
+            "108" -> FixedField(label = "OPACMSG", value = "f", display = "Online request"),
+          ),
+          location = Some(SierraSourceLocation(code = "sgeph", name = "Closed stores ephemera"))
+        )
+
+        val (ac, status) = SierraAccessCondition(bibId, bibData, itemId, itemData)
+
+        ac shouldBe List(
+          AccessCondition(
+            status = Some(AccessStatus.TemporarilyUnavailable),
+            terms = Some("Item is in use by another reader. Please ask at Enquiry Desk."))
+        )
+        status shouldBe ItemStatus.TemporarilyUnavailable
+      }
+
+      it("if it's on the holdshelf, it can't be requested") {
+        val bibId = createSierraBibNumber
+        val bibData = createSierraBibData
+
+        val itemId = createSierraItemNumber
+        val itemData = createSierraItemDataWith(
+          holdCount = Some(1),
+          fixedFields = Map(
+            "79" -> FixedField(label = "LOCATION", value = "swms4", display = "Closed stores WMS 4"),
+            "88" -> FixedField(label = "STATUS", value = "!", display = "On holdshelf"),
+            "108" -> FixedField(label = "OPACMSG", value = "f", display = "Online request"),
+          ),
+          location = Some(SierraSourceLocation(code = "swms4", name = "Closed stores WMS 4"))
+        )
+
+        val (ac, status) = SierraAccessCondition(bibId, bibData, itemId, itemData)
+
+        ac shouldBe List(
+          AccessCondition(
+            status = Some(AccessStatus.TemporarilyUnavailable),
+            terms = Some("Item is in use by another reader. Please ask at Enquiry Desk."))
+        )
+        status shouldBe ItemStatus.TemporarilyUnavailable
       }
     }
   }

@@ -21,6 +21,7 @@ object SierraAccessCondition extends SierraQueryOps {
     val Unavailable = "r"
     val Closed = "h"
     val Restricted = "6"
+    val OnHoldshelf = "!"
   }
 
   object OpacMsg {
@@ -31,6 +32,7 @@ object SierraAccessCondition extends SierraQueryOps {
     val AtDigitisation = "b"
     val DonorPermission = "q"
     val Unavailable = "u"
+    val StaffUseOnly = "s"
   }
 
   def apply(bibId: SierraBibNumber, bibData: SierraBibData, itemId: SierraItemNumber, itemData: SierraItemData): (List[AccessCondition], ItemStatus) = {
@@ -89,8 +91,9 @@ object SierraAccessCondition extends SierraQueryOps {
 
       // The status "by appointment" takes precedence over "permission required".
       //
-      // Example: b32214832 / i19389383
-      case (Some(AccessStatus.ByAppointment), Some(0), Some(Status.PermissionRequired), Some(OpacMsg.ByAppointment), NotRequestable.PermissionRequired, Some(LocationType.ClosedStores)) =>
+      // Examples: b32214832 / i19389383, b16576111 / 15862409
+      case (bibStatus, Some(0), Some(Status.PermissionRequired), Some(OpacMsg.ByAppointment), NotRequestable.PermissionRequired, Some(LocationType.ClosedStores))
+          if bibStatus.isEmpty || bibStatus.contains(AccessStatus.ByAppointment) =>
         (List(AccessCondition(status = Some(AccessStatus.ByAppointment), note = maybeDisplayNote)), ItemStatus.Available)
 
       // Manual requesting if all values are consistent.
@@ -135,8 +138,9 @@ object SierraAccessCondition extends SierraQueryOps {
       // We don't show the text from rules for requesting -- it's not saying anything
       // that you can't work out from the AccessStatus.
       //
-      // Example: b20657365 / i18576503
-      case (Some(AccessStatus.Closed), _, Some(Status.Closed), Some(OpacMsg.Unavailable), NotRequestable.ItemClosed(_), Some(LocationType.ClosedStores)) =>
+      // Examples: b20657365 / i18576503, b1899457x / i17720734
+      case (Some(AccessStatus.Closed), _, Some(Status.Closed), Some(OpacMsg.Unavailable), NotRequestable.ItemClosed(_), locationType)
+          if locationType.isEmpty || locationType.contains(LocationType.ClosedStores) =>
         if (displayNote.nonEmpty) {
           println(s"Warn: $bibId / $itemId is closed but has a display note $displayNote")
         }
@@ -150,6 +154,38 @@ object SierraAccessCondition extends SierraQueryOps {
           println(s"Warn: $bibId / $itemId is not requestable but has a display note $displayNote")
         }
         (List(AccessCondition(status = Some(AccessStatus.ByAppointment), terms = message)), ItemStatus.Available)
+
+      // An item for staff use only can't be requested online.
+      //
+      // Example: b20164579 / i18446383
+      case (None, _, Some(Status.Available), Some(OpacMsg.StaffUseOnly), OtherNotRequestable(None), Some(LocationType.ClosedStores)) =>
+        if (displayNote.nonEmpty) {
+          println(s"Warn: $bibId / $itemId is not requestable but has a display note $displayNote")
+        }
+        (List(AccessCondition(status = Some(AccessStatus.Unavailable), terms = Some("Staff use only"))), ItemStatus.Unavailable)
+
+      // An item on exhibition is temporarily unavailable.
+      //
+      // Note: The rules for requesting give you a message about this item being in use by another reader;
+      // this is technically true (it's checked out to the exhibitions patron ID) but not useful.
+      // We intercept this message if we detect the OnExhibition location type.
+      //
+      // Example: b11860777 / i1207858x
+      case (None, _, _, _, NotRequestable.ItemOnHold(_), Some(LocationType.OnExhibition)) =>
+        (List(AccessCondition(status = Some(AccessStatus.TemporarilyUnavailable), terms = Some("Item is on Exhibition Reserve. Please ask at the Enquiry Desk"))), ItemStatus.TemporarilyUnavailable)
+
+      // If an item is on hold for another reader, it can't be requested -- even
+      // if it would ordinarily be requestable.
+      //
+      // Note that an item on hold goes through two stages:
+      //  1. A reader places a hold, but the item is still in the store
+      //  2. A staff member collects the item from the store, and places it on the holdshelf
+      //
+      case (None, Some(holdCount), _, _, Requestable, Some(LocationType.ClosedStores)) if holdCount > 0=>
+        (List(AccessCondition(status = Some(AccessStatus.TemporarilyUnavailable), terms = Some("Item is in use by another reader. Please ask at Enquiry Desk."))), ItemStatus.TemporarilyUnavailable)
+
+      case (None, _, _, _, NotRequestable.ItemOnHold(_), Some(LocationType.ClosedStores)) =>
+        (List(AccessCondition(status = Some(AccessStatus.TemporarilyUnavailable), terms = Some("Item is in use by another reader. Please ask at Enquiry Desk."))), ItemStatus.TemporarilyUnavailable)
 
       case other =>
         println(other)
