@@ -77,13 +77,20 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
 
           // opacmsg = "manual request", surely shouldn't be requestable
           "1426986",
+          "1662472",
 
           // investigate further
           "1656560",
+
+          // strongroom
+          "2029687",
+
+          // on exhibition
+          "1186077"
         ).contains(bibId.withoutCheckDigit)
       }
       .filterNot { case (_, _, _, itemData) =>
-        itemData.location.map { _.code }.contains("bwith")
+        itemData.location.map { _.code }.contains("bwith") | itemData.location.map { _.code }.contains("cwith")
       }
       .filterNot {
         case (_, _, _, itemData) =>
@@ -510,5 +517,27 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
       AccessCondition(status = Some(AccessStatus.Unavailable), terms = Some("Item not available due to provisions of Data Protection Act. Return to Archives catalogue to see when this file will be opened."))
     )
     status shouldBe ItemStatus.Unavailable
+  }
+
+  it("an item that is on hold but would otherwise be available") {
+    val bibId = createSierraBibNumber
+    val bibData = createSierraBibData
+
+    val itemId = createSierraItemNumber
+    val itemData = createSierraItemDataWith(
+      fixedFields = Map(
+        "79" -> FixedField(label = "LOCATION", value = "sgeph", display = "Closed stores ephemera"),
+        "88" -> FixedField(label = "STATUS", value = "-", display = "Available"),
+        "108" -> FixedField(label = "OPACMSG", value = "f", display = "Online request"),
+      ),
+      location = Some(SierraSourceLocation(code = "sgeph", name = "Closed stores ephemera"))
+    ).copy(holdCount = Some(1))
+
+    val (ac, status) = SierraAccessCondition(bibId, bibData, itemId, itemData)
+
+    ac shouldBe List(
+      AccessCondition(status = Some(AccessStatus.TemporarilyUnavailable), terms = Some("Item is on hold for another reader."))
+    )
+    status shouldBe ItemStatus.TemporarilyUnavailable
   }
 }

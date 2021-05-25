@@ -10,4 +10,6 @@ case class SierraItemData(
   holdCount: Option[Int] = Some(0),
   fixedFields: Map[String, FixedField] = Map(),
   varFields: List[VarField] = List()
-)
+) {
+  require(holdCount.getOrElse(0) >= 0, s"Item has a negative hold count, how? $holdCount")
+}
