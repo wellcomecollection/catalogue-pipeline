@@ -61,12 +61,14 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
           }
         }
 
-    bibItemPairs.foreach { case (bibId, bibData, itemId, itemData) =>
+    bibItemPairs
+      .zipWithIndex.foreach { case ((bibId, bibData, itemId, itemData), idx) =>
       val ac = Try { SierraAccessCondition(bibId, bibData, itemId, itemData) }
 
       ac match {
         case Success(_) => ()
         case Failure(err) =>
+          println(s"Got to $idx")
           println(bibId)
           println(bibData)
           println(itemId)
@@ -115,7 +117,7 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
     ac shouldBe List(
       AccessCondition(
         status = Some(AccessStatus.Open),
-        note = Some("Online request")
+        terms = Some("Online request")
       )
     )
     status shouldBe ItemStatus.Available
@@ -188,8 +190,32 @@ class SierraAccessConditionTest extends AnyFunSpec with Matchers with SierraData
     ac shouldBe List(
       AccessCondition(
         status = Some(AccessStatus.Open),
-        note = Some("Manual request"),
         terms = Some("Please complete a manual request slip.  This item cannot be requested online.")
+      )
+    )
+    status shouldBe ItemStatus.Unavailable
+  }
+
+  it("an item that is missing") {
+    val bibId = createSierraBibNumber
+    val bibData = createSierraBibData
+
+    val itemId = createSierraItemNumber
+    val itemData = createSierraItemDataWith(
+      fixedFields = Map(
+        "79" -> FixedField(label = "LOCATION", value = "sghi2", display = "Closed stores Hist. 2"),
+        "88" -> FixedField(label = "STATUS", value = "m", display = "Missing"),
+        "108" -> FixedField(label = "OPACMSG", value = "f", display = "Online request"),
+      ),
+      location = Some(SierraSourceLocation(code = "sghi2", name = "Closed stores Hist. 2"))
+    )
+
+    val (ac, status) = SierraAccessCondition(bibId, bibData, itemId, itemData)
+
+    ac shouldBe List(
+      AccessCondition(
+        status = Some(AccessStatus.Unavailable),
+        terms = Some("This item is missing.")
       )
     )
     status shouldBe ItemStatus.Unavailable

@@ -22,6 +22,10 @@ object NotRequestable {
   case object PermissionRequired extends NotRequestable {
     val message: Option[String] = None
   }
+
+  case class ItemMissing(displayMessage: String) extends NotRequestable {
+    val message: Option[String] = Some(displayMessage)
+  }
 }
 
 case class OtherNotRequestable(message: Option[String] = None)
@@ -77,7 +81,7 @@ object SierraRulesForRequesting extends SierraQueryOps {
       // These rules mean "if fixed field 88 on the item has a given value,
       // show this message".
       case i if i.status.contains("m") =>
-        OtherNotRequestable(message = "This item is missing.")
+        NotRequestable.ItemMissing("This item is missing.")
       case i if i.status.contains("s") =>
         OtherNotRequestable(message = "This item is on search.")
       case i if i.status.contains("x") =>

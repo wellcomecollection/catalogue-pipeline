@@ -44,7 +44,7 @@ object SierraAccessCondition extends SierraQueryOps {
       // f = "Online request"
       case (None, Some(0), Some("-"), Some("f"), Requestable, Some(LocationType.ClosedStores)) =>
         (
-          List(AccessCondition(status = Some(AccessStatus.Open), note = Some("Online request"))),
+          List(AccessCondition(status = Some(AccessStatus.Open), terms = Some("Online request"))),
           ItemStatus.Available
         )
 
@@ -67,8 +67,19 @@ object SierraAccessCondition extends SierraQueryOps {
           List(
             AccessCondition(
               status = Some(AccessStatus.Open),
-              note = Some("Manual request"),
               terms = notRequestable.message
+            )
+          ),
+          ItemStatus.Unavailable
+        )
+
+      // "m" = "missing"
+      case (_, _, Some("m"), _, NotRequestable.ItemMissing(missingMessage), _) =>
+        (
+          List(
+            AccessCondition(
+              status = Some(AccessStatus.Unavailable),
+              terms = Some(missingMessage)
             )
           ),
           ItemStatus.Unavailable

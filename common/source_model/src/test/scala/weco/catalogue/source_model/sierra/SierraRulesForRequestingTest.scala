@@ -33,7 +33,6 @@ class SierraRulesForRequestingTest
   it("blocks an item based on the status") {
     val testCases = Table(
       ("status", "expectedMessage"),
-      ("m", Some("This item is missing.")),
       ("s", Some("This item is on search.")),
       ("x", Some("This item is withdrawn.")),
       ("r", Some("This item is unavailable.")),
@@ -56,6 +55,15 @@ class SierraRulesForRequestingTest
         sierra.SierraRulesForRequesting(item) shouldBe OtherNotRequestable(
           expectedMessage)
     }
+  }
+
+  it("blocks a missing item") {
+    val item = createSierraItemDataWith(
+      fixedFields =
+        Map("88" -> FixedField(label = "STATUS", value = "m"))
+    )
+
+    sierra.SierraRulesForRequesting(item) shouldBe NotRequestable.ItemMissing("This item is missing.")
   }
 
   it("blocks an item based on the permission required status") {

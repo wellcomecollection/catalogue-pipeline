@@ -3,7 +3,6 @@ package weco.catalogue.internal_model.locations
 case class AccessCondition(
   status: Option[AccessStatus] = None,
   terms: Option[String] = None,
-  note: Option[String] = None,
   to: Option[String] = None
 ) {
   def isEmpty: Boolean =
