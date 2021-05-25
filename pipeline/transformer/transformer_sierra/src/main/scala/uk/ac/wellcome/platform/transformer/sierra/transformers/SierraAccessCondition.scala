@@ -66,7 +66,7 @@ object SierraAccessCondition extends SierraQueryOps {
           List(AccessCondition(status = Some(AccessStatus.TemporarilyUnavailable), terms = Some("Item is on hold for another reader."), note = maybeDisplayNote)),
           ItemStatus.TemporarilyUnavailable
         )
-      case (None, Some(holdCount), Some("!"), Some("f"), NotRequestable.ItemOnHold(message), Some(LocationType.ClosedStores)) if holdCount > 0 =>
+      case (None, _, _, Some("f"), NotRequestable.ItemOnHold(message), Some(LocationType.ClosedStores)) =>
         (
           List(AccessCondition(status = Some(AccessStatus.TemporarilyUnavailable), terms = Some(message), note = maybeDisplayNote)),
           ItemStatus.TemporarilyUnavailable
@@ -171,7 +171,7 @@ object SierraAccessCondition extends SierraQueryOps {
 
       // "6" = "restricted"
       // "f" = "Online request"
-      case (Some(AccessStatus.Restricted), Some(0), Some("6"), Some("f"), Requestable, Some(LocationType.ClosedStores)) =>
+      case (Some(AccessStatus.Restricted), Some(0), status, Some("f"), Requestable, Some(LocationType.ClosedStores)) if status.contains("6") | status.contains("-") =>
         (
           List(
             AccessCondition(status = Some(AccessStatus.Restricted), terms = Some("Online request"), note = maybeDisplayNote)
@@ -217,6 +217,85 @@ object SierraAccessCondition extends SierraQueryOps {
                 case None => Some(message)
               }
             )
+          ),
+          ItemStatus.Available
+        )
+
+      // This sometimes happens where the bib-level record has been updated, but the item
+      // not.  There's often an accompanying bib message like:
+      //
+      //    This item was previously restricted until 01/01/2021. It was reassessed in April 2021
+      //    and subsequently opened
+      //
+      // but there's no way to distinguish that from:
+      //
+      //    This item was previously open until 01/01/2021. It was reassessed in April 2021 and
+      //    subsequently restricted
+      //
+      // so we assume the least permissive status.
+      //
+      // "6" = "Restricted"
+      // "f" = "Online request"
+      //
+      // TODO: Log here
+      case (Some(AccessStatus.Open), Some(0), Some("6"), Some("f"), Requestable, Some(LocationType.ClosedStores)) =>
+        (
+          List(
+            AccessCondition(
+              status = Some(AccessStatus.Restricted),
+              terms = Some("Online request"),
+              note = maybeDisplayNote
+            )
+          ),
+          ItemStatus.Available
+        )
+
+      case (Some(AccessStatus.TemporarilyUnavailable), _, Some("r"), Some("u"), OtherNotRequestable(message), Some(LocationType.ClosedStores)) =>
+        (
+          List(
+            AccessCondition(
+              status = Some(AccessStatus.TemporarilyUnavailable),
+              terms = maybeDisplayNote match {
+                case Some(note) => Some(note)
+                case None => message
+              },
+            )
+          ),
+          ItemStatus.TemporarilyUnavailable
+        )
+
+      // This looks like a flat-out bug in the data.  Only the OPACMSG tells us this is a manual request.
+      // "n" = "manual request"
+      // As above, we choose the msot conservative case.
+      case (None, Some(0), Some("-"), Some("n"), Requestable, Some(LocationType.ClosedStores)) =>
+        (
+          List(
+            AccessCondition(
+              terms = Some("Manual request"),
+              note = maybeDisplayNote
+            )
+          ),
+          ItemStatus.Available
+        )
+
+      // Another data bug.  Only the bib tells us this isn't requestable online.
+      // As above, choose conservatively, double-check later.
+      // "-" = "available"
+      // "f" = "online request"
+      case (Some(AccessStatus.ByAppointment), Some(0), Some("-"), Some("f"), Requestable, Some(LocationType.ClosedStores)) =>
+        (
+          List(
+            AccessCondition(status = AccessStatus.ByAppointment)
+          ),
+          ItemStatus.Available
+        )
+
+      // Looks like a bug somewhere
+      // an open shelves item shouldn't be closed stores
+      case (None, Some(0), Some("-"), Some("i"), NotRequestable.OpenShelves(_), Some(LocationType.ClosedStores)) =>
+        (
+          List(
+            AccessCondition(terms = Some("Ask at desk"))
           ),
           ItemStatus.Available
         )
