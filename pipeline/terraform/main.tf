@@ -4,8 +4,7 @@ module "catalogue_pipeline_2021-05-17" {
   pipeline_date = "2021-05-17"
   release_label = "2021-05-17"
 
-  # This pipeline is temporarily disabled.
-  max_capacity = 0
+  max_capacity = 1
 
   # Transformer config
   #
