@@ -306,6 +306,27 @@ class SierraItemAccessTest extends AnyFunSpec with Matchers with SierraDataGener
         )
         itemStatus shouldBe ItemStatus.TemporarilyUnavailable
       }
+
+      it("if the bib and item are by appointment") {
+        val itemData = createSierraItemDataWith(
+          fixedFields = Map(
+            "79" -> FixedField(label = "LOCATION", value = "scmac", display = "Closed stores Arch. & MSS"),
+            "88" -> FixedField(label = "STATUS", value = "y", display = "Permission required"),
+            "108" -> FixedField(label = "OPACMSG", value = "a", display = "By appointment"),
+          )
+        )
+
+        val (ac, itemStatus) = SierraItemAccess(
+          bibStatus = Some(AccessStatus.ByAppointment),
+          location = Some(LocationType.ClosedStores),
+          itemData = itemData
+        )
+
+        ac shouldBe Some(
+          AccessCondition(status = AccessStatus.ByAppointment)
+        )
+        itemStatus shouldBe ItemStatus.Available
+      }
     }
   }
 

@@ -165,6 +165,25 @@ object SierraItemAccess extends SierraQueryOps {
               note = itemData.displayNote)),
           ItemStatus.Available)
 
+      // The status "by appointment" takes precedence over "permission required".
+      //
+      // Examples: b32214832 / i19389383, b16576111 / 15862409
+      case (
+        bibStatus,
+        Some(0),
+        Some(Status.PermissionRequired),
+        Some(OpacMsg.ByAppointment),
+        NotRequestable.NoReason,
+        Some(LocationType.ClosedStores))
+        if bibStatus.isEmpty || bibStatus.contains(AccessStatus.ByAppointment) || bibStatus
+          .contains(AccessStatus.PermissionRequired) =>
+        (
+          Some(
+            AccessCondition(
+              status = Some(AccessStatus.ByAppointment),
+              note = itemData.displayNote)),
+          ItemStatus.Available)
+
       case other =>
         println(s"@@ $other @@")
         throw new Throwable("Unhandled!!!")
