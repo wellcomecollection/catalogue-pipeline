@@ -1,22 +1,22 @@
-module "tei_adapter_output" {
+module "tei_id_extractor_topic" {
   source = "github.com/wellcomecollection/terraform-aws-sns-topic.git?ref=v1.0.0"
-  name   = "tei-adapter-output"
+  name   = "tei-id-extractor"
 }
 
 
-data "aws_iam_policy_document" "publish_to_adapter_output_topic" {
+data "aws_iam_policy_document" "publish_to_tei_id_extractor_topic" {
   statement {
     actions = [
       "sns:Publish",
     ]
 
     resources = [
-      module.tei_adapter_output.arn
+      module.tei_id_extractor_topic.arn
     ]
   }
 }
 
 resource "aws_iam_role_policy" "tei_github_policy" {
-  role   = module.tei_github.task_role_name
-  policy = data.aws_iam_policy_document.publish_to_adapter_output_topic.json
+  role   = module.tei_id_extractor.task_role_name
+  policy = data.aws_iam_policy_document.publish_to_tei_id_extractor_topic.json
 }

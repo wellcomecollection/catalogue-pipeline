@@ -297,7 +297,7 @@ object CatalogueDependencies {
 
   // TEI adapter
 
-  val teiGitHubDependencies: Seq[ModuleID] = {
+  val teiIdExtractorDependencies: Seq[ModuleID] = {
     WellcomeDependencies.messagingTypesafeLibrary ++
       ExternalDependencies.scalatestDependencies
   }
