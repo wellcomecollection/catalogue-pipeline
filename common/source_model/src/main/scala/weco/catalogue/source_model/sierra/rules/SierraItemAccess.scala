@@ -51,6 +51,28 @@ object SierraItemAccess extends SierraQueryOps {
 
         (Some(ac), ItemStatus.Available)
 
+      // Items on the open shelves don't have any access conditions.
+      //
+      // We could add an access status of "Open" here, but it feels dubious to be
+      // synthesising access information that doesn't come from the source records.
+      //
+      // Note: We create an AccessCondition here so we can carry information from the
+      // display note.  This is used sparingly, but occasionally contains useful information
+      // for readers, e.g.
+      //
+      //      Shelved at the end of the Quick Ref. section with the oversize Quick Ref. books.
+      //
+      // Example: b1659504x / i15894897
+      case (
+        None,
+        Some(0),
+        Some(Status.Available),
+        Some(OpacMsg.OpenShelves),
+        NotRequestable.OnOpenShelves(_),
+        Some(LocationType.OpenShelves)) =>
+        val ac = itemData.displayNote.map { note => AccessCondition(note = Some(note)) }
+        (ac, ItemStatus.Available)
+
       case other =>
         println(s"@@ $other @@")
         throw new Throwable("Unhandled!!!")

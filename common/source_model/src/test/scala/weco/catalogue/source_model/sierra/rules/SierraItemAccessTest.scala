@@ -11,7 +11,7 @@ import weco.catalogue.internal_model.locations.{
 }
 import weco.catalogue.source_model.generators.SierraDataGenerators
 import weco.catalogue.source_model.sierra.Implicits._
-import weco.catalogue.source_model.sierra.marc.FixedField
+import weco.catalogue.source_model.sierra.marc.{FixedField, VarField}
 import weco.catalogue.source_model.sierra.{
   SierraBibData,
   SierraBibNumber,
@@ -36,7 +36,7 @@ class SierraItemAccessTest extends AnyFunSpec with Matchers with SierraDataGener
         val reader =
           new BufferedReader(
             new InputStreamReader(
-              new FileInputStream("/Users/alexwlchan/desktop/sierra/out.json")))
+              new FileInputStream("/Users/alexwlchan/desktop/sierra/out_trimmed6.json")))
 
         override def hasNext: Boolean = reader.ready
         override def next(): String = reader.readLine()
@@ -160,6 +160,58 @@ class SierraItemAccessTest extends AnyFunSpec with Matchers with SierraDataGener
         )
 
         ac shouldBe Some(AccessCondition(terms = Some("Online request")))
+        itemStatus shouldBe ItemStatus.Available
+      }
+    }
+  }
+
+  describe("an item on the open shelves") {
+    describe("with no holds or other restrictions") {
+      it("cannot be requested online") {
+        val itemData = createSierraItemDataWith(
+          fixedFields = Map(
+            "79" -> FixedField(label = "LOCATION", value = "wgmem", display = "Medical Collection"),
+            "88" -> FixedField(label = "STATUS", value = "-", display = "Available"),
+            "108" -> FixedField(label = "OPACMSG", value = "o", display = "Open shelves"),
+          )
+        )
+
+        val (ac, itemStatus) = SierraItemAccess(
+          bibStatus = None,
+          location = Some(LocationType.OpenShelves),
+          itemData = itemData
+        )
+
+        ac shouldBe None
+        itemStatus shouldBe ItemStatus.Available
+      }
+
+      it("gets a display note") {
+        val itemData = createSierraItemDataWith(
+          fixedFields = Map(
+            "79" -> FixedField(label = "LOCATION", value = "wgpvm", display = "History of Medicine"),
+            "88" -> FixedField(label = "STATUS", value = "-", display = "Available"),
+            "108" -> FixedField(label = "OPACMSG", value = "o", display = "Open shelves"),
+          ),
+          varFields = List(
+            VarField(
+              fieldTag = Some("n"),
+              content = Some("Shelved at the end of the Quick Ref. section with the oversize Quick Ref. books.")
+            )
+          )
+        )
+
+        val (ac, itemStatus) = SierraItemAccess(
+          bibStatus = None,
+          location = Some(LocationType.OpenShelves),
+          itemData = itemData
+        )
+
+        ac shouldBe Some(
+          AccessCondition(
+            note = Some("Shelved at the end of the Quick Ref. section with the oversize Quick Ref. books.")
+          )
+        )
         itemStatus shouldBe ItemStatus.Available
       }
     }
