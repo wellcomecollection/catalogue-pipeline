@@ -43,7 +43,7 @@ object SierraRulesForRequesting {
       //    q|i||97||=|x||This item belongs in the Strongroom
       //
       // This rule means "if fixed field 97 on the item has the value 'x'".
-      case i if i.imessage.contains("x") =>
+      case i if i.fixedField("97").contains("x") =>
         NotRequestable.BelongsInStrongroom("This item belongs in the Strongroom")
 
       // These cases cover the lines:
@@ -58,18 +58,18 @@ object SierraRulesForRequesting {
       //
       // These rules mean "if fixed field 88 on the item has a given value,
       // show this message".
-      case i if i.status.contains("m") =>
+      case i if i.fixedField("88").contains("m") =>
         NotRequestable.ItemMissing("This item is missing.")
-      case i if i.status.contains("s") =>
+      case i if i.fixedField("88").contains("s") =>
         NotRequestable.ItemOnSearch("This item is on search.")
-      case i if i.status.contains("x") =>
+      case i if i.fixedField("88").contains("x") =>
         NotRequestable.ItemWithdrawn("This item is withdrawn.")
-      case i if i.status.contains("r") =>
+      case i if i.fixedField("88").contains("r") =>
         NotRequestable.ItemUnavailable("This item is unavailable.")
-      case i if i.status.contains("z") => NotRequestable.NoReason
-      case i if i.status.contains("v") =>
+      case i if i.fixedField("88").contains("z") => NotRequestable.NoReason
+      case i if i.fixedField("88").contains("v") =>
         NotRequestable.AtConservation("This item is with conservation.")
-      case i if i.status.contains("h") =>
+      case i if i.fixedField("88").contains("h") =>
         NotRequestable.ItemClosed("This item is closed.")
 
       // These cases cover the lines:
@@ -79,7 +79,7 @@ object SierraRulesForRequesting {
       //
       // These are similar to the rules above; the difference is that the 'v' means
       // "if this line or the next line matches".  The 'q' means 'end of rule'.
-      case i if i.status.contains("b") || i.status.contains("c") =>
+      case i if i.fixedField("88").contains("b") || i.fixedField("88").contains("c") =>
         NotRequestable.RequestTopItem("Please request top item.")
 
       // These cases cover the lines:
@@ -89,11 +89,11 @@ object SierraRulesForRequesting {
       //    q|i||88||=|y||
       //
       // These are the same as the checks above.
-      case i if i.status.contains("d") =>
+      case i if i.fixedField("88").contains("d") =>
         NotRequestable.OnNewBooksDisplay("On new books display.")
-      case i if i.status.contains("e") =>
+      case i if i.fixedField("88").contains("e") =>
         NotRequestable.OnExhibition("On exhibition. Please ask at Enquiry Desk.")
-      case i if i.status.contains("y") =>
+      case i if i.fixedField("88").contains("y") =>
         NotRequestable.NoReason
 
       // These cases cover the lines:
@@ -115,7 +115,7 @@ object SierraRulesForRequesting {
       //    - I haven't found an example of an item with tag 8, so I'm skipping that rule
       //      for now.  TODO: Find an example of this.
       //
-      case i if i.loanRule.getOrElse("0") != "0" || i.status.contains("!") =>
+      case i if i.fixedField("87").getOrElse("0") != "0" || i.fixedField("88").contains("!") =>
         NotRequestable.OnHold(
           "Item is in use by another reader. Please ask at Enquiry Desk.")
 
@@ -128,7 +128,7 @@ object SierraRulesForRequesting {
       //    q|i||79||=|mfulc||Item cannot be requested online. Please contact Medical Film & Audio Library.   Email: mfac@wellcome.ac.uk. Telephone: +44 (0)20 76118596/97.
       //
       case i
-          if i.locationCode.containsAnyOf(
+          if i.fixedField("79").containsAnyOf(
             "mfgmc",
             "mfinc",
             "mfwcm",
@@ -156,7 +156,7 @@ object SierraRulesForRequesting {
       //    q|i||79||=|ofvds||This item cannot be requested online. Please place a manual request.
       //
       case i
-          if i.locationCode.containsAnyOf(
+          if i.fixedField("79").containsAnyOf(
             "dbiaa",
             "dcoaa",
             "dinad",
@@ -180,7 +180,7 @@ object SierraRulesForRequesting {
       //    v|i||79||=|isvid||
       //    q|i||79||=|iscdr||Item cannot be requested online. Please ask at Information Service desk, email: infoserv@wellcome.ac.uk or telephone +44 (0)20 7611 8722.
       //
-      case i if i.locationCode.containsAnyOf("isvid", "iscdr") =>
+      case i if i.fixedField("79").containsAnyOf("isvid", "iscdr") =>
         NotRequestable.ContactUs(
           "Item cannot be requested online. Please ask at Information Service desk, email: infoserv@wellcome.ac.uk or telephone +44 (0)20 7611 8722.")
 
@@ -217,7 +217,7 @@ object SierraRulesForRequesting {
       //    q|i||79||=|wsrex||Item is on open shelves.  Check Location and Shelfmark for location details.
       //
       case i
-          if i.locationCode.containsAnyOf(
+          if i.fixedField("79").containsAnyOf(
             "isope",
             "isref",
             "gblip",
@@ -272,15 +272,15 @@ object SierraRulesForRequesting {
       //    v|i||79||=|sompr||
       //    q|i||79||=|somsy||Please complete a manual request slip.  This item cannot be requested online.
       //
-      case i if i.itemType.contains("22") =>
+      case i if i.fixedField("61").contains("22") =>
         NotRequestable.OnExhibition(
           "Item is on Exhibition Reserve. Please ask at the Enquiry Desk")
 
-      case i if i.itemType.containsAnyOf("17", "18", "15") =>
+      case i if i.fixedField("61").containsAnyOf("17", "18", "15") =>
         NotRequestable.NoReason
 
       case i
-          if i.itemType.containsAnyOf("4", "14") || i.locationCode
+          if i.fixedField("61").containsAnyOf("4", "14") || i.fixedField("79")
             .containsAnyOf(
               "ofvn1",
               "scmwc",
@@ -300,7 +300,7 @@ object SierraRulesForRequesting {
       //
       //    q|i||79||=|sepep||
       //
-      case i if i.locationCode.contains("sepep") =>
+      case i if i.fixedField("79").contains("sepep") =>
         NotRequestable.NoReason
 
       // This case covers the lines:
@@ -320,7 +320,7 @@ object SierraRulesForRequesting {
       //    q|i||79||=|swm#7||Item not available due to provisions of Data Protection Act. Return to Archives catalogue to see when this file will be opened.
       //
       case i
-          if i.locationCode.containsAnyOf(
+          if i.fixedField("79").containsAnyOf(
             "sc#ac",
             "sc#ra",
             "sc#wa",
@@ -354,7 +354,7 @@ object SierraRulesForRequesting {
       //    q|i||79||=|temp6||At digitisation and temporarily unavailable.
       //
       case i
-          if i.locationCode.containsAnyOf(
+          if i.fixedField("79").containsAnyOf(
             "temp1",
             "temp2",
             "temp3",
@@ -368,34 +368,22 @@ object SierraRulesForRequesting {
       //    v|i||79||=|rm001||
       //    q|i||79||=|rmdda||
       //
-      case i if i.locationCode.containsAnyOf("rm001", "rmdda") =>
+      case i if i.fixedField("79").containsAnyOf("rm001", "rmdda") =>
         NotRequestable.NoReason
 
       // This case covers the line:
       //
       //    q|i||97||=|j||
       //
-      case i if i.imessage.contains("j") =>
+      case i if i.fixedField("97").contains("j") =>
         NotRequestable.NoReason
 
       case _ => Requestable
     }
 
   private implicit class ItemDataOps(itemData: SierraItemData) {
-    def imessage: Option[String] =
-      itemData.fixedFields.get("97").map { _.value.trim }
-
-    def status: Option[String] =
-      itemData.fixedFields.get("88").map { _.value.trim }
-
-    def loanRule: Option[String] =
-      itemData.fixedFields.get("87").map { _.value.trim }
-
-    def locationCode: Option[String] =
-      itemData.fixedFields.get("79").map { _.value.trim }
-
-    def itemType: Option[String] =
-      itemData.fixedFields.get("61").map { _.value.trim }
+    def fixedField(code: String): Option[String] =
+      itemData.fixedFields.get(code).map { _.value.trim }
   }
 
   private implicit class OptionalStringOps(s: Option[String]) {
