@@ -184,6 +184,23 @@ object SierraItemAccess extends SierraQueryOps {
               note = itemData.displayNote)),
           ItemStatus.Available)
 
+      // A missing status overrides all other values.
+      //
+      // Example: b10379198 / i10443861
+      case (
+        _,
+        _,
+        Some(Status.Missing),
+        _,
+        NotRequestable.ItemMissing(message),
+        _) =>
+        (
+          Some(
+            AccessCondition(
+              status = Some(AccessStatus.Unavailable),
+              terms = Some(message))),
+          ItemStatus.Unavailable)
+
       case other =>
         println(s"@@ $other @@")
         throw new Throwable("Unhandled!!!")

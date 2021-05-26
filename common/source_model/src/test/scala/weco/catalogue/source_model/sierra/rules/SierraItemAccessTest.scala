@@ -327,6 +327,30 @@ class SierraItemAccessTest extends AnyFunSpec with Matchers with SierraDataGener
         )
         itemStatus shouldBe ItemStatus.Available
       }
+
+      it("if the item is missing") {
+        val itemData = createSierraItemDataWith(
+          fixedFields = Map(
+            "79" -> FixedField(label = "LOCATION", value = "sghi2", display = "Closed stores Hist. 2"),
+            "88" -> FixedField(label = "STATUS", value = "m", display = "Missing"),
+            "108" -> FixedField(label = "OPACMSG", value = "f", display = "Online request"),
+          )
+        )
+
+        val (ac, itemStatus) = SierraItemAccess(
+          bibStatus = None,
+          location = Some(LocationType.ClosedStores),
+          itemData = itemData
+        )
+
+        ac shouldBe Some(
+          AccessCondition(
+            status = Some(AccessStatus.Unavailable),
+            terms = Some("This item is missing.")
+          )
+        )
+        itemStatus shouldBe ItemStatus.Unavailable
+      }
     }
   }
 
@@ -379,6 +403,30 @@ class SierraItemAccessTest extends AnyFunSpec with Matchers with SierraDataGener
         )
         itemStatus shouldBe ItemStatus.Available
       }
+    }
+
+    it("is not available if it is missing") {
+      val itemData = createSierraItemDataWith(
+        fixedFields = Map(
+          "79" -> FixedField(label = "LOCATION", value = "wgmem", display = "Medical Collection"),
+          "88" -> FixedField(label = "STATUS", value = "m", display = "Missing"),
+          "108" -> FixedField(label = "OPACMSG", value = "o", display = "Open shelves"),
+        )
+      )
+
+      val (ac, itemStatus) = SierraItemAccess(
+        bibStatus = None,
+        location = Some(LocationType.OpenShelves),
+        itemData = itemData
+      )
+
+      ac shouldBe Some(
+        AccessCondition(
+          status = Some(AccessStatus.Unavailable),
+          terms = Some("This item is missing.")
+        )
+      )
+      itemStatus shouldBe ItemStatus.Unavailable
     }
   }
 }
