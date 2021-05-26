@@ -73,6 +73,12 @@ object SierraItemAccess extends SierraQueryOps {
         val ac = itemData.displayNote.map { note => AccessCondition(note = Some(note)) }
         (ac, ItemStatus.Available)
 
+      // There are some items that are labelled "bound in above" or "contained in above".
+      //
+      // These items aren't requestable on their own; you have to request the "primary" item.
+      case (None, _, _, _, NotRequestable.RequestTopItem(message), _) =>
+        (Some(AccessCondition(terms = Some(message))), ItemStatus.Unavailable)
+
       case other =>
         println(s"@@ $other @@")
         throw new Throwable("Unhandled!!!")

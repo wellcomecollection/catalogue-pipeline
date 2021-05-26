@@ -163,6 +163,44 @@ class SierraItemAccessTest extends AnyFunSpec with Matchers with SierraDataGener
         itemStatus shouldBe ItemStatus.Available
       }
     }
+
+    it("cannot be requested if it's bound in the top item") {
+      val itemData = createSierraItemDataWith(
+        fixedFields = Map(
+          "79" -> FixedField(label = "LOCATION", value = "bwith", display = "bound in above"),
+          "88" -> FixedField(label = "STATUS", value = "b", display = "As above"),
+          "108" -> FixedField(label = "OPACMSG", value = "-", display = "-"),
+        )
+      )
+
+      val (ac, itemStatus) = SierraItemAccess(
+        bibStatus = None,
+        location = None,
+        itemData = itemData
+      )
+
+      ac shouldBe Some(AccessCondition(terms = Some("Please request top item.")))
+      itemStatus shouldBe ItemStatus.Unavailable
+    }
+
+    it("cannot be requested if it's contained the top item") {
+      val itemData = createSierraItemDataWith(
+        fixedFields = Map(
+          "79" -> FixedField(label = "LOCATION", value = "cwith", display = "contained in above"),
+          "88" -> FixedField(label = "STATUS", value = "c", display = "As above"),
+          "108" -> FixedField(label = "OPACMSG", value = "-", display = "-"),
+        )
+      )
+
+      val (ac, itemStatus) = SierraItemAccess(
+        bibStatus = None,
+        location = None,
+        itemData = itemData
+      )
+
+      ac shouldBe Some(AccessCondition(terms = Some("Please request top item.")))
+      itemStatus shouldBe ItemStatus.Unavailable
+    }
   }
 
   describe("an item on the open shelves") {
