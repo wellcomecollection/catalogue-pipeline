@@ -43,8 +43,10 @@ object SierraItemAccess extends SierraQueryOps {
       // Items on the closed stores that are requestable get the "Online request" condition.
       //
       // Example: b18799966 / i17571170
-      case (None, Some(0), Some(Status.Available), Some(OpacMsg.OnlineRequest), Requestable, Some(LocationType.ClosedStores)) =>
+      case (bibStatus, Some(0), Some(Status.Available), Some(OpacMsg.OnlineRequest), Requestable, Some(LocationType.ClosedStores))
+        if bibStatus.isEmpty || bibStatus.contains(AccessStatus.Open) =>
         val ac = AccessCondition(
+          status = bibStatus,
           terms = Some("Online request"),
           note = itemData.displayNote
         )
@@ -108,7 +110,7 @@ object SierraItemAccess extends SierraQueryOps {
         Some(Status.Closed),
         Some(OpacMsg.Unavailable),
         NotRequestable.ItemClosed(_),
-        Some(LocationType.ClosedStores)) =>
+        locationType) if locationType.isEmpty || locationType.contains(LocationType.ClosedStores) =>
         (
           Some(
             AccessCondition(

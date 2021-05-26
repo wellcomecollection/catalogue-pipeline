@@ -165,6 +165,25 @@ class SierraItemAccessTest extends AnyFunSpec with Matchers with SierraDataGener
           itemStatus shouldBe ItemStatus.Available
         }
 
+        it("if it has no restrictions and the bib is open") {
+          val itemData = createSierraItemDataWith(
+            fixedFields = Map(
+              "79" -> FixedField(label = "LOCATION", value = "scmwf", display = "Closed stores A&MSS Well.Found."),
+              "88" -> FixedField(label = "STATUS", value = "-", display = "Available"),
+              "108" -> FixedField(label = "OPACMSG", value = "f", display = "Online request"),
+            )
+          )
+
+          val (ac, itemStatus) = SierraItemAccess(
+            bibStatus = Some(AccessStatus.Open),
+            location = Some(LocationType.ClosedStores),
+            itemData = itemData
+          )
+
+          ac shouldBe Some(AccessCondition(status = Some(AccessStatus.Open), terms = Some("Online request")))
+          itemStatus shouldBe ItemStatus.Available
+        }
+
         it("if it's restricted") {
           val itemData = createSierraItemDataWith(
             fixedFields = Map(
@@ -256,6 +275,25 @@ class SierraItemAccessTest extends AnyFunSpec with Matchers with SierraDataGener
           val (ac, itemStatus) = SierraItemAccess(
             bibStatus = Some(AccessStatus.Closed),
             location = Some(LocationType.ClosedStores),
+            itemData = itemData
+          )
+
+          ac shouldBe Some(AccessCondition(status = AccessStatus.Closed))
+          itemStatus shouldBe ItemStatus.Unavailable
+        }
+
+        it("if the bib and the item are closed, and there's no location") {
+          val itemData = createSierraItemDataWith(
+            fixedFields = Map(
+              "79" -> FixedField(label = "LOCATION", value = "sc#ac", display = "Unrequestable Arch. & MSS"),
+              "88" -> FixedField(label = "STATUS", value = "h", display = "Closed"),
+              "108" -> FixedField(label = "OPACMSG", value = "u", display = "Unavailable"),
+            )
+          )
+
+          val (ac, itemStatus) = SierraItemAccess(
+            bibStatus = Some(AccessStatus.Closed),
+            location = None,
             itemData = itemData
           )
 
