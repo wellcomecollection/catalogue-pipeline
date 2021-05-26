@@ -66,7 +66,7 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
     val otherLocations =
       sierraItemDataMap
         .collect {
-          case (id, SierraItemData(_, _, Some(location), _, _)) =>
+          case (id, SierraItemData(_, _, _, Some(location), _, _)) =>
             id -> location
         }
         .filterNot {
