@@ -1,9 +1,9 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
-import uk.ac.wellcome.platform.transformer.sierra.source.SierraQueryOps
 import weco.catalogue.internal_model.work._
 import weco.catalogue.source_model.sierra.SierraBibData
 import weco.catalogue.source_model.sierra.marc.VarField
+import weco.catalogue.source_model.sierra.source.SierraQueryOps
 
 object SierraNotes extends SierraDataTransformer with SierraQueryOps {
 
