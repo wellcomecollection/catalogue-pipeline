@@ -25,7 +25,7 @@ import java.io.{BufferedReader, FileInputStream, InputStreamReader}
 import scala.util.{Failure, Success, Try}
 
 class SierraItemAccessTest extends AnyFunSpec with Matchers with SierraDataGenerators {
-  it("assigns access conditions for all Sierra items") {
+  ignore("assigns access conditions for all Sierra items") {
     // Note: this test is not meant to hang around long-term.  It's a test harness
     // that runs through every SierraTransformable instance, tries to assign some
     // access conditions, and counts how many it can't handle.
