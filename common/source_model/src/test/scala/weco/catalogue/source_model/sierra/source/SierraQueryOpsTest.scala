@@ -2,7 +2,10 @@ package weco.catalogue.source_model.sierra.source
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.source_model.generators.{MarcGenerators, SierraDataGenerators}
+import weco.catalogue.source_model.generators.{
+  MarcGenerators,
+  SierraDataGenerators
+}
 import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
 
 class SierraQueryOpsTest
@@ -33,10 +36,12 @@ class SierraQueryOpsTest
       it("finds the content from the subfields on field tag n") {
         val item = createSierraItemDataWith(
           varFields = List(
-            VarField(fieldTag = Some("n"), subfields = List(
-              MarcSubfield(tag = "a", content = "Part of:"),
-              MarcSubfield(tag = "c", content = "a special collection"),
-            ))
+            VarField(
+              fieldTag = Some("n"),
+              subfields = List(
+                MarcSubfield(tag = "a", content = "Part of:"),
+                MarcSubfield(tag = "c", content = "a special collection"),
+              ))
           )
         )
 
