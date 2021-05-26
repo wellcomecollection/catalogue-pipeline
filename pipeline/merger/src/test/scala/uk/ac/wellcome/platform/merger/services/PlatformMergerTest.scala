@@ -9,7 +9,13 @@ import weco.catalogue.internal_model.image.ParentWork._
 import uk.ac.wellcome.models.work.generators.SourceWorkGenerators
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.image.ParentWorks
-import weco.catalogue.internal_model.locations.{AccessCondition, AccessStatus, DigitalLocation, License, LocationType}
+import weco.catalogue.internal_model.locations.{
+  AccessCondition,
+  AccessStatus,
+  DigitalLocation,
+  License,
+  LocationType
+}
 import weco.catalogue.internal_model.work.{Format, Item, MergeCandidate, Work}
 
 class PlatformMergerTest

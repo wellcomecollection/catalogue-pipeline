@@ -6,8 +6,19 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.generators.SourceWorkGenerators
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 import weco.catalogue.internal_model.identifiers.IdState
-import weco.catalogue.internal_model.locations.{AccessCondition, AccessStatus, DigitalLocation, LocationType}
-import weco.catalogue.internal_model.work.{Format, Item, MergeCandidate, Work, WorkState}
+import weco.catalogue.internal_model.locations.{
+  AccessCondition,
+  AccessStatus,
+  DigitalLocation,
+  LocationType
+}
+import weco.catalogue.internal_model.work.{
+  Format,
+  Item,
+  MergeCandidate,
+  Work,
+  WorkState
+}
 
 class ItemsRuleTest
     extends AnyFunSpec
