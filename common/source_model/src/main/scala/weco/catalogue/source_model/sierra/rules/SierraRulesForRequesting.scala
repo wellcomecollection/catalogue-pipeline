@@ -2,18 +2,6 @@ package weco.catalogue.source_model.sierra.rules
 
 import weco.catalogue.source_model.sierra.SierraItemData
 
-sealed trait RulesForRequestingResult
-
-case class NotRequestable(message: Option[String] = None)
-    extends RulesForRequestingResult
-
-case object NotRequestable {
-  def apply(message: String): NotRequestable =
-    NotRequestable(message = Some(message))
-}
-
-case object Requestable extends RulesForRequestingResult
-
 /** The Rules for Requesting are a set of rules in Sierra that can block an item
   * from being requested, and if so, optionally explain to the user why an item
   * can't be requested.
