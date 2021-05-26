@@ -886,4 +886,59 @@ class PlatformMergerTest
     }.toMap shouldBe Map(
       metsWork.state.canonicalId -> eVideoWork.state.canonicalId)
   }
+
+  it("retains the 856 web link item when merging physical/digitised bibs") {
+    // This test case is based on a real example, in which the links to digitised
+    // journals in the Internet Archive were being added to the 856 link in the
+    // digitised records.
+    //
+    // We don't expect digitised records to have any identified items, but if we
+    // created an item from the 856 field, then we should preserve it when merging.
+    //
+    // See https://wellcome.slack.com/archives/C8X9YKM5X/p1621866017004000
+
+    val item = Item(
+      id = IdState.Unidentifiable,
+      locations = List(
+        DigitalLocation(
+          url = "https://example.org/b12345678",
+          locationType = LocationType.OnlineResource,
+          accessConditions = List(
+            AccessCondition(status = AccessStatus.LicensedResources)
+          )
+        )
+      )
+    )
+
+    val digitisedWork = sierraIdentifiedWork().items(List(item))
+
+    val physicalWork =
+      sierraIdentifiedWork()
+        .mergeCandidates(
+          List(
+            MergeCandidate(
+              id = IdState.Identified(
+                canonicalId = digitisedWork.state.canonicalId,
+                sourceIdentifier = digitisedWork.state.sourceIdentifier
+              ),
+              reason = Some("Physical/digitised Sierra work")
+            )
+          )
+        )
+        .items(List(createIdentifiedPhysicalItem))
+
+    val result = merger
+      .merge(works = Seq(digitisedWork, physicalWork))
+      .mergedWorksWithTime(now)
+
+    val redirectedWorks = result.collect {
+      case w: Work.Redirected[Merged] => w
+    }
+    val visibleWorks = result.collect { case w: Work.Visible[Merged] => w }
+
+    redirectedWorks should have size 1
+    visibleWorks should have size 1
+
+    visibleWorks.head.data.items should contain(item)
+  }
 }

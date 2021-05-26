@@ -5,7 +5,20 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.generators.SourceWorkGenerators
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
-import weco.catalogue.internal_model.work.{Format, Work, WorkState}
+import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.locations.{
+  AccessCondition,
+  AccessStatus,
+  DigitalLocation,
+  LocationType
+}
+import weco.catalogue.internal_model.work.{
+  Format,
+  Item,
+  MergeCandidate,
+  Work,
+  WorkState
+}
 
 class ItemsRuleTest
     extends AnyFunSpec
@@ -68,6 +81,44 @@ class ItemsRuleTest
         items should have size 1
         items.head shouldBe metsWork.data.items.head
         mergedSources should be(Seq(metsWork))
+    }
+  }
+
+  it("merges an 856 item from a digitised Sierra work into a physical work") {
+    val item = Item(
+      id = IdState.Unidentifiable,
+      locations = List(
+        DigitalLocation(
+          url = "https://example.org/b12345678",
+          locationType = LocationType.OnlineResource,
+          accessConditions = List(
+            AccessCondition(status = AccessStatus.LicensedResources)
+          )
+        )
+      )
+    )
+
+    val digitisedWork = sierraIdentifiedWork().items(List(item))
+
+    val physicalWork =
+      sierraIdentifiedWork()
+        .mergeCandidates(
+          List(
+            MergeCandidate(
+              id = IdState.Identified(
+                canonicalId = digitisedWork.state.canonicalId,
+                sourceIdentifier = digitisedWork.state.sourceIdentifier
+              ),
+              reason = Some("Physical/digitised Sierra work")
+            )
+          )
+        )
+        .items(List(createIdentifiedPhysicalItem))
+
+    inside(ItemsRule.merge(physicalWork, List(digitisedWork))) {
+      case FieldMergeResult(items, mergedSources) =>
+        items should contain(item)
+        mergedSources should be(Seq(digitisedWork))
     }
   }
 
