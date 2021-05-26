@@ -352,6 +352,58 @@ class SierraItemAccessTest extends AnyFunSpec with Matchers with SierraDataGener
         itemStatus shouldBe ItemStatus.Unavailable
       }
     }
+
+    describe("that's on hold") {
+      it("can't be requested when another reader has placed a hold") {
+        val itemData = createSierraItemDataWith(
+          holdCount = Some(1),
+          fixedFields = Map(
+            "79" -> FixedField(label = "LOCATION", value = "sgeph", display = "Closed stores ephemera"),
+            "88" -> FixedField(label = "STATUS", value = "-", display = "Available"),
+            "108" -> FixedField(label = "OPACMSG", value = "f", display = "Online request"),
+          )
+        )
+
+        val (ac, itemStatus) = SierraItemAccess(
+          bibStatus = None,
+          location = Some(LocationType.ClosedStores),
+          itemData = itemData
+        )
+
+        ac shouldBe Some(
+          AccessCondition(
+            status = Some(AccessStatus.TemporarilyUnavailable),
+            terms = Some("Item is in use by another reader. Please ask at Enquiry Desk.")
+          )
+        )
+        itemStatus shouldBe ItemStatus.TemporarilyUnavailable
+      }
+
+      it("can't be requested when it's on the hold shelf for another reader") {
+        val itemData = createSierraItemDataWith(
+          holdCount = Some(1),
+          fixedFields = Map(
+            "79" -> FixedField(label = "LOCATION", value = "swms4", display = "Closed stores WMS 4"),
+            "88" -> FixedField(label = "STATUS", value = "!", display = "On holdshelf"),
+            "108" -> FixedField(label = "OPACMSG", value = "f", display = "Online request"),
+          )
+        )
+
+        val (ac, itemStatus) = SierraItemAccess(
+          bibStatus = None,
+          location = Some(LocationType.ClosedStores),
+          itemData = itemData
+        )
+
+        ac shouldBe Some(
+          AccessCondition(
+            status = Some(AccessStatus.TemporarilyUnavailable),
+            terms = Some("Item is in use by another reader. Please ask at Enquiry Desk.")
+          )
+        )
+        itemStatus shouldBe ItemStatus.TemporarilyUnavailable
+      }
+    }
   }
 
   describe("an item on the open shelves") {

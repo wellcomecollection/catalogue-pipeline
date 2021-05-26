@@ -201,6 +201,43 @@ object SierraItemAccess extends SierraQueryOps {
               terms = Some(message))),
           ItemStatus.Unavailable)
 
+      // If an item is on hold for another reader, it can't be requested -- even
+      // if it would ordinarily be requestable.
+      //
+      // Note that an item on hold goes through two stages:
+      //  1. A reader places a hold, but the item is still in the store.
+      //     The status is still "-" (Available)
+      //  2. A staff member collects the item from the store, and places it on the holdshelf
+      //     Then the status becomes "!" (On holdshelf)
+      //
+      case (
+        None,
+        Some(holdCount),
+        _,
+        _,
+        Requestable,
+        Some(LocationType.ClosedStores)) if holdCount > 0 =>
+        (
+          Some(AccessCondition(
+            status = Some(AccessStatus.TemporarilyUnavailable),
+            terms = Some(
+              "Item is in use by another reader. Please ask at Enquiry Desk."))),
+          ItemStatus.TemporarilyUnavailable)
+
+      case (
+        None,
+        _,
+        _,
+        _,
+        NotRequestable.OnHold(_),
+        Some(LocationType.ClosedStores)) =>
+        (
+          Some(AccessCondition(
+            status = Some(AccessStatus.TemporarilyUnavailable),
+            terms = Some(
+              "Item is in use by another reader. Please ask at Enquiry Desk."))),
+          ItemStatus.TemporarilyUnavailable)
+
       case other =>
         println(s"@@ $other @@")
         throw new Throwable("Unhandled!!!")
