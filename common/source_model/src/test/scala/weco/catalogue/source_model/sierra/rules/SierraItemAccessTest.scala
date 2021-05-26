@@ -3,14 +3,27 @@ package weco.catalogue.source_model.sierra.rules
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil._
-import weco.catalogue.internal_model.locations.PhysicalLocationType
+import weco.catalogue.internal_model.locations.{
+  AccessCondition,
+  ItemStatus,
+  LocationType,
+  PhysicalLocationType
+}
+import weco.catalogue.source_model.generators.SierraDataGenerators
 import weco.catalogue.source_model.sierra.Implicits._
-import weco.catalogue.source_model.sierra.{SierraBibData, SierraBibNumber, SierraItemData, SierraItemNumber, SierraTransformable}
+import weco.catalogue.source_model.sierra.marc.FixedField
+import weco.catalogue.source_model.sierra.{
+  SierraBibData,
+  SierraBibNumber,
+  SierraItemData,
+  SierraItemNumber,
+  SierraTransformable
+}
 
 import java.io.{BufferedReader, FileInputStream, InputStreamReader}
 import scala.util.{Failure, Success, Try}
 
-class SierraItemAccessTest extends AnyFunSpec with Matchers {
+class SierraItemAccessTest extends AnyFunSpec with Matchers with SierraDataGenerators {
   it("assigns access conditions for all Sierra items") {
     // Note: this test is not meant to hang around long-term.  It's a test harness
     // that runs through every SierraTransformable instance, tries to assign some
@@ -74,6 +87,7 @@ class SierraItemAccessTest extends AnyFunSpec with Matchers {
             println(bibData.varFields.filter(_.marcTag.contains("506")))
             println(itemId.withCheckDigit)
             println(itemData.location)
+            println(itemData.holdCount)
             println(itemData.fixedFields.filterNot {
               case (code, _) =>
                 Set(
@@ -126,5 +140,28 @@ class SierraItemAccessTest extends AnyFunSpec with Matchers {
       }
 
     println(s"$handled handled, $unhandled unhandled")
+  }
+
+  describe("an item in the closed stores") {
+    describe("with no holds") {
+      it("can be requested online if it has no restrictions") {
+        val itemData = createSierraItemDataWith(
+          fixedFields = Map(
+            "79" -> FixedField(label = "LOCATION", value = "scmac", display = "Closed stores Arch. & MSS"),
+            "88" -> FixedField(label = "STATUS", value = "-", display = "Available"),
+            "108" -> FixedField(label = "OPACMSG", value = "f", display = "Online request"),
+          )
+        )
+
+        val (ac, itemStatus) = SierraItemAccess(
+          bibStatus = None,
+          location = Some(LocationType.ClosedStores),
+          itemData = itemData
+        )
+
+        ac shouldBe Some(AccessCondition(terms = Some("Online request")))
+        itemStatus shouldBe ItemStatus.Available
+      }
+    }
   }
 }
