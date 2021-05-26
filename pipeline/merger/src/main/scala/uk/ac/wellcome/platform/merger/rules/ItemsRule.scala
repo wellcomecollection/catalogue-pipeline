@@ -5,6 +5,7 @@ import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 import uk.ac.wellcome.platform.merger.models.Sources.findFirstLinkedDigitisedSierraWorkFor
 import cats.data.NonEmptyList
 import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.locations.LocationType
 import weco.catalogue.internal_model.work.{Item, Work}
 import weco.catalogue.internal_model.work.WorkState.Identified
 
@@ -32,13 +33,15 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
         .orElse(
           mergeSingleMiroIntoSingleOrZeroItemSierraTarget(target, sources)
         )
+        .orElse(mergeDigitalIntoPhysicalSierraTarget(target, sources))
         .getOrElse(target.data.items)
 
     val mergedSources = (
       List(
         mergeIntoCalmTarget,
         mergeMetsIntoSierraTarget,
-        mergeSingleMiroIntoSingleOrZeroItemSierraTarget
+        mergeSingleMiroIntoSingleOrZeroItemSierraTarget,
+        mergeDigitalIntoPhysicalSierraTarget
       ).flatMap { rule =>
         rule.mergedSources(target, sources)
       } ++ findFirstLinkedDigitisedSierraWorkFor(target, sources)
@@ -167,5 +170,35 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
         )
       )
     }
+  }
+
+  /** If we're merging a physical/digitised Sierra work pair, make
+    * sure we copy any items from the digitised bib that are stored
+    * in the 856 web link field.
+    *
+    */
+  private val mergeDigitalIntoPhysicalSierraTarget = new PartialRule {
+
+    // We don't merge physical/digitised audiovisual works, because the
+    // original bib records often contain different data.
+    //
+    // See the comment on Sources.findFirstLinkedDigitisedSierraWorkFor
+    val isDefinedForTarget: WorkPredicate = physicalSierra and not(
+      isAudiovisual)
+
+    val isDefinedForSource: WorkPredicate = sierraWork
+
+    def rule(target: Work.Visible[Identified],
+             sources: NonEmptyList[Work[Identified]]): FieldData =
+      findFirstLinkedDigitisedSierraWorkFor(target, sources.toList)
+        .map { digitisedWork =>
+          val onlineItems = digitisedWork.data.items
+            .filter { it =>
+              it.locations.exists(_.locationType == LocationType.OnlineResource)
+            }
+
+          target.data.items ++ onlineItems
+        }
+        .getOrElse(Nil)
   }
 }
