@@ -1,11 +1,10 @@
-package weco.catalogue.source_model.sierra
+package weco.catalogue.source_model.sierra.rules
 
 import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
 import weco.catalogue.source_model.generators.SierraDataGenerators
-import weco.catalogue.source_model.sierra
 import weco.catalogue.source_model.sierra.marc.FixedField
 
 class SierraRulesForRequestingTest
@@ -27,7 +26,7 @@ class SierraRulesForRequestingTest
       fixedFields = Map("97" -> FixedField(label = "IMESSAGE", value = "j"))
     )
 
-    sierra.SierraRulesForRequesting(item) shouldBe NotRequestable()
+    SierraRulesForRequesting(item) shouldBe NotRequestable()
   }
 
   it("blocks an item based on the status") {
@@ -54,7 +53,7 @@ class SierraRulesForRequestingTest
             Map("88" -> FixedField(label = "STATUS", value = status))
         )
 
-        sierra.SierraRulesForRequesting(item) shouldBe NotRequestable(
+        SierraRulesForRequesting(item) shouldBe NotRequestable(
           expectedMessage)
     }
   }
@@ -64,7 +63,7 @@ class SierraRulesForRequestingTest
       fixedFields = Map("87" -> FixedField(label = "LOANRULE", value = "1"))
     )
 
-    sierra.SierraRulesForRequesting(item) shouldBe NotRequestable(
+    SierraRulesForRequesting(item) shouldBe NotRequestable(
       "Item is in use by another reader. Please ask at Enquiry Desk.")
   }
 
@@ -73,7 +72,7 @@ class SierraRulesForRequestingTest
       fixedFields = Map("88" -> FixedField(label = "STATUS", value = "!"))
     )
 
-    sierra.SierraRulesForRequesting(item) shouldBe NotRequestable(
+    SierraRulesForRequesting(item) shouldBe NotRequestable(
       "Item is in use by another reader. Please ask at Enquiry Desk.")
   }
 
@@ -82,7 +81,7 @@ class SierraRulesForRequestingTest
       fixedFields = Map("87" -> FixedField(label = "LOANRULE", value = "0"))
     )
 
-    sierra.SierraRulesForRequesting(item) shouldBe Requestable
+    SierraRulesForRequesting(item) shouldBe Requestable
   }
 
   describe("blocks an item based on fixed field 79 (location)") {
@@ -214,7 +213,7 @@ class SierraRulesForRequestingTest
             Map("79" -> FixedField(label = "LOCATION", value = locationCode))
         )
 
-        sierra.SierraRulesForRequesting(item) shouldBe NotRequestable()
+        SierraRulesForRequesting(item) shouldBe NotRequestable()
       }
     }
 
@@ -267,7 +266,7 @@ class SierraRulesForRequestingTest
           Map("79" -> FixedField(label = "LOCATION", value = locationCode))
       )
 
-      sierra.SierraRulesForRequesting(item) shouldBe NotRequestable(
+      SierraRulesForRequesting(item) shouldBe NotRequestable(
         expectedMessage)
     }
   }
@@ -298,7 +297,7 @@ class SierraRulesForRequestingTest
             Map("61" -> FixedField(label = "I TYPE", value = itemType))
         )
 
-        sierra.SierraRulesForRequesting(item) shouldBe NotRequestable(
+        SierraRulesForRequesting(item) shouldBe NotRequestable(
           expectedMessage)
     }
   }
@@ -325,7 +324,7 @@ class SierraRulesForRequestingTest
     )
 
     forAll(testCases) {
-      sierra.SierraRulesForRequesting(_) shouldBe Requestable
+      SierraRulesForRequesting(_) shouldBe Requestable
     }
   }
 }

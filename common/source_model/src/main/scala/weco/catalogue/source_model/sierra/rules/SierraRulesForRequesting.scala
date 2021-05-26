@@ -1,4 +1,6 @@
-package weco.catalogue.source_model.sierra
+package weco.catalogue.source_model.sierra.rules
+
+import weco.catalogue.source_model.sierra.SierraItemData
 
 sealed trait RulesForRequestingResult
 
