@@ -162,6 +162,26 @@ class SierraItemAccessTest extends AnyFunSpec with Matchers with SierraDataGener
         ac shouldBe Some(AccessCondition(terms = Some("Online request")))
         itemStatus shouldBe ItemStatus.Available
       }
+
+      it("cannot be requested online if it needs a manual request") {
+        val itemData = createSierraItemDataWith(
+          fixedFields = Map(
+            "61" -> FixedField(label = "I TYPE", value = "4", display = "serial"),
+            "79" -> FixedField(label = "LOCATION", value = "sgser", display = "Closed stores journals"),
+            "88" -> FixedField(label = "STATUS", value = "-", display = "Available"),
+            "108" -> FixedField(label = "OPACMSG", value = "n", display = "Manual request"),
+          )
+        )
+
+        val (ac, itemStatus) = SierraItemAccess(
+          bibStatus = None,
+          location = Some(LocationType.ClosedStores),
+          itemData = itemData
+        )
+
+        ac shouldBe Some(AccessCondition(terms = Some("Manual request")))
+        itemStatus shouldBe ItemStatus.Available
+      }
     }
 
     it("cannot be requested if it's bound in the top item") {

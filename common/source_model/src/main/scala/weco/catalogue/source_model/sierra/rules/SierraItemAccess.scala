@@ -79,6 +79,23 @@ object SierraItemAccess extends SierraQueryOps {
       case (None, _, _, _, NotRequestable.RequestTopItem(message), _) =>
         (Some(AccessCondition(terms = Some(message))), ItemStatus.Unavailable)
 
+      // Handle any cases that require a manual request.
+      //
+      // Example: b32214832 / i19389383
+      case (
+        None,
+        Some(0),
+        Some(Status.Available),
+        Some(OpacMsg.ManualRequest),
+        NotRequestable.NeedsManualRequest(_),
+        Some(LocationType.ClosedStores)) =>
+        (
+          Some(
+            AccessCondition(
+              terms = Some("Manual request"),
+              note = itemData.displayNote)),
+          ItemStatus.Available)
+
       case other =>
         println(s"@@ $other @@")
         throw new Throwable("Unhandled!!!")
