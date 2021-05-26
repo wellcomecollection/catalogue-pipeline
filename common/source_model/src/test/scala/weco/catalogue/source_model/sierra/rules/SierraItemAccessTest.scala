@@ -242,6 +242,49 @@ class SierraItemAccessTest extends AnyFunSpec with Matchers with SierraDataGener
         ac shouldBe Some(AccessCondition(status = AccessStatus.Closed))
         itemStatus shouldBe ItemStatus.Unavailable
       }
+
+      it("if the item is unavailable") {
+        val itemData = createSierraItemDataWith(
+          fixedFields = Map(
+            "79" -> FixedField(label = "LOCATION", value = "sgser", display = "Closed stores journals"),
+            "88" -> FixedField(label = "STATUS", value = "r", display = "Unavailable"),
+            "108" -> FixedField(label = "OPACMSG", value = "u", display = "Unavailable"),
+          )
+        )
+
+        val (ac, itemStatus) = SierraItemAccess(
+          bibStatus = None,
+          location = Some(LocationType.ClosedStores),
+          itemData = itemData
+        )
+
+        ac shouldBe Some(AccessCondition(status = AccessStatus.Unavailable))
+        itemStatus shouldBe ItemStatus.Unavailable
+      }
+
+      it("if the item is at digitisation") {
+        val itemData = createSierraItemDataWith(
+          fixedFields = Map(
+            "79" -> FixedField(label = "LOCATION", value = "sgser", display = "Closed stores journals"),
+            "88" -> FixedField(label = "STATUS", value = "r", display = "Unavailable"),
+            "108" -> FixedField(label = "OPACMSG", value = "b", display = "@ digitisation"),
+          )
+        )
+
+        val (ac, itemStatus) = SierraItemAccess(
+          bibStatus = None,
+          location = Some(LocationType.ClosedStores),
+          itemData = itemData
+        )
+
+        ac shouldBe Some(
+          AccessCondition(
+            status = Some(AccessStatus.TemporarilyUnavailable),
+            terms = Some("At digitisation and temporarily unavailable")
+          )
+        )
+        itemStatus shouldBe ItemStatus.TemporarilyUnavailable
+      }
     }
   }
 

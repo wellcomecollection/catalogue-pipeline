@@ -116,6 +116,36 @@ object SierraItemAccess extends SierraQueryOps {
               note = itemData.displayNote)),
           ItemStatus.Unavailable)
 
+      // Handle any cases where the item is explicitly unavailable.
+      case (
+        None,
+        _,
+        Some(Status.Unavailable),
+        Some(OpacMsg.Unavailable),
+        NotRequestable.ItemUnavailable(_),
+        _) =>
+        (
+          Some(
+            AccessCondition(
+              status = Some(AccessStatus.Unavailable),
+              note = itemData.displayNote)),
+          ItemStatus.Unavailable)
+
+      case (
+        None,
+        _,
+        Some(Status.Unavailable),
+        Some(OpacMsg.AtDigitisation),
+        NotRequestable.ItemUnavailable(_),
+        _) =>
+        (
+          Some(
+            AccessCondition(
+              status = Some(AccessStatus.TemporarilyUnavailable),
+              terms = Some("At digitisation and temporarily unavailable"),
+              note = itemData.displayNote)),
+          ItemStatus.TemporarilyUnavailable)
+
       case other =>
         println(s"@@ $other @@")
         throw new Throwable("Unhandled!!!")
