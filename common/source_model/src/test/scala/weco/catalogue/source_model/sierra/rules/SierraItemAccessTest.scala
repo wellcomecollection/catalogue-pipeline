@@ -145,23 +145,44 @@ class SierraItemAccessTest extends AnyFunSpec with Matchers with SierraDataGener
 
   describe("an item in the closed stores") {
     describe("with no holds") {
-      it("can be requested online if it has no restrictions") {
-        val itemData = createSierraItemDataWith(
-          fixedFields = Map(
-            "79" -> FixedField(label = "LOCATION", value = "scmac", display = "Closed stores Arch. & MSS"),
-            "88" -> FixedField(label = "STATUS", value = "-", display = "Available"),
-            "108" -> FixedField(label = "OPACMSG", value = "f", display = "Online request"),
+      describe("can be requested online") {
+        it("if it has no restrictions") {
+          val itemData = createSierraItemDataWith(
+            fixedFields = Map(
+              "79" -> FixedField(label = "LOCATION", value = "scmac", display = "Closed stores Arch. & MSS"),
+              "88" -> FixedField(label = "STATUS", value = "-", display = "Available"),
+              "108" -> FixedField(label = "OPACMSG", value = "f", display = "Online request"),
+            )
           )
-        )
 
-        val (ac, itemStatus) = SierraItemAccess(
-          bibStatus = None,
-          location = Some(LocationType.ClosedStores),
-          itemData = itemData
-        )
+          val (ac, itemStatus) = SierraItemAccess(
+            bibStatus = None,
+            location = Some(LocationType.ClosedStores),
+            itemData = itemData
+          )
 
-        ac shouldBe Some(AccessCondition(terms = Some("Online request")))
-        itemStatus shouldBe ItemStatus.Available
+          ac shouldBe Some(AccessCondition(terms = Some("Online request")))
+          itemStatus shouldBe ItemStatus.Available
+        }
+
+        it("if it's restricted") {
+          val itemData = createSierraItemDataWith(
+            fixedFields = Map(
+              "79" -> FixedField(label = "LOCATION", value = "scmac", display = "Closed stores Arch. & MSS"),
+              "88" -> FixedField(label = "STATUS", value = "6", display = "Restricted"),
+              "108" -> FixedField(label = "OPACMSG", value = "f", display = "Online request"),
+            )
+          )
+
+          val (ac, itemStatus) = SierraItemAccess(
+            bibStatus = Some(AccessStatus.Restricted),
+            location = Some(LocationType.ClosedStores),
+            itemData = itemData
+          )
+
+          ac shouldBe Some(AccessCondition(status = Some(AccessStatus.Restricted), terms = Some("Online request")))
+          itemStatus shouldBe ItemStatus.Available
+        }
       }
 
       describe("cannot be requested") {

@@ -146,6 +146,25 @@ object SierraItemAccess extends SierraQueryOps {
               note = itemData.displayNote)),
           ItemStatus.TemporarilyUnavailable)
 
+      // An item which is restricted can be requested online -- the user will have to fill in
+      // any paperwork when they actually visit the library.
+      //
+      // Example: b29459126 / i19023340
+      case (
+        Some(AccessStatus.Restricted),
+        Some(0),
+        Some(Status.Restricted),
+        Some(OpacMsg.OnlineRequest),
+        Requestable,
+        Some(LocationType.ClosedStores)) =>
+        (
+          Some(
+            AccessCondition(
+              status = Some(AccessStatus.Restricted),
+              terms = Some("Online request"),
+              note = itemData.displayNote)),
+          ItemStatus.Available)
+
       case other =>
         println(s"@@ $other @@")
         throw new Throwable("Unhandled!!!")
