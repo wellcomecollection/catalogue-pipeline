@@ -11,6 +11,7 @@ import weco.catalogue.internal_model.locations.{
   PhysicalLocationType
 }
 import weco.catalogue.internal_model.work.Item
+import weco.catalogue.source_model.sierra.rules.SierraPhysicalLocationType
 import weco.catalogue.source_model.sierra.source.SierraQueryOps
 import weco.catalogue.source_model.sierra.{
   SierraBibData,

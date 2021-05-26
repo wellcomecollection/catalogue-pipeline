@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.transformer.sierra.transformers
+package weco.catalogue.source_model.sierra.rules
 
 import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.locations.{
@@ -8,8 +8,10 @@ import weco.catalogue.internal_model.locations.{
 import weco.catalogue.source_model.sierra.TypedSierraRecordNumber
 
 object SierraPhysicalLocationType extends Logging {
-  def fromName(id: TypedSierraRecordNumber,
-               name: String): Option[PhysicalLocationType] =
+  def fromName(
+    id: TypedSierraRecordNumber,
+    name: String
+  ): Option[PhysicalLocationType] =
     name.toLowerCase match {
       case lowerCaseName
           if lowerCaseName.hasSubstring(
@@ -52,7 +54,8 @@ object SierraPhysicalLocationType extends Logging {
 
       case _ =>
         warn(
-          s"${id.withCheckDigit}: Unable to map Sierra location name to LocationType: $name")
+          s"${id.withCheckDigit}: Unable to map Sierra location name to LocationType: $name"
+        )
         None
     }
 

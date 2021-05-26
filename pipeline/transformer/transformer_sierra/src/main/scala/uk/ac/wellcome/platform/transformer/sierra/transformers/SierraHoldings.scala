@@ -5,6 +5,7 @@ import weco.catalogue.internal_model.locations.LocationType.ClosedStores
 import weco.catalogue.internal_model.locations.PhysicalLocation
 import weco.catalogue.internal_model.work.{Holdings, Item}
 import weco.catalogue.source_model.sierra.marc.FixedField
+import weco.catalogue.source_model.sierra.rules.SierraPhysicalLocationType
 import weco.catalogue.source_model.sierra.source.SierraQueryOps
 import weco.catalogue.source_model.sierra.{
   SierraBibNumber,

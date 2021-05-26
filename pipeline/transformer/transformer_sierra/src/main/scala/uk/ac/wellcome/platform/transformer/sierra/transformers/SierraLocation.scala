@@ -1,6 +1,7 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import weco.catalogue.internal_model.locations._
+import weco.catalogue.source_model.sierra.rules.SierraPhysicalLocationType
 import weco.catalogue.source_model.sierra.{
   SierraBibData,
   SierraBibNumber,
