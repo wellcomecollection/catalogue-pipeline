@@ -3,7 +3,6 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.locations.AccessStatus.LicensedResources
 import weco.catalogue.internal_model.locations.LocationType.OnlineResource
-import uk.ac.wellcome.platform.transformer.sierra.source.SierraQueryOps
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.locations.{
   AccessCondition,
@@ -12,6 +11,7 @@ import weco.catalogue.internal_model.locations.{
 import weco.catalogue.internal_model.work.Item
 import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
 import weco.catalogue.source_model.sierra.TypedSierraRecordNumber
+import weco.catalogue.source_model.sierra.source.SierraQueryOps
 
 import java.net.URL
 import scala.util.Try

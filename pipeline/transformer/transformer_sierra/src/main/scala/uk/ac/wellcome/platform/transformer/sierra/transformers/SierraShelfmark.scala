@@ -1,7 +1,9 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
-import uk.ac.wellcome.platform.transformer.sierra.source.SierraQueryOps
-import weco.catalogue.source_model.sierra.source.SierraMaterialType
+import weco.catalogue.source_model.sierra.source.{
+  SierraMaterialType,
+  SierraQueryOps
+}
 import weco.catalogue.source_model.sierra.{SierraBibData, SierraItemData}
 
 object SierraShelfmark extends SierraQueryOps {

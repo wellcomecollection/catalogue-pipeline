@@ -1,16 +1,6 @@
-package weco.catalogue.source_model.sierra
+package weco.catalogue.source_model.sierra.rules
 
-sealed trait RulesForRequestingResult
-
-case class NotRequestable(message: Option[String] = None)
-    extends RulesForRequestingResult
-
-case object NotRequestable {
-  def apply(message: String): NotRequestable =
-    NotRequestable(message = Some(message))
-}
-
-case object Requestable extends RulesForRequestingResult
+import weco.catalogue.source_model.sierra.SierraItemData
 
 /** The Rules for Requesting are a set of rules in Sierra that can block an item
   * from being requested, and if so, optionally explain to the user why an item
@@ -20,14 +10,28 @@ case object Requestable extends RulesForRequestingResult
   * The original rules are included for reference and to help apply updates,
   * along with explanations of the syntax.
   *
+  * If you disagree with one of these rules, you have two options:
+  *
+  *   1)  Discuss the change with Library Systems Support and get it changed
+  *       in Sierra proper, then update this object to match
+  *   2)  Work around it elsewhere in our applications
+  *
+  * But don't modify these rules without updating the canonical set in Sierra --
+  * this is meant to be a 1:1 reflection of those rules, not a mix of Sierra rules
+  * and platform logic.
+  *
+  * The type hierarchy for NotRequestable is to allow us to pattern match in our
+  * downstream applications without being tied to the exact wording of the messages --
+  * so if they get changed in Sierra, we can change them without breaking our other code.
+  *
   * Relevant Sierra docs:
   *
-  *   - Rules for Requesting syntax
-  *     https://documentation.iii.com/sierrahelp/Content/sgasaa/sgasaa_requestrl.html
-  *   - Fixed fields on items
-  *     https://documentation.iii.com/sierrahelp/Content/sril/sril_records_fixed_field_types_item.html
-  *   - Variable length fields on items
-  *     https://documentation.iii.com/sierrahelp/Content/sril/sril_records_varfld_types_item.html
+  *   -   Rules for Requesting syntax
+  *       https://documentation.iii.com/sierrahelp/Content/sgasaa/sgasaa_requestrl.html
+  *   -   Fixed fields on items
+  *       https://documentation.iii.com/sierrahelp/Content/sril/sril_records_fixed_field_types_item.html
+  *   -   Variable length fields on items
+  *       https://documentation.iii.com/sierrahelp/Content/sril/sril_records_varfld_types_item.html
   *
   */
 object SierraRulesForRequesting {
@@ -39,8 +43,9 @@ object SierraRulesForRequesting {
       //    q|i||97||=|x||This item belongs in the Strongroom
       //
       // This rule means "if fixed field 97 on the item has the value 'x'".
-      case i if i.imessage.contains("x") =>
-        NotRequestable(message = "This item belongs in the Strongroom")
+      case i if i.fixedField("97").contains("x") =>
+        NotRequestable.BelongsInStrongroom(
+          "This item belongs in the Strongroom")
 
       // These cases cover the lines:
       //
@@ -54,19 +59,19 @@ object SierraRulesForRequesting {
       //
       // These rules mean "if fixed field 88 on the item has a given value,
       // show this message".
-      case i if i.status.contains("m") =>
-        NotRequestable(message = "This item is missing.")
-      case i if i.status.contains("s") =>
-        NotRequestable(message = "This item is on search.")
-      case i if i.status.contains("x") =>
-        NotRequestable(message = "This item is withdrawn.")
-      case i if i.status.contains("r") =>
-        NotRequestable(message = "This item is unavailable.")
-      case i if i.status.contains("z") => NotRequestable()
-      case i if i.status.contains("v") =>
-        NotRequestable(message = "This item is with conservation.")
-      case i if i.status.contains("h") =>
-        NotRequestable(message = "This item is closed.")
+      case i if i.fixedField("88").contains("m") =>
+        NotRequestable.ItemMissing("This item is missing.")
+      case i if i.fixedField("88").contains("s") =>
+        NotRequestable.ItemOnSearch("This item is on search.")
+      case i if i.fixedField("88").contains("x") =>
+        NotRequestable.ItemWithdrawn("This item is withdrawn.")
+      case i if i.fixedField("88").contains("r") =>
+        NotRequestable.ItemUnavailable("This item is unavailable.")
+      case i if i.fixedField("88").contains("z") => NotRequestable.NoReason
+      case i if i.fixedField("88").contains("v") =>
+        NotRequestable.AtConservation("This item is with conservation.")
+      case i if i.fixedField("88").contains("h") =>
+        NotRequestable.ItemClosed("This item is closed.")
 
       // These cases cover the lines:
       //
@@ -75,8 +80,11 @@ object SierraRulesForRequesting {
       //
       // These are similar to the rules above; the difference is that the 'v' means
       // "if this line or the next line matches".  The 'q' means 'end of rule'.
-      case i if i.status.contains("b") || i.status.contains("c") =>
-        NotRequestable(message = "Please request top item.")
+      case i
+          if i
+            .fixedField("88")
+            .contains("b") || i.fixedField("88").contains("c") =>
+        NotRequestable.RequestTopItem("Please request top item.")
 
       // These cases cover the lines:
       //
@@ -85,12 +93,13 @@ object SierraRulesForRequesting {
       //    q|i||88||=|y||
       //
       // These are the same as the checks above.
-      case i if i.status.contains("d") =>
-        NotRequestable(message = "On new books display.")
-      case i if i.status.contains("e") =>
-        NotRequestable(message = "On exhibition. Please ask at Enquiry Desk.")
-      case i if i.status.contains("y") =>
-        NotRequestable()
+      case i if i.fixedField("88").contains("d") =>
+        NotRequestable.OnNewBooksDisplay("On new books display.")
+      case i if i.fixedField("88").contains("e") =>
+        NotRequestable.OnExhibition(
+          "On exhibition. Please ask at Enquiry Desk.")
+      case i if i.fixedField("88").contains("y") =>
+        NotRequestable.NoReason
 
       // These cases cover the lines:
       //
@@ -111,10 +120,12 @@ object SierraRulesForRequesting {
       //    - I haven't found an example of an item with tag 8, so I'm skipping that rule
       //      for now.  TODO: Find an example of this.
       //
-      case i if i.loanRule.getOrElse("0") != "0" || i.status.contains("!") =>
-        NotRequestable(
-          message =
-            "Item is in use by another reader. Please ask at Enquiry Desk.")
+      case i
+          if i.fixedField("87").getOrElse("0") != "0" || i
+            .fixedField("88")
+            .contains("!") =>
+        NotRequestable.OnHold(
+          "Item is in use by another reader. Please ask at Enquiry Desk.")
 
       // These cases cover the lines:
       //
@@ -125,15 +136,11 @@ object SierraRulesForRequesting {
       //    q|i||79||=|mfulc||Item cannot be requested online. Please contact Medical Film & Audio Library.   Email: mfac@wellcome.ac.uk. Telephone: +44 (0)20 76118596/97.
       //
       case i
-          if i.locationCode.containsAnyOf(
-            "mfgmc",
-            "mfinc",
-            "mfwcm",
-            "hmfac",
-            "mfulc") =>
-        NotRequestable(
-          message =
-            "Item cannot be requested online. Please contact Medical Film & Audio Library.   Email: mfac@wellcome.ac.uk. Telephone: +44 (0)20 76118596/97.")
+          if i
+            .fixedField("79")
+            .containsAnyOf("mfgmc", "mfinc", "mfwcm", "hmfac", "mfulc") =>
+        NotRequestable.ContactUs(
+          "Item cannot be requested online. Please contact Medical Film & Audio Library.   Email: mfac@wellcome.ac.uk. Telephone: +44 (0)20 76118596/97.")
 
       // These cases cover the lines:
       //
@@ -154,23 +161,25 @@ object SierraRulesForRequesting {
       //    q|i||79||=|ofvds||This item cannot be requested online. Please place a manual request.
       //
       case i
-          if i.locationCode.containsAnyOf(
-            "dbiaa",
-            "dcoaa",
-            "dinad",
-            "dinop",
-            "dinsd",
-            "dints",
-            "dpoaa",
-            "dimgs",
-            "dhuaa",
-            "dimgs",
-            "dingo",
-            "dpleg",
-            "dpuih",
-            "gblip",
-            "ofvds") =>
-        NotRequestable(message =
+          if i
+            .fixedField("79")
+            .containsAnyOf(
+              "dbiaa",
+              "dcoaa",
+              "dinad",
+              "dinop",
+              "dinsd",
+              "dints",
+              "dpoaa",
+              "dimgs",
+              "dhuaa",
+              "dimgs",
+              "dingo",
+              "dpleg",
+              "dpuih",
+              "gblip",
+              "ofvds") =>
+        NotRequestable.NeedsManualRequest(
           "This item cannot be requested online. Please place a manual request.")
 
       // These cases cover the lines:
@@ -178,10 +187,9 @@ object SierraRulesForRequesting {
       //    v|i||79||=|isvid||
       //    q|i||79||=|iscdr||Item cannot be requested online. Please ask at Information Service desk, email: infoserv@wellcome.ac.uk or telephone +44 (0)20 7611 8722.
       //
-      case i if i.locationCode.containsAnyOf("isvid", "iscdr") =>
-        NotRequestable(
-          message =
-            "Item cannot be requested online. Please ask at Information Service desk, email: infoserv@wellcome.ac.uk or telephone +44 (0)20 7611 8722.")
+      case i if i.fixedField("79").containsAnyOf("isvid", "iscdr") =>
+        NotRequestable.ContactUs(
+          "Item cannot be requested online. Please ask at Information Service desk, email: infoserv@wellcome.ac.uk or telephone +44 (0)20 7611 8722.")
 
       // These cases cover the lines:
       //
@@ -216,40 +224,41 @@ object SierraRulesForRequesting {
       //    q|i||79||=|wsrex||Item is on open shelves.  Check Location and Shelfmark for location details.
       //
       case i
-          if i.locationCode.containsAnyOf(
-            "isope",
-            "isref",
-            "gblip",
-            "wghib",
-            "wghig",
-            "wghip",
-            "wghir",
-            "wghxb",
-            "wghxg",
-            "wghxp",
-            "wghxr",
-            "wgmem",
-            "wgmxm",
-            "wgpvm",
-            "wgsee",
-            "wgsem",
-            "wgser",
-            "wqrfc",
-            "wqrfd",
-            "wqrfe",
-            "wqrfp",
-            "wqrfr",
-            "wslob",
-            "wslom",
-            "wslor",
-            "wslox",
-            "wsref",
-            "hgslr",
-            "wsrex"
-          ) =>
-        NotRequestable(
-          message =
-            "Item is on open shelves.  Check Location and Shelfmark for location details.")
+          if i
+            .fixedField("79")
+            .containsAnyOf(
+              "isope",
+              "isref",
+              "gblip",
+              "wghib",
+              "wghig",
+              "wghip",
+              "wghir",
+              "wghxb",
+              "wghxg",
+              "wghxp",
+              "wghxr",
+              "wgmem",
+              "wgmxm",
+              "wgpvm",
+              "wgsee",
+              "wgsem",
+              "wgser",
+              "wqrfc",
+              "wqrfd",
+              "wqrfe",
+              "wqrfp",
+              "wqrfr",
+              "wslob",
+              "wslom",
+              "wslor",
+              "wslox",
+              "wsref",
+              "hgslr",
+              "wsrex"
+            ) =>
+        NotRequestable.OnOpenShelves(
+          "Item is on open shelves.  Check Location and Shelfmark for location details.")
 
       // These cases cover the lines:
       //
@@ -272,16 +281,16 @@ object SierraRulesForRequesting {
       //    v|i||79||=|sompr||
       //    q|i||79||=|somsy||Please complete a manual request slip.  This item cannot be requested online.
       //
-      case i if i.itemType.contains("22") =>
-        NotRequestable(
-          message =
-            "Item is on Exhibition Reserve. Please ask at the Enquiry Desk")
+      case i if i.fixedField("61").contains("22") =>
+        NotRequestable.OnExhibition(
+          "Item is on Exhibition Reserve. Please ask at the Enquiry Desk")
 
-      case i if i.itemType.containsAnyOf("17", "18", "15") =>
-        NotRequestable()
+      case i if i.fixedField("61").containsAnyOf("17", "18", "15") =>
+        NotRequestable.NoReason
 
       case i
-          if i.itemType.containsAnyOf("4", "14") || i.locationCode
+          if i.fixedField("61").containsAnyOf("4", "14") || i
+            .fixedField("79")
             .containsAnyOf(
               "ofvn1",
               "scmwc",
@@ -294,16 +303,15 @@ object SierraRulesForRequesting {
               "sompa",
               "sompr",
               "somsy") =>
-        NotRequestable(
-          message =
-            "Please complete a manual request slip.  This item cannot be requested online.")
+        NotRequestable.NeedsManualRequest(
+          "Please complete a manual request slip.  This item cannot be requested online.")
 
       // This case covers the line:
       //
       //    q|i||79||=|sepep||
       //
-      case i if i.locationCode.contains("sepep") =>
-        NotRequestable()
+      case i if i.fixedField("79").contains("sepep") =>
+        NotRequestable.NoReason
 
       // This case covers the lines:
       //
@@ -322,23 +330,24 @@ object SierraRulesForRequesting {
       //    q|i||79||=|swm#7||Item not available due to provisions of Data Protection Act. Return to Archives catalogue to see when this file will be opened.
       //
       case i
-          if i.locationCode.containsAnyOf(
-            "sc#ac",
-            "sc#ra",
-            "sc#wa",
-            "sc#wf",
-            "swm#m",
-            "swm#o",
-            "swm#1",
-            "swm#2",
-            "swm#3",
-            "swm#4",
-            "swm#5",
-            "swm#6",
-            "swm#7") =>
-        NotRequestable(
-          message =
-            "Item not available due to provisions of Data Protection Act. Return to Archives catalogue to see when this file will be opened.")
+          if i
+            .fixedField("79")
+            .containsAnyOf(
+              "sc#ac",
+              "sc#ra",
+              "sc#wa",
+              "sc#wf",
+              "swm#m",
+              "swm#o",
+              "swm#1",
+              "swm#2",
+              "swm#3",
+              "swm#4",
+              "swm#5",
+              "swm#6",
+              "swm#7") =>
+        NotRequestable.ItemUnavailable(
+          "Item not available due to provisions of Data Protection Act. Return to Archives catalogue to see when this file will be opened.")
 
       // There's a rule in the Rules for Requesting that goes:
       //
@@ -357,48 +366,39 @@ object SierraRulesForRequesting {
       //    q|i||79||=|temp6||At digitisation and temporarily unavailable.
       //
       case i
-          if i.locationCode.containsAnyOf(
-            "temp1",
-            "temp2",
-            "temp3",
-            "temp4",
-            "temp5",
-            "temp6") =>
-        NotRequestable(message = "At digitisation and temporarily unavailable.")
+          if i
+            .fixedField("79")
+            .containsAnyOf(
+              "temp1",
+              "temp2",
+              "temp3",
+              "temp4",
+              "temp5",
+              "temp6") =>
+        NotRequestable.AtDigitisation(
+          "At digitisation and temporarily unavailable.")
 
       // This case covers the lines:
       //
       //    v|i||79||=|rm001||
       //    q|i||79||=|rmdda||
       //
-      case i if i.locationCode.containsAnyOf("rm001", "rmdda") =>
-        NotRequestable()
+      case i if i.fixedField("79").containsAnyOf("rm001", "rmdda") =>
+        NotRequestable.NoReason
 
       // This case covers the line:
       //
       //    q|i||97||=|j||
       //
-      case i if i.imessage.contains("j") =>
-        NotRequestable()
+      case i if i.fixedField("97").contains("j") =>
+        NotRequestable.NoReason
 
       case _ => Requestable
     }
 
   private implicit class ItemDataOps(itemData: SierraItemData) {
-    def imessage: Option[String] =
-      itemData.fixedFields.get("97").map { _.value.trim }
-
-    def status: Option[String] =
-      itemData.fixedFields.get("88").map { _.value.trim }
-
-    def loanRule: Option[String] =
-      itemData.fixedFields.get("87").map { _.value.trim }
-
-    def locationCode: Option[String] =
-      itemData.fixedFields.get("79").map { _.value.trim }
-
-    def itemType: Option[String] =
-      itemData.fixedFields.get("61").map { _.value.trim }
+    def fixedField(code: String): Option[String] =
+      itemData.fixedFields.get(code).map { _.value.trim }
   }
 
   private implicit class OptionalStringOps(s: Option[String]) {

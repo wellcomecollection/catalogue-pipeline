@@ -1,8 +1,8 @@
-package uk.ac.wellcome.platform.transformer.sierra.source
+package weco.catalogue.source_model.sierra.source
 
 import grizzled.slf4j.Logging
+import weco.catalogue.source_model.sierra.{SierraBibData, SierraItemData}
 import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
-import weco.catalogue.source_model.sierra.SierraBibData
 
 trait SierraQueryOps extends Logging {
 
@@ -49,6 +49,28 @@ trait SierraQueryOps extends Logging {
       subfieldsWithTags(tag)
   }
 
+  implicit class ItemDataOps(itemData: SierraItemData) {
+    def displayNote: Option[String] = {
+      val varfields = itemData.varFields
+        .filter { _.fieldTag.contains("n") }
+        .collect {
+          case VarField(Some(content), _, _, _, _, Nil) =>
+            content
+
+          case VarField(None, _, _, _, _, subfields) =>
+            subfields.map { _.content }.mkString(" ")
+        }
+        .filterNot(_.isEmpty)
+        .distinct
+
+      if (varfields.isEmpty) {
+        None
+      } else {
+        Some(varfields.mkString("\n\n"))
+      }
+    }
+  }
+
   implicit class VarFieldsOps(varfields: List[VarField]) {
     def withFieldTags(tags: String*): List[VarField] =
       varfields
@@ -87,7 +109,8 @@ trait SierraQueryOps extends Logging {
           Some(
             MarcSubfield(
               tag = tag,
-              content = multiple.map { _.content }.mkString(" "))
+              content = multiple.map { _.content }.mkString(" ")
+            )
           )
       }
 

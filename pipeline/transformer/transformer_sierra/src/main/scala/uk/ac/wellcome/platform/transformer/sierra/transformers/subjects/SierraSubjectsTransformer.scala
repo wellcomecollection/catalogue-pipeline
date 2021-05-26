@@ -1,11 +1,11 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers.subjects
 
 import uk.ac.wellcome.platform.transformer.sierra.transformers.SierraIdentifiedDataTransformer
-import uk.ac.wellcome.platform.transformer.sierra.source.SierraQueryOps
 import weco.catalogue.internal_model.text.TextNormalisation._
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.Subject
 import weco.catalogue.source_model.sierra.marc.VarField
+import weco.catalogue.source_model.sierra.source.SierraQueryOps
 import weco.catalogue.source_model.sierra.{SierraBibData, SierraBibNumber}
 
 trait SierraSubjectsTransformer

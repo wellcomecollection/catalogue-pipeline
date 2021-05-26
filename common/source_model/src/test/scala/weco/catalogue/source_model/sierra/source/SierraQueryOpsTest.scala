@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.transformer.sierra.source
+package weco.catalogue.source_model.sierra.source
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -6,7 +6,7 @@ import weco.catalogue.source_model.generators.{
   MarcGenerators,
   SierraDataGenerators
 }
-import weco.catalogue.source_model.sierra.marc.MarcSubfield
+import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
 
 class SierraQueryOpsTest
     extends AnyFunSpec
@@ -14,6 +14,41 @@ class SierraQueryOpsTest
     with MarcGenerators
     with SierraDataGenerators
     with SierraQueryOps {
+
+  describe("ItemDataOps") {
+    describe("displayNote") {
+      it("returns None if there are no varfields with field tag n") {
+        val item = createSierraItemData
+
+        item.displayNote shouldBe None
+      }
+
+      it("finds the content from a single field tag n") {
+        val item = createSierraItemDataWith(
+          varFields = List(
+            VarField(fieldTag = Some("n"), content = Some("Offsite"))
+          )
+        )
+
+        item.displayNote shouldBe Some("Offsite")
+      }
+
+      it("finds the content from the subfields on field tag n") {
+        val item = createSierraItemDataWith(
+          varFields = List(
+            VarField(
+              fieldTag = Some("n"),
+              subfields = List(
+                MarcSubfield(tag = "a", content = "Part of:"),
+                MarcSubfield(tag = "c", content = "a special collection"),
+              ))
+          )
+        )
+
+        item.displayNote shouldBe Some("Part of: a special collection")
+      }
+    }
+  }
 
   it("finds the varfields with given tags") {
     val varFields = List(
