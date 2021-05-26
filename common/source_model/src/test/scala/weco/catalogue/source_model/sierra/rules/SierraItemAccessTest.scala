@@ -5,6 +5,7 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil._
 import weco.catalogue.internal_model.locations.{
   AccessCondition,
+  AccessStatus,
   ItemStatus,
   LocationType,
   PhysicalLocationType
@@ -163,63 +164,84 @@ class SierraItemAccessTest extends AnyFunSpec with Matchers with SierraDataGener
         itemStatus shouldBe ItemStatus.Available
       }
 
-      it("cannot be requested online if it needs a manual request") {
+      describe("cannot be requested") {
+        it("if it needs a manual request") {
+          val itemData = createSierraItemDataWith(
+            fixedFields = Map(
+              "61" -> FixedField(label = "I TYPE", value = "4", display = "serial"),
+              "79" -> FixedField(label = "LOCATION", value = "sgser", display = "Closed stores journals"),
+              "88" -> FixedField(label = "STATUS", value = "-", display = "Available"),
+              "108" -> FixedField(label = "OPACMSG", value = "n", display = "Manual request"),
+            )
+          )
+
+          val (ac, itemStatus) = SierraItemAccess(
+            bibStatus = None,
+            location = Some(LocationType.ClosedStores),
+            itemData = itemData
+          )
+
+          ac shouldBe Some(AccessCondition(terms = Some("Manual request")))
+          itemStatus shouldBe ItemStatus.Available
+        }
+      }
+
+      it("if it's bound in the top item") {
         val itemData = createSierraItemDataWith(
           fixedFields = Map(
-            "61" -> FixedField(label = "I TYPE", value = "4", display = "serial"),
-            "79" -> FixedField(label = "LOCATION", value = "sgser", display = "Closed stores journals"),
-            "88" -> FixedField(label = "STATUS", value = "-", display = "Available"),
-            "108" -> FixedField(label = "OPACMSG", value = "n", display = "Manual request"),
+            "79" -> FixedField(label = "LOCATION", value = "bwith", display = "bound in above"),
+            "88" -> FixedField(label = "STATUS", value = "b", display = "As above"),
+            "108" -> FixedField(label = "OPACMSG", value = "-", display = "-"),
           )
         )
 
         val (ac, itemStatus) = SierraItemAccess(
           bibStatus = None,
+          location = None,
+          itemData = itemData
+        )
+
+        ac shouldBe Some(AccessCondition(terms = Some("Please request top item.")))
+        itemStatus shouldBe ItemStatus.Unavailable
+      }
+
+      it("if it's contained the top item") {
+        val itemData = createSierraItemDataWith(
+          fixedFields = Map(
+            "79" -> FixedField(label = "LOCATION", value = "cwith", display = "contained in above"),
+            "88" -> FixedField(label = "STATUS", value = "c", display = "As above"),
+            "108" -> FixedField(label = "OPACMSG", value = "-", display = "-"),
+          )
+        )
+
+        val (ac, itemStatus) = SierraItemAccess(
+          bibStatus = None,
+          location = None,
+          itemData = itemData
+        )
+
+        ac shouldBe Some(AccessCondition(terms = Some("Please request top item.")))
+        itemStatus shouldBe ItemStatus.Unavailable
+      }
+
+      it("if the bib and the item are closed") {
+        val itemData = createSierraItemDataWith(
+          fixedFields = Map(
+            "79" -> FixedField(label = "LOCATION", value = "sc#ac", display = "Unrequestable Arch. & MSS"),
+            "88" -> FixedField(label = "STATUS", value = "h", display = "Closed"),
+            "108" -> FixedField(label = "OPACMSG", value = "u", display = "Unavailable"),
+          )
+        )
+
+        val (ac, itemStatus) = SierraItemAccess(
+          bibStatus = Some(AccessStatus.Closed),
           location = Some(LocationType.ClosedStores),
           itemData = itemData
         )
 
-        ac shouldBe Some(AccessCondition(terms = Some("Manual request")))
-        itemStatus shouldBe ItemStatus.Available
+        ac shouldBe Some(AccessCondition(status = AccessStatus.Closed))
+        itemStatus shouldBe ItemStatus.Unavailable
       }
-    }
-
-    it("cannot be requested if it's bound in the top item") {
-      val itemData = createSierraItemDataWith(
-        fixedFields = Map(
-          "79" -> FixedField(label = "LOCATION", value = "bwith", display = "bound in above"),
-          "88" -> FixedField(label = "STATUS", value = "b", display = "As above"),
-          "108" -> FixedField(label = "OPACMSG", value = "-", display = "-"),
-        )
-      )
-
-      val (ac, itemStatus) = SierraItemAccess(
-        bibStatus = None,
-        location = None,
-        itemData = itemData
-      )
-
-      ac shouldBe Some(AccessCondition(terms = Some("Please request top item.")))
-      itemStatus shouldBe ItemStatus.Unavailable
-    }
-
-    it("cannot be requested if it's contained the top item") {
-      val itemData = createSierraItemDataWith(
-        fixedFields = Map(
-          "79" -> FixedField(label = "LOCATION", value = "cwith", display = "contained in above"),
-          "88" -> FixedField(label = "STATUS", value = "c", display = "As above"),
-          "108" -> FixedField(label = "OPACMSG", value = "-", display = "-"),
-        )
-      )
-
-      val (ac, itemStatus) = SierraItemAccess(
-        bibStatus = None,
-        location = None,
-        itemData = itemData
-      )
-
-      ac shouldBe Some(AccessCondition(terms = Some("Please request top item.")))
-      itemStatus shouldBe ItemStatus.Unavailable
     }
   }
 

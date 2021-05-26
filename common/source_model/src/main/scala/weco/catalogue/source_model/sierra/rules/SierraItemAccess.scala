@@ -96,6 +96,26 @@ object SierraItemAccess extends SierraQueryOps {
               note = itemData.displayNote)),
           ItemStatus.Available)
 
+      // Handle any cases where the item is closed.
+      //
+      // We don't show the text from rules for requesting -- it's not saying anything
+      // that you can't work out from the AccessStatus.
+      //
+      // Examples: b20657365 / i18576503, b1899457x / i17720734
+      case (
+        Some(AccessStatus.Closed),
+        _,
+        Some(Status.Closed),
+        Some(OpacMsg.Unavailable),
+        NotRequestable.ItemClosed(_),
+        Some(LocationType.ClosedStores)) =>
+        (
+          Some(
+            AccessCondition(
+              status = Some(AccessStatus.Closed),
+              note = itemData.displayNote)),
+          ItemStatus.Unavailable)
+
       case other =>
         println(s"@@ $other @@")
         throw new Throwable("Unhandled!!!")
