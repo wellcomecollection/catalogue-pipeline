@@ -22,14 +22,24 @@ case object Requestable extends RulesForRequestingResult
   * The original rules are included for reference and to help apply updates,
   * along with explanations of the syntax.
   *
+  * If you disagree with one of these rules, you have two options:
+  *
+  *   1)  Discuss the change with Library Systems Support and get it changed
+  *       in Sierra proper, then update this object to match
+  *   2)  Work around it elsewhere in our applications
+  *
+  * But don't modify these rules without updating the canonical set in Sierra --
+  * this is meant to be a 1:1 reflection of those rules, not a mix of Sierra rules
+  * and platform logic.
+  *
   * Relevant Sierra docs:
   *
-  *   - Rules for Requesting syntax
-  *     https://documentation.iii.com/sierrahelp/Content/sgasaa/sgasaa_requestrl.html
-  *   - Fixed fields on items
-  *     https://documentation.iii.com/sierrahelp/Content/sril/sril_records_fixed_field_types_item.html
-  *   - Variable length fields on items
-  *     https://documentation.iii.com/sierrahelp/Content/sril/sril_records_varfld_types_item.html
+  *   -   Rules for Requesting syntax
+  *       https://documentation.iii.com/sierrahelp/Content/sgasaa/sgasaa_requestrl.html
+  *   -   Fixed fields on items
+  *       https://documentation.iii.com/sierrahelp/Content/sril/sril_records_fixed_field_types_item.html
+  *   -   Variable length fields on items
+  *       https://documentation.iii.com/sierrahelp/Content/sril/sril_records_varfld_types_item.html
   *
   */
 object SierraRulesForRequesting {
