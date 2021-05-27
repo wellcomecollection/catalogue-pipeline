@@ -43,8 +43,14 @@ object SierraItemAccess extends SierraQueryOps {
       // Items on the closed stores that are requestable get the "Online request" condition.
       //
       // Example: b18799966 / i17571170
-      case (bibStatus, Some(0), Some(Status.Available), Some(OpacMsg.OnlineRequest), Requestable, Some(LocationType.ClosedStores))
-        if bibStatus.isEmpty || bibStatus.contains(AccessStatus.Open) =>
+      case (
+          bibStatus,
+          Some(0),
+          Some(Status.Available),
+          Some(OpacMsg.OnlineRequest),
+          Requestable,
+          Some(LocationType.ClosedStores))
+          if bibStatus.isEmpty || bibStatus.contains(AccessStatus.Open) =>
         val ac = AccessCondition(
           status = bibStatus,
           terms = Some("Online request"),
@@ -66,13 +72,15 @@ object SierraItemAccess extends SierraQueryOps {
       //
       // Example: b1659504x / i15894897
       case (
-        None,
-        Some(0),
-        Some(Status.Available),
-        Some(OpacMsg.OpenShelves),
-        NotRequestable.OnOpenShelves(_),
-        Some(LocationType.OpenShelves)) =>
-        val ac = itemData.displayNote.map { note => AccessCondition(note = Some(note)) }
+          None,
+          Some(0),
+          Some(Status.Available),
+          Some(OpacMsg.OpenShelves),
+          NotRequestable.OnOpenShelves(_),
+          Some(LocationType.OpenShelves)) =>
+        val ac = itemData.displayNote.map { note =>
+          AccessCondition(note = Some(note))
+        }
         (ac, ItemStatus.Available)
 
       // There are some items that are labelled "bound in above" or "contained in above".
@@ -85,12 +93,12 @@ object SierraItemAccess extends SierraQueryOps {
       //
       // Example: b32214832 / i19389383
       case (
-        None,
-        Some(0),
-        Some(Status.Available),
-        Some(OpacMsg.ManualRequest),
-        NotRequestable.NeedsManualRequest(_),
-        Some(LocationType.ClosedStores)) =>
+          None,
+          Some(0),
+          Some(Status.Available),
+          Some(OpacMsg.ManualRequest),
+          NotRequestable.NeedsManualRequest(_),
+          Some(LocationType.ClosedStores)) =>
         (
           Some(
             AccessCondition(
@@ -105,12 +113,14 @@ object SierraItemAccess extends SierraQueryOps {
       //
       // Examples: b20657365 / i18576503, b1899457x / i17720734
       case (
-        Some(AccessStatus.Closed),
-        _,
-        Some(Status.Closed),
-        Some(OpacMsg.Unavailable),
-        NotRequestable.ItemClosed(_),
-        locationType) if locationType.isEmpty || locationType.contains(LocationType.ClosedStores) =>
+          Some(AccessStatus.Closed),
+          _,
+          Some(Status.Closed),
+          Some(OpacMsg.Unavailable),
+          NotRequestable.ItemClosed(_),
+          locationType)
+          if locationType.isEmpty || locationType.contains(
+            LocationType.ClosedStores) =>
         (
           Some(
             AccessCondition(
@@ -120,12 +130,12 @@ object SierraItemAccess extends SierraQueryOps {
 
       // Handle any cases where the item is explicitly unavailable.
       case (
-        None,
-        _,
-        Some(Status.Unavailable),
-        Some(OpacMsg.Unavailable),
-        NotRequestable.ItemUnavailable(_),
-        _) =>
+          None,
+          _,
+          Some(Status.Unavailable),
+          Some(OpacMsg.Unavailable),
+          NotRequestable.ItemUnavailable(_),
+          _) =>
         (
           Some(
             AccessCondition(
@@ -134,12 +144,12 @@ object SierraItemAccess extends SierraQueryOps {
           ItemStatus.Unavailable)
 
       case (
-        None,
-        _,
-        Some(Status.Unavailable),
-        Some(OpacMsg.AtDigitisation),
-        NotRequestable.ItemUnavailable(_),
-        _) =>
+          None,
+          _,
+          Some(Status.Unavailable),
+          Some(OpacMsg.AtDigitisation),
+          NotRequestable.ItemUnavailable(_),
+          _) =>
         (
           Some(
             AccessCondition(
@@ -153,12 +163,12 @@ object SierraItemAccess extends SierraQueryOps {
       //
       // Example: b29459126 / i19023340
       case (
-        Some(AccessStatus.Restricted),
-        Some(0),
-        Some(Status.Restricted),
-        Some(OpacMsg.OnlineRequest),
-        Requestable,
-        Some(LocationType.ClosedStores)) =>
+          Some(AccessStatus.Restricted),
+          Some(0),
+          Some(Status.Restricted),
+          Some(OpacMsg.OnlineRequest),
+          Requestable,
+          Some(LocationType.ClosedStores)) =>
         (
           Some(
             AccessCondition(
@@ -171,14 +181,14 @@ object SierraItemAccess extends SierraQueryOps {
       //
       // Examples: b32214832 / i19389383, b16576111 / 15862409
       case (
-        bibStatus,
-        Some(0),
-        Some(Status.PermissionRequired),
-        Some(OpacMsg.ByAppointment),
-        NotRequestable.NoReason,
-        Some(LocationType.ClosedStores))
-        if bibStatus.isEmpty || bibStatus.contains(AccessStatus.ByAppointment) || bibStatus
-          .contains(AccessStatus.PermissionRequired) =>
+          bibStatus,
+          Some(0),
+          Some(Status.PermissionRequired),
+          Some(OpacMsg.ByAppointment),
+          NotRequestable.NoReason,
+          Some(LocationType.ClosedStores))
+          if bibStatus.isEmpty || bibStatus.contains(AccessStatus.ByAppointment) || bibStatus
+            .contains(AccessStatus.PermissionRequired) =>
         (
           Some(
             AccessCondition(
@@ -190,12 +200,12 @@ object SierraItemAccess extends SierraQueryOps {
       //
       // Example: b10379198 / i10443861
       case (
-        _,
-        _,
-        Some(Status.Missing),
-        _,
-        NotRequestable.ItemMissing(message),
-        _) =>
+          _,
+          _,
+          Some(Status.Missing),
+          _,
+          NotRequestable.ItemMissing(message),
+          _) =>
         (
           Some(
             AccessCondition(
@@ -213,12 +223,12 @@ object SierraItemAccess extends SierraQueryOps {
       //     Then the status becomes "!" (On holdshelf)
       //
       case (
-        None,
-        Some(holdCount),
-        _,
-        _,
-        Requestable,
-        Some(LocationType.ClosedStores)) if holdCount > 0 =>
+          None,
+          Some(holdCount),
+          _,
+          _,
+          Requestable,
+          Some(LocationType.ClosedStores)) if holdCount > 0 =>
         (
           Some(AccessCondition(
             status = Some(AccessStatus.TemporarilyUnavailable),
@@ -227,12 +237,12 @@ object SierraItemAccess extends SierraQueryOps {
           ItemStatus.TemporarilyUnavailable)
 
       case (
-        None,
-        _,
-        _,
-        _,
-        NotRequestable.OnHold(_),
-        Some(LocationType.ClosedStores)) =>
+          None,
+          _,
+          _,
+          _,
+          NotRequestable.OnHold(_),
+          Some(LocationType.ClosedStores)) =>
         (
           Some(AccessCondition(
             status = Some(AccessStatus.TemporarilyUnavailable),

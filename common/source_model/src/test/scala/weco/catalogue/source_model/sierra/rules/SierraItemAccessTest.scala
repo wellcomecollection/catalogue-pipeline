@@ -24,7 +24,10 @@ import weco.catalogue.source_model.sierra.{
 import java.io.{BufferedReader, FileInputStream, InputStreamReader}
 import scala.util.{Failure, Success, Try}
 
-class SierraItemAccessTest extends AnyFunSpec with Matchers with SierraDataGenerators {
+class SierraItemAccessTest
+    extends AnyFunSpec
+    with Matchers
+    with SierraDataGenerators {
   ignore("assigns access conditions for all Sierra items") {
     // Note: this test is not meant to hang around long-term.  It's a test harness
     // that runs through every SierraTransformable instance, tries to assign some
@@ -36,14 +39,15 @@ class SierraItemAccessTest extends AnyFunSpec with Matchers with SierraDataGener
       new Iterator[String] {
         val reader =
           new BufferedReader(
-            new InputStreamReader(
-              new FileInputStream("/Users/alexwlchan/desktop/sierra/out_trimmed6.json")))
+            new InputStreamReader(new FileInputStream(
+              "/Users/alexwlchan/desktop/sierra/out_trimmed6.json")))
 
         override def hasNext: Boolean = reader.ready
         override def next(): String = reader.readLine()
       }
 
-    val bibItemPairs: Iterator[(SierraBibNumber, SierraBibData, SierraItemNumber, SierraItemData)] =
+    val bibItemPairs: Iterator[
+      (SierraBibNumber, SierraBibData, SierraItemNumber, SierraItemData)] =
       reader
         .flatMap { json =>
           val t = fromJson[SierraTransformable](json).get
@@ -149,9 +153,18 @@ class SierraItemAccessTest extends AnyFunSpec with Matchers with SierraDataGener
         it("if it has no restrictions") {
           val itemData = createSierraItemDataWith(
             fixedFields = Map(
-              "79" -> FixedField(label = "LOCATION", value = "scmac", display = "Closed stores Arch. & MSS"),
-              "88" -> FixedField(label = "STATUS", value = "-", display = "Available"),
-              "108" -> FixedField(label = "OPACMSG", value = "f", display = "Online request"),
+              "79" -> FixedField(
+                label = "LOCATION",
+                value = "scmac",
+                display = "Closed stores Arch. & MSS"),
+              "88" -> FixedField(
+                label = "STATUS",
+                value = "-",
+                display = "Available"),
+              "108" -> FixedField(
+                label = "OPACMSG",
+                value = "f",
+                display = "Online request"),
             )
           )
 
@@ -168,9 +181,18 @@ class SierraItemAccessTest extends AnyFunSpec with Matchers with SierraDataGener
         it("if it has no restrictions and the bib is open") {
           val itemData = createSierraItemDataWith(
             fixedFields = Map(
-              "79" -> FixedField(label = "LOCATION", value = "scmwf", display = "Closed stores A&MSS Well.Found."),
-              "88" -> FixedField(label = "STATUS", value = "-", display = "Available"),
-              "108" -> FixedField(label = "OPACMSG", value = "f", display = "Online request"),
+              "79" -> FixedField(
+                label = "LOCATION",
+                value = "scmwf",
+                display = "Closed stores A&MSS Well.Found."),
+              "88" -> FixedField(
+                label = "STATUS",
+                value = "-",
+                display = "Available"),
+              "108" -> FixedField(
+                label = "OPACMSG",
+                value = "f",
+                display = "Online request"),
             )
           )
 
@@ -180,16 +202,28 @@ class SierraItemAccessTest extends AnyFunSpec with Matchers with SierraDataGener
             itemData = itemData
           )
 
-          ac shouldBe Some(AccessCondition(status = Some(AccessStatus.Open), terms = Some("Online request")))
+          ac shouldBe Some(
+            AccessCondition(
+              status = Some(AccessStatus.Open),
+              terms = Some("Online request")))
           itemStatus shouldBe ItemStatus.Available
         }
 
         it("if it's restricted") {
           val itemData = createSierraItemDataWith(
             fixedFields = Map(
-              "79" -> FixedField(label = "LOCATION", value = "scmac", display = "Closed stores Arch. & MSS"),
-              "88" -> FixedField(label = "STATUS", value = "6", display = "Restricted"),
-              "108" -> FixedField(label = "OPACMSG", value = "f", display = "Online request"),
+              "79" -> FixedField(
+                label = "LOCATION",
+                value = "scmac",
+                display = "Closed stores Arch. & MSS"),
+              "88" -> FixedField(
+                label = "STATUS",
+                value = "6",
+                display = "Restricted"),
+              "108" -> FixedField(
+                label = "OPACMSG",
+                value = "f",
+                display = "Online request"),
             )
           )
 
@@ -199,7 +233,10 @@ class SierraItemAccessTest extends AnyFunSpec with Matchers with SierraDataGener
             itemData = itemData
           )
 
-          ac shouldBe Some(AccessCondition(status = Some(AccessStatus.Restricted), terms = Some("Online request")))
+          ac shouldBe Some(
+            AccessCondition(
+              status = Some(AccessStatus.Restricted),
+              terms = Some("Online request")))
           itemStatus shouldBe ItemStatus.Available
         }
       }
@@ -208,10 +245,22 @@ class SierraItemAccessTest extends AnyFunSpec with Matchers with SierraDataGener
         it("if it needs a manual request") {
           val itemData = createSierraItemDataWith(
             fixedFields = Map(
-              "61" -> FixedField(label = "I TYPE", value = "4", display = "serial"),
-              "79" -> FixedField(label = "LOCATION", value = "sgser", display = "Closed stores journals"),
-              "88" -> FixedField(label = "STATUS", value = "-", display = "Available"),
-              "108" -> FixedField(label = "OPACMSG", value = "n", display = "Manual request"),
+              "61" -> FixedField(
+                label = "I TYPE",
+                value = "4",
+                display = "serial"),
+              "79" -> FixedField(
+                label = "LOCATION",
+                value = "sgser",
+                display = "Closed stores journals"),
+              "88" -> FixedField(
+                label = "STATUS",
+                value = "-",
+                display = "Available"),
+              "108" -> FixedField(
+                label = "OPACMSG",
+                value = "n",
+                display = "Manual request"),
             )
           )
 
@@ -228,9 +277,18 @@ class SierraItemAccessTest extends AnyFunSpec with Matchers with SierraDataGener
         it("if it's bound in the top item") {
           val itemData = createSierraItemDataWith(
             fixedFields = Map(
-              "79" -> FixedField(label = "LOCATION", value = "bwith", display = "bound in above"),
-              "88" -> FixedField(label = "STATUS", value = "b", display = "As above"),
-              "108" -> FixedField(label = "OPACMSG", value = "-", display = "-"),
+              "79" -> FixedField(
+                label = "LOCATION",
+                value = "bwith",
+                display = "bound in above"),
+              "88" -> FixedField(
+                label = "STATUS",
+                value = "b",
+                display = "As above"),
+              "108" -> FixedField(
+                label = "OPACMSG",
+                value = "-",
+                display = "-"),
             )
           )
 
@@ -240,16 +298,26 @@ class SierraItemAccessTest extends AnyFunSpec with Matchers with SierraDataGener
             itemData = itemData
           )
 
-          ac shouldBe Some(AccessCondition(terms = Some("Please request top item.")))
+          ac shouldBe Some(
+            AccessCondition(terms = Some("Please request top item.")))
           itemStatus shouldBe ItemStatus.Unavailable
         }
 
         it("if it's contained the top item") {
           val itemData = createSierraItemDataWith(
             fixedFields = Map(
-              "79" -> FixedField(label = "LOCATION", value = "cwith", display = "contained in above"),
-              "88" -> FixedField(label = "STATUS", value = "c", display = "As above"),
-              "108" -> FixedField(label = "OPACMSG", value = "-", display = "-"),
+              "79" -> FixedField(
+                label = "LOCATION",
+                value = "cwith",
+                display = "contained in above"),
+              "88" -> FixedField(
+                label = "STATUS",
+                value = "c",
+                display = "As above"),
+              "108" -> FixedField(
+                label = "OPACMSG",
+                value = "-",
+                display = "-"),
             )
           )
 
@@ -259,16 +327,26 @@ class SierraItemAccessTest extends AnyFunSpec with Matchers with SierraDataGener
             itemData = itemData
           )
 
-          ac shouldBe Some(AccessCondition(terms = Some("Please request top item.")))
+          ac shouldBe Some(
+            AccessCondition(terms = Some("Please request top item.")))
           itemStatus shouldBe ItemStatus.Unavailable
         }
 
         it("if the bib and the item are closed") {
           val itemData = createSierraItemDataWith(
             fixedFields = Map(
-              "79" -> FixedField(label = "LOCATION", value = "sc#ac", display = "Unrequestable Arch. & MSS"),
-              "88" -> FixedField(label = "STATUS", value = "h", display = "Closed"),
-              "108" -> FixedField(label = "OPACMSG", value = "u", display = "Unavailable"),
+              "79" -> FixedField(
+                label = "LOCATION",
+                value = "sc#ac",
+                display = "Unrequestable Arch. & MSS"),
+              "88" -> FixedField(
+                label = "STATUS",
+                value = "h",
+                display = "Closed"),
+              "108" -> FixedField(
+                label = "OPACMSG",
+                value = "u",
+                display = "Unavailable"),
             )
           )
 
@@ -285,9 +363,18 @@ class SierraItemAccessTest extends AnyFunSpec with Matchers with SierraDataGener
         it("if the bib and the item are closed, and there's no location") {
           val itemData = createSierraItemDataWith(
             fixedFields = Map(
-              "79" -> FixedField(label = "LOCATION", value = "sc#ac", display = "Unrequestable Arch. & MSS"),
-              "88" -> FixedField(label = "STATUS", value = "h", display = "Closed"),
-              "108" -> FixedField(label = "OPACMSG", value = "u", display = "Unavailable"),
+              "79" -> FixedField(
+                label = "LOCATION",
+                value = "sc#ac",
+                display = "Unrequestable Arch. & MSS"),
+              "88" -> FixedField(
+                label = "STATUS",
+                value = "h",
+                display = "Closed"),
+              "108" -> FixedField(
+                label = "OPACMSG",
+                value = "u",
+                display = "Unavailable"),
             )
           )
 
@@ -304,9 +391,18 @@ class SierraItemAccessTest extends AnyFunSpec with Matchers with SierraDataGener
         it("if the item is unavailable") {
           val itemData = createSierraItemDataWith(
             fixedFields = Map(
-              "79" -> FixedField(label = "LOCATION", value = "sgser", display = "Closed stores journals"),
-              "88" -> FixedField(label = "STATUS", value = "r", display = "Unavailable"),
-              "108" -> FixedField(label = "OPACMSG", value = "u", display = "Unavailable"),
+              "79" -> FixedField(
+                label = "LOCATION",
+                value = "sgser",
+                display = "Closed stores journals"),
+              "88" -> FixedField(
+                label = "STATUS",
+                value = "r",
+                display = "Unavailable"),
+              "108" -> FixedField(
+                label = "OPACMSG",
+                value = "u",
+                display = "Unavailable"),
             )
           )
 
@@ -323,9 +419,18 @@ class SierraItemAccessTest extends AnyFunSpec with Matchers with SierraDataGener
         it("if the item is at digitisation") {
           val itemData = createSierraItemDataWith(
             fixedFields = Map(
-              "79" -> FixedField(label = "LOCATION", value = "sgser", display = "Closed stores journals"),
-              "88" -> FixedField(label = "STATUS", value = "r", display = "Unavailable"),
-              "108" -> FixedField(label = "OPACMSG", value = "b", display = "@ digitisation"),
+              "79" -> FixedField(
+                label = "LOCATION",
+                value = "sgser",
+                display = "Closed stores journals"),
+              "88" -> FixedField(
+                label = "STATUS",
+                value = "r",
+                display = "Unavailable"),
+              "108" -> FixedField(
+                label = "OPACMSG",
+                value = "b",
+                display = "@ digitisation"),
             )
           )
 
@@ -347,9 +452,18 @@ class SierraItemAccessTest extends AnyFunSpec with Matchers with SierraDataGener
         it("if the bib and item are by appointment") {
           val itemData = createSierraItemDataWith(
             fixedFields = Map(
-              "79" -> FixedField(label = "LOCATION", value = "scmac", display = "Closed stores Arch. & MSS"),
-              "88" -> FixedField(label = "STATUS", value = "y", display = "Permission required"),
-              "108" -> FixedField(label = "OPACMSG", value = "a", display = "By appointment"),
+              "79" -> FixedField(
+                label = "LOCATION",
+                value = "scmac",
+                display = "Closed stores Arch. & MSS"),
+              "88" -> FixedField(
+                label = "STATUS",
+                value = "y",
+                display = "Permission required"),
+              "108" -> FixedField(
+                label = "OPACMSG",
+                value = "a",
+                display = "By appointment"),
             )
           )
 
@@ -368,9 +482,18 @@ class SierraItemAccessTest extends AnyFunSpec with Matchers with SierraDataGener
         it("if the item is missing") {
           val itemData = createSierraItemDataWith(
             fixedFields = Map(
-              "79" -> FixedField(label = "LOCATION", value = "sghi2", display = "Closed stores Hist. 2"),
-              "88" -> FixedField(label = "STATUS", value = "m", display = "Missing"),
-              "108" -> FixedField(label = "OPACMSG", value = "f", display = "Online request"),
+              "79" -> FixedField(
+                label = "LOCATION",
+                value = "sghi2",
+                display = "Closed stores Hist. 2"),
+              "88" -> FixedField(
+                label = "STATUS",
+                value = "m",
+                display = "Missing"),
+              "108" -> FixedField(
+                label = "OPACMSG",
+                value = "f",
+                display = "Online request"),
             )
           )
 
@@ -396,9 +519,18 @@ class SierraItemAccessTest extends AnyFunSpec with Matchers with SierraDataGener
         val itemData = createSierraItemDataWith(
           holdCount = Some(1),
           fixedFields = Map(
-            "79" -> FixedField(label = "LOCATION", value = "sgeph", display = "Closed stores ephemera"),
-            "88" -> FixedField(label = "STATUS", value = "-", display = "Available"),
-            "108" -> FixedField(label = "OPACMSG", value = "f", display = "Online request"),
+            "79" -> FixedField(
+              label = "LOCATION",
+              value = "sgeph",
+              display = "Closed stores ephemera"),
+            "88" -> FixedField(
+              label = "STATUS",
+              value = "-",
+              display = "Available"),
+            "108" -> FixedField(
+              label = "OPACMSG",
+              value = "f",
+              display = "Online request"),
           )
         )
 
@@ -411,7 +543,8 @@ class SierraItemAccessTest extends AnyFunSpec with Matchers with SierraDataGener
         ac shouldBe Some(
           AccessCondition(
             status = Some(AccessStatus.TemporarilyUnavailable),
-            terms = Some("Item is in use by another reader. Please ask at Enquiry Desk.")
+            terms = Some(
+              "Item is in use by another reader. Please ask at Enquiry Desk.")
           )
         )
         itemStatus shouldBe ItemStatus.TemporarilyUnavailable
@@ -421,9 +554,18 @@ class SierraItemAccessTest extends AnyFunSpec with Matchers with SierraDataGener
         val itemData = createSierraItemDataWith(
           holdCount = Some(1),
           fixedFields = Map(
-            "79" -> FixedField(label = "LOCATION", value = "swms4", display = "Closed stores WMS 4"),
-            "88" -> FixedField(label = "STATUS", value = "!", display = "On holdshelf"),
-            "108" -> FixedField(label = "OPACMSG", value = "f", display = "Online request"),
+            "79" -> FixedField(
+              label = "LOCATION",
+              value = "swms4",
+              display = "Closed stores WMS 4"),
+            "88" -> FixedField(
+              label = "STATUS",
+              value = "!",
+              display = "On holdshelf"),
+            "108" -> FixedField(
+              label = "OPACMSG",
+              value = "f",
+              display = "Online request"),
           )
         )
 
@@ -436,7 +578,8 @@ class SierraItemAccessTest extends AnyFunSpec with Matchers with SierraDataGener
         ac shouldBe Some(
           AccessCondition(
             status = Some(AccessStatus.TemporarilyUnavailable),
-            terms = Some("Item is in use by another reader. Please ask at Enquiry Desk.")
+            terms = Some(
+              "Item is in use by another reader. Please ask at Enquiry Desk.")
           )
         )
         itemStatus shouldBe ItemStatus.TemporarilyUnavailable
@@ -449,9 +592,18 @@ class SierraItemAccessTest extends AnyFunSpec with Matchers with SierraDataGener
       it("cannot be requested online") {
         val itemData = createSierraItemDataWith(
           fixedFields = Map(
-            "79" -> FixedField(label = "LOCATION", value = "wgmem", display = "Medical Collection"),
-            "88" -> FixedField(label = "STATUS", value = "-", display = "Available"),
-            "108" -> FixedField(label = "OPACMSG", value = "o", display = "Open shelves"),
+            "79" -> FixedField(
+              label = "LOCATION",
+              value = "wgmem",
+              display = "Medical Collection"),
+            "88" -> FixedField(
+              label = "STATUS",
+              value = "-",
+              display = "Available"),
+            "108" -> FixedField(
+              label = "OPACMSG",
+              value = "o",
+              display = "Open shelves"),
           )
         )
 
@@ -468,14 +620,24 @@ class SierraItemAccessTest extends AnyFunSpec with Matchers with SierraDataGener
       it("gets a display note") {
         val itemData = createSierraItemDataWith(
           fixedFields = Map(
-            "79" -> FixedField(label = "LOCATION", value = "wgpvm", display = "History of Medicine"),
-            "88" -> FixedField(label = "STATUS", value = "-", display = "Available"),
-            "108" -> FixedField(label = "OPACMSG", value = "o", display = "Open shelves"),
+            "79" -> FixedField(
+              label = "LOCATION",
+              value = "wgpvm",
+              display = "History of Medicine"),
+            "88" -> FixedField(
+              label = "STATUS",
+              value = "-",
+              display = "Available"),
+            "108" -> FixedField(
+              label = "OPACMSG",
+              value = "o",
+              display = "Open shelves"),
           ),
           varFields = List(
             VarField(
               fieldTag = Some("n"),
-              content = Some("Shelved at the end of the Quick Ref. section with the oversize Quick Ref. books.")
+              content = Some(
+                "Shelved at the end of the Quick Ref. section with the oversize Quick Ref. books.")
             )
           )
         )
@@ -488,7 +650,8 @@ class SierraItemAccessTest extends AnyFunSpec with Matchers with SierraDataGener
 
         ac shouldBe Some(
           AccessCondition(
-            note = Some("Shelved at the end of the Quick Ref. section with the oversize Quick Ref. books.")
+            note = Some(
+              "Shelved at the end of the Quick Ref. section with the oversize Quick Ref. books.")
           )
         )
         itemStatus shouldBe ItemStatus.Available
@@ -498,9 +661,18 @@ class SierraItemAccessTest extends AnyFunSpec with Matchers with SierraDataGener
     it("is not available if it is missing") {
       val itemData = createSierraItemDataWith(
         fixedFields = Map(
-          "79" -> FixedField(label = "LOCATION", value = "wgmem", display = "Medical Collection"),
-          "88" -> FixedField(label = "STATUS", value = "m", display = "Missing"),
-          "108" -> FixedField(label = "OPACMSG", value = "o", display = "Open shelves"),
+          "79" -> FixedField(
+            label = "LOCATION",
+            value = "wgmem",
+            display = "Medical Collection"),
+          "88" -> FixedField(
+            label = "STATUS",
+            value = "m",
+            display = "Missing"),
+          "108" -> FixedField(
+            label = "OPACMSG",
+            value = "o",
+            display = "Open shelves"),
         )
       )
 
