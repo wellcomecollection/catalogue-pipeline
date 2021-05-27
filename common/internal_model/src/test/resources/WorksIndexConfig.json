@@ -1,0 +1,857 @@
+{
+  "settings" : {
+    "analysis" : {
+      "analyzer" : {
+        "path_hierarchy_analyzer" : {
+          "type" : "custom",
+          "tokenizer" : "path_hierarchy_tokenizer"
+        },
+        "asciifolding_analyzer" : {
+          "type" : "custom",
+          "tokenizer" : "standard",
+          "filter" : [
+            "lowercase",
+            "asciifolding_token_filter"
+          ]
+        },
+        "shingle_asciifolding_analyzer" : {
+          "type" : "custom",
+          "tokenizer" : "standard",
+          "filter" : [
+            "lowercase",
+            "shingle_token_filter",
+            "asciifolding_token_filter"
+          ]
+        },
+        "english_analyzer" : {
+          "type" : "custom",
+          "tokenizer" : "standard",
+          "filter" : [
+            "lowercase",
+            "english_token_filter",
+            "english_possessive_token_filter"
+          ]
+        },
+        "whitespace_analyzer" : {
+          "type" : "custom",
+          "tokenizer" : "whitespace"
+        },
+        "arabic_analyzer" : {
+          "type" : "custom",
+          "tokenizer" : "standard",
+          "filter" : [
+            "lowercase",
+            "arabic_token_filter"
+          ]
+        },
+        "bengali_analyzer" : {
+          "type" : "custom",
+          "tokenizer" : "standard",
+          "filter" : [
+            "lowercase",
+            "bengali_token_filter"
+          ]
+        },
+        "french_analyzer" : {
+          "type" : "custom",
+          "tokenizer" : "standard",
+          "filter" : [
+            "lowercase",
+            "french_token_filter"
+          ]
+        },
+        "german_analyzer" : {
+          "type" : "custom",
+          "tokenizer" : "standard",
+          "filter" : [
+            "lowercase",
+            "german_token_filter"
+          ]
+        },
+        "hindi_analyzer" : {
+          "type" : "custom",
+          "tokenizer" : "standard",
+          "filter" : [
+            "lowercase",
+            "hindi_token_filter"
+          ]
+        },
+        "italian_analyzer" : {
+          "type" : "custom",
+          "tokenizer" : "standard",
+          "filter" : [
+            "lowercase",
+            "italian_token_filter"
+          ]
+        }
+      },
+      "normalizer" : {
+        "lowercase_normalizer" : {
+          "type" : "custom",
+          "filter" : [
+            "lowercase"
+          ]
+        }
+      },
+      "tokenizer" : {
+        "path_hierarchy_tokenizer" : {
+          "type" : "path_hierarchy",
+          "delimiter" : "/",
+          "replacement" : "/"
+        }
+      },
+      "filter" : {
+        "asciifolding_token_filter" : {
+          "type" : "asciifolding",
+          "preserve_original" : true
+        },
+        "shingle_token_filter" : {
+          "type" : "shingle",
+          "max_shingle_size" : 4,
+          "min_shingle_size" : 2
+        },
+        "english_token_filter" : {
+          "type" : "stemmer",
+          "name" : "english"
+        },
+        "english_possessive_token_filter" : {
+          "type" : "stemmer",
+          "name" : "possessive_english"
+        },
+        "arabic_token_filter" : {
+          "type" : "stemmer",
+          "name" : "arabic"
+        },
+        "bengali_token_filter" : {
+          "type" : "stemmer",
+          "name" : "bengali"
+        },
+        "french_token_filter" : {
+          "type" : "stemmer",
+          "name" : "french"
+        },
+        "german_token_filter" : {
+          "type" : "stemmer",
+          "name" : "german"
+        },
+        "hindi_token_filter" : {
+          "type" : "stemmer",
+          "name" : "hindi"
+        },
+        "italian_token_filter" : {
+          "type" : "stemmer",
+          "name" : "italian"
+        }
+      }
+    }
+  },
+  "mappings" : {
+    "dynamic" : "strict",
+    "properties" : {
+      "state" : {
+        "type" : "object",
+        "properties" : {
+          "canonicalId" : {
+            "type" : "keyword",
+            "normalizer" : "lowercase_normalizer"
+          },
+          "sourceIdentifier" : {
+            "type" : "object",
+            "properties" : {
+              "value" : {
+                "type" : "keyword",
+                "normalizer" : "lowercase_normalizer"
+              }
+            },
+            "dynamic" : "false"
+          },
+          "sourceModifiedTime" : {
+            "type" : "date"
+          },
+          "mergedTime" : {
+            "type" : "date"
+          },
+          "indexedTime" : {
+            "type" : "date"
+          },
+          "availabilities" : {
+            "type" : "object",
+            "properties" : {
+              "id" : {
+                "type" : "keyword"
+              }
+            }
+          },
+          "relations" : {
+            "type" : "object",
+            "properties" : {
+              "ancestors" : {
+                "type" : "object",
+                "properties" : {
+                  "id" : {
+                    "type" : "keyword",
+                    "normalizer" : "lowercase_normalizer"
+                  },
+                  "depth" : {
+                    "type" : "integer"
+                  },
+                  "numChildren" : {
+                    "type" : "integer"
+                  },
+                  "numDescendents" : {
+                    "type" : "integer"
+                  },
+                  "title" : {
+                    "type" : "text",
+                    "fields" : {
+                      "keyword" : {
+                        "type" : "keyword",
+                        "normalizer" : "lowercase_normalizer"
+                      },
+                      "english" : {
+                        "type" : "text",
+                        "analyzer" : "english_analyzer"
+                      },
+                      "shingles" : {
+                        "type" : "text",
+                        "analyzer" : "shingle_asciifolding_analyzer"
+                      },
+                      "arabic" : {
+                        "type" : "text",
+                        "analyzer" : "arabic_analyzer"
+                      },
+                      "bengali" : {
+                        "type" : "text",
+                        "analyzer" : "bengali_analyzer"
+                      },
+                      "french" : {
+                        "type" : "text",
+                        "analyzer" : "french_analyzer"
+                      },
+                      "german" : {
+                        "type" : "text",
+                        "analyzer" : "german_analyzer"
+                      },
+                      "hindi" : {
+                        "type" : "text",
+                        "analyzer" : "hindi_analyzer"
+                      },
+                      "italian" : {
+                        "type" : "text",
+                        "analyzer" : "italian_analyzer"
+                      }
+                    }
+                  },
+                  "collectionPath" : {
+                    "type" : "object",
+                    "properties" : {
+                      "label" : {
+                        "type" : "text",
+                        "analyzer" : "asciifolding_analyzer",
+                        "fields" : {
+                          "keyword" : {
+                            "type" : "keyword"
+                          },
+                          "lowercaseKeyword" : {
+                            "type" : "keyword",
+                            "normalizer" : "lowercase_normalizer"
+                          }
+                        }
+                      },
+                      "path" : {
+                        "type" : "text",
+                        "analyzer" : "path_hierarchy_analyzer",
+                        "fields" : {
+                          "keyword" : {
+                            "type" : "keyword"
+                          }
+                        }
+                      },
+                      "depth" : {
+                        "type" : "token_count",
+                        "analyzer" : "standard"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "dynamic" : "false"
+          },
+          "derivedData" : {
+            "type" : "object",
+            "properties" : {
+              "contributorAgents" : {
+                "type" : "keyword"
+              }
+            },
+            "dynamic" : "false"
+          }
+        }
+      },
+      "type" : {
+        "type" : "keyword"
+      },
+      "data" : {
+        "type" : "object",
+        "properties" : {
+          "otherIdentifiers" : {
+            "type" : "object",
+            "properties" : {
+              "value" : {
+                "type" : "keyword",
+                "normalizer" : "lowercase_normalizer"
+              }
+            }
+          },
+          "format" : {
+            "type" : "object",
+            "properties" : {
+              "id" : {
+                "type" : "keyword"
+              }
+            }
+          },
+          "title" : {
+            "type" : "text",
+            "fields" : {
+              "keyword" : {
+                "type" : "keyword",
+                "normalizer" : "lowercase_normalizer"
+              },
+              "english" : {
+                "type" : "text",
+                "analyzer" : "english_analyzer"
+              },
+              "shingles" : {
+                "type" : "text",
+                "analyzer" : "shingle_asciifolding_analyzer"
+              },
+              "arabic" : {
+                "type" : "text",
+                "analyzer" : "arabic_analyzer"
+              },
+              "bengali" : {
+                "type" : "text",
+                "analyzer" : "bengali_analyzer"
+              },
+              "french" : {
+                "type" : "text",
+                "analyzer" : "french_analyzer"
+              },
+              "german" : {
+                "type" : "text",
+                "analyzer" : "german_analyzer"
+              },
+              "hindi" : {
+                "type" : "text",
+                "analyzer" : "hindi_analyzer"
+              },
+              "italian" : {
+                "type" : "text",
+                "analyzer" : "italian_analyzer"
+              }
+            }
+          },
+          "alternativeTitles" : {
+            "type" : "text",
+            "fields" : {
+              "keyword" : {
+                "type" : "keyword",
+                "normalizer" : "lowercase_normalizer"
+              },
+              "english" : {
+                "type" : "text",
+                "analyzer" : "english_analyzer"
+              },
+              "shingles" : {
+                "type" : "text",
+                "analyzer" : "shingle_asciifolding_analyzer"
+              },
+              "arabic" : {
+                "type" : "text",
+                "analyzer" : "arabic_analyzer"
+              },
+              "bengali" : {
+                "type" : "text",
+                "analyzer" : "bengali_analyzer"
+              },
+              "french" : {
+                "type" : "text",
+                "analyzer" : "french_analyzer"
+              },
+              "german" : {
+                "type" : "text",
+                "analyzer" : "german_analyzer"
+              },
+              "hindi" : {
+                "type" : "text",
+                "analyzer" : "hindi_analyzer"
+              },
+              "italian" : {
+                "type" : "text",
+                "analyzer" : "italian_analyzer"
+              }
+            }
+          },
+          "description" : {
+            "type" : "text",
+            "fields" : {
+              "english" : {
+                "type" : "text",
+                "analyzer" : "english"
+              }
+            }
+          },
+          "physicalDescription" : {
+            "type" : "text",
+            "fields" : {
+              "keyword" : {
+                "type" : "keyword"
+              },
+              "english" : {
+                "type" : "text",
+                "analyzer" : "english"
+              }
+            }
+          },
+          "lettering" : {
+            "type" : "text",
+            "fields" : {
+              "english" : {
+                "type" : "text",
+                "analyzer" : "english_analyzer"
+              },
+              "shingles" : {
+                "type" : "text",
+                "analyzer" : "shingle_asciifolding_analyzer"
+              },
+              "arabic" : {
+                "type" : "text",
+                "analyzer" : "arabic_analyzer"
+              },
+              "bengali" : {
+                "type" : "text",
+                "analyzer" : "bengali_analyzer"
+              },
+              "french" : {
+                "type" : "text",
+                "analyzer" : "french_analyzer"
+              },
+              "german" : {
+                "type" : "text",
+                "analyzer" : "german_analyzer"
+              },
+              "hindi" : {
+                "type" : "text",
+                "analyzer" : "hindi_analyzer"
+              },
+              "italian" : {
+                "type" : "text",
+                "analyzer" : "italian_analyzer"
+              }
+            }
+          },
+          "contributors" : {
+            "type" : "object",
+            "properties" : {
+              "agent" : {
+                "type" : "object",
+                "properties" : {
+                  "label" : {
+                    "type" : "text",
+                    "analyzer" : "asciifolding_analyzer",
+                    "fields" : {
+                      "keyword" : {
+                        "type" : "keyword"
+                      },
+                      "lowercaseKeyword" : {
+                        "type" : "keyword",
+                        "normalizer" : "lowercase_normalizer"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "subjects" : {
+            "type" : "object",
+            "properties" : {
+              "label" : {
+                "type" : "text",
+                "analyzer" : "asciifolding_analyzer",
+                "fields" : {
+                  "keyword" : {
+                    "type" : "keyword"
+                  },
+                  "lowercaseKeyword" : {
+                    "type" : "keyword",
+                    "normalizer" : "lowercase_normalizer"
+                  }
+                }
+              },
+              "concepts" : {
+                "type" : "object",
+                "properties" : {
+                  "label" : {
+                    "type" : "text",
+                    "analyzer" : "asciifolding_analyzer",
+                    "fields" : {
+                      "keyword" : {
+                        "type" : "keyword"
+                      },
+                      "lowercaseKeyword" : {
+                        "type" : "keyword",
+                        "normalizer" : "lowercase_normalizer"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "genres" : {
+            "type" : "object",
+            "properties" : {
+              "label" : {
+                "type" : "text",
+                "analyzer" : "asciifolding_analyzer",
+                "fields" : {
+                  "keyword" : {
+                    "type" : "keyword"
+                  },
+                  "lowercaseKeyword" : {
+                    "type" : "keyword",
+                    "normalizer" : "lowercase_normalizer"
+                  }
+                }
+              },
+              "concepts" : {
+                "type" : "object",
+                "properties" : {
+                  "label" : {
+                    "type" : "text",
+                    "analyzer" : "asciifolding_analyzer",
+                    "fields" : {
+                      "keyword" : {
+                        "type" : "keyword"
+                      },
+                      "lowercaseKeyword" : {
+                        "type" : "keyword",
+                        "normalizer" : "lowercase_normalizer"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "items" : {
+            "type" : "object",
+            "properties" : {
+              "locations" : {
+                "type" : "object",
+                "properties" : {
+                  "type" : {
+                    "type" : "keyword"
+                  },
+                  "locationType" : {
+                    "type" : "object",
+                    "properties" : {
+                      "id" : {
+                        "type" : "keyword"
+                      }
+                    }
+                  },
+                  "license" : {
+                    "type" : "object",
+                    "properties" : {
+                      "id" : {
+                        "type" : "keyword"
+                      }
+                    }
+                  },
+                  "accessConditions" : {
+                    "type" : "object",
+                    "properties" : {
+                      "status" : {
+                        "type" : "object",
+                        "properties" : {
+                          "type" : {
+                            "type" : "keyword"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "id" : {
+                "type" : "object",
+                "properties" : {
+                  "canonicalId" : {
+                    "type" : "keyword",
+                    "normalizer" : "lowercase_normalizer"
+                  },
+                  "sourceIdentifier" : {
+                    "type" : "object",
+                    "properties" : {
+                      "value" : {
+                        "type" : "keyword",
+                        "normalizer" : "lowercase_normalizer"
+                      }
+                    },
+                    "dynamic" : "false"
+                  },
+                  "otherIdentifiers" : {
+                    "type" : "object",
+                    "properties" : {
+                      "value" : {
+                        "type" : "keyword",
+                        "normalizer" : "lowercase_normalizer"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "production" : {
+            "type" : "object",
+            "properties" : {
+              "label" : {
+                "type" : "text",
+                "analyzer" : "asciifolding_analyzer",
+                "fields" : {
+                  "keyword" : {
+                    "type" : "keyword"
+                  },
+                  "lowercaseKeyword" : {
+                    "type" : "keyword",
+                    "normalizer" : "lowercase_normalizer"
+                  }
+                }
+              },
+              "places" : {
+                "type" : "object",
+                "properties" : {
+                  "label" : {
+                    "type" : "text",
+                    "analyzer" : "asciifolding_analyzer",
+                    "fields" : {
+                      "keyword" : {
+                        "type" : "keyword"
+                      },
+                      "lowercaseKeyword" : {
+                        "type" : "keyword",
+                        "normalizer" : "lowercase_normalizer"
+                      }
+                    }
+                  }
+                }
+              },
+              "agents" : {
+                "type" : "object",
+                "properties" : {
+                  "label" : {
+                    "type" : "text",
+                    "analyzer" : "asciifolding_analyzer",
+                    "fields" : {
+                      "keyword" : {
+                        "type" : "keyword"
+                      },
+                      "lowercaseKeyword" : {
+                        "type" : "keyword",
+                        "normalizer" : "lowercase_normalizer"
+                      }
+                    }
+                  }
+                }
+              },
+              "dates" : {
+                "type" : "object",
+                "properties" : {
+                  "label" : {
+                    "type" : "text",
+                    "analyzer" : "asciifolding_analyzer",
+                    "fields" : {
+                      "keyword" : {
+                        "type" : "keyword"
+                      },
+                      "lowercaseKeyword" : {
+                        "type" : "keyword",
+                        "normalizer" : "lowercase_normalizer"
+                      }
+                    }
+                  },
+                  "range" : {
+                    "type" : "object",
+                    "properties" : {
+                      "from" : {
+                        "type" : "date"
+                      }
+                    }
+                  }
+                }
+              },
+              "function" : {
+                "type" : "object",
+                "properties" : {
+                  "label" : {
+                    "type" : "text",
+                    "analyzer" : "asciifolding_analyzer",
+                    "fields" : {
+                      "keyword" : {
+                        "type" : "keyword"
+                      },
+                      "lowercaseKeyword" : {
+                        "type" : "keyword",
+                        "normalizer" : "lowercase_normalizer"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "languages" : {
+            "type" : "object",
+            "properties" : {
+              "label" : {
+                "type" : "text",
+                "analyzer" : "asciifolding_analyzer",
+                "fields" : {
+                  "keyword" : {
+                    "type" : "keyword"
+                  },
+                  "lowercaseKeyword" : {
+                    "type" : "keyword",
+                    "normalizer" : "lowercase_normalizer"
+                  }
+                }
+              },
+              "id" : {
+                "type" : "keyword"
+              }
+            }
+          },
+          "edition" : {
+            "type" : "text"
+          },
+          "notes" : {
+            "type" : "object",
+            "properties" : {
+              "content" : {
+                "type" : "text",
+                "fields" : {
+                  "english" : {
+                    "type" : "text",
+                    "analyzer" : "english"
+                  }
+                }
+              }
+            }
+          },
+          "duration" : {
+            "type" : "integer"
+          },
+          "collectionPath" : {
+            "type" : "object",
+            "properties" : {
+              "label" : {
+                "type" : "text",
+                "analyzer" : "asciifolding_analyzer",
+                "fields" : {
+                  "keyword" : {
+                    "type" : "keyword"
+                  },
+                  "lowercaseKeyword" : {
+                    "type" : "keyword",
+                    "normalizer" : "lowercase_normalizer"
+                  }
+                }
+              },
+              "path" : {
+                "type" : "text",
+                "analyzer" : "path_hierarchy_analyzer",
+                "copy_to" : [
+                  "data.collectionPath.depth"
+                ],
+                "fields" : {
+                  "keyword" : {
+                    "type" : "keyword"
+                  }
+                }
+              },
+              "depth" : {
+                "type" : "token_count",
+                "analyzer" : "standard"
+              }
+            }
+          },
+          "imageData" : {
+            "type" : "object",
+            "properties" : {
+              "id" : {
+                "type" : "object",
+                "properties" : {
+                  "canonicalId" : {
+                    "type" : "keyword",
+                    "normalizer" : "lowercase_normalizer"
+                  },
+                  "sourceIdentifier" : {
+                    "type" : "object",
+                    "properties" : {
+                      "value" : {
+                        "type" : "keyword",
+                        "normalizer" : "lowercase_normalizer"
+                      }
+                    },
+                    "dynamic" : "false"
+                  }
+                }
+              }
+            }
+          },
+          "workType" : {
+            "type" : "keyword"
+          }
+        },
+        "dynamic" : "false"
+      },
+      "invisibilityReasons" : {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "type" : "keyword"
+          }
+        },
+        "dynamic" : "false"
+      },
+      "deletedReason" : {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "type" : "keyword"
+          }
+        },
+        "dynamic" : "false"
+      },
+      "redirectTarget" : {
+        "type" : "object",
+        "dynamic" : "false"
+      },
+      "redirectSources" : {
+        "type" : "object",
+        "dynamic" : "false"
+      },
+      "version" : {
+        "type" : "integer"
+      }
+    },
+    "_meta" : {
+      "model.versions.0" : "b60a01f8d3d8e30a301952463e3922f2e02b8914"
+    }
+  }
+}
