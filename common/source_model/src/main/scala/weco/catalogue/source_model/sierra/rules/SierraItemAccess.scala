@@ -214,28 +214,6 @@ object SierraItemAccess extends SierraQueryOps with Logging {
               note = itemData.displayNote)),
           ItemStatus.Available)
 
-      // Normally we expect the opacmsg 'By appointment' to be accompanied by the
-      // status 'permission required'.  On ~3000 items, the status is actually 'available'.
-      // We can guess what the right behaviour is, so let's map all these to 'by appointment'.
-      //
-      // TODO: Find out from the Collections team if this status/opacmsg pair is meant
-      // to exist.  If not, work with them to clean it up and then remove this branch.
-      //
-      // Example: b16621980 / i15960201
-      case (
-          None,
-          Some(0),
-          Some(Status.Available),
-          Some(OpacMsg.ByAppointment),
-          _: NotRequestable,
-          Some(LocationType.ClosedStores)) =>
-        (
-          Some(
-            AccessCondition(
-              status = Some(AccessStatus.ByAppointment),
-              note = itemData.displayNote)),
-          ItemStatus.Available)
-
       // A missing status overrides all other values.
       //
       // Example: b10379198 / i10443861
