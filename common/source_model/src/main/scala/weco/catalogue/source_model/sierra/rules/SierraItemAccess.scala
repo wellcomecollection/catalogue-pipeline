@@ -7,7 +7,7 @@ import weco.catalogue.internal_model.locations.{
   LocationType,
   PhysicalLocationType
 }
-import weco.catalogue.source_model.sierra.SierraItemData
+import weco.catalogue.source_model.sierra.{SierraItemData, SierraItemNumber}
 import weco.catalogue.source_model.sierra.source.{
   OpacMsg,
   SierraQueryOps,
@@ -29,6 +29,7 @@ import weco.catalogue.source_model.sierra.source.{
   */
 object SierraItemAccess extends SierraQueryOps {
   def apply(
+    id: SierraItemNumber,
     bibStatus: Option[AccessStatus],
     location: Option[PhysicalLocationType],
     itemData: SierraItemData
