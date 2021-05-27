@@ -11,6 +11,7 @@ import weco.catalogue.internal_model.locations.{
   PhysicalLocationType
 }
 import weco.catalogue.internal_model.work.Item
+import weco.catalogue.source_model.sierra.rules.SierraPhysicalLocationType
 import weco.catalogue.source_model.sierra.source.SierraQueryOps
 import weco.catalogue.source_model.sierra.{
   SierraBibData,
@@ -65,7 +66,7 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
     val otherLocations =
       sierraItemDataMap
         .collect {
-          case (id, SierraItemData(_, _, Some(location), _, _)) =>
+          case (id, SierraItemData(_, _, _, Some(location), _, _)) =>
             id -> location
         }
         .filterNot {

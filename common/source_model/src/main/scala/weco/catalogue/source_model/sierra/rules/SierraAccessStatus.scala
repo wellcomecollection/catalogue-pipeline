@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.transformer.sierra.transformers
+package weco.catalogue.source_model.sierra.rules
 
 import weco.catalogue.internal_model.locations.AccessStatus
 import weco.catalogue.source_model.sierra.marc.VarField

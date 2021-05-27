@@ -5,6 +5,7 @@ import weco.catalogue.internal_model.locations.LocationType.ClosedStores
 import weco.catalogue.internal_model.locations.PhysicalLocation
 import weco.catalogue.internal_model.work.{Holdings, Item}
 import weco.catalogue.source_model.sierra.marc.FixedField
+import weco.catalogue.source_model.sierra.rules.SierraPhysicalLocationType
 import weco.catalogue.source_model.sierra.source.SierraQueryOps
 import weco.catalogue.source_model.sierra.{
   SierraBibNumber,
@@ -35,8 +36,8 @@ object SierraHoldings extends SierraQueryOps {
         .partition {
           case (_, holdingsData) =>
             holdingsData.fixedFields.get("40") match {
-              case Some(FixedField(_, value)) if value.trim == "elro" => true
-              case _                                                  => false
+              case Some(FixedField(_, value, _)) if value.trim == "elro" => true
+              case _                                                     => false
             }
         }
 

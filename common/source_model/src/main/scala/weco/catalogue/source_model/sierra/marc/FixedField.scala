@@ -13,5 +13,11 @@ package weco.catalogue.source_model.sierra.marc
 //
 case class FixedField(
   label: String,
-  value: String
+  value: String,
+  display: Option[String] = None
 )
+
+case object FixedField {
+  def apply(label: String, value: String, display: String): FixedField =
+    FixedField(label = label, value = value, display = Some(display))
+}
