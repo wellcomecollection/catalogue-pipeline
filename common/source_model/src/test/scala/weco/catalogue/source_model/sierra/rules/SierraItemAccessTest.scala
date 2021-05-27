@@ -511,6 +511,39 @@ class SierraItemAccessTest
           )
           itemStatus shouldBe ItemStatus.Unavailable
         }
+
+        it("if the item is withdrawn") {
+          val itemData = createSierraItemDataWith(
+            fixedFields = Map(
+              "79" -> FixedField(
+                label = "LOCATION",
+                value = "sghx2",
+                display = "Closed stores Hist. O/S 2"),
+              "88" -> FixedField(
+                label = "STATUS",
+                value = "x",
+                display = "Withdrawn"),
+              "108" -> FixedField(
+                label = "OPACMSG",
+                value = "u",
+                display = "Unavailable"),
+            )
+          )
+
+          val (ac, itemStatus) = SierraItemAccess(
+            bibStatus = None,
+            location = Some(LocationType.ClosedStores),
+            itemData = itemData
+          )
+
+          ac shouldBe Some(
+            AccessCondition(
+              status = Some(AccessStatus.Unavailable),
+              terms = Some("This item is withdrawn.")
+            )
+          )
+          itemStatus shouldBe ItemStatus.Unavailable
+        }
       }
     }
 

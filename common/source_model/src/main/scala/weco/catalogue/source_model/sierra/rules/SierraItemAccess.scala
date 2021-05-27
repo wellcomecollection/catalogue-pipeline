@@ -213,6 +213,21 @@ object SierraItemAccess extends SierraQueryOps {
               terms = Some(message))),
           ItemStatus.Unavailable)
 
+      // A withdrawn status also overrides all other values.
+      case (
+          _,
+          _,
+          Some(Status.Withdrawn),
+          _,
+          NotRequestable.ItemWithdrawn(message),
+          _) =>
+        (
+          Some(
+            AccessCondition(
+              status = Some(AccessStatus.Unavailable),
+              terms = Some(message))),
+          ItemStatus.Unavailable)
+
       // If an item is on hold for another reader, it can't be requested -- even
       // if it would ordinarily be requestable.
       //

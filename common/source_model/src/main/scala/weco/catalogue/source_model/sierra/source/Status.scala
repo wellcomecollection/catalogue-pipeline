@@ -8,4 +8,5 @@ object Status {
   val Closed = "h"
   val Restricted = "6"
   val OnHoldshelf = "!"
+  val Withdrawn = "x"
 }
