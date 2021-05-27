@@ -197,12 +197,13 @@ object SierraItemAccess extends SierraQueryOps {
           ItemStatus.Available)
 
       case (
-          Some(AccessStatus.PermissionRequired),
+          bibStatus,
           Some(0),
           Some(Status.PermissionRequired),
           Some(OpacMsg.DonorPermission),
           _: NotRequestable,
-          Some(LocationType.ClosedStores)) =>
+          Some(LocationType.ClosedStores))
+          if bibStatus.isEmpty || bibStatus.contains(AccessStatus.PermissionRequired) =>
         (
           Some(
             AccessCondition(
