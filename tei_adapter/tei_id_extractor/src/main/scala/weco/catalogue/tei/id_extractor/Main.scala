@@ -13,10 +13,11 @@ object Main extends WellcomeTypesafeApp {
     implicit val actorSystem: ActorSystem =
       AkkaBuilder.buildActorSystem()
 
-    TeiIdExtractorWorkerService(
+    new TeiIdExtractorWorkerService(
       messageStream = SQSBuilder.buildSQSStream(config),
-      messageSender = SNSBuilder
-        .buildSNSMessageSender(config, subject = "TEI id extractor")
+      messageSender = SNSBuilder.buildSNSMessageSender(config, subject = "TEI id extractor"),
+      gitHubBlobReader = new GitHubBlobReader(),
+      concurrentFiles = ???
     )
   }
 }
