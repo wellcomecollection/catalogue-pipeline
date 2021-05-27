@@ -1,5 +1,6 @@
 package weco.catalogue.source_model.sierra.rules
 
+import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.locations.{
   AccessCondition,
   AccessStatus,
@@ -7,7 +8,7 @@ import weco.catalogue.internal_model.locations.{
   LocationType,
   PhysicalLocationType
 }
-import weco.catalogue.source_model.sierra.SierraItemData
+import weco.catalogue.source_model.sierra.{SierraItemData, SierraItemNumber}
 import weco.catalogue.source_model.sierra.source.{
   OpacMsg,
   SierraQueryOps,
@@ -27,8 +28,9 @@ import weco.catalogue.source_model.sierra.source.{
   *     data from Sierra.
   *
   */
-object SierraItemAccess extends SierraQueryOps {
+object SierraItemAccess extends SierraQueryOps with Logging {
   def apply(
+    id: SierraItemNumber,
     bibStatus: Option[AccessStatus],
     location: Option[PhysicalLocationType],
     itemData: SierraItemData
@@ -196,6 +198,44 @@ object SierraItemAccess extends SierraQueryOps {
               note = itemData.displayNote)),
           ItemStatus.Available)
 
+      case (
+          bibStatus,
+          Some(0),
+          Some(Status.PermissionRequired),
+          Some(OpacMsg.DonorPermission),
+          _: NotRequestable,
+          Some(LocationType.ClosedStores))
+          if bibStatus.isEmpty || bibStatus.contains(
+            AccessStatus.PermissionRequired) =>
+        (
+          Some(
+            AccessCondition(
+              status = Some(AccessStatus.PermissionRequired),
+              note = itemData.displayNote)),
+          ItemStatus.Available)
+
+      // Normally we expect the opacmsg 'By appointment' to be accompanied by the
+      // status 'permission required'.  On ~3000 items, the status is actually 'available'.
+      // We can guess what the right behaviour is, so let's map all these to 'by appointment'.
+      //
+      // TODO: Find out from the Collections team if this status/opacmsg pair is meant
+      // to exist.  If not, work with them to clean it up and then remove this branch.
+      //
+      // Example: b16621980 / i15960201
+      case (
+          None,
+          Some(0),
+          Some(Status.Available),
+          Some(OpacMsg.ByAppointment),
+          _: NotRequestable,
+          Some(LocationType.ClosedStores)) =>
+        (
+          Some(
+            AccessCondition(
+              status = Some(AccessStatus.ByAppointment),
+              note = itemData.displayNote)),
+          ItemStatus.Available)
+
       // A missing status overrides all other values.
       //
       // Example: b10379198 / i10443861
@@ -205,6 +245,21 @@ object SierraItemAccess extends SierraQueryOps {
           Some(Status.Missing),
           _,
           NotRequestable.ItemMissing(message),
+          _) =>
+        (
+          Some(
+            AccessCondition(
+              status = Some(AccessStatus.Unavailable),
+              terms = Some(message))),
+          ItemStatus.Unavailable)
+
+      // A withdrawn status also overrides all other values.
+      case (
+          _,
+          _,
+          Some(Status.Withdrawn),
+          _,
+          NotRequestable.ItemWithdrawn(message),
           _) =>
         (
           Some(
@@ -250,9 +305,14 @@ object SierraItemAccess extends SierraQueryOps {
               "Item is in use by another reader. Please ask at Enquiry Desk."))),
           ItemStatus.TemporarilyUnavailable)
 
-      case other =>
-        println(s"@@ $other @@")
-        throw new Throwable("Unhandled!!!")
+      // If we can't work out how this item should be handled, then let's mark it
+      // as unavailable for now.
+      case (bibStatus, holdCount, status, opacmsg, isRequestable, location) =>
+        warn(
+          s"Unable to assign access status for item ${id.withCheckDigit}: " +
+            s"bibStatus=$bibStatus, holdCount=$holdCount, status=$status, " +
+            s"opacmsg=$opacmsg, isRequestable=$isRequestable, location=$location"
+        )
         (None, ItemStatus.Unavailable)
     }
   }
