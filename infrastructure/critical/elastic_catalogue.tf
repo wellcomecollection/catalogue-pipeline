@@ -31,6 +31,10 @@ resource "ec_deployment" "catalogue" {
       size       = "1g"
     }
   }
+
+  observability {
+    deployment_id = data.ec_deployment.logging.id
+  }
 }
 
 locals {

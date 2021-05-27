@@ -2,6 +2,10 @@ data "aws_ssm_parameter" "admin_cidr_ingress" {
   name = "/infra_critical/config/prod/admin_cidr_ingress"
 }
 
+data "ec_deployment" "logging" {
+  id = "f4c9aca09347dad4c05f35cfbec04cdb"
+}
+
 locals {
   vpc_id_new          = local.catalogue_vpcs["catalogue_vpc_delta_id"]
   private_subnets_new = local.catalogue_vpcs["catalogue_vpc_delta_private_subnets"]
