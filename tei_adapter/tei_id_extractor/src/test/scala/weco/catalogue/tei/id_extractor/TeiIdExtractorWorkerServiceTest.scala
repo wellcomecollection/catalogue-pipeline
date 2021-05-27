@@ -48,7 +48,7 @@ class TeiIdExtractorWorkerServiceTest extends AnyFunSpec with Wiremock with SQS 
               store.entries.keySet should contain only(expectedS3Location)
               store.entries(expectedS3Location) shouldBe IOUtils.resourceToString("/WMS_Arabic_1.xml", StandardCharsets.UTF_8)
 
-              messageSender.getMessages[TeiIdChangeMessage]() should contain only(TeiIdChangeMessage(id="manuscript_15651", s3Location = expectedS3Location, ZonedDateTime.now()))
+              messageSender.getMessages[TeiIdChangeMessage]() should contain only(TeiIdChangeMessage(id="manuscript_15651", s3Location = expectedS3Location, ZonedDateTime.parse(modifiedTime)))
               assertQueueEmpty(queue)
               assertQueueEmpty(dlq)
             }
@@ -69,4 +69,4 @@ class TeiIdExtractorWorkerServiceTest extends AnyFunSpec with Wiremock with SQS 
   }
 }
 
-case class TeiIdChangeMessage(id: String, s3Location: S3ObjectLocation, timeModified: ZonedDateTime)
+
