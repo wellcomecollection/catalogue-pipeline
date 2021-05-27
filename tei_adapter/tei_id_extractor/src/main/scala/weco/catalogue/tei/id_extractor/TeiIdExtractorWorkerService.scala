@@ -16,6 +16,7 @@ import java.time.ZonedDateTime
 import scala.concurrent.{ExecutionContext, Future}
 
 case class TeiFileChangedMessage(path: String, uri: URI, timeModified: ZonedDateTime)
+case class TeiIdChangeMessage(id: String, s3Location: S3ObjectLocation, timeModified: ZonedDateTime)
 
 class TeiIdExtractorWorkerService[Dest](messageStream: SQSStream[NotificationMessage],
                                         gitHubBlobReader: GitHubBlobReader,
@@ -39,7 +40,8 @@ class TeiIdExtractorWorkerService[Dest](messageStream: SQSStream[NotificationMes
           blobContent <- gitHubBlobReader.getBlob(message.uri)
           id <- Future.fromTry(idExtractor.extractId(blobContent))
           stored <- Future.fromTry(store.put(S3ObjectLocation(bucket, s"tei_files/$id/${message.timeModified.toEpochSecond}.xml"))(blobContent).left.map(error => error.e).toTry)
-        } yield(ctx, Right(stored))
+          _ <- Future.fromTry(messageSender.sendT(TeiIdChangeMessage(id, stored.id, message.timeModified)))
+        } yield(ctx, Right(()))
       }
       .via(catchErrors)
 
