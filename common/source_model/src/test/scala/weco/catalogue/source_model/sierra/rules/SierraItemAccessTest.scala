@@ -421,6 +421,41 @@ class SierraItemAccessTest
           itemStatus shouldBe ItemStatus.Available
         }
 
+        it("if the item is by appointment, even if the status is wrong") {
+          val itemData = createSierraItemDataWith(
+            fixedFields = Map(
+              "61" -> FixedField(
+                label = "I TYPE",
+                value = "17",
+                display = "film"),
+              "79" -> FixedField(
+                label = "LOCATION",
+                value = "mfohc",
+                display = "Closed stores Moving image and sound collections"),
+              "88" -> FixedField(
+                label = "STATUS",
+                value = "-",
+                display = "Available"),
+              "108" -> FixedField(
+                label = "OPACMSG",
+                value = "a",
+                display = "By appointment"),
+            )
+          )
+
+          val (ac, itemStatus) = SierraItemAccess(
+            id = itemId,
+            bibStatus = None,
+            location = Some(LocationType.ClosedStores),
+            itemData = itemData
+          )
+
+          ac shouldBe Some(
+            AccessCondition(status = AccessStatus.ByAppointment)
+          )
+          itemStatus shouldBe ItemStatus.Available
+        }
+
         it("if the item is missing") {
           val itemData = createSierraItemDataWith(
             fixedFields = Map(
