@@ -205,7 +205,8 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           Some(OpacMsg.DonorPermission),
           _: NotRequestable,
           Some(LocationType.ClosedStores))
-          if bibStatus.isEmpty || bibStatus.contains(AccessStatus.PermissionRequired) =>
+          if bibStatus.isEmpty || bibStatus.contains(
+            AccessStatus.PermissionRequired) =>
         (
           Some(
             AccessCondition(
@@ -222,12 +223,12 @@ object SierraItemAccess extends SierraQueryOps with Logging {
       //
       // Example: b16621980 / i15960201
       case (
-        None,
-        Some(0),
-        Some(Status.Available),
-        Some(OpacMsg.ByAppointment),
-        _: NotRequestable,
-        Some(LocationType.ClosedStores)) =>
+          None,
+          Some(0),
+          Some(Status.Available),
+          Some(OpacMsg.ByAppointment),
+          _: NotRequestable,
+          Some(LocationType.ClosedStores)) =>
         (
           Some(
             AccessCondition(
