@@ -196,6 +196,20 @@ object SierraItemAccess extends SierraQueryOps {
               note = itemData.displayNote)),
           ItemStatus.Available)
 
+      case (
+          Some(AccessStatus.PermissionRequired),
+          Some(0),
+          Some(Status.PermissionRequired),
+          Some(OpacMsg.DonorPermission),
+          _: NotRequestable,
+          Some(LocationType.ClosedStores)) =>
+        (
+          Some(
+            AccessCondition(
+              status = Some(AccessStatus.PermissionRequired),
+              note = itemData.displayNote)),
+          ItemStatus.Available)
+
       // A missing status overrides all other values.
       //
       // Example: b10379198 / i10443861

@@ -484,6 +484,36 @@ class SierraItemAccessTest
           itemStatus shouldBe ItemStatus.Available
         }
 
+        it("if the bib and item need donor permission") {
+          val itemData = createSierraItemDataWith(
+            fixedFields = Map(
+              "79" -> FixedField(
+                label = "LOCATION",
+                value = "sc#ac",
+                display = "Unrequestable Arch. & MSS"),
+              "88" -> FixedField(
+                label = "STATUS",
+                value = "y",
+                display = "Permission required"),
+              "108" -> FixedField(
+                label = "OPACMSG",
+                value = "q",
+                display = "Donor permission"),
+            )
+          )
+
+          val (ac, itemStatus) = SierraItemAccess(
+            bibStatus = Some(AccessStatus.PermissionRequired),
+            location = Some(LocationType.ClosedStores),
+            itemData = itemData
+          )
+
+          ac shouldBe Some(
+            AccessCondition(status = AccessStatus.PermissionRequired)
+          )
+          itemStatus shouldBe ItemStatus.Available
+        }
+
         it("if the item is missing") {
           val itemData = createSierraItemDataWith(
             fixedFields = Map(
