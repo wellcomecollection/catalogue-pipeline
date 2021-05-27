@@ -99,6 +99,8 @@ object ExternalDependencies {
     val enumeratum = "1.6.1"
     val enumeratumScalacheck = "1.6.1"
     val jsoup = "1.13.1"
+    val logback = "1.1.8"
+
     val scalaJHttp = "2.3.0"
   }
 
@@ -175,6 +177,12 @@ object ExternalDependencies {
   val scalaJDependencies = Seq(
     "org.scalaj" %% "scalaj-http" % versions.scalaJHttp
   )
+
+  val logbackDependencies = Seq(
+    "ch.qos.logback" % "logback-classic" % versions.logback,
+    "ch.qos.logback" % "logback-core" % versions.logback,
+    "ch.qos.logback" % "logback-access" % versions.logback
+  )
 }
 
 object CatalogueDependencies {
@@ -196,7 +204,8 @@ object CatalogueDependencies {
   val sourceModelDependencies: Seq[sbt.ModuleID] =
     WellcomeDependencies.storageLibrary ++
       WellcomeDependencies.fixturesLibrary ++
-      ExternalDependencies.scalatestDependencies
+      ExternalDependencies.scalatestDependencies ++
+      ExternalDependencies.logbackDependencies
 
   val sourceModelTypesafeDependencies: Seq[ModuleID] =
     WellcomeDependencies.storageTypesafeLibrary ++

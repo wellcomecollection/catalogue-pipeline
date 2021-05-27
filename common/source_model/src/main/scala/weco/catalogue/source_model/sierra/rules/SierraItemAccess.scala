@@ -1,5 +1,6 @@
 package weco.catalogue.source_model.sierra.rules
 
+import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.locations.{
   AccessCondition,
   AccessStatus,
@@ -27,7 +28,7 @@ import weco.catalogue.source_model.sierra.source.{
   *     data from Sierra.
   *
   */
-object SierraItemAccess extends SierraQueryOps {
+object SierraItemAccess extends SierraQueryOps with Logging {
   def apply(
     id: SierraItemNumber,
     bibStatus: Option[AccessStatus],
@@ -281,9 +282,12 @@ object SierraItemAccess extends SierraQueryOps {
               "Item is in use by another reader. Please ask at Enquiry Desk."))),
           ItemStatus.TemporarilyUnavailable)
 
-      case other =>
-        println(s"@@ $other @@")
-        throw new Throwable(s"Unhandled!!! $other")
+      case (bibStatus, holdCount, status, opacmsg, isRequestable, location) =>
+        warn(
+          s"Unable to assign access status for item ${id.withCheckDigit}: " +
+            s"bibStatus=$bibStatus, holdCount=$holdCount, status=$status, " +
+            s"opacmsg=$opacmsg, isRequestable=$isRequestable, location=$location"
+        )
         (None, ItemStatus.Unavailable)
     }
   }

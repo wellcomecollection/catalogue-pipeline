@@ -21,14 +21,13 @@ import weco.catalogue.source_model.sierra.{
   SierraTransformable
 }
 
-import java.io.{BufferedReader, FileInputStream, InputStreamReader, PrintWriter}
-import scala.util.{Failure, Success, Try}
+import java.io.{BufferedReader, FileInputStream, InputStreamReader}
 
 class SierraItemAccessTest
     extends AnyFunSpec
     with Matchers
     with SierraDataGenerators {
-  ignore("assigns access conditions for all Sierra items") {
+  it("assigns access conditions for all Sierra items") {
     // Note: this test is not meant to hang around long-term.  It's a test harness
     // that runs through every SierraTransformable instance, tries to assign some
     // access conditions, and counts how many it can't handle.
@@ -64,11 +63,6 @@ class SierraItemAccessTest
           }
         }
 
-    var handled = 0
-    var unhandled = 0
-
-    val log = new PrintWriter("/users/alexwlchan/desktop/sierra_item_access_out.txt")
-
     bibItemPairs
       .filterNot {
         case (_, bibData, _, itemData) =>
@@ -84,72 +78,8 @@ class SierraItemAccessTest
             .map { _.name }
             .flatMap { SierraPhysicalLocationType.fromName(itemId, _) }
 
-          val ac = Try {
-            SierraItemAccess(itemId, bibAccessStatus, location, itemData)
-          }
-
-          ac match {
-            case Success(_) => handled += 1
-            case Failure(err) =>
-              log.write(s"${bibId.withCheckDigit} / ${itemId.withCheckDigit}\n")
-              log.write(s"${bibData.varFields.filter(_.marcTag.contains("506"))}\n")
-              log.write(s"location = ${itemData.location}, holdCount = ${itemData.holdCount}\n")
-
-              val interestingFixedFields = itemData.fixedFields.filterNot {
-                case (code, _) =>
-                  Set(
-                    "68",
-                    "63",
-                    "71",
-                    "72",
-                    "80",
-                    "67",
-                    "66",
-                    "69",
-                    "78",
-                    "109",
-                    "162",
-                    "264",
-                    "161",
-                    "306",
-                    "70",
-                    "86",
-                    "64",
-                    "81",
-                    "59",
-                    "64",
-                    "76",
-                    "98",
-                    "93",
-                    "84",
-                    "265",
-                    "62",
-                    "83",
-                    "77",
-                    "110",
-                    "60",
-                    "94",
-                    "127",
-                    "57",
-                    "58",
-                    "74",
-                    "85"
-                  ).contains(code)
-              }
-              log.write(s"interesting fixed fields: $interestingFixedFields\n")
-
-              val noteFields = itemData.varFields.filter(_.fieldTag.contains("n"))
-              log.write(s"notes = $noteFields\n")
-
-              log.write(s"err = $err\n\n- - -\n\n")
-
-              unhandled += 1
-          }
+          SierraItemAccess(itemId, bibAccessStatus, location, itemData)
       }
-
-    log.flush()
-
-    println(s"$handled handled, $unhandled unhandled")
   }
 
   describe("an item in the closed stores") {
