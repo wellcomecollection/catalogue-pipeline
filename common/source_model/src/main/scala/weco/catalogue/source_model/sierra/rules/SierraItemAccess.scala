@@ -267,7 +267,7 @@ object SierraItemAccess extends SierraQueryOps {
 
       case other =>
         println(s"@@ $other @@")
-        throw new Throwable("Unhandled!!!")
+        throw new Throwable(s"Unhandled!!! $other")
         (None, ItemStatus.Unavailable)
     }
   }
