@@ -1,23 +1,27 @@
 package weco.catalogue.tei.id_extractor
 
-import akka.http.scaladsl.model.Uri
 import akka.stream.scaladsl.Flow
 import software.amazon.awssdk.services.sqs.model.{Message => SQSMessage}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
+import uk.ac.wellcome.storage.s3.S3ObjectLocation
+import uk.ac.wellcome.storage.store.Writable
 import uk.ac.wellcome.typesafe.Runnable
 import weco.flows.FlowOps
 
+import java.net.URI
 import java.time.ZonedDateTime
 import scala.concurrent.{ExecutionContext, Future}
 
-case class TeiFileChangedMessage(path: String, uri: Uri, timeModified: ZonedDateTime)
+case class TeiFileChangedMessage(path: String, uri: URI, timeModified: ZonedDateTime)
 
 class TeiIdExtractorWorkerService[Dest](messageStream: SQSStream[NotificationMessage],
                                         gitHubBlobReader: GitHubBlobReader,
-                                             messageSender: MessageSender[Dest], concurrentFiles: Int)(implicit val ec: ExecutionContext)
+                                        idExtractor: IdExtractor,
+                                        store: Writable[S3ObjectLocation, String],
+                                        messageSender: MessageSender[Dest], concurrentFiles: Int, bucket: String)(implicit val ec: ExecutionContext)
     extends Runnable with FlowOps{
   val className = this.getClass.getSimpleName
 
@@ -32,8 +36,10 @@ class TeiIdExtractorWorkerService[Dest](messageStream: SQSStream[NotificationMes
     Flow[(Context, TeiFileChangedMessage)]
       .mapAsync(concurrentFiles) {
         case (ctx, message) => for{
-          result <- gitHubBlobReader.getBlob(message.uri)
-        } yield(ctx, result)
+          blobContent <- gitHubBlobReader.getBlob(message.uri)
+          id <- Future.fromTry(idExtractor.extractId(blobContent))
+          stored <- Future.fromTry(store.put(S3ObjectLocation(bucket, s"tei_files/$id/${message.timeModified.toEpochSecond}.xml"))(blobContent).left.map(error => error.e).toTry)
+        } yield(ctx, Right(stored))
       }
       .via(catchErrors)
 

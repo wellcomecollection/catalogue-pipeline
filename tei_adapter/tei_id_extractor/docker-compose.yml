@@ -8,7 +8,3 @@ mysql:
     - "3307:3306"
   environment:
     - "MYSQL_ROOT_PASSWORD=password"
-s3:
-  image: "760097843905.dkr.ecr.eu-west-1.amazonaws.com/scality/s3server:mem-latest"
-  ports:
-    - "33333:8000"

@@ -7,21 +7,20 @@ import akka.http.scaladsl.unmarshalling.{Unmarshal, Unmarshaller}
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import uk.ac.wellcome.json.JsonUtil._
 
+import java.net.URI
 import scala.concurrent.Future
 import scala.util.Try
 
 class GitHubBlobReader(implicit ac: ActorSystem) {
   implicit val ec = ac.dispatcher
-  def getBlob(uri: Uri): Future[Either[Throwable, String]] = {
-    val request = HttpRequest(uri=uri)
-    val f = for {
+  def getBlob(uri: URI): Future[String] = {
+    val request = HttpRequest(uri=Uri(uri.toString))
+    for {
       response <- Http().singleRequest(request)
       blob <- unmarshalAs[Blob](response)
       decoded <- Future.fromTry(decodeBase64(blob.content))
-    } yield Right(decoded)
-    f.recover{
-      case t: Throwable => Left(t)
-    }
+    } yield decoded
+
   }
   private val base64 = java.util.Base64.getMimeDecoder
 
