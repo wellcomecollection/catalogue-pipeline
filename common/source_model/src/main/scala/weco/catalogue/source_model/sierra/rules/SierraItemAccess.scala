@@ -282,6 +282,8 @@ object SierraItemAccess extends SierraQueryOps with Logging {
               "Item is in use by another reader. Please ask at Enquiry Desk."))),
           ItemStatus.TemporarilyUnavailable)
 
+      // If we can't work out how this item should be handled, then let's mark it
+      // as unavailable for now.
       case (bibStatus, holdCount, status, opacmsg, isRequestable, location) =>
         warn(
           s"Unable to assign access status for item ${id.withCheckDigit}: " +
