@@ -111,6 +111,38 @@ class SierraItemAccessTest
               terms = Some("Online request")))
           itemStatus shouldBe ItemStatus.Available
         }
+
+        it("if the bib is restricted but the item is open") {
+          val itemData = createSierraItemDataWith(
+            fixedFields = Map(
+              "79" -> FixedField(
+                label = "LOCATION",
+                value = "scmac",
+                display = "Closed stores Arch. & MSS"),
+              "88" -> FixedField(
+                label = "STATUS",
+                value = "-",
+                display = "Available"),
+              "108" -> FixedField(
+                label = "OPACMSG",
+                value = "f",
+                display = "Online request"),
+            )
+          )
+
+          val (ac, itemStatus) = SierraItemAccess(
+            id = itemId,
+            bibStatus = Some(AccessStatus.Restricted),
+            location = Some(LocationType.ClosedStores),
+            itemData = itemData
+          )
+
+          ac shouldBe Some(
+            AccessCondition(
+              status = Some(AccessStatus.Open),
+              terms = Some("Online request")))
+          itemStatus shouldBe ItemStatus.Available
+        }
       }
 
       describe("cannot be requested") {

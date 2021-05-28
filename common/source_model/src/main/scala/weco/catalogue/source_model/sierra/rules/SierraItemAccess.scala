@@ -61,6 +61,38 @@ object SierraItemAccess extends SierraQueryOps with Logging {
 
         (Some(ac), ItemStatus.Available)
 
+      // Note: it is possible for individual items within a restricted bib to be available
+      // online, e.g. in archives.  The "restricted" on the bib applies to the archive as
+      // a whole, but individual files may be open.
+      //
+      // Consider an archive with three items:
+      //
+      //      Item 1 = Open
+      //      Item 2 = contains sensitive material, so restricted
+      //      Item 3 = Open
+      //
+      // Then the top-level bib status would be "certain restrictions apply" for the
+      // archive as a whole, referring to item 2 -- but items 1 and 3 would be open.
+      //
+      // This is distinct from the case above because we want to replace the bib-level
+      // status with "Open", rather than pass it through.
+      //
+      // Example: b1842941 / i17286803
+      case (
+        Some(AccessStatus.Restricted),
+        Some(0),
+        Some(Status.Available),
+        Some(OpacMsg.OnlineRequest),
+        Requestable,
+        Some(LocationType.ClosedStores)) =>
+        val ac = AccessCondition(
+          status = Some(AccessStatus.Open),
+          terms = Some("Online request"),
+          note = itemData.displayNote
+        )
+
+        (Some(ac), ItemStatus.Available)
+
       // Items on the open shelves don't have any access conditions.
       //
       // We could add an access status of "Open" here, but it feels dubious to be
