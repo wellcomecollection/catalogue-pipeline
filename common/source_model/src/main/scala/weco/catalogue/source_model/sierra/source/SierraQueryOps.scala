@@ -66,7 +66,7 @@ trait SierraQueryOps extends Logging {
       if (varfields.isEmpty) {
         None
       } else {
-        Some(varfields.mkString("\n\n").trim)
+        Some(varfields.mkString("\n\n").trim.replace("<p>", ""))
       }
     }
   }
