@@ -133,6 +133,18 @@ class SierraTransformerTest
          |  "location": {
          |    "code": "sgmed",
          |    "name": "Closed stores Med."
+         |  },
+         |  "fixedFields": {
+         |    "88": {
+         |      "label": "STATUS",
+         |      "value": "-",
+         |      "display": "Available"
+         |    },
+         |    "108": {
+         |      "label": "OPACMSG",
+         |      "value": "f",
+         |      "display": "Online request"
+         |    }
          |  }
          |}
          |""".stripMargin
@@ -175,7 +187,9 @@ class SierraTransformerTest
       locations = List(
         PhysicalLocation(
           locationType = LocationType.ClosedStores,
-          label = LocationType.ClosedStores.label
+          label = LocationType.ClosedStores.label,
+          accessConditions =
+            List(AccessCondition(terms = Some("Online request")))
         )
       )
     )

@@ -3,6 +3,7 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 import weco.catalogue.internal_model.locations._
 import weco.catalogue.source_model.sierra.rules.{
   SierraAccessStatus,
+  SierraItemAccess,
   SierraPhysicalLocationType
 }
 import weco.catalogue.source_model.sierra.{
@@ -43,14 +44,16 @@ trait SierraLocation {
         }
       }
 
+      (accessCondition, _) = SierraItemAccess(
+        id = itemNumber,
+        bibStatus = SierraAccessStatus.forBib(bibNumber, bibData),
+        location = Some(locationType),
+        itemData = itemData
+      )
+
       physicalLocation = PhysicalLocation(
         locationType = locationType,
-        accessConditions = SierraAccessStatus
-          .forBib(bibNumber, bibData)
-          .map { status =>
-            AccessCondition(status)
-          }
-          .toList,
+        accessConditions = accessCondition.toList,
         label = label,
         shelfmark = SierraShelfmark(bibData, itemData)
       )

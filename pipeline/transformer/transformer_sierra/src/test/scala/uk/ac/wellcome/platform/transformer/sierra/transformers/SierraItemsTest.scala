@@ -7,10 +7,18 @@ import weco.catalogue.internal_model.identifiers.{
   IdentifierType,
   SourceIdentifier
 }
-import weco.catalogue.internal_model.locations.{LocationType, PhysicalLocation}
+import weco.catalogue.internal_model.locations.{
+  AccessCondition,
+  LocationType,
+  PhysicalLocation
+}
 import weco.catalogue.internal_model.work.Item
 import weco.catalogue.source_model.generators.SierraDataGenerators
-import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
+import weco.catalogue.source_model.sierra.marc.{
+  FixedField,
+  MarcSubfield,
+  VarField
+}
 import weco.catalogue.source_model.sierra.source.SierraSourceLocation
 import weco.catalogue.source_model.sierra.{
   SierraBibData,
@@ -187,7 +195,23 @@ class SierraItemsTest
       code = "sghi2",
       name = "Closed stores Hist. 2"
     )
-    val itemData = createSierraItemDataWith(location = Some(sierraLocation))
+    val itemData = createSierraItemDataWith(
+      location = Some(sierraLocation),
+      fixedFields = Map(
+        "79" -> FixedField(
+          label = "LOCATION",
+          value = "sghi2",
+          display = "Closed stores Hist. 2"),
+        "88" -> FixedField(
+          label = "STATUS",
+          value = "-",
+          display = "Available"),
+        "108" -> FixedField(
+          label = "OPACMSG",
+          value = "f",
+          display = "Online request"),
+      )
+    )
 
     val itemDataMap = Map(createSierraItemNumber -> itemData)
 
@@ -195,7 +219,8 @@ class SierraItemsTest
     item.locations shouldBe List(
       PhysicalLocation(
         locationType = LocationType.ClosedStores,
-        label = LocationType.ClosedStores.label
+        label = LocationType.ClosedStores.label,
+        accessConditions = List(AccessCondition(terms = Some("Online request")))
       )
     )
   }
@@ -210,12 +235,10 @@ class SierraItemsTest
     val itemDataMap = Map(createSierraItemNumber -> itemData)
 
     val item = getTransformedItems(itemDataMap = itemDataMap).head
-    item.locations shouldBe List(
-      PhysicalLocation(
-        locationType = LocationType.OpenShelves,
-        label = openLocation.name
-      )
-    )
+    item.locations should have size 1
+    item.locations.head
+      .asInstanceOf[PhysicalLocation]
+      .label shouldBe openLocation.name
   }
 
   it("creates an item with a physical location and ignores digital locations") {
@@ -229,19 +252,36 @@ class SierraItemsTest
             SierraSourceLocation("digi", "Digitised Collections"),
             SierraSourceLocation("dlnk", "Digitised content"))))
 
-    val itemDataMap = Map(
-      createSierraItemNumber -> createSierraItemDataWith(
-        location = Some(sierraPhysicalLocation1))
+    val itemData = createSierraItemDataWith(
+      location = Some(sierraPhysicalLocation1),
+      fixedFields = Map(
+        "79" -> FixedField(
+          label = "LOCATION",
+          value = "sicon",
+          display = "Closed stores Iconographic"),
+        "88" -> FixedField(
+          label = "STATUS",
+          value = "-",
+          display = "Available"),
+        "108" -> FixedField(
+          label = "OPACMSG",
+          value = "f",
+          display = "Online request"),
+      )
     )
 
     val results =
-      getTransformedItems(bibData = bibData, itemDataMap = itemDataMap)
+      getTransformedItems(
+        bibData = bibData,
+        itemDataMap = Map(createSierraItemNumber -> itemData))
 
     results.head.locations should be(
       List(
         PhysicalLocation(
           locationType = LocationType.ClosedStores,
-          label = LocationType.ClosedStores.label
+          label = LocationType.ClosedStores.label,
+          accessConditions =
+            List(AccessCondition(terms = Some("Online request")))
         )
       ))
   }
@@ -284,12 +324,11 @@ class SierraItemsTest
 
       items should have size 4
       items.foreach {
-        _.locations shouldBe List(
-          PhysicalLocation(
-            locationType = LocationType.ClosedStores,
-            label = LocationType.ClosedStores.label
-          )
-        )
+        _.locations.foreach { loc =>
+          val physicalLoc = loc.asInstanceOf[PhysicalLocation]
+          physicalLoc.locationType shouldBe LocationType.ClosedStores
+          physicalLoc.label shouldBe LocationType.ClosedStores.label
+        }
       }
     }
 
@@ -316,12 +355,11 @@ class SierraItemsTest
 
       items should have size 4
       items.foreach {
-        _.locations shouldBe List(
-          PhysicalLocation(
-            locationType = LocationType.ClosedStores,
-            label = LocationType.ClosedStores.label
-          )
-        )
+        _.locations.foreach { loc =>
+          val physicalLoc = loc.asInstanceOf[PhysicalLocation]
+          physicalLoc.locationType shouldBe LocationType.ClosedStores
+          physicalLoc.label shouldBe LocationType.ClosedStores.label
+        }
       }
     }
 
