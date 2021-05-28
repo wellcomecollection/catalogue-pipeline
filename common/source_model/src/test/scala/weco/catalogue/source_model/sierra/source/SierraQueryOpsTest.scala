@@ -47,6 +47,19 @@ class SierraQueryOpsTest
 
         item.displayNote shouldBe Some("Part of: a special collection")
       }
+
+      it("removes any whitespace") {
+        val item = createSierraItemDataWith(
+          varFields = List(
+            VarField(
+              fieldTag = Some("n"),
+              content = Some(" Conserved (2016)")
+            )
+          )
+        )
+
+        item.displayNote shouldBe Some("Conserved (2016)")
+      }
     }
   }
 
