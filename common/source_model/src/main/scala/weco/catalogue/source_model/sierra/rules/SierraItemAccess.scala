@@ -196,7 +196,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           NotRequestable.ItemUnavailable(_),
           _) =>
         val terms = itemData.displayNote match {
-          case Some(note) => Some(note.replace("<p>", ""))
+          case Some(note) => Some(note)
           case None =>
             Some("This item is being digitised and is currently unavailable.")
         }
