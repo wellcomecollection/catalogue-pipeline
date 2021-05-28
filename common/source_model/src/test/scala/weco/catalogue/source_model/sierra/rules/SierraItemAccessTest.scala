@@ -111,6 +111,38 @@ class SierraItemAccessTest
               terms = Some("Online request")))
           itemStatus shouldBe ItemStatus.Available
         }
+
+        it("if the bib is restricted but the item is open") {
+          val itemData = createSierraItemDataWith(
+            fixedFields = Map(
+              "79" -> FixedField(
+                label = "LOCATION",
+                value = "scmac",
+                display = "Closed stores Arch. & MSS"),
+              "88" -> FixedField(
+                label = "STATUS",
+                value = "-",
+                display = "Available"),
+              "108" -> FixedField(
+                label = "OPACMSG",
+                value = "f",
+                display = "Online request"),
+            )
+          )
+
+          val (ac, itemStatus) = SierraItemAccess(
+            id = itemId,
+            bibStatus = Some(AccessStatus.Restricted),
+            location = Some(LocationType.ClosedStores),
+            itemData = itemData
+          )
+
+          ac shouldBe Some(
+            AccessCondition(
+              status = Some(AccessStatus.Open),
+              terms = Some("Online request")))
+          itemStatus shouldBe ItemStatus.Available
+        }
       }
 
       describe("cannot be requested") {
@@ -322,7 +354,50 @@ class SierraItemAccessTest
           ac shouldBe Some(
             AccessCondition(
               status = Some(AccessStatus.TemporarilyUnavailable),
-              terms = Some("At digitisation and temporarily unavailable")
+              terms = Some(
+                "This item is being digitised and is currently unavailable.")
+            )
+          )
+          itemStatus shouldBe ItemStatus.TemporarilyUnavailable
+        }
+
+        it("if doesn't double up the note about digitisation") {
+          val itemData = createSierraItemDataWith(
+            fixedFields = Map(
+              "79" -> FixedField(
+                label = "LOCATION",
+                value = "sgser",
+                display = "Closed stores journals"),
+              "88" -> FixedField(
+                label = "STATUS",
+                value = "r",
+                display = "Unavailable"),
+              "108" -> FixedField(
+                label = "OPACMSG",
+                value = "b",
+                display = "@ digitisation"),
+            ),
+            varFields = List(
+              VarField(
+                fieldTag = Some("n"),
+                content = Some(
+                  "<p>This item is being digitised and is currently unavailable.")
+              )
+            )
+          )
+
+          val (ac, itemStatus) = SierraItemAccess(
+            id = itemId,
+            bibStatus = None,
+            location = Some(LocationType.ClosedStores),
+            itemData = itemData
+          )
+
+          ac shouldBe Some(
+            AccessCondition(
+              status = Some(AccessStatus.TemporarilyUnavailable),
+              terms = Some(
+                "This item is being digitised and is currently unavailable.")
             )
           )
           itemStatus shouldBe ItemStatus.TemporarilyUnavailable
@@ -417,41 +492,6 @@ class SierraItemAccessTest
 
           ac shouldBe Some(
             AccessCondition(status = AccessStatus.PermissionRequired)
-          )
-          itemStatus shouldBe ItemStatus.Available
-        }
-
-        it("if the item is by appointment, even if the status is wrong") {
-          val itemData = createSierraItemDataWith(
-            fixedFields = Map(
-              "61" -> FixedField(
-                label = "I TYPE",
-                value = "17",
-                display = "film"),
-              "79" -> FixedField(
-                label = "LOCATION",
-                value = "mfohc",
-                display = "Closed stores Moving image and sound collections"),
-              "88" -> FixedField(
-                label = "STATUS",
-                value = "-",
-                display = "Available"),
-              "108" -> FixedField(
-                label = "OPACMSG",
-                value = "a",
-                display = "By appointment"),
-            )
-          )
-
-          val (ac, itemStatus) = SierraItemAccess(
-            id = itemId,
-            bibStatus = None,
-            location = Some(LocationType.ClosedStores),
-            itemData = itemData
-          )
-
-          ac shouldBe Some(
-            AccessCondition(status = AccessStatus.ByAppointment)
           )
           itemStatus shouldBe ItemStatus.Available
         }
