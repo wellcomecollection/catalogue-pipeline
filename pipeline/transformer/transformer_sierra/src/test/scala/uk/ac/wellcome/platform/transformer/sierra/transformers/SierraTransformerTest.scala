@@ -188,7 +188,8 @@ class SierraTransformerTest
         PhysicalLocation(
           locationType = LocationType.ClosedStores,
           label = LocationType.ClosedStores.label,
-          accessConditions = List(AccessCondition(terms = Some("Online request")))
+          accessConditions =
+            List(AccessCondition(terms = Some("Online request")))
         )
       )
     )

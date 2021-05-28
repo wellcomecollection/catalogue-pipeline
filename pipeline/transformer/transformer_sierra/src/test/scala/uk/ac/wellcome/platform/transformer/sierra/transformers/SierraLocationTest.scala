@@ -71,7 +71,8 @@ class SierraLocationTest
         location = Some(SierraSourceLocation("wghxg", "Folios"))
       )
 
-      val location = transformer.getPhysicalLocation(bibId, itemId, itemData, bibData).get
+      val location =
+        transformer.getPhysicalLocation(bibId, itemId, itemData, bibData).get
       location.label shouldBe "Folios"
     }
 
@@ -131,9 +132,12 @@ class SierraLocationTest
         )
       )
 
-      val location = transformer.getPhysicalLocation(bibId, itemId, itemData, bibData).get
+      val location =
+        transformer.getPhysicalLocation(bibId, itemId, itemData, bibData).get
       location.accessConditions shouldBe List(
-        AccessCondition(status = Some(AccessStatus.Open), terms = Some("Online request"))
+        AccessCondition(
+          status = Some(AccessStatus.Open),
+          terms = Some("Online request"))
       )
     }
 
@@ -236,7 +240,8 @@ class SierraLocationTest
       location.accessConditions shouldBe List(
         AccessCondition(
           status = Some(AccessStatus.TemporarilyUnavailable),
-          terms = Some("Please check this item on the Wellcome Library website for access information")
+          terms = Some(
+            "Please check this item on the Wellcome Library website for access information")
         )
       )
     }

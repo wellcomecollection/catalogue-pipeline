@@ -236,7 +236,9 @@ class SierraItemsTest
 
     val item = getTransformedItems(itemDataMap = itemDataMap).head
     item.locations should have size 1
-    item.locations.head.asInstanceOf[PhysicalLocation].label shouldBe openLocation.name
+    item.locations.head
+      .asInstanceOf[PhysicalLocation]
+      .label shouldBe openLocation.name
   }
 
   it("creates an item with a physical location and ignores digital locations") {
@@ -278,7 +280,8 @@ class SierraItemsTest
         PhysicalLocation(
           locationType = LocationType.ClosedStores,
           label = LocationType.ClosedStores.label,
-          accessConditions = List(AccessCondition(terms = Some("Online request")))
+          accessConditions =
+            List(AccessCondition(terms = Some("Online request")))
         )
       ))
   }
