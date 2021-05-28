@@ -63,6 +63,10 @@ class SierraItemAccessTest
           }
         }
 
+    var hasTermsButNoNote = 0
+    var hasNoteButNoTerms = 0
+    var hasNoteAndTerms = 0
+
     bibItemPairs
       .filterNot {
         case (_, bibData, _, itemData) =>
@@ -78,8 +82,19 @@ class SierraItemAccessTest
             .map { _.name }
             .flatMap { SierraPhysicalLocationType.fromName(itemId, _) }
 
-          SierraItemAccess(itemId, bibAccessStatus, location, itemData)
+          val (ac, _) = SierraItemAccess(itemId, bibAccessStatus, location, itemData)
+          ac match {
+            case Some(AccessCondition(_, Some(terms), _, Some(note))) =>
+              println(s"terms = $terms, note = $note")
+
+              hasNoteAndTerms += 1
+            case Some(AccessCondition(_, Some(terms), _, None)) => hasTermsButNoNote += 1
+            case Some(AccessCondition(_, _, _, Some(note))) => hasNoteButNoTerms += 1
+            case _ => ()
+          }
       }
+
+    println(s"hasTermsButNoNote = $hasTermsButNoNote, hasNoteButNoTerms = $hasNoteButNoTerms, hasNoteAndTerms = $hasNoteAndTerms")
   }
 
   describe("an item in the closed stores") {
