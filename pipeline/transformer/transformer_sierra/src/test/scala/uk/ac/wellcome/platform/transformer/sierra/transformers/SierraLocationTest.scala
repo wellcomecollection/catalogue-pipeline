@@ -12,7 +12,11 @@ import weco.catalogue.source_model.generators.{
   MarcGenerators,
   SierraDataGenerators
 }
-import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
+import weco.catalogue.source_model.sierra.marc.{
+  FixedField,
+  MarcSubfield,
+  VarField
+}
 import weco.catalogue.source_model.sierra.source.SierraSourceLocation
 import weco.catalogue.source_model.sierra.SierraItemData
 
@@ -29,8 +33,6 @@ class SierraLocationTest
     val itemId = createSierraItemNumber
     val bibData = createSierraBibData
 
-    val locationType = LocationType.ClosedStores
-    val label = LocationType.ClosedStores.label
     val itemData = createSierraItemDataWith(
       location = Some(SierraSourceLocation("sgmed", "Closed stores Med."))
     )
@@ -86,26 +88,42 @@ class SierraLocationTest
       transformer.getPhysicalLocation(bibId, itemId, itemData, bibData) shouldBe None
     }
 
-    it("adds access status to the location if present") {
+    it("adds access conditions to the items") {
       val bibData = createSierraBibDataWith(
         varFields = List(
           VarField(
             marcTag = Some("506"),
             subfields = List(
-              MarcSubfield("a", "You're not allowed yet"),
-              MarcSubfield("f", "Restricted")
+              MarcSubfield("a", "You can look at this"),
+              MarcSubfield("f", "Open")
             )
           )
         )
       )
-      transformer.getPhysicalLocation(bibId, itemId, itemData, bibData) shouldBe Some(
-        PhysicalLocation(
-          locationType = locationType,
-          label = label,
-          accessConditions = List(
-            AccessCondition(status = AccessStatus.Restricted),
-          )
+
+      val itemData: SierraItemData = createSierraItemDataWith(
+        fixedFields = Map(
+          "79" -> FixedField(
+            label = "LOCATION",
+            value = "scmac",
+            display = "Closed stores Arch. & MSS"),
+          "88" -> FixedField(
+            label = "STATUS",
+            value = "-",
+            display = "Available"),
+          "108" -> FixedField(
+            label = "OPACMSG",
+            value = "f",
+            display = "Online request"),
+        ),
+        location = Some(
+          SierraSourceLocation(code = "sgmed", name = "Closed stores Med.")
         )
+      )
+
+      val location = transformer.getPhysicalLocation(bibId, itemId, itemData, bibData).get
+      location.accessConditions shouldBe List(
+        AccessCondition(status = Some(AccessStatus.Open), terms = Some("Online request"))
       )
     }
 
@@ -190,22 +208,7 @@ class SierraLocationTest
       }
     }
 
-    it("adds 'Open' access condition if ind1 is 0") {
-      val bibData = createSierraBibDataWith(
-        varFields = List(
-          VarField(marcTag = Some("506"), indicator1 = Some("0"))
-        )
-      )
-      transformer.getPhysicalLocation(bibId, itemId, itemData, bibData) shouldBe Some(
-        PhysicalLocation(
-          locationType = locationType,
-          label = label,
-          accessConditions = List(AccessCondition(status = AccessStatus.Open))
-        )
-      )
-    }
-
-    it("skips an access condition if it can't get an access status") {
+    it("skips an access condition if it doesn't have enough information") {
       val bibData = createSierraBibDataWith(
         varFields = List(
           VarField(
@@ -221,88 +224,6 @@ class SierraLocationTest
       val location =
         transformer.getPhysicalLocation(bibId, itemId, itemData, bibData).get
       location.accessConditions shouldBe empty
-    }
-
-    it("sets an access status based on the contents of subfield ǂf") {
-      val bibData = createSierraBibDataWith(
-        varFields = List(
-          VarField(
-            marcTag = Some("506"),
-            subfields = List(
-              MarcSubfield("a", "You're not allowed yet"),
-              MarcSubfield("f", "Restricted"),
-            )
-          )
-        )
-      )
-
-      val location =
-        transformer.getPhysicalLocation(bibId, itemId, itemData, bibData).get
-      location.accessConditions should have size 1
-
-      location.accessConditions.head.status shouldBe Some(
-        AccessStatus.Restricted)
-    }
-
-    it(
-      "sets an access status based on the contents of subfield ǂa if ǂf is missing") {
-      val bibData = createSierraBibDataWith(
-        varFields = List(
-          VarField(
-            marcTag = Some("506"),
-            subfields = List(
-              MarcSubfield("a", "Restricted"),
-            )
-          )
-        )
-      )
-
-      val location =
-        transformer.getPhysicalLocation(bibId, itemId, itemData, bibData).get
-      location.accessConditions should have size 1
-
-      location.accessConditions.head.status shouldBe Some(
-        AccessStatus.Restricted)
-      location.accessConditions.head.terms shouldBe None
-    }
-
-    it("only sets an AccessStatus if the contents of ǂa and ǂf agree") {
-      val bibData = createSierraBibDataWith(
-        varFields = List(
-          VarField(
-            marcTag = Some("506"),
-            subfields = List(
-              MarcSubfield("a", "Restricted"),
-              MarcSubfield("f", "Open"),
-            )
-          )
-        )
-      )
-
-      val location =
-        transformer.getPhysicalLocation(bibId, itemId, itemData, bibData).get
-      location.accessConditions shouldBe empty
-    }
-
-    it(
-      "does not add an access condition if none of the relevant subfields are present") {
-      val bibData = createSierraBibDataWith(
-        varFields = List(
-          VarField(
-            marcTag = Some("506"),
-            subfields = List(
-              MarcSubfield("e", "Something something"),
-            )
-          )
-        )
-      )
-      transformer.getPhysicalLocation(bibId, itemId, itemData, bibData) shouldBe Some(
-        PhysicalLocation(
-          locationType = locationType,
-          label = label,
-          accessConditions = List()
-        )
-      )
     }
   }
 }
