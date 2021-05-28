@@ -337,7 +337,12 @@ object SierraItemAccess extends SierraQueryOps with Logging {
             s"bibStatus=$bibStatus, holdCount=$holdCount, status=$status, " +
             s"opacmsg=$opacmsg, isRequestable=$isRequestable, location=$location"
         )
-        (None, ItemStatus.Unavailable)
+        (Some(
+          createAccessCondition(
+            status = Some(AccessStatus.TemporarilyUnavailable),
+            note = Some("Please check this item on the Wellcome Library website for access information")
+          )
+        ), ItemStatus.Unavailable)
     }
   }
 

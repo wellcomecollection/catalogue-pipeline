@@ -89,6 +89,19 @@ class SierraAccessStatusTest
     accessStatus shouldBe None
   }
 
+  it("returns Open if the first indicator is 0") {
+    val accessStatus = getAccessStatus(
+      bibVarFields = List(
+        VarField(
+          marcTag = Some("506"),
+          indicator1 = Some("0")
+        )
+      )
+    )
+
+    accessStatus shouldBe Some(AccessStatus.Open)
+  }
+
   it("returns None if the first indicator and subfield ǂf disagree") {
     val accessStatus = getAccessStatus(
       bibVarFields = List(

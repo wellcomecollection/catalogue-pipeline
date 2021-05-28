@@ -39,12 +39,27 @@ class SierraLocationTest
 
     it("extracts location from item data") {
       val itemData = createSierraItemDataWith(
-        location = Some(SierraSourceLocation("sgmed", "Closed stores Med."))
+        location = Some(SierraSourceLocation("sgmed", "Closed stores Med.")),
+        fixedFields = Map(
+          "79" -> FixedField(
+            label = "LOCATION",
+            value = "scmac",
+            display = "Closed stores Arch. & MSS"),
+          "88" -> FixedField(
+            label = "STATUS",
+            value = "-",
+            display = "Available"),
+          "108" -> FixedField(
+            label = "OPACMSG",
+            value = "f",
+            display = "Online request"),
+        )
       )
 
       val expectedLocation = PhysicalLocation(
         locationType = LocationType.ClosedStores,
-        label = LocationType.ClosedStores.label
+        label = LocationType.ClosedStores.label,
+        accessConditions = List(AccessCondition(terms = Some("Online request")))
       )
 
       transformer.getPhysicalLocation(bibId, itemId, itemData, bibData) shouldBe Some(
@@ -52,17 +67,12 @@ class SierraLocationTest
     }
 
     it("uses the name as the label for non-closed locations") {
-      val itemData = createSierraItemDataWith(
+      val itemData: SierraItemData = createSierraItemDataWith(
         location = Some(SierraSourceLocation("wghxg", "Folios"))
       )
 
-      val expectedLocation = PhysicalLocation(
-        locationType = LocationType.OpenShelves,
-        label = "Folios"
-      )
-
-      transformer.getPhysicalLocation(bibId, itemId, itemData, bibData) shouldBe Some(
-        expectedLocation)
+      val location = transformer.getPhysicalLocation(bibId, itemId, itemData, bibData).get
+      location.label shouldBe "Folios"
     }
 
     it("returns None if the location field only contains empty strings") {
@@ -223,7 +233,12 @@ class SierraLocationTest
 
       val location =
         transformer.getPhysicalLocation(bibId, itemId, itemData, bibData).get
-      location.accessConditions shouldBe empty
+      location.accessConditions shouldBe List(
+        AccessCondition(
+          status = Some(AccessStatus.TemporarilyUnavailable),
+          terms = Some("Please check this item on the Wellcome Library website for access information")
+        )
+      )
     }
   }
 }
