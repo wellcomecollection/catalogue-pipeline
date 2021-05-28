@@ -2,20 +2,86 @@ package weco.catalogue.source_model.sierra.rules
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import uk.ac.wellcome.json.JsonUtil._
 import weco.catalogue.internal_model.locations.{
   AccessCondition,
   AccessStatus,
   ItemStatus,
-  LocationType
+  LocationType,
+  PhysicalLocationType
 }
 import weco.catalogue.source_model.generators.SierraDataGenerators
-import weco.catalogue.source_model.sierra.SierraItemNumber
+import weco.catalogue.source_model.sierra.Implicits._
 import weco.catalogue.source_model.sierra.marc.{FixedField, VarField}
+import weco.catalogue.source_model.sierra.{
+  SierraBibData,
+  SierraBibNumber,
+  SierraItemData,
+  SierraItemNumber,
+  SierraTransformable
+}
+
+import java.io.{BufferedReader, FileInputStream, InputStreamReader}
 
 class SierraItemAccessTest
     extends AnyFunSpec
     with Matchers
     with SierraDataGenerators {
+  it("assigns access conditions for all Sierra items") {
+    // Note: this test is not meant to hang around long-term.  It's a test harness
+    // that runs through every SierraTransformable instance, tries to assign some
+    // access conditions, and counts how many it can't handle.
+    //
+    // Looking at the items that can't be assigned access conditions helps us
+    // find what needs fixing in the data/transformer.
+    val reader: Iterator[String] =
+      new Iterator[String] {
+        val reader =
+          new BufferedReader(
+            new InputStreamReader(new FileInputStream(
+              "/Users/alexwlchan/desktop/sierra/out_trimmed6.json")))
+
+        override def hasNext: Boolean = reader.ready
+        override def next(): String = reader.readLine()
+      }
+
+    val bibItemPairs: Iterator[
+      (SierraBibNumber, SierraBibData, SierraItemNumber, SierraItemData)] =
+      reader
+        .flatMap { json =>
+          val t = fromJson[SierraTransformable](json).get
+
+          t.maybeBibRecord match {
+            case Some(bibRecord) =>
+              val bibData = fromJson[SierraBibData](bibRecord.data).get
+              t.itemRecords.values.toList.map { itemRecord =>
+                val itemData = fromJson[SierraItemData](itemRecord.data).get
+                (bibRecord.id, bibData, itemRecord.id, itemData)
+              }
+
+            case None => List()
+          }
+        }
+
+    bibItemPairs
+      .filterNot {
+        case (_, bibData, _, itemData) =>
+          bibData.suppressed | bibData.deleted | itemData.suppressed | itemData.deleted
+      }
+      .foreach {
+        case (bibId, bibData, itemId, itemData) =>
+          // Note: When we wire up these into the items/locations code, we'll pass
+          // in these values rather than re-parse them, but this works well enough
+          // for the test harness.
+          val bibAccessStatus = SierraAccessStatus.forBib(bibId, bibData)
+          val location: Option[PhysicalLocationType] = itemData.location
+            .map { _.name }
+            .flatMap { SierraPhysicalLocationType.fromName(itemId, _) }
+
+          SierraItemAccess(itemId, bibAccessStatus, location, itemData)
+      }
+  }
+
   describe("an item in the closed stores") {
     describe("with no holds") {
       describe("can be requested online") {
