@@ -749,5 +749,45 @@ class SierraItemAccessTest
     }
   }
 
+  it("moves the display note to the terms if it's access related") {
+    val itemData = createSierraItemDataWith(
+      fixedFields = Map(
+        "61" -> FixedField(
+          label = "I TYPE",
+          value = "4",
+          display = "serial"
+        ),
+        "79" -> FixedField(
+          label = "LOCATION",
+          value = "hgser",
+          display = "Offsite"),
+        "88" -> FixedField(
+          label = "STATUS",
+          value = "y",
+          display = "Permission required"),
+        "108" -> FixedField(
+          label = "OPACMSG",
+          value = "a",
+          display = "By appointment"),
+      ),
+      varFields = List(
+        VarField(
+          fieldTag = Some("n"),
+          content = Some("Email library@wellcomecollection.org to tell us why you need the physical copy. We'll reply within a week.")
+        )
+      )
+    )
+
+    val (ac, _) = SierraItemAccess(
+      id = itemId,
+      bibStatus = None,
+      location = Some(LocationType.ClosedStores),
+      itemData = itemData
+    )
+
+    ac.get.note shouldBe None
+    ac.get.terms shouldBe Some("Email library@wellcomecollection.org to tell us why you need the physical copy. We'll reply within a week.")
+  }
+
   val itemId: SierraItemNumber = createSierraItemNumber
 }

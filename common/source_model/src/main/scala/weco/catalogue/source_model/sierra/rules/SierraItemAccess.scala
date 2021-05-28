@@ -53,7 +53,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           Requestable,
           Some(LocationType.ClosedStores))
           if bibStatus.isEmpty || bibStatus.contains(AccessStatus.Open) =>
-        val ac = AccessCondition(
+        val ac = createAccessCondition(
           status = bibStatus,
           terms = Some("Online request"),
           note = itemData.displayNote
@@ -85,7 +85,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           Some(OpacMsg.OnlineRequest),
           Requestable,
           Some(LocationType.ClosedStores)) =>
-        val ac = AccessCondition(
+        val ac = createAccessCondition(
           status = Some(AccessStatus.Open),
           terms = Some("Online request"),
           note = itemData.displayNote
@@ -113,7 +113,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           NotRequestable.OnOpenShelves(_),
           Some(LocationType.OpenShelves)) =>
         val ac = itemData.displayNote.map { note =>
-          AccessCondition(note = Some(note))
+          createAccessCondition(note = Some(note))
         }
         (ac, ItemStatus.Available)
 
@@ -123,7 +123,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
       case (None, _, _, _, NotRequestable.RequestTopItem(message), _) =>
         (
           Some(
-            AccessCondition(
+            createAccessCondition(
               terms = Some(message),
               note = itemData.displayNote)),
           ItemStatus.Unavailable)
@@ -140,7 +140,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           Some(LocationType.ClosedStores)) =>
         (
           Some(
-            AccessCondition(
+            createAccessCondition(
               terms = Some("Manual request"),
               note = itemData.displayNote)),
           ItemStatus.Available)
@@ -162,7 +162,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
             LocationType.ClosedStores) =>
         (
           Some(
-            AccessCondition(
+            createAccessCondition(
               status = Some(AccessStatus.Closed),
               note = itemData.displayNote)),
           ItemStatus.Unavailable)
@@ -177,17 +177,11 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           _) =>
         (
           Some(
-            AccessCondition(
+            createAccessCondition(
               status = Some(AccessStatus.Unavailable),
               note = itemData.displayNote)),
           ItemStatus.Unavailable)
 
-      // Many items at digitisation have a note like
-      //
-      //    <p>This item is being digitised and is currently unavailable.
-      //
-      // It's not worth setting notes and a term separately for this, so we use the note
-      // unless it's not available.
       case (
           None,
           _,
@@ -195,17 +189,12 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           Some(OpacMsg.AtDigitisation),
           NotRequestable.ItemUnavailable(_),
           _) =>
-        val terms = itemData.displayNote match {
-          case Some(note) => Some(note)
-          case None =>
-            Some("This item is being digitised and is currently unavailable.")
-        }
         (
           Some(
-            AccessCondition(
+            createAccessCondition(
               status = Some(AccessStatus.TemporarilyUnavailable),
-              terms = terms,
-              note = None)),
+              terms = Some("This item is being digitised and is currently unavailable."),
+              note = itemData.displayNote)),
           ItemStatus.TemporarilyUnavailable)
 
       // An item which is restricted can be requested online -- the user will have to fill in
@@ -221,7 +210,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           Some(LocationType.ClosedStores)) =>
         (
           Some(
-            AccessCondition(
+            createAccessCondition(
               status = Some(AccessStatus.Restricted),
               terms = Some("Online request"),
               note = itemData.displayNote)),
@@ -241,7 +230,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
             .contains(AccessStatus.PermissionRequired) =>
         (
           Some(
-            AccessCondition(
+            createAccessCondition(
               status = Some(AccessStatus.ByAppointment),
               note = itemData.displayNote)),
           ItemStatus.Available)
@@ -257,7 +246,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
             AccessStatus.PermissionRequired) =>
         (
           Some(
-            AccessCondition(
+            createAccessCondition(
               status = Some(AccessStatus.PermissionRequired),
               note = itemData.displayNote)),
           ItemStatus.Available)
@@ -274,7 +263,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           _) =>
         (
           Some(
-            AccessCondition(
+            createAccessCondition(
               status = Some(AccessStatus.Unavailable),
               terms = Some(message),
               note = itemData.displayNote)),
@@ -290,7 +279,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           _) =>
         (
           Some(
-            AccessCondition(
+            createAccessCondition(
               status = Some(AccessStatus.Unavailable),
               terms = Some(message),
               note = itemData.displayNote)),
@@ -314,7 +303,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           Some(LocationType.ClosedStores)) if holdCount > 0 =>
         (
           Some(
-            AccessCondition(
+            createAccessCondition(
               status = Some(AccessStatus.TemporarilyUnavailable),
               terms = Some(
                 "Item is in use by another reader. Please ask at Enquiry Desk."),
@@ -331,7 +320,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           Some(LocationType.ClosedStores)) =>
         (
           Some(
-            AccessCondition(
+            createAccessCondition(
               status = Some(AccessStatus.TemporarilyUnavailable),
               terms = Some(
                 "Item is in use by another reader. Please ask at Enquiry Desk."),
@@ -357,5 +346,44 @@ object SierraItemAccess extends SierraQueryOps with Logging {
 
     def opacmsg: Option[String] =
       itemData.fixedFields.get("108").map { _.value.trim }
+  }
+
+  private def createAccessCondition(
+    status: Option[AccessStatus] = None,
+    terms: Option[String] = None,
+    note: Option[String]
+  ): AccessCondition = {
+    val (accessTerms, accessNote) =
+      (terms, note) match {
+        case (None, Some(note)) if note.containsAccessTerms => (Some(note), None)
+
+        case (Some(terms), Some(note)) if terms == note =>
+          (Some(terms), None)
+
+        case other => other
+      }
+
+    AccessCondition(
+      status = status,
+      terms = accessTerms,
+      note = accessNote
+    )
+  }
+
+  // The display note field has been used for multiple purposes, in particular:
+  //
+  //  1) Distinguishing between different copies of an item, so people know
+  //     which item to request, e.g. "impression lacking lettering"
+  //  2) Recording information about how to access the item, e.g. "please email us"
+  //
+  // This method uses a few heuristics to guess whether a given note is actually information
+  // about access that we should copy to the "terms" field.
+  private implicit class NoteStringOps(s: String) {
+    def containsAccessTerms: Boolean =
+      s.toLowerCase.contains("unavailable") ||
+        s.toLowerCase.contains("access") ||
+        s.toLowerCase.contains("please contact") ||
+        s.toLowerCase.contains("@wellcomecollection.org") ||
+        s == "Offsite"
   }
 }
