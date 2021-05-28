@@ -354,7 +354,8 @@ class SierraItemAccessTest
           ac shouldBe Some(
             AccessCondition(
               status = Some(AccessStatus.TemporarilyUnavailable),
-              terms = Some("This item is being digitised and is currently unavailable.")
+              terms = Some(
+                "This item is being digitised and is currently unavailable.")
             )
           )
           itemStatus shouldBe ItemStatus.TemporarilyUnavailable
@@ -379,7 +380,8 @@ class SierraItemAccessTest
             varFields = List(
               VarField(
                 fieldTag = Some("n"),
-                content = Some("<p>This item is being digitised and is currently unavailable.")
+                content = Some(
+                  "<p>This item is being digitised and is currently unavailable.")
               )
             )
           )
@@ -394,7 +396,8 @@ class SierraItemAccessTest
           ac shouldBe Some(
             AccessCondition(
               status = Some(AccessStatus.TemporarilyUnavailable),
-              terms = Some("This item is being digitised and is currently unavailable.")
+              terms = Some(
+                "This item is being digitised and is currently unavailable.")
             )
           )
           itemStatus shouldBe ItemStatus.TemporarilyUnavailable
