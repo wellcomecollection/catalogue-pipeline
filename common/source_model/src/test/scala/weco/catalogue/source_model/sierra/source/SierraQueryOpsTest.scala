@@ -66,12 +66,14 @@ class SierraQueryOpsTest
           varFields = List(
             VarField(
               fieldTag = Some("n"),
-              content = Some("<p>This item is being digitised and is currently unavailable.")
+              content = Some(
+                "<p>This item is being digitised and is currently unavailable.")
             )
           )
         )
 
-        item.displayNote shouldBe Some("This item is being digitised and is currently unavailable.")
+        item.displayNote shouldBe Some(
+          "This item is being digitised and is currently unavailable.")
       }
     }
   }

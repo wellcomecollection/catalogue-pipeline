@@ -773,7 +773,8 @@ class SierraItemAccessTest
       varFields = List(
         VarField(
           fieldTag = Some("n"),
-          content = Some("Email library@wellcomecollection.org to tell us why you need the physical copy. We'll reply within a week.")
+          content = Some(
+            "Email library@wellcomecollection.org to tell us why you need the physical copy. We'll reply within a week.")
         )
       )
     )
@@ -786,7 +787,8 @@ class SierraItemAccessTest
     )
 
     ac.get.note shouldBe None
-    ac.get.terms shouldBe Some("Email library@wellcomecollection.org to tell us why you need the physical copy. We'll reply within a week.")
+    ac.get.terms shouldBe Some(
+      "Email library@wellcomecollection.org to tell us why you need the physical copy. We'll reply within a week.")
   }
 
   val itemId: SierraItemNumber = createSierraItemNumber

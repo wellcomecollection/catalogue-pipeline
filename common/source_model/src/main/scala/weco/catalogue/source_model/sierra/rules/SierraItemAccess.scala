@@ -193,7 +193,8 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           Some(
             createAccessCondition(
               status = Some(AccessStatus.TemporarilyUnavailable),
-              terms = Some("This item is being digitised and is currently unavailable."),
+              terms = Some(
+                "This item is being digitised and is currently unavailable."),
               note = itemData.displayNote)),
           ItemStatus.TemporarilyUnavailable)
 
@@ -355,7 +356,8 @@ object SierraItemAccess extends SierraQueryOps with Logging {
   ): AccessCondition = {
     val (accessTerms, accessNote) =
       (terms, note) match {
-        case (None, Some(note)) if note.containsAccessTerms => (Some(note), None)
+        case (None, Some(note)) if note.containsAccessTerms =>
+          (Some(note), None)
 
         case (Some(terms), Some(note)) if terms == note =>
           (Some(terms), None)
