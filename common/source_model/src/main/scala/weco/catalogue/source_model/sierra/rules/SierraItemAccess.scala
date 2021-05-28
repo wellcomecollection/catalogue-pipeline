@@ -121,7 +121,9 @@ object SierraItemAccess extends SierraQueryOps with Logging {
       //
       // These items aren't requestable on their own; you have to request the "primary" item.
       case (None, _, _, _, NotRequestable.RequestTopItem(message), _) =>
-        (Some(AccessCondition(terms = Some(message))), ItemStatus.Unavailable)
+        (Some(AccessCondition(
+          terms = Some(message),
+          note = itemData.displayNote)), ItemStatus.Unavailable)
 
       // Handle any cases that require a manual request.
       //
@@ -198,7 +200,8 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           Some(
             AccessCondition(
               status = Some(AccessStatus.TemporarilyUnavailable),
-              terms = terms)),
+              terms = terms,
+              note = None)),
           ItemStatus.TemporarilyUnavailable)
 
       // An item which is restricted can be requested online -- the user will have to fill in
@@ -269,7 +272,8 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           Some(
             AccessCondition(
               status = Some(AccessStatus.Unavailable),
-              terms = Some(message))),
+              terms = Some(message),
+              note = itemData.displayNote)),
           ItemStatus.Unavailable)
 
       // A withdrawn status also overrides all other values.
@@ -284,7 +288,8 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           Some(
             AccessCondition(
               status = Some(AccessStatus.Unavailable),
-              terms = Some(message))),
+              terms = Some(message),
+              note = itemData.displayNote)),
           ItemStatus.Unavailable)
 
       // If an item is on hold for another reader, it can't be requested -- even
@@ -307,7 +312,8 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           Some(AccessCondition(
             status = Some(AccessStatus.TemporarilyUnavailable),
             terms = Some(
-              "Item is in use by another reader. Please ask at Enquiry Desk."))),
+              "Item is in use by another reader. Please ask at Enquiry Desk."),
+            note = itemData.displayNote)),
           ItemStatus.TemporarilyUnavailable)
 
       case (
@@ -321,7 +327,8 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           Some(AccessCondition(
             status = Some(AccessStatus.TemporarilyUnavailable),
             terms = Some(
-              "Item is in use by another reader. Please ask at Enquiry Desk."))),
+              "Item is in use by another reader. Please ask at Enquiry Desk."),
+            note = itemData.displayNote)),
           ItemStatus.TemporarilyUnavailable)
 
       // If we can't work out how this item should be handled, then let's mark it
