@@ -42,7 +42,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
 
     (bibStatus, holdCount, status, opacmsg, isRequestable, location) match {
 
-      // Items on the closed stores that are requestable get the "Online request" condition.
+      // Items in the closed stores that are requestable get the "Online request" condition.
       //
       // Example: b18799966 / i17571170
       case (
