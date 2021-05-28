@@ -435,7 +435,47 @@ class SierraItemAccessTest
           ac shouldBe Some(
             AccessCondition(
               status = Some(AccessStatus.TemporarilyUnavailable),
-              terms = Some("At digitisation and temporarily unavailable")
+              terms = Some("This item is being digitised and is currently unavailable.")
+            )
+          )
+          itemStatus shouldBe ItemStatus.TemporarilyUnavailable
+        }
+
+        it("if doesn't double up the note about digitisation") {
+          val itemData = createSierraItemDataWith(
+            fixedFields = Map(
+              "79" -> FixedField(
+                label = "LOCATION",
+                value = "sgser",
+                display = "Closed stores journals"),
+              "88" -> FixedField(
+                label = "STATUS",
+                value = "r",
+                display = "Unavailable"),
+              "108" -> FixedField(
+                label = "OPACMSG",
+                value = "b",
+                display = "@ digitisation"),
+            ),
+            varFields = List(
+              VarField(
+                fieldTag = Some("n"),
+                content = Some("<p>This item is being digitised and is currently unavailable.")
+              )
+            )
+          )
+
+          val (ac, itemStatus) = SierraItemAccess(
+            id = itemId,
+            bibStatus = None,
+            location = Some(LocationType.ClosedStores),
+            itemData = itemData
+          )
+
+          ac shouldBe Some(
+            AccessCondition(
+              status = Some(AccessStatus.TemporarilyUnavailable),
+              terms = Some("This item is being digitised and is currently unavailable.")
             )
           )
           itemStatus shouldBe ItemStatus.TemporarilyUnavailable

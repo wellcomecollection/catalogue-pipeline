@@ -177,6 +177,12 @@ object SierraItemAccess extends SierraQueryOps with Logging {
               note = itemData.displayNote)),
           ItemStatus.Unavailable)
 
+      // Many items at digitisation have a note like
+      //
+      //    <p>This item is being digitised and is currently unavailable.
+      //
+      // It's not worth setting notes and a term separately for this, so we use the note
+      // unless it's not available.
       case (
           None,
           _,
@@ -184,12 +190,15 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           Some(OpacMsg.AtDigitisation),
           NotRequestable.ItemUnavailable(_),
           _) =>
+          val terms = itemData.displayNote match {
+            case Some(note) => Some(note.replace("<p>", ""))
+            case None       => Some("This item is being digitised and is currently unavailable.")
+          }
         (
           Some(
             AccessCondition(
               status = Some(AccessStatus.TemporarilyUnavailable),
-              terms = Some("At digitisation and temporarily unavailable"),
-              note = itemData.displayNote)),
+              terms = terms)),
           ItemStatus.TemporarilyUnavailable)
 
       // An item which is restricted can be requested online -- the user will have to fill in
