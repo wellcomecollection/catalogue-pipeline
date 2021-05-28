@@ -47,6 +47,34 @@ class SierraQueryOpsTest
 
         item.displayNote shouldBe Some("Part of: a special collection")
       }
+
+      it("removes any whitespace") {
+        val item = createSierraItemDataWith(
+          varFields = List(
+            VarField(
+              fieldTag = Some("n"),
+              content = Some(" Conserved (2016)")
+            )
+          )
+        )
+
+        item.displayNote shouldBe Some("Conserved (2016)")
+      }
+
+      it("removes a leading <p> tag") {
+        val item = createSierraItemDataWith(
+          varFields = List(
+            VarField(
+              fieldTag = Some("n"),
+              content = Some(
+                "<p>This item is being digitised and is currently unavailable.")
+            )
+          )
+        )
+
+        item.displayNote shouldBe Some(
+          "This item is being digitised and is currently unavailable.")
+      }
     }
   }
 
