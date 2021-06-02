@@ -176,9 +176,15 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
         .dynamic("false")
     )
 
+  val search = objectField("search").fields(
+    textField("relations").analyzer("with_slashes_text_analyzer"),
+    multilingualField("titlesAndContributors")
+  )
+
   val fields =
     Seq(
       state,
+      search,
       keywordField("type"),
       data.dynamic("false"),
       objectField("invisibilityReasons")

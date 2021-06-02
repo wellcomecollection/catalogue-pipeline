@@ -110,7 +110,8 @@ object ExternalDependencies {
   )
 
   val scribeJavaDependencies = Seq(
-    "com.github.dakatsuka" %% "akka-http-oauth2-client" % "0.2.0")
+    "com.github.dakatsuka" %% "akka-http-oauth2-client" % "0.2.0"
+  )
 
   val akkaHttpDependencies = Seq(
     "com.typesafe.akka" %% "akka-testkit" % versions.akka % "test",
@@ -133,7 +134,8 @@ object ExternalDependencies {
 
   val mockitoDependencies: Seq[ModuleID] = Seq(
     "org.mockito" % "mockito-core" % versions.mockito % "test",
-    "org.scalatestplus" %% versions.scalatestplusMockitoArtifactId % versions.scalatestplus % "test")
+    "org.scalatestplus" %% versions.scalatestplusMockitoArtifactId % versions.scalatestplus % "test"
+  )
 
   val wireMockDependencies = Seq(
     "com.github.tomakehurst" % "wiremock" % "2.25.1" % Test

@@ -1,16 +1,12 @@
 package uk.ac.wellcome.models.index
 
-import com.sksamuel.elastic4s.analysis.{
-  Analysis,
-  CustomAnalyzer,
-  CustomNormalizer,
-  PathHierarchyTokenizer,
-  ShingleTokenFilter,
-  StemmerTokenFilter
-}
+import com.sksamuel.elastic4s.analysis._
 
 object WorksAnalysis {
-  // Analysis
+  // This analyzer "keeps" the slash, by turning it into
+  // `__` which isn't removed by the standard tokenizer
+  val withSlashesCharFilter =
+    MappingCharFilter("with_slashes_char_filter", mappings = Map("/" -> " __"))
   val pathTokenizer = PathHierarchyTokenizer("path_hierarchy_tokenizer")
 
   val pathAnalyzer =
@@ -51,7 +47,8 @@ object WorksAnalysis {
           name
         ),
         charFilters = Nil
-      ))
+      )
+    )
   })
 
   val asciifoldingAnalyzer = CustomAnalyzer(
@@ -87,6 +84,14 @@ object WorksAnalysis {
     charFilters = Nil
   )
 
+  val withSlashesTextAnalyzer =
+    CustomAnalyzer(
+      "with_slashes_text_analyzer",
+      tokenizer = "standard",
+      charFilters = List(withSlashesCharFilter.name),
+      tokenFilters = List("lowercase", asciiFoldingTokenFilter.name)
+    )
+
   val lowercaseNormalizer = CustomNormalizer(
     "lowercase_normalizer",
     tokenFilters = List("lowercase"),
@@ -100,17 +105,18 @@ object WorksAnalysis {
         asciifoldingAnalyzer,
         shingleAsciifoldingAnalyzer,
         englishAnalyzer,
-        whitespaceAnalyzer
+        whitespaceAnalyzer,
+        withSlashesTextAnalyzer
       ) ++ languageFiltersAndAnalyzers.map(_._2),
       tokenFilters = List(
         asciiFoldingTokenFilter,
         shingleTokenFilter,
         englishStemmerTokenFilter,
-        englishPossessiveStemmerTokenFilter,
+        englishPossessiveStemmerTokenFilter
       ) ++ languageFiltersAndAnalyzers.map(_._1),
       tokenizers = List(pathTokenizer),
-      normalizers = List(lowercaseNormalizer)
+      normalizers = List(lowercaseNormalizer),
+      charFilters = List(withSlashesCharFilter)
     )
-
   }
 }

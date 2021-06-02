@@ -36,6 +36,17 @@
           "type" : "custom",
           "tokenizer" : "whitespace"
         },
+        "with_slashes_text_analyzer": {
+          "type": "custom",
+          "tokenizer" : "standard",
+          "char_filter": [
+            "with_slashes_char_filter"
+          ],
+          "filter": [
+            "lowercase",
+            "asciifolding_token_filter"
+          ]
+        },
         "arabic_analyzer" : {
           "type" : "custom",
           "tokenizer" : "standard",
@@ -141,6 +152,12 @@
         "italian_token_filter" : {
           "type" : "stemmer",
           "name" : "italian"
+        }
+      },
+      "char_filter": {
+        "with_slashes_char_filter" : {
+          "type" : "mapping",
+          "mappings" : ["/=> __"]
         }
       }
     }

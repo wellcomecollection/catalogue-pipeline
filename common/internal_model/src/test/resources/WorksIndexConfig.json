@@ -36,6 +36,17 @@
           "type" : "custom",
           "tokenizer" : "whitespace"
         },
+        "with_slashes_text_analyzer": {
+          "type": "custom",
+          "tokenizer" : "standard",
+          "char_filter": [
+            "with_slashes_char_filter"
+          ],
+          "filter": [
+            "lowercase",
+            "asciifolding_token_filter"
+          ]
+        },
         "arabic_analyzer" : {
           "type" : "custom",
           "tokenizer" : "standard",
@@ -142,12 +153,64 @@
           "type" : "stemmer",
           "name" : "italian"
         }
+      },
+      "char_filter": {
+        "with_slashes_char_filter" : {
+          "type" : "mapping",
+          "mappings" : ["/=> __"]
+        }
       }
     }
   },
   "mappings" : {
     "dynamic" : "strict",
     "properties" : {
+      "search": {
+        "type": "object",
+        "properties": {
+          "relations": {
+            "type": "text",
+            "analyzer": "with_slashes_text_analyzer"
+          },
+          "titlesAndContributors": {
+            "type": "text",
+            "fields": {
+              "arabic" : {
+                "type" : "text",
+                "analyzer" : "arabic_analyzer"
+              },
+              "bengali" : {
+                "type" : "text",
+                "analyzer" : "bengali_analyzer"
+              },
+              "english": {
+                "analyzer": "english_analyzer",
+                "type": "text"
+              },
+              "french" : {
+                "type" : "text",
+                "analyzer" : "french_analyzer"
+              },
+              "german" : {
+                "type" : "text",
+                "analyzer" : "german_analyzer"
+              },
+              "hindi" : {
+                "type" : "text",
+                "analyzer" : "hindi_analyzer"
+              },
+              "italian" : {
+                "type" : "text",
+                "analyzer" : "italian_analyzer"
+              },
+              "shingles" : {
+                "type" : "text",
+                "analyzer" : "shingle_asciifolding_analyzer"
+              }
+            }
+          }
+        }
+      },
       "state" : {
         "type" : "object",
         "properties" : {
