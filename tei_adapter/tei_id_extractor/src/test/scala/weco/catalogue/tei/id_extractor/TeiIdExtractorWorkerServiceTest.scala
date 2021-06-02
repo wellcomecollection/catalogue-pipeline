@@ -13,6 +13,7 @@ import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.memory.MemoryStore
 import weco.catalogue.tei.id_extractor.fixtures.Wiremock
+import com.github.tomakehurst.wiremock.client.WireMock
 
 import java.nio.charset.StandardCharsets
 import java.time.ZonedDateTime
@@ -57,7 +58,38 @@ class TeiIdExtractorWorkerServiceTest extends AnyFunSpec with Wiremock with SQS 
 }
 
   it("a message for a non TEI file is ignored"){
-    fail()
+    withWiremock("localhost"){ port =>
+      val repoUrl = s"http://localhost:$port"
+      val modifiedTime = "2021-05-27T14:05:00Z"
+      val message = {
+        s"""
+        {
+          "path": "Arabic/README.md",
+          "uri": "$repoUrl/git/blobs/4bfe74311d86293447f173108190a4b4664d68ea",
+          "timeModified": "$modifiedTime"
+        }""".stripMargin
+      }
+      withLocalSqsQueuePair() { case QueuePair(queue, dlq) =>
+        sendNotificationToSQS(queue, message)
+        withActorSystem { implicit ac =>
+          implicit val ec = ac.dispatcher
+          withSQSStream(queue) { stream: SQSStream[NotificationMessage] =>
+            val messageSender = new MemoryMessageSender()
+            val gitHubBlobReader = new GitHubBlobReader()
+            val store = new MemoryStore[S3ObjectLocation, String](Map())
+            val service = new TeiIdExtractorWorkerService(messageStream = stream, messageSender = messageSender, gitHubBlobReader= gitHubBlobReader,idExtractor = new IdExtractor, store = store, concurrentFiles = 10, bucket = "bucket")
+            service.run()
+            Thread.sleep(200)
+            eventually{
+              WireMock.verify(WireMock.exactly(0), WireMock.getRequestedFor(WireMock.urlEqualTo("/git/blobs/4bfe74311d86293447f173108190a4b4664d68ea")))
+              store.entries.keySet shouldBe empty
+
+              messageSender.getMessages[TeiIdChangeMessage]() shouldBe empty
+              assertQueueEmpty(queue)
+              assertQueueEmpty(dlq)
+            }
+          }}}
+    }
   }
 
   it("handles file deleted messages"){

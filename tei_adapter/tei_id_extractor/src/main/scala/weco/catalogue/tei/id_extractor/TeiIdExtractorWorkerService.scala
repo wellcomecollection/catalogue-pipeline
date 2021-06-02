@@ -25,16 +25,31 @@ class TeiIdExtractorWorkerService[Dest](messageStream: SQSStream[NotificationMes
                                         messageSender: MessageSender[Dest], concurrentFiles: Int, bucket: String)(implicit val ec: ExecutionContext)
     extends Runnable with FlowOps{
   val className = this.getClass.getSimpleName
+  val teiDirectories = List("Arabic", "Batak", "Egyptian", "Greek", "Hebrew", "Indic", "Javanese", "Malay")
 
   override def run(): Future[Any] = {
     messageStream.runStream(className,source =>
       source.via(unwrapMessage)
-        .via(processMessage)
+        .via(broadcastAndMerge(filterNonTei, processMessage))
         .map { case (Context(msg), _) => msg })
   }
 
+  def unwrapMessage =
+    Flow[(SQSMessage, NotificationMessage)]
+      .map {
+        case (msg, NotificationMessage(body)) =>
+          (Context(msg), fromJson[TeiFileChangedMessage](body).toEither)
+      }
+      .via(catchErrors)
+
+  def filterNonTei = Flow[(Context, TeiFileChangedMessage)].filter{
+    case (_, TeiFileChangedMessage(path, _, _)) => !isTeiFile(path)
+  }
+
   def processMessage =
-    Flow[(Context, TeiFileChangedMessage)]
+    Flow[(Context, TeiFileChangedMessage)].filter{
+      case (_, TeiFileChangedMessage(path, _, _)) => isTeiFile(path)
+    }
       .mapAsync(concurrentFiles) {
         case (ctx, message) => for{
           blobContent <- gitHubBlobReader.getBlob(message.uri)
@@ -45,13 +60,10 @@ class TeiIdExtractorWorkerService[Dest](messageStream: SQSStream[NotificationMes
       }
       .via(catchErrors)
 
-  def unwrapMessage =
-    Flow[(SQSMessage, NotificationMessage)]
-      .map {
-        case (msg, NotificationMessage(body)) =>
-          (Context(msg), fromJson[TeiFileChangedMessage](body).toEither)
-      }
-      .via(catchErrors)
+
+  private def isTeiFile(path: String) = {
+    teiDirectories.exists(dir => path.startsWith(dir)) && path.endsWith(".xml")
+  }
 
   /** Encapsulates context to pass along each akka-stream stage. Newer versions
     * of akka-streams have the asSourceWithContext/ asFlowWithContext idioms for
