@@ -849,9 +849,6 @@
       "version" : {
         "type" : "integer"
       }
-    },
-    "_meta" : {
-      "model.versions.0" : "b60a01f8d3d8e30a301952463e3922f2e02b8914"
     }
   }
 }
