@@ -41,7 +41,7 @@ class TeiIdExtractorWorkerServiceTest extends AnyFunSpec with Wiremock with SQS 
             val messageSender = new MemoryMessageSender()
               val gitHubBlobReader = new GitHubBlobReader()
               val store = new MemoryStore[S3ObjectLocation, String](Map())
-            val service = new TeiIdExtractorWorkerService(messageStream = stream, messageSender = messageSender, gitHubBlobReader= gitHubBlobReader,idExtractor = new IdExtractor, store = store, concurrentFiles = 10, bucket = bucket)
+            val service = new TeiIdExtractorWorkerService(messageStream = stream, messageSender = messageSender, gitHubBlobReader= gitHubBlobReader,idExtractor = new IdExtractor, store = store, config = TeiIdExtractorConfig(concurrentFiles = 10, bucket = bucket))
             service.run()
 
             eventually{
@@ -77,7 +77,7 @@ class TeiIdExtractorWorkerServiceTest extends AnyFunSpec with Wiremock with SQS 
             val messageSender = new MemoryMessageSender()
             val gitHubBlobReader = new GitHubBlobReader()
             val store = new MemoryStore[S3ObjectLocation, String](Map())
-            val service = new TeiIdExtractorWorkerService(messageStream = stream, messageSender = messageSender, gitHubBlobReader= gitHubBlobReader,idExtractor = new IdExtractor, store = store, concurrentFiles = 10, bucket = "bucket")
+            val service = new TeiIdExtractorWorkerService(messageStream = stream, messageSender = messageSender, gitHubBlobReader= gitHubBlobReader,idExtractor = new IdExtractor, store = store, config = TeiIdExtractorConfig(concurrentFiles = 10, bucket = "bucket"))
             service.run()
             Thread.sleep(200)
             eventually{
