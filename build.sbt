@@ -61,7 +61,7 @@ lazy val source_model_typesafe = setupProject(
 lazy val pipeline_storage = setupProject(
   project,
   "common/pipeline_storage",
-  localDependencies = Seq(internal_model),
+  localDependencies = Seq(internal_model, flows),
   externalDependencies = CatalogueDependencies.pipelineStorageDependencies
 )
 

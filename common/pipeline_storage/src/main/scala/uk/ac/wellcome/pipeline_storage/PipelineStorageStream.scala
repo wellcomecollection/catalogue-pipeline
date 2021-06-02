@@ -12,6 +12,7 @@ import software.amazon.awssdk.services.sqs.model.Message
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
+import weco.flows.FlowOps
 
 case class PipelineStorageConfig(batchSize: Int,
                                  flushInterval: FiniteDuration,
@@ -24,7 +25,7 @@ class PipelineStorageStream[In, Out, MsgDestination](
   indexer: Indexer[Out],
   messageSender: MessageSender[MsgDestination])(
   val config: PipelineStorageConfig)(implicit ec: ExecutionContext)
-    extends Logging {
+    extends Logging with FlowOps {
 
   import PipelineStorageStream._
 
@@ -195,18 +196,6 @@ object PipelineStorageStream extends Logging {
     Flow[(Message, List[Out])]
       .collect { case (message, Nil) => message }
 
-  def broadcastAndMerge[I, O](a: Flow[I, O, NotUsed],
-                              b: Flow[I, O, NotUsed]): Flow[I, O, NotUsed] =
-    Flow.fromGraph(
-      GraphDSL.create() { implicit builder =>
-        import GraphDSL.Implicits._
-        val broadcast = builder.add(Broadcast[I](2))
-        val merge = builder.add(Merge[O](2))
-        broadcast ~> a ~> merge
-        broadcast ~> b ~> merge
-        FlowShape(broadcast.in, merge.out)
-      }
-    )
 
   private def unzipBundles[T](
     bundles: Seq[Bundle[T]]): (List[Message], List[T]) =
