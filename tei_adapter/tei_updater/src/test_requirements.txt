@@ -64,7 +64,7 @@ six==1.16.0
     #   moto
     #   python-dateutil
     #   responses
-urllib3==1.26.4
+urllib3==1.26.5
     # via
     #   botocore
     #   requests
