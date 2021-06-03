@@ -1,0 +1,110 @@
+package weco.catalogue.tei.id_extractor.fixtures
+
+import org.scalatest.Assertion
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import uk.ac.wellcome.fixtures.TestWith
+import scalikejdbc._
+import weco.catalogue.tei.id_extractor.{FieldDescription, PathIdTableConfig, RDSClientConfig}
+
+trait PathIdDatabase
+    extends Eventually
+    with IntegrationPatience
+    with Matchers
+    with TableNameGenerators {
+
+  val host = "localhost"
+  val port = 3307
+  val username = "root"
+  val password = "password"
+  val maxSize = 8
+
+  def eventuallyTableExists(tableConfig: PathIdTableConfig): Assertion =
+    eventually {
+      val database: SQLSyntax = SQLSyntax.createUnsafely(tableConfig.database)
+      val table: SQLSyntax = SQLSyntax.createUnsafely(tableConfig.tableName)
+
+      val fields = NamedDB('primary) readOnly { implicit session =>
+        sql"DESCRIBE $database.$table"
+          .map(
+            rs =>
+              FieldDescription(
+                rs.string("Field"),
+                rs.string("Type"),
+                rs.string("Null"),
+                rs.string("Key")))
+          .list()
+          .apply()
+      }
+
+      fields.sortBy(_.field) shouldBe Seq(
+        FieldDescription(
+          field = "id",
+          dataType = "varchar(255)",
+          nullable = "NO",
+          key = "UNI"),
+        FieldDescription(
+          field = "path",
+          dataType = "varchar(255)",
+          nullable = "NO",
+          key = "PRI"),
+        FieldDescription(
+          field = "timeModified",
+          dataType = "datetime",
+          nullable = "NO",
+          key = "")
+      ).sortBy(_.field)
+    }
+
+  val rdsClientConfig = RDSClientConfig(
+    primaryHost = host,
+    replicaHost = host,
+    port = port,
+    username = username,
+    password = password
+  )
+
+  def withPathIdTable[R](
+    testWith: TestWith[PathIdTableConfig, R]): R = {
+    ConnectionPool.add(
+      'primary,
+      s"jdbc:mysql://$host:$port",
+      username,
+      password,
+      settings = ConnectionPoolSettings(maxSize = maxSize)
+    )
+    ConnectionPool.add(
+      'replica,
+      s"jdbc:mysql://$host:$port",
+      username,
+      password,
+      settings = ConnectionPoolSettings(maxSize = maxSize)
+    )
+
+    implicit val session = NamedAutoSession('primary)
+
+    val databaseName: String = createDatabaseName
+    val tableName: String = createTableName
+
+    val pathIdDatabase: SQLSyntax = SQLSyntax.createUnsafely(databaseName)
+
+    val pathIdTableConfig = PathIdTableConfig(
+      database = databaseName,
+      tableName = tableName
+    )
+
+    try {
+      sql"CREATE DATABASE $pathIdDatabase".execute().apply()
+
+      testWith(pathIdTableConfig)
+    } finally {
+      NamedDB('primary) localTx { implicit session =>
+        sql"DROP DATABASE IF EXISTS $pathIdDatabase".execute().apply()
+      }
+
+      session.close()
+    }
+
+  }
+
+}
