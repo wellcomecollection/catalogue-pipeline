@@ -4,6 +4,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.locations.{
   AccessCondition,
+  AccessMethod,
   AccessStatus,
   LocationType,
   PhysicalLocation
@@ -59,7 +60,7 @@ class SierraLocationTest
       val expectedLocation = PhysicalLocation(
         locationType = LocationType.ClosedStores,
         label = LocationType.ClosedStores.label,
-        accessConditions = List(AccessCondition(terms = Some("Online request")))
+        accessConditions = List(AccessCondition(method = Some(AccessMethod.OnlineRequest)))
       )
 
       transformer.getPhysicalLocation(bibId, itemId, itemData, bibData) shouldBe Some(
@@ -136,8 +137,8 @@ class SierraLocationTest
         transformer.getPhysicalLocation(bibId, itemId, itemData, bibData).get
       location.accessConditions shouldBe List(
         AccessCondition(
-          status = Some(AccessStatus.Open),
-          terms = Some("Online request"))
+          method = Some(AccessMethod.OnlineRequest),
+          status = Some(AccessStatus.Open))
       )
     }
 
