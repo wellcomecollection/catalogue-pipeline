@@ -1,13 +1,14 @@
 package weco.catalogue.internal_model.locations
 
 case class AccessCondition(
+  method: Option[AccessMethod] = None,
   status: Option[AccessStatus] = None,
   terms: Option[String] = None,
   to: Option[String] = None,
   note: Option[String] = None
 ) {
   def isEmpty: Boolean =
-    this == AccessCondition(None, None, None)
+    this == AccessCondition()
 
   def isAvailable: Boolean = status.exists(_.isAvailable)
 
