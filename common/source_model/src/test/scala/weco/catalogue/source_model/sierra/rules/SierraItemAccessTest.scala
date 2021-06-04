@@ -379,9 +379,9 @@ class SierraItemAccessTest
             ),
             varFields = List(
               VarField(
-                fieldTag = Some("n"),
-                content = Some(
-                  "<p>This item is being digitised and is currently unavailable.")
+                fieldTag = "n",
+                content =
+                  "<p>This item is being digitised and is currently unavailable."
               )
             )
           )
@@ -690,9 +690,9 @@ class SierraItemAccessTest
           ),
           varFields = List(
             VarField(
-              fieldTag = Some("n"),
-              content = Some(
-                "Shelved at the end of the Quick Ref. section with the oversize Quick Ref. books.")
+              fieldTag = "n",
+              content =
+                "Shelved at the end of the Quick Ref. section with the oversize Quick Ref. books."
             )
           )
         )
@@ -772,9 +772,9 @@ class SierraItemAccessTest
       ),
       varFields = List(
         VarField(
-          fieldTag = Some("n"),
-          content = Some(
-            "Email library@wellcomecollection.org to tell us why you need the physical copy. We'll reply within a week.")
+          fieldTag = "n",
+          content =
+            "Email library@wellcomecollection.org to tell us why you need the physical copy. We'll reply within a week."
         )
       )
     )

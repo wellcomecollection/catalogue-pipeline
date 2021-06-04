@@ -26,7 +26,7 @@ class SierraQueryOpsTest
       it("finds the content from a single field tag n") {
         val item = createSierraItemDataWith(
           varFields = List(
-            VarField(fieldTag = Some("n"), content = Some("Offsite"))
+            VarField(fieldTag = "n", content = "Offsite")
           )
         )
 
@@ -52,8 +52,8 @@ class SierraQueryOpsTest
         val item = createSierraItemDataWith(
           varFields = List(
             VarField(
-              fieldTag = Some("n"),
-              content = Some(" Conserved (2016)")
+              fieldTag = "n",
+              content = " Conserved (2016)"
             )
           )
         )
@@ -65,9 +65,9 @@ class SierraQueryOpsTest
         val item = createSierraItemDataWith(
           varFields = List(
             VarField(
-              fieldTag = Some("n"),
-              content = Some(
-                "<p>This item is being digitised and is currently unavailable.")
+              fieldTag = "n",
+              content =
+                "<p>This item is being digitised and is currently unavailable."
             )
           )
         )

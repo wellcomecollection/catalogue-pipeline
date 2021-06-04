@@ -39,12 +39,12 @@ class SierraHoldingsTest
       // This example is based on b1017055 / h1068096
       val varFields = List(
         VarField(
-          content = Some("00000ny   22000003n 4500"),
-          fieldTag = Some("_")
+          content = "00000ny   22000003n 4500",
+          fieldTag = "_"
         ),
         VarField(
-          content = Some("HighWire - Free Full Text"),
-          fieldTag = Some("p")
+          content = "HighWire - Free Full Text",
+          fieldTag = "p"
         )
       )
 
