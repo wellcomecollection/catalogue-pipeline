@@ -60,7 +60,8 @@ class SierraLocationTest
       val expectedLocation = PhysicalLocation(
         locationType = LocationType.ClosedStores,
         label = LocationType.ClosedStores.label,
-        accessConditions = List(AccessCondition(method = Some(AccessMethod.OnlineRequest)))
+        accessConditions =
+          List(AccessCondition(method = Some(AccessMethod.OnlineRequest)))
       )
 
       transformer.getPhysicalLocation(bibId, itemId, itemData, bibData) shouldBe Some(
