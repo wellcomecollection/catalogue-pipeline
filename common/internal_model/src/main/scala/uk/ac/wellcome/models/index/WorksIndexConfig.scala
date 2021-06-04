@@ -95,7 +95,7 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
       englishTextKeywordField("physicalDescription"),
       multilingualField("lettering"),
       objectField("contributors").fields(
-        objectField("agent").fields(label).copyTo(titlesAndContributorsPath)
+        objectField("agent").fields(label.copyTo(titlesAndContributorsPath))
       ),
       objectField("subjects").fields(
         label,

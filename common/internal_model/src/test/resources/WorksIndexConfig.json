@@ -539,11 +539,11 @@
             "properties" : {
               "agent" : {
                 "type" : "object",
-                "copy_to" : [
-                  "search.titlesAndContributors"
-                ],
                 "properties" : {
                   "label" : {
+                    "copy_to" : [
+                      "search.titlesAndContributors"
+                    ],
                     "type" : "text",
                     "analyzer" : "asciifolding_analyzer",
                     "fields" : {
