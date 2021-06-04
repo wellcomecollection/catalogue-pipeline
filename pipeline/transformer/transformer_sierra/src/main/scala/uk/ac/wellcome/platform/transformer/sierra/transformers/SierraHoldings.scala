@@ -2,7 +2,13 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import com.github.tototoshi.csv.CSVReader
 import weco.catalogue.internal_model.locations.LocationType.ClosedStores
-import weco.catalogue.internal_model.locations.PhysicalLocation
+import weco.catalogue.internal_model.locations.{
+  AccessCondition,
+  AccessStatus,
+  DigitalLocation,
+  LocationType,
+  PhysicalLocation
+}
 import weco.catalogue.internal_model.work.{Holdings, Item}
 import weco.catalogue.source_model.sierra.marc.FixedField
 import weco.catalogue.source_model.sierra.rules.SierraPhysicalLocationType
@@ -77,7 +83,7 @@ object SierraHoldings extends SierraQueryOps {
     //
     // Since we also don't identify the Holdings objects we create, we may end up
     // with duplicates in the transformer output.  This isn't useful, so remove them.
-    (digitalHoldings ++ physicalHoldings).distinct
+    (deduplicateDigitalHoldings(digitalHoldings) ++ physicalHoldings).distinct
   }
 
   private def createPhysicalHoldings(
@@ -178,4 +184,91 @@ object SierraHoldings extends SierraQueryOps {
         shelfmark = shelfmark
       )
     } yield location
+
+  // Sometimes the same URL will appear in multiple holdings records, with
+  // different fields populated in each record.
+  //
+  // This affects ~1600 URLs.  We could fix this in the source data, but:
+  //
+  //    - that's a lot of records to fix by hand, and there are other data
+  //      quality issues that need more attention
+  //    - a lot of the holdings records are automatically ingested from
+  //      publishers, and thus tricky to change
+  //
+  private def deduplicateDigitalHoldings(holdings: List[Holdings]): List[Holdings] = {
+
+    // These should all be holdings with digital locations; extracting this
+    // information is so the compiler knows this further down.
+    val locations =
+      holdings.collect {
+        case h @ Holdings(_, _, Some(location: DigitalLocation)) =>
+          (h, location)
+      }
+
+    require(locations.size == holdings.size)
+
+    // For each URL, we look at all the associated holdings and combine the holdings
+    // if all the information is compatible.
+    //
+    // For this check, two values are considered compatible if:
+    //
+    //    - they are equal (e.g. Some("Connect to the database") and Some("Connect to the database"))
+    //    - one is defined and the other is empty (e.g. Some("Connect to the database") and None)
+    //
+    val distinctUrls = locations
+      .map { case (_, location) => location.url }
+      .distinct
+
+    distinctUrls.flatMap { url =>
+      val matchingHoldings = locations.filter { case (_, location) => location.url == url }
+
+      val notes = matchingHoldings
+        .map { case (h, _) => h.note }
+        .distinct
+        .flatten
+
+      val enumerations = matchingHoldings
+        .map { case (h, _) => h.enumeration }
+        .distinct
+
+      val linkTexts = matchingHoldings
+        .map { case (_, loc) => loc.linkText }
+        .distinct
+        .flatten
+
+      val uniqueNote = notes match {
+        case Seq(n) => Right(Some(n))
+        case Nil    => Right(None)
+        case _      => Left(None)
+      }
+
+      val uniqueLinkText = linkTexts match {
+        case Seq(text) => Right(Some(text))
+        case Nil       => Right(None)
+        case _         => Left(None)
+      }
+
+      (uniqueNote, enumerations, uniqueLinkText) match {
+        case (Right(note), Seq(uniqueEnumerations), Right(linkText)) =>
+          List(
+            Holdings(
+              note = note,
+              enumeration = uniqueEnumerations,
+              location = Some(
+                DigitalLocation(
+                  url = url,
+                  locationType = LocationType.OnlineResource,
+                  linkText = linkText,
+                  accessConditions = List(
+                    AccessCondition(status = AccessStatus.LicensedResources)
+                  )
+                )
+              )
+            )
+          )
+
+        case _ => matchingHoldings.map { case (h, _) => h }
+      }
+    }
+  }
 }
