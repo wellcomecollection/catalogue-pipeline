@@ -273,7 +273,10 @@ class SierraHoldingsTest
             marcTag = Some("856"),
             subfields = List(
               MarcSubfield(tag = "u", content = "http://example.org/journal"),
-              MarcSubfield(tag = "z", content = "Connect to 17th-18th Century Burney Collection newspapers")
+              MarcSubfield(
+                tag = "z",
+                content =
+                  "Connect to 17th-18th Century Burney Collection newspapers")
             )
           )
         )
@@ -306,7 +309,10 @@ class SierraHoldingsTest
             marcTag = Some("856"),
             subfields = List(
               MarcSubfield(tag = "u", content = "http://example.org/journal"),
-              MarcSubfield(tag = "z", content = "Universal London Price Current -- Seventeenth and Eighteenth Century Burney Newspapers Collection")
+              MarcSubfield(
+                tag = "z",
+                content =
+                  "Universal London Price Current -- Seventeenth and Eighteenth Century Burney Newspapers Collection")
             )
           )
         )
@@ -321,14 +327,17 @@ class SierraHoldingsTest
 
       holdings shouldBe List(
         Holdings(
-          note = Some("Universal London Price Current -- Seventeenth and Eighteenth Century Burney Newspapers Collection"),
+          note = Some(
+            "Universal London Price Current -- Seventeenth and Eighteenth Century Burney Newspapers Collection"),
           enumeration = List("1 Jan. 1787 - 31 Dec. 1789"),
           location = Some(
             DigitalLocation(
               url = "http://example.org/journal",
-              linkText = Some("Connect to 17th-18th Century Burney Collection newspapers"),
+              linkText = Some(
+                "Connect to 17th-18th Century Burney Collection newspapers"),
               locationType = LocationType.OnlineResource,
-              accessConditions = List(AccessCondition(status = AccessStatus.LicensedResources))
+              accessConditions =
+                List(AccessCondition(status = AccessStatus.LicensedResources))
             )
           )
         )

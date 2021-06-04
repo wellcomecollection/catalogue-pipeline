@@ -195,7 +195,8 @@ object SierraHoldings extends SierraQueryOps {
   //    - a lot of the holdings records are automatically ingested from
   //      publishers, and thus tricky to change
   //
-  private def deduplicateDigitalHoldings(holdings: List[Holdings]): List[Holdings] = {
+  private def deduplicateDigitalHoldings(
+    holdings: List[Holdings]): List[Holdings] = {
 
     // These should all be holdings with digital locations; extracting this
     // information is so the compiler knows this further down.
@@ -215,21 +216,19 @@ object SierraHoldings extends SierraQueryOps {
     //    - they are equal (e.g. Some("Connect to the database") and Some("Connect to the database"))
     //    - one is defined and the other is empty (e.g. Some("Connect to the database") and None)
     //
-    val distinctUrls = locations
-      .map { case (_, location) => location.url }
-      .distinct
+    val distinctUrls = locations.map { case (_, location) => location.url }.distinct
 
     distinctUrls.flatMap { url =>
-      val matchingHoldings = locations.filter { case (_, location) => location.url == url }
+      val matchingHoldings = locations.filter {
+        case (_, location) => location.url == url
+      }
 
       val notes = matchingHoldings
         .map { case (h, _) => h.note }
         .distinct
         .flatten
 
-      val enumerations = matchingHoldings
-        .map { case (h, _) => h.enumeration }
-        .distinct
+      val enumerations = matchingHoldings.map { case (h, _) => h.enumeration }.distinct
 
       val linkTexts = matchingHoldings
         .map { case (_, loc) => loc.linkText }
