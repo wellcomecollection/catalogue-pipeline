@@ -44,10 +44,13 @@ object SierraShelfmark extends SierraQueryOps {
         //
         // We used to use the callNumber field on Sierra item records, but this
         // draws from some MARC fields that we don't want (including 999).
+        //
+        // Field tag c is for "call number" data.  In particular, we don't want
+        // to expose field tag a, which has legacy data we don't want to display.
+        // See https://wellcome.slack.com/archives/CGXDT2GSH/p1622719935015500?thread_ts=1622719185.015400&cid=CGXDT2GSH
         itemData.varFields
-          .filter { vf =>
-            vf.marcTag.contains("949")
-          }
+          .filter { _.marcTag.contains("949") }
+          .filter { _.fieldTag.contains("c") }
           .subfieldsWithTags("a")
           .headOption
           .map { _.content.trim }

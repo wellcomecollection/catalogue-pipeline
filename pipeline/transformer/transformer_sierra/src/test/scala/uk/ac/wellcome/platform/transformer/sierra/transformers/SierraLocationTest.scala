@@ -145,8 +145,9 @@ class SierraLocationTest
       val itemData: SierraItemData = createSierraItemDataWith(
         location = Some(SierraSourceLocation("info", "Open shelves")),
         varFields = List(
-          createVarFieldWith(
-            marcTag = "949",
+          VarField(
+            marcTag = Some("949"),
+            fieldTag = Some("c"),
             subfields = List(
               MarcSubfield(tag = "a", content = "AX1234:Box 1")
             )
