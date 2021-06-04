@@ -45,7 +45,8 @@ class SierraItemAccessTest
             itemData = itemData
           )
 
-          ac shouldBe Some(AccessCondition(method = Some(AccessMethod.OnlineRequest)))
+          ac shouldBe Some(
+            AccessCondition(method = Some(AccessMethod.OnlineRequest)))
           itemStatus shouldBe ItemStatus.Available
         }
 
@@ -176,7 +177,8 @@ class SierraItemAccessTest
             itemData = itemData
           )
 
-          ac shouldBe Some(AccessCondition(method = Some(AccessMethod.ManualRequest)))
+          ac shouldBe Some(
+            AccessCondition(method = Some(AccessMethod.ManualRequest)))
           itemStatus shouldBe ItemStatus.Available
         }
 
