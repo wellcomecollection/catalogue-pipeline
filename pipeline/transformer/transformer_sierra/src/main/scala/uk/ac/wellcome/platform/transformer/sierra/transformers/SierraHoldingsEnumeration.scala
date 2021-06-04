@@ -97,6 +97,7 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
           createString(id, label, value) + " " + publicNote
       }
       .map { _.trim }
+      .distinct
   }
 
   private def createString(id: TypedSierraRecordNumber,
