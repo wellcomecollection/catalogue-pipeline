@@ -24,10 +24,11 @@ class SierraShelfmarkTest
     getShelfmark(itemData = itemData) shouldBe None
   }
 
-  it("uses the contents of field 949 subfield ǂa") {
+  it("uses the contents of field 949 field tag c subfield ǂa") {
     val varFields = List(
-      createVarFieldWith(
-        marcTag = "949",
+      VarField(
+        marcTag = Some("949"),
+        fieldTag = Some("c"),
         subfields = List(
           MarcSubfield(tag = "a", content = "S7956")
         )
@@ -41,8 +42,9 @@ class SierraShelfmarkTest
 
   it("strips whitespace from shelfmarks") {
     val varFields = List(
-      createVarFieldWith(
-        marcTag = "949",
+      VarField(
+        marcTag = Some("949"),
+        fieldTag = Some("c"),
         subfields = List(
           MarcSubfield(tag = "a", content = "/LEATHER            ")
         )
@@ -56,8 +58,9 @@ class SierraShelfmarkTest
 
   it("suppresses shelfmarks for Archives & Manuscripts") {
     val varFields = List(
-      createVarFieldWith(
-        marcTag = "949",
+      VarField(
+        marcTag = Some("949"),
+        fieldTag = Some("c"),
         subfields = List(
           MarcSubfield(tag = "a", content = "PP/BOW/P.1.2.3/10:Box 123,1")
         )
@@ -77,10 +80,27 @@ class SierraShelfmarkTest
 
   it("ignores any other 949 subfields") {
     val varFields = List(
-      createVarFieldWith(
-        marcTag = "949",
+      VarField(
+        marcTag = Some("949"),
+        fieldTag = Some("c"),
         subfields = List(
           MarcSubfield(tag = "d", content = "X42461")
+        )
+      )
+    )
+
+    val itemData = createSierraItemDataWith(varFields = varFields)
+
+    getShelfmark(itemData = itemData) shouldBe None
+  }
+
+  it("ignores any instances of 949 with a different field tag") {
+    val varFields = List(
+      VarField(
+        marcTag = Some("949"),
+        fieldTag = Some("a"),
+        subfields = List(
+          MarcSubfield(tag = "a", content = "X42461")
         )
       )
     )
@@ -100,8 +120,9 @@ class SierraShelfmarkTest
       )
 
       val varFields = List(
-        createVarFieldWith(
-          marcTag = "949",
+        VarField(
+          marcTag = Some("949"),
+          fieldTag = Some("c"),
           subfields = List(
             MarcSubfield(tag = "a", content = "S7956")
           )
