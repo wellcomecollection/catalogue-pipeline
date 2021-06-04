@@ -49,3 +49,8 @@ variable "log_retention_in_days" {
   default     = 7
   type        = number
 }
+
+variable "runtime" {
+  default = "python3.6"
+  type    = string
+}
