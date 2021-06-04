@@ -3,6 +3,7 @@ package weco.catalogue.source_model.sierra.rules
 import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.locations.{
   AccessCondition,
+  AccessMethod,
   AccessStatus,
   ItemStatus,
   LocationType,
@@ -54,8 +55,8 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           Some(LocationType.ClosedStores))
           if bibStatus.isEmpty || bibStatus.contains(AccessStatus.Open) =>
         val ac = createAccessCondition(
+          method = Some(AccessMethod.OnlineRequest),
           status = bibStatus,
-          terms = Some("Online request"),
           note = itemData.displayNote
         )
 
@@ -86,8 +87,8 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           Requestable,
           Some(LocationType.ClosedStores)) =>
         val ac = createAccessCondition(
+          method = Some(AccessMethod.OnlineRequest),
           status = Some(AccessStatus.Open),
-          terms = Some("Online request"),
           note = itemData.displayNote
         )
 
@@ -124,6 +125,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
         (
           Some(
             createAccessCondition(
+              method = Some(AccessMethod.NotRequestable),
               terms = Some(message),
               note = itemData.displayNote)),
           ItemStatus.Unavailable)
@@ -141,7 +143,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
         (
           Some(
             createAccessCondition(
-              terms = Some("Manual request"),
+              method = Some(AccessMethod.ManualRequest),
               note = itemData.displayNote)),
           ItemStatus.Available)
 
@@ -212,8 +214,8 @@ object SierraItemAccess extends SierraQueryOps with Logging {
         (
           Some(
             createAccessCondition(
+              method = Some(AccessMethod.OnlineRequest),
               status = Some(AccessStatus.Restricted),
-              terms = Some("Online request"),
               note = itemData.displayNote)),
           ItemStatus.Available)
 
@@ -358,6 +360,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
   }
 
   private def createAccessCondition(
+    method: Option[AccessMethod] = None,
     status: Option[AccessStatus] = None,
     terms: Option[String] = None,
     note: Option[String]
@@ -374,6 +377,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
       }
 
     AccessCondition(
+      method = method,
       status = status,
       terms = accessTerms,
       note = accessNote

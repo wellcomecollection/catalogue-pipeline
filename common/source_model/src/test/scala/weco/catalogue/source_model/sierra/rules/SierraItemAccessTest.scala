@@ -4,6 +4,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.locations.{
   AccessCondition,
+  AccessMethod,
   AccessStatus,
   ItemStatus,
   LocationType
@@ -44,7 +45,8 @@ class SierraItemAccessTest
             itemData = itemData
           )
 
-          ac shouldBe Some(AccessCondition(terms = Some("Online request")))
+          ac shouldBe Some(
+            AccessCondition(method = Some(AccessMethod.OnlineRequest)))
           itemStatus shouldBe ItemStatus.Available
         }
 
@@ -75,8 +77,8 @@ class SierraItemAccessTest
 
           ac shouldBe Some(
             AccessCondition(
-              status = Some(AccessStatus.Open),
-              terms = Some("Online request")))
+              method = Some(AccessMethod.OnlineRequest),
+              status = Some(AccessStatus.Open)))
           itemStatus shouldBe ItemStatus.Available
         }
 
@@ -107,8 +109,8 @@ class SierraItemAccessTest
 
           ac shouldBe Some(
             AccessCondition(
-              status = Some(AccessStatus.Restricted),
-              terms = Some("Online request")))
+              method = Some(AccessMethod.OnlineRequest),
+              status = Some(AccessStatus.Restricted)))
           itemStatus shouldBe ItemStatus.Available
         }
 
@@ -139,8 +141,8 @@ class SierraItemAccessTest
 
           ac shouldBe Some(
             AccessCondition(
-              status = Some(AccessStatus.Open),
-              terms = Some("Online request")))
+              method = Some(AccessMethod.OnlineRequest),
+              status = Some(AccessStatus.Open)))
           itemStatus shouldBe ItemStatus.Available
         }
       }
@@ -175,7 +177,8 @@ class SierraItemAccessTest
             itemData = itemData
           )
 
-          ac shouldBe Some(AccessCondition(terms = Some("Manual request")))
+          ac shouldBe Some(
+            AccessCondition(method = Some(AccessMethod.ManualRequest)))
           itemStatus shouldBe ItemStatus.Available
         }
 
@@ -205,7 +208,9 @@ class SierraItemAccessTest
           )
 
           ac shouldBe Some(
-            AccessCondition(terms = Some("Please request top item.")))
+            AccessCondition(
+              method = Some(AccessMethod.NotRequestable),
+              terms = Some("Please request top item.")))
           itemStatus shouldBe ItemStatus.Unavailable
         }
 
@@ -235,7 +240,9 @@ class SierraItemAccessTest
           )
 
           ac shouldBe Some(
-            AccessCondition(terms = Some("Please request top item.")))
+            AccessCondition(
+              method = Some(AccessMethod.NotRequestable),
+              terms = Some("Please request top item.")))
           itemStatus shouldBe ItemStatus.Unavailable
         }
 
