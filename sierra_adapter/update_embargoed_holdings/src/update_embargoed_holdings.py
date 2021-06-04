@@ -102,7 +102,7 @@ def update_embargoed_holdings():
         es_host=es_host, es_username=es_username, es_password=es_password
     )
 
-    print(f"affected_holdings = {affected_holdings!}")
+    print(f"affected_holdings = {affected_holdings!r}")
 
     # A bunch of these were modified on similar times on a small number
     # of dates (e.g. 2002-11-28 00:42:42, 00:46:38, 00:52:38), so find
@@ -120,6 +120,7 @@ def update_embargoed_holdings():
                 }
             ),
         )
+        break
 
 
 if __name__ == "__main__":
