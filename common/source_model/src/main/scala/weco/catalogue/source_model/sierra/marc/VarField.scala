@@ -34,3 +34,11 @@ case class VarField(
   @JsonKey("ind2") indicator2: Option[String] = None,
   subfields: List[MarcSubfield] = Nil
 )
+
+case object VarField {
+  def apply(fieldTag: String, content: String): VarField =
+    VarField(
+      fieldTag = Some(fieldTag),
+      content = Some(content)
+    )
+}

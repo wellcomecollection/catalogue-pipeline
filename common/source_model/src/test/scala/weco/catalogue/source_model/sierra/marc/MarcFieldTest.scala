@@ -52,8 +52,8 @@ class MarcFieldTest extends AnyFunSpec with Matchers with JsonAssertions {
     }"""
 
     val expectedVarField = VarField(
-      fieldTag = Some("c"),
-      content = Some("Enjoying an event with enormous eagles")
+      fieldTag = "c",
+      content = "Enjoying an event with enormous eagles"
     )
 
     fromJson[VarField](jsonString).get shouldBe expectedVarField
