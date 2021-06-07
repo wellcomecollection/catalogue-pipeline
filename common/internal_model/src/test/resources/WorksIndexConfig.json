@@ -36,6 +36,17 @@
           "type" : "custom",
           "tokenizer" : "whitespace"
         },
+        "with_slashes_text_analyzer" : {
+          "type" : "custom",
+          "tokenizer" : "standard",
+          "filter" : [
+            "lowercase",
+            "asciifolding_token_filter"
+          ],
+          "char_filter" : [
+            "with_slashes_char_filter"
+          ]
+        },
         "arabic_analyzer" : {
           "type" : "custom",
           "tokenizer" : "standard",
@@ -98,6 +109,14 @@
           "type" : "path_hierarchy",
           "delimiter" : "/",
           "replacement" : "/"
+        }
+      },
+      "char_filter" : {
+        "with_slashes_char_filter" : {
+          "type" : "mapping",
+          "mappings" : [
+            "/=> __"
+          ]
         }
       },
       "filter" : {
@@ -203,6 +222,9 @@
                   },
                   "title" : {
                     "type" : "text",
+                    "copy_to" : [
+                      "search.relations"
+                    ],
                     "fields" : {
                       "keyword" : {
                         "type" : "keyword",
@@ -248,6 +270,9 @@
                       "label" : {
                         "type" : "text",
                         "analyzer" : "asciifolding_analyzer",
+                        "copy_to" : [
+                          "search.relations"
+                        ],
                         "fields" : {
                           "keyword" : {
                             "type" : "keyword"
@@ -261,6 +286,9 @@
                       "path" : {
                         "type" : "text",
                         "analyzer" : "path_hierarchy_analyzer",
+                        "copy_to" : [
+                          "search.relations"
+                        ],
                         "fields" : {
                           "keyword" : {
                             "type" : "keyword"
@@ -289,6 +317,52 @@
           }
         }
       },
+      "search" : {
+        "type" : "object",
+        "properties" : {
+          "relations" : {
+            "type" : "text",
+            "analyzer" : "with_slashes_text_analyzer"
+          },
+          "titlesAndContributors" : {
+            "type" : "text",
+            "fields" : {
+              "english" : {
+                "type" : "text",
+                "analyzer" : "english_analyzer"
+              },
+              "shingles" : {
+                "type" : "text",
+                "analyzer" : "shingle_asciifolding_analyzer"
+              },
+              "arabic" : {
+                "type" : "text",
+                "analyzer" : "arabic_analyzer"
+              },
+              "bengali" : {
+                "type" : "text",
+                "analyzer" : "bengali_analyzer"
+              },
+              "french" : {
+                "type" : "text",
+                "analyzer" : "french_analyzer"
+              },
+              "german" : {
+                "type" : "text",
+                "analyzer" : "german_analyzer"
+              },
+              "hindi" : {
+                "type" : "text",
+                "analyzer" : "hindi_analyzer"
+              },
+              "italian" : {
+                "type" : "text",
+                "analyzer" : "italian_analyzer"
+              }
+            }
+          }
+        }
+      },
       "type" : {
         "type" : "keyword"
       },
@@ -314,6 +388,10 @@
           },
           "title" : {
             "type" : "text",
+            "copy_to" : [
+              "search.relations",
+              "search.titlesAndContributors"
+            ],
             "fields" : {
               "keyword" : {
                 "type" : "keyword",
@@ -355,6 +433,10 @@
           },
           "alternativeTitles" : {
             "type" : "text",
+            "copy_to" : [
+              "search.relations",
+              "search.titlesAndContributors"
+            ],
             "fields" : {
               "keyword" : {
                 "type" : "keyword",
@@ -459,6 +541,9 @@
                 "type" : "object",
                 "properties" : {
                   "label" : {
+                    "copy_to" : [
+                      "search.titlesAndContributors"
+                    ],
                     "type" : "text",
                     "analyzer" : "asciifolding_analyzer",
                     "fields" : {
@@ -762,6 +847,9 @@
               "label" : {
                 "type" : "text",
                 "analyzer" : "asciifolding_analyzer",
+                "copy_to" : [
+                  "search.relations"
+                ],
                 "fields" : {
                   "keyword" : {
                     "type" : "keyword"
@@ -776,7 +864,8 @@
                 "type" : "text",
                 "analyzer" : "path_hierarchy_analyzer",
                 "copy_to" : [
-                  "data.collectionPath.depth"
+                  "data.collectionPath.depth",
+                  "search.relations"
                 ],
                 "fields" : {
                   "keyword" : {

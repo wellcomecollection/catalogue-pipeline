@@ -77,6 +77,9 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
   // we do not need to map every field and can save CPU.
   override val dynamicMapping: DynamicMapping = DynamicMapping.Strict
 
+  val relationsPath = List("search.relations")
+  val titlesAndContributorsPath = List("search.titlesAndContributors")
+
   // Indexing lots of individual fields on Elasticsearch can be very CPU
   // intensive, so here only include fields that are needed for querying in the
   // API.
@@ -84,13 +87,15 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
     objectField("data").fields(
       objectField("otherIdentifiers").fields(lowercaseKeyword("value")),
       objectField("format").fields(keywordField("id")),
-      multilingualFieldWithKeyword("title"),
-      multilingualFieldWithKeyword("alternativeTitles"),
+      multilingualFieldWithKeyword("title")
+        .copyTo(relationsPath ++ titlesAndContributorsPath),
+      multilingualFieldWithKeyword("alternativeTitles")
+        .copyTo(relationsPath ++ titlesAndContributorsPath),
       englishTextField("description"),
       englishTextKeywordField("physicalDescription"),
       multilingualField("lettering"),
       objectField("contributors").fields(
-        objectField("agent").fields(label)
+        objectField("agent").fields(label.copyTo(titlesAndContributorsPath))
       ),
       objectField("subjects").fields(
         label,
@@ -129,21 +134,21 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
       textField("edition"),
       objectField("notes").fields(englishTextField("content")),
       intField("duration"),
-      collectionPath(copyDepthTo = Some("data.collectionPath.depth")),
+      collectionPath(copyPathTo = Some("data.collectionPath.depth")),
       objectField("imageData").fields(
         objectField("id").fields(canonicalId, sourceIdentifier)
       ),
       keywordField("workType")
     )
 
-  def collectionPath(copyDepthTo: Option[String]) = {
+  def collectionPath(copyPathTo: Option[String]) = {
     val path = textField("path")
       .analyzer(pathAnalyzer.name)
       .fields(keywordField("keyword"))
-      .copyTo(copyDepthTo.toList)
+      .copyTo(copyPathTo.toList ++ relationsPath)
 
     objectField("collectionPath").fields(
-      label,
+      label.copyTo(relationsPath),
       path,
       tokenCountField("depth").analyzer("standard")
     )
@@ -164,8 +169,8 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
             intField("depth"),
             intField("numChildren"),
             intField("numDescendents"),
-            multilingualFieldWithKeyword("title"),
-            collectionPath(copyDepthTo = None)
+            multilingualFieldWithKeyword("title").copyTo(relationsPath),
+            collectionPath(copyPathTo = None)
           )
         )
         .dynamic("false"),
@@ -176,9 +181,15 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
         .dynamic("false")
     )
 
+  val search = objectField("search").fields(
+    textField("relations").analyzer("with_slashes_text_analyzer"),
+    multilingualField("titlesAndContributors")
+  )
+
   val fields =
     Seq(
       state,
+      search,
       keywordField("type"),
       data.dynamic("false"),
       objectField("invisibilityReasons")
