@@ -244,7 +244,7 @@ class SierraLocationTest
         AccessCondition(
           status = Some(AccessStatus.TemporarilyUnavailable),
           terms = Some(
-            "Please check this item on the Wellcome Library website for access information")
+            s"""Please check this item <a href="https://search.wellcomelibrary.org/iii/encore/record/C__Rb${bibId.withoutCheckDigit}?lang=eng">on the Wellcome Library website</a> for access information""")
         )
       )
     }
