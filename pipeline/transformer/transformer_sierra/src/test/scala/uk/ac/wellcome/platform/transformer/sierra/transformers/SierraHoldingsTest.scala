@@ -11,6 +11,7 @@ import weco.catalogue.internal_model.locations.{
   AccessCondition,
   AccessStatus,
   DigitalLocation,
+  LocationType,
   PhysicalLocation
 }
 import weco.catalogue.internal_model.work.Holdings
@@ -238,6 +239,107 @@ class SierraHoldingsTest
             )
           ),
           enumeration = List()
+        )
+      )
+    }
+
+    it("combines holdings if they have the same URL but distinct data") {
+      // This test is based on holdings c10885389 and c11142145, which
+      // are both linked to bib b25314166
+      val holdingsData1 = SierraHoldingsData(
+        fixedFields = Map(
+          "40" -> FixedField(label = "LOCATION", value = "elro ")
+        ),
+        varFields = List(
+          VarField(
+            marcTag = Some("863"),
+            subfields = List(
+              MarcSubfield(tag = "8", content = "1.1"),
+              MarcSubfield(tag = "i", content = "1787-1789"),
+              MarcSubfield(tag = "j", content = "01-12"),
+              MarcSubfield(tag = "k", content = "01-31")
+            )
+          ),
+          VarField(
+            marcTag = Some("853"),
+            subfields = List(
+              MarcSubfield(tag = "8", content = "1"),
+              MarcSubfield(tag = "i", content = "(year)"),
+              MarcSubfield(tag = "j", content = "(month)"),
+              MarcSubfield(tag = "k", content = "(day)")
+            )
+          ),
+          VarField(
+            marcTag = Some("856"),
+            subfields = List(
+              MarcSubfield(tag = "u", content = "http://example.org/journal"),
+              MarcSubfield(
+                tag = "z",
+                content =
+                  "Connect to 17th-18th Century Burney Collection newspapers")
+            )
+          )
+        )
+      )
+
+      val holdingsData2 = SierraHoldingsData(
+        fixedFields = Map(
+          "40" -> FixedField(label = "LOCATION", value = "elro ")
+        ),
+        varFields = List(
+          VarField(
+            marcTag = Some("863"),
+            subfields = List(
+              MarcSubfield(tag = "8", content = "1.1"),
+              MarcSubfield(tag = "i", content = "1787-1789"),
+              MarcSubfield(tag = "j", content = "01-12"),
+              MarcSubfield(tag = "k", content = "01-31")
+            )
+          ),
+          VarField(
+            marcTag = Some("853"),
+            subfields = List(
+              MarcSubfield(tag = "8", content = "1"),
+              MarcSubfield(tag = "i", content = "(year)"),
+              MarcSubfield(tag = "j", content = "(month)"),
+              MarcSubfield(tag = "k", content = "(day)")
+            )
+          ),
+          VarField(
+            marcTag = Some("856"),
+            subfields = List(
+              MarcSubfield(tag = "u", content = "http://example.org/journal"),
+              MarcSubfield(
+                tag = "z",
+                content =
+                  "Universal London Price Current -- Seventeenth and Eighteenth Century Burney Newspapers Collection")
+            )
+          )
+        )
+      )
+
+      val holdings = getHoldings(
+        Map(
+          createSierraHoldingsNumber -> holdingsData1,
+          createSierraHoldingsNumber -> holdingsData2
+        )
+      )
+
+      holdings shouldBe List(
+        Holdings(
+          note = Some(
+            "Universal London Price Current -- Seventeenth and Eighteenth Century Burney Newspapers Collection"),
+          enumeration = List("1 Jan. 1787 - 31 Dec. 1789"),
+          location = Some(
+            DigitalLocation(
+              url = "http://example.org/journal",
+              linkText = Some(
+                "Connect to 17th-18th Century Burney Collection newspapers"),
+              locationType = LocationType.OnlineResource,
+              accessConditions =
+                List(AccessCondition(status = AccessStatus.LicensedResources))
+            )
+          )
         )
       )
     }

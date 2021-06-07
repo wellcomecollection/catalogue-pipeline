@@ -106,6 +106,42 @@ class SierraHoldingsEnumerationTest
     getEnumerations(varFields) shouldBe List("vol.1 (2001)")
   }
 
+  it("deduplicates based on the rendered values") {
+    // This is based on holdings record c11058213, which is linked
+    // to bib b29248164
+    val varFields = List(
+      createVarFieldWith(
+        marcTag = "863",
+        subfields = List(
+          MarcSubfield(tag = "8", content = "1.1"),
+          MarcSubfield(tag = "i", content = "2004-"),
+          MarcSubfield(tag = "j", content = "01-"),
+          MarcSubfield(tag = "k", content = "01-"),
+        )
+      ),
+      createVarFieldWith(
+        marcTag = "863",
+        subfields = List(
+          MarcSubfield(tag = "8", content = "1.2"),
+          MarcSubfield(tag = "i", content = "2004-"),
+          MarcSubfield(tag = "j", content = "01-"),
+          MarcSubfield(tag = "k", content = "01-"),
+        )
+      ),
+      createVarFieldWith(
+        marcTag = "853",
+        subfields = List(
+          MarcSubfield(tag = "8", content = "1"),
+          MarcSubfield(tag = "i", content = "(year)"),
+          MarcSubfield(tag = "j", content = "(month)"),
+          MarcSubfield(tag = "k", content = "(day)"),
+        )
+      )
+    )
+
+    getEnumerations(varFields) shouldBe List("1 Jan. 2004 -")
+  }
+
   it("skips empty values in field 863") {
     // This is based on b13108608
     val varFields = List(

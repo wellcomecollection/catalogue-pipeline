@@ -97,6 +97,7 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
           createString(id, label, value) + " " + publicNote
       }
       .map { _.trim }
+      .distinct
   }
 
   private def createString(id: TypedSierraRecordNumber,
@@ -349,13 +350,13 @@ object SierraHoldingsEnumeration extends SierraQueryOps with Logging {
           case Success(Seq(link, sequence)) => Some(Value(link, sequence, vf))
           case _ =>
             warn(
-              s"${id.withCheckDigit}: an instance of $labelTag subfield ǂ8 could not be parsed as a link/sequence: $content")
+              s"${id.withCheckDigit}: an instance of $valueTag subfield ǂ8 could not be parsed as a link/sequence: $content")
             None
         }
 
       case None =>
         warn(
-          s"${id.withCheckDigit}: an instance of $labelTag is missing subfield ǂ8")
+          s"${id.withCheckDigit}: an instance of $valueTag is missing subfield ǂ8")
         None
     }
 
