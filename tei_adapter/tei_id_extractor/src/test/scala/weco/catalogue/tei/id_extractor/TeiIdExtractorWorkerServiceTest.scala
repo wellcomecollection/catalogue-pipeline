@@ -1,29 +1,34 @@
 package weco.catalogue.tei.id_extractor
 
-import com.github.tomakehurst.wiremock.client.WireMock
 import org.apache.commons.io.IOUtils
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.akka.fixtures.Akka
-import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
-import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.memory.MemoryStore
+import weco.catalogue.tei.id_extractor.fixtures.{PathIdDatabase, Wiremock}
+import com.github.tomakehurst.wiremock.client.WireMock
+import uk.ac.wellcome.fixtures.TestWith
+import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
+import weco.catalogue.tei.id_extractor.models.{TeiIdChangeMessage, TeiIdDeletedMessage, TeiIdMessage}
+import weco.http.client.AkkaHttpClient
 import weco.catalogue.tei.id_extractor.fixtures.Wiremock
 import weco.http.client.AkkaHttpClient
 
 import java.nio.charset.StandardCharsets
+
+class TeiIdExtractorWorkerServiceTest extends AnyFunSpec with Wiremock with SQS with Akka with Eventually with IntegrationPatience with PathIdDatabase{
 import java.time.Instant
 import scala.xml.Utility.trim
 import scala.xml.XML
 
-class TeiIdExtractorWorkerServiceTest extends AnyFunSpec with Wiremock with SQS with Akka with Eventually with IntegrationPatience{
+
   it("receives a message, stores the file in s3 and send a message to the tei adapter with the file id"){
     withWorkerService{ case (QueuePair(queue, dlq), messageSender, store, bucket, repoUrl) =>
       val modifiedTime = "2021-05-27T14:05:00Z"
@@ -37,13 +42,13 @@ class TeiIdExtractorWorkerServiceTest extends AnyFunSpec with Wiremock with SQS 
       }
         sendNotificationToSQS(queue, message)
 
-
             eventually{
+              assertQueueEmpty(queue)
+              assertQueueEmpty(dlq)
               val expectedS3Location = checkFileIsStored(store, bucket, modifiedTime,IOUtils.resourceToString("/WMS_Arabic_1.xml", StandardCharsets.UTF_8))
 
               messageSender.getMessages[TeiIdChangeMessage]() should contain only(TeiIdChangeMessage(id="manuscript_15651", s3Location = expectedS3Location, Instant.parse(modifiedTime)))
-              assertQueueEmpty(queue)
-              assertQueueEmpty(dlq)
+
             }
           }}
 
@@ -99,11 +104,11 @@ class TeiIdExtractorWorkerServiceTest extends AnyFunSpec with Wiremock with SQS 
         sendNotificationToSQS(queue, messageDeleted)
 
         eventually {
+          assertQueueEmpty(queue)
+          assertQueueEmpty(dlq)
           val changeMessage = TeiIdChangeMessage(id = "manuscript_15651", s3Location = expectedS3Location, Instant.parse(modifiedTime))
           val deletedMessage = TeiIdDeletedMessage(id = "manuscript_15651", Instant.parse(deletedTime))
           messageSender.getMessages[TeiIdMessage]() should contain only(changeMessage, deletedMessage)
-          assertQueueEmpty(queue)
-          assertQueueEmpty(dlq)
         }
       }
 
@@ -119,17 +124,27 @@ class TeiIdExtractorWorkerServiceTest extends AnyFunSpec with Wiremock with SQS 
   def withWorkerService[R](testWith: TestWith[(QueuePair, MemoryMessageSender, MemoryStore[S3ObjectLocation, String], Bucket, String), R]): R =
     withWiremock("localhost"){ port =>
       val repoUrl = s"http://localhost:$port"
-    withLocalSqsQueuePair() { case q@QueuePair(queue, dlq) =>
+    withLocalSqsQueuePair(10) { case q@QueuePair(queue, dlq) =>
       withActorSystem { implicit ac =>
         implicit val ec = ac.dispatcher
         withSQSStream(queue) { stream: SQSStream[NotificationMessage] =>
-          val messageSender = new MemoryMessageSender()
-          val gitHubBlobReader = new GitHubBlobContentReader(new AkkaHttpClient(),"fake_token")
-          val store = new MemoryStore[S3ObjectLocation, String](Map())
-          val bucket = Bucket("bucket")
-          val service = new TeiIdExtractorWorkerService(messageStream = stream, messageSender = messageSender, gitHubBlobReader= gitHubBlobReader,store = store, pathIdDao = new PathIdDao, config = TeiIdExtractorConfig(concurrentFiles = 10, bucket = bucket.name))
-          service.run()
-          testWith((q,messageSender, store, bucket, repoUrl))
+          withPathIdDao(initializeTable = false) { case (provisioner,_, pathIdDao) =>
+
+            val messageSender = new MemoryMessageSender()
+            val gitHubBlobReader = new GitHubBlobContentReader(new AkkaHttpClient(),"fake_token")
+            val store = new MemoryStore[S3ObjectLocation, String](Map())
+            val bucket = Bucket("bucket")
+            val service = new TeiIdExtractorWorkerService(
+              messageStream = stream,
+              messageSender = messageSender,
+              tableProvisioner = provisioner,
+              gitHubBlobReader = gitHubBlobReader,
+              store = store,
+              pathIdDao = pathIdDao,
+              config = TeiIdExtractorConfig(concurrentFiles = 10, bucket = bucket.name))
+            service.run()
+            testWith((q, messageSender, store, bucket, repoUrl))
+          }
         }}}
   }
   private def checkFileIsStored(store: MemoryStore[S3ObjectLocation, String], bucket: Bucket, modifiedTime: String, fileContents: String) = {

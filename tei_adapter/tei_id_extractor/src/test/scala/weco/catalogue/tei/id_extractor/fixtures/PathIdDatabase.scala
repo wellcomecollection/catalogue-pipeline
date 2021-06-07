@@ -5,7 +5,8 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import uk.ac.wellcome.fixtures.TestWith
 import scalikejdbc._
-import weco.catalogue.tei.id_extractor.{FieldDescription, PathIdTableConfig, RDSClientConfig}
+import weco.catalogue.tei.id_extractor.database.{PathIdTableConfig, RDSClientConfig, TableProvisioner}
+import weco.catalogue.tei.id_extractor.{FieldDescription, PathIdDao, PathIdTable}
 
 trait PathIdDatabase
     extends Eventually
@@ -24,7 +25,7 @@ trait PathIdDatabase
       val database: SQLSyntax = SQLSyntax.createUnsafely(tableConfig.database)
       val table: SQLSyntax = SQLSyntax.createUnsafely(tableConfig.tableName)
 
-      val fields = NamedDB('primary) readOnly { implicit session =>
+      val fields = NamedDB('default) readOnly { implicit session =>
         sql"DESCRIBE $database.$table"
           .map(
             rs =>
@@ -64,25 +65,18 @@ trait PathIdDatabase
     password = password
   )
 
-  def withPathIdTable[R](
+  def withPathIdDatabase[R](
     testWith: TestWith[PathIdTableConfig, R]): R = {
     ConnectionPool.add(
-      'primary,
-      s"jdbc:mysql://$host:$port",
-      username,
-      password,
-      settings = ConnectionPoolSettings(maxSize = maxSize)
-    )
-    ConnectionPool.add(
-      'replica,
+      'default,
       s"jdbc:mysql://$host:$port",
       username,
       password,
       settings = ConnectionPoolSettings(maxSize = maxSize)
     )
 
-    implicit val session = NamedAutoSession('primary)
 
+    implicit val session = AutoSession
     val databaseName: String = createDatabaseName
     val tableName: String = createTableName
 
@@ -98,7 +92,7 @@ trait PathIdDatabase
 
       testWith(pathIdTableConfig)
     } finally {
-      NamedDB('primary) localTx { implicit session =>
+      NamedDB('default) localTx { implicit session =>
         sql"DROP DATABASE IF EXISTS $pathIdDatabase".execute().apply()
       }
 
@@ -106,5 +100,24 @@ trait PathIdDatabase
     }
 
   }
+
+  def withPathIdDao[R](initializeTable: Boolean)(testWith: TestWith[(TableProvisioner,PathIdTable, PathIdDao), R]): R = {
+    withPathIdDatabase { config =>
+      val provisioner = new TableProvisioner(rdsClientConfig)(
+        database = config.database,
+        tableName = config.tableName
+      )
+      if(initializeTable) {
+        provisioner
+          .provision()
+        eventuallyTableExists(config)
+      }
+
+      val table = new PathIdTable(config)
+      val pathIdDao = new PathIdDao(table)
+      testWith((provisioner,table,pathIdDao))
+    }
+    }
+
 
 }
