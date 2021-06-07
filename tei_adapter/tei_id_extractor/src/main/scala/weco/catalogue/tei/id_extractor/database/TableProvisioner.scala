@@ -1,12 +1,12 @@
-package weco.catalogue.tei.id_extractor
+package weco.catalogue.tei.id_extractor.database
 
 import org.flywaydb.core.Flyway
 
 import scala.collection.JavaConverters._
 
-class TableProvisioner(rdsClientConfig: RDSClientConfig) {
+class TableProvisioner(rdsClientConfig: RDSClientConfig)(database: String, tableName: String) {
 
-  def provision(database: String, tableName: String): Unit = {
+  def provision(): Unit = {
     val flyway = new Flyway()
     flyway.setDataSource(
       s"jdbc:mysql://${rdsClientConfig.primaryHost}:${rdsClientConfig.port}/$database",

@@ -1,7 +1,6 @@
 package weco.catalogue.tei.id_extractor
 
 import akka.stream.scaladsl.Flow
-import io.circe.Decoder
 import software.amazon.awssdk.services.sqs.model.{Message => SQSMessage}
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.MessageSender
@@ -10,40 +9,35 @@ import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.Writable
 import uk.ac.wellcome.typesafe.Runnable
+import weco.catalogue.tei.id_extractor.database.TableProvisioner
+import weco.catalogue.tei.id_extractor.models._
 import weco.flows.FlowOps
 
-import java.net.URI
-import java.time.ZonedDateTime
 import scala.concurrent.{ExecutionContext, Future}
 
-sealed trait TeiPathMessage{
-  val path: String
-}
-case class TeiPathChangedMessage(path: String, uri: URI, timeModified: ZonedDateTime) extends TeiPathMessage
-case class TeiPathDeletedMessage(path: String, timeDeleted: ZonedDateTime) extends TeiPathMessage
-object TeiPathMessage {
-  implicit val decoder: Decoder[TeiPathMessage] = Decoder[TeiPathChangedMessage].map[TeiPathMessage](identity).or(Decoder[TeiPathDeletedMessage].map[TeiPathMessage](identity))
-}
 
-
-sealed trait TeiIdMessage
-case class TeiIdChangeMessage(id: String, s3Location: S3ObjectLocation, timeModified: ZonedDateTime) extends TeiIdMessage
-case class TeiIdDeletedMessage(id: String, timeDeleted: ZonedDateTime)
-
-
-case class TeiIdExtractorConfig(concurrentFiles: Int, bucket: String, teiDirectories: Set[String] = Set("Arabic", "Batak", "Egyptian", "Greek", "Hebrew", "Indic", "Javanese", "Malay"))
+case class TeiIdExtractorConfig(concurrentFiles: Int,
+                                bucket: String,
+                                teiDirectories: Set[String] = Set("Arabic", "Batak", "Egyptian", "Greek", "Hebrew", "Indic", "Javanese", "Malay"))
 
 class TeiIdExtractorWorkerService[Dest](messageStream: SQSStream[NotificationMessage],
                                         gitHubBlobReader: GitHubBlobReader,
+                                        tableProvisioner: TableProvisioner,
                                         idExtractor: IdExtractor,
                                         store: Writable[S3ObjectLocation, String],
                                         messageSender: MessageSender[Dest],
                                         pathIdDao: PathIdDao,
-                                        config: TeiIdExtractorConfig)(implicit val ec: ExecutionContext)
+                                        config: TeiIdExtractorConfig,
+                                       )(implicit val ec: ExecutionContext)
     extends Runnable with FlowOps{
   val className = this.getClass.getSimpleName
 
-  override def run(): Future[Any] = {
+  override def run()= for{
+    _ <- Future(tableProvisioner.provision)
+    _ <- runStream()
+  } yield ()
+
+  private def runStream(): Future[Any] = {
     messageStream.runStream(className,source =>
       source.via(unwrapMessage)
         .via(broadcastAndMerge(filterNonTei, processMessage))
@@ -64,14 +58,14 @@ class TeiIdExtractorWorkerService[Dest](messageStream: SQSStream[NotificationMes
 
   def processMessage =
     Flow[(Context, TeiPathMessage)].filter{
-      case (_, teiPathMessage) => !isTeiFile(teiPathMessage.path)
+      case (_, teiPathMessage) => isTeiFile(teiPathMessage.path)
     }.via(broadcastAndMerge(processDeleted, processChange))
 
   def processDeleted = Flow[(Context, TeiPathMessage)].collectType[(Context,TeiPathDeletedMessage)]
     .mapAsync(config.concurrentFiles) { case (ctx, message) =>
 for{
   row <- pathIdDao.getByPath(message.path)
-  _ <- Future.fromTry(messageSender.sendT(TeiIdDeletedMessage(row.get.id, message.timeDeleted)))
+  _ <- Future.fromTry(messageSender.sendT[TeiIdMessage](TeiIdDeletedMessage(row.get.id, message.timeDeleted)))
 } yield ((ctx, Right(())))
     }.via(catchErrors)
 
@@ -82,7 +76,7 @@ for{
           id <- Future.fromTry(idExtractor.extractId(blobContent))
           _ <- pathIdDao.save(id, message.path, message.timeModified)
           stored <- Future.fromTry(store.put(S3ObjectLocation(config.bucket, s"tei_files/$id/${message.timeModified.toEpochSecond}.xml"))(blobContent).left.map(error => error.e).toTry)
-          _ <- Future.fromTry(messageSender.sendT(TeiIdChangeMessage(id, stored.id, message.timeModified)))
+          _ <- Future.fromTry(messageSender.sendT[TeiIdMessage](TeiIdChangeMessage(id, stored.id, message.timeModified)))
         } yield(ctx, Right(()))
       }
       .via(catchErrors)

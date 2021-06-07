@@ -2,6 +2,7 @@ package weco.catalogue.tei.id_extractor
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import weco.catalogue.tei.id_extractor.database.TableProvisioner
 
 case class FieldDescription(field: String,
                             dataType: String,
@@ -14,12 +15,12 @@ class TableProvisionerTest
     with Matchers {
 
   it("creates the PathId table") {
-    withPathIdTable { pathIdTableConfig =>
+    withPathIdDatabase { pathIdTableConfig =>
       val databaseName = pathIdTableConfig.database
       val tableName = pathIdTableConfig.tableName
 
-      new TableProvisioner(rdsClientConfig)
-        .provision(databaseName, tableName)
+      new TableProvisioner(rdsClientConfig)(databaseName, tableName)
+        .provision()
 
       eventuallyTableExists(pathIdTableConfig)
     }
