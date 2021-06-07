@@ -19,8 +19,22 @@ locals {
   id_minter_task_max_connections = min(9, local.max_capacity)
 
   # We don't want to overload our databases if we're not reindexing
-  # and don't have extra database capacity provisioned
-  max_capacity = var.is_reindexing ? var.max_capacity : min(3, var.max_capacity)
+  # and don't have extra database capacity provisioned.
+  #
+  # Note: during a reindex, we usually cap the number of ingestors:
+  #
+  #     = 6 * works ingestors + 5 * image ingestors
+  #
+  # These are ingestors writing into an empty index with no read traffic.
+  # We want lots of parallelism to get through the reindex quickly.
+  #
+  # When we're not reindexing, our ingestors are writing into a full index
+  # that may be serving API queries.  We want to avoid sending too many
+  # queries to Elasticsearch and breaking the cluster.
+  #
+  # We also want to avoid running more ingestors when not reindexing
+  # than when we are!
+  max_capacity = var.is_reindexing ? var.max_capacity : min(1, var.max_capacity)
 
   # If we're reindexing, our services will scale up to max capacity,
   # work through everything on the reindex queues, and then suddenly
