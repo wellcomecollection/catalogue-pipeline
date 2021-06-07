@@ -3,13 +3,13 @@ variable "pipeline_date" {
 }
 
 variable "min_capacity" {
-  type = number
+  type    = number
   default = 0
 }
 
 variable "max_capacity" {
-  type = number
-  default = 15
+  type        = number
+  default     = 15
   description = "The max capacity of every ECS service will be less than or equal to this value"
 }
 
@@ -34,7 +34,7 @@ variable "rds_subnet_group_name" {
 }
 
 variable "is_reindexing" {
-  type = bool
+  type        = bool
   description = "Are you reindexing through this pipeline right now?"
 }
 
@@ -72,7 +72,7 @@ variable "traffic_filter_public_internet_id" {
 
 variable "adapters" {
   type = map(object({
-    topics = list(string)
+    topics        = list(string)
     reindex_topic = string
   }))
 }

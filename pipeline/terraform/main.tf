@@ -69,4 +69,3 @@ module "catalogue_pipeline_2021-06-03" {
 
   storage_bucket_name = local.storage_bucket
 }
-
