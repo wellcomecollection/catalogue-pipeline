@@ -37,7 +37,7 @@ module "service" {
   use_fargate_spot = true
 }
 
-module "ingestor_works_scaling_alarm" {
+module "reindexer_scaling" {
   source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.1.3"
   queue_name = module.reindexer_queue.name
 
