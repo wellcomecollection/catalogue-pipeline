@@ -17,11 +17,15 @@ See also:
 ## Shape of the Sierra data
 
 The Sierra API contains multiple types of record.
-The two we're especially interested in are *bibs* and *items*.
+These are the records we're especially interested in:
 
 *   A *bib* is a *bibliographic record* – for example, an individual book.
     It's the "concept" of the book, rather than an individual copy.
 *   An *item* is a retrievable object – for example, a physical copy of a book, or an electronic book that you can download.
+*   A *holdings* is an object that is published in multiple parts – for example, the issues of a journal.
+    Sometimes a holdings record is broken down into individual items.
+*   An *order* is a placeholder record that describes something which has been ordered but not yet received.
+    These are usually replaced by item records when the item is received, but the order record isn't always deleted.
 
 There is a many-to-many mapping between bibs and items:
 
@@ -29,13 +33,13 @@ There is a many-to-many mapping between bibs and items:
 
 *   A single item can be associated with multiple bibs.
     There are two cases where this can happen:
-    
+
     -   "boundwith": items such as pamphlets or patents which are bound together, where there are bib records for individual pieces but not for the whole volume.
         For example, i15699833 is a single physical item (a bound volume of patents), and each of the individual patents has its own bib number.
-    
+
     -   "contained in": this is how the ephemera is organised.
         You have a single box (an item) of ephemera, and then a bib record both for the box as a whole, and individual big records for the pieces of ephemera it contains – for example, i14702228.
-    
+
     In both cases, there's a single item record because the physical objects have to be produced together.
     You can't make an individual order for a single pamphlet or ephemera object.
 
@@ -46,21 +50,26 @@ There is a many-to-many mapping between bibs and items:
 ## What do we need for a Work?
 
 The adapter needs to provide enough data for the Sierra transformer to create a Work for the catalogue API.
-To create a Work from the Sierra data, we need a single bib and all the items it is associated with.
+To create a Work from the Sierra data, we need a single bib and all the items, holdings, and orders it is associated with.
 
 <img style="width: 400px" src="images/work_from_sierra.svg">
 
-In our ontology, the "Work" is the conceptual thing – which maps to a bib in Sierra – and an "Item" is the individual objects – like Sierra items.
+In our ontology:
+
+*   A bib maps to a "Work"
+*   An item maps to an identified "Item"
+*   A holdings maps to a "Holdings"
+*   An order maps to an unidentified "Item"
 
 
 
 ## Shape of the Sierra API
 
-The Sierra API allows you to query bibs or items separately.
+The Sierra API requires you to query for different types of record separately.
 
-Bibs are standalone entities, and do not refer to other bibs and items.
+Bibs are standalone entities, and do not refer to other records.
 
-Items have a reference to the bibs they are associated with:
+Items, holdings, and orders have a reference to the bibs they are associated with:
 
 ```http
 GET /sierra-api/items?id=1569983
@@ -82,12 +91,12 @@ You cannot ask the API "get me a single bib and all the items associated with it
 
 ## Getting credentials for the Sierra API
 
-At time of writing (16 January 2020), the API credentials for the Sierra adapter are owned by <wellcomedigitalplatform@wellcome.ac.uk>.
+At time of writing (7 June 2021), the API credentials for the Sierra adapter are owned by <wellcomedigitalplatform@wellcome.ac.uk>.
 To create new credentials, or to revoke an existing API key:
 
 1. Log in to Sierra API console (you need an admin account; contact Library Systems Support)
 2. Select "Sierra API keys"
-3. Create a new key with the `bibs read` and `items read` permissions
+3. Create a new key with the `bibs read`, `items read`, `holdings read` and `orders read` permissions
 
 
 
@@ -266,7 +275,7 @@ Bibs:
 
 4.  The bib merger sends an SNS notification to tell the rest of the pipeline that a new Sierra record is available.
 
-Items have some extra steps:
+Items, orders and holdings have some extra steps:
 
 1.  The **item reader** (an ECS task) and **S3 demultiplexer** work as for bibs, but querying the Sierra API for items, not bibs.
 
@@ -283,7 +292,7 @@ Items have some extra steps:
 
     We need to remove the item from the Work created from bib `b1`, but the API data doesn't tell us we need to do that – so we need to track the history of item/bib associations ourselves.
 
-    The **items to dynamo** app (an ECS task) records the item–bib associations in a VHS.
+    The **item linker** app (an ECS task) records the item–bib associations in a VHS.
     When it gets an updated item, it can compare between the new item and the item in the items-to-dynamo VHS, and see if any bibs have been removed from the item.
 
     It sends an SNS notification for every item–bib association.
@@ -304,3 +313,17 @@ Items have some extra steps:
     As with the bib merger, it compares the existing record with the item/bib record it's just received, and decides whether to update/delete the source data table, or drop the update it's received as stale.
 
 4.  The item merger sends an SNS notification to tell the rest of the pipeline that a new Sierra record is available.
+
+There's a similar reader/linker/merger pipeline for holdings and orders.
+
+
+
+## How the adapter uses the reporting cluster
+
+-   The Sierra adapter stores a copy of all its records in the reporting cluster.
+
+    There are indexes for each type of record (bib/item/holdings/order) which record the top-level information for each record, then separate indexes for fixed-length fields and variable-length fields.
+    This allows you to slice across records: e.g. fetching every instance of varfield 856 from bibs, but nothing else.
+
+-   The Sierra adapter queries the holdings data to find electronic holdings that are under embargo, and which need to be repolled on a schedule.
+    See the `update_embargoed_holdings` Lambda for more information.
