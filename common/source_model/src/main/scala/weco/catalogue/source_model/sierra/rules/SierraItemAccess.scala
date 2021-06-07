@@ -9,7 +9,11 @@ import weco.catalogue.internal_model.locations.{
   LocationType,
   PhysicalLocationType
 }
-import weco.catalogue.source_model.sierra.{SierraItemData, SierraItemNumber}
+import weco.catalogue.source_model.sierra.{
+  SierraBibNumber,
+  SierraItemData,
+  SierraItemNumber
+}
 import weco.catalogue.source_model.sierra.source.{
   OpacMsg,
   SierraQueryOps,
@@ -31,7 +35,8 @@ import weco.catalogue.source_model.sierra.source.{
   */
 object SierraItemAccess extends SierraQueryOps with Logging {
   def apply(
-    id: SierraItemNumber,
+    bibId: SierraBibNumber,
+    itemId: SierraItemNumber,
     bibStatus: Option[AccessStatus],
     location: Option[PhysicalLocationType],
     itemData: SierraItemData
@@ -333,9 +338,16 @@ object SierraItemAccess extends SierraQueryOps with Logging {
 
       // If we can't work out how this item should be handled, then let's mark it
       // as unavailable for now.
+      //
+      // TODO: We should work with the Collections team to better handle any records
+      // that are hitting this branch.  Sending readers to Encore isn't a long-term
+      // solution.  Remove this link when Encore goes away.
+      //
+      // Note: once you remove the link, you can also remove the bibId passed into
+      // this apply() method.
       case (bibStatus, holdCount, status, opacmsg, isRequestable, location) =>
         warn(
-          s"Unable to assign access status for item ${id.withCheckDigit}: " +
+          s"Unable to assign access status for item ${itemId.withCheckDigit}: " +
             s"bibStatus=$bibStatus, holdCount=$holdCount, status=$status, " +
             s"opacmsg=$opacmsg, isRequestable=$isRequestable, location=$location"
         )
@@ -344,7 +356,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
             createAccessCondition(
               status = Some(AccessStatus.TemporarilyUnavailable),
               note = Some(
-                "Please check this item on the Wellcome Library website for access information")
+                s"""Please check this item <a href="https://search.wellcomelibrary.org/iii/encore/record/C__Rb${bibId.withoutCheckDigit}?lang=eng">on the Wellcome Library website</a> for access information""")
             )
           ),
           ItemStatus.Unavailable)
