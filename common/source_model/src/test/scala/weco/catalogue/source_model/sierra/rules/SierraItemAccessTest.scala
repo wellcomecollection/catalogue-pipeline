@@ -39,7 +39,7 @@ class SierraItemAccessTest
           )
 
           val (ac, itemStatus) = SierraItemAccess(
-            id = itemId,
+            itemId = itemId,
             bibStatus = None,
             location = Some(LocationType.ClosedStores),
             itemData = itemData
@@ -69,7 +69,7 @@ class SierraItemAccessTest
           )
 
           val (ac, itemStatus) = SierraItemAccess(
-            id = itemId,
+            itemId = itemId,
             bibStatus = Some(AccessStatus.Open),
             location = Some(LocationType.ClosedStores),
             itemData = itemData
@@ -101,7 +101,7 @@ class SierraItemAccessTest
           )
 
           val (ac, itemStatus) = SierraItemAccess(
-            id = itemId,
+            itemId = itemId,
             bibStatus = Some(AccessStatus.Restricted),
             location = Some(LocationType.ClosedStores),
             itemData = itemData
@@ -133,7 +133,7 @@ class SierraItemAccessTest
           )
 
           val (ac, itemStatus) = SierraItemAccess(
-            id = itemId,
+            itemId = itemId,
             bibStatus = Some(AccessStatus.Restricted),
             location = Some(LocationType.ClosedStores),
             itemData = itemData
@@ -171,7 +171,7 @@ class SierraItemAccessTest
           )
 
           val (ac, itemStatus) = SierraItemAccess(
-            id = itemId,
+            itemId = itemId,
             bibStatus = None,
             location = Some(LocationType.ClosedStores),
             itemData = itemData
@@ -201,7 +201,7 @@ class SierraItemAccessTest
           )
 
           val (ac, itemStatus) = SierraItemAccess(
-            id = itemId,
+            itemId = itemId,
             bibStatus = None,
             location = None,
             itemData = itemData
@@ -233,7 +233,7 @@ class SierraItemAccessTest
           )
 
           val (ac, itemStatus) = SierraItemAccess(
-            id = itemId,
+            itemId = itemId,
             bibStatus = None,
             location = None,
             itemData = itemData
@@ -265,7 +265,7 @@ class SierraItemAccessTest
           )
 
           val (ac, itemStatus) = SierraItemAccess(
-            id = itemId,
+            itemId = itemId,
             bibStatus = Some(AccessStatus.Closed),
             location = Some(LocationType.ClosedStores),
             itemData = itemData
@@ -294,7 +294,7 @@ class SierraItemAccessTest
           )
 
           val (ac, itemStatus) = SierraItemAccess(
-            id = itemId,
+            itemId = itemId,
             bibStatus = Some(AccessStatus.Closed),
             location = None,
             itemData = itemData
@@ -323,7 +323,7 @@ class SierraItemAccessTest
           )
 
           val (ac, itemStatus) = SierraItemAccess(
-            id = itemId,
+            itemId = itemId,
             bibStatus = None,
             location = Some(LocationType.ClosedStores),
             itemData = itemData
@@ -352,7 +352,7 @@ class SierraItemAccessTest
           )
 
           val (ac, itemStatus) = SierraItemAccess(
-            id = itemId,
+            itemId = itemId,
             bibStatus = None,
             location = Some(LocationType.ClosedStores),
             itemData = itemData
@@ -394,7 +394,7 @@ class SierraItemAccessTest
           )
 
           val (ac, itemStatus) = SierraItemAccess(
-            id = itemId,
+            itemId = itemId,
             bibStatus = None,
             location = Some(LocationType.ClosedStores),
             itemData = itemData
@@ -429,7 +429,7 @@ class SierraItemAccessTest
           )
 
           val (ac, itemStatus) = SierraItemAccess(
-            id = itemId,
+            itemId = itemId,
             bibStatus = Some(AccessStatus.ByAppointment),
             location = Some(LocationType.ClosedStores),
             itemData = itemData
@@ -460,7 +460,7 @@ class SierraItemAccessTest
           )
 
           val (ac, itemStatus) = SierraItemAccess(
-            id = itemId,
+            itemId = itemId,
             bibStatus = Some(AccessStatus.PermissionRequired),
             location = Some(LocationType.ClosedStores),
             itemData = itemData
@@ -491,7 +491,7 @@ class SierraItemAccessTest
           )
 
           val (ac, itemStatus) = SierraItemAccess(
-            id = itemId,
+            itemId = itemId,
             bibStatus = None,
             location = Some(LocationType.ClosedStores),
             itemData = itemData
@@ -522,7 +522,7 @@ class SierraItemAccessTest
           )
 
           val (ac, itemStatus) = SierraItemAccess(
-            id = itemId,
+            itemId = itemId,
             bibStatus = None,
             location = Some(LocationType.ClosedStores),
             itemData = itemData
@@ -556,7 +556,7 @@ class SierraItemAccessTest
           )
 
           val (ac, itemStatus) = SierraItemAccess(
-            id = itemId,
+            itemId = itemId,
             bibStatus = None,
             location = Some(LocationType.ClosedStores),
             itemData = itemData
@@ -594,7 +594,7 @@ class SierraItemAccessTest
         )
 
         val (ac, itemStatus) = SierraItemAccess(
-          id = itemId,
+          itemId = itemId,
           bibStatus = None,
           location = Some(LocationType.ClosedStores),
           itemData = itemData
@@ -630,7 +630,7 @@ class SierraItemAccessTest
         )
 
         val (ac, itemStatus) = SierraItemAccess(
-          id = itemId,
+          itemId = itemId,
           bibStatus = None,
           location = Some(LocationType.ClosedStores),
           itemData = itemData
@@ -669,7 +669,7 @@ class SierraItemAccessTest
         )
 
         val (ac, itemStatus) = SierraItemAccess(
-          id = itemId,
+          itemId = itemId,
           bibStatus = None,
           location = Some(LocationType.OpenShelves),
           itemData = itemData
@@ -705,7 +705,7 @@ class SierraItemAccessTest
         )
 
         val (ac, itemStatus) = SierraItemAccess(
-          id = itemId,
+          itemId = itemId,
           bibStatus = None,
           location = Some(LocationType.OpenShelves),
           itemData = itemData
@@ -740,7 +740,7 @@ class SierraItemAccessTest
       )
 
       val (ac, itemStatus) = SierraItemAccess(
-        id = itemId,
+        itemId = itemId,
         bibStatus = None,
         location = Some(LocationType.OpenShelves),
         itemData = itemData
@@ -787,7 +787,7 @@ class SierraItemAccessTest
     )
 
     val (ac, _) = SierraItemAccess(
-      id = itemId,
+      itemId = itemId,
       bibStatus = None,
       location = Some(LocationType.ClosedStores),
       itemData = itemData

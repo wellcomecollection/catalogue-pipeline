@@ -31,7 +31,7 @@ import weco.catalogue.source_model.sierra.source.{
   */
 object SierraItemAccess extends SierraQueryOps with Logging {
   def apply(
-    id: SierraItemNumber,
+    itemId: SierraItemNumber,
     bibStatus: Option[AccessStatus],
     location: Option[PhysicalLocationType],
     itemData: SierraItemData
@@ -335,7 +335,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
       // as unavailable for now.
       case (bibStatus, holdCount, status, opacmsg, isRequestable, location) =>
         warn(
-          s"Unable to assign access status for item ${id.withCheckDigit}: " +
+          s"Unable to assign access status for item ${itemId.withCheckDigit}: " +
             s"bibStatus=$bibStatus, holdCount=$holdCount, status=$status, " +
             s"opacmsg=$opacmsg, isRequestable=$isRequestable, location=$location"
         )
