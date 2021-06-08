@@ -6,7 +6,7 @@ import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import uk.ac.wellcome.fixtures.TestWith
 import scalikejdbc._
 import weco.catalogue.tei.id_extractor.database.{PathIdTableConfig, RDSClientConfig, TableProvisioner}
-import weco.catalogue.tei.id_extractor.{FieldDescription, PathIdDao, PathIdTable}
+import weco.catalogue.tei.id_extractor.{FieldDescription, PathIdTable}
 
 trait PathIdDatabase
     extends Eventually
@@ -101,23 +101,27 @@ trait PathIdDatabase
 
   }
 
-  def withPathIdDao[R](initializeTable: Boolean)(testWith: TestWith[(TableProvisioner,PathIdTable, PathIdDao), R]): R = {
+  def withPathIdTable[R](testWith: TestWith[(PathIdTableConfig,PathIdTable), R]): R = {
     withPathIdDatabase { config =>
+      val table = new PathIdTable(config)
+      testWith((config,table))
+    }
+    }
+
+  def withInitializedPathIdTable[R](testWith: TestWith[PathIdTable, R]): R = {
+    withPathIdTable { case (config,table) =>
       val provisioner = new TableProvisioner(rdsClientConfig)(
         database = config.database,
         tableName = config.tableName
       )
-      if(initializeTable) {
+
         provisioner
           .provision()
         eventuallyTableExists(config)
-      }
 
-      val table = new PathIdTable(config)
-      val pathIdDao = new PathIdDao(table)
-      testWith((provisioner,table,pathIdDao))
+      testWith(table)
     }
-    }
+  }
 
 
 }

@@ -3,13 +3,13 @@ package weco.catalogue.tei.id_extractor
 import scalikejdbc._
 
 import java.time.format.DateTimeFormatter
-import java.time.{LocalDateTime, ZoneId, ZonedDateTime}
+import java.time.{LocalDateTime, ZoneId, Instant}
 
 /** Represents a set of identifiers as stored in MySQL */
 case class PathId(
                        path: String,
                        id: String,
-                       timeModified: ZonedDateTime
+                       timeModified: Instant
 )
 
 object PathId {
@@ -20,7 +20,7 @@ object PathId {
     PathId(
       path = rs.string(p.resultName.path),
       id = rs.string(p.resultName.id),
-      timeModified = LocalDateTime.parse(str, formatter).atZone(ZoneId.of("Z"))
+      timeModified = LocalDateTime.parse(str, formatter).atZone(ZoneId.of("Z")).toInstant
     )
   }
 
