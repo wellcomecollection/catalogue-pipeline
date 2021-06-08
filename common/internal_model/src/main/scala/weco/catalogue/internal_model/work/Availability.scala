@@ -64,7 +64,8 @@ object Availabilities {
         // can actually see, so we don't include items that have been ordered
         // but aren't available to view yet.
         case physicalLoc: PhysicalLocation
-          if physicalLoc.locationType == LocationType.OnOrder => false
+            if physicalLoc.locationType == LocationType.OnOrder =>
+          false
 
         // Don't include items if they have a physical location but are actually
         // held in another institution.
@@ -75,7 +76,10 @@ object Availabilities {
         //
         // See https://github.com/wellcomecollection/platform/issues/5190
         case physicalLoc: PhysicalLocation
-          if physicalLoc.accessConditions.exists { _.termsAreOtherInstitution } => false
+            if physicalLoc.accessConditions.exists {
+              _.termsAreOtherInstitution
+            } =>
+          false
 
         case _: PhysicalLocation => true
 
@@ -93,13 +97,18 @@ object Availabilities {
     def termsAreOtherInstitution: Boolean =
       ac.terms match {
         case Some(t) if t.toLowerCase.contains("available at") => true
-        case Some(t) if t.toLowerCase.contains("available by appointment at") => true
+        case Some(t) if t.toLowerCase.contains("available by appointment at") =>
+          true
 
         case Some(t) if t.contains("Churchill Archives Centre") => true
-        case Some(t) if t.contains("UCL Special Collections and Archives") => true
+        case Some(t) if t.contains("UCL Special Collections and Archives") =>
+          true
         case Some(t) if t.contains("at King's College London") => true
-        case Some(t) if t.contains("at the Army Medical Services Museum") => true
-        case Some(t) if t.contains("currently remains with the Martin Leake family") => true
+        case Some(t) if t.contains("at the Army Medical Services Museum") =>
+          true
+        case Some(t)
+            if t.contains("currently remains with the Martin Leake family") =>
+          true
 
         case _ => false
       }
