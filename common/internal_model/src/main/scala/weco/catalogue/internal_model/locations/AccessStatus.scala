@@ -24,10 +24,10 @@ sealed trait AccessStatus extends EnumEntry { this: AccessStatus =>
   }
 }
 
-object AccessStatus extends Enum[License] {
+object AccessStatus extends Enum[AccessStatus] {
   val values = findValues
   assert(
-    values.size == values.map { _.id }.toSet.size,
+    values.size == values.map { _.name }.toSet.size,
     "IDs for AccessStatus are not unique!"
   )
 
