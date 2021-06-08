@@ -12,12 +12,11 @@ import uk.ac.wellcome.storage.store.dynamo.DynamoSingleVersionStore
 import uk.ac.wellcome.storage.typesafe.DynamoBuilder
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
-import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 import weco.catalogue.sierra_linker.dynamo.Implicits._
 import weco.catalogue.sierra_linker.models.{Link, LinkOps}
 import weco.catalogue.sierra_linker.services.{LinkStore, SierraLinkerWorker}
+import weco.catalogue.source_model.config.SierraRecordTypeBuilder
 import weco.catalogue.source_model.sierra.identifiers._
-import weco.catalogue.source_model.sierra.identifiers.SierraRecordTypes._
 import weco.catalogue.source_model.sierra.{
   AbstractSierraRecord,
   SierraHoldingsRecord,
@@ -39,19 +38,11 @@ object Main extends WellcomeTypesafeApp {
     val messageSender =
       SNSBuilder.buildSNSMessageSender(config, subject = "Sierra linker")
 
-    val resourceType = config.requireString("linker.resourceType") match {
-      case s: String if s == bibs.toString     => bibs
-      case s: String if s == items.toString    => items
-      case s: String if s == holdings.toString => holdings
-      case s: String if s == orders.toString   => orders
-      case s: String =>
-        throw new IllegalArgumentException(
-          s"$s is not a valid Sierra resource type")
-    }
+    val recordType = SierraRecordTypeBuilder.build(config, name = "linker")
 
     import LinkOps._
 
-    resourceType match {
+    recordType match {
       case SierraRecordTypes.items =>
         new SierraLinkerWorker(
           sqsStream = sqsStream,
