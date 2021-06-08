@@ -9,9 +9,9 @@ import uk.ac.wellcome.storage.{
   Version
 }
 import weco.catalogue.sierra_merger.models.{RecordOps, TransformableOps}
+import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
 import weco.catalogue.source_model.sierra.{
   AbstractSierraRecord,
-  SierraBibNumber,
   SierraTransformable
 }
 import weco.catalogue.source_model.store.SourceVHS
