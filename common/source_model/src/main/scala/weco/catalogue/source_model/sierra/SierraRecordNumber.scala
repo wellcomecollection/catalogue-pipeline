@@ -1,7 +1,7 @@
 package weco.catalogue.source_model.sierra
 
 object SierraRecordTypes extends Enumeration {
-  val bibs, items, holdings, orders = Value
+  val bibs, items, holdings, orders, patrons = Value
 }
 
 trait SierraRecordNumber {
@@ -33,6 +33,7 @@ sealed trait TypedSierraRecordNumber extends SierraRecordNumber {
       case SierraRecordTypes.items    => "i"
       case SierraRecordTypes.holdings => "c" // for "checkin"
       case SierraRecordTypes.orders   => "o"
+      case SierraRecordTypes.patrons  => "p"
       case _ =>
         throw new RuntimeException(
           s"Received unrecognised record type: $recordType"
