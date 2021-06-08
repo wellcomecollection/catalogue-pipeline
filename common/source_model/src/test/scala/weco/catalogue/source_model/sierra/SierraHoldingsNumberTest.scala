@@ -4,7 +4,6 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil._
 import weco.catalogue.source_model.generators.SierraGenerators
-import Implicits._
 
 import scala.util.{Failure, Success}
 

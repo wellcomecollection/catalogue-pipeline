@@ -1,5 +1,11 @@
 package weco.catalogue.source_model.sierra
 
+import io.circe.{Decoder, DecodingFailure, Encoder, HCursor, Json, KeyDecoder, KeyEncoder}
+import uk.ac.wellcome.json.JsonUtil._
+import weco.catalogue.source_model.json.JsonOps.StringOrInt
+
+import scala.util.{Failure, Success, Try}
+
 object SierraRecordTypes extends Enumeration {
   val bibs, items, holdings, orders, patrons = Value
 }
@@ -88,6 +94,48 @@ sealed trait TypedSierraRecordNumber extends SierraRecordNumber {
   override def hashCode: Int = this.withCheckDigit.hashCode
 }
 
+trait SierraRecordNumberOps[T <: SierraRecordNumber] {
+  def apply(number: String): T
+
+  implicit val keyEncoder: KeyEncoder[T] =
+    (key: T) => key.withoutCheckDigit
+
+  implicit val keyDecoder: KeyDecoder[T] =
+    (key: String) => Some(apply(key))
+
+  // We have Sierra record numbers stored in three formats:
+  //
+  //  - a string (from Sierra API responses for bibs and items)
+  //  - a number (from Sierra API responses for holdings)
+  //  - a dict like {"recordNumber": "1234567"} (from the automatically
+  //    derived Circe-encoder in some old case classes)
+  //
+  // We always encode as a string, but we need to cope with all three
+  // forms for decoding.
+  private case class RecordNumberDict(recordNumber: StringOrInt)
+
+  implicit val decoder: Decoder[T] =
+    (c: HCursor) => {
+      val idString =
+        (c.value.as[StringOrInt], c.value.as[RecordNumberDict]) match {
+          case (Right(value), _) => Right(value.underlying)
+          case (_, Right(value)) => Right(value.recordNumber.underlying)
+          case (Left(err), _)    => Left(err)
+        }
+
+      idString.flatMap { id =>
+        Try { apply(id) } match {
+          case Success(number) => Right(number)
+          case Failure(err) =>
+            Left(DecodingFailure(err.toString, ops = List.empty))
+        }
+      }
+    }
+
+  implicit val encoder: Encoder[T] =
+    (number: T) => Json.fromString(number.withoutCheckDigit)
+}
+
 // Note: these are deliberately classes rather than case classes so that
 // we can have fine-grained control over how their encoding/decoding works.
 //
@@ -104,7 +152,7 @@ sealed trait TypedSierraRecordNumber extends SierraRecordNumber {
 class UntypedSierraRecordNumber(val recordNumber: String)
     extends SierraRecordNumber
 
-object UntypedSierraRecordNumber {
+object UntypedSierraRecordNumber extends SierraRecordNumberOps[UntypedSierraRecordNumber] {
   def apply(number: String) = new UntypedSierraRecordNumber(number)
 }
 
@@ -113,7 +161,7 @@ class SierraBibNumber(val recordNumber: String)
   val recordType: SierraRecordTypes.Value = SierraRecordTypes.bibs
 }
 
-object SierraBibNumber {
+object SierraBibNumber extends SierraRecordNumberOps[SierraBibNumber] {
   def apply(number: String) = new SierraBibNumber(number)
 }
 
@@ -122,7 +170,7 @@ class SierraItemNumber(val recordNumber: String)
   val recordType: SierraRecordTypes.Value = SierraRecordTypes.items
 }
 
-object SierraItemNumber {
+object SierraItemNumber extends SierraRecordNumberOps[SierraItemNumber] {
   def apply(number: String): SierraItemNumber =
     if (number.length == 9) {
       val itn = new SierraItemNumber(number.slice(1, 8))
@@ -138,7 +186,7 @@ class SierraHoldingsNumber(val recordNumber: String)
   val recordType: SierraRecordTypes.Value = SierraRecordTypes.holdings
 }
 
-object SierraHoldingsNumber {
+object SierraHoldingsNumber extends SierraRecordNumberOps[SierraHoldingsNumber] {
   def apply(number: String) = new SierraHoldingsNumber(number)
 }
 
@@ -147,6 +195,15 @@ class SierraOrderNumber(val recordNumber: String)
   val recordType: SierraRecordTypes.Value = SierraRecordTypes.orders
 }
 
-object SierraOrderNumber {
+object SierraOrderNumber extends SierraRecordNumberOps[SierraOrderNumber] {
   def apply(number: String) = new SierraOrderNumber(number)
+}
+
+class SierraPatronNumber(val recordNumber: String)
+  extends TypedSierraRecordNumber {
+  val recordType: SierraRecordTypes.Value = SierraRecordTypes.patrons
+}
+
+object SierraPatronNumber extends SierraRecordNumberOps[SierraPatronNumber] {
+  def apply(number: String) = new SierraPatronNumber(number)
 }
