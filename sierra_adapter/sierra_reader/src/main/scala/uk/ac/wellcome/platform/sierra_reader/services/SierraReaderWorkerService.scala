@@ -22,7 +22,6 @@ import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.typesafe.Runnable
 import weco.catalogue.sierra_reader.models.{SierraResourceTypes, WindowStatus}
 import weco.catalogue.sierra_reader.source.{SierraSource, ThrottleRate}
-import weco.catalogue.source_model.sierra.Implicits._
 import weco.catalogue.source_model.sierra.{
   AbstractSierraRecord,
   SierraBibRecord,

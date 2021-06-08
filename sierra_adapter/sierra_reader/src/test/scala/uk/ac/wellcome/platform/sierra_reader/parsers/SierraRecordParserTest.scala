@@ -8,11 +8,13 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.json.JsonUtil.toJson
 import uk.ac.wellcome.json.utils.JsonAssertions
 import weco.catalogue.source_model.generators.SierraGenerators
+import weco.catalogue.source_model.sierra.identifiers.{
+  SierraBibNumber,
+  SierraHoldingsNumber
+}
 import weco.catalogue.source_model.sierra.{
   AbstractSierraRecord,
-  SierraBibNumber,
   SierraBibRecord,
-  SierraHoldingsNumber,
   SierraHoldingsRecord,
   SierraItemRecord
 }
