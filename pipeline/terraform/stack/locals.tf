@@ -69,4 +69,10 @@ locals {
     "transformer_sierra",
     "transformer_calm",
   ]
+
+  sierra_adapter_topic_arns = var.is_reindexing ? concat(var.adapters["sierra"].topics, [var.adapters["sierra"].reindex_topic]) : var.adapters["sierra"].topics
+  miro_adapter_topic_arns   = var.is_reindexing ? concat(var.adapters["miro"].topics, [var.adapters["miro"].reindex_topic]) : var.adapters["miro"].topics
+  mets_adapter_topic_arns   = var.is_reindexing ? concat(var.adapters["mets"].topics, [var.adapters["mets"].reindex_topic]) : var.adapters["mets"].topics
+  calm_adapter_topic_arns   = var.is_reindexing ? concat(var.adapters["calm"].topics, [var.adapters["calm"].reindex_topic]) : var.adapters["calm"].topics
 }
+

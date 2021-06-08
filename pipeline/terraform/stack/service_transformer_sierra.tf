@@ -1,7 +1,7 @@
 module "sierra_transformer_queue" {
   source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
   queue_name      = "${local.namespace_hyphen}_sierra_transformer"
-  topic_arns      = var.sierra_adapter_topic_arns
+  topic_arns      = local.sierra_adapter_topic_arns
   alarm_topic_arn = var.dlq_alarm_arn
   aws_region      = var.aws_region
 }

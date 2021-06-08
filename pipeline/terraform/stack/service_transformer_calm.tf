@@ -1,7 +1,7 @@
 module "calm_transformer_queue" {
   source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
   queue_name      = "${local.namespace_hyphen}_calm_transformer"
-  topic_arns      = var.calm_adapter_topic_arns
+  topic_arns      = local.calm_adapter_topic_arns
   alarm_topic_arn = var.dlq_alarm_arn
   aws_region      = var.aws_region
 }

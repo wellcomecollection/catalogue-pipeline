@@ -48,27 +48,13 @@ variable "release_label" {
 }
 
 # Miro
-variable "miro_adapter_topic_arns" {
-  type = list(string)
-}
 variable "vhs_miro_read_policy" {}
 
 # Sierra
 variable "vhs_sierra_read_policy" {}
-variable "sierra_adapter_topic_arns" {
-  type = list(string)
-}
 
 # Calm
 variable "vhs_calm_read_policy" {}
-variable "calm_adapter_topic_arns" {
-  type = list(string)
-}
-
-# Mets
-variable "mets_adapter_topic_arns" {
-  type = list(string)
-}
 
 variable "storage_bucket_name" {
   type = string
@@ -82,4 +68,11 @@ variable "traffic_filter_platform_vpce_id" {
 
 variable "traffic_filter_public_internet_id" {
   type = string
+}
+
+variable "adapters" {
+  type = map(object({
+    topics        = list(string)
+    reindex_topic = string
+  }))
 }

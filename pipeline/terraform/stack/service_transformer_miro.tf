@@ -1,7 +1,7 @@
 module "miro_transformer_queue" {
   source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
   queue_name      = "${local.namespace_hyphen}_miro_transformer"
-  topic_arns      = var.miro_adapter_topic_arns
+  topic_arns      = local.miro_adapter_topic_arns
   aws_region      = var.aws_region
   alarm_topic_arn = var.dlq_alarm_arn
 }

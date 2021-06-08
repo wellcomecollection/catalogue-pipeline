@@ -4,37 +4,42 @@ module "catalogue_pipeline_2021-06-03" {
   pipeline_date = "2021-06-03"
   release_label = "2021-06-03"
 
-  # Transformer config
-  #
-  # If this pipeline is meant to be reindexed, remember to uncomment the
-  # reindexer topic names.
-
   is_reindexing = false
 
-  sierra_adapter_topic_arns = [
-    //    local.sierra_reindexer_topic_arn,
-    local.sierra_merged_bibs_topic_arn,
-    local.sierra_merged_items_topic_arn,
-    local.sierra_merged_holdings_topic_arn,
-  ]
-
-  miro_adapter_topic_arns = [
-    //    local.miro_reindexer_topic_arn,
-    local.miro_updates_topic_arn,
-  ]
-
-  mets_adapter_topic_arns = [
-    //    local.mets_reindexer_topic_arn,
-    local.mets_adapter_topic_arn,
-  ]
-
-  calm_adapter_topic_arns = [
-    //    local.calm_reindexer_topic_arn,
-    local.calm_adapter_topic_arn,
-    local.calm_deletions_topic_arn,
-  ]
-
   # Boilerplate that shouldn't change between pipelines.
+
+  adapters = {
+    sierra = {
+      topics = [
+        local.sierra_merged_bibs_topic_arn,
+        local.sierra_merged_items_topic_arn,
+        local.sierra_merged_holdings_topic_arn,
+      ]
+      reindex_topic = local.sierra_reindexer_topic_arn
+    }
+
+    miro = {
+      topics = [
+        local.miro_updates_topic_arn
+      ]
+      reindex_topic = local.miro_reindexer_topic_arn,
+    }
+
+    mets = {
+      topics = [
+        local.mets_adapter_topic_arn,
+      ],
+      reindex_topic = local.mets_reindexer_topic_arn,
+    }
+
+    calm = {
+      topics = [
+        local.calm_adapter_topic_arn,
+        local.calm_deletions_topic_arn,
+      ],
+      reindex_topic = local.calm_reindexer_topic_arn,
+    }
+  }
 
   aws_region = local.aws_region
   vpc_id     = local.vpc_id
@@ -64,4 +69,3 @@ module "catalogue_pipeline_2021-06-03" {
 
   storage_bucket_name = local.storage_bucket
 }
-
