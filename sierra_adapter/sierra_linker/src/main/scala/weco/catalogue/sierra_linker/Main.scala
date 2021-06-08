@@ -5,6 +5,7 @@ import com.typesafe.config.Config
 import org.scanamo.DynamoFormat
 import org.scanamo.generic.auto._
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
+import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.storage.store.dynamo.DynamoSingleVersionStore
@@ -15,18 +16,13 @@ import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 import weco.catalogue.sierra_linker.dynamo.Implicits._
 import weco.catalogue.sierra_linker.models.{Link, LinkOps}
 import weco.catalogue.sierra_linker.services.{LinkStore, SierraLinkerWorker}
-import weco.catalogue.source_model.sierra.SierraRecordTypes._
-import weco.catalogue.source_model.sierra.Implicits._
+import weco.catalogue.source_model.sierra.identifiers._
+import weco.catalogue.source_model.sierra.identifiers.SierraRecordTypes._
 import weco.catalogue.source_model.sierra.{
   AbstractSierraRecord,
-  SierraHoldingsNumber,
   SierraHoldingsRecord,
-  SierraItemNumber,
   SierraItemRecord,
-  SierraOrderNumber,
-  SierraOrderRecord,
-  SierraRecordTypes,
-  TypedSierraRecordNumber
+  SierraOrderRecord
 }
 
 import scala.concurrent.ExecutionContext

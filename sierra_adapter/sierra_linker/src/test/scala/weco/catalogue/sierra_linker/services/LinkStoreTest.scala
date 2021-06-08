@@ -13,7 +13,8 @@ import uk.ac.wellcome.storage.{
 }
 import weco.catalogue.sierra_linker.models.Link
 import weco.catalogue.source_model.generators.SierraGenerators
-import weco.catalogue.source_model.sierra.{SierraItemNumber, SierraItemRecord}
+import weco.catalogue.source_model.sierra.SierraItemRecord
+import weco.catalogue.source_model.sierra.identifiers.SierraItemNumber
 
 class LinkStoreTest
     extends AnyFunSpec

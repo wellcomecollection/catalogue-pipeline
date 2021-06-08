@@ -7,10 +7,8 @@ import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.typesafe.Runnable
-import weco.catalogue.source_model.sierra.{
-  AbstractSierraRecord,
-  TypedSierraRecordNumber
-}
+import weco.catalogue.source_model.sierra.AbstractSierraRecord
+import weco.catalogue.source_model.sierra.identifiers.TypedSierraRecordNumber
 
 import scala.concurrent.Future
 import scala.util.Success
