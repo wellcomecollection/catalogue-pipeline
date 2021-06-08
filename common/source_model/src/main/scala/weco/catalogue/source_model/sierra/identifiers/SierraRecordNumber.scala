@@ -62,4 +62,3 @@ trait SierraRecordNumberOps[T <: SierraRecordNumber] {
   implicit val encoder: Encoder[T] =
     (number: T) => Json.fromString(number.withoutCheckDigit)
 }
-

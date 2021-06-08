@@ -85,7 +85,8 @@ sealed trait TypedSierraRecordNumber extends SierraRecordNumber {
 class UntypedSierraRecordNumber(val recordNumber: String)
     extends SierraRecordNumber
 
-object UntypedSierraRecordNumber extends SierraRecordNumberOps[UntypedSierraRecordNumber] {
+object UntypedSierraRecordNumber
+    extends SierraRecordNumberOps[UntypedSierraRecordNumber] {
   def apply(number: String) = new UntypedSierraRecordNumber(number)
 }
 
@@ -119,7 +120,8 @@ class SierraHoldingsNumber(val recordNumber: String)
   val recordType: SierraRecordTypes.Value = SierraRecordTypes.holdings
 }
 
-object SierraHoldingsNumber extends SierraRecordNumberOps[SierraHoldingsNumber] {
+object SierraHoldingsNumber
+    extends SierraRecordNumberOps[SierraHoldingsNumber] {
   def apply(number: String) = new SierraHoldingsNumber(number)
 }
 
@@ -133,7 +135,7 @@ object SierraOrderNumber extends SierraRecordNumberOps[SierraOrderNumber] {
 }
 
 class SierraPatronNumber(val recordNumber: String)
-  extends TypedSierraRecordNumber {
+    extends TypedSierraRecordNumber {
   val recordType: SierraRecordTypes.Value = SierraRecordTypes.patrons
 }
 

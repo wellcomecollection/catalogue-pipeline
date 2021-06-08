@@ -38,10 +38,12 @@ object IndexerRequest {
     Index(s"${indexPrefix}_fixedfields")
 
   implicit val recordNumberEncoder: Encoder[TypedSierraRecordNumber] =
-    (number: TypedSierraRecordNumber) => Json.fromString(number.withoutCheckDigit)
+    (number: TypedSierraRecordNumber) =>
+      Json.fromString(number.withoutCheckDigit)
 
   implicit val encoder: Encoder[SierraRecordTypes.Value] =
-    (recordType: SierraRecordTypes.Value) => Json.fromString(recordType.toString)
+    (recordType: SierraRecordTypes.Value) =>
+      Json.fromString(recordType.toString)
 
   private case class IndexedVarField(
     parent: Parent,
