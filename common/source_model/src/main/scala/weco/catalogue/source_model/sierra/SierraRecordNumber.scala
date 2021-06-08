@@ -122,7 +122,14 @@ class SierraItemNumber(val recordNumber: String)
 }
 
 object SierraItemNumber {
-  def apply(number: String) = new SierraItemNumber(number)
+  def apply(number: String): SierraItemNumber =
+    if (number.length == 9) {
+      val itn = new SierraItemNumber(number.slice(1, 8))
+      require(itn.withCheckDigit == number)
+      itn
+    } else {
+      new SierraItemNumber(number)
+    }
 }
 
 class SierraHoldingsNumber(val recordNumber: String)
