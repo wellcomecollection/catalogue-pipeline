@@ -3,11 +3,11 @@ package uk.ac.wellcome.platform.sierra_reader.config.builders
 import com.typesafe.config.Config
 import uk.ac.wellcome.platform.sierra_reader.config.models.ReaderConfig
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
-import weco.catalogue.sierra_reader.models.SierraResourceTypes._
+import weco.catalogue.source_model.sierra.identifiers.SierraRecordTypes._
 
 object ReaderConfigBuilder {
   def buildReaderConfig(config: Config): ReaderConfig = {
-    val resourceType = config.requireString("reader.resourceType") match {
+    val recordType = config.requireString("reader.resourceType") match {
       case s: String if s == bibs.toString     => bibs
       case s: String if s == items.toString    => items
       case s: String if s == holdings.toString => holdings
@@ -18,7 +18,7 @@ object ReaderConfigBuilder {
     }
 
     ReaderConfig(
-      resourceType = resourceType,
+      recordType = recordType,
       fields = config.requireString("reader.fields"),
       batchSize = config
         .getIntOption("reader.batchSize")

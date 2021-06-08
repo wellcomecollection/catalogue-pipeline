@@ -88,7 +88,7 @@ class WindowManager(
   }
 
   def buildWindowShard(window: String) =
-    s"records_${readerConfig.resourceType.toString}/${buildWindowLabel(window)}/"
+    s"records_${readerConfig.recordType.toString}/${buildWindowLabel(window)}/"
 
   def buildWindowLabel(window: String) = {
     // Window is a string like [2013-12-01T01:01:01+00:00,2013-12-01T01:01:01+00:00].

@@ -1,9 +1,9 @@
 package uk.ac.wellcome.platform.sierra_reader.config.models
 
-import weco.catalogue.sierra_reader.models.SierraResourceTypes
+import weco.catalogue.source_model.sierra.identifiers.SierraRecordTypes
 
 case class ReaderConfig(
-  resourceType: SierraResourceTypes.Value,
+  recordType: SierraRecordTypes.Value,
   fields: String,
   batchSize: Int = 50
 )
