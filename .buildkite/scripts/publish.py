@@ -23,7 +23,7 @@ def publish(project_name):
 # when used with the buildkite docker plugin incorrectly parses
 # spaces as newlines preventing passing args to this script!
 if __name__ == "__main__":
-    project = os.environ.get("PROJECT")
+    projects = os.environ.get("PROJECTS").split()
     commit_range = None
     local_head = local_current_head()
 
@@ -40,10 +40,12 @@ if __name__ == "__main__":
 
     changed_paths = get_changed_paths(commit_range, globs=None)
 
-    # Determine whether we should build this project
+    # Determine whether we should build these projects
 
     sbt_repo = Repository(".sbt_metadata")
-    if not should_run_sbt_project(sbt_repo, project, changed_paths):
-        print(f"Nothing in this patch affects {project}, so stopping.")
+    if not any(should_run_sbt_project(sbt_repo, p, changed_paths) for p in projects):
+        print(f"Nothing in this patch affects {projects}, so stopping.")
         sys.exit(0)
-    publish(project)
+
+    for p in projects:
+        publish(p)
