@@ -3,7 +3,11 @@ package weco.catalogue.internal_model.work
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.generators.{ItemsGenerators, WorkGenerators}
-import weco.catalogue.internal_model.locations.{AccessStatus, LocationType}
+import weco.catalogue.internal_model.locations.{
+  AccessCondition,
+  AccessStatus,
+  LocationType
+}
 
 class AvailabilityTest
     extends AnyFunSpec
@@ -44,6 +48,27 @@ class AvailabilityTest
               locations = List(
                 createPhysicalLocationWith(
                   locationType = LocationType.OnOrder
+                )
+              ))
+          )
+        )
+      val workAvailabilities = Availabilities.forWorkData(work.data)
+
+      workAvailabilities shouldBe empty
+    }
+
+    it("does not add Availability.InLibrary if the location is offsite") {
+      val work = denormalisedWork()
+        .items(
+          List(
+            createIdentifiedItemWith(
+              locations = List(
+                createPhysicalLocationWith(
+                  accessConditions = List(
+                    AccessCondition(
+                      terms = Some("Available at Churchill Archives Centre")
+                    )
+                  )
                 )
               ))
           )

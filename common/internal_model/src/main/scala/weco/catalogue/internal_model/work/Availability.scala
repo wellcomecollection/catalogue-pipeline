@@ -3,6 +3,7 @@ package weco.catalogue.internal_model.work
 import enumeratum.{Enum, EnumEntry}
 import io.circe.{Decoder, Encoder}
 import weco.catalogue.internal_model.locations.{
+  AccessCondition,
   DigitalLocation,
   Location,
   LocationType,
@@ -59,14 +60,24 @@ object Availabilities {
   private implicit class LocationOps(loc: Location) {
     def isAvailableInLibrary: Boolean =
       loc match {
-        case physicalLoc: PhysicalLocation =>
-          // The availability filter is meant to show people things they
-          // can actually see, so we don't include items that have been ordered
-          // but aren't available to view yet.
-          physicalLoc.locationType match {
-            case LocationType.OnOrder => false
-            case _                    => true
-          }
+        // The availability filter is meant to show people things they
+        // can actually see, so we don't include items that have been ordered
+        // but aren't available to view yet.
+        case physicalLoc: PhysicalLocation
+          if physicalLoc.locationType == LocationType.OnOrder => false
+
+        // Don't include items if they have a physical location but are actually
+        // held in another institution.
+        //
+        // Right now we do crude string matching on the terms in the access condition.
+        // There might be something better we can do that looks at the reference numbers,
+        // but for now this is a significant improvement without much effort.
+        //
+        // See https://github.com/wellcomecollection/platform/issues/5190
+        case physicalLoc: PhysicalLocation
+          if physicalLoc.accessConditions.exists { _.termsAreOtherInstitution } => false
+
+        case _: PhysicalLocation => true
 
         case _ => false
       }
@@ -75,6 +86,22 @@ object Availabilities {
       loc match {
         case digitalLoc: DigitalLocation if digitalLoc.isAvailable => true
         case _                                                     => false
+      }
+  }
+
+  private implicit class OptionalAccessConditionOps(ac: AccessCondition) {
+    def termsAreOtherInstitution: Boolean =
+      ac.terms match {
+        case Some(t) if t.toLowerCase.contains("available at") => true
+        case Some(t) if t.toLowerCase.contains("available by appointment at") => true
+
+        case Some(t) if t.contains("Churchill Archives Centre") => true
+        case Some(t) if t.contains("UCL Special Collections and Archives") => true
+        case Some(t) if t.contains("at King's College London") => true
+        case Some(t) if t.contains("at the Army Medical Services Museum") => true
+        case Some(t) if t.contains("currently remains with the Martin Leake family") => true
+
+        case _ => false
       }
   }
 
