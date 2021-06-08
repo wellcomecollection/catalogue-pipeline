@@ -3,7 +3,8 @@ package weco.catalogue.source_model.sierra.rules
 import weco.catalogue.internal_model.locations.AccessStatus
 import weco.catalogue.source_model.sierra.marc.VarField
 import weco.catalogue.source_model.sierra.source.SierraQueryOps
-import weco.catalogue.source_model.sierra.{SierraBibData, SierraBibNumber}
+import weco.catalogue.source_model.sierra.SierraBibData
+import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
 
 object SierraAccessStatus extends SierraQueryOps {
   def forBib(bibId: SierraBibNumber,

@@ -4,8 +4,10 @@ import java.io.InputStream
 import uk.ac.wellcome.storage.streaming.Codec._
 import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType}
 import weco.catalogue.internal_model.work.Item
-import weco.catalogue.source_model.sierra.{SierraBibNumber, SierraItemNumber}
-import weco.catalogue.source_model.sierra.Implicits._
+import weco.catalogue.source_model.sierra.identifiers.{
+  SierraBibNumber,
+  SierraItemNumber
+}
 
 /** The order of physical items in Sierra is significant, and can affect
   * how items should be requested by users.

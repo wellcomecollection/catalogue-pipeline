@@ -11,7 +11,6 @@ import uk.ac.wellcome.storage.store.memory.MemoryTypedStore
 import weco.catalogue.sierra_indexer.fixtures.IndexerFixtures
 import weco.catalogue.source_model.SierraSourcePayload
 import weco.catalogue.source_model.generators.SierraGenerators
-import weco.catalogue.source_model.sierra.Implicits._
 import weco.catalogue.source_model.sierra.SierraTransformable
 
 class WorkerTest

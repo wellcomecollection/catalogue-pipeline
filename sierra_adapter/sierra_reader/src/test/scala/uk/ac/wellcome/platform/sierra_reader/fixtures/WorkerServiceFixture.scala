@@ -12,7 +12,7 @@ import uk.ac.wellcome.platform.sierra_reader.config.models.{
 import uk.ac.wellcome.platform.sierra_reader.services.SierraReaderWorkerService
 import uk.ac.wellcome.storage.fixtures.S3Fixtures
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
-import weco.catalogue.sierra_reader.models.SierraResourceTypes
+import weco.catalogue.source_model.sierra.identifiers.SierraRecordTypes
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -42,17 +42,17 @@ trait WorkerServiceFixture
     }
 
   val bibsReaderConfig: ReaderConfig = ReaderConfig(
-    resourceType = SierraResourceTypes.bibs,
+    recordType = SierraRecordTypes.bibs,
     fields = "updatedDate,deletedDate,deleted,suppressed,author,title"
   )
 
   val itemsReaderConfig: ReaderConfig = ReaderConfig(
-    resourceType = SierraResourceTypes.items,
+    recordType = SierraRecordTypes.items,
     fields = "updatedDate,deleted,deletedDate,bibIds,fixedFields,varFields"
   )
 
   val holdingsReaderConfig: ReaderConfig = ReaderConfig(
-    resourceType = SierraResourceTypes.holdings,
+    recordType = SierraRecordTypes.holdings,
     fields = "updatedDate"
   )
 }

@@ -35,6 +35,10 @@ import weco.catalogue.internal_model.work.InvisibilityReason.{
 import weco.catalogue.internal_model.work._
 import weco.catalogue.source_model.generators.{MarcGenerators, SierraGenerators}
 import weco.catalogue.source_model.sierra._
+import weco.catalogue.source_model.sierra.identifiers.{
+  SierraBibNumber,
+  SierraItemNumber
+}
 import weco.catalogue.source_model.sierra.marc.MarcSubfield
 
 class SierraTransformerTest

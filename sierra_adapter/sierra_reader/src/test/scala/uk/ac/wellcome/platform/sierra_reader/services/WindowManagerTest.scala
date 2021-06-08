@@ -10,10 +10,12 @@ import uk.ac.wellcome.platform.sierra_reader.exceptions.SierraReaderException
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.storage.fixtures.S3Fixtures
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
-import weco.catalogue.sierra_reader.models.{SierraResourceTypes, WindowStatus}
+import weco.catalogue.sierra_reader.models.WindowStatus
 import weco.catalogue.source_model.generators.SierraGenerators
-import weco.catalogue.source_model.sierra.Implicits._
-import weco.catalogue.source_model.sierra.SierraBibNumber
+import weco.catalogue.source_model.sierra.identifiers.{
+  SierraBibNumber,
+  SierraRecordTypes
+}
 
 class WindowManagerTest
     extends AnyFunSpec
@@ -28,7 +30,7 @@ class WindowManagerTest
     val windowManager = new WindowManager(
       s3Config = createS3ConfigWith(bucket),
       readerConfig = ReaderConfig(
-        resourceType = SierraResourceTypes.bibs,
+        recordType = SierraRecordTypes.bibs,
         fields = "title"
       )
     )

@@ -20,9 +20,9 @@ import uk.ac.wellcome.storage.Identified
 import uk.ac.wellcome.storage.s3.{S3Config, S3ObjectLocation}
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.typesafe.Runnable
-import weco.catalogue.sierra_reader.models.{SierraResourceTypes, WindowStatus}
+import weco.catalogue.sierra_reader.models.WindowStatus
 import weco.catalogue.sierra_reader.source.{SierraSource, ThrottleRate}
-import weco.catalogue.source_model.sierra.Implicits._
+import weco.catalogue.source_model.sierra.identifiers.SierraRecordTypes
 import weco.catalogue.source_model.sierra.{
   AbstractSierraRecord,
   SierraBibRecord,
@@ -88,7 +88,7 @@ class SierraReaderWorkerService(
       config = sierraAPIConfig,
       throttleRate = ThrottleRate(3, per = 1.second),
       timeout = 60 seconds
-    )(resourceType = readerConfig.resourceType.toString, params)
+    )(resourceType = readerConfig.recordType.toString, params)
 
     val outcome = sierraSource
       .via(SierraRecordWrapperFlow(createRecord))
@@ -101,7 +101,7 @@ class SierraReaderWorkerService(
     // our S3 bucket to see which windows were never successfully completed.
     outcome.flatMap { _ =>
       val key =
-        s"windows_${readerConfig.resourceType.toString}_complete/${windowManager
+        s"windows_${readerConfig.recordType.toString}_complete/${windowManager
           .buildWindowLabel(window)}"
 
       Future.fromTry(
@@ -115,22 +115,22 @@ class SierraReaderWorkerService(
 
   private def createRecord
     : (String, String, Instant) => AbstractSierraRecord[_] =
-    readerConfig.resourceType match {
-      case SierraResourceTypes.bibs     => SierraBibRecord.apply
-      case SierraResourceTypes.items    => SierraItemRecord.apply
-      case SierraResourceTypes.holdings => SierraHoldingsRecord.apply
-      case SierraResourceTypes.orders   => SierraOrderRecord.apply
+    readerConfig.recordType match {
+      case SierraRecordTypes.bibs     => SierraBibRecord.apply
+      case SierraRecordTypes.items    => SierraItemRecord.apply
+      case SierraRecordTypes.holdings => SierraHoldingsRecord.apply
+      case SierraRecordTypes.orders   => SierraOrderRecord.apply
     }
 
   private def toJson(records: Seq[AbstractSierraRecord[_]]): Json =
-    readerConfig.resourceType match {
-      case SierraResourceTypes.bibs =>
+    readerConfig.recordType match {
+      case SierraRecordTypes.bibs =>
         records.asInstanceOf[Seq[SierraBibRecord]].asJson
-      case SierraResourceTypes.items =>
+      case SierraRecordTypes.items =>
         records.asInstanceOf[Seq[SierraItemRecord]].asJson
-      case SierraResourceTypes.holdings =>
+      case SierraRecordTypes.holdings =>
         records.asInstanceOf[Seq[SierraHoldingsRecord]].asJson
-      case SierraResourceTypes.orders =>
+      case SierraRecordTypes.orders =>
         records.asInstanceOf[Seq[SierraOrderRecord]].asJson
     }
 }

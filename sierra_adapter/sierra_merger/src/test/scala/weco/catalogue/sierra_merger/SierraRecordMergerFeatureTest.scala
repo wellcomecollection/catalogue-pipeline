@@ -17,7 +17,7 @@ import weco.catalogue.sierra_merger.services.Worker
 import weco.catalogue.source_model.fixtures.SourceVHSFixture
 import weco.catalogue.source_model.generators.SierraGenerators
 import weco.catalogue.source_model.sierra._
-import weco.catalogue.source_model.sierra.Implicits._
+import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
 import weco.catalogue.source_model.store.SourceVHS
 
 trait SierraRecordMergerFeatureTestCases[Record <: AbstractSierraRecord[_]]

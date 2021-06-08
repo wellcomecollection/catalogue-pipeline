@@ -3,6 +3,12 @@ package weco.catalogue.source_model.generators
 import uk.ac.wellcome.fixtures.RandomGenerators
 import uk.ac.wellcome.json.JsonUtil.toJson
 import weco.catalogue.source_model.sierra._
+import weco.catalogue.source_model.sierra.identifiers.{
+  SierraBibNumber,
+  SierraHoldingsNumber,
+  SierraItemNumber,
+  SierraOrderNumber
+}
 
 import java.time.Instant
 import scala.util.Random

@@ -1,23 +1,4 @@
-package weco.catalogue.source_model.sierra
-
-object SierraRecordTypes extends Enumeration {
-  val bibs, items, holdings, orders = Value
-}
-
-trait SierraRecordNumber {
-  val recordNumber: String
-
-  if ("""^[0-9]{7}$""".r.unapplySeq(recordNumber) isEmpty) {
-    throw new IllegalArgumentException(
-      s"requirement failed: Not a 7-digit Sierra record number: $recordNumber"
-    )
-  }
-
-  override def toString: String = withoutCheckDigit
-
-  /** Returns the ID without the check digit or prefix. */
-  def withoutCheckDigit: String = recordNumber
-}
+package weco.catalogue.source_model.sierra.identifiers
 
 sealed trait TypedSierraRecordNumber extends SierraRecordNumber {
   val recordType: SierraRecordTypes.Value
@@ -33,6 +14,7 @@ sealed trait TypedSierraRecordNumber extends SierraRecordNumber {
       case SierraRecordTypes.items    => "i"
       case SierraRecordTypes.holdings => "c" // for "checkin"
       case SierraRecordTypes.orders   => "o"
+      case SierraRecordTypes.patrons  => "p"
       case _ =>
         throw new RuntimeException(
           s"Received unrecognised record type: $recordType"
@@ -103,7 +85,8 @@ sealed trait TypedSierraRecordNumber extends SierraRecordNumber {
 class UntypedSierraRecordNumber(val recordNumber: String)
     extends SierraRecordNumber
 
-object UntypedSierraRecordNumber {
+object UntypedSierraRecordNumber
+    extends SierraRecordNumberOps[UntypedSierraRecordNumber] {
   def apply(number: String) = new UntypedSierraRecordNumber(number)
 }
 
@@ -112,7 +95,7 @@ class SierraBibNumber(val recordNumber: String)
   val recordType: SierraRecordTypes.Value = SierraRecordTypes.bibs
 }
 
-object SierraBibNumber {
+object SierraBibNumber extends SierraRecordNumberOps[SierraBibNumber] {
   def apply(number: String) = new SierraBibNumber(number)
 }
 
@@ -121,7 +104,7 @@ class SierraItemNumber(val recordNumber: String)
   val recordType: SierraRecordTypes.Value = SierraRecordTypes.items
 }
 
-object SierraItemNumber {
+object SierraItemNumber extends SierraRecordNumberOps[SierraItemNumber] {
   def apply(number: String): SierraItemNumber =
     if (number.length == 9) {
       val itn = new SierraItemNumber(number.slice(1, 8))
@@ -137,7 +120,8 @@ class SierraHoldingsNumber(val recordNumber: String)
   val recordType: SierraRecordTypes.Value = SierraRecordTypes.holdings
 }
 
-object SierraHoldingsNumber {
+object SierraHoldingsNumber
+    extends SierraRecordNumberOps[SierraHoldingsNumber] {
   def apply(number: String) = new SierraHoldingsNumber(number)
 }
 
@@ -146,6 +130,15 @@ class SierraOrderNumber(val recordNumber: String)
   val recordType: SierraRecordTypes.Value = SierraRecordTypes.orders
 }
 
-object SierraOrderNumber {
+object SierraOrderNumber extends SierraRecordNumberOps[SierraOrderNumber] {
   def apply(number: String) = new SierraOrderNumber(number)
+}
+
+class SierraPatronNumber(val recordNumber: String)
+    extends TypedSierraRecordNumber {
+  val recordType: SierraRecordTypes.Value = SierraRecordTypes.patrons
+}
+
+object SierraPatronNumber extends SierraRecordNumberOps[SierraPatronNumber] {
+  def apply(number: String) = new SierraPatronNumber(number)
 }

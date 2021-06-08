@@ -2,6 +2,10 @@ package weco.catalogue.source_model.sierra
 
 import java.time.Instant
 import uk.ac.wellcome.json.JsonUtil._
+import weco.catalogue.source_model.sierra.identifiers.{
+  SierraBibNumber,
+  SierraOrderNumber
+}
 
 import scala.util.{Failure, Success}
 

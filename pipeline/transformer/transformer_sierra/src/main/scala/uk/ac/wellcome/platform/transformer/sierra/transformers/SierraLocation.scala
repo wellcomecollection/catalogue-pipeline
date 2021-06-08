@@ -1,17 +1,16 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import weco.catalogue.internal_model.locations._
+import weco.catalogue.source_model.sierra.identifiers.{
+  SierraBibNumber,
+  SierraItemNumber
+}
 import weco.catalogue.source_model.sierra.rules.{
   SierraAccessStatus,
   SierraItemAccess,
   SierraPhysicalLocationType
 }
-import weco.catalogue.source_model.sierra.{
-  SierraBibData,
-  SierraBibNumber,
-  SierraItemData,
-  SierraItemNumber
-}
+import weco.catalogue.source_model.sierra.{SierraBibData, SierraItemData}
 
 trait SierraLocation {
   def getPhysicalLocation(

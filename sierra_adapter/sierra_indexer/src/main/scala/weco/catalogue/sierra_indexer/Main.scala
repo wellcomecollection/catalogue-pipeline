@@ -4,6 +4,7 @@ import akka.actor.ActorSystem
 import com.amazonaws.services.s3.AmazonS3
 import com.sksamuel.elastic4s.ElasticClient
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
+import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.typesafe.SQSBuilder
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.storage.typesafe.S3Builder
@@ -11,7 +12,6 @@ import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import weco.catalogue.sierra_indexer.services.Worker
 import weco.catalogue.source_model.sierra.SierraTransformable
-import weco.catalogue.source_model.sierra.Implicits._
 
 import scala.concurrent.ExecutionContext
 

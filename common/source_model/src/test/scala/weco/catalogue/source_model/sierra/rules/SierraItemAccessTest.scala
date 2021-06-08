@@ -10,7 +10,10 @@ import weco.catalogue.internal_model.locations.{
   LocationType
 }
 import weco.catalogue.source_model.generators.SierraDataGenerators
-import weco.catalogue.source_model.sierra.{SierraBibNumber, SierraItemNumber}
+import weco.catalogue.source_model.sierra.identifiers.{
+  SierraBibNumber,
+  SierraItemNumber
+}
 import weco.catalogue.source_model.sierra.marc.{FixedField, VarField}
 
 class SierraItemAccessTest

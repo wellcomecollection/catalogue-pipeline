@@ -21,10 +21,8 @@ import weco.catalogue.source_model.sierra.marc.{
   MarcSubfield,
   VarField
 }
-import weco.catalogue.source_model.sierra.{
-  SierraHoldingsData,
-  SierraHoldingsNumber
-}
+import weco.catalogue.source_model.sierra.SierraHoldingsData
+import weco.catalogue.source_model.sierra.identifiers.SierraHoldingsNumber
 
 class SierraHoldingsTest
     extends AnyFunSpec

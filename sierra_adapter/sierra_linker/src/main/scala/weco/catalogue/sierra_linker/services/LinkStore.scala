@@ -3,10 +3,8 @@ package weco.catalogue.sierra_linker.services
 import uk.ac.wellcome.storage.store.VersionedStore
 import uk.ac.wellcome.storage.{Identified, UpdateNotApplied}
 import weco.catalogue.sierra_linker.models.{Link, LinkOps}
-import weco.catalogue.source_model.sierra.{
-  AbstractSierraRecord,
-  TypedSierraRecordNumber
-}
+import weco.catalogue.source_model.sierra.AbstractSierraRecord
+import weco.catalogue.source_model.sierra.identifiers.TypedSierraRecordNumber
 
 class LinkStore[Id <: TypedSierraRecordNumber,
                 Record <: AbstractSierraRecord[Id]](

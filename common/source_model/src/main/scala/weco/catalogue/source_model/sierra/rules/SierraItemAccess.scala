@@ -9,9 +9,9 @@ import weco.catalogue.internal_model.locations.{
   LocationType,
   PhysicalLocationType
 }
-import weco.catalogue.source_model.sierra.{
+import weco.catalogue.source_model.sierra.SierraItemData
+import weco.catalogue.source_model.sierra.identifiers.{
   SierraBibNumber,
-  SierraItemData,
   SierraItemNumber
 }
 import weco.catalogue.source_model.sierra.source.{
