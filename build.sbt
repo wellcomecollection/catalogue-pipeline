@@ -35,11 +35,8 @@ lazy val internal_model = setupProject(
   externalDependencies = CatalogueDependencies.internalModelDependencies)
   .settings(Publish.settings: _*)
   .enablePlugins(GitVersioning)
-  .settings(
-    git.baseVersion:= sys.env.getOrElse("BUILDKITE_BUILD_NUMBER","0"),
-    git.formattedShaVersion := git.gitHeadCommit.value map { sha => s"${git.baseVersion.value}.$sha" })
-  .enablePlugins(BuildInfoPlugin).settings(
-  buildInfoKeys := Seq[BuildInfoKey](name, version))
+  .enablePlugins(BuildInfoPlugin)
+  .settings(Publish.sharedLibrarySettings: _*)
 
 lazy val flows = setupProject(
   project,
@@ -50,8 +47,10 @@ lazy val source_model = setupProject(
   project,
   folder = "common/source_model",
   localDependencies = Seq(internal_model),
-  externalDependencies = CatalogueDependencies.sourceModelDependencies
-)
+  externalDependencies = CatalogueDependencies.sourceModelDependencies)
+  .enablePlugins(GitVersioning)
+  .enablePlugins(BuildInfoPlugin)
+  .settings(Publish.sharedLibrarySettings: _*)
 
 lazy val source_model_typesafe = setupProject(
   project,
