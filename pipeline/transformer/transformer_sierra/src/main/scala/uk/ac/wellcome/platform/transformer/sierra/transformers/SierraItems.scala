@@ -14,12 +14,11 @@ import weco.catalogue.internal_model.locations.{
 import weco.catalogue.internal_model.work.Item
 import weco.catalogue.source_model.sierra.rules.SierraPhysicalLocationType
 import weco.catalogue.source_model.sierra.source.SierraQueryOps
-import weco.catalogue.source_model.sierra.{
-  SierraBibData,
+import weco.catalogue.source_model.sierra.identifiers.{
   SierraBibNumber,
-  SierraItemData,
   SierraItemNumber
 }
+import weco.catalogue.source_model.sierra.{SierraBibData, SierraItemData}
 
 object SierraItems extends Logging with SierraLocation with SierraQueryOps {
 

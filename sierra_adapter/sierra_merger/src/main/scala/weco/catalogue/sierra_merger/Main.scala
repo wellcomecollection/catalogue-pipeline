@@ -2,21 +2,22 @@ package weco.catalogue.sierra_merger
 
 import akka.actor.ActorSystem
 import com.typesafe.config.Config
+import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import weco.catalogue.sierra_merger.services.{Updater, Worker}
-import weco.catalogue.source_model.config.SourceVHSBuilder
-import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
-import weco.catalogue.source_model.sierra.Implicits._
-import weco.catalogue.source_model.sierra.SierraRecordTypes._
+import weco.catalogue.source_model.config.{
+  SierraRecordTypeBuilder,
+  SourceVHSBuilder
+}
+import weco.catalogue.source_model.sierra.identifiers.SierraRecordTypes
 import weco.catalogue.source_model.sierra.{
   SierraBibRecord,
   SierraHoldingsRecord,
   SierraItemRecord,
   SierraOrderRecord,
-  SierraRecordTypes,
   SierraTransformable
 }
 
@@ -35,20 +36,12 @@ object Main extends WellcomeTypesafeApp {
 
     val sourceVHS = SourceVHSBuilder.build[SierraTransformable](config)
 
-    val resourceType = config.requireString("merger.resourceType") match {
-      case s: String if s == bibs.toString     => bibs
-      case s: String if s == items.toString    => items
-      case s: String if s == holdings.toString => holdings
-      case s: String if s == orders.toString   => orders
-      case s: String =>
-        throw new IllegalArgumentException(
-          s"$s is not a valid Sierra resource type")
-    }
+    val recordType = SierraRecordTypeBuilder.build(config, name = "merger")
 
     import weco.catalogue.sierra_merger.models.TransformableOps._
     import weco.catalogue.sierra_merger.models.RecordOps._
 
-    resourceType match {
+    recordType match {
       case SierraRecordTypes.bibs =>
         new Worker(
           sqsStream = sqsStream,

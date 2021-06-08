@@ -1,7 +1,7 @@
 package weco.catalogue.sierra_indexer.services
 
 import io.circe.Json
-import weco.catalogue.source_model.sierra.TypedSierraRecordNumber
+import weco.catalogue.source_model.sierra.identifiers.TypedSierraRecordNumber
 
 object SierraJsonOps {
   implicit class JsonOps(j: Json) {

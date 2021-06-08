@@ -6,7 +6,8 @@ import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.Subject
 import weco.catalogue.source_model.sierra.marc.VarField
 import weco.catalogue.source_model.sierra.source.SierraQueryOps
-import weco.catalogue.source_model.sierra.{SierraBibData, SierraBibNumber}
+import weco.catalogue.source_model.sierra.SierraBibData
+import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
 
 trait SierraSubjectsTransformer
     extends SierraIdentifiedDataTransformer

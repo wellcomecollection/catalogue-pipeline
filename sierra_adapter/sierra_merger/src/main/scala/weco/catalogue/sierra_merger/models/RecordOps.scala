@@ -1,9 +1,9 @@
 package weco.catalogue.sierra_merger.models
 
 import grizzled.slf4j.Logging
+import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
 import weco.catalogue.source_model.sierra.{
   AbstractSierraRecord,
-  SierraBibNumber,
   SierraBibRecord,
   SierraHoldingsRecord,
   SierraItemRecord,

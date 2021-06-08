@@ -15,17 +15,14 @@ import weco.catalogue.internal_model.locations.{
 }
 import weco.catalogue.internal_model.work.Item
 import weco.catalogue.source_model.generators.SierraDataGenerators
+import weco.catalogue.source_model.sierra.identifiers.SierraItemNumber
 import weco.catalogue.source_model.sierra.marc.{
   FixedField,
   MarcSubfield,
   VarField
 }
 import weco.catalogue.source_model.sierra.source.SierraSourceLocation
-import weco.catalogue.source_model.sierra.{
-  SierraBibData,
-  SierraItemData,
-  SierraItemNumber
-}
+import weco.catalogue.source_model.sierra.{SierraBibData, SierraItemData}
 
 class SierraItemsTest
     extends AnyFunSpec

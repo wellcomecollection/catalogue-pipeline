@@ -26,8 +26,6 @@ import scala.concurrent.ExecutionContext
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>
-    import weco.catalogue.source_model.sierra.Implicits._
-
     implicit val actorSystem: ActorSystem =
       AkkaBuilder.buildActorSystem()
     implicit val executionContext: ExecutionContext =

@@ -1,5 +1,12 @@
 package weco.catalogue.source_model.sierra
 
+import weco.catalogue.source_model.sierra.identifiers.{
+  SierraBibNumber,
+  SierraHoldingsNumber,
+  SierraItemNumber,
+  SierraOrderNumber
+}
+
 case class SierraTransformable(
   sierraId: SierraBibNumber,
   maybeBibRecord: Option[SierraBibRecord] = None,

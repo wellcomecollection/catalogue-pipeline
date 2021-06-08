@@ -9,8 +9,8 @@ import weco.catalogue.internal_model.locations.{
   DigitalLocation
 }
 import weco.catalogue.internal_model.work.Item
+import weco.catalogue.source_model.sierra.identifiers.TypedSierraRecordNumber
 import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
-import weco.catalogue.source_model.sierra.TypedSierraRecordNumber
 import weco.catalogue.source_model.sierra.source.SierraQueryOps
 
 import java.net.URL

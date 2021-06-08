@@ -3,8 +3,8 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers.subjects
 import uk.ac.wellcome.platform.transformer.sierra.transformers.SierraAgents
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work._
+import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
 import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
-import weco.catalogue.source_model.sierra.SierraBibNumber
 
 // Populate wwork:subject
 //
