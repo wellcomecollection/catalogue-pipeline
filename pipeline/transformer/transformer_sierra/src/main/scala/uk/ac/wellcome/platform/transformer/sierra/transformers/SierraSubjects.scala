@@ -9,7 +9,8 @@ import uk.ac.wellcome.platform.transformer.sierra.transformers.subjects.{
 }
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.Subject
-import weco.catalogue.source_model.sierra.{SierraBibData, SierraBibNumber}
+import weco.catalogue.source_model.sierra.SierraBibData
+import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
 
 object SierraSubjects extends SierraIdentifiedDataTransformer {
 

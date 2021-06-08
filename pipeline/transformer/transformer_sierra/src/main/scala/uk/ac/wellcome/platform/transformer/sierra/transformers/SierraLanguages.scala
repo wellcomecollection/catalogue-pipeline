@@ -6,7 +6,8 @@ import weco.catalogue.source_model.sierra.source.{
   SierraQueryOps,
   SierraSourceLanguage
 }
-import weco.catalogue.source_model.sierra.{SierraBibData, SierraBibNumber}
+import weco.catalogue.source_model.sierra.SierraBibData
+import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
 
 object SierraLanguages
     extends SierraIdentifiedDataTransformer

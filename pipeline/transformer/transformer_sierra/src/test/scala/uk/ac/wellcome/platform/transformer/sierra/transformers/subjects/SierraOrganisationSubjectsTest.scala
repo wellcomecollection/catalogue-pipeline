@@ -10,7 +10,8 @@ import weco.catalogue.internal_model.identifiers.{
 }
 import weco.catalogue.source_model.generators.SierraDataGenerators
 import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
-import weco.catalogue.source_model.sierra.{SierraBibData, SierraBibNumber}
+import weco.catalogue.source_model.sierra.SierraBibData
+import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
 
 class SierraOrganisationSubjectsTest
     extends AnyFunSpec

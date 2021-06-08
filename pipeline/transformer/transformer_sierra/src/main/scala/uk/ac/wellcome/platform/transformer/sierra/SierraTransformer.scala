@@ -15,6 +15,7 @@ import weco.catalogue.internal_model.work.InvisibilityReason._
 import weco.catalogue.internal_model.work.{Work, WorkData}
 import weco.catalogue.source_model.sierra._
 import weco.catalogue.source_model.sierra.SierraBibData._
+import weco.catalogue.source_model.sierra.identifiers._
 import weco.catalogue.source_model.sierra.source.SierraMaterialType._
 
 class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)

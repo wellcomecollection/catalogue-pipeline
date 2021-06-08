@@ -12,10 +12,10 @@ import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.memory.MemoryTypedStore
 import weco.catalogue.internal_model.identifiers.IdentifierType
 import weco.catalogue.internal_model.work.{Work, WorkState}
-import weco.catalogue.source_model.sierra.{SierraBibNumber, SierraTransformable}
-import weco.catalogue.source_model.sierra.Implicits._
+import weco.catalogue.source_model.sierra.SierraTransformable
 import weco.catalogue.source_model.SierraSourcePayload
 import weco.catalogue.source_model.generators.SierraGenerators
+import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
 import weco.catalogue.transformer.{
   TransformerWorker,
   TransformerWorkerTestCases
