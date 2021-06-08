@@ -267,12 +267,13 @@ class SierraTransformerTest
          |}
          |""".stripMargin
 
-    val itemRecords = Seq("1874354", "1874355", "1000031", "1874353").map { itemNumber =>
-      createSierraItemRecordWith(
-        id = SierraItemNumber(itemNumber),
-        data = itemData,
-        bibIds = List(bibId)
-      )
+    val itemRecords = Seq("1874354", "1874355", "1000031", "1874353").map {
+      itemNumber =>
+        createSierraItemRecordWith(
+          id = SierraItemNumber(itemNumber),
+          data = itemData,
+          bibIds = List(bibId)
+        )
     }
 
     val bibRecord = createSierraBibRecordWith(id = bibId)
@@ -289,16 +290,18 @@ class SierraTransformerTest
 
     val identifiers = unidentifiedWork.data.items
       .collect {
-        case Item(IdState.Identifiable(sourceIdentifier, _, _), _, _) => sourceIdentifier
+        case Item(IdState.Identifiable(sourceIdentifier, _, _), _, _) =>
+          sourceIdentifier
       }
 
-    identifiers shouldBe Seq("i18743547", "i18743559", "i10000318", "i18743535").map { id =>
-      SourceIdentifier(
-        identifierType = IdentifierType.SierraSystemNumber,
-        value = id,
-        ontologyType = "Item"
-      )
-    }
+    identifiers shouldBe Seq("i18743547", "i18743559", "i10000318", "i18743535")
+      .map { id =>
+        SourceIdentifier(
+          identifierType = IdentifierType.SierraSystemNumber,
+          value = id,
+          ontologyType = "Item"
+        )
+      }
   }
 
   it("returns an InvisibleWork if there isn't any bib data") {

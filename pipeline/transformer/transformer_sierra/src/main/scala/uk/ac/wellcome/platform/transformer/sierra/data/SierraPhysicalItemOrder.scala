@@ -61,16 +61,17 @@ object SierraPhysicalItemOrder {
     typeCodec[OrderingMap].fromStream(stream).right.get
   }
 
-  def apply(
-    bibNumber: SierraBibNumber,
-    items: List[Item[IdState.Identifiable]]): List[Item[IdState.Identifiable]] = {
+  def apply(bibNumber: SierraBibNumber, items: List[Item[IdState.Identifiable]])
+    : List[Item[IdState.Identifiable]] = {
 
     val overrideOrder = orderingMap.getOrElse(bibNumber, default = List())
 
-    val (inOrder, outOfOrder) = items.partition { it: Item[IdState.Identifiable] =>
-      require(it.id.sourceIdentifier.identifierType == IdentifierType.SierraSystemNumber)
-      val itemNumber = SierraItemNumber(it.id.sourceIdentifier.value)
-      overrideOrder.contains(itemNumber)
+    val (inOrder, outOfOrder) = items.partition {
+      it: Item[IdState.Identifiable] =>
+        require(
+          it.id.sourceIdentifier.identifierType == IdentifierType.SierraSystemNumber)
+        val itemNumber = SierraItemNumber(it.id.sourceIdentifier.value)
+        overrideOrder.contains(itemNumber)
     }
 
     val sortedInOrder = inOrder.sortBy { it =>

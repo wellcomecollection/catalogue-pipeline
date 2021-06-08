@@ -34,7 +34,8 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
     */
   def apply(bibId: SierraBibNumber,
             bibData: SierraBibData,
-            itemDataMap: Map[SierraItemNumber, SierraItemData]): List[Item[IdState.Identifiable]] = {
+            itemDataMap: Map[SierraItemNumber, SierraItemData])
+    : List[Item[IdState.Identifiable]] = {
     val visibleItems =
       itemDataMap
         .filterNot {
@@ -42,7 +43,8 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
         }
 
     SierraPhysicalItemOrder(
-      bibId, items = getPhysicalItems(bibId, visibleItems, bibData)
+      bibId,
+      items = getPhysicalItems(bibId, visibleItems, bibData)
     )
   }
 

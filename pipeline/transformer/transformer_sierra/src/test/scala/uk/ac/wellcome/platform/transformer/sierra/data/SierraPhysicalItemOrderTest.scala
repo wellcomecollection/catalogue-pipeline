@@ -3,12 +3,20 @@ package uk.ac.wellcome.platform.transformer.sierra.data
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.generators.ItemsGenerators
-import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  IdState,
+  IdentifierType,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.work.Item
 import weco.catalogue.source_model.generators.SierraGenerators
 import weco.catalogue.source_model.sierra.{SierraBibNumber, SierraItemNumber}
 
-class SierraPhysicalItemOrderTest extends AnyFunSpec with Matchers with ItemsGenerators with SierraGenerators {
+class SierraPhysicalItemOrderTest
+    extends AnyFunSpec
+    with Matchers
+    with ItemsGenerators
+    with SierraGenerators {
   it("uses alphabetical ordering of IDs if there's no explicit override") {
     val items = List(
       createItem(id = createSierraItemNumber),
@@ -16,7 +24,8 @@ class SierraPhysicalItemOrderTest extends AnyFunSpec with Matchers with ItemsGen
       createItem(id = createSierraItemNumber)
     )
 
-    SierraPhysicalItemOrder(SierraBibNumber("1000000"), items) shouldBe items.sortBy { _.id.sourceIdentifier.value }
+    SierraPhysicalItemOrder(SierraBibNumber("1000000"), items) shouldBe items
+      .sortBy { _.id.sourceIdentifier.value }
   }
 
   it("reorders items if there's an explicit override") {
@@ -26,9 +35,15 @@ class SierraPhysicalItemOrderTest extends AnyFunSpec with Matchers with ItemsGen
     val item4 = createItem(id = SierraItemNumber("1874353"))
 
     val items = List(item1, item2, item3, item4)
-      .sortBy { it => it.id.sourceIdentifier.value }
+      .sortBy { it =>
+        it.id.sourceIdentifier.value
+      }
 
-    SierraPhysicalItemOrder(SierraBibNumber("1000024"), items) shouldBe List(item1, item2, item3, item4)
+    SierraPhysicalItemOrder(SierraBibNumber("1000024"), items) shouldBe List(
+      item1,
+      item2,
+      item3,
+      item4)
   }
 
   it("puts any items not mentioned in the override at the end]") {
@@ -39,7 +54,11 @@ class SierraPhysicalItemOrderTest extends AnyFunSpec with Matchers with ItemsGen
 
     val items = List(item1, item2, item3, item4)
 
-    SierraPhysicalItemOrder(SierraBibNumber("1000309"), items) shouldBe List(item1, item2, item4, item3)
+    SierraPhysicalItemOrder(SierraBibNumber("1000309"), items) shouldBe List(
+      item1,
+      item2,
+      item4,
+      item3)
   }
 
   def createItem(id: SierraItemNumber): Item[IdState.Identifiable] =
