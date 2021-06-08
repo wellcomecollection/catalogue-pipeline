@@ -26,7 +26,7 @@ class TeiIdExtractorWorkerService[Dest](messageStream: SQSStream[NotificationMes
                                         idExtractor: IdExtractor,
                                         store: Writable[S3ObjectLocation, String],
                                         messageSender: MessageSender[Dest],
-                                        pathIdDao: PathIdDao,
+                                        pathIdManager: PathIdManager,
                                         config: TeiIdExtractorConfig,
                                        )(implicit val ec: ExecutionContext)
     extends Runnable with FlowOps{
@@ -64,8 +64,8 @@ class TeiIdExtractorWorkerService[Dest](messageStream: SQSStream[NotificationMes
   def processDeleted = Flow[(Context, TeiPathMessage)].collectType[(Context,TeiPathDeletedMessage)]
     .mapAsync(config.concurrentFiles) { case (ctx, message) =>
 for{
-  row <- pathIdDao.getByPath(message.path)
-  _ <- Future.fromTry(messageSender.sendT[TeiIdMessage](TeiIdDeletedMessage(row.get.id, message.timeDeleted)))
+  maybeId <- pathIdManager.handlePathDeleted(message.path, message.timeDeleted)
+  _ <- Future.fromTry(messageSender.sendT[TeiIdMessage](TeiIdDeletedMessage(maybeId.get.id, message.timeDeleted)))
 } yield ((ctx, Right(())))
     }.via(catchErrors)
 
@@ -74,7 +74,7 @@ for{
         case (ctx, message) => for{
           blobContent <- gitHubBlobReader.getBlob(message.uri)
           id <- Future.fromTry(idExtractor.extractId(blobContent))
-          _ <- pathIdDao.save(id, message.path, message.timeModified)
+          _ <- pathIdManager.handlePathChanged(message.path,id, message.timeModified)
           stored <- Future.fromTry(store.put(S3ObjectLocation(config.bucket, s"tei_files/$id/${message.timeModified.toEpochSecond}.xml"))(blobContent).left.map(error => error.e).toTry)
           _ <- Future.fromTry(messageSender.sendT[TeiIdMessage](TeiIdChangeMessage(id, stored.id, message.timeModified)))
         } yield(ctx, Right(()))

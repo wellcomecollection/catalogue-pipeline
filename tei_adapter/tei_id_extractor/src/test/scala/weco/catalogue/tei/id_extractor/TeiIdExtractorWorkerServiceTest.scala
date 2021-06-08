@@ -16,6 +16,7 @@ import weco.catalogue.tei.id_extractor.fixtures.{PathIdDatabase, Wiremock}
 import com.github.tomakehurst.wiremock.client.WireMock
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
+import weco.catalogue.tei.id_extractor.database.TableProvisioner
 import weco.catalogue.tei.id_extractor.models.{TeiIdChangeMessage, TeiIdDeletedMessage, TeiIdMessage}
 
 import java.nio.charset.StandardCharsets
@@ -74,21 +75,8 @@ class TeiIdExtractorWorkerServiceTest extends AnyFunSpec with Wiremock with SQS 
   it("handles file deleted messages"){
     withWorkerService { case (QueuePair(queue, dlq), messageSender, store, bucket, repoUrl) =>
 
-      val modifiedTime = "2021-05-27T14:05:00Z"
-      val message = {
-        s"""
-        {
-          "path": "Arabic/WMS_Arabic_1.xml",
-          "uri": "$repoUrl/git/blobs/2e6b5fa45462510d5549b6bcf2bbc8b53ae08aed",
-          "timeModified": "$modifiedTime"
-        }""".stripMargin
-      }
-      sendNotificationToSQS(queue, message)
-
-      eventually{
-        val expectedS3Location = checkFileIsStored(store, bucket, modifiedTime,IOUtils.resourceToString("/WMS_Arabic_1.xml", StandardCharsets.UTF_8))
-
-        val deletedTime = "2021-05-27T16:05:00Z"
+      val (modifiedTime: String, expectedS3Location: S3ObjectLocation) = createFile(queue, store, bucket, repoUrl)
+      val deletedTime = "2021-05-27T16:05:00Z"
         val messageDeleted =
           s"""
           {
@@ -105,14 +93,47 @@ class TeiIdExtractorWorkerServiceTest extends AnyFunSpec with Wiremock with SQS 
           val deletedMessage = TeiIdDeletedMessage(id = "manuscript_15651", ZonedDateTime.parse(deletedTime))
           messageSender.getMessages[TeiIdMessage]() should contain only(changeMessage, deletedMessage)
         }
-      }
+
 
 
     }
   }
 
   it("handles a file being moved"){
-    fail()
+    withWorkerService { case (QueuePair(queue, dlq), messageSender, store, bucket, repoUrl) =>
+
+      val (createdTime: String, expectedS3Location: S3ObjectLocation) = createFile(queue, store, bucket, repoUrl)
+        val movedTime = "2021-05-27T16:05:00Z"
+        val fileMovedMessage =
+          s"""
+          {
+            "path": "Arabic/another_path.xml",
+            "uri": "$repoUrl/git/blobs/2e6b5fa45462510d5549b6bcf2bbc8b53ae08aed",
+            "timeModified": "$movedTime"
+          }""".stripMargin
+        val deletedTime = "2021-05-27T16:05:00Z"
+        val messageDeleted =
+          s"""
+          {
+            "path": "Arabic/WMS_Arabic_1.xml",
+            "timeDeleted": "$deletedTime"
+          }""".stripMargin
+
+        sendNotificationToSQS(queue, messageDeleted)
+        sendNotificationToSQS(queue, fileMovedMessage)
+
+        eventually {
+          assertQueueEmpty(queue)
+          assertQueueEmpty(dlq)
+          val expectedNewS3Location = checkFileIsStored(store, bucket, movedTime,IOUtils.resourceToString("/WMS_Arabic_1.xml", StandardCharsets.UTF_8))
+          val fileCreatedMessage = TeiIdChangeMessage(id = "manuscript_15651", s3Location = expectedS3Location, ZonedDateTime.parse(createdTime))
+          val fileMovedMessage = TeiIdChangeMessage(id = "manuscript_15651", s3Location = expectedNewS3Location, ZonedDateTime.parse(movedTime))
+          messageSender.getMessages[TeiIdMessage]() should contain only(fileCreatedMessage, fileMovedMessage)
+        }
+
+
+
+    }
   }
 
 
@@ -123,7 +144,7 @@ class TeiIdExtractorWorkerServiceTest extends AnyFunSpec with Wiremock with SQS 
       withActorSystem { implicit ac =>
         implicit val ec = ac.dispatcher
         withSQSStream(queue) { stream: SQSStream[NotificationMessage] =>
-          withPathIdDao(initializeTable = false) { case (provisioner,_, pathIdDao) =>
+          withPathIdTable { case (config,table) =>
 
             val messageSender = new MemoryMessageSender()
             val gitHubBlobReader = new GitHubBlobReader()
@@ -132,21 +153,43 @@ class TeiIdExtractorWorkerServiceTest extends AnyFunSpec with Wiremock with SQS 
             val service = new TeiIdExtractorWorkerService(
               messageStream = stream,
               messageSender = messageSender,
-              tableProvisioner = provisioner,
+              tableProvisioner = new TableProvisioner(rdsClientConfig)(
+                database = config.database,
+                tableName = config.tableName
+              ),
               gitHubBlobReader = gitHubBlobReader,
               idExtractor = new IdExtractor,
               store = store,
-              pathIdDao = pathIdDao,
+              pathIdManager = new PathIdManager(table),
               config = TeiIdExtractorConfig(concurrentFiles = 10, bucket = bucket.name))
             service.run()
             testWith((q, messageSender, store, bucket, repoUrl))
           }
         }}}
   }
+
+  private def createFile(queue: SQS.Queue, store: MemoryStore[S3ObjectLocation, String], bucket: Bucket, repoUrl: String) = {
+    val modifiedTime = "2021-05-27T14:05:00Z"
+    val message = {
+      s"""
+        {
+          "path": "Arabic/WMS_Arabic_1.xml",
+          "uri": "$repoUrl/git/blobs/2e6b5fa45462510d5549b6bcf2bbc8b53ae08aed",
+          "timeModified": "$modifiedTime"
+        }""".stripMargin
+    }
+    sendNotificationToSQS(queue, message)
+
+    val expectedS3Location = eventually {
+      checkFileIsStored(store, bucket, modifiedTime, IOUtils.resourceToString("/WMS_Arabic_1.xml", StandardCharsets.UTF_8))
+    }
+    (modifiedTime, expectedS3Location)
+  }
+
   private def checkFileIsStored(store: MemoryStore[S3ObjectLocation, String], bucket: Bucket, modifiedTime: String, fileContents: String) = {
     val expectedKey = s"tei_files/manuscript_15651/${ZonedDateTime.parse(modifiedTime).toEpochSecond}.xml"
     val expectedS3Location = S3ObjectLocation(bucket.name, expectedKey)
-    store.entries.keySet should contain only (expectedS3Location)
+    store.entries.keySet should contain (expectedS3Location)
     store.entries(expectedS3Location) shouldBe fileContents
     expectedS3Location
   }
