@@ -19,6 +19,9 @@ object Implicits {
   // This is based on the "Custom key types" section of the Circe docs:
   // https://circe.github.io/circe/codecs/custom-codecs.html#custom-key-types
   //
+  implicit val bibNumberKeyEncoder: KeyEncoder[SierraBibNumber] =
+    (key: SierraBibNumber) => key.withoutCheckDigit
+
   implicit val itemNumberKeyEncoder: KeyEncoder[SierraItemNumber] =
     (key: SierraItemNumber) => key.withoutCheckDigit
 
@@ -27,6 +30,9 @@ object Implicits {
 
   implicit val orderNumberKeyEncoder: KeyEncoder[SierraOrderNumber] =
     (key: SierraOrderNumber) => key.withoutCheckDigit
+
+  implicit val bibNumberKeyDecoder: KeyDecoder[SierraBibNumber] =
+    (key: String) => Some(new SierraBibNumber(key))
 
   implicit val itemNumberKeyDecoder: KeyDecoder[SierraItemNumber] =
     (key: String) => Some(new SierraItemNumber(key))
