@@ -33,7 +33,6 @@ lazy val internal_model = setupProject(
   project,
   "common/internal_model",
   externalDependencies = CatalogueDependencies.internalModelDependencies)
-  .settings(Publish.settings: _*)
   .enablePlugins(GitVersioning)
   .enablePlugins(BuildInfoPlugin)
   .settings(Publish.sharedLibrarySettings: _*)
