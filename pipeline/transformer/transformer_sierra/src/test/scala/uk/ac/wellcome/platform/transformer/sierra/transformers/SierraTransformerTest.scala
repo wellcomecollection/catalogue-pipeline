@@ -239,6 +239,68 @@ class SierraTransformerTest
     unidentifiedWork.data.items.head.title shouldBe Some("Envelope")
   }
 
+  it("puts items in the right order") {
+    val bibId = SierraBibNumber("1000024")
+
+    def itemData(itemId: SierraItemNumber,
+                 modifiedDate: Instant,
+                 bibIds: List[SierraBibNumber]) =
+      s"""
+         |{
+         |  "id": "$itemId",
+         |  "location": {
+         |    "code": "sgmed",
+         |    "name": "Closed stores Med."
+         |  },
+         |  "fixedFields": {
+         |    "88": {
+         |      "label": "STATUS",
+         |      "value": "-",
+         |      "display": "Available"
+         |    },
+         |    "108": {
+         |      "label": "OPACMSG",
+         |      "value": "f",
+         |      "display": "Online request"
+         |    }
+         |  }
+         |}
+         |""".stripMargin
+
+    val itemRecords = Seq("1874354", "1874355", "1000031", "1874353").map { itemNumber =>
+      createSierraItemRecordWith(
+        id = SierraItemNumber(itemNumber),
+        data = itemData,
+        bibIds = List(bibId)
+      )
+    }
+
+    val bibRecord = createSierraBibRecordWith(id = bibId)
+
+    val transformable = createSierraTransformableWith(
+      sierraId = bibId,
+      maybeBibRecord = Some(bibRecord),
+      itemRecords = itemRecords
+    )
+
+    val work = transformToWork(transformable)
+    work shouldBe a[Work.Visible[_]]
+    val unidentifiedWork = work.asInstanceOf[Work.Visible[_]]
+
+    val identifiers = unidentifiedWork.data.items
+      .collect {
+        case Item(IdState.Identifiable(sourceIdentifier, _, _), _, _) => sourceIdentifier
+      }
+
+    identifiers shouldBe Seq("i18743547", "i18743559", "i10000318", "i18743535").map { id =>
+      SourceIdentifier(
+        identifierType = IdentifierType.SierraSystemNumber,
+        value = id,
+        ontologyType = "Item"
+      )
+    }
+  }
+
   it("returns an InvisibleWork if there isn't any bib data") {
     assertTransformReturnsInvisibleWork(
       maybeBibRecord = None,

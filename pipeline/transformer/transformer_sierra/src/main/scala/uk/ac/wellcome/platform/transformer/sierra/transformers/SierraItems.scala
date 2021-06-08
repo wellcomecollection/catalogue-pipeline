@@ -1,6 +1,7 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import grizzled.slf4j.Logging
+import uk.ac.wellcome.platform.transformer.sierra.data.SierraPhysicalItemOrder
 import weco.catalogue.internal_model.identifiers.{
   IdState,
   IdentifierType,
@@ -33,26 +34,22 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
     */
   def apply(bibId: SierraBibNumber,
             bibData: SierraBibData,
-            itemDataMap: Map[SierraItemNumber, SierraItemData]) = {
+            itemDataMap: Map[SierraItemNumber, SierraItemData]): List[Item[IdState.Identifiable]] = {
     val visibleItems =
       itemDataMap
         .filterNot {
           case (_, itemData) => itemData.deleted || itemData.suppressed
         }
 
-    getPhysicalItems(bibId, visibleItems, bibData)
-      .sortBy { item =>
-        item.id match {
-          case IdState.Unidentifiable          => None
-          case IdState.Identifiable(_, ids, _) => ids.headOption.map(_.value)
-        }
-      }
+    SierraPhysicalItemOrder(
+      bibId, items = getPhysicalItems(bibId, visibleItems, bibData)
+    )
   }
 
   private def getPhysicalItems(
     bibId: SierraBibNumber,
     sierraItemDataMap: Map[SierraItemNumber, SierraItemData],
-    bibData: SierraBibData): List[Item[IdState.Unminted]] = {
+    bibData: SierraBibData): List[Item[IdState.Identifiable]] = {
 
     // Some of the Sierra items have a location like "contained in above"
     // or "bound in above".
@@ -114,7 +111,7 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
     itemData: SierraItemData,
     bibData: SierraBibData,
     fallbackLocation: Option[(PhysicalLocationType, String)])
-    : Item[IdState.Unminted] = {
+    : Item[IdState.Identifiable] = {
     debug(s"Attempting to transform $itemId")
     Item(
       title = getItemTitle(itemId, itemData),
