@@ -12,6 +12,7 @@ import uk.ac.wellcome.typesafe.Runnable
 import weco.catalogue.tei.id_extractor.database.TableProvisioner
 import weco.catalogue.tei.id_extractor.models._
 import weco.flows.FlowOps
+import scala.concurrent.duration._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -59,11 +60,12 @@ class TeiIdExtractorWorkerService[Dest](messageStream: SQSStream[NotificationMes
     }.via(broadcastAndMerge(processDeleted, processChange))
 
   def processDeleted = Flow[(Context, TeiPathMessage)].collectType[(Context,TeiPathDeletedMessage)]
+    .delay(500 milliseconds)
     .mapAsync(config.concurrentFiles) { case (ctx, message) =>
 for{
   maybeId <- pathIdManager.handlePathDeleted(message.path, message.timeDeleted)
-  _ <- Future.fromTry(messageSender.sendT[TeiIdMessage](TeiIdDeletedMessage(maybeId.get.id, message.timeDeleted)))
-} yield ((ctx, Right(())))
+  _ <- maybeId.fold(ifEmpty = Future.successful(()))(pathId => Future.fromTry(messageSender.sendT[TeiIdMessage](TeiIdDeletedMessage(pathId.id, pathId.timeModified))))
+} yield (ctx, Right(()))
     }.via(catchErrors)
 
   def processChange = Flow[(Context, TeiPathMessage)].collectType[(Context,TeiPathChangedMessage)]

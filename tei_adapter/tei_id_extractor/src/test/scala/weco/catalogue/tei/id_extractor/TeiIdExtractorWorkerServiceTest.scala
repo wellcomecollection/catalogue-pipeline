@@ -116,12 +116,11 @@ class TeiIdExtractorWorkerServiceTest extends AnyFunSpec with Wiremock with SQS 
             "uri": "$repoUrl/git/blobs/2e6b5fa45462510d5549b6bcf2bbc8b53ae08aed",
             "timeModified": "$movedTime"
           }""".stripMargin
-        val deletedTime = "2021-05-27T16:05:00Z"
         val messageDeleted =
           s"""
           {
             "path": "Arabic/WMS_Arabic_1.xml",
-            "timeDeleted": "$deletedTime"
+            "timeDeleted": "$movedTime"
           }""".stripMargin
 
         sendNotificationToSQS(queue, messageDeleted)
@@ -145,7 +144,7 @@ class TeiIdExtractorWorkerServiceTest extends AnyFunSpec with Wiremock with SQS 
   def withWorkerService[R](testWith: TestWith[(QueuePair, MemoryMessageSender, MemoryStore[S3ObjectLocation, String], Bucket, String), R]): R =
     withWiremock("localhost"){ port =>
       val repoUrl = s"http://localhost:$port"
-    withLocalSqsQueuePair(10) { case q@QueuePair(queue, dlq) =>
+    withLocalSqsQueuePair(3) { case q@QueuePair(queue, dlq) =>
       withActorSystem { implicit ac =>
         implicit val ec = ac.dispatcher
         withSQSStream(queue) { stream: SQSStream[NotificationMessage] =>
