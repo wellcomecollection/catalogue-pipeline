@@ -73,7 +73,7 @@ class PathIdManager(pathIds: PathIdTable) {
           else {
             None
           }
-        case None => throw new RuntimeException(s"No path found for $path!")
+        case None => None
       }
     }
   }

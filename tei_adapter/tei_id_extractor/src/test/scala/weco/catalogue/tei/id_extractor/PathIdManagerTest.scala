@@ -141,16 +141,21 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase with ScalaFutures
       }
     }
 
-    it("errors if the pathId does not exist"){
+    it("ignores if the pathId does not exist"){
       withInitializedPathIdTable{ table =>
-
+        implicit val session = AutoSession
       val manager = new PathIdManager(table)
         val path = "Batak/WMS_Batak_1.xml"
         val time = ZonedDateTime.parse("2021-06-07T10:00:00Z")
 
         val deletedTime = time.plus(2, ChronoUnit.HOURS)
-        whenReady(manager.handlePathDeleted(path, deletedTime).failed){ exception =>
-            exception shouldBe a[Exception]
+        whenReady(manager.handlePathDeleted(path, deletedTime)){ res =>
+          res shouldBe None
+          val maybePathId = withSQL {
+            select.from(table as table.p)
+          }.map(PathId(table.p)).single.apply()
+
+          maybePathId shouldBe None
 
         }
 
