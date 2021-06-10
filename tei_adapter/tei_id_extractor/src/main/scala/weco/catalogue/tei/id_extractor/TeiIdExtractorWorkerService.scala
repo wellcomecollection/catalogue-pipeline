@@ -3,17 +3,14 @@ package weco.catalogue.tei.id_extractor
 import akka.stream.scaladsl.Flow
 import software.amazon.awssdk.services.sqs.model.{Message => SQSMessage}
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
-import uk.ac.wellcome.storage.s3.S3ObjectLocation
-import uk.ac.wellcome.storage.store.Writable
 import uk.ac.wellcome.typesafe.Runnable
 import weco.catalogue.tei.id_extractor.database.TableProvisioner
 import weco.catalogue.tei.id_extractor.models._
 import weco.flows.FlowOps
-import scala.concurrent.duration._
 
+import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 
 
@@ -22,9 +19,7 @@ case class TeiIdExtractorConfig(concurrentFiles: Int,
 class TeiIdExtractorWorkerService[Dest](messageStream: SQSStream[NotificationMessage],
                                         gitHubBlobReader: GitHubBlobContentReader,
                                         tableProvisioner: TableProvisioner,
-                                        store: Writable[S3ObjectLocation, String],
-                                        messageSender: MessageSender[Dest],
-                                        pathIdManager: PathIdManager,
+                                        pathIdManager: PathIdManager[Dest],
                                         config: TeiIdExtractorConfig,
                                        )(implicit val ec: ExecutionContext)
     extends Runnable with FlowOps{
@@ -59,23 +54,20 @@ class TeiIdExtractorWorkerService[Dest](messageStream: SQSStream[NotificationMes
       case (_, teiPathMessage) => isTeiFile(teiPathMessage.path)
     }.via(broadcastAndMerge(processDeleted, processChange))
 
-  def processDeleted = Flow[(Context, TeiPathMessage)].collectType[(Context,TeiPathDeletedMessage)]
+  def processDeleted = Flow[(Context, TeiPathMessage)].collectType[(Context, TeiPathDeletedMessage)]
     .delay(500 milliseconds)
     .mapAsync(config.concurrentFiles) { case (ctx, message) =>
-for{
-  maybeId <- pathIdManager.handlePathDeleted(message.path, message.timeDeleted)
-  _ <- maybeId.fold(ifEmpty = Future.successful(()))(pathId => Future.fromTry(messageSender.sendT[TeiIdMessage](TeiIdDeletedMessage(pathId.id, pathId.timeModified))))
-} yield (ctx, Right(()))
+      for {
+        _ <- Future.fromTry(pathIdManager.handlePathDeleted(message.path, message.timeDeleted))
+     } yield (ctx, Right(()))
     }.via(catchErrors)
 
   def processChange = Flow[(Context, TeiPathMessage)].collectType[(Context,TeiPathChangedMessage)]
       .mapAsync(config.concurrentFiles) {
         case (ctx, message) => for{
           blobContent <- gitHubBlobReader.getBlob(message.uri)
-          id <- Future.fromTry(IdExtractor.extractId(blobContent, message.uri))
-          _ <- pathIdManager.handlePathChanged(message.path,id, message.timeModified)
-          stored <- Future.fromTry(store.put(S3ObjectLocation(config.bucket, s"tei_files/$id/${message.timeModified.getEpochSecond}.xml"))(blobContent).left.map(error => error.e).toTry)
-          _ <- Future.fromTry(messageSender.sendT[TeiIdMessage](TeiIdChangeMessage(id, stored.id, message.timeModified)))
+          id <- Future.fromTry(IdExtractor.extractId(blobContent))
+          _ <- Future.fromTry(pathIdManager.handlePathChanged(PathId(message.path,id, message.timeModified), blobContent))
         } yield(ctx, Right(()))
       }
       .via(catchErrors)

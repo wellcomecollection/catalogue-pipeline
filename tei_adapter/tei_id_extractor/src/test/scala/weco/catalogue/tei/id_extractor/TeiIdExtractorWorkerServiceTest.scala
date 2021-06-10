@@ -14,6 +14,7 @@ import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.memory.MemoryStore
 import weco.catalogue.tei.id_extractor.fixtures.{PathIdDatabase, Wiremock}
 import com.github.tomakehurst.wiremock.client.WireMock
+import io.circe.Encoder
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 import weco.catalogue.tei.id_extractor.database.TableProvisioner
@@ -25,13 +26,15 @@ import weco.http.client.AkkaHttpClient
 import java.nio.charset.StandardCharsets
 import java.time.Instant
 import scala.xml.Utility.trim
+import java.time.temporal.ChronoUnit
+import scala.util.Try
 import scala.xml.XML
 
 class TeiIdExtractorWorkerServiceTest extends AnyFunSpec with Wiremock with SQS with Akka with Eventually with IntegrationPatience with PathIdDatabase{
 
 
   it("receives a message, stores the file in s3 and send a message to the tei adapter with the file id"){
-    withWorkerService{ case (QueuePair(queue, dlq), messageSender, store, bucket, repoUrl) =>
+    withWorkerService(){ case (QueuePair(queue, dlq), messageSender, store, bucket, repoUrl) =>
       val modifiedTime = "2021-05-27T14:05:00Z"
       val message = {
         s"""
@@ -54,7 +57,7 @@ class TeiIdExtractorWorkerServiceTest extends AnyFunSpec with Wiremock with SQS 
           }}
 
   it("a message for a non TEI file is ignored"){
-    withWorkerService{ case (QueuePair(queue, dlq), messageSender, store, bucket, repoUrl) =>
+    withWorkerService(){ case (QueuePair(queue, dlq), messageSender, store, bucket, repoUrl) =>
       val modifiedTime = "2021-05-27T14:05:00Z"
       val message = {
         s"""
@@ -77,8 +80,37 @@ class TeiIdExtractorWorkerServiceTest extends AnyFunSpec with Wiremock with SQS 
             }
           }}
 
+  it("an older message for a file changed is ignored"){
+    withWorkerService() { case (QueuePair(queue, dlq), messageSender, store, bucket, repoUrl) =>
+
+      val (createdTime: String, expectedS3Location: S3ObjectLocation) = createFile(queue, store, bucket, repoUrl)
+      val modifiedTime = ZonedDateTime.parse(createdTime).minus(2, ChronoUnit.HOURS)
+      val message =
+        s"""
+          {
+            "path": "Arabic/WMS_Arabic_1.xml",
+            "uri": "$repoUrl/git/blobs/2e6b5fa45462510d5549b6bcf2bbc8b53ae08aed",
+            "timeModified": "$modifiedTime"
+          }""".stripMargin
+
+      sendNotificationToSQS(queue, message)
+
+      eventually {
+        assertQueueEmpty(queue)
+        assertQueueEmpty(dlq)
+        val changeMessage = TeiIdChangeMessage(id = "manuscript_15651", s3Location = expectedS3Location, ZonedDateTime.parse(createdTime))
+        val newKeyKey = s"tei_files/manuscript_15651/${modifiedTime.toEpochSecond}.xml"
+        store.entries.keySet shouldNot contain(S3ObjectLocation(bucket.name, newKeyKey))
+        messageSender.getMessages[TeiIdMessage]() should contain only(changeMessage)
+      }
+
+
+
+    }
+  }
+
   it("handles file deleted messages"){
-    withWorkerService { case (QueuePair(queue, dlq), messageSender, store, bucket, repoUrl) =>
+    withWorkerService() { case (QueuePair(queue, dlq), messageSender, store, bucket, repoUrl) =>
 
       val (modifiedTime: String, expectedS3Location: S3ObjectLocation) = createFile(queue, store, bucket, repoUrl)
       val deletedTime = "2021-05-27T16:05:00Z"
@@ -104,8 +136,77 @@ class TeiIdExtractorWorkerServiceTest extends AnyFunSpec with Wiremock with SQS 
     }
   }
 
+  it("if sending the file deleted message fails, the message can be retried"){
+    val messageSender: MemoryMessageSender = new MemoryMessageSender{
+
+      var attempts = 0
+      override def sendT[T](t: T)(implicit encoder: Encoder[T]): Try[Unit] = {
+        if (attempts <1 && t.isInstanceOf[TeiIdDeletedMessage]){
+          attempts += 1
+          Try(throw new Exception("BOOOM!"))
+        }else {
+          super.sendT(t)
+        }
+      }
+    }
+    withWorkerService(messageSender){ case (QueuePair(queue, dlq), _, store, bucket, repoUrl) =>
+      val (modifiedTime: String, expectedS3Location: S3ObjectLocation) = createFile(queue, store, bucket, repoUrl)
+      val deletedTime = "2021-05-27T16:05:00Z"
+      val messageDeleted =
+        s"""
+          {
+            "path": "Arabic/WMS_Arabic_1.xml",
+            "timeDeleted": "$deletedTime"
+          }""".stripMargin
+
+      sendNotificationToSQS(queue, messageDeleted)
+
+      eventually {
+        assertQueueEmpty(queue)
+        assertQueueEmpty(dlq)
+        val changeMessage = TeiIdChangeMessage(id = "manuscript_15651", s3Location = expectedS3Location, ZonedDateTime.parse(modifiedTime))
+        val deletedMessage = TeiIdDeletedMessage(id = "manuscript_15651", ZonedDateTime.parse(deletedTime))
+        messageSender.getMessages[TeiIdMessage]() should contain only(changeMessage, deletedMessage)
+      }
+    }}
+
+  it("if sending the file changed message fails, the message can be retried"){
+    val messageSender = new MemoryMessageSender{
+
+      var attempts = 0
+      override def sendT[T](t: T)(implicit encoder: Encoder[T]): Try[Unit] = {
+        if (attempts <1 ){
+          attempts += 1
+          Try(throw new Exception("BOOOM!"))
+        }else {
+          super.sendT(t)
+        }
+      }
+    }
+    withWorkerService(messageSender){ case (QueuePair(queue, dlq), _, store, bucket, repoUrl) =>
+      val modifiedTime = "2021-05-27T14:05:00Z"
+      val message = {
+        s"""
+        {
+          "path": "Arabic/WMS_Arabic_1.xml",
+          "uri": "$repoUrl/git/blobs/2e6b5fa45462510d5549b6bcf2bbc8b53ae08aed",
+          "timeModified": "$modifiedTime"
+        }""".stripMargin
+      }
+      sendNotificationToSQS(queue, message)
+
+      eventually{
+        assertQueueEmpty(queue)
+        assertQueueEmpty(dlq)
+        val expectedS3Location = checkFileIsStored(store, bucket, modifiedTime,IOUtils.resourceToString("/WMS_Arabic_1.xml", StandardCharsets.UTF_8))
+
+        messageSender.getMessages[TeiIdChangeMessage]() should contain only(TeiIdChangeMessage(id="manuscript_15651", s3Location = expectedS3Location, ZonedDateTime.parse(modifiedTime)))
+
+      }
+    }}
+
   it("handles a file being moved"){
-    withWorkerService { case (QueuePair(queue, dlq), messageSender, store, bucket, repoUrl) =>
+    withWorkerService() { case (QueuePair(queue, dlq), messageSender, store, bucket, repoUrl) =>
 
       val (createdTime: String, expectedS3Location: S3ObjectLocation) = createFile(queue, store, bucket, repoUrl)
         val movedTime = "2021-05-27T16:05:00Z"
@@ -141,7 +242,7 @@ class TeiIdExtractorWorkerServiceTest extends AnyFunSpec with Wiremock with SQS 
   }
 
 
-  def withWorkerService[R](testWith: TestWith[(QueuePair, MemoryMessageSender, MemoryStore[S3ObjectLocation, String], Bucket, String), R]): R =
+  def withWorkerService[R](messageSender: MemoryMessageSender = new MemoryMessageSender())(testWith: TestWith[(QueuePair, MemoryMessageSender, MemoryStore[S3ObjectLocation, String], Bucket, String), R]): R =
     withWiremock("localhost"){ port =>
       val repoUrl = s"http://localhost:$port"
     withLocalSqsQueuePair(3) { case q@QueuePair(queue, dlq) =>
@@ -150,21 +251,18 @@ class TeiIdExtractorWorkerServiceTest extends AnyFunSpec with Wiremock with SQS 
         withSQSStream(queue) { stream: SQSStream[NotificationMessage] =>
           withPathIdTable { case (config,table) =>
 
-            val messageSender = new MemoryMessageSender()
-            val gitHubBlobReader = new GitHubBlobContentReader(new AkkaHttpClient(),"fake_token")
+            val gitHubBlobReader = new GitHubBlobContentReader(new AkkaHttpClient(),("fake_token")
             val store = new MemoryStore[S3ObjectLocation, String](Map())
             val bucket = Bucket("bucket")
             val service = new TeiIdExtractorWorkerService(
               messageStream = stream,
-              messageSender = messageSender,
               tableProvisioner = new TableProvisioner(rdsClientConfig)(
                 database = config.database,
                 tableName = config.tableName
               ),
               gitHubBlobReader = gitHubBlobReader,
-              store = store,
-              pathIdManager = new PathIdManager(table),
-              config = TeiIdExtractorConfig(concurrentFiles = 10, bucket = bucket.name))
+              pathIdManager = new PathIdManager(table, store, messageSender, bucket.name),
+              config = TeiIdExtractorConfig(concurrentFiles = 10))
             service.run()
             testWith((q, messageSender, store, bucket, repoUrl))
           }

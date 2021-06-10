@@ -1,177 +1,355 @@
 package weco.catalogue.tei.id_extractor
 
-import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import scalikejdbc._
+import uk.ac.wellcome.json.JsonUtil._
+import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
+import uk.ac.wellcome.storage.s3.S3ObjectLocation
+import uk.ac.wellcome.storage.store.memory.MemoryStore
 import weco.catalogue.tei.id_extractor.fixtures.PathIdDatabase
+import weco.catalogue.tei.id_extractor.models.{TeiIdChangeMessage, TeiIdDeletedMessage, TeiIdMessage}
 
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 
-class PathIdManagerTest extends AnyFunSpec with PathIdDatabase with ScalaFutures{
+class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
+  val bucket = Bucket("bucket")
+  val blobContents = "blah"
   describe("handlePathChanged") {
-    it("stores a previously unseen path & id"){
-      withInitializedPathIdTable{ table =>
-        implicit val session = AutoSession
-        val manager = new PathIdManager(table)
-        val path = "Batak/WMS_Batak_1.xml"
-        val id = "manuscript_1234"
-        val time = ZonedDateTime.parse("2021-06-07T10:00:00Z")
-        whenReady(manager.handlePathChanged(path, id, time)){
-          res =>
-            res shouldBe Some(PathId(path, id, time))
-            val maybePathId = withSQL {
-              select.from(table as table.p)
-            }.map(PathId(table.p)).single.apply()
+    it("stores a previously unseen path & id") {
+      withInitializedPathIdTable { table =>
+        withPathIdManager(table, bucket) { case (manager, store, messageSender) =>
 
-            maybePathId shouldBe Some(res.get)
+          implicit val session = AutoSession
+          val pathId = PathId("Batak/WMS_Batak_1.xml", "manuscript_1234", ZonedDateTime.parse("2021-06-07T10:00:00Z"))
+
+          manager.handlePathChanged(pathId, blobContents)
+
+          val maybePathId = withSQL {
+            select.from(table as table.p)
+          }.map(PathId(table.p)).single.apply()
+
+          maybePathId shouldBe Some(pathId)
+          val expectedS3Location = checkFileIsStored(store, bucket, "2021-06-07T10:00:00Z", blobContents, pathId.id)
+
+          messageSender.getMessages[TeiIdChangeMessage]() should contain only (TeiIdChangeMessage(id = pathId.id, s3Location = expectedS3Location, ZonedDateTime.parse("2021-06-07T10:00:00Z")))
+
         }
-
-
       }
     }
 
-    it("stores a new path for a previously seen id"){
-      withInitializedPathIdTable{ table =>
+    it("records a change to previously seen id & path") {
+      withInitializedPathIdTable { table =>
+        withPathIdManager(table, bucket) { case (manager, store, messageSender) =>
 
-      implicit val session = AutoSession
+          implicit val session = AutoSession
 
+          val oldTime = ZonedDateTime.parse("2021-06-07T10:00:00Z")
+          val storedPathId = PathId("Batak/path.xml", "manuscript_1234", oldTime)
+          savePathId(storedPathId, table)
+          val updatedPathId = storedPathId.copy(timeModified = oldTime.plus(2, ChronoUnit.HOURS))
 
-        val manager = new PathIdManager(table)
-        val oldPath = "Batak/oldpath.xml"
-        val newPath = "Batak/newpath.xml"
-        val id = "manuscript_1234"
-        val oldTime = ZonedDateTime.parse("2021-06-07T10:00:00Z")
-        val newTime = oldTime.plus(2, ChronoUnit.HOURS)
-        savePathId(PathId(oldPath, id, oldTime), table)
+          manager.handlePathChanged(updatedPathId, blobContents)
 
-        val future = manager.handlePathChanged(newPath, id, newTime)
-        whenReady(future){
-          res =>
-            res shouldBe Some(PathId(newPath, id, newTime))
-            val maybePathId = withSQL {
-              select.from(table as table.p)
-            }.map(PathId(table.p)).single.apply()
+          val maybePathId = withSQL {
+            select.from(table as table.p)
+          }.map(PathId(table.p)).single.apply()
 
-            maybePathId shouldBe Some(res.get)
+          maybePathId shouldBe Some(updatedPathId)
+          val expectedS3Location = checkFileIsStored(store, bucket, "2021-06-07T12:00:00Z", blobContents, updatedPathId.id)
+
+          messageSender.getMessages[TeiIdChangeMessage]() should contain only (TeiIdChangeMessage(id = updatedPathId.id, s3Location = expectedS3Location, oldTime.plus(2, ChronoUnit.HOURS)))
         }
+      }
+    }
 
+    it("ignores a change to previously seen id & path if the timestamp saved is greater than the timestamp in the message") {
+      withInitializedPathIdTable { table =>
+        withPathIdManager(table, bucket) { case (manager, store, messageSender) =>
+        implicit val session = AutoSession
 
+        val storedTime = ZonedDateTime.parse("2021-06-07T10:00:00Z")
+        val messageTime = storedTime.minus(2, ChronoUnit.HOURS)
+        val storedPathId = PathId("Batak/path.xml", "manuscript_1234", storedTime)
+        savePathId(storedPathId, table)
+        val updatedPathId = storedPathId.copy(timeModified = messageTime)
+
+        manager.handlePathChanged(updatedPathId, blobContents)
+
+        val maybePathId = withSQL {
+          select.from(table as table.p)
+        }.map(PathId(table.p)).single.apply()
+
+        maybePathId shouldBe Some(storedPathId)
+
+        messageSender.getMessages[TeiIdChangeMessage]() shouldBe empty
+        store.entries.keySet shouldBe empty
+
+      }
+      }
+    }
+
+    it("record that a previously seen id has moved") {
+      withInitializedPathIdTable { table =>
+        withPathIdManager(table, bucket) { case (manager, store, messageSender) =>
+
+          implicit val session = AutoSession
+          val oldTime = ZonedDateTime.parse("2021-06-07T10:00:00Z")
+          val newTime = oldTime.plus(2, ChronoUnit.HOURS)
+
+          val storedPathId = PathId("Batak/oldpath.xml", "manuscript_1234", oldTime)
+          savePathId(storedPathId, table)
+
+          val updatedPathId = storedPathId.copy(timeModified = newTime, path = "Batak/newpath.xml")
+
+          manager.handlePathChanged(updatedPathId, blobContents)
+
+          val maybePathId = withSQL {
+            select.from(table as table.p)
+          }.map(PathId(table.p)).single.apply()
+
+          maybePathId shouldBe Some(updatedPathId)
+          val expectedS3Location = checkFileIsStored(store, bucket, "2021-06-07T12:00:00Z", blobContents, updatedPathId.id)
+
+          messageSender.getMessages[TeiIdChangeMessage]() should contain only (TeiIdChangeMessage(id = updatedPathId.id, s3Location = expectedS3Location, newTime))
+        }
+      }
+    }
+
+    it("records that a new id has moved into a previously seen path") {
+      withInitializedPathIdTable { table =>
+        withPathIdManager(table, bucket) { case (manager, store, messageSender) =>
+
+          implicit val session = AutoSession
+
+          val newId = "manuscript_5678"
+          val oldTime = ZonedDateTime.parse("2021-06-07T10:00:00Z")
+          val newTime = oldTime.plus(2, ChronoUnit.HOURS)
+          val storedPathId = PathId("Batak/path.xml", "manuscript_1234", oldTime)
+          savePathId(storedPathId, table)
+
+          val updatedPathId =storedPathId.copy(id = newId, timeModified = newTime)
+
+          manager.handlePathChanged(updatedPathId, blobContents)
+
+          val maybePathId = withSQL {
+            select.from(table as table.p)
+          }.map(PathId(table.p)).single.apply()
+          maybePathId shouldBe Some(updatedPathId)
+          val expectedS3Location = checkFileIsStored(store, bucket, "2021-06-07T12:00:00Z", blobContents, updatedPathId.id)
+
+          messageSender.getMessages[TeiIdMessage]() should contain only(TeiIdChangeMessage(id = updatedPathId.id, s3Location = expectedS3Location, newTime), TeiIdDeletedMessage(id = "manuscript_1234", newTime))
+        }
+      }
+    }
+
+    it("ignores messages for a previously seen path if stored time is newer than the message time") {
+      withInitializedPathIdTable { table =>
+        withPathIdManager(table, bucket) { case (manager, store, messageSender) =>
+
+          implicit val session = AutoSession
+          val storedTime = ZonedDateTime.parse("2021-06-07T10:00:00Z")
+          val newTime = storedTime.minus(2, ChronoUnit.HOURS)
+          val storedPathId = PathId("Batak/oldpath.xml", "manuscript_1234", storedTime)
+          savePathId(storedPathId, table)
+
+          val updatedPathId = storedPathId.copy(id = "manuscript_5678", timeModified = newTime)
+          manager.handlePathChanged(updatedPathId, blobContents)
+
+          val maybePathId = withSQL {
+            select.from(table as table.p)
+          }.map(PathId(table.p)).single.apply()
+
+          maybePathId shouldBe Some(storedPathId)
+          messageSender.getMessages[TeiIdChangeMessage]() shouldBe empty
+          store.entries.keySet shouldBe empty
+        }
       }
     }
 
     it("ignores changes to a saved id if the timeModified in the database is greater") {
-      withInitializedPathIdTable{ table =>
+      withInitializedPathIdTable { table =>
+        withPathIdManager(table, bucket) { case (manager, store, messageSender) =>
 
-      implicit val session = AutoSession
+          implicit val session = AutoSession
 
+          val savedTime = ZonedDateTime.parse("2021-06-07T10:00:00Z")
+          val newTime = savedTime.minus(2, ChronoUnit.HOURS)
+          val storedPathId = PathId("Batak/oldpath.xml", "manuscript_1234", savedTime)
+          savePathId(storedPathId, table)
 
-        val manager = new PathIdManager(table)
-        val savedPath = "Batak/oldpath.xml"
-        val newPath = "Batak/newpath.xml"
-        val id = "manuscript_1234"
-        val savedTime = ZonedDateTime.parse("2021-06-07T10:00:00Z")
-        val newTime = savedTime.minus(2, ChronoUnit.HOURS)
-        savePathId(PathId(savedPath, id, savedTime), table)
+          val updatedPathId = storedPathId.copy(path = "Batak/newpath.xml", timeModified = newTime)
+          manager.handlePathChanged(updatedPathId, blobContents)
 
-        val future = manager.handlePathChanged(newPath, id, newTime)
-        whenReady(future){
-          res =>
-            res shouldBe None
-            val maybePathId = withSQL {
-              select.from(table as table.p)
-            }.map(PathId(table.p)).single.apply()
+          val maybePathId = withSQL {
+            select.from(table as table.p)
+          }.map(PathId(table.p)).single.apply()
 
-            maybePathId shouldBe Some(PathId(savedPath, id, savedTime))
+          maybePathId shouldBe Some(storedPathId)
+          store.entries.keySet shouldBe empty
+          messageSender.getMessages[TeiIdChangeMessage]() shouldBe empty
         }
+      }
+    }
 
+    it("records that a previously seen id has moved into a previously seen path") {
 
+      withInitializedPathIdTable { table =>
+        withPathIdManager(table, bucket) { case (manager, store, messageSender) =>
+
+        implicit val session = AutoSession
+
+        val path1 = "Batak/path.xml"
+        val id1 = "manuscript_1234"
+        val time1 = ZonedDateTime.parse("2021-06-07T10:00:00Z")
+
+        val path2 = "Batak/anotherpath.xml"
+        val id2 = "manuscript_5678"
+        val time2 = time1.plus(2, ChronoUnit.HOURS)
+          val firstPathId = PathId(path1, id1, time1)
+          val secondPathId = PathId(path2, id2, time2)
+          savePathId(firstPathId, table)
+          savePathId(secondPathId, table)
+
+        val newTime = time2.plus(2, ChronoUnit.HOURS)
+        val updatedPathId = PathId(path1, id2, newTime)
+
+        manager.handlePathChanged(updatedPathId, blobContents)
+
+        val maybePathId = withSQL {
+          select.from(table as table.p)
+        }.map(PathId(table.p)).single.apply()
+        maybePathId shouldBe Some(updatedPathId)
+        val expectedS3Location = checkFileIsStored(store, bucket, "2021-06-07T14:00:00Z", blobContents, id2)
+
+        messageSender.getMessages[TeiIdMessage]() should contain only(TeiIdChangeMessage(id = id2, s3Location = expectedS3Location, newTime), TeiIdDeletedMessage(id = id1, newTime))
+
+      }
+      }
+    }
+    it("ignores changes to previously seen id and  previously seen path if the timestamp in the message is older than the ones in the database") {
+
+      withInitializedPathIdTable { table =>
+        withPathIdManager(table, bucket) { case (manager, store, messageSender) =>
+
+          implicit val session = AutoSession
+
+          val path1 = "Batak/path.xml"
+          val id1 = "manuscript_1234"
+          val time1 = ZonedDateTime.parse("2021-06-07T10:00:00Z")
+
+          val path2 = "Batak/anotherpath.xml"
+          val id2 = "manuscript_5678"
+          val time2 = time1.plus(2, ChronoUnit.HOURS)
+          val firstPathId = PathId(path1, id1, time1)
+          val secondPathId = PathId(path2, id2, time2)
+          savePathId(firstPathId, table)
+          savePathId(secondPathId, table)
+
+          val newTime = time1.minus(2, ChronoUnit.HOURS)
+
+          manager.handlePathChanged(PathId(path1, id2, newTime), blobContents)
+
+          val listOfpathIds = withSQL {
+            select.from(table as table.p)
+          }.map(PathId(table.p)).list().apply()
+
+          listOfpathIds should contain theSameElementsAs List(firstPathId, secondPathId)
+          store.entries shouldBe empty
+          messageSender.getMessages[TeiIdMessage]() shouldBe empty
+        }
       }
     }
   }
 
-  describe("handlePathDeleted"){
-    it("deletes a path"){
-      withInitializedPathIdTable{ table =>
+  describe("handlePathDeleted") {
+    it("deletes a path") {
+      withInitializedPathIdTable { table =>
+        withPathIdManager(table, bucket) { case (manager, store, messageSender) =>
 
-      implicit val session = AutoSession
-        val manager = new PathIdManager(table)
+        implicit val session = AutoSession
+
         val path = "Batak/WMS_Batak_1.xml"
         val id = "manuscript_1234"
         val time = ZonedDateTime.parse("2021-06-07T10:00:00Z")
         savePathId(PathId(path, id, time), table)
 
         val newTime = time.plus(2, ChronoUnit.HOURS)
-        whenReady(manager.handlePathDeleted(path, newTime)){
-          res =>
-            res shouldBe Some(PathId(path, id, newTime))
-            val maybePathId = withSQL {
-              select.from(table as table.p)
-            }.map(PathId(table.p)).single.apply()
 
-            maybePathId shouldBe None
-        }
+        manager.handlePathDeleted(path, newTime)
 
-
+        val maybePathId = withSQL {
+          select.from(table as table.p)
+        }.map(PathId(table.p)).single.apply()
+        maybePathId shouldBe None
+        messageSender.getMessages[TeiIdDeletedMessage]() should contain only (TeiIdDeletedMessage(id = "manuscript_1234", newTime))
+      }
       }
     }
 
-    it("does not delete a path if the timeModified in the table is greater than the timeDeleted"){
-      withInitializedPathIdTable{ table =>
+    it("does not delete a path if the timeModified in the table is greater than the timeDeleted") {
+      withInitializedPathIdTable { table =>
 
-      implicit val session = AutoSession
-        val manager = new PathIdManager(table)
-        val path = "Batak/WMS_Batak_1.xml"
-        val id = "manuscript_1234"
-        val time = ZonedDateTime.parse("2021-06-07T10:00:00Z")
-        savePathId(PathId(path, id, time), table)
+        withPathIdManager(table, bucket) { case (manager, _, messageSender) =>
+          implicit val session = AutoSession
+          val path = "Batak/WMS_Batak_1.xml"
+          val id = "manuscript_1234"
+          val time = ZonedDateTime.parse("2021-06-07T10:00:00Z")
+          savePathId(PathId(path, id, time), table)
 
-        val deletedTime = time.minus(2, ChronoUnit.HOURS)
-        whenReady(manager.handlePathDeleted(path, deletedTime)){
-          res =>
-            res shouldBe None
-            val maybePathId = withSQL {
-              select.from(table as table.p)
-            }.map(PathId(table.p)).single.apply()
+          val deletedTime = time.minus(2, ChronoUnit.HOURS)
 
-            maybePathId shouldBe Some(PathId(path, id, time))
+          manager.handlePathDeleted(path, deletedTime)
+
+          val maybePathId = withSQL {
+            select.from(table as table.p)
+          }.map(PathId(table.p)).single.apply()
+
+          maybePathId shouldBe Some(PathId(path, id, time))
+          messageSender.getMessages[TeiIdChangeMessage]() shouldBe empty
+
         }
-
-
       }
     }
 
-    it("ignores if the pathId does not exist"){
-      withInitializedPathIdTable{ table =>
-        implicit val session = AutoSession
-      val manager = new PathIdManager(table)
-        val path = "Batak/WMS_Batak_1.xml"
-        val time = ZonedDateTime.parse("2021-06-07T10:00:00Z")
+    it("ignores if the pathId does not exist") {
+      withInitializedPathIdTable { table =>
+        withPathIdManager(table, bucket) { case (manager, _, messageSender) =>
+          implicit val session = AutoSession
+          val path = "Batak/WMS_Batak_1.xml"
+          val time = ZonedDateTime.parse("2021-06-07T10:00:00Z")
 
-        val deletedTime = time.plus(2, ChronoUnit.HOURS)
-        whenReady(manager.handlePathDeleted(path, deletedTime)){ res =>
-          res shouldBe None
+          val deletedTime = time.plus(2, ChronoUnit.HOURS)
+          manager.handlePathDeleted(path, deletedTime)
+
           val maybePathId = withSQL {
             select.from(table as table.p)
           }.map(PathId(table.p)).single.apply()
 
           maybePathId shouldBe None
-
+          messageSender.getMessages[TeiIdChangeMessage]() shouldBe empty
         }
-
-
       }
     }
   }
 
-  private def savePathId(pathId:PathId, pathIds: PathIdTable)(implicit session: DBSession) = withSQL {
+
+  private def savePathId(pathId: PathId, pathIds: PathIdTable)(implicit session: DBSession) = withSQL {
     insert
       .into(pathIds)
       .namedValues(
         pathIds.column.path -> pathId.path,
         pathIds.column.id -> pathId.id,
-        pathIds.column.timeModified -> pathId.timeModified.format( PathId.formatter)
+        pathIds.column.timeModified -> pathId.timeModified.format(PathId.formatter)
       )
   }.update.apply()
+
+  private def checkFileIsStored(store: MemoryStore[S3ObjectLocation, String], bucket: Bucket, modifiedTime: String, fileContents: String, id: String) = {
+    val expectedKey = s"tei_files/${id}/${ZonedDateTime.parse(modifiedTime).toEpochSecond}.xml"
+    val expectedS3Location = S3ObjectLocation(bucket.name, expectedKey)
+    store.entries.keySet should contain(expectedS3Location)
+    store.entries(expectedS3Location) shouldBe fileContents
+    expectedS3Location
+  }
 
 }
