@@ -15,12 +15,10 @@ case class PathId(
 object PathId {
   val formatter = DateTimeFormatter.ofPattern("yyyy-M-d k:m:s")
   def apply(p: SyntaxProvider[PathId])(rs: WrappedResultSet): PathId = {
-    val str = rs.string(p.resultName.timeModified)
-    println(str)
     PathId(
       path = rs.string(p.resultName.path),
       id = rs.string(p.resultName.id),
-      timeModified = LocalDateTime.parse(str, formatter).atZone(ZoneId.of("Z"))
+      timeModified = LocalDateTime.parse(rs.string(p.resultName.timeModified), formatter).atZone(ZoneId.of("Z"))
     )
   }
 
