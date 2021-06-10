@@ -196,6 +196,52 @@ class MergerScenarioTest
       calmItem.id shouldBe sierra.data.items.head.id
     }
 
+    Scenario("A Calm work, a Sierra work, and a Miro work are matched") {
+      Given("A Calm work, a Sierra work and a Miro work")
+      val sierra = sierraPhysicalIdentifiedWork()
+      val calm = calmIdentifiedWork()
+      val miro = miroIdentifiedWork()
+
+      When("the works are merged")
+      val outcome = merger.merge(Seq(sierra, calm, miro))
+
+      Then("the Sierra work is redirected to the Calm work")
+      outcome.getMerged(sierra) should beRedirectedTo(calm)
+
+      And("the Miro work is redirected to the Calm work")
+      outcome.getMerged(miro) should beRedirectedTo(calm)
+
+      And("the Calm work contains the Miro location")
+      outcome.getMerged(calm).data.items.flatMap(_.locations) should
+        contain(miro.data.items.head.locations.head)
+      And("the Calm work contains the Miro image")
+      outcome.getMerged(calm).data.imageData should contain(miro.singleImage)
+    }
+
+    Scenario("A Calm work, a Sierra picture work, and a METS work are matched") {
+      Given("A Calm work, a Sierra picture work and a METS work")
+      val sierraPicture = sierraIdentifiedWork()
+        .items(List(createIdentifiedPhysicalItem))
+        .format(Format.Pictures)
+      val calm = calmIdentifiedWork()
+      val mets = metsIdentifiedWork()
+
+      When("the works are merged")
+      val outcome = merger.merge(Seq(sierraPicture, calm, mets))
+
+      Then("the Sierra work is redirected to the Calm work")
+      outcome.getMerged(sierraPicture) should beRedirectedTo(calm)
+
+      And("the METS work is redirected to the Calm work")
+      outcome.getMerged(mets) should beRedirectedTo(calm)
+
+      And("the Calm work contains the METS location")
+      outcome.getMerged(calm).data.items.flatMap(_.locations) should
+        contain(mets.data.items.head.locations.head)
+      And("the Calm work contains the METS image")
+      outcome.getMerged(calm).data.imageData should contain(mets.singleImage)
+    }
+
     Scenario("A digitised video with Sierra physical records and e-bibs") {
       // This test case is based on a real example of four related works that
       // were being merged incorrectly.  In particular, the METS work (and associated
