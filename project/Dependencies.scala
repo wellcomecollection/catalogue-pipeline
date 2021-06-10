@@ -7,6 +7,7 @@ object WellcomeDependencies {
   lazy val versions = new {
     val typesafe = defaultVersion
     val fixtures = defaultVersion
+    val http = defaultVersion
     val json = defaultVersion
     val messaging = defaultVersion
     val monitoring = defaultVersion
@@ -42,6 +43,11 @@ object WellcomeDependencies {
   val elasticsearchTypesafeLibrary: Seq[ModuleID] = library(
     name = "elasticsearch_typesafe",
     version = versions.elasticsearch
+  )
+
+  val httpLibrary: Seq[ModuleID] = library(
+    name = "http",
+    version = versions.http
   )
 
   val monitoringLibrary: Seq[ModuleID] = library(
@@ -287,7 +293,8 @@ object CatalogueDependencies {
   val calmApiClientDependencies: Seq[ModuleID] =
     ExternalDependencies.akkaHttpDependencies ++
       ExternalDependencies.scalaXmlDependencies ++
-      ExternalDependencies.scalatestDependencies
+      ExternalDependencies.scalatestDependencies ++
+      WellcomeDependencies.httpLibrary
 
   // Sierra adapter stack
 
