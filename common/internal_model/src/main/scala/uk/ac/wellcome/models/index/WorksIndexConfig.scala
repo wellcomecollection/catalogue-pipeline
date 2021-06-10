@@ -2,8 +2,12 @@ package uk.ac.wellcome.models.index
 
 import buildinfo.BuildInfo
 import com.sksamuel.elastic4s.ElasticDsl._
+import com.sksamuel.elastic4s.fields.{
+  ElasticField,
+  ObjectField,
+  TokenCountField
+}
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
-import com.sksamuel.elastic4s.requests.mappings.{FieldDefinition, ObjectField}
 import uk.ac.wellcome.elasticsearch.IndexConfig
 
 sealed trait WorksIndexConfig extends IndexConfig with IndexConfigFields {
@@ -12,7 +16,7 @@ sealed trait WorksIndexConfig extends IndexConfig with IndexConfigFields {
 
   val dynamicMapping: DynamicMapping = DynamicMapping.False
 
-  def fields: Seq[FieldDefinition with Product with Serializable]
+  def fields: Seq[ElasticField]
 
   def mapping = {
     val version = BuildInfo.version.split("\\.").toList
@@ -40,7 +44,7 @@ object MergedWorkIndexConfig extends WorksIndexConfig {
             .copyTo("data.collectionPath.depth")
             .analyzer(pathAnalyzer.name)
             .fields(lowercaseKeyword("keyword")),
-          tokenCountField("depth").analyzer("standard")
+          TokenCountField("depth").withAnalyzer("standard")
         )
       )
     )
@@ -150,7 +154,7 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
     objectField("collectionPath").fields(
       label.copyTo(relationsPath),
       path,
-      tokenCountField("depth").analyzer("standard")
+      TokenCountField("depth").withAnalyzer("standard")
     )
   }
 
@@ -173,12 +177,12 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
             collectionPath(copyPathTo = None)
           )
         )
-        .dynamic("false"),
+        .withDynamic("false"),
       objectField("derivedData")
         .fields(
           keywordField("contributorAgents")
         )
-        .dynamic("false")
+        .withDynamic("false")
     )
 
   val search = objectField("search").fields(
@@ -191,15 +195,15 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
       state,
       search,
       keywordField("type"),
-      data.dynamic("false"),
+      data.withDynamic("false"),
       objectField("invisibilityReasons")
         .fields(keywordField("type"))
-        .dynamic("false"),
+        .withDynamic("false"),
       objectField("deletedReason")
         .fields(keywordField("type"))
-        .dynamic("false"),
-      objectField("redirectTarget").dynamic("false"),
-      objectField("redirectSources").dynamic(false),
+        .withDynamic("false"),
+      objectField("redirectTarget").withDynamic("false"),
+      objectField("redirectSources").withDynamic("false"),
       version
     )
 }

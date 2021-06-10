@@ -3,7 +3,8 @@ package uk.ac.wellcome.models.index
 import buildinfo.BuildInfo
 import com.sksamuel.elastic4s.ElasticDsl.{keywordField, _}
 import com.sksamuel.elastic4s.analysis.Analysis
-import com.sksamuel.elastic4s.requests.mappings.{MappingDefinition, ObjectField}
+import com.sksamuel.elastic4s.fields.{DenseVectorField, ObjectField}
+import com.sksamuel.elastic4s.requests.mappings.MappingDefinition
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
 import uk.ac.wellcome.elasticsearch.IndexConfig
 
@@ -28,12 +29,12 @@ object IndexedImageIndexConfig extends IndexConfig with IndexConfigFields {
   val analysis: Analysis = WorksAnalysis()
 
   val inferredData = objectField("inferredData").fields(
-    denseVectorField("features1", 2048),
-    denseVectorField("features2", 2048),
+    DenseVectorField("features1", dims = 2048),
+    DenseVectorField("features2", dims = 2048),
     keywordField("lshEncodedFeatures"),
     keywordField("palette"),
-    intField("binSizes").index(false),
-    floatField("binMinima").index(false),
+    intField("binSizes").withIndex(false),
+    floatField("binMinima").withIndex(false),
     floatField("aspectRatio")
   )
 
@@ -74,7 +75,7 @@ object IndexedImageIndexConfig extends IndexConfig with IndexConfigFields {
         ),
         keywordField("type")
       )
-      .dynamic("false")
+      .withDynamic("false")
 
   val source = objectField("source").fields(
     sourceWork("canonicalWork"),
@@ -91,7 +92,7 @@ object IndexedImageIndexConfig extends IndexConfig with IndexConfigFields {
         .fields(
           keywordField("sourceContributorAgents")
         )
-        .dynamic("false")
+        .withDynamic("false")
     )
 
   val fields = Seq(
@@ -103,7 +104,7 @@ object IndexedImageIndexConfig extends IndexConfig with IndexConfigFields {
       .fields(
         objectField("license").fields(keywordField("id"))
       )
-      .dynamic("false")
+      .withDynamic("false")
   )
 
   // Here we set dynamic strict to be sure the object vaguely looks like an
