@@ -82,9 +82,6 @@ object WellcomeDependencies {
 
 object ExternalDependencies {
   lazy val versions = new {
-    val akka = "2.6.10"
-    val akkaHttp = "10.1.11"
-    val akkaHttpCirce = "1.32.0"
     val apacheCommons = "1.9"
     val circe = "0.13.0"
     val fastparse = "2.3.0"
@@ -101,6 +98,12 @@ object ExternalDependencies {
     val logback = "1.1.8"
 
     val scalaJHttp = "2.3.0"
+
+    // This should match the version used in scala-libs
+    // See https://github.com/wellcomecollection/scala-libs/blob/main/project/Dependencies.scala
+    val akka = "2.6.14"
+    val akkaHttp = "10.1.11"
+    val akkaHttpCirce = "1.32.0"
   }
 
   val enumeratumDependencies = Seq(
