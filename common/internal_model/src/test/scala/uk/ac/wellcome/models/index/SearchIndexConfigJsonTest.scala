@@ -1,9 +1,7 @@
 package uk.ac.wellcome.models.index
 
-import com.sksamuel.elastic4s.requests.indexes.{
-  CreateIndexContentBuilder,
-  CreateIndexRequest
-}
+import com.sksamuel.elastic4s.handlers.index.CreateIndexContentBuilder
+import com.sksamuel.elastic4s.requests.indexes.CreateIndexRequest
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -40,7 +38,7 @@ class SearchIndexConfigJsonTest
         analysis = Some(IndexedWorkIndexConfig.analysis),
         mapping = Some(IndexedWorkIndexConfig.mapping.meta(Map()))
       )
-    ).string()
+    ).value.toString
     assertJsonStringsAreEqual(fileJson, indexJson)
   }
 
@@ -57,7 +55,7 @@ class SearchIndexConfigJsonTest
         analysis = Some(IndexedImageIndexConfig.analysis),
         mapping = Some(IndexedImageIndexConfig.mapping.meta(Map()))
       )
-    ).string()
+    ).value.toString
     assertJsonStringsAreEqual(fileJson, indexJson)
   }
 }

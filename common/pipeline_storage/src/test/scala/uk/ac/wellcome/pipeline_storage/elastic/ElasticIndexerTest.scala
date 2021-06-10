@@ -152,7 +152,7 @@ class ElasticIndexerTest
 
       val id = lowercaseKeyword("id")
       val title = textField("title")
-      val data = objectField("data").dynamic("false")
+      val data = objectField("data").withDynamic("false")
 
       val mapping = properties(Seq(title, id, version, data))
         .dynamic(DynamicMapping.Strict)
