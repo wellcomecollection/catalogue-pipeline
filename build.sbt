@@ -174,7 +174,7 @@ lazy val transformer_mets = setupProject(
 lazy val transformer_calm = setupProject(
   project,
   folder = "pipeline/transformer/transformer_calm",
-  localDependencies = Seq(transformer_common, calm_adapter),
+  localDependencies = Seq(transformer_common),
   externalDependencies = CatalogueDependencies.calmTransformerDependencies
 )
 
