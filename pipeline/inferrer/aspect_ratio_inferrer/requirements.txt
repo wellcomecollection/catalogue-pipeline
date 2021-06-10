@@ -44,7 +44,7 @@ click==7.1.2
     # via uvicorn
 docutils==0.15.2
     # via botocore
-fastapi==0.54.1
+fastapi==0.65.2
     # via -r requirements.in
 future==0.18.2
     # via piffle
@@ -76,7 +76,7 @@ pycares==3.1.1
     # via aiodns
 pycparser==2.20
     # via cffi
-pydantic==1.4
+pydantic==1.8.2
     # via fastapi
 python-dateutil==2.8.1
     # via botocore
@@ -88,8 +88,10 @@ six==1.14.0
     # via
     #   piffle
     #   python-dateutil
-starlette==0.13.2
+starlette==0.14.2
     # via fastapi
+typing-extensions==3.10.0.0
+    # via pydantic
 urllib3==1.25.8
     # via
     #   botocore
