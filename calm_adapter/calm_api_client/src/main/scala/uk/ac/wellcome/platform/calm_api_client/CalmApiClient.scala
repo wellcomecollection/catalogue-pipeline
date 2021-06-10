@@ -2,7 +2,6 @@ package uk.ac.wellcome.platform.calm_api_client
 
 import akka.Done
 import akka.actor.ActorSystem
-import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.{
   BasicHttpCredentials,
@@ -11,6 +10,7 @@ import akka.http.scaladsl.model.headers.{
 }
 import akka.stream.{Materializer, RestartSettings}
 import weco.catalogue.source_model.calm.CalmRecord
+import weco.http.client.{AkkaHttpClient, HttpClient}
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
@@ -38,19 +38,8 @@ trait CalmApiClient {
     request(request = CalmAbandonRequest, cookie = Some(cookie))
 }
 
-// HttpClients turn HttpRequests into HttpResponses via their
-// singleRequest method
-trait HttpClient {
-  def singleRequest(request: HttpRequest): Future[HttpResponse]
-}
-
-trait AkkaHttpClient extends HttpClient {
-  implicit val actorSystem: ActorSystem
-  def singleRequest(request: HttpRequest): Future[HttpResponse] =
-    Http().singleRequest(request)
-}
-
 class HttpCalmApiClient(
+  val client: HttpClient,
   url: String,
   username: String,
   password: String,
@@ -59,8 +48,7 @@ class HttpCalmApiClient(
   randomFactor: Double = 0.2,
   maxRestarts: Int = 10
 )(implicit materializer: Materializer)
-    extends CalmApiClient { this: HttpClient =>
-
+    extends CalmApiClient {
   private implicit val ec: ExecutionContext = materializer.executionContext
 
   private implicit val restartSettings: RestartSettings = RestartSettings(
@@ -73,7 +61,7 @@ class HttpCalmApiClient(
                                          cookie: Option[Cookie])(
     implicit parse: CalmHttpResponseParser[Request]): Future[Request#Response] =
     RetryFuture {
-      singleRequest(createHttpRequest(request, cookie))
+      client.singleRequest(createHttpRequest(request, cookie))
         .map { resp =>
           resp.status match {
             case StatusCodes.OK => resp
@@ -114,8 +102,9 @@ class AkkaHttpCalmApiClient(
   maxBackoff: FiniteDuration = 30 seconds,
   randomFactor: Double = 0.2,
   maxRestarts: Int = 10
-)(implicit mat: Materializer)
+)(implicit actorSystem: ActorSystem, ec: ExecutionContext)
     extends HttpCalmApiClient(
+      client = new AkkaHttpClient(baseUri = Uri(url)),
       url,
       username,
       password,
@@ -123,6 +112,3 @@ class AkkaHttpCalmApiClient(
       maxBackoff,
       randomFactor,
       maxRestarts)
-    with AkkaHttpClient {
-  implicit val actorSystem: ActorSystem = mat.system
-}
