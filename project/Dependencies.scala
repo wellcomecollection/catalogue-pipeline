@@ -85,7 +85,6 @@ object ExternalDependencies {
     val akka = "2.6.10"
     val akkaHttp = "10.1.11"
     val akkaHttpCirce = "1.32.0"
-    val akkaStreamAlpakka = "1.1.2"
     val apacheCommons = "1.9"
     val circe = "0.13.0"
     val fastparse = "2.3.0"
@@ -118,10 +117,6 @@ object ExternalDependencies {
     "com.typesafe.akka" %% "akka-http" % versions.akkaHttp,
     "com.typesafe.akka" %% "akka-http-testkit" % versions.akkaHttp % "test",
     "de.heikoseeberger" %% "akka-http-circe" % versions.akkaHttpCirce
-  )
-
-  val alpakkaS3Dependencies = Seq(
-    "com.lightbend.akka" %% "akka-stream-alpakka-s3" % versions.akkaStreamAlpakka
   )
 
   val apacheCommonsDependencies = Seq(
