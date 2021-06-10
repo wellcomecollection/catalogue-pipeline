@@ -15,15 +15,26 @@ object ImageDataRule extends FieldMergeRule {
   override def merge(
     target: Work.Visible[Identified],
     sources: Seq[Work[Identified]] = Nil
-  ): FieldMergeResult[FieldData] =
-    FieldMergeResult(
-      data = getMetsPictureAndEphemeraImages(target, sources).getOrElse(Nil) ++
-        getPairedMiroImages(target, sources).getOrElse(Nil),
-      sources = List(
-        getMetsPictureAndEphemeraImages,
-        getPairedMiroImages
-      ).flatMap(_.mergedSources(target, sources))
-    )
+  ): FieldMergeResult[FieldData] = {
+    // We merge images into Sierra targets, regardless of whether this is the principal
+    // target of the graph we're currently merging (ie if there's a Calm target, it's ignored)
+    TargetPrecedence
+      .targetSatisfying(sierraWork)(
+        target +: sources.collect(TargetPrecedence.visibleWork)
+      )
+      .map { sierraTarget =>
+        FieldMergeResult(
+          data = getMetsPictureAndEphemeraImages(sierraTarget, sources)
+            .getOrElse(Nil) ++
+            getPairedMiroImages(sierraTarget, sources).getOrElse(Nil),
+          sources = List(
+            getMetsPictureAndEphemeraImages,
+            getPairedMiroImages
+          ).flatMap(_.mergedSources(sierraTarget, sources))
+        )
+      }
+      .getOrElse(FieldMergeResult(data = Nil, sources = Nil))
+  }
 
   private lazy val getMetsPictureAndEphemeraImages = new FlatImageMergeRule {
     val isDefinedForTarget: WorkPredicate = sierraPictureOrEphemera
