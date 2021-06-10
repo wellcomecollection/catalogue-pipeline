@@ -33,7 +33,7 @@ class GitHubBlobReader(implicit ac: ActorSystem) {
     response match {
       case HttpResponse(StatusCodes.OK, _, entity, _) =>
         Unmarshal(entity).to[T]
-      case _ => ???
+      case HttpResponse(code, _, _, _) => throw new RuntimeException(s"The GitHub api returned an error: ${code.value}")
     }
   }
 }
