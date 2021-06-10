@@ -2,6 +2,7 @@ package uk.ac.wellcome.platform.calm_api_client
 
 import akka.Done
 import akka.actor.ActorSystem
+import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.{
   BasicHttpCredentials,
@@ -10,7 +11,7 @@ import akka.http.scaladsl.model.headers.{
 }
 import akka.stream.{Materializer, RestartSettings}
 import weco.catalogue.source_model.calm.CalmRecord
-import weco.http.client.{AkkaHttpClient, HttpClient}
+import weco.http.client.HttpClient
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
@@ -94,6 +95,14 @@ class HttpCalmApiClient(
   }
 }
 
+// TODO: Inline this into scala-libs
+class AkkaHttpClient(implicit system: ActorSystem,
+                     val ec: ExecutionContext)
+  extends HttpClient {
+  override def singleRequest(request: HttpRequest): Future[HttpResponse] =
+    Http().singleRequest(request)
+}
+
 class AkkaHttpCalmApiClient(
   url: String,
   username: String,
@@ -104,7 +113,7 @@ class AkkaHttpCalmApiClient(
   maxRestarts: Int = 10
 )(implicit actorSystem: ActorSystem, ec: ExecutionContext)
     extends HttpCalmApiClient(
-      client = new AkkaHttpClient(baseUri = Uri(url)),
+      client = new AkkaHttpClient(),
       url,
       username,
       password,

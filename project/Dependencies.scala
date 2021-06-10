@@ -2,7 +2,7 @@ import sbt._
 
 object WellcomeDependencies {
 
-  val defaultVersion = "26.17.0"
+  val defaultVersion = "26.17.2"
 
   lazy val versions = new {
     val typesafe = defaultVersion

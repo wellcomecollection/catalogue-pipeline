@@ -44,8 +44,6 @@ trait CalmApiClientFixtures extends Akka {
   class TestHttpClient(responses: Iterator[HttpResponse])(implicit val ec: ExecutionContext) extends HttpClient {
     final var requests: List[HttpRequest] = Nil
 
-    val baseUri: Uri = Uri(url)
-
     def singleRequest(request: HttpRequest): Future[HttpResponse] = {
       requests = requests :+ request
       if (responses.hasNext) {
