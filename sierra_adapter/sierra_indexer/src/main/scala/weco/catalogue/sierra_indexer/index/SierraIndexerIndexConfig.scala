@@ -2,11 +2,8 @@ package weco.catalogue.sierra_indexer.index
 
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.analysis.Analysis
-import com.sksamuel.elastic4s.requests.mappings.{
-  FieldDefinition,
-  MappingDefinition,
-  ObjectField
-}
+import com.sksamuel.elastic4s.fields.{ElasticField, ObjectField}
+import com.sksamuel.elastic4s.requests.mappings.MappingDefinition
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
 import uk.ac.wellcome.elasticsearch.IndexConfig
 import uk.ac.wellcome.models.index.IndexConfigFields
@@ -15,7 +12,7 @@ trait SierraIndexerIndexConfig extends IndexConfig with IndexConfigFields {
   override def analysis: Analysis =
     Analysis(analyzers = List())
 
-  def fields: Seq[FieldDefinition]
+  def fields: Seq[ElasticField]
 
   val parent: ObjectField = objectField("parent").fields(
     keywordField("id"),
@@ -28,7 +25,7 @@ trait SierraIndexerIndexConfig extends IndexConfig with IndexConfigFields {
 }
 
 object VarfieldIndexConfig extends SierraIndexerIndexConfig {
-  val fields: Seq[FieldDefinition] = Seq(
+  val fields: Seq[ElasticField] = Seq(
     parent,
     intField("position"),
     objectField("varField").fields(
@@ -46,7 +43,7 @@ object VarfieldIndexConfig extends SierraIndexerIndexConfig {
 }
 
 object FixedFieldIndexConfig extends SierraIndexerIndexConfig {
-  val fields: Seq[FieldDefinition] = Seq(
+  val fields: Seq[ElasticField] = Seq(
     parent,
     keywordField("code"),
     objectField("fixedField").fields(
