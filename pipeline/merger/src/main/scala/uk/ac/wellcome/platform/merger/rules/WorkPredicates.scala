@@ -12,22 +12,30 @@ import weco.catalogue.internal_model.locations.{
 }
 import weco.catalogue.internal_model.work.{Format, Item, Work}
 
+import scala.Function.const
+
 object WorkPredicates {
   type WorkPredicate = Work[Identified] => Boolean
 
   private val sierraIdentified: WorkPredicate = identifierTypeId(
-    IdentifierType.SierraSystemNumber)
+    IdentifierType.SierraSystemNumber
+  )
   private val metsIdentified: WorkPredicate = identifierTypeId(
-    IdentifierType.METS)
+    IdentifierType.METS
+  )
   private val calmIdentified: WorkPredicate = identifierTypeId(
-    IdentifierType.CalmRecordIdentifier)
+    IdentifierType.CalmRecordIdentifier
+  )
   private val miroIdentified: WorkPredicate = identifierTypeId(
-    IdentifierType.MiroImageNumber)
+    IdentifierType.MiroImageNumber
+  )
 
   val sierraWork: WorkPredicate = sierraIdentified
   val zeroItem: WorkPredicate = work => work.data.items.isEmpty
   val singleItem: WorkPredicate = work => work.data.items.size == 1
   val multiItem: WorkPredicate = work => work.data.items.size > 1
+
+  val anyWork: WorkPredicate = const(true)
 
   val zeroIdentifiedItems: WorkPredicate =
     work =>
@@ -133,8 +141,9 @@ object WorkPredicates {
       .find(_.identifierType == IdentifierType.WellcomeDigcode)
       .exists(_.value == digcode)
 
-  private def identifierTypeId(id: IdentifierType)(
-    work: Work[Identified]): Boolean =
+  private def identifierTypeId(
+    id: IdentifierType
+  )(work: Work[Identified]): Boolean =
     work.sourceIdentifier.identifierType == id
 
   private def format(format: Format)(work: Work[Identified]): Boolean =
@@ -147,7 +156,8 @@ object WorkPredicates {
     }
 
   private def satisfiesAll(predicates: (Work[Identified] => Boolean)*)(
-    work: Work[Identified]): Boolean = predicates.forall(_(work))
+    work: Work[Identified]
+  ): Boolean = predicates.forall(_(work))
 
   implicit class WorkPredicateOps(val predA: WorkPredicate) {
     def or(predB: WorkPredicate): WorkPredicate =
