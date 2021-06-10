@@ -217,20 +217,21 @@ object PlatformMerger extends Merger {
             imageData = sourceImageData
           )
         }
-      } yield MergeResult(
-        mergedTarget = work,
-        imageDataWithSources = sourceImageData.map { imageData =>
-          ImageDataWithSource(
-            imageData = imageData,
-            source = image.ParentWorks(
-              canonicalWork = work.toParentWork,
-              redirectedWork = sources
-                .find { _.data.imageData.contains(imageData) }
-                .map(_.toParentWork)
+      } yield
+        MergeResult(
+          mergedTarget = work,
+          imageDataWithSources = sourceImageData.map { imageData =>
+            ImageDataWithSource(
+              imageData = imageData,
+              source = image.ParentWorks(
+                canonicalWork = work.toParentWork,
+                redirectedWork = sources
+                  .find { _.data.imageData.contains(imageData) }
+                  .map(_.toParentWork)
+              )
             )
-          )
-        }
-      )
+          }
+        )
 
   private def standaloneImages(
     target: Work.Visible[Identified]
