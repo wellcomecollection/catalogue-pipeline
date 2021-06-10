@@ -1,5 +1,6 @@
 package weco.catalogue.tei.id_extractor
 
+import com.github.tomakehurst.wiremock.client.WireMock._
 import org.apache.commons.io.IOUtils
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
@@ -23,6 +24,17 @@ class GitHubBlobReaderTest extends AnyFunSpec with Wiremock with ScalaFutures wi
     }
   }
   it("handles error from github"){
-    fail()
+    withWiremock("localhost") { port =>
+      withActorSystem { implicit ac =>
+        val uri = new URI(s"http://localhost:$port/git/blobs/123456789qwertyu")
+        val gitHubBlobReader = new GitHubBlobReader()
+    stubFor(get("/git/blobs/123456789qwertyu")
+      .willReturn(serverError()
+        .withBody("<response>ERROR!</response>")))
+
+        whenReady(gitHubBlobReader.getBlob(uri).failed) { result =>
+          result shouldBe a[RuntimeException]
+          result.getMessage should include ("Server Error")
+        }}}
   }
 }
