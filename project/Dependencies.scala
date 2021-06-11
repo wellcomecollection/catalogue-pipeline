@@ -238,8 +238,7 @@ object CatalogueDependencies {
   val mergerDependencies: Seq[ModuleID] = Nil
 
   val relationEmbedderDependencies: Seq[ModuleID] =
-    WellcomeDependencies.storageTypesafeLibrary ++
-      WellcomeDependencies.messagingTypesafeLibrary
+    WellcomeDependencies.messagingTypesafeLibrary
 
   val routerDependencies: Seq[ModuleID] =
     WellcomeDependencies.messagingTypesafeLibrary
