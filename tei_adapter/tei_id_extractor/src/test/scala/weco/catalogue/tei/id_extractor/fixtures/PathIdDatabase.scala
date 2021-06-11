@@ -51,7 +51,7 @@ trait PathIdDatabase
           key = "PRI"),
         FieldDescription(
           field = "timeModified",
-          dataType = "datetime",
+          dataType = "bigint(20) unsigned",
           nullable = "NO",
           key = "")
       ).sortBy(_.field)

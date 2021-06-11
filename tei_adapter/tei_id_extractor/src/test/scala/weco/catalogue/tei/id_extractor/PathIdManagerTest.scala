@@ -322,7 +322,7 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
       .namedValues(
         pathIds.column.path -> pathId.path,
         pathIds.column.id -> pathId.id,
-        pathIds.column.timeModified -> pathId.timeModified.format(PathId.formatter)
+        pathIds.column.timeModified -> pathId.timeModified.toInstant.toEpochMilli
       )
   }.update.apply()
 

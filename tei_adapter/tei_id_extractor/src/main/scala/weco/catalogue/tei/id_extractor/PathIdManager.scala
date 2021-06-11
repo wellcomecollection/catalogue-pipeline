@@ -130,7 +130,7 @@ object PathIdManager {
   Try(withSQL {
     update(pathIds).set(
       pathIds.column.path -> pathId.path,
-      pathIds.column.timeModified -> pathId.timeModified.format(PathId.formatter)
+      pathIds.column.timeModified -> pathId.timeModified.toInstant.toEpochMilli
     ).where.eq(pathIds.column.id, pathId.id)
   }.update.apply())
 
@@ -141,7 +141,7 @@ object PathIdManager {
         .namedValues(
           pathIds.column.path -> pathId.path,
           pathIds.column.id -> pathId.id,
-          pathIds.column.timeModified -> pathId.timeModified.format(PathId.formatter)
+          pathIds.column.timeModified -> pathId.timeModified.toInstant.toEpochMilli
         )
     }.update.apply())
 
