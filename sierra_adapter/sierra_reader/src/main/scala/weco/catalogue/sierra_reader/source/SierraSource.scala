@@ -24,8 +24,7 @@ case object ThrottleRate {
 object SierraSource {
   def apply(
     config: SierraAPIConfig,
-    throttleRate: ThrottleRate = ThrottleRate(elements = 0, per = 0 seconds),
-    timeout: Duration = 10 seconds
+    throttleRate: ThrottleRate = ThrottleRate(elements = 0, per = 0 seconds)
   )(recordType: SierraRecordTypes.Value, params: Map[String, String])(
     implicit
     system: ActorSystem,

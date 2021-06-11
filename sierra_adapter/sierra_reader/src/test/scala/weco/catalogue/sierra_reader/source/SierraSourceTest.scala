@@ -15,7 +15,7 @@ import java.time.temporal.ChronoUnit
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class SierraStreamSourceTest
+class SierraSourceTest
     extends AnyFunSpec
     with Matchers
     with ScalaFutures
