@@ -11,7 +11,7 @@ import uk.ac.wellcome.storage.store.memory.MemoryStore
 import weco.catalogue.tei.id_extractor.fixtures.PathIdDatabase
 import weco.catalogue.tei.id_extractor.models.{TeiIdChangeMessage, TeiIdDeletedMessage, TeiIdMessage}
 
-import java.time.ZonedDateTime
+import java.time.Instant
 import java.time.temporal.ChronoUnit
 
 class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
@@ -22,7 +22,7 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
       withPathIdManager(bucket) { case (table, manager, store, messageSender) =>
 
         implicit val session = AutoSession
-        val pathId = PathId("Batak/WMS_Batak_1.xml", "manuscript_1234", ZonedDateTime.parse("2021-06-07T10:00:00Z"))
+        val pathId = PathId("Batak/WMS_Batak_1.xml", "manuscript_1234", Instant.parse("2021-06-07T10:00:00Z"))
 
         manager.handlePathChanged(pathId, blobContents)
 
@@ -33,7 +33,7 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
         maybePathId shouldBe Some(pathId)
         val expectedS3Location = checkFileIsStored(store, bucket, "2021-06-07T10:00:00Z", blobContents, pathId.id)
 
-        messageSender.getMessages[TeiIdChangeMessage]() should contain only (TeiIdChangeMessage(id = pathId.id, s3Location = expectedS3Location, ZonedDateTime.parse("2021-06-07T10:00:00Z")))
+        messageSender.getMessages[TeiIdChangeMessage]() should contain only (TeiIdChangeMessage(id = pathId.id, s3Location = expectedS3Location, Instant.parse("2021-06-07T10:00:00Z")))
 
 
       }
@@ -44,7 +44,7 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
 
         implicit val session = AutoSession
 
-        val oldTime = ZonedDateTime.parse("2021-06-07T10:00:00Z")
+        val oldTime = Instant.parse("2021-06-07T10:00:00Z")
         val storedPathId = PathId("Batak/path.xml", "manuscript_1234", oldTime)
         savePathId(storedPathId, table)
         val updatedPathId = storedPathId.copy(timeModified = oldTime.plus(2, ChronoUnit.HOURS))
@@ -67,7 +67,7 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
       withPathIdManager(bucket) { case (table, manager, store, messageSender) =>
         implicit val session = AutoSession
 
-        val storedTime = ZonedDateTime.parse("2021-06-07T10:00:00Z")
+        val storedTime = Instant.parse("2021-06-07T10:00:00Z")
         val messageTime = storedTime.minus(2, ChronoUnit.HOURS)
         val storedPathId = PathId("Batak/path.xml", "manuscript_1234", storedTime)
         savePathId(storedPathId, table)
@@ -92,7 +92,7 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
       withPathIdManager(bucket) { case (table, manager, store, messageSender) =>
 
         implicit val session = AutoSession
-        val oldTime = ZonedDateTime.parse("2021-06-07T10:00:00Z")
+        val oldTime = Instant.parse("2021-06-07T10:00:00Z")
         val newTime = oldTime.plus(2, ChronoUnit.HOURS)
 
         val storedPathId = PathId("Batak/oldpath.xml", "manuscript_1234", oldTime)
@@ -120,7 +120,7 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
         implicit val session = AutoSession
 
         val newId = "manuscript_5678"
-        val oldTime = ZonedDateTime.parse("2021-06-07T10:00:00Z")
+        val oldTime = Instant.parse("2021-06-07T10:00:00Z")
         val newTime = oldTime.plus(2, ChronoUnit.HOURS)
         val storedPathId = PathId("Batak/path.xml", "manuscript_1234", oldTime)
         savePathId(storedPathId, table)
@@ -144,7 +144,7 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
       withPathIdManager(bucket) { case (table, manager, store, messageSender) =>
 
         implicit val session = AutoSession
-        val storedTime = ZonedDateTime.parse("2021-06-07T10:00:00Z")
+        val storedTime = Instant.parse("2021-06-07T10:00:00Z")
         val newTime = storedTime.minus(2, ChronoUnit.HOURS)
         val storedPathId = PathId("Batak/oldpath.xml", "manuscript_1234", storedTime)
         savePathId(storedPathId, table)
@@ -168,7 +168,7 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
 
         implicit val session = AutoSession
 
-        val savedTime = ZonedDateTime.parse("2021-06-07T10:00:00Z")
+        val savedTime = Instant.parse("2021-06-07T10:00:00Z")
         val newTime = savedTime.minus(2, ChronoUnit.HOURS)
         val storedPathId = PathId("Batak/oldpath.xml", "manuscript_1234", savedTime)
         savePathId(storedPathId, table)
@@ -195,7 +195,7 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
 
         val path1 = "Batak/path.xml"
         val id1 = "manuscript_1234"
-        val time1 = ZonedDateTime.parse("2021-06-07T10:00:00Z")
+        val time1 = Instant.parse("2021-06-07T10:00:00Z")
 
         val path2 = "Batak/anotherpath.xml"
         val id2 = "manuscript_5678"
@@ -227,7 +227,7 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
 
         val path1 = "Batak/path.xml"
         val id1 = "manuscript_1234"
-        val time1 = ZonedDateTime.parse("2021-06-07T10:00:00Z")
+        val time1 = Instant.parse("2021-06-07T10:00:00Z")
 
         val path2 = "Batak/anotherpath.xml"
         val id2 = "manuscript_5678"
@@ -260,7 +260,7 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
 
         val path = "Batak/WMS_Batak_1.xml"
         val id = "manuscript_1234"
-        val time = ZonedDateTime.parse("2021-06-07T10:00:00Z")
+        val time = Instant.parse("2021-06-07T10:00:00Z")
         savePathId(PathId(path, id, time), table)
 
         val newTime = time.plus(2, ChronoUnit.HOURS)
@@ -280,7 +280,7 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
         implicit val session = AutoSession
         val path = "Batak/WMS_Batak_1.xml"
         val id = "manuscript_1234"
-        val time = ZonedDateTime.parse("2021-06-07T10:00:00Z")
+        val time = Instant.parse("2021-06-07T10:00:00Z")
         savePathId(PathId(path, id, time), table)
 
         val deletedTime = time.minus(2, ChronoUnit.HOURS)
@@ -300,7 +300,7 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
       withPathIdManager(bucket) { case (table, manager, _, messageSender) =>
         implicit val session = AutoSession
         val path = "Batak/WMS_Batak_1.xml"
-        val time = ZonedDateTime.parse("2021-06-07T10:00:00Z")
+        val time = Instant.parse("2021-06-07T10:00:00Z")
 
         val deletedTime = time.plus(2, ChronoUnit.HOURS)
         manager.handlePathDeleted(path, deletedTime)
@@ -322,12 +322,12 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
       .namedValues(
         pathIds.column.path -> pathId.path,
         pathIds.column.id -> pathId.id,
-        pathIds.column.timeModified -> pathId.timeModified.format(PathId.formatter)
+        pathIds.column.timeModified -> pathId.timeModified.toEpochMilli
       )
   }.update.apply()
 
   private def checkFileIsStored(store: MemoryStore[S3ObjectLocation, String], bucket: Bucket, modifiedTime: String, fileContents: String, id: String) = {
-    val expectedKey = s"tei_files/${id}/${ZonedDateTime.parse(modifiedTime).toEpochSecond}.xml"
+    val expectedKey = s"tei_files/${id}/${Instant.parse(modifiedTime).getEpochSecond}.xml"
     val expectedS3Location = S3ObjectLocation(bucket.name, expectedKey)
     store.entries.keySet should contain(expectedS3Location)
     store.entries(expectedS3Location) shouldBe fileContents

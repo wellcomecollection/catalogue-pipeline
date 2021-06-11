@@ -112,7 +112,7 @@ class PathIdManager[Dest](pathIds: PathIdTable,
     _ <- messageSender.sendT[TeiIdMessage](TeiIdChangeMessage(pathId.id, stored.id, pathId.timeModified))
   }yield ()
 
-  private def storeTei(pathId: PathId, blobContent: String) = store.put(S3ObjectLocation(bucket, s"tei_files/${pathId.id}/${pathId.timeModified.toEpochSecond}.xml"))(blobContent).left.map(error => error.e).toTry
+  private def storeTei(pathId: PathId, blobContent: String) = store.put(S3ObjectLocation(bucket, s"tei_files/${pathId.id}/${pathId.timeModified.getEpochSecond}.xml"))(blobContent).left.map(error => error.e).toTry
 
 }
 
@@ -130,7 +130,7 @@ object PathIdManager {
   Try(withSQL {
     update(pathIds).set(
       pathIds.column.path -> pathId.path,
-      pathIds.column.timeModified -> pathId.timeModified.format(PathId.formatter)
+      pathIds.column.timeModified -> pathId.timeModified.toEpochMilli
     ).where.eq(pathIds.column.id, pathId.id)
   }.update.apply())
 
@@ -141,7 +141,7 @@ object PathIdManager {
         .namedValues(
           pathIds.column.path -> pathId.path,
           pathIds.column.id -> pathId.id,
-          pathIds.column.timeModified -> pathId.timeModified.format(PathId.formatter)
+          pathIds.column.timeModified -> pathId.timeModified.toEpochMilli
         )
     }.update.apply())
 

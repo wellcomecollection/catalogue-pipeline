@@ -66,7 +66,7 @@ class TeiIdExtractorWorkerService[Dest](messageStream: SQSStream[NotificationMes
       .mapAsync(config.concurrentFiles) {
         case (ctx, message) => for{
           blobContent <- gitHubBlobReader.getBlob(message.uri)
-          id <- Future.fromTry(IdExtractor.extractId(blobContent))
+          id <- Future.fromTry(IdExtractor.extractId(blobContent, message.uri))
           _ <- Future.fromTry(pathIdManager.handlePathChanged(PathId(message.path,id, message.timeModified), blobContent))
         } yield(ctx, Right(()))
       }

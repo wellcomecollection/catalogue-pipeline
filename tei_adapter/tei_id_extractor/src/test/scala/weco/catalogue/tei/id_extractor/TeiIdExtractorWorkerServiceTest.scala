@@ -35,7 +35,7 @@ class TeiIdExtractorWorkerServiceTest extends AnyFunSpec with Wiremock with SQS 
 
   it("receives a message, stores the file in s3 and send a message to the tei adapter with the file id"){
     withWorkerService(){ case (QueuePair(queue, dlq), messageSender, store, bucket, repoUrl) =>
-      val modifiedTime = "2021-05-27T14:05:00Z"
+      val modifiedTime = "2021-05-27T14:05:00+00:00"
       val message = {
         s"""
         {
@@ -84,7 +84,7 @@ class TeiIdExtractorWorkerServiceTest extends AnyFunSpec with Wiremock with SQS 
     withWorkerService() { case (QueuePair(queue, dlq), messageSender, store, bucket, repoUrl) =>
 
       val (createdTime: String, expectedS3Location: S3ObjectLocation) = createFile(queue, store, bucket, repoUrl)
-      val modifiedTime = ZonedDateTime.parse(createdTime).minus(2, ChronoUnit.HOURS)
+      val modifiedTime = Instant.parse(createdTime).minus(2, ChronoUnit.HOURS)
       val message =
         s"""
           {
@@ -98,8 +98,8 @@ class TeiIdExtractorWorkerServiceTest extends AnyFunSpec with Wiremock with SQS 
       eventually {
         assertQueueEmpty(queue)
         assertQueueEmpty(dlq)
-        val changeMessage = TeiIdChangeMessage(id = "manuscript_15651", s3Location = expectedS3Location, ZonedDateTime.parse(createdTime))
-        val newKeyKey = s"tei_files/manuscript_15651/${modifiedTime.toEpochSecond}.xml"
+        val changeMessage = TeiIdChangeMessage(id = "manuscript_15651", s3Location = expectedS3Location, Instant.parse(createdTime))
+        val newKeyKey = s"tei_files/manuscript_15651/${modifiedTime.getEpochSecond}.xml"
         store.entries.keySet shouldNot contain(S3ObjectLocation(bucket.name, newKeyKey))
         messageSender.getMessages[TeiIdMessage]() should contain only(changeMessage)
       }
@@ -164,8 +164,8 @@ class TeiIdExtractorWorkerServiceTest extends AnyFunSpec with Wiremock with SQS 
       eventually {
         assertQueueEmpty(queue)
         assertQueueEmpty(dlq)
-        val changeMessage = TeiIdChangeMessage(id = "manuscript_15651", s3Location = expectedS3Location, ZonedDateTime.parse(modifiedTime))
-        val deletedMessage = TeiIdDeletedMessage(id = "manuscript_15651", ZonedDateTime.parse(deletedTime))
+        val changeMessage = TeiIdChangeMessage(id = "manuscript_15651", s3Location = expectedS3Location, Instant.parse(modifiedTime))
+        val deletedMessage = TeiIdDeletedMessage(id = "manuscript_15651", Instant.parse(deletedTime))
         messageSender.getMessages[TeiIdMessage]() should contain only(changeMessage, deletedMessage)
       }
     }}
@@ -200,7 +200,7 @@ class TeiIdExtractorWorkerServiceTest extends AnyFunSpec with Wiremock with SQS 
         assertQueueEmpty(dlq)
         val expectedS3Location = checkFileIsStored(store, bucket, modifiedTime,IOUtils.resourceToString("/WMS_Arabic_1.xml", StandardCharsets.UTF_8))
 
-        messageSender.getMessages[TeiIdChangeMessage]() should contain only(TeiIdChangeMessage(id="manuscript_15651", s3Location = expectedS3Location, ZonedDateTime.parse(modifiedTime)))
+        messageSender.getMessages[TeiIdChangeMessage]() should contain only(TeiIdChangeMessage(id="manuscript_15651", s3Location = expectedS3Location, Instant.parse(modifiedTime)))
 
       }
     }}
@@ -251,7 +251,7 @@ class TeiIdExtractorWorkerServiceTest extends AnyFunSpec with Wiremock with SQS 
         withSQSStream(queue) { stream: SQSStream[NotificationMessage] =>
           withPathIdTable { case (config,table) =>
 
-            val gitHubBlobReader = new GitHubBlobContentReader(new AkkaHttpClient(),("fake_token")
+            val gitHubBlobReader = new GitHubBlobContentReader(new AkkaHttpClient(), "fake_token")
             val store = new MemoryStore[S3ObjectLocation, String](Map())
             val bucket = Bucket("bucket")
             val service = new TeiIdExtractorWorkerService(
@@ -262,7 +262,7 @@ class TeiIdExtractorWorkerServiceTest extends AnyFunSpec with Wiremock with SQS 
               ),
               gitHubBlobReader = gitHubBlobReader,
               pathIdManager = new PathIdManager(table, store, messageSender, bucket.name),
-              config = TeiIdExtractorConfig(concurrentFiles = 10))
+              config = TeiIdExtractorConfig(concurrentFiles = 10, bucket = bucket.name))
             service.run()
             testWith((q, messageSender, store, bucket, repoUrl))
           }
