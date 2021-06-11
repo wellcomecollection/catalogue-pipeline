@@ -24,6 +24,8 @@ import java.nio.charset.StandardCharsets
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 import scala.util.Try
+import scala.xml.Utility.trim
+import scala.xml.XML
 
 class TeiIdExtractorWorkerServiceTest extends AnyFunSpec with Wiremock with SQS with Akka with Eventually with IntegrationPatience with PathIdDatabase{
 
@@ -286,7 +288,7 @@ class TeiIdExtractorWorkerServiceTest extends AnyFunSpec with Wiremock with SQS 
     val expectedKey = s"tei_files/manuscript_15651/${ZonedDateTime.parse(modifiedTime).toEpochSecond}.xml"
     val expectedS3Location = S3ObjectLocation(bucket.name, expectedKey)
     store.entries.keySet should contain (expectedS3Location)
-    store.entries(expectedS3Location) shouldBe fileContents
+    trim(XML.loadString(store.entries(expectedS3Location))) shouldBe trim(XML.loadString(fileContents))
     expectedS3Location
   }
 }
