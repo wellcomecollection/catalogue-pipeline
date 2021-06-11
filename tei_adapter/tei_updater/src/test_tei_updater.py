@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 
-
+import dateutil
 import json
 import mock
 import os
@@ -138,11 +138,11 @@ def test_elements_added_changed_deleted_are_returned():
         "filec": {"sha": "bgfbhsg", "url": "http://filec"},
         "filed": {"sha": "dkgef", "url": "http://filed"},
     }
-    diffs = diff_trees(old_tree, new_tree)
+    diffs = diff_trees(old_tree, new_tree, dateutil.parser.parse("Fri, 11 Jun 2021 15:34:45 GMT"))
     expected_diffs = [
-        {"path": "fileb", "url": "http://filebb"},  # fileb is modified
-        {"path": "filed", "url": "http://filed"},  # filed is added
-        {"path": "filea", "deleted": True},  # filea is deleted
+        {"path": "fileb", "url": "http://filebb", "timeModified": "2021-06-11T15:34:45+00:00"},  # fileb is modified
+        {"path": "filed", "url": "http://filed", "timeModified": "2021-06-11T15:34:45+00:00"},  # filed is added
+        {"path": "filea", "timeDeleted": "2021-06-11T15:34:45+00:00"},  # filea is deleted
     ]
     assert diffs == expected_diffs
 
@@ -160,4 +160,4 @@ def test_more_types_of_diff_is_error():
         "filec": {"sha": "bgfbhsg", "url": "http://filec"},
     }
     with pytest.raises(AssertionError):
-        diff_trees(old_tree, new_tree)
+        diff_trees(old_tree, new_tree, dateutil.parser.parse("Fri, 11 Jun 2021 15:34:45 GMT"))
