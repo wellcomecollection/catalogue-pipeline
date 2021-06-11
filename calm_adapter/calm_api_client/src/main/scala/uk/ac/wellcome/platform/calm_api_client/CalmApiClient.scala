@@ -2,7 +2,6 @@ package uk.ac.wellcome.platform.calm_api_client
 
 import akka.Done
 import akka.actor.ActorSystem
-import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.{
   BasicHttpCredentials,
