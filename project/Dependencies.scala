@@ -104,12 +104,6 @@ object ExternalDependencies {
     val logback = "1.1.8"
 
     val akkaHttpOauth2Client = "0.2.0"
-
-    // This should match the version used in scala-libs
-    // See https://github.com/wellcomecollection/scala-libs/blob/main/project/Dependencies.scala
-    val akka = "2.6.14"
-    val akkaHttp = "10.1.11"
-    val akkaHttpCirce = "1.32.0"
   }
 
   val enumeratumDependencies = Seq(
@@ -119,13 +113,6 @@ object ExternalDependencies {
 
   val oauthDependencies = Seq(
     "com.github.dakatsuka" %% "akka-http-oauth2-client" % versions.akkaHttpOauth2Client
-  )
-
-  val akkaHttpDependencies = Seq(
-    "com.typesafe.akka" %% "akka-testkit" % versions.akka % "test",
-    "com.typesafe.akka" %% "akka-http" % versions.akkaHttp,
-    "com.typesafe.akka" %% "akka-http-testkit" % versions.akkaHttp % "test",
-    "de.heikoseeberger" %% "akka-http-circe" % versions.akkaHttpCirce
   )
 
   val apacheCommonsDependencies = Seq(
@@ -306,8 +293,8 @@ object CatalogueDependencies {
 
   // Inference manager
   val inferenceManagerDependencies: Seq[ModuleID] =
-    ExternalDependencies.akkaHttpDependencies ++
-      ExternalDependencies.wireMockDependencies
+    ExternalDependencies.wireMockDependencies ++
+      WellcomeDependencies.httpLibrary
 
   // TEI adapter
 
