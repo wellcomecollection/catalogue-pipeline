@@ -269,8 +269,7 @@ object CatalogueDependencies {
     ExternalDependencies.apacheCommonsDependencies
 
   val calmTransformerDependencies: Seq[ModuleID] =
-    ExternalDependencies.apacheCommonsDependencies ++
-      ExternalDependencies.jsoupDependencies ++
+    ExternalDependencies.jsoupDependencies ++
       ExternalDependencies.parseDependencies
 
   // METS adapter
