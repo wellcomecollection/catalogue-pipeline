@@ -42,7 +42,7 @@ class TargetPrecedenceTest
         )
         .value shouldBe multiItemPhysicalSierra
     }
-    it("finally, chooses any remaining sierra work") {
+    it("finally, chooses any remaining Sierra work") {
       TargetPrecedence
         .getTarget(
           Seq(digitalSierra, miro)
@@ -56,10 +56,12 @@ class TargetPrecedenceTest
   }
 
   it("can apply an additional predicate for target selection") {
-    TargetPrecedence
-      .targetSatisfying(WorkPredicates.singleItemSierra)(
-        Seq(multiItemPhysicalSierra, digitalSierra, miro)
-      )
-      .value shouldBe digitalSierra
+    val works = Seq(multiItemPhysicalSierra, digitalSierra, miro)
+    val nonPredicated = TargetPrecedence.getTarget(works)
+    val singleItemPredicated =
+      TargetPrecedence.targetSatisfying(WorkPredicates.singleItemSierra)(works)
+
+    nonPredicated.value shouldBe multiItemPhysicalSierra
+    singleItemPredicated.value shouldBe digitalSierra
   }
 }
