@@ -1,10 +1,6 @@
 package uk.ac.wellcome.pipeline_storage
 
-import scala.concurrent.duration._
-import scala.concurrent.{ExecutionContext, Future, TimeoutException}
-import scala.util.Try
-import akka.stream.FlowShape
-import akka.stream.scaladsl.{Broadcast, Flow, GraphDSL, Merge}
+import akka.stream.scaladsl.Flow
 import akka.{Done, NotUsed}
 import grizzled.slf4j.Logging
 import io.circe.Decoder
@@ -13,6 +9,10 @@ import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import weco.flows.FlowOps
+
+import scala.concurrent.duration._
+import scala.concurrent.{ExecutionContext, Future, TimeoutException}
+import scala.util.Try
 
 case class PipelineStorageConfig(batchSize: Int,
                                  flushInterval: FiniteDuration,
@@ -24,7 +24,7 @@ class PipelineStorageStream[In, Out, MsgDestination](
   messageStream: SQSStream[In],
   indexer: Indexer[Out],
   messageSender: MessageSender[MsgDestination])(
-  val config: PipelineStorageConfig)(implicit ec: ExecutionContext)
+  val config: PipelineStorageConfig)(implicit val ec: ExecutionContext)
     extends Logging with FlowOps {
 
   import PipelineStorageStream._
