@@ -291,8 +291,7 @@ object CatalogueDependencies {
   // CALM adapter
 
   val calmApiClientDependencies: Seq[ModuleID] =
-    ExternalDependencies.akkaHttpDependencies ++
-      ExternalDependencies.scalaXmlDependencies ++
+    ExternalDependencies.scalaXmlDependencies ++
       ExternalDependencies.scalatestDependencies ++
       WellcomeDependencies.httpLibrary
 

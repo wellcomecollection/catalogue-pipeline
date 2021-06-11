@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.calm_api_client.fixtures
 
 import akka.Done
 import akka.http.scaladsl.model.headers.Cookie
-import akka.http.scaladsl.model.{HttpRequest, HttpResponse, Uri}
+import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
 import akka.stream.Materializer
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
