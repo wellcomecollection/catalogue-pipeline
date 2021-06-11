@@ -15,7 +15,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 
 case class TeiIdExtractorConfig(concurrentFiles: Int,
-                                bucket: String)
+                                deleteMessageDelay: FiniteDuration)
 class TeiIdExtractorWorkerService[Dest](messageStream: SQSStream[NotificationMessage],
                                         gitHubBlobReader: GitHubBlobContentReader,
                                         tableProvisioner: TableProvisioner,
@@ -54,16 +54,18 @@ class TeiIdExtractorWorkerService[Dest](messageStream: SQSStream[NotificationMes
       case (_, teiPathMessage) => isTeiFile(teiPathMessage.path)
     }.via(broadcastAndMerge(processDeleted, processChange))
 
-  def processDeleted = Flow[(Context, TeiPathMessage)].collectType[(Context, TeiPathDeletedMessage)]
-    .delay(500 milliseconds)
+  def processDeleted = Flow[(Context, TeiPathMessage)]
+    .collect{case (ctx, msg) if msg.isInstanceOf[TeiPathDeletedMessage] => (ctx, msg.asInstanceOf[TeiPathDeletedMessage])}
+    .delay(config.deleteMessageDelay)
     .mapAsync(config.concurrentFiles) { case (ctx, message) =>
       for {
         _ <- Future.fromTry(pathIdManager.handlePathDeleted(message.path, message.timeDeleted))
      } yield (ctx, Right(()))
     }.via(catchErrors)
 
-  def processChange = Flow[(Context, TeiPathMessage)].collectType[(Context,TeiPathChangedMessage)]
-      .mapAsync(config.concurrentFiles) {
+  def processChange = Flow[(Context, TeiPathMessage)]
+    .collect{case (ctx, msg) if msg.isInstanceOf[TeiPathChangedMessage] => (ctx, msg.asInstanceOf[TeiPathChangedMessage])}
+    .mapAsync(config.concurrentFiles) {
         case (ctx, message) => for{
           blobContent <- gitHubBlobReader.getBlob(message.uri)
           id <- Future.fromTry(IdExtractor.extractId(blobContent, message.uri))

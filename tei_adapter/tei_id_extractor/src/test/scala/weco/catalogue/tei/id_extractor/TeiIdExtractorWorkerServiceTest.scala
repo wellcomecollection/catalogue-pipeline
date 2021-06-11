@@ -1,33 +1,32 @@
 package weco.catalogue.tei.id_extractor
 
+import com.github.tomakehurst.wiremock.client.WireMock
+import io.circe.Encoder
 import org.apache.commons.io.IOUtils
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import uk.ac.wellcome.akka.fixtures.Akka
+import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
+import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.memory.MemoryStore
-import weco.catalogue.tei.id_extractor.fixtures.{PathIdDatabase, Wiremock}
-import com.github.tomakehurst.wiremock.client.WireMock
-import io.circe.Encoder
-import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 import weco.catalogue.tei.id_extractor.database.TableProvisioner
+import weco.catalogue.tei.id_extractor.fixtures.{PathIdDatabase, Wiremock}
 import weco.catalogue.tei.id_extractor.models.{TeiIdChangeMessage, TeiIdDeletedMessage, TeiIdMessage}
-import weco.http.client.AkkaHttpClient
-import weco.catalogue.tei.id_extractor.fixtures.Wiremock
 import weco.http.client.AkkaHttpClient
 
 import java.nio.charset.StandardCharsets
 import java.time.Instant
-import scala.xml.Utility.trim
 import java.time.temporal.ChronoUnit
+import scala.concurrent.duration._
 import scala.util.Try
+import scala.xml.Utility.trim
 import scala.xml.XML
 
 class TeiIdExtractorWorkerServiceTest extends AnyFunSpec with Wiremock with SQS with Akka with Eventually with IntegrationPatience with PathIdDatabase{
@@ -262,7 +261,7 @@ class TeiIdExtractorWorkerServiceTest extends AnyFunSpec with Wiremock with SQS 
               ),
               gitHubBlobReader = gitHubBlobReader,
               pathIdManager = new PathIdManager(table, store, messageSender, bucket.name),
-              config = TeiIdExtractorConfig(concurrentFiles = 10, bucket = bucket.name))
+              config = TeiIdExtractorConfig(concurrentFiles = 10, deleteMessageDelay = 500 milliseconds))
             service.run()
             testWith((q, messageSender, store, bucket, repoUrl))
           }
