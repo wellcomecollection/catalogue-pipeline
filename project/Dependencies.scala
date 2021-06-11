@@ -105,6 +105,8 @@ object ExternalDependencies {
 
     val scalaJHttp = "2.3.0"
 
+    val akkaHttpOauth2Client = "0.2.0"
+
     // This should match the version used in scala-libs
     // See https://github.com/wellcomecollection/scala-libs/blob/main/project/Dependencies.scala
     val akka = "2.6.14"
@@ -117,8 +119,8 @@ object ExternalDependencies {
     "com.beachape" %% "enumeratum-scalacheck" % versions.enumeratumScalacheck % "test"
   )
 
-  val scribeJavaDependencies = Seq(
-    "com.github.dakatsuka" %% "akka-http-oauth2-client" % "0.2.0"
+  val oauthDependencies = Seq(
+    "com.github.dakatsuka" %% "akka-http-oauth2-client" % versions.akkaHttpOauth2Client
   )
 
   val akkaHttpDependencies = Seq(
@@ -280,11 +282,9 @@ object CatalogueDependencies {
   // METS adapter
 
   val metsAdapterDependencies: Seq[ModuleID] =
-    ExternalDependencies.apacheCommonsDependencies ++
-      ExternalDependencies.akkaHttpDependencies ++
+    ExternalDependencies.oauthDependencies ++
       ExternalDependencies.mockitoDependencies ++
       ExternalDependencies.wireMockDependencies ++
-      ExternalDependencies.scribeJavaDependencies ++
       WellcomeDependencies.messagingTypesafeLibrary ++
       WellcomeDependencies.storageTypesafeLibrary ++
       WellcomeDependencies.httpLibrary
