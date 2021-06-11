@@ -286,7 +286,8 @@ object CatalogueDependencies {
       ExternalDependencies.wireMockDependencies ++
       ExternalDependencies.scribeJavaDependencies ++
       WellcomeDependencies.messagingTypesafeLibrary ++
-      WellcomeDependencies.storageTypesafeLibrary
+      WellcomeDependencies.storageTypesafeLibrary ++
+      WellcomeDependencies.httpLibrary
 
   // CALM adapter
 

@@ -3,6 +3,7 @@ package uk.ac.wellcome.mets_adapter
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import akka.actor.ActorSystem
+import akka.http.scaladsl.model.Uri
 import com.typesafe.config.Config
 import org.scanamo.generic.auto._
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
@@ -19,6 +20,7 @@ import uk.ac.wellcome.mets_adapter.services.{
 }
 import uk.ac.wellcome.storage.store.dynamo.DynamoSingleVersionStore
 import uk.ac.wellcome.storage.typesafe.DynamoBuilder
+import weco.http.client.AkkaHttpClient
 
 import scala.language.higherKinds
 
@@ -54,6 +56,8 @@ object Main extends WellcomeTypesafeApp {
     ec: ExecutionContext): BagRetriever =
     new HttpBagRetriever(
       config.requireString("bags.api.url"),
+      // TODO: Remove the baseUri here
+      client = new AkkaHttpClient(baseUri = Uri(config.requireString("bags.api.url"))),
       new TokenService(
         config.requireString("bags.oauth.url"),
         config.requireString("bags.oauth.client_id"),

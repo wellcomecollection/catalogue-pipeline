@@ -1,6 +1,7 @@
 package uk.ac.wellcome.mets_adapter.services
 
 import akka.actor.ActorSystem
+import akka.http.scaladsl.model.Uri
 import akka.http.scaladsl.model.headers.OAuth2BearerToken
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.http.Fault
@@ -14,6 +15,7 @@ import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.mets_adapter.models._
 import uk.ac.wellcome.mets_adapter.fixtures.BagsWiremock
+import weco.http.client.AkkaHttpClient
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -135,6 +137,7 @@ class BagRetrieverTest
       testWith(
         new HttpBagRetriever(
           s"http://localhost:$port/storage/v1/bags",
+          client = new AkkaHttpClient(Uri(s"http://localhost:$port/storage/v1/bags")),
           tokenService)
       )
     }
@@ -152,6 +155,7 @@ class BagRetrieverTest
       testWith(
         new HttpBagRetriever(
           baseUrl = s"http://localhost:$port/storage/v1/bags",
+          client = new AkkaHttpClient(Uri(s"http://localhost:$port/storage/v1/bags")),
           tokenService = tokenService
         )
       )
