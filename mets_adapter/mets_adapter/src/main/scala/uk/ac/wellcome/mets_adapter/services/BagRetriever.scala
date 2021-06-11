@@ -16,7 +16,9 @@ trait BagRetriever {
   def getBag(space: String, externalIdentifier: String): Future[Bag]
 }
 
-class HttpBagRetriever(baseUrl: String, client: HttpClient, tokenService: TokenService)(
+class HttpBagRetriever(baseUrl: String,
+                       client: HttpClient,
+                       tokenService: TokenService)(
   implicit
   actorSystem: ActorSystem,
   executionContext: ExecutionContext)

@@ -33,13 +33,14 @@ class SearchIndexConfigJsonTest
         .getLines
         .mkString
 
-    val indexJson = JacksonBuilder.writeAsString(CreateIndexContentBuilder(
-      CreateIndexRequest(
-        "works",
-        analysis = Some(IndexedWorkIndexConfig.analysis),
-        mapping = Some(IndexedWorkIndexConfig.mapping.meta(Map()))
-      )
-    ).value)
+    val indexJson = JacksonBuilder.writeAsString(
+      CreateIndexContentBuilder(
+        CreateIndexRequest(
+          "works",
+          analysis = Some(IndexedWorkIndexConfig.analysis),
+          mapping = Some(IndexedWorkIndexConfig.mapping.meta(Map()))
+        )
+      ).value)
 
     assertJsonStringsAreEqual(fileJson, indexJson)
   }
@@ -51,13 +52,14 @@ class SearchIndexConfigJsonTest
         .getLines
         .mkString
 
-    val indexJson = JacksonBuilder.writeAsString(CreateIndexContentBuilder(
-      CreateIndexRequest(
-        "images",
-        analysis = Some(IndexedImageIndexConfig.analysis),
-        mapping = Some(IndexedImageIndexConfig.mapping.meta(Map()))
-      )
-    ).value)
+    val indexJson = JacksonBuilder.writeAsString(
+      CreateIndexContentBuilder(
+        CreateIndexRequest(
+          "images",
+          analysis = Some(IndexedImageIndexConfig.analysis),
+          mapping = Some(IndexedImageIndexConfig.mapping.meta(Map()))
+        )
+      ).value)
 
     assertJsonStringsAreEqual(fileJson, indexJson)
   }

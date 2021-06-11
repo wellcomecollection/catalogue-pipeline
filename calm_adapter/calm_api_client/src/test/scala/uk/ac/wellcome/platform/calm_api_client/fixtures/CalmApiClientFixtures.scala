@@ -41,7 +41,9 @@ trait CalmApiClientFixtures extends Akka {
         new TestCalmApiClient(handleSearch, handleSummary, handleAbandon))
     }
 
-  class TestHttpClient(responses: Iterator[HttpResponse])(implicit val ec: ExecutionContext) extends HttpClient {
+  class TestHttpClient(responses: Iterator[HttpResponse])(
+    implicit val ec: ExecutionContext)
+      extends HttpClient {
     final var requests: List[HttpRequest] = Nil
 
     def singleRequest(request: HttpRequest): Future[HttpResponse] = {
@@ -65,15 +67,15 @@ trait CalmApiClientFixtures extends Akka {
         maxBackoff,
         randomFactor,
         maxRestarts) {
-    def requests: List[HttpRequest] = client.asInstanceOf[TestHttpClient].requests
+    def requests: List[HttpRequest] =
+      client.asInstanceOf[TestHttpClient].requests
   }
 
   class TestCalmApiClient(
     handleSearch: CalmQuery => CalmSession,
     handleSummary: Int => CalmRecord,
     handleAbandon: Cookie => Done
-  )
-      extends CalmApiClient {
+  ) extends CalmApiClient {
     var requests: List[(CalmXmlRequest, Option[Cookie])] = Nil
 
     def request[Request <: CalmXmlRequest: CalmHttpResponseParser](

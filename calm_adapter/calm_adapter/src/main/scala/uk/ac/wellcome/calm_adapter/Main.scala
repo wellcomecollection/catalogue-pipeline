@@ -30,10 +30,9 @@ object Main extends WellcomeTypesafeApp {
     )
   }
 
-  def calmRetriever(config: Config)(
-    implicit
-    actorSystem: ActorSystem,
-    ec: ExecutionContext) =
+  def calmRetriever(config: Config)(implicit
+                                    actorSystem: ActorSystem,
+                                    ec: ExecutionContext) =
     new ApiCalmRetriever(
       apiClient = new AkkaHttpCalmApiClient(
         url = config.requireString("calm.api.url"),

@@ -62,7 +62,8 @@ class HttpCalmApiClient(
                                          cookie: Option[Cookie])(
     implicit parse: CalmHttpResponseParser[Request]): Future[Request#Response] =
     RetryFuture {
-      client.singleRequest(createHttpRequest(request, cookie))
+      client
+        .singleRequest(createHttpRequest(request, cookie))
         .map { resp =>
           resp.status match {
             case StatusCodes.OK => resp

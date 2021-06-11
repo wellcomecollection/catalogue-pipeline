@@ -42,8 +42,7 @@ class SierraPageSource(
         case None     => params
       }
 
-      logger.debug(
-        s"Making request to $url with parameters $newParams")
+      logger.debug(s"Making request to $url with parameters $newParams")
 
       for {
         nextPage <- client.singleRequest(
@@ -64,7 +63,8 @@ class SierraPageSource(
           case resp if resp.status == StatusCodes.NotFound =>
             Future.successful(None)
 
-          case resp => Future.failed(new Throwable(s"Unexpected HTTP response: $resp"))
+          case resp =>
+            Future.failed(new Throwable(s"Unexpected HTTP response: $resp"))
         }
       } yield jsonList
     }

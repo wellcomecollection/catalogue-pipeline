@@ -26,7 +26,9 @@ class SierraStreamSourceTest
   it("reads from Sierra") {
     withActorSystem { implicit actorSystem =>
       val sierraSource =
-        SierraSource(sierraAPIConfig)(recordType = SierraRecordTypes.items, params = Map.empty)
+        SierraSource(sierraAPIConfig)(
+          recordType = SierraRecordTypes.items,
+          params = Map.empty)
 
       val eventualJson = sierraSource.take(1).runWith(Sink.head[Json])
 
@@ -98,7 +100,8 @@ class SierraStreamSourceTest
 
       whenReady(future.failed) { ex =>
         ex shouldBe a[Throwable]
-        ex.getMessage should startWith("Unexpected HTTP response: HttpResponse(401 Unauthorized")
+        ex.getMessage should startWith(
+          "Unexpected HTTP response: HttpResponse(401 Unauthorized")
       }
     }
   }

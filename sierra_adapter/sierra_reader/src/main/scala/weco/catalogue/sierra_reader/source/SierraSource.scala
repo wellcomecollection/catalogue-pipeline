@@ -26,8 +26,7 @@ object SierraSource {
     config: SierraAPIConfig,
     throttleRate: ThrottleRate = ThrottleRate(elements = 0, per = 0 seconds),
     timeout: Duration = 10 seconds
-  )(recordType: SierraRecordTypes.Value,
-    params: Map[String, String])(
+  )(recordType: SierraRecordTypes.Value, params: Map[String, String])(
     implicit
     system: ActorSystem,
     ec: ExecutionContext): Source[Json, NotUsed] = {
