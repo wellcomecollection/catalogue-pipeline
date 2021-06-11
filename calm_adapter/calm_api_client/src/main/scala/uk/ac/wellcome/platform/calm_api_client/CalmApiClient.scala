@@ -11,7 +11,7 @@ import akka.http.scaladsl.model.headers.{
 }
 import akka.stream.{Materializer, RestartSettings}
 import weco.catalogue.source_model.calm.CalmRecord
-import weco.http.client.HttpClient
+import weco.http.client.{AkkaHttpClient, HttpClient}
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
@@ -93,14 +93,6 @@ class HttpCalmApiClient(
       case None         => request
     }
   }
-}
-
-// TODO: Inline this into scala-libs
-class AkkaHttpClient(implicit system: ActorSystem,
-                     val ec: ExecutionContext)
-  extends HttpClient {
-  override def singleRequest(request: HttpRequest): Future[HttpResponse] =
-    Http().singleRequest(request)
 }
 
 class AkkaHttpCalmApiClient(
