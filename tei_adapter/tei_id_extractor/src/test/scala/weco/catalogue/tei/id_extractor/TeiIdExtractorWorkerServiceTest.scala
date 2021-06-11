@@ -26,6 +26,7 @@ import java.time.temporal.ChronoUnit
 import scala.util.Try
 import scala.xml.Utility.trim
 import scala.xml.XML
+import scala.concurrent.duration._
 
 class TeiIdExtractorWorkerServiceTest extends AnyFunSpec with Wiremock with SQS with Akka with Eventually with IntegrationPatience with PathIdDatabase{
 
@@ -259,7 +260,7 @@ class TeiIdExtractorWorkerServiceTest extends AnyFunSpec with Wiremock with SQS 
               ),
               gitHubBlobReader = gitHubBlobReader,
               pathIdManager = new PathIdManager(table, store, messageSender, bucket.name),
-              config = TeiIdExtractorConfig(concurrentFiles = 10))
+              config = TeiIdExtractorConfig(concurrentFiles = 10, deleteMessageDelay = 500 milliseconds))
             service.run()
             testWith((q, messageSender, store, bucket, repoUrl))
           }
