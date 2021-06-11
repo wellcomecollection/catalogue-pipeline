@@ -31,11 +31,13 @@ trait Merger extends MergerLogging {
   type MergeState = Map[Work[Identified], Boolean]
 
   protected def findTarget(
-    works: Seq[Work[Identified]]): Option[Work.Visible[Identified]]
+    works: Seq[Work[Identified]]
+  ): Option[Work.Visible[Identified]]
 
   protected def createMergeResult(
     target: Work.Visible[Identified],
-    sources: Seq[Work[Identified]]): State[MergeState, MergeResult]
+    sources: Seq[Work[Identified]]
+  ): State[MergeState, MergeResult]
 
   private case class CategorisedWorks(
     target: Work.Visible[Identified],
@@ -47,7 +49,8 @@ trait Merger extends MergerLogging {
   }
 
   private def categoriseWorks(
-    works: Seq[Work[Identified]]): Option[CategorisedWorks] =
+    works: Seq[Work[Identified]]
+  ): Option[CategorisedWorks] =
     works match {
       case List(unmatchedWork: Work.Visible[Identified]) =>
         Some(CategorisedWorks(target = unmatchedWork))
@@ -60,7 +63,7 @@ trait Merger extends MergerLogging {
               .filterNot { _.sourceIdentifier == target.sourceIdentifier },
             deleted = matchedWorks.collect {
               case w: Work.Deleted[Identified] => w
-            },
+            }
           )
         }
     }
@@ -119,20 +122,24 @@ trait Merger extends MergerLogging {
       }
       .getOrElse(MergerOutcome.passThrough(works))
 
-  private def redirectSourceToTarget(target: Work.Visible[Identified])(
-    source: Work[Identified]): Work.Redirected[Identified] =
+  private def redirectSourceToTarget(
+    target: Work.Visible[Identified]
+  )(source: Work[Identified]): Work.Redirected[Identified] =
     Work.Redirected[Identified](
       version = source.version,
       state = Identified(
         source.sourceIdentifier,
         source.state.canonicalId,
-        source.state.sourceModifiedTime),
+        source.state.sourceModifiedTime
+      ),
       redirectTarget =
         IdState.Identified(target.state.canonicalId, target.sourceIdentifier)
     )
 
-  private def logIntentions(target: Work.Visible[Identified],
-                            sources: Seq[Work[Identified]]): Unit =
+  private def logIntentions(
+    target: Work.Visible[Identified],
+    sources: Seq[Work[Identified]]
+  ): Unit =
     sources match {
       case Nil =>
         info(s"Processing ${describeWork(target)}")
@@ -140,12 +147,15 @@ trait Merger extends MergerLogging {
         info(s"Attempting to merge ${describeMergeSet(target, sources)}")
     }
 
-  private def logResult(result: MergeResult,
-                        redirects: Seq[Work[_]],
-                        remaining: Seq[Work[_]]): Unit = {
+  private def logResult(
+    result: MergeResult,
+    redirects: Seq[Work[_]],
+    remaining: Seq[Work[_]]
+  ): Unit = {
     if (redirects.nonEmpty) {
       info(
-        s"Merged ${describeMergeOutcome(result.mergedTarget, redirects, remaining)}")
+        s"Merged ${describeMergeOutcome(result.mergedTarget, redirects, remaining)}"
+      )
     }
     if (result.imageDataWithSources.nonEmpty) {
       info(s"Created images ${describeImages(result.imageDataWithSources)}")
@@ -156,7 +166,8 @@ trait Merger extends MergerLogging {
 object Merger {
   // Parameter can't be `State` as that shadows the Cats type
   implicit class WorkMergingOps[StateT <: WorkState](
-    work: Work.Visible[StateT]) {
+    work: Work.Visible[StateT]
+  ) {
     def mapData(
       f: WorkData[StateT#WorkDataState] => WorkData[StateT#WorkDataState]
     ): Work.Visible[StateT] =
@@ -169,19 +180,14 @@ object PlatformMerger extends Merger {
   import Merger.WorkMergingOps
 
   override def findTarget(
-    works: Seq[Work[Identified]]): Option[Work.Visible[Identified]] =
-    works
-      .find(WorkPredicates.singlePhysicalItemCalmWork)
-      .orElse(works.find(WorkPredicates.sierraElectronicVideo))
-      .orElse(works.find(WorkPredicates.physicalSierra))
-      .orElse(works.find(WorkPredicates.sierraWork)) match {
-      case Some(target: Work.Visible[Identified]) => Some(target)
-      case _                                      => None
-    }
+    works: Seq[Work[Identified]]
+  ): Option[Work.Visible[Identified]] =
+    TargetPrecedence.getTarget(works)
 
   override def createMergeResult(
     target: Work.Visible[Identified],
-    sources: Seq[Work[Identified]]): State[MergeState, MergeResult] =
+    sources: Seq[Work[Identified]]
+  ): State[MergeState, MergeResult] =
     if (sources.isEmpty)
       State.pure(
         MergeResult(
@@ -228,7 +234,8 @@ object PlatformMerger extends Merger {
         )
 
   private def standaloneImages(
-    target: Work.Visible[Identified]): List[ImageData[IdState.Identified]] =
+    target: Work.Visible[Identified]
+  ): List[ImageData[IdState.Identified]] =
     if (WorkPredicates.singleDigitalItemMiroWork(target)) target.data.imageData
     else Nil
 }

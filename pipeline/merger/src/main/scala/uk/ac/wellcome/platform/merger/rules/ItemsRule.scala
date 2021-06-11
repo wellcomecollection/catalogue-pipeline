@@ -139,13 +139,15 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     * Sierra records are created from the Sierra / Calm harvest.
     * We merge the Sierra item ID into the Calm item.
     *
-    * If an item is digitised via METS, it is linked to the Sierra record.
+    * If an item is digitised via METS or Miro, it is linked to the Sierra record.
     * We merge that into the Calm item.
     */
   private val mergeIntoCalmTarget = new PartialRule {
     val isDefinedForTarget: WorkPredicate = singlePhysicalItemCalmWork
-    val isDefinedForSource
-      : WorkPredicate = singleDigitalItemMetsWork or sierraWork
+    val isDefinedForSource: WorkPredicate =
+      singleDigitalItemMetsWork or
+        singleDigitalItemMiroWork or
+        sierraWork
 
     def rule(
       target: Work.Visible[Identified],
@@ -155,9 +157,10 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
       // The calm Work predicate ensures this is safe
       val calmItem = target.data.items.head
 
-      val metsSources = sources.filter(singleDigitalItemMetsWork)
-      val metsDigitalLocations =
-        metsSources.flatMap(_.data.items.flatMap(_.locations))
+      val digitisedSources =
+        sources.filter(singleDigitalItemMetsWork or singleDigitalItemMiroWork)
+      val digitisedLocations =
+        digitisedSources.flatMap(_.data.items.flatMap(_.locations))
 
       val sierraSources = sources.filter(sierraWork)
       val sierraItemId =
@@ -165,7 +168,7 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
 
       List(
         calmItem.copy(
-          locations = calmItem.locations ++ metsDigitalLocations,
+          locations = calmItem.locations ++ digitisedLocations,
           id = sierraItemId.getOrElse(IdState.Unidentifiable)
         )
       )
@@ -184,12 +187,15 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     //
     // See the comment on Sources.findFirstLinkedDigitisedSierraWorkFor
     val isDefinedForTarget: WorkPredicate = physicalSierra and not(
-      isAudiovisual)
+      isAudiovisual
+    )
 
     val isDefinedForSource: WorkPredicate = sierraWork
 
-    def rule(target: Work.Visible[Identified],
-             sources: NonEmptyList[Work[Identified]]): FieldData =
+    def rule(
+      target: Work.Visible[Identified],
+      sources: NonEmptyList[Work[Identified]]
+    ): FieldData =
       findFirstLinkedDigitisedSierraWorkFor(target, sources.toList)
         .map { digitisedWork =>
           val onlineItems = digitisedWork.data.items
