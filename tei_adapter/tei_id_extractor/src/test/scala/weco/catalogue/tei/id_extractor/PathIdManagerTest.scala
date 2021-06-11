@@ -8,6 +8,7 @@ import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.memory.MemoryStore
+import weco.catalogue.tei.id_extractor.PathIdManager.insertPathId
 import weco.catalogue.tei.id_extractor.fixtures.PathIdDatabase
 import weco.catalogue.tei.id_extractor.models.{TeiIdChangeMessage, TeiIdDeletedMessage, TeiIdMessage}
 
@@ -46,7 +47,7 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
 
         val oldTime = Instant.parse("2021-06-07T10:00:00Z")
         val storedPathId = PathId("Batak/path.xml", "manuscript_1234", oldTime)
-        savePathId(storedPathId, table)
+        insertPathId(table, storedPathId).get
         val updatedPathId = storedPathId.copy(timeModified = oldTime.plus(2, ChronoUnit.HOURS))
 
         manager.handlePathChanged(updatedPathId, blobContents)
@@ -70,7 +71,7 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
         val storedTime = Instant.parse("2021-06-07T10:00:00Z")
         val messageTime = storedTime.minus(2, ChronoUnit.HOURS)
         val storedPathId = PathId("Batak/path.xml", "manuscript_1234", storedTime)
-        savePathId(storedPathId, table)
+        insertPathId(table, storedPathId).get
         val updatedPathId = storedPathId.copy(timeModified = messageTime)
 
         manager.handlePathChanged(updatedPathId, blobContents)
@@ -96,7 +97,7 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
         val newTime = oldTime.plus(2, ChronoUnit.HOURS)
 
         val storedPathId = PathId("Batak/oldpath.xml", "manuscript_1234", oldTime)
-        savePathId(storedPathId, table)
+        insertPathId(table, storedPathId).get
 
         val updatedPathId = storedPathId.copy(timeModified = newTime, path = "Batak/newpath.xml")
 
@@ -123,7 +124,7 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
         val oldTime = Instant.parse("2021-06-07T10:00:00Z")
         val newTime = oldTime.plus(2, ChronoUnit.HOURS)
         val storedPathId = PathId("Batak/path.xml", "manuscript_1234", oldTime)
-        savePathId(storedPathId, table)
+        insertPathId(table, storedPathId).get
 
         val updatedPathId = storedPathId.copy(id = newId, timeModified = newTime)
 
@@ -147,7 +148,7 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
         val storedTime = Instant.parse("2021-06-07T10:00:00Z")
         val newTime = storedTime.minus(2, ChronoUnit.HOURS)
         val storedPathId = PathId("Batak/oldpath.xml", "manuscript_1234", storedTime)
-        savePathId(storedPathId, table)
+        insertPathId(table, storedPathId).get
 
         val updatedPathId = storedPathId.copy(id = "manuscript_5678", timeModified = newTime)
         manager.handlePathChanged(updatedPathId, blobContents)
@@ -171,7 +172,7 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
         val savedTime = Instant.parse("2021-06-07T10:00:00Z")
         val newTime = savedTime.minus(2, ChronoUnit.HOURS)
         val storedPathId = PathId("Batak/oldpath.xml", "manuscript_1234", savedTime)
-        savePathId(storedPathId, table)
+        insertPathId(table, storedPathId).get
 
         val updatedPathId = storedPathId.copy(path = "Batak/newpath.xml", timeModified = newTime)
         manager.handlePathChanged(updatedPathId, blobContents)
@@ -202,8 +203,8 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
         val time2 = time1.plus(2, ChronoUnit.HOURS)
         val firstPathId = PathId(path1, id1, time1)
         val secondPathId = PathId(path2, id2, time2)
-        savePathId(firstPathId, table)
-        savePathId(secondPathId, table)
+        insertPathId(table, firstPathId).get
+        insertPathId(table, secondPathId).get
 
         val newTime = time2.plus(2, ChronoUnit.HOURS)
         val updatedPathId = PathId(path1, id2, newTime)
@@ -234,8 +235,8 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
         val time2 = time1.plus(2, ChronoUnit.HOURS)
         val firstPathId = PathId(path1, id1, time1)
         val secondPathId = PathId(path2, id2, time2)
-        savePathId(firstPathId, table)
-        savePathId(secondPathId, table)
+        insertPathId(table, firstPathId).get
+        insertPathId(table, secondPathId).get
 
         val newTime = time1.minus(2, ChronoUnit.HOURS)
 
@@ -261,7 +262,7 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
         val path = "Batak/WMS_Batak_1.xml"
         val id = "manuscript_1234"
         val time = Instant.parse("2021-06-07T10:00:00Z")
-        savePathId(PathId(path, id, time), table)
+        insertPathId(table, PathId(path, id, time)).get
 
         val newTime = time.plus(2, ChronoUnit.HOURS)
 
@@ -281,7 +282,7 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
         val path = "Batak/WMS_Batak_1.xml"
         val id = "manuscript_1234"
         val time = Instant.parse("2021-06-07T10:00:00Z")
-        savePathId(PathId(path, id, time), table)
+        insertPathId(table, PathId(path, id, time)).get
 
         val deletedTime = time.minus(2, ChronoUnit.HOURS)
 
@@ -314,17 +315,6 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
       }
     }
   }
-
-
-  private def savePathId(pathId: PathId, pathIds: PathIdTable)(implicit session: DBSession) = withSQL {
-    insert
-      .into(pathIds)
-      .namedValues(
-        pathIds.column.path -> pathId.path,
-        pathIds.column.id -> pathId.id,
-        pathIds.column.timeModified -> pathId.timeModified.toEpochMilli
-      )
-  }.update.apply()
 
   private def checkFileIsStored(store: MemoryStore[S3ObjectLocation, String], bucket: Bucket, modifiedTime: String, fileContents: String, id: String) = {
     val expectedKey = s"tei_files/${id}/${Instant.parse(modifiedTime).getEpochSecond}.xml"
