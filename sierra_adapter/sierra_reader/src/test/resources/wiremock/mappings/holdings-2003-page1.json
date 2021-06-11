@@ -2,7 +2,7 @@
   "id" : "a3c2bbef-e364-404d-96d0-3e949c0d2447",
   "name" : "holdings",
   "request" : {
-    "url" : "/holdings?updatedDate=%5B2003-03-03T03%3A00%3A00Z%2C2003-04-04T04%3A00%3A00Z%5D&fields=updatedDate",
+    "url" : "/holdings?updatedDate=%5B2003-03-03T03:00:00Z,2003-04-04T04:00:00Z%5D&fields=updatedDate",
     "method" : "GET",
     "headers" : {
       "Authorization" : {
@@ -12,7 +12,10 @@
   },
   "response" : {
     "status" : 200,
-    "bodyFileName" : "holdings-2003-page1.json"
+    "bodyFileName" : "holdings-2003-page1.json",
+    "headers": {
+      "Content-Type": "application/json;charset=UTF-8"
+    }
   },
   "uuid" : "a3c2bbef-e364-404d-96d0-3e949c0d2447",
   "persistent" : true

@@ -2,7 +2,7 @@
   "id" : "56afed67-47e7-4cf7-ad12-264ab5944e84",
   "name" : "bibs",
   "request" : {
-    "url" : "/bibs?updatedDate=%5B2013-12-10T17%3A16%3A35Z%2C2013-12-13T21%3A34%3A35Z%5D&fields=updatedDate%2CdeletedDate%2Cdeleted%2Csuppressed%2Cauthor%2Ctitle",
+    "url" : "/bibs?updatedDate=%5B2013-12-10T17:16:35Z,2013-12-13T21:34:35Z%5D&fields=updatedDate,deletedDate,deleted,suppressed,author,title",
     "method" : "GET",
     "headers" : {
       "Authorization" : {

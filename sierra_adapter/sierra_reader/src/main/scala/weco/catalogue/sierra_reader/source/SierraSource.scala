@@ -1,11 +1,18 @@
 package weco.catalogue.sierra_reader.source
 
 import akka.NotUsed
+import akka.actor.ActorSystem
+import akka.http.scaladsl.model.Uri
+import akka.http.scaladsl.model.headers.BasicHttpCredentials
 import akka.stream.ThrottleMode
 import akka.stream.scaladsl.Source
 import io.circe.Json
 import uk.ac.wellcome.platform.sierra_reader.config.models.SierraAPIConfig
+import weco.catalogue.source_model.sierra.identifiers.SierraRecordTypes
+import weco.http.client.{AkkaHttpClient, HttpGet, HttpPost}
+import weco.http.client.sierra.SierraOauthHttpClient
 
+import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
 case class ThrottleRate(elements: Int, per: FiniteDuration, maximumBurst: Int)
@@ -19,13 +26,27 @@ object SierraSource {
     config: SierraAPIConfig,
     throttleRate: ThrottleRate = ThrottleRate(elements = 0, per = 0 seconds),
     timeout: Duration = 10 seconds
-  )(resourceType: String,
-    params: Map[String, String]): Source[Json, NotUsed] = {
+  )(recordType: SierraRecordTypes.Value,
+    params: Map[String, String])(
+    implicit
+    system: ActorSystem,
+    ec: ExecutionContext): Source[Json, NotUsed] = {
+
+    val pageSource = new SierraPageSource(
+      config = config,
+      client = new SierraOauthHttpClient(
+        underlying = new AkkaHttpClient() with HttpPost with HttpGet {
+          override val baseUri: Uri = Uri(config.apiURL)
+        },
+        credentials = new BasicHttpCredentials(config.oauthKey, config.oauthSec)
+      )
+    )
 
     val source = Source.fromGraph(
-      new SierraPageSource(config = config, timeout = timeout)(
-        resourceType = resourceType,
-        params = params)
+      pageSource(
+        recordType = recordType,
+        params = params
+      )
     )
 
     throttleRate.elements match {

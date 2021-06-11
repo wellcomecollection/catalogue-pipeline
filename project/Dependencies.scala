@@ -103,8 +103,6 @@ object ExternalDependencies {
     val jsoup = "1.13.1"
     val logback = "1.1.8"
 
-    val scalaJHttp = "2.3.0"
-
     val akkaHttpOauth2Client = "0.2.0"
 
     // This should match the version used in scala-libs
@@ -180,10 +178,6 @@ object ExternalDependencies {
 
   val jsoupDependencies = Seq(
     "org.jsoup" % "jsoup" % versions.jsoup
-  )
-
-  val scalaJDependencies = Seq(
-    "org.scalaj" %% "scalaj-http" % versions.scalaJHttp
   )
 
   val logbackDependencies = Seq(
@@ -307,9 +301,9 @@ object CatalogueDependencies {
   val sierraReaderDependencies: Seq[ModuleID] =
     ExternalDependencies.circeOpticsDependencies ++
       WellcomeDependencies.messagingTypesafeLibrary ++
-      ExternalDependencies.scalaJDependencies ++
       WellcomeDependencies.jsonLibrary ++
-      WellcomeDependencies.typesafeLibrary
+      WellcomeDependencies.typesafeLibrary ++
+      WellcomeDependencies.httpLibrary
 
   // Inference manager
   val inferenceManagerDependencies: Seq[ModuleID] =

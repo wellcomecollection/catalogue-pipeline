@@ -12,7 +12,10 @@
   },
   "response" : {
     "status" : 401,
-    "body" : "{\"code\":113,\"specificCode\":0,\"httpStatus\":401,\"name\":\"Unauthorized\",\"description\":\"Invalid or missing authorization header\"}"
+    "body" : "{\"code\":113,\"specificCode\":0,\"httpStatus\":401,\"name\":\"Unauthorized\",\"description\":\"Invalid or missing authorization header\"}",
+    "headers": {
+      "Content-Type": "application/json;charset=UTF-8"
+    }
   },
   "uuid" : "75ec617b-9363-4b78-bf8a-37364168f667",
   "persistent" : true

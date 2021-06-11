@@ -1,109 +1,72 @@
 package weco.catalogue.sierra_reader.source
 
-import akka.stream.stage.{GraphStage, GraphStageLogic, OutHandler}
-import akka.stream.{Attributes, Outlet, SourceShape}
+import akka.NotUsed
+import akka.http.scaladsl.model.Uri.Query
+import akka.http.scaladsl.model.{HttpEntity, HttpRequest, StatusCodes, Uri}
+import akka.http.scaladsl.unmarshalling.{Unmarshal, Unmarshaller}
+import akka.stream.Materializer
+import akka.stream.scaladsl.Source
+import grizzled.slf4j.Logging
 import io.circe.Json
 import io.circe.optics.JsonPath.root
-import io.circe.parser.parse
-import org.slf4j.{Logger, LoggerFactory}
-import scalaj.http.{Http, HttpOptions, HttpResponse}
 import uk.ac.wellcome.platform.sierra_reader.config.models.SierraAPIConfig
 import weco.catalogue.source_model.json.JsonOps._
+import weco.catalogue.source_model.sierra.identifiers.SierraRecordTypes
+import weco.http.client.HttpClient
+import weco.http.json.CirceMarshalling
 
-import scala.concurrent.duration.Duration
+import scala.concurrent.{ExecutionContext, Future}
 
 class SierraPageSource(
   config: SierraAPIConfig,
-  timeout: Duration
+  client: HttpClient
 )(
-  resourceType: String,
-  params: Map[String, String] = Map()
-) extends GraphStage[SourceShape[List[Json]]] {
+  implicit
+  ec: ExecutionContext,
+  mat: Materializer
+) extends Logging {
+  implicit val um: Unmarshaller[HttpEntity, Json] =
+    CirceMarshalling.fromDecoder[Json]
 
-  val out: Outlet[List[Json]] = Outlet("SierraSource")
+  private val lastId: Option[Int] = None
 
-  override def shape = SourceShape(out)
-  val logger: Logger = LoggerFactory.getLogger(this.getClass)
+  def apply(
+    recordType: SierraRecordTypes.Value,
+    params: Map[String, String]
+  ): Source[List[Json], NotUsed] =
+    Source.unfoldAsync(lastId) { lastId =>
+      val url = s"${config.apiURL}/$recordType"
 
-  override def createLogic(inheritedAttributes: Attributes): GraphStageLogic =
-    new GraphStageLogic(shape) {
-
-      var token: String = refreshToken(config)
-      var lastId: Option[Int] = None
-      var jsonList: List[Json] = Nil
-
-      setHandler(out, new OutHandler {
-        override def onPull(): Unit = makeSierraRequestAndPush()
-      })
-
-      private def makeSierraRequestAndPush(): Unit = {
-        val newParams = lastId match {
-          case Some(id) =>
-            params + ("id" -> s"[${id + 1},]")
-          case None => params
-        }
-
-        makeRequestWith(
-          newParams,
-          ifUnauthorized = {
-            token = refreshToken(config)
-            makeRequestWith(newParams, ifUnauthorized = {
-              fail(out, new RuntimeException("Unable to refresh token!"))
-            })
-          }
-        )
+      val newParams = lastId match {
+        case Some(id) => params + ("id" -> s"[${id + 1},]")
+        case None     => params
       }
 
-      private def makeRequestWith[T](newParams: Map[String, String],
-                                     ifUnauthorized: => Unit): Unit = {
-        val newResponse =
-          makeRequest(config.apiURL, resourceType, token, newParams)
+      logger.debug(
+        s"Making request to $url with parameters $newParams")
 
-        newResponse.code match {
-          case 200 => refreshJsonListAndPush(newResponse)
-          case 404 => complete(out)
-          case 401 => ifUnauthorized
-          case code =>
-            fail(
-              out,
-              new RuntimeException(
-                s"Unexpected HTTP status code from Sierra: $code"))
-        }
-      }
-
-      private def refreshJsonListAndPush(
-        response: HttpResponse[String]): Unit = {
-        val responseJson = parse(response.body).right
-          .getOrElse(
-            throw new RuntimeException(
-              s"List response was not JSON; got ${response.body}"))
-
-        jsonList = root.entries.each.json.getAll(responseJson)
-
-        lastId = Some(getLastId(jsonList))
-
-        push(out, jsonList)
-      }
-
-      private def refreshToken(config: SierraAPIConfig): String = {
-        val url = s"${config.apiURL}/token"
-
-        val tokenResponse =
-          Http(url).postForm.auth(config.oauthKey, config.oauthSec).asString
-
-        val json = parse(tokenResponse.body).right
-          .getOrElse(
-            throw new RuntimeException(
-              s"Token response was not JSON; got ${tokenResponse.body}"))
-        root.access_token.string
-          .getOption(json)
-          .getOrElse(
-            throw new Exception(
-              s"Couldn't find access_token in token response; got ${tokenResponse.body}"
-            )
+      for {
+        nextPage <- client.singleRequest(
+          HttpRequest(
+            uri = Uri(url).withQuery(Query(newParams))
           )
-      }
+        )
 
+        jsonList <- nextPage match {
+          case resp if resp.status == StatusCodes.OK =>
+            Unmarshal(resp).to[Json].map { responseJson =>
+              val records = root.entries.each.json.getAll(responseJson)
+              val lastId = getLastId(records)
+
+              Some((Some(lastId), records))
+            }
+
+          case resp if resp.status == StatusCodes.NotFound =>
+            Future.successful(None)
+
+          case resp => Future.failed(new Throwable(s"Unexpected HTTP response: $resp"))
+        }
+      } yield jsonList
     }
 
   // The Sierra API returns entries as a list of the form:
@@ -132,21 +95,4 @@ class SierraPageSource(
       .toInt
   }
 
-  private def makeRequest(apiUrl: String,
-                          resourceType: String,
-                          token: String,
-                          params: Map[String, String]): HttpResponse[String] = {
-    val url = s"$apiUrl/$resourceType"
-    logger.debug(
-      s"Making request to $url with parameters $params & token $token")
-
-    Http(url)
-      .option(HttpOptions.readTimeout(timeout.toMillis.toInt))
-      .option(HttpOptions.connTimeout(timeout.toMillis.toInt))
-      .params(params)
-      .header("Authorization", s"Bearer $token")
-      .header("Accept", "application/json")
-      .header("Connection", "close")
-      .asString
-  }
 }

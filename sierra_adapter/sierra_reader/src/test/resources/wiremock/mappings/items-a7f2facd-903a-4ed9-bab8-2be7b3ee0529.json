@@ -2,7 +2,7 @@
   "id" : "a7f2facd-903a-4ed9-bab8-2be7b3ee0529",
   "name" : "items",
   "request" : {
-    "url" : "/items?updatedDate=%5B2013-12-10T17%3A16%3A35Z%2C2013-12-13T21%3A34%3A35Z%5D",
+    "url" : "/items?updatedDate=%5B2013-12-10T17:16:35Z,2013-12-13T21:34:35Z%5D",
     "method" : "GET",
     "headers" : {
       "Authorization" : {

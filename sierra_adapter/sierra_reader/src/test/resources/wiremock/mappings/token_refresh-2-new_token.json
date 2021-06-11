@@ -2,7 +2,7 @@
   "id" : "dc6c7b4f-d24d-45e6-89c1-f5e7bf9c577c",
   "name" : "token",
   "request" : {
-    "url" : "/token",
+    "url" : "/v5/token",
     "method" : "POST",
     "headers" : {
       "Authorization" : {
@@ -12,7 +12,10 @@
   },
   "response" : {
     "status" : 200,
-    "body" : "{\"access_token\":\"refreshed-token\",\"token_type\":\"bearer\",\"expires_in\":3600}"
+    "body" : "{\"access_token\":\"refreshed-token\",\"token_type\":\"bearer\",\"expires_in\":3600}",
+    "headers": {
+      "Content-Type": "application/json;charset=UTF-8"
+    }
   },
   "uuid" : "dc6c7b4f-d24d-45e6-89c1-f5e7bf9c577c"
 }
