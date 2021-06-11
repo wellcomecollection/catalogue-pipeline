@@ -86,9 +86,8 @@ class SierraReaderWorkerService(
 
     val sierraSource = SierraSource(
       config = sierraAPIConfig,
-      throttleRate = ThrottleRate(3, per = 1.second),
-      timeout = 60 seconds
-    )(resourceType = readerConfig.recordType.toString, params)
+      throttleRate = ThrottleRate(3, per = 1.second)
+    )(recordType = readerConfig.recordType, params)
 
     val outcome = sierraSource
       .via(SierraRecordWrapperFlow(createRecord))

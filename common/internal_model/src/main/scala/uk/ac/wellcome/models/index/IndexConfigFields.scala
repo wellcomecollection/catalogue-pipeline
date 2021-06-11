@@ -1,11 +1,12 @@
 package uk.ac.wellcome.models.index
 
 import com.sksamuel.elastic4s.ElasticDsl._
-import WorksAnalysis._
+import com.sksamuel.elastic4s.fields.{KeywordField, TextField}
+import uk.ac.wellcome.models.index.WorksAnalysis._
 
 /** Mixin for common fields used within an IndexConfig in our internal models.
   */
-trait IndexConfigFields {
+trait IndexConfigFields extends ElasticFieldOps {
   def englishTextKeywordField(name: String) =
     textField(name).fields(
       keywordField("keyword"),
@@ -20,7 +21,7 @@ trait IndexConfigFields {
   val languagesTextFields =
     languages.map(lang => textField(lang).analyzer(s"${lang}_analyzer"))
 
-  def multilingualField(name: String) =
+  def multilingualField(name: String): TextField =
     textField(name)
       .fields(
         List(
@@ -31,12 +32,12 @@ trait IndexConfigFields {
       )
 
   def multilingualFieldWithKeyword(name: String) = textField(name).fields(
-    lowercaseKeyword("keyword"),
-    // we don't care about the name, we just want to compose the fields parameter
-    multilingualField("").fields: _*
+    Seq(lowercaseKeyword("keyword")) ++
+      // we don't care about the name, we just want to compose the fields parameter
+      multilingualField("").fields
   )
 
-  def lowercaseKeyword(name: String) =
+  def lowercaseKeyword(name: String): KeywordField =
     keywordField(name).normalizer(lowercaseNormalizer.name)
 
   def asciifoldingTextFieldWithKeyword(name: String) =
@@ -60,5 +61,5 @@ trait IndexConfigFields {
 
   val sourceIdentifier = objectField("sourceIdentifier")
     .fields(lowercaseKeyword("value"))
-    .dynamic("false")
+    .withDynamic("false")
 }

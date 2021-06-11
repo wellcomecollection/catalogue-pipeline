@@ -1,7 +1,6 @@
 package uk.ac.wellcome.platform.calm_deletion_checker
 
 import akka.actor.ActorSystem
-import akka.stream.Materializer
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.platform.calm_api_client.AkkaHttpCalmApiClient
@@ -17,8 +16,6 @@ object Main extends WellcomeTypesafeApp {
     implicit val ec: ExecutionContext = AkkaBuilder.buildExecutionContext()
     implicit val actorSystem: ActorSystem =
       AkkaBuilder.buildActorSystem()
-    implicit val materializer: Materializer =
-      AkkaBuilder.buildMaterializer()
 
     implicit val dynamoClient: DynamoDbClient =
       DynamoBuilder.buildDynamoClient(config)

@@ -19,6 +19,7 @@ import uk.ac.wellcome.mets_adapter.services.{
 }
 import uk.ac.wellcome.storage.store.dynamo.DynamoSingleVersionStore
 import uk.ac.wellcome.storage.typesafe.DynamoBuilder
+import weco.http.client.AkkaHttpClient
 
 import scala.language.higherKinds
 
@@ -54,6 +55,7 @@ object Main extends WellcomeTypesafeApp {
     ec: ExecutionContext): BagRetriever =
     new HttpBagRetriever(
       config.requireString("bags.api.url"),
+      client = new AkkaHttpClient(),
       new TokenService(
         config.requireString("bags.oauth.url"),
         config.requireString("bags.oauth.client_id"),

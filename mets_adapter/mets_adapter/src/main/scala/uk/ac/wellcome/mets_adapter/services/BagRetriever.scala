@@ -1,7 +1,6 @@
 package uk.ac.wellcome.mets_adapter.services
 
 import akka.actor.ActorSystem
-import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.Authorization
 import akka.http.scaladsl.unmarshalling.Unmarshal
@@ -9,6 +8,7 @@ import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import grizzled.slf4j.Logging
 import io.circe.generic.auto._
 import uk.ac.wellcome.mets_adapter.models._
+import weco.http.client.HttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -16,7 +16,9 @@ trait BagRetriever {
   def getBag(space: String, externalIdentifier: String): Future[Bag]
 }
 
-class HttpBagRetriever(baseUrl: String, tokenService: TokenService)(
+class HttpBagRetriever(baseUrl: String,
+                       client: HttpClient,
+                       tokenService: TokenService)(
   implicit
   actorSystem: ActorSystem,
   executionContext: ExecutionContext)
@@ -35,7 +37,7 @@ class HttpBagRetriever(baseUrl: String, tokenService: TokenService)(
       httpRequest = HttpRequest(uri = requestUri)
         .addHeader(Authorization(token))
 
-      response <- Http().singleRequest(httpRequest)
+      response <- client.singleRequest(httpRequest)
       maybeBag <- {
         debug(s"Received response ${response.status}")
         handleResponse(response)

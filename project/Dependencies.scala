@@ -2,11 +2,12 @@ import sbt._
 
 object WellcomeDependencies {
 
-  val defaultVersion = "26.14.0"
+  val defaultVersion = "26.17.3"
 
   lazy val versions = new {
     val typesafe = defaultVersion
     val fixtures = defaultVersion
+    val http = defaultVersion
     val json = defaultVersion
     val messaging = defaultVersion
     val monitoring = defaultVersion
@@ -42,6 +43,11 @@ object WellcomeDependencies {
   val elasticsearchTypesafeLibrary: Seq[ModuleID] = library(
     name = "elasticsearch_typesafe",
     version = versions.elasticsearch
+  )
+
+  val httpLibrary: Seq[ModuleID] = library(
+    name = "http",
+    version = versions.http
   )
 
   val monitoringLibrary: Seq[ModuleID] = library(
@@ -82,10 +88,6 @@ object WellcomeDependencies {
 
 object ExternalDependencies {
   lazy val versions = new {
-    val akka = "2.6.10"
-    val akkaHttp = "10.1.11"
-    val akkaHttpCirce = "1.32.0"
-    val akkaStreamAlpakka = "1.1.2"
     val apacheCommons = "1.9"
     val circe = "0.13.0"
     val fastparse = "2.3.0"
@@ -101,7 +103,7 @@ object ExternalDependencies {
     val jsoup = "1.13.1"
     val logback = "1.1.8"
 
-    val scalaJHttp = "2.3.0"
+    val akkaHttpOauth2Client = "0.2.0"
   }
 
   val enumeratumDependencies = Seq(
@@ -109,19 +111,8 @@ object ExternalDependencies {
     "com.beachape" %% "enumeratum-scalacheck" % versions.enumeratumScalacheck % "test"
   )
 
-  val scribeJavaDependencies = Seq(
-    "com.github.dakatsuka" %% "akka-http-oauth2-client" % "0.2.0"
-  )
-
-  val akkaHttpDependencies = Seq(
-    "com.typesafe.akka" %% "akka-testkit" % versions.akka % "test",
-    "com.typesafe.akka" %% "akka-http" % versions.akkaHttp,
-    "com.typesafe.akka" %% "akka-http-testkit" % versions.akkaHttp % "test",
-    "de.heikoseeberger" %% "akka-http-circe" % versions.akkaHttpCirce
-  )
-
-  val alpakkaS3Dependencies = Seq(
-    "com.lightbend.akka" %% "akka-stream-alpakka-s3" % versions.akkaStreamAlpakka
+  val oauthDependencies = Seq(
+    "com.github.dakatsuka" %% "akka-http-oauth2-client" % versions.akkaHttpOauth2Client
   )
 
   val apacheCommonsDependencies = Seq(
@@ -174,10 +165,6 @@ object ExternalDependencies {
 
   val jsoupDependencies = Seq(
     "org.jsoup" % "jsoup" % versions.jsoup
-  )
-
-  val scalaJDependencies = Seq(
-    "org.scalaj" %% "scalaj-http" % versions.scalaJHttp
   )
 
   val logbackDependencies = Seq(
@@ -268,27 +255,25 @@ object CatalogueDependencies {
     ExternalDependencies.apacheCommonsDependencies
 
   val calmTransformerDependencies: Seq[ModuleID] =
-    ExternalDependencies.apacheCommonsDependencies ++
-      ExternalDependencies.jsoupDependencies ++
+    ExternalDependencies.jsoupDependencies ++
       ExternalDependencies.parseDependencies
 
   // METS adapter
 
   val metsAdapterDependencies: Seq[ModuleID] =
-    ExternalDependencies.apacheCommonsDependencies ++
-      ExternalDependencies.akkaHttpDependencies ++
+    ExternalDependencies.oauthDependencies ++
       ExternalDependencies.mockitoDependencies ++
       ExternalDependencies.wireMockDependencies ++
-      ExternalDependencies.scribeJavaDependencies ++
       WellcomeDependencies.messagingTypesafeLibrary ++
-      WellcomeDependencies.storageTypesafeLibrary
+      WellcomeDependencies.storageTypesafeLibrary ++
+      WellcomeDependencies.httpLibrary
 
   // CALM adapter
 
   val calmApiClientDependencies: Seq[ModuleID] =
-    ExternalDependencies.akkaHttpDependencies ++
-      ExternalDependencies.scalaXmlDependencies ++
-      ExternalDependencies.scalatestDependencies
+    ExternalDependencies.scalaXmlDependencies ++
+      ExternalDependencies.scalatestDependencies ++
+      WellcomeDependencies.httpLibrary
 
   // Sierra adapter stack
 
@@ -301,14 +286,14 @@ object CatalogueDependencies {
   val sierraReaderDependencies: Seq[ModuleID] =
     ExternalDependencies.circeOpticsDependencies ++
       WellcomeDependencies.messagingTypesafeLibrary ++
-      ExternalDependencies.scalaJDependencies ++
       WellcomeDependencies.jsonLibrary ++
-      WellcomeDependencies.typesafeLibrary
+      WellcomeDependencies.typesafeLibrary ++
+      WellcomeDependencies.httpLibrary
 
   // Inference manager
   val inferenceManagerDependencies: Seq[ModuleID] =
-    ExternalDependencies.akkaHttpDependencies ++
-      ExternalDependencies.wireMockDependencies
+    ExternalDependencies.wireMockDependencies ++
+      WellcomeDependencies.httpLibrary
 
   // TEI adapter
 

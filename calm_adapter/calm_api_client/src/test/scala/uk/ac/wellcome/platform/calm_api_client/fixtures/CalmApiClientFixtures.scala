@@ -8,8 +8,10 @@ import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.platform.calm_api_client._
 import weco.catalogue.source_model.calm.CalmRecord
+import weco.http.client.HttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
 trait CalmApiClientFixtures extends Akka {
@@ -35,13 +37,13 @@ trait CalmApiClientFixtures extends Akka {
     handleAbandon: Cookie => Done = _ => throw new NotImplementedError,
   )(testWith: TestWith[TestCalmApiClient, R]): R =
     withMaterializer { mat =>
-      implicit val ec: ExecutionContext = mat.executionContext
       testWith(
         new TestCalmApiClient(handleSearch, handleSummary, handleAbandon))
     }
 
-  trait TestHttpClient extends HttpClient {
-    val responses: Iterator[HttpResponse]
+  class TestHttpClient(responses: Iterator[HttpResponse])(
+    implicit val ec: ExecutionContext)
+      extends HttpClient {
     final var requests: List[HttpRequest] = Nil
 
     def singleRequest(request: HttpRequest): Future[HttpResponse] = {
@@ -57,23 +59,23 @@ trait CalmApiClientFixtures extends Akka {
   class TestHttpCalmApiClient(responseList: List[HttpResponse])(
     implicit mat: Materializer)
       extends HttpCalmApiClient(
+        client = new TestHttpClient(responseList.toIterator),
         url,
         username,
         password,
         minBackoff,
         maxBackoff,
         randomFactor,
-        maxRestarts)
-      with TestHttpClient {
-    val responses = responseList.iterator
+        maxRestarts) {
+    def requests: List[HttpRequest] =
+      client.asInstanceOf[TestHttpClient].requests
   }
 
   class TestCalmApiClient(
     handleSearch: CalmQuery => CalmSession,
     handleSummary: Int => CalmRecord,
     handleAbandon: Cookie => Done
-  )(implicit ec: ExecutionContext)
-      extends CalmApiClient {
+  ) extends CalmApiClient {
     var requests: List[(CalmXmlRequest, Option[Cookie])] = Nil
 
     def request[Request <: CalmXmlRequest: CalmHttpResponseParser](

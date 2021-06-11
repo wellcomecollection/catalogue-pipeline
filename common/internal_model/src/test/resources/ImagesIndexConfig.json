@@ -1127,11 +1127,11 @@
               },
               "binSizes" : {
                 "type" : "integer",
-                "index" : "false"
+                "index" : false
               },
               "binMinima" : {
                 "type" : "float",
-                "index" : "false"
+                "index" : false
               },
               "aspectRatio" : {
                 "type" : "float"

@@ -11,8 +11,11 @@
     }
   },
   "response" : {
-    "status" : 200,
-    "body" : "{\"total\":1,\"entries\":[{\"id\":\"1000001\"}]}"
+    "status": 200,
+    "body": "{\"total\":1,\"entries\":[{\"id\":\"1000001\"}]}",
+    "headers": {
+      "Content-Type": "application/json;charset=UTF-8"
+    }
   },
   "uuid" : "9a296039-894f-4d35-9d82-45960c347556",
   "persistent" : true

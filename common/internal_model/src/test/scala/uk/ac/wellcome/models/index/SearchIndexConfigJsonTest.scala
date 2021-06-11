@@ -1,9 +1,8 @@
 package uk.ac.wellcome.models.index
 
-import com.sksamuel.elastic4s.requests.indexes.{
-  CreateIndexContentBuilder,
-  CreateIndexRequest
-}
+import com.sksamuel.elastic4s.handlers.index.CreateIndexContentBuilder
+import com.sksamuel.elastic4s.json.JacksonBuilder
+import com.sksamuel.elastic4s.requests.indexes.CreateIndexRequest
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -34,13 +33,15 @@ class SearchIndexConfigJsonTest
         .getLines
         .mkString
 
-    val indexJson = CreateIndexContentBuilder(
-      CreateIndexRequest(
-        "works",
-        analysis = Some(IndexedWorkIndexConfig.analysis),
-        mapping = Some(IndexedWorkIndexConfig.mapping.meta(Map()))
-      )
-    ).string()
+    val indexJson = JacksonBuilder.writeAsString(
+      CreateIndexContentBuilder(
+        CreateIndexRequest(
+          "works",
+          analysis = Some(IndexedWorkIndexConfig.analysis),
+          mapping = Some(IndexedWorkIndexConfig.mapping.meta(Map()))
+        )
+      ).value)
+
     assertJsonStringsAreEqual(fileJson, indexJson)
   }
 
@@ -51,13 +52,15 @@ class SearchIndexConfigJsonTest
         .getLines
         .mkString
 
-    val indexJson = CreateIndexContentBuilder(
-      CreateIndexRequest(
-        "images",
-        analysis = Some(IndexedImageIndexConfig.analysis),
-        mapping = Some(IndexedImageIndexConfig.mapping.meta(Map()))
-      )
-    ).string()
+    val indexJson = JacksonBuilder.writeAsString(
+      CreateIndexContentBuilder(
+        CreateIndexRequest(
+          "images",
+          analysis = Some(IndexedImageIndexConfig.analysis),
+          mapping = Some(IndexedImageIndexConfig.mapping.meta(Map()))
+        )
+      ).value)
+
     assertJsonStringsAreEqual(fileJson, indexJson)
   }
 }

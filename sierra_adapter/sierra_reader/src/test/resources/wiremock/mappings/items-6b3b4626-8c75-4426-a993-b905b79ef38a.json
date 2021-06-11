@@ -2,7 +2,7 @@
   "id" : "6b3b4626-8c75-4426-a993-b905b79ef38a",
   "name" : "items",
   "request" : {
-    "url" : "/items?updatedDate=%5B2013-12-10T17%3A16%3A35Z%2C2013-12-13T21%3A34%3A35Z%5D&fields=updatedDate%2Cdeleted%2CdeletedDate%2CbibIds%2CfixedFields%2CvarFields&id=%5B1794166%2C%5D",
+    "url" : "/items?updatedDate=%5B2013-12-10T17:16:35Z,2013-12-13T21:34:35Z%5D&fields=updatedDate,deleted,deletedDate,bibIds,fixedFields,varFields&id=%5B1794166,%5D",
     "method" : "GET",
     "headers" : {
       "Authorization" : {
