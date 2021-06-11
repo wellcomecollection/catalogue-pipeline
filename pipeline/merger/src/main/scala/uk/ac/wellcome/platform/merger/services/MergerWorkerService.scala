@@ -6,24 +6,19 @@ import java.time.Instant
 import akka.{Done, NotUsed}
 import akka.stream.scaladsl.Flow
 import software.amazon.awssdk.services.sqs.model.Message
-
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.matcher.MatcherResult
 import uk.ac.wellcome.messaging.sqs.SQSStream
-import uk.ac.wellcome.pipeline_storage.{
-  Indexable,
-  Indexer,
-  PipelineStorageConfig,
-  PipelineStorageStream
-}
+import uk.ac.wellcome.pipeline_storage.{Indexable, Indexer, PipelineStorageConfig, PipelineStorageStream}
 import uk.ac.wellcome.typesafe.Runnable
 import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.catalogue.internal_model.image.Image
 import weco.catalogue.internal_model.image.ImageState.Initial
 import weco.catalogue.internal_model.work.Work
+import weco.flows.FlowOps
 
 class MergerWorkerService[WorkDestination, ImageDestination](
   msgStream: SQSStream[NotificationMessage],
@@ -33,8 +28,8 @@ class MergerWorkerService[WorkDestination, ImageDestination](
   workMsgSender: MessageSender[WorkDestination],
   imageMsgSender: MessageSender[ImageDestination],
   config: PipelineStorageConfig
-)(implicit ec: ExecutionContext)
-    extends Runnable {
+)(implicit val ec: ExecutionContext)
+    extends Runnable with FlowOps {
 
   import PipelineStorageStream._
   import Indexable._
