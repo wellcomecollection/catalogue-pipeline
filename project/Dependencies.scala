@@ -303,7 +303,7 @@ object CatalogueDependencies {
       WellcomeDependencies.storageLibrary ++
       ExternalDependencies.mySqlDependencies ++
       ExternalDependencies.wireMockDependencies ++
-      ExternalDependencies.akkaHttpDependencies ++
+      WellcomeDependencies.httpLibrary ++
       ExternalDependencies.scalatestDependencies
   }
 }
