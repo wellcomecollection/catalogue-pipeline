@@ -22,7 +22,7 @@ object Main extends WellcomeTypesafeApp {
       gitHubBlobReader = new GitHubBlobReader(),
       tableProvisioner = new TableProvisioner(???)(???, ???),
       pathIdManager = new PathIdManager[SNSConfig](???, store, messageSender, bucket = ???),
-      config = TeiIdExtractorConfig(concurrentFiles = ???)
+      config = TeiIdExtractorConfig(concurrentFiles = ???, ???)
     )
   }
 }
