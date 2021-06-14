@@ -2,7 +2,7 @@
   "id" : "8be78772-0670-4bf7-bc54-dd9997eb6c74",
   "name" : "token",
   "request" : {
-    "url" : "/v5/token",
+    "url" : "/token",
     "method" : "POST",
     "headers" : {
       "Authorization" : {
