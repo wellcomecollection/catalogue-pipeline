@@ -25,7 +25,7 @@ object Main extends WellcomeTypesafeApp {
         new AkkaHttpClient(),config.requireString("tei.github.token")),
       tableProvisioner = new TableProvisioner(???)(???, ???),
       pathIdManager = new PathIdManager[SNSConfig](???, store, messageSender, bucket = ???),
-      config = TeiIdExtractorConfig(???, ???)
+      config = TeiIdExtractorConfig(concurrentFiles = ???, ???)
     )
   }
 }
