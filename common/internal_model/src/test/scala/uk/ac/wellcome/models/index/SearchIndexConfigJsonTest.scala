@@ -40,7 +40,8 @@ class SearchIndexConfigJsonTest
           analysis = Some(IndexedWorkIndexConfig.analysis),
           mapping = Some(IndexedWorkIndexConfig.mapping.meta(Map()))
         )
-      ).value)
+      ).value
+    )
 
     assertJsonStringsAreEqual(fileJson, indexJson)
   }
@@ -59,7 +60,8 @@ class SearchIndexConfigJsonTest
           analysis = Some(IndexedImageIndexConfig.analysis),
           mapping = Some(IndexedImageIndexConfig.mapping.meta(Map()))
         )
-      ).value)
+      ).value
+    )
 
     assertJsonStringsAreEqual(fileJson, indexJson)
   }

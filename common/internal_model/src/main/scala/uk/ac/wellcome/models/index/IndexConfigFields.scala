@@ -40,7 +40,17 @@ trait IndexConfigFields extends ElasticFieldOps {
   def lowercaseKeyword(name: String): KeywordField =
     keywordField(name).normalizer(lowercaseNormalizer.name)
 
-  def asciifoldingTextFieldWithKeyword(name: String) =
+  def asciifoldingTextFieldWithKeyword(
+    name: String,
+    setEagerGlobalOrdinals: Boolean = false
+  ) = {
+    // We set eagerGlobalOrdinals on fields that we know we are aggregating on the frontend
+    val keyword: KeywordField = setEagerGlobalOrdinals match {
+      case true =>
+        KeywordField("keyword", eagerGlobalOrdinals = Some(true))
+      case false => keywordField("keyword")
+    }
+
     textField(name)
       .fields(
         /**
@@ -48,12 +58,16 @@ trait IndexConfigFields extends ElasticFieldOps {
           * aggregate accurately on the field i.e. `ID123` does not become `id123`
           * but also allows you to do keyword searches e.g. `id123` matches `ID123`
           */
-        keywordField("keyword"),
+        keyword,
         lowercaseKeyword("lowercaseKeyword")
       )
       .analyzer(asciifoldingAnalyzer.name)
+  }
 
   val label = asciifoldingTextFieldWithKeyword("label")
+
+  val eagerGlobalOrdinalsLabel =
+    asciifoldingTextFieldWithKeyword("label", setEagerGlobalOrdinals = true)
 
   val canonicalId = lowercaseKeyword("canonicalId")
 

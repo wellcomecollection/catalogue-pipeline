@@ -4,6 +4,7 @@ import buildinfo.BuildInfo
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.fields.{
   ElasticField,
+  KeywordField,
   ObjectField,
   TokenCountField
 }
@@ -87,6 +88,16 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
   // Indexing lots of individual fields on Elasticsearch can be very CPU
   // intensive, so here only include fields that are needed for querying in the
   // API.
+  //
+  // We also set `eager_global_ordinals` on fields that we know we aggregate on all requests from the frontend
+  // see: https://www.elastic.co/guide/en/elasticsearch/reference/master/eager-global-ordinals.html
+  // These are:
+  // Genre => data.genres.concepts.label.keyword
+  // Subject => data.subjects.label.keyword
+  // Languages => data.languages.id
+  // License => data.items.locations.license.id
+  // Contributor => state.derivedData.contributorAgents
+  // Availabilities => state.availabilities.id
   def data: ObjectField =
     objectField("data").fields(
       objectField("otherIdentifiers").fields(lowercaseKeyword("value")),
@@ -102,18 +113,19 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
         objectField("agent").fields(label.copyTo(titlesAndContributorsPath))
       ),
       objectField("subjects").fields(
-        label,
+        eagerGlobalOrdinalsLabel,
         objectField("concepts").fields(label)
       ),
       objectField("genres").fields(
         label,
-        objectField("concepts").fields(label)
+        objectField("concepts").fields(eagerGlobalOrdinalsLabel)
       ),
       objectField("items").fields(
         objectField("locations").fields(
           keywordField("type"),
           objectField("locationType").fields(keywordField("id")),
-          objectField("license").fields(keywordField("id")),
+          objectField("license")
+            .fields(KeywordField("id", eagerGlobalOrdinals = Some(true))),
           objectField("accessConditions").fields(
             objectField("status").fields(keywordField("type"))
           )
@@ -134,7 +146,10 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
         ),
         objectField("function").fields(label)
       ),
-      objectField("languages").fields(label, keywordField("id")),
+      objectField("languages").fields(
+        label,
+        KeywordField("id", eagerGlobalOrdinals = Some(true))
+      ),
       textField("edition"),
       objectField("notes").fields(englishTextField("content")),
       intField("duration"),
@@ -165,7 +180,8 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
       dateField("sourceModifiedTime"),
       dateField("mergedTime"),
       dateField("indexedTime"),
-      objectField("availabilities").fields(keywordField("id")),
+      objectField("availabilities")
+        .fields(KeywordField("id", eagerGlobalOrdinals = Some(true))),
       objectField("relations")
         .fields(
           objectField("ancestors").fields(
@@ -180,7 +196,7 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
         .withDynamic("false"),
       objectField("derivedData")
         .fields(
-          keywordField("contributorAgents")
+          KeywordField("contributorAgents", eagerGlobalOrdinals = Some(true))
         )
         .withDynamic("false")
     )
