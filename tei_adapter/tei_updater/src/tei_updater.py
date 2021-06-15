@@ -35,7 +35,7 @@ def get_new_tree(url, session=None):
     assert response_tree["truncated"] is False
     for entry in response_tree["tree"]:
         if entry["type"] == "blob":
-            new_tree[entry["path"]] = {"sha": entry["sha"], "url": entry["url"]}
+            new_tree[entry["path"]] = {"sha": entry["sha"], "uri": entry["url"]}
     return new_tree, time
 
 
@@ -59,13 +59,13 @@ def diff_trees(old_tree, new_tree, time):
             get_path_from_diff(changed.up.path()) for changed in values_changed
         }
         messages += [
-            {"path": path, "url": new_tree[path]["url"], "timeModified": time.isoformat()} for path in paths_changed
+            {"path": path, "uri": new_tree[path]["uri"], "timeModified": time.isoformat()} for path in paths_changed
         ]
     if items_added:
         messages += [
             {
                 "path": get_path_from_diff(added.path()),
-                "url": new_tree[get_path_from_diff(added.path())]["url"],
+                "uri": new_tree[get_path_from_diff(added.path())]["uri"],
                 "timeModified": time.isoformat()
             }
             for added in items_added
@@ -95,7 +95,7 @@ def main(event, _ctxt=None, s3_client=None, sns_client=None, session=None):
         messages = diff_trees(old_tree, new_tree, time)
     else:
         messages = [
-            {"path": path, "url": entry["url"], "timeModified": time.isoformat()} for path, entry in new_tree.items()
+            {"path": path, "uri": entry["uri"], "timeModified": time.isoformat()} for path, entry in new_tree.items()
         ]
 
     for message in messages:
