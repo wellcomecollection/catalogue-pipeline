@@ -299,11 +299,11 @@ object CatalogueDependencies {
 
   val teiIdExtractorDependencies: Seq[ModuleID] = {
     WellcomeDependencies.messagingTypesafeLibrary ++
+      WellcomeDependencies.httpLibrary ++
       WellcomeDependencies.typesafeLibrary ++
-      WellcomeDependencies.storageLibrary ++
+      WellcomeDependencies.storageTypesafeLibrary ++
       ExternalDependencies.mySqlDependencies ++
       ExternalDependencies.wireMockDependencies ++
-      WellcomeDependencies.httpLibrary ++
       ExternalDependencies.scalatestDependencies
   }
 }

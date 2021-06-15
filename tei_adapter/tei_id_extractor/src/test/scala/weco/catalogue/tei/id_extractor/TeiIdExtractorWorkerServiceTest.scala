@@ -254,13 +254,10 @@ class TeiIdExtractorWorkerServiceTest extends AnyFunSpec with Wiremock with SQS 
             val bucket = Bucket("bucket")
             val service = new TeiIdExtractorWorkerService(
               messageStream = stream,
-              tableProvisioner = new TableProvisioner(rdsClientConfig)(
-                database = config.database,
-                tableName = config.tableName
-              ),
+              tableProvisioner = new TableProvisioner(rdsClientConfig,config),
               gitHubBlobReader = gitHubBlobReader,
               pathIdManager = new PathIdManager(table, store, messageSender, bucket.name),
-              config = TeiIdExtractorConfig(concurrentFiles = 10, deleteMessageDelay = 500 milliseconds))
+              config = TeiIdExtractorConfig(parallelism = 10, deleteMessageDelay = 500 milliseconds))
             service.run()
             testWith((q, messageSender, store, bucket, repoUrl))
           }

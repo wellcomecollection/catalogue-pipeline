@@ -10,13 +10,8 @@ import weco.catalogue.tei.id_extractor.database.TableProvisioner
 import weco.catalogue.tei.id_extractor.models._
 import weco.flows.FlowOps
 
-import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 
-
-case class TeiIdExtractorConfig(concurrentFiles: Int,
-                                deleteMessageDelay: FiniteDuration,
-                                teiDirectories: Set[String] = Set("Arabic", "Batak", "Egyptian", "Greek", "Hebrew", "Indic", "Javanese", "Malay"))
 
 class TeiIdExtractorWorkerService[Dest](messageStream: SQSStream[NotificationMessage],
                                         gitHubBlobReader: GitHubBlobReader,
@@ -59,7 +54,7 @@ class TeiIdExtractorWorkerService[Dest](messageStream: SQSStream[NotificationMes
   def processDeleted = Flow[(Context, TeiPathMessage)]
     .collect{case (ctx, msg) if msg.isInstanceOf[TeiPathDeletedMessage] => (ctx, msg.asInstanceOf[TeiPathDeletedMessage])}
     .delay(config.deleteMessageDelay)
-    .mapAsync(config.concurrentFiles) { case (ctx, message) =>
+    .mapAsync(config.parallelism) { case (ctx, message) =>
       for {
         _ <- Future.fromTry(pathIdManager.handlePathDeleted(message.path, message.timeDeleted))
      } yield (ctx, Right(()))
@@ -67,7 +62,7 @@ class TeiIdExtractorWorkerService[Dest](messageStream: SQSStream[NotificationMes
 
   def processChange = Flow[(Context, TeiPathMessage)]
     .collect{case (ctx, msg) if msg.isInstanceOf[TeiPathChangedMessage] => (ctx, msg.asInstanceOf[TeiPathChangedMessage])}
-    .mapAsync(config.concurrentFiles) {
+    .mapAsync(config.parallelism) {
         case (ctx, message) => for{
           blobContent <- gitHubBlobReader.getBlob(message.uri)
           id <- Future.fromTry(IdExtractor.extractId(blobContent, message.uri))
