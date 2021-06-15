@@ -4,29 +4,22 @@ import org.flywaydb.core.Flyway
 
 import scala.collection.JavaConverters._
 
-class TableProvisioner(rdsClientConfig: RDSClientConfig)(database: String,
-                                                         tableName: String) {
+class TableProvisioner(rdsClientConfig: RDSClientConfig, pathIdConfig: PathIdTableConfig) {
 
   def provision(): Unit = {
     val flyway = new Flyway()
     flyway.setDataSource(
-      s"jdbc:mysql://${rdsClientConfig.primaryHost}:${rdsClientConfig.port}/$database",
+      s"jdbc:mysql://${rdsClientConfig.host}:${rdsClientConfig.port}/${pathIdConfig.database}",
       rdsClientConfig.username,
       rdsClientConfig.password
     )
     flyway.setPlaceholders(
-      Map("database" -> database, "tableName" -> tableName).asJava)
+      Map("database" -> pathIdConfig.database, "tableName" -> pathIdConfig.tableName).asJava)
     flyway.migrate()
   }
 
 }
-case class RDSClientConfig(
-  primaryHost: String,
-  replicaHost: String,
-  port: Int,
-  username: String,
-  password: String
-)
+
 case class PathIdTableConfig(
   database: String,
   tableName: String

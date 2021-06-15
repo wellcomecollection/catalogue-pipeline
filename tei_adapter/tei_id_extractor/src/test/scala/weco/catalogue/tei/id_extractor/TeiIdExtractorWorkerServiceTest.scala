@@ -319,41 +319,26 @@ class TeiIdExtractorWorkerServiceTest
                        R]): R =
     withWiremock("localhost") { port =>
       val repoUrl = s"http://localhost:$port"
-      withLocalSqsQueuePair(3) {
-        case q @ QueuePair(queue, dlq) =>
-          withActorSystem { implicit ac =>
-            implicit val ec = ac.dispatcher
-            withSQSStream(queue) { stream: SQSStream[NotificationMessage] =>
-              withPathIdTable {
-                case (config, table) =>
-                  val gitHubBlobReader = new GitHubBlobContentReader(
-                    new AkkaHttpClient(),
-                    "fake_token")
-                  val store = new MemoryStore[S3ObjectLocation, String](Map())
-                  val bucket = Bucket("bucket")
-                  val service = new TeiIdExtractorWorkerService(
-                    messageStream = stream,
-                    tableProvisioner = new TableProvisioner(rdsClientConfig)(
-                      database = config.database,
-                      tableName = config.tableName
-                    ),
-                    gitHubBlobReader = gitHubBlobReader,
-                    pathIdManager = new PathIdManager(
-                      table,
-                      store,
-                      messageSender,
-                      bucket.name),
-                    config = TeiIdExtractorConfig(
-                      concurrentFiles = 10,
-                      deleteMessageDelay = 500 milliseconds)
-                  )
-                  service.run()
-                  testWith((q, messageSender, store, bucket, repoUrl))
-              }
-            }
+    withLocalSqsQueuePair(3) { case q@QueuePair(queue, dlq) =>
+      withActorSystem { implicit ac =>
+        implicit val ec = ac.dispatcher
+        withSQSStream(queue) { stream: SQSStream[NotificationMessage] =>
+          withPathIdTable { case (config,table) =>
+
+            val gitHubBlobReader = new GitHubBlobContentReader(new AkkaHttpClient(), "fake_token")
+            val store = new MemoryStore[S3ObjectLocation, String](Map())
+            val bucket = Bucket("bucket")
+            val service = new TeiIdExtractorWorkerService(
+              messageStream = stream,
+              tableProvisioner = new TableProvisioner(rdsClientConfig,config),
+              gitHubBlobReader = gitHubBlobReader,
+              pathIdManager = new PathIdManager(table, store, messageSender, bucket.name),
+              config = TeiIdExtractorConfig(parallelism = 10, deleteMessageDelay = 500 milliseconds))
+            service.run()
+            testWith((q, messageSender, store, bucket, repoUrl))
           }
       }
-    }
+    }}}
 
   private def createFile(queue: SQS.Queue,
                          store: MemoryStore[S3ObjectLocation, String],
