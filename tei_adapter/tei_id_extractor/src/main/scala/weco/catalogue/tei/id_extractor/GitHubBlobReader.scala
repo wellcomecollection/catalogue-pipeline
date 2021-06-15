@@ -9,7 +9,7 @@ import uk.ac.wellcome.json.JsonUtil._
 
 import java.net.URI
 import scala.concurrent.Future
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 class GitHubBlobReader(implicit ac: ActorSystem) {
   implicit val ec = ac.dispatcher
@@ -17,7 +17,7 @@ class GitHubBlobReader(implicit ac: ActorSystem) {
     val request = HttpRequest(uri=Uri(uri.toString))
     for {
       response <- Http().singleRequest(request)
-      blob <- unmarshalAs[Blob](response)
+      blob <- unmarshalAs[Blob](response, uri)
       decoded <- Future.fromTry(decodeBase64(blob.content))
     } yield decoded
 
@@ -29,11 +29,15 @@ class GitHubBlobReader(implicit ac: ActorSystem) {
   new String(bytes, java.nio.charset.StandardCharsets.UTF_8)
 }
 
-  private def unmarshalAs[T](response: HttpResponse)(implicit um: Unmarshaller[ResponseEntity, T]): Future[T] = {
+  private def unmarshalAs[T](response: HttpResponse, uri: URI)(implicit um: Unmarshaller[ResponseEntity, T]): Future[T] = {
     response match {
       case HttpResponse(StatusCodes.OK, _, entity, _) =>
         Unmarshal(entity).to[T]
-      case HttpResponse(code, _, _, _) => throw new RuntimeException(s"The GitHub api returned an error: ${code.value}")
+      case HttpResponse(code, _, entity, _) =>
+        Unmarshal(entity).to[String].transform{
+          case Success(responseEntity) => Failure(new RuntimeException(s"The GitHub api returned an error: ${code.value} for url ${uri.toString}: $responseEntity"))
+          case _ => Failure(new RuntimeException(s"The GitHub api returned an error: ${code.value} for url ${uri.toString}"))
+        }
     }
   }
 }
