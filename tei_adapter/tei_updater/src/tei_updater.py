@@ -59,20 +59,28 @@ def diff_trees(old_tree, new_tree, time):
             get_path_from_diff(changed.up.path()) for changed in values_changed
         }
         messages += [
-            {"path": path, "uri": new_tree[path]["uri"], "timeModified": time.isoformat()} for path in paths_changed
+            {
+                "path": path,
+                "uri": new_tree[path]["uri"],
+                "timeModified": time.isoformat(),
+            }
+            for path in paths_changed
         ]
     if items_added:
         messages += [
             {
                 "path": get_path_from_diff(added.path()),
                 "uri": new_tree[get_path_from_diff(added.path())]["uri"],
-                "timeModified": time.isoformat()
+                "timeModified": time.isoformat(),
             }
             for added in items_added
         ]
     if items_removed:
         messages += [
-            {"path": get_path_from_diff(removed.path()), "timeDeleted": time.isoformat()}
+            {
+                "path": get_path_from_diff(removed.path()),
+                "timeDeleted": time.isoformat(),
+            }
             for removed in items_removed
         ]
     return messages
@@ -95,7 +103,8 @@ def main(event, _ctxt=None, s3_client=None, sns_client=None, session=None):
         messages = diff_trees(old_tree, new_tree, time)
     else:
         messages = [
-            {"path": path, "uri": entry["uri"], "timeModified": time.isoformat()} for path, entry in new_tree.items()
+            {"path": path, "uri": entry["uri"], "timeModified": time.isoformat()}
+            for path, entry in new_tree.items()
         ]
 
     for message in messages:
