@@ -18,7 +18,7 @@ object SierraNotes extends SierraDataTransformer with SierraQueryOps {
     "505" -> createNoteFromContents(ContentsNote),
     "506" -> createNoteFromContents(TermsOfUse),
     "508" -> createNoteFromContents(CreditsNote),
-    "510" -> createNoteFromContents(PublicationsNote),
+    "510" -> createNoteFromContents(ReferencesNote),
     "511" -> createNoteFromContents(CreditsNote),
     "514" -> createNoteFromContents(LetteringNote),
     "518" -> createNoteFromContents(TimeAndPlaceNote),

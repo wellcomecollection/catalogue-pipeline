@@ -25,7 +25,7 @@ class SierraNotesTest
       "505" -> ContentsNote("contents note"),
       "506" -> TermsOfUse("typical terms of use"),
       "508" -> CreditsNote("credits note a"),
-      "510" -> PublicationsNote("publications a"),
+      "510" -> ReferencesNote("references a"),
       "511" -> CreditsNote("credits note b"),
       "514" -> LetteringNote("Completeness:"),
       "518" -> TimeAndPlaceNote("time and place note"),

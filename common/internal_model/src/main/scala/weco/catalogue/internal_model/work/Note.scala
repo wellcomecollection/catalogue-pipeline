@@ -57,3 +57,5 @@ case class ArrangementNote(content: String) extends Note
 case class LetteringNote(content: String) extends Note
 
 case class LanguageNote(content: String) extends Note
+
+case class ReferencesNote(content: String) extends Note
