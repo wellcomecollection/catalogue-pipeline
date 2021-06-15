@@ -3,7 +3,10 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.work._
-import weco.catalogue.source_model.generators.{MarcGenerators, SierraDataGenerators}
+import weco.catalogue.source_model.generators.{
+  MarcGenerators,
+  SierraDataGenerators
+}
 import weco.catalogue.source_model.sierra.SierraBibData
 import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
 
@@ -125,21 +128,27 @@ class SierraNotesTest
           marcTag = Some("561"),
           indicator1 = Some("1"),
           subfields = List(
-            MarcSubfield(tag = "a", content = "Provenance: one plate in the set of plates"),
+            MarcSubfield(
+              tag = "a",
+              content = "Provenance: one plate in the set of plates"),
           )
         ),
         VarField(
           marcTag = Some("561"),
           indicator1 = Some("0"),
           subfields = List(
-            MarcSubfield(tag = "a", content = "Purchased from John Smith on 01/01/2001"),
+            MarcSubfield(
+              tag = "a",
+              content = "Purchased from John Smith on 01/01/2001"),
           )
         ),
         VarField(
           marcTag = Some("561"),
           indicator1 = None,
           subfields = List(
-            MarcSubfield(tag = "a", content = "Private contact details for John Smith"),
+            MarcSubfield(
+              tag = "a",
+              content = "Private contact details for John Smith"),
           )
         )
       )
