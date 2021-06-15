@@ -8,7 +8,7 @@ import weco.catalogue.source_model.generators.{
   SierraDataGenerators
 }
 import weco.catalogue.source_model.sierra.SierraBibData
-import weco.catalogue.source_model.sierra.marc.MarcSubfield
+import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
 
 class SierraNotesTest
     extends AnyFunSpec
@@ -25,7 +25,7 @@ class SierraNotesTest
       "505" -> ContentsNote("contents note"),
       "506" -> TermsOfUse("typical terms of use"),
       "508" -> CreditsNote("credits note a"),
-      "510" -> PublicationsNote("publications a"),
+      "510" -> ReferencesNote("references a"),
       "511" -> CreditsNote("credits note b"),
       "514" -> LetteringNote("Completeness:"),
       "518" -> TimeAndPlaceNote("time and place note"),
@@ -118,6 +118,43 @@ class SierraNotesTest
     SierraNotes(bibData) shouldBe List(
       LocationOfOriginalNote("The originals are in Oman"),
       LocationOfDuplicatesNote("The duplicates are in Denmark")
+    )
+  }
+
+  it("only gets an ownership note if 561 1st indicator is 1") {
+    val bibData = createSierraBibDataWith(
+      varFields = List(
+        VarField(
+          marcTag = Some("561"),
+          indicator1 = Some("1"),
+          subfields = List(
+            MarcSubfield(
+              tag = "a",
+              content = "Provenance: one plate in the set of plates"),
+          )
+        ),
+        VarField(
+          marcTag = Some("561"),
+          indicator1 = Some("0"),
+          subfields = List(
+            MarcSubfield(
+              tag = "a",
+              content = "Purchased from John Smith on 01/01/2001"),
+          )
+        ),
+        VarField(
+          marcTag = Some("561"),
+          indicator1 = None,
+          subfields = List(
+            MarcSubfield(
+              tag = "a",
+              content = "Private contact details for John Smith"),
+          )
+        )
+      )
+    )
+    SierraNotes(bibData) shouldBe List(
+      OwnershipNote("Provenance: one plate in the set of plates")
     )
   }
 
