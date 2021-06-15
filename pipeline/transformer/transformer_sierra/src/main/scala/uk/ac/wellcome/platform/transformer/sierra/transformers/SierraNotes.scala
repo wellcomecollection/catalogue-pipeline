@@ -44,6 +44,14 @@ object SierraNotes extends SierraDataTransformer with SierraQueryOps {
   def apply(bibData: SierraBibData): List[Note] =
     bibData.varFields
       .map {
+        // For the 561 "Ownership and Custodial History" field, we only want
+        // to expose the note when the 1st indicator is 1 ("public note").
+        // We don't want to expose the field otherwise.
+        //
+        // See https://www.loc.gov/marc/bibliographic/bd561.html
+        case vf @ VarField(_, Some("561"), _, Some("1"), _, _) =>
+          Some((vf, Some(createNoteFromContents(OwnershipNote))))
+
         case vf @ VarField(_, Some(marcTag), _, _, _, _) =>
           Some((vf, notesFields.get(marcTag)))
         case _ => None
