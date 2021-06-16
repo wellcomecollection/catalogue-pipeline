@@ -17,10 +17,12 @@ object Main extends WellcomeTypesafeApp {
 
     new TeiIdExtractorWorkerService(
       messageStream = SQSBuilder.buildSQSStream(config),
-      messageSender = SNSBuilder.buildSNSMessageSender(config, subject = "TEI id extractor"),
-      gitHubBlobReader = new GitHubBlobReader(config.requireString("tei.github.token")),
+      messageSender =
+        SNSBuilder.buildSNSMessageSender(config, subject = "TEI id extractor"),
+      gitHubBlobReader =
+        new GitHubBlobReader(config.requireString("tei.github.token")),
       store = S3TypedStore[String](???, ???),
-      config = TeiIdExtractorConfig(???,???)
+      config = TeiIdExtractorConfig(???, ???)
     )
   }
 }

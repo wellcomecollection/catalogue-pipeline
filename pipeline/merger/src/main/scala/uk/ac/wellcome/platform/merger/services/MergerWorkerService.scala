@@ -12,7 +12,12 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.matcher.MatcherResult
 import uk.ac.wellcome.messaging.sqs.SQSStream
-import uk.ac.wellcome.pipeline_storage.{Indexable, Indexer, PipelineStorageConfig, PipelineStorageStream}
+import uk.ac.wellcome.pipeline_storage.{
+  Indexable,
+  Indexer,
+  PipelineStorageConfig,
+  PipelineStorageStream
+}
 import uk.ac.wellcome.typesafe.Runnable
 import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.catalogue.internal_model.image.Image
@@ -29,7 +34,8 @@ class MergerWorkerService[WorkDestination, ImageDestination](
   imageMsgSender: MessageSender[ImageDestination],
   config: PipelineStorageConfig
 )(implicit val ec: ExecutionContext)
-    extends Runnable with FlowOps {
+    extends Runnable
+    with FlowOps {
 
   import PipelineStorageStream._
   import Indexable._

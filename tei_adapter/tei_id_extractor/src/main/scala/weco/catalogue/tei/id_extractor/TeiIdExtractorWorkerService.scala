@@ -15,22 +15,42 @@ import java.net.URI
 import java.time.ZonedDateTime
 import scala.concurrent.{ExecutionContext, Future}
 
-case class TeiFileChangedMessage(path: String, uri: URI, timeModified: ZonedDateTime)
-case class TeiIdChangeMessage(id: String, s3Location: S3ObjectLocation, timeModified: ZonedDateTime)
-case class TeiIdExtractorConfig(concurrentFiles: Int, bucket: String, teiDirectories: Set[String] = Set("Arabic", "Batak", "Egyptian", "Greek", "Hebrew", "Indic", "Javanese", "Malay"))
+case class TeiFileChangedMessage(path: String,
+                                 uri: URI,
+                                 timeModified: ZonedDateTime)
+case class TeiIdChangeMessage(id: String,
+                              s3Location: S3ObjectLocation,
+                              timeModified: ZonedDateTime)
+case class TeiIdExtractorConfig(concurrentFiles: Int,
+                                bucket: String,
+                                teiDirectories: Set[String] = Set(
+                                  "Arabic",
+                                  "Batak",
+                                  "Egyptian",
+                                  "Greek",
+                                  "Hebrew",
+                                  "Indic",
+                                  "Javanese",
+                                  "Malay"))
 
-class TeiIdExtractorWorkerService[Dest](messageStream: SQSStream[NotificationMessage],
-                                        gitHubBlobReader: GitHubBlobReader,
-                                        store: Writable[S3ObjectLocation, String],
-                                        messageSender: MessageSender[Dest], config: TeiIdExtractorConfig)(implicit val ec: ExecutionContext)
-    extends Runnable with FlowOps{
+class TeiIdExtractorWorkerService[Dest](
+  messageStream: SQSStream[NotificationMessage],
+  gitHubBlobReader: GitHubBlobReader,
+  store: Writable[S3ObjectLocation, String],
+  messageSender: MessageSender[Dest],
+  config: TeiIdExtractorConfig)(implicit val ec: ExecutionContext)
+    extends Runnable
+    with FlowOps {
   val className = this.getClass.getSimpleName
 
   override def run(): Future[Any] = {
-    messageStream.runStream(className,source =>
-      source.via(unwrapMessage)
-        .via(broadcastAndMerge(filterNonTei, processMessage))
-        .map { case (Context(msg), _) => msg })
+    messageStream.runStream(
+      className,
+      source =>
+        source
+          .via(unwrapMessage)
+          .via(broadcastAndMerge(filterNonTei, processMessage))
+          .map { case (Context(msg), _) => msg })
   }
 
   def unwrapMessage =
@@ -41,27 +61,40 @@ class TeiIdExtractorWorkerService[Dest](messageStream: SQSStream[NotificationMes
       }
       .via(catchErrors)
 
-  def filterNonTei = Flow[(Context, TeiFileChangedMessage)].filter{
+  def filterNonTei = Flow[(Context, TeiFileChangedMessage)].filter {
     case (_, TeiFileChangedMessage(path, _, _)) => !isTeiFile(path)
   }
 
   def processMessage =
-    Flow[(Context, TeiFileChangedMessage)].filter{
-      case (_, TeiFileChangedMessage(path, _, _)) => isTeiFile(path)
-    }
+    Flow[(Context, TeiFileChangedMessage)]
+      .filter {
+        case (_, TeiFileChangedMessage(path, _, _)) => isTeiFile(path)
+      }
       .mapAsync(config.concurrentFiles) {
-        case (ctx, message) => for{
-          blobContent <- gitHubBlobReader.getBlob(message.uri)
-          id <- Future.fromTry(IdExtractor.extractId(blobContent, message.uri))
-          stored <- Future.fromTry(store.put(S3ObjectLocation(config.bucket, s"tei_files/$id/${message.timeModified.toEpochSecond}.xml"))(blobContent).left.map(error => error.e).toTry)
-          _ <- Future.fromTry(messageSender.sendT(TeiIdChangeMessage(id, stored.id, message.timeModified)))
-        } yield(ctx, Right(()))
+        case (ctx, message) =>
+          for {
+            blobContent <- gitHubBlobReader.getBlob(message.uri)
+            id <- Future.fromTry(
+              IdExtractor.extractId(blobContent, message.uri))
+            stored <- Future.fromTry(
+              store
+                .put(S3ObjectLocation(
+                  config.bucket,
+                  s"tei_files/$id/${message.timeModified.toEpochSecond}.xml"))(
+                  blobContent)
+                .left
+                .map(error => error.e)
+                .toTry)
+            _ <- Future.fromTry(
+              messageSender.sendT(
+                TeiIdChangeMessage(id, stored.id, message.timeModified)))
+          } yield (ctx, Right(()))
       }
       .via(catchErrors)
 
-
   private def isTeiFile(path: String) = {
-    config.teiDirectories.exists(dir => path.startsWith(dir)) && path.endsWith(".xml")
+    config.teiDirectories.exists(dir => path.startsWith(dir)) && path.endsWith(
+      ".xml")
   }
 
   /** Encapsulates context to pass along each akka-stream stage. Newer versions
