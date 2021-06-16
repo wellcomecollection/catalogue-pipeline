@@ -253,6 +253,12 @@ lazy val tei_id_extractor = setupProject(
   localDependencies = Seq(flows),
   externalDependencies = CatalogueDependencies.teiIdExtractorDependencies
 )
+
+lazy val tei_adapter = setupProject(
+  project,
+  folder = "tei_adapter/tei_adapter",
+  externalDependencies = CatalogueDependencies.teiAdapterServiceDependencies
+)
 // AWS Credentials to read from S3
 
 s3CredentialsProvider := { _ =>
