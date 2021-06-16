@@ -27,7 +27,7 @@ object Main extends WellcomeTypesafeApp {
     val  store = S3TypedStore[String]
     new TeiIdExtractorWorkerService(
       messageStream = SQSBuilder.buildSQSStream(config),
-      gitHubBlobReader = new GitHubBlobReader(),
+      gitHubBlobReader = new GitHubBlobReader(config.requireString("tei.github.token")),
       tableProvisioner = new TableProvisioner(rdsConfig, tableConfig),
       pathIdManager = new PathIdManager[SNSConfig](table, store, messageSender, bucket = config.requireString("tei.id_extractor.bucket")),
       config = TeiIdExtractorConfigBuilder.buildTeiIdExtractorConfig(config)

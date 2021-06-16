@@ -249,7 +249,7 @@ class TeiIdExtractorWorkerServiceTest extends AnyFunSpec with Wiremock with SQS 
         withSQSStream(queue) { stream: SQSStream[NotificationMessage] =>
           withPathIdTable { case (config,table) =>
 
-            val gitHubBlobReader = new GitHubBlobReader()
+            val gitHubBlobReader = new GitHubBlobReader("fake_token")
             val store = new MemoryStore[S3ObjectLocation, String](Map())
             val bucket = Bucket("bucket")
             val service = new TeiIdExtractorWorkerService(

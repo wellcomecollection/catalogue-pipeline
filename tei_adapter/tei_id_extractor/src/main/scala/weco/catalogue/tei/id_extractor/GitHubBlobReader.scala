@@ -5,19 +5,22 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers._
 import akka.http.scaladsl.unmarshalling.{Unmarshal, Unmarshaller}
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import uk.ac.wellcome.json.JsonUtil._
 
 import java.net.URI
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
+import de.heikoseeberger.akkahttpcirce.ErrorAccumulatingCirceSupport._
 
-class GitHubBlobReader(implicit ac: ActorSystem) {
+class GitHubBlobReader(token: String)(implicit ac: ActorSystem) {
   implicit val ec = ac.dispatcher
   def getBlob(uri: URI): Future[String] = {
     val request = HttpRequest(uri = Uri(uri.toString), headers = List(
       Accept(MediaType.applicationWithFixedCharset("vnd.github.v3+json", HttpCharsets.`UTF-8`)),
-      `Cache-Control`(CacheDirectives.`no-cache`), Connection("keep-alive")))
+      `Cache-Control`(CacheDirectives.`no-cache`),
+      Connection("keep-alive"),
+      Authorization(OAuth2BearerToken(token))
+    ))
     for {
       response <- Http().singleRequest(request)
       blob <- unmarshalAs[Blob](response, request)
