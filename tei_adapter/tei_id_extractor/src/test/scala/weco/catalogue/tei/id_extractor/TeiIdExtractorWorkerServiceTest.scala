@@ -41,7 +41,7 @@ class TeiIdExtractorWorkerServiceTest extends AnyFunSpec with Wiremock with SQS 
             val bucket = "bucket"
             val expectedKey = s"tei_files/manuscript_15651/${ZonedDateTime.parse(modifiedTime).toEpochSecond}.xml"
             val messageSender = new MemoryMessageSender()
-              val gitHubBlobReader = new GitHubBlobReader()
+              val gitHubBlobReader = new GitHubBlobReader("fake_token")
               val store = new MemoryStore[S3ObjectLocation, String](Map())
             val service = new TeiIdExtractorWorkerService(messageStream = stream, messageSender = messageSender, gitHubBlobReader= gitHubBlobReader, store = store, config = TeiIdExtractorConfig(concurrentFiles = 10, bucket = bucket))
             service.run()
@@ -77,7 +77,7 @@ class TeiIdExtractorWorkerServiceTest extends AnyFunSpec with Wiremock with SQS 
           implicit val ec = ac.dispatcher
           withSQSStream(queue) { stream: SQSStream[NotificationMessage] =>
             val messageSender = new MemoryMessageSender()
-            val gitHubBlobReader = new GitHubBlobReader()
+            val gitHubBlobReader = new GitHubBlobReader("fake_token")
             val store = new MemoryStore[S3ObjectLocation, String](Map())
             val service = new TeiIdExtractorWorkerService(messageStream = stream, messageSender = messageSender, gitHubBlobReader= gitHubBlobReader, store = store, config = TeiIdExtractorConfig(concurrentFiles = 10, bucket = "bucket"))
             service.run()
