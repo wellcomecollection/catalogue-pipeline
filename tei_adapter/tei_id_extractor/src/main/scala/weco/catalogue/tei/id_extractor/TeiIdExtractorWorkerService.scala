@@ -21,7 +21,6 @@ case class TeiIdExtractorConfig(concurrentFiles: Int, bucket: String, teiDirecto
 
 class TeiIdExtractorWorkerService[Dest](messageStream: SQSStream[NotificationMessage],
                                         gitHubBlobReader: GitHubBlobReader,
-                                        idExtractor: IdExtractor,
                                         store: Writable[S3ObjectLocation, String],
                                         messageSender: MessageSender[Dest], config: TeiIdExtractorConfig)(implicit val ec: ExecutionContext)
     extends Runnable with FlowOps{
@@ -53,7 +52,7 @@ class TeiIdExtractorWorkerService[Dest](messageStream: SQSStream[NotificationMes
       .mapAsync(config.concurrentFiles) {
         case (ctx, message) => for{
           blobContent <- gitHubBlobReader.getBlob(message.uri)
-          id <- Future.fromTry(idExtractor.extractId(blobContent))
+          id <- Future.fromTry(IdExtractor.extractId(blobContent, message.uri))
           stored <- Future.fromTry(store.put(S3ObjectLocation(config.bucket, s"tei_files/$id/${message.timeModified.toEpochSecond}.xml"))(blobContent).left.map(error => error.e).toTry)
           _ <- Future.fromTry(messageSender.sendT(TeiIdChangeMessage(id, stored.id, message.timeModified)))
         } yield(ctx, Right(()))
