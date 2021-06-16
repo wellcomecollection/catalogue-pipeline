@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+import dateutil.parser as parser
 import json
 import os
 import requests
@@ -28,20 +29,21 @@ def get_new_tree(url, session=None):
     session = session or requests.Session()
     response = session.get(url)
     response.raise_for_status()
+    time = parser.parse(response.headers["date"])
     new_tree = {}
     response_tree = response.json()
     assert response_tree["truncated"] is False
     for entry in response_tree["tree"]:
         if entry["type"] == "blob":
-            new_tree[entry["path"]] = {"sha": entry["sha"], "url": entry["url"]}
-    return new_tree
+            new_tree[entry["path"]] = {"sha": entry["sha"], "uri": entry["url"]}
+    return new_tree, time
 
 
 def get_path_from_diff(deep_diff_path):
     return deep_diff_path.replace("root['", "").replace("']", "")
 
 
-def diff_trees(old_tree, new_tree):
+def diff_trees(old_tree, new_tree, time):
     diff = DeepDiff(old_tree, new_tree, view="tree")
     values_changed = diff.pop("values_changed", [])
     items_added = diff.pop("dictionary_item_added", [])
@@ -57,19 +59,28 @@ def diff_trees(old_tree, new_tree):
             get_path_from_diff(changed.up.path()) for changed in values_changed
         }
         messages += [
-            {"path": path, "url": new_tree[path]["url"]} for path in paths_changed
+            {
+                "path": path,
+                "uri": new_tree[path]["uri"],
+                "timeModified": time.isoformat(),
+            }
+            for path in paths_changed
         ]
     if items_added:
         messages += [
             {
                 "path": get_path_from_diff(added.path()),
-                "url": new_tree[get_path_from_diff(added.path())]["url"],
+                "uri": new_tree[get_path_from_diff(added.path())]["uri"],
+                "timeModified": time.isoformat(),
             }
             for added in items_added
         ]
     if items_removed:
         messages += [
-            {"path": get_path_from_diff(removed.path()), "deleted": True}
+            {
+                "path": get_path_from_diff(removed.path()),
+                "timeDeleted": time.isoformat(),
+            }
             for removed in items_removed
         ]
     return messages
@@ -86,13 +97,14 @@ def main(event, _ctxt=None, s3_client=None, sns_client=None, session=None):
     sns_client = sns_client or boto3.client("sns")
 
     old_tree = get_stored_tree(s3_client, bucket_name, key)
-    new_tree = get_new_tree(github_api_url, session)
+    new_tree, time = get_new_tree(github_api_url, session)
 
     if old_tree:
-        messages = diff_trees(old_tree, new_tree)
+        messages = diff_trees(old_tree, new_tree, time)
     else:
         messages = [
-            {"path": path, "url": entry["url"]} for path, entry in new_tree.items()
+            {"path": path, "uri": entry["uri"], "timeModified": time.isoformat()}
+            for path, entry in new_tree.items()
         ]
 
     for message in messages:

@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 
-
+import dateutil
 import json
 import mock
 import os
@@ -129,35 +129,50 @@ def test_truncated_tree_results_in_error(
 
 def test_elements_added_changed_deleted_are_returned():
     old_tree = {
-        "filea": {"sha": "ababababa", "url": "http://filea"},
-        "fileb": {"sha": "bfvnwhgvdf", "url": "http://fileb"},
-        "filec": {"sha": "bgfbhsg", "url": "http://filec"},
+        "filea": {"sha": "ababababa", "uri": "http://filea"},
+        "fileb": {"sha": "bfvnwhgvdf", "uri": "http://fileb"},
+        "filec": {"sha": "bgfbhsg", "uri": "http://filec"},
     }
     new_tree = {
-        "fileb": {"sha": "dgfhkjgew", "url": "http://filebb"},
-        "filec": {"sha": "bgfbhsg", "url": "http://filec"},
-        "filed": {"sha": "dkgef", "url": "http://filed"},
+        "fileb": {"sha": "dgfhkjgew", "uri": "http://filebb"},
+        "filec": {"sha": "bgfbhsg", "uri": "http://filec"},
+        "filed": {"sha": "dkgef", "uri": "http://filed"},
     }
-    diffs = diff_trees(old_tree, new_tree)
+    diffs = diff_trees(
+        old_tree, new_tree, dateutil.parser.parse("Fri, 11 Jun 2021 15:34:45 GMT")
+    )
     expected_diffs = [
-        {"path": "fileb", "url": "http://filebb"},  # fileb is modified
-        {"path": "filed", "url": "http://filed"},  # filed is added
-        {"path": "filea", "deleted": True},  # filea is deleted
+        {
+            "path": "fileb",
+            "uri": "http://filebb",
+            "timeModified": "2021-06-11T15:34:45+00:00",
+        },  # fileb is modified
+        {
+            "path": "filed",
+            "uri": "http://filed",
+            "timeModified": "2021-06-11T15:34:45+00:00",
+        },  # filed is added
+        {
+            "path": "filea",
+            "timeDeleted": "2021-06-11T15:34:45+00:00",
+        },  # filea is deleted
     ]
     assert diffs == expected_diffs
 
 
 def test_more_types_of_diff_is_error():
     old_tree = {
-        "filea": {"sha": "ababababa", "url": "http://filea"},
-        "fileb": {"sha": "bfvnwhgvdf", "url": "http://fileb"},
-        "filec": {"sha": "bgfbhsg", "url": "http://filec"},
+        "filea": {"sha": "ababababa", "uri": "http://filea"},
+        "fileb": {"sha": "bfvnwhgvdf", "uri": "http://fileb"},
+        "filec": {"sha": "bgfbhsg", "uri": "http://filec"},
     }
-    # filea.url has changes type so it will be returned under type_changed which we don't expect
+    # filea.uri has changes type so it will be returned under type_changed which we don't expect
     new_tree = {
-        "filea": {"sha": "ababababa", "url": 2},
-        "fileb": {"sha": "bfvnwhgvdf", "url": "http://fileb"},
-        "filec": {"sha": "bgfbhsg", "url": "http://filec"},
+        "filea": {"sha": "ababababa", "uri": 2},
+        "fileb": {"sha": "bfvnwhgvdf", "uri": "http://fileb"},
+        "filec": {"sha": "bgfbhsg", "uri": "http://filec"},
     }
     with pytest.raises(AssertionError):
-        diff_trees(old_tree, new_tree)
+        diff_trees(
+            old_tree, new_tree, dateutil.parser.parse("Fri, 11 Jun 2021 15:34:45 GMT")
+        )
