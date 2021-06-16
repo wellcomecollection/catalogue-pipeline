@@ -2,7 +2,7 @@ import sbt._
 
 object WellcomeDependencies {
 
-  val defaultVersion = "26.17.6"
+  val defaultVersion = "26.18.2"  // This is automatically bumped by the scala-libs release process, do not edit this line manually
 
   lazy val versions = new {
     val typesafe = defaultVersion
