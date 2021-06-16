@@ -4,7 +4,7 @@ import scalikejdbc._
 
 import java.time.Instant
 
-/** Represents a set of identifiers as stored in MySQL */
+/** Associates a filepath to its id and last modified time */
 case class PathId(
                        path: String,
                        id: String,
