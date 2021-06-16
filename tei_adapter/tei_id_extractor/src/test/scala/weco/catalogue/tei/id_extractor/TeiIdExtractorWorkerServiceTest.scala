@@ -17,6 +17,8 @@ import com.github.tomakehurst.wiremock.client.WireMock
 
 import java.nio.charset.StandardCharsets
 import java.time.ZonedDateTime
+import scala.xml.Utility.trim
+import scala.xml.XML
 
 class TeiIdExtractorWorkerServiceTest extends AnyFunSpec with Wiremock with SQS with Akka with Eventually with IntegrationPatience{
   it("receives a message, stores the file in s3 and send a message to the tei adapter with the file id"){
@@ -47,7 +49,7 @@ class TeiIdExtractorWorkerServiceTest extends AnyFunSpec with Wiremock with SQS 
             eventually{
               val expectedS3Location = S3ObjectLocation(bucket, expectedKey)
               store.entries.keySet should contain only(expectedS3Location)
-              store.entries(expectedS3Location) shouldBe IOUtils.resourceToString("/WMS_Arabic_1.xml", StandardCharsets.UTF_8)
+              trim(XML.loadString(store.entries(expectedS3Location))) shouldBe trim(XML.loadString(IOUtils.resourceToString("/WMS_Arabic_1.xml", StandardCharsets.UTF_8)))
 
               messageSender.getMessages[TeiIdChangeMessage]() should contain only(TeiIdChangeMessage(id="manuscript_15651", s3Location = expectedS3Location, ZonedDateTime.parse(modifiedTime)))
               assertQueueEmpty(queue)
@@ -92,13 +94,6 @@ class TeiIdExtractorWorkerServiceTest extends AnyFunSpec with Wiremock with SQS 
     }
   }
 
-  it("handles file deleted messages"){
-    fail()
-  }
-
-  it("handles a file being moved"){
-    fail()
-  }
 }
 
 
