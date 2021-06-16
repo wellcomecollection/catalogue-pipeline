@@ -16,7 +16,6 @@ class TableProvisionerTest
 
   it("creates the PathId table") {
     withPathIdDatabase { pathIdTableConfig =>
-
       new TableProvisioner(rdsClientConfig, pathIdTableConfig)
         .provision()
 

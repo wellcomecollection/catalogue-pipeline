@@ -5,7 +5,11 @@ import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.matchers.should.Matchers
 import scalikejdbc._
 import uk.ac.wellcome.fixtures.TestWith
-import weco.catalogue.tei.id_extractor.database.{PathIdTableConfig, RDSClientConfig, TableProvisioner}
+import weco.catalogue.tei.id_extractor.database.{
+  PathIdTableConfig,
+  RDSClientConfig,
+  TableProvisioner
+}
 import weco.catalogue.tei.id_extractor.{FieldDescription, PathIdTable}
 
 trait PathIdDatabase
@@ -65,8 +69,7 @@ trait PathIdDatabase
     maxConnections = 3
   )
 
-  def withPathIdDatabase[R](
-    testWith: TestWith[PathIdTableConfig, R]): R = {
+  def withPathIdDatabase[R](testWith: TestWith[PathIdTableConfig, R]): R = {
     ConnectionPool.add(
       'default,
       s"jdbc:mysql://$host:$port",
@@ -74,7 +77,6 @@ trait PathIdDatabase
       password,
       settings = ConnectionPoolSettings(maxSize = maxSize)
     )
-
 
     implicit val session = AutoSession
     val databaseName: String = createDatabaseName
@@ -101,22 +103,24 @@ trait PathIdDatabase
 
   }
 
-  def withPathIdTable[R](testWith: TestWith[(PathIdTableConfig,PathIdTable), R]): R = {
+  def withPathIdTable[R](
+    testWith: TestWith[(PathIdTableConfig, PathIdTable), R]): R = {
     withPathIdDatabase { config =>
       val table = new PathIdTable(config)
-      testWith((config,table))
+      testWith((config, table))
     }
-    }
+  }
 
   def withInitializedPathIdTable[R](testWith: TestWith[PathIdTable, R]): R = {
-    withPathIdTable { case (config,table) =>
-      val provisioner = new TableProvisioner(rdsClientConfig, config)
+    withPathIdTable {
+      case (config, table) =>
+        val provisioner = new TableProvisioner(rdsClientConfig, config)
 
         provisioner
           .provision()
         eventuallyTableExists(config)
 
-      testWith(table)
+        testWith(table)
     }
   }
 }

@@ -25,7 +25,8 @@ class PipelineStorageStream[In, Out, MsgDestination](
   indexer: Indexer[Out],
   messageSender: MessageSender[MsgDestination])(
   val config: PipelineStorageConfig)(implicit val ec: ExecutionContext)
-    extends Logging with FlowOps {
+    extends Logging
+    with FlowOps {
 
   import PipelineStorageStream._
 
@@ -195,7 +196,6 @@ object PipelineStorageStream extends Logging {
   def noOutputFlow[Out]: Flow[(Message, List[Out]), Message, NotUsed] =
     Flow[(Message, List[Out])]
       .collect { case (message, Nil) => message }
-
 
   private def unzipBundles[T](
     bundles: Seq[Bundle[T]]): (List[Message], List[T]) =

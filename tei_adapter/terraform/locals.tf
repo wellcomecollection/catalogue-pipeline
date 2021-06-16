@@ -9,7 +9,7 @@ locals {
   private_subnets          = local.catalogue_vpcs["catalogue_vpc_delta_private_subnets"]
   shared_logging_secrets   = data.terraform_remote_state.shared_infra.outputs.shared_secrets_logging
   elastic_cloud_vpce_sg_id = data.terraform_remote_state.shared_infra.outputs.ec_platform_privatelink_sg_id
-  admin_cidr_ingress = data.aws_ssm_parameter.admin_cidr_ingress.value
+  admin_cidr_ingress       = data.aws_ssm_parameter.admin_cidr_ingress.value
 }
 data "aws_ssm_parameter" "admin_cidr_ingress" {
   name = "/infra_critical/config/prod/admin_cidr_ingress"

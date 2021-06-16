@@ -15,19 +15,19 @@ module "tei_id_extractor" {
   image = local.tei_id_extractor_image
 
   env_vars = {
-    metrics_namespace         = "${local.namespace}_tei_id_extractor"
-    queue_url   = module.tei_id_extractor_queue.url
-    topic_arn = module.tei_id_extractor_topic.arn
-    bucket = aws_s3_bucket.tei_adapter.id
+    metrics_namespace = "${local.namespace}_tei_id_extractor"
+    queue_url         = module.tei_id_extractor_queue.url
+    topic_arn         = module.tei_id_extractor_topic.arn
+    bucket            = aws_s3_bucket.tei_adapter.id
 
     max_connections = 10
   }
 
   secret_env_vars = {
-    db_host          = "rds/tei-adapter-cluster-delta/endpoint"
-    db_port              = "rds/tei-adapter-cluster-delta/port"
-    db_username          = "catalogue/tei_id_extractor/rds_user"
-    db_password          = "catalogue/tei_id_extractor/rds_password"
+    db_host      = "rds/tei-adapter-cluster-delta/endpoint"
+    db_port      = "rds/tei-adapter-cluster-delta/port"
+    db_username  = "catalogue/tei_id_extractor/rds_user"
+    db_password  = "catalogue/tei_id_extractor/rds_password"
     github_token = "catalogue/tei_id_extractor/github_token"
   }
 
