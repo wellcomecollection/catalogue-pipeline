@@ -2,7 +2,14 @@
   "id" : "208fe047-56b7-3cca-ae0b-09f200a21d3b",
   "request" : {
     "url" : "/git/blobs/2e6b5fa45462510d5549b6bcf2bbc8b53ae08aed",
-    "method" : "GET"
+    "method" : "GET",
+    "headers" : {
+      "User-Agent" : { "equalTo": "akka-http/10.1.11"},
+      "Host": {"contains":  "localhost:"},
+      "Accept": {"equalTo":  "application/vnd.github.v3+json"},
+      "Cache-Control": {"equalTo":  "no-cache"},
+      "Connection": {"equalTo":  "keep-alive"}
+    }
   },
   "response" : {
     "status" : 200,
