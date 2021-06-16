@@ -15,6 +15,9 @@ sys.path.append(
 sys.path.append(
     os.path.join(os.path.dirname(__file__), "sierra_window_generator", "src")
 )
+sys.path.append(
+    os.path.join(os.path.dirname(__file__), "..", "common", "window_generator", "src")
+)
 
 from build_windows import generate_windows  # noqa
 from sierra_progress_reporter import build_report  # noqa
