@@ -1,16 +1,12 @@
 package weco.catalogue.tei.id_extractor.fixtures
 
 import org.scalatest.Assertion
-import org.scalatest.matchers.should.Matchers
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import uk.ac.wellcome.fixtures.TestWith
+import org.scalatest.matchers.should.Matchers
 import scalikejdbc._
-import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
-import uk.ac.wellcome.storage.s3.S3ObjectLocation
-import uk.ac.wellcome.storage.store.memory.MemoryStore
+import uk.ac.wellcome.fixtures.TestWith
 import weco.catalogue.tei.id_extractor.database.{PathIdTableConfig, RDSClientConfig, TableProvisioner}
-import weco.catalogue.tei.id_extractor.{FieldDescription, PathIdManager, PathIdTable}
+import weco.catalogue.tei.id_extractor.{FieldDescription, PathIdTable}
 
 trait PathIdDatabase
     extends Eventually
@@ -126,13 +122,4 @@ trait PathIdDatabase
       testWith(table)
     }
   }
-
-  def withPathIdManager[R](table: PathIdTable, bucket: Bucket)(testWith: TestWith[(PathIdManager[String], MemoryStore[S3ObjectLocation, String], MemoryMessageSender), R]) = {
-    val store = new MemoryStore[S3ObjectLocation, String](Map())
-    val messageSender: MemoryMessageSender = new MemoryMessageSender()
-    val manager = new PathIdManager(table, store, messageSender, bucket.name)
-    testWith((manager, store, messageSender))
-  }
-
-
 }
