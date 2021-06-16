@@ -18,9 +18,8 @@ object Main extends WellcomeTypesafeApp {
       messageStream = SQSBuilder.buildSQSStream(config),
       messageSender = SNSBuilder.buildSNSMessageSender(config, subject = "TEI id extractor"),
       gitHubBlobReader = new GitHubBlobReader(),
-      concurrentFiles = ???,
       store = S3TypedStore[String](???, ???),
-      bucket = ???
+      config = TeiIdExtractorConfig(???,???)
     )
   }
 }
