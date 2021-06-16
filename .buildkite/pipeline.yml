@@ -59,7 +59,7 @@ steps:
     label: "Calm deletion checker"
   - command: .buildkite/scripts/run_job.py inference_manager
     label: "inference manager"
-  - command: .buildkite/scripts/run_job.py tei_github
+  - command: .buildkite/scripts/run_job.py tei_id_extractor
     label: "Tei github"
   - command: .buildkite/scripts/run_job.py feature_inferrer --changes-in pipeline/inferrer/feature_inferrer
     label: "feature inferrer"

@@ -1,4 +1,4 @@
-module "tei_windows_queue" {
+module "tei_id_extractor_queue" {
   source                     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
   queue_name                 = "tei-windows"
   topic_arns                 = [module.tei_updater_lambda.topic_arn]
@@ -7,16 +7,16 @@ module "tei_windows_queue" {
   visibility_timeout_seconds = 10800
 }
 
-module "tei_github" {
+module "tei_id_extractor" {
   source = "../../infrastructure/modules/worker"
 
-  name = "tei_github"
+  name = "tei_id_extractor"
 
-  image = local.tei_github_image
+  image = local.tei_id_extractor_image
 
   env_vars = {
-    sqs_url   = module.tei_windows_queue.url
-    sns_topic = module.tei_adapter_output.arn
+    sqs_url   = module.tei_id_extractor_queue.url
+    sns_topic = module.tei_id_extractor_topic.arn
   }
   secret_env_vars = {
   }
@@ -38,18 +38,18 @@ module "tei_github" {
   ]
 
   deployment_service_env  = local.release_label
-  deployment_service_name = "tei-github"
+  deployment_service_name = "tei-id-extractor"
 
   use_fargate_spot = true
 }
 
 resource "aws_iam_role_policy" "read_from_adapter_queue" {
-  role   = module.tei_github.task_role_name
-  policy = module.tei_windows_queue.read_policy
+  role   = module.tei_id_extractor.task_role_name
+  policy = module.tei_id_extractor_queue.read_policy
 }
 
 resource "aws_iam_role_policy" "cloudwatch_push_metrics" {
-  role   = module.tei_github.task_role_name
+  role   = module.tei_id_extractor.task_role_name
   policy = data.aws_iam_policy_document.allow_cloudwatch_push_metrics.json
 }
 
@@ -67,13 +67,13 @@ data "aws_iam_policy_document" "allow_cloudwatch_push_metrics" {
 
 module "adapter_scaling_alarm" {
   source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.1.2"
-  queue_name = module.tei_windows_queue.name
+  queue_name = module.tei_id_extractor_queue.name
 
   queue_high_actions = [
-    module.tei_github.scale_up_arn
+    module.tei_id_extractor.scale_up_arn
   ]
 
   queue_low_actions = [
-    module.tei_github.scale_down_arn
+    module.tei_id_extractor.scale_down_arn
   ]
 }

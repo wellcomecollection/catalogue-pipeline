@@ -1,7 +1,7 @@
-resource "aws_ecr_repository" "ecr_repository_tei_github" {
-  name = "uk.ac.wellcome/tei_github"
+resource "aws_ecr_repository" "ecr_repository_tei_id_extractor" {
+  name = "uk.ac.wellcome/tei_id_extractor"
 }
 
 locals {
-  tei_github_image = "${aws_ecr_repository.ecr_repository_tei_github.repository_url}:env.${local.release_label}"
+  tei_id_extractor_image = "${aws_ecr_repository.ecr_repository_tei_id_extractor.repository_url}:env.${local.release_label}"
 }

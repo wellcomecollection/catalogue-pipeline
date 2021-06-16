@@ -1,4 +1,4 @@
-package weco.catalogue.tei.github
+package weco.catalogue.tei.id_extractor
 
 import akka.actor.ActorSystem
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
@@ -13,10 +13,10 @@ object Main extends WellcomeTypesafeApp {
     implicit val actorSystem: ActorSystem =
       AkkaBuilder.buildActorSystem()
 
-    GitHubWorkerService(
+    TeiIdExtractorWorkerService(
       messageStream = SQSBuilder.buildSQSStream(config),
       messageSender = SNSBuilder
-        .buildSNSMessageSender(config, subject = "TEI github service")
+        .buildSNSMessageSender(config, subject = "TEI id extractor")
     )
   }
 }
