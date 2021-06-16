@@ -256,7 +256,6 @@ class TeiIdExtractorWorkerServiceTest extends AnyFunSpec with Wiremock with SQS 
                 tableName = config.tableName
               ),
               gitHubBlobReader = gitHubBlobReader,
-              idExtractor = new IdExtractor,
               pathIdManager = new PathIdManager(table, store, messageSender, bucket.name),
               config = TeiIdExtractorConfig(concurrentFiles = 10))
             service.run()

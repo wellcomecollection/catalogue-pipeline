@@ -21,7 +21,6 @@ object Main extends WellcomeTypesafeApp {
       messageStream = SQSBuilder.buildSQSStream(config),
       gitHubBlobReader = new GitHubBlobReader(),
       tableProvisioner = new TableProvisioner(???)(???, ???),
-      idExtractor = new IdExtractor(),
       pathIdManager = new PathIdManager[SNSConfig](???, store, messageSender, bucket = ???),
       config = TeiIdExtractorConfig(concurrentFiles = ???)
     )
