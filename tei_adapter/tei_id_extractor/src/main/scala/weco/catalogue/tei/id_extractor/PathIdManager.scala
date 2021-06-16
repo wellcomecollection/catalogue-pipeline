@@ -17,7 +17,6 @@ class PathIdManager[Dest](pathIds: PathIdTable,
                     messageSender: MessageSender[Dest],
                           bucket: String) {
 
-
   def handlePathChanged(pathId: PathId, blobContent: String): Try[Unit] = {
     DB localTx { implicit session =>
           for {
@@ -43,7 +42,6 @@ class PathIdManager[Dest](pathIds: PathIdTable,
 
       }
     }
-
 
   def handlePathDeleted(path: String, timeDeleted: Instant): Try[Unit] = DB localTx { implicit session =>
         for {
@@ -102,9 +100,6 @@ class PathIdManager[Dest](pathIds: PathIdTable,
       } yield ()
     }
     else Success(())
-
-
-
   private def sendDeleted(pathId: PathId)= messageSender.sendT[TeiIdMessage](TeiIdDeletedMessage(pathId.id, pathId.timeModified))
 
   private def storeAndSendChange(pathId: PathId, blobContent: String) = for {
@@ -112,8 +107,10 @@ class PathIdManager[Dest](pathIds: PathIdTable,
     _ <- messageSender.sendT[TeiIdMessage](TeiIdChangeMessage(pathId.id, stored.id, pathId.timeModified))
   }yield ()
 
-  private def storeTei(pathId: PathId, blobContent: String) = store.put(S3ObjectLocation(bucket, s"tei_files/${pathId.id}/${pathId.timeModified.getEpochSecond}.xml"))(blobContent).left.map(error => error.e).toTry
-
+  private def storeTei(pathId: PathId, blobContent: String) = {
+    val location = S3ObjectLocation(bucket, s"tei_files/${pathId.id}/${pathId.timeModified.getEpochSecond}.xml")
+    store.put(location)(blobContent).left.map(error => new RuntimeException(s"Error putting $location: ", error.e)).toTry
+  }
 }
 
 object PathIdManager {
