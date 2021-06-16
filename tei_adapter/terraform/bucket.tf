@@ -1,6 +1,6 @@
 
 resource "aws_s3_bucket" "tei_adapter" {
-  bucket = "wellcomecollection-platform-${var.namespace}-tei-updater"
+  bucket = "wellcomecollection-platform-${local.namespace}"
 
   lifecycle {
     prevent_destroy = false
