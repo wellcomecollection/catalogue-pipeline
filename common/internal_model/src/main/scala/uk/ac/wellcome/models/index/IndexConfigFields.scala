@@ -3,6 +3,7 @@ package uk.ac.wellcome.models.index
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.fields.{KeywordField, TextField}
 import uk.ac.wellcome.models.index.WorksAnalysis._
+import weco.elasticsearch.ElasticFieldOps
 
 /** Mixin for common fields used within an IndexConfig in our internal models.
   */
