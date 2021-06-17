@@ -1,7 +1,7 @@
 package weco.catalogue.tei.id_extractor
 
 import java.net.URI
-import scala.util.Try
+import scala.util.{Failure, Try}
 import scala.xml.XML
 
 object IdExtractor {
@@ -16,6 +16,6 @@ object IdExtractor {
         }
         .getOrElse(throw new RuntimeException(
           s"Could not find an id in XML at $uri"))
-    }
+    }.recoverWith{case th => Failure(new RuntimeException(s"Error processing XL at $uri", th))}
 
 }

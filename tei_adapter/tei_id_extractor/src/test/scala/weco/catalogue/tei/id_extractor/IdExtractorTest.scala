@@ -40,4 +40,30 @@ class IdExtractorTest extends AnyFunSpec with Matchers {
     triedId.failed.get shouldBe a[RuntimeException]
     triedId.failed.get.getMessage should include(uri.toString)
   }
+  it("fails if tei xml has more than one xml:id property") {
+
+    val triedId = IdExtractor.extractId(
+      """<?xml version="1.0" encoding="UTF-8"?>
+    <?xml-model href="https://raw.githubusercontent.com/bodleian/consolidated-tei-schema/master/msdesc.rng" type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0"?>
+    <?xml-model href="https://raw.githubusercontent.com/bodleian/consolidated-tei-schema/master/msdesc.rng" type="application/xml" schematypens="http://purl.oclc.org/dsdl/schematron"?>
+    <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id="manuscript_12345" xml:id="manuscript_5678"></TEI>""",
+      uri
+    )
+    triedId shouldBe a[Failure[_]]
+    triedId.failed.get shouldBe a[RuntimeException]
+    triedId.failed.get.getMessage should include(uri.toString)
+  }
+  it("does not read the xml:id from anywhere else in the xml") {
+
+    val triedId = IdExtractor.extractId(
+      """<?xml version="1.0" encoding="UTF-8"?>
+    <?xml-model href="https://raw.githubusercontent.com/bodleian/consolidated-tei-schema/master/msdesc.rng" type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0"?>
+    <?xml-model href="https://raw.githubusercontent.com/bodleian/consolidated-tei-schema/master/msdesc.rng" type="application/xml" schematypens="http://purl.oclc.org/dsdl/schematron"?>
+    <TEI xmlns="http://www.tei-c.org/ns/1.0"><child xml:id="manuscript_12345"></child></TEI>""",
+      uri
+    )
+    triedId shouldBe a[Failure[_]]
+    triedId.failed.get shouldBe a[RuntimeException]
+    triedId.failed.get.getMessage should include(uri.toString)
+  }
 }
