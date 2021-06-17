@@ -21,7 +21,7 @@ inference_manager-test: feature_inferrer-build palette_inferrer-build aspect_rat
 inference_manager-integration-only: feature_inferrer-build palette_inferrer-build aspect_ratio_inferrer-build
 	$(ROOT)/docker_run.py --dind --sbt --root -- \
 		--net host \
-		wellcome/sbt_wrapper \
+		$(ECR_REGISTRY)/wellcome/sbt_wrapper \
 		"project inference_manager" ";dockerComposeUp;testOnly **.integration.*;dockerComposeStop"
 
 feature_inferrer-test:
