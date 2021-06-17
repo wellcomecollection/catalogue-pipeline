@@ -3,13 +3,14 @@ package weco.catalogue.tei.id_extractor
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers._
-import akka.http.scaladsl.unmarshalling.{Unmarshal, Unmarshaller}
-import uk.ac.wellcome.json.JsonUtil._
+import akka.http.scaladsl.unmarshalling.Unmarshal
 
 import java.net.URI
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 import de.heikoseeberger.akkahttpcirce.ErrorAccumulatingCirceSupport._
+import io.circe.Decoder
+import uk.ac.wellcome.json.JsonUtil._
 import weco.http.client.HttpClient
 
 class GitHubBlobReader(httpClient: HttpClient, token: String)(implicit ac: ActorSystem) {
@@ -42,7 +43,7 @@ class GitHubBlobReader(httpClient: HttpClient, token: String)(implicit ac: Actor
   }
 
   private def unmarshalAs[T](response: HttpResponse, request: HttpRequest)(
-    implicit um: Unmarshaller[ResponseEntity, T]): Future[T] = {
+    implicit decoder: Decoder[T]): Future[T] = {
     response match {
       case HttpResponse(StatusCodes.OK, _, entity, _) =>
         Unmarshal(entity).to[T].recoverWith {
