@@ -3,6 +3,7 @@ package weco.catalogue.source_model
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import weco.catalogue.source_model.mets.MetsSourceData
 import weco.catalogue.source_model.miro.{MiroSourceOverrides, MiroUpdateEvent}
+import weco.catalogue.source_model.tei.TeiMetadata
 
 sealed trait SourcePayload {
   val id: String
@@ -42,3 +43,5 @@ case class SierraSourcePayload(
   location: S3ObjectLocation,
   version: Int
 ) extends SourcePayload
+
+case class TeiSourcePayload(id: String, metadata: TeiMetadata, version: Int)extends SourcePayload

@@ -6,7 +6,7 @@ STACK_ROOT = tei_adapter
 PROJECT_ID = tei_adapter
 
 SBT_APPS = tei_id_extractor tei_adapter
-SBT_NO_DOCKER_APPS = tei_models
+SBT_NO_DOCKER_APPS =
 
 SBT_DOCKER_LIBRARIES =
 SBT_NO_DOCKER_LIBRARIES =

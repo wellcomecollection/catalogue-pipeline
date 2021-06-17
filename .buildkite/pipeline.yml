@@ -14,8 +14,6 @@ steps:
     label: "transformer common"
   - command: .buildkite/scripts/run_job.py calm_api_client
     label: "Calm API client"
-  - command: .buildkite/scripts/run_job.py tei_models
-    label: "TEI models"
   - command: .buildkite/scripts/run_lambda_job.py lambda
     label: "Lambdas"
   - wait

@@ -3,6 +3,6 @@
   "folder" : "tei_adapter/tei_id_extractor",
   "dependencyIds" : [
     "flows",
-    "tei_models"
+    "source_model"
   ]
 }

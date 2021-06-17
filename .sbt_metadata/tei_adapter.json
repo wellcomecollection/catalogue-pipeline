@@ -2,6 +2,6 @@
   "id" : "tei_adapter",
   "folder" : "tei_adapter/tei_adapter",
   "dependencyIds" : [
-    "tei_models"
+    "source_model"
   ]
 }
