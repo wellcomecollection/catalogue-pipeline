@@ -297,6 +297,10 @@ object CatalogueDependencies {
 
   // TEI adapter
 
+  val teiIdModelsDependencies: Seq[ModuleID] = {
+    WellcomeDependencies.storageLibrary ++
+      WellcomeDependencies.jsonLibrary
+  }
   val teiIdExtractorDependencies: Seq[ModuleID] = {
     WellcomeDependencies.messagingTypesafeLibrary ++
       WellcomeDependencies.httpLibrary ++
@@ -308,6 +312,7 @@ object CatalogueDependencies {
   }
   val teiAdapterServiceDependencies: Seq[ModuleID] = {
     WellcomeDependencies.messagingTypesafeLibrary ++
-      WellcomeDependencies.typesafeLibrary
+      WellcomeDependencies.typesafeLibrary ++
+      ExternalDependencies.scalatestDependencies
   }
 }

@@ -1,0 +1,6 @@
+{
+  "id" : "tei_models",
+  "folder" : "tei_adapter/tei_models",
+  "dependencyIds" : [
+  ]
+}

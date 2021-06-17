@@ -1,4 +1,4 @@
-package weco.catalogue.tei.id_extractor.models
+package weco.catalogue.tei.models
 
 import io.circe.Decoder
 import uk.ac.wellcome.json.JsonUtil._

@@ -13,6 +13,7 @@ import weco.catalogue.tei.id_extractor.database.PathIdTable
 import weco.catalogue.tei.id_extractor.fixtures.PathIdDatabase
 import weco.catalogue.tei.id_extractor.models.{
   PathId,
+import weco.catalogue.tei.models.{
   TeiIdChangeMessage,
   TeiIdDeletedMessage,
   TeiIdMessage

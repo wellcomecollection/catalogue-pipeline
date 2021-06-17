@@ -1,4 +1,4 @@
-package weco.catalogue.tei.id_extractor.models
+package weco.catalogue.tei.models
 
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 

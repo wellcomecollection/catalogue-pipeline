@@ -7,9 +7,13 @@ import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.Writable
 import weco.catalogue.tei.id_extractor.PathIdManager._
+<<<<<<< HEAD
 import weco.catalogue.tei.id_extractor.database.PathIdTable
 import weco.catalogue.tei.id_extractor.models.{
   PathId,
+=======
+import weco.catalogue.tei.models.{
+>>>>>>> 9ac6375d7 (Move message models into their own module)
   TeiIdChangeMessage,
   TeiIdDeletedMessage,
   TeiIdMessage
