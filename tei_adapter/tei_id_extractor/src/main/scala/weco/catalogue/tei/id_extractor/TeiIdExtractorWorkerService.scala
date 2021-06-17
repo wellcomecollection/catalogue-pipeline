@@ -34,11 +34,11 @@ case class TeiIdExtractorConfig(concurrentFiles: Int,
                                   "Malay"))
 
 class TeiIdExtractorWorkerService[Dest](
-  messageStream: SQSStream[NotificationMessage],
-  gitHubBlobReader: GitHubBlobReader,
-  store: Writable[S3ObjectLocation, String],
-  messageSender: MessageSender[Dest],
-  config: TeiIdExtractorConfig)(implicit val ec: ExecutionContext)
+                                         messageStream: SQSStream[NotificationMessage],
+                                         gitHubBlobReader: GitHubBlobContentReader,
+                                         store: Writable[S3ObjectLocation, String],
+                                         messageSender: MessageSender[Dest],
+                                         config: TeiIdExtractorConfig)(implicit val ec: ExecutionContext)
     extends Runnable
     with FlowOps {
   val className = this.getClass.getSimpleName

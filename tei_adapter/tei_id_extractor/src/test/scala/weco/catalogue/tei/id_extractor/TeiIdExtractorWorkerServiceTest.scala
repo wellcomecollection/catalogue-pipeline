@@ -51,7 +51,7 @@ class TeiIdExtractorWorkerServiceTest
               val expectedKey =
                 s"tei_files/manuscript_15651/${ZonedDateTime.parse(modifiedTime).toEpochSecond}.xml"
               val messageSender = new MemoryMessageSender()
-              val gitHubBlobReader = new GitHubBlobReader(new AkkaHttpClient(),"fake_token")
+              val gitHubBlobReader = new GitHubBlobContentReader(new AkkaHttpClient(),"fake_token")
               val store = new MemoryStore[S3ObjectLocation, String](Map())
               val service = new TeiIdExtractorWorkerService(
                 messageStream = stream,
@@ -104,7 +104,7 @@ class TeiIdExtractorWorkerServiceTest
             implicit val ec = ac.dispatcher
             withSQSStream(queue) { stream: SQSStream[NotificationMessage] =>
               val messageSender = new MemoryMessageSender()
-              val gitHubBlobReader = new GitHubBlobReader(new AkkaHttpClient(),"fake_token")
+              val gitHubBlobReader = new GitHubBlobContentReader(new AkkaHttpClient(),"fake_token")
               val store = new MemoryStore[S3ObjectLocation, String](Map())
               val service = new TeiIdExtractorWorkerService(
                 messageStream = stream,

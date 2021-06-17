@@ -21,7 +21,7 @@ object Main extends WellcomeTypesafeApp {
       messageSender =
         SNSBuilder.buildSNSMessageSender(config, subject = "TEI id extractor"),
       gitHubBlobReader =
-        new GitHubBlobReader(new AkkaHttpClient(),config.requireString("tei.github.token")),
+        new GitHubBlobContentReader(new AkkaHttpClient(),config.requireString("tei.github.token")),
       store = S3TypedStore[String](???, ???),
       config = TeiIdExtractorConfig(???, ???)
     )

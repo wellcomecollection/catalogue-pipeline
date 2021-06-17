@@ -13,7 +13,7 @@ import io.circe.Decoder
 import uk.ac.wellcome.json.JsonUtil._
 import weco.http.client.HttpClient
 
-class GitHubBlobReader(httpClient: HttpClient, token: String)(implicit ac: ActorSystem) {
+class GitHubBlobContentReader(httpClient: HttpClient, token: String)(implicit ac: ActorSystem) {
   implicit val ec = ac.dispatcher
   def getBlob(uri: URI): Future[String] = {
     val request = HttpRequest(
@@ -66,4 +66,5 @@ class GitHubBlobReader(httpClient: HttpClient, token: String)(implicit ac: Actor
   }
 }
 
+// Represents a Blob as returned by the GitHub API https://docs.github.com/en/rest/reference/git#blobs
 case class Blob(content: String, encoding: String)
