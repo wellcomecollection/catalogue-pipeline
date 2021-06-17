@@ -103,7 +103,7 @@ class AkkaHttpCalmApiClient(
   maxBackoff: FiniteDuration = 30 seconds,
   randomFactor: Double = 0.2,
   maxRestarts: Int = 10
-)(implicit actorSystem: ActorSystem, ec: ExecutionContext)
+)(implicit actorSystem: ActorSystem)
     extends HttpCalmApiClient(
       client = new AkkaHttpClient(),
       url,
