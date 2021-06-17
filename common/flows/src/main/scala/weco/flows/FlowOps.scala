@@ -54,6 +54,9 @@ trait FlowOps extends Logging {
       }
       .collect { case (ctx, Right(data)) => (ctx, data) }
 
+  /**
+    * Broadcasts the output of a flow to flows `a` and `b` and merges them again
+    */
   def broadcastAndMerge[I, O](a: Flow[I, O, NotUsed],
                               b: Flow[I, O, NotUsed]): Flow[I, O, NotUsed] =
     Flow.fromGraph(
