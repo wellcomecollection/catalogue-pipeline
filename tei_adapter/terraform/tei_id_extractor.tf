@@ -15,12 +15,12 @@ module "tei_id_extractor" {
   image = local.tei_id_extractor_image
 
   env_vars = {
-    metrics_namespace         = "${local.namespace}_tei_id_extractor"
-    queue_url   = module.tei_id_extractor_queue.url
-    topic_arn = module.tei_id_extractor_topic.arn
-    bucket = aws_s3_bucket.tei_adapter.id
-
-    max_connections = 10
+    metrics_namespace = "${local.namespace}_tei_id_extractor"
+    queue_url         = module.tei_id_extractor_queue.url
+    topic_arn         = module.tei_id_extractor_topic.arn
+    bucket            = aws_s3_bucket.tei_adapter.id
+    parallelism = 10
+    max_connections = local.tei_id_extractor_max_connections
   }
 
   secret_env_vars = {
@@ -33,8 +33,8 @@ module "tei_id_extractor" {
 
   // The total number of connections to RDS across all tasks from all ID minter
   // services must not exceed the maximum supported by the RDS instance.
-  min_capacity = 1
-  max_capacity = 2
+  min_capacity = local.min_capacity
+  max_capacity = min(floor(local.rds_max_connections / local.tei_id_extractor_max_connections), local.max_capacity)
 
   cpu    = 1024
   memory = 2048
