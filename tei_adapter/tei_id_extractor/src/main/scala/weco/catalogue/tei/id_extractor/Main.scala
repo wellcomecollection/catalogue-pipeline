@@ -20,8 +20,9 @@ object Main extends WellcomeTypesafeApp {
       messageStream = SQSBuilder.buildSQSStream(config),
       messageSender =
         SNSBuilder.buildSNSMessageSender(config, subject = "TEI id extractor"),
-      gitHubBlobReader =
-        new GitHubBlobContentReader(new AkkaHttpClient(),config.requireString("tei.github.token")),
+      gitHubBlobReader = new GitHubBlobContentReader(
+        new AkkaHttpClient(),
+        config.requireString("tei.github.token")),
       store = S3TypedStore[String](???, ???),
       config = TeiIdExtractorConfig(???, ???)
     )

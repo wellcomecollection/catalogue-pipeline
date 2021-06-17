@@ -16,23 +16,20 @@ import java.time.Instant
 import scala.concurrent.{ExecutionContext, Future}
 
 // Represents a path change coming from the tei_updater lambda
-case class TeiFileChangedMessage(path: String,
-                                 uri: URI,
-                                 timeModified: Instant)
+case class TeiFileChangedMessage(path: String, uri: URI, timeModified: Instant)
 
 // Represents a message for the tei_adapter with changes to id instead of file path
 case class TeiIdChangeMessage(id: String,
                               s3Location: S3ObjectLocation,
                               timeModified: Instant)
-case class TeiIdExtractorConfig(concurrentFiles: Int,
-                                bucket: String)
+case class TeiIdExtractorConfig(concurrentFiles: Int, bucket: String)
 
 class TeiIdExtractorWorkerService[Dest](
-                                         messageStream: SQSStream[NotificationMessage],
-                                         gitHubBlobReader: GitHubBlobContentReader,
-                                         store: Writable[S3ObjectLocation, String],
-                                         messageSender: MessageSender[Dest],
-                                         config: TeiIdExtractorConfig)(implicit val ec: ExecutionContext)
+  messageStream: SQSStream[NotificationMessage],
+  gitHubBlobReader: GitHubBlobContentReader,
+  store: Writable[S3ObjectLocation, String],
+  messageSender: MessageSender[Dest],
+  config: TeiIdExtractorConfig)(implicit val ec: ExecutionContext)
     extends Runnable
     with FlowOps {
   val className = this.getClass.getSimpleName
@@ -90,7 +87,8 @@ class TeiIdExtractorWorkerService[Dest](
   // directory that isn't "docs" or "Templates" and ends with .xml is a TEI file
   private def isTeiFile(path: String) = {
     val noTeiDirectories = Seq("docs", "Templates")
-    !noTeiDirectories.exists(dir => path.startsWith(dir)) && path.endsWith(".xml") && path.contains("/")
+    !noTeiDirectories.exists(dir => path.startsWith(dir)) && path.endsWith(
+      ".xml") && path.contains("/")
   }
 
   /** Encapsulates context to pass along each akka-stream stage. Newer versions
