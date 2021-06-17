@@ -70,7 +70,8 @@ class TeiIdExtractorWorkerService[Dest](
             location = S3ObjectLocation(
               bucket = config.bucket,
               key = s"tei_files/$id/${message.timeModified.getEpochSecond}.xml")
-            stored <- Future.fromTry(store.put(location)(blobContent).left.map(error => error.e).toTry)
+            stored <- Future.fromTry(
+              store.put(location)(blobContent).left.map(error => error.e).toTry)
             _ <- Future.fromTry(
               messageSender.sendT(
                 TeiIdChangeMessage(id, stored.id, message.timeModified)))
