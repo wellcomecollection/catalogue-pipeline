@@ -26,7 +26,7 @@ class TeiIdExtractorWorkerService[Dest](messageStream: SQSStream[NotificationMes
   val className = this.getClass.getSimpleName
 
   override def run()= for{
-    _ <- Future(tableProvisioner.provision)
+    _ <- Future(tableProvisioner.provision())
     _ <- runStream()
   } yield ()
 

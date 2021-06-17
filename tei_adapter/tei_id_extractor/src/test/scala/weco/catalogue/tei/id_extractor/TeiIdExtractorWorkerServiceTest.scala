@@ -34,7 +34,7 @@ class TeiIdExtractorWorkerServiceTest extends AnyFunSpec with Wiremock with SQS 
 
   it("receives a message, stores the file in s3 and send a message to the tei adapter with the file id"){
     withWorkerService(){ case (QueuePair(queue, dlq), messageSender, store, bucket, repoUrl) =>
-      val modifiedTime = "2021-05-27T14:05:00+00:00"
+      val modifiedTime = "2021-05-27T14:05:00Z"
       val message = {
         s"""
         {
