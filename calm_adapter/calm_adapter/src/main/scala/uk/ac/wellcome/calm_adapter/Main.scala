@@ -1,7 +1,6 @@
 package uk.ac.wellcome.calm_adapter
 
 import scala.concurrent.ExecutionContext
-import com.typesafe.config.Config
 import akka.actor.ActorSystem
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
@@ -20,20 +19,7 @@ object Main extends WellcomeTypesafeApp {
     implicit val actorSystem: ActorSystem =
       AkkaBuilder.buildActorSystem()
 
-    new CalmAdapterWorkerService(
-      SQSBuilder.buildSQSStream(config),
-      SNSBuilder.buildSNSMessageSender(config, subject = "CALM adapter"),
-      calmRetriever(config),
-      calmStore = new CalmStore(
-        SourceVHSBuilder.build[CalmRecord](config)
-      ),
-    )
-  }
-
-  def calmRetriever(config: Config)(implicit
-                                    actorSystem: ActorSystem,
-                                    ec: ExecutionContext) =
-    new ApiCalmRetriever(
+    val calmRetriever = new ApiCalmRetriever(
       apiClient = new AkkaHttpCalmApiClient(
         url = config.requireString("calm.api.url"),
         username = config.requireString("calm.api.username"),
@@ -44,4 +30,14 @@ object Main extends WellcomeTypesafeApp {
         .split(",")
         .toSet
     )
+
+    new CalmAdapterWorkerService(
+      SQSBuilder.buildSQSStream(config),
+      SNSBuilder.buildSNSMessageSender(config, subject = "CALM adapter"),
+      calmRetriever = calmRetriever,
+      calmStore = new CalmStore(
+        SourceVHSBuilder.build[CalmRecord](config)
+      ),
+    )
+  }
 }
