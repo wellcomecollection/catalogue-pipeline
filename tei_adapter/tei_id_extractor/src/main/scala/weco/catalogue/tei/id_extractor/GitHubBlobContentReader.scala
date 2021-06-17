@@ -60,8 +60,7 @@ class GitHubBlobContentReader(httpClient: HttpClient, token: String)(
               s"The GitHub api returned an error: ${code.value} for url ${request.uri} with headers ${response.headers}: $responseEntity"))
           case _ =>
             Failure(new RuntimeException(
-              s"The GitHub api returned an error: ${code.value} for url ${request.uri.toString} with headers ${response.headers
-                .toString()}: ${entity.toString}"))
+              s"The GitHub api returned an error: ${code.value} for url ${request.uri} with headers ${response.headers}: $entity (couldn't decode entity as string)"))
         }
     }
   }
