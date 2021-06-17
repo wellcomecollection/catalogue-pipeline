@@ -13,28 +13,33 @@ import weco.flows.FlowOps
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 
-
 case class TeiIdExtractorConfig(concurrentFiles: Int,
                                 deleteMessageDelay: FiniteDuration)
-class TeiIdExtractorWorkerService[Dest](messageStream: SQSStream[NotificationMessage],
-                                        gitHubBlobReader: GitHubBlobContentReader,
-                                        tableProvisioner: TableProvisioner,
-                                        pathIdManager: PathIdManager[Dest],
-                                        config: TeiIdExtractorConfig,
-                                       )(implicit val ec: ExecutionContext)
-    extends Runnable with FlowOps{
+class TeiIdExtractorWorkerService[Dest](
+  messageStream: SQSStream[NotificationMessage],
+  gitHubBlobReader: GitHubBlobContentReader,
+  tableProvisioner: TableProvisioner,
+  pathIdManager: PathIdManager[Dest],
+  config: TeiIdExtractorConfig,
+)(implicit val ec: ExecutionContext)
+    extends Runnable
+    with FlowOps {
   val className = this.getClass.getSimpleName
 
-  override def run()= for{
-    _ <- Future(tableProvisioner.provision())
-    _ <- runStream()
-  } yield ()
+  override def run() =
+    for {
+      _ <- Future(tableProvisioner.provision())
+      _ <- runStream()
+    } yield ()
 
   private def runStream(): Future[Any] = {
-    messageStream.runStream(className,source =>
-      source.via(unwrapMessage)
-        .via(broadcastAndMerge(filterNonTei, processMessage))
-        .map { case (Context(msg), _) => msg })
+    messageStream.runStream(
+      className,
+      source =>
+        source
+          .via(unwrapMessage)
+          .via(broadcastAndMerge(filterNonTei, processMessage))
+          .map { case (Context(msg), _) => msg })
   }
 
   def unwrapMessage =
@@ -45,32 +50,51 @@ class TeiIdExtractorWorkerService[Dest](messageStream: SQSStream[NotificationMes
       }
       .via(catchErrors)
 
-  def filterNonTei = Flow[(Context, TeiPathMessage)].filter{
+  def filterNonTei = Flow[(Context, TeiPathMessage)].filter {
     case (_, teiPathMessage) => !isTeiFile(teiPathMessage.path)
   }
 
   def processMessage =
-    Flow[(Context, TeiPathMessage)].filter{
-      case (_, teiPathMessage) => isTeiFile(teiPathMessage.path)
-    }.via(broadcastAndMerge(processDeleted, processChange))
+    Flow[(Context, TeiPathMessage)]
+      .filter {
+        case (_, teiPathMessage) => isTeiFile(teiPathMessage.path)
+      }
+      .via(broadcastAndMerge(processDeleted, processChange))
 
-  def processDeleted = Flow[(Context, TeiPathMessage)]
-    .collect{case (ctx, msg) if msg.isInstanceOf[TeiPathDeletedMessage] => (ctx, msg.asInstanceOf[TeiPathDeletedMessage])}
-    .delay(config.deleteMessageDelay)
-    .mapAsync(config.concurrentFiles) { case (ctx, message) =>
-      for {
-        _ <- Future.fromTry(pathIdManager.handlePathDeleted(message.path, message.timeDeleted))
-     } yield (ctx, Right(()))
-    }.via(catchErrors)
+  def processDeleted =
+    Flow[(Context, TeiPathMessage)]
+      .collect {
+        case (ctx, msg) if msg.isInstanceOf[TeiPathDeletedMessage] =>
+          (ctx, msg.asInstanceOf[TeiPathDeletedMessage])
+      }
+      .delay(config.deleteMessageDelay)
+      .mapAsync(config.concurrentFiles) {
+        case (ctx, message) =>
+          for {
+            _ <- Future.fromTry(
+              pathIdManager
+                .handlePathDeleted(message.path, message.timeDeleted))
+          } yield (ctx, Right(()))
+      }
+      .via(catchErrors)
 
-  def processChange = Flow[(Context, TeiPathMessage)]
-    .collect{case (ctx, msg) if msg.isInstanceOf[TeiPathChangedMessage] => (ctx, msg.asInstanceOf[TeiPathChangedMessage])}
-    .mapAsync(config.concurrentFiles) {
-        case (ctx, message) => for{
-          blobContent <- gitHubBlobReader.getBlob(message.uri)
-          id <- Future.fromTry(IdExtractor.extractId(blobContent, message.uri))
-          _ <- Future.fromTry(pathIdManager.handlePathChanged(PathId(message.path,id, message.timeModified), blobContent))
-        } yield(ctx, Right(()))
+  def processChange =
+    Flow[(Context, TeiPathMessage)]
+      .collect {
+        case (ctx, msg) if msg.isInstanceOf[TeiPathChangedMessage] =>
+          (ctx, msg.asInstanceOf[TeiPathChangedMessage])
+      }
+      .mapAsync(config.concurrentFiles) {
+        case (ctx, message) =>
+          for {
+            blobContent <- gitHubBlobReader.getBlob(message.uri)
+            id <- Future.fromTry(
+              IdExtractor.extractId(blobContent, message.uri))
+            _ <- Future.fromTry(
+              pathIdManager.handlePathChanged(
+                PathId(message.path, id, message.timeModified),
+                blobContent))
+          } yield (ctx, Right(()))
       }
       .via(catchErrors)
 

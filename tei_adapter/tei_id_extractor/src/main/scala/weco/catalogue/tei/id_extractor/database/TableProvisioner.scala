@@ -4,7 +4,8 @@ import org.flywaydb.core.Flyway
 
 import scala.collection.JavaConverters._
 
-class TableProvisioner(rdsClientConfig: RDSClientConfig)(database: String, tableName: String) {
+class TableProvisioner(rdsClientConfig: RDSClientConfig)(database: String,
+                                                         tableName: String) {
 
   def provision(): Unit = {
     val flyway = new Flyway()
@@ -20,13 +21,13 @@ class TableProvisioner(rdsClientConfig: RDSClientConfig)(database: String, table
 
 }
 case class RDSClientConfig(
-                            primaryHost: String,
-                            replicaHost: String,
-                            port: Int,
-                            username: String,
-                            password: String
-                          )
+  primaryHost: String,
+  replicaHost: String,
+  port: Int,
+  username: String,
+  password: String
+)
 case class PathIdTableConfig(
-                                   database: String,
-                                   tableName: String
-                                 )
+  database: String,
+  tableName: String
+)

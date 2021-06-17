@@ -6,9 +6,9 @@ import java.time.Instant
 
 /** Associates a filepath to its id and last modified time */
 case class PathId(
-                       path: String,
-                       id: String,
-                       timeModified: Instant
+  path: String,
+  id: String,
+  timeModified: Instant
 )
 
 object PathId {

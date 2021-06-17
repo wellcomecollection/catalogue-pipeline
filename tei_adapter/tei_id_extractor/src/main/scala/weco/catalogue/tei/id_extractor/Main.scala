@@ -17,14 +17,17 @@ object Main extends WellcomeTypesafeApp {
     implicit val ec: ExecutionContext = AkkaBuilder.buildExecutionContext()
     implicit val actorSystem: ActorSystem =
       AkkaBuilder.buildActorSystem()
- val messageSender = SNSBuilder.buildSNSMessageSender(config, subject = "TEI id extractor")
-    val  store = S3TypedStore[String](???, ???)
+    val messageSender =
+      SNSBuilder.buildSNSMessageSender(config, subject = "TEI id extractor")
+    val store = S3TypedStore[String](???, ???)
     new TeiIdExtractorWorkerService(
       messageStream = SQSBuilder.buildSQSStream(config),
       gitHubBlobReader = new GitHubBlobContentReader(
-        new AkkaHttpClient(),config.requireString("tei.github.token")),
+        new AkkaHttpClient(),
+        config.requireString("tei.github.token")),
       tableProvisioner = new TableProvisioner(???)(???, ???),
-      pathIdManager = new PathIdManager[SNSConfig](???, store, messageSender, bucket = ???),
+      pathIdManager =
+        new PathIdManager[SNSConfig](???, store, messageSender, bucket = ???),
       config = TeiIdExtractorConfig(concurrentFiles = ???, ???)
     )
   }
