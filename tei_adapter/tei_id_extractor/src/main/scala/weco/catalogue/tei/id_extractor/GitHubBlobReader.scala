@@ -48,16 +48,14 @@ class GitHubBlobReader(httpClient: HttpClient, token: String)(implicit ac: Actor
         Unmarshal(entity).to[T].recoverWith {
           case t: Throwable =>
             Future.failed(new RuntimeException(
-              s"Failed to marshal Github api response for url ${request.uri.toString} with headers ${response.headers
-                .toString()}: ${entity.toString}",
+              s"Failed to unmarshal GitHub api response for url ${request.uri} with headers ${response.headers}: $entity",
               t))
         }
       case HttpResponse(code, _, entity, _) =>
         Unmarshal(entity).to[String].transform {
           case Success(responseEntity) =>
             Failure(new RuntimeException(
-              s"The GitHub api returned an error: ${code.value} for url ${request.uri.toString} with headers ${response.headers
-                .toString()}: $responseEntity"))
+              s"The GitHub api returned an error: ${code.value} for url ${request.uri} with headers ${response.headers}: $responseEntity"))
           case _ =>
             Failure(new RuntimeException(
               s"The GitHub api returned an error: ${code.value} for url ${request.uri.toString} with headers ${response.headers
