@@ -14,6 +14,7 @@ import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.memory.MemoryStore
 import weco.catalogue.tei.id_extractor.fixtures.Wiremock
 import com.github.tomakehurst.wiremock.client.WireMock
+import weco.http.client.AkkaHttpClient
 
 import java.nio.charset.StandardCharsets
 import java.time.ZonedDateTime
@@ -50,7 +51,7 @@ class TeiIdExtractorWorkerServiceTest
               val expectedKey =
                 s"tei_files/manuscript_15651/${ZonedDateTime.parse(modifiedTime).toEpochSecond}.xml"
               val messageSender = new MemoryMessageSender()
-              val gitHubBlobReader = new GitHubBlobReader("fake_token")
+              val gitHubBlobReader = new GitHubBlobReader(new AkkaHttpClient(),"fake_token")
               val store = new MemoryStore[S3ObjectLocation, String](Map())
               val service = new TeiIdExtractorWorkerService(
                 messageStream = stream,
@@ -103,7 +104,7 @@ class TeiIdExtractorWorkerServiceTest
             implicit val ec = ac.dispatcher
             withSQSStream(queue) { stream: SQSStream[NotificationMessage] =>
               val messageSender = new MemoryMessageSender()
-              val gitHubBlobReader = new GitHubBlobReader("fake_token")
+              val gitHubBlobReader = new GitHubBlobReader(new AkkaHttpClient(),"fake_token")
               val store = new MemoryStore[S3ObjectLocation, String](Map())
               val service = new TeiIdExtractorWorkerService(
                 messageStream = stream,

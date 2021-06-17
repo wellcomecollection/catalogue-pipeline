@@ -1,7 +1,6 @@
 package weco.catalogue.tei.id_extractor
 
 import akka.actor.ActorSystem
-import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers._
 import akka.http.scaladsl.unmarshalling.{Unmarshal, Unmarshaller}
@@ -11,8 +10,9 @@ import java.net.URI
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 import de.heikoseeberger.akkahttpcirce.ErrorAccumulatingCirceSupport._
+import weco.http.client.HttpClient
 
-class GitHubBlobReader(token: String)(implicit ac: ActorSystem) {
+class GitHubBlobReader(httpClient: HttpClient, token: String)(implicit ac: ActorSystem) {
   implicit val ec = ac.dispatcher
   def getBlob(uri: URI): Future[String] = {
     val request = HttpRequest(
@@ -28,7 +28,7 @@ class GitHubBlobReader(token: String)(implicit ac: ActorSystem) {
       )
     )
     for {
-      response <- Http().singleRequest(request)
+      response <- httpClient.singleRequest(request)
       blob <- unmarshalAs[Blob](response, request)
       decoded <- Future.fromTry(decodeBase64(blob.content))
     } yield decoded

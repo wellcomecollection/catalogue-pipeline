@@ -6,6 +6,7 @@ import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig.RichConfig
+import weco.http.client.AkkaHttpClient
 
 import scala.concurrent.ExecutionContext
 
@@ -20,7 +21,7 @@ object Main extends WellcomeTypesafeApp {
       messageSender =
         SNSBuilder.buildSNSMessageSender(config, subject = "TEI id extractor"),
       gitHubBlobReader =
-        new GitHubBlobReader(config.requireString("tei.github.token")),
+        new GitHubBlobReader(new AkkaHttpClient(),config.requireString("tei.github.token")),
       store = S3TypedStore[String](???, ???),
       config = TeiIdExtractorConfig(???, ???)
     )
