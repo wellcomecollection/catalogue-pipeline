@@ -25,16 +25,7 @@ case class TeiIdChangeMessage(id: String,
                               s3Location: S3ObjectLocation,
                               timeModified: Instant)
 case class TeiIdExtractorConfig(concurrentFiles: Int,
-                                bucket: String,
-                                teiDirectories: Set[String] = Set(
-                                  "Arabic",
-                                  "Batak",
-                                  "Egyptian",
-                                  "Greek",
-                                  "Hebrew",
-                                  "Indic",
-                                  "Javanese",
-                                  "Malay"))
+                                bucket: String)
 
 class TeiIdExtractorWorkerService[Dest](
                                          messageStream: SQSStream[NotificationMessage],
@@ -95,9 +86,11 @@ class TeiIdExtractorWorkerService[Dest](
       }
       .via(catchErrors)
 
+  // Files in https://github.com/wellcomecollection/wellcome-collection-tei in any
+  // directory that isn't "docs" or "Templates" and ends with .xml is a TEI file
   private def isTeiFile(path: String) = {
-    config.teiDirectories.exists(dir => path.startsWith(dir)) && path.endsWith(
-      ".xml")
+    val noTeiDirectories = Seq("docs", "Templates")
+    !noTeiDirectories.exists(dir => path.startsWith(dir)) && path.endsWith(".xml") && path.contains("/")
   }
 
   /** Encapsulates context to pass along each akka-stream stage. Newer versions
