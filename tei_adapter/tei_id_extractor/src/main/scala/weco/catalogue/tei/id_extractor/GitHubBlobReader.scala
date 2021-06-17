@@ -18,12 +18,11 @@ class GitHubBlobReader(httpClient: HttpClient, token: String)(implicit ac: Actor
     val request = HttpRequest(
       uri = Uri(uri.toString),
       headers = List(
+        // Send the version of GitHub API we expect as per https://docs.github.com/en/rest/overview/media-types
         Accept(
           MediaType.applicationWithFixedCharset(
             "vnd.github.v3+json",
             HttpCharsets.`UTF-8`)),
-        `Cache-Control`(CacheDirectives.`no-cache`),
-        Connection("keep-alive"),
         Authorization(OAuth2BearerToken(token))
       )
     )

@@ -7,8 +7,6 @@
       "User-Agent" : { "equalTo": "akka-http/10.1.11"},
       "Host": {"contains":  "localhost:"},
       "Accept": {"equalTo":  "application/vnd.github.v3+json"},
-      "Cache-Control": {"equalTo":  "no-cache"},
-      "Connection": {"equalTo":  "keep-alive"},
       "Authorization": {"equalTo":  "Bearer fake_token"}
     }
   },
