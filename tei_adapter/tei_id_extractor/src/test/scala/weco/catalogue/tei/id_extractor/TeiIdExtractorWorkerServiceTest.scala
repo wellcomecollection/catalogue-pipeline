@@ -17,7 +17,7 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import weco.http.client.AkkaHttpClient
 
 import java.nio.charset.StandardCharsets
-import java.time.ZonedDateTime
+import java.time.Instant
 import scala.xml.Utility.trim
 import scala.xml.XML
 
@@ -49,7 +49,7 @@ class TeiIdExtractorWorkerServiceTest
             withSQSStream(queue) { stream: SQSStream[NotificationMessage] =>
               val bucket = "bucket"
               val expectedKey =
-                s"tei_files/manuscript_15651/${ZonedDateTime.parse(modifiedTime).toEpochSecond}.xml"
+                s"tei_files/manuscript_15651/${Instant.parse(modifiedTime).getEpochSecond}.xml"
               val messageSender = new MemoryMessageSender()
               val gitHubBlobReader = new GitHubBlobContentReader(new AkkaHttpClient(),"fake_token")
               val store = new MemoryStore[S3ObjectLocation, String](Map())
@@ -75,7 +75,7 @@ class TeiIdExtractorWorkerServiceTest
                   .getMessages[TeiIdChangeMessage]() should contain only (TeiIdChangeMessage(
                   id = "manuscript_15651",
                   s3Location = expectedS3Location,
-                  ZonedDateTime.parse(modifiedTime)))
+                  Instant.parse(modifiedTime)))
                 assertQueueEmpty(queue)
                 assertQueueEmpty(dlq)
               }

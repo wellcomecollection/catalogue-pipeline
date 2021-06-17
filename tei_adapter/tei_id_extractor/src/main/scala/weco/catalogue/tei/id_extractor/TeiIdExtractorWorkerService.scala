@@ -12,15 +12,18 @@ import uk.ac.wellcome.typesafe.Runnable
 import weco.flows.FlowOps
 
 import java.net.URI
-import java.time.ZonedDateTime
+import java.time.Instant
 import scala.concurrent.{ExecutionContext, Future}
 
+// Represents a path change coming from the tei_updater lambda
 case class TeiFileChangedMessage(path: String,
                                  uri: URI,
-                                 timeModified: ZonedDateTime)
+                                 timeModified: Instant)
+
+// Represents a message for the tei_adapter with changes to id instead of file path
 case class TeiIdChangeMessage(id: String,
                               s3Location: S3ObjectLocation,
-                              timeModified: ZonedDateTime)
+                              timeModified: Instant)
 case class TeiIdExtractorConfig(concurrentFiles: Int,
                                 bucket: String,
                                 teiDirectories: Set[String] = Set(
@@ -80,7 +83,7 @@ class TeiIdExtractorWorkerService[Dest](
               store
                 .put(S3ObjectLocation(
                   config.bucket,
-                  s"tei_files/$id/${message.timeModified.toEpochSecond}.xml"))(
+                  s"tei_files/$id/${message.timeModified.getEpochSecond}.xml"))(
                   blobContent)
                 .left
                 .map(error => error.e)
