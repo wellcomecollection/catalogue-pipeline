@@ -67,15 +67,14 @@ class TeiIdExtractorWorkerService[Dest](
             blobContent <- gitHubBlobReader.getBlob(message.uri)
             id <- Future.fromTry(
               IdExtractor.extractId(blobContent, message.uri))
-            stored <- Future.fromTry(
-              store
-                .put(S3ObjectLocation(
-                  config.bucket,
-                  s"tei_files/$id/${message.timeModified.getEpochSecond}.xml"))(
-                  blobContent)
-                .left
-                .map(error => error.e)
-                .toTry)
+            location = S3ObjectLocation(
+              bucket = config.bucket,
+              key = s"tei_files/$id/${message.timeModified.getEpochSecond}.xml")    
+            )
+            stored <- store.put(location, blobContent) match {
+              case Right(stored) => Future.successful(stored)
+              case Failure(error) => Future.failed(error.e)
+            }
             _ <- Future.fromTry(
               messageSender.sendT(
                 TeiIdChangeMessage(id, stored.id, message.timeModified)))
