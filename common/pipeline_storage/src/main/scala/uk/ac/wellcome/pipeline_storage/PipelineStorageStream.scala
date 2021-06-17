@@ -1,10 +1,6 @@
 package uk.ac.wellcome.pipeline_storage
 
-import scala.concurrent.duration._
-import scala.concurrent.{ExecutionContext, Future, TimeoutException}
-import scala.util.Try
-import akka.stream.FlowShape
-import akka.stream.scaladsl.{Broadcast, Flow, GraphDSL, Merge}
+import akka.stream.scaladsl.Flow
 import akka.{Done, NotUsed}
 import grizzled.slf4j.Logging
 import io.circe.Decoder
@@ -12,6 +8,11 @@ import software.amazon.awssdk.services.sqs.model.Message
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
+import weco.flows.FlowOps
+
+import scala.concurrent.duration._
+import scala.concurrent.{ExecutionContext, Future, TimeoutException}
+import scala.util.Try
 
 case class PipelineStorageConfig(batchSize: Int,
                                  flushInterval: FiniteDuration,
@@ -23,8 +24,9 @@ class PipelineStorageStream[In, Out, MsgDestination](
   messageStream: SQSStream[In],
   indexer: Indexer[Out],
   messageSender: MessageSender[MsgDestination])(
-  val config: PipelineStorageConfig)(implicit ec: ExecutionContext)
-    extends Logging {
+  val config: PipelineStorageConfig)(implicit val ec: ExecutionContext)
+    extends Logging
+    with FlowOps {
 
   import PipelineStorageStream._
 
@@ -194,19 +196,6 @@ object PipelineStorageStream extends Logging {
   def noOutputFlow[Out]: Flow[(Message, List[Out]), Message, NotUsed] =
     Flow[(Message, List[Out])]
       .collect { case (message, Nil) => message }
-
-  def broadcastAndMerge[I, O](a: Flow[I, O, NotUsed],
-                              b: Flow[I, O, NotUsed]): Flow[I, O, NotUsed] =
-    Flow.fromGraph(
-      GraphDSL.create() { implicit builder =>
-        import GraphDSL.Implicits._
-        val broadcast = builder.add(Broadcast[I](2))
-        val merge = builder.add(Merge[O](2))
-        broadcast ~> a ~> merge
-        broadcast ~> b ~> merge
-        FlowShape(broadcast.in, merge.out)
-      }
-    )
 
   private def unzipBundles[T](
     bundles: Seq[Bundle[T]]): (List[Message], List[T]) =

@@ -1,9 +1,11 @@
 package weco.flows
 
 import grizzled.slf4j.Logging
+
 import scala.concurrent.{ExecutionContext, Future}
 import akka.NotUsed
-import akka.stream.scaladsl.Flow
+import akka.stream.FlowShape
+import akka.stream.scaladsl.{Broadcast, Flow, GraphDSL, Merge}
 
 trait FlowOps extends Logging {
 
@@ -51,4 +53,20 @@ trait FlowOps extends Logging {
           (ctx, result)
       }
       .collect { case (ctx, Right(data)) => (ctx, data) }
+
+  /**
+    * Broadcasts the output of a flow to flows `a` and `b` and merges them again
+    */
+  def broadcastAndMerge[I, O](a: Flow[I, O, NotUsed],
+                              b: Flow[I, O, NotUsed]): Flow[I, O, NotUsed] =
+    Flow.fromGraph(
+      GraphDSL.create() { implicit builder =>
+        import GraphDSL.Implicits._
+        val broadcast = builder.add(Broadcast[I](2))
+        val merge = builder.add(Merge[O](2))
+        broadcast ~> a ~> merge
+        broadcast ~> b ~> merge
+        FlowShape(broadcast.in, merge.out)
+      }
+    )
 }

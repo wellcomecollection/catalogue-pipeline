@@ -61,7 +61,7 @@ lazy val source_model_typesafe = setupProject(
 lazy val pipeline_storage = setupProject(
   project,
   "common/pipeline_storage",
-  localDependencies = Seq(internal_model),
+  localDependencies = Seq(internal_model, flows),
   externalDependencies = CatalogueDependencies.pipelineStorageDependencies
 )
 
@@ -250,6 +250,7 @@ lazy val inference_manager = setupProject(
 lazy val tei_id_extractor = setupProject(
   project,
   folder = "tei_adapter/tei_id_extractor",
+  localDependencies = Seq(flows),
   externalDependencies = CatalogueDependencies.teiIdExtractorDependencies
 )
 // AWS Credentials to read from S3
