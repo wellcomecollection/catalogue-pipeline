@@ -19,7 +19,7 @@ object IdExtractor {
           throw new RuntimeException(s"Could not find an id in XML at $uri"))
     }.recoverWith {
       case th =>
-        Failure(new RuntimeException(s"Error processing XL at $uri", th))
+        Failure(new RuntimeException(s"Unable to extract ID from XML at $uri", th))
     }
 
 }
