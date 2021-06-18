@@ -1,7 +1,7 @@
-package weco.catalogue.tei.id_extractor
+package weco.catalogue.tei.id_extractor.database
 
 import scalikejdbc._
-import weco.catalogue.tei.id_extractor.database.PathIdTableConfig
+import weco.catalogue.tei.id_extractor.models.PathId
 
 class PathIdTable(pathIdTableConfig: PathIdTableConfig)
     extends SQLSyntaxSupport[PathId] {

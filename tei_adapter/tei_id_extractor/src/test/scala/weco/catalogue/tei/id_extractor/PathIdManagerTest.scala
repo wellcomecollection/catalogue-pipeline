@@ -9,12 +9,9 @@ import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.memory.MemoryStore
 import weco.catalogue.tei.id_extractor.PathIdManager.insertPathId
+import weco.catalogue.tei.id_extractor.database.PathIdTable
 import weco.catalogue.tei.id_extractor.fixtures.PathIdDatabase
-import weco.catalogue.tei.id_extractor.models.{
-  TeiIdChangeMessage,
-  TeiIdDeletedMessage,
-  TeiIdMessage
-}
+import weco.catalogue.tei.id_extractor.models.{PathId, TeiIdChangeMessage, TeiIdDeletedMessage, TeiIdMessage}
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit

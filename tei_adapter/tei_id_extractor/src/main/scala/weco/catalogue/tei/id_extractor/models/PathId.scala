@@ -1,4 +1,4 @@
-package weco.catalogue.tei.id_extractor
+package weco.catalogue.tei.id_extractor.models
 
 import scalikejdbc._
 
