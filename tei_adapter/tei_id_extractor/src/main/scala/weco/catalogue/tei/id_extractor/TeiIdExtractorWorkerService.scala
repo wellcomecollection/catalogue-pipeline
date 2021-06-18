@@ -67,7 +67,7 @@ class TeiIdExtractorWorkerService[Dest](
         case (ctx, msg) if msg.isInstanceOf[TeiPathDeletedMessage] =>
           (ctx, msg.asInstanceOf[TeiPathDeletedMessage])
       }
-    // When something is moved in the repo the updater lambda will send a changed message
+      // When something is moved in the repo the updater lambda will send a changed message
       // for the new path and a delete message for the old path. We don't want the delete message
       // to be processed first because it could make thing disappear temporarily from the api
       // (the change message will override the deleted message changes eventually). So we're introducing
