@@ -10,11 +10,8 @@ import weco.catalogue.tei.id_extractor.database.TableProvisioner
 import weco.catalogue.tei.id_extractor.models._
 import weco.flows.FlowOps
 
-import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 
-case class TeiIdExtractorConfig(concurrentFiles: Int,
-                                deleteMessageDelay: FiniteDuration)
 class TeiIdExtractorWorkerService[Dest](
   messageStream: SQSStream[NotificationMessage],
   gitHubBlobReader: GitHubBlobContentReader,
@@ -73,7 +70,7 @@ class TeiIdExtractorWorkerService[Dest](
       // (the change message will override the deleted message changes eventually). So we're introducing
       // a delay for deleted messages so that changed messages are processed first
       .delay(config.deleteMessageDelay)
-      .mapAsync(config.concurrentFiles) {
+      .mapAsync(config.parallelism) {
         case (ctx, message) =>
           for {
             _ <- Future.fromTry(
@@ -89,7 +86,7 @@ class TeiIdExtractorWorkerService[Dest](
         case (ctx, msg) if msg.isInstanceOf[TeiPathChangedMessage] =>
           (ctx, msg.asInstanceOf[TeiPathChangedMessage])
       }
-      .mapAsync(config.concurrentFiles) {
+      .mapAsync(config.parallelism) {
         case (ctx, message) =>
           for {
             blobContent <- gitHubBlobReader.getBlob(message.uri)

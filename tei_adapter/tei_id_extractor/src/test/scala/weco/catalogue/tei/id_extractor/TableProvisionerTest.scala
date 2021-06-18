@@ -16,10 +16,7 @@ class TableProvisionerTest
 
   it("creates the PathId table") {
     withPathIdDatabase { pathIdTableConfig =>
-      val databaseName = pathIdTableConfig.database
-      val tableName = pathIdTableConfig.tableName
-
-      new TableProvisioner(rdsClientConfig)(databaseName, tableName)
+      new TableProvisioner(rdsClientConfig, pathIdTableConfig)
         .provision()
 
       eventuallyTableExists(pathIdTableConfig)

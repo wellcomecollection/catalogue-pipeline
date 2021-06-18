@@ -63,11 +63,11 @@ trait PathIdDatabase
     }
 
   val rdsClientConfig = RDSClientConfig(
-    primaryHost = host,
-    replicaHost = host,
+    host = host,
     port = port,
     username = username,
-    password = password
+    password = password,
+    maxConnections = 3
   )
 
   def withPathIdDatabase[R](testWith: TestWith[PathIdTableConfig, R]): R = {
@@ -115,10 +115,7 @@ trait PathIdDatabase
   def withInitializedPathIdTable[R](testWith: TestWith[PathIdTable, R]): R = {
     withPathIdTable {
       case (config, table) =>
-        val provisioner = new TableProvisioner(rdsClientConfig)(
-          database = config.database,
-          tableName = config.tableName
-        )
+        val provisioner = new TableProvisioner(rdsClientConfig, config)
 
         provisioner
           .provision()
