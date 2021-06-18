@@ -5,7 +5,12 @@ import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.matchers.should.Matchers
 import scalikejdbc._
 import uk.ac.wellcome.fixtures.TestWith
-import weco.catalogue.tei.id_extractor.database.{PathIdTable, PathIdTableConfig, RDSClientConfig, TableProvisioner}
+import weco.catalogue.tei.id_extractor.database.{
+  PathIdTable,
+  PathIdTableConfig,
+  RDSClientConfig,
+  TableProvisioner
+}
 import weco.catalogue.tei.id_extractor.FieldDescription
 
 trait PathIdDatabase
