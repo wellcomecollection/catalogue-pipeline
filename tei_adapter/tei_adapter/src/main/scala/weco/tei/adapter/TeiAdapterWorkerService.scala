@@ -6,7 +6,7 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.storage.store.VersionedStore
 import weco.catalogue.source_model.TeiSourcePayload
-import weco.catalogue.source_model.tei.{TeiIdChangeMessage, TeiMetadata}
+import weco.catalogue.source_model.tei.{TeiChangedMetadata, TeiDeletedMetadata, TeiIdChangeMessage, TeiIdDeletedMessage, TeiIdMessage, TeiMetadata}
 
 import scala.concurrent.ExecutionContext
 
@@ -25,16 +25,13 @@ class TeiAdapterWorkerService[Dest](
         source.map {
           case (msg, notificationMessage) =>
             val tried = for {
-              changeMessage <- fromJson[TeiIdChangeMessage](
+              idMessage <- fromJson[TeiIdMessage](
                 notificationMessage.body
               )
-              metadata = TeiMetadata(
-                false,
-                changeMessage.s3Location,
-                changeMessage.timeModified
-              )
-              stored <- store.upsert(changeMessage.id)(metadata)(existingMetadata =>
-                if(existingMetadata.timeModified.isAfter(metadata.timeModified)) {
+              metadata = toMetadata(idMessage)
+
+              stored <- store.upsert(idMessage.id)(metadata)(existingMetadata =>
+                if(existingMetadata.time.isAfter(metadata.time)) {
                   Right(existingMetadata)
               }else {
                   Right(metadata)
@@ -52,4 +49,15 @@ class TeiAdapterWorkerService[Dest](
             tried.get
         }
     )
+
+  private def toMetadata(message: TeiIdMessage)= message match {
+    case TeiIdChangeMessage(_, s3Location, timeModified) =>
+      TeiChangedMetadata(
+        s3Location,
+        timeModified
+      )
+    case TeiIdDeletedMessage(_, timeDeleted) => TeiDeletedMetadata(
+      timeDeleted
+    )
+  }
 }
