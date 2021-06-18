@@ -7,7 +7,12 @@ import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
-import weco.catalogue.tei.id_extractor.database.{PathIdTableBuilder, RDSClientBuilder, TableProvisioner}
+import weco.catalogue.tei.id_extractor.database.{
+  PathIdTableBuilder,
+  RDSClientBuilder,
+  TableProvisioner,
+  PathIdTable
+}
 import uk.ac.wellcome.storage.typesafe.S3Builder
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig.RichConfig
 import weco.http.client.AkkaHttpClient
