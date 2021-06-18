@@ -127,45 +127,45 @@ class PathIdManager[Dest](pathIdTable: PathIdTable,
 
 object PathIdManager {
 
-  def selectById(pathIds: PathIdTable, id: String)(
+  def selectById(pathIdTable: PathIdTable, id: String)(
     implicit session: DBSession) =
     Try(withSQL {
-      select.from(pathIds as pathIds.p).where.eq(pathIds.p.id, id).forUpdate
-    }.map(models.PathId(pathIds.p)).single().apply())
+      select.from(pathIdTable as pathIdTable.p).where.eq(pathIdTable.p.id, id).forUpdate
+    }.map(models.PathId(pathIdTable.p)).single().apply())
 
-  def selectByPath(pathIds: PathIdTable, path: String)(
+  def selectByPath(pathIdTable: PathIdTable, path: String)(
     implicit session: DBSession) =
     Try(withSQL {
-      select.from(pathIds as pathIds.p).where.eq(pathIds.p.path, path).forUpdate
-    }.map(models.PathId(pathIds.p)).single().apply())
+      select.from(pathIdTable as pathIdTable.p).where.eq(pathIdTable.p.path, path).forUpdate
+    }.map(models.PathId(pathIdTable.p)).single().apply())
 
-  def updatePathId(pathIds: PathIdTable, pathId: PathId)(
+  def updatePathId(pathIdTable: PathIdTable, pathId: PathId)(
     implicit session: DBSession) =
     Try(withSQL {
-      update(pathIds)
+      update(pathIdTable)
         .set(
-          pathIds.column.path -> pathId.path,
-          pathIds.column.timeModified -> pathId.timeModified.toEpochMilli
+          pathIdTable.column.path -> pathId.path,
+          pathIdTable.column.timeModified -> pathId.timeModified.toEpochMilli
         )
         .where
-        .eq(pathIds.column.id, pathId.id)
+        .eq(pathIdTable.column.id, pathId.id)
     }.update.apply())
 
-  def insertPathId(pathIds: PathIdTable, pathId: PathId)(
+  def insertPathId(pathIdTable: PathIdTable, pathId: PathId)(
     implicit session: DBSession) =
     Try(withSQL {
       insert
-        .into(pathIds)
+        .into(pathIdTable)
         .namedValues(
-          pathIds.column.path -> pathId.path,
-          pathIds.column.id -> pathId.id,
-          pathIds.column.timeModified -> pathId.timeModified.toEpochMilli
+          pathIdTable.column.path -> pathId.path,
+          pathIdTable.column.id -> pathId.id,
+          pathIdTable.column.timeModified -> pathId.timeModified.toEpochMilli
         )
     }.update.apply())
 
-  def deletePathId(pathIds: PathIdTable, path: String)(
+  def deletePathId(pathIdTable: PathIdTable, path: String)(
     implicit session: DBSession) =
     Try(withSQL {
-      delete.from(pathIds).where.eq(pathIds.column.path, path)
+      delete.from(pathIdTable).where.eq(pathIdTable.column.path, path)
     }.update().apply())
 }
