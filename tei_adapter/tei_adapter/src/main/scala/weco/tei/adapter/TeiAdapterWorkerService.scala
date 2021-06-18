@@ -33,11 +33,17 @@ class TeiAdapterWorkerService[Dest](
                 changeMessage.s3Location,
                 changeMessage.timeModified
               )
-              stored <- store.upsert(changeMessage.id)(metadata)(_ =>Right(metadata)).left.map(_.e).toTry
+              stored <- store.upsert(changeMessage.id)(metadata)(existingMetadata =>
+                if(existingMetadata.timeModified.isAfter(metadata.timeModified)) {
+                  Right(existingMetadata)
+              }else {
+                  Right(metadata)
+                }
+              ).left.map(_.e).toTry
               _ <- messageSender.sendT(
                 TeiSourcePayload(
                   stored.id.id,
-                  metadata,
+                  stored.identifiedT,
                   stored.id.version
                 )
               )
