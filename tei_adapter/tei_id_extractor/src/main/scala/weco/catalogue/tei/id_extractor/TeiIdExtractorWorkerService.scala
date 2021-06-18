@@ -3,38 +3,36 @@ package weco.catalogue.tei.id_extractor
 import akka.stream.scaladsl.Flow
 import software.amazon.awssdk.services.sqs.model.{Message => SQSMessage}
 import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
-import uk.ac.wellcome.storage.s3.S3ObjectLocation
-import uk.ac.wellcome.storage.store.Writable
 import uk.ac.wellcome.typesafe.Runnable
+import weco.catalogue.tei.id_extractor.database.TableProvisioner
+import weco.catalogue.tei.id_extractor.models._
 import weco.flows.FlowOps
 
-import java.net.URI
-import java.time.Instant
+import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 
-// Represents a path change coming from the tei_updater lambda
-case class TeiFileChangedMessage(path: String, uri: URI, timeModified: Instant)
-
-// Represents a message for the tei_adapter with changes to id instead of file path
-case class TeiIdChangeMessage(id: String,
-                              s3Location: S3ObjectLocation,
-                              timeModified: Instant)
-case class TeiIdExtractorConfig(concurrentFiles: Int, bucket: String)
-
+case class TeiIdExtractorConfig(concurrentFiles: Int,
+                                deleteMessageDelay: FiniteDuration)
 class TeiIdExtractorWorkerService[Dest](
   messageStream: SQSStream[NotificationMessage],
   gitHubBlobReader: GitHubBlobContentReader,
-  store: Writable[S3ObjectLocation, String],
-  messageSender: MessageSender[Dest],
-  config: TeiIdExtractorConfig)(implicit val ec: ExecutionContext)
+  tableProvisioner: TableProvisioner,
+  pathIdManager: PathIdManager[Dest],
+  config: TeiIdExtractorConfig,
+)(implicit val ec: ExecutionContext)
     extends Runnable
     with FlowOps {
   val className = this.getClass.getSimpleName
 
-  override def run(): Future[Any] = {
+  override def run() =
+    for {
+      _ <- Future(tableProvisioner.provision())
+      _ <- runStream()
+    } yield ()
+
+  private def runStream(): Future[Any] = {
     messageStream.runStream(
       className,
       source =>
@@ -48,18 +46,48 @@ class TeiIdExtractorWorkerService[Dest](
     Flow[(SQSMessage, NotificationMessage)]
       .map {
         case (msg, NotificationMessage(body)) =>
-          (Context(msg), fromJson[TeiFileChangedMessage](body).toEither)
+          (Context(msg), fromJson[TeiPathMessage](body).toEither)
       }
       .via(catchErrors)
 
-  def filterNonTei = Flow[(Context, TeiFileChangedMessage)].filter {
-    case (_, TeiFileChangedMessage(path, _, _)) => !isTeiFile(path)
+  def filterNonTei = Flow[(Context, TeiPathMessage)].filter {
+    case (_, teiPathMessage) => !isTeiFile(teiPathMessage.path)
   }
 
   def processMessage =
-    Flow[(Context, TeiFileChangedMessage)]
+    Flow[(Context, TeiPathMessage)]
       .filter {
-        case (_, TeiFileChangedMessage(path, _, _)) => isTeiFile(path)
+        case (_, teiPathMessage) => isTeiFile(teiPathMessage.path)
+      }
+      .via(broadcastAndMerge(processDeleted, processChange))
+
+  def processDeleted =
+    Flow[(Context, TeiPathMessage)]
+      .collect {
+        case (ctx, msg) if msg.isInstanceOf[TeiPathDeletedMessage] =>
+          (ctx, msg.asInstanceOf[TeiPathDeletedMessage])
+      }
+      // When something is moved in the repo the updater lambda will send a changed message
+      // for the new path and a delete message for the old path. We don't want the delete message
+      // to be processed first because it could make thing disappear temporarily from the api
+      // (the change message will override the deleted message changes eventually). So we're introducing
+      // a delay for deleted messages so that changed messages are processed first
+      .delay(config.deleteMessageDelay)
+      .mapAsync(config.concurrentFiles) {
+        case (ctx, message) =>
+          for {
+            _ <- Future.fromTry(
+              pathIdManager
+                .handlePathDeleted(message.path, message.timeDeleted))
+          } yield (ctx, Right(()))
+      }
+      .via(catchErrors)
+
+  def processChange =
+    Flow[(Context, TeiPathMessage)]
+      .collect {
+        case (ctx, msg) if msg.isInstanceOf[TeiPathChangedMessage] =>
+          (ctx, msg.asInstanceOf[TeiPathChangedMessage])
       }
       .mapAsync(config.concurrentFiles) {
         case (ctx, message) =>
@@ -67,14 +95,10 @@ class TeiIdExtractorWorkerService[Dest](
             blobContent <- gitHubBlobReader.getBlob(message.uri)
             id <- Future.fromTry(
               IdExtractor.extractId(blobContent, message.uri))
-            location = S3ObjectLocation(
-              bucket = config.bucket,
-              key = s"tei_files/$id/${message.timeModified.getEpochSecond}.xml")
-            stored <- Future.fromTry(
-              store.put(location)(blobContent).left.map(error => error.e).toTry)
             _ <- Future.fromTry(
-              messageSender.sendT(
-                TeiIdChangeMessage(id, stored.id, message.timeModified)))
+              pathIdManager.handlePathChanged(
+                PathId(message.path, id, message.timeModified),
+                blobContent))
           } yield (ctx, Right(()))
       }
       .via(catchErrors)
