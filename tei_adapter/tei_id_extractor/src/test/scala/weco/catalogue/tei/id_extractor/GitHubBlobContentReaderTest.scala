@@ -24,7 +24,6 @@ class GitHubBlobContentReaderTest
   it("reads a blob from GitHub") {
     withWiremock("localhost") { port =>
       withActorSystem { implicit ac =>
-        implicit val ec = ac.dispatcher
         val uri = new URI(
           s"http://localhost:$port/git/blobs/2e6b5fa45462510d5549b6bcf2bbc8b53ae08aed")
         val gitHubBlobReader =
@@ -41,7 +40,6 @@ class GitHubBlobContentReaderTest
   it("handles error from github") {
     withWiremock("localhost") { port =>
       withActorSystem { implicit ac =>
-        implicit val ec = ac.dispatcher
         val uri = new URI(s"http://localhost:$port/git/blobs/123456789qwertyu")
         val gitHubBlobReader =
           new GitHubBlobContentReader(new AkkaHttpClient(), "fake_token")
