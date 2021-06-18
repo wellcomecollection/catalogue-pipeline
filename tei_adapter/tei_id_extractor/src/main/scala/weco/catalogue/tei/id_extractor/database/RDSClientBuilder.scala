@@ -7,17 +7,17 @@ import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 object RDSClientBuilder {
   def buildDB(rdsClientConfig: RDSClientConfig): Unit = {
 
-  Class.forName("com.mysql.jdbc.Driver")
-  ConnectionPool.singleton(
-    s"jdbc:mysql://${rdsClientConfig.host}:${rdsClientConfig.port}",
-    user = rdsClientConfig.username,
-    password = rdsClientConfig.password,
-    settings = ConnectionPoolSettings(
-      maxSize = rdsClientConfig.maxConnections,
-      connectionTimeoutMillis = 120000L
+    Class.forName("com.mysql.jdbc.Driver")
+    ConnectionPool.singleton(
+      s"jdbc:mysql://${rdsClientConfig.host}:${rdsClientConfig.port}",
+      user = rdsClientConfig.username,
+      password = rdsClientConfig.password,
+      settings = ConnectionPoolSettings(
+        maxSize = rdsClientConfig.maxConnections,
+        connectionTimeoutMillis = 120000L
+      )
     )
-  )
-}
+  }
   def buildRDSClientConfig(config: Config): RDSClientConfig = {
     val host = config.requireString("aws.rds.host")
 
@@ -38,9 +38,9 @@ object RDSClientBuilder {
   }
 }
 case class RDSClientConfig(
-                            host: String,
-                            port: Int,
-                            username: String,
-                            password: String,
-                            maxConnections: Int
-                          )
+  host: String,
+  port: Int,
+  username: String,
+  password: String,
+  maxConnections: Int
+)

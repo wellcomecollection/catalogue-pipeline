@@ -8,10 +8,10 @@ import uk.ac.wellcome.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import weco.catalogue.tei.id_extractor.database.{
+  PathIdTable,
   PathIdTableBuilder,
   RDSClientBuilder,
-  TableProvisioner,
-  PathIdTable
+  TableProvisioner
 }
 import uk.ac.wellcome.storage.typesafe.S3Builder
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig.RichConfig
@@ -30,14 +30,20 @@ object Main extends WellcomeTypesafeApp {
     val tableConfig = PathIdTableBuilder.buildTableConfig(config)
     val table = new PathIdTable(tableConfig)
     RDSClientBuilder.buildDB(rdsConfig)
- val messageSender = SNSBuilder.buildSNSMessageSender(config, subject = "TEI id extractor")
-    val  store = S3TypedStore[String]
+    val messageSender =
+      SNSBuilder.buildSNSMessageSender(config, subject = "TEI id extractor")
+    val store = S3TypedStore[String]
     new TeiIdExtractorWorkerService(
       messageStream = SQSBuilder.buildSQSStream(config),
       gitHubBlobReader = new GitHubBlobContentReader(
-        new AkkaHttpClient(),config.requireString("tei.github.token")),
+        new AkkaHttpClient(),
+        config.requireString("tei.github.token")),
       tableProvisioner = new TableProvisioner(rdsConfig, tableConfig),
-      pathIdManager = new PathIdManager[SNSConfig](table, store, messageSender, bucket = config.requireString("tei.id_extractor.bucket")),
+      pathIdManager = new PathIdManager[SNSConfig](
+        table,
+        store,
+        messageSender,
+        bucket = config.requireString("tei.id_extractor.bucket")),
       config = TeiIdExtractorConfigBuilder.buildTeiIdExtractorConfig(config)
     )
   }

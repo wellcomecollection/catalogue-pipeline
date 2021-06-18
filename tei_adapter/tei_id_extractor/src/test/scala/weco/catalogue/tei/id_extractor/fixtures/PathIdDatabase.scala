@@ -113,8 +113,9 @@ trait PathIdDatabase
   }
 
   def withInitializedPathIdTable[R](testWith: TestWith[PathIdTable, R]): R = {
-    withPathIdTable { case (config,table) =>
-      val provisioner = new TableProvisioner(rdsClientConfig, config)
+    withPathIdTable {
+      case (config, table) =>
+        val provisioner = new TableProvisioner(rdsClientConfig, config)
 
         provisioner
           .provision()

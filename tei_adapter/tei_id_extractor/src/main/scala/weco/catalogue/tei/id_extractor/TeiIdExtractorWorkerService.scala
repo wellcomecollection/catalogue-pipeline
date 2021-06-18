@@ -12,14 +12,15 @@ import weco.flows.FlowOps
 
 import scala.concurrent.{ExecutionContext, Future}
 
-
-class TeiIdExtractorWorkerService[Dest](messageStream: SQSStream[NotificationMessage],
-                                        gitHubBlobReader: GitHubBlobContentReader,
-                                        tableProvisioner: TableProvisioner,
-                                        pathIdManager: PathIdManager[Dest],
-                                        config: TeiIdExtractorConfig,
-                                       )(implicit val ec: ExecutionContext)
-    extends Runnable with FlowOps{
+class TeiIdExtractorWorkerService[Dest](
+  messageStream: SQSStream[NotificationMessage],
+  gitHubBlobReader: GitHubBlobContentReader,
+  tableProvisioner: TableProvisioner,
+  pathIdManager: PathIdManager[Dest],
+  config: TeiIdExtractorConfig,
+)(implicit val ec: ExecutionContext)
+    extends Runnable
+    with FlowOps {
   val className = this.getClass.getSimpleName
 
   override def run() =
@@ -57,28 +58,45 @@ class TeiIdExtractorWorkerService[Dest](messageStream: SQSStream[NotificationMes
       }
       .via(broadcastAndMerge(processDeleted, processChange))
 
-  def processDeleted = Flow[(Context, TeiPathMessage)]
-    .collect{case (ctx, msg) if msg.isInstanceOf[TeiPathDeletedMessage] => (ctx, msg.asInstanceOf[TeiPathDeletedMessage])}
-    // When something is moved in the repo the updater lambda will send a changed message
-    // for the new path and a delete message for the old path. We don't want the delete message
-    // to be processed first because it could make thing disappear temporarily from the api
-    // (the change message will override the deleted message changes eventually). So we're introducing
-    // a delay for deleted messages so that changed messages are processed first
-    .delay(config.deleteMessageDelay)
-    .mapAsync(config.parallelism) { case (ctx, message) =>
-      for {
-        _ <- Future.fromTry(pathIdManager.handlePathDeleted(message.path, message.timeDeleted))
-     } yield (ctx, Right(()))
-    }.via(catchErrors)
+  def processDeleted =
+    Flow[(Context, TeiPathMessage)]
+      .collect {
+        case (ctx, msg) if msg.isInstanceOf[TeiPathDeletedMessage] =>
+          (ctx, msg.asInstanceOf[TeiPathDeletedMessage])
+      }
+      // When something is moved in the repo the updater lambda will send a changed message
+      // for the new path and a delete message for the old path. We don't want the delete message
+      // to be processed first because it could make thing disappear temporarily from the api
+      // (the change message will override the deleted message changes eventually). So we're introducing
+      // a delay for deleted messages so that changed messages are processed first
+      .delay(config.deleteMessageDelay)
+      .mapAsync(config.parallelism) {
+        case (ctx, message) =>
+          for {
+            _ <- Future.fromTry(
+              pathIdManager
+                .handlePathDeleted(message.path, message.timeDeleted))
+          } yield (ctx, Right(()))
+      }
+      .via(catchErrors)
 
-  def processChange = Flow[(Context, TeiPathMessage)]
-    .collect{case (ctx, msg) if msg.isInstanceOf[TeiPathChangedMessage] => (ctx, msg.asInstanceOf[TeiPathChangedMessage])}
-    .mapAsync(config.parallelism) {
-        case (ctx, message) => for{
-          blobContent <- gitHubBlobReader.getBlob(message.uri)
-          id <- Future.fromTry(IdExtractor.extractId(blobContent, message.uri))
-          _ <- Future.fromTry(pathIdManager.handlePathChanged(PathId(message.path,id, message.timeModified), blobContent))
-        } yield(ctx, Right(()))
+  def processChange =
+    Flow[(Context, TeiPathMessage)]
+      .collect {
+        case (ctx, msg) if msg.isInstanceOf[TeiPathChangedMessage] =>
+          (ctx, msg.asInstanceOf[TeiPathChangedMessage])
+      }
+      .mapAsync(config.parallelism) {
+        case (ctx, message) =>
+          for {
+            blobContent <- gitHubBlobReader.getBlob(message.uri)
+            id <- Future.fromTry(
+              IdExtractor.extractId(blobContent, message.uri))
+            _ <- Future.fromTry(
+              pathIdManager.handlePathChanged(
+                PathId(message.path, id, message.timeModified),
+                blobContent))
+          } yield (ctx, Right(()))
       }
       .via(catchErrors)
 
