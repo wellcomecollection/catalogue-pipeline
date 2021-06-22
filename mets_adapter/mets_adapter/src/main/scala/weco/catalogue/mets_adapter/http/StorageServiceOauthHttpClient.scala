@@ -1,7 +1,11 @@
 package weco.catalogue.mets_adapter.http
 
 import akka.actor.ActorSystem
-import akka.http.scaladsl.model.headers.{Authorization, BasicHttpCredentials, OAuth2BearerToken}
+import akka.http.scaladsl.model.headers.{
+  Authorization,
+  BasicHttpCredentials,
+  OAuth2BearerToken
+}
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.unmarshalling.{FromEntityUnmarshaller, Unmarshal}
 import uk.ac.wellcome.json.JsonUtil._
@@ -22,7 +26,10 @@ class StorageServiceOauthHttpClient(
   implicit
   val system: ActorSystem,
   val ec: ExecutionContext
-) extends HttpClient with HttpGet with HttpPost with TokenExchange[BasicHttpCredentials, OAuth2BearerToken] {
+) extends HttpClient
+    with HttpGet
+    with HttpPost
+    with TokenExchange[BasicHttpCredentials, OAuth2BearerToken] {
 
   implicit val um: FromEntityUnmarshaller[StorageServiceAccessToken] =
     CirceMarshalling.fromDecoder[StorageServiceAccessToken]
@@ -44,7 +51,8 @@ class StorageServiceOauthHttpClient(
       )
 
       accessToken <- tokenResponse.status match {
-        case StatusCodes.OK => Unmarshal(tokenResponse).to[StorageServiceAccessToken]
+        case StatusCodes.OK =>
+          Unmarshal(tokenResponse).to[StorageServiceAccessToken]
         case code =>
           Unmarshal(tokenResponse).to[String].flatMap { resp =>
             Future.failed(
@@ -59,7 +67,6 @@ class StorageServiceOauthHttpClient(
         Instant.now().plusSeconds(accessToken.expiresIn)
       )
     } yield result
-
 
   override def singleRequest(request: HttpRequest): Future[HttpResponse] =
     for {

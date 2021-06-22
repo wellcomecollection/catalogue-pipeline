@@ -115,7 +115,8 @@ class BagRetrieverTest
     )
 
     withBagRetriever(responses) { retriever =>
-      val future = retriever.getBag(space = "digitised", externalIdentifier = "b16237456")
+      val future =
+        retriever.getBag(space = "digitised", externalIdentifier = "b16237456")
 
       whenReady(future) { bag =>
         bag.manifest.files.head shouldBe
@@ -138,7 +139,8 @@ class BagRetrieverTest
     )
 
     withBagRetriever(responses) { retriever =>
-      val future = retriever.getBag(space = "digitised", externalIdentifier = "b30246039")
+      val future =
+        retriever.getBag(space = "digitised", externalIdentifier = "b30246039")
 
       whenReady(future.failed) {
         _.getMessage shouldBe "Bag digitised/b30246039 does not exist in storage service"
@@ -155,10 +157,12 @@ class BagRetrieverTest
     )
 
     withBagRetriever(responses) { retriever =>
-      val future = retriever.getBag(space = "digitised", externalIdentifier = "b30246039")
+      val future =
+        retriever.getBag(space = "digitised", externalIdentifier = "b30246039")
 
       whenReady(future.failed) {
-        _.getMessage should startWith("Failed to authorize with storage service")
+        _.getMessage should startWith(
+          "Failed to authorize with storage service")
       }
     }
   }
@@ -172,7 +176,8 @@ class BagRetrieverTest
     )
 
     withBagRetriever(responses) { retriever =>
-      val future = retriever.getBag(space = "digitised", externalIdentifier = "b30246039")
+      val future =
+        retriever.getBag(space = "digitised", externalIdentifier = "b30246039")
 
       whenReady(future.failed) {
         _.getMessage shouldBe "Received error from storage service: 500 Internal Server Error"
@@ -180,7 +185,8 @@ class BagRetrieverTest
     }
   }
 
-  def withBagRetriever[R](responses: Seq[(HttpRequest, HttpResponse)])(testWith: TestWith[BagRetriever, R]): R =
+  def withBagRetriever[R](responses: Seq[(HttpRequest, HttpResponse)])(
+    testWith: TestWith[BagRetriever, R]): R =
     withActorSystem { implicit actorSystem =>
       val client = new MemoryHttpClient(responses) with HttpGet {
         override val baseUri: Uri = Uri("http://storage:1234/bags")

@@ -1,7 +1,11 @@
 package weco.catalogue.mets_adapter.http
 
 import akka.http.scaladsl.model.Uri.Path
-import akka.http.scaladsl.model.headers.{Authorization, BasicHttpCredentials, OAuth2BearerToken}
+import akka.http.scaladsl.model.headers.{
+  Authorization,
+  BasicHttpCredentials,
+  OAuth2BearerToken
+}
 import akka.http.scaladsl.model._
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -13,8 +17,13 @@ import java.net.URL
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class StorageServiceOauthHttpClientTest extends AnyFunSpec with Matchers with Akka with HttpFixtures {
-  val credentials: BasicHttpCredentials = BasicHttpCredentials("username", "password")
+class StorageServiceOauthHttpClientTest
+    extends AnyFunSpec
+    with Matchers
+    with Akka
+    with HttpFixtures {
+  val credentials: BasicHttpCredentials =
+    BasicHttpCredentials("username", "password")
 
   val tokenRequest =
     HttpRequest(
@@ -145,7 +154,8 @@ class StorageServiceOauthHttpClientTest extends AnyFunSpec with Matchers with Ak
       )
     )
 
-    val underlying = new MemoryHttpClient(responses) with HttpGet with HttpPost {
+    val underlying = new MemoryHttpClient(responses) with HttpGet
+    with HttpPost {
       override val baseUri: Uri = Uri("http://storage:1234")
     }
 
@@ -227,7 +237,8 @@ class StorageServiceOauthHttpClientTest extends AnyFunSpec with Matchers with Ak
       )
     )
 
-    val underlying = new MemoryHttpClient(responses) with HttpGet with HttpPost {
+    val underlying = new MemoryHttpClient(responses) with HttpGet
+    with HttpPost {
       override val baseUri: Uri = Uri("http://storage:1234")
     }
 

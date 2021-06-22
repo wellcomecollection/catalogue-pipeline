@@ -16,10 +16,9 @@ trait BagRetriever {
   def getBag(space: String, externalIdentifier: String): Future[Bag]
 }
 
-class HttpBagRetriever(client: HttpGet)(
-  implicit
-  actorSystem: ActorSystem,
-  executionContext: ExecutionContext)
+class HttpBagRetriever(client: HttpGet)(implicit
+                                        actorSystem: ActorSystem,
+                                        executionContext: ExecutionContext)
     extends BagRetriever
     with Logging {
 
@@ -39,11 +38,14 @@ class HttpBagRetriever(client: HttpGet)(
     } yield maybeBag
   }
 
-  private def handleResponse(space: String, externalIdentifier: String, response: HttpResponse): Future[Bag] =
+  private def handleResponse(space: String,
+                             externalIdentifier: String,
+                             response: HttpResponse): Future[Bag] =
     response.status match {
       case StatusCodes.OK => parseResponseIntoBag(response)
       case StatusCodes.NotFound =>
-        Future.failed(new Exception(s"Bag $space/$externalIdentifier does not exist in storage service"))
+        Future.failed(new Exception(
+          s"Bag $space/$externalIdentifier does not exist in storage service"))
       case StatusCodes.Unauthorized =>
         Future.failed(new Exception("Failed to authorize with storage service"))
       case status =>
