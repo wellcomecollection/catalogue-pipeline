@@ -1,14 +1,19 @@
 package weco.catalogue.sierra_reader.source
 
-import akka.stream.scaladsl.Sink
+import akka.NotUsed
+import akka.actor.ActorSystem
+import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpRequest, HttpResponse, Uri}
+import akka.stream.scaladsl.{Sink, Source}
 import io.circe.Json
 import io.circe.optics.JsonPath.root
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
+import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.platform.sierra_reader.fixtures.WireMockFixture
 import weco.catalogue.source_model.sierra.identifiers.SierraRecordTypes
+import weco.http.client.{HttpGet, MemoryHttpClient}
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -23,17 +28,50 @@ class SierraSourceTest
     with Akka
     with WireMockFixture {
 
+  val sierraUri = "http://sierra:1234"
+
+  def withSource[R](responses: Seq[(HttpRequest, HttpResponse)])(recordType: SierraRecordTypes.Value, params: Map[String, String] = Map())(testWith: TestWith[Source[Json, NotUsed], R])(implicit system: ActorSystem): R = {
+    val client = new MemoryHttpClient(responses) with HttpGet {
+      override val baseUri: Uri = Uri(sierraUri)
+    }
+
+    val source = SierraSource.applyWithClient(client)(recordType, params)
+
+    testWith(source)
+  }
+
   it("reads from Sierra") {
+    val responses = Seq(
+      (
+        HttpRequest(uri = Uri(s"$sierraUri/items")),
+        HttpResponse(
+          entity = HttpEntity(
+            contentType = ContentTypes.`application/json`,
+            s"""
+               |{
+               |  "total" : 5,
+               |  "entries" : [
+               |    {"id" : "1461851"},
+               |    {"id" : "1461862"},
+               |    {"id" : "1461864"},
+               |    {"id" : "1462796"},
+               |    {"id" : "1462800"}
+               |  ]
+               |}
+               |
+               |""".stripMargin
+          )
+        )
+      )
+    )
+
     withActorSystem { implicit actorSystem =>
-      val sierraSource =
-        SierraSource(sierraAPIConfig)(
-          recordType = SierraRecordTypes.items,
-          params = Map.empty)
+      withSource(responses)(recordType = SierraRecordTypes.items) { source =>
+        val future = source.take(1).runWith(Sink.head[Json])
 
-      val eventualJson = sierraSource.take(1).runWith(Sink.head[Json])
-
-      whenReady(eventualJson) {
-        root.id.string.getOption(_) shouldBe Some("1000001")
+        whenReady(future) {
+          root.id.string.getOption(_) shouldBe Some("1461851")
+        }
       }
     }
   }
