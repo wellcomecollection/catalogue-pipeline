@@ -6,7 +6,14 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.storage.store.VersionedStore
 import weco.catalogue.source_model.TeiSourcePayload
-import weco.catalogue.source_model.tei.{TeiChangedMetadata, TeiDeletedMetadata, TeiIdChangeMessage, TeiIdDeletedMessage, TeiIdMessage, TeiMetadata}
+import weco.catalogue.source_model.tei.{
+  TeiChangedMetadata,
+  TeiDeletedMetadata,
+  TeiIdChangeMessage,
+  TeiIdDeletedMessage,
+  TeiIdMessage,
+  TeiMetadata
+}
 
 import scala.concurrent.ExecutionContext
 
@@ -30,13 +37,27 @@ class TeiAdapterWorkerService[Dest](
               )
               metadata = toMetadata(idMessage)
 
-              stored <- store.upsert(idMessage.id)(metadata)(existingMetadata =>
-                if(existingMetadata.time.isAfter(metadata.time)) {
-                  Right(existingMetadata)
-              }else {
-                  Right(metadata)
-                }
-              ).left.map(_.e).toTry
+              stored <- store
+                .upsert(idMessage.id)(metadata)(
+                  existingMetadata =>
+                    metadata match {
+                      case TeiChangedMetadata(_, time) =>
+                        if (existingMetadata.time.isAfter(time)) {
+                          Right(existingMetadata)
+                        } else {
+                          Right(metadata)
+                        }
+                      case TeiDeletedMetadata(time) =>
+                        if (time.isAfter(existingMetadata.time)) {
+                          Right(metadata)
+                        } else {
+                          Right(existingMetadata)
+                        }
+                    }
+                )
+                .left
+                .map(_.e)
+                .toTry
               _ <- messageSender.sendT(
                 TeiSourcePayload(
                   stored.id.id,
@@ -50,14 +71,15 @@ class TeiAdapterWorkerService[Dest](
         }
     )
 
-  private def toMetadata(message: TeiIdMessage)= message match {
+  private def toMetadata(message: TeiIdMessage) = message match {
     case TeiIdChangeMessage(_, s3Location, timeModified) =>
       TeiChangedMetadata(
         s3Location,
         timeModified
       )
-    case TeiIdDeletedMessage(_, timeDeleted) => TeiDeletedMetadata(
-      timeDeleted
-    )
+    case TeiIdDeletedMessage(_, timeDeleted) =>
+      TeiDeletedMetadata(
+        timeDeleted
+      )
   }
 }
