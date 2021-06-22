@@ -1,14 +1,14 @@
 package uk.ac.wellcome.mets_adapter.services
 
 import akka.actor.ActorSystem
+import akka.http.scaladsl.model.Uri.Path
 import akka.http.scaladsl.model._
-import akka.http.scaladsl.model.headers.Authorization
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import grizzled.slf4j.Logging
 import io.circe.generic.auto._
 import uk.ac.wellcome.mets_adapter.models._
-import weco.http.client.HttpClient
+import weco.http.client.HttpGet
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -16,9 +16,7 @@ trait BagRetriever {
   def getBag(space: String, externalIdentifier: String): Future[Bag]
 }
 
-class HttpBagRetriever(baseUrl: String,
-                       client: HttpClient,
-                       tokenService: TokenService)(
+class HttpBagRetriever(client: HttpGet)(
   implicit
   actorSystem: ActorSystem,
   executionContext: ExecutionContext)
@@ -28,16 +26,12 @@ class HttpBagRetriever(baseUrl: String,
   def getBag(space: String, externalIdentifier: String): Future[Bag] = {
     // Construct a URL to request a bag from the storage service.
     // See https://github.com/wellcomecollection/docs/tree/master/rfcs/002-archival_storage#bags
-    val requestUri = Uri(s"$baseUrl/$space/$externalIdentifier")
+    val path = Path(s"bags/$space/$externalIdentifier")
 
-    debug(s"Making request to $requestUri")
+    debug(s"Making request to $path")
     for {
-      token <- tokenService.getToken
+      response <- client.get(path)
 
-      httpRequest = HttpRequest(uri = requestUri)
-        .addHeader(Authorization(token))
-
-      response <- client.singleRequest(httpRequest)
       maybeBag <- {
         debug(s"Received response ${response.status}")
         handleResponse(response)

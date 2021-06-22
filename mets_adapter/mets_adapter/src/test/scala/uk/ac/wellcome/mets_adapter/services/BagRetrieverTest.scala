@@ -1,24 +1,25 @@
 package uk.ac.wellcome.mets_adapter.services
 
 import akka.actor.ActorSystem
-import akka.http.scaladsl.model.headers.OAuth2BearerToken
+import akka.http.scaladsl.model.headers.BasicHttpCredentials
+import akka.http.scaladsl.model.{HttpRequest, HttpResponse, StatusCodes, Uri}
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.http.Fault
-import org.mockito.Mockito
 import org.scalatest.Inside
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
-import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.matchers.should.Matchers
+import org.scalatestplus.mockito.MockitoSugar
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.mets_adapter.models._
 import uk.ac.wellcome.mets_adapter.fixtures.BagsWiremock
-import weco.http.client.AkkaHttpClient
+import uk.ac.wellcome.mets_adapter.models._
+import weco.catalogue.mets_adapter.http.StorageServiceOauthHttpClient
+import weco.http.client.{AkkaHttpClient, HttpGet, HttpPost, MemoryHttpClient}
 
+import java.time.Instant
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import java.time.Instant
 
 class BagRetrieverTest
     extends AnyFunSpec
@@ -40,16 +41,6 @@ class BagRetrieverTest
               BagLocation(bucket, path),
               _,
               createdDate) =>
-            verify(
-              moreThanOrExactly(1),
-              postRequestedFor(urlEqualTo("/oauth2/token"))
-                .withRequestBody(matching(".*client_id=client.*"))
-                .withRequestBody(matching(".*client_secret=secret.*"))
-            )
-
-            verify(
-              getRequestedFor(
-                urlEqualTo("/storage/v1/bags/digitised/b30246039")))
             files.head shouldBe BagFile(
               "data/b30246039.xml",
               "v1/data/b30246039.xml")
@@ -77,18 +68,24 @@ class BagRetrieverTest
   }
 
   it("does not retry if the storage service responds with unauthorized") {
+    val responses = Seq(
+      (
+        HttpRequest(uri = Uri("http://storage:1234/bags/digitised/b30246039")),
+        HttpResponse(status = StatusCodes.Unauthorized)
+      )
+    )
+
+    val client = new MemoryHttpClient(responses) with HttpGet {
+      override val baseUri: Uri = Uri("http://storage:1234")
+    }
+
     withActorSystem { implicit actorSystem =>
-      val tokenService = mock[TokenService]
-      Mockito
-        .when(tokenService.getToken)
-        .thenReturn(Future.successful(OAuth2BearerToken("not-valid-token")))
-      withBagRetriever(tokenService) { bagRetriever =>
-        whenReady(getBag(bagRetriever, "digitised", "b30246039").failed) { e =>
-          e shouldBe a[Throwable]
-          verify(
-            1,
-            getRequestedFor(urlEqualTo("/storage/v1/bags/digitised/b30246039")))
-        }
+      val retriever = new HttpBagRetriever(client)
+
+      val future = retriever.getBag(space = "digitised", externalIdentifier = "b30246039")
+
+      whenReady(future.failed) {
+        _.getMessage should startWith("Failed to authorize with storage service")
       }
     }
   }
@@ -130,33 +127,19 @@ class BagRetrieverTest
              externalIdentifier: String): Future[Bag] =
     bagRetriever.getBag(space = space, externalIdentifier = externalIdentifier)
 
-  def withBagRetriever[R](tokenService: TokenService)(
-    testWith: TestWith[BagRetriever, R])(implicit actorSystem: ActorSystem): R =
-    withBagsService("localhost") { port =>
-      testWith(
-        new HttpBagRetriever(
-          s"http://localhost:$port/storage/v1/bags",
-          client = new AkkaHttpClient(),
-          tokenService)
-      )
-    }
-
   def withBagRetriever[R](testWith: TestWith[BagRetriever, R])(
     implicit actorSystem: ActorSystem): Unit =
     withBagsService("localhost") { port =>
-      val tokenService = new TokenService(
-        url = s"http://localhost:$port",
-        clientId = "client",
-        secret = "secret",
-        scope = "https://api.wellcomecollection.org/scope"
+      val client = new AkkaHttpClient() with HttpGet with HttpPost {
+        override val baseUri: Uri = Uri(s"http://localhost:$port/storage/v1/bags")
+      }
+
+      val oauthClient = new StorageServiceOauthHttpClient(
+        client,
+        tokenUri = Uri(s"http://localhost:$port/oauth2/token"),
+        credentials = BasicHttpCredentials("client", "secret")
       )
 
-      testWith(
-        new HttpBagRetriever(
-          baseUrl = s"http://localhost:$port/storage/v1/bags",
-          client = new AkkaHttpClient(),
-          tokenService = tokenService
-        )
-      )
+      testWith(new HttpBagRetriever(oauthClient))
     }
 }
