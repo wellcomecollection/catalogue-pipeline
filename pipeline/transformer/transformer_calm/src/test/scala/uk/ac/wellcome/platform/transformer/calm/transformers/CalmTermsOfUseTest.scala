@@ -2,14 +2,14 @@ package uk.ac.wellcome.platform.transformer.calm.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.source_model.calm.CalmRecord
 import uk.ac.wellcome.json.JsonUtil._
 import weco.catalogue.internal_model.work.TermsOfUse
+import weco.catalogue.source_model.calm.CalmRecord
 import weco.catalogue.source_model.generators.CalmRecordGenerators
 
-import scala.collection.JavaConverters._
 import java.io.{BufferedReader, FileReader}
 import java.time.Instant
+import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
 
 class CalmTermsOfUseTest extends AnyFunSpec with Matchers with CalmRecordGenerators {
@@ -55,7 +55,7 @@ class CalmTermsOfUseTest extends AnyFunSpec with Matchers with CalmRecordGenerat
       ("AccessConditions", "Closed on depositor agreement."),
     )
 
-    CalmTermsOfUse(record) shouldBe Some(TermsOfUse("Closed on depositor agreement. Closed."))
+    CalmTermsOfUse(record) shouldBe Some(TermsOfUse("Closed on depositor agreement."))
   }
 
   it("handles an item which is restricted") {
@@ -65,5 +65,25 @@ class CalmTermsOfUseTest extends AnyFunSpec with Matchers with CalmRecordGenerat
     )
 
     CalmTermsOfUse(record) shouldBe Some(TermsOfUse("Digital records cannot be ordered or viewed online. Requests to view digital records onsite are considered on a case by case basis. Please contact collections@wellcome.ac.uk for more details. Restricted."))
+  }
+
+  it("creates the right note for an item where the date is in the access conditions") {
+    val record = createCalmRecordWith(
+      ("AccessStatus", "Closed"),
+      ("AccessConditions", "Closed under the Data Protection Act until 1st January 2039."),
+      ("ClosedUntil", "01/01/2039")
+    )
+
+    CalmTermsOfUse(record) shouldBe Some(TermsOfUse("Closed under the Data Protection Act until 1st January 2039."))
+  }
+
+  it("creates the right note for a closed item where the date is not in the access conditions") {
+    val record = createCalmRecordWith(
+      ("AccessStatus", "Closed"),
+      ("AccessConditions", "Closed under the Data Protection Act."),
+      ("ClosedUntil", "01/01/2039")
+    )
+
+    CalmTermsOfUse(record) shouldBe Some(TermsOfUse("Closed under the Data Protection Act. Closed until 1 January 2039."))
   }
 }
