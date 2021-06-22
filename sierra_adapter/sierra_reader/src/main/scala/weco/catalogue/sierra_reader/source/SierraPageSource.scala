@@ -1,25 +1,23 @@
 package weco.catalogue.sierra_reader.source
 
 import akka.NotUsed
-import akka.http.scaladsl.model.Uri.Query
-import akka.http.scaladsl.model.{HttpEntity, HttpRequest, StatusCodes, Uri}
+import akka.http.scaladsl.model.Uri.Path
+import akka.http.scaladsl.model.{HttpEntity, StatusCodes}
 import akka.http.scaladsl.unmarshalling.{Unmarshal, Unmarshaller}
 import akka.stream.Materializer
 import akka.stream.scaladsl.Source
 import grizzled.slf4j.Logging
 import io.circe.Json
 import io.circe.optics.JsonPath.root
-import uk.ac.wellcome.platform.sierra_reader.config.models.SierraAPIConfig
 import weco.catalogue.source_model.json.JsonOps._
 import weco.catalogue.source_model.sierra.identifiers.SierraRecordTypes
-import weco.http.client.HttpClient
+import weco.http.client.HttpGet
 import weco.http.json.CirceMarshalling
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class SierraPageSource(
-  config: SierraAPIConfig,
-  client: HttpClient
+  client: HttpGet
 )(
   implicit
   ec: ExecutionContext,
@@ -35,21 +33,17 @@ class SierraPageSource(
     params: Map[String, String]
   ): Source[List[Json], NotUsed] =
     Source.unfoldAsync(lastId) { lastId =>
-      val url = s"${config.apiURL}/$recordType"
+      val path = Path(recordType.toString)
 
       val newParams = lastId match {
         case Some(id) => params + ("id" -> s"[${id + 1},]")
         case None     => params
       }
 
-      logger.debug(s"Making request to $url with parameters $newParams")
+      logger.debug(s"Making request to $path with parameters $newParams")
 
       for {
-        nextPage <- client.singleRequest(
-          HttpRequest(
-            uri = Uri(url).withQuery(Query(newParams))
-          )
-        )
+        nextPage <- client.get(path = path, params = newParams)
 
         jsonList <- nextPage match {
           case resp if resp.status == StatusCodes.OK =>

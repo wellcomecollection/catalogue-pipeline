@@ -10,10 +10,7 @@ import io.circe.syntax._
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs._
-import uk.ac.wellcome.platform.sierra_reader.config.models.{
-  ReaderConfig,
-  SierraAPIConfig
-}
+import uk.ac.wellcome.platform.sierra_reader.config.models.ReaderConfig
 import uk.ac.wellcome.platform.sierra_reader.flow.SierraRecordWrapperFlow
 import uk.ac.wellcome.platform.sierra_reader.sink.SequentialS3Sink
 import uk.ac.wellcome.storage.Identified
@@ -30,15 +27,16 @@ import weco.catalogue.source_model.sierra.{
   SierraItemRecord,
   SierraOrderRecord
 }
+import weco.http.client.HttpGet
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 
 class SierraReaderWorkerService(
+  client: HttpGet,
   sqsStream: SQSStream[NotificationMessage],
   s3Config: S3Config,
-  readerConfig: ReaderConfig,
-  sierraAPIConfig: SierraAPIConfig
+  readerConfig: ReaderConfig
 )(implicit
   actorSystem: ActorSystem,
   ec: ExecutionContext,
@@ -85,7 +83,7 @@ class SierraReaderWorkerService(
     )
 
     val sierraSource = SierraSource(
-      config = sierraAPIConfig,
+      client = client,
       throttleRate = ThrottleRate(3, per = 1.second)
     )(recordType = readerConfig.recordType, params)
 
