@@ -7,9 +7,8 @@ import io.circe.optics.JsonPath.root
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.akka.fixtures.Akka
+import weco.catalogue.sierra_reader.fixtures.WorkerServiceFixture
 import weco.catalogue.source_model.sierra.identifiers.SierraRecordTypes
-import weco.http.client.{HttpGet, MemoryHttpClient}
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -20,14 +19,7 @@ class SierraSourceTest
     extends AnyFunSpec
     with Matchers
     with ScalaFutures
-    with Akka {
-
-  val sierraUri = "http://sierra:1234"
-
-  def createClient(responses: Seq[(HttpRequest, HttpResponse)]): HttpGet =
-    new MemoryHttpClient(responses) with HttpGet {
-      override val baseUri: Uri = Uri(sierraUri)
-    }
+    with WorkerServiceFixture {
 
   it("reads from Sierra") {
     val responses = Seq(
