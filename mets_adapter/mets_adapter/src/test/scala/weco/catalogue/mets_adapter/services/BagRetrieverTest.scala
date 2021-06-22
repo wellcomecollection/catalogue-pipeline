@@ -1,4 +1,4 @@
-package uk.ac.wellcome.mets_adapter.services
+package weco.catalogue.mets_adapter.services
 
 import akka.http.scaladsl.model._
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}

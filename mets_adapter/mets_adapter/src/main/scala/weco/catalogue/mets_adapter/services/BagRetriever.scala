@@ -1,4 +1,4 @@
-package uk.ac.wellcome.mets_adapter.services
+package weco.catalogue.mets_adapter.services
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model.Uri.Path
