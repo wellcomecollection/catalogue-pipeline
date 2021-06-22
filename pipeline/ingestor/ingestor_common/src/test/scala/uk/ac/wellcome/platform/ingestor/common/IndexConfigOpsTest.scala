@@ -15,18 +15,19 @@ object TestConfig extends IndexConfig {
   override val refreshInterval = RefreshInterval.On(30.seconds)
 }
 
-class IndexConfigOpsTest
-  extends AnyFunSpec with Matchers with IndexConfigOps {
+class IndexConfigOpsTest extends AnyFunSpec with Matchers with IndexConfigOps {
   it("sets the value of RefreshInterval to Off if es.is_reindexing is true") {
     val config = ConfigFactory.load("reindexing.application")
-    val newIndexConfig: IndexConfig = TestConfig.withRefreshIntervalFromConfig(config)
+    val newIndexConfig: IndexConfig =
+      TestConfig.withRefreshIntervalFromConfig(config)
 
     newIndexConfig.refreshInterval shouldBe RefreshInterval.Off
   }
 
   it("maintains the value of RefreshInterval if es.is_reindexing is false") {
     val config = ConfigFactory.load("searching.application")
-    val newIndexConfig: IndexConfig = TestConfig.withRefreshIntervalFromConfig(config)
+    val newIndexConfig: IndexConfig =
+      TestConfig.withRefreshIntervalFromConfig(config)
 
     newIndexConfig.refreshInterval shouldBe TestConfig.refreshInterval
   }
