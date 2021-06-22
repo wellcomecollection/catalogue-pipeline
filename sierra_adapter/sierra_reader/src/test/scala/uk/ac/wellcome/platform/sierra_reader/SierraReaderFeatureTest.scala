@@ -24,7 +24,8 @@ class SierraReaderFeatureTest
 
     val responses = Seq(
       (
-        HttpRequest(uri = Uri(s"$sierraUri/bibs?updatedDate=%5B2013-12-10T17:16:35Z,2013-12-13T21:34:35Z%5D&fields=updatedDate,deletedDate,deleted,suppressed,author,title")),
+        HttpRequest(uri = Uri(
+          s"$sierraUri/bibs?updatedDate=%5B2013-12-10T17:16:35Z,2013-12-13T21:34:35Z%5D&fields=updatedDate,deletedDate,deleted,suppressed,author,title")),
         HttpResponse(
           entity = HttpEntity(
             contentType = ContentTypes.`application/json`,
@@ -56,7 +57,8 @@ class SierraReaderFeatureTest
         )
       ),
       (
-        HttpRequest(uri = Uri(s"$sierraUri/bibs?updatedDate=%5B2013-12-10T17:16:35Z,2013-12-13T21:34:35Z%5D&fields=updatedDate,deletedDate,deleted,suppressed,author,title&id=%5B1000017,%5D")),
+        HttpRequest(uri = Uri(
+          s"$sierraUri/bibs?updatedDate=%5B2013-12-10T17:16:35Z,2013-12-13T21:34:35Z%5D&fields=updatedDate,deletedDate,deleted,suppressed,author,title&id=%5B1000017,%5D")),
         HttpResponse(
           status = StatusCodes.NotFound,
           entity = HttpEntity(

@@ -47,7 +47,9 @@ class SierraSourceTest
 
     withActorSystem { implicit actorSystem =>
       val client = createClient(responses)
-      val source = SierraSource(client)(recordType = SierraRecordTypes.items, params = Map())
+      val source = SierraSource(client)(
+        recordType = SierraRecordTypes.items,
+        params = Map())
 
       val future = source.take(1).runWith(Sink.head[Json])
 
@@ -60,7 +62,8 @@ class SierraSourceTest
   it("fetches holdings from Sierra") {
     val responses = Seq(
       (
-        HttpRequest(uri = Uri(s"$sierraUri/holdings?updatedDate=%5B2003-03-03T03:00:00Z,2003-04-04T04:00:00Z%5D&fields=updatedDate")),
+        HttpRequest(uri = Uri(
+          s"$sierraUri/holdings?updatedDate=%5B2003-03-03T03:00:00Z,2003-04-04T04:00:00Z%5D&fields=updatedDate")),
         HttpResponse(
           entity = HttpEntity(
             contentType = ContentTypes.`application/json`,
@@ -84,9 +87,11 @@ class SierraSourceTest
 
     withActorSystem { implicit actorSystem =>
       val client = createClient(responses)
-      val source = SierraSource(client)(recordType = SierraRecordTypes.holdings, params = Map(
-        "updatedDate" -> "[2003-03-03T03:00:00Z,2003-04-04T04:00:00Z]",
-        "fields" -> "updatedDate"))
+      val source = SierraSource(client)(
+        recordType = SierraRecordTypes.holdings,
+        params = Map(
+          "updatedDate" -> "[2003-03-03T03:00:00Z,2003-04-04T04:00:00Z]",
+          "fields" -> "updatedDate"))
 
       val future = source.take(1).runWith(Sink.head[Json])
 
@@ -159,7 +164,9 @@ class SierraSourceTest
 
     withActorSystem { implicit actorSystem =>
       val client = createClient(responses)
-      val source = SierraSource(client)(recordType = SierraRecordTypes.items, params = Map())
+      val source = SierraSource(client)(
+        recordType = SierraRecordTypes.items,
+        params = Map())
 
       val future = source.runWith(Sink.seq[Json])
 
@@ -167,7 +174,15 @@ class SierraSourceTest
         json.map { root.id.string.getOption(_).get }
       }
 
-      ids shouldBe Seq("1000001", "1000002", "1000003", "1000004", "1000005", "1000006", "1000007", "1000008")
+      ids shouldBe Seq(
+        "1000001",
+        "1000002",
+        "1000003",
+        "1000004",
+        "1000005",
+        "1000006",
+        "1000007",
+        "1000008")
     }
   }
 
@@ -189,7 +204,9 @@ class SierraSourceTest
 
     withActorSystem { implicit actorSystem =>
       val client = createClient(responses)
-      val source = SierraSource(client)(recordType = SierraRecordTypes.bibs, params = Map())
+      val source = SierraSource(client)(
+        recordType = SierraRecordTypes.bibs,
+        params = Map())
 
       val future = source.take(1).runWith(Sink.head[Json])
 
@@ -268,7 +285,11 @@ class SierraSourceTest
 
     withActorSystem { implicit actorSystem =>
       val client = createClient(responses)
-      val source = SierraSource(client, throttleRate = ThrottleRate(elements = 4, per = 1.second))(recordType = SierraRecordTypes.items, params = Map())
+      val source = SierraSource(
+        client,
+        throttleRate = ThrottleRate(elements = 4, per = 1.second))(
+        recordType = SierraRecordTypes.items,
+        params = Map())
 
       val startTime = Instant.now()
 

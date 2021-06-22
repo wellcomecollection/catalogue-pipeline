@@ -30,7 +30,8 @@ class SierraReaderWorkerServiceTest
 
     val responses = Seq(
       (
-        HttpRequest(uri = Uri(s"$sierraUri/bibs?updatedDate=%5B2013-12-10T17:16:35Z,2013-12-13T21:34:35Z%5D&fields=updatedDate,deletedDate,deleted,suppressed,author,title")),
+        HttpRequest(uri = Uri(
+          s"$sierraUri/bibs?updatedDate=%5B2013-12-10T17:16:35Z,2013-12-13T21:34:35Z%5D&fields=updatedDate,deletedDate,deleted,suppressed,author,title")),
         HttpResponse(
           entity = HttpEntity(
             contentType = ContentTypes.`application/json`,
@@ -62,7 +63,8 @@ class SierraReaderWorkerServiceTest
         )
       ),
       (
-        HttpRequest(uri = Uri(s"$sierraUri/bibs?updatedDate=%5B2013-12-10T17:16:35Z,2013-12-13T21:34:35Z%5D&fields=updatedDate,deletedDate,deleted,suppressed,author,title&id=%5B1000017,%5D")),
+        HttpRequest(uri = Uri(
+          s"$sierraUri/bibs?updatedDate=%5B2013-12-10T17:16:35Z,2013-12-13T21:34:35Z%5D&fields=updatedDate,deletedDate,deleted,suppressed,author,title&id=%5B1000017,%5D")),
         HttpResponse(
           status = StatusCodes.NotFound,
           entity = HttpEntity(
@@ -89,9 +91,12 @@ class SierraReaderWorkerServiceTest
           readerConfig = bibsReaderConfig.copy(batchSize = 5)) { _ =>
           sendNotificationToSQS(queue = queue, body = body)
 
-          val pageNames = List("0000.json", "0001.json", "0002.json", "0003.json").map {
-            label =>
-              s"records_bibs/2013-12-10T17-16-35Z__2013-12-13T21-34-35Z/$label"
+          val pageNames = List(
+            "0000.json",
+            "0001.json",
+            "0002.json",
+            "0003.json").map { label =>
+            s"records_bibs/2013-12-10T17-16-35Z__2013-12-13T21-34-35Z/$label"
           } ++ List(
             "windows_bibs_complete/2013-12-10T17-16-35Z__2013-12-13T21-34-35Z")
 
@@ -118,7 +123,8 @@ class SierraReaderWorkerServiceTest
       """.stripMargin
 
     val firstPage = (
-      HttpRequest(uri = Uri(s"$sierraUri/bibs?updatedDate=%5B2013-12-10T17:16:35Z,2013-12-13T21:34:35Z%5D&fields=updatedDate,deletedDate,deleted,suppressed,author,title")),
+      HttpRequest(uri = Uri(
+        s"$sierraUri/bibs?updatedDate=%5B2013-12-10T17:16:35Z,2013-12-13T21:34:35Z%5D&fields=updatedDate,deletedDate,deleted,suppressed,author,title")),
       HttpResponse(
         entity = HttpEntity(
           contentType = ContentTypes.`application/json`,
@@ -145,7 +151,8 @@ class SierraReaderWorkerServiceTest
     )
 
     val secondPage = (
-      HttpRequest(uri = Uri(s"$sierraUri/bibs?updatedDate=%5B2013-12-10T17:16:35Z,2013-12-13T21:34:35Z%5D&fields=updatedDate,deletedDate,deleted,suppressed,author,title&id=%5B1000011,%5D")),
+      HttpRequest(uri = Uri(
+        s"$sierraUri/bibs?updatedDate=%5B2013-12-10T17:16:35Z,2013-12-13T21:34:35Z%5D&fields=updatedDate,deletedDate,deleted,suppressed,author,title&id=%5B1000011,%5D")),
       HttpResponse(
         entity = HttpEntity(
           contentType = ContentTypes.`application/json`,
@@ -168,7 +175,8 @@ class SierraReaderWorkerServiceTest
     )
 
     val finalPage = (
-      HttpRequest(uri = Uri(s"$sierraUri/bibs?updatedDate=%5B2013-12-10T17:16:35Z,2013-12-13T21:34:35Z%5D&fields=updatedDate,deletedDate,deleted,suppressed,author,title&id=%5B1000017,%5D")),
+      HttpRequest(uri = Uri(
+        s"$sierraUri/bibs?updatedDate=%5B2013-12-10T17:16:35Z,2013-12-13T21:34:35Z%5D&fields=updatedDate,deletedDate,deleted,suppressed,author,title&id=%5B1000017,%5D")),
       HttpResponse(
         status = StatusCodes.NotFound,
         entity = HttpEntity(
@@ -189,42 +197,45 @@ class SierraReaderWorkerServiceTest
 
     withLocalS3Bucket { bucket =>
       withLocalSqsQueue(visibilityTimeout = 5) { queue =>
-        withWorkerService(responses, bucket, queue, readerConfig = bibsReaderConfig.copy(batchSize = 10)) {
-          service =>
-            // Do a complete run of the reader -- this gives us a set of JSON files
-            // to compare to.
-            sendNotificationToSQS(queue = queue, body = body)
+        withWorkerService(
+          responses,
+          bucket,
+          queue,
+          readerConfig = bibsReaderConfig.copy(batchSize = 10)) { service =>
+          // Do a complete run of the reader -- this gives us a set of JSON files
+          // to compare to.
+          sendNotificationToSQS(queue = queue, body = body)
 
-            eventually {
-              assertQueueEmpty(queue = queue)
+          eventually {
+            assertQueueEmpty(queue = queue)
 
-              // 2 files + 1 window
-              listKeysInBucket(bucket = bucket) should have size 3
+            // 2 files + 1 window
+            listKeysInBucket(bucket = bucket) should have size 3
+          }
+
+          val expectedContents = getAllObjectContents(bucket = bucket)
+
+          // Now, let's delete every key in the bucket _except_ the first --
+          // which we'll use to restart the window.
+          listKeysInBucket(bucket = bucket)
+            .filterNot {
+              _.endsWith("0000.json")
+            }
+            .foreach { key =>
+              s3Client.deleteObject(bucket.name, key)
             }
 
-            val expectedContents = getAllObjectContents(bucket = bucket)
+          eventually {
+            listKeysInBucket(bucket = bucket) should have size 1
+          }
 
-            // Now, let's delete every key in the bucket _except_ the first --
-            // which we'll use to restart the window.
-            listKeysInBucket(bucket = bucket)
-              .filterNot {
-                _.endsWith("0000.json")
-              }
-              .foreach { key =>
-                s3Client.deleteObject(bucket.name, key)
-              }
+          // Now, send a second message to the reader, and we'll see if it completes
+          // the window successfully.
+          sendNotificationToSQS(queue = queue, body = body)
 
-            eventually {
-              listKeysInBucket(bucket = bucket) should have size 1
-            }
-
-            // Now, send a second message to the reader, and we'll see if it completes
-            // the window successfully.
-            sendNotificationToSQS(queue = queue, body = body)
-
-            eventually {
-              getAllObjectContents(bucket = bucket) shouldBe expectedContents
-            }
+          eventually {
+            getAllObjectContents(bucket = bucket) shouldBe expectedContents
+          }
         }
       }
     }
@@ -244,12 +255,14 @@ class SierraReaderWorkerServiceTest
 
     withLocalS3Bucket { bucket =>
       withLocalSqsQueue() { queue =>
-        withWorkerService(responses, bucket, queue, readerConfig = itemsReaderConfig) {
-          service =>
-            whenReady(service.processMessage(notificationMessage).failed) {
-              ex =>
-                ex shouldBe a[SierraReaderException]
-            }
+        withWorkerService(
+          responses,
+          bucket,
+          queue,
+          readerConfig = itemsReaderConfig) { service =>
+          whenReady(service.processMessage(notificationMessage).failed) { ex =>
+            ex shouldBe a[SierraReaderException]
+          }
         }
       }
     }

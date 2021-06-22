@@ -36,7 +36,8 @@ object Main extends WellcomeTypesafeApp {
       underlying = new AkkaHttpClient() with HttpPost with HttpGet {
         override val baseUri: Uri = Uri(apiConfig.apiURL)
       },
-      credentials = new BasicHttpCredentials(apiConfig.oauthKey, apiConfig.oauthSec)
+      credentials =
+        new BasicHttpCredentials(apiConfig.oauthKey, apiConfig.oauthSec)
     )
 
     new SierraReaderWorkerService(
