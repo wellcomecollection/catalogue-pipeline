@@ -11,13 +11,8 @@ import uk.ac.wellcome.storage.store.memory.MemoryStore
 import weco.catalogue.tei.id_extractor.PathIdManager.insertPathId
 import weco.catalogue.tei.id_extractor.database.PathIdTable
 import weco.catalogue.tei.id_extractor.fixtures.PathIdDatabase
-import weco.catalogue.tei.id_extractor.models.{
-  PathId,
-import weco.catalogue.tei.models.{
-  TeiIdChangeMessage,
-  TeiIdDeletedMessage,
-  TeiIdMessage
-}
+import weco.catalogue.tei.id_extractor.models.PathId
+import weco.catalogue.source_model.tei.{TeiIdMessage, TeiIdDeletedMessage, TeiIdChangeMessage}
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit
