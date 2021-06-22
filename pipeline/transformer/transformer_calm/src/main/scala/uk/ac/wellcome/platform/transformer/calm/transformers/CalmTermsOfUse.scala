@@ -10,8 +10,7 @@ import java.time.format.DateTimeFormatter
 
 object CalmTermsOfUse extends CalmRecordOps {
   def apply(record: CalmRecord): Option[TermsOfUse] = {
-    val accessConditions = record.getJoined("AccessConditions")
-
+    val accessConditions = getAccessConditions(record)
     val accessStatus = getAccessStatus(record)
 
     val closedUntil = record.get("ClosedUntil").map(parseAsDate)
@@ -36,9 +35,22 @@ object CalmTermsOfUse extends CalmRecordOps {
         case (Some(conditions), Some(status), None, None) =>
           Some(s"$conditions ${status.label}.")
 
-        // If the item is closed, we include the closure date.
+        // If the item is closed and we have a ClosedUntil date, we create a message.
+        // We don't repeat the access status/date if they're already included in the text.
+        //
+        // Examples:
+        //
+        //      Closed under the Data Protection Act until 1st January 2039.
+        //
+        //      This file is closed for business sensitivity reasons and cannot be accessed.
+        //      Once the closure period expires the file will be re-reviewed and the closure may be extended.
+        //      Closed until 1 January 2065.
+        //
+        case (Some(conditions), Some(AccessStatus.Closed), Some(closedUntil), _)
+            if conditions.isSingleSentence & conditions.toLowerCase.contains("closed") & conditions.containsDate(closedUntil) =>
+          Some(conditions)
         case (Some(conditions), Some(AccessStatus.Closed), Some(closedUntil), _) =>
-          Some(createClosedMessage(conditions, closedUntil))
+          Some(s"$conditions Closed until ${closedUntil.format(displayFormat)}.")
 
         case _ => throw new NotImplementedError(s"record = $record")
       }
@@ -49,13 +61,9 @@ object CalmTermsOfUse extends CalmRecordOps {
   // e.g. 1 January 2021
   private val displayFormat = DateTimeFormatter.ofPattern("d MMMM yyyy")
 
-  private def createClosedMessage(conditions: String, closedUntil: LocalDate): String =
-    (conditions, closedUntil) match {
-      case (conditions, closedUntil) if conditions.isSingleSentence & conditions.toLowerCase.contains("closed") & conditions.containsDate(closedUntil) =>
-        conditions
-
-      case (conditions, closedUntil) =>
-        s"$conditions Closed until ${closedUntil.format(displayFormat)}."
+  private def getAccessConditions(record: CalmRecord): Option[String] =
+    record.getJoined("AccessConditions").map { s =>
+      if (s.endsWith(".")) s else s + "."
     }
 
   private def getAccessStatus(record: CalmRecord): Option[AccessStatus] =
@@ -64,6 +72,7 @@ object CalmTermsOfUse extends CalmRecordOps {
       case Some("Closed")     => Some(AccessStatus.Closed)
       case Some("Restricted") | Some("Certain restrictions apply") => Some(AccessStatus.Restricted)
       case Some("By Appointment") => Some(AccessStatus.ByAppointment)
+      case Some("Donor Permission") => Some(AccessStatus.PermissionRequired)
       case _                  => None
     }
 

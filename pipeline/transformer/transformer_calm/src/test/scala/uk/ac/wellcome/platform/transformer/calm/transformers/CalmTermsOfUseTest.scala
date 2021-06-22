@@ -86,4 +86,14 @@ class CalmTermsOfUseTest extends AnyFunSpec with Matchers with CalmRecordGenerat
 
     CalmTermsOfUse(record) shouldBe Some(TermsOfUse("Closed under the Data Protection Act. Closed until 1 January 2039."))
   }
+
+  it("adds a missing full stop to access conditions") {
+    val record = createCalmRecordWith(
+      ("AccessStatus", "Closed"),
+      ("AccessConditions", "This file is closed for data protection reasons and cannot be accessed"),
+      ("ClosedUntil", "01/01/2055")
+    )
+
+    CalmTermsOfUse(record) shouldBe Some(TermsOfUse("This file is closed for data protection reasons and cannot be accessed. Closed until 1 January 2055."))
+  }
 }
