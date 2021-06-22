@@ -34,11 +34,9 @@ object WindowExtractor extends Logging {
           throw SierraReaderException(e)
       }
 
-  private def extractField(field: String, json: Json) = {
+  private def extractField(field: String, json: Json): String =
     root.selectDynamic(field).string.getOption(json).get
-  }
 
-  private def parseStringToDateTime(dateTimeString: String) = {
+  private def parseStringToDateTime(dateTimeString: String): LocalDateTime =
     LocalDateTime.parse(dateTimeString, formatter)
-  }
 }
