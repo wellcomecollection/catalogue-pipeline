@@ -1,7 +1,0 @@
-{
-  "@context": "https://api.wellcomecollection.org/context.json",
-  "httpStatus": 404,
-  "description": "Storage manifest digitised/not-existing not found",
-  "label": "Not Found",
-  "type": "Error"
-}
