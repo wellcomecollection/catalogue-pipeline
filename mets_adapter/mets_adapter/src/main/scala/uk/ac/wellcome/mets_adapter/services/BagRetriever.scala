@@ -34,16 +34,16 @@ class HttpBagRetriever(client: HttpGet)(
 
       maybeBag <- {
         debug(s"Received response ${response.status}")
-        handleResponse(response)
+        handleResponse(space, externalIdentifier, response)
       }
     } yield maybeBag
   }
 
-  private def handleResponse(response: HttpResponse): Future[Bag] =
+  private def handleResponse(space: String, externalIdentifier: String, response: HttpResponse): Future[Bag] =
     response.status match {
       case StatusCodes.OK => parseResponseIntoBag(response)
       case StatusCodes.NotFound =>
-        Future.failed(new Exception("Bag does not exist on storage service"))
+        Future.failed(new Exception(s"Bag $space/$externalIdentifier does not exist in storage service"))
       case StatusCodes.Unauthorized =>
         Future.failed(new Exception("Failed to authorize with storage service"))
       case status =>

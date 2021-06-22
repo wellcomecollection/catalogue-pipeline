@@ -1,68 +1,147 @@
 package uk.ac.wellcome.mets_adapter.services
 
-import akka.actor.ActorSystem
-import akka.http.scaladsl.model.headers.BasicHttpCredentials
-import akka.http.scaladsl.model.{HttpRequest, HttpResponse, StatusCodes, Uri}
-import com.github.tomakehurst.wiremock.client.WireMock._
-import com.github.tomakehurst.wiremock.http.Fault
-import org.scalatest.Inside
+import akka.http.scaladsl.model._
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import org.scalatestplus.mockito.MockitoSugar
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.mets_adapter.fixtures.BagsWiremock
 import uk.ac.wellcome.mets_adapter.models._
-import weco.catalogue.mets_adapter.http.StorageServiceOauthHttpClient
-import weco.http.client.{AkkaHttpClient, HttpGet, HttpPost, MemoryHttpClient}
+import weco.http.client.{HttpGet, MemoryHttpClient}
 
 import java.time.Instant
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 class BagRetrieverTest
     extends AnyFunSpec
     with Matchers
-    with BagsWiremock
-    with Inside
     with ScalaFutures
-    with Akka
     with IntegrationPatience
-    with MockitoSugar {
+    with Akka {
 
   it("gets a bag from the storage service") {
-    withActorSystem { implicit actorSystem =>
-      withBagRetriever { bagRetriever =>
-        whenReady(getBag(bagRetriever, "digitised", "b30246039")) {
-          case Bag(
-              _,
-              BagManifest(files),
-              BagLocation(bucket, path),
-              _,
-              createdDate) =>
-            files.head shouldBe BagFile(
-              "data/b30246039.xml",
-              "v1/data/b30246039.xml")
-            bucket shouldBe "wellcomecollection-storage"
-            path shouldBe "digitised/b30246039"
-            createdDate shouldBe Instant.parse("2019-09-14T02:25:40.532998Z")
-        }
+    val responses = Seq(
+      (
+        HttpRequest(uri = Uri("http://storage:1234/bags/digitised/b16237456")),
+        HttpResponse(
+          entity = HttpEntity(
+            contentType = ContentTypes.`application/json`,
+            """
+              |{
+              |  "@context": "https://api.wellcomecollection.org/context.json",
+              |  "id": "digitised/b16237456",
+              |  "space": {
+              |    "id": "digitised",
+              |    "type": "Space"
+              |  },
+              |  "info": {
+              |    "externalIdentifier": "b16237456",
+              |    "payloadOxum": "1138856615.297",
+              |    "baggingDate": "2021-05-19",
+              |    "sourceOrganization": "intranda GmbH",
+              |    "externalDescription": "[The Caldecott Community]",
+              |    "internalSenderIdentifier": "4656",
+              |    "internalSenderDescription": "sa_eug_d_51_box_35_b16237456",
+              |    "type": "BagInfo"
+              |  },
+              |  "manifest": {
+              |    "checksumAlgorithm": "SHA-256",
+              |    "files": [
+              |      {
+              |        "checksum": "00c28fa37208820ff9e621092fe522ef49b7dfe38f027a370b02666efff017a1",
+              |        "name": "data/b16237456.xml",
+              |        "path": "v3/data/b16237456.xml",
+              |        "size": 758093,
+              |        "type": "File"
+              |      },
+              |      {
+              |        "checksum": "30266128984e9e702aebc4e2ca89c56ac189818f4e328d1e7bb8570e14acdbc7",
+              |        "name": "data/objects/b16237456_0001.JP2",
+              |        "path": "v3/data/objects/b16237456_0001.JP2",
+              |        "size": 3931320,
+              |        "type": "File"
+              |      },
+              |      {
+              |        "checksum": "21b8887ad02ac0e28fb97105e895a0164c3cbf0db1d5dff5747eab2e30401c58",
+              |        "name": "data/objects/b16237456_0002.JP2",
+              |        "path": "v3/data/objects/b16237456_0002.JP2",
+              |        "size": 3679235,
+              |        "type": "File"
+              |      }
+              |    ],
+              |    "type": "BagManifest"
+              |  },
+              |  "tagManifest": {
+              |    "checksumAlgorithm": "SHA-256",
+              |    "files": [
+              |      {
+              |        "checksum": "f0164324e54044613b756979343b4fd5a5a5b1ab222d26fca7b4f24679e2b19a",
+              |        "name": "bag-info.txt",
+              |        "path": "v3/bag-info.txt",
+              |        "size": 295,
+              |        "type": "File"
+              |      }
+              |    ],
+              |    "type": "BagManifest"
+              |  },
+              |  "location": {
+              |    "provider": {
+              |      "id": "amazon-s3",
+              |      "type": "Provider"
+              |    },
+              |    "bucket": "wellcomecollection-storage",
+              |    "path": "digitised/b16237456",
+              |    "type": "Location"
+              |  },
+              |  "replicaLocations": [
+              |    {
+              |      "provider": {
+              |        "id": "amazon-s3",
+              |        "type": "Provider"
+              |      },
+              |      "bucket": "wellcomecollection-storage-replica-ireland",
+              |      "path": "digitised/b16237456",
+              |      "type": "Location"
+              |    }
+              |  ],
+              |  "createdDate": "2021-05-19T12:32:38.589051Z",
+              |  "version": "v3",
+              |  "type": "Bag"
+              |}
+              |""".stripMargin
+          )
+        )
+      )
+    )
+
+    withBagRetriever(responses) { retriever =>
+      val future = retriever.getBag(space = "digitised", externalIdentifier = "b16237456")
+
+      whenReady(future) { bag =>
+        bag.manifest.files.head shouldBe
+          BagFile(name = "data/b16237456.xml", path = "v3/data/b16237456.xml")
+
+        bag.location.bucket shouldBe "wellcomecollection-storage"
+        bag.location.path shouldBe "digitised/b16237456"
+
+        bag.createdDate shouldBe Instant.parse("2021-05-19T12:32:38.589051Z")
       }
     }
   }
 
   it("fails if the bag does not exist in the storage service") {
-    withActorSystem { implicit actorSystem =>
-      withBagRetriever { bagRetriever =>
-        whenReady(getBag(bagRetriever, "digitised", "not-existing").failed) {
-          e =>
-            e shouldBe a[Throwable]
-            verify(
-              1,
-              getRequestedFor(
-                urlEqualTo("/storage/v1/bags/digitised/not-existing")))
-        }
+    val responses = Seq(
+      (
+        HttpRequest(uri = Uri("http://storage:1234/bags/digitised/b30246039")),
+        HttpResponse(status = StatusCodes.NotFound)
+      )
+    )
+
+    withBagRetriever(responses) { retriever =>
+      val future = retriever.getBag(space = "digitised", externalIdentifier = "b30246039")
+
+      whenReady(future.failed) {
+        _.getMessage shouldBe "Bag digitised/b30246039 does not exist in storage service"
       }
     }
   }
@@ -75,13 +154,7 @@ class BagRetrieverTest
       )
     )
 
-    val client = new MemoryHttpClient(responses) with HttpGet {
-      override val baseUri: Uri = Uri("http://storage:1234/bags")
-    }
-
-    withActorSystem { implicit actorSystem =>
-      val retriever = new HttpBagRetriever(client)
-
+    withBagRetriever(responses) { retriever =>
       val future = retriever.getBag(space = "digitised", externalIdentifier = "b30246039")
 
       whenReady(future.failed) {
@@ -91,55 +164,28 @@ class BagRetrieverTest
   }
 
   it("returns a failed future if the storage service responds with 500") {
-    withActorSystem { implicit actorSystem =>
-      withBagRetriever { bagRetriever =>
-        stubFor(
-          get(urlMatching("/storage/v1/bags/digitised/this-shall-crash"))
-            .willReturn(aResponse().withStatus(500)))
-        whenReady(getBag(bagRetriever, "digitised", "this-shall-crash").failed) {
-          _ shouldBe a[Throwable]
-        }
-      }
-    }
-  }
-
-  it("returns a failed future if the storage service response has a fault") {
-    withActorSystem { implicit actorSystem =>
-      withBagRetriever { bagRetriever =>
-        stubFor(
-          get(urlMatching("/storage/v1/bags/digitised/this-will-fault"))
-            .willReturn(
-              aResponse()
-                .withStatus(200)
-                // Simulate an immediately returning Fault
-                // Fault.CONNECTION_RESET_BY_PEER can cause an extended wait
-                // which can cause this test to fail in some environments
-                .withFault(Fault.RANDOM_DATA_THEN_CLOSE)))
-        whenReady(getBag(bagRetriever, "digitised", "this-will-fault").failed) {
-          _ shouldBe a[Throwable]
-        }
-      }
-    }
-  }
-
-  def getBag(bagRetriever: BagRetriever,
-             space: String,
-             externalIdentifier: String): Future[Bag] =
-    bagRetriever.getBag(space = space, externalIdentifier = externalIdentifier)
-
-  def withBagRetriever[R](testWith: TestWith[BagRetriever, R])(
-    implicit actorSystem: ActorSystem): Unit =
-    withBagsService("localhost") { port =>
-      val client = new AkkaHttpClient() with HttpGet with HttpPost {
-        override val baseUri: Uri = Uri(s"http://localhost:$port/storage/v1/bags")
-      }
-
-      val oauthClient = new StorageServiceOauthHttpClient(
-        client,
-        tokenUri = Uri(s"http://localhost:$port/oauth2/token"),
-        credentials = BasicHttpCredentials("client", "secret")
+    val responses = Seq(
+      (
+        HttpRequest(uri = Uri("http://storage:1234/bags/digitised/b30246039")),
+        HttpResponse(status = StatusCodes.InternalServerError)
       )
+    )
 
-      testWith(new HttpBagRetriever(oauthClient))
+    withBagRetriever(responses) { retriever =>
+      val future = retriever.getBag(space = "digitised", externalIdentifier = "b30246039")
+
+      whenReady(future.failed) {
+        _.getMessage shouldBe "Received error from storage service: 500 Internal Server Error"
+      }
+    }
+  }
+
+  def withBagRetriever[R](responses: Seq[(HttpRequest, HttpResponse)])(testWith: TestWith[BagRetriever, R]): R =
+    withActorSystem { implicit actorSystem =>
+      val client = new MemoryHttpClient(responses) with HttpGet {
+        override val baseUri: Uri = Uri("http://storage:1234/bags")
+      }
+
+      testWith(new HttpBagRetriever(client))
     }
 }
