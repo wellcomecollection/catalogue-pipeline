@@ -26,7 +26,7 @@ class HttpBagRetriever(client: HttpGet)(
   def getBag(space: String, externalIdentifier: String): Future[Bag] = {
     // Construct a URL to request a bag from the storage service.
     // See https://github.com/wellcomecollection/docs/tree/master/rfcs/002-archival_storage#bags
-    val path = Path(s"bags/$space/$externalIdentifier")
+    val path = Path(s"$space/$externalIdentifier")
 
     debug(s"Making request to $path")
     for {

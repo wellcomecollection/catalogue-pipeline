@@ -76,7 +76,7 @@ class BagRetrieverTest
     )
 
     val client = new MemoryHttpClient(responses) with HttpGet {
-      override val baseUri: Uri = Uri("http://storage:1234")
+      override val baseUri: Uri = Uri("http://storage:1234/bags")
     }
 
     withActorSystem { implicit actorSystem =>
