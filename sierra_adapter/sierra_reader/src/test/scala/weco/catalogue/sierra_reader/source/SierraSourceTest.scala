@@ -4,7 +4,7 @@ import akka.http.scaladsl.model._
 import akka.stream.scaladsl.Sink
 import io.circe.Json
 import io.circe.optics.JsonPath.root
-import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
+import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
@@ -20,7 +20,6 @@ class SierraSourceTest
     extends AnyFunSpec
     with Matchers
     with ScalaFutures
-    with IntegrationPatience
     with Akka {
 
   val sierraUri = "http://sierra:1234"
