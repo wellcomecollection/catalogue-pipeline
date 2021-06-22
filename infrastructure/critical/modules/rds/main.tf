@@ -6,6 +6,7 @@ resource "aws_rds_cluster_instance" "cluster_instances" {
   instance_class       = var.instance_class
   db_subnet_group_name = var.aws_db_subnet_group_name
   publicly_accessible  = false
+  db_parameter_group_name = var.db_parameter_group_name
 }
 
 resource "aws_rds_cluster" "default" {

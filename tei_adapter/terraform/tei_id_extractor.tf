@@ -4,7 +4,7 @@ module "tei_id_extractor_queue" {
   topic_arns                 = [module.tei_updater_lambda.topic_arn]
   aws_region                 = local.aws_region
   alarm_topic_arn            = local.dlq_alarm_arn
-  visibility_timeout_seconds = 60
+  visibility_timeout_seconds = 1200
 }
 
 module "tei_id_extractor" {
@@ -21,6 +21,7 @@ module "tei_id_extractor" {
     bucket            = aws_s3_bucket.tei_adapter.id
     parallelism       = 10
     max_connections   = local.tei_id_extractor_max_connections
+    delete_delay = "2 minutes"
     database          = "pathid"
     table             = "pathid"
   }
@@ -58,12 +59,12 @@ module "tei_id_extractor" {
   use_fargate_spot = true
 }
 
-resource "aws_iam_role_policy" "read_from_adapter_queue" {
+resource "aws_iam_role_policy" "read_from_extractor_queue" {
   role   = module.tei_id_extractor.task_role_name
   policy = module.tei_id_extractor_queue.read_policy
 }
 
-resource "aws_iam_role_policy" "cloudwatch_push_metrics" {
+resource "aws_iam_role_policy" "cloudwatch_push_metrics_extractor" {
   role   = module.tei_id_extractor.task_role_name
   policy = data.aws_iam_policy_document.allow_cloudwatch_push_metrics.json
 }

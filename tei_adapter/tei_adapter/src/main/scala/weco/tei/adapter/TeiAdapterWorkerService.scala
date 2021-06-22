@@ -1,6 +1,6 @@
 package weco.tei.adapter
 
-import akka.NotUsed
+import akka.{Done, NotUsed}
 import akka.stream.scaladsl.{Flow, Source}
 import software.amazon.awssdk.services.sqs.model.Message
 import uk.ac.wellcome.json.JsonUtil._
@@ -9,15 +9,9 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.storage.store.VersionedStore
 import weco.catalogue.source_model.TeiSourcePayload
-import weco.catalogue.source_model.tei.{
-  TeiChangedMetadata,
-  TeiDeletedMetadata,
-  TeiIdChangeMessage,
-  TeiIdDeletedMessage,
-  TeiIdMessage,
-  TeiMetadata
-}
+import weco.catalogue.source_model.tei.{TeiChangedMetadata, TeiDeletedMetadata, TeiIdChangeMessage, TeiIdDeletedMessage, TeiIdMessage, TeiMetadata}
 import weco.flows.FlowOps
+import uk.ac.wellcome.typesafe.Runnable
 
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, Future}
@@ -33,7 +27,7 @@ class TeiAdapterWorkerService[Dest](
     with FlowOps {
   val className = this.getClass.getSimpleName
 
-  override def run(): Unit =
+  override def run(): Future[Done] =
     messageStream.runStream(
       className,
       runStream

@@ -48,7 +48,7 @@ resource "aws_security_group" "database_sg" {
 
 module "tei_id_extractor_rds_cluster" {
   source             = "../../infrastructure/critical/modules/rds"
-  cluster_identifier = "tei-adapter-cluster-delta"
+  cluster_identifier = "tei-adapter-cluster-beta"
   database_name      = "pathid"
   username           = local.rds_username
   password           = local.rds_password
@@ -56,6 +56,7 @@ module "tei_id_extractor_rds_cluster" {
   # This instance class provides us with 45 connections per instance.
   instance_count = 1
   instance_class = "db.t3.medium"
+  db_parameter_group_name = aws_db_parameter_group.default.id
 
   db_security_group_id = aws_security_group.database_sg.id
 
@@ -79,3 +80,17 @@ resource "aws_security_group" "rds_ingress_security_group" {
   }
 }
 
+resource "aws_db_parameter_group" "default" {
+  name_prefix   = "tei-rds"
+  family = "mysql5.6"
+
+  parameter {
+    name  = "wait_timeout"
+    value = "600"
+  }
+
+  parameter {
+    name  = "interactive_timeout"
+    value = "600"
+  }
+}

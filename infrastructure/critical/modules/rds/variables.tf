@@ -20,3 +20,7 @@ variable "instance_count" {
   type    = number
   default = 2
 }
+
+variable "db_parameter_group_name" {
+  default = null
+}
