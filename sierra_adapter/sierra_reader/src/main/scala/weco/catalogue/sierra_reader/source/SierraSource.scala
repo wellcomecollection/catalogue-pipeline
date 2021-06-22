@@ -9,7 +9,7 @@ import akka.stream.scaladsl.Source
 import io.circe.Json
 import uk.ac.wellcome.platform.sierra_reader.config.models.SierraAPIConfig
 import weco.catalogue.source_model.sierra.identifiers.SierraRecordTypes
-import weco.http.client.{AkkaHttpClient, HttpClient, HttpGet, HttpPost}
+import weco.http.client.{AkkaHttpClient, HttpGet, HttpPost}
 import weco.http.client.sierra.SierraOauthHttpClient
 
 import scala.concurrent.ExecutionContext
@@ -36,7 +36,6 @@ object SierraSource {
         },
         credentials = new BasicHttpCredentials(config.oauthKey, config.oauthSec)
       ),
-      config = config,
       throttleRate = throttleRate
     )(
       recordType = recordType,
@@ -44,18 +43,14 @@ object SierraSource {
     )
 
   def applyWithClient(
-    client: HttpClient,
-    config: SierraAPIConfig,
+    client: HttpGet,
     throttleRate: ThrottleRate = ThrottleRate(elements = 0, per = 0 seconds)
   )(recordType: SierraRecordTypes.Value, params: Map[String, String])(
     implicit
     system: ActorSystem,
     ec: ExecutionContext): Source[Json, NotUsed] = {
 
-    val pageSource = new SierraPageSource(
-      config = config,
-      client = client
-    )
+    val pageSource = new SierraPageSource(client = client)
 
     val source = Source.fromGraph(
       pageSource(
