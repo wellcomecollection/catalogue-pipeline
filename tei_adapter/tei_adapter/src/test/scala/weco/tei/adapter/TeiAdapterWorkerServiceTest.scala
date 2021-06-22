@@ -27,6 +27,7 @@ import weco.catalogue.source_model.tei.{
 import java.time.Instant
 import java.time.temporal.ChronoUnit.HOURS
 import scala.util.{Failure, Try}
+import scala.concurrent.duration._
 
 class TeiAdapterWorkerServiceTest
     extends AnyFunSpec
@@ -249,6 +250,43 @@ class TeiAdapterWorkerServiceTest
     }
   }
 
+  it("if it receives a message changed and a message deleted with the same time, the message deleted takes precedence"){
+    val storedObjectLocation = S3ObjectLocation("bucket", "key.xml")
+    val storedTime = Instant.parse("2021-06-17T11:46:00Z")
+    val storedVersion = Version("manuscript_1234", 0)
+    val storedMap =
+      Map(storedVersion -> TeiChangedMetadata(storedObjectLocation, storedTime))
+
+    withWorkerService(initialData = storedMap) {
+      case (QueuePair(queue, dlq), messageSender, store) =>
+        val messageTime = storedTime.plus(2, HOURS)
+        val changedMessage = TeiIdChangeMessage(storedVersion.id, S3ObjectLocation("bucket", "anotherkey.xml"), messageTime)
+        val deletedMessage = TeiIdDeletedMessage(storedVersion.id, messageTime)
+
+        sendNotificationToSQS[TeiIdMessage](queue, deletedMessage)
+        sendNotificationToSQS[TeiIdMessage](queue, changedMessage)
+
+        eventually {
+          val expectedVersions = List(Version(changedMessage.id, 1),Version(changedMessage.id, 2))
+          val expectedMetadata = TeiChangedMetadata(s3Location = changedMessage.s3Location,time = messageTime)
+
+          messageSender
+            .getMessages[TeiSourcePayload] should contain theSameElementsAs expectedVersions.map(version => TeiSourcePayload(
+            version.id,
+            expectedMetadata,
+            version.version
+          ))
+          messageSender
+            .getMessages[Version[String, Int]]() should contain theSameElementsAs expectedVersions
+
+          isStored(store, Version(changedMessage.id, 2), expectedMetadata)
+
+          assertQueueEmpty(queue)
+          assertQueueEmpty(dlq)
+        }
+    }
+  }
+
   def failingOnceMessageSender = new MemoryMessageSender {
     var attempts = 0
     override def sendT[T](t: T)(implicit encoder: Encoder[T]): Try[Unit] = {
@@ -270,14 +308,13 @@ class TeiAdapterWorkerServiceTest
 
   private def isSent(messageSender: MemoryMessageSender, expectedVersion: Version[String, Int], expectedMetadata: TeiMetadata) = {
     messageSender
-      .getMessages[Version[String, Int]]() should contain only expectedVersion
-
-    messageSender
       .getMessages[TeiSourcePayload] should contain only TeiSourcePayload(
       expectedVersion.id,
       expectedMetadata,
       expectedVersion.version
     )
+    messageSender
+      .getMessages[Version[String, Int]]() should contain only expectedVersion
   }
 
   def withWorkerService[R](
@@ -301,7 +338,7 @@ class TeiAdapterWorkerServiceTest
             val store: MemoryVersionedStore[String, TeiMetadata] =
               MemoryVersionedStore(initialData)
             val service =
-              new TeiAdapterWorkerService(stream, messageSender, store, 10)
+              new TeiAdapterWorkerService(stream, messageSender, store, 10, 100 milliseconds)
             service.run()
             testWith((q, messageSender, store))
           }
