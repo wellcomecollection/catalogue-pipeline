@@ -5,7 +5,10 @@ import enumeratum.{Enum, EnumEntry}
 class UnknownAccessStatus(status: String) extends Exception(status)
 
 sealed trait AccessStatus extends EnumEntry { this: AccessStatus =>
-  def name: String = this.getClass.getSimpleName.stripSuffix("$")
+  val id: String
+  val label: String
+
+  def name: String = id
 
   def isAvailable: Boolean = this match {
     case AccessStatus.Open              => true
@@ -37,23 +40,50 @@ object AccessStatus extends Enum[AccessStatus] {
   //
   // This is based on §12 Research access, as retrieved 8 February 2021
   //
-  case object Open extends AccessStatus
+  case object Open extends AccessStatus {
+    override val id: String = "open"
+    override val label: String = "Open"
+  }
 
-  case object OpenWithAdvisory extends AccessStatus
+  case object OpenWithAdvisory extends AccessStatus {
+    override val id: String = "open-with-advisory"
+    override val label: String = "Open with advisory"
+  }
 
-  case object Restricted extends AccessStatus
+  case object Restricted extends AccessStatus {
+    override val id: String = "restricted"
+    override val label: String = "Restricted"
+  }
 
-  case object ByAppointment extends AccessStatus
+  case object ByAppointment extends AccessStatus {
+    override val id: String = "by-appointment"
+    override val label: String = "By appointment"
+  }
 
-  case object TemporarilyUnavailable extends AccessStatus
+  case object TemporarilyUnavailable extends AccessStatus {
+    override val id: String = "temporarily-unavailable"
+    override val label: String = "Temporarily unavailable"
+  }
 
-  case object Unavailable extends AccessStatus
+  case object Unavailable extends AccessStatus {
+    override val id: String = "unavailable"
+    override val label: String = "Unavailable"
+  }
 
-  case object Closed extends AccessStatus
+  case object Closed extends AccessStatus {
+    override val id: String = "closed"
+    override val label: String = "Closed"
+  }
 
-  case object LicensedResources extends AccessStatus
+  case object LicensedResources extends AccessStatus {
+    override val id: String = "licensed-resources"
+    override val label: String = "Licensed resources"
+  }
 
-  case object PermissionRequired extends AccessStatus
+  case object PermissionRequired extends AccessStatus {
+    override val id: String = "permission-required"
+    override val label: String = "Permission required"
+  }
 
   def apply(status: String): Either[Exception, AccessStatus] = {
     val normalisedStatus = status.trim.stripSuffix(".").trim.toLowerCase()
