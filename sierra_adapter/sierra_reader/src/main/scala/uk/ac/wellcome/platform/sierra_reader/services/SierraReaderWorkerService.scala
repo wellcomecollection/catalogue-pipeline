@@ -82,7 +82,7 @@ class SierraReaderWorkerService(
       offset = windowStatus.offset
     )
 
-    val sierraSource = SierraSource.applyWithClient(
+    val sierraSource = SierraSource(
       client = client,
       throttleRate = ThrottleRate(3, per = 1.second)
     )(recordType = readerConfig.recordType, params)

@@ -47,7 +47,7 @@ class SierraSourceTest
 
     withActorSystem { implicit actorSystem =>
       val client = createClient(responses)
-      val source = SierraSource.applyWithClient(client)(recordType = SierraRecordTypes.items, params = Map())
+      val source = SierraSource(client)(recordType = SierraRecordTypes.items, params = Map())
 
       val future = source.take(1).runWith(Sink.head[Json])
 
@@ -84,7 +84,7 @@ class SierraSourceTest
 
     withActorSystem { implicit actorSystem =>
       val client = createClient(responses)
-      val source = SierraSource.applyWithClient(client)(recordType = SierraRecordTypes.holdings, params = Map(
+      val source = SierraSource(client)(recordType = SierraRecordTypes.holdings, params = Map(
         "updatedDate" -> "[2003-03-03T03:00:00Z,2003-04-04T04:00:00Z]",
         "fields" -> "updatedDate"))
 
@@ -159,7 +159,7 @@ class SierraSourceTest
 
     withActorSystem { implicit actorSystem =>
       val client = createClient(responses)
-      val source = SierraSource.applyWithClient(client)(recordType = SierraRecordTypes.items, params = Map())
+      val source = SierraSource(client)(recordType = SierraRecordTypes.items, params = Map())
 
       val future = source.runWith(Sink.seq[Json])
 
@@ -189,7 +189,7 @@ class SierraSourceTest
 
     withActorSystem { implicit actorSystem =>
       val client = createClient(responses)
-      val source = SierraSource.applyWithClient(client)(recordType = SierraRecordTypes.bibs, params = Map())
+      val source = SierraSource(client)(recordType = SierraRecordTypes.bibs, params = Map())
 
       val future = source.take(1).runWith(Sink.head[Json])
 
@@ -268,7 +268,7 @@ class SierraSourceTest
 
     withActorSystem { implicit actorSystem =>
       val client = createClient(responses)
-      val source = SierraSource.applyWithClient(client, throttleRate = ThrottleRate(elements = 4, per = 1.second))(recordType = SierraRecordTypes.items, params = Map())
+      val source = SierraSource(client, throttleRate = ThrottleRate(elements = 4, per = 1.second))(recordType = SierraRecordTypes.items, params = Map())
 
       val startTime = Instant.now()
 
