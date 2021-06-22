@@ -102,17 +102,11 @@ object ExternalDependencies {
     val enumeratumScalacheck = "1.6.1"
     val jsoup = "1.13.1"
     val logback = "1.1.8"
-
-    val akkaHttpOauth2Client = "0.2.0"
   }
 
   val enumeratumDependencies = Seq(
     "com.beachape" %% "enumeratum" % versions.enumeratum,
     "com.beachape" %% "enumeratum-scalacheck" % versions.enumeratumScalacheck % "test"
-  )
-
-  val oauthDependencies = Seq(
-    "com.github.dakatsuka" %% "akka-http-oauth2-client" % versions.akkaHttpOauth2Client
   )
 
   val apacheCommonsDependencies = Seq(
@@ -261,10 +255,7 @@ object CatalogueDependencies {
   // METS adapter
 
   val metsAdapterDependencies: Seq[ModuleID] =
-    ExternalDependencies.oauthDependencies ++
-      ExternalDependencies.mockitoDependencies ++
-      ExternalDependencies.wireMockDependencies ++
-      WellcomeDependencies.messagingTypesafeLibrary ++
+    WellcomeDependencies.messagingTypesafeLibrary ++
       WellcomeDependencies.storageTypesafeLibrary ++
       WellcomeDependencies.httpLibrary
 
