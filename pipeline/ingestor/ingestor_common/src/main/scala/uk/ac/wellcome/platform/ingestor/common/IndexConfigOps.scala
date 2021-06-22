@@ -7,7 +7,8 @@ trait IndexConfigOps {
   implicit class IndexConfigOps[IC <: IndexConfig](indexConfig: IC) {
     def withRefreshIntervalFromConfig(config: Config): IndexConfig = {
       val isReindexing = config.getBoolean(s"es.is_reindexing")
-      val interval = if (isReindexing) RefreshInterval.Off else indexConfig.refreshInterval
+      val interval =
+        if (isReindexing) RefreshInterval.Off else indexConfig.refreshInterval
 
       object NewConfig extends IndexConfig {
         override def mapping = indexConfig.mapping
@@ -19,4 +20,3 @@ trait IndexConfigOps {
     }
   }
 }
-
