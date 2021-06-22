@@ -23,7 +23,11 @@ import io.circe.Encoder
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
 import weco.catalogue.tei.id_extractor.database.TableProvisioner
-import weco.catalogue.source_model.tei.{TeiIdMessage, TeiIdDeletedMessage, TeiIdChangeMessage}
+import weco.catalogue.source_model.tei.{
+  TeiIdChangeMessage,
+  TeiIdDeletedMessage,
+  TeiIdMessage
+}
 
 import weco.http.client.AkkaHttpClient
 

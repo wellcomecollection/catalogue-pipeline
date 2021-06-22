@@ -12,7 +12,11 @@ import weco.catalogue.tei.id_extractor.PathIdManager.insertPathId
 import weco.catalogue.tei.id_extractor.database.PathIdTable
 import weco.catalogue.tei.id_extractor.fixtures.PathIdDatabase
 import weco.catalogue.tei.id_extractor.models.PathId
-import weco.catalogue.source_model.tei.{TeiIdMessage, TeiIdDeletedMessage, TeiIdChangeMessage}
+import weco.catalogue.source_model.tei.{
+  TeiIdChangeMessage,
+  TeiIdDeletedMessage,
+  TeiIdMessage
+}
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit

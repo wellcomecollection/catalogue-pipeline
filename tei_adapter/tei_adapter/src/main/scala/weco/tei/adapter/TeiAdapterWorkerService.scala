@@ -9,7 +9,14 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.storage.store.VersionedStore
 import weco.catalogue.source_model.TeiSourcePayload
-import weco.catalogue.source_model.tei.{TeiChangedMetadata, TeiDeletedMetadata, TeiIdChangeMessage, TeiIdDeletedMessage, TeiIdMessage, TeiMetadata}
+import weco.catalogue.source_model.tei.{
+  TeiChangedMetadata,
+  TeiDeletedMetadata,
+  TeiIdChangeMessage,
+  TeiIdDeletedMessage,
+  TeiIdMessage,
+  TeiMetadata
+}
 import weco.flows.FlowOps
 
 import scala.concurrent.duration.FiniteDuration
@@ -22,7 +29,8 @@ class TeiAdapterWorkerService[Dest](
   parallelism: Int,
   delay: FiniteDuration
 )(implicit val ec: ExecutionContext)
-    extends Runnable with FlowOps {
+    extends Runnable
+    with FlowOps {
   val className = this.getClass.getSimpleName
 
   override def run(): Unit =
@@ -31,27 +39,28 @@ class TeiAdapterWorkerService[Dest](
       runStream
     )
 
-  private def runStream(source: Source[(Message,NotificationMessage), NotUsed]) =
+  private def runStream(
+    source: Source[(Message, NotificationMessage), NotUsed]) =
     source
       .via(unwrapMessage)
       .via(broadcastAndMerge(delayDeleted, sendChanged))
       .mapAsync(parallelism) {
-    case (ctx, msg) =>
-      Future.fromTry{
-        for {
-          stored <- updateStore(msg.id, msg.toMetadata)
-          _ <- messageSender.sendT(
-            TeiSourcePayload(
-              stored.id.id,
-              stored.identifiedT,
-              stored.id.version
-            )
-          )
+        case (ctx, msg) =>
+          Future.fromTry {
+            for {
+              stored <- updateStore(msg.id, msg.toMetadata)
+              _ <- messageSender.sendT(
+                TeiSourcePayload(
+                  stored.id.id,
+                  stored.identifiedT,
+                  stored.id.version
+                )
+              )
 
-        } yield ctx.msg
+            } yield ctx.msg
+          }
+
       }
-
-  }
 
   def unwrapMessage =
     Flow[(Message, NotificationMessage)]
@@ -68,23 +77,27 @@ class TeiAdapterWorkerService[Dest](
   // a delete message for an id that as been moved. However, if the delay
   // isn't large enough some delete message could "escape" and be
   // propagated incorrectly to the tei adapter. So we delay them here as well
-  def delayDeleted = Flow[(Context, TeiIdMessage)].collect {
-    case (ctx, msg) if msg.isInstanceOf[TeiIdDeletedMessage] =>
-      (ctx, msg.asInstanceOf[TeiIdDeletedMessage])
-  }.delay(delay)
+  def delayDeleted =
+    Flow[(Context, TeiIdMessage)]
+      .collect {
+        case (ctx, msg) if msg.isInstanceOf[TeiIdDeletedMessage] =>
+          (ctx, msg.asInstanceOf[TeiIdDeletedMessage])
+      }
+      .delay(delay)
 
   def sendChanged = Flow[(Context, TeiIdMessage)].collect {
     case (ctx, msg) if msg.isInstanceOf[TeiIdChangeMessage] =>
       (ctx, msg.asInstanceOf[TeiIdChangeMessage])
   }
 
-  private def updateStore(id: String, metadata: TeiMetadata) = store
+  private def updateStore(id: String, metadata: TeiMetadata) =
+    store
       .upsert(id)(metadata)(
         existingMetadata =>
           updateMetadata(
             newMetadata = metadata,
             existingMetadata = existingMetadata
-          )
+        )
       )
       .left
       .map(_.e)
