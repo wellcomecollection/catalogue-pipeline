@@ -6,19 +6,16 @@ import com.typesafe.config.Config
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
-import uk.ac.wellcome.pipeline_storage.typesafe.{
-  ElasticIndexerBuilder,
-  ElasticSourceRetrieverBuilder,
-  PipelineStorageStreamBuilder
-}
+import uk.ac.wellcome.pipeline_storage.typesafe.{ElasticIndexerBuilder, ElasticSourceRetrieverBuilder, PipelineStorageStreamBuilder}
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.models.index.IndexedImageIndexConfig
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.Implicits._
+import uk.ac.wellcome.platform.ingestor.common.IndexConfigOps
 import weco.catalogue.internal_model.image.Image
 import weco.catalogue.internal_model.image.ImageState.{Augmented, Indexed}
 
-object Main extends WellcomeTypesafeApp {
+object Main extends WellcomeTypesafeApp with IndexConfigOps {
   runWithConfig { config: Config =>
     implicit val actorSystem: ActorSystem =
       AkkaBuilder.buildActorSystem()
@@ -38,7 +35,7 @@ object Main extends WellcomeTypesafeApp {
         config,
         ElasticBuilder.buildElasticClient(config, namespace = "catalogue"),
         namespace = "indexed-images",
-        indexConfig = IndexedImageIndexConfig
+        indexConfig = IndexedImageIndexConfig.withRefreshIntervalFromConfig(config)
       )
     val msgSender = SNSBuilder
       .buildSNSMessageSender(config, subject = "Sent from the ingestor-images")
