@@ -1,5 +1,6 @@
 package uk.ac.wellcome.platform.transformer.calm.transformers
 
+import grizzled.slf4j.Logging
 import uk.ac.wellcome.platform.transformer.calm.CalmRecordOps
 import weco.catalogue.internal_model.locations.AccessStatus
 import weco.catalogue.internal_model.work.TermsOfUse
@@ -8,13 +9,13 @@ import weco.catalogue.source_model.calm.CalmRecord
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-object CalmTermsOfUse extends CalmRecordOps {
+object CalmTermsOfUse extends CalmRecordOps with Logging {
   def apply(record: CalmRecord): Option[TermsOfUse] = {
     val accessConditions = getAccessConditions(record)
     val accessStatus = getAccessStatus(record)
 
     val closedUntil = record.get("ClosedUntil").map(parseAsDate)
-    val restrictedUntil = record.get("RestrictedUntil")
+    val restrictedUntil = record.get("UserDate1").map(parseAsDate)
 
     val terms =
       (accessConditions, accessStatus, closedUntil, restrictedUntil) match {
@@ -47,12 +48,62 @@ object CalmTermsOfUse extends CalmRecordOps {
         //      Closed until 1 January 2065.
         //
         case (Some(conditions), Some(AccessStatus.Closed), Some(closedUntil), _)
-            if conditions.isSingleSentence & conditions.toLowerCase.contains("closed") & conditions.containsDate(closedUntil) =>
+            if conditions.toLowerCase.contains("closed") & conditions.containsDate(closedUntil) =>
           Some(conditions)
         case (Some(conditions), Some(AccessStatus.Closed), Some(closedUntil), _) =>
           Some(s"$conditions Closed until ${closedUntil.format(displayFormat)}.")
+        case (None, Some(AccessStatus.Closed), Some(closedUntil), _) =>
+          Some(s"Closed until ${closedUntil.format(displayFormat)}.")
 
-        case _ => throw new NotImplementedError(s"record = $record")
+        // Similarly, if an item is restricted and we have a RestrictedUntil date,
+        // we create a message.
+        case (Some(conditions), Some(AccessStatus.Restricted), _, Some(restrictedUntil))
+            if conditions.toLowerCase.contains("restricted") & conditions.containsDate(restrictedUntil) =>
+          Some(conditions)
+        case (Some(conditions), Some(AccessStatus.Restricted), _, Some(restrictedUntil)) =>
+          Some(s"$conditions Restricted until ${restrictedUntil.format(displayFormat)}.")
+        case (None, Some(AccessStatus.Restricted), _, Some(restrictedUntil)) =>
+          Some(s"Restricted until ${restrictedUntil.format(displayFormat)}.")
+
+        // Some items require permission *and* they're restricted.
+        //
+        // Examples:
+        //
+        //      Permission must be obtained from the Winnicott Trust before access can be
+        //      granted to this item. This item is also restricted. You will need to complete
+        //      a Restricted Access form agreeing to anonymise personal data before you will
+        //      be allowed to view this item. Please see our Access Policy for more details.
+        //      Restricted until 1 January 2027.
+        //
+        case (Some(conditions), Some(AccessStatus.PermissionRequired), _, Some(restrictedUntil))
+            if conditions.toLowerCase.contains("permission") & conditions.hasRestrictions & conditions.containsDate(restrictedUntil) =>
+          Some(conditions)
+        case (Some(conditions), Some(AccessStatus.PermissionRequired), _, Some(restrictedUntil))
+            if conditions.toLowerCase.contains("permission") & conditions.hasRestrictions =>
+          Some(s"$conditions Restricted until ${restrictedUntil.format(displayFormat)}.")
+
+        // If the item only has an access status, we still create a note, albeit not
+        // a particularly verbose one.
+        case (None, Some(accessStatus), None, None) =>
+          Some(s"${accessStatus.label}.")
+
+        // Otherwise, we create a TermsOfUse note that smushes together all the bits of
+        // access information that we have.  This isn't particularly nice, but it's what
+        // Encore currently does, and in most cases we'll do a better job of it.
+        //
+        // This currently affects ~200 of 350k Calm items, and in some cases it reflects
+        // a mistake in the underlying data that should be fixed.  This catch-all approach
+        // will highlight issues, and then we can ask C&R to sort them out.
+        case (conditions, status, closedUntil, restrictedUntil) =>
+          warn(s"Unclear how to create TermsOfUse note for item ${record.id}")
+          val parts = Seq(
+            conditions,
+            restrictedUntil.map(d => s"Restricted until ${d.format(displayFormat)}."),
+            closedUntil.map(d => s"Closed until ${d.format(displayFormat)}."),
+            status.map(s => s"${s.label}."),
+          ).flatten
+
+          if (parts.isEmpty) None else Some(parts.mkString(" "))
       }
 
     terms.map(TermsOfUse)
@@ -67,12 +118,17 @@ object CalmTermsOfUse extends CalmRecordOps {
     }
 
   private def getAccessStatus(record: CalmRecord): Option[AccessStatus] =
-    record.get("AccessStatus") match {
+    record.get("AccessStatus").map(_.stripSuffix(".")) match {
       case Some("Open")       => Some(AccessStatus.Open)
+      case Some("Open with advisory")       => Some(AccessStatus.OpenWithAdvisory)
       case Some("Closed")     => Some(AccessStatus.Closed)
-      case Some("Restricted") | Some("Certain restrictions apply") => Some(AccessStatus.Restricted)
+      case Some("Restricted") => Some(AccessStatus.Restricted)
+      case Some(s) if s.toLowerCase == "certain restrictions apply" => Some(AccessStatus.Restricted)
+      case Some(s) if s.toLowerCase == "restricted access (data protection act)" => Some(AccessStatus.Restricted)
       case Some("By Appointment") => Some(AccessStatus.ByAppointment)
       case Some("Donor Permission") => Some(AccessStatus.PermissionRequired)
+      case Some("Cannot Be Produced") | Some("Missing") | Some("Deaccessioned") => Some(AccessStatus.Unavailable)
+      case Some("Temporarily Unavailable") => Some(AccessStatus.TemporarilyUnavailable)
       case _                  => None
     }
 
@@ -81,9 +137,6 @@ object CalmTermsOfUse extends CalmRecordOps {
     LocalDate.parse(s, DateTimeFormatter.ofPattern("d/M/yyyy"))
 
   implicit class StringOps(s: String) {
-    def isSingleSentence: Boolean =
-      s.count(_ == '.') == 1
-
     def containsDate(d: LocalDate): Boolean = {
       // Remove any ordinals, e.g. "1st", "2nd"
       val normalisedS = s
@@ -92,11 +145,19 @@ object CalmTermsOfUse extends CalmRecordOps {
         .replace("3rd", "3")
         .replace("th", "")
 
-      Seq("d MMMM yyyy").exists {
+      Seq(
+        "d MMMM yyyy",  // 1 January 2021
+        "dd/MM/yyyy",   // 01/01/2021
+      ).exists {
         fmt =>
           val dateString = d.format(DateTimeFormatter.ofPattern(fmt))
           normalisedS.contains(s"until $dateString")
       }
     }
+
+    def hasRestrictions: Boolean =
+      Seq("restricted", "restrictions").exists(
+        s.toLowerCase.contains(_)
+      )
   }
 }
