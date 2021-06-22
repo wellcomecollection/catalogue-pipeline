@@ -4,7 +4,9 @@ import buildinfo.BuildInfo
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.fields.{ElasticField, ObjectField, TokenCountField}
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
-import uk.ac.wellcome.elasticsearch.IndexConfig
+import uk.ac.wellcome.elasticsearch.{IndexConfig, RefreshInterval}
+
+import scala.concurrent.duration.DurationInt
 
 sealed trait WorksIndexConfig extends IndexConfig with IndexConfigFields {
 
@@ -201,4 +203,6 @@ object IndexedWorkIndexConfig extends WorksIndexConfig {
       objectField("redirectSources").withDynamic("false"),
       version
     )
+
+  override val refreshInterval = RefreshInterval.On(30.seconds)
 }
