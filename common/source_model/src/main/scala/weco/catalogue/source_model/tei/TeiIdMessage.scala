@@ -13,3 +13,19 @@ case class TeiIdChangeMessage(id: String,
     extends TeiIdMessage
 case class TeiIdDeletedMessage(id: String, timeDeleted: Instant)
     extends TeiIdMessage
+
+object TeiIdMessage {
+  implicit class TeiIdMessageToTeiMetadata(message: TeiIdMessage) {
+    def toMetadata = message match {
+      case TeiIdChangeMessage(_, s3Location, timeModified) =>
+        TeiChangedMetadata(
+          s3Location,
+          timeModified
+        )
+      case TeiIdDeletedMessage(_, timeDeleted) =>
+        TeiDeletedMetadata(
+          timeDeleted
+        )
+    }
+  }
+}

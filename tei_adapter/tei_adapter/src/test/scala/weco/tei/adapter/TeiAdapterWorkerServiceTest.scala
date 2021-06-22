@@ -301,7 +301,7 @@ class TeiAdapterWorkerServiceTest
             val store: MemoryVersionedStore[String, TeiMetadata] =
               MemoryVersionedStore(initialData)
             val service =
-              new TeiAdapterWorkerService(stream, messageSender, store)
+              new TeiAdapterWorkerService(stream, messageSender, store, 10)
             service.run()
             testWith((q, messageSender, store))
           }

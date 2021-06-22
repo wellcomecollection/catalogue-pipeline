@@ -9,18 +9,17 @@ import weco.catalogue.source_model.TeiSourcePayload
 import weco.catalogue.source_model.tei.{
   TeiChangedMetadata,
   TeiDeletedMetadata,
-  TeiIdChangeMessage,
-  TeiIdDeletedMessage,
   TeiIdMessage,
   TeiMetadata
 }
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class TeiAdapterWorkerService[Dest](
   messageStream: SQSStream[NotificationMessage],
   messageSender: MessageSender[Dest],
-  store: VersionedStore[String, Int, TeiMetadata]
+  store: VersionedStore[String, Int, TeiMetadata],
+  parallelism: Int
 )(implicit val ec: ExecutionContext)
     extends Runnable {
   val className = this.getClass.getSimpleName
@@ -29,57 +28,60 @@ class TeiAdapterWorkerService[Dest](
     messageStream.runStream(
       className,
       source =>
-        source.map {
+        source.mapAsync(parallelism) {
           case (msg, notificationMessage) =>
-            val tried = for {
-              idMessage <- fromJson[TeiIdMessage](
-                notificationMessage.body
-              )
-              metadata = toMetadata(idMessage)
-
-              stored <- store
-                .upsert(idMessage.id)(metadata)(
-                  existingMetadata =>
-                    metadata match {
-                      case TeiChangedMetadata(_, time) =>
-                        if (existingMetadata.time.isAfter(time)) {
-                          Right(existingMetadata)
-                        } else {
-                          Right(metadata)
-                        }
-                      case TeiDeletedMetadata(time) =>
-                        if (time.isAfter(existingMetadata.time)) {
-                          Right(metadata)
-                        } else {
-                          Right(existingMetadata)
-                        }
-                    }
+            Future.fromTry({
+              for {
+                idMessage <- fromJson[TeiIdMessage](
+                  notificationMessage.body
                 )
-                .left
-                .map(_.e)
-                .toTry
-              _ <- messageSender.sendT(
-                TeiSourcePayload(
-                  stored.id.id,
-                  stored.identifiedT,
-                  stored.id.version
-                )
-              )
-            } yield msg
+                metadata = idMessage.toMetadata
 
-            tried.get
+                stored <- updateStore(idMessage.id, metadata)
+                _ <- messageSender.sendT(
+                  TeiSourcePayload(
+                    stored.id.id,
+                    stored.identifiedT,
+                    stored.id.version
+                  )
+                )
+
+              } yield msg
+            })
+
         }
     )
 
-  private def toMetadata(message: TeiIdMessage) = message match {
-    case TeiIdChangeMessage(_, s3Location, timeModified) =>
-      TeiChangedMetadata(
-        s3Location,
-        timeModified
+  private def updateStore(id: String, metadata: TeiMetadata) = store
+      .upsert(id)(metadata)(
+        existingMetadata =>
+          updateMetadata(
+            newMetadata = metadata,
+            existingMetadata = existingMetadata
+          )
       )
-    case TeiIdDeletedMessage(_, timeDeleted) =>
-      TeiDeletedMetadata(
-        timeDeleted
-      )
+      .left
+      .map(_.e)
+      .toTry
+
+  private def updateMetadata(
+    newMetadata: TeiMetadata,
+    existingMetadata: TeiMetadata
+  ) = {
+    newMetadata match {
+      case TeiChangedMetadata(_, changedTime) =>
+        if (existingMetadata.time.isAfter(changedTime)) {
+          Right(existingMetadata)
+        } else {
+          Right(newMetadata)
+        }
+      case TeiDeletedMetadata(deletedTime) =>
+        if (deletedTime.isAfter(existingMetadata.time)) {
+          Right(newMetadata)
+        } else {
+          Right(existingMetadata)
+        }
+    }
   }
+
 }
