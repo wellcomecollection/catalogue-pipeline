@@ -1,6 +1,5 @@
 # -*- encoding: utf-8 -*-
 
-import dateutil
 import json
 import mock
 import os
