@@ -19,8 +19,9 @@ import weco.catalogue.internal_model.work.{Work, WorkState}
 trait IndexFixtures extends ElasticsearchFixtures { this: Suite =>
 
   def withLocalWorksIndex[R](testWith: TestWith[Index, R]): R =
-    withLocalElasticsearchIndex[R](config = WorksIndexConfig.ingested) { index =>
-      testWith(index)
+    withLocalElasticsearchIndex[R](config = WorksIndexConfig.ingested) {
+      index =>
+        testWith(index)
     }
 
   def withLocalMergedWorksIndex[R](testWith: TestWith[Index, R]): R =
@@ -34,8 +35,9 @@ trait IndexFixtures extends ElasticsearchFixtures { this: Suite =>
         testWith(index)
     }
   def withLocalInitialImagesIndex[R](testWith: TestWith[Index, R]): R =
-    withLocalElasticsearchIndex[R](config = ImagesIndexConfig.initial) { index =>
-      testWith(index)
+    withLocalElasticsearchIndex[R](config = ImagesIndexConfig.initial) {
+      index =>
+        testWith(index)
     }
 
   def withLocalAugmentedImageIndex[R](testWith: TestWith[Index, R]): R =
@@ -45,8 +47,9 @@ trait IndexFixtures extends ElasticsearchFixtures { this: Suite =>
     }
 
   def withLocalImagesIndex[R](testWith: TestWith[Index, R]): R =
-    withLocalElasticsearchIndex[R](config = ImagesIndexConfig.ingested) { index =>
-      testWith(index)
+    withLocalElasticsearchIndex[R](config = ImagesIndexConfig.ingested) {
+      index =>
+        testWith(index)
     }
 
   def withLocalIndex[R](config: IndexConfig)(testWith: TestWith[Index, R]): R =

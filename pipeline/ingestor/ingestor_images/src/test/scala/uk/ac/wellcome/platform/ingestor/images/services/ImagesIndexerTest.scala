@@ -3,7 +3,7 @@ package uk.ac.wellcome.platform.ingestor.images.services
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.index.{IndexFixtures, ImagesIndexConfig}
+import uk.ac.wellcome.models.index.{ImagesIndexConfig, IndexFixtures}
 import uk.ac.wellcome.pipeline_storage.ElasticIndexer
 import uk.ac.wellcome.pipeline_storage.Indexable.imageIndexable
 import uk.ac.wellcome.models.Implicits._

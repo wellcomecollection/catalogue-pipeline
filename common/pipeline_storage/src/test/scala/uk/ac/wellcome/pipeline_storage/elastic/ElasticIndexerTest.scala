@@ -30,7 +30,9 @@ class ElasticIndexerTest
     with IndexConfigFields
     with SampleDocumentGenerators {
 
-  import SampleDocument._, SampleDocument.{canonicalId => sampleDocumentCanonicalId}
+  import SampleDocument._, SampleDocument.{
+    canonicalId => sampleDocumentCanonicalId
+  }
 
   override def withContext[R](documents: Seq[SampleDocument])(
     testWith: TestWith[Index, R]): R =
@@ -96,14 +98,17 @@ class ElasticIndexerTest
         .copy(data = SampleDocumentData(genre = Some(randomAlphanumeric())))
     }
 
-    val strictWithNoDataIndexConfig = IndexConfig({
-      val id = lowercaseKeyword("id")
-      val title = textField("title")
-      val data = objectField("data")
+    val strictWithNoDataIndexConfig = IndexConfig(
+      {
+        val id = lowercaseKeyword("id")
+        val title = textField("title")
+        val data = objectField("data")
 
-      properties(Seq(title, id, version, data))
-        .dynamic(DynamicMapping.Strict)
-    }, WorksAnalysis())
+        properties(Seq(title, id, version, data))
+          .dynamic(DynamicMapping.Strict)
+      },
+      WorksAnalysis()
+    )
 
     withLocalElasticsearchIndex(config = strictWithNoDataIndexConfig) {
       implicit index =>
@@ -136,14 +141,17 @@ class ElasticIndexerTest
 
     val documents = List(documentA, documentB)
 
-    val unmappedDataMappingIndexConfig = IndexConfig({
-      val id = lowercaseKeyword("id")
-      val title = textField("title")
-      val data = objectField("data").withDynamic("false")
+    val unmappedDataMappingIndexConfig = IndexConfig(
+      {
+        val id = lowercaseKeyword("id")
+        val title = textField("title")
+        val data = objectField("data").withDynamic("false")
 
-      properties(Seq(title, id, version, data))
-        .dynamic(DynamicMapping.Strict)
-    }, WorksAnalysis())
+        properties(Seq(title, id, version, data))
+          .dynamic(DynamicMapping.Strict)
+      },
+      WorksAnalysis()
+    )
 
     withLocalElasticsearchIndex(config = unmappedDataMappingIndexConfig) {
       implicit index =>

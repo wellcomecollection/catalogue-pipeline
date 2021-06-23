@@ -5,7 +5,7 @@ import org.scalatest.Assertion
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.index.{IndexFixtures, ImagesIndexConfig}
+import uk.ac.wellcome.models.index.{ImagesIndexConfig, IndexFixtures}
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.models.work.generators.{InstantGenerators, WorkGenerators}
