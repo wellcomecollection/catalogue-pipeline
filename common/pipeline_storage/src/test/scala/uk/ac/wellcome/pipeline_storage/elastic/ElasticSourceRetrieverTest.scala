@@ -6,7 +6,10 @@ import uk.ac.wellcome.elasticsearch.model.IndexId
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.pipeline_storage.{Retriever, RetrieverTestCases}
 import uk.ac.wellcome.pipeline_storage.fixtures.ElasticIndexerFixtures
-import weco.catalogue.pipeline_storage.generators.{SampleDocument, SampleDocumentGenerators}
+import weco.catalogue.pipeline_storage.generators.{
+  SampleDocument,
+  SampleDocumentGenerators
+}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
