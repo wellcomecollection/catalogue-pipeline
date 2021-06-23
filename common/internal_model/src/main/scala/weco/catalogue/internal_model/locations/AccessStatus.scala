@@ -5,10 +5,10 @@ import enumeratum.{Enum, EnumEntry}
 class UnknownAccessStatus(status: String) extends Exception(status)
 
 sealed trait AccessStatus extends EnumEntry { this: AccessStatus =>
+  def name: String = this.getClass.getSimpleName.stripSuffix("$")
+
   val id: String
   val label: String
-
-  def name: String = id
 
   def isAvailable: Boolean = this match {
     case AccessStatus.Open              => true
