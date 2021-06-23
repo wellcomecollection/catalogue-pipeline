@@ -9,7 +9,8 @@ import uk.ac.wellcome.platform.transformer.calm.models.CalmTransformerException.
 import uk.ac.wellcome.platform.transformer.calm.transformers.{
   CalmItems,
   CalmLanguages,
-  CalmNotes
+  CalmNotes,
+  CalmTermsOfUse
 }
 import weco.catalogue.source_model.calm.CalmRecord
 import weco.catalogue.transformer.Transformer
@@ -149,7 +150,6 @@ object CalmTransformer
     val (languages, languageNotes) = CalmLanguages(record.getList("Language"))
 
     for {
-      items <- CalmItems(record)
       title <- title(record)
       workType <- workType(record)
       collectionPath <- collectionPath(record)
@@ -163,13 +163,13 @@ object CalmTransformer
         subjects = subjects(record),
         languages = languages,
         mergeCandidates = mergeCandidates(record),
-        items = items,
+        items = CalmItems(record),
         contributors = contributors(record),
         description = description(record),
         physicalDescription = physicalDescription(record),
         production = production(record),
         workType = workType,
-        notes = CalmNotes(record) ++ languageNotes,
+        notes = CalmNotes(record) ++ languageNotes ++ CalmTermsOfUse(record),
       )
   }
 
