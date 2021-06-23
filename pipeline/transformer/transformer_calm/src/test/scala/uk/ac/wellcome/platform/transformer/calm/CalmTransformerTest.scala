@@ -146,14 +146,10 @@ class CalmTransformerTest
       "AccessConditions" -> "nope.",
       "CatalogueStatus" -> "Catalogued"
     )
-    val item = CalmTransformer(record, version).right.get.data.items.head
-    item.locations.head.accessConditions shouldBe List(
-      AccessCondition(
-        status = Some(AccessStatus.Restricted),
-        terms = Some("nope. nope."),
-        to = Some("10/10/2050")
-      )
-    )
+    val termsOfUse = CalmTransformer(record, version).right.get.data.notes
+      .collectFirst { case TermsOfUse(content) => content }
+
+    termsOfUse shouldBe Some("nope. nope. Restricted until 10 October 2050.")
   }
 
   it("transforms description") {
@@ -473,18 +469,6 @@ class CalmTransformerTest
     List(noTitle, noLevel, noRefNo) map { record =>
       CalmTransformer(record, version).right.get shouldBe a[Work.Invisible[_]]
     }
-  }
-
-  it("returns a Work.Invisible[Source] if invalid access status") {
-    val record = createCalmRecordWith(
-      "Title" -> "abc",
-      "Level" -> "Collection",
-      "RefNo" -> "a/b/c",
-      "AltRefNo" -> "a.b.c",
-      "AccessStatus" -> "AAH",
-      "CatalogueStatus" -> "Catalogued"
-    )
-    CalmTransformer(record, version).right.get shouldBe a[Work.Invisible[_]]
   }
 
   it("returns a Work.Invisible[Source] if no title") {
