@@ -8,6 +8,7 @@ import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.locations.{
   AccessCondition,
+  AccessMethod,
   AccessStatus,
   DigitalLocation,
   LocationType
@@ -228,27 +229,33 @@ class ItemsRuleTest
     }
   }
 
-  it("Adds the METS item location to the Calm item") {
-    inside(ItemsRule.merge(calmWork, List(metsWork))) {
+  it("copies the locations from Sierra to Calm") {
+    val ac = AccessCondition(
+      status = Some(AccessStatus.Open),
+      method = Some(AccessMethod.OnlineRequest)
+    )
+
+    val location = createPhysicalLocationWith(accessConditions = List(ac))
+
+    val item = createIdentifiedItemWith(locations = List(location))
+
+    val sierraWork = sierraIdentifiedWork().items(List(item))
+
+    inside(ItemsRule.merge(calmWork, List(sierraWork))) {
       case FieldMergeResult(items, mergedSources) =>
         items should have size 1
-        items.head.locations should contain theSameElementsAs (calmWork.data.items.head.locations ++ metsWork.data.items.head.locations)
+        items.head.locations shouldBe Seq(location)
 
-        mergedSources should be(Seq(metsWork))
+        mergedSources shouldBe Seq(sierraWork)
     }
   }
 
-  it("Adds Sierra item IDs and the METS item location to a Calm work") {
+  it("replace Calm items with Sierra and METS items") {
     inside(ItemsRule.merge(calmWork, List(physicalPictureSierra, metsWork))) {
       case FieldMergeResult(items, mergedSources) =>
-        items should have size 1
-        items.head.id should be(physicalPictureSierra.data.items.head.id)
-        items.head.locations should contain theSameElementsAs (calmWork.data.items.head.locations ++ metsWork.data.items.head.locations)
+        items should have size 2
 
-        mergedSources should contain theSameElementsAs Seq(
-          metsWork,
-          physicalPictureSierra
-        )
+        items shouldBe physicalPictureSierra.data.items ++ metsWork.data.items
     }
   }
 }

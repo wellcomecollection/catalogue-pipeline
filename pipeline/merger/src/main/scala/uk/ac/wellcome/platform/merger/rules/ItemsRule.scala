@@ -135,12 +135,20 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
       Nil
     }
 
-  /**
-    * Sierra records are created from the Sierra / Calm harvest.
-    * We merge the Sierra item ID into the Calm item.
+  /** When records are harvested from Calm, both a bib and an item record are
+    * created in Sierra.  The Sierra item will have more interesting information
+    * about access status, hold count, etc.  The Calm items are just stubs.
     *
-    * If an item is digitised via METS or Miro, it is linked to the Sierra record.
-    * We merge that into the Calm item.
+    * See CalmItems.scala -- the Calm item is only:
+    *
+    *     Item {
+    *       locations: [
+    *         Location { locationType = ClosedStores }
+    *       ]
+    *     }
+    *
+    * For this reason, we keep all the items *except* the Calm item.  This means
+    * we'll also pick up any items linked to the Sierra work from METS or Miro.
     */
   private val mergeIntoCalmTarget = new PartialRule {
     val isDefinedForTarget: WorkPredicate = singlePhysicalItemCalmWork
@@ -152,27 +160,8 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     def rule(
       target: Work.Visible[Identified],
       sources: NonEmptyList[Work[Identified]]
-    ): FieldData = {
-
-      // The calm Work predicate ensures this is safe
-      val calmItem = target.data.items.head
-
-      val digitisedSources =
-        sources.filter(singleDigitalItemMetsWork or singleDigitalItemMiroWork)
-      val digitisedLocations =
-        digitisedSources.flatMap(_.data.items.flatMap(_.locations))
-
-      val sierraSources = sources.filter(sierraWork)
-      val sierraItemId =
-        sierraSources.flatMap(_.data.items.map(_.id)).headOption
-
-      List(
-        calmItem.copy(
-          locations = calmItem.locations ++ digitisedLocations,
-          id = sierraItemId.getOrElse(IdState.Unidentifiable)
-        )
-      )
-    }
+    ): FieldData =
+      sources.map(_.data.items).toList.flatten
   }
 
   /** If we're merging a physical/digitised Sierra work pair, make
