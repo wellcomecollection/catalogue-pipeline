@@ -13,7 +13,7 @@ import uk.ac.wellcome.pipeline_storage.typesafe.{
   PipelineStorageStreamBuilder
 }
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
-import uk.ac.wellcome.models.index.IndexedWorkIndexConfig
+import uk.ac.wellcome.models.index.WorksIndexConfig
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.Implicits._
 import weco.catalogue.internal_model.work.Work
@@ -39,7 +39,7 @@ object Main extends WellcomeTypesafeApp {
       config,
       ElasticBuilder.buildElasticClient(config, namespace = "catalogue"),
       namespace = "indexed-works",
-      indexConfig = IndexedWorkIndexConfig
+      indexConfig = WorksIndexConfig.ingested
     )
     val messageSender = SNSBuilder
       .buildSNSMessageSender(config, subject = "Sent from the ingestor-works")

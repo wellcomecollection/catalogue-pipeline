@@ -7,7 +7,7 @@ import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.utils.JsonAssertions
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.index.IndexedWorkIndexConfig
+import uk.ac.wellcome.models.index.WorksIndexConfig
 import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.pipeline_storage.ElasticIndexer
 import uk.ac.wellcome.pipeline_storage.Indexable.workIndexable
@@ -71,7 +71,7 @@ class IngestorFeatureTest
       indexer = new ElasticIndexer[Work[Indexed]](
         elasticClient,
         indexedIndex,
-        IndexedWorkIndexConfig),
+        WorksIndexConfig.ingested),
       retriever = new ElasticSourceRetriever[Work[Denormalised]](
         elasticClient,
         denormalisedIndex

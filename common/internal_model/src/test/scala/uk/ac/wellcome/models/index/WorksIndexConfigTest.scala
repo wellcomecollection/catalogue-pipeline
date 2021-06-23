@@ -124,7 +124,7 @@ class WorksIndexConfigTest
 
     it("WorkState.Indexed") {
       forAll { indexedWork: Work[WorkState.Indexed] =>
-        withLocalIndex(IndexedWorkIndexConfig) { index =>
+        withLocalIndex(WorksIndexConfig.ingested) { index =>
           whenReady(indexObject(index, indexedWork)) { _ =>
             assertObjectIndexed(index, indexedWork)
           }
