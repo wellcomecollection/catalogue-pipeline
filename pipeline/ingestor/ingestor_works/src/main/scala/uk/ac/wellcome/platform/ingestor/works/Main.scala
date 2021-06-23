@@ -39,7 +39,7 @@ object Main extends WellcomeTypesafeApp {
       config,
       ElasticBuilder.buildElasticClient(config, namespace = "catalogue"),
       namespace = "indexed-works",
-      indexConfig = WorksIndexConfig.ingested
+      indexConfig = WorksIndexConfig.ingested.withRefreshIntervalFromConfig(config)
     )
     val messageSender = SNSBuilder
       .buildSNSMessageSender(config, subject = "Sent from the ingestor-works")
