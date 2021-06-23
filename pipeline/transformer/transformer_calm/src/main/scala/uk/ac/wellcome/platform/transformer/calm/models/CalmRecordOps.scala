@@ -7,7 +7,7 @@ trait CalmRecordOps {
   implicit class CalmRecordOps(record: CalmRecord) {
 
     def get(key: String): Option[String] =
-      getList(key).headOption
+      getList(key).distinct.headOption
 
     def getList(key: String): List[String] =
       record.data
