@@ -38,7 +38,7 @@ module "ingestor_images" {
     es_augmented_index = local.es_images_augmented_index
     es_is_reindexing   = var.is_reindexing
 
-    ingest_queue_id   = module.ingestor_images_queue.url
+    ingest_queue_id               = module.ingestor_images_queue.url
     ingest_flush_interval_seconds = local.image_ingestor_flush_interval_seconds
 
     # We initially had this set to 100, and we saw errors like:

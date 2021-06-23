@@ -30,12 +30,12 @@ module "ingestor_works" {
   cluster_arn  = aws_ecs_cluster.cluster.arn
 
   env_vars = {
-    metrics_namespace             = "${local.namespace_hyphen}_ingestor_works"
-    topic_arn                     = module.work_ingestor_topic.arn
+    metrics_namespace = "${local.namespace_hyphen}_ingestor_works"
+    topic_arn         = module.work_ingestor_topic.arn
 
-    es_works_index                = local.es_works_index
-    es_denormalised_index         = local.es_works_denormalised_index
-    es_is_reindexing              = var.is_reindexing
+    es_works_index        = local.es_works_index
+    es_denormalised_index = local.es_works_denormalised_index
+    es_is_reindexing      = var.is_reindexing
 
     ingest_queue_id               = module.ingestor_works_queue.url
     ingest_batch_size             = 100
