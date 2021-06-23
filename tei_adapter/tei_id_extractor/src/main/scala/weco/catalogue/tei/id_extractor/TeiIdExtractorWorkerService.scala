@@ -7,7 +7,12 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.typesafe.Runnable
 import weco.catalogue.tei.id_extractor.database.TableProvisioner
-import weco.catalogue.tei.id_extractor.models._
+import weco.catalogue.source_model.tei.{
+  TeiPathChangedMessage,
+  TeiPathDeletedMessage,
+  TeiPathMessage
+}
+import weco.catalogue.tei.id_extractor.models.PathId
 import weco.flows.FlowOps
 
 import scala.concurrent.{ExecutionContext, Future}

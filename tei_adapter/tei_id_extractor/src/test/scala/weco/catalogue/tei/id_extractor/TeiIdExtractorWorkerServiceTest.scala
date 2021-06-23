@@ -18,11 +18,17 @@ import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.memory.MemoryStore
 import weco.catalogue.tei.id_extractor.database.TableProvisioner
 import weco.catalogue.tei.id_extractor.fixtures.{PathIdDatabase, Wiremock}
-import weco.catalogue.tei.id_extractor.models.{
+import com.github.tomakehurst.wiremock.client.WireMock
+import io.circe.Encoder
+import uk.ac.wellcome.fixtures.TestWith
+import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
+import weco.catalogue.tei.id_extractor.database.TableProvisioner
+import weco.catalogue.source_model.tei.{
   TeiIdChangeMessage,
   TeiIdDeletedMessage,
   TeiIdMessage
 }
+
 import weco.http.client.AkkaHttpClient
 
 import java.nio.charset.StandardCharsets

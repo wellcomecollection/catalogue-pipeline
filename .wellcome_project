@@ -31,6 +31,9 @@ tei_adapter:
     - id: tei_id_extractor
       services:
         - id: tei-id-extractor
+    - id: tei_adapter
+      services:
+        - id: tei-adapter
   name: Tei Adapter
   role_arn: arn:aws:iam::760097843905:role/platform-ci
 

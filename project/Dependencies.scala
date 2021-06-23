@@ -306,4 +306,8 @@ object CatalogueDependencies {
       ExternalDependencies.wireMockDependencies ++
       ExternalDependencies.scalatestDependencies
   }
+  val teiAdapterServiceDependencies: Seq[ModuleID] =
+    WellcomeDependencies.messagingTypesafeLibrary ++
+      WellcomeDependencies.typesafeLibrary ++
+      ExternalDependencies.scalatestDependencies
 }
