@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.router
 
 import akka.actor.ActorSystem
 import com.typesafe.config.Config
-import uk.ac.wellcome.models.index.DenormalisedWorkIndexConfig
+import uk.ac.wellcome.models.index.WorksIndexConfig
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
@@ -32,7 +32,7 @@ object Main extends WellcomeTypesafeApp {
       config,
       esClient,
       namespace = "denormalised-works",
-      indexConfig = DenormalisedWorkIndexConfig
+      indexConfig = WorksIndexConfig.denormalised
     )
 
     val workRetriever = ElasticSourceRetrieverBuilder[Work[Merged]](

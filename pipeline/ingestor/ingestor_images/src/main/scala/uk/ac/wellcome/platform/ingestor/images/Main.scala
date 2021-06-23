@@ -12,7 +12,7 @@ import uk.ac.wellcome.pipeline_storage.typesafe.{
   PipelineStorageStreamBuilder
 }
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
-import uk.ac.wellcome.models.index.IndexedImageIndexConfig
+import uk.ac.wellcome.models.index.ImagesIndexConfig
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.models.Implicits._
 import weco.catalogue.internal_model.image.Image
@@ -38,7 +38,7 @@ object Main extends WellcomeTypesafeApp {
         config,
         ElasticBuilder.buildElasticClient(config, namespace = "catalogue"),
         namespace = "indexed-images",
-        indexConfig = IndexedImageIndexConfig
+        indexConfig = ImagesIndexConfig.ingested
       )
     val msgSender = SNSBuilder
       .buildSNSMessageSender(config, subject = "Sent from the ingestor-images")

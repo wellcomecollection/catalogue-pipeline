@@ -6,7 +6,7 @@ import org.scalatest.Suite
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.elasticsearch.model.IndexId
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
-import uk.ac.wellcome.elasticsearch.{IndexConfig, NoStrictMapping}
+import uk.ac.wellcome.elasticsearch.IndexConfig
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.pipeline_storage.{ElasticIndexer, Indexable}
 
@@ -17,7 +17,7 @@ trait ElasticIndexerFixtures extends ElasticsearchFixtures with Akka {
 
   def withElasticIndexer[T, R](idx: Index,
                                esClient: ElasticClient = elasticClient,
-                               config: IndexConfig = NoStrictMapping)(
+                               config: IndexConfig = IndexConfig.empty)(
     testWith: TestWith[ElasticIndexer[T], R])(implicit
                                               ec: ExecutionContext,
                                               encoder: Encoder[T],

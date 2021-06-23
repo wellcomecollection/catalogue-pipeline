@@ -3,7 +3,7 @@ package uk.ac.wellcome.platform.transformer.sierra
 import akka.actor.ActorSystem
 import com.amazonaws.services.s3.AmazonS3
 import com.typesafe.config.Config
-import uk.ac.wellcome.models.index.SourceWorkIndexConfig
+import uk.ac.wellcome.models.index.WorksIndexConfig
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
@@ -39,7 +39,7 @@ object Main extends WellcomeTypesafeApp {
         indexer = ElasticIndexerBuilder[Work[Source]](
           config,
           esClient,
-          indexConfig = SourceWorkIndexConfig
+          indexConfig = WorksIndexConfig.source
         ),
         messageSender = SNSBuilder
           .buildSNSMessageSender(

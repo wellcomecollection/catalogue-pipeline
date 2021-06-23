@@ -12,7 +12,7 @@ import uk.ac.wellcome.platform.transformer.mets.services.MetsTransformerWorker
 import uk.ac.wellcome.storage.typesafe.S3Builder
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
-import uk.ac.wellcome.models.index.SourceWorkIndexConfig
+import uk.ac.wellcome.models.index.WorksIndexConfig
 import weco.catalogue.internal_model.work.WorkState.Source
 import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.pipeline_storage.typesafe.{
@@ -41,7 +41,7 @@ object Main extends WellcomeTypesafeApp with AWSClientConfigBuilder {
         indexer = ElasticIndexerBuilder[Work[Source]](
           config,
           esClient,
-          indexConfig = SourceWorkIndexConfig
+          indexConfig = WorksIndexConfig.source
         ),
         messageSender = SNSBuilder
           .buildSNSMessageSender(

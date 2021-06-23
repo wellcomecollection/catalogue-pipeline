@@ -83,7 +83,7 @@ class WorksIndexConfigTest
   describe("indexing different works with every type of WorkState") {
     it("WorkState.Source") {
       forAll { sourceWork: Work[WorkState.Source] =>
-        withLocalIndex(SourceWorkIndexConfig) { index =>
+        withLocalIndex(WorksIndexConfig.source) { index =>
           println(sourceWork)
           whenReady(indexObject(index, sourceWork)) { _ =>
             assertObjectIndexed(index, sourceWork)
@@ -94,7 +94,7 @@ class WorksIndexConfigTest
 
     it("WorkState.Identified") {
       forAll { identifiedWork: Work[WorkState.Identified] =>
-        withLocalIndex(IdentifiedWorkIndexConfig) { index =>
+        withLocalIndex(WorksIndexConfig.identified) { index =>
           whenReady(indexObject(index, identifiedWork)) { _ =>
             assertObjectIndexed(index, identifiedWork)
           }
@@ -104,7 +104,7 @@ class WorksIndexConfigTest
 
     it("WorkState.Merged") {
       forAll { mergedWork: Work[WorkState.Merged] =>
-        withLocalIndex(MergedWorkIndexConfig) { index =>
+        withLocalIndex(WorksIndexConfig.merged) { index =>
           whenReady(indexObject(index, mergedWork)) { _ =>
             assertObjectIndexed(index, mergedWork)
           }
@@ -114,7 +114,7 @@ class WorksIndexConfigTest
 
     it("WorkState.Denormalised") {
       forAll { denormalisedWork: Work[WorkState.Denormalised] =>
-        withLocalIndex(DenormalisedWorkIndexConfig) { index =>
+        withLocalIndex(WorksIndexConfig.denormalised) { index =>
           whenReady(indexObject(index, denormalisedWork)) { _ =>
             assertObjectIndexed(index, denormalisedWork)
           }
@@ -124,7 +124,7 @@ class WorksIndexConfigTest
 
     it("WorkState.Indexed") {
       forAll { indexedWork: Work[WorkState.Indexed] =>
-        withLocalIndex(IndexedWorkIndexConfig) { index =>
+        withLocalIndex(WorksIndexConfig.ingested) { index =>
           whenReady(indexObject(index, indexedWork)) { _ =>
             assertObjectIndexed(index, indexedWork)
           }

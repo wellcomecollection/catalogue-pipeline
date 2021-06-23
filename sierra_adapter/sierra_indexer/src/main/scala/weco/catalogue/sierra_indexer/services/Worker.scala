@@ -13,10 +13,7 @@ import uk.ac.wellcome.storage.Identified
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.Readable
 import uk.ac.wellcome.typesafe.Runnable
-import weco.catalogue.sierra_indexer.index.{
-  FixedFieldIndexConfig,
-  VarfieldIndexConfig
-}
+import weco.catalogue.sierra_indexer.index.SierraIndexConfig
 import weco.catalogue.source_model.SierraSourcePayload
 import weco.catalogue.source_model.sierra.SierraTransformable
 
@@ -39,13 +36,13 @@ class Worker(
       _ <- new ElasticsearchIndexCreator(
         elasticClient,
         index = Index(s"${indexPrefix}_varfields"),
-        config = VarfieldIndexConfig
+        config = SierraIndexConfig.varfield
       ).create
 
       _ <- new ElasticsearchIndexCreator(
         elasticClient,
         index = Index(s"${indexPrefix}_fixedfields"),
-        config = FixedFieldIndexConfig
+        config = SierraIndexConfig.fixedField
       ).create
 
       _ <- sqsStream.foreach("Sierra indexer", processMessage)

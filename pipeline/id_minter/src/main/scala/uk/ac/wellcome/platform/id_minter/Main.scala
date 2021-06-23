@@ -23,7 +23,7 @@ import uk.ac.wellcome.pipeline_storage.typesafe.{
   PipelineStorageStreamBuilder
 }
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.index.IdentifiedWorkIndexConfig
+import uk.ac.wellcome.models.index.WorksIndexConfig
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.Identified
 
@@ -51,7 +51,7 @@ object Main extends WellcomeTypesafeApp {
       config,
       esClient,
       namespace = "identified-works",
-      indexConfig = IdentifiedWorkIndexConfig
+      indexConfig = WorksIndexConfig.identified
     )
 
     val messageStream = SQSBuilder.buildSQSStream[NotificationMessage](config)

@@ -9,7 +9,7 @@ import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.time.{Seconds, Span}
 import software.amazon.awssdk.services.sqs.model.Message
-import uk.ac.wellcome.elasticsearch.{ElasticClientBuilder, NoStrictMapping}
+import uk.ac.wellcome.elasticsearch.{ElasticClientBuilder, IndexConfig}
 import uk.ac.wellcome.json.JsonUtil
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
@@ -36,7 +36,7 @@ class PipelineStorageStreamTest
     with SampleDocumentGenerators {
 
   def indexer(index: Index, elasticClient: ElasticClient = elasticClient) =
-    new ElasticIndexer[SampleDocument](elasticClient, index, NoStrictMapping)
+    new ElasticIndexer[SampleDocument](elasticClient, index, IndexConfig.empty)
 
   it("creates the index at startup if it doesn't already exist") {
     val index = createIndex

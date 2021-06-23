@@ -1,7 +1,7 @@
 package uk.ac.wellcome.pipeline_storage.elastic
 
 import com.sksamuel.elastic4s.Index
-import uk.ac.wellcome.elasticsearch.NoStrictMapping
+import uk.ac.wellcome.elasticsearch.IndexConfig
 import uk.ac.wellcome.elasticsearch.model.IndexId
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.pipeline_storage.{Retriever, RetrieverTestCases}
@@ -22,7 +22,7 @@ class ElasticSourceRetrieverTest
 
   override def withContext[R](documents: Seq[SampleDocument])(
     testWith: TestWith[Index, R]): R =
-    withLocalElasticsearchIndex(config = NoStrictMapping) { index =>
+    withLocalElasticsearchIndex(config = IndexConfig.empty) { index =>
       withElasticIndexer[SampleDocument, R](index) { indexer =>
         whenReady(indexer(documents)) { _ =>
           assertElasticsearchEventuallyHas(index, documents: _*)

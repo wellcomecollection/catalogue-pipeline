@@ -6,9 +6,9 @@ import org.scalatest.matchers.should.Matchers
 import scala.concurrent.ExecutionContext.Implicits.global
 import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.index.{
+  ImagesIndexConfig,
   IndexFixtures,
-  InitialImageIndexConfig,
-  MergedWorkIndexConfig
+  WorksIndexConfig
 }
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.elasticsearch.model.IndexId
@@ -44,12 +44,12 @@ class EitherIndexerTest
           leftIndexer = new ElasticIndexer[Work[Merged]](
             client = elasticClient,
             index = workIndex,
-            config = MergedWorkIndexConfig
+            config = WorksIndexConfig.merged
           ),
           rightIndexer = new ElasticIndexer[Image[Initial]](
             client = elasticClient,
             index = imageIndex,
-            config = InitialImageIndexConfig
+            config = ImagesIndexConfig.initial
           )
         )
 
@@ -70,12 +70,12 @@ class EitherIndexerTest
           leftIndexer = new ElasticIndexer[Work[Merged]](
             client = elasticClient,
             index = workIndex,
-            config = MergedWorkIndexConfig
+            config = WorksIndexConfig.merged
           ),
           rightIndexer = new ElasticIndexer[Image[Initial]](
             client = elasticClient,
             index = imageIndex,
-            config = InitialImageIndexConfig
+            config = ImagesIndexConfig.initial
           )
         )
 

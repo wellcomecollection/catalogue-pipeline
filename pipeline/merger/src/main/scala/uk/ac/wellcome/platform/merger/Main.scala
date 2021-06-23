@@ -4,10 +4,7 @@ import scala.concurrent.ExecutionContext
 import akka.actor.ActorSystem
 import com.typesafe.config.Config
 
-import uk.ac.wellcome.models.index.{
-  InitialImageIndexConfig,
-  MergedWorkIndexConfig
-}
+import uk.ac.wellcome.models.index.{ImagesIndexConfig, WorksIndexConfig}
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.models.Implicits._
@@ -67,13 +64,13 @@ object Main extends WellcomeTypesafeApp {
           config,
           esClient,
           namespace = "merged-works",
-          indexConfig = MergedWorkIndexConfig
+          indexConfig = WorksIndexConfig.merged
         ),
         ElasticIndexerBuilder[Image[Initial]](
           config,
           esClient,
           namespace = "initial-images",
-          indexConfig = InitialImageIndexConfig
+          indexConfig = ImagesIndexConfig.initial
         )
       )
 
