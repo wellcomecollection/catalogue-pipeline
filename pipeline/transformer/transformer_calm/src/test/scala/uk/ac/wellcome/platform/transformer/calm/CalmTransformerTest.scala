@@ -146,10 +146,7 @@ class CalmTransformerTest
       "AccessConditions" -> "nope.",
       "CatalogueStatus" -> "Catalogued"
     )
-    val termsOfUse = CalmTransformer(record, version)
-      .right.get
-      .data
-      .notes
+    val termsOfUse = CalmTransformer(record, version).right.get.data.notes
       .collectFirst { case TermsOfUse(content) => content }
 
     termsOfUse shouldBe Some("nope. nope. Restricted until 10 October 2050.")
