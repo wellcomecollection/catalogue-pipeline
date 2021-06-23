@@ -5,8 +5,8 @@ import akka.actor.ActorSystem
 import com.typesafe.config.Config
 
 import uk.ac.wellcome.models.index.{
-  InitialImageIndexConfig,
-  MergedWorkIndexConfig
+  ImagesIndexConfig,
+  WorksIndexConfig
 }
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
@@ -67,13 +67,13 @@ object Main extends WellcomeTypesafeApp {
           config,
           esClient,
           namespace = "merged-works",
-          indexConfig = MergedWorkIndexConfig
+          indexConfig = WorksIndexConfig.merged
         ),
         ElasticIndexerBuilder[Image[Initial]](
           config,
           esClient,
           namespace = "initial-images",
-          indexConfig = InitialImageIndexConfig
+          indexConfig = ImagesIndexConfig.initial
         )
       )
 

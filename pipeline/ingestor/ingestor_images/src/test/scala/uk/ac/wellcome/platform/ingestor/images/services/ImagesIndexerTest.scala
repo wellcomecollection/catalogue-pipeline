@@ -3,7 +3,7 @@ package uk.ac.wellcome.platform.ingestor.images.services
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.index.{IndexFixtures, IndexedImageIndexConfig}
+import uk.ac.wellcome.models.index.{IndexFixtures, ImagesIndexConfig}
 import uk.ac.wellcome.pipeline_storage.ElasticIndexer
 import uk.ac.wellcome.pipeline_storage.Indexable.imageIndexable
 import uk.ac.wellcome.models.Implicits._
@@ -28,7 +28,7 @@ class ImagesIndexerTest
         new ElasticIndexer[Image[ImageState.Augmented]](
           elasticClient,
           index,
-          IndexedImageIndexConfig)
+          ImagesIndexConfig.ingested)
       val image = createImageData.toAugmentedImage
       whenReady(imagesIndexer(List(image))) { r =>
         r.isRight shouldBe true
@@ -44,7 +44,7 @@ class ImagesIndexerTest
         new ElasticIndexer[Image[ImageState.Augmented]](
           elasticClient,
           index,
-          IndexedImageIndexConfig)
+          ImagesIndexConfig.ingested)
       val images = (1 to 5).map(_ => createImageData.toAugmentedImage)
       whenReady(imagesIndexer(images)) { r =>
         r.isRight shouldBe true
@@ -60,7 +60,7 @@ class ImagesIndexerTest
         new ElasticIndexer[Image[ImageState.Augmented]](
           elasticClient,
           index,
-          IndexedImageIndexConfig)
+          ImagesIndexConfig.ingested)
       val image = createImageData.toAugmentedImage
       val newerImage =
         image.copy(
@@ -84,7 +84,7 @@ class ImagesIndexerTest
         new ElasticIndexer[Image[ImageState.Augmented]](
           elasticClient,
           index,
-          IndexedImageIndexConfig)
+          ImagesIndexConfig.ingested)
       val image = createImageData.toAugmentedImage
       val olderImage =
         image.copy(

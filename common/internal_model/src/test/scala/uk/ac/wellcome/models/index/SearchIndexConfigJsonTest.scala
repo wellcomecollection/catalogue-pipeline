@@ -56,8 +56,8 @@ class SearchIndexConfigJsonTest
       CreateIndexContentBuilder(
         CreateIndexRequest(
           "images",
-          analysis = Some(IndexedImageIndexConfig.analysis),
-          mapping = Some(IndexedImageIndexConfig.mapping.meta(Map()))
+          analysis = Some(ImagesIndexConfig.ingested.analysis),
+          mapping = Some(ImagesIndexConfig.ingested.mapping.meta(Map()))
         )
       ).value)
 

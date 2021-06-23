@@ -5,7 +5,7 @@ import com.sksamuel.elastic4s.{Index, Response}
 import com.sksamuel.elastic4s.requests.get.GetResponse
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
 import org.scalatest.{Assertion, EitherValues}
-import uk.ac.wellcome.elasticsearch.{IndexConfig, NoStrictMapping}
+import uk.ac.wellcome.elasticsearch.IndexConfig
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil.toJson
@@ -27,13 +27,14 @@ class ElasticIndexerTest
     extends IndexerTestCases[Index, SampleDocument]
     with ElasticsearchFixtures
     with EitherValues
+    with IndexConfigFields
     with SampleDocumentGenerators {
 
-  import SampleDocument._
+  import SampleDocument._, SampleDocument.{canonicalId => sampleDocumentCanonicalId}
 
   override def withContext[R](documents: Seq[SampleDocument])(
     testWith: TestWith[Index, R]): R =
-    withLocalElasticsearchIndex(config = NoStrictMapping) { implicit index =>
+    withLocalElasticsearchIndex(config = IndexConfig.empty) { implicit index =>
       if (documents.nonEmpty) {
         withIndexer { indexer =>
           indexer(documents).await shouldBe a[Right[_, _]]
@@ -52,7 +53,7 @@ class ElasticIndexerTest
     val indexer = new ElasticIndexer[SampleDocument](
       client = elasticClient,
       index = index,
-      config = NoStrictMapping
+      config = IndexConfig.empty
     )
 
     testWith(indexer)
@@ -71,7 +72,7 @@ class ElasticIndexerTest
 
     eventually {
       val response: Response[GetResponse] = elasticClient.execute {
-        get(index, canonicalId.indexId(doc))
+        get(index, sampleDocumentCanonicalId.indexId(doc))
       }.await
 
       val getResponse = response.result
@@ -95,23 +96,16 @@ class ElasticIndexerTest
         .copy(data = SampleDocumentData(genre = Some(randomAlphanumeric())))
     }
 
-    object StrictWithNoDataIndexConfig
-        extends IndexConfig
-        with IndexConfigFields {
-
-      import com.sksamuel.elastic4s.ElasticDsl._
-
-      val analysis = WorksAnalysis()
-
+    val strictWithNoDataIndexConfig = IndexConfig({
       val id = lowercaseKeyword("id")
       val title = textField("title")
       val data = objectField("data")
 
-      val mapping = properties(Seq(title, id, version, data))
+      properties(Seq(title, id, version, data))
         .dynamic(DynamicMapping.Strict)
-    }
+    }, WorksAnalysis())
 
-    withLocalElasticsearchIndex(config = StrictWithNoDataIndexConfig) {
+    withLocalElasticsearchIndex(config = strictWithNoDataIndexConfig) {
       implicit index =>
         withIndexer { indexer =>
           val future = indexer(validDocuments ++ invalidDocuments)
@@ -142,23 +136,16 @@ class ElasticIndexerTest
 
     val documents = List(documentA, documentB)
 
-    object UnmappedDataMappingIndexConfig
-        extends IndexConfig
-        with IndexConfigFields {
-
-      import com.sksamuel.elastic4s.ElasticDsl._
-
-      val analysis = WorksAnalysis()
-
+    val unmappedDataMappingIndexConfig = IndexConfig({
       val id = lowercaseKeyword("id")
       val title = textField("title")
       val data = objectField("data").withDynamic("false")
 
-      val mapping = properties(Seq(title, id, version, data))
+      properties(Seq(title, id, version, data))
         .dynamic(DynamicMapping.Strict)
-    }
+    }, WorksAnalysis())
 
-    withLocalElasticsearchIndex(config = UnmappedDataMappingIndexConfig) {
+    withLocalElasticsearchIndex(config = unmappedDataMappingIndexConfig) {
       implicit index =>
         withIndexer { indexer =>
           val future = indexer(documents)

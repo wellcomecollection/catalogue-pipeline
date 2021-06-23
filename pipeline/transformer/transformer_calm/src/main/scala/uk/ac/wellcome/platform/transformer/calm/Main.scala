@@ -3,7 +3,7 @@ package uk.ac.wellcome.platform.transformer.calm
 import akka.actor.ActorSystem
 import com.amazonaws.services.s3.AmazonS3
 import com.typesafe.config.Config
-import uk.ac.wellcome.models.index.SourceWorkIndexConfig
+import uk.ac.wellcome.models.index.WorksIndexConfig
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
@@ -42,7 +42,7 @@ object Main extends WellcomeTypesafeApp with AWSClientConfigBuilder {
         indexer = ElasticIndexerBuilder[Work[Source]](
           config,
           esClient,
-          indexConfig = SourceWorkIndexConfig
+          indexConfig = WorksIndexConfig.source
         ),
         messageSender = SNSBuilder
           .buildSNSMessageSender(

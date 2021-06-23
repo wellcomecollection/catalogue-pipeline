@@ -5,7 +5,7 @@ import org.scalatest.Assertion
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.index.{IdentifiedWorkIndexConfig, IndexFixtures}
+import uk.ac.wellcome.models.index.{WorksIndexConfig, IndexFixtures}
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.models.work.generators.{InstantGenerators, WorkGenerators}
 import weco.catalogue.internal_model.work.WorkState.Identified
@@ -112,7 +112,7 @@ class WorkIndexableTest
         new ElasticIndexer[Work[Identified]](
           elasticClient,
           index,
-          IdentifiedWorkIndexConfig)
+          WorksIndexConfig.identified)
       testWith((index, indexer))
     }
   }

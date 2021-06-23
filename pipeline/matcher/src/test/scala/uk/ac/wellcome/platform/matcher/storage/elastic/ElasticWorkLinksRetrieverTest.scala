@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.matcher.storage.elastic
 
 import com.sksamuel.elastic4s.Index
-import uk.ac.wellcome.models.index.IdentifiedWorkIndexConfig
+import uk.ac.wellcome.models.index.WorksIndexConfig
 import uk.ac.wellcome.elasticsearch.model.IndexId
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.json.JsonUtil._
@@ -23,7 +23,7 @@ class ElasticWorkLinksRetrieverTest
 
   override def withContext[R](links: Seq[WorkLinks])(
     testWith: TestWith[Index, R]): R =
-    withLocalElasticsearchIndex(config = IdentifiedWorkIndexConfig) { index =>
+    withLocalElasticsearchIndex(config = WorksIndexConfig.identified) { index =>
       withElasticIndexer[Work[WorkState.Identified], R](index) { indexer =>
         val works: Seq[Work[WorkState.Identified]] = links.map { lk =>
           identifiedWork(canonicalId = lk.workId)

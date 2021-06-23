@@ -7,7 +7,7 @@ import com.typesafe.config.Config
 import software.amazon.awssdk.services.sqs.model.Message
 
 import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.index.AugmentedImageIndexConfig
+import uk.ac.wellcome.models.index.ImagesIndexConfig
 import uk.ac.wellcome.platform.inference_manager.adapters.{
   AspectRatioInferrerAdapter,
   FeatureVectorInferrerAdapter,
@@ -73,7 +73,7 @@ object Main extends WellcomeTypesafeApp {
       config,
       esClient,
       namespace = "augmented-images",
-      indexConfig = AugmentedImageIndexConfig
+      indexConfig = ImagesIndexConfig.augmented
     )
 
     val pipelineStorageConfig = PipelineStorageStreamBuilder
