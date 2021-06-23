@@ -51,8 +51,9 @@ def test_tree_does_not_exist(
 
     # Check that a message per blob in the tree has been sent. The number of messages
     # expected comes from the betamax recording of the github api response
-    messages = get_test_topic_messages()
-    assert len(list(messages)) == 653
+    messages = list(get_test_topic_messages())
+    assert len(messages) == 653
+    assert messages[0]["timeModified"] == "2021-05-22T11:38:45Z"
 
     # Check that a s3 file hase been written with the right number of entries
     content_object = mock_s3_client.get_object(Bucket=bucket, Key=key)
@@ -139,22 +140,22 @@ def test_elements_added_changed_deleted_are_returned():
         "filed": {"sha": "dkgef", "uri": "http://filed"},
     }
     diffs = diff_trees(
-        old_tree, new_tree, dateutil.parser.parse("Fri, 11 Jun 2021 15:34:45 GMT")
+        old_tree, new_tree, "2021-06-11T15:34:45Z"
     )
     expected_diffs = [
         {
             "path": "fileb",
             "uri": "http://filebb",
-            "timeModified": "2021-06-11T15:34:45+00:00",
+            "timeModified": "2021-06-11T15:34:45Z",
         },  # fileb is modified
         {
             "path": "filed",
             "uri": "http://filed",
-            "timeModified": "2021-06-11T15:34:45+00:00",
+            "timeModified": "2021-06-11T15:34:45Z",
         },  # filed is added
         {
             "path": "filea",
-            "timeDeleted": "2021-06-11T15:34:45+00:00",
+            "timeDeleted": "2021-06-11T15:34:45Z",
         },  # filea is deleted
     ]
     assert diffs == expected_diffs
@@ -174,5 +175,5 @@ def test_more_types_of_diff_is_error():
     }
     with pytest.raises(AssertionError):
         diff_trees(
-            old_tree, new_tree, dateutil.parser.parse("Fri, 11 Jun 2021 15:34:45 GMT")
+            old_tree, new_tree, "2021-06-11T15:34:45Z"
         )

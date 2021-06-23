@@ -20,30 +20,57 @@ chardet==4.0.0
     # via requests
 daiquiri==3.0.0
     # via wellcome-aws-utils
+dateparser==1.0.0
+    # via maya
 deepdiff==5.5.0
     # via -r requirements.in
 elasticsearch==7.12.1
     # via wellcome-aws-utils
+humanize==3.9.0
+    # via maya
 idna==2.10
     # via requests
 jmespath==0.10.0
     # via
     #   boto3
     #   botocore
+maya==0.6.1
+    # via -r requirements.in
 ordered-set==4.0.2
     # via deepdiff
+pendulum==2.1.2
+    # via maya
 python-dateutil==2.8.1
     # via
     #   botocore
+    #   dateparser
+    #   pendulum
+    #   snaptime
     #   wellcome-aws-utils
 python-json-logger==2.0.1
     # via daiquiri
+pytz==2021.1
+    # via
+    #   dateparser
+    #   maya
+    #   snaptime
+    #   tzlocal
+pytzdata==2020.1
+    # via pendulum
+regex==2021.4.4
+    # via dateparser
 requests==2.25.1
     # via -r requirements.in
 s3transfer==0.4.2
     # via boto3
 six==1.16.0
     # via python-dateutil
+snaptime==0.2.4
+    # via maya
+tzlocal==2.1
+    # via
+    #   dateparser
+    #   maya
 urllib3==1.26.5
     # via
     #   botocore
@@ -51,3 +78,6 @@ urllib3==1.26.5
     #   requests
 wellcome_aws_utils==3.2.0
     # via -r requirements.in
+
+# The following packages are considered to be unsafe in a requirements file:
+# setuptools
