@@ -59,11 +59,7 @@ def diff_trees(old_tree, new_tree, time):
             get_path_from_diff(changed.up.path()) for changed in values_changed
         }
         messages += [
-            {
-                "path": path,
-                "uri": new_tree[path]["uri"],
-                "timeModified": time,
-            }
+            {"path": path, "uri": new_tree[path]["uri"], "timeModified": time}
             for path in paths_changed
         ]
     if items_added:
@@ -77,10 +73,7 @@ def diff_trees(old_tree, new_tree, time):
         ]
     if items_removed:
         messages += [
-            {
-                "path": get_path_from_diff(removed.path()),
-                "timeDeleted": time,
-            }
+            {"path": get_path_from_diff(removed.path()), "timeDeleted": time}
             for removed in items_removed
         ]
     return messages
