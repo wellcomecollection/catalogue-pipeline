@@ -4,7 +4,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.time.{Seconds, Span}
-import uk.ac.wellcome.models.index.{IndexFixtures, ImagesIndexConfig}
+import uk.ac.wellcome.models.index.{ImagesIndexConfig, IndexFixtures}
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.models.Implicits._
 import uk.ac.wellcome.pipeline_storage.ElasticIndexer

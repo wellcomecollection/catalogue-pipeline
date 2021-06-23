@@ -6,8 +6,8 @@ import org.scalatest.matchers.should.Matchers
 import scala.concurrent.ExecutionContext.Implicits.global
 import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.models.index.{
-  IndexFixtures,
   ImagesIndexConfig,
+  IndexFixtures,
   WorksIndexConfig
 }
 import uk.ac.wellcome.models.Implicits._

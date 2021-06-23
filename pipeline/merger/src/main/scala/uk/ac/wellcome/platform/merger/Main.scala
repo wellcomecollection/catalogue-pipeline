@@ -4,10 +4,7 @@ import scala.concurrent.ExecutionContext
 import akka.actor.ActorSystem
 import com.typesafe.config.Config
 
-import uk.ac.wellcome.models.index.{
-  ImagesIndexConfig,
-  WorksIndexConfig
-}
+import uk.ac.wellcome.models.index.{ImagesIndexConfig, WorksIndexConfig}
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.models.Implicits._
