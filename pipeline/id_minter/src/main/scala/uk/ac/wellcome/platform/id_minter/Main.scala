@@ -51,7 +51,7 @@ object Main extends WellcomeTypesafeApp {
       config,
       esClient,
       namespace = "identified-works",
-      indexConfig = IdentifiedWorkIndexConfig
+      indexConfig = WorksIndexConfig.identified
     )
 
     val messageStream = SQSBuilder.buildSQSStream[NotificationMessage](config)

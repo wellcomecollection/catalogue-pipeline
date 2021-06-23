@@ -34,7 +34,7 @@ object Main extends WellcomeTypesafeApp {
       config,
       esClient,
       namespace = "denormalised-works",
-      indexConfig = WorksIndexConfig.de
+      indexConfig = WorksIndexConfig.denormalised
     )
 
     new RelationEmbedderWorkerService(
