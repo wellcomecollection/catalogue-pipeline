@@ -9,20 +9,14 @@ import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.time.{Seconds, Span}
 import software.amazon.awssdk.services.sqs.model.Message
-import uk.ac.wellcome.elasticsearch.{ElasticClientBuilder, NoStrictMapping}
+import uk.ac.wellcome.elasticsearch.{ElasticClientBuilder, IndexConfig}
 import uk.ac.wellcome.json.JsonUtil
 import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.pipeline_storage.fixtures.{
-  ElasticIndexerFixtures,
-  PipelineStorageStreamFixtures
-}
-import weco.catalogue.pipeline_storage.generators.{
-  SampleDocument,
-  SampleDocumentGenerators
-}
+import uk.ac.wellcome.pipeline_storage.fixtures.{ElasticIndexerFixtures, PipelineStorageStreamFixtures}
+import weco.catalogue.pipeline_storage.generators.{SampleDocument, SampleDocumentGenerators}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -36,7 +30,7 @@ class PipelineStorageStreamTest
     with SampleDocumentGenerators {
 
   def indexer(index: Index, elasticClient: ElasticClient = elasticClient) =
-    new ElasticIndexer[SampleDocument](elasticClient, index, NoStrictMapping)
+    new ElasticIndexer[SampleDocument](elasticClient, index, IndexConfig.empty)
 
   it("creates the index at startup if it doesn't already exist") {
     val index = createIndex

@@ -6,7 +6,7 @@ import com.sksamuel.elastic4s.requests.get.GetResponse
 import org.scalatest.{Assertion, Suite}
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import uk.ac.wellcome.akka.fixtures.Akka
-import uk.ac.wellcome.elasticsearch.NoStrictMapping
+import uk.ac.wellcome.elasticsearch.IndexConfig
 import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS
@@ -46,7 +46,7 @@ trait IndexerFixtures
   ): R = {
     val index = Index(s"${prefix}_$suffix")
 
-    withLocalElasticsearchIndex(NoStrictMapping, index = index) {
+    withLocalElasticsearchIndex(IndexConfig.empty, index = index) {
       testWith(_)
     }
   }
