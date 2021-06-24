@@ -2,7 +2,11 @@ package uk.ac.wellcome.models.index
 
 import buildinfo.BuildInfo
 import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.fields.{ElasticField, ObjectField, TokenCountField}
+import com.sksamuel.elastic4s.fields.{
+  ElasticField,
+  ObjectField,
+  TokenCountField
+}
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
 import uk.ac.wellcome.elasticsearch.{IndexConfig, RefreshInterval}
 
