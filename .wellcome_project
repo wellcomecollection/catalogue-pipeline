@@ -84,6 +84,8 @@ catalogue_pipeline:
       name: Staging
     - id: "2021-06-08"
       name: "2021-06-08"
+    - id: "2021-06-24"
+      name: "2021-06-24"
   image_repositories:
     - id: id_minter
       services:
