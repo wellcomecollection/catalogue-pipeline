@@ -28,8 +28,8 @@ object Main extends WellcomeTypesafeApp {
       store = new DynamoSingleVersionStore(
         DynamoBuilder.buildDynamoConfig(config, namespace = "tei")
       ),
-      config.requireInt("tei.adapter.parallelism"),
-      config.getDuration("tei.adapter.delete.delay").toScala
+      parallelism = config.requireInt("tei.adapter.parallelism"),
+      delay = config.getDuration("tei.adapter.delete.delay").toScala
     )
   }
 }
