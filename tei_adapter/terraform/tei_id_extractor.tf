@@ -4,7 +4,7 @@ module "tei_id_extractor_queue" {
   topic_arns                 = [module.tei_updater_lambda.topic_arn]
   aws_region                 = local.aws_region
   alarm_topic_arn            = local.dlq_alarm_arn
-  visibility_timeout_seconds = 1200
+  visibility_timeout_seconds = local.rds_lock_timeout_seconds + 30
 }
 
 module "tei_id_extractor" {
@@ -21,21 +21,21 @@ module "tei_id_extractor" {
     bucket            = aws_s3_bucket.tei_adapter.id
     parallelism       = 10
     max_connections   = local.tei_id_extractor_max_connections
-    delete_delay = "2 minutes"
+    delete_delay = "30 minutes"
     database          = "pathid"
     table             = "pathid"
   }
 
   secret_env_vars = {
-    db_host      = "rds/tei-adapter-cluster-delta/endpoint"
-    db_port      = "rds/tei-adapter-cluster-delta/port"
+    db_host      = "rds/tei-adapter-cluster/endpoint"
+    db_port      = "rds/tei-adapter-cluster/port"
     db_username  = "catalogue/tei_id_extractor/rds_user"
     db_password  = "catalogue/tei_id_extractor/rds_password"
     github_token = "catalogue/tei_id_extractor/github_token"
   }
 
-  // The total number of connections to RDS across all tasks from all ID minter
-  // services must not exceed the maximum supported by the RDS instance.
+  // The total number of connections to RDS across all tasks
+  // must not exceed the maximum supported by the RDS instance.
   min_capacity = local.min_capacity
   max_capacity = min(floor(local.rds_max_connections / local.tei_id_extractor_max_connections), local.max_capacity)
 
@@ -83,7 +83,7 @@ data "aws_iam_policy_document" "allow_cloudwatch_push_metrics" {
 
 resource "aws_iam_role_policy" "tei_id_extractor_publish_policy" {
   role   = module.tei_id_extractor.task_role_name
-  policy = data.aws_iam_policy_document.publish_to_tei_id_extractor_topic.json
+  policy = module.tei_id_extractor_topic.publish_policy
 }
 
 resource "aws_iam_role_policy" "tei_id_extractor_put_policy" {

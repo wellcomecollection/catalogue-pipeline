@@ -23,11 +23,6 @@ module "tei_adapter" {
     tei_adapter_dynamo_table = aws_dynamodb_table.tei_adapter_table.id
   }
 
-  secret_env_vars = {
-  }
-
-  // The total number of connections to RDS across all tasks from all ID minter
-  // services must not exceed the maximum supported by the RDS instance.
   min_capacity = local.min_capacity
   max_capacity = local.max_capacity
 
@@ -63,7 +58,7 @@ resource "aws_iam_role_policy" "cloudwatch_push_metrics_tei_adapter" {
 
 resource "aws_iam_role_policy" "tei_adapter_publish_policy" {
   role   = module.tei_adapter.task_role_name
-  policy = data.aws_iam_policy_document.publish_to_tei_adapter_topic.json
+  policy = module.tei_adapter_topic.publish_policy
 }
 
 resource "aws_iam_role_policy" "tei_adapter_dynamo_full_access" {

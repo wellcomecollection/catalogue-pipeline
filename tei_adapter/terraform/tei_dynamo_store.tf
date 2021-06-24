@@ -1,5 +1,5 @@
 locals {
-  table_name = "tai-adapter-store"
+  table_name = "tei-adapter-store"
 }
 
 resource "aws_dynamodb_table" "tei_adapter_table" {
