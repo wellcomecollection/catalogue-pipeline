@@ -21,7 +21,7 @@ module "tei_id_extractor" {
     bucket            = aws_s3_bucket.tei_adapter.id
     parallelism       = 10
     max_connections   = local.tei_id_extractor_max_connections
-    delete_delay = "30 minutes"
+    delete_delay      = "30 minutes"
     database          = "pathid"
     table             = "pathid"
   }

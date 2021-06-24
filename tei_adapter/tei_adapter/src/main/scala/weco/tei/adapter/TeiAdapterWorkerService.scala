@@ -9,7 +9,14 @@ import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.storage.store.VersionedStore
 import weco.catalogue.source_model.TeiSourcePayload
-import weco.catalogue.source_model.tei.{TeiChangedMetadata, TeiDeletedMetadata, TeiIdChangeMessage, TeiIdDeletedMessage, TeiIdMessage, TeiMetadata}
+import weco.catalogue.source_model.tei.{
+  TeiChangedMetadata,
+  TeiDeletedMetadata,
+  TeiIdChangeMessage,
+  TeiIdDeletedMessage,
+  TeiIdMessage,
+  TeiMetadata
+}
 import weco.flows.FlowOps
 import uk.ac.wellcome.typesafe.Runnable
 

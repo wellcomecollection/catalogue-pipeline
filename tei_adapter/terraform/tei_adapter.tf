@@ -15,11 +15,11 @@ module "tei_adapter" {
   image = local.tei_adapter_image
 
   env_vars = {
-    metrics_namespace = "${local.namespace}_tei_adapter"
-    queue_url         = module.tei_adapter_queue.url
-    topic_arn         = module.tei_adapter_topic.arn
-    parallelism       = 10
-    delete_delay = "2 minutes"
+    metrics_namespace        = "${local.namespace}_tei_adapter"
+    queue_url                = module.tei_adapter_queue.url
+    topic_arn                = module.tei_adapter_topic.arn
+    parallelism              = 10
+    delete_delay             = "2 minutes"
     tei_adapter_dynamo_table = aws_dynamodb_table.tei_adapter_table.id
   }
 

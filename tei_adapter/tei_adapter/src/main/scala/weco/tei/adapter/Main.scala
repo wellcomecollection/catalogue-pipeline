@@ -23,8 +23,8 @@ object Main extends WellcomeTypesafeApp {
       DynamoBuilder.buildDynamoClient(config)
     new TeiAdapterWorkerService(
       messageStream = SQSBuilder.buildSQSStream(config),
-    messageSender =
-      SNSBuilder.buildSNSMessageSender(config, subject = "TEI adapter"),
+      messageSender =
+        SNSBuilder.buildSNSMessageSender(config, subject = "TEI adapter"),
       store = new DynamoSingleVersionStore(
         DynamoBuilder.buildDynamoConfig(config, namespace = "tei")
       ),

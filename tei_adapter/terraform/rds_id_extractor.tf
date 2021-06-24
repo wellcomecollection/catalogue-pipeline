@@ -60,7 +60,7 @@ module "tei_id_extractor_rds_cluster" {
   db_security_group_id = aws_security_group.database_sg.id
 
   aws_db_subnet_group_name = aws_db_subnet_group.default.name
-  db_parameter_group_name = aws_db_parameter_group.default.id
+  db_parameter_group_name  = aws_db_parameter_group.default.id
 }
 
 resource "aws_security_group" "rds_ingress_security_group" {
@@ -81,8 +81,8 @@ resource "aws_security_group" "rds_ingress_security_group" {
 }
 
 resource "aws_db_parameter_group" "default" {
-  name_prefix   = "tei-rds"
-  family = "aurora5.6"
+  name_prefix = "tei-rds"
+  family      = "aurora5.6"
 
   parameter {
     name  = "wait_timeout"
