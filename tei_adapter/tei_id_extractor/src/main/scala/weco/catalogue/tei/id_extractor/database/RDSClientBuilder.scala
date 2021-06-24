@@ -5,19 +5,17 @@ import scalikejdbc.{ConnectionPool, ConnectionPoolSettings}
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 
 object RDSClientBuilder {
-  def buildDB(rdsClientConfig: RDSClientConfig): Unit = {
-
-    Class.forName("com.mysql.jdbc.Driver")
+  def buildDB(rdsClientConfig: RDSClientConfig): Unit =
     ConnectionPool.singleton(
       s"jdbc:mysql://${rdsClientConfig.host}:${rdsClientConfig.port}",
       user = rdsClientConfig.username,
       password = rdsClientConfig.password,
       settings = ConnectionPoolSettings(
         maxSize = rdsClientConfig.maxConnections,
-        connectionTimeoutMillis = 120000L
+        connectionTimeoutMillis = 600000L
       )
     )
-  }
+
   def buildRDSClientConfig(config: Config): RDSClientConfig = {
     val host = config.requireString("aws.rds.host")
 
