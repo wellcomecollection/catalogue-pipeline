@@ -12,7 +12,8 @@ from deepdiff import DeepDiff
 from wellcome_aws_utils import sns_utils
 from wellcome_aws_utils.lambda_utils import log_on_error
 
-tzinfos = {x:pytz.timezone(x) for x in pytz.all_timezones}
+tzinfos = {x: pytz.timezone(x) for x in pytz.all_timezones}
+
 
 def get_stored_tree(s3, bucket, key):
     try:
@@ -31,10 +32,12 @@ def get_new_tree(url, session=None):
     session = session or requests.Session()
     response = session.get(url)
     response.raise_for_status()
-    datetime = parser.parse(response.headers["date"], tzinfos=tzinfos).astimezone(pytz.utc)
+    datetime = parser.parse(response.headers["date"], tzinfos=tzinfos).astimezone(
+        pytz.utc
+    )
     # The tei id extractor needs to parse this into a java.time.Instant.
     # For _reasons_ parsing into Instant fails if there is an offset instead of Z
-    time = datetime.isoformat().replace('+00:00', 'Z')
+    time = datetime.isoformat().replace("+00:00", "Z")
     new_tree = {}
     response_tree = response.json()
     assert response_tree["truncated"] is False
