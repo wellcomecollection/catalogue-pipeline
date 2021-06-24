@@ -1,0 +1,200 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="https://raw.githubusercontent.com/bodleian/consolidated-tei-schema/master/msdesc.rng" type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0"?>
+
+
+<TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id="Well.Jav.11">
+
+    <teiHeader>
+    
+    <fileDesc>
+        
+        <titleStmt>
+            <title>Well. Jav. 11</title>
+            <title type="collection">Wellcome Collection</title>
+            <respStmt xml:id="RV">
+                <resp when="1982">Cataloguer</resp>
+                <persName>Ricklefs and Voorhoeve</persName>
+            </respStmt>
+            <respStmt xml:id="OCV">
+                <resp when="2020-05-18">TEI Encoder</resp>
+                <persName>Odalys Caballero</persName>
+            </respStmt>
+            <respStmt xml:id="AP">
+                <resp when="2020-05-18">TEI Encoder</resp>
+                <persName>Adrian Plau</persName>
+            </respStmt>
+        </titleStmt>
+        
+        <publicationStmt>
+            <publisher>Wellcome Collection</publisher>
+            <idno>UkLW</idno>
+            <address>
+                <orgName type="institution">Wellcome Collection</orgName>
+                <street>215 Euston Rd</street>
+                <settlement>London</settlement>
+                <postCode>NW1 2BE</postCode>
+            </address>
+            <distributor>
+                <email>library@wellcome.ac.uk</email>
+            </distributor>
+            <idno type="msID">Well.Jav.11</idno>
+            <idno type="catalogue">Catalogue of Javanese manuscripts in the Wellcome Institute for the
+                History of Medicine from 'Indonesian manuscripts in Great Britain:
+                Addenda et Corrigenda"></idno>
+        </publicationStmt>
+        
+        <sourceDesc>
+            
+            <msDesc>
+                
+                <msIdentifier>
+                    <country>United Kingdom</country>
+                    <settlement>London</settlement>
+                    <institution>Wellcome Collection</institution>
+                    <repository>Wellcome Library</repository>
+                    <idno type="shelfmark"> WMS Javanese 11"></idno>
+                    <altIdentifier type="Sierra">
+                        <idno>b30464316</idno>
+                    </altIdentifier>
+                </msIdentifier>
+                
+                <msContents>
+                  
+                    <summary>Fragments</summary>
+                   
+                      <msItem  xml:id="well.Jav.11.1">
+                         <locus>f1</locus>                        
+                        <textLang mainLang="Ja"> Java</textLang>
+                        <textLang otherLangs="arb">Arabic</textLang>
+                          <note>Teachings concerning spirits, angels, etc., with Arabic phrases</note>
+                        
+                         <incipit> 
+                             <note>Begins kénya-kénya-kénya Si Arjuna Sasra.</note>
+                        </incipit>
+                                                                      
+                    </msItem>
+                    
+                    <msItem n="2" xml:id= "well.Jav.11.2"> 
+                        <locus>f2</locus>
+                         <textLang mainLang="Jv"> Java</textLang>
+                                               
+                        <note>Unidentified Islamic fragment.</note>
+                                                                     
+                                                                     
+                    </msItem>
+                    
+                                     
+                    <msItem n="3" xml:id= "well.Jav.11.3"> 
+                        <locus>f3</locus>
+                        <textLang mainLang="Jv"> Java</textLang>
+                        
+                        <note>Fragment of legal text</note>
+                        
+                      </msItem>
+                    
+                        <msItem n="4" xml:id= "well.Jav.11.4"> 
+                            <locus>f4</locus>
+                         <textLang mainLang="Jv"> Java</textLang>
+                      
+                        <note> Punika katuranggan ing duyung punika lapalipun.</note>
+                              
+                           </msItem>
+                    
+                                
+                    <msItem n="5" xml:id= "well.Jav.11.5">  
+                        <locus>f5</locus>
+                        <textLang mainLang="Jv"> Java</textLang>
+                        
+                      <note>Fragment, including the statement isun imam tokhid makripat, ... asmaku Allah..</note>
+                        
+                        
+                    </msItem>
+                    
+                </msContents>
+                
+                
+                <physDesc>
+                   
+                    <objectDesc form="follios">
+                       
+                        <supportDesc material="paper">
+                                                    
+                            <support>The item is divided in 5 foliosI</support>
+                            <extent> P. 5 ff. Javanese paper, <note>pasted onto larger pp (40 X 26 cm) </note> 
+                            <dimensions unit="cm" >
+                                    <height>30cm</height>
+                                    <width>20cm</width>
+                                </dimensions>
+                               
+                            </extent>
+                                                                                                  
+                        </supportDesc>  
+                        
+                </objectDesc>
+                    
+                    </physDesc>
+                                        
+                                   
+                <history>
+                    <origin>
+                         <origPlace>
+                            <country>Indonesia></country>,
+                            <region>Java</region>,
+                                                                              
+                            </origPlace> 
+                        </origin>    
+                    
+                    <provenance>Unknown</provenance>
+                        
+                   </history>
+                
+                <additional>
+                    <adminInfo>
+                        <recordHist>
+                            <source>
+                                <bibl> 
+                                    <title>Catalogue of Javanese manuscripts in the Wellcome Institute for the
+                                    History of Medicine from 'Indonesian manuscripts in Great Britain:
+                                    Addenda et Corrigenda',, Bulletin of  the School of Oriental and African Studies
+                                </title> 
+                                    <author>M. C. Ricklefs and P. Voorhoeve</author>
+                                    <date>1982</date>
+                                    <note>308, 309</note>
+                                    <note>v. 45 </note>
+                                
+                                </bibl>
+                                
+                                 </source>
+                        </recordHist>
+                        <availability status="unknown"><p> <!-- Insert if relevant --></p></availability> 
+                    </adminInfo>
+                 
+                </additional>
+            
+            </msDesc>
+        
+        </sourceDesc>
+    
+    </fileDesc>
+    
+        <revisionDesc>
+        <change when="2020-06-03" who="#AP">Moved locus element.</change>    
+        <change when="2020-05-18" who="#OCV">Create XML file></change>
+    
+        </revisionDesc>
+
+    </teiHeader>    
+
+    <facsimile>
+    
+    <surface></surface>
+    </facsimile>    
+
+    <text>
+    <body>
+        <p></p>
+    </body>
+
+    </text>    
+
+</TEI>
