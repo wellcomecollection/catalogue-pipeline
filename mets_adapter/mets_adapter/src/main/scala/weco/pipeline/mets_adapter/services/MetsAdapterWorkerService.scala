@@ -1,24 +1,22 @@
-package uk.ac.wellcome.mets_adapter.services
+package weco.pipeline.mets_adapter.services
 
-import scala.util.{Failure, Success}
-import scala.concurrent.ExecutionContext
 import akka.Done
 import akka.stream.scaladsl._
-import software.amazon.awssdk.services.sqs.model.{Message => SQSMessage}
 import grizzled.slf4j.Logging
-import weco.messaging.sqs.SQSStream
-import weco.messaging.sns.NotificationMessage
-import weco.typesafe.Runnable
-import weco.json.JsonUtil._
-import uk.ac.wellcome.mets_adapter.models._
-import weco.storage.{Identified, Version}
-import weco.messaging.MessageSender
-import weco.catalogue.mets_adapter.services.BagRetriever
+import software.amazon.awssdk.services.sqs.model.{Message => SQSMessage}
+import weco.pipeline.mets_adapter.models._
 import weco.catalogue.source_model.MetsSourcePayload
 import weco.catalogue.source_model.mets.MetsSourceData
 import weco.flows.FlowOps
+import weco.json.JsonUtil._
+import weco.messaging.MessageSender
+import weco.messaging.sns.NotificationMessage
+import weco.messaging.sqs.SQSStream
+import weco.storage.{Identified, Version}
+import weco.typesafe.Runnable
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 /** Processes SQS messages representing bag ingests on storage-service, and
   *  publishes METS data for use in the pipeline.

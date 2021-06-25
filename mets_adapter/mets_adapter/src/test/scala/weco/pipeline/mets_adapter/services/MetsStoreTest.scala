@@ -1,11 +1,11 @@
-package uk.ac.wellcome.mets_adapter.services
+package weco.pipeline.mets_adapter.services
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.storage.store.memory.MemoryVersionedStore
-import weco.storage.{Identified, Version}
 import weco.catalogue.source_model.generators.MetsSourceDataGenerators
 import weco.catalogue.source_model.mets.MetsSourceData
+import weco.storage.store.memory.MemoryVersionedStore
+import weco.storage.{Identified, Version}
 
 class MetsStoreTest
     extends AnyFunSpec

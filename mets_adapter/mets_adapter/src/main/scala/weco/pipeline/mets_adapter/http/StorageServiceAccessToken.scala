@@ -1,4 +1,4 @@
-package weco.catalogue.mets_adapter.http
+package weco.pipeline.mets_adapter.http
 
 import io.circe.generic.extras.JsonKey
 

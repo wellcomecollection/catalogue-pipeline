@@ -1,4 +1,4 @@
-package uk.ac.wellcome.mets_adapter.models
+package weco.pipeline.mets_adapter.models
 
 // A notification from the storage service about a newly-registered bag.
 //

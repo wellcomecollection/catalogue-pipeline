@@ -1,4 +1,4 @@
-package uk.ac.wellcome.mets_adapter.models
+package weco.pipeline.mets_adapter.models
 
 import weco.storage.s3.S3ObjectLocationPrefix
 

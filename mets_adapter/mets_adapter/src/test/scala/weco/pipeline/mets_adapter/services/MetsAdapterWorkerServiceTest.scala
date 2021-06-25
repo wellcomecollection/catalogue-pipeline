@@ -1,29 +1,28 @@
-package uk.ac.wellcome.mets_adapter.services
+package weco.pipeline.mets_adapter.services
 
-import scala.util.{Failure, Try}
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
-import org.scalatest.matchers.should.Matchers
 import io.circe.Encoder
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
+import weco.akka.fixtures.Akka
+import weco.catalogue.source_model.MetsSourcePayload
+import weco.catalogue.source_model.generators.MetsSourceDataGenerators
+import weco.catalogue.source_model.mets.MetsSourceData
 import weco.fixtures.TestWith
+import weco.json.JsonUtil._
 import weco.messaging.fixtures.SQS
 import weco.messaging.fixtures.SQS.QueuePair
-import uk.ac.wellcome.mets_adapter.models._
-import weco.akka.fixtures.Akka
+import weco.messaging.memory.MemoryMessageSender
+import weco.messaging.sns.NotificationMessage
+import weco.pipeline.mets_adapter.models._
 import weco.storage.store.VersionedStore
 import weco.storage.store.memory.MemoryVersionedStore
-import weco.messaging.sns.NotificationMessage
 import weco.storage.{Identified, Version}
-import weco.json.JsonUtil._
-import weco.messaging.memory.MemoryMessageSender
-import weco.catalogue.mets_adapter.services.BagRetriever
-import weco.catalogue.source_model.MetsSourcePayload
-import weco.catalogue.source_model.mets.MetsSourceData
 
 import java.time.Instant
-import weco.catalogue.source_model.generators.MetsSourceDataGenerators
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.util.{Failure, Try}
 
 class MetsAdapterWorkerServiceTest
     extends AnyFunSpec

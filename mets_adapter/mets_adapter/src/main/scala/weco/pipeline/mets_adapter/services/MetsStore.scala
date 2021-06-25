@@ -1,10 +1,9 @@
-package uk.ac.wellcome.mets_adapter.services
+package weco.pipeline.mets_adapter.services
 
 import grizzled.slf4j.Logging
-import weco.storage.VersionAlreadyExistsError
-import weco.storage.store.VersionedStore
-import weco.storage.{Identified, Version}
 import weco.catalogue.source_model.mets.MetsSourceData
+import weco.storage.store.VersionedStore
+import weco.storage.{Identified, Version, VersionAlreadyExistsError}
 
 class MetsStore(val store: VersionedStore[String, Int, MetsSourceData])
     extends Logging {

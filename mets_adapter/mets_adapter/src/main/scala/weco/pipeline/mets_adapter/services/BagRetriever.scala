@@ -1,4 +1,4 @@
-package weco.catalogue.mets_adapter.services
+package weco.pipeline.mets_adapter.services
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model.Uri.Path
@@ -7,7 +7,7 @@ import akka.http.scaladsl.unmarshalling.Unmarshal
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import grizzled.slf4j.Logging
 import io.circe.generic.auto._
-import uk.ac.wellcome.mets_adapter.models._
+import weco.pipeline.mets_adapter.models._
 import weco.http.client.HttpGet
 
 import scala.concurrent.{ExecutionContext, Future}

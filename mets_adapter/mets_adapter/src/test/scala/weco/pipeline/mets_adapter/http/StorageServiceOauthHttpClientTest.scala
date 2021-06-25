@@ -1,4 +1,4 @@
-package weco.catalogue.mets_adapter.http
+package weco.pipeline.mets_adapter.http
 
 import akka.http.scaladsl.model.Uri.Path
 import akka.http.scaladsl.model.headers.{

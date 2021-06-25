@@ -1,4 +1,4 @@
-package uk.ac.wellcome.mets_adapter.models
+package weco.pipeline.mets_adapter.models
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers

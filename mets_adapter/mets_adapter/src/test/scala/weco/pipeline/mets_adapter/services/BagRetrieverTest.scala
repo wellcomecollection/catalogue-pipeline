@@ -1,4 +1,4 @@
-package weco.catalogue.mets_adapter.services
+package weco.pipeline.mets_adapter.services
 
 import akka.http.scaladsl.model._
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
@@ -6,7 +6,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.akka.fixtures.Akka
 import weco.fixtures.TestWith
-import uk.ac.wellcome.mets_adapter.models._
+import weco.pipeline.mets_adapter.models._
 import weco.http.client.{HttpGet, MemoryHttpClient}
 
 import java.time.Instant
