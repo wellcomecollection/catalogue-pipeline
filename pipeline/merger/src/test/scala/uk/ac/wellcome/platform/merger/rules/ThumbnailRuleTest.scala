@@ -1,10 +1,12 @@
 package uk.ac.wellcome.platform.merger.rules
+
 import org.scalatest.Inside
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.generators.SourceWorkGenerators
 import weco.catalogue.internal_model.locations.{
   AccessCondition,
+  AccessMethod,
   AccessStatus,
   DigitalLocation,
   License,
@@ -23,15 +25,6 @@ class ThumbnailRuleTest
   val digitalSierraWork = sierraDigitalIdentifiedWork()
 
   val calmWork = calmIdentifiedWork()
-
-  val calmWorkWithAdvisory = calmIdentifiedWork().items(
-    List(
-      createUnidentifiableItemWith(locations = List(createPhysicalLocationWith(
-        locationType = LocationType.ClosedStores,
-        label = LocationType.ClosedStores.label,
-        accessConditions =
-          List(AccessCondition(status = Some(AccessStatus.OpenWithAdvisory)))
-      )))))
 
   val metsWork = metsIdentifiedWork()
     .thumbnail(
@@ -52,7 +45,8 @@ class ThumbnailRuleTest
             createDigitalLocationWith(
               accessConditions = List(
                 AccessCondition(
-                  status = Some(AccessStatus.Restricted)
+                  method = AccessMethod.ViewOnline,
+                  status = AccessStatus.Restricted
                 )
               )
             )
@@ -109,13 +103,6 @@ class ThumbnailRuleTest
 
   it("suppresses thumbnails when restricted access status") {
     inside(ThumbnailRule.merge(restrictedDigitalWork, miroWorks :+ metsWork)) {
-      case FieldMergeResult(thumbnail, _) =>
-        thumbnail shouldBe None
-    }
-  }
-
-  it("suppresses thumbnails when an archive is open with advisory") {
-    inside(ThumbnailRule.merge(calmWorkWithAdvisory, miroWorks :+ metsWork)) {
       case FieldMergeResult(thumbnail, _) =>
         thumbnail shouldBe None
     }

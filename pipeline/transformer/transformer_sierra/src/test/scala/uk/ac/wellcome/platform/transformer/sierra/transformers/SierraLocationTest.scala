@@ -61,7 +61,7 @@ class SierraLocationTest
         locationType = LocationType.ClosedStores,
         label = LocationType.ClosedStores.label,
         accessConditions =
-          List(AccessCondition(method = Some(AccessMethod.OnlineRequest)))
+          List(AccessCondition(method = AccessMethod.OnlineRequest))
       )
 
       transformer.getPhysicalLocation(bibId, itemId, itemData, bibData) shouldBe Some(
@@ -138,8 +138,8 @@ class SierraLocationTest
         transformer.getPhysicalLocation(bibId, itemId, itemData, bibData).get
       location.accessConditions shouldBe List(
         AccessCondition(
-          method = Some(AccessMethod.OnlineRequest),
-          status = Some(AccessStatus.Open))
+          method = AccessMethod.OnlineRequest,
+          status = AccessStatus.Open)
       )
     }
 
@@ -242,7 +242,7 @@ class SierraLocationTest
         transformer.getPhysicalLocation(bibId, itemId, itemData, bibData).get
       location.accessConditions shouldBe List(
         AccessCondition(
-          status = Some(AccessStatus.TemporarilyUnavailable),
+          method = AccessMethod.NotRequestable,
           terms = Some(
             s"""Please check this item <a href="https://search.wellcomelibrary.org/iii/encore/record/C__Rb${bibId.withoutCheckDigit}?lang=eng">on the Wellcome Library website</a> for access information""")
         )

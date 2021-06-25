@@ -2,10 +2,11 @@ package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.locations.AccessStatus.LicensedResources
 import weco.catalogue.internal_model.locations.LocationType.OnlineResource
 import weco.catalogue.internal_model.locations.{
   AccessCondition,
+  AccessMethod,
+  AccessStatus,
   DigitalLocation
 }
 import weco.catalogue.internal_model.work.Item
@@ -35,7 +36,9 @@ class SierraElectronicResourcesTest
             url = "https://example.org/journal",
             locationType = OnlineResource,
             accessConditions = List(
-              AccessCondition(status = LicensedResources)
+              AccessCondition(
+                method = AccessMethod.ViewOnline,
+                status = AccessStatus.LicensedResources)
             )
           )
         )
@@ -69,7 +72,9 @@ class SierraElectronicResourcesTest
             url = "https://example.org/journal",
             locationType = OnlineResource,
             accessConditions = List(
-              AccessCondition(status = LicensedResources)
+              AccessCondition(
+                method = AccessMethod.ViewOnline,
+                status = AccessStatus.LicensedResources)
             )
           )
         )
@@ -81,7 +86,9 @@ class SierraElectronicResourcesTest
             url = "https://example.org/another-journal",
             locationType = OnlineResource,
             accessConditions = List(
-              AccessCondition(status = LicensedResources)
+              AccessCondition(
+                method = AccessMethod.ViewOnline,
+                status = AccessStatus.LicensedResources)
             )
           )
         )
@@ -114,7 +121,9 @@ class SierraElectronicResourcesTest
               url = "https://example.org/journal",
               locationType = OnlineResource,
               accessConditions = List(
-                AccessCondition(status = LicensedResources)
+                AccessCondition(
+                  method = AccessMethod.ViewOnline,
+                  status = AccessStatus.LicensedResources)
               )
             )
           )
@@ -157,7 +166,9 @@ class SierraElectronicResourcesTest
               linkText = Some("View online"),
               locationType = OnlineResource,
               accessConditions = List(
-                AccessCondition(status = LicensedResources)
+                AccessCondition(
+                  method = AccessMethod.ViewOnline,
+                  status = AccessStatus.LicensedResources)
               )
             )
           )
@@ -170,7 +181,9 @@ class SierraElectronicResourcesTest
               linkText = Some("Access resource"),
               locationType = OnlineResource,
               accessConditions = List(
-                AccessCondition(status = LicensedResources)
+                AccessCondition(
+                  method = AccessMethod.ViewOnline,
+                  status = AccessStatus.LicensedResources)
               )
             )
           )
@@ -183,7 +196,9 @@ class SierraElectronicResourcesTest
               linkText = Some("Connect to journal"),
               locationType = OnlineResource,
               accessConditions = List(
-                AccessCondition(status = LicensedResources)
+                AccessCondition(
+                  method = AccessMethod.ViewOnline,
+                  status = AccessStatus.LicensedResources)
               )
             )
           )
@@ -211,7 +226,9 @@ class SierraElectronicResourcesTest
               url = "https://example.org/oxford",
               locationType = OnlineResource,
               accessConditions = List(
-                AccessCondition(status = LicensedResources)
+                AccessCondition(
+                  method = AccessMethod.ViewOnline,
+                  status = AccessStatus.LicensedResources)
               )
             )
           )
@@ -239,7 +256,9 @@ class SierraElectronicResourcesTest
               linkText = Some("View resource"),
               locationType = OnlineResource,
               accessConditions = List(
-                AccessCondition(status = LicensedResources)
+                AccessCondition(
+                  method = AccessMethod.ViewOnline,
+                  status = AccessStatus.LicensedResources)
               )
             )
           )
@@ -267,7 +286,9 @@ class SierraElectronicResourcesTest
               linkText = Some("View resource"),
               locationType = OnlineResource,
               accessConditions = List(
-                AccessCondition(status = LicensedResources)
+                AccessCondition(
+                  method = AccessMethod.ViewOnline,
+                  status = AccessStatus.LicensedResources)
               )
             )
           )
@@ -295,7 +316,9 @@ class SierraElectronicResourcesTest
               linkText = Some("View resource"),
               locationType = OnlineResource,
               accessConditions = List(
-                AccessCondition(status = LicensedResources)
+                AccessCondition(
+                  method = AccessMethod.ViewOnline,
+                  status = AccessStatus.LicensedResources)
               )
             )
           )
@@ -325,7 +348,9 @@ class SierraElectronicResourcesTest
               linkText = Some("You can view this resource online"),
               locationType = OnlineResource,
               accessConditions = List(
-                AccessCondition(status = LicensedResources)
+                AccessCondition(
+                  method = AccessMethod.ViewOnline,
+                  status = AccessStatus.LicensedResources)
               )
             )
           )

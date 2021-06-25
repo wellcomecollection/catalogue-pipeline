@@ -11,6 +11,7 @@ import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.image.ParentWorks
 import weco.catalogue.internal_model.locations.{
   AccessCondition,
+  AccessMethod,
   AccessStatus,
   DigitalLocation,
   License,
@@ -833,7 +834,10 @@ class PlatformMergerTest
                   url = "http://www.scope.org.uk",
                   locationType = LocationType.OnlineResource,
                   accessConditions = List(
-                    AccessCondition(status = AccessStatus.LicensedResources)
+                    AccessCondition(
+                      method = AccessMethod.ViewOnline,
+                      status = AccessStatus.LicensedResources
+                    )
                   )
                 )
               )
@@ -904,7 +908,10 @@ class PlatformMergerTest
           url = "https://example.org/b12345678",
           locationType = LocationType.OnlineResource,
           accessConditions = List(
-            AccessCondition(status = AccessStatus.LicensedResources)
+            AccessCondition(
+              method = AccessMethod.ViewOnline,
+              status = AccessStatus.LicensedResources
+            )
           )
         )
       )

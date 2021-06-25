@@ -17,7 +17,6 @@ import weco.catalogue.internal_model.identifiers.{
 }
 import weco.catalogue.internal_model.identifiers.IdState.Unidentifiable
 import weco.catalogue.internal_model.languages.Language
-import weco.catalogue.internal_model.locations.AccessStatus.LicensedResources
 import weco.catalogue.internal_model.locations._
 import weco.catalogue.internal_model.locations.LocationType.{
   ClosedStores,
@@ -193,7 +192,7 @@ class SierraTransformerTest
           locationType = LocationType.ClosedStores,
           label = LocationType.ClosedStores.label,
           accessConditions =
-            List(AccessCondition(method = Some(AccessMethod.OnlineRequest)))
+            List(AccessCondition(method = AccessMethod.OnlineRequest))
         )
       )
     )
@@ -1022,7 +1021,9 @@ class SierraTransformerTest
             linkText = Some("View this journal"),
             locationType = OnlineResource,
             accessConditions = List(
-              AccessCondition(status = LicensedResources)
+              AccessCondition(
+                method = AccessMethod.ViewOnline,
+                status = AccessStatus.LicensedResources)
             )
           )
         )

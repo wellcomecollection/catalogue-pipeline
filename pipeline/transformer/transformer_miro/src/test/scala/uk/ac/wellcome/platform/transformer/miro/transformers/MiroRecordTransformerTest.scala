@@ -314,7 +314,9 @@ class MiroRecordTransformerTest
       credit = Some("Ezra Feilden"),
       locationType = LocationType.IIIFImageAPI,
       accessConditions = List(
-        AccessCondition(status = AccessStatus.Open)
+        AccessCondition(
+          method = AccessMethod.ViewOnline,
+          status = AccessStatus.Open)
       )
     )
     work.data.items.head.locations shouldBe List(expectedDigitalLocation)
@@ -331,7 +333,9 @@ class MiroRecordTransformerTest
       license = Some(License.CCBY),
       credit = None,
       accessConditions = List(
-        AccessCondition(status = AccessStatus.Open)
+        AccessCondition(
+          method = AccessMethod.ViewOnline,
+          status = AccessStatus.Open)
       )
     )
     work.data.items shouldBe List(
