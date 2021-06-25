@@ -63,10 +63,8 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
     // non-above locations are unambiguous, we use them instead.
     val otherLocations =
       sierraItemDataMap
-        .collect {
-          case (id, SierraItemData(_, _, _, Some(location), _, _)) =>
-            id -> location
-        }
+        .collect { case (id, itemData) => id -> itemData.location }
+        .collect { case (id, Some(location)) => id -> location }
         .filterNot {
           case (_, loc) =>
             loc.name.toLowerCase.contains("above") || loc.name == "-" || loc.name == ""
