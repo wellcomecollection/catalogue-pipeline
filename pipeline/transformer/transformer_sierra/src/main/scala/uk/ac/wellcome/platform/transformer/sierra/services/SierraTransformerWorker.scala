@@ -33,7 +33,8 @@ class SierraTransformerWorker[MsgDestination](
       MsgDestination] {
 
   override val transformer: Transformer[SierraTransformable] =
-    (id: String, transformable: SierraTransformable, version: Int) => SierraTransformer(transformable, version).toEither
+    (id: String, transformable: SierraTransformable, version: Int) =>
+      SierraTransformer(transformable, version).toEither
 
   override def lookupSourceData(p: SierraSourcePayload)
     : Either[ReadError, Identified[Version[String, Int], SierraTransformable]] =

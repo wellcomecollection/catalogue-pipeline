@@ -22,7 +22,7 @@ case object InvalidExampleData extends ExampleData
 
 object ExampleTransformer extends Transformer[ExampleData] with WorkGenerators {
   override def apply(id: String,
-                      data: ExampleData,
+                     data: ExampleData,
                      version: Int): Either[Exception, Work.Visible[Source]] =
     data match {
       case ValidExampleData(id, title) =>

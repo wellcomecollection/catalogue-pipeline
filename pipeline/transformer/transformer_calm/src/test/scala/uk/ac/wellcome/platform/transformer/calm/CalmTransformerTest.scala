@@ -370,7 +370,8 @@ class CalmTransformerTest
       "CatalogueStatus" -> "Catalogued"
     )
 
-    val result = CalmTransformer(record.id,
+    val result = CalmTransformer(
+      record.id,
       CalmSourceData(record, isDeleted = true),
       version).right.get
     result shouldBe a[Work.Deleted[_]]
