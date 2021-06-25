@@ -96,7 +96,7 @@ class TeiIdExtractorWorkerService[Dest](
           for {
             blobContent <- gitHubBlobReader.getBlob(message.uri)
             id <- Future.fromTry(
-              IdExtractor.extractId(blobContent, message.uri))
+              IdExtractor.extractId(blobContent, message.path))
             _ <- Future.fromTry(
               pathIdManager.handlePathChanged(
                 PathId(message.path, id, message.timeModified),
