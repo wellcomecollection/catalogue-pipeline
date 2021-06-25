@@ -18,6 +18,7 @@ import weco.catalogue.source_model.sierra.identifiers.{
   SierraBibNumber,
   SierraItemNumber
 }
+import weco.catalogue.source_model.sierra.marc.VarField
 import weco.catalogue.source_model.sierra.{SierraBibData, SierraItemData}
 
 object SierraItems extends Logging with SierraLocation with SierraQueryOps {
@@ -137,31 +138,42 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
     )
   }
 
+  /** Create a title for the item.
+    *
+    * We use one of:
+    *
+    *   - field tag `v` for VOLUME
+    *     https://documentation.iii.com/sierrahelp/Content/sril/sril_records_varfld_types_item.html
+    *
+    *   - The copyNo field from the Sierra API response, which we use to
+    *     create a string like "Copy 2".
+    *
+    */
   private def getItemTitle(itemId: SierraItemNumber,
                            data: SierraItemData): Option[String] = {
-    // For the title of the item, we look at the varfields with
-    // field tag ǂv, and use either their "contents" or the content of
-    // the subfield with tag ǂa.
     val titleCandidates: List[String] =
       data.varFields
         .filter { _.fieldTag.contains("v") }
-        .flatMap { vf =>
-          List(vf.content) ++ vf.subfieldsWithTag("a").map { sf =>
-            Some(sf.content)
-          }
-        }
-        .flatten
+        .flatMap { getTitleFromVarfield }
         .map { _.trim }
         .filterNot { _ == "" }
         .distinct
 
     titleCandidates match {
       case Seq(title) => Some(title)
-      case Nil        => None
+      case Nil        => data.copyNo.map { copyNo => s"Copy $copyNo" }
       case multipleTitles =>
         warn(
           s"Multiple title candidates on item $itemId: ${titleCandidates.mkString("; ")}")
         Some(multipleTitles.head)
     }
   }
+
+  private def getTitleFromVarfield(vf: VarField): Option[String] =
+    vf.content match {
+      case Some(s) => Some(s)
+      case None =>
+        val title = vf.subfieldsWithTag("a").map { _.content }.mkString(" ")
+        if (title.isEmpty) None else Some(title)
+    }
 }

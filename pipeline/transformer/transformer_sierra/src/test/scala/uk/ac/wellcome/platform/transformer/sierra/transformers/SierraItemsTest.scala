@@ -99,8 +99,7 @@ class SierraItemsTest
       getTitle(itemData) shouldBe Some("Envelope")
     }
 
-    it(
-      "uses the contents of subfield ǂa if field tag ǂv doesn't have a contents field") {
+    it("uses subfield ǂa if field tag v doesn't have a contents field") {
       val itemData = createSierraItemDataWith(
         varFields = List(
           VarField(fieldTag = "b", content = "S11.1L"),
@@ -129,6 +128,12 @@ class SierraItemsTest
       )
 
       getTitle(itemData) shouldBe Some("Volumes 1–5")
+    }
+
+    it("uses the copy number if there's no field tag v") {
+      val itemData = createSierraItemDataWith(copyNo = Some(3))
+
+      getTitle(itemData) shouldBe Some("Copy 3")
     }
 
     def getTitle(itemData: SierraItemData): Option[String] = {
