@@ -1,15 +1,18 @@
 # -*- encoding: utf-8 -*-
+import dateutil.parser as parser
 import json
 import os
+import pytz
 import requests
 
 import boto3
 from botocore.exceptions import ClientError
 from deepdiff import DeepDiff
-import maya
 
 from wellcome_aws_utils import sns_utils
 from wellcome_aws_utils.lambda_utils import log_on_error
+
+tzinfos = {tz: pytz.timezone(tz) for tz in pytz.all_timezones}
 
 
 def get_stored_tree(s3, bucket, key):
@@ -29,7 +32,12 @@ def get_new_tree(url, session=None):
     session = session or requests.Session()
     response = session.get(url)
     response.raise_for_status()
-    time = maya.when(response.headers["Date"]).iso8601()
+    datetime = parser.parse(response.headers["date"], tzinfos=tzinfos).astimezone(
+        pytz.utc
+    )
+    # The tei id extractor needs to parse this into a java.time.Instant.
+    # For _reasons_ parsing into Instant fails if there is an offset instead of Z
+    time = datetime.isoformat().replace("+00:00", "Z")
     new_tree = {}
     response_tree = response.json()
     assert response_tree["truncated"] is False
