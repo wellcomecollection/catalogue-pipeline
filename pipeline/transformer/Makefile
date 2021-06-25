@@ -5,7 +5,7 @@ STACK_ROOT 	= pipeline/transformer
 
 PROJECT_ID = catalogue_pipeline
 
-SBT_APPS = transformer_calm transformer_mets transformer_miro transformer_sierra
+SBT_APPS = transformer_calm transformer_mets transformer_miro transformer_sierra transformer_tei
 SBT_NO_DOCKER_APPS =
 
 SBT_DOCKER_LIBRARIES    = transformer_common
