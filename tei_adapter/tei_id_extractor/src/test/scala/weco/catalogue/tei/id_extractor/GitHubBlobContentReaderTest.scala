@@ -5,7 +5,7 @@ import org.apache.commons.io.IOUtils
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.akka.fixtures.Akka
+import weco.akka.fixtures.Akka
 import weco.catalogue.tei.id_extractor.fixtures.Wiremock
 import weco.http.client.AkkaHttpClient
 

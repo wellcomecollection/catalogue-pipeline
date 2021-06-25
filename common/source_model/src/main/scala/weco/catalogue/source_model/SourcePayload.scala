@@ -1,6 +1,6 @@
 package weco.catalogue.source_model
 
-import uk.ac.wellcome.storage.s3.S3ObjectLocation
+import weco.storage.s3.S3ObjectLocation
 import weco.catalogue.source_model.mets.MetsSourceData
 import weco.catalogue.source_model.miro.{MiroSourceOverrides, MiroUpdateEvent}
 import weco.catalogue.source_model.tei.TeiMetadata

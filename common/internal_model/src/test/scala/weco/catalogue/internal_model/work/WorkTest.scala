@@ -2,12 +2,12 @@ package weco.catalogue.internal_model.work
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.json.JsonUtil.{fromJson, toJson}
-import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.json.exceptions.JsonDecodingError
-import uk.ac.wellcome.models.work.generators.WorkGenerators
+import weco.json.JsonUtil.{fromJson, toJson}
+import weco.catalogue.internal_model.Implicits._
+import weco.json.exceptions.JsonDecodingError
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.WorkState.Merged
+import weco.catalogue.internal_model.work.generators.WorkGenerators
 
 import java.time.Instant
 

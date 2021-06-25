@@ -10,7 +10,7 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 import de.heikoseeberger.akkahttpcirce.ErrorAccumulatingCirceSupport._
 import io.circe.Decoder
-import uk.ac.wellcome.json.JsonUtil._
+import weco.json.JsonUtil._
 import weco.http.client.HttpClient
 
 class GitHubBlobContentReader(httpClient: HttpClient, token: String)(

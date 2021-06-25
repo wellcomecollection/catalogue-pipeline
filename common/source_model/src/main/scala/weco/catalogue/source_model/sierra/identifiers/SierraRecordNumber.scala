@@ -1,7 +1,7 @@
 package weco.catalogue.source_model.sierra.identifiers
 
 import io.circe._
-import uk.ac.wellcome.json.JsonUtil._
+import weco.json.JsonUtil._
 import weco.catalogue.source_model.json.JsonOps.StringOrInt
 
 import scala.util.{Failure, Success, Try}

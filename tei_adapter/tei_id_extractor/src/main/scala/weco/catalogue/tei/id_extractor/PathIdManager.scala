@@ -2,10 +2,10 @@ package weco.catalogue.tei.id_extractor
 
 import scalikejdbc.TxBoundary.Try._
 import scalikejdbc._
-import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.messaging.MessageSender
-import uk.ac.wellcome.storage.s3.S3ObjectLocation
-import uk.ac.wellcome.storage.store.Writable
+import weco.json.JsonUtil._
+import weco.messaging.MessageSender
+import weco.storage.s3.S3ObjectLocation
+import weco.storage.store.Writable
 import weco.catalogue.source_model.tei.{
   TeiIdChangeMessage,
   TeiIdDeletedMessage,

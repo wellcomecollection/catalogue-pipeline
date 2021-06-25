@@ -1,7 +1,7 @@
 package weco.catalogue.tei.id_extractor
 
 import com.typesafe.config.Config
-import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
+import weco.typesafe.config.builders.EnrichConfig._
 import scala.concurrent.duration.FiniteDuration
 import scala.compat.java8.DurationConverters._
 object TeiIdExtractorConfigBuilder {

@@ -3,11 +3,11 @@ package weco.tei.adapter
 import akka.{Done, NotUsed}
 import akka.stream.scaladsl.{Flow, Source}
 import software.amazon.awssdk.services.sqs.model.Message
-import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.messaging.MessageSender
-import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.messaging.sqs.SQSStream
-import uk.ac.wellcome.storage.store.VersionedStore
+import weco.json.JsonUtil._
+import weco.messaging.MessageSender
+import weco.messaging.sns.NotificationMessage
+import weco.messaging.sqs.SQSStream
+import weco.storage.store.VersionedStore
 import weco.catalogue.source_model.TeiSourcePayload
 import weco.catalogue.source_model.tei.{
   TeiChangedMetadata,
@@ -18,7 +18,7 @@ import weco.catalogue.source_model.tei.{
   TeiMetadata
 }
 import weco.flows.FlowOps
-import uk.ac.wellcome.typesafe.Runnable
+import weco.typesafe.Runnable
 
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, Future}

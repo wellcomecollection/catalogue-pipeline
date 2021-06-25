@@ -3,8 +3,8 @@ package weco.catalogue.source_model.store
 import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.storage.{UpdateNoSourceError, Version}
+import weco.json.JsonUtil._
+import weco.storage.{UpdateNoSourceError, Version}
 import weco.catalogue.source_model.fixtures.SourceVHSFixture
 
 class SourceVHSTest

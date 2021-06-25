@@ -2,7 +2,7 @@ package weco.catalogue.internal_model.work
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.generators.WorkGenerators
+import weco.catalogue.internal_model.work.generators.WorkGenerators
 
 class DerivedWorkDataTest extends AnyFunSpec with Matchers with WorkGenerators {
 

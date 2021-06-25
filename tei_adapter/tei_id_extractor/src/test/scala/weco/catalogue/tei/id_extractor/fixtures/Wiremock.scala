@@ -4,7 +4,7 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import org.scalatest.Suite
-import uk.ac.wellcome.fixtures.TestWith
+import weco.fixtures.TestWith
 
 import scala.util.Try
 

@@ -1,6 +1,6 @@
 package weco.catalogue.internal_model.work
 
-import uk.ac.wellcome.models.parse.Parser
+import weco.catalogue.internal_model.parse.Parser
 import weco.catalogue.internal_model.work.InstantRange.instantOrdering
 
 import java.time.{Instant, LocalDate, LocalDateTime, ZoneOffset}

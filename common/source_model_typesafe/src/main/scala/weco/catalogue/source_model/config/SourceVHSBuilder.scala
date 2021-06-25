@@ -4,21 +4,18 @@ import com.amazonaws.services.s3.AmazonS3
 import com.typesafe.config.Config
 import org.scanamo.generic.auto._
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import uk.ac.wellcome.storage.s3.{S3ObjectLocation, S3ObjectLocationPrefix}
-import uk.ac.wellcome.storage.store.{
-  HybridStoreWithMaxima,
-  VersionedHybridStore
-}
-import uk.ac.wellcome.storage.store.dynamo.{
+import weco.storage.s3.{S3ObjectLocation, S3ObjectLocationPrefix}
+import weco.storage.store.{HybridStoreWithMaxima, VersionedHybridStore}
+import weco.storage.store.dynamo.{
   ConsistencyMode,
   DynamoHashStore,
   DynamoHybridStore,
   StronglyConsistent
 }
-import uk.ac.wellcome.storage.store.s3.S3TypedStore
-import uk.ac.wellcome.storage.streaming.Codec
-import uk.ac.wellcome.storage.typesafe.{DynamoBuilder, S3Builder}
-import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
+import weco.storage.store.s3.S3TypedStore
+import weco.storage.streaming.Codec
+import weco.storage.typesafe.{DynamoBuilder, S3Builder}
+import weco.typesafe.config.builders.EnrichConfig._
 import weco.catalogue.source_model.store.SourceVHS
 
 import scala.language.higherKinds

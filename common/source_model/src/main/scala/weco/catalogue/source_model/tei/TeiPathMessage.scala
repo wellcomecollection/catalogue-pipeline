@@ -1,7 +1,7 @@
 package weco.catalogue.source_model.tei
 
 import io.circe.Decoder
-import uk.ac.wellcome.json.JsonUtil._
+import weco.json.JsonUtil._
 
 import java.net.URI
 import java.time.Instant

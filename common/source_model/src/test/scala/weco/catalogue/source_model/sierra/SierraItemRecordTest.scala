@@ -3,7 +3,7 @@ package weco.catalogue.source_model.sierra
 import java.time.Instant
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.json.JsonUtil._
+import weco.json.JsonUtil._
 import weco.catalogue.source_model.generators.SierraGenerators
 import weco.catalogue.source_model.sierra.identifiers.SierraItemNumber
 
@@ -83,6 +83,6 @@ class SierraItemRecordTest
     }
 
     val message1 = caught.getMessage
-    message1 shouldBe s"Error parsing bibIds from JSON <<$data>> (uk.ac.wellcome.json.exceptions.JsonDecodingError: $expectedMessage)"
+    message1 shouldBe s"Error parsing bibIds from JSON <<$data>> (weco.json.exceptions.JsonDecodingError: $expectedMessage)"
   }
 }

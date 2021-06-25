@@ -1,6 +1,6 @@
 package weco.catalogue.source_model.mets
 
-import uk.ac.wellcome.storage.s3.{S3ObjectLocation, S3ObjectLocationPrefix}
+import weco.storage.s3.{S3ObjectLocation, S3ObjectLocationPrefix}
 
 import java.time.Instant
 

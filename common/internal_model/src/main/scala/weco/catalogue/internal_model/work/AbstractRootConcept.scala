@@ -1,6 +1,6 @@
 package weco.catalogue.internal_model.work
 
-import uk.ac.wellcome.models.parse.parsers.DateParser
+import weco.catalogue.internal_model.parse.parsers.DateParser
 import weco.catalogue.internal_model.text.TextNormalisation._
 import weco.catalogue.internal_model.identifiers.{HasId, IdState}
 

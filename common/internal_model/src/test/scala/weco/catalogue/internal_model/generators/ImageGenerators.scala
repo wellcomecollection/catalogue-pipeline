@@ -1,6 +1,6 @@
 package weco.catalogue.internal_model.generators
 
-import uk.ac.wellcome.models.work.generators._
+import weco.catalogue.internal_model.work.generators._
 import weco.catalogue.internal_model.identifiers.{
   CanonicalId,
   IdState,
@@ -14,6 +14,10 @@ import weco.catalogue.internal_model.locations.{
   DigitalLocation,
   License,
   LocationType
+}
+import weco.catalogue.internal_model.work.generators.{
+  InstantGenerators,
+  SierraWorkGenerators
 }
 import weco.catalogue.internal_model.work.{Work, WorkState}
 

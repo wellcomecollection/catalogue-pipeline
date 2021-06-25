@@ -4,8 +4,8 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scanamo.{DynamoFormat, DynamoValue}
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
-import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.json.utils.JsonAssertions
+import weco.json.JsonUtil._
+import weco.json.utils.JsonAssertions
 
 import scala.util.Success
 

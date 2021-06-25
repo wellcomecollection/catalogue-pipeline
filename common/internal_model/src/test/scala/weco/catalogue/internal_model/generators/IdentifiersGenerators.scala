@@ -1,6 +1,6 @@
 package weco.catalogue.internal_model.generators
 
-import uk.ac.wellcome.fixtures.RandomGenerators
+import weco.fixtures.RandomGenerators
 import weco.catalogue.internal_model.identifiers.{
   CanonicalId,
   IdentifierType,
