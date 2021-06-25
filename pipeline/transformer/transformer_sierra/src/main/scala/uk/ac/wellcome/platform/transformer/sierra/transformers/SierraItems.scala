@@ -161,7 +161,10 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
 
     titleCandidates match {
       case Seq(title) => Some(title)
-      case Nil        => data.copyNo.map { copyNo => s"Copy $copyNo" }
+      case Nil =>
+        data.copyNo.map { copyNo =>
+          s"Copy $copyNo"
+        }
       case multipleTitles =>
         warn(
           s"Multiple title candidates on item $itemId: ${titleCandidates.mkString("; ")}")
