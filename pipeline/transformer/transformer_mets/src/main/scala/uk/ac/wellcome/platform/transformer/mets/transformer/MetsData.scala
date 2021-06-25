@@ -90,7 +90,12 @@ case class MetsData(
       case (None, None) => Nil
       case _ =>
         List(
-          AccessCondition(status = accessStatus, terms = accessConditionUsage))
+          AccessCondition(
+            method = AccessMethod.ViewOnline,
+            status = accessStatus,
+            terms = accessConditionUsage
+          )
+        )
     }
 
   private def parseLicense: Either[Exception, Option[License]] =
