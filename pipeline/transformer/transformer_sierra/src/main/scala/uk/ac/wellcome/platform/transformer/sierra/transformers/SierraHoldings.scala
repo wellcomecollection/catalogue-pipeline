@@ -4,6 +4,7 @@ import com.github.tototoshi.csv.CSVReader
 import weco.catalogue.internal_model.locations.LocationType.ClosedStores
 import weco.catalogue.internal_model.locations.{
   AccessCondition,
+  AccessMethod,
   AccessStatus,
   DigitalLocation,
   LocationType,
@@ -255,7 +256,9 @@ object SierraHoldings extends SierraQueryOps {
                   locationType = LocationType.OnlineResource,
                   linkText = linkText,
                   accessConditions = List(
-                    AccessCondition(status = AccessStatus.LicensedResources)
+                    AccessCondition(
+                      method = AccessMethod.ViewOnline,
+                      status = AccessStatus.LicensedResources)
                   )
                 )
               )

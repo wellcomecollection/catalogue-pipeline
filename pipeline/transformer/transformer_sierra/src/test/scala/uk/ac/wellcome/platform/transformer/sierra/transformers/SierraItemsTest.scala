@@ -224,7 +224,7 @@ class SierraItemsTest
         locationType = LocationType.ClosedStores,
         label = LocationType.ClosedStores.label,
         accessConditions =
-          List(AccessCondition(method = Some(AccessMethod.OnlineRequest)))
+          List(AccessCondition(method = AccessMethod.OnlineRequest))
       )
     )
   }
@@ -285,7 +285,7 @@ class SierraItemsTest
           locationType = LocationType.ClosedStores,
           label = LocationType.ClosedStores.label,
           accessConditions =
-            List(AccessCondition(method = Some(AccessMethod.OnlineRequest)))
+            List(AccessCondition(method = AccessMethod.OnlineRequest))
         )
       ))
   }

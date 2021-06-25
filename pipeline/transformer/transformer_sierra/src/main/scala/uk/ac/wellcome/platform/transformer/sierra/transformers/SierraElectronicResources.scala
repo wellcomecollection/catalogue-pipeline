@@ -1,11 +1,12 @@
 package uk.ac.wellcome.platform.transformer.sierra.transformers
 
 import grizzled.slf4j.Logging
-import weco.catalogue.internal_model.locations.AccessStatus.LicensedResources
 import weco.catalogue.internal_model.locations.LocationType.OnlineResource
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.locations.{
   AccessCondition,
+  AccessMethod,
+  AccessStatus,
   DigitalLocation
 }
 import weco.catalogue.internal_model.work.Item
@@ -92,7 +93,9 @@ object SierraElectronicResources extends SierraQueryOps with Logging {
             // See https://github.com/wellcomecollection/platform/issues/5062 for
             // more discussion and conversations about this.
             accessConditions = List(
-              AccessCondition(status = LicensedResources)
+              AccessCondition(
+                method = AccessMethod.ViewOnline,
+                status = AccessStatus.LicensedResources)
             )
           )
         )

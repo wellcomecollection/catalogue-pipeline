@@ -9,6 +9,7 @@ import weco.catalogue.internal_model.locations.LocationType.{
 }
 import weco.catalogue.internal_model.locations.{
   AccessCondition,
+  AccessMethod,
   AccessStatus,
   DigitalLocation,
   LocationType,
@@ -108,7 +109,9 @@ class SierraHoldingsTest
               locationType = OnlineResource,
               linkText = Some("Connect to Example Journals"),
               accessConditions = List(
-                AccessCondition(status = AccessStatus.LicensedResources)
+                AccessCondition(
+                  method = AccessMethod.ViewOnline,
+                  status = AccessStatus.LicensedResources)
               )
             )
           )
@@ -154,7 +157,9 @@ class SierraHoldingsTest
               locationType = OnlineResource,
               linkText = Some("Connect to Example Journals"),
               accessConditions = List(
-                AccessCondition(status = AccessStatus.LicensedResources)
+                AccessCondition(
+                  method = AccessMethod.ViewOnline,
+                  status = AccessStatus.LicensedResources)
               )
             )
           ),
@@ -167,7 +172,9 @@ class SierraHoldingsTest
               url = "https://example.org/subscriptions",
               locationType = OnlineResource,
               accessConditions = List(
-                AccessCondition(status = AccessStatus.LicensedResources)
+                AccessCondition(
+                  method = AccessMethod.ViewOnline,
+                  status = AccessStatus.LicensedResources)
               )
             )
           ),
@@ -219,7 +226,9 @@ class SierraHoldingsTest
               locationType = OnlineResource,
               linkText = Some("Connect to Example Journals"),
               accessConditions = List(
-                AccessCondition(status = AccessStatus.LicensedResources)
+                AccessCondition(
+                  method = AccessMethod.ViewOnline,
+                  status = AccessStatus.LicensedResources)
               )
             )
           ),
@@ -232,7 +241,9 @@ class SierraHoldingsTest
               url = "https://example.org/subscriptions",
               locationType = OnlineResource,
               accessConditions = List(
-                AccessCondition(status = AccessStatus.LicensedResources)
+                AccessCondition(
+                  method = AccessMethod.ViewOnline,
+                  status = AccessStatus.LicensedResources)
               )
             )
           ),
@@ -335,7 +346,11 @@ class SierraHoldingsTest
                 "Connect to 17th-18th Century Burney Collection newspapers"),
               locationType = LocationType.OnlineResource,
               accessConditions =
-                List(AccessCondition(status = AccessStatus.LicensedResources))
+                List(
+                  AccessCondition(
+                    method = AccessMethod.ViewOnline,
+                    status = AccessStatus.LicensedResources)
+                )
             )
           )
         )
