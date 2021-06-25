@@ -371,6 +371,7 @@ class CalmTransformerTest
     )
 
     val result = CalmTransformer(
+      record.id,
       CalmSourceData(record, isDeleted = true),
       version).right.get
     result shouldBe a[Work.Deleted[_]]

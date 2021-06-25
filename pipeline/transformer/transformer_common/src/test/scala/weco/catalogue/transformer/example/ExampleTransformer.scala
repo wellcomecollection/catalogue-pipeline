@@ -21,7 +21,8 @@ case class ValidExampleData(id: SourceIdentifier, title: String)
 case object InvalidExampleData extends ExampleData
 
 object ExampleTransformer extends Transformer[ExampleData] with WorkGenerators {
-  override def apply(data: ExampleData,
+  override def apply(id: String,
+                     data: ExampleData,
                      version: Int): Either[Exception, Work.Visible[Source]] =
     data match {
       case ValidExampleData(id, title) =>

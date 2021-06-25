@@ -39,6 +39,7 @@ class MiroRecordTransformer
     with Transformer[(MiroRecord, MiroSourceOverrides, MiroMetadata)] {
 
   override def apply(
+    id: String,
     sourceData: (MiroRecord, MiroSourceOverrides, MiroMetadata),
     version: Int): Result[Work[Source]] = {
     val (miroRecord, overrides, miroMetadata) = sourceData
