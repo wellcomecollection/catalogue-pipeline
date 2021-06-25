@@ -7,6 +7,7 @@ import akka.http.scaladsl.model.headers.{
   OAuth2BearerToken
 }
 import akka.http.scaladsl.model._
+import org.scalatest.concurrent.IntegrationPatience
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.akka.fixtures.Akka
@@ -21,7 +22,8 @@ class StorageServiceOauthHttpClientTest
     extends AnyFunSpec
     with Matchers
     with Akka
-    with HttpFixtures {
+    with HttpFixtures
+    with IntegrationPatience {
   val credentials: BasicHttpCredentials =
     BasicHttpCredentials("username", "password")
 

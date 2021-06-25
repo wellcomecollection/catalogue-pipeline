@@ -58,15 +58,11 @@ trait ItemsGenerators extends IdentifiersGenerators with LocationGenerators {
     createDigitalItemWith(
       locations = List(
         createDigitalLocationWith(
-<<<<<<< HEAD:common/internal_model/src/test/scala/uk/ac/wellcome/models/work/generators/ItemsGenerators.scala
           accessConditions = List(
             AccessCondition(
               method = AccessMethod.NotRequestable,
               status = accessStatus
             ))
-=======
-          accessConditions = List(AccessCondition(status = accessStatus))
->>>>>>> Move internal model into the weco.catalogue namespace:common/internal_model/src/test/scala/weco/catalogue/internal_model/work/generators/ItemsGenerators.scala
         )
       )
     )
