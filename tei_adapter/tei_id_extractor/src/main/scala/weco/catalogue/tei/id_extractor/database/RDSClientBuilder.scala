@@ -3,6 +3,7 @@ package weco.catalogue.tei.id_extractor.database
 import com.typesafe.config.Config
 import scalikejdbc.{ConnectionPool, ConnectionPoolSettings}
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
+import scala.concurrent.duration._
 
 object RDSClientBuilder {
   def buildDB(rdsClientConfig: RDSClientConfig): Unit =
@@ -12,7 +13,7 @@ object RDSClientBuilder {
       password = rdsClientConfig.password,
       settings = ConnectionPoolSettings(
         maxSize = rdsClientConfig.maxConnections,
-        connectionTimeoutMillis = 600000L
+        connectionTimeoutMillis = (10 minutes).toMillis
       )
     )
 
