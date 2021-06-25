@@ -81,8 +81,8 @@ object WellcomeDependencies {
   ) ++ monitoringLibrary
 
   private def library(name: String, version: String): Seq[ModuleID] = Seq(
-    "uk.ac.wellcome" %% name % version,
-    "uk.ac.wellcome" %% name % version % "test" classifier "tests"
+    "weco" %% name % version,
+    "weco" %% name % version % "test" classifier "tests"
   )
 }
 
