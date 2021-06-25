@@ -12,7 +12,7 @@ from deepdiff import DeepDiff
 from wellcome_aws_utils import sns_utils
 from wellcome_aws_utils.lambda_utils import log_on_error
 
-tzinfos = {x: pytz.timezone(x) for x in pytz.all_timezones}
+tzinfos = {tz: pytz.timezone(tz) for tz in pytz.all_timezones}
 
 
 def get_stored_tree(s3, bucket, key):
