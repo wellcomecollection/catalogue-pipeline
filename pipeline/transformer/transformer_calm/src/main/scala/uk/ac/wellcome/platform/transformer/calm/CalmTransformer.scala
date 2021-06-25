@@ -52,7 +52,7 @@ object CalmTransformer
     "third-party metadata"
   )
 
-  override def apply(sourceData: CalmSourceData,
+  override def apply(id: String,sourceData: CalmSourceData,
                      version: Int): Result[Work[Source]] = sourceData match {
     case CalmSourceData(record, isDeleted) if isDeleted =>
       Right(deletedWork(version, record, DeletedFromSource("Calm")))
@@ -63,7 +63,7 @@ object CalmTransformer
   }
 
   def apply(record: CalmRecord, version: Int): Result[Work[Source]] =
-    CalmTransformer(CalmSourceData(record), version)
+    CalmTransformer(record.id,CalmSourceData(record), version)
 
   def deletedWork(
     version: Int,

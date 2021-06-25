@@ -2,18 +2,17 @@ package uk.ac.wellcome.platform.transformer.sierra.services
 
 import io.circe.Decoder
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import weco.catalogue.internal_model.work.WorkState.Source
 import uk.ac.wellcome.pipeline_storage.{PipelineStorageStream, Retriever}
 import uk.ac.wellcome.platform.transformer.sierra.SierraTransformer
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
-import uk.ac.wellcome.storage.{Identified, ReadError, Version}
 import uk.ac.wellcome.storage.store.Readable
+import uk.ac.wellcome.storage.{Identified, ReadError, Version}
 import uk.ac.wellcome.typesafe.Runnable
 import weco.catalogue.internal_model.work.Work
+import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.source_model.SierraSourcePayload
 import weco.catalogue.source_model.sierra.SierraTransformable
 import weco.catalogue.transformer.{Transformer, TransformerWorker}
-import weco.catalogue.transformer.result
 
 import scala.concurrent.ExecutionContext
 
@@ -34,11 +33,7 @@ class SierraTransformerWorker[MsgDestination](
       MsgDestination] {
 
   override val transformer: Transformer[SierraTransformable] =
-    new Transformer[SierraTransformable] {
-      override def apply(transformable: SierraTransformable,
-                         version: Int): result.Result[Work[Source]] =
-        SierraTransformer(transformable, version).toEither
-    }
+    (id: String, transformable: SierraTransformable, version: Int) => SierraTransformer(transformable, version).toEither
 
   override def lookupSourceData(p: SierraSourcePayload)
     : Either[ReadError, Identified[Version[String, Int], SierraTransformable]] =
