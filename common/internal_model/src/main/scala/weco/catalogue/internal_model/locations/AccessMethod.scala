@@ -15,6 +15,8 @@ object AccessMethod extends Enum[License] {
 
   case object OpenShelves extends AccessMethod
 
+  case object ViewOnline extends AccessMethod
+
   case object OnlineRequest extends AccessMethod
   case object ManualRequest extends AccessMethod
 

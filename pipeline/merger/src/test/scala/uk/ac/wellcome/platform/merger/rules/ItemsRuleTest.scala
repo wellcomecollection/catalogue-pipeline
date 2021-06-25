@@ -93,7 +93,10 @@ class ItemsRuleTest
           url = "https://example.org/b12345678",
           locationType = LocationType.OnlineResource,
           accessConditions = List(
-            AccessCondition(status = AccessStatus.LicensedResources)
+            AccessCondition(
+              method = AccessMethod.ViewOnline,
+              status = AccessStatus.LicensedResources
+            )
           )
         )
       )
@@ -231,8 +234,8 @@ class ItemsRuleTest
 
   it("copies the locations from Sierra to Calm") {
     val ac = AccessCondition(
-      status = Some(AccessStatus.Open),
-      method = Some(AccessMethod.OnlineRequest)
+      method = AccessMethod.OnlineRequest,
+      status = AccessStatus.Open
     )
 
     val location = createPhysicalLocationWith(accessConditions = List(ac))
