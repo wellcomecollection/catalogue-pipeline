@@ -12,7 +12,7 @@ import software.amazon.awssdk.services.dynamodb.model.{
   ResourceNotFoundException,
   ScalarAttributeType
 }
-import uk.ac.wellcome.storage.fixtures.DynamoFixtures
+import weco.storage.fixtures.DynamoFixtures
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.language.higherKinds

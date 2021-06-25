@@ -6,11 +6,11 @@ import com.sksamuel.elastic4s.requests.get.GetResponse
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.scalatest.{Assertion, Suite}
-import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.json.JsonUtil._
+import weco.fixtures.TestWith
+import weco.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
-import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.index.IndexFixtures
+import weco.catalogue.internal_model.Implicits._
+import weco.catalogue.internal_model.index.IndexFixtures
 import weco.catalogue.internal_model.work.WorkState.{Denormalised, Indexed}
 import uk.ac.wellcome.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import uk.ac.wellcome.pipeline_storage.{Indexer, Retriever}

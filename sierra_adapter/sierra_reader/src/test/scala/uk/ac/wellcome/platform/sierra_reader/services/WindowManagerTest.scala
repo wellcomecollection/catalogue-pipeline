@@ -4,12 +4,12 @@ import com.amazonaws.services.s3.model.AmazonS3Exception
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.json.JsonUtil._
+import weco.json.JsonUtil._
 import uk.ac.wellcome.platform.sierra_reader.config.models.ReaderConfig
 import uk.ac.wellcome.platform.sierra_reader.exceptions.SierraReaderException
-import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.storage.fixtures.S3Fixtures
-import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
+import weco.fixtures.TestWith
+import weco.storage.fixtures.S3Fixtures
+import weco.storage.fixtures.S3Fixtures.Bucket
 import weco.catalogue.sierra_reader.models.WindowStatus
 import weco.catalogue.source_model.generators.SierraGenerators
 import weco.catalogue.source_model.sierra.identifiers.{

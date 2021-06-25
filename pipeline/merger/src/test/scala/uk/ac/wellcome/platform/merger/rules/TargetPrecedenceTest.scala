@@ -3,8 +3,8 @@ package uk.ac.wellcome.platform.merger.rules
 import org.scalatest.OptionValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.generators.SourceWorkGenerators
 import weco.catalogue.internal_model.work.Format
+import weco.catalogue.internal_model.work.generators.SourceWorkGenerators
 
 class TargetPrecedenceTest
     extends AnyFunSpec

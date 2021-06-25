@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.platform.calm_api_client.AkkaHttpCalmApiClient
-import uk.ac.wellcome.storage.typesafe.DynamoBuilder
+import weco.storage.typesafe.DynamoBuilder
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._

@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.matcher.storage
 
-import uk.ac.wellcome.models.matcher.WorkNode
+import weco.catalogue.internal_model.matcher.WorkNode
 
 import scala.concurrent.{ExecutionContext, Future}
 import uk.ac.wellcome.platform.matcher.models.{WorkGraph, WorkLinks}

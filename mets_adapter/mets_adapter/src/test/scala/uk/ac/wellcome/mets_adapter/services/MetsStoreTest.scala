@@ -2,8 +2,8 @@ package uk.ac.wellcome.mets_adapter.services
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
-import uk.ac.wellcome.storage.{Identified, Version}
+import weco.storage.store.memory.MemoryVersionedStore
+import weco.storage.{Identified, Version}
 import weco.catalogue.source_model.generators.MetsSourceDataGenerators
 import weco.catalogue.source_model.mets.MetsSourceData
 

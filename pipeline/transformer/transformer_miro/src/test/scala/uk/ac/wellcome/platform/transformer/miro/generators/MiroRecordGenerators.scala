@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.transformer.miro.generators
 
 import org.apache.commons.lang3.StringUtils
-import uk.ac.wellcome.fixtures.RandomGenerators
+import weco.fixtures.RandomGenerators
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 
 trait MiroRecordGenerators extends RandomGenerators {

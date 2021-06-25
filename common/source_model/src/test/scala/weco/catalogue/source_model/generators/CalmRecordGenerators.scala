@@ -2,7 +2,7 @@ package weco.catalogue.source_model.generators
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.fixtures.RandomGenerators
+import weco.fixtures.RandomGenerators
 import weco.catalogue.source_model.calm.CalmRecord
 
 trait CalmRecordGenerators extends RandomGenerators {

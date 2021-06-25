@@ -3,20 +3,20 @@ package uk.ac.wellcome.platform.transformer.calm
 import akka.actor.ActorSystem
 import com.amazonaws.services.s3.AmazonS3
 import com.typesafe.config.Config
-import uk.ac.wellcome.models.index.WorksIndexConfig
-import uk.ac.wellcome.json.JsonUtil._
+import weco.catalogue.internal_model.index.WorksIndexConfig
+import weco.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.catalogue.internal_model.work.WorkState.Source
-import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
+import weco.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.pipeline_storage.typesafe.{
   ElasticIndexerBuilder,
   ElasticSourceRetrieverBuilder,
   PipelineStorageStreamBuilder
 }
 import uk.ac.wellcome.platform.transformer.calm.services.CalmTransformerWorker
-import uk.ac.wellcome.storage.store.s3.S3TypedStore
-import uk.ac.wellcome.storage.typesafe.S3Builder
+import weco.storage.store.s3.S3TypedStore
+import weco.storage.typesafe.S3Builder
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.{
   AWSClientConfigBuilder,

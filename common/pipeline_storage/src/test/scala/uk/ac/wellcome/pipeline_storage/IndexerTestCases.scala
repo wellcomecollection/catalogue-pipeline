@@ -4,7 +4,7 @@ import org.scalatest.Assertion
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.fixtures.{RandomGenerators, TestWith}
+import weco.fixtures.{RandomGenerators, TestWith}
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global

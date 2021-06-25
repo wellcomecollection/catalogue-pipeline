@@ -7,13 +7,13 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.models.matcher.{
+import weco.catalogue.internal_model.matcher.{
   MatchedIdentifiers,
   MatcherResult,
   WorkIdentifier
 }
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
-import uk.ac.wellcome.models.Implicits._
+import weco.catalogue.internal_model.Implicits._
 import uk.ac.wellcome.pipeline_storage.MemoryRetriever
 import uk.ac.wellcome.platform.matcher.generators.WorkLinksGenerators
 import uk.ac.wellcome.platform.matcher.models.WorkLinks

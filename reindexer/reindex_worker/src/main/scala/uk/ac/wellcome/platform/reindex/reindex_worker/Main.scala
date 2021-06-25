@@ -11,7 +11,7 @@ import uk.ac.wellcome.platform.reindex.reindex_worker.services.{
   RecordReader,
   ReindexWorkerService
 }
-import uk.ac.wellcome.storage.typesafe.DynamoBuilder
+import weco.storage.typesafe.DynamoBuilder
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 

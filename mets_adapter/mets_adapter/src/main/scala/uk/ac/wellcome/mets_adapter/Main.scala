@@ -11,8 +11,8 @@ import uk.ac.wellcome.mets_adapter.services.{
   MetsAdapterWorkerService,
   MetsStore
 }
-import uk.ac.wellcome.storage.store.dynamo.DynamoSingleVersionStore
-import uk.ac.wellcome.storage.typesafe.DynamoBuilder
+import weco.storage.store.dynamo.DynamoSingleVersionStore
+import weco.storage.typesafe.DynamoBuilder
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._

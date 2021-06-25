@@ -3,8 +3,8 @@ package uk.ac.wellcome.platform.calm_deletion_checker.fixtures
 import java.util.UUID
 
 import uk.ac.wellcome.platform.calm_deletion_checker.CalmSourceDynamoRow
-import uk.ac.wellcome.storage.generators.S3ObjectLocationGenerators
-import uk.ac.wellcome.storage.s3.S3ObjectLocation
+import weco.storage.generators.S3ObjectLocationGenerators
+import weco.storage.s3.S3ObjectLocation
 import weco.catalogue.source_model.CalmSourcePayload
 
 case class CalmSourceDynamoRowWithoutDeletionFlag(

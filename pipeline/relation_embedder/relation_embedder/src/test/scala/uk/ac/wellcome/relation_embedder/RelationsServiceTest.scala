@@ -7,8 +7,8 @@ import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
-import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.index.IndexFixtures
+import weco.catalogue.internal_model.Implicits._
+import weco.catalogue.internal_model.index.IndexFixtures
 import weco.catalogue.internal_model.work.WorkState.Merged
 import uk.ac.wellcome.relation_embedder.fixtures.RelationGenerators
 import weco.catalogue.internal_model.work.Work

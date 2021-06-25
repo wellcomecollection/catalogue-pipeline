@@ -5,24 +5,24 @@ import org.scalatest.matchers.should.Matchers
 import org.scanamo.generic.auto._
 import org.scanamo.{Table => ScanamoTable}
 import org.scanamo.syntax._
-import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.json.JsonUtil._
+import weco.fixtures.TestWith
+import weco.json.JsonUtil._
 import uk.ac.wellcome.platform.calm_deletion_checker.CalmSourceDynamoRow
-import uk.ac.wellcome.storage.Version
-import uk.ac.wellcome.storage.dynamo.DynamoConfig
-import uk.ac.wellcome.storage.fixtures.DynamoFixtures
-import uk.ac.wellcome.storage.generators.S3ObjectLocationGenerators
-import uk.ac.wellcome.storage.maxima.Maxima
-import uk.ac.wellcome.storage.s3.S3ObjectLocation
-import uk.ac.wellcome.storage.store.dynamo.DynamoHashStore
-import uk.ac.wellcome.storage.store.memory.MemoryTypedStore
-import uk.ac.wellcome.storage.store.{
+import weco.storage.Version
+import weco.storage.dynamo.DynamoConfig
+import weco.storage.fixtures.DynamoFixtures
+import weco.storage.generators.S3ObjectLocationGenerators
+import weco.storage.maxima.Maxima
+import weco.storage.s3.S3ObjectLocation
+import weco.storage.store.dynamo.DynamoHashStore
+import weco.storage.store.memory.MemoryTypedStore
+import weco.storage.store.{
   HybridStoreWithMaxima,
   Store,
   TypedStore,
   VersionedHybridStore
 }
-import uk.ac.wellcome.storage.streaming.Codec
+import weco.storage.streaming.Codec
 import weco.catalogue.source_model.calm.CalmRecord
 import weco.catalogue.source_model.store.SourceVHS
 

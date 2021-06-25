@@ -1,8 +1,8 @@
 package uk.ac.wellcome.platform.transformer.mets.transformer
 
-import uk.ac.wellcome.storage.store.Readable
-import uk.ac.wellcome.storage.Identified
-import uk.ac.wellcome.storage.s3.S3ObjectLocation
+import weco.storage.store.Readable
+import weco.storage.Identified
+import weco.storage.s3.S3ObjectLocation
 import weco.catalogue.internal_model.work.{Work, WorkState}
 import weco.catalogue.source_model.mets.{
   DeletedMetsFile,

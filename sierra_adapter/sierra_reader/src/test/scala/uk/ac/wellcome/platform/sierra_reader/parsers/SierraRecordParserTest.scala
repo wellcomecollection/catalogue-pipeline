@@ -5,8 +5,8 @@ import io.circe.parser.parse
 import org.scalatest.compatible.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.json.JsonUtil.toJson
-import uk.ac.wellcome.json.utils.JsonAssertions
+import weco.json.JsonUtil.toJson
+import weco.json.utils.JsonAssertions
 import weco.catalogue.source_model.generators.SierraGenerators
 import weco.catalogue.source_model.sierra.identifiers.{
   SierraBibNumber,

@@ -3,11 +3,11 @@ package weco.tei.adapter
 import akka.{Done, NotUsed}
 import akka.stream.scaladsl.{Flow, Source}
 import software.amazon.awssdk.services.sqs.model.Message
-import uk.ac.wellcome.json.JsonUtil._
+import weco.json.JsonUtil._
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
-import uk.ac.wellcome.storage.store.VersionedStore
+import weco.storage.store.VersionedStore
 import weco.catalogue.source_model.TeiSourcePayload
 import weco.catalogue.source_model.tei.{
   TeiChangedMetadata,

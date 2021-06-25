@@ -5,11 +5,11 @@ import com.sksamuel.elastic4s.{Index, Response}
 import com.sksamuel.elastic4s.requests.get.GetResponse
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
 import org.scalatest.{Assertion, EitherValues}
-import uk.ac.wellcome.elasticsearch.IndexConfig
-import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
-import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.json.JsonUtil.toJson
-import uk.ac.wellcome.models.index.{IndexConfigFields, WorksAnalysis}
+import weco.elasticsearch.IndexConfig
+import weco.elasticsearch.test.fixtures.ElasticsearchFixtures
+import weco.fixtures.TestWith
+import weco.json.JsonUtil.toJson
+import weco.catalogue.internal_model.index.{IndexConfigFields, WorksAnalysis}
 import uk.ac.wellcome.pipeline_storage.{
   ElasticIndexer,
   Indexer,

@@ -3,8 +3,8 @@ package uk.ac.wellcome.pipeline_storage
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.elasticsearch.model.IndexId
-import uk.ac.wellcome.fixtures.TestWith
+import weco.elasticsearch.model.IndexId
+import weco.fixtures.TestWith
 
 trait RetrieverTestCases[Context, T]
     extends AnyFunSpec

@@ -3,14 +3,14 @@ package weco.catalogue.transformer.example
 import io.circe.Encoder
 import io.circe.generic.extras.semiauto.deriveConfiguredEncoder
 import org.scalatest.EitherValues
-import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.fixtures.TestWith
+import weco.json.JsonUtil._
+import weco.fixtures.TestWith
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.pipeline_storage.{PipelineStorageStream, Retriever}
-import uk.ac.wellcome.storage.Version
-import uk.ac.wellcome.storage.generators.S3ObjectLocationGenerators
-import uk.ac.wellcome.storage.s3.S3ObjectLocation
-import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
+import weco.storage.Version
+import weco.storage.generators.S3ObjectLocationGenerators
+import weco.storage.s3.S3ObjectLocation
+import weco.storage.store.memory.MemoryVersionedStore
 import weco.catalogue.internal_model.generators.IdentifiersGenerators
 import weco.catalogue.internal_model.identifiers.IdentifierType
 import weco.catalogue.internal_model.work.{Work, WorkState}

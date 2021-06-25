@@ -1,19 +1,19 @@
 package weco.catalogue.source_model.fixtures
 
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.storage.Version
-import uk.ac.wellcome.storage.generators.S3ObjectLocationGenerators
-import uk.ac.wellcome.storage.maxima.Maxima
-import uk.ac.wellcome.storage.maxima.memory.MemoryMaxima
-import uk.ac.wellcome.storage.s3.S3ObjectLocation
-import uk.ac.wellcome.storage.store.{
+import weco.storage.Version
+import weco.storage.generators.S3ObjectLocationGenerators
+import weco.storage.maxima.Maxima
+import weco.storage.maxima.memory.MemoryMaxima
+import weco.storage.s3.S3ObjectLocation
+import weco.storage.store.{
   HybridStoreWithMaxima,
   Store,
   TypedStore,
   VersionedHybridStore
 }
-import uk.ac.wellcome.storage.store.memory.{MemoryStore, MemoryTypedStore}
-import uk.ac.wellcome.storage.streaming.Codec
+import weco.storage.store.memory.{MemoryStore, MemoryTypedStore}
+import weco.storage.streaming.Codec
 import weco.catalogue.source_model.store.SourceVHS
 
 trait SourceVHSFixture extends S3ObjectLocationGenerators with Matchers {

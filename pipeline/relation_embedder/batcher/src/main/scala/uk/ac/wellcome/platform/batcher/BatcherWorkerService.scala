@@ -13,7 +13,7 @@ import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.typesafe.Runnable
-import uk.ac.wellcome.json.JsonUtil._
+import weco.json.JsonUtil._
 
 case class Batch(rootPath: String, selectors: List[Selector])
 

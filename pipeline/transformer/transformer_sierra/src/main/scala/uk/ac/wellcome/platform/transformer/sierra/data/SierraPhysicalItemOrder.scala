@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.transformer.sierra.data
 
 import java.io.InputStream
-import uk.ac.wellcome.storage.streaming.Codec._
+import weco.storage.streaming.Codec._
 import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType}
 import weco.catalogue.internal_model.work.Item
 import weco.catalogue.source_model.sierra.identifiers.{

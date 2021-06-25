@@ -3,11 +3,11 @@ package uk.ac.wellcome.platform.matcher.matcher
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, MatcherResult}
+import weco.catalogue.internal_model.matcher.{MatchedIdentifiers, MatcherResult}
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
 import uk.ac.wellcome.platform.matcher.generators.WorkLinksGenerators
-import uk.ac.wellcome.storage.locking.memory.{
+import weco.storage.locking.memory.{
   MemoryLockDao,
   MemoryLockingService
 }

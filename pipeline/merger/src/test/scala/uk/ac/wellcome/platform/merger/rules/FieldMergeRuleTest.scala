@@ -3,11 +3,11 @@ package uk.ac.wellcome.platform.merger.rules
 import org.scalatest.matchers.should.Matchers
 import cats.data.NonEmptyList
 import org.scalatest.funspec.AnyFunSpec
-import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 import uk.ac.wellcome.platform.merger.rules.WorkPredicates.WorkPredicate
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.Identified
+import weco.catalogue.internal_model.work.generators.WorkGenerators
 
 class FieldMergeRuleTest
     extends AnyFunSpec

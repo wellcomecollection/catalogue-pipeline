@@ -1,9 +1,9 @@
 package uk.ac.wellcome.mets_adapter.services
 
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.storage.VersionAlreadyExistsError
-import uk.ac.wellcome.storage.store.VersionedStore
-import uk.ac.wellcome.storage.{Identified, Version}
+import weco.storage.VersionAlreadyExistsError
+import weco.storage.store.VersionedStore
+import weco.storage.{Identified, Version}
 import weco.catalogue.source_model.mets.MetsSourceData
 
 class MetsStore(val store: VersionedStore[String, Int, MetsSourceData])

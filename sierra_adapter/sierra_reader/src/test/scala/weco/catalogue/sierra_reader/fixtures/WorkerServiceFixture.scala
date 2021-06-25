@@ -2,14 +2,14 @@ package weco.catalogue.sierra_reader.fixtures
 
 import akka.http.scaladsl.model.{HttpRequest, HttpResponse, Uri}
 import uk.ac.wellcome.akka.fixtures.Akka
-import uk.ac.wellcome.fixtures.TestWith
+import weco.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.platform.sierra_reader.config.models.ReaderConfig
 import uk.ac.wellcome.platform.sierra_reader.services.SierraReaderWorkerService
-import uk.ac.wellcome.storage.fixtures.S3Fixtures
-import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
+import weco.storage.fixtures.S3Fixtures
+import weco.storage.fixtures.S3Fixtures.Bucket
 import weco.catalogue.source_model.sierra.identifiers.SierraRecordTypes
 import weco.http.client.{HttpGet, MemoryHttpClient}
 

@@ -3,11 +3,11 @@ package uk.ac.wellcome.relation_embedder
 import akka.actor.ActorSystem
 import com.sksamuel.elastic4s.Index
 import com.typesafe.config.Config
-import uk.ac.wellcome.models.index.WorksIndexConfig
-import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
+import weco.catalogue.internal_model.index.WorksIndexConfig
+import weco.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
-import uk.ac.wellcome.models.Implicits._
+import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.work.WorkState.Denormalised
 import uk.ac.wellcome.pipeline_storage.typesafe.ElasticIndexerBuilder
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp

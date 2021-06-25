@@ -3,7 +3,7 @@ package weco.catalogue.transformer
 import io.circe.Encoder
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
-import uk.ac.wellcome.fixtures.TestWith
+import weco.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.{Queue, QueuePair}
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage

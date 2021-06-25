@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.transformer.miro.transformers
 
-import uk.ac.wellcome.json.JsonUtil._
+import weco.json.JsonUtil._
 import uk.ac.wellcome.platform.transformer.miro.exceptions.ShouldSuppressException
 
 import java.io.InputStream

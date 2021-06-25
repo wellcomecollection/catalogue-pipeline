@@ -3,7 +3,7 @@ package uk.ac.wellcome.pipeline_storage.typesafe
 import com.sksamuel.elastic4s.{ElasticClient, Index}
 import com.typesafe.config.Config
 import io.circe.Encoder
-import uk.ac.wellcome.elasticsearch.IndexConfig
+import weco.elasticsearch.IndexConfig
 import uk.ac.wellcome.pipeline_storage.{ElasticIndexer, Indexable}
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 

@@ -1,8 +1,8 @@
 package weco.catalogue.source_model.store
 
-import uk.ac.wellcome.storage.s3.S3ObjectLocation
-import uk.ac.wellcome.storage.store.VersionedHybridStore
-import uk.ac.wellcome.storage.{Identified, StorageError, Version}
+import weco.storage.s3.S3ObjectLocation
+import weco.storage.store.VersionedHybridStore
+import weco.storage.{Identified, StorageError, Version}
 
 // A wrapper around a VHS that exposes the underlying S3 location
 // when you call certain methods.

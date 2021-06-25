@@ -11,7 +11,7 @@ import uk.ac.wellcome.platform.reindex.reindex_worker.models.{
   PartialReindexParameters,
   SpecificReindexParameters
 }
-import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
+import weco.storage.fixtures.DynamoFixtures.Table
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.language.higherKinds

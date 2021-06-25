@@ -5,16 +5,16 @@ import akka.actor.ActorSystem
 import com.typesafe.config.Config
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
-import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
+import weco.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.pipeline_storage.typesafe.{
   ElasticIndexerBuilder,
   ElasticSourceRetrieverBuilder,
   PipelineStorageStreamBuilder
 }
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
-import uk.ac.wellcome.models.index.ImagesIndexConfig
+import weco.catalogue.internal_model.index.ImagesIndexConfig
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.models.Implicits._
+import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.image.Image
 import weco.catalogue.internal_model.image.ImageState.{Augmented, Indexed}
 

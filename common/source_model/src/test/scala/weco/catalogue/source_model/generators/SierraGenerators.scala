@@ -1,7 +1,7 @@
 package weco.catalogue.source_model.generators
 
-import uk.ac.wellcome.fixtures.RandomGenerators
-import uk.ac.wellcome.json.JsonUtil.toJson
+import weco.fixtures.RandomGenerators
+import weco.json.JsonUtil.toJson
 import weco.catalogue.source_model.sierra._
 import weco.catalogue.source_model.sierra.identifiers.{
   SierraBibNumber,

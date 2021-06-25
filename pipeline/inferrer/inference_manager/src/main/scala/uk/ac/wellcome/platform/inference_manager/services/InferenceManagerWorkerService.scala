@@ -6,7 +6,7 @@ import akka.http.scaladsl.model.HttpResponse
 import akka.stream.scaladsl.{Flow, FlowWithContext, Source}
 import grizzled.slf4j.Logging
 import software.amazon.awssdk.services.sqs.model.Message
-import uk.ac.wellcome.json.JsonUtil._
+import weco.json.JsonUtil._
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream

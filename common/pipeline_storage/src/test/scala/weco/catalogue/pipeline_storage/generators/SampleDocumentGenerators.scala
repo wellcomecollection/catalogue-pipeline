@@ -2,9 +2,9 @@ package weco.catalogue.pipeline_storage.generators
 
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
-import uk.ac.wellcome.elasticsearch.model.IndexId
-import uk.ac.wellcome.fixtures.RandomGenerators
-import uk.ac.wellcome.json.JsonUtil._
+import weco.elasticsearch.model.IndexId
+import weco.fixtures.RandomGenerators
+import weco.json.JsonUtil._
 import uk.ac.wellcome.pipeline_storage.Indexable
 
 case class SampleDocument(

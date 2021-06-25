@@ -4,7 +4,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 import akka.http.scaladsl.model.{HttpRequest, HttpResponse, StatusCodes, Uri}
 import akka.stream.scaladsl.Flow
-import uk.ac.wellcome.fixtures.TestWith
+import weco.fixtures.TestWith
 import uk.ac.wellcome.platform.inference_manager.services.RequestPoolFlow
 
 import scala.collection.JavaConverters._

@@ -4,7 +4,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import akka.Done
 import akka.stream.scaladsl.Flow
 import software.amazon.awssdk.services.sqs.model.Message
-import uk.ac.wellcome.json.JsonUtil._
+import weco.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.pipeline_storage.PipelineStorageStream.{
   batchRetrieveFlow,

@@ -1,9 +1,9 @@
 package uk.ac.wellcome.pipeline_storage.elastic
 
 import com.sksamuel.elastic4s.Index
-import uk.ac.wellcome.elasticsearch.IndexConfig
-import uk.ac.wellcome.elasticsearch.model.IndexId
-import uk.ac.wellcome.fixtures.TestWith
+import weco.elasticsearch.IndexConfig
+import weco.elasticsearch.model.IndexId
+import weco.fixtures.TestWith
 import uk.ac.wellcome.pipeline_storage.{Retriever, RetrieverTestCases}
 import uk.ac.wellcome.pipeline_storage.fixtures.ElasticIndexerFixtures
 import weco.catalogue.pipeline_storage.generators.{

@@ -2,7 +2,7 @@ package weco.catalogue.sierra_linker.services
 
 import akka.Done
 import io.circe.{Decoder, Encoder}
-import uk.ac.wellcome.json.JsonUtil._
+import weco.json.JsonUtil._
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream

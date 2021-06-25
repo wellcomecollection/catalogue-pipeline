@@ -12,7 +12,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{Inside, Inspectors, OptionValues}
 import software.amazon.awssdk.services.sqs.model.Message
-import uk.ac.wellcome.fixtures.TestWith
+import weco.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.platform.inference_manager.adapters.{

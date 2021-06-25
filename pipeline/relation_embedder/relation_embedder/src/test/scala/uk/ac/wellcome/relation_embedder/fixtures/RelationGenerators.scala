@@ -1,6 +1,6 @@
 package uk.ac.wellcome.relation_embedder.fixtures
 
-import uk.ac.wellcome.models.work.generators.{ItemsGenerators, WorkGenerators}
+import weco.catalogue.internal_model.work.generators.WorkGenerators
 import weco.catalogue.internal_model.work.WorkState.Merged
 import uk.ac.wellcome.relation_embedder.{
   RelationWork,
@@ -8,6 +8,10 @@ import uk.ac.wellcome.relation_embedder.{
   RelationWorkState
 }
 import weco.catalogue.internal_model.locations.AccessStatus
+import weco.catalogue.internal_model.work.generators.{
+  ItemsGenerators,
+  WorkGenerators
+}
 import weco.catalogue.internal_model.work.{CollectionPath, Work}
 
 trait RelationGenerators extends WorkGenerators with ItemsGenerators {

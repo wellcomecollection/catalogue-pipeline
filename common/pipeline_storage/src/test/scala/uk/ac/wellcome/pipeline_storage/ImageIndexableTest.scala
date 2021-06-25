@@ -5,14 +5,18 @@ import org.scalatest.Assertion
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.index.{ImagesIndexConfig, IndexFixtures}
-import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.work.generators.{InstantGenerators, WorkGenerators}
+import weco.catalogue.internal_model.index.{ImagesIndexConfig, IndexFixtures}
+import weco.fixtures.TestWith
+import weco.catalogue.internal_model.Implicits._
+import weco.catalogue.internal_model.work.generators.WorkGenerators
 import uk.ac.wellcome.pipeline_storage.Indexable.imageIndexable
 import uk.ac.wellcome.pipeline_storage.fixtures.ElasticIndexerFixtures
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.image.{Image, ImageState}
+import weco.catalogue.internal_model.work.generators.{
+  InstantGenerators,
+  WorkGenerators
+}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._

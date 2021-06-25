@@ -6,10 +6,10 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import uk.ac.wellcome.fixtures.TestWith
+import weco.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.models.Implicits._
+import weco.catalogue.internal_model.Implicits._
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
 import uk.ac.wellcome.platform.merger.fixtures.{
   MatcherResultFixture,
@@ -17,9 +17,9 @@ import uk.ac.wellcome.platform.merger.fixtures.{
 }
 import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.catalogue.internal_model.work.WorkFsm._
-import uk.ac.wellcome.models.work.generators.MiroWorkGenerators
 import uk.ac.wellcome.pipeline_storage.MemoryRetriever
 import weco.catalogue.internal_model.identifiers.{CanonicalId, IdState}
+import weco.catalogue.internal_model.work.generators.MiroWorkGenerators
 import weco.catalogue.internal_model.work.{MergeCandidate, Work}
 
 class MergerWorkerServiceTest

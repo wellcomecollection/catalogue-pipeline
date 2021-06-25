@@ -1,8 +1,8 @@
 package weco.catalogue.sierra_merger.services
 
 import cats.implicits._
-import uk.ac.wellcome.storage.s3.S3ObjectLocation
-import uk.ac.wellcome.storage.{
+import weco.storage.s3.S3ObjectLocation
+import weco.storage.{
   Identified,
   StorageError,
   UpdateNotApplied,

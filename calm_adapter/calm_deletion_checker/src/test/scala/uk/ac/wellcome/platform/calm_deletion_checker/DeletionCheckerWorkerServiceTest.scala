@@ -6,8 +6,8 @@ import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scanamo.generic.auto._
-import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.json.JsonUtil._
+import weco.fixtures.TestWith
+import weco.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
@@ -22,7 +22,7 @@ import uk.ac.wellcome.platform.calm_deletion_checker.fixtures.{
   CalmSourcePayloadGenerators,
   DynamoCalmVHSFixture
 }
-import uk.ac.wellcome.storage.fixtures.DynamoFixtures
+import weco.storage.fixtures.DynamoFixtures
 import weco.catalogue.source_model.CalmSourcePayload
 import weco.catalogue.source_model.generators.CalmRecordGenerators
 

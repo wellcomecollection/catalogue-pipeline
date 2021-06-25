@@ -7,7 +7,7 @@ import scalikejdbc._
 import uk.ac.wellcome.platform.id_minter.database.IdentifiersDao
 import uk.ac.wellcome.platform.id_minter.fixtures
 import uk.ac.wellcome.platform.id_minter.models.{Identifier, IdentifiersTable}
-import uk.ac.wellcome.fixtures.TestWith
+import weco.fixtures.TestWith
 import uk.ac.wellcome.platform.id_minter.config.models.IdentifiersTableConfig
 import weco.catalogue.internal_model.generators.IdentifiersGenerators
 import weco.catalogue.internal_model.identifiers.SourceIdentifier

@@ -6,11 +6,11 @@ import java.time.Instant
 import akka.{Done, NotUsed}
 import akka.stream.scaladsl.Flow
 import software.amazon.awssdk.services.sqs.model.Message
-import uk.ac.wellcome.json.JsonUtil._
+import weco.json.JsonUtil._
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.matcher.MatcherResult
+import weco.catalogue.internal_model.Implicits._
+import weco.catalogue.internal_model.matcher.MatcherResult
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.pipeline_storage.{
   Indexable,

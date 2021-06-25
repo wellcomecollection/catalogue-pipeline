@@ -3,7 +3,7 @@ package uk.ac.wellcome.platform.router
 import akka.Done
 import akka.stream.scaladsl.Flow
 import software.amazon.awssdk.services.sqs.model.Message
-import uk.ac.wellcome.json.JsonUtil._
+import weco.json.JsonUtil._
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import weco.catalogue.internal_model.work.WorkState.{Denormalised, Merged}

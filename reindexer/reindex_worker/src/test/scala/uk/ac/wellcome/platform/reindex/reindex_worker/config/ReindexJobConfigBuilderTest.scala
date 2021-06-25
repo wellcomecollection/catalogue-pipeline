@@ -7,7 +7,7 @@ import uk.ac.wellcome.platform.reindex.reindex_worker.models.{
   ReindexJobConfig,
   ReindexSource
 }
-import uk.ac.wellcome.storage.dynamo.DynamoConfig
+import weco.storage.dynamo.DynamoConfig
 
 class ReindexJobConfigBuilderTest extends AnyFunSpec with Matchers {
   it("reads the config") {

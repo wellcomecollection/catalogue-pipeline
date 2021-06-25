@@ -4,7 +4,7 @@ import grizzled.slf4j.Logging
 import org.apache.commons.codec.digest.DigestUtils
 import scalax.collection.Graph
 import scalax.collection.GraphPredef._
-import uk.ac.wellcome.models.matcher.WorkNode
+import weco.catalogue.internal_model.matcher.WorkNode
 import uk.ac.wellcome.platform.matcher.models.{
   VersionExpectedConflictException,
   VersionUnexpectedConflictException,

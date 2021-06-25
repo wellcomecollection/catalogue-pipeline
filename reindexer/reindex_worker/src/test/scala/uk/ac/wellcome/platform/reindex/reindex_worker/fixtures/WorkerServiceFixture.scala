@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.reindex.reindex_worker.fixtures
 
 import uk.ac.wellcome.akka.fixtures.Akka
-import uk.ac.wellcome.fixtures.{RandomGenerators, TestWith}
+import weco.fixtures.{RandomGenerators, TestWith}
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryIndividualMessageSender
@@ -18,7 +18,7 @@ import uk.ac.wellcome.platform.reindex.reindex_worker.services.{
   RecordReader,
   ReindexWorkerService
 }
-import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
+import weco.storage.fixtures.DynamoFixtures.Table
 
 import scala.concurrent.ExecutionContext.Implicits.global
 

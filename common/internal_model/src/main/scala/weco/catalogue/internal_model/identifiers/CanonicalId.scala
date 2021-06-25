@@ -1,6 +1,6 @@
 package weco.catalogue.internal_model.identifiers
 
-import uk.ac.wellcome.storage.TypedStringScanamoOps
+import weco.storage.TypedStringScanamoOps
 import weco.json.TypedString
 
 class CanonicalId(val underlying: String) extends TypedString[CanonicalId] {

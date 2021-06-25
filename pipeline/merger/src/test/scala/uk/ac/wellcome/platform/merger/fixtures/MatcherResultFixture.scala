@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.merger.fixtures
 
-import uk.ac.wellcome.fixtures.RandomGenerators
-import uk.ac.wellcome.models.matcher.{
+import weco.fixtures.RandomGenerators
+import weco.catalogue.internal_model.matcher.{
   MatchedIdentifiers,
   MatcherResult,
   WorkIdentifier

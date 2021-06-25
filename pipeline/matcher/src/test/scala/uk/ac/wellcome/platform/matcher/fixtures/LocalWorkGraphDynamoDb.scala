@@ -1,9 +1,9 @@
 package uk.ac.wellcome.platform.matcher.fixtures
 
 import software.amazon.awssdk.services.dynamodb.model._
-import uk.ac.wellcome.fixtures.RandomGenerators
-import uk.ac.wellcome.storage.fixtures.DynamoFixtures
-import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
+import weco.fixtures.RandomGenerators
+import weco.storage.fixtures.DynamoFixtures
+import weco.storage.fixtures.DynamoFixtures.Table
 
 trait LocalWorkGraphDynamoDb extends DynamoFixtures with RandomGenerators {
   override def createTable(table: Table): Table = Table("table", "index")

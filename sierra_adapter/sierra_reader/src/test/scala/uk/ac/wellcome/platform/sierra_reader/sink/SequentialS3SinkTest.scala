@@ -10,11 +10,11 @@ import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
-import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.storage.fixtures.S3Fixtures
-import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
-import uk.ac.wellcome.storage.s3.S3ObjectLocation
-import uk.ac.wellcome.storage.store.s3.S3TypedStore
+import weco.fixtures.TestWith
+import weco.storage.fixtures.S3Fixtures
+import weco.storage.fixtures.S3Fixtures.Bucket
+import weco.storage.s3.S3ObjectLocation
+import weco.storage.store.s3.S3TypedStore
 
 import scala.concurrent.Future
 

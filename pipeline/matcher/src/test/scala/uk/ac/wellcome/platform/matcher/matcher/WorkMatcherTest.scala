@@ -8,7 +8,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import org.scanamo.syntax._
-import uk.ac.wellcome.models.matcher.{
+import weco.catalogue.internal_model.matcher.{
   MatchedIdentifiers,
   WorkIdentifier,
   WorkNode
@@ -18,8 +18,8 @@ import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
 import uk.ac.wellcome.platform.matcher.generators.WorkLinksGenerators
 import uk.ac.wellcome.platform.matcher.models.{WorkGraph, WorkLinks}
 import uk.ac.wellcome.platform.matcher.storage.WorkGraphStore
-import uk.ac.wellcome.storage.locking.LockFailure
-import uk.ac.wellcome.storage.locking.memory.{
+import weco.storage.locking.LockFailure
+import weco.storage.locking.memory.{
   MemoryLockDao,
   MemoryLockingService
 }

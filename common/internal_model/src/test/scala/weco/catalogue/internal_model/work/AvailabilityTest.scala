@@ -2,12 +2,16 @@ package weco.catalogue.internal_model.work
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.generators.{ItemsGenerators, WorkGenerators}
+import weco.catalogue.internal_model.work.generators.WorkGenerators
 import weco.catalogue.internal_model.locations.{
   AccessCondition,
   AccessMethod,
   AccessStatus,
   LocationType
+}
+import weco.catalogue.internal_model.work.generators.{
+  ItemsGenerators,
+  WorkGenerators
 }
 
 class AvailabilityTest

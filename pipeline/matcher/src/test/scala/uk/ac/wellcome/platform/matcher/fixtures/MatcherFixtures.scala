@@ -10,24 +10,24 @@ import org.scanamo.{
   Table => ScanamoTable
 }
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import uk.ac.wellcome.fixtures.TestWith
+import weco.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.models.matcher.{MatchedIdentifiers, WorkNode}
+import weco.catalogue.internal_model.matcher.{MatchedIdentifiers, WorkNode}
 import uk.ac.wellcome.pipeline_storage.MemoryRetriever
 import uk.ac.wellcome.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import uk.ac.wellcome.platform.matcher.matcher.WorkMatcher
 import uk.ac.wellcome.platform.matcher.models.WorkLinks
 import uk.ac.wellcome.platform.matcher.services.MatcherWorkerService
 import uk.ac.wellcome.platform.matcher.storage.{WorkGraphStore, WorkNodeDao}
-import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
-import uk.ac.wellcome.storage.locking.dynamo.{
+import weco.storage.fixtures.DynamoFixtures.Table
+import weco.storage.locking.dynamo.{
   DynamoLockDaoFixtures,
   DynamoLockingService,
   ExpiringLock
 }
-import uk.ac.wellcome.storage.locking.memory.{
+import weco.storage.locking.memory.{
   MemoryLockDao,
   MemoryLockingService
 }

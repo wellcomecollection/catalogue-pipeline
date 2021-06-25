@@ -4,10 +4,10 @@ import com.sksamuel.elastic4s.{ElasticClient, Index}
 import io.circe.Encoder
 import org.scalatest.Suite
 import uk.ac.wellcome.akka.fixtures.Akka
-import uk.ac.wellcome.elasticsearch.model.IndexId
-import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
-import uk.ac.wellcome.elasticsearch.IndexConfig
-import uk.ac.wellcome.fixtures.TestWith
+import weco.elasticsearch.model.IndexId
+import weco.elasticsearch.test.fixtures.ElasticsearchFixtures
+import weco.elasticsearch.IndexConfig
+import weco.fixtures.TestWith
 import uk.ac.wellcome.pipeline_storage.{ElasticIndexer, Indexable}
 
 import scala.concurrent.{ExecutionContext, Future}

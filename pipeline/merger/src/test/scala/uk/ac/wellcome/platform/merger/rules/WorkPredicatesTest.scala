@@ -3,14 +3,15 @@ package uk.ac.wellcome.platform.merger.rules
 import org.scalatest.Inspectors
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.generators.{
-  MetsWorkGenerators,
-  MiroWorkGenerators
-}
+import weco.catalogue.internal_model.work.generators.MiroWorkGenerators
 import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.catalogue.internal_model.locations.{
   DigitalLocation,
   PhysicalLocation
+}
+import weco.catalogue.internal_model.work.generators.{
+  MetsWorkGenerators,
+  MiroWorkGenerators
 }
 import weco.catalogue.internal_model.work.{Format, Work}
 

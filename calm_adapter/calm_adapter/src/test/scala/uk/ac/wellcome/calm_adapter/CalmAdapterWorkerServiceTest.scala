@@ -10,8 +10,8 @@ import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.akka.fixtures.Akka
-import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.json.JsonUtil._
+import weco.fixtures.TestWith
+import weco.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.{
@@ -20,9 +20,9 @@ import uk.ac.wellcome.messaging.memory.{
 }
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.platform.calm_api_client.CalmQuery
-import uk.ac.wellcome.storage.{Identified, Version}
-import uk.ac.wellcome.storage.maxima.memory.MemoryMaxima
-import uk.ac.wellcome.storage.store.memory.MemoryStore
+import weco.storage.{Identified, Version}
+import weco.storage.maxima.memory.MemoryMaxima
+import weco.storage.store.memory.MemoryStore
 import weco.catalogue.source_model.CalmSourcePayload
 import weco.catalogue.source_model.calm.CalmRecord
 import weco.catalogue.source_model.fixtures.SourceVHSFixture

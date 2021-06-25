@@ -3,11 +3,11 @@ package uk.ac.wellcome.platform.merger.services
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.matcher.WorkIdentifier
-import uk.ac.wellcome.models.work.generators.WorkGenerators
+import weco.catalogue.internal_model.matcher.WorkIdentifier
 import weco.catalogue.internal_model.work.WorkState.Identified
 import uk.ac.wellcome.pipeline_storage.MemoryRetriever
 import weco.catalogue.internal_model.work.Work
+import weco.catalogue.internal_model.work.generators.WorkGenerators
 
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global

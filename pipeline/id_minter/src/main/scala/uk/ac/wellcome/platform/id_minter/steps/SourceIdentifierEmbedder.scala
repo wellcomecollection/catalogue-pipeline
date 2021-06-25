@@ -5,7 +5,7 @@ import io.circe.Json
 import io.circe.optics.JsonPath.root
 import io.circe.optics.JsonOptics._
 import monocle.function.Plated
-import uk.ac.wellcome.models.Implicits._
+import weco.catalogue.internal_model.Implicits._
 import uk.ac.wellcome.platform.id_minter.models.Identifier
 import weco.catalogue.internal_model.identifiers.{CanonicalId, SourceIdentifier}
 

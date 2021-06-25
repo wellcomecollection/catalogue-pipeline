@@ -4,17 +4,17 @@ import java.time.format.DateTimeFormatter
 import java.time.{Instant, ZoneOffset}
 import com.amazonaws.services.s3.AmazonS3
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.json.JsonUtil._
+import weco.json.JsonUtil._
 import uk.ac.wellcome.platform.sierra_reader.config.models.ReaderConfig
 import uk.ac.wellcome.platform.sierra_reader.exceptions.SierraReaderException
-import uk.ac.wellcome.storage.Identified
-import uk.ac.wellcome.storage.listing.s3.S3ObjectLocationListing
-import uk.ac.wellcome.storage.s3.{
+import weco.storage.Identified
+import weco.storage.listing.s3.S3ObjectLocationListing
+import weco.storage.s3.{
   S3Config,
   S3ObjectLocation,
   S3ObjectLocationPrefix
 }
-import uk.ac.wellcome.storage.store.s3.S3TypedStore
+import weco.storage.store.s3.S3TypedStore
 import weco.catalogue.sierra_reader.models.WindowStatus
 import weco.catalogue.source_model.sierra.identifiers.UntypedSierraRecordNumber
 

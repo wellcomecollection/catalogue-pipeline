@@ -6,14 +6,14 @@ import com.sksamuel.elastic4s.requests.get.GetResponse
 import org.scalatest.{Assertion, Suite}
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import uk.ac.wellcome.akka.fixtures.Akka
-import uk.ac.wellcome.elasticsearch.IndexConfig
-import uk.ac.wellcome.elasticsearch.test.fixtures.ElasticsearchFixtures
-import uk.ac.wellcome.fixtures.TestWith
+import weco.elasticsearch.IndexConfig
+import weco.elasticsearch.test.fixtures.ElasticsearchFixtures
+import weco.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.storage.s3.S3ObjectLocation
-import uk.ac.wellcome.storage.store.memory.MemoryTypedStore
+import weco.storage.s3.S3ObjectLocation
+import weco.storage.store.memory.MemoryTypedStore
 import weco.catalogue.sierra_indexer.services.Worker
 import weco.catalogue.source_model.sierra.SierraTransformable
 

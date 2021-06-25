@@ -6,11 +6,11 @@ import org.scalatest.matchers.should.Matchers
 import software.amazon.awssdk.services.sqs.model.QueueAttributeName
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.models.work.generators.WorkGenerators
 import weco.catalogue.internal_model.work.WorkState.Identified
 import uk.ac.wellcome.platform.id_minter.fixtures.WorkerServiceFixture
 import weco.catalogue.internal_model.identifiers.{CanonicalId, IdState}
 import weco.catalogue.internal_model.work.Work
+import weco.catalogue.internal_model.work.generators.WorkGenerators
 
 import scala.collection.mutable
 

@@ -2,13 +2,13 @@ package weco.catalogue.sierra_merger.fixtures
 
 import io.circe.Decoder
 import uk.ac.wellcome.akka.fixtures.Akka
-import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.json.JsonUtil._
+import weco.fixtures.TestWith
+import weco.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.storage.streaming.Codec._
+import weco.storage.streaming.Codec._
 import weco.catalogue.sierra_merger.models.{RecordOps, TransformableOps}
 import weco.catalogue.sierra_merger.services.{Updater, Worker}
 import weco.catalogue.source_model.fixtures.SourceVHSFixture

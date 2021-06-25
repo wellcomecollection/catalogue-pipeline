@@ -8,7 +8,7 @@ import akka.stream.Materializer
 import akka.stream.scaladsl._
 import grizzled.slf4j.Logging
 
-import uk.ac.wellcome.json.JsonUtil._
+import weco.json.JsonUtil._
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream

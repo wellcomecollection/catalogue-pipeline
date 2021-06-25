@@ -8,7 +8,7 @@ import com.sksamuel.elastic4s.{ElasticClient, Index}
 import com.sksamuel.elastic4s.{Indexable => ElasticIndexable}
 import io.circe.{Encoder, Printer}
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.elasticsearch.{ElasticsearchIndexCreator, IndexConfig}
+import weco.elasticsearch.{ElasticsearchIndexCreator, IndexConfig}
 
 import java.security.MessageDigest
 import scala.util.Try

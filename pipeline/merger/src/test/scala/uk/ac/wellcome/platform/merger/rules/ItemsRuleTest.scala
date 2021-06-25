@@ -3,7 +3,6 @@ package uk.ac.wellcome.platform.merger.rules
 import org.scalatest.Inside
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.generators.SourceWorkGenerators
 import uk.ac.wellcome.platform.merger.models.FieldMergeResult
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.locations.{
@@ -13,6 +12,7 @@ import weco.catalogue.internal_model.locations.{
   DigitalLocation,
   LocationType
 }
+import weco.catalogue.internal_model.work.generators.SourceWorkGenerators
 import weco.catalogue.internal_model.work.{
   Format,
   Item,

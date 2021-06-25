@@ -7,16 +7,16 @@ import org.scalatest.matchers.should.Matchers
 import io.circe.Encoder
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
-import uk.ac.wellcome.fixtures.TestWith
+import weco.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.mets_adapter.models._
 import uk.ac.wellcome.akka.fixtures.Akka
-import uk.ac.wellcome.storage.store.VersionedStore
-import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
+import weco.storage.store.VersionedStore
+import weco.storage.store.memory.MemoryVersionedStore
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.storage.{Identified, Version}
-import uk.ac.wellcome.json.JsonUtil._
+import weco.storage.{Identified, Version}
+import weco.json.JsonUtil._
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import weco.catalogue.mets_adapter.services.BagRetriever
 import weco.catalogue.source_model.MetsSourcePayload

@@ -4,8 +4,8 @@ import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.analysis.Analysis
 import com.sksamuel.elastic4s.fields.{ElasticField, ObjectField}
 import com.sksamuel.elastic4s.requests.mappings.dynamictemplate.DynamicMapping
-import uk.ac.wellcome.elasticsearch.IndexConfig
-import uk.ac.wellcome.models.index.IndexConfigFields
+import weco.elasticsearch.IndexConfig
+import weco.catalogue.internal_model.index.IndexConfigFields
 
 object SierraIndexConfig extends IndexConfigFields {
   def apply(fields: Seq[ElasticField]): IndexConfig =

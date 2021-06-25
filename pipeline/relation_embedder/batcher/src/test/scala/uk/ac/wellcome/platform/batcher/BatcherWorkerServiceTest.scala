@@ -10,12 +10,12 @@ import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.time.{Seconds, Span}
 import io.circe.Encoder
 
-import uk.ac.wellcome.fixtures.TestWith
+import weco.fixtures.TestWith
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.json.JsonUtil._
+import weco.json.JsonUtil._
 
 import SQS.QueuePair
 

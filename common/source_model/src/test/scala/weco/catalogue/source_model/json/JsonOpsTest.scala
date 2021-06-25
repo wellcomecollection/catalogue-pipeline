@@ -3,7 +3,7 @@ package weco.catalogue.source_model.json
 import org.scalatest.TryValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.json.JsonUtil._
+import weco.json.JsonUtil._
 
 import scala.util.Failure
 

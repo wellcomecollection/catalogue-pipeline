@@ -3,17 +3,17 @@ package uk.ac.wellcome.platform.transformer.calm.services
 import io.circe.Encoder
 import io.circe.generic.extras.semiauto.deriveConfiguredEncoder
 import org.scalatest.EitherValues
-import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.json.JsonUtil._
+import weco.fixtures.TestWith
+import weco.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.pipeline_storage.{
   MemoryIndexer,
   PipelineStorageStream,
   Retriever
 }
-import uk.ac.wellcome.storage.generators.S3ObjectLocationGenerators
-import uk.ac.wellcome.storage.s3.S3ObjectLocation
-import uk.ac.wellcome.storage.store.memory.MemoryTypedStore
+import weco.storage.generators.S3ObjectLocationGenerators
+import weco.storage.s3.S3ObjectLocation
+import weco.storage.store.memory.MemoryTypedStore
 import weco.catalogue.source_model.CalmSourcePayload
 import weco.catalogue.transformer.{
   TransformerWorker,

@@ -3,7 +3,7 @@ package uk.ac.wellcome.platform.matcher.matcher
 import scala.concurrent.{ExecutionContext, Future}
 import cats.implicits._
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.models.matcher.{
+import weco.catalogue.internal_model.matcher.{
   MatchedIdentifiers,
   MatcherResult,
   WorkIdentifier
@@ -12,7 +12,7 @@ import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.models._
 import uk.ac.wellcome.platform.matcher.storage.WorkGraphStore
 import uk.ac.wellcome.platform.matcher.workgraph.WorkGraphUpdater
-import uk.ac.wellcome.storage.locking.{
+import weco.storage.locking.{
   FailedLockingServiceOp,
   FailedProcess,
   FailedUnlock,

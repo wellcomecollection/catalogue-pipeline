@@ -2,12 +2,12 @@ package weco.catalogue.tei.id_extractor
 
 import org.scalatest.funspec.AnyFunSpec
 import scalikejdbc._
-import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.json.JsonUtil._
+import weco.fixtures.TestWith
+import weco.json.JsonUtil._
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
-import uk.ac.wellcome.storage.s3.S3ObjectLocation
-import uk.ac.wellcome.storage.store.memory.MemoryStore
+import weco.storage.fixtures.S3Fixtures.Bucket
+import weco.storage.s3.S3ObjectLocation
+import weco.storage.store.memory.MemoryStore
 import weco.catalogue.tei.id_extractor.PathIdManager.insertPathId
 import weco.catalogue.tei.id_extractor.database.PathIdTable
 import weco.catalogue.tei.id_extractor.fixtures.PathIdDatabase

@@ -3,12 +3,12 @@ package weco.catalogue.sierra_linker.services
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.json.JsonUtil._
+import weco.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.monitoring.memory.MemoryMetrics
-import uk.ac.wellcome.storage.Version
-import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
+import weco.storage.Version
+import weco.storage.store.memory.MemoryVersionedStore
 import weco.catalogue.sierra_linker.fixtures.WorkerFixture
 import weco.catalogue.sierra_linker.models.{Link, LinkOps}
 import weco.catalogue.source_model.generators.SierraGenerators

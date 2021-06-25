@@ -5,10 +5,10 @@ import org.scanamo.{DynamoFormat, Scanamo, Table}
 import org.scanamo.syntax._
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.model.ProvisionedThroughputExceededException
-import uk.ac.wellcome.models.matcher.WorkNode
+import weco.catalogue.internal_model.matcher.WorkNode
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.storage.dynamo.DynamoBatchWriter
-import uk.ac.wellcome.storage.dynamo.DynamoConfig
+import weco.storage.dynamo.DynamoConfig
 import weco.catalogue.internal_model.identifiers.CanonicalId
 
 import scala.concurrent.{ExecutionContext, Future}

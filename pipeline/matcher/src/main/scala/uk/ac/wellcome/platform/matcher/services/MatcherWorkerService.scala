@@ -2,11 +2,11 @@ package uk.ac.wellcome.platform.matcher.services
 
 import akka.Done
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.json.JsonUtil._
+import weco.json.JsonUtil._
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
-import uk.ac.wellcome.models.Implicits._
+import weco.catalogue.internal_model.Implicits._
 import uk.ac.wellcome.pipeline_storage.PipelineStorageStream._
 import uk.ac.wellcome.pipeline_storage.{PipelineStorageConfig, Retriever}
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException

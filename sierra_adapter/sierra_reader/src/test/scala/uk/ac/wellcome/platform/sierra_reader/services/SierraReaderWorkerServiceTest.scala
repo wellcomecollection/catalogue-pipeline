@@ -4,10 +4,10 @@ import akka.http.scaladsl.model._
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.json.JsonUtil._
+import weco.json.JsonUtil._
 import uk.ac.wellcome.platform.sierra_reader.exceptions.SierraReaderException
-import uk.ac.wellcome.storage.fixtures.S3Fixtures.Bucket
-import uk.ac.wellcome.storage.s3.S3ObjectLocation
+import weco.storage.fixtures.S3Fixtures.Bucket
+import weco.storage.s3.S3ObjectLocation
 import weco.catalogue.sierra_reader.fixtures.WorkerServiceFixture
 import weco.catalogue.source_model.sierra.SierraBibRecord
 

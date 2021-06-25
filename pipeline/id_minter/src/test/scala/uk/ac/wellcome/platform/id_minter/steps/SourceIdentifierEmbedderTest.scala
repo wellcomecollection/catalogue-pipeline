@@ -3,7 +3,7 @@ package uk.ac.wellcome.platform.id_minter.steps
 import org.scalatest.matchers.should.Matchers
 import io.circe.parser._
 import org.scalatest.funspec.AnyFunSpec
-import uk.ac.wellcome.json.utils.JsonAssertions
+import weco.json.utils.JsonAssertions
 import uk.ac.wellcome.platform.id_minter.fixtures.SqlIdentifiersGenerators
 import uk.ac.wellcome.platform.id_minter.models.Identifier
 

@@ -7,9 +7,9 @@ import uk.ac.wellcome.pipeline_storage.{PipelineStorageStream, Retriever}
 import uk.ac.wellcome.platform.transformer.miro.MiroRecordTransformer
 import uk.ac.wellcome.platform.transformer.miro.models.MiroMetadata
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
-import uk.ac.wellcome.storage.s3.S3ObjectLocation
-import uk.ac.wellcome.storage.store.Readable
-import uk.ac.wellcome.storage.{Identified, ReadError, Version}
+import weco.storage.s3.S3ObjectLocation
+import weco.storage.store.Readable
+import weco.storage.{Identified, ReadError, Version}
 import uk.ac.wellcome.typesafe.Runnable
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.source_model.MiroSourcePayload

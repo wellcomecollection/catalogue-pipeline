@@ -9,9 +9,9 @@ import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.time.{Seconds, Span}
 import software.amazon.awssdk.services.sqs.model.Message
-import uk.ac.wellcome.elasticsearch.{ElasticClientBuilder, IndexConfig}
-import uk.ac.wellcome.json.JsonUtil
-import uk.ac.wellcome.json.JsonUtil._
+import weco.elasticsearch.{ElasticClientBuilder, IndexConfig}
+import weco.json.JsonUtil
+import weco.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage

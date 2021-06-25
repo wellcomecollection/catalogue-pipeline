@@ -3,7 +3,7 @@ package uk.ac.wellcome.platform.id_minter.fixtures
 import org.scalatest.Assertion
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import uk.ac.wellcome.fixtures.TestWith
+import weco.fixtures.TestWith
 import scalikejdbc._
 import uk.ac.wellcome.platform.id_minter.config.models.{
   IdentifiersTableConfig,

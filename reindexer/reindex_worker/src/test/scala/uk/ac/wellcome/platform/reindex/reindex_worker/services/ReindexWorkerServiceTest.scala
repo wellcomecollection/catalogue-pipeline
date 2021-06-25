@@ -9,7 +9,7 @@ import software.amazon.awssdk.services.dynamodb.model.{
   AttributeValue,
   PutItemRequest
 }
-import uk.ac.wellcome.json.JsonUtil._
+import weco.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryIndividualMessageSender
 import uk.ac.wellcome.platform.reindex.reindex_worker.fixtures.WorkerServiceFixture
@@ -17,8 +17,8 @@ import uk.ac.wellcome.platform.reindex.reindex_worker.models.{
   CompleteReindexParameters,
   ReindexSource
 }
-import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
-import uk.ac.wellcome.storage.generators.S3ObjectLocationGenerators
+import weco.storage.fixtures.DynamoFixtures.Table
+import weco.storage.generators.S3ObjectLocationGenerators
 import weco.catalogue.internal_model.locations.License
 import weco.catalogue.source_model.{
   CalmSourcePayload,

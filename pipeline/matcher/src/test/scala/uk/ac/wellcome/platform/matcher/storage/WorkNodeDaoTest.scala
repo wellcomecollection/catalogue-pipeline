@@ -18,10 +18,10 @@ import software.amazon.awssdk.services.dynamodb.model.{
   ProvisionedThroughputExceededException,
   QueryRequest
 }
-import uk.ac.wellcome.models.matcher.WorkNode
+import weco.catalogue.internal_model.matcher.WorkNode
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
-import uk.ac.wellcome.storage.dynamo.DynamoConfig
+import weco.storage.dynamo.DynamoConfig
 import weco.catalogue.internal_model.generators.IdentifiersGenerators
 import weco.catalogue.internal_model.identifiers.CanonicalId
 

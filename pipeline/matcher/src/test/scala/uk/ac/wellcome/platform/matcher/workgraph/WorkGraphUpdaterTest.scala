@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.matcher.workgraph
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.matcher.WorkNode
+import weco.catalogue.internal_model.matcher.WorkNode
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
 import uk.ac.wellcome.platform.matcher.models._
 import weco.catalogue.internal_model.identifiers.CanonicalId

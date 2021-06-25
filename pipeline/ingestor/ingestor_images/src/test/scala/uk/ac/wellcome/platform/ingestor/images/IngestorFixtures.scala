@@ -3,7 +3,7 @@ package uk.ac.wellcome.platform.ingestor.images
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.scalatest.Suite
 
-import uk.ac.wellcome.fixtures.TestWith
+import weco.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.pipeline_storage.fixtures.{
   ElasticIndexerFixtures,

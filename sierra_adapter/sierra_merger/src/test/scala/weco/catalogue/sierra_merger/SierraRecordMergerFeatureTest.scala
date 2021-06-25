@@ -5,12 +5,12 @@ import io.circe.generic.semiauto.deriveEncoder
 import org.scalatest.{Assertion, EitherValues}
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
-import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.json.JsonUtil._
+import weco.fixtures.TestWith
+import weco.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.storage.{Identified, Version}
+import weco.storage.{Identified, Version}
 import weco.catalogue.sierra_merger.fixtures.RecordMergerFixtures
 import weco.catalogue.sierra_merger.models.TransformableOps
 import weco.catalogue.sierra_merger.services.Worker

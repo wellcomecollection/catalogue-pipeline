@@ -5,10 +5,10 @@ import akka.stream.scaladsl.Flow
 import grizzled.slf4j.Logging
 import io.circe.{Decoder, Json}
 import software.amazon.awssdk.services.sqs.model.Message
-import uk.ac.wellcome.json.JsonUtil
-import uk.ac.wellcome.json.JsonUtil._
+import weco.json.JsonUtil
+import weco.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.models.Implicits._
+import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.work.WorkState.Identified
 import uk.ac.wellcome.pipeline_storage.PipelineStorageStream.{
   batchRetrieveFlow,

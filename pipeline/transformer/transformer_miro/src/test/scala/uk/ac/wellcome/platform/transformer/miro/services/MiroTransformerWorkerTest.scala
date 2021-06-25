@@ -3,16 +3,16 @@ package uk.ac.wellcome.platform.transformer.miro.services
 import io.circe.Encoder
 import io.circe.generic.extras.semiauto.deriveConfiguredEncoder
 import org.scalatest.EitherValues
-import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.json.JsonUtil._
+import weco.fixtures.TestWith
+import weco.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.pipeline_storage.{PipelineStorageStream, Retriever}
 import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
 import uk.ac.wellcome.platform.transformer.miro.models.MiroMetadata
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
-import uk.ac.wellcome.storage.generators.S3ObjectLocationGenerators
-import uk.ac.wellcome.storage.s3.S3ObjectLocation
-import uk.ac.wellcome.storage.store.memory.MemoryTypedStore
+import weco.storage.generators.S3ObjectLocationGenerators
+import weco.storage.s3.S3ObjectLocation
+import weco.storage.store.memory.MemoryTypedStore
 import weco.catalogue.internal_model.identifiers.IdentifierType
 import weco.catalogue.internal_model.work.{Work, WorkState}
 import weco.catalogue.source_model.MiroSourcePayload

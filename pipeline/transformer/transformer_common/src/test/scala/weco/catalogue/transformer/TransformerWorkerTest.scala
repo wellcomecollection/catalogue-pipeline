@@ -3,17 +3,17 @@ package weco.catalogue.transformer
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.json.JsonUtil._
+import weco.fixtures.TestWith
+import weco.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.{Queue, QueuePair}
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import weco.catalogue.internal_model.work.WorkState.Source
 import uk.ac.wellcome.pipeline_storage.{MemoryIndexer, MemoryRetriever}
 import uk.ac.wellcome.pipeline_storage.fixtures.PipelineStorageStreamFixtures
-import uk.ac.wellcome.storage.Version
-import uk.ac.wellcome.storage.generators.S3ObjectLocationGenerators
-import uk.ac.wellcome.storage.s3.S3ObjectLocation
-import uk.ac.wellcome.storage.store.memory.MemoryVersionedStore
+import weco.storage.Version
+import weco.storage.generators.S3ObjectLocationGenerators
+import weco.storage.s3.S3ObjectLocation
+import weco.storage.store.memory.MemoryVersionedStore
 import weco.catalogue.internal_model.generators.IdentifiersGenerators
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.source_model.CalmSourcePayload

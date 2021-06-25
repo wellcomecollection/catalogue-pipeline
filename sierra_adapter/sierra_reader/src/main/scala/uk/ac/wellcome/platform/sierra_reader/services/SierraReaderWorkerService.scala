@@ -7,15 +7,15 @@ import com.amazonaws.services.s3.AmazonS3
 import grizzled.slf4j.Logging
 import io.circe.Json
 import io.circe.syntax._
-import uk.ac.wellcome.json.JsonUtil._
+import weco.json.JsonUtil._
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs._
 import uk.ac.wellcome.platform.sierra_reader.config.models.ReaderConfig
 import uk.ac.wellcome.platform.sierra_reader.flow.SierraRecordWrapperFlow
 import uk.ac.wellcome.platform.sierra_reader.sink.SequentialS3Sink
-import uk.ac.wellcome.storage.Identified
-import uk.ac.wellcome.storage.s3.{S3Config, S3ObjectLocation}
-import uk.ac.wellcome.storage.store.s3.S3TypedStore
+import weco.storage.Identified
+import weco.storage.s3.{S3Config, S3ObjectLocation}
+import weco.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.typesafe.Runnable
 import weco.catalogue.sierra_reader.models.WindowStatus
 import weco.catalogue.sierra_reader.source.{SierraSource, ThrottleRate}

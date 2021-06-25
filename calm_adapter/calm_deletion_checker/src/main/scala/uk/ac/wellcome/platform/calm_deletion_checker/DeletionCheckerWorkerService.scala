@@ -6,7 +6,7 @@ import software.amazon.awssdk.services.sqs.model.Message
 import uk.ac.wellcome.messaging.MessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.sqs.SQSStream
-import uk.ac.wellcome.json.JsonUtil._
+import weco.json.JsonUtil._
 import uk.ac.wellcome.platform.calm_api_client.CalmApiClient
 import uk.ac.wellcome.typesafe.Runnable
 import weco.catalogue.source_model.CalmSourcePayload

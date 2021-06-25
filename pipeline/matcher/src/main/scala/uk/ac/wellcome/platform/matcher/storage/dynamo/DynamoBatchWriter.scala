@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.matcher.storage.dynamo
 
 import org.scanamo.{DynamoFormat, Scanamo, Table}
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import uk.ac.wellcome.storage.dynamo.DynamoConfig
+import weco.storage.dynamo.DynamoConfig
 
 import scala.concurrent.{ExecutionContext, Future}
 

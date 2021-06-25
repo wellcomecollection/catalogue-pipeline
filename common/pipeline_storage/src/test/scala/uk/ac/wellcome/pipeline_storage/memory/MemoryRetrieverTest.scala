@@ -2,8 +2,8 @@ package uk.ac.wellcome.pipeline_storage.memory
 
 import java.util.UUID
 
-import uk.ac.wellcome.elasticsearch.model.IndexId
-import uk.ac.wellcome.fixtures.TestWith
+import weco.elasticsearch.model.IndexId
+import weco.fixtures.TestWith
 import uk.ac.wellcome.pipeline_storage.{
   MemoryRetriever,
   Retriever,

@@ -8,8 +8,8 @@ import com.sksamuel.elastic4s.circe._
 import com.sksamuel.elastic4s.streams.ReactiveElastic._
 import com.sksamuel.elastic4s.{ElasticClient, Index}
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.models.Implicits._
+import weco.json.JsonUtil._
+import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.work.WorkState.Merged
 import weco.catalogue.internal_model.work.Work
 

@@ -6,8 +6,8 @@ import akka.http.scaladsl.Http
 import com.typesafe.config.Config
 import software.amazon.awssdk.services.sqs.model.Message
 
-import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.index.ImagesIndexConfig
+import weco.catalogue.internal_model.Implicits._
+import weco.catalogue.internal_model.index.ImagesIndexConfig
 import uk.ac.wellcome.platform.inference_manager.adapters.{
   AspectRatioInferrerAdapter,
   FeatureVectorInferrerAdapter,
@@ -29,7 +29,7 @@ import uk.ac.wellcome.pipeline_storage.typesafe.{
   ElasticSourceRetrieverBuilder,
   PipelineStorageStreamBuilder
 }
-import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
+import weco.elasticsearch.typesafe.ElasticBuilder
 import weco.catalogue.internal_model.image.Image
 import weco.catalogue.internal_model.image.ImageState.{Augmented, Initial}
 

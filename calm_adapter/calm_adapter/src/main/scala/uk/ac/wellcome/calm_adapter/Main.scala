@@ -6,7 +6,7 @@ import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
-import uk.ac.wellcome.json.JsonUtil._
+import weco.json.JsonUtil._
 import uk.ac.wellcome.platform.calm_api_client.AkkaHttpCalmApiClient
 import weco.catalogue.source_model.calm.CalmRecord
 import weco.catalogue.source_model.config.SourceVHSBuilder

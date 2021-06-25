@@ -12,7 +12,7 @@ import uk.ac.wellcome.platform.sierra_reader.config.builders.{
   SierraAPIConfigBuilder
 }
 import uk.ac.wellcome.platform.sierra_reader.services.SierraReaderWorkerService
-import uk.ac.wellcome.storage.typesafe.S3Builder
+import weco.storage.typesafe.S3Builder
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import weco.http.client.sierra.SierraOauthHttpClient

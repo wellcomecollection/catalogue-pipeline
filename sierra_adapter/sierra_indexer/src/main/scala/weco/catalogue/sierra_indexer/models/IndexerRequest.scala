@@ -11,7 +11,7 @@ import com.sksamuel.elastic4s.{Index, Indexes}
 import com.sksamuel.elastic4s.requests.indexes.IndexRequest
 import io.circe.{Encoder, Json}
 import io.circe.syntax._
-import uk.ac.wellcome.json.JsonUtil._
+import weco.json.JsonUtil._
 import weco.catalogue.sierra_indexer.services.SierraJsonOps._
 import weco.catalogue.source_model.sierra.identifiers.{
   SierraRecordTypes,

@@ -7,10 +7,10 @@ import org.scanamo.{DynamoFormat, Table => ScanamoTable}
 import org.scanamo.syntax._
 import org.scanamo.generic.auto._
 import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException
-import uk.ac.wellcome.fixtures.TestWith
+import weco.fixtures.TestWith
 import uk.ac.wellcome.platform.calm_deletion_checker.fixtures.CalmSourcePayloadGenerators
-import uk.ac.wellcome.storage.fixtures.DynamoFixtures
-import uk.ac.wellcome.storage.fixtures.DynamoFixtures.Table
+import weco.storage.fixtures.DynamoFixtures
+import weco.storage.fixtures.DynamoFixtures.Table
 import weco.catalogue.source_model.CalmSourcePayload
 
 import scala.language.higherKinds

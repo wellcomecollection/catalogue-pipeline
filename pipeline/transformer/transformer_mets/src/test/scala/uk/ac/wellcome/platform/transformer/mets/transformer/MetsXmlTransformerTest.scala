@@ -7,8 +7,8 @@ import uk.ac.wellcome.platform.transformer.mets.fixtures.{
   LocalResources,
   MetsGenerators
 }
-import uk.ac.wellcome.storage.s3.{S3ObjectLocation, S3ObjectLocationPrefix}
-import uk.ac.wellcome.storage.store.memory.MemoryStore
+import weco.storage.s3.{S3ObjectLocation, S3ObjectLocationPrefix}
+import weco.storage.store.memory.MemoryStore
 import weco.catalogue.internal_model.locations.License
 import weco.catalogue.source_model.mets.{DeletedMetsFile, MetsFileWithImages}
 import weco.catalogue.transformer.result.Result

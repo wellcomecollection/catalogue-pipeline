@@ -2,8 +2,8 @@ package weco.catalogue.source_model.sierra.marc
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.json.utils.JsonAssertions
+import weco.json.JsonUtil._
+import weco.json.utils.JsonAssertions
 
 class MarcFieldTest extends AnyFunSpec with Matchers with JsonAssertions {
 

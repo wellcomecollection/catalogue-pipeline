@@ -3,9 +3,9 @@ package weco.catalogue.sierra_linker.services
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{Assertion, EitherValues}
-import uk.ac.wellcome.storage.maxima.memory.MemoryMaxima
-import uk.ac.wellcome.storage.store.memory.{MemoryStore, MemoryVersionedStore}
-import uk.ac.wellcome.storage.{
+import weco.storage.maxima.memory.MemoryMaxima
+import weco.storage.store.memory.{MemoryStore, MemoryVersionedStore}
+import weco.storage.{
   Identified,
   StoreWriteError,
   UpdateWriteError,

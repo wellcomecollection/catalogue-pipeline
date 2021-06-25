@@ -5,7 +5,7 @@ import scala.collection.mutable
 import io.circe.Json
 import io.circe.syntax._
 import scalikejdbc.{ConnectionPool, ConnectionPoolSettings}
-import uk.ac.wellcome.fixtures.TestWith
+import weco.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.platform.id_minter.config.models.IdentifiersTableConfig
@@ -14,7 +14,7 @@ import uk.ac.wellcome.platform.id_minter.models.IdentifiersTable
 import uk.ac.wellcome.platform.id_minter.steps.IdentifierGenerator
 import uk.ac.wellcome.platform.id_minter.services.IdMinterWorkerService
 import uk.ac.wellcome.pipeline_storage.{MemoryIndexer, MemoryRetriever}
-import uk.ac.wellcome.models.Implicits._
+import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.work.WorkState.{Identified, Source}
 import uk.ac.wellcome.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import weco.catalogue.internal_model.work.Work

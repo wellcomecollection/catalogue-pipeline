@@ -2,11 +2,12 @@ package uk.ac.wellcome.platform.merger.models
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.generators.{
+import weco.catalogue.internal_model.work.generators.SierraWorkGenerators
+import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.work.generators.{
   CalmWorkGenerators,
   SierraWorkGenerators
 }
-import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.{Format, MergeCandidate}
 
 class SourcesTest

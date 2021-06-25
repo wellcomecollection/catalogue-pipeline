@@ -11,16 +11,16 @@ import org.scalatest.matchers.should.Matchers
 import akka.NotUsed
 import akka.stream.scaladsl.Source
 import uk.ac.wellcome.akka.fixtures.Akka
-import uk.ac.wellcome.fixtures.TestWith
+import weco.fixtures.TestWith
 import uk.ac.wellcome.messaging.fixtures.SQS
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.models.Implicits._
+import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.work.WorkState.{Denormalised, Merged}
 import uk.ac.wellcome.pipeline_storage.MemoryIndexer
-import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.models.index.IndexFixtures
+import weco.json.JsonUtil._
+import weco.catalogue.internal_model.index.IndexFixtures
 import uk.ac.wellcome.relation_embedder.fixtures.RelationGenerators
 import weco.catalogue.internal_model.work._
 

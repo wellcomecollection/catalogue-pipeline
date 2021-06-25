@@ -3,7 +3,7 @@ package uk.ac.wellcome.platform.transformer.miro
 import java.time.Instant
 import scala.util.{Success, Try}
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.json.JsonUtil._
+import weco.json.JsonUtil._
 import uk.ac.wellcome.platform.transformer.miro.exceptions.{
   ShouldNotTransformException,
   ShouldSuppressException

@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.merger.services
 
-import uk.ac.wellcome.models.matcher.WorkIdentifier
+import weco.catalogue.internal_model.matcher.WorkIdentifier
 import weco.catalogue.internal_model.work.WorkState.Identified
 import uk.ac.wellcome.pipeline_storage.{Retriever, RetrieverMultiResult}
 import weco.catalogue.internal_model.work.Work

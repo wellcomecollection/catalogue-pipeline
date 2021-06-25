@@ -5,8 +5,8 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.matcher.{
+import weco.catalogue.internal_model.Implicits._
+import weco.catalogue.internal_model.matcher.{
   MatchedIdentifiers,
   MatcherResult,
   WorkIdentifier,

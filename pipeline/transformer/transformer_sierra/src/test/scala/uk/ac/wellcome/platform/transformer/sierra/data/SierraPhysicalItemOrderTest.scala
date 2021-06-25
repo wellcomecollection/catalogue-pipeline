@@ -2,13 +2,13 @@ package uk.ac.wellcome.platform.transformer.sierra.data
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.generators.ItemsGenerators
 import weco.catalogue.internal_model.identifiers.{
   IdState,
   IdentifierType,
   SourceIdentifier
 }
 import weco.catalogue.internal_model.work.Item
+import weco.catalogue.internal_model.work.generators.ItemsGenerators
 import weco.catalogue.source_model.generators.SierraGenerators
 import weco.catalogue.source_model.sierra.identifiers.{
   SierraBibNumber,

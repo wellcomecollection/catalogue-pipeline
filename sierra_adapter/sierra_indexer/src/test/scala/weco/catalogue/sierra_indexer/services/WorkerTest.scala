@@ -3,11 +3,11 @@ package weco.catalogue.sierra_indexer.services
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.Indexes
 import org.scalatest.funspec.AnyFunSpec
-import uk.ac.wellcome.json.JsonUtil._
+import weco.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
-import uk.ac.wellcome.storage.generators.S3ObjectLocationGenerators
-import uk.ac.wellcome.storage.s3.S3ObjectLocation
-import uk.ac.wellcome.storage.store.memory.MemoryTypedStore
+import weco.storage.generators.S3ObjectLocationGenerators
+import weco.storage.s3.S3ObjectLocation
+import weco.storage.store.memory.MemoryTypedStore
 import weco.catalogue.sierra_indexer.fixtures.IndexerFixtures
 import weco.catalogue.source_model.SierraSourcePayload
 import weco.catalogue.source_model.generators.SierraGenerators

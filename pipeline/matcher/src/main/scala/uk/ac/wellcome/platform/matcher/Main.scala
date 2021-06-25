@@ -3,14 +3,14 @@ package uk.ac.wellcome.platform.matcher
 import akka.actor.ActorSystem
 import com.typesafe.config.Config
 import org.scanamo.generic.auto._
-import uk.ac.wellcome.elasticsearch.typesafe.ElasticBuilder
+import weco.elasticsearch.typesafe.ElasticBuilder
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
-import uk.ac.wellcome.models.matcher.MatchedIdentifiers
+import weco.catalogue.internal_model.matcher.MatchedIdentifiers
 import uk.ac.wellcome.platform.matcher.matcher.WorkMatcher
 import uk.ac.wellcome.platform.matcher.services.MatcherWorkerService
 import uk.ac.wellcome.platform.matcher.storage.{WorkGraphStore, WorkNodeDao}
-import uk.ac.wellcome.storage.typesafe.{DynamoBuilder, LockingBuilder}
+import weco.storage.typesafe.{DynamoBuilder, LockingBuilder}
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._

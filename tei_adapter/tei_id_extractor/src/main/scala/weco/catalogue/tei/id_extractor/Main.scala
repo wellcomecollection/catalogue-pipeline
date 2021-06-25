@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import com.amazonaws.services.s3.AmazonS3
 import uk.ac.wellcome.messaging.sns.SNSConfig
 import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
-import uk.ac.wellcome.storage.store.s3.S3TypedStore
+import weco.storage.store.s3.S3TypedStore
 import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
 import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
 import weco.catalogue.tei.id_extractor.database.{
@@ -13,7 +13,7 @@ import weco.catalogue.tei.id_extractor.database.{
   RDSClientBuilder,
   TableProvisioner
 }
-import uk.ac.wellcome.storage.typesafe.S3Builder
+import weco.storage.typesafe.S3Builder
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig.RichConfig
 import weco.http.client.AkkaHttpClient
 import weco.catalogue.tei.id_extractor.database.TableProvisioner

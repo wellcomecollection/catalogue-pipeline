@@ -5,7 +5,7 @@ import akka.http.scaladsl.model.headers.Cookie
 import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
 import akka.stream.Materializer
 import uk.ac.wellcome.akka.fixtures.Akka
-import uk.ac.wellcome.fixtures.TestWith
+import weco.fixtures.TestWith
 import uk.ac.wellcome.platform.calm_api_client._
 import weco.catalogue.source_model.calm.CalmRecord
 import weco.http.client.HttpClient

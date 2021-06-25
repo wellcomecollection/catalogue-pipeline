@@ -1,7 +1,7 @@
 package uk.ac.wellcome.pipeline_storage.memory
 
 import org.scalatest.Assertion
-import uk.ac.wellcome.fixtures.TestWith
+import weco.fixtures.TestWith
 import uk.ac.wellcome.pipeline_storage.{
   Indexer,
   IndexerTestCases,

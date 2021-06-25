@@ -1,6 +1,6 @@
 package uk.ac.wellcome.platform.calm_deletion_checker
 
-import uk.ac.wellcome.storage.s3.S3ObjectLocation
+import weco.storage.s3.S3ObjectLocation
 import weco.catalogue.source_model.CalmSourcePayload
 
 case class CalmSourceDynamoRow(

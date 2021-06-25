@@ -9,9 +9,9 @@ import grizzled.slf4j.Logging
 import uk.ac.wellcome.messaging.sqs.SQSStream
 import uk.ac.wellcome.messaging.sns.NotificationMessage
 import uk.ac.wellcome.typesafe.Runnable
-import uk.ac.wellcome.json.JsonUtil._
+import weco.json.JsonUtil._
 import uk.ac.wellcome.mets_adapter.models._
-import uk.ac.wellcome.storage.{Identified, Version}
+import weco.storage.{Identified, Version}
 import uk.ac.wellcome.messaging.MessageSender
 import weco.catalogue.mets_adapter.services.BagRetriever
 import weco.catalogue.source_model.MetsSourcePayload

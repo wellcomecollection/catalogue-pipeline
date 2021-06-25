@@ -3,17 +3,17 @@ package uk.ac.wellcome.platform.ingestor.works
 import com.sksamuel.elastic4s.Index
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.json.utils.JsonAssertions
+import weco.fixtures.TestWith
+import weco.json.utils.JsonAssertions
 import uk.ac.wellcome.messaging.fixtures.SQS.Queue
-import uk.ac.wellcome.models.Implicits._
-import uk.ac.wellcome.models.index.WorksIndexConfig
-import uk.ac.wellcome.models.work.generators.WorkGenerators
+import weco.catalogue.internal_model.Implicits._
+import weco.catalogue.internal_model.index.WorksIndexConfig
 import uk.ac.wellcome.pipeline_storage.ElasticIndexer
 import uk.ac.wellcome.pipeline_storage.Indexable.workIndexable
 import uk.ac.wellcome.pipeline_storage.elastic.ElasticSourceRetriever
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.{Denormalised, Indexed}
+import weco.catalogue.internal_model.work.generators.WorkGenerators
 
 import scala.concurrent.ExecutionContext.Implicits.global
 

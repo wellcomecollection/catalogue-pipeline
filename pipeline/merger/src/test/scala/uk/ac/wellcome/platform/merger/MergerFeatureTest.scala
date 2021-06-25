@@ -4,10 +4,9 @@ import org.scalatest.EitherValues
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.json.JsonUtil._
+import weco.json.JsonUtil._
 import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
 import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.models.work.generators.WorkGenerators
 import uk.ac.wellcome.pipeline_storage.MemoryRetriever
 import uk.ac.wellcome.platform.merger.fixtures.{
   MatcherResultFixture,
@@ -16,6 +15,7 @@ import uk.ac.wellcome.platform.merger.fixtures.{
 import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
+import weco.catalogue.internal_model.work.generators.WorkGenerators
 
 import java.time.Instant
 import scala.collection.mutable
