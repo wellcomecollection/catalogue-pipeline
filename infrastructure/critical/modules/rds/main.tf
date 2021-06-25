@@ -1,11 +1,12 @@
 resource "aws_rds_cluster_instance" "cluster_instances" {
   count = var.instance_count
 
-  identifier           = "${var.cluster_identifier}-${count.index}"
-  cluster_identifier   = aws_rds_cluster.default.id
-  instance_class       = var.instance_class
-  db_subnet_group_name = var.aws_db_subnet_group_name
-  publicly_accessible  = false
+  identifier              = "${var.cluster_identifier}-${count.index}"
+  cluster_identifier      = aws_rds_cluster.default.id
+  instance_class          = var.instance_class
+  db_subnet_group_name    = var.aws_db_subnet_group_name
+  publicly_accessible     = false
+  db_parameter_group_name = var.db_parameter_group_name
 }
 
 resource "aws_rds_cluster" "default" {

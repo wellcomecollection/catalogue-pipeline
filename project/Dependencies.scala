@@ -309,5 +309,6 @@ object CatalogueDependencies {
   val teiAdapterServiceDependencies: Seq[ModuleID] =
     WellcomeDependencies.messagingTypesafeLibrary ++
       WellcomeDependencies.typesafeLibrary ++
+      WellcomeDependencies.storageTypesafeLibrary ++
       ExternalDependencies.scalatestDependencies
 }

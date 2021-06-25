@@ -13,7 +13,8 @@ locals {
   min_capacity                     = 0
   max_capacity                     = 15
   rds_max_connections              = 45
-  tei_id_extractor_max_connections = 9
+  tei_id_extractor_max_connections = 5
+  rds_lock_timeout_seconds         = 10 * 60
 }
 data "aws_ssm_parameter" "admin_cidr_ingress" {
   name = "/infra_critical/config/prod/admin_cidr_ingress"
