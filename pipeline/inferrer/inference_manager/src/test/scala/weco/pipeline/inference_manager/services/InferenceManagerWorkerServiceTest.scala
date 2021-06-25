@@ -13,8 +13,19 @@ import weco.messaging.memory.MemoryMessageSender
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.image.{Image, ImageState, InferredData}
 import weco.catalogue.internal_model.image.ImageState.{Augmented, Initial}
-import weco.pipeline.inference_manager.adapters.{AspectRatioInferrerAdapter, FeatureVectorInferrerAdapter, InferrerAdapter, PaletteInferrerAdapter}
-import weco.pipeline.inference_manager.fixtures.{InferenceManagerWorkerServiceFixture, MemoryFileWriter, RequestPoolFixtures, RequestPoolMock, Responses}
+import weco.pipeline.inference_manager.adapters.{
+  AspectRatioInferrerAdapter,
+  FeatureVectorInferrerAdapter,
+  InferrerAdapter,
+  PaletteInferrerAdapter
+}
+import weco.pipeline.inference_manager.fixtures.{
+  InferenceManagerWorkerServiceFixture,
+  MemoryFileWriter,
+  RequestPoolFixtures,
+  RequestPoolMock,
+  Responses
+}
 import weco.pipeline.inference_manager.models.DownloadedImage
 
 class InferenceManagerWorkerServiceTest

@@ -2,12 +2,7 @@ package weco.pipeline.calm_adapter
 
 import grizzled.slf4j.Logging
 import weco.storage.s3.S3ObjectLocation
-import weco.storage.{
-  Identified,
-  NoVersionExistsError,
-  StorageError,
-  Version
-}
+import weco.storage.{Identified, NoVersionExistsError, StorageError, Version}
 import weco.catalogue.source_model.calm.CalmRecord
 import weco.catalogue.source_model.store.SourceVHS
 

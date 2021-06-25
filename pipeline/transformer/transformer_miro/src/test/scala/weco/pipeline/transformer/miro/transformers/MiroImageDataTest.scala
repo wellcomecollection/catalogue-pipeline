@@ -3,7 +3,11 @@ package weco.pipeline.transformer.miro.transformers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.generators.IdentifiersGenerators
-import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  IdState,
+  IdentifierType,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.image.ImageData
 import weco.catalogue.internal_model.locations._
 import weco.catalogue.source_model.miro.MiroSourceOverrides

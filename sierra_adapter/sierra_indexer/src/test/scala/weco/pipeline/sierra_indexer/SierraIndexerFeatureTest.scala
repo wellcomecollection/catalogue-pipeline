@@ -12,7 +12,12 @@ import weco.storage.s3.S3ObjectLocation
 import weco.storage.store.memory.MemoryTypedStore
 import weco.catalogue.source_model.SierraSourcePayload
 import weco.catalogue.source_model.generators.SierraGenerators
-import weco.catalogue.source_model.sierra.{SierraHoldingsRecord, SierraItemRecord, SierraOrderRecord, SierraTransformable}
+import weco.catalogue.source_model.sierra.{
+  SierraHoldingsRecord,
+  SierraItemRecord,
+  SierraOrderRecord,
+  SierraTransformable
+}
 import weco.pipeline.sierra_indexer.fixtures.IndexerFixtures
 
 import java.time.Instant

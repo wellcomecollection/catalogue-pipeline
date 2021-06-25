@@ -28,7 +28,8 @@ class ElasticIndexerTest
     with IndexConfigFields
     with SampleDocumentGenerators {
 
-  import weco.pipeline_storage.generators.SampleDocument._, weco.pipeline_storage.generators.SampleDocument.{
+  import weco.pipeline_storage.generators.SampleDocument._,
+  weco.pipeline_storage.generators.SampleDocument.{
     canonicalId => sampleDocumentCanonicalId
   }
 

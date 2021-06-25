@@ -3,7 +3,10 @@ package weco.pipeline.transformer.sierra.transformers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks._
-import weco.catalogue.source_model.generators.{MarcGenerators, SierraDataGenerators}
+import weco.catalogue.source_model.generators.{
+  MarcGenerators,
+  SierraDataGenerators
+}
 import weco.catalogue.source_model.sierra.marc.MarcSubfield
 import weco.pipeline.transformer.sierra.exceptions.ShouldNotTransformException
 

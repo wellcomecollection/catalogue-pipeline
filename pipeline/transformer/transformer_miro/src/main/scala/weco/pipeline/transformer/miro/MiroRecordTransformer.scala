@@ -1,7 +1,11 @@
 package weco.pipeline.transformer.miro
 
 import grizzled.slf4j.Logging
-import weco.catalogue.internal_model.identifiers.{DataState, IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  DataState,
+  IdentifierType,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.work.DeletedReason.SuppressedFromSource
 import weco.catalogue.internal_model.work.InvisibilityReason.UnableToTransform
 import weco.catalogue.internal_model.work.WorkState.Source
@@ -9,7 +13,10 @@ import weco.catalogue.internal_model.work.{Work, WorkData}
 import weco.catalogue.source_model.miro.MiroSourceOverrides
 import weco.json.JsonUtil._
 import weco.pipeline.transformer.Transformer
-import weco.pipeline.transformer.miro.exceptions.{ShouldNotTransformException, ShouldSuppressException}
+import weco.pipeline.transformer.miro.exceptions.{
+  ShouldNotTransformException,
+  ShouldSuppressException
+}
 import weco.pipeline.transformer.miro.models.MiroMetadata
 import weco.pipeline.transformer.miro.source.MiroRecord
 import weco.pipeline.transformer.miro.transformers._

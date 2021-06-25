@@ -6,7 +6,11 @@ import org.scalatest.matchers.should.Matchers
 import org.scanamo.generic.auto._
 import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException
 import weco.pipeline.reindex_worker.fixtures.ReindexDynamoFixtures
-import weco.pipeline.reindex_worker.models.{CompleteReindexParameters, PartialReindexParameters, SpecificReindexParameters}
+import weco.pipeline.reindex_worker.models.{
+  CompleteReindexParameters,
+  PartialReindexParameters,
+  SpecificReindexParameters
+}
 import weco.storage.fixtures.DynamoFixtures.Table
 
 import scala.concurrent.ExecutionContext.Implicits.global

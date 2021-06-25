@@ -19,7 +19,11 @@ import weco.typesafe.config.builders.AkkaBuilder
 import weco.catalogue.internal_model.work.Work
 import weco.pipeline.transformer.miro.services.MiroTransformerWorker
 import weco.pipeline.transformer.miro.source.MiroRecord
-import weco.pipeline_storage.typesafe.{ElasticIndexerBuilder, ElasticSourceRetrieverBuilder, PipelineStorageStreamBuilder}
+import weco.pipeline_storage.typesafe.{
+  ElasticIndexerBuilder,
+  ElasticSourceRetrieverBuilder,
+  PipelineStorageStreamBuilder
+}
 
 import scala.concurrent.ExecutionContext
 

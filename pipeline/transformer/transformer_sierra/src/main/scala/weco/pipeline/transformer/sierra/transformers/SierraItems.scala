@@ -1,12 +1,22 @@
 package weco.pipeline.transformer.sierra.transformers
 
 import grizzled.slf4j.Logging
-import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
-import weco.catalogue.internal_model.locations.{LocationType, PhysicalLocationType}
+import weco.catalogue.internal_model.identifiers.{
+  IdState,
+  IdentifierType,
+  SourceIdentifier
+}
+import weco.catalogue.internal_model.locations.{
+  LocationType,
+  PhysicalLocationType
+}
 import weco.catalogue.internal_model.work.Item
 import weco.catalogue.source_model.sierra.rules.SierraPhysicalLocationType
 import weco.catalogue.source_model.sierra.source.SierraQueryOps
-import weco.catalogue.source_model.sierra.identifiers.{SierraBibNumber, SierraItemNumber}
+import weco.catalogue.source_model.sierra.identifiers.{
+  SierraBibNumber,
+  SierraItemNumber
+}
 import weco.catalogue.source_model.sierra.marc.VarField
 import weco.catalogue.source_model.sierra.{SierraBibData, SierraItemData}
 import weco.pipeline.transformer.sierra.data.SierraPhysicalItemOrder

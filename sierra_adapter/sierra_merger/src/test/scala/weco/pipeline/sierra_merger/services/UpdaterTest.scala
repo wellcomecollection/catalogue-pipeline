@@ -7,12 +7,20 @@ import weco.storage.maxima.Maxima
 import weco.storage.maxima.memory.MemoryMaxima
 import weco.storage.s3.S3ObjectLocation
 import weco.storage.store.memory.{MemoryStore, MemoryTypedStore}
-import weco.storage.store.{HybridStoreWithMaxima, Store, TypedStore, VersionedHybridStore}
+import weco.storage.store.{
+  HybridStoreWithMaxima,
+  Store,
+  TypedStore,
+  VersionedHybridStore
+}
 import weco.storage.{StoreWriteError, UpdateWriteError, Version}
 import weco.catalogue.source_model.fixtures.SourceVHSFixture
 import weco.catalogue.source_model.generators.SierraGenerators
 import weco.catalogue.source_model.sierra.identifiers.TypedSierraRecordNumber
-import weco.catalogue.source_model.sierra.{SierraItemRecord, SierraTransformable}
+import weco.catalogue.source_model.sierra.{
+  SierraItemRecord,
+  SierraTransformable
+}
 import weco.catalogue.source_model.store.SourceVHS
 import weco.pipeline.sierra_merger.fixtures.RecordMergerFixtures
 

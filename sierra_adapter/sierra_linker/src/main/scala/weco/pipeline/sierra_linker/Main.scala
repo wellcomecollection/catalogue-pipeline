@@ -7,7 +7,12 @@ import org.scanamo.generic.auto._
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import weco.catalogue.source_model.config.SierraRecordTypeBuilder
 import weco.catalogue.source_model.sierra.identifiers._
-import weco.catalogue.source_model.sierra.{AbstractSierraRecord, SierraHoldingsRecord, SierraItemRecord, SierraOrderRecord}
+import weco.catalogue.source_model.sierra.{
+  AbstractSierraRecord,
+  SierraHoldingsRecord,
+  SierraItemRecord,
+  SierraOrderRecord
+}
 import weco.json.JsonUtil._
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}

@@ -10,7 +10,10 @@ import weco.catalogue.source_model.sierra._
 import weco.catalogue.source_model.sierra.identifiers._
 import weco.json.JsonUtil._
 import weco.json.exceptions.JsonDecodingError
-import weco.pipeline.transformer.sierra.exceptions.{ShouldNotTransformException, SierraTransformerException}
+import weco.pipeline.transformer.sierra.exceptions.{
+  ShouldNotTransformException,
+  SierraTransformerException
+}
 import weco.pipeline.transformer.sierra.transformers._
 
 import java.time.Instant

@@ -6,7 +6,12 @@ import weco.json.JsonUtil._
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.sqs.SQSStream
 import weco.pipeline.reindex_worker.models.source._
-import weco.pipeline.reindex_worker.models.{ReindexJobConfig, ReindexParameters, ReindexRequest, ReindexSource}
+import weco.pipeline.reindex_worker.models.{
+  ReindexJobConfig,
+  ReindexParameters,
+  ReindexRequest,
+  ReindexSource
+}
 import weco.typesafe.Runnable
 
 import scala.concurrent.{ExecutionContext, Future}

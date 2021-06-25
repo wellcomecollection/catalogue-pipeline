@@ -12,7 +12,12 @@ import weco.akka.fixtures.Akka
 import weco.fixtures.TestWith
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.locations.LocationType
-import weco.pipeline.inference_manager.fixtures.{MemoryFileWriter, RequestPoolFixtures, RequestPoolMock, Responses}
+import weco.pipeline.inference_manager.fixtures.{
+  MemoryFileWriter,
+  RequestPoolFixtures,
+  RequestPoolMock,
+  Responses
+}
 import weco.pipeline.inference_manager.models.DownloadedImage
 
 class ImageDownloaderTest

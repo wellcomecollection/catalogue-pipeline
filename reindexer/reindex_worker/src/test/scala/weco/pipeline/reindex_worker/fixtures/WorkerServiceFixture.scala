@@ -7,7 +7,11 @@ import weco.messaging.fixtures.SQS.Queue
 import weco.messaging.memory.MemoryIndividualMessageSender
 import weco.messaging.sns.NotificationMessage
 import weco.pipeline.reindex_worker.models._
-import weco.pipeline.reindex_worker.services.{BulkMessageSender, RecordReader, ReindexWorkerService}
+import weco.pipeline.reindex_worker.services.{
+  BulkMessageSender,
+  RecordReader,
+  ReindexWorkerService
+}
 import weco.storage.fixtures.DynamoFixtures.Table
 
 import scala.concurrent.ExecutionContext.Implicits.global

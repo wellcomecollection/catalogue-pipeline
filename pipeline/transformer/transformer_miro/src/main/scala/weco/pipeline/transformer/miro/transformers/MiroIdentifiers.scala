@@ -1,6 +1,9 @@
 package weco.pipeline.transformer.miro.transformers
 
-import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  IdentifierType,
+  SourceIdentifier
+}
 import weco.pipeline.transformer.miro.source.MiroRecord
 
 trait MiroIdentifiers extends MiroTransformableUtils {

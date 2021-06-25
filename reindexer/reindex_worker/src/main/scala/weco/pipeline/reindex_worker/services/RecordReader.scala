@@ -3,8 +3,17 @@ package weco.pipeline.reindex_worker.services
 import grizzled.slf4j.Logging
 import org.scanamo.DynamoFormat
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import weco.pipeline.reindex_worker.dynamo.{MaxRecordsScanner, MultiItemGetter, ParallelScanner}
-import weco.pipeline.reindex_worker.models.{CompleteReindexParameters, PartialReindexParameters, ReindexParameters, SpecificReindexParameters}
+import weco.pipeline.reindex_worker.dynamo.{
+  MaxRecordsScanner,
+  MultiItemGetter,
+  ParallelScanner
+}
+import weco.pipeline.reindex_worker.models.{
+  CompleteReindexParameters,
+  PartialReindexParameters,
+  ReindexParameters,
+  SpecificReindexParameters
+}
 
 import scala.concurrent.{ExecutionContext, Future}
 

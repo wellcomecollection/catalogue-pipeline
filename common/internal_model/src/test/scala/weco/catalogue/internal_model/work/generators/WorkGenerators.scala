@@ -311,7 +311,7 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
         state.copy(
           derivedData = DerivedWorkData(data),
           availabilities = Availabilities.forWorkData(data)
-        )
+      )
     implicit val updateIdentifiedState: UpdateState[Identified] = identity
     implicit val updateDenormalisedState: UpdateState[Denormalised] =
       (state: Denormalised, data: WorkData[DataState.Identified]) =>

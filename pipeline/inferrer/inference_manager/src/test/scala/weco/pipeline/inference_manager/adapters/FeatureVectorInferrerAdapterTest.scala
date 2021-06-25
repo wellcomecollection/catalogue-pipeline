@@ -8,7 +8,10 @@ import org.scalatest.{Inside, OptionValues}
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.image.InferredData
 import weco.pipeline.inference_manager.fixtures.Encoding
-import weco.pipeline.inference_manager.models.{DownloadedImage, FeatureVectorInferrerResponse}
+import weco.pipeline.inference_manager.models.{
+  DownloadedImage,
+  FeatureVectorInferrerResponse
+}
 
 class FeatureVectorInferrerAdapterTest
     extends AnyFunSpec

@@ -11,8 +11,18 @@ import weco.messaging.sns.NotificationMessage
 import weco.monitoring.Metrics
 import weco.monitoring.memory.MemoryMetrics
 import weco.storage.store.memory.MemoryVersionedStore
-import weco.catalogue.source_model.sierra.identifiers.{SierraHoldingsNumber, SierraItemNumber, SierraOrderNumber, TypedSierraRecordNumber}
-import weco.catalogue.source_model.sierra.{AbstractSierraRecord, SierraHoldingsRecord, SierraItemRecord, SierraOrderRecord}
+import weco.catalogue.source_model.sierra.identifiers.{
+  SierraHoldingsNumber,
+  SierraItemNumber,
+  SierraOrderNumber,
+  TypedSierraRecordNumber
+}
+import weco.catalogue.source_model.sierra.{
+  AbstractSierraRecord,
+  SierraHoldingsRecord,
+  SierraItemRecord,
+  SierraOrderRecord
+}
 import weco.pipeline.sierra_linker.models.{Link, LinkOps}
 import weco.pipeline.sierra_linker.services.{LinkStore, SierraLinkerWorker}
 

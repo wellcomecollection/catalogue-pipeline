@@ -5,7 +5,10 @@ import org.scalatest.Assertion
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import software.amazon.awssdk.services.dynamodb.model.{AttributeValue, PutItemRequest}
+import software.amazon.awssdk.services.dynamodb.model.{
+  AttributeValue,
+  PutItemRequest
+}
 import weco.catalogue.internal_model.locations.License
 import weco.catalogue.source_model.generators.MetsSourceDataGenerators
 import weco.catalogue.source_model.mets.DeletedMetsFile
@@ -15,7 +18,10 @@ import weco.json.JsonUtil._
 import weco.messaging.fixtures.SQS.QueuePair
 import weco.messaging.memory.MemoryIndividualMessageSender
 import weco.pipeline.reindex_worker.fixtures.WorkerServiceFixture
-import weco.pipeline.reindex_worker.models.{CompleteReindexParameters, ReindexSource}
+import weco.pipeline.reindex_worker.models.{
+  CompleteReindexParameters,
+  ReindexSource
+}
 import weco.storage.fixtures.DynamoFixtures.Table
 import weco.storage.generators.S3ObjectLocationGenerators
 

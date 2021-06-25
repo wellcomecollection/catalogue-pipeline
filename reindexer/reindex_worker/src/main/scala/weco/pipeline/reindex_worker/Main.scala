@@ -6,7 +6,11 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.pipeline.reindex_worker.config.ReindexJobConfigBuilder
-import weco.pipeline.reindex_worker.services.{BulkMessageSender, RecordReader, ReindexWorkerService}
+import weco.pipeline.reindex_worker.services.{
+  BulkMessageSender,
+  RecordReader,
+  ReindexWorkerService
+}
 import weco.storage.typesafe.DynamoBuilder
 import weco.typesafe.WellcomeTypesafeApp
 import weco.typesafe.config.builders.AkkaBuilder

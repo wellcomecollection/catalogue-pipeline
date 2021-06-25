@@ -20,10 +20,18 @@ import akka.http.scaladsl.model.Uri
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.image.{Image, InferredData}
 import weco.catalogue.internal_model.locations.LocationType
-import weco.pipeline.inference_manager.adapters.{AspectRatioInferrerAdapter, FeatureVectorInferrerAdapter, InferrerAdapter, PaletteInferrerAdapter}
+import weco.pipeline.inference_manager.adapters.{
+  AspectRatioInferrerAdapter,
+  FeatureVectorInferrerAdapter,
+  InferrerAdapter,
+  PaletteInferrerAdapter
+}
 import weco.pipeline.inference_manager.fixtures.InferenceManagerWorkerServiceFixture
 import weco.pipeline.inference_manager.models.DownloadedImage
-import weco.pipeline.inference_manager.services.{DefaultFileWriter, MergedIdentifiedImage}
+import weco.pipeline.inference_manager.services.{
+  DefaultFileWriter,
+  MergedIdentifiedImage
+}
 
 class ManagerInferrerIntegrationTest
     extends AnyFunSpec

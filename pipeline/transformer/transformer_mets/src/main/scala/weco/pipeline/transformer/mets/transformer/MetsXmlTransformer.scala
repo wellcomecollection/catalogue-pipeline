@@ -1,7 +1,11 @@
 package weco.pipeline.transformer.mets.transformer
 
 import weco.catalogue.internal_model.work.{Work, WorkState}
-import weco.catalogue.source_model.mets.{DeletedMetsFile, MetsFileWithImages, MetsSourceData}
+import weco.catalogue.source_model.mets.{
+  DeletedMetsFile,
+  MetsFileWithImages,
+  MetsSourceData
+}
 import weco.pipeline.transformer.Transformer
 import weco.pipeline.transformer.result.Result
 import weco.storage.Identified

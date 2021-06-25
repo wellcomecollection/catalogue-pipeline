@@ -6,7 +6,12 @@ import scalax.collection.Graph
 import scalax.collection.GraphPredef._
 import weco.catalogue.internal_model.matcher.WorkNode
 import weco.catalogue.internal_model.identifiers.CanonicalId
-import weco.pipeline.matcher.models.{VersionExpectedConflictException, VersionUnexpectedConflictException, WorkGraph, WorkLinks}
+import weco.pipeline.matcher.models.{
+  VersionExpectedConflictException,
+  VersionUnexpectedConflictException,
+  WorkGraph,
+  WorkLinks
+}
 
 object WorkGraphUpdater extends Logging {
   def update(links: WorkLinks, existingGraph: WorkGraph): WorkGraph = {

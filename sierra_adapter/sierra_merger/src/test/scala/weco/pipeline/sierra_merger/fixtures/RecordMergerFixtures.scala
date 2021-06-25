@@ -3,7 +3,10 @@ package weco.pipeline.sierra_merger.fixtures
 import io.circe.Decoder
 import weco.akka.fixtures.Akka
 import weco.catalogue.source_model.fixtures.SourceVHSFixture
-import weco.catalogue.source_model.sierra.{AbstractSierraRecord, SierraTransformable}
+import weco.catalogue.source_model.sierra.{
+  AbstractSierraRecord,
+  SierraTransformable
+}
 import weco.catalogue.source_model.store.SourceVHS
 import weco.fixtures.TestWith
 import weco.json.JsonUtil._

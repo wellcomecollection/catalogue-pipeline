@@ -10,7 +10,13 @@ import weco.messaging.memory.MemoryMessageSender
 import weco.messaging.sns.NotificationMessage
 import weco.pipeline.inference_manager.adapters.InferrerAdapter
 import weco.pipeline.inference_manager.models.DownloadedImage
-import weco.pipeline.inference_manager.services.{FileWriter, ImageDownloader, InferenceManagerWorkerService, MergedIdentifiedImage, RequestPoolFlow}
+import weco.pipeline.inference_manager.services.{
+  FileWriter,
+  ImageDownloader,
+  InferenceManagerWorkerService,
+  MergedIdentifiedImage,
+  RequestPoolFlow
+}
 import weco.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import weco.pipeline_storage.memory.{MemoryIndexer, MemoryRetriever}
 

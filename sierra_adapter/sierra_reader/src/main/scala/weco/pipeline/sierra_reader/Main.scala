@@ -9,7 +9,10 @@ import weco.http.client.sierra.SierraOauthHttpClient
 import weco.http.client.{AkkaHttpClient, HttpGet, HttpPost}
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.typesafe.SQSBuilder
-import weco.pipeline.sierra_reader.config.builders.{ReaderConfigBuilder, SierraAPIConfigBuilder}
+import weco.pipeline.sierra_reader.config.builders.{
+  ReaderConfigBuilder,
+  SierraAPIConfigBuilder
+}
 import weco.pipeline.sierra_reader.services.SierraReaderWorkerService
 import weco.storage.typesafe.S3Builder
 import weco.typesafe.WellcomeTypesafeApp

@@ -4,7 +4,10 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.locations.License
 import weco.catalogue.source_model.miro.MiroSourceOverrides
-import weco.pipeline.transformer.miro.exceptions.{ShouldNotTransformException, ShouldSuppressException}
+import weco.pipeline.transformer.miro.exceptions.{
+  ShouldNotTransformException,
+  ShouldSuppressException
+}
 
 class MiroLicensesTest extends AnyFunSpec with Matchers {
   it("finds a recognised license") {

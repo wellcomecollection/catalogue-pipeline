@@ -19,7 +19,11 @@ import weco.storage.store.s3.S3TypedStore
 import weco.typesafe.config.builders.AWSClientConfigBuilder
 import weco.catalogue.internal_model.work.Work
 import weco.pipeline.transformer.mets.services.MetsTransformerWorker
-import weco.pipeline_storage.typesafe.{ElasticIndexerBuilder, ElasticSourceRetrieverBuilder, PipelineStorageStreamBuilder}
+import weco.pipeline_storage.typesafe.{
+  ElasticIndexerBuilder,
+  ElasticSourceRetrieverBuilder,
+  PipelineStorageStreamBuilder
+}
 
 object Main extends WellcomeTypesafeApp with AWSClientConfigBuilder {
   runWithConfig { config: Config =>

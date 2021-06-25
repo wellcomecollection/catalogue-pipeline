@@ -3,8 +3,17 @@ package weco.pipeline.transformer.sierra.transformers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.IdState
-import weco.catalogue.internal_model.work.{Agent, Concept, Period, Place, ProductionEvent}
-import weco.catalogue.source_model.generators.{MarcGenerators, SierraDataGenerators}
+import weco.catalogue.internal_model.work.{
+  Agent,
+  Concept,
+  Period,
+  Place,
+  ProductionEvent
+}
+import weco.catalogue.source_model.generators.{
+  MarcGenerators,
+  SierraDataGenerators
+}
 import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
 import weco.pipeline.transformer.sierra.exceptions.CataloguingException
 

@@ -3,7 +3,11 @@ package weco.pipeline.transformer.sierra.transformers
 import grizzled.slf4j.Logging
 
 import java.util.UUID
-import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  IdState,
+  IdentifierType,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.work.MergeCandidate
 import weco.catalogue.source_model.sierra.source.SierraQueryOps
 import weco.catalogue.source_model.sierra.SierraBibData

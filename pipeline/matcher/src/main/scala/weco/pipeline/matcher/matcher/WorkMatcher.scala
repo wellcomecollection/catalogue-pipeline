@@ -3,12 +3,22 @@ package weco.pipeline.matcher.matcher
 import scala.concurrent.{ExecutionContext, Future}
 import cats.implicits._
 import grizzled.slf4j.Logging
-import weco.catalogue.internal_model.matcher.{MatchedIdentifiers, MatcherResult, WorkIdentifier}
+import weco.catalogue.internal_model.matcher.{
+  MatchedIdentifiers,
+  MatcherResult,
+  WorkIdentifier
+}
 import weco.pipeline.matcher.exceptions.MatcherException
 import weco.pipeline.matcher.models.{WorkGraph, WorkLinks}
 import weco.pipeline.matcher.storage.WorkGraphStore
 import weco.pipeline.matcher.workgraph.WorkGraphUpdater
-import weco.storage.locking.{FailedLockingServiceOp, FailedProcess, FailedUnlock, LockDao, LockingService}
+import weco.storage.locking.{
+  FailedLockingServiceOp,
+  FailedProcess,
+  FailedUnlock,
+  LockDao,
+  LockingService
+}
 
 import java.time.Instant
 import java.util.UUID

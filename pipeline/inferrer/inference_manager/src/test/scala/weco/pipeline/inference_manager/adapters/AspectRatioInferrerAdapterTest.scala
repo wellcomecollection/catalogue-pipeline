@@ -7,7 +7,10 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.{Inside, OptionValues}
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.image.InferredData
-import weco.pipeline.inference_manager.models.{AspectRatioInferrerResponse, DownloadedImage}
+import weco.pipeline.inference_manager.models.{
+  AspectRatioInferrerResponse,
+  DownloadedImage
+}
 
 import scala.util.Random
 

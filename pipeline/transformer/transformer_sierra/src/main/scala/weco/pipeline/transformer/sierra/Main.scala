@@ -17,7 +17,11 @@ import weco.typesafe.config.builders.AkkaBuilder
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.source_model.sierra.SierraTransformable
 import weco.pipeline.transformer.sierra.services.SierraTransformerWorker
-import weco.pipeline_storage.typesafe.{ElasticIndexerBuilder, ElasticSourceRetrieverBuilder, PipelineStorageStreamBuilder}
+import weco.pipeline_storage.typesafe.{
+  ElasticIndexerBuilder,
+  ElasticSourceRetrieverBuilder,
+  PipelineStorageStreamBuilder
+}
 
 import scala.concurrent.ExecutionContext
 

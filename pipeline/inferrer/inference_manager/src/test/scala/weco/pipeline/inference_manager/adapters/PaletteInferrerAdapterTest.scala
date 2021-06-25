@@ -7,7 +7,11 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.{Inside, OptionValues}
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.image.InferredData
-import weco.pipeline.inference_manager.models.{DownloadedImage, HashParams, PaletteInferrerResponse}
+import weco.pipeline.inference_manager.models.{
+  DownloadedImage,
+  HashParams,
+  PaletteInferrerResponse
+}
 
 class PaletteInferrerAdapterTest
     extends AnyFunSpec

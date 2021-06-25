@@ -3,7 +3,10 @@ package weco.pipeline.transformer.miro.transformers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.generators.IdentifiersGenerators
-import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  IdentifierType,
+  SourceIdentifier
+}
 import weco.pipeline.transformer.miro.generators.MiroRecordGenerators
 
 class MiroIdentifiersTest

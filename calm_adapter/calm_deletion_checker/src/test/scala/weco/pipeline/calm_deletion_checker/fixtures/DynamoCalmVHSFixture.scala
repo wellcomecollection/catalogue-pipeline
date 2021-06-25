@@ -15,7 +15,12 @@ import weco.storage.maxima.Maxima
 import weco.storage.s3.S3ObjectLocation
 import weco.storage.store.dynamo.DynamoHashStore
 import weco.storage.store.memory.MemoryTypedStore
-import weco.storage.store.{HybridStoreWithMaxima, Store, TypedStore, VersionedHybridStore}
+import weco.storage.store.{
+  HybridStoreWithMaxima,
+  Store,
+  TypedStore,
+  VersionedHybridStore
+}
 import weco.storage.streaming.Codec
 import weco.catalogue.source_model.calm.CalmRecord
 import weco.catalogue.source_model.store.SourceVHS

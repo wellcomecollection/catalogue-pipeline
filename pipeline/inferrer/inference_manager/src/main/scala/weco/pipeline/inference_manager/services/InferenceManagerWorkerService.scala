@@ -16,7 +16,10 @@ import weco.pipeline_storage.PipelineStorageStream._
 import weco.pipeline_storage.PipelineStorageConfig
 import weco.typesafe.Runnable
 import weco.catalogue.internal_model.image.{Image, ImageState, InferredData}
-import weco.pipeline.inference_manager.adapters.{InferrerAdapter, InferrerResponse}
+import weco.pipeline.inference_manager.adapters.{
+  InferrerAdapter,
+  InferrerResponse
+}
 import weco.pipeline.inference_manager.models.DownloadedImage
 import weco.pipeline_storage.{Indexer, PipelineStorageConfig, Retriever}
 

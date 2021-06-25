@@ -9,7 +9,11 @@ import weco.messaging.memory.MemoryMessageSender
 import weco.storage.store.memory.MemoryVersionedStore
 import weco.catalogue.source_model.generators.SierraGenerators
 import weco.catalogue.source_model.sierra._
-import weco.catalogue.source_model.sierra.identifiers.{SierraHoldingsNumber, SierraItemNumber, SierraOrderNumber}
+import weco.catalogue.source_model.sierra.identifiers.{
+  SierraHoldingsNumber,
+  SierraItemNumber,
+  SierraOrderNumber
+}
 import weco.pipeline.sierra_linker.fixtures.WorkerFixture
 import weco.pipeline.sierra_linker.models.Link
 

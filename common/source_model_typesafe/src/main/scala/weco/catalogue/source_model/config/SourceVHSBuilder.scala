@@ -5,10 +5,7 @@ import com.typesafe.config.Config
 import org.scanamo.generic.auto._
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import weco.storage.s3.{S3ObjectLocation, S3ObjectLocationPrefix}
-import weco.storage.store.{
-  HybridStoreWithMaxima,
-  VersionedHybridStore
-}
+import weco.storage.store.{HybridStoreWithMaxima, VersionedHybridStore}
 import weco.storage.store.dynamo.{
   ConsistencyMode,
   DynamoHashStore,

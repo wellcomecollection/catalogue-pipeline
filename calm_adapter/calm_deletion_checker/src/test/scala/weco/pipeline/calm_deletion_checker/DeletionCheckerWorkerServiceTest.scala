@@ -17,7 +17,10 @@ import weco.catalogue.source_model.CalmSourcePayload
 import weco.catalogue.source_model.generators.CalmRecordGenerators
 import weco.pipeline.calm_api_client.{CalmQuery, CalmSession, QueryNode}
 import weco.pipeline.calm_api_client.fixtures.CalmApiClientFixtures
-import weco.pipeline.calm_deletion_checker.fixtures.{CalmSourcePayloadGenerators, DynamoCalmVHSFixture}
+import weco.pipeline.calm_deletion_checker.fixtures.{
+  CalmSourcePayloadGenerators,
+  DynamoCalmVHSFixture
+}
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._

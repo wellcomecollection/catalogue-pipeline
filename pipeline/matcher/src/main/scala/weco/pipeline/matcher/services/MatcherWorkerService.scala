@@ -11,7 +11,10 @@ import weco.pipeline_storage.PipelineStorageStream._
 import weco.pipeline_storage.PipelineStorageConfig
 import weco.pipeline.matcher.exceptions.MatcherException
 import weco.pipeline.matcher.matcher.WorkMatcher
-import weco.pipeline.matcher.models.{VersionExpectedConflictException, WorkLinks}
+import weco.pipeline.matcher.models.{
+  VersionExpectedConflictException,
+  WorkLinks
+}
 import weco.typesafe.Runnable
 import weco.pipeline_storage.{PipelineStorageConfig, Retriever}
 

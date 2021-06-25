@@ -2,7 +2,10 @@ package weco.pipeline.sierra_merger
 
 import akka.actor.ActorSystem
 import com.typesafe.config.Config
-import weco.catalogue.source_model.config.{SierraRecordTypeBuilder, SourceVHSBuilder}
+import weco.catalogue.source_model.config.{
+  SierraRecordTypeBuilder,
+  SourceVHSBuilder
+}
 import weco.catalogue.source_model.sierra.identifiers.SierraRecordTypes
 import weco.catalogue.source_model.sierra._
 import weco.json.JsonUtil._

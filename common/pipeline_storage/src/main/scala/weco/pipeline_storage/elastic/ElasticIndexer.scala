@@ -3,7 +3,11 @@ package weco.pipeline_storage.elastic
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.bulk.BulkResponseItem
 import com.sksamuel.elastic4s.requests.common.VersionType.ExternalGte
-import com.sksamuel.elastic4s.{ElasticClient, Index, Indexable => ElasticIndexable}
+import com.sksamuel.elastic4s.{
+  ElasticClient,
+  Index,
+  Indexable => ElasticIndexable
+}
 import grizzled.slf4j.Logging
 import io.circe.{Encoder, Printer}
 import weco.elasticsearch.{ElasticsearchIndexCreator, IndexConfig}

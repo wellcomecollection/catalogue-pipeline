@@ -2,7 +2,10 @@ package weco.pipeline.transformer.miro.transformers
 
 import weco.catalogue.internal_model.locations.License
 import weco.catalogue.source_model.miro.MiroSourceOverrides
-import weco.pipeline.transformer.miro.exceptions.{ShouldNotTransformException, ShouldSuppressException}
+import weco.pipeline.transformer.miro.exceptions.{
+  ShouldNotTransformException,
+  ShouldSuppressException
+}
 
 trait MiroLicenses {
 
