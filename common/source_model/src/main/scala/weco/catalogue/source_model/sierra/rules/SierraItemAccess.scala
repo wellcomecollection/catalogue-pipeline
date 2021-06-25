@@ -208,7 +208,8 @@ object SierraItemAccess extends SierraQueryOps with Logging {
               status = Some(AccessStatus.TemporarilyUnavailable),
               terms = Some(
                 "This item is being digitised and is currently unavailable."),
-              note = itemData.displayNote)),
+              note = itemData.displayNote
+            )),
           ItemStatus.TemporarilyUnavailable)
 
       // An item which is restricted can be requested online -- the user will have to fill in

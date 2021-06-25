@@ -345,12 +345,11 @@ class SierraHoldingsTest
               linkText = Some(
                 "Connect to 17th-18th Century Burney Collection newspapers"),
               locationType = LocationType.OnlineResource,
-              accessConditions =
-                List(
-                  AccessCondition(
-                    method = AccessMethod.ViewOnline,
-                    status = AccessStatus.LicensedResources)
-                )
+              accessConditions = List(
+                AccessCondition(
+                  method = AccessMethod.ViewOnline,
+                  status = AccessStatus.LicensedResources)
+              )
             )
           )
         )

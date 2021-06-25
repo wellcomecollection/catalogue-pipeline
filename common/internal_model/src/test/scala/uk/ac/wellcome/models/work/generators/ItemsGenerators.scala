@@ -64,10 +64,11 @@ trait ItemsGenerators extends IdentifiersGenerators with LocationGenerators {
     createDigitalItemWith(
       locations = List(
         createDigitalLocationWith(
-          accessConditions = List(AccessCondition(
-            method = AccessMethod.NotRequestable,
-            status = accessStatus
-          ))
+          accessConditions = List(
+            AccessCondition(
+              method = AccessMethod.NotRequestable,
+              status = accessStatus
+            ))
         )
       )
     )

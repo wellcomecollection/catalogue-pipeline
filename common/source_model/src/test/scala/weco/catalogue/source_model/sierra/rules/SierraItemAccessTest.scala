@@ -49,8 +49,7 @@ class SierraItemAccessTest
             itemData = itemData
           )
 
-          ac shouldBe Some(
-            AccessCondition(method = AccessMethod.OnlineRequest))
+          ac shouldBe Some(AccessCondition(method = AccessMethod.OnlineRequest))
           itemStatus shouldBe ItemStatus.Available
         }
 
@@ -185,8 +184,7 @@ class SierraItemAccessTest
             itemData = itemData
           )
 
-          ac shouldBe Some(
-            AccessCondition(method = AccessMethod.ManualRequest))
+          ac shouldBe Some(AccessCondition(method = AccessMethod.ManualRequest))
           itemStatus shouldBe ItemStatus.Available
         }
 
@@ -282,10 +280,11 @@ class SierraItemAccessTest
             itemData = itemData
           )
 
-          ac shouldBe Some(AccessCondition(
-            method = AccessMethod.NotRequestable,
-            status = AccessStatus.Closed
-          ))
+          ac shouldBe Some(
+            AccessCondition(
+              method = AccessMethod.NotRequestable,
+              status = AccessStatus.Closed
+            ))
           itemStatus shouldBe ItemStatus.Unavailable
         }
 
@@ -315,9 +314,10 @@ class SierraItemAccessTest
             itemData = itemData
           )
 
-          ac shouldBe Some(AccessCondition(
-            method = AccessMethod.NotRequestable,
-            status = AccessStatus.Closed))
+          ac shouldBe Some(
+            AccessCondition(
+              method = AccessMethod.NotRequestable,
+              status = AccessStatus.Closed))
           itemStatus shouldBe ItemStatus.Unavailable
         }
 
@@ -347,9 +347,10 @@ class SierraItemAccessTest
             itemData = itemData
           )
 
-          ac shouldBe Some(AccessCondition(
-            method = AccessMethod.NotRequestable,
-            status = AccessStatus.Unavailable))
+          ac shouldBe Some(
+            AccessCondition(
+              method = AccessMethod.NotRequestable,
+              status = AccessStatus.Unavailable))
           itemStatus shouldBe ItemStatus.Unavailable
         }
 
