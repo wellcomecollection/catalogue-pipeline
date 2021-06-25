@@ -6,6 +6,7 @@ import weco.catalogue.source_model.sierra.source.SierraSourceLocation
 case class SierraItemData(
   deleted: Boolean = false,
   suppressed: Boolean = false,
+  copyNo: Option[Int] = None,
   holdCount: Option[Int] = Some(0),
   location: Option[SierraSourceLocation] = None,
   fixedFields: Map[String, FixedField] = Map(),
