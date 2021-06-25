@@ -36,7 +36,9 @@ class MiroItemsTest
             license = Some(License.CC0),
             credit = Some("Ezra Feilden"),
             accessConditions = List(
-              AccessCondition(status = AccessStatus.Open)
+              AccessCondition(
+                method = AccessMethod.ViewOnline,
+                status = AccessStatus.Open)
             )
           ))
         ))
