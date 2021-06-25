@@ -1,11 +1,10 @@
 package weco.pipeline.inference_manager.fixtures
 
 import java.util.concurrent.ConcurrentHashMap
-
 import akka.http.scaladsl.model.{HttpRequest, HttpResponse, StatusCodes, Uri}
 import akka.stream.scaladsl.Flow
 import weco.fixtures.TestWith
-import uk.ac.wellcome.platform.inference_manager.services.RequestPoolFlow
+import weco.pipeline.inference_manager.services.RequestPoolFlow
 
 import scala.collection.JavaConverters._
 import scala.collection._
