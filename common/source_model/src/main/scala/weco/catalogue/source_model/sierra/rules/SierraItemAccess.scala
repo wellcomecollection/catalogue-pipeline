@@ -60,7 +60,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           Some(LocationType.ClosedStores))
           if bibStatus.isEmpty || bibStatus.contains(AccessStatus.Open) =>
         val ac = createAccessCondition(
-          method = Some(AccessMethod.OnlineRequest),
+          method = AccessMethod.OnlineRequest,
           status = bibStatus,
           note = itemData.displayNote
         )
@@ -92,7 +92,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           Requestable,
           Some(LocationType.ClosedStores)) =>
         val ac = createAccessCondition(
-          method = Some(AccessMethod.OnlineRequest),
+          method = AccessMethod.OnlineRequest,
           status = Some(AccessStatus.Open),
           note = itemData.displayNote
         )
@@ -119,7 +119,10 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           NotRequestable.OnOpenShelves(_),
           Some(LocationType.OpenShelves)) =>
         val ac = itemData.displayNote.map { note =>
-          createAccessCondition(note = Some(note))
+          createAccessCondition(
+            method = AccessMethod.OpenShelves,
+            note = Some(note)
+          )
         }
         (ac, ItemStatus.Available)
 
@@ -130,7 +133,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
         (
           Some(
             createAccessCondition(
-              method = Some(AccessMethod.NotRequestable),
+              method = AccessMethod.NotRequestable,
               terms = Some(message),
               note = itemData.displayNote)),
           ItemStatus.Unavailable)
@@ -148,7 +151,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
         (
           Some(
             createAccessCondition(
-              method = Some(AccessMethod.ManualRequest),
+              method = AccessMethod.ManualRequest,
               note = itemData.displayNote)),
           ItemStatus.Available)
 
@@ -170,6 +173,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
         (
           Some(
             createAccessCondition(
+              method = AccessMethod.NotRequestable,
               status = Some(AccessStatus.Closed),
               note = itemData.displayNote)),
           ItemStatus.Unavailable)
@@ -185,6 +189,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
         (
           Some(
             createAccessCondition(
+              method = AccessMethod.NotRequestable,
               status = Some(AccessStatus.Unavailable),
               note = itemData.displayNote)),
           ItemStatus.Unavailable)
@@ -199,6 +204,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
         (
           Some(
             createAccessCondition(
+              method = AccessMethod.NotRequestable,
               status = Some(AccessStatus.TemporarilyUnavailable),
               terms = Some(
                 "This item is being digitised and is currently unavailable."),
@@ -219,7 +225,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
         (
           Some(
             createAccessCondition(
-              method = Some(AccessMethod.OnlineRequest),
+              method = AccessMethod.OnlineRequest,
               status = Some(AccessStatus.Restricted),
               note = itemData.displayNote)),
           ItemStatus.Available)
@@ -239,6 +245,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
         (
           Some(
             createAccessCondition(
+              method = AccessMethod.ManualRequest,
               status = Some(AccessStatus.ByAppointment),
               note = itemData.displayNote)),
           ItemStatus.Available)
@@ -255,6 +262,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
         (
           Some(
             createAccessCondition(
+              method = AccessMethod.ManualRequest,
               status = Some(AccessStatus.PermissionRequired),
               note = itemData.displayNote)),
           ItemStatus.Available)
@@ -272,6 +280,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
         (
           Some(
             createAccessCondition(
+              method = AccessMethod.NotRequestable,
               status = Some(AccessStatus.Unavailable),
               terms = Some(message),
               note = itemData.displayNote)),
@@ -288,6 +297,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
         (
           Some(
             createAccessCondition(
+              method = AccessMethod.NotRequestable,
               status = Some(AccessStatus.Unavailable),
               terms = Some(message),
               note = itemData.displayNote)),
@@ -312,6 +322,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
         (
           Some(
             createAccessCondition(
+              method = AccessMethod.ManualRequest,
               status = Some(AccessStatus.TemporarilyUnavailable),
               terms = Some(
                 "Item is in use by another reader. Please ask at Enquiry Desk."),
@@ -329,6 +340,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
         (
           Some(
             createAccessCondition(
+              method = AccessMethod.ManualRequest,
               status = Some(AccessStatus.TemporarilyUnavailable),
               terms = Some(
                 "Item is in use by another reader. Please ask at Enquiry Desk."),
@@ -354,7 +366,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
         (
           Some(
             createAccessCondition(
-              status = Some(AccessStatus.TemporarilyUnavailable),
+              method = AccessMethod.NotRequestable,
               note = Some(
                 s"""Please check this item <a href="https://search.wellcomelibrary.org/iii/encore/record/C__Rb${bibId.withoutCheckDigit}?lang=eng">on the Wellcome Library website</a> for access information""")
             )
@@ -372,7 +384,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
   }
 
   private def createAccessCondition(
-    method: Option[AccessMethod] = None,
+    method: AccessMethod,
     status: Option[AccessStatus] = None,
     terms: Option[String] = None,
     note: Option[String]

@@ -13,7 +13,10 @@ object AccessMethod extends Enum[License] {
     "IDs for AccessMethod are not unique!"
   )
 
+  case object OpenShelves extends AccessMethod
+
   case object OnlineRequest extends AccessMethod
   case object ManualRequest extends AccessMethod
+
   case object NotRequestable extends AccessMethod
 }

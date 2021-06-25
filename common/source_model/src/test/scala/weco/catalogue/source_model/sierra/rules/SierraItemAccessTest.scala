@@ -50,7 +50,7 @@ class SierraItemAccessTest
           )
 
           ac shouldBe Some(
-            AccessCondition(method = Some(AccessMethod.OnlineRequest)))
+            AccessCondition(method = AccessMethod.OnlineRequest))
           itemStatus shouldBe ItemStatus.Available
         }
 
@@ -82,8 +82,8 @@ class SierraItemAccessTest
 
           ac shouldBe Some(
             AccessCondition(
-              method = Some(AccessMethod.OnlineRequest),
-              status = Some(AccessStatus.Open)))
+              method = AccessMethod.OnlineRequest,
+              status = AccessStatus.Open))
           itemStatus shouldBe ItemStatus.Available
         }
 
@@ -115,8 +115,8 @@ class SierraItemAccessTest
 
           ac shouldBe Some(
             AccessCondition(
-              method = Some(AccessMethod.OnlineRequest),
-              status = Some(AccessStatus.Restricted)))
+              method = AccessMethod.OnlineRequest,
+              status = AccessStatus.Restricted))
           itemStatus shouldBe ItemStatus.Available
         }
 
@@ -148,8 +148,8 @@ class SierraItemAccessTest
 
           ac shouldBe Some(
             AccessCondition(
-              method = Some(AccessMethod.OnlineRequest),
-              status = Some(AccessStatus.Open)))
+              method = AccessMethod.OnlineRequest,
+              status = AccessStatus.Open))
           itemStatus shouldBe ItemStatus.Available
         }
       }
@@ -186,7 +186,7 @@ class SierraItemAccessTest
           )
 
           ac shouldBe Some(
-            AccessCondition(method = Some(AccessMethod.ManualRequest)))
+            AccessCondition(method = AccessMethod.ManualRequest))
           itemStatus shouldBe ItemStatus.Available
         }
 
@@ -218,7 +218,7 @@ class SierraItemAccessTest
 
           ac shouldBe Some(
             AccessCondition(
-              method = Some(AccessMethod.NotRequestable),
+              method = AccessMethod.NotRequestable,
               terms = Some("Please request top item.")))
           itemStatus shouldBe ItemStatus.Unavailable
         }
@@ -251,7 +251,7 @@ class SierraItemAccessTest
 
           ac shouldBe Some(
             AccessCondition(
-              method = Some(AccessMethod.NotRequestable),
+              method = AccessMethod.NotRequestable,
               terms = Some("Please request top item.")))
           itemStatus shouldBe ItemStatus.Unavailable
         }
@@ -282,7 +282,10 @@ class SierraItemAccessTest
             itemData = itemData
           )
 
-          ac shouldBe Some(AccessCondition(status = AccessStatus.Closed))
+          ac shouldBe Some(AccessCondition(
+            method = AccessMethod.NotRequestable,
+            status = AccessStatus.Closed
+          ))
           itemStatus shouldBe ItemStatus.Unavailable
         }
 
@@ -312,7 +315,9 @@ class SierraItemAccessTest
             itemData = itemData
           )
 
-          ac shouldBe Some(AccessCondition(status = AccessStatus.Closed))
+          ac shouldBe Some(AccessCondition(
+            method = AccessMethod.NotRequestable,
+            status = AccessStatus.Closed))
           itemStatus shouldBe ItemStatus.Unavailable
         }
 
@@ -342,7 +347,9 @@ class SierraItemAccessTest
             itemData = itemData
           )
 
-          ac shouldBe Some(AccessCondition(status = AccessStatus.Unavailable))
+          ac shouldBe Some(AccessCondition(
+            method = AccessMethod.NotRequestable,
+            status = AccessStatus.Unavailable))
           itemStatus shouldBe ItemStatus.Unavailable
         }
 
@@ -374,6 +381,7 @@ class SierraItemAccessTest
 
           ac shouldBe Some(
             AccessCondition(
+              method = AccessMethod.NotRequestable,
               status = Some(AccessStatus.TemporarilyUnavailable),
               terms = Some(
                 "This item is being digitised and is currently unavailable.")
@@ -417,6 +425,7 @@ class SierraItemAccessTest
 
           ac shouldBe Some(
             AccessCondition(
+              method = AccessMethod.NotRequestable,
               status = Some(AccessStatus.TemporarilyUnavailable),
               terms = Some(
                 "This item is being digitised and is currently unavailable.")
@@ -452,7 +461,9 @@ class SierraItemAccessTest
           )
 
           ac shouldBe Some(
-            AccessCondition(status = AccessStatus.ByAppointment)
+            AccessCondition(
+              method = AccessMethod.ManualRequest,
+              status = AccessStatus.ByAppointment)
           )
           itemStatus shouldBe ItemStatus.Available
         }
@@ -484,7 +495,9 @@ class SierraItemAccessTest
           )
 
           ac shouldBe Some(
-            AccessCondition(status = AccessStatus.PermissionRequired)
+            AccessCondition(
+              method = AccessMethod.ManualRequest,
+              status = AccessStatus.PermissionRequired)
           )
           itemStatus shouldBe ItemStatus.Available
         }
@@ -516,7 +529,9 @@ class SierraItemAccessTest
           )
 
           ac shouldBe Some(
-            AccessCondition(status = AccessStatus.PermissionRequired)
+            AccessCondition(
+              method = AccessMethod.ManualRequest,
+              status = AccessStatus.PermissionRequired)
           )
           itemStatus shouldBe ItemStatus.Available
         }
@@ -549,6 +564,7 @@ class SierraItemAccessTest
 
           ac shouldBe Some(
             AccessCondition(
+              method = AccessMethod.NotRequestable,
               status = Some(AccessStatus.Unavailable),
               terms = Some("This item is missing.")
             )
@@ -584,6 +600,7 @@ class SierraItemAccessTest
 
           ac shouldBe Some(
             AccessCondition(
+              method = AccessMethod.NotRequestable,
               status = Some(AccessStatus.Unavailable),
               terms = Some("This item is withdrawn.")
             )
@@ -623,6 +640,7 @@ class SierraItemAccessTest
 
         ac shouldBe Some(
           AccessCondition(
+            method = AccessMethod.ManualRequest,
             status = Some(AccessStatus.TemporarilyUnavailable),
             terms = Some(
               "Item is in use by another reader. Please ask at Enquiry Desk.")
@@ -660,6 +678,7 @@ class SierraItemAccessTest
 
         ac shouldBe Some(
           AccessCondition(
+            method = AccessMethod.ManualRequest,
             status = Some(AccessStatus.TemporarilyUnavailable),
             terms = Some(
               "Item is in use by another reader. Please ask at Enquiry Desk.")
@@ -737,6 +756,7 @@ class SierraItemAccessTest
 
         ac shouldBe Some(
           AccessCondition(
+            method = AccessMethod.OpenShelves,
             note = Some(
               "Shelved at the end of the Quick Ref. section with the oversize Quick Ref. books.")
           )
@@ -773,6 +793,7 @@ class SierraItemAccessTest
 
       ac shouldBe Some(
         AccessCondition(
+          method = AccessMethod.NotRequestable,
           status = Some(AccessStatus.Unavailable),
           terms = Some("This item is missing.")
         )
