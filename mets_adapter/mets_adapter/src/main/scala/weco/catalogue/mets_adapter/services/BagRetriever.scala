@@ -1,14 +1,14 @@
-package uk.ac.wellcome.mets_adapter.services
+package weco.catalogue.mets_adapter.services
 
 import akka.actor.ActorSystem
+import akka.http.scaladsl.model.Uri.Path
 import akka.http.scaladsl.model._
-import akka.http.scaladsl.model.headers.Authorization
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import grizzled.slf4j.Logging
 import io.circe.generic.auto._
 import uk.ac.wellcome.mets_adapter.models._
-import weco.http.client.HttpClient
+import weco.http.client.HttpGet
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -16,40 +16,36 @@ trait BagRetriever {
   def getBag(space: String, externalIdentifier: String): Future[Bag]
 }
 
-class HttpBagRetriever(baseUrl: String,
-                       client: HttpClient,
-                       tokenService: TokenService)(
-  implicit
-  actorSystem: ActorSystem,
-  executionContext: ExecutionContext)
+class HttpBagRetriever(client: HttpGet)(implicit
+                                        actorSystem: ActorSystem,
+                                        executionContext: ExecutionContext)
     extends BagRetriever
     with Logging {
 
   def getBag(space: String, externalIdentifier: String): Future[Bag] = {
     // Construct a URL to request a bag from the storage service.
     // See https://github.com/wellcomecollection/docs/tree/master/rfcs/002-archival_storage#bags
-    val requestUri = Uri(s"$baseUrl/$space/$externalIdentifier")
+    val path = Path(s"$space/$externalIdentifier")
 
-    debug(s"Making request to $requestUri")
+    debug(s"Making request to $path")
     for {
-      token <- tokenService.getToken
+      response <- client.get(path)
 
-      httpRequest = HttpRequest(uri = requestUri)
-        .addHeader(Authorization(token))
-
-      response <- client.singleRequest(httpRequest)
       maybeBag <- {
         debug(s"Received response ${response.status}")
-        handleResponse(response)
+        handleResponse(space, externalIdentifier, response)
       }
     } yield maybeBag
   }
 
-  private def handleResponse(response: HttpResponse): Future[Bag] =
+  private def handleResponse(space: String,
+                             externalIdentifier: String,
+                             response: HttpResponse): Future[Bag] =
     response.status match {
       case StatusCodes.OK => parseResponseIntoBag(response)
       case StatusCodes.NotFound =>
-        Future.failed(new Exception("Bag does not exist on storage service"))
+        Future.failed(new Exception(
+          s"Bag $space/$externalIdentifier does not exist in storage service"))
       case StatusCodes.Unauthorized =>
         Future.failed(new Exception("Failed to authorize with storage service"))
       case status =>

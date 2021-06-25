@@ -1,8 +1,0 @@
-{
-  "@context": "https://api.wellcomecollection.org/storage/v1/context.json",
-  "errorType": "http",
-  "httpStatus": "401",
-  "label": "Unauthorized",
-  "description": "Unauthorized",
-  "type": "Error"
-}

@@ -13,6 +13,7 @@ import uk.ac.wellcome.json.JsonUtil._
 import uk.ac.wellcome.mets_adapter.models._
 import uk.ac.wellcome.storage.{Identified, Version}
 import uk.ac.wellcome.messaging.MessageSender
+import weco.catalogue.mets_adapter.services.BagRetriever
 import weco.catalogue.source_model.MetsSourcePayload
 import weco.catalogue.source_model.mets.MetsSourceData
 import weco.flows.FlowOps
