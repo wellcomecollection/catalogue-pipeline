@@ -1,11 +1,11 @@
 package uk.ac.wellcome.platform.reindex.reindex_worker.fixtures
 
-import uk.ac.wellcome.akka.fixtures.Akka
+import weco.akka.fixtures.Akka
 import weco.fixtures.{RandomGenerators, TestWith}
-import uk.ac.wellcome.messaging.fixtures.SQS
-import uk.ac.wellcome.messaging.fixtures.SQS.Queue
-import uk.ac.wellcome.messaging.memory.MemoryIndividualMessageSender
-import uk.ac.wellcome.messaging.sns.NotificationMessage
+import weco.messaging.fixtures.SQS
+import weco.messaging.fixtures.SQS.Queue
+import weco.messaging.memory.MemoryIndividualMessageSender
+import weco.messaging.sns.NotificationMessage
 import uk.ac.wellcome.platform.reindex.reindex_worker.models.{
   CompleteReindexParameters,
   ReindexJobConfig,

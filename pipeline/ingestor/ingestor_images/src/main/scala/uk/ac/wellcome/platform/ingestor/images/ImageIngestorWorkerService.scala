@@ -1,10 +1,11 @@
 package uk.ac.wellcome.platform.ingestor.images
 
-import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.pipeline_storage.{PipelineStorageStream, Retriever}
+import weco.messaging.sns.NotificationMessage
+import weco.pipeline_storage.PipelineStorageStream
 import uk.ac.wellcome.platform.ingestor.common.IngestorWorkerService
 import weco.catalogue.internal_model.image.Image
 import weco.catalogue.internal_model.image.ImageState.{Augmented, Indexed}
+import weco.pipeline_storage.{PipelineStorageStream, Retriever}
 
 import scala.concurrent.ExecutionContext
 

@@ -5,14 +5,13 @@ import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.time.{Seconds, Span}
 import weco.catalogue.internal_model.index.{ImagesIndexConfig, IndexFixtures}
-import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
+import weco.messaging.fixtures.SQS.QueuePair
 import weco.catalogue.internal_model.Implicits._
-import uk.ac.wellcome.pipeline_storage.ElasticIndexer
-import uk.ac.wellcome.pipeline_storage.Indexable.imageIndexable
+import weco.pipeline_storage.Indexable.imageIndexable
 import weco.catalogue.internal_model.image.ImageState.{Augmented, Indexed}
-import uk.ac.wellcome.pipeline_storage.elastic.ElasticSourceRetriever
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.image.Image
+import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
 
 class ImagesIngestorFeatureTest
     extends AnyFunSpec

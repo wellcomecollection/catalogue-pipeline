@@ -3,10 +3,10 @@ package weco.catalogue.sierra_merger
 import akka.actor.ActorSystem
 import com.typesafe.config.Config
 import weco.json.JsonUtil._
-import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
-import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
-import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
+import weco.messaging.sns.NotificationMessage
+import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
+import weco.typesafe.WellcomeTypesafeApp
+import weco.typesafe.config.builders.AkkaBuilder
 import weco.catalogue.sierra_merger.services.{Updater, Worker}
 import weco.catalogue.source_model.config.{
   SierraRecordTypeBuilder,

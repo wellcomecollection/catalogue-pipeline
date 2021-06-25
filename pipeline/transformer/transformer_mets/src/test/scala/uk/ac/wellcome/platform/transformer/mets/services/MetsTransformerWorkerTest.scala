@@ -5,8 +5,8 @@ import io.circe.generic.extras.semiauto.deriveConfiguredEncoder
 import org.scalatest.concurrent.IntegrationPatience
 import weco.json.JsonUtil._
 import weco.fixtures.TestWith
-import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.pipeline_storage.{PipelineStorageStream, Retriever}
+import weco.messaging.sns.NotificationMessage
+import weco.pipeline_storage.PipelineStorageStream
 import uk.ac.wellcome.platform.transformer.mets.fixtures.MetsGenerators
 import weco.storage.generators.S3ObjectLocationGenerators
 import weco.storage.s3.{S3ObjectLocation, S3ObjectLocationPrefix}
@@ -21,6 +21,7 @@ import weco.catalogue.transformer.{
   TransformerWorker,
   TransformerWorkerTestCases
 }
+import weco.pipeline_storage.{PipelineStorageStream, Retriever}
 
 import java.time.Instant
 import scala.concurrent.ExecutionContext.Implicits.global

@@ -7,9 +7,9 @@ import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import weco.fixtures.TestWith
 import weco.json.JsonUtil._
-import uk.ac.wellcome.messaging.fixtures.SQS
-import uk.ac.wellcome.messaging.fixtures.SQS.Queue
-import uk.ac.wellcome.messaging.memory.MemoryMessageSender
+import weco.messaging.fixtures.SQS
+import weco.messaging.fixtures.SQS.Queue
+import weco.messaging.memory.MemoryMessageSender
 import weco.storage.{Identified, Version}
 import weco.catalogue.sierra_merger.fixtures.RecordMergerFixtures
 import weco.catalogue.sierra_merger.models.TransformableOps

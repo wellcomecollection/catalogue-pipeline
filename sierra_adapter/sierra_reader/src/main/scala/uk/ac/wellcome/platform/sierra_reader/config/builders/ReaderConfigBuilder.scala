@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.sierra_reader.config.builders
 
 import com.typesafe.config.Config
 import uk.ac.wellcome.platform.sierra_reader.config.models.ReaderConfig
-import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
+import weco.typesafe.config.builders.EnrichConfig._
 import weco.catalogue.source_model.config.SierraRecordTypeBuilder
 
 object ReaderConfigBuilder {

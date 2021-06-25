@@ -5,13 +5,14 @@ import weco.catalogue.internal_model.index.WorksIndexConfig
 import weco.elasticsearch.model.IndexId
 import weco.fixtures.TestWith
 import weco.json.JsonUtil._
-import uk.ac.wellcome.pipeline_storage.fixtures.ElasticIndexerFixtures
-import uk.ac.wellcome.pipeline_storage.{Retriever, RetrieverTestCases}
+import weco.pipeline_storage.Retriever
 import uk.ac.wellcome.platform.matcher.generators.WorkLinksGenerators
 import uk.ac.wellcome.platform.matcher.models.WorkLinks
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.generators.WorkGenerators
 import weco.catalogue.internal_model.work.{MergeCandidate, Work, WorkState}
+import weco.pipeline_storage.{Retriever, RetrieverTestCases}
+import weco.pipeline_storage.fixtures.ElasticIndexerFixtures
 
 import scala.concurrent.ExecutionContext.Implicits.global
 

@@ -1,9 +1,9 @@
 package weco.catalogue.transformer.example
 
 import io.circe.Decoder
-import uk.ac.wellcome.messaging.sns.NotificationMessage
+import weco.messaging.sns.NotificationMessage
 import weco.catalogue.internal_model.work.WorkState.Source
-import uk.ac.wellcome.pipeline_storage.{PipelineStorageStream, Retriever}
+import weco.pipeline_storage.PipelineStorageStream
 import weco.storage.s3.S3ObjectLocation
 import weco.storage.store.VersionedStore
 import weco.storage.{Identified, ReadError, Version}
@@ -12,6 +12,7 @@ import weco.catalogue.internal_model.work.generators.WorkGenerators
 import weco.catalogue.internal_model.work.{Work, WorkData}
 import weco.catalogue.source_model.CalmSourcePayload
 import weco.catalogue.transformer.{Transformer, TransformerWorker}
+import weco.pipeline_storage.{PipelineStorageStream, Retriever}
 
 import scala.concurrent.ExecutionContext
 

@@ -5,7 +5,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.fixtures.RandomGenerators
 import weco.json.JsonUtil._
-import uk.ac.wellcome.messaging.memory.MemoryIndividualMessageSender
+import weco.messaging.memory.MemoryIndividualMessageSender
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

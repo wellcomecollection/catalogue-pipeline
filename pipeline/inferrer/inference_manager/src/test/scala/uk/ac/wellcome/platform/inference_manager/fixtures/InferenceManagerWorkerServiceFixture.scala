@@ -3,14 +3,13 @@ package uk.ac.wellcome.platform.inference_manager.fixtures
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.collection.mutable
 import software.amazon.awssdk.services.sqs.model.Message
-
 import weco.fixtures.TestWith
-import uk.ac.wellcome.messaging.fixtures.SQS.Queue
-import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.messaging.memory.MemoryMessageSender
+import weco.messaging.fixtures.SQS.Queue
+import weco.messaging.sns.NotificationMessage
+import weco.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.platform.inference_manager.adapters.InferrerAdapter
 import uk.ac.wellcome.platform.inference_manager.models.DownloadedImage
-import uk.ac.wellcome.pipeline_storage.{MemoryIndexer, MemoryRetriever}
+import weco.pipeline_storage.MemoryRetriever
 import uk.ac.wellcome.platform.inference_manager.services.{
   FileWriter,
   ImageDownloader,
@@ -18,10 +17,12 @@ import uk.ac.wellcome.platform.inference_manager.services.{
   MergedIdentifiedImage,
   RequestPoolFlow
 }
-import uk.ac.wellcome.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import weco.catalogue.internal_model.image.ImageState.{Augmented, Initial}
 import akka.http.scaladsl.model.Uri
 import weco.catalogue.internal_model.image.Image
+import weco.pipeline_storage.MemoryRetriever
+import weco.pipeline_storage.fixtures.PipelineStorageStreamFixtures
+import weco.pipeline_storage.memory.{MemoryIndexer, MemoryRetriever}
 
 trait InferenceManagerWorkerServiceFixture
     extends PipelineStorageStreamFixtures {

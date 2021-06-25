@@ -3,14 +3,14 @@ package weco.tei.adapter;
 import io.circe.Encoder
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
-import uk.ac.wellcome.akka.fixtures.Akka
+import weco.akka.fixtures.Akka
 import weco.fixtures.TestWith
 import weco.json.JsonUtil._
-import uk.ac.wellcome.messaging.fixtures.SQS
-import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
-import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.messaging.sqs.SQSStream
+import weco.messaging.fixtures.SQS
+import weco.messaging.fixtures.SQS.QueuePair
+import weco.messaging.memory.MemoryMessageSender
+import weco.messaging.sns.NotificationMessage
+import weco.messaging.sqs.SQSStream
 import weco.storage.Version
 import weco.storage.s3.S3ObjectLocation
 import weco.storage.store.memory.MemoryVersionedStore

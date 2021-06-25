@@ -10,19 +10,19 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import akka.NotUsed
 import akka.stream.scaladsl.Source
-import uk.ac.wellcome.akka.fixtures.Akka
+import weco.akka.fixtures.Akka
 import weco.fixtures.TestWith
-import uk.ac.wellcome.messaging.fixtures.SQS
-import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
-import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.messaging.sns.NotificationMessage
+import weco.messaging.fixtures.SQS
+import weco.messaging.fixtures.SQS.QueuePair
+import weco.messaging.memory.MemoryMessageSender
+import weco.messaging.sns.NotificationMessage
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.work.WorkState.{Denormalised, Merged}
-import uk.ac.wellcome.pipeline_storage.MemoryIndexer
 import weco.json.JsonUtil._
 import weco.catalogue.internal_model.index.IndexFixtures
 import uk.ac.wellcome.relation_embedder.fixtures.RelationGenerators
 import weco.catalogue.internal_model.work._
+import weco.pipeline_storage.memory.MemoryIndexer
 
 class RelationEmbedderWorkerServiceTest
     extends AnyFunSpec

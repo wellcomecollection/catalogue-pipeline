@@ -7,12 +7,12 @@ import com.sksamuel.elastic4s.requests.bulk.BulkResponse
 import com.sksamuel.elastic4s.requests.delete.DeleteByQueryResponse
 import weco.elasticsearch.ElasticsearchIndexCreator
 import weco.json.JsonUtil._
-import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.messaging.sqs.SQSStream
+import weco.messaging.sns.NotificationMessage
+import weco.messaging.sqs.SQSStream
 import weco.storage.Identified
 import weco.storage.s3.S3ObjectLocation
 import weco.storage.store.Readable
-import uk.ac.wellcome.typesafe.Runnable
+import weco.typesafe.Runnable
 import weco.catalogue.sierra_indexer.index.SierraIndexConfig
 import weco.catalogue.source_model.SierraSourcePayload
 import weco.catalogue.source_model.sierra.SierraTransformable

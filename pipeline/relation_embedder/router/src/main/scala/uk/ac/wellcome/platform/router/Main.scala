@@ -4,18 +4,19 @@ import akka.actor.ActorSystem
 import com.typesafe.config.Config
 import weco.catalogue.internal_model.index.WorksIndexConfig
 import weco.elasticsearch.typesafe.ElasticBuilder
-import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
+import weco.messaging.sns.NotificationMessage
+import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.work.WorkState.{Denormalised, Merged}
-import uk.ac.wellcome.pipeline_storage.typesafe.{
+import weco.pipeline_storage.typesafe.ElasticSourceRetrieverBuilder
+import weco.typesafe.WellcomeTypesafeApp
+import weco.typesafe.config.builders.AkkaBuilder
+import weco.catalogue.internal_model.work.Work
+import weco.pipeline_storage.typesafe.{
   ElasticIndexerBuilder,
   ElasticSourceRetrieverBuilder,
   PipelineStorageStreamBuilder
 }
-import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
-import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
-import weco.catalogue.internal_model.work.Work
 
 import scala.concurrent.ExecutionContext
 

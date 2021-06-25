@@ -3,8 +3,8 @@ package uk.ac.wellcome.platform.reindex.reindex_worker
 import akka.actor.ActorSystem
 import com.typesafe.config.Config
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
+import weco.messaging.sns.NotificationMessage
+import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.platform.reindex.reindex_worker.config.ReindexJobConfigBuilder
 import uk.ac.wellcome.platform.reindex.reindex_worker.services.{
   BulkMessageSender,
@@ -12,8 +12,8 @@ import uk.ac.wellcome.platform.reindex.reindex_worker.services.{
   ReindexWorkerService
 }
 import weco.storage.typesafe.DynamoBuilder
-import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
-import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
+import weco.typesafe.WellcomeTypesafeApp
+import weco.typesafe.config.builders.AkkaBuilder
 
 import scala.concurrent.ExecutionContext
 

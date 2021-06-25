@@ -3,25 +3,29 @@ package uk.ac.wellcome.platform.merger
 import scala.concurrent.ExecutionContext
 import akka.actor.ActorSystem
 import com.typesafe.config.Config
-
 import weco.catalogue.internal_model.index.{ImagesIndexConfig, WorksIndexConfig}
-import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
+import weco.messaging.sns.NotificationMessage
+import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.catalogue.internal_model.Implicits._
 import weco.elasticsearch.typesafe.ElasticBuilder
-import uk.ac.wellcome.pipeline_storage.EitherIndexer
-import uk.ac.wellcome.pipeline_storage.typesafe.{
+import weco.pipeline_storage.typesafe.{
   ElasticIndexerBuilder,
   ElasticSourceRetrieverBuilder,
   PipelineStorageStreamBuilder
 }
 import uk.ac.wellcome.platform.merger.services._
-import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
-import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
+import weco.typesafe.WellcomeTypesafeApp
+import weco.typesafe.config.builders.AkkaBuilder
 import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.catalogue.internal_model.image.Image
 import weco.catalogue.internal_model.image.ImageState.Initial
 import weco.catalogue.internal_model.work.Work
+import weco.pipeline_storage.EitherIndexer
+import weco.pipeline_storage.typesafe.{
+  ElasticIndexerBuilder,
+  ElasticSourceRetrieverBuilder,
+  PipelineStorageStreamBuilder
+}
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>

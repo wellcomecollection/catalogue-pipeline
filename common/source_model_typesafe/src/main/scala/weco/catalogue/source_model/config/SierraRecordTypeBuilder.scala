@@ -3,7 +3,7 @@ package weco.catalogue.source_model.config
 import com.typesafe.config.Config
 import weco.catalogue.source_model.sierra.identifiers.SierraRecordTypes
 import weco.catalogue.source_model.sierra.identifiers.SierraRecordTypes._
-import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
+import weco.typesafe.config.builders.EnrichConfig._
 
 object SierraRecordTypeBuilder {
   def build(config: Config, name: String): SierraRecordTypes.Value =

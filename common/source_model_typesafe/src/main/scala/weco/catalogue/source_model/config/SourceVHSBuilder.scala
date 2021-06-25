@@ -18,7 +18,7 @@ import weco.storage.store.dynamo.{
 import weco.storage.store.s3.S3TypedStore
 import weco.storage.streaming.Codec
 import weco.storage.typesafe.{DynamoBuilder, S3Builder}
-import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
+import weco.typesafe.config.builders.EnrichConfig._
 import weco.catalogue.source_model.store.SourceVHS
 
 import scala.language.higherKinds

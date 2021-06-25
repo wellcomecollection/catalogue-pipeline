@@ -4,12 +4,11 @@ import io.circe.Encoder
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import weco.fixtures.TestWith
-import uk.ac.wellcome.messaging.fixtures.SQS.{Queue, QueuePair}
-import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.messaging.sns.NotificationMessage
+import weco.messaging.fixtures.SQS.{Queue, QueuePair}
+import weco.messaging.memory.MemoryMessageSender
+import weco.messaging.sns.NotificationMessage
 import weco.catalogue.internal_model.work.WorkState.Source
-import uk.ac.wellcome.pipeline_storage.fixtures.PipelineStorageStreamFixtures
-import uk.ac.wellcome.pipeline_storage.{
+import weco.pipeline_storage.{
   MemoryIndexer,
   MemoryRetriever,
   PipelineStorageStream,
@@ -18,6 +17,13 @@ import uk.ac.wellcome.pipeline_storage.{
 }
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.source_model.SourcePayload
+import weco.pipeline_storage.{
+  PipelineStorageStream,
+  Retriever,
+  RetrieverNotFoundException
+}
+import weco.pipeline_storage.fixtures.PipelineStorageStreamFixtures
+import weco.pipeline_storage.memory.{MemoryIndexer, MemoryRetriever}
 
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global

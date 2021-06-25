@@ -4,12 +4,12 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.index.{ImagesIndexConfig, IndexFixtures}
-import uk.ac.wellcome.pipeline_storage.ElasticIndexer
-import uk.ac.wellcome.pipeline_storage.Indexable.imageIndexable
+import weco.pipeline_storage.Indexable.imageIndexable
 import weco.catalogue.internal_model.Implicits._
-import uk.ac.wellcome.pipeline_storage.fixtures.ElasticIndexerFixtures
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.image.{Image, ImageState}
+import weco.pipeline_storage.elastic.ElasticIndexer
+import weco.pipeline_storage.fixtures.ElasticIndexerFixtures
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._

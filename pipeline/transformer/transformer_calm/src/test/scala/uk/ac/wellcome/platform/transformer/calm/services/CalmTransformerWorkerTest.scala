@@ -5,12 +5,8 @@ import io.circe.generic.extras.semiauto.deriveConfiguredEncoder
 import org.scalatest.EitherValues
 import weco.fixtures.TestWith
 import weco.json.JsonUtil._
-import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.pipeline_storage.{
-  MemoryIndexer,
-  PipelineStorageStream,
-  Retriever
-}
+import weco.messaging.sns.NotificationMessage
+import weco.pipeline_storage.PipelineStorageStream
 import weco.storage.generators.S3ObjectLocationGenerators
 import weco.storage.s3.S3ObjectLocation
 import weco.storage.store.memory.MemoryTypedStore
@@ -21,14 +17,16 @@ import weco.catalogue.transformer.{
 }
 
 import java.util.UUID
-import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
-import uk.ac.wellcome.messaging.memory.MemoryMessageSender
+import weco.messaging.fixtures.SQS.QueuePair
+import weco.messaging.memory.MemoryMessageSender
 import weco.catalogue.internal_model.work.WorkState.Source
 import uk.ac.wellcome.platform.transformer.calm.models.CalmSourceData
 import weco.catalogue.internal_model.identifiers.IdentifierType
 import weco.catalogue.internal_model.work.{Work, WorkState}
 import weco.catalogue.source_model.calm.CalmRecord
 import weco.catalogue.source_model.generators.CalmRecordGenerators
+import weco.pipeline_storage.memory.MemoryIndexer
+import weco.pipeline_storage.{PipelineStorageStream, Retriever}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 

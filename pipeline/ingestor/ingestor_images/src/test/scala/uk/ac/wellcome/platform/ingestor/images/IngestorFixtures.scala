@@ -2,16 +2,17 @@ package uk.ac.wellcome.platform.ingestor.images
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.scalatest.Suite
-
 import weco.fixtures.TestWith
-import uk.ac.wellcome.messaging.fixtures.SQS.Queue
-import uk.ac.wellcome.pipeline_storage.fixtures.{
+import weco.messaging.fixtures.SQS.Queue
+import weco.pipeline_storage.fixtures.PipelineStorageStreamFixtures
+import weco.pipeline_storage.Retriever
+import weco.catalogue.internal_model.image.Image
+import weco.catalogue.internal_model.image.ImageState.{Augmented, Indexed}
+import weco.pipeline_storage.{Indexer, Retriever}
+import weco.pipeline_storage.fixtures.{
   ElasticIndexerFixtures,
   PipelineStorageStreamFixtures
 }
-import uk.ac.wellcome.pipeline_storage.{Indexer, Retriever}
-import weco.catalogue.internal_model.image.Image
-import weco.catalogue.internal_model.image.ImageState.{Augmented, Indexed}
 
 trait IngestorFixtures
     extends ElasticIndexerFixtures

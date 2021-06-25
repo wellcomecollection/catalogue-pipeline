@@ -4,8 +4,8 @@ import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import software.amazon.awssdk.services.sqs.model.QueueAttributeName
-import uk.ac.wellcome.messaging.fixtures.SQS.Queue
-import uk.ac.wellcome.messaging.memory.MemoryMessageSender
+import weco.messaging.fixtures.SQS.Queue
+import weco.messaging.memory.MemoryMessageSender
 import weco.catalogue.internal_model.work.WorkState.Identified
 import uk.ac.wellcome.platform.id_minter.fixtures.WorkerServiceFixture
 import weco.catalogue.internal_model.identifiers.{CanonicalId, IdState}

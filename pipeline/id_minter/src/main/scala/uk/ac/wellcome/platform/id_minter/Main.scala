@@ -12,20 +12,21 @@ import uk.ac.wellcome.platform.id_minter.database.IdentifiersDao
 import uk.ac.wellcome.platform.id_minter.models.IdentifiersTable
 import uk.ac.wellcome.platform.id_minter.services.IdMinterWorkerService
 import uk.ac.wellcome.platform.id_minter.steps.IdentifierGenerator
-import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
-import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
-import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
+import weco.typesafe.WellcomeTypesafeApp
+import weco.typesafe.config.builders.AkkaBuilder
+import weco.messaging.sns.NotificationMessage
+import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.elasticsearch.typesafe.ElasticBuilder
-import uk.ac.wellcome.pipeline_storage.typesafe.{
-  ElasticIndexerBuilder,
-  ElasticSourceRetrieverBuilder,
-  PipelineStorageStreamBuilder
-}
+import weco.pipeline_storage.typesafe.ElasticSourceRetrieverBuilder
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.index.WorksIndexConfig
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.Identified
+import weco.pipeline_storage.typesafe.{
+  ElasticIndexerBuilder,
+  ElasticSourceRetrieverBuilder,
+  PipelineStorageStreamBuilder
+}
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>

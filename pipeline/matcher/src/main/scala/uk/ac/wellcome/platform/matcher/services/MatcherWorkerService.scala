@@ -3,19 +3,20 @@ package uk.ac.wellcome.platform.matcher.services
 import akka.Done
 import grizzled.slf4j.Logging
 import weco.json.JsonUtil._
-import uk.ac.wellcome.messaging.MessageSender
-import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.messaging.sqs.SQSStream
+import weco.messaging.MessageSender
+import weco.messaging.sns.NotificationMessage
+import weco.messaging.sqs.SQSStream
 import weco.catalogue.internal_model.Implicits._
-import uk.ac.wellcome.pipeline_storage.PipelineStorageStream._
-import uk.ac.wellcome.pipeline_storage.{PipelineStorageConfig, Retriever}
+import weco.pipeline_storage.PipelineStorageStream._
+import weco.pipeline_storage.PipelineStorageConfig
 import uk.ac.wellcome.platform.matcher.exceptions.MatcherException
 import uk.ac.wellcome.platform.matcher.matcher.WorkMatcher
 import uk.ac.wellcome.platform.matcher.models.{
   VersionExpectedConflictException,
   WorkLinks
 }
-import uk.ac.wellcome.typesafe.Runnable
+import weco.typesafe.Runnable
+import weco.pipeline_storage.{PipelineStorageConfig, Retriever}
 
 import scala.concurrent.{ExecutionContext, Future}
 

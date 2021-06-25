@@ -11,10 +11,10 @@ import org.scalatest.time.{Seconds, Span}
 import io.circe.Encoder
 
 import weco.fixtures.TestWith
-import uk.ac.wellcome.akka.fixtures.Akka
-import uk.ac.wellcome.messaging.fixtures.SQS
-import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.messaging.sns.NotificationMessage
+import weco.akka.fixtures.Akka
+import weco.messaging.fixtures.SQS
+import weco.messaging.memory.MemoryMessageSender
+import weco.messaging.sns.NotificationMessage
 import weco.json.JsonUtil._
 
 import SQS.QueuePair

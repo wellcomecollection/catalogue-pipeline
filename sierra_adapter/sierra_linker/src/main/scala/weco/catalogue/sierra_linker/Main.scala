@@ -6,12 +6,12 @@ import org.scanamo.DynamoFormat
 import org.scanamo.generic.auto._
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import weco.json.JsonUtil._
-import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
+import weco.messaging.sns.NotificationMessage
+import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.storage.store.dynamo.DynamoSingleVersionStore
 import weco.storage.typesafe.DynamoBuilder
-import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
-import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
+import weco.typesafe.WellcomeTypesafeApp
+import weco.typesafe.config.builders.AkkaBuilder
 import weco.catalogue.sierra_linker.dynamo.Implicits._
 import weco.catalogue.sierra_linker.models.{Link, LinkOps}
 import weco.catalogue.sierra_linker.services.{LinkStore, SierraLinkerWorker}

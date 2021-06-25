@@ -2,8 +2,9 @@ package uk.ac.wellcome.platform.merger.services
 
 import weco.catalogue.internal_model.matcher.WorkIdentifier
 import weco.catalogue.internal_model.work.WorkState.Identified
-import uk.ac.wellcome.pipeline_storage.{Retriever, RetrieverMultiResult}
+import weco.pipeline_storage.RetrieverMultiResult
 import weco.catalogue.internal_model.work.Work
+import weco.pipeline_storage.{Retriever, RetrieverMultiResult}
 
 import scala.concurrent.{ExecutionContext, Future}
 

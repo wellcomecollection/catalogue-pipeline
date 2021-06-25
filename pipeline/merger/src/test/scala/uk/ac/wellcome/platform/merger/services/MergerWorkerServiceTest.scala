@@ -7,20 +7,20 @@ import org.scalatest.matchers.should.Matchers
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import weco.fixtures.TestWith
-import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
-import uk.ac.wellcome.messaging.memory.MemoryMessageSender
+import weco.messaging.fixtures.SQS.QueuePair
+import weco.messaging.memory.MemoryMessageSender
 import weco.catalogue.internal_model.Implicits._
-import uk.ac.wellcome.monitoring.memory.MemoryMetrics
+import weco.monitoring.memory.MemoryMetrics
 import uk.ac.wellcome.platform.merger.fixtures.{
   MatcherResultFixture,
   WorkerServiceFixture
 }
 import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.catalogue.internal_model.work.WorkFsm._
-import uk.ac.wellcome.pipeline_storage.MemoryRetriever
 import weco.catalogue.internal_model.identifiers.{CanonicalId, IdState}
 import weco.catalogue.internal_model.work.generators.MiroWorkGenerators
 import weco.catalogue.internal_model.work.{MergeCandidate, Work}
+import weco.pipeline_storage.memory.MemoryRetriever
 
 class MergerWorkerServiceTest
     extends AnyFunSpec

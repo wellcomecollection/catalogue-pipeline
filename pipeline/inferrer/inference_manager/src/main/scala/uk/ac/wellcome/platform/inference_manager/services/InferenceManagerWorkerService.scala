@@ -7,24 +7,21 @@ import akka.stream.scaladsl.{Flow, FlowWithContext, Source}
 import grizzled.slf4j.Logging
 import software.amazon.awssdk.services.sqs.model.Message
 import weco.json.JsonUtil._
-import uk.ac.wellcome.messaging.MessageSender
-import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.messaging.sqs.SQSStream
+import weco.messaging.MessageSender
+import weco.messaging.sns.NotificationMessage
+import weco.messaging.sqs.SQSStream
 import weco.catalogue.internal_model.image.ImageState.{Augmented, Initial}
-import uk.ac.wellcome.pipeline_storage.Indexable.imageIndexable
-import uk.ac.wellcome.pipeline_storage.PipelineStorageStream._
-import uk.ac.wellcome.pipeline_storage.{
-  Indexer,
-  PipelineStorageConfig,
-  Retriever
-}
+import weco.pipeline_storage.Indexable.imageIndexable
+import weco.pipeline_storage.PipelineStorageStream._
+import weco.pipeline_storage.PipelineStorageConfig
 import uk.ac.wellcome.platform.inference_manager.adapters.{
   InferrerAdapter,
   InferrerResponse
 }
 import uk.ac.wellcome.platform.inference_manager.models.DownloadedImage
-import uk.ac.wellcome.typesafe.Runnable
+import weco.typesafe.Runnable
 import weco.catalogue.internal_model.image.{Image, ImageState, InferredData}
+import weco.pipeline_storage.{Indexer, PipelineStorageConfig, Retriever}
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}

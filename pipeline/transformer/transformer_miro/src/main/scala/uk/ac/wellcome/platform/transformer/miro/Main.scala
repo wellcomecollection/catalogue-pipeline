@@ -5,24 +5,25 @@ import com.amazonaws.services.s3.AmazonS3
 import com.typesafe.config.Config
 import weco.catalogue.internal_model.index.WorksIndexConfig
 import weco.json.JsonUtil._
-import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
+import weco.messaging.sns.NotificationMessage
+import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.elasticsearch.typesafe.ElasticBuilder
-import uk.ac.wellcome.pipeline_storage.typesafe.{
-  ElasticIndexerBuilder,
-  ElasticSourceRetrieverBuilder,
-  PipelineStorageStreamBuilder
-}
+import weco.pipeline_storage.typesafe.ElasticSourceRetrieverBuilder
 import uk.ac.wellcome.platform.transformer.miro.Implicits._
 import uk.ac.wellcome.platform.transformer.miro.services.MiroTransformerWorker
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
 import weco.storage.store.s3.S3TypedStore
 import weco.storage.streaming.Codec._
 import weco.storage.typesafe.S3Builder
-import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
-import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
+import weco.typesafe.WellcomeTypesafeApp
+import weco.typesafe.config.builders.AkkaBuilder
 import weco.catalogue.internal_model.work.Work
+import weco.pipeline_storage.typesafe.{
+  ElasticIndexerBuilder,
+  ElasticSourceRetrieverBuilder,
+  PipelineStorageStreamBuilder
+}
 
 import scala.concurrent.ExecutionContext
 

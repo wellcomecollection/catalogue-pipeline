@@ -3,20 +3,21 @@ package uk.ac.wellcome.platform.merger.fixtures
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-
 import weco.fixtures.TestWith
-import uk.ac.wellcome.messaging.fixtures.SQS.Queue
-import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.monitoring.Metrics
-import uk.ac.wellcome.monitoring.memory.MemoryMetrics
-import uk.ac.wellcome.pipeline_storage.fixtures.PipelineStorageStreamFixtures
-import uk.ac.wellcome.pipeline_storage.{MemoryIndexer, MemoryRetriever}
+import weco.messaging.fixtures.SQS.Queue
+import weco.messaging.memory.MemoryMessageSender
+import weco.messaging.sns.NotificationMessage
+import weco.monitoring.Metrics
+import weco.monitoring.memory.MemoryMetrics
+import weco.pipeline_storage.MemoryRetriever
 import uk.ac.wellcome.platform.merger.services._
 import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.catalogue.internal_model.image.Image
 import weco.catalogue.internal_model.image.ImageState.Initial
 import weco.catalogue.internal_model.work.Work
+import weco.pipeline_storage.MemoryRetriever
+import weco.pipeline_storage.fixtures.PipelineStorageStreamFixtures
+import weco.pipeline_storage.memory.{MemoryIndexer, MemoryRetriever}
 
 trait WorkerServiceFixture extends PipelineStorageStreamFixtures {
 

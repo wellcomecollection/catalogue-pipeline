@@ -4,14 +4,15 @@ import akka.Done
 import grizzled.slf4j.Logging
 import io.circe.Decoder
 import weco.json.JsonUtil._
-import uk.ac.wellcome.messaging.sns.NotificationMessage
+import weco.messaging.sns.NotificationMessage
 import weco.catalogue.internal_model.work.WorkState.Source
-import uk.ac.wellcome.pipeline_storage.{PipelineStorageStream, Retriever}
-import uk.ac.wellcome.pipeline_storage.Indexable._
+import weco.pipeline_storage.PipelineStorageStream
+import weco.pipeline_storage.Indexable._
 import weco.storage.{Identified, ReadError, Version}
 import weco.catalogue
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.source_model.SourcePayload
+import weco.pipeline_storage.{PipelineStorageStream, Retriever}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}

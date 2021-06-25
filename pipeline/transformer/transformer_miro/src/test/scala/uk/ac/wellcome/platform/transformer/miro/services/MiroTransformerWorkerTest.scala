@@ -5,8 +5,8 @@ import io.circe.generic.extras.semiauto.deriveConfiguredEncoder
 import org.scalatest.EitherValues
 import weco.fixtures.TestWith
 import weco.json.JsonUtil._
-import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.pipeline_storage.{PipelineStorageStream, Retriever}
+import weco.messaging.sns.NotificationMessage
+import weco.pipeline_storage.PipelineStorageStream
 import uk.ac.wellcome.platform.transformer.miro.generators.MiroRecordGenerators
 import uk.ac.wellcome.platform.transformer.miro.models.MiroMetadata
 import uk.ac.wellcome.platform.transformer.miro.source.MiroRecord
@@ -21,6 +21,7 @@ import weco.catalogue.transformer.{
   TransformerWorker,
   TransformerWorkerTestCases
 }
+import weco.pipeline_storage.{PipelineStorageStream, Retriever}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 

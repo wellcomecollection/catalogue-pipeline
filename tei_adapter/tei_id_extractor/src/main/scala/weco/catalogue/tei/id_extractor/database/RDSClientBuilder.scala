@@ -2,7 +2,7 @@ package weco.catalogue.tei.id_extractor.database
 
 import com.typesafe.config.Config
 import scalikejdbc.{ConnectionPool, ConnectionPoolSettings}
-import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
+import weco.typesafe.config.builders.EnrichConfig._
 import scala.concurrent.duration._
 
 object RDSClientBuilder {

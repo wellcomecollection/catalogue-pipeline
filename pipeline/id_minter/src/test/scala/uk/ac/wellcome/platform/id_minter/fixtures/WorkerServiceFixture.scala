@@ -6,18 +6,20 @@ import io.circe.Json
 import io.circe.syntax._
 import scalikejdbc.{ConnectionPool, ConnectionPoolSettings}
 import weco.fixtures.TestWith
-import uk.ac.wellcome.messaging.fixtures.SQS.Queue
-import uk.ac.wellcome.messaging.memory.MemoryMessageSender
+import weco.messaging.fixtures.SQS.Queue
+import weco.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.platform.id_minter.config.models.IdentifiersTableConfig
 import uk.ac.wellcome.platform.id_minter.database.IdentifiersDao
 import uk.ac.wellcome.platform.id_minter.models.IdentifiersTable
 import uk.ac.wellcome.platform.id_minter.steps.IdentifierGenerator
 import uk.ac.wellcome.platform.id_minter.services.IdMinterWorkerService
-import uk.ac.wellcome.pipeline_storage.{MemoryIndexer, MemoryRetriever}
+import weco.pipeline_storage.MemoryRetriever
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.work.WorkState.{Identified, Source}
-import uk.ac.wellcome.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import weco.catalogue.internal_model.work.Work
+import weco.pipeline_storage.MemoryRetriever
+import weco.pipeline_storage.fixtures.PipelineStorageStreamFixtures
+import weco.pipeline_storage.memory.{MemoryIndexer, MemoryRetriever}
 
 trait WorkerServiceFixture
     extends IdentifiersDatabase

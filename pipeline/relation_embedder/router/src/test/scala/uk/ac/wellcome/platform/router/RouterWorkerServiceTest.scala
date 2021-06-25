@@ -3,11 +3,10 @@ package uk.ac.wellcome.platform.router
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import weco.fixtures.TestWith
-import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
-import uk.ac.wellcome.messaging.memory.MemoryMessageSender
+import weco.messaging.fixtures.SQS.QueuePair
+import weco.messaging.memory.MemoryMessageSender
 import weco.catalogue.internal_model.work.WorkState.{Denormalised, Merged}
-import uk.ac.wellcome.pipeline_storage.fixtures.PipelineStorageStreamFixtures
-import uk.ac.wellcome.pipeline_storage.{
+import weco.pipeline_storage.{
   Indexer,
   MemoryIndexer,
   MemoryRetriever,
@@ -15,6 +14,9 @@ import uk.ac.wellcome.pipeline_storage.{
 }
 import weco.catalogue.internal_model.work.generators.WorkGenerators
 import weco.catalogue.internal_model.work.{CollectionPath, Relations, Work}
+import weco.pipeline_storage.{Indexer, Retriever}
+import weco.pipeline_storage.fixtures.PipelineStorageStreamFixtures
+import weco.pipeline_storage.memory.{MemoryIndexer, MemoryRetriever}
 
 import scala.collection.mutable
 import scala.concurrent.Future

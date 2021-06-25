@@ -3,20 +3,21 @@ package uk.ac.wellcome.platform.ingestor.images
 import scala.concurrent.ExecutionContext
 import akka.actor.ActorSystem
 import com.typesafe.config.Config
-import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
-import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
+import weco.typesafe.WellcomeTypesafeApp
+import weco.typesafe.config.builders.AkkaBuilder
 import weco.elasticsearch.typesafe.ElasticBuilder
-import uk.ac.wellcome.pipeline_storage.typesafe.{
+import weco.pipeline_storage.typesafe.ElasticSourceRetrieverBuilder
+import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
+import weco.catalogue.internal_model.index.ImagesIndexConfig
+import weco.messaging.sns.NotificationMessage
+import weco.catalogue.internal_model.Implicits._
+import weco.catalogue.internal_model.image.Image
+import weco.catalogue.internal_model.image.ImageState.{Augmented, Indexed}
+import weco.pipeline_storage.typesafe.{
   ElasticIndexerBuilder,
   ElasticSourceRetrieverBuilder,
   PipelineStorageStreamBuilder
 }
-import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
-import weco.catalogue.internal_model.index.ImagesIndexConfig
-import uk.ac.wellcome.messaging.sns.NotificationMessage
-import weco.catalogue.internal_model.Implicits._
-import weco.catalogue.internal_model.image.Image
-import weco.catalogue.internal_model.image.ImageState.{Augmented, Indexed}
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>

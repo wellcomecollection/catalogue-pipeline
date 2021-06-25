@@ -5,11 +5,10 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.fixtures.TestWith
 import weco.json.JsonUtil._
-import uk.ac.wellcome.messaging.fixtures.SQS.{Queue, QueuePair}
-import uk.ac.wellcome.messaging.memory.MemoryMessageSender
+import weco.messaging.fixtures.SQS.{Queue, QueuePair}
+import weco.messaging.memory.MemoryMessageSender
 import weco.catalogue.internal_model.work.WorkState.Source
-import uk.ac.wellcome.pipeline_storage.{MemoryIndexer, MemoryRetriever}
-import uk.ac.wellcome.pipeline_storage.fixtures.PipelineStorageStreamFixtures
+import weco.pipeline_storage.MemoryRetriever
 import weco.storage.Version
 import weco.storage.generators.S3ObjectLocationGenerators
 import weco.storage.s3.S3ObjectLocation
@@ -22,6 +21,9 @@ import weco.catalogue.transformer.example.{
   ExampleTransformerWorker,
   ValidExampleData
 }
+import weco.pipeline_storage.MemoryRetriever
+import weco.pipeline_storage.fixtures.PipelineStorageStreamFixtures
+import weco.pipeline_storage.memory.{MemoryIndexer, MemoryRetriever}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 

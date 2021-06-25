@@ -3,7 +3,7 @@ package uk.ac.wellcome.platform.id_minter.config.builders
 import com.typesafe.config.Config
 import scalikejdbc.{ConnectionPool, ConnectionPoolSettings}
 import uk.ac.wellcome.platform.id_minter.config.models.RDSClientConfig
-import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
+import weco.typesafe.config.builders.EnrichConfig._
 
 object RDSBuilder {
   def buildDB(config: Config): Unit = {

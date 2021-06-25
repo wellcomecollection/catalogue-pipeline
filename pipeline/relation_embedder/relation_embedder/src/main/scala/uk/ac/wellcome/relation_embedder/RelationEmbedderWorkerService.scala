@@ -7,17 +7,17 @@ import akka.Done
 import akka.stream.Materializer
 import akka.stream.scaladsl._
 import grizzled.slf4j.Logging
-
 import weco.json.JsonUtil._
-import uk.ac.wellcome.messaging.MessageSender
-import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.messaging.sqs.SQSStream
+import weco.messaging.MessageSender
+import weco.messaging.sns.NotificationMessage
+import weco.messaging.sqs.SQSStream
 import weco.catalogue.internal_model.work.WorkFsm._
 import weco.catalogue.internal_model.work.WorkState.Denormalised
-import uk.ac.wellcome.pipeline_storage.{Indexable, Indexer}
-import uk.ac.wellcome.typesafe.Runnable
-import Indexable.workIndexable
+import weco.pipeline_storage.Indexable
+import weco.typesafe.Runnable
+import weco.pipeline_storage.Indexable.workIndexable
 import weco.catalogue.internal_model.work.Work
+import weco.pipeline_storage.Indexer
 
 class RelationEmbedderWorkerService[MsgDestination](
   sqsStream: SQSStream[NotificationMessage],

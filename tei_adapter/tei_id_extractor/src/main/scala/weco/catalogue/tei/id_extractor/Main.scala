@@ -2,11 +2,11 @@ package weco.catalogue.tei.id_extractor
 
 import akka.actor.ActorSystem
 import com.amazonaws.services.s3.AmazonS3
-import uk.ac.wellcome.messaging.sns.SNSConfig
-import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
+import weco.messaging.sns.SNSConfig
+import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.storage.store.s3.S3TypedStore
-import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
-import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
+import weco.typesafe.WellcomeTypesafeApp
+import weco.typesafe.config.builders.AkkaBuilder
 import weco.catalogue.tei.id_extractor.database.{
   PathIdTable,
   PathIdTableBuilder,
@@ -14,7 +14,7 @@ import weco.catalogue.tei.id_extractor.database.{
   TableProvisioner
 }
 import weco.storage.typesafe.S3Builder
-import uk.ac.wellcome.typesafe.config.builders.EnrichConfig.RichConfig
+import weco.typesafe.config.builders.EnrichConfig.RichConfig
 import weco.http.client.AkkaHttpClient
 import weco.catalogue.tei.id_extractor.database.TableProvisioner
 

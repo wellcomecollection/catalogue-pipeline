@@ -9,10 +9,10 @@ import akka.stream.Materializer
 import software.amazon.awssdk.services.sqs.model.{Message => SQSMessage}
 import grizzled.slf4j.Logging
 
-import uk.ac.wellcome.messaging.MessageSender
-import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.messaging.sqs.SQSStream
-import uk.ac.wellcome.typesafe.Runnable
+import weco.messaging.MessageSender
+import weco.messaging.sns.NotificationMessage
+import weco.messaging.sqs.SQSStream
+import weco.typesafe.Runnable
 import weco.json.JsonUtil._
 
 case class Batch(rootPath: String, selectors: List[Selector])

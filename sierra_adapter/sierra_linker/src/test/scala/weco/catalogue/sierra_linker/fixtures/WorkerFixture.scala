@@ -1,15 +1,15 @@
 package weco.catalogue.sierra_linker.fixtures
 
 import io.circe.{Decoder, Encoder}
-import uk.ac.wellcome.akka.fixtures.Akka
+import weco.akka.fixtures.Akka
 import weco.fixtures.TestWith
 import weco.json.JsonUtil._
-import uk.ac.wellcome.messaging.fixtures.SQS
-import uk.ac.wellcome.messaging.fixtures.SQS.Queue
-import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.monitoring.Metrics
-import uk.ac.wellcome.monitoring.memory.MemoryMetrics
+import weco.messaging.fixtures.SQS
+import weco.messaging.fixtures.SQS.Queue
+import weco.messaging.memory.MemoryMessageSender
+import weco.messaging.sns.NotificationMessage
+import weco.monitoring.Metrics
+import weco.monitoring.memory.MemoryMetrics
 import weco.storage.store.memory.MemoryVersionedStore
 import weco.catalogue.sierra_linker.models.{Link, LinkOps}
 import weco.catalogue.sierra_linker.services.{LinkStore, SierraLinkerWorker}

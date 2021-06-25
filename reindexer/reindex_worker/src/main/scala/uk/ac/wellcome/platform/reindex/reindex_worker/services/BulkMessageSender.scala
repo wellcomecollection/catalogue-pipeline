@@ -1,7 +1,7 @@
 package uk.ac.wellcome.platform.reindex.reindex_worker.services
 
 import io.circe.Encoder
-import uk.ac.wellcome.messaging.IndividualMessageSender
+import weco.messaging.IndividualMessageSender
 
 import scala.concurrent.{ExecutionContext, Future}
 

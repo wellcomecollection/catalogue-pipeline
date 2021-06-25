@@ -4,9 +4,9 @@ import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.json.JsonUtil._
-import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
-import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.monitoring.memory.MemoryMetrics
+import weco.messaging.fixtures.SQS.QueuePair
+import weco.messaging.memory.MemoryMessageSender
+import weco.monitoring.memory.MemoryMetrics
 import weco.storage.Version
 import weco.storage.store.memory.MemoryVersionedStore
 import weco.catalogue.sierra_linker.fixtures.WorkerFixture

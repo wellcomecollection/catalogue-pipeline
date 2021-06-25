@@ -5,16 +5,16 @@ import akka.http.scaladsl.model.Uri
 import akka.http.scaladsl.model.headers.BasicHttpCredentials
 import com.amazonaws.services.s3.AmazonS3
 import com.typesafe.config.Config
-import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.messaging.typesafe.SQSBuilder
+import weco.messaging.sns.NotificationMessage
+import weco.messaging.typesafe.SQSBuilder
 import uk.ac.wellcome.platform.sierra_reader.config.builders.{
   ReaderConfigBuilder,
   SierraAPIConfigBuilder
 }
 import uk.ac.wellcome.platform.sierra_reader.services.SierraReaderWorkerService
 import weco.storage.typesafe.S3Builder
-import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
-import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
+import weco.typesafe.WellcomeTypesafeApp
+import weco.typesafe.config.builders.AkkaBuilder
 import weco.http.client.sierra.SierraOauthHttpClient
 import weco.http.client.{AkkaHttpClient, HttpGet, HttpPost}
 

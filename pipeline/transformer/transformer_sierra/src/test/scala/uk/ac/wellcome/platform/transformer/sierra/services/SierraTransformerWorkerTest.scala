@@ -5,8 +5,8 @@ import io.circe.generic.extras.semiauto.deriveConfiguredEncoder
 import org.scalatest.EitherValues
 import weco.fixtures.TestWith
 import weco.json.JsonUtil._
-import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.pipeline_storage.{PipelineStorageStream, Retriever}
+import weco.messaging.sns.NotificationMessage
+import weco.pipeline_storage.PipelineStorageStream
 import weco.storage.generators.S3ObjectLocationGenerators
 import weco.storage.s3.S3ObjectLocation
 import weco.storage.store.memory.MemoryTypedStore
@@ -20,6 +20,7 @@ import weco.catalogue.transformer.{
   TransformerWorker,
   TransformerWorkerTestCases
 }
+import weco.pipeline_storage.{PipelineStorageStream, Retriever}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 

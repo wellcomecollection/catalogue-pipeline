@@ -3,20 +3,13 @@ package uk.ac.wellcome.platform.matcher.fixtures
 import org.apache.commons.codec.digest.DigestUtils
 import org.scanamo.generic.semiauto.deriveDynamoFormat
 import org.scanamo.query.UniqueKey
-import org.scanamo.{
-  DynamoFormat,
-  DynamoReadError,
-  Scanamo,
-  Table => ScanamoTable
-}
+import org.scanamo.{DynamoFormat, DynamoReadError, Scanamo, Table => ScanamoTable}
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import weco.fixtures.TestWith
-import uk.ac.wellcome.messaging.fixtures.SQS
-import uk.ac.wellcome.messaging.memory.MemoryMessageSender
-import uk.ac.wellcome.messaging.sns.NotificationMessage
+import weco.messaging.fixtures.SQS
+import weco.messaging.memory.MemoryMessageSender
+import weco.messaging.sns.NotificationMessage
 import weco.catalogue.internal_model.matcher.{MatchedIdentifiers, WorkNode}
-import uk.ac.wellcome.pipeline_storage.MemoryRetriever
-import uk.ac.wellcome.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import uk.ac.wellcome.platform.matcher.matcher.WorkMatcher
 import uk.ac.wellcome.platform.matcher.models.WorkLinks
 import uk.ac.wellcome.platform.matcher.services.MatcherWorkerService
@@ -27,11 +20,10 @@ import weco.storage.locking.dynamo.{
   DynamoLockingService,
   ExpiringLock
 }
-import weco.storage.locking.memory.{
-  MemoryLockDao,
-  MemoryLockingService
-}
+import weco.storage.locking.memory.{MemoryLockDao, MemoryLockingService}
 import weco.catalogue.internal_model.identifiers.CanonicalId
+import weco.pipeline_storage.fixtures.PipelineStorageStreamFixtures
+import weco.pipeline_storage.memory.MemoryRetriever
 
 import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global

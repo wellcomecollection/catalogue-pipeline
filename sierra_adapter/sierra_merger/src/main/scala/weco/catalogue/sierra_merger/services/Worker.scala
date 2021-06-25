@@ -4,12 +4,12 @@ import akka.Done
 import grizzled.slf4j.Logging
 import io.circe.Decoder
 import weco.json.JsonUtil._
-import uk.ac.wellcome.messaging.MessageSender
-import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.messaging.sqs.SQSStream
+import weco.messaging.MessageSender
+import weco.messaging.sns.NotificationMessage
+import weco.messaging.sqs.SQSStream
 import weco.storage.s3.S3ObjectLocation
 import weco.storage.{Identified, Version}
-import uk.ac.wellcome.typesafe.Runnable
+import weco.typesafe.Runnable
 import weco.catalogue.source_model.SierraSourcePayload
 import weco.catalogue.source_model.sierra.AbstractSierraRecord
 

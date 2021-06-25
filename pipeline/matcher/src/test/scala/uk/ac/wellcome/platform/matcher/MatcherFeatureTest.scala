@@ -3,8 +3,8 @@ package uk.ac.wellcome.platform.matcher
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
-import uk.ac.wellcome.messaging.memory.MemoryMessageSender
+import weco.messaging.fixtures.SQS.QueuePair
+import weco.messaging.memory.MemoryMessageSender
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.matcher.{
   MatchedIdentifiers,
@@ -12,11 +12,11 @@ import weco.catalogue.internal_model.matcher.{
   WorkIdentifier,
   WorkNode
 }
-import uk.ac.wellcome.pipeline_storage.MemoryRetriever
 import uk.ac.wellcome.platform.matcher.fixtures.MatcherFixtures
 import uk.ac.wellcome.platform.matcher.generators.WorkLinksGenerators
 import uk.ac.wellcome.platform.matcher.models.WorkLinks
 import weco.fixtures.TimeAssertions
+import weco.pipeline_storage.memory.MemoryRetriever
 
 import scala.concurrent.ExecutionContext.Implicits.global
 

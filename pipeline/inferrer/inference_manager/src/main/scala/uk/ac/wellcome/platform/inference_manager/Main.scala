@@ -5,7 +5,6 @@ import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import com.typesafe.config.Config
 import software.amazon.awssdk.services.sqs.model.Message
-
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.index.ImagesIndexConfig
 import uk.ac.wellcome.platform.inference_manager.adapters.{
@@ -19,19 +18,20 @@ import uk.ac.wellcome.platform.inference_manager.services.{
   ImageDownloader,
   InferenceManagerWorkerService
 }
-import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
-import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
-import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
-import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
-import uk.ac.wellcome.pipeline_storage.typesafe.{
+import weco.typesafe.WellcomeTypesafeApp
+import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
+import weco.messaging.sns.NotificationMessage
+import weco.typesafe.config.builders.AkkaBuilder
+import weco.typesafe.config.builders.EnrichConfig._
+import weco.pipeline_storage.typesafe.ElasticSourceRetrieverBuilder
+import weco.elasticsearch.typesafe.ElasticBuilder
+import weco.catalogue.internal_model.image.Image
+import weco.catalogue.internal_model.image.ImageState.{Augmented, Initial}
+import weco.pipeline_storage.typesafe.{
   ElasticIndexerBuilder,
   ElasticSourceRetrieverBuilder,
   PipelineStorageStreamBuilder
 }
-import weco.elasticsearch.typesafe.ElasticBuilder
-import weco.catalogue.internal_model.image.Image
-import weco.catalogue.internal_model.image.ImageState.{Augmented, Initial}
 
 object Main extends WellcomeTypesafeApp {
   runWithConfig { config: Config =>

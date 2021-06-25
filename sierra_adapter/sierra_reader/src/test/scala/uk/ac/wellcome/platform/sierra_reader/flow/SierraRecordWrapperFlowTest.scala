@@ -9,7 +9,7 @@ import org.scalatest.compatible.Assertion
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.akka.fixtures.Akka
+import weco.akka.fixtures.Akka
 import weco.fixtures.TestWith
 import weco.json.JsonUtil._
 import weco.json.utils.JsonAssertions

@@ -13,8 +13,8 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.{Inside, Inspectors, OptionValues}
 import software.amazon.awssdk.services.sqs.model.Message
 import weco.fixtures.TestWith
-import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
-import uk.ac.wellcome.messaging.memory.MemoryMessageSender
+import weco.messaging.fixtures.SQS.QueuePair
+import weco.messaging.memory.MemoryMessageSender
 import uk.ac.wellcome.platform.inference_manager.adapters.{
   AspectRatioInferrerAdapter,
   FeatureVectorInferrerAdapter,

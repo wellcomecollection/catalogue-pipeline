@@ -5,7 +5,7 @@ import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.json.JsonUtil._
-import uk.ac.wellcome.messaging.memory.MemoryMessageSender
+import weco.messaging.memory.MemoryMessageSender
 import weco.storage.store.memory.MemoryVersionedStore
 import weco.catalogue.sierra_linker.fixtures.WorkerFixture
 import weco.catalogue.sierra_linker.models.Link

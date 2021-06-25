@@ -6,16 +6,16 @@ import akka.http.scaladsl.model.headers.BasicHttpCredentials
 import com.typesafe.config.Config
 import org.scanamo.generic.auto._
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
+import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import uk.ac.wellcome.mets_adapter.services.{
   MetsAdapterWorkerService,
   MetsStore
 }
 import weco.storage.store.dynamo.DynamoSingleVersionStore
 import weco.storage.typesafe.DynamoBuilder
-import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
-import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
-import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
+import weco.typesafe.WellcomeTypesafeApp
+import weco.typesafe.config.builders.AkkaBuilder
+import weco.typesafe.config.builders.EnrichConfig._
 import weco.catalogue.mets_adapter.http.StorageServiceOauthHttpClient
 import weco.catalogue.mets_adapter.services.HttpBagRetriever
 import weco.http.client.{AkkaHttpClient, HttpGet, HttpPost}

@@ -3,10 +3,10 @@ package weco.catalogue.sierra_linker.services
 import akka.Done
 import io.circe.{Decoder, Encoder}
 import weco.json.JsonUtil._
-import uk.ac.wellcome.messaging.MessageSender
-import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.messaging.sqs.SQSStream
-import uk.ac.wellcome.typesafe.Runnable
+import weco.messaging.MessageSender
+import weco.messaging.sns.NotificationMessage
+import weco.messaging.sqs.SQSStream
+import weco.typesafe.Runnable
 import weco.catalogue.source_model.sierra.AbstractSierraRecord
 import weco.catalogue.source_model.sierra.identifiers.TypedSierraRecordNumber
 

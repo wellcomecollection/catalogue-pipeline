@@ -2,7 +2,7 @@ package uk.ac.wellcome.platform.reindex.reindex_worker.config
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.messaging.sns.SNSConfig
+import weco.messaging.sns.SNSConfig
 import uk.ac.wellcome.platform.reindex.reindex_worker.models.{
   ReindexJobConfig,
   ReindexSource

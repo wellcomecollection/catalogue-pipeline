@@ -8,7 +8,7 @@ import akka.util.ByteString
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.akka.fixtures.Akka
+import weco.akka.fixtures.Akka
 import weco.fixtures.TestWith
 import uk.ac.wellcome.platform.inference_manager.fixtures.{
   MemoryFileWriter,

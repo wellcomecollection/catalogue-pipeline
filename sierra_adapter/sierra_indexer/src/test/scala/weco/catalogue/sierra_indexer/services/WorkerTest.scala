@@ -4,7 +4,7 @@ import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.Indexes
 import org.scalatest.funspec.AnyFunSpec
 import weco.json.JsonUtil._
-import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
+import weco.messaging.fixtures.SQS.QueuePair
 import weco.storage.generators.S3ObjectLocationGenerators
 import weco.storage.s3.S3ObjectLocation
 import weco.storage.store.memory.MemoryTypedStore

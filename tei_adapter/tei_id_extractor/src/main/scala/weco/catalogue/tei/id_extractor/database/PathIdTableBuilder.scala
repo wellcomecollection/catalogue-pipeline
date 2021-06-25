@@ -1,7 +1,7 @@
 package weco.catalogue.tei.id_extractor.database
 
 import com.typesafe.config.Config
-import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
+import weco.typesafe.config.builders.EnrichConfig._
 
 object PathIdTableBuilder {
   def buildTableConfig(config: Config): PathIdTableConfig = {

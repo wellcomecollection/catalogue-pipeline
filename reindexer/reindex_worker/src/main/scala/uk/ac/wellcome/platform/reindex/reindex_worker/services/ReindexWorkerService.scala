@@ -3,8 +3,8 @@ package uk.ac.wellcome.platform.reindex.reindex_worker.services
 import akka.Done
 import org.scanamo.generic.auto._
 import weco.json.JsonUtil._
-import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.messaging.sqs.SQSStream
+import weco.messaging.sns.NotificationMessage
+import weco.messaging.sqs.SQSStream
 import uk.ac.wellcome.platform.reindex.reindex_worker.models.source.{
   CalmReindexPayload,
   MetsReindexPayload,
@@ -19,7 +19,7 @@ import uk.ac.wellcome.platform.reindex.reindex_worker.models.{
   ReindexRequest,
   ReindexSource
 }
-import uk.ac.wellcome.typesafe.Runnable
+import weco.typesafe.Runnable
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.higherKinds

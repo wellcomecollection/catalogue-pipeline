@@ -4,15 +4,14 @@ import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.index.WorksIndexConfig
-import uk.ac.wellcome.messaging.fixtures.SQS.QueuePair
+import weco.messaging.fixtures.SQS.QueuePair
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.work.WorkState.{Denormalised, Indexed}
-import uk.ac.wellcome.pipeline_storage.Indexable.workIndexable
-import uk.ac.wellcome.pipeline_storage.elastic.ElasticSourceRetriever
-import uk.ac.wellcome.pipeline_storage.ElasticIndexer
+import weco.pipeline_storage.Indexable.workIndexable
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.generators.WorkGenerators
+import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 

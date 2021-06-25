@@ -6,13 +6,13 @@ import akka.Done
 import akka.stream.scaladsl._
 import software.amazon.awssdk.services.sqs.model.{Message => SQSMessage}
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.messaging.sqs.SQSStream
-import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.typesafe.Runnable
+import weco.messaging.sqs.SQSStream
+import weco.messaging.sns.NotificationMessage
+import weco.typesafe.Runnable
 import weco.json.JsonUtil._
 import uk.ac.wellcome.mets_adapter.models._
 import weco.storage.{Identified, Version}
-import uk.ac.wellcome.messaging.MessageSender
+import weco.messaging.MessageSender
 import weco.catalogue.mets_adapter.services.BagRetriever
 import weco.catalogue.source_model.MetsSourcePayload
 import weco.catalogue.source_model.mets.MetsSourceData

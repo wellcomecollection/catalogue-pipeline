@@ -4,19 +4,19 @@ import akka.actor.ActorSystem
 import com.typesafe.config.Config
 import org.scanamo.generic.auto._
 import weco.elasticsearch.typesafe.ElasticBuilder
-import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.messaging.typesafe.{SNSBuilder, SQSBuilder}
+import weco.messaging.sns.NotificationMessage
+import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.catalogue.internal_model.matcher.MatchedIdentifiers
 import uk.ac.wellcome.platform.matcher.matcher.WorkMatcher
 import uk.ac.wellcome.platform.matcher.services.MatcherWorkerService
 import uk.ac.wellcome.platform.matcher.storage.{WorkGraphStore, WorkNodeDao}
 import weco.storage.typesafe.{DynamoBuilder, LockingBuilder}
-import uk.ac.wellcome.typesafe.WellcomeTypesafeApp
-import uk.ac.wellcome.typesafe.config.builders.AkkaBuilder
-import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
+import weco.typesafe.WellcomeTypesafeApp
+import weco.typesafe.config.builders.AkkaBuilder
+import weco.typesafe.config.builders.EnrichConfig._
 import com.sksamuel.elastic4s.Index
-import uk.ac.wellcome.pipeline_storage.typesafe.PipelineStorageStreamBuilder
 import uk.ac.wellcome.platform.matcher.storage.elastic.ElasticWorkLinksRetriever
+import weco.pipeline_storage.typesafe.PipelineStorageStreamBuilder
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.higherKinds
