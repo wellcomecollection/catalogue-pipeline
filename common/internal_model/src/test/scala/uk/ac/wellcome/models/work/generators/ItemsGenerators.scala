@@ -11,6 +11,7 @@ import weco.catalogue.internal_model.identifiers.{
 }
 import weco.catalogue.internal_model.locations.{
   AccessCondition,
+  AccessMethod,
   AccessStatus,
   License,
   Location,
@@ -63,7 +64,13 @@ trait ItemsGenerators extends IdentifiersGenerators with LocationGenerators {
     createDigitalItemWith(
       locations = List(
         createDigitalLocationWith(
-          accessConditions = List(AccessCondition(status = accessStatus)))))
+          accessConditions = List(AccessCondition(
+            method = AccessMethod.NotRequestable,
+            status = accessStatus
+          ))
+        )
+      )
+    )
 
   def createDigitalItemWith(
     locations: List[Location]): Item[IdState.Unidentifiable.type] =

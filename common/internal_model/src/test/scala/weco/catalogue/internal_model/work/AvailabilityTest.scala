@@ -5,6 +5,7 @@ import org.scalatest.matchers.should.Matchers
 import uk.ac.wellcome.models.work.generators.{ItemsGenerators, WorkGenerators}
 import weco.catalogue.internal_model.locations.{
   AccessCondition,
+  AccessMethod,
   AccessStatus,
   LocationType
 }
@@ -66,6 +67,7 @@ class AvailabilityTest
                 createPhysicalLocationWith(
                   accessConditions = List(
                     AccessCondition(
+                      method = AccessMethod.ManualRequest,
                       terms = Some("Available at Churchill Archives Centre")
                     )
                   )

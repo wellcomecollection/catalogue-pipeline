@@ -19,7 +19,11 @@ import weco.catalogue.internal_model.identifiers.{
   IdState,
   SourceIdentifier
 }
-import weco.catalogue.internal_model.locations.{AccessCondition, AccessStatus}
+import weco.catalogue.internal_model.locations.{
+  AccessCondition,
+  AccessMethod,
+  AccessStatus
+}
 import weco.catalogue.internal_model.work._
 
 import java.time.Instant
@@ -164,6 +168,7 @@ class WorksIndexConfigTest
   // a bug in the mapping related to accessConditions wasn't caught by the catch-all test above.
   it("puts a work with a access condition") {
     val accessCondition: AccessCondition = AccessCondition(
+      method = AccessMethod.OnlineRequest,
       status = Some(AccessStatus.Open),
       terms = Some("ask nicely"),
       to = Some("2014"))
