@@ -120,12 +120,7 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
     debug(s"Attempting to transform $itemId")
 
     val location =
-      getPhysicalLocation(
-        bibId,
-        itemId,
-        itemData,
-        bibData,
-        fallbackLocation)
+      getPhysicalLocation(bibId, itemId, itemData, bibData, fallbackLocation)
 
     Item(
       title = getItemTitle(itemId, itemData),
@@ -203,7 +198,11 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
     bibData: SierraBibData,
     location: Option[PhysicalLocation]): Option[String] = {
     val (_, note, _) = SierraItemAccess(
-      bibId, itemId, SierraAccessStatus.forBib(bibId, bibData), location.map(_.locationType), itemData
+      bibId,
+      itemId,
+      SierraAccessStatus.forBib(bibId, bibData),
+      location.map(_.locationType),
+      itemData
     )
 
     note

@@ -38,8 +38,7 @@ object WorkPredicates {
   val anyWork: WorkPredicate = const(true)
 
   val zeroIdentifiedItems: WorkPredicate =
-    work =>
-      !work.data.items.exists { _.id.isInstanceOf[IdState.Identified] }
+    work => !work.data.items.exists { _.id.isInstanceOf[IdState.Identified] }
 
   /**
     * This is the shape in which we expect the works from the transformers.

@@ -713,7 +713,8 @@ class SierraItemAccessTest
           varFields = List(
             VarField(
               fieldTag = "n",
-              content = "Email library@wellcomecollection.org to tell us why you need access. We’ll reply within a week."
+              content =
+                "Email library@wellcomecollection.org to tell us why you need access. We’ll reply within a week."
             )
           )
         )
@@ -728,7 +729,8 @@ class SierraItemAccessTest
 
         ac shouldBe AccessCondition(
           method = AccessMethod.ManualRequest,
-          note = Some("Email library@wellcomecollection.org to tell us why you need access. We’ll reply within a week.")
+          note = Some(
+            "Email library@wellcomecollection.org to tell us why you need access. We’ll reply within a week.")
         )
         note shouldBe None
         itemStatus shouldBe ItemStatus.Available
@@ -754,7 +756,8 @@ class SierraItemAccessTest
           varFields = List(
             VarField(
               fieldTag = "n",
-              content = "Email library@wellcomecollection.org to tell us why you need access. We’ll reply within a week."
+              content =
+                "Email library@wellcomecollection.org to tell us why you need access. We’ll reply within a week."
             )
           )
         )
@@ -767,7 +770,8 @@ class SierraItemAccessTest
           itemData = itemData
         )
 
-        ac.note shouldBe Some("Item is in use by another reader. Please ask at Enquiry Desk.")
+        ac.note shouldBe Some(
+          "Item is in use by another reader. Please ask at Enquiry Desk.")
         note shouldBe None
       }
 
@@ -971,10 +975,7 @@ class SierraItemAccessTest
           label = "LOCATION",
           value = "scmac",
           display = "Closed stores Arch. & MSS"),
-        "88" -> FixedField(
-          label = "STATUS",
-          value = "?",
-          display = "Unknown"),
+        "88" -> FixedField(label = "STATUS", value = "?", display = "Unknown"),
         "108" -> FixedField(
           label = "OPACMSG",
           value = "f",

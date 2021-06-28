@@ -43,7 +43,14 @@ object SierraItemAccess extends SierraQueryOps with Logging {
     location: Option[PhysicalLocationType],
     itemData: SierraItemData
   ): (Option[AccessCondition], Option[String], ItemStatus) =
-    (createAccessConditionAndStatus(bibId, itemId, bibStatus, location, itemData), itemData.displayNote) match {
+    (
+      createAccessConditionAndStatus(
+        bibId,
+        itemId,
+        bibStatus,
+        location,
+        itemData),
+      itemData.displayNote) match {
       // If the item note is already on the access condition, we don't need to copy it.
       case ((Some(ac), itemStatus), displayNote) if ac.note == displayNote =>
         (Some(ac), None, itemStatus)
@@ -52,9 +59,11 @@ object SierraItemAccess extends SierraQueryOps with Logging {
       // access condition, we discard the item note.
       //
       // Otherwise, we copy the item note onto the access condition.
-      case ((Some(ac), itemStatus), Some(displayNote)) if ac.note.isDefined && displayNote.isAccessNote =>
+      case ((Some(ac), itemStatus), Some(displayNote))
+          if ac.note.isDefined && displayNote.isAccessNote =>
         (Some(ac), None, itemStatus)
-      case ((Some(ac), itemStatus), Some(displayNote)) if ac.note.isEmpty && displayNote.isAccessNote =>
+      case ((Some(ac), itemStatus), Some(displayNote))
+          if ac.note.isEmpty && displayNote.isAccessNote =>
         (Some(ac.copy(note = Some(displayNote))), None, itemStatus)
 
       // If the item note is nothing to do with the access condition, we return it to
@@ -169,7 +178,6 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           Some(OpacMsg.ManualRequest),
           NotRequestable.NeedsManualRequest(_),
           Some(LocationType.ClosedStores)) =>
-
         // Some items like this have a display note that explains how the manual request
         // works, e.g.
         //
@@ -186,7 +194,10 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           }
 
         (
-          Some(AccessCondition(method = AccessMethod.ManualRequest, note = accessNote)),
+          Some(
+            AccessCondition(
+              method = AccessMethod.ManualRequest,
+              note = accessNote)),
           ItemStatus.Available)
 
       // Handle any cases where the item is closed.
