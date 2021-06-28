@@ -39,7 +39,7 @@ object Main extends WellcomeTypesafeApp {
 
     val lockingService =
       LockingBuilder
-        .buildDynamoLockingService[Set[MatchedIdentifiers], Future](config)
+        .buildDynamoLockingService[Set[MatchedIdentifiers], Future](config, namespace = "locking")
 
     val esClient = ElasticBuilder.buildElasticClient(config)
 
