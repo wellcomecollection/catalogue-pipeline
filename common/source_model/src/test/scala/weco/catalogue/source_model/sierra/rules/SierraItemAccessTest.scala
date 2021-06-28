@@ -41,7 +41,7 @@ class SierraItemAccessTest
             )
           )
 
-          val (ac, itemStatus) = SierraItemAccess(
+          val (ac, _, itemStatus) = SierraItemAccess(
             bibId = bibId,
             itemId = itemId,
             bibStatus = None,
@@ -71,7 +71,7 @@ class SierraItemAccessTest
             )
           )
 
-          val (ac, itemStatus) = SierraItemAccess(
+          val (ac, _, itemStatus) = SierraItemAccess(
             bibId = bibId,
             itemId = itemId,
             bibStatus = Some(AccessStatus.Open),
@@ -104,7 +104,7 @@ class SierraItemAccessTest
             )
           )
 
-          val (ac, itemStatus) = SierraItemAccess(
+          val (ac, _, itemStatus) = SierraItemAccess(
             bibId = bibId,
             itemId = itemId,
             bibStatus = Some(AccessStatus.Restricted),
@@ -137,7 +137,7 @@ class SierraItemAccessTest
             )
           )
 
-          val (ac, itemStatus) = SierraItemAccess(
+          val (ac, _, itemStatus) = SierraItemAccess(
             bibId = bibId,
             itemId = itemId,
             bibStatus = Some(AccessStatus.Restricted),
@@ -176,7 +176,7 @@ class SierraItemAccessTest
             )
           )
 
-          val (ac, itemStatus) = SierraItemAccess(
+          val (ac, _, itemStatus) = SierraItemAccess(
             bibId = bibId,
             itemId = itemId,
             bibStatus = None,
@@ -206,7 +206,7 @@ class SierraItemAccessTest
             )
           )
 
-          val (ac, itemStatus) = SierraItemAccess(
+          val (ac, _, itemStatus) = SierraItemAccess(
             bibId = bibId,
             itemId = itemId,
             bibStatus = None,
@@ -239,7 +239,7 @@ class SierraItemAccessTest
             )
           )
 
-          val (ac, itemStatus) = SierraItemAccess(
+          val (ac, _, itemStatus) = SierraItemAccess(
             bibId = bibId,
             itemId = itemId,
             bibStatus = None,
@@ -272,7 +272,7 @@ class SierraItemAccessTest
             )
           )
 
-          val (ac, itemStatus) = SierraItemAccess(
+          val (ac, _, itemStatus) = SierraItemAccess(
             bibId = bibId,
             itemId = itemId,
             bibStatus = Some(AccessStatus.Closed),
@@ -306,7 +306,7 @@ class SierraItemAccessTest
             )
           )
 
-          val (ac, itemStatus) = SierraItemAccess(
+          val (ac, _, itemStatus) = SierraItemAccess(
             bibId = bibId,
             itemId = itemId,
             bibStatus = Some(AccessStatus.Closed),
@@ -339,7 +339,7 @@ class SierraItemAccessTest
             )
           )
 
-          val (ac, itemStatus) = SierraItemAccess(
+          val (ac, _, itemStatus) = SierraItemAccess(
             bibId = bibId,
             itemId = itemId,
             bibStatus = None,
@@ -372,7 +372,7 @@ class SierraItemAccessTest
             )
           )
 
-          val (ac, itemStatus) = SierraItemAccess(
+          val (ac, _, itemStatus) = SierraItemAccess(
             bibId = bibId,
             itemId = itemId,
             bibStatus = None,
@@ -384,7 +384,7 @@ class SierraItemAccessTest
             AccessCondition(
               method = AccessMethod.NotRequestable,
               status = Some(AccessStatus.TemporarilyUnavailable),
-              terms = Some(
+              note = Some(
                 "This item is being digitised and is currently unavailable.")
             )
           )
@@ -416,7 +416,7 @@ class SierraItemAccessTest
             )
           )
 
-          val (ac, itemStatus) = SierraItemAccess(
+          val (ac, _, itemStatus) = SierraItemAccess(
             bibId = bibId,
             itemId = itemId,
             bibStatus = None,
@@ -428,7 +428,7 @@ class SierraItemAccessTest
             AccessCondition(
               method = AccessMethod.NotRequestable,
               status = Some(AccessStatus.TemporarilyUnavailable),
-              terms = Some(
+              note = Some(
                 "This item is being digitised and is currently unavailable.")
             )
           )
@@ -453,7 +453,7 @@ class SierraItemAccessTest
             )
           )
 
-          val (ac, itemStatus) = SierraItemAccess(
+          val (ac, _, itemStatus) = SierraItemAccess(
             bibId = bibId,
             itemId = itemId,
             bibStatus = Some(AccessStatus.ByAppointment),
@@ -487,7 +487,7 @@ class SierraItemAccessTest
             )
           )
 
-          val (ac, itemStatus) = SierraItemAccess(
+          val (ac, _, itemStatus) = SierraItemAccess(
             bibId = bibId,
             itemId = itemId,
             bibStatus = Some(AccessStatus.PermissionRequired),
@@ -521,7 +521,7 @@ class SierraItemAccessTest
             )
           )
 
-          val (ac, itemStatus) = SierraItemAccess(
+          val (ac, _, itemStatus) = SierraItemAccess(
             bibId = bibId,
             itemId = itemId,
             bibStatus = None,
@@ -555,7 +555,7 @@ class SierraItemAccessTest
             )
           )
 
-          val (ac, itemStatus) = SierraItemAccess(
+          val (ac, _, itemStatus) = SierraItemAccess(
             bibId = bibId,
             itemId = itemId,
             bibStatus = None,
@@ -567,7 +567,7 @@ class SierraItemAccessTest
             AccessCondition(
               method = AccessMethod.NotRequestable,
               status = Some(AccessStatus.Unavailable),
-              terms = Some("This item is missing.")
+              note = Some("This item is missing.")
             )
           )
           itemStatus shouldBe ItemStatus.Unavailable
@@ -591,7 +591,7 @@ class SierraItemAccessTest
             )
           )
 
-          val (ac, itemStatus) = SierraItemAccess(
+          val (ac, _, itemStatus) = SierraItemAccess(
             bibId = bibId,
             itemId = itemId,
             bibStatus = None,
@@ -603,7 +603,7 @@ class SierraItemAccessTest
             AccessCondition(
               method = AccessMethod.NotRequestable,
               status = Some(AccessStatus.Unavailable),
-              terms = Some("This item is withdrawn.")
+              note = Some("This item is withdrawn.")
             )
           )
           itemStatus shouldBe ItemStatus.Unavailable
@@ -631,7 +631,7 @@ class SierraItemAccessTest
           )
         )
 
-        val (ac, itemStatus) = SierraItemAccess(
+        val (ac, _, itemStatus) = SierraItemAccess(
           bibId = bibId,
           itemId = itemId,
           bibStatus = None,
@@ -643,7 +643,7 @@ class SierraItemAccessTest
           AccessCondition(
             method = AccessMethod.ManualRequest,
             status = Some(AccessStatus.TemporarilyUnavailable),
-            terms = Some(
+            note = Some(
               "Item is in use by another reader. Please ask at Enquiry Desk.")
           )
         )
@@ -669,7 +669,7 @@ class SierraItemAccessTest
           )
         )
 
-        val (ac, itemStatus) = SierraItemAccess(
+        val (ac, _, itemStatus) = SierraItemAccess(
           bibId = bibId,
           itemId = itemId,
           bibStatus = None,
@@ -681,11 +681,172 @@ class SierraItemAccessTest
           AccessCondition(
             method = AccessMethod.ManualRequest,
             status = Some(AccessStatus.TemporarilyUnavailable),
-            terms = Some(
+            note = Some(
               "Item is in use by another reader. Please ask at Enquiry Desk.")
           )
         )
         itemStatus shouldBe ItemStatus.TemporarilyUnavailable
+      }
+    }
+
+    describe("gets the right note") {
+      it("if there's a display note about manual requesting") {
+        val itemData = createSierraItemDataWith(
+          fixedFields = Map(
+            "61" -> FixedField(
+              label = "I TYPE",
+              value = "4",
+              display = "serial"),
+            "79" -> FixedField(
+              label = "LOCATION",
+              value = "sgser",
+              display = "Closed stores journals"),
+            "88" -> FixedField(
+              label = "STATUS",
+              value = "-",
+              display = "Available"),
+            "108" -> FixedField(
+              label = "OPACMSG",
+              value = "n",
+              display = "Manual request"),
+          ),
+          varFields = List(
+            VarField(
+              fieldTag = "n",
+              content = "Email library@wellcomecollection.org to tell us why you need access. We’ll reply within a week."
+            )
+          )
+        )
+
+        val (Some(ac), note, itemStatus) = SierraItemAccess(
+          bibId = bibId,
+          itemId = itemId,
+          bibStatus = None,
+          location = Some(LocationType.ClosedStores),
+          itemData = itemData
+        )
+
+        ac shouldBe AccessCondition(
+          method = AccessMethod.ManualRequest,
+          note = Some("Email library@wellcomecollection.org to tell us why you need access. We’ll reply within a week.")
+        )
+        note shouldBe None
+        itemStatus shouldBe ItemStatus.Available
+      }
+
+      it("doesn't overwrite the note if there's a hold on the item") {
+        val itemData = createSierraItemDataWith(
+          fixedFields = Map(
+            "79" -> FixedField(
+              label = "LOCATION",
+              value = "sgser",
+              display = "Closed stores journals"),
+            "88" -> FixedField(
+              label = "STATUS",
+              value = "-",
+              display = "Available"),
+            "108" -> FixedField(
+              label = "OPACMSG",
+              value = "f",
+              display = "Online request"),
+          ),
+          holdCount = Some(1),
+          varFields = List(
+            VarField(
+              fieldTag = "n",
+              content = "Email library@wellcomecollection.org to tell us why you need access. We’ll reply within a week."
+            )
+          )
+        )
+
+        val (Some(ac), note, _) = SierraItemAccess(
+          bibId = bibId,
+          itemId = itemId,
+          bibStatus = None,
+          location = Some(LocationType.ClosedStores),
+          itemData = itemData
+        )
+
+        ac.note shouldBe Some("Item is in use by another reader. Please ask at Enquiry Desk.")
+        note shouldBe None
+      }
+
+      it("if there's a display note with access information") {
+        val itemData = createSierraItemDataWith(
+          fixedFields = Map(
+            "61" -> FixedField(
+              label = "I TYPE",
+              value = "4",
+              display = "serial"
+            ),
+            "79" -> FixedField(
+              label = "LOCATION",
+              value = "hgser",
+              display = "Offsite"),
+            "88" -> FixedField(
+              label = "STATUS",
+              value = "y",
+              display = "Permission required"),
+            "108" -> FixedField(
+              label = "OPACMSG",
+              value = "a",
+              display = "By appointment"),
+          ),
+          varFields = List(
+            VarField(
+              fieldTag = "n",
+              content =
+                "Email library@wellcomecollection.org to tell us why you need the physical copy. We'll reply within a week."
+            )
+          )
+        )
+
+        val (Some(ac), _, _) = SierraItemAccess(
+          bibId = bibId,
+          itemId = itemId,
+          bibStatus = None,
+          location = Some(LocationType.ClosedStores),
+          itemData = itemData
+        )
+
+        ac.note shouldBe Some(
+          "Email library@wellcomecollection.org to tell us why you need the physical copy. We'll reply within a week.")
+        ac.terms shouldBe None
+      }
+
+      it("returns the note if it's unrelated to access data") {
+        val itemData = createSierraItemDataWith(
+          fixedFields = Map(
+            "79" -> FixedField(
+              label = "LOCATION",
+              value = "scmac",
+              display = "Closed stores Arch. & MSS"),
+            "88" -> FixedField(
+              label = "STATUS",
+              value = "-",
+              display = "Available"),
+            "108" -> FixedField(
+              label = "OPACMSG",
+              value = "f",
+              display = "Online request"),
+          ),
+          varFields = List(
+            VarField(
+              fieldTag = "n",
+              content = "uncoloured impression on paper mount"
+            )
+          )
+        )
+
+        val (_, Some(note), _) = SierraItemAccess(
+          bibId = bibId,
+          itemId = itemId,
+          bibStatus = None,
+          location = Some(LocationType.ClosedStores),
+          itemData = itemData
+        )
+
+        note shouldBe "uncoloured impression on paper mount"
       }
     }
   }
@@ -710,7 +871,7 @@ class SierraItemAccessTest
           )
         )
 
-        val (ac, itemStatus) = SierraItemAccess(
+        val (Some(ac), _, itemStatus) = SierraItemAccess(
           bibId = bibId,
           itemId = itemId,
           bibStatus = None,
@@ -718,7 +879,7 @@ class SierraItemAccessTest
           itemData = itemData
         )
 
-        ac shouldBe None
+        ac shouldBe AccessCondition(method = AccessMethod.OpenShelves)
         itemStatus shouldBe ItemStatus.Available
       }
 
@@ -747,7 +908,7 @@ class SierraItemAccessTest
           )
         )
 
-        val (ac, itemStatus) = SierraItemAccess(
+        val (ac, _, itemStatus) = SierraItemAccess(
           bibId = bibId,
           itemId = itemId,
           bibStatus = None,
@@ -784,7 +945,7 @@ class SierraItemAccessTest
         )
       )
 
-      val (ac, itemStatus) = SierraItemAccess(
+      val (ac, _, itemStatus) = SierraItemAccess(
         bibId = bibId,
         itemId = itemId,
         bibStatus = None,
@@ -796,44 +957,32 @@ class SierraItemAccessTest
         AccessCondition(
           method = AccessMethod.NotRequestable,
           status = Some(AccessStatus.Unavailable),
-          terms = Some("This item is missing.")
+          note = Some("This item is missing.")
         )
       )
       itemStatus shouldBe ItemStatus.Unavailable
     }
   }
 
-  it("moves the display note to the terms if it's access related") {
+  it("handles the case where we can't map the access data") {
     val itemData = createSierraItemDataWith(
       fixedFields = Map(
-        "61" -> FixedField(
-          label = "I TYPE",
-          value = "4",
-          display = "serial"
-        ),
         "79" -> FixedField(
           label = "LOCATION",
-          value = "hgser",
-          display = "Offsite"),
+          value = "scmac",
+          display = "Closed stores Arch. & MSS"),
         "88" -> FixedField(
           label = "STATUS",
-          value = "y",
-          display = "Permission required"),
+          value = "?",
+          display = "Unknown"),
         "108" -> FixedField(
           label = "OPACMSG",
-          value = "a",
-          display = "By appointment"),
-      ),
-      varFields = List(
-        VarField(
-          fieldTag = "n",
-          content =
-            "Email library@wellcomecollection.org to tell us why you need the physical copy. We'll reply within a week."
-        )
+          value = "f",
+          display = "Online request"),
       )
     )
 
-    val (ac, _) = SierraItemAccess(
+    val (Some(ac), _, _) = SierraItemAccess(
       bibId = bibId,
       itemId = itemId,
       bibStatus = None,
@@ -841,9 +990,11 @@ class SierraItemAccessTest
       itemData = itemData
     )
 
-    ac.get.note shouldBe None
-    ac.get.terms shouldBe Some(
-      "Email library@wellcomecollection.org to tell us why you need the physical copy. We'll reply within a week.")
+    ac shouldBe AccessCondition(
+      method = AccessMethod.NotRequestable,
+      note = Some(
+        s"""Please check this item <a href="https://search.wellcomelibrary.org/iii/encore/record/C__Rb${bibId.withoutCheckDigit}?lang=eng">on the Wellcome Library website</a> for access information""")
+    )
   }
 
   val bibId: SierraBibNumber = createSierraBibNumber
