@@ -1,23 +1,23 @@
 package weco.pipeline.transformer.sierra.data
 
+import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.work.Format
 import weco.catalogue.internal_model.work.Format.{Linked, Unlinked}
-import weco.pipeline.transformer.sierra.exceptions.SierraTransformerException
 
-object SierraMaterialTypes {
+object SierraMaterialTypes extends Logging {
 
-  def fromCode(code: String): Format = {
+  def fromCode(code: String): Option[Format] =
     code.toList match {
       case List(c) =>
         Format.fromCode(c.toString) match {
-          case Some(format: Unlinked) => format
-          case Some(format: Linked)   => format.linksTo
+          case Some(format: Unlinked) => Some(format)
+          case Some(format: Linked)   => Some(format.linksTo)
           case None =>
-            throw SierraTransformerException(s"Unrecognised work type code: $c")
+            warn(s"Unrecognised work type code: $c")
+            None
         }
       case _ =>
-        throw SierraTransformerException(
-          s"Work type code is not a single character: <<$code>>")
+        warn(s"Work type code is not a single character: <<$code>>")
+        None
     }
-  }
 }
