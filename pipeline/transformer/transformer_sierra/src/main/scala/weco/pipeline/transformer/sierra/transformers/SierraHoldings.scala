@@ -65,7 +65,7 @@ object SierraHoldings extends SierraQueryOps {
             }
         }
         .flatMap {
-          case (varFields, Item(_, title, locations)) =>
+          case (varFields, Item(_, title, _, locations)) =>
             locations.map { loc =>
               Holdings(
                 note = title,
