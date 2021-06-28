@@ -10,7 +10,7 @@ import weco.catalogue.internal_model.locations.{
   DigitalLocation,
   PhysicalLocation
 }
-import weco.catalogue.internal_model.work.{Format, Item, Work}
+import weco.catalogue.internal_model.work.{Format, Work}
 
 import scala.Function.const
 
@@ -39,9 +39,7 @@ object WorkPredicates {
 
   val zeroIdentifiedItems: WorkPredicate =
     work =>
-      work.data.items.collect {
-        case it @ Item(IdState.Identified(_, _, _), _, _) => it
-      }.isEmpty
+      !work.data.items.exists { _.id.isInstanceOf[IdState.Identified] }
 
   /**
     * This is the shape in which we expect the works from the transformers.
