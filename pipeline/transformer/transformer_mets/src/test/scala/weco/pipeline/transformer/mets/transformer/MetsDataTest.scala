@@ -148,6 +148,7 @@ class MetsDataTest
           Item(
             IdState.Unidentifiable,
             _,
+            _,
             List(DigitalLocation(_, _, license, _, _, _)))) =>
         license shouldBe Some(License.InCopyright)
     }
@@ -164,6 +165,7 @@ class MetsDataTest
           Item(
             IdState.Unidentifiable,
             _,
+            _,
             List(DigitalLocation(_, _, license, _, _, _)))) =>
         license shouldBe Some(License.InCopyright)
     }
@@ -178,6 +180,7 @@ class MetsDataTest
       case List(
           Item(
             IdState.Unidentifiable,
+            _,
             _,
             List(DigitalLocation(_, _, license, _, _, _)))) =>
         license shouldBe Some(License.InCopyright)
@@ -194,6 +197,7 @@ class MetsDataTest
       case List(
           Item(
             IdState.Unidentifiable,
+            _,
             _,
             List(DigitalLocation(_, _, license, _, _, _)))) =>
         license shouldBe Some(License.InCopyright)
@@ -213,6 +217,7 @@ class MetsDataTest
           Item(
             IdState.Unidentifiable,
             _,
+            _,
             List(DigitalLocation(_, _, license, _, _, _)))) =>
         license shouldBe Some(License.InCopyright)
     }
@@ -229,6 +234,7 @@ class MetsDataTest
       case List(
           Item(
             IdState.Unidentifiable,
+            _,
             _,
             List(DigitalLocation(_, _, license, _, _, _)))) =>
         license shouldBe Some(License.InCopyright)
