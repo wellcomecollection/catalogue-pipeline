@@ -5,7 +5,10 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.work.Format.{Books, StudentDissertations}
 
-class SierraMaterialTypesTest extends AnyFunSpec with Matchers with OptionValues {
+class SierraMaterialTypesTest
+    extends AnyFunSpec
+    with Matchers
+    with OptionValues {
   it("looks up a Format by code") {
     SierraMaterialTypes.fromCode("w").value shouldBe StudentDissertations
   }
