@@ -1202,7 +1202,6 @@ class SierraTransformerTest
     )
 
     val work = transformToWork(transformable)
-    println(work)
 
     work.data.referenceNumber shouldBe Some(ReferenceNumber("12345i"))
     work.data.collectionPath shouldBe None
@@ -1222,6 +1221,32 @@ class SierraTransformerTest
 
     val location = item.locations.head.asInstanceOf[PhysicalLocation]
     location.shelfmark shouldBe None
+  }
+
+  it("transforms a work with an unrecognised material type") {
+    val bibId = createSierraBibNumber
+    val bibData =
+      s"""
+         |{
+         |  "id": "$bibId",
+         |  "materialType": {"code": "-", "label": "Pictures"},
+         |  "varFields": [
+         |    ${createTitleVarfield()}
+         |  ]
+         |}
+       """.stripMargin
+
+    val transformable = SierraTransformable(
+      bibRecord = SierraBibRecord(
+        id = createSierraBibNumber,
+        data = bibData,
+        modifiedDate = Instant.now()
+      )
+    )
+
+    val work = transformToWork(transformable)
+
+    work.data.format shouldBe None
   }
 
   describe("throws a TransformerException when passed invalid data") {

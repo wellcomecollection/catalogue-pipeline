@@ -188,8 +188,8 @@ trait TransformerWorker[Payload <: SourcePayload, SourceData, SenderDest]
                 error(s"$name: DecodePayloadError from $notificationMsg")
               case StoreReadError(_, key) =>
                 error(s"$name: StoreReadError on $key")
-              case TransformerError(_, sourceData, key) =>
-                error(s"$name: TransformerError on $sourceData with $key")
+              case TransformerError(t, sourceData, key) =>
+                error(s"$name: TransformerError on $sourceData with $key ($t)")
             }
 
             throw err
