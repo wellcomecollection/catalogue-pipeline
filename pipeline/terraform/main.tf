@@ -70,11 +70,11 @@ module "catalogue_pipeline_2021-06-08" {
   storage_bucket_name = local.storage_bucket
 }
 
-module "catalogue_pipeline_2021-06-28" {
+module "catalogue_pipeline_2021-06-27" {
   source = "./stack"
 
-  pipeline_date = "2021-06-28"
-  release_label = "2021-06-28"
+  pipeline_date = "2021-06-27"
+  release_label = "2021-06-27"
 
   is_reindexing = true
 
