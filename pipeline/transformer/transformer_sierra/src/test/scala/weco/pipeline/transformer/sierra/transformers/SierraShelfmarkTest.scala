@@ -138,7 +138,8 @@ class SierraShelfmarkTest
     getShelfmarkWith001(s = "12345i") shouldBe None
   }
 
-  it("shows the shelfmark if the iconographic number on the bib and item have a common prefix") {
+  it(
+    "shows the shelfmark if the iconographic number on the bib and item have a common prefix") {
     val bibData = createSierraBibDataWith(
       materialType = Some(SierraMaterialType("k")),
       varFields = List(
@@ -158,10 +159,12 @@ class SierraShelfmarkTest
 
     val itemData = createSierraItemDataWith(varFields = varFields)
 
-    getShelfmark(bibData = bibData, itemData = itemData) shouldBe Some("12345i.1")
+    getShelfmark(bibData = bibData, itemData = itemData) shouldBe Some(
+      "12345i.1")
   }
 
-  it("skips the shelfmark if the iconographic number on the bib and item are the same") {
+  it(
+    "skips the shelfmark if the iconographic number on the bib and item are the same") {
     val bibData = createSierraBibDataWith(
       materialType = Some(SierraMaterialType("k")),
       varFields = List(

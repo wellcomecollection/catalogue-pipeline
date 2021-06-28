@@ -37,7 +37,9 @@ object SierraShelfmark extends SierraQueryOps {
       //
       // e.g. 12345i, 12346i, 12347i
       //
-      case _ if bibData.hasIconographicNumber && itemData.shelfmarkStartsWith(bibData.iconographicNumber + ".") =>
+      case _
+          if bibData.hasIconographicNumber && itemData.shelfmarkStartsWith(
+            bibData.iconographicNumber + ".") =>
         itemData.shelfmark
 
       case _ if bibData.hasIconographicNumber =>
@@ -58,12 +60,12 @@ object SierraShelfmark extends SierraQueryOps {
       // Field tag c is for "call number" data.  In particular, we don't want
       // to expose field tag a, which has legacy data we don't want to display.
       // See https://wellcome.slack.com/archives/CGXDT2GSH/p1622719935015500?thread_ts=1622719185.015400&cid=CGXDT2GSH
-        itemData.varFields
-          .filter { _.marcTag.contains("949") }
-          .filter { _.fieldTag.contains("c") }
-          .subfieldsWithTags("a")
-          .headOption
-          .map { _.content.trim }
+      itemData.varFields
+        .filter { _.marcTag.contains("949") }
+        .filter { _.fieldTag.contains("c") }
+        .subfieldsWithTags("a")
+        .headOption
+        .map { _.content.trim }
 
     def shelfmarkStartsWith(prefix: String): Boolean =
       shelfmark match {
