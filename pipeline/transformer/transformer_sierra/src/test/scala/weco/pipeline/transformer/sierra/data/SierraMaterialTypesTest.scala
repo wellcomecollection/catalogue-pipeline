@@ -1,38 +1,29 @@
 package weco.pipeline.transformer.sierra.data
 
+import org.scalatest.OptionValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.work.Format.{Books, StudentDissertations}
-import weco.pipeline.transformer.sierra.exceptions.SierraTransformerException
 
-class SierraMaterialTypesTest extends AnyFunSpec with Matchers {
+class SierraMaterialTypesTest extends AnyFunSpec with Matchers with OptionValues {
   it("looks up a Format by code") {
-    SierraMaterialTypes.fromCode("w") shouldBe StudentDissertations
+    SierraMaterialTypes.fromCode("w").value shouldBe StudentDissertations
   }
 
   it("uses the linked format") {
     // v maps to E-books material type which is linked to Books
-    SierraMaterialTypes.fromCode("v") shouldBe Books
+    SierraMaterialTypes.fromCode("v").value shouldBe Books
   }
 
-  it("throws an exception if passed an unrecognised code") {
-    val caught = intercept[SierraTransformerException] {
-      SierraMaterialTypes.fromCode("?")
-    }
-    caught.e.getMessage shouldBe "Unrecognised work type code: ?"
+  it("returns None if passed an unrecognised code") {
+    SierraMaterialTypes.fromCode("?") shouldBe None
   }
 
-  it("throws an exception if passed an empty string") {
-    val caught = intercept[SierraTransformerException] {
-      SierraMaterialTypes.fromCode("")
-    }
-    caught.e.getMessage shouldBe "Work type code is not a single character: <<>>"
+  it("returns None if passed an empty string") {
+    SierraMaterialTypes.fromCode("") shouldBe None
   }
 
-  it("throws an exception if passed a code which is more than a single char") {
-    val caught = intercept[SierraTransformerException] {
-      SierraMaterialTypes.fromCode("XXX")
-    }
-    caught.e.getMessage shouldBe "Work type code is not a single character: <<XXX>>"
+  it("returns None if passed a code which is more than a single char") {
+    SierraMaterialTypes.fromCode("XXX") shouldBe None
   }
 }
