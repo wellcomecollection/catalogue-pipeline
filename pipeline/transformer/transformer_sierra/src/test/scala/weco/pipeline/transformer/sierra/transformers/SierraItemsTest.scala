@@ -229,6 +229,41 @@ class SierraItemsTest
     )
   }
 
+  it("adds a note to the item") {
+    val sierraLocation = SierraSourceLocation(
+      code = "scmac",
+      name = "Closed stores Arch. & MSS"
+    )
+    val itemData = createSierraItemDataWith(
+      location = Some(sierraLocation),
+      fixedFields = Map(
+        "79" -> FixedField(
+          label = "LOCATION",
+          value = "scmac",
+          display = "Closed stores Arch. & MSS"),
+        "88" -> FixedField(
+          label = "STATUS",
+          value = "-",
+          display = "Available"),
+        "108" -> FixedField(
+          label = "OPACMSG",
+          value = "f",
+          display = "Online request"),
+      ),
+      varFields = List(
+        VarField(
+          fieldTag = "n",
+          content = "uncoloured impression"
+        )
+      )
+    )
+
+    val itemDataMap = Map(createSierraItemNumber -> itemData)
+
+    val item = getTransformedItems(itemDataMap = itemDataMap).head
+    item.note shouldBe Some("uncoloured impression")
+  }
+
   it("uses the Sierra location name as the label for non-closed locations") {
     val openLocation = SierraSourceLocation(
       code = "wghib",

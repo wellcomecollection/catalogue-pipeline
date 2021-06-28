@@ -8,10 +8,15 @@ import weco.catalogue.internal_model.identifiers.{
 }
 import weco.catalogue.internal_model.locations.{
   LocationType,
+  PhysicalLocation,
   PhysicalLocationType
 }
 import weco.catalogue.internal_model.work.Item
-import weco.catalogue.source_model.sierra.rules.SierraPhysicalLocationType
+import weco.catalogue.source_model.sierra.rules.{
+  SierraAccessStatus,
+  SierraItemAccess,
+  SierraPhysicalLocationType
+}
 import weco.catalogue.source_model.sierra.source.SierraQueryOps
 import weco.catalogue.source_model.sierra.identifiers.{
   SierraBibNumber,
@@ -113,14 +118,14 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
     fallbackLocation: Option[(PhysicalLocationType, String)])
     : Item[IdState.Identifiable] = {
     debug(s"Attempting to transform $itemId")
+
+    val location =
+      getPhysicalLocation(bibId, itemId, itemData, bibData, fallbackLocation)
+
     Item(
       title = getItemTitle(itemId, itemData),
-      locations = getPhysicalLocation(
-        bibId,
-        itemId,
-        itemData,
-        bibData,
-        fallbackLocation).toList,
+      note = getItemNote(bibId, itemId, itemData, bibData, location),
+      locations = List(location).flatten,
       id = IdState.Identifiable(
         sourceIdentifier = SourceIdentifier(
           identifierType = IdentifierType.SierraSystemNumber,
@@ -179,4 +184,27 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
         val title = vf.subfieldsWithTag("a").map { _.content }.mkString(" ")
         if (title.isEmpty) None else Some(title)
     }
+
+  /** Create a note for the item.
+    *
+    * Note that this isn't as simple as just using the contents of field tag "n" --
+    * we may have copied the note to the access conditions instead, or decided to
+    * discard it.
+    */
+  private def getItemNote(
+    bibId: SierraBibNumber,
+    itemId: SierraItemNumber,
+    itemData: SierraItemData,
+    bibData: SierraBibData,
+    location: Option[PhysicalLocation]): Option[String] = {
+    val (_, note, _) = SierraItemAccess(
+      bibId,
+      itemId,
+      SierraAccessStatus.forBib(bibId, bibData),
+      location.map(_.locationType),
+      itemData
+    )
+
+    note
+  }
 }

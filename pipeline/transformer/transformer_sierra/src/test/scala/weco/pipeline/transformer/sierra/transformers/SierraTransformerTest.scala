@@ -293,7 +293,7 @@ class SierraTransformerTest
 
     val identifiers = unidentifiedWork.data.items
       .collect {
-        case Item(IdState.Identifiable(sourceIdentifier, _, _), _, _) =>
+        case Item(IdState.Identifiable(sourceIdentifier, _, _), _, _, _) =>
           sourceIdentifier
       }
 
