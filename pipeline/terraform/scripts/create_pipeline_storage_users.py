@@ -34,6 +34,7 @@ SERVICES = {
     "work_ingestor": ["works-denormalised_read", "works-indexed_write"],
     "inferrer": ["images-initial_read", "images-augmented_write"],
     "image_ingestor": ["images-augmented_read", "images-indexed_write"],
+    "snapshot_generator": ["works-indexed_read"],
     # This role isn't used by applications, but instead provided to give developer scripts
     # read-only access to the pipeline_storage cluster.
     "read_only": [f"works-{index}_read" for index in WORK_INDICES] + [f"images-{index}_read" for index in IMAGE_INDICES],
@@ -45,13 +46,20 @@ def get_aws_client(resource, *, role_arn):
     """
     Get a boto3 client authenticated against the given role.
     """
+    session = get_aws_session(role_arn=role_arn)
+    return session.client(resource)
+
+
+def get_aws_session(*, role_arn):
+    """
+    Get a boto3 client authenticated against the given role.
+    """
     sts_client = boto3.client("sts")
     assumed_role_object = sts_client.assume_role(
         RoleArn=role_arn, RoleSessionName="AssumeRoleSession1"
     )
     credentials = assumed_role_object["Credentials"]
-    return boto3.client(
-        resource,
+    return boto3.Session(
         aws_access_key_id=credentials["AccessKeyId"],
         aws_secret_access_key=credentials["SecretAccessKey"],
         aws_session_token=credentials["SessionToken"],
@@ -69,28 +77,18 @@ def read_secret(secret_id):
     return secrets_client.get_secret_value(SecretId=secret_id)["SecretString"]
 
 
-def store_secret(secret_id, secret_value, description):
+def store_secret(session, *, secret_id, secret_value, description):
     """
     Store a key/value pair in Secrets Manager.
     """
-    # We store a secret in both the platform and catalogue accounts.
-    # This is a stopgap until all the pipeline services are running in
-    # the catalogue account; eventually we should remove them from
-    # the platform account.
-    #
-    # See https://github.com/wellcomecollection/platform/issues/4823
-    for role_arn in [
-        "arn:aws:iam::760097843905:role/platform-developer",
-        # "arn:aws:iam::756629837203:role/catalogue-developer",
-    ]:
-        secrets_client = get_aws_client("secretsmanager", role_arn=role_arn)
+    secrets_client = session.client("secretsmanager")
 
-        resp = secrets_client.put_secret_value(
-            SecretId=secret_id, SecretString=secret_value
-        )
+    resp = secrets_client.put_secret_value(
+        SecretId=secret_id, SecretString=secret_value
+    )
 
-        if resp["ResponseMetadata"]["HTTPStatusCode"] != 200:
-            raise RuntimeError(f"Unexpected error from PutSecretValue: {resp}")
+    if resp["ResponseMetadata"]["HTTPStatusCode"] != 200:
+        raise RuntimeError(f"Unexpected error from PutSecretValue: {resp}")
 
     click.echo(f"Stored secret {click.style(secret_id, 'yellow')}")
 
@@ -125,6 +123,13 @@ if __name__ == '__main__':
         pipeline_date = sys.argv[1]
     except IndexError:
         sys.exit(f"Usage: {__file__} <PIPELINE_DATE>")
+
+    platform_session = get_aws_session(
+        role_arn="arn:aws:iam::760097843905:role/platform-developer"
+    )
+    catalogue_session = get_aws_session(
+        role_arn="arn:aws:iam::756629837203:role/catalogue-developer"
+    )
 
     secret_prefix = f"elasticsearch/pipeline_storage_{pipeline_date}"
 
@@ -167,13 +172,20 @@ if __name__ == '__main__':
     print("")
 
     for username, password in newly_created_usernames:
+        if username == "snapshot_generator":
+            session = catalogue_session
+        else:
+            session = platform_session
+
         store_secret(
+            session,
             secret_id=f"{secret_prefix}/{username}/es_username",
             secret_value=username,
             description=DESCRIPTION.format(date=pipeline_date)
         )
 
         store_secret(
+            session,
             secret_id=f"{secret_prefix}/{username}/es_password",
             secret_value=password,
             description=DESCRIPTION.format(date=pipeline_date)
