@@ -589,7 +589,6 @@ class SierraItemAccessTest
               note = Some("This item is withdrawn.")
             )
           )
-          itemStatus shouldBe ItemStatus.Unavailable
         }
       }
     }
