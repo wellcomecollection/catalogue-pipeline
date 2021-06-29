@@ -28,8 +28,6 @@ def get_catalogue_es_client(catalogue_session):
     username = read_secret(catalogue_session, secret_id=f"{secret_prefix}/username")
     password = read_secret(catalogue_session, secret_id=f"{secret_prefix}/password")
 
-    catalogue_es = Elasticsearch(f"{es_protocol}")
-
     endpoint = f"{es_protocol}://{es_host}:{es_port}"
 
     return Elasticsearch(endpoint, http_auth=(username, password))
