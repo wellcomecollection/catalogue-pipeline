@@ -153,6 +153,19 @@ def has_subscriptions(session, *, topic_arn):
     return len(resp["Subscriptions"]) > 0
 
 
+def verify_specific_ids(*, source, specific_ids):
+    # The IDs in the Sierra table are the seven-digit IDs (e.g. 3272507),
+    # but they appear in multiple forms (e.g. b32725073) that can't be
+    # reindexed.  If somebody tries to reindex the wrong form, warn them!
+    if source == "sierra":
+        bad_ids = [id for id in specific_ids if len(id) != 7 or not id.isnumeric()]
+        if bad_ids:
+            raise ValueError(
+                f"Sierra IDs should be 7-digit numeric IDs, got {bad_ids}"
+            )
+
+
+
 @click.command()
 @click.option(
     "--src",
@@ -201,6 +214,8 @@ def start_reindex(ctx, src, dst, mode):
         specified_records = specified_records_str.split()
         if not specified_records:
             return sys.exit("You need to specify at least 1 record ID")
+
+        verify_specific_ids(source=src, specific_ids=specified_records)
         parameters = specific_reindex_parameters(specified_records)
 
     job_config_id = f"{src}--{dst}"
