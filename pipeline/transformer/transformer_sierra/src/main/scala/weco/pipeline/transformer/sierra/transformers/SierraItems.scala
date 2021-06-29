@@ -197,7 +197,7 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
     itemData: SierraItemData,
     bibData: SierraBibData,
     location: Option[PhysicalLocation]): Option[String] = {
-    val (_, note, _) = SierraItemAccess(
+    val (_, note) = SierraItemAccess(
       bibId,
       itemId,
       SierraAccessStatus.forBib(bibId, bibData),

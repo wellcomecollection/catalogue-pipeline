@@ -43,7 +43,7 @@ trait SierraLocation {
         }
       }
 
-      (accessCondition, _, _) = SierraItemAccess(
+      (accessCondition, _) = SierraItemAccess(
         bibId = bibNumber,
         itemId = itemNumber,
         bibStatus = SierraAccessStatus.forBib(bibNumber, bibData),
