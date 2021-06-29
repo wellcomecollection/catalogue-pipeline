@@ -29,15 +29,19 @@ object Main extends WellcomeTypesafeApp {
     val msgStream =
       SQSBuilder.buildSQSStream[NotificationMessage](config)
 
+    val client =
+      ElasticBuilder
+        .buildElasticClient(config, namespace = "pipeline_storage")
+
     val imageRetriever = ElasticSourceRetrieverBuilder[Image[Augmented]](
       config,
-      ElasticBuilder.buildElasticClient(config, namespace = "pipeline_storage"),
+      client = client,
       namespace = "augmented-images")
 
     val imageIndexer =
       ElasticIndexerBuilder[Image[Indexed]](
         config,
-        ElasticBuilder.buildElasticClient(config, namespace = "catalogue"),
+        client = client,
         namespace = "indexed-images",
         indexConfig = ImagesIndexConfig.ingested
       )
