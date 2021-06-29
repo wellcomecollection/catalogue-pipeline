@@ -104,7 +104,7 @@ def create_roles(es, index):
 
         es.security.put_role(
             role_name,
-            body={"indices": [{"names": [index], "privileges": privileges}]},
+            body={"indices": [{"names": [f"{index}*"], "privileges": privileges}]},
         )
 
         yield role_name
