@@ -11,6 +11,7 @@ resource "ec_deployment" "pipeline" {
 
   traffic_filter = [
     var.traffic_filter_platform_vpce_id,
+    var.traffic_filter_catalogue_vpce_id,
     var.traffic_filter_public_internet_id,
   ]
 
