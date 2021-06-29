@@ -15,9 +15,9 @@ from elasticsearch import Elasticsearch
 
 DESCRIPTION = "Credentials for the pipeline-storage-{date} Elasticsearch cluster"
 
-WORK_INDICES = ["source", "merged", "denormalised", "identified"]
+WORK_INDICES = ["source", "merged", "denormalised", "identified", "indexed"]
 
-IMAGE_INDICES = ["initial", "augmented"]
+IMAGE_INDICES = ["initial", "augmented", "indexed"]
 
 WORK_INDEX_PATTERN = "works-{index}*"
 
@@ -25,18 +25,18 @@ IMAGE_INDEX_PATTERN = "images-{index}*"
 
 
 SERVICES = {
-    "transformer": ["source_write"],
-    "id_minter": ["source_read", "identified_write"],
-    "matcher": ["identified_read"],
-    "merger": ["identified_read", "merged_write", "initial_write"],
-    "router": ["merged_read", "denormalised_write"],
-    "relation_embedder": ["merged_read", "denormalised_write"],
-    "work_ingestor": ["denormalised_read"],
-    "inferrer": ["initial_read", "augmented_write"],
-    "image_ingestor": ["augmented_read"],
+    "transformer": ["works-source_write"],
+    "id_minter": ["works-source_read", "works-identified_write"],
+    "matcher": ["works-identified_read"],
+    "merger": ["works-identified_read", "works-merged_write", "images-initial_write"],
+    "router": ["works-merged_read", "works-denormalised_write"],
+    "relation_embedder": ["works-merged_read", "works-denormalised_write"],
+    "work_ingestor": ["works-denormalised_read", "works-indexed_write"],
+    "inferrer": ["images-initial_read", "images-augmented_write"],
+    "image_ingestor": ["images-augmented_read", "images-indexed_write"],
     # This role isn't used by applications, but instead provided to give developer scripts
     # read-only access to the pipeline_storage cluster.
-    "read_only": [f"{index}_read" for index in IMAGE_INDICES + WORK_INDICES],
+    "read_only": [f"works-{index}_read" for index in WORK_INDICES] + [f"images-{index}_read" for index in IMAGE_INDICES],
 }
 
 
@@ -101,14 +101,10 @@ def create_roles(es, index):
     """
     for role_suffix, privileges in [("read", ["read"]), ("write", ["all"])]:
         role_name = f"{index}_{role_suffix}"
-        index_pattern = (
-            IMAGE_INDEX_PATTERN if index in IMAGE_INDICES else WORK_INDEX_PATTERN
-        )
-        index_name = index_pattern.format(index=index)
 
         es.security.put_role(
             role_name,
-            body={"indices": [{"names": [index_name], "privileges": privileges}]},
+            body={"indices": [{"names": [index], "privileges": privileges}]},
         )
 
         yield role_name
@@ -144,8 +140,14 @@ if __name__ == '__main__':
     es = Elasticsearch(endpoint, http_auth=(username, password))
 
     newly_created_roles = set()
-    for index in WORK_INDICES + IMAGE_INDICES:
-        for r in create_roles(es, index=index):
+
+    for index in WORK_INDICES:
+        for r in create_roles(es, index=f"works-{index}"):
+            newly_created_roles.add(r)
+            click.echo(f"Created role {click.style(r, 'green')}")
+
+    for index in IMAGE_INDICES:
+        for r in create_roles(es, index=f"images-{index}"):
             newly_created_roles.add(r)
             click.echo(f"Created role {click.style(r, 'green')}")
 
