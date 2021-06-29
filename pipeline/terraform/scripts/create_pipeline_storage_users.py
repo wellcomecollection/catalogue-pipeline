@@ -4,13 +4,13 @@ This script is run by a Terraform local-exec provisioner to create roles/users i
 an Elastic Cloud cluster immediately after it's been created.
 """
 
-import functools
 import secrets
 import sys
 
-import boto3
 import click
 from elasticsearch import Elasticsearch
+
+from aws import get_session, read_secret, write_secret
 
 
 DESCRIPTION = "Credentials for the pipeline-storage-{date} Elasticsearch cluster"
@@ -39,42 +39,6 @@ SERVICES = {
     # read-only access to the pipeline_storage cluster.
     "read_only": [f"works-{index}_read" for index in WORK_INDICES] + [f"images-{index}_read" for index in IMAGE_INDICES],
 }
-
-
-@functools.lru_cache()
-def get_aws_client(resource, *, role_arn):
-    """
-    Get a boto3 client authenticated against the given role.
-    """
-    session = get_aws_session(role_arn=role_arn)
-    return session.client(resource)
-
-
-def get_aws_session(*, role_arn):
-    """
-    Get a boto3 client authenticated against the given role.
-    """
-    sts_client = boto3.client("sts")
-    assumed_role_object = sts_client.assume_role(
-        RoleArn=role_arn, RoleSessionName="AssumeRoleSession1"
-    )
-    credentials = assumed_role_object["Credentials"]
-    return boto3.Session(
-        aws_access_key_id=credentials["AccessKeyId"],
-        aws_secret_access_key=credentials["SecretAccessKey"],
-        aws_session_token=credentials["SessionToken"],
-    )
-
-
-def read_secret(secret_id):
-    """
-    Retrieve a secret from Secrets Manager.
-    """
-    secrets_client = get_aws_client(
-        "secretsmanager", role_arn="arn:aws:iam::760097843905:role/platform-developer"
-    )
-
-    return secrets_client.get_secret_value(SecretId=secret_id)["SecretString"]
 
 
 def store_secret(session, *, secret_id, secret_value, description):
@@ -124,21 +88,21 @@ if __name__ == '__main__':
     except IndexError:
         sys.exit(f"Usage: {__file__} <PIPELINE_DATE>")
 
-    platform_session = get_aws_session(
+    platform_session = get_session(
         role_arn="arn:aws:iam::760097843905:role/platform-developer"
     )
-    catalogue_session = get_aws_session(
+    catalogue_session = get_session(
         role_arn="arn:aws:iam::756629837203:role/catalogue-developer"
     )
 
     secret_prefix = f"elasticsearch/pipeline_storage_{pipeline_date}"
 
-    es_host = read_secret(f"{secret_prefix}/public_host")
-    es_protocol = read_secret(f"{secret_prefix}/protocol")
-    es_port = read_secret(f"{secret_prefix}/port")
+    es_host = read_secret(platform_session, secret_id=f"{secret_prefix}/public_host")
+    es_protocol = read_secret(platform_session, secret_id=f"{secret_prefix}/protocol")
+    es_port = read_secret(platform_session, secret_id=f"{secret_prefix}/port")
 
-    username = read_secret(f"{secret_prefix}/es_username")
-    password = read_secret(f"{secret_prefix}/es_password")
+    username = read_secret(platform_session, secret_id=f"{secret_prefix}/es_username")
+    password = read_secret(platform_session, secret_id=f"{secret_prefix}/es_password")
 
     endpoint = f"{es_protocol}://{es_host}:{es_port}"
 
@@ -177,14 +141,14 @@ if __name__ == '__main__':
         else:
             session = platform_session
 
-        store_secret(
+        write_secret(
             session,
             secret_id=f"{secret_prefix}/{username}/es_username",
             secret_value=username,
             description=DESCRIPTION.format(date=pipeline_date)
         )
 
-        store_secret(
+        write_secret(
             session,
             secret_id=f"{secret_prefix}/{username}/es_password",
             secret_value=password,
