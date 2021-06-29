@@ -68,6 +68,10 @@ module "catalogue_pipeline_2021-06-08" {
   shared_logging_secrets = data.terraform_remote_state.shared_infra.outputs.shared_secrets_logging
 
   storage_bucket_name = local.storage_bucket
+
+  providers = {
+    aws.catalogue = aws.catalogue
+  }
 }
 
 module "catalogue_pipeline_2021-06-27" {
@@ -140,4 +144,8 @@ module "catalogue_pipeline_2021-06-27" {
   shared_logging_secrets = data.terraform_remote_state.shared_infra.outputs.shared_secrets_logging
 
   storage_bucket_name = local.storage_bucket
+
+  providers = {
+    aws.catalogue = aws.catalogue
+  }
 }

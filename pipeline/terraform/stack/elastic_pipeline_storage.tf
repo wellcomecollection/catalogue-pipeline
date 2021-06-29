@@ -1,5 +1,5 @@
 locals {
-  es_memory = var.is_reindexing ? "58g" : "15g"
+  es_memory = var.is_reindexing ? "58g" : "58g"
 }
 
 resource "ec_deployment" "pipeline_storage" {
@@ -40,6 +40,22 @@ resource "aws_secretsmanager_secret" "es_username" {
 
 resource "aws_secretsmanager_secret" "es_password" {
   for_each = toset(concat(local.pipeline_storage_service_list, ["image_ingestor", "work_ingestor", "read_only"]))
+
+  name = "elasticsearch/pipeline_storage_${var.pipeline_date}/${each.key}/es_password"
+}
+
+resource "aws_secretsmanager_secret" "es_username_catalogue" {
+  provider = aws.catalogue
+
+  for_each = toset(["snapshot_generator"])
+
+  name = "elasticsearch/pipeline_storage_${var.pipeline_date}/${each.key}/es_username"
+}
+
+resource "aws_secretsmanager_secret" "es_password_catalogue" {
+  provider = aws.catalogue
+
+  for_each = toset(["snapshot_generator"])
 
   name = "elasticsearch/pipeline_storage_${var.pipeline_date}/${each.key}/es_password"
 }
@@ -87,6 +103,29 @@ locals {
 
 module "pipeline_storage_secrets" {
   source = "../../../infrastructure/modules/secrets"
+
+  key_value_map = {
+    (local.pipeline_storage_public_host) = "${local.pipeline_storage_elastic_id}.${local.pipeline_storage_elastic_region}.aws.found.io"
+    (local.pipeline_storage_es_username) = ec_deployment.pipeline_storage.elasticsearch_username
+    (local.pipeline_storage_es_password) = ec_deployment.pipeline_storage.elasticsearch_password
+
+    # The endpoint value is of the form https://{deployment_id}.eu-west-1.aws.found.io:9243
+    # We could hard-code these values as "https" and "9243", but we can just as easily infer
+    # them from the actual endpoint value.
+    (local.pipeline_storage_protocol) = split(":", ec_deployment.pipeline_storage.elasticsearch[0].https_endpoint)[0]
+    (local.pipeline_storage_port)     = reverse(split(":", ec_deployment.pipeline_storage.elasticsearch[0].https_endpoint))[0]
+
+    # See https://www.elastic.co/guide/en/cloud/current/ec-traffic-filtering-vpc.html
+    (local.pipeline_storage_private_host) = "${local.pipeline_storage_elastic_id}.vpce.${local.pipeline_storage_elastic_region}.aws.elastic-cloud.com"
+  }
+}
+
+module "pipeline_storage_secrets_catalogue" {
+  source = "../../../infrastructure/modules/secrets"
+
+  providers = {
+    aws = aws.catalogue
+  }
 
   key_value_map = {
     (local.pipeline_storage_public_host) = "${local.pipeline_storage_elastic_id}.${local.pipeline_storage_elastic_region}.aws.found.io"
