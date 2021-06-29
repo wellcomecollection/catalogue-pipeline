@@ -43,11 +43,11 @@ module "ingestor_works" {
   }
 
   secret_env_vars = merge({
-    es_host_catalogue     = "elasticsearch/catalogue/private_host"
-    es_port_catalogue     = "catalogue/ingestor/es_port"
-    es_username_catalogue = "catalogue/ingestor/es_username"
-    es_password_catalogue = "catalogue/ingestor/es_password"
-    es_protocol_catalogue = "catalogue/ingestor/es_protocol"
+    es_host_catalogue     = local.pipeline_storage_private_host
+    es_port_catalogue     = local.pipeline_storage_port
+    es_protocol_catalogue = local.pipeline_storage_protocol
+    es_username_catalogue = "elasticsearch/pipeline_storage_${var.pipeline_date}/work_ingestor/es_username"
+    es_password_catalogue = "elasticsearch/pipeline_storage_${var.pipeline_date}/work_ingestor/es_password"
 
     es_host_pipeline_storage     = local.pipeline_storage_private_host
     es_port_pipeline_storage     = local.pipeline_storage_port
