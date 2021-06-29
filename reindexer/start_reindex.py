@@ -160,10 +160,7 @@ def verify_specific_ids(*, source, specific_ids):
     if source == "sierra":
         bad_ids = [id for id in specific_ids if len(id) != 7 or not id.isnumeric()]
         if bad_ids:
-            raise ValueError(
-                f"Sierra IDs should be 7-digit numeric IDs, got {bad_ids}"
-            )
-
+            raise ValueError(f"Sierra IDs should be 7-digit numeric IDs, got {bad_ids}")
 
 
 @click.command()
