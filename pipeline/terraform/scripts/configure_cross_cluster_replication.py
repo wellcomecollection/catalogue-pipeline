@@ -14,6 +14,7 @@ import sys
 import time
 
 from elasticsearch import Elasticsearch
+from elasticsearch.exceptions import NotFoundError
 
 from aws import get_session, read_secret
 
@@ -33,6 +34,16 @@ def get_catalogue_es_client(catalogue_session):
     return Elasticsearch(endpoint, http_auth=(username, password))
 
 
+def get_rank_es_client(catalogue_session):
+    secret_prefix = "elasticsearch/rank"
+
+    endpoint = read_secret(catalogue_session, secret_id=f"{secret_prefix}/endpoint")
+    username = read_secret(catalogue_session, secret_id=f"{secret_prefix}/username")
+    password = read_secret(catalogue_session, secret_id=f"{secret_prefix}/password")
+
+    return Elasticsearch(endpoint, http_auth=(username, password))
+
+
 def get_pipeline_hostname(platform_session, *, pipeline_date):
     return read_secret(
         platform_session,
@@ -44,7 +55,8 @@ def set_remote_cluster(client, *, dst_name, src_hostname, src_name):
     """
     Set the dst cluster as a remote cluster in the src cluster.
     """
-    settings = catalogue_es_client.cluster.get_settings()
+    print(f"Configuring {src_name} as a remote cluster in {dst_name}")
+    settings = client.cluster.get_settings()
 
     # Add the pipeline cluster as a remote cluster to the catalogue-api
     # cluster.  If it's already configured, we can skip changing the settings
@@ -58,14 +70,14 @@ def set_remote_cluster(client, *, dst_name, src_hostname, src_name):
 
     if settings["persistent"]["cluster"]["remote"].get(src_name) != new_cluster_info:
         settings["persistent"]["cluster"]["remote"][src_name] = new_cluster_info
-        catalogue_es_client.cluster.put_settings(settings)
+        client.cluster.put_settings(settings)
 
     # Wait up to 10 seconds to see if the catalogue-api cluster can connect
     # to the pipeline cluster.  As soon as we see a successful connection we
     # can continue; if we don't then something has gone wrong.
     now = time.time()
     while time.time() - now < 10:
-        remote_info = catalogue_es_client.cluster.remote_info()
+        remote_info = client.cluster.remote_info()
 
         if remote_info.get(src_name, {}).get("connected"):
             return
@@ -76,9 +88,18 @@ def set_remote_cluster(client, *, dst_name, src_hostname, src_name):
     )
 
 
-def create_follower_indexes(client, *, src_name, pipeline_date):
+def create_follower_indexes(client, *, src_name, dst_name, pipeline_date):
     for prefix in ("works-indexed", "images-indexed"):
         index = f"{prefix}-{pipeline_date}"
+
+        try:
+            client.cat.indices(index, format="json")
+            print(f"Index {index} already exists in {dst_name}, skipping...")
+            continue
+        except NotFoundError:
+            pass
+
+        print(f"Following index {index} in {dst_name}")
         client.ccr.follow(
             index, body={"remote_cluster": src_name, "leader_index": index}
         )
@@ -102,16 +123,19 @@ if __name__ == "__main__":
     )
 
     catalogue_es_client = get_catalogue_es_client(catalogue_session)
+    rank_es_client = get_rank_es_client(catalogue_session)
 
-    set_remote_cluster(
-        catalogue_es_client,
-        dst_name="catalogue-api",
-        src_hostname=pipeline_hostname,
-        src_name=f"pipeline-{pipeline_date}",
-    )
+    for (name, client) in [("catalogue-api", catalogue_es_client), ("rank", rank_es_client)]:
+        set_remote_cluster(
+            client,
+            dst_name=name,
+            src_hostname=pipeline_hostname,
+            src_name=f"pipeline-{pipeline_date}",
+        )
 
-    create_follower_indexes(
-        catalogue_es_client,
-        src_name=f"pipeline-{pipeline_date}",
-        pipeline_date=pipeline_date
-    )
+        create_follower_indexes(
+            client,
+            dst_name=name,
+            src_name=f"pipeline-{pipeline_date}",
+            pipeline_date=pipeline_date
+        )
