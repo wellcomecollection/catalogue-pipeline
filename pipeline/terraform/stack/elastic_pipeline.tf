@@ -1,9 +1,9 @@
 locals {
-  es_memory = var.is_reindexing ? "58g" : "58g"
+  es_memory = var.is_reindexing ? "58g" : "15g"
 }
 
-resource "ec_deployment" "pipeline_storage" {
-  name = "catalogue-pipeline-storage-${var.pipeline_date}"
+resource "ec_deployment" "pipeline" {
+  name = "pipeline-${var.pipeline_date}"
 
   region                 = "eu-west-1"
   version                = "7.12.1"
@@ -90,8 +90,8 @@ resource "null_resource" "elasticsearch_users" {
 }
 
 locals {
-  pipeline_storage_elastic_id     = ec_deployment.pipeline_storage.elasticsearch[0].resource_id
-  pipeline_storage_elastic_region = ec_deployment.pipeline_storage.elasticsearch[0].region
+  pipeline_storage_elastic_id     = ec_deployment.pipeline.elasticsearch[0].resource_id
+  pipeline_storage_elastic_region = ec_deployment.pipeline.elasticsearch[0].region
 
   pipeline_storage_public_host  = "elasticsearch/pipeline_storage_${var.pipeline_date}/public_host"
   pipeline_storage_private_host = "elasticsearch/pipeline_storage_${var.pipeline_date}/private_host"
@@ -106,14 +106,14 @@ module "pipeline_storage_secrets" {
 
   key_value_map = {
     (local.pipeline_storage_public_host) = "${local.pipeline_storage_elastic_id}.${local.pipeline_storage_elastic_region}.aws.found.io"
-    (local.pipeline_storage_es_username) = ec_deployment.pipeline_storage.elasticsearch_username
-    (local.pipeline_storage_es_password) = ec_deployment.pipeline_storage.elasticsearch_password
+    (local.pipeline_storage_es_username) = ec_deployment.pipeline.elasticsearch_username
+    (local.pipeline_storage_es_password) = ec_deployment.pipeline.elasticsearch_password
 
     # The endpoint value is of the form https://{deployment_id}.eu-west-1.aws.found.io:9243
     # We could hard-code these values as "https" and "9243", but we can just as easily infer
     # them from the actual endpoint value.
-    (local.pipeline_storage_protocol) = split(":", ec_deployment.pipeline_storage.elasticsearch[0].https_endpoint)[0]
-    (local.pipeline_storage_port)     = reverse(split(":", ec_deployment.pipeline_storage.elasticsearch[0].https_endpoint))[0]
+    (local.pipeline_storage_protocol) = split(":", ec_deployment.pipeline.elasticsearch[0].https_endpoint)[0]
+    (local.pipeline_storage_port)     = reverse(split(":", ec_deployment.pipeline.elasticsearch[0].https_endpoint))[0]
 
     # See https://www.elastic.co/guide/en/cloud/current/ec-traffic-filtering-vpc.html
     (local.pipeline_storage_private_host) = "${local.pipeline_storage_elastic_id}.vpce.${local.pipeline_storage_elastic_region}.aws.elastic-cloud.com"
@@ -129,14 +129,14 @@ module "pipeline_storage_secrets_catalogue" {
 
   key_value_map = {
     (local.pipeline_storage_public_host) = "${local.pipeline_storage_elastic_id}.${local.pipeline_storage_elastic_region}.aws.found.io"
-    (local.pipeline_storage_es_username) = ec_deployment.pipeline_storage.elasticsearch_username
-    (local.pipeline_storage_es_password) = ec_deployment.pipeline_storage.elasticsearch_password
+    (local.pipeline_storage_es_username) = ec_deployment.pipeline.elasticsearch_username
+    (local.pipeline_storage_es_password) = ec_deployment.pipeline.elasticsearch_password
 
     # The endpoint value is of the form https://{deployment_id}.eu-west-1.aws.found.io:9243
     # We could hard-code these values as "https" and "9243", but we can just as easily infer
     # them from the actual endpoint value.
-    (local.pipeline_storage_protocol) = split(":", ec_deployment.pipeline_storage.elasticsearch[0].https_endpoint)[0]
-    (local.pipeline_storage_port)     = reverse(split(":", ec_deployment.pipeline_storage.elasticsearch[0].https_endpoint))[0]
+    (local.pipeline_storage_protocol) = split(":", ec_deployment.pipeline.elasticsearch[0].https_endpoint)[0]
+    (local.pipeline_storage_port)     = reverse(split(":", ec_deployment.pipeline.elasticsearch[0].https_endpoint))[0]
 
     # See https://www.elastic.co/guide/en/cloud/current/ec-traffic-filtering-vpc.html
     (local.pipeline_storage_private_host) = "${local.pipeline_storage_elastic_id}.vpce.${local.pipeline_storage_elastic_region}.aws.elastic-cloud.com"
