@@ -115,7 +115,7 @@ def get_works_index_stats(session, *, reindex_date):
     """
     pipeline_client = get_pipeline_storage_es_client(session, reindex_date=reindex_date)
 
-    indexes = ["works-source", "works-identified", "works-merged", "works-denormalised"]
+    indexes = ["works-source", "works-identified", "works-merged", "works-denormalised", "works-indexed"]
 
     result = {
         idx: count_documents_in_index(
@@ -138,7 +138,7 @@ def get_images_index_stats(session, *, reindex_date):
     """
     pipeline_client = get_pipeline_storage_es_client(session, reindex_date=reindex_date)
 
-    indexes = ["images-initial", "images-augmented"]
+    indexes = ["images-initial", "images-augmented", "images-indexed"]
 
     result = {
         idx: count_documents_in_index(
