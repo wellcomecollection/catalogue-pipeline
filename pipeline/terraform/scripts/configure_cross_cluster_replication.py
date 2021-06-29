@@ -1,7 +1,13 @@
 #!/usr/bin/env python
 """
 This script sets up a following for the works/images indexes in the
-catalogue-api cluster.
+catalogue-api cluster.  Only run this script after the initial reindex
+has completed.
+
+Usage:
+
+    $ python3 configure_cross_cluster_replication.py 2021-06-29
+
 """
 
 import sys
