@@ -6,7 +6,6 @@ import weco.catalogue.internal_model.locations.{
   AccessCondition,
   AccessMethod,
   AccessStatus,
-  ItemStatus,
   LocationType
 }
 import weco.catalogue.source_model.generators.SierraDataGenerators
@@ -41,7 +40,7 @@ class SierraItemAccessTest
             )
           )
 
-          val (ac, _, itemStatus) = SierraItemAccess(
+          val (ac, _) = SierraItemAccess(
             bibId = bibId,
             itemId = itemId,
             bibStatus = None,
@@ -50,7 +49,6 @@ class SierraItemAccessTest
           )
 
           ac shouldBe Some(AccessCondition(method = AccessMethod.OnlineRequest))
-          itemStatus shouldBe ItemStatus.Available
         }
 
         it("if it has no restrictions and the bib is open") {
@@ -71,7 +69,7 @@ class SierraItemAccessTest
             )
           )
 
-          val (ac, _, itemStatus) = SierraItemAccess(
+          val (ac, _) = SierraItemAccess(
             bibId = bibId,
             itemId = itemId,
             bibStatus = Some(AccessStatus.Open),
@@ -83,7 +81,6 @@ class SierraItemAccessTest
             AccessCondition(
               method = AccessMethod.OnlineRequest,
               status = AccessStatus.Open))
-          itemStatus shouldBe ItemStatus.Available
         }
 
         it("if it's restricted") {
@@ -104,7 +101,7 @@ class SierraItemAccessTest
             )
           )
 
-          val (ac, _, itemStatus) = SierraItemAccess(
+          val (ac, _) = SierraItemAccess(
             bibId = bibId,
             itemId = itemId,
             bibStatus = Some(AccessStatus.Restricted),
@@ -116,7 +113,6 @@ class SierraItemAccessTest
             AccessCondition(
               method = AccessMethod.OnlineRequest,
               status = AccessStatus.Restricted))
-          itemStatus shouldBe ItemStatus.Available
         }
 
         it("if the bib is restricted but the item is open") {
@@ -137,7 +133,7 @@ class SierraItemAccessTest
             )
           )
 
-          val (ac, _, itemStatus) = SierraItemAccess(
+          val (ac, _) = SierraItemAccess(
             bibId = bibId,
             itemId = itemId,
             bibStatus = Some(AccessStatus.Restricted),
@@ -149,7 +145,6 @@ class SierraItemAccessTest
             AccessCondition(
               method = AccessMethod.OnlineRequest,
               status = AccessStatus.Open))
-          itemStatus shouldBe ItemStatus.Available
         }
       }
 
@@ -176,7 +171,7 @@ class SierraItemAccessTest
             )
           )
 
-          val (ac, _, itemStatus) = SierraItemAccess(
+          val (ac, _) = SierraItemAccess(
             bibId = bibId,
             itemId = itemId,
             bibStatus = None,
@@ -185,7 +180,6 @@ class SierraItemAccessTest
           )
 
           ac shouldBe Some(AccessCondition(method = AccessMethod.ManualRequest))
-          itemStatus shouldBe ItemStatus.Available
         }
 
         it("if it's bound in the top item") {
@@ -206,7 +200,7 @@ class SierraItemAccessTest
             )
           )
 
-          val (ac, _, itemStatus) = SierraItemAccess(
+          val (ac, _) = SierraItemAccess(
             bibId = bibId,
             itemId = itemId,
             bibStatus = None,
@@ -218,7 +212,6 @@ class SierraItemAccessTest
             AccessCondition(
               method = AccessMethod.NotRequestable,
               terms = Some("Please request top item.")))
-          itemStatus shouldBe ItemStatus.Unavailable
         }
 
         it("if it's contained the top item") {
@@ -239,7 +232,7 @@ class SierraItemAccessTest
             )
           )
 
-          val (ac, _, itemStatus) = SierraItemAccess(
+          val (ac, _) = SierraItemAccess(
             bibId = bibId,
             itemId = itemId,
             bibStatus = None,
@@ -251,7 +244,6 @@ class SierraItemAccessTest
             AccessCondition(
               method = AccessMethod.NotRequestable,
               terms = Some("Please request top item.")))
-          itemStatus shouldBe ItemStatus.Unavailable
         }
 
         it("if the bib and the item are closed") {
@@ -272,7 +264,7 @@ class SierraItemAccessTest
             )
           )
 
-          val (ac, _, itemStatus) = SierraItemAccess(
+          val (ac, _) = SierraItemAccess(
             bibId = bibId,
             itemId = itemId,
             bibStatus = Some(AccessStatus.Closed),
@@ -285,7 +277,6 @@ class SierraItemAccessTest
               method = AccessMethod.NotRequestable,
               status = AccessStatus.Closed
             ))
-          itemStatus shouldBe ItemStatus.Unavailable
         }
 
         it("if the bib and the item are closed, and there's no location") {
@@ -306,7 +297,7 @@ class SierraItemAccessTest
             )
           )
 
-          val (ac, _, itemStatus) = SierraItemAccess(
+          val (ac, _) = SierraItemAccess(
             bibId = bibId,
             itemId = itemId,
             bibStatus = Some(AccessStatus.Closed),
@@ -318,7 +309,6 @@ class SierraItemAccessTest
             AccessCondition(
               method = AccessMethod.NotRequestable,
               status = AccessStatus.Closed))
-          itemStatus shouldBe ItemStatus.Unavailable
         }
 
         it("if the item is unavailable") {
@@ -339,7 +329,7 @@ class SierraItemAccessTest
             )
           )
 
-          val (ac, _, itemStatus) = SierraItemAccess(
+          val (ac, _) = SierraItemAccess(
             bibId = bibId,
             itemId = itemId,
             bibStatus = None,
@@ -351,7 +341,6 @@ class SierraItemAccessTest
             AccessCondition(
               method = AccessMethod.NotRequestable,
               status = AccessStatus.Unavailable))
-          itemStatus shouldBe ItemStatus.Unavailable
         }
 
         it("if the item is at digitisation") {
@@ -372,7 +361,7 @@ class SierraItemAccessTest
             )
           )
 
-          val (ac, _, itemStatus) = SierraItemAccess(
+          val (ac, _) = SierraItemAccess(
             bibId = bibId,
             itemId = itemId,
             bibStatus = None,
@@ -388,7 +377,6 @@ class SierraItemAccessTest
                 "This item is being digitised and is currently unavailable.")
             )
           )
-          itemStatus shouldBe ItemStatus.TemporarilyUnavailable
         }
 
         it("if doesn't double up the note about digitisation") {
@@ -416,7 +404,7 @@ class SierraItemAccessTest
             )
           )
 
-          val (ac, _, itemStatus) = SierraItemAccess(
+          val (ac, _) = SierraItemAccess(
             bibId = bibId,
             itemId = itemId,
             bibStatus = None,
@@ -432,7 +420,6 @@ class SierraItemAccessTest
                 "This item is being digitised and is currently unavailable.")
             )
           )
-          itemStatus shouldBe ItemStatus.TemporarilyUnavailable
         }
 
         it("if the bib and item are by appointment") {
@@ -453,7 +440,7 @@ class SierraItemAccessTest
             )
           )
 
-          val (ac, _, itemStatus) = SierraItemAccess(
+          val (ac, _) = SierraItemAccess(
             bibId = bibId,
             itemId = itemId,
             bibStatus = Some(AccessStatus.ByAppointment),
@@ -466,7 +453,6 @@ class SierraItemAccessTest
               method = AccessMethod.ManualRequest,
               status = AccessStatus.ByAppointment)
           )
-          itemStatus shouldBe ItemStatus.Available
         }
 
         it("if the bib and item need donor permission") {
@@ -487,7 +473,7 @@ class SierraItemAccessTest
             )
           )
 
-          val (ac, _, itemStatus) = SierraItemAccess(
+          val (ac, _) = SierraItemAccess(
             bibId = bibId,
             itemId = itemId,
             bibStatus = Some(AccessStatus.PermissionRequired),
@@ -500,7 +486,6 @@ class SierraItemAccessTest
               method = AccessMethod.ManualRequest,
               status = AccessStatus.PermissionRequired)
           )
-          itemStatus shouldBe ItemStatus.Available
         }
 
         it("if the bib and item needs donor permission") {
@@ -521,7 +506,7 @@ class SierraItemAccessTest
             )
           )
 
-          val (ac, _, itemStatus) = SierraItemAccess(
+          val (ac, _) = SierraItemAccess(
             bibId = bibId,
             itemId = itemId,
             bibStatus = None,
@@ -534,7 +519,6 @@ class SierraItemAccessTest
               method = AccessMethod.ManualRequest,
               status = AccessStatus.PermissionRequired)
           )
-          itemStatus shouldBe ItemStatus.Available
         }
 
         it("if the item is missing") {
@@ -555,7 +539,7 @@ class SierraItemAccessTest
             )
           )
 
-          val (ac, _, itemStatus) = SierraItemAccess(
+          val (ac, _) = SierraItemAccess(
             bibId = bibId,
             itemId = itemId,
             bibStatus = None,
@@ -570,7 +554,6 @@ class SierraItemAccessTest
               note = Some("This item is missing.")
             )
           )
-          itemStatus shouldBe ItemStatus.Unavailable
         }
 
         it("if the item is withdrawn") {
@@ -591,7 +574,7 @@ class SierraItemAccessTest
             )
           )
 
-          val (ac, _, itemStatus) = SierraItemAccess(
+          val (ac, _) = SierraItemAccess(
             bibId = bibId,
             itemId = itemId,
             bibStatus = None,
@@ -631,7 +614,7 @@ class SierraItemAccessTest
           )
         )
 
-        val (ac, _, itemStatus) = SierraItemAccess(
+        val (ac, _) = SierraItemAccess(
           bibId = bibId,
           itemId = itemId,
           bibStatus = None,
@@ -647,7 +630,6 @@ class SierraItemAccessTest
               "Item is in use by another reader. Please ask at Enquiry Desk.")
           )
         )
-        itemStatus shouldBe ItemStatus.TemporarilyUnavailable
       }
 
       it("can't be requested when it's on the hold shelf for another reader") {
@@ -669,7 +651,7 @@ class SierraItemAccessTest
           )
         )
 
-        val (ac, _, itemStatus) = SierraItemAccess(
+        val (ac, _) = SierraItemAccess(
           bibId = bibId,
           itemId = itemId,
           bibStatus = None,
@@ -685,7 +667,6 @@ class SierraItemAccessTest
               "Item is in use by another reader. Please ask at Enquiry Desk.")
           )
         )
-        itemStatus shouldBe ItemStatus.TemporarilyUnavailable
       }
     }
 
@@ -719,7 +700,7 @@ class SierraItemAccessTest
           )
         )
 
-        val (Some(ac), note, itemStatus) = SierraItemAccess(
+        val (Some(ac), note) = SierraItemAccess(
           bibId = bibId,
           itemId = itemId,
           bibStatus = None,
@@ -732,8 +713,8 @@ class SierraItemAccessTest
           note = Some(
             "Email library@wellcomecollection.org to tell us why you need access. We’ll reply within a week.")
         )
+
         note shouldBe None
-        itemStatus shouldBe ItemStatus.Available
       }
 
       it("doesn't overwrite the note if there's a hold on the item") {
@@ -762,7 +743,7 @@ class SierraItemAccessTest
           )
         )
 
-        val (Some(ac), note, _) = SierraItemAccess(
+        val (Some(ac), note) = SierraItemAccess(
           bibId = bibId,
           itemId = itemId,
           bibStatus = None,
@@ -805,7 +786,7 @@ class SierraItemAccessTest
           )
         )
 
-        val (Some(ac), _, _) = SierraItemAccess(
+        val (Some(ac), _) = SierraItemAccess(
           bibId = bibId,
           itemId = itemId,
           bibStatus = None,
@@ -842,7 +823,7 @@ class SierraItemAccessTest
           )
         )
 
-        val (_, Some(note), _) = SierraItemAccess(
+        val (_, Some(note)) = SierraItemAccess(
           bibId = bibId,
           itemId = itemId,
           bibStatus = None,
@@ -875,7 +856,7 @@ class SierraItemAccessTest
           )
         )
 
-        val (Some(ac), _, itemStatus) = SierraItemAccess(
+        val (Some(ac), _) = SierraItemAccess(
           bibId = bibId,
           itemId = itemId,
           bibStatus = None,
@@ -884,7 +865,6 @@ class SierraItemAccessTest
         )
 
         ac shouldBe AccessCondition(method = AccessMethod.OpenShelves)
-        itemStatus shouldBe ItemStatus.Available
       }
 
       it("gets a display note") {
@@ -912,7 +892,7 @@ class SierraItemAccessTest
           )
         )
 
-        val (ac, _, itemStatus) = SierraItemAccess(
+        val (ac, _) = SierraItemAccess(
           bibId = bibId,
           itemId = itemId,
           bibStatus = None,
@@ -927,7 +907,6 @@ class SierraItemAccessTest
               "Shelved at the end of the Quick Ref. section with the oversize Quick Ref. books.")
           )
         )
-        itemStatus shouldBe ItemStatus.Available
       }
     }
 
@@ -949,7 +928,7 @@ class SierraItemAccessTest
         )
       )
 
-      val (ac, _, itemStatus) = SierraItemAccess(
+      val (ac, _) = SierraItemAccess(
         bibId = bibId,
         itemId = itemId,
         bibStatus = None,
@@ -964,7 +943,6 @@ class SierraItemAccessTest
           note = Some("This item is missing.")
         )
       )
-      itemStatus shouldBe ItemStatus.Unavailable
     }
   }
 
@@ -983,7 +961,7 @@ class SierraItemAccessTest
       )
     )
 
-    val (Some(ac), _, _) = SierraItemAccess(
+    val (Some(ac), _) = SierraItemAccess(
       bibId = bibId,
       itemId = itemId,
       bibStatus = None,

@@ -5,7 +5,6 @@ import weco.catalogue.internal_model.locations.{
   AccessCondition,
   AccessMethod,
   AccessStatus,
-  ItemStatus,
   LocationType,
   PhysicalLocationType
 }
@@ -42,9 +41,9 @@ object SierraItemAccess extends SierraQueryOps with Logging {
     bibStatus: Option[AccessStatus],
     location: Option[PhysicalLocationType],
     itemData: SierraItemData
-  ): (Option[AccessCondition], Option[String], ItemStatus) =
+  ): (Option[AccessCondition], Option[String]) =
     (
-      createAccessConditionAndStatus(
+      createAccessCondition(
         bibId,
         itemId,
         bibStatus,
@@ -52,32 +51,31 @@ object SierraItemAccess extends SierraQueryOps with Logging {
         itemData),
       itemData.displayNote) match {
       // If the item note is already on the access condition, we don't need to copy it.
-      case ((Some(ac), itemStatus), displayNote) if ac.note == displayNote =>
-        (Some(ac), None, itemStatus)
+      case ((Some(ac), displayNote)) if ac.note == displayNote =>
+        (Some(ac), None)
 
       // If the item note is an access note but there's already an access note on the
       // access condition, we discard the item note.
       //
       // Otherwise, we copy the item note onto the access condition.
-      case ((Some(ac), itemStatus), Some(displayNote))
-          if ac.note.isDefined && displayNote.isAccessNote =>
-        (Some(ac), None, itemStatus)
-      case ((Some(ac), itemStatus), Some(displayNote))
+      case (Some(ac), Some(displayNote))
+          if ac.note.isDefined && displayNote.isAccessNote => (Some(ac), None)
+      case (Some(ac), Some(displayNote))
           if ac.note.isEmpty && displayNote.isAccessNote =>
-        (Some(ac.copy(note = Some(displayNote))), None, itemStatus)
+        (Some(ac.copy(note = Some(displayNote))), None)
 
       // If the item note is nothing to do with the access condition, we return it to
       // be copied onto the item.
-      case ((ac, itemStatus), displayNote) => (ac, displayNote, itemStatus)
+      case (ac, displayNote) => (ac, displayNote)
     }
 
-  private def createAccessConditionAndStatus(
+  private def createAccessCondition(
     bibId: SierraBibNumber,
     itemId: SierraItemNumber,
     bibStatus: Option[AccessStatus],
     location: Option[PhysicalLocationType],
     itemData: SierraItemData
-  ): (Option[AccessCondition], ItemStatus) = {
+  ): Option[AccessCondition] = {
     val holdCount = itemData.holdCount
     val status = itemData.status
     val opacmsg = itemData.opacmsg
