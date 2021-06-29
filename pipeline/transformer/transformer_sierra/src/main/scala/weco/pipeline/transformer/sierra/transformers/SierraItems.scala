@@ -99,19 +99,17 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
         require(!itemData.suppressed)
       }
 
-    sierraItemDataMap
-      .map {
-        case (itemId: SierraItemNumber, itemData: SierraItemData) =>
-          transformItemData(
-            bibId = bibId,
-            itemId = itemId,
-            itemData = itemData,
-            bibData = bibData,
-            fallbackLocation = fallbackLocation,
-            itemCount = sierraItemDataMap.size
-          )
-      }
-      .toList
+    sierraItemDataMap.map {
+      case (itemId: SierraItemNumber, itemData: SierraItemData) =>
+        transformItemData(
+          bibId = bibId,
+          itemId = itemId,
+          itemData = itemData,
+          bibData = bibData,
+          fallbackLocation = fallbackLocation,
+          itemCount = sierraItemDataMap.size
+        )
+    }.toList
   }
 
   private def transformItemData(
@@ -120,8 +118,7 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
     itemData: SierraItemData,
     bibData: SierraBibData,
     fallbackLocation: Option[(PhysicalLocationType, String)],
-    itemCount: Int)
-    : Item[IdState.Identifiable] = {
+    itemCount: Int): Item[IdState.Identifiable] = {
     debug(s"Attempting to transform $itemId")
 
     val location =

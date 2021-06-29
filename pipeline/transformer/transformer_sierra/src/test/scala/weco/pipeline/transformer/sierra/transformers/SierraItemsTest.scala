@@ -131,15 +131,17 @@ class SierraItemsTest
     }
 
     it("uses the copy number if there are multiple items and no field tag v") {
-      val itemDataMap = Seq(1, 2, 4)
-        .map { copyNo =>
-          createSierraItemNumber -> createSierraItemDataWith(copyNo = Some(copyNo))
-        }
-        .toMap
+      val itemDataMap = Seq(1, 2, 4).map { copyNo =>
+        createSierraItemNumber -> createSierraItemDataWith(
+          copyNo = Some(copyNo))
+      }.toMap
 
       val items = getTransformedItems(itemDataMap = itemDataMap)
 
-      items.map { _.title.get } should contain theSameElementsAs Seq("Copy 1", "Copy 2", "Copy 4")
+      items.map { _.title.get } should contain theSameElementsAs Seq(
+        "Copy 1",
+        "Copy 2",
+        "Copy 4")
     }
 
     it("omits the copy number if there's only a single item") {
