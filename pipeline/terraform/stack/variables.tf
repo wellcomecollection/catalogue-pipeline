@@ -66,6 +66,10 @@ variable "traffic_filter_platform_vpce_id" {
   type = string
 }
 
+variable "traffic_filter_catalogue_vpce_id" {
+  type = string
+}
+
 variable "traffic_filter_public_internet_id" {
   type = string
 }

@@ -55,6 +55,7 @@ module "catalogue_pipeline_2021-06-08" {
   ec_privatelink_security_group_id = local.ec_platform_privatelink_security_group_id
 
   traffic_filter_platform_vpce_id   = local.traffic_filter_platform_vpce_id
+  traffic_filter_catalogue_vpce_id  = local.traffic_filter_catalogue_vpce_id
   traffic_filter_public_internet_id = local.traffic_filter_public_internet_id
 
   # Adapter VHS
@@ -131,6 +132,7 @@ module "catalogue_pipeline_2021-06-27" {
   ec_privatelink_security_group_id = local.ec_platform_privatelink_security_group_id
 
   traffic_filter_platform_vpce_id   = local.traffic_filter_platform_vpce_id
+  traffic_filter_catalogue_vpce_id  = local.traffic_filter_catalogue_vpce_id
   traffic_filter_public_internet_id = local.traffic_filter_public_internet_id
 
   # Adapter VHS
