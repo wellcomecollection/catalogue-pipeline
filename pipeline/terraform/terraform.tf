@@ -10,6 +10,16 @@ provider "aws" {
   }
 }
 
+provider "aws" {
+  region = "eu-west-1"
+
+  alias = "catalogue"
+
+  assume_role {
+    role_arn = "arn:aws:iam::756629837203:role/catalogue-developer"
+  }
+}
+
 provider "template" {}
 
 provider "ec" {}

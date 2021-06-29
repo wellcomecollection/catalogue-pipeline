@@ -4,20 +4,20 @@ This script is run by a Terraform local-exec provisioner to create roles/users i
 an Elastic Cloud cluster immediately after it's been created.
 """
 
-import functools
 import secrets
 import sys
 
-import boto3
 import click
 from elasticsearch import Elasticsearch
+
+from aws import get_session, read_secret, write_secret
 
 
 DESCRIPTION = "Credentials for the pipeline-storage-{date} Elasticsearch cluster"
 
-WORK_INDICES = ["source", "merged", "denormalised", "identified"]
+WORK_INDICES = ["source", "merged", "denormalised", "identified", "indexed"]
 
-IMAGE_INDICES = ["initial", "augmented"]
+IMAGE_INDICES = ["initial", "augmented", "indexed"]
 
 WORK_INDEX_PATTERN = "works-{index}*"
 
@@ -25,72 +25,34 @@ IMAGE_INDEX_PATTERN = "images-{index}*"
 
 
 SERVICES = {
-    "transformer": ["source_write"],
-    "id_minter": ["source_read", "identified_write"],
-    "matcher": ["identified_read"],
-    "merger": ["identified_read", "merged_write", "initial_write"],
-    "router": ["merged_read", "denormalised_write"],
-    "relation_embedder": ["merged_read", "denormalised_write"],
-    "work_ingestor": ["denormalised_read"],
-    "inferrer": ["initial_read", "augmented_write"],
-    "image_ingestor": ["augmented_read"],
+    "transformer": ["works-source_write"],
+    "id_minter": ["works-source_read", "works-identified_write"],
+    "matcher": ["works-identified_read"],
+    "merger": ["works-identified_read", "works-merged_write", "images-initial_write"],
+    "router": ["works-merged_read", "works-denormalised_write"],
+    "relation_embedder": ["works-merged_read", "works-denormalised_write"],
+    "work_ingestor": ["works-denormalised_read", "works-indexed_write"],
+    "inferrer": ["images-initial_read", "images-augmented_write"],
+    "image_ingestor": ["images-augmented_read", "images-indexed_write"],
+    "snapshot_generator": ["works-indexed_read"],
     # This role isn't used by applications, but instead provided to give developer scripts
     # read-only access to the pipeline_storage cluster.
-    "read_only": [f"{index}_read" for index in IMAGE_INDICES + WORK_INDICES],
+    "read_only": [f"works-{index}_read" for index in WORK_INDICES] + [f"images-{index}_read" for index in IMAGE_INDICES],
 }
 
 
-@functools.lru_cache()
-def get_aws_client(resource, *, role_arn):
-    """
-    Get a boto3 client authenticated against the given role.
-    """
-    sts_client = boto3.client("sts")
-    assumed_role_object = sts_client.assume_role(
-        RoleArn=role_arn, RoleSessionName="AssumeRoleSession1"
-    )
-    credentials = assumed_role_object["Credentials"]
-    return boto3.client(
-        resource,
-        aws_access_key_id=credentials["AccessKeyId"],
-        aws_secret_access_key=credentials["SecretAccessKey"],
-        aws_session_token=credentials["SessionToken"],
-    )
-
-
-def read_secret(secret_id):
-    """
-    Retrieve a secret from Secrets Manager.
-    """
-    secrets_client = get_aws_client(
-        "secretsmanager", role_arn="arn:aws:iam::760097843905:role/platform-developer"
-    )
-
-    return secrets_client.get_secret_value(SecretId=secret_id)["SecretString"]
-
-
-def store_secret(secret_id, secret_value, description):
+def store_secret(session, *, secret_id, secret_value, description):
     """
     Store a key/value pair in Secrets Manager.
     """
-    # We store a secret in both the platform and catalogue accounts.
-    # This is a stopgap until all the pipeline services are running in
-    # the catalogue account; eventually we should remove them from
-    # the platform account.
-    #
-    # See https://github.com/wellcomecollection/platform/issues/4823
-    for role_arn in [
-        "arn:aws:iam::760097843905:role/platform-developer",
-        # "arn:aws:iam::756629837203:role/catalogue-developer",
-    ]:
-        secrets_client = get_aws_client("secretsmanager", role_arn=role_arn)
+    secrets_client = session.client("secretsmanager")
 
-        resp = secrets_client.put_secret_value(
-            SecretId=secret_id, SecretString=secret_value
-        )
+    resp = secrets_client.put_secret_value(
+        SecretId=secret_id, SecretString=secret_value
+    )
 
-        if resp["ResponseMetadata"]["HTTPStatusCode"] != 200:
-            raise RuntimeError(f"Unexpected error from PutSecretValue: {resp}")
+    if resp["ResponseMetadata"]["HTTPStatusCode"] != 200:
+        raise RuntimeError(f"Unexpected error from PutSecretValue: {resp}")
 
     click.echo(f"Stored secret {click.style(secret_id, 'yellow')}")
 
@@ -101,14 +63,10 @@ def create_roles(es, index):
     """
     for role_suffix, privileges in [("read", ["read"]), ("write", ["all"])]:
         role_name = f"{index}_{role_suffix}"
-        index_pattern = (
-            IMAGE_INDEX_PATTERN if index in IMAGE_INDICES else WORK_INDEX_PATTERN
-        )
-        index_name = index_pattern.format(index=index)
 
         es.security.put_role(
             role_name,
-            body={"indices": [{"names": [index_name], "privileges": privileges}]},
+            body={"indices": [{"names": [f"{index}*"], "privileges": privileges}]},
         )
 
         yield role_name
@@ -130,22 +88,35 @@ if __name__ == '__main__':
     except IndexError:
         sys.exit(f"Usage: {__file__} <PIPELINE_DATE>")
 
+    platform_session = get_session(
+        role_arn="arn:aws:iam::760097843905:role/platform-developer"
+    )
+    catalogue_session = get_session(
+        role_arn="arn:aws:iam::756629837203:role/catalogue-developer"
+    )
+
     secret_prefix = f"elasticsearch/pipeline_storage_{pipeline_date}"
 
-    es_host = read_secret(f"{secret_prefix}/public_host")
-    es_protocol = read_secret(f"{secret_prefix}/protocol")
-    es_port = read_secret(f"{secret_prefix}/port")
+    es_host = read_secret(platform_session, secret_id=f"{secret_prefix}/public_host")
+    es_protocol = read_secret(platform_session, secret_id=f"{secret_prefix}/protocol")
+    es_port = read_secret(platform_session, secret_id=f"{secret_prefix}/port")
 
-    username = read_secret(f"{secret_prefix}/es_username")
-    password = read_secret(f"{secret_prefix}/es_password")
+    username = read_secret(platform_session, secret_id=f"{secret_prefix}/es_username")
+    password = read_secret(platform_session, secret_id=f"{secret_prefix}/es_password")
 
     endpoint = f"{es_protocol}://{es_host}:{es_port}"
 
     es = Elasticsearch(endpoint, http_auth=(username, password))
 
     newly_created_roles = set()
-    for index in WORK_INDICES + IMAGE_INDICES:
-        for r in create_roles(es, index=index):
+
+    for index in WORK_INDICES:
+        for r in create_roles(es, index=f"works-{index}"):
+            newly_created_roles.add(r)
+            click.echo(f"Created role {click.style(r, 'green')}")
+
+    for index in IMAGE_INDICES:
+        for r in create_roles(es, index=f"images-{index}"):
             newly_created_roles.add(r)
             click.echo(f"Created role {click.style(r, 'green')}")
 
@@ -165,13 +136,20 @@ if __name__ == '__main__':
     print("")
 
     for username, password in newly_created_usernames:
-        store_secret(
+        if username == "snapshot_generator":
+            session = catalogue_session
+        else:
+            session = platform_session
+
+        write_secret(
+            session,
             secret_id=f"{secret_prefix}/{username}/es_username",
             secret_value=username,
             description=DESCRIPTION.format(date=pipeline_date)
         )
 
-        store_secret(
+        write_secret(
+            session,
             secret_id=f"{secret_prefix}/{username}/es_password",
             secret_value=password,
             description=DESCRIPTION.format(date=pipeline_date)

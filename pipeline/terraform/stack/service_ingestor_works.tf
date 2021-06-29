@@ -43,12 +43,6 @@ module "ingestor_works" {
   }
 
   secret_env_vars = merge({
-    es_host_catalogue     = "elasticsearch/catalogue/private_host"
-    es_port_catalogue     = "catalogue/ingestor/es_port"
-    es_username_catalogue = "catalogue/ingestor/es_username"
-    es_password_catalogue = "catalogue/ingestor/es_password"
-    es_protocol_catalogue = "catalogue/ingestor/es_protocol"
-
     es_host_pipeline_storage     = local.pipeline_storage_private_host
     es_port_pipeline_storage     = local.pipeline_storage_port
     es_protocol_pipeline_storage = local.pipeline_storage_protocol
@@ -59,7 +53,7 @@ module "ingestor_works" {
   subnets = var.subnets
 
   min_capacity = var.min_capacity
-  max_capacity = min(6, local.max_capacity)
+  max_capacity = local.max_capacity
 
   scale_down_adjustment = local.scale_down_adjustment
   scale_up_adjustment   = local.scale_up_adjustment
