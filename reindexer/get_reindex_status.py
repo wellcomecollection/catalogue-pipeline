@@ -126,7 +126,7 @@ def get_works_index_stats(session, *, reindex_date):
 
     api_client = get_api_es_client(session)
     result["API"] = count_documents_in_index(
-        api_client, index_name=f"works-{reindex_date}"
+        api_client, index_name=f"works-indexed-{reindex_date}"
     )
 
     return result
@@ -149,7 +149,7 @@ def get_images_index_stats(session, *, reindex_date):
 
     api_client = get_api_es_client(session)
     result["API"] = count_documents_in_index(
-        api_client, index_name=f"images-{reindex_date}"
+        api_client, index_name=f"images-indexed-{reindex_date}"
     )
 
     return result
