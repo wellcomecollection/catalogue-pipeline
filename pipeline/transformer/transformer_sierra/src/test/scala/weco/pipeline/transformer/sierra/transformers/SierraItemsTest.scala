@@ -130,10 +130,26 @@ class SierraItemsTest
       getTitle(itemData) shouldBe Some("Volumes 1–5")
     }
 
-    it("uses the copy number if there's no field tag v") {
-      val itemData = createSierraItemDataWith(copyNo = Some(3))
+    it("uses the copy number if there are multiple items and no field tag v") {
+      val itemDataMap = Seq(1, 2, 4)
+        .map { copyNo =>
+          createSierraItemNumber -> createSierraItemDataWith(copyNo = Some(copyNo))
+        }
+        .toMap
 
-      getTitle(itemData) shouldBe Some("Copy 3")
+      val items = getTransformedItems(itemDataMap = itemDataMap)
+
+      items.map { _.title.get } should contain theSameElementsAs Seq("Copy 1", "Copy 2", "Copy 4")
+    }
+
+    it("omits the copy number if there's only a single item") {
+      val itemDataMap = Map(
+        createSierraItemNumber -> createSierraItemDataWith(copyNo = Some(1))
+      )
+
+      val items = getTransformedItems(itemDataMap = itemDataMap)
+
+      items.map { _.title } shouldBe Seq(None)
     }
 
     def getTitle(itemData: SierraItemData): Option[String] = {

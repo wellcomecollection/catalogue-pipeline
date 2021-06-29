@@ -93,10 +93,13 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
       case _                                => None
     }
 
-    sierraItemDataMap
-      .filterNot {
-        case (_: SierraItemNumber, itemData: SierraItemData) => itemData.deleted
+    sierraItemDataMap.values
+      .foreach { itemData =>
+        require(!itemData.deleted)
+        require(!itemData.suppressed)
       }
+
+    sierraItemDataMap
       .map {
         case (itemId: SierraItemNumber, itemData: SierraItemData) =>
           transformItemData(
@@ -104,7 +107,8 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
             itemId = itemId,
             itemData = itemData,
             bibData = bibData,
-            fallbackLocation = fallbackLocation
+            fallbackLocation = fallbackLocation,
+            itemCount = sierraItemDataMap.size
           )
       }
       .toList
@@ -115,7 +119,8 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
     itemId: SierraItemNumber,
     itemData: SierraItemData,
     bibData: SierraBibData,
-    fallbackLocation: Option[(PhysicalLocationType, String)])
+    fallbackLocation: Option[(PhysicalLocationType, String)],
+    itemCount: Int)
     : Item[IdState.Identifiable] = {
     debug(s"Attempting to transform $itemId")
 
@@ -123,7 +128,7 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
       getPhysicalLocation(bibId, itemId, itemData, bibData, fallbackLocation)
 
     Item(
-      title = getItemTitle(itemId, itemData),
+      title = getItemTitle(itemId, itemData, itemCount),
       note = getItemNote(bibId, itemId, itemData, bibData, location),
       locations = List(location).flatten,
       id = IdState.Identifiable(
@@ -151,11 +156,12 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
     *     https://documentation.iii.com/sierrahelp/Content/sril/sril_records_varfld_types_item.html
     *
     *   - The copyNo field from the Sierra API response, which we use to
-    *     create a string like "Copy 2".
+    *     create a string like "Copy 2".  We only set this if there are multiple items
     *
     */
   private def getItemTitle(itemId: SierraItemNumber,
-                           data: SierraItemData): Option[String] = {
+                           data: SierraItemData,
+                           itemCount: Int): Option[String] = {
     val titleCandidates: List[String] =
       data.varFields
         .filter { _.fieldTag.contains("v") }
@@ -164,12 +170,17 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
         .filterNot { _ == "" }
         .distinct
 
+    val copyNoTitle =
+      data.copyNo.map { copyNo =>
+        s"Copy $copyNo"
+      }
+
     titleCandidates match {
       case Seq(title) => Some(title)
-      case Nil =>
-        data.copyNo.map { copyNo =>
-          s"Copy $copyNo"
-        }
+
+      case Nil if itemCount > 1 => copyNoTitle
+      case Nil                  => None
+
       case multipleTitles =>
         warn(
           s"Multiple title candidates on item $itemId: ${titleCandidates.mkString("; ")}")
