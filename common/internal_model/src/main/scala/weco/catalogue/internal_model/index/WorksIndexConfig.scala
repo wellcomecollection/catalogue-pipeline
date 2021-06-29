@@ -74,7 +74,7 @@ object WorksIndexConfig extends IndexConfigFields {
             .copyTo(relationsPath ++ titlesAndContributorsPath),
           multilingualFieldWithKeyword("alternativeTitles")
             .copyTo(relationsPath ++ titlesAndContributorsPath),
-          englishTextField("description"),
+          englishTextField("description").copyTo(relationsPath),
           englishTextKeywordField("physicalDescription"),
           multilingualField("lettering"),
           objectField("contributors").fields(
