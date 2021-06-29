@@ -96,7 +96,7 @@ module "catalogue_pipeline_2021-06-27" {
 
     miro = {
       topics = [
-        local.miro_updates_topic_arn
+        local.miro_updates_topic_arn,
       ]
       reindex_topic = local.miro_reindexer_topic_arn,
     }
