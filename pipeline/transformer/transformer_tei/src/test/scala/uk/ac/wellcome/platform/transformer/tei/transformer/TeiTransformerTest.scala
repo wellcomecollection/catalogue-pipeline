@@ -7,22 +7,43 @@ import uk.ac.wellcome.models.work.generators.InstantGenerators
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.memory.MemoryStore
 import weco.catalogue.internal_model.identifiers.DataState.Unidentified
-import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  IdentifierType,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.work.{Work, WorkData}
 import weco.catalogue.source_model.tei.TeiChangedMetadata
 
 import java.nio.charset.StandardCharsets
 
-class TeiTransformerTest extends AnyFunSpec with Matchers with InstantGenerators{
-  it("transforms into a Work"){
-    val teiXml = IOUtils.resourceToString("/WMS_Arabic_1.xml", StandardCharsets.UTF_8)
-    val location = S3ObjectLocation("bucket","key.xml")
-    val store = new MemoryStore[S3ObjectLocation, String](Map(location -> teiXml))
+class TeiTransformerTest
+    extends AnyFunSpec
+    with Matchers
+    with InstantGenerators {
+  it("transforms into a Work") {
+    val teiXml =
+      IOUtils.resourceToString("/WMS_Arabic_1.xml", StandardCharsets.UTF_8)
+    val location = S3ObjectLocation("bucket", "key.xml")
+    val store =
+      new MemoryStore[S3ObjectLocation, String](Map(location -> teiXml))
     val transformer = new TeiTransformer(store)
     val timeModified = instantInLast30Days
     val id = "manuscript_15651"
-    val sourceIdentifier = SourceIdentifier(identifierType = IdentifierType.Tei,ontologyType = "Work", value = id)
-    transformer(id,TeiChangedMetadata(location, timeModified), 1) shouldBe Work.Visible[Source](1,WorkData[Unidentified](description = Some("1 copy of al-Qānūn fī al-ṭibb by Avicenna, 980-1037")), Source(sourceIdentifier, timeModified))
+    val sourceIdentifier = SourceIdentifier(
+      identifierType = IdentifierType.Tei,
+      ontologyType = "Work",
+      value = id
+    )
+    transformer(id, TeiChangedMetadata(location, timeModified), 1) shouldBe Right(
+      Work.Visible[Source](
+        version = 1,
+        data = WorkData[Unidentified](
+          description =
+            Some("1 copy of al-Qānūn fī al-ṭibb by Avicenna, 980-1037")
+        ),
+        state = Source(sourceIdentifier, timeModified)
+      )
+    )
   }
 }
