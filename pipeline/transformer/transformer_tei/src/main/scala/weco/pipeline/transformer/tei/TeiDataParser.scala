@@ -1,7 +1,10 @@
 package weco.pipeline.transformer.tei
 
 import weco.catalogue.internal_model.identifiers.DataState.Unidentified
-import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  IdentifierType,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.work.{MergeCandidate, Work, WorkData}
 
@@ -27,11 +30,13 @@ case class TeiData(
           MergeCandidate(
             SourceIdentifier(IdentifierType.SierraSystemNumber, "Work", b),
             "Bnumber present in TEI file"
-          )
+        )
       )
 
     val value =
-      WorkData[Unidentified](description = description, mergeCandidates = maybeBnumber.toList)
+      WorkData[Unidentified](
+        description = description,
+        mergeCandidates = maybeBnumber.toList)
     Work.Visible[Source](
       version,
       value,
@@ -40,7 +45,3 @@ case class TeiData(
     )
   }
 }
-
-
-
-

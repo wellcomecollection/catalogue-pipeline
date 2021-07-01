@@ -4,7 +4,10 @@ import org.apache.commons.io.IOUtils
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.DataState.Unidentified
-import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  IdentifierType,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.work.generators.InstantGenerators
 import weco.catalogue.internal_model.work.{DeletedReason, Work, WorkData}
@@ -43,7 +46,7 @@ class TeiTransformerTest
       )
     )
   }
-  it("handles delete messages"){
+  it("handles delete messages") {
 
     val store =
       new MemoryStore[S3ObjectLocation, String](Map.empty)

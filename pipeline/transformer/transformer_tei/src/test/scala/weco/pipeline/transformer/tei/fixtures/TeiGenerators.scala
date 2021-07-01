@@ -14,7 +14,9 @@ trait TeiGenerators { this: Suite =>
 
   def summary(str: String) = <summary>{str}</summary>
 
-  def teiXml(id: String, identifiers: Option[Elem]= None, summary: Option[Elem]= None) =
+  def teiXml(id: String,
+             identifiers: Option[Elem] = None,
+             summary: Option[Elem] = None) =
     <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id={id}>
       <teiHeader>
         <fileDesc>
