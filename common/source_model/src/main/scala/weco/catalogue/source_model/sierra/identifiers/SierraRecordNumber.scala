@@ -21,8 +21,7 @@ trait SierraRecordNumber {
   def withoutCheckDigit: String = recordNumber
 }
 
-trait
-SierraRecordNumberOps[T <: SierraRecordNumber] {
+trait SierraRecordNumberOps[T <: SierraRecordNumber] {
   def apply(number: String): T
 
   implicit val keyEncoder: KeyEncoder[T] =

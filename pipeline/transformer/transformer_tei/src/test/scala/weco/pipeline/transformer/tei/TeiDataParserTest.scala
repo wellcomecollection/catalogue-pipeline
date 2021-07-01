@@ -5,7 +5,11 @@ import org.scalatest.matchers.should.Matchers
 import weco.catalogue.source_model.generators.SierraDataGenerators
 import weco.pipeline.transformer.tei.fixtures.TeiGenerators
 
-class TeiDataParserTest extends AnyFunSpec with Matchers with TeiGenerators with SierraDataGenerators {
+class TeiDataParserTest
+    extends AnyFunSpec
+    with Matchers
+    with TeiGenerators
+    with SierraDataGenerators {
   val id = "manuscript_15651"
   val bnumber = createSierraBibNumber.withCheckDigit
   it("parses a tei xml and returns TeiData") {

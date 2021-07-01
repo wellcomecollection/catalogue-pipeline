@@ -6,10 +6,9 @@ import scala.xml.{Elem, NodeSeq}
 
 trait TeiGenerators { this: Suite =>
   def sierraIdentifiers(bnumber: String) =
-      <altIdentifier type="Sierra">
+    <altIdentifier type="Sierra">
         <idno>{bnumber} </idno>
       </altIdentifier>
-
 
   def summary(str: String) = <summary>{str}</summary>
 

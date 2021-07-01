@@ -4,7 +4,10 @@ import org.apache.commons.io.IOUtils
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.DataState.Unidentified
-import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  IdentifierType,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.work.generators.InstantGenerators
 import weco.catalogue.internal_model.work.{DeletedReason, Work, WorkData}
@@ -18,7 +21,8 @@ import java.nio.charset.StandardCharsets
 class TeiTransformerTest
     extends AnyFunSpec
     with Matchers
-    with InstantGenerators with S3ObjectLocationGenerators{
+    with InstantGenerators
+    with S3ObjectLocationGenerators {
   it("transforms into a Work") {
     val teiXml =
       IOUtils.resourceToString("/WMS_Arabic_1.xml", StandardCharsets.UTF_8)
