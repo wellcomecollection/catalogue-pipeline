@@ -1,3 +1,6 @@
+data "ec_deployment" "logging" {
+  id = local.logging_cluster_id
+}
 locals {
   es_memory = var.is_reindexing ? "58g" : "15g"
 }
@@ -27,6 +30,10 @@ resource "ec_deployment" "pipeline" {
       zone_count = 1
       size       = "1g"
     }
+  }
+
+  observability {
+    deployment_id = data.ec_deployment.logging.id
   }
 }
 

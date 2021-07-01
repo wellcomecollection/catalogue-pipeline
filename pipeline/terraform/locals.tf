@@ -49,4 +49,6 @@ locals {
   traffic_filter_platform_vpce_id   = local.shared_infra["ec_platform_privatelink_traffic_filter_id"]
   traffic_filter_catalogue_vpce_id  = local.shared_infra["ec_catalogue_privatelink_traffic_filter_id"]
   traffic_filter_public_internet_id = local.shared_infra["ec_public_internet_traffic_filter_id"]
+
+  logging_cluster_id = data.terraform_remote_state.shared_infra.outputs.logging_cluster_id
 }

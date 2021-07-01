@@ -73,6 +73,8 @@ module "catalogue_pipeline_2021-06-08" {
   providers = {
     aws.catalogue = aws.catalogue
   }
+
+  logging_cluster_id = local.logging_cluster_id
 }
 
 module "catalogue_pipeline_2021-06-27" {
@@ -150,4 +152,6 @@ module "catalogue_pipeline_2021-06-27" {
   providers = {
     aws.catalogue = aws.catalogue
   }
+
+  logging_cluster_id = local.logging_cluster_id
 }

@@ -80,3 +80,7 @@ variable "adapters" {
     reindex_topic = string
   }))
 }
+
+variable "logging_cluster_id" {
+  type = string
+}
