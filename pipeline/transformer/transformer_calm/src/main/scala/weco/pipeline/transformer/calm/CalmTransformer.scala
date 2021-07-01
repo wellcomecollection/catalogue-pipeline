@@ -27,8 +27,7 @@ import weco.pipeline.transformer.calm.models.{
 import weco.pipeline.transformer.calm.transformers.{
   CalmItems,
   CalmLanguages,
-  CalmNotes,
-  CalmTermsOfUse
+  CalmNotes
 }
 import weco.pipeline.transformer.result.Result
 
@@ -170,7 +169,7 @@ object CalmTransformer
         physicalDescription = physicalDescription(record),
         production = production(record),
         workType = workType,
-        notes = CalmNotes(record) ++ languageNotes ++ CalmTermsOfUse(record),
+        notes = CalmNotes(record) ++ languageNotes,
       )
   }
 

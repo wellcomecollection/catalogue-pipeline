@@ -154,7 +154,7 @@ class CalmAccessTermsTest
     CalmAccessTerms(record, accessStatus = Some(AccessStatus.ByAppointment)) shouldBe Some(
       "The papers are available subject to the usual conditions of access to Archives and Manuscripts material. In addition a Restricted Access form must be completed to apply for access to this file. Restricted until 1 January 2066.")
   }
-g
+
   it("returns no note if there's no useful access info") {
     val record = createCalmRecordWith()
 
