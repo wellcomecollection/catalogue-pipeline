@@ -6,7 +6,7 @@ import weco.catalogue.internal_model.locations.AccessStatus
 import weco.catalogue.source_model.generators.CalmRecordGenerators
 
 class CalmAccessTermsTest
-  extends AnyFunSpec
+    extends AnyFunSpec
     with Matchers
     with CalmRecordGenerators {
   it("handles an item which is open") {
@@ -114,7 +114,9 @@ class CalmAccessTermsTest
       ("UserDate1", "01/01/2072")
     )
 
-    CalmAccessTerms(record, accessStatus = Some(AccessStatus.PermissionRequired)) shouldBe Some(
+    CalmAccessTerms(
+      record,
+      accessStatus = Some(AccessStatus.PermissionRequired)) shouldBe Some(
       "Permission must be obtained from <a href=\"mailto:barbie.antonis@gmail.com\">the Winnicott Trust</a>, and the usual conditions of access to Archives and Manuscripts material apply; a Reader's Undertaking must be completed. In addition there are Data Protection restrictions on this item and an additional application for access must be completed. Restricted until 1 January 2072.")
   }
 

@@ -163,8 +163,8 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
         singleLocation,
         (
           (metsIdentified and allDigitalLocations) or
-          (miroIdentified and allDigitalLocations) or
-          (sierraIdentified and allPhysicalLocations)
+            (miroIdentified and allDigitalLocations) or
+            (sierraIdentified and allPhysicalLocations)
         )
       )
 

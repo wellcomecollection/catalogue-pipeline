@@ -4,12 +4,16 @@ import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.IdState
-import weco.catalogue.internal_model.locations.{AccessCondition, AccessMethod, AccessStatus}
+import weco.catalogue.internal_model.locations.{
+  AccessCondition,
+  AccessMethod,
+  AccessStatus
+}
 import weco.catalogue.internal_model.work.Item
 import weco.catalogue.source_model.generators.CalmRecordGenerators
 
 class CalmItemsTest
-  extends AnyFunSpec
+    extends AnyFunSpec
     with Matchers
     with EitherValues
     with CalmRecordGenerators {
@@ -22,7 +26,8 @@ class CalmItemsTest
       getAccessConditions(items) shouldBe empty
     }
 
-    it("sets access conditions based on the terms and access status if there's nothing useful to show") {
+    it(
+      "sets access conditions based on the terms and access status if there's nothing useful to show") {
       val record = createCalmRecordWith(
         "AccessStatus" -> "Open",
         "AccessConditions" -> "The papers are available subject to the usual conditions of access to Archives and Manuscripts material."
@@ -34,7 +39,9 @@ class CalmItemsTest
         AccessCondition(
           method = AccessMethod.NotRequestable,
           status = Some(AccessStatus.Open),
-          terms = Some("The papers are available subject to the usual conditions of access to Archives and Manuscripts material."))
+          terms = Some(
+            "The papers are available subject to the usual conditions of access to Archives and Manuscripts material.")
+        )
       )
     }
 
@@ -47,7 +54,10 @@ class CalmItemsTest
       val items = CalmItems(record)
 
       getAccessConditions(items) shouldBe List(
-        AccessCondition(method = AccessMethod.NotRequestable, status = Some(AccessStatus.Closed), terms = Some("Closed until 2 February 2002."))
+        AccessCondition(
+          method = AccessMethod.NotRequestable,
+          status = Some(AccessStatus.Closed),
+          terms = Some("Closed until 2 February 2002."))
       )
     }
 
@@ -60,11 +70,15 @@ class CalmItemsTest
       val items = CalmItems(record)
 
       getAccessConditions(items) shouldBe List(
-        AccessCondition(method = AccessMethod.NotRequestable, status = Some(AccessStatus.Restricted), terms = Some("Restricted until 2 February 2002."))
+        AccessCondition(
+          method = AccessMethod.NotRequestable,
+          status = Some(AccessStatus.Restricted),
+          terms = Some("Restricted until 2 February 2002."))
       )
     }
 
-    def getAccessConditions(items: Seq[Item[IdState.Unminted]]): List[AccessCondition] = {
+    def getAccessConditions(
+      items: Seq[Item[IdState.Unminted]]): List[AccessCondition] = {
       items should have size 1
 
       val locations = items.head.locations

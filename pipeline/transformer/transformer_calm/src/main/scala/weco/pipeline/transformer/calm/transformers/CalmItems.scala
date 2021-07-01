@@ -1,7 +1,12 @@
 package weco.pipeline.transformer.calm.transformers
 
 import weco.catalogue.internal_model.identifiers.IdState
-import weco.catalogue.internal_model.locations.{AccessCondition, AccessMethod, LocationType, PhysicalLocation}
+import weco.catalogue.internal_model.locations.{
+  AccessCondition,
+  AccessMethod,
+  LocationType,
+  PhysicalLocation
+}
 import weco.catalogue.internal_model.work.Item
 import weco.catalogue.source_model.calm.CalmRecord
 import weco.pipeline.transformer.calm.models.CalmRecordOps
@@ -21,7 +26,8 @@ object CalmItems extends CalmRecordOps {
       )
     )
 
-  private def createAccessCondition(record: CalmRecord): List[AccessCondition] = {
+  private def createAccessCondition(
+    record: CalmRecord): List[AccessCondition] = {
     val accessStatus = CalmAccessStatus(record)
     val terms = CalmAccessTerms(record, accessStatus = accessStatus)
 
