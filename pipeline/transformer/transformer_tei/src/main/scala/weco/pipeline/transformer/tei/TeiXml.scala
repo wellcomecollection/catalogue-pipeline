@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.transformer.tei.transformer
+package weco.pipeline.transformer.tei
 
 import scala.util.Try
 import scala.xml.{Elem, XML}

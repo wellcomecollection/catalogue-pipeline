@@ -1,22 +1,22 @@
-package uk.ac.wellcome.platform.transformer.tei.transformer.service
+package weco.pipeline.transformer.tei.service
 
 import io.circe.Encoder
 import io.circe.generic.extras.semiauto.deriveConfiguredEncoder
-import uk.ac.wellcome.fixtures.TestWith
-import uk.ac.wellcome.json.JsonUtil._
-import uk.ac.wellcome.messaging.sns.NotificationMessage
-import uk.ac.wellcome.pipeline_storage.{PipelineStorageStream, Retriever}
-import uk.ac.wellcome.platform.transformer.tei.transformer.TeiTransformer
-import uk.ac.wellcome.platform.transformer.tei.transformer.fixtures.TeiGenerators
-import uk.ac.wellcome.storage.generators.S3ObjectLocationGenerators
-import uk.ac.wellcome.storage.s3.S3ObjectLocation
-import uk.ac.wellcome.storage.store.memory.MemoryTypedStore
 import weco.catalogue.internal_model.identifiers.DataState.Unidentified
 import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
 import weco.catalogue.internal_model.work.{MergeCandidate, Work, WorkData, WorkState}
 import weco.catalogue.source_model.TeiSourcePayload
 import weco.catalogue.source_model.tei.{TeiChangedMetadata, TeiMetadata}
-import weco.catalogue.transformer.{TransformerWorker, TransformerWorkerTestCases}
+import weco.fixtures.TestWith
+import weco.messaging.sns.NotificationMessage
+import weco.pipeline.transformer.{TransformerWorker, TransformerWorkerTestCases}
+import weco.pipeline_storage.{PipelineStorageStream, Retriever}
+import weco.storage.generators.S3ObjectLocationGenerators
+import weco.storage.s3.S3ObjectLocation
+import weco.storage.store.memory.MemoryTypedStore
+import weco.json.JsonUtil._
+import weco.pipeline.transformer.tei.TeiTransformer
+import weco.pipeline.transformer.tei.fixtures.TeiGenerators
 
 import java.time.Instant
 import scala.concurrent.ExecutionContext.Implicits.global

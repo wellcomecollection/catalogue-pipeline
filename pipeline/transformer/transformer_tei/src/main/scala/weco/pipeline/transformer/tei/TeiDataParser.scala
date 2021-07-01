@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.transformer.tei.transformer
+package weco.pipeline.transformer.tei
 
 import weco.catalogue.internal_model.identifiers.DataState.Unidentified
 import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}

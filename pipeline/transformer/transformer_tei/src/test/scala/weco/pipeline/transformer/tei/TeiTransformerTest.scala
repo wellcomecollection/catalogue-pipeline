@@ -1,16 +1,16 @@
-package uk.ac.wellcome.platform.transformer.tei.transformer
+package weco.pipeline.transformer.tei
 
 import org.apache.commons.io.IOUtils
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.models.work.generators.InstantGenerators
-import uk.ac.wellcome.storage.s3.S3ObjectLocation
-import uk.ac.wellcome.storage.store.memory.MemoryStore
 import weco.catalogue.internal_model.identifiers.DataState.Unidentified
 import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
 import weco.catalogue.internal_model.work.WorkState.Source
+import weco.catalogue.internal_model.work.generators.InstantGenerators
 import weco.catalogue.internal_model.work.{DeletedReason, Work, WorkData}
 import weco.catalogue.source_model.tei.{TeiChangedMetadata, TeiDeletedMetadata}
+import weco.storage.s3.S3ObjectLocation
+import weco.storage.store.memory.MemoryStore
 
 import java.nio.charset.StandardCharsets
 

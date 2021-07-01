@@ -1,13 +1,13 @@
-package uk.ac.wellcome.platform.transformer.tei.transformer
+package weco.pipeline.transformer.tei
 
-import uk.ac.wellcome.storage.s3.S3ObjectLocation
-import uk.ac.wellcome.storage.store.Store
 import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.work.{DeletedReason, Work, WorkData, WorkState}
 import weco.catalogue.source_model.tei.{TeiChangedMetadata, TeiDeletedMetadata, TeiMetadata}
-import weco.catalogue.transformer.Transformer
-import weco.catalogue.transformer.result.Result
+import weco.pipeline.transformer.Transformer
+import weco.pipeline.transformer.result.Result
+import weco.storage.s3.S3ObjectLocation
+import weco.storage.store.Store
 
 class TeiTransformer(store: Store[S3ObjectLocation, String]) extends Transformer[TeiMetadata]{
   override def apply(id: String, sourceData: TeiMetadata, version: Int): Result[Work[WorkState.Source]] = sourceData match {

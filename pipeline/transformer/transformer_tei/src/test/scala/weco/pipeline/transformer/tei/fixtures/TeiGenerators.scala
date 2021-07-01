@@ -1,4 +1,4 @@
-package uk.ac.wellcome.platform.transformer.tei.transformer.fixtures
+package weco.pipeline.transformer.tei.fixtures
 
 import org.scalatest.Suite
 

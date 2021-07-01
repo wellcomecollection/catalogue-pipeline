@@ -1,8 +1,8 @@
-package uk.ac.wellcome.platform.transformer.tei.transformer
+package weco.pipeline.transformer.tei
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import uk.ac.wellcome.platform.transformer.tei.transformer.fixtures.TeiGenerators
+import weco.pipeline.transformer.tei.fixtures.TeiGenerators
 
 class TeiDataParserTest extends AnyFunSpec with Matchers with TeiGenerators{
   val id = "manuscript_15651"
