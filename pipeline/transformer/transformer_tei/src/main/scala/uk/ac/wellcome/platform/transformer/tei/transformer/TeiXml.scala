@@ -18,7 +18,7 @@ class TeiXml(xml: Elem) {
     seq match {
       case List(node) => Right(Some(node.text.trim))
       case Nil        => Right(None)
-      case _          => ???
+      case _          => Left(new RuntimeException("More than one sierra bnumber node!"))
     }
   }
 
@@ -27,7 +27,7 @@ class TeiXml(xml: Elem) {
     nodes match {
       case List(node) => Right(Some(node.text))
       case Nil        => Right(None)
-      case _          => ???
+      case _          => Left(new RuntimeException("More than one summary node!"))
     }
   }
 }

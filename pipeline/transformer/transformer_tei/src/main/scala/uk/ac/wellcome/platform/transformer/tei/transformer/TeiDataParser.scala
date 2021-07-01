@@ -21,17 +21,17 @@ case class TeiData(
   bNumber: Option[String]
 ) {
   def toWork(time: Instant, version: Int): Work[Source] = {
-    val list = bNumber
+    val maybeBnumber = bNumber
       .map(
         b =>
           MergeCandidate(
             SourceIdentifier(IdentifierType.SierraSystemNumber, "Work", b),
-            ""
+            "Bnumber present in TEI file"
           )
       )
-      .toList
+
     val value =
-      WorkData[Unidentified](description = description, mergeCandidates = list)
+      WorkData[Unidentified](description = description, mergeCandidates = maybeBnumber.toList)
     Work.Visible[Source](
       version,
       value,

@@ -9,9 +9,10 @@ class TeiXmlTest extends AnyFunSpec with Matchers with TeiGenerators {
 
   it("fails parsing a tei XML if the supplied id is different from the id in the XML"){
     val suppliedId = "another_id"
-    val result = TeiXml(suppliedId, xmlString(id = id).toString())
+    val result = TeiXml(suppliedId, teiXml(id = id).toString())
     result shouldBe a [Left[_,_]]
     result.left.get.getMessage should include (suppliedId)
     result.left.get.getMessage should include (id)
   }
+
 }

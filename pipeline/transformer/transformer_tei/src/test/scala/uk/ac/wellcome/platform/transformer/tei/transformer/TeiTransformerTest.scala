@@ -7,13 +7,10 @@ import uk.ac.wellcome.models.work.generators.InstantGenerators
 import uk.ac.wellcome.storage.s3.S3ObjectLocation
 import uk.ac.wellcome.storage.store.memory.MemoryStore
 import weco.catalogue.internal_model.identifiers.DataState.Unidentified
-import weco.catalogue.internal_model.identifiers.{
-  IdentifierType,
-  SourceIdentifier
-}
+import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
 import weco.catalogue.internal_model.work.WorkState.Source
-import weco.catalogue.internal_model.work.{Work, WorkData}
-import weco.catalogue.source_model.tei.TeiChangedMetadata
+import weco.catalogue.internal_model.work.{DeletedReason, Work, WorkData}
+import weco.catalogue.source_model.tei.{TeiChangedMetadata, TeiDeletedMetadata}
 
 import java.nio.charset.StandardCharsets
 
@@ -43,6 +40,27 @@ class TeiTransformerTest
             Some("1 copy of al-Qānūn fī al-ṭibb by Avicenna, 980-1037")
         ),
         state = Source(sourceIdentifier, timeModified)
+      )
+    )
+  }
+  it("handles delete messages"){
+
+    val store =
+      new MemoryStore[S3ObjectLocation, String](Map.empty)
+    val transformer = new TeiTransformer(store)
+    val timeModified = instantInLast30Days
+    val id = "manuscript_15651"
+    val sourceIdentifier = SourceIdentifier(
+      identifierType = IdentifierType.Tei,
+      ontologyType = "Work",
+      value = id
+    )
+    transformer(id, TeiDeletedMetadata(timeModified), 1) shouldBe Right(
+      Work.Deleted[Source](
+        version = 1,
+        data = WorkData[Unidentified](),
+        state = Source(sourceIdentifier, timeModified),
+        deletedReason = DeletedReason.DeletedFromSource("Deleted by TEI source")
       )
     )
   }
