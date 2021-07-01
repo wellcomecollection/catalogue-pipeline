@@ -2,11 +2,12 @@ package weco.pipeline.transformer.tei
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import weco.catalogue.source_model.generators.SierraDataGenerators
 import weco.pipeline.transformer.tei.fixtures.TeiGenerators
 
-class TeiDataParserTest extends AnyFunSpec with Matchers with TeiGenerators {
+class TeiDataParserTest extends AnyFunSpec with Matchers with TeiGenerators with SierraDataGenerators {
   val id = "manuscript_15651"
-
+  val bnumber = createSierraBibNumber.withCheckDigit
   it("parses a tei xml and returns TeiData") {
     val description = "a manuscript about stuff"
     TeiDataParser.parse(
@@ -17,7 +18,7 @@ class TeiDataParserTest extends AnyFunSpec with Matchers with TeiGenerators {
       TeiData(id, Some(description), None))
   }
   it("parses a tei xml and returns TeiData with bNumber") {
-    val bnumber = "b1234567"
+
     TeiDataParser.parse(
       TeiXml(
         id,
@@ -27,15 +28,16 @@ class TeiDataParserTest extends AnyFunSpec with Matchers with TeiGenerators {
   }
   it("fails parsing if there's more than one bnumber node") {
 
-    val bnumber = "b1234567"
     val xml = <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id={id}>
       <teiHeader>
         <fileDesc>
           <sourceDesc>
             <msDesc xml:lang="en" xml:id="MS_Arabic_1">
+              <msIdentifier>
+                {sierraIdentifiers(bnumber)}
+                {sierraIdentifiers(bnumber)}
+              </msIdentifier>
               <msContents>
-                {sierraIdentifiers(bnumber)}
-                {sierraIdentifiers(bnumber)}
               </msContents>
             </msDesc>
           </sourceDesc>
@@ -48,7 +50,6 @@ class TeiDataParserTest extends AnyFunSpec with Matchers with TeiGenerators {
   }
   it("fails parsing if there's more than one summary node") {
 
-    val bnumber = "b1234567"
     val xml = <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id={id}>
       <teiHeader>
         <fileDesc>

@@ -28,8 +28,8 @@ case class TeiData(
       .map(
         b =>
           MergeCandidate(
-            SourceIdentifier(IdentifierType.SierraSystemNumber, "Work", b),
-            "Bnumber present in TEI file"
+            identifier = SourceIdentifier(IdentifierType.SierraSystemNumber, "Work", b),
+            reason = "Bnumber present in TEI file"
         )
       )
 

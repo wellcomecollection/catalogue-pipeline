@@ -4,14 +4,12 @@ import org.apache.commons.io.IOUtils
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.DataState.Unidentified
-import weco.catalogue.internal_model.identifiers.{
-  IdentifierType,
-  SourceIdentifier
-}
+import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.work.generators.InstantGenerators
 import weco.catalogue.internal_model.work.{DeletedReason, Work, WorkData}
 import weco.catalogue.source_model.tei.{TeiChangedMetadata, TeiDeletedMetadata}
+import weco.storage.generators.S3ObjectLocationGenerators
 import weco.storage.s3.S3ObjectLocation
 import weco.storage.store.memory.MemoryStore
 
@@ -20,11 +18,11 @@ import java.nio.charset.StandardCharsets
 class TeiTransformerTest
     extends AnyFunSpec
     with Matchers
-    with InstantGenerators {
+    with InstantGenerators with S3ObjectLocationGenerators{
   it("transforms into a Work") {
     val teiXml =
       IOUtils.resourceToString("/WMS_Arabic_1.xml", StandardCharsets.UTF_8)
-    val location = S3ObjectLocation("bucket", "key.xml")
+    val location = createS3ObjectLocation
     val store =
       new MemoryStore[S3ObjectLocation, String](Map(location -> teiXml))
     val transformer = new TeiTransformer(store)

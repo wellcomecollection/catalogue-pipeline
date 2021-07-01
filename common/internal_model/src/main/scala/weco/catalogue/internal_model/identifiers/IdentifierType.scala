@@ -27,8 +27,8 @@ object IdentifierType extends Enum[IdentifierType] {
     IdentifierType.withName(id)
 
   case object Tei extends IdentifierType {
-    val id = "tei"
-    val label = "Tei"
+    val id = "tei-manuscript-id"
+    val label = "Tei manuscript id"
   }
 
   case object MiroImageNumber extends IdentifierType {

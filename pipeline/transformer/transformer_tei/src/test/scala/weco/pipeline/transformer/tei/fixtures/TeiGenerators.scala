@@ -6,11 +6,10 @@ import scala.xml.{Elem, NodeSeq}
 
 trait TeiGenerators { this: Suite =>
   def sierraIdentifiers(bnumber: String) =
-    <msIdentifier>
       <altIdentifier type="Sierra">
         <idno>{bnumber} </idno>
       </altIdentifier>
-    </msIdentifier>
+
 
   def summary(str: String) = <summary>{str}</summary>
 
@@ -22,8 +21,10 @@ trait TeiGenerators { this: Suite =>
         <fileDesc>
           <sourceDesc>
             <msDesc xml:lang="en" xml:id="MS_Arabic_1">
+              <msIdentifier>
+              {identifiers.getOrElse(NodeSeq.Empty)}
+              </msIdentifier>
               <msContents>
-                {identifiers.getOrElse(NodeSeq.Empty)}
                 {summary.getOrElse(NodeSeq.Empty)}
               </msContents>
             </msDesc>

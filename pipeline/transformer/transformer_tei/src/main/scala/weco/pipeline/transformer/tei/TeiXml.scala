@@ -10,8 +10,31 @@ class TeiXml(xml: Elem) {
     }
     .getOrElse(throw new RuntimeException(s"Could not find an id in XML!"))
 
+  /**
+    * All the identifiers of the TEI file are in a `msIdentifier` bloc.
+    * We need the `altIdentifier` node where `type` is `Sierra.`
+    * <TEI>
+    *   <teiHeader>
+    *     <fileDesc>
+    *       <sourceDesc>
+    *         <msDesc xml:lang="en" xml:id="MS_Arabic_1">
+    *           <msIdentifier>
+    *               <altIdentifier type="former">
+    *                 <idno>WMS. Or. 1a (Iskandar)</idno>
+    *               </altIdentifier>
+    *               <altIdentifier type="former">
+    *                 <idno>WMS. Or. 1a</idno>
+    *                </altIdentifier>
+    *               <altIdentifier type="Sierra">
+    *                 <idno>b1234567</idno>
+    *                </altIdentifier>
+    *           </msIdentifier>
+    *      ...
+    * </TEI>
+    *
+    */
   def bNumber: Either[Throwable, Option[String]] = {
-    val identifiersNodes = xml \\ "msDesc" \ "msContents" \ "msIdentifier" \ "altIdentifier"
+    val identifiersNodes = xml \\ "msDesc" \ "msIdentifier" \ "altIdentifier"
     val seq = (identifiersNodes.filter(
       n => (n \@ "type").toLowerCase == "sierra"
     ) \ "idno").toList
@@ -22,6 +45,19 @@ class TeiXml(xml: Elem) {
     }
   }
 
+  /**
+    * The summary of the TEI is in the `summary` node under `msContents`. There is supposed to be only one summary node
+    * <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id="manuscript_15651">
+    *    <teiHeader>
+    *      <fileDesc>
+    *        <sourceDesc>
+    *          <msDesc xml:lang="en" xml:id="MS_Arabic_1">
+    *            <msContents>
+    *              <summary>1 copy of al-Qānūn fī al-ṭibb by Avicenna, 980-1037</summary>
+    *    ...
+    *    </TEI>
+    *
+    */
   def summary: Either[Throwable, Option[String]] = {
     val nodes = (xml \\ "msDesc" \ "msContents" \ "summary").toList
     nodes match {
