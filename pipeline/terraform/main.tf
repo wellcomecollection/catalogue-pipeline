@@ -32,6 +32,13 @@ module "catalogue_pipeline_2021-06-27" {
       reindex_topic = local.mets_reindexer_topic_arn,
     }
 
+    tei = {
+      topics = [
+        local.tei_adapter_topic_arn,
+      ],
+      reindex_topic = local.tei_reindexer_topic_arn,
+    }
+
     calm = {
       topics = [
         local.calm_adapter_topic_arn,
