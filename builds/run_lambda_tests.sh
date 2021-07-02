@@ -4,11 +4,11 @@ set -o errexit
 set -o nounset
 set -o verbose
 
-PATH="$1"
+PROJECT="$1"
 
 ROOT=$(git rev-parse --show-toplevel)
 
 docker run --rm --tty \
   --volume "$ROOT:$ROOT" \
-  --workdir "$ROOT/$PATH" \
+  --workdir "$ROOT/$PROJECT" \
   wellcome/tox:latest --workdir /tmp/.tox
