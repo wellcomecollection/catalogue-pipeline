@@ -18,6 +18,10 @@ resource "aws_ecr_repository" "transformer_calm" {
   name = "uk.ac.wellcome/transformer_calm"
 }
 
+resource "aws_ecr_repository" "transformer_tei" {
+  name = "uk.ac.wellcome/transformer_tei"
+}
+
 resource "aws_ecr_repository" "id_minter" {
   name = "uk.ac.wellcome/id_minter"
 }
