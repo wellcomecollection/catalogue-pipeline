@@ -317,7 +317,7 @@ class SierraIndexerFeatureTest
     )
 
     withIndices { indexPrefix =>
-      withLocalSqsQueuePair(visibilityTimeout = 5) {
+      withLocalSqsQueuePair() {
         case QueuePair(queue, dlq) =>
           withWorker(queue, store, indexPrefix) { _ =>
             sendNotificationToSQS(

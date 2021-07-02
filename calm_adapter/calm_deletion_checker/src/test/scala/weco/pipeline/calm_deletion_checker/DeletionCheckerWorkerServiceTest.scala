@@ -188,7 +188,7 @@ class DeletionCheckerWorkerServiceTest
     batchDuration: FiniteDuration = 100 milliseconds
   )(testWith: TestWith[(QueuePair, MemoryMessageSender), R]): R =
     withActorSystem { implicit actorSystem =>
-      withLocalSqsQueuePair(visibilityTimeout = 5) {
+      withLocalSqsQueuePair() {
         case queuePair @ QueuePair(queue, _) =>
           withSQSStream[NotificationMessage, R](queue) { stream =>
             implicit val ec: ExecutionContext = actorSystem.dispatcher
