@@ -11,7 +11,12 @@ import sys
 import boto3
 import httpx
 
-from _common import get_pipeline_es_client, get_secret_string, get_session, get_date_from_index_name
+from _common import (
+    get_pipeline_es_client,
+    get_secret_string,
+    get_session,
+    get_date_from_index_name,
+)
 
 
 SESSION = get_session(role_arn="arn:aws:iam::760097843905:role/platform-developer")
@@ -22,7 +27,9 @@ TABLE_NAME = "vhs-sourcedata-miro"
 
 @functools.lru_cache()
 def pipeline_es_client(*, date, action, doc_type):
-    return get_pipeline_es_client(SESSION, pipeline_date=date, action=action, doc_type=doc_type)
+    return get_pipeline_es_client(
+        SESSION, pipeline_date=date, action=action, doc_type=doc_type
+    )
 
 
 @functools.lru_cache()
@@ -158,7 +165,9 @@ def _remove_image_from_elasticsearch(*, miro_id):
     pipeline_date = get_date_from_index_name(works_index)
 
     # Remove the work from the works index
-    works_resp = pipeline_es_client(date=pipeline_date, action="read", doc_type="work").search(
+    works_resp = pipeline_es_client(
+        date=pipeline_date, action="read", doc_type="work"
+    ).search(
         index=works_index,
         body={
             "query": {
@@ -186,12 +195,14 @@ def _remove_image_from_elasticsearch(*, miro_id):
         }
         work["_source"]["type"] = "Deleted"
 
-        index_resp = pipeline_es_client(date=pipeline_date, action="write", doc_type="work").index(
-            index=works_index, body=work["_source"], id=work["_id"]
-        )
+        index_resp = pipeline_es_client(
+            date=pipeline_date, action="write", doc_type="work"
+        ).index(index=works_index, body=work["_source"], id=work["_id"])
         assert index_resp["result"] == "updated", index_resp
 
-    images_resp = pipeline_es_client(date=pipeline_date, action="read", doc_type="image").search(
+    images_resp = pipeline_es_client(
+        date=pipeline_date, action="read", doc_type="image"
+    ).search(
         index=images_index,
         body={
             "query": {
@@ -214,7 +225,9 @@ def _remove_image_from_elasticsearch(*, miro_id):
         )
         return
     else:
-        delete_resp = pipeline_es_client(date=pipeline_date, action="write", doc_type="image").delete(index=images_index, id=image_id)
+        delete_resp = pipeline_es_client(
+            date=pipeline_date, action="write", doc_type="image"
+        ).delete(index=images_index, id=image_id)
         assert delete_resp["result"] == "deleted", delete_resp
 
 

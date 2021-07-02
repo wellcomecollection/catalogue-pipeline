@@ -53,8 +53,7 @@ def get_pipeline_es_client(session, *, pipeline_date, action, doc_type):
 
 
 def get_date_from_index_name(index_name):
-    date_match = re.search(r'-(\d{4}-\d{2}-\d{2})$', index_name)
+    date_match = re.search(r"-(\d{4}-\d{2}-\d{2})$", index_name)
     if not date_match:
         raise Exception(f"Cannot extract a date from index name '{index_name}'")
     return date_match.group(1)
-

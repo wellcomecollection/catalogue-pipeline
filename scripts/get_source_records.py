@@ -48,7 +48,9 @@ def get_source_identifiers(session, *, work_id):
 
     works_index = get_current_works_index()
     pipeline_date = get_date_from_index_name(works_index)
-    es_client = get_pipeline_es_client(session, pipeline_date=pipeline_date, doc_type="work", action="read")
+    es_client = get_pipeline_es_client(
+        session, pipeline_date=pipeline_date, doc_type="work", action="read"
+    )
 
     es_resp = es_client.get(index=works_index, id=work_id)
     work = es_resp["_source"]
