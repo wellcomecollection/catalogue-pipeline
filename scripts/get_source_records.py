@@ -21,7 +21,7 @@ import tempfile
 
 import httpx
 
-from _common import get_api_es_client, get_session
+from _common import get_pipeline_es_client, get_session, get_date_from_index_name
 
 
 CALM_ADAPTER_TABLE = "vhs-calm-adapter"
@@ -45,9 +45,10 @@ def get_source_identifiers(session, *, work_id):
     This is *not* the same as the list of identifiers presented in the API.
 
     """
-    es_client = get_api_es_client(session)
 
     works_index = get_current_works_index()
+    pipeline_date = get_date_from_index_name(works_index)
+    es_client = get_pipeline_es_client(session, pipeline_date=pipeline_date, doc_type="work", action="read")
 
     es_resp = es_client.get(index=works_index, id=work_id)
     work = es_resp["_source"]
