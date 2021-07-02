@@ -61,7 +61,7 @@ def get_holdings_under_embargo(*, es_host, es_username, es_password):
     #
     # If we hit this assertion, it means we need to start paginating the
     # Elasticsearch response, but I don't want to do that right now.
-    assert hits["total"]["value"] <= 10000
+    assert hits["total"]["value"] <= 10000, "Too many results!"
 
     holdings_ids = set(hit["_source"]["parent"]["id"] for hit in hits["hits"])
 
