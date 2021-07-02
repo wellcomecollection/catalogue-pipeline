@@ -26,8 +26,7 @@ trait IndexerFixtures
     with Akka
     with SQS { this: Suite =>
   def withWorker[R](
-    queue: Queue =
-      Queue("test://q", "arn::test:q", visibilityTimeout = 1),
+    queue: Queue = Queue("test://q", "arn::test:q", visibilityTimeout = 1),
     typedStore: MemoryTypedStore[S3ObjectLocation, SierraTransformable],
     indexPrefix: String)(
     testWith: TestWith[Worker, R]
