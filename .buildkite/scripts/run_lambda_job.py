@@ -1,9 +1,4 @@
 #!/usr/bin/env python3
-# -*- encoding: utf-8
-
-import argparse
-import os
-import sys
 
 from commands import run_build_script
 from git_utils import (
@@ -61,4 +56,4 @@ if __name__ == "__main__":
         run_build_script("run_lambda_tests.sh", path)
 
         if is_default_branch():
-            run_lambda_tests("publish_lambda_zip.py", path, "--bucket", "wellcomecollection-platform-infra", "--key", f"lambdas/{path}.zip")
+            run_build_script("publish_lambda_zip.py", path, "--bucket", "wellcomecollection-platform-infra", "--key", f"lambdas/{path}.zip")
