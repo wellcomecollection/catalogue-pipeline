@@ -18,7 +18,6 @@ import weco.catalogue.source_model.sierra.SierraTransformable
 import weco.pipeline.sierra_indexer.services.Worker
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration._
 
 trait IndexerFixtures
     extends ElasticsearchFixtures
@@ -28,7 +27,7 @@ trait IndexerFixtures
     with SQS { this: Suite =>
   def withWorker[R](
     queue: Queue =
-      Queue("test://q", "arn::test:q", visibilityTimeout = 1.second),
+      Queue("test://q", "arn::test:q", visibilityTimeout = 1),
     typedStore: MemoryTypedStore[S3ObjectLocation, SierraTransformable],
     indexPrefix: String)(
     testWith: TestWith[Worker, R]
