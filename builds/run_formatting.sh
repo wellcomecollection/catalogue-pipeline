@@ -29,7 +29,7 @@ docker run --tty --rm \
   --volume ~/.ivy2:/root/.ivy2 \
   --volume "$HOST_COURSIER_CACHE:/root/$LINUX_COURSIER_CACHE" \
 	--volume "$ROOT:/repo" \
-	"$ECR_REGISTRY/wellcome/scalafmt:edge"
+	"$ECR_REGISTRY/wellcome/scalafmt"
 
 docker run --tty --rm \
 	--volume "$ROOT:/repo" \
