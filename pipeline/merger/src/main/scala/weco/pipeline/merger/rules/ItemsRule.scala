@@ -159,8 +159,8 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     val isDefinedForTarget: WorkPredicate = singlePhysicalItemCalmWork
     val isDefinedForSource: WorkPredicate =
       singleDigitalItemMetsWork or
-         singleDigitalItemMiroWork or
-         sierraWork
+        singleDigitalItemMiroWork or
+        sierraWork
 
     def rule(
       target: Work.Visible[Identified],
