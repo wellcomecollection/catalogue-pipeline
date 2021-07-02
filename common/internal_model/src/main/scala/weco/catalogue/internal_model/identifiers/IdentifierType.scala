@@ -26,6 +26,11 @@ object IdentifierType extends Enum[IdentifierType] {
   def apply(id: String): IdentifierType =
     IdentifierType.withName(id)
 
+  case object Tei extends IdentifierType {
+    val id = "tei-manuscript-id"
+    val label = "Tei manuscript id"
+  }
+
   case object MiroImageNumber extends IdentifierType {
     val id = "miro-image-number"
     val label = "Miro image number"

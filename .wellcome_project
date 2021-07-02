@@ -135,5 +135,8 @@ catalogue_pipeline:
     - id: transformer_sierra
       services:
         - id: sierra-transformer
+    - id: transformer_tei
+      services:
+        - id: tei-transformer
   name: Catalogue pipeline
   role_arn: arn:aws:iam::760097843905:role/platform-ci

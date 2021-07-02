@@ -178,6 +178,12 @@ lazy val transformer_calm = setupProject(
   externalDependencies = CatalogueDependencies.calmTransformerDependencies
 )
 
+lazy val transformer_tei= setupProject(
+  project,
+  folder = "pipeline/transformer/transformer_tei",
+  localDependencies = Seq(transformer_common)
+)
+
 // Sierra adapter
 
 lazy val sierra_reader = setupProject(
