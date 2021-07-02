@@ -442,7 +442,7 @@ class PipelineStorageStreamTest
         Failure(new Throwable("BOOM!"))
     }
 
-    withLocalSqsQueuePair() {
+    withLocalSqsQueuePair(visibilityTimeout = 1.second) {
       case QueuePair(queue, dlq) =>
         withPipelineStream(
           queue = queue,

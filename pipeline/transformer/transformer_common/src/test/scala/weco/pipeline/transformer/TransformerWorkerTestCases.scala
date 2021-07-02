@@ -21,6 +21,7 @@ import weco.pipeline_storage.{
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.concurrent.duration._
 import scala.util.{Failure, Try}
 
 trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
@@ -291,7 +292,7 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
       // parsed as a notification.
       it("if it can't parse the notification on the queue") {
         withContext { implicit context =>
-          withLocalSqsQueuePair() {
+          withLocalSqsQueuePair(visibilityTimeout = 1.second) {
             case QueuePair(queue, dlq) =>
               withWorkerImpl(queue) { _ =>
                 sendNotificationToSQS(queue, "this-is-not-json")
@@ -341,7 +342,7 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
         withContext { implicit context =>
           val payload = createPayload
 
-          withLocalSqsQueuePair() {
+          withLocalSqsQueuePair(visibilityTimeout = 1.second) {
             case QueuePair(queue, dlq) =>
               withWorkerImpl(
                 queue,
@@ -369,7 +370,7 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
         withContext { implicit context =>
           val payload = createPayload
 
-          withLocalSqsQueuePair() {
+          withLocalSqsQueuePair(visibilityTimeout = 1.second) {
             case QueuePair(queue, dlq) =>
               withWorkerImpl(queue, workKeySender = brokenSender) { _ =>
                 sendNotificationToSQS(queue, payload)
