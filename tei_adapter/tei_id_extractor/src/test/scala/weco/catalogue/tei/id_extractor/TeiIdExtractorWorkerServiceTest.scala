@@ -6,7 +6,11 @@ import org.apache.commons.io.IOUtils
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import weco.akka.fixtures.Akka
-import weco.catalogue.source_model.tei.{TeiIdChangeMessage, TeiIdDeletedMessage, TeiIdMessage}
+import weco.catalogue.source_model.tei.{
+  TeiIdChangeMessage,
+  TeiIdDeletedMessage,
+  TeiIdMessage
+}
 import weco.catalogue.tei.id_extractor.database.TableProvisioner
 import weco.catalogue.tei.id_extractor.fixtures.{PathIdDatabase, Wiremock}
 import weco.fixtures.TestWith
