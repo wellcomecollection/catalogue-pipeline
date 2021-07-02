@@ -113,4 +113,4 @@ class MetsTransformerWorkerTest
         retriever = retriever
       )
     )
-  }
+}
