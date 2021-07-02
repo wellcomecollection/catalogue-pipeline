@@ -158,15 +158,9 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
   private val mergeIntoCalmTarget = new PartialRule {
     val isDefinedForTarget: WorkPredicate = singlePhysicalItemCalmWork
     val isDefinedForSource: WorkPredicate =
-      satisfiesAll(
-        singleItem,
-        singleLocation,
-        (
-          (metsIdentified and allDigitalLocations) or
-            (miroIdentified and allDigitalLocations) or
-            (sierraIdentified and allPhysicalLocations)
-        )
-      )
+      singleDigitalItemMetsWork or
+         singleDigitalItemMiroWork or
+         sierraWork
 
     def rule(
       target: Work.Visible[Identified],
