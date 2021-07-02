@@ -8,7 +8,7 @@ import weco.catalogue.internal_model.locations.{
   LocationType,
   PhysicalLocationType
 }
-import weco.catalogue.source_model.sierra.SierraItemData
+import weco.catalogue.source_model.sierra.{SierraBibData, SierraItemData}
 import weco.catalogue.source_model.sierra.identifiers.{
   SierraBibNumber,
   SierraItemNumber
@@ -40,10 +40,17 @@ object SierraItemAccess extends SierraQueryOps with Logging {
     itemId: SierraItemNumber,
     bibStatus: Option[AccessStatus],
     location: Option[PhysicalLocationType],
+    bibData: SierraBibData,
     itemData: SierraItemData
   ): (Option[AccessCondition], Option[String]) =
     (
-      createAccessCondition(bibId, itemId, bibStatus, location, itemData),
+      createAccessCondition(
+        bibId,
+        itemId,
+        bibStatus,
+        location,
+        bibData,
+        itemData),
       itemData.displayNote) match {
       // If the item note is already on the access condition, we don't need to copy it.
       case ((Some(ac), displayNote)) if ac.note == displayNote =>
@@ -70,6 +77,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
     itemId: SierraItemNumber,
     bibStatus: Option[AccessStatus],
     location: Option[PhysicalLocationType],
+    bibData: SierraBibData,
     itemData: SierraItemData
   ): Option[AccessCondition] = {
     val holdCount = itemData.holdCount
@@ -156,7 +164,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
         Some(
           AccessCondition(
             method = AccessMethod.NotRequestable,
-            terms = Some(message)
+            note = Some(message)
           )
         )
 
@@ -388,6 +396,27 @@ object SierraItemAccess extends SierraQueryOps with Logging {
           )
         )
     }
+  } match {
+    case Some(accessCondition) =>
+      // We set the access terms on an item from the access terms on the bib.
+      // Note that we need to be careful about merging terms from Calm/Sierra harvested
+      // items, which is why we assert that we haven't set terms based on anything
+      // *except* 506 subfield ǂa.
+      require(accessCondition.terms.isEmpty)
+
+      val bibTerms = {
+        val terms = bibData
+          .varfieldsWithTag("506")
+          .subfieldsWithTag("a")
+          .map(_.content)
+          .mkString(" ")
+
+        if (terms.isEmpty) None else Some(terms)
+      }
+
+      Some(accessCondition.copy(terms = bibTerms))
+
+    case condition => condition
   }
 
   implicit class ItemDataAccessOps(itemData: SierraItemData) {

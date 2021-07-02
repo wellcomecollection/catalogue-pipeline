@@ -136,19 +136,24 @@ object ItemsRule extends FieldMergeRule with MergerLogging {
     }
 
   /** When records are harvested from Calm, both a bib and an item record are
-    * created in Sierra.  The Sierra item will have more interesting information
-    * about access status, hold count, etc.  The Calm items are just stubs.
+    * created in Sierra.  How we combine these is slightly complicated:
     *
-    * See CalmItems.scala -- the Calm item is only:
+    *     - We can’t just take the Calm item – we would lose any access information,
+    *       which is only populated in Sierra.
+    *     - We can’t just take the Sierra item – when the Calm/Sierra harvest happens,
+    *       it smushes all the access data into 506 $a, undoing all the work we’ve done
+    *       to tidy up the terms in the Calm transformer, e.g. de-duplicated "closed until".
     *
-    *     Item {
-    *       locations: [
-    *         Location { locationType = ClosedStores }
-    *       ]
-    *     }
+    * For now, we choose to just take the Sierra item (or rather, take any items except
+    * the Calm item).  We lose some of the Calm transformer niceties, but they're not worth
+    * the additional complexity it would add here.
     *
-    * For this reason, we keep all the items *except* the Calm item.  This means
+    * Additionally, it's possible the CALM fields will be split into separate 506 subfields
+    * in a future version of the Calm/Sierra harvest, which would allow us to mirror the tidy-up
+    * logic in the Sierra transformer.
+    * For now, we keep all the items *except* the Calm item.  This means
     * we'll also pick up any items linked to the Sierra work from METS or Miro.
+    *
     */
   private val mergeIntoCalmTarget = new PartialRule {
     val isDefinedForTarget: WorkPredicate = singlePhysicalItemCalmWork
