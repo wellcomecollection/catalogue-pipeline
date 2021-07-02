@@ -344,7 +344,7 @@ class PipelineStorageStreamTest
     val index = createIndex
     val sender = new MemoryMessageSender
 
-    withLocalSqsQueuePair() {
+    withLocalSqsQueuePair(visibilityTimeout = 1.second) {
       case QueuePair(queue, dlq) =>
         withPipelineStream(queue = queue, indexer = indexer(index)) {
           pipelineStream =>
