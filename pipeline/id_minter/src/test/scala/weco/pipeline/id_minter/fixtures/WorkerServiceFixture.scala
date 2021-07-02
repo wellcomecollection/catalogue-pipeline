@@ -24,7 +24,7 @@ trait WorkerServiceFixture
     with PipelineStorageStreamFixtures {
   def withWorkerService[R](
     messageSender: MemoryMessageSender = new MemoryMessageSender(),
-    queue: Queue = Queue("url://q", "arn::q", visibilityTimeout = 1.second),
+    queue: Queue = Queue("url://q", "arn::q", visibilityTimeout = 1),
     identifiersDao: IdentifiersDao,
     identifiersTableConfig: IdentifiersTableConfig,
     mergedIndex: Map[String, Json] = Map.empty,

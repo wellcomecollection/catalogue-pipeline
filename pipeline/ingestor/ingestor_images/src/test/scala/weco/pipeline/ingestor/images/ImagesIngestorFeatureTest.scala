@@ -50,7 +50,7 @@ class ImagesIngestorFeatureTest
   }
 
   it("does not delete a message from the queue if it fails processing it") {
-    withLocalSqsQueuePair() {
+    withLocalSqsQueuePair(visibilityTimeout = 1.second) {
       case QueuePair(queue, dlq) =>
         sendNotificationToSQS(queue = queue, body = "nope")
         withLocalImagesIndex { index =>

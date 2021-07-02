@@ -6,7 +6,11 @@ import org.apache.commons.io.IOUtils
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import weco.akka.fixtures.Akka
+import weco.catalogue.source_model.tei.{TeiIdChangeMessage, TeiIdDeletedMessage, TeiIdMessage}
+import weco.catalogue.tei.id_extractor.database.TableProvisioner
+import weco.catalogue.tei.id_extractor.fixtures.{PathIdDatabase, Wiremock}
 import weco.fixtures.TestWith
+import weco.http.client.AkkaHttpClient
 import weco.json.JsonUtil._
 import weco.messaging.fixtures.SQS
 import weco.messaging.fixtures.SQS.QueuePair
@@ -16,20 +20,6 @@ import weco.messaging.sqs.SQSStream
 import weco.storage.fixtures.S3Fixtures.Bucket
 import weco.storage.s3.S3ObjectLocation
 import weco.storage.store.memory.MemoryStore
-import weco.catalogue.tei.id_extractor.database.TableProvisioner
-import weco.catalogue.tei.id_extractor.fixtures.{PathIdDatabase, Wiremock}
-import com.github.tomakehurst.wiremock.client.WireMock
-import io.circe.Encoder
-import weco.fixtures.TestWith
-import weco.storage.fixtures.S3Fixtures.Bucket
-import weco.catalogue.tei.id_extractor.database.TableProvisioner
-import weco.catalogue.source_model.tei.{
-  TeiIdChangeMessage,
-  TeiIdDeletedMessage,
-  TeiIdMessage
-}
-
-import weco.http.client.AkkaHttpClient
 
 import java.nio.charset.StandardCharsets
 import java.time.Instant
@@ -325,8 +315,8 @@ class TeiIdExtractorWorkerServiceTest
                        R]): R =
     withWiremock("localhost") { port =>
       val repoUrl = s"http://localhost:$port"
-      withLocalSqsQueuePair(3) {
-        case q @ QueuePair(queue, dlq) =>
+      withLocalSqsQueuePair(visibilityTimeout = 3.seconds) {
+        case q @ QueuePair(queue, _) =>
           withActorSystem { implicit ac =>
             implicit val ec = ac.dispatcher
             withSQSStream(queue) { stream: SQSStream[NotificationMessage] =>
