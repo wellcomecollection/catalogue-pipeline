@@ -21,6 +21,7 @@ import weco.catalogue.source_model.sierra.{
 import weco.pipeline.sierra_indexer.fixtures.IndexerFixtures
 
 import java.time.Instant
+import scala.concurrent.duration._
 
 class SierraIndexerFeatureTest
     extends AnyFunSpec
@@ -317,7 +318,7 @@ class SierraIndexerFeatureTest
     )
 
     withIndices { indexPrefix =>
-      withLocalSqsQueuePair(visibilityTimeout = 5) {
+      withLocalSqsQueuePair() {
         case QueuePair(queue, dlq) =>
           withWorker(queue, store, indexPrefix) { _ =>
             sendNotificationToSQS(
@@ -1111,7 +1112,7 @@ class SierraIndexerFeatureTest
         )
         .await
 
-      withLocalSqsQueuePair() {
+      withLocalSqsQueuePair(visibilityTimeout = 1.second) {
         case QueuePair(queue, dlq) =>
           withWorker(queue, store, indexPrefix) { _ =>
             sendNotificationToSQS(

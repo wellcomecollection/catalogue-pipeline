@@ -34,7 +34,7 @@ class MatcherFeatureTest
       new MemoryRetriever[WorkLinks]()
     val messageSender = new MemoryMessageSender()
 
-    withLocalSqsQueue(visibilityTimeout = 5) { queue =>
+    withLocalSqsQueue() { queue =>
       withWorkerService(retriever, queue, messageSender) { _ =>
         val links = createWorkLinksWith(referencedIds = Set.empty)
 

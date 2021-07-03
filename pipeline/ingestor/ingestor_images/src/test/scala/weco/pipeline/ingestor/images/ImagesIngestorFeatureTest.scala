@@ -13,6 +13,8 @@ import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.image.Image
 import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
 
+import scala.concurrent.duration._
+
 class ImagesIngestorFeatureTest
     extends AnyFunSpec
     with ImageGenerators
@@ -21,7 +23,7 @@ class ImagesIngestorFeatureTest
   it("reads an image from the queue, ingests it and deletes the message") {
     val image = createImageData.toAugmentedImage
 
-    withLocalSqsQueuePair(visibilityTimeout = 10) {
+    withLocalSqsQueuePair(visibilityTimeout = 10.seconds) {
       case QueuePair(queue, dlq) =>
         sendNotificationToSQS(queue = queue, body = image.id)
         withLocalImagesIndex { index =>
@@ -48,7 +50,7 @@ class ImagesIngestorFeatureTest
   }
 
   it("does not delete a message from the queue if it fails processing it") {
-    withLocalSqsQueuePair() {
+    withLocalSqsQueuePair(visibilityTimeout = 1.second) {
       case QueuePair(queue, dlq) =>
         sendNotificationToSQS(queue = queue, body = "nope")
         withLocalImagesIndex { index =>

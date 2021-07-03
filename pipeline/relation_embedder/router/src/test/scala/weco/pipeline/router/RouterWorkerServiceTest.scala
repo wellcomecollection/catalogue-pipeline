@@ -123,7 +123,7 @@ class RouterWorkerServiceTest
                            retriever: Retriever[Work[Merged]])(
     testWith: TestWith[(QueuePair, MemoryMessageSender, MemoryMessageSender),
                        R]): R =
-    withLocalSqsQueuePair(visibilityTimeout = 1) {
+    withLocalSqsQueuePair() {
       case q @ QueuePair(queue, _) =>
         val worksMessageSender = new MemoryMessageSender
         val pathsMessageSender = new MemoryMessageSender

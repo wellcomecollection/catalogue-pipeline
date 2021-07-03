@@ -14,6 +14,7 @@ import weco.catalogue.internal_model.work.generators.WorkGenerators
 import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
 
 class IngestorWorkerServiceTest
     extends AnyFunSpec
@@ -120,7 +121,7 @@ class IngestorWorkerServiceTest
     withLocalWorksIndex { indexedIndex =>
       withLocalDenormalisedWorksIndex { identifiedIndex =>
         insertIntoElasticsearch(identifiedIndex, works: _*)
-        withLocalSqsQueuePair(visibilityTimeout = 10) {
+        withLocalSqsQueuePair(visibilityTimeout = 10.seconds) {
           case QueuePair(queue, dlq) =>
             withWorkerService(
               queue,

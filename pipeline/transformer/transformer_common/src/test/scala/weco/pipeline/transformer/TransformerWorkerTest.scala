@@ -24,6 +24,7 @@ import weco.storage.s3.S3ObjectLocation
 import weco.storage.store.memory.MemoryVersionedStore
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
 
 class TransformerWorkerTest
     extends AnyFunSpec
@@ -35,7 +36,7 @@ class TransformerWorkerTest
     with S3ObjectLocationGenerators {
 
   it("if it can't look up the source data, it fails") {
-    withLocalSqsQueuePair() {
+    withLocalSqsQueuePair(visibilityTimeout = 1.second) {
       case QueuePair(queue, dlq) =>
         withWorker(queue) { _ =>
           sendNotificationToSQS(queue, Version("A", 1))

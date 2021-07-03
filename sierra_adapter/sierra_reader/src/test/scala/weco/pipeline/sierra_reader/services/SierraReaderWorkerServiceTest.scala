@@ -196,7 +196,7 @@ class SierraReaderWorkerServiceTest
     val responses = Seq(firstPage, secondPage, finalPage, secondPage, finalPage)
 
     withLocalS3Bucket { bucket =>
-      withLocalSqsQueue(visibilityTimeout = 5) { queue =>
+      withLocalSqsQueue() { queue =>
         withWorkerService(
           responses,
           bucket,

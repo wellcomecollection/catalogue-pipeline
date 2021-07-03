@@ -21,6 +21,7 @@ import weco.pipeline_storage.{
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.concurrent.duration._
 import scala.util.{Failure, Try}
 
 trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
@@ -63,8 +64,6 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
     implicit context: Context
   ): R
 
-  val visibilityTimeout: Int = 1
-
   describe("behaves as a TransformerWorker") {
     it("transforms a work, indexes it, and removes it from the queue") {
       withContext { implicit context =>
@@ -73,7 +72,7 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
         val workIndexer = new MemoryIndexer[Work[Source]]()
         val workKeySender = new MemoryMessageSender()
 
-        withLocalSqsQueuePair(visibilityTimeout = visibilityTimeout) {
+        withLocalSqsQueuePair() {
           case QueuePair(queue, dlq) =>
             withWorkerImpl(queue, workIndexer, workKeySender) { _ =>
               sendNotificationToSQS(queue, payload)
@@ -210,7 +209,7 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
           val workIndexer = new MemoryIndexer[Work[Source]]()
           val workKeySender = new MemoryMessageSender()
 
-          withLocalSqsQueuePair(visibilityTimeout = 2) {
+          withLocalSqsQueuePair() {
             case QueuePair(queue, dlq) =>
               withWorkerImpl(queue, workIndexer, workKeySender) { _ =>
                 // Transform the first payload, and check it stores successfully.
@@ -293,7 +292,7 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
       // parsed as a notification.
       it("if it can't parse the notification on the queue") {
         withContext { implicit context =>
-          withLocalSqsQueuePair() {
+          withLocalSqsQueuePair(visibilityTimeout = 1.second) {
             case QueuePair(queue, dlq) =>
               withWorkerImpl(queue) { _ =>
                 sendNotificationToSQS(queue, "this-is-not-json")
@@ -343,7 +342,7 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
         withContext { implicit context =>
           val payload = createPayload
 
-          withLocalSqsQueuePair() {
+          withLocalSqsQueuePair(visibilityTimeout = 1.second) {
             case QueuePair(queue, dlq) =>
               withWorkerImpl(
                 queue,
@@ -371,7 +370,7 @@ trait TransformerWorkerTestCases[Context, Payload <: SourcePayload, SourceData]
         withContext { implicit context =>
           val payload = createPayload
 
-          withLocalSqsQueuePair() {
+          withLocalSqsQueuePair(visibilityTimeout = 1.second) {
             case QueuePair(queue, dlq) =>
               withWorkerImpl(queue, workKeySender = brokenSender) { _ =>
                 sendNotificationToSQS(queue, payload)

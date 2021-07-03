@@ -113,8 +113,4 @@ class MetsTransformerWorkerTest
         retriever = retriever
       )
     )
-
-  // We've seen tests fail in CI where messages get resent with the default
-  // visibility timeout (1 second), so bump it to avoid flakiness.
-  override val visibilityTimeout: Int = 5
 }

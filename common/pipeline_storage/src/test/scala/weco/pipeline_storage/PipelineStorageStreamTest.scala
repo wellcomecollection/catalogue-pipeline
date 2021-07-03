@@ -67,7 +67,7 @@ class PipelineStorageStreamTest
 
     val sender = new MemoryMessageSender
 
-    withLocalSqsQueuePair(visibilityTimeout = 10) {
+    withLocalSqsQueuePair(visibilityTimeout = 10.seconds) {
       case QueuePair(queue, dlq) =>
         withPipelineStream(
           queue = queue,
@@ -105,7 +105,7 @@ class PipelineStorageStreamTest
 
     val sender = new MemoryMessageSender
 
-    withLocalSqsQueuePair(visibilityTimeout = 10) {
+    withLocalSqsQueuePair(visibilityTimeout = 10.seconds) {
       case QueuePair(queue, dlq) =>
         withPipelineStream(
           queue = queue,
@@ -157,7 +157,7 @@ class PipelineStorageStreamTest
 
     val sender = new MemoryMessageSender
 
-    withLocalSqsQueuePair(visibilityTimeout = 1) {
+    withLocalSqsQueuePair(visibilityTimeout = 1.second) {
       case QueuePair(queue, dlq) =>
         withPipelineStream(queue = queue, indexer = indexer, sender = sender) {
           pipelineStream =>
@@ -205,7 +205,7 @@ class PipelineStorageStreamTest
       }
     }
 
-    withLocalSqsQueuePair(visibilityTimeout = 1) {
+    withLocalSqsQueuePair(visibilityTimeout = 1.second) {
       case QueuePair(queue, dlq) =>
         withPipelineStream(
           queue = queue,
@@ -246,7 +246,7 @@ class PipelineStorageStreamTest
 
     val sender = new MemoryMessageSender
 
-    withLocalSqsQueuePair(visibilityTimeout = 10) {
+    withLocalSqsQueuePair(visibilityTimeout = 10.seconds) {
       case QueuePair(queue, dlq) =>
         withPipelineStream(
           queue = queue,
@@ -274,7 +274,7 @@ class PipelineStorageStreamTest
 
     val sender = new MemoryMessageSender
 
-    withLocalSqsQueuePair(visibilityTimeout = 5) {
+    withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>
         withPipelineStream(
           queue = queue,
@@ -309,7 +309,7 @@ class PipelineStorageStreamTest
 
     val sender = new MemoryMessageSender
 
-    withLocalSqsQueuePair(visibilityTimeout = 30) {
+    withLocalSqsQueuePair(visibilityTimeout = 30.seconds) {
       case QueuePair(queue, dlq) =>
         withPipelineStream(
           queue = queue,
@@ -344,7 +344,7 @@ class PipelineStorageStreamTest
     val index = createIndex
     val sender = new MemoryMessageSender
 
-    withLocalSqsQueuePair() {
+    withLocalSqsQueuePair(visibilityTimeout = 1.second) {
       case QueuePair(queue, dlq) =>
         withPipelineStream(queue = queue, indexer = indexer(index)) {
           pipelineStream =>
@@ -442,7 +442,7 @@ class PipelineStorageStreamTest
         Failure(new Throwable("BOOM!"))
     }
 
-    withLocalSqsQueuePair() {
+    withLocalSqsQueuePair(visibilityTimeout = 1.second) {
       case QueuePair(queue, dlq) =>
         withPipelineStream(
           queue = queue,

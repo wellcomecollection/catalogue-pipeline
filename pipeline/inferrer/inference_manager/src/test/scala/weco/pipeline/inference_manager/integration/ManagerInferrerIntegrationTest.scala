@@ -127,9 +127,7 @@ class ManagerInferrerIntegrationTest
       R
     ]
   ): R =
-    // We would like a timeout longer than 1s here because the inferrer
-    // may need to warm up.
-    withLocalSqsQueuePair(visibilityTimeout = 5) { queuePair =>
+    withLocalSqsQueuePair() { queuePair =>
       val messageSender = new MemoryMessageSender()
       val root = Paths.get("integration-tmp").toFile
       root.mkdir()

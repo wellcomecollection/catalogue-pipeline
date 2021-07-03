@@ -22,6 +22,7 @@ import weco.storage.{Identified, Version}
 import java.time.Instant
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.concurrent.duration._
 import scala.util.{Failure, Try}
 
 class MetsAdapterWorkerServiceTest
@@ -280,7 +281,7 @@ class MetsAdapterWorkerServiceTest
                         MemoryMessageSender),
                        R]): R =
     withActorSystem { implicit actorSystem =>
-      withLocalSqsQueuePair() {
+      withLocalSqsQueuePair(visibilityTimeout = 1.second) {
         case QueuePair(queue, dlq) =>
           withSQSStream[NotificationMessage, R](queue) { stream =>
             val workerService = new MetsAdapterWorkerService(

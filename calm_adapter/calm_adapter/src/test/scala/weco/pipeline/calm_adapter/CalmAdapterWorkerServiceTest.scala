@@ -28,6 +28,7 @@ import weco.catalogue.source_model.store.SourceVHS
 import weco.pipeline.calm_api_client.CalmQuery
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
 import scala.language.reflectiveCalls
 import scala.util.{Failure, Try}
 
@@ -156,7 +157,7 @@ class CalmAdapterWorkerServiceTest
     messageSender: MemoryMessageSender = new MemoryMessageSender())(
     testWith: TestWith[(CalmAdapterWorkerService[String], QueuePair), R]): R =
     withActorSystem { implicit actorSystem =>
-      withLocalSqsQueuePair() {
+      withLocalSqsQueuePair(visibilityTimeout = 1.second) {
         case QueuePair(queue, dlq) =>
           withSQSStream[NotificationMessage, R](queue) { stream =>
             val calmAdapter = new CalmAdapterWorkerService(

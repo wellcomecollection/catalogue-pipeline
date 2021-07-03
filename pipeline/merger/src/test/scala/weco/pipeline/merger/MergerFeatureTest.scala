@@ -84,7 +84,7 @@ class MergerFeatureTest
 
     val workSender = new MemoryMessageSender
 
-    withLocalSqsQueuePair(visibilityTimeout = 5) {
+    withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>
         withWorkerService(retriever, queue, workSender, index = index) { _ =>
           // 2) Now we update all four works at times t=1, t=2, t=3 and t=4.
