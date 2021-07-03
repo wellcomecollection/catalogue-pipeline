@@ -122,7 +122,8 @@ trait IdentifiersDatabase
 
   }
 
-  def insertIdentifiers(table: IdentifiersTable, identifiers: Seq[Identifier]): Unit =
+  def insertIdentifiers(table: IdentifiersTable,
+                        identifiers: Seq[Identifier]): Unit =
     identifiers.foreach { id =>
       NamedDB('primary) localTx { implicit session =>
         withSQL {
@@ -135,8 +136,13 @@ trait IdentifiersDatabase
               table.column.SourceId -> sqls.?
             )
         }.batch {
-          Seq(id.CanonicalId.toString, id.OntologyType, id.SourceSystem, id.SourceId)
-        }.apply()
+            Seq(
+              id.CanonicalId.toString,
+              id.OntologyType,
+              id.SourceSystem,
+              id.SourceId)
+          }
+          .apply()
       }
     }
 

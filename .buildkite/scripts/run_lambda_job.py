@@ -35,8 +35,7 @@ if __name__ == "__main__":
 
     lambda_paths = [
         "calm_adapter/calm_window_generator",
-        "calm_adapter/calm_deletion_check_initiator"
-        "common/window_generator",
+        "calm_adapter/calm_deletion_check_initiator" "common/window_generator",
         "sierra_adapter/s3_demultiplexer",
         "sierra_adapter/sierra_progress_reporter",
         "sierra_adapter/update_embargoed_holdings",
@@ -56,4 +55,11 @@ if __name__ == "__main__":
         run_build_script("run_lambda_tests.sh", path)
 
         if is_default_branch():
-            run_build_script("publish_lambda_zip.py", path, "--bucket", "wellcomecollection-platform-infra", "--key", f"lambdas/{path}.zip")
+            run_build_script(
+                "publish_lambda_zip.py",
+                path,
+                "--bucket",
+                "wellcomecollection-platform-infra",
+                "--key",
+                f"lambdas/{path}.zip",
+            )
