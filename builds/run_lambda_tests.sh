@@ -8,7 +8,12 @@ PROJECT="$1"
 
 ROOT=$(git rev-parse --show-toplevel)
 
-docker run --rm --tty \
-  --volume "$ROOT:$ROOT" \
-  --workdir "$ROOT/$PROJECT" \
-  wellcome/tox:latest --workdir /tmp/.tox
+if [[ -f "$ROOT/$PROJECT/tox.ini" ]]
+then
+  docker run --rm --tty \
+    --volume "$ROOT:$ROOT" \
+    --workdir "$ROOT/$PROJECT" \
+    wellcome/tox:latest --workdir /tmp/.tox
+else
+  echo "No tox.ini, no tests to run!"
+fi
