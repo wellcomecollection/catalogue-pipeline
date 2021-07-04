@@ -127,7 +127,7 @@ if __name__ == "__main__":
 
     # Perform make tasks
 
-    run_build_script("run_sbt_tests.sh", args.project_name)
+    run_build_script("run_tests.sh", args.project_name)
 
     if is_default_branch():
-        run_build_script("publish_sbt_app.sh", args.project_name)
+        run_build_script("publish_app.sh", args.project_name)
