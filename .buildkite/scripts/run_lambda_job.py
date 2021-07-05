@@ -52,7 +52,7 @@ if __name__ == "__main__":
             print(f"*** Nothing in this patch affects {path}, skipping")
             continue
 
-        run_build_script("run_lambda_tests.sh", path)
+        run_build_script("run_python_tests.sh", path)
 
         if is_default_branch():
             run_build_script(

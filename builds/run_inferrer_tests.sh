@@ -9,5 +9,5 @@ PROJECT="$1"
 ROOT=$(git rev-parse --show-toplevel)
 BUILDS_DIR="$ROOT/builds"
 
-$BUILDS_DIR/run_python_tests.sh pipeline/inferrer/$service_name
+$BUILDS_DIR/run_python_tests.sh pipeline/inferrer/$PROJECT
 $BUILDS_DIR/run_inference_manager_integration_tests.sh
