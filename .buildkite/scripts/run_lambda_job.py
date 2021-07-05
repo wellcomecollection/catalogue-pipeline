@@ -1,11 +1,6 @@
 #!/usr/bin/env python3
-# -*- encoding: utf-8
 
-import argparse
-import os
-import sys
-
-from commands import make
+from commands import run_build_script
 from git_utils import (
     local_current_head,
     get_sha1_for_tag,
@@ -38,28 +33,33 @@ if __name__ == "__main__":
     print(f"On default branch: {is_default_branch()}")
     print(f"Commit range: {commit_range}")
 
-    # Parse script args
+    lambda_paths = [
+        "calm_adapter/calm_window_generator",
+        "calm_adapter/calm_deletion_check_initiator" "common/window_generator",
+        "sierra_adapter/s3_demultiplexer",
+        "sierra_adapter/sierra_progress_reporter",
+        "sierra_adapter/update_embargoed_holdings",
+        "tei_adapter/tei_updater",
+    ]
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument("project_name", default=os.environ.get("SBT_PROJECT"))
-    parser.add_argument("--changes-in", nargs="*")
-    args = parser.parse_args()
+    changed_paths = get_changed_paths(commit_range)
 
-    # Get changed_paths
+    for path in lambda_paths:
+        if not any(
+            p.endswith((".py", ".ini", ".txt")) and p.startswith(path)
+            for p in changed_paths
+        ):
+            print(f"*** Nothing in this patch affects {path}, skipping")
+            continue
 
-    if args.changes_in:
-        change_globs = args.changes_in + [".buildkite/pipeline.yml"]
-    else:
-        change_globs = None
+        run_build_script("run_python_tests.sh", path)
 
-    changed_paths = get_changed_paths(commit_range, globs=change_globs)
-
-    # Determine whether we should build this project
-
-    if not should_run_lambda_tests(changed_paths):
-        print(f"Nothing in this patch affects {args.project_name}, so stopping.")
-        sys.exit(0)
-
-    make(f"{args.project_name}-test")
-    if is_default_branch():
-        make(f"{args.project_name}-publish")
+        if is_default_branch():
+            run_build_script(
+                "publish_lambda_zip.py",
+                path,
+                "--bucket",
+                "wellcomecollection-platform-infra",
+                "--key",
+                f"lambdas/{path}.zip",
+            )

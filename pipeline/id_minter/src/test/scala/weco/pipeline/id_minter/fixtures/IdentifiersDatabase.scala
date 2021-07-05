@@ -122,8 +122,9 @@ trait IdentifiersDatabase
 
   }
 
-  def insertIdentifiers(table: IdentifiersTable, identifiers: Seq[Identifier]): Unit = {
-    if (identifiers.nonEmpty) {
+  def insertIdentifiers(table: IdentifiersTable,
+                        identifiers: Seq[Identifier]): Unit =
+    identifiers.foreach { id =>
       NamedDB('primary) localTx { implicit session =>
         withSQL {
           insert
@@ -135,13 +136,15 @@ trait IdentifiersDatabase
               table.column.SourceId -> sqls.?
             )
         }.batch {
-          identifiers.map { id =>
-            Seq(id.CanonicalId.toString, id.OntologyType, id.SourceSystem, id.SourceId)
-          }: _*
-        }.apply()
+            Seq(
+              id.CanonicalId.toString,
+              id.OntologyType,
+              id.SourceSystem,
+              id.SourceId)
+          }
+          .apply()
       }
     }
-  }
 
   def withIdentifiersDao[R](existingEntries: Seq[Identifier] = Nil)(
     testWith: TestWith[(IdentifiersDao, IdentifiersTable), R]): R =
