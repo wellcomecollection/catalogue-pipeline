@@ -24,7 +24,7 @@ case "$IMAGE_ID" in
 
   "tei_id_extractor" | "tei_adapter")
     PROJECT_ID="tei_adapter"
-    ;;)
+    ;;
 
   "sierra_merger" | "sierra_linker" | "sierra_reader" | "sierra_indexer")
     PROJECT_ID="sierra_adapter"
