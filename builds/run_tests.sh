@@ -14,6 +14,10 @@ case "$PROJECT" in
     $BUILDS_DIR/run_inferrer_tests.sh "$PROJECT"
     ;;
 
+  "inference_manager")
+    $BUILDS_DIR/run_inference_manager_integration_tests.sh
+    ;;
+
   *)
     $BUILDS_DIR/run_sbt_tests.sh "$PROJECT"
     ;;
