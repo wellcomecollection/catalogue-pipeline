@@ -28,4 +28,5 @@ docker run --tty --rm \
   --net host \
   --volume "$ROOT:$ROOT" \
   --workdir "$ROOT" \
+  --env "ROOT" \
   "$ECR_REGISTRY/wellcome/sbt_wrapper" "$@"
