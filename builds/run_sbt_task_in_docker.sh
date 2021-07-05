@@ -6,7 +6,8 @@ set -o verbose
 
 ECR_REGISTRY="760097843905.dkr.ecr.eu-west-1.amazonaws.com"
 
-ROOT=$(git rev-parse --show-toplevel)
+ROOT="$(git rev-parse --show-toplevel)"
+ROOT="$(cd "$(dirname "$ROOT")"; pwd)/$(basename "$ROOT")"
 
 # Coursier cache location is platform-dependent
 # https://get-coursier.io/docs/cache.html#default-location
