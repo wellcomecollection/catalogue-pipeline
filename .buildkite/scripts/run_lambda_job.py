@@ -56,6 +56,7 @@ if __name__ == "__main__":
 
         if is_default_branch():
             _subprocess_run(["pip3", "install", "--user", "boto3"])
+            _subprocess_run(["pip3", "install", "--user", "docopt"])
             run_build_script(
                 "publish_lambda_zip.py",
                 path,
