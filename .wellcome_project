@@ -82,10 +82,10 @@ catalogue_pipeline:
       name: Production
     - id: stage
       name: Staging
-    - id: "2021-06-08"
-      name: "2021-06-08"
     - id: "2021-06-27"
       name: "2021-06-27"
+    - id: "2021-07-06"
+      name: "2021-07-06"
   image_repositories:
     - id: id_minter
       services:
