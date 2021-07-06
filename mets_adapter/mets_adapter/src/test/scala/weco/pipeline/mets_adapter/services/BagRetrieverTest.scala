@@ -28,7 +28,6 @@ class BagRetrieverTest
             contentType = ContentTypes.`application/json`,
             """
               |{
-              |  "@context": "https://api.wellcomecollection.org/context.json",
               |  "id": "digitised/b16237456",
               |  "space": {
               |    "id": "digitised",

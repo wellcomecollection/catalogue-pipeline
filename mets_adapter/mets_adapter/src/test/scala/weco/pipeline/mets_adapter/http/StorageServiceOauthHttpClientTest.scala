@@ -14,7 +14,6 @@ import weco.akka.fixtures.Akka
 import weco.http.client.{HttpGet, HttpPost, MemoryHttpClient}
 import weco.http.fixtures.HttpFixtures
 
-import java.net.URL
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -41,7 +40,6 @@ class StorageServiceOauthHttpClientTest
   val bagJson: String =
     """
       |{
-      |  "@context": "https://api.wellcomecollection.org/context.json",
       |  "id": "digitised/b16237456",
       |  "space": {
       |    "id": "digitised",
@@ -271,6 +269,4 @@ class StorageServiceOauthHttpClientTest
       }
     }
   }
-
-  override def contextUrl: URL = new URL("http://example.net/context.json")
 }
