@@ -43,11 +43,6 @@ object WorkPredicates {
   val zeroIdentifiedItems: WorkPredicate =
     work => !work.data.items.exists { _.id.isInstanceOf[IdState.Identified] }
 
-  /**
-    * This is the shape in which we expect the works from the transformers.
-    * We're specific here as the merging rules often rely on the shape of the
-    * transformers outputs.
-    */
   val teiWork: WorkPredicate = satisfiesAll(
     teiIdentified,
     zeroItem

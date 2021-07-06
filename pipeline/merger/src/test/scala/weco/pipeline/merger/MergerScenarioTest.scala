@@ -3,7 +3,7 @@ package weco.pipeline.merger
 import org.scalatest.GivenWhenThen
 import org.scalatest.featurespec.AnyFeatureSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType}
 import weco.catalogue.internal_model.work.generators.SourceWorkGenerators
 import weco.catalogue.internal_model.work.{Format, MergeCandidate}
 import weco.pipeline.merger.fixtures.FeatureTestSugar
@@ -308,10 +308,7 @@ class MergerScenarioTest
     Scenario("A Tei and a Sierra digital and a sierra physical work are merged") {
       Given("a Tei, a Sierra physical record and a Sierra digital record")
       val (digitalSierra, physicalSierra) = sierraIdentifiedWorkPair()
-      val teiWork = teiIdentifiedWork().title("A tei work").mergeCandidates(List(MergeCandidate(IdState.Identified(
-        physicalSierra.state.canonicalId,
-        physicalSierra.sourceIdentifier
-      ),Some(""))))
+      val teiWork = teiIdentifiedWork().title("A tei work")
 
       When("the works are merged")
       val sierraWorks = List(digitalSierra, physicalSierra)
@@ -323,13 +320,12 @@ class MergerScenarioTest
       outcome.getMerged(physicalSierra) should beRedirectedTo(teiWork)
 
       And("the tei work has the Sierra works' items")
-      outcome.getMerged(teiWork).data.items should contain allElementsOf (digitalSierra.data.items)
-      outcome.getMerged(teiWork).data.items should contain allElementsOf (physicalSierra.data.items)
+      outcome.getMerged(teiWork).data.items should contain allElementsOf digitalSierra.data.items
+      outcome.getMerged(teiWork).data.items should contain allElementsOf physicalSierra.data.items
 
       And("the tei work has the Sierra works' identifiers")
-
-      outcome.getMerged(teiWork).data.otherIdentifiers should contain allElementsOf (physicalSierra.data.otherIdentifiers)
-      outcome.getMerged(teiWork).data.otherIdentifiers should contain allElementsOf (digitalSierra.data.otherIdentifiers)
+      outcome.getMerged(teiWork).data.otherIdentifiers should contain allElementsOf physicalSierra.data.otherIdentifiers.filter(_.identifierType == IdentifierType.SierraIdentifier)
+      outcome.getMerged(teiWork).data.otherIdentifiers should contain allElementsOf digitalSierra.data.otherIdentifiers.filter(_.identifierType == IdentifierType.SierraIdentifier)
     }
   }
 }
