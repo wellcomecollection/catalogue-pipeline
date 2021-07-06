@@ -85,11 +85,10 @@ class OtherIdentifiersRuleTest
     )
 
   it("merges METS, Miro, Calm and Sierra source IDs into Tei target") {
-    inside(
-      OtherIdentifiersRule
-        .merge(
-          teiWork,
-          calmWork :: physicalSierraWork :: nothingWork :: miroWork :: metsWorks)) {
+    inside(OtherIdentifiersRule
+      .merge(
+        teiWork,
+        calmWork :: physicalSierraWork :: nothingWork :: miroWork :: metsWorks)) {
       case FieldMergeResult(otherIdentifiers, mergedSources) =>
         otherIdentifiers should contain theSameElementsAs
           List(physicalSierraWork.sourceIdentifier, miroWork.sourceIdentifier) ++

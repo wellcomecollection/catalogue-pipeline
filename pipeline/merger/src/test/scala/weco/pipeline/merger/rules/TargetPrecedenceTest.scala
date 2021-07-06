@@ -25,7 +25,13 @@ class TargetPrecedenceTest
     it("first, chooses a Tei work") {
       TargetPrecedence
         .getTarget(
-          Seq(tei ,calm, videoSierra, multiItemPhysicalSierra, digitalSierra, miro)
+          Seq(
+            tei,
+            calm,
+            videoSierra,
+            multiItemPhysicalSierra,
+            digitalSierra,
+            miro)
         )
         .value shouldBe tei
     }

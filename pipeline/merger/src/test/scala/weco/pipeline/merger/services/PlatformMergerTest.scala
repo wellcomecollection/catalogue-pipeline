@@ -949,7 +949,7 @@ class PlatformMergerTest
     visibleWorks.head.data.items should contain(item)
   }
 
-  it("merges a physical sierra with a tei"){
+  it("merges a physical sierra with a tei") {
     val physicalWork =
       sierraIdentifiedWork()
         .items(List(createIdentifiedPhysicalItem))
@@ -975,7 +975,6 @@ class PlatformMergerTest
 
     redirectedWorks should have size 1
     visibleWorks should have size 1
-
 
   }
 }

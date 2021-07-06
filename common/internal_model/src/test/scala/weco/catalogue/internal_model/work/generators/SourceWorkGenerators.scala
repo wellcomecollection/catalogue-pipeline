@@ -5,4 +5,4 @@ trait SourceWorkGenerators
     with MiroWorkGenerators
     with MetsWorkGenerators
     with CalmWorkGenerators
-  with TeiWorkGenerators
+    with TeiWorkGenerators

@@ -320,12 +320,26 @@ class MergerScenarioTest
       outcome.getMerged(physicalSierra) should beRedirectedTo(teiWork)
 
       And("the tei work has the Sierra works' items")
-      outcome.getMerged(teiWork).data.items should contain allElementsOf digitalSierra.data.items
-      outcome.getMerged(teiWork).data.items should contain allElementsOf physicalSierra.data.items
+      outcome
+        .getMerged(teiWork)
+        .data
+        .items should contain allElementsOf digitalSierra.data.items
+      outcome
+        .getMerged(teiWork)
+        .data
+        .items should contain allElementsOf physicalSierra.data.items
 
       And("the tei work has the Sierra works' identifiers")
-      outcome.getMerged(teiWork).data.otherIdentifiers should contain allElementsOf physicalSierra.data.otherIdentifiers.filter(_.identifierType == IdentifierType.SierraIdentifier)
-      outcome.getMerged(teiWork).data.otherIdentifiers should contain allElementsOf digitalSierra.data.otherIdentifiers.filter(_.identifierType == IdentifierType.SierraIdentifier)
+      outcome
+        .getMerged(teiWork)
+        .data
+        .otherIdentifiers should contain allElementsOf physicalSierra.data.otherIdentifiers
+        .filter(_.identifierType == IdentifierType.SierraIdentifier)
+      outcome
+        .getMerged(teiWork)
+        .data
+        .otherIdentifiers should contain allElementsOf digitalSierra.data.otherIdentifiers
+        .filter(_.identifierType == IdentifierType.SierraIdentifier)
     }
   }
 }
