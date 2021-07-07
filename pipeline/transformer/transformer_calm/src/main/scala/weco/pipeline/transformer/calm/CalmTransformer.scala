@@ -24,11 +24,7 @@ import weco.pipeline.transformer.calm.models.{
   CalmSourceData,
   CalmTransformerException
 }
-import weco.pipeline.transformer.calm.transformers.{
-  CalmItems,
-  CalmLanguages,
-  CalmNotes
-}
+import weco.pipeline.transformer.calm.transformers._
 import weco.pipeline.transformer.result.Result
 
 object CalmTransformer
@@ -51,9 +47,11 @@ object CalmTransformer
     "third-party metadata"
   )
 
-  override def apply(id: String,
-                     sourceData: CalmSourceData,
-                     version: Int): Result[Work[Source]] = sourceData match {
+  override def apply(
+    id: String,
+    sourceData: CalmSourceData,
+    version: Int
+  ): Result[Work[Source]] = sourceData match {
     case CalmSourceData(record, isDeleted) if isDeleted =>
       Right(deletedWork(version, record, DeletedFromSource("Calm")))
     case CalmSourceData(record, _) if shouldSuppress(record) =>
@@ -77,8 +75,10 @@ object CalmTransformer
       deletedReason = reason
     )
 
-  private def tryParseValidWork(record: CalmRecord,
-                                version: Int): Either[Exception, Work[Source]] =
+  private def tryParseValidWork(
+    record: CalmRecord,
+    version: Int
+  ): Either[Exception, Work[Source]] =
     workData(record) match {
       case Right(data) =>
         Right(
@@ -86,7 +86,8 @@ object CalmTransformer
             state = Source(sourceIdentifier(record), record.retrievedAt),
             version = version,
             data = data
-          ))
+          )
+        )
 
       case Left(err) =>
         err match {
@@ -98,10 +99,12 @@ object CalmTransformer
                 data = WorkData(),
                 invisibilityReasons =
                   List(knownErrToUntransformableReason(knownErr))
-              ))
+              )
+            )
           case unknownStatus: UnknownAccessStatus =>
             warn(
-              s"${record.id}: unknown access status: ${unknownStatus.getMessage}")
+              s"${record.id}: unknown access status: ${unknownStatus.getMessage}"
+            )
             Right(
               Work.Invisible[Source](
                 state = Source(sourceIdentifier(record), record.retrievedAt),
@@ -109,13 +112,15 @@ object CalmTransformer
                 data = WorkData(),
                 invisibilityReasons =
                   List(InvalidValueInSourceField("Calm:AccessStatus"))
-              ))
+              )
+            )
           case err: Exception => Left(err)
         }
     }
 
   private def knownErrToUntransformableReason(
-    err: CalmTransformerException): InvisibilityReason =
+    err: CalmTransformerException
+  ): InvisibilityReason =
     err match {
       case TitleMissing => SourceFieldMissing("Calm:Title")
       case RefNoMissing => SourceFieldMissing("Calm:RefNo")
@@ -153,24 +158,23 @@ object CalmTransformer
       title <- title(record)
       workType <- workType(record)
       collectionPath <- collectionPath(record)
-    } yield
-      WorkData[DataState.Unidentified](
-        title = Some(title),
-        otherIdentifiers = otherIdentifiers(record),
-        format = Some(Format.ArchivesAndManuscripts),
-        collectionPath = Some(collectionPath),
-        referenceNumber = collectionPath.label.map(ReferenceNumber(_)),
-        subjects = subjects(record),
-        languages = languages,
-        mergeCandidates = mergeCandidates(record),
-        items = CalmItems(record),
-        contributors = contributors(record),
-        description = description(record),
-        physicalDescription = physicalDescription(record),
-        production = production(record),
-        workType = workType,
-        notes = CalmNotes(record) ++ languageNotes,
-      )
+    } yield WorkData[DataState.Unidentified](
+      title = Some(title),
+      otherIdentifiers = otherIdentifiers(record),
+      format = Some(Format.ArchivesAndManuscripts),
+      collectionPath = Some(collectionPath),
+      referenceNumber = collectionPath.label.map(ReferenceNumber(_)),
+      subjects = subjects(record),
+      languages = languages,
+      mergeCandidates = CalmMergeCandidates(record),
+      items = CalmItems(record),
+      contributors = contributors(record),
+      description = description(record),
+      physicalDescription = physicalDescription(record),
+      production = production(record),
+      workType = workType,
+      notes = CalmNotes(record) ++ languageNotes
+    )
   }
 
   def sourceIdentifier(record: CalmRecord): SourceIdentifier =
@@ -191,26 +195,9 @@ object CalmTransformer
                 identifierType = idType,
                 value = id,
                 ontologyType = "Work"
-            )
+              )
           )
     }
-
-  def mergeCandidates(
-    record: CalmRecord): List[MergeCandidate[IdState.Identifiable]] =
-    record
-      .get("BNumber")
-      .map { id =>
-        MergeCandidate(
-          IdState.Identifiable(
-            SourceIdentifier(
-              identifierType = IdentifierType.SierraSystemNumber,
-              ontologyType = "Work",
-              value = id
-            )
-          )
-        )
-      }
-      .toList
 
   def title(record: CalmRecord): Result[String] =
     record
@@ -266,7 +253,8 @@ object CalmTransformer
     }
 
   def production(
-    record: CalmRecord): List[ProductionEvent[IdState.Unminted]] = {
+    record: CalmRecord
+  ): List[ProductionEvent[IdState.Unminted]] = {
     record.getList("Date") match {
       case Nil => Nil
       case dates =>
@@ -276,7 +264,9 @@ object CalmTransformer
             label = dates.mkString(" "),
             places = Nil,
             agents = Nil,
-            function = None))
+            function = None
+          )
+        )
     }
   }
 
