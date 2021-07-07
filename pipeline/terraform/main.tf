@@ -83,7 +83,7 @@ module "catalogue_pipeline_2021-07-06" {
   pipeline_date = "2021-07-06"
   release_label = "2021-07-06"
 
-  is_reindexing = true
+  is_reindexing = false
 
   # Boilerplate that shouldn't change between pipelines.
 
