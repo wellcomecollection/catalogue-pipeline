@@ -25,6 +25,7 @@ class ThumbnailRuleTest
   val digitalSierraWork = sierraDigitalIdentifiedWork()
 
   val calmWork = calmIdentifiedWork()
+  val teiWork = teiIdentifiedWork()
 
   val metsWork = metsIdentifiedWork()
     .thumbnail(
@@ -69,6 +70,23 @@ class ThumbnailRuleTest
       case FieldMergeResult(thumbnail, _) =>
         thumbnail shouldBe defined
         thumbnail shouldBe metsWork.data.thumbnail
+    }
+  }
+
+  it("chooses the METS thumbnail for a Tei target") {
+    inside(ThumbnailRule.merge(teiWork, miroWorks :+ metsWork)) {
+      case FieldMergeResult(thumbnail, _) =>
+        thumbnail shouldBe defined
+        thumbnail shouldBe metsWork.data.thumbnail
+    }
+  }
+
+  it(
+    "chooses a Miro thumbnail if no METS works are available, for a Tei target") {
+    inside(ThumbnailRule.merge(teiWork, miroWorks)) {
+      case FieldMergeResult(thumbnail, _) =>
+        thumbnail shouldBe defined
+        miroWorks.map(_.data.thumbnail) should contain(thumbnail)
     }
   }
 

@@ -26,6 +26,9 @@ class ItemsRuleTest
     with Matchers
     with SourceWorkGenerators
     with Inside {
+  val tei: Work.Visible[WorkState.Identified] =
+    teiIdentifiedWork()
+
   val physicalPictureSierra: Work.Visible[WorkState.Identified] =
     sierraPhysicalIdentifiedWork()
       .format(Format.Pictures)
@@ -73,6 +76,15 @@ class ItemsRuleTest
         items should have size 1
         items.head shouldBe miroWork.data.items.head
         mergedSources should be(Seq(miroWork))
+    }
+  }
+
+  it("merges the item from Sierra works tei works") {
+    inside(ItemsRule.merge(tei, List(multiItemPhysicalSierra))) {
+      case FieldMergeResult(items, mergedSources) =>
+        items should have size 2
+        items.head shouldBe multiItemPhysicalSierra.data.items.head
+        mergedSources should be(Seq(multiItemPhysicalSierra))
     }
   }
 
