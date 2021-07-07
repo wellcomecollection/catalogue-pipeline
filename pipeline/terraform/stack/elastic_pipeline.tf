@@ -20,6 +20,7 @@ resource "ec_deployment" "pipeline" {
 
   elasticsearch {
     topology {
+      id         = "hot_content"
       zone_count = 1
       size       = local.es_memory
     }
