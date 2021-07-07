@@ -32,6 +32,10 @@ class GitHubBlobContentReader(httpClient: HttpClient, token: String)(
       response <- httpClient.singleRequest(request)
       blob <- unmarshalAs[Blob](response, request)
       decoded <- Future.fromTry(decodeBase64(blob.content))
+        // Some of the TEI file have a Byte Order Mark (https://en.wikipedia.org/wiki/Byte_order_mark)
+        // at the beginning, probably added by one of the tools used to edit the tei files.
+        // This is a very hacky solution stolen from https://stackoverflow.com/questions/26847500/remove-bom-from-string-in-java
+        .map(_.replace("\uFEFF", ""))
     } yield decoded
 
   }
