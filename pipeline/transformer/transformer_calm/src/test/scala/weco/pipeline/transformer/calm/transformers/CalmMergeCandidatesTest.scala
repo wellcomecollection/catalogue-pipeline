@@ -50,7 +50,7 @@ class CalmMergeCandidatesTest
               value = id
             )
           )
-        )
+      )
     )
   }
 
@@ -84,7 +84,7 @@ class CalmMergeCandidatesTest
               value = id
             )
           )
-        )
+      )
     )
   }
 }
