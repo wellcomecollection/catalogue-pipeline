@@ -1,70 +1,33 @@
 # Catalogue Pipeline
 
-| CI Pipeline       | Status                                                                                                                                                                    |
-|-------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Build             | [![Build status](https://badge.buildkite.com/0ca819db1215b66ecb17019d8ee5331d8e537094d051141219.svg?branch=main)](https://buildkite.com/wellcomecollection/catalogue-pipeline)   |
+[![Build status](https://badge.buildkite.com/0ca819db1215b66ecb17019d8ee5331d8e537094d051141219.svg?branch=main)](https://buildkite.com/wellcomecollection/catalogue-pipeline)
 
-## Purpose
+## Overview
 
-Making Wellcome Collection's catalogue open, accessible and
-discoverable.
+If you are new to the catalogue pipeline the [GitBook documentation](https://docs.wellcomecollection.org/catalogue-pipeline) is a good place to start.
 
-The catalogue consists of multiple sources including:
-* Library holdings
-* Archives and manuscripts
-* Born digital content
-* Images from what was previously wellcomeimages.org
+## Developing
 
-As and when these sources are made available digitally, we will consume
-them via [our pipeline](./pipeline), unify them into a
-[single model](./common/internal_model) and make them discoverable via
-our [API](https://github.com/wellcomecollection/catalogue-api).
+Information for developers working on the catalogue-pipeline.
 
-**Interested in how we make these services?**
+### Deploying
 
-[Take a look at our documentation on the design and decision making
-processes of the services within the catalogue repo][catalogue docs].
+We deploy catalogue-pipeline services using the [weco-deploy](https://github.com/wellcomecollection/weco-deploy) tool.
 
-**Interested in making use of our data to build your own products or
-use in your research?**
+### Things you might want to do
 
-[Take look at our developer documentation][api developer docs] or
-[go straight to our API][api].
+#### Reindexing
 
-**Interested in other parts of the Wellome Collection digital platform
-works?**
+If the [internal_model](./common/internal_model) has been changed you will want to update the information stored by the pipeline to match that model.
 
-[Take a look at our Platform repo][platform repo]
+A reindex operation runs the source data from the [adapters](docs/adapters/README.md) through the pipeline causing it to be re-transformed / matched & merged as appropriate.
 
-**Interested in how all of this works**
-[Keep reading about the architecture of the services in this repo](#architecture).
+#### Scripts
 
+Generally small things you might want to do irregularly involving the
+API & data are in [./scripts](./scripts)
 
-## Architecture
-
-The catalogue consists of three main parts with supporting services.
-
-These are:
-
-* Adapters: Syncing data from multiple external sources, enabling retrieving data performantly and at scale:
-  - [Sierra adapter](sierra_adapter/README.md): [Sierra](https://www.iii.com/products/sierra-ils/) contains data on things in the library
-  - [Calm adapter](calm_adapter/README.md): [Calm](https://www.axiell.com/uk/solutions/product/calm/) contains data on things in the archive
-  - [METS adapter](mets_adapter/README.md): [METS](http://www.loc.gov/standards/mets/) data on digital assets from our workflow & archival storage systems. 
-* [Pipeline](pipeline.md): Taking adapter data and putting it into our query index. We use [Elasticsearch](https://www.elastic.co/elasticsearch/) as our underlying search engine.
-* [API](https://github.com/wellcomecollection/catalogue-api/blob/main/README.md): The public APIs to query our catalogue data. The API services are stored in a different GitHub repository: https://github.com/wellcomecollection/catalogue-api
-
-
-## Dependencies
-
-* Java 1.8
-* Scala 2.12
-* SBT
-* Terraform 0.11
-* Docker
-* Make
-
-
-## Problems you might have
+### Problems you might have
 
 * **Stack overflow from scalac \(in IntelliJ\) when building projects**:
 
@@ -79,23 +42,3 @@ These are:
   aws ecr get-login-password --region eu-west-1 --profile platform-dev | \
   docker login --username AWS --password-stdin 760097843905.dkr.ecr.eu-west-1.amazonaws.com
   ```
-
-
-## Deploying
-
-We deploy ECS catalogue services using the [weco-deploy](https://github.com/wellcomecollection/weco-deploy) tool.
-
-
-## Things you might want to do
-
-Generally small things you might want to do irregularly involving the
-API & data are stored within \[`./scripts`\].
-
----
-
-Part of the [Wellcome Digital Platform][platform repo].
-
-[catalogue docs]: https://docs.wellcomecollection.org/catalogue/
-[api developer docs]: https://developers.wellcomecollection.org/catalogue/
-[api]: https://api.wellcomecollection.org/catalogue
-[platform repo]: [https://github.com/wellcomecollection/platform]
