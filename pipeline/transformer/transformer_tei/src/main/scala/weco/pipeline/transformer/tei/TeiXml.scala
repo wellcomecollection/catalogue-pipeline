@@ -61,7 +61,9 @@ class TeiXml(xml: Elem) {
   def summary: Either[Throwable, Option[String]] = {
     val nodes = (xml \\ "msDesc" \ "msContents" \ "summary").toList
     nodes match {
-      case List(node) => Right(Some(node.text))
+      case List(node) =>
+        // some summary nodes can contain TEI specific xml tags, so we remove them
+        Right(Some(node.text.trim.replaceAll("<.*?>", "")))
       case Nil        => Right(None)
       case _          => Left(new RuntimeException("More than one summary node!"))
     }
