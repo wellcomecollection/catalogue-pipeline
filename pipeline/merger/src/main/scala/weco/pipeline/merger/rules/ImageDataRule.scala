@@ -16,25 +16,38 @@ object ImageDataRule extends FieldMergeRule {
     target: Work.Visible[Identified],
     sources: Seq[Work[Identified]] = Nil
   ): FieldMergeResult[FieldData] = {
-    // We merge images into Sierra targets, regardless of whether this is the principal
-    // target of the graph we're currently merging (ie if there's a Calm target, it's ignored)
+    // We first try to merge images into Sierra targets, regardless of whether this is the principal
+    // target of the graph we're currently merging (ie if there's a Calm target, it's ignored).
+    // If this fails, we try to merge into a Calm target
     TargetPrecedence
       .targetSatisfying(sierraWork)(
         target +: sources.collect(TargetPrecedence.visibleWork)
       )
-      .map { sierraTarget =>
-        FieldMergeResult(
-          data = getMetsPictureAndEphemeraImages(sierraTarget, sources)
-            .getOrElse(Nil) ++
-            getPairedMiroImages(sierraTarget, sources).getOrElse(Nil),
-          sources = List(
-            getMetsPictureAndEphemeraImages,
-            getPairedMiroImages
-          ).flatMap(_.mergedSources(sierraTarget, sources))
-        )
-      }
-      .getOrElse(FieldMergeResult(data = Nil, sources = Nil))
+      .map(mergeSierraImages(sources))
+      .getOrElse(mergeCalmImages(target, sources))
   }
+
+  private def mergeSierraImages(
+    sources: Seq[Work[Identified]]
+  )(sierraTarget: Work.Visible[Identified]) =
+    FieldMergeResult(
+      data = getMetsPictureAndEphemeraImages(sierraTarget, sources)
+        .getOrElse(Nil) ++
+        getPairedMiroImages(sierraTarget, sources).getOrElse(Nil),
+      sources = List(
+        getMetsPictureAndEphemeraImages,
+        getPairedMiroImages
+      ).flatMap(_.mergedSources(sierraTarget, sources))
+    )
+
+  private def mergeCalmImages(
+    target: Work.Visible[Identified],
+    sources: Seq[Work[Identified]]
+  ) =
+    FieldMergeResult(
+      data = getCalmMiroImages(target, sources).getOrElse(Nil),
+      sources = getCalmMiroImages.mergedSources(target, sources)
+    )
 
   private lazy val getMetsPictureAndEphemeraImages = new FlatImageMergeRule {
     val isDefinedForTarget: WorkPredicate = sierraPictureOrEphemera
@@ -47,6 +60,11 @@ object ImageDataRule extends FieldMergeRule {
     val isDefinedForTarget: WorkPredicate =
       sierraWork and not(sierraDigaids)
     val isDefinedForSource: WorkPredicate = singleDigitalItemMiroWork
+  }
+
+  private lazy val getCalmMiroImages = new FlatImageMergeRule {
+    override val isDefinedForTarget: WorkPredicate = singlePhysicalItemCalmWork
+    override val isDefinedForSource: WorkPredicate = singleDigitalItemMiroWork
   }
 
   trait FlatImageMergeRule extends PartialRule {
