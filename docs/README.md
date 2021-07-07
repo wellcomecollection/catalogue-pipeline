@@ -46,3 +46,7 @@ These are:
 * [Pipeline](./pipeline/README.md): Taking adapter data and putting it into our query index. We use [Elasticsearch](https://www.elastic.co/elasticsearch/) as our underlying search engine.
 * [API](https://github.com/wellcomecollection/catalogue-api/blob/main/README.md): The public APIs to query our catalogue data. The API services are stored in a different GitHub repository: https://github.com/wellcomecollection/catalogue-api
 
+## Updating this documentation
+
+See the [Workflow for editing in Gitbook](GITBOOK.md).
+
