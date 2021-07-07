@@ -54,11 +54,13 @@ class CalmTransformerTest
             SourceIdentifier(
               value = "a/b/c",
               identifierType = IdentifierType.CalmRefNo,
-              ontologyType = "Work"),
+              ontologyType = "Work"
+            ),
             SourceIdentifier(
               value = "a.b.c",
               identifierType = IdentifierType.CalmAltRefNo,
-              ontologyType = "Work"),
+              ontologyType = "Work"
+            )
           ),
           items = List(
             Item(
@@ -99,15 +101,18 @@ class CalmTransformerTest
         SourceIdentifier(
           value = "a/b/c",
           identifierType = IdentifierType.CalmRefNo,
-          ontologyType = "Work"),
+          ontologyType = "Work"
+        ),
         SourceIdentifier(
           value = "a.b.c",
           identifierType = IdentifierType.CalmAltRefNo,
-          ontologyType = "Work"),
+          ontologyType = "Work"
+        ),
         SourceIdentifier(
           value = "b456",
           identifierType = IdentifierType.SierraSystemNumber,
-          ontologyType = "Work"),
+          ontologyType = "Work"
+        )
       )
   }
 
@@ -118,6 +123,8 @@ class CalmTransformerTest
       "RefNo" -> "a/b/c",
       "AltRefNo" -> "a.b.c",
       "BNumber" -> "b456",
+      "Wheels" -> "M0000001",
+      "Wheels" -> "M0000002",
       "CatalogueStatus" -> "Catalogued"
     )
     CalmTransformer(record, version).right.get.data.mergeCandidates shouldBe
@@ -127,6 +134,24 @@ class CalmTransformerTest
             SourceIdentifier(
               value = "b456",
               identifierType = IdentifierType.SierraSystemNumber,
+              ontologyType = "Work"
+            )
+          )
+        ),
+        MergeCandidate(
+          IdState.Identifiable(
+            SourceIdentifier(
+              value = "M0000001",
+              identifierType = IdentifierType.MiroImageNumber,
+              ontologyType = "Work"
+            )
+          )
+        ),
+        MergeCandidate(
+          IdState.Identifiable(
+            SourceIdentifier(
+              value = "M0000002",
+              identifierType = IdentifierType.MiroImageNumber,
               ontologyType = "Work"
             )
           )
@@ -180,12 +205,17 @@ class CalmTransformerTest
                 InstantRange(
                   LocalDate of (1890, 1, 1),
                   LocalDate of (1914, 12, 31),
-                  "c.1900 and 1914")))),
+                  "c.1900 and 1914"
+                )
+              )
+            )
+          ),
           label = "c.1900 and 1914",
           places = Nil,
           agents = Nil,
           function = None
-        ))
+        )
+      )
   }
 
   it("transforms subjects, stripping all HTML") {
@@ -310,7 +340,7 @@ class CalmTransformerTest
     )
     CalmTransformer(record, version).right.get.data.contributors should contain theSameElementsAs List(
       Contributor(Agent("Bebop"), Nil),
-      Contributor(Agent("Rocksteady"), Nil),
+      Contributor(Agent("Rocksteady"), Nil)
     )
   }
 
@@ -327,7 +357,7 @@ class CalmTransformerTest
     )
     CalmTransformer(record, version).right.get.data.notes should contain theSameElementsAs List(
       CopyrightNote("no copyright"),
-      ArrangementNote("meet at midnight"),
+      ArrangementNote("meet at midnight")
     )
   }
 
@@ -355,7 +385,8 @@ class CalmTransformerTest
     val result = CalmTransformer(
       record.id,
       CalmSourceData(record, isDeleted = true),
-      version).right.get
+      version
+    ).right.get
     result shouldBe a[Work.Deleted[_]]
     val deletedWork = result.asInstanceOf[Work.Deleted[_]]
 
@@ -409,7 +440,7 @@ class CalmTransformerTest
     val suppressibleRecordB = createCalmRecordWith(
       "Title" -> "abc",
       "Level" -> "Collection",
-      "RefNo" -> "a/b/c",
+      "RefNo" -> "a/b/c"
     )
 
     val examples = Table(
