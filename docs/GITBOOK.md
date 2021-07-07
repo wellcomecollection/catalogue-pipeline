@@ -34,7 +34,3 @@ TODO
 * Write up the review explaining what the docs are for
 * Follow up on any suggestions or changes
 * Once you've had a positive review, merge the changes, and delete the branch
-* Delete the variant in Gitbook  
-
-![gitbook\_delete\_variant](https://user-images.githubusercontent.com/31692/70724129-ec936480-1cf1-11ea-9101-3264053016c4.png)
-
