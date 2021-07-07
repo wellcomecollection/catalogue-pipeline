@@ -45,9 +45,8 @@ class GitHubBlobContentReaderTest
         val gitHubBlobReader =
           new GitHubBlobContentReader(new AkkaHttpClient(), "fake_token")
         whenReady(gitHubBlobReader.getBlob(uri)) { result =>
-          val str = IOUtils.resourceToString(
-            "/Javanese_11.xml",
-            StandardCharsets.UTF_8)
+          val str =
+            IOUtils.resourceToString("/Javanese_11.xml", StandardCharsets.UTF_8)
           trim(XML.loadString(result)) shouldBe trim(XML.loadString(str))
         }
       }
