@@ -1,42 +1,48 @@
-# Catalogue
+# Wellcome Collection Catalogue
 
-## Workflow for editing in Gitbook
+Making Wellcome Collection's catalogue open, accessible and
+discoverable.
 
-You can edit this documentation directly in Gitbook, [where it is hosted](https://wellcomecollection.gitbook.io/catalogue/).
+The catalogue consists of multiple sources including:
+* Library holdings
+* Archives and manuscripts
+* Born digital content
+* Images from what was previously wellcomeimages.org
 
-### Create
+As and when these sources are made available digitally, we will consume
+them via [our pipeline](./pipeline), unify them into a
+[single model](../common/internal_model) and make them discoverable via
+our [API](https://github.com/wellcomecollection/catalogue-api).
 
-* [Login](https://app.gitbook.com/)
-* Choose the Wellcome Collection catalogue space
-* Create a new variant  
+**Interested in how we make these services?**
 
-![new\_variant](https://user-images.githubusercontent.com/31692/70724013-c372d400-1cf1-11ea-9370-db0245b964a7.png)
+[Take a look at our documentation on the design and decision making
+processes of the services within the catalogue repo](https://github.com/wellcomecollection/docs).
 
-* Name the variant `docs/name_of_what_youre_up_to`
-* Edit away
-* Save your changes  
+**Interested in making use of our data to build your own products or
+use in your research?**
 
-![gitbook\_save](https://user-images.githubusercontent.com/31692/70724055-d1c0f000-1cf1-11ea-97b9-da8233903523.png)
+[Take look at our developer documentation](https://developers.wellcomecollection.org/) or
+[go straight to our API](https://api.wellcomecollection.org/catalogue/v2/works).
 
-* Once you're done, merge your changes  
+**Interested in other parts of the Wellome Collection digital platform
+works?**
 
-![gitbook\_merge](https://user-images.githubusercontent.com/31692/70724078-d84f6780-1cf1-11ea-9092-6e41735d0db8.png)
+[Take a look at our Platform repo](https://github.com/wellcomecollection/platform)
 
-### Images
+**Interested in how all of this works**
+[Keep reading about the architecture of the services in this repo](#architecture).
 
-TODO
+## Architecture
 
-### Review
+The catalogue consists of three main parts with supporting services.
 
-* Go to the [catalogue repo](https://github.com/wellcomecollection/catalogue)
-* You should see a branch with the `docs/name_of_what_youre_up_to` and a button to compare & pull request - press that  
+These are:
 
-![gitbook\_pr](https://user-images.githubusercontent.com/31692/70724110-e604ed00-1cf1-11ea-92b1-d7b2e4a61108.png)
-
-* Write up the review explaining what the docs are for
-* Follow up on any suggestions or changes
-* Once you've had a positive review, merge the changes, and delete the branch
-* Delete the variant in Gitbook  
-
-![gitbook\_delete\_variant](https://user-images.githubusercontent.com/31692/70724129-ec936480-1cf1-11ea-9101-3264053016c4.png)
+* Adapters: Syncing data from multiple external sources, enabling retrieving data performantly and at scale:
+  - [Sierra adapter](../sierra_adapter/README.md): [Sierra](https://www.iii.com/products/sierra-ils/) contains data on things in the library
+  - [Calm adapter](../calm_adapter/README.md): [Calm](https://www.axiell.com/uk/solutions/product/calm/) contains data on things in the archive
+  - [METS adapter](../mets_adapter/README.md): [METS](http://www.loc.gov/standards/mets/) data on digital assets from our workflow & archival storage systems. 
+* [Pipeline](./pipeline/README.md): Taking adapter data and putting it into our query index. We use [Elasticsearch](https://www.elastic.co/elasticsearch/) as our underlying search engine.
+* [API](https://github.com/wellcomecollection/catalogue-api/blob/main/README.md): The public APIs to query our catalogue data. The API services are stored in a different GitHub repository: https://github.com/wellcomecollection/catalogue-api
 
