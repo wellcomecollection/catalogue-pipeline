@@ -52,7 +52,7 @@ class CalmMergeCandidatesTest
             )
           ),
           reason = Some("CALM/Miro work")
-        )
+      )
     )
   }
 
@@ -88,7 +88,7 @@ class CalmMergeCandidatesTest
             )
           ),
           reason = Some("CALM/Miro work")
-        )
+      )
     )
   }
 }
