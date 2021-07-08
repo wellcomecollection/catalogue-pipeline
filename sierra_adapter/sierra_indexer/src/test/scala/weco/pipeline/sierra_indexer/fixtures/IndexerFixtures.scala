@@ -21,7 +21,6 @@ import weco.storage.store.memory.MemoryTypedStore
 import weco.catalogue.source_model.sierra.SierraTransformable
 import weco.pipeline.sierra_indexer.services.Worker
 
-
 trait IndexerFixtures
     extends ElasticsearchFixtures
     with Eventually
@@ -29,7 +28,8 @@ trait IndexerFixtures
     with Akka
     with SQS { this: Suite =>
   def withWorker[R](
-    queue: Queue = Queue("test://q", "arn::test:q", visibilityTimeout = 1 seconds),
+    queue: Queue =
+      Queue("test://q", "arn::test:q", visibilityTimeout = 1 seconds),
     typedStore: MemoryTypedStore[S3ObjectLocation, SierraTransformable],
     indexPrefix: String)(
     testWith: TestWith[Worker, R]
