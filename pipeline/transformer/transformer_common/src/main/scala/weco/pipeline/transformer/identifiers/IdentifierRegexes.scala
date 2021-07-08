@@ -54,10 +54,10 @@ object IdentifierRegexes {
    * of alphabet characters.  The digcode is only useful if it identifies
    * a digitisation project, hence requiring a non-empty suffix.
    */
-  lazy val wellcomeDigcode = "^dig[a-z]+$".r
+  lazy val wellcomeDigcode: Regex = "^dig[a-z]+$".r
 
   /*
    * A RefNo is composed of alphanumeric identifiers separated by slashes
    */
-  lazy val calmRefNo = "^([A-Za-z0-9]+/?)+$".r
+  lazy val calmRefNo: Regex = "^([A-Za-z0-9]+/?)+$".r
 }
