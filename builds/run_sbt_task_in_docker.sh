@@ -29,5 +29,6 @@ docker run --tty --rm \
   --net host \
   --volume "$ROOT:$ROOT" \
   --workdir "$ROOT" \
+  --env "BUILDKITE_BUILD_NUMBER" \
   --env "ROOT" \
   "$ECR_REGISTRY/wellcome/sbt_wrapper" "$@"
