@@ -7,24 +7,26 @@ import scala.xml.NodeSeq
 
 trait MetsGenerators extends RandomGenerators {
   def createBibNumber: String =
-    s"b%08d.test".format(randomInt(from = 1, to = 99999999))
+    s"b%08d".format(randomInt(from = 1, to = 99999999))
 
-  def metsXmlWith(recordIdentifier: String,
-                  license: Option[License] = None,
-                  accessConditionStatus: Option[String] = None,
-                  accessConditionUsage: Option[String] = None,
-                  secondarySections: NodeSeq = NodeSeq.Empty,
-                  fileSec: NodeSeq = NodeSeq.Empty,
-                  structMap: NodeSeq = NodeSeq.Empty) =
+  def metsXmlWith(
+    recordIdentifier: String,
+    license: Option[License] = None,
+    accessConditionStatus: Option[String] = None,
+    accessConditionUsage: Option[String] = None,
+    secondarySections: NodeSeq = NodeSeq.Empty,
+    fileSec: NodeSeq = NodeSeq.Empty,
+    structMap: NodeSeq = NodeSeq.Empty
+  ) =
     <mets:mets xmlns:dv="http://dfg-viewer.de/" xmlns:mets="http://www.loc.gov/METS/" xmlns:mods="http://www.loc.gov/mods/v3" xmlns:premis="http://www.loc.gov/premis/v3" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" OBJID="276914" xsi:schemaLocation="http://www.loc.gov/standards/premis/ http://www.loc.gov/standards/premis/v2/premis-v2-0.xsd http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-7.xsd http://www.loc.gov/METS/ http://www.loc.gov/standards/mets/mets.xsd http://www.loc.gov/standards/mix/ http://www.loc.gov/standards/mix/mix.xsd">
       {
-        rootSection(
-          recordIdentifier = recordIdentifier,
-          license = license,
-          accessConditionStatus = accessConditionStatus,
-          accessConditionUsage = accessConditionUsage
-        )
-      }
+      rootSection(
+        recordIdentifier = recordIdentifier,
+        license = license,
+        accessConditionStatus = accessConditionStatus,
+        accessConditionUsage = accessConditionUsage
+      )
+    }
       {secondarySections}
       {fileSec}
       {structMap}
@@ -32,26 +34,34 @@ trait MetsGenerators extends RandomGenerators {
 
   def xmlWithManifestations(manifestations: List[(String, String, String)]) =
     <mets:mets xmlns:mets="http://www.loc.gov/METS/" xmlns:mods="http://www.loc.gov/mods/v3" xmlns:xlink="http://www.w3.org/1999/xlink">
-      {rootSection(recordIdentifier = "b30246039", license = None,
-      accessConditionStatus = None,
-      accessConditionUsage = None)}
+      {
+      rootSection(
+        recordIdentifier = "b30246039",
+        license = None,
+        accessConditionStatus = None,
+        accessConditionUsage = None
+      )
+    }
       <mets:structMap TYPE="LOGICAL">
         <mets:div ADMID="AMD" DMDID="DMDLOG_0000" ID="LOG_0000" TYPE="MultipleManifestation">
           {
-            manifestations.map { case (id, order, filename) =>
-              <mets:div ID={id} ORDER={order} TYPE="Monograph">
+      manifestations.map {
+        case (id, order, filename) =>
+          <mets:div ID={id} ORDER={order} TYPE="Monograph">
                 <mets:mptr LOCTYPE="URL" xlink:href={filename} />
               </mets:div>
-            }
-          }
+      }
+    }
         </mets:div>
       </mets:structMap>
     </mets:mets>
 
-  def rootSection(recordIdentifier: String,
-                  license: Option[License],
-                  accessConditionStatus: Option[String],
-                  accessConditionUsage: Option[String]) =
+  def rootSection(
+    recordIdentifier: String,
+    license: Option[License],
+    accessConditionStatus: Option[String],
+    accessConditionUsage: Option[String]
+  ) =
     <mets:dmdSec ID="DMDLOG_0000">
       <mets:mdWrap MDTYPE="MODS">
         <mets:xmlData>
@@ -60,17 +70,20 @@ trait MetsGenerators extends RandomGenerators {
               <mods:recordIdentifier source="gbv-ppn">{recordIdentifier}</mods:recordIdentifier>
             </mods:recordInfo>
             {
-            license.fold(ifEmpty = NodeSeq.Empty){ l =>
-              <mods:accessCondition type="dz">{l.id.toUpperCase}</mods:accessCondition>
-            }}
+      license.fold(ifEmpty = NodeSeq.Empty) { l =>
+        <mods:accessCondition type="dz">{l.id.toUpperCase}</mods:accessCondition>
+      }
+    }
             {
-            accessConditionStatus.fold(ifEmpty = NodeSeq.Empty){ a =>
-              <mods:accessCondition type="status">{a}</mods:accessCondition>
-            }}
+      accessConditionStatus.fold(ifEmpty = NodeSeq.Empty) { a =>
+        <mods:accessCondition type="status">{a}</mods:accessCondition>
+      }
+    }
             {
-            accessConditionUsage.fold(ifEmpty = NodeSeq.Empty){ a =>
-              <mods:accessCondition type="usage">{a}</mods:accessCondition>
-            }}
+      accessConditionUsage.fold(ifEmpty = NodeSeq.Empty) { a =>
+        <mods:accessCondition type="usage">{a}</mods:accessCondition>
+      }
+    }
           </mods:mods>
         </mets:xmlData>
       </mets:mdWrap>
@@ -91,10 +104,14 @@ trait MetsGenerators extends RandomGenerators {
     <mets:fileSec>
       <mets:fileGrp USE="OBJECTS">
         <mets:file ID="FILE_0001_OBJECTS" MIMETYPE="image/jp2">
-          <mets:FLocat LOCTYPE="URL" xlink:href={s"objects/${filePrefix}_0001.jp2"} />
+          <mets:FLocat LOCTYPE="URL" xlink:href={
+      s"objects/${filePrefix}_0001.jp2"
+    } />
         </mets:file>
         <mets:file ID="FILE_0002_OBJECTS" MIMETYPE="image/jp2">
-          <mets:FLocat LOCTYPE="URL" xlink:href={s"objects/${filePrefix}_0002.jp2"} />
+          <mets:FLocat LOCTYPE="URL" xlink:href={
+      s"objects/${filePrefix}_0002.jp2"
+    } />
         </mets:file>
       </mets:fileGrp>
       <mets:fileGrp USE="ALTO">

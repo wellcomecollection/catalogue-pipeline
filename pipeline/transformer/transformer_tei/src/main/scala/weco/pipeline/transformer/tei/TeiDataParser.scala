@@ -7,6 +7,7 @@ import weco.catalogue.internal_model.identifiers.{
 }
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.work.{MergeCandidate, Work, WorkData}
+import weco.pipeline.transformer.identifiers.SourceIdentifierValidation._
 
 import java.time.Instant
 
@@ -25,19 +26,21 @@ case class TeiData(
 ) {
   def toWork(time: Instant, version: Int): Work[Source] = {
     val maybeBnumber = bNumber
-      .map(
-        b =>
-          MergeCandidate(
-            identifier =
-              SourceIdentifier(IdentifierType.SierraSystemNumber, "Work", b),
-            reason = "Bnumber present in TEI file"
+      .flatMap { id =>
+        SourceIdentifier(IdentifierType.SierraSystemNumber, "Work", id).validateAndWarn
+      }
+      .map { sourceIdentifier =>
+        MergeCandidate(
+          identifier = sourceIdentifier,
+          reason = "Bnumber present in TEI file"
         )
-      )
+      }
 
     val value =
       WorkData[Unidentified](
         description = description,
-        mergeCandidates = maybeBnumber.toList)
+        mergeCandidates = maybeBnumber.toList
+      )
     Work.Visible[Source](
       version,
       value,

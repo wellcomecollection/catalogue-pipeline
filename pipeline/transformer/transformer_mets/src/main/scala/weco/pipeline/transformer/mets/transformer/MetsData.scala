@@ -12,6 +12,7 @@ import weco.catalogue.internal_model.locations._
 import weco.catalogue.internal_model.work.DeletedReason.DeletedFromSource
 import weco.catalogue.internal_model.work.InvisibilityReason.MetsWorksAreNotVisible
 import weco.catalogue.internal_model.work.{Item, MergeCandidate, Work, WorkData}
+import weco.pipeline.transformer.identifiers.SourceIdentifierValidation._
 import weco.pipeline.transformer.mets.transformers.MetsAccessStatus
 
 case class MetsData(
@@ -24,8 +25,10 @@ case class MetsData(
   deleted: Boolean = false
 ) {
 
-  def toWork(version: Int,
-             modifiedTime: Instant): Either[Throwable, Work[Source]] = {
+  def toWork(
+    version: Int,
+    modifiedTime: Instant
+  ): Either[Throwable, Work[Source]] = {
     deleted match {
       case true =>
         Right(
@@ -42,20 +45,19 @@ case class MetsData(
           accessStatus <- MetsAccessStatus(accessConditionStatus)
           item = Item[IdState.Unminted](
             id = IdState.Unidentifiable,
-            locations = List(digitalLocation(license, accessStatus)))
-        } yield
-          Work.Invisible[Source](
-            version = version,
-            state = Source(sourceIdentifier, modifiedTime),
-            data = WorkData[DataState.Unidentified](
-              items = List(item),
-              mergeCandidates = List(mergeCandidate),
-              thumbnail =
-                thumbnail(sourceIdentifier.value, license, accessStatus),
-              imageData = imageData(version, license, accessStatus)
-            ),
-            invisibilityReasons = List(MetsWorksAreNotVisible)
+            locations = List(digitalLocation(license, accessStatus))
           )
+        } yield Work.Invisible[Source](
+          version = version,
+          state = Source(sourceIdentifier, modifiedTime),
+          data = WorkData[DataState.Unidentified](
+            items = List(item),
+            mergeCandidates = List(mergeCandidate),
+            thumbnail = thumbnail(sourceIdentifier.value, license, accessStatus),
+            imageData = imageData(version, license, accessStatus)
+          ),
+          invisibilityReasons = List(MetsWorksAreNotVisible)
+        )
     }
   }
 
@@ -71,12 +73,18 @@ case class MetsData(
       // e.g. b20442233 has the identifier "B20442233" in the METS file,
       //
       value = recordIdentifier.toLowerCase
+    ).validateAndWarn.getOrElse(
+      throw new RuntimeException(
+        s"METS works must have a valid Sierra merge candidate: ${recordIdentifier.toLowerCase} is not valid."
+      )
     ),
     reason = "METS work"
   )
 
-  private def digitalLocation(license: Option[License],
-                              accessStatus: Option[AccessStatus]) =
+  private def digitalLocation(
+    license: Option[License],
+    accessStatus: Option[AccessStatus]
+  ) =
     DigitalLocation(
       url = s"https://wellcomelibrary.org/iiif/$recordIdentifier/manifest",
       locationType = LocationType.IIIFPresentationAPI,
@@ -85,7 +93,8 @@ case class MetsData(
     )
 
   private def accessConditions(
-    accessStatus: Option[AccessStatus]): List[AccessCondition] =
+    accessStatus: Option[AccessStatus]
+  ): List[AccessCondition] =
     (accessStatus, accessConditionUsage) match {
       case (None, None) => Nil
       case _ =>
@@ -120,7 +129,8 @@ case class MetsData(
         License.values.find { license =>
           equalsIgnoreCase(license.id, accessCondition) || equalsIgnoreCase(
             license.label,
-            accessCondition) || license.url.equals(accessCondition)
+            accessCondition
+          ) || license.url.equals(accessCondition)
 
         } match {
           case Some(license) => Right(license)
@@ -151,23 +161,24 @@ case class MetsData(
   private def thumbnail(
     bnumber: String,
     license: Option[License],
-    accessStatus: Option[AccessStatus]): Option[DigitalLocation] =
+    accessStatus: Option[AccessStatus]
+  ): Option[DigitalLocation] =
     for {
       fileReference <- titlePageFileReference
         .orElse(fileReferences.find(ImageUtils.isThumbnail))
       url <- ImageUtils.buildThumbnailUrl(bnumber, fileReference)
       if !accessStatus.exists(_.hasRestrictions)
-    } yield
-      DigitalLocation(
-        url = url,
-        locationType = LocationType.ThumbnailImage,
-        license = license
-      )
+    } yield DigitalLocation(
+      url = url,
+      locationType = LocationType.ThumbnailImage,
+      license = license
+    )
 
   private def imageData(
     version: Int,
     license: Option[License],
-    accessStatus: Option[AccessStatus]): List[ImageData[IdState.Identifiable]] =
+    accessStatus: Option[AccessStatus]
+  ): List[ImageData[IdState.Identifiable]] =
     if (accessStatus.exists(_.hasRestrictions)) {
       Nil
     } else {
