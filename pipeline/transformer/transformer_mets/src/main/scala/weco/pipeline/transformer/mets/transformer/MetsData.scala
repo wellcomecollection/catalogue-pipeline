@@ -47,17 +47,19 @@ case class MetsData(
             id = IdState.Unidentifiable,
             locations = List(digitalLocation(license, accessStatus))
           )
-        } yield Work.Invisible[Source](
-          version = version,
-          state = Source(sourceIdentifier, modifiedTime),
-          data = WorkData[DataState.Unidentified](
-            items = List(item),
-            mergeCandidates = List(mergeCandidate),
-            thumbnail = thumbnail(sourceIdentifier.value, license, accessStatus),
-            imageData = imageData(version, license, accessStatus)
-          ),
-          invisibilityReasons = List(MetsWorksAreNotVisible)
-        )
+        } yield
+          Work.Invisible[Source](
+            version = version,
+            state = Source(sourceIdentifier, modifiedTime),
+            data = WorkData[DataState.Unidentified](
+              items = List(item),
+              mergeCandidates = List(mergeCandidate),
+              thumbnail =
+                thumbnail(sourceIdentifier.value, license, accessStatus),
+              imageData = imageData(version, license, accessStatus)
+            ),
+            invisibilityReasons = List(MetsWorksAreNotVisible)
+          )
     }
   }
 
@@ -168,11 +170,12 @@ case class MetsData(
         .orElse(fileReferences.find(ImageUtils.isThumbnail))
       url <- ImageUtils.buildThumbnailUrl(bnumber, fileReference)
       if !accessStatus.exists(_.hasRestrictions)
-    } yield DigitalLocation(
-      url = url,
-      locationType = LocationType.ThumbnailImage,
-      license = license
-    )
+    } yield
+      DigitalLocation(
+        url = url,
+        locationType = LocationType.ThumbnailImage,
+        license = license
+      )
 
   private def imageData(
     version: Int,
