@@ -46,7 +46,8 @@ object SourceIdentifierValidation {
            * e.g: f5217b45-b742-472b-95c3-f136d5de1104
            * see: `https://search.wellcomelibrary.org/iii/encore/record/C__Rb1971204?marcData=Y`
            */
-          str => Try(UUID.fromString(str)).isSuccess
+          str =>
+            Try(UUID.fromString(str)).isSuccess
         case IdentifierType.METS               => sierraSystemNumber.toPredicate
         case IdentifierType.WellcomeDigcode    => wellcomeDigcode.toPredicate
         case IdentifierType.IconographicNumber => iconographicNumber.toPredicate
