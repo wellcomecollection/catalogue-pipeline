@@ -27,7 +27,7 @@ case class TeiData(
   def toWork(time: Instant, version: Int): Work[Source] = {
     val maybeBnumber = bNumber
       .flatMap { id =>
-        SourceIdentifier(IdentifierType.SierraSystemNumber, "Work", id).validateAndWarn
+        SourceIdentifier(IdentifierType.SierraSystemNumber, "Work", id).validatedWithWarning
       }
       .map { sourceIdentifier =>
         MergeCandidate(

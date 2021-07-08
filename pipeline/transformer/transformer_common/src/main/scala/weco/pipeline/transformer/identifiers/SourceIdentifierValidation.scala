@@ -16,14 +16,14 @@ object SourceIdentifierValidation {
       extends Logging {
     import IdentifierRegexes._
 
-    def validate: Option[SourceIdentifier] =
+    def validated: Option[SourceIdentifier] =
       if (isValid) {
         Some(sourceIdentifier)
       } else {
         None
       }
 
-    def validateAndWarn: Option[SourceIdentifier] = validate match {
+    def validatedWithWarning: Option[SourceIdentifier] = validated match {
       case None =>
         warn(
           s"Invalid ${sourceIdentifier.identifierType.id}: ${sourceIdentifier.value}"

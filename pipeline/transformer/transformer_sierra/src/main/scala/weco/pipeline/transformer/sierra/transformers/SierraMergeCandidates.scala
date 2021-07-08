@@ -65,7 +65,7 @@ object SierraMergeCandidates
             identifierType = IdentifierType.SierraSystemNumber,
             ontologyType = "Work",
             value = id
-          ).validateAndWarn
+          ).validatedWithWarning
         }
 
     identifiers.distinct match {
@@ -110,7 +110,7 @@ object SierraMergeCandidates
           identifierType = IdentifierType.CalmRecordIdentifier,
           ontologyType = "Work",
           value = recordId
-        ).validate
+        ).validated
       }
       .map { sourceIdentifier =>
         MergeCandidate(

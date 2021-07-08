@@ -73,7 +73,7 @@ case class MetsData(
       // e.g. b20442233 has the identifier "B20442233" in the METS file,
       //
       value = recordIdentifier.toLowerCase
-    ).validateAndWarn.getOrElse(
+    ).validatedWithWarning.getOrElse(
       throw new RuntimeException(
         s"METS works must have a valid Sierra merge candidate: ${recordIdentifier.toLowerCase} is not valid."
       )

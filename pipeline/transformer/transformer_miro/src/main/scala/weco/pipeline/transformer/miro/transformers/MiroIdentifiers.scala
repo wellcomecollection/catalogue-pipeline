@@ -55,7 +55,7 @@ trait MiroIdentifiers extends MiroTransformableUtils {
                 identifierType = IdentifierType.SierraSystemNumber,
                 ontologyType = "Work",
                 value = s"b$id"
-              ).validateAndWarn
+              ).validatedWithWarning
             }
           case _ =>
             throw new RuntimeException(
@@ -86,7 +86,7 @@ trait MiroIdentifiers extends MiroTransformableUtils {
                     identifierType = IdentifierType.IconographicNumber,
                     ontologyType = "Work",
                     value = value
-                  ).validate
+                  ).validated
                 case _ => None
               }
               .getOrElse(

@@ -214,7 +214,7 @@ object CalmTransformer
           identifierType = IdentifierType.SierraSystemNumber,
           ontologyType = "Work",
           value = id
-        ).validateAndWarn
+        ).validatedWithWarning
       }
       .map { sourceIdentifier =>
         MergeCandidate(
