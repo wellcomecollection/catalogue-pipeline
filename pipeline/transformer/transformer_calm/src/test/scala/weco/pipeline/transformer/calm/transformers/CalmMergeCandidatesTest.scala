@@ -23,13 +23,14 @@ class CalmMergeCandidatesTest
     val mergeCandidates = CalmMergeCandidates(record)
 
     mergeCandidates should contain only MergeCandidate(
-      IdState.Identifiable(
+      id = IdState.Identifiable(
         SourceIdentifier(
           identifierType = IdentifierType.SierraSystemNumber,
           ontologyType = "Work",
           value = bnumber
         )
-      )
+      ),
+      reason = Some("CALM/Sierra harvest work")
     )
   }
 
@@ -43,14 +44,15 @@ class CalmMergeCandidatesTest
     mergeCandidates should contain allElementsOf miroIds.map(
       id =>
         MergeCandidate(
-          IdState.Identifiable(
+          id = IdState.Identifiable(
             SourceIdentifier(
               identifierType = IdentifierType.MiroImageNumber,
               ontologyType = "Work",
               value = id
             )
-          )
-      )
+          ),
+          reason = Some("CALM/Miro work")
+        )
     )
   }
 
@@ -65,26 +67,28 @@ class CalmMergeCandidatesTest
 
     mergeCandidates should contain(
       MergeCandidate(
-        IdState.Identifiable(
+        id = IdState.Identifiable(
           SourceIdentifier(
             identifierType = IdentifierType.SierraSystemNumber,
             ontologyType = "Work",
             value = bnumber
           )
-        )
+        ),
+        reason = Some("CALM/Sierra harvest work")
       )
     )
     mergeCandidates should contain allElementsOf miroIds.map(
       id =>
         MergeCandidate(
-          IdState.Identifiable(
+          id = IdState.Identifiable(
             SourceIdentifier(
               identifierType = IdentifierType.MiroImageNumber,
               ontologyType = "Work",
               value = id
             )
-          )
-      )
+          ),
+          reason = Some("CALM/Miro work")
+        )
     )
   }
 }

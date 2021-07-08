@@ -130,31 +130,34 @@ class CalmTransformerTest
     CalmTransformer(record, version).right.get.data.mergeCandidates shouldBe
       List(
         MergeCandidate(
-          IdState.Identifiable(
+          id = IdState.Identifiable(
             SourceIdentifier(
               value = "b456",
               identifierType = IdentifierType.SierraSystemNumber,
               ontologyType = "Work"
             )
-          )
+          ),
+          reason = Some("CALM/Sierra harvest work")
         ),
         MergeCandidate(
-          IdState.Identifiable(
+          id = IdState.Identifiable(
             SourceIdentifier(
               value = "M0000001",
               identifierType = IdentifierType.MiroImageNumber,
               ontologyType = "Work"
             )
-          )
+          ),
+          reason = Some("CALM/Miro work")
         ),
         MergeCandidate(
-          IdState.Identifiable(
+          id = IdState.Identifiable(
             SourceIdentifier(
               value = "M0000002",
               identifierType = IdentifierType.MiroImageNumber,
               ontologyType = "Work"
             )
-          )
+          ),
+          reason = Some("CALM/Miro work")
         )
       )
   }

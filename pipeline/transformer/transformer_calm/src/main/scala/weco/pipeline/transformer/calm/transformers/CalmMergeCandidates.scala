@@ -17,26 +17,28 @@ object CalmMergeCandidates extends CalmRecordOps {
     // The internal field "Wheels" is mapped to "MiroID"
     record.getList("Wheels").map { miroIdentifier =>
       MergeCandidate(
-        IdState.Identifiable(
+        id = IdState.Identifiable(
           SourceIdentifier(
             identifierType = IdentifierType.MiroImageNumber,
             ontologyType = "Work",
             value = miroIdentifier
           )
-        )
+        ),
+        reason = Some("CALM/Miro work")
       )
     }
 
   private def sierraMergeCandidate(record: CalmRecord) =
     record.get("BNumber").map { bNumber =>
       MergeCandidate(
-        IdState.Identifiable(
+        id = IdState.Identifiable(
           SourceIdentifier(
             identifierType = IdentifierType.SierraSystemNumber,
             ontologyType = "Work",
             value = bNumber
           )
-        )
+        ),
+        reason = Some("CALM/Sierra harvest work")
       )
     }
 }
