@@ -144,7 +144,7 @@ class SierraItemsTest
         "Copy 4")
     }
 
-    it("omits the copy number if there's only a single item") {
+    it("omits the copy number title if there's only a single item") {
       val itemDataMap = Map(
         createSierraItemNumber -> createSierraItemDataWith(copyNo = Some(1))
       )
@@ -152,6 +152,36 @@ class SierraItemsTest
       val items = getTransformedItems(itemDataMap = itemDataMap)
 
       items.map { _.title } shouldBe Seq(None)
+    }
+
+    it("omits the copy number title if every item has the same copy number") {
+      val itemDataMap = Map(
+        createSierraItemNumber -> createSierraItemDataWith(copyNo = Some(1)),
+        createSierraItemNumber -> createSierraItemDataWith(copyNo = Some(1)),
+        createSierraItemNumber -> createSierraItemDataWith(copyNo = Some(1))
+      )
+
+      val items = getTransformedItems(itemDataMap = itemDataMap)
+
+      items.map { _.title } shouldBe Seq(None, None, None)
+    }
+
+    it("uses the title if every item has the same explicitly set title") {
+      val itemData = createSierraItemDataWith(
+        varFields = List(
+          VarField(fieldTag = "v", content = "Impression")
+        )
+      )
+
+      val itemDataMap = Map(
+        createSierraItemNumber -> itemData,
+        createSierraItemNumber -> itemData,
+        createSierraItemNumber -> itemData
+      )
+
+      val items = getTransformedItems(itemDataMap = itemDataMap)
+
+      items.map { _.title } shouldBe Seq(Some("Impression"), Some("Impression"), Some("Impression"))
     }
 
     def getTitle(itemData: SierraItemData): Option[String] = {
