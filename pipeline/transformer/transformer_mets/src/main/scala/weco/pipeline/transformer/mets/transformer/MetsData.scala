@@ -78,7 +78,7 @@ case class MetsData(
   private def digitalLocation(license: Option[License],
                               accessStatus: Option[AccessStatus]) =
     DigitalLocation(
-      url = s"https://wellcomelibrary.org/iiif/$recordIdentifier/manifest",
+      url = s"https://iiif.wellcomecollection.org/presentation/v2/$recordIdentifier",
       locationType = LocationType.IIIFPresentationAPI,
       license = license,
       accessConditions = accessConditions(accessStatus)

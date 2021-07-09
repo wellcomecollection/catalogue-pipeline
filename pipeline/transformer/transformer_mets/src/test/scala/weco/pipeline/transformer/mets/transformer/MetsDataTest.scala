@@ -31,7 +31,7 @@ class MetsDataTest
       ontologyType = "Work",
       value = bibNumber)
 
-    val url = s"https://wellcomelibrary.org/iiif/$bibNumber/manifest"
+    val url = s"https://iiif.wellcomecollection.org/presentation/v2/$bibNumber"
     val digitalLocation = DigitalLocation(
       url = url,
       locationType = LocationType.IIIFPresentationAPI,
@@ -94,7 +94,7 @@ class MetsDataTest
       ontologyType = "Work",
       value = bibNumber)
 
-    val url = s"https://wellcomelibrary.org/iiif/$bibNumber/manifest"
+    val url = s"https://iiif.wellcomecollection.org/presentation/v2/$bibNumber"
     val digitalLocation =
       DigitalLocation(
         url = url,
@@ -362,7 +362,7 @@ class MetsDataTest
       ),
       DigitalLocation(
         url =
-          s"https://wellcomelibrary.org/iiif/${metsData.recordIdentifier}/manifest",
+          s"https://iiif.wellcomecollection.org/presentation/v2/${metsData.recordIdentifier}",
         locationType = LocationType.IIIFPresentationAPI,
         license = Some(License.CCBYNC)
       )
