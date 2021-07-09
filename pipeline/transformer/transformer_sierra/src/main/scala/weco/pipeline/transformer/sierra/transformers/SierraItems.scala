@@ -99,33 +99,40 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
         require(!itemData.suppressed)
       }
 
-    sierraItemDataMap.map {
-      case (itemId: SierraItemNumber, itemData: SierraItemData) =>
+    val items = sierraItemDataMap.map {
+      case (itemId, itemData) =>
         transformItemData(
           bibId = bibId,
           itemId = itemId,
           itemData = itemData,
           bibData = bibData,
-          fallbackLocation = fallbackLocation,
-          itemCount = sierraItemDataMap.size
+          fallbackLocation = fallbackLocation
         )
     }.toList
+
+    tidyTitles(items)
   }
+
+  // A "automated" title is a title that we created automatically, as opposed
+  // to one that was written by a human cataloguer.
+  private type HasAutomatedTitle = Boolean
 
   private def transformItemData(
     bibId: SierraBibNumber,
     itemId: SierraItemNumber,
     itemData: SierraItemData,
     bibData: SierraBibData,
-    fallbackLocation: Option[(PhysicalLocationType, String)],
-    itemCount: Int): Item[IdState.Identifiable] = {
+    fallbackLocation: Option[(PhysicalLocationType, String)]
+  ): (Item[IdState.Identifiable], HasAutomatedTitle) = {
     debug(s"Attempting to transform $itemId")
 
     val location =
       getPhysicalLocation(bibId, itemId, itemData, bibData, fallbackLocation)
 
-    Item(
-      title = getItemTitle(itemId, itemData, itemCount),
+    val (title, hasInferredTitle) = getItemTitle(itemId, itemData)
+
+    val item = Item(
+      title = title,
       note = getItemNote(bibId, itemId, itemData, bibData, location),
       locations = List(location).flatten,
       id = IdState.Identifiable(
@@ -143,22 +150,28 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
         )
       )
     )
+
+    (item, hasInferredTitle)
   }
 
   /** Create a title for the item.
     *
     * We use one of:
     *
-    *   - field tag `v` for VOLUME
+    *   - field tag `v` for VOLUME.  This is written by a cataloguer.
     *     https://documentation.iii.com/sierrahelp/Content/sril/sril_records_varfld_types_item.html
     *
     *   - The copyNo field from the Sierra API response, which we use to
-    *     create a string like "Copy 2".  We only set this if there are multiple items
+    *     create a string like "Copy 2".
+    *
+    *     Elsewhere in this class, this is called an "automated title", because we're
+    *     creating the title automatically rather than using text written by a cataloguer.
+    *     In general, we prefer the human-written title where possible.
     *
     */
-  private def getItemTitle(itemId: SierraItemNumber,
-                           data: SierraItemData,
-                           itemCount: Int): Option[String] = {
+  private def getItemTitle(
+    itemId: SierraItemNumber,
+    data: SierraItemData): (Option[String], HasAutomatedTitle) = {
     val titleCandidates: List[String] =
       data.varFields
         .filter { _.fieldTag.contains("v") }
@@ -173,15 +186,14 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
       }
 
     titleCandidates match {
-      case Seq(title) => Some(title)
+      case Seq(title) => (Some(title), false)
 
-      case Nil if itemCount > 1 => copyNoTitle
-      case Nil                  => None
+      case Nil => (copyNoTitle, true)
 
       case multipleTitles =>
         warn(
           s"Multiple title candidates on item $itemId: ${titleCandidates.mkString("; ")}")
-        Some(multipleTitles.head)
+        (Some(multipleTitles.head), false)
     }
   }
 
@@ -192,6 +204,39 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
         val title = vf.subfieldsWithTag("a").map { _.content }.mkString(" ")
         if (title.isEmpty) None else Some(title)
     }
+
+  /** Tidy up the automated titles (Copy 1, Copy 2, Copy 3, etc.)
+    *
+    * The purpose of a title is to help users distinguish between multiple items.
+    * We remove the automated title if they aren't doing that, in particular if:
+    *
+    *   1) There's only one item, and it has an inferred title
+    *   2) Every item has the same inferred title
+    *
+    * Note: (1) is really a special case of (2) for the case when there's a single item.
+    *
+    * Note: we can't do this when we add the title to the individual items, because this rule
+    * can only be applied when looking at the items together.
+    *
+    */
+  private def tidyTitles(
+    items: List[(Item[IdState.Identifiable], HasAutomatedTitle)])
+    : List[Item[IdState.Identifiable]] = {
+    val inferredTitles =
+      items.collect {
+        case (Item(_, Some(title), _, _), inferredTitle) if inferredTitle =>
+          title
+      }
+
+    val everyItemHasTheSameInferredTitle =
+      inferredTitles.size == items.size && inferredTitles.toSet.size == 1
+
+    if (everyItemHasTheSameInferredTitle) {
+      items.map { case (it, _) => it.copy(title = None) }
+    } else {
+      items.collect { case (it, _) => it }
+    }
+  }
 
   /** Create a note for the item.
     *
