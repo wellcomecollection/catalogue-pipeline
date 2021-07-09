@@ -4,11 +4,14 @@ A reindex operation runs the source data from the [adapters](docs/adapters/READM
 
 ## How to run a reindex
 
-Running a reindex will require:
+To run a reindex follow these steps:
 
-- Preparing and deploying a release
-- Terraforming a new pipeline using that release
-- Running the reindex script to feed the new pipeline
+1. [Update the catalogue-pipeline environments](#update-the-catalogue-pipeline-environments)
+2. [Prepare a release](#prepare-a-release)
+3. [Deploy a release](#deploy-a-release)
+4. [Terraform a new pipeline](#terraform-a-new-pipeline)
+5. [Run the reindex script](#run-the-reindex-script)
+6. [Connect the Catalogue API](#connect-the-catalogue-api)
 
 ### Update the catalogue-pipeline environments
 
@@ -158,9 +161,11 @@ Plan: 389 to add, 0 to change, 0 to destroy.
 > ./run_terraform.sh apply
 ```
 
-### Running the reindex script
+### Run the reindex script
 
 Now we have our pipeline connected for reindexing and running our chosen version of the pipeline code we can start a reindex operation.
+
+#### Start the reindex
 
 The reindex script can be found in [./reindexer/start_reindex.py](./reindexer/start_reindex.py).
 
@@ -172,7 +177,9 @@ Which pipeline are you sending this to? (catalogue, catalogue_miro_updates, repo
 Every record (complete), just a few (partial), or specific records (specific)? (complete, partial, specific): partial
 ```
 
-You may wish to run a partial reindex to verify that the process will work as expected before embarking on a complete reindex.
+A partial reindex will allow You may wish to run a partial reindex to verify that the process will work as expected before embarking on a complete reindex.
+
+#### Monitor the reindex
 
 You can monitor a reindex in progress using Grafana at [https://monitoring.wellcomecollection.org/](https://monitoring.wellcomecollection.org/), or by looking at CloudWatch metrics in the `platform` AWS account.
 
@@ -180,7 +187,7 @@ Non-empty DLQs will be reported in the Wellcome #wc-platform-alerts Slack channe
 
 A reindex should take less than a working day to complete. 
 
-### Connecting the Catalogue API
+### Connect the Catalogue API
 
 Every pipeline has a dedicated Elasticsearch cluster, and this cluster contains indexes for different stages of the reindex.
 The two indexes of interest are `works-indexed-{PIPELINE_DATE}` and `images-indexed-{PIPELINE_DATE}` – these contain documents suitably for the API to use.
