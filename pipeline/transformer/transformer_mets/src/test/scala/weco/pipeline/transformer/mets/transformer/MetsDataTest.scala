@@ -254,7 +254,7 @@ class MetsDataTest
     result.right.get.data.thumbnail shouldBe Some(
       DigitalLocation(
         url =
-          s"https://iiif.wellcomecollection.org/thumbs/location.jp2/full/!200,200/0/default.jpg",
+          s"https://iiif.wellcomecollection.org/thumb/location.jp2/full/!200,200/0/default.jpg",
         locationType = LocationType.ThumbnailImage,
         license = Some(License.CCBYNC)
       )
@@ -276,7 +276,7 @@ class MetsDataTest
     result.right.get.data.thumbnail shouldBe Some(
       DigitalLocation(
         url =
-          s"https://iiif.wellcomecollection.org/thumbs/title.jp2/full/!200,200/0/default.jpg",
+          s"https://iiif.wellcomecollection.org/thumb/title.jp2/full/!200,200/0/default.jpg",
         locationType = LocationType.ThumbnailImage,
         license = Some(License.CCBYNC)
       )
