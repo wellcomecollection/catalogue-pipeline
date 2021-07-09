@@ -178,7 +178,10 @@ A reindex should take less than a working day to complete.
 
 ### Connecting the Catalogue API
 
-When we have a new index in the Elasticsearch cluster created for the pipeline when we terraformed it, we will want to make that index available to the Catalogue API cluster.
+Every pipeline has a dedicated Elasticsearch cluster, and this cluster contains indexes for different stages of the reindex.
+The two indexes of interest are `works-indexed-{PIPELINE_DATE}` and `images-indexed-{PIPELINE_DATE}` – these contain documents suitably for the API to use.
+
+When these indexes are fully populate, we want to replicate them into the `catalogue-api` cluster.
 
 #### Following an index
 
@@ -231,5 +234,4 @@ object ElasticConfig {
 You will want to deploy this change through the API stage environment and allow CI to perform the usual API checks. 
 
 Be sure to check the diff_tool output in CI before deploying to production!
-
 
