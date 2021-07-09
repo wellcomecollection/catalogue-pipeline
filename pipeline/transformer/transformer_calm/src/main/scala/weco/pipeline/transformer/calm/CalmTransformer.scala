@@ -13,7 +13,6 @@ import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.work._
 import weco.catalogue.source_model.calm.CalmRecord
 import weco.pipeline.transformer.Transformer
-import weco.pipeline.transformer.identifiers.SourceIdentifierValidation._
 import weco.pipeline.transformer.calm.models.CalmTransformerException.{
   LevelMissing,
   RefNoMissing,
