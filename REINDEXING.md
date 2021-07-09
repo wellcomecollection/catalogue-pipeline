@@ -214,9 +214,14 @@ A reindex should take less than a working day to complete.
 ### Connect the Catalogue API
 
 Every pipeline has a dedicated Elasticsearch cluster, and this cluster contains indexes for different stages of the reindex.
-The two indexes of interest are `works-indexed-{PIPELINE_DATE}` and `images-indexed-{PIPELINE_DATE}` – these contain documents suitably for the API to use.
 
-When these indexes are fully populate, we want to replicate them into the `catalogue-api` cluster.
+The two indexes of interest are `works-indexed-{PIPELINE_DATE}` and `images-indexed-{PIPELINE_DATE}`, these contain documents suitable for the API to use.
+
+When these indexes have been fully populated, we want to replicate them into the `catalogue-api` cluster.
+
+This diagram intends to provide an overview of how the pipeline and API connect:
+
+![Catalogue pipeline visualisation](.gitbook/assets/wc_pipeline_viz.png)
 
 #### Following an index
 
