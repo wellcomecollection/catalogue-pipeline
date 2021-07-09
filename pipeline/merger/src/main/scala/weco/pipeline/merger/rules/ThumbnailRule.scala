@@ -48,7 +48,7 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
   val getMetsThumbnail =
     new PartialRule {
       val isDefinedForTarget: WorkPredicate =
-        sierraWork or singlePhysicalItemCalmWork
+        sierraWork or singlePhysicalItemCalmWork or teiWork
       val isDefinedForSource: WorkPredicate = singleDigitalItemMetsWork
 
       def rule(target: Work.Visible[Identified],
@@ -61,7 +61,7 @@ object ThumbnailRule extends FieldMergeRule with MergerLogging {
   val getMinMiroThumbnail =
     new PartialRule {
       val isDefinedForTarget: WorkPredicate =
-        singleItemSierra or zeroItemSierra or singlePhysicalItemCalmWork
+        singleItemSierra or zeroItemSierra or singlePhysicalItemCalmWork or teiWork
       val isDefinedForSource: WorkPredicate = singleDigitalItemMiroWork
 
       def rule(target: Work.Visible[Identified],

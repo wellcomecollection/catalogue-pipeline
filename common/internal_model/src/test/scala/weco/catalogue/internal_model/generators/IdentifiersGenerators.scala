@@ -97,6 +97,13 @@ trait IdentifiersGenerators extends RandomGenerators {
       ontologyType = "Work"
     )
 
+  def createTeiSourceIdentifier: SourceIdentifier =
+    SourceIdentifier(
+      value = randomAlphanumeric(10),
+      identifierType = IdentifierType.Tei,
+      ontologyType = "Work"
+    )
+
   def createDigcodeIdentifier(digcode: String): SourceIdentifier =
     SourceIdentifier(
       value = digcode,

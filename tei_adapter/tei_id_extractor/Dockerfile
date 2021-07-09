@@ -1,5 +1,7 @@
-FROM 760097843905.dkr.ecr.eu-west-1.amazonaws.com/wellcome/typesafe_config_base:104
+FROM 760097843905.dkr.ecr.eu-west-1.amazonaws.com/openjdk:11
+
+LABEL maintainer = "Wellcome Collection <digital@wellcomecollection.org>"
 
 ADD target/universal/stage /opt/docker
 
-ENV PROJECT tei_id_extractor
+ENTRYPOINT ["/opt/docker/bin/tei_id_extractor"]

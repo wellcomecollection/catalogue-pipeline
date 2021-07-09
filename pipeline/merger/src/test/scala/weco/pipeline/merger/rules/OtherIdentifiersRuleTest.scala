@@ -31,6 +31,8 @@ class OtherIdentifiersRuleTest
     )
   )
 
+  val teiWork: Work.Visible[WorkState.Identified] = teiIdentifiedWork()
+
   val miroWork: Work.Visible[WorkState.Identified] = miroIdentifiedWork()
 
   val metsWorks: List[Work.Invisible[WorkState.Identified]] =
@@ -81,6 +83,23 @@ class OtherIdentifiersRuleTest
         createDigcodeIdentifier("dighole")
       )
     )
+
+  it("merges METS, Miro, Calm and Sierra source IDs into Tei target") {
+    inside(OtherIdentifiersRule
+      .merge(
+        teiWork,
+        calmWork :: physicalSierraWork :: nothingWork :: miroWork :: metsWorks)) {
+      case FieldMergeResult(otherIdentifiers, mergedSources) =>
+        otherIdentifiers should contain theSameElementsAs
+          List(physicalSierraWork.sourceIdentifier, miroWork.sourceIdentifier) ++
+            metsWorks.map(_.sourceIdentifier) ++ calmWork.data.otherIdentifiers :+ calmWork.sourceIdentifier :+
+            physicalSierraWork.data.otherIdentifiers
+              .find(_.identifierType.id == IdentifierType.SierraIdentifier.id)
+              .get
+
+        mergedSources should contain theSameElementsAs (physicalSierraWork :: miroWork :: calmWork :: metsWorks)
+    }
+  }
 
   it("merges METS, Miro, and Sierra source IDs into Calm target") {
     inside(

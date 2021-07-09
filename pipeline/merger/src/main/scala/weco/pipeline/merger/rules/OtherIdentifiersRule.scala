@@ -38,13 +38,15 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
     sources: Seq[Work[Identified]]): FieldMergeResult[FieldData] = {
     val ids = (
       mergeDigitalIntoPhysicalSierraTarget(target, sources) |+|
-        mergeIntoCalmTarget(target, sources)
+        mergeIntoTeiTarget(target, sources)
+          .orElse(mergeIntoCalmTarget(target, sources))
           .orElse(
             mergeSingleMiroIntoSingleOrZeroItemSierraTarget(target, sources))
     ).getOrElse(target.data.otherIdentifiers).distinct
 
     val mergedSources = (
       List(
+        mergeIntoTeiTarget,
         mergeIntoCalmTarget,
         mergeSingleMiroIntoSingleOrZeroItemSierraTarget
       ).flatMap { rule =>
@@ -78,6 +80,17 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
         target.data.otherIdentifiers ++ sources.toList.flatMap(
           getAllowedIdentifiersFromSource)
     }
+
+  private val mergeIntoTeiTarget = new PartialRule {
+    val isDefinedForTarget: WorkPredicate = teiWork
+    val isDefinedForSource: WorkPredicate =
+      singleDigitalItemMetsWork or sierraWork or singleDigitalItemMiroWork or singlePhysicalItemCalmWork
+
+    def rule(target: Work.Visible[Identified],
+             sources: NonEmptyList[Work[Identified]]): FieldData =
+      target.data.otherIdentifiers ++ sources.toList.flatMap(
+        getAllowedIdentifiersFromSource)
+  }
 
   private val mergeIntoCalmTarget = new PartialRule {
     val isDefinedForTarget: WorkPredicate = singlePhysicalItemCalmWork

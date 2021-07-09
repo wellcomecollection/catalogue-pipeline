@@ -16,13 +16,6 @@ class IdExtractorTest extends AnyFunSpec with Matchers {
     triedId shouldBe a[Success[_]]
     triedId.get shouldBe "manuscript_15651"
   }
-  it("extracts the id from a valid tei xml with BOM") {
-    val triedId = IdExtractor.extractId(
-      IOUtils.resourceToString("/Javanese_11.xml", StandardCharsets.UTF_8),
-      path)
-    triedId shouldBe a[Success[_]]
-    triedId.get shouldBe "Well.Jav.11"
-  }
 
   it("fails if xml is invalid") {
     val triedId = IdExtractor.extractId("not an xml", path)

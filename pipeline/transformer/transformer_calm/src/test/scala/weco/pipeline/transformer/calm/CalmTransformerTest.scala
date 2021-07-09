@@ -122,7 +122,7 @@ class CalmTransformerTest
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
       "AltRefNo" -> "a.b.c",
-      "BNumber" -> "b456",
+      "BNumber" -> "b12345672",
       "Wheels" -> "M0000001",
       "Wheels" -> "M0000002",
       "CatalogueStatus" -> "Catalogued"
@@ -132,7 +132,7 @@ class CalmTransformerTest
         MergeCandidate(
           id = IdState.Identifiable(
             SourceIdentifier(
-              value = "b456",
+              value = "b12345672",
               identifierType = IdentifierType.SierraSystemNumber,
               ontologyType = "Work"
             )

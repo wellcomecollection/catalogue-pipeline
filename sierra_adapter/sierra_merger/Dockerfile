@@ -1,5 +1,7 @@
-FROM 760097843905.dkr.ecr.eu-west-1.amazonaws.com/wellcome/typesafe_config_base:21
+FROM 760097843905.dkr.ecr.eu-west-1.amazonaws.com/openjdk:11
+
+LABEL maintainer = "Wellcome Collection <digital@wellcomecollection.org>"
 
 ADD target/universal/stage /opt/docker
 
-ENV PROJECT sierra_merger
+ENTRYPOINT ["/opt/docker/bin/sierra_merger"]

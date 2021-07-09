@@ -9,10 +9,7 @@ object IdExtractor {
   // and we want to extract the value of the xml:id attribute, "manuscript_15651" in the example
   def extractId(blobContent: String, path: String): Try[String] =
     Try {
-      // Some of the TEI file have a Byte Order Mark (https://en.wikipedia.org/wiki/Byte_order_mark)
-      // at the beginning, probably added by one of the tools used to edit the tei files.
-      // This is a very hacky solution stolen from https://stackoverflow.com/questions/26847500/remove-bom-from-string-in-java
-      val xml = XML.loadString(blobContent.replace("\uFEFF", ""))
+      val xml = XML.loadString(blobContent)
       xml.attributes
         .collectFirst {
           case metadata if metadata.key == "id" => metadata.value.text

@@ -24,18 +24,21 @@ class MetsDataTest
     val metsData =
       MetsData(
         recordIdentifier = bibNumber,
-        accessConditionDz = Some("CC-BY-NC"))
+        accessConditionDz = Some("CC-BY-NC")
+      )
     val version = 1
     val expectedSourceIdentifier = SourceIdentifier(
       identifierType = IdentifierType.METS,
       ontologyType = "Work",
-      value = bibNumber)
+      value = bibNumber
+    )
 
-    val url = s"https://wellcomelibrary.org/iiif/$bibNumber/manifest"
+    val url = s"https://iiif.wellcomecollection.org/presentation/v2/$bibNumber"
     val digitalLocation = DigitalLocation(
       url = url,
       locationType = LocationType.IIIFPresentationAPI,
-      license = Some(License.CCBYNC))
+      license = Some(License.CCBYNC)
+    )
 
     val createdDate = Instant.now()
 
@@ -70,7 +73,8 @@ class MetsDataTest
     val expectedSourceIdentifier = SourceIdentifier(
       identifierType = IdentifierType.METS,
       ontologyType = "Work",
-      value = bibNumber)
+      value = bibNumber
+    )
 
     val createdDate = Instant.now()
 
@@ -92,9 +96,10 @@ class MetsDataTest
     val expectedSourceIdentifier = SourceIdentifier(
       identifierType = IdentifierType.METS,
       ontologyType = "Work",
-      value = bibNumber)
+      value = bibNumber
+    )
 
-    val url = s"https://wellcomelibrary.org/iiif/$bibNumber/manifest"
+    val url = s"https://iiif.wellcomecollection.org/presentation/v2/$bibNumber"
     val digitalLocation =
       DigitalLocation(
         url = url,
@@ -141,7 +146,8 @@ class MetsDataTest
     val metsData =
       MetsData(
         recordIdentifier = createBibNumber,
-        accessConditionDz = Some("in copyright"))
+        accessConditionDz = Some("in copyright")
+      )
 
     inside(metsData.toWork(1, Instant.now()).right.get.data.items) {
       case List(
@@ -149,7 +155,9 @@ class MetsDataTest
             IdState.Unidentifiable,
             _,
             _,
-            List(DigitalLocation(_, _, license, _, _, _)))) =>
+            List(DigitalLocation(_, _, license, _, _, _))
+          )
+          ) =>
         license shouldBe Some(License.InCopyright)
     }
   }
@@ -158,7 +166,8 @@ class MetsDataTest
     val metsData =
       MetsData(
         recordIdentifier = createBibNumber,
-        accessConditionDz = Some("In copyright"))
+        accessConditionDz = Some("In copyright")
+      )
 
     inside(metsData.toWork(1, Instant.now()).right.get.data.items) {
       case List(
@@ -166,7 +175,9 @@ class MetsDataTest
             IdState.Unidentifiable,
             _,
             _,
-            List(DigitalLocation(_, _, license, _, _, _)))) =>
+            List(DigitalLocation(_, _, license, _, _, _))
+          )
+          ) =>
         license shouldBe Some(License.InCopyright)
     }
   }
@@ -175,14 +186,17 @@ class MetsDataTest
     val metsData =
       MetsData(
         recordIdentifier = createBibNumber,
-        accessConditionDz = Some(License.InCopyright.url))
+        accessConditionDz = Some(License.InCopyright.url)
+      )
     inside(metsData.toWork(1, Instant.now()).right.get.data.items) {
       case List(
           Item(
             IdState.Unidentifiable,
             _,
             _,
-            List(DigitalLocation(_, _, license, _, _, _)))) =>
+            List(DigitalLocation(_, _, license, _, _, _))
+          )
+          ) =>
         license shouldBe Some(License.InCopyright)
     }
   }
@@ -190,7 +204,8 @@ class MetsDataTest
   it("maps Copyright not cleared to In copyright") {
     val metsData = MetsData(
       recordIdentifier = createBibNumber,
-      accessConditionDz = Some("Copyright not cleared"))
+      accessConditionDz = Some("Copyright not cleared")
+    )
     val result = metsData.toWork(1, Instant.now())
 
     inside(result.right.get.data.items) {
@@ -199,7 +214,9 @@ class MetsDataTest
             IdState.Unidentifiable,
             _,
             _,
-            List(DigitalLocation(_, _, license, _, _, _)))) =>
+            List(DigitalLocation(_, _, license, _, _, _))
+          )
+          ) =>
         license shouldBe Some(License.InCopyright)
     }
   }
@@ -209,7 +226,8 @@ class MetsDataTest
       MetsData(
         recordIdentifier = createBibNumber,
         accessConditionDz =
-          Some("rightsstatements.org/page/InC/1.0/?language=en"))
+          Some("rightsstatements.org/page/InC/1.0/?language=en")
+      )
     val result = metsData.toWork(1, Instant.now())
 
     inside(result.right.get.data.items) {
@@ -218,7 +236,9 @@ class MetsDataTest
             IdState.Unidentifiable,
             _,
             _,
-            List(DigitalLocation(_, _, license, _, _, _)))) =>
+            List(DigitalLocation(_, _, license, _, _, _))
+          )
+          ) =>
         license shouldBe Some(License.InCopyright)
     }
   }
@@ -227,7 +247,8 @@ class MetsDataTest
     val metsData =
       MetsData(
         recordIdentifier = createBibNumber,
-        accessConditionDz = Some("All Rights Reserved"))
+        accessConditionDz = Some("All Rights Reserved")
+      )
     val result = metsData.toWork(1, Instant.now())
 
     inside(result.right.get.data.items) {
@@ -236,7 +257,9 @@ class MetsDataTest
             IdState.Unidentifiable,
             _,
             _,
-            List(DigitalLocation(_, _, license, _, _, _)))) =>
+            List(DigitalLocation(_, _, license, _, _, _))
+          )
+          ) =>
         license shouldBe Some(License.InCopyright)
     }
   }
@@ -254,7 +277,7 @@ class MetsDataTest
     result.right.get.data.thumbnail shouldBe Some(
       DigitalLocation(
         url =
-          s"https://dlcs.io/thumbs/wellcome/5/location.jp2/full/!200,200/0/default.jpg",
+          s"https://iiif.wellcomecollection.org/thumb/location.jp2/full/!200,200/0/default.jpg",
         locationType = LocationType.ThumbnailImage,
         license = Some(License.CCBYNC)
       )
@@ -276,7 +299,7 @@ class MetsDataTest
     result.right.get.data.thumbnail shouldBe Some(
       DigitalLocation(
         url =
-          s"https://dlcs.io/thumbs/wellcome/5/title.jp2/full/!200,200/0/default.jpg",
+          s"https://iiif.wellcomecollection.org/thumb/title.jp2/full/!200,200/0/default.jpg",
         locationType = LocationType.ThumbnailImage,
         license = Some(License.CCBYNC)
       )
@@ -356,13 +379,14 @@ class MetsDataTest
     result shouldBe a[Right[_, _]]
     result.right.get.data.imageData.head.locations shouldBe List(
       DigitalLocation(
-        url = s"https://dlcs.io/iiif-img/wellcome/5/location.jp2/info.json",
+        url =
+          s"https://iiif.wellcomecollection.org/image/location.jp2/info.json",
         locationType = LocationType.IIIFImageAPI,
         license = Some(License.CCBYNC)
       ),
       DigitalLocation(
         url =
-          s"https://wellcomelibrary.org/iiif/${metsData.recordIdentifier}/manifest",
+          s"https://iiif.wellcomecollection.org/presentation/v2/${metsData.recordIdentifier}",
         locationType = LocationType.IIIFPresentationAPI,
         license = Some(License.CCBYNC)
       )
@@ -371,8 +395,8 @@ class MetsDataTest
 
   it("creates a work with a single accessCondition") {
     val result = MetsData(
-      recordIdentifier = "ID",
-      accessConditionStatus = Some("Requires registration"),
+      recordIdentifier = createBibNumber,
+      accessConditionStatus = Some("Requires registration")
     ).toWork(1, Instant.now())
     result shouldBe a[Right[_, _]]
     inside(result.right.get.data.items.head.locations.head) {
@@ -388,8 +412,9 @@ class MetsDataTest
   }
 
   it("creates a work with all images") {
+    val bibNumber = createBibNumber
     val result = MetsData(
-      recordIdentifier = "ID",
+      recordIdentifier = bibNumber,
       accessConditionDz = Some("CC-BY-NC"),
       fileReferencesMapping = List(
         "A" -> FileReference("A", "location1.jp2", Some("image/jp2")),
@@ -403,14 +428,15 @@ class MetsDataTest
     val images = result.right.get.data.imageData
     images should have length 3
     images.map(_.id.allSourceIdentifiers.head.value) should contain theSameElementsAs List(
-      "ID/A",
-      "ID/B",
-      "ID/C")
+      s"$bibNumber/A",
+      s"$bibNumber/B",
+      s"$bibNumber/C"
+    )
   }
 
   it("creates a work without images for restricted access statuses") {
     val result = MetsData(
-      recordIdentifier = "ID",
+      recordIdentifier = createBibNumber,
       accessConditionDz = Some("CC-BY-NC"),
       accessConditionStatus = Some("Restricted files"),
       fileReferencesMapping = List(
@@ -424,7 +450,7 @@ class MetsDataTest
 
   it("creates a work with a single accessCondition including usage terms") {
     val result = MetsData(
-      recordIdentifier = "ID",
+      recordIdentifier = createBibNumber,
       accessConditionStatus = Some("Clinical images"),
       accessConditionUsage = Some("Please ask nicely")
     ).toWork(1, Instant.now())
@@ -436,13 +462,14 @@ class MetsDataTest
             method = AccessMethod.ViewOnline,
             status = Some(AccessStatus.Restricted),
             terms = Some("Please ask nicely")
-          ))
+          )
+        )
     }
   }
 
   it("does not add access condition if all fields are empty") {
     val result = MetsData(
-      recordIdentifier = "ID",
+      recordIdentifier = createBibNumber,
       accessConditionStatus = None,
       accessConditionUsage = None
     ).toWork(1, Instant.now())
@@ -455,7 +482,7 @@ class MetsDataTest
 
   it("maps restricted files to Restricted AccessCondition") {
     val result = MetsData(
-      recordIdentifier = "ID",
+      recordIdentifier = createBibNumber,
       accessConditionStatus = Some("Restricted files")
     ).toWork(1, Instant.now())
     result shouldBe a[Right[_, _]]
@@ -473,15 +500,15 @@ class MetsDataTest
 
   it("fails creating a work when unknown AccessStatus") {
     val result = MetsData(
-      recordIdentifier = "ID",
-      accessConditionStatus = Some("Kanye West"),
+      recordIdentifier = createBibNumber,
+      accessConditionStatus = Some("Kanye West")
     ).toWork(1, Instant.now())
     result shouldBe a[Left[_, _]]
   }
 
   it("lowercases the b number") {
     val data = MetsData(
-      recordIdentifier = "B1234"
+      recordIdentifier = "B12345678"
     )
 
     val work = data.toWork(version = 1, modifiedTime = Instant.now()).value
@@ -489,7 +516,7 @@ class MetsDataTest
     work.sourceIdentifier shouldBe SourceIdentifier(
       identifierType = IdentifierType.METS,
       ontologyType = "Work",
-      value = "b1234"
+      value = "b12345678"
     )
 
     val mergeCandidates = work.data.mergeCandidates
@@ -499,7 +526,7 @@ class MetsDataTest
       SourceIdentifier(
         identifierType = IdentifierType.SierraSystemNumber,
         ontologyType = "Work",
-        value = "b1234"
+        value = "b12345678"
       )
   }
 }

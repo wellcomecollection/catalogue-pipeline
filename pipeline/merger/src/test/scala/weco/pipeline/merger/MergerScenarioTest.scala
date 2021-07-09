@@ -3,7 +3,7 @@ package weco.pipeline.merger
 import org.scalatest.GivenWhenThen
 import org.scalatest.featurespec.AnyFeatureSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType}
 import weco.catalogue.internal_model.work.generators.SourceWorkGenerators
 import weco.catalogue.internal_model.work.{Format, MergeCandidate}
 import weco.pipeline.merger.fixtures.FeatureTestSugar
@@ -242,6 +242,34 @@ class MergerScenarioTest
       outcome.getMerged(calm).data.imageData should contain(mets.singleImage)
     }
 
+    Scenario("A Calm work and multiple Miro works are matched") {
+      Given("A Calm work and 2 Miro works")
+      val calm = calmIdentifiedWork()
+      val miro1 = miroIdentifiedWork()
+      val miro2 = miroIdentifiedWork()
+
+      When("the works are merged")
+      val outcome = merger.merge(Seq(calm, miro1, miro2))
+
+      Then("the Miro works are redirected to the Calm work")
+      outcome.getMerged(miro1) should beRedirectedTo(calm)
+      outcome.getMerged(miro2) should beRedirectedTo(calm)
+
+      And("the Calm work contains the miro items")
+      outcome
+        .getMerged(calm)
+        .data
+        .items should contain allElementsOf miro1.data.items
+      outcome
+        .getMerged(calm)
+        .data
+        .items should contain allElementsOf miro2.data.items
+
+      And("the Calm work contains the Miro images")
+      outcome.getMerged(calm).data.imageData should contain(miro1.singleImage)
+      outcome.getMerged(calm).data.imageData should contain(miro2.singleImage)
+    }
+
     Scenario("A digitised video with Sierra physical records and e-bibs") {
       // This test case is based on a real example of four related works that
       // were being merged incorrectly.  In particular, the METS work (and associated
@@ -303,6 +331,43 @@ class MergerScenarioTest
 
       And("the Sierra physical work is unaffected")
       outcome.getMerged(workWithPhysicalVideoFormats) shouldBe workWithPhysicalVideoFormats
+    }
+
+    Scenario("A Tei and a Sierra digital and a sierra physical work are merged") {
+      Given("a Tei, a Sierra physical record and a Sierra digital record")
+      val (digitalSierra, physicalSierra) = sierraIdentifiedWorkPair()
+      val teiWork = teiIdentifiedWork().title("A tei work")
+
+      When("the works are merged")
+      val sierraWorks = List(digitalSierra, physicalSierra)
+      val works = sierraWorks :+ teiWork
+      val outcome = merger.merge(works)
+
+      Then("the Sierra works are redirected to the tei")
+      outcome.getMerged(digitalSierra) should beRedirectedTo(teiWork)
+      outcome.getMerged(physicalSierra) should beRedirectedTo(teiWork)
+
+      And("the tei work has the Sierra works' items")
+      outcome
+        .getMerged(teiWork)
+        .data
+        .items should contain allElementsOf digitalSierra.data.items
+      outcome
+        .getMerged(teiWork)
+        .data
+        .items should contain allElementsOf physicalSierra.data.items
+
+      And("the tei work has the Sierra works' identifiers")
+      outcome
+        .getMerged(teiWork)
+        .data
+        .otherIdentifiers should contain allElementsOf physicalSierra.data.otherIdentifiers
+        .filter(_.identifierType == IdentifierType.SierraIdentifier)
+      outcome
+        .getMerged(teiWork)
+        .data
+        .otherIdentifiers should contain allElementsOf digitalSierra.data.otherIdentifiers
+        .filter(_.identifierType == IdentifierType.SierraIdentifier)
     }
   }
 }
