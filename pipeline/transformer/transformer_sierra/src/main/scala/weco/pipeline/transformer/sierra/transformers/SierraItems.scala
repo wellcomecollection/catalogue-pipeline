@@ -30,8 +30,6 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
 
   type Output = List[Item[IdState.Unminted]]
 
-  type HasInferredTitle = Boolean
-
   /** We don't get the digital items from Sierra.
     * The `dlnk` was previously used, but we now use the METS source.
     *
@@ -112,8 +110,12 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
         )
     }.toList
 
-    tidyInferredTitles(items)
+    tidyTitles(items)
   }
+
+  // A "automated" title is a title that we created automatically, as opposed
+  // to one that was written by a human cataloguer.
+  private type HasAutomatedTitle = Boolean
 
   private def transformItemData(
     bibId: SierraBibNumber,
@@ -121,7 +123,7 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
     itemData: SierraItemData,
     bibData: SierraBibData,
     fallbackLocation: Option[(PhysicalLocationType, String)]
-  ): (Item[IdState.Identifiable], HasInferredTitle) = {
+  ): (Item[IdState.Identifiable], HasAutomatedTitle) = {
     debug(s"Attempting to transform $itemId")
 
     val location =
@@ -156,16 +158,20 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
     *
     * We use one of:
     *
-    *   - field tag `v` for VOLUME
+    *   - field tag `v` for VOLUME.  This is written by a cataloguer.
     *     https://documentation.iii.com/sierrahelp/Content/sril/sril_records_varfld_types_item.html
     *
     *   - The copyNo field from the Sierra API response, which we use to
     *     create a string like "Copy 2".
     *
+    *     Elsewhere in this class, this is called an "automated title", because we're
+    *     creating the title automatically rather than using text written by a cataloguer.
+    *     In general, we prefer the human-written title where possible.
+    *
     */
   private def getItemTitle(
     itemId: SierraItemNumber,
-    data: SierraItemData): (Option[String], HasInferredTitle) = {
+    data: SierraItemData): (Option[String], HasAutomatedTitle) = {
     val titleCandidates: List[String] =
       data.varFields
         .filter { _.fieldTag.contains("v") }
@@ -199,10 +205,10 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
         if (title.isEmpty) None else Some(title)
     }
 
-  /** Tidy up the inferred titles (Copy 1, Copy 2, Copy 3, etc.)
+  /** Tidy up the automated titles (Copy 1, Copy 2, Copy 3, etc.)
     *
     * The purpose of a title is to help users distinguish between multiple items.
-    * We remove the inferred title if they aren't doing that, in particular if:
+    * We remove the automated title if they aren't doing that, in particular if:
     *
     *   1) There's only one item, and it has an inferred title
     *   2) Every item has the same inferred title
@@ -214,7 +220,7 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
     *
     */
   private def tidyInferredTitles(
-    items: List[(Item[IdState.Identifiable], HasInferredTitle)])
+    items: List[(Item[IdState.Identifiable], HasAutomatedTitle)])
     : List[Item[IdState.Identifiable]] = {
     val inferredTitles =
       items.collect {
