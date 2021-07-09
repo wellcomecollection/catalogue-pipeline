@@ -177,13 +177,37 @@ Which pipeline are you sending this to? (catalogue, catalogue_miro_updates, repo
 Every record (complete), just a few (partial), or specific records (specific)? (complete, partial, specific): partial
 ```
 
-A partial reindex will allow You may wish to run a partial reindex to verify that the process will work as expected before embarking on a complete reindex.
+A partial reindex will allow sending a few records (by default 10) in order to verify that a pipeline is functioning as expected without incurring the costs of a full reindex.
 
 #### Monitor the reindex
 
 You can monitor a reindex in progress using Grafana at [https://monitoring.wellcomecollection.org/](https://monitoring.wellcomecollection.org/), or by looking at CloudWatch metrics in the `platform` AWS account.
 
 Non-empty DLQs will be reported in the Wellcome #wc-platform-alerts Slack channel.
+
+You can monitor a reindex using the [./reindexer/get_reindex_status.py](./reindexer/get_reindex_status.py) script, specifying the ID of the pipeline you wish to check.
+
+```
+> python3 get_reindex_status.py YYYY-MM-DD
+
+*** Source tables ***
+...
+sierra  2,168,470
+TOTAL   3,243,477
+
+*** Work index stats ***
+source records      3,243,477
+...
+works-indexed       3,243,477
+API                 3,242,763  ▼ 714
+
+*** Image index stats ***
+...
+images-indexed    144,981
+API               144,981
+
+Approximately 99% of records have been reindexed successfully (counts may not be exact)
+```
 
 A reindex should take less than a working day to complete. 
 
@@ -196,7 +220,7 @@ When these indexes are fully populate, we want to replicate them into the `catal
 
 #### Following an index
 
-We replicate indexes between pipeline and catalogue-api clusters using [Elasticsearch CCR](https://www.elastic.co/guide/en/elasticsearch/reference/current/xpack-ccr.html).
+We replicate indexes between the pipeline and catalogue-api clusters using [Elasticsearch CCR](https://www.elastic.co/guide/en/elasticsearch/reference/current/xpack-ccr.html).
 
 To follow an index using the console:
 
