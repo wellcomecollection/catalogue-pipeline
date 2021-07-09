@@ -144,14 +144,18 @@ module "catalogue_pipeline_YYYY-MM-DD" {
 
 Remember to create a pull request with this change.
 
-You can now run `terraform` in  [./pipeline/terraform/main.tf](./pipeline/terraform/main.tf):
+You can now run `terraform` in  [./pipeline/terraform](./pipeline/terraform):
 
 ```
-> terraform plan
+# Use the run_terraform.sh script to get Elastic Cloud credentials
+> ./run_terraform.sh plan
 
-# Review the plan operation and ensure you are only adding/modifying the correct resources
+...
 
-> terraform apply
+Plan: 389 to add, 0 to change, 0 to destroy.
+
+# Before applying review the plan operation and verify it makes sense
+> ./run_terraform.sh apply
 ```
 
 ### Running the reindex script
