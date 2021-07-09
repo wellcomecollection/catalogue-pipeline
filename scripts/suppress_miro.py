@@ -6,7 +6,7 @@ import httpx
 from miro_updates import suppress_image
 
 
-miro_id_regex = re.compile("^([a-zA-Z])([0-9]+)([a-zA-Z]*)$")
+miro_id_regex = re.compile("^[A-Z][0-9]{7}[A-Z]{0,4}[0-9]{0,2}$")
 
 
 @click.command()
@@ -40,7 +40,7 @@ def suppress_miro(id, message):
             print(f"Miro identifier: {miro_id}")
         except Exception:
             raise click.ClickException(
-                "It looks like that isn't an identifier for a Miro image!"
+                f"{id} doesn't look like a Miro ID and isn't the identifier of a catalogue record containing a Miro ID"
             )
 
     suppress_image(miro_id=miro_id, message=message)
