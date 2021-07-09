@@ -25,8 +25,8 @@ catalogue_pipeline:
       name: "2021-06-27"
     - id: "2021-07-06"
       name: "2021-07-06"
-    - id: "MY-NEW-PIPELINE"
-      name: "MY-NEW-PIPELINE"
+    - id: "YYYY-MM-DD"
+      name: "YYYY-MM-DD"
 ```
 
 Name your new pipeline environment using the date pattern indicated above. You will need to use the environment label when terraforming a new pipeline.
@@ -36,31 +36,19 @@ Name your new pipeline environment using the date pattern indicated above. You w
 Prepare a release following the example below. You may want to choose a specific git ref as a label and _not_ latest.
 
 ```
-> weco-deploy --project-id catalogue_pipeline prepare --from-label latest --description "A helpful description"
+> weco-deploy \
+  --project-id catalogue_pipeline prepare \
+  --from-label latest \
+  --description "A helpful description"
 
 Prepared release from images in latest
-Requested by: arn:aws:sts::760097843905:assumed-role/platform-superdev/KennyR@Wellcomecloud.onmicrosoft.com
+Requested by: dev@Wellcomecloud.onmicrosoft.com
 Date created: 2021-07-08T15:11:48.403652
 
 service                old image    new image    Git commit
 ---------------------  -----------  -----------  ------------
 aspect_ratio_inferrer  efd451f      -            -
-batcher                532ddee      -            -
-feature_inferrer       efd451f      -            -
-id_minter              021df38      -            -
-inference_manager      021df38      -            -
-ingestor_images        021df38      -            -
-ingestor_works         021df38      -            -
-matcher                021df38      -            -
-merger                 021df38      -            -
-palette_inferrer       efd451f      -            -
-relation_embedder      021df38      -            -
-router                 021df38      -            -
-transformer_calm       021df38      -            -
-transformer_mets       021df38      -            -
-transformer_miro       021df38      -            -
-transformer_sierra     021df38      -            -
-transformer_tei        f9f910d      -            -
+...
 
 Created release eeb9482f-0a6a-4211-8de9-27cee7567134
 ```
@@ -72,12 +60,12 @@ Using the release identifier gathered from preparing the release and the environ
 ```
 > weco-deploy --project-id catalogue_pipeline deploy \
   --release-id eeb9482f-0a6a-4211-8de9-27cee7567134 \
-  --environment-id EXAMPLE-PIPELINE \
+  --environment-id YYYY-MM-DD \
   --description "A helpful description"
 
 Deploying release eeb9482f-0a6a-4211-8de9-27cee7567134
-Targeting env: EXAMPLE-PIPELINE (Environment(id='EXAMPLE-PIPELINE', name='EXAMPLE-PIPELINE'))
-Requested by: arn:aws:sts::760097843905:assumed-role/platform-superdev/KennyR@Wellcomecloud.onmicrosoft.com
+Targeting env: YYYY-MM-DD (Environment(id='YYYY-MM-DD', name='YYYY-MM-DD'))
+Requested by: dev@Wellcomecloud.onmicrosoft.com
 Date created: 2021-07-08T15:11:48.403652
 
 ECS services discovered:
@@ -85,57 +73,22 @@ ECS services discovered:
 image ID               services
 ---------------------  ----------
 aspect_ratio_inferrer
-batcher
-feature_inferrer
-id_minter
-inference_manager
-ingestor_images
-ingestor_works
-matcher
-merger
-palette_inferrer
-relation_embedder
-router
-transformer_calm
-transformer_mets
-transformer_miro
-transformer_sierra
-transformer_tei
+...
 
 Create deployment? [y/N]: y
 
 Deployment Summary
-Requested by: arn:aws:sts::760097843905:assumed-role/platform-superdev/KennyR@Wellcomecloud.onmicrosoft.com
+Requested by: dev@Wellcomecloud.onmicrosoft.com
 Date created: 2021-07-08T15:23:55.267305
-Deploy data:  /Users/robertkenny/.local/share/weco-deploy/deployment_results/deploy_2021-07-08_16-23-55.json
+Deploy data:  deploy_2021-07-08_16-23-55.json
 
 image ID               summary of changes
 ---------------------  --------------------
 aspect_ratio_inferrer  ECR tag updated,
-batcher                ECR tag updated,
-feature_inferrer       ECR tag updated,
-id_minter              ECR tag updated,
-inference_manager      ECR tag updated,
-ingestor_images        ECR tag updated,
-ingestor_works         ECR tag updated,
-matcher                ECR tag updated,
-merger                 ECR tag updated,
-palette_inferrer       ECR tag updated,
-relation_embedder      ECR tag updated,
-router                 ECR tag updated,
-transformer_calm       ECR tag updated,
-transformer_mets       ECR tag updated,
-transformer_miro       ECR tag updated,
-transformer_sierra     ECR tag updated,
-transformer_tei        ECR tag updated,
+...
 
-Deployed release eeb9482f-0a6a-4211-8de9-27cee7567134 to EXAMPLE-PIPELINE (Environment(id='EXAMPLE-PIPELINE', name='EXAMPLE-PIPELINE'))
-
-Checking deployment of eeb9482f-0a6a-4211-8de9-27cee7567134 to EXAMPLE-PIPELINE
-Allowing 600s for deployment.
-
-Deployment of eeb9482f-0a6a-4211-8de9-27cee7567134 to EXAMPLE-PIPELINE successful
-Deployment took 2s
+Deployed release eeb9482f-0a6a-4211-8de9-27cee7567134 to YYYY-MM-DD (Environment(id='YYYY-MM-DD', name='YYYY-MM-DD'))
+Deployment of eeb9482f-0a6a-4211-8de9-27cee7567134 to YYYY-MM-DD successful
 ```
 
 This operation **only tags ECR images with the new environment** it does not deploy any services. 
@@ -167,11 +120,11 @@ module "catalogue_pipeline_2021-07-06" {
   # ...
 }
 
-module "catalogue_pipeline_MY-NEW-PIPELINE" {
+module "catalogue_pipeline_YYYY-MM-DD" {
   source = "./stack"
 
-  pipeline_date = "MY-NEW-PIPELINE"
-  release_label = "MY-NEW-PIPELINE"
+  pipeline_date = "YYYY-MM-DD"
+  release_label = "YYYY-MM-DD"
 
   is_reindexing = true
 
@@ -214,7 +167,7 @@ To follow an index using the console:
 
 - You can sign into Elastic Cloud here: https://cloud.elastic.co/home
 
-  Your cluster will be created in Elastic Cloud with a name patterned after : `pipeline-MY-NEW-PIPELINE`.
+  Your cluster will be created in Elastic Cloud with a name patterned after : `pipeline-YYYY-MM-DD`.
 
   ![Example Elastic Cloud dashboard](.gitbook/assets/es_dash_example.png)
 
@@ -227,8 +180,8 @@ To follow an index using the console:
   - Pick the remote cluster created by terraform above.
   - Create the follower indexes using the naming pattern:
   
-    - `works-indexed-MY-NEW-PIPELINE`
-    - `images-indexed-MY-NEW-PIPELINE`
+    - `works-indexed-YYYY-MM-DD`
+    - `images-indexed-YYYY-MM-DD`
   
   Be sure to create follower indexes for both images & works indexes. You should name the follower indexes the same as their leader. 
   
@@ -244,7 +197,7 @@ The `indexDate` should be the one used to reference the deployment and terraform
 object ElasticConfig {
   // We use this to share config across API applications
   // i.e. The API and the snapshot generator.
-  val indexDate = "MY-NEW-PIPELINE"
+  val indexDate = "YYYY-MM-DD"
 
   def apply(): ElasticConfig =
     ElasticConfig(
