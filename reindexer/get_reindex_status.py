@@ -70,9 +70,7 @@ def get_pipeline_storage_es_client(reindex_date):
     """
     Returns an Elasticsearch client for the pipeline-storage cluster.
     """
-    session = get_session_with_role(
-        "arn:aws:iam::760097843905:role/platform-developer"
-    )
+    session = get_session_with_role("arn:aws:iam::760097843905:role/platform-developer")
 
     secret_prefix = f"elasticsearch/pipeline_storage_{reindex_date}"
 
@@ -102,8 +100,12 @@ def get_api_es_client():
     host = get_secret_string(session, secret_id=f"{secret_prefix}/public_host")
     port = get_secret_string(session, secret_id=f"{secret_prefix}/port")
     protocol = get_secret_string(session, secret_id=f"{secret_prefix}/protocol")
-    username = get_secret_string(session, secret_id=f"{secret_prefix}/diff_tool/username")
-    password = get_secret_string(session, secret_id=f"{secret_prefix}/diff_tool/password")
+    username = get_secret_string(
+        session, secret_id=f"{secret_prefix}/diff_tool/username"
+    )
+    password = get_secret_string(
+        session, secret_id=f"{secret_prefix}/diff_tool/password"
+    )
 
     return Elasticsearch(f"{protocol}://{username}:{password}@{host}:{port}")
 
