@@ -356,7 +356,8 @@ class MetsDataTest
     result shouldBe a[Right[_, _]]
     result.right.get.data.imageData.head.locations shouldBe List(
       DigitalLocation(
-        url = s"https://iiif.wellcomecollection.org/image/location.jp2/info.json",
+        url =
+          s"https://iiif.wellcomecollection.org/image/location.jp2/info.json",
         locationType = LocationType.IIIFImageAPI,
         license = Some(License.CCBYNC)
       ),
