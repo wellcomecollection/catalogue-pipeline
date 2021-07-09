@@ -219,7 +219,7 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
     * can only be applied when looking at the items together.
     *
     */
-  private def tidyInferredTitles(
+  private def tidyTitles(
     items: List[(Item[IdState.Identifiable], HasAutomatedTitle)])
     : List[Item[IdState.Identifiable]] = {
     val inferredTitles =
