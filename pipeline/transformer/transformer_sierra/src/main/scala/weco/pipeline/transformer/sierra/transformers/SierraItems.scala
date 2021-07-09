@@ -207,7 +207,7 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
     *   1) There's only one item, and it has an inferred title
     *   2) Every item has the same inferred title
     *
-    * Note: (1) is really a special case of (1) for the case when there's a single item.
+    * Note: (1) is really a special case of (2) for the case when there's a single item.
     *
     * Note: we can't do this when we add the title to the individual items, because this rule
     * can only be applied when looking at the items together.
