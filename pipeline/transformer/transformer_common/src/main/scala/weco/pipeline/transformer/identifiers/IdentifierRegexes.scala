@@ -20,7 +20,7 @@ object IdentifierRegexes {
   /* Regex for parsing a Miro ID.  Examples of valid IDs, all taken from
    * the Sierra data:
    *
-   *    L0046161, V0033167F1, V0032544ECL
+   *    L0046161, V0033167F1, V0032544ECL, V0009118ETLL, L0025088F01
    *
    * Regarding suffixes (from a slack discussion with collections):
    *
@@ -41,11 +41,10 @@ object IdentifierRegexes {
    * to slip the image in line.
    */
   lazy val miroImageNumber: Regex =
-    "^[A-Z][0-9]{7}[A-Z]{0,3}[0-9]?$".r
+    "^[A-Z][0-9]{7}[A-Z]{0,4}[0-9]{0,2}$".r
 
   /*
    * Iconographic numbers are a series of digits followed by an 'i'
-   * TODO: Are there any rules about the number of digits?
    */
   lazy val iconographicNumber: Regex = "^[0-9]+i$".r
 
