@@ -181,7 +181,10 @@ class SierraItemsTest
 
       val items = getTransformedItems(itemDataMap = itemDataMap)
 
-      items.map { _.title } shouldBe Seq(Some("Impression"), Some("Impression"), Some("Impression"))
+      items.map { _.title } shouldBe Seq(
+        Some("Impression"),
+        Some("Impression"),
+        Some("Impression"))
     }
 
     def getTitle(itemData: SierraItemData): Option[String] = {

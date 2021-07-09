@@ -101,18 +101,16 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
         require(!itemData.suppressed)
       }
 
-    val items = sierraItemDataMap
-      .map {
-        case (itemId, itemData) =>
-          transformItemData(
-            bibId = bibId,
-            itemId = itemId,
-            itemData = itemData,
-            bibData = bibData,
-            fallbackLocation = fallbackLocation
-          )
-      }
-      .toList
+    val items = sierraItemDataMap.map {
+      case (itemId, itemData) =>
+        transformItemData(
+          bibId = bibId,
+          itemId = itemId,
+          itemData = itemData,
+          bibData = bibData,
+          fallbackLocation = fallbackLocation
+        )
+    }.toList
 
     tidyInferredTitles(items)
   }
@@ -165,8 +163,9 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
     *     create a string like "Copy 2".
     *
     */
-  private def getItemTitle(itemId: SierraItemNumber,
-                           data: SierraItemData): (Option[String], HasInferredTitle) = {
+  private def getItemTitle(
+    itemId: SierraItemNumber,
+    data: SierraItemData): (Option[String], HasInferredTitle) = {
     val titleCandidates: List[String] =
       data.varFields
         .filter { _.fieldTag.contains("v") }
@@ -214,9 +213,14 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
     * can only be applied when looking at the items together.
     *
     */
-  private def tidyInferredTitles(items: List[(Item[IdState.Identifiable], HasInferredTitle)]): List[Item[IdState.Identifiable]] = {
+  private def tidyInferredTitles(
+    items: List[(Item[IdState.Identifiable], HasInferredTitle)])
+    : List[Item[IdState.Identifiable]] = {
     val inferredTitles =
-      items.collect { case (Item(_, Some(title), _, _), inferredTitle) if inferredTitle => title }
+      items.collect {
+        case (Item(_, Some(title), _, _), inferredTitle) if inferredTitle =>
+          title
+      }
 
     val everyItemHasTheSameInferredTitle =
       inferredTitles.size == items.size && inferredTitles.toSet.size == 1
