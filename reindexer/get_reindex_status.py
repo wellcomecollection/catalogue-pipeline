@@ -3,6 +3,8 @@
 Reports some stats about the state of a reindex.
 """
 
+import functools
+
 import boto3
 import click
 from elasticsearch import Elasticsearch
@@ -63,10 +65,15 @@ def get_secret_string(session, *, secret_id):
     return secrets.get_secret_value(SecretId=secret_id)["SecretString"]
 
 
-def get_pipeline_storage_es_client(session, *, reindex_date):
+@functools.lru_cache()
+def get_pipeline_storage_es_client(reindex_date):
     """
     Returns an Elasticsearch client for the pipeline-storage cluster.
     """
+    session = get_session_with_role(
+        "arn:aws:iam::760097843905:role/platform-developer"
+    )
+
     secret_prefix = f"elasticsearch/pipeline_storage_{reindex_date}"
 
     host = get_secret_string(session, secret_id=f"{secret_prefix}/public_host")
@@ -78,19 +85,25 @@ def get_pipeline_storage_es_client(session, *, reindex_date):
     password = get_secret_string(
         session, secret_id=f"{secret_prefix}/read_only/es_password"
     )
-
     return Elasticsearch(f"{protocol}://{username}:{password}@{host}:{port}")
 
 
-def get_api_es_client(session):
+@functools.lru_cache()
+def get_api_es_client():
     """
     Returns an Elasticsearch client for the catalogue cluster.
     """
-    host = get_secret_string(session, secret_id="catalogue/api/es_host")
-    port = get_secret_string(session, secret_id="catalogue/api/es_port")
-    protocol = get_secret_string(session, secret_id="catalogue/api/es_protocol")
-    username = get_secret_string(session, secret_id="catalogue/api/es_username")
-    password = get_secret_string(session, secret_id="catalogue/api/es_password")
+    session = get_session_with_role(
+        "arn:aws:iam::756629837203:role/catalogue-developer"
+    )
+
+    secret_prefix = f"elasticsearch/catalogue_api"
+
+    host = get_secret_string(session, secret_id=f"{secret_prefix}/public_host")
+    port = get_secret_string(session, secret_id=f"{secret_prefix}/port")
+    protocol = get_secret_string(session, secret_id=f"{secret_prefix}/protocol")
+    username = get_secret_string(session, secret_id=f"{secret_prefix}/diff_tool/username")
+    password = get_secret_string(session, secret_id=f"{secret_prefix}/diff_tool/password")
 
     return Elasticsearch(f"{protocol}://{username}:{password}@{host}:{port}")
 
@@ -109,11 +122,11 @@ def count_documents_in_index(es_client, *, index_name):
         return int(count_resp[0]["count"])
 
 
-def get_works_index_stats(session, *, reindex_date):
+def get_works_index_stats(*, reindex_date):
     """
     Returns a map (step) -> (ES documents count).
     """
-    pipeline_client = get_pipeline_storage_es_client(session, reindex_date=reindex_date)
+    pipeline_client = get_pipeline_storage_es_client(reindex_date=reindex_date)
 
     indexes = [
         "works-source",
@@ -130,7 +143,7 @@ def get_works_index_stats(session, *, reindex_date):
         for idx in indexes
     }
 
-    api_client = get_api_es_client(session)
+    api_client = get_api_es_client()
     result["API"] = count_documents_in_index(
         api_client, index_name=f"works-indexed-{reindex_date}"
     )
@@ -138,11 +151,11 @@ def get_works_index_stats(session, *, reindex_date):
     return result
 
 
-def get_images_index_stats(session, *, reindex_date):
+def get_images_index_stats(*, reindex_date):
     """
     Returns a map (step) -> (ES documents count).
     """
-    pipeline_client = get_pipeline_storage_es_client(session, reindex_date=reindex_date)
+    pipeline_client = get_pipeline_storage_es_client(reindex_date=reindex_date)
 
     indexes = ["images-initial", "images-augmented", "images-indexed"]
 
@@ -153,7 +166,7 @@ def get_images_index_stats(session, *, reindex_date):
         for idx in indexes
     }
 
-    api_client = get_api_es_client(session)
+    api_client = get_api_es_client()
     result["API"] = count_documents_in_index(
         api_client, index_name=f"images-indexed-{reindex_date}"
     )
@@ -166,9 +179,6 @@ def get_images_index_stats(session, *, reindex_date):
 def main(reindex_date):
     session_read_only = get_session_with_role(
         "arn:aws:iam::760097843905:role/platform-read_only"
-    )
-    session_dev = get_session_with_role(
-        "arn:aws:iam::760097843905:role/platform-developer"
     )
 
     source_counts = get_source_counts(session_read_only)
@@ -187,7 +197,7 @@ def main(reindex_date):
 
     print("*** Work index stats ***")
 
-    work_index_stats = get_works_index_stats(session_dev, reindex_date=reindex_date)
+    work_index_stats = get_works_index_stats(reindex_date=reindex_date)
 
     rows = [[step, count] for step, count in work_index_stats.items()]
     rows.insert(0, ["source records", source_counts["TOTAL"], ""])
@@ -209,7 +219,7 @@ def main(reindex_date):
 
     print("*** Image index stats ***")
 
-    image_index_stats = get_images_index_stats(session_dev, reindex_date=reindex_date)
+    image_index_stats = get_images_index_stats(reindex_date=reindex_date)
 
     rows = [[step, count] for step, count in image_index_stats.items()]
     rows[0].append("")
