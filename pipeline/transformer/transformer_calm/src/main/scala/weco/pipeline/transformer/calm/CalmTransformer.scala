@@ -159,23 +159,24 @@ object CalmTransformer
       title <- title(record)
       workType <- workType(record)
       collectionPath <- collectionPath(record)
-    } yield WorkData[DataState.Unidentified](
-      title = Some(title),
-      otherIdentifiers = otherIdentifiers(record),
-      format = Some(Format.ArchivesAndManuscripts),
-      collectionPath = Some(collectionPath),
-      referenceNumber = collectionPath.label.map(ReferenceNumber(_)),
-      subjects = subjects(record),
-      languages = languages,
-      mergeCandidates = CalmMergeCandidates(record),
-      items = CalmItems(record),
-      contributors = contributors(record),
-      description = description(record),
-      physicalDescription = physicalDescription(record),
-      production = production(record),
-      workType = workType,
-      notes = CalmNotes(record) ++ languageNotes
-    )
+    } yield
+      WorkData[DataState.Unidentified](
+        title = Some(title),
+        otherIdentifiers = otherIdentifiers(record),
+        format = Some(Format.ArchivesAndManuscripts),
+        collectionPath = Some(collectionPath),
+        referenceNumber = collectionPath.label.map(ReferenceNumber(_)),
+        subjects = subjects(record),
+        languages = languages,
+        mergeCandidates = CalmMergeCandidates(record),
+        items = CalmItems(record),
+        contributors = contributors(record),
+        description = description(record),
+        physicalDescription = physicalDescription(record),
+        production = production(record),
+        workType = workType,
+        notes = CalmNotes(record) ++ languageNotes
+      )
   }
 
   def sourceIdentifier(record: CalmRecord): SourceIdentifier =
@@ -196,7 +197,7 @@ object CalmTransformer
                 identifierType = idType,
                 value = id,
                 ontologyType = "Work"
-              )
+            )
           )
     }
 
