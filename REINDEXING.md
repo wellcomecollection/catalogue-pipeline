@@ -271,7 +271,9 @@ object ElasticConfig {
 }
 ```
 
-You will want to deploy this change through the API stage environment and allow CI to perform the usual API checks. 
+You will want to PR & deploy this change through the API stage environment and allow CI to perform the usual API checks. 
 
-Be sure to check the diff_tool output in CI before deploying to production!
+Be sure to check the [diff_tool](https://github.com/wellcomecollection/catalogue-api/tree/main/diff_tool) output in CI in before deploying to production (you can also run this manually).
+
+Visit the [Buildkite job for catalogue-api](https://buildkite.com/wellcomecollection/catalogue-api-deploy-prod/builds?branch=main) job for your PR after it is merged to `main` to view the `diff_tool` output and access the "Deploy to prod" button.
 
