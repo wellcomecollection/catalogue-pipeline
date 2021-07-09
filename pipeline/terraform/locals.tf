@@ -19,6 +19,7 @@ locals {
 
   # Tei adapter topics
   tei_adapter_topic_arn = data.terraform_remote_state.tei_adapter.outputs.tei_adapter_topic_arn
+  tei_adapter_bucket_name = data.terraform_remote_state.tei_adapter.outputs.tei_adapter_bucket_name
 
   # Calm adapter VHS
   vhs_calm_read_policy = data.terraform_remote_state.calm_adapter.outputs.vhs_read_policy

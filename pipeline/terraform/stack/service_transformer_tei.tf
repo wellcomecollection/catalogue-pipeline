@@ -86,7 +86,7 @@ module "tei_transformer_scaling_alarm" {
   queue_low_actions  = [module.tei_transformer.scale_down_arn]
 }
 
-data "aws_iam_policy_document" "read_storage_bucket" {
+data "aws_iam_policy_document" "read_tei_adapter_bucket" {
   statement {
     actions = [
       "s3:ListBucket",
@@ -94,13 +94,13 @@ data "aws_iam_policy_document" "read_storage_bucket" {
     ]
 
     resources = [
-      "arn:aws:s3:::${var.storage_bucket_name}",
-      "arn:aws:s3:::${var.storage_bucket_name}/*",
+      "arn:aws:s3:::${var.tei_adapter_bucket_name}",
+      "arn:aws:s3:::${var.tei_adapter_bucket_name}/*",
     ]
   }
 }
 
-resource "aws_iam_role_policy" "read_storage_bucket" {
+resource "aws_iam_role_policy" "read_tei_adapter_bucket" {
   role   = module.tei_transformer.task_role_name
-  policy = data.aws_iam_policy_document.read_storage_bucket.json
+  policy = data.aws_iam_policy_document.read_tei_adapter_bucket.json
 }

@@ -101,7 +101,7 @@ data "terraform_remote_state" "tei_adapter" {
   config = {
     role_arn = "arn:aws:iam::760097843905:role/platform-read_only"
     bucket   = "wellcomecollection-platform-infra"
-    key      = "terraform/catalogue/tei_adapter.tfstate"
+    key      = "terraform/tei_adapter.tfstate"
     region   = "eu-west-1"
   }
 }
