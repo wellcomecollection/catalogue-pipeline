@@ -32,14 +32,17 @@ object ImageUtils {
                         validThumbnailFile: FileReference): Option[String] =
     validThumbnailFile.mimeType match {
       case Some("application/pdf") =>
+        // TODO: This URL pattern should either be updated to use iiif.wellcomecollection.org
+        // or removed entirely.  I couldn't find any uses of it in a snapshot (2021-07-05),
+        // so it's possible this path is unused or wrong.
         Some(
           s"https://wellcomelibrary.org/pdfthumbs/$bnumber/0/${validThumbnailFile.location}.jpg")
       case _ =>
         Some(
-          s"https://dlcs.io/thumbs/wellcome/5/${validThumbnailFile.location}/full/!$thumbnailDim,$thumbnailDim/0/default.jpg")
+          s"https://iiif.wellcomecollection.org/thumbs/${validThumbnailFile.location}/full/!$thumbnailDim,$thumbnailDim/0/default.jpg")
     }
 
   def buildImageUrl(validImageFile: FileReference): Option[String] =
     Some(
-      s"https://dlcs.io/iiif-img/wellcome/5/${validImageFile.location}/info.json")
+      s"https://iiif.wellcomecollection.org/image/${validImageFile.location}/info.json")
 }

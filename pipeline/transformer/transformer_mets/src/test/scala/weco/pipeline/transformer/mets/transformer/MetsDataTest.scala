@@ -31,7 +31,7 @@ class MetsDataTest
       ontologyType = "Work",
       value = bibNumber)
 
-    val url = s"https://wellcomelibrary.org/iiif/$bibNumber/manifest"
+    val url = s"https://iiif.wellcomecollection.org/presentation/v2/$bibNumber"
     val digitalLocation = DigitalLocation(
       url = url,
       locationType = LocationType.IIIFPresentationAPI,
@@ -94,7 +94,7 @@ class MetsDataTest
       ontologyType = "Work",
       value = bibNumber)
 
-    val url = s"https://wellcomelibrary.org/iiif/$bibNumber/manifest"
+    val url = s"https://iiif.wellcomecollection.org/presentation/v2/$bibNumber"
     val digitalLocation =
       DigitalLocation(
         url = url,
@@ -254,7 +254,7 @@ class MetsDataTest
     result.right.get.data.thumbnail shouldBe Some(
       DigitalLocation(
         url =
-          s"https://dlcs.io/thumbs/wellcome/5/location.jp2/full/!200,200/0/default.jpg",
+          s"https://iiif.wellcomecollection.org/thumbs/location.jp2/full/!200,200/0/default.jpg",
         locationType = LocationType.ThumbnailImage,
         license = Some(License.CCBYNC)
       )
@@ -276,7 +276,7 @@ class MetsDataTest
     result.right.get.data.thumbnail shouldBe Some(
       DigitalLocation(
         url =
-          s"https://dlcs.io/thumbs/wellcome/5/title.jp2/full/!200,200/0/default.jpg",
+          s"https://iiif.wellcomecollection.org/thumbs/title.jp2/full/!200,200/0/default.jpg",
         locationType = LocationType.ThumbnailImage,
         license = Some(License.CCBYNC)
       )
@@ -356,13 +356,14 @@ class MetsDataTest
     result shouldBe a[Right[_, _]]
     result.right.get.data.imageData.head.locations shouldBe List(
       DigitalLocation(
-        url = s"https://dlcs.io/iiif-img/wellcome/5/location.jp2/info.json",
+        url =
+          s"https://iiif.wellcomecollection.org/image/location.jp2/info.json",
         locationType = LocationType.IIIFImageAPI,
         license = Some(License.CCBYNC)
       ),
       DigitalLocation(
         url =
-          s"https://wellcomelibrary.org/iiif/${metsData.recordIdentifier}/manifest",
+          s"https://iiif.wellcomecollection.org/presentation/v2/${metsData.recordIdentifier}",
         locationType = LocationType.IIIFPresentationAPI,
         license = Some(License.CCBYNC)
       )
