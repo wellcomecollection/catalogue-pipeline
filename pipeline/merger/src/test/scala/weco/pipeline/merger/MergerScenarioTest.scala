@@ -242,6 +242,34 @@ class MergerScenarioTest
       outcome.getMerged(calm).data.imageData should contain(mets.singleImage)
     }
 
+    Scenario("A Calm work and multiple Miro works are matched") {
+      Given("A Calm work and 2 Miro works")
+      val calm = calmIdentifiedWork()
+      val miro1 = miroIdentifiedWork()
+      val miro2 = miroIdentifiedWork()
+
+      When("the works are merged")
+      val outcome = merger.merge(Seq(calm, miro1, miro2))
+
+      Then("the Miro works are redirected to the Calm work")
+      outcome.getMerged(miro1) should beRedirectedTo(calm)
+      outcome.getMerged(miro2) should beRedirectedTo(calm)
+
+      And("the Calm work contains the miro items")
+      outcome
+        .getMerged(calm)
+        .data
+        .items should contain allElementsOf miro1.data.items
+      outcome
+        .getMerged(calm)
+        .data
+        .items should contain allElementsOf miro2.data.items
+
+      And("the Calm work contains the Miro images")
+      outcome.getMerged(calm).data.imageData should contain(miro1.singleImage)
+      outcome.getMerged(calm).data.imageData should contain(miro2.singleImage)
+    }
+
     Scenario("A digitised video with Sierra physical records and e-bibs") {
       // This test case is based on a real example of four related works that
       // were being merged incorrectly.  In particular, the METS work (and associated
