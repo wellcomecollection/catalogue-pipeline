@@ -12,9 +12,9 @@ Running a reindex will require:
 
 ### Update the catalogue-pipeline environments
 
-The catalogue-pipeline is deployed using [weco-deploy](https://github.com/wellcomecollection/weco-deploy) but does not deploy in the usual way as there is often one release per pipeline. 
+The catalogue-pipeline is deployed using [weco-deploy](https://github.com/wellcomecollection/weco-deploy).
 
-Each environment will represent a new release.
+Each environment represents a new pipeline.
 
 In `.wellcome_project`:
 
@@ -29,11 +29,15 @@ catalogue_pipeline:
       name: "YYYY-MM-DD"
 ```
 
-Name your new pipeline environment using the date pattern indicated above. You will need to use the environment label when terraforming a new pipeline.
+Give your new pipeline environment id and name using the date pattern `YYYY-MM-DD`.
+
+You will need to use the environment id when terraforming a new pipeline.
 
 ### Prepare a release
 
-Prepare a release following the example below. You may want to choose a specific git ref as a label and _not_ latest.
+Prepare a release following the example below. 
+
+You may want to choose a specific git ref as a label and _not_ `latest`.
 
 ```
 > weco-deploy \
@@ -55,7 +59,12 @@ Created release eeb9482f-0a6a-4211-8de9-27cee7567134
 
 ### Deploy a release
 
-Using the release identifier gathered from preparing the release and the environment identifier added to `.wellcome-project` you can now perform a deploy operation:
+You will need to specify:
+
+- `release-id`: Gathered from preparing the release with `weco-deploy`
+- `environment-id`: The environment identifier added to [`.wellcome-project`](.wellcome_project)
+
+Using this you can do a `weco-deploy deploy` operation:
 
 ```
 > weco-deploy --project-id catalogue_pipeline deploy \
@@ -99,7 +108,7 @@ This will be done when you terraform a new pipeline.
 
 You will now need to create a new pipeline module in [./pipeline/terraform/main.tf](./pipeline/terraform/main.tf).
 
-Copy and paste an exisiting pipeline making sure to update the fields:
+Copy and paste an existing pipeline making sure to update the fields:
 
 - `pipeline_date`: References secrets required to access ES and to sets internal infrastructure labels.
 - `release_label`: Sets the ECR label to use on the service deployment images, created in the above deployment process. 
@@ -133,6 +142,18 @@ module "catalogue_pipeline_YYYY-MM-DD" {
 }
 ```
 
+Remember to create a pull request with this change.
+
+You can now run `terraform` in  [./pipeline/terraform/main.tf](./pipeline/terraform/main.tf):
+
+```
+> terraform plan
+
+# Review the plan operation and ensure you are only adding/modifying the correct resources
+
+> terraform apply
+```
+
 ### Running the reindex script
 
 Now we have our pipeline connected for reindexing and running our chosen version of the pipeline code we can start a reindex operation.
@@ -147,7 +168,7 @@ Which pipeline are you sending this to? (catalogue, catalogue_miro_updates, repo
 Every record (complete), just a few (partial), or specific records (specific)? (complete, partial, specific): partial
 ```
 
-You may wish to run a partial-reindex to verify that the process will work as expected before embarking on a complete reindex.
+You may wish to run a partial reindex to verify that the process will work as expected before embarking on a complete reindex.
 
 You can monitor a reindex in progress using Grafana at [https://monitoring.wellcomecollection.org/](https://monitoring.wellcomecollection.org/), or by looking at CloudWatch metrics in the `platform` AWS account.
 
