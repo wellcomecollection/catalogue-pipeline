@@ -100,9 +100,11 @@ class TeiTransformerWorkerTest
   }
 
   override def withWorker[R](
-    pipelineStream: PipelineStorageStream[NotificationMessage, Work[
-      WorkState.Source
-    ], String],
+    pipelineStream: PipelineStorageStream[NotificationMessage,
+                                          Work[
+                                            WorkState.Source
+                                          ],
+                                          String],
     retriever: Retriever[Work[WorkState.Source]]
   )(
     testWith: TestWith[
