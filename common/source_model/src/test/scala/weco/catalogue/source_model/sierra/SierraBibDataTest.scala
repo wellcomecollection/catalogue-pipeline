@@ -6,8 +6,6 @@ import org.scalatest.matchers.should.Matchers
 import weco.json.JsonUtil._
 import weco.catalogue.source_model.sierra.source.SierraSourceLanguage
 
-import SierraBibData._
-
 class SierraBibDataTest extends AnyFunSpec with Matchers with TryValues {
   it("decodes a bibData with language") {
     val bibDataJson =
@@ -21,18 +19,6 @@ class SierraBibDataTest extends AnyFunSpec with Matchers with TryValues {
 
     fromJson[SierraBibData](bibDataJson).get shouldBe SierraBibData(
       lang = Some(SierraSourceLanguage("eng", "English")))
-  }
-
-  it("decodes a language with empty code as None") {
-    val bibDataJson =
-      s"""
-         |{
-         |  "lang": {
-         |    "code": " "
-         |  }
-         |}""".stripMargin
-
-    fromJson[SierraBibData](bibDataJson).get shouldBe SierraBibData()
   }
 
   it("decodes a bib with no language name") {
