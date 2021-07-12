@@ -255,7 +255,6 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
       itemId,
       SierraAccessStatus.forBib(bibId, bibData),
       location.map(_.locationType),
-      bibData,
       itemData
     )
 

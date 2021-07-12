@@ -20,7 +20,7 @@ object CalmItems extends CalmRecordOps {
           PhysicalLocation(
             locationType = LocationType.ClosedStores,
             label = LocationType.ClosedStores.label,
-            accessConditions = createAccessCondition(record: CalmRecord)
+            accessConditions = createAccessCondition(record)
           )
         )
       )
@@ -29,15 +29,13 @@ object CalmItems extends CalmRecordOps {
   private def createAccessCondition(
     record: CalmRecord): List[AccessCondition] = {
     val accessStatus = CalmAccessStatus(record)
-    val terms = CalmAccessTerms(record, accessStatus = accessStatus)
 
     List(
       AccessCondition(
         // Items cannot be requested directly from Calm.  If this record gets merged
         // with a Sierra record, then we'll change the AccessMethod to match.
         method = AccessMethod.NotRequestable,
-        status = accessStatus,
-        terms = terms
+        status = accessStatus
       )
     ).filterNot(_.isEmpty)
   }

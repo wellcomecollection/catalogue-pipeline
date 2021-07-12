@@ -10,13 +10,9 @@ import weco.catalogue.internal_model.locations.{
   PhysicalLocationType
 }
 import weco.catalogue.source_model.generators.SierraDataGenerators
-import weco.catalogue.source_model.sierra.{SierraBibData, SierraItemData}
+import weco.catalogue.source_model.sierra.SierraItemData
 import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
-import weco.catalogue.source_model.sierra.marc.{
-  FixedField,
-  MarcSubfield,
-  VarField
-}
+import weco.catalogue.source_model.sierra.marc.{FixedField, VarField}
 
 class SierraItemAccessTest
     extends AnyFunSpec
@@ -754,7 +750,6 @@ class SierraItemAccessTest
 
         ac.note shouldBe Some(
           "Email library@wellcomecollection.org to tell us why you need the physical copy. We'll reply within a week.")
-        ac.terms shouldBe None
       }
 
       it("returns the note if it's unrelated to access data") {
@@ -926,36 +921,17 @@ class SierraItemAccessTest
     )
   }
 
-  it("sets terms based on 506 subfield ǂa") {
-    val bibData = createSierraBibDataWith(
-      varFields = List(
-        VarField(
-          marcTag = Some("506"),
-          subfields = List(
-            MarcSubfield(tag = "a", content = "Available to subscribers only.")
-          )
-        )
-      )
-    )
-
-    val (Some(ac), _) = getItemAccess(bibData = bibData)
-
-    ac.terms shouldBe Some("Available to subscribers only.")
-  }
-
   private def getItemAccess(
     bibId: SierraBibNumber = createSierraBibNumber,
-    bibStatus: Option[AccessStatus] = None,
-    location: Option[PhysicalLocationType] = None,
-    bibData: SierraBibData = createSierraBibData,
-    itemData: SierraItemData = createSierraItemData
+    bibStatus: Option[AccessStatus],
+    location: Option[PhysicalLocationType],
+    itemData: SierraItemData
   ): (Option[AccessCondition], Option[String]) =
     SierraItemAccess(
       bibId = bibId,
       itemId = createSierraItemNumber,
       bibStatus = bibStatus,
       location = location,
-      bibData = bibData,
       itemData = itemData
     )
 }

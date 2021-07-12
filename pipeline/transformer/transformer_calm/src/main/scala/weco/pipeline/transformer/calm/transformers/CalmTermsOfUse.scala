@@ -2,15 +2,17 @@ package weco.pipeline.transformer.calm.transformers
 
 import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.locations.AccessStatus
+import weco.catalogue.internal_model.work.TermsOfUse
 import weco.catalogue.source_model.calm.CalmRecord
 import weco.pipeline.transformer.calm.models.CalmRecordOps
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-object CalmAccessTerms extends CalmRecordOps with Logging {
-  def apply(record: CalmRecord, accessStatus: Option[AccessStatus]): Option[String] = {
+object CalmTermsOfUse extends CalmRecordOps with Logging {
+  def apply(record: CalmRecord): List[TermsOfUse] = {
     val accessConditions = getAccessConditions(record)
+    val accessStatus = CalmAccessStatus(record)
 
     val closedUntil = record.get("ClosedUntil").map(parseAsDate)
     val restrictedUntil = record.get("UserDate1").map(parseAsDate)
@@ -81,15 +83,15 @@ object CalmAccessTerms extends CalmRecordOps with Logging {
         case (None, Some(accessStatus), None, None) =>
           None
 
-        // Otherwise, we create terms that smush together all the bits of access information
-        // that we have.  This isn't particularly nice, but it's what Encore currently does,
-        // and in most cases we'll do a better job of it.
+        // Otherwise, we create a TermsOfUse note that smushes together all the bits of
+        // access information that we have.  This isn't particularly nice, but it's what
+        // Encore currently does, and in most cases we'll do a better job of it.
         //
         // This currently affects ~200 of 350k Calm items, and in some cases it reflects
         // a mistake in the underlying data that should be fixed.  This catch-all approach
         // will highlight issues, and then we can ask C&R to sort them out.
         case (conditions, status, closedUntil, restrictedUntil) =>
-          warn(s"Unclear how to create access terms note for item ${record.id}")
+          warn(s"Unclear how to create a TermsOfUse note for item ${record.id}")
           val parts = Seq(
             conditions,
             restrictedUntil.map(d => s"Restricted until ${d.format(displayFormat)}."),
@@ -99,7 +101,7 @@ object CalmAccessTerms extends CalmRecordOps with Logging {
           if (parts.isEmpty) None else Some(parts.mkString(" "))
       }
 
-    terms
+    terms.map(TermsOfUse).toList
   }
 
   // e.g. 1 January 2021

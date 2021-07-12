@@ -48,7 +48,6 @@ trait SierraLocation {
         itemId = itemNumber,
         bibStatus = SierraAccessStatus.forBib(bibNumber, bibData),
         location = Some(locationType),
-        bibData,
         itemData = itemData
       )
 

@@ -174,7 +174,7 @@ object CalmTransformer
         physicalDescription = physicalDescription(record),
         production = production(record),
         workType = workType,
-        notes = CalmNotes(record) ++ languageNotes
+        notes = CalmNotes(record) ++ languageNotes ++ CalmTermsOfUse(record)
       )
   }
 

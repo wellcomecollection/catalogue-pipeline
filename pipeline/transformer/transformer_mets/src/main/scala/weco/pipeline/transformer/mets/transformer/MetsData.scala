@@ -105,7 +105,7 @@ case class MetsData(
           AccessCondition(
             method = AccessMethod.ViewOnline,
             status = accessStatus,
-            terms = accessConditionUsage
+            note = accessConditionUsage
           )
         )
     }

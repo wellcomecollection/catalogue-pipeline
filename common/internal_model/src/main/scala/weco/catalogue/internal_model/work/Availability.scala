@@ -3,7 +3,6 @@ package weco.catalogue.internal_model.work
 import enumeratum.{Enum, EnumEntry}
 import io.circe.{Decoder, Encoder}
 import weco.catalogue.internal_model.locations.{
-  AccessCondition,
   DigitalLocation,
   Location,
   LocationType,
@@ -48,7 +47,9 @@ object Availabilities {
         data.holdings.flatMap { _.location }
 
     Set(
-      when(locations.exists(_.isAvailableInLibrary)) {
+      when(
+        locations.exists(_.isAvailableInLibrary) && !data.notes.exists(
+          _.isInOtherLibrary)) {
         Availability.InLibrary
       },
       when(locations.exists(_.isAvailableOnline)) {
@@ -67,20 +68,6 @@ object Availabilities {
             if physicalLoc.locationType == LocationType.OnOrder =>
           false
 
-        // Don't include items if they have a physical location but are actually
-        // held in another institution.
-        //
-        // Right now we do crude string matching on the terms in the access condition.
-        // There might be something better we can do that looks at the reference numbers,
-        // but for now this is a significant improvement without much effort.
-        //
-        // See https://github.com/wellcomecollection/platform/issues/5190
-        case physicalLoc: PhysicalLocation
-            if physicalLoc.accessConditions.exists {
-              _.termsAreOtherInstitution
-            } =>
-          false
-
         case _: PhysicalLocation => true
 
         case _ => false
@@ -93,20 +80,34 @@ object Availabilities {
       }
   }
 
-  private implicit class OptionalAccessConditionOps(ac: AccessCondition) {
-    def termsAreOtherInstitution: Boolean =
-      ac.terms match {
-        case Some(t) if t.toLowerCase.contains("available at") => true
-        case Some(t) if t.toLowerCase.contains("available by appointment at") =>
+  private implicit class NoteOps(n: Note) {
+    // Don't include items if they have a physical location but are actually
+    // held in another institution.
+    //
+    // Right now we do crude string matching on the terms in the access condition.
+    // There might be something better we can do that looks at the reference numbers,
+    // but for now this is a significant improvement without much effort.
+    //
+    // See https://github.com/wellcomecollection/platform/issues/5190
+    def isInOtherLibrary: Boolean =
+      n match {
+        case t: TermsOfUse => termsAreOtherInstitution(t)
+        case _             => false
+      }
+
+    def termsAreOtherInstitution(termsOfUse: TermsOfUse): Boolean =
+      termsOfUse.content match {
+        case t if t.toLowerCase.contains("available at") => true
+        case t if t.toLowerCase.contains("available by appointment at") =>
           true
 
-        case Some(t) if t.contains("Churchill Archives Centre") => true
-        case Some(t) if t.contains("UCL Special Collections and Archives") =>
+        case t if t.contains("Churchill Archives Centre") => true
+        case t if t.contains("UCL Special Collections and Archives") =>
           true
-        case Some(t) if t.contains("at King's College London") => true
-        case Some(t) if t.contains("at the Army Medical Services Museum") =>
+        case t if t.contains("at King's College London") => true
+        case t if t.contains("at the Army Medical Services Museum") =>
           true
-        case Some(t)
+        case t
             if t.contains("currently remains with the Martin Leake family") =>
           true
 

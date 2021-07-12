@@ -26,8 +26,7 @@ class CalmItemsTest
       getAccessConditions(items) shouldBe empty
     }
 
-    it(
-      "sets access conditions based on the terms and access status if there's nothing useful to show") {
+    it("sets access conditions based on the access status") {
       val record = createCalmRecordWith(
         "AccessStatus" -> "Open",
         "AccessConditions" -> "The papers are available subject to the usual conditions of access to Archives and Manuscripts material."
@@ -38,42 +37,8 @@ class CalmItemsTest
       getAccessConditions(items) shouldBe List(
         AccessCondition(
           method = AccessMethod.NotRequestable,
-          status = Some(AccessStatus.Open),
-          terms = Some(
-            "The papers are available subject to the usual conditions of access to Archives and Manuscripts material.")
+          status = AccessStatus.Open
         )
-      )
-    }
-
-    it("uses ClosedUntil if the access status is Closed") {
-      val record = createCalmRecordWith(
-        "AccessStatus" -> "Closed",
-        "ClosedUntil" -> "02/02/2002"
-      )
-
-      val items = CalmItems(record)
-
-      getAccessConditions(items) shouldBe List(
-        AccessCondition(
-          method = AccessMethod.NotRequestable,
-          status = Some(AccessStatus.Closed),
-          terms = Some("Closed until 2 February 2002."))
-      )
-    }
-
-    it("uses UserDate1 if the access status is Restricted") {
-      val record = createCalmRecordWith(
-        "AccessStatus" -> "Restricted",
-        "UserDate1" -> "02/02/2002"
-      )
-
-      val items = CalmItems(record)
-
-      getAccessConditions(items) shouldBe List(
-        AccessCondition(
-          method = AccessMethod.NotRequestable,
-          status = Some(AccessStatus.Restricted),
-          terms = Some("Restricted until 2 February 2002."))
       )
     }
 
