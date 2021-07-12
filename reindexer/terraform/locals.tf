@@ -5,6 +5,7 @@ locals {
   vhs_miro_table_name           = data.terraform_remote_state.catalogue_infra_critical.outputs.vhs_miro_table_name
   vhs_miro_inventory_table_name = data.terraform_remote_state.catalogue_infra_critical.outputs.vhs_miro_inventory_table_name
   mets_dynamo_table_name        = data.terraform_remote_state.mets_adapter.outputs.mets_dynamo_table_name
+  tei_dynamo_table_name        = data.terraform_remote_state.tei_adapter.outputs.tei_adapter_dynamo_table_name
   vhs_calm_table_name           = data.terraform_remote_state.calm_adapter.outputs.vhs_table_name
 
   reporting_miro_reindex_topic_arn           = data.terraform_remote_state.shared_infra.outputs.reporting_miro_reindex_topic_arn
@@ -75,6 +76,12 @@ locals {
       destination = "catalogue"
       table       = local.mets_dynamo_table_name
       topic       = local.mets_reindexer_topic_arn
+    },
+    {
+      source      = "tei"
+      destination = "catalogue"
+      table       = local.tei_dynamo_table_name
+      topic       = local.tei_reindexer_topic_arn
     },
     {
       source      = "calm"
