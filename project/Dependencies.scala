@@ -266,6 +266,12 @@ object CatalogueDependencies {
       ExternalDependencies.scalatestDependencies ++
       WellcomeDependencies.httpLibrary
 
+  val calmIndexerDependencies: Seq[ModuleID] =
+    WellcomeDependencies.typesafeLibrary ++
+      WellcomeDependencies.messagingTypesafeLibrary ++
+      WellcomeDependencies.storageTypesafeLibrary ++
+      WellcomeDependencies.elasticsearchTypesafeLibrary
+
   // Sierra adapter stack
 
   val sierraLinkerDependencies: Seq[ModuleID] =

@@ -247,7 +247,8 @@ lazy val calm_deletion_checker = setupProject(
 lazy val calm_indexer = setupProject(
   project,
   folder = "calm_adapter/calm_indexer",
-  localDependencies = Seq(source_model, pipeline_storage_typesafe)
+  localDependencies = Seq(source_model),
+  externalDependencies = CatalogueDependencies.calmIndexerDependencies
 )
 
 // Inference manager

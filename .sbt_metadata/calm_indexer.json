@@ -2,7 +2,6 @@
   "id" : "calm_indexer",
   "folder" : "calm_adapter/calm_indexer",
   "dependencyIds" : [
-    "source_model",
-    "pipeline_storage_typesafe"
+    "source_model"
   ]
 }
