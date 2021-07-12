@@ -24,10 +24,9 @@ trait IndexerFixtures
     with IntegrationPatience
     with Akka
     with SQS { this: Suite =>
-  def withWorker[R](
-    queue: Queue,
-    typedStore: MemoryTypedStore[S3ObjectLocation, CalmRecord],
-    index: Index)(
+  def withWorker[R](queue: Queue,
+                    typedStore: MemoryTypedStore[S3ObjectLocation, CalmRecord],
+                    index: Index)(
     testWith: TestWith[Worker, R]
   ): R =
     withActorSystem { implicit actorSystem =>

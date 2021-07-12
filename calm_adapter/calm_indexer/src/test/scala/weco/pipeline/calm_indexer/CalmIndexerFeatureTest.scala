@@ -28,10 +28,8 @@ class CalmIndexerFeatureTest
 
     val location = createS3ObjectLocation
 
-    val payload = CalmSourcePayload(
-      id = record.id,
-      location = location,
-      version = 1)
+    val payload =
+      CalmSourcePayload(id = record.id, location = location, version = 1)
 
     val store = MemoryTypedStore[S3ObjectLocation, CalmRecord](
       initialEntries = Map(location -> record)
@@ -39,15 +37,13 @@ class CalmIndexerFeatureTest
 
     withLocalElasticsearchIndex(config = IndexConfig.empty) { index =>
       withLocalSqsQueue() { queue =>
-
         withWorker(queue, store, index) { _ =>
           sendNotificationToSQS(queue, payload)
 
           assertElasticsearchEventuallyHas(
             index = index,
             id = record.id,
-            json =
-              s"""
+            json = s"""
                  |{
                  |  "Modified": "29/06/2020"
                  |}

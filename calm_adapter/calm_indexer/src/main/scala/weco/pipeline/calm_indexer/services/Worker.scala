@@ -55,14 +55,14 @@ class Worker(
       //    - If the value is empty, it actually gets a list of empty string [""].
       //      We remove this to make it easier to filter records in Elasticsearch.
       //    - If the value is a list with a single value, we unwrap the list.
-      fields =
-        record.data
-          .filterNot { case (_, value) => value == Seq("") }
-          .map {
-            case (key, Seq(value)) => key -> Json.fromString(value)
-            case (key, value) => key -> Json.fromValues(value.map(Json.fromString))
-          }
-          .toSeq
+      fields = record.data
+        .filterNot { case (_, value) => value == Seq("") }
+        .map {
+          case (key, Seq(value)) => key -> Json.fromString(value)
+          case (key, value) =>
+            key -> Json.fromValues(value.map(Json.fromString))
+        }
+        .toSeq
 
       _ <- elasticClient.execute(
         indexInto(index)
