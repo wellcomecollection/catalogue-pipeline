@@ -1,6 +1,5 @@
 package weco.catalogue.source_model.sierra
 
-import io.circe.Decoder
 import weco.catalogue.source_model.sierra.marc.{FixedField, VarField}
 import weco.catalogue.source_model.sierra.source.{
   SierraMaterialType,
@@ -42,17 +41,4 @@ case class SierraBibData(
             varFieldsWithPosition
               .map { case (_, position, vf) => (position, vf) }
       }
-}
-
-object SierraBibData {
-
-  // the "lang" field in sierra can be "lang": {"code": " "} for example for paintings that don't have a language.
-  // We want those records to be decoded as `None` as this effectively means the record doesn't have a language,
-  // so we use a custom decoder to achieve that
-  implicit def d(implicit dec: Decoder[Option[SierraSourceLanguage]])
-    : Decoder[Option[SierraSourceLanguage]] =
-    dec.map {
-      case Some(SierraSourceLanguage(code, _)) if code.trim.isEmpty => None
-      case other                                                    => other
-    }
 }

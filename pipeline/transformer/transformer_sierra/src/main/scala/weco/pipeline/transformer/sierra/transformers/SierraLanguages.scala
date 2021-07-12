@@ -72,6 +72,13 @@ object SierraLanguages
     (lang, MarcLanguageCodeList.fromCode(lang.code)) match {
       case (_, Some(deducedLang)) => Some(deducedLang)
       case (SierraSourceLanguage(code, Some(name)), _) => Some(Language(label = name, id = code))
+
+      // Some records in Sierra don't have a language, e.g. paintings, and this is
+      // represented by a string that is only whitespace "   ".  This isn't a data error,
+      // and we shouldn't warn for it.
+      case (SierraSourceLanguage(code, _), _) if code.trim.isEmpty =>
+        None
+
       case _ =>
         warn(s"$bibId: Unrecognised primary language: $lang")
         None

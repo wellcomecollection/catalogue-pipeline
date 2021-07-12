@@ -195,6 +195,14 @@ class SierraLanguagesTest
     getLanguages(bibData) shouldBe empty
   }
 
+  it("ignores a language code which is only whitespace") {
+    val bibData = createSierraBibDataWith(
+      lang = Some(SierraSourceLanguage(code = "   ", name = None))
+    )
+
+    getLanguages(bibData) shouldBe empty
+  }
+
   private def getLanguages(bibData: SierraBibData): List[Language] =
     SierraLanguages(bibId = createSierraBibNumber, bibData = bibData)
 }
