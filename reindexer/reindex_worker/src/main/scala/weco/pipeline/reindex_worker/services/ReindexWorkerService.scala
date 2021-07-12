@@ -68,7 +68,7 @@ class ReindexWorkerService[Destination](
 
       case ReindexSource.Tei =>
         recordReader
-          .findRecords[MetsReindexPayload](reindexParameters, tableName)
+          .findRecords[TeiReindexPayload](reindexParameters, tableName)
 
       case ReindexSource.Miro =>
         recordReader

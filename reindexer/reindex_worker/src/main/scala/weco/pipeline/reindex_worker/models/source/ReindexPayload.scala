@@ -1,16 +1,10 @@
 package weco.pipeline.reindex_worker.models.source
 
 import weco.storage.s3.S3ObjectLocation
-import weco.catalogue.source_model.{
-  CalmSourcePayload,
-  MetsSourcePayload,
-  MiroInventorySourcePayload,
-  MiroSourcePayload,
-  SierraSourcePayload,
-  SourcePayload
-}
+import weco.catalogue.source_model.{CalmSourcePayload, MetsSourcePayload, MiroInventorySourcePayload, MiroSourcePayload, SierraSourcePayload, SourcePayload, TeiSourcePayload}
 import weco.catalogue.source_model.mets.MetsSourceData
 import weco.catalogue.source_model.miro.{MiroSourceOverrides, MiroUpdateEvent}
+import weco.catalogue.source_model.tei.TeiMetadata
 
 sealed trait ReindexPayload {
   val id: String
@@ -68,6 +62,16 @@ case class MetsReindexPayload(
 
   override def toSourcePayload: SourcePayload =
     MetsSourcePayload(id, payload, version)
+}
+
+case class TeiReindexPayload(
+                              id: String,
+                              payload: TeiMetadata,
+                              version: Int
+) extends ReindexPayload {
+
+  override def toSourcePayload: SourcePayload =
+    TeiSourcePayload(id, payload, version)
 }
 
 case class SierraReindexPayload(
