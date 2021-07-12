@@ -68,6 +68,21 @@ class TeiXml(xml: Elem) {
       case _   => Left(new RuntimeException("More than one summary node!"))
     }
   }
+
+  /**
+    *
+    */
+  def title: Either[Throwable, Option[String]] = {
+    val nodes = (xml \ "teiHeader" \ "fileDesc" \ "titleStmt" \ "title").toList
+    val maybeTitles = nodes.filter(
+      n => n.attributes.isEmpty)
+    maybeTitles match {
+      case List(titleNode) => Right(Some(titleNode.text))
+      case Nil => Right(None)
+      case _ => Left(new RuntimeException("More than one title node!"))
+    }
+  }
+
 }
 
 object TeiXml {

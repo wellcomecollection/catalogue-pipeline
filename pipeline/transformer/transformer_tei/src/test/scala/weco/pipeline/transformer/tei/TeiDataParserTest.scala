@@ -19,7 +19,7 @@ class TeiDataParserTest
         id,
         teiXml(id = id, summary = Some(summary(description)))
           .toString()).right.get) shouldBe Right(
-      TeiData(id, Some(description), None))
+      TeiData(id = id, bNumber = None, description = Some(description), title = None))
   }
   it("strips xml from descriptions TeiData") {
     val description = "a <note>manuscript</note> about stuff"
@@ -28,7 +28,7 @@ class TeiDataParserTest
         id,
         teiXml(id = id, summary = Some(summary(description)))
           .toString()).right.get) shouldBe Right(
-      TeiData(id, Some("a manuscript about stuff"), None))
+      TeiData(id = id, bNumber = None, description = Some("a manuscript about stuff"), title = None))
   }
   it("parses a tei xml and returns TeiData with bNumber") {
 
@@ -37,7 +37,7 @@ class TeiDataParserTest
         id,
         teiXml(id = id, identifiers = Some(sierraIdentifiers(bnumber)))
           .toString()).right.get) shouldBe Right(
-      TeiData(id, None, Some(bnumber)))
+      TeiData(id = id, bNumber = Some(bnumber), description = None, title = None))
   }
   it("fails parsing if there's more than one bnumber node") {
 
