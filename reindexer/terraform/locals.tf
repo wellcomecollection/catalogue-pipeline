@@ -14,6 +14,7 @@ locals {
   catalogue_sierra_reindex_topic_arn         = data.terraform_remote_state.shared_infra.outputs.catalogue_sierra_reindex_topic_arn
   mets_reindexer_topic_name                  = module.mets_reindexer_topic.name
   mets_reindexer_topic_arn                   = module.mets_reindexer_topic.arn
+  tei_reindexer_topic_arn                  = module.tei_reindexer_topic.arn
   calm_reindexer_topic_name                  = module.calm_reindexer_topic.name
   calm_reindexer_topic_arn                   = module.calm_reindexer_topic.arn
   calm_deletion_checker_topic_name           = module.calm_deletion_checker_topic.name
