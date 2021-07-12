@@ -1,7 +1,6 @@
 module "calm_adapter_topic" {
-  source                         = "github.com/wellcomecollection/terraform-aws-sns-topic.git?ref=v1.0.0"
-  name                           = "calm-records"
-  cross_account_subscription_ids = ["269807742353"]
+  source = "github.com/wellcomecollection/terraform-aws-sns-topic.git?ref=v1.0.0"
+  name   = "calm-records"
 }
 
 module "calm_deletions_topic" {

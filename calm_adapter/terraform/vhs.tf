@@ -4,7 +4,6 @@ module "vhs" {
   table_name_prefix  = "vhs-"
   name               = local.namespace
   tags               = {}
-  read_principals    = ["arn:aws:iam::269807742353:root"]
 }
 
 resource "aws_iam_role_policy" "vhs_adapter_readwrite" {
