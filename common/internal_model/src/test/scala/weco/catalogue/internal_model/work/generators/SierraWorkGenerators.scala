@@ -24,10 +24,10 @@ trait SierraWorkGenerators extends WorkGenerators with ItemsGenerators {
         List(
           MergeCandidate(
             id = IdState.Identified(
-              digitisedWork.state.canonicalId,
-              digitisedWork.sourceIdentifier
+              canonicalId = digitisedWork.state.canonicalId,
+              sourceIdentifier = digitisedWork.sourceIdentifier
             ),
-            reason = Some("Physical/digitised Sierra work")
+            reason = "Physical/digitised Sierra work"
           )
         )
       )

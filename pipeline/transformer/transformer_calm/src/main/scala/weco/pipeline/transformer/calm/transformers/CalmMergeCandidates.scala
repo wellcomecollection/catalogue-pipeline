@@ -27,8 +27,8 @@ object CalmMergeCandidates extends CalmRecordOps {
       }
       .map { sourceIdentifier =>
         MergeCandidate(
-          id = IdState.Identifiable(sourceIdentifier),
-          reason = Some("CALM/Miro work")
+          identifier = sourceIdentifier,
+          reason = "CALM/Miro work"
         )
       }
 
@@ -44,8 +44,8 @@ object CalmMergeCandidates extends CalmRecordOps {
       }
       .map { sourceIdentifier =>
         MergeCandidate(
-          id = IdState.Identifiable(sourceIdentifier),
-          reason = Some("CALM/Sierra harvest work")
+          identifier = sourceIdentifier,
+          reason = "CALM/Sierra harvest work"
         )
       }
 }

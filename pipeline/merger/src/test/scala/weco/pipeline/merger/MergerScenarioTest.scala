@@ -165,7 +165,7 @@ class MergerScenarioTest
                   sourceIdentifier = digitisedVideo.sourceIdentifier,
                   canonicalId = digitisedVideo.state.canonicalId
                 ),
-                reason = Some("Physical/digitised Sierra work")
+                reason = "Physical/digitised Sierra work"
               )
             )
           )
@@ -296,7 +296,7 @@ class MergerScenarioTest
                   sourceIdentifier =
                     workWithPhysicalVideoFormats.sourceIdentifier
                 ),
-                reason = Some("Physical/digitised Sierra work")
+                reason = "Physical/digitised Sierra work"
               )
             )
           )
@@ -311,7 +311,7 @@ class MergerScenarioTest
                   canonicalId = workForEbib.state.canonicalId,
                   sourceIdentifier = workForEbib.sourceIdentifier
                 ),
-                reason = Some("METS work")
+                reason = "METS work"
               )
             )
           )

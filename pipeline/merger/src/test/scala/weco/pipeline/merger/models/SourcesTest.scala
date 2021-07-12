@@ -36,13 +36,13 @@ class SourcesTest
                 id = IdState.Identified(
                   sourceIdentifier = digitisedWork1.sourceIdentifier,
                   canonicalId = digitisedWork1.state.canonicalId),
-                reason = Some("Physical/digitised Sierra work")
+                reason = "Physical/digitised Sierra work"
               ),
               MergeCandidate(
                 id = IdState.Identified(
                   sourceIdentifier = digitisedWork2.sourceIdentifier,
                   canonicalId = digitisedWork2.state.canonicalId),
-                reason = Some("Physical/digitised Sierra work")
+                reason = "Physical/digitised Sierra work"
               )
             )
           )
@@ -66,7 +66,7 @@ class SourcesTest
                 id = IdState.Identified(
                   sourceIdentifier = digitisedWork.sourceIdentifier,
                   canonicalId = digitisedWork.state.canonicalId),
-                reason = Some("Linked for a mystery reason")
+                reason = "Linked for a mystery reason"
               )
             )
           )
@@ -90,7 +90,7 @@ class SourcesTest
                 id = IdState.Identified(
                   sourceIdentifier = createSierraIdentifierSourceIdentifier,
                   canonicalId = createCanonicalId),
-                reason = Some("Physical/digitised Sierra work")
+                reason = "Physical/digitised Sierra work"
               )
             )
           )
@@ -114,7 +114,7 @@ class SourcesTest
                 id = IdState.Identified(
                   sourceIdentifier = digitisedWork.sourceIdentifier,
                   canonicalId = digitisedWork.state.canonicalId),
-                reason = Some("Physical/digitised Sierra work")
+                reason = "Physical/digitised Sierra work"
               )
             )
           )
@@ -138,7 +138,7 @@ class SourcesTest
                 id = IdState.Identified(
                   sourceIdentifier = digitisedWork.sourceIdentifier,
                   canonicalId = digitisedWork.state.canonicalId),
-                reason = Some("Physical/digitised Sierra work")
+                reason = "Physical/digitised Sierra work"
               )
             )
           )
@@ -163,7 +163,7 @@ class SourcesTest
                 id = IdState.Identified(
                   sourceIdentifier = digitisedWork.sourceIdentifier,
                   canonicalId = digitisedWork.state.canonicalId),
-                reason = Some("Physical/digitised Sierra work")
+                reason = "Physical/digitised Sierra work"
               )
             )
           )
