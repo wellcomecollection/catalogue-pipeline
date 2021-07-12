@@ -13,7 +13,6 @@ import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.work._
 import weco.catalogue.source_model.calm.CalmRecord
 import weco.pipeline.transformer.Transformer
-import weco.pipeline.transformer.identifiers.SourceIdentifierValidation._
 import weco.pipeline.transformer.calm.models.CalmTransformerException.{
   LevelMissing,
   RefNoMissing,
@@ -25,11 +24,7 @@ import weco.pipeline.transformer.calm.models.{
   CalmSourceData,
   CalmTransformerException
 }
-import weco.pipeline.transformer.calm.transformers.{
-  CalmItems,
-  CalmLanguages,
-  CalmNotes
-}
+import weco.pipeline.transformer.calm.transformers._
 import weco.pipeline.transformer.result.Result
 
 object CalmTransformer
@@ -172,7 +167,7 @@ object CalmTransformer
         referenceNumber = collectionPath.label.map(ReferenceNumber(_)),
         subjects = subjects(record),
         languages = languages,
-        mergeCandidates = mergeCandidates(record),
+        mergeCandidates = CalmMergeCandidates(record),
         items = CalmItems(record),
         contributors = contributors(record),
         description = description(record),
@@ -204,25 +199,6 @@ object CalmTransformer
             )
           )
     }
-
-  def mergeCandidates(
-    record: CalmRecord
-  ): List[MergeCandidate[IdState.Identifiable]] =
-    record
-      .get("BNumber")
-      .flatMap { id =>
-        SourceIdentifier(
-          identifierType = IdentifierType.SierraSystemNumber,
-          ontologyType = "Work",
-          value = id
-        ).validatedWithWarning
-      }
-      .map { sourceIdentifier =>
-        MergeCandidate(
-          id = IdState.Identifiable(sourceIdentifier)
-        )
-      }
-      .toList
 
   def title(record: CalmRecord): Result[String] =
     record
