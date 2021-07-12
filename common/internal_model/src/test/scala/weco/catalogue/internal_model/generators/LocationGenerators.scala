@@ -10,18 +10,23 @@ trait LocationGenerators extends RandomGenerators {
       LocationType.OpenShelves
     ),
     accessConditions: List[AccessCondition] = Nil,
-    label: String = "locationLabel"
+    label: String = "locationLabel",
+    license: Option[License] = chooseFrom(
+      None,
+      Some(License.CCBY),
+      Some(License.OGL),
+      Some(License.PDM)
+    ),
+    shelfmark: Option[String] = chooseFrom(
+      None,
+      Some(s"Shelfmark: ${randomAlphanumeric()}")
+    )
   ): PhysicalLocation =
     PhysicalLocation(
       locationType = locationType,
       label = label,
-      license = chooseFrom(
-        None,
-        Some(License.CCBY),
-        Some(License.OGL),
-        Some(License.PDM)
-      ),
-      shelfmark = chooseFrom(None, Some(s"Shelfmark: ${randomAlphanumeric()}")),
+      license = license,
+      shelfmark = shelfmark,
       accessConditions = accessConditions
     )
 
