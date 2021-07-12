@@ -27,7 +27,8 @@ class CalmTermsOfUseTest
       ("AccessConditions", "Closed on depositor agreement."),
     )
 
-    CalmTermsOfUse(record) shouldBe List(TermsOfUse("Closed on depositor agreement."))
+    CalmTermsOfUse(record) shouldBe List(
+      TermsOfUse("Closed on depositor agreement."))
   }
 
   it("handles an item which is restricted") {
@@ -52,8 +53,9 @@ class CalmTermsOfUseTest
       ("ClosedUntil", "01/01/2039")
     )
 
-    CalmTermsOfUse(record) shouldBe List(TermsOfUse(
-      "Closed under the Data Protection Act until 1st January 2039."))
+    CalmTermsOfUse(record) shouldBe List(
+      TermsOfUse(
+        "Closed under the Data Protection Act until 1st January 2039."))
   }
 
   it(
@@ -92,8 +94,9 @@ class CalmTermsOfUseTest
       ("ClosedUntil", "01/01/2039")
     )
 
-    CalmTermsOfUse(record) shouldBe List(TermsOfUse(
-      "Closed under the Data Protection Act. Closed until 1 January 2039."))
+    CalmTermsOfUse(record) shouldBe List(
+      TermsOfUse(
+        "Closed under the Data Protection Act. Closed until 1 January 2039."))
   }
 
   it("creates a note for a closed item with no conditions") {
@@ -102,7 +105,8 @@ class CalmTermsOfUseTest
       ("ClosedUntil", "01/01/2068")
     )
 
-    CalmTermsOfUse(record) shouldBe List(TermsOfUse("Closed until 1 January 2068."))
+    CalmTermsOfUse(record) shouldBe List(
+      TermsOfUse("Closed until 1 January 2068."))
   }
 
   it("doesn't create a note for an item with just a status") {

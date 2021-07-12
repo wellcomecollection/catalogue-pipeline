@@ -13,8 +13,7 @@ import weco.catalogue.internal_model.work.DeletedReason._
 import weco.catalogue.internal_model.work._
 import weco.pipeline.transformer.calm.models.CalmSourceData
 
-class
-CalmTransformerTest
+class CalmTransformerTest
     extends AnyFunSpec
     with Matchers
     with CalmRecordGenerators {

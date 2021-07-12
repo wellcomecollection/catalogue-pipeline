@@ -10,8 +10,7 @@ import weco.catalogue.source_model.generators.{
 import weco.catalogue.source_model.sierra.SierraBibData
 import weco.catalogue.source_model.sierra.marc.{MarcSubfield, VarField}
 
-class
-SierraNotesTest
+class SierraNotesTest
     extends AnyFunSpec
     with Matchers
     with MarcGenerators

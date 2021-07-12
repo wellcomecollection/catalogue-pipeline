@@ -47,7 +47,9 @@ object Availabilities {
         data.holdings.flatMap { _.location }
 
     Set(
-      when(locations.exists(_.isAvailableInLibrary) && !data.notes.exists(_.isInOtherLibrary)) {
+      when(
+        locations.exists(_.isAvailableInLibrary) && !data.notes.exists(
+          _.isInOtherLibrary)) {
         Availability.InLibrary
       },
       when(locations.exists(_.isAvailableOnline)) {
@@ -90,7 +92,7 @@ object Availabilities {
     def isInOtherLibrary: Boolean =
       n match {
         case t: TermsOfUse => termsAreOtherInstitution(t)
-        case _ => false
+        case _             => false
       }
 
     def termsAreOtherInstitution(termsOfUse: TermsOfUse): Boolean =
@@ -106,7 +108,7 @@ object Availabilities {
         case t if t.contains("at the Army Medical Services Museum") =>
           true
         case t
-          if t.contains("currently remains with the Martin Leake family") =>
+            if t.contains("currently remains with the Martin Leake family") =>
           true
 
         case _ => false

@@ -43,12 +43,7 @@ object SierraItemAccess extends SierraQueryOps with Logging {
     itemData: SierraItemData
   ): (Option[AccessCondition], Option[String]) =
     (
-      createAccessCondition(
-        bibId,
-        itemId,
-        bibStatus,
-        location,
-        itemData),
+      createAccessCondition(bibId, itemId, bibStatus, location, itemData),
       itemData.displayNote) match {
       // If the item note is already on the access condition, we don't need to copy it.
       case ((Some(ac), displayNote)) if ac.note == displayNote =>
