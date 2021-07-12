@@ -169,7 +169,7 @@ module "catalogue_pipeline_2021-07-07" {
   source = "./stack"
 
   pipeline_date = "2021-07-07"
-  release_label = "alice-tei"
+  release_label = "2021-07-07"
 
   is_reindexing = true
 
