@@ -3,7 +3,6 @@ package weco.pipeline.transformer.calm.transformers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.{
-  IdState,
   IdentifierType,
   SourceIdentifier
 }
@@ -23,14 +22,12 @@ class CalmMergeCandidatesTest
     val mergeCandidates = CalmMergeCandidates(record)
 
     mergeCandidates should contain only MergeCandidate(
-      id = IdState.Identifiable(
-        SourceIdentifier(
-          identifierType = IdentifierType.SierraSystemNumber,
-          ontologyType = "Work",
-          value = bnumber
-        )
+      identifier = SourceIdentifier(
+        identifierType = IdentifierType.SierraSystemNumber,
+        ontologyType = "Work",
+        value = bnumber
       ),
-      reason = Some("CALM/Sierra harvest work")
+      reason = "CALM/Sierra harvest work"
     )
   }
 
@@ -44,14 +41,12 @@ class CalmMergeCandidatesTest
     mergeCandidates should contain allElementsOf miroIds.map(
       id =>
         MergeCandidate(
-          id = IdState.Identifiable(
-            SourceIdentifier(
-              identifierType = IdentifierType.MiroImageNumber,
-              ontologyType = "Work",
-              value = id
-            )
+          identifier = SourceIdentifier(
+            identifierType = IdentifierType.MiroImageNumber,
+            ontologyType = "Work",
+            value = id
           ),
-          reason = Some("CALM/Miro work")
+          reason = "CALM/Miro work"
       )
     )
   }
@@ -67,27 +62,23 @@ class CalmMergeCandidatesTest
 
     mergeCandidates should contain(
       MergeCandidate(
-        id = IdState.Identifiable(
-          SourceIdentifier(
-            identifierType = IdentifierType.SierraSystemNumber,
-            ontologyType = "Work",
-            value = bnumber
-          )
+        identifier = SourceIdentifier(
+          identifierType = IdentifierType.SierraSystemNumber,
+          ontologyType = "Work",
+          value = bnumber
         ),
-        reason = Some("CALM/Sierra harvest work")
+        reason = "CALM/Sierra harvest work"
       )
     )
     mergeCandidates should contain allElementsOf miroIds.map(
       id =>
         MergeCandidate(
-          id = IdState.Identifiable(
-            SourceIdentifier(
-              identifierType = IdentifierType.MiroImageNumber,
-              ontologyType = "Work",
-              value = id
-            )
+          identifier = SourceIdentifier(
+            identifierType = IdentifierType.MiroImageNumber,
+            ontologyType = "Work",
+            value = id
           ),
-          reason = Some("CALM/Miro work")
+          reason = "CALM/Miro work"
       )
     )
   }

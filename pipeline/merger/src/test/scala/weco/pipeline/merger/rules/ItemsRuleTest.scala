@@ -125,7 +125,7 @@ class ItemsRuleTest
                 canonicalId = digitisedWork.state.canonicalId,
                 sourceIdentifier = digitisedWork.state.sourceIdentifier
               ),
-              reason = Some("Physical/digitised Sierra work")
+              reason = "Physical/digitised Sierra work"
             )
           )
         )

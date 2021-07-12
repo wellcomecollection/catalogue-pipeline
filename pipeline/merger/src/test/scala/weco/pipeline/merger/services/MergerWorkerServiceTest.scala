@@ -342,9 +342,9 @@ class MergerWorkerServiceTest
         List(
           MergeCandidate(
             id = IdState.Identified(
-              deletedWork.state.canonicalId,
-              deletedWork.sourceIdentifier),
-            reason = Some("Physical/digitised Sierra work")
+              canonicalId = deletedWork.state.canonicalId,
+              sourceIdentifier = deletedWork.sourceIdentifier),
+            reason = "Physical/digitised Sierra work"
           )
         )
       )

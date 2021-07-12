@@ -40,7 +40,7 @@ class PlatformMergerTest
             id = IdState.Identified(
               sourceIdentifier = sierraDigitisedWork.sourceIdentifier,
               canonicalId = sierraDigitisedWork.state.canonicalId),
-            reason = Some("Physical/digitised Sierra work")
+            reason = "Physical/digitised Sierra work"
           )
         )
       )
@@ -61,7 +61,7 @@ class PlatformMergerTest
             id = IdState.Identified(
               sourceIdentifier = sierraDigitisedWork.sourceIdentifier,
               canonicalId = sierraDigitisedWork.state.canonicalId),
-            reason = Some("Physical/digitised Sierra work")
+            reason = "Physical/digitised Sierra work"
           )
         )
       )
@@ -693,7 +693,7 @@ class PlatformMergerTest
               id = IdState.Identified(
                 sourceIdentifier = digitisedVideo.sourceIdentifier,
                 canonicalId = digitisedVideo.state.canonicalId),
-              reason = Some("Physical/digitised Sierra work")
+              reason = "Physical/digitised Sierra work"
             )
           )
         )
@@ -744,7 +744,7 @@ class PlatformMergerTest
                 canonicalId = workWithPhysicalVideoFormats.state.canonicalId,
                 sourceIdentifier = workWithPhysicalVideoFormats.sourceIdentifier
               ),
-              reason = Some("Physical/digitised Sierra work")
+              reason = "Physical/digitised Sierra work"
             )
           )
         )
@@ -759,7 +759,7 @@ class PlatformMergerTest
                 canonicalId = workForEbib.state.canonicalId,
                 sourceIdentifier = workForEbib.sourceIdentifier
               ),
-              reason = Some("METS work")
+              reason = "METS work"
             )
           )
         )
@@ -776,7 +776,7 @@ class PlatformMergerTest
                 canonicalId = workForEbib.state.canonicalId,
                 sourceIdentifier = workForEbib.sourceIdentifier
               ),
-              reason = Some("Physical/digitised Sierra work")
+              reason = "Physical/digitised Sierra work"
             )
           )
         )
@@ -854,7 +854,7 @@ class PlatformMergerTest
                 canonicalId = eVideoWork.state.canonicalId,
                 sourceIdentifier = eVideoWork.sourceIdentifier
               ),
-              reason = Some("Physical/digitised Sierra work")
+              reason = "Physical/digitised Sierra work"
             )
           )
         )
@@ -870,7 +870,7 @@ class PlatformMergerTest
                 canonicalId = eVideoWork.state.canonicalId,
                 sourceIdentifier = eVideoWork.sourceIdentifier
               ),
-              reason = Some("METS work")
+              reason = "METS work"
             )
           )
         )
@@ -928,7 +928,7 @@ class PlatformMergerTest
                 canonicalId = digitisedWork.state.canonicalId,
                 sourceIdentifier = digitisedWork.state.sourceIdentifier
               ),
-              reason = Some("Physical/digitised Sierra work")
+              reason = "Physical/digitised Sierra work"
             )
           )
         )
@@ -960,7 +960,7 @@ class PlatformMergerTest
             canonicalId = physicalWork.state.canonicalId,
             sourceIdentifier = physicalWork.state.sourceIdentifier
           ),
-          reason = Some("Physical/digitised Sierra work")
+          reason = "Physical/digitised Sierra work"
         )
       )
     )

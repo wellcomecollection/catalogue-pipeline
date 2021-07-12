@@ -36,7 +36,7 @@ class ElasticWorkLinksRetrieverTest
                     canonicalId = id,
                     sourceIdentifier = createSourceIdentifier
                   ),
-                  reason = None
+                  reason = "Linked in the matcher tests"
                 )
               }.toList
             )
