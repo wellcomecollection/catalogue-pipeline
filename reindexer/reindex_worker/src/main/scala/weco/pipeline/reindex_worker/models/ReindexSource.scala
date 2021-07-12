@@ -18,7 +18,7 @@ object ReindexSource {
     case "calm"           => Success(ReindexSource.Calm)
     case "mets"           => Success(ReindexSource.Mets)
     case "miro"           => Success(ReindexSource.Miro)
-    case "tei"           => Success(ReindexSource.Tei)
+    case "tei"            => Success(ReindexSource.Tei)
     case "miro_inventory" => Success(ReindexSource.MiroInventory)
     case "sierra"         => Success(ReindexSource.Sierra)
     case other            => Failure(new Throwable(s"Unrecognised ReindexSource: $other"))
