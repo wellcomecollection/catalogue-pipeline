@@ -13,7 +13,8 @@ import weco.catalogue.internal_model.work.DeletedReason._
 import weco.catalogue.internal_model.work._
 import weco.pipeline.transformer.calm.models.CalmSourceData
 
-class CalmTransformerTest
+class
+CalmTransformerTest
     extends AnyFunSpec
     with Matchers
     with CalmRecordGenerators {
@@ -150,16 +151,32 @@ class CalmTransformerTest
           reason = Some("CALM/Miro work")
         ),
         MergeCandidate(
-          id = IdState.Identifiable(
-            SourceIdentifier(
-              value = "M0000002",
-              identifierType = IdentifierType.MiroImageNumber,
-              ontologyType = "Work"
-            )
+          identifier = SourceIdentifier(
+            value = "M0000002",
+            identifierType = IdentifierType.MiroImageNumber,
+            ontologyType = "Work"
           ),
-          reason = Some("CALM/Miro work")
+          reason = "CALM/Miro work"
         )
       )
+  }
+
+  it("transforms access conditions") {
+    val record = createCalmRecordWith(
+      "Title" -> "abc",
+      "Level" -> "Collection",
+      "RefNo" -> "a/b/c",
+      "AltRefNo" -> "a.b.c",
+      "AccessStatus" -> "Restricted",
+      "UserDate1" -> "10/10/2050",
+      "AccessConditions" -> "nope.",
+      "AccessConditions" -> "nope.",
+      "CatalogueStatus" -> "Catalogued"
+    )
+    val termsOfUse = CalmTransformer(record, version).right.get.data.notes
+      .collectFirst { case TermsOfUse(content) => content }
+
+    termsOfUse shouldBe Some("nope. nope. Restricted until 10 October 2050.")
   }
 
   it("transforms description") {

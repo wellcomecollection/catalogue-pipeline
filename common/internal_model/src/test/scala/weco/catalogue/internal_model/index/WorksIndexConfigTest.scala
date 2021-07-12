@@ -169,8 +169,7 @@ class WorksIndexConfigTest
   it("puts a work with a access condition") {
     val accessCondition: AccessCondition = AccessCondition(
       method = AccessMethod.OnlineRequest,
-      status = Some(AccessStatus.Open),
-      terms = Some("ask nicely"))
+      status = AccessStatus.Open)
 
     withLocalWorksIndex { index =>
       val sampleWork = identifiedWork().items(

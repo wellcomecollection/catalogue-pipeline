@@ -139,8 +139,7 @@ class SierraLocationTest
       location.accessConditions shouldBe List(
         AccessCondition(
           method = AccessMethod.OnlineRequest,
-          status = Some(AccessStatus.Open),
-          terms = Some("You can look at this"))
+          status = Some(AccessStatus.Open))
       )
     }
 
@@ -244,7 +243,6 @@ class SierraLocationTest
       location.accessConditions shouldBe List(
         AccessCondition(
           method = AccessMethod.NotRequestable,
-          terms = Some("You're not allowed yet"),
           note = Some(
             s"""Please check this item <a href="https://search.wellcomelibrary.org/iii/encore/record/C__Rb${bibId.withoutCheckDigit}?lang=eng">on the Wellcome Library website</a> for access information""")
         )
