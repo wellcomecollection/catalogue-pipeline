@@ -15,6 +15,7 @@ SOURCES = {
     "sierra": "vhs-sierra-sierra-adapter-20200604",
     "mets": "mets-adapter-store-delta",
     "calm": "vhs-calm-adapter",
+    "tei": "tei-adapter-store",
 }
 
 DESTINATIONS = ["catalogue", "catalogue_miro_updates", "reporting"]
