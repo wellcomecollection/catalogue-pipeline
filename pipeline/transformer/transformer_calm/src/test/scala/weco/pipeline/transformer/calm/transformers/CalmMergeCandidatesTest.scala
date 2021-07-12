@@ -16,7 +16,7 @@ class CalmMergeCandidatesTest
     with CalmRecordGenerators {
 
   it("creates a Sierra mergeCandidate from the BNumber field") {
-    val bnumber = "b1234567"
+    val bnumber = "b12345672"
     val record = createCalmRecordWith(
       "BNumber" -> bnumber
     )
@@ -57,7 +57,7 @@ class CalmMergeCandidatesTest
   }
 
   it("returns both Miro and Sierra mergeCandidates") {
-    val bnumber = "b1234567"
+    val bnumber = "b12345672"
     val miroIds = List("M0000001", "M0000002")
     val record = createCalmRecordWith(
       ("BNumber" -> bnumber) ::
