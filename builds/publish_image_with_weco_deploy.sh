@@ -18,7 +18,7 @@ case "$IMAGE_ID" in
     PROJECT_ID="mets_adapter"
     ;;
 
-  "calm_adapter" | "calm_deletion_checker")
+  "calm_adapter" | "calm_deletion_checker" | "calm_indexer")
     PROJECT_ID="calm_adapter"
     ;;
 

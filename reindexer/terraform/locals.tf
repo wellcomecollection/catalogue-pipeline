@@ -86,6 +86,12 @@ locals {
       destination = "calm_deletion_checker"
       table       = local.vhs_calm_table_name
       topic       = local.calm_deletion_checker_topic_arn
-    }
+    },
+    {
+      source      = "calm"
+      destination = "reporting"
+      table       = local.vhs_calm_table_name
+      topic       = aws_sns_topic.calm_reindex_reporting.arn
+    },
   ]
 }

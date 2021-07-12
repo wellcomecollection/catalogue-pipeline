@@ -1,0 +1,7 @@
+{
+  "id" : "calm_indexer",
+  "folder" : "calm_adapter/calm_indexer",
+  "dependencyIds" : [
+    "source_model"
+  ]
+}

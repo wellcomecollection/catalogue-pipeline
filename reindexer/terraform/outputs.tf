@@ -30,3 +30,8 @@ output "calm_deletion_checker_topic_name" {
 output "calm_deletion_checker_topic_arn" {
   value = local.calm_deletion_checker_topic_arn
 }
+
+output "calm_reporting_topic_arn" {
+  value = aws_sns_topic.calm_reindex_reporting.arn
+}
+
