@@ -86,8 +86,6 @@ catalogue_pipeline:
       name: "2021-06-27"
     - id: "2021-07-06"
       name: "2021-07-06"
-    - id: "2021-07-07"
-      name: "2021-07-07"
   image_repositories:
     - id: id_minter
       services:
