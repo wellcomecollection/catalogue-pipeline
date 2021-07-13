@@ -16,7 +16,8 @@ object TeiDataParser {
     for {
       summary <- teiXml.summary
       bNumber <- teiXml.bNumber
-    } yield TeiData(teiXml.id, bNumber, summary, None)
+      title <- teiXml.title
+    } yield TeiData(teiXml.id, bNumber, summary, title)
 }
 
 case class TeiData(id: String, bNumber: Option[String], description: Option[String], title: Option[String]) {
@@ -34,6 +35,7 @@ case class TeiData(id: String, bNumber: Option[String], description: Option[Stri
 
     val value =
       WorkData[Unidentified](
+        title = title,
         description = description,
         mergeCandidates = maybeBnumber.toList
       )

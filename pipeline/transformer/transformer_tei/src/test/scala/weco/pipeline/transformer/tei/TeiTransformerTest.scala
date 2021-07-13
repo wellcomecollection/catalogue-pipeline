@@ -41,6 +41,7 @@ class TeiTransformerTest
       Work.Visible[Source](
         version = 1,
         data = WorkData[Unidentified](
+          title = Some("Wellcome Library"),
           description =
             Some("1 copy of al-Qānūn fī al-ṭibb by Avicenna, 980-1037")
         ),

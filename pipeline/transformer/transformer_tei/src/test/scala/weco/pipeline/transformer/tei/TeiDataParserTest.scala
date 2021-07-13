@@ -21,6 +21,15 @@ class TeiDataParserTest
           .toString()).right.get) shouldBe Right(
       TeiData(id = id, bNumber = None, description = Some(description), title = None))
   }
+  it("add the title from a tei into TeiData") {
+    val titleString = "MS_345"
+    TeiDataParser.parse(
+      TeiXml(
+        id,
+        teiXml(id = id, title = Some(title(titleString)))
+          .toString()).right.get) shouldBe Right(
+      TeiData(id = id, bNumber = None, description = None, title = Some(titleString)))
+  }
   it("strips xml from descriptions TeiData") {
     val description = "a <note>manuscript</note> about stuff"
     TeiDataParser.parse(
