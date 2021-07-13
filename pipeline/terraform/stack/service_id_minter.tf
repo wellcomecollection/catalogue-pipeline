@@ -6,6 +6,7 @@ module "id_minter_queue" {
     module.mets_transformer_output_topic.arn,
     module.miro_transformer_output_topic.arn,
     module.sierra_transformer_output_topic.arn,
+    module.tei_transformer_output_topic.arn,
   ]
   aws_region                 = var.aws_region
   alarm_topic_arn            = var.dlq_alarm_arn

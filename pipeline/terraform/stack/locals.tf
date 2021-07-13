@@ -66,6 +66,7 @@ locals {
     "relation_embedder",
     "transformer_miro",
     "transformer_mets",
+    "transformer_tei",
     "transformer_sierra",
     "transformer_calm",
   ]
@@ -73,6 +74,7 @@ locals {
   sierra_adapter_topic_arns = var.is_reindexing ? concat(var.adapters["sierra"].topics, [var.adapters["sierra"].reindex_topic]) : var.adapters["sierra"].topics
   miro_adapter_topic_arns   = var.is_reindexing ? concat(var.adapters["miro"].topics, [var.adapters["miro"].reindex_topic]) : var.adapters["miro"].topics
   mets_adapter_topic_arns   = var.is_reindexing ? concat(var.adapters["mets"].topics, [var.adapters["mets"].reindex_topic]) : var.adapters["mets"].topics
+  tei_adapter_topic_arns    = var.is_reindexing ? concat(var.adapters["tei"].topics, [var.adapters["tei"].reindex_topic]) : var.adapters["tei"].topics
   calm_adapter_topic_arns   = var.is_reindexing ? concat(var.adapters["calm"].topics, [var.adapters["calm"].reindex_topic]) : var.adapters["calm"].topics
 
   logging_cluster_id = var.logging_cluster_id

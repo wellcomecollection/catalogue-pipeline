@@ -43,6 +43,8 @@ variable "ec_privatelink_security_group_id" {
   type = string
 }
 
+variable "tei_adapter_bucket_name" {
+}
 variable "release_label" {
   type = string
 }

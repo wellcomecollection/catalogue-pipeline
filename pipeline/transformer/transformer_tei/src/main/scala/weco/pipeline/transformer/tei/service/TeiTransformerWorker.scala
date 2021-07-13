@@ -8,6 +8,7 @@ import weco.messaging.sns.NotificationMessage
 import weco.pipeline.transformer.{Transformer, TransformerWorker}
 import weco.pipeline_storage.{PipelineStorageStream, Retriever}
 import weco.storage.{Identified, ReadError, Version}
+import weco.typesafe.Runnable
 
 import scala.concurrent.ExecutionContext
 
@@ -19,7 +20,8 @@ class TeiTransformerWorker[MsgDestination](
                                             MsgDestination])(
   implicit val ec: ExecutionContext,
   val decoder: Decoder[TeiSourcePayload])
-    extends TransformerWorker[TeiSourcePayload, TeiMetadata, MsgDestination] {
+    extends TransformerWorker[TeiSourcePayload, TeiMetadata, MsgDestination]
+    with Runnable {
 
   override def lookupSourceData(payload: TeiSourcePayload)
     : Either[ReadError, Identified[Version[String, Int], TeiMetadata]] =
