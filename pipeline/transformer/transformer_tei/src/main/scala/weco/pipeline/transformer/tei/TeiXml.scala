@@ -3,10 +3,11 @@ package weco.pipeline.transformer.tei
 import weco.catalogue.internal_model.languages.Language
 
 import scala.util.Try
-import scala.xml.{Elem, XML}
+import scala.xml.{Elem, Node, XML}
 import cats.implicits._
+import grizzled.slf4j.Logging
 
-class TeiXml(xml: Elem) {
+class TeiXml(xml: Elem) extends Logging{
   val id: String = xml.attributes
     .collectFirst {
       case metadata if metadata.key == "id" => metadata.value.text.trim
@@ -76,17 +77,41 @@ class TeiXml(xml: Elem) {
     *
     */
   def title: Either[Throwable, String] = {
-    val nodes = (xml \ "teiHeader" \ "fileDesc" \ "titleStmt" \ "title").toList
-    val maybeTitles = nodes.filter(
-      n => n.attributes.isEmpty)
+    val msItemNodes = (xml \\ "msDesc" \ "msContents" \ "msItem").toList
+    msItemNodes match {
+      case List(itemNode) if (itemNode \"title").nonEmpty =>
+        getTitleFromSingleItem(itemNode).left.flatMap{ex =>
+          warn("Not able to extract title from item", ex)
+            getTitleFromTeiHeader}
+      case _ =>
+        getTitleFromTeiHeader
+    }
+  }
+
+  private def getTitleFromTeiHeader = {
+    val nodes =
+      (xml \ "teiHeader" \ "fileDesc" \ "titleStmt" \ "title").toList
+    val maybeTitles = nodes.filter(n => n.attributes.isEmpty)
     maybeTitles match {
       case List(titleNode) => Right(titleNode.text)
-      case Nil =>Left(new RuntimeException("No title found!"))
+      case Nil => Left(new RuntimeException("No title found!"))
       case _ => Left(new RuntimeException("More than one title node!"))
     }
   }
 
-  def languages :Either[Throwable, List[Language]] = {
+  private def getTitleFromSingleItem(itemNode: Node) = {
+    val titleNodes = (itemNode \ "title").toList
+    titleNodes match {
+      case List(titleNode) => Right(titleNode.text)
+      case list => list.filter(n => (n \@ "type").toLowerCase == "original") match {
+        case List(singleNode) => Right(singleNode.text)
+        case Nil => Left(new RuntimeException(s"Cannot find original title in msItem $titleNodes"))
+        case _ => Left(new RuntimeException(s"Multiple titles with type original msItem $titleNodes"))
+      }
+    }
+  }
+
+  def languages: Either[Throwable, List[Language]] = {
     val nodes = (xml \\ "msDesc" \ "msContents" \ "textLang").toList
 
     val eitherLanguages = nodes.map { n =>
@@ -94,16 +119,23 @@ class TeiXml(xml: Elem) {
       val mainLangId = (n \@ "mainLang").toLowerCase
       val otherLangId = (n \@ "otherLangs").toLowerCase
       val langId = (mainLangId, otherLangId) match {
-        case (id1, id2) if id2.isEmpty && id1.nonEmpty=> Right(id1)
+        case (id1, id2) if id2.isEmpty && id1.nonEmpty => Right(id1)
         case (id1, id2) if id1.isEmpty && id2.nonEmpty => Right(id2)
-        case (id1, id2) if id2.isEmpty && id1.isEmpty => Left(new RuntimeException(s"Cannot find a language id in ${n.toString()}"))
-        case _ => Left(new RuntimeException(s"Multiple language ids in ${n.toString()}"))
+        case (id1, id2) if id2.isEmpty && id1.isEmpty =>
+          Left(
+            new RuntimeException(
+              s"Cannot find a language id in ${n.toString()}"
+            )
+          )
+        case _ =>
+          Left(
+            new RuntimeException(s"Multiple language ids in ${n.toString()}")
+          )
       }
-      langId.map ( id =>  Language(id, langText))
+      langId.map(id => Language(id, langText))
     }
     eitherLanguages.sequence
   }
-
 }
 
 object TeiXml {
