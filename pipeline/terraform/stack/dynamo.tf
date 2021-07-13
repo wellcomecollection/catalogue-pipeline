@@ -16,13 +16,11 @@
 locals {
   graph_table_name = "${local.namespace_hyphen}_works-graph"
 
-  # In the 2021-07-06 reindex, the write/read capacity peaked at
-  # 1500 write units and 620 read units consumed per minute.
-  #
-  # Provisioned capacity is per-second, not per-minute.
+  # These numbers were chosen by running a reindex and seeing when the
+  # matcher started throttling.
   graph_table_billing_mode   = var.is_reindexing ? "PROVISIONED" : "PAY_PER_REQUEST"
-  graph_table_write_capacity = var.is_reindexing ? ceil(1500 / 60) : null
-  graph_table_read_capacity  = var.is_reindexing ? ceil(620 / 60) : null
+  graph_table_write_capacity = var.is_reindexing ? 1000 : null
+  graph_table_read_capacity  = var.is_reindexing ? 600 : null
 }
 
 resource "aws_dynamodb_table" "matcher_graph_table" {
@@ -88,13 +86,11 @@ data "aws_iam_policy_document" "graph_table_readwrite" {
 locals {
   lock_table_name = "${local.namespace_hyphen}_matcher-lock-table"
 
-  # In the 2021-07-06 reindex, the write/read capacity peaked at
-  # 4800 write units and 0 read units consumed per minute.
-  #
-  # Provisioned capacity is per-second, not per-minute.
+  # These numbers were chosen by running a reindex and seeing when the
+  # matcher started throttling.
   lock_table_billing_mode   = var.is_reindexing ? "PROVISIONED" : "PAY_PER_REQUEST"
-  lock_table_write_capacity = var.is_reindexing ? ceil(4800 / 60) : null
-  lock_table_read_capacity  = var.is_reindexing ? 5 : null
+  lock_table_write_capacity = var.is_reindexing ? 2000 : null
+  lock_table_read_capacity  = var.is_reindexing ? 1500 : null
 }
 
 resource "aws_dynamodb_table" "matcher_lock_table" {
