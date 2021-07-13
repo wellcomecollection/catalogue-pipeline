@@ -116,10 +116,11 @@ object SierraMergeCandidates
       }
       .flatMap {
         case Success(Some(sourceIdentifier)) =>
-          Some(MergeCandidate(
-            identifier = sourceIdentifier,
-            reason = "Calm/Sierra harvest"
-          ))
+          Some(
+            MergeCandidate(
+              identifier = sourceIdentifier,
+              reason = "Calm/Sierra harvest"
+            ))
         case _ => None
       }
       .distinct

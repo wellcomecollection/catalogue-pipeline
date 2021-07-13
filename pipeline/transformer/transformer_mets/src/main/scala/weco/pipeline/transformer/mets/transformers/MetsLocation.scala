@@ -1,13 +1,19 @@
 package weco.pipeline.transformer.mets.transformers
 
-import weco.catalogue.internal_model.locations.{AccessCondition, AccessMethod, AccessStatus, DigitalLocation, License, LocationType}
+import weco.catalogue.internal_model.locations.{
+  AccessCondition,
+  AccessMethod,
+  AccessStatus,
+  DigitalLocation,
+  License,
+  LocationType
+}
 
 object MetsLocation {
-  def apply(
-    recordIdentifier: String,
-    license: Option[License],
-    accessStatus: Option[AccessStatus],
-    accessConditionUsage: Option[String]): DigitalLocation =
+  def apply(recordIdentifier: String,
+            license: Option[License],
+            accessStatus: Option[AccessStatus],
+            accessConditionUsage: Option[String]): DigitalLocation =
     DigitalLocation(
       url =
         s"https://iiif.wellcomecollection.org/presentation/v2/$recordIdentifier",
@@ -16,7 +22,9 @@ object MetsLocation {
       accessConditions = accessConditions(accessStatus, accessConditionUsage)
     )
 
-  private def accessConditions(accessStatus: Option[AccessStatus], accessConditionUsage: Option[String]): List[AccessCondition] =
+  private def accessConditions(
+    accessStatus: Option[AccessStatus],
+    accessConditionUsage: Option[String]): List[AccessCondition] =
     (accessStatus, accessConditionUsage) match {
       case (None, None) => Nil
       case _ =>
