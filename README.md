@@ -22,6 +22,8 @@ If the [internal_model](./common/internal_model) has been changed you will want 
 
 A reindex operation runs the source data from the [adapters](docs/adapters/README.md) through the pipeline causing it to be re-transformed / matched & merged as appropriate.
 
+If you want to perform a reindex, follow the instructions in [REINDEX.md](REINDEX.md).
+
 #### Scripts
 
 Generally small things you might want to do irregularly involving the
