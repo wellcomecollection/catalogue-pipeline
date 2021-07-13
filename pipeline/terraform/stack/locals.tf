@@ -48,7 +48,7 @@ locals {
   # ECS will just stop every task.  e.g. if scale_down_adjustment = -5 and
   # there are 3 tasks running, ECS will scale the tasks down to zero.
   scale_down_adjustment = var.is_reindexing ? -5 : -1
-  scale_up_adjustment   = 1
+  scale_up_adjustment   = var.is_reindexing ? 3 : 1
 
   services = [
     "ingestor_works",
