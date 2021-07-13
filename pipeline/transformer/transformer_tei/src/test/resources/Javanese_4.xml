@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="https://raw.githubusercontent.com/bodleian/consolidated-tei-schema/master/msdesc.rng" type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0"?>
+
+<TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id="Wellcome_Javanese_4">
+
+    <teiHeader>
+    
+    <fileDesc>
+        
+        <titleStmt>
+            <title>Well_Jav_4_TEI</title> 
+            <title type="collection">Wellcome Collection</title>
+            <respStmt xml:id="RV"> 
+                <resp when="1982">Cataloguer</resp>
+                <persName>M. C. Ricklefs and P. Voorhoeve</persName> 
+            </respStmt>
+            <respStmt xml:id="MM">
+                <resp when="2020-05-04">TEI Encoder</resp>
+                <persName>Miten Mistry</persName>
+            </respStmt>
+               </titleStmt>
+        
+        <publicationStmt>
+            <publisher>Wellcome Collection</publisher>
+            <idno>UkLW</idno>
+            <address>
+                <orgName type="institution">Wellcome Collection</orgName>
+                <street>215 Euston Rd</street>
+                <settlement>London</settlement>
+                <postCode>NW1 2BE</postCode>
+            </address>
+            <distributor>
+                <email>library@wellcome.ac.uk</email>
+            </distributor>
+            <idno type="msID">Well. Jav. 4</idno>
+            <idno type="catalogue">Catalogue of Javanese manuscripts in the Wellcome Institute for the History of Medicine from 'Indonesian manuscripts in 
+                Great Britain: Addenda et Corrigenda'</idno>
+        </publicationStmt>
+        
+        <sourceDesc>
+            
+            <msDesc>                
+                <msIdentifier>
+                    <country>United Kingdom</country>
+                    <settlement>London</settlement>
+                    <institution>Wellcome Collection</institution>
+                    <repository>Wellcome Library</repository>
+                    <idno type="shelfmark">WMS Javanese 4</idno>
+                      <altIdentifier type="Sierra_b_number">
+                          <idno>b3046416x</idno>
+                    </altIdentifier>
+                </msIdentifier>
+                
+                <msContents>
+                  
+                    <summary>Yusup Romance.</summary>                 
+           <textLang mainLang="jv" source="IANA">Javanese</textLang> 
+                    <msItem xml:id="Wellcome_Javanese_4_1">                     
+                        <note>Verse</note>                              
+                    </msItem>
+                                          </msContents>
+                <physDesc>                     
+                    <objectDesc form="palm-leaf">                       
+                        <supportDesc> 
+                            <support>palm-leaves</support>
+                            <extent>125 palm leaves
+                                <dimensions unit="cm" type="palm-leaf">
+                                    <height>44.5</height>
+                                    <width>4</width>                                    
+                                </dimensions>
+                            </extent>
+                                 </supportDesc>     
+                    </objectDesc>
+                     </physDesc>
+                <history>                   
+                      <provenance>Unknown</provenance>
+                </history>
+                
+                <additional>
+                    <adminInfo>
+                        <recordHist>
+                            <source>                                
+                                <bibl>Catalogue of Javanese manuscripts in the Wellcome Institute for the History of Medicine from 'Indonesian manuscripts in 
+                                    Great Britain: Addenda et Corrigenda' Bulletin of the School of Oriental and African Studies, vol. 45, no. 2 (1982), pp. 308-309</bibl>                                
+                            </source>
+                        </recordHist>
+                       </adminInfo>     
+                </additional>
+            </msDesc>
+        </sourceDesc> 
+     
+    </fileDesc>
+    
+        <revisionDesc>
+        <change when="2020-05-04" who="#MM">Created XML file</change>    
+        </revisionDesc>
+    </teiHeader>    
+    <facsimile>
+    <surface></surface>
+    </facsimile>    
+    <text>
+    <body>
+        <p></p>
+    </body>
+    </text>    
+</TEI>

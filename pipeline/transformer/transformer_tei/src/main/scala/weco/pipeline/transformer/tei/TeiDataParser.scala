@@ -1,10 +1,8 @@
 package weco.pipeline.transformer.tei
 
 import weco.catalogue.internal_model.identifiers.DataState.Unidentified
-import weco.catalogue.internal_model.identifiers.{
-  IdentifierType,
-  SourceIdentifier
-}
+import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.work.{MergeCandidate, Work, WorkData}
 import weco.pipeline.transformer.identifiers.SourceIdentifierValidation._
@@ -17,10 +15,11 @@ object TeiDataParser {
       summary <- teiXml.summary
       bNumber <- teiXml.bNumber
       title <- teiXml.title
-    } yield TeiData(teiXml.id, bNumber, summary, title)
+    languages <- teiXml.languages
+    } yield TeiData(teiXml.id, bNumber, summary, title, languages)
 }
 
-case class TeiData(id: String, bNumber: Option[String], description: Option[String], title: Option[String]) {
+case class TeiData(id: String, bNumber: Option[String], description: Option[String], title: Option[String], languages: List[Language]) {
   def toWork(time: Instant, version: Int): Work[Source] = {
     val maybeBnumber = bNumber
       .flatMap { id =>
@@ -37,7 +36,8 @@ case class TeiData(id: String, bNumber: Option[String], description: Option[Stri
       WorkData[Unidentified](
         title = title,
         description = description,
-        mergeCandidates = maybeBnumber.toList
+        mergeCandidates = maybeBnumber.toList,
+        languages = languages
       )
     Work.Visible[Source](
       version,

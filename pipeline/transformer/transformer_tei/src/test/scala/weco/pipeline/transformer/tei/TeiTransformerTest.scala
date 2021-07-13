@@ -49,6 +49,19 @@ class TeiTransformerTest
       )
     )
   }
+
+  it("extracts languages"){
+    val teiXml =
+      IOUtils.resourceToString("/Javanese_4.xml", StandardCharsets.UTF_8)
+    val location = createS3ObjectLocation
+    val store =
+      new MemoryStore[S3ObjectLocation, String](Map(location -> teiXml))
+    val transformer = new TeiTransformer(store)
+    val timeModified = instantInLast30Days
+    val id = "Wellcome_Javanese_4"
+    transformer(id, TeiChangedMetadata(location, timeModified), 1).right.get.data.title shouldBe Some("Well_Jav_4_TEI")
+  }
+
   it("handles delete messages") {
 
     val store =

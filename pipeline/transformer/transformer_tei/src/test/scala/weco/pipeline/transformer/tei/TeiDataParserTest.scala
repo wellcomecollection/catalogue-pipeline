@@ -2,6 +2,7 @@ package weco.pipeline.transformer.tei
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.source_model.generators.SierraDataGenerators
 import weco.pipeline.transformer.tei.fixtures.TeiGenerators
 
@@ -19,7 +20,7 @@ class TeiDataParserTest
         id,
         teiXml(id = id, summary = Some(summary(description)))
           .toString()).right.get) shouldBe Right(
-      TeiData(id = id, bNumber = None, description = Some(description), title = None))
+      TeiData(id = id, bNumber = None, description = Some(description), title = None, languages = Nil))
   }
   it("add the title from a tei into TeiData") {
     val titleString = "MS_345"
@@ -28,7 +29,18 @@ class TeiDataParserTest
         id,
         teiXml(id = id, title = Some(title(titleString)))
           .toString()).right.get) shouldBe Right(
-      TeiData(id = id, bNumber = None, description = None, title = Some(titleString)))
+      TeiData(id = id, bNumber = None, description = None, title = Some(titleString), languages = Nil))
+  }
+  it("add the languages from a tei into the WorkData") {
+    val languageId = "sa"
+    val languageLabel = "Sanskrit"
+    val expectedTeiData = TeiData(id = id, bNumber = None, description = None, title = None, languages = List(Language(languageId, languageLabel)))
+    TeiDataParser.parse(
+      TeiXml(
+        id,
+        teiXml(id = id, languages = List(mainLanguage(languageId, languageLabel)))
+          .toString()).right.get) shouldBe Right(
+      expectedTeiData)
   }
   it("strips xml from descriptions TeiData") {
     val description = "a <note>manuscript</note> about stuff"
@@ -37,7 +49,7 @@ class TeiDataParserTest
         id,
         teiXml(id = id, summary = Some(summary(description)))
           .toString()).right.get) shouldBe Right(
-      TeiData(id = id, bNumber = None, description = Some("a manuscript about stuff"), title = None))
+      TeiData(id = id, bNumber = None, description = Some("a manuscript about stuff"), title = None, languages = Nil))
   }
   it("parses a tei xml and returns TeiData with bNumber") {
 
@@ -46,7 +58,7 @@ class TeiDataParserTest
         id,
         teiXml(id = id, identifiers = Some(sierraIdentifiers(bnumber)))
           .toString()).right.get) shouldBe Right(
-      TeiData(id = id, bNumber = Some(bnumber), description = None, title = None))
+      TeiData(id = id, bNumber = Some(bnumber), description = None, title = None, languages = Nil))
   }
   it("fails parsing if there's more than one bnumber node") {
 
