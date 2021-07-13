@@ -1,12 +1,15 @@
 package weco.pipeline.transformer.tei
 
+import weco.catalogue.internal_model.languages.Language
+
 import scala.util.Try
 import scala.xml.{Elem, XML}
+import cats.implicits._
 
 class TeiXml(xml: Elem) {
   val id: String = xml.attributes
     .collectFirst {
-      case metadata if metadata.key == "id" => metadata.value.text
+      case metadata if metadata.key == "id" => metadata.value.text.trim
     }
     .getOrElse(throw new RuntimeException(s"Could not find an id in XML!"))
 
@@ -81,6 +84,24 @@ class TeiXml(xml: Elem) {
       case Nil => Right(None)
       case _ => Left(new RuntimeException("More than one title node!"))
     }
+  }
+
+  def languages :Either[Throwable, List[Language]] = {
+    val nodes = (xml \\ "msDesc" \ "msContents" \ "textLang").toList
+
+    val eitherLanguages = nodes.map { n =>
+      val langText = n.text
+      val mainLangId = (n \@ "mainLang").toLowerCase
+      val otherLangId = (n \@ "otherLangs").toLowerCase
+      val langId = (mainLangId, otherLangId) match {
+        case (id1, id2) if id2.isEmpty && id1.nonEmpty=> Right(id1)
+        case (id1, id2) if id1.isEmpty && id2.nonEmpty => Right(id2)
+        case (id1, id2) if id2.isEmpty && id1.isEmpty => Left(new RuntimeException(s"Cannot find a language id in ${n.toString()}"))
+        case _ => Left(new RuntimeException(s"Multiple language ids in ${n.toString()}"))
+      }
+      langId.map ( id =>  Language(id, langText))
+    }
+    eitherLanguages.sequence
   }
 
 }

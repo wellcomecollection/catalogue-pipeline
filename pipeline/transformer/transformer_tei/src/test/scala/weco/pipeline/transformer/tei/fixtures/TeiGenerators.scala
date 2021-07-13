@@ -14,10 +14,14 @@ trait TeiGenerators { this: Suite =>
 
   def title(str: String) =  <titleStmt><title>{str}</title></titleStmt>
 
+  def mainLanguage(id: String,label: String) =  <textLang mainLang={id} source="IANA">{label}</textLang>
+  def otherLanguage(id: String,label: String) =  <textLang otherLangs={id} source="IANA">{label}</textLang>
+
   def teiXml(id: String,
              identifiers: Option[Elem] = None,
              summary: Option[Elem] = None,
-             title: Option[Elem] = None) =
+             title: Option[Elem] = None,
+             languages: List[Elem] = Nil) =
     <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id={id}>
       <teiHeader>
         <fileDesc>
@@ -29,6 +33,7 @@ trait TeiGenerators { this: Suite =>
               </msIdentifier>
               <msContents>
                 {summary.getOrElse(NodeSeq.Empty)}
+                {languages}
               </msContents>
             </msDesc>
           </sourceDesc>
