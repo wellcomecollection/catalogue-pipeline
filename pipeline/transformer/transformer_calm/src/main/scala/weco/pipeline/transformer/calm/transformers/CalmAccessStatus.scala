@@ -24,6 +24,7 @@ object CalmAccessStatus extends CalmRecordOps with Logging {
         Some(AccessStatus.Unavailable)
       case Some("Temporarily Unavailable") =>
         Some(AccessStatus.TemporarilyUnavailable)
+      case None => None
       case status =>
         warn(s"Unrecognised AccessStatus in Calm: $status")
         None
