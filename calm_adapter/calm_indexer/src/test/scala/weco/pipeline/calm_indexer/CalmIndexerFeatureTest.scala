@@ -53,4 +53,45 @@ class CalmIndexerFeatureTest
       }
     }
   }
+
+  it("removes a deleted Calm record") {
+    val record = createCalmRecordWith(
+      ("Modified", "29/06/2020"),
+      ("Document", "")
+    )
+
+    val location = createS3ObjectLocation
+
+    val payload =
+      CalmSourcePayload(id = record.id, location = location, version = 1)
+
+    val payloadDeleted =
+      payload.copy(version = 2, isDeleted = true)
+
+    val store = MemoryTypedStore[S3ObjectLocation, CalmRecord](
+      initialEntries = Map(location -> record)
+    )
+
+    withLocalElasticsearchIndex(config = IndexConfig.empty) { index =>
+      withLocalSqsQueue() { queue =>
+        withWorker(queue, store, index) { _ =>
+          sendNotificationToSQS(queue, payload)
+
+          assertElasticsearchEventuallyHas(
+            index = index,
+            id = record.id,
+            json = s"""
+                      |{
+                      |  "Modified": "29/06/2020"
+                      |}
+                      |""".stripMargin
+          )
+
+          sendNotificationToSQS(queue, payloadDeleted)
+
+          assertElasticsearchEmpty(index)
+        }
+      }
+    }
+  }
 }
