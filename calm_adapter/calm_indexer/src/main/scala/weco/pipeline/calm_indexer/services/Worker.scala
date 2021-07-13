@@ -56,7 +56,9 @@ class Worker(
       .execute(
         deleteById(index, payload.id)
       )
-      .map { _ => ()}
+      .map { _ =>
+        ()
+      }
 
   private def indexRecord(payload: CalmSourcePayload): Future[Unit] =
     for {
