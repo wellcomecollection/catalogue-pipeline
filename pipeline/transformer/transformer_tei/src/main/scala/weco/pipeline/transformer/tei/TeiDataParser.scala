@@ -16,10 +16,10 @@ object TeiDataParser {
       bNumber <- teiXml.bNumber
       title <- teiXml.title
     languages <- teiXml.languages
-    } yield TeiData(teiXml.id, bNumber, summary, title, languages)
+    } yield TeiData(teiXml.id, title, bNumber, summary, languages)
 }
 
-case class TeiData(id: String, bNumber: Option[String], description: Option[String], title: Option[String], languages: List[Language]) {
+case class TeiData(id: String, title: String, bNumber: Option[String], description: Option[String], languages: List[Language]) {
   def toWork(time: Instant, version: Int): Work[Source] = {
     val maybeBnumber = bNumber
       .flatMap { id =>
@@ -34,7 +34,7 @@ case class TeiData(id: String, bNumber: Option[String], description: Option[Stri
 
     val value =
       WorkData[Unidentified](
-        title = title,
+        title = Some(title),
         description = description,
         mergeCandidates = maybeBnumber.toList,
         languages = languages

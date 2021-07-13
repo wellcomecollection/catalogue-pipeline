@@ -75,13 +75,13 @@ class TeiXml(xml: Elem) {
   /**
     *
     */
-  def title: Either[Throwable, Option[String]] = {
+  def title: Either[Throwable, String] = {
     val nodes = (xml \ "teiHeader" \ "fileDesc" \ "titleStmt" \ "title").toList
     val maybeTitles = nodes.filter(
       n => n.attributes.isEmpty)
     maybeTitles match {
-      case List(titleNode) => Right(Some(titleNode.text))
-      case Nil => Right(None)
+      case List(titleNode) => Right(titleNode.text)
+      case Nil =>Left(new RuntimeException("No title found!"))
       case _ => Left(new RuntimeException("More than one title node!"))
     }
   }

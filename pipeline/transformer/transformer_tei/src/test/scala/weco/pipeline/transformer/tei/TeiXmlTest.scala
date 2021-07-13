@@ -27,9 +27,9 @@ class TeiXmlTest extends AnyFunSpec with Matchers with TeiGenerators {
   it(
     "gets the title from the TEI") {
     val titleString = "This is the title"
-    val result = TeiXml(id, teiXml(id = id, title= Some(title(titleString))).toString()).flatMap(_.title)
+    val result = TeiXml(id, teiXml(id = id, title= titleElem(titleString)).toString()).flatMap(_.title)
     result shouldBe a[Right[_,_]]
-    result.right.get shouldBe Some(titleString)
+    result.right.get shouldBe titleString
   }
 
   it(
@@ -77,7 +77,7 @@ class TeiXmlTest extends AnyFunSpec with Matchers with TeiGenerators {
         <title>{titleString1}</title>
         <title>{titleString2}</title>
       </titleStmt>
-    val result = TeiXml(id, teiXml(id = id, title= Some(titleStm)).toString()).flatMap(_.title)
+    val result = TeiXml(id, teiXml(id = id, title= titleStm).toString()).flatMap(_.title)
     result shouldBe a[Left[_,_]]
     result.left.get.getMessage should include ("title")
   }

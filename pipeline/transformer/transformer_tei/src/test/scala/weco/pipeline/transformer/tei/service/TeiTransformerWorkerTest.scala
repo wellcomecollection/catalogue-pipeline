@@ -39,6 +39,7 @@ class TeiTransformerWorkerTest
     with S3ObjectLocationGenerators {
   val description = "This is a summary"
   val bnumber = "b12345672"
+  val title = "This is the title"
 
   override def withContext[R](
     testWith: TestWith[MemoryTypedStore[S3ObjectLocation, String], R]
@@ -51,12 +52,12 @@ class TeiTransformerWorkerTest
     implicit store: MemoryTypedStore[S3ObjectLocation, String]
   ): TeiSourcePayload = {
     val xmlString =
-      teiXml(id, Some(sierraIdentifiers(bnumber)), Some(summary(description)))
+      teiXml(id,title = titleElem(title), identifiers = Some(sierraIdentifiers(bnumber)), summary = Some(summary(description)))
         .toString()
 
     val location = S3ObjectLocation(
       bucket = createBucketName,
-      key = s"tei_files/$id/METS.xml"
+      key = s"tei_files/$id/Tei.xml"
     )
 
     store.put(location)(xmlString) shouldBe a[Right[_, _]]
@@ -89,6 +90,7 @@ class TeiTransformerWorkerTest
     )
     w.version shouldBe p.version
     w.data shouldBe WorkData[Unidentified](
+      title = Some(title),
       description = Some(description),
       mergeCandidates = List(
         MergeCandidate(
