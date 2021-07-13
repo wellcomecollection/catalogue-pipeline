@@ -44,6 +44,22 @@ class Worker(
         fromJson[CalmSourcePayload](notificationMessage.body)
       )
 
+      _ <- if (payload.isDeleted) {
+        deleteRecord(payload)
+      } else {
+        indexRecord(payload)
+      }
+    } yield ()
+
+  private def deleteRecord(payload: CalmSourcePayload): Future[Unit] =
+    elasticClient
+      .execute(
+        deleteById(index, payload.id)
+      )
+      .map { _ => ()}
+
+  private def indexRecord(payload: CalmSourcePayload): Future[Unit] =
+    for {
       record <- calmReader.get(payload.location) match {
         case Right(Identified(_, transformable)) =>
           Future.successful(transformable)
