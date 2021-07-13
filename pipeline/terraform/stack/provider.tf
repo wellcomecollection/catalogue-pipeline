@@ -3,13 +3,15 @@
 # See https://github.com/hashicorp/terraform/issues/25172#issuecomment-641284286
 terraform {
   required_providers {
+    aws = {
+      source = "hashicorp/aws"
+
+      configuration_aliases = [aws.catalogue]
+    }
+
     ec = {
       source  = "elastic/ec"
       version = "0.2.1"
     }
   }
-}
-
-provider "aws" {
-  alias = "catalogue"
 }

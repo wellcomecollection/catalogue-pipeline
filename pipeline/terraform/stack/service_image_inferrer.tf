@@ -163,7 +163,7 @@ module "image_inferrer" {
   max_capacity = min(6, local.max_capacity)
 
   scale_down_adjustment = local.scale_down_adjustment
-  scale_up_adjustment   = local.scale_up_adjustment
+  scale_up_adjustment   = min(1, local.scale_up_adjustment)
 
   queue_read_policy = module.image_inferrer_queue.read_policy
 
