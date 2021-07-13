@@ -111,7 +111,7 @@ locals {
 }
 
 module "pipeline_storage_secrets" {
-  source = "../../../infrastructure/modules/secrets"
+  source = "github.com/wellcomecollection/terraform-aws-secrets?ref=v1.0.1"
 
   key_value_map = {
     (local.pipeline_storage_public_host) = "${local.pipeline_storage_elastic_id}.${local.pipeline_storage_elastic_region}.aws.found.io"
@@ -130,10 +130,10 @@ module "pipeline_storage_secrets" {
 }
 
 module "pipeline_storage_secrets_catalogue" {
-  source = "../../../infrastructure/modules/secrets"
+  source = "github.com/wellcomecollection/terraform-aws-secrets?ref=v1.0.1"
 
   providers = {
-    aws = aws.catalogue
+    aws= aws.catalogue
   }
 
   key_value_map = {
