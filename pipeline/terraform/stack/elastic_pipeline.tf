@@ -33,6 +33,7 @@ resource "ec_deployment" "pipeline" {
     }
   }
 
+  # TODO: Why do we round-trip this via a data block?
   observability {
     deployment_id = data.ec_deployment.logging.id
   }
