@@ -16,14 +16,14 @@ locals {
   # These numbers were chosen by running a reindex and seeing when the
   # matcher started throttling.
   graph_table_billing_mode   = var.is_reindexing ? "PROVISIONED" : "PAY_PER_REQUEST"
-  graph_table_write_capacity = var.is_reindexing ? 100 : null
+  graph_table_write_capacity = var.is_reindexing ? 1000 : null
   graph_table_read_capacity  = var.is_reindexing ? 600 : null
-
+  
   # These numbers were chosen by running a reindex and seeing when the
   # matcher started throttling.
   lock_table_billing_mode   = var.is_reindexing ? "PROVISIONED" : "PAY_PER_REQUEST"
-  lock_table_write_capacity = var.is_reindexing ? 100 : null
-  lock_table_read_capacity  = var.is_reindexing ? 75 : null
+  lock_table_write_capacity = var.is_reindexing ? 2000 : null
+  lock_table_read_capacity  = var.is_reindexing ? 1500 : null
 }
 
 # Graph table
