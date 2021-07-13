@@ -49,6 +49,7 @@ def get_source_counts(session):
         "mets": "mets-adapter-store-delta",
         "miro": "vhs-sourcedata-miro",
         "sierra": "vhs-sierra-sierra-adapter-20200604",
+        "tei": "tei-adapter-store",
     }
 
     return {
