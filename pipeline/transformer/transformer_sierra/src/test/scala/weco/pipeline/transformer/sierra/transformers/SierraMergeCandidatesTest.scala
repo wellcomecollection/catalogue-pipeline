@@ -349,6 +349,13 @@ class SierraMergeCandidatesTest
 
       getMergeCandidates(bibData) shouldBe Nil
     }
+
+    it("ignores a malformed OCoLC value in 035 subfield ǂa") {
+      // This is based on a value from b11955491
+      val bibData = bibDataWith035(Seq("(OCoLC)92747927 "))
+
+      getMergeCandidates(bibData) shouldBe empty
+    }
   }
 
   private def bibDataWith035(calmIds: Seq[String]) =

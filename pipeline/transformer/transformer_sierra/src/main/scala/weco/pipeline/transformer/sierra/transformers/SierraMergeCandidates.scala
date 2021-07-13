@@ -1,7 +1,6 @@
 package weco.pipeline.transformer.sierra.transformers
 
 import grizzled.slf4j.Logging
-
 import weco.catalogue.internal_model.identifiers.{
   IdState,
   IdentifierType,
@@ -14,6 +13,7 @@ import weco.catalogue.source_model.sierra.identifiers.SierraBibNumber
 import weco.pipeline.transformer.identifiers.SourceIdentifierValidation._
 import weco.pipeline.transformer.sierra.transformers.parsers.MiroIdParsing
 
+import scala.util.{Success, Try}
 import scala.util.matching.Regex
 
 object SierraMergeCandidates
@@ -105,18 +105,23 @@ object SierraMergeCandidates
     bibData
       .subfieldsWithTag("035" -> "a")
       .contents
-      .flatMap { recordId =>
-        SourceIdentifier(
-          identifierType = IdentifierType.CalmRecordIdentifier,
-          ontologyType = "Work",
-          value = recordId
-        ).validated
+      .map { recordId =>
+        Try {
+          SourceIdentifier(
+            identifierType = IdentifierType.CalmRecordIdentifier,
+            ontologyType = "Work",
+            value = recordId
+          ).validated
+        }
       }
-      .map { sourceIdentifier =>
-        MergeCandidate(
-          identifier = sourceIdentifier,
-          reason = "Calm/Sierra harvest"
-        )
+      .flatMap {
+        case Success(Some(sourceIdentifier)) =>
+          Some(
+            MergeCandidate(
+              identifier = sourceIdentifier,
+              reason = "Calm/Sierra harvest"
+            ))
+        case _ => None
       }
       .distinct
 
