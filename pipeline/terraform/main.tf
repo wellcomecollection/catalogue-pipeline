@@ -84,7 +84,7 @@ module "catalogue_pipeline_2021-07-13" {
   pipeline_date = "2021-07-13"
   release_label = "2021-07-13"
 
-  is_reindexing = true
+  is_reindexing = false
 
   # Boilerplate that shouldn't change between pipelines.
 
@@ -119,6 +119,13 @@ module "catalogue_pipeline_2021-07-13" {
       ],
       reindex_topic = local.calm_reindexer_topic_arn,
     }
+
+    tei = {
+       topics = [
+         local.tei_adapter_topic_arn,
+       ],
+       reindex_topic = local.tei_reindexer_topic_arn,
+     }
   }
 
   aws_region = local.aws_region
@@ -145,6 +152,8 @@ module "catalogue_pipeline_2021-07-13" {
 
   # Inferrer data
   inferrer_model_data_bucket_name = aws_s3_bucket.inferrer_model_core_data.id
+
+  tei_adapter_bucket_name = local.tei_adapter_bucket_name
 
   shared_logging_secrets = data.terraform_remote_state.shared_infra.outputs.shared_secrets_logging
 
