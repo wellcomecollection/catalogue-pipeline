@@ -461,7 +461,7 @@ class MetsDataTest
           AccessCondition(
             method = AccessMethod.ViewOnline,
             status = Some(AccessStatus.Restricted),
-            note = Some("Please ask nicely")
+            terms = Some("Please ask nicely")
           )
         )
     }

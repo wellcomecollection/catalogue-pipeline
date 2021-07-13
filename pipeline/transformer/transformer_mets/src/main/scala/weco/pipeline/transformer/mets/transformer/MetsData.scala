@@ -13,7 +13,7 @@ import weco.catalogue.internal_model.work.DeletedReason.DeletedFromSource
 import weco.catalogue.internal_model.work.InvisibilityReason.MetsWorksAreNotVisible
 import weco.catalogue.internal_model.work.{Item, MergeCandidate, Work, WorkData}
 import weco.pipeline.transformer.identifiers.SourceIdentifierValidation._
-import weco.pipeline.transformer.mets.transformers.MetsAccessStatus
+import weco.pipeline.transformer.mets.transformers.{MetsAccessStatus, MetsLocation}
 
 case class MetsData(
   recordIdentifier: String,
@@ -43,12 +43,18 @@ case class MetsData(
         for {
           license <- parseLicense
           accessStatus <- MetsAccessStatus(accessConditionStatus)
+          location = MetsLocation(
+            recordIdentifier = recordIdentifier,
+            license = license,
+            accessStatus = accessStatus,
+            accessConditionUsage = accessConditionUsage
+          )
           item = Item[IdState.Unminted](
             id = IdState.Unidentifiable,
-            locations = List(digitalLocation(license, accessStatus))
+            locations = List(location)
           )
-        } yield
-          Work.Invisible[Source](
+
+          work = Work.Invisible[Source](
             version = version,
             state = Source(sourceIdentifier, modifiedTime),
             data = WorkData[DataState.Unidentified](
@@ -56,10 +62,11 @@ case class MetsData(
               mergeCandidates = List(mergeCandidate),
               thumbnail =
                 thumbnail(sourceIdentifier.value, license, accessStatus),
-              imageData = imageData(version, license, accessStatus)
+              imageData = imageData(version, license, accessStatus, location)
             ),
             invisibilityReasons = List(MetsWorksAreNotVisible)
           )
+        } yield work
     }
   }
 
@@ -82,33 +89,6 @@ case class MetsData(
     ),
     reason = "METS work"
   )
-
-  private def digitalLocation(
-    license: Option[License],
-    accessStatus: Option[AccessStatus]
-  ) =
-    DigitalLocation(
-      url =
-        s"https://iiif.wellcomecollection.org/presentation/v2/$recordIdentifier",
-      locationType = LocationType.IIIFPresentationAPI,
-      license = license,
-      accessConditions = accessConditions(accessStatus)
-    )
-
-  private def accessConditions(
-    accessStatus: Option[AccessStatus]
-  ): List[AccessCondition] =
-    (accessStatus, accessConditionUsage) match {
-      case (None, None) => Nil
-      case _ =>
-        List(
-          AccessCondition(
-            method = AccessMethod.ViewOnline,
-            status = accessStatus,
-            note = accessConditionUsage
-          )
-        )
-    }
 
   private def parseLicense: Either[Exception, Option[License]] =
     accessConditionDz.map {
@@ -181,7 +161,8 @@ case class MetsData(
   private def imageData(
     version: Int,
     license: Option[License],
-    accessStatus: Option[AccessStatus]
+    accessStatus: Option[AccessStatus],
+    manifestLocation: DigitalLocation
   ): List[ImageData[IdState.Identifiable]] =
     if (accessStatus.exists(_.hasRestrictions)) {
       Nil
@@ -201,9 +182,9 @@ case class MetsData(
                   url = url,
                   locationType = LocationType.IIIFImageAPI,
                   license = license,
-                  accessConditions = accessConditions(accessStatus)
+                  accessConditions = manifestLocation.accessConditions
                 ),
-                digitalLocation(license, accessStatus)
+                manifestLocation
               )
             )
           }
