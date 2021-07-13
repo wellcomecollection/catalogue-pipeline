@@ -134,7 +134,7 @@ module "pipeline_storage_secrets_catalogue" {
   source = "github.com/wellcomecollection/terraform-aws-secrets?ref=v1.0.1"
 
   providers = {
-    aws= aws.catalogue
+    aws = aws.catalogue
   }
 
   key_value_map = {

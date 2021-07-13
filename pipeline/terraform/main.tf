@@ -121,11 +121,11 @@ module "catalogue_pipeline_2021-07-13" {
     }
 
     tei = {
-       topics = [
-         local.tei_adapter_topic_arn,
-       ],
-       reindex_topic = local.tei_reindexer_topic_arn,
-     }
+      topics = [
+        local.tei_adapter_topic_arn,
+      ],
+      reindex_topic = local.tei_reindexer_topic_arn,
+    }
   }
 
   aws_region = local.aws_region
