@@ -74,7 +74,7 @@ module "catalogue_pipeline_2021-06-27" {
     aws.catalogue = aws.catalogue
   }
 
-  logging_cluster_id = local.logging_cluster_id
+  logging_cluster_id      = local.logging_cluster_id
   tei_adapter_bucket_name = local.tei_adapter_bucket_name
 }
 
@@ -154,7 +154,7 @@ module "catalogue_pipeline_2021-07-06" {
     aws.catalogue = aws.catalogue
   }
 
-  logging_cluster_id = local.logging_cluster_id
+  logging_cluster_id      = local.logging_cluster_id
   tei_adapter_bucket_name = local.tei_adapter_bucket_name
 }
 

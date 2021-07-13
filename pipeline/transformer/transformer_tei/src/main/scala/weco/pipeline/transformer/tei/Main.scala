@@ -9,7 +9,11 @@ import weco.catalogue.internal_model.work.WorkState.Source
 import weco.elasticsearch.typesafe.ElasticBuilder
 import weco.messaging.sns.{NotificationMessage, SNSConfig}
 import weco.pipeline.transformer.tei.service.TeiTransformerWorker
-import weco.pipeline_storage.typesafe.{ElasticIndexerBuilder, ElasticSourceRetrieverBuilder, PipelineStorageStreamBuilder}
+import weco.pipeline_storage.typesafe.{
+  ElasticIndexerBuilder,
+  ElasticSourceRetrieverBuilder,
+  PipelineStorageStreamBuilder
+}
 import weco.typesafe.WellcomeTypesafeApp
 import weco.json.JsonUtil._
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
@@ -29,12 +33,11 @@ object Main extends WellcomeTypesafeApp {
 
     val esClient = ElasticBuilder.buildElasticClient(config)
 
-  val retriever = ElasticSourceRetrieverBuilder.apply[Work[Source]](config, esClient)
+    val retriever =
+      ElasticSourceRetrieverBuilder.apply[Work[Source]](config, esClient)
     val store = S3TypedStore[String]
     val messageSender = SNSBuilder
-      .buildSNSMessageSender(
-        config,
-        subject = "Sent from the TEI transformer")
+      .buildSNSMessageSender(config, subject = "Sent from the TEI transformer")
     val pipelineStream = PipelineStorageStreamBuilder
       .buildPipelineStorageStream(
         sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
@@ -45,6 +48,9 @@ object Main extends WellcomeTypesafeApp {
         ),
         messageSender = messageSender
       )(config)
-    new TeiTransformerWorker[SNSConfig](new TeiTransformer(store), retriever ,pipelineStream)
+    new TeiTransformerWorker[SNSConfig](
+      new TeiTransformer(store),
+      retriever,
+      pipelineStream)
   }
 }
