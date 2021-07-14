@@ -39,12 +39,12 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
     */
   def apply(bibId: SierraBibNumber,
             bibData: SierraBibData,
-            itemDataMap: Map[SierraItemNumber, SierraItemData])
+            itemDataEntries: Seq[SierraItemData])
     : List[Item[IdState.Identifiable]] = {
     val visibleItems =
-      itemDataMap
-        .filterNot {
-          case (_, itemData) => itemData.deleted || itemData.suppressed
+      itemDataEntries
+        .filterNot { itemData =>
+          itemData.deleted || itemData.suppressed
         }
 
     SierraPhysicalItemOrder(
@@ -55,7 +55,7 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
 
   private def getPhysicalItems(
     bibId: SierraBibNumber,
-    sierraItemDataMap: Map[SierraItemNumber, SierraItemData],
+    itemDataEntries: Seq[SierraItemData],
     bibData: SierraBibData): List[Item[IdState.Identifiable]] = {
 
     // Some of the Sierra items have a location like "contained in above"
@@ -68,8 +68,8 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
     // We assume that "in above" refers to another item on the same bib, so if the
     // non-above locations are unambiguous, we use them instead.
     val otherLocations =
-      sierraItemDataMap
-        .collect { case (id, itemData) => id -> itemData.location }
+      itemDataEntries
+        .map { itemData => itemData.id -> itemData.location }
         .collect { case (id, Some(location)) => id -> location }
         .filterNot {
           case (_, loc) =>
@@ -85,7 +85,6 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
               case other => (other, loc.name)
             }
         }
-        .toSeq
         .distinct
 
     val fallbackLocation = otherLocations match {
@@ -93,17 +92,16 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
       case _                                => None
     }
 
-    sierraItemDataMap.values
+    itemDataEntries
       .foreach { itemData =>
         require(!itemData.deleted)
         require(!itemData.suppressed)
       }
 
-    val items = sierraItemDataMap.map {
-      case (itemId, itemData) =>
+    val items = itemDataEntries.map { itemData =>
         transformItemData(
           bibId = bibId,
-          itemId = itemId,
+          itemId = itemData.id,
           itemData = itemData,
           bibData = bibData,
           fallbackLocation = fallbackLocation

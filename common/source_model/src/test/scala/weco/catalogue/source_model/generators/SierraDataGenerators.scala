@@ -2,17 +2,10 @@ package weco.catalogue.source_model.generators
 
 import weco.catalogue.internal_model.generators.IdentifiersGenerators
 import weco.catalogue.source_model
+import weco.catalogue.source_model.sierra.identifiers.SierraItemNumber
 import weco.catalogue.source_model.sierra.marc.{FixedField, VarField}
-import weco.catalogue.source_model.sierra.source.{
-  SierraMaterialType,
-  SierraSourceLanguage,
-  SierraSourceLocation
-}
-import weco.catalogue.source_model.sierra.{
-  SierraBibData,
-  SierraItemData,
-  SierraOrderData
-}
+import weco.catalogue.source_model.sierra.source.{SierraMaterialType, SierraSourceLanguage, SierraSourceLocation}
+import weco.catalogue.source_model.sierra.{SierraBibData, SierraItemData, SierraOrderData}
 
 trait SierraDataGenerators extends IdentifiersGenerators with SierraGenerators {
   def createSierraBibDataWith(
@@ -31,13 +24,15 @@ trait SierraDataGenerators extends IdentifiersGenerators with SierraGenerators {
   def createSierraBibData: SierraBibData = createSierraBibDataWith()
 
   def createSierraItemDataWith(
-    location: Option[SierraSourceLocation] = None,
-    copyNo: Option[Int] = None,
-    holdCount: Option[Int] = Some(0),
-    fixedFields: Map[String, FixedField] = Map(),
-    varFields: List[VarField] = Nil
+                                id: SierraItemNumber = createSierraItemNumber,
+                                location: Option[SierraSourceLocation] = None,
+                                copyNo: Option[Int] = None,
+                                holdCount: Option[Int] = Some(0),
+                                fixedFields: Map[String, FixedField] = Map(),
+                                varFields: List[VarField] = Nil
   ): SierraItemData =
     SierraItemData(
+      id = id,
       location = location,
       copyNo = copyNo,
       holdCount = holdCount,

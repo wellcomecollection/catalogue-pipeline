@@ -20,6 +20,7 @@ object WellcomeDependencies {
     name = "internal_model",
     version = versions.internalModel
   )
+
   val jsonLibrary: Seq[ModuleID] = library(
     name = "json",
     version = versions.json

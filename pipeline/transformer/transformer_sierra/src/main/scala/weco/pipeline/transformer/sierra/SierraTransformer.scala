@@ -10,13 +10,11 @@ import weco.catalogue.source_model.sierra._
 import weco.catalogue.source_model.sierra.identifiers._
 import weco.json.JsonUtil._
 import weco.json.exceptions.JsonDecodingError
-import weco.pipeline.transformer.sierra.exceptions.{
-  ShouldNotTransformException,
-  SierraTransformerException
-}
+import weco.pipeline.transformer.sierra.exceptions.{ShouldNotTransformException, SierraTransformerException}
 import weco.pipeline.transformer.sierra.transformers._
-
 import java.time.Instant
+
+import scala.collection.immutable
 import scala.util.{Failure, Success, Try}
 
 class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
@@ -119,7 +117,7 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
           bibData = bibData,
           hasItems = hasItems,
           orderDataMap) ++
-          SierraItems(bibId, bibData, itemDataMap) ++
+          SierraItems(bibId, bibData, itemDataEntries) ++
           SierraElectronicResources(bibId, varFields = bibData.varFields),
       holdings = SierraHoldings(bibId, holdingsDataMap),
       referenceNumber = SierraReferenceNumber(bibData)
@@ -136,18 +134,17 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
   lazy val hasItems: Boolean =
     sierraTransformable.itemRecords.nonEmpty
 
-  lazy val itemDataMap: Map[SierraItemNumber, SierraItemData] =
+  lazy val itemDataEntries: Seq[SierraItemData] =
     sierraTransformable.itemRecords
-      .map { case (id, itemRecord) => (id, itemRecord.data) }
-      .map {
-        case (id, jsonString) =>
-          fromJson[SierraItemData](jsonString) match {
-            case Success(data) => id -> data
+      .map { case (_, itemRecord) =>
+          fromJson[SierraItemData](itemRecord.data) match {
+            case Success(itemData) => itemData
             case Failure(_) =>
               throw SierraTransformerException(
-                s"Unable to parse item data for $id as JSON: <<$jsonString>>")
+                s"Unable to parse item data for ${itemRecord.id} as JSON: <<${itemRecord.data}>>")
           }
       }
+      .toSeq
 
   lazy val holdingsDataMap: Map[SierraHoldingsNumber, SierraHoldingsData] =
     sierraTransformable.holdingsRecords

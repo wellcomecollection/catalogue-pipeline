@@ -1,9 +1,11 @@
 package weco.catalogue.source_model.sierra
 
+import weco.catalogue.source_model.sierra.identifiers.SierraItemNumber
 import weco.catalogue.source_model.sierra.marc.{FixedField, VarField}
 import weco.catalogue.source_model.sierra.source.SierraSourceLocation
 
 case class SierraItemData(
+  id: SierraItemNumber,
   deleted: Boolean = false,
   suppressed: Boolean = false,
   copyNo: Option[Int] = None,
