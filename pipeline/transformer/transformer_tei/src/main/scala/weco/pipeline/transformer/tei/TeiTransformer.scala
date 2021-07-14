@@ -5,11 +5,7 @@ import weco.catalogue.internal_model.identifiers.{
   SourceIdentifier
 }
 import weco.catalogue.internal_model.work.WorkState.Source
-import weco.catalogue.internal_model.work.{
-  DeletedReason,
-  Work,
-  WorkState
-}
+import weco.catalogue.internal_model.work.{DeletedReason, Work, WorkState}
 import weco.catalogue.source_model.tei.{
   TeiChangedMetadata,
   TeiDeletedMetadata,
