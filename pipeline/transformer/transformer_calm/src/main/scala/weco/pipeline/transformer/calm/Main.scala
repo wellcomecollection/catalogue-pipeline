@@ -48,7 +48,7 @@ object Main extends WellcomeTypesafeApp with AWSClientConfigBuilder {
             subject = "Sent from the CALM transformer")
       )(config)
 
-    implicit val s3Client: AmazonS3 = S3Builder.buildS3Client(config)
+    implicit val s3Client: AmazonS3 = S3Builder.buildS3Client
 
     new CalmTransformerWorker(
       pipelineStream = pipelineStream,

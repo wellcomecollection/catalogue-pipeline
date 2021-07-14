@@ -48,8 +48,7 @@ object Main extends WellcomeTypesafeApp {
             subject = "Sent from the Sierra transformer")
       )(config)
 
-    implicit val s3Client: AmazonS3 =
-      S3Builder.buildS3Client(config)
+    implicit val s3Client: AmazonS3 = S3Builder.buildS3Client
 
     new SierraTransformerWorker(
       pipelineStream = pipelineStream,

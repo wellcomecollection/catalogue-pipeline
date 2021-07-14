@@ -81,7 +81,7 @@ object Main extends WellcomeTypesafeApp {
     format: DynamoFormat[Id]
   ): LinkStore[Id, Record] = {
     implicit val dynamoClient: DynamoDbClient =
-      DynamoBuilder.buildDynamoClient(config)
+      DynamoBuilder.buildDynamoClient
 
     val versionedStore =
       new DynamoSingleVersionStore[Id, Link](
