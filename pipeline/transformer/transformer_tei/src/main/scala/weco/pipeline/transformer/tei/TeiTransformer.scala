@@ -8,7 +8,6 @@ import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.work.{
   DeletedReason,
   Work,
-  WorkData,
   WorkState
 }
 import weco.catalogue.source_model.tei.{
