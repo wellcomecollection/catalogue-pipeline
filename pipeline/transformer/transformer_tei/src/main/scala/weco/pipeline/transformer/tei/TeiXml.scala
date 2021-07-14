@@ -141,7 +141,7 @@ class TeiXml(xml: Elem) extends Logging {
     *            <msItem xml:id="MS_Arabic_1-item1">
     *              <title xml:lang="ar-Latn-x-lc" key="work_3001">Al-Qānūn fī al-ṭibb</title>
     * extract the title from titleStmt, so "Wellcome Library" in the example.
-   */
+    */
   private def getTitleFromTitleStmt = {
     val nodes =
       (xml \ "teiHeader" \ "fileDesc" \ "titleStmt" \ "title").toList
