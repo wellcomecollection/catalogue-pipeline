@@ -52,7 +52,11 @@ class TeiTransformerWorkerTest
     implicit store: MemoryTypedStore[S3ObjectLocation, String]
   ): TeiSourcePayload = {
     val xmlString =
-      teiXml(id,title = titleElem(title), identifiers = Some(sierraIdentifiers(bnumber)), summary = Some(summary(description)))
+      teiXml(
+        id,
+        title = titleElem(title),
+        identifiers = Some(sierraIdentifiers(bnumber)),
+        summary = Some(summary(description)))
         .toString()
 
     val location = S3ObjectLocation(

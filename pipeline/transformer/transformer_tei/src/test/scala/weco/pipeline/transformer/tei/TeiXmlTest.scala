@@ -47,18 +47,23 @@ class TeiXmlTest extends AnyFunSpec with Matchers with TeiGenerators {
     result.right.get shouldBe titleString
   }
 
-  it("doesn't get the title from the item if there's more than one"){
+  it("doesn't get the title from the item if there's more than one") {
     val titleString = "This is the title"
     val item1 = msItem("id1", List(itemTitle("itemTitle1")))
     val item2 = msItem("id2", List(itemTitle("itemTitle2")))
     val result =
-      TeiXml(id, teiXml(id = id, title = titleElem(titleString), items = List(item1, item2)).toString())
+      TeiXml(
+        id,
+        teiXml(
+          id = id,
+          title = titleElem(titleString),
+          items = List(item1, item2)).toString())
         .flatMap(_.title)
     result shouldBe a[Right[_, _]]
     result.right.get shouldBe titleString
   }
 
-  it("picks the title with type=original if there's more than one in the item"){
+  it("picks the title with type=original if there's more than one in the item") {
     val titleString = "This is the title"
     val title = itemTitle("this is not the title")
     val originalTitle = originalItemTitle(titleString)
@@ -74,7 +79,8 @@ class TeiXmlTest extends AnyFunSpec with Matchers with TeiGenerators {
     result.right.get shouldBe titleString
   }
 
-  it("falls back if there's more than one title in the item and none have type=original"){
+  it(
+    "falls back if there's more than one title in the item and none have type=original") {
     val title = itemTitle("this is not the title")
     val secondTitle = itemTitle("this is not the title either")
     val titleString = "this is the title"
@@ -90,7 +96,7 @@ class TeiXmlTest extends AnyFunSpec with Matchers with TeiGenerators {
     result.right.get shouldBe titleString
   }
 
-  it("falls back if there's more than one title with type=original"){
+  it("falls back if there's more than one title with type=original") {
     val firstItemTitle = originalItemTitle("this is not the title")
     val secondItemTitle = originalItemTitle("this is not the title either")
     val validTitle = "this is the title"
@@ -142,7 +148,11 @@ class TeiXmlTest extends AnyFunSpec with Matchers with TeiGenerators {
 
   it("fails if it cannot parse the language id") {
     val languageLabel = "Sanskrit"
-    val result = TeiXml(id, teiXml(id = id, languages = List(<textLang>{
+    val result = TeiXml(
+      id,
+      teiXml(
+        id = id,
+        languages = List(<textLang>{
       languageLabel
     }</textLang>)).toString()).flatMap(_.languages)
     result shouldBe a[Left[_, _]]

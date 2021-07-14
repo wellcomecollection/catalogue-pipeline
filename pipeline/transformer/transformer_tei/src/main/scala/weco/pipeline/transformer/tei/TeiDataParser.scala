@@ -1,7 +1,10 @@
 package weco.pipeline.transformer.tei
 
 import weco.catalogue.internal_model.identifiers.DataState.Unidentified
-import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  IdentifierType,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.work.{MergeCandidate, Work, WorkData}
@@ -15,11 +18,15 @@ object TeiDataParser {
       summary <- teiXml.summary
       bNumber <- teiXml.bNumber
       title <- teiXml.title
-    languages <- teiXml.languages
+      languages <- teiXml.languages
     } yield TeiData(teiXml.id, title, bNumber, summary, languages)
 }
 
-case class TeiData(id: String, title: String, bNumber: Option[String], description: Option[String], languages: List[Language]) {
+case class TeiData(id: String,
+                   title: String,
+                   bNumber: Option[String],
+                   description: Option[String],
+                   languages: List[Language]) {
   def toWork(time: Instant, version: Int): Work[Source] = {
     val maybeBnumber = bNumber
       .flatMap { id =>
