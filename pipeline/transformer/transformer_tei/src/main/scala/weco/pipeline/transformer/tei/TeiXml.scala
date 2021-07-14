@@ -74,51 +74,16 @@ class TeiXml(xml: Elem) extends Logging {
   }
 
   /**
+    * The languages of the TEI are in `textLang` nodes under `msContents`.
+    * <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id={id}>
+    *  <teiHeader>
+    *    <fileDesc>
+    *      <sourceDesc>
+    *        <msDesc xml:lang="en" xml:id="MS_Arabic_1">
+    *          <msContents>
+    *            <textLang mainLang={id} source="IANA">{label}</textLang>
     *
     */
-  def title: Either[Throwable, String] = {
-    val msItemNodes = (xml \\ "msDesc" \ "msContents" \ "msItem").toList
-    msItemNodes match {
-      case List(itemNode) if (itemNode \ "title").nonEmpty =>
-        getTitleFromSingleItem(itemNode).left.flatMap { ex =>
-          warn("Not able to extract title from item", ex)
-          getTitleFromTeiHeader
-        }
-      case _ =>
-        getTitleFromTeiHeader
-    }
-  }
-
-  private def getTitleFromTeiHeader = {
-    val nodes =
-      (xml \ "teiHeader" \ "fileDesc" \ "titleStmt" \ "title").toList
-    val maybeTitles = nodes.filter(n => n.attributes.isEmpty)
-    maybeTitles match {
-      case List(titleNode) => Right(titleNode.text)
-      case Nil             => Left(new RuntimeException("No title found!"))
-      case _               => Left(new RuntimeException("More than one title node!"))
-    }
-  }
-
-  private def getTitleFromSingleItem(itemNode: Node) = {
-    val titleNodes = (itemNode \ "title").toList
-    titleNodes match {
-      case List(titleNode) => Right(titleNode.text)
-      case list =>
-        list.filter(n => (n \@ "type").toLowerCase == "original") match {
-          case List(singleNode) => Right(singleNode.text)
-          case Nil =>
-            Left(
-              new RuntimeException(
-                s"Cannot find original title in msItem $titleNodes"))
-          case _ =>
-            Left(
-              new RuntimeException(
-                s"Multiple titles with type original msItem $titleNodes"))
-        }
-    }
-  }
-
   def languages: Either[Throwable, List[Language]] = {
     val nodes = (xml \\ "msDesc" \ "msContents" \ "textLang").toList
 
@@ -143,6 +108,83 @@ class TeiXml(xml: Elem) extends Logging {
       langId.map(id => Language(id, langText))
     }
     eitherLanguages.sequence
+  }
+
+  /**
+    * If the Tei has a single msItem node under msContents, we get the title from that
+    * Otherwise we get the title from the titleStmt
+    */
+  def title: Either[Throwable, String] = {
+    val msItemNodes = (xml \\ "msDesc" \ "msContents" \ "msItem").toList
+    msItemNodes match {
+      case List(itemNode) if (itemNode \ "title").nonEmpty =>
+        getTitleFromSingleItem(itemNode).left.flatMap { ex =>
+          warn("Not able to extract title from item", ex)
+          getTitleFromTitleStmt
+        }
+      case _ =>
+        getTitleFromTitleStmt
+    }
+  }
+
+  /**
+    * In an XML like this:
+    * <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id="manuscript_15651">
+    *  <teiHeader>
+    *    <fileDesc>
+    *      <titleStmt>
+    *        <title>Wellcome Library</title>
+    *      </titleStmt>
+    *      <sourceDesc>
+    *        <msDesc xml:lang="en" xml:id="MS_Arabic_1">
+    *          <msContents>
+    *            <msItem xml:id="MS_Arabic_1-item1">
+    *              <title xml:lang="ar-Latn-x-lc" key="work_3001">Al-Qānūn fī al-ṭibb</title>
+    * extract the title from titleStmt, so "Wellcome Library" in the example.
+   */
+  private def getTitleFromTitleStmt = {
+    val nodes =
+      (xml \ "teiHeader" \ "fileDesc" \ "titleStmt" \ "title").toList
+    val maybeTitles = nodes.filter(n => n.attributes.isEmpty)
+    maybeTitles match {
+      case List(titleNode) => Right(titleNode.text)
+      case Nil             => Left(new RuntimeException("No title found!"))
+      case _               => Left(new RuntimeException("More than one title node!"))
+    }
+  }
+
+  /**
+    * In an XML like this:
+    * <TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id="manuscript_15651">
+    *  <teiHeader>
+    *    <fileDesc>
+    *      <titleStmt>
+    *        <title>Wellcome Library</title>
+    *      </titleStmt>
+    *      <sourceDesc>
+    *        <msDesc xml:lang="en" xml:id="MS_Arabic_1">
+    *          <msContents>
+    *            <msItem xml:id="MS_Arabic_1-item1">
+    *              <title xml:lang="ar-Latn-x-lc" key="work_3001">Al-Qānūn fī al-ṭibb</title>
+    * extract the title from the msItem, so "Al-Qānūn fī al-ṭibb" in the example.
+    */
+  private def getTitleFromSingleItem(itemNode: Node) = {
+    val titleNodes = (itemNode \ "title").toList
+    titleNodes match {
+      case List(titleNode) => Right(titleNode.text)
+      case list =>
+        list.filter(n => (n \@ "type").toLowerCase == "original") match {
+          case List(singleNode) => Right(singleNode.text)
+          case Nil =>
+            Left(
+              new RuntimeException(
+                s"Cannot find original title in msItem $titleNodes"))
+          case _ =>
+            Left(
+              new RuntimeException(
+                s"Multiple titles with type original msItem $titleNodes"))
+        }
+    }
   }
 }
 
