@@ -63,7 +63,6 @@ class TeiTransformerTest
     transformer(id, TeiDeletedMetadata(timeModified), 1) shouldBe Right(
       Work.Deleted[Source](
         version = 1,
-        data = WorkData[Unidentified](),
         state = Source(sourceIdentifier, timeModified),
         deletedReason = DeletedReason.DeletedFromSource("Deleted by TEI source")
       )

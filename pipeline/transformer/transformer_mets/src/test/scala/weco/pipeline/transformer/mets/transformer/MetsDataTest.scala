@@ -81,7 +81,6 @@ class MetsDataTest
     metsData.toWork(version, createdDate).right.get shouldBe Work
       .Deleted[Source](
         version = version,
-        data = WorkData[DataState.Unidentified](),
         state = Source(expectedSourceIdentifier, createdDate),
         deletedReason = DeletedFromSource("Mets")
       )

@@ -82,7 +82,6 @@ class MiroRecordTransformer
       Success(
         Work.Deleted[Source](
           version = version,
-          data = WorkData(),
           state = state,
           deletedReason =
             SuppressedFromSource("Miro: isClearedForCatalogueAPI = false")
@@ -97,7 +96,6 @@ class MiroRecordTransformer
       Success(
         Work.Deleted[Source](
           version = version,
-          data = WorkData(),
           state = state,
           deletedReason = SuppressedFromSource(
             s"Miro: image_copyright_cleared = ${originalMiroRecord.copyrightCleared
@@ -137,7 +135,6 @@ class MiroRecordTransformer
         case e: ShouldSuppressException =>
           Work.Deleted[Source](
             version = version,
-            data = WorkData(),
             state = state,
             deletedReason = SuppressedFromSource(s"Miro: ${e.getMessage}")
           )

@@ -63,15 +63,13 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
           Work.Deleted[Source](
             version = version,
             state = state,
-            deletedReason = DeletedFromSource("Sierra"),
-            data = WorkData()
+            deletedReason = DeletedFromSource("Sierra")
           )
         } else if (bibData.suppressed) {
           Work.Deleted[Source](
             version = version,
             state = state,
-            deletedReason = SuppressedFromSource("Sierra"),
-            data = WorkData()
+            deletedReason = SuppressedFromSource("Sierra")
           )
         } else {
           Work.Visible[Source](

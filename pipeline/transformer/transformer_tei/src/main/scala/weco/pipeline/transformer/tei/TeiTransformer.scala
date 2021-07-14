@@ -39,7 +39,6 @@ class TeiTransformer(store: Store[S3ObjectLocation, String])
     Right(
       Work.Deleted[Source](
         version = version,
-        data = WorkData(),
         state = Source(SourceIdentifier(IdentifierType.Tei, "Work", id), time),
         deletedReason = DeletedReason.DeletedFromSource("Deleted by TEI source")
       ))

@@ -585,7 +585,6 @@ class CalmTransformerTest
     )
     CalmTransformer(record, version) shouldBe Right(
       Work.Deleted[Source](
-        data = WorkData(),
         state = Source(
           SourceIdentifier(
             value = record.id,
