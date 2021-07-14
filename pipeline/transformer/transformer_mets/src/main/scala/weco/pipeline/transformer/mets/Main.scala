@@ -11,7 +11,11 @@ import weco.json.JsonUtil._
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.pipeline.transformer.mets.services.MetsTransformerWorker
-import weco.pipeline_storage.typesafe.{ElasticIndexerBuilder, ElasticSourceRetrieverBuilder, PipelineStorageStreamBuilder}
+import weco.pipeline_storage.typesafe.{
+  ElasticIndexerBuilder,
+  ElasticSourceRetrieverBuilder,
+  PipelineStorageStreamBuilder
+}
 import weco.storage.store.s3.S3TypedStore
 import weco.storage.typesafe.S3Builder
 import weco.typesafe.WellcomeTypesafeApp
