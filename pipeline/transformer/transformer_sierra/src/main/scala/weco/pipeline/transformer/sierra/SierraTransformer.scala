@@ -10,7 +10,10 @@ import weco.catalogue.source_model.sierra._
 import weco.catalogue.source_model.sierra.identifiers._
 import weco.json.JsonUtil._
 import weco.json.exceptions.JsonDecodingError
-import weco.pipeline.transformer.sierra.exceptions.{ShouldNotTransformException, SierraTransformerException}
+import weco.pipeline.transformer.sierra.exceptions.{
+  ShouldNotTransformException,
+  SierraTransformerException
+}
 import weco.pipeline.transformer.sierra.transformers._
 import java.time.Instant
 
@@ -135,16 +138,15 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
     sierraTransformable.itemRecords.nonEmpty
 
   lazy val itemDataEntries: Seq[SierraItemData] =
-    sierraTransformable.itemRecords
-      .map { case (_, itemRecord) =>
-          fromJson[SierraItemData](itemRecord.data) match {
-            case Success(itemData) => itemData
-            case Failure(_) =>
-              throw SierraTransformerException(
-                s"Unable to parse item data for ${itemRecord.id} as JSON: <<${itemRecord.data}>>")
-          }
-      }
-      .toSeq
+    sierraTransformable.itemRecords.map {
+      case (_, itemRecord) =>
+        fromJson[SierraItemData](itemRecord.data) match {
+          case Success(itemData) => itemData
+          case Failure(_) =>
+            throw SierraTransformerException(
+              s"Unable to parse item data for ${itemRecord.id} as JSON: <<${itemRecord.data}>>")
+        }
+    }.toSeq
 
   lazy val holdingsDataMap: Map[SierraHoldingsNumber, SierraHoldingsData] =
     sierraTransformable.holdingsRecords

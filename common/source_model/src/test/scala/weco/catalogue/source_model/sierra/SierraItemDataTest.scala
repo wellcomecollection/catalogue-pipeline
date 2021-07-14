@@ -4,7 +4,11 @@ import org.scalatest.TryValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.source_model.sierra.identifiers.SierraItemNumber
-import weco.catalogue.source_model.sierra.marc.{FixedField, MarcSubfield, VarField}
+import weco.catalogue.source_model.sierra.marc.{
+  FixedField,
+  MarcSubfield,
+  VarField
+}
 import weco.json.JsonUtil._
 
 class SierraItemDataTest extends AnyFunSpec with Matchers with TryValues {
@@ -51,22 +55,23 @@ class SierraItemDataTest extends AnyFunSpec with Matchers with TryValues {
       location = None,
       fixedFields = Map(
         "57" -> FixedField(
-          label="BIB HOLD",
-          value="false",
-          display=None
+          label = "BIB HOLD",
+          value = "false",
+          display = None
         )
       ),
-      varFields = List(VarField(
-        content = None,
-        marcTag = Some("949"),
-        fieldTag = Some("a"),
-        indicator1 = Some("0"),
-        indicator2 = Some("0"),
-        subfields = List(
-          MarcSubfield("1","STAX"),
-          MarcSubfield("2","sepam")
+      varFields = List(
+        VarField(
+          content = None,
+          marcTag = Some("949"),
+          fieldTag = Some("a"),
+          indicator1 = Some("0"),
+          indicator2 = Some("0"),
+          subfields = List(
+            MarcSubfield("1", "STAX"),
+            MarcSubfield("2", "sepam")
+          )
         ))
-      )
     )
   }
 }

@@ -37,10 +37,10 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
     * sierra-identifier.  We want to revisit this at some point.
     * See https://github.com/wellcomecollection/platform/issues/4993
     */
-  def apply(bibId: SierraBibNumber,
-            bibData: SierraBibData,
-            itemDataEntries: Seq[SierraItemData])
-    : List[Item[IdState.Identifiable]] = {
+  def apply(
+    bibId: SierraBibNumber,
+    bibData: SierraBibData,
+    itemDataEntries: Seq[SierraItemData]): List[Item[IdState.Identifiable]] = {
     val visibleItems =
       itemDataEntries
         .filterNot { itemData =>
@@ -69,7 +69,9 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
     // non-above locations are unambiguous, we use them instead.
     val otherLocations =
       itemDataEntries
-        .map { itemData => itemData.id -> itemData.location }
+        .map { itemData =>
+          itemData.id -> itemData.location
+        }
         .collect { case (id, Some(location)) => id -> location }
         .filterNot {
           case (_, loc) =>
@@ -99,13 +101,13 @@ object SierraItems extends Logging with SierraLocation with SierraQueryOps {
       }
 
     val items = itemDataEntries.map { itemData =>
-        transformItemData(
-          bibId = bibId,
-          itemId = itemData.id,
-          itemData = itemData,
-          bibData = bibData,
-          fallbackLocation = fallbackLocation
-        )
+      transformItemData(
+        bibId = bibId,
+        itemId = itemData.id,
+        itemData = itemData,
+        bibData = bibData,
+        fallbackLocation = fallbackLocation
+      )
     }.toList
 
     tidyTitles(items)
