@@ -43,8 +43,8 @@ sealed trait Work[State <: WorkState] {
         })
       case Work.Invisible(version, _, _, invisibilityReasons) =>
         Work.Invisible(version, outData, outState, invisibilityReasons)
-      case Work.Deleted(version, _, _, deletedReason) =>
-        Work.Deleted(version, outData, outState, deletedReason)
+      case Work.Deleted(version, _, deletedReason) =>
+        Work.Deleted(version, outState, deletedReason)
       case Work.Redirected(version, redirectTarget, _) =>
         Work.Redirected(version, transition.redirect(redirectTarget), outState)
     }
@@ -77,10 +77,11 @@ object Work {
 
   case class Deleted[State <: WorkState](
     version: Int,
-    data: WorkData[State#WorkDataState],
     state: State,
     deletedReason: DeletedReason,
-  ) extends Work[State]
+  ) extends Work[State] {
+    val data: WorkData[State#WorkDataState] = WorkData[State#WorkDataState]()
+  }
 }
 
 /** WorkData contains data common to all types of works that can exist at any

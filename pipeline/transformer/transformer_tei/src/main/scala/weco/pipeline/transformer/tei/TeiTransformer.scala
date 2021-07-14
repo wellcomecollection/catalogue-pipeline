@@ -5,12 +5,7 @@ import weco.catalogue.internal_model.identifiers.{
   SourceIdentifier
 }
 import weco.catalogue.internal_model.work.WorkState.Source
-import weco.catalogue.internal_model.work.{
-  DeletedReason,
-  Work,
-  WorkData,
-  WorkState
-}
+import weco.catalogue.internal_model.work.{DeletedReason, Work, WorkState}
 import weco.catalogue.source_model.tei.{
   TeiChangedMetadata,
   TeiDeletedMetadata,
@@ -39,7 +34,6 @@ class TeiTransformer(store: Store[S3ObjectLocation, String])
     Right(
       Work.Deleted[Source](
         version = version,
-        data = WorkData(),
         state = Source(SourceIdentifier(IdentifierType.Tei, "Work", id), time),
         deletedReason = DeletedReason.DeletedFromSource("Deleted by TEI source")
       ))

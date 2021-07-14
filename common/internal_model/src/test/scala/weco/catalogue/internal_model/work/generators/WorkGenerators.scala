@@ -147,7 +147,6 @@ trait WorkGenerators extends IdentifiersGenerators with InstantGenerators {
     ): Work.Deleted[State] =
       Work.Deleted[State](
         state = work.state,
-        data = work.data,
         version = work.version,
         deletedReason = deletedReason
       )

@@ -438,7 +438,6 @@ class MiroRecordTransformerTest
         sourceModifiedTime = Instant.EPOCH
       ),
       version = 1,
-      data = WorkData(),
       deletedReason = deletedReason
     )
   }
