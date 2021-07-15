@@ -1,9 +1,8 @@
 module "sierra_transformer_queue" {
-  source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
-  queue_name      = "${local.namespace_hyphen}_sierra_transformer"
+  source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
+  queue_name      = "${local.namespace}_sierra_transformer"
   topic_arns      = local.sierra_adapter_topic_arns
   alarm_topic_arn = var.dlq_alarm_arn
-  aws_region      = var.aws_region
 }
 
 module "sierra_transformer" {
@@ -63,7 +62,7 @@ resource "aws_iam_role_policy" "sierra_transformer_vhs_sierra_adapter_read" {
 module "sierra_transformer_output_topic" {
   source = "github.com/wellcomecollection/terraform-aws-sns-topic?ref=v1.0.1"
 
-  name = "${local.namespace_hyphen}_sierra_transformer_output"
+  name = "${local.namespace}_sierra_transformer_output"
 }
 
 resource "aws_iam_role_policy" "allow_sierra_transformer_sns_publish" {
@@ -72,7 +71,7 @@ resource "aws_iam_role_policy" "allow_sierra_transformer_sns_publish" {
 }
 
 module "sierra_transformer_scaling_alarm" {
-  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.1.3"
+  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.2.1"
   queue_name = module.sierra_transformer_queue.name
 
   queue_high_actions = [module.sierra_transformer.scale_up_arn]

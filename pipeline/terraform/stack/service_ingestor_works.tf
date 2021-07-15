@@ -3,10 +3,9 @@ locals {
 }
 
 module "ingestor_works_queue" {
-  source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
-  queue_name      = "${local.namespace_hyphen}_ingestor_works"
+  source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
+  queue_name      = "${local.namespace}_ingestor_works"
   topic_arns      = [module.router_work_output_topic.arn, module.relation_embedder_output_topic.arn]
-  aws_region      = var.aws_region
   alarm_topic_arn = var.dlq_alarm_arn
 
   max_receive_count = 6
@@ -79,12 +78,12 @@ module "ingestor_works" {
 module "work_ingestor_topic" {
   source = "../modules/topic"
 
-  name       = "${local.namespace_hyphen}_work_ingestor"
+  name       = "${local.namespace}_work_ingestor"
   role_names = [module.ingestor_works.task_role_name]
 }
 
 module "ingestor_works_scaling_alarm" {
-  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.1.3"
+  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.2.1"
   queue_name = module.ingestor_works_queue.name
 
   queue_high_actions = [module.ingestor_works.scale_up_arn]

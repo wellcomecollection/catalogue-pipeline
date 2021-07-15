@@ -3,10 +3,9 @@ locals {
 }
 
 module "ingestor_images_queue" {
-  source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
-  queue_name      = "${local.namespace_hyphen}_ingestor_images"
+  source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
+  queue_name      = "${local.namespace}_ingestor_images"
   topic_arns      = [module.image_inferrer_topic.arn]
-  aws_region      = var.aws_region
   alarm_topic_arn = var.dlq_alarm_arn
 
   visibility_timeout_seconds = local.image_ingestor_flush_interval_seconds + 60
@@ -90,12 +89,12 @@ module "ingestor_images" {
 module "image_ingestor_topic" {
   source = "../modules/topic"
 
-  name       = "${local.namespace_hyphen}_image_ingestor_output"
+  name       = "${local.namespace}_image_ingestor_output"
   role_names = [module.ingestor_images.task_role_name]
 }
 
 module "ingestor_images_scaling_alarm" {
-  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.1.3"
+  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.2.1"
   queue_name = module.ingestor_images_queue.name
 
   queue_high_actions = [module.ingestor_images.scale_up_arn]
