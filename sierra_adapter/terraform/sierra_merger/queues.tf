@@ -1,5 +1,5 @@
 module "input_queue" {
-  source = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.1.2"
+  source = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
 
   queue_name = "${var.namespace}-sierra_${var.resource_type}_merger_input"
 
@@ -10,12 +10,10 @@ module "input_queue" {
   visibility_timeout_seconds = 300
 
   alarm_topic_arn = var.dlq_alarm_arn
-
-  aws_region = var.aws_region
 }
 
 module "scaling_alarm" {
-  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.1.2"
+  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//autoscaling?ref=v1.2.1"
   queue_name = module.input_queue.name
 
   queue_high_actions = [module.service.scale_up_arn]
