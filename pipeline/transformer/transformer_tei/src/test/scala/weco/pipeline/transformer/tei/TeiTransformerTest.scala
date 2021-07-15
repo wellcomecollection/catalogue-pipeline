@@ -4,13 +4,10 @@ import org.apache.commons.io.IOUtils
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.DataState.Unidentified
-import weco.catalogue.internal_model.identifiers.{
-  IdentifierType,
-  SourceIdentifier
-}
+import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.work.generators.InstantGenerators
-import weco.catalogue.internal_model.work.{DeletedReason, Work, WorkData}
+import weco.catalogue.internal_model.work.{DeletedReason, Format, Work, WorkData}
 import weco.catalogue.source_model.tei.{TeiChangedMetadata, TeiDeletedMetadata}
 import weco.storage.generators.S3ObjectLocationGenerators
 import weco.storage.s3.S3ObjectLocation
@@ -43,7 +40,8 @@ class TeiTransformerTest
         data = WorkData[Unidentified](
           title = Some("Wellcome Library"),
           description =
-            Some("1 copy of al-Qānūn fī al-ṭibb by Avicenna, 980-1037")
+            Some("1 copy of al-Qānūn fī al-ṭibb by Avicenna, 980-1037"),
+          format = Some(Format.ArchivesAndManuscripts)
         ),
         state = Source(sourceIdentifier, timeModified)
       )

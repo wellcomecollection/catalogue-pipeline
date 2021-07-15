@@ -1,13 +1,10 @@
 package weco.pipeline.transformer.tei
 
 import weco.catalogue.internal_model.identifiers.DataState.Unidentified
-import weco.catalogue.internal_model.identifiers.{
-  IdentifierType,
-  SourceIdentifier
-}
+import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
 import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.work.WorkState.Source
-import weco.catalogue.internal_model.work.{MergeCandidate, Work, WorkData}
+import weco.catalogue.internal_model.work.{Format, MergeCandidate, Work, WorkData}
 import weco.pipeline.transformer.identifiers.SourceIdentifierValidation._
 
 import java.time.Instant
@@ -44,13 +41,14 @@ case class TeiData(id: String,
         title = Some(title),
         description = description,
         mergeCandidates = maybeBnumber.toList,
-        languages = languages
+        languages = languages,
+        format = Some(Format.ArchivesAndManuscripts)
       )
     Work.Visible[Source](
-      version,
-      value,
+      version = version,
+      data = value,
       state = Source(SourceIdentifier(IdentifierType.Tei, "Work", id), time),
-      Nil
+      redirectSources = Nil
     )
   }
 }
