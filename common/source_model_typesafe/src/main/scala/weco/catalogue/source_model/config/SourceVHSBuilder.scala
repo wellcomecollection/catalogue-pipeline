@@ -23,9 +23,9 @@ import scala.language.higherKinds
 object SourceVHSBuilder {
   def build[T](config: Config, namespace: String = "vhs")(
     implicit codec: Codec[T]): SourceVHS[T] = {
-    implicit val s3Client: AmazonS3 = S3Builder.buildS3Client(config)
+    implicit val s3Client: AmazonS3 = S3Builder.buildS3Client
     implicit val dynamoClient: DynamoDbClient =
-      DynamoBuilder.buildDynamoClient(config)
+      DynamoBuilder.buildDynamoClient
 
     val dynamoConfig =
       DynamoBuilder.buildDynamoConfig(config, namespace = namespace)

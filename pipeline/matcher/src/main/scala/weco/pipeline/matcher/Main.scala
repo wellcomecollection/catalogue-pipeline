@@ -28,7 +28,7 @@ object Main extends WellcomeTypesafeApp {
     implicit val executionContext: ExecutionContext =
       AkkaBuilder.buildExecutionContext()
 
-    val dynamoClient = DynamoBuilder.buildDynamoClient(config)
+    val dynamoClient = DynamoBuilder.buildDynamoClient
 
     val workGraphStore = new WorkGraphStore(
       workNodeDao = new WorkNodeDao(
