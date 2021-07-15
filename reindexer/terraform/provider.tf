@@ -1,5 +1,5 @@
 provider "aws" {
-  region = var.aws_region
+  region = "eu-west-1"
 
   assume_role {
     role_arn = "arn:aws:iam::760097843905:role/platform-developer"
@@ -7,3 +7,4 @@ provider "aws" {
 }
 
 data "aws_caller_identity" "current" {}
+data "aws_region" "current" {}
