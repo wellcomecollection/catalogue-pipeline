@@ -8,9 +8,15 @@ import weco.catalogue.internal_model.identifiers.{
   IdentifierType,
   SourceIdentifier
 }
+import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.work.generators.InstantGenerators
-import weco.catalogue.internal_model.work.{DeletedReason, Work, WorkData}
+import weco.catalogue.internal_model.work.{
+  DeletedReason,
+  Format,
+  Work,
+  WorkData
+}
 import weco.catalogue.source_model.tei.{TeiChangedMetadata, TeiDeletedMetadata}
 import weco.storage.generators.S3ObjectLocationGenerators
 import weco.storage.s3.S3ObjectLocation
@@ -41,13 +47,29 @@ class TeiTransformerTest
       Work.Visible[Source](
         version = 1,
         data = WorkData[Unidentified](
+          title = Some("Wellcome Library"),
           description =
-            Some("1 copy of al-Qānūn fī al-ṭibb by Avicenna, 980-1037")
+            Some("1 copy of al-Qānūn fī al-ṭibb by Avicenna, 980-1037"),
+          format = Some(Format.ArchivesAndManuscripts)
         ),
         state = Source(sourceIdentifier, timeModified)
       )
     )
   }
+
+  it("extracts languages") {
+    val teiXml =
+      IOUtils.resourceToString("/Javanese_4.xml", StandardCharsets.UTF_8)
+    val location = createS3ObjectLocation
+    val store =
+      new MemoryStore[S3ObjectLocation, String](Map(location -> teiXml))
+    val transformer = new TeiTransformer(store)
+    val timeModified = instantInLast30Days
+    val id = "Wellcome_Javanese_4"
+    transformer(id, TeiChangedMetadata(location, timeModified), 1).right.get.data.languages shouldBe List(
+      Language("jv", "Javanese"))
+  }
+
   it("handles delete messages") {
 
     val store =
