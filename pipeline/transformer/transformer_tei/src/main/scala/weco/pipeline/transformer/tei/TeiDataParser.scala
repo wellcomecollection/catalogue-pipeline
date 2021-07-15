@@ -1,10 +1,18 @@
 package weco.pipeline.transformer.tei
 
 import weco.catalogue.internal_model.identifiers.DataState.Unidentified
-import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  IdentifierType,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.work.WorkState.Source
-import weco.catalogue.internal_model.work.{Format, MergeCandidate, Work, WorkData}
+import weco.catalogue.internal_model.work.{
+  Format,
+  MergeCandidate,
+  Work,
+  WorkData
+}
 import weco.pipeline.transformer.identifiers.SourceIdentifierValidation._
 
 import java.time.Instant

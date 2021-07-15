@@ -3,8 +3,17 @@ package weco.pipeline.transformer.tei.service
 import io.circe.Encoder
 import io.circe.generic.extras.semiauto.deriveConfiguredEncoder
 import weco.catalogue.internal_model.identifiers.DataState.Unidentified
-import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
-import weco.catalogue.internal_model.work.{Format, MergeCandidate, Work, WorkData, WorkState}
+import weco.catalogue.internal_model.identifiers.{
+  IdentifierType,
+  SourceIdentifier
+}
+import weco.catalogue.internal_model.work.{
+  Format,
+  MergeCandidate,
+  Work,
+  WorkData,
+  WorkState
+}
 import weco.catalogue.source_model.TeiSourcePayload
 import weco.catalogue.source_model.tei.{TeiChangedMetadata, TeiMetadata}
 import weco.fixtures.TestWith
