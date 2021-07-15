@@ -36,7 +36,7 @@ case class TeiData(id: String,
         )
       }
 
-    val value =
+    val data =
       WorkData[Unidentified](
         title = Some(title),
         description = description,
@@ -46,7 +46,7 @@ case class TeiData(id: String,
       )
     Work.Visible[Source](
       version = version,
-      data = value,
+      data = data,
       state = Source(SourceIdentifier(IdentifierType.Tei, "Work", id), time),
       redirectSources = Nil
     )

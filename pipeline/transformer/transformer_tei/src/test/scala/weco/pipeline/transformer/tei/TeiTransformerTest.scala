@@ -5,6 +5,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.DataState.Unidentified
 import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.languages.Language
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.work.generators.InstantGenerators
 import weco.catalogue.internal_model.work.{DeletedReason, Format, Work, WorkData}
@@ -57,8 +58,7 @@ class TeiTransformerTest
     val transformer = new TeiTransformer(store)
     val timeModified = instantInLast30Days
     val id = "Wellcome_Javanese_4"
-    transformer(id, TeiChangedMetadata(location, timeModified), 1).right.get.data.title shouldBe Some(
-      "Well_Jav_4_TEI")
+    transformer(id, TeiChangedMetadata(location, timeModified), 1).right.get.data.languages shouldBe List(Language("jv", "Javanese"))
   }
 
   it("handles delete messages") {
