@@ -1,7 +1,7 @@
 module "merger_queue" {
-  source     = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
-  queue_name = "${local.namespace}_merger"
-  topic_arns = [module.matcher_topic.arn]
+  source          = "git::github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
+  queue_name      = "${local.namespace}_merger"
+  topic_arns      = [module.matcher_topic.arn]
   alarm_topic_arn = var.dlq_alarm_arn
 
   # This has to be longer than the `flush_interval_seconds` in the merger.
